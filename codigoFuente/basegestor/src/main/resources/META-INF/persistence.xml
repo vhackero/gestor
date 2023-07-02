@@ -1,248 +1,227 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="2.1"
-	xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+    xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
 
-	<persistence-unit name="gestor" transaction-type="RESOURCE_LOCAL">
-		<jta-data-source>java:jboss/jdbc_elearning</jta-data-source>
-		<!-- <exclude-unlisted-classes>false</exclude-unlisted-classes> -->
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatRol</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaRol</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.RelRolFuncionalidad</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblPersona</class>
+    <persistence-unit name="gestor" transaction-type="RESOURCE_LOCAL">
+        <jta-data-source>java:jboss/jdbc_elearning</jta-data-source>
+        <!-- <exclude-unlisted-classes>false</exclude-unlisted-classes> -->
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatRol</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaRol</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.RelRolFuncionalidad</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.TblPersona</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.TblFuncionalidad</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaCorreo</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatTiposCorreo</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaTelefono</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatTiposTelefono</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.TblDomiciliosPersona</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatAsentamiento</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatMunicipio</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatTipoAsentamiento</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatEntidadFederativa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatPais</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatCapacidad</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.TblTextoSistema</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.TblPlantilla</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaDatosAcademico</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatRamaEspecialidadPlanPrograma</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatModalidadPlanPrograma</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.RelVariableMensajeOperacion</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.RelMensajeOperacion</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatDocumentosExpidePlan</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatEstadoPrograma</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatModeloPedagogicoPlan</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatNivelEnsenanzaPrograma</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoPlan</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatObjetoCurricular</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.TblTema</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatParametroSistema</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.TblOrganismoGubernamental</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatParametroWSMoodle</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.badges.CatClasificacionBadge</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.badges.CatBadge</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.TblCfgCron</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.SsoElemento</class>
 
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblFuncionalidad</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaCorreo</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatTiposCorreo</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaTelefono</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatTiposTelefono</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblDomiciliosPersona</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatAsentamiento</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatMunicipio</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatTipoAsentamiento</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatEntidadFederativa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatPais</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatCapacidad</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblTextoSistema</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblPlantilla</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaDatosAcademico</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatRamaEspecialidadPlanPrograma</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatModalidadPlanPrograma</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.RelVariableMensajeOperacion</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.RelMensajeOperacion</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatDocumentosExpidePlan</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatEstadoPrograma</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatModeloPedagogicoPlan</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatNivelEnsenanzaPrograma</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoPlan</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatObjetoCurricular</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblTema</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatParametroSistema</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblOrganismoGubernamental</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatParametroWSMoodle</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.badges.CatClasificacionBadge</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.badges.CatBadge</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblCfgCron</class>
+        <!-- Planes y programas -->
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatActividadesAprendizajePrograma</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatAreasConocimiento</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTecnicaDidacticaPrograma</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCargaHoraria</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaResponsable</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaAutore</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblMallaCurricular</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatAmbientesAprendizajeEc</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoEventoEc</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatStatusPrograma</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblEntidad</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelCatalogoGeneralValor</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblCatalogoGeneral</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblEstructuraTematica</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.MdlModulo</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelEtematicaModuloMdl</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatAptitudesPlan</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatCompetenciasPlan</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatEstatusPlan</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatHabilidadesPlan</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelPlanAptitud</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelPlanConocimiento</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelPlanHabilidad</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatAlcancePlan</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatCompetenciaEspecifica</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelEjeCompetencia</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatNivelConocimiento</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTpoCargaHoraria</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatInstitucionesCertificadora</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatMaterialDidactico</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelUniDidacticaMaterial</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.DetEstUnidadDidactica</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblSubtemasUdidactica</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelEstructuraUnidadDidactica</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.DetEtematicaTema</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelUnidDidacticaTposComp</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCompEspecifica</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblEstPersonalExterno</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaPersonalExterno</class>
+        <!-- Fin Planes y programas -->
 
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.SsoElemento
-		</class>
+        <!-- Inicia seccion encuestas -->
+        <class>mx.gob.sedesol.basegestor.model.entities.encuestas.RelRespuestaUsuario</class>
+        <!-- Fin Encuestas -->
 
-		<!-- Planes y programas -->
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatActividadesAprendizajePrograma</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatAreasConocimiento</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTecnicaDidacticaPrograma</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCargaHoraria</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaResponsable</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaAutore</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblMallaCurricular</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatAmbientesAprendizajeEc</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoEventoEc</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatStatusPrograma</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblEntidad</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelCatalogoGeneralValor</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblCatalogoGeneral</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblEstructuraTematica</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.MdlModulo</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelEtematicaModuloMdl</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatAptitudesPlan</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatCompetenciasPlan</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatEstatusPlan</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatHabilidadesPlan</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelPlanAptitud</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelPlanConocimiento</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelPlanHabilidad</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatAlcancePlan</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatCompetenciaEspecifica</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelEjeCompetencia</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatNivelConocimiento</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTpoCargaHoraria</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatInstitucionesCertificadora</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatMaterialDidactico</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelUniDidacticaMaterial</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.DetEstUnidadDidactica</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblSubtemasUdidactica</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelEstructuraUnidadDidactica</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.DetEtematicaTema</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelUnidDidacticaTposComp</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCompEspecifica</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblEstPersonalExterno</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaPersonalExterno</class>
-		<!-- Fin Planes y programas -->
+        <!-- Inicia seccion eventos -->
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatMobiliario</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.TblLoteCargaUsuario</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.RelLoteUsuario</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.RelUsuarioDatosLaborales</class>
+        <!-- Fin eventos -->
 
-		<!-- Inicia seccion encuestas -->
-		<class>mx.gob.sedesol.basegestor.model.entities.encuestas.RelRespuestaUsuario</class>
-		<!-- Fin Encuestas -->
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatCategoriaEventoCapacitacion</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDictamen</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatEstadoEventoCapacitacion</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatAsistencia</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoCalificacionEc</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatClasificacionInformacion</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatClasificacionAva</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatAlcanceArea</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoResponsabilidadEc</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelPersonaResponsabilidades</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblGrupo</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelGrupoParticipante</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelAsistencia</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelDiasEventoCapacitacion</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelReponsableProduccionEc</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelGrupoEvaluacion</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelEvaluacionCalificacion</class>
 
-		<!-- Inicia seccion eventos -->
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatMobiliario</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblLoteCargaUsuario</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.RelLoteUsuario</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.RelUsuarioDatosLaborales</class>
-		<!-- Fin eventos -->
+        <!-- gestion aprendizaje -->
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatClasificacionArchivoOa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatEstadoAva</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatTemaRecurso</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatDificultadOa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatIdiomaOa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblFichaDescripcionObjetoAprendizaje</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblFichaDescriptivaObjetoAprendizaje</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblCargaArchivosOa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblRecursosOa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatTipoContenidoOa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatNivelGranularidadOa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatTipoEstructuraOa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatComposicionObjetoOa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatDensidadSemanticaOa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatNivelInteractividadOa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatRecursoDidacticoOa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatTipoInteractividadOa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelReponsableProduccionOa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatRecursoPredominanteFoa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatAmbitoAplicacionFoa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblAmbienteVirtualAprendizaje</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelUnidadOaAva</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatElementosMultimedia</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatActividadReforzamientoFoa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatEstatusFoa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatFormatoFoa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatRelacionOtrosObjeto</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelCatRelacionOtrosObjetosFoa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelFoaActividadReforzamiento</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelMaterialDidacticoFoa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelRecursoPredominanteFoa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelElementosMultimediaFoa</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblInformacionServidor</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblRespaldosAva</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblRutaRespaldo</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblUsuariosFtp</class>
 
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatCategoriaEventoCapacitacion</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDictamen</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatEstadoEventoCapacitacion</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatAsistencia</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoCalificacionEc</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatClasificacionInformacion</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatClasificacionAva</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatAlcanceArea</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoResponsabilidadEc</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelPersonaResponsabilidades</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblGrupo</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelGrupoParticipante</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelAsistencia</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelDiasEventoCapacitacion</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelReponsableProduccionEc</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelGrupoEvaluacion</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelEvaluacionCalificacion</class>
+        <!-- logistica e infraestructura -->
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatAreasSede</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatDistribucionArea</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatEstatusArea</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatRecursosInfraestructura</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatSede</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatTipoRecurso</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatUbicacionTerritorial</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.RelAreaDistribucion</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.RelAreaRecurso</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.TblConfiguracionArea</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.TblPersonalizacionArea</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatAreaInfraestructura</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.TblEventoGeneral</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.RelPersonalizacionRecurso</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatEstatusReservacion</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.RelSolicitudEventoCapacitacion</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.RelSolicitudEventoCapacitacionPK</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.RelSolicitudEventoGeneral</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.RelSolicitudEventoGeneralPK</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.TblReservacionEventoCapacitacion</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.TblReservacionEventoGeneral</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.TblSolicitudReservacion</class>
 
-		<!-- gestion aprendizaje -->
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatClasificacionArchivoOa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatEstadoAva</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatTemaRecurso</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatDificultadOa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatIdiomaOa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblFichaDescripcionObjetoAprendizaje</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblFichaDescriptivaObjetoAprendizaje</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblCargaArchivosOa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblRecursosOa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatTipoContenidoOa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatNivelGranularidadOa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatTipoEstructuraOa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatComposicionObjetoOa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatDensidadSemanticaOa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatNivelInteractividadOa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatRecursoDidacticoOa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatTipoInteractividadOa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelReponsableProduccionOa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatRecursoPredominanteFoa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatAmbitoAplicacionFoa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblAmbienteVirtualAprendizaje</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelUnidadOaAva</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatElementosMultimedia</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatActividadReforzamientoFoa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatEstatusFoa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatFormatoFoa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatRelacionOtrosObjeto</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelCatRelacionOtrosObjetosFoa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelFoaActividadReforzamiento</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelMaterialDidacticoFoa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelRecursoPredominanteFoa</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelElementosMultimediaFoa</class>
+        <!-- Encuestas -->
+        <class>mx.gob.sedesol.basegestor.model.entities.encuestas.CatEncuestaEstatus</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.encuestas.CatEncuestaObjetivo</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.encuestas.CatEncuestaTipo</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.encuestas.TblEncuesta</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.encuestas.TblOpcionesPregunta</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.encuestas.TblPreguntasEncuesta</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.encuestas.TblRespuesta</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.encuestas.CatEncuestaContexto</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.encuestas.RelEncuestaEventoCapacitacion</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.encuestas.RelEncuestaUsuario</class>
 
-
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblInformacionServidor</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblRespaldosAva</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblRutaRespaldo</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblUsuariosFtp</class>
-
-
-
-
-
-
-		<!-- logistica e infraestructura -->
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatAreasSede</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatDistribucionArea</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatEstatusArea</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatRecursosInfraestructura</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatSede</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatTipoRecurso</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatUbicacionTerritorial</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.RelAreaDistribucion</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.RelAreaRecurso</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.TblConfiguracionArea</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.TblPersonalizacionArea</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatAreaInfraestructura</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.TblEventoGeneral</class>
-
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.RelPersonalizacionRecurso</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.CatEstatusReservacion</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.RelSolicitudEventoCapacitacion</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.RelSolicitudEventoCapacitacionPK</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.RelSolicitudEventoGeneral</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.RelSolicitudEventoGeneralPK</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.TblReservacionEventoCapacitacion</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.TblReservacionEventoGeneral</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.logisticainfraestructura.TblSolicitudReservacion</class>
-
-		<!-- Encuestas -->
-		<class>mx.gob.sedesol.basegestor.model.entities.encuestas.CatEncuestaEstatus</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.encuestas.CatEncuestaObjetivo</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.encuestas.CatEncuestaTipo</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.encuestas.TblEncuesta</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.encuestas.TblOpcionesPregunta</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.encuestas.TblPreguntasEncuesta</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.encuestas.TblRespuesta</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.encuestas.CatEncuestaContexto</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.encuestas.RelEncuestaEventoCapacitacion</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.encuestas.RelEncuestaUsuario</class>
-
-		<!-- <properties> <property name="hibernate.archive.autodetection" value="class,hbm"/> 
+        <!-- <properties> <property name="hibernate.archive.autodetection" value="class,hbm"/> 
 			</properties> -->
 
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatProgramaSocial</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatUnidadResponsable</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDestinatariosEc</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelSolicitudEnrolamientoEvtCap</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaPlataformaMoodle</class>
 
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatProgramaSocial</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatUnidadResponsable</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDestinatariosEc</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelSolicitudEnrolamientoEvtCap</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaPlataformaMoodle</class>
+        <!-- Inicia optimizacion de entidades -->
+        <!--Modulo
+        de Usuarios  -->
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.TblPersonaBasica</class>
 
-<!-- Inicia optimizacion de entidades -->
-		<!--Modulo de Usuarios  -->
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblPersonaBasica</class>
+        <!-- Modulo de reporte de usuarios en analisis de datos -->
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.TblPersonaReporteUsuario</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.TblDomiciliosPersonaReporteUsuario</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatAsentamientoReporteUsuario</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatMunicipioReporteUsuario</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatEntidadFederativaReporteUsuario</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaRolReporteUsuario</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatRolReporteUsuario</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.RelUsuarioDatosLaboralesReporteUsuario</class>
+        <!-- Fin optimizacion de entidades -->
 
-		<!-- Modulo de reporte de usuarios en analisis de datos -->
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblPersonaReporteUsuario</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblDomiciliosPersonaReporteUsuario</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatAsentamientoReporteUsuario</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatMunicipioReporteUsuario</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatEntidadFederativaReporteUsuario</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaRolReporteUsuario</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatRolReporteUsuario</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.RelUsuarioDatosLaboralesReporteUsuario</class>
-<!-- Fin optimizacion de entidades -->
-		
-		
+        <!-- Fin de seccion de entidades optimizadas -->
+        <properties>
+            <property name="hibernate.show_sql" value="false" />
+        </properties>
 
-
-		<!-- Fin de seccion de entidades optimizadas -->
-		<properties>
-			<property name="hibernate.show_sql" value="false" />
-		</properties>
-
-
-
-
-
-
-
-
-
-	</persistence-unit>
+    </persistence-unit>
 </persistence>
