@@ -1,0 +1,63 @@
+- Instalar MySQL server
+- Crear ambas bases de datos
+- Importar ambos scripts (carpeta bd) para poblar las bases
+- Crear el usuario y darle permisos (ver TUTORIAL GESTOR buscar "11.4.- Creacion de usuario")
+
+- Instalar mongodb
+- Crear la base de datos y crear el usuario
+  (ver GUIA DEV-QA buscar "Registrar usuario eLearning en el servicio MongoDB")
+
+- Instalar eclipse
+- Instalarle el Jboss Tools al eclipse (ver TUTORIAL GESTOR)
+- Instalarle el Wildfly al eclipse (ver TUTORIAL GESTOR)
+- Crearle su conexión mysql y datasource al Wildfly,
+  ver TUTORIAL GESTOR buscar "Ir a la carpeta de donde se almacenará nuestra carpeta WildFly"
+  el paso 2 es dentro de modules\system\layers\base\com
+
+- Importar proyecto basegestor
+- clic derecho > Maven > Update Project .... NOTA:
+  [x] Marcar Force update of snapshots/releases
+  [ ] Desmarcar Update project configuration from pom.xml
+- clic derecho > Run as > Maven clean
+- clic derecho > Run as > Maven install
+(REPETIR HASTA QUE NO HAYA ERRORES)
+(REVISAR EL PANEL "PROBLEMS" ECLIPSE)
+(REVISAR QUE COMPILE CON JDK1.8)
+
+- Importar proyecto gestorweb
+- clic derecho > Maven > Update Project .... NOTA:
+  [x] Marcar Force update of snapshots/releases
+  [ ] Desmarcar Update project configuration from pom.xml
+- clic derecho > properties > deployment assembly > Agregar:
+  [1] archives from file system > la ruta /user/.m2/repositores/mx/gob/... del basegestor.jar
+  [2] Java build path entries > Mave Dependencies
+- clic derecho > Run as > Maven clean
+- clic derecho > Run as > Maven install
+- clic derecho > build project
+- darle "clean" al server Wildfly
+- iniciar el server Wildfly
+(CADA VEZ QUE SE MODIFIQUE basegestor SE DEBE REPETIR TODO ESTO)
+(REPETIR HASTA QUE NO HAYA ERRORES)
+(REVISAR EL PANEL "PROBLEMS" ECLIPSE)
+(REVISAR QUE COMPILE CON JDK1.8)
+
+Cuando el proyecto levanta, el acceso es http://localhost:8080/gestorweb/login
+userdesa
+123456
+(ver GUIA DEV-QA)
+
+
+Errores que me encontré al correr gestorweb:
+
+P: "Error configurando escuchador de aplicación de clase [org.springframework.web.context.ContextLoaderListener]"
+S: Clic derecho > Properties > Deployment Assembly > Add... > Java Build Path Entries > Maven Dependencies
+
+P: "Failed to retrieve JNDI naming context for container"
+S: https://stackoverflow.com/questions/20854848/tomcat-error-warning-failed-to-retrieve-jndi-naming-context-for-container
+
+P: no encuentra las clases del basegestor
+S: repetir los pasos de arriba de deployment assembly y restantes
+
+P: "Caused by: java.lang.ClassNotFoundException: mx.gob.sedesol.gestorweb.commons.validator.GestorWebMessageInterpolator"
+S: lo dejé comentado, hay que volverlo a poner en validation.xml
+
