@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="breadcrumb">
+
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.encuestas')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.encuestas.consulta.titulo')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="formf">
+			<h1>#{sistema.obtenerTexto('gw.encuestas.consulta.titulo')}</h1>
+			<hr />
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.encuestas.boton.crear')}"
+							ajax="true" process="@this" update="@form" id="btnCrearEncuesta"
+							action="#{encuestaBean.navegaRegistraEncuesta}"
+							styleClass="pull-right btn btn-primary" />
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.encuestas.alta.etiqueta.crear')}:"
+							styleClass="pull-right agregaHeight" />
+					</div>
+				</div>
+			</div>
+			<p:panel styleClass="fondoPrimario"
+				header="#{sistema.obtenerTexto('gw.encuestas.consulta.etiqueta.busqueda')}">
+
+
+				<f:validateBean disabled="true">
+					<div class="form-group">
+
+						<div class="row">
+
+							<div class="col-md-3">
+								<p:outputLabel for="input_clave_encuesta"
+									value="#{sistema.obtenerTexto('gw.encuesta.consulta.filtro.placeholder.clave')}:" />
+								<p:inputText id="input_clave_encuesta"
+									placeholder="#{sistema.obtenerTexto('gw.encuesta.consulta.filtro.placeholder.claveM')}"
+									value="#{encuestaBean.criterioEncuesta.clave}"
+									styleClass="form-control">
+
+								</p:inputText>
+							</div>
+
+							<div class="col-md-9">
+								<p:outputLabel for="input_nombreEncuesta"
+									value="#{sistema.obtenerTexto('gw.encuesta.consulta.filtro.etiqueta.nombre')}:" />
+								<p:inputText id="input_nombreEncuesta"
+									label="#{sistema.obtenerTexto('gw.encuesta.consulta.filtro.etiqueta.nombre')}:"
+									placeholder="#{sistema.obtenerTexto('gw.encuesta.consulta.filtro.placeholder.nombreM')}"
+									value="#{encuestaBean.criterioEncuesta.nombre}"
+									styleClass="form-control">
+
+								</p:inputText>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+
+						<div class="row">
+
+							<div class="col-md-3 col-xs-12">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.encuesta.texto.contexto')}:" />
+								<p:selectOneMenu id="id_contexto_encuesta" required="false"
+									styleClass="col-xs-12"
+									value="#{encuestaBean.criterioEncuesta.encuestaTipo.contexto.id}"
+									update="select_nivel_evaluacion">
+									<f:ajax event="change" listener="#{encuestaBean.cargarCatTipo}"
+										execute="id_contexto_encuesta"
+										render="select_nivel_evaluacion" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItems value="#{encuestaBean.lstContexto}"
+										var="contexto" itemValue="#{contexto.id}"
+										itemLabel="#{contexto.nombre}" />
+								</p:selectOneMenu>
+								<p:message for="id_contexto_encuesta" />
+							</div>
+							<div class="col-md-3 col-xs-12">
+								<p:outputLabel for="select_nivel_evaluacion"
+									value="#{sistema.obtenerTexto('gw.encuesta.texto.niveleval')}: " />
+								<p:selectOneMenu id="select_nivel_evaluacion"
+									value="#{encuestaBean.criterioEncuesta.encuestaTipo.id}"
+									styleClass="col-xs-12">
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="" />
+									<f:selectItems value="#{encuestaBean.lstCatTipo}" var="nivel"
+										itemValue="#{nivel.id}" itemLabel="#{nivel.nombre}" />
+
+								</p:selectOneMenu>
+							</div>
+
+
+							<div class="col-md-3 col-xs-12">
+								<p:outputLabel for="select_asignado"
+									value="#{sistema.obtenerTexto('gw.encuesta.texto.dirigidoa')}: " />
+								<p:selectOneMenu id="select_asignado"
+									value="#{encuestaBean.criterioEncuesta.encuestaObjetivo.id}"
+									styleClass="col-xs-12">
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="" />
+									<f:selectItems value="#{encuestaBean.lstObjetivo}"
+										var="objetivo" itemValue="#{objetivo.id}"
+										itemLabel="#{objetivo.nombre}" />
+								</p:selectOneMenu>
+							</div>
+							<div class="col-md-3 col-xs-12">
+								<p:outputLabel for="select_estado"
+									value="#{sistema.obtenerTexto('gw.encuesta.texto.estatus')}: " />
+								<p:selectOneMenu id="select_estado"
+									value="#{encuestaBean.criterioEncuesta.encuestaEstatus.id}"
+									styleClass="col-xs-12">
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="" />
+									<f:selectItems value="#{encuestaBean.lstEstado}" var="estado"
+										itemValue="#{estado.id}" itemLabel="#{estado.nombre}" />
+
+								</p:selectOneMenu>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+
+							<div class="col-md-12">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.encuesta.texto.rangofecha')}: " />
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-3">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.encuesta.texto.desde')}: "
+									styleClass="agregaHeight separaLabelEncuesta" />
+								<p:calendar id="fecha_inicio"
+									styleClass="calendario calendarioEncuesta"
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+									yearRange="c-100:c+100" locale="es" navigator="true"
+									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									value="#{encuestaBean.criterioEncuesta.fechaCreacion}"
+									showOn="button" readonlyInput="true">
+								</p:calendar>
+							</div>
+
+							<div class="col-md-3">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.encuesta.texto.hasta')}: "
+									styleClass="agregaHeight separaLabelEncuesta" />
+								<p:calendar id="fecha_fin"
+									styleClass="calendario calendarioEncuesta"
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+									yearRange="c-100:c+100" locale="es"
+									mindate="#{encuestaBean.encuesta.fechaCreacion}"
+									readonlyInput="true" navigator="true"
+									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									value="#{encuestaBean.criterioEncuesta.fechaRegistroAux}"
+									showOn="button">
+								</p:calendar>
+							</div>
+						</div>
+					</div>
+				</f:validateBean>
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton ajax="true"
+							styleClass="btn btn-primary pull-right" update="@form"
+							process="@form"
+							actionListener="#{encuestaBean.buscarPorCriterio}"
+							value="#{sistema.obtenerTexto('gw.encuestas.consulta.boton.buscar')}" />
+					</div>
+				</div>
+			</p:panel>
+
+			<p:importEnum
+				type="mx.gob.sedesol.gestorweb.commons.utils.EstatusEncuestasEnum"
+				var="ESTATUS_ENCUESTA" allSuffix="ALL_ENUM_VALUES" />
+
+			<p:panel id="panel_consulta"
+				header="#{sistema.obtenerTexto('gw.encuestas.consulta.etiqueta.listado')}">
+				<p:dataTable value="#{encuestaBean.lstEncuesta}"
+					styleClass="ajustaTable" reflow="true"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					var="encuesta" paginator="true" rows="10" sortOrder="descending"
+					paginatorPosition="bottom"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks}
+								 {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.encuesta.texto.clave')}">
+						<h:outputText id="clave_encuesta" value="#{encuesta.clave}">
+						</h:outputText>
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.encuestas.consulta.etiqueta.header.nombre')}">
+						<h:outputText id="nombreEncuesta" value="#{encuesta.nombre}">
+						</h:outputText>
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.encuesta.texto.contexto')}">
+						<h:outputText id="contexto_encuesta"
+							value="#{encuesta.encuestaTipo.contexto.nombre}">
+						</h:outputText>
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.encuesta.texto.nivel')}"
+						style="width:125px">
+						<h:outputText id="nivel_evaluacion_encuesta"
+							value="#{encuesta.encuestaTipo.nombre}">
+						</h:outputText>
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.encuesta.texto.dirigidoa')}">
+						<h:outputText id="dirigido_a_encuesta"
+							value="#{encuesta.encuestaObjetivo.nombre}">
+						</h:outputText>
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.encuesta.texto.estatus')}">
+						<h:outputText id="estado_encuesta"
+							value="#{encuesta.encuestaEstatus.nombre}">
+						</h:outputText>
+						<h:outputText value="(#{encuesta.numeroRevision})"
+							rendered="#{encuesta.encuestaEstatus.id == '3' and encuesta.numeroRevision > '0'}">
+						</h:outputText>
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.encuestas.consulta.etiqueta.header.fhRegistro')}">
+						<h:outputText id="fechaRegistro" value="#{encuesta.fechaCreacion}">
+							<f:convertDateTime type="date"
+								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+						</h:outputText>
+
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.encuestas.consulta.etiqueta.header.fechaActualizacion')}">
+						<h:outputText id="fechaActualizacion"
+							value="#{encuesta.fechaActualizacion}">
+							<f:convertDateTime type="date"
+								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+						</h:outputText>
+
+					</p:column>
+
+					<p:column class="text-center"
+						headerText="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.acciones')}">
+
+						<p:commandButton ajax="true" update="@form" id="clonar"
+							disabled="#{!(encuesta.encuestaEstatus.id == ESTATUS_ENCUESTA.PUBLICAR.id) }"
+							action="#{encuestaBean.clonarEncuesta}"
+							styleClass="btn-icon btn btn-default icono_sisi ss_gn_clonar">
+							<f:setPropertyActionListener value="#{encuesta}"
+								target="#{encuestaBean.encuestaSel}" />
+						</p:commandButton>
+						<p:tooltip for="clonar"
+							value="#{sistema.obtenerTexto('gw.encuesta.texto.clonar')}"
+							position="top" />
+
+						<p:commandButton ajax="true" process="@form" update="@form"
+							disabled="#{!(encuesta.encuestaEstatus.id == ESTATUS_ENCUESTA.BORRADOR.id or encuesta.encuestaEstatus.id == ESTATUS_ENCUESTA.COMENTARIOS.id)}"
+							id="editar" action="#{encuestaBean.navegaEditarEncuesta}"
+							styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+							<f:setPropertyActionListener value="#{encuesta}"
+								target="#{encuestaBean.encuestaSel}" />
+						</p:commandButton>
+						<p:tooltip for="editar"
+							value="#{sistema.obtenerTexto('gw.encuesta.texto.editar')}"
+							position="top" />
+
+
+						<p:commandButton ajax="true" update="@form" id="ver"
+							disabled="#{!(encuesta.encuestaEstatus.id == ESTATUS_ENCUESTA.REVISION.id)}"
+							action="#{encuestaBean.navegaVerEncuesta}"
+							styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+							<f:setPropertyActionListener value="#{encuesta}"
+								target="#{encuestaBean.encuestaSel}" />
+						</p:commandButton>
+						<p:tooltip for="ver"
+							value="#{sistema.obtenerTexto('gw.encuesta.texto.ver')}"
+							position="top" />
+
+						<p:commandButton id="eliminar"
+							oncomplete="PF('mdlEliminar').show();"
+							disabled="#{!(encuesta.encuestaEstatus.id == ESTATUS_ENCUESTA.BORRADOR.id)}"
+							styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar"
+							ajax="true" process="@this" update="@form">
+							<f:setPropertyActionListener value="#{encuesta}"
+								target="#{encuestaBean.encuestaSel}" />
+						</p:commandButton>
+						<p:tooltip for="eliminar"
+							value="#{sistema.obtenerTexto('gw.encuestas.consulta.boton.eliminar')}"
+							position="top" />
+
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+			<!-- 		Fin area de consulta -->
+
+			<!--modal mensaje de eliminar-->
+			<p:dialog id="dlg_msgAlert" widgetVar="mdlEliminar"
+				appendTo="@(body)"
+				header="#{sistema.obtenerTexto('gw.encuestas.consulta.title.modal.eliminar')}"
+				responsive="true" closable="false" draggable="false"
+				resizable="false" position="center" modal="true"
+				styleClass="medidaModal">
+
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText
+							value="#{encuestaBean.encuestaSel.nombre} #{sistema.obtenerTexto('gw.encuestas.consulta.title.modal.eliminar.pregunta')}" />
+					</div>
+				</div>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.encuestas.consulta.title.modal.btn.aceptar')}"
+								styleClass="btn btn-primary pull-right" update="@this, @form"
+								process="@this" ajax="true"
+								action="#{encuestaBean.eliminarEncuesta}"
+								oncomplete="PF('mdlEliminar').hide(); return false;" />
+
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.encuestas.consulta.title.modal.btn.cancelar')}"
+								onclick="PF('mdlEliminar').hide(); return false;"
+								styleClass="btn btn-default pull-right" />
+
+
+						</div>
+					</div>
+				</f:facet>
+
+			</p:dialog>
+
+
+			<!--		Ventana modal 		-->
+			<p:dialog id="dlg_mensaje_sistema"
+				header="#{sistema.obtenerTexto('gw.encuestas.consulta.title.modal.msg')}"
+				responsive="true" closable="false" appendTo="@(body)"
+				widgetVar="modal" draggable="false" resizable="false"
+				position="center" modal="true" styleClass="medidaModal">
+
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText value="#{encuestaBean.encuestaMSG}" />
+					</div>
+				</div>
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.encuestas.consulta.aceptar')}"
+								styleClass="btn btn-primary pull-right" immediate="true"
+								update="@this, dlg_mensaje_sistema"
+								process="@this, dlg_mensaje_sistema" ajax="true"
+								oncomplete="PF('modal').hide(); return false;"
+								action="#{encuestaBean.closeMSGDialog}" />
+
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

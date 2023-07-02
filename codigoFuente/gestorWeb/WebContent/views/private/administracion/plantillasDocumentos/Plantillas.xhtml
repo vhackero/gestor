@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.personalizacion')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.plantillas.docs')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.plantillas.docs')}</h1>
+		<hr />
+
+		<h:form id="frmFiltro">
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.plantillas.documentos.panel.superior.titulo')}">
+
+				<div class="row">
+					<div class="col-md-3 text-right">
+						<p:outputLabel styleClass="agregaHeight"
+							value="#{sistema.obtenerTexto('gw.plantillas.documentos.etiqueta.documento')}:" />
+					</div>
+					<div class="col-md-4">
+						<p:selectOneMenu id="somTipoDocumento"
+							value="#{plantillasDocumentosBean.tipoDocumento}"
+							valueChangeListener="#{plantillasDocumentosBean.cargarPlantillas}"
+							styleClass="col-xs-12">
+							<p:ajax process="@this" event="valueChange"
+								update="tblPlantillas btnAgregar" />
+							<f:selectItem
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+							<f:selectItems value="#{plantillasDocumentosBean.tiposDocumento}"
+								var="elemento" itemValue="#{elemento.valor}"
+								itemLabel="#{elemento.descripcion}" />
+						</p:selectOneMenu>
+					</div>
+				</div>
+
+			</p:panel>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.plantillas.documentos.panel.inferior.titulo')}">
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton id="btnAgregar"
+							value="#{sistema.obtenerTexto('gw.plantillas.documentos.boton.agregar')}"
+							action="#{plantillasDocumentosBean.nuevaPlantilla()}"
+							ajax="false"
+							disabled="#{plantillasDocumentosBean.tipoDocumento == null}"
+							styleClass="pull-right btn btn-primary" />
+					</div>
+				</div>
+				<p:dataTable id="tblPlantillas"
+					value="#{plantillasDocumentosBean.plantillas}" var="plantilla"
+					paginator="true" rows="10" paginatorPosition="bottom" reflow="true"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.plantillas.documentos.columna.descripcion')}">
+						<h:outputText value="#{plantilla.nombre}" />
+					</p:column>
+
+					<p:column style="width:16px;text-align:center" width="75"
+						headerText="#{sistema.obtenerTexto('gw.plantillas.documentos.columna.activo')}">
+						<p:selectOneRadio value="#{plantillasDocumentosBean.idPlantilla}"
+							valueChangeListener="#{plantillasDocumentosBean.seleccionarPlantilla}">
+							<p:ajax update="tblPlantillas"/>
+							<f:selectItem itemValue="#{plantilla.idPlantilla}" />
+						</p:selectOneRadio>
+					</p:column>
+
+					<p:column styleClass="text-center"
+						headerText="#{sistema.obtenerTexto('gw.administracion.catalogos.tblheader.accion')}">
+						<p:commandButton id="btnCargarPlantilla"
+							action="#{plantillasDocumentosBean.cargarPlantilla()}"
+							ajax="false"
+							styleClass="btn btn-default btn-icon icono_sisi ss_gn_mod">
+							<f:setPropertyActionListener value="#{plantilla}"
+								target="#{plantillasDocumentosBean.plantillaModificar}" />
+						</p:commandButton>
+						<p:tooltip for="btnCargarPlantilla" value="Editar" position="top" />
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+
+		</h:form>
+
+	</ui:define>
+</ui:composition>

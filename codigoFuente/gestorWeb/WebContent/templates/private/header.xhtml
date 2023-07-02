@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<!-- Navigation -->
+	<nav class="navbar navbar-default navbar-static-top" role="navigation"
+		style="margin-bottom: 0">
+		<div class="contenedor-flex">
+			<div class="navbar-header item1">
+				<button type="button" class="navbar-toggle" data-toggle="collapse"
+					data-target=".navbar-collapse">
+					<span class="sr-only">Toggle navigation</span> <span
+						class="icon-bar"></span> <span class="icon-bar"></span> <span
+						class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#{request.contextPath}/tablero"> <img
+					src="/recursos/Privado/#{sistema.obtenerTemaPrivado()}/img/elearning_logo_largo.png"
+					class="logo_lg" />
+				</a>
+			</div>
+			<!-- /.navbar-header -->
+
+			<ul class="nav navbar-top-links item2">
+				<li class="boton-header" id="tareas"><p:commandButton
+						id="btnActividadesUsuario" ajax="true"
+						action="#{menuGestorBean.navegaActividadesUsuario()}"
+						styleClass="btn-icon btn btn-default icono_sisi ss_adm_listatareas tareas icono-btn-header" />
+					<p:tooltip for="btnActividadesUsuario" position="bottom"
+						value="Lista de tareas"></p:tooltip></li>
+				<li class="boton-header"><p:commandButton
+						id="btnHeaderNotificaciones" ajax="true"
+						action="#{notificacionesBean.cargarNotificacionesSistema()}"
+						styleClass="btn-icon btn btn-default icono_sisi fa fa-bell tareas icono-btn-header" />
+					<p:tooltip for="btnHeaderNotificaciones" position="bottom"
+						value="Notificaciones"></p:tooltip></li>
+
+				<li class="boton-header"><p:commandButton
+						id="btnHeaderMensajes" ajax="true"
+						actionListener="#{notificacionesBean.cargarNotificacionesSistema()}"
+						action="#{menuGestorBean.navegaNotificaciones()}"
+						styleClass="btn-icon btn btn-default icono_sisi ss_adm_mensajes tareas icono-btn-header">
+					</p:commandButton></li>
+				<p:tooltip for="btnHeaderMensajes" position="bottom"
+					value="Mensajes"></p:tooltip>
+				<ui:fragment
+					rendered="#{menuGestorBean.rolTienePermiso('LOG_ACA_INF')}">
+					<sec:authorize access="hasPermission(null, 'LOG_ACA_INF')">
+						<li class="boton-header"><p:commandButton
+								id="btnHeaderReservaciones" ajax="true"
+								action="#{menuGestorBean.navegaReservacionAreas}"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_calen tareas icono-btn-header">
+							</p:commandButton></li>
+						<p:tooltip for="btnHeaderReservaciones" position="bottom"
+							value="Reservaciones"></p:tooltip>
+					</sec:authorize>
+				</ui:fragment>
+
+				<li class="dropdown visible-xs"><a class="dropdown-toggle"
+					data-toggle="dropdown" href="#"> <i class="fa fa-user fa-fw"></i>
+				</a>
+					<ul class="dropdown-menu dropdown-user">
+						<ui:include src="/templates/private/menu-user.xhtml"></ui:include>
+					</ul></li>
+			</ul>
+
+
+			<div class="hidden-xs visible-sm visible-md visible-lg perfil item3">
+				<div class="container-fluid">
+					<div class="row">
+
+						<div class="col-xs-7">
+							<div>
+								<strong>¡Bienvenido!</strong>,
+								#{loginBean.usuarioEnSession.usuario}
+							</div>
+							<h:form>
+								<p:selectOneMenu id="somRol" value="#{menuGestorBean.idRol}"
+									effect="fade" class="col-xs-12"
+									onchange="correccionSelectores()">
+
+									<p:ajax listener="#{menuGestorBean.actualizarMenu()}" />
+									<f:selectItems value="#{menuGestorBean.roles}" var="rol"
+										itemValue="#{rol.idRol}" itemLabel="#{rol.nombre}" />
+								</p:selectOneMenu>
+							</h:form>
+						</div>
+						<div class="col-xs-1">
+							<button class="ui-outputpanel ui-widget imgPerfil cabecera"
+								data-toggle="dropdown">
+
+								<img src="#{menuGestorBean.rutaFotoUsuario}" class="foto" />
+
+							</button>
+							<ul class="dropdown-menu opcionesperfil">
+								<ui:include src="/templates/private/menu-user.xhtml"></ui:include>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Sidebar -->
+		<ui:include src="/templates/private/sidebar.xhtml" />
+
+
+	</nav>
+	<!-- /.navbar-default -->
+
+</ui:composition>

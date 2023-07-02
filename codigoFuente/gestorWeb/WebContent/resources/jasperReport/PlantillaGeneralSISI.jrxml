@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.3.0.final using JasperReports Library version 6.3.0  -->
+<!-- 2016-08-01T14:01:01 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PlantillaGeneralSISI" pageWidth="612" pageHeight="792" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" whenResourceMissingType="Empty" uuid="59d6bfaf-e63f-4b97-884d-0709dc0c2bb5">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="P_IMG_HEAD" class="java.io.InputStream"/>
+	<parameter name="P_IMG_FOOTER" class="java.io.InputStream"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="108">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+			<image isUsingCache="false" onErrorType="Blank">
+				<reportElement x="0" y="0" width="570" height="100" uuid="7e05ab5f-0c80-44ad-b837-d145f109fd43"/>
+				<imageExpression><![CDATA[$P{P_IMG_HEAD}]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="61" splitType="Stretch">
+			<staticText>
+				<reportElement x="100" y="10" width="220" height="30" uuid="7a602434-34f9-4a98-9a7d-689a37047bf1"/>
+				<text><![CDATA[TESTING REPORT v2]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="125" splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="104" splitType="Stretch">
+			<image isUsingCache="false" onErrorType="Blank">
+				<reportElement x="0" y="0" width="560" height="100" uuid="f650fdc7-a130-4eb3-8bc6-a2acdee0331d"/>
+				<imageExpression><![CDATA[$P{P_IMG_FOOTER}]]></imageExpression>
+			</image>
+		</band>
+	</pageFooter>
+</jasperReport>

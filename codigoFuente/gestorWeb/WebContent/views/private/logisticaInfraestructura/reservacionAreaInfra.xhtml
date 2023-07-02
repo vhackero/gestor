@@ -1,0 +1,1029 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.logistica.etiqueta.menu.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.logistica.etiqueta.menu.reservacion')}</li>
+	</ui:define>
+	<ui:define name="content">
+
+		<style type="text/css">
+.evnt_no_aprobado {
+	background: orange !important;
+	text-color: white;
+}
+
+.evnt_aprobado {
+	background: green !important;
+	text-color: white;
+}
+</style>
+
+		<h1>
+			#{sistema.obtenerTexto('gw.logistica.etiqueta.menu.reservacion')}</h1>
+		<hr />
+
+		<h:form id="formSchedule">
+
+
+			<!-- Panel Info Area  -->
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.logistica.panel.reservacion')}"
+				id="pnlBusAreas">
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.logistica.texto.nota')}:" />
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.logistica.texto.notadescripcion')}" />
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-3">
+							<p:outputLabel styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.dependencia')}:" />
+						</div>
+						<div class="col-md-offset-3 col-md-6">
+							<p:outputLabel for="selUbicacionRes"
+								styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.ubicacion')}:" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-3">
+							<p:inputText disabled="true" id="orgGubNombre"
+								styleClass="orgGubOpacity form-control"
+								value="#{reservacionAreaBean.criteriosBusq.orgGubNombre}" />
+						</div>
+						<div class="col-md-3">
+							<p:commandButton id="selDependenciaRes"
+								value="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								type="button" styleClass="btn btn-primary quitaMargen" />
+							<p:overlayPanel for="selDependenciaRes" hideEffect="fade"
+								showCloseIcon="true" widgetVar="wdgOvrDependencia">
+								<p:treeTable id="treeTblRes" scrollable="true" scrollWidth="600"
+									styleClass="reserv"
+									value="#{reservacionAreaBean.arbolOrgGubernamental}"
+									var="dependencia" selectionMode="single"
+									selection="#{reservacionAreaBean.nodoOrgGubernamentalSel}">
+									<p:ajax event="select" update="@form" process="@this"
+										listener="#{reservacionAreaBean.onNodeSelectDependencia}" />
+									<f:facet name="header">
+									#{sistema.obtenerTexto('gw.logistica.texto.estorg')}
+								        </f:facet>
+									<p:column>
+										<h:outputText value="#{dependencia.nombre}" />
+									</p:column>
+								</p:treeTable>
+							</p:overlayPanel>
+							<p:message for="selDependenciaRes" />
+						</div>
+						<div class="col-md-6">
+							<p:selectOneMenu
+								value="#{reservacionAreaBean.criteriosBusq.idUbicacion}"
+								valueChangeListener="#{reservacionAreaBean.onChangeBusqUbicacion}"
+								disabled="#{reservacionAreaBean.nodoOrgGubernamentalSel eq null}"
+								id="selUbicacionRes" styleClass="col-xs-12">
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{0}" />
+								<f:selectItems value="#{reservacionAreaBean.catUbicacionTerr}"
+									var="ubi" itemLabel="#{ubi.nombre}" itemValue="#{ubi.id}" />
+								<p:ajax update="cmbSedeRes" />
+							</p:selectOneMenu>
+							<p:message for="selUbicacionRes" />
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6">
+							<p:outputLabel for="cmbSedeRes" styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.sede')}:" />
+							<p:selectOneMenu id="cmbSedeRes" styleClass="col-xs-12"
+								value="#{reservacionAreaBean.criteriosBusq.idSede}"
+								disabled="#{reservacionAreaBean.criteriosBusq.idUbicacion eq 0}"
+								valueChangeListener="#{reservacionAreaBean.onChangeSede}">
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{0}" />
+								<f:selectItems value="#{reservacionAreaBean.catSedesInfra}"
+									var="sede" itemLabel="#{sede.nombre}"
+									itemValue="#{sede.idSede}" />
+								<p:ajax update="@form" />
+							</p:selectOneMenu>
+							<p:message for="cmbSedeRes" />
+						</div>
+
+						<div class="col-md-6">
+							<p:outputLabel for="cmbAreaRes" styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.area')}:" />
+							<p:selectOneMenu id="cmbAreaRes" styleClass="col-xs-12"
+								disabled="#{(reservacionAreaBean.criteriosBusq.idSede eq 0) or (reservacionAreaBean.criteriosBusq.idUbicacion eq 0) }"
+								value="#{reservacionAreaBean.criteriosBusq.idArea}"
+								valueChangeListener="#{reservacionAreaBean.onChangeArea}">
+								<f:selectItem itemValue="#{0}"
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+								<f:selectItems value="#{reservacionAreaBean.catAreasInfra}"
+									var="area" itemLabel="#{area.nombre}" itemValue="#{area.id}" />
+								<p:ajax process="@this" update="@form,dlgVerArea" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logistica.texto.datosobligatorios')}" />
+					</div>
+					<div class="col-md-6 text-right">
+						<p:commandButton styleClass="btn btn-default quitaMargen"
+							value="#{sistema.obtenerTexto('gw.logistica.btn.limpiar')}"
+							action="#{reservacionAreaBean.limpiarPantalla}" ajax="true"
+							immediate="true" process="@this" update="@form" />
+						<p:commandButton
+							disabled="#{reservacionAreaBean.criteriosBusq.idArea eq 0}"
+							value="#{sistema.obtenerTexto('gw.logistica.texto.verinfo')}"
+							onclick="PF('dialogVerArea').show()"
+							styleClass="btn btn-primary pull-right" />
+					</div>
+				</div>
+			</p:panel>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.logistica.texto.calenreser')}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6 centraVertical">
+							<div
+								style="display: inline-block; width: 30px; height: 30px; background-color: orange"></div>
+							<p:outputLabel value="Evento no aprobado"
+								style="margin-left:20px" />
+						</div>
+						<div class="col-md-6 centraVertical">
+							<div
+								style="display: inline-block; width: 30px; height: 30px; background-color: green"></div>
+							<p:outputLabel value="Evento aprobado" style="margin-left:20px" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<p:schedule id="schedule" rendered="true"
+							value="#{reservacionAreaBean.scheduleModel}" resizable="false"
+							widgetVar="scheduleReserv" draggable="false" allDaySlot="true"
+							timeZone="GMT-5" rightHeaderTemplate="month,agendaDay"
+							binding="#{reservacionAreaBean.scheduleCmp}">
+							<p:ajax event="dateSelect"
+								listener="#{reservacionAreaBean.onDateSelect}"
+								update=":dlgReserv,schedule, formAprobar" />
+							<p:ajax event="eventSelect"
+								listener="#{reservacionAreaBean.onEventSelect}"
+								update="@form, formAprobar" />
+							<p:ajax event="viewChange"
+								listener="#{reservacionAreaBean.onViewChange}"
+								update="@form, formAprobar" />
+						</p:schedule>
+					</div>
+				</div>
+			</p:panel>
+		</h:form>
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" styleClass="medidaModal reservaAreaDialog"
+			closable="false" modal="true" id="dlgReserv"
+			widgetVar="dialogReservacion"
+			header="#{sistema.obtenerTexto('gw.logistica.texto.solicitud')}"
+			dynamic="true">
+			<h:form id="formReserv">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12 text-center">
+							<p:outputLabel rendered="#{reservacionAreaBean.opcionesEventos}"
+								for="tpoEvento"
+								value="#{sistema.obtenerTexto('gw.logistica.texto.seleccioneopcion')}"
+								styleClass="bloque" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:selectOneRadio styleClass="marginCenter"
+								rendered="#{reservacionAreaBean.opcionesEventos}" id="tpoEvento"
+								value="#{reservacionAreaBean.tipoEvento}">
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.logistica.texto.especificar')}"
+									itemValue="1" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.logistica.texto.eventonuevo')}"
+									itemValue="2" />
+								<p:ajax event="change"
+									listener="#{reservacionAreaBean.tipoEventoSel}" update="@form" />
+							</p:selectOneRadio>
+						</div>
+					</div>
+				</div>
+				<!-- Tabla de eventos de capacitacion -->
+				<div class="row">
+					<div class="col-md-12">
+						<p:importEnum
+							type="mx.gob.sedesol.gestorweb.commons.utils.EstadoEventoCapEnum"
+							var="ESTATUS_EVENTO" allSuffix="ALL_ENUM_VALUES" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-2 col-md-offset-6 alinearDerecha">
+						<p:outputLabel styleClass="separaLabelDerecho agregaHeight"
+							value="#{sistema.obtenerTexto('gw.logistica.texto.estatus')}:"
+							rendered="#{reservacionAreaBean.muestraEventosCap}" />
+					</div>
+					<div class="col-md-4 ">
+						<p:selectOneMenu
+							rendered="#{reservacionAreaBean.muestraEventosCap}"
+							styleClass="col-xs-12"
+							valueChangeListener="#{reservacionAreaBean.changeEstatusEventoCap}">
+							<f:selectItem
+								itemLabel="#{ESTATUS_EVENTO.CALENDARIZADO.etiqueta}"
+								itemValue="#{ESTATUS_EVENTO.CALENDARIZADO.id}" />
+							<f:selectItem itemLabel="#{ESTATUS_EVENTO.EN_EJECUCION.etiqueta}"
+								itemValue="#{ESTATUS_EVENTO.EN_EJECUCION.id}" />
+							<p:ajax update="tblEventosCapacit" />
+						</p:selectOneMenu>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12 tablaSolicitudArea">
+						<p:dataTable rendered="#{reservacionAreaBean.muestraEventosCap}"
+							var="evnCap" selectionMode="single" tableStyleClass="table"
+							selection="#{reservacionAreaBean.eventoCapacitacion}"
+							rowKey="#{evnCap.idEvento}" id="tblEventosCapacit"
+							value="#{reservacionAreaBean.eventosCapacitacion}" reflow="true"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							paginatorPosition="bottom" paginator="true" rows="10"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks}
+								 {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15">
+							<p:ajax event="rowSelect"
+								listener="#{reservacionAreaBean.onRowSelect}" update="@form"
+								process="@form,tblEventosCapacit" />
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logistica.texto.nombre')}">
+								<h:outputText value="#{evnCap.nombreEc}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logistica.texto.tipo')}">
+								<h:outputText
+									value="#{reservacionAreaBean.obtieneNombreTpoCompetencia(evnCap.fichaDescriptivaPrograma.tipoCompetencia)}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logistica.texto.eje')}">
+								<h:outputText
+									value="#{reservacionAreaBean.obtieneNombreEjeCapacit(evnCap.fichaDescriptivaPrograma.ejeCapacitacion)}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logistica.texto.modalidad')}">
+								<h:outputText value="#{evnCap.catModalidadPlanPrograma.nombre}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logistica.texto.fechainicial')}">
+								<h:outputText value="#{evnCap.fechaInicial}">
+									<f:convertDateTime pattern="dd/MM/yyyy" />
+								</h:outputText>
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logistica.texto.fechafinal')}">
+								<h:outputText value="#{evnCap.fechaFinal}">
+									<f:convertDateTime pattern="dd/MM/yyyy" />
+								</h:outputText>
+							</p:column>
+						</p:dataTable>
+						<p:commandButton rendered="#{reservacionAreaBean.opcionesEventos}"
+							value="#{sistema.obtenerTexto('gw.logistica.texto.cancelar')}"
+							ajax="true" oncomplete="PF('dialogReservacion').hide();"
+							actionListener="#{reservacionAreaBean.cancelaFechaReservacion}"
+							styleClass="btn btn-default pull-right" update="dlgReserv"
+							process="@this" />
+					</div>
+				</div>
+
+				<!-- Info evento seleccionado -->
+				<h:panelGroup width="100%" id="selEventoCapacit"
+					rendered="#{reservacionAreaBean.detReservEventoCap}">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="nombreevt"
+									value="#{sistema.obtenerTexto('gw.logistica.texto.nombre')}"
+									styleClass="bloque requerido" />
+								<h:outputText
+									value="#{reservacionAreaBean.eventoCapacitacion.nombreEc}"
+									rendered="#{reservacionAreaBean.eventoCapacit}" />
+								<!-- Longitud de campo -->
+								<p:inputText styleClass="requerido form-control" id="nombreevt"
+									maxlength="150"
+									placeholder="#{sistema.obtenerTexto('gw.logistica.texto.nombre')}"
+									value="#{reservacionAreaBean.eventoGeneral.nombre}"
+									rendered="#{reservacionAreaBean.eventoGenerico}">
+									<p:ajax process="@this" />
+								</p:inputText>
+							</div>
+
+							<div class="col-md-6">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.logistica.texto.eventoprivado')}"
+									styleClass="bloque" />
+								<p:selectOneRadio value="#{reservacionAreaBean.solRes.privado}">
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.logistica.switch.si')}"
+										itemValue="1" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.logistica.switch.no')}"
+										itemValue="0" />
+									<p:ajax process="@this" />
+								</p:selectOneRadio>
+							</div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="solicitado"
+									value="#{sistema.obtenerTexto('gw.logistica.texto.solicitado')}:"
+									styleClass="requerido bloque" />
+								<!-- Longitud de campo -->
+								<p:inputText styleClass="form-control" id="solicitado"
+									maxlength="150"
+									placeholder="#{sistema.obtenerTexto('gw.logistica.texto.solicitado')}"
+									value="#{reservacionAreaBean.solRes.solicitante}">
+									<p:ajax process="@this" />
+								</p:inputText>
+								<p:message for="solicitado" />
+							</div>
+
+							<div class="col-md-6">
+								<p:outputLabel for="correoevt"
+									value="#{sistema.obtenerTexto('gw.logistica.texto.correo')}:"
+									styleClass="requerido bloque" />
+								<!-- Longitud de campo -->
+								<p:inputText styleClass="form-control" id="correoevt"
+									maxlength="200"
+									placeholder="#{sistema.obtenerTexto('gw.logistica.texto.correo')}"
+									value="#{reservacionAreaBean.solRes.emailSolicitante}">
+									<p:ajax process="@this" />
+								</p:inputText>
+								<p:message for="correoevt" />
+							</div>
+
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.logistica.texto.solicitarsala')}"
+								id="btnSalaA"
+								styleClass="quitaMargen btn btn-default pull-right btnAncho"
+								action="#{reservacionAreaBean.agregaSalaAdicional}" ajax="true"
+								update="pnlSolReserv" process="@this" />
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12 tablaSolicitudArea">
+								<h:panelGroup id="pnlSolReserv">
+									<p:dataTable tableStyleClass="table" var="solicitud"
+										value="#{reservacionAreaBean.solicitudesReserv}" reflow="true"
+										emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+										paginatorPosition="bottom" paginator="true" rows="10"
+										paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks}
+								 {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+										currentPageReportTemplate="({currentPage} de {totalPages})"
+										rowsPerPageTemplate="5,10,15">
+
+										<p:column>
+											<f:facet name="header">
+												<h:outputText styleClass="requerido"
+													value="#{sistema.obtenerTexto('gw.logistica.texto.ubicacionsede')}" />
+											</f:facet>
+
+											<p:selectOneMenu value="#{solicitud.idSede}" autoWidth="true"
+												styleClass="col-xs-12">
+												<p:ajax
+													listener="#{reservacionAreaBean.actualizaCatAreas(solicitud)}"
+													process="@this" update="areaRes" />
+												<f:selectItems value="#{solicitud.catUbicacionSede}"
+													var="ubiSede" itemLabel="#{ubiSede.nombre}"
+													itemValue="#{ubiSede.id}" />
+											</p:selectOneMenu>
+
+										</p:column>
+
+										<p:column>
+											<f:facet name="header">
+												<h:outputText styleClass="requerido"
+													value="#{sistema.obtenerTexto('gw.logistica.texto.area')}" />
+											</f:facet>
+
+											<p:selectOneMenu value="#{solicitud.idArea}" id="areaRes"
+												styleClass="col-xs-12" autoWidth="true">
+												<p:ajax process="@this" update="hi"
+													listener="#{reservacionAreaBean.generaHorasLibres(solicitud)}" />
+												<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+													noSelectionOption="true" />
+												<f:selectItems value="#{solicitud.catAreas}" var="area"
+													itemLabel="#{area.nombre}" itemValue="#{area.id}" />
+											</p:selectOneMenu>
+
+										</p:column>
+
+										<p:column>
+											<f:facet name="header">
+												<h:outputText styleClass="requerido"
+													value="#{sistema.obtenerTexto('gw.logistica.texto.config')}" />
+											</f:facet>
+
+											<p:commandButton
+												action="#{reservacionAreaBean.navegaPersonalizacionArea}"
+												value="Personalizar" process="@this" ajax="true"
+												update="frmPA" oncomplete="PF('dlgPersonalizacion').show()"
+												styleClass="btn btn-primary">
+												<f:setPropertyActionListener value="#{solicitud}"
+													target="#{reservacionAreaBean.solicitudSeleccionada}" />
+											</p:commandButton>
+
+										</p:column>
+
+										<p:column>
+											<f:facet name="header">
+												<h:outputText styleClass="requerido"
+													value="#{sistema.obtenerTexto('gw.logistica.texto.hinicial')}" />
+											</f:facet>
+
+											<p:selectOneMenu id="hi" value="#{solicitud.horaInicial}"
+												styleClass="col-xs-12">
+												<p:ajax process="@this" update="hB"
+													listener="#{reservacionAreaBean.asignaHorasB(solicitud)}" />
+												<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+													noSelectionOption="true" />
+												<f:selectItems value="#{solicitud.horasA}" var="c"
+													itemValue="#{c}" itemLabel="#{c}" />
+											</p:selectOneMenu>
+
+										</p:column>
+
+
+										<p:column>
+											<f:facet name="header">
+												<h:outputText styleClass="requerido"
+													value="#{sistema.obtenerTexto('gw.logistica.texto.hfinal')}" />
+											</f:facet>
+
+											<p:selectOneMenu id="hB" value="#{solicitud.horaFinal}"
+												styleClass="col-xs-12">
+												<p:ajax process="@this" />
+												<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+													noSelectionOption="true" />
+												<f:selectItems value="#{solicitud.horasB}" var="c"
+													itemValue="#{c}" itemLabel="#{c}" />
+											</p:selectOneMenu>
+
+										</p:column>
+
+									</p:dataTable>
+
+								</h:panelGroup>
+							</div>
+						</div>
+
+					</div>
+
+
+
+					<div class="row">
+						<div class="col-md-12">
+
+							<p:commandButton id="addButton"
+								styleClass="btn btn-primary pull-right"
+								update="selEventoCapacit"
+								value="#{sistema.obtenerTexto('gw.logistica.texto.generar')}"
+								action="#{reservacionAreaBean.agregaEventoReservacion}" />
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.logistica.texto.cancelar')}"
+								ajax="true" oncomplete="PF('dialogReservacion').hide();"
+								actionListener="#{reservacionAreaBean.cancelaFechaReservacion}"
+								styleClass="btn btn-default pull-right" update="dlgReserv"
+								process="@this" />
+						</div>
+					</div>
+				</h:panelGroup>
+
+			</h:form>
+		</p:dialog>
+
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" styleClass="medidaModal modalAbsoluto"
+			closable="false" modal="true" width="600px"
+			widgetVar="dlgPersonalizacion" id="dialogPersonalizacion"
+			header="Personalización" dynamic="true">
+
+			<ui:include src="personalizacionAreaInfra.xhtml" />
+		</p:dialog>
+
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion" header="Validación" dynamic="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText styleClass="bloque"
+							value="No se ha seleccionado un área." />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dlgValidarSeleccion').hide()" />
+				</div>
+			</div>
+		</p:dialog>
+
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" styleClass="medidaModal listaDialog"
+			closable="false" modal="true" id="dlgAprobar"
+			widgetVar="dialogWvAprobar"
+			header="#{sistema.obtenerTexto('gw.logistica.texto.lista')}"
+			dynamic="true">
+			<h:form id="formAprobar">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText
+							value="#{sistema.obtenerTexto('gw.logistica.texto.mensaje')} " />
+					</div>
+				</div>
+
+				<p:outputPanel rendered="#{reservacionAreaBean.bolPanelAprobarCap}">
+					<div class="form-group">
+						<p:dataTable var="reservCap" tableStyleClass="table"
+							id="tblReservacionesCap"
+							value="#{reservacionAreaBean.reservacionesCapPorAprobar}">
+
+							<p:column headerText="Nombre del evento">
+								<h:outputText
+									value="#{reservCap.tblReservacionEventoCapacitacion.tblEvento.nombreEc}" />
+							</p:column>
+
+							<p:column headerText="Fecha reservada" styleClass="text-center">
+								<h:outputText
+									value="#{reservCap.tblReservacionEventoCapacitacion.fechaInicialReservacion}">
+
+									<f:convertDateTime type="date"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+								</h:outputText>
+							</p:column>
+
+							<p:column headerText="Fecha y hora de registro"
+								styleClass="text-center">
+								<h:outputText styleClass="text-center"
+									value="#{reservCap.tblReservacionEventoCapacitacion.fechaRegistro}">
+									<f:convertDateTime type="date"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+								</h:outputText>
+							</p:column>
+
+							<p:column headerText="Acciones" styleClass="text-center">
+
+								<p:commandButton id="ver1"
+									styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis">
+									<p:ajax
+										oncomplete="PF('dialogVerInfoRes').show();PF('dialogWvAprobar').hide();"
+										listener="#{reservacionAreaBean.asignaInfoReservSeleccionadaCap(reservCap)}"
+										process="@this" update="formAprobar,formVisualizar" />
+								</p:commandButton>
+								<p:tooltip for="ver1" value="Ver" position="top" />
+
+								<p:commandButton id="dwnldPdfReservEC" ajax="false"
+									update="@form" rendered="false"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_desc"
+									actionListener="#{reservacionAreaBean.descargarPDFReservacionEC(reservCap)}">
+									<p:fileDownload value="#{reservacionAreaBean.pdfReservacion}" />
+								</p:commandButton>
+								<p:tooltip for="dwnldPdfReservEC" value="Descargar"
+									rendered="false" position="top" />
+
+								<p:commandButton id="btnvalidar"
+									styleClass="btn btn-icon btn-default icono_sisi ss_gn_activar colorverde"
+									disabled="#{reservCap.aprobado}"
+									rendered="#{reservCap.aprobado}" widgetVar="btnAprResCap">
+									<p:ajax
+										listener="#{reservacionAreaBean.actualizaIconoCap(reservCap)}"
+										process="@this" update="formAprobar" />
+								</p:commandButton>
+								<p:tooltip for="btnvalidar" value="Validar" position="top" />
+
+								<p:commandButton id="btnnovalidar"
+									styleClass="btn btn-icon btn-default icono_sisi ss_gn_activar colornegro"
+									rendered="#{!reservCap.aprobado}" widgetVar="btnNoAprResCap">
+									<p:ajax
+										listener="#{reservacionAreaBean.actualizaIconoCap(reservCap)}"
+										process="@this" update="formAprobar" />
+								</p:commandButton>
+								<p:tooltip for="btnnovalidar" value="Validar" position="top" />
+
+								<p:commandButton id="btncancelart"
+									styleClass="btn btn-icon btn-default icono_sisi ss_gn_cancelar"
+									widgetVar="cancelaResCap" disabled="#{!reservCap.aprobado}">
+									<p:ajax
+										listener="#{reservacionAreaBean.actualizaIconoCap(reservCap)}"
+										process="@this" update="formAprobar" />
+								</p:commandButton>
+								<p:tooltip for="btncancelart" value="Cancelar" position="top" />
+							</p:column>
+						</p:dataTable>
+					</div>
+
+
+					<div class="col-md-12 text-right">
+						<p:commandButton value="Cancelar"
+							onclick="PF('dialogWvAprobar').hide();"
+							styleClass="btn btn-default" />
+						<p:commandButton value="Aceptar" process="@this"
+							styleClass="btn btn-primary"
+							oncomplete="PF('dialogWvAprobar').hide();"
+							action="#{reservacionAreaBean.actualizaEstatusReservCap}"
+							update="formSchedule" />
+
+					</div>
+
+
+				</p:outputPanel>
+
+
+				<p:outputPanel rendered="#{!reservacionAreaBean.bolPanelAprobarCap}">
+
+					<p:dataTable var="reservGen" tableStyleClass="table"
+						id="tblReservacionesGen" styleClass="form-group"
+						value="#{reservacionAreaBean.reservacionesGenPorAprobar}">
+
+						<p:column headerText="Nombre del evento">
+							<h:outputText
+								value="#{reservGen.tblReservacionEventoGeneral.tblEventoGeneral.nombre}" />
+						</p:column>
+
+
+						<p:column headerText="Fecha reservada">
+							<h:outputText
+								value="#{reservGen.tblReservacionEventoGeneral.fechaInicialReservacion}">
+								<f:convertDateTime type="date"
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+							</h:outputText>
+						</p:column>
+
+						<p:column headerText="Fecha y hora de registro">
+							<h:outputText
+								value="#{reservGen.tblReservacionEventoGeneral.fechaRegistro}">
+								<f:convertDateTime type="date"
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+							</h:outputText>
+						</p:column>
+
+						<p:column headerText="Acciones" styleClass="text-center">
+							<p:commandButton id="ver5"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis">
+								<p:ajax
+									oncomplete="PF('dialogVerInfoRes').show();PF('dialogWvAprobar').hide();"
+									listener="#{reservacionAreaBean.asignaInfoReservSeleccionadaGen(reservGen)}"
+									process="@this" update="formAprobar,formVisualizar" />
+							</p:commandButton>
+							<p:tooltip for="ver5" value="Ver" position="top" />
+
+							<p:commandButton id="dwnldPdfReservEG" ajax="false"
+								update="@form" immediate="true" rendered="false"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_desc"
+								actionListener="#{reservacionAreaBean.descargarPDFReservacionEG(reservGen)}">
+								<p:fileDownload value="#{reservacionAreaBean.pdfReservacion}" />
+							</p:commandButton>
+							<p:tooltip for="dwnldPdfReservEG" value="Descargar"
+								position="top" />
+							<p:commandButton id="btnvalidar3"
+								disabled="#{reservGen.aprobado}"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_activar colorverde"
+								rendered="#{reservGen.aprobado}" widgetVar="btnAprResGen">
+								<p:ajax
+									listener="#{reservacionAreaBean.actualizaIconoGen(reservGen)}"
+									process="@this" update="formAprobar" />
+							</p:commandButton>
+							<p:tooltip for="btnvalidar3" value="Validar" position="top" />
+							<p:commandButton id="btnnovalidar1"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_activar colornegro"
+								rendered="#{!reservGen.aprobado}" widgetVar="btnNoAprResCap">
+								<p:ajax
+									listener="#{reservacionAreaBean.actualizaIconoGen(reservGen)}"
+									process="@this" update="formAprobar" />
+							</p:commandButton>
+							<p:tooltip for="btnnovalidar1" value="Validar" position="top" />
+
+							<p:commandButton id="btncancelart1"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_cancelar"
+								widgetVar="cancelaResGen" disabled="#{!reservGen.aprobado}">
+								<p:ajax
+									listener="#{reservacionAreaBean.actualizaIconoGen(reservGen)}"
+									process="@this" update="formAprobar" />
+							</p:commandButton>
+							<p:tooltip for="btncancelart1" value="Cancelar" position="top" />
+						</p:column>
+
+					</p:dataTable>
+
+
+					<div class="col-md-12">
+						<p:commandButton value="Aceptar"
+							oncomplete="PF('dialogWvAprobar').hide();"
+							styleClass="btn btn-primary pull-right" update="formSchedule"
+							process="@this"
+							action="#{reservacionAreaBean.actualizaEstatusReservGen}" />
+						<p:commandButton value="Cancelar"
+							onclick="PF('dialogWvAprobar').hide();"
+							styleClass="btn btn-default pull-right" />
+					</div>
+				</p:outputPanel>
+
+
+			</h:form>
+		</p:dialog>
+
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false"
+			modal="true" id="dlgVerInfoRes" width="900"
+			widgetVar="dialogVerInfoRes" header="Detalle de la solicitud de Área"
+			dynamic="true">
+
+			<h:form id="formVisualizar">
+
+
+				<p:outputPanel rendered="#{reservacionAreaBean.bolInfoReserv}">
+
+					<div class="row">
+
+						<div class="col-md-6">
+							<p:outputLabel value="Correo del responsable:"
+								styleClass="bloque" />
+							<h:outputText
+								value="#{reservacionAreaBean.persoCap.emailResponsable}" />
+						</div>
+
+						<div class="col-md-6">
+							<p:outputLabel value="CC:" styleClass="bloque" />
+							<h:outputText value="#{reservacionAreaBean.persoCap.emailCc}" />
+						</div>
+
+					</div>
+
+					<div class="row">
+						<div class="col-md-3">
+							<p:outputLabel value="Dependencia:" styleClass="bloque" />
+							<h:outputText
+								value="#{reservacionAreaBean.areaSedeInfoGen.catSede.organismoGubernamental.nombre}" />
+						</div>
+
+						<div class="col-md-3">
+							<p:outputLabel value="Ubicación:" styleClass="bloque" />
+							<h:outputText
+								value="#{reservacionAreaBean.areaSedeInfoGen.catSede.catUbicacionTerritorial.nombre}" />
+						</div>
+
+						<div class="col-md-3">
+							<p:outputLabel value="Sede:" styleClass="bloque" />
+							<h:outputText
+								value="#{reservacionAreaBean.areaSedeInfoGen.catSede.nombre}" />
+						</div>
+
+						<div class="col-md-3">
+							<p:outputLabel value="Área:" styleClass="bloque" />
+							<h:outputText
+								value="#{reservacionAreaBean.areaSedeInfoGen.catArea.nombre}" />
+						</div>
+
+					</div>
+
+					<div class="row">
+
+						<div class="col-md-3">
+							<p:outputLabel value="Nombre del evento:" styleClass="bloque" />
+							<h:outputText
+								value="#{reservacionAreaBean.infoReservacionCap.tblReservacionEventoCapacitacion.tblEvento.nombreEc}" />
+						</div>
+
+						<div class="col-md-3">
+							<p:outputLabel value="Fecha inicial:" styleClass="bloque" />
+							<h:outputText
+								value="#{reservacionAreaBean.fechaInicialInfoCap()}" />
+						</div>
+
+						<div class="col-md-3">
+							<p:outputLabel value="Fecha final:" styleClass="bloque" />
+							<h:outputText value="#{reservacionAreaBean.fechaFinalInfoCap()}" />
+						</div>
+
+						<div class="col-md-3">
+							<p:outputLabel value="Horario:" styleClass="bloque" />
+							<h:outputText value="#{reservacionAreaBean.horarioInfoCap()}" />
+						</div>
+
+					</div>
+
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel value="Estatus:" />
+							<h:outputText
+								value="#{reservacionAreaBean.infoReservacionCap.tblReservacionEventoCapacitacion.catEstatusReservacion.nombre}" />
+						</div>
+					</div>
+
+				</p:outputPanel>
+
+
+				<p:outputPanel rendered="#{!reservacionAreaBean.bolInfoReserv}">
+
+					<div class="row">
+
+						<div class="col-md-6">
+							<p:outputLabel value="Correo del responsable" styleClass="bloque" />
+							<h:outputText
+								value="#{reservacionAreaBean.persoGen.emailResponsable}" />
+						</div>
+
+						<div class="col-md-6">
+							<p:outputLabel value="CC" styleClass="bloque" />
+							<h:outputText value="#{reservacionAreaBean.persoGen.emailCc}" />
+						</div>
+
+					</div>
+
+					<div class="row">
+						<div class="col-md-3">
+							<p:outputLabel value="Dependencia:" styleClass="bloque" />
+							<h:outputText
+								value="#{reservacionAreaBean.areaSedeInfoGen.catSede.organismoGubernamental.nombre}" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel value="Ubicación:" styleClass="bloque" />
+							<h:outputText
+								value="#{reservacionAreaBean.areaSedeInfoGen.catSede.catUbicacionTerritorial.nombre}" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel value="Sede:" styleClass="bloque" />
+							<h:outputText
+								value="#{reservacionAreaBean.areaSedeInfoGen.catSede.nombre}" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel value="Área:" styleClass="bloque" />
+							<h:outputText
+								value="#{reservacionAreaBean.areaSedeInfoGen.catArea.nombre}" />
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-3">
+							<p:outputLabel value="Nombre del evento:" styleClass="bloque" />
+							<h:outputText
+								value="#{reservacionAreaBean.infoReservacionGen.tblReservacionEventoGeneral.tblEventoGeneral.nombre}" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel value="Fecha inicial:" styleClass="bloque" />
+							<h:outputText
+								value="#{reservacionAreaBean.fechaInicialInfoGen()}" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel value="Fecha final:" styleClass="bloque" />
+							<h:outputText value="#{reservacionAreaBean.fechaFinalInfoGen()}" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel value="Horario:" styleClass="bloque" />
+							<h:outputText value="#{reservacionAreaBean.horarioInfoGen()}" />
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel value="Estatus:" styleClass="bloque" />
+
+							<h:outputText
+								value="#{reservacionAreaBean.infoReservacionGen.tblReservacionEventoGeneral.catEstatusReservacion.nombre}" />
+						</div>
+					</div>
+
+				</p:outputPanel>
+
+			</h:form>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dialogVerInfoRes').hide();" />
+				</div>
+			</div>
+		</p:dialog>
+
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" styleClass="medidaModal" closable="false"
+			modal="true" id="dlgVerArea" widgetVar="dialogVerArea"
+			header="#{sistema.obtenerTexto('gw.logistica.texto.consultarconfig')}"
+			dynamic="true">
+
+			<div class="row">
+				<div class="col-md-6">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.logistica.texto.dependencia')}"
+						styleClass="bloque" />
+					<h:outputText
+						value="#{reservacionAreaBean.areaSeleccionada.catAreasSede.catSede.organismoGubernamental.nombre}" />
+				</div>
+
+				<div class="col-md-6">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.logistica.texto.ubicacion')}"
+						styleClass="bloque" />
+					<h:outputText
+						value="#{reservacionAreaBean.areaSeleccionada.catAreasSede.catSede.catUbicacionTerritorial.nombre}" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.logistica.texto.sede')}"
+						styleClass="bloque" />
+					<h:outputText
+						value="#{reservacionAreaBean.areaSeleccionada.catAreasSede.catSede.nombre}" />
+				</div>
+
+				<div class="col-md-6">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.logistica.texto.area')}"
+						styleClass="bloque" />
+					<h:outputText
+						value="#{reservacionAreaBean.areaSeleccionada.catAreasSede.catArea.nombre}" />
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.logistica.texto.mostrarimg')}"
+						styleClass="bloque" />
+
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<p:carousel value="#{reservacionAreaBean.imagenes}" var="imagen"
+							numVisible="1" responsive="true" circular="true"
+							itemStyle="height:200px;text-align:center">
+
+							<h:panelGrid columns="1" style="margin: 0 auto;">
+								<p:graphicImage value="#{imagen}" stream="false" height="170px" />
+								<p:outputLabel value="#{imagen.name}" />
+							</h:panelGrid>
+						</p:carousel>
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.logistica.texto.cerrar')}"
+								onclick="PF('dialogVerArea').hide()"
+								styleClass="btn btn-default" />
+						</div>
+					</div>
+				</f:facet>
+			</div>
+		</p:dialog>
+
+		<p:ajaxStatus onstart="PF('dialogLayout').show();"
+			onsuccess="PF('dialogLayout').hide();" />
+	</ui:define>
+</ui:composition>

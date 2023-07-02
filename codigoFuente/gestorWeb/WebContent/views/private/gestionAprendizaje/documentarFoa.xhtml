@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:sec="http://www.springframework.org/security/tags">
+    <ui:define name="breadcrumb">
+        <li>#{sistema.obtenerTexto('gw.titulo.gestionaprendizaje.texto')}</li>
+        <li>#{sistema.obtenerTexto('gw.titulo.ambientes.texto.ava.parentesis')}</li>
+        <li>#{sistema.obtenerTexto('gw.titulo.segava.texto')}</li>
+        <li class="active">#{sistema.obtenerTexto('gw.titulo.docfoa.texto')}</li>
+    </ui:define>
+    <ui:define name="content">
+
+        <p:ajaxStatus onstart="PF('dialogLayout').show()"
+                      onsuccess="PF('dialogLayout').hide()" />
+
+        <h1>#{sistema.obtenerTexto('gw.titulo.docfoa.texto')}</h1>
+        <hr />
+
+
+        <p:tabView id="tabDocumentarFoa"
+                   activeIndex="#{fichaObjetoAprendizajeBean.indicePanel}">
+            <p:tab title="#{sistema.obtenerTexto('gw.ga.label.datosgenerales')}">
+                <ui:include src="fichaDescriptivaGa.xhtml" />
+            </p:tab>
+            <p:tab title="#{sistema.obtenerTexto('gw.ga.label.eleminstru')}">
+                <ui:include src="elementosInstruccionales.xhtml" />
+            </p:tab>
+            <p:tab title="#{sistema.obtenerTexto('gw.ga.label.descoa')}">
+                <ui:include src="descripcionOA.xhtml" />
+            </p:tab>
+            <p:tab title="#{sistema.obtenerTexto('gw.ga.label.contexto')}">
+                <ui:include src="contexto.xhtml" />
+            </p:tab>
+
+        </p:tabView>
+        <p:dialog id="dialogo_faltan_campos" header="Validaci&#243;n"
+                  widgetVar="dlg_faltan_campos" resizable="false" position="center"
+                  responsive="true" closable="false" appendTo="@(body)"
+                  draggable="false" modal="true" styleClass="modalAbsoluto" width="600">
+
+
+            <div class="row">
+                <div class="col-md-12">
+                    <p:outputLabel value="Hacen falta campos por validar:"
+                                   styleClass="bloque" />
+                    <p:repeat var="mensaje"
+                              value="#{fichaObjetoAprendizajeBean.mensajes}">
+                        <h:outputText value="#{mensaje}" styleClass="bloque" />
+                    </p:repeat>
+                </div>
+            </div>
+
+            <f:facet name="footer">
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <p:commandButton value="Cerrar" styleClass="btn btn-default"
+                                         process="@this" ajax="true"
+                                         oncomplete="PF('dlg_faltan_campos').hide();" />
+                    </div>
+                </div>
+            </f:facet>
+        </p:dialog>
+
+        <p:dialog id="dialogo_redireccionar" header="Confirmar"
+                  widgetVar="dlg_redireccionar" resizable="false" position="center"
+                  responsive="true" closable="false" appendTo="@(body)"
+                  draggable="false" modal="true" width="600">
+            <h:form>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <p:outputLabel
+                            value="La ficha del objeto de aprendizaje se ha guardado en estatus Borrador:"
+                            styleClass="bloque" />
+                        <p:outputLabel
+                            value="Si desea continuar con la captura, de clic en continuar:"
+                            styleClass="bloque" />
+                        <p:outputLabel
+                            value="Si desea regresar a la edicion de ambientes virtuales de aprendizaje, de clic en regresar:"
+                            styleClass="bloque" />
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <p:commandButton value="Regresar" styleClass="btn btn-default"
+                                         process="@this" ajax="false"
+                                         action="#{fichaObjetoAprendizajeBean.cancelar}"
+                                         onclick="PF('dlg_redireccionar').hide();" />
+                        <p:commandButton value="Continuar" styleClass="btn btn-primary"
+                                         process="@this" ajax="true"
+                                         oncomplete="PF('dlg_redireccionar').hide();" />
+
+                    </div>
+                </div>
+
+            </h:form>
+        </p:dialog>
+
+        <p:dialog id="dialogo_finalizar" header="Confirmar"
+                  widgetVar="dlg_finalizar" resizable="false" position="center"
+                  responsive="true" closable="false" appendTo="@(body)"
+                  draggable="false" modal="true" styleClass="modalAbsoluto" width="600">
+            <h:form>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <p:outputLabel
+                            value="La ficha del objeto de aprendizaje se ha guardado en estatus Final."
+                            styleClass="bloque" />
+
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <p:commandButton value="Continuar" styleClass="btn btn-primary"
+                                         process="@this" ajax="false"
+                                         action="#{modificarSeguimientoAVABean.navegaModificarSeguimientoAVA}"
+                                         onclick="PF('dlg_finalizar').hide();" />
+                    </div>
+                </div>
+
+            </h:form>
+        </p:dialog>
+
+
+    </ui:define>
+</ui:composition>

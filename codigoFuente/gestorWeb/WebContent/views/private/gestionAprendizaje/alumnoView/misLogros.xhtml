@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="breadcrumb">
+		<li class="active">Mis logros</li>
+	</ui:define>
+
+	<ui:define name="content">
+
+		<h:form id="formMisCursos">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<h1>Mis logros</h1>
+			<hr />
+			<div class="row mislogros">
+				<div class="col-md-7 contenedorDatosInsignia">
+
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel styleClass="tituloInsignia"
+								value="#{misLogrosBean.contenedorLogros.badge.nombre}" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6">
+							<div class="row">
+								<div class="col-md-12 contenedorTrofeos">
+									<div class="contenedorTrofeo">
+										<div class="trofeo">
+											<span class="ss_ga_logros oro"></span>
+										</div>
+										<div class="baseTrofeo">
+											<p:outputLabel
+												value="#{misLogrosBean.contenedorLogros.cantTrofeosOroPlata[0]}" />
+										</div>
+
+									</div>
+
+									<div class="contenedorTrofeo">
+										<div class="trofeo">
+											<span class="ss_ga_logros plata"></span>
+										</div>
+										<div class="baseTrofeo plata">
+											<p:outputLabel
+												value="#{misLogrosBean.contenedorLogros.cantTrofeosOroPlata[1]}" />
+										</div>
+									</div>
+
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6 contenedorNivelPuntos">
+							<p:outputPanel rendered="#{misLogrosBean.badge != null}"
+								layout="block">
+
+								<p:outputLabel
+									value="#{misLogrosBean.contenedorLogros.clasificacionBadge.nombre}"
+									styleClass="bloque tituloNivel" />
+								<h:outputText
+									value="#{misLogrosBean.contenedorLogros.totalPuntosCompetencias}"
+									styleClass="descripcionPuntos" />
+								<h:outputText
+									rendered="#{!(misLogrosBean.contenedorLogros.totalPuntosCompetencias gt misLogrosBean.contenedorLogros.badge.calificacionMaxima)}"
+									value=" de #{misLogrosBean.contenedorLogros.badge.calificacionMaxima} puntos."
+									styleClass="descripcionPuntos" />
+							</p:outputPanel>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12 ">
+							<p:outputLabel rendered="#{!(misLogrosBean.contenedorLogros.logros.isEmpty())}" value="Principales competencias desarrolladas:"
+								styleClass="bloque" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12 contenedorCompetencias">
+							<ui:repeat var="competencia"
+								value="#{misLogrosBean.contenedorLogros.competencias}">
+								<p:outputLabel value="#{competencia}" />
+							</ui:repeat>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-5">
+					<p:outputPanel
+						rendered="#{misLogrosBean.contenedorLogros.badge != null}"
+						layout="block">
+						<p:outputPanel id="imgInsignia" styleClass="imgInsigniaContenedor">
+							<img class="imgInsignia"
+								src="/recursos/insignias/#{misLogrosBean.contenedorLogros.badge.rutaImagen}" />
+						</p:outputPanel>
+						<div class="contenedorInsignia">
+							<p:outputLabel
+								value="#{misLogrosBean.contenedorLogros.badge.descripcion}"
+								styleClass="descripcionInsignia" />
+						</div>
+					</p:outputPanel>
+				</div>
+			</div>
+			<div class="row contenedorPrincipalNivel">
+				<div class="col-md-12">
+					<div class="row contenedorNivelInsigniaImg">
+						<div class="col-md-4 col-md-offset-1 ">
+							<div class="proximoNivel">
+								<p:outputPanel
+									rendered="#{!(misLogrosBean.puntosParaSigNivel == 0)}"
+									layout="block">
+									<p:outputLabel
+										value="Para el próximo nivel de #{misLogrosBean.contenedorLogros.badge.nombre} &#160;" />
+
+									<p:outputLabel
+										value="te faltan #{misLogrosBean.puntosParaSigNivel} puntos." />
+								</p:outputPanel>
+							</div>
+							<div class="proximaInsignia">
+								<p:outputPanel
+									rendered="#{!(misLogrosBean.puntosParaSigBadge == 0)}">
+									<p:outputLabel
+										value="Para convertirte en #{misLogrosBean.sigBadgeNombre} &#160;" />
+
+									<p:outputLabel
+										value=" te faltan #{misLogrosBean.puntosParaSigBadge} puntos." />
+								</p:outputPanel>
+							</div>
+
+						</div>
+						<div class="col-md-7 contenedorImgBloqDesbloq">
+							<p:outputPanel id="imgInsignia1" styleClass="imgChicaContenedor">
+								<img class="#{misLogrosBean.insignia1}"
+									src="/recursos/insignias/insignias01.png" />
+								<p:outputPanel layout="block"
+									rendered="#{misLogrosBean.insignia1 eq 'insigniaBloqueada'}">
+									<div class="contenedorIconoBloq">
+										<span class="ss_gn_bloq"></span>
+									</div>
+								</p:outputPanel>
+							</p:outputPanel>
+							<p:outputPanel id="imgInsignia2" styleClass="imgChicaContenedor">
+								<img class="#{misLogrosBean.insignia2}"
+									src="/recursos/insignias/insignias02.png" />
+								<p:outputPanel layout="block"
+									rendered="#{misLogrosBean.insignia2 eq 'insigniaBloqueada'}">
+									<div class="contenedorIconoBloq">
+										<span class="ss_gn_bloq"></span>
+									</div>
+								</p:outputPanel>
+
+							</p:outputPanel>
+							<p:outputPanel id="imgInsignia3" styleClass="imgChicaContenedor">
+								<img class="#{misLogrosBean.insignia3}"
+									src="/recursos/insignias/insignias03.png" />
+								<p:outputPanel layout="block"
+									rendered="#{misLogrosBean.insignia3 eq 'insigniaBloqueada'}">
+									<div class="contenedorIconoBloq">
+										<span class="ss_gn_bloq"></span>
+									</div>
+								</p:outputPanel>
+							</p:outputPanel>
+							<p:outputPanel id="imgInsignia4" styleClass="imgChicaContenedor">
+								<img class="#{misLogrosBean.insignia4}"
+									src="/recursos/insignias/insignias04.png" />
+								<p:outputPanel layout="block"
+									rendered="#{misLogrosBean.insignia4 eq 'insigniaBloqueada'}">
+									<div class="contenedorIconoBloq">
+										<span class="ss_gn_bloq"></span>
+									</div>
+								</p:outputPanel>
+							</p:outputPanel>
+						</div>
+
+
+					</div>
+					<p:outputPanel
+						rendered="#{!(misLogrosBean.contenedorLogros.logros.isEmpty())}">
+						<div class="row ultimoTrofeoContenedor">
+							<div class="col-md-4">
+								<p:outputLabel value="El último trofeo que ganaste:"
+									styleClass="descripcionUltimoTrofeo" />
+
+							</div>
+							<div class="col-md-4">
+								<p:outputPanel rendered="#{(not misLogrosBean.contenedorLogros.logros.isEmpty()) and (misLogrosBean.contenedorLogros.logros.get(0).trofeo eq 1)}"
+									styleClass="text-center">
+									<span class="ss_ga_logros trofeoOro" style="font-size:50px"></span>
+								</p:outputPanel>
+								<p:outputPanel rendered="#{(not misLogrosBean.contenedorLogros.logros.isEmpty()) and (misLogrosBean.contenedorLogros.logros.get(0).trofeo eq 2)}"
+									styleClass="text-center">
+									<span class="ss_ga_logros trofeoPlata" style="font-size:50px"></span>
+								</p:outputPanel>
+
+
+							</div>
+							<div class="col-md-4">
+								<p:outputLabel value="Detalle:" styleClass="bloque" />
+								<h:outputText
+									value="Por aprobar el curso de " />
+								<p:outputLabel rendered="#{not (misLogrosBean.contenedorLogros.logros.isEmpty())}" value="#{misLogrosBean.contenedorLogros.logros.get(misLogrosBean.contenedorLogros.logros.size()-1).nombreCurso}" />
+							</div>
+						</div>
+					</p:outputPanel>
+					<div class="row">
+						<div class="col-md-12">
+							<p:dataTable reflow="true"
+								value="#{misLogrosBean.contenedorLogros.logros}" var="logro"
+								emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+								paginator="true" rows="10" paginatorPosition="bottom"
+								paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks}
+								 {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+								currentPageReportTemplate="({currentPage} de {totalPages})"
+								rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+								<p:column headerText="Trofeo">
+									<p:outputPanel rendered="#{logro.trofeo eq 1}"
+										styleClass="text-center">
+										<span class="ss_ga_logros trofeoOro tamanioTrofeoTabla"></span>
+									</p:outputPanel>
+									<p:outputPanel rendered="#{logro.trofeo eq 2}"
+										styleClass="text-center">
+										<span class="ss_ga_logros trofeoPlata tamanioTrofeoTabla"></span>
+									</p:outputPanel>
+								</p:column>
+								<p:column headerText="Nombre del curso">
+									<h:outputText value="#{logro.nombreCurso}" />
+								</p:column>
+								<p:column headerText="Modalidad">
+									<h:outputText value="#{logro.modalidad}" />
+								</p:column>
+								<p:column headerText="Fecha y hora">
+									<h:outputText value="#{logro.fecha}">
+										<f:convertDateTime
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Puntos">
+									<h:outputText value="#{logro.puntos}" />
+								</p:column>
+
+							</p:dataTable>
+						</div>
+					</div>
+
+
+				</div>
+
+			</div>
+
+
+		</h:form>
+	</ui:define>
+</ui:composition>

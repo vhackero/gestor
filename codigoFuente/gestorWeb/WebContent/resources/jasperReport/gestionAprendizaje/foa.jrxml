@@ -1,0 +1,958 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
+<!-- 2017-07-20T09:40:29 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="foa" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="00edfe99-8f4b-4cc7-b5e2-c8a0797e18d8">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<style name="table_TH" mode="Opaque" backcolor="#F2F3F4">
+		<box>
+			<pen lineWidth="0.5" lineColor="#F8F8FF"/>
+		</box>
+	</style>
+	<parameter name="P_NOMBRE_OA" class="java.lang.String"/>
+	<parameter name="P_AREA_CONOCIMIENTO" class="java.lang.String"/>
+	<parameter name="P_CURSOS_REFERENCIA_TEMA" class="java.lang.String"/>
+	<parameter name="P_ASIGNATURA_REFERENCIA" class="java.lang.String"/>
+	<parameter name="P_MODALIDAD" class="java.lang.String"/>
+	<parameter name="P_RESPONSABLE_DE_MATERIA" class="java.lang.String"/>
+	<parameter name="P_NIVEL_EDUCATIVO" class="java.lang.String"/>
+	<parameter name="P_OBJETIVO_GENERAL" class="java.lang.String"/>
+	<parameter name="P_PROPOSITO" class="java.lang.String"/>
+	<parameter name="P_REQUISITOS" class="java.lang.String"/>
+	<parameter name="P_DESC_CONTENIDO" class="java.lang.String"/>
+	<parameter name="P_TEMAS_RELACIONADOS" class="java.lang.String"/>
+	<parameter name="P_LISTA_ELEMENTOS_MULTIMEDIA" class="java.lang.String"/>
+	<parameter name="P_TRATAMIENTO_EDITORIAL" class="java.lang.String"/>
+	<parameter name="P_PALABRAS_CLAVE" class="java.lang.String"/>
+	<parameter name="P_AUTORES" class="java.lang.String"/>
+	<parameter name="P_TIEMPO_TIPICO_APRENDIZAJE" class="java.lang.String"/>
+	<parameter name="P_DESTINATARIOS" class="java.lang.String"/>
+	<parameter name="P_RANGO_TIPICO_EDAD" class="java.lang.String"/>
+	<parameter name="P_TIPO_ESTRUCTURA" class="java.lang.String"/>
+	<parameter name="P_TIPO_CONTENIDO" class="java.lang.String"/>
+	<parameter name="P_TIPO_INTERACTIVIDAD" class="java.lang.String"/>
+	<parameter name="P_DENSIDAD_SEMANTICA" class="java.lang.String"/>
+	<parameter name="P_NIVEL_DIFICULTAD" class="java.lang.String"/>
+	<parameter name="P_TIPO_RECURSO_PREDOMINANTE" class="java.lang.String"/>
+	<parameter name="P_MATERIAL_DIDACTICO_APOYO" class="java.lang.String"/>
+	<parameter name="P_ACTIVIDADES_REFORZAMIENTO" class="java.lang.String"/>
+	<parameter name="P_EVALUACION_APRENDIZAJE" class="java.lang.String"/>
+	<parameter name="P_COMENTARIOS" class="java.lang.String"/>
+	<parameter name="P_RESUMEN" class="java.lang.String"/>
+	<parameter name="P_VERSION" class="java.lang.String"/>
+	<parameter name="P_LUGAR_EDICION" class="java.lang.String"/>
+	<parameter name="P_IDIOMA" class="java.lang.String"/>
+	<parameter name="P_AMBITO_APLICACION" class="java.lang.String"/>
+	<parameter name="P_NIVEL_GRANULARIDAD" class="java.lang.String"/>
+	<parameter name="P_COMPOSICION_OBJETO" class="java.lang.String"/>
+	<parameter name="P_ESTA_DISPONIBLE" class="java.lang.String"/>
+	<parameter name="P_URL" class="java.lang.String"/>
+	<parameter name="P_FECHA_LIBERACION" class="java.lang.String"/>
+	<parameter name="P_TIEMPO_ESTIMADO_REPRODUCCION" class="java.lang.String"/>
+	<parameter name="P_FORMATO" class="java.lang.String"/>
+	<parameter name="P_RESPONSABLES_ACADEMICOS" class="java.lang.String"/>
+	<parameter name="P_TAMANIO_SCORM" class="java.lang.String"/>
+	<parameter name="P_TAMANIO_OA" class="java.lang.String"/>
+	<parameter name="P_TIPO_EVENTO_CAPACITACION" class="java.lang.String"/>
+	<parameter name="P_TIENE_COSTO" class="java.lang.String"/>
+	<parameter name="P_TIENE_DERECHOS_AUTOR" class="java.lang.String"/>
+	<parameter name="P_CONDICION_USO" class="java.lang.String"/>
+	<parameter name="P_RELACION_CON_OA" class="java.lang.String"/>
+	<parameter name="P_DESCRIPCION" class="java.lang.String"/>
+	<parameter name="P_ANOTACION" class="java.lang.String"/>
+	<parameter name="P_ESTATUS" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="586" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<staticText>
+				<reportElement x="0" y="20" width="550" height="30" uuid="e3eb6a50-9b91-4e65-88de-e1b570aa5caf"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DATOS GENERALES]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="60" width="200" height="30" backcolor="#F2F3F4" uuid="d282d924-75f7-438b-9da9-6cb90d8fbe1c"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nombre del OA:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="90" width="200" height="30" uuid="bc0ea59d-7335-46ba-8c4e-b5ec59f510c2"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_NOMBRE_OA}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="154" width="274" height="30" uuid="286a7c52-d813-454e-8ac7-15f63b7e14ac"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_AREA_CONOCIMIENTO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="122" width="274" height="30" backcolor="#F2F3F4" uuid="4f1b4f13-f53d-4be5-9c3f-3c06442a382a"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tema o área de conocimiento:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="280" y="122" width="272" height="30" backcolor="#F2F3F4" uuid="333af307-7be4-4dbd-90c3-1f8dc3a4c0c7"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cursos a los que hace referencia el tema:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="280" y="154" width="272" height="30" uuid="0655e2af-093c-43b8-83ea-18704152a997"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_CURSOS_REFERENCIA_TEMA}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="186" width="274" height="30" backcolor="#F2F3F4" uuid="df0b783d-54fd-4771-bf81-0620174594b5"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Asignatura o cursos a los que hace referencia:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="218" width="274" height="30" uuid="92162304-12df-4778-822d-aaac87b66bcd"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_ASIGNATURA_REFERENCIA}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="280" y="218" width="272" height="30" uuid="0fcb3ff1-5bdc-4e73-bccf-4b733f53a5dd"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_MODALIDAD}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="280" y="186" width="272" height="30" backcolor="#F2F3F4" uuid="c55ae9d9-a44f-4f16-bc6c-6a2fa091676c"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Modalidad:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="250" width="274" height="30" backcolor="#F2F3F4" uuid="61d15bd5-91c8-4fbd-b44e-824f27520c46"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Responsables de la materia:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="282" width="274" height="30" uuid="83f3d547-0749-4d76-8ea9-94609c268422"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_RESPONSABLE_DE_MATERIA}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="280" y="250" width="272" height="30" backcolor="#F2F3F4" uuid="2d300d54-dc1a-45e8-88e4-9712c18a6804"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nivel educativo:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="280" y="282" width="272" height="30" uuid="3a2ec843-0b11-4d12-82f2-96235f1dd338"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_NIVEL_EDUCATIVO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="314" width="546" height="30" backcolor="#F2F3F4" uuid="f0b2b83b-bb21-4b7b-b24b-fe90e0b547e9"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Objetivo general:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="346" width="546" height="30" uuid="ac6f6529-db80-4f43-95fc-12842ec8b0c6"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_OBJETIVO_GENERAL}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="378" width="546" height="30" backcolor="#F2F3F4" uuid="29aba567-44aa-418b-b574-138feeeb97b7"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Propósito:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="410" width="546" height="30" uuid="8aab92b7-95a7-4230-9e15-bc34030a83bf"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_PROPOSITO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="443" width="546" height="30" backcolor="#F2F3F4" uuid="338dc6f5-a3eb-4f49-baf0-00a475dee983"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Requisitos:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="475" width="546" height="30" uuid="c27eddce-e86c-4576-9d50-c0a29523dc49"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_REQUISITOS}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="508" width="546" height="30" backcolor="#F2F3F4" uuid="8e4b9300-85ce-423d-b9e5-df32d1bab45c"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descripción del contenido:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="540" width="546" height="30" uuid="939ac18a-2a72-4995-9170-94d10908f3f9"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_DESC_CONTENIDO}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="330">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="10" width="546" height="30" backcolor="#F2F3F4" uuid="1aa41373-eb33-41eb-865d-cb80d87af32c"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Temas relacionados:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="42" width="546" height="30" uuid="87fdbdd9-7e94-43c8-b205-fb379da0ca73"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TEMAS_RELACIONADOS}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="6" y="76" width="546" height="30" backcolor="#F2F3F4" uuid="8418b07e-267d-4aed-8254-7e204552d60e"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Elementos multimedia:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="6" y="139" width="546" height="30" backcolor="#F2F3F4" uuid="316af5e7-2848-4d82-9c42-1f0b16fe5f14"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tratamiento editorial:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="6" y="202" width="546" height="30" backcolor="#F2F3F4" uuid="9876a446-112e-4861-bbe2-642416c858a0"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Palabras clave:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="6" y="265" width="546" height="30" backcolor="#F2F3F4" uuid="6f858dcb-d363-446c-b675-b63d3377f86c"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Autores o contribuidores:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="6" y="108" width="546" height="30" uuid="7e556161-44e8-4af0-90e1-09ce2e99cd41"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_LISTA_ELEMENTOS_MULTIMEDIA}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="6" y="171" width="546" height="30" uuid="002a70de-e1ed-4cf0-9aaf-19345690f6da"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TRATAMIENTO_EDITORIAL}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="6" y="234" width="546" height="30" uuid="31d3f0be-6bbc-4a66-9cdf-33bf436b0cda"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_PALABRAS_CLAVE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="6" y="297" width="546" height="30" uuid="46bbbe0f-a4f6-4c45-9e77-7f40145bf650"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_AUTORES}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="567">
+			<staticText>
+				<reportElement x="0" y="11" width="550" height="30" uuid="ed0425b4-13d4-41d9-afff-93dad6bb7487"/>
+				<box leftPadding="5"/>
+				<textElement>
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ELEMENTOS INSTRUCCIONALES]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="244" width="546" height="30" backcolor="#F2F3F4" uuid="86e33135-43d5-4167-98ad-1d908caa431f"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo de recurso predominante:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="276" width="546" height="30" uuid="469a1975-cd2a-494a-bbd2-41f01de0662c"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TIPO_RECURSO_PREDOMINANTE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="4" y="50" width="177" height="30" backcolor="#F2F3F4" uuid="9c45a118-9f10-4f81-830d-c2d0d75f82ef"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tiempo típico de aprendizaje:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="4" y="82" width="177" height="30" uuid="94b0cdce-e16e-48d4-8b06-482e77f3c227"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TIEMPO_TIPICO_APRENDIZAJE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="189" y="50" width="177" height="30" backcolor="#F2F3F4" uuid="e632af03-a1f3-41f8-9c17-cb6c9d6863b9"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Destinatarios:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="189" y="82" width="177" height="30" uuid="c9ac0983-63ee-4dca-bff2-11b69dcb11fc"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_DESTINATARIOS}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="374" y="50" width="177" height="30" backcolor="#F2F3F4" uuid="c148f7d8-60ea-489a-8b87-2786f4953046"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rango típico de edad:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="374" y="82" width="177" height="30" uuid="fab3f733-cf82-4aac-8376-c7c9c8496582"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_RANGO_TIPICO_EDAD}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="4" y="114" width="177" height="30" backcolor="#F2F3F4" uuid="6ec84088-cf17-4c56-8cc1-da2d7707bea0"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo de estructura:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="4" y="146" width="177" height="30" uuid="50b08fc7-9ab2-4c6f-a47c-a1e202588038"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TIPO_ESTRUCTURA}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="189" y="114" width="177" height="30" backcolor="#F2F3F4" uuid="7e1b4a1d-e3b0-40cc-b21e-036a1ba3f111"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo de contenido:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="189" y="146" width="177" height="30" uuid="874ea7a8-6478-40fd-a33b-3ab742e149cf"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TIPO_CONTENIDO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="374" y="114" width="177" height="30" backcolor="#F2F3F4" uuid="48469040-f484-4a21-ad09-b28da18c4a55"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo de interactividad:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="374" y="146" width="177" height="30" uuid="32c3955d-808c-4b8f-91e4-b37f97b8a82a"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TIPO_INTERACTIVIDAD}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="179" width="274" height="30" backcolor="#F2F3F4" uuid="5d6038f9-064c-427a-9981-74517022b01d"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Densidad semántica:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="211" width="274" height="30" uuid="60c40640-ca94-466d-92ca-1a76c6453855"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_DENSIDAD_SEMANTICA}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="280" y="179" width="272" height="30" backcolor="#F2F3F4" uuid="7f9c40b7-7caa-4175-9da4-ca11125967f5"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nivel de dificultad:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="280" y="211" width="272" height="30" uuid="36c28676-dbea-48a3-8611-9aa26ffaff85"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_NIVEL_DIFICULTAD}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="6" y="308" width="546" height="30" backcolor="#F2F3F4" uuid="8ceb176d-a8f7-4a3c-91d2-a4831d88cdc0"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Material didáctico de apoyo: ]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="6" y="340" width="546" height="30" uuid="2b7d4510-c327-4cdc-afc5-2d7eed685090"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_MATERIAL_DIDACTICO_APOYO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="6" y="372" width="546" height="30" backcolor="#F2F3F4" uuid="6ea1eb0a-43b9-4975-999e-d9f7aa1da883"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Actividades de reforzamiento:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="6" y="404" width="546" height="30" uuid="e4caee03-fb43-4193-aeff-988cec1c72d5"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_ACTIVIDADES_REFORZAMIENTO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="7" y="437" width="546" height="30" backcolor="#F2F3F4" uuid="0544268e-9d50-47f2-9b70-65076d46231f"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Evaluación del aprendizaje:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="7" y="469" width="546" height="30" uuid="90021e83-6f72-4675-8e30-791bce4b210b"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_EVALUACION_APRENDIZAJE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="8" y="502" width="546" height="30" backcolor="#F2F3F4" uuid="5cfb7d49-8ef1-4180-969e-83056a0083ef"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Comentarios:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="8" y="534" width="546" height="30" uuid="d890d0c1-5559-428a-8360-910298c737d3"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_COMENTARIOS}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="534">
+			<staticText>
+				<reportElement x="2" y="11" width="550" height="30" uuid="eb009841-3517-436f-bcc0-d79d11488d3e"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DESCRIPCIÓN DEL OA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="8" y="51" width="546" height="30" backcolor="#F2F3F4" uuid="2b40a90b-4005-40ed-aca4-f399156edcf0"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Resumen:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="8" y="83" width="546" height="30" uuid="29076c95-46af-4d7a-ac8a-7a4f39929d85"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_RESUMEN}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="9" y="117" width="177" height="30" backcolor="#F2F3F4" uuid="030d96fe-53e1-4708-a6a1-95787086eff7"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Versión:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="9" y="149" width="177" height="30" uuid="b5ef7c71-53b5-488d-aa23-5f127eaa1829"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_VERSION}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="194" y="117" width="177" height="30" backcolor="#F2F3F4" uuid="9027a8f9-a6af-49b6-a6ca-6053f2679578"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Lugar de edición:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="194" y="149" width="177" height="30" uuid="4ca19bfd-a977-4296-85c1-824ef2789d8c"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_LUGAR_EDICION}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="379" y="117" width="177" height="30" backcolor="#F2F3F4" uuid="d4de26e3-ab5c-4b5f-b4aa-e9dffb763393"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Idioma:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="379" y="149" width="177" height="30" uuid="26432526-ea9c-496b-9d98-d871bc8da810"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_IDIOMA}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="9" y="181" width="177" height="30" backcolor="#F2F3F4" uuid="0fe7337c-0197-4938-8605-521c1fe321f3"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ámbito de aplicación:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="9" y="213" width="177" height="30" uuid="88b997d2-f1bc-4eb0-ad01-f4a2c97c5590"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_AMBITO_APLICACION}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="194" y="181" width="177" height="30" backcolor="#F2F3F4" uuid="bc037b5c-2599-449a-b542-9dff004b4786"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nivel de granularidad:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="194" y="213" width="177" height="30" uuid="f6cfa569-f3a5-4aac-87d3-34c5353f4ae0"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_NIVEL_GRANULARIDAD}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="379" y="181" width="177" height="30" backcolor="#F2F3F4" uuid="c5b3f97c-f955-4611-8205-4e2b159fa0fa"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Composición del objeto:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="379" y="213" width="177" height="30" uuid="e6481507-5a0c-4635-b736-bd6f62c04c0e"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_COMPOSICION_OBJETO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="9" y="245" width="177" height="30" backcolor="#F2F3F4" uuid="d3299d08-b54e-4052-8391-2a3a5685c6c2"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Está disponible:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="9" y="277" width="177" height="30" uuid="f93b839e-9c37-4434-bc61-2abf501abebc"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_ESTA_DISPONIBLE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="194" y="245" width="177" height="30" backcolor="#F2F3F4" uuid="bcd674ae-cfbc-4782-a351-26b97a2dd2e2"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[URL:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="194" y="277" width="177" height="30" uuid="d6adbab5-c8d7-485f-956c-7f0ef6bc21f2"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_URL}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="379" y="245" width="177" height="30" backcolor="#F2F3F4" uuid="fe5a54d5-ecf8-4db0-9473-29bed46f293f"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha de liberación:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="379" y="277" width="177" height="30" uuid="fc480657-0673-45f7-a3b5-8851c8e3987b"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_FECHA_LIBERACION}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="310" width="274" height="30" backcolor="#F2F3F4" uuid="7fb25d66-8b9f-401b-b45c-f4616e789032"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tiempo estimado de reproducción o lectura:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="342" width="274" height="30" uuid="900cbcea-6636-48b4-9987-e53c81c066b8"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TIEMPO_ESTIMADO_REPRODUCCION}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="280" y="310" width="272" height="30" backcolor="#F2F3F4" uuid="c52ed5b5-8f97-4e0e-a50a-5d55e8b2af6e"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Formato:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="280" y="342" width="272" height="30" uuid="d4edd7c5-8d8f-483b-863a-76b7031ac0bd"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_FORMATO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="6" y="374" width="546" height="30" backcolor="#F2F3F4" uuid="808f7bfd-95fd-4b34-a9d2-f6773ad204c2"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Responsables académicos:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="6" y="406" width="546" height="30" uuid="44ef30e7-665f-49ea-9058-766af7592ef4"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_RESPONSABLES_ACADEMICOS}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="6" y="439" width="546" height="30" backcolor="#F2F3F4" uuid="c1992ca9-fb56-4efd-9b0d-8ddcc8edfb87"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Aspectos técnicos de los elementos del OA:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="6" y="471" width="274" height="30" backcolor="#F2F3F4" uuid="fffccc87-efc1-416e-a2ce-4341bc9bf16b"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tamaño del SCORM:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="6" y="503" width="274" height="30" uuid="471479b6-fb11-47d9-92a9-4ada37cacc9f"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TAMANIO_SCORM}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="281" y="471" width="271" height="30" backcolor="#F2F3F4" uuid="c3e4d455-bf70-46e0-ad1d-83541def5b38"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tamaño del OA:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="281" y="503" width="271" height="30" uuid="b4ecfe0a-68c8-4628-825a-ac195a7bde72"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TAMANIO_OA}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="432">
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="3" y="109" width="546" height="30" backcolor="#F2F3F4" uuid="31a831b0-013c-4b8a-9a35-c6556ec72e88"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Condiciones de uso:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="3" y="141" width="546" height="30" uuid="f81bab5a-9600-4a58-8283-455a75f526b4"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_CONDICION_USO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="3" y="44" width="177" height="30" backcolor="#F2F3F4" uuid="3effd13c-047a-4225-91fb-527ea3aa6402"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo de evento de capacitación:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="3" y="76" width="177" height="30" uuid="6ef6fe6e-3271-44f0-b490-3ed4d8de5744"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TIPO_EVENTO_CAPACITACION}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="188" y="44" width="177" height="30" backcolor="#F2F3F4" uuid="411fbbcf-07b0-4783-a2d4-0473fec2146c"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[¿Tiene costo?]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="188" y="76" width="177" height="30" uuid="7817debf-df80-4dfd-b12a-258d08579ba0"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TIENE_COSTO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="373" y="44" width="177" height="30" backcolor="#F2F3F4" uuid="09706284-3588-4fa2-89af-a2816989efb0"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[¿Tiene registro de derechos de autor?]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="373" y="76" width="177" height="30" uuid="1d0a8405-28bc-4beb-9044-d173a0effd29"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TIENE_DERECHOS_AUTOR}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="8" width="550" height="30" uuid="48196790-5a01-4bc4-ae96-78fd9922bc2b"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CONTEXTO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="3" y="173" width="546" height="30" backcolor="#F2F3F4" uuid="3b15ca6f-c7eb-4967-a823-3a60b4f784d2"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo de relación que guarda este OA con otros:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="3" y="205" width="546" height="30" uuid="533f0b1a-73a9-4f02-98c5-c9136564fb1d"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_RELACION_CON_OA}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="3" y="237" width="546" height="30" backcolor="#F2F3F4" uuid="bc3f60fb-329f-4c23-a051-37a9775e2577"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descripción:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="3" y="269" width="546" height="30" uuid="529206ee-3a71-47a5-8030-c0a3ea6f3742"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_DESCRIPCION}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="4" y="302" width="546" height="30" backcolor="#F2F3F4" uuid="c91faa18-5d43-4e89-90f1-386f20e0a334"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Anotación:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="4" y="334" width="546" height="30" uuid="341783ed-ced1-4538-b439-4d732ee9c50f"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_ANOTACION}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="4" y="367" width="177" height="30" backcolor="#F2F3F4" uuid="3dd5826a-15ca-482a-884d-d93a8a3059bd"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Estatus:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="4" y="399" width="177" height="30" uuid="6f2cea29-2675-470a-b7ab-d117c606f558"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_ESTATUS}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="38"/>
+	</pageFooter>
+</jasperReport>

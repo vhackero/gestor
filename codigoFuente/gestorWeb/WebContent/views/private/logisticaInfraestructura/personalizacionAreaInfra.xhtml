@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<h:form id="frmPA">
+		<!-- Panel Info Area  -->
+
+		<h1>
+			<p:outputLabel value="Personalización del área" />
+		</h1>
+		<hr />
+
+
+		<p:panel header="Informacion de Area" id="panelInfoArea">
+			<ui:include src="infoAreaInfraPer.xhtml" />
+		</p:panel>
+		<br />
+		<p:panel header="Configuracion" id="panelConfiguracion">
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel value="Mostrar imagenes" styleClass="bloque" />
+
+						<p:carousel value="#{reservacionAreaBean.obtieneImagenes()}"
+							var="imagen" numVisible="1" responsive="true" circular="true"
+							itemStyle="height:200px;text-align:center">
+
+							<h:panelGrid columns="1" style="margin: 0 auto;">
+								<p:graphicImage value="#{imagen}" stream="false" height="170px" />
+								<p:outputLabel value="#{imagen.name}" />
+							</h:panelGrid>
+						</p:carousel>
+
+
+					</div>
+				</div>
+			</div>
+
+
+			<!-- recursos tecnologicos -->
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+
+						<p:outputLabel value="Recursos tecnologicos" styleClass="bloque" />
+
+						<p:dataTable id="tblRecTec" StyleClass="table" var="rt"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							value="#{reservacionAreaBean.selTec}">
+
+							<p:column headerText="Nombre">
+								<h:outputText value="#{rt.catRecursosInfraestructura.nombre}" />
+							</p:column>
+
+							<p:column headerText="Cantidad">
+
+								<p:selectOneMenu styleClass="col-xs-12"
+									value="#{rt.cantidadSeleccionada}">
+									<p:ajax process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										noSelectionOption="true" />
+									<f:selectItems value="#{rt.listadoCantidad}" var="c"
+										itemValue="#{c}" itemLabel="#{c}" />
+								</p:selectOneMenu>
+							</p:column>
+
+						</p:dataTable>
+
+					</div>
+
+				</div>
+			</div>
+
+			<!-- recursos mobiliarios -->
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel value="Mobiliario" styleClass="bloque " />
+
+						<p:dataTable id="tblRecMobi" StyleClass="table" var="rm"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							value="#{reservacionAreaBean.selMobi}">
+
+							<p:column headerText="Nombre">
+								<h:outputText value="#{rm.catRecursosInfraestructura.nombre}" />
+							</p:column>
+
+							<p:column headerText="Cantidad">
+
+								<p:selectOneMenu styleClass="col-xs-12"
+									value="#{rm.cantidadSeleccionada}">
+									<p:ajax process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										noSelectionOption="true" />
+									<f:selectItems value="#{rm.listadoCantidad}" var="c"
+										itemValue="#{c}" itemLabel="#{c}" />
+								</p:selectOneMenu>
+							</p:column>
+
+						</p:dataTable>
+
+					</div>
+
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel value="Observaciones academicas"
+							styleClass="bloque" for="obsA" />
+						<p:inputText id="obsA"
+							value="#{reservacionAreaBean.solicitudSeleccionadaEdit.perArea.observacionesAcademicas}"
+							styleClass="form-control">
+							<p:ajax process="@this" />
+						</p:inputText>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel value="Distribucion" styleClass="bloque " />
+						<p:selectOneMenu
+							value="#{reservacionAreaBean.solicitudSeleccionadaEdit.perArea.distribucionArea}"
+							converter="entityConverter">
+							<p:ajax process="@this" update="@this" />
+							<f:selectItem itemLabel="--Seleccionar--"
+								noSelectionOption="true" />
+							<f:selectItems
+								value="#{reservacionAreaBean.configuracionAreaReservacion.relAreaDistribucion}"
+								var="catDist" itemLabel="#{catDist.catDistribucionArea.nombre}"
+								itemValue="#{catDist.catDistribucionArea}" />
+						</p:selectOneMenu>
+					</div>
+
+					<div class="col-md-6">
+						<p:outputLabel value="Servicio de cafeteria" styleClass="bloque " />
+
+						<p:selectOneRadio
+							value="#{reservacionAreaBean.solicitudSeleccionadaEdit.perArea.servicioCafeteria}">
+							<f:selectItem itemLabel="Si" itemValue="1" />
+							<f:selectItem itemLabel="No" itemValue="0" />
+							<p:ajax process="@this" />
+						</p:selectOneRadio>
+					</div>
+
+				</div>
+			</div>
+
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel
+							value="Enviar solicitud de reservacion al responsable del área"
+							styleClass="bloque " />
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel value="Correo electrónico" for="emailRes"
+							styleClass="bloque requerido" />
+						<p:inputText styleClass="form-control" id="emailRes"
+							value="#{reservacionAreaBean.solicitudSeleccionadaEdit.perArea.emailResponsable}">
+							<p:ajax process="@this" />
+						</p:inputText>
+						<p:message for="emailRes" />
+					</div>
+
+					<div class="col-md-6">
+						<p:outputLabel value="CC" styleClass="bloque" />
+						<p:inputText styleClass="form-control"
+							value="#{reservacionAreaBean.solicitudSeleccionadaEdit.perArea.emailCc}">
+							<p:ajax process="@this" />
+						</p:inputText>
+					</div>
+
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+
+						<p:commandButton id="btnSave" ajax="true"
+							update="panelConfiguracion"
+							styleClass="btn btn-primary pull-right"
+							actionListener="#{reservacionAreaBean.validarPersonalizacion}"
+							value="Guardar" />
+
+						<p:commandButton value="Cancelar"
+							actionListener="#{reservacionAreaBean.limpiaSS}"
+							oncomplete="PF('dlgPersonalizacion').hide(); scrollArriba();"
+							styleClass="btn btn-default pull-right" />
+
+					</div>
+				</div>
+			</div>
+		</p:panel>
+
+	</h:form>
+
+	<!-- 		Confirma personalización área -->
+	<h:form id="frmPers">
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" styleClass="medidaModal" closable="true"
+			modal="true" id="modalPers" widgetVar="modalReserv"
+			header="Personalización del área" dynamic="true">
+
+
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText value="Se guardara la Personalización del área" />
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel value="Dependencia" styleClass="bloque" />
+						<h:outputText
+							value="#{reservacionAreaBean.areaSeleccionada.catAreasSede.catSede.organismoGubernamental.nombre}" />
+					</div>
+
+					<div class="col-md-6">
+						<p:outputLabel value="Ubicacion" styleClass="bloque" />
+						<h:outputText
+							value="#{reservacionAreaBean.areaSeleccionada.catAreasSede.catSede.catUbicacionTerritorial.nombre}" />
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel value="Sede" styleClass="bloque" />
+						<h:outputText
+							value="#{reservacionAreaBean.areaSeleccionada.catAreasSede.catSede.nombre}" />
+					</div>
+
+					<div class="col-md-6">
+						<p:outputLabel value="Area" styleClass="bloque" />
+						<h:outputText
+							value="#{reservacionAreaBean.areaSeleccionada.catAreasSede.catArea.nombre}" />
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel value="Fecha" styleClass="bloque" />
+						<h:outputText value="#{reservacionAreaBean.fechaActual}">
+							<f:convertDateTime
+								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+						</h:outputText>
+					</div>
+				</div>
+			</div>
+
+			<f:facet name="footer">
+				<div class="row">
+					<div class="col-md-12">
+
+						<p:commandButton styleClass="btn btn-primary pull-right"
+							process="@this" value="Guardar" ajax="true"
+							actionListener="#{reservacionAreaBean.guardaPersonalizacionArea}"
+							update="formReserv"
+							oncomplete="PF('modalReserv').hide(),PF('dlgPersonalizacion').hide(), scrollArriba();" />
+
+						<p:commandButton value="Cancelar"
+							onclick="PF('modalReserv').hide();  scrollArriba();"
+							styleClass="btn btn-default pull-right" />
+
+					</div>
+				</div>
+			</f:facet>
+
+
+		</p:dialog>
+	</h:form>
+
+
+</ui:composition>

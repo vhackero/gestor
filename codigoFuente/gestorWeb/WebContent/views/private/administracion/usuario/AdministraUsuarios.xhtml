@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.administrarUsuarios')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form id="frmPersonas">
+			<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.administrarUsuarios')}</h1>
+			<hr />
+
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<div class="row">
+				<div class="col-md-12">
+					<sec:authorize access="hasPermission(null,'PER_AGR')">
+						<p:commandButton id="btnCargaMasiva" rendered="false"
+							action="#{cargaMasivaUsuariosBean.inicioCargaUsuarios()}"
+							value="#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.cargaMasiva')}"
+							styleClass="pull-right btn btn-primary" />
+						<p:commandButton id="btnIndividual"
+							action="#{adminPersonaBean.agregarPersona()}"  rendered="false"
+							value="#{sistema.obtenerTexto('gw.adminPersona.boton.agregar')}"
+							ajax="true" styleClass="pull-right btn btn-primary" />
+						<p:outputLabel rendered="false"
+							value="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.nuevoUsuario')}:"
+							styleClass="pull-right agregaHeight" />
+					</sec:authorize>
+				</div>
+			</div>
+
+
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel id="panelBuscarCriterios"
+						header="#{sistema.obtenerTexto('gw.adminPersona.titulo.busquedaAvanzada')}">
+
+						<ui:include src="../componentes/filtroBusquedaPersona.xhtml" />
+
+						<div class="row">
+							<div class="col-md-12">
+								<p:commandButton ajax="true" update="@form"
+									id="btnBuscarPorCriterios"
+									styleClass="btn btn-primary pull-right"
+									action="#{adminPersonaBean.buscarPersonaPorCriterios}"
+									value="#{sistema.obtenerTexto('gw.adminPersona.boton.buscar')}" />
+								<p:commandButton ajax="true" update="@form"
+									action="#{adminPersonaBean.limpiarDatos()}"
+									styleClass="btn btn-default pull-right" value="Limpiar campos" />
+							</div>
+						</div>
+					</p:panel>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel
+						header="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.personas')}">
+						<p:dataTable value="#{adminPersonaBean.personas}"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							var="persona" paginator="true" rows="10" widgetVar="tblPersonas"
+							paginatorPosition="bottom" reflow="true"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+							<f:facet name="header">
+								<p:outputPanel styleClass="text-right">
+									<p:outputLabel for="globalFilter"
+										value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}:" />
+									<p:inputText id="globalFilter"
+										onkeyup="PF('tblPersonas').filter()"
+										placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+								</p:outputPanel>
+							</f:facet>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.nombre')}"
+								sortBy="#{persona.nombre}" filterMatchMode="contains"
+								filterBy="#{persona.nombre}" filterStyle="display:none">
+								<h:outputText value="#{persona.nombre}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.apPaterno')}"
+								sortBy="#{persona.apellidoPaterno}" filterMatchMode="contains"
+								filterBy="#{persona.apellidoPaterno}" filterStyle="display:none">
+
+								<h:outputText value="#{persona.apellidoPaterno}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.apMaterno')}"
+								sortBy="#{persona.apellidoMaterno}" filterMatchMode="contains"
+								filterBy="#{persona.apellidoMaterno}" filterStyle="display:none">
+
+								<h:outputText value="#{persona.apellidoMaterno}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.usuario')}"
+								sortBy="#{persona.usuario}" filterMatchMode="contains"
+								filterBy="#{persona.usuario}" filterStyle="display:none">
+								<h:outputText value="#{persona.usuario}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.fechaNac')}"
+								sortBy="#{persona.fechaNacimiento}" filterMatchMode="contains"
+								filterBy="#{persona.fechaNacimiento}" filterStyle="display:none">
+								<h:outputText value="#{persona.fechaNacimiento}">
+									<f:convertDateTime pattern="dd/MM/yyyy" />
+								</h:outputText>
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.genero')}"
+								sortBy="#{persona.genero}" filterMatchMode="contains"
+								filterBy="#{persona.genero}" filterStyle="display:none">
+								<h:outputText value="#{persona.genero}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.tipo')}"
+								sortBy="#{persona.tipoUsuario}" filterMatchMode="contains"
+								filterBy="#{persona.tipoUsuario}" filterStyle="display:none">
+								<h:outputText
+									value="#{adminPersonaBean.obtenerTipoUsuario(persona.tipoUsuario)}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.curp')}"
+								sortBy="#{persona.curp}" filterMatchMode="contains"
+								filterBy="#{persona.curp}" filterStyle="display:none">
+								<h:outputText value="#{persona.curp}" />
+							</p:column>
+
+							<p:column styleClass="text-center"
+								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.activo')}"
+								sortBy="#{persona.activo}" filterMatchMode="contains"
+								filterBy="#{persona.activo}" filterStyle="display:none">
+								<p:inputSwitch id="swchActivo" disabled="true"
+									valueChangeListener="#{adminPersonaBean.cambioEstatusPersona}"
+									value="#{persona.activo}" onLabel="Sí" offLabel="No">
+									<p:ajax update="@form" />
+									<f:param name="idPersona" value="#{persona.idPersona}" />
+								</p:inputSwitch>
+							</p:column>
+
+							<p:column styleClass="text-center"
+								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.accion')}">
+								<sec:authorize access="hasPermission(null,'PER_EDI')">
+									<p:commandButton id="btnEditar" ajax="false"
+										action="#{adminPersonaBean.cargarDatosPersona}"
+										styleClass="btn btn-default btn-icon icono_sisi ss_gn_vis">
+										<f:setPropertyActionListener value="#{persona}"
+											target="#{adminPersonaBean.persona}" />
+									</p:commandButton>
+									<p:tooltip for="btnEditar"
+										value="Ver usuario"
+										position="top" />
+								</sec:authorize>
+								<sec:authorize access="hasPermission(null, 'PER_ROLES_AGR' ) ">
+									<p:commandButton id="key"
+										styleClass="btn-icon btn btn-default icono_sisi ss_gn_agrerol"
+										action="#{adminPersonaBean.cargarRolesUsuario()}" ajax="true"
+										oncomplete="PF('mRol').show();" update="@form">
+										<f:setPropertyActionListener value="#{persona}"
+											target="#{adminPersonaBean.personaSeleccionada}" />
+									</p:commandButton>
+								</sec:authorize>
+								<p:tooltip for="key"
+									value="Ver roles"
+									position="top" />
+							</p:column>
+						</p:dataTable>
+
+					</p:panel>
+				</div>
+			</div>
+
+			<p:dialog id="modalRoles" widgetVar="mRol" modal="true"
+				draggable="false" resizable="false" closable="false"
+				position="center" styleClass="medidaModal"
+				header="Roles">
+
+				<p:pickList id="pickListRoles"
+					value="#{adminPersonaBean.listaRoles}" var="rol"
+					itemLabel="#{rol.nombre}" itemValue="#{rol}"
+					converter="entityConverter" disabled="false"
+					addLabel="#{sistema.obtenerTexto('gw.global.picklist.agregar')}"
+					addAllLabel="#{sistema.obtenerTexto('gw.global.picklist.agregartodos')}"
+					removeLabel="#{sistema.obtenerTexto('gw.global.picklist.eliminar')}"
+					removeAllLabel="#{sistema.obtenerTexto('gw.global.picklist.eliminartodos')}">
+					<p:ajax event="transfer" process="@this" />
+					<f:facet name="sourceCaption">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.global.picklist.disponible')}" />
+					</f:facet>
+					<f:facet name="targetCaption">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.global.picklist.asignado')}" />
+					</f:facet>
+				</p:pickList>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton id="btnGuardarRol"
+								value="#{sistema.obtenerTexto('gw.roles.usuario.modal.boton.guardar')}"
+								action="#{adminPersonaBean.guardarRolesUsuario()}" ajax="true"
+								oncomplete="PF('mRol').hide();" rendered="true"
+								styleClass="btn btn-primary pull-right" />
+							<p:commandButton id="btnCancelarRol"
+								onclick="PF('mRol').hide(); return false;"
+								styleClass="btn btn-default pull-right"
+								value="Cerrar" />
+						</div>
+					</div>
+
+				</f:facet>
+			</p:dialog>
+			<p:dialog id="dlgExito" widgetVar="dlgExito" resizable="false"
+				visible="#{adminPersonaBean.mostrarDialogoExito}" responsive="true"
+				modal="true" draggable="false" position="center" closable="false"
+				styleClass="medidaModal"
+				header="#{sistema.obtenerTexto('gw.global.header.modal.mensajes')}">
+
+				<p:messages autoUpdate="false" closable="false" id="msgsReqProg" />
+				<h:outputText
+					value="#{sistema.obtenerTexto('gw.global.msg.guardado.exitoso')}" />
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton action="#{adminPersonaBean.ocultarDialogo()}"
+								update="frmPersonas:dlgExito"
+								oncomplete="PF('dlgExito').hide();"
+								styleClass="btn btn-primary pull-right"
+								value="#{sistema.obtenerTexto('gw.global.modal.boton.aceptar')}" />
+						</div>
+					</div>
+				</f:facet>
+
+			</p:dialog>
+
+			<p:defaultCommand target="btnBuscarPorCriterios" />
+		</h:form>
+	</ui:define>
+</ui:composition>

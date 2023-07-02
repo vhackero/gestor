@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios')}</li>
+		<li class="active"><p:outputLabel
+				value="#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.nuevoUsuario')}"
+				rendered="#{adminPersonaBean.nuevaPersona}" /> <p:outputLabel
+				value="#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.editarusuario')}"
+				rendered="#{!adminPersonaBean.nuevaPersona}" /></li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form id="frmPrincipal">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<p:outputLabel styleClass="h1"
+				value="#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.nuevoUsuario')}"
+				rendered="#{adminPersonaBean.nuevaPersona}" />
+			<p:outputLabel styleClass="h1"
+				value="#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.editarusuario')}"
+				rendered="#{!adminPersonaBean.nuevaPersona}" />
+			<hr />
+			<ui:include src="DatosUsuario.xhtml" />
+			<ui:include src="DatosPersonales.xhtml" />
+			<ui:include src="DomicilioPersona.xhtml" />
+			<ui:include src="DatosLaborales.xhtml" />
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+						<p:outputLabel
+							value=" #{sistema.obtenerTexto('gw.encuestas.etiqueta.obligatorios')}" />
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton validateClient="true" id="btnGuardarUsuario"
+							styleClass="btn btn-primary pull-right" rendered="false"
+							value="#{sistema.obtenerTexto('gw.adminPersona.boton.aceptar')}"
+							ajax="false" action="#{adminPersonaBean.guardarPersona()}" />
+						<p:commandButton styleClass="btn btn-default pull-right"
+							id="btnCancelarUsuario"
+							value="Regresar"
+							immediate="true"
+							action="#{menuGestorBean.navegaAdministracionUsuarios()}"
+							ajax="false" />
+					</div>
+				</div>
+			</div>
+			<p:dialog id="dlgErrores" widgetVar="dlgValidadorProg"
+				responsive="true" modal="true" styleClass="medidaModal"
+				closable="true"
+				header="#{sistema.obtenerTexto('gw.global.header.modal.mensajes')}">
+
+
+				<p:messages autoUpdate="false" closable="false" id="msgsReqProg" />
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton action="#{adminPersonaBean.ocultarDialogo()}"
+								update="frmPrincipal:dlgErrores"
+								oncomplete="PF('dlgValidadorProg').hide();"
+								styleClass="btn btn-primary pull-right"
+								value="#{sistema.obtenerTexto('gw.global.modal.boton.aceptar')}" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+			<p:defaultCommand target="btnGuardarUsuario" />
+		</h:form>
+		<ui:include src="RolesUsuario.xhtml" />
+	</ui:define>
+</ui:composition>

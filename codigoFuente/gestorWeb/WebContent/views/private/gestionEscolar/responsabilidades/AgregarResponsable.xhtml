@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}</li>
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.responsables.titulo')}</li>
+		<li class="active">Agregar responsables</li>
+
+	</ui:define>
+
+	<ui:define name="content">
+		<h1>Agregar responsables</h1>
+		<hr />
+		<p:ajaxStatus onstart="PF('dialogLayout').show()"
+			onsuccess="PF('dialogLayout').hide()" />
+		<h:form id="formResponsables">
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel
+						header="#{sistema.obtenerTexto('gw.gestionescolar.pnlheader.busquedaavanzada')}">
+						<f:validateBean disabled="true">
+							<div class="form-group">
+								<div class="row">
+
+									<div class="col-md-3">
+										<p:outputLabel styleClass="bloque"
+											value="Usuario:"
+											for="fitroUsuario" />
+										<p:inputText
+											placeholder="Usuario"
+											value="#{responsablesEventoCapBean.filtroPersona.usuario}"
+											id="fitroUsuario" styleClass="form-control" />
+									</div>
+									<div class="col-md-3">
+										<p:outputLabel styleClass="bloque"
+											value="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.nombre')}"
+											for="fitroNombre" />
+										<p:inputText
+											placeholder="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.nombre')}"
+											value="#{responsablesEventoCapBean.filtroPersona.nombre}"
+											id="fitroNombre" styleClass="form-control" />
+									</div>
+
+									<div class="col-md-3">
+										<p:outputLabel for="filtroPApellido" styleClass="bloque"
+											value="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.primerApellido')}" />
+										<p:inputText id="filtroPApellido" styleClass="form-control"
+											placeholder="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.primerApellido')}"
+											value="#{responsablesEventoCapBean.filtroPersona.apellidoPaterno}" />
+									</div>
+
+									<div class="col-md-3">
+										<p:outputLabel for="filtroSApellido" styleClass="bloque"
+											value="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.segundoApellido')}" />
+										<p:inputText styleClass="form-control"
+											placeholder="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.segundoApellido')}"
+											value="#{responsablesEventoCapBean.filtroPersona.apellidoMaterno}"
+											id="filtroSApellido" />
+									</div>
+
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-12">
+									<p:commandButton
+										value="#{sistema.obtenerTexto('gw.gestionescolar.button.buscar')}"
+										ajax="true" styleClass="btn btn-primary pull-right"
+										update="formResponsables"
+										action="#{responsablesEventoCapBean.busquedaDinamica}" />
+								</div>
+							</div>
+
+						</f:validateBean>
+					</p:panel>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel
+						header="#{sistema.obtenerTexto('gw.gestionescolar.pnlheader.personasdisponibles')}">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-12">
+									<p:dataTable id="tblAgregaResponsables" reflow="true"
+										value="#{responsablesEventoCapBean.listaDinamicaPersonas}"
+										tableStyleClass="table" var="responsable" paginator="true"
+										paginatorPosition="bottom" rows="10"
+										rowsPerPageTemplate="5,10,15"
+										currentPageReportTemplate="({currentPage} de {totalPages})"
+										paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+
+										<p:column
+											headerText="Usuario">
+											<h:outputText value="#{responsable.usuario}" />
+										</p:column>
+
+										<p:column
+											headerText="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.nombre')}">
+											<h:outputText value="#{responsable.nombre}" />
+										</p:column>
+
+										<p:column
+											headerText="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.primerApellido')}">
+											<h:outputText value="#{responsable.apellidoPaterno}" />
+										</p:column>
+
+										<p:column
+											headerText="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.segundoApellido')}">
+											<h:outputText value="#{responsable.apellidoMaterno}" />
+										</p:column>
+
+										<p:column styleClass="text-center"
+											headerText="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.agregar')}">
+											<p:selectBooleanCheckbox value="#{responsable.seleccionado}" />
+										</p:column>
+
+									</p:dataTable>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<p:commandButton
+									value="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.agregar')}"
+									action="#{responsablesEventoCapBean.agregarListaResponsables}"
+									styleClass="btn btn-primary pull-right" />
+								<p:commandButton
+									value="#{sistema.obtenerTexto('gw.gestionescolar.button.cancelar')}"
+									action="#{responsablesEventoCapBean.cancelar}" process="@this"
+									styleClass="btn btn-default pull-right" />
+							</div>
+						</div>
+					</p:panel>
+				</div>
+			</div>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

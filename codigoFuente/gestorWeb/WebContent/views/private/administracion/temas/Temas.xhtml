@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.personalizacion')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.temas')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.temas')}</h1>
+		<hr />
+		<h:form id="frmTemas" enctype="multipart/form-data">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<div class="row">
+				<div class="col-md-12">
+					<sec:authorize access="hasPermission(null, 'TEMA_AGR' ) ">
+						<p:commandButton id="btnAgregar"
+							value="#{sistema.obtenerTexto('gw.temas.boton.agregar')}"
+							action="#{temaBean.nuevoTema()}" process="@this" ajax="true"
+							update="@form" oncomplete="PF('mTema').show();"
+							disabled="#{temaBean.tipoTema == 0}"
+							styleClass="pull-right btn btn-primary" />
+						<p:outputLabel styleClass="agregaHeight pull-right"
+							value="#{sistema.obtenerTexto('gw.temas.texto.crear')}:" />
+					</sec:authorize>
+				</div>
+			</div>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.temas.titulo.panel.inferior')}">
+				<p:dataTable id="tblTemas" value="#{temaBean.temas}" var="tema"
+					widgetVar="tblTemas" paginator="true" rows="10" reflow="true"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					rowsPerPageTemplate="5,10,15" paginatorPosition="bottom"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					tableStyleClass="table">
+
+					<f:facet name="header">
+						<p:outputPanel styleClass="text-right">
+							<p:outputLabel for="globalFilter"
+								value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}" />
+							<p:inputText id="globalFilter" onkeyup="PF('tblTemas').filter()"
+								placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+						</p:outputPanel>
+					</f:facet>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.temas.columna.id')}"
+						sortBy="#{tema.idTema}" filterMatchMode="contains"
+						filterBy="#{tema.idTema}" filterStyle="display:none">
+						<h:outputText value="#{tema.idTema}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.temas.columna.nombre')}"
+						sortBy="#{tema.nombre}" filterMatchMode="contains"
+						filterBy="#{tema.nombre}" filterStyle="display:none">
+						<h:outputText value="#{tema.nombre}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.temas.columna.activo')}"
+						sortBy="#{tema.activo?'SI':'NO'}" filterMatchMode="contains"
+						filterBy="#{tema.activo?'SI':'NO'}" filterStyle="display:none">
+						<h:outputText value="#{tema.activo?'SI':'NO'}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.temas.columna.acciones')}"
+						styleClass="text-center acciones">
+						<sec:authorize access="hasPermission(null, 'TEMA_EDI' ) ">
+							<p:commandButton id="btnEditar" action="#{temaBean.cargarTema()}"
+								process="@this" ajax="true" update="@form"
+								oncomplete="PF('mTema').show();"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod"
+								disabled="#{tema.activo or tema.idTema == 1 or tema.idTema == 2}">
+
+								<f:setPropertyActionListener value="#{tema}"
+									target="#{temaBean.temaModificar}" />
+							</p:commandButton>
+							<p:tooltip for="btnEditar" position="top"
+								value="#{sistema.obtenerTexto('gw.temas.boton.editar')}" />
+
+							<p:commandButton id="btnUpload" process="@this" ajax="true"
+								update="@form" oncomplete="PF('mCargaArchivo').show();"
+								disabled="#{tema.activo or tema.idTema == 1 or tema.idTema == 2}"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_cargar">
+								<f:setPropertyActionListener value="#{tema}"
+									target="#{temaBean.tema}" />
+							</p:commandButton>
+							<p:tooltip for="btnUpload" position="top"
+								value="#{sistema.obtenerTexto('gw.temas.boton.cargar')}" />
+
+							<p:commandButton id="btnArchivos"
+								action="#{temaBean.cargarArchivosTema()}" ajax="false"
+								immediate="true" process="@this"
+								disabled="#{tema.activo or tema.idTema == 1 or tema.idTema == 2}"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+
+								<f:setPropertyActionListener value="#{tema}"
+									target="#{temaBean.tema}" />
+							</p:commandButton>
+							<p:tooltip for="btnArchivos"
+								value="#{sistema.obtenerTexto('gw.temas.boton.archivos')}"
+								position="top" />
+
+							<p:commandButton
+								styleClass="btn-icon btn btn-default icono_sisi ss_da_corr"
+								id="btnActivar" oncomplete="PF('mConfirmacion').show();"
+								ajax="true" update="@form" disabled="#{tema.activo}"
+								process="@this">
+								<f:setPropertyActionListener value="#{tema}"
+									target="#{temaBean.tema}" />
+							</p:commandButton>
+							<p:tooltip for="btnActivar"
+								value="#{sistema.obtenerTexto('gw.temas.boton.activar')}"
+								position="top" />
+						</sec:authorize>
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+			<p:dialog widgetVar="mTema" modal="true" styleClass="medidaModal"
+				position="center" resizable="false"
+				header="#{sistema.obtenerTexto('gw.temas.modal.titulo')}"
+				closable="false" draggable="false">
+
+				<p:outputPanel id="contenido">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel for="txtNombre" styleClass="requerido"
+									disabled="#{temaBean.nuevo eq false}"
+									value="#{sistema.obtenerTexto('gw.temas.modal.etiqueta.nombre')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="txtNombre" value="#{temaBean.tema.nombre}"
+									styleClass="form-control" required="true"
+									requiredMessage="Dato requerido" maxlength="45"
+									placeholder="#{sistema.obtenerTexto('gw.temas.modal.etiqueta.nombre')}" />
+								<p:message for="txtNombre" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+								<p:outputLabel
+									value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+							</div>
+						</div>
+					</div>
+				</p:outputPanel>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.temas.modal.boton.guardar')}"
+								action="#{temaBean.guardarTema()}" ajax="true" update="@form"
+								styleClass="btn btn-primary pull-right" />
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.temas.modal.boton.cancelar')}"
+								onclick="PF('mTema').hide();"
+								styleClass="btn btn-default pull-right" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+			<p:dialog widgetVar="mCargaArchivo" modal="true"
+				styleClass="medidaModal" position="center" resizable="false"
+				header="#{sistema.obtenerTexto('gw.temas.modal.carga.titulo')}"
+				closable="false" draggable="false">
+
+				<p:outputPanel id="contenidoCarga">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel for="txtNombre"
+									value="#{sistema.obtenerTexto('gw.temas.modal.etiqueta.nombre')}:" />
+								<p:outputLabel value="#{temaBean.tema.nombre}"
+									styleClass="form-control" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:fileUpload value="#{temaBean.archivoCargar}" mode="simple"
+									skinSimple="true" onstart="PF('dialogLayout').show()"
+									oncomplete="PF('dialogLayout').hide()"
+									label="#{sistema.obtenerTexto('gw.temas.modal.carga.boton.adjuntar')}">
+								</p:fileUpload>
+							</div>
+						</div>
+					</div>
+				</p:outputPanel>
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.temas.modal.carga.boton.aceptar')}"
+								action="#{temaBean.cargarArchivo()}" ajax="false"
+								process="@this" styleClass="btn btn-primary pull-right" />
+							<p:commandButton action="#{temaBean.eliminarArchivo()}"
+								value="#{sistema.obtenerTexto('gw.temas.modal.carga.boton.cancelar')}"
+								onclick="PF('mCargaArchivo').hide();" ajax="true"
+								styleClass="btn btn-default pull-right" />
+
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+
+			<p:dialog widgetVar="mConfirmacion" modal="true" position="center"
+				resizable="false" styleClass="medidaModal"
+				header="#{sistema.obtenerTexto('gw.temas.modal.confirmacion.titulo')}"
+				closable="false" draggable="false">
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.temas.modal.confirmacion.mensaje')}" />
+						</div>
+					</div>
+				</div>
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.temas.modal.confirmacion.boton.si')}"
+								action="#{temaBean.activarTema()}" ajax="false"
+								styleClass="btn btn-primary pull-right" />
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.temas.modal.confirmacion.boton.no')}"
+								onclick="PF('mConfirmacion').hide();"
+								styleClass="btn btn-default pull-right" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

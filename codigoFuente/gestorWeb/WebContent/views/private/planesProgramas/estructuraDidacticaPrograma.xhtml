@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+<div class="form-group agregaMargenTop">
+	<div class="row">
+		<div class="col-md-12">
+			<p:outputLabel styleClass="requerido bloque" for="presentacion"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.presentacion')}:" />
+			<!-- Longitud de campo -->
+			<p:inputTextarea id="presentacion" styleClass="altoMaximo"
+				maxlength="2000"
+				value="#{programaCapacitacionBean.programa.presentacion}"
+				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.presentacion')}">
+				<p:ajax process="@this" />
+			</p:inputTextarea>
+		</div>
+	</div>
+</div>
+
+<div class="form-group">
+	<div class="row">
+		<div class="col-md-12">
+			<p:outputLabel styleClass="bloque requerido" for="proposito"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.proposito')}:" />
+			<!-- Longitud de campo -->
+			<p:inputTextarea styleClass="altoMaximo"
+				value="#{programaCapacitacionBean.programa.propositos}"
+				id="proposito" maxlength="2000"
+				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.propositos')}">
+				<p:ajax process="@this" />
+			</p:inputTextarea>
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class="row">
+		<div class="col-md-12">
+			<p:outputLabel for="objetivoAp" styleClass="bloque requerido"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.objetivoAp')}:" />
+			<!-- Longitud de campo -->
+			<p:inputTextarea id="objetivoAp" styleClass="altoMaximo"
+				maxlength="2000"
+				value="#{programaCapacitacionBean.programa.objetivosGenerales}"
+				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.objAp')}">
+				<p:ajax process="@this" />
+			</p:inputTextarea>
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class="row">
+		<div class="col-md-12">
+			<p:outputLabel for="metodologia" styleClass="bloque requerido"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.metodologia')}:" />
+			<!-- Longitud de campo -->
+			<p:inputTextarea id="metodologia" styleClass="altoMaximo"
+				value="#{programaCapacitacionBean.programa.metodologia}"
+				maxlength="2000"
+				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.metodologia')}">
+				<p:ajax process="@this" />
+			</p:inputTextarea>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-3">
+		<p:outputLabel styleClass="bloque requerido" for="tematicas"
+			value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.estTematica')}:" />
+	</div>
+	<div class="col-md-3 col-md-offset-1">
+		<p:outputLabel styleClass="bloque requerido" for="spnrUDid"
+			value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.unidadesDid')}:" />
+	</div>
+</div>
+<div class="form-group">
+	<div class="row">
+		<div class="col-md-2">
+			<p:spinner value="#{programaCapacitacionBean.numEstTematicas}"
+				rendered="false" min="0" max="50" placeholder="00" maxlength="2"
+				disabled="#{programaCapacitacionBean.progConEstDid}">
+				<p:ajax listener="#{programaCapacitacionBean.generaTemasPrograma}"
+					update="temasCmps pnlGralCmps" />
+				<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+			</p:spinner>
+			<p:inputText value="#{programaCapacitacionBean.numEstTematicasAux}"
+				min="0" max="50" id="tematicas" maxlength="2"
+				disabled="#{programaCapacitacionBean.progConEstDid}">
+				<p:ajax event="keyup" update="btnGenerarEst" />
+				<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+			</p:inputText>
+		</div>
+		<div class="col-md-offset-2 col-md-2">
+			<p:spinner placeholder="00" maxlength="2" rendered="false"
+				value="#{programaCapacitacionBean.numUniDidacticas}" min="0"
+				max="50" disabled="#{programaCapacitacionBean.progConEstDid}">
+				<p:ajax
+					listener="#{programaCapacitacionBean.generaUniDidacticasPrograma}"
+					update="pnlGralCmps" />
+				<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+			</p:spinner>
+
+			<p:inputText id="spnrUDid" maxlength="2"
+				value="#{programaCapacitacionBean.numUniDidacticasAux}"
+				disabled="#{programaCapacitacionBean.progConEstDid}">
+				<p:ajax event="keyup" update="btnGenerarEst" />
+				<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+			</p:inputText>
+		</div>
+		<div class="col-md-offset-2 col-md-2">
+			<p:commandButton value="Generar" ajax="true"
+				disabled="#{programaCapacitacionBean.numUniDidacticasAux eq 0 and programaCapacitacionBean.numEstTematicasAux eq 0}"
+				oncomplete="PF('confirmarEstructura').show()" id="btnGenerarEst"
+				update="mdlConfirmarEstructura" styleClass="btn btn-primary" />
+
+		</div>
+	</div>
+</div>
+<div class="form-group paddingTemasObjetos">
+	<div class="row theadTemasObjetos">
+		<div class="col-md-4">
+			<p:outputLabel styleClass="bloque"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.nomTemas')}:" />
+		</div>
+		<div class="col-md-8 text-center">
+			<p:outputLabel styleClass="bloque"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.objetosAp')}:" />
+		</div>
+	</div>
+
+	<p:outputPanel id="pnlGralCmps" layout="block">
+		<div class="row tbodyTemasObjetos">
+			<div class="col-md-4">
+				<p:outputPanel layout="block" id="temasCmps">
+					<ui:repeat
+						value="#{programaCapacitacionBean.controlEstTematica.temas}"
+						var="tema">
+						<div>
+							<!-- Longitud de campo -->
+							<p:inputText value="#{tema.nombreTema}" maxlength="200"
+								placeholder="#{sistema.obtenerTexto('gw.planesprogramas.texto.place.ingresa')}"
+								styleClass="form-control margenInferior"
+								disabled="#{programaCapacitacionBean.progConUnidDid}">
+								<p:ajax process="@this" />
+							</p:inputText>
+						</div>
+					</ui:repeat>
+				</p:outputPanel>
+			</div>
+			<div class="col-md-8">
+				<p:outputPanel layout="block" id="udCmpsI"
+					rendered="#{programaCapacitacionBean.cmpMultiSelectUd}">
+					<ui:repeat
+						value="#{programaCapacitacionBean.controlEstTematica.unidDidSelect}"
+						var="list">
+						<div class="row">
+							<div class="col-md-4 text-right">
+								<p:outputLabel styleClass="agregaHeightUd"
+									value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.unidadesDid')}" />
+							</div>
+							<div class="col-md-8">
+								<p:selectCheckboxMenu value="#{list.unidadesTematicas}"
+									label="Temas" id="chkMany"
+									disabled="#{programaCapacitacionBean.progConUnidDid}"
+									styleClass="col-xs-12">
+									<p:ajax process="@this" />
+									<f:selectItems value="#{programaCapacitacionBean.temasXUnidad}" />
+								</p:selectCheckboxMenu>
+							</div>
+						</div>
+					</ui:repeat>
+				</p:outputPanel>
+				<p:outputPanel id="udCmpsII" layout="block"
+					rendered="#{!programaCapacitacionBean.cmpMultiSelectUd}">
+					<ui:repeat
+						value="#{programaCapacitacionBean.controlEstTematica.unidadesDidacticas}"
+						var="unidadDid">
+						<div class="row">
+							<div class="col-md-4 text-right">
+								<p:outputLabel styleClass="agregaHeightUd"
+									value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.unidadesDid')}" />
+							</div>
+							<div class="col-md-8">
+								<p:selectOneMenu value="#{unidadDid.unidadTematica}"
+									autoWidth="true" styleClass="col-xs-12"
+									disabled="#{programaCapacitacionBean.progConUnidDid}">
+									<p:ajax process="@this" />
+									<f:selectItem itemValue="#{null}" itemLabel="Temas" />
+									<f:selectItems value="#{programaCapacitacionBean.temasXUnidad}"
+										var="ud" itemValue="#{ud}" />
+								</p:selectOneMenu>
+							</div>
+						</div>
+					</ui:repeat>
+				</p:outputPanel>
+			</div>
+		</div>
+	</p:outputPanel>
+</div>
+<div class="row">
+	<div class="col-md-12">
+		<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+		<p:outputLabel
+			value=" #{sistema.obtenerTexto('gw.encuestas.etiqueta.obligatorios')}" />
+	</div>
+</div>
+
+
+
+</html>

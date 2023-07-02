@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>Catálogos</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.class.insignias')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form id="frmClass">
+			<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.class.insignias')}</h1>
+			<hr />
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton rendered="false"
+						value="#{sistema.obtenerTexto('gw.badget.boton.agregar')}"
+						oncomplete="PF('mClass').show();"
+						action="#{clasBadgeBean.nuevaClass()}" update="frmClass:contenido"
+						process="@this" ajax="true"
+						styleClass="pull-right btn btn-primary">
+					</p:commandButton>
+					<p:outputLabel rendered="false"
+						value="#{sistema.obtenerTexto('gw.badge.texto.nueva.class')}:"
+						styleClass="pull-right agregaHeight" />
+				</div>
+			</div>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.textos.menu.administracion.class.insignias')}">
+				<p:dataTable id="tblClass" reflow="true" tableStyleClass="table"
+					paginator="true" paginatorPosition="bottom" rows="10"
+					widgetVar="tblClass" rowsPerPageTemplate="5,10,15"
+					value="#{clasBadgeBean.clasificaciones}" var="class"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+					<f:facet name="header">
+						<p:outputPanel styleClass="text-right">
+							<p:outputLabel for="globalFilter"
+								value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}" />
+							<p:inputText id="globalFilter" onkeyup="PF('tblClass').filter()"
+								placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+						</p:outputPanel>
+					</f:facet>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.badge.columna.id')}"
+						sortBy="#{class.idClasificacionBadge}" filterMatchMode="contains"
+						filterBy="#{class.idClasificacionBadge}"
+						filterStyle="display:none">
+						<h:outputText value="#{class.idClasificacionBadge}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.badge.columna.nombre')}"
+						sortBy="#{class.nombre}" filterMatchMode="contains"
+						filterBy="#{class.nombre}" filterStyle="display:none">
+						<h:outputText value="#{class.nombre}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.badge.columna.descripcion')}"
+						sortBy="#{lass.descripcion}" filterMatchMode="contains"
+						filterBy="#{lass.descripcion}" filterStyle="display:none">
+						<h:outputText value="#{class.descripcion}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.badge.columna.acciones')}"
+						styleClass="text-center">
+						<p:commandButton
+							styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod"
+							id="editartooltip" action="#{clasBadgeBean.cargarClass()}"
+							process="@this" oncomplete="PF('mClass').show();" ajax="true"
+							update="frmClass:contenido">
+							<f:setPropertyActionListener value="#{class}"
+								target="#{clasBadgeBean.classModificar}" />
+						</p:commandButton>
+
+						<p:tooltip for="editartooltip"
+							value="#{sistema.obtenerTexto('gw.roles.boton.editar')}"
+							position="top" />
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+			<p:dialog id="mdlClass"
+				header="#{sistema.obtenerTexto('gw.badge.class.modal.titulo')}"
+				widgetVar="mClass" modal="true" resizable="false" draggable="false"
+				closable="false" styleClass="medidaModal" position="center"
+				role="dialog">
+				<p:outputPanel id="contenido">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="txtNombre" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.nombre')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="txtNombre"
+									placeholder="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.nombre')}"
+									value="#{clasBadgeBean.clasificacion.nombre}"
+									styleClass="form-control" maxlength="50" />
+								<p:message for="txtNombre" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel for="txtDescr" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.descripcion')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="txtDescr"
+									placeholder="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.descripcion')}"
+									value="#{clasBadgeBean.clasificacion.descripcion}"
+									styleClass="form-control" maxlength="100" />
+								<p:message for="txtDescr" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+								<p:outputLabel
+									value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+							</div>
+						</div>
+					</div>
+				</p:outputPanel>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.badge.modal.boton.guardar')}"
+								action="#{clasBadgeBean.guardarClass()}" ajax="true"
+								update="frmClass:tblClass contenido"
+								styleClass="btn btn-primary pull-right" />
+							<p:commandButton type="button" onclick="PF('mClass').hide();"
+								styleClass="btn btn-default pull-right"
+								value="#{sistema.obtenerTexto('gw.badge.modal.boton.cancelar')}" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

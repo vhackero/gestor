@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li class="active">Mi perfil</li>
+	</ui:define>
+	<ui:define name="content">
+
+		<h:form>
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<h1>Mi perfil</h1>
+			<hr />
+			<div class="row">
+				<div class="col-md-6">
+					<p:panel header="Perfil" styleClass="quitaMargenTop">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputPanel id="imgFotoUsuario" styleClass="imgPerfil">
+
+									<p:outputPanel id="perfilImg">
+										<img
+											src="#{miPerfilBean.personaEnSesion.persona.rutaCompletaFoto}" />
+									</p:outputPanel>
+
+									<p:fileUpload value="#{miPerfilBean.archivoCargar}"
+										mode="advanced" auto="true" sizeLimit="50000000"
+										invalidSizeMessage="#{sistema.obtenerTexto('gw.global.archivo.tamanio.limite')}"
+										fileUploadListener="#{miPerfilBean.fileUploadListener}"
+										update="perfilImg" />
+								</p:outputPanel>
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel styleClass="bloque"
+									value="#{miPerfilBean.personaEnSesion.persona.nombreCompleto}" />
+								<h:outputText styleClass="bloque margenBottom"
+									value="#{miPerfilBean.personaEnSesion.datosLaborales.puesto}" />
+								<p:outputLabel styleClass="bloque"
+									value="#{miPerfilBean.personaEnSesion.datosLaborales.areaAdscripcion}" />
+							</div>
+						</div>
+					</p:panel>
+				</div>
+				<div class="col-md-6">
+					<p:panel header="Semblanza" styleClass="quitaMargenTop">
+						<div class="row">
+							<div class="col-md-12">
+								<p:inputTextarea styleClass="form-control" placeholder="Semblanza"
+									value="#{miPerfilBean.personaEnSesion.datosAcademicos.semblanza}">
+
+								</p:inputTextarea>
+							</div>
+						</div>
+					</p:panel>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel header="Datos personales">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-12">
+									<p:outputLabel value="CURP:" styleClass="bloque requerido" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.persona.curp}"
+										styleClass="bloque" />
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-4">
+									<p:outputLabel value="Nombre:" styleClass="bloque requerido" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.persona.nombre}"
+										styleClass="bloque" />
+								</div>
+								<div class="col-md-4">
+									<p:outputLabel value="Primer apellido:"
+										styleClass="bloque requerido" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.persona.apellidoPaterno}"
+										styleClass="bloque" />
+								</div>
+								<div class="col-md-4">
+									<p:outputLabel value="Segundo apellido:" styleClass="bloque" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.persona.apellidoMaterno}"
+										styleClass="bloque" />
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-4">
+									<p:outputLabel value="Género:" styleClass="bloque" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.persona.genero}"
+										styleClass="bloque" />
+								</div>
+								<div class="col-md-4">
+									<p:outputLabel value="Fecha de nacimiento:" styleClass="bloque" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.persona.fechaNacimiento}"
+										styleClass="bloque" />
+								</div>
+								<div class="col-md-4">
+									<p:outputLabel value="Nacionalidad:" styleClass="bloque" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.persona.nacionalidad.nombre}"
+										styleClass="bloque" />
+								</div>
+							</div>
+						</div>
+					</p:panel>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel header="Domicilio">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-2">
+									<p:outputLabel value="País" styleClass="bloque" />
+									<p:selectOneMenu id="somPais"
+										value="#{miPerfilBean.personaEnSesion.domicilioPersona.idPais}"
+										styleClass="col-xs-12"
+										valueChangeListener="#{miPerfilBean.onChangePais}">
+										<p:ajax update="somEntidad" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+										<f:selectItems value="#{miPerfilBean.listaPaises}" var="pais"
+											itemValue="#{pais.getIdPais()}"
+											itemLabel="#{pais.getNombre()}" />
+									</p:selectOneMenu>
+								</div>
+								<div class="col-md-2">
+									<p:outputLabel value="Código postal:" styleClass="bloque" />
+									<p:inputText maxlength="5" placeholder="Código postal"
+										value="#{miPerfilBean.personaEnSesion.domicilioPersona.asentamiento.codigoPostal}"
+										styleClass="form-control">
+										<p:ajax
+											update="somPais, somEntidad, somMunicipioDomicilio, somLocalidad"
+											event="blur" listener="#{miPerfilBean.validarCodigoPostal}" />
+									</p:inputText>
+
+								</div>
+								<div class="col-md-4">
+									<p:outputLabel value="Estado:" styleClass="bloque" />
+									<p:selectOneMenu id="somEntidad"
+										value="#{miPerfilBean.personaEnSesion.domicilioPersona.idEntidadFederativa}"
+										styleClass="col-xs-12"
+										valueChangeListener="#{miPerfilBean.onChangeEntidad}">
+										<p:ajax update="somMunicipioDomicilio" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+										<f:selectItems value="#{miPerfilBean.listaEntidades}"
+											var="entidad" itemValue="#{entidad.getIdEntidadFederativa()}"
+											itemLabel="#{entidad.getNombre()}" />
+									</p:selectOneMenu>
+								</div>
+								<div class="col-md-4">
+									<p:outputLabel value="Ciudad o municipio:" styleClass="bloque" />
+									<p:selectOneMenu id="somMunicipioDomicilio"
+										value="#{miPerfilBean.personaEnSesion.domicilioPersona.idMunicipio}"
+										styleClass="col-xs-12"
+										valueChangeListener="#{miPerfilBean.onChangeMunicipio}">
+										<p:ajax update="somLocalidad" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+										<f:selectItems value="#{miPerfilBean.listaMunicipios}"
+											var="municipio" itemValue="#{municipio.getIdMunicipio()}"
+											itemLabel="#{municipio.getNombre()}" />
+									</p:selectOneMenu>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-4">
+									<p:outputLabel value="Colonia:" styleClass="bloque" />
+									<p:selectOneMenu id="somLocalidad"
+										value="#{miPerfilBean.personaEnSesion.domicilioPersona.asentamiento.idAsentamiento}"
+										styleClass="col-xs-12">
+
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+										<f:selectItems value="#{miPerfilBean.listaAsentamientos}"
+											var="asentamiento"
+											itemValue="#{asentamiento.getIdAsentamiento()}"
+											itemLabel="#{asentamiento.getNombre()}" />
+									</p:selectOneMenu>
+								</div>
+								<div class="col-md-4">
+									<p:outputLabel value="Calle:" styleClass="bloque requerido" />
+									<p:inputText placeholder="Calle"
+										value="#{miPerfilBean.personaEnSesion.domicilioPersona.calle}"
+										styleClass="form-control" />
+								</div>
+								<div class="col-md-2">
+									<p:outputLabel value="Número exterior:"
+										styleClass="bloque requerido" />
+									<p:inputText placeholder="Número exterior"
+										value="#{miPerfilBean.personaEnSesion.domicilioPersona.numeroExterior}"
+										styleClass="form-control" />
+								</div>
+								<div class="col-md-2">
+									<p:outputLabel value="Número interior:" styleClass="bloque" />
+									<p:inputText placeholder="Número interior"
+										value="#{miPerfilBean.personaEnSesion.domicilioPersona.numeroInterior}"
+										styleClass="form-control" />
+								</div>
+							</div>
+						</div>
+
+					</p:panel>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel header="Datos laborales">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-4">
+									<p:outputLabel value="Nombre de la institución:"
+										styleClass="bloque" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.datosLaborales.institucion}"
+										styleClass="bloque" />
+								</div>
+								<div class="col-md-4">
+									<p:outputLabel value="Unidad de adscripción:"
+										styleClass="bloque" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.datosLaborales.unidadAdscripcion}"
+										styleClass="bloque" />
+								</div>
+								<div class="col-md-4">
+									<p:outputLabel value="Área de adscripción:" styleClass="bloque" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.datosLaborales.areaAdscripcion}"
+										styleClass="bloque" />
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-4">
+									<p:outputLabel value="Orden de gobierno:"
+										styleClass="bloque requerido" />
+									<h:outputText
+										value="#{miPerfilBean.obtenerNombreOrdenPorId(miPerfilBean.personaEnSesion.datosLaborales.idOrdenGobierno)}"
+										styleClass="bloque" />
+								</div>
+								<div class="col-md-4">
+									<p:outputLabel value="Estado:" styleClass="bloque requerido" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.datosLaborales.sede.nombre}"
+										styleClass="bloque" />
+								</div>
+								<div class="col-md-4">
+									<p:outputLabel value="Delegación o municipio:"
+										styleClass="bloque requerido" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.datosLaborales.municipio.nombre}"
+										styleClass="bloque" />
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+
+								<div class="col-md-3">
+									<p:outputLabel value="Teléfono:" styleClass="bloque requerido" />
+									<p:inputText placeholder="Teléfono"
+										value="#{miPerfilBean.personaEnSesion.telefonoFijo.telefono}"
+										styleClass="form-control" />
+								</div>
+								<div class="col-md-1">
+									<p:outputLabel value="Extensión:" styleClass="bloque" />
+									<p:inputText placeholder="Ext."
+										value="#{miPerfilBean.personaEnSesion.telefonoFijo.extension}"
+										styleClass="form-control" />
+								</div>
+								<div class="col-md-3">
+									<p:outputLabel value="Celular:" styleClass="bloque" />
+									<p:inputText placeholder="Celular"
+										value="#{miPerfilBean.personaEnSesion.celular.telefono}"
+										styleClass="form-control" />
+								</div>
+								<div class="col-md-4 col-md-offset-1">
+									<p:outputLabel value="Correo electrónico:"
+										styleClass="bloque requerido" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.personaCorreo.correoElectronico}"
+										styleClass="bloque" />
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-4">
+									<p:outputLabel value="Fecha de ingreso:" styleClass="bloque" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.datosLaborales.fechaIngreso}"
+										styleClass="bloque">
+										<f:convertDateTime
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+									</h:outputText>
+								</div>
+
+								<div class="col-md-4">
+									<p:outputLabel value="Puesto:" styleClass="bloque requerido" />
+									<h:outputText
+										value="#{miPerfilBean.personaEnSesion.datosLaborales.puesto}"
+										styleClass="bloque" />
+								</div>
+								<div class="col-md-4">
+									<p:outputLabel value="Campo de acción:"
+										styleClass="bloque requerido" />
+									<h:outputText value="Secretarias" styleClass="bloque" />
+								</div>
+							</div>
+						</div>
+					</p:panel>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+					<p:outputLabel value="Datos obligatorios" />
+					<hr class="quitaMargenTop" />
+				</div>
+			</div>
+			<div class="form-group agregaPaddingBot">
+				<div class="row">
+					<div class="col-md-6">
+						<h:outputText styleClass="margenDerechoMenor"
+							value="Si existe algún dato incorrecto en sus datos personales, se debe solicitar su corrección al siguiente correo:" />
+						<p:commandLink onclick="return false">
+							<h:outputText value="admin@litde.com.mx"
+								styleClass="subrayar" />
+						</p:commandLink>
+
+					</div>
+					<div class="col-md-6">
+						<p:commandButton value="Actualizar"
+							action="#{miPerfilBean.actualizarPersona()}"
+							styleClass="btn btn-primary pull-right" />
+					</div>
+				</div>
+			</div>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

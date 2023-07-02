@@ -1,0 +1,624 @@
+<?xml version="1.0" standalone="no" ?>
+<!-- 
+Manifest template to demonstrate the proper XML namespace declarations for
+SCORM 2004 4th Edition manifests that do not use metadata. 
+
+Provided by Rustici Software - www.scorm.com.
+-->
+<manifest identifier="com.scorm.manifesttemplates.scorm2004.4thEd.nometadata" version="1"
+                  xmlns = "http://www.imsglobal.org/xsd/imscp_v1p1"
+                  xmlns:adlcp = "http://www.adlnet.org/xsd/adlcp_v1p3"
+                  xmlns:adlseq = "http://www.adlnet.org/xsd/adlseq_v1p3"
+                  xmlns:adlnav = "http://www.adlnet.org/xsd/adlnav_v1p3"
+                  xmlns:imsss = "http://www.imsglobal.org/xsd/imsss"
+                  xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation = "http://www.imsglobal.org/xsd/imscp_v1p1 imscp_v1p1.xsd
+                                       http://www.adlnet.org/xsd/adlcp_v1p3 adlcp_v1p3.xsd
+                                       http://www.adlnet.org/xsd/adlseq_v1p3 adlseq_v1p3.xsd
+                                       http://www.adlnet.org/xsd/adlnav_v1p3 adlnav_v1p3.xsd
+                                       http://www.imsglobal.org/xsd/imsss imsss_v1p0.xsd" >
+  <metadata>
+    <imsmd_lom>
+      <!-- *************************************
+            1 General
+
+            1.1 Identifier
+            1.1.1 Catalog
+            1.1.2 Entry
+            1.2 Title
+            1.3 Language
+            1.4 Description
+            1.5 Keyword
+            1.6 Coverage
+            1.7 Structure
+            1.8 Aggregation Level
+      ************************************* -->
+      <imsmd_general>
+        <!--1.1 Identifier-->
+        <imsmd_identifier>
+          <!--1.1.1 Catalog-->
+          <imsmd_catalog>---</imsmd_catalog>
+          <!--1.1.2 Entry-->
+          <imsmd_Entry>---</imsmd_Entry>
+        </imsmd_identifier>          
+        <!--1.2 Title-->
+        <imsmd_title>
+            <imsmd_langstring xml:lang="x-none">LOREM</imsmd_langstring>
+        </imsmd_title>
+        <!--1.3 Language-->
+        <imsmd_language>es</imsmd_language>
+        <!--1.4 Description-->
+        <imsmd_description>
+            <imsmd_langstring xml:lang="x-none">LOREM</imsmd_langstring>
+        </imsmd_description>
+        <!--1.5 Keyword-->
+        <imsmd_keyword>
+          <imsmd_langstring xml:lang="es">LOREM</imsmd_langstring>
+        </imsmd_keyword>
+        <!--1.6 Coverage-->
+        <imsmd_coverage>
+          <imsmd_langstring xml:lang="es">LOREM</imsmd_langstring>
+        </imsmd_coverage>
+        <!--1.7 Structure-->
+        <imsmd_structure>
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+          </imsmd_source>
+          <imsmd_value>
+            <imsmd_langstring xml:lang="x-none">LOREM</imsmd_langstring>
+          </imsmd_value>
+        </imsmd_structure>
+        <!--1.8 Aggregation Level-->
+        <imsmd_aggregationlevel>
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+          </imsmd_source>
+          <imsmd_value>
+            <imsmd_langstring xml:lang="x-none">LOREM_NUMBER</imsmd_langstring>
+          </imsmd_value>
+        </imsmd_aggregationlevel>
+      </imsmd_general>
+
+      <!-- *************************************
+            2 Life Cycle
+
+            2.1 Version
+            2.2 Status
+            2.3 Contribute
+            2.3.1 Role
+            2.3.2 Entity
+            2.3.3 Date
+      ************************************* -->
+      <imsmd_lifecycle>
+        <!--2.1 Version-->
+        <imsmd_version>
+          <imsmd_langstring xml:lang="es">LOREM_NUMBER</imsmd_langstring>
+        </imsmd_version>
+        <!--2.2 Status-->
+        <imsmd_status>
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+          </imsmd_source>
+          <imsmd_value>
+            <imsmd_langstring xml:lang="x-none">LOREM</imsmd_langstring>
+          </imsmd_value>
+        </imsmd_status>
+        <!--2.3 Contribute-->
+        <imsmd_contribute>
+          <!--2.3.1 Role-->
+          <imsmd_role>
+            <imsmd_source>
+              <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+            </imsmd_source>
+            <imsmd_value>
+              <imsmd_langstring xml:lang="x-none">LOREM_NUMBER</imsmd_langstring>
+            </imsmd_value>
+          </imsmd_role>
+          <!--2.3.2 Entity-->
+          <imsmd_centity>
+            <imsmd_vcard>BEGIN:VCARD\nFN: LOREM \nEND:VCARD\n</imsmd_vcard>
+          </imsmd_centity>
+          <!--2.3.3 Date-->
+          <imsmd_date>
+            <imsmd_datetime>2017-12-12 00:00:00</imsmd_datetime>
+          </imsmd_date>
+        </imsmd_contribute>
+      </imsmd_lifecycle>
+      
+      <!-- *************************************
+            3 Meta-Metadata
+
+            3.1 Identifier
+            3.1.1 Catalog
+            3.1.2 Entry
+            3.2 Contribute
+            3.2.1 Role
+            3.2.2 Entity
+            3.2.3 Date
+            3.3 Metadata Schema
+            3.4 Language
+      ************************************* -->
+      <imsmd_metametadata>
+        <!--3.1 Identifier-->
+        <imsmd_identifier>
+          <!--3.1.1 Catalog-->
+          <imsmd_catalogentry>
+            <imsmd_catalog>URL</imsmd_catalog>
+            <imsmd_entry>
+              <imsmd_langstring xml:lang="es">http://132.248.238.12/oas/coba/ariadne/</imsmd_langstring>
+            </imsmd_entry>
+          </imsmd_catalogentry>
+          <!--3.1.2 Entry-->
+          <imsmd_entry>LOREM</imsmd_entry>
+        </imsmd_identifier>
+        
+        <!--3.2 Contribute-->
+        <imsmd_contribute>
+          <!--3.2.1 Role-->
+          <imsmd_role>
+            <imsmd_source>
+              <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+            </imsmd_source>
+            <imsmd_value>
+              <imsmd_langstring xml:lang="x-none">Creator</imsmd_langstring>
+            </imsmd_value>
+          </imsmd_role>
+          <!--3.2.2 Entity-->
+          <imsmd_centity>
+            <imsmd_vcard>BEGIN:VCARD\nFN:CObÁ\nEND:VCARD\n</imsmd_vcard>
+          </imsmd_centity>
+          <!--3.2.3 Date-->
+          <imsmd_date>
+            <imsmd_datetime>1994</imsmd_datetime>
+          </imsmd_date>
+        </imsmd_contribute>
+        
+
+        <!--3.2 Contribute-->
+        <imsmd_contribute>
+          <!--3.2.1 Role-->
+          <imsmd_role>
+            <imsmd_source>
+              <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+            </imsmd_source>
+            <imsmd_value>
+              <imsmd_langstring xml:lang="x-none">Validator</imsmd_langstring>
+            </imsmd_value>
+          </imsmd_role>
+          <!--3.2.2 Entity-->
+          <imsmd_centity>
+            <imsmd_vcard>BEGIN:VCARD\nFN:CATED\nEND:VCARD\n</imsmd_vcard>
+          </imsmd_centity>
+          <!--3.2.3 Date-->
+          <imsmd_date>
+            <imsmd_datetime>1994</imsmd_datetime>
+          </imsmd_date>
+        </imsmd_contribute>
+        <!--3.3 Metadata Schema-->
+        <imsmd_metadatascheme>LOMv1.0</imsmd_metadatascheme>
+        <!--3.4 Language-->
+        <imsmd_language>es</imsmd_language>
+      </imsmd_metametadata>
+
+      <!-- *************************************
+            4 Technical
+
+            4.1 Format
+            4.2 Size
+            4.3 Location
+            4.4 Requirement
+            4.4.1 OrComposite
+            4.4.1.1 Type
+            4.4.1.2 Name
+            4.4.1.3 Minimum Version
+            4.4.1.4 Maximum Version
+            4.5 Installation Remarks
+            4.6 Other Platform Requirements
+            4.7 Duration
+      ************************************* -->
+      <imsmd_technical>
+        <!--4.1 Format-->
+        <imsmd_format>text/html</imsmd_format>
+        <!--4.2 Size-->
+        <imsmd_size />
+        <!--4.3 Location-->
+        <imsmd_location />
+        <!--4.4 Requirement-->
+        <imsmd_requirement>
+          <!--4.4.1 OrComposite-->
+          <imsmd_orcomposite>
+            <!--4.4.1.1 Type-->
+            <imsmd_type>
+              <imsmd_source>
+                <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+              </imsmd_source>
+              <imsmd_value>
+                <imsmd_langstring xml:lang="x-none">Browser</imsmd_langstring>
+              </imsmd_value>
+            </imsmd_type>
+            <!--4.4.1.2 Name-->
+            <imsmd_name>
+              <imsmd_source>
+                <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+              </imsmd_source>
+              <imsmd_value>
+                <imsmd_langstring xml:lang="x-none">Cualquiera</imsmd_langstring>
+              </imsmd_value>
+            </imsmd_name>
+            <!--4.4.1.3 Minimum Version-->
+            <imsmd_minimumversion />
+            <!--4.4.1.4 Maximum Version-->
+            <imsmd_maximumversion />
+          </imsmd_orcomposite>
+        </imsmd_requirement>
+        <!--4.5 Installation Remarks-->
+        <imsmd_installationremarks>
+          <imsmd_langstring xml:lang="es">Ejecutarse en un visualizador SCORM. Su contenido también puede ser accedido descomprimiendo el paquete y ejecutando el archivo index.htm en un navegador Web.</imsmd_langstring>
+        </imsmd_installationremarks>
+        <!--4.6 Other Platform Requirements-->
+        <imsmd_otherplatformrequirements>
+          <imsmd_langstring xml:lang="es">Plugin FLash</imsmd_langstring>
+          <imsmd_langstring xml:lang="es">Plugin PDF</imsmd_langstring>
+        </imsmd_otherplatformrequirements>
+        <!--4.7 Duration-->
+        <imsmd_duration />
+
+      </imsmd_technical>
+
+      <!-- *************************************
+            5 Educational
+
+            5.1 Interactivity Type
+            5.2 Learning Resource Type
+            5.3 Interactivity Level
+            5.4 Semantic Density
+            5.5 Intended End User Role
+            5.6 Context
+            5.7 Typical Age Range
+            5.8 Difficulty
+            5.9 Typical Learning Time
+            5.10 Description
+      ************************************* -->
+      <imsmd_educational>
+        <!--5.1 Interactivity Type-->
+        <imsmd_interactivitytype>
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+          </imsmd_source>
+          <imsmd_value>
+            <imsmd_langstring xml:lang="x-none">Active</imsmd_langstring>
+          </imsmd_value>
+        </imsmd_interactivitytype>
+        <!--5.2 Learning Resource Type-->
+        <imsmd_learningresourcetype>
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+          </imsmd_source>
+          <imsmd_value>
+            <imsmd_langstring xml:lang="x-none">Diagram</imsmd_langstring>
+          </imsmd_value>
+        </imsmd_learningresourcetype>
+        <!--5.3 Interactivity Level-->
+        <imsmd_interactivitylevel>
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+          </imsmd_source>
+          <imsmd_value>
+            <imsmd_langstring xml:lang="x-none">medium</imsmd_langstring>
+          </imsmd_value>
+        </imsmd_interactivitylevel>
+        <!--5.4 Semantic Density-->
+        <imsmd_semanticdensity>
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+          </imsmd_source>
+          <imsmd_value>
+            <imsmd_langstring xml:lang="x-none">low</imsmd_langstring>
+          </imsmd_value>
+        </imsmd_semanticdensity>
+        <!--5.5 Intended End User Role-->
+        <imsmd_intendedenduserrole>
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+          </imsmd_source>
+          <imsmd_value>
+            <imsmd_langstring xml:lang="x-none">Manager</imsmd_langstring>
+          </imsmd_value>
+        </imsmd_intendedenduserrole>
+        <!--5.6 Context-->
+        <imsmd_context>
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+          </imsmd_source>
+          <imsmd_value>
+            <imsmd_langstring xml:lang="x-none">Professional Formation</imsmd_langstring>
+          </imsmd_value>
+        </imsmd_context>
+        <!--5.7 Typical Age Range-->
+        <imsmd_typicalagerange>
+          <imsmd_langstring xml:lang="es">20 -</imsmd_langstring>
+        </imsmd_typicalagerange>
+        <!--5.8 Difficulty-->
+        <imsmd_difficulty>
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+          </imsmd_source>
+          <imsmd_value>
+            <imsmd_langstring xml:lang="x-none">medium</imsmd_langstring>
+          </imsmd_value>
+        </imsmd_difficulty>
+        <!--5.9 Typical Learning Time-->
+        <imsmd_typicallearningtime>
+          <imsmd_langstring xml:lang="es">01:00:00</imsmd_langstring>
+        </imsmd_typicallearningtime>
+        <!--5.10 Description-->
+        <imsmd_description>es</imsmd_description>
+      </imsmd_educational>
+
+      <!-- *************************************
+            6 Rights
+
+            6.1 Cost
+            6.2 Copyright and Other Restrictions
+            6.3 Description
+      ************************************* -->
+      <imsmd_rights>
+        <!--6.1 Cost-->
+        <imsmd_cost>
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+          </imsmd_source>
+          <imsmd_value>
+            <imsmd_langstring xml:lang="x-none">no</imsmd_langstring>
+          </imsmd_value>
+        </imsmd_cost>
+        <!--6.2 Copyright and Other Restrictions-->
+        <imsmd_copyrightandotherrestrictions>
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+          </imsmd_source>
+          <imsmd_value>
+            <imsmd_langstring xml:lang="x-none">yes</imsmd_langstring>
+          </imsmd_value>
+        </imsmd_copyrightandotherrestrictions>
+        <!--6.3 Description-->
+        <imsmd_description>
+          <imsmd_langstring xml:lang="es">Solicitar permisos a la institución</imsmd_langstring>
+        </imsmd_description>
+      </imsmd_rights>
+
+      
+      <!-- *************************************
+            7 Relation
+
+            7.1 Kind
+            7.2 Resource
+            7.2.1 Identifier
+            7.2.1.1 Catalog
+            7.2.1.2 Entry
+            7.2.2 Description
+      ************************************* -->
+      <imsmd_relation>
+        <!--7.1 Kind-->
+        <imsmd_kind>
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+          </imsmd_source>
+          <imsmd_value>
+            <imsmd_langstring xml:lang="x-none">IsPartOf</imsmd_langstring>
+          </imsmd_value>
+        </imsmd_kind>
+        <!--7.2 Resource-->
+        <imsmd_resource>
+          <!--7.2.1 Identifier-->
+          <imsmd_identifier>
+            <!--7.2.1.1 Catalog-->
+            <imsmd_catalog>
+            </imsmd_catalog>
+            <!--7.2.1.2 Entry-->
+            <imsmd_entry>
+            </imsmd_entry>
+          </imsmd_identifier>
+          <!--7.2.2 Description-->
+          <imsmd_description>
+            <imsmd_langstring xml:lang="es">Es parte de medios de comunicación</imsmd_langstring>
+          </imsmd_description>
+        
+        </imsmd_resource>
+      </imsmd_relation>
+
+      <!-- *************************************
+            8 Annotation
+
+            8.1 Entity
+            8.2 Date
+            8.3 Description
+      ************************************* -->
+      <imsmd_annotation>
+        <!--8.1 Entity-->
+        <imsmd_entity>
+        </imsmd_entity>
+        <!--8.2 Date-->
+        <imsmd_date>
+        </imsmd_date>
+        <!--8.3 Description-->
+        <imsmd_description>
+        </imsmd_description>
+      </imsmd_annotation>
+
+      <!-- *************************************
+            9 Classification
+            
+            9.1 Purpose
+            9.2 Taxon Path
+            9.2.1 Source
+            9.2.2 Taxon
+            9.2.2.1 Id
+            9.2.2.2 Entry
+            9.3 Description
+            9.4 Keyword
+      ************************************* -->
+      <imsmd_classification>
+        <!--9.1 Purpose-->
+        <imsmd_purpose>
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">LOMv1.0</imsmd_langstring>
+          </imsmd_source>
+          <imsmd_value>
+            <imsmd_langstring xml:lang="x-none">Discipline</imsmd_langstring>
+          </imsmd_value>
+        </imsmd_purpose>
+        <!--9.2 Taxon Path-->
+        <imsmd_taxonpath>
+         <!--9.2.1 Source--> 
+          <imsmd_source>
+            <imsmd_langstring xml:lang="es">Clasificación de las Subdisciplinas del Catálogo N</imsmd_langstring>
+          </imsmd_source>
+          <!--9.2.2 Taxon-->
+          <imsmd_taxon>
+            <!--9.2.2.1 Id-->
+            <imsmd_id>3307OA13029</imsmd_id>
+            <!--9.2.2.2 Entry-->
+            <imsmd_entry>
+              <imsmd_langstring xml:lang="es">3307-OA-130-29</imsmd_langstring>
+            </imsmd_entry>
+          </imsmd_taxon>
+        </imsmd_taxonpath>
+        <!--9.3 Description-->
+        <imsmd_description>
+          <imsmd_langstring xml:lang="es">Disciplina - Tipo de Objeto - Entidad - Identificador en Base de Datos</imsmd_langstring>
+        </imsmd_description>
+        <!--9.4 Keyword-->
+        <imsmd_keyword>
+          <imsmd_langstring xml:lang="es">Disciplina - Tipo de Objeto - Entidad - Identificador en Base de Datos</imsmd_langstring>
+        </imsmd_keyword>
+        
+      </imsmd_classification>
+
+    </imsmd_lom> 
+  </metadata>
+
+
+
+
+
+
+
+
+
+  <organizations default="ORG-C5B49806-CCAC-AEB4-75E1-29B628E6ADFF">
+    <organization identifier="ORG-C5B49806-CCAC-AEB4-75E1-29B628E6ADFF" structure="hierarchical">
+      <title>Organization</title>
+      <item identifier="ITEM-3D14B237-E2E2-870E-55CB-F4D62E39500D" isvisible="true" identifierref="RES-63CA3401-DCBD-350F-3B9A-C2304F154E8E">
+        <title>INTRODUCCIÓN</title>
+      </item>
+      <item identifier="ITEM-63EC0142-CE4E-636B-CF38-85898CA5046F" isvisible="true" identifierref="RES-DC8BE0F4-8BCB-B47B-07E6-6CADC44CF2E6">
+        <title>CONTENIDO</title>
+      </item>
+      <item identifier="ITEM-057501AA-9000-0AE0-A745-DC520745C6A6" isvisible="true" identifierref="RES-48E107FF-9D4D-C756-E73F-2BC57AD32527">
+        <title>ACTIVIDAD</title>
+      </item>
+      <item identifier="ITEM-CF1F229B-04D8-77DB-F08A-DAAF5CDCCDC2" isvisible="true" identifierref="RES-F97CFD11-BC16-5D6B-05B5-380229ADEABD">
+        <title>EVALUACIÓN</title>
+      </item>
+    </organization>
+  </organizations>
+  <resources>
+    <resource identifier="RES-63CA3401-DCBD-350F-3B9A-C2304F154E8E" type="webcontent" href="index.htm">
+      <file href="index.htm" />
+      <file href="estilos.css" />
+      <file href="images/aux1.jpg" />
+      <file href="images/aux2.jpg" />
+      <file href="images/aux3.jpg" />
+      <file href="images/aux_bullAz.gif" />
+      <file href="images/aux_bullet1.jpg" />
+      <file href="images/aux_grafico.jpg" />
+      <file href="images/back_btm.jpg" />
+      <file href="images/back_gris.jpg" />
+      <file href="images/back_top.jpg" />
+      <file href="images/back_yllw.jpg" />
+      <file href="images/impresora.gif" />
+      <file href="images/lg_cated.jpg" />
+      <file href="images/lg_cuaed.jpg" />
+      <file href="images/lg_ingenier.jpg" />
+      <file href="images/lg_sdei.jpg" />
+      <file href="images/lg_unam.jpg" />
+      <file href="images/tit_med_trans.jpg" />
+      <file href="images/transp.gif" />
+      <file href="materiales/glosario.pdf" />
+      <file href="materiales/medios_trans.pdf" />
+      <file href="pages/Api_SCORM.js" />
+      <file href="pages/muti_imp.htm" />
+    </resource>
+    <resource identifier="RES-48E107FF-9D4D-C756-E73F-2BC57AD32527" type="webcontent" href="pages/muti_act.htm">
+      <file href="pages/muti_act.htm" />
+      <file href="estilos.css" />
+      <file href="images/aux1.jpg" />
+      <file href="images/aux2.jpg" />
+      <file href="images/aux3.jpg" />
+      <file href="images/aux_bullet.jpg" />
+      <file href="images/aux_grafico.jpg" />
+      <file href="images/back_btm.jpg" />
+      <file href="images/back_gris.jpg" />
+      <file href="images/back_top.jpg" />
+      <file href="images/back_yllw.jpg" />
+      <file href="images/lg_cated.jpg" />
+      <file href="images/lg_cuaed.jpg" />
+      <file href="images/lg_ingenier.jpg" />
+      <file href="images/lg_sdei.jpg" />
+      <file href="images/lg_unam.jpg" />
+      <file href="images/tit_med_trans.jpg" />
+      <file href="images/transp.gif" />
+      <file href="media/crucigrama.swf" />
+      <file href="pages/Api_SCORM.js" />
+    </resource>
+    <resource identifier="RES-DC8BE0F4-8BCB-B47B-07E6-6CADC44CF2E6" type="webcontent" href="pages/muti_cont.html">
+      <file href="pages/muti_cont.html" />
+      <file href="estilos.css" />
+      <file href="images/aux1.jpg" />
+      <file href="images/aux2.jpg" />
+      <file href="images/aux3.jpg" />
+      <file href="images/aux_grafico.jpg" />
+      <file href="images/back_btm.jpg" />
+      <file href="images/back_gris.jpg" />
+      <file href="images/back_top.jpg" />
+      <file href="images/back_yllw.jpg" />
+      <file href="images/impresora.gif" />
+      <file href="images/lg_cated.jpg" />
+      <file href="images/lg_cuaed.jpg" />
+      <file href="images/lg_ingenier.jpg" />
+      <file href="images/lg_sdei.jpg" />
+      <file href="images/lg_unam.jpg" />
+      <file href="images/tit_med_trans.jpg" />
+      <file href="images/transp.gif" />
+      <file href="materiales/glosario.pdf" />
+      <file href="media/par_trenzado.swf" />
+      <file href="pages/Api_SCORM.js" />
+    </resource>
+    <resource identifier="RES-F97CFD11-BC16-5D6B-05B5-380229ADEABD" type="webcontent" href="pages/muti_eval_com.htm">
+      <file href="pages/muti_eval_com.htm" />
+      <file href="estilos.css" />
+      <file href="images/aux1.jpg" />
+      <file href="images/aux2.jpg" />
+      <file href="images/aux3.jpg" />
+      <file href="images/aux_bullet.jpg" />
+      <file href="images/aux_bullet1.jpg" />
+      <file href="images/aux_grafico.jpg" />
+      <file href="images/back_btm.jpg" />
+      <file href="images/back_gris.jpg" />
+      <file href="images/back_top.jpg" />
+      <file href="images/back_yllw.jpg" />
+      <file href="images/lg_cated.jpg" />
+      <file href="images/lg_cuaed.jpg" />
+      <file href="images/lg_ingenier.jpg" />
+      <file href="images/lg_sdei.jpg" />
+      <file href="images/lg_unam.jpg" />
+      <file href="images/tit_med_trans.jpg" />
+      <file href="images/transp.gif" />
+      <file href="media/eval2_v3.swf" />
+      <file href="pages/Api_SCORM.js" />
+    </resource>
+  </resources>
+
+</manifest>
+

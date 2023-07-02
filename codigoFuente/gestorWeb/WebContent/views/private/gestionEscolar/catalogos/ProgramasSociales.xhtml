@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.programas.sociales')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form id="frmProgramasSociales">
+			<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.programas.sociales')}</h1>
+			<hr />
+			
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.programas.sociales.titulo.unidad')}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6">
+							<p:outputLabel for="somUnidades" styleClass="requerido"
+								value="#{sistema.obtenerTexto('gw.programas.sociales.campo.unidad.responsable')}:" />
+						</div>
+					</div>
+					<div class="row flexCentrarXY">
+						<div class="col-md-6">
+
+							<p:selectOneMenu id="somUnidades"
+								value="#{programasSocialesBean.idUnidadResponsable}"
+								valueChangeListener="#{programasSocialesBean.onChangeUnidad}"
+								styleClass="col-xs-12" onchange="correccionSelectores()">
+
+								<p:ajax update="tblProgramas, panelBtnAgregar" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+								<f:selectItems value="#{programasSocialesBean.unidades}"
+									var="unidad" itemValue="#{unidad.getIdUnidadResponsable()}"
+									itemLabel="#{unidad.getNombre()}" />
+							</p:selectOneMenu>
+						</div>
+						<div class="col-md-6 text-right">
+							<p:outputPanel id="panelBtnAgregar">
+								<sec:authorize access="hasPermission(null, 'PROG_SOC_AGR' ) ">
+									<p:outputLabel value="Nuevo programa social: "
+										styleClass="agregaHeight" />
+									<p:commandButton id="btnAgregar"
+										value="#{sistema.obtenerTexto('gw.programas.sociales.boton.agregar')}"
+										disabled="#{programasSocialesBean.idUnidadResponsable == null}"
+										action="#{programasSocialesBean.nuevoPrograma()}" ajax="true"
+										process="@this" oncomplete="PF('dialogPrograma').show();"
+										update="frmProgramasSociales:contenido"
+										styleClass="btn btn-primary pull-right">
+									</p:commandButton>
+								</sec:authorize>
+							</p:outputPanel>
+						</div>
+					</div>
+				</div>
+			</p:panel>
+
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.programas.sociales.titulo')}">
+				<p:dataTable id="tblProgramas"
+					value="#{programasSocialesBean.programas}"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					tableStyleClass="table" var="programa" widgetVar="tblProgramas"
+					paginator="true" paginatorPosition="bottom" rows="10"
+					rowsPerPageTemplate="5,10,15" reflow="true"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+
+					<f:facet name="header">
+						<p:outputPanel styleClass="text-right">
+							<p:outputLabel for="globalFilter"
+								value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}" />
+							<p:inputText id="globalFilter"
+								onkeyup="PF('tblProgramas').filter()"
+								placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+						</p:outputPanel>
+					</f:facet>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.programas.sociales.campo.clave')}"
+						sortBy="#{programa.clave}" filterMatchMode="contains"
+						filterBy="#{programa.clave}" filterStyle="display:none">
+						<h:outputText value="#{programa.clave}" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.programas.sociales.campo.nombre')}"
+						sortBy="#{programa.nombre}" filterMatchMode="contains"
+						filterBy="#{programa.nombre}" filterStyle="display:none">
+						<h:outputText value="#{programa.nombre}" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.programas.sociales.columna.acciones')}"
+						styleClass="text-center">
+						<sec:authorize access="hasPermission(null, 'PROG_SOC_EDI' ) ">
+							<p:commandButton id="btn-editar"
+								action="#{programasSocialesBean.cargarPrograma()}" ajax="true"
+								process="@this"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod"
+								oncomplete="PF('dialogPrograma').show();"
+								update="frmProgramasSociales:contenido">
+								<f:setPropertyActionListener value="#{programa}"
+									target="#{programasSocialesBean.programaModificar}" />
+							</p:commandButton>
+							<p:tooltip for="btn-editar"
+								value="#{sistema.obtenerTexto('gw.programas.sociales.boton.editar')}"
+								position="top" />
+						</sec:authorize>
+					</p:column>
+
+				</p:dataTable>
+			</p:panel>
+
+			<p:dialog id="dialogPrograma" widgetVar="dialogPrograma"
+				draggable="false" position="center" closable="false"
+				resizable="false"
+				header="#{sistema.obtenerTexto('gw.programas.sociales.modal.titulo')}"
+				styleClass="modalPseudoClass medidaModal" modal="true">
+
+				<p:outputPanel id="contenido">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel for="txtClave" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.programas.sociales.campo.clave')}:" />
+								<p:inputText id="txtClave" maxlength="100"
+									placeholder="#{sistema.obtenerTexto('gw.programas.sociales.campo.clave')}"
+									value="#{programasSocialesBean.programa.clave}"
+									styleClass="form-control" />
+								<p:message for="txtClave" />
+							</div>
+
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel for="txtNombre" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.programas.sociales.campo.nombre')}:" />
+								<p:inputText id="txtNombre" maxlength="100"
+									placeholder="#{sistema.obtenerTexto('gw.programas.sociales.campo.nombre')}"
+									value="#{programasSocialesBean.programa.nombre}"
+									styleClass="form-control" />
+								<p:message for="txtNombre" />
+							</div>
+
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+								<p:outputLabel
+									value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+							</div>
+						</div>
+					</div>
+
+				</p:outputPanel>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton validateClient="true"
+								value="#{sistema.obtenerTexto('gw.programas.sociales.modal.boton.guardar')}"
+								action="#{programasSocialesBean.guardarPrograma()}" ajax="true"
+								update="contenido, tblProgramas"
+								styleClass="pull-right btn btn-primary" />
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.programas.sociales.modal.boton.cancelar')}"
+								onclick="PF('dialogPrograma').hide();"
+								styleClass="pull-right btn btn-default" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

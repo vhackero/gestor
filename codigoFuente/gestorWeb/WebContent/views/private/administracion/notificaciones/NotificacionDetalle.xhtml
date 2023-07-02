@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.mensajes.texto.mensajes')}</li>
+		<li class="active">Detalle del mensaje</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>Detalle del mensaje</h1>
+		<hr />
+		<h:form>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.mensaje.detalle.boton.responder')}"
+							action="#{notificacionesBean.cargarNuevoMensaje()}" ajax="true"
+							styleClass="btn btn-primary pull-right" />
+					</div>
+				</div>
+			</div>
+
+			<p:panel header="#{notificacionesBean.notificacion.titulo}">
+				<div class="row">
+					<div class="col-md-12">
+						<ui:repeat var="mensaje"
+							value="#{notificacionesBean.notificacion.mensajes}">
+							<p:panel id="horizontal" header="#{mensaje.nombreCompleto}"
+								toggleable="true" style="background-color:white">
+								<div class="form-group">
+									<div class="row">
+										<div class="col-md-10">
+											<h:outputText escape="false" value="#{mensaje.contenido}" />
+										</div>
+										<div class="col-md-2 text-right">
+											<p:outputLabel value="#{mensaje.fecha}">
+												<f:convertDateTime
+													pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+											</p:outputLabel>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12">
+											<h:outputText value="El mensaje contiene un archivo adjunto:"
+												rendered="#{mensaje.archivo != null and (mensaje.archivo.nombre != null and not mensaje.archivo.nombre.isEmpty())}" />
+											<p:commandButton ajax="false" id="btnDescargarAdjunto"
+												styleClass="btn-icon btn btn-default icono_sisi ss_gn_desc"
+												onclick="PrimeFaces.monitorDownload(start, stop);"
+												rendered="#{mensaje.archivo != null and (mensaje.archivo.nombre != null and not mensaje.archivo.nombre.isEmpty())}">
+												<f:setPropertyActionListener value="#{mensaje}"
+													target="#{notificacionesBean.mensaje}" />
+												<p:fileDownload
+													value="#{notificacionesBean.archivoDescargar}" />
+											</p:commandButton>
+											<p:tooltip value="Descargar" position="top"
+												for="btnDescargarAdjunto" />
+										</div>
+									</div>
+								</div>
+							</p:panel>
+						</ui:repeat>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.mensaje.detalle.boton.regresar')}"
+								action="#{menuGestorBean.navegaNotificaciones()}" ajax="true"
+								class="btn btn-default pull-right" />
+						</div>
+					</div>
+				</div>
+			</p:panel>
+			<p:panel rendered="false"
+				header="#{sistema.obtenerTexto('gw.mensaje.detalle.titulo')}">
+				<p:dataTable id="tblDestinatarios" var="persona" reflow="true"
+					value="#{notificacionesBean.notificacion.destinatarios}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					paginator="true" rows="10" rowsPerPageTemplate="5,10,15"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.mensaje.editar.columna.destinatario')}">
+						<h:outputText value="#{persona.nombreCompleto}" />
+					</p:column>
+				</p:dataTable>
+
+
+			</p:panel>
+
+			<p:dialog closable="false" draggable="false" resizable="false"
+				position="center" widgetVar="mMensajeNuevo" modal="true"
+				styleClass="medidaModal"
+				header="#{sistema.obtenerTexto('gw.mensaje.editar.modal.mensaje.titulo')}">
+				<p:editor id="editor" widgetVar="editorWidget"
+					value="#{notificacionesBean.mensaje.contenido}" width="600" />
+				<div class="row">
+					<div class="col-md-12">
+						<p:fileUpload value="#{notificacionesBean.archivoCargar}"
+							mode="simple" skinSimple="true" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:button
+							value="#{sistema.obtenerTexto('gw.mensaje.editar.modal.mensaje.boton.cancelar')}"
+							onclick="PF('mMensajeNuevo').hide();"
+							styleClass="btn btn-default" />
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.mensaje.editar.modal.mensaje.boton.enviar')}"
+							action="#{notificacionesBean.enviarMensaje()}"
+							oncomplete="PF('mMensajeNuevo').hide();"
+							styleClass="btn btn-primary btn-top" />
+					</div>
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

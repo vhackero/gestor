@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<h:form>
+		<div class="row">
+			<div class="col-md-12">
+				<p:outputLabel for="notaDG"
+					value="#{sistema.obtenerTexto('gw.ga.label.nota')}:"
+					styleClass="margenDerechoMenor" />
+				<h:outputText id="notaDG"
+					value="#{sistema.obtenerTexto('gw.ga.label.infotex3')}" />
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<p:outputLabel for="objetivos"
+					value="#{sistema.obtenerTexto('gw.ga.label.objesp')}: " />
+				<h:outputText id="objetivos"
+					value=" #{sistema.obtenerTexto('gw.ga.label.actmap')}" />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel id="tiempoEstudio"
+						value="#{sistema.obtenerTexto('gw.ga.label.tiempotipico')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="txtAreaTiempoEstudio"
+						styleClass="form-control" maxlength="50"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.tiempoTipicoAprendizaje}"
+						placeholder="Tiempo aproximado o típico que necesitan para asimilar el objeto  los destinatarios objetivo típicos.">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+					<p:message for="txtAreaTiempoEstudio" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel id="destinatarios"
+						value="#{sistema.obtenerTexto('gw.ga.label.destinatarios')}:"
+						styleClass="bloque" />
+					<h:outputText id="txtDestinatarios"
+						value="#{fichaObjetoAprendizajeBean.unidadOaAvaDTO.ambienteVirtualAprendizaje.eventoCapacitacion.idDestinatario.nombre}" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel id="rangoEdad"
+						value="#{sistema.obtenerTexto('gw.ga.label.rangotipico')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="txtRangoEdad" styleClass="form-control"
+						maxlength="100"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.rangoTipicoDeEdad}">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+					<p:message for="txtRangoEdad" />
+
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel id="tipoEstructura"
+						value="#{sistema.obtenerTexto('gw.ga.label.tipoestruc')}:"
+						styleClass="requerido bloque" />
+					<p:selectOneMenu
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.fichaDescripcionOa.catTipoEstructuraOa.id}"
+						styleClass="col-xs-12" id="txtTipoEstructura">
+						<p:ajax process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems
+							value="#{fichaObjetoAprendizajeBean.listaTipoEstructura}"
+							var="tipoEstructura" itemValue="#{tipoEstructura.id}"
+							itemLabel="#{tipoEstructura.nombre}" />
+					</p:selectOneMenu>
+					<p:message for="txtTipoEstructura" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel id="tipoContenido"
+						value="#{sistema.obtenerTexto('gw.ga.label.tipocont')}:"
+						styleClass="requerido bloque" />
+					<p:selectOneMenu
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.fichaDescripcionOa.catTipoContenidoOa.id}"
+						styleClass="col-xs-12" id="txtTipoContenido">
+						<p:ajax process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems
+							value="#{fichaObjetoAprendizajeBean.listaTipoContenido}"
+							var="tipoContenido" itemValue="#{tipoContenido.id}"
+							itemLabel="#{tipoContenido.nombre}" />
+					</p:selectOneMenu>
+					<p:message for="txtTipoContenido" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel id="tipoInteractividad"
+						value="#{sistema.obtenerTexto('gw.ga.label.tipoint')}:"
+						styleClass="requerido bloque" />
+					<p:selectOneMenu
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.fichaDescripcionOa.catTipoInteractividadOa.id}"
+						styleClass="col-xs-12" id="txtTipoInteractividad">
+						<p:ajax process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems
+							value="#{fichaObjetoAprendizajeBean.listaTipoInteractividad}"
+							var="tipoInteractividad" itemValue="#{tipoInteractividad.id}"
+							itemLabel="#{tipoInteractividad.nombre}" />
+					</p:selectOneMenu>
+					<p:message for="txtTipoInteractividad" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-6">
+					<p:outputLabel id="densidad"
+						value="#{sistema.obtenerTexto('gw.ga.label.denseman')}:"
+						styleClass="requerido bloque" />
+					<p:selectOneMenu
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.fichaDescripcionOa.catDensidadSemanticaOa.id}"
+						styleClass="col-xs-12" id="txtDensidadSemantica">
+						<p:ajax process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							noSelectionOption="" />
+						<f:selectItems
+							value="#{fichaObjetoAprendizajeBean.listaDensidadSemantica}"
+							var="densidadSemantica" itemLabel="#{densidadSemantica.nombre}"
+							itemValue="#{densidadSemantica.id}" />
+					</p:selectOneMenu>
+					<p:message for="txtDensidadSemantica" />
+				</div>
+				<div class="col-md-6">
+					<p:outputLabel id="nivelDificultad"
+						value="#{sistema.obtenerTexto('gw.ga.label.nvldificult')}:"
+						styleClass="requerido bloque" />
+					<p:selectOneMenu
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.fichaDescripcionOa.catDificultadOa.id}"
+						styleClass="col-xs-12" id="txtNivelDificultad">
+						<p:ajax process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							noSelectionOption="" />
+						<f:selectItems
+							value="#{fichaObjetoAprendizajeBean.listaNivelDificultad}"
+							var="nivelDificultad" itemLabel="#{nivelDificultad.nombre}"
+							itemValue="#{nivelDificultad.id}" />
+					</p:selectOneMenu>
+					<p:message for="txtNivelDificultad" />
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="tipoRecurso" styleClass="requerido"
+						value="#{sistema.obtenerTexto('gw.ga.label.tiporec')}:" />
+					<p:selectOneMenu
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.fichaDescripcionOa.catRecursoPredominanteFoa.id}"
+						styleClass="col-xs-12" id="txtRecursoPredominante">
+						<p:ajax process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							noSelectionOption="" />
+						<f:selectItems
+							value="#{fichaObjetoAprendizajeBean.listaRecursoPredominante}"
+							var="recursoPredominante"
+							itemLabel="#{recursoPredominante.nombre}"
+							itemValue="#{recursoPredominante.id}" />
+					</p:selectOneMenu>
+					<p:message for="txtRecursoPredominante" />
+
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="materialDidactico"
+						value="#{sistema.obtenerTexto('gw.ga.label.matdidac')}:" />
+					<p:selectManyCheckbox id="cbMaterialDidactico"
+						value="#{fichaObjetoAprendizajeBean.listaMaterialDidacticoSeleccionado}"
+						layout="responsive" columns="4" converter="entityConverter">
+						<p:ajax process="@this" />
+						<f:selectItems
+							value="#{fichaObjetoAprendizajeBean.listaMaterialDidactico}"
+							var="materialDidactico" itemValue="#{materialDidactico}"
+							itemLabel="#{materialDidactico.nombre}" />
+					</p:selectManyCheckbox>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="activdiadesReforzamiento"
+						value="Actividades reforzamiento:" />
+					<p:selectManyCheckbox id="cbActividadesReforsamiento"
+						value="#{fichaObjetoAprendizajeBean.listaActividadesReforzamientoSeleccionado}"
+						layout="responsive" columns="4" converter="entityConverter">
+						<p:ajax process="@this" />
+						<f:selectItems
+							value="#{fichaObjetoAprendizajeBean.listaActivdadesReforzamiento}"
+							var="actividadReforzamiento"
+							itemValue="#{actividadReforzamiento}"
+							itemLabel="#{actividadReforzamiento.nombre}" />
+					</p:selectManyCheckbox>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="evaluacionAprendizaje"
+						value="#{sistema.obtenerTexto('gw.ga.label.evalapren')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="txtEvaluacionAprendizaje"
+						styleClass="form-control" maxlength="2000"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.evaluacionDelAprendizaje}">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+					<p:message for="txtEvaluacionAprendizaje" />
+				</div>
+			</div>
+		</div>
+
+		<!-- <div class="form-group">
+			<div class="row">
+				<div class="col-md-12"> 
+					<p:outputLabel for="evaluacion" value="#{sistema.obtenerTexto('gw.ga.label.eval')}:" styleClass="bloque" />
+					<h:outputText id="evaluacion"
+						value="#{fichaObjetoAprendizajeBean.unidadOaAvaDTO.detEstUnidadDidactica.evaluacion}" />
+				</div>
+			</div>
+		</div> -->
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="comentarios"
+						value="#{sistema.obtenerTexto('gw.ga.label.comentarios')}:"
+						styleClass="" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="txtComentarios" styleClass="form-control"
+						maxlength="2000"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.comentarios}"
+						placeholder="Comentarios pedagógicos respecto  al OA">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputLabel
+						value="#{sistema.obtenerTexto('gw.ga.label.datosoblig')}"
+						styleClass="requerido" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.continuar')}"
+						action="#{fichaObjetoAprendizajeBean.guardarElementosInstruccionales}"
+						process="@this" ajax="false" update="@form"
+						styleClass="btn btn-primary pull-right" />
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.guarda.borrador')}"
+						action="#{fichaObjetoAprendizajeBean.guardarBorrador}"
+						oncomplete="PF('dlg_redireccionar').show();" process="@this"
+						immediate="true" ajax="true"
+						styleClass="btn btn-default pull-right" />
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.cancelar')}" ajax="false"
+						styleClass="btn btn-default pull-right"
+						action="#{fichaObjetoAprendizajeBean.cancelar}" />
+				</div>
+			</div>
+		</div>
+	</h:form>
+</ui:composition>

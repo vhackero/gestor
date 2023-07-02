@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<h:form>
+		<div class="row">
+			<div class="col-md-12">
+				<p:outputLabel for="nota"
+					value="#{sistema.obtenerTexto('gw.ga.label.nota')}:"
+					styleClass="margenDerechoMenor" />
+				<h:outputText id="nota"
+					value="#{sistema.obtenerTexto('gw.ga.label.tenerinfo')}" />
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="pNombreOA"
+						value="#{sistema.obtenerTexto('gw.ga.label.nombreoabreve')}: " />
+					<h:outputText id="hNombreOa"
+						value=" #{fichaObjetoAprendizajeBean.unidadOaAvaDTO.detEstUnidadDidactica.nombreUnidad}."></h:outputText>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+				<p:outputLabel id="pAreaConocimiento"
+					value="#{sistema.obtenerTexto('gw.ga.label.areaconoc')}:"
+					styleClass="bloque" />
+				<h:outputText id="hAreaConocimiento"
+					value=" #{fichaObjetoAprendizajeBean.unidadOaAvaDTO.detEstUnidadDidactica.nombreUnidad}."></h:outputText>
+			</div>
+			<!-- <div class="col-md-4"> 
+				<p:outputLabel id="pTemasrelacionado" value="#{sistema.obtenerTexto('gw.ga.label.temasrel')}:"
+					styleClass="bloque" />
+				<h:outputText id="hTemasRelacionados" value="#{fichaObjetoAprendizajeBean.unidadOaAvaDTO.ambienteVirtualAprendizaje.eventoCapacitacion.fichaDescriptivaPrograma.programaAntecedente.conocimietosPrevios}"></h:outputText>
+			</div> -->
+			<div class="col-md-6">
+				<p:outputLabel id="pCursosReferencia"
+					value="#{sistema.obtenerTexto('gw.ga.label.cursoscon')}:"
+					styleClass="bloque" />
+				<h:outputText id="hCursosReferencia"
+					value="#{fichaObjetoAprendizajeBean.unidadOaAvaDTO.ambienteVirtualAprendizaje.eventoCapacitacion.fichaDescriptivaPrograma.programaAntecedente.nombreTentativo}"></h:outputText>
+			</div>
+		</div>
+		<br />
+		<div class="row">
+			<div class="col-md-6">
+				<p:outputLabel id="asignaturas"
+					value="#{sistema.obtenerTexto('gw.ga.label.asigcursos')}:"
+					styleClass="bloque" />
+				<h:outputText id="txtAsignaturas"
+					value="#{fichaObjetoAprendizajeBean.unidadOaAvaDTO.ambienteVirtualAprendizaje.eventoCapacitacion.fichaDescriptivaPrograma.programaAntecedente.nombreTentativo}"></h:outputText>
+			</div>
+			<div class="col-md-6">
+				<p:outputLabel id="modalidad"
+					value="#{sistema.obtenerTexto('gw.ga.label.modalidad')}:"
+					styleClass="bloque" />
+				<h:outputText id="txtModalidad"
+					value="#{fichaObjetoAprendizajeBean.unidadOaAvaDTO.ambienteVirtualAprendizaje.eventoCapacitacion.fichaDescriptivaPrograma.catModalidad.nombre}"></h:outputText>
+			</div>
+		</div>
+		<br />
+		<div class="row">
+			<div class="col-md-6">
+				<p:outputLabel id="responsablesMateria"
+					value="#{sistema.obtenerTexto('gw.ga.label.respmat')}:"
+					styleClass="bloque" />
+				<h:outputText id="txtResponsablesMateria"
+					value="#{fichaObjetoAprendizajeBean.unidadOaAvaDTO.ambienteVirtualAprendizaje.eventoCapacitacion.responsableCoordinadorAcademico.personaResponsabilidad.tblPersona.nombreCompleto}"></h:outputText>
+			</div>
+			<div class="col-md-6">
+				<p:outputLabel id="nivelEducativo"
+					value="#{sistema.obtenerTexto('gw.ga.label.nvleduc')}:"
+					styleClass="bloque" />
+				<h:outputText id="txtNivelEducativo"
+					value="#{fichaObjetoAprendizajeBean.unidadOaAvaDTO.ambienteVirtualAprendizaje.eventoCapacitacion.fichaDescriptivaPrograma.catNivelConocimiento.nombre}"></h:outputText>
+			</div>
+		</div>
+		<br />
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="objetivoGeneral"
+						value="#{sistema.obtenerTexto('gw.ga.label.objgen')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="txtObjetivoGeneral" styleClass="form-control"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.objetivoGeneral}"
+						maxlength="2000">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+					<p:message for="txtObjetivoGeneral" />
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="proposito"
+						value="#{sistema.obtenerTexto('gw.ga.label.prop')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="txtProposito" styleClass="form-control"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.proposito}"
+						maxlength="500"
+						placeholder="Es la descripción de lo que los alumnos serán capaces de realizar a partir del OA. Deberán de relacionarse con los conocimientos, habilidades, actitudes y valores a ser aprendidos.">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+					<p:message for="txtProposito" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="requisitos"
+						value="#{sistema.obtenerTexto('gw.ga.label.requisitos')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="txtRequisitos" styleClass="form-control"
+						maxlength="500"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.requisitosConocimientosPrevios}">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+					<p:message for="txtRequisitos" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="descContenido"
+						value="#{sistema.obtenerTexto('gw.ga.label.desccont')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="txtDescripcionContenido"
+						styleClass="form-control" maxlength="2000"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.descripcionContenido}"
+						placeholder="Se presenta un resumen del contenido del OA, es decir, se brinda un panorama general de la temática a tratar.">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+					<p:message for="txtDescripcionContenido" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="temasRelacionados"
+						value="#{sistema.obtenerTexto('gw.ga.label.temasrel')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="txtTemasRelacionados"
+						styleClass="form-control" maxlength="500"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.temasRelacionados}"
+						placeholder="Se enuncian los temas que se encuentran estrechamente relacionados con el OA, y que pueden servir de referencia para la comprensión y ubicación del tema tratado.">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+					<p:message for="txtTemasRelacionados" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="elementosMultimedia"
+						value="#{sistema.obtenerTexto('gw.ga.label.multimedia')}:" />
+					<p:selectManyCheckbox id="cbElementosMultimedia"
+						value="#{fichaObjetoAprendizajeBean.listaElementosMultimediaSeleccionados}"
+						layout="responsive" columns="4" converter="entityConverter"
+						placeholder="Se describirá de manera general el diseño gráfico y elementos multimedia del curso.">
+						<p:ajax process="@this" />
+						<f:selectItems
+							value="#{fichaObjetoAprendizajeBean.listaElementosMultimedia}"
+							var="elementoMultimedia" itemValue="#{elementoMultimedia}"
+							itemLabel="#{elementoMultimedia.nombre}" />
+					</p:selectManyCheckbox>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="tratamientoEditorial"
+						value="#{sistema.obtenerTexto('gw.ga.label.tratedit')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="txtTratamientoEditorial"
+						styleClass="form-control" maxlength="2000"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.tratamientoEditorial}"
+						placeholder="Se describirá de manera general los lineamientos de edición para el correcto lenguaje gramatical del curso.">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+					<p:message for="txtTratamientoEditorial" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="palabrasClave"
+						value="#{sistema.obtenerTexto('gw.ga.label.palcla')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="txtPalabrasClave" styleClass="form-control"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.palabrasClave}"
+						maxlength="2000"
+						placeholder="Las palabras clave describen el contenido abordado por el Objeto Educativo y permitirán el fácil acceso y búsqueda puntual de los objetos educativos. En este espacio es posible escribir de tres a diez palabras clave, separadas por una coma. Evite escribir frases u oraciones.">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+					<p:message for="txtPalabrasClave" />
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.ga.label.autores')}:"
+						styleClass="bloque" />
+					<p:repeat var="mensaje"
+						value="#{fichaObjetoAprendizajeBean.unidadOaAvaDTO.ambienteVirtualAprendizaje.eventoCapacitacion.fichaDescriptivaPrograma.relProgramaAutores}">
+						<h:outputText value="#{mensaje.autores}" />
+					</p:repeat>
+
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.ga.label.datosoblig')}"
+						styleClass="requerido" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.continuar')}"
+						action="#{fichaObjetoAprendizajeBean.guardarFichaDescriptiva}"
+						process="@this" ajax="false"
+						styleClass="btn btn-primary pull-right" />
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.guarda.borrador')}"
+						action="#{fichaObjetoAprendizajeBean.guardarBorrador}"
+						oncomplete="PF('dlg_redireccionar').show();" process="@this"
+						immediate="true" ajax="true"
+						styleClass="btn btn-default pull-right" />
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.cancelar')}" ajax="false"
+						immediate="true" styleClass="btn btn-default pull-right"
+						action="#{fichaObjetoAprendizajeBean.cancelar}" />
+				</div>
+			</div>
+		</div>
+
+	</h:form>
+</ui:composition>

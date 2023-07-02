@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.4.0.final using JasperReports Library version 6.4.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="constanciaParticipacion" pageWidth="792" pageHeight="612" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="efde5801-38d5-4a40-8372-1a6fde2bf1b4">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<style name="direccionGeneral1" fontName="Soberana Titular" fontSize="20"/>
+	<style name="nombre1" fontName="Soberana Titular" fontSize="18" isBold="true"/>
+	<parameter name="P_NOMBRE_ACREDITADO" class="java.lang.String"/>
+	<parameter name="P_CALIFICACION" class="java.lang.String"/>
+	<parameter name="P_NOMBRE_PROGRAMA" class="java.lang.String"/>
+	<parameter name="P_DIRECCION" class="java.lang.String"/>
+	<parameter name="P_FECHA_INICIO" class="java.lang.String"/>
+	<parameter name="P_DURACION_HRS" class="java.lang.String"/>
+	<parameter name="P_DIRECTOR_GRAL" class="java.lang.String"/>
+	<parameter name="P_IMAGEN" class="java.lang.String"/>
+	<parameter name="P_MODALIDAD" class="java.lang.String"/>
+	<parameter name="P_PARRAFO1" class="java.lang.String"/>
+	<parameter name="P_PARRAFO2" class="java.lang.String"/>
+	<parameter name="P_PARRAFO3" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band height="570">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
+			<image scaleImage="FillFrame" hAlign="Center" vAlign="Middle">
+				<reportElement mode="Transparent" x="0" y="0" width="752" height="570" uuid="fba7a82c-7a74-4cca-a811-d455e64d42bc"/>
+				<imageExpression><![CDATA[$P{P_IMAGEN}]]></imageExpression>
+			</image>
+		</band>
+	</background>
+	<title>
+		<band height="122" splitType="Stretch"/>
+	</title>
+	<columnHeader>
+		<band height="108" splitType="Stretch">
+			<staticText>
+				<reportElement key="" style="direccionGeneral1" positionType="Float" x="20" y="10" width="720" height="98" forecolor="#767676" uuid="bc1be8c9-9f42-4fc3-8664-b8c6b2744270"/>
+				<textElement textAlignment="Center">
+					<font size="24"/>
+				</textElement>
+				<text><![CDATA[LA DIRECCIÓN GENERAL DE GEOESTADÍSTICA
+Y PADRONES DE BENEFICIARIOS OTORGA
+LA PRESENTE CONSTANCIA A:]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<columnFooter>
+		<band height="196" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="87" width="747" height="26" forecolor="#333333" uuid="bf4f52dd-432b-42f5-a5ae-170b7a63c807"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Liberation Sans" size="20" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_NOMBRE_PROGRAMA}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="0" y="62" width="752" height="31" forecolor="#767676" uuid="2ff9bcd5-b8eb-4aa0-be65-21ab580fe777"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Liberation Sans" size="18"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_PARRAFO1}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="2" y="109" width="752" height="35" forecolor="#767676" uuid="de2a5768-0bd3-43b7-8a1f-44230805d6e7"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="Liberation Sans" size="18"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_PARRAFO2}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement key="" style="nombre1" positionType="Float" x="80" y="10" width="600" height="39" forecolor="#000000" uuid="f5b80725-cac2-43c3-9f77-0a8de458b682"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_NOMBRE_ACREDITADO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="132" splitType="Stretch">
+			<staticText>
+				<reportElement positionType="Float" x="110" y="34" width="549" height="36" forecolor="#767676" uuid="6f744b11-00b7-455a-a598-dcdc8af6f8ce"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Liberation Sans" size="14"/>
+				</textElement>
+				<text><![CDATA[Director General de Geoestadística y Padrones
+de Beneficiarios]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="179" y="5" width="400" height="23" forecolor="#333333" uuid="53e10425-1dd5-4bbd-a448-91fd05303327"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Liberation Sans" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_DIRECTOR_GRAL}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="61" y="72" width="640" height="43" forecolor="#707070" uuid="3e00227c-bf60-4a51-95c8-4fc9ca05a55c">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Liberation Sans" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_PARRAFO3}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

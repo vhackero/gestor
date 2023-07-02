@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.menu.titulo.recursos')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.menu.titulo.recursos')}</h1>
+		<hr />
+		<h:form id="frmRecursos" enctype="multipart/form-data">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.configuracionAreas.pnlHeader.administrarRecursos')}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6">
+							<p:outputLabel value="Tipo de recurso:" styleClass="bloque" />
+							<p:selectOneMenu id="selTip" value="#{recursosBean.tipoRecurso}"
+								required="true"
+								valueChangeListener="#{recursosBean.actualizaTipoRecursos}"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+								converter="entityConverter" styleClass="col-xs-12">
+								<p:ajax process="@this" update="tblRecursos1 nombreRecurso" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+								<f:selectItems value="#{recursosBean.tiposRecursos}" var="tr"
+									itemLabel="#{tr.nombre}" itemValue="#{tr}" />
+							</p:selectOneMenu>
+							<p:message for="selTip" />
+						</div>
+						<div class="col-md-6">
+							<p:outputLabel for="nombreRecurso" styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.logisticainfraestructura.etiqueta.nuevorecurso')}:" />
+							<!-- Longitud de campo -->
+							<p:inputText id="nombreRecurso" styleClass="form-control"
+								required="true" maxlength="100"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+								placeholder="#{sistema.obtenerTexto('gw.logisticainfraestructura.etiqueta.nuevorecurso')}"
+								value="#{recursosBean.recursoNuevo.nombre}">
+							</p:inputText>
+							<p:message for="nombreRecurso" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton id="btnAgregar"
+							styleClass="btn btn-primary quitaMargen" ajax="true"
+							update="@form"
+							value="#{sistema.obtenerTexto('gw.logisticainfraestructura.button.agregar')}"
+							action="#{recursosBean.agregarRecurso}" />
+					</div>
+				</div>
+				<p:dataTable value="#{recursosBean.tblRecursos}" var="recurso"
+					id="tblRecursos1"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					paginator="true" rows="10" paginatorPosition="bottom" reflow="true"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.nombreimagen')}">
+						<h:outputText value="#{recurso.nombre}" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.acciones')}"
+						styleClass="text-center">
+						<p:commandButton id="elimina"
+							oncomplete="PF('wModalEliminar').show();"
+							styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
+							ajax="true" process="@this">
+							<f:setPropertyActionListener value="#{recurso}"
+								target="#{recursosBean.recursoElim}" />
+						</p:commandButton>
+						<p:tooltip for="elimina" position="top" value="Eliminar" />
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+			<p:dialog id="modalEliminar" widgetVar="wModalEliminar" modal="true"
+				header="Eliminar recurso" dynamic="true" closable="false"
+				draggable="false" resizable="false" position="center"
+				styleClass="medidaModal">
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel value="¿Está seguro que desea eliminar el recurso?" />
+					</div>
+				</div>
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:commandButton value="Cancelar"
+								onclick="PF('wModalEliminar').hide()"
+								styleClass="btn btn-default" />
+							<p:commandButton update="tblRecursos1" process="@this"
+								value="Aceptar" action="#{recursosBean.eliminarRecurso}"
+								styleClass="btn btn-primary"
+								oncomplete="PF('wModalEliminar').hide();" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

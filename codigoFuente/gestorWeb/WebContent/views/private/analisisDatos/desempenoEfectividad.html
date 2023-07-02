@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>Ponme un título</li>
+		<li class="active">Ponme un subtítulo plz :)</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form>
+
+			<f:validateBean disabled="true">
+				<p:panel header="Búsqueda de datos de las encuestas">
+
+					<div class="form-group">
+
+						<div class="row">
+
+							<div class="col-md-4">
+							
+							<p:outputLabel value="Tipo de competencia"
+									for="selTipoComp" styleClass="bloque" />
+								<p:selectOneMenu id="selTipoComp" styleClass="col-xs-12">
+									<f:selectItem noSelectionOption="true" itemLabel="Seleccionar" />
+									<f:selectItems value="#{reporteUsuariosBean.tiposUsuario()}"
+										var="tipoU" itemLabel="#{tipoU.descripcion}"
+										itemValue="#{tipoU.valor}" />
+								</p:selectOneMenu>
+							
+							</div>
+						</div>
+					</div>
+		</h:form>
+	</ui:define>
+</ui:composition>

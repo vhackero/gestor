@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<h:form id="formReserv">
+
+		<!-- Info evento seleccionado -->
+		<h:panelGroup width="100%" id="selEventoCapacit">
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.ge.texto.nombreevento')}:"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{capturaEventoCapacitacion.datos.evento.nombreEc}" />
+					</div>
+
+					<div class="col-md-3">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.ge.texto.evtprivado')}:"
+							styleClass="bloque requerido" />
+						<p:selectOneRadio required="true" id="radios"
+							requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+							value="#{capturaEventoCapacitacion.solRes.privado}">
+							<f:selectItem
+								itemLabel="#{sistema.obtenerTexto('gw.ge.texto.si')}"
+								itemValue="1" />
+							<f:selectItem
+								itemLabel="#{sistema.obtenerTexto('gw.ge.texto.no')}"
+								itemValue="0" />
+							<p:ajax process="@this" />
+						</p:selectOneRadio>
+						<p:message for="radios" />
+					</div>
+					<div class="col-md-3">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.ge.texto.fecha.reservacion')}:"
+							styleClass="bloque requerido" />
+						<p:calendar id="fechaInicio" styleClass="calendario"
+							disabled="#{empty capturaEventoCapacitacion.datos.evento.fechaFinal}"
+							yearRange="c-100:c+100" required="true"
+							requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+							mindate="#{capturaEventoCapacitacion.datos.evento.fechaInicial}"
+							maxdate="#{capturaEventoCapacitacion.datos.evento.fechaFinal}"
+							value="#{capturaEventoCapacitacion.fechaReservacion}"
+							pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+							showOn="button" readonlyInput="true" locale="es" navigator="true"
+							placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}">
+							<p:ajax event="change" process="@this" />
+							<p:ajax event="dateSelect" process="@this" />
+						</p:calendar>
+						<p:message for="fechaInicio" />
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.ge.texto.solicitado')}:"
+							styleClass="bloque requerido" />
+						<!-- Longitud de campo -->
+						<p:inputText styleClass="form-control" id="solicitante"
+							maxlength="150"
+							value="#{capturaEventoCapacitacion.solRes.solicitante}">
+							<p:ajax process="@this" />
+						</p:inputText>
+						<p:message for="solicitante" />
+					</div>
+
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.ge.texto.correo')}:"
+							styleClass="bloque requerido" />
+						<!-- Longitud de campo -->
+						<p:inputText type="email" styleClass="form-control"
+							id="emailSolicitante" maxlength="200"
+							value="#{capturaEventoCapacitacion.solRes.emailSolicitante}">
+							<p:ajax process="@this" />
+						</p:inputText>
+						<p:message for="emailSolicitante" />
+					</div>
+
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+					</div>
+					<div class="col-md-6 text-right">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.ge.texto.sala')}" id="btnSalaA"
+							styleClass="quitaMargen btn btn-default btnAncho"
+							action="#{capturaEventoCapacitacion.agregarRegistroReservacion()}"
+							ajax="true" update="pnlSolReserv" process="@this" />
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group contenedorDialog">
+				<div class="theadTemasObjetos">
+
+					<div class="anchoColumna">
+						<p:outputLabel styleClass="requerido"
+							value="#{sistema.obtenerTexto('gw.ge.texto.ubsede')}" />
+					</div>
+					<div class="anchoColumna">
+						<p:outputLabel styleClass="requerido"
+							value="#{sistema.obtenerTexto('gw.ge.texto.area')}" />
+					</div>
+					<div class="anchoColumna">
+						<p:outputLabel styleClass="requerido"
+							value="#{sistema.obtenerTexto('gw.ge.texto.conf')}" />
+					</div>
+					<div class="anchoColumna">
+						<p:outputLabel styleClass="requerido"
+							value="#{sistema.obtenerTexto('gw.ge.texto.hrainicial')}" />
+					</div>
+					<div class="anchoColumna">
+						<p:outputLabel styleClass="requerido"
+							value="#{sistema.obtenerTexto('gw.ge.texto.hrafinal')}" />
+					</div>
+				</div>
+				<h:panelGroup styleClass="tbodyTemasObjetos" id="pnlSolReserv">
+					<ui:repeat value="#{capturaEventoCapacitacion.listaReservaciones}"
+						var="solicitud">
+
+						<div class="anchoColumna">
+							<p:selectOneMenu value="#{solicitud.idSede}" autoWidth="true"
+								styleClass="col-xs-12">
+								<p:ajax
+									listener="#{capturaEventoCapacitacion.actualizaCatAreas(solicitud)}"
+									process="@this" update="somAreasSede" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+								<f:selectItems value="#{capturaEventoCapacitacion.sedes}"
+									var="ubiSede"
+									itemLabel="#{ubiSede.catUbicacionTerritorial.nombre} - #{ubiSede.nombre}"
+									itemValue="#{ubiSede.idSede}" />
+							</p:selectOneMenu>
+						</div>
+
+						<div class="anchoColumna">
+							<p:selectOneMenu id="somAreasSede" value="#{solicitud.idArea}"
+								autoWidth="true" styleClass="col-xs-12">
+								<p:ajax process="@this" update="somHoraInicial"
+									listener="#{reservacionAreaBean.generaHorasLibres(solicitud)}" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									noSelectionOption="true" />
+								<f:selectItems value="#{solicitud.catAreas}" var="area"
+									itemLabel="#{area.nombre}" itemValue="#{area.id}" />
+							</p:selectOneMenu>
+						</div>
+						<div class="anchoColumna">
+							<p:commandButton
+								action="#{capturaEventoCapacitacion.navegaPersonalizacionArea}"
+								value="Personalizar" process="@this" ajax="true"
+								oncomplete="PF('dlgPersonalizacion').show()"
+								update="tabEventoCapacitacion:frmPA"
+								styleClass="quitaMargen btn btn-primary">
+								<f:setPropertyActionListener value="#{solicitud}"
+									target="#{capturaEventoCapacitacion.solicitudSeleccionada}" />
+							</p:commandButton>
+						</div>
+
+						<div class="anchoColumna">
+							<p:selectOneMenu styleClass="col-xs-12" id="somHoraInicial"
+								value="#{solicitud.horaInicial}"
+								valueChangeListener="#{solicitud.voidSetHorasB}">
+								<p:ajax process="@this" update="somHoraFinal" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									noSelectionOption="true" />
+								<f:selectItems value="#{solicitud.horasA}" var="c"
+									itemValue="#{c}" itemLabel="#{c}" />
+							</p:selectOneMenu>
+
+						</div>
+						<div class="anchoColumna">
+							<p:selectOneMenu id="somHoraFinal" value="#{solicitud.horaFinal}"
+								styleClass="col-xs-12">
+								<p:ajax process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									noSelectionOption="true" />
+								<f:selectItems value="#{solicitud.horasB}" var="c"
+									itemValue="#{c}" itemLabel="#{c}" />
+							</p:selectOneMenu>
+						</div>
+
+
+					</ui:repeat>
+				</h:panelGroup>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+
+					<p:commandButton id="addButton" ajax="true" update="@form"
+						action="#{capturaEventoCapacitacion.validarReservacion()}"
+						styleClass="btn btn-primary pull-right"
+						value="#{sistema.obtenerTexto('gw.ge.btn.validar')}" />
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ge.btn.cancelar')}"
+						onclick="PF('dialogReservacion').hide();"
+						styleClass="btn btn-default pull-right" />
+				</div>
+			</div>
+		</h:panelGroup>
+
+	</h:form>
+</ui:composition>

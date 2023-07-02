@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<f:validateBean disabled="true">
+
+
+		<div class="form-group">
+
+			<div class="row">
+				<div class="col-md-4 col-xs-12">
+
+					<p:outputLabel for="somTipoUsuario"
+						value="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.tipousuario')}:" />
+					<p:selectOneMenu id="somTipoUsuario"
+						value="#{adminPersonaBean.personaFiltros.tipoUsuario}"
+						styleClass="col-xs-12" onchange="correccionSelectores()">
+
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{adminPersonaBean.tiposUsuarios}"
+							var="tipo" itemValue="#{tipo.getValor()}"
+							itemLabel="#{tipo.getDescripcion()}" />
+					</p:selectOneMenu>
+
+				</div>
+				<div class="col-md-4 col-xs-12">
+
+					<p:outputLabel for="txtCurp"
+						value="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.curp')}:" />
+					<p:inputText id="txtCurp"
+						placeholder="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.curp')}"
+						value="#{adminPersonaBean.personaFiltros.curp}"
+						styleClass="form-control" />
+
+				</div>
+				<div class="col-md-4 col-xs-12">
+
+					<p:outputLabel for="txtUsuario"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.usuario')}:" />
+					<p:inputText id="txtUsuario"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.usuario')}"
+						value="#{adminPersonaBean.personaFiltros.usuario}"
+						styleClass="form-control" />
+
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel for="nombre"
+						value="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.nombre')}:" />
+					<p:inputText id="nombre"
+						label="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.nombre')}:"
+						placeholder="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.nombre')}"
+						value="#{adminPersonaBean.personaFiltros.nombre}"
+						styleClass="form-control" />
+				</div>
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel for="apPaterno"
+						value="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.apPaterno')}:" />
+					<p:inputText id="apPaterno"
+						label="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.apPaterno')}:"
+						placeholder="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.apPaterno')}"
+						value="#{adminPersonaBean.personaFiltros.apellidoPaterno}"
+						styleClass="form-control" />
+				</div>
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel for="apMaterno"
+						value="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.apMaterno')}:" />
+					<p:inputText id="apMaterno"
+						label="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.apMaterno')}:"
+						placeholder="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.apMaterno')}"
+						value="#{adminPersonaBean.personaFiltros.apellidoMaterno}"
+						styleClass="form-control" />
+				</div>
+			</div>
+		</div>
+
+	</f:validateBean>
+</ui:composition>
+

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<h:form>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-6">
+					<p:outputLabel for="selecPlataformaMoodle" styleClass="requerido"
+						value="#{sistema.obtenerTexto('gw.gestionescolar.label.plataformamoodle')}" />
+					<p:selectOneMenu id="selecPlataformaMoodle"
+						value="#{capturaEventoCapacitacion.datos.evento.idPlataformaLmsBorrador}"
+						styleClass="col-xs-12" onchange="correccionSelectores()"
+						valueChangeListener="#{capturaEventoCapacitacion.onChangePlataforma}">
+						<p:ajax process="@this" event="valueChange"
+							update="sorClasificacionAVA" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.seleccione')}" />
+						<f:selectItems
+							value="#{capturaEventoCapacitacion.listaPlataformasMoodle}"
+							var="plataforma" itemLabel="#{plataforma.descripcion}"
+							itemValue="#{plataforma.idParametroWSMoodle}" />
+					</p:selectOneMenu>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel for="sorClasificacionAVA" styleClass="requerido"
+						value="#{sistema.obtenerTexto('gw.gestionescolar.label.selecava')}" />
+					<p:selectOneRadio id="sorClasificacionAVA"
+						disabled="#{capturaEventoCapacitacion.datos.evento.idPlataformaLmsBorrador == null}"
+						value="#{capturaEventoCapacitacion.datos.evento.idClasificacionAva}">
+						<p:ajax process="@this" event="valueChange"
+							update="pPrincipalAVA" />
+						<f:selectItems
+							value="#{capturaEventoCapacitacion.listaClasificacionesAVA}"
+							var="ava" itemLabel="#{ava.nombre}" itemValue="#{ava.id}" />
+					</p:selectOneRadio>
+				</div>
+			</div>
+		</div>
+
+		<p:outputPanel id="pPrincipalAVA">
+			<p:outputPanel id="p_AVA_EC_anterior"
+				rendered="#{capturaEventoCapacitacion.datos.evento.idClasificacionAva eq 1}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel for="somEventosAnteriores"
+								value="#{sistema.obtenerTexto('gw.gestionescolar.label.clnoeventocap')}" />
+							<br />
+							<p:selectOneMenu id="somEventosAnteriores"
+								value="#{capturaEventoCapacitacion.datos.evento.idEventoCapacitacionAnterior}"
+								styleClass="col-xs-12" onchange="correccionSelectores()">
+								<p:ajax process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.seleccione')}" />
+								<f:selectItems
+									value="#{capturaEventoCapacitacion.eventosAnteriores}"
+									var="elemento" itemLabel="#{elemento.nombreEc}"
+									itemValue="#{elemento.id}" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+				</div>
+			</p:outputPanel>
+
+			<p:outputPanel id="p_AVA_curso_moodle"
+				rendered="#{capturaEventoCapacitacion.datos.evento.idClasificacionAva eq 2 }">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel for="somCursoMoodle"
+								value="#{sistema.obtenerTexto('gw.gestionescolar.label.cursoMoodle')}" />
+							<br />
+							<p:selectOneMenu id="somCursoMoodle" styleClass="col-xs-12"
+								onchange="correccionSelectores()">
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.seleccione')}" />
+								<f:selectItems value="#{capturaEventoCapacitacion.cursosMoodle}"
+									var="elemento" itemLabel="#{elemento.shortname}" itemValue="#{elemento.id}" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+				</div>
+			</p:outputPanel>
+
+			<p:outputPanel id="p_AVA_nuevo"
+				rendered="#{capturaEventoCapacitacion.datos.evento.idClasificacionAva eq 3}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<div>
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.gestionescolar.label.nuevoAVA')}" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</p:outputPanel>
+		</p:outputPanel>
+	</h:form>
+</ui:composition>

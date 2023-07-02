@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.modulos')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.modulos')}</h1>
+		<hr />
+		<h:form id="frmTree">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<sec:authorize access="hasPermission(null, 'FUN_AGR' )">
+							<p:commandButton id="agregar" rendered="false"
+								value="#{sistema.obtenerTexto('gw.funcionalidades.boton.principal.agregar')}"
+								action="#{funcionalidadBean.nuevaFuncionalidad()}"
+								process="@this" ajax="true" update="frmTree:contenido"
+								oncomplete="PF('amodal').show()"
+								styleClass="btn btn-primary pull-right" />
+						</sec:authorize>
+					</div>
+				</div>
+			</div>
+
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.funcionalidades.titulo')}">
+				<p:treeTable id="treeFuncionalidades"
+					value="#{funcionalidadBean.root}" var="funcion"
+					tableStyleClass="table">
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.funcionalidades.columna.descripcion')}">
+						<h:outputText value="#{funcion.descripcion}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.funcionalidades.columna.clave')}">
+						<h:outputText value="#{funcion.clave}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.funcionalidades.columna.activo')}">
+						<h:outputText value="#{funcion.activo?'SI':'NO'}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.funcionalidades.columna.acciones')}"
+						styleClass="text-center">
+						<sec:authorize access="hasPermission(null, 'FUN_AGR' ) ">
+							<p:commandButton id="agregar"
+								action="#{funcionalidadBean.nuevaFuncionalidad()}"
+								process="@this" ajax="true" update="frmTree:contenido"
+								oncomplete="PF('amodal').show();"
+								styleClass="btn-icon btn btn-default icono_sisi ss_adm_agrecata">
+								<f:setPropertyActionListener value="#{funcion}"
+									target="#{funcionalidadBean.funcionalidadPadre}" />
+							</p:commandButton>
+							<p:tooltip id="toolTipFade" for="agregar"
+								value="#{sistema.obtenerTexto('gw.funcionalidades.boton.agregar')}"
+								position="top" />
+						</sec:authorize>
+						<sec:authorize access="hasPermission(null, 'FUN_EDI' ) ">
+							<p:commandButton id="editar"
+								action="#{funcionalidadBean.cargaFuncionalidad()}"
+								process="@this" ajax="true" update="frmTree:contenido"
+								oncomplete="PF('amodal').show();"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+								<f:setPropertyActionListener value="#{funcion}"
+									target="#{funcionalidadBean.funcionalidadModificar}" />
+							</p:commandButton>
+							<p:tooltip id="toolTipFade1" for="editar"
+								value="#{sistema.obtenerTexto('gw.funcionalidades.boton.editar')}"
+								position="top" />
+						</sec:authorize>
+
+						<sec:authorize access="hasPermission(null, 'FUN_TEX' ) ">
+							<p:commandButton id="text"
+								action="#{funcionalidadBean.cargarTextosSistema()}"
+								process="@this" ajax="false" immediate="true"
+								styleClass="btn-icon btn btn-default icono_sisi ss_adm_editex">
+								<f:setPropertyActionListener value="#{funcion}"
+									target="#{funcionalidadBean.funcionalidadModificar}" />
+							</p:commandButton>
+							<p:tooltip id="toolTipFade2" for="text"
+								value="#{sistema.obtenerTexto('gw.funcionalidades.boton.textos')}"
+								position="top" />
+						</sec:authorize>
+					</p:column>
+				</p:treeTable>
+
+			</p:panel>
+			<p:dialog id="amodal" widgetVar="amodal"
+				header="#{sistema.obtenerTexto('gw.funcionalidades.modal.titulo')}"
+				modal="true" resizable="false" draggable="false" closable="false"
+				position="center" styleClass="modalPseudoClass medidaModal"
+				closeOnEscape="false">
+
+				<p:outputPanel id="contenido">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12 text-center">
+								<h:outputLabel id="outRuta" value="#{funcionalidadBean.ruta}" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="descripcion" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.funcionalidades.modal.etiqueta.descripcion')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="descripcion" maxlength="250"
+									placeholder="#{sistema.obtenerTexto('gw.funcionalidades.modal.etiqueta.descripcion')}"
+									value="#{funcionalidadBean.funcionalidad.descripcion}"
+									styleClass="form-control" />
+								<p:message for="descripcion" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel for="clave" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.funcionalidades.modal.etiqueta.clave')}" />
+								<!-- Longitud de campo -->
+								<p:inputText id="clave" maxlength="100"
+									placeholder="#{sistema.obtenerTexto('gw.funcionalidades.modal.etiqueta.clave')}"
+									value="#{funcionalidadBean.funcionalidad.clave}"
+									styleClass="form-control">
+									<p:keyFilter regEx="/[A-Z_]/" preventPaste="false" />
+								</p:inputText>
+								<p:message for="clave" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="chk"
+									value="#{sistema.obtenerTexto('gw.funcionalidades.modal.etiqueta.activo')}:"
+									rendered="#{funcionalidadBean.funcionalidad.idFuncionalidad != null}" />
+								<p:selectBooleanCheckbox id="chk"
+									value="#{funcionalidadBean.funcionalidad.activo}"
+									rendered="#{funcionalidadBean.funcionalidad.idFuncionalidad != null}"
+									styleClass="paddingChk" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+								<p:outputLabel
+									value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+							</div>
+						</div>
+					</div>
+				</p:outputPanel>
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.funcionalidades.modal.boton.guardar')}"
+								action="#{funcionalidadBean.guardarFuncionalidad()}" ajax="true"
+								update="frmTree:treeFuncionalidades contenido"
+								styleClass="btn btn-primary pull-right" />
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.funcionalidades.modal.boton.cancelar')}"
+								onclick="PF('amodal').hide();"
+								styleClass="btn btn-default pull-right" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

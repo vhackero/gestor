@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="breadcrumb">
+		<li class="active">Expediente académico</li>
+	</ui:define>
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#{constanciasBean.init}" />
+		<h:form>
+			<h1>Expediente académico</h1>
+			<hr />
+
+			<p:panel header="Expediente académico del alumno">
+				<div class="row">
+					<div class="col-md-12">
+						<p:dataTable var="evento" value="#{constanciasBean.eventos}"
+							widgetVar="tblConstancias" paginator="true" rows="10"
+							paginatorPosition="bottom"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15" tableStyleClass="table"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							reflow="true">
+							<f:facet name="header">
+								<p:outputPanel styleClass="text-right">
+									<p:outputLabel for="globalFilter"
+										value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}" />
+									<p:inputText id="globalFilter"
+										onkeyup="PF('tblConstancias').filter()"
+										placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+								</p:outputPanel>
+							</f:facet>
+							<p:column headerText="Nombre del curso"
+								sortBy="#{evento.nombreEc}" filterMatchMode="contains"
+								filterBy="#{evento.nombreEc}" filterStyle="display:none">
+								<h:outputText value="#{evento.nombreEc}" />
+							</p:column>
+							<p:column headerText="Modalidad" sortBy="#{evento.modalidad}"
+								filterMatchMode="contains" filterBy="#{evento.modalidad}"
+								filterStyle="display:none">
+								<h:outputText value="#{evento.modalidad}" />
+							</p:column>
+							<p:column headerText="Fecha de finalización"
+								sortBy="#{evento.fecha}" filterMatchMode="contains"
+								filterBy="#{evento.fecha}" filterStyle="display:none">
+								<h:outputText value="#{evento.fecha}">
+									<f:convertDateTime type="date"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+								</h:outputText>
+							</p:column>
+							<p:column headerText="Encuesta final"
+								sortBy="#{evento.nombreEstatusEncuesta}"
+								filterMatchMode="contains"
+								filterBy="#{evento.nombreEstatusEncuesta}"
+								filterStyle="display:none">
+								<h:outputText id="enc" value="#{evento.nombreEstatusEncuesta}"
+									styleClass="#{evento.nombreEstatusEncuesta eq 'Pendiente' ? 'colorRojo' : ''}" />
+								<p:tooltip for="enc"
+									rendered="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
+									value="Para poder visualizar su constancia debe contestar la encuesta." />
+							</p:column>
+							<p:column headerText="Promedio de evaluaciones"
+								sortBy="#{evento.nombreEstatusEncuesta}"
+								filterMatchMode="contains"
+								filterBy="#{evento.calificacionTotal}"
+								filterStyle="display:none">
+								<h:outputText value="#{evento.calificacionTotal}" />
+							</p:column>
+							<p:column headerText="Porcentaje de asistencias"
+								sortBy="#{evento.porcentajeAsistencia}"
+								filterMatchMode="contains"
+								filterBy="#{evento.porcentajeAsistencia}"
+								filterStyle="display:none">
+								<h:outputText value="#{evento.porcentajeAsistencia}" />
+							</p:column>
+							<p:column headerText="Calificación final"
+								sortBy="#{evento.calificacionFinal}" filterMatchMode="contains"
+								filterBy="#{evento.calificacionFinal}"
+								filterStyle="display:none">
+								<h:outputText value="#{evento.calificacionFinal}" />
+							</p:column>
+							<p:column headerText="Constancias" styleClass="text-center">
+								<p:commandButton action="#{constanciasBean.generarConstancia}"
+									ajax="true" id="btn1"
+									disabled="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
+									rendered="#{evento.tipoConstancia eq 1}"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+									<f:setPropertyActionListener value="#{evento}"
+										target="#{constanciasBean.eventoSeleccionado}" />
+								</p:commandButton>
+								<p:tooltip for="btn1" position="top" value="Ver" />
+								<p:commandButton id="btn2"
+									action="#{constanciasBean.generarConstancia}" ajax="true"
+									disabled="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
+									rendered="#{evento.tipoConstancia eq 2}"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+									<f:setPropertyActionListener value="#{evento}"
+										target="#{constanciasBean.eventoSeleccionado}" />
+								</p:commandButton>
+								<p:tooltip for="btn2" value="Ver" position="top" />
+							</p:column>
+						</p:dataTable>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12 flex-derecha">
+							<p:outputLabel value="Expediente académico:"
+								styleClass="margenDerecho" />
+							<p:commandButton value="Generar"
+								disabled="#{empty constanciasBean.eventos}"
+								styleClass="btn btn-primary" style="width:170px"
+								action="#{constanciasBean.generarReporte}"
+								oncomplete="PF('modalReporte').show()" />
+						</div>
+					</div>
+				</div>
+			</p:panel>
+
+
+		</h:form>
+
+		<p:dialog id="constancia" dynamic="true" responsive="true"
+			modal="true" closable="false" resizable="false" position="center"
+			styleClass="modalAbsoluto" header="Constancia" width="900"
+			widgetVar="modalConstancia">
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:media player="pdf" value="#{constanciasBean.constanciaPDF}"
+							width="865" height="400" styleClass="agregaBorde" />
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton value="Cerrar"
+						styleClass="btn btn-default pull-right"
+						onclick="PF('modalConstancia').hide();" />
+				</div>
+			</div>
+		</p:dialog>
+
+		<p:dialog id="reporte" dynamic="true" responsive="true" modal="true"
+			closable="false" resizable="false" position="center"
+			styleClass="modalAbsoluto" header="Expediente académico" width="900"
+			widgetVar="modalReporte">
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:media player="pdf" value="#{constanciasBean.reportePDF}"
+							width="865" height="400" styleClass="agregaBorde" />
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton value="Cerrar"
+						styleClass="btn btn-default pull-right"
+						onclick="PF('modalReporte').hide();" />
+				</div>
+			</div>
+		</p:dialog>
+
+	</ui:define>
+</ui:composition>

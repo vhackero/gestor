@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:components="http://java.sun.com/jsf/composite/components">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.administracion.catalogos.cga')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.administracion.catalogos.cga')}</h1>
+		<hr />
+		<h:form id="formf">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+
+			<div class="row">
+				<div class="col-md-4">
+					<p:accordionPanel multiple="true" activeIndex="null" id="acordion"
+						styleClass="acordeoncatalogo">
+						<c:forEach
+							items="#{catGestionAprendizajeBean.catalogosGestionAprendizaje}"
+							var="cat">
+							<p:tab id="tab#{cat.id}" title="#{cat.nombre}">
+								<p:commandLink
+									value="#{sistema.obtenerTexto('gw.catalogos.texto.registrar')}"
+									process="@this" id="link#{cat.id}" styleClass="bloque"
+									action="#{catGestionAprendizajeBean.generaComponenteReg(cat)}"
+									update="formf" rendered="#{cat.visualizarReg}" />
+								
+								<p:commandLink
+									value="#{sistema.obtenerTexto('gw.catalogos.texto.visualizar')}"
+									process="@this" id="link2#{cat.id}"
+									action="#{catGestionAprendizajeBean.obtenerDatosCatSel(cat)}"
+									update="formf" />
+							</p:tab>
+						</c:forEach>
+					</p:accordionPanel>
+				</div>
+
+				<div class="col-md-8">
+					<components:regCatalogoComun
+						idCat="#{catGestionAprendizajeBean.idCat}"
+						nombreCat="#{catGestionAprendizajeBean.nombreCat}"
+						catalogoDTO="#{catGestionAprendizajeBean.catComunDTOGenerico}"
+						rendered="#{catGestionAprendizajeBean.muestraCompReg}"
+						accionBtnGuardar="#{catGestionAprendizajeBean.guardarRegCatalogo}"
+						renderCmpSelect="false" />
+					<br />
+					<components:verCatalogoComun
+						idCat="#{catGestionAprendizajeBean.idCat}"
+						nombreCat="#{catGestionAprendizajeBean.nombreCat}"
+						listaElemCat="#{catGestionAprendizajeBean.lstCatSelec}"
+						rendered="#{catGestionAprendizajeBean.muestraCompTabla}"
+						listenerCambioEstatus="#{catGestionAprendizajeBean.cambioEstatusCatSelec}"
+						accionEditRegCatalogo="#{catGestionAprendizajeBean.editaRegCatSeleccionado}"
+						catalogoDTOSel="#{catGestionAprendizajeBean.catComunDTOGenerico}"
+						renderCmpSelect="false" />
+				</div>
+			</div>
+		</h:form>
+	</ui:define>
+</ui:composition>

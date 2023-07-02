@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.0.1.final using JasperReports Library version 6.0.0  -->
+<!-- 2017-03-14T15:35:16 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GrupoParticipantes" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="968ad8f2-b720-4439-8277-07105a278a11">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="New Data Adapter "/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="P_SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA["/home/mario/JaspersoftWorkspace/MyReports/"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_FECHA01" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["01/04/2017"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_FECHA02" class="java.lang.String" isForPrompting="false">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA["02/04/2017"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_FECHA03" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["03/04/2017"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="P_FECHA04" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["03/04/2017"]]></defaultValueExpression>
+	</parameter>
+	<queryString language="xPath">
+		<![CDATA[/RelAsistencias/grupos/grupo]]>
+	</queryString>
+	<field name="descripcion_1" class="java.lang.String">
+		<fieldDescription><![CDATA[descripcion]]></fieldDescription>
+	</field>
+	<field name="idGrupo_1" class="java.lang.String">
+		<fieldDescription><![CDATA[idGrupo]]></fieldDescription>
+	</field>
+	<field name="participantes_1" class="java.lang.String">
+		<fieldDescription><![CDATA[participantes]]></fieldDescription>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="51" splitType="Stretch">
+			<textField>
+				<reportElement x="61" y="10" width="200" height="19" uuid="21686572-7542-4a58-8155-83fa4c5fcc50"/>
+				<textFieldExpression><![CDATA[$F{descripcion_1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="11" y="9" width="48" height="20" uuid="56ac406c-7e4c-44ea-a606-6ca5a02a498b"/>
+				<text><![CDATA[Grupo: ]]></text>
+			</staticText>
+			<subreport>
+				<reportElement x="11" y="30" width="533" height="20" uuid="3a638a22-7d2d-4ce9-8729-06c541c57ccf"/>
+				<subreportParameter name="XML_DATA_DOCUMENT">
+					<subreportParameterExpression><![CDATA[$P{XML_DATA_DOCUMENT}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="P_ID_GRUPO">
+					<subreportParameterExpression><![CDATA[$F{idGrupo_1}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{P_SUBREPORT_DIR} + "Participantes.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

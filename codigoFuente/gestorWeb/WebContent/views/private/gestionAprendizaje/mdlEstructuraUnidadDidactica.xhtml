@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<!-- Modal de unidad didactica --> 
+	<p:dialog id="dlgEstructuraUnidadDidactica" modal="true"
+		widgetVar="modEstructuraUnidadDidactica"
+		header="#{sistema.obtenerTexto('gw.ga.panel.estamb')}" width="900"
+		draggable="false" position="center" closable="false" resizable="false">
+		<div class="row">
+			<div class="col-md-12">
+				<p:outputPanel id="panelEstUnidadDida">
+					<!-- Row 1 -->
+					<div class="row">
+						<!-- Nombre del objeto de aprendizaje -->
+						<div class="col-md-6">
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.ga.label.nec')}:" />
+							<h:outputText value="" />
+						</div>
+						<!-- Arbol -->
+						<div class="col-md-6">
+							<!--Componente tipo arbol-->
+							<p:tree value="#{ambientesVirtualesAvaBean.root}" var="node"
+								orientation="horizontal">
+								<p:treeNode expandedIcon="ui-icon ui-icon-folder-open">
+									<h:outputText value="#{node}" />
+								</p:treeNode>
+							</p:tree>
+						</div>
+					</div>
+				</p:outputPanel>
+
+			</div>
+		</div>
+
+		<!--Row 2-5-->
+		<div class="row">
+			<div class="col-md-12 ">
+				<p:commandButton styleClass="btn btn-primary pull-right"
+					onclick="PF('modEstructuraUnidadDidactica').hide()" value="#{sistema.obtenerTexto('gw.ga.btn.aceptar')}" />
+
+				<!-- Boton cancelar -->
+				<p:commandButton styleClass="btn btn-default pull-right"
+					onclick="PF('modEstructuraUnidadDidactica').hide()"
+					value="#{sistema.obtenerTexto('gw.ga.btn.cancelar')}" />
+			</div>
+
+		</div>
+
+	</p:dialog>
+</ui:composition>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.unidades.responsables')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form id="frmUnidadesResponsables">
+			<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.unidades.responsables')}</h1>
+			<hr />
+			<div class="row">
+				<div class="col-md-12">
+					<sec:authorize access="hasPermission(null, 'UNI_RESP_AGR' ) ">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.unidades.responsables.boton.agregar')}"
+							ajax="true" action="#{unidadesResponsablesBean.nuevaUnidad()}"
+							process="@this" oncomplete="PF('dialogUnidad').show();"
+							update="frmUnidadesResponsables:contenido"
+							styleClass="btn btn-primary pull-right">
+						</p:commandButton>
+						<p:outputLabel value="Nueva unidad responsable:"
+							styleClass="pull-right agregaHeight" />
+					</sec:authorize>
+				</div>
+			</div>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.unidades.responsables.titulo')}">
+				<p:dataTable id="tblUnidades"
+					value="#{unidadesResponsablesBean.unidades}"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					tableStyleClass="table" var="unidad" widgetVar="tblUnidades"
+					paginator="true" paginatorPosition="bottom" rows="10"
+					rowsPerPageTemplate="5,10,15" reflow="true"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+
+					<f:facet name="header">
+						<p:outputPanel styleClass="text-right">
+							<p:outputLabel for="globalFilter"
+								value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}:" />
+							<p:inputText id="globalFilter"
+								onkeyup="PF('tblUnidades').filter()"
+								placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+						</p:outputPanel>
+					</f:facet>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.unidades.responsables.campo.clave')}"
+						sortBy="#{unidad.clave}" filterMatchMode="contains"
+						filterBy="#{unidad.clave}" filterStyle="display:none">
+						<h:outputText value="#{unidad.clave}" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.unidades.responsables.campo.nombre')}"
+						sortBy="#{unidad.nombre}" filterMatchMode="contains"
+						filterBy="#{unidad.nombre}" filterStyle="display:none">
+						<h:outputText value="#{unidad.nombre}" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.unidades.responsables.columna.acciones')}"
+						styleClass="text-center">
+						<sec:authorize access="hasPermission(null, 'UNI_RESP_EDI' ) ">
+							<p:commandButton id="btn-editar"
+								action="#{unidadesResponsablesBean.cargarUnidad()}" ajax="true"
+								process="@this"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod"
+								oncomplete="PF('dialogUnidad').show();"
+								update="frmUnidadesResponsables:contenido">
+								<f:setPropertyActionListener value="#{unidad}"
+									target="#{unidadesResponsablesBean.unidadModificar}" />
+							</p:commandButton>
+							<p:tooltip for="btn-editar"
+								value="#{sistema.obtenerTexto('gw.unidades.responsables.boton.editar')}"
+								position="top" />
+						</sec:authorize>
+					</p:column>
+
+				</p:dataTable>
+			</p:panel>
+
+			<p:dialog id="dialogUnidad" widgetVar="dialogUnidad"
+				draggable="false" position="center" closable="false"
+				resizable="false"
+				header="#{sistema.obtenerTexto('gw.unidades.responsables.modal.titulo')}"
+				styleClass="modalPseudoClass medidaModal" modal="true">
+
+				<p:outputPanel id="contenido">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel for="txtClave" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.unidades.responsables.campo.clave')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="txtClave" maxlength="100"
+									placeholder="#{sistema.obtenerTexto('gw.unidades.responsables.campo.clave')}"
+									value="#{unidadesResponsablesBean.unidad.clave}"
+									styleClass="form-control" />
+								<p:message for="txtClave" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel for="txtNombre" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.unidades.responsables.campo.nombre')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="txtNombre" maxlength="100"
+									placeholder="#{sistema.obtenerTexto('gw.unidades.responsables.campo.nombre')}"
+									value="#{unidadesResponsablesBean.unidad.nombre}"
+									styleClass="form-control" />
+								<p:message for="txtNombre" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+								<p:outputLabel
+									value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+							</div>
+						</div>
+					</div>
+				</p:outputPanel>
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton validateClient="true"
+								value="#{sistema.obtenerTexto('gw.unidades.responsables.modal.boton.guardar')}"
+								action="#{unidadesResponsablesBean.guardarUnidad()}" ajax="true"
+								update="contenido, tblUnidades"
+								styleClass="pull-right btn btn-primary" />
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.unidades.responsables.modal.boton.cancelar')}"
+								onclick="PF('dialogUnidad').hide();"
+								styleClass="pull-right btn btn-default" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

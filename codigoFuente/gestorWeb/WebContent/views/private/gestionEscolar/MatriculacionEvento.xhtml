@@ -1,0 +1,576 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCap')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.gestionescolar.label.matricular')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<div class="containerMtr">
+			<h:form id="frmGrupos">
+				<p:ajaxStatus onstart="PF('dialogLayout').show()"
+					onsuccess="PF('dialogLayout').hide()" />
+				<h1>#{sistema.obtenerTexto('gw.gestionescolar.label.matricular')}</h1>
+				<hr />
+				<p:panel header="Datos del Evento de Capacitación" style="margin-bottom:25px">
+
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-3">
+								<p:outputLabel value="Id del evento:"
+									styleClass="margenDerecho bloque" />
+								<h:outputText value="#{matriculacionEventoBean.evento.idEvento}" />
+							</div>
+							<div class="col-md-3">
+								<p:outputLabel value="Nombre del evento de capacitación:"
+									styleClass="margenDerecho bloque" />
+								<h:outputText value="#{matriculacionEventoBean.evento.nombreEc}" />
+
+							</div>
+							<div class="col-md-3">
+								<p:outputLabel value="Nombre del programa de capacitación:"
+									styleClass="margenDerecho bloque" />
+								<h:outputText
+									value="#{matriculacionEventoBean.evento.fichaDescriptivaPrograma.nombreTentativo}" />
+							</div>
+
+							<div class="col-md-3">
+								<p:outputLabel styleClass="bloque" value="Coordinador Academico" />
+								<h:outputText
+									value="#{matriculacionEventoBean.evento.responsableCoordinadorAcademico.personaResponsabilidad.tblPersona.nombreCompleto}" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-3">
+								<p:outputLabel value="Modalidad:"
+									styleClass="margenDerecho bloque" />
+								<h:outputText
+									value="#{matriculacionEventoBean.evento.catModalidadPlanPrograma.nombre}" />
+							</div>
+							<div class="col-md-3">
+								<p:outputLabel styleClass="bloque" value="Fecha Inicial" />
+								<h:outputText
+									value="#{matriculacionEventoBean.evento.fechaInicial}">
+									<f:convertDateTime pattern="dd/MM/yyyy" />
+								</h:outputText>
+							</div>
+							<div class="col-md-3">
+								<p:outputLabel styleClass="bloque" value="Fecha Final" />
+								<h:outputText
+									value="#{matriculacionEventoBean.evento.fechaFinal}">
+									<f:convertDateTime pattern="dd/MM/yyyy" />
+								</h:outputText>
+							</div>
+						</div>
+					</div>
+				</p:panel>
+
+
+				<p:panel
+					header="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.listado')}">
+					<div class="row" style="margin-bottom:20px">
+						<div class="col-md-4">
+							<p:outputLabel value="Seleccione un grupo: "
+								styleClass="bloque textoRojo agregaHeight" />
+						</div>
+						<div class="col-md-4 text-right col-md-offset-4">
+							<p:outputLabel value="Generar grupo:"
+								styleClass="agregaHeight margenDerechoMenor" />
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.generar')}"
+								action="#{matriculacionEventoBean.generarGrupos()}"
+								process="@this" ajax="true"
+								update="tblGrupos frmDetalleGrupo:pnlDetalleGrupo pnlBusquedaUsuarios"
+								styleClass="btn btn-primary pull-right" />
+						</div>
+					</div>
+
+					<p:dataTable id="tblGrupos"
+						value="#{matriculacionEventoBean.grupos}" var="grupo"
+						emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+						paginatorPosition="bottom" paginator="true" rows="10"
+						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks}
+								 {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+						currentPageReportTemplate="({currentPage} de {totalPages})"
+						rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+						<p:column style="width:16px;text-align:center" width="75"
+							headerText="Selección">
+							<p:selectOneRadio value="#{matriculacionEventoBean.idGrupo}"
+								valueChangeListener="#{matriculacionEventoBean.seleccionarGrupo}">
+								<p:ajax
+									update="tblGrupos frmDetalleGrupo:pnlDetalleGrupo pnlBusquedaUsuarios" />
+								<f:selectItem itemValue="#{grupo.idGrupo}" />
+							</p:selectOneRadio>
+						</p:column>
+						<p:column styleClass="text-center"
+							headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.nombregrupo')}">
+							<h:outputText value="#{grupo.nombre}" />
+						</p:column>
+						<p:column headerText="Estatus del acta" styleClass="text-center">
+							<h:outputText
+								styleClass="#{grupo.actaCerrada eq true ? 'textoRojo':''}"
+								value="#{grupo.actaCerrada eq true? 'Cerrada':'Abierta'}" />
+						</p:column>
+						<p:column styleClass="text-center"
+							headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.cantmaxmatri')}">
+							<h:outputText value="#{grupo.numAlumnosMatriculados}" />
+						</p:column>
+						<p:column styleClass="text-center"
+							headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.fechacreacion')}">
+							<h:outputText value="#{grupo.fechaRegistro}">
+								<f:convertDateTime type="date"
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+							</h:outputText>
+						</p:column>
+						<p:column styleClass="text-center"
+							headerText="Fecha de actualización">
+							<h:outputText value="#{grupo.fachaActualizacion}">
+								<f:convertDateTime type="date"
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+							</h:outputText>
+						</p:column>
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.acciones')}"
+							styleClass="text-center">
+							<p:commandButton
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar"
+								id="eliminarTooltip" oncomplete="PF('dlgConfirmar').show()"
+								process="@this" ajax="true" update="@(.containerMtr form)">
+								<f:setPropertyActionListener value="#{grupo}"
+									target="#{matriculacionEventoBean.grupoEliminar}" />
+							</p:commandButton>
+							<p:tooltip for="eliminarTooltip"
+								value="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.eliminar')}"
+								position="top" />
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+			</h:form>
+			<p:panel id="pnlBusquedaUsuarios"
+				header="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.busqueda')}">
+				<h:form id="frmSelectTipoBusquedaRadio">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="form-group">
+								<p:selectOneRadio id="sorTipoBusqueda"
+									value="#{matriculacionEventoBean.tipoBusqueda}">
+									<p:ajax process="@this" event="valueChange"
+										update="panelBusqueda frmBusquedaIndividual frmResultadoBusqueda"
+										listener="#{matriculacionEventoBean.cambioTipoBusqueda()}" />
+									<f:selectItems
+										value="#{matriculacionEventoBean.tiposBusquedaUsuarios}"
+										var="tipo" itemLabel="#{tipo.descripcion}"
+										itemValue="#{tipo.valor}" />
+								</p:selectOneRadio>
+							</div>
+						</div>
+					</div>
+				</h:form>
+				<p:outputPanel id="panelBusqueda">
+					<h:form id="frmBusquedaIndividual">
+						<f:validateBean disabled="true">
+							<p:outputPanel
+								rendered="#{matriculacionEventoBean.tipoBusqueda eq 1}">
+								<div class="row">
+									<div class="col-md-3">
+										<div class="form-group">
+											<p:outputLabel for="usuario" value="Usuario:" />
+											<p:inputText id="usuario" placeholder="Usuario:"
+												value="#{matriculacionEventoBean.filtrosPersona.usuario}"
+												styleClass="form-control " />
+											<p:message for="usuario" />
+										</div>
+									</div>
+									<div class="col-md-3">
+										<div class="form-group">
+											<p:outputLabel for="nombre"
+												value="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.nombre')}:" />
+											<p:inputText id="nombre"
+												placeholder="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.nombre')}"
+												value="#{matriculacionEventoBean.filtrosPersona.nombre}"
+												styleClass="form-control " />
+											<p:message for="nombre" />
+										</div>
+									</div>
+									<div class="col-md-3">
+										<div class="form-group">
+											<p:outputLabel for="appaterno"
+												value="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.appaterno')}:" />
+											<p:inputText id="appaterno"
+												placeholder="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.appaterno')}"
+												value="#{matriculacionEventoBean.filtrosPersona.apellidoPaterno}"
+												styleClass="form-control requerido" />
+											<p:message for="appaterno" />
+										</div>
+									</div>
+									<div class="col-md-3">
+										<div class="form-group">
+											<p:outputLabel for="apmaterno"
+												value="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.apmaterno')}:" />
+											<p:inputText id="apmaterno"
+												placeholder="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.apmaterno')}"
+												value="#{matriculacionEventoBean.filtrosPersona.apellidoMaterno}"
+												styleClass="form-control" />
+											<p:message for="apmaterno" />
+										</div>
+									</div>
+								</div>
+								<div class="form-group">
+									<div class="row">
+										<div class="col-md-12">
+											<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+											<p:outputLabel
+												value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+										</div>
+									</div>
+								</div>
+								<div class="form-group">
+									<div class="row">
+										<div class="col-md-12">
+											<p:commandButton
+												disabled="#{empty matriculacionEventoBean.grupo}"
+												value="#{sistema.obtenerTexto('gw.matriculacion.btn.buscar')}"
+												action="#{matriculacionEventoBean.buscarPersonas()}"
+												ajax="true"
+												update="frmBusquedaIndividual frmResultadoBusqueda"
+												styleClass="btn btn-primary pull-right" />
+										</div>
+									</div>
+								</div>
+							</p:outputPanel>
+						</f:validateBean>
+					</h:form>
+					<h:form id="frmTipoBusqueda2">
+						<p:outputPanel
+							rendered="#{matriculacionEventoBean.tipoBusqueda eq 2}">
+							<div class="row">
+								<div class="col-md-4">
+									<div class="form-group">
+										<p:outputLabel for="txtClave"
+											value="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.clave')}:" />
+										<p:inputText id="txtClave"
+											placeholder="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.clave')}"
+											value="#{matriculacionEventoBean.filtrosLote.idLoteCargaUsuarios}"
+											styleClass="form-control" />
+									</div>
+								</div>
+								<div class="col-md-4">
+									<div class="form-group">
+										<p:outputLabel for="txtNombreLote"
+											value="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.nombre.lote')}:" />
+										<p:inputText id="txtNombreLote"
+											placeholder="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.nombre.lote')}"
+											value="#{matriculacionEventoBean.filtrosLote.nombre}"
+											styleClass="form-control" />
+									</div>
+								</div>
+								<div class="col-md-4">
+									<div class="form-group">
+										<p:outputLabel for="fechaInicio" styleClass="bloque"
+											value="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.fecha')}:" />
+
+										<p:calendar id="fechaInicio" styleClass="calendario"
+											value="#{matriculacionEventoBean.filtrosLote.fechaInicio}"
+											readonlyInput="true" navigator="true" locale="es"
+											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											showOn="button">
+											<p:ajax event="change" process="@this" />
+											<p:ajax event="dateSelect" process="@this" />
+										</p:calendar>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-12">
+										<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+										<p:outputLabel
+											value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-12">
+										<p:commandButton
+											disabled="#{empty matriculacionEventoBean.grupo}"
+											value="#{sistema.obtenerTexto('gw.matriculacion.btn.buscar')}"
+											action="#{matriculacionEventoBean.buscarLotes()}"
+											process="@this" ajax="true" update="somLote"
+											styleClass="btn btn-primary pull-right" />
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-12">
+										<p:outputLabel for="somLote"
+											value="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.lote')}:" />
+										<p:selectOneMenu id="somLote" styleClass="col-xs-12"
+											disabled="#{empty matriculacionEventoBean.grupo or empty matriculacionEventoBean.lotes}"
+											valueChangeListener="#{matriculacionEventoBean.cargarPersonasLote}">
+											<p:ajax event="change" update="frmResultadoBusqueda" />
+											<f:selectItem itemValue="#{0}"
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+											<f:selectItems value="#{matriculacionEventoBean.lotes}"
+												var="elemento" itemLabel="#{elemento.nombre}"
+												itemValue="#{elemento.idLoteCargaUsuarios}" />
+										</p:selectOneMenu>
+									</div>
+								</div>
+							</div>
+						</p:outputPanel>
+					</h:form>
+				</p:outputPanel>
+				<h:form id="frmResultadoBusqueda">
+					<p:panel
+						header="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.resultados')}">
+						<p:outputLabel
+							value="Personas disponibles para ser matriculadas al curso: "
+							styleClass="bloque " />
+						<p:dataTable id="tblPersonasDisponibles"
+							value="#{matriculacionEventoBean.personas}" var="datos"
+							tableStyleClass="table" reflow="true" widgetVar="tblPersonasMtr"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							paginatorPosition="bottom" paginator="true" rows="10"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks}
+								 {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15">
+
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+								Todos: 
+								<p:selectBooleanCheckbox
+										disabled="#{matriculacionEventoBean.grupo.actaCerrada eq true or empty matriculacionEventoBean.grupo}"
+										value="#{matriculacionEventoBean.todasPersonas}"
+										valueChangeListener="#{matriculacionEventoBean.seleccionarTodasPersonas}">
+										<p:ajax update="tblPersonasDisponibles" />
+									</p:selectBooleanCheckbox>
+								</f:facet>
+								<p:selectBooleanCheckbox value="#{datos.seleccionado}"
+									disabled="#{matriculacionEventoBean.grupo.actaCerrada eq true or empty matriculacionEventoBean.grupo}" />
+							</p:column>
+							<p:column headerText="Usuario">
+								<h:outputText value="#{datos.persona.usuario}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.nombre')}">
+								<h:outputText value="#{datos.persona.nombre}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.app')}">
+								<h:outputText value="#{datos.persona.apellidoPaterno}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.apm')}">
+								<h:outputText value="#{datos.persona.apellidoMaterno}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.nominst')}">
+								<h:outputText value="#{datos.institucion}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.area')}">
+								<h:outputText value="#{datos.areaAdscripcion}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.acciones')}"
+								styleClass="text-center">
+								<p:commandButton id="btnMatricularIndividual"
+									disabled="#{matriculacionEventoBean.grupo.actaCerrada eq true or empty matriculacionEventoBean.grupo}"
+									action="#{matriculacionEventoBean.matricularIndividual()}"
+									ajax="true" update="@(.containerMtr form)"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_matri">
+									<f:setPropertyActionListener value="#{datos}"
+										target="#{matriculacionEventoBean.persona}" />
+								</p:commandButton>
+								<p:tooltip for="btnMatricularIndividual"
+									value="#{sistema.obtenerTexto('gw.matriculacion.btn.matricular')}"
+									position="top" />
+							</p:column>
+						</p:dataTable>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-12">
+									<p:commandButton
+										disabled="#{empty matriculacionEventoBean.grupo or empty matriculacionEventoBean.personas or (matriculacionEventoBean.grupo.actaCerrada eq true)}"
+										value="#{sistema.obtenerTexto('gw.matriculacion.btn.matricular')}"
+										action="#{matriculacionEventoBean.matricularPersonas()}"
+										ajax="true" update="@(.containerMtr form)"
+										styleClass="btn btn-primary pull-right" />
+									<p:outputLabel
+										value="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.todosselec')}:"
+										styleClass="pull-right agregaHeight" />
+								</div>
+							</div>
+						</div>
+					</p:panel>
+				</h:form>
+			</p:panel>
+			<h:form id="frmDetalleGrupo">
+				<p:outputPanel id="pnlDetalleGrupo">
+					<p:panel
+						header="Detalle del grupo #{matriculacionEventoBean.grupo.nombre}"
+						rendered="#{matriculacionEventoBean.idGrupo != null}">
+						<div class="form-group">
+							<div class="row flexY">
+								<div class="col-md-6">
+									<p:outputLabel value="Personas matriculadas al curso: " />
+								</div>
+								<div class="col-md-2">
+									<p:outputLabel styleClass="agregaHeight pull-right"
+										value="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.facilitador')}:" />
+								</div>
+								<div class="col-md-4">
+									<p:selectOneMenu id="somFacilitador"
+										disabled="#{empty(matriculacionEventoBean.facilitadores) or (matriculacionEventoBean.evento.catModalidadPlanPrograma.id eq 1)}"
+										value="#{matriculacionEventoBean.idFacilitador}"
+										valueChangeListener="#{matriculacionEventoBean.onChangeFacilitador}"
+										styleClass="col-xs-12">
+										<p:ajax />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+										<f:selectItems
+											value="#{matriculacionEventoBean.facilitadores}"
+											var="elemento"
+											itemLabel="#{elemento.personaResponsabilidad.tblPersona.nombreCompleto}"
+											itemValue="#{elemento.personaResponsabilidad.id}" />
+									</p:selectOneMenu>
+								</div>
+							</div>
+						</div>
+						<p:dataTable id="tblAlumnosMatriculados"
+							value="#{matriculacionEventoBean.participantes}" var="alumno"
+							reflow="true" paginatorPosition="bottom" paginator="true"
+							rows="10" widgetVar="wAlumnosMatriculados"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks}
+								 {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+								Todos: 
+								<p:selectBooleanCheckbox
+										disabled="#{matriculacionEventoBean.grupo.actaCerrada eq true}"
+										value="#{matriculacionEventoBean.todosAlumnos}"
+										valueChangeListener="#{matriculacionEventoBean.seleccionarTodosAlumnos}">
+										<p:ajax update="tblAlumnosMatriculados" />
+									</p:selectBooleanCheckbox>
+								</f:facet>
+								<p:selectBooleanCheckbox value="#{alumno.seleccionado}"
+									disabled="#{matriculacionEventoBean.grupo.actaCerrada eq true}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.nombre')}">
+								<h:outputText value="#{alumno.persona.usuario}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.nombre')}">
+								<h:outputText value="#{alumno.persona.nombre}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.app')}">
+								<h:outputText value="#{alumno.persona.apellidoPaterno}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.apm')}">
+								<h:outputText value="#{alumno.persona.apellidoMaterno}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.nominst')}">
+								<h:outputText value="#{alumno.institucion}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.area')}">
+								<h:outputText value="#{alumno.areaAdscripcion}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.acciones')}"
+								styleClass="text-center">
+								<p:commandButton id="btnBajaIndividual"
+									disabled="#{matriculacionEventoBean.grupo.actaCerrada eq true}"
+									action="#{matriculacionEventoBean.bajaIndividual()}"
+									ajax="true" update="@(.containerMtr form)"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_baja">
+									<f:setPropertyActionListener value="#{alumno}"
+										target="#{matriculacionEventoBean.participante}" />
+								</p:commandButton>
+								<p:tooltip for="btnBajaIndividual"
+									value="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.baja')}"
+									position="top" />
+							</p:column>
+						</p:dataTable>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-12">
+									<p:commandButton
+										disabled="#{empty matriculacionEventoBean.grupo or empty matriculacionEventoBean.participantes or(matriculacionEventoBean.grupo.actaCerrada eq true)}"
+										value="#{sistema.obtenerTexto('gw.matriculacion.btn.baja')}"
+										action="#{matriculacionEventoBean.darBajaPersonas()}"
+										ajax="true" update="@(.containerMtr form)"
+										styleClass="btn btn-primary pull-right" />
+									<p:outputLabel
+										value="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.todosselec')}:"
+										styleClass="pull-right agregaHeight" />
+								</div>
+							</div>
+						</div>
+					</p:panel>
+				</p:outputPanel>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:commandButton id="btn_cancelar"
+								value="#{sistema.obtenerTexto('gw.ec.btn.regresar')}"
+								action="#{menuGestorBean.navegaBusquedaEventosCapacitacion}"
+								ajax="false" immediate="true" styleClass="btn btn-default" />
+						</div>
+					</div>
+				</div>
+			</h:form>
+			<p:dialog id="dlgConf" widgetVar="dlgConfirmar" resizable="false"
+				responsive="true" modal="true" draggable="false" position="center"
+				closable="false" styleClass="medidaModal" header="Confirmación">
+				<h:form>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<h:outputText value="¿Seguro que desea eliminar el grupo " />
+								<p:outputLabel
+									value="#{matriculacionEventoBean.grupoEliminar.nombre}" />
+								<h:outputText value="?" />
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:commandButton oncomplete="PF('dlgConfirmar').hide()"
+								styleClass="btn btn-default" value="Cancelar" ajax="true" />
+							<p:commandButton
+								actionListener="#{matriculacionEventoBean.eliminarGrupo}"
+								oncomplete="PF('dlgConfirmar').hide()" ajax="true"
+								process="@this" update="@(.containerMtr form)"
+								styleClass="btn btn-primary"
+								value="#{sistema.obtenerTexto('gw.global.modal.boton.aceptar')}" />
+						</div>
+					</div>
+				</h:form>
+			</p:dialog>
+		</div>
+	</ui:define>
+</ui:composition>

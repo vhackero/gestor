@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<h:form>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText value="#{sistema.obtenerTexto('gw.ge.texto.asigna')}" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel for="somCoordinadores" styleClass="requerido"
+						value=" #{sistema.obtenerTexto('gw.ge.texto.coord')}:" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-8">
+
+					<p:selectOneMenu id="somCoordinadores" converter="entityConverter"
+						value="#{capturaEventoCapacitacion.coordinador}"
+						styleClass="col-xs-12">
+						<p:ajax process="@this" update="@form" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{capturaEventoCapacitacion.coordinadores}"
+							var="elemento" itemLabel="#{elemento.tblPersona.nombreCompleto}"
+							itemValue="#{elemento}" />
+					</p:selectOneMenu>
+				</div>
+				<div class="col-md-4">
+					<p:commandButton
+						disabled="#{capturaEventoCapacitacion.coordinador eq null}"
+						value="#{sistema.obtenerTexto('gw.ge.texto.agregar')}"
+						action="#{capturaEventoCapacitacion.agregarCoordinador()}"
+						process="@this" ajax="true" update="tblCoordAcad somCoordinadores"
+						styleClass="btn btn-primary pull-right" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:dataTable id="tblCoordAcad"
+						emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+						paginator="true" rows="10" paginatorPosition="bottom"
+						value="#{capturaEventoCapacitacion.datos.coordinadores}"
+						var="coord"
+						currentPageReportTemplate="({currentPage} de {totalPages})"
+						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+						rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.ge.texto.principal')}"
+							style="width:16px;text-align:center" width="75">
+							<p:selectOneRadio
+								value="#{capturaEventoCapacitacion.datos.idCoordinador}"
+								valueChangeListener="#{capturaEventoCapacitacion.seleccionarCoordinador}">
+								<p:ajax update="tblCoordAcad" />
+								<f:selectItem itemValue="#{coord.id}" />
+							</p:selectOneRadio>
+						</p:column>
+
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.ge.texto.nombre')}">
+							<h:outputText value="#{coord.tblPersona.nombre}" />
+						</p:column>
+						<p:column headerText="#{sistema.obtenerTexto('gw.ge.texto.app')}">
+							<h:outputText value="#{coord.tblPersona.apellidoPaterno}" />
+						</p:column>
+						<p:column headerText="#{sistema.obtenerTexto('gw.ge.texto.apm')}">
+							<h:outputText value="#{coord.tblPersona.apellidoMaterno}" />
+						</p:column>
+
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.ge.texto.acciones')}"
+							styleClass="text-center">
+							<p:commandButton id="eliminar1"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
+								action="#{capturaEventoCapacitacion.eliminarCoordinador()}"
+								process="@this" ajax="true"
+								update="tblCoordAcad @form:somCoordinadores">
+								<f:setPropertyActionListener value="#{coord}"
+									target="#{capturaEventoCapacitacion.coordinador}" />
+							</p:commandButton>
+							<p:tooltip for="eliminar1"
+								value="#{sistema.obtenerTexto('gw.ge.texto.eliminar')}"
+								position="top" />
+						</p:column>
+					</p:dataTable>
+				</div>
+			</div>
+		</div>
+		<br />
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel for="somFacilitadores"
+						rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+						value="#{sistema.obtenerTexto('gw.ge.texto.facilitador')}:" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-8">
+					<p:selectOneMenu id="somFacilitadores" converter="entityConverter"
+						value="#{capturaEventoCapacitacion.facilitador}"
+						styleClass="col-xs-12"
+						rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}">
+						<p:ajax process="@this" update="@form" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{capturaEventoCapacitacion.facilitadores}"
+							var="elemento" itemLabel="#{elemento.tblPersona.nombreCompleto}"
+							itemValue="#{elemento}" />
+					</p:selectOneMenu>
+				</div>
+				<div class="col-md-4">
+					<p:commandButton
+						disabled="#{capturaEventoCapacitacion.facilitador eq null}" styleClass="btn btn-primary pull-right"
+						process="@this" ajax="true"
+						rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+						update="tblFacilitador somFacilitadores"
+						action="#{capturaEventoCapacitacion.agregarFacilitador()}"
+						value="Agregar" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:dataTable id="tblFacilitador"
+						emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+						paginator="true" rows="10" paginatorPosition="bottom"
+						value="#{capturaEventoCapacitacion.datos.facilitadores}"
+						var="faci"
+						rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+						currentPageReportTemplate="({currentPage} de {totalPages})"
+						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+						rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+
+
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.ge.texto.nombre')}">
+							<h:outputText value="#{faci.tblPersona.nombre}" />
+						</p:column>
+						<p:column headerText="#{sistema.obtenerTexto('gw.ge.texto.app')}">
+							<h:outputText value="#{faci.tblPersona.apellidoPaterno}" />
+						</p:column>
+						<p:column headerText="#{sistema.obtenerTexto('gw.ge.texto.apm')}">
+							<h:outputText value="#{faci.tblPersona.apellidoMaterno}" />
+						</p:column>
+
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.ge.texto.acciones')}"
+							styleClass="text-center">
+							<p:commandButton id="eliminar2"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
+								process="@this" update="tblFacilitador @form:somFacilitadores"
+								ajax="true"
+								action="#{capturaEventoCapacitacion.eliminarFacilitador()}">
+								<f:setPropertyActionListener value="#{faci}"
+									target="#{capturaEventoCapacitacion.facilitador}" />
+							</p:commandButton>
+							<p:tooltip for="eliminar2"
+								value="#{sistema.obtenerTexto('gw.ge.texto.eliminar')}"
+								position="top" />
+						</p:column>
+					</p:dataTable>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-8">
+					<p:outputLabel for="somConstructores"
+						rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 2)}"
+						value="#{sistema.obtenerTexto('gw.ge.texto.respprod')}:" />
+				</div>
+				<div class="col-md-4"></div>
+			</div>
+			<div class="row">
+				<div class="col-md-8">
+					<p:selectOneMenu id="somConstructores" converter="entityConverter"
+						value="#{capturaEventoCapacitacion.productor}"
+						rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 2)}"
+						styleClass="col-xs-12">
+						<p:ajax process="@this" update="@form"/>
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{capturaEventoCapacitacion.productores}"
+							var="elemento" itemLabel="#{elemento.tblPersona.nombreCompleto}"
+							itemValue="#{elementos}" />
+					</p:selectOneMenu>
+				</div>
+				<div class="col-md-4">
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ge.texto.agregar')}"
+						action="#{capturaEventoCapacitacion.agregarProductor()}"
+						process="@this" ajax="true" disabled="#{capturaEventoCapacitacion.productor eq null}"
+						rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 2)}"
+						update="tblResponsableProduccion somConstructores"
+						styleClass="btn btn-primary pull-right" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:dataTable id="tblResponsableProduccion"
+						emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+						paginator="true" rows="10" paginatorPosition="bottom"
+						rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 2)}"
+						currentPageReportTemplate="({currentPage} de {totalPages})"
+						value="#{capturaEventoCapacitacion.datos.productores}" var="resp"
+						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+						rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.ge.texto.principal')}"
+							style="width:16px;text-align:center" width="75">
+							<p:selectOneRadio
+								value="#{capturaEventoCapacitacion.datos.idProductor}"
+								valueChangeListener="#{capturaEventoCapacitacion.seleccionarProductor}">
+								<p:ajax update="tblResponsableProduccion" />
+								<f:selectItem itemValue="#{resp.id}" />
+							</p:selectOneRadio>
+						</p:column>
+
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.ge.texto.nombre')}">
+							<h:outputText value="#{resp.tblPersona.nombre}" />
+						</p:column>
+						<p:column headerText="#{sistema.obtenerTexto('gw.ge.texto.app')}">
+							<h:outputText value="#{resp.tblPersona.apellidoPaterno}" />
+						</p:column>
+						<p:column headerText="#{sistema.obtenerTexto('gw.ge.texto.apm')}">
+							<h:outputText value="#{resp.tblPersona.apellidoMaterno}" />
+						</p:column>
+
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.ge.texto.acciones')}"
+							styleClass="text-center">
+							<p:commandButton id="eliminar4"
+								action="#{capturaEventoCapacitacion.eliminarProductores()}"
+								process="@this" ajax="true"
+								update="tblResponsableProduccion @form:somConstructores"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar">
+								<f:setPropertyActionListener value="#{resp}"
+									target="#{capturaEventoCapacitacion.productor}" />
+							</p:commandButton>
+							<p:tooltip for="eliminar4"
+								value="#{sistema.obtenerTexto('gw.ge.texto.eliminar')}"
+								position="top" />
+						</p:column>
+					</p:dataTable>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.finalizar')}"
+						action="#{capturaEventoCapacitacion.guardarEventoCapacitacion()}"
+						process="@this" ajax="true"
+						styleClass="btn btn-primary pull-right" />
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.guarda.borrador')}"
+						action="#{capturaEventoCapacitacion.guardarBorrador()}"
+						process="@this" ajax="true"
+						styleClass="btn btn-default pull-right" />
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.cancelar')}"
+						action="#{menuGestorBean.navegaBusquedaEventosCapacitacion}"
+						ajax="true" immediate="true"
+						styleClass="btn btn-default pull-right" />
+				</div>
+			</div>
+		</div>
+	</h:form>
+</ui:composition>

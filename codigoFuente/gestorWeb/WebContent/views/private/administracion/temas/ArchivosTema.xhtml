@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.personalizacion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.temas')}</li>
+		<li class="active">Ver listado de archivos del tema</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>Ver listado de archivos del tema</h1>
+		<hr />
+		<h:form id="frmArchivosTema">
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.temas.archivos.titulo.panel.superior')}">
+				<div class="row">
+					<div class="col-md-1 text-right">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.temas.archivos.etiqueta.tema')}:" />
+					</div>
+					<div class="col-md-3">
+						<h:outputText value="#{temaBean.tema.nombre}" />
+					</div>
+				</div>
+
+			</p:panel>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.temas.archivos.titulo.panel.inferior')}">
+				<p:dataTable value="#{temaBean.archivos}" var="archivo"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					paginator="true" rows="10" rowsPerPageTemplate="5,10,15"
+					paginatorPosition="bottom" reflow="true"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					tableStyleClass="table"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.temas.archivos.columna.nombre')}">
+						<h:outputText value="#{archivo.nombre}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.temas.archivos.columna.acciones')}"
+						styleClass="text-center">
+						<sec:authorize access="hasPermission(null, 'TEX_SIS_EDI' ) ">
+							<p:commandButton id="btn-editar"
+								action="#{temaBean.cargarArchivoTema()}" 
+								styleClass="btn btn-default btn-icon icono_sisi ss_gn_mod">
+								<f:setPropertyActionListener value="#{archivo}"
+									target="#{temaBean.archivo}" />
+							</p:commandButton>
+							<p:tooltip for="btn-editar"
+								value="#{sistema.obtenerTexto('gw.temas.archivos.boton.editar')}"
+								position="top" />
+						</sec:authorize>
+					</p:column>
+				</p:dataTable>
+
+			</p:panel>
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.temas.archivos.boton.regresar')}"
+						action="#{menuGestorBean.navegaTemas()}"
+						styleClass="btn btn-default " />
+				</div>
+			</div>
+		</h:form>
+	</ui:define>
+</ui:composition>

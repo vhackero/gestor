@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:aop="http://www.springframework.org/schema/aop" 
+	xmlns:util="http://www.springframework.org/schema/util" 
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa" 
+	xmlns:jee="http://www.springframework.org/schema/jee" 
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd 
+	http://www.springframework.org/schema/data/jpa 
+	http://www.springframework.org/schema/data/jpa/spring-jpa.xsd 
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/jee
+    http://www.springframework.org/schema/jee/spring-jee.xsd 
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx.xsd 
+	http://www.springframework.org/schema/util 
+	http://www.springframework.org/schema/util/spring-util.xsd
+	http://www.springframework.org/schema/jdbc
+	http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd">
+
+	<!-- For consider the using of annotations foe defining Spring Bean -->
+	<context:annotation-config />
+
+	<!-- For defining Spring Bean -->
+	<context:component-scan base-package="mx.gob.sedesol.basegestor" />
+
+	<!-- For bootstrapping the Spring Repository -->
+	<jpa:repositories base-package="mx.gob.sedesol.basegestor.model.repositories" />
+
+	<bean id="elearnigDS" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="#{dbConfig.driver}" />
+		<property name="url" value="#{dbConfig.url}" />
+		<property name="username" value="#{dbConfig.usuario}" />
+		<property name="password" value="#{dbConfig.password}" />
+	</bean>
+
+
+	
+	<!-- Configuración de base de datos virtual prueba uno-->
+	 <jdbc:initialize-database data-source="virtualElearnigDS" enabled="true">
+  		<jdbc:script location="classpath:/database/gestor_sisi_estructura.sql"/>
+  		<jdbc:script location="classpath:/database/gestor_sisi_data_catalogos.sql"/>  	
+  		<jdbc:script location="classpath:/database/gestor_sisi_tbl_rel.sql"/>  
+	</jdbc:initialize-database>
+	
+	<bean id="virtualElearnigDS" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="org.h2.Driver" />
+		<property name="url" value="jdbc:h2:mem:gestor_sisi;MODE=MySQL;DB_CLOSE_DELAY=-1;LOCK_MODE=0" />
+		<property name="username" value="elearning" />
+		<property name="password" value="elearning" />
+	</bean>
+	 		
+	<!-- Fin configuracion de base de datos virtual -->
+	
+	
+	<!-- Define EclipseLink JPA Vendor Adapter org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter -->
+	<bean id="jpaVendorAdapter"
+		class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		<property name="generateDdl" value="false" />
+		<property name="showSql" value="false" />
+	</bean>
+
+	<!-- Entity Manager Factory -->
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="virtualElearnigDS" />
+		<property name="persistenceUnitName" value="gestor" />
+		<property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.enable_lazy_load_no_trans">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- Transaction Manager -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+
+	<!-- Enable Transactional Manner -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean id="log4jInitialization"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetClass" value="org.springframework.util.Log4jConfigurer" />
+		<property name="targetMethod" value="initLogging" />
+		<property name="arguments">
+			<list>
+				<value>classpath:log4j.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<util:properties id="dbConfig" location="classpath:/database/dbConfig.properties" />
+
+	<import resource="mongoContext.xml"/>
+
+</beans>

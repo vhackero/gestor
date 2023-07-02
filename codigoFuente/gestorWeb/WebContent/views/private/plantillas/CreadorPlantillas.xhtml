@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.personalizacion')}</li>
+		<li class="active">Imágenes de documentos</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h1>Imágenes de documentos</h1>
+		<hr />
+		<p:ajaxStatus onstart="PF('dialogLayout').show()"
+			onsuccess="PF('dialogLayout').hide()" />
+		<h:form id="formPlantillas">
+
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.admin.plantillas.panel.creador')}">
+
+				<div class="row">
+					<div class="col-md-12">
+						<div class="flexBaseLine">
+							<div class="separaLabelDerecho">
+								<p:outputLabel value="Adjuntar imagen " />
+								<h:outputText value="(.png, .jpg, .gif)" />
+								<p:outputLabel value=" :" />
+							</div>
+							<div>
+								<p:fileUpload id="fileUpImg" onstart="PF('dialogLayout').show()"
+									oncomplete="PF('dialogLayout').hide()"
+									label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									fileUploadListener="#{creadorPlantillasBean.cargaImagenPlantilla}"
+									mode="advanced" dragDropSupport="false" auto="true"
+									allowTypes="/(\.|\/)(gif|jpe?g|png)$/" update="@form" />
+							</div>
+						</div>
+
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<p:panel styleClass="quitaMargenTop"
+							header="#{sistema.obtenerTexto('gw.admin.plantillas.panel.imgdisp')}">
+							<div class="form-group">
+								<div class="row">
+
+									<div class="col-md-12 contenedorImagenPlantilla">
+										<p:carousel id="cmpImgsEnc"
+											value="#{creadorPlantillasBean.cargaImagenesEncabezado()}"
+											headerText="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											var="imagenEnc" numVisible="4" responsive="true"
+											circular="false">
+											<div class="flexCentrarXY">
+												<p:graphicImage value="#{imagenEnc}"
+													styleClass="ajustaImgPlantilla" stream="false" />
+											</div>
+										</p:carousel>
+									</div>
+								</div>
+							</div>
+						</p:panel>
+					</div>
+				</div>
+			</p:panel>
+		</h:form>
+
+
+
+
+	</ui:define>
+</ui:composition>

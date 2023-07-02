@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>Tablero de control</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>Tablero de control</h1>
+		<hr />
+
+		<div class="row">
+			<div class="col-md-6">
+				<h:form id="formMisCursos">
+					<p:panel header="Cursos" style="margin-top:0">
+						<p:dataTable id="dtResultadoBusquedaMisCursos"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							reflow="true"
+							value="#{misCursosBean.participanteEventosCapacitacionEnEjecucion}"
+							var="participante" paginator="true" rows="10"
+							paginatorPosition="bottom"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+							<!-- Nombre del curso -->
+							<p:column styleClass="text-center"
+								sortBy="#{participante.grupo.evento.nombreEc}">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.nombrecurso')}" />
+								</f:facet>
+								<h:outputText
+									rendered="#{participante.grupo.evento.catModalidadPlanPrograma.id eq 2}"
+									value="#{participante.grupo.evento.nombreEc}" />
+								<p:commandLink value="#{participante.grupo.evento.nombreEc}"
+									styleClass="subrayar-con-azul" target="_blank" ajax="false"
+									rendered="#{not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}"
+									action="#{misCursosBean.navegaUrlCursoLms(participante.grupo.evento.idEvento)}" />
+							</p:column>
+
+							<p:column styleClass="text-center"
+								sortBy="#{participante.grupo.evento.catModalidadPlanPrograma.nombre}">
+								<f:facet name="header">
+									<h:outputText value="Modalidad" />
+								</f:facet>
+
+								<h:outputText
+									value="#{participante.grupo.evento.catModalidadPlanPrograma.nombre}" />
+							</p:column>
+							<!-- Porcentaje de avance -->
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText value="Avance" />
+								</f:facet>
+								<!-- Progress bar -->
+								<p:progressBar id="progressBarAvanceEvento" ajax="true"
+									labelTemplate="{value}%"
+									rendered="#{not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}"
+									value="#{misCursosBean.obtenerAvanceOa(participante.grupo.evento.idEvento)}"
+									displayOnly="true" style="width:100%" styleClass="pull-right" />
+							</p:column>
+						</p:dataTable>
+
+					</p:panel>
+				</h:form>
+			</div>
+			<div class="col-md-6">
+				<p:panel header="Logros" style="margin-top:0">
+					<div class="row">
+						<div class="col-md-6 contenedorTrofeos">
+							<div class="contenedorTrofeo">
+								<div class="trofeo">
+									<span class="ss_ga_logros oro"></span>
+								</div>
+								<div class="baseTrofeo">
+									<p:outputLabel
+										value="#{misLogrosBean.contenedorLogros.cantTrofeosOroPlata[0]}" />
+								</div>
+
+							</div>
+
+							<div class="contenedorTrofeo">
+								<div class="trofeo">
+									<span class="ss_ga_logros plata"></span>
+								</div>
+								<div class="baseTrofeo plata">
+									<p:outputLabel
+										value="#{misLogrosBean.contenedorLogros.cantTrofeosOroPlata[1]}" />
+								</div>
+							</div>
+
+						</div>
+						<div class="col-md-6">
+							<p:outputPanel
+								rendered="#{misLogrosBean.contenedorLogros.badge != null}"
+								layout="block">
+								<p:outputPanel id="imgInsignia"
+									styleClass="imgInsigniaContenedor">
+									<img class="imgInsignia"
+										src="/recursos/insignias/#{misLogrosBean.contenedorLogros.badge.rutaImagen}" />
+								</p:outputPanel>
+								<p:outputPanel layout="block" styleClass="tablero-logros">
+									<p:outputLabel styleClass="tituloInsignia bloque"
+										value="#{misLogrosBean.contenedorLogros.badge.nombre}" />
+									<h:outputText
+										value="#{misLogrosBean.contenedorLogros.clasificacionBadge.nombre}"
+										styleClass="bloque tituloNivel" />
+
+								</p:outputPanel>
+							</p:outputPanel>
+						</div>
+					</div>
+				</p:panel>
+			</div>
+		</div>
+
+
+	</ui:define>
+
+</ui:composition>

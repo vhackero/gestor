@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+
+	<h:form id="formDatosAgenda">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText
+						value="#{sistema.obtenerTexto('gw.gestionescolar.registra.agenda')}" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel for="fechaInicio" styleClass="requerido bloque"
+						value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechaInicial')}:" />
+					<p:calendar id="fechaInicio" styleClass="calendario"
+						yearRange="c-100:c+100"
+						value="#{capturaEventoCapacitacion.datos.evento.fechaInicial}"
+						pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+						showOn="button" readonlyInput="true" locale="es" navigator="true"
+						placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}">
+						<p:ajax event="change" process="@this" />
+						<p:ajax event="dateSelect" process="@this"
+							update="fechaFinal tabEventoCapacitacion:formReserv:fechaInicio"
+							listener="#{capturaEventoCapacitacion.validarFechas}" />
+					</p:calendar>
+					<p:message for="fechaInicio" />
+				</div>
+
+				<div class="col-md-4">
+					<p:outputLabel for="fechaFinal" styleClass="requerido bloque"
+						value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechafinal')}:" />
+					<p:calendar id="fechaFinal" styleClass="calendario"
+						mindate="#{capturaEventoCapacitacion.datos.evento.fechaInicial}"
+						readonlyInput="true"
+						disabled="#{capturaEventoCapacitacion.datos.evento.fechaInicial eq null}"
+						value="#{capturaEventoCapacitacion.datos.evento.fechaFinal}"
+						yearRange="c-100:c+100"
+						pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+						placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+						showOn="button" locale="es" navigator="true">
+						<p:ajax event="change" process="@this" />
+						<p:ajax event="dateSelect" process="@this"
+							update="tabEventoCapacitacion:formReserv:fechaInicio"
+							listener="#{capturaEventoCapacitacion.validarFechas}" />
+					</p:calendar>
+					<p:message for="fechaFinal" />
+				</div>
+
+				<div class="col-md-4">
+					<p:outputLabel for="categEventosCap" styleClass="requerido bloque"
+						value="#{sistema.obtenerTexto('gw.gestionescolar.label.categoriaevento')}:" />
+
+					<p:selectOneMenu id="categEventosCap"
+						value="#{capturaEventoCapacitacion.datos.evento.categoriaEC.id}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+						styleClass="col-xs-12" onchange="correccionSelectores()">
+						<p:ajax process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems
+							value="#{capturaEventoCapacitacion.listaCategoriasEC}"
+							var="eventoCap" itemLabel="#{eventoCap.nombre}"
+							itemValue="#{eventoCap.id}" />
+					</p:selectOneMenu>
+					<p:message for="categEventosCap" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel for="modalidad" styleClass="requerido bloque"
+						value="#{sistema.obtenerTexto('gw.gestionescolar.label.modalidad')}" />
+					<p:selectOneMenu id="modalidad"
+						disabled="#{(capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1) || (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 2) || (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 3) }"
+						value="#{capturaEventoCapacitacion.datos.evento.catModalidadPlanPrograma.id}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+						styleClass="col-xs-12" onchange="correccionSelectores()">
+						<p:ajax process="@this" update="pModalidades" event="change" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems
+							value="#{capturaEventoCapacitacion.listaModalidades}"
+							var="modalidad" itemLabel="#{modalidad.nombre}"
+							itemValue="#{modalidad.id}" />
+					</p:selectOneMenu>
+					<p:message for="modalidad" />
+				</div>
+			</div>
+		</div>
+
+
+		<p:outputPanel id="pModalidades">
+			<p:outputPanel id="outputPanelAva"
+				rendered="#{(capturaEventoCapacitacion.datos.evento.catModalidadPlanPrograma.id eq 1) or (capturaEventoCapacitacion.datos.evento.catModalidadPlanPrograma.id == 3)}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12" style="margin-bottom:5px">
+							<p:outputLabel styleClass="requerido"
+								value="Vincular Ambiente Virtual de Aprendizaje (AVA)" />
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton onclick="PF('modVincAva').show();"
+								value="#{sistema.obtenerTexto('gw.gestionescolar.button.vincular')}"
+								styleClass="btn btn-primary" />
+						</div>
+					</div>
+				</div>
+
+			</p:outputPanel>
+
+			<p:outputPanel id="panelAreas"
+				rendered="#{capturaEventoCapacitacion.datos.evento.catModalidadPlanPrograma.id == 2 or capturaEventoCapacitacion.datos.evento.catModalidadPlanPrograma.id == 3}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4">
+							<p:outputLabel for="tipoArea" styleClass="requerido"
+								value="#{sistema.obtenerTexto('gw.gestionescolar.label.tipoarea')}" />
+							<p:selectOneMenu id="tipoArea"
+								value="#{capturaEventoCapacitacion.datos.tipoAreaSeleccionado}"
+								valueChangeListener="#{capturaEventoCapacitacion.onChangeTipoArea}"
+								styleClass="col-xs-12" onchange="correccionSelectores()">
+								<p:ajax
+									update="@form,tabEventoCapacitacion:dlgReserv,tabEventoCapacitacion:dialogPersonalizacion"
+									event="change" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.seleccione')}"
+									itemValue="#{0}" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.ge.texto.interna')}"
+									itemValue="#{1}" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.ge.texto.externa')}"
+									itemValue="#{2}" />
+							</p:selectOneMenu>
+						</div>
+
+						<p:outputPanel
+							rendered="#{capturaEventoCapacitacion.datos.tipoAreaSeleccionado eq 1}">
+							<div class="col-md-4">
+								<p:outputLabel for="solicitar" styleClass="requerido bloque"
+									value="#{sistema.obtenerTexto('gw.gestionescolar.label.reservacion')}" />
+
+								<p:commandButton id="solicitar"
+									styleClass="quitaMargen btn btn-primary"
+									onclick="PF('dialogReservacion').show();"
+									value="#{sistema.obtenerTexto('gw.gestionescolar.button.solicitar')}" />
+							</div>
+						</p:outputPanel>
+
+					</div>
+				</div>
+			</p:outputPanel>
+		</p:outputPanel>
+
+		<br />
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+					<p:outputLabel
+						value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.continuar')}"
+						action="#{capturaEventoCapacitacion.cargarResponsables()}"
+						process="@this" ajax="false"
+						styleClass="btn btn-primary pull-right" />
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.guarda.borrador')}"
+						action="#{capturaEventoCapacitacion.guardarBorrador()}"
+						process="@this" ajax="false" immediate="true"
+						styleClass="btn btn-default pull-right" />
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.cancelar')}"
+						action="#{menuGestorBean.navegaBusquedaEventosCapacitacion}"
+						ajax="false" immediate="true"
+						styleClass="btn btn-default pull-right" />
+				</div>
+			</div>
+		</div>
+	</h:form>
+
+	<p:dialog id="dialogVincularAva" widgetVar="modVincAva"
+		header="#{sistema.obtenerTexto('gw.gestionescolar.dialogheader.vinculaava')}"
+		modal="true" resizable="false" draggable="false" closable="false"
+		position="center" width="650" height="210">
+
+		<ui:include src="vincularAVA.xhtml" />
+
+		<f:facet name="footer">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton value="Cerrar" onclick="PF('modVincAva').hide();"
+							styleClass="btn btn-default pull-right" />
+					</div>
+				</div>
+			</div>
+		</f:facet>
+	</p:dialog>
+
+	<p:dialog draggable="false" position="center" resizable="false"
+		closable="false" modal="true" id="dlgReserv" width="900"
+		widgetVar="dialogReservacion"
+		header="#{sistema.obtenerTexto('gw.ge.texto.solicitudarea')}"
+		dynamic="true">
+		<ui:include src="reservacionArea.xhtml" />
+	</p:dialog>
+
+
+	<p:dialog draggable="false" position="top" resizable="false"
+		styleClass="modalAbsCentrado" closable="false" modal="true"
+		width="900" widgetVar="dlgPersonalizacion" id="dialogPersonalizacion"
+		header="Personalización" dynamic="true">
+		<ui:include src="personalizacionArea.xhtml" />
+	</p:dialog>
+
+
+</ui:composition>

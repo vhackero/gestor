@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.personalizacion')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.plantillas.docs')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.plantillas.docs')}</h1>
+		<hr />
+		<p:ajaxStatus onstart="PF('dialogLayout').show()"
+			onsuccess="PF('dialogLayout').hide()" />
+		<h:form id="formPlantillas">
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.admin.plantillas.panel.creador')}">
+
+				<div class="row flexCentrarXY form-group">
+					<div class="col-md-3 text-right">
+						<p:outputLabel styleClass="agregaHeight"
+							value="#{sistema.obtenerTexto('gw.plantillas.documentos.etiqueta.documento')}:" />
+					</div>
+					<div class="col-md-4">
+						<p:selectOneMenu id="somTipoDocumento" disabled="true"
+							value="#{plantillasDocumentosBean.tipoDocumento}"
+							styleClass="col-xs-12">
+							<f:selectItems value="#{plantillasDocumentosBean.tiposDocumento}"
+								var="elemento" itemValue="#{elemento.valor}"
+								itemLabel="#{elemento.descripcion}" />
+						</p:selectOneMenu>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6">
+							<p:outputLabel for="txtNombre" styleClass="requerido"
+								value="#{sistema.obtenerTexto('gw.admin.plantillas.campo.nombre')}:" />
+							<!-- Longitud de campo -->
+							<p:inputText id="txtNombre" maxlength="60"
+								placeholder="#{sistema.obtenerTexto('gw.admin.plantillas.campo.nombre')}"
+								value="#{plantillasDocumentosBean.plantilla.nombre}"
+								styleClass="form-control" />
+							<p:message for="txtNombre" />
+						</div>
+
+					</div>
+				</div>
+
+				<div class="form-group" style="margin-bottom: 30px">
+					<div class="row">
+						<div class="col-md-12">
+							<p:carousel id="cImagenesEncabezado"
+								value="#{plantillasDocumentosBean.cargaImagenesEncabezado()}"
+								headerText="Imágenes disponibles" var="imagenEncabezado"
+								numVisible="1" responsive="true" circular="true"
+								itemStyle="text-align:center">
+								<div class="form-group">
+									<div class="row">
+										<div class="col-md-12">
+											<p:graphicImage value="#{imagenEncabezado}"
+												styleClass="margenSuperior agregaBorde ajustaImgPlantilla"
+												stream="false" />
+										</div>
+									</div>
+								</div>
+								<div class="form-group">
+									<div class="row">
+										<div class="col-md-12">
+											<p:commandButton
+												value="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+												action="#{plantillasDocumentosBean.seleccionaEncabezado}"
+												process="@this" ajax="true"
+												update="@form:giImagenEncabezado @form:btnVisualizar @form:btnGuardarPlantilla"
+												styleClass="btn btn-primary">
+												<f:setPropertyActionListener value="#{imagenEncabezado}"
+													target="#{plantillasDocumentosBean.imagenEncabezado}" />
+											</p:commandButton>
+										</div>
+									</div>
+								</div>
+							</p:carousel>
+						</div>
+						<div class="col-md-6">
+							<p:graphicImage id="giImagenEncabezado" rendered="false"
+								value="#{plantillasDocumentosBean.getEncabezado()}"
+								styleClass="margenSuperior agregaBorde ajustaImgPlantilla" />
+						</div>
+					</div>
+				</div>
+				<p:outputPanel
+					rendered="#{plantillasDocumentosBean.tipoDocumento == 1 or plantillasDocumentosBean.tipoDocumento == 2}">
+					<div class="row">
+						<div class="col-md-6 col-md-offset-6">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.plantilla.docs..boton.variables')}"
+								rendered="#{plantillasDocumentosBean.tipoDocumento == 1 or plantillasDocumentosBean.tipoDocumento == 2}"
+								onclick="PF('mVariables').show();"
+								styleClass="btn btn-primary pull-right" />
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel for="txtParrafo1" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.admin.plantillas.campo.parrafo1')}:" />
+								<!-- Longitud de campo -->
+								<p:inputTextarea id="txtParrafo1" maxlength="100"
+									placeholder="#{sistema.obtenerTexto('gw.admin.plantillas.campo.parrafo1')}"
+									value="#{plantillasDocumentosBean.plantilla.parrafo1}"
+									styleClass="form-control" />
+								<p:message for="txtParrafo1" />
+							</div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel for="txtParrafo2" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.admin.plantillas.campo.parrafo2')}:" />
+								<!-- Longitud de campo -->
+								<p:inputTextarea id="txtParrafo2" maxlength="100"
+									placeholder="#{sistema.obtenerTexto('gw.admin.plantillas.campo.parrafo2')}"
+									value="#{plantillasDocumentosBean.plantilla.parrafo2}"
+									styleClass="form-control" />
+								<p:message for="txtParrafo2" />
+							</div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel for="txtParrafo3" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.admin.plantillas.campo.parrafo3')}:" />
+								<!-- Longitud de campo -->
+								<p:inputTextarea id="txtParrafo3" maxlength="200"
+									placeholder="#{sistema.obtenerTexto('gw.admin.plantillas.campo.parrafo3')}"
+									value="#{plantillasDocumentosBean.plantilla.parrafo3}"
+									styleClass="form-control" />
+								<p:message for="txtParrafo3" />
+							</div>
+						</div>
+					</div>
+				</p:outputPanel>
+
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton id="btnVisualizar" update="formPlantillas"
+							value="#{sistema.obtenerTexto('gw.admin.plantillas.texto.visplant')}"
+							process="@this txtParrafo3 txtParrafo2 txtParrafo1 txtNombre" styleClass="btn btn-primary"
+							action="#{plantillasDocumentosBean.verPlantilla}" ajax="true" />
+						<p:commandButton id="btnCancelarPlantilla"
+							action="#{plantillasDocumentosBean.cargarPlantillas()}"
+							ajax="false" immediate="true" styleClass="btn btn-default"
+							value="#{sistema.obtenerTexto('gw.admin.plantillas.boton.cancelar')}" />
+						<p:commandButton id="btnGuardarPlantilla"
+							value="#{sistema.obtenerTexto('gw.admin.plantillas.boton.guardar')}"
+							action="#{plantillasDocumentosBean.guardarPlantilla()}"
+							ajax="false"
+							disabled="#{plantillasDocumentosBean.plantilla.imagenFondo == null}"
+							styleClass="btn btn-primary" />
+
+					</div>
+				</div>
+			</p:panel>
+		</h:form>
+
+		<p:dialog id="visorPdf" dynamic="true" responsive="true" modal="true"
+			closable="false" resizable="false" position="center"
+			header="Constancia" width="900" widgetVar="visorPlantilla">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:media player="pdf"
+							value="#{plantillasDocumentosBean.plantillaPDF}" width="865"
+							height="400" styleClass="agregaBorde" />
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.admin.plantillas.btn.cerrar')}"
+						styleClass="btn btn-default pull-right"
+						onclick="PF('visorPlantilla').hide();" />
+				</div>
+			</div>
+		</p:dialog>
+
+		<p:dialog widgetVar="mVariables" width="300" closable="false"
+			header="#{sistema.obtenerTexto('gw.plantilla.modal.variables.titulo')}"
+			modal="true" resizable="false" draggable="false" position="center">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:panelGrid columns="2" style="margin:auto">
+							<p:outputLabel value="Modalidad" style="margin-bottom:0px" />
+							<h:outputText value="$_modalidad_" />
+							<p:outputLabel value="Lugar" style="margin-bottom:0px" />
+							<h:outputText value="$_lugar_" />
+							<p:outputLabel value="Fecha" style="margin-bottom:0px" />
+							<h:outputText value="$_fecha_" />
+							<p:outputLabel value="Horas" style="margin-bottom:0px" />
+							<h:outputText value="$_num_horas_" />
+							<p:outputLabel value="Calificación" style="margin-bottom:0px" />
+							<h:outputText value="$_calificacion_" />
+						</p:panelGrid>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12 text-center">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('mVariables').hide();" />
+				</div>
+			</div>
+		</p:dialog>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>Análisis de datos</li>
+		<li class="active">Áreas y recursos</li>
+	</ui:define>
+	<ui:define name="content">
+
+		<h:form>
+			<div class="row">
+				<div class="col-md-12">
+
+					<p:panel header="Búsqueda de reservaciones de áreas">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-4">
+									<p:outputLabel value="Sede:" for="selSede" styleClass="bloque" />
+									<p:selectOneMenu id="selSede" styleClass="col-xs-12"
+										value="#{reporteReservacionesBean.criteriosBusq.idSede}"
+										valueChangeListener="#{reporteReservacionesBean.onChangeSede}">
+										<p:ajax update="selArea" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											noSelectionOption="true" />
+										<f:selectItems value="#{reporteReservacionesBean.sedes}"
+											var="sede"
+											itemLabel="#{sede.catUbicacionTerritorial.nombre} - #{sede.nombre}"
+											itemValue="#{sede.idSede}" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="col-md-4">
+									<p:outputLabel value="Área:" for="selArea" styleClass="bloque" />
+									<p:selectOneMenu id="selArea" styleClass="col-xs-12"
+										value="#{reporteReservacionesBean.criteriosBusq.idArea}">
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											noSelectionOption="true" />
+										<f:selectItems
+											value="#{reporteReservacionesBean.areasConfiguradas}"
+											var="area" itemLabel="#{area.catAreasSede.catArea.nombre}"
+											itemValue="#{area.catAreasSede.catArea.id}" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="col-md-4">
+									<p:outputLabel value="Tipo evento:" for="selTipoEvento"
+										styleClass="bloque" />
+									<p:selectOneMenu id="selTipoEvento" styleClass="col-xs-12"
+										value="#{reporteReservacionesBean.criteriosBusq.tipoEvento}">
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											noSelectionOption="true" />
+										<f:selectItems
+											value="#{reporteReservacionesBean.tiposEvento()}" var="tipo"
+											itemLabel="#{tipo.descripcion}" itemValue="#{tipo.valor}" />
+									</p:selectOneMenu>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-4">
+									<p:outputLabel value="Estatus reservación:" for="selEstatus"
+										styleClass="bloque" />
+									<p:selectOneMenu id="selEstatus" styleClass="col-xs-12"
+										value="#{reporteReservacionesBean.criteriosBusq.idEstatusReservacion}">
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											noSelectionOption="true" />
+										<f:selectItems
+											value="#{reporteReservacionesBean.estatusReservacion()}"
+											var="estatus" itemLabel="#{estatus.descripcion}"
+											itemValue="#{estatus.valor}" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="col-md-4">
+									<p:outputLabel value="Fecha de registro inicial:"
+										for="selInicial" styleClass="bloque" />
+									<p:calendar id="selInicial" styleClass="calendario"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+										yearRange="c-100:c+100" locale="es" navigator="true"
+										placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										showOn="button" readonlyInput="true"
+										value="#{reporteReservacionesBean.criteriosBusq.fechaInicial}" />
+								</div>
+
+								<div class="col-md-4">
+									<p:outputLabel value="Fecha de registro final:" for="selFinal"
+										styleClass="bloque" />
+									<p:calendar id="selFinal" styleClass="calendario"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+										yearRange="c-100:c+100" locale="es" navigator="true"
+										placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										showOn="button" readonlyInput="true"
+										value="#{reporteReservacionesBean.criteriosBusq.fechaFinal}" />
+								</div>
+							</div>
+						</div>
+
+						<!-- Buscar reservaciones -->
+						<div class="row">
+							<div class="col-md-12">
+								<p:commandButton styleClass="btn btn-primary pull-right"
+									value="Buscar" ajax="false" update="tblReservaciones"
+									action="#{reporteReservacionesBean.buscaPorCriterios}" />
+							</div>
+						</div>
+
+
+					</p:panel>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel header="Resultado de la búsqueda">
+
+						<p:dataTable value="#{reporteReservacionesBean.tblReservaciones}"
+							tableStyleClass="table" id="tblReservaciones" var="reservacion"
+							reflow="true"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							paginator="true" paginatorPosition="bottom"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks}
+								 {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15">
+
+							<f:facet name="header">
+								<div class="row flexY">
+									<div class="col-md-8">
+										<p:outputLabel
+											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+									</div>
+									<div class="col-md-4">
+										<p:commandButton id="toggler" type="button"
+											value="Columna de datos"
+											styleClass="pull-right btn btn-primary"
+											icon="ui-icon-carat-1-s" />
+										<p:columnToggler datasource="tblReservaciones"
+											trigger="toggler" />
+									</div>
+								</div>
+							</f:facet>
+
+							<!-- Datos principales -->
+							<p:column visible="#{reporteReservacionesBean.visible[0]}"
+								exportable="true">
+								<f:facet name="header">
+									<p:outputLabel value="Área" />
+								</f:facet>
+
+								<p:outputLabel value="#{reservacion.areaSede.catArea.nombre}" />
+							</p:column>
+
+							<p:column visible="#{reporteReservacionesBean.visible[1]}"
+								exportable="true">
+								<f:facet name="header">
+									<p:outputLabel value="Tipo de evento" />
+								</f:facet>
+
+								<p:outputLabel value="#{reservacion.tipoEvento}" />
+							</p:column>
+
+							<p:column visible="#{reporteReservacionesBean.visible[2]}"
+								exportable="true">
+								<f:facet name="header">
+									<p:outputLabel value="Nombre del evento" />
+								</f:facet>
+
+								<p:outputLabel value="#{reservacion.nombreEvento}" />
+							</p:column>
+
+							<p:column visible="#{reporteReservacionesBean.visible[3]}"
+								exportable="true">
+								<f:facet name="header">
+									<p:outputLabel value="Evento privado" />
+								</f:facet>
+
+								<p:outputLabel
+									value="#{reservacion.solicitud.privado eq 0 or reservacion.solicitud.privado eq null? 'No' : 'Si'}" />
+							</p:column>
+
+							<p:column visible="#{reporteReservacionesBean.visible[4]}"
+								exportable="true">
+								<f:facet name="header">
+									<p:outputLabel value="Solicitante" />
+								</f:facet>
+
+								<p:outputLabel value="#{reservacion.solicitud.solicitante}" />
+							</p:column>
+
+							<!-- Columnas ocultas -->
+							<p:column visible="#{reporteReservacionesBean.visible[5]}"
+								exportable="true">
+								<f:facet name="header">
+									<p:outputLabel value="Estatus reservación" />
+								</f:facet>
+
+								<p:outputLabel value="#{reservacion.estatusReservacion.nombre}" />
+							</p:column>
+
+							<p:column visible="#{reporteReservacionesBean.visible[6]}"
+								exportable="true">
+								<f:facet name="header">
+									<p:outputLabel value="Fecha de solicitud" />
+								</f:facet>
+
+								<p:outputLabel value="#{reservacion.fechaCreacion}" />
+							</p:column>
+
+							<p:column visible="#{reporteReservacionesBean.visible[7]}"
+								exportable="true">
+								<f:facet name="header">
+									<p:outputLabel value="Distribución" />
+								</f:facet>
+
+								<p:outputLabel
+									value="#{reservacion.personalizacion.distribucionArea.nombre}" />
+							</p:column>
+
+							<p:column visible="#{reporteReservacionesBean.visible[8]}"
+								exportable="true">
+								<f:facet name="header">
+									<p:outputLabel value="Servicio de cafetería" />
+								</f:facet>
+
+								<p:outputLabel
+									value="#{reservacion.personalizacion.servicioCafeteria eq 0 or reservacion.personalizacion.servicioCafeteria eq null? 'No' : 'Si'}" />
+							</p:column>
+
+							<p:column visible="#{reporteReservacionesBean.visible[9]}"
+								exportable="true">
+								<f:facet name="header">
+									<p:outputLabel value="Hora de inicio" />
+								</f:facet>
+
+								<p:outputLabel value="#{reservacion.horaInicial()}" />
+							</p:column>
+
+							<p:column visible="#{reporteReservacionesBean.visible[10]}"
+								exportable="true">
+								<f:facet name="header">
+									<p:outputLabel value="Hora de término" />
+								</f:facet>
+
+								<p:outputLabel value="#{reservacion.horaFinal()}" />
+							</p:column>
+
+							<p:column visible="#{reporteReservacionesBean.visible[11]}"
+								exportable="true">
+								<f:facet name="header">
+									<p:outputLabel value="Ubicación" />
+								</f:facet>
+
+								<p:outputLabel
+									value="#{reservacion.areaSede.catSede.catUbicacionTerritorial.nombre}" />
+							</p:column>
+
+							<p:column visible="#{reporteReservacionesBean.visible[12]}"
+								exportable="true">
+								<f:facet name="header">
+									<p:outputLabel value="Sede" />
+								</f:facet>
+
+								<p:outputLabel value="#{reservacion.areaSede.catSede.nombre}" />
+							</p:column>
+
+						</p:dataTable>
+
+					</p:panel>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12 floatFlexCentrarY margenInferior">
+						<p:outputLabel value="Reporte de excel:"
+							styleClass="margenDerecho" for="btnReporte" />
+						<p:commandLink id="btnReporte" ajax="false"
+							styleClass="margenDerecho">
+							<p:dataExporter type="xls" target="tblReservaciones"
+								fileName="analisisDatosReservaciones" pageOnly="true" />
+							<p:graphicImage library="images" width="150" height="35"
+								name="analisis_datos/descargar.png"
+								styleClass="foto margenDerecho" />
+						</p:commandLink>
+						<p:outputLabel value="Informe prediseñado"
+							styleClass="margenDerecho" />
+						<p:commandButton value="Generar"
+							styleClass="margenDerecho btn btn-primary"
+							action="#{reporteReservacionesBean.generaEstadisticas}" />
+
+					</div>
+				</div>
+			</div>
+
+		</h:form>
+
+	</ui:define>
+</ui:composition>

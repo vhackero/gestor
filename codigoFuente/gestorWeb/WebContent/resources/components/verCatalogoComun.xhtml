@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:composite="http://java.sun.com/jsf/composite">
+
+<composite:interface>
+	<composite:attribute name="idCat" />
+	<composite:attribute name="nombreCat" />
+	<composite:attribute name="listaElemCat" />
+	<composite:attribute name="rendered" />
+	<composite:attribute name="listenerCambioEstatus"
+		method-signature="void listener()" />
+	<composite:attribute name="accionEditRegCatalogo"
+		method-signature="void action()" />
+	<composite:attribute name="catalogoDTOSel" />
+	<composite:attribute name="renderCmpSelect" />
+	<composite:attribute name="renderCmpEncuestas" />
+</composite:interface>
+
+<composite:implementation>
+
+	<p:panel header="#{cc.attrs.nombreCat}" toggleable="false"
+		rendered="#{cc.attrs.rendered}">
+		<p:dataTable tableStyleClass="table" value="#{cc.attrs.listaElemCat}"
+			var="elemCat" paginator="true" paginatorPosition="bottom"
+			currentPageReportTemplate="({currentPage} de {totalPages})"
+			emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+			paginatorTemplate=" {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+			rowsPerPageTemplate="5,10,15" rows="10">
+				
+			<p:column headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.nombre')}"  sortBy="#{elemCat.nombre}">
+				<h:outputText value="#{elemCat.nombre}" />
+			</p:column>
+
+			<p:column headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.desc')}"  sortBy="#{elemCat.descripcion}">
+				<h:outputText value="#{elemCat.descripcion}" />
+			</p:column>
+
+			<p:column headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.contexto')}" sortBy="#{elemCat.contexto.nombre}"
+				rendered="#{cc.attrs.renderCmpSelect}">
+				<h:outputText value="#{elemCat.contexto.nombre}" />
+			</p:column>
+
+			<p:column rendered="false" headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.prioridad')}" sortBy="#{elemCat.orden}">
+				<h:outputText value="#{elemCat.orden}" />
+			</p:column>
+
+			<p:column headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.activo')}">
+				<p:inputSwitch id="swchActivoCat" value="#{elemCat.activoBoolean}"
+					onLabel="#{sistema.obtenerTexto('gw.admin.vercat.texto.si')}" offLabel="#{sistema.obtenerTexto('gw.admin.vercat.texto.no')}">
+					<p:ajax event="change" immediate="true"
+						listener="#{cc.attrs.listenerCambioEstatus}" update="@parent"
+						process="@this" />
+					<f:param name="idRegCat" value="#{elemCat.id}" />
+				</p:inputSwitch>
+			</p:column>
+			
+			<p:column headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.fechareg')}"  
+				sortBy="#{elemCat.fechaRegistro}">
+				<h:outputText value="#{elemCat.fechaRegistro}">
+					<f:convertDateTime pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+				</h:outputText>
+			</p:column>
+
+			<p:column headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.acciones')}" styleClass="text-center">
+				<p:commandButton id="editar" styleClass="btn btn-default btn-icon icono_sisi ss_gn_mod" ajax="true"
+					update="@form" process="@this"
+					action="#{cc.attrs.accionEditRegCatalogo}" onstart="PF('statusDialog').hide()">
+					<f:setPropertyActionListener value="#{elemCat}"
+						target="#{cc.attrs.catalogoDTOSel}" />
+				</p:commandButton>
+				<p:tooltip for="editar" value="#{sistema.obtenerTexto('gw.admin.vercat.texto.editar')}" position="top" />
+				
+			</p:column>
+
+		</p:dataTable>
+	</p:panel>
+
+</composite:implementation>
+
+</html>

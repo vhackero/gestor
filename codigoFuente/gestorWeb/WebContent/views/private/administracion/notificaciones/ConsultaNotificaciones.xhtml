@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li class="active">#{sistema.obtenerTexto('gw.mensajes.texto.mensajes')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form>
+			<h1>#{sistema.obtenerTexto('gw.mensajes.texto.mensajes')}</h1>
+			<hr />
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.mensajes.consulta.boton.nuevo')}"
+							action="#{notificacionesBean.nuevaNotificacion()}"
+							styleClass="pull-right btn btn-primary" />
+						<p:outputLabel styleClass="pull-right agregaHeight" value="#{sistema.obtenerTexto('gw.mensajes.consulta.label.nuevo')}:" />
+					</div>
+				</div>
+			</div>
+			<p:tabView>
+				<p:tab
+					title="#{sistema.obtenerTexto('gw.mensajes.consulta.titulo.panel.recibidos')}">
+					<p:dataTable id="tblRecibidos" var="notificacion"
+						value="#{notificacionesBean.recibidos}" reflow="true"
+						emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+						paginator="true" rows="10" rowsPerPageTemplate="5,10,15"
+						paginatorPosition="bottom"
+						currentPageReportTemplate="({currentPage} de {totalPages})"
+						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+						tableStyleClass="table">
+
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.nombre')}">
+							<h:outputText
+								value="#{notificacion.mensajes.get(0).nombreCompleto}"
+								styleClass="#{notificacion.nuevo?'nuevo':'normal'}" />
+						</p:column>
+
+						<p:column 
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.titulo')}">
+							<h:outputText value="#{notificacion.titulo}"
+								styleClass="#{notificacion.nuevo?'nuevo':'normal'}" />
+						</p:column>
+
+						<p:column 
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.descripcion')}">
+							<h:outputText
+								value="#{notificacion.mensajes.get(0).contenidoResumen}"
+								escape="false"
+								styleClass="#{notificacion.nuevo?'nuevo':'normal'}" />
+						</p:column>
+
+						<p:column 
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.fecha')}">
+							<h:outputText value="#{notificacion.mensajes.get(0).fecha}"
+								styleClass="#{notificacion.nuevo?'nuevo':'normal'}">
+								<f:convertDateTime pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+							</h:outputText>
+						</p:column>
+
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.acciones')}"
+							styleClass="text-center">
+							<p:commandButton id="acciones"
+								action="#{notificacionesBean.detalleNotificacion()}"
+								 styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+								<f:setPropertyActionListener value="#{notificacion}"
+									target="#{notificacionesBean.notificacionModificar}" />
+							</p:commandButton>
+							<p:tooltip for="acciones"
+								value="#{sistema.obtenerTexto('gw.mensajes.consulta.boton.detalle')}"
+								position="top" />
+							<p:commandButton id="eliminar" ajax="true" 
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar"
+								oncomplete="PF('mConfirmacion').show();">
+								<f:setPropertyActionListener value="#{notificacion}"
+									target="#{notificacionesBean.notificacion}" />
+							</p:commandButton>
+							<p:tooltip for="eliminar"
+								value="#{sistema.obtenerTexto('gw.mensajes.consulta.boton.eliminar')}"
+								position="top" />
+						</p:column>
+					</p:dataTable>
+				</p:tab>
+				<p:tab
+					title="#{sistema.obtenerTexto('gw.mensajes.consulta.titulo.panel.enviados')}">
+					<p:dataTable id="tblEnviados" var="notificacion" reflow="true"
+						value="#{notificacionesBean.enviados}" paginator="true" rows="10"
+						rowsPerPageTemplate="5,10,15" paginatorPosition="bottom"
+						currentPageReportTemplate="({currentPage} de {totalPages})"
+						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+						tableStyleClass="table"
+						emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}">
+
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.nombre')}">
+							<h:outputText
+								value="#{notificacion.mensajes.get(0).nombreCompleto}" />
+						</p:column>
+
+						<p:column 
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.titulo')}">
+							<h:outputText value="#{notificacion.titulo}" />
+						</p:column>
+
+						<p:column 
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.descripcion')}">
+							<h:outputText
+								value="#{notificacion.mensajes.get(0).contenidoResumen}" />
+						</p:column>
+
+						<p:column 
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.fecha')}">
+							<h:outputText value="#{notificacion.mensajes.get(0).fecha}">
+								<f:convertDateTime pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+							</h:outputText>
+						</p:column>
+
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.acciones')}"
+							styleClass="text-center">
+							<p:commandButton id="detalle"
+								action="#{notificacionesBean.detalleEnviado()}"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+								<f:setPropertyActionListener value="#{notificacion}"
+									target="#{notificacionesBean.notificacion}" />
+							</p:commandButton>
+							<p:tooltip for="detalle"
+								value="#{sistema.obtenerTexto('gw.mensajes.consulta.boton.detalle')}"
+								position="top" />
+
+						</p:column>
+					</p:dataTable>
+				</p:tab>
+				<p:tab
+					title="#{sistema.obtenerTexto('gw.mensajes.consulta.titulo.panel.borradores')}">
+					<p:dataTable id="tblBorradores" var="notificacion" reflow="true"
+						value="#{notificacionesBean.borradores}" paginator="true"
+						rows="10" rowsPerPageTemplate="5,10,15" paginatorPosition="bottom"
+						currentPageReportTemplate="({currentPage} de {totalPages})"
+						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+						tableStyleClass="table"
+						emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}">
+
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.nombre')}">
+							<h:outputText
+								value="#{notificacion.mensajes.get(0).nombreCompleto}" />
+						</p:column>
+
+						<p:column 
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.titulo')}">
+							<h:outputText value="#{notificacion.titulo}" />
+						</p:column>
+
+						<p:column 
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.descripcion')}">
+							<h:outputText
+								value="#{notificacion.mensajes.get(0).contenidoResumen}" />
+						</p:column>
+
+						<p:column 
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.fecha')}">
+							<h:outputText value="#{notificacion.mensajes.get(0).fecha}">
+								<f:convertDateTime pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+							</h:outputText>
+						</p:column>
+
+						<p:column headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.acciones')}" styleClass="text-center">
+							<p:commandButton id="detalleBorradores"
+								
+								action="#{notificacionesBean.cargarNotificacion()}" 
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis">
+								<f:setPropertyActionListener value="#{notificacion}"
+									target="#{notificacionesBean.notificacionModificar}" />
+							</p:commandButton>
+							<p:tooltip for="detalleBorradores"
+								value="#{sistema.obtenerTexto('gw.mensajes.consulta.boton.detalle')}"
+								position="top" />
+						</p:column>
+					</p:dataTable>
+				</p:tab>
+				<p:tab
+					title="#{sistema.obtenerTexto('gw.mensajes.consulta.titulo.panel.eliminados')}">
+					<p:dataTable id="tblEliminados" var="notificacion" reflow="true"
+						value="#{notificacionesBean.eliminados}" paginator="true"
+						rows="10" rowsPerPageTemplate="5,10,15" paginatorPosition="bottom"
+						currentPageReportTemplate="({currentPage} de {totalPages})"
+						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+						tableStyleClass="table"
+						emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}">
+
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.nombre')}">
+							<h:outputText
+								value="#{notificacion.mensajes.get(0).nombreCompleto}" />
+						</p:column>
+
+						<p:column 
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.titulo')}">
+							<h:outputText value="#{notificacion.titulo}" />
+						</p:column>
+
+						<p:column 
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.descripcion')}">
+							<h:outputText
+								value="#{notificacion.mensajes.get(0).contenidoResumen}" />
+						</p:column>
+
+						<p:column 
+							headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.fecha')}">
+							<h:outputText value="#{notificacion.mensajes.get(0).fecha}">
+								<f:convertDateTime pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+							</h:outputText>
+						</p:column>
+
+						<p:column headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.acciones')}" styleClass="text-center">
+							<p:commandButton id="eliminados"
+								
+								action="#{notificacionesBean.detalleNotificacion()}"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis">
+								<f:setPropertyActionListener value="#{notificacion}"
+									target="#{notificacionesBean.notificacionModificar}" />
+							</p:commandButton>
+							<p:tooltip for="eliminados"
+								value="#{sistema.obtenerTexto('gw.mensajes.consulta.boton.detalle')}"
+								position="top" />
+						</p:column>
+					</p:dataTable>
+				</p:tab>
+			</p:tabView>
+			<p:dialog widgetVar="mConfirmacion" modal="true" closable="false"
+				resizable="false" draggable="false" position="center" styleClass="medidaModal"
+				header="#{sistema.obtenerTexto('gw.mensajes.consulta.modal.confirmacion.titulo')}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.mensajes.consulta.modal.confirmacion.mensaje')}" />
+						</div>
+					</div>
+				</div>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.mensajes.consulta.modal.confirmacion.boton.si')}"
+								action="#{notificacionesBean.eliminarNotificacion()}"
+								oncomplete="PF('mConfirmacion').hide();" update="@form"
+								styleClass="btn btn-primary pull-right" />
+							<p:button
+								value="#{sistema.obtenerTexto('gw.mensajes.consulta.modal.confirmacion.boton.no')}"
+								onclick="PF('mConfirmacion').hide();"
+								styleClass="btn btn-default pull-right" />
+
+						</div>
+					</div>
+				</f:facet>
+
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,43 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+	<ui:repeat var="pregunta"
+		value="#{consultaEncuestaBean.encuestaSelDetalle.preguntasEncuesta}">
+		<div class="row">
+			<div class="col-md-12 espacioPregutaRespuesta">
+				<p:outputLabel value="#{pregunta.nombre}" />
+			</div>
+		</div>
+		<div class="row flex">
+			
+				<p:graphicImage library="images" width="70" height="70"
+					name="escala_encuestas/e2.png" styleClass="foto" />
+			
+			
+				<p:graphicImage library="images" width="70" height="70"
+					name="escala_encuestas/e4.png" styleClass="foto" />
+			
+			
+				<p:graphicImage library="images" width="70" height="70"
+					name="escala_encuestas/e6.png" styleClass="foto" />
+			
+		
+				<p:graphicImage library="images" width="70" height="70"
+					name="escala_encuestas/e8.png" styleClass="foto" />
+			
+			
+				<p:graphicImage library="images" width="70" height="70"
+					name="escala_encuestas/e10.png" styleClass="foto" />
+			
+		
+			
+		</div>
+		<hr class="claseSeparadora" />
+
+
+	</ui:repeat>
+
+</ui:composition>

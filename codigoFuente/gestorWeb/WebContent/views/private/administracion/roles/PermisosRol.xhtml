@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.roles')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.editarroles')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.editarroles')}</h1>
+		<hr class="red" />
+		<h:form id="frmPermisosRol">
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.roles.permisos.titulo.panel.superior')}"
+				styleClass="fondoPrimario">
+
+				<div class="row">
+					<div class="col-md-1 text-right">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.roles.permisos.etiqueta.rol')}:" />
+					</div>
+					<div class="col-md-3">
+						<h:outputText value="#{rolBean.rolModificar.nombre}" />
+					</div>
+
+
+				</div>
+
+
+
+			</p:panel>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.roles.permisos.titulo.panel.inferior')}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:tree value="#{rolBean.permisos}" var="permiso"
+								selectionMode="checkbox" styleClass="arbolRoles"
+								selection="#{rolBean.permisosSeleccionados}">
+								<p:treeNode expandedIcon="ui-icon-folder-open"
+									collapsedIcon="ui-icon-folder-collapsed">
+									<h:outputText value="#{permiso.funcionalidadDTO.descripcion }" />
+								</p:treeNode>
+							</p:tree>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.roles.permisos.boton.cancelar')}"
+							immediate="true" ajax="false" styleClass="btn btn-default"
+							action="ROLES" />
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.roles.permisos.boton.guardar')}"
+							ajax="false" styleClass="btn btn-primary"
+							action="#{rolBean.guardarPermisos()}" />
+					</div>
+				</div>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>

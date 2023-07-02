@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<h:form id="frmPA">
+		<!-- Panel Info Area  -->
+
+		<p:panel
+			header="#{sistema.obtenerTexto('gw.logInfra.persArea.titulo.info')}"
+			id="panelInfoArea">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-4">
+						<p:outputLabel styleClass="bloque"
+							value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.dependencia')}" />
+						<h:outputText
+							value="#{capturaEventoCapacitacion.configuracionAreaReservacion.catAreasSede.catSede.organismoGubernamental.nombre}" />
+					</div>
+					<div class="col-md-4">
+						<p:outputLabel styleClass="bloque"
+							value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.ubicacion')}" />
+						<h:outputText
+							value="#{capturaEventoCapacitacion.configuracionAreaReservacion.catAreasSede.catSede.catUbicacionTerritorial.nombre}" />
+					</div>
+					<div class="col-md-4">
+						<p:outputLabel styleClass="bloque"
+							value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.sede')}" />
+						<h:outputText
+							value="#{capturaEventoCapacitacion.configuracionAreaReservacion.catAreasSede.catSede.nombre}" />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel styleClass="bloque"
+						value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.area')}" />
+					<h:outputText
+						value="#{capturaEventoCapacitacion.configuracionAreaReservacion.catAreasSede.catArea.nombre}" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel styleClass="bloque"
+						value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.direccion')}" />
+					<h:outputText
+						value="#{capturaEventoCapacitacion.configuracionAreaReservacion.catAreasSede.catSede.direccion} #{capturaEventoCapacitacion.configuracionAreaReservacion.catAreasSede.catSede.colonia} " />
+				</div>
+
+			</div>
+		</p:panel>
+		<br />
+		<p:panel header="Configuracion" id="panelConfiguracion">
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.titulo.mostrarImgs')}"
+							styleClass="bloque" />
+
+						<p:carousel value="#{capturaEventoCapacitacion.obtieneImagenes()}"
+							var="imagen" numVisible="1" responsive="true" circular="true"
+							itemStyle="height:200px;text-align:center">
+
+							<h:panelGrid columns="1" style="margin: 0 auto;">
+								<p:graphicImage value="#{imagen}" stream="false" height="170px" />
+								<p:outputLabel value="#{imagen.name}" />
+							</h:panelGrid>
+						</p:carousel>
+
+
+					</div>
+				</div>
+			</div>
+
+
+			<!-- recursos tecnologicos -->
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.titulo.recTec')}"
+							styleClass="bloque" />
+
+						<p:dataTable id="tblRecTec" StyleClass="table" var="rt"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							value="#{capturaEventoCapacitacion.selTec}">
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logInfra.persArea.etiqueta.nombreRec')}">
+								<h:outputText value="#{rt.catRecursosInfraestructura.nombre}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logInfra.persArea.etiqueta.cantidadRec')}">
+
+								<p:selectOneMenu styleClass="col-xs-12"
+									value="#{rt.cantidadSeleccionada}">
+									<p:ajax process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										noSelectionOption="true" />
+									<f:selectItems value="#{rt.listadoCantidad}" var="c"
+										itemValue="#{c}" itemLabel="#{c}" />
+								</p:selectOneMenu>
+							</p:column>
+
+						</p:dataTable>
+
+					</div>
+
+				</div>
+			</div>
+
+			<!-- recursos mobiliarios -->
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.etiqueta.mobiliario')}"
+							styleClass="bloque " />
+
+						<p:dataTable id="tblRecMobi" StyleClass="table" var="rm"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							value="#{capturaEventoCapacitacion.selMobi}">
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logInfra.persArea.etiqueta.nombreRec')}">
+								<h:outputText value="#{rm.catRecursosInfraestructura.nombre}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logInfra.persArea.etiqueta.cantidadRec')}">
+
+								<p:selectOneMenu styleClass="col-xs-12"
+									value="#{rm.cantidadSeleccionada}">
+									<p:ajax process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										noSelectionOption="true" />
+									<f:selectItems value="#{rm.listadoCantidad}" var="c"
+										itemValue="#{c}" itemLabel="#{c}" />
+								</p:selectOneMenu>
+							</p:column>
+
+						</p:dataTable>
+
+					</div>
+
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.etiqueta.obsAcad')}"
+							styleClass="bloque" for="obsA" />
+						<!-- Longitud de campo -->
+						<p:inputText id="obsA" maxlength="2000"
+							value="#{capturaEventoCapacitacion.solicitudSeleccionadaEdit.perArea.observacionesAcademicas}"
+							styleClass="form-control">
+							<p:ajax process="@this" />
+						</p:inputText>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.etiqueta.distribucion')}"
+							styleClass="bloque " />
+						<p:selectOneMenu
+							value="#{capturaEventoCapacitacion.solicitudSeleccionadaEdit.perArea.distribucionArea}"
+							converter="entityConverter">
+							<p:ajax process="@this" update="@this" />
+							<f:selectItem
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								noSelectionOption="true" />
+							<f:selectItems
+								value="#{capturaEventoCapacitacion.configuracionAreaReservacion.relAreaDistribucion}"
+								var="catDist" itemLabel="#{catDist.catDistribucionArea.nombre}"
+								itemValue="#{catDist.catDistribucionArea}" />
+						</p:selectOneMenu>
+					</div>
+
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.etiqueta.servicioCaf')}"
+							styleClass="bloque " />
+
+						<p:selectOneRadio
+							value="#{capturaEventoCapacitacion.solicitudSeleccionadaEdit.perArea.servicioCafeteria}">
+							<f:selectItem itemLabel="Si" itemValue="1" />
+							<f:selectItem itemLabel="No" itemValue="0" />
+							<p:ajax process="@this" />
+						</p:selectOneRadio>
+					</div>
+
+				</div>
+			</div>
+
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.titulo.envioSol')}"
+							styleClass="bloque " />
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.etiqueta.email')}"
+							for="emailRes" styleClass="bloque requerido" />
+						<!-- Longitud de campo -->
+						<p:inputText styleClass="form-control" id="emailRes" type="email"
+							required="true" maxlength="200"
+							requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+							value="#{capturaEventoCapacitacion.solicitudSeleccionadaEdit.perArea.emailResponsable}">
+							<p:ajax process="@this" update="panelConfiguracion" />
+						</p:inputText>
+						<p:message for="emailRes" />
+					</div>
+
+					<div class="col-md-6">
+						<p:outputLabel value="CC" styleClass="bloque" />
+						<!-- Longitud de campo -->
+						<p:inputText styleClass="form-control" type="email"
+							maxlength="200"
+							value="#{capturaEventoCapacitacion.solicitudSeleccionadaEdit.perArea.emailCc}">
+							<p:ajax process="@this" />
+						</p:inputText>
+					</div>
+
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+
+						<p:commandButton id="btnSave" ajax="true"
+							styleClass="btn btn-primary pull-right" update="@form"
+							action="#{capturaEventoCapacitacion.abrirModal}"
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.btn.guardar')}" />
+
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.btn.cancelar')}"
+							actionListener="#{capturaEventoCapacitacion.limpiaSS}"
+							oncomplete="PF('dlgPersonalizacion').hide(); scrollArriba();"
+							styleClass="btn btn-default pull-right" />
+
+					</div>
+				</div>
+			</div>
+		</p:panel>
+
+	</h:form>
+
+	<!-- 		Confirma personalización área -->
+	<h:form id="frmPers">
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" styleClass="medidaModal" closable="false"
+			modal="true" id="modalPers" widgetVar="modalReserv"
+			header="#{sistema.obtenerTexto('gw.logInfra.persArea.titulo.personalizacion')}"
+			dynamic="true">
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.titulo.msgGuardar')}" />
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.etiqueta.dependencia')}"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{capturaEventoCapacitacion.configuracionAreaReservacion.catAreasSede.catSede.organismoGubernamental.nombre}" />
+					</div>
+
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.etiqueta.ubicacion')}"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{capturaEventoCapacitacion.configuracionAreaReservacion.catAreasSede.catSede.catUbicacionTerritorial.nombre}" />
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.etiqueta.sede')}"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{capturaEventoCapacitacion.configuracionAreaReservacion.catAreasSede.catSede.nombre}" />
+					</div>
+
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.etiqueta.area')}"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{capturaEventoCapacitacion.configuracionAreaReservacion.catAreasSede.catArea.nombre}" />
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.etiqueta.fecha')}"
+							styleClass="bloque" />
+						<h:outputText value="#{capturaEventoCapacitacion.fechaActual}">
+							<f:convertDateTime
+								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+						</h:outputText>
+					</div>
+				</div>
+			</div>
+
+			<f:facet name="footer">
+				<div class="row">
+					<div class="col-md-12">
+
+						<p:commandButton styleClass="btn btn-primary pull-right"
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.btn.guardar')}"
+							ajax="true" process="@this"
+							action="#{capturaEventoCapacitacion.guardaPersonalizacionArea}"
+							update="tabEventoCapacitacion:formReserv"
+							oncomplete="PF('modalReserv').hide(),PF('dlgPersonalizacion').hide(), scrollArriba();" />
+
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.logInfra.persArea.btn.cancelar')}"
+							onclick="PF('modalReserv').hide();  scrollArriba();"
+							styleClass="btn btn-default pull-right" />
+
+					</div>
+				</div>
+			</f:facet>
+
+		</p:dialog>
+	</h:form>
+
+
+</ui:composition>

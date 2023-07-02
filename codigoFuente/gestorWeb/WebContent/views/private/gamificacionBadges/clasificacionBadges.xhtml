@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="breadcrumb">
+		<li>Gamificación badges</li>
+		<li class="active">Clasificación badges</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form>
+			<h1>Clasificación Badges</h1>
+			<hr />
+
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton rendered="false"
+						value="#{sistema.obtenerTexto('gw.roles.boton.agregar')}"
+						styleClass="pull-right btn btn-primary">
+					</p:commandButton>
+					<p:outputLabel value="Nueva clasificación" rendered="false"
+						styleClass="pull-right agregaHeight" />
+				</div>
+			</div>
+
+			<p:panel header="Clasificación badges">
+
+				<p:dataTable id="tblRoles" reflow="true" tableStyleClass="table"
+					styleClass="roles" paginator="true" paginatorPosition="bottom"
+					rows="10" rowsPerPageTemplate="5,10,15"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}">
+
+					<f:facet name="header">
+						<p:outputPanel styleClass="text-right">
+							<p:outputLabel for="globalFilter"
+								value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}" />
+							<p:inputText id="globalFilter" onkeyup="PF('tblRoles').filter()"
+								placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+						</p:outputPanel>
+					</f:facet>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.roles.columna.id')}">
+						<h:outputText value="valor" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.roles.columna.nombre')}">
+						<h:outputText value="valor" />
+					</p:column>
+
+					<p:column headerText="Descripción">
+						<h:outputText value="valor" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.roles.columna.acciones')}"
+						styleClass="text-center">
+						<p:commandButton
+							styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod"
+							id="editartooltip" process="@this"
+							oncomplete="PF('mRol').show();" ajax="true" />
+						<p:tooltip for="editartooltip"
+							value="#{sistema.obtenerTexto('gw.roles.boton.editar')}"
+							position="top" />
+						<p:commandButton
+							styleClass="btn-icon btn btn-default icono_sisi ss_adm_rolpermi"
+							id="eliminar" ajax="false" />
+						<p:tooltip for="eliminar" value="Eliminar" position="top" />
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+
+			<p:dialog id="mdlRoles" header="Editar" widgetVar="mRol" modal="true"
+				resizable="false" draggable="false" closable="false"
+				styleClass="medidaModal" position="center" role="dialog">
+
+				<p:outputPanel id="contenido">
+				</p:outputPanel>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.roles.modal.boton.guardar')}"
+								styleClass="btn btn-primary pull-right" />
+							<p:commandButton type="button" onclick="PF('mRol').hide();"
+								styleClass="btn btn-default pull-right"
+								value="#{sistema.obtenerTexto('gw.roles.modal.boton.cancelar')}" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

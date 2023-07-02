@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li class="active">#{sistema.obtenerTexto('gw.textos.header.notificaciones')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.header.notificaciones')}</h1>
+		<hr />
+		<p:ajaxStatus onstart="PF('dialogLayout').show()"
+			onsuccess="PF('dialogLayout').hide()" />
+		<p:dataTable value="#{notificacionesBean.notificacionesSistema}"
+			id="tblNotificacionesSistema"
+			emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+			tableStyleClass="table" var="notificacion" widgetVar="tblActividades"
+			paginator="true" paginatorPosition="bottom" rows="10" reflow="true"
+			rowsPerPageTemplate="5,10,15"
+			currentPageReportTemplate="({currentPage} de {totalPages})"
+			paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+			<p:column
+				headerText="#{sistema.obtenerTexto('gw.mensajes.panel.detalle')}">
+				<h:outputText value="#{notificacion.titulo}" 
+					styleClass="#{notificacion.nuevo? 'nuevo':'normal'}" />
+
+			</p:column>
+			<p:column
+				headerText="#{sistema.obtenerTexto('gw.mensajes.panel.fecha')}">
+				<h:outputText value="#{notificacion.fechaEnvio}"
+					styleClass="#{notificacion.nuevo? 'nuevo':'normal'}">
+					<f:convertDateTime
+						pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+				</h:outputText>
+			</p:column>
+			<p:column
+				headerText="#{sistema.obtenerTexto('gw.mensajes.consulta.columna.acciones')}"
+				styleClass="text-center">
+				<p:commandButton id="btn-detalle" ajax="true"
+					action="#{notificacionesBean.actualizarEstatusNotificacion()}"
+					update="detalleMensaje tblNotificacionesSistema" process="@this"
+					styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis"
+					oncomplete="PF('detalleMensaje').show();">
+					<f:setPropertyActionListener value="#{notificacion}"
+						target="#{notificacionesBean.notificacionSistema}" />
+				</p:commandButton>
+				<p:tooltip for="btn-detalle"
+					value="#{sistema.obtenerTexto('gw.mensajes.tooltip.detalles')}"
+					position="top" />
+			</p:column>
+		</p:dataTable>
+		<p:dialog id="detalleMensaje" widgetVar="detalleMensaje" modal="true"
+			resizable="false" draggable="false" closable="false"
+			position="center" role="dialog" styleClass="medidaModal"
+			header="#{sistema.obtenerTexto('gw.mensajes.panel.detalle')}">
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText escape="false"
+							value="#{notificacionesBean.notificacionSistema.mensaje}" />
+					</div>
+				</div>
+			</div>
+			<f:facet name="footer">
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.mensajes.btn.cerrar')}"
+							onclick="PF('detalleMensaje').hide();"
+							styleClass="btn btn-default pull-right" />
+
+					</div>
+				</div>
+			</f:facet>
+
+		</p:dialog>
+	</ui:define>
+</ui:composition>

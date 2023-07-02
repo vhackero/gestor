@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.cargaMasiva')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.cargaMasiva')}</h1>
+		<hr />
+		<h:form enctype="multipart/form-data">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<div class="row">
+				<div class="col-md-12 ">
+
+
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.cargamasiva.resultados.boton.plantilla')}"
+						ajax="false" onclick="PrimeFaces.monitorDownload(start, stop);"
+						styleClass="btn btn-primary pull-right botonPlantilla">
+
+						<p:fileDownload value="#{cargaMasivaUsuariosBean.plantilla}" />
+
+					</p:commandButton>
+					<p:outputLabel style="margin-left:10px"
+						value="#{sistema.obtenerTexto('gw.usuarios.texto.descargar')}:"
+						styleClass="pull-right agregaHeight" />
+					<p:commandButton styleClass="iconoAyuda pull-right" rendered="false"
+						icon="fa fa-question-circle" onclick="PF('modal').show();" />
+					<p:outputLabel value="Ver:" style="color: red" rendered="false"
+						styleClass="pull-right agregaHeight" />
+
+				</div>
+
+			</div>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.cargaMasiva.panel.superior.titulo')}">
+
+
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel styleClass="margenDerecho"
+							value="#{sistema.obtenerTexto('gw.cargamasiva.etiqueta.archivo')}" />
+						<h:outputText value="(.csv, .xls, .xlsl)" />
+
+
+					</div>
+				</div>
+				<div class="row">
+
+					<div class="col-md-6 flexibleVertical margenTop">
+						<p:inputText
+							placeholder="#{sistema.obtenerTexto('gw.usuarios.texto.sinarchivo')}"
+							styleClass="form-control" disabled="true" />
+
+
+					</div>
+					<div class="col-md-5 flexibleVertical">
+						<p:fileUpload value="#{cargaMasivaUsuariosBean.archivo}"
+							styleClass="cargarArchivo agregaHeight"
+							label="#{sistema.obtenerTexto('gw.usuarios.texto.seleccionar')}"
+							mode="advanced" auto="true" sizeLimit="50000000"
+							oncomplete="desactivaBtnGuardarLote();"
+							invalidSizeMessage="#{sistema.obtenerTexto('gw.global.archivo.tamanio.limite')}"
+							fileUploadListener="#{cargaMasivaUsuariosBean.fileUploadListener}"
+							update="@form " />
+
+						<!--  <i class="fa fa-question-circle"></i>-->
+						<p:commandButton styleClass="iconoAyuda"
+							icon="fa fa-question-circle" onclick="PF('modal').show();" />
+					</div>
+				</div>
+			</p:panel>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.cargaMasiva.panel.inferior.titulo')}"
+				rendered="#{not cargaMasivaUsuariosBean.mostrarResultados}">
+				<p:dataTable value="#{cargaMasivaUsuariosBean.lotes}"
+					tableStyleClass="table" var="lote" paginator="true" reflow="true"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					paginatorPosition="bottom" rows="10" rowsPerPageTemplate="5,10,15"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.cargamasiva.lotes.columna.clave')}">
+						<h:outputText value="#{lote.idLoteCargaUsuarios}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.cargamasiva.lotes.columna.nombre')}">
+						<h:outputText value="#{lote.nombre}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.cargamasiva.lotes.columna.fecha')}">
+						<h:outputText value="#{lote.fechaRegistro}" >
+							<f:convertDateTime type="date"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />	
+						</h:outputText>
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.cargamasiva.lotes.columna.acciones')}"
+						styleClass="text-center">
+
+						<p:commandButton ajax="false"
+							onclick="PrimeFaces.monitorDownload(start, stop);"
+							styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc"
+							id="descargarIcon">
+
+							<f:setPropertyActionListener value="#{lote}"
+								target="#{cargaMasivaUsuariosBean.lote}" />
+							<p:fileDownload value="#{cargaMasivaUsuariosBean.archivoLote}" />
+						</p:commandButton>
+						<p:tooltip for="descargarIcon" position="top"
+							value="#{sistema.obtenerTexto('gw.cargamasiva.resultados.boton.descargar')}"></p:tooltip>
+
+					</p:column>
+				</p:dataTable>
+
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12 text-right">
+
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.cargamasiva.resultados.boton.regresar')}"
+								action="ADMIN_USUARIOS" ajax="false"
+								styleClass="btn btn-default botonPlantilla" />
+
+						</div>
+					</div>
+				</div>
+			</p:panel>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.cargaMasiva.panel.resultados')}"
+				rendered="#{cargaMasivaUsuariosBean.mostrarResultados}">
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel
+							value="#{cargaMasivaUsuariosBean.lote.nombreArchivo}" />
+						<p:outputLabel value="#{cargaMasivaUsuariosBean.lote.nombre}" />
+					</div>
+				</div>
+
+				<p:dataTable tableStyleClass="table"
+					value="#{cargaMasivaUsuariosBean.resultado}">
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.cargamasiva.resultados.columna.total')}">
+						<h:outputText
+							value="#{cargaMasivaUsuariosBean.resultado.totalRegistros}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.cargamasiva.resultados.columna.validos')}">
+						<h:outputText
+							value="#{cargaMasivaUsuariosBean.resultado.registrosValidos}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.cargamasiva.resultados.columna.invalidos')}">
+						<h:outputText
+							value="#{cargaMasivaUsuariosBean.resultado.registrosInvalidos}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.cargamasiva.resultados.columna.observaciones')}">
+						<h:outputText
+							value="#{sistema.obtenerTexto('gw.cargamasiva.resultados.dato.observaciones')}"
+							styleClass="pull-left" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.cargamasiva.resultados.columna.acciones')}"
+						styleClass="text-center">
+
+
+						<p:commandButton id="iconDescargar" ajax="false"
+							onclick="PrimeFaces.monitorDownload(start, stop);"
+							styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc">
+
+							<p:fileDownload
+								value="#{cargaMasivaUsuariosBean.archivoResultado}" />
+						</p:commandButton>
+						<p:tooltip for="iconDescargar" position="top"
+							value="#{sistema.obtenerTexto('gw.cargamasiva.resultados.boton.descargar')}" />
+					</p:column>
+				</p:dataTable>
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel for="lote"
+							value="#{sistema.obtenerTexto('gw.cargamasiva.etiqueta.lote')}:" />
+
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6">
+							<p:inputText id="lote"
+								disabled="#{not cargaMasivaUsuariosBean.resultado.correcto}"
+								value="#{cargaMasivaUsuariosBean.lote.nombre}"
+								styleClass="form-control">
+							</p:inputText>
+						</div>
+						<div class="col-md-6">
+							<p:commandButton id="btnGuardarLote"
+								styleClass="btn btn-primary pull-right"
+								widgetVar="btnGuardarLote"
+								value="#{sistema.obtenerTexto('gw.cargamasiva.resultados.boton.guardar')}"
+								action="#{cargaMasivaUsuariosBean.guardarLote()}"
+								disabled="#{not cargaMasivaUsuariosBean.resultado.correcto}" />
+
+
+							<p:commandButton styleClass="btn btn-default pull-right"
+								value="#{sistema.obtenerTexto('gw.cargamasiva.resultados.boton.cancelar')}"
+								action="#{cargaMasivaUsuariosBean.inicioCargaUsuarios()}" />
+						</div>
+					</div>
+				</div>
+			</p:panel>
+			<p:dialog
+				header="#{sistema.obtenerTexto('gw.cargamasiva.modal.header')}"
+				responsive="true" closable="false" appendTo="@(body)"
+				widgetVar="modal" draggable="false" resizable="false"
+				position="center" modal="true" width="1366">
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel styleClass="bloque"
+							value="#{sistema.obtenerTexto('gw.cargamasiva.modal.titulo')}:" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<table class="table-bordered tablaAyuda" >
+						<tr class="text-center negrita">
+							<td>Tipo de usuario: (INTERNO/EXTERNO)</td>
+							<td>Usuario: (Alfanumérico)</td>
+							<td>Contraseña:(Alfanumérico)</td>
+							<td>Programa social: (SI/NO)</td>
+							<td>CURP:</td>
+							<td>Nombre:(TEXTO)</td>
+							<td>Primer apellido:(TEXTO)</td>
+							<td>Segundo apellido:(TEXTO)</td>
+							<td>Fecha de nacimiento (DD/MM/AA)</td>
+							<td>Institución:(TEXTO)</td>
+							<td>Correo eletrónico:</td>
+							<td>Teléfono:</td>
+							<td>Celular:</td>
+							<td>Sede: (ESTADO)</td>
+							<td>Municipio o delegación</td>
+							<td>Orden de gobierno: (FEDERAL, ESTATAL, MUNICIPAL, OTRO)</td>
+							<td>Puesto:(TEXTO)</td>
+							
+						</tr>
+						</table>
+						<h:outputText rendered="false"
+							value="#{sistema.obtenerTexto('gw.cargamasiva.modal.mensaje')}" />
+					</div>
+				</div>
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.usuarios.btn.cerrar')}"
+								styleClass="btn btn-default"
+								onclick="PF('modal').hide(); return false;" />
+
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

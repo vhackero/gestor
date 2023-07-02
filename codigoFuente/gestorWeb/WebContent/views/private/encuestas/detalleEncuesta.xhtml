@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.encuestas')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.encuestas.consulta.etiqueta.verencuesta')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="formf">
+
+			<h1>
+				<p:outputLabel styleClass="h1"
+					value="#{sistema.obtenerTexto('gw.encuestas.etiqueta.tituloVerEncuesta')}" />
+			</h1>
+			<hr />
+			<p:panel header="#{sistema.obtenerTexto('gw.encuesta.texto.datosp')}"
+				toggleable="false">
+				<div class="row margenRow">
+					<div class="col-md-4">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.encuesta.texto.clave')}:"
+							styleClass="bloque" />
+						<p:outputLabel
+							value="#{consultaEncuestaBean.encuestaSelDetalle.clave}" />
+					</div>
+					<div class="col-md-4">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.encuesta.texto.contexto')}:"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{consultaEncuestaBean.encuestaSelDetalle.encuestaTipo.contexto.nombre}" />
+					</div>
+					<div class="col-md-4">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.encuesta.texto.nombre')}:"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{consultaEncuestaBean.encuestaSelDetalle.nombre}" />
+					</div>
+
+				</div>
+
+				<div class="row margenRow">
+					<div class="col-md-4">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.encuesta.texto.asignado')}:"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{consultaEncuestaBean.encuestaSelDetalle.encuestaObjetivo.nombre}" />
+					</div>
+					<div class="col-md-4">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.encuesta.texto.nivele')}:"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{consultaEncuestaBean.encuestaSelDetalle.encuestaTipo.nombre}" />
+					</div>
+
+					<div class="col-md-4">
+
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.encuesta.texto.estatus')}:"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{consultaEncuestaBean.encuestaSelDetalle.encuestaEstatus.nombre}" />
+
+					</div>
+				</div>
+
+				<div class="row margenRow">
+					<div class="col-md-12">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.encuesta.texto.instrucciones')}:"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{consultaEncuestaBean.encuestaSelDetalle.instrucciones}" />
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.encuesta.texto.observaciones')}:"
+							styleClass="bloque" />
+						<h:outputText
+							rendered="#{consultaEncuestaBean.encuestaSelDetalle.observaciones}"
+							value="#{consultaEncuestaBean.encuestaSelDetalle.observaciones}" />
+					</div>
+				</div>
+			</p:panel>
+
+			<br />
+			<!-- Panel de vista de usuarios administrativos -->
+			<p:panel id="pnl_ver_encuesta"
+				header="#{sistema.obtenerTexto('gw.encuesta.texto.encuesta')}"
+				toggleable="false" rendered="#{consultaEncuestaBean.renderVista}">
+				<ui:include src="../encuestas/verEncuesta.xhtml" />
+			</p:panel>
+			<!-- Panel de vista de usuarios administrativos -->
+			<p:panel id="pnl_responder_encuesta"
+				header="#{sistema.obtenerTexto('gw.encuesta.texto.encuesta')}"
+				toggleable="false"
+				rendered="#{consultaEncuestaBean.renderResponder}">
+				<ui:include src="../encuestas/responderEncuesta.xhtml" />
+			</p:panel>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel for="comentarios"
+							rendered="#{consultaEncuestaBean.encuestaSelDetalle.encuestaEstatus.id == '3'}"
+							value="#{sistema.obtenerTexto('gw.encuestas.consulta.etiqueta.comentario')}:"
+							styleClass="bloque" />
+						<p:inputTextarea id="comentarios" rows="6" cols="140"
+							rendered="#{consultaEncuestaBean.encuestaSelDetalle.encuestaEstatus.id == '3'}"
+							value="#{consultaEncuestaBean.nuevoComentario}" queryDelay="500"
+							minQueryLength="0">
+							<p:ajax process="@this"></p:ajax>
+						</p:inputTextarea>
+						<p:message for="comentarios" />
+						<p:dataTable value="#{consultaEncuestaBean.listaComentarioss}"
+							styleClass="ajustaTable" reflow="true"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							var="comentarioH" paginator="true" rows="10"
+							sortOrder="descending" paginatorPosition="bottom"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15" tableStyleClass="table"
+							rowIndexVar="contadorRevision">
+							<p:column>
+								<f:facet name="header">
+						        #{sistema.obtenerTexto('gw.encuesta.texto.historial')}
+						    </f:facet>
+						    	#{sistema.obtenerTexto('gw.encuesta.texto.revision')} #{contadorRevision+1}: 
+								<h:outputText id="comentario" value=" #{comentarioH}"></h:outputText>
+							</p:column>
+
+						</p:dataTable>
+					</div>
+
+				</div>
+			</div>
+
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.encuestas.boton.aprobar')}"
+							rendered="#{consultaEncuestaBean.encuestaSelDetalle.encuestaEstatus.id == '3'}"
+							action="#{consultaEncuestaBean.aprobarMensaje}"
+							styleClass="btn btn-primary pull-right" ajax="true"
+							widgetVar="btnAprobar" update="formf, dlg_mensaje_ver"
+							oncomplete="PF('dlg').show(); return false;" />
+
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.encuestas.boton.enviarcomentarios')}"
+							rendered="#{consultaEncuestaBean.encuestaSelDetalle.encuestaEstatus.id == '3'}"
+							id="btnComentarios" onclick="verificaComentarios();"
+							widgetVar="wbtnComentarios"
+							action="#{consultaEncuestaBean.comentariosMensaje}"
+							styleClass="btn btn-default pull-right" ajax="true"
+							process="@this" update="formf, dlg_mensaje_ver"
+							oncomplete="PF('dlg').show();" />
+
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.encuestas.boton.cancelar')}"
+							action="#{consultaEncuestaBean.navegaConsultaEncuesta}"
+							styleClass="btn btn-default pull-right" ajax="true" />
+					</div>
+
+				</div>
+			</div>
+			<!-- Ventana modal -->
+			<p:dialog id="dlg_mensaje_ver"
+				header="#{sistema.obtenerTexto('gw.encuestas.alta.header.etiqueta.mensaje.dlg')}"
+				widgetVar="dlg" resizable="false" position="center"
+				responsive="true" closable="false" appendTo="@(body)"
+				draggable="false" modal="true" styleClass="medidaModal">
+
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText
+							value="#{sistema.obtenerTexto('gw.encuestas.alta.modal.mensaje.comentarios')}"
+							rendered="#{consultaEncuestaBean.encuestaMSG == 'comentarios'}" />
+						<h:outputText
+							value="#{sistema.obtenerTexto('gw.encuesta.texto.apunto')}: #{consultaEncuestaBean.encuestaSelDetalle.nombre}"
+							rendered="#{consultaEncuestaBean.encuestaMSG == 'aprobar'}" />
+					</div>
+				</div>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.encuestas.alta.modal.etiqueta.btn.aceptar')}"
+								styleClass="btn btn-primary pull-right" process="@this"
+								ajax="true" oncomplete="PF('dlg').hide();"
+								rendered="#{consultaEncuestaBean.encuestaMSG == 'comentarios'}"
+								action="#{consultaEncuestaBean.guardaConComentarios}" />
+
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.encuestas.alta.modal.etiqueta.btn.aceptar')}"
+								styleClass="btn btn-primary pull-right" update="formf"
+								process="@this" ajax="true" oncomplete="PF('dlg').hide();"
+								rendered="#{consultaEncuestaBean.encuestaMSG == 'aprobar'}"
+								action="#{consultaEncuestaBean.publicarEncuesta}" />
+
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.encuestas.alta.modal.etiqueta.btn.cancelar')}"
+								styleClass="btn btn-default pull-right" update="formf"
+								process="@this" ajax="true" oncomplete="PF('dlg').hide();" />
+
+						</div>
+					</div>
+
+				</f:facet>
+
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.localizacion')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.localizacion')}</h1>
+		<hr />
+		<h:form id="frmAsentamientos">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.asentamientos.titulo.panel.superior')}">
+				<div class="row">
+					<div class="col-md-2">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.asentamientos.etiqueta.entidad')}:" />
+					</div>
+					<div class="col-md-3">
+						<h:outputText
+							value="#{localizacionBean.entidadFederativaDTO.nombre}" />
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-2 ">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.asentamientos.etiqueta.municipio')}:" />
+					</div>
+					<div class="col-md-3">
+						<h:outputText value="#{localizacionBean.municipio.nombre}" />
+					</div>
+				</div>
+			</p:panel>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.asentamientos.titulo.panel.inferior')}"
+				styleClass="fondoPrimario">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<sec:authorize access="hasPermission(null, 'ASEN_AGR' ) ">
+								<p:commandButton id="btnAgregar"
+									value="#{sistema.obtenerTexto('gw.asentamientos.boton.agregar')}"
+									action="#{localizacionBean.nuevoAsentamiento()}"
+									process="@this" ajax="true" update="frmAsentamientos:contenido"
+									oncomplete="PF('amodal').show()"
+									styleClass="btn btn-primary pull-right" />
+							</sec:authorize>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<p:dataTable id="tblAsentamientos"
+							value="#{localizacionBean.asentamientos}" var="asentamiento"
+							reflow="true"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							paginator="true" rows="10" rowsPerPageTemplate="5,10,15"
+							paginatorPosition="bottom"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							tableStyleClass="table">
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.asentamientos.columna.id')}">
+								<h:outputText value="#{asentamiento.idAsentamiento}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.asentamientos.columna.nombre')}">
+								<h:outputText value="#{asentamiento.nombre}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.asentamientos.columna.codigo')}">
+								<h:outputText value="#{asentamiento.codigoPostal}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.asentamientos.columna.tipo')}">
+								<h:outputText
+									value="#{asentamiento.tipoAsentamiento.descripcion}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.asentamientos.columna.activo')}">
+								<h:outputText value="#{asentamiento.activo?'SI':'NO'}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.asentamientos.columna.acciones')}"
+								styleClass="text-center">
+								<sec:authorize access="hasPermission(null, 'ASEN_EDI' ) ">
+									<p:commandButton id="btnEditar"
+										action="#{localizacionBean.cargarAsentamiento()}"
+										process="@this" ajax="true"
+										update="frmAsentamientos:contenido"
+										oncomplete="PF('amodal').show()"
+										styleClass="btn-icon btn btn-default ss_gn_mod icono_sisi">
+										<f:setPropertyActionListener value="#{asentamiento}"
+											target="#{localizacionBean.asentamientoModificar}" />
+									</p:commandButton>
+									<p:tooltip for="btnEditar"
+										value="#{sistema.obtenerTexto('gw.asentamientos.boton.editar')}"
+										position="top" />
+								</sec:authorize>
+							</p:column>
+						</p:dataTable>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.asentamientos.boton.regresar')}"
+							action="#{menuGestorBean.navegaMunicipios}" immediate="true"
+							ajax="false" styleClass="btn btn-default" />
+					</div>
+				</div>
+			</p:panel>
+			<p:dialog id="amodal" widgetVar="amodal" modal="true"
+				header="#{sistema.obtenerTexto('gw.asentamientos.modal.titulo')}"
+				closable="false" draggable="false" resizable="false"
+				position="center" styleClass="medidaModal">
+				<p:outputPanel id="contenido">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="txtIdAsentamiento" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.asentamientos.modal.etiqueta.id')}" />
+								<!-- Longitud de campo -->
+								<p:inputText id="txtIdAsentamiento"
+									value="#{localizacionBean.asentamiento.idAsentamiento}"
+									disabled="#{not localizacionBean.nuevo}"
+									styleClass="form-control" maxlength="9">
+									<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+								</p:inputText>
+								<p:message for="txtIdAsentamiento" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel for="txtNombre" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.asentamientos.modal.etiqueta.nombre')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="txtNombre" maxlength="80"
+									value="#{localizacionBean.asentamiento.nombre}"
+									styleClass="form-control" />
+								<p:message for="txtNombre" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="txtCodigo" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.asentamientos.modal.etiqueta.codigo')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="txtCodigo" maxlength="5"
+									value="#{localizacionBean.asentamiento.codigoPostal}"
+									styleClass="form-control">
+									<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+								</p:inputText>
+								<p:message for="txtCodigo" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel for="somTipoAsentamiento" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.asentamientos.modal.etiqueta.tipo')}:" />
+								<p:selectOneMenu id="somTipoAsentamiento"
+									value="#{localizacionBean.asentamiento.tipoAsentamiento.idTipoAsentamiento}"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+									styleClass="col-xs-12">
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+									<f:selectItems value="#{localizacionBean.tiposAsentamiento}"
+										var="tipoAsentamiento"
+										itemLabel="#{tipoAsentamiento.descripcion}"
+										itemValue="#{tipoAsentamiento.idTipoAsentamiento}" />
+								</p:selectOneMenu>
+								<p:message for="somTipoAsentamiento" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="chk"
+									value="#{sistema.obtenerTexto('gw.asentamientos.modal.etiqueta.activo')}:"
+									rendered="#{not localizacionBean.nuevo}" />
+								<p:selectBooleanCheckbox styleClass="paddingChk" id="chk"
+									value="#{localizacionBean.asentamiento.activo}"
+									rendered="#{not localizacionBean.nuevo}" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+								<p:outputLabel
+									value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+							</div>
+						</div>
+					</div>
+				</p:outputPanel>
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.asentamientos.modal.boton.guardar')}"
+								action="#{localizacionBean.guardarAsentamiento()}" ajax="true"
+								update="contenido frmAsentamientos:tblAsentamientos"
+								styleClass="btn btn-primary pull-right" />
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.asentamientos.modal.boton.cancelar')}"
+								styleClass="btn btn-default pull-right"
+								onclick="PF('amodal').hide();" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

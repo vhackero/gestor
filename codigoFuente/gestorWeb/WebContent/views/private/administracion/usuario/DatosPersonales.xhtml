@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+	<p:panel id="pnlDatosPersonales"
+		header="#{sistema.obtenerTexto('gw.usuarios.etiquetaPanel.datosPersonales')}">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel for="txtCURP"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.curp')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtCURP" styleClass="form-control"
+						validator="#{adminPersonaBean.validarFormatoCurp}" disabled="true"
+						value="#{adminPersonaBean.datos.persona.curp}" maxlength="18"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.curp')}">
+						<p:keyFilter regEx="/[A-Z]|[0-9]/" preventPaste="false" />
+					</p:inputText>
+					<p:message id="mtxtCURP" for="txtCURP" />
+				</div>
+				<div class="col-md-4" style="display: none">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.existCurp')}:"
+						styleClass="bloque"
+						rendered="#{adminPersonaBean.datos.persona.tipoUsuario == 2}" />
+					<p:commandButton value="Verificar"
+						action="#{adminPersonaBean.validarCURP()}" process="@this"
+						ajax="true" immediate="true" disabled="true"
+						update="txtNombrePersona, txtApellidoPaterno, txtApellidoMaterno"
+						styleClass="btn btn-primary removeMarginLeft"
+						rendered="#{adminPersonaBean.datos.persona.tipoUsuario == 2}" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel for="txtNombrePersona"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.nombre')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtNombrePersona" styleClass="form-control"
+						value="#{adminPersonaBean.datos.persona.nombre}" maxlength="45" disabled="true"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.nombre')}">
+						<p:keyFilter regEx="/[a-z ]/i" preventPaste="false" />
+					</p:inputText>
+					<p:message for="txtNombrePersona" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="txtApellidoPaterno"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.primerApellido')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtApellidoPaterno" styleClass="form-control"
+						value="#{adminPersonaBean.datos.persona.apellidoPaterno}"
+						maxlength="45" disabled="true"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.primerApellido')}">
+						<p:keyFilter regEx="/[a-z ]/i" preventPaste="false" />
+					</p:inputText>
+					<p:message for="txtApellidoPaterno" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="txtApellidoMaterno"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.segundoApellido')}:" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtApellidoMaterno" styleClass="form-control"
+						value="#{adminPersonaBean.datos.persona.apellidoMaterno}"
+						maxlength="45" disabled="true"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.segundoApellido')}">
+						<p:keyFilter regEx="/[a-z ]/i" preventPaste="false" />
+					</p:inputText>
+					<p:message for="txtApellidoMaterno" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+
+			<div class="row">
+
+				<div class="col-md-4">
+					<p:outputLabel for="somGenero"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.genero')}:" />
+					<p:selectOneMenu id="somGenero" disabled="true"
+						value="#{adminPersonaBean.datos.persona.genero}"
+						styleClass="col-xs-12" onchange="correccionSelectores()">
+
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{adminPersonaBean.generos}" var="genero"
+							itemValue="#{genero.getValor()}"
+							itemLabel="#{genero.getDescripcion()}" />
+					</p:selectOneMenu>
+					<p:message for="somGenero" />
+				</div>
+				<div class="col-md-3">
+					<p:outputLabel for="cldFechaNacimiento"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.fechaNacimiento')}:"
+						styleClass="bloque requerido" />
+					<p:calendar id="cldFechaNacimiento" navigator="true"
+						styleClass="calendario" yearRange="c-100:c+0" disabled="true"
+						placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+						value="#{adminPersonaBean.datos.persona.fechaNacimiento}"
+						showOn="button" locale="es" readonlyInput="true"
+						maxdate="#{adminPersonaBean.fechaActual}"
+						pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+					<p:message for="cldFechaNacimiento" />
+				</div>
+				<div class="col-md-4 col-md-offset-1">
+					<p:outputLabel for="somNacionalidad"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.nacionalidad')}:"
+						styleClass="requerido" />
+					<p:selectOneMenu id="somNacionalidad" required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+						value="#{adminPersonaBean.datos.persona.nacionalidad.idPais}"
+						styleClass="col-xs-12 medidaMinima" disabled="true"
+						onchange="correccionSelectores()">
+
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{adminPersonaBean.listaPaises}" var="pais"
+							itemValue="#{pais.getIdPais()}" itemLabel="#{pais.getNombre()}" />
+					</p:selectOneMenu>
+					<p:message for="somNacionalidad" />
+				</div>
+			</div>
+		</div>
+
+	</p:panel>
+</ui:composition>

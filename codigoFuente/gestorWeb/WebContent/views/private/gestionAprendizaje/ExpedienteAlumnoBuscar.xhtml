@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}</h1>
+		<hr />
+		<p:ajaxStatus onstart="PF('dialogLayout').show()"
+			onsuccess="PF('dialogLayout').hide()" />
+		<h:form>
+			<f:validateBean disabled="true">
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:panel
+							header="#{sistema.obtenerTexto('gw.gestionaprendizaje.titulo.busqueda')}">
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-4 col-xs-12">
+										<p:outputLabel for="somTipoUsuario"
+											value="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.tipousuario')}" />
+										<p:selectOneMenu id="somTipoUsuario"
+											value="#{expedienteAcademicoBean.personaFiltros.tipoUsuario}"
+											styleClass="col-xs-12">
+											<f:selectItem
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" itemValue="#{null}" />
+											<f:selectItems
+												value="#{expedienteAcademicoBean.tiposUsuarios}" var="tipo"
+												itemValue="#{tipo.getValor()}"
+												itemLabel="#{tipo.getDescripcion()}" />
+										</p:selectOneMenu>
+
+									</div>
+									<div class="col-md-4 col-xs-12">
+										<p:outputLabel for="txtCurp"
+											value="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.curp')}:" />
+										<p:inputText id="txtCurp"
+											placeholder="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.curp')}"
+											value="#{expedienteAcademicoBean.personaFiltros.curp}"
+											styleClass="form-control" />
+									</div>
+									<div class="col-md-4 col-xs-12">
+										<p:outputLabel for="txtUsuario"
+											value="Usuario:" />
+										<p:inputText id="txtUsuario"
+											placeholder="Usuario"
+											value="#{expedienteAcademicoBean.personaFiltros.usuario}"
+											styleClass="form-control" />
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-4 col-xs-12">
+										<p:outputLabel for="nombre"
+											value="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.nombre')}:" />
+										<p:inputText id="nombre"
+											label="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.nombre')}:"
+											placeholder="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.nombre')}"
+											value="#{expedienteAcademicoBean.personaFiltros.nombre}"
+											styleClass="form-control" />
+									</div>
+									<div class="col-md-4 col-xs-12">
+										<p:outputLabel for="apPaterno"
+											value="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.apPaterno')}:" />
+										<p:inputText id="apPaterno"
+											label="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.apPaterno')}:"
+											placeholder="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.apPaterno')}"
+											value="#{expedienteAcademicoBean.personaFiltros.apellidoPaterno}"
+											styleClass="form-control" />
+									</div>
+									<div class="col-md-4 col-xs-12">
+										<p:outputLabel for="apMaterno"
+											value="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.apMaterno')}:" />
+										<p:inputText id="apMaterno"
+											label="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.apMaterno')}:"
+											placeholder="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.apMaterno')}"
+											value="#{expedienteAcademicoBean.personaFiltros.apellidoMaterno}"
+											styleClass="form-control" />
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-12 text-right">
+									<p:commandButton
+										action="#{expedienteAcademicoBean.buscarPersonaPorCriterios()}"
+										ajax="true" update="@form"
+										value="#{sistema.obtenerTexto('gw.gestionaprendizaje.boton.buscar')}"
+										styleClass="btn btn-primary" />
+
+								</div>
+							</div>
+						</p:panel>
+					</div>
+
+				</div>
+			</f:validateBean>
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel
+						header="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.personas')}">
+						<p:dataTable value="#{expedienteAcademicoBean.personas}"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							var="persona" paginator="true" rows="10" widgetVar="tblPersonas"
+							paginatorPosition="bottom" reflow="true" id="tblResultados"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+							<f:facet name="header">
+								<p:outputPanel styleClass="text-right">
+									<p:outputLabel for="globalFilter"
+										value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}" />
+									<p:inputText id="globalFilter"
+										onkeyup="PF('tblPersonas').filter()"
+										placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+								</p:outputPanel>
+							</f:facet>
+							
+							<p:column
+								headerText="Usuario"
+								sortBy="#{persona.usuario}" filterMatchMode="contains"
+								filterBy="#{persona.usuario}" filterStyle="display:none">
+								<h:outputText
+									value="#{persona.usuario}" />
+							</p:column>
+							
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.nombre')}"
+								sortBy="#{persona.nombre}" filterMatchMode="contains"
+								filterBy="#{persona.nombre}" filterStyle="display:none">
+								<h:outputText
+									value="#{persona.nombre} #{persona.apellidoPaterno} #{persona.apellidoMaterno}" />
+							</p:column>
+
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.tipo')}"
+								sortBy="#{persona.tipoUsuario}" filterMatchMode="contains"
+								filterBy="#{persona.tipoUsuario}" filterStyle="display:none">
+								<h:outputText
+									value="#{expedienteAcademicoBean.obtenerTipoUsuario(persona.tipoUsuario)}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.curp')}"
+								sortBy="#{persona.curp}" filterMatchMode="contains"
+								filterBy="#{persona.curp}" filterStyle="display:none">
+								<h:outputText value="#{persona.curp}" />
+							</p:column>
+
+							<p:column styleClass="text-center"
+								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.accion')}">
+								<p:commandButton id="btnAbrirExpediente" ajax="true"
+									action="#{expedienteAlumnoBean.navegaExpedienteAlumno}"
+									styleClass="btn btn-default btn-icon icono_sisi ss_ge_expediente"
+									process="@this">
+									<f:setPropertyActionListener value="#{persona}"
+										target="#{expedienteAlumnoBean.personaDTO}" />
+								</p:commandButton>
+								<p:tooltip for="btnAbrirExpediente"
+									value="#{sistema.obtenerTexto('gw.gestionaprendizaje.boton.expediente')}"
+									position="top" />
+							</p:column>
+						</p:dataTable>
+
+					</p:panel>
+				</div>
+			</div>
+
+
+		</h:form>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>Análisis de datos</li>
+		<li class="active">Reporte de ambientes virtuales de aprendizaje</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>Reporte de ambientes virtuales de aprendizaje</h1>
+		<hr />
+		<p:ajaxStatus onstart="PF('dialogLayout').show()"
+			onsuccess="PF('dialogLayout').hide()" />
+		<h:form id="form">
+			<f:validateBean disabled="true">
+				<div class="row">
+					<div class="col-md-12">
+						<p:panel header="Búsqueda de datos en gestión del aprendizaje"
+							id="pnlBusqueda">
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-4">
+										<p:outputLabel value="Tipo de competencia:"
+											styleClass="bloque" />
+										<p:selectOneMenu
+											value="#{reporteAvaBean.filtros.fichaDescriptivaPrograma.tipoCompetencia}"
+											valueChangeListener="#{reporteAvaBean.onChangeTpoCompetencia}"
+											styleClass="col-xs-12">
+											<p:ajax update="selectEjeCapacitacion" />
+											<f:selectItem itemValue="#{null}" itemLabel="Seleccionar" />
+											<f:selectItems
+												value="#{reporteAvaBean.listaTiposCompetencias}"
+												var="competencia" itemLabel="#{competencia.nombre}"
+												itemValue="#{competencia.id}" />
+										</p:selectOneMenu>
+									</div>
+									<div class="col-md-4">
+										<p:outputLabel value="Eje de capacitacion:"
+											styleClass="bloque" />
+										<p:selectOneMenu id="selectEjeCapacitacion"
+											styleClass="col-xs-12"
+											disabled="#{reporteAvaBean.filtros.fichaDescriptivaPrograma.tipoCompetencia == null}"
+											value="#{reporteAvaBean.filtros.fichaDescriptivaPrograma.ejeCapacitacion}">
+											<p:ajax event="change" process="@this" />
+											<f:selectItem itemValue="#{null}"
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+											<f:selectItems
+												value="#{reporteAvaBean.listaEjesCapacitacion}" var="ejeCap"
+												itemValue="#{ejeCap.id}" itemLabel="#{ejeCap.nombre}" />
+										</p:selectOneMenu>
+									</div>
+									<div class="col-md-4">
+										<p:outputLabel value="Modalidad:" styleClass="bloque" />
+										<p:selectOneMenu styleClass="col-xs-12"
+											converter="entityConverter"
+											value="#{reporteAvaBean.filtros.catModalidadPlanPrograma}">
+											<p:ajax event="change" process="@this" />
+											<f:selectItem itemValue="#{null}"
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+											<f:selectItems
+												value="#{reporteAvaBean.listaModalidadesPrograma}"
+												var="modalidad" itemLabel="#{modalidad.nombre}"
+												itemValue="#{modalidad}" />
+										</p:selectOneMenu>
+									</div>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-3">
+										<p:outputLabel value="Nivel de enseñanza:" styleClass="bloque" />
+										<p:selectOneMenu styleClass="col-xs-12:"
+											value="#{reporteAvaBean.filtros.fichaDescriptivaPrograma.catNivelEnsenanzaPrograma.id}">
+											<p:ajax event="change" process="@this" />
+											<f:selectItem itemValue="#{null}"
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+											<f:selectItems
+												value="#{reporteAvaBean.catNivelEnsenanzaProg}"
+												var="nivelEns" itemLabel="#{nivelEns.nombre}"
+												itemValue="#{nivelEns.id}" />
+										</p:selectOneMenu>
+									</div>
+									<div class="col-md-3">
+										<p:outputLabel value="Estatus:" styleClass="bloque" />
+										<p:selectOneMenu styleClass="col-xs-12"
+											converter="entityConverter"
+											value="#{reporteAvaBean.filtros.catEstadoEventoCapacitacion}">
+											<p:ajax event="change" process="@this" />
+											<f:selectItem itemValue="#{null}"
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+											<f:selectItems value="#{reporteAvaBean.listaEstatusEC}"
+												var="estadoEventCap" itemLabel="#{estadoEventCap.nombre}"
+												itemValue="#{estadoEventCap}" />
+										</p:selectOneMenu>
+									</div>
+
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-3">
+										<p:outputLabel value="Tipo de rango de fecha:"
+											styleClass="bloque" />
+										<p:selectOneMenu styleClass="col-xs-12"
+											value="#{reporteAvaBean.tipoDatoFechas}">
+											<p:ajax process="@this"
+												listener="#{reporteGestionEscolarBean.actualizaFechas}"
+												event="valueChange" update="fechaInicial fechaFinal" />
+											<f:selectItem itemValue="#{null}"
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+											<f:selectItem
+												itemLabel="#{sistema.obtenerTexto('gw.ga.label.ite')}"
+												itemValue="#{1}" />
+											<f:selectItem
+												itemLabel="#{sistema.obtenerTexto('gw.ga.label.ie')}"
+												itemValue="#{2}" />
+											<f:selectItem
+												itemLabel="#{sistema.obtenerTexto('gw.ga.label.te')}"
+												itemValue="#{3}" />
+										</p:selectOneMenu>
+									</div>
+									<div class="col-md-3">
+										<p:outputLabel value="Fecha inicial:" styleClass="bloque" />
+										<p:calendar id="fechaInicial" navigator="true"
+											disabled="#{reporteAvaBean.tipoDatoFechas == null}"
+											value="#{reporteAvaBean.filtros.fechaInicial}"
+											styleClass="calendario"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											yearRange="c-100:c+100" locale="es"
+											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											showOn="button" readonlyInput="true">
+											<p:ajax event="dateSelect" process="@this" />
+										</p:calendar>
+
+									</div>
+									<div class="col-md-3">
+										<p:outputLabel value="Fecha final:" styleClass="bloque" />
+										<p:calendar navigator="true"
+											disabled="#{reporteAvaBean.filtros.fechaInicial == null}"
+											value="#{reporteAvaBean.filtros.fechaFinal}"
+											styleClass="calendario" id="fechaFinal"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											yearRange="c-100:c+100" locale="es" readonlyInput="true"
+											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											showOn="button">
+											<p:ajax event="dateSelect" process="@this" />
+										</p:calendar>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-12 text-right">
+									<p:commandButton value="Limpiar campos"
+										actionListener="#{reporteAvaBean.limpiarCampos}" ajax="true"
+										update="@form" styleClass="btn btn-default" />
+									<p:commandButton value="Buscar" styleClass="btn btn-primary"
+										update="@form" ajax="true"
+										action="#{reporteAvaBean.buscarEventosCapacitacion}" />
+								</div>
+							</div>
+						</p:panel>
+
+					</div>
+				</div>
+			</f:validateBean>
+
+
+
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel header="Resultado de la búsqueda">
+						<p:dataTable value="#{reporteAvaBean.eventosCapacitacion}"
+							reflow="true"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							tableStyleClass="table" id="tblEventosCapacitacion" var="evento"
+							paginator="true" paginatorPosition="bottom" rows="10"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks}
+								 {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15">
+
+							<f:facet name="header">
+								<div class="row flexY">
+									<div class="col-md-8">
+										<p:outputLabel
+											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+									</div>
+									<div class="col-md-4">
+										<p:commandButton id="toggler" type="button"
+											value="Columna de datos" style="width:200px"
+											styleClass="pull-right btn btn-default"
+											icon="ui-icon-carat-1-s" />
+										<p:columnToggler id="columnaSelectora"
+											datasource="tblEventosCapacitacion" trigger="toggler">
+											<p:ajax event="toggle" listener="#{reporteAvaBean.onToggle}" />
+										</p:columnToggler>
+									</div>
+								</div>
+							</f:facet>
+							<p:column visible="#{reporteAvaBean.visible[0]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Clave" />
+								</f:facet>
+
+								<h:outputText value="#{evento.cveEventoCap}" />
+							</p:column>
+							<p:column visible="#{reporteAvaBean.visible[1]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Nombre del evento" />
+								</f:facet>
+
+								<h:outputText value="#{evento.nombreEc}" />
+							</p:column>
+							<p:column visible="#{reporteAvaBean.visible[2]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Tipo de competencia" />
+								</f:facet>
+
+								<h:outputText
+									value="#{reporteAvaBean.obtieneNombreTpoCompetencia(evento.fichaDescriptivaPrograma.tipoCompetencia)}" />
+							</p:column>
+							<p:column visible="#{reporteAvaBean.visible[3]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Eje de capacitación" />
+								</f:facet>
+
+								<h:outputText
+									value="#{reporteAvaBean.obtieneNombreEjeCapacit(evento.fichaDescriptivaPrograma.ejeCapacitacion)}" />
+							</p:column>
+							<p:column visible="#{reporteAvaBean.visible[4]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Modalidad" />
+								</f:facet>
+
+								<h:outputText value="#{evento.catModalidadPlanPrograma.nombre}" />
+							</p:column>
+							<p:column visible="#{reporteAvaBean.visible[5]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Estatus" />
+								</f:facet>
+
+								<h:outputText
+									value="#{evento.catEstadoEventoCapacitacion.nombre}" />
+							</p:column>
+							<p:column visible="#{reporteAvaBean.visible[6]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Fecha inicial" />
+								</f:facet>
+								<h:outputText value="#{evento.fechaInicial}">
+									<f:convertDateTime type="date"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+								</h:outputText>
+							</p:column>
+							<p:column visible="#{reporteAvaBean.visible[7]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Fecha final" />
+								</f:facet>
+								<h:outputText value="#{evento.fechaFinal}">
+									<f:convertDateTime type="date"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+								</h:outputText>
+							</p:column>
+
+						</p:dataTable>
+					</p:panel>
+				</div>
+			</div>
+			<div class="form-group" style="display: none">
+				<div class="row">
+					<div class="col-md-12 floatFlexCentrarY margenInferior">
+						<p:outputLabel value="Reporte de excel:" style="margin-bottom:0"
+							styleClass="margenDerecho agregaHeight" for="btnReporte" />
+						<p:commandButton id="btnReporte" value="Descargar"
+							style="margin-left:0; margin-right:10px"
+							disabled="#{reporteAvaBean.eventosCapacitacion.isEmpty()}"
+							styleClass="btn btn-primary" ajax="false">
+							<p:dataExporter type="xls" target="tblEventosCapacitacion"
+								fileName="analisisDatosEventos" pageOnly="false" />
+						</p:commandButton>
+
+						<p:outputLabel value="Informe prediseñado:"
+							style="margin-bottom:0" styleClass="margenDerecho" />
+
+						<p:commandButton value="Generar"
+							disabled="#{reporteAvaBean.eventosCapacitacion.isEmpty()}"
+							onclick="graficasEventos();"
+							styleClass="btn btn-primary margenDerecho quitaMargen" />
+
+						<p:remoteCommand name="graficasEventos"
+							action="#{reporteAvaBean.generarEstadisticas}"
+							oncomplete="cargaGraficasEventos(xhr, status, args); PF('modalAnalisis').show(); scrollArribaEventos();" />
+
+						<p:remoteCommand name="scrollArribaEventos"
+							action="#{reporteAvaBean.scrollArriba}" />
+
+
+					</div>
+				</div>
+			</div>
+
+		</h:form>
+
+
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.consultarBitacora')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.consultarBitacora')}</h1>
+		<hr />
+		<h:form id="consultarBitacora">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.bitacora.titulo.panel.superior')}">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-4">
+									<div class="form-inline">
+										<p:outputLabel
+											value="#{sistema.obtenerTexto('gw.bitacora.etiqueta.fecha.inicio')}: " />
+										<p:calendar id="finiPlan" styleClass="calendario"
+											readonlyInput="true"
+											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											yearRange="c-100:c+100" locale="es" navigator="true"
+											value="#{consultaBitacoraBean.bitacoraFiltro.fechaInicio}"
+											showOn="button"
+											maxdate="#{consultaBitacoraBean.bitacoraFiltro.fechaFin}">
+											<p:ajax event="change" update="ffinBitacora" />
+											<p:ajax event="dateSelect" update="ffinBitacora" />
+										</p:calendar>
+									</div>
+								</div>
+								<div class="col-md-4 col-md-offset-3">
+									<div class="form-inline">
+										<p:outputLabel
+											value="#{sistema.obtenerTexto('gw.bitacora.etiqueta.fecha.fin')}:" />
+										<p:calendar id="ffinBitacora" styleClass="calendario"
+											readonlyInput="true"
+											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											yearRange="c-100:c+100" locale="es" navigator="true"
+											mindate="#{consultaBitacoraBean.bitacoraFiltro.fechaInicio}"
+											disabled="#{consultaBitacoraBean.bitacoraFiltro.fechaInicio == null}"
+											value="#{consultaBitacoraBean.bitacoraFiltro.fechaFin}"
+											showOn="button" />
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-6">
+									<h:outputLabel
+										value="#{sistema.obtenerTexto('gw.bitacora.etiqueta.usuario')}:" />
+									<div class="form-group">
+										<div class="row">
+											<div class="col-md-7">
+												<p:inputText id="txtNombreCompleto" disabled="true"
+													value="#{consultaBitacoraBean.bitacoraFiltro.nombreCompleto}"
+													styleClass="form-control noCursor">
+												</p:inputText>
+											</div>
+											<div class="col-md-5">
+												<p:commandButton id="btnSeleccionar"
+													value="#{sistema.obtenerTexto('gw.bitacora.boton.personas')}"
+													action="#{consultaBitacoraBean.cargarBusquedaPersona()}"
+													styleClass="btn btn-primary pull-right" />
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-md-6">
+									<p:outputLabel
+										value="#{sistema.obtenerTexto('gw.bitacora.etiqueta.modulo')}:" />
+									<p:selectOneMenu id="modulo"
+										value="#{consultaBitacoraBean.claveModulo}"
+										styleClass="col-xs-12">
+										<p:ajax listener="#{consultaBitacoraBean.cargarComponentes()}"
+											update="componente funcionalidad" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											itemValue="" />
+										<f:selectItems value="#{consultaBitacoraBean.modulos}"
+											var="modulo" itemValue="#{modulo.clave}"
+											itemLabel="#{modulo.nombreElemento}" />
+									</p:selectOneMenu>
+
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-6 ">
+									<p:outputLabel
+										value="#{sistema.obtenerTexto('gw.bitacora.etiqueta.componente')}:" />
+									<p:selectOneMenu id="componente"
+										disabled="#{empty consultaBitacoraBean.claveModulo}"
+										value="#{consultaBitacoraBean.claveComponente}"
+										styleClass="col-xs-12">
+										<p:ajax
+											listener="#{consultaBitacoraBean.cargarFuncionalidades()}"
+											update="funcionalidad" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											itemValue="" />
+										<f:selectItems value="#{consultaBitacoraBean.componentes}"
+											var="componente" itemValue="#{componente.clave}"
+											itemLabel="#{componente.nombreElemento}" />
+									</p:selectOneMenu>
+								</div>
+								<div class="col-md-6">
+									<h:outputLabel value="Funcionalidad:" />
+									<p:selectOneMenu id="funcionalidad"
+										disabled="#{empty consultaBitacoraBean.claveComponente or empty consultaBitacoraBean.claveModulo}"
+										value="#{consultaBitacoraBean.claveFuncionalidad}"
+										styleClass="col-xs-12">
+										<p:ajax
+											listener="#{consultaBitacoraBean.llenarFiltroFuncionalidad()}" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											itemValue="" />
+										<f:selectItems value="#{consultaBitacoraBean.funcionalidades}"
+											var="funcionalidad" itemValue="#{funcionalidad.clave}"
+											itemLabel="#{funcionalidad.nombreElemento}" />
+									</p:selectOneMenu>
+
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+
+								<div class="col-md-12">
+									<sec:authorize access="hasPermission(null, 'CON_BIT' ) ">
+										<p:commandButton id="btnBuscarBitacora"
+											value="#{sistema.obtenerTexto('gw.bitacora.boton.buscar')}"
+											styleClass="btn btn-primary pull-right"
+											action="#{consultaBitacoraBean.cargarBitacora()}" ajax="true"
+											update="tblBitacora, btnDescargar" />
+									</sec:authorize>
+									<p:commandButton id="btnLimpiarCampos"
+										value="#{sistema.obtenerTexto('gw.bitacora.boton.limpiar')}"
+										action="#{consultaBitacoraBean.limpiarCampos()}" ajax="true"
+										update="@form" styleClass="btn btn-default pull-right" />
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</p:panel>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.bitacora.titulo.panel.inferior')}"
+				styleClass="fondoPrimario">
+				<p:dataTable value="#{consultaBitacoraBean.listaBitacora}"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					id="tblBitacora" var="bitacora" widgetVar="tblBitacora"
+					reflow="true" paginator="true" rows="15"
+					rowsPerPageTemplate="5,10,15" paginatorPosition="bottom"
+					tableStyleClass="table"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+
+					<f:facet name="header">
+						<p:outputPanel styleClass="text-right">
+							<p:outputLabel for="globalFilter"
+								value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}" />
+							<p:inputText id="globalFilter"
+								onkeyup="PF('tblBitacora').filter()"
+								placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+							<p:commandButton id="toggler" type="button"
+								value="Columna de datos" style="width:200px"
+								styleClass="pull-right btn btn-default" icon="ui-icon-carat-1-s" />
+							<p:columnToggler id="columnaSelectora" datasource="tblBitacora"
+								trigger="toggler">
+								<p:ajax event="toggle"
+									listener="#{consultaBitacoraBean.onToggle}" />
+							</p:columnToggler>
+						</p:outputPanel>
+					</f:facet>
+
+
+					<p:column visible="#{consultaBitacoraBean.columnasVisibles[0]}"
+						headerText="Id bitacora" sortBy="#{bitacora.idBitacora}"
+						filterMatchMode="contains" filterBy="#{bitacora.idBitacora}"
+						filterStyle="display:none">
+						<h:outputText value="#{bitacora.idBitacora}" />
+					</p:column>
+
+					<p:column visible="#{consultaBitacoraBean.columnasVisibles[1]}"
+						headerText="Id usuario" sortBy="#{bitacora.idUsuario}"
+						styleClass="text-center" filterMatchMode="contains"
+						filterBy="#{bitacora.idUsuario}" filterStyle="display:none">
+						<h:outputText value="#{bitacora.idUsuario}" />
+					</p:column>
+
+					<p:column visible="#{consultaBitacoraBean.columnasVisibles[2]}"
+						headerText="Usuario" sortBy="#{bitacora.usuario}"
+						filterMatchMode="contains" filterBy="#{bitacora.usuario}"
+						filterStyle="display:none">
+						<h:outputText value="#{bitacora.usuario}" />
+					</p:column>
+
+					<p:column visible="#{consultaBitacoraBean.columnasVisibles[3]}"
+						headerText="Nombre" sortBy="#{bitacora.nombreCompleto}"
+						filterMatchMode="contains" filterBy="#{bitacora.nombreCompleto}"
+						filterStyle="display:none">
+						<h:outputText value="#{bitacora.nombreCompleto}">
+
+						</h:outputText>
+					</p:column>
+
+					<p:column visible="#{consultaBitacoraBean.columnasVisibles[4]}"
+						headerText="Módulo" sortBy="#{bitacora.modulo}"
+						filterMatchMode="contains" filterBy="#{bitacora.modulo}"
+						filterStyle="display:none">
+						<h:outputText value="#{bitacora.modulo}">
+						</h:outputText>
+					</p:column>
+
+					<p:column visible="#{consultaBitacoraBean.columnasVisibles[5]}"
+						headerText="Componente" sortBy="#{bitacora.componente}"
+						filterMatchMode="contains" filterBy="#{bitacora.componente}"
+						filterStyle="display:none">
+						<h:outputText value="#{bitacora.componente}">
+						</h:outputText>
+					</p:column>
+
+					<p:column visible="#{consultaBitacoraBean.columnasVisibles[6]}"
+						headerText="Funcionalidad" sortBy="#{bitacora.funcionalidad}"
+						filterMatchMode="contains" filterBy="#{bitacora.funcionalidad}"
+						filterStyle="display:none">
+						<h:outputText value="#{bitacora.funcionalidad}" />
+					</p:column>
+
+					<p:column visible="#{consultaBitacoraBean.columnasVisibles[7]}"
+						headerText="Id elemento afectado" styleClass="text-center"
+						sortBy="#{bitacora.idElementoAfectado}" filterMatchMode="contains"
+						filterBy="#{bitacora.idElementoAfectado}"
+						filterStyle="display:none">
+						<h:outputText value="#{bitacora.idElementoAfectado}" />
+					</p:column>
+
+					<p:column visible="#{consultaBitacoraBean.columnasVisibles[8]}"
+						headerText="Fecha registro" sortBy="#{bitacora.fechaRegistro}"
+						filterMatchMode="contains" filterBy="#{bitacora.fechaRegistro}"
+						filterStyle="display:none">
+						<h:outputText value="#{bitacora.fechaRegistro}">
+							<f:convertDateTime type="date"
+								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+						</h:outputText>
+					</p:column>
+
+					<p:column visible="#{consultaBitacoraBean.columnasVisibles[9]}"
+						styleClass="text-center" headerText="Ip" sortBy="#{bitacora.ip}"
+						filterMatchMode="contains" filterBy="#{bitacora.ip}"
+						filterStyle="display:none">
+						<h:outputText value="#{bitacora.ip}" />
+					</p:column>
+
+					<p:column visible="#{consultaBitacoraBean.columnasVisibles[10]}"
+						headerText="Navegador" sortBy="#{bitacora.navegador}"
+						filterMatchMode="contains" filterBy="#{bitacora.navegador}"
+						filterStyle="display:none">
+						<h:outputText value="#{bitacora.navegador}" />
+					</p:column>
+
+					<p:column visible="#{consultaBitacoraBean.columnasVisibles[11]}"
+						headerText="Tipo servicio" sortBy="#{bitacora.tipoServicio}"
+						filterMatchMode="contains" filterBy="#{bitacora.tipoServicio}"
+						filterStyle="display:none">
+						<h:outputText value="#{bitacora.tipoServicio}" />
+					</p:column>
+				</p:dataTable>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton id="btnDescargar"
+								value="#{sistema.obtenerTexto('gw.bitacora.btn.descargar')}"
+								ajax="false"
+								disabled="#{consultaBitacoraBean.listaBitacora.isEmpty()}"
+								styleClass="pull-right btn btn-default">
+								<p:dataExporter type="xls" target="tblBitacora"
+									fileName="bitacora"
+									postProcessor="#{consultaBitacoraBean.listenerPostProcesamiento()}" />
+							</p:commandButton>
+						</div>
+					</div>
+				</div>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>

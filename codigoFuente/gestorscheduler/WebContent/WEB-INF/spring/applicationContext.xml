@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" 
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:repository="http://www.springframework.org/schema/data/repository"	
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+						http://www.springframework.org/schema/data/jpa 
+						http://www.springframework.org/schema/data/jpa/spring-jpa.xsd 
+						http://www.springframework.org/schema/context 
+						http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+						http://www.springframework.org/schema/jee 
+    					http://www.springframework.org/schema/jee/spring-jee.xsd 
+						http://www.springframework.org/schema/tx 
+						http://www.springframework.org/schema/tx/spring-tx.xsd
+						http://www.springframework.org/schema/util 
+						http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<!-- For consider the using of annotations foe defining Spring Bean -->
+	<context:annotation-config/>
+
+	<!-- For defining Spring Bean -->
+	
+	<context:component-scan base-package="mx.gob.sedesol.basegestor,mx.gob.sedesol.gestorscheduler" >
+		  		 
+		 <!--  
+		  <context:exclude-filter type="regex" expression="mx.gob.sedesol.basegestor.model.repositories.badges.*"/>
+		  <context:exclude-filter type="regex" expression="mx.gob.sedesol.basegestor.model.repositories.encuestas.*"/>
+
+		  <context:exclude-filter type="regex" expression="mx.gob.sedesol.basegestor.model.repositories.logisticainfraestructura.*"/>
+		  <context:exclude-filter type="regex" expression="mx.gob.sedesol.basegestor.model.repositories.planesyprogramas.*"/>
+		  
+		  
+
+		  <context:exclude-filter type="regex" expression="mx.gob.sedesol.basegestor.service.impl.analisisdatos.*"/>
+		  <context:exclude-filter type="regex" expression="mx.gob.sedesol.basegestor.service.impl.badges.*"/>
+		  <context:exclude-filter type="regex" expression="mx.gob.sedesol.basegestor.service.impl.encuestas.*"/>
+		  <context:exclude-filter type="regex" expression="mx.gob.sedesol.basegestor.service.impl.gestionescolar.*"/>
+		  <context:exclude-filter type="regex" expression="mx.gob.sedesol.basegestor.service.impl.logisticainfraestructura.*"/>
+		  <context:exclude-filter type="regex" expression="mx.gob.sedesol.basegestor.service.impl.planesyprogramas.*"/>
+		  
+		  <context:exclude-filter type="assignable" expression="mx.gob.sedesol.basegestor.mongo.service.impl.NotificacionServiceImpl"/>
+		  <context:exclude-filter type="assignable" expression="mx.gob.sedesol.basegestor.mongo.service.impl.NotificacionSistemaServiceImpl"/>
+		  <context:exclude-filter type="assignable" expression="mx.gob.sedesol.basegestor.service.impl.gestion.aprendizaje.FichaDescriptivaOaServiceFacade"/>
+		  
+		  <context:exclude-filter type="regex" expression="mx.gob.sedesol.basegestor.springinit.*"/>-->
+		  		  		  
+	</context:component-scan>
+	
+	<bean id="applicationContextProvder"
+                        class="mx.gob.sedesol.gestorscheduler.util.AplicationContextProvider"/>
+                        
+                        
+	
+	
+											
+    											
+																     
+	<!-- For bootstrapping the Spring Repository -->
+	<jpa:repositories base-package="mx.gob.sedesol.basegestor.model.repositories" >
+	 	<!--<repository:exclude-filter type="regex" expression="CatalogoComunRepoImpl"/> -->																 	
+	</jpa:repositories>
+
+	<jee:jndi-lookup id="elearnigDS" jndi-name="java:jboss/jdbc_elearning" expected-type="javax.sql.DataSource" />
+	
+	
+	
+	<!-- Define EclipseLink JPA Vendor Adapter org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter  -->
+	<bean id="jpaVendorAdapter"
+		class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		<!-- <property name="databasePlatform" value="org.eclipse.persistence.platform.database.MySQLPlatform" /> -->
+		<property name="generateDdl" value="false" />
+		<property name="showSql" value="false" />
+	</bean>
+
+	<!-- Entity Manager Factory -->
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" >
+		<property name="dataSource" ref="elearnigDS" />
+		<property name="persistenceXmlLocation" value="classpath*:/META-INF/persistenceScheduler.xml"/>
+		<property name="persistenceUnitName" value="gestorScheduler" />
+		<property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+	</bean>
+
+	<!-- Transaction Manager -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+
+	<!-- Enable Transactional Manner -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	
+	
+	
+	<import resource="mongoContext.xml"/>
+	
+
+ 
+</beans>

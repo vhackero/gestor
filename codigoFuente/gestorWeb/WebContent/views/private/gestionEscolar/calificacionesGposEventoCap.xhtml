@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCap')}</li>
+		<li class="active">Calificaciones</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="frmCalif">
+			<!-- Panel Datos Generales Evento Capacitacion -->
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<h1>Calificaciones</h1>
+			<hr />
+			<ui:include src="datosGeneralesEventoCap.xhtml" />
+
+			<p:panel header="Calificaciones">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText
+							rendered="#{empty(calificacionGpoEventoCapBean.gruposXEventoCap)}"
+							styleClass="textoRojo"
+							value="El evento aún no tiene grupos asignados." />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-3">
+							<p:outputLabel styleClass="bloque" value="Grupo:" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel
+								rendered="#{not (calificacionGpoEventoCapBean.grupoSelec.idGrupo eq 0)}"
+								value="Estatus del acta:" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel
+								rendered="#{calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados eq 0 and not (calificacionGpoEventoCapBean.grupoSelec.idGrupo eq 0)}"
+								value="Número de alumnos" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-3">
+							<p:selectOneMenu
+								value="#{calificacionGpoEventoCapBean.grupoSelec.idGrupo}"
+								styleClass="col-xs-12">
+								<p:ajax event="valueChange" update="@form" process="@this"
+									listener="#{calificacionGpoEventoCapBean.onChangeGpoEC()}" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{0}" />
+								<f:selectItems
+									value="#{calificacionGpoEventoCapBean.gruposXEventoCap}"
+									var="gpoEc" itemLabel="#{gpoEc.nombre}"
+									itemValue="#{gpoEc.idGrupo}" />
+							</p:selectOneMenu>
+						</div>
+						<div class="col-md-3">
+							<h:outputText
+								rendered="#{not (calificacionGpoEventoCapBean.grupoSelec.idGrupo eq 0)}"
+								value="#{calificacionGpoEventoCapBean.grupoSelec.actaCerrada eq true?'Cerrada': 'Abierta'}"
+								styleClass="#{calificacionGpoEventoCapBean.grupoSelec.actaCerrada eq true ? 'textoRojo' : ''}" />
+						</div>
+						<div class="col-md-3">
+							<h:outputText
+								rendered="#{calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados eq 0 and not (calificacionGpoEventoCapBean.grupoSelec.idGrupo eq 0)}"
+								value="#{(calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados eq 0) ? 'No hay alumnos matriculados' : calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados }" />
+						</div>
+					</div>
+				</div>
+
+				<p:outputPanel
+					rendered="#{calificacionGpoEventoCapBean.grupoSeleccionado}">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-3">
+								<p:outputLabel styleClass="bloque" value="Facilitador" />
+								<h:outputText
+									value="#{calificacionGpoEventoCapBean.grupoSelec.facilitador.tblPersona.nombreCompleto}" />
+							</div>
+							<div class="col-md-3">
+								<p:outputLabel styleClass="bloque"
+									value="Fecha limite de llenado" />
+								<h:outputText
+									value="#{calificacionGpoEventoCapBean.evento.fechaLimiteLLenado}">
+									<f:convertDateTime pattern="dd/MM/yyyy" />
+								</h:outputText>
+							</div>
+							<div class="col-md-3">
+								<p:outputLabel styleClass="bloque" value="Número de alumnos" />
+								<h:outputText
+									value="#{calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados eq 0 ? 'No hay alumnos matriculados': calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados }" />
+							</div>
+							<div class="col-md-3">
+								<p:outputLabel styleClass="bloque" value="Duración del evento"
+									rendered="#{not(calificacionGpoEventoCapBean.modLineaMixto)}" />
+								<h:outputText styleClass="margenDerechoMenor"
+									rendered="#{not(calificacionGpoEventoCapBean.modLineaMixto)}"
+									value="#{calificacionGpoEventoCapBean.duracionEvento}" />
+								<h:outputText
+									rendered="#{not(calificacionGpoEventoCapBean.modLineaMixto)}"
+									value="#{(calificacionGpoEventoCapBean.duracionEvento eq 1)?'día':'días'}" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-3">
+								<p:outputLabel styleClass="bloque"
+									rendered="false"
+									value="Generar evaluación:" />
+								<p:commandButton process="@this" ajax="true" value="Generar evaluación"
+									action="#{calificacionGpoEventoCapBean.generaTablaCalifGrupo}"
+									update="@form" styleClass="btn btn-primary" style="margin:0"
+									disabled="#{calificacionGpoEventoCapBean.cerrarActa or calificacionGpoEventoCapBean.modalidadEnLinea}"
+									rendered="#{not(calificacionGpoEventoCapBean.modLineaMixto)}" />
+
+								<p:spinner min="0" maxlength="1" max="9" 
+									rendered="false"
+									value="#{calificacionGpoEventoCapBean.numEvaluaciones}"
+									disabled="#{calificacionGpoEventoCapBean.cerrarActa or calificacionGpoEventoCapBean.modalidadEnLinea}">
+									<p:ajax process="@this"
+										listener="#{calificacionGpoEventoCapBean.generaTablaCalifGrupo}"
+										update="@form" />
+									<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+								</p:spinner>
+							</div>
+							<div class="col-md-8">
+								<p:commandButton
+									rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) }"
+									value="Cargar" process="@this"
+									action="#{calificacionGpoEventoCapBean.obtieneCalifMoodleWS}"
+									ajax="true" styleClass="btn btn-primary pull-right"
+									update="@form" />
+							</div>
+						</div>
+					</div>
+				</p:outputPanel>
+
+				<p:panel id="pnlCalif" header="Evaluaciones"
+					rendered="#{calificacionGpoEventoCapBean.muestraTblCalif}">
+
+					<p:importEnum
+						type="mx.gob.sedesol.gestorweb.commons.utils.ECTipoCalificacionEnum"
+						var="TPO_CALIF" allSuffix="ALL_ENUM_VALUES" />
+
+					<p:dataTable id="dtCalificaciones" widgetVar="dtCalifGpo"
+						emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.msjRegistros')}"
+						value="#{calificacionGpoEventoCapBean.tablaAuxCalif}"
+						var="partCalif" style="text-align:center;" paginator="true"
+						rows="15" paginatorPosition="bottom" reflow="true"
+						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+						currentPageReportTemplate="({currentPage} de {totalPages})"
+						rowsPerPageTemplate="5,10,15"
+						rendered="#{not empty calificacionGpoEventoCapBean.tablaAuxCalif}"
+						tableStyleClass="table" scrollable="true">
+
+						<f:facet name="header">
+							<p:outputPanel styleClass="text-right">
+								<p:outputLabel for="globalFilter"
+									value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}" />
+								<p:inputText id="globalFilter"
+									onkeyup="PF('dtCalifGpo').filter()"
+									placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}">
+								</p:inputText>
+							</p:outputPanel>
+						</f:facet>
+
+						<!-- Id del evento de capacitacion -->
+						<p:column styleClass="text-center">
+							<f:facet name="header">
+								<h:outputText value="Número" />
+							</f:facet>
+							<h:outputText value="#{partCalif.consecutivo}" />
+						</p:column>
+						<p:column>
+							<f:facet name="header">
+								<h:outputText
+									value="#{sistema.obtenerTexto('gw.ge.texto.nombre')}" />
+							</f:facet>
+							<h:outputText value="#{partCalif.participante.nombre}" />
+						</p:column>
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="Primer apellido" />
+							</f:facet>
+							<h:outputText value="#{partCalif.participante.apellidoPaterno}" />
+						</p:column>
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="Segundo apellido" />
+							</f:facet>
+							<h:outputText value="#{partCalif.participante.apellidoMaterno}" />
+						</p:column>
+						
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="Nombre de usuario" />
+							</f:facet>
+							<h:outputText value="#{partCalif.participante.usuario}" />
+						</p:column>
+
+						<c:forEach items="#{calificacionGpoEventoCapBean.calificaciones}"
+							varStatus="indice" var="pc">
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<p:outputLabel
+										rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}"
+										value="Nombre evaluación:" />
+									<h:outputText
+										rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}"
+										value="#{pc.nombreEvaluacion}" />
+								</f:facet>
+
+								<f:facet name="header">
+									<p:inputText id="nombreEvaluacion"
+										value="#{pc.nombreEvaluacion}"
+										rendered="#{not calificacionGpoEventoCapBean.grupoSelec.actaCerrada eq true}"
+										placeholder="Nombre evaluación:"
+										title="Nombre de la evaluacion #{indice.index + 1}"
+										styleClass="form-control margenInferior"
+										disabled="#{calificacionGpoEventoCapBean.modalidadEnLinea or (calificacionGpoEventoCapBean.grupoSelec.actaCerrada eq true)}">
+										<p:ajax process="@this" />
+									</p:inputText>
+								</f:facet>
+
+								<h:outputText
+									rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}"
+									value="#{partCalif.calificacionEC[indice.index].calificacion}" />
+								<p:spinner stepFactor="0.25"
+									rendered="#{not (calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}"
+									value="#{partCalif.calificacionEC[indice.index].calificacion}"
+									disabled="#{calificacionGpoEventoCapBean.cerrarActa or (calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1) or (calificacionGpoEventoCapBean.grupoSelec.actaCerrada eq true)}"
+									size="5" min="#{calificacionGpoEventoCapBean.escalaMin}"
+									max="#{calificacionGpoEventoCapBean.escalaMax}">
+									<p:ajax update="dtCalificaciones" process="@this"
+										listener="#{calificacionGpoEventoCapBean.calculaCalFinalParticipante(partCalif, pc.nombreEvaluacion)}" />
+								</p:spinner>
+							</p:column>
+						</c:forEach>
+
+						<p:column styleClass="text-center">
+							<f:facet name="header">
+								<h:outputText value="Calificación total" />
+							</f:facet>
+							<h:outputText value="#{partCalif.califTotal}">
+								
+							</h:outputText>
+						</p:column>
+
+						<p:column styleClass="text-center"
+							rendered="#{not(calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}">
+							<f:facet name="header">
+								<p:commandLink id="asistLnk" process="@this"
+									styleClass="porcentajeAsis" update="@form"
+									action="#{registroAsistenciaBean.navegaRegistrarAsistenciasEventoCap()}">
+									<f:setPropertyActionListener
+										value="#{calificacionGpoEventoCapBean.grupoSelec.evento.idEvento}"
+										target="#{registroAsistenciaBean.idEvento}" />
+									<h:outputText value="% Asistencia" />
+								</p:commandLink>
+							</f:facet>
+
+							<p:commandLink id="asist" process="@this" update="@form"
+								actionListener="#{calificacionGpoEventoCapBean.visualizaAsistenciaUsuario(partCalif.idGpoParticipante)}">
+								<u><h:outputText value="#{partCalif.asistencia}" /></u>
+								<f:setPropertyActionListener value="#{partCalif}"
+									target="#{calificacionGpoEventoCapBean.participanteCalSel}" />
+							</p:commandLink>
+						</p:column>
+
+						<p:column styleClass="text-center">
+							<f:facet name="header">
+								<h:outputText value="Calificación final" />
+							</f:facet>
+							<h:outputText value="#{partCalif.califFinal}">
+								 
+							</h:outputText>
+						</p:column>
+
+
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="Dictamen" />
+							</f:facet>
+							<f:validateBean disabled="true">
+								<p:selectOneMenu styleClass="col-xs-12"
+									value="#{partCalif.dictamen.id}"
+									rendered="#{not(calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}"
+									disabled="#{!(partCalif.conAsistencia) or calificacionGpoEventoCapBean.cerrarActa}">
+									<p:ajax process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										noSelectionOption="true" />
+									<f:selectItems
+										value="#{calificacionGpoEventoCapBean.catDictamenes}"
+										var="dict" itemLabel="#{dict.nombre}" itemValue="#{dict.id}" />
+								</p:selectOneMenu>
+							</f:validateBean>
+							<h:outputText
+								rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}"
+								value="#{calificacionGpoEventoCapBean.obtenerNombreDictamen(partCalif.dictamen.id)}" />
+						</p:column>
+					</p:dataTable>
+
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:outputLabel value="Exportar XLS: "
+								styleClass="margenIzquierdo agregaHeight" />
+							<p:commandButton id="btnDescargar" ajax="false"
+								disabled="#{calificacionGpoEventoCapBean.tablaAuxCalif.isEmpty()}"
+								styleClass="btn btn-default btn-icon icono_sisi ss_adm_desexcel">
+								<p:dataExporter type="xls" target="dtCalificaciones"
+									fileName="calificaciones_" />
+							</p:commandButton>
+
+							<p:outputLabel value="PDF" rendered="false"
+								styleClass="margenIzquierdo pull-right agregaHeight" />
+							<p:commandButton id="btnDescargarPdf" ajax="false"
+								rendered="false"
+								disabled="#{calificacionGpoEventoCapBean.tablaAuxCalif.isEmpty()}"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc pull-right">
+								<p:dataExporter type="pdf" target="dtCalificaciones"
+									fileName="calificaciones_" />
+							</p:commandButton>
+						</div>
+					</div>
+					<div class="row">
+						<div
+							class="col-md-12 displayFlex centrarMainAxis centrarCrossAxis invertirEjeFlex">
+							<p:outputLabel value="Cerrar Acta:" />
+							<p:inputSwitch value="#{calificacionGpoEventoCapBean.cerrarActa}"
+								disabled="#{calificacionGpoEventoCapBean.cerrarActa}"
+								onLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.si')}"
+								offLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.no')}">
+								<p:ajax
+									listener="#{calificacionGpoEventoCapBean.abrirDialogValidar()}" />
+							</p:inputSwitch>
+						</div>
+					</div>
+				</p:panel>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputPanel id="btnsNavCal" layout="block">
+								<p:commandButton styleClass="btn btn-primary pull-right"
+									disabled="#{ (not calificacionGpoEventoCapBean.grupoSeleccionado) or (calificacionGpoEventoCapBean.grupoSelec.actaCerrada eq true) or (calificacionGpoEventoCapBean.grupoSelec.idGrupo eq 0)}"
+									value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.guardaBorrador')}"
+									process="@this" update="@form" id="btnContinuarCal"
+									action="#{calificacionGpoEventoCapBean.guardaCalifBorrador}" />
+								<p:commandButton styleClass="btn btn-default pull-right"
+									action="#{calificacionGpoEventoCapBean.navegaBusqEventosCap}"
+									value="Regresar" update="@form" process="@this" ajax="true" />
+							</p:outputPanel>
+						</div>
+					</div>
+				</div>
+			</p:panel>
+
+			<p:dialog id="dlgAsistencias" closable="false" header="Asistencias"
+				widgetVar="dlgAsistPart" responsive="true" modal="true"
+				draggable="false" width="800" resizable="false" position="center">
+				<ui:include src="tablaAsistenciasEC.xhtml" />
+			</p:dialog>
+
+		</h:form>
+		<p:dialog id="dlgConfirmActa" responsive="true" modal="true"
+			draggable="false" resizable="false" position="center"
+			styleClass="medidaModal" closable="false" header="Cerrar Acta"
+			widgetVar="dlgCerrarActa">
+			<h:form>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel
+								value="Confirmar que desea cerrar actas, esta acción no se podra revertir" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton styleClass="btn btn-default" value="Cancelar"
+							ajax="true" onclick="PF('dlgCerrarActa').hide();"
+							update="@form frmCalif">
+							<f:setPropertyActionListener value="false"
+								target="#{calificacionGpoEventoCapBean.cerrarActa}" />
+						</p:commandButton>
+						<p:commandButton styleClass="btn btn-primary" value="Aceptar"
+							ajax="true"
+							action="#{calificacionGpoEventoCapBean.cierraActaGrupoEC}"
+							update="@form frmCalif" />
+					</div>
+				</div>
+			</h:form>
+		</p:dialog>
+
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li class="active">Cursos disponibles</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form>
+			<h1>Cursos disponibles</h1>
+			<hr />
+			<h:panelGroup class="cursosPublicoGeneral" layout="block">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+
+							<p:remoteCommand name="filtrarCursos" update="cursos"
+								actionListener="#{cursosPrivadosBean.filtrarCursos}" />
+							<div
+								class="input-group col-md-4 col-lg-3 buscarCursos pull-right">
+								<p:inputText class="form-control" placeholder="Buscar cursos"
+									onkeyup="if(this.value.length>0 || this.value.length==0) filtrarCursos();"
+									value="#{cursosPrivadosBean.filtroCursos}" />
+								<span class="input-group-addon"><i
+									class="fa fa-search fa-fw fa-flip-horizontal"></i></span>
+							</div>
+							<div class="clear"></div>
+
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row cursos">
+						<h:panelGroup id="cursos" layout="block">
+
+							<ui:repeat var="evento" value="#{cursosPrivadosBean.eventos}">
+								<div class="col-md-3 curso margenInferior">
+
+									<div class="row">
+										<div class="col-md-12">
+											<h:panelGroup styleClass="imagen"
+												style="background-image:url('#{evento.rutaRelativa}')"
+												layout="block">
+											</h:panelGroup>
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col-md-12">
+											<h4 class="nombre-curso">
+												<h:outputText value="#{evento.nombreEc}" />
+											</h4>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12">
+											<p class="descripcion">
+												<h:outputText
+													value="#{evento.objetivoGeneralEc.length() > 200 ? evento.objetivoGeneralEc.substring(0,200) : evento.objetivoGeneralEc}" />
+											</p>
+										</div>
+									</div>
+									<div class="row margenInferior">
+										<div class="col-xs-5 text-left">
+											<p:outputLabel value="Nivel: "
+												styleClass="margenDerechoMenor" />
+											<h:outputText
+												value="#{evento.fichaDescriptivaPrograma.catNivelConocimiento.nombre}"
+												styleClass="nivel" />
+										</div>
+										<div class="col-xs-7 text-right">
+											<p:outputLabel value="Duración (días): "
+												styleClass="margenDerechoMenor bloque" />
+											<h:outputText value="#{evento.obtenerDuracion()}"
+												styleClass="margenDerechoMenor" />
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12">
+											<p:outputLabel
+												value="Valoracion del curso por los participantes:" />
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col-md-12 text-right valoracion">
+											<c:forEach begin="1" end="5" varStatus="contadorEstrellas">
+												<p:button icon="fa fa-star" styleClass="starIcon"
+													onclick="return false;"
+													rendered="#{contadorEstrellas.count lt (evento.numEstrellas+1)}" />
+											</c:forEach>
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col-md-12 text-right">
+											<p:commandButton styleClass="btn btn-primary"
+												value="Solicitar"
+												action="#{cursosPrivadosBean.validarSolicitud()}">
+												<f:setPropertyActionListener value="#{evento}"
+													target="#{cursosPrivadosBean.eventoTemp}" />
+											</p:commandButton>
+										</div>
+									</div>
+
+								</div>
+							</ui:repeat>
+						</h:panelGroup>
+					</div>
+				</div>
+			</h:panelGroup>
+
+			<p:dialog id="dlgConfirmacionSolicitud" header="Mensaje"
+				closable="false" widgetVar="wdlgConfirmacionSolicitud"
+				draggable="false" width="600" resizable="false" position="center"
+				modal="true">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText
+								value="¿Deseas agregar una solicitud al evento de capacitación?" />
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton value="Cancelar" styleClass="btn btn-default"
+							oncomplete="PF('wdlgConfirmacionSolicitud').hide();" />
+						<p:commandButton value="Aceptar" styleClass="btn btn-primary"
+							action="#{cursosPrivadosBean.agregarSolicitud()}"
+							oncomplete="PF('wdlgConfirmacionSolicitud').hide()" />
+
+					</div>
+				</div>
+
+			</p:dialog>
+
+			<p:dialog id="dlgAlertaSolicitud" header="Mensaje de alerta"
+				closable="false" widgetVar="wdlgAlertaSolicitud" draggable="false"
+				width="600" resizable="false" position="center" modal="true">
+
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText value="Ya hay una solicitud para este evento." />
+					</div>
+				</div>
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:commandButton value="Cerrar" styleClass="btn btn-default"
+								oncomplete="PF('wdlgAlertaSolicitud').hide();" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+
+
+	</ui:define>
+</ui:composition>

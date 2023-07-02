@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<ui:composition template="/templates/layoutSinMenu.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="content">
+
+		<h:form>
+			<p:spacer height="50"></p:spacer>
+			<h:panelGrid columns="1" width="920"
+				style="margin-left: auto; margin-right: auto;">
+
+				<h:outputText 
+					value="La sesión ha expirado" />
+				<p:spacer width="15px" />
+				
+			</h:panelGrid>
+		</h:form>
+	</ui:define>
+</ui:composition>

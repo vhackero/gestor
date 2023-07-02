@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.titulo.gestionaprendizaje.texto')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.titulo.ambientes.texto.ava.parentesis')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+
+		<h:form id="formBusquedaAva">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<h1>#{sistema.obtenerTexto('gw.titulo.ambientes.texto.ava.parentesis')}</h1>
+			<hr />
+
+			<!-- Panel búsqueda de ambientes virtuales -->
+			<p:panel id="fldBusqueda"
+				header="#{sistema.obtenerTexto('gw.ga.panel.ava')}"
+				showCollapseLink="false" collapsible="false">
+
+
+				<div class="form-group">
+					<div class="row">
+
+						<!-- Tipo de competencia -->
+						<div class="col-md-6">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ga.label.tipocomp')}:"
+								styleClass="requerido" />
+							<p:selectOneMenu id="tpoCmpSel" required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+								value="#{ambientesVirtualesAvaBean.filtro.fichaDescriptivaPrograma.tipoCompetencia}"
+								autoWidth="false"
+								valueChangeListener="#{ambientesVirtualesAvaBean.onChangeTpoCompetencia}"
+								styleClass="col-xs-12">
+								<p:ajax update="ejeCapSel" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+								<f:selectItems
+									value="#{ambientesVirtualesAvaBean.listaTiposCompetencias}"
+									var="tpoComp" itemLabel="#{tpoComp.nombre}"
+									itemValue="#{tpoComp.id}" />
+							</p:selectOneMenu>
+							<p:message for="tpoCmpSel" />
+						</div>
+
+						<!-- Eje de capacitacion -->
+						<div class="col-md-6">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ga.label.ejecap')}:"
+								styleClass="requerido" />
+							<p:selectOneMenu id="ejeCapSel" required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+								value="#{ambientesVirtualesAvaBean.filtro.fichaDescriptivaPrograma.ejeCapacitacion}"
+								valueChangeListener="#{ambientesVirtualesAvaBean.onChangeEventoCapacitacion}"
+								styleClass="col-xs-12"
+								disabled="#{!ambientesVirtualesAvaBean.esEjeDeCapacitacionEditable}">
+								<p:ajax update="progCap"
+									listener="#{ambientesVirtualesAvaBean.deshabilita}" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									value="#{null}" />
+								<f:selectItems
+									value="#{ambientesVirtualesAvaBean.listaEjesCapacitacion}"
+									var="ejeCap" itemValue="#{ejeCap.id}"
+									itemLabel="#{ejeCap.nombre}" />
+							</p:selectOneMenu>
+							<p:message for="ejeCapSel" />
+						</div>
+					</div>
+				</div>
+
+				<!-- Row 2 -->
+				<div class="form-group">
+					<div class="row">
+
+						<!-- Nombre del programa de capacitacion  -->
+						<div class="col-md-6">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ga.label.nomprog')}:"
+								styleClass="requerido" />
+							<p:selectOneMenu id="progCap" required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+								value="#{ambientesVirtualesAvaBean.filtro.fichaDescriptivaPrograma.nombreTentativo}"
+								styleClass="col-xs-12"
+								valueChangeListener="#{ambientesVirtualesAvaBean.onChangeNombreProgramaCapacitacion}"
+								disabled="#{!ambientesVirtualesAvaBean.esNombreProgramaEditable}">
+								<p:ajax event="change" process="@this" update="modalidad" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+								<f:selectItems
+									value="#{ambientesVirtualesAvaBean.avaFiltroBusquedaList}"
+									var="ava"
+									itemValue="#{ava.eventoCapacitacion.fichaDescriptivaPrograma.nombreTentativo}"
+									itemLabel="#{ava.eventoCapacitacion.fichaDescriptivaPrograma.nombreTentativo}" />
+							</p:selectOneMenu>
+							<p:message for="progCap" />
+						</div>
+						<f:validateBean disabled="true">
+							<!-- Nombre del evento de capacitacion -->
+							<div class="col-md-6">
+								<p:outputLabel for="nombreEvt"
+									value="#{sistema.obtenerTexto('gw.textos.menu.nomevtcap')}:" />
+								<p:inputText id="nombreEvt"
+									placeholder="#{sistema.obtenerTexto('gw.textos.menu.nomevtcap')}"
+									styleClass="form-control"
+									value="#{ambientesVirtualesAvaBean.filtro.nombreEc}" />
+								<p:message for="nombreEvt" />
+							</div>
+						</f:validateBean>
+					</div>
+				</div>
+
+				<!-- Row 3 -->
+				<div class="form-group">
+					<div class="row">
+
+						<!-- Modalidad -->
+						<div class="col-md-3">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ga.label.modalidadec')}:"
+								styleClass="requerido" />
+							<p:selectOneMenu id="modalidad" required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+								value="#{ambientesVirtualesAvaBean.filtro.catModalidadPlanPrograma.id}"
+								styleClass="col-xs-12"
+								disabled="#{!ambientesVirtualesAvaBean.esModalidadEditable}">
+								<p:ajax event="change" process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+								<f:selectItems
+									value="#{ambientesVirtualesAvaBean.modalidadEventoCapList}"
+									var="modalidad" itemLabel="#{modalidad.nombre}"
+									itemValue="#{modalidad.id}" />
+							</p:selectOneMenu>
+							<p:message for="modalidad" />
+
+						</div>
+
+						<!-- Tipo rango fechas  -->
+						<div class="col-md-3">
+							<f:validateBean disabled="true">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.ga.label.rangofechas')}:" />
+								<p:selectOneMenu id="tipofecha" required="false"
+									value="#{ambientesVirtualesAvaBean.tipoDatoFechas}"
+									valueChangeListener="#{ambientesVirtualesAvaBean.onChangeActivaBusquedaFechas}"
+									autoWidth="false" styleClass="col-xs-12">
+									<p:ajax update="fc_fechaInicial,fc_fechaFinal" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.ga.label.ite')}"
+										itemValue="#{1}" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.ga.label.ie')}"
+										itemValue="#{2}" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.ga.label.te')}"
+										itemValue="#{3}" />
+								</p:selectOneMenu>
+							</f:validateBean>
+						</div>
+
+
+						<!-- Fecha Inicial  -->
+
+						<div class="col-md-3">
+							<f:validateBean disabled="true">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.ga.label.fi')}:" />
+								<p:calendar id="fc_fechaInicial" navigator="true"
+									value="#{ambientesVirtualesAvaBean.filtro.fechaInicial}"
+									disabled="#{ambientesVirtualesAvaBean.tipoDatoFechas eq null}"
+									styleClass="calendario"
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+									yearRange="c-100:c+100" locale="es"
+									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									showOn="button" readonlyInput="true">
+									<p:ajax event="dateSelect" process="@this" />
+								</p:calendar>
+							</f:validateBean>
+						</div>
+
+						<!-- Fecha Final -->
+						<div class="col-md-3">
+							<f:validateBean disabled="true">
+								<h:outputLabel
+									value="#{sistema.obtenerTexto('gw.ga.label.ff')}:" />
+								<p:calendar navigator="true"
+									value="#{ambientesVirtualesAvaBean.filtro.fechaFinal}"
+									disabled="#{ambientesVirtualesAvaBean.tipoDatoFechas eq null}"
+									styleClass="calendario" id="fc_fechaFinal"
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+									yearRange="c-100:c+100" locale="es" readonlyInput="true"
+									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									showOn="button">
+									<p:ajax event="dateSelect" process="@this" />
+								</p:calendar>
+							</f:validateBean>
+						</div>
+
+
+					</div>
+				</div>
+
+				<!-- Row 4 -->
+				<div class="row">
+					<!-- Busqueda de Eventos de capacitacion -->
+					<div class="col-md-12">
+						<p:commandButton id="btnBusquedaAvas" process="@form" ajax="true"
+							update="@form" styleClass="btn btn-primary pull-right"
+							action="#{ambientesVirtualesAvaBean.busquedaAvasPorCriteriosBusqueda}"
+							value="#{sistema.obtenerTexto('gw.ga.btn.buscar')}" />
+					</div>
+				</div>
+
+			</p:panel>
+
+
+			<p:panel id="resultadosAva"
+				header="#{sistema.obtenerTexto('gw.ga.panel.listadoava')}">
+				<div class="row">
+					<!-- Estatus AVA -->
+					<div class="col-md-3 col-md-offset-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.ga.label.estatus')}:"
+							styleClass="pull-right agregaHeight" />
+					</div>
+					<div class="col-md-3">
+						<f:validateBean disabled="true">
+							<p:selectOneMenu id="selectCatEstatusAva"
+								value="#{ambientesVirtualesAvaBean.estatusSeleccionado.id}"
+								valueChangeListener="#{ambientesVirtualesAvaBean.onChangeEstatusAva}"
+								autoWidth="false" styleClass="col-xs-12">
+								<p:ajax event="change" process="@this"
+									update="dtResultBusqAva,resultadosAva" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" />
+								<f:selectItems
+									value="#{ambientesVirtualesAvaBean.estadoAvaList}"
+									var="estatusAva" itemLabel="#{estatusAva.nombre}"
+									itemValue="#{estatusAva.id}" />
+							</p:selectOneMenu>
+						</f:validateBean>
+					</div>
+				</div>
+
+				<p:panel id="panelSemaforos"
+					header="#{sistema.obtenerTexto('gw.ga.panel.dispaba')}"
+					rendered="#{ambientesVirtualesAvaBean.esPanelSemaforoVisible}">
+
+					<div class="row">
+						<!-- Semaforos -->
+						<div class="col-md-1 text-center">
+							<p:commandButton disabled="true"
+								styleClass="solo-icono btn-icon btn btn-default icono_sisi ss_ga_semaforo SemaforoGris" />
+						</div>
+						<div class="col-md-5">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ga.label.textonovisible')}" />
+
+						</div>
+
+						<div class="col-md-1 text-center">
+							<p:commandButton disabled="true"
+								styleClass="solo-icono btn-icon btn btn-default icono_sisi ss_ga_semaforo SemaforoRojo" />
+
+
+						</div>
+						<div class="col-md-5">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ga.label.textovisprox')}" />
+						</div>
+
+					</div>
+					<div class="row flexY">
+						<!-- Semaforos -->
+						<div class="col-md-1 text-center">
+							<p:commandButton disabled="true"
+								styleClass="solo-icono btn-icon btn btn-default icono_sisi ss_ga_semaforo SemaforoAmarillo" />
+
+						</div>
+						<div class="col-md-5">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ga.label.textonovisfecha')}" />
+						</div>
+						<div class="col-md-1 text-center">
+							<p:commandButton disabled="true"
+								styleClass="solo-icono btn-icon btn btn-default icono_sisi ss_ga_semaforo SemaforoVerde" />
+
+						</div>
+						<div class="col-md-5">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ga.label.textoacceso')}" />
+						</div>
+					</div>
+				</p:panel>
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:dataTable id="dtResultBusqAva"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							reflow="true"
+							value="#{ambientesVirtualesAvaBean.ambienteVirtualAprendizajeDTOList}"
+							var="ava" paginator="true" rows="10" paginatorPosition="bottom"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.nombreec')}" />
+								</f:facet>
+								<h:outputText value="#{ava.eventoCapacitacion.nombreEc}" />
+							</p:column>
+
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.tipocomp')}" />
+								</f:facet>
+								<h:outputText
+									value="#{ambientesVirtualesAvaBean.obtieneNombreTpoCompetencia
+														(ava.eventoCapacitacion.fichaDescriptivaPrograma.tipoCompetencia)}" />
+							</p:column>
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.ejecap')}" />
+								</f:facet>
+								<h:outputText
+									value="#{ambientesVirtualesAvaBean.obtieneNombreEjeCapacit
+														(ava.eventoCapacitacion.fichaDescriptivaPrograma.ejeCapacitacion)}" />
+							</p:column>
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.modalidad')}" />
+								</f:facet>
+								<h:outputText
+									value="#{ava.eventoCapacitacion.catModalidadPlanPrograma.nombre}" />
+							</p:column>
+							<!-- Columna estatus -->
+							<p:column styleClass="text-center"
+								rendered="#{ambientesVirtualesAvaBean.esEstatusAvaVisible}">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.estatusava')}" />
+								</f:facet>
+								<h:outputText value="#{ava.catEstadoAva.nombre}" />
+							</p:column>
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText value="#{sistema.obtenerTexto('gw.ga.label.fi')}" />
+								</f:facet>
+								<h:outputText id="fechaProxima"
+									value="#{ava.eventoCapacitacion.fechaInicial}"
+									styleClass="bloque #{ambientesVirtualesAvaBean.pintarFechaInicial(ava)}">
+									<f:convertDateTime type="date"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+								</h:outputText>
+
+
+								<p:tooltip for="fechaProxima"
+									rendered="#{ambientesVirtualesAvaBean.mostrarTextoFechaInicialProxima(ava)}"
+									value="Está próxima la fecha de inicio del evento de capacitacion"
+									position="top" />
+
+
+							</p:column>
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText value="#{sistema.obtenerTexto('gw.ga.label.ff')}" />
+								</f:facet>
+								<h:outputText value="#{ava.eventoCapacitacion.fechaFinal}">
+									<f:convertDateTime type="date"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+								</h:outputText>
+							</p:column>
+							<!-- Coordinador academico -->
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.coord')}" />
+								</f:facet>
+								<h:outputText
+									value="#{ava.eventoCapacitacion.
+									responsableCoordinadorAcademico.personaResponsabilidad.tblPersona.nombreCompleto}" />
+							</p:column>
+							<!-- Responsable de produccion -->
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.respprod')}" />
+								</f:facet>
+								<h:outputText
+									value="#{ava.eventoCapacitacion.
+									responsableProduccion.personaResponsabilidad.tblPersona.nombreCompleto}" />
+							</p:column>
+
+							<!-- Unidad Didactica -->
+
+							<p:column styleClass="text-center"
+								rendered="#{ambientesVirtualesAvaBean.esColumnaUnidadDidacticaVisible}">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.udidact')}" />
+								</f:facet>
+								<p:commandButton id="btnUnidadDidactica" process="@this"
+									rendered="#{ambientesVirtualesAvaBean.validaAccionUnidadDidacticaAva(ava)}"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis"
+									actionListener="#{ambientesVirtualesAvaBean.armaArbol(ava)}"
+									oncomplete="PF('modEstructuraUnidadDidactica').show()"
+									update="formBusquedaAva:dlgEstructuraUnidadDidactica">
+								</p:commandButton>
+								<p:tooltip for="btnUnidadDidactica"
+									value="#{sistema.obtenerTexto('gw.ga.tooltip.mostrarud')}"
+									position="top" />
+							</p:column>
+
+							<!-- Cerrar Actas -->
+							<p:column styleClass="text-center"
+								rendered="#{ambientesVirtualesAvaBean.esColumnaCerrarActasVisible}">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.cerraracta')}" />
+								</f:facet>
+								<!-- Nota este debe de cambiar de color y de texto cuando 
+										se hayan cerrado las actas -->
+								<p:commandLink id="linkCerrarActas"
+									styleClass="#{ambientesVirtualesAvaBean.validaColorTextoCerrarActas(ava)}"
+									value="#{sistema.obtenerTexto(ambientesVirtualesAvaBean.validaTextoCerrarActas(ava))}"
+									disabled="true"
+									rendered="#{ambientesVirtualesAvaBean.validaAccionCerrarActasAva(ava)}" />
+								<p:tooltip for="linkCerrarActas"
+									value="#{sistema.obtenerTexto('gw.ga.label.estadoacta')}"
+									position="top" />
+
+							</p:column>
+
+							<!-- Columna de avance de AVA -->
+							<p:column styleClass="text-center" style="width:60px"
+								rendered="#{ambientesVirtualesAvaBean.esAvanceVisible}">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.columnaAvance')}" />
+								</f:facet>
+								<p:outputPanel layout="block" styleClass="text-center"
+									rendered="#{ambientesVirtualesAvaBean.esColumnaSemaroforoVisible}">
+									<p:commandButton id="semaforoAva" onclick="return false;"
+										rendered="#{ambientesVirtualesAvaBean.validaAccionSemaforoAva(ava)}"
+										styleClass="#{ambientesVirtualesAvaBean.asignaColorSemaro(ava)} btn btn-icon btn-default icono_sisi ss_ga_semaforo solo-icono" />
+									<p:tooltip for="semaforoAva"
+										value="#{sistema.obtenerTexto('gw.ga.label.estadoava')}"
+										position="top" />
+								</p:outputPanel>
+								<p:outputLabel
+									value="#{(ava.porcentajeAvance==null)?0:ava.porcentajeAvance}%"></p:outputLabel>
+							</p:column>
+							<!-- Acciones -->
+							<p:column styleClass="text-center" style="width:90px">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.acciones')}" />
+								</f:facet>
+								<!-- Modificar seguimiento AVA -->
+								<p:commandButton id="btnModificarSeguimientoAva" process="@this"
+									rendered="#{ambientesVirtualesAvaBean.validaAccionModificarSeguimientoAva(ava)}"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod"
+									action="#{modificarSeguimientoAVABean.navegaModificarSeguimientoAVA}">
+									<f:setPropertyActionListener value="#{ava}"
+										target="#{modificarSeguimientoAVABean.ambienteVirtualAprendizajeDTO}" />
+									<f:setPropertyActionListener
+										value="#{ambientesVirtualesAvaBean.obtieneNombreTpoCompetencia
+														(ava.eventoCapacitacion.fichaDescriptivaPrograma.tipoCompetencia)}"
+										target="#{modificarSeguimientoAVABean.tipoCompetencia}" />
+									<f:setPropertyActionListener
+										value="#{ambientesVirtualesAvaBean.obtieneNombreEjeCapacit
+														(ava.eventoCapacitacion.fichaDescriptivaPrograma.ejeCapacitacion)}"
+										target="#{modificarSeguimientoAVABean.ejeCapacitacion}" />
+								</p:commandButton>
+								<p:tooltip for="btnModificarSeguimientoAva"
+									value="#{sistema.obtenerTexto('gw.ga.label.modsegava')}"
+									position="top" />
+								<!-- Boton URL Ava -->
+
+								<p:commandButton id="btnUrlAva" process="@this" disabled="false"
+									ajax="false" actionListener="#{ambientesVirtualesAvaBean.guardarBitacoraAva(ava)}"
+									onclick="window.open('#{ambientesVirtualesAvaBean.navegarAUrlExterna(ava)}');return false;"
+									rendered="#{ambientesVirtualesAvaBean.validaAccionUrlAva(ava)}"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_urlact"
+									target="_blank">
+								</p:commandButton>
+								<p:tooltip for="btnUrlAva"
+									value="#{sistema.obtenerTexto('gw.ga.label.irava')}"
+									position="top" />
+
+
+								<!-- Ver FOA -->
+								<p:commandButton id="verFoa"
+									styleClass="btn btn-default btn-icon icono_sisi ss_gn_vis"
+									rendered="#{ambientesVirtualesAvaBean.estatusSeleccionado.id eq 2}"
+									oncomplete="PF('modalElegirUnidad').show()" process="@this"
+									update="@form:pnlUnidadesReporte" ajax="true"
+									action="#{fichaObjetoAprendizajeBean.obtenerUnidades}">
+									<f:setPropertyActionListener value="#{ava}"
+										target="#{fichaObjetoAprendizajeBean.avaSeleccionado}" />
+								</p:commandButton>
+								<p:tooltip for="verFoa" value="Ver FOA" position="top" />
+
+
+								<!--Desactivar Ava -->
+								<p:commandButton id="btnDesactivarAva" process="@this"
+									actionListener="#{ambientesVirtualesAvaBean.desactivarAVA(ava)}"
+									rendered="#{ambientesVirtualesAvaBean.validaAccionDesactivarAva(ava)}"
+									disabled="#{(ambientesVirtualesAvaBean.validaActasCerradas(ava.eventoCapacitacion.idEvento))}"
+									update="dtResultBusqAva"
+									styleClass="btn-icon btn btn-default icono_sisi ss_ga_urldesac">
+
+									<p:confirm header="Confirmación"
+										message="#{sistema.obtenerTexto('¿Desea desactivar el AVA ? Los participantes no tendrán acceso a el mismo. .')}" />
+
+								</p:commandButton>
+								<p:tooltip for="btnDesactivarAva"
+									value="#{sistema.obtenerTexto('gw.ga.label.desactava')}"
+									position="top" />
+								<!--Archivar -->
+								<p:commandButton id="btnArchivarAva" process="@this"
+									disabled="#{ava.esAvaArchivado}"
+									rendered="false"
+									actionListener="#{ambientesVirtualesAvaBean.archivarAva(ava)}"
+									update="dtResultBusqAva"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_archivar">
+									<p:confirm
+										header="#{sistema.obtenerTexto('gw.ga.label.archivarava')}"
+										message="#{sistema.obtenerTexto('gw.ga.label.archivaravamsj')}"
+										icon="ui-icon-alert" />
+								</p:commandButton>
+								<p:tooltip for="btnArchivarAva"
+									value="#{sistema.obtenerTexto('gw.ga.label.archava')}"
+									position="top" />
+								<!-- Boton Asignar responsables de produccion -->
+								<p:commandButton id="btnAsignarResponsables" process="@this"
+									rendered="#{ambientesVirtualesAvaBean.validaAccionAsignarRespYPuestaProduccionAva(ava)}"
+									styleClass="btn-icon btn btn-default icono_sisi ss_ga_asgresp"
+									update="formBusquedaAva:dtRespProduccion,formBusquedaAva:dlgAsignarRespFoa"
+									actionListener="#{asignacionResponsableProduccionFoaBean.asignaResponsableProdAva(ava)}"
+									oncomplete="PF('modAsignarRespFoa').show()">
+								</p:commandButton>
+								<p:tooltip for="btnAsignarResponsables"
+									value="#{sistema.obtenerTexto('gw.ga.label.asigresp')}"
+									position="top" />
+								<!-- Boton iniciar produccion AVA -->
+								<p:commandButton id="btnProd" process="@this"
+									rendered="#{ambientesVirtualesAvaBean.validaAccionarAvaAsignaResponsablePermitida(ava)}"
+									disabled="#{ambientesVirtualesAvaBean.validaSiExisteResponsableProduccion(ava)}"
+									styleClass="btn-icon btn btn-default icono_sisi ss_ga_iniprod SemaforoVerde"
+									update="dtResultBusqAva"
+									actionListener="#{ambientesVirtualesAvaBean.porcesarAvaCambioEstatusConstruccion(ava)}">
+									<p:confirm
+										header="#{sistema.obtenerTexto('gw.ga.label.confirma')}"
+										message="#{sistema.obtenerTexto('gw.ga.label.textoconfirm')}" />
+								</p:commandButton>
+								<p:confirmDialog global="true" styleClass="medidaModal"
+									closable="false">
+									<div class="row">
+										<div class="col-md-12">
+											<p:commandButton
+												value="#{sistema.obtenerTexto('gw.ga.btn.aceptar')}"
+												type="button"
+												styleClass="btn btn-primary pull-right ui-confirmdialog-yes" />
+											<p:commandButton
+												value="#{sistema.obtenerTexto('gw.ga.btn.cancelar')}"
+												type="button"
+												styleClass="btn btn-default pull-right ui-confirmdialog-no" />
+										</div>
+									</div>
+								</p:confirmDialog>
+								<p:tooltip for="btnProd"
+									value="#{sistema.obtenerTexto('gw.ga.btn.construccion')}"
+									position="top" />
+							</p:column>
+						</p:dataTable>
+					</div>
+				</div>
+			</p:panel>
+			<ui:include src="mdlEstructuraUnidadDidactica.xhtml" />
+			<ui:include src="mdlResponsableFoa.xhtml" />
+
+			<p:dialog id="elegirUnidad" dynamic="true" responsive="true"
+				modal="true" closable="false" resizable="false" position="center"
+				header="Objetos de aprendizaje" width="600"
+				widgetVar="modalElegirUnidad">
+
+				<p:outputPanel id="pnlUnidadesReporte">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel value="Ficha:" styleClass="bloque" />
+								<p:selectOneMenu id="selectUnidad"
+									value="#{fichaObjetoAprendizajeBean.idUnidadDidactica}"
+									disabled="#{fichaObjetoAprendizajeBean.listaUnidades.isEmpty()}"
+									autoWidth="false" styleClass="col-xs-12">
+									<p:ajax process="@this" event="valueChange" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+									<f:selectItems
+										value="#{fichaObjetoAprendizajeBean.listaUnidades}"
+										var="unidad"
+										itemLabel="#{unidad.detEstUnidadDidactica.tituloUa}"
+										itemValue="#{unidad.detEstUnidadDidactica.idUnidadDidactica}" />
+
+								</p:selectOneMenu>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:commandButton value="Cerrar" styleClass="btn btn-default"
+								onclick="PF('modalElegirUnidad').hide();" />
+							<p:commandButton id="btnGenerarReporte" value="Ver"
+								disabled="#{fichaObjetoAprendizajeBean.listaUnidades.isEmpty()}"
+								styleClass="btn btn-primary" process="@this"
+								update="@form:reporte" ajax="true"
+								action="#{fichaObjetoAprendizajeBean.cargarUnidad}"
+								oncomplete="PF('modalReporte').show()" />
+						</div>
+					</div>
+				</p:outputPanel>
+			</p:dialog>
+			<p:dialog id="reporte" dynamic="true" responsive="true" modal="true"
+				closable="false" resizable="false" position="center"
+				header="Reporte FOA" width="900" widgetVar="modalReporte">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:media player="pdf"
+								value="#{fichaObjetoAprendizajeBean.reportePDF}" width="865"
+								height="400" styleClass="agregaBorde" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton value="Cerrar"
+							styleClass="btn btn-default pull-right"
+							onclick="PF('modalReporte').hide();" />
+					</div>
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

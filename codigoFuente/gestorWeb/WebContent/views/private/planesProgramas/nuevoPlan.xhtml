@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.planesprogramas.etiqueta.menu.titulo')}</li>
+		<li>#{sistema.obtenerTexto('gw.planesprogramas.plandeestudio.titulo')}</li>
+		<li class="active"><p:outputLabel
+				rendered="#{!planBean.edicionPlan}"
+				value="#{sistema.obtenerTexto('gw.plan.nuevo.titulo.nuevoPlan')}" /></li>
+		<li class="active"><p:outputLabel
+				rendered="#{planBean.edicionPlan}"
+				value="#{sistema.obtenerTexto('gw.plan.editar.titulo.editarPlan')}" />
+		</li>
+	</ui:define>
+
+
+	<ui:define name="content">
+
+		<h:form id="nuevoPlanForm">
+			<h1>
+				<p:outputLabel styleClass="h1" rendered="#{!planBean.edicionPlan}"
+					value="#{sistema.obtenerTexto('gw.plan.nuevo.titulo.nuevoPlan')}" />
+
+				<p:outputLabel styleClass="h1" rendered="#{planBean.edicionPlan}"
+					value="#{sistema.obtenerTexto('gw.plan.editar.titulo.editarPlan')}" />
+			</h1>
+			<hr />
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.plan.nuevo.titulo.nuevoPlan')}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel for="nomPlan"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.nombre')}:"
+								styleClass="requerido bloque" />
+							<!-- Longitud de campo -->
+							<p:inputText id="nomPlan" styleClass="form-control"
+								value="#{planBean.plan.nombre}" maxlength="150"
+								placeholder="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.nombre')}" />
+							<p:message for="nomPlan" />
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel for="idPlan"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.identificador')}:"
+								styleClass="requerido bloque" />
+							<p:inputText id="idPlan" styleClass="form-control"
+								value="#{planBean.plan.identificador}"
+								placeholder="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.identificador')}"
+								disabled="true" />
+							<p:message for="idPlan" />
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.tpoPlan')}:"
+								styleClass="requerido bloque" />
+							<p:selectOneMenu id="mnuTpoPlan"
+								value="#{planBean.plan.catTipoPlan.id}"
+								valueChangeListener="#{planBean.onChangeTpoPlan}"
+								autoWidth="false" styleClass="col-xs-12">
+								<p:ajax event="change" process="@this" styleClass="col-xs-12" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+								<f:selectItems value="#{planBean.catTpoPlan}" var="tpoPlan"
+									itemLabel="#{tpoPlan.nombre}" itemValue="#{tpoPlan.id}" />
+							</p:selectOneMenu>
+							<p:message for="mnuTpoPlan" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque requerido"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.modalidad')}:" />
+							<p:selectOneMenu id="mnuModPlan" styleClass="col-xs-12"
+								value="#{planBean.plan.catModalidadPlanPrograma.id}"
+								valueChangeListener="#{planBean.onChangeModalidadPlan}"
+								autoWidth="false">
+								<p:ajax event="change" update="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+								<f:selectItems value="#{planBean.catModalidadPlan}"
+									var="modalidad" itemLabel="#{modalidad.nombre}"
+									itemValue="#{modalidad.id}" />
+							</p:selectOneMenu>
+							<p:message for="mnuModPlan" />
+
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.nvlEnsenanza')}:" />
+							<p:selectOneMenu id="mnuNvlEns"
+								value="#{planBean.plan.catNivelEnsenanzaPrograma.id}"
+								valueChangeListener="#{planBean.onChangeNvEnsePlan}"
+								autoWidth="false" styleClass="col-xs-12">
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+								<f:selectItems value="#{planBean.catNivelEnsPlan}"
+									var="nivelEnse" itemLabel="#{nivelEnse.nombre}"
+									itemValue="#{nivelEnse.id}" />
+							</p:selectOneMenu>
+							<p:message for="mnuNvlEns" />
+
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque requerido"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.competencias')}:" />
+							<p:selectOneMenu id="mnuCmpPlan"
+								value="#{planBean.plan.catCompetenciasPlan.id}"
+								valueChangeListener="#{planBean.onChangeCompetenciaPlan}"
+								autoWidth="false" styleClass="col-xs-12">
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+								<f:selectItems value="#{planBean.catCompPlan}" var="compPlan"
+									itemLabel="#{compPlan.nombre}" itemValue="#{compPlan.id}" />
+							</p:selectOneMenu>
+							<p:message for="mnuCmpPlan" />
+
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12 col-xs-12">
+							<p:outputLabel styleClass="bloque requerido"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.vigencia')}:" />
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+
+						<div class="col-md-3 col-xs-12">
+							<p:outputLabel styleClass="bloque" for="finiPlan"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.fechaInicio')}:" />
+							<p:calendar id="finiPlan"
+								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+								yearRange="c-100:c+100" locale="es" navigator="true"
+								styleClass="calendario"
+								placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								value="#{planBean.plan.fechaInicio}" showOn="button"
+								readonlyInput="true">
+								<p:ajax event="change" update="ffinPlan" />
+								<p:ajax event="dateSelect" update="ffinPlan" />
+							</p:calendar>
+							<p:message for="finiPlan" />
+
+						</div>
+
+						<div class="col-md-3 col-md-offset-1 col-xs-12">
+
+							<p:outputLabel for="ffinPlan" styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.fechaFin')}:" />
+							<p:calendar id="ffinPlan" styleClass="calendario"
+								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+								yearRange="c-100:c+100" locale="es" readonlyInput="true"
+								mindate="#{planBean.plan.fechaInicio}" navigator="true"
+								placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								value="#{planBean.plan.fechaTermino}" showOn="button" />
+							<p:message for="ffinPlan" />
+
+						</div>
+
+					</div>
+				</div>
+
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4 col-xs-12">
+
+							<h:outputLabel styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.alcance')}:" />
+							<f:validateBean disabled="true">
+								<p:selectOneMenu value="#{planBean.plan.catAlcancePlan.id}"
+									valueChangeListener="#{planBean.onChangeAlcancePlan}"
+									autoWidth="false" styleClass="col-xs-12">
+									<p:ajax event="change" process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+									<f:selectItems value="#{planBean.catAlcancePlan}" var="alcance"
+										itemLabel="#{alcance.nombre}" itemValue="#{alcance.id}" />
+								</p:selectOneMenu>
+							</f:validateBean>
+
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque requerido"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.estatus')}:" />
+							<p:selectOneMenu id="estPLan"
+								value="#{planBean.plan.catEstatusPlan.id}"
+								valueChangeListener="#{planBean.onChangeEstatusPlan}"
+								autoWidth="false" styleClass="col-xs-12">
+								<p:ajax event="change" update="estPLan" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+								<f:selectItems value="#{planBean.catalEstatusPlan}"
+									var="estatus" itemLabel="#{estatus.nombre}"
+									itemValue="#{estatus.id}" />
+							</p:selectOneMenu>
+							<p:message for="estPLan" />
+
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.ponderacion')}:" />
+							<p:inputSwitch value="#{planBean.plan.ponderacion}" onLabel="Si"
+								offLabel="No" />
+
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque requerido"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.sede')}:" />
+							<p:selectOneMenu id="sedePlan"
+								value="#{planBean.plan.tblOrganismoGubernamental.id}"
+								valueChangeListener="#{planBean.onChangeOrgGubPlan}"
+								autoWidth="false" styleClass="col-xs-12 sedePlanes">
+								<p:ajax event="change" process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+								<f:selectItems value="#{planBean.listItemsOrgGubs}" var="orgGub"
+									itemLabel="#{orgGub.label}" itemValue="#{orgGub.id}" />
+							</p:selectOneMenu>
+							<p:message for="sedePlan" />
+
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel styleClass="bloque" for="fundamentacion"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.fundamentacion')}:" />
+							<!-- Longitud de campo -->
+							<p:inputTextarea id="fundamentacion" maxlength="2000"
+								value="#{planBean.plan.fundamentacion}"
+								label="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.fundamentacion')}"
+								rows="2" />
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel styleClass="bloque" for="objetivos"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.objetivos')}:" />
+							<!-- Longitud de campo -->
+							<p:inputTextarea value="#{planBean.plan.objetivos}"
+								id="objetivos" maxlength="2000"
+								label="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.objetivos')}"
+								rows="2" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel styleClass="bloque" for="perfilIngreso"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.perfilIng')}:" />
+							<!-- Longitud de campo -->
+							<p:inputTextarea value="#{planBean.plan.perfilIngreso}"
+								id="perfilIngreso" maxlength="2000"
+								label="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.perfilIng')}"
+								rows="2" />
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel styleClass="bloque" for="perfilEgreso"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.perfilEgr')}:" />
+							<!-- Longitud de campo -->
+							<p:inputTextarea value="#{planBean.plan.perfilEgreso}"
+								id="perfilEgreso" maxlength="2000"
+								label="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.perfilEgr')}"
+								rows="2" />
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque requerido"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.docExpide')}:" />
+							<p:selectOneMenu id="docExpPln"
+								value="#{planBean.plan.catDocumentosExpidePlan.id}"
+								valueChangeListener="#{planBean.onChangeDocExpide}"
+								autoWidth="false" styleClass="col-xs-12">
+								<p:ajax event="change" process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+								<f:selectItems value="#{planBean.catDocsExpidePlan}"
+									var="docExp" itemLabel="#{docExp.nombre}"
+									itemValue="#{docExp.id}" />
+							</p:selectOneMenu>
+
+							<p:message for="docExpPln" />
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.conocimientos')}:" />
+							<p:selectCheckboxMenu id="conocsPlan"
+								value="#{planBean.conocimsPlanSelec}"
+								label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								filter="true" filterMatchMode="startsWith"
+								styleClass="col-xs-12">
+								<f:selectItems value="#{planBean.catConocimientosPlan}"
+									var="conoc" itemLabel="#{conoc.nombre}" itemValue="#{conoc.id}" />
+							</p:selectCheckboxMenu>
+
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.habilidades')}:" />
+							<p:selectCheckboxMenu value="#{planBean.habilidadesPlanSelec}"
+								label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								filter="true" filterMatchMode="startsWith"
+								styleClass="col-xs-12">
+								<f:selectItems value="#{planBean.catHabilidadesPlan}"
+									var="habilidad" itemLabel="#{habilidad.nombre}"
+									itemValue="#{habilidad.id}" />
+							</p:selectCheckboxMenu>
+
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.aptitudes')}:" />
+							<p:selectCheckboxMenu value="#{planBean.aptitudesPlanSelec}"
+								label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								filter="true" filterMatchMode="startsWith"
+								styleClass="col-xs-12">
+								<f:selectItems value="#{planBean.catAptitutesPlan}"
+									var="aptitud" itemLabel="#{aptitud.nombre}"
+									itemValue="#{aptitud.id}" />
+							</p:selectCheckboxMenu>
+
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+
+
+						<div class="col-md-12 col-xs-12">
+							<p:commandButton styleClass="btn btn-primary pull-right"
+								rendered="#{!planBean.edicionPlan}"
+								value="#{sistema.obtenerTexto('gw.plan.nuevo.boton.guardar')}"
+								action="#{planBean.guardaNuevoPlan}" ajax="true"
+								validateClient="true" update="@form, :growlLayout" />
+
+							<p:commandButton styleClass="btn btn-primary pull-right"
+								rendered="#{planBean.edicionPlan}"
+								value="#{sistema.obtenerTexto('gw.plan.editar.boton.editar')}"
+								action="#{planBean.editarPlan}" ajax="true"
+								validateClient="true" update="@form,:growlLayout" />
+
+							<p:commandButton immediate="true" ajax="true"
+								id="btnRegresarPlanes" styleClass="btn btn-default pull-right"
+								action="#{planBean.regresaBusquedaPlanes}"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.regresar')}"
+								update="@form" />
+
+						</div>
+					</div>
+				</div>
+
+
+			</p:panel>
+
+		</h:form>
+	</ui:define>
+</ui:composition>
+

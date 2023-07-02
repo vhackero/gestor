@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<!-- Modal de unidad didactica -->
+
+	<p:dialog id="dlgEstructura" modal="true" widgetVar="modEstructura"
+		width="900"
+		header="#{sistema.obtenerTexto('gw.ga.label.unidaddidactica')}"
+		styleClass="modalAbsoluto" draggable="false" position="center"
+		closable="false" resizable="false">
+
+
+		<p:outputPanel id="panelUnidadDida">
+			<!-- Row 1 -->
+			<div class="form-group">
+				<div class="row">
+					<!-- Nombre del objeto de aprendizaje -->
+					<div class="col-md-12">
+						<div>
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ga.label.nomoa')}:" />
+						</div>
+						<div>
+							<h:outputText
+								value="#{estructuraDidacticaBean.objetoAprendizajeSeleccionado.
+                            							detEstUnidadDidactica.tituloUa}" />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<!-- Arbol -->
+				<div class="col-md-12">
+					<!--Componente tipo arbol-->
+					<p:tree value="#{estructuraDidacticaBean.root}" var="node"
+						orientation="horizontal">
+						<p:treeNode expandedIcon="ui-icon ui-icon-folder-open">
+							<h:outputText value="#{node}" />
+						</p:treeNode>
+					</p:tree>
+				</div>
+			</div>
+			<!-- Row 2 -->
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel header="#{sistema.obtenerTexto('gw.ga.label.asigrec')}">
+						<!--Row 2-1-->
+						<div class="row">
+							<!-- Recurso  -->
+							<div class="col-md-4">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.ga.label.recurso')}:" />
+								<p:selectOneMenu id="selectCatTemaRec"
+									value="#{estructuraDidacticaBean.recursoSeleccionado.idCatTemaR}"
+									autoWidth="false" styleClass="col-xs-12">
+									<p:ajax event="change"
+										listener="#{estructuraDidacticaBean.onChangeAsignaTituloRecurso}"
+										process="@this" update="panelUnidadDida" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItems
+										value="#{estructuraDidacticaBean.catTemaRecursos}"
+										var="temaRecurso" itemLabel="#{temaRecurso.nombre}"
+										itemValue="#{temaRecurso.id}" />
+								</p:selectOneMenu>
+							</div>
+							<!-- origen de datos  -->
+							<p:outputPanel id="panelOrigenDatos">
+								<div class="col-md-4">
+									<p:outputLabel for="origenDatos"
+										value="#{sistema.obtenerTexto('gw.ga.label.obtdat')}:"
+										rendered="#{estructuraDidacticaBean.habilitarSeccionOrigenDatos}" />
+									<p:selectOneRadio id="origenDatos"
+										value="#{estructuraDidacticaBean.origenDatos}"
+										rendered="#{estructuraDidacticaBean.habilitarSeccionOrigenDatos}">
+										<f:selectItem itemLabel="Unidad didactica" itemValue="0"
+											noSelectionOption="true" />
+										<f:selectItem itemLabel="Nuevo" itemValue="1" />
+										<p:ajax process="@this"
+											listener="#{estructuraDidacticaBean.inicializaDatosOrigenDeDatos}"
+											update="panelUnidadDida" />
+									</p:selectOneRadio>
+								</div>
+							</p:outputPanel>
+							<!-- nombre -->
+							<div class="col-md-4">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.ga.label.nombre')}:"
+									styleClass="requerido" />
+								<!-- Longitud de campo -->
+								<p:inputText id="idNombreRecurso"
+									value="#{estructuraDidacticaBean.recursoSeleccionado.nombre}"
+									maxlength="100"
+									disabled="${!estructuraDidacticaBean.habilitarElementosDeLaVista}"
+									styleClass="form-control" required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
+								</p:inputText>
+								<p:message for="idNombreRecurso" />
+							</div>
+						</div>
+
+						<!-- Instrucciones o Descripcion -->
+						<div class="row">
+							<div class="col-md-12" id="divIntruccionesDescripcion">
+
+								<p:outputLabel id="idInstrucciones"
+									value="#{estructuraDidacticaBean.tipoTituloRecurso}"
+									styleClass="requerido" />
+								<!-- Longitud de campo -->
+								<p:inputTextarea id="idDescripcion"
+									value="#{estructuraDidacticaBean.recursoSeleccionado.instruccionesContenido}"
+									styleClass="form-control" maxlength="500"
+									disabled="${!estructuraDidacticaBean.habilitarElementosDeLaVista}"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
+									<p:ajax process="@this" />
+								</p:inputTextarea>
+								<p:message for="idDescripcion" />
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<p:dataTable id="dtResultRecursos" rowIndexVar="row"
+									emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+									value="#{estructuraDidacticaBean.recursosOaDTOs}" var="recurso"
+									paginator="true" rows="5" paginatorPosition="bottom"
+									paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+									currentPageReportTemplate="({currentPage} de {totalPages})"
+									rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+									<p:column>
+										<f:facet name="header">
+											<h:outputText
+												value="#{sistema.obtenerTexto('gw.ga.label.id')}" />
+										</f:facet>
+										<h:outputText value="#{row + 1}" />
+									</p:column>
+									<p:column>
+										<f:facet name="header">
+											<h:outputText
+												value="#{sistema.obtenerTexto('gw.ga.label.recurso')}" />
+										</f:facet>
+										<h:outputText value="#{recurso.catTemaRecurso.nombre}" />
+									</p:column>
+									<p:column>
+										<f:facet name="header">
+											<h:outputText
+												value="#{sistema.obtenerTexto('gw.ga.label.nombre')}" />
+										</f:facet>
+										<h:outputText value="#{recurso.nombre}" />
+									</p:column>
+									<p:column>
+										<f:facet name="header">
+											<h:outputText
+												value="#{sistema.obtenerTexto('gw.ga.label.desc')}" />
+										</f:facet>
+										<h:outputText value="#{recurso.instruccionesContenido}" />
+									</p:column>
+									<p:column styleClass="text-center">
+										<f:facet name="header">
+											<h:outputText
+												value="#{sistema.obtenerTexto('gw.ga.label.acciones')}" />
+										</f:facet>
+										<!-- Borrar recurso  -->
+										<p:commandButton id="btnBorrar"
+											action="#{estructuraDidacticaBean.borrarObjetoRecurso(recurso)}"
+											update="dtResultRecursos" process="@this"
+											styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar">
+										</p:commandButton>
+										<p:tooltip for="btnBorrar"
+											value="#{sistema.obtenerTexto('gw.ga.label.eliminar')}"
+											position="top" />
+									</p:column>
+								</p:dataTable>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-12 text-right">
+									<p:commandButton styleClass="btn btn-default"
+										onclick="PF('modEstructura').hide()" update="dlgEstructura"
+										actionListener="#{estructuraDidacticaBean.reestablecerValores}"
+										value="Cerrar" />
+									<p:commandButton styleClass="btn btn-primary"
+										actionListener="#{estructuraDidacticaBean.guardaObjetoRecurso}"
+										update="panelUnidadDida"
+										process="frmSeguimientoAva:dlgEstructura"
+										disabled="${!estructuraDidacticaBean.habilitarElementosDeLaVista}"
+										value="#{sistema.obtenerTexto('gw.ga.label.agregar')}" />
+								</div>
+							</div>
+						</div>
+					</p:panel>
+				</div>
+			</div>
+		</p:outputPanel>
+
+	</p:dialog>
+
+
+</ui:composition>

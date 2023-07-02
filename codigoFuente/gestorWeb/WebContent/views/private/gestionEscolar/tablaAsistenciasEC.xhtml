@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<div class="form-group">
+		<div class="row">
+			<div class="col-md-3">
+				<p:outputLabel value="Grupo:" styleClass="bloque" />
+				<h:outputText
+					value="#{calificacionGpoEventoCapBean.grupoSelec.nombre}" />
+			</div>
+			<div class="col-md-4">
+				<p:outputLabel value="Alumno:" styleClass="bloque" />
+				<h:outputText
+					value="#{calificacionGpoEventoCapBean.participanteCalSel.participante.nombreCompleto}" />
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="row">
+			<div class="col-md-12">
+				<p:dataTable id="dtParticipantes"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.msjRegistros')}"
+					value="#{calificacionGpoEventoCapBean.asistenciasPart}"
+					var="participante" tableStyleClass="table" scrollable="true">
+					<!-- Id del evento de capacitacion -->
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.ge.texto.numero')}" />
+						</f:facet>
+						<h:outputText value="#{participante.secuencia}" />
+					</p:column>
+
+					<p:column>
+						<f:facet name="header">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.ge.texto.nombre')}" />
+						</f:facet>
+						<h:outputText value="#{participante.persona.nombreCompleto}" />
+					</p:column>
+
+					<c:forEach items="#{calificacionGpoEventoCapBean.diasEvento}"
+						var="dia" varStatus="indice">
+						<p:column headerText="#{dia.fechaEventoFormat}"
+							styleClass="intercalar">
+							<p:selectOneMenu styleClass="col-xs-12"
+								valueChangeListener="#{calificacionGpoEventoCapBean.onChangeAsistencia}"
+								value="#{participante.asistencias[indice.index].idtipoAsistencia}">
+
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									noSelectionOption="true" />
+								<f:selectItems
+									value="#{calificacionGpoEventoCapBean.catAsistencia}"
+									var="tipoAsistencia" itemLabel="#{tipoAsistencia.nombre}"
+									itemValue="#{tipoAsistencia.id}" />
+								<p:ajax process="@this" update="dtParticipantes" />
+								<f:param
+									value="#{participante.asistencias[indice.index].fechaEventoFormat}"
+									name="fechaEvento" />
+							</p:selectOneMenu>
+						</p:column>
+					</c:forEach>
+
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.ge.texto.porcentaje')}" />
+						</f:facet>
+						<h:outputText value="#{participante.porcentajeAsistencia}" />
+					</p:column>
+				</p:dataTable>
+			</div>
+		</div>
+	</div>
+
+
+	<h:form>
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton id="cmdRegresar"
+					value="#{sistema.obtenerTexto('gw.ge.texto.regresar')}"
+					process="@this" onclick="PF('dlgAsistPart').hide();" update="@form"
+					styleClass="btn btn-default" />
+				<p:commandButton id="cmdSalvar"
+					value="#{sistema.obtenerTexto('gw.ge.texto.guardar')}"
+					process="@this"
+					actionListener="#{calificacionGpoEventoCapBean.guardaAsistenciasPersona}"
+					update="frmCalif" ajax="true"
+					onsuccess="PF('dlgAsistPart').hide();" styleClass="btn btn-primary" />
+
+			</div>
+		</div>
+	</h:form>
+
+
+
+</ui:composition>
+

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+
+	<p:dialog id="dlgAsignarRespFoa" modal="true" styleClass="medidaModal"
+		widgetVar="modAsignarRespFoa" draggable="false" position="center"
+		closable="false" resizable="false"
+		header="#{sistema.obtenerTexto('gw.ga.panel.asignaresp')}">
+
+		<!-- Asignacion de responsables -->
+		<p:outputPanel id="asignacionResponsables">
+			<div class="row">
+				<div class="col-md-8">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.ga.label.respprod')}" />
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-8">
+						<p:selectOneMenu id="idResponsableProduccion"
+							disabled="#{!asignacionResponsableProduccionFoaBean.elementosAsignacionRespEsActivo}"
+							value="#{asignacionResponsableProduccionFoaBean.respProdSeleccionado.id}"
+							autoWidth="false" styleClass="col-xs-12">
+							<p:ajax event="change" process="@this" />
+							<f:selectItem
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+							<f:selectItems
+								value="#{asignacionResponsableProduccionFoaBean.personaResponsablesList}"
+								var="responsableProduccion"
+								itemLabel="#{responsableProduccion.tblPersona.nombre.concat(responsableProduccion.tblPersona.apellidoPaterno)}"
+								itemValue="#{responsableProduccion.id}" />
+						</p:selectOneMenu>
+					</div>
+					<div class="col-md-4">
+						<p:commandButton id="btnAsignacion"
+							styleClass="btn btn-primary quitaMargen" process="@this"
+							update="dtRespProduccion,formBusquedaAva:idResponsableProduccion,@this"
+							disabled="#{!asignacionResponsableProduccionFoaBean.elementosAsignacionRespEsActivo}"
+							action="#{asignacionResponsableProduccionFoaBean.guardarResponsableProduccion}"
+							value="#{sistema.obtenerTexto('gw.ga.btn.asignar')}" />
+					</div>
+				</div>
+			</div>
+			<!-- tbl responsable produccion -->
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.ga.label.textoresp')}" />
+
+					<p:dataTable id="dtRespProduccion" reflow="true"
+						emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+						rowIndexVar="row" rows="1" value="" tableStyleClass="table">
+
+						<p:column>
+							<f:facet name="header">
+								<h:outputText
+									value="#{sistema.obtenerTexto('gw.ga.label.nombre')}" />
+							</f:facet>
+							<h:outputText
+								value="#{asignacionResponsableProduccionFoaBean.
+                                            				respProdSeleccionado.tblPersona.nombre}" />
+						</p:column>
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sistema.obtenerTexto('gw.ga.label.app')}" />
+							</f:facet>
+							<h:outputText
+								value="#{asignacionResponsableProduccionFoaBean.
+                                            				respProdSeleccionado.tblPersona.apellidoPaterno}" />
+						</p:column>
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sistema.obtenerTexto('gw.ga.label.apm')}" />
+							</f:facet>
+							<h:outputText
+								value="#{asignacionResponsableProduccionFoaBean.
+                                            				respProdSeleccionado.tblPersona.apellidoMaterno}" />
+						</p:column>
+						<p:column styleClass="text-center">
+							<f:facet name="header">
+								<h:outputText
+									value="#{sistema.obtenerTexto('gw.ga.label.acciones')}" />
+							</f:facet>
+							<!-- Boton para borrar responsable produccion  -->
+							<p:commandButton id="btnBorrarResponsableProd"
+								disabled="#{!asignacionResponsableProduccionFoaBean.btnBorrarRespEsActivo}"
+								update="dtRespProduccion,formBusquedaAva:btnAsignacion,
+										formBusquedaAva:idResponsableProduccion"
+								process="@this"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar"
+								actionListener="#{asignacionResponsableProduccionFoaBean.borrarResponsableProduccionSeleccionado}">
+							</p:commandButton>
+							<p:tooltip for="btnBorrarResponsableProd"
+								value="#{sistema.obtenerTexto('gw.ga.tooltip.borraresp')}"
+								position="top" />
+						</p:column>
+					</p:dataTable>
+
+				</div>
+			</div>
+
+			<!-- Data table -->
+			<div class="row">
+				<div class="col-md-12 ">
+					<p:outputLabel value="#{sistema.obtenerTexto('gw.ga.label.nota')}:"
+						styleClass="margenDerecho" />
+					<h:outputText
+						value="#{sistema.obtenerTexto('gw.ga.label.textonota')}" />
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton styleClass="btn btn-default"
+						process="@this" update="dtResultBusqAva"
+						oncomplete="PF('modAsignarRespFoa').hide()" value="Cerrar" />
+				</div>
+
+			</div>
+		</p:outputPanel>
+
+	</p:dialog>
+
+
+</ui:composition>
+

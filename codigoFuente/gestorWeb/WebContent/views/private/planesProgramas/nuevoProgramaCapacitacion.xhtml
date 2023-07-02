@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.planesprogramas.etiqueta.menu.titulo')}</li>
+		<li>#{sistema.obtenerTexto('gw.planes.titulo.progsCapacitacion')}</li>
+		<li class="active"><p:outputLabel
+				rendered="#{!programaCapacitacionBean.edicionPrograma}"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.etiqueta.nuevoprograma')}" />
+			<p:outputLabel rendered="#{programaCapacitacionBean.edicionPrograma}"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.etiqueta.editarPrograma')}" />
+		</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="frmEspProg">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+
+			<h:panelGrid rendered="#{!programaCapacitacionBean.edicionPrograma}">
+				<h1>#{sistema.obtenerTexto('gw.progCapacitacion.etiqueta.nuevoprograma')}</h1>
+			</h:panelGrid>
+
+			<h:panelGrid rendered="#{programaCapacitacionBean.edicionPrograma}">
+				<h1>#{sistema.obtenerTexto('gw.progCapacitacion.etiqueta.editarPrograma')}</h1>
+			</h:panelGrid>
+
+			<hr />
+			<p:panel id="pnlProgNvo"
+				header="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.titulo.competencias')}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel styleClass="requerido"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.tpocomp')}:" />
+							<p:selectOneMenu id="nvoTpoComp" styleClass="col-xs-12"
+								
+								value="#{programaCapacitacionBean.programa.tipoCompetencia}"
+								valueChangeListener="#{programaCapacitacionBean.onChangeTpoCompetencia}">
+								<p:ajax update="nvoEjeCap" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{0}" />
+								<f:selectItems value="#{programaCapacitacionBean.catTpoComp}"
+									var="tpoComp" itemLabel="#{tpoComp.nombre}"
+									itemValue="#{tpoComp.id}" />
+							</p:selectOneMenu>
+							<p:message for="nvoTpoComp" />
+						</div>
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel styleClass="requerido"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.ejecapacit')}:" />
+							<p:selectOneMenu id="nvoEjeCap" styleClass="col-xs-12"
+								disabled="#{programaCapacitacionBean.programa.tipoCompetencia eq 0}"
+								value="#{programaCapacitacionBean.programa.ejeCapacitacion}"
+								valueChangeListener="#{programaCapacitacionBean.onChangeEjeCapacitacion}">
+								<p:ajax process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" />
+								<f:selectItems value="#{programaCapacitacionBean.catEjeCapacit}"
+									var="ejeCap" itemLabel="#{ejeCap.nombre}"
+									itemValue="#{ejeCap.id}" />
+							</p:selectOneMenu>
+							<p:message for="nvoEjeCap" />
+						</div>
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputPanel id="pnlBtnCmpEsp" autoUpdate="false">
+								<p:outputLabel value="Competencias específicas"
+									styleClass="bloque requerido" />
+								<p:commandButton id="cmpEspecifBtn"
+									onmouseover="PF('pnlCmpEspeTree').show()"
+									disabled="#{programaCapacitacionBean.edicionPrograma}"
+									process="@this"
+									value="#{programaCapacitacionBean.conCompEspecificas ? sistema.obtenerTexto('gw.progCapacitacion.etiqueta.opcSeleccionada') : sistema.obtenerTexto('gw.progCapacitacion.etiqueta.seleccioneOp')}"
+									styleClass="#{programaCapacitacionBean.conCompEspecificas ? 'btn btn-user-selected' : 'btn btn-primary'} quitaMargen btnEnOverlay"
+									type="button" />
+							</p:outputPanel>
+							<p:overlayPanel id="pnlCmpEsp"  dismissable="true"
+								showCloseIcon="true" styleClass="tamanioPanel"
+								rendered="#{!programaCapacitacionBean.edicionPrograma}"
+								for="cmpEspecifBtn" showEffect="fade" 
+								widgetVar="pnlCmpEspeTree" hideEffect="fade">
+								<p:treeTable id="arbolCmpEspe" styleClass="compEspProgCap" 
+									value="#{programaCapacitacionBean.arbolCompEspecificas}"
+									scrollable="true" var="compEspProg"
+									selectionMode="checkbox"
+									selection="#{programaCapacitacionBean.competenciasEspecifProg}">
+									<p:ajax event="select"
+										listener="#{programaCapacitacionBean.onNodeSelectCompEspecif}"
+										process="@this" update="frmEspProg:pnlBtnCmpEsp" />
+									<p:ajax event="unselect"
+										listener="#{programaCapacitacionBean.onNodeUnSelectCompEspecif}"
+										process="@this" update="frmEspProg:pnlBtnCmpEsp" />
+									
+									<p:column>
+										<h:outputText value="#{compEspProg.nombre}" />
+									</p:column>
+								</p:treeTable>
+							</p:overlayPanel>
+						</div>
+					</div>
+				</div>
+			</p:panel>
+			<p:panel id="pnlDef" header="Definición">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12 col-xs-12">
+							<p:outputLabel styleClass="requerido bloque" for="nombreProg"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.nombreProg')}:" />
+							<!-- Longitud de campo -->
+							<p:inputText id="nombreProg" maxlength="255"
+								placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.nombre')}"
+								value="#{programaCapacitacionBean.programa.nombreTentativo}"
+								styleClass="form-control">
+								<p:ajax process="@this" />
+							</p:inputText>
+							<p:message for="nombreProg" />
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel styleClass="requerido"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.nivelEns')}:" />
+							<p:selectOneMenu id="nvlEnse"
+								value="#{programaCapacitacionBean.programa.catNivelEnsenanzaPrograma.id}"
+								styleClass="col-xs-12">
+								<p:ajax event="change" process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									noSelectionOption="true" />
+								<f:selectItems
+									value="#{programaCapacitacionBean.catNivelEnsenanzaProg}"
+									var="nivelEns" itemLabel="#{nivelEns.nombre}"
+									itemValue="#{nivelEns.id}" />
+							</p:selectOneMenu>
+							<p:message for="nvlEnse" />
+						</div>
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.modalidad')}:" />
+							<p:selectOneMenu id="modProg"
+								value="#{programaCapacitacionBean.programa.catModalidad.id}"
+								styleClass="col-xs-12">
+								<p:ajax event="change" process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									noSelectionOption="true" />
+								<f:selectItems
+									value="#{programaCapacitacionBean.catModalidadPrograma}"
+									var="modalidad" itemLabel="#{modalidad.nombre}"
+									itemValue="#{modalidad.id}" />
+							</p:selectOneMenu>
+							<p:message for="modProg" />
+						</div>
+						
+						<div class="col-md-4 col-xs-12"> 
+							<h:outputLabel rendered="false" styleClass="bloque" value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.coordinadorAcad')}:" />
+							<p:inputText readonly="true" rendered="false" value="#{programaCapacitacionBean.programa.coordinadorAcademico.nombreCompleto}"  styleClass="form-control" />
+						</div>
+
+						<div class="col-md-4 col-xs-12" style="display: none;">
+							<p:outputLabel styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.dirigidoA')}:" />
+							<p:inputSwitch styleClass="bloque margenInferior"
+								value="#{programaCapacitacionBean.personalInterno}"
+								offLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.externo')}" onLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.interno')}">
+								<p:ajax process="@this" update="opDirigidoA" />
+							</p:inputSwitch>
+
+
+							<p:outputPanel id="opDirigidoA">
+								<p:commandButton id="dirigidoABtn"
+									rendered="#{programaCapacitacionBean.personalInterno}"
+									value="#{programaCapacitacionBean.opcDirigidoA ? sistema.obtenerTexto('gw.progCapacitacion.etiqueta.opcSeleccionada') : sistema.obtenerTexto('gw.progCapacitacion.etiqueta.seleccioneOp')}"
+									type="button" styleClass="btn btn-primary quitaMargen" />
+								<p:overlayPanel id="pnlDInt" for="dirigidoABtn"
+									hideEffect="fade" dynamic="true" styleClass="selectPersonal"
+									rendered="#{programaCapacitacionBean.personalInterno}">
+									<p:treeTable id="dirigidoAInt" scrollable="true"
+										scrollHeight="160"
+										value="#{programaCapacitacionBean.arbolOrgGubernamental}"
+										var="orgGub" selectionMode="single"
+										selection="#{programaCapacitacionBean.nodoOrgGubernamentalSel}">
+										<p:ajax event="select"
+											listener="#{programaCapacitacionBean.onNodeSelectDirigidoA}" />
+										<f:facet name="header">
+								          	#{sistema.obtenerTexto('gw.planesprogramas.texto.estorg')}
+								        </f:facet>
+										<p:column headerText="Organismos Gubernamentales">
+											<h:outputText value="#{orgGub.nombre}" />
+										</p:column>
+									</p:treeTable>
+								</p:overlayPanel>
+								<p:message for="dirigidoAInt"
+									rendered="#{programaCapacitacionBean.personalInterno}" />
+								<p:commandButton id="dirigidoAExternosBtn"
+									rendered="#{!programaCapacitacionBean.personalInterno}"
+									value="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									type="button" styleClass="btn btn-primary quitaMargen" />
+								<p:overlayPanel id="pnlDExt"
+									rendered="#{!programaCapacitacionBean.personalInterno}"
+									styleClass="selectPersonal" for="dirigidoAExternosBtn"
+									hideEffect="fade" dynamic="true">
+									<p:treeTable id="dirigidoAExt" scrollable="true"
+										scrollHeight="160"
+										value="#{programaCapacitacionBean.arbolEstPersonalExt}"
+										var="pExt" selectionMode="checkbox"
+										selection="#{programaCapacitacionBean.nodoEstPersonalExtSel}">
+										<p:ajax event="select" process="@this" />
+										<f:facet name="header">
+								           #{sistema.obtenerTexto('gw.planesprogramas.texto.estperext')}
+								        </f:facet>
+										<p:column headerText="#{sistema.obtenerTexto('gw.planesprogramas.texto.perext')}">
+											<h:outputText value="#{pExt.nombre}" />
+										</p:column>
+									</p:treeTable>
+								</p:overlayPanel>
+								<p:message for="dirigidoAExt"
+									rendered="#{!programaCapacitacionBean.personalInterno}" />
+
+							</p:outputPanel>
+						</div>
+					</div>
+				</div>
+
+
+				<div class="row">
+					<div class="col-md-12 col-xs-12">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.vigencia')}:" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-3 col-xs-12">
+							<p:outputLabel styleClass="bloque requerido"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.fechaInicio')}:" />
+							<p:calendar id="finiProg"
+								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+								yearRange="c-100:c+100" locale="es" navigator="true"
+								value="#{programaCapacitacionBean.programa.fechaVigInicial}"
+								showOn="button" readonlyInput="true" styleClass="calendario"
+								placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}">
+								<p:ajax event="change" update="ffinProg" />
+								<p:ajax event="dateSelect" update="ffinProg" />
+							</p:calendar>
+							<p:message for="finiProg" />
+						</div>
+						<div class="col-md-3 col-md-offset-1 col-xs-12">
+							<p:outputLabel styleClass="bloque requerido"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.fechaFin')}:" />
+							<p:calendar id="ffinProg"
+								disabled="#{programaCapacitacionBean.programa.fechaVigInicial eq null}"
+								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+								mindate="#{programaCapacitacionBean.programa.fechaVigInicial}"
+								yearRange="c-100:c+100" locale="es" navigator="true"
+								value="#{programaCapacitacionBean.programa.fechaVigFinal}"
+								showOn="button" readonlyInput="true" styleClass="calendario"
+								placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}">
+								<p:ajax event="dateSelect" update="@this" />
+								<p:ajax event="change" update="@this" />
+							</p:calendar>
+							<p:message for="ffinProg" />
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12 col-xs-12">
+						<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.planesprogramas.texto.obligatorios')}" />
+						<p:commandButton value="#{sistema.obtenerTexto('gw.planesprogramas.btn.continuar')}" ajax="true" update="@form"
+							process="@form"
+							action="#{programaCapacitacionBean.navegaDatosFECPrograma}"
+							validateClient="true" styleClass="btn btn-primary pull-right" />
+						<p:commandButton value="#{sistema.obtenerTexto('gw.planesprogramas.btn.cancelar')}"
+							action="#{programaCapacitacionBean.cancelarPrograma}"
+							immediate="true" ajax="false"
+							styleClass="btn btn-default pull-right" />
+					</div>
+				</div>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>

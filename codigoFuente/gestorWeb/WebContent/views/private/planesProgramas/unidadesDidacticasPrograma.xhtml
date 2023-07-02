@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags"
+	xmlns:components="http://java.sun.com/jsf/composite/components">
+
+<div id="divEstDid">
+	<div class="row agregaMargenTop">
+		<div class="col-md-2">
+			<p:outputLabel styleClass="agregaHeight"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.unidadesDid')}: " />
+		</div>
+		<div class="col-md-2">
+			<p:spinner value="#{programaCapacitacionBean.numUniDidacticas}"
+				disabled="true" />
+		</div>
+	</div>
+
+	<ui:repeat value="#{programaCapacitacionBean.unidadesDidacticasProg}"
+		varStatus="loop" var="cmpUniDid">
+		<components:cmpUnidadDidactica
+			nombreLabel="#{programaCapacitacionBean.labelCompetencias}"
+			boolColor="#{programaCapacitacionBean.color}"
+			listenerScript="#{programaCapacitacionBean.changeColorLabel(cmpUniDid)}"
+			identificador="#{loop.index}"
+			detEstUniDidactica="#{cmpUniDid.detUnidadDidactica}"
+			nombresUnidades="#{cmpUniDid.nombreUnidad}"
+			catMaterialDidactico="#{programaCapacitacionBean.catMaterialDidactico}"
+			listMatDidacticoSel="#{cmpUniDid.materialDidApoyoSel}"
+			listTposCompetenciaSel="#{cmpUniDid.tiposCompetenciaXEje}"
+			catTiposCompetencias="#{programaCapacitacionBean.catTposCompetenciaXEje}" />
+	</ui:repeat>
+
+</div>
+</html>

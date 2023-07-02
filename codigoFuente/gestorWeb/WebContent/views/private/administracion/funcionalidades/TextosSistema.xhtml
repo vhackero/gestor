@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.modulos')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.modulostextos')}</li>
+
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.modulostextos')}</h1>
+		<hr />
+		<h:form id="frmTextosSistema">
+			<div class="row">
+				<div class="col-md-12">
+					<sec:authorize access="hasPermission(null, 'TEX_SIS_AGR' ) ">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.textos.boton.agregar')}"
+							action="#{funcionalidadBean.nuevoTextoSistema()}" process="@this"
+							ajax="true" update="frmTextosSistema:contenido"
+							oncomplete="PF('amodal').show()"
+							styleClass="btn btn-primary pull-right" />
+						<p:outputLabel
+							styleClass="pull-right agregaHeight separaLabelDerecho"
+							value="#{sistema.obtenerTexto('gw.textos.label.nuevo')}:" />
+					</sec:authorize>
+				</div>
+			</div>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.textos.titulo.panel.superior')}"
+				styleClass="fondoPrimario">
+				<div class="row">
+					<div class="col-md-1 text-right">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.textos.etiqueta.modulo')}:" />
+					</div>
+					<div class="col-md-3">
+						<h:outputText
+							value="#{funcionalidadBean.funcionalidadModificar.descripcion}" />
+					</div>
+				</div>
+
+			</p:panel>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.textos.titulo.panel.inferior')}">
+				<p:dataTable id="tblTextos"
+					value="#{funcionalidadBean.textosSistema}" var="texto"
+					paginator="true" rows="10" rowsPerPageTemplate="5,10,15"
+					paginatorPosition="bottom" reflow="true"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					tableStyleClass="table"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.textos.columna.clave')}">
+						<h:outputText value="#{texto.clave}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.textos.columna.valor')}">
+						<h:outputText value="#{texto.valor}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.textos.columna.acciones')}"
+						class="text-center">
+						<sec:authorize access="hasPermission(null, 'TEX_SIS_EDI' ) ">
+							<p:commandButton id="editar"
+								action="#{funcionalidadBean.cargarTextoSistema()}"
+								process="@this" ajax="true" update="frmTextosSistema:contenido"
+								oncomplete="PF('amodal').show();"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+								<f:setPropertyActionListener value="#{texto}"
+									target="#{funcionalidadBean.textoSistemaModificar}" />
+							</p:commandButton>
+							<p:tooltip id="toolTipFade2" for="editar"
+								value="#{sistema.obtenerTexto('gw.textos.boton.editar')}"
+								position="top" />
+						</sec:authorize>
+					</p:column>
+				</p:dataTable>
+
+			</p:panel>
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.textos.boton.regresar')}"
+						action="#{menuGestorBean.navegaFuncionalidades()}" process="@this"
+						ajax="false" immediate="true"
+						styleClass="btn btn-default pull-right" />
+				</div>
+			</div>
+			<p:dialog id="amodal" widgetVar="amodal" draggable="false"
+				closable="false" position="center" resizable="false"
+				header="#{sistema.obtenerTexto('gw.textos.modal.titulo')}"
+				modal="true" styleClass="modalPseudoClass medidaModal">
+
+				<p:outputPanel id="contenido">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="clave" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.textos.modal.etiqueta.clave')}:" />
+								<p:inputText id="clave"
+									value="#{funcionalidadBean.textoSistema.clave}"
+									styleClass="form-control" maxlength="45"
+									disabled="#{not funcionalidadBean.nueva}" />
+								<p:message for="clave" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel for="valor" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.textos.modal.etiqueta.valor')}:" />
+								<p:inputTextarea value="#{funcionalidadBean.textoSistema.valor}"
+									id="valor" styleClass="form-control" maxlength="45" />
+								<p:message for="valor" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+								<p:outputLabel
+									value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+							</div>
+						</div>
+					</div>
+				</p:outputPanel>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.textos.modal.boton.guardar')}"
+								action="#{funcionalidadBean.guardarTextoSistema()}" ajax="true"
+								update="contenido frmTextosSistema:tblTextos"
+								styleClass="btn btn-primary pull-right" />
+
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.textos.modal.boton.cancelar')}"
+								onclick="PF('amodal').hide();"
+								styleClass="btn btn-default pull-right" />
+						</div>
+
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

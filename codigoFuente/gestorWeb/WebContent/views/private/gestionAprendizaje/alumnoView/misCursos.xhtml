@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="breadcrumb">
+		<li class="active">Mis cursos</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form id="formMisCursos">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<h1>Mis cursos</h1>
+			<hr />
+			<p:panel id="misCursos"
+				header="#{sistema.obtenerTexto('gw.ga.panel.informacioncursosproceso')}">
+				<div class="row">
+					<div class="col-md-12">
+						<p:dataTable id="dtResultadoBusquedaMisCursos"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							reflow="true"
+							value="#{misCursosBean.participanteEventosCapacitacionEnEjecucion}"
+							var="participante" paginator="true" rows="10"
+							paginatorPosition="bottom"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+							<!-- Nombre del curso -->
+							<p:column styleClass="text-center"
+								sortBy="#{participante.grupo.evento.nombreEc}">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.nombrecurso')}" />
+								</f:facet>
+								<h:outputText
+									rendered="#{participante.grupo.evento.catModalidadPlanPrograma.id eq 2}"
+									value="#{participante.grupo.evento.nombreEc}" />
+								<p:commandLink value="#{participante.grupo.evento.nombreEc}"
+									rendered="#{not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}"
+									target="_blank" ajax="false" styleClass="subrayar-con-azul"
+									action="#{misCursosBean.navegaUrlCursoLms(participante.grupo.evento.idEvento)}" />
+							</p:column>
+							<!-- Modalidad -->
+							<p:column styleClass="text-center"
+								sortBy="#{participante.grupo.evento.catModalidadPlanPrograma.nombre}">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.modalidad')}" />
+								</f:facet>
+								<h:outputText
+									value="#{participante.grupo.evento.catModalidadPlanPrograma.nombre}" />
+							</p:column>
+							<!-- Porcentaje de avance -->
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.porcentajeavance')}" />
+								</f:facet>
+								<!-- Progress bar -->
+								<p:progressBar id="progressBarAvanceEvento" ajax="true"
+									labelTemplate="{value}%"
+									rendered="#{not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}"
+									value="#{misCursosBean.obtenerAvanceOa(participante.grupo.evento.idEvento)}"
+									displayOnly="true" style="width:100%" styleClass="pull-right" />
+							</p:column>
+							<!-- Encuesta final -->
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.encuestafinal')}" />
+								</f:facet>
+								<p:commandLink process="@this" style="opacity:1;"
+									styleClass="#{misCursosBean.obtenerEstatusEncuestaEvtEnEjec(participante.grupo.evento) eq 'Contestar' ? 'subrayar-con-azul' : ''}"
+									action="#{consultarEncuestaUsuarioBean.navegaConsultarEncuestaUsuario}"
+									disabled="#{misCursosBean.esEncuestaVisibleEvtEnEje(participante.grupo.evento.idEvento)}"
+									value="#{misCursosBean.obtenerEstatusEncuestaEvtEnEjec(participante.grupo.evento)}">
+									<f:setPropertyActionListener
+										target="#{consultarEncuestaUsuarioBean.idEvento}"
+										value="#{participante.grupo.evento.idEvento}" />
+									<f:setPropertyActionListener
+										target="#{consultarEncuestaUsuarioBean.idTipoEncuesta}"
+										value="#{misCursosBean.tipoEncuestaSeleccionado.id}" />
+								</p:commandLink>
+							</p:column>
+							<!-- Finaliza -->
+							<p:column styleClass="text-center"
+								sortBy="#{participante.grupo.evento.fechaFinal}">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.finaliza')}" />
+								</f:facet>
+								<h:outputText value="#{participante.grupo.evento.fechaFinal}">
+									<f:convertDateTime type="date"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+								</h:outputText>
+							</p:column>
+						</p:dataTable>
+						<div class="row">
+							<div class="col-md-12">
+								<h:outputText
+									value="#{sistema.obtenerTexto('gw.ga.label.leyendaseguimientoeventoscap')}" />
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-3 col-md-offset-9">
+								<p:selectOneMenu id="estatus"
+									value="#{misCursosBean.idEstatusSeleccionado}"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+									valueChangeListener="#{misCursosBean.onChangeEstatuEc}"
+									styleClass="col-xs-12">
+									<p:ajax event="change" process="@this"
+										update="dtResultadoBusquedaMisCursosEstatus" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+									<f:selectItems
+										value="#{misCursosBean.catEstadoEventoCapacitacionList}"
+										var="estatus" itemValue="#{estatus.id}"
+										itemLabel="#{estatus.nombre}" />
+								</p:selectOneMenu>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<p:dataTable id="dtResultadoBusquedaMisCursosEstatus"
+									emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+									reflow="true" value="#{misCursosBean.eventoCapacitacionList}"
+									var="evento" paginator="true" rows="10"
+									paginatorPosition="bottom"
+									paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+									currentPageReportTemplate="({currentPage} de {totalPages})"
+									rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+									<!-- Nombre del curso -->
+									<p:column styleClass="text-center">
+										<f:facet name="header">
+											<h:outputText
+												value="#{sistema.obtenerTexto('gw.ga.label.nombrecurso')}" />
+										</f:facet>
+										<h:outputText value="#{evento.nombreEc}" />
+									</p:column>
+									<!-- Modalidad -->
+									<p:column styleClass="text-center">
+										<f:facet name="header">
+											<h:outputText
+												value="#{sistema.obtenerTexto('gw.ga.label.modalidad')}" />
+										</f:facet>
+										<h:outputText
+											value="#{evento.catModalidadPlanPrograma.nombre}" />
+									</p:column>
+									<!-- Seguimiento de desarrollo de competencias -->
+									<p:column styleClass="text-center" rendered="false">
+										<f:facet name="header">
+											<h:outputText
+												value="#{sistema.obtenerTexto('gw.ga.label.seguimientodesacomp')}" />
+										</f:facet>
+										<p:commandLink process="@this"
+											action="#{consultarEncuestaUsuarioBean.navegaConsultarEncuestaUsuario}"
+											disabled="#{misCursosBean.esEncuestaVisibleEvtConc(evento.idEvento)}"
+											value="#{sistema.obtenerTexto(misCursosBean.obtenerEstatusEncuestaEvtConc(evento.idEvento))}">
+											<f:setPropertyActionListener
+												target="#{consultarEncuestaUsuarioBean.idEvento}"
+												value="#{participante.grupo.evento.idEvento}" />
+											<f:setPropertyActionListener
+												target="#{consultarEncuestaUsuarioBean.idTipoEncuesta}"
+												value="#{null}" />
+										</p:commandLink>
+									</p:column>
+									<!--Fecha  Limite -->
+									<p:column styleClass="text-center">
+										<f:facet name="header">
+											<h:outputText
+												value="#{sistema.obtenerTexto('gw.ga.label.fechaLimite')}" />
+										</f:facet>
+										<h:outputText
+											value="#{misCursosBean.obtenerFechaLimiteEncuesta(evento.idEvento)}">
+											<f:convertDateTime type="date"
+												pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+										</h:outputText>
+									</p:column>
+								</p:dataTable>
+							</div>
+						</div>
+					</div>
+				</div>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>

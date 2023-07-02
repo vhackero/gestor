@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<!-- Modal de unidad didactica -->
+	<p:dialog id="dlgCargaArchivo" modal="true" widgetVar="modCargaArchivo"
+		width="1000" styleClass="modalAbsoluto" resizable="false"
+		draggable="false" closable="false"
+		header="#{sistema.obtenerTexto('gw.ga.panel.cargadescarga')}">
+		<!-- Row 1 -->
+		<div class="row">
+			<!-- Nombre del modulo para carga y descarga de archivos -->
+			<div class="col-md-12">
+				<p:outputLabel styleClass="margenDerechoMenor"
+					value="#{sistema.obtenerTexto('gw.ga.label.cargadescarga')}:" />
+				<h:outputText
+					value="#{modificarSeguimientoAVABean.clasificacionArchivoSeleccionado.nombre}" />
+			</div>
+		</div>
+		<!-- Datatable de Gestion de archivos -->
+		<p:panel header="#{sistema.obtenerTexto('gw.ga.panel.gestarchivo')}">
+			<div class="row">
+				<!-- Carga de archivos  -->
+				<div class="col-md-12">
+					<p:fileUpload id="cargaArchivo" value="#{fileUploadView.file}"
+						mode="advanced" auto="true" skinSimple="true"
+						label="#{sistema.obtenerTexto('gw.ga.label.cargar')}"
+						fileUploadListener="#{modificarSeguimientoAVABean.cargaArchivo}"
+						sizeLimit="#{modificarSeguimientoAVABean.pesoMaximoArchivo}"
+						allowTypes="#{modificarSeguimientoAVABean.extensionValida}"
+						styleClass="pull-right" onstart="PF('dialogLayout').show()"
+						oncomplete="PF('dialogLayout').hide();"
+						update="dtResultArchivos,frmSeguimientoAva:identificador2"
+						fileLimitMessage="#{sistema.obtenerTexto(modificarSeguimientoAVABean.mensajePesoIncorrecto)}"
+						invalidSizeMessage="#{sistema.obtenerTexto(modificarSeguimientoAVABean.mensajePesoIncorrecto)}"
+						invalidFileMessage="#{sistema.obtenerTexto(modificarSeguimientoAVABean.mensajeExtensionInvalida)}"
+						disabled="#{modificarSeguimientoAVABean.botonCargaEsActivo}" />
+					<p:message for="cargaArchivo" />
+				</div>
+
+			</div>
+			<!-- tbl Historial de arhivos -->
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:dataTable id="dtResultArchivos" rowIndexVar="row"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							value="#{modificarSeguimientoAVABean.archivosCargados}"
+							var="archivo" paginator="true" rows="5"
+							paginatorPosition="bottom"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText value="#{sistema.obtenerTexto('gw.ga.label.id')}" />
+								</f:facet>
+								<h:outputText value="#{row + 1}" />
+							</p:column>
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.nombrearchivo')}" />
+								</f:facet>
+								<h:outputText value="#{archivo.nombreArchivo}" />
+							</p:column>
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.fechacarga')}" />
+								</f:facet>
+								<h:outputText value="#{archivo.fechaRegistro}">
+									<f:convertDateTime type="date"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+								</h:outputText>
+							</p:column>
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.pesoarchivo')}" />
+								</f:facet>
+								<h:outputText value="#{archivo.pesoArchivo}" />
+							</p:column>
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.acciones')}" />
+								</f:facet>
+								<!-- Boton para descargar archivo  -->
+								<p:commandButton id="btnDescargar" ajax="false" immediate="true"
+									disabled="#{modificarSeguimientoAVABean.botonDescargaEsActivo}"
+									update="dtResultArchivos" process="@this"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_desc"
+									actionListener="#{modificarSeguimientoAVABean.descargaArchivos(archivo)}">
+									<p:fileDownload
+										value="#{modificarSeguimientoAVABean.fileDownload}" />
+								</p:commandButton>
+								<p:tooltip for="btnDescargar"
+									value="#{sistema.obtenerTexto('gw.ga.label.descarch')}"
+									position="top" />
+							</p:column>
+						</p:dataTable>
+					</div>
+				</div>
+			</div>
+			<!--Row 2-5-->
+			<div class="row">
+				<div class="col-md-12 ">
+					<p:commandButton styleClass="btn btn-default pull-right"
+						onclick="PF('modCargaArchivo').hide()"
+						value="Cerrar" />
+				</div>
+			</div>
+		</p:panel>
+
+	</p:dialog>
+</ui:composition>

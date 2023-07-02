@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.configuracion')}</li>
+		<li class="active">Configuración de correo</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h1>Configuración de correo</h1>
+		<hr />
+		<h:form>
+			<p:panel header="Configuracion de servidor y cuenta de correo">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-3">
+							<p:outputLabel styleClass="bloque"
+								value="Nombre del Host de correo:" for="host" />
+							<p:inputText id="host"
+								value="#{configCorreoBean.datosConfig.host}"
+								styleClass="form-control" />
+						</div>
+
+						<div class="col-md-3">
+							<p:outputLabel styleClass="bloque" for="puerto"
+								value="Puerto de correo:" />
+							<p:inputText id="puerto"
+								value="#{configCorreoBean.datosConfig.port}"
+								styleClass="form-control" />
+						</div>
+
+						<div class="col-md-3">
+							<p:outputLabel styleClass="bloque" for="correo"
+								value="Cuenta de correo:" />
+							<p:inputText id="correo"
+								value="#{configCorreoBean.datosConfig.usuarioCorreo}"
+								styleClass="form-control" />
+						</div>
+
+						<div class="col-md-3">
+							<p:outputLabel styleClass="bloque" for="pass"
+								value="Contraseña de correo:" />
+							<p:password id="pass" value="#{configCorreoBean.password}"
+								styleClass="form-control" />
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton
+							styleClass="quitaMargen btn btn-primary pull-right"
+							value="Guardar" action="#{configCorreoBean.guardaConfigCorreo}"
+							ajax="true" />
+					</div>
+				</div>
+			</p:panel>
+
+			<p:panel id="pnlGral" header="Envió de Correo" toggleable="true"
+				closable="false" toggleSpeed="500" closeSpeed="500">
+
+				<p:ajax event="toggle"
+					listener="#{configCorreoBean.onTogglePnlCorreo}" update="pnlGral" />
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-8">
+							<p:outputLabel styleClass="bloque" for="para" value="Para:" />
+							<p:inputText id="para" value="#{configCorreoBean.para}"
+								styleClass="form-control" />
+
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-8">
+							<p:commandButton value="Agregar" update="@form"
+								styleClass="quitaMargen btn btn-primary"
+								action="#{configCorreoBean.nuevoPara}">
+								<p:collector value="#{configCorreoBean.para}"
+									addTo="#{configCorreoBean.datosCorreo.destinatarios}"
+									unique="true" />
+							</p:commandButton>
+						</div>
+					</div>
+
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputPanel id="listPara">
+								<p:dataTable emptyMessage="Sin registros"
+									value="#{configCorreoBean.datosCorreo.destinatarios}"
+									var="destinatario">
+
+									<p:column headerText="Destinatario">
+										<h:outputText value="#{destinatario}" />
+									</p:column>
+
+									<p:column headerText="Eliminar">
+										<p:commandButton value="eliminar" update="@form"
+											styleClass="quitaMargen btn-icon btn btn-default icono_sisi ss_gn_eliminar">
+											<p:collector value="#{destinatario}"
+												removeFrom="#{configCorreoBean.datosCorreo.destinatarios}"
+												unique="true" />
+										</p:commandButton>
+									</p:column>
+
+								</p:dataTable>
+							</p:outputPanel>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-8">
+							<p:outputLabel for="cc" value="CC:" />
+							<p:inputText id="cc" value="#{configCorreoBean.paraCC}"
+								styleClass="form-control" />
+							
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-8">
+							<p:commandButton value="Agregar" update="listParaCC"
+								styleClass="quitaMargen btn btn-primary"
+								action="#{configCorreoBean.nuevoParaCC}">
+								<p:collector value="#{configCorreoBean.paraCC}"
+									addTo="#{configCorreoBean.datosCorreo.destinatariosCC}"
+									unique="true" />
+							</p:commandButton>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputPanel id="listParaCC">
+								<p:dataTable emptyMessage="Sin registros"
+									value="#{configCorreoBean.datosCorreo.destinatariosCC}"
+									var="destinatarioCC">
+									<p:column headerText="CC">
+										<h:outputText value="#{destinatarioCC}" />
+									</p:column>
+
+									<p:column headerText="Eliminar">
+										<p:commandButton value="eliminar" update="listParaCC"
+											styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar">
+											<p:collector value="#{destinatarioCC}"
+												removeFrom="#{configCorreoBean.datosCorreo.destinatariosCC}"
+												unique="true" />
+										</p:commandButton>
+									</p:column>
+								</p:dataTable>
+							</p:outputPanel>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel for="asunto" value="Asunto:" />
+							<p:inputText id="asunto"
+								value="#{configCorreoBean.datosCorreo.asunto}"
+								styleClass="form-control" />
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:editor id="detCorreo" widgetVar="correoWidget"
+								value="#{configCorreoBean.datosCorreo.contenido}" />
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton
+							styleClass="btn btn-primary pull-right quitaMargen"
+							value="Enviar" action="#{configCorreoBean.enviarCorreo}"
+							ajax="true" />
+					</div>
+				</div>
+
+			</p:panel>
+
+		</h:form>
+	</ui:define>
+
+</ui:composition>

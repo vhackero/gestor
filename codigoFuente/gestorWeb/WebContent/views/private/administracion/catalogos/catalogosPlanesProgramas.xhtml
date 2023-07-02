@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:components="http://java.sun.com/jsf/composite/components">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.administracion.catalogos.cpp')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form id="formf">
+			<h1>#{sistema.obtenerTexto('gw.administracion.catalogos.cpp')}</h1>
+			<hr />
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<div class="row">
+				<div class="col-md-4">
+					<p:accordionPanel multiple="true" activeIndex="null" id="acordion"
+						styleClass="acordeonpyp">
+						<c:forEach items="#{catPlanesProgramasBean.catalogosPlanesProg}"
+							var="cat">
+							<p:tab id="tab#{cat.id}" title="#{cat.nombre}" >
+								<p:commandLink value="#{sistema.obtenerTexto('gw.catalogos.texto.registrar')}" process="@this"
+									id="link#{cat.id}" rendered="#{cat.visualizarReg}" styleClass="bloque"
+									action="#{catPlanesProgramasBean.generaComponenteReg(cat)}"
+									update="formf" />
+								
+								<p:commandLink value="#{sistema.obtenerTexto('gw.catalogos.texto.visualizar')}" process="@this"
+									id="link2#{cat.id}"
+									action="#{catPlanesProgramasBean.obtenerDatosCatSel(cat)}"
+									update="formf" />
+							</p:tab>
+						</c:forEach>
+					</p:accordionPanel>
+				</div>
+				<div class="col-md-8">
+					<components:regCatalogoComun
+						idCat="#{catPlanesProgramasBean.idCat}"
+						nombreCat="#{catPlanesProgramasBean.nombreCat}"
+						catalogoDTO="#{catPlanesProgramasBean.catComunDTOGenerico}"
+						rendered="#{catPlanesProgramasBean.muestraCompReg}"
+						accionBtnGuardar="#{catPlanesProgramasBean.guardarRegCatalogo}"
+						renderCmpSelect="false" />
+					<br />
+					<components:verCatalogoComun
+						idCat="#{catPlanesProgramasBean.idCat}"
+						nombreCat="#{catPlanesProgramasBean.nombreCat}"
+						listaElemCat="#{catPlanesProgramasBean.lstCatSelec}"
+						rendered="#{catPlanesProgramasBean.muestraCompTabla}"
+						listenerCambioEstatus="#{catPlanesProgramasBean.cambioEstatusCatSelec}"
+						accionEditRegCatalogo="#{catPlanesProgramasBean.editaRegCatSeleccionado}"
+						catalogoDTOSel="#{catPlanesProgramasBean.catComunDTOGenerico}"
+						renderCmpSelect="false" />
+				</div>
+			</div>
+		</h:form>
+	</ui:define>
+</ui:composition>

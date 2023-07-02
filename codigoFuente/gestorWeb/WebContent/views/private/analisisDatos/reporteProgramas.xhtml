@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>Análisis de datos</li>
+		<li class="active">Reporte de programas</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>Reporte programas</h1>
+		<hr />
+		<p:ajaxStatus onstart="PF('dialogLayout').show()"
+			onsuccess="PF('dialogLayout').hide()" />
+		<h:form id="form">
+			<f:validateBean disabled="true">
+				<div class="row">
+					<div class="col-md-12">
+						<p:panel header="Búsqueda de programas"
+							id="pnlBusqueda">
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-6">
+										<p:outputLabel value="Entidad federativa:" styleClass="bloque" />
+										<p:selectOneMenu id="selectEntidad" styleClass="col-xs-12"
+											value="#{reporteGestionEscolarBean.filtros.idEntidadFederativa}"
+											valueChangeListener="#{reporteGestionEscolarBean.onEstadoChange}">
+											<p:ajax update="selectMunicipio" />
+											<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+											<f:selectItems
+												value="#{reporteGestionEscolarBean.listaEntidades}"
+												var="entidad" itemLabel="#{entidad.nombre}"
+												itemValue="#{entidad.idEntidadFederativa}" />
+
+										</p:selectOneMenu>
+									</div>
+
+									<div class="col-md-6">
+										<p:outputLabel value="Ciudad o municipio:" styleClass="bloque" />
+										<p:selectOneMenu id="selectMunicipio" styleClass="col-xs-12"
+											disabled="#{reporteGestionEscolarBean.filtros.idEntidadFederativa == NULL}"
+											value="#{reporteGestionEscolarBean.filtros.idMunicipio}">
+											<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+											<f:selectItems
+												value="#{reporteGestionEscolarBean.listaMunicipios}"
+												var="municipio" itemLabel="#{municipio.nombre}"
+												itemValue="#{municipio.idMunicipio}" />
+										</p:selectOneMenu>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-4">
+										<p:outputLabel value="Tipo de competencia:"
+											styleClass="bloque" />
+										<p:selectOneMenu styleClass="col-xs-12"
+											valueChangeListener="#{eventoCapacitacionBean.onChangeTpoCompetencia}"
+											value="#{reporteGestionEscolarBean.filtros.fichaDescriptivaPrograma.tipoCompetencia}">
+											<p:ajax update="selectEjeCapacitacion" />
+											<f:selectItem itemValue="#{null}" itemLabel="Seleccionar" />
+											<f:selectItems
+												value="#{reporteGestionEscolarBean.listaTiposCompetencias}"
+												var="competencia" itemLabel="#{competencia.nombre}"
+												itemValue="#{competencia.id}" />
+										</p:selectOneMenu>
+									</div>
+									<div class="col-md-4">
+										<p:outputLabel value="Eje de capacitacion:"
+											styleClass="bloque" />
+										<p:selectOneMenu id="selectEjeCapacitacion"
+											styleClass="col-xs-12"
+											disabled="#{reporteGestionEscolarBean.filtros.fichaDescriptivaPrograma.tipoCompetencia == null}"
+											value="#{reporteGestionEscolarBean.filtros.fichaDescriptivaPrograma.ejeCapacitacion}">
+											<p:ajax event="change" process="@this" />
+											<f:selectItem itemValue="#{null}"
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+											<f:selectItems
+												value="#{eventoCapacitacionBean.listaEjesCapacitacion}"
+												var="ejeCap" itemValue="#{ejeCap.id}"
+												itemLabel="#{ejeCap.nombre}" />
+										</p:selectOneMenu>
+									</div>
+									<div class="col-md-4">
+										<p:outputLabel value="Modalidad:" styleClass="bloque" />
+										<p:selectOneMenu styleClass="col-xs-12"
+											converter="entityConverter"
+											value="#{reporteGestionEscolarBean.filtros.catModalidadPlanPrograma}">
+											<p:ajax event="change" process="@this" />
+											<f:selectItem itemValue="#{null}"
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+											<f:selectItems
+												value="#{reporteGestionEscolarBean.listaModalidadesPrograma}"
+												var="modalidad" itemLabel="#{modalidad.nombre}"
+												itemValue="#{modalidad}" />
+										</p:selectOneMenu>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-6">
+										<p:outputLabel value="Nivel de enseñanza:"
+											styleClass="bloque" />
+										<p:inputText
+											value="#{reporteGestionEscolarBean.filtros.nombreEc}"
+											styleClass="form-control" />
+									</div>
+									<div class="col-md-3">
+										<p:outputLabel value="Estatus:"
+											styleClass="bloque" />
+										<p:selectOneMenu styleClass="col-xs-12"
+											value="#{reporteGestionEscolarBean.filtros.privado}">
+											<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+											<f:selectItem itemLabel="Privado" itemValue="#{false}" />
+											<f:selectItem itemLabel="Público" itemValue="#{true}" />
+
+										</p:selectOneMenu>
+									</div>
+									
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-12 text-right">
+										<p:commandButton value="Limpiar campos"
+											actionListener="#{reporteGestionEscolarBean.limpiarCampos}"
+											ajax="true" update="@form" styleClass="btn btn-default" />
+										<p:commandButton value="Buscar" styleClass="btn btn-primary"
+											update="@form" ajax="true"
+											action="#{reporteGestionEscolarBean.buscarEventosCapacitacion}" />
+									</div>
+								</div>
+							</div>
+						</p:panel>
+
+					</div>
+				</div>
+			</f:validateBean>
+
+
+
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel header="Resultado de la búsqueda">
+
+
+
+						<p:dataTable
+							value="#{reporteGestionEscolarBean.eventosCapacitacion}"
+							reflow="true"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							tableStyleClass="table" id="tblProgramas" var="evento"
+							paginator="true" paginatorPosition="bottom" rows="10"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks}
+								 {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15">
+
+							<f:facet name="header">
+								<div class="row flexY">
+									<div class="col-md-8">
+										<p:outputLabel
+											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+									</div>
+									<div class="col-md-4">
+										<p:commandButton id="toggler" type="button"
+											value="Columna de datos" style="width:200px"
+											styleClass="pull-right btn btn-default"
+											icon="ui-icon-carat-1-s" />
+										<p:columnToggler id="columnaSelectora"
+											datasource="tblProgramas" trigger="toggler">
+											<p:ajax event="toggle"
+												listener="#{reporteGestionEscolarBean.onToggle}" />
+										</p:columnToggler>
+									</div>
+								</div>
+							</f:facet>
+							<p:column visible="#{reporteGestionEscolarBean.visible[0]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Clave" />
+								</f:facet>
+
+								<h:outputText value="#{evento.cveEventoCap}" />
+							</p:column>
+							<p:column visible="#{reporteGestionEscolarBean.visible[1]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Nombre del programa" />
+								</f:facet>
+
+								<h:outputText value="#{evento.nombreEc}" />
+							</p:column>
+							<p:column visible="#{reporteGestionEscolarBean.visible[2]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Eje de competencia" />
+								</f:facet>
+
+								<h:outputText
+									value="#{reporteGestionEscolarBean.obtieneNombreTpoCompetencia(evento.fichaDescriptivaPrograma.tipoCompetencia)}" />
+							</p:column>
+							<p:column visible="#{reporteGestionEscolarBean.visible[3]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Tipo de competencia" />
+								</f:facet>
+
+								<h:outputText
+									value="#{reporteGestionEscolarBean.obtieneNombreEjeCapacit(evento.fichaDescriptivaPrograma.ejeCapacitacion)}" />
+							</p:column>
+							<p:column visible="#{reporteGestionEscolarBean.visible[4]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Competencia específica" />
+								</f:facet>
+
+								<h:outputText value="#{evento.catModalidadPlanPrograma.nombre}" />
+							</p:column>
+							<p:column visible="#{reporteGestionEscolarBean.visible[5]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Modalidad" />
+								</f:facet>
+
+								<h:outputText
+									value="#{evento.catEstadoEventoCapacitacion.nombre}" />
+							</p:column>
+							<p:column visible="#{reporteGestionEscolarBean.visible[6]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Estatus" />
+								</f:facet>
+								<h:outputText value="#{evento.fechaInicial}">
+									<f:convertDateTime type="date"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+								</h:outputText>
+							</p:column>
+							<p:column visible="#{reporteGestionEscolarBean.visible[7]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Área responsable" />
+								</f:facet>
+								<h:outputText value="#{evento.fechaFinal}">
+									<f:convertDateTime type="date"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+								</h:outputText>
+							</p:column>
+							<p:column visible="#{reporteGestionEscolarBean.visible[8]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Tipo de evento" />
+								</f:facet>
+								<h:outputText
+									value="#{evento.fichaDescriptivaPrograma.catNivelConocimiento.nombre}" />
+							</p:column>
+
+							<p:column visible="#{reporteGestionEscolarBean.visible[9]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Nivel de conocimiento" />
+								</f:facet>
+								<h:outputText
+									value="#{reporteGestionEscolarBean.obtenerCantidadAlumnosPorEvento(evento.idEvento)}" />
+							</p:column>
+
+							<p:column visible="#{reporteGestionEscolarBean.visible[10]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Seriado" />
+								</f:facet>
+								<h:outputText
+									value="#{reporteGestionEscolarBean.obtenerNombreEntidadPorId(evento.idEntidadFederativa)}" />
+							</p:column>
+
+							<p:column visible="#{reporteGestionEscolarBean.visible[11]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Dirigido a:" />
+								</f:facet>
+								<h:outputText
+									value="#{reporteGestionEscolarBean.obtenerPromedioAsistencia(evento.idEvento)}" />
+							</p:column>
+
+							<p:column visible="#{reporteGestionEscolarBean.visible[12]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Número de EC por programa" />
+								</f:facet>
+								<h:outputText
+									value="#{reporteGestionEscolarBean.obtenerPromedioCalificacion(evento.idEvento)}" />
+							</p:column>
+
+						</p:dataTable>
+					</p:panel>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12 floatFlexCentrarY margenInferior">
+						<p:outputLabel value="Reporte de excel:" style="margin-bottom:0"
+							styleClass="margenDerecho agregaHeight" for="btnReporte" />
+						<p:commandButton id="btnReporte" value="Descargar"
+							style="margin-left:0; margin-right:10px"
+							disabled="#{reporteGestionEscolarBean.eventosCapacitacion.isEmpty()}"
+							styleClass="btn btn-primary" ajax="false">
+							<p:dataExporter type="xls" target="tblEventosCapacitacion"
+								fileName="analisisDatosEventos" pageOnly="false" />
+						</p:commandButton>
+
+						<p:outputLabel value="Informe prediseñado:"
+							style="margin-bottom:0" styleClass="margenDerecho" />
+
+						<p:commandButton value="Generar"
+							disabled="#{reporteGestionEscolarBean.eventosCapacitacion.isEmpty()}"
+							onclick="graficasEventos();"
+							styleClass="btn btn-primary margenDerecho quitaMargen" />
+
+						<p:remoteCommand name="graficasEventos"
+							action="#{reporteGestionEscolarBean.generarEstadisticas}"
+							oncomplete="cargaGraficasEventos(xhr, status, args); PF('modalAnalisis').show(); scrollArribaEventos();" />
+
+						<p:remoteCommand name="scrollArribaEventos"
+							action="#{reporteGestionEscolarBean.scrollArriba}" />
+
+
+					</div>
+				</div>
+			</div>
+		</h:form>
+
+
+	</ui:define>
+</ui:composition>

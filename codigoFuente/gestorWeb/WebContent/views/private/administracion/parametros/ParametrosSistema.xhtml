@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.configuracion')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.parametros.sistema')}</li>
+	</ui:define>
+	<ui:define name="content">
+
+		<h:form id="frmParametros">
+			<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.parametros.sistema')}</h1>
+			<hr />
+			<!-- GRR :: Ocultar botón 
+			
+			div class="row">
+				<div class="col-md-12 text-right">
+					<sec:authorize access="hasPermission(null, 'PAR_SIS_AGR' ) ">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.parametros.sistema.label.nuevo')}:"
+							styleClass="agregaHeight" />
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.parametros.sistema.boton.agregar')}"
+							ajax="true" action="#{parametroSistemaBean.nuevoParametro()}"
+							update="amodal" oncomplete="PF('amodal').show()"
+							styleClass="btn btn-primary" />
+
+					</sec:authorize>
+				</div>
+			</div-->
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.parametros.sistema.titulo')}">
+				<p:dataTable id="tblParametros"
+					value="#{parametroSistemaBean.parametros}" tableStyleClass="table"
+					var="parametro" widgetVar="tblParametros" paginator="true"
+					paginatorPosition="bottom" rows="10" rowsPerPageTemplate="5,10,15"
+					reflow="true"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+					<f:facet name="header">
+						<p:outputPanel styleClass="text-right">
+							<p:outputLabel for="globalFilter"
+								value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}" />
+							<p:inputText id="globalFilter"
+								onkeyup="PF('tblParametros').filter()"
+								placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+						</p:outputPanel>
+					</f:facet>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.parametros.sistema.columna.clave')}"
+						sortBy="#{parametro.clave}" filterMatchMode="contains"
+						filterBy="#{parametro.clave}" filterStyle="display:none">
+						<h:outputText value="#{parametro.clave}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.parametros.sistema.columna.valor')}"
+						sortBy="#{parametro.valor}" filterMatchMode="contains"
+						filterBy="#{parametro.valor}" filterStyle="display:none">
+						<h:outputText value="#{parametro.valor}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.parametros.sistema.columna.acciones')}"
+						styleClass="text-center">
+						<sec:authorize access="hasPermission(null, 'PAR_SIS_EDI' ) ">
+							<p:commandButton id="boton2"
+								action="#{parametroSistemaBean.cargarParametro()}" ajax="true"
+								update="dlgForm"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod"
+								oncomplete="PF('amodal').show();">
+								<f:setPropertyActionListener value="#{parametro}"
+									target="#{parametroSistemaBean.parametroModificar}" />
+							</p:commandButton>
+							<p:tooltip id="toolTipFade2" for="boton2"
+								value="#{sistema.obtenerTexto('gw.parametros.sistema.boton.editar')}"
+								position="top" />
+						</sec:authorize>
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+		</h:form>
+		<p:dialog id="amodal" dynamic="true" appendTo="@(body)"
+			header="#{sistema.obtenerTexto('gw.parametros.sistema.modal.titulo')}"
+			widgetVar="amodal" modal="true" resizable="false" draggable="false"
+			closable="false" position="center" styleClass="medidaModal">
+			<h:form id="dlgForm">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6">
+							<p:outputLabel for="clave"
+								value="#{sistema.obtenerTexto('gw.parametros.sistema.modal.etiqueta.clave')}:" />
+							<!-- Longitud de campo -->
+							<p:inputText id="clave" styleClass="form-control" required="true"
+								disabled="#{parametroSistemaBean.nuevo eq false}"
+								maxlength="255"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+								placeholder="#{sistema.obtenerTexto('gw.parametros.sistema.modal.etiqueta.clave')}"
+								value="#{parametroSistemaBean.parametro.clave}">
+								<p:keyFilter regEx="/[A-Z_]/" preventPaste="false" />
+							</p:inputText>
+							<p:message for="clave" />
+						</div>
+						<div class="col-md-6">
+							<p:outputLabel for="valor"
+								value="#{sistema.obtenerTexto('gw.parametros.sistema.modal.etiqueta.valor')}:" />
+							<!-- Longitud de campo -->
+							<p:inputText id="valor" styleClass="form-control" required="true"
+								maxlength="255"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+								placeholder="#{sistema.obtenerTexto('gw.parametros.sistema.modal.etiqueta.valor')}"
+								value="#{parametroSistemaBean.parametro.valor}" />
+							<p:message for="valor" />
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.parametros.sistema.modal.boton.guardar')}"
+							update="@form frmParametros" process="@form" ajax="true"
+							action="#{parametroSistemaBean.guardarParametro()}"
+							styleClass="btn btn-primary pull-right" />
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.parametros.sistema.modal.boton.cancelar')}"
+							onclick="PF('amodal').hide();"
+							styleClass="btn btn-default pull-right" />
+					</div>
+				</div>
+			</h:form>
+		</p:dialog>
+
+	</ui:define>
+</ui:composition>

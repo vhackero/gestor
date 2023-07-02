@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+
+	<h:form id="frmBusquedaPrograma">
+		<p:outputPanel id="contenido" layout="block">
+			<div class="row">
+				<div class="col-md-12 margenBot notasYCamposObligatorios">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.ge.texto.nota')}: " />
+					<h:outputText
+						value="#{sistema.obtenerTexto('gw.ge.texto.buscaprog')}" />
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel for="tpoCmpSel" styleClass="requerido bloque"
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.tpocomp')}:" />
+
+						<p:selectOneMenu id="tpoCmpSel" styleClass="col-xs-12"
+							value="#{capturaEventoCapacitacion.filtrosPrograma.tipoCompetencia}"
+							validator="#{capturaEventoCapacitacion.validarEjeCapacitacion}"
+							valueChangeListener="#{capturaEventoCapacitacion.onChangeTpoCompetencia}">
+							<p:ajax update="ejeCapSel" />
+							<f:selectItem itemValue="#{0}"
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+							<f:selectItems
+								value="#{capturaEventoCapacitacion.listaTiposCompetencias}"
+								var="tpoComp" itemLabel="#{tpoComp.nombre}"
+								itemValue="#{tpoComp.id}" />
+						</p:selectOneMenu>
+						<p:message for="tpoCmpSel" />
+					</div>
+					<div class="col-md-6">
+						<p:outputLabel for="ejeCapSel" styleClass="requerido bloque"
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.ejecapacit')}:" />
+						<p:selectOneMenu id="ejeCapSel"
+							value="#{capturaEventoCapacitacion.filtrosPrograma.ejeCapacitacion}"
+							disabled="#{empty capturaEventoCapacitacion.listaEjesCapacitacion}"
+							styleClass="col-xs-12">
+							<f:selectItem
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+							<f:selectItems
+								value="#{capturaEventoCapacitacion.listaEjesCapacitacion}"
+								var="ejeCap" itemLabel="#{ejeCap.nombre}"
+								itemValue="#{ejeCap.id}" />
+						</p:selectOneMenu>
+						<p:message for="ejeCapSel" />
+					</div>
+				</div>
+			</div>
+		</p:outputPanel>
+		<f:validateBean disabled="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel for="ncap"
+							value="#{sistema.obtenerTexto('gw.ge.texto.nomprogcap')}:" />
+						<p:inputText id="ncap" styleClass="form-control"
+							placeholder="#{sistema.obtenerTexto('gw.ge.texto.nomprogcap')}"
+							value="#{capturaEventoCapacitacion.filtrosPrograma.nombreTentativo}" />
+					</div>
+					<div class="col-md-3">
+						<p:outputLabel styleClass="bloque"
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.modalidad')}:" />
+						<p:selectOneMenu
+							value="#{capturaEventoCapacitacion.filtrosPrograma.catModalidad}"
+							converter="catalogoComunConverter" styleClass="col-xs-12">
+							<f:selectItem
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								itemValue="#{null}" />
+							<f:selectItems
+								value="#{capturaEventoCapacitacion.listaModalidades}"
+								var="modalidad" itemLabel="#{modalidad.nombre}"
+								itemValue="#{modalidad}" />
+						</p:selectOneMenu>
+
+					</div>
+					<div class="col-md-3">
+
+						<p:outputLabel styleClass="bloque"
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.nivelEns')}:" />
+						<p:selectOneMenu
+							value="#{capturaEventoCapacitacion.filtrosPrograma.catNivelEnsenanzaPrograma}"
+							converter="catalogoComunConverter" styleClass="col-xs-12">
+							<f:selectItem
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								itemValue="#{null}" />
+							<f:selectItems
+								value="#{capturaEventoCapacitacion.listaNivelesEnsenanza}"
+								var="nivelEns" itemLabel="#{nivelEns.nombre}"
+								itemValue="#{nivelEns}" />
+						</p:selectOneMenu>
+
+					</div>
+
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+					<p:outputLabel
+						value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12 ">
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.buscar')}"
+						action="#{capturaEventoCapacitacion.buscarProgramasCapacitacion()}"
+						ajax="true" update="contenido tblProgramas"
+						styleClass="btn btn-primary pull-right" />
+				</div>
+			</div>
+		</f:validateBean>
+
+
+
+		<p:panel id="pnlResultados"
+			header="#{sistema.obtenerTexto('gw.ge.texto.listprog')}">
+			<div class="row">
+
+				<div class="col-md-12">
+					<p:outputLabel value="#{sistema.obtenerTexto('gw.ge.texto.nota')}:" />
+					<h:outputText
+						value="#{sistema.obtenerTexto('gw.ge.texto.selecprog')}" />
+
+				</div>
+			</div>
+			<p:dataTable id="tblProgramas"
+				value="#{capturaEventoCapacitacion.programas}" var="programa"
+				reflow="true" paginator="true" rows="10" paginatorPosition="bottom"
+				emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+				currentPageReportTemplate="({currentPage} de {totalPages})"
+				rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+				<p:column style="width:16px;text-align:center" width="75">
+					<p:selectOneRadio
+						value="#{capturaEventoCapacitacion.datos.idPrograma}"
+						valueChangeListener="#{capturaEventoCapacitacion.seleccionarPrograma}">
+						<p:ajax
+							update="tblProgramas @form:btn_continuar @form:lbl_selecciona" />
+						<f:selectItem itemValue="#{programa.idPrograma}" />
+					</p:selectOneRadio>
+				</p:column>
+
+				<p:column
+					headerText="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.nombreprog')}">
+					<h:outputText value="#{programa.nombreTentativo}" />
+				</p:column>
+
+				<p:column
+					headerText="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.modalidad')}">
+					<h:outputText value="#{programa.catModalidad.nombre}" />
+				</p:column>
+
+				<p:column
+					headerText="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.nivelEns')}">
+					<h:outputText value="#{programa.catNivelEnsenanzaPrograma.nombre}" />
+				</p:column>
+
+				<p:column
+					headerText="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.tpocomp')}">
+					<h:outputText
+						value="#{eventoCapacitacionBean.obtieneNombreTpoCompetencia(programa.tipoCompetencia)}" />
+				</p:column>
+
+				<p:column
+					headerText="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.ejecapacit')}">
+					<h:outputText
+						value="#{eventoCapacitacionBean.obtieneNombreEjeCapacit(programa.ejeCapacitacion)}" />
+				</p:column>
+
+				<p:column
+					headerText="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.estatus')}">
+					<h:outputText value="#{programa.catStatusPrograma.nombre}" />
+				</p:column>
+
+				<p:column
+					headerText="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.fechaAct')}">
+					<h:outputText value="#{programa.fechaActualizacion}">
+						<f:convertDateTime
+							pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+					</h:outputText>
+				</p:column>
+
+				<p:column
+					headerText="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.acciones')}"
+					styleClass="text-center">
+
+					<p:commandButton id="verProg" process="@this" immediate="true"
+						ajax="false" class="btn-icon btn btn-default icono_sisi ss_gn_vis"
+						actionListener="#{reporteProgramaBean.verFECenVisor(programa)}"
+						onsuccess="PF('visorPDFProg').show();">
+						<f:setPropertyActionListener value="#{0}"
+							target="#{capturaEventoCapacitacion.indicePanel}"></f:setPropertyActionListener>
+					</p:commandButton>
+					<p:tooltip
+						value="#{sistema.obtenerTexto('gw.planesprogramas.tooltip.ver')}"
+						for="verProg" position="top" />
+
+				</p:column>
+			</p:dataTable>
+
+		</p:panel>
+
+		<div class="row">
+			<div class="col-md-12">
+				<p:outputLabel
+					value="#{sistema.obtenerTexto('gw.ec.text.programa.seleccionado')}:"
+					styleClass="bloque" />
+				<h:outputText id="lbl_selecciona"
+					value="#{capturaEventoCapacitacion.datos.programa.nombreTentativo}"
+					styleClass="agregaHeight" />
+
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12 pull-right">
+					<p:commandButton id="btn_continuar"
+						value="#{sistema.obtenerTexto('gw.ec.btn.continuar')}"
+						action="#{capturaEventoCapacitacion.llenarDatosPrograma()}"
+						process="@this" ajax="false"
+						disabled="#{capturaEventoCapacitacion.datos.programa == null}"
+						styleClass="btn btn-primary pull-right" />
+
+					<p:commandButton id="btn_cancelar"
+						value="#{sistema.obtenerTexto('gw.ec.btn.cancelar')}"
+						action="#{menuGestorBean.navegaBusquedaEventosCapacitacion}"
+						ajax="false" immediate="true"
+						styleClass="btn btn-default pull-right" />
+				</div>
+			</div>
+		</div>
+
+		<p:dialog id="visorProg" appendTo="@(body)" resizable="false"
+			draggable="false" position="top" responsive="true" modal="true"
+			closable="false"
+			header="#{sistema.obtenerTexto('gw.planesprogramas.modal.programacap')}"
+			width="900" widgetVar="visorPDFProg">
+			<p:media player="pdf" value="#{reporteProgramaBean.pdfFECMedia}"
+				width="860" height="400" />
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" onclick="PF('visorPDFProg').hide()"
+						styleClass="btn btn-default" />
+				</div>
+			</div>
+		</p:dialog>
+	</h:form>
+
+</ui:composition>

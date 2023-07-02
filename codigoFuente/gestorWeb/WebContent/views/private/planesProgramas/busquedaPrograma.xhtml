@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.planesprogramas.etiqueta.menu.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.planes.titulo.progsCapacitacion')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form>
+			<h1>
+				<p:outputLabel styleClass="h1"
+					value="#{sistema.obtenerTexto('gw.planes.titulo.progsCapacitacion')}" />
+			</h1>
+			<hr />
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton styleClass="btn btn-primary pull-right"
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.crear')}"
+							action="#{programaCapacitacionBean.crearProgramaCapacitacion}"
+							ajax="false" immediate="true" process="@this" />
+						<p:outputLabel styleClass="pull-right agregaHeight"
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.etiqueta.nuevoprograma')}:" />
+					</div>
+				</div>
+			</div>
+
+			<p:panel id="fldBusqueda"
+				header="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.titulo')}">
+				<f:validateBean disabled="true">
+					<div class="row">
+						<div class="col-md-6 col-xs-12">
+							<p:outputLabel styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.tpocomp')}" />
+							<p:selectOneMenu id="tpoCmpSel"
+								value="#{programaCapacitacionBean.programa.tipoCompetencia}"
+								autoWidth="false" styleClass="col-xs-12"
+								valueChangeListener="#{programaCapacitacionBean.onChangeTpoCompetencia}">
+								<p:ajax update="@form" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{0}" />
+								<f:selectItems value="#{programaCapacitacionBean.catTpoComp}"
+									var="tpoComp" itemLabel="#{tpoComp.nombre}"
+									itemValue="#{tpoComp.id}" />
+							</p:selectOneMenu>
+
+							<p:message for="tpoCmpSel" />
+						</div>
+						<div class="col-md-6 col-xs-12">
+							<p:outputLabel styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.ejecapacit')}:" />
+							<p:selectOneMenu id="ejeCapSel"
+								disabled="#{programaCapacitacionBean.programa.tipoCompetencia eq 0}"
+								value="#{programaCapacitacionBean.programa.ejeCapacitacion}"
+								styleClass="col-xs-12">
+								<p:ajax event="change" process="@this" update="@form" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" />
+								<f:selectItems value="#{programaCapacitacionBean.catEjeCapacit}"
+									var="ejeCap" itemLabel="#{ejeCap.nombre}"
+									itemValue="#{ejeCap.id}" />
+							</p:selectOneMenu>
+							<p:message for="ejeCapSel" />
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6 col-xs-12">
+								<p:outputLabel rendered="false" styleClass="bloque"
+									value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.estatus')}:" />
+								<p:selectOneMenu rendered="false"
+									value="#{programaCapacitacionBean.programa.catStatusPrograma}"
+									converter="catalogoComunConverter" styleClass="col-xs-12">
+									<p:ajax event="change" process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItems
+										value="#{programaCapacitacionBean.catStatusPrograma}"
+										var="statusProg" itemLabel="#{statusProg.nombre}"
+										itemValue="#{statusProg}" />
+								</p:selectOneMenu>
+							</div>
+						</div>
+					</div>
+
+					<div class="form-group">
+
+						<div class="row">
+							<div class="col-md-6 col-xs-12">
+								<p:outputLabel for="nombreTentativo" styleClass="bloque"
+									value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.nombreprog')}:" />
+
+								<p:inputText id="nombreTentativo" styleClass="form-control"
+									value="#{programaCapacitacionBean.programa.nombreTentativo}" />
+							</div>
+							<div class="col-md-3 col-xs-12">
+								<p:outputLabel styleClass="bloque"
+									value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.modalidad')}:" />
+								<p:selectOneMenu
+									value="#{programaCapacitacionBean.programa.catModalidad}"
+									converter="catalogoComunConverter" styleClass="col-xs-12">
+									<p:ajax event="change" process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItems
+										value="#{programaCapacitacionBean.catModalidadPrograma}"
+										var="modalidad" itemLabel="#{modalidad.nombre}"
+										itemValue="#{modalidad}" />
+								</p:selectOneMenu>
+
+							</div>
+							<div class="col-md-3 col-xs-12">
+
+								<p:outputLabel styleClass="bloque"
+									value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.nivelEns')}:" />
+								<p:selectOneMenu
+									value="#{programaCapacitacionBean.programa.catNivelEnsenanzaPrograma}"
+									converter="catalogoComunConverter" styleClass="col-xs-12">
+									<p:ajax event="change" process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItems
+										value="#{programaCapacitacionBean.catNivelEnsenanzaProg}"
+										var="nivelEns" itemLabel="#{nivelEns.nombre}"
+										itemValue="#{nivelEns}" />
+								</p:selectOneMenu>
+							</div>
+						</div>
+					</div>
+				</f:validateBean>
+				<div class="row">
+					<div class="col-md-6 col-xs-12">
+						<div style="display: none;">
+							<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+							<p:outputLabel
+								value=" #{sistema.obtenerTexto('gw.planes.etiqueta.obligatorios')}" />
+						</div>
+					</div>
+					<div class="col-md-6 col-xs-12 text-right">
+						<p:commandButton value="Limpiar campos" ajax="true"
+							styleClass="btn btn-default"
+							action="#{programaCapacitacionBean.limpiarFiltro()}"
+							update="@form:fldBusqueda" />
+						<p:commandButton update="pnlResultados, fldBusqueda"
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.buscar')}"
+							action="#{programaCapacitacionBean.buscarProgramasCapacitacion}"
+							ajax="true" styleClass="btn btn-primary" />
+					</div>
+				</div>
+			</p:panel>
+			<p:importEnum
+				type="mx.gob.sedesol.gestorweb.commons.utils.EstatusProgramaEnum"
+				var="ESTATUS_PROG" allSuffix="ALL_ENUM_VALUES" />
+			<p:panel id="pnlResultados"
+				header="#{programaCapacitacionBean.leyendaBusqueda}">
+				<div class="row">
+					<div class="col-md-2 col-md-offset-6">
+						<p:outputLabel styleClass="agregaHeight pull-right"
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.estatus')}:" />
+					</div>
+					<div class="col-md-4">
+						<p:selectOneMenu
+							value="#{programaCapacitacionBean.programa.catStatusPrograma}"
+							valueChangeListener="#{programaCapacitacionBean.onChangeBusquedaEstatus}"
+							converter="catalogoComunConverter" styleClass="col-xs-12">
+							<p:ajax process="@this" update="@form" />
+							<f:selectItems
+								value="#{programaCapacitacionBean.catStatusPrograma}"
+								var="statusProg" itemLabel="#{statusProg.nombre}"
+								itemValue="#{statusProg}" />
+						</p:selectOneMenu>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:dataTable id="dtBusqueda" reflow="true"
+							value="#{programaCapacitacionBean.programasBusqueda}"
+							var="programa" paginator="true" rows="10"
+							paginatorPosition="bottom"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.nombreprog')}" />
+								</f:facet>
+								<h:outputText value="#{programa.nombreTentativo}" />
+							</p:column>
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.modalidad')}" />
+								</f:facet>
+								<h:outputText value="#{programa.catModalidad.nombre}" />
+							</p:column>
+
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.nivelEns')}" />
+								</f:facet>
+								<h:outputText
+									value="#{programa.catNivelEnsenanzaPrograma.nombre}" />
+							</p:column>
+
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.tpocomp')}" />
+								</f:facet>
+								<h:outputText
+									value="#{programaCapacitacionBean.obtieneNombreTpoCompetencia(programa.tipoCompetencia)}" />
+							</p:column>
+
+							<p:column styleClass="text-left">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.ejecapacit')}" />
+								</f:facet>
+								<h:outputText
+									value="#{programaCapacitacionBean.obtieneNombreEjeCapacit(programa.ejeCapacitacion)}" />
+							</p:column>
+
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.estatus')}" />
+								</f:facet>
+								<h:outputText value="#{programa.catStatusPrograma.nombre}" />
+							</p:column>
+
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.fechaAct')}" />
+								</f:facet>
+								<h:outputText value="#{programa.fechaActualizacion}">
+									<f:convertDateTime
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+								</h:outputText>
+							</p:column>
+
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.acciones')}" />
+								</f:facet>
+
+								<p:commandButton id="verProg" process="@this" immediate="true"
+									rendered="#{programa.catStatusPrograma.id == ESTATUS_PROG.FINAL.id}"
+									ajax="false"
+									class="btn-icon btn btn-default icono_sisi ss_gn_vis"
+									actionListener="#{reporteProgramaBean.verFECenVisor(programa)}"
+									onsuccess="PF('visorPDFProg').show();">
+								</p:commandButton>
+								<p:tooltip
+									value="#{sistema.obtenerTexto('gw.planesprogramas.tooltip.ver')}"
+									for="verProg" position="top" />
+
+								<p:commandButton id="editProg"
+									rendered="#{programa.catStatusPrograma.id == ESTATUS_PROG.BORRADOR.id}"
+									immediate="true" ajax="true"
+									action="#{programaCapacitacionBean.editaProgramaCapacitacion}"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+									<f:setPropertyActionListener value="#{programa}"
+										target="#{programaCapacitacionBean.programaSeleccionado}" />
+								</p:commandButton>
+								<p:tooltip
+									value="#{sistema.obtenerTexto('gw.planesprogramas.tooltip.editar')}"
+									for="editProg" position="top" />
+
+								<p:commandButton onclick="PF('dlgClonar').show();"
+									process="@this" immediate="true"
+									rendered="#{programa.catStatusPrograma.id == ESTATUS_PROG.FINAL.id}"
+									id="clonProg" ajax="true"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_clonar">
+									<f:setPropertyActionListener value="#{programa}"
+										target="#{programaCapacitacionBean.programaSeleccionado}" />
+								</p:commandButton>
+								<p:tooltip
+									value="#{sistema.obtenerTexto('gw.planesprogramas.tooltip.clonar')}"
+									for="clonProg" position="top" />
+
+								<p:commandButton id="dwnldProg"
+									rendered="#{programa.catStatusPrograma.id == ESTATUS_PROG.FINAL.id}"
+									ajax="false" update="@form" immediate="true"
+									onstart="PF('dialogLayout').show()"
+									oncomplete="PF('dialogLayout').hide()"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_desc"
+									actionListener="#{programaCapacitacionBean.descargarPrograma(programa)}">
+									<p:fileDownload value="#{programaCapacitacionBean.programaPDF}" />
+								</p:commandButton>
+								<p:tooltip
+									value="#{sistema.obtenerTexto('gw.planesprogramas.tooltip.descargar')}"
+									for="dwnldProg" position="top" />
+
+								<p:commandButton id="eliminaProg" immediate="true"
+									rendered="#{programa.catStatusPrograma.id == ESTATUS_PROG.CANCELADO.id}"
+									action="#{programaCapacitacionBean.eliminaProgCapacitacion}"
+									ajax="true" update="@form"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar">
+									<f:setPropertyActionListener value="#{programa}"
+										target="#{programaCapacitacionBean.programaSeleccionado}" />
+								</p:commandButton>
+								<p:tooltip
+									value="#{sistema.obtenerTexto('gw.planesprogramas.tooltip.eliminar')}"
+									for="eliminaProg" position="top" />
+
+								<p:commandButton id="cancelarProg" immediate="true"
+									rendered="#{programa.catStatusPrograma.id == ESTATUS_PROG.BLOQUEADO.id}"
+									ajax="true" update="@form"
+									styleClass="btn-icon btn btn-default icono_sisi ss_da_inco"
+									action="#{programaCapacitacionBean.cancelarProgramaCapacitacion}">
+									<f:setPropertyActionListener value="#{programa}"
+										target="#{programaCapacitacionBean.programaSeleccionado}" />
+								</p:commandButton>
+								<p:tooltip
+									value="#{sistema.obtenerTexto('gw.planesprogramas.tooltip.cancelar')}"
+									for="cancelarProg" position="top" />
+
+								<p:commandButton id="bloqueaProg" immediate="true"
+									rendered="#{programa.catStatusPrograma.id eq ESTATUS_PROG.BORRADOR.id}"
+									action="#{programaCapacitacionBean.bloqueaProgCapacitacion}"
+									ajax="true" update="@form"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_bloq">
+									<f:setPropertyActionListener value="#{programa}"
+										target="#{programaCapacitacionBean.programaSeleccionado}" />
+								</p:commandButton>
+								<p:tooltip
+									value="#{sistema.obtenerTexto('gw.planesprogramas.tooltip.bloquear')}"
+									for="bloqueaProg" position="top" />
+
+								<p:commandButton id="desbloqueaProg" immediate="true"
+									rendered="#{programa.catStatusPrograma.id == ESTATUS_PROG.BLOQUEADO.id}"
+									action="#{programaCapacitacionBean.desbloqueaProgCapacitacion}"
+									ajax="true" update="@form"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_desblo">
+									<f:setPropertyActionListener value="#{programa}"
+										target="#{programaCapacitacionBean.programaSeleccionado}" />
+								</p:commandButton>
+								<p:tooltip
+									value="#{sistema.obtenerTexto('gw.planesprogramas.tooltip.desbloquear')}"
+									position="top" for="desbloqueaProg" />
+							</p:column>
+						</p:dataTable>
+
+					</div>
+				</div>
+
+			</p:panel>
+
+			<p:dialog id="visorProg" appendTo="@(body)" resizable="false"
+				draggable="false" position="top" responsive="true" modal="true"
+				closable="false"
+				header="#{sistema.obtenerTexto('gw.planesprogramas.modal.programacap')}"
+				width="900" widgetVar="visorPDFProg">
+				<p:media player="pdf" value="#{reporteProgramaBean.pdfFECMedia}"
+					width="860" height="450" />
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton value="Cerrar"
+							onclick="PF('visorPDFProg').hide()" styleClass="btn btn-default" />
+					</div>
+				</div>
+			</p:dialog>
+
+
+			<p:dialog widgetVar="dlgClonar" modal="true" resizable="false"
+				draggable="false" closable="false" position="center"
+				styleClass="medidaModal"
+				header="#{sistema.obtenerTexto('gw.planesprogramas.modal.clonarprog')}">
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.planesprogramas.texto.nombreprogclonar')}: "
+							styleClass="bloque" />
+						<!-- Longitud de campo -->
+						<p:inputText
+							value="#{programaCapacitacionBean.nombreProgramaClon}"
+							maxlength="255"
+							placeholder="#{sistema.obtenerTexto('gw.planesprogramas.texto.nombreprogclonar')}"
+							styleClass="form-control">
+							<p:ajax process="@this" />
+						</p:inputText>
+						<br />
+						<p:selectBooleanCheckbox styleClass="pull-left margenDerechoMenor"
+							itemLabel="#{sistema.obtenerTexto('gw.planesprogramas.texto.clonarprog')}"
+							value="#{programaCapacitacionBean.clonarConEstYUD}">
+							<p:ajax process="@this" />
+						</p:selectBooleanCheckbox>
+					</div>
+				</div>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton onsuccess="PF('dlgClonar').hide();" ajax="true"
+								process="@this"
+								action="#{programaCapacitacionBean.clonarProgramaCapacitacion}"
+								styleClass="btn btn-primary pull-right"
+								value="#{sistema.obtenerTexto('gw.planesprogramas.btn.aceptar')}" />
+							<p:commandButton onclick="PF('dlgClonar').hide();"
+								styleClass="btn btn-default pull-right"
+								value="#{sistema.obtenerTexto('gw.planesprogramas.btn.cancelar')}" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+
+</ui:composition>

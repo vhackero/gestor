@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.localizacion')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.localizacion')}</h1>
+		<hr />
+		<h:form id="frmMunicipios">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.municipios.titulo.panel.superior')}">
+				<div class="row">
+					<div class="col-md-4">
+						<p:outputLabel for="somEntidades" styleClass="requerido"
+							value="#{sistema.obtenerTexto('gw.municipios.etiqueta.entidad')}:" />
+						<p:selectOneMenu id="somEntidades"
+							value="#{localizacionBean.idEntidadFederativa}" effect="fade"
+							styleClass="col-xs-12" filter="true" filterMatchMode="startsWith"
+							onchange="correccionSelectores()">
+
+							<p:ajax listener="#{localizacionBean.cargarMunicipios()}"
+								update="frmMunicipios" />
+							<f:selectItem
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								itemValue="0" />
+							<f:selectItems value="#{localizacionBean.entidadesFederativas}"
+								var="entidad" itemValue="#{entidad.idEntidadFederativa}"
+								itemLabel="#{entidad.nombre}" />
+						</p:selectOneMenu>
+					</div>
+				</div>
+			</p:panel>
+
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.municipios.totulo.panel.inferior')}"
+				styleClass="fondoPrimario">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<sec:authorize access="hasPermission(null, 'MUN_AGR' ) ">
+								<p:commandButton id="btnAgregar"
+									value="#{sistema.obtenerTexto('gw.municipios.boton.agregar')}"
+									action="#{localizacionBean.nuevoMunicipio()}" process="@this"
+									ajax="true" update="frmMunicipios:contenido"
+									oncomplete="PF('aModal').show();"
+									disabled="#{localizacionBean.idEntidadFederativa == 0}"
+									styleClass="btn btn-primary pull-right" />
+							</sec:authorize>
+						</div>
+					</div>
+				</div>
+
+
+				<p:dataTable id="tblMunicipios" reflow="true"
+					value="#{localizacionBean.municipios}" var="municipio"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					widgetVar="tblMunicipios" paginator="true" rows="10"
+					rowsPerPageTemplate="5,10,15" paginatorPosition="bottom"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					tableStyleClass="table">
+					<f:facet name="header">
+						<p:outputPanel styleClass="text-right">
+							<p:outputLabel for="globalFilter"
+								value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}" />
+							<p:inputText id="globalFilter"
+								onkeyup="PF('tblMunicipios').filter()"
+								placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+						</p:outputPanel>
+					</f:facet>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.municipios.columna.id')}"
+						sortBy="#{municipio.idMunicipio}" filterMatchMode="contains"
+						filterBy="#{municipio.idMunicipio}" filterStyle="display:none">
+						<h:outputText value="#{municipio.idMunicipio}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.municipios.columna.nombre')}"
+						sortBy="#{municipio.nombre}" filterMatchMode="contains"
+						filterBy="#{municipio.nombre}" filterStyle="display:none">
+						<h:outputText value="#{municipio.nombre}" />
+					</p:column>
+					<p:column styleClass="text-center"
+						headerText="#{sistema.obtenerTexto('gw.municipios.columna.activo')}"
+						sortBy="#{municipio.activo?'SI':'NO'}" filterMatchMode="contains"
+						filterBy="#{municipio.activo?'SI':'NO'}"
+						filterStyle="display:none">
+						<h:outputText value="#{municipio.activo?'SI':'NO'}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.municipios.columna.acciones')}"
+						class="text-center">
+						<sec:authorize access="hasPermission(null, 'MUN_EDI' ) ">
+							<p:commandButton id="btn-editar"
+								action="#{localizacionBean.cargarMunicipio()}" process="@this"
+								ajax="true" update="frmMunicipios:contenido"
+								oncomplete="PF('aModal').show();"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+								<f:setPropertyActionListener value="#{municipio}"
+									target="#{localizacionBean.municipioModificar}" />
+							</p:commandButton>
+							<p:tooltip for="btn-editar"
+								value="#{sistema.obtenerTexto('gw.municipios.boton.editar')}"
+								position="top" />
+						</sec:authorize>
+						<sec:authorize access="hasPermission(null, 'ASENTA' ) ">
+							<p:commandButton id="btn-cargar"
+								action="#{localizacionBean.cargarAsentamientos()}"
+								immediate="true" ajax="false"
+								styleClass="btn-icon btn btn-default ss_adm_local icono_sisi">
+								<f:setPropertyActionListener value="#{municipio}"
+									target="#{localizacionBean.municipio}" />
+							</p:commandButton>
+							<p:tooltip for="btn-cargar"
+								value="#{sistema.obtenerTexto('gw.municipios.boton.asentamientos')}"
+								position="top" />
+
+						</sec:authorize>
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+			<p:dialog id="amodal"
+				header="#{sistema.obtenerTexto('gw.municipios.modal.titulo')}"
+				widgetVar="aModal" draggable="false" position="center"
+				closable="false" resizable="false"
+				styleClass="modalPseudoClass medidaModal" modal="true">
+				<p:outputPanel id="contenido">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="txtIdMunicipio" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.municipios.modal.etiqueta.id')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="txtIdMunicipio" maxlength="5"
+									value="#{localizacionBean.municipio.idMunicipio}"
+									disabled="#{not localizacionBean.nuevo}"
+									styleClass="form-control">
+									<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+								</p:inputText>
+								<p:message for="txtIdMunicipio" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel for="txtNombre" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.municipios.modal.etiqueta.nombre')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="txtNombre" maxlength="50"
+									value="#{localizacionBean.municipio.nombre}"
+									styleClass="form-control" />
+								<p:message for="txtNombre" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="chkActivo"
+									value="#{sistema.obtenerTexto('gw.municipios.modal.etiqueta.activo')}:"
+									rendered="#{not localizacionBean.nuevo}" />
+								<p:selectBooleanCheckbox id="chkActivo" styleClass="paddingChk"
+									value="#{localizacionBean.municipio.activo}"
+									rendered="#{not localizacionBean.nuevo}" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+								<p:outputLabel
+									value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+							</div>
+						</div>
+					</div>
+				</p:outputPanel>
+
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.municipios.modal.boton.guardar')}"
+								action="#{localizacionBean.guardarMunicipio()}" ajax="true"
+								update="contenido frmMunicipios:tblMunicipios"
+								styleClass="btn btn-primary pull-right" />
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.municipios.modal.boton.cancelar')}"
+								oncomplete="PF('aModal').hide();"
+								styleClass="btn btn-default pull-right" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

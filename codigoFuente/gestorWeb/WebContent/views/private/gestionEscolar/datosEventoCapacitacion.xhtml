@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<h:form id="frmDatosGenerales">
+		<p:outputPanel id="pDatosGenerales">
+			<p:panel showCollapseLink="false" collapsible="false"
+				styleClass="datosGenerales">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ge.texto.nota')}: " />
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.ge.texto.ingresa')}" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-10">
+							<p:outputLabel for="txtNombreEC" styleClass="requerido"
+								value="#{sistema.obtenerTexto('gw.ge.texto.nomevt')}:" />
+						</div>
+						<div class="col_md-2">
+							<p:outputLabel for="spnPrivado"
+								value="#{sistema.obtenerTexto('gw.ge.texto.privado')}:" />
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-10">
+							<p:inputText id="txtNombreEC"
+								value="#{capturaEventoCapacitacion.datos.evento.nombreEc}"
+								styleClass="form-control" maxlength="64">
+								<p:ajax process="@this" update="@form" />
+							</p:inputText>
+							<p:message for="txtNombreEC" />
+						</div>
+						<div class="col_md-2">
+							<p:inputSwitch id="spnPrivado"
+								value="#{capturaEventoCapacitacion.datos.evento.privado}"
+								onLabel="#{sistema.obtenerTexto('gw.ge.texto.si')}"
+								offLabel="#{sistema.obtenerTexto('gw.ge.texto.no')}">
+								<p:ajax process="@this" />
+							</p:inputSwitch>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6">
+							<p:outputLabel
+								value="Imagen del evento de capacitación (PNG, JPG)"
+								styleClass="requerido" />
+						</div>
+						<div class="col-md-5 col-md-offset-1">
+							<p:outputLabel value="Miniatura" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-4">
+							<p:inputText disabled="true"
+								value="#{capturaEventoCapacitacion.nombreImagen}"
+								styleClass="form-control inputDeshabilitado"
+								style="margin-top:4px" />
+						</div>
+						<div class="col-md-4">
+							<p:fileUpload styleClass="cargarArchivo contenedorCargaImagen"
+								label="Seleccionar" mode="advanced" auto="true"
+								onstart="PF('dialogLayout').show()"
+								oncomplete="PF('dialogLayout').hide()" sizeLimit="50000000"
+								invalidSizeMessage="#{sistema.obtenerTexto('gw.global.archivo.tamanio.limite')}"
+								fileUploadListener="#{capturaEventoCapacitacion.fileUploadListener}"
+								update="@form " />
+						</div>
+						<div class="col-md-4">
+							<div class="contenedorImagen">
+								<img class="imgEventoSize"
+									src="#{capturaEventoCapacitacion.datos.rutaCompletaImagen}" />
+							</div>
+
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ge.texto.nvlens')}:" />
+							<p:inputText disabled="true"
+								value="#{capturaEventoCapacitacion.datos.programa.catNivelEnsenanzaPrograma.nombre}"
+								styleClass="form-control" />
+						</div>
+						<div class="col-md-4">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.tpocomp')}" />
+							<p:inputText disabled="true"
+								value="#{eventoCapacitacionBean.obtieneNombreTpoCompetencia(capturaEventoCapacitacion.datos.programa.tipoCompetencia)}"
+								styleClass="form-control" />
+						</div>
+						<div class="col-md-4">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.ejecapacit')}:" />
+							<p:inputText disabled="true"
+								value="#{eventoCapacitacionBean.obtieneNombreEjeCapacit(capturaEventoCapacitacion.datos.programa.ejeCapacitacion)}"
+								styleClass="form-control" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel for="txtObjetivoGeneral"
+								value="#{sistema.obtenerTexto('gw.ge.texto.objgeneral')}:" />
+							<!-- Longitud de campo -->
+							<p:inputTextarea id="txtObjetivoGeneral" maxlength="2000"
+								value="#{capturaEventoCapacitacion.datos.evento.objetivoGeneralEc}"
+								placeholder="#{sistema.obtenerTexto('gw.ge.texto.objgeneral')}"
+								styleClass="form-control">
+								<p:ajax process="@this" />
+							</p:inputTextarea>
+							<p:message for="txtObjetivoGeneral" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel for="txtPerfil"
+								value="#{sistema.obtenerTexto('gw.ge.texto.perfil')}:" />
+							<!-- Longitud de campo -->
+							<p:inputTextarea id="txtPerfil" maxlength="2000"
+								value="#{capturaEventoCapacitacion.datos.evento.perfilEc}"
+								placeholder="#{sistema.obtenerTexto('gw.ge.texto.perfil')}"
+								styleClass="form-control">
+								<p:ajax process="@this" />
+							</p:inputTextarea>
+							<p:message for="txtPerfil" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4">
+							<p:outputLabel for="somTipoUsuario" styleClass="requerido"
+								value="#{sistema.obtenerTexto('gw.ge.texto.dirigidoa')}:" />
+							<p:selectOneMenu id="somTipoUsuario"
+								value="#{capturaEventoCapacitacion.datos.evento.idDirigido}"
+								styleClass="col-xs-12">
+								<p:ajax process="@this" event="valueChange"
+									update="pDestinatarios pProgramasSociales pEstructuraTerritorial" />
+								<f:selectItems
+									value="#{capturaEventoCapacitacion.tiposUsuarios}" var="tipo"
+									itemValue="#{tipo.getValor()}"
+									itemLabel="#{tipo.getDescripcion()}" />
+							</p:selectOneMenu>
+						</div>
+						<div class="col-md-4">
+							<p:outputPanel id="pDestinatarios">
+								<ui:fragment
+									rendered="#{capturaEventoCapacitacion.datos.evento.idDirigido == 2}">
+									<p:outputLabel for="txtDestinatarios" styleClass="requerido"
+										value="#{sistema.obtenerTexto('gw.ge.texto.dest')}:" />
+									<p:selectOneMenu id="txtDestinatarios"
+										value="#{capturaEventoCapacitacion.datos.evento.idDestinatario.id}"
+										required="true"
+										requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+										styleClass="col-xs-12">
+										<p:ajax process="@this" event="valueChange"
+											update="pProgramasSociales pEstructuraTerritorial" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+										<f:selectItems
+											value="#{capturaEventoCapacitacion.listaDestinatarios}"
+											var="destinatario" itemValue="#{destinatario.id}"
+											itemLabel="#{destinatario.nombre}" />
+									</p:selectOneMenu>
+									<p:message for="txtDestinatarios" />
+								</ui:fragment>
+							</p:outputPanel>
+						</div>
+					</div>
+				</div>
+				<p:outputPanel id="pProgramasSociales">
+					<ui:fragment
+						rendered="#{capturaEventoCapacitacion.datos.evento.idDestinatario.id == 4
+											and capturaEventoCapacitacion.datos.evento.idDirigido == 2}">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-12">
+									<p:outputLabel for="somProgramasSociales"
+										styleClass="requerido"
+										value="#{sistema.obtenerTexto('gw.ge.texto.clvprour')}:" />
+									<p:selectOneMenu id="somProgramasSociales"
+										value="#{capturaEventoCapacitacion.datos.evento.idProgramaSocial}"
+										required="true"
+										requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+										styleClass="col-xs-12">
+										<p:ajax process="@this" event="valueChange"
+											update="pEstructuraTerritorial" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+										<f:selectItems
+											value="#{capturaEventoCapacitacion.listaProgramasSociales}"
+											var="programaSocial"
+											itemValue="#{programaSocial.idProgramaSocial}"
+											itemLabel="#{programaSocial.clave} - #{programaSocial.nombre} - #{programaSocial.unidadResponsable.nombre} - (#{programaSocial.unidadResponsable.clave})" />
+									</p:selectOneMenu>
+									<p:message for="somProgramasSociales" />
+								</div>
+							</div>
+						</div>
+					</ui:fragment>
+				</p:outputPanel>
+				<p:outputPanel id="pEstructuraTerritorial">
+					<ui:fragment
+						rendered="#{capturaEventoCapacitacion.datos.evento.idProgramaSocial == 1
+											and capturaEventoCapacitacion.datos.evento.idDestinatario.id == 4
+											and capturaEventoCapacitacion.datos.evento.idDirigido == 2}">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-4">
+									<p:outputLabel
+										value="#{sistema.obtenerTexto('gw.ge.texto.local')}" />
+								</div>
+								<div class="col-md-4">
+									<p:outputLabel for="somEntidadesFederativas"
+										styleClass="requerido"
+										value="#{sistema.obtenerTexto('gw.ge.texto.estado')}:" />
+									<p:selectOneMenu id="somEntidadesFederativas"
+										value="#{capturaEventoCapacitacion.datos.evento.idEntidadFederativa}"
+										valueChangeListener="#{capturaEventoCapacitacion.onChangeEntidadFederativa}"
+										required="true"
+										requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+										styleClass="col-xs-12">
+										<p:ajax process="@this" event="valueChange"
+											update="somMunicipios" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+										<f:selectItems
+											value="#{capturaEventoCapacitacion.listaEntidadesFederativas}"
+											var="entidad" itemValue="#{entidad.idEntidadFederativa}"
+											itemLabel="#{entidad.nombre}" />
+									</p:selectOneMenu>
+									<p:message for="somEntidadesFederativas" />
+								</div>
+								<div class="col-md-4">
+									<p:outputLabel for="somMunicipios" styleClass="requerido"
+										value="#{sistema.obtenerTexto('gw.ge.texto.municipio')}:" />
+									<p:selectOneMenu id="somMunicipios"
+										value="#{capturaEventoCapacitacion.datos.evento.idMunicipio}"
+										required="true"
+										requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+										styleClass="col-xs-12">
+										<p:ajax process="@this" event="valueChange" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+										<f:selectItems
+											value="#{capturaEventoCapacitacion.listaMunicipios}"
+											var="municipio" itemValue="#{municipio.idMunicipio}"
+											itemLabel="#{municipio.nombre}" />
+									</p:selectOneMenu>
+									<p:message for="somMunicipios" />
+								</div>
+							</div>
+						</div>
+					</ui:fragment>
+				</p:outputPanel>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel for="txtRequisitos"
+								value="#{sistema.obtenerTexto('gw.ge.texto.req')}:" />
+							<!-- Longitud de campo -->
+							<p:inputTextarea id="txtRequisitos" maxlength="2000"
+								value="#{capturaEventoCapacitacion.datos.evento.requisitosEc}"
+								placeholder="#{sistema.obtenerTexto('gw.ge.texto.req')}"
+								styleClass="form-control">
+								<p:ajax process="@this" />
+							</p:inputTextarea>
+							<p:message for="txtRequisitos" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ge.texto.definicion')}:" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ge.texto.duracion')}:" />
+						</div>
+						<div class="col-md-8">
+							<p:outputLabel
+								rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+								value="#{sistema.obtenerTexto('gw.ge.texto.ponderacion.asistencias')}:" />
+						</div>
+					</div>
+					<div class="row centrarVertical">
+						<div class="col-md-4 centrarVertical">
+							<div class="col-md-6">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.ge.texto.duracion.horas')}:" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.ge.texto.duracion.minutos')}:" />
+							</div>
+						</div>
+						<div class="col-md-8 centrarVertical">
+
+							<div class="col-md-2">
+								<p:outputLabel
+									rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+									value="#{sistema.obtenerTexto('gw.ge.texto.ponderacion.asistencia')}:" />
+							</div>
+							<div class="col-md-2">
+								<p:outputLabel
+									rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+									value="#{sistema.obtenerTexto('gw.ge.texto.ponderacion.retardo')}:" />
+							</div>
+							<div class="col-md-2">
+								<p:outputLabel
+									rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+									value="#{sistema.obtenerTexto('gw.ge.texto.ponderacion.falta.justificada')}:" />
+							</div>
+							<div class="col-md-2">
+								<p:outputLabel
+									rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+									value="#{sistema.obtenerTexto('gw.ge.texto.ponderacion.inconcluso')}:" />
+							</div>
+							<div class="col-md-2">
+								<p:outputLabel
+									rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+									value="#{sistema.obtenerTexto('gw.ge.texto.ponderacion.falta')}:" />
+							</div>
+
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-4">
+							<div class="row">
+								<div class="col-md-6">
+									<p:inputText disabled="true"
+										value="#{capturaEventoCapacitacion.datos.numeroHoras}"
+										styleClass="form-control" />
+								</div>
+								<div class="col-md-6">
+									<p:inputText disabled="true"
+										value="#{capturaEventoCapacitacion.datos.numeroMinutos}"
+										styleClass="form-control" />
+								</div>
+							</div>
+						</div>
+						<div class="col-md-8">
+							<div class="col-md-2">
+								<!-- Longitud de campo -->
+								<p:spinner
+									rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+									value="#{capturaEventoCapacitacion.datos.evento.valorAsistencia}"
+									min="0" max="100" styleClass="form-control" maxlength="3">
+									<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+								</p:spinner>
+							</div>
+							<div class="col-md-2">
+								<!-- Longitud de campo -->
+								<p:spinner
+									rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+									value="#{capturaEventoCapacitacion.datos.evento.valorRetardo}"
+									min="0" max="100" maxlength="3" styleClass="form-control">
+									<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+								</p:spinner>
+							</div>
+							<div class="col-md-2">
+								<!-- Longitud de campo -->
+								<p:spinner
+									rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+									value="#{capturaEventoCapacitacion.datos.evento.valorFaltaJustificada}"
+									min="0" max="100" styleClass="form-control" maxlength="3">
+									<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+								</p:spinner>
+							</div>
+							<div class="col-md-2">
+								<!-- Longitud de campo -->
+								<p:spinner
+									rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+									value="#{capturaEventoCapacitacion.datos.evento.valorInconcluso}"
+									min="0" max="100" styleClass="form-control" maxlength="3">
+									<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+								</p:spinner>
+							</div>
+							<div class="col-md-2">
+								<!-- Longitud de campo -->
+								<p:spinner
+									rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+									value="#{capturaEventoCapacitacion.datos.evento.valorFalta}"
+									min="0" max="100" styleClass="form-control" maxlength="3">
+									<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+								</p:spinner>
+							</div>
+
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+
+						<div class="col-md-3">
+							<p:outputLabel
+								rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+								value="#{sistema.obtenerTexto('gw.ge.texto.tipo.calificacion')}:" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel
+								rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+								value="#{sistema.obtenerTexto('gw.ge.texto.tipo.dictamen')}:" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel
+								rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+								value="#{sistema.obtenerTexto('gw.ge.texto.porcentaje.asistencias')}:" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel
+								rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+								value="#{sistema.obtenerTexto('gw.ge.texto.porcentaje.calificacion')}:" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-3">
+							<p:selectOneMenu id="somTipoCalificacion"
+								rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+								value="#{capturaEventoCapacitacion.datos.evento.tpoCalificacion}"
+								styleClass="col-xs-12" disabled="true">
+								<p:ajax process="@this" />
+								<f:selectItems
+									value="#{capturaEventoCapacitacion.tiposCalificacion}"
+									var="tipo" itemValue="#{tipo.getId()}"
+									itemLabel="#{tipo.getNombre()}" />
+							</p:selectOneMenu>
+						</div>
+						<div class="col-md-3">
+							<p:selectOneMenu id="somTipoDictamen"
+								rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+								value="#{capturaEventoCapacitacion.datos.evento.tpoDictamen}"
+								styleClass="col-xs-12" disabled="true">
+								<p:ajax process="@this" update="spnPorcentajeAsistencia" />
+								<f:selectItems
+									value="#{capturaEventoCapacitacion.tiposCalificacion}"
+									var="tipo" itemValue="#{tipo.getId()}"
+									itemLabel="#{tipo.getNombre()}" />
+							</p:selectOneMenu>
+						</div>
+						<div class="col-md-3">
+							<!-- Longitud de campo -->
+							<p:spinner id="spnPorcentajeAsistencia"
+								rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+								value="#{capturaEventoCapacitacion.datos.evento.valorAsistenciaDictamen}"
+								min="0" max="100" styleClass="form-control" maxlength="3">
+								<p:ajax process="@this" update="txtPorcentajeCalificacion" />
+								<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+							</p:spinner>
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel id="txtPorcentajeCalificacion"
+								rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+								value="#{100 - capturaEventoCapacitacion.datos.evento.valorAsistenciaDictamen}" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+
+						<div class="col-md-3">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ge.texto.calif')}:" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel
+								rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+								value="#{sistema.obtenerTexto('gw.ge.texto.porcentaje.min.asist')}" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ge.texto.opor')}:" />
+						</div>
+						<div class="col-md-6"></div>
+					</div>
+					<div class="row">
+
+						<div class="col-md-3">
+							<!-- Longitud de campo -->
+							<p:spinner
+								value="#{capturaEventoCapacitacion.datos.evento.calificacionMinAprobatoria}"
+								min="0" max="100" styleClass="form-control" maxlength="3">
+								<p:ajax process="@this" />
+								<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+							</p:spinner>
+						</div>
+						<div class="col-md-3">
+							<!-- Longitud de campo -->
+							<p:spinner
+								rendered="#{not (capturaEventoCapacitacion.datos.evento.fichaDescriptivaPrograma.catModalidad.id eq 1)}"
+								value="#{capturaEventoCapacitacion.datos.evento.procentajeMinAsistencia}"
+								min="0" max="100" maxlength="3" styleClass="form-control">
+								<p:ajax process="@this" />
+								<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+							</p:spinner>
+						</div>
+
+
+
+						<div class="col-md-3">
+							<p:selectOneMenu
+								value="#{capturaEventoCapacitacion.datos.evento.oportunidadesEvaluacion}"
+								styleClass="col-xs-12" onchange="correccionSelectores()">
+
+								<p:ajax process="@this" />
+								<f:selectItem itemValue="1" itemLabel="1" />
+								<f:selectItem itemValue="2" itemLabel="2" />
+								<f:selectItem itemValue="3" itemLabel="3" />
+								<f:selectItem itemValue="4" itemLabel="4" />
+								<f:selectItem itemValue="5" itemLabel="5" />
+
+							</p:selectOneMenu>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-3">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ge.texto.encuesta')}:" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel value="Encuestas Kirkpatrick disponibles:" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ge.texto.version')}:" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ge.texto.const')}" />
+						</div>
+
+					</div>
+					<div class="row">
+						<div class="col-md-3">
+							<p:inputSwitch
+								value="#{capturaEventoCapacitacion.datos.evento.aplicaEncuesta}"
+								onLabel="#{sistema.obtenerTexto('gw.ge.texto.si')}"
+								offLabel="#{sistema.obtenerTexto('gw.ge.texto.no')}"
+								valueChangeListener="#{capturaEventoCapacitacion.onChangeAplicaEncuesta}">
+								<p:ajax process="@this" update="selectEncuesta" />
+							</p:inputSwitch>
+						</div>
+						<div class="col-md-3">
+							<p:selectOneMenu id="selectEncuesta"
+								value="#{capturaEventoCapacitacion.datos.encuesta}"
+								disabled="#{(capturaEventoCapacitacion.datos.evento.aplicaEncuesta eq false) or (empty capturaEventoCapacitacion.datos.evento.aplicaEncuesta) }"
+								styleClass="col-xs-12" converter="entityConverter">
+								<p:ajax event="change" process="@this" />
+								<f:selectItem itemValue="#{null}"
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+								<f:selectItems
+									value="#{capturaEventoCapacitacion.listaEncuestas}"
+									var="encuesta" itemValue="#{encuesta}"
+									itemLabel="#{encuesta.nombre}" />
+							</p:selectOneMenu>
+							<h:outputText
+								value="#{capturaEventoCapacitacion.mensajeEncuestas}" />
+						</div>
+						<div class="col-md-3">
+							<p:selectOneMenu disabled="true"
+								value="#{capturaEventoCapacitacion.datos.evento.versionEncuesta}"
+								styleClass="col-xs-12" onchange="correccionSelectores()">
+								<p:ajax process="@this" />
+								<f:selectItem itemValue="1.0" itemLabel="1.0" />
+							</p:selectOneMenu>
+						</div>
+						<div class="col-md-3">
+							<p:inputSwitch
+								value="#{capturaEventoCapacitacion.datos.evento.constancia}"
+								onLabel="#{sistema.obtenerTexto('gw.ge.texto.si')}"
+								offLabel="#{sistema.obtenerTexto('gw.ge.texto.no')}">
+								<p:ajax process="@this" />
+							</p:inputSwitch>
+						</div>
+
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+							<p:outputLabel
+								value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+						</div>
+					</div>
+				</div>
+			</p:panel>
+		</p:outputPanel>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.continuar')}"
+						action="#{capturaEventoCapacitacion.cargarDatosAgenda()}"
+						process="@this" ajax="false"
+						styleClass="btn btn-primary pull-right" />
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.guarda.borrador')}"
+						action="#{capturaEventoCapacitacion.guardarBorrador()}"
+						process="@this" immediate="true" ajax="false"
+						styleClass="btn btn-default pull-right" />
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.cancelar')}"
+						action="#{menuGestorBean.navegaBusquedaEventosCapacitacion}"
+						ajax="false" immediate="true"
+						styleClass="btn btn-default pull-right" />
+				</div>
+			</div>
+		</div>
+	</h:form>
+</ui:composition>

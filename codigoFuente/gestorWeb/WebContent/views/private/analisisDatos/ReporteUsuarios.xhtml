@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>Análisis de datos</li>
+		<li class="active">Reporte de usuarios</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>Reporte de usuarios</h1>
+		<hr />
+		<p:ajaxStatus onstart="PF('dialogLayout').show()"
+			onsuccess="PF('dialogLayout').hide()" />
+		<h:form id="form">
+			<f:validateBean disabled="true">
+				<div class="row">
+					<div class="col-md-12">
+						<p:panel header="Búsqueda de datos del usuario">
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-3">
+										<p:outputLabel value="Clasificación de usuario:"
+											for="selClasificacion" styleClass="bloque" />
+										<p:selectOneMenu id="selClasificacion" styleClass="col-xs-12"
+											value="#{reporteUsuariosBean.criterios.persona.tipoUsuario}">
+											<f:selectItem noSelectionOption="true"
+												itemLabel="Seleccionar" />
+											<f:selectItems value="#{reporteUsuariosBean.tiposUsuario()}"
+												var="tipoU" itemLabel="#{tipoU.descripcion}"
+												itemValue="#{tipoU.valor}" />
+										</p:selectOneMenu>
+									</div>
+
+									<div class="col-md-3">
+										<p:outputLabel value="Estatus:" for="selEstatus"
+											styleClass="bloque" />
+										<p:selectOneMenu id="selEstatus" styleClass="col-xs-12"
+											value="#{reporteUsuariosBean.criterios.persona.activo}">
+											<f:selectItem noSelectionOption="true"
+												itemLabel="Seleccionar" />
+											<f:selectItems
+												value="#{reporteUsuariosBean.estatusPersona()}"
+												var="estatus" itemLabel="#{estatus.descripcion}"
+												itemValue="#{estatus.valor}" />
+										</p:selectOneMenu>
+									</div>
+
+									<div class="col-md-6">
+										<p:outputLabel value="Estado:" for="selEstado"
+											styleClass="bloque" />
+										<p:selectOneMenu id="selEstado" styleClass="col-xs-12"
+											value="#{reporteUsuariosBean.criterios.idEntidadFederativa}"
+											valueChangeListener="#{reporteUsuariosBean.onEstadoChange}">
+											<p:ajax update="selCiudad" />
+											<f:selectItem noSelectionOption="true"
+												itemLabel="Seleccionar" />
+											<f:selectItems
+												value="#{reporteUsuariosBean.entidadesFederativas}"
+												var="entidad" itemLabel="#{entidad.nombre}"
+												itemValue="#{entidad.id}" />
+										</p:selectOneMenu>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-3">
+										<p:outputLabel value="Ciudad o municipio:" for="selCiudad"
+											styleClass="bloque" />
+
+										<p:selectOneMenu id="selCiudad" styleClass="col-xs-12"
+											disabled="#{reporteUsuariosBean.criterios.idEntidadFederativa == 0}"
+											value="#{reporteUsuariosBean.criterios.idMunicipio}">
+											<f:selectItem noSelectionOption="true"
+												itemLabel="Seleccionar" />
+											<f:selectItems value="#{reporteUsuariosBean.municipios}"
+												var="municipio" itemLabel="#{municipio.nombre}"
+												itemValue="#{municipio.idMunicipio}" />
+										</p:selectOneMenu>
+
+									</div>
+
+									<div class="col-md-3">
+										<p:outputLabel value="Género:" for="selGenero"
+											styleClass="bloque" />
+										<p:selectOneMenu id="selGenero" styleClass="col-xs-12"
+											value="#{reporteUsuariosBean.criterios.persona.genero}">
+											<f:selectItem noSelectionOption="true"
+												itemLabel="Seleccionar" />
+											<f:selectItems value="#{reporteUsuariosBean.generos()}"
+												var="genero" itemLabel="#{genero.descripcion}"
+												itemValue="#{genero.valor}" />
+										</p:selectOneMenu>
+									</div>
+									<div class="col-md-6">
+										<p:outputLabel value="Rango de edad:" for="rangoEdad"
+											styleClass="bloque" />
+										<p:selectOneMenu id="rangoEdad" styleClass="col-xs-12"
+											value="#{reporteUsuariosBean.seleccionRangoEdad}">
+											<f:selectItem noSelectionOption="true"
+												itemLabel="Seleccionar" />
+											<f:selectItems value="#{reporteUsuariosBean.rangoEdades}" />
+										</p:selectOneMenu>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-4">
+										<f:validateBean disabled="true">
+											<p:outputLabel
+												value="#{sistema.obtenerTexto('gw.ga.label.rangofechas')}:" />
+											<p:selectOneMenu id="tipofecha" required="false"
+												value="#{reporteUsuariosBean.tipoDatoFechas}"
+												autoWidth="false" styleClass="col-xs-12">
+												<p:ajax update="fc_fechaInicial fc_fechaFinal" />
+												<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+													itemValue="#{null}" />
+												<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.ga.label.ite')}"
+													itemValue="#{1}" />
+												<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.ga.label.ie')}"
+													itemValue="#{2}" />
+												<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.ga.label.te')}"
+													itemValue="#{3}" />
+											</p:selectOneMenu>
+										</f:validateBean>
+									</div>
+									<div class="col-md-6">
+
+										<div class="row">
+											<div class="col-md-6">
+												<p:outputLabel value="Inicial:" styleClass="bloque" />
+												<p:calendar id="fc_fechaInicial" styleClass="calendario"
+													pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+													yearRange="c-100:c+100" locale="es" navigator="true"
+													placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+													showOn="button" readonlyInput="true"
+													disabled="#{reporteUsuariosBean.tipoDatoFechas == null}"
+													value="#{reporteUsuariosBean.criterios.persona.fechaInicial}">
+													<p:ajax update="fc_fechaFinal" />
+												</p:calendar>
+
+											</div>
+
+											<div class="col-md-6">
+												<p:outputLabel value="Final:" styleClass="bloque" />
+												<p:calendar id="fc_fechaFinal" styleClass="calendario"
+													pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+													yearRange="c-100:c+100" locale="es" navigator="true"
+													placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+													showOn="button" readonlyInput="true"
+													disabled="#{reporteUsuariosBean.tipoDatoFechas == null}"
+													value="#{reporteUsuariosBean.criterios.persona.fechaFinal}" />
+											</div>
+										</div>
+									</div>
+
+								</div>
+
+							</div>
+							<!-- 				Buscar usuarios -->
+							<div class="row">
+								<div class="col-md-12 text-right">
+									<p:commandButton value="Limpiar campos"
+										actionListener="#{reporteUsuariosBean.limpiarCampos}"
+										ajax="true" update="@form" styleClass="btn btn-default" />
+									<p:commandButton styleClass="btn btn-primary" value="Buscar"
+										update="@form"
+										action="#{reporteUsuariosBean.buscaUsuariosCriterios}"
+										ajax="true" />
+								</div>
+							</div>
+						</p:panel>
+					</div>
+				</div>
+
+			</f:validateBean>
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel header="Resultado de la búsqueda">
+						<p:dataTable value="#{reporteUsuariosBean.tblDatosPersona}"
+							reflow="true"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							tableStyleClass="table" id="tblPersonas" var="datosPer"
+							paginator="true" paginatorPosition="bottom" rows="10"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks}
+								 {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15">
+
+							<f:facet name="header">
+								<div class="row flexY">
+									<div class="col-md-8">
+										<p:outputLabel
+											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+									</div>
+									<div class="col-md-4">
+										<p:commandButton id="toggler" type="button"
+											value="Columna de datos" style="width:200px"
+											styleClass="pull-right btn btn-default"
+											icon="ui-icon-carat-1-s" />
+										<p:columnToggler id="columnaSelectora"
+											datasource="tblPersonas" trigger="toggler">
+											<p:ajax event="toggle"
+												listener="#{reporteUsuariosBean.onToggle}" />
+										</p:columnToggler>
+									</div>
+								</div>
+							</f:facet>
+
+							<!-- Datos persona -->
+							<p:column visible="#{reporteUsuariosBean.visible[0]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Estatus" />
+								</f:facet>
+
+								<h:outputText
+									value="#{datosPer.domicilioPersona.persona.activo? 'Activo':'Inactivo'}" />
+							</p:column>
+
+							<p:column visible="#{reporteUsuariosBean.visible[1]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Clasificación" />
+								</f:facet>
+
+								<h:outputText value="Externo"
+									rendered="#{datosPer.domicilioPersona.persona.tipoUsuario eq 2}" />
+								<h:outputText value="Interno"
+									rendered="#{datosPer.domicilioPersona.persona.tipoUsuario eq 1}" />
+							</p:column>
+
+							<p:column visible="#{reporteUsuariosBean.visible[2]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Nombre" />
+								</f:facet>
+
+								<h:outputText
+									value="#{datosPer.domicilioPersona.persona.nombre}" />
+							</p:column>
+
+							<p:column visible="#{reporteUsuariosBean.visible[3]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Apellido paterno" />
+								</f:facet>
+
+								<h:outputText
+									value="#{datosPer.domicilioPersona.persona.apellidoPaterno}" />
+							</p:column>
+
+							<p:column visible="#{reporteUsuariosBean.visible[4]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Apellido materno" />
+								</f:facet>
+
+								<h:outputText
+									value="#{datosPer.domicilioPersona.persona.apellidoMaterno}" />
+							</p:column>
+
+							<p:column visible="#{reporteUsuariosBean.visible[5]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Fecha registro" />
+								</f:facet>
+
+								<h:outputText value="#{datosPer.fechaRegistro()}" />
+							</p:column>
+
+							<p:column visible="#{reporteUsuariosBean.visible[6]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Entidad Federativa" />
+								</f:facet>
+
+								<h:outputText
+									value="#{datosPer.domicilioPersona.asentamiento.municipio.entidadFederativa.nombre}" />
+							</p:column>
+
+							<p:column visible="#{reporteUsuariosBean.visible[7]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Género" />
+								</f:facet>
+
+								<h:outputText
+									value="#{datosPer.domicilioPersona.persona.genero}" />
+							</p:column>
+
+
+
+							<!-- 					Datos laborales -->
+							<p:column visible="#{reporteUsuariosBean.visible[8]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Institución" />
+								</f:facet>
+
+								<h:outputText value="#{datosPer.datosLaborales.institucion}" />
+							</p:column>
+
+							<p:column visible="#{reporteUsuariosBean.visible[9]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Unidad de adscripción" />
+								</f:facet>
+
+								<h:outputText
+									value="#{datosPer.datosLaborales.unidadAdscripcion}" />
+							</p:column>
+
+							<p:column visible="#{reporteUsuariosBean.visible[10]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Área de adscripción" />
+								</f:facet>
+
+								<h:outputText value="#{datosPer.datosLaborales.areaAdscripcion}" />
+							</p:column>
+
+							<p:column visible="#{reporteUsuariosBean.visible[11]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Pertenece a un programa social" />
+								</f:facet>
+
+								<h:outputText
+									value="#{datosPer.datosLaborales.programaSocial? 'Si':'No'}" />
+							</p:column>
+
+							<p:column visible="#{reporteUsuariosBean.visible[12]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Puesto" />
+								</f:facet>
+
+								<h:outputText value="#{datosPer.datosLaborales.puesto}" />
+							</p:column>
+
+							<p:column visible="#{reporteUsuariosBean.visible[13]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Orden de gobierno" />
+								</f:facet>
+
+								<h:outputText value="#{reporteUsuariosBean.obtenerNombreOrdenPorId(datosPer.datosLaborales.idOrdenGobierno)}" />
+							</p:column>
+
+							<p:column visible="#{reporteUsuariosBean.visible[14]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Roles" />
+								</f:facet>
+
+								<h:outputText value="#{datosPer.roles()}" />
+							</p:column>
+
+							<p:column visible="#{reporteUsuariosBean.visible[15]}"
+								exportable="true">
+								<f:facet name="header">
+									<h:outputText value="Edad" />
+								</f:facet>
+
+								<h:outputText
+									value="#{datosPer.domicilioPersona.persona.edad()}" />
+							</p:column>
+
+							
+
+						</p:dataTable>
+					</p:panel>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12 floatFlexCentrarY margenInferior">
+						<p:outputLabel value="Reporte de excel:" style="margin-bottom:0"
+							styleClass="margenDerecho agregaHeight" for="btnReporte" />
+						<p:commandButton id="btnReporte" value="Descargar"
+							disabled="#{reporteUsuariosBean.tblDatosPersona.isEmpty()}"
+							style="margin-left:0; margin-right:10px"
+							styleClass="btn btn-primary" ajax="false">
+							<p:dataExporter type="xls" target="tblPersonas"
+								fileName="analisisDatosUsuarios" pageOnly="false" />
+						</p:commandButton>
+
+						<p:outputLabel value="Informe prediseñado:"
+							style="margin-bottom:0" styleClass="margenDerecho" />
+
+
+						<p:commandButton value="Generar"
+							disabled="#{reporteUsuariosBean.tblDatosPersona.isEmpty()}"
+							onclick="graficasUsuarios();"
+							styleClass="btn btn-primary margenDerecho quitaMargen" />
+
+						<p:remoteCommand name="graficasUsuarios"
+							action="#{reporteUsuariosBean.generaEstadisticas}" update="@form"
+							oncomplete="cargaGraficasUsuarios(xhr, status, args); PF('modalAnalisis').show(); scrollArribaUsuarios()" />
+
+						<p:remoteCommand name="scrollArribaUsuarios"
+							action="#{reporteUsuariosBean.scrollArriba}" />
+
+
+
+					</div>
+				</div>
+			</div>
+
+
+			<p:dialog widgetVar="modalAnalisis" modal="true" resizable="false"
+				id="modalInformeUsuarios" draggable="false" closable="false"
+				position="center" width="900" dynamic="true"
+				styleClass="modalAnalisisDatos modalAbsoluto"
+				header="#{reporteUsuariosBean.renderizarEstado ?'Usuarios por entidad federativa':'Informe prediseñado general de usuarios'}">
+				<div class="row">
+					<div class="col-md-12" style="text-align: right">
+						<p:outputPanel layout="block"
+							rendered="#{((reporteUsuariosBean.criterios.persona.fechaInicial != null) and (reporteUsuariosBean.criterios.persona.fechaFinal != null))}">
+
+							<p:outputLabel
+								value="REGISTRO DE USUARIOS QUE #{reporteUsuariosBean.tipoDatoFecha(reporteUsuariosBean.tipoDatoFechas)}"
+								styleClass="labelSuperior labelRangoFechas bloque"
+								style="margin:0" />
+							<p:outputLabel />
+
+							<p:outputLabel
+								value="#{reporteUsuariosBean.criterios.persona.fechaInicial}"
+								styleClass="labelSuperior labelFecha">
+								<f:convertDateTime type="date"
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+							</p:outputLabel>
+							<h:outputText value="y" style="margin-left:5px; margin-right:5px"
+								styleClass="labelSuperior labelFecha" />
+							<p:outputLabel
+								value="#{reporteUsuariosBean.criterios.persona.fechaFinal}"
+								styleClass="labelSuperior labelFecha">
+								<f:convertDateTime type="date"
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+							</p:outputLabel>
+						</p:outputPanel>
+					</div>
+				</div>
+
+				<p:outputPanel layout="block"
+					rendered="#{reporteUsuariosBean.renderizarEstado}">
+					<div class="row">
+						<div class="col-md-4">
+							<p:outputLabel value="ENTIDAD FEDERATIVA"
+								styleClass="bloque labelSuperior" />
+							<p:outputLabel value="#{reporteUsuariosBean.nombreEntidad}"
+								styleClass="bloque numeroGrande gEntidad" />
+
+						</div>
+						<div class="col-md-8">
+							<p:outputPanel layout="block"
+								rendered="#{reporteUsuariosBean.renderizarMunicipio}">
+								<p:outputLabel value="CIUDAD O MUNICIPIO"
+									styleClass="bloque labelSuperior" />
+								<p:outputLabel value="#{reporteUsuariosBean.nombreMunicipio}"
+									styleClass="bloque numeroGrande gMunicipio" />
+							</p:outputPanel>
+						</div>
+					</div>
+				</p:outputPanel>
+
+				<div class="row">
+
+					<!-- CABECERA TOTAL USUARIOS -->
+					<div class="col-md-3 text-center fondoGris">
+						<p:outputLabel value="TOTAL" styleClass="bloque labelSuperior" />
+						<p:outputLabel value=""
+							styleClass="bloque numeroGrande gTotalUsuarios" />
+						<p:outputLabel value="Usuarios" styleClass="bloque labelInferior" />
+					</div>
+
+					<!-- CABECERA TIPO DE USUARIO EXTERNO -->
+					<div class="col-md-3 text-center fondoGris">
+						<p:outputLabel value="TIPOS DE USUARIOS"
+							styleClass="bloque labelSuperior" />
+						<p:outputLabel value=""
+							styleClass="bloque numeroGrande gTotalExternos" />
+						<p:outputLabel value="Externos" styleClass="bloque labelInferior" />
+					</div>
+
+					<!-- CABECERA TIPO DE USUARIO INTERNO -->
+
+					<div class="col-md-3 text-center fondoGris">
+						<p:outputLabel value="TIPOS DE USUARIOS"
+							styleClass="bloque labelSuperior" />
+						<p:outputLabel value=""
+							styleClass="bloque numeroGrande gTotalInternos" />
+						<p:outputLabel value="Internos" styleClass="bloque labelInferior" />
+					</div>
+
+					<!-- CABECERA USUARIOS EN LINEA -->
+
+					<div class="col-md-3 fondoGris">
+						<p:outputLabel value="EN LINEA" styleClass="bloque labelSuperior" />
+						<div class="centrarHorizontal">
+							<p:outputPanel layout="block" styleClass="c100 p#{reporteUsuariosBean.obtenerPorcentajeUsuariosEnLinea()} small">
+								<span>#{reporteUsuariosBean.obtenerPorcentajeUsuariosEnLinea()}%</span>
+								<div class="slice">
+									<div class="bar"></div>
+									<div class="fill"></div>
+								</div>
+
+							</p:outputPanel>
+						</div>
+
+						<p:outputLabel
+							value="#{reporteUsuariosBean.obtenerUsuariosEnLinea()}"
+							styleClass="bloque numeroGrande text-center"
+							style="margin-bottom:0" />
+						<p:outputLabel
+							value="#{reporteUsuariosBean.obtenerUsuariosEnLinea() == 1 ? 'Activo' : 'Activos'}"
+							styleClass="bloque labelInferior text-center"
+							style="margin-bottom:0" />
+
+					</div>
+				</div>
+				<div class="row">
+					<!-- GRAFICA USUARIOS POR GENERO -->
+					<div class="col-md-6 fondoGris">
+						<p:outputLabel value="GENERO"
+							styleClass="bloque text-center labelSuperior" />
+						<div id="datosUsuariosGeneros" class="medidaGrafica"></div>
+					</div>
+					<!-- GRAFICA USUARIOS POR ESTATUS -->
+					<div class="col-md-6 fondoGris">
+						<p:outputLabel value="ESTATUS DE USUARIOS"
+							styleClass="bloque text-center labelSuperior" />
+						<div id="datosUsuariosEstatus" class="medidaGrafica"></div>
+					</div>
+				</div>
+
+				<div class="row">
+					<!-- GRAFICA USUARIOS POR ORDEN DE GOBIERNO -->
+					<div class="col-md-offset-3 col-md-6 fondoGris">
+						<p:outputLabel value="USUARIOS POR ORDEN DE GOBIERNO"
+							styleClass="bloque text-center labelSuperior" />
+						<div id="datosUsuariosOrdenGobierno" class="medidaGrafica"></div>
+					</div>
+					<!-- GRAFICA USUARIOS POR PUESTO -->
+					<div class="col-md-6 fondoGris" style="display:none">
+						<p:outputLabel value="USUARIOS POR PUESTO"
+							styleClass="bloque text-center labelSuperior" />
+						<div id="datosUsuariosPuesto" class="medidaGrafica"></div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 fondoGris">
+						<p:outputLabel value="USUARIOS POR RANGO DE EDADES"
+							styleClass="bloque text-center tituloSuperior" />
+						<div id="rangoEdades"></div>
+					</div>
+				</div>
+				<p:panel rendered="false">
+					<div class="row">
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="NIVEL DE CONOCIMIENTOS"
+								styleClass="bloque text-center labelSuperior" />
+							<div id="nivelDeConocimiento" class="medidaGrafica"></div>
+						</div>
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="NIVEL DE ENSEÑANZA"
+								styleClass="bloque text-center labelSuperior" />
+							<div id="nivelDeEnsenanza" class="medidaGrafica"></div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="MODALIDAD"
+								styleClass="bloque text-center labelSuperior" />
+							<div id="modalidad" class="medidaGrafica"></div>
+						</div>
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="ESTATUS"
+								styleClass="bloque text-center labelSuperior" />
+							<div id="estatus" class="medidaGrafica"></div>
+						</div>
+					</div>
+
+				</p:panel>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton value="Cerrar"
+								onclick="PF('modalAnalisis').hide();"
+								styleClass="btn btn-default pull-right" />
+						</div>
+					</div>
+				</f:facet>
+
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+	<p:panel id="pnlDatosLaborales"
+		header="#{sistema.obtenerTexto('gw.usuarios.etiquetaPanel.datosLaborales')}">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel for="txtNumEmpleado"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.numEmpleado')}:" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtNumEmpleado" styleClass="form-control"
+						value="#{adminPersonaBean.datos.datosLaborales.numeroEmpleado}"
+						maxlength="30" disabled="true"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.numEmpleado')}">
+						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+					</p:inputText>
+					<p:message for="txtNumEmpleado" />
+				</div>
+				<div class="col-md-4" style="display: none">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.existeEmpleado')}:"
+						rendered="#{adminPersonaBean.datos.persona.tipoUsuario == 1}" />
+					<p:commandButton value="Verificar" 
+						styleClass="btn btn-primary quitaMargen" disabled="true"
+						rendered="false" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel for="txtNbInstitucion"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.nomInstitucion')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtNbInstitucion" styleClass="form-control"
+						value="#{adminPersonaBean.datos.datosLaborales.institucion}"
+						maxlength="45" disabled="true"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.nomInstitucion')}" />
+					<p:message for="txtNbInstitucion" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="txtUnidadAdscripcion"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.unidadAdscripcion')}:" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtUnidadAdscripcion" styleClass="form-control"
+						value="#{adminPersonaBean.datos.datosLaborales.unidadAdscripcion}"
+						maxlength="45" disabled="true"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.unidadAdscripcion')}" />
+					<p:message for="txtUnidadAdscripcion" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="txtAreaAdscripcion"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.areaAdscripcion')}:" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtAreaAdscripcion" styleClass="form-control"
+						value="#{adminPersonaBean.datos.datosLaborales.areaAdscripcion}"
+						maxlength="45" disabled="true"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.areaAdscripcion')}" />
+					<p:message for="txtAreaAdscripcion" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+
+				<div class="col-md-4">
+					<p:outputLabel for="txtPuesto"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.puesto')}:" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtPuesto" styleClass="form-control"
+						value="#{adminPersonaBean.datos.datosLaborales.puesto}"
+						maxlength="45" disabled="true"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.puesto')}" />
+					<p:message for="txtPuesto" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="isProgramaSocial" styleClass="bloque"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.programaSocial')}:" />
+					<p:inputSwitch id="isProgramaSocial" disabled="true"
+						value="#{adminPersonaBean.datos.datosLaborales.programaSocial}"
+						onLabel="#{sistema.obtenerTexto('gw.usuarios.switch.si')}"
+						offLabel="#{sistema.obtenerTexto('gw.usuarios.switch.no')}"></p:inputSwitch>
+					<p:message for="isProgramaSocial" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="somSedeLaboral"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.sedeLaboral')}:"
+						styleClass="requerido" />
+					<p:selectOneMenu id="somSedeLaboral" disabled="true"
+						value="#{adminPersonaBean.datos.datosLaborales.sede.idEntidadFederativa}"
+						validator="#{adminPersonaBean.validarSedeLaboral}"
+						valueChangeListener="#{adminPersonaBean.onChangeSede}"
+						styleClass="col-xs-12" onchange="correccionSelectores()">
+						<p:ajax update="somMunicipio" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="#{0}" />
+						<f:selectItems value="#{adminPersonaBean.listaSedes}"
+							var="entidad" itemValue="#{entidad.getIdEntidadFederativa()}"
+							itemLabel="#{entidad.getNombre()}" />
+					</p:selectOneMenu>
+					<p:message for="somSedeLaboral" />
+				</div>
+			</div>
+		</div>
+
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel for="somMunicipio"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.municipio')}:"
+						styleClass="requerido" />
+					<p:selectOneMenu id="somMunicipio" 
+						value="#{adminPersonaBean.datos.datosLaborales.municipio.idMunicipio}"
+						validator="#{adminPersonaBean.validarMunicipioLaboral}"
+						valueChangeListener="#{adminPersonaBean.onChangeMunicipio}"
+						disabled="true"
+						styleClass="col-xs-12" onchange="correccionSelectores()">
+						<f:selectItem itemValue="#{0}"
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{adminPersonaBean.listaMunicipiosLaboral}"
+							var="municipio" itemValue="#{municipio.getIdMunicipio()}"
+							itemLabel="#{municipio.getNombre()}" />
+					</p:selectOneMenu>
+					<p:message for="somMunicipio" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="somOrdenGobierno"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.ordenGobierno')}:" />
+					<p:selectOneMenu id="somOrdenGobierno" disabled="true"
+						value="#{adminPersonaBean.datos.datosLaborales.idOrdenGobierno}"
+						styleClass="col-xs-12" onchange="correccionSelectores()">
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{adminPersonaBean.ordenGobierno}"
+							var="orden" itemValue="#{orden.getValor()}"
+							itemLabel="#{orden.getDescripcion()}" />
+					</p:selectOneMenu>
+					<p:message for="somOrdenGobierno" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="txtTipoContratacion"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.tipoContrato')}:" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtTipoContratacion" styleClass="form-control"
+						value="#{adminPersonaBean.datos.datosLaborales.tipoContratacion}"
+						maxlength="45" disabled="true"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.tipoContrato')}" />
+					<p:message for="txtTipoContratacion" />
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+
+				<div class="col-md-3">
+					<p:outputLabel for="calFechaRegistro"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.fechaIngreso')}:"
+						styleClass="bloque" />
+					<p:calendar id="calFechaRegistro" styleClass="calendario"
+						pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+						yearRange="c-100:c+100" locale="es" navigator="true"
+						showOn="button" readonlyInput="true" disabled="true"
+						maxdate="#{adminPersonaBean.fechaActual}"
+						placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+						value="#{adminPersonaBean.datos.datosLaborales.fechaIngreso}" />
+					<p:message for="calFechaRegistro" />
+				</div>
+
+				<div class="col-md-2 col-md-offset-1">
+					<p:outputLabel for="txtTelefono"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.telefono')}:" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtTelefono" styleClass="form-control"
+						value="#{adminPersonaBean.datos.telefonoFijo.telefono}"
+						maxlength="11" disabled="true"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.telefono')}">
+						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+					</p:inputText>
+					<p:message for="txtTelefono" />
+				</div>
+				<div class="col-md-2">
+					<p:outputLabel for="txtExtension"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.extension')}:" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtExtension" styleClass="form-control"
+						value="#{adminPersonaBean.datos.telefonoFijo.extension}"
+						maxlength="5" disabled="true"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.extension')}">
+						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+					</p:inputText>
+					<p:message for="txtExtension" />
+				</div>
+				<div class="col-md-2">
+					<p:outputLabel for="txtCelular"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.celular')}:" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtCelular" styleClass="form-control" disabled="true"
+						value="#{adminPersonaBean.datos.celular.telefono}" maxlength="10"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.celular')}">
+						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+					</p:inputText>
+					<p:message for="txtCelular" />
+				</div>
+			</div>
+		</div>
+
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel for="txtCorreoElectronico" styleClass="requerido"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.correo')}:" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtCorreoElectronico" styleClass="form-control"
+						type="email" validator="#{adminPersonaBean.validarCorreo}"
+						maxlength="45" disabled="true"
+						value="#{adminPersonaBean.datos.personaCorreo.correoElectronico}"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.correo')}" />
+					<p:message for="txtCorreoElectronico" />
+				</div>
+			</div>
+		</div>
+
+	</p:panel>
+</ui:composition>

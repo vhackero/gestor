@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition template="/templates/layout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:components="http://java.sun.com/jsf/composite/components">
+
+    <ui:define name="breadcrumb">
+        <li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+        <li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+        <li class="active">#{sistema.obtenerTexto('gw.administracion.catalogos.cge')}</li>
+    </ui:define>
+    <ui:define name="content">
+    <h1>#{sistema.obtenerTexto('gw.administracion.catalogos.cge')}</h1>
+			<hr />
+        <h:form id ="formf">
+            <p:ajaxStatus onstart="PF('dialogLayout').show()" onsuccess="PF('dialogLayout').hide()" />
+
+            <div class="row">
+                <div class="col-md-4">
+                    <p:accordionPanel multiple="true" activeIndex="null" id="acordion" styleClass="acordeoncatalogo">
+                        <c:forEach items="#{catGestionEscolarBean.catalogosGestionEscolar}"
+                                   var="cat">	
+                            <p:tab id="tab#{cat.id}" title="#{cat.nombre}"  >
+                                <p:commandLink value="#{sistema.obtenerTexto('gw.gestionescolar.texto.registrar')}" process="@this" id="link#{cat.id}"
+                                               action="#{catGestionEscolarBean.generaComponenteReg(cat)}"
+                                               update="formf" rendered="#{cat.visualizarReg}" styleClass="bloque"/>
+                                <p:commandLink value="#{sistema.obtenerTexto('gw.gestionescolar.texto.visualizar')}" process="@this" id="link2#{cat.id}"
+                                               action="#{catGestionEscolarBean.obtenerDatosCatSel(cat)}" update="formf" />
+                            </p:tab>
+                        </c:forEach>
+                    </p:accordionPanel>
+                </div>
+
+                <div class="col-md-8" >
+                    <components:regCatalogoComun
+                            idCat="#{catGestionEscolarBean.idCat}"
+                            nombreCat="#{catGestionEscolarBean.nombreCat}"
+                            catalogoDTO="#{catGestionEscolarBean.catComunDTOGenerico}"
+                            rendered="#{catGestionEscolarBean.muestraCompReg}"
+                            accionBtnGuardar="#{catGestionEscolarBean.guardarRegCatalogo}"
+                            renderCmpSelect="false" />
+
+
+                    <br />
+                    <components:verCatalogoComun
+                            idCat="#{catGestionEscolarBean.idCat}"
+                            nombreCat="#{catGestionEscolarBean.nombreCat}"
+                            listaElemCat="#{catGestionEscolarBean.lstCatSelec}"
+                            rendered="#{catGestionEscolarBean.muestraCompTabla}"
+                            listenerCambioEstatus="#{catGestionEscolarBean.cambioEstatusCatSelec}"
+                            accionEditRegCatalogo="#{catGestionEscolarBean.editaRegCatSeleccionado}"
+                            catalogoDTOSel="#{catGestionEscolarBean.catComunDTOGenerico}"
+                            renderCmpSelect="false" />
+
+                </div>
+
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.titulo.gestionaprendizaje.texto')}</li>
+		<li>#{sistema.obtenerTexto('gw.titulo.ambientes.texto.ava.parentesis')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.titulo.editarsegava.texto')}</li>
+	</ui:define>
+	<ui:define name="content">
+
+		<h1>#{sistema.obtenerTexto('gw.titulo.editarsegava.texto')}</h1>
+		<hr />
+		<h:form id="frmSeguimientoAva">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.ga.panel.datospertenece')}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-3">
+							<!-- Nombre del evento de capacitacion -->
+							<p:outputLabel for="nombreEvt"
+								value="#{sistema.obtenerTexto('gw.ga.label.nomevent')}:"
+								styleClass="bloque" />
+							<h:outputText id="nombreEvt"
+								value="#{modificarSeguimientoAVABean.ambienteVirtualAprendizajeDTO.
+                                                   eventoCapacitacion.nombreEc}" />
+						</div>
+
+						<div class="col-md-3">
+							<p:outputLabel for="nombreProg" value="Nombre del programa:"
+								styleClass="bloque" />
+							<h:outputText id="nombreProg"
+								value="#{modificarSeguimientoAVABean.ambienteVirtualAprendizajeDTO.eventoCapacitacion.fichaDescriptivaPrograma.nombreTentativo}" />
+						</div>
+
+						<div class="col-md-3">
+							<!-- Tipo de competencia -->
+							<p:outputLabel for="tpoComp"
+								value="#{sistema.obtenerTexto('gw.ga.label.tipocompetencia')}"
+								styleClass="bloque" />
+							<h:outputText id="tpoComp"
+								value="#{modificarSeguimientoAVABean.tipoCompetencia}" />
+						</div>
+						<div class="col-md-3">
+							<!-- Eje de capacitacion  -->
+							<p:outputLabel for="ejeCap"
+								value="#{sistema.obtenerTexto('gw.ga.label.ejedecap')}:"
+								styleClass="bloque" />
+							<h:outputText id="ejeCap"
+								value="#{modificarSeguimientoAVABean.ejeCapacitacion}" />
+						</div>
+
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-3">
+							<!-- Responsable de produccion -->
+							<p:outputLabel for="respProduccion"
+								value="#{sistema.obtenerTexto('gw.ga.label.responproduc')}"
+								styleClass="bloque" />
+							<h:outputText id="respProduccion"
+								value="#{modificarSeguimientoAVABean.responsableProduccion.
+                                                   personaResponsabilidad.tblPersona.nombreCompleto}" />
+
+						</div>
+						<div class="col-md-3">
+							<!-- Modalidad -->
+							<p:outputLabel for="modalidad"
+								value="#{sistema.obtenerTexto('gw.ga.label.modalidad')}"
+								styleClass="bloque" />
+							<h:outputText id="modalidad"
+								value="#{modificarSeguimientoAVABean.
+                                                   ambienteVirtualAprendizajeDTO.eventoCapacitacion.
+                                                   catModalidadPlanPrograma.nombre}" />
+						</div>
+						<div class="col-md-3">
+							<!-- Fecha inicial -->
+							<p:outputLabel for="fInicial"
+								value="#{sistema.obtenerTexto('gw.ga.label.fechainicial')}:"
+								styleClass="bloque #{modificarSeguimientoAVABean.pintarFechaInicial(modificarSeguimientoAVABean.
+                                                                ambienteVirtualAprendizajeDTO)}" />
+							<h:outputText id="fInicial"
+								styleClass="#{modificarSeguimientoAVABean.pintarFechaInicial(modificarSeguimientoAVABean.
+                                                        ambienteVirtualAprendizajeDTO)}"
+								value="#{modificarSeguimientoAVABean.
+                                                   ambienteVirtualAprendizajeDTO.eventoCapacitacion.
+                                                   fechaInicial}">
+								<f:convertDateTime
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+							</h:outputText>
+						</div>
+						<div class="col-md-3">
+							<!-- Fecha final  -->
+							<p:outputLabel for="fFinal"
+								value="#{sistema.obtenerTexto('gw.ga.label.fechafinal')}:"
+								styleClass="bloque" />
+							<h:outputText id="fFinal"
+								value="#{modificarSeguimientoAVABean.
+                                                   ambienteVirtualAprendizajeDTO.
+                                                   eventoCapacitacion.fechaFinal}">
+								<f:convertDateTime
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+							</h:outputText>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-3">
+							<!-- Coordianador academico -->
+							<p:outputLabel for="cAcademic"
+								value="#{sistema.obtenerTexto('gw.ga.label.coordacademic')}"
+								styleClass="bloque" />
+							<h:outputText id="cAcademic"
+								value="#{modificarSeguimientoAVABean.
+                                                   coordinadorAcademico.
+                                                   personaResponsabilidad.
+                                                   tblPersona.nombre} 
+                                          #{modificarSeguimientoAVABean.
+                                            coordinadorAcademico.
+                                            personaResponsabilidad.
+                                            tblPersona.apellidoPaterno}" />
+						</div>
+					</div>
+				</div>
+			</p:panel>
+
+			<!-- Panel de responsables de produccion-->
+			<p:panel header="#{sistema.obtenerTexto('gw.ga.panel.avapanel')}">
+				<p:panel header="#{sistema.obtenerTexto('gw.ga.panel.colaboa')}">
+					<p:dataTable id="idResponsablesProduccion" rowIndexVar="row"
+						emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.msjRegistros')}"
+						value="#{modificarSeguimientoAVABean.unidadOaAvaDTOs}"
+						var="unidad" tableStyleClass="table">
+						<p:column styleClass="text-center">
+							<f:facet name="header">
+								<h:outputText value="#{sistema.obtenerTexto('gw.ga.label.oa')}" />
+							</f:facet>
+							<h:outputText value="#{row + 1}" />
+						</p:column>
+						<!-- Columna experto ene contenido -->
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.ga.panel.expertcontent')}"
+							styleClass="text-center">
+							<h:outputText
+								value="#{unidad.expertoEnContenido.
+                                         personaResponsabilidade.tblPersona.nombre}" />
+						</p:column>
+						<!-- Columna dise�ador instruccional -->
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.ga.label.disinstruc')}"
+							styleClass="text-center">
+							<h:outputText
+								value="#{unidad.disenadorInstruccional.
+                                         personaResponsabilidade.tblPersona.nombre}" />
+						</p:column>
+						<!-- Columna dise�ador elearning -->
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.ga.label.dislearning')}"
+							styleClass="text-center">
+							<h:outputText
+								value="#{unidad.disenadorElearning.
+                                         personaResponsabilidade.tblPersona.nombre}" />
+						</p:column>
+						<!-- Columna desarrollador instruccional -->
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.ga.label.desinstruc')}"
+							styleClass="text-center">
+							<h:outputText
+								value="#{unidad.desarrolladorElearning.
+                                         personaResponsabilidade.tblPersona.nombre}" />
+						</p:column>
+
+					</p:dataTable>
+
+				</p:panel>
+
+
+
+				<p:panel>
+					<!-- Data table de objetos de aprendizaje -->
+					<p:outputPanel id="idDataTable">
+						<p:dataTable id="identificador2" rowIndexVar="row"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.msjRegistros')}"
+							value="#{modificarSeguimientoAVABean.unidadOaAvaDTOs}"
+							var="unidad" paginator="true" rows="10"
+							paginatorPosition="bottom"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+							<p:column>
+								<!-- numero unidad -->
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.unidad')}" />
+								</f:facet>
+								<h:outputText value="#{row + 1}" />
+							</p:column>
+							<p:column>
+								<!-- Nommbre del tema -->
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.nombretema')}" />
+								</f:facet>
+								<h:outputText value="#{unidad.detEstUnidadDidactica.tituloUa}" />
+							</p:column>
+							<p:column styleClass="text-center">
+								<!-- Link unidad didactica u objeto aprendizaje -->
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.unididactica')}" />
+								</f:facet>
+								<p:commandLink id="cmdlink_estructura"
+									update="frmSeguimientoAva:dlgEstructura,
+                                               frmSeguimientoAva:identificador2"
+									styleClass="linkAzul"
+									actionListener="#{estructuraDidacticaBean.crearObjetoRecursosOaDTO
+                                                                 (unidad,modificarSeguimientoAVABean.ambienteVirtualAprendizajeDTO)}"
+									oncomplete="PF('modEstructura').show(), scrollArriba()"
+									value="#{sistema.obtenerTexto('gw.ga.label.editar')}">
+									<f:setPropertyActionListener value="#{unidad}"
+										target="#{modificarSeguimientoAVABean.objetoAprendizajeSeleccionado}" />
+
+								</p:commandLink>
+
+							</p:column>
+							<p:column styleClass="text-center">
+								<!-- link equipo de produccion -->
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.produccion')}" />
+								</f:facet>
+								<!-- update="frmSeguimientoAva:idOutputTituloOa -->
+								<p:commandLink id="cmdlink_asignarOA" styleClass="linkAzul"
+									update="frmSeguimientoAva:asignacionResponsables"
+									oncomplete="scrollArriba()"
+									actionListener="#{asignacionRespProduccionGABean.asignarUnidad(unidad,row + 1)}"
+									onclick="PF('modAsignarOA').show()"
+									value="#{sistema.obtenerTexto('gw.ga.btn.asignar')}">
+									<f:setPropertyActionListener
+										value="#{modificarSeguimientoAVABean.ambienteVirtualAprendizajeDTO}"
+										target="#{asignacionRespProduccionGABean.ava}" />
+								</p:commandLink>
+							</p:column>
+							<p:column styleClass="text-center">
+								<!-- Link documentar FOA -->
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.foa')}" />
+								</f:facet>
+								<p:commandLink
+									value="#{sistema.obtenerTexto('gw.ga.label.documentar')}"
+									process="@this" styleClass="linkAzul"
+									action="#{fichaObjetoAprendizajeBean.cargarFOA}"
+									oncomplete="scrollArriba()"
+									rendered="#{fichaObjetoAprendizajeBean.obtenerEstatusFoa(unidad) ne 3}">
+									<f:setPropertyActionListener value="#{unidad}"
+										target="#{fichaObjetoAprendizajeBean.unidadOaAvaDTO}" />
+									<f:setPropertyActionListener
+										value="#{modificarSeguimientoAVABean.tipoCompetencia}"
+										target="#{fichaObjetoAprendizajeBean.tipoCompetencia}" />
+									<f:setPropertyActionListener
+										value="#{modificarSeguimientoAVABean.ejeCapacitacion}"
+										target="#{fichaObjetoAprendizajeBean.ejeCapacitacion}" />
+								</p:commandLink>
+
+								<p:commandLink value="Ver" process="@this" styleClass="linkAzul"
+									ajax="true" update="@form:reporte"
+									oncomplete="PF('modalReporte').show()"
+									action="#{fichaObjetoAprendizajeBean.generarReporte()}"
+									rendered="#{fichaObjetoAprendizajeBean.obtenerEstatusFoa(unidad) eq 3}">
+									<f:setPropertyActionListener value="#{unidad}"
+										target="#{fichaObjetoAprendizajeBean.unidadOaAvaDTO}" />
+
+								</p:commandLink>
+
+
+
+							</p:column>
+							<p:column styleClass="text-center" rendered="false">
+								<!-- Link descarga XML -->
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.xml')}" />
+								</f:facet>
+								<p:commandButton id="btnDownload" process="@this" ajax="false"
+									onclick="PrimeFaces.monitorDownload(start, stop);"
+									rendered="#{unidad.fichaDescriptivaObjetoAprendizaje.estatusDF}"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_desc"
+									actionListener="#{fichaObjetoAprendizajeBean.descargarXML(unidad)}">
+									<p:fileDownload
+										value="#{fichaObjetoAprendizajeBean.fileDownload}" />
+								</p:commandButton>
+								<p:tooltip for="btnDownload" position="top"
+									value="#{sistema.obtenerTexto('gw.ga.btn.descargar')}" />
+							</p:column>
+							<p:column styleClass="text-center">
+								<!-- Boton de guion instruccional -->
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.guioninsti')}" />
+								</f:facet>
+								<p:commandButton id="btnGuionInstitucuinal"
+									update="frmSeguimientoAva:dlgCargaArchivo"
+									actionListener="#{modificarSeguimientoAVABean.
+                                                                   procesaModalGestionArchivos(unidad,'Gui&#243;n instruccional',unidad.validacionGuionInst)}"
+									oncomplete="PF('modCargaArchivo').show(), scrollArriba()"
+									styleClass="btn-icon btn btn-default icono_sisi ss_ga_adjunt" />
+								<p:selectBooleanCheckbox value="#{unidad.validacionGuionInst}"
+									disabled="#{!(unidad.isGuionIConfirmable)}">
+									<p:ajax process="@this"
+										listener="#{modificarSeguimientoAVABean.actualizaUnidadSeleccionada(unidad,'Gui&#243;n instruccional')}"
+										update="identificador2,frmSeguimientoAva:progressBarAvanceAva,
+                                            frmSeguimientoAva:idConfirmacionAva,frmSeguimientoAva:btnActivar,@this" />
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column styleClass="text-center">
+								<!-- Agregacion del Desarrollo OA -->
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.desoa')}" />
+								</f:facet>
+								<!-- Boton de adjuntar -->
+								<p:commandButton id="btnDesarrolloOA"
+									update="frmSeguimientoAva:dlgCargaArchivo"
+									actionListener="#{modificarSeguimientoAVABean.
+                                                                   procesaModalGestionArchivos(unidad,'Desarrollo OA',unidad.validacionDesarrolloOa)}"
+									oncomplete="PF('modCargaArchivo').show(), scrollArriba()"
+									styleClass="btn-icon btn btn-default icono_sisi ss_ga_adjunt" />
+								<!-- Check box -->
+								<p:selectBooleanCheckbox
+									value="#{unidad.validacionDesarrolloOa}"
+									disabled="#{!(unidad.isDesarrolloOaConfirmable)}">
+									<p:ajax process="@this"
+										listener="#{modificarSeguimientoAVABean.actualizaUnidadSeleccionada(unidad,'Desarrollo OA')}"
+										update="identificador2,frmSeguimientoAva:progressBarAvanceAva,
+                                            frmSeguimientoAva:idConfirmacionAva,frmSeguimientoAva:btnActivar,@this" />
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column styleClass="text-center">
+								<!-- Agregacion de SCORM  -->
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.asigscorm')}" />
+								</f:facet>
+								<p:commandButton id="btnScorm"
+									update="frmSeguimientoAva:dlgCargaArchivo"
+									actionListener="#{modificarSeguimientoAVABean.
+                                                                   procesaModalGestionArchivos(unidad,'SCORM',unidad.validacionScorm)}"
+									oncomplete="PF('modCargaArchivo').show(), scrollArriba()"
+									styleClass="btn-icon btn btn-default icono_sisi ss_ga_adjunt" />
+								<p:selectBooleanCheckbox value="#{unidad.validacionScorm}"
+									disabled="#{!(unidad.isScormConfirmable)}">
+									<p:ajax process="@this"
+										listener="#{modificarSeguimientoAVABean.actualizaUnidadSeleccionada(unidad,'SCORM')}"
+										update="identificador2,frmSeguimientoAva:progressBarAvanceAva,
+                                            frmSeguimientoAva:idConfirmacionAva,frmSeguimientoAva:btnActivar,@this" />
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column styleClass="text-center">
+								<!-- Columna funcionalidad -->
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.funcionalidad')}" />
+								</f:facet>
+								<p:selectBooleanCheckbox value="#{unidad.funcionalidad}"
+									disabled="#{!(unidad.isFuncionalidadConfirmable)}">
+									<p:ajax process="@this"
+										listener="#{modificarSeguimientoAVABean.
+                                                        actualizaUnidadSeleccionada(unidad,'Valida Funcionalidad')}"
+										update="identificador2,frmSeguimientoAva:progressBarAvanceAva,
+                                            frmSeguimientoAva:idConfirmacionAva,frmSeguimientoAva:btnActivar,@this" />
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column styleClass="text-center">
+								<!-- Columna porcentaje de avance -->
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.ga.label.avance')}" />
+								</f:facet>
+								<h:outputText value="#{unidad.porcentajeAvanceOa} %" />
+							</p:column>
+						</p:dataTable>
+					</p:outputPanel>
+
+
+					<p:panel
+						header="#{sistema.obtenerTexto('gw.titulo.ambientes.texto.ava.parentesis')}"
+						style="background-color: white;">
+
+						<!-- Columna del campo de validacion del AVA -->
+						<div class="row flexY">
+							<div class="col-md-6 flexY" style="justify-content: space-around">
+
+								<h:outputText
+									value="#{sistema.obtenerTexto('gw.ga.label.porcentajeava')}:" />
+								<!-- Progress bar -->
+								<p:progressBar id="progressBarAvanceAva" widgetVar="pbClient"
+									ajax="true" labelTemplate="{value}%"
+									value="#{modificarSeguimientoAVABean.ambienteVirtualAprendizajeDTO.
+                                                        porcentajeAvance}"
+									displayOnly="true"
+									style="width:100%; margin-bottom:0px;color:black; height:20px;" />
+								<p:commandButton disabled="true"
+									styleClass="solo-icono btn-icon btn btn-default icono_sisi ss_ga_semaforo #{modificarSeguimientoAVABean.asignaColorSemaro(modificarSeguimientoAVABean.ambienteVirtualAprendizajeDTO)}" />
+
+							</div>
+
+
+							<div class="col-md-3" style="justify-content: space-around">
+
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.ga.label.validacionava')}:"
+									styleClass="agregaHeight" />
+
+								<p:commandButton id="btnUrlAva"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_urlact "
+									ajax="false"
+									onclick="window.open('#{modificarSeguimientoAVABean.navegarAUrlExterna()}');return false;"
+									disabled="false" target="_blank" />
+								<p:tooltip for="btnUrlAva"
+									value="#{sistema.obtenerTexto('gw.ga.label.irava')}"
+									position="top" />
+
+								<p:selectBooleanCheckbox id="idConfirmacionAva"
+									value="#{modificarSeguimientoAVABean.
+                                                                  ambienteVirtualAprendizajeDTO.validacionAva}"
+									disabled="#{modificarSeguimientoAVABean.isAvaConfirmable}">
+									<p:ajax process="@this"
+										listener="#{modificarSeguimientoAVABean.actualizarAVASeleccionado}"
+										update="frmSeguimientoAva:progressBarAvanceAva,btnActivar,idConfirmacionAva" />
+								</p:selectBooleanCheckbox>
+
+
+							</div>
+							<div class="col-md-3">
+
+								<p:commandButton id="btnActivar" process="@this"
+									action="#{modificarSeguimientoAVABean.activarAva}"
+									disabled="#{!modificarSeguimientoAVABean.ambienteVirtualAprendizajeDTO.validacionAva}"
+									styleClass="btn btn-primary pull-right"
+									value="#{sistema.obtenerTexto('gw.ga.label.activarava')}">
+									<p:confirm
+										header="#{sistema.obtenerTexto('gw.ga.label.confirmacion')}"
+										message="#{sistema.obtenerTexto('gw.ga.label.confirmacionmsj')}" />
+								</p:commandButton>
+							</div>
+
+
+						</div>
+
+
+					</p:panel>
+
+
+					<div class="row">
+						<div class="col-md-12">
+							<p:confirmDialog global="true" styleClass="medidaModal"
+								closable="false">
+								<div class="row">
+									<div class="col-md-12">
+										<p:commandButton
+											value="#{sistema.obtenerTexto('gw.ga.btn.aceptar')}"
+											type="button"
+											styleClass="btn btn-primary pull-right ui-confirmdialog-yes" />
+										<p:commandButton
+											value="#{sistema.obtenerTexto('gw.ga.btn.cancelar')}"
+											type="button"
+											styleClass="btn btn-default pull-right ui-confirmdialog-no" />
+									</div>
+								</div>
+							</p:confirmDialog>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+
+								<p:commandButton value="Regresar"
+									action="#{modificarSeguimientoAVABean.navegarPantallaprincipal}"
+									styleClass="btn btn-default pull-right"></p:commandButton>
+
+							</div>
+						</div>
+					</div>
+				</p:panel>
+			</p:panel>
+
+			<br></br>
+			<ui:include src="mdlResponsableOA.xhtml" />
+			<ui:include src="mdlEstructuraDidactica.xhtml" />
+			<ui:include src="mdlCargaArchivo.xhtml" />
+
+			<p:dialog id="reporte" dynamic="true" responsive="true" modal="true"
+				closable="false" resizable="false" position="center"
+				header="Reporte FOA" width="900" widgetVar="modalReporte">
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:media player="pdf"
+								value="#{fichaObjetoAprendizajeBean.reportePDF}" width="865"
+								height="400" styleClass="agregaBorde" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton value="Cerrar" update="@form"
+							styleClass="btn btn-default pull-right"
+							onclick="PF('modalReporte').hide();" />
+					</div>
+				</div>
+			</p:dialog>
+
+		</h:form>
+
+		<script type="text/javascript">
+			function start() {
+				PF('dialogLayout').show();
+			}
+
+			function stop() {
+				PF('dialogLayout').hide();
+			}
+		</script>
+	</ui:define>
+</ui:composition>

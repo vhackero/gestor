@@ -1,0 +1,385 @@
+
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.encuestas')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.encuestas.seguimiento.titulo')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.encuestas.seguimiento.titulo')}</h1>
+		<hr />
+
+		<h:form>
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+
+
+
+			<p:panel id="fldBusqueda"
+				header="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.busquedaEventoC')}"
+				showCollapseLink="false" collapsible="false">
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6">
+							<h:outputLabel
+								value="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.tipoCompetencia')}" />
+							<p:selectOneMenu id="tipoCompetencia"
+								value="#{seguimientoEncuestaBean.filtros.tblEvento.fichaDescriptivaPrograma.tipoCompetencia}"
+								autoWidth="false"
+								valueChangeListener="#{seguimientoEncuestaBean.generarComboBoxEjesCapacitacion}"
+								required="true" styleClass="col-xs-12">
+								<p:ajax update="ejeCapacitacion" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.seleccionar')}"
+									noSelectionOption="true" />
+								<f:selectItems
+									value="#{seguimientoEncuestaBean.listaCompetencias}"
+									var="tipoCompetencia" itemLabel="#{tipoCompetencia.nombre}"
+									itemValue="#{tipoCompetencia.id}" />
+							</p:selectOneMenu>
+							<p:message for="tipoCompetencia" />
+						</div>
+
+						<!-- Eje de capacitacion -->
+						<div class="col-md-6">
+
+							<h:outputLabel
+								value="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.ejeCapacitacion')}" />
+							<p:selectOneMenu id="ejeCapacitacion"
+								value="#{seguimientoEncuestaBean.filtros.tblEvento.fichaDescriptivaPrograma.ejeCapacitacion}"
+								required="true" styleClass="col-xs-12">
+								<p:ajax event="change" process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.seleccionar')}"
+									noSelectionOption="true" />
+
+								<f:selectItems
+									value="#{seguimientoEncuestaBean.listaEjesCapacitacion}"
+									var="ejeCapacitacion" itemValue="#{ejeCapacitacion.id}"
+									itemLabel="#{ejeCapacitacion.nombre}" />
+							</p:selectOneMenu>
+							<p:message for="ejeCapacitacion" />
+						</div>
+					</div>
+				</div>
+				<f:validateBean disabled="true">
+					<!-- Row 2 -->
+					<div class="form-group">
+						<div class="row">
+							<!-- Nombre del evento de capacitacion -->
+							<div class="col-md-6">
+								<h:outputLabel
+									value="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.nombreEventoCap')}" />
+								<p:selectOneMenu
+									value="#{seguimientoEncuestaBean.filtros.tblEvento.idEvento}"
+									required="true" id="idNombreEventoCapacitacion"
+									styleClass="col-xs-12">
+									<p:ajax process="@this"></p:ajax>
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.seleccionar')}"
+										noSelectionOption="true" />
+									<f:selectItems
+										value="#{seguimientoEncuestaBean.lstEventosCapacitacion}"
+										var="eventoCapacitacion"
+										itemValue="#{eventoCapacitacion.idEvento}"
+										itemLabel="#{eventoCapacitacion.nombreEc}" />
+								</p:selectOneMenu>
+								<p:message for="idNombreEventoCapacitacion" />
+							</div>
+							<!-- Nombre del programa de capacitacion  -->
+							<div class="col-md-6">
+								<h:outputLabel for="idNombrePrograma"
+									value="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.nombrePrograma')}" />
+								<p:inputText id="idNombrePrograma"
+									placeholder="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.nombrePrograma')}"
+									value="#{seguimientoEncuestaBean.filtros.tblEvento.fichaDescriptivaPrograma.nombreTentativo}"
+									styleClass="form-control">
+									<p:ajax process="@this"></p:ajax>
+								</p:inputText>
+							</div>
+						</div>
+					</div>
+					<!-- Row 3 -->
+					<div class="form-group">
+						<div class="row">
+							<!-- Modalidad -->
+							<div class="col-md-3">
+								<h:outputLabel
+									value="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.modalidad')}" />
+								<p:selectOneMenu
+									value="#{seguimientoEncuestaBean.filtros.tblEvento.fichaDescriptivaPrograma.catModalidad}"
+									converter="entityConverter" required="false"
+									styleClass="col-xs-12">
+
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.seleccionar')}"
+										noSelectionOption="true" />
+									<f:selectItems
+										value="#{seguimientoEncuestaBean.listaModalidadesPrograma}"
+										var="modalidad" itemLabel="#{modalidad.nombre}"
+										itemValue="#{modalidad}" />
+									<p:ajax process="@this"></p:ajax>
+								</p:selectOneMenu>
+							</div>
+							<div class="col-md-3">
+								<h:outputLabel
+									value="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.tipoRangoFecha')}" />
+								<p:selectOneMenu id="tipoFecha" required="false"
+									value="#{seguimientoEncuestaBean.tipoDatoFechas}"
+									valueChangeListener="#{seguimientoEncuestaBean.onChangeActivaBusquedaFechas}"
+									autoWidth="false" styleClass="col-xs-12">
+									<p:ajax update="fc_fechaInicial,fc_fechaFinal" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.ga.label.ite')}"
+										itemValue="#{1}" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.ga.label.ie')}"
+										itemValue="#{2}" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.ga.label.te')}"
+										itemValue="#{3}" />
+								</p:selectOneMenu>
+							</div>
+							<!-- Fecha Inicial  -->
+							<div class="col-md-3">
+								<f:validateBean disabled="true">
+									<p:outputLabel
+										value="#{sistema.obtenerTexto('gw.ga.label.fi')}:" />
+									<p:calendar id="fc_fechaInicial" navigator="true"
+										value="#{seguimientoEncuestaBean.filtros.tblEvento.fechaInicial}"
+										disabled="#{seguimientoEncuestaBean.tipoDatoFechas == null}"
+										styleClass="calendario"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+										yearRange="c-100:c+100" locale="es"
+										placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										showOn="button" readonlyInput="true">
+										<p:ajax event="dateSelect" process="@this"
+											update="fc_fechaFinal" />
+									</p:calendar>
+								</f:validateBean>
+							</div>
+
+							<!-- Fecha Final -->
+							<div class="col-md-3">
+								<f:validateBean disabled="true">
+									<h:outputLabel
+										value="#{sistema.obtenerTexto('gw.ga.label.ff')}:" />
+									<p:calendar navigator="true"
+										value="#{seguimientoEncuestaBean.filtros.tblEvento.fechaFinal}"
+										disabled="#{seguimientoEncuestaBean.tipoDatoFechas == null}"
+										styleClass="calendario" id="fc_fechaFinal"
+										mindate="#{seguimientoEncuestaBean.filtros.tblEvento.fechaInicial}"
+										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+										yearRange="c-100:c+100" locale="es" readonlyInput="true"
+										placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										showOn="button">
+										<p:ajax event="dateSelect" process="@this" />
+									</p:calendar>
+								</f:validateBean>
+							</div>
+
+						</div>
+					</div>
+				</f:validateBean>
+				<!-- Row 4 -->
+				<div class="form-group">
+					<div class="row">
+						<!-- Busqueda de Eventos de capacitacion -->
+						<div class="col-md-12 text-right">
+							<p:commandButton styleClass="btn btn-default " process="@this"
+								value="Limpiar filtro" ajax="true" update="@form"
+								action="#{seguimientoEncuestaBean.limpiarCampos()}"
+								immediate="true" />
+							<p:commandButton styleClass="btn btn-primary "
+								value="#{sistema.obtenerTexto('gw.encuesta.btn.buscar')}"
+								action="#{seguimientoEncuestaBean.buscarEventosCapacitacion}"
+								ajax="true" update="@form" immediate="true" />
+						</div>
+					</div>
+				</div>
+
+			</p:panel>
+
+			<p:importEnum
+				type="mx.gob.sedesol.gestorweb.commons.utils.EstadoEventoCapEnum"
+				var="ESTADO_EVENTO" allSuffix="ALL_ENUM_VALUES" />
+
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.listadoEncuestas')}">
+				<div class="form-group">
+					<div class="row">
+						<!-- Modalidad -->
+						<div class="col-md-8">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.nivelEvaluacion')}: "
+								styleClass="pull-right agregaHeight" />
+						</div>
+						<div class="col-md-4">
+							<p:selectOneMenu
+								value="#{seguimientoEncuestaBean.filtros.tblEncuesta.encuestaTipo.id}"
+								styleClass="col-xs-12">
+								<p:ajax process="@this" update="dtResultBusqEncuesta"
+									listener="#{seguimientoEncuestaBean.buscarEventosCapacitacion()}" />
+								<f:selectItems
+									value="#{seguimientoEncuestaBean.listaTipoEncuesta}"
+									var="encuestaTipo" itemLabel="#{encuestaTipo.nombre}"
+									itemValue="#{encuestaTipo.id}" />
+							</p:selectOneMenu>
+
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:dataTable id="dtResultBusqEncuesta"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							value="#{seguimientoEncuestaBean.listaEncuestasEventoAsignadas}"
+							reflow="true" var="encuestaDetalle" paginator="true" rows="10"
+							paginatorPosition="bottom"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+							<!-- Nombre de la encuesta -->
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="Nombre encuesta:" />
+								</f:facet>
+								<h:outputText value="#{encuestaDetalle.tblEncuesta.nombre}" />
+							</p:column>
+
+							<!-- Nombre del evento de capacitacion -->
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="Nombre evento:" />
+								</f:facet>
+								<h:outputText value="#{encuestaDetalle.tblEvento.nombreEc}" />
+							</p:column>
+
+							<!-- Contexto -->
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.contexto')}" />
+								</f:facet>
+								<h:outputText
+									value="#{encuestaDetalle.tblEncuesta.encuestaTipo.contexto.nombre}" />
+							</p:column>
+
+							<!-- Nivel de evaluacion -->
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.nivelEvaluacion')}" />
+								</f:facet>
+								<h:outputText
+									value="#{encuestaDetalle.tblEncuesta.encuestaTipo.nombre}" />
+							</p:column>
+
+							<!-- Nombre del programa -->
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="Nombre programa:" />
+								</f:facet>
+								<h:outputText
+									value="#{encuestaDetalle.tblEvento.fichaDescriptivaPrograma.nombreTentativo}" />
+							</p:column>
+
+							<!-- Modalidad del programa -->
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="Modalidad" />
+								</f:facet>
+								<h:outputText
+									value="#{encuestaDetalle.tblEvento.fichaDescriptivaPrograma.catModalidad.nombre}" />
+							</p:column>
+
+
+							<!-- tipo de competencia -->
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.tipoCompetencia')}" />
+								</f:facet>
+								<h:outputText
+									value="#{seguimientoEncuestaBean.obtieneNombreTpoCompetencia(encuestaDetalle.tblEvento.fichaDescriptivaPrograma.tipoCompetencia)}" />
+							</p:column>
+							<!-- Eje de capacitacion -->
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.ejeCapacitacion')}" />
+								</f:facet>
+								<h:outputText
+									value="#{seguimientoEncuestaBean.obtieneNombreEjeCapacit(encuestaDetalle.tblEvento.fichaDescriptivaPrograma.ejeCapacitacion)}" />
+							</p:column>
+
+							<!--Fecha final  -->
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.fechaLimite')}" />
+								</f:facet>
+								<h:outputText
+									value="#{seguimientoEncuestaBean.fecharLimite(encuestaDetalle.tblEvento.fechaFinal,0)}">
+
+								</h:outputText>
+							</p:column>
+
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.pendientes')}" />
+								</f:facet>
+								<h:outputText
+									value="#{seguimientoEncuestaBean.obtenerPendientesPorContestar(encuestaDetalle)}">
+								</h:outputText>
+							</p:column>
+							<!-- Acciones -->
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText
+										value="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.acciones')}" />
+								</f:facet>
+								<!-- boton para navegar al detalle de la encuesta -->
+								<p:commandButton id="visualizar"
+									action="#{seguimientoEncuestaBean.navegaDetalleEncuestadosPendientes(encuestaDetalle)}"
+									ajax="true" process="@this"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+								</p:commandButton>
+								<p:tooltip for="visualizar"
+									value="#{sistema.obtenerTexto('gw.encuesta.texto.visualizar')}"
+									position="top" />
+
+								<p:commandButton id="recordatorio"
+									action="#{seguimientoEncuestaBean.enviarNotificacionesParticipantes(encuestaDetalle)}"
+									ajax="true" process="@this"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_recordar">
+								</p:commandButton>
+								<p:tooltip for="recordatorio"
+									value="#{sistema.obtenerTexto('gw.encuesta.texto.asignar')}"
+									position="top" />
+							</p:column>
+
+						</p:dataTable>
+					</div>
+				</div>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>

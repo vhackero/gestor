@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCap')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCapRegAsis')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCapRegAsis')}</h1>
+		<hr />
+		<p:ajaxStatus onstart="PF('dialogLayout').show()"
+			onsuccess="PF('dialogLayout').hide()" />
+		<p:panel id="flEvento"
+			header="#{sistema.obtenerTexto('gw.ge.texto.datos')}"
+			showCollapseLink="false" collapsible="false">
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-3">
+						<p:outputLabel value="Id evento:" styleClass="bloque" />
+						<h:outputText value="#{registroAsistenciaBean.evento.idEvento}" />
+					</div>
+					<!-- Nombre del evento de capacitacion -->
+					<div class="col-md-3">
+						<p:outputLabel styleClass="bloque"
+							value="Nombre del evento de capacitación:" />
+						<h:outputText id="idNombreEc"
+							value="#{registroAsistenciaBean.evento.nombreEc}" />
+						<p:message for="idNombreEc" />
+					</div>
+					<div class="col-md-3">
+						<p:outputLabel styleClass="bloque"
+							value="#{sistema.obtenerTexto('gw.gestionescolar.label.modalidad')}:" />
+						<h:outputText id="idModalidad"
+							value="#{registroAsistenciaBean.modalidad.descripcion}" />
+					</div>
+					<div class="col-md-3">
+						<p:outputLabel styleClass="bloque"
+							value="Nombre del programa de capacitación:" />
+						<h:outputText id="idNombrePrograma"
+							value="#{registroAsistenciaBean.evento.fichaDescriptivaPrograma.descripcion}" />
+					</div>
+
+
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+
+					<div class="col-md-3">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.ge.texto.tipocomp')}:"
+							styleClass="bloque" />
+						<h:outputText value="#{registroAsistenciaBean.competencia.nombre}" />
+					</div>
+					<div class="col-md-3">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.ge.texto.ejecap')}:"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{registroAsistenciaBean.ejeCapacitacion.nombre}" />
+					</div>
+
+					<!-- Fecha Inicial  -->
+					<div class="col-md-3">
+						<p:outputLabel styleClass="bloque"
+							value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechaInicial')}:" />
+						<h:outputText id="fechaInicial"
+							value="#{registroAsistenciaBean.evento.fechaInicialFormat}" />
+					</div>
+					<!-- Fecha Final -->
+					<div class="col-md-3">
+						<p:outputLabel styleClass="bloque"
+							value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechafinal')}:" />
+						<h:outputText id="fechaFinal"
+							value="#{registroAsistenciaBean.evento.fechaFinalFormat}" />
+					</div>
+				</div>
+			</div>
+
+		</p:panel>
+		<p:panel id="pnlActaAsisencia"
+			header="#{sistema.obtenerTexto('gw.ge.texto.actaasist')}"
+			showCollapseLink="false" collapsible="false">
+
+			<h:form id="frm">
+				<!-- Row 1 -->
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText rendered="#{empty(registroAsistenciaBean.grupos)}"
+							styleClass="textoRojo"
+							value="El evento aún no tiene grupos asignados." />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-3">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.ge.texto.grupo')}:" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel
+								rendered="#{not (registroAsistenciaBean.idGrupo eq 0)}"
+								value="Estatus del acta:" />
+						</div>
+						<div class="col-md-3">
+							<p:outputLabel
+							rendered="#{not (registroAsistenciaBean.idGrupo eq 0) and registroAsistenciaBean.numParticipantes eq 0}"
+								value="Número de alumnos:" />
+						</div>
+					</div>
+					<div class="row">
+						<!-- Evento descripcion -->
+						<div class="col-md-3">
+							<p:selectOneMenu id="grupoSel" styleClass="col-xs-12"
+								value="#{registroAsistenciaBean.grupo.idGrupo}"
+								autoWidth="false" required="true">
+								<p:ajax event="valueChange"
+									listener="#{registroAsistenciaBean.onChangeGrupoAjax}"
+									execute="@this"
+									update="pnlActaAsisencia pnlParticipantes pnlComandos outFacilitador" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{0}" />
+								<f:selectItems value="#{registroAsistenciaBean.grupos}"
+									var="grupo" itemLabel="#{grupo.nombre}"
+									itemValue="#{grupo.idGrupo}" />
+							</p:selectOneMenu>
+							<p:messages id="msgGrupo" for="grupo" />
+						</div>
+						<div class="col-md-3">
+							<h:outputText
+								rendered="#{not (registroAsistenciaBean.grupo.idGrupo eq 0)}"
+								value="#{registroAsistenciaBean.grupo.actaCerrada eq true?'Cerrada': 'Abierta'}"
+								styleClass="#{registroAsistenciaBean.grupo.actaCerrada eq true ? 'textoRojo' : ''}" />
+						</div>
+						<div class="col-md-3">
+
+							<h:outputText
+							rendered="#{not (registroAsistenciaBean.idGrupo eq 0) and registroAsistenciaBean.numParticipantes eq 0 }"
+								value="#{registroAsistenciaBean.numParticipantes eq 0 ? 'No hay alumnos matriculados': registroAsistenciaBean.numParticipantes}" />
+
+						</div>
+					</div>
+				</div>
+				<p:outputPanel
+					rendered="#{not empty registroAsistenciaBean.grupoParticipantes}">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.ge.texto.coordaca')}:"
+									styleClass="bloque" />
+								<h:outputText
+									value="#{registroAsistenciaBean.evento.responsableCoordinadorAcademico.personaResponsabilidad.tblPersona.nombreCompleto}" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.ge.texto.facilitador')}:"
+									styleClass="bloque" />
+								<h:outputText id="outFacilitador"
+									value="#{registroAsistenciaBean.grupo.facilitador.tblPersona.nombreCompleto}" />
+							</div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="row">
+							<div id="divCalendar" class="col-md-3">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.ge.texto.agregardia')}:" />
+								<p:calendar id="diaEvento" styleClass="calendario"
+									disabled="#{registroAsistenciaBean.grupo.actaCerrada eq true or registroAsistenciaBean.grupo.idGrupo eq 0}"
+									showOn="button" readonlyInput="true" navigator="true"
+									value="#{registroAsistenciaBean.diaEvento}"
+									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}">
+									<p:ajax event="dateSelect" locale="es"
+										listener="#{registroAsistenciaBean.agregarDiaEvento}"
+										execute="@this"
+										update="msgDiaEvento pnlActaAsisencia pnlParticipantes" />
+								</p:calendar>
+
+								<p:messages id="msgDiaEvento" for="diaEvento" />
+							</div>
+							<div class="col-md-3">
+								<p:outputLabel styleClass="margenDerecho bloque"
+									value="#{sistema.obtenerTexto('gw.ge.texto.numalum')}:" />
+								<h:outputText value="#{registroAsistenciaBean.numParticipantes}" />
+							</div>
+							<div class="col-md-3">
+								<p:outputLabel styleClass="margenDerecho bloque"
+									value="#{sistema.obtenerTexto('gw.ge.texto.durevt')}:" />
+								<h:outputText value="#{registroAsistenciaBean.duracionEvento}" />
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12">
+							<!-- Alumno-->
+							<h:outputLabel
+								value="#{sistema.obtenerTexto('gw.ge.texto.alumno')}:" />
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12 displayFlex centrarCrossAxis">
+								<p:inputText id="alumnoNombre"
+									disabled="#{registroAsistenciaBean.grupo.idGrupo eq 0}"
+									value="#{registroAsistenciaBean.alumnoNombre}" maxlength="130" />
+								<p:commandButton id="cmdBuscar"
+									disabled="#{registroAsistenciaBean.grupo.idGrupo eq 0}"
+									value="#{sistema.obtenerTexto('gw.ge.texto.buscar')}"
+									action="#{registroAsistenciaBean.buscarAlumno}"
+									update=":pnlParticipantes: msgAlumnoNombre:"
+									styleClass="btn btn-primary" />
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText
+								value="Para obtener todos los alumnos del grupo realice una búsqueda con el campo de de texto vacío." />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<p:messages id="msgAlumnoNombre" for="alumnoNombre" />
+						</div>
+					</div>
+				</p:outputPanel>
+			</h:form>
+		</p:panel>
+
+		<p:panel id="pnlParticipantes"
+			header="#{sistema.obtenerTexto('gw.ge.texto.actaasist')}"
+			showCollapseLink="false" collapsible="false">
+			<p:messages id="msgRegAsistencias" for="regAsistencia" />
+			<div class="form-group">
+				<div class="row">
+					<c:forEach items="#{registroAsistenciaBean.catAsistencia}"
+						var="tipoAsistencia" varStatus="indice">
+						<div class="col-md-2 text-center">
+							<p:outputLabel value="#{tipoAsistencia.nombre}" />
+							<h:outputText value=":"
+								styleClass="margenDerecho margenIzquierdo" />
+							<h:outputText value="#{tipoAsistencia.nombreCorto}" />
+						</div>
+					</c:forEach>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:form id="frmParticipantes">
+							<p:dataTable id="dtParticipantes" widgetVar="tblParticipantes"
+								emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.msjRegistros')}"
+								value="#{registroAsistenciaBean.grupoParticipantes}"
+								var="participante" editable="true" editMode="cell"
+								rendered="#{not empty registroAsistenciaBean.grupoParticipantes}"
+								tableStyleClass="table" scrollable="true" frozenColumns="0">
+								<p:ajax event="cellEdit"
+									listener="#{registroAsistenciaBean.onCellEdit}" update="@this" />
+								<!-- Id del evento de capacitacion -->
+
+								<p:column styleClass="text-center"
+									sortBy="#{participante.secuencia}" filterMatchMode="contains"
+									filterBy="#{participante.secuencia}" filterStyle="display:none">
+									<f:facet name="header">
+										<h:outputText
+											value="#{sistema.obtenerTexto('gw.ge.texto.numero')}" />
+									</f:facet>
+									<h:outputText value="#{participante.secuencia}" />
+								</p:column>
+
+								<p:column sortBy="#{participante.persona.usuario}"
+									filterMatchMode="contains"
+									filterBy="#{participante.persona.usuario}"
+									filterStyle="display:none">
+									<f:facet name="header">
+										<h:outputText value="Usuario" />
+									</f:facet>
+									<h:outputText value="#{participante.persona.usuario}" />
+								</p:column>
+
+								<p:column sortBy="#{participante.persona.nombre}"
+									filterMatchMode="contains"
+									filterBy="#{participante.persona.nombre}"
+									filterStyle="display:none">
+									<f:facet name="header">
+										<h:outputText
+											value="#{sistema.obtenerTexto('gw.ge.texto.nombre')}" />
+									</f:facet>
+									<h:outputText value="#{participante.persona.nombre}" />
+								</p:column>
+								<p:column sortBy="#{participante.persona.apellidoPaterno}"
+									filterMatchMode="contains"
+									filterBy="#{participante.persona.apellidoPaterno}"
+									filterStyle="display:none">
+									<f:facet name="header">
+										<h:outputText
+											value="#{sistema.obtenerTexto('gw.ge.texto.app')}" />
+									</f:facet>
+									<h:outputText value="#{participante.persona.apellidoPaterno}" />
+								</p:column>
+								<p:column sortBy="#{participante.persona.apellidoMaterno}"
+									filterMatchMode="contains"
+									filterBy="#{participante.persona.apellidoMaterno}"
+									filterStyle="display:none">
+									<f:facet name="header">
+										<h:outputText
+											value="#{sistema.obtenerTexto('gw.ge.texto.apm')}" />
+									</f:facet>
+									<h:outputText value="#{participante.persona.apellidoMaterno}" />
+								</p:column>
+								<c:forEach items="#{registroAsistenciaBean.diasEvento}"
+									var="dia" varStatus="indice">
+									<p:column headerText="#{dia.fechaEventoFormat}"
+										styleClass="intercalar">
+										<p:cellEditor>
+											<f:facet name="output">
+												<h:outputText
+													value="#{participante.asistencias[indice.index].tipoAsistencia}" />
+											</f:facet>
+											<f:facet name="input">
+												<p:selectOneMenu styleClass="col-xs-12"
+													disabled="#{registroAsistenciaBean.grupo.actaCerrada eq true}"
+													value="#{participante.asistencias[indice.index].idtipoAsistencia}">
+													<f:selectItem
+														itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+														itemValue="#{0}" />
+													<f:selectItems
+														value="#{registroAsistenciaBean.catAsistencia}"
+														var="tipoAsistencia" itemLabel="#{tipoAsistencia.nombre}"
+														itemValue="#{tipoAsistencia.id}" />
+													<f:attribute name="participante" value="#{participante}" />
+													<f:attribute name="diaEvento" value="#{dia}" />
+												</p:selectOneMenu>
+											</f:facet>
+										</p:cellEditor>
+									</p:column>
+								</c:forEach>
+								<p:column sortBy="#{participante.porcentajeAsistencia}"
+									filterMatchMode="contains"
+									filterBy="#{participante.porcentajeAsistencia}"
+									filterStyle="display:none">
+									<f:facet name="header">
+										<h:outputText
+											value="#{sistema.obtenerTexto('gw.ge.texto.porcentaje')}" />
+									</f:facet>
+									<h:outputText value="#{participante.porcentajeAsistencia}" />
+								</p:column>
+							</p:dataTable>
+						</h:form>
+					</div>
+				</div>
+			</div>
+			<h:form id="frmDescargas">
+				<div class="form-group">
+					<div class="row">
+						<div
+							class="col-md-12 displayFlex centrarCrossAxis alinearDerechaFlex">
+							<p:outputLabel value="Exportar XLS: " styleClass="margenDerecho" />
+							<p:commandButton ajax="false"
+								actionListener="#{registroAsistenciaBean.getReporteExcel}"
+								disabled="#{registroAsistenciaBean.cmdSalvarDisabled}"
+								styleClass="btn btn-icon btn-default icono_sisi ss_adm_desexcel">
+							</p:commandButton>
+							<p:outputLabel rendered="false"
+								value="#{sistema.obtenerTexto('gw.ge.texto.descargar')}"
+								styleClass="pull-right agregaHeight separaLabel" />
+							<p:commandButton ajax="false" rendered="false"
+								actionListener="#{registroAsistenciaBean.getReporte(1)}"
+								disabled="#{registroAsistenciaBean.cmdSalvarDisabled}"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc pull-right ">
+							</p:commandButton>
+						</div>
+					</div>
+				</div>
+			</h:form>
+		</p:panel>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputPanel id="pnlComandos" layout="block">
+						<h:form>
+							<p:commandButton id="cmdSalvar"
+								value="#{sistema.obtenerTexto('gw.ge.texto.guardar')}"
+								process="@this" action="#{registroAsistenciaBean.guardar}"
+								disabled="#{registroAsistenciaBean.cmdSalvarDisabled or (registroAsistenciaBean.grupo.actaCerrada eq true) or empty(registroAsistenciaBean.grupoParticipantes)}"
+								update="pnlParticipantes msgRegAsistencias"
+								styleClass="btn btn-primary pull-right" />
+							<p:commandButton id="cmdRegresar"
+								value="#{sistema.obtenerTexto('gw.ge.texto.regresar')}"
+								process="@this"
+								action="#{menuGestorBean.navegaBusquedaEventosCapacitacion}"
+								update="pnlParticipantes msgRegAsistencias"
+								styleClass="btn btn-default pull-right" />
+						</h:form>
+					</p:outputPanel>
+				</div>
+			</div>
+		</div>
+	</ui:define>
+</ui:composition>

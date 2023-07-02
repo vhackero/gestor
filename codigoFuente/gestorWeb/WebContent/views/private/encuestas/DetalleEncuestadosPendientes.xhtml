@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.encuestas')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.encuestas.seguimiento.titulo')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.encuestas.seguimiento.titulo')}</h1>
+		<hr />
+
+		<p:panel id="panelDatosPrincipales" header="Datos principales"
+			showCollapseLink="false" collapsible="false">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-4">
+						<p:outputLabel value="Nombre de la encuesta:" styleClass="bloque"></p:outputLabel>
+						<h:outputText
+							value="#{detallarEncuestadosPendientesBean.encuesta.nombre}"></h:outputText>
+					</div>
+					<div class="col-md-4">
+						<p:outputLabel value="Nombre del evento de capacitación:"
+							styleClass="bloque"></p:outputLabel>
+						<h:outputText
+							value="#{detallarEncuestadosPendientesBean.evento.nombreEc}"></h:outputText>
+					</div>
+					<div class="col-md-4">
+						<p:outputLabel value="Nombre del programa de capacitación:"
+							styleClass="bloque"></p:outputLabel>
+						<h:outputText
+							value="#{detallarEncuestadosPendientesBean.evento.fichaDescriptivaPrograma.nombreTentativo}"></h:outputText>
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-4">
+						<p:outputLabel value="Modalidad:" styleClass="bloque"></p:outputLabel>
+						<h:outputText
+							value="#{detallarEncuestadosPendientesBean.evento.catModalidadPlanPrograma.descripcion}"></h:outputText>
+					</div>
+
+					<div class="col-md-4">
+						<p:outputLabel value="Tipo de competencia:" styleClass="bloque"></p:outputLabel>
+						<h:outputText
+							value="#{detallarEncuestadosPendientesBean.obtieneNombreTpoCompetencia(detallarEncuestadosPendientesBean.evento.fichaDescriptivaPrograma.tipoCompetencia)}"></h:outputText>
+					</div>
+					<div class="col-md-4">
+						<p:outputLabel value="Eje de capacitacion:" styleClass="bloque"></p:outputLabel>
+						<h:outputText
+							value="#{detallarEncuestadosPendientesBean.obtieneNombreEjeCapacit(detallarEncuestadosPendientesBean.evento.fichaDescriptivaPrograma.ejeCapacitacion)}"></h:outputText>
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-4">
+						<p:outputLabel value="Nivel de evaluación:" styleClass="bloque"></p:outputLabel>
+						<h:outputText
+							value="#{detallarEncuestadosPendientesBean.encuesta.encuestaTipo.nombre}" />
+					</div>
+					<div class="col-md-4">
+						<p:outputLabel value="Contexto:" styleClass="bloque"></p:outputLabel>
+						<h:outputText
+							value="#{detallarEncuestadosPendientesBean.encuesta.encuestaTipo.contexto.nombre}" />
+					</div>
+					<div class="col-md-4">
+						<p:outputLabel value="Dirigido a:" styleClass="bloque"></p:outputLabel>
+						<h:outputText
+							value="#{detallarEncuestadosPendientesBean.encuesta.encuestaObjetivo.nombre}" />
+					</div>
+				</div>
+			</div>
+		</p:panel>
+		<p:panel id="panelEncestadosPendientes" header="Datos principales"
+			showCollapseLink="false" collapsible="false">
+			<p:dataTable id="tablaEncuestadosPendientes"
+				value="#{detallarEncuestadosPendientesBean.listaParticipantesPendientes}"
+				var="participante" paginator="true" rows="10"
+				paginatorPosition="bottom"
+				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+				currentPageReportTemplate="({currentPage} de {totalPages})"
+				rowsPerPageTemplate="5,10,15" tableStyleClass="table"
+				emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+				styleClass="ajustaTable" reflow="true">
+
+				<p:column headerText="Nombre" styleClass="text-center">
+					<h:outputText id="textNombre"
+						value="#{participante.persona.nombre}">
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Primer apellido" styleClass="text-center">
+					<h:outputText id="textApellidoPaterno"
+						value="#{participante.persona.apellidoPaterno}">
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Segundo apellido" styleClass="text-center">
+					<h:outputText id="textApellidoMaterno"
+						value="#{participante.persona.apellidoMaterno}">
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Fecha limite" styleClass="text-center">
+					<h:outputText id="textFechaLimite"
+						value="#{participante.persona.apellidoMaterno}">
+					</h:outputText>
+				</p:column>
+				<p:column headerText="Acciones" styleClass="text-center">
+					<p:commandButton id="recordatorio"
+						action="#{detallarEncuestadosPendientesBean.enviarNotificacion(participante)}"
+						process="@this" ajax="true"
+						styleClass="btn-icon btn btn-default icono_sisi ss_gn_recordar">
+
+					</p:commandButton>
+					<p:tooltip for="recordatorio"
+						value="#{sistema.obtenerTexto('gw.encuesta.texto.asignar')}"
+						position="top" />
+				</p:column>
+			</p:dataTable>
+
+			<p:commandButton value="Cancelar"
+				action="#{detallarEncuestadosPendientesBean.navegaSeguimientoEncuesta}"
+				styleClass="btn btn-default pull-right">
+			</p:commandButton>
+
+		</p:panel>
+	</ui:define>
+</ui:composition>

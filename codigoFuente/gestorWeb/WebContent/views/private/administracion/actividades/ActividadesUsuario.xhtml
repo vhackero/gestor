@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.actividades')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.actividades')}</h1>
+		<hr />
+		<h:form id="frmActividades">
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<sec:authorize access="hasPermission(null, 'ACT_USU_AGR' ) ">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.actividades.etiqueta.nuevaTarea')}:"
+							styleClass="agregaHeight" />
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.actividades.boton.agregar')}"
+							ajax="true" action="#{actividadesBean.nuevaActividad()}"
+							process="@this" oncomplete="PF('modalActividad').show()"
+							update="@form, frmCrearActividad" styleClass="btn btn-primary">
+						</p:commandButton>
+					</sec:authorize>
+				</div>
+			</div>
+			<p:panel header="#{sistema.obtenerTexto('gw.actividades.titulo')}">
+				<p:dataTable id="tblActividades" reflow="true"
+					value="#{actividadesBean.actividades}"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					tableStyleClass="table" var="actividad" widgetVar="tblActividades"
+					paginator="true" paginatorPosition="bottom" rows="10"
+					rowsPerPageTemplate="5,10,15"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+
+					<f:facet name="header">
+						<p:outputPanel styleClass="text-right">
+							<p:outputLabel for="globalFilter"
+								value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}" />
+							<p:inputText id="globalFilter"
+								onkeyup="PF('tblActividades').filter()"
+								placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+						</p:outputPanel>
+					</f:facet>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.actividades.columna.actividad')}"
+						sortBy="#{actividad.actividad}" filterMatchMode="contains"
+						filterBy="#{actividad.actividad}" filterStyle="display:none">
+						<h:outputText value="#{actividad.actividad}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.actividades.columna.fecha.inicio')}">
+						<h:outputText value="#{actividad.fechaInicio}">
+							<f:convertDateTime type="date"
+								timeZone="#{actividadesBean.timeZone}"
+								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+						</h:outputText>
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.actividades.columna.fecha.fin')}">
+						<h:outputText value="#{actividad.fechaFin}">
+							<f:convertDateTime type="date"
+								timeZone="#{actividadesBean.timeZone}"
+								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+						</h:outputText>
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.actividades.columna.estatus')}"
+						sortBy="#{actividad.estatus}" filterMatchMode="contains"
+						filterBy="#{actividad.estatus}" filterStyle="display:none">
+						<h:outputText value="#{actividad.estatus}" />
+					</p:column>
+					<p:column headerText="Tiempo restante">
+						<h:outputText value="Retraso de: " style="color:red" rendered="#{actividadesBean.compararFechaFinFechaActual(actividad.fechaFin) and actividad.estatus.equals('Pendiente')}" /> 
+						<h:outputText id="tiempoRestante"
+							value="#{actividadesBean.obtenerTiempoRestante(actividad.fechaFin)}"
+							rendered="#{actividad.estatus.equals('Pendiente')}" />
+						<p:tooltip for="tiempoRestante"
+							value="Tiempo Restante = Fecha final - Fecha Actual"
+							position="top"></p:tooltip>
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.actividades.columna.acciones')}"
+						styleClass="text-center">
+						<sec:authorize access="hasPermission(null, 'ACT_USU_EDI' ) ">
+							<p:commandButton id="btn-editar"
+								rendered="#{actividad.estatus.equals('Pendiente')}" ajax="true"
+								process="@this"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_activar"
+								oncomplete="PF('mConfirmacion').show();">
+								<f:setPropertyActionListener value="#{actividad}"
+									target="#{actividadesBean.actividad}" />
+							</p:commandButton>
+							<p:tooltip for="btn-editar"
+								value="#{sistema.obtenerTexto('gw.actividades.boton.finalizar')}"
+								position="top" />
+						</sec:authorize>
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+			<p:dialog widgetVar="mConfirmacion" modal="true" resizable="false"
+				draggable="false" closable="false" position="center"
+				styleClass="medidaModal"
+				header="#{sistema.obtenerTexto('gw.actividades.modal.confirmacion.titulo')}">
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.actividades.modal.confirmacion.mensaje')}" />
+						</div>
+					</div>
+				</div>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.actividades.modal.confirmacion.boton.no')}"
+								oncomplete="PF('mConfirmacion').hide();"
+								styleClass="btn btn-default" />
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.actividades.modal.confirmacion.boton.si')}"
+								action="#{actividadesBean.finalizarActividad()}" ajax="true"
+								update="tblActividades" oncomplete="PF('mConfirmacion').hide();"
+								process="@this" styleClass="btn btn-primary" />
+
+
+						</div>
+					</div>
+				</f:facet>
+
+			</p:dialog>
+		</h:form>
+		<p:dialog id="aModal" widgetVar="modalActividad" draggable="false"
+			dynamic="true" position="center" closable="false" resizable="false"
+			header="#{sistema.obtenerTexto('gw.actividades.modal.titulo')}"
+			styleClass="medidaModal" modal="true">
+			<h:form id="frmCrearActividad">
+				<p:outputPanel id="contenido" layout="block">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel for="actividad" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.actividades.modal.etiqueta.actividad')}:" />
+								<p:inputText id="actividad" maxlength="500"
+									placeholder="#{sistema.obtenerTexto('gw.actividades.modal.etiqueta.actividad')}"
+									value="#{actividadesBean.actividad.actividad}"
+									styleClass="form-control" />
+								<p:message for="actividad" />
+							</div>
+
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="fechaInicio" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.actividades.modal.etiqueta.fecha.inicio')}:" />
+								<p:calendar id="fechaInicio" styleClass="bloque calendario"
+									showButtonPanel="false"
+									mindate="#{actividadesBean.obtenerFechaActual()}"
+									showOn="button" readonlyInput="true" pattern="dd/MM/yyyy HH:mm"
+									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									value="#{actividadesBean.actividad.fechaInicio}" locale="es"
+									navigator="true" yearRange="c-0:c+100">
+									<p:ajax process="@this" update="ffinal" event="change"
+										listener="#{actividadesBean.onDateChange}" />
+								</p:calendar>
+								<p:message for="fechaInicio" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel for="ffinal" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.actividades.modal.etiqueta.fecha.fin')}:" />
+								<p:calendar id="ffinal" styleClass="bloque calendario"
+									locale="es" navigator="true" readonlyInput="true"
+									mindate="#{actividadesBean.cadenaFechaMinima}"
+									disabled="#{actividadesBean.actividad.fechaInicio eq null}"
+									value="#{actividadesBean.actividad.fechaFin}" showOn="button"
+									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									yearRange="c-0:c+100" pattern="dd/MM/yyyy HH:mm"
+									showButtonPanel="false">
+									<p:ajax process="@this" event="change"/>
+
+								</p:calendar>
+								<p:message for="ffinal" />
+							</div>
+
+						</div>
+					</div>
+				</p:outputPanel>
+
+
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.actividades.modal.boton.cancelar')}"
+							action="#{actividadesBean.limpiarActividad()}" update="@form frmActividades"
+							oncomplete="PF('modalActividad').hide();"
+							styleClass="btn btn-default" />
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.actividades.modal.boton.guardar')}"
+							ajax="true" update="@form frmActividades"
+							
+							action="#{actividadesBean.guardarActividad()}"
+							styleClass="btn btn-primary" />
+
+					</div>
+				</div>
+			</h:form>
+		</p:dialog>
+
+
+	</ui:define>
+</ui:composition>

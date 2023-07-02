@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+	<tbl_notificaciones id_notificacion="1"
+		titulo="prueba notificacion 1"
+		mensaje="mensaje de la notificacion"
+		id_usuario_envia="1"
+		tipo_notificacion="3"
+		fecha_registro="2014-12-24 11:13:28"
+		usuario_modifico="1"
+		enviado="true" />
+	<tbl_notificaciones id_notificacion="2"
+		titulo="prueba notificacion 2"
+		mensaje="mensaje de la notificacion"
+		id_usuario_envia="1"
+		tipo_notificacion="3"
+		fecha_registro="2014-12-24 11:13:28"
+		usuario_modifico="1"
+		enviado="false" />
+</dataset>

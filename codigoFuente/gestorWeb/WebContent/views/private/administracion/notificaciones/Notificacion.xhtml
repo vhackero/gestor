@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.mensajes.texto.mensajes')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.mensajes.texto.nuevomensaje')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form enctype="multipart/form-data">
+			<h1>#{sistema.obtenerTexto('gw.mensajes.texto.nuevomensaje')}</h1>
+			<hr />
+
+
+			<p:panel header="#{sistema.obtenerTexto('gw.mensaje.editar.titulo')}"
+				styleClass="fondoPrimario">
+
+				<div class="form-group">
+					<div class="row flexCentrarXY">
+						<div class="col-md-1 text-center">
+							<p:outputLabel for="titulo"
+								value="#{sistema.obtenerTexto('gw.mensaje.editar.etiqueta.titulo')}:" />
+						</div>
+						<div class="col-md-8">
+							<p:inputText id="titulo" styleClass="form-control"
+								placeholder="Título del mensaje"
+								value="#{notificacionesBean.notificacion.titulo}" />
+						</div>
+
+						<div class="col-md-3">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.mensaje.editar.boton.enviar')}"
+								action="#{notificacionesBean.enviarNotificacion()}" ajax="true"
+								styleClass="pull-right btn btn-primary" process="@this" />
+						</div>
+
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:inputTextarea id="editor" placeholder="Contenido del mensaje"
+								value="#{notificacionesBean.mensaje.contenido}"
+								styleClass="form-control" rows="10" />
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:fileUpload value="#{notificacionesBean.archivoCargar}"
+								label="#{sistema.obtenerTexto('gw.mensajes.texto.adjuntar')}"
+								mode="advanced" auto="true" sizeLimit="50000000"
+								invalidSizeMessage="#{sistema.obtenerTexto('gw.global.archivo.tamanio.limite')}"
+								invalidFileMessage="#{sistema.obtenerTexto('gw.global.archivo.tipo.permitido')}"
+								validatorMessage="#{sistema.obtenerTexto('gw.global.archivo.tipo.permitido')}"
+								fileUploadListener="#{notificacionesBean.fileUploadListener}"
+								update="txtNombreArchivoAdjunto"
+								allowTypes="/(\.|\/)(csv|jpg|jpeg|gif|zip|rar|xls|doc|xlsx|docx)$/" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText id="txtNombreArchivoAdjunto"
+								value="#{notificacionesBean.archivoCargar.getFileName()}" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12 flex-derecha">
+							<p:outputLabel value="Seleccionar destinatarios:" />
+							<p:commandButton ajax="true"
+								value="#{sistema.obtenerTexto('gw.mensaje.editar.boton.personas')}"
+								action="#{notificacionesBean.iniciarListaPersonas()}"
+								styleClass="pull-right btn btn-primary" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<p:dataTable id="tblDestinatarios" var="persona"
+							value="#{notificacionesBean.notificacion.destinatarios}"
+							rows="10" rowsPerPageTemplate="5,10,15" tableStyleClass="table"
+							paginator="true" paginatorPosition="bottom" reflow="true"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}">
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.mensaje.editar.columna.destinatario')}">
+								<h:outputText value="#{persona.nombreCompleto}" />
+							</p:column>
+
+							<p:column styleClass="text-center"
+								headerText="#{sistema.obtenerTexto('gw.notificaciones.texto.eliminar')}">
+								<p:commandButton ajax="true" update="tblDestinatarios @form" id="btnEliminar"
+									styleClass="btn btn-default btn-icon icono_sisi ss_gn_eliminar"
+									action="#{notificacionesBean.eliminarDestinatario()}">
+									<f:setPropertyActionListener value="#{persona}"
+										target="#{notificacionesBean.destinatarioDTO}" />
+								</p:commandButton>
+								<p:tooltip for="btnEliminar"
+									value="#{sistema.obtenerTexto('gw.mensajes.consulta.boton.eliminar')}"
+									position="top" />
+							</p:column>
+
+						</p:dataTable>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:commandButton ajax="true"
+								value="#{sistema.obtenerTexto('gw.mensaje.editar.boton.regresar')}"
+								onclick="PF('mConfirmacion').show();"
+								styleClass="pull-right btn btn-default" />
+						</div>
+					</div>
+				</div>
+			</p:panel>
+
+			<p:dialog widgetVar="mConfirmacion" modal="true" closable="false"
+				draggable="false" resizable="false" position="center"
+				styleClass="medidaModal"
+				header="#{sistema.obtenerTexto('gw.mensaje.editar.modal.confirmacion.titulo')}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.mensaje.editar.modal.confirmacion.mensaje')}" />
+						</div>
+					</div>
+				</div>
+
+				<f:facet name="footer">
+
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.mensaje.editar.modal.confirmacion.boton.si')}"
+								action="#{notificacionesBean.guardarBorrador()}" ajax="true"
+								styleClass="pull-right btn btn-primary" />
+							<p:commandButton ajax="true"
+								value="#{sistema.obtenerTexto('gw.mensaje.editar.modal.confirmacion.boton.no')}"
+								action="#{menuGestorBean.navegaNotificaciones()}"
+								styleClass="pull-right btn btn-default" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

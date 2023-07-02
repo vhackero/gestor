@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:composite="http://java.sun.com/jsf/composite">
+
+<composite:interface>
+	<composite:attribute name="identificador" />
+	<composite:attribute name="detEstUniDidactica" />
+	<composite:attribute name="nombresUnidades" />
+	<composite:attribute name="catMaterialDidactico" />
+	<composite:attribute name="listMatDidacticoSel" />
+	<composite:attribute name="listTposCompetenciaSel" />
+	<composite:attribute name="catTiposCompetencias" />
+	<composite:attribute name="listenerScript"
+		method-signature="void listener()" />
+	<composite:attribute name="boolColor" />
+	<composite:attribute name="nombreLabel" />
+</composite:interface>
+
+<composite:implementation>
+
+	<p:panel id="tab_#{cc.attrs.identificador}" styleClass="fondoPanel"
+		header="#{cc.attrs.nombresUnidades}" toggleable="true"
+		collapsed="false" style="margin-bottom:30px">
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel styleClass="bloque requerido"
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.tituloUnAp')}:" />
+					<p:inputText value="#{cc.attrs.detEstUniDidactica.tituloUa}"
+						styleClass="form-control" disabled="true">
+						<p:ajax process="@this" />
+					</p:inputText>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel styleClass="bloque requerido"
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.nombreUd')}:" />
+					<!-- Longitud de campo -->
+					<p:inputText maxlength="255"
+						value="#{cc.attrs.detEstUniDidactica.nombreUnidad}"
+						styleClass="form-control">
+						<p:ajax process="@this" />
+					</p:inputText>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel styleClass="bloque requerido" for="objEspe"
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.objEspe')}:" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="objEspe" maxlength="2000"
+						value="#{cc.attrs.detEstUniDidactica.objetivosEspecificos}"
+						styleClass="form-control altoMaximo"
+						placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.objEspecif')}">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-4">
+				<p:outputLabel styleClass="bloque requerido"
+					value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.compEspe')}:" />
+			</div>
+			<div class="col-md-4 col-md-offset-1">
+				<p:outputLabel styleClass="bloque requerido"
+					value=" #{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.cargaHor')}:" />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:selectCheckboxMenu value="#{cc.attrs.listTposCompetenciaSel}"
+						filter="true" label="#{cc.attrs.nombreLabel}"
+						filterMatchMode="startsWith"
+						styleClass="col-xs-12 form-control chkTiposComp #{cc.attrs.boolColor}">
+						<p:ajax process="@this" listener="#{cc.attrs.listenerScript}"
+							event="change" update="@this" />
+						<p:ajax process="@this" listener="#{cc.attrs.listenerScript}"
+							event="toggleSelect" update="@this" />
+						<f:selectItems value="#{cc.attrs.catTiposCompetencias}"
+							var="tposComp" itemLabel="#{tposComp.nombre}"
+							itemValue="#{tposComp.id}" />
+					</p:selectCheckboxMenu>
+				</div>
+				<div class="col-md-1 col-md-offset-1">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.etiqueta.subtemas')}: "
+						for="subtemas" styleClass="agregaHeight" />
+
+				</div>
+				<div class="col-md-2">
+					<!-- Longitud de campo -->
+					<p:spinner id="subtemas"
+						value="#{cc.attrs.detEstUniDidactica.numSubtemas}" min="0"
+						maxlength="2" max="50">
+						<p:ajax process="@this" update="subTemas" />
+						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+					</p:spinner>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group paddingTemasObjetos">
+			<p:outputPanel id="subTemas" layout="block">
+				<div class="row theadTemasObjetos">
+					<div class="col-md-6">
+						<p:outputLabel styleClass="bloque requerido"
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.nomsubtema')}" />
+					</div>
+					<div class="col-md-2 col-md-offset-1">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.horas')}" />
+					</div>
+					<div class="col-md-2 col-md-offset-1">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.minutos')}" />
+					</div>
+				</div>
+
+				<ui:repeat value="#{cc.attrs.detEstUniDidactica.subtemasUdidactica}"
+					var="subtema">
+					<div class="row tbodyTemasObjetos">
+						<div class="col-md-6">
+							<!-- Longitud de campo -->
+							<p:inputText value="#{subtema.nombre}" styleClass="form-control"
+								maxlength="200">
+								<p:ajax process="@this" />
+							</p:inputText>
+						</div>
+						<div class="col-md-2 col-md-offset-1">
+							<!-- Longitud de campo -->
+							<p:spinner value="#{subtema.horas}" min="0" max="100"
+								maxlength="3">
+								<p:ajax process="@this" />
+								<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+							</p:spinner>
+						</div>
+						<div class="col-md-2 col-md-offset-1">
+							<!-- Longitud de campo -->
+							<p:spinner value="#{subtema.minutos}" min="0" max="59"
+								maxlength="2">
+								<p:ajax process="@this" />
+								<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+							</p:spinner>
+						</div>
+					</div>
+				</ui:repeat>
+			</p:outputPanel>
+		</div>
+
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel styleClass="bloque requerido" for="actApren"
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.actAprendizaje')}:" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea styleClass="form-control altoMaximo" id="actApren"
+						value="#{cc.attrs.detEstUniDidactica.actividadesAprendizaje}"
+						maxlength="2000"
+						placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.actAp')}">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel styleClass="bloque requerido" for="mediosRecursos"
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.mediosCom')}:" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea styleClass="form-control altoMaximo"
+						id="mediosRecursos" maxlength="2000"
+						value="#{cc.attrs.detEstUniDidactica.mediosRecursos}"
+						placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.mediosCom')}">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel styleClass="bloque requerido"
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.matDidactico')}:" />
+					<p:selectManyCheckbox value="#{cc.attrs.listMatDidacticoSel}"
+						layout="responsive" columns="3">
+						<p:ajax process="@this" />
+						<f:selectItems value="#{cc.attrs.catMaterialDidactico}"
+							var="matDid" itemLabel="#{matDid.nombre}"
+							itemValue="#{matDid.id}" />
+					</p:selectManyCheckbox>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel styleClass="bloque requerido" for="fuentes"
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.fuentesInfo')}:" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea styleClass="form-control altoMaximo" id="fuentes"
+						value="#{cc.attrs.detEstUniDidactica.fuentesInformacion}"
+						maxlength="2000"
+						placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.fuentesInfo')}">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel styleClass="bloque requerido" for="evaluaciones"
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.evaluacion')}:" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea styleClass="form-control altoMaximo"
+						id="evaluaciones" maxlength="2000"
+						placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.evaluacion')}"
+						value="#{cc.attrs.detEstUniDidactica.evaluacion}">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+				</div>
+			</div>
+		</div>
+	</p:panel>
+
+
+</composite:implementation>
+</html>

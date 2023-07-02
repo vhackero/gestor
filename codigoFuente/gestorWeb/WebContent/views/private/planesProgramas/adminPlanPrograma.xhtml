@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.planesprogramas.etiqueta.menu.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.planesprogramas.plandeestudio.titulo')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form>
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<p:panel header="#{sistema.obtenerTexto('gw.planesprogramas.panel.agregarplan')}" rendered="true">
+				<div class="row">
+					<div class="col-md-4">
+						<p:outputLabel for="nombrePlan" styleClass="bloque" value="#{sistema.obtenerTexto('gw.planesprogramas.texto.nombre')}" />
+						<p:inputText id="nombrePlan" styleClass="form-control"
+							value="#{planProgramaBean.nuevoPlan.nombre}" placeholder="#{sistema.obtenerTexto('gw.planesprogramas.texto.place.nombre')}"
+							 />
+					</div>
+					<div class="col-md-4">
+						<p:message for="nombrePlan" />
+					</div>
+					<div class="col-md-4">
+						<p:commandButton value="#{sistema.obtenerTexto('gw.planesprogramas.btn.agregar')}"
+							action="#{planProgramaBean.agregaPlanGeneral}" ajax="true"
+							process="@form" update="pnlMallaCur" />
+					</div>
+				</div>
+			</p:panel>
+			<p:panel id="pnlMallaCur" header="#{sistema.obtenerTexto('gw.planesprogramas.panel.malla')}"
+				binding="#{planProgramaBean.panelMallaCurr}">
+				<c:forEach items="#{planProgramaBean.lstArbolesPlanes}"
+					var="arbolPlan">
+					<p:tree id="tree_#{arbolPlan.data.id}" value="#{arbolPlan}"
+						var="objCurr" dynamic="true" orientation="horizontal"
+						selectionMode="single">
+						<p:ajax event="select" listener="#{planProgramaBean.onNodeSelect}" />
+						<p:treeNode
+							expandedIcon="#{objCurr.nombreObjCurricular eq 'Programa' ? 'fa fa-file-text-o' : 'ui-icon-folder-open'}"
+							collapsedIcon="ui-icon-folder-collapsed">
+							<h:outputText value="#{objCurr.nombre}" />
+						</p:treeNode>
+					</p:tree>
+
+					<p:contextMenu id="context_#{arbolPlan.data.id}"
+						for="tree_#{arbolPlan.data.id}">
+						<p:menuitem id="add_#{arbolPlan.data.id}" value="#{sistema.obtenerTexto('gw.planesprogramas.btn.agregar')}"
+							action="#{planProgramaBean.validaTipoObjCurricular}"
+							update="@form" ajax="true" />
+						<p:menuitem id="delete_#{arbolPlan.data.id}" value="#{sistema.obtenerTexto('gw.planesprogramas.btn.eliminar')}"
+							action="#{planProgramaBean.eliminaObjCurricular}" update="@form"
+							ajax="true" />
+						<p:menuitem rendered="false" id="show_#{arbolPlan.data.id}"
+							value="#{sistema.obtenerTexto('gw.planesprogramas.menu.verprogramas')}"
+							action="#{planProgramaBean.muestraProgramasDelNodo}"
+							update="@form" ajax="true" />
+						<p:menuitem rendered="false" id="temario_#{arbolPlan.data.id}"
+							value="#{sistema.obtenerTexto('gw.planesprogramas.menu.agregartemas')}"
+							action="#{planProgramaBean.generaEstructuraTematicaProg}"
+							update="@form" ajax="true" />
+					</p:contextMenu>
+				</c:forEach>
+			</p:panel>
+
+
+			<p:panel id="pnlAdd" header="#{sistema.obtenerTexto('gw.planesprogramas.panel.agregarmalla')}"
+				rendered="#{planProgramaBean.muestraPanelAgregar}">
+				<p:outputPanel layout="block"
+					rendered="#{planProgramaBean.muestraComboObjsCurr}">
+					<div class="row">
+						<div class="col-md-4">
+							<p:outputPanel layout="block"
+								rendered="#{!planProgramaBean.objCurrPrograma}">
+								<p:outputLabel for="tpoObjCur" value="Tipo objeto curricular:" />
+								<p:selectOneMenu value="#{planProgramaBean.tipoObjCurrSel.id}"
+									id="tpoObjCur" converter="#{objCurricularConverter}">
+									<p:ajax process="@this" event="change" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItems value="#{planProgramaBean.tiposObjCurr}"
+										var="oc" itemLabel="#{oc.nombre}" itemValue="#{oc.id}" />
+								</p:selectOneMenu>
+							</p:outputPanel>
+						</div>
+
+						<div class="col-md-4"> 
+							<p:outputLabel for="nombremas" value="#{sistema.obtenerTexto('gw.planesprogramas.texto.place.nombre')}:" styleClass="bloque" />
+							<p:inputText id="nombremas" styleClass="form-control" value="#{planProgramaBean.objetoCurrNuevo.nombre}"
+								placeholder="#{sistema.obtenerTexto('gw.planesprogramas.texto.place.nombre')}"/>
+						</div>
+
+						<div class="col-md-4">
+							<p:commandButton value="#{sistema.obtenerTexto('gw.planesprogramas.btn.guardar')}" styleClass="btn btn-primary"
+								action="#{planProgramaBean.guardarNodoPlanPrograma}"
+								update="pnlMallaCur" ajax="true" />
+						</div>
+					</div>
+				</p:outputPanel>
+
+				<p:outputPanel layout="block"
+					rendered="#{planProgramaBean.muestraPnlAddTemario}">
+					<div class="row">
+						<div class="col-md-4">
+							<p:outputLabel for="nombreTema" value="#{sistema.obtenerTexto('gw.planesprogramas.texto.nombretemario')}:" styleClass="bloque" />
+							<p:inputText id="nombreTema" styleClass="form-control"
+								value="#{planProgramaBean.nuevoTemarioXProg.nombreTema}"
+								placeholder="#{sistema.obtenerTexto('gw.planesprogramas.texto.nombretemario')}"
+								 />
+						</div>
+						<div class="col-md-4">
+							<p:message for="nombreTema" />
+						</div>
+						<div class="col-md-4">
+							<p:commandButton value="#{sistema.obtenerTexto('gw.planesprogramas.btn.agregar')}" styleClass="btn btn-primary"
+								action="#{planProgramaBean.agregaTemarioAPrograma}" ajax="true"
+								process="@form" />
+						</div>
+					</div>
+
+				</p:outputPanel>
+
+			</p:panel>
+
+			<p:panel id="estTematica"
+				header="#{sistema.obtenerTexto('gw.planesprogramas.panel.esttemprog')}: #{planProgramaBean.objCurrSelec.data.nombre} "
+				visible="#{planProgramaBean.muestraArbolTemasXProg}">
+
+				<p:inputSwitch value="#{planProgramaBean.orientHorizontalDef}"
+					offLabel="Horizontal" onLabel="Vertical">
+					<p:ajax listener="#{planProgramaBean.onSwitchOrientacion}"
+						update="estTemProg" />
+				</p:inputSwitch>
+
+				<p:tree value="#{planProgramaBean.temarioXProg}" id="estTemProg"
+					var="tema" dynamic="true"
+					orientation="#{planProgramaBean.tipoOrientacionPFTree}"
+					selectionMode="single">
+					<p:ajax event="select" listener="#{planProgramaBean.onTemaSelec}" />
+					<p:treeNode expandedIcon="fa fa-file-text-o"
+						collapsedIcon="ui-icon-folder-collapsed">
+						<h:outputText value="#{tema.nombre}" />
+					</p:treeNode>
+				</p:tree>
+
+				<p:contextMenu for="estTemProg" style="width:200px;">
+					<p:menuitem value="#{sistema.obtenerTexto('gw.planesprogramas.menu.agregar')}"
+						action="#{planProgramaBean.muestraPnlSubTemas}" update="@form"
+						ajax="true" />
+					<p:menuitem value="#{sistema.obtenerTexto('gw.planesprogramas.menu.agregaractividad')}"
+						action="#{planProgramaBean.navegaActividadRecursoMoodle}"
+						update="@form" ajax="true" />
+					<p:menuitem value="#{sistema.obtenerTexto('gw.planesprogramas.menu.eliminar')}"
+						action="#{planProgramaBean.eliminaEstTematica}" update="@form"
+						ajax="true" />
+				</p:contextMenu>
+			</p:panel>
+
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.planesprogramas.panel.agregartemas')} #{planProgramaBean.objTemarioProgSel.data.nombre} "
+				rendered="#{planProgramaBean.muestraPnlAgregaTemas}">
+				<div class="row">
+					<div class="col-md-4">
+						<p:outputLabel for="nombreSubTema" value="#{sistema.obtenerTexto('gw.planesprogramas.texto.nombretema')}:" styleClass="bloque" />
+						<p:inputText id="nombreSubTema" styleClass="form-control"
+							value="#{planProgramaBean.subTema.nombreTema}"
+							placeholder="#{sistema.obtenerTexto('gw.planesprogramas.texto.nombretema')}"
+							requiredMessage="Es requerido" />
+					</div>
+					<div class="col-md-4">
+						<p:message for="nombreSubTema" />
+					</div>
+					<div class="col-md-4">
+						<p:commandButton value="#{sistema.obtenerTexto('gw.planesprogramas.btn.agregar')}" styleClass="btn btn-primary"
+							action="#{planProgramaBean.agregaSubTemasATemario}" ajax="true" />
+					</div>
+				</div>
+			</p:panel>
+
+
+			<p:dataList rendered="#{planProgramaBean.muestraProgsXNodo}"
+				value="#{planProgramaBean.programasPorNodoSel}" var="prog"
+				type="ordered" emptyMessage="Sin Programas que mostrar.">
+				<f:facet name="header">
+			            Programas de #{planProgramaBean.objCurrSelec.data.nombre}
+			        </f:facet>
+				<h:outputText value="#{prog.data.nombre}" />
+			</p:dataList>
+
+
+		</h:form>
+	</ui:define>
+</ui:composition>

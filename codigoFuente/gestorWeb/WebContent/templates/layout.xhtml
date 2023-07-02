@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui" data-ng-app="sisiGestorWeb">
+
+<h:head>
+	<f:facet name="first">
+		<meta http-equiv="X-UA-Compatible" content="IE=8, IE=edge,chrome=1" />
+		<meta http-equiv="Content-Type"
+			content="text/html; charset=UTF-8" />
+	</f:facet>
+
+	<title><h:outputText
+			value="#{sistema.obtenerTexto('gw.global.titulo')}" /></title>
+	<link rel="shortcut icon" type="image/x-icon"
+		href="/recursos/Privado/#{sistema.obtenerTemaPrivado()}/img/favicon.ico" />
+
+	<h:outputStylesheet library="DevExtreme" name="dx.common.css" />
+	<h:outputStylesheet library="DevExtreme" name="dx.light.css" />
+	<h:outputStylesheet library="bootstrap" name="css/bootstrap.min.css" />
+
+	<link rel="stylesheet" type="text/css"
+		href="/recursos/Privado/#{sistema.obtenerTemaPrivado()}/css/sb-admin-2.css" />
+
+	<ui:insert name="head"></ui:insert>
+
+</h:head>
+<h:body>
+	<div id="wrapper">
+		<ui:include src="/templates/private/header.xhtml"></ui:include>
+
+		<div id="page-wrapper">
+			<ul class="breadcrumb">
+				<li><a href="#{request.contextPath}/tablero"><i
+						class="fa fa-home fa-fw"></i></a></li>
+				<ui:insert name="breadcrumb" />
+			</ul>
+			<ui:insert name="content" />
+		</div>
+		<ui:include src="/templates/private/footer.xhtml" />
+
+	</div>
+
+
+	<p:growl id="growlLayout" autoUpdate="true" 
+		showDetail="false" globalOnly="true"  />
+
+	<p:dialog modal="true" appendTo="@(body)" widgetVar="dialogLayout"
+		header="Cargando" draggable="false" closable="false" resizable="false"
+		style="text-align: center;">
+		<p:graphicImage library="images" name="ajax-loader.gif" />
+	</p:dialog>
+
+	<h:outputScript library="metismenu" name="metisMenu.min.js" />
+	<h:outputScript library="bootstrap" name="js/bootstrap.js" />
+	<h:outputScript library="DevExtreme" name="dx.all.js" />
+
+	<script
+		src="/recursos/Privado/#{sistema.obtenerTemaPrivado()}/js/script.js"></script>
+	<h:outputScript library="js" name="analisisDatos.js" />
+	<h:outputScript library="js" name="reporteUsuarios.js" />
+	<h:outputScript library="js" name="reporteEventos.js" />
+
+	<h:outputScript library="js" name="calendar_es.js" />
+
+
+
+</h:body>
+
+
+
+</html>

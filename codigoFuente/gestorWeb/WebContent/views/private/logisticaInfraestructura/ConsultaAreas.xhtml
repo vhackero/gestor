@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.logistica.etiqueta.menu.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.menu.titulo')}</li>
+	</ui:define>
+
+
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.menu.titulo')}</h1>
+		<hr />
+		<h:form id="formBusConf">
+
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+
+			<div class="row">
+				<div class="col-md-6 col-md-offset-6">
+					<p:commandButton styleClass="btn btn-primary pull-right"
+						value="#{sistema.obtenerTexto('gw.logistica.btn.crear')}"
+						action="#{areasBean.crearConfiguracionArea}" ajax="false"
+						immediate="true" process="@this" />
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.logistica.texto.nuevaconfig')}:"
+						styleClass="pull-right agregaHeight" />
+				</div>
+			</div>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.titulo.seleccionar')}"
+				id="pnlTblConsultaAreas">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-3">
+							<p:outputLabel styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.dependencia')}:" />
+						</div>
+
+						<div class="col-md-offset-3 col-md-6">
+							<p:outputLabel for="selUbicacion" styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.ubicacion')}:" />
+						</div>
+					</div>
+					<div class="row">
+
+						<div class="col-md-3">
+
+							<p:inputText readonly="true" id="orgGubNombre"
+								styleClass="orgGubOpacity form-control"
+								value="#{areasBean.criteriosBusq.orgGubNombre}">
+							</p:inputText>
+							<p:message for="treeTbl" />
+						</div>
+
+						<div class="col-md-3">
+
+							<p:commandButton id="selDependencia"
+								styleClass="btn btn-primary quitaMargen"
+								value="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								type="button" />
+							<p:overlayPanel for="selDependencia" hideEffect="fade"
+								widgetVar="wdgOvrDependencia" showCloseIcon="true">
+
+								<p:treeTable id="treeTbl" scrollable="true" scrollWidth="600"
+									styleClass="dependencia"
+									value="#{areasBean.arbolOrgGubernamental}" var="dependencia"
+									selectionMode="single"
+									selection="#{areasBean.nodoOrgGubernamentalSel}">
+									<p:ajax event="select" update="@form" process="@this"
+										listener="#{areasBean.onNodeSelectDependencia}" />
+									<f:facet name="header">
+								           #{sistema.obtenerTexto('gw.logistica.texto.estorg')}
+								        </f:facet>
+									<p:column id="ojo"
+										headerText="#{sistema.obtenerTexto('gw.logistica.texto.orggub')}">
+										<h:outputText value="#{dependencia.nombre}" />
+									</p:column>
+								</p:treeTable>
+							</p:overlayPanel>
+
+						</div>
+
+						<div class="col-md-6">
+							<p:selectOneMenu value="#{areasBean.criteriosBusq.idUbicacion}"
+								valueChangeListener="#{areasBean.onChangeBusqUbicacion}"
+								disabled="#{areasBean.nodoOrgGubernamentalSel eq null}"
+								id="selUbicacion" styleClass="col-xs-12">
+								<f:selectItem itemValue="#{0}"
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+								<f:selectItems value="#{areasBean.catUbicacionTerr}" var="ubi"
+									itemLabel="#{ubi.nombre}" itemValue="#{ubi.id}" />
+								<p:ajax update="cmbSede" process="@this" />
+							</p:selectOneMenu>
+							<p:message for="selUbicacion" id="msgSelUbicacion" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6">
+							<p:outputLabel for="cmbSede" styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.sede')}:" />
+							<p:selectOneMenu id="cmbSede" styleClass="col-xs-12"
+								value="#{areasBean.criteriosBusq.idSede}"
+								disabled="#{areasBean.criteriosBusq.idUbicacion eq 0}"
+								valueChangeListener="#{areasBean.onChangeSedeBusqueda}">
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{0}" />
+								<f:selectItems value="#{areasBean.catSedesInfra}" var="sede"
+									itemLabel="#{sede.nombre}" itemValue="#{sede.idSede}" />
+								<p:ajax update="cmbArea" />
+							</p:selectOneMenu>
+							<p:message for="cmbSede" />
+						</div>
+						<div class="col-md-6" style="display: none">
+							<p:outputLabel for="cmbArea" styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.area')}" />
+							<p:selectOneMenu value="#{areasBean.criteriosBusq.idAreaSede}"
+								id="cmbArea" styleClass="col-xs-12">
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									noSelectionOption="true" />
+								<f:selectItems value="#{areasBean.areasXSede}" var="areaSede"
+									itemLabel="#{areaSede.catArea.nombre}"
+									itemValue="#{areaSede.idAreaSede}" />
+								<p:ajax process="@this" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6">
+							<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.logistica.texto.dobligatorios')}" />
+						</div>
+						<div class="col-md-6">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.logistica.btn.buscar')}"
+								action="#{areasBean.buscarAreasConfiguradas}" ajax="true"
+								styleClass="btn btn-primary pull-right" update="@form, tblAreas" />
+							<p:commandButton
+								styleClass="btn btn-default quitaMargen pull-right"
+								value="#{sistema.obtenerTexto('gw.logistica.btn.limpiar')}"
+								action="#{areasBean.limpiarPantalla}" ajax="true"
+								immediate="true" process="@this" update="formBusConf" />
+
+						</div>
+					</div>
+				</div>
+			</p:panel>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.titulo.ultimosConfig')}"
+				id="pnlResBusq">
+				<div class="row">
+					<div class="col-md-12">
+						<!-- tabla areass -->
+						<p:dataTable id="tblAreas" value="#{areasBean.areasConfigBusq}"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							var="area" paginator="true" rows="10" paginatorPosition="bottom"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.dependencia')}">
+								<h:outputText
+									value="#{area.catAreasSede.catSede.organismoGubernamental.nombre}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.ubicacion')}">
+								<h:outputText
+									value="#{area.catAreasSede.catSede.catUbicacionTerritorial.nombre}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.sede')}">
+								<h:outputText value="#{area.catAreasSede.catSede.nombre}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.area')}">
+								<h:outputText value="#{area.catAreasSede.catArea.nombre}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.fechaModif')}">
+								<h:outputText value="#{area.fechaActualizacion}">
+									<f:convertDateTime pattern="dd/MM/yyy" />
+								</h:outputText>
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.acciones')}"
+								styleClass="text-center">
+								<p:commandButton immediate="true" id="configurar"
+									action="#{areasBean.navegaConfiguracionArea}"
+									styleClass="btn btn-default btn-icon icono_sisi ss_gn_mod"
+									update="tblAreas" ajax="true">
+									<f:setPropertyActionListener value="#{area}"
+										target="#{areasBean.areaSeleccionada}" />
+								</p:commandButton>
+								<p:tooltip for="configurar" position="top"
+									value="#{sistema.obtenerTexto('gw.logisticainfra.tooltip.configurar')}" />
+								<p:commandButton immediate="true" id="ver"
+									action="#{areasBean.navegaVisualizacionArea}"
+									styleClass="btn btn-default btn-icon icono_sisi ss_gn_vis"
+									update="tblAreas" ajax="true">
+									<f:setPropertyActionListener value="#{area}"
+										target="#{areasBean.areaSeleccionada}" />
+								</p:commandButton>
+								<p:tooltip for="ver" position="top"
+									value="#{sistema.obtenerTexto('gw.logisticainfra.tooltip.ver')}" />
+							</p:column>
+						</p:dataTable>
+					</div>
+				</div>
+			</p:panel>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

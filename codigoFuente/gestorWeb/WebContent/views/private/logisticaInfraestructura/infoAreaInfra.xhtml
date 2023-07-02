@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<div class="form-group">
+		<div class="row">
+			<div class="col-md-4">
+				<p:outputLabel styleClass="bloque"
+					value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.dependencia')}" />
+				<h:outputText
+					value="#{areasBean.areaSeleccionada.catAreasSede.catSede.organismoGubernamental.nombre}" />
+			</div>
+			<div class="col-md-4">
+				<p:outputLabel styleClass="bloque"
+					value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.ubicacion')}" />
+				<h:outputText
+					value="#{areasBean.areaSeleccionada.catAreasSede.catSede.catUbicacionTerritorial.nombre}" />
+			</div>
+			<div class="col-md-4">
+				<p:outputLabel styleClass="bloque"
+					value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.sede')}" />
+				<h:outputText
+					value="#{areasBean.areaSeleccionada.catAreasSede.catSede.nombre}" />
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-4">
+			<p:outputLabel styleClass="bloque"
+				value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.area')}" />
+			<h:outputText
+				value="#{areasBean.areaSeleccionada.catAreasSede.catArea.nombre}" />
+		</div>
+		<div class="col-md-4">
+			<p:outputLabel styleClass="bloque" value="Direccion" />
+			<h:outputText
+				value="#{areasBean.areaSeleccionada.catAreasSede.catSede.direccion} #{areasBean.areaSeleccionada.catAreasSede.catSede.colonia} " />
+		</div>
+
+	</div>
+</ui:composition>
+

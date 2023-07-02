@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.textosDeSistema')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<div class="container-fluid">
+			<h:form id="frmArchivoTema" enctype="multipart/form-data">
+				<p:panel
+					header="#{sistema.obtenerTexto('gw.temas.archivo.titulo.panel.superior')}"
+					>
+
+					<div class="row">
+						<div class="col-md-1 text-right">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.temas.archivo.etiqueta.archivo')}:" />
+						</div>
+						<div class="col-md-3">
+							<h:outputText value="#{temaBean.archivo.nombre}" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<p:graphicImage value="#{temaBean.imagen}" />
+						</div>
+					</div>
+
+
+
+				</p:panel>
+				<p:panel
+					header="#{sistema.obtenerTexto('gw.temas.archivo.titulo.panel.inferior')}"
+					>
+					<p:fileUpload value="#{temaBean.archivoCargar}" label="Seleccionar"
+						mode="advanced" skinSimple="true" auto="true"
+						fileUploadListener="#{temaBean.fileUploadListener}"
+						update="imgNueva" />
+					<p:graphicImage id="imgNueva" value="#{temaBean.imagenNueva}" />
+				</p:panel>
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.temas.archivo.boton.guardar')}"
+							action="#{temaBean.guardarArchivo()}"
+							styleClass="btn btn-primary pull-right" />
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.temas.archivo.boton.cancelar')}"
+							immediate="true" action="#{temaBean.cancelarEditarArchivo()}"
+							styleClass="btn btn-default pull-right"></p:commandButton>
+					</div>
+				</div>
+
+			</h:form>
+		</div>
+	</ui:define>
+</ui:composition>

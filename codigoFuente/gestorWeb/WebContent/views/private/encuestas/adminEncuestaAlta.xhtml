@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.encuestas')}</li>
+		<li>#{sistema.obtenerTexto('gw.encuestas.consulta.titulo')}</li>
+		<li class="active"><p:outputLabel
+				value="#{sistema.obtenerTexto('gw.encuestas.consulta.etiqueta.alta')}"
+				rendered="#{registraEncuestaBean.renderAlta}" /> <p:outputLabel
+				value="#{sistema.obtenerTexto('gw.encuestas.consulta.etiqueta.modificar')}"
+				rendered="#{registraEncuestaBean.renderEditar}" /></li>
+
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="formf">
+
+			<f:validateBean disabled="false">
+
+				<div class="row">
+					<div class="col-md-12 col-xs-12">
+						<h1>
+
+							<p:outputLabel styleClass="h1"
+								value="#{sistema.obtenerTexto('gw.encuestas.consulta.etiqueta.alta')}"
+								rendered="#{registraEncuestaBean.renderAlta}" />
+
+							<p:outputLabel styleClass="h1"
+								value="#{sistema.obtenerTexto('gw.encuestas.consulta.etiqueta.modificar')}"
+								rendered="#{registraEncuestaBean.renderEditar}" />
+
+							<p:outputLabel styleClass="h1"
+								value="#{sistema.obtenerTexto('gw.encuestas.consulta.etiqueta.duplicar')}"
+								rendered="#{registraEncuestaBean.renderDuplicar}" />
+						</h1>
+						<hr />
+					</div>
+				</div>
+
+				<div class="row">
+
+					<div class="col-md-12 col-xs-12">
+
+						<p:outputLabel rendered="#{registraEncuestaBean.renderEditar}"
+							value="#{registraEncuestaBean.nombreModifico}"
+							styleClass="pull-right margenDerecho" />
+
+						<h:outputText rendered="#{registraEncuestaBean.renderEditar}"
+							value="#{sistema.obtenerTexto('gw.encuestas.etiqueta.usuario.modifico')}:"
+							styleClass="pull-right margenDerechoMenor" />
+
+						<p:outputLabel rendered="#{registraEncuestaBean.renderEditar}"
+							value="#{registraEncuestaBean.encuesta.fechaActualizacion}"
+							styleClass="pull-right margenDerecho">
+							<f:convertDateTime type="date"
+								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}" />
+						</p:outputLabel>
+
+						<h:outputText rendered="#{registraEncuestaBean.renderEditar}"
+							value="#{sistema.obtenerTexto('gw.encuestas.etiqueta.fecha.modificacion')}: "
+							styleClass="pull-right margenDerechoMenor" />
+
+					</div>
+				</div>
+
+				<p:panel id="datos_principales"
+					header="#{sistema.obtenerTexto('gw.encuestas.etiqueta.datos.principales')}">
+
+					<div class="form-group">
+						<div class="row">
+
+							<div class="col-md-6 col-xs-12">
+								<p:outputLabel for="id_nombre" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.encuestas.alta.placeholder.etiqueta.nombre')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="id_nombre" maxlength="155"
+									placeholder="#{sistema.obtenerTexto('gw.encuesta.consulta.filtro.placeholder.nombreM')}"
+									value="#{registraEncuestaBean.encuesta.nombre}" ajax="true"
+									styleClass="form-control">
+									<p:ajax process="@this" />
+								</p:inputText>
+								<p:message for="id_nombre" />
+
+							</div>
+						</div>
+
+					</div>
+
+					<div class="form-group">
+
+						<div class="row">
+							<div class="col-md-4 col-xs-12">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.encuesta.texto.contexto')}: "
+									styleClass="requerido" />
+								<p:selectOneMenu id="id_contexto_encuesta"
+									value="#{registraEncuestaBean.encuesta.encuestaTipo.contexto.id}"
+									styleClass="col-xs-12" update="tipoEncuesta">
+
+									<f:ajax event="change" process="@this"
+										listener="#{registraEncuestaBean.cargarCatTipo}"
+										execute="id_contexto_encuesta" render="id_tipo_encuesta" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="" />
+									<f:selectItems value="#{registraEncuestaBean.lstContexto}"
+										var="contexto" itemValue="#{contexto.id}"
+										itemLabel="#{contexto.nombre}" />
+								</p:selectOneMenu>
+								<p:message for="id_contexto_encuesta" />
+							</div>
+
+							<div class="col-md-4 col-xs-12">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.encuestas.alta.placeholder.etiqueta.nivel.evaluacion')}"
+									styleClass="requerido" />
+
+								<p:selectOneMenu
+									label="#{sistema.obtenerTexto('gw.encuestas.alta.placeholder.etiqueta.nivel.evaluacion')}"
+									id="id_tipo_encuesta"
+									value="#{registraEncuestaBean.encuesta.encuestaTipo.id}"
+									styleClass="col-xs-12">
+									<p:ajax process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="" />
+
+									<f:selectItems value="#{registraEncuestaBean.lstCatTipo}"
+										var="tipo" itemValue="#{tipo.id}" itemLabel="#{tipo.nombre}" />
+								</p:selectOneMenu>
+								<p:message for="id_tipo_encuesta" />
+							</div>
+
+							<div class="col-md-4 col-xs-12">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.encuesta.texto.dirigidoa')}: "
+									styleClass="requerido" />
+								<p:selectOneMenu id="id_objetivo_encuesta"
+									value="#{registraEncuestaBean.encuesta.encuestaObjetivo.id}"
+									styleClass="col-xs-12" onchange="correccionSelectores()">
+									<p:ajax process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="" />
+
+									<f:selectItems value="#{registraEncuestaBean.lstObjetivo}"
+										var="objetivo" itemValue="#{objetivo.id}"
+										itemLabel="#{objetivo.nombre}" />
+								</p:selectOneMenu>
+								<p:message for="id_objetivo_encuesta" />
+							</div>
+						</div>
+					</div>
+					<!-- 					end row -->
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12 col-xs-12">
+								<p:outputLabel for="id_instrucciones"
+									value="#{sistema.obtenerTexto('gw.encuestas.alta.placeholder.etiqueta.instrucciones')}"
+									styleClass="requerido" />
+								<!-- Longitud de campo -->
+								<p:inputText id="id_instrucciones" maxlength="500"
+									placeholder="#{sistema.obtenerTexto('gw.encuestas.alta.placeholder.etiqueta.instrucciones')}"
+									styleClass="form-control"
+									value="#{registraEncuestaBean.encuesta.instrucciones}">
+									<p:ajax process="@this" />
+								</p:inputText>
+								<p:message for="id_instrucciones" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12 col-xs-12">
+								<p:outputLabel for="id_observaciones"
+									value="#{sistema.obtenerTexto('gw.encuestas.alta.placeholder.etiqueta.observaciones')} " />
+								<p:inputText id="id_observaciones" styleClass="form-control"
+									maxlength="500"
+									placeholder="#{sistema.obtenerTexto('gw.encuestas.alta.placeholder.etiqueta.observaciones')}"
+									value="#{registraEncuestaBean.encuesta.observaciones}">
+									<p:ajax process="@this" />
+								</p:inputText>
+								<p:message for="id_observaciones" />
+							</div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12 col-xs-12 notasYDatosObligatorios">
+								<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+								<p:outputLabel
+									value=" #{sistema.obtenerTexto('gw.encuestas.etiqueta.obligatorios')}" />
+							</div>
+						</div>
+					</div>
+				</p:panel>
+
+				<!-- 			Fin Agregar encuesta -->
+
+				<p:panel header="Preguntas">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+								<p:outputLabel for="idPregunta"
+									value="#{sistema.obtenerTexto('gw.encuestas.etiqueta.agregarPregunta')}:" />
+
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-md-10 col-xs-12">
+								<!-- Longitud de campo -->
+								<p:inputText
+									label="#{sistema.obtenerTexto('gw.encuestas.alta.placeholder.etiqueta.pregunta')}"
+									id="idPregunta" maxlength="155"
+									placeholder="#{sistema.obtenerTexto('gw.encuestas.alta.preguntas.placeholder.nombre')}"
+									value="#{registraEncuestaBean.nuevaPregunta.nombre}"
+									styleClass="form-control" />
+							</div>
+							<div class="col-md-2 col-xs-12">
+								<p:commandButton id="btnPregunta"
+									value="#{sistema.obtenerTexto('gw.encuestas.alta.preguntas.boton.agregar')}"
+									process="@this, idPregunta, lstPreguntas"
+									update="@this, lstPreguntas, idPregunta" ajax="true"
+									styleClass="btn btn-primary pull-right"
+									actionListener="#{registraEncuestaBean.agregarPregunta}" />
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12 col-xs-12">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.encuestas.etiqueta.tituloNota')}:" />
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.encuestas.etiqueta.nota')}" />
+						</div>
+					</div>
+
+				</p:panel>
+
+				<!-- 	Fin Agregar Pregunta -->
+
+				<p:importEnum
+					type="mx.gob.sedesol.gestorweb.commons.utils.EstatusEncuestasEnum"
+					var="ESTATUS_ENCUESTA" allSuffix="ALL_ENUM_VALUES" />
+
+				<p:panel id="lstPreguntas"
+					header="#{sistema.obtenerTexto('gw.encuesta.texto.encuesta')}">
+					<div class="row">
+						<div class="col-md-12 notasYDatosObligatorios">
+							<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.encuestas.etiqueta.minMax')}" />
+						</div>
+					</div>
+					<div class="row">
+						<p:dataTable id="dataTablePreguntas" tableStyleClass="table"
+							styleClass="ajustaTable"
+							value="#{registraEncuestaBean.lstPreguntasEncuesta}"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							var="pregunta" paginator="true" paginatorPosition="bottom"
+							widgetVar="tblPreguntasEncuesta"
+							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							rowsPerPageTemplate="5,10,15" rows="10" editable="true"
+							type="ordered">
+
+							<p:ajax event="rowEdit"
+								listener="#{registraEncuestaBean.onRowEditar}" />
+							<p:ajax event="rowEditCancel"
+								listener="#{registraEncuestaBean.onRowCancelar}" />
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.encuesta.texto.numero')}"
+								style="width:132px;" sortBy="#{pregunta.index}"
+								filterMatchMode="contains" filterBy="#{pregunta.index}"
+								filterStyle="display:none">
+								<h:outputText value="#{pregunta.index}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.encuesta.texto.pregunta')}"
+								sortBy="#{pregunta.nombre}" filterMatchMode="contains"
+								filterBy="#{pregunta.nombre}" filterStyle="display:none">
+								<p:cellEditor>
+									<f:facet name="output">
+										<h:outputText value="#{pregunta.nombre}" />
+									</f:facet>
+									<f:facet name="input">
+										<p:inputText id="modelInput" value="#{pregunta.nombre}" />
+									</f:facet>
+								</p:cellEditor>
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.encuesta.texto.acciones')}"
+								style="width:150px" styleClass="text-center"
+								id="columnaAcciones">
+								<p:rowEditor id="editar" styleClass="flexible" />
+								<p:commandButton ajax="true" id="eliminar"
+									action="#{registraEncuestaBean.eliminarPregunta}"
+									process="@this, @form" update="formf"
+									styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar"
+									onsuccess="$('.modalPseudoClass').modal();return false;">
+									<f:setPropertyActionListener value="#{pregunta}"
+										target="#{registraEncuestaBean.preguntaSel}" />
+								</p:commandButton>
+								<p:tooltip for="eliminar" position="top"
+									value="#{sistema.obtenerTexto('gw.encuesta.texto.eliminar')}" />
+
+							</p:column>
+						</p:dataTable>
+					</div>
+					<!-- 					Fin listado de preguntas -->
+
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:dataTable value="#{registraEncuestaBean.listaComentarios}"
+									styleClass="ajustaTable" reflow="true"
+									emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+									var="comentarioH" paginator="true" rows="10"
+									sortOrder="descending" paginatorPosition="bottom"
+									paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+									currentPageReportTemplate="({currentPage} de {totalPages})"
+									rowsPerPageTemplate="5,10,15" tableStyleClass="table"
+									rowIndexVar="contadorRevision">
+									<p:column>
+										<f:facet name="header">
+						        
+						        #{sistema.obtenerTexto('gw.encuesta.texto.historial')}
+						    </f:facet>
+						    
+						    #{sistema.obtenerTexto('gw.encuesta.texto.revision')} #{contadorRevision+1}: 
+								<h:outputText id="comentario" value="#{comentarioH}"></h:outputText>
+									</p:column>
+
+								</p:dataTable>
+							</div>
+
+						</div>
+					</div>
+					<div class="row">
+
+						<div class="col-md-12">
+
+							<!-- 	Guarda como revision -->
+							<p:commandButton id="btn_finalizar"
+								value="#{sistema.obtenerTexto('gw.encuestas.alta.etiqueta.finalizar')}"
+								ajax="true" process="@this,@form" update="dlg_mensaje_sistema"
+								onclick="return validarCreacionEncuesta();"
+								validateClient="true" styleClass="btn btn-primary pull-right"
+								action="#{registraEncuestaBean.finalizaMensaje}"
+								oncomplete="PF('dlg').show();">
+
+							</p:commandButton>
+
+							<!-- Guarda como borrador -->
+							<p:commandButton id="btn_borrador"
+								value="#{sistema.obtenerTexto('gw.encuestas.alta.etiqueta.borrador')}"
+								ajax="true" process="@this"
+								onclick="return validarBorradorEncuesta();"
+								styleClass="btn btn-default pull-right"
+								action="#{registraEncuestaBean.borradorMensaje}"
+								update="dlg_mensaje_sistema"
+								oncomplete="PF('dlg').show(); return false;" />
+
+							<!-- cancela operacion -->
+							<p:commandButton id="btn_cancelar"
+								value="#{sistema.obtenerTexto('gw.encuestas.boton.cancelar')}"
+								ajax="true" process="@this" update="@form"
+								action="#{registraEncuestaBean.navegaConsultaEncuesta}"
+								styleClass="pull-right btn btn-default" />
+						</div>
+					</div>
+					<!-- 							Boton guardar encuesta -->
+				</p:panel>
+
+				<!--		Ventana modal -->
+				<p:dialog id="dlg_mensaje_sistema"
+					header="#{sistema.obtenerTexto('gw.encuestas.alta.header.etiqueta.mensaje.dlg')}"
+					widgetVar="dlg" resizable="false" position="center"
+					responsive="true" closable="false" appendTo="@(body)"
+					draggable="false" modal="true" styleClass="medidaModal">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.encuestas.alta.modal.mensaje.borrador')}"
+								rendered="#{registraEncuestaBean.encuestaMSG == 'borrador'}" />
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.encuestas.alta.modal.mensaje.finalizar')}"
+								rendered="#{registraEncuestaBean.encuestaMSG == 'finalizar'}" />
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.encuestas.alta.modal.mensaje.validacion')}"
+								rendered="#{registraEncuestaBean.encuestaMSG == 'validarPreguntas'}" />
+						</div>
+					</div>
+
+					<f:facet name="footer">
+						<div class="row">
+							<div class="col-md-12">
+								<p:commandButton
+									value="#{sistema.obtenerTexto('gw.encuestas.alta.modal.etiqueta.btn.aceptar')}"
+									styleClass="btn btn-primary pull-right" update="formf"
+									process="@this" ajax="true" immediate="true"
+									oncomplete="PF('dlg').hide(); return false;"
+									rendered="#{registraEncuestaBean.encuestaMSG == 'borrador'}"
+									action="#{registraEncuestaBean.guardarBorrador}" />
+
+								<p:commandButton
+									value="#{sistema.obtenerTexto('gw.encuestas.alta.modal.etiqueta.btn.aceptar')}"
+									styleClass="btn btn-primary pull-right" update="formf"
+									process="@this" ajax="true" immediate="true"
+									oncomplete="PF('dlg').hide(); return false;"
+									rendered="#{registraEncuestaBean.encuestaMSG == 'finalizar'}"
+									action="#{registraEncuestaBean.finalizaEncuesta}" />
+
+								<p:commandButton
+									value="#{sistema.obtenerTexto('gw.encuestas.alta.modal.etiqueta.btn.aceptar')}"
+									styleClass="btn btn-primary pull-right" update="formf"
+									process="@this" ajax="true" immediate="true"
+									oncomplete="PF('dlg').hide(); return false;"
+									rendered="#{registraEncuestaBean.encuestaMSG == 'validarPreguntas'}" />
+
+								<p:commandButton
+									value="#{sistema.obtenerTexto('gw.encuestas.alta.modal.etiqueta.btn.cancelar')}"
+									styleClass="btn btn-default pull-right" update="formf"
+									process="@this" ajax="true"
+									oncomplete="PF('dlg').hide(); return false;"
+									rendered="#{registraEncuestaBean.encuestaMSG == 'borrador' or registraEncuestaBean.encuestaMSG == 'finalizar'}" />
+
+							</div>
+						</div>
+
+					</f:facet>
+
+				</p:dialog>
+			</f:validateBean>
+
+
+		</h:form>
+	</ui:define>
+</ui:composition>
+

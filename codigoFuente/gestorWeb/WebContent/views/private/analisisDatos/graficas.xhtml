@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="breadcrumb">
+		<li>Análisis de datos</li>
+		<li class="active">Programas</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="form">
+			<h1>Análisis de datos</h1>
+			<hr />
+			<div class="row">
+				<div class="col-md-4">
+					<p:remoteCommand name="graficasProgramas"
+						action="#{graficasBean.totalProgramasEstatusBorrador}"
+						oncomplete="cargaGraficasProgramas(xhr, status, args); ajustaColorLabel();" />
+					<p:commandButton value="Estadisticas Programas" process="@this"
+						styleClass="btn btn-primary quitaMargen"
+						onclick="graficasProgramas(); PF('modalAnalisis').show(); " />
+				</div>
+			</div>
+
+			<p:dialog widgetVar="modalAnalisis" modal="true" resizable="false"
+				draggable="false" closable="false" position="center" width="900"
+				styleClass="modalAnalisisDatos modalAbsoluto"
+				header="Programas de capacitación">
+					<div class="row">
+						<div class="col-md-4 text-center fondoGris">
+							<p:outputLabel value="TOTAL" styleClass="bloque labelSuperior" />
+							<p:outputLabel value="0" styleClass="bloque numeroGrande" id="totalProgramas" />
+							<p:outputLabel value="Programas"
+								styleClass="bloque labelInferior" />
+						</div>
+						<div class="col-md-4 text-center fondoGris">
+							<p:outputLabel value="TIPO DE COMPETENCIA"
+								styleClass="bloque labelSuperior" />
+							<p:outputLabel value="0" styleClass="bloque numeroGrande" id="totalEstrategicos" />
+							<p:outputLabel value="Estratégicos"
+								styleClass="bloque labelInferior" />
+						</div>
+						<div class="col-md-4 text-center fondoGris">
+							<p:outputLabel value="TIPO DE COMPETENCIA"
+								styleClass="bloque labelSuperior" />
+							<p:outputLabel value="0" styleClass="bloque numeroGrande" id="totalGestion" />
+							<p:outputLabel value="De gestión"
+								styleClass="bloque labelInferior" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="PROGRAMA DE TIPO ESTRATÉGICO"
+								styleClass="bloque text-center labelSuperior" />
+							<div id="progTipoEstrategico" class="medidaGrafica"></div>
+						</div>
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="PROGRAMA DE TIPO DE GESTIÓN"
+								styleClass="bloque text-center labelSuperior" />
+							<div id="progTipoDeGestion" class="medidaGrafica"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="NUM. DE PROGRAMAS POR ÁREA RESPONSABLE"
+								styleClass="bloque text-center labelSuperior" />
+							<div id="progAreaResponsable" class="medidaGrafica"></div>
+						</div>
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel
+								value="NUM. DE PROGRAMAS POR TIPO DE EVENTO DE CAPACITACIÓN"
+								styleClass="bloque text-center labelSuperior" />
+							<div id="progTipoEventoCapacitacion" class="medidaGrafica"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="NIVEL DE CONOCIMIENTOS"
+								styleClass="bloque text-center labelSuperior" />
+							<div id="nivelDeConocimiento" class="medidaGrafica"></div>
+						</div>
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="NIVEL DE ENSEÑANZA"
+								styleClass="bloque text-center labelSuperior" />
+							<div id="nivelDeEnsenanza" class="medidaGrafica"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="MODALIDAD" styleClass="bloque text-center labelSuperior" />
+							<div id="modalidad" class="medidaGrafica"></div>
+						</div>
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="ESTATUS" styleClass="bloque text-center labelSuperior" />
+							<div id="estatus" class="medidaGrafica"></div>
+						</div>
+					</div>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton value="Cerrar"
+								onclick="PF('modalAnalisis').hide();"
+								styleClass="btn btn-default pull-right" />
+						</div>
+					</div>
+				</f:facet>
+
+			</p:dialog>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

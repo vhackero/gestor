@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.configuracion')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.tareasprogramadas.menu.tareasprogramadas')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form id="frmTareasProgramadas">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<h1>#{sistema.obtenerTexto('gw.tareasprogramadas.menu.tareasprogramadas')}</h1>
+			<hr />
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.tareasprogramadas.btn.agregar')}"
+						process="@this"
+						update="@form"
+						action="#{schedulerBean.crearNuevaTareaProgramada}"
+						oncomplete="PF('mdlGestionarTareaProgramada').show();"
+						styleClass="pull-right btn btn-primary" />
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.tareasprogramadas.lbl.nuevatareaprogramada')}:"
+						styleClass="pull-right agregaHeight" />
+				</div>
+			</div>
+			<p:panel id="panelTareas"
+				header="#{sistema.obtenerTexto('gw.tareasprogramadas.panel.tareas.header')}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel value="Atención:" styleClass="agregaMargenDerecho" />
+							<h:outputText
+								value="Aunque usted cree una nueva tarea programada se deberá solicitar al área correspondiente ya que esta funcionalidad solo es administrativa." />
+						</div>
+					</div>
+				</div>
+				<p:dataTable id="tblTareas" reflow="true"
+					value="#{schedulerBean.tareaProgramadaList}"
+					tableStyleClass="table" var="tareaProgramada" widgetVar="tblTareas"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}">
+
+					<!-- Clave -->
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.tareasprogramadas.panel.col.clave')}"
+						styleClass="text-center">
+						<h:outputText value="#{tareaProgramada.clave}" />
+					</p:column>
+
+					<!-- Nombre de la tarea programada -->
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.tareasprogramadas.panel.col.nombretareaprogramada')}"
+						styleClass="text-center">
+						<h:outputText value="#{tareaProgramada.nombreTarea}" />
+					</p:column>
+
+					<!-- Descripcion -->
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.tareasprogramadas.panel.col.descripcion')}"
+						styleClass="text-center">
+						<h:outputText value="#{tareaProgramada.descripcion}" />
+					</p:column>
+
+					<!-- Patron de ejecucion -->
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.tareasprogramadas.panel.col.patronejecucion')}"
+						styleClass="text-center">
+
+						<p:commandLink id="verPatronEjecucion"
+							actionListener="#{schedulerBean.asignaTareaSeleccionada(tareaProgramada)}"
+							process="@this" oncomplete="PF('mdlPatronEjecucion').show();"
+							value="#{sistema.obtenerTexto('gw.tareasprogramadas.btn.verpatronejecucion')}"
+							update="frmTareasProgramadas:contenidoPatronEjecucion">
+
+
+						</p:commandLink>
+					</p:column>
+
+					<!-- Es activo -->
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.tareasprogramadas.panel.col.activo')}"
+						styleClass="text-center">
+						<p:inputSwitch value="#{tareaProgramada.activo}" disabled="true"
+							onLabel="Sí" offLabel="No" />
+					</p:column>
+
+					<!-- Fecha de registro  -->
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.tareasprogramadas.panel.col.fecharegistro')}"
+						styleClass="text-center">
+						<h:outputText value="#{tareaProgramada.fechaRegistro}">
+							<f:convertDateTime
+								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+						</h:outputText>
+
+					</p:column>
+
+					<!-- Fecha de actualizacion  -->
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.tareasprogramadas.panel.col.fechaactualizacion')}"
+						styleClass="text-center">
+						<h:outputText value="#{tareaProgramada.fechaActualizacion}">
+							<f:convertDateTime
+								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+						</h:outputText>
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.tareasprogramadas.panel.col.acciones')}"
+						styleClass="text-center">
+						<p:commandButton
+							styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod"
+							id="editarTareaProgramada"
+							actionListener="#{schedulerBean.asignaTareaSeleccionada(tareaProgramada)}"
+							process="@this"
+							oncomplete="PF('mdlGestionarTareaProgramada').show();"
+							update="frmTareasProgramadas:mdlGestionarTareaProgramada">
+						</p:commandButton>
+						<p:tooltip for="editarTareaProgramada"
+							value="#{sistema.obtenerTexto('gw.tareasprogramadas.tooltip.editartareaprogramada')}"
+							position="top" />
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+			<ui:include src="mdlGestionarTareaProgramada.xhtml" />
+			<ui:include src="mdlMuestraPatronEjecucion.xhtml" />
+		</h:form>
+	</ui:define>
+</ui:composition>

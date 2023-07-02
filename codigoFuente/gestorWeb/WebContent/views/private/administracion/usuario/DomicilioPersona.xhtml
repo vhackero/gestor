@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+	<p:panel id="pnlDomicilio"
+		header="#{sistema.obtenerTexto('gw.usuarios.etiquetaPanel.domicilio')}">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-2">
+					<p:outputLabel for="txtCodigoPostal"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.codigoPostal')}:" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtCodigoPostal" maxlength="5"
+						styleClass="form-control" disabled="true"
+						value="#{adminPersonaBean.datos.domicilioPersona.codigoPostal}"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.codigoPostal')}">
+						<p:ajax
+							update="somPais, somEntidad, somMunicipioDomicilio, somLocalidad"
+							event="blur" listener="#{adminPersonaBean.validarCodigoPostal}" />
+						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+					</p:inputText>
+				</div>
+				<div class="col-md-2">
+					<p:outputLabel for="somPais"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.pais')}:" />
+					<p:selectOneMenu id="somPais" disabled="true"
+						value="#{adminPersonaBean.datos.domicilioPersona.idPais}"
+						valueChangeListener="#{adminPersonaBean.onChangePais}"
+						styleClass="col-xs-12" onchange="correccionSelectores()">
+						<p:ajax update="somEntidad" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{adminPersonaBean.listaPaises}" var="pais"
+							itemValue="#{pais.getIdPais()}" itemLabel="#{pais.getNombre()}" />
+					</p:selectOneMenu>
+					<p:message for="somPais" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="somEntidad" styleClass="requerido"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.estado')}:" />
+					<p:selectOneMenu id="somEntidad" disabled="true"
+						value="#{adminPersonaBean.datos.domicilioPersona.idEntidadFederativa}"
+						valueChangeListener="#{adminPersonaBean.onChangeEntidad}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+						styleClass="col-xs-12" onchange="correccionSelectores()">
+						<p:ajax update="somMunicipioDomicilio" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{adminPersonaBean.listaEntidades}"
+							var="entidad" itemValue="#{entidad.getIdEntidadFederativa()}"
+							itemLabel="#{entidad.getNombre()}" />
+					</p:selectOneMenu>
+					<p:message for="somEntidad" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="somMunicipioDomicilio" styleClass="requerido"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.municipio')}:" />
+					<p:selectOneMenu id="somMunicipioDomicilio"
+						value="#{adminPersonaBean.datos.domicilioPersona.idMunicipio}"
+						valueChangeListener="#{adminPersonaBean.onChangeMunicipio}"
+						required="true" disabled="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+						styleClass="col-xs-12" onchange="correccionSelectores()">
+						<p:ajax update="somLocalidad" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="0" />
+						<f:selectItems
+							value="#{adminPersonaBean.listaMunicipiosDomicilio}"
+							var="municipio" itemValue="#{municipio.getIdMunicipio()}"
+							itemLabel="#{municipio.getNombre()}" />
+					</p:selectOneMenu>
+					<p:message for="somMunicipioDomicilio" />
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel for="somLocalidad"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.colonia')}:"
+						styleClass="requerido" />
+					<p:selectOneMenu id="somLocalidad" disabled="true"
+						value="#{adminPersonaBean.datos.domicilioPersona.asentamiento.idAsentamiento}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+						class="col-xs-12" onchange="correccionSelectores()">
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{adminPersonaBean.listaAsentamientos}"
+							var="asentamiento" itemValue="#{asentamiento.idAsentamiento}"
+							itemLabel="#{asentamiento.getNombre()}" />
+					</p:selectOneMenu>
+					<p:message for="somLocalidad" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="txtCalle"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.calle')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtCalle" styleClass="form-control"
+						value="#{adminPersonaBean.datos.domicilioPersona.calle}"
+						maxlength="200" disabled="true"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.calle')}" />
+					<p:message for="txtCalle" />
+				</div>
+
+				<div class="row">
+					<div class="col-md-2">
+						<p:outputLabel for="txtNumExterior"
+							value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.numExterior')}:"
+							styleClass="requerido" />
+						<!-- Longitud de campo -->
+						<p:inputText id="txtNumExterior" styleClass="form-control"
+							value="#{adminPersonaBean.datos.domicilioPersona.numeroExterior}"
+							maxlength="6" disabled="true"
+							placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.numExterior')}">
+							<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+						</p:inputText>
+						<p:message for="txtNumExterior" />
+					</div>
+					<div class="col-md-2">
+						<p:outputLabel for="txtNumInterior"
+							value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.numInterior')}:" />
+						<!-- Longitud de campo -->
+						<p:inputText id="txtNumInterior" styleClass="form-control"
+							value="#{adminPersonaBean.datos.domicilioPersona.numeroInterior}"
+							maxlength="6" disabled="true"
+							placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.numInterior')}">
+							<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+						</p:inputText>
+						<p:message for="txtNumInterior" />
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</p:panel>
+</ui:composition>

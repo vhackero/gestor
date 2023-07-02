@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}</h1>
+		<hr />
+		<p:ajaxStatus onstart="PF('dialogLayout').show()"
+			onsuccess="PF('dialogLayout').hide()" />
+		<h:form id="formResponsables">
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}">
+				<div class="row">
+					<div class="col-md-4 col-xs-12">
+						<p:selectOneMenu
+							value="#{responsablesEventoCapBean.responsabilidad.id}"
+							styleClass="col-xs-12"
+							valueChangeListener="#{responsablesEventoCapBean.onChangeTpoResponsabilidad}">
+							<p:ajax update="@form" process="@this" />
+							<f:selectItem
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								itemValue="#{0}" />
+							<f:selectItems
+								value="#{responsablesEventoCapBean.responsabilidades}"
+								var="resp" itemLabel="#{resp.nombre}" itemValue="#{resp.id}" />
+						</p:selectOneMenu>
+					</div>
+					<div class="col-md-8 col-xs-12">
+						<p:commandButton
+							disabled="#{responsablesEventoCapBean.responsabilidad.id eq 0}"
+							value="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.agregar')}"
+							styleClass="btn btn-primary pull-right" process="@this"
+							action="#{responsablesEventoCapBean.navegaAgregarResponsable()}" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 col-xs-12">
+						<p:dataTable id="tblEditaResponsables" reflow="true"
+							value="#{responsablesEventoCapBean.responsables}"
+							tableStyleClass="table" var="responsable" paginator="true"
+							paginatorPosition="bottom" rows="10"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							rowsPerPageTemplate="5,10,15"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.nombre')}">
+								<h:outputText value="#{responsable.tblPersona.nombre}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.aPaterno')}">
+								<h:outputText value="#{responsable.tblPersona.apellidoPaterno}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.aMaterno')}">
+								<h:outputText value="#{responsable.tblPersona.apellidoMaterno}" />
+							</p:column>
+
+							<p:column styleClass="text-center"
+								headerText="#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.eliminar')}">
+								<p:commandButton id="btnEliminar"
+									styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
+									onclick="PF('modConf').show()">
+									<f:setPropertyActionListener value="#{responsable}"
+										target="#{responsablesEventoCapBean.responsable}" />
+								</p:commandButton>
+								<p:tooltip for="btnEliminar" position="top"
+									value="#{sistema.obtenerTexto('gw.ec.resp.tooltip.eliminar')}" />
+							</p:column>
+
+						</p:dataTable>
+					</div>
+				</div>
+
+			</p:panel>
+
+			<p:dialog id="dialogConf" modal="true" position="center" responsive="true"
+				resizable="false"
+				closable="false" draggable="false" widgetVar="modConf"
+				styleClass="medidaModal" header="Eliminar responsable">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel
+								value="¿Está seguro que desea eliminar al responsable seleccionado?" />
+
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.gestionescolar.button.cancelar')}"
+							type="button" onclick="PF('modConf').hide();"
+							styleClass="btn btn-default" />
+
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.gestionescolar.button.si')}"
+							action="#{responsablesEventoCapBean.eliminarResponsable()}"
+							ajax="true" oncomplete="PF('modConf').hide();"
+							update="tblEditaResponsables" styleClass="btn btn-primary" />
+
+					</div>
+				</div>
+
+
+
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

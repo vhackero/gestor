@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+		<li>Expediente de alumnos por grupo</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form>
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<h1>Expediente de alumnos por grupo</h1>
+			<hr />
+			<f:validateBean disabled="true">
+				<p:panel header="Búsqueda de grupo">
+
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel styleClass="bloque" value="Tipo de competencia:" />
+								<p:selectOneMenu id="tipoCompetencia"
+									value="#{expedienteEventoBean.filtroPrograma.tipoCompetencia}"
+									autoWidth="true" styleClass="col-xs-12"
+									valueChangeListener="#{expedienteEventoBean.onChangeTipoCompetencia}">
+									<p:ajax event="change" process="@this" update="@form" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{0}" />
+									<f:selectItems value="#{expedienteEventoBean.catalogoTipoComp}"
+										var="tipoComp" itemLabel="#{tipoComp.nombre}"
+										itemValue="#{tipoComp.id}" />
+								</p:selectOneMenu>
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel styleClass="bloque" value="Eje de capacitación:" />
+								<p:selectOneMenu id="ejeCapacitacion"
+									value="#{expedienteEventoBean.filtroPrograma.ejeCapacitacion}"
+									disabled="#{expedienteEventoBean.filtroPrograma.tipoCompetencia eq 0}"
+									styleClass="col-xs-12" autoWidth="true"
+									valueChangeListener="#{expedienteEventoBean.onChangeEjeCapacitacion}">
+									<p:ajax event="change" process="@this" update="@form" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{0}" />
+									<f:selectItems value="#{expedienteEventoBean.catalogoEjeCap}"
+										var="ejeCap" itemLabel="#{ejeCap.nombre}"
+										itemValue="#{ejeCap.id}" />
+								</p:selectOneMenu>
+
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel styleClass="bloque" value="Nombre del programa:" />
+								<p:selectOneMenu id="programa"
+									disabled="#{expedienteEventoBean.filtroPrograma.ejeCapacitacion eq 0}"
+									value="#{expedienteEventoBean.idPrograma}"
+									styleClass="col-xs-12">
+									<p:ajax listener="#{expedienteEventoBean.onProgramaChange()}"
+										update="@form" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{0}" />
+									<f:selectItems value="#{expedienteEventoBean.listaProgramas}"
+										var="programa" itemLabel="#{programa.nombreTentativo}"
+										itemValue="#{programa.idPrograma}" />
+								</p:selectOneMenu>
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel styleClass="bloque" value="Nombre del evento:" />
+								<p:selectOneMenu id="evento"
+									disabled="#{expedienteEventoBean.idPrograma eq 0}"
+									value="#{expedienteEventoBean.idEvento}" styleClass="col-xs-12">
+									<p:ajax listener="#{expedienteEventoBean.onEventoChange()}"
+										update="@form" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{0}" />
+									<f:selectItems value="#{expedienteEventoBean.listaEventos}"
+										var="evento" itemLabel="#{evento.nombreEc}"
+										itemValue="#{evento.idEvento}" />
+								</p:selectOneMenu>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6">
+							<p:outputLabel styleClass="bloque" value="Grupo:" />
+							<p:selectOneMenu id="grupo" autoWidth="true"
+								disabled="#{expedienteEventoBean.idEvento eq 0}"
+								value="#{expedienteEventoBean.idGrupo}" styleClass="col-xs-12">
+								<p:ajax process="@this" update="@form" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{0}" />
+								<f:selectItems value="#{expedienteEventoBean.listaGrupos}"
+									var="grupo" itemLabel="#{grupo.nombre}"
+									itemValue="#{grupo.idGrupo}" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:commandButton value="Limpiar campos" ajax="true"
+								styleClass="btn btn-default"
+								action="#{expedienteEventoBean.limpiarFiltro()}" update="@form" />
+							<p:commandButton id="btnBuscar" value="Buscar"
+								disabled="#{expedienteEventoBean.idGrupo eq 0}"
+								action="#{expedienteEventoBean.buscarAlumnosAprobados()}"
+								ajax="true" update="@form" styleClass="btn btn-primary" />
+						</div>
+					</div>
+				</p:panel>
+
+				<p:panel id="panelResultados" header="Resultado de la búsqueda">
+					<p:dataTable id="tablaResultados" reflow="true"
+						value="#{expedienteEventoBean.alumnosConConstancia}" var="alumno"
+						paginator="true" rows="10" paginatorPosition="bottom"
+						emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+						currentPageReportTemplate="({currentPage} de {totalPages})"
+						rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+						<p:column headerText="Id alumno: " styleClass="text-center">
+							<h:outputText value="#{alumno.persona.idPersona}" />
+						</p:column>
+						<p:column headerText="Nombre del alumno: "
+							styleClass="text-center">
+							<h:outputText value="#{alumno.persona.nombreCompleto}" />
+						</p:column>
+						<p:column headerText="Calificación final" styleClass="text-center">
+							<h:outputText value="#{alumno.califFinal * 10}" />
+						</p:column>
+						<p:column headerText="Constancias" styleClass="text-center">
+							<p:commandButton id="btnVerConstancia" process="@this"
+								actionListener="#{expedienteEventoBean.verConstancia(alumno)}"
+								ajax="true"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+							</p:commandButton>
+							<p:tooltip for="btnVerConstancia" position="top" value="Ver" />
+							<p:commandButton id="btnDescargarConstancia" process="@this"
+								onclick="PrimeFaces.monitorDownload(start, stop);"
+								actionListener="#{expedienteEventoBean.descargarConstancia(alumno)}"
+								ajax="false"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_desc">
+								<p:fileDownload value="#{expedienteEventoBean.constanciaPDF}" />
+							</p:commandButton>
+							<p:tooltip for="btnDescargarConstancia" position="top"
+								value="Descargar" />
+						</p:column>
+
+					</p:dataTable>
+					<div class="row flexY">
+						<div class="col-md-12 text-right">
+							<p:outputLabel value="Constancias: " />
+							<p:commandButton id="btnDescargarTodasLasConstancia"
+								value="Descargar" process="@this"
+								onclick="PrimeFaces.monitorDownload(start, stop);"
+								disabled="#{empty expedienteEventoBean.alumnosConConstancia}"
+								actionListener="#{expedienteEventoBean.descargarTodasLasConstancias}"
+								ajax="false" styleClass="btn btn-primary">
+								<p:fileDownload value="#{expedienteEventoBean.constanciasZip}" />
+							</p:commandButton>
+						</div>
+					</div>
+
+				</p:panel>
+			</f:validateBean>
+		</h:form>
+		<p:dialog id="constancia" dynamic="true" responsive="true"
+			modal="true" closable="false" resizable="false" position="center"
+			header="Constancia" width="900" widgetVar="modalConstancia">
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:media player="pdf"
+							value="#{expedienteEventoBean.constanciaPDF}" width="865"
+							height="400" styleClass="agregaBorde" />
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton value="Cerrar" process="@this"
+						styleClass="btn btn-default pull-right"
+						onclick="PF('modalConstancia').hide();" />
+				</div>
+			</div>
+		</p:dialog>
+
+		<script type="text/javascript">
+			function start() {
+				PF('dialogLayout').show();
+			}
+
+			function stop() {
+				PF('dialogLayout').hide();
+			}
+		</script>
+
+	</ui:define>
+</ui:composition>

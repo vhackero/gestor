@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.personalizacion')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.mensajes.plantillas')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.mensajes.plantillas')}</h1>
+		<hr />
+
+		<h:form id="frmFiltro">
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.plantillas.mensajes.panel.superior.titulo')}">
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel styleClass="agregaHeight"
+							value="#{sistema.obtenerTexto('gw.plantillas.mensajes.etiqueta.operacion')}:" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-4">
+						<p:inputText id="txtOperacion" disabled="true"
+							styleClass="form-control"
+							value="#{plantillasMensajesBean.funcionalidadSeleccionada.descripcion}" />
+					</div>
+					<div class="col-md-8">
+						<p:commandButton
+							action="#{plantillasMensajesBean.llenarTablaBusquedaDeOperaciones}"
+							value="#{sistema.obtenerTexto('gw.plantillas.mensajes.boton.funcionalidades')}"
+							oncomplete="PF('mFuncionalidades').show();" update="@form"
+							styleClass="btn btn-primary" />
+					</div>
+				</div>
+
+			</p:panel>
+			<p:dialog widgetVar="mFuncionalidades" dynamic="true"
+				closable="false" draggable="false" resizable="false"
+				position="center" styleClass="modalAbsoluto" width="900"
+				header="#{sistema.obtenerTexto('gw.plantillas.mensajes.modal.funcionalidades.titulo')}"
+				modal="true">
+				<p:panel styleClass="quitaMargenTop"
+					header="#{sistema.obtenerTexto('gw.plantillas.mensajes.modal.funcionalidades.titulo.panel.superior')}">
+					<f:validateBean disabled="true">
+						<div class="form-group">
+
+							<div class="row">
+								<div class="col-md-6">
+									<p:outputLabel for="clave"
+										value="#{sistema.obtenerTexto('gw.plantillas.mensajes.modal.funcionalidades.etiqueta.clave')}" />
+									<p:inputText id="clave"
+										label="#{sistema.obtenerTexto('gw.plantillas.mensajes.modal.funcionalidades.etiqueta.clave')}"
+										placeholder="#{sistema.obtenerTexto('gw.plantillas.mensajes.modal.funcionalidades.etiqueta.clave')}"
+										value="#{plantillasMensajesBean.funcionalidadFiltro.clave}"
+										styleClass="form-control" />
+								</div>
+								<div class="col-md-6">
+									<p:outputLabel for="descripcion"
+										value="#{sistema.obtenerTexto('gw.plantillas.mensajes.modal.funcionalidades.etiqueta.descripcion')}" />
+									<p:inputText id="descripcion"
+										label="#{sistema.obtenerTexto('gw.plantillas.mensajes.modal.funcionalidades.etiqueta.descripcion')}"
+										placeholder="#{sistema.obtenerTexto('gw.plantillas.mensajes.modal.funcionalidades.etiqueta.descripcion')}"
+										value="#{plantillasMensajesBean.funcionalidadFiltro.descripcion}"
+										styleClass="form-control" />
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 text-right">
+								<p:commandButton
+									value="#{sistema.obtenerTexto('gw.plantillas.mensajes.modal.funcionalidades.boton.buscar')}"
+									action="#{plantillasMensajesBean.buscarFuncionalidades()}"
+									ajax="true" update="frmFiltro:tblFuncionalidades"
+									styleClass="btn btn-primary" />
+							</div>
+						</div>
+					</f:validateBean>
+				</p:panel>
+				<p:panel
+					header="#{sistema.obtenerTexto('gw.plantillas.mensajes.modal.funcionalidades.titulo.panel.inferior')}">
+					<p:dataTable id="tblFuncionalidades"
+						value="#{plantillasMensajesBean.funcionalidades}"
+						var="funcionalidad" paginator="true" rows="10"
+						paginatorPosition="bottom" reflow="true"
+						emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+						currentPageReportTemplate="({currentPage} de {totalPages})"
+						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+						rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+						<p:column priority="2"
+							headerText="#{sistema.obtenerTexto('gw.plantillas.mensajes.modal.funcionalidades.columna.clave')}">
+							<h:outputText value="#{funcionalidad.clave}" />
+						</p:column>
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.plantillas.mensajes.modal.funcionalidades.columna.descripcion')}">
+							<h:outputText value="#{funcionalidad.descripcion}" />
+						</p:column>
+						<p:column styleClass="text-center"
+							headerText="#{sistema.obtenerTexto('gw.administracion.catalogos.tblheader.accion')}">
+							<p:commandButton id="boton1"
+								action="#{plantillasMensajesBean.seleccionarFuncionalidad()}"
+								process="@this" ajax="true"
+								update="frmFiltro:txtOperacion frmPlntNtf"
+								oncomplete="PF('mFuncionalidades').hide();"
+								styleClass="btn-icon btn btn-default icono_sisi ss_gn_activar">
+								<f:setPropertyActionListener value="#{funcionalidad}"
+									target="#{plantillasMensajesBean.funcionalidadSeleccionada}" />
+							</p:commandButton>
+							<p:tooltip id="toolTipFade1" for="boton1"
+								value="#{sistema.obtenerTexto('gw.plantillas.mensajes.modal.funcionalidades.boton.seleccionar')}"
+								position="top" />
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton process="@this" ajax="true" value="Cerrar"
+							onclick="PF('mFuncionalidades').hide();"
+							styleClass="btn btn-default" />
+
+
+					</div>
+				</div>
+			</p:dialog>
+		</h:form>
+		<h:form id="frmPlntNtf">
+			<p:tabView id="tPanel"
+				tabindex="#{plantillasMensajesBean.indiceTabulacion}">
+				<sec:authorize access="hasPermission(null, 'PLNT_MSGS')">
+					<p:tab
+						title="#{sistema.obtenerTexto('gw.plantillas.mensajes.panel.plantillas.titulo')}">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-12">
+
+									<sec:authorize access="hasPermission(null, 'PLNT_MSG_AGR')">
+										<p:commandButton
+											value="#{sistema.obtenerTexto('gw.plantillas.mensajes.boton.agregar')}"
+											action="#{plantillasMensajesBean.agregarMensaje()}"
+											immediate="true" ajax="false"
+											disabled="#{plantillasMensajesBean.funcionalidadSeleccionada.idFuncionalidad == null}"
+											styleClass="btn btn-primary pull-right" />
+										<p:outputLabel
+											value="#{sistema.obtenerTexto('gw.variables.mensaje.texto.nuevaplantilla')}:"
+											styleClass="pull-right agregaHeight" />
+									</sec:authorize>
+
+								</div>
+							</div>
+						</div>
+						<p:dataTable value="#{plantillasMensajesBean.mensajes}"
+							id="tblMensajes" var="mensaje" widgetVar="tblMensajes"
+							paginator="true" rows="10" rowsPerPageTemplate="5,10,15"
+							paginatorPosition="bottom" reflow="true"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							tableStyleClass="table">
+
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.plantillas.mensajes.columna.titulo')}"
+								sortBy="#{mensaje.titulo}" filterMatchMode="contains"
+								filterBy="#{mensaje.titulo}" filterStyle="display:none">
+								<h:outputText value="#{mensaje.titulo}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.plantillas.mensajes.columna.tipo')}"
+								sortBy="#{mensaje.tipoEnum}" filterMatchMode="contains"
+								filterBy="#{mensaje.tipoEnum}" filterStyle="display:none">
+								<h:outputText value="#{mensaje.tipoEnum}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.plantillas.mensajes.columna.activo')}"
+								sortBy="#{mensaje.activo?'SI':'NO'}" filterMatchMode="contains"
+								filterBy="#{mensaje.activo?'SI':'NO'}"
+								filterStyle="display:none">
+								<h:outputText value="#{mensaje.activo?'SI':'NO'}" />
+							</p:column>
+
+							<p:column class="text-center"
+								headerText="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.acciones')}">
+								<sec:authorize access="hasPermission(null, 'PLNT_MSG_EDI')">
+									<p:commandButton id="editarmsg"
+										action="#{plantillasMensajesBean.cargarMensaje()}"
+										process="@this" immediate="true" ajax="false"
+										styleClass="btn btn-default btn-icon icono_sisi ss_gn_mod">
+										<f:setPropertyActionListener value="#{mensaje}"
+											target="#{plantillasMensajesBean.mensajeModificar}" />
+									</p:commandButton>
+									<p:tooltip for="editarmsg" position="top"
+										value="#{sistema.obtenerTexto('gw.variables.mensajes.boton.editar')}" />
+								</sec:authorize>
+							</p:column>
+						</p:dataTable>
+					</p:tab>
+				</sec:authorize>
+				<sec:authorize access="hasPermission(null, 'VAR_MGS')">
+					<p:tab
+						title="#{sistema.obtenerTexto('gw.variables.mensajes.panel.variables.titulo')}">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-12">
+
+									<sec:authorize access="hasPermission(null, 'VAR_MSG_AGR')">
+										<p:commandButton
+											value="#{sistema.obtenerTexto('gw.variables.mensajes.boton.agregar')}"
+											action="#{plantillasMensajesBean.agregarVariable()}"
+											process="@this" ajax="true" update="frmPlntNtf:contenido"
+											oncomplete="PF('amodal').show();"
+											disabled="#{plantillasMensajesBean.funcionalidadSeleccionada.idFuncionalidad == null}"
+											styleClass="btn btn-primary pull-right" />
+										<p:outputLabel
+											value="#{sistema.obtenerTexto('gw.variables.mensaje.texto.nuevavariable')}:"
+											styleClass="pull-right agregaHeight" />
+
+									</sec:authorize>
+
+								</div>
+							</div>
+						</div>
+						<p:dataTable value="#{plantillasMensajesBean.variables}"
+							id="tblVariables" var="variable" paginator="true" rows="10"
+							rowsPerPageTemplate="5,10,15" paginatorPosition="bottom"
+							widgetVar="tblVariables" reflow="true"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							tableStyleClass="table"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}">
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.variables.mensajes.columna.clave')}"
+								sortBy="#{variable.clave}" filterMatchMode="contains"
+								filterBy="#{variable.clave}" filterStyle="display:none">
+								<h:outputText value="#{variable.clave}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.variables.mensajes.columna.descripcion')}"
+								sortBy="#{variable.descripcion}" filterMatchMode="contains"
+								filterBy="#{variable.descripcion}" filterStyle="display:none">
+								<h:outputText value="#{variable.descripcion}" />
+							</p:column>
+
+							<p:column class="text-center"
+								headerText="#{sistema.obtenerTexto('gw.encuestas.seguimiento.label.acciones')}">
+								<sec:authorize access="hasPermission(null, 'VAR_MSG_EDI')">
+									<p:commandButton id="editar"
+										action="#{plantillasMensajesBean.cargarVariable()}"
+										process="@this" ajax="true" update="frmPlntNtf:contenido"
+										oncomplete="PF('amodal').show()"
+										styleClass="btn btn-default btn-icon icono_sisi ss_gn_mod">
+										<f:setPropertyActionListener value="#{variable}"
+											target="#{plantillasMensajesBean.variableModificar}" />
+									</p:commandButton>
+									<p:tooltip for="editar" position="top"
+										value="#{sistema.obtenerTexto('gw.variables.mensajes.boton.editar')}" />
+								</sec:authorize>
+							</p:column>
+						</p:dataTable>
+					</p:tab>
+				</sec:authorize>
+			</p:tabView>
+
+			<p:dialog id="amodal"
+				header="#{sistema.obtenerTexto('gw.variables.modal.titulo')}"
+				widgetVar="amodal" modal="true" resizable="false" draggable="false"
+				closable="false" closeOnEscape="false" position="center"
+				styleClass="modalPseudoClass medidaModal">
+
+				<p:outputPanel id="contenido" styleClass="quitaMargenTop">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="campoClave" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.variables.modal.etiqueta.clave')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="campoClave"
+									value="#{plantillasMensajesBean.variable.clave}"
+									styleClass="form-control" maxlength="45" />
+								<p:message for="campoClave" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel for="campoDescripcion" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.variables.modal.etiqueta.descripcion')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="campoDescripcion"
+									value="#{plantillasMensajesBean.variable.descripcion}"
+									styleClass="form-control" maxlength="100" />
+								<p:message for="campoDescripcion" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+								<p:outputLabel
+									value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+							</div>
+						</div>
+					</div>
+				</p:outputPanel>
+
+				<f:facet name="footer">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:commandButton
+									value="#{sistema.obtenerTexto('gw.variables.modal.boton.guardar')}"
+									action="#{plantillasMensajesBean.guardarVariable()}"
+									ajax="true" update="contenido frmPlntNtf:tPanel:tblVariables"
+									styleClass="btn btn-primary pull-right" />
+								<p:commandButton type="button" onclick="PF('amodal').hide();"
+									ajax="false"
+									value="#{sistema.obtenerTexto('gw.variables.modal.boton.cancelar')}"
+									styleClass="btn btn-default pull-right" />
+							</div>
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

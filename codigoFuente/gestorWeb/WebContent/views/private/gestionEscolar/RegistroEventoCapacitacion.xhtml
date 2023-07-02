@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCap')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.gestionescolar.label.nuevoevtcap')}</li> 
+	</ui:define>
+	<ui:define name="content">
+
+			<p:ajaxStatus onstart="PF('dialogLayout').show()" onsuccess="PF('dialogLayout').hide()"/>
+			<h1>#{sistema.obtenerTexto('gw.gestionescolar.label.nuevoevtcap')}</h1>
+			<hr /> 
+			
+			<p:tabView id="tabEventoCapacitacion" activeIndex="#{capturaEventoCapacitacion.indicePanel}">
+				<p:ajax event="tabChange" listener="#{capturaEventoCapacitacion.onTabChange}" ></p:ajax>
+				<p:tab title="#{sistema.obtenerTexto('gw.ge.texto.progcap')}" id="tabCero" >
+					<ui:include src="seleccionPrograma.xhtml" />
+				</p:tab> 
+				<p:tab title="#{sistema.obtenerTexto('gw.ge.texto.datosgen')}" id="tabUno" disabled="#{capturaEventoCapacitacion.datos.programa == null}">
+					<ui:include src="datosEventoCapacitacion.xhtml" />
+				</p:tab>
+				<p:tab title="#{sistema.obtenerTexto('gw.ge.texto.datosagen')}" id="tabDos" disabled="#{capturaEventoCapacitacion.datos.programa == null}">
+					<ui:include src="DatosAgenda.xhtml" />
+				</p:tab>
+				<p:tab title="#{sistema.obtenerTexto('gw.ge.texto.responsables')}" id="tabTres" disabled="#{capturaEventoCapacitacion.datos.programa == null}">
+					<ui:include src="EventoCapacitacionResponsables.xhtml" />
+				</p:tab>
+			</p:tabView>
+	</ui:define>
+</ui:composition>

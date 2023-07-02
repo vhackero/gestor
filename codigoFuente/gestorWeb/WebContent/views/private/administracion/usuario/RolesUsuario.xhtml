@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+	<h:form id="mdlRolesUsuarios" >
+		<p:dialog id="modalRoles" widgetVar="mRol" modal="true" styleClass="medidaModal" position="center" role="dialog" 
+			header="#{sistema.obtenerTexto('gw.roles.usuario.modal.titulo')}"
+			resizable="false" draggable="false"
+			closable="false">
+	
+			<p:pickList id="pickListRoles" value="#{adminPersonaBean.listaRoles}"
+				var="rol" itemLabel="#{rol.nombre}" itemValue="#{rol}" converter="entityConverter" 
+				addLabel="#{sistema.obtenerTexto('gw.global.picklist.agregar')}" 
+				addAllLabel="#{sistema.obtenerTexto('gw.global.picklist.agregartodos')}" 
+				removeLabel="#{sistema.obtenerTexto('gw.global.picklist.eliminar')}" 
+				removeAllLabel="#{sistema.obtenerTexto('gw.global.picklist.eliminartodos')}">
+				
+				<f:facet name="sourceCaption">#{sistema.obtenerTexto('gw.global.picklist.disponible')}</f:facet>
+	    		<f:facet name="targetCaption">#{sistema.obtenerTexto('gw.global.picklist.asignado')}</f:facet>
+	    	</p:pickList>
+				
+			<f:facet name="footer">
+				<div class="row">
+					<div class="col-md-12">
+			            
+			            <p:commandButton id="btnGuardarRoles"
+			            	value="#{sistema.obtenerTexto('gw.roles.usuario.modal.boton.guardar')}"
+			            	action="#{adminPersonaBean.actualizarRolesUsuario()}" 
+			            	styleClass="btn btn-primary pull-right" update="frmPrincipal:txtRolesAsignados"
+			            	ajax="true" oncomplete="PF('mRol').hide();" />
+			            	
+			            <p:commandButton id="btnCancelarRoles" type="button" onclick="PF('mRol').hide();" styleClass="btn btn-default pull-right"
+			            	value="#{sistema.obtenerTexto('gw.roles.usuario.modal.boton.cancelar')}" />
+	            	</div>
+	            </div>
+	        </f:facet>
+        
+		</p:dialog>	
+	</h:form>
+</ui:composition>

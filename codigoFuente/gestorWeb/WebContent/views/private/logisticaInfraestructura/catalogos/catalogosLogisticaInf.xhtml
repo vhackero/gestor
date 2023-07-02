@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition template="/templates/layout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:components="http://java.sun.com/jsf/composite/components">
+
+    <ui:define name="breadcrumb">
+        <li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+        <li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+        <li class="active">#{sistema.obtenerTexto('gw.administracion.catalogos.catlogi')}</li>
+    </ui:define>
+    <ui:define name="content">
+    
+     <h1>#{sistema.obtenerTexto('gw.administracion.catalogos.catlogi')}</h1>
+			<hr />
+        <h:form id ="formLogInf">
+            <p:ajaxStatus onstart="PF('dialogLayout').show()" onsuccess="PF('dialogLayout').hide()" />
+
+            <div class="row">
+                <div class="col-md-4">
+                    <p:accordionPanel multiple="true" activeIndex="null" id="acordionLogInf" styleClass="acordeoncatalogo">
+                        <c:forEach items="#{catLogisticaInfraestructuraBean.catalogosLogisticaInf}" var="cat">
+                            <p:tab id="tab#{cat.id}" title="#{cat.nombre}"  >
+                                <p:commandLink value="#{sistema.obtenerTexto('gw.logistica.texto.registrar')}" process="@this" id="link#{cat.id}"
+                                               action="#{catLogisticaInfraestructuraBean.generaComponenteRegistro(cat)}"
+                                               update="formLogInf" styleClass="bloque" rendered="#{cat.visualizarReg}" />
+                                
+                                <p:commandLink value="#{sistema.obtenerTexto('gw.logistica.texto.visualizar')}" process="@this" id="link2#{cat.id}"
+                                               action="#{catLogisticaInfraestructuraBean.obtenerDatosCatSel(cat)}" update="formLogInf" />
+                            </p:tab>
+                        </c:forEach>
+                    </p:accordionPanel>
+                </div>
+
+                <div class="col-md-8" >
+                    <components:regCatalogoComun
+                            idCat="#{catLogisticaInfraestructuraBean.idCat}"
+                            nombreCat="#{catLogisticaInfraestructuraBean.nombreCat}"
+                            catalogoDTO="#{catLogisticaInfraestructuraBean.catComunDTOGenerico}"
+                            rendered="#{catLogisticaInfraestructuraBean.muestraCompReg}"
+                            accionBtnGuardar="#{catLogisticaInfraestructuraBean.guardarRegCatalogo}"
+                            renderCmpSelect="false" />
+
+
+                    <br />
+                    <components:verCatalogoComun
+                            idCat="#{catLogisticaInfraestructuraBean.idCat}"
+                            nombreCat="#{catLogisticaInfraestructuraBean.nombreCat}"
+                            listaElemCat="#{catLogisticaInfraestructuraBean.lstCatSelec}"
+                            rendered="#{catLogisticaInfraestructuraBean.muestraCompTabla}"
+                            listenerCambioEstatus="#{catLogisticaInfraestructuraBean.cambioEstatusCatSelec}"
+                            accionEditRegCatalogo="#{catLogisticaInfraestructuraBean.editaRegCatSeleccionado}"
+                            catalogoDTOSel="#{catLogisticaInfraestructuraBean.catComunDTOGenerico}"
+                            renderCmpSelect="false" />
+
+                </div>
+
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

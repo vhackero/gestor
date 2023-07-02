@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.mensajes.texto.mensajes')}</li>
+		<li>#{sistema.obtenerTexto('gw.mensajes.texto.nuevomensaje')}</li>
+		<li class="active">Seleccionar destinatarios</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form enctype="multipart/form-data">
+			<h1>Seleccionar destinatarios</h1>
+			<hr />
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.titulo.panel.superior')}"
+				styleClass="fondoPrimario">
+				<f:validateBean disabled="true">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-4">
+								<div class="form-group">
+									<h:outputLabel for="somTipoUsuario"
+										value="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.etiqueta.tipousuario')}" />
+									<p:selectOneMenu id="somTipoUsuario"
+										value="#{notificacionesBean.filtroPersona.tipoUsuario}"
+										class="col-xs-12" onchange="correccionSelectores()">
+
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+										<f:selectItems value="#{notificacionesBean.tiposUsuarios}"
+											var="tipo" itemValue="#{tipo.getValor()}"
+											itemLabel="#{tipo.getDescripcion()}" />
+									</p:selectOneMenu>
+								</div>
+							</div>
+							<div class="col-md-4">
+								<div class="form-group">
+									<h:outputLabel for="txtCurp"
+										value="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.etiqueta.curp')}" />
+									<p:inputText id="txtCurp"
+										placeholder="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.etiqueta.curp')}"
+										value="#{notificacionesBean.filtroPersona.curp}"
+										styleClass="form-control" />
+								</div>
+							</div>
+							<div class="col-md-4">
+								<div class="form-group">
+									<h:outputLabel for="nombreUsuario"
+										value="Nombre de usuario:" />
+									<p:inputText id="nombreUsuario"
+										placeholder="Nombre de usuario"
+										value="#{notificacionesBean.filtroPersona.usuario}"
+										styleClass="form-control" />
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-4">
+								<p:outputLabel for="nombre"
+									value="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.etiqueta.nombre')}" />
+								<p:inputText id="nombre"
+									label="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.etiqueta.nombre')}"
+									placeholder="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.etiqueta.nombre')}"
+									value="#{notificacionesBean.filtroPersona.nombre}"
+									styleClass="form-control" />
+							</div>
+							<div class="col-md-4">
+								<p:outputLabel for="appaterno"
+									value="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.etiqueta.appaterno')}" />
+								<p:inputText id="appaterno"
+									label="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.etiqueta.appaterno')}"
+									placeholder="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.etiqueta.appaterno')}"
+									value="#{notificacionesBean.filtroPersona.apellidoPaterno}"
+									styleClass="form-control" />
+							</div>
+							<div class="col-md-4">
+								<p:outputLabel for="apmaterno"
+									value="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.etiqueta.apmaterno')}" />
+								<p:inputText id="apmaterno"
+									label="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.etiqueta.apmaterno')}"
+									placeholder="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.etiqueta.apmaterno')}"
+									value="#{notificacionesBean.filtroPersona.apellidoMaterno}"
+									styleClass="form-control" />
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.boton.buscar')}"
+								action="#{notificacionesBean.buscarPersonas()}" ajax="true"
+								update="tblPersonas" styleClass="btn btn-primary pull-right" />
+						</div>
+					</div>
+				</f:validateBean>
+			</p:panel>
+
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel
+						header="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.titulo.panel.inferior')}"
+						styleClass="fondoPrimario">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-12 flex-derecha">
+									<p:outputLabel value="Todos los seleccionados:" />
+									<p:commandButton ajax="true"
+										value="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.boton.agregar')}"
+										action="#{notificacionesBean.agregarDestinatarios()}"
+										styleClass="btn btn-primary" />
+								</div>
+							</div>
+						</div>
+						<p:dataTable id="tblPersonas"
+							value="#{notificacionesBean.personas}" var="persona"
+							paginator="true" rows="10" tableStyleClass="table"
+							paginatorPosition="bottom" reflow="true"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							rowsPerPageTemplate="5,10,15">
+
+							<p:column priority="2"
+								headerText="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.columna.usuario')}">
+								<h:outputText value="#{persona.usuario}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.columna.nombre')}">
+								<h:outputText value="#{persona.nombre}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.columna.appaterno')}">
+								<h:outputText value="#{persona.apellidoPaterno}" />
+							</p:column>
+							<p:column priority="2"
+								headerText="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.columna.apmaterno')}">
+								<h:outputText value="#{persona.apellidoMaterno}" />
+							</p:column>
+
+							<p:column class="text-center">
+								<p:selectBooleanCheckbox value="#{persona.seleccionado}"></p:selectBooleanCheckbox>
+							</p:column>
+						</p:dataTable>
+
+
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-12">
+									<p:commandButton
+										value="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.boton.regresar')}"
+										styleClass="btn btn-default pull-right"
+										action="#{menuGestorBean.navegaNotificacionEdicion()}" />
+								</div>
+							</div>
+						</div>
+
+					</p:panel>
+				</div>
+			</div>
+
+
+
+
+		</h:form>
+	</ui:define>
+</ui:composition>

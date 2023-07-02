@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<li class="text-center"><h:form>
+			<p:commandLink value="Perfil" ajax="true"
+				action="#{menuGestorBean.navegaMiPerfil}"></p:commandLink>
+		</h:form></li>
+	<li class="text-center"><h:form>
+			<p:commandLink value="Mis cursos" ajax="true"
+				action="#{menuGestorBean.navegaMisCursos}"></p:commandLink>
+		</h:form></li>
+	<li class="divider"></li>
+	<li class="text-center"><h:form>
+			<p:commandLink ajax="true" actionListener="#{loginBean.doLogOut}"
+				value="Cerrar sesión"></p:commandLink>
+		</h:form></li>
+</ui:composition>

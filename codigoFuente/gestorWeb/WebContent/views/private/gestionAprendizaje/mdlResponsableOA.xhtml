@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+
+	<p:dialog id="dlgAsignarOA" modal="true" width="1000"
+		widgetVar="modAsignarOA" draggable="false" position="center"
+		closable="false" styleClass="modalAbsoluto" resizable="false"
+		header="#{sistema.obtenerTexto('gw.ga.label.asigrespava')}">
+
+		<!-- Row 1 -->
+		<p:outputPanel id="asignacionResponsables">
+
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText
+						value="#{sistema.obtenerTexto('gw.ga.label.selecperfil')}" />
+				</div>
+			</div>
+			<div class="margenBot">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.ga.label.oa')}:"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{asignacionRespProduccionGABean.numeroUnidad}" />
+					</div>
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.ga.label.nomtema')}:"
+							styleClass="bloque" />
+						<h:outputText id="idOutputTituloOa"
+							value="#{asignacionRespProduccionGABean.objetoAprendizajeSeleccionado.
+									detEstUnidadDidactica.tituloUa}" />
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<!-- Experto en contenido -->
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.ga.label.expertocont')}"
+							styleClass="bloque" />
+
+
+						<p:selectOneMenu id="idSelectExpertoContenido"
+							value="#{asignacionRespProduccionGABean.objetoAprendizajeSeleccionado.expertoEnContenido.idResponsableProduccion}"
+							autoWidth="false" styleClass="col-xs-12">
+							<p:ajax process="@this" update="asignacionResponsables" />
+							<f:selectItem itemValue="#{0}"
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+							<f:selectItems
+								value="#{asignacionRespProduccionGABean.respProdExpContenidoList}"
+								var="expContenido" itemLabel="#{expContenido.tblPersona.nombreCompleto}"
+								itemValue="#{expContenido.id}" />
+						</p:selectOneMenu>
+					</div>
+					<!-- Diseñador instruccional -->
+					<div class="col-md-6">
+
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.ga.label.disinstruc')}"
+							styleClass="bloque" />
+
+						<p:selectOneMenu id="idSelectDisenadorInst"
+							value="#{asignacionRespProduccionGABean.objetoAprendizajeSeleccionado.disenadorInstruccional.idResponsableProduccion}"
+							autoWidth="false" styleClass="col-xs-12">
+							<p:ajax process="@this" update="asignacionResponsables" />
+							<f:selectItem itemValue="#{0}"
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+							<f:selectItems
+								value="#{asignacionRespProduccionGABean.respProdDisInstList}"
+								var="disenadorInst"
+								itemLabel="#{disenadorInst.tblPersona.nombreCompleto}"
+								itemValue="#{disenadorInst.id}" />
+						</p:selectOneMenu>
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<!-- Disenador elearning -->
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.ga.label.dislearning')}"
+							styleClass="bloque" />
+						<p:selectOneMenu id="idDisenadorElearning"
+							value="#{asignacionRespProduccionGABean.objetoAprendizajeSeleccionado.disenadorElearning.idResponsableProduccion}"
+							autoWidth="false" styleClass="col-xs-12">
+							<p:ajax process="@this" update="asignacionResponsables" />
+							<f:selectItem itemValue="#{0}"
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+							<f:selectItems
+								value="#{asignacionRespProduccionGABean.respProdDisElearningList}"
+								var="disElearning" itemLabel="#{disElearning.tblPersona.nombreCompleto}"
+								itemValue="#{disElearning.id}" />
+						</p:selectOneMenu>
+					</div>
+					<!-- Desarrollador elearning -->
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.ga.label.deslearning')}"
+							styleClass="bloque" />
+						<p:selectOneMenu id="idDesaElearning"
+							value="#{asignacionRespProduccionGABean.objetoAprendizajeSeleccionado.desarrolladorElearning.idResponsableProduccion}"
+							autoWidth="false" styleClass="col-xs-12">
+							<p:ajax process="@this" update="asignacionResponsables" />
+							<f:selectItem itemValue="#{0}"
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+							<f:selectItems
+								value="#{asignacionRespProduccionGABean.respProdDesaElearningList}"
+								var="desaElearning"
+								itemLabel="#{desaElearning.tblPersona.nombreCompleto}"
+								itemValue="#{desaElearning.id}" />
+						</p:selectOneMenu>
+					</div>
+				</div>
+			</div>
+			<!-- Row 6 -->
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel styleClass="margenDerechoMenor"
+							value="#{sistema.obtenerTexto('gw.ga.label.nota')}:" />
+						<h:outputText
+							value="#{sistema.obtenerTexto('gw.ga.label.envnotifi')}" />
+					</div>
+				</div>
+			</div>
+			<!-- Row 7 -->
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton styleClass="btn btn-primary pull-right"
+						process="@form" update="frmSeguimientoAva" ajax="false"
+						disabled="#{asignacionRespProduccionGABean.objetoAprendizajeSeleccionado.expertoEnContenido.idResponsableProduccion eq 0 and asignacionRespProduccionGABean.objetoAprendizajeSeleccionado.disenadorInstruccional.idResponsableProduccion eq 0 and asignacionRespProduccionGABean.objetoAprendizajeSeleccionado.disenadorElearning.idResponsableProduccion eq 0 and asignacionRespProduccionGABean.objetoAprendizajeSeleccionado.desarrolladorElearning.idResponsableProduccion eq 0}"
+						actionListener="#{asignacionRespProduccionGABean.guardarResponsablesEnUnidadOaAva}"
+						onclick="PF('modAsignarOA').hide()"
+						value="#{sistema.obtenerTexto('gw.ga.btn.aceptar')}" />
+					<p:commandButton styleClass="btn btn-default pull-right"
+						process="@form" update="frmSeguimientoAva" ajax="false"
+						onclick="PF('modAsignarOA').hide()"
+						value="#{sistema.obtenerTexto('gw.ga.btn.cancelar')}" />
+				</div>
+			</div>
+		</p:outputPanel>
+
+	</p:dialog>
+
+</ui:composition>
+

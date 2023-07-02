@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:composite="http://java.sun.com/jsf/composite">
+
+<composite:interface>
+	<composite:attribute name="idCat" />
+	<composite:attribute name="nombreCat" />
+	<composite:attribute name="catalogoDTO" />
+	<composite:attribute name="rendered" />
+	<composite:attribute name="accionBtnGuardar"
+		method-signature="void action()"
+		targets="formNested:nombreCatReg,formNested:descCatReg,formNested:ordenCatReg,formNested:activoCatReg" />
+
+	<composite:attribute name="lstContexto" />
+	<composite:attribute name="renderCmpEncuestas" />
+	<composite:attribute name="renderCmpSelect" />
+</composite:interface>
+
+<composite:implementation>
+	<h:form id="formNested">
+		<p:panel header="#{cc.attrs.nombreCat}" id="pnlRegCat"
+			toggleable="false">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel for="nombreCatReg" styleClass="requerido"
+							value="#{sistema.obtenerTexto('gw.catComunes.etiqueta.nombre')}" />
+						<!-- Longitud de campo -->
+						<p:inputText id="nombreCatReg" required="true" maxlength="45"
+							requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+							placeholder="#{sistema.obtenerTexto('gw.catComunes.etiqueta.nombre')}"
+							value="#{cc.attrs.catalogoDTO.nombre}" styleClass="form-control" />
+						<p:message for="nombreCatReg" />
+					</div>
+					<div class="col-md-6">
+						<p:outputLabel for="descCatReg" styleClass="requerido"
+							value="#{sistema.obtenerTexto('gw.catComunes.etiqueta.descripcion')}" />
+						<!-- Longitud de campo -->
+						<p:inputText id="descCatReg" maxlength="45"
+							requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+							placeholder="#{sistema.obtenerTexto('gw.catComunes.etiqueta.descripcion')}"
+							value="#{cc.attrs.catalogoDTO.descripcion}"
+							styleClass="form-control" required="true" />
+						<p:message for="descCatReg" />
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel for="activoCatReg" styleClass="requerido"
+							value="#{sistema.obtenerTexto('gw.catComunes.etiqueta.estatus')}:" />
+						<p:selectOneRadio id="activoCatReg"
+							requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+							value="#{cc.attrs.catalogoDTO.activo}" required="true"
+							styleClass="radioBoton">
+							<f:selectItem
+								itemLabel="#{sistema.obtenerTexto('gw.catComunes.etiqueta.inactivo')}"
+								itemValue="0" />
+							<f:selectItem
+								itemLabel="#{sistema.obtenerTexto('gw.catComunes.etiqueta.activo')}"
+								itemValue="1" />
+						</p:selectOneRadio>
+						<p:message for="activoCatReg" />
+
+					</div>
+					<div class="col-md-6">
+						<p:column
+							headerText="#{sistema.obtenerTexto('gw.catComunes.etiqueta.contexto')}"
+							rendered="#{cc.attrs.renderCmpSelect}">
+							<p:outputLabel for="ordenCatReg" styleClass="requerido"
+								value="#{sistema.obtenerTexto('gw.catComunes.etiqueta.contexto')}:" />
+							<p:selectOneMenu id="selectContexto"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+								value="#{cc.attrs.catalogoDTO.contexto.id}" required="true"
+								styleClass="form-control">
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="" />
+								<f:selectItems value="#{cc.attrs.lstContexto}" var="contexto"
+									itemValue="#{contexto.id}" itemLabel="#{contexto.nombre}" />
+							</p:selectOneMenu>
+							<p:message for="selectContexto" />
+						</p:column>
+					</div>
+					<div class="col-md-6">
+						<div class="form-group">
+							<p:outputLabel for="ordenCatReg" rendered="false"
+								value="#{sistema.obtenerTexto('gw.catComunes.etiqueta.prioridad')}:"
+								styleClass="bloque" />
+							<p:spinner id="ordenCatReg" value="#{cc.attrs.catalogoDTO.orden}"
+								rendered="false" min="0" max="10" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.catComunes.etiqueta.guardar')}"
+							action="#{cc.attrs.accionBtnGuardar}" process="formNested"
+							ajax="true" update="@form" styleClass="btn btn-primary "
+							onstart="PF('statusDialog').hide()" />
+					</div>
+				</div>
+			</div>
+		</p:panel>
+	</h:form>
+</composite:implementation>
+</html>

@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.4.0.final using JasperReports Library version 6.4.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="eventos" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="da7d8bc5-ad51-4403-93ee-a22b86a7aea7">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<style name="table_TH" mode="Opaque" backcolor="#F2F3F4">
+		<box>
+			<pen lineWidth="0.5" lineColor="#F8F8FF"/>
+		</box>
+	</style>
+	<parameter name="P_EJE_CAPACITACION" class="java.lang.String"/>
+	<parameter name="P_TIPO_COMPETENCIA" class="java.lang.String"/>
+	<parameter name="P_MODALIDAD" class="java.lang.String"/>
+	<parameter name="P_NIVEL_ENSENANZA" class="java.lang.String"/>
+	<parameter name="P_CARGA_HORARIA" class="java.lang.String"/>
+	<parameter name="P_NOMBRE_EVENTO" class="java.lang.String"/>
+	<parameter name="P_TIPO_EVENTO" class="java.lang.String"/>
+	<parameter name="P_OBJETIVO_GENERAL" class="java.lang.String"/>
+	<parameter name="P_PERFIL_DESTINATARIO" class="java.lang.String"/>
+	<parameter name="P_REQUISITOS_TECNICOS" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="715" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="20" width="550" height="30" uuid="39f4e574-9b97-4724-ba4a-3cfd5991a6f6"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DATOS DEL PROGRAMA DE CAPACITACIÓN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="70" width="274" height="30" backcolor="#F2F3F4" uuid="e3c989eb-4824-4fc6-acf7-17302a9fe1d9"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Eje de capacitción:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="102" width="274" height="30" uuid="a2a3b477-e28b-480a-ab13-d6e8119082f8"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_EJE_CAPACITACION}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="280" y="70" width="272" height="30" backcolor="#F2F3F4" uuid="cac5d888-ced5-499f-ab0e-9c1426283002"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo de competencia:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="280" y="102" width="272" height="30" uuid="20a1c6cc-36ab-4dff-92ee-c3e3202301da"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TIPO_COMPETENCIA}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="134" width="274" height="30" backcolor="#F2F3F4" uuid="216625a9-4d9e-4f1b-84a4-8ce471c22db2"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Modalidad:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="166" width="274" height="30" uuid="5b46a78b-3bc7-49df-9a92-1e89d8c74a11"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_MODALIDAD}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="280" y="134" width="272" height="30" backcolor="#F2F3F4" uuid="0313f5eb-4fe3-484d-a160-0f650e9ab27a"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nivel de enseñanza:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="280" y="166" width="272" height="30" uuid="967ac19e-b612-43cb-8d49-450c737d4793"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_NIVEL_ENSENANZA}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="198" width="545" height="30" backcolor="#F2F3F4" uuid="827a77d1-1b98-471b-a0f4-6c873bbb6bc4"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Carga horaria registrada en el programa:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="230" width="546" height="30" uuid="5ce87aab-d14a-44d0-b61c-56eab510f8ae"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_CARGA_HORARIA}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="314" width="546" height="30" backcolor="#F2F3F4" uuid="ff7970af-8a8b-4337-83c8-688fae08d2b3"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nombre del evento de capacitación:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="346" width="546" height="30" uuid="0e246f60-7bc3-408d-abb9-68ceb3942d6c"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_NOMBRE_EVENTO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="378" width="546" height="30" backcolor="#F2F3F4" uuid="147288bf-9874-466a-b85e-08326d4e3537"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo de evento de capacitación:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="410" width="546" height="30" uuid="36ca5682-7a2d-4bea-acc9-e33f8e81f32f"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_TIPO_EVENTO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="443" width="546" height="30" backcolor="#F2F3F4" uuid="2be57512-a08d-42c8-80a5-c9a07d9c3748"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Objetivo general:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="475" width="546" height="30" uuid="02aa4d44-0ed0-487c-ac78-a97ddc9f0eb8"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_OBJETIVO_GENERAL}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="508" width="546" height="30" backcolor="#F2F3F4" uuid="ac07590f-0843-4373-96bd-df471237cbf1"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Perfil del destinatario:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="540" width="546" height="30" uuid="8afd50e0-70de-4502-bdaf-3f244a34ee6d"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_PERFIL_DESTINATARIO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="table_TH" positionType="Float" x="5" y="574" width="546" height="30" backcolor="#F2F3F4" uuid="c7753c95-6978-45c5-a516-f7b57efe8ffc"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Requisitos técnicos:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="5" y="606" width="546" height="30" uuid="a8bd190b-f21a-42c1-a687-7d10285890ef"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{P_REQUISITOS_TECNICOS}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="271" width="550" height="30" uuid="00612bb6-865c-4d54-82c3-deafbd4376cf"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DATOS DEL EVENTO DE CAPACITACIÓN]]></text>
+			</staticText>
+		</band>
+	</detail>
+</jasperReport>

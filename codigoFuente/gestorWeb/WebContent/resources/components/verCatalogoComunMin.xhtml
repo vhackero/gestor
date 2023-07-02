@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:composite="http://java.sun.com/jsf/composite">
+
+<composite:interface>
+	<composite:attribute name="idCat" />
+	<composite:attribute name="nombreCat" />
+	<composite:attribute name="rendered" />
+	<composite:attribute name="listenerCambioEstatus"
+		method-signature="void listener()" />
+	<composite:attribute name="accionEditRegCatalogo"
+		method-signature="void action()" />
+	<composite:attribute name="catalogoDTOSel" />
+</composite:interface>
+
+<composite:implementation>
+
+	<p:panel header="#{cc.attrs.nombreCat}" toggleable="false"
+		rendered="#{cc.attrs.rendered}" styleClass="fondoPrimario">
+		<p:dataTable tableStyleClass="table" value="#{cc.attrs.listaElemCat}"
+			var="elemCat" paginator="true" paginatorPosition="bottom"
+			paginatorTemplate=" {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+			rowsPerPageTemplate="5,10,15" rows="10" 	
+			emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}">
+
+			<p:column headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.id')}" sortBy="#{elemCat.id}">
+				<h:outputText value="#{elemCat.nombre}" />
+			</p:column>
+
+			<p:column headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.nombre')}" sortBy="#{elemCat.nomobre}">
+				<h:outputText value="#{elemCat.nombre}" />
+			</p:column>
+
+			<p:column headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.desc')}" sortBy="#{elemCat.descripcion}">
+				<h:outputText value="#{elemCat.descripcion}" />
+			</p:column>
+
+			<p:column headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.fechareg')}"
+				sortBy="#{elemCat.fechaRegistro}">
+				<h:outputText value="#{elemCat.fechaRegistro}">
+					<f:convertDateTime pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+				</h:outputText>
+			</p:column>
+
+			<p:column headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.fechaact')}"
+				sortBy="#{elemCat.fechaActualizacion}">
+				<h:outputText value="#{elemCat.fechaActualizacion}">
+					<f:convertDateTime pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+				</h:outputText>
+			</p:column>
+
+			<p:column  headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.acciones')}" styleClass="text-center">
+				<p:commandButton styleClass="btn btn-default btn-icon icono_sisi ss_gn_mod" ajax="true"
+					update="@form" process="@this" id="campo"
+					action="#{cc.attrs.accionEditRegCatalogo}" onstart="PF('statusDialog').hide()">
+					<f:setPropertyActionListener value="#{elemCat}"
+						target="#{cc.attrs.catalogoDTOSel}" />
+				</p:commandButton>
+			</p:column>
+			<p:tooltip for="campo" value="#{sistema.obtenerTexto('gw.admin.vercat.texto.editar')}" position="top" />
+
+		</p:dataTable>
+	</p:panel>
+
+</composite:implementation>
+
+</html>

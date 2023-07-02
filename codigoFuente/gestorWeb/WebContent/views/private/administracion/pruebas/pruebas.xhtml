@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li></li>
+		<li class="active"></li>
+	</ui:define>
+	<ui:define name="content">
+		<p:ajaxStatus onstart="PF('dialogLayout').show()"
+			onsuccess="PF('dialogLayout').hide()" />
+		<h:form>
+			<p:panel>
+				<p:outputLabel value="#{pruebaBean.titulo}" />
+				<p:inputText id="caja" value="#{pruebaBean.codigoPostal}" required="true" requiredMessage="hola" />
+				<p:commandButton value="Clic" update="@form" ajax="true"
+					styleClass="btn btn-primary" 
+					action="#{pruebaBean.obtenerPersonasPorCodigoPostal()}" />
+				<p:message for="caja" />
+			</p:panel>
+			<p:panel id="panel" header="Titulo del panel">
+				<p:dataTable value="#{pruebaBean.personas}"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					var="persona" paginator="true" rows="10" widgetVar="tblPersonas"
+					paginatorPosition="bottom" reflow="true"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+					<f:facet name="header">
+						<p:outputPanel styleClass="text-right">
+							<p:outputLabel for="globalFilter"
+								value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}:" />
+							<p:inputText id="globalFilter"
+								onkeyup="PF('tblPersonas').filter()"
+								placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+						</p:outputPanel>
+					</f:facet>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.nombre')}"
+						sortBy="#{persona.nombre}" filterMatchMode="contains"
+						filterBy="#{persona.nombre}" filterStyle="display:none">
+						<h:outputText value="#{persona.nombre}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.apPaterno')}"
+						sortBy="#{persona.apellidoPaterno}" filterMatchMode="contains"
+						filterBy="#{persona.apellidoPaterno}" filterStyle="display:none">
+
+						<h:outputText value="#{persona.apellidoPaterno}" />
+					</p:column>
+
+					<p:column headerText="Codigo Postal"
+						sortBy="#{persona.domiciliosPersona.get(0).asentamiento.codigoPostal}"
+						filterMatchMode="contains"
+						filterBy="#{persona.domiciliosPersona.get(0).asentamiento.codigoPostal}"
+						filterStyle="display:none">
+
+						<h:outputText
+							value="#{persona.domiciliosPersona.get(0).asentamiento.codigoPostal}" />
+					</p:column>
+
+					<p:column headerText="Accion">
+						<p:commandButton
+							styleClass="btn-icon btn btn-default icono_sisi ss_gn_agrerol"
+							ajax="true" oncomplete="PF('dialogVerArea').show();"
+							update="@form:panel">
+							<f:setPropertyActionListener value="#{persona}"
+								target="#{pruebaBean.personaSeleccionada}" />
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+
+			</p:panel>
+			<p:dialog draggable="false" position="center" resizable="false"
+				styleClass="medidaModal" closable="false" modal="true"
+				id="dlgVerArea" widgetVar="dialogVerArea"
+				header="#{sistema.obtenerTexto('gw.logistica.texto.consultarconfig')}"
+				dynamic="true">
+
+				<div class="row form-group">
+					<div class="col-md-12">
+						<p:outputLabel id="label"
+							value="#{pruebaBean.personaSeleccionada.nombre}" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton value="cerrar" styleClass="btn btn-default"
+							onclick="PF('dialogVerArea').hide();" />
+					</div>
+				</div>
+
+			</p:dialog>
+
+		</h:form>
+
+	</ui:define>
+</ui:composition>

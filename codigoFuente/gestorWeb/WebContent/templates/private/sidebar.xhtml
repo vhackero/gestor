@@ -1,0 +1,748 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<div class="bloque-enlinea sidebar-contenedor">
+		<h:form id="frmMenu">
+			<div class="navbar-default sidebar" role="navigation">
+				<div class="sidebar-nav navbar-collapse">
+					<p:outputPanel id="menuPrincipal" autoUpdate="false">
+						<ul class="nav nav-first-level" id="side-menu">
+							<li><a href="#"> <span class="m-label">Menú</span> <i
+									class="fa fa-bars fa-fw pull-right"></i>
+									<div class="clear"></div>
+							</a></li>
+							<!-- Menú Construcción basada en permisos -->
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('ADMIN')}">
+								<sec:authorize access="hasPermission(null, 'ADMIN') ">
+									<li><a href="#"
+										title="#{sistema.obtenerTexto('gw.textos.menu.administracion')}">
+											<i class="ss_adm_admin"></i> <span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion')}</span>
+											<span class="fa arrow"></span>
+									</a>
+										<ul class="nav nav-second-level">
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('PERSONA')}">
+												<sec:authorize access="hasPermission(null, 'PERSONA' ) ">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaAdministracionUsuarios}"
+															title="#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.administrarUsuarios')}">
+															<i class="ss_adm_usuarios"></i>
+															<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.administrarUsuarios')}</span>
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('ROLES')}">
+												<sec:authorize access="hasPermission(null, 'ROLES')">
+													<li><h:commandLink action="#{rolBean.init()}"
+															title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.roles')}">
+															<i class="ss_adm_rolpermi"></i>
+															<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.roles')}</span>
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('CON_BIT')}">
+												<sec:authorize access="hasPermission(null, 'CON_BIT')">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaConsultaBitacora}"
+															title="#{sistema.obtenerTexto('gw.textos.menu.administracion.consultarBitacora')}">
+															<i class="ss_adm_consulbita"></i>
+															<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.consultarBitacora')}</span>
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('PERS_SIS')}">
+												<sec:authorize access="hasPermission(null, 'PERS_SIS')">
+													<li><a href="#"
+														title="#{sistema.obtenerTexto('gw.textos.menu.administracion.personalizacion')}">
+															<i class="ss_adm_person"></i> <span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.personalizacion')}</span>
+															<span class="fa arrow"></span>
+													</a>
+														<ul class="nav nav-third-level">
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('TEM')}">
+																<sec:authorize access="hasPermission(null, 'TEM')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaTemas()}"
+																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.temas')}">
+																			<i class="ss_ad_interfaz"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.temas')}</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('EDI_TXTS_SIS')}">
+																<sec:authorize
+																	access="hasPermission(null, 'EDI_TXTS_SIS')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaBusquedaTextosSistema()}"
+																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.textos')}">
+																			<i class="ss_adm_editex"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.textos')}</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('PLNT_MSGS')}">
+																<sec:authorize access="hasPermission(null, 'PLNT_MSGS')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaPlantillaMensajes}"
+																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.mensajes.plantillas')}">
+																			<i class="ss_adm_planmens"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.mensajes.plantillas')}</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('IMAGENES_DOCS')}">
+																<sec:authorize
+																	access="hasPermission(null, 'IMAGENES_DOCS')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaImagenesDocumentos()}"
+																			title="Imágenes de documentos">
+																			<i class="ss_adm_plantilla"></i>
+																			<span class="m-label">Imágenes de documentos</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+
+
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('PLANTILLAS_DOCS')}">
+																<sec:authorize
+																	access="hasPermission(null, 'PLANTILLAS_DOCS')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaPlantillasDocumentos()}"
+																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.plantillas.docs')}">
+																			<i class="ss_adm_plantilla"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.plantillas.docs')}</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+
+														</ul></li>
+												</sec:authorize>
+											</ui:fragment>
+
+
+
+
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('PAR_SIS')}">
+												<sec:authorize access="hasPermission(null, 'PAR_SIS')">
+													<li><a href="#"
+														title="#{sistema.obtenerTexto('gw.textos.menu.configuracion')}">
+															<i class="ss_adm_config"></i> <span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.configuracion')}</span>
+															<span class="fa arrow"></span>
+													</a>
+														<ul class="nav nav-third-level">
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('PAR_SIS')}">
+																<sec:authorize access="hasPermission(null, 'PAR_SIS')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaParametrosSistema()}"
+																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.parametros.sistema')}">
+																			<i class="ss_adm_parsis"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.parametros.sistema')}</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('PAR_SIS')}">
+																<li><h:commandLink 
+																		action="#{menuGestorBean.navegaTareasProgramadas}"
+																		title="#{sistema.obtenerTexto('gw.textos.menu.tareasprogramadas')}">
+																		<i class="ss_gn_asisten"></i>
+																		<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.tareasprogramadas')}</span>
+																	</h:commandLink></li>
+															</ui:fragment>
+
+														</ul></li>
+												</sec:authorize>
+											</ui:fragment>
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('CATALOGOS')}">
+												<sec:authorize access="hasPermission(null, 'CATALOGOS')">
+													<li><a href="#"
+														title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}">
+															<i class="ss_adm_catal"></i> <span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</span>
+															<span class="fa arrow"></span>
+													</a>
+														<ul class="nav nav-third-level">
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('MODULOS')}">
+																<sec:authorize access="hasPermission(null, 'MODULOS')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaFuncionalidades}"
+																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.modulos')}">
+																			<i class="ss_adm_modulos"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.modulos')}</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('EST_TERR')}">
+																<sec:authorize access="hasPermission(null, 'EST_TERR')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaMunicipios}"
+																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.localizacion')}">
+																			<i class="ss_adm_local"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.localizacion')}</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('RECURSOS')}">
+																<sec:authorize access="hasPermission(null, 'RECURSOS')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaRecursos}"
+																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.recursos')}">
+																			<i class="ss_adm_recursos"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.recursos')}</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('PLANES_PROGRAMAS')}">
+																<sec:authorize
+																	access="hasPermission(null, 'PLANES_PROGRAMAS')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaCatPlanesProgramas}"
+																			title="#{sistema.obtenerTexto('gw.administracion.catalogos.cpp')}">
+																			<i class="ss_adm_cataloprogra"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.administracion.catalogos.cpp')}</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('CAT_GEST_ESCOLAR')}">
+																<sec:authorize
+																	access="hasPermission(null, 'CAT_GEST_ESCOLAR')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaCatGestionEscolar}"
+																			title="#{sistema.obtenerTexto('gw.administracion.catalogos.cge')}">
+																			<i class="ss_adm_catgest"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.administracion.catalogos.cge')}</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('CAT_GEST_APRENDIZAJE')}">
+																<sec:authorize
+																	access="hasPermission(null, 'CAT_GEST_ESCOLAR')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaCatGestionAprendizaje}"
+																			title="#{sistema.obtenerTexto('gw.administracion.catalogos.cga')}">
+																			<i class="ss_adm_catgest"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.administracion.catalogos.cga')}</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('CAT_ENCUESTA')}">
+																<sec:authorize
+																	access="hasPermission(null, 'CAT_ENCUESTA')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaCatEncuestas}"
+																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogosenc')}">
+																			<i class="ss_adm_catalencue"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogosenc')}</span>
+
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('CAT_LOGIST_INFRA')}">
+																<sec:authorize
+																	access="hasPermission(null,'CAT_LOGIST_INFRA')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaCatsLogisticaInfraestructura}"
+																			title="#{sistema.obtenerTexto('gw.administracion.catalogos.catlogi')}">
+																			<i class="ss_adm_logisinfra"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.administracion.catalogos.catlogi')}</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('LOG_ACA_INF')}">
+																<sec:authorize access="hasPermission(null,'CONF_SEDES')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaAdminSedeInfra}"
+																			title="#{sistema.obtenerTexto('gw.administracion.catalogos.logisticaInfra.sedes')}">
+																			<i class="ss_adm_logisinfra"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.administracion.catalogos.logisticaInfra.sedes')}</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('CAT_LOGIST_INFRA')}">
+																<sec:authorize
+																	access="hasPermission(null,'CAT_LOGIST_INFRA')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaOrganismosGubernamentales}"
+																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.orggub')}">
+																			<i class="ss_adm_orgaguber"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.orggub')}
+																			</span>
+																		</h:commandLink></li>
+
+																</sec:authorize>
+															</ui:fragment>
+
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('UNI_RESP')}">
+																<sec:authorize access="hasPermission(null,'UNI_RESP')">
+																	<li><h:commandLink
+																			action="#{unidadesResponsablesBean.cargarUnidades()}"
+																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.unidades.responsables')}">
+																			<i class="ss_adm_uniresp"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.unidades.responsables')}</span>
+																		</h:commandLink></li>
+
+																</sec:authorize>
+															</ui:fragment>
+															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('PROG_SOC')}">
+																<sec:authorize access="hasPermission(null,'PROG_SOC')">
+																	<li><h:commandLink
+																			action="#{programasSocialesBean.cargarProgramas()}"
+																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.programas.sociales')}">
+																			<i class="ss_adm_programsoci"></i>
+																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.programas.sociales')}</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+															<ui:fragment>
+																<li><h:commandLink action="#{clasBadgeBean.init()}"
+																		title="#{sistema.obtenerTexto('gw.textos.menu.administracion.class.insignias')}">
+																		<i class="ss_ge_constancias"></i>
+																		<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.class.insignias')}</span>
+																	</h:commandLink></li>
+															</ui:fragment>
+															<ui:fragment>
+																<li><h:commandLink action="#{badgetBean.init()}"
+																		title="#{sistema.obtenerTexto('gw.textos.menu.administracion.insignias')}">
+																		<i class="ss_gn_medalla"></i>
+																		<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.insignias')}</span>
+																	</h:commandLink></li>
+															</ui:fragment>
+														</ul></li>
+												</sec:authorize>
+											</ui:fragment>
+
+										</ul></li>
+								</sec:authorize>
+							</ui:fragment>
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('PLANES_PROGRAMAS')}">
+								<sec:authorize access="hasPermission(null, 'PLANES_PROGRAMAS') ">
+									<li><a href="#"
+										title="#{sistema.obtenerTexto('gw.planesprogramas.etiqueta.menu.titulo')}">
+											<i class="ss_pp_progra"></i> <span class="m-label">#{sistema.obtenerTexto('gw.planesprogramas.etiqueta.menu.titulo')}</span>
+											<span class="fa arrow"></span>
+									</a>
+										<ul class="nav nav-second-level">
+
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('PLANES')}">
+												<sec:authorize access="hasPermission(null, 'PLANES' ) ">
+													<li><h:commandLink rendered="false"
+															action="#{menuGestorBean.navegaPlanProgMallaCurricular}"
+															title="#{sistema.obtenerTexto('gw.planesprogramas.plandeestudio.titulo')}">
+															<i class="ss_pp_planestudio"></i>
+															<span class="m-label">#{sistema.obtenerTexto('gw.planesprogramas.plandeestudio.titulo')}</span>
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('BUSQ_PROG')}">
+												<sec:authorize access="hasPermission(null, 'BUSQ_PROG' ) ">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaBusquedaProgramas}"
+															title="#{sistema.obtenerTexto('gw.planes.titulo.progsCapacitacion')}">
+															<i class="ss_pp_programcapa"></i>
+															<span class="m-label">#{sistema.obtenerTexto('gw.planes.titulo.progsCapacitacion')}</span>
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('ADMIN_CAT_PLAN_PROG')}">
+												<sec:authorize
+													access="hasPermission(null, 'ADMIN_CAT_PLAN_PROG' ) ">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaCompetenciasPorEje}"
+															title="#{sistema.obtenerTexto('gw.administracion.catalogos.titulo.eje.comp')}">
+															<i class="ss_pp_compeje"></i>
+															<span class="m-label">#{sistema.obtenerTexto('gw.administracion.catalogos.titulo.eje.comp')}</span>
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('ADMIN_CAT_PLAN_PROG')}">
+												<sec:authorize
+													access="hasPermission(null, 'ADMIN_CAT_PLAN_PROG' ) ">
+													<li><h:commandLink
+															action="#{competenciaEspecificaBean.administrarCompetencias}"
+															title="#{sistema.obtenerTexto('gw.administracion.catalogos.btn.adm.competencias')}">
+															<i class="ss_pp_admicompe"></i>
+															<span class="m-label">#{sistema.obtenerTexto('gw.administracion.catalogos.btn.adm.competencias')}</span>
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+										</ul></li>
+								</sec:authorize>
+							</ui:fragment>
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('GES_ESC')}">
+								<sec:authorize access="hasPermission(null, 'GES_ESC') ">
+									<li><a href="#"
+										title="#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}">
+											<i class="ss_ge_gestesco"></i> <span class="m-label">#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</span>
+											<span class="fa arrow"></span>
+									</a>
+										<ul class="nav nav-second-level">
+											<!-- 
+                                        <li><a
+                                                href="#{request.contextPath}/views/private/gestionEscolar/chat/chat.xhtml">
+                                                        <i class="ss_ge_chat"></i> <span class="m-label">Prueba
+                                                                de concepto: Chat</span>
+                                        </a></li>
+                                        -->
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('EC_BUS')}">
+												<sec:authorize access="hasPermission(null, 'EC_BUS') ">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaBusquedaEventosCapacitacion}"
+															title="#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCap')}">
+															<i class="ss_ge_evencapaci"></i>
+															<span class="m-label">#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCap')}</span>
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+											<li><h:commandLink
+													action="#{menuGestorBean.navegaResponsablesEventoCapacitacion}"
+													title="#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}">
+													<i class="ss_ge_respeven"></i>
+													<span class="m-label">#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}</span>
+												</h:commandLink></li>
+											<li><h:commandLink
+													action="#{menuGestorBean.navegaExpedienteAlumoBuscar}"
+													title="#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}">
+													<i class="ss_ge_expediente"></i>
+													<span class="m-label">#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}</span>
+												</h:commandLink></li>
+											<li><h:commandLink
+													action="#{menuGestorBean.navegaExpedienteGrupo}"
+													title="Expediente de alumnos por grupo">
+													<i class="ss_en_conteencu"></i>
+													<span class="m-label">Expediente de alumnos por
+														grupo</span>
+												</h:commandLink></li>
+
+
+
+										</ul></li>
+								</sec:authorize>
+							</ui:fragment>
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('GES_APREN')}">
+								<sec:authorize access="hasPermission(null, 'GES_APREN') ">
+									<li><a href="#"
+										title="#{sistema.obtenerTexto('gw.titulo.gestionaprendizaje.texto')}">
+											<i class="ss_ga_gestion"></i> <span class="m-label">#{sistema.obtenerTexto('gw.titulo.gestionaprendizaje.texto')}</span>
+											<span class="fa arrow"></span>
+									</a>
+										<ul class="nav nav-second-level">
+											<li><h:commandLink
+													action="#{menuGestorBean.navegaAmbientesVirtualesAprendizaje}"
+													title="#{sistema.obtenerTexto('gw.titulo.ambientes.texto.ava.parentesis')}">
+													<i class="ss_ga_amvirtual"></i>
+													<span class="m-label">#{sistema.obtenerTexto('gw.titulo.ambientes.texto.ava.parentesis')}</span>
+
+												</h:commandLink></li>
+										</ul></li>
+								</sec:authorize>
+							</ui:fragment>
+
+
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('CURSOS_DISP')}">
+								<sec:authorize access="hasPermission(null, 'CURSOS_DISP') ">
+									<li><h:commandLink
+											action="#{menuGestorBean.navegaMisCursosDisponibles}"
+											title="Cursos disponibles">
+											<i class="ss_pp_progra"></i>
+											<span class="m-label">Cursos disponibles</span>
+
+										</h:commandLink></li>
+								</sec:authorize>
+							</ui:fragment>
+
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('MIS_CURSOS')}">
+								<sec:authorize access="hasPermission(null, 'MIS_CURSOS') ">
+									<li><h:commandLink
+											action="#{menuGestorBean.navegaMisCursos}" title="Mis cursos">
+											<i class="ss_lo_aprovecha"></i>
+											<span class="m-label">Mis cursos</span>
+
+										</h:commandLink></li>
+								</sec:authorize>
+							</ui:fragment>
+
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('MIS_LOGROS')}">
+								<sec:authorize access="hasPermission(null, 'MIS_LOGROS') ">
+									<li><h:commandLink
+											action="#{menuGestorBean.navegaMisLogros}" title="Mis logros">
+											<i class="ss_ga_logros"></i>
+											<span class="m-label">Mis logros</span>
+
+										</h:commandLink></li>
+								</sec:authorize>
+							</ui:fragment>
+
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('CONST')}">
+								<sec:authorize access="hasPermission(null, 'CONST') ">
+									<li><h:commandLink
+											action="#{menuGestorBean.navegaConstancias}"
+											title="Expediente académico">
+											<i class="ss_ge_expediente"></i>
+											<span class="m-label">Expediente académico</span>
+
+										</h:commandLink></li>
+								</sec:authorize>
+							</ui:fragment>
+
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('ENC_EVAL')}">
+
+								<li><a href="#"
+									title="#{sistema.obtenerTexto('gw.encuestas.menu.titulo')}">
+										<i class="ss_en_encuevalu"></i> <span class="m-label">#{sistema.obtenerTexto('gw.encuestas.menu.titulo')}</span>
+										<span class="fa arrow"></span>
+								</a>
+									<ul class="nav nav-second-level">
+										<ui:fragment
+											rendered="#{menuGestorBean.rolTienePermiso('ADM_ENCUESTA')}">
+											<sec:authorize access="hasPermission(null, 'ADM_ENCUESTA')">
+												<li><h:commandLink
+														action="#{menuGestorBean.navegaAdminEncuesta}"
+														title="#{sistema.obtenerTexto('gw.encuestas.consulta.titulo')}">
+														<i class="ss_en_gestencues"></i>
+														<span class="m-label">#{sistema.obtenerTexto('gw.encuestas.consulta.titulo')}</span>
+													</h:commandLink></li>
+											</sec:authorize>
+										</ui:fragment>
+										<ui:fragment
+											rendered="#{menuGestorBean.rolTienePermiso('SEGUIMIENTO_ENCUESTA')}">
+											<sec:authorize access="hasPermission(null, 'SEGUIMIENTO_ENCUESTA')">
+												<li><h:commandLink
+														action="#{menuGestorBean.navegaSeguimientoEncuesta}"
+														title="#{sistema.obtenerTexto('gw.encuestas.seguimiento.titulo')}">
+														<i class="ss_en_segencue"></i>
+														<span class="m-label">#{sistema.obtenerTexto('gw.encuestas.seguimiento.titulo')}</span>
+													</h:commandLink></li>
+											</sec:authorize>
+										</ui:fragment>
+
+										<ui:fragment
+											rendered="#{menuGestorBean.rolTienePermiso('CONTESTA_ENCUESTA')}">
+											<sec:authorize
+												access="hasPermission(null, 'CONTESTA_ENCUESTA')">
+												<li><h:commandLink
+														action="#{menuGestorBean.navegaEncuestasPendientes}"
+														title="#{sistema.obtenerTexto('gw.encuestas.contestar.titulo')}">
+														<i class="ss_en_conteencu"></i>
+														<span class="m-label">#{sistema.obtenerTexto('gw.encuestas.contestar.titulo')}</span>
+													</h:commandLink></li>
+											</sec:authorize>
+										</ui:fragment>
+									</ul></li>
+							</ui:fragment>
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('LOG_ACA_INF')}">
+								<sec:authorize access="hasPermission(null, 'LOG_ACA_INF')">
+									<li><a href="#"
+										title="#{sistema.obtenerTexto('gw.logistica.etiqueta.menu.titulo')}">
+											<i class="ss_lo_logist"></i> <span class="m-label">#{sistema.obtenerTexto('gw.logistica.etiqueta.menu.titulo')}</span>
+											<span class="fa arrow"></span>
+									</a>
+										<ul class="nav nav-second-level">
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('LOG_ACA_INF')}">
+												<sec:authorize access="hasPermission(null, 'LOG_ACA_INF')">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaConfiguracionAreas}"
+															title="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.menu.titulo')}">
+															<i class="ss_la_configareas"></i>
+															<span class="m-label">#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.menu.titulo')}</span>
+
+														</h:commandLink></li>
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaReservacionAreas}"
+															title="#{sistema.obtenerTexto('gw.logistica.etiqueta.menu.reservacion')}">
+															<i class="ss_lo_reservarea"></i>
+															<span class="m-label">#{sistema.obtenerTexto('gw.logistica.etiqueta.menu.reservacion')}</span>
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+										</ul></li>
+								</sec:authorize>
+							</ui:fragment>
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT')}">
+								<sec:authorize access="hasPermission(null, 'ANA_DAT')">
+									<li><a href="#"
+										title="#{sistema.obtenerTexto('gw.analisis.etiqueta.menu.titulo')}">
+											<i class="ss_anda_analisis"></i> <span class="m-label">
+												#{sistema.obtenerTexto('gw.analisis.etiqueta.menu.titulo')}
+										</span> <span class="fa arrow"></span>
+									</a>
+										<ul class="nav nav-second-level">
+
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT')}">
+												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaAnalisisUsuarios}"
+															title="Reporte de usuarios">
+															<i class="ss_adm_usuarios"></i>
+															<span class="m-label">Reporte de usuarios</span>
+
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+
+											<ui:fragment>
+												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
+													<li><h:commandLink rendered="false"
+															action="/views/private/analisisDatos/reporteProgramas.xhtml"
+															title="Reporte de programas">
+															<i class="ss_adm_usuarios"></i>
+															<span class="m-label">Reporte de programas</span>
+
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT')}">
+												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaAnalisisGestionEscolar}"
+															title="Reporte de gestión escolar">
+															<i class="ss_ge_gestesco"></i>
+															<span class="m-label">Reporte de gestión escolar</span>
+
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT')}">
+												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaAnalisisEventos}"
+															title="Reporte de eventos de capacitación">
+															<i class="ss_ge_expediente"></i>
+															<span class="m-label">Reporte de eventos de
+																capacitación</span>
+
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+
+
+
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT')}">
+												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
+													<li><h:commandLink rendered="false"
+															action="/views/private/analisisDatos/reporteAmbientesVirtuales.xhtml"
+															title="Reporte de ambientes virtuales de aprendizaje">
+															<i class="ss_ge_gestesco"></i>
+															<span class="m-label">Reporte de ambientes
+																virtuales de aprendizaje</span>
+
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT')}">
+												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
+													<li><h:commandLink rendered="false"
+															action="/views/private/analisisDatos/reporteReservaciones.xhtml"
+															title="Áreas y recursos">
+															<i class="ss_la_configareas"></i>
+															<span class="m-label">Áreas y recursos</span>
+
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('LOG_ACA_INF')}">
+												<sec:authorize access="hasPermission(null, 'LOG_ACA_INF')">
+													<li><h:commandLink rendered="false"
+															action="/views/private/analisisDatos/graficas.xhtml"
+															title="Programas">
+															<i class="ss_la_configareas"></i>
+															<span class="m-label">Programas</span>
+
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+
+										</ul></li>
+								</sec:authorize>
+							</ui:fragment>
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('GES_APREN_VIST_ALUMNO')}">
+								<sec:authorize
+									access="hasPermission(null, 'GES_APREN_VIST_ALUMNO')">
+									<li><a href="#" title="Mi perfil"> <i
+											class="ss_adm_usuarios"></i> <span class="m-label">
+												#{sistema.obtenerTexto('gw.miperfil.etiqueta.menu.titulo')}
+										</span> <span class="fa arrow"></span>
+									</a>
+										<ul class="nav nav-second-level">
+
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('GES_APREN_VIST_ALUMNO')}">
+												<sec:authorize
+													access="hasPermission(null, 'GES_APREN_VIST_ALUMNO')">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaMisCursos}"
+															title="Mis Cursos">
+															<i class="ss_pp_progra"></i>
+															<span class="m-label">#{sistema.obtenerTexto('gw.miperfil.etiqueta.menu.miscursos')}</span>
+
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+
+
+										</ul></li>
+								</sec:authorize>
+							</ui:fragment>
+						</ul>
+					</p:outputPanel>
+				</div>
+			</div>
+		</h:form>
+	</div>
+
+</ui:composition>

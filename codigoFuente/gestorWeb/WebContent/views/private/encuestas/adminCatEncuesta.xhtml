@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	 xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:components="http://java.sun.com/jsf/composite/components">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogosenc')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogosenc')}</h1>
+		<hr />
+		<h:form id="formf">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<div class="row">
+				<div class="col-md-4">
+					<p:accordionPanel multiple="true" activeIndex="null" id="acordion"
+						styleClass="acordeoncatalogo">
+						<c:forEach items="#{catEncuestasBean.catalogosEncuestasYEval}"
+							var="cat">
+							<p:tab id="tab#{cat.id}" title="#{cat.nombre}">
+								<p:commandLink value="#{sistema.obtenerTexto('gw.encuestas.texto.registrar')}" process="@this"
+									id="link#{cat.id}" rendered="#{cat.visualizarReg}"
+									action="#{catEncuestasBean.generaComponenteReg(cat)}"
+									update="formf" styleClass="bloque" />
+								
+								<p:commandLink value="#{sistema.obtenerTexto('gw.encuestas.texto.visualizar')}" process="@this"
+									id="link2#{cat.id}"
+									action="#{catEncuestasBean.obtenerDatosCatSel(cat)}"
+									update="formf" />
+							</p:tab>
+						</c:forEach>
+					</p:accordionPanel>
+				</div>
+
+				<div class="col-md-8">
+					<components:regCatalogoComun idCat="#{catEncuestasBean.idCat}"
+						nombreCat="#{catEncuestasBean.nombreCat}"
+						catalogoDTO="#{catEncuestasBean.catComunDTOGenerico}"
+						rendered="#{catEncuestasBean.muestraCompReg}"
+						accionBtnGuardar="#{catEncuestasBean.guardarRegCatalogo}"
+						renderCmpSelect="#{catEncuestasBean.renderCmpSelect}"
+						lstContexto="#{catEncuestasBean.lstCatContexto}" />
+					<br />
+					<components:verCatalogoComun idCat="#{catEncuestasBean.idCat}"
+						nombreCat="#{catEncuestasBean.nombreCat}"
+						listaElemCat="#{catEncuestasBean.lstCatSelec}"
+						rendered="#{catEncuestasBean.muestraCompTabla}"
+						listenerCambioEstatus="#{catEncuestasBean.cambioEstatusCatSelec}"
+						accionEditRegCatalogo="#{catEncuestasBean.editaRegCatSeleccionado}"
+						catalogoDTOSel="#{catEncuestasBean.catComunDTOGenerico}"
+						renderCmpSelect="#{catEncuestasBean.renderCmpSelect}" />
+
+				</div>
+
+			</div>
+		</h:form>
+
+
+	</ui:define>
+
+</ui:composition>

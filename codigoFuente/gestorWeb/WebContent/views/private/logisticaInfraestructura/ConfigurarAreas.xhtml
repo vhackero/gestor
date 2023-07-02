@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.logistica.etiqueta.menu.titulo')}</li>
+		<li>#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.menu.titulo')}</li>
+		<li class="active"><h:outputText
+				rendered="#{areasBean.nuevaConfigArea}"
+				value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.menu.titulo')}" />
+			<h:outputText rendered="#{areasBean.editConfigArea}"
+				value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.editarConfig')}" />
+			<h:outputText rendered="#{areasBean.verConfigArea}"
+				value="Ver configuración de área" /></li>
+	</ui:define>
+	<ui:define name="content">
+		<p:ajaxStatus onstart="PF('dialogLayout').show()"
+			onsuccess="PF('dialogLayout').hide()" />
+		<h:form id="formAreaSeleccionada" enctype="multipart/form-data">
+
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+
+			<p:remoteCommand process="@this" name="formAreaSeleccionada"
+				action="#{areasBean.carousel()}" />
+
+			<h:panelGrid rendered="#{areasBean.nuevaConfigArea}">
+				<h1>#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.menu.titulo')}</h1>
+			</h:panelGrid>
+
+			<h:panelGrid rendered="#{areasBean.editConfigArea}">
+				<h1>#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.editarConfig')}</h1>
+			</h:panelGrid>
+
+			<h:panelGrid rendered="#{areasBean.verConfigArea}">
+				<h1>Ver configuración de área</h1>
+			</h:panelGrid>
+
+			<hr />
+
+			<!-- Panel evento capacitacion -->
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.infoArea')}"
+				rendered="#{!areasBean.nuevaConfigArea}">
+				<ui:include src="infoAreaInfra.xhtml" />
+			</p:panel>
+
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.nuevaConfig')}"
+				id="pnlConfigArea" rendered="#{areasBean.nuevaConfigArea}">
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-3">
+							<p:outputLabel styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.dependencia')}:" />
+
+						</div>
+						<div class="col-md-offset-3 col-md-3">
+							<p:outputLabel for="selUbicacion" styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.ubicacion')}:" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-3">
+
+							<p:inputText readonly="true" id="orgGubNombre"
+								styleClass="orgGubOpacity form-control"
+								value="#{areasBean.criteriosBusq.orgGubNombre}" />
+							<p:message for="treeTbl" />
+
+						</div>
+
+						<div class="col-md-3">
+							<p:commandButton id="selDependencia"
+								styleClass="btn btn-primary quitaMargen"
+								value="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								type="button" />
+
+							<p:overlayPanel for="selDependencia" hideEffect="fade"
+								showCloseIcon="true" widgetVar="wdgOvrDependencia">
+
+								<p:treeTable id="treeTbl"
+									value="#{areasBean.arbolOrgGubernamental}" var="dependencia"
+									selectionMode="single" styleClass="reserv" scrollable="true"
+									scrollWidth="600"
+									selection="#{areasBean.nodoOrgGubernamentalSel}">
+									<p:ajax event="select" update="@form"
+										listener="#{areasBean.onNodeSelectDependencia}" />
+									<f:facet name="header">
+								           #{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.estOrg')}
+								        </f:facet>
+									<p:column
+										headerText="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.orgGub')}">
+										<h:outputText value="#{dependencia.nombre}" />
+									</p:column>
+								</p:treeTable>
+							</p:overlayPanel>
+							<p:message for="selDependencia" />
+						</div>
+
+						<div class="col-md-6">
+
+							<p:selectOneMenu value="#{areasBean.criteriosBusq.idUbicacion}"
+								valueChangeListener="#{areasBean.onChangeBusqUbicacion}"
+								disabled="#{areasBean.nodoOrgGubernamentalSel eq null}"
+								id="selUbicacion" styleClass="col-xs-12">
+								<f:selectItem itemValue="#{0}"
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									noSelectionOption="true" />
+								<f:selectItems value="#{areasBean.catUbicacionTerr}" var="ubi"
+									itemLabel="#{ubi.nombre}" itemValue="#{ubi.id}" />
+								<p:ajax update="@form" />
+							</p:selectOneMenu>
+
+							<p:message for="selUbicacion" />
+
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6">
+							<p:outputLabel for="cmbSede" styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.sede')}:" />
+							<p:selectOneMenu id="cmbSede" styleClass="col-xs-12"
+								value="#{areasBean.criteriosBusq.idSede}"
+								disabled="#{areasBean.criteriosBusq.idUbicacion eq 0}"
+								valueChangeListener="#{areasBean.onChangeSedeBusqueda}">
+								<f:selectItem itemValue="#{0}"
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									noSelectionOption="true" />
+								<f:selectItems value="#{areasBean.catSedesInfra}" var="sede"
+									itemLabel="#{sede.nombre}" itemValue="#{sede.idSede}" />
+								<p:ajax update="@form" />
+							</p:selectOneMenu>
+
+							<p:message for="cmbSede" />
+
+						</div>
+
+						<div class="col-md-6">
+							<p:outputLabel for="cmbArea" styleClass="bloque requerido"
+								value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.area')}:" />
+							<p:selectOneMenu value="#{areasBean.criteriosBusq.idAreaSede}"
+								id="cmbArea" styleClass="col-xs-12"
+								disabled="#{(areasBean.criteriosBusq.idSede eq 0) or (areasBean.criteriosBusq.idUbicacion eq 0) }"
+								valueChangeListener="#{areasBean.onChangeAreaSede}">
+								<f:selectItem itemValue="#{0}"
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+								<f:selectItems value="#{areasBean.areasXSede}" var="areaSede"
+									itemLabel="#{areaSede.catArea.nombre}"
+									itemValue="#{areaSede.idAreaSede}" />
+								<p:ajax process="@this" update="@form" />
+							</p:selectOneMenu>
+							<p:message for="cmbArea" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 col-xs-12">
+						<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.encuestas.etiqueta.obligatorios')}" />
+					</div>
+				</div>
+			</p:panel>
+
+
+			<!-- Panel configuracion -->
+			<p:panel id="pnlConfArea"
+				header="#{sistema.obtenerTexto('gw.configuracionAreas.pnlHeader.configuracion')}">
+
+				<div class="row">
+					<div class="col-md-12 col-xs-12">
+						<p:outputLabel styleClass="requerido" for="btnExaminar"
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.cargarfotos')}" />
+
+						<p:fileUpload id="btnExaminar" update="@form"
+							disabled="#{(areasBean.criteriosBusq.idAreaSede eq 0) or (areasBean.verConfigArea)}"
+							label="#{sistema.obtenerTexto('gw.configuracionAreas.button.examinar')}"
+							mode="advanced" skinSimple="true" auto="true"
+							fileUploadListener="#{areasBean.cargaImagen}" />
+						<p:message for="btnExaminar" />
+						<p:outputLabel for="btnExaminar"
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.pesomaximo')}" />
+					</div>
+
+				</div>
+
+				<div class="row">
+					<div class="col-md-12 col-xs-12">
+						<p:dataTable id="tblImagenes" tableStyleClass="table"
+							styleClass="table" var="imagen"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							rowsPerPageTemplate="5,10,15" rows="10"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							value="#{areasBean.arrayImagenes}" paginator="true"
+							paginatorPosition="bottom">
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.nombreimagen')}">
+								<h:outputText value="#{imagen.name}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.pesofotografia')}">
+								<h:outputText value="#{imagen.length()}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.acciones')}"
+								styleClass="text-center">
+								<p:commandButton id="eliminar"
+									disabled="#{areasBean.verConfigArea}"
+									styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
+									oncomplete="PF('wdgBorrarImagen').show();" ajax="true"
+									process="@this">
+									<f:setPropertyActionListener value="#{imagen}"
+										target="#{areasBean.imagenElim}" />
+								</p:commandButton>
+								<p:tooltip for="eliminar" position="top"
+									value="#{sistema.obtenerTexto('gw.logisticainfra.tooltip.eliminar')}" />
+							</p:column>
+						</p:dataTable>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 col-xs-12 contenedorImagenPlantilla">
+						<p:carousel value="#{areasBean.imagenes}" var="imagen"
+							id="cmpImgsEnc" numVisible="3" responsive="true" circular="false">
+							<div class="flexCentrarXY" style="margin: 5%">
+								<p:graphicImage value="#{imagen}"
+									styleClass="ajustaImgPlantilla" stream="false" />
+							</div>
+
+						</p:carousel>
+					</div>
+				</div>
+
+				<!-- Recursos tecnologicos -->
+				<div class="row">
+					<div class="col-md-6 col-xs-12">
+						<p:outputLabel for="selTec"
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.recursostecnologicos')}:" />
+					</div>
+					<div class="col-md-3 col-xs-12">
+						<p:outputLabel for="inputCantidad"
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.cantidad')}" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6 col-xs-12">
+
+						<p:selectOneMenu id="selTec" value="#{areasBean.recursosTecSelec}"
+							converter="entityConverter" styleClass="col-xs-12"
+							disabled="#{areasBean.verConfigArea}">
+							<p:ajax process="@this" update="@form" />
+							<f:selectItem itemValue="#{null}"
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+							<f:selectItems value="#{areasBean.recursosTec}" var="rt"
+								itemLabel="#{rt.nombre}" itemValue="#{rt}" />
+						</p:selectOneMenu>
+					</div>
+					<div class="col-md-3 col-xs-12">
+						<!-- Longitud de campo -->
+						<p:inputText id="inputCantidad" maxlength="3"
+							disabled="#{(empty areasBean.recursosTecSelec) or (areasBean.verConfigArea)}"
+							value="#{areasBean.tecGuardar.cantidad}">
+							<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+							<p:ajax process="@this" />
+						</p:inputText>
+					</div>
+					<div class="col-md-3 col-xs-12">
+						<p:commandButton action="#{areasBean.agregarTecTbl}"
+							id="btnTecTbl"
+							disabled="#{(empty areasBean.recursosTecSelec) or (areasBean.verConfigArea)}"
+							update="@form" styleClass="btn btn-primary pull-right"
+							process="@this"
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.button.agregar')}">
+						</p:commandButton>
+					</div>
+				</div>
+
+				<div class="row">
+					<!-- tabla Recursos Tecnologicos -->
+					<div class="col-md-12 col-xs-12">
+						<p:dataTable id="tblRecursosTecnologicos"
+							value="#{areasBean.tblTec}" tableStyleClass="table"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							paginator="true" rows="10" paginatorPosition="bottom" var="rt"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							rowsPerPageTemplate="5,10,15" styleClass="table">
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.nombre')}">
+								<h:outputText value="#{rt.catRecursosInfraestructura.nombre}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.cantidad')}">
+								<h:outputText value="#{rt.cantidad}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.acciones')}"
+								styleClass="text-center">
+								<p:commandButton id="eliminarRecursosTec"
+									disabled="#{areasBean.verConfigArea}"
+									styleClass="btn btn-default btn-icon icono_sisi ss_gn_eliminar"
+									update="@form" ajax="true" process="@this"
+									action="#{areasBean.eliminarRecursoTec}">
+									<f:setPropertyActionListener value="#{rt}"
+										target="#{areasBean.tecGuardar}" />
+								</p:commandButton>
+								<p:tooltip for="eliminarRecursosTec" position="top"
+									value="#{sistema.obtenerTexto('gw.logisticainfra.tooltip.eliminar')}" />
+
+							</p:column>
+						</p:dataTable>
+					</div>
+				</div>
+
+				<!-- recursos mobiliarios -->
+				<div class="row">
+					<div class="col-md-6 col-xs-12">
+						<p:outputLabel for="selMob"
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.mobiliarios')}:" />
+					</div>
+					<div class="col-md-3 col-xs-12">
+						<p:outputLabel for="inputCantidadM"
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.cantidad')}" />
+					</div>
+
+				</div>
+				<div class="row">
+					<div class="col-md-6 col-xs-12">
+
+						<p:selectOneMenu id="selMob" styleClass="col-xs-12"
+							value="#{areasBean.recursosMobiSelec}"
+							disabled="#{areasBean.verConfigArea}" converter="entityConverter">
+							<p:ajax process="@this" update="@form" />
+							<f:selectItem itemValue="#{null}"
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+							<f:selectItems value="#{areasBean.recursosMobi}" var="rm"
+								itemLabel="#{rm.nombre}" itemValue="#{rm}" />
+						</p:selectOneMenu>
+					</div>
+					<div class="col-md-3 col-xs-12">
+						<!-- Longitud de campo -->
+						<p:inputText id="inputCantidadM" maxlength="3"
+							disabled="#{(empty areasBean.recursosMobiSelec) or (areasBean.verConfigArea)}"
+							value="#{areasBean.mobiGuardar.cantidad}">
+							<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+							<p:ajax process="@this" />
+						</p:inputText>
+					</div>
+					<div class="col-md-3 col-xs-12">
+						<p:commandButton action="#{areasBean.agregarMobiTbl}"
+							id="btnRecMob"
+							disabled="#{(empty areasBean.recursosMobiSelec) or (areasBean.verConfigArea)}"
+							update="@form" ajax="true" process="@this"
+							styleClass="pull-right btn btn-primary"
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.button.agregar')}">
+						</p:commandButton>
+					</div>
+				</div>
+
+				<div class="row">
+
+					<div class="col-md-12 col-xs-12">
+						<!-- Tabla Recursos Mobiliarios -->
+						<p:dataTable id="tblRecursosMobiliarios"
+							value="#{areasBean.tblMobi}" tableStyleClass="table"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.msjRegistros')}"
+							paginator="true" rows="10" paginatorPosition="bottom" var="rm"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							rowsPerPageTemplate="5,10,15" styleClass="table">
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.nombre')}">
+								<h:outputText value="#{rm.catRecursosInfraestructura.nombre}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.cantidad')}">
+								<h:outputText value="#{rm.cantidad}" />
+							</p:column>
+
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.acciones')}"
+								styleClass="text-center">
+								<p:commandButton id="eliminarRecursosMob"
+									styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
+									update="@form" process="@this"
+									disabled="#{areasBean.verConfigArea}"
+									action="#{areasBean.eliminarRecursoMobi}">
+									<f:setPropertyActionListener value="#{rm}"
+										target="#{areasBean.mobiGuardar}" />
+								</p:commandButton>
+								<p:tooltip for="eliminarRecursosMob" position="top"
+									value="#{sistema.obtenerTexto('gw.logisticainfra.tooltip.eliminar')}" />
+
+							</p:column>
+						</p:dataTable>
+					</div>
+				</div>
+				<!-- Distribucionn -->
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6 col-xs-12">
+							<p:outputLabel for="selDist"
+								rendered="#{!areasBean.verConfigArea}"
+								value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.distribucion')}" />
+
+							<p:selectCheckboxMenu id="selDist"
+								label="#{areasBean.styleDistLabel}"
+								rendered="#{!areasBean.verConfigArea}"
+								value="#{areasBean.distribucionesSelec}"
+								styleClass="col-xs-12 form-control chkTiposComp #{areasBean.styleDist}"
+								filter="true" filterMatchMode="startsWith">
+								<p:ajax process="@this" update="@this" event="change"
+									listener="#{areasBean.styleDistChange()}" />
+								<p:ajax process="@this" update="@this" event="toggleSelect"
+									listener="#{areasBean.styleDistChange}" />
+								<f:selectItems value="#{areasBean.distribuciones}" var="d"
+									itemLabel="#{d.nombre}" itemValue="#{d.id}" />
+							</p:selectCheckboxMenu>
+							<p:outputLabel rendered="#{areasBean.verConfigArea}"
+								value="Distribuciones seleccionadas:" styleClass="bloque" />
+							<h:outputText rendered="#{areasBean.verConfigArea}"
+								value="#{areasBean.obtenerDistribuciones()}" />
+						</div>
+					</div>
+
+				</div>
+
+				<div class="row">
+					<div class="col-md-12  col-xs-12">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.solicitudresponsablearea')}" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.correo')}:"
+							styleClass="requerido" for="emailS" />
+					</div>
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel for="idC"
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.cc')}:" />
+					</div>
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel for="selEst"
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.estatus')}:"
+							styleClass="requerido" />
+
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4 col-xs-12">
+							<!-- Longitud de campo -->
+							<p:inputText required="true" type="email"
+								requiredMessage="Dato requerido."
+								value="#{areasBean.areaSeleccionada.emailResponsable}"
+								disabled="#{areasBean.verConfigArea}" id="emailS"
+								maxlength="150" styleClass="form-control">
+								<p:ajax process="@this" />
+							</p:inputText>
+							<p:message for="emailS" />
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+							<!-- Longitud de campo -->
+							<p:inputText id="idC" type="email"
+								disabled="#{areasBean.verConfigArea}"
+								value="#{areasBean.areaSeleccionada.emailCc}" maxlength="150"
+								styleClass="form-control">
+								<p:ajax process="@this" />
+							</p:inputText>
+							<p:message for="idC" />
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+							<p:selectOneMenu id="selEst" styleClass="col-xs-12" 
+								disabled="true" required="true"
+								requiredMessage="Dato requerido."
+								value="#{areasBean.areaSeleccionada.catEstatusArea.id}"
+								converter="entityConverter">
+								<p:ajax process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									noSelectionOption="true" />
+								<f:selectItems value="#{areasBean.estatusArea}" var="e"
+									itemLabel="#{e.nombre}" itemValue="#{e.id}" />
+							</p:selectOneMenu>
+							<p:message for="selEst" />
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12 col-xs-12">
+						<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.encuestas.etiqueta.obligatorios')}" />
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12 col-xs-12">
+						<p:commandButton id="btnGuardarConf"
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.button.guardar')}"
+							styleClass="btn btn-primary pull-right" ajax="true"
+							validateClient="true" rendered="#{!areasBean.verConfigArea}"
+							action="#{areasBean.guardaAreaConfig}" update="@form" />
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.button.cancelar')}"
+							ajax="true" styleClass="btn btn-default pull-right"
+							process="@this" action="#{areasBean.cancelaImagenes}" />
+					</div>
+				</div>
+			</p:panel>
+
+			<p:dialog id="dialogBorrarImagen" modal="true" closable="false"
+				widgetVar="wdgBorrarImagen" styleClass="medidaModal"
+				header="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.estasSeguro')}">
+
+				<p:commandButton
+					value="#{sistema.obtenerTexto('gw.gestionescolar.button.si')}"
+					ajax="true" oncomplete="PF('wdgBorrarImagen').hide();"
+					validateClient="true" action="#{areasBean.eliminarImagen()}"
+					process="@this" styleClass="btn btn-primary pull-right"
+					update="@form" />
+				<p:commandButton
+					value="#{sistema.obtenerTexto('gw.gestionescolar.button.no')}"
+					type="button" onclick="PF('wdgBorrarImagen').hide();"
+					styleClass="btn btn-default pull-right" />
+			</p:dialog>
+		</h:form>
+
+
+		<p:dialog responsive="true" dynamic="true" modal="true" id="dlgInfo"
+			closable="false" draggable="false" position="center"
+			resizable="false" appendTo="@(body)" styleClass="medidaModal"
+			header="#{sistema.obtenerTexto('gw.configuracionAreas.titulo.configAreas')}"
+			widgetVar="dlgConfArea">
+			<h:form>
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputLabel
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.info.registroArea')}" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.configuracionAreas.btn.aceptar')}"
+							action="#{areasBean.navegaConsultaAreasConfig}"
+							styleClass="btn btn-primary pull-right" />
+					</div>
+				</div>
+			</h:form>
+		</p:dialog>
+
+	</ui:define>
+</ui:composition>

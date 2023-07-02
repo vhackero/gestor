@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+	<p:panel header="Datos del Evento de Capacitación">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-3">
+					<p:outputLabel styleClass="bloque" value="Id del evento" />
+					<h:outputText
+						value="#{eventoCapacitacionBean.eventoSelec.idEvento}" />
+				</div>
+				<div class="col-md-3">
+					<p:outputLabel styleClass="bloque" value="Nombre del evento de capacitación" />
+					<h:outputText
+						value="#{eventoCapacitacionBean.eventoSelec.nombreEc}" />
+				</div>
+				<div class="col-md-3">
+					<p:outputLabel styleClass="bloque" value="Tipo de competencia" />
+					<h:outputText
+						value="#{eventoCapacitacionBean.nombreEjeCapacitacion}" />
+				</div>
+				<div class="col-md-3">
+					<p:outputLabel styleClass="bloque" value="Eje de Capacitacion" />
+					<h:outputText
+						value="#{eventoCapacitacionBean.nombreEjeCapacitacion}" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-3">
+					<p:outputLabel styleClass="bloque" value="Modalidad" />
+					<h:outputText
+						value="#{eventoCapacitacionBean.eventoSelec.catModalidadPlanPrograma.nombre}" />
+				</div>
+				<div class="col-md-3">
+					<p:outputLabel styleClass="bloque" value="Fecha Inicial" />
+					<h:outputText
+						value="#{eventoCapacitacionBean.eventoSelec.fechaInicial}">
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+					</h:outputText>
+				</div>
+				<div class="col-md-3">
+					<p:outputLabel styleClass="bloque" value="Fecha Final" />
+					<h:outputText
+						value="#{eventoCapacitacionBean.eventoSelec.fechaFinal}">
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+					</h:outputText>
+				</div>
+				<div class="col-md-3">
+					<p:outputLabel styleClass="bloque" value="Coordinador Academico" />
+					<h:outputText
+						value="#{eventoCapacitacionBean.eventoSelec.responsableCoordinadorAcademico.personaResponsabilidad.tblPersona.nombreCompleto}" />
+				</div>
+			</div>
+		</div>
+	</p:panel>
+</ui:composition>

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.planesprogramas.etiqueta.menu.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.planesprogramas.plandeestudio.titulo')}</li>
+	</ui:define>
+
+
+	<ui:define name="content">
+		<h:form id="frmAddRecAct">
+			<p:messages autoUpdate="true" closable="true" />
+
+			<p:panel id="pnlAct" header="#{sistema.obtenerTexto('gw.planesprogramas.panel.actividad')}"
+				rendered="#{asignaRecursosMdlBean.showPnlActividad}">
+				<p:fieldset
+					legend="Asignar #{asignaRecursosMdlBean.actividadMdl.nombre} a #{asignaRecursosMdlBean.temarioProgSelect.nombre}"
+					toggleable="true" toggleSpeed="500">
+					<div class="row">
+						<div class="col-md-8">
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.planesprogramas.texto.nombre')}:" styleClass="bloque" />
+							<p:inputText id="actNom" styleClass="form-control"
+								value="#{asignaRecursosMdlBean.actModuleMdl.name}"
+								placeholder="#{sistema.obtenerTexto('gw.planesprogramas.texto.nombre')}" required="true"
+								requiredMessage="es requerido." />
+							<p:message for="actNom" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.planesprogramas.texto.desc')}:" styleClass="bloque" />
+							<p:editor rendered="#{asignaRecursosMdlBean.showPnlActividad}"
+								id="editor" widgetVar="descWdg" width="600"
+								value="#{asignaRecursosMdlBean.actModuleMdl.summary}" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton value="#{sistema.obtenerTexto('gw.planesprogramas.btn.guardar')}"
+								styleClass="btn btn-primary pull-right"
+								action="#{asignaRecursosMdlBean.guardaRelActividadTema}"
+								process=":frmAddRecAct" ajax="true" update="@form" />
+						</div>
+					</div>
+				</p:fieldset>
+			</p:panel>
+
+			<p:panel id="pnlRec" header="#{sistema.obtenerTexto('gw.planesprogramas.panel.recurso')}"
+				rendered="#{asignaRecursosMdlBean.showPnlRecurso}">
+				<p:fieldset
+					legend="Asignar #{asignaRecursosMdlBean.recursoMdl.nombre} a #{asignaRecursosMdlBean.temarioProgSelect.nombre}"
+					toggleable="true" toggleSpeed="500">
+					<div class="row">
+						<div class="col-md-8">
+
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.planesprogramas.texto.nombre')}:" styleClass="bloque" />
+							<p:inputText styleClass="form-control" placeholder="#{sistema.obtenerTexto('gw.planesprogramas.texto.nombre')}"
+								value="#{asignaRecursosMdlBean.recursoModuleMdl.name}"
+								required="true" requiredMessage="es requerido" />
+
+
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.planesprogramas.texto.desc')}:" styleClass="bloque" />
+							<p:editor rendered="#{asignaRecursosMdlBean.showPnlRecurso}"
+								id="editorRec" widgetVar="descRecWdg" width="600"
+								value="#{asignaRecursosMdlBean.recursoModuleMdl.summary}" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton value="#{sistema.obtenerTexto('gw.planesprogramas.btn.guardar')}"
+								action="#{asignaRecursosMdlBean.guardaRelRecursoTema}"
+								ajax="true" update="@form"
+								styleClass="btn btn-primary pull-right" />
+						</div>
+					</div>
+				</p:fieldset>
+			</p:panel>
+		</h:form>
+
+		<p:dialog modal="true" resizable="false" styleClass="medidaModal"
+			draggable="false" position="center" widgetVar="dlgRecActMdl"
+			visible="true" closable="false" header="#{sistema.obtenerTexto('gw.planesprogramas.panel.recyact')}">
+			<h:form>
+				<p:ajaxStatus onstart="PF('dialogLayout').show()"
+					onsuccess="PF('dialogLayout').hide()" />
+				<div class="row">
+					<div class="col-md-6">
+						<p:panel header="#{sistema.obtenerTexto('gw.planesprogramas.panel.actividad')}">
+							<p:scrollPanel style="height:380px; text-align:center;">
+								<p:selectOneRadio id="customRadio"
+									value="#{asignaRecursosMdlBean.actividadMdlSel}" layout="grid"
+									columns="1">
+									<p:ajax event="click"
+										listener="#{asignaRecursosMdlBean.onSelecActividadMdl}"
+										update="pnlDescMod" />
+									<f:selectItems value="#{asignaRecursosMdlBean.actividadesMdl}"
+										var="actMdl" itemValue="#{actMdl.id}" itemLabelEscaped="false"
+										itemLabel="&lt;img width=&quot;40&quot; height=&quot;40&quot;  src=&quot;#{request.contextPath}/javax.faces.resource/usuarios/muestra.png.jsf?ln=images&quot; /&gt; #{actMdl.nombre}" />
+								</p:selectOneRadio>
+							</p:scrollPanel>
+						</p:panel>
+
+						<p:panel header="#{sistema.obtenerTexto('gw.planesprogramas.panel.recurso')}">
+							<p:scrollPanel style="height:380px; text-align:center;">
+								<p:selectOneRadio id="customRadioRec"
+									value="#{asignaRecursosMdlBean.recursoMdlSel}" layout="grid"
+									columns="1">
+									<p:ajax event="click"
+										listener="#{asignaRecursosMdlBean.onSelecRecursoMdl}"
+										update="pnlDescRecMod" />
+									<f:selectItems value="#{asignaRecursosMdlBean.recursosMdl}"
+										var="recMdl" itemValue="#{recMdl.id}" itemLabelEscaped="false"
+										itemLabel="&lt;img width=&quot;40&quot; height=&quot;40&quot;  src=&quot;#{request.contextPath}/javax.faces.resource/usuarios/muestra.png.jsf?ln=images&quot; /&gt; #{recMdl.nombre}" />
+								</p:selectOneRadio>
+							</p:scrollPanel>
+						</p:panel>
+					</div>
+
+					<div class="col-md-6">
+						<p:panel id="pnlDescMod" header="#{sistema.obtenerTexto('gw.planesprogramas.panel.descact')}">
+							<p:scrollPanel style="height:380px; text-align:center;">
+								<p:outputLabel value=" #{asignaRecursosMdlBean.descActMdl}" />
+							</p:scrollPanel>
+						</p:panel>
+
+						<p:panel id="pnlDescRecMod" header="#{sistema.obtenerTexto('gw.planesprogramas.panel.descrec')}">
+							<p:scrollPanel style="height:380px; text-align:center;">
+								<p:outputLabel value="#{asignaRecursosMdlBean.descRecMdl}"
+									style="white-space: pre-wrap;word-wrap: break-word;" />
+							</p:scrollPanel>
+						</p:panel>
+
+					</div>
+				</div>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton value="#{sistema.obtenerTexto('gw.planesprogramas.btn.aceptar')}"
+								action="#{asignaRecursosMdlBean.asignaActRecATema}"
+								update=":frmAddRecAct" ajax="true"
+								styleClass="btn btn-primarty pull-right"
+								oncomplete="PF('dlgRecActMdl').hide();" />
+							<p:commandButton value="#{sistema.obtenerTexto('gw.planesprogramas.btn.cancelar')}"
+								styleClass="btn btn-default pull-right"
+								onclick="PF('dlgRecActMdl').hide();" />
+						</div>
+					</div>
+				</f:facet>
+			</h:form>
+		</p:dialog>
+	</ui:define>
+
+
+</ui:composition>

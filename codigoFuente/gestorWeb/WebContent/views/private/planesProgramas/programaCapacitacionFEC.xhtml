@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.planesprogramas.etiqueta.menu.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.planes.titulo.progsCapacitacion')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="formNvoProg">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+
+			<h:panelGrid rendered="#{!programaCapacitacionBean.edicionPrograma}">
+				<h1>#{sistema.obtenerTexto('gw.progCapacitacion.etiqueta.nuevoprograma')}</h1>
+			</h:panelGrid>
+
+			<h:panelGrid rendered="#{programaCapacitacionBean.edicionPrograma}">
+				<h1>#{sistema.obtenerTexto('gw.progCapacitacion.etiqueta.editarPrograma')}</h1>
+			</h:panelGrid>
+
+			<hr />
+
+			<div id="divPrinc" class="form-group">
+				<div class="row">
+					<div class="col-md-3">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.nombreProg')}:"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{programaCapacitacionBean.programa.nombreTentativo}" />
+					</div>
+
+					<div class="col-md-3">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.nivelEns')}:"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{programaCapacitacionBean.programa.catNivelEnsenanzaPrograma.nombre}" />
+					</div>
+
+					<div class="col-md-3">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.modalidad')}:"
+							styleClass="bloque" />
+						<h:outputText
+							value="#{programaCapacitacionBean.programa.catModalidad.nombre}" />
+					</div>
+
+					<div class="col-md-3">
+						<p:outputLabel styleClass="bloque"
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.estatus')}:" />
+						<h:outputText
+							value="#{programaCapacitacionBean.programa.catStatusPrograma.nombre}" />
+					</div>
+				</div>
+			</div>
+
+			<hr />
+
+			<p:outputLabel value="Nota: " />
+			<h:outputText
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.titulo.fec')}" />
+
+			<p:tabView id="tabViewFec"
+				binding="#{programaCapacitacionBean.cpmTabViewProg}"
+				widgetVar="tabViewProg" cache="true"
+				activeIndex="#{programaCapacitacionBean.indexTabProg}">
+
+				<p:ajax event="tabChange"
+					listener="#{programaCapacitacionBean.onTabProgChange}"
+					update="@form" />
+
+				<p:tab id="datosGnrals"
+					title="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.tab.titulo.datosGrals')}">
+					<ui:include src="datosGeneralesProgFEC.xhtml" />
+				</p:tab>
+
+				<p:tab id="estandarComp"
+					title="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.tab.titulo.estandarCmp')}">
+					<ui:include src="estandarCompetenciaProgFEC.xhtml" />
+				</p:tab>
+
+				<p:tab id="tabEstDid"
+					title="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.tab.titulo.estructDid')}">
+					<p:outputPanel>
+						<ui:include src="estructuraDidacticaPrograma.xhtml" />
+					</p:outputPanel>
+				</p:tab>
+
+				<p:tab id="unidadesDid"
+					title="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.tab.titulo.unidadesDid')}">
+					<ui:include src="unidadesDidacticasPrograma.xhtml" />
+				</p:tab>
+
+			</p:tabView>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-2 col-md-offset-8 ">
+						<p:outputLabel styleClass="pull-right agregaHeight"
+							rendered="#{programaCapacitacionBean.ultimoTabProg}"
+							value="#{programaCapacitacionBean.programa.catStatusPrograma.nombre}" />
+						<p:outputLabel
+							styleClass="pull-right agregaHeight margenDerechoMenor"
+							rendered="#{programaCapacitacionBean.ultimoTabProg}"
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.estatus')}:" />
+
+					</div>
+					<div class="col-md-2">
+						<p:inputSwitch
+							rendered="#{programaCapacitacionBean.ultimoTabProg}"
+							onLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.validado')}"
+							offLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.final')}"
+							value="#{programaCapacitacionBean.validaFinPrograma}">
+							<p:ajax
+								listener="#{programaCapacitacionBean.validaFinalizacionPrograma}"
+								update="@form,dlgErrores" />
+						</p:inputSwitch>
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputPanel id="btnsNav" layout="block">
+							<p:commandButton immediate="true"
+								styleClass="btn btn-primary pull-right"
+								action="#{programaCapacitacionBean.nextTabProg}"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.continuar')}"
+								update="@form" id="btnContinuar"
+								rendered="#{!programaCapacitacionBean.ultimoTabProg}" />
+
+							<p:commandButton id="btnFinProg" ajax="true"
+								styleClass="btn btn-default pull-right"
+								action="#{programaCapacitacionBean.finalizarPrograma}"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.finalizar')}"
+								rendered="#{programaCapacitacionBean.finalizaProg}"
+								onsuccess="PF('progFinalizado').show();" />
+
+							<p:commandButton immediate="true"
+								styleClass="btn btn-default pull-right"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.guardaBorrador')}"
+								action="#{programaCapacitacionBean.validarEstructuraTematica()}"
+								update="@form" process="@this" ajax="true" />
+
+							<p:commandButton immediate="true" ajax="true" id="btnRegresar"
+								styleClass="btn btn-default pull-right"
+								action="#{programaCapacitacionBean.prevTabProg}"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.regresar')}"
+								update="@form" />
+
+
+						</p:outputPanel>
+					</div>
+				</div>
+			</div>
+
+		</h:form>
+
+
+		<p:dialog header="Confirmar estructura temática" responsive="true"
+			id="mdlConfirmarEstructura" closable="false" draggable="false"
+			appendTo="@(body)" modal="true" width="600" height="auto"
+			resizable="false" widgetVar="confirmarEstructura">
+			<h:form>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText value="Se agregarán los siguientes elementos:"
+								styleClass="bloque" />
+							<p:outputLabel styleClass="bloque"
+								value="#{programaCapacitacionBean.numEstTematicasAux} #{(programaCapacitacionBean.numEstTematicasAux eq 1 ? ' tema.':' temas.')}" />
+							<p:outputLabel styleClass="bloque"
+								value="#{programaCapacitacionBean.numUniDidacticasAux} #{(programaCapacitacionBean.numUniDidacticasAux eq 1 ? ' objeto de aprendizaje.':' objetos de aprendizaje.')}" />
+							<h:outputText styleClass="colorRojo"
+								value="Una vez agregados no podrán ser eliminados, ¿está de acuerdo?" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton value="Cancelar" ajax="true"
+							onclick="PF('confirmarEstructura').hide()"
+							styleClass="btn btn-default" />
+						<p:commandButton value="Aceptar" ajax="true"
+							oncomplete="PF('confirmarEstructura').hide()"
+							styleClass="btn btn-primary" update=":formNvoProg"
+							action="#{programaCapacitacionBean.generaTemaUnidad()}" />
+					</div>
+				</div>
+			</h:form>
+
+		</p:dialog>
+
+
+		<p:dialog binding="#{programaCapacitacionBean.cmpDialogNvoProg}"
+			draggable="false" position="center" resizable="false"
+			id="dlgInfoProg" responsive="true" dynamic="true" modal="true"
+			appendTo="@(body)" styleClass="medidaModal" closable="true"
+			header="#{sistema.obtenerTexto('gw.progCapacitacion.header.modal')}"
+			widgetVar="dlgAlertProg">
+			<h:form>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.modal.leyenda.nomprog')} #{programaCapacitacionBean.programa.nombreTentativo} #{sistema.obtenerTexto('gw.progCapacitacion.guardado.borrador')}" />
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.confirmacion.accion')}" />
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton onclick="PF('dlgAlertProg').hide()"
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.continuar')}"
+							styleClass="btn btn-primary pull-right" />
+
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.cancelar')}"
+							action="#{programaCapacitacionBean.navegaBusquedaProgramas}"
+							styleClass="btn btn-default pull-right" />
+					</div>
+				</div>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog id="dlgErrores" responsive="true" modal="true"
+			draggable="false" resizable="false" position="top" appendTo="@(body)"
+			styleClass="medidaModal" closable="false"
+			header="#{sistema.obtenerTexto('gw.progCapacitacion.header.modal.finprog')}"
+			widgetVar="dlgValidadorProg">
+			<h:form id="pnlValidator">
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.modal.leyenda.finprog')}" />
+
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<p:messages globalOnly="true" closable="false" id="msgsReqProg" />
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton styleClass="btn btn-primary pull-right"
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.aceptar')}"
+							onclick="PF('dlgValidadorProg').hide();"
+							update=":formNvoProg:btnsNav" />
+					</div>
+				</div>
+
+			</h:form>
+		</p:dialog>
+
+		<p:dialog responsive="true" dynamic="true" modal="true" id="finProg"
+			closable="false" draggable="false" position="center"
+			resizable="false" appendTo="@(body)" styleClass="medidaModal"
+			header="#{sistema.obtenerTexto('gw.progCapacitacion.header.modal.finprog')}"
+			widgetVar="progFinalizado">
+			<h:form>
+				<div class="row">
+					<div class="col-md-12">
+						<p:outputPanel layout="block">
+							<p:outputLabel styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.modal.leyenda.nomprog')} #{programaCapacitacionBean.programa.nombreTentativo}" />
+							<p:outputLabel styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.estatus')}: #{programaCapacitacionBean.programa.catStatusPrograma.nombre}" />
+							<p:outputLabel styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.etiqueta.identificador')} #{programaCapacitacionBean.programa.identificadorFinal}" />
+						</p:outputPanel>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.aceptar')}"
+							styleClass="btn btn-primary pull-right"
+							action="#{programaCapacitacionBean.navegaBusquedaProgramas}" />
+					</div>
+				</div>
+
+			</h:form>
+
+		</p:dialog>
+
+		<p:dialog widgetVar="mConfirmacionEstructura" modal="true"
+			position="center" resizable="false" styleClass="medidaModal"
+			header="#{sistema.obtenerTexto('gw.temas.modal.confirmacion.titulo')}"
+			closable="false" draggable="false">
+
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText
+							value="#{sistema.obtenerTexto('gw.programas.confirmar.estructura')}" />
+					</div>
+				</div>
+			</div>
+			<f:facet name="footer">
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.temas.modal.confirmacion.boton.si')}"
+							action="#{programaCapacitacionBean.guardaBorradorPrograma()}"
+							ajax="true" oncomplete="PF('mConfirmacionEstructura').hide();"
+							styleClass="btn btn-primary pull-right" />
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.temas.modal.confirmacion.boton.no')}"
+							onclick="PF('mConfirmacionEstructura').hide();"
+							styleClass="btn btn-default pull-right" />
+					</div>
+				</div>
+			</f:facet>
+		</p:dialog>
+
+		<script>
+			$("body").on('click',
+					"button[id$='btnContinuar'],button[id$='btnRegresar']",
+					function() {
+						$('html,body').animate({
+							scrollTop : $("#divPrinc").offset().top - 50
+						});
+					});
+		</script>
+
+	</ui:define>
+</ui:composition>

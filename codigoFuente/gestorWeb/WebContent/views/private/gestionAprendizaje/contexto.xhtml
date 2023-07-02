@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<h:form>
+		<p:outputPanel styleClass="ui-fluid">
+			<p:outputLabel for="notaD" styleClass="margenDerechoMenor"
+				value="#{sistema.obtenerTexto('gw.ga.label.nota')}:" />
+			<h:outputText id="notaD"
+				value="#{sistema.obtenerTexto('gw.ga.label.textonota1')}"></h:outputText>
+		</p:outputPanel>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.ga.label.nomactividad')}:"
+						styleClass="bloque requerido" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtNombreActividad" maxlength="100"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.nombreActividad}"
+						styleClass="form-control">
+						<p:ajax process="@this" />
+					</p:inputText>
+					<p:message for="txtNombreActividad" />
+				</div>
+
+				<div class="col-md-4">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.ga.label.tienecosto')}"
+						styleClass="requerido bloque" />
+					<p:inputSwitch
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.tieneCosto}"
+						id="txtTieneCosto"
+						offLabel="#{sistema.obtenerTexto('gw.ga.switch.no')}"
+						onLabel="#{sistema.obtenerTexto('gw.ga.switch.si')}">
+						<p:ajax process="@this" />
+					</p:inputSwitch>
+					<p:message for="txtTieneCosto" />
+
+				</div>
+
+				<div class="col-md-4">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.ga.label.derechoautor')}"
+						styleClass="bloque requerido" />
+					<p:inputSwitch id="txtTieneDerechasA"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.tieneDerechosAutor}"
+						offLabel="#{sistema.obtenerTexto('gw.ga.switch.no')}"
+						onLabel="#{sistema.obtenerTexto('gw.ga.switch.si')}">
+						<p:ajax process="@this" />
+					</p:inputSwitch>
+					<p:message for="txtTieneDerechasA" />
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.ga.label.conduso')}:"
+						styleClass="requerido bloque" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="txtCondiciones" maxlength="500"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.condicionesUso}"
+						styleClass="form-control"
+						placeholder="Ingresar los comentarios sobre las condiciones de uso del Objeto de Aprendizaje.">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+					<p:message for="txtCondiciones" />
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel id="relacionOA"
+						value="#{sistema.obtenerTexto('gw.ga.label.tiporeloa')}:"
+						styleClass="requerido bloque" />
+					<p:selectManyCheckbox id="cbRelacionOtrosObjetos"
+						value="#{fichaObjetoAprendizajeBean.listaRelacionOtrosObjetosSeleccionado}"
+						layout="responsive" columns="4" converter="entityConverter">
+						<p:ajax process="@this" />
+						<f:selectItems
+							value="#{fichaObjetoAprendizajeBean.listaRelacionOtrosObjetos}"
+							var="relacionOtroObjeto" itemValue="#{relacionOtroObjeto}"
+							itemLabel="#{relacionOtroObjeto.nombre}" />
+					</p:selectManyCheckbox>
+					<p:message for="cbRelacionOtrosObjetos" />
+				</div>
+				<div class="col-md-7"></div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.ga.label.descp')}:"
+						styleClass="requerido bloque" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="txtDescripcion" maxlength="500"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.descripcionObjetoRelacionado}"
+						styleClass="form-control"
+						placeholder="Ingresar  la descripción del Objeto de Aprendizaje con el cuál tiene relación este OA.">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+					<p:message for="txtDescripcion" />
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:outputLabel value="#{sistema.obtenerTexto('gw.ga.label.anot')}:"
+						styleClass="requerido bloque" />
+					<!-- Longitud de campo -->
+					<p:inputTextarea id="txtAnotacion" maxlength="100"
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.anotacion}"
+						styleClass="form-control">
+						<p:ajax process="@this" />
+					</p:inputTextarea>
+					<p:message for="txtAnotacion" />
+				</div>
+			</div>
+		</div>
+		<!-- 
+        <div class="form-group">
+                <div class="row">
+                        <div class="col-md-4" style="display:none">
+                                <p:outputLabel rendered="false"
+                                        value="#{sistema.obtenerTexto('gw.ga.label.estatus')}:"
+                                        styleClass="requerido bloque" />
+                                <p:selectOneMenu rendered="false"
+                                        value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.fichaDescripcionOa.catEstatusFoa.id}"
+                                        styleClass="col-xs-12" id="txtEstatus">
+                                        <p:ajax process="@this" />
+                                        <f:selectItem
+                                                itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+                                        <f:selectItems value="#{fichaObjetoAprendizajeBean.listaEstatus}"
+                                                var="estatus" itemValue="#{estatus.id}"
+                                                itemLabel="#{estatus.nombre}" />
+                                </p:selectOneMenu>
+                                <p:message for="txtEstatus" />
+
+                        </div>
+                        <div class="col-md-8"></div>
+                </div>
+        </div>
+        -->
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputLabel
+						value="#{sistema.obtenerTexto('gw.ga.label.datosoblig')}"
+						styleClass="requerido bloque" />
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:inputSwitch value="#{fichaObjetoAprendizajeBean.estatusBDFF}"
+						id="txtEsborrador" offLabel="Borrador" onLabel="Final"
+						styleClass="pull-right">
+						<p:ajax
+							listener="#{fichaObjetoAprendizajeBean.habilitarFinalizar}"
+							process="@this" update="@form,dialogo_faltan_campos"
+							event="change" />
+					</p:inputSwitch>
+					<p:outputLabel value="Estatus: "
+						styleClass="requerido bloque pull-right margenDerechoMenor" />
+
+				</div>
+			</div>
+			<br />
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton id="finalizar" value="Finalizar"
+						action="#{fichaObjetoAprendizajeBean.finalizar}"
+						styleClass="btn btn-primary pull-right" ajax="true"
+						oncomplete="PF('dlg_finalizar').show();"
+						rendered="#{fichaObjetoAprendizajeBean.botonFinalizar}" />
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.guarda.borrador')}"
+						action="#{fichaObjetoAprendizajeBean.guardarBorrador}"
+						process="@this" immediate="true" ajax="true"
+						oncomplete="PF('dlg_redireccionar').show();"
+						styleClass="btn btn-default pull-right" />
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.ec.btn.cancelar')}" ajax="false"
+						immediate="true" styleClass="btn btn-default pull-right"
+						action="#{fichaObjetoAprendizajeBean.cancelar}" />
+				</div>
+			</div>
+		</div>
+	</h:form>
+
+
+
+</ui:composition>

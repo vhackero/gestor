@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+<div class="form-group agregaMargenTop">
+	<div class="row">
+		<div class="col-md-4">
+			<p:outputLabel styleClass="bloque"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.tpocomp')}:" />
+			<h:outputText
+				value="#{programaCapacitacionBean.nombreTipoCompetencia}" />
+		</div>
+
+		<div class="col-md-4">
+			<p:outputLabel styleClass="bloque"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.ejecapacit')}:" />
+			<h:outputText
+				value="#{programaCapacitacionBean.nombreEjeCapacitacion}" />
+		</div>
+
+		<div class="col-md-4">
+			<p:outputLabel styleClass="bloque"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.compEspecif')}:" />
+			<h:outputText value="#{programaCapacitacionBean.compEspecificasProg}" />
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class="row">
+		<div class="col-md-4" style="display: none;">
+			<p:outputLabel styleClass="bloque"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.dirigidoA')}:" />
+		</div>
+
+		<div class="col-md-4">
+			<p:outputLabel rendered="false"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.puestoImpacta')}:" />
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class="row">
+		<div class="col-md-4" style="display: none;">
+			<h:outputText
+				value="#{programaCapacitacionBean.programa.organismoGubernamental.nombre}"
+				rendered="#{programaCapacitacionBean.personalInterno}" />
+			<h:outputText value="#{programaCapacitacionBean.personalExtDirigoA}"
+				rendered="#{!programaCapacitacionBean.personalInterno}" />
+		</div>
+
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-4">
+		<p:outputLabel styleClass="requerido bloque"
+			value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.cargaHorCap')}:" />
+	</div>
+</div>
+
+<div class="form-group paddingCargaHoraria">
+
+	<div class="row theadCargaHoraria">
+		<div class="col-md-3">
+			<p:outputLabel styleClass="agregaHeight"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.teoria')}:" />
+		</div>
+		<div class="col-md-3">
+			<p:outputLabel styleClass="agregaHeight"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.practica')}:" />
+		</div>
+		<div class="col-md-3">
+			<div class="flexibleVertical">
+				<p:outputLabel styleClass="agregaHeight separaLabelDerecho"
+					value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.evaluacion')}:" />
+				<p:inputSwitch value="#{programaCapacitacionBean.progConEvaluacion}"
+					onLabel="Si" offLabel="No" styleClass="margenSwitch"
+					valueChangeListener="#{programaCapacitacionBean.onChangeSwchEvaluacion}">
+					<p:ajax update="@form" />
+				</p:inputSwitch>
+			</div>
+		</div>
+	</div>
+	<div class="row tbodyCargaHoraria">
+		<div class="col-md-3">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel styleClass="bloque" for="sp1"
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.horas')}:" />
+					<p:spinner id="sp1" maxlength="3"
+						value="#{programaCapacitacionBean.relProgDuracionTeoria.horasInteger}"
+						min="0" max="100">
+						<p:ajax process="@this" />
+						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+					</p:spinner>
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel styleClass="bloque" for="sp2"
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.minutos')}:" />
+					<p:spinner id="sp2" maxlength="2"
+						value="#{programaCapacitacionBean.relProgDuracionTeoria.minutosInteger}"
+						min="0" max="59">
+						<p:ajax process="@this" />
+						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+					</p:spinner>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel for="sp3"
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.horas')}:" />
+					<p:spinner id="sp3" maxlength="3"
+						value="#{programaCapacitacionBean.relProgDuracionPractica.horasInteger}"
+						min="0" max="100">
+						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+						<p:ajax process="@this" />
+					</p:spinner>
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel styleClass="bloque" for="sp4"
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.minutos')}:" />
+					<p:spinner id="sp4" maxlength="2"
+						value="#{programaCapacitacionBean.relProgDuracionPractica.minutosInteger}"
+						min="0" max="59">
+						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+						<p:ajax process="@this" />
+					</p:spinner>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="row">
+				<div class="col-md-4">
+
+					<p:outputLabel styleClass="bloque" for="sp5"
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.horas')}:" />
+					<p:spinner id="sp5" maxlength="3"
+						disabled="#{!programaCapacitacionBean.progConEvaluacion}"
+						value="#{programaCapacitacionBean.relProgDuracionEvaluacion.horasInteger}"
+						min="0" max="100">
+						<p:ajax process="@this" />
+						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+					</p:spinner>
+
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel styleClass="bloque" for="sp6"
+						value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.minutos')}:" />
+					<p:spinner id="sp6" maxlength="2"
+						disabled="#{!programaCapacitacionBean.progConEvaluacion}"
+						value="#{programaCapacitacionBean.relProgDuracionEvaluacion.minutosInteger}"
+						min="0" max="59">
+						<p:ajax process="@this" />
+						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+					</p:spinner>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3 disminuyePadding">
+
+			<p:outputLabel styleClass="bloque" for="sp7"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.calMinApro')}:" />
+			<div class="col-md-6 col-md-offset-5">
+				<p:spinner id="sp7" maxlength="3"
+					disabled="#{!programaCapacitacionBean.progConEvaluacion}"
+					value="#{programaCapacitacionBean.calificacionMinimaAprobatoria}"
+					min="70" max="100">
+					<p:ajax process="@this" />
+					<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+				</p:spinner>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+
+
+<div class="form-group agregaMasMargen">
+	<div class="row">
+		<div class="col-md-2">
+			<p:outputLabel styleClass="bloque"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.seriado')}:" />
+			<p:inputSwitch value="#{programaCapacitacionBean.seriado}"
+				onLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.si')}"
+				offLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.no')}"
+				valueChangeListener="#{programaCapacitacionBean.onChangeGetProgramaSeriado}">
+				<p:ajax update="idClaveProgramaCapacitacion" />
+			</p:inputSwitch>
+		</div>
+
+		<div class="col-md-4">
+			<p:outputLabel styleClass="bloque"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.cveYNomProgCap')}:" />
+			<p:selectOneMenu id="idClaveProgramaCapacitacion"
+				valueChangeListener="#{programaCapacitacionBean.onChangeProgramasSeriados}"
+				value="#{programaCapacitacionBean.idProgramaSeriado}" effect="fade"
+				class="col-xs-12" filter="true" filterMatchMode="startsWith"
+				disabled="#{!programaCapacitacionBean.seriado}">
+				<f:selectItem
+					itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+					itemValue="0" />
+				<f:selectItems value="#{programaCapacitacionBean.programasList}"
+					var="programa" itemValue="#{programa.idPrograma}"
+					itemLabel="#{programa.cvePrograma} #{programa.nombreTentativo}" />
+				<p:ajax process="@this" />
+			</p:selectOneMenu>
+		</div>
+	</div>
+</div>
+
+<div class="form-group agregaMasMargen">
+	<div class="row">
+		<div class="col-md-12">
+			<p:outputLabel styleClass="bloque"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.seCertificaComp')}" />
+		</div>
+	</div>
+</div>
+
+<div class="form-group agregaMargenTop">
+	<div class="row">
+		<div class="col-md-2">
+			<p:outputLabel styleClass="bloque"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.certificar')}:" />
+			<p:inputSwitch value="#{programaCapacitacionBean.certificar}"
+				onLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.si')}"
+				offLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.no')}">
+				<p:ajax update="idInstiticionCertificadora" />
+			</p:inputSwitch>
+		</div>
+
+		<div class="col-md-4">
+			<p:outputLabel styleClass="bloque"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.instCertificadora')}:" />
+			<p:selectOneMenu id="idInstiticionCertificadora"
+				valueChangeListener="#{programaCapacitacionBean.onChangeInstitucionesCertificadoras}"
+				value="#{programaCapacitacionBean.idInstitucionesCertificadoras}"
+				styleClass="col-xs-12" filter="true" filterMatchMode="startsWith"
+				disabled="#{!programaCapacitacionBean.certificar}">
+				<f:selectItem
+					itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+					itemValue="0" />
+				<f:selectItems
+					value="#{programaCapacitacionBean.catInstitucionesCertificadoras}"
+					var="institucion" itemValue="#{institucion.id}"
+					itemLabel="#{institucion.nombre}" />
+				<p:ajax process="@this" />
+			</p:selectOneMenu>
+		</div>
+	</div>
+</div>
+
+</html>

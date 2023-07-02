@@ -1,0 +1,144 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>mx.gob.sedesol</groupId>
+	<artifactId>gestorscheduler</artifactId>
+	<packaging>war</packaging>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>gestorscheduler Maven Webapp</name>
+	<url>http://maven.apache.org</url>
+
+	<!-- Profiles -->
+
+	<profiles>
+		<!-- Perfil de desarrollo -->
+		<!-- <profile> <id>desarrollo</id> <activation> <activeByDefault>true</activeByDefault> 
+			<property> <name>ambiente</name> <value>desarrollo</value> </property> </activation> 
+			<properties> <webXmlPath>DeployConfig/Desarrollo/web.xml</webXmlPath> <warName>desarrollo_gestor_scheduler</warName> 
+			</properties> </profile> -->
+		<!-- Perfil de QA -->
+		<!--<profile> <id>qa</id> <activation> <property> <name>ambiente</name> 
+			<value>qa</value> </property> </activation> <properties> <webXmlPath>DeployConfig/QA/web.xml</webXmlPath> 
+			<warName>gestor_scheduler</warName> </properties> </profile> -->
+	</profiles>
+
+	<properties>
+		<!-- Java version -->
+		<java.version>1.8</java.version>
+		<!-- Spring version -->
+		<springframework.version>4.3.3.RELEASE</springframework.version>
+		<!-- Servlet version -->
+		<javax.servlet.version>3.0.1</javax.servlet.version>
+		<!-- jsr 250 version -->
+		<anotations.jsr250.version>1.0</anotations.jsr250.version>
+		<!-- log4j version -->
+		<log4j.version>1.2.17</log4j.version>
+		<!-- encoding -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- Base gestor version -->
+		<basegestor.sedesol.version>0.0.1-SNAPSHOT</basegestor.sedesol.version>
+		<!-- Maven Compiler plugin version -->
+		<maven.compiler.version>3.5.1</maven.compiler.version>
+		<!-- Maven war plugin version -->
+		<maven.war.plugin.version>2.6</maven.war.plugin.version>
+		<!-- jackson mapper version -->
+		<jackson.version>2.4.1</jackson.version>
+	</properties>
+
+	<dependencies>
+
+		<!-- Dependencia core basegestor -->
+		<dependency>
+			<groupId>mx.gob.sedesol</groupId>
+			<artifactId>basegestor</artifactId>
+			<version>${basegestor.sedesol.version}</version>
+
+		</dependency>
+
+
+		<!-- Servlet -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>${javax.servlet.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!--Jsr 250 api anotations -->
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>jsr250-api</artifactId>
+			<version>${anotations.jsr250.version}</version>
+		</dependency>
+
+
+		<!-- log4j -->
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+
+		<!-- Quartz Scheduler -->
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>2.1.5</version>
+		</dependency>
+
+		<!--Spring Core -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${springframework.version}</version>
+		</dependency>
+
+		<!-- Spring Web -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${springframework.version}</version>
+		</dependency>
+
+		<!-- Spring Web MVC -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${springframework.version}</version>
+		</dependency>
+
+		<!-- Jackson JSON Processor -->
+		<!-- <dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency> -->
+
+
+
+	</dependencies>
+	<build>
+		<finalName>gestorscheduler</finalName>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven.compiler.version}</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>${maven.war.plugin.version}</version>
+				<configuration>
+					<warSourceDirectory>WebContent</warSourceDirectory>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+					<warName>desarrollo_gestor_scheduler</warName>
+					<webXml>DeployConfig/Desarrollo/web.xml</webXml>
+					<!--<warName>${warName}</warName> <webXml>${webXmlPath}</webXml> -->
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

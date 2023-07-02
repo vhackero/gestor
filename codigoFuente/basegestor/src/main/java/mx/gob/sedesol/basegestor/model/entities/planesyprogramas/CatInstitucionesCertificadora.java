@@ -1,0 +1,134 @@
+package mx.gob.sedesol.basegestor.model.entities.planesyprogramas;
+
+import java.io.Serializable;
+import javax.persistence.*;
+import java.util.Date;
+import java.util.List;
+import java.math.BigInteger;
+
+
+/**
+ * The persistent class for the cat_instituciones_certificadoras database table.
+ * 
+ */
+@Entity
+@Table(name="cat_institucion_certificadora")
+@NamedQuery(name="CatInstitucionesCertificadora.findAll", query="SELECT c FROM CatInstitucionesCertificadora c")
+public class CatInstitucionesCertificadora implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	private Integer id;
+
+	private Integer activo;
+
+	private String descripcion;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="fecha_actualizacion")
+	private Date fechaActualizacion;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="fecha_registro")
+	private Date fechaRegistro;
+
+	private String nombre;
+
+	private Integer orden;
+
+	@Column(name="usuario_modifico")
+	private BigInteger usuarioModifico;
+
+	//bi-directional many-to-one association to TblFichaDescriptivaPrograma
+    @OneToMany(mappedBy="idInstitucionCertifica")
+	private List<TblFichaDescriptivaPrograma> tblFichaDescriptivaProgramas;
+	
+	public CatInstitucionesCertificadora() {
+	}
+
+	public Integer getId() {
+		return this.id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public Integer getActivo() {
+		return this.activo;
+	}
+
+	public void setActivo(Integer activo) {
+		this.activo = activo;
+	}
+
+	public String getDescripcion() {
+		return this.descripcion;
+	}
+
+	public void setDescripcion(String descripcion) {
+		this.descripcion = descripcion;
+	}
+
+	public Date getFechaActualizacion() {
+		return this.fechaActualizacion;
+	}
+
+	public void setFechaActualizacion(Date fechaActualizacion) {
+		this.fechaActualizacion = fechaActualizacion;
+	}
+
+	public Date getFechaRegistro() {
+		return this.fechaRegistro;
+	}
+
+	public void setFechaRegistro(Date fechaRegistro) {
+		this.fechaRegistro = fechaRegistro;
+	}
+
+	public String getNombre() {
+		return this.nombre;
+	}
+
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
+
+	public Integer getOrden() {
+		return this.orden;
+	}
+
+	public void setOrden(Integer orden) {
+		this.orden = orden;
+	}
+
+	public BigInteger getUsuarioModifico() {
+		return this.usuarioModifico;
+	}
+
+	public void setUsuarioModifico(BigInteger usuarioModifico) {
+		this.usuarioModifico = usuarioModifico;
+	}
+	public List<TblFichaDescriptivaPrograma> getTblFichaDescriptivaProgramas() {
+		return this.tblFichaDescriptivaProgramas;
+	}
+
+	public void setTblFichaDescriptivaProgramas(List<TblFichaDescriptivaPrograma> tblFichaDescriptivaProgramas) {
+		this.tblFichaDescriptivaProgramas = tblFichaDescriptivaProgramas;
+	}
+
+	public TblFichaDescriptivaPrograma addTblFichaDescriptivaPrograma(TblFichaDescriptivaPrograma tblFichaDescriptivaPrograma) {
+		getTblFichaDescriptivaProgramas().add(tblFichaDescriptivaPrograma);
+		tblFichaDescriptivaPrograma.setIdInstitucionCertifica(this);
+
+		return tblFichaDescriptivaPrograma;
+	}
+
+	public TblFichaDescriptivaPrograma removeTblFichaDescriptivaPrograma(TblFichaDescriptivaPrograma tblFichaDescriptivaPrograma) {
+		getTblFichaDescriptivaProgramas().remove(tblFichaDescriptivaPrograma);
+		tblFichaDescriptivaPrograma.setIdInstitucionCertifica(null);
+
+		return tblFichaDescriptivaPrograma;
+	}
+
+}

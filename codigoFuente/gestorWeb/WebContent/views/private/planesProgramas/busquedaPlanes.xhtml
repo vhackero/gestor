@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.planesprogramas.etiqueta.menu.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.planesprogramas.plandeestudio.titulo')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form>
+			<h1><p:outputLabel styleClass="h1" value="#{sistema.obtenerTexto('gw.planesprogramas.plandeestudio.titulo')}"/></h1>
+            <hr class="red"/>
+            
+			<p:ajaxStatus onstart="PF('dialogLayout').show()" onsuccess="PF('dialogLayout').hide()" />
+			
+			<div class="form-group">
+				<div class="row">
+
+
+					<div class="col-md-12 col-xs-12">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.plan.busqueda.boton.crear')}"
+							action="#{planBean.navegaCrearNuevoPlan}" ajax="false"
+							immediate="true" process="@this"
+							styleClass="btn btn-primary pull-right" />
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.nuevo')}:"
+							styleClass="pull-right agregaHeight" />
+					</div>
+				</div>
+			</div>
+
+			<p:panel header="#{sistema.obtenerTexto('gw.plan.busqueda.titulo')}"
+				 id="fldBusqPlan">
+				<f:validateBean disabled="true">
+					<div class="form-group">
+						<div class="row">
+
+							<div class="col-md-4 col-xs-12">
+
+								<p:outputLabel styleClass="bloque" for="filtroplannombre"
+									value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.nombre')}:" />
+								<p:inputText id="filtroplannombre" onkeypress="if (event.keyCode == 13) { return false; }"
+									value="#{planBean.filtroPlan.nombre}" styleClass="form-control" />
+
+							</div>
+
+							<div class="col-md-4 col-xs-12">
+
+								<p:outputLabel styleClass="bloque"
+									value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.orgGub')}:" />
+								<p:selectOneMenu id="institucion"
+									value="#{planBean.filtroPlan.tblOrganismoGubernamental}"
+									converter="orgGuberConverter" autoWidth="false"
+									styleClass="col-xs-12" onclick="ajustaAlto();">
+									<p:ajax event="change" process="@this" />
+									<f:selectItem 
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItems value="#{planBean.itemsOrgGubs}" var="orgGub"
+										itemLabel="#{orgGub.label}" itemValue="#{orgGub}" />
+								</p:selectOneMenu>
+
+							</div>
+
+							<div class="col-md-4 col-xs-12">
+
+								<p:outputLabel styleClass="bloque"
+									value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.modalidad')}:" />
+								<p:selectOneMenu
+									value="#{planBean.filtroPlan.catModalidadPlanPrograma}"
+									converter="catalogoComunConverter" styleClass="col-xs-12">
+									<p:ajax event="change" process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItems value="#{planBean.catModalidadPlan}"
+										var="modalidad" itemLabel="#{modalidad.nombre}"
+										itemValue="#{modalidad}" />
+								</p:selectOneMenu>
+
+							</div>
+
+						</div>
+					</div>
+					<div class="form-group">
+
+						<div class="row">
+
+							<div class="col-md-4 col-xs-12">
+
+								<p:outputLabel styleClass="bloque"
+									value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.tpoPlan')}:" />
+								<p:selectOneMenu value="#{planBean.filtroPlan.catTipoPlan}"
+									converter="catalogoComunConverter" styleClass="col-xs-12">
+									<p:ajax event="change" process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItems value="#{planBean.catTpoPlan}" var="tpoPlan"
+										itemLabel="#{tpoPlan.nombre}" itemValue="#{tpoPlan}" />
+								</p:selectOneMenu>
+
+							</div>
+
+							<div class="col-md-4 col-xs-12">
+
+								<p:outputLabel styleClass="bloque"
+									value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.alcancePlan')}:" />
+								<p:selectOneMenu value="#{planBean.filtroPlan.catAlcancePlan}"
+									converter="catalogoComunConverter" styleClass="col-xs-12">
+									<p:ajax event="change" process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItems value="#{planBean.catAlcancePlan}" var="alcance"
+										itemLabel="#{alcance.nombre}" itemValue="#{alcance}" />
+								</p:selectOneMenu>
+
+							</div>
+
+							<div class="col-md-4 col-xs-12">
+
+								<p:outputLabel styleClass="bloque"
+									value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.estatus')}:" />
+								<p:selectOneMenu value="#{planBean.filtroPlan.catEstatusPlan}"
+									converter="catalogoComunConverter" styleClass="col-xs-12">
+									<p:ajax event="change" process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItems value="#{planBean.catalEstatusPlan}"
+										var="estatusPlan" itemLabel="#{estatusPlan.nombre}"
+										itemValue="#{estatusPlan}" />
+								</p:selectOneMenu>
+
+							</div>
+
+
+						</div>
+					</div>
+
+				</f:validateBean>
+
+				<div class="row">
+					<div class="col-md-12 col-xs-12">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.plan.busqueda.boton.buscar')}"
+							action="#{planBean.buscarPlanes}" ajax="true"
+							validateClient="false" update="pnlResultadosPlan, fldBusqPlan"
+							styleClass="btn btn-primary pull-right" />
+					</div>
+				</div>
+
+			</p:panel>
+
+
+			<p:panel id="pnlResultadosPlan" header="#{sistema.obtenerTexto('gw.planesprogramas.panel.planes')}">
+			
+				<p:dataTable value="#{planBean.planesFiltrados}"
+					rendered="#{not empty planBean.planesFiltrados}" var="plan"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					paginator="true" rows="10" paginatorPosition="bottom"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+					<p:column>
+						<f:facet name="header">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.nombre')}" />
+						</f:facet>
+						<h:outputText value="#{plan.nombre}" />
+					</p:column>
+
+					<p:column>
+						<f:facet name="header">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.version')}" />
+						</f:facet>
+						<h:outputText value="#{plan.version}" />
+					</p:column>
+
+					<p:column>
+						<f:facet name="header">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.orgGub')}" />
+						</f:facet>
+						<h:outputText value="#{plan.tblOrganismoGubernamental.nombre}" />
+					</p:column>
+
+
+					<p:column>
+						<f:facet name="header">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.modalidad')}" />
+						</f:facet>
+						<h:outputText value="#{plan.catModalidadPlanPrograma.nombre}" />
+					</p:column>
+
+
+					<p:column>
+						<f:facet name="header">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.tpoPlan')}" />
+						</f:facet>
+						<h:outputText value="#{plan.catTipoPlan.nombre}" />
+					</p:column>
+
+					<p:column>
+						<f:facet name="header">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.alcancePlan')}" />
+						</f:facet>
+						<h:outputText value="#{plan.catAlcancePlan.nombre}" />
+					</p:column>
+
+					<p:column >
+						<f:facet name="header">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.fechaPub')}" />
+						</f:facet>
+						<h:outputText value="#{plan.fechaInicio}">
+							<f:convertDateTime pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+						</h:outputText>
+					</p:column>
+
+					<p:column>
+						<f:facet name="header">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.estatus')}" />
+						</f:facet>
+						<h:outputText value="#{plan.catEstatusPlan.nombre}" />
+					</p:column>
+
+					<p:column>
+						<f:facet name="header">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.fechaReg')}" />
+						</f:facet>
+						<h:outputText value="#{plan.fechaRegistro}">
+							<f:convertDateTime pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+						</h:outputText>
+					</p:column>
+
+					<p:column>
+						<f:facet name="header">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.fechaModif')}" />
+						</f:facet>
+						<h:outputText value="#{plan.fechaActualizacion}">
+							<f:convertDateTime pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+						</h:outputText>
+					</p:column>
+
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText
+								value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.acciones')}" />
+						</f:facet>
+
+
+						<p:commandButton ajax="true" update="@form" id="ver"
+							action="#{planBean.navegaEstructuraPlan}"
+							styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+							<f:setPropertyActionListener value="#{plan}"
+								target="#{planBean.planSelecBusq}" />
+						</p:commandButton>
+						<p:tooltip for="ver" position="top" value="#{sistema.obtenerTexto('gw.planesprogramas.tooltip.ver')}" />
+
+						<p:commandButton ajax="true" update="@form" id="editar"
+							action="#{planBean.navegaEditarPlan}"
+							styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+							<f:setPropertyActionListener value="#{plan}"
+								target="#{planBean.planSelecBusq}" />
+						</p:commandButton>
+						<p:tooltip for="editar" position="top" value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.modificar')}" />
+
+						<p:commandButton ajax="true" update="@form" id="clonar"
+							action="#{planBean.clonarPlan}"
+							styleClass="btn-icon btn btn-default icono_sisi ss_gn_clonar">
+							<f:setPropertyActionListener value="#{plan}"
+								target="#{planBean.planSelecBusq}" />
+						</p:commandButton>
+						<p:tooltip for="clonar" position="top" value="#{sistema.obtenerTexto('gw.planesprogramas.tooltip.clonar')}" />
+
+					</p:column>
+
+				</p:dataTable>
+			</p:panel>
+
+
+
+		</h:form>
+	</ui:define>
+</ui:composition>

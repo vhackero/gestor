@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PROCESS model-entity="JSFProcess">
+ <PROCESS-ITEM NAME="rules:#views#*" PATH="/views/*" SHAPE="32,17,0,0" model-entity="JSFProcessGroup">
+  <PROCESS-ITEM ID="rules:#views#*:0" NAME="item" PATH="/views/*" model-entity="JSFProcessItem">
+   <PROCESS-ITEM-OUTPUT ID="PANTALLA_INICIO::#views#private#home.jsf"
+    NAME="output" PATH="/views/private/home.jsf"
+    TARGET="rules:#views#private#home.jsf" TITLE="PANTALLA_INICIO" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="ADMIN_USUARIOS::#views#private#administracion#usuario#AdministraUsuarios.jsf"
+    NAME="output1"
+    PATH="/views/private/administracion/usuario/AdministraUsuarios.jsf"
+    TARGET="rules:#views#private#administracion#usuario#AdministraUsuarios.jsf"
+    TITLE="ADMIN_USUARIOS" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="AGREGAR_USUARIO::#views#private#administracion#usuario#AdminRegistroPersona.jsf"
+    NAME="output2"
+    PATH="/views/private/administracion/usuario/AdminRegistroPersona.jsf"
+    TARGET="rules:#views#private#administracion#usuario#AdminRegistroPersona.jsf"
+    TITLE="AGREGAR_USUARIO" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="VER_EDITAR_USUARIO::#views#private#administracion#usuario#editarPersonaSeleccionada.jsf"
+    NAME="output3"
+    PATH="/views/private/administracion/usuario/editarPersonaSeleccionada.jsf"
+    TARGET="rules:#views#private#administracion#usuario#editarPersonaSeleccionada.jsf"
+    TITLE="VER_EDITAR_USUARIO" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="FUNCIONALIDADES::#views#private#administracion#funcionalidades#Funcionalidades.jsf"
+    NAME="output4"
+    PATH="/views/private/administracion/funcionalidades/Funcionalidades.jsf"
+    TARGET="rules:#views#private#administracion#funcionalidades#Funcionalidades.jsf"
+    TITLE="FUNCIONALIDADES" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="TEXTOS_SISTEMA::#views#private#administracion#funcionalidades#TextosSistema.jsf"
+    NAME="output5"
+    PATH="/views/private/administracion/funcionalidades/TextosSistema.jsf"
+    TARGET="rules:#views#private#administracion#funcionalidades#TextosSistema.jsf"
+    TITLE="TEXTOS_SISTEMA" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="ROLES::#views#private#administracion#roles#Roles.jsf"
+    NAME="output6" PATH="/views/private/administracion/roles/Roles.jsf"
+    TARGET="rules:#views#private#administracion#roles#Roles.jsf"
+    TITLE="ROLES" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="MUNICIPIOS::#views#private#administracion#estructuraTerritorial#Municipios.jsf"
+    NAME="output7"
+    PATH="/views/private/administracion/estructuraTerritorial/Municipios.jsf"
+    TARGET="rules:#views#private#administracion#estructuraTerritorial#Municipios.jsf"
+    TITLE="MUNICIPIOS" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="ASENTAMIENTOS::#views#private#administracion#estructuraTerritorial#Asentamientos.jsf"
+    NAME="output8"
+    PATH="/views/private/administracion/estructuraTerritorial/Asentamientos.jsf"
+    TARGET="rules:#views#private#administracion#estructuraTerritorial#Asentamientos.jsf"
+    TITLE="ASENTAMIENTOS" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="CARGA_USUARIOS::#views#private#administracion#CargaUsuarios.jsf"
+    NAME="output9"
+    PATH="/views/private/administracion/CargaUsuarios.jsf"
+    TARGET="rules:#views#private#administracion#CargaUsuarios.jsf"
+    TITLE="CARGA_USUARIOS" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="CONSULTA_BITACORA::#views#private#administracion#bitacora#ConsultarBitacora.jsf"
+    NAME="output10"
+    PATH="/views/private/administracion/bitacora/ConsultarBitacora.jsf"
+    TARGET="rules:#views#private#administracion#bitacora#ConsultarBitacora.jsf"
+    TITLE="CONSULTA_BITACORA" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="TEMAS::#views#private#administracion#temas#Temas.jsf"
+    NAME="output11" PATH="/views/private/administracion/temas/Temas.jsf"
+    TARGET="rules:#views#private#administracion#temas#Temas.jsf"
+    TITLE="TEMAS" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="ASIGNACION_ROLES::#views#private#administracion#roles#asignaRolesUsuario.jsf"
+    NAME="output12"
+    PATH="/views/private/administracion/roles/asignaRolesUsuario.jsf"
+    TARGET="rules:#views#private#administracion#roles#asignaRolesUsuario.jsf"
+    TITLE="ASIGNACION_ROLES" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="PLANTILLAS::#views#private#plantillas#CreadorPlantillas.jsf"
+    NAME="output13"
+    PATH="/views/private/plantillas/CreadorPlantillas.jsf"
+    TARGET="rules:#views#private#plantillas#CreadorPlantillas.jsf"
+    TITLE="PLANTILLAS" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="NOTIFICACIONES::#views#private#administracion#notificaciones#ConsultaNotificaciones.jsf"
+    NAME="output14"
+    PATH="/views/private/administracion/notificaciones/ConsultaNotificaciones.jsf"
+    TARGET="rules:#views#private#administracion#notificaciones#ConsultaNotificaciones.jsf"
+    TITLE="NOTIFICACIONES" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="NOTIFICACION_DETALLE::#views#private#administracion#notificaciones#NotificacionDetalle.jsf"
+    NAME="output15"
+    PATH="/views/private/administracion/notificaciones/NotificacionDetalle.jsf"
+    TARGET="rules:#views#private#administracion#notificaciones#NotificacionDetalle.jsf"
+    TITLE="NOTIFICACION_DETALLE" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="NOTIFICACION_EDICION::#views#private#administracion#notificaciones#Notificacion.jsf"
+    NAME="output16"
+    PATH="/views/private/administracion/notificaciones/Notificacion.jsf"
+    TARGET="rules:#views#private#administracion#notificaciones#Notificacion.jsf"
+    TITLE="NOTIFICACION_EDICION" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="NOTIFICACION_RESPONDER::#views#private#administracion#notificaciones#Mensaje.jsf"
+    NAME="output17"
+    PATH="/views/private/administracion/notificaciones/Mensaje.jsf"
+    TARGET="rules:#views#private#administracion#notificaciones#Mensaje.jsf"
+    TITLE="NOTIFICACION_RESPONDER" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="NOTIFICACION_PERSONAS::#views#private#administracion#notificaciones#BusquedaPersonas.jsf"
+    NAME="output18"
+    PATH="/views/private/administracion/notificaciones/BusquedaPersonas.jsf"
+    TARGET="rules:#views#private#administracion#notificaciones#BusquedaPersonas.jsf"
+    TITLE="NOTIFICACION_PERSONAS" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="PARAMETROS_SISTEMA::#views#private#administracion#parametros#ParametrosSistema.jsf"
+    NAME="output19"
+    PATH="/views/private/administracion/parametros/ParametrosSistema.jsf"
+    TARGET="rules:#views#private#administracion#parametros#ParametrosSistema.jsf"
+    TITLE="PARAMETROS_SISTEMA" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="CAT_PLANES_PROG::#views#private#administracion#catalogos#catalogosPlanesProgramas.jsf"
+    NAME="output20"
+    PATH="/views/private/administracion/catalogos/catalogosPlanesProgramas.jsf"
+    TARGET="rules:#views#private#administracion#catalogos#catalogosPlanesProgramas.jsf"
+    TITLE="CAT_PLANES_PROG" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="PLANTILLAS_MENSAJES::#views#private#administracion#notificaciones#Plantillas.jsf"
+    NAME="output21"
+    PATH="/views/private/administracion/notificaciones/Plantillas.jsf"
+    TARGET="rules:#views#private#administracion#notificaciones#Plantillas.jsf"
+    TITLE="PLANTILLAS_MENSAJES" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="ADMIN_CAT_PLAN_PROG::#views#private#administracion#catalogos#catalogosPlanesProgramas.jsf"
+    NAME="output22"
+    PATH="/views/private/administracion/catalogos/catalogosPlanesProgramas.jsf"
+    TARGET="rules:#views#private#administracion#catalogos#catalogosPlanesProgramas.jsf"
+    TITLE="ADMIN_CAT_PLAN_PROG" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="MALLA_CURRICULAR::#views#private#planesProgramas#adminPlanPrograma.jsf"
+    NAME="output23"
+    PATH="/views/private/planesProgramas/adminPlanPrograma.jsf"
+    TARGET="rules:#views#private#planesProgramas#adminPlanPrograma.jsf"
+    TITLE="MALLA_CURRICULAR" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="CATALOGOS_ENCUESTA::#views#private#administracion#encuestas#adminCatEncuesta.jsf"
+    NAME="output24"
+    PATH="/views/private/administracion/encuestas/adminCatEncuesta.jsf"
+    TARGET="rules:#views#private#administracion#encuestas#adminCatEncuesta.jsf"
+    TITLE="CATALOGOS_ENCUESTA" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="ADMIN_ENCUESTA::#views#private#administracion#encuestas#adminEncuesta.jsf"
+    NAME="output25"
+    PATH="/views/private/administracion/encuestas/adminEncuesta.jsf"
+    TARGET="rules:#views#private#administracion#encuestas#adminEncuesta.jsf"
+    TITLE="ADMIN_ENCUESTA" model-entity="JSFProcessItemOutput"/>
+   <PROCESS-ITEM-OUTPUT
+    ID="RECURSOS_MOODLE::#views#private#planesProgramas#agregaActividadRecursoMoodle.jsf"
+    NAME="output26"
+    PATH="/views/private/planesProgramas/agregaActividadRecursoMoodle.jsf"
+    TARGET="rules:#views#private#planesProgramas#agregaActividadRecursoMoodle.jsf"
+    TITLE="RECURSOS_MOODLE" model-entity="JSFProcessItemOutput"/>
+  </PROCESS-ITEM>
+ </PROCESS-ITEM>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#temas#Temas.jsf"
+  PATH="/views/private/administracion/temas/Temas.jsf"
+  SHAPE="304,1969,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#catalogos#catalogosPlanesProgramas.jsf"
+  PATH="/views/private/administracion/catalogos/catalogosPlanesProgramas.jsf"
+  SHAPE="304,2865,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#usuario#AdministraUsuarios.jsf"
+  PATH="/views/private/administracion/usuario/AdministraUsuarios.jsf"
+  SHAPE="304,849,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#funcionalidades#TextosSistema.jsf"
+  PATH="/views/private/administracion/funcionalidades/TextosSistema.jsf"
+  SHAPE="304,1297,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#CargaUsuarios.jsf"
+  PATH="/views/private/administracion/CargaUsuarios.jsf"
+  SHAPE="304,1745,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#plantillas#CreadorPlantillas.jsf"
+  PATH="/views/private/plantillas/CreadorPlantillas.jsf"
+  SHAPE="304,2193,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#notificaciones#Plantillas.jsf"
+  PATH="/views/private/administracion/notificaciones/Plantillas.jsf"
+  SHAPE="304,33,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#notificaciones#Notificacion.jsf"
+  PATH="/views/private/administracion/notificaciones/Notificacion.jsf"
+  SHAPE="304,2529,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#planesProgramas#adminPlanPrograma.jsf"
+  PATH="/views/private/planesProgramas/adminPlanPrograma.jsf"
+  SHAPE="304,33,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM NAME="rules:#views#private#home.jsf"
+  PATH="/views/private/home.jsf" SHAPE="304,33,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#notificaciones#ConsultaNotificaciones.jsf"
+  PATH="/views/private/administracion/notificaciones/ConsultaNotificaciones.jsf"
+  SHAPE="304,2305,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#notificaciones#Mensaje.jsf"
+  PATH="/views/private/administracion/notificaciones/Mensaje.jsf"
+  SHAPE="304,2641,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#notificaciones#BusquedaPersonas.jsf"
+  PATH="/views/private/administracion/notificaciones/BusquedaPersonas.jsf"
+  SHAPE="304,2753,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#usuario#AdminRegistroPersona.jsf"
+  PATH="/views/private/administracion/usuario/AdminRegistroPersona.jsf"
+  SHAPE="304,961,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#roles#asignaRolesUsuario.jsf"
+  PATH="/views/private/administracion/roles/asignaRolesUsuario.jsf"
+  SHAPE="304,2081,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#estructuraTerritorial#Municipios.jsf"
+  PATH="/views/private/administracion/estructuraTerritorial/Municipios.jsf"
+  SHAPE="304,1521,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#usuario#editarPersonaSeleccionada.jsf"
+  PATH="/views/private/administracion/usuario/editarPersonaSeleccionada.jsf"
+  SHAPE="304,1073,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#funcionalidades#Funcionalidades.jsf"
+  PATH="/views/private/administracion/funcionalidades/Funcionalidades.jsf"
+  SHAPE="304,1185,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#roles#Roles.jsf"
+  PATH="/views/private/administracion/roles/Roles.jsf"
+  SHAPE="304,1409,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#bitacora#ConsultarBitacora.jsf"
+  PATH="/views/private/administracion/bitacora/ConsultarBitacora.jsf"
+  SHAPE="304,1857,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#notificaciones#NotificacionDetalle.jsf"
+  PATH="/views/private/administracion/notificaciones/NotificacionDetalle.jsf"
+  SHAPE="304,2417,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#estructuraTerritorial#Asentamientos.jsf"
+  PATH="/views/private/administracion/estructuraTerritorial/Asentamientos.jsf"
+  SHAPE="304,1633,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#encuestas#adminCatEncuesta.jsf"
+  PATH="/views/private/administracion/encuestas/adminCatEncuesta.jsf"
+  SHAPE="304,881,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#encuestas#adminEncuesta.jsf"
+  PATH="/views/private/administracion/encuestas/adminEncuesta.jsf"
+  SHAPE="304,913,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#administracion#parametros#ParametrosSistema.jsf"
+  PATH="/views/private/administracion/parametros/ParametrosSistema.jsf"
+  SHAPE="304,913,0,0" model-entity="JSFProcessGroup"/>
+ <PROCESS-ITEM
+  NAME="rules:#views#private#planesProgramas#agregaActividadRecursoMoodle.jsf"
+  PATH="/views/private/planesProgramas/agregaActividadRecursoMoodle.jsf"
+  SHAPE="304,977,0,0" model-entity="JSFProcessGroup"/>
+</PROCESS>

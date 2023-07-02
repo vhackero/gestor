@@ -1,0 +1,27 @@
+package mx.gob.sedesol.basegestor.commons.utils;
+
+public enum ParametrosSistemaEnum {
+
+	PS_CONFIG_CORREO_HOST("CONFIG_CORREO_HOST"),
+	PS_CONFIG_CORREO_PUERTO("CONFIG_CORREO_PUERTO"),
+	PS_CONFIG_CORREO_CUENTA_ADMIN("CONFIG_CORREO_CUENTA_ADMIN"),
+	PS_CONFIG_CORREO_CUENTA_PASSWORD("CONFIG_CORREO_CUENTA_PASSWORD"),
+	PS_TITULO_NOTIFICACION_CORREO("TITULO_NOTIFICACION_CORREO"),
+	PS_CONTENIDO_CORREO_ACTIVACION_CTA("CONTENIDO_CORREO_ACTIVACION_CTA"),
+	PS_ASUNTO_CORREO_ACTIVACION_CTA("ASUNTO_CORREO_ACTIVACION_CTA"),
+	PS_ASUNTO_CORREO_RECUP_PASSWORD("ASUNTO_CORREO_RECUP_PASSWORD");
+	
+	private String clave;
+	
+	private ParametrosSistemaEnum( String clave) {
+		this.clave = clave;
+	}
+
+	/**
+	 * @return the clave
+	 */
+	public String getClave() {
+		return clave;
+	}
+
+}

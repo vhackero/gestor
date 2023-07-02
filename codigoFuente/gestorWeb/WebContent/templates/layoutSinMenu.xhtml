@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" data-ng-app="sisiGestorWeb">
+	
+	<h:head>
+		<f:facet name="first">
+			<meta http-equiv="X-UA-Compatible" content="IE=8, IE=edge,chrome=1" />
+			<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+			
+		</f:facet>
+			
+		<title><h:outputText value="#{sistema.obtenerTexto('gw.global.titulo')}" /></title>
+		<link rel="shortcut icon" type="image/x-icon" href="/recursos/Publico/#{sistema.obtenerTemaPublico()}/img/favicon.ico"/>
+		<link rel="stylesheet" type="text/css" href="/recursos/Publico/#{sistema.obtenerTemaPublico()}/css/custom.css" />
+		<script src="/recursos/Publico/#{sistema.obtenerTemaPublico()}/js/script.js"></script>
+		
+		<ui:insert name="cabecera" />
+	</h:head>
+	
+	
+	<ui:include src="/templates/headerSinMenu.xhtml" />
+	
+	
+	<ui:insert name="titular" />
+	
+	
+	<div class="container" id="divContainer">
+		<ui:insert name="contenido" />
+		<p:growl id="growlGlobal" autoUpdate="true" globalOnly="true"  />
+	</div>
+	
+	
+	<p:dialog modal="true" appendTo="@(body)"  widgetVar="statusDialog" 
+		header="#{msgGestorWeb['gestorweb.global.trabajando']}"
+		draggable="false" closable="false" resizable="false" style="text-align: center;" >
+		<p:graphicImage library="images" name="ajax-loader.gif" />
+	</p:dialog>
+	
+</html>

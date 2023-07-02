@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.mensajes.texto.mensajes')}</li>
+		<li>Detalle del mensaje</li>
+		<li class="active">#{sistema.obtenerTexto('gw.mensajes.texto.responder')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form enctype="multipart/form-data">
+			<h1>#{sistema.obtenerTexto('gw.mensajes.texto.responder')}</h1>
+			<hr />
+
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.mensaje.responder.titulo')}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.mensaje.responder.boton.enviar')}"
+								action="#{notificacionesBean.enviarMensaje()}" ajax="true"
+								styleClass="pull-right btn btn-primary" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:editor id="editor" widgetVar="editorWidget"
+								value="#{notificacionesBean.mensaje.contenido}" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<p:fileUpload value="#{notificacionesBean.archivoCargar}"
+							label="#{sistema.obtenerTexto('gw.mensajes.texto.adjuntar')}"
+							mode="advanced" auto="true" sizeLimit="50000000"
+							invalidSizeMessage="#{sistema.obtenerTexto('gw.global.archivo.tamanio.limite')}"
+							fileUploadListener="#{notificacionesBean.fileUploadListener}"
+							update="txtNombreArchivoAdjunto" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText id="txtNombreArchivoAdjunto"
+								value="#{notificacionesBean.archivoCargar.getFileName()}" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.mensaje.responder.boton.regresar')}"
+								action="#{menuGestorBean.navegaNotificacionDetalle()}"
+								ajax="true" styleClass="pull-right btn btn-default" />
+						</div>
+					</div>
+				</div>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>

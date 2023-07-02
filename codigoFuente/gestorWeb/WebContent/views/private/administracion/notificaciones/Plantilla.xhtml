@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.personalizacion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.mensajes.plantillas')}</li>
+		<li class="active"><p:outputLabel
+				value="#{sistema.obtenerTexto('gw.textos.menu.administracion.mensajes.nuevaplantilla')}"
+				rendered="#{plantillasMensajesBean.nuevo}" /> <p:outputLabel
+				value="#{sistema.obtenerTexto('gw.textos.menu.administracion.mensajes.editarplantilla')}"
+				rendered="#{not plantillasMensajesBean.nuevo}" /></li>
+
+	</ui:define>
+	<ui:define name="content">
+
+		<h1>
+			<p:outputLabel styleClass="h1"
+				rendered="#{plantillasMensajesBean.nuevo}"
+				value="#{sistema.obtenerTexto('gw.textos.menu.administracion.mensajes.nuevaplantilla')}" />
+			<p:outputLabel styleClass="h1"
+				rendered="#{not plantillasMensajesBean.nuevo}"
+				value="#{sistema.obtenerTexto('gw.textos.menu.administracion.mensajes.editarplantilla')}" />
+		</h1>
+
+		<hr />
+		<h:form>
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.plantilla.mensaje.editar.titulo')}">
+				<div class="row">
+					<div class="col-md-6">
+						<h:outputLabel for="txtTitulo" styleClass="requerido"
+							value="#{sistema.obtenerTexto('gw.plantilla.mensaje.editar.etiqueta.titulo')}:" />
+					</div>
+					<div class="col-md-6">
+						<h:outputLabel for="somTipo" styleClass="requerido" rendered="false"
+							value="#{sistema.obtenerTexto('gw.plantilla.mensaje.editar.etiqueta.tipo')}:" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6">
+							<!-- Longitud de campo -->
+							<p:inputText id="txtTitulo" styleClass="form-control"
+								maxlength="100" value="#{plantillasMensajesBean.mensaje.titulo}" />
+							<p:message for="txtTitulo" />
+						</div>
+						<div class="col-md-4">
+							<p:selectOneMenu id="somTipo" rendered="false"
+								value="#{plantillasMensajesBean.mensaje.tipo}" required="true"
+								styleClass="col-xs-12"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+								<f:selectItems
+									value="#{plantillasMensajesBean.tiposNotificacion}"
+									var="tipoNotificacion" itemLabel="#{tipoNotificacion}"
+									itemValue="#{tipoNotificacion.getValor()}" />
+							</p:selectOneMenu>
+							<p:message for="somTipo" />
+						</div>
+						<div class="col-md-2">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.plantilla.mensaje.editar.boton.variables')}"
+								onclick="PF('mVariables').show();"
+								styleClass="btn btn-primary pull-right" />
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<!-- Longitud de campo -->
+							<p:editor id="editor" widgetVar="editorWidget" maxlength="4000"
+								value="#{plantillasMensajesBean.mensaje.mensaje}" />
+							<p:message for="editor" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+							<p:outputLabel
+								value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.plantilla.mensaje.editar.boton.cancelar')}"
+							action="#{plantillasMensajesBean.navegaPlantillasDeNotificaciones()}"
+							ajax="false" immediate="true" styleClass="btn btn-default" />
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.plantilla.mensaje.editar.boton.predeterminado')}"
+							rendered="#{not plantillasMensajesBean.nuevo}"
+							disabled="#{plantillasMensajesBean.mensaje.activo}"
+							action="#{plantillasMensajesBean.establecerPlantillaPersonalizada()}"
+							styleClass="btn btn-default" />
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.plantilla.mensaje.editar.boton.guardar')}"
+							action="#{plantillasMensajesBean.guardarMensaje()}" ajax="false"
+							styleClass="btn btn-primary" />
+					</div>
+				</div>
+			</p:panel>
+			<p:dialog widgetVar="mVariables" styleClass="medidaModal"
+				header="#{sistema.obtenerTexto('gw.plantilla.modal.variables.titulo')}"
+				modal="true" resizable="false" draggable="false" position="center">
+				<p:dataTable value="#{plantillasMensajesBean.variables}"
+					id="tblVariables" var="variable" reflow="true"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					paginator="true" rows="10" paginatorPosition="bottom"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks}
+								 {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.plantilla.modal.variables.columna.descripcion')}">
+						<h:outputText value="#{variable.descripcion}" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.plantilla.modal.variables.columna.clave')}">
+						<h:outputText value="#{variable.clave}" />
+					</p:column>
+				</p:dataTable>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

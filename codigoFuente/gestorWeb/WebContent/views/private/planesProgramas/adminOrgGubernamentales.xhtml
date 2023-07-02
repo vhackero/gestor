@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.orggub')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.orggub')}</h1>
+		<hr />
+
+		<h:form id="frmAdminOrgGub">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.admin.textos.panel.titulo')}">
+
+				<div class="row">
+					<div class="col-md-4">
+						<h:outputLabel
+							value="#{sistema.obtenerTexto('gw.textos.label.estorggub')}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+
+							<p:tree id="treeOrgGub"
+								value="#{adminOrgGubernamentalBean.rootView}"
+								style="width:820px;" var="orgGub" dynamic="true"
+								selectionMode="single" cache="true">
+								<p:ajax event="select"
+									listener="#{adminOrgGubernamentalBean.onNodeSelect}" />
+								<p:treeNode expandedIcon="fa fa-file-text-o}"
+									collapsedIcon="ui-icon-folder-collapsed">
+									<h:outputText value="#{orgGub.nombre}" />
+								</p:treeNode>
+							</p:tree>
+
+							<p:contextMenu id="contextOrgGub" for="treeOrgGub">
+								<p:menuitem
+									value="#{sistema.obtenerTexto('gw.admin.orggub.menu.agregar')}"
+									action="#{adminOrgGubernamentalBean.muestraApartadoRegistro}"
+									update="@form" ajax="true" process="@this" />
+								<p:menuitem id="delete"
+									value="#{sistema.obtenerTexto('gw.admin.orggub.menu.eliminar')}"
+									action="#{adminOrgGubernamentalBean.eliminaOrgGubSel}"
+									update="@form" ajax="true" process="@this" />
+							</p:contextMenu>
+						</div>
+					</div>
+				</div>
+
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4">
+							<p:outputLabel styleClass="bloque" for="nombreOrgGubPadre"
+								value="#{sistema.obtenerTexto('gw.admin.textos.orggub.crearorg')}:" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-4">
+							<!-- Longitud de campo -->
+							<p:inputText id="nombreOrgGubPadre" styleClass="form-control"
+								value="#{adminOrgGubernamentalBean.orgGub.nombre}"
+								maxlength="100"
+								placeholder="#{sistema.obtenerTexto('gw.admin.textos.orggub.ingresanom')}">
+								<p:ajax process="@this" />
+							</p:inputText>
+						</div>
+
+						<div class="col-md-4">
+							<p:message for="nombreOrgGubPadre" />
+						</div>
+						<div class="col-md-4">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.admin.orggub.btn.crear')}"
+								action="#{adminOrgGubernamentalBean.generaOrgGubPadre}"
+								ajax="true" process="@this" update="frmAdminOrgGub,treeOrgGub"
+								styleClass="btn btn-primary pull-right" />
+						</div>
+					</div>
+				</div>
+			</p:panel>
+
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.admin.orggub.panel.agregar')}"
+				rendered="#{adminOrgGubernamentalBean.muestraPnlRegistro}">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4">
+							<p:outputLabel styleClass="bloque" for="orgGHij"
+								value="#{sistema.obtenerTexto('gw.admin.orggub.label.orggubhijo')}:" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-4">
+							<p:inputText id="orgGHij"
+								placeholder="#{sistema.obtenerTexto('gw.admin.textos.orggub.ingresanom')}"
+								value="#{adminOrgGubernamentalBean.nombreElemOrgGub}">
+								<p:ajax process="@this" />
+							</p:inputText>
+						</div>
+
+						<div class="col-md-4">
+							<p:message for="orgGHij" />
+						</div>
+
+						<div class="col-md-4">
+							<p:commandButton styleClass="btn btn-primary pull-right"
+								value="#{sistema.obtenerTexto('gw.admin.orggub.btn.guardar')}"
+								process="@this"
+								action="#{adminOrgGubernamentalBean.guardarElementoOrgGub}"
+								ajax="true" update="frmAdminOrgGub,treeOrgGub" />
+						</div>
+					</div>
+				</div>
+			</p:panel>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

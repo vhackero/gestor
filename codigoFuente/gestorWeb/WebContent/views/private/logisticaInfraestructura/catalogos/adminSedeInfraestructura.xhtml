@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.administracion.catalogos.logisticaInfra.sedes')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="frmCrear">
+			<h1>#{sistema.obtenerTexto('gw.administracion.catalogos.logisticaInfra.sedes')}</h1>
+			<hr />
+
+			<p:panel header="Alta Sedes Infraestructura" id="pnlAlta">
+
+				<div class="form-group">
+
+					<div class="row">
+						<div class="col-md-4">
+							<p:outputLabel styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.nombre')}" />
+							<!-- Longitud de campo -->
+							<p:inputText id="nomSedeLog" required="true" maxlength="60"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+								placeholder="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.nombre')}"
+								value="#{sedeInfraBean.sede.nombre}" styleClass="form-control" />
+							<p:message for="nomSedeLog" />
+						</div>
+
+						<div class="col-md-4">
+							<p:outputLabel styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.dependencia')}" />
+							<p:commandButton id="dependenciaSede"
+								styleClass="btn btn-primary quitaMargen"
+								value="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+
+							<p:overlayPanel for="dependenciaSede" hideEffect="fade"
+								style="width:600px">
+								<p:treeTable id="treeTbl" required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+									value="#{sedeInfraBean.arbolOrgGubernamental}"
+									var="dependencia" selectionMode="single"
+									selection="#{sedeInfraBean.nodoOrgGubernamentalSel}">
+									<p:ajax event="select"
+										listener="#{sedeInfraBean.onNodeSelectDependencia}" />
+
+									<p:column
+										headerText="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.orgsGub')}">
+										<h:outputText value="#{dependencia.nombre}" />
+									</p:column>
+								</p:treeTable>
+							</p:overlayPanel>
+							<p:message for="treeTbl" />
+
+						</div>
+
+						<div class="col-md-4">
+							<p:outputLabel for="selUbiSede" styleClass="requerido bloque"
+								value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.ubicacion')}" />
+							<p:selectOneMenu required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+								value="#{sedeInfraBean.sede.catUbicacionTerritorial}"
+								converter="catalogoComunConverter" id="selUbiSede"
+								styleClass="col-xs-12">
+								<p:ajax process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									noSelectionOption="true" />
+								<f:selectItems value="#{sedeInfraBean.catUbicacionTerr}"
+									var="ubi" itemLabel="#{ubi.nombre}" itemValue="#{ubi}" />
+							</p:selectOneMenu>
+							<p:message for="selUbiSede" />
+						</div>
+					</div>
+
+				</div>
+
+				<div class="form-group">
+
+					<div class="row">
+						<div class="col-md-4">
+							<p:outputLabel for="inptDir"
+								value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.direccion')}"
+								styleClass="bloque" />
+							<!-- Longitud de campo -->
+							<p:inputText id="inptDir" maxlength="60"
+								placeholder="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.direccion')}"
+								value="#{sedeInfraBean.sede.direccion}"
+								styleClass="form-control" />
+						</div>
+
+						<div class="col-md-4">
+							<p:outputLabel for="inptCol"
+								value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.colonia')}"
+								styleClass="bloque" />
+							<!-- Longitud de campo -->
+							<p:inputText id="inptCol" maxlength="60"
+								placeholder="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.colonia')}"
+								value="#{sedeInfraBean.sede.colonia}" styleClass="form-control" />
+						</div>
+
+						<div class="col-md-4">
+							<p:outputLabel for="inptCp"
+								value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.codPostal')}"
+								styleClass="bloque" />
+							<!-- Longitud de campo -->
+							<p:inputText id="inptCp" styleClass="form-control"
+								placeholder="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.codPostal')}"
+								value="#{sedeInfraBean.sede.codigoPostal}" maxlength="5">
+								<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+							</p:inputText>
+						</div>
+					</div>
+
+				</div>
+
+				<div class="row flexBoton">
+					<div class="col-md-4">
+						<p:outputLabel for="inptSwt"
+							value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.estatus')}"
+							styleClass="bloque" />
+						<p:inputSwitch id="inptSwt" value="#{sedeInfraBean.sede.activo}"
+							onLabel="Activo" offLabel="Inactivo">
+							<p:ajax process="@this" />
+						</p:inputSwitch>
+					</div>
+
+					<div class="col-md-8 text-right">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.btn.guardar')}"
+							action="#{sedeInfraBean.guardarSede()}" ajax="true"
+							process="@this frmCrear:pnlAlta" styleClass="btn btn-primary"
+							update="@form" />
+
+					</div>
+
+				</div>
+			</p:panel>
+
+
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.logInfra.adminsedes.pnl.titulo.sedesReg')}">
+
+				<p:dataTable
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.msjRegistros')}"
+					style="text-align:center;" var="sede"
+					value="#{sedeInfraBean.sedesRegistradas}" paginator="true"
+					rows="10" paginatorPosition="bottom"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.nombre')}">
+						<h:outputText value="#{sede.nombre}" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.dependencia')}">
+						<h:outputText value="#{sede.organismoGubernamental.nombre}" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.ubicacion')}">
+						<h:outputText value="#{sede.catUbicacionTerritorial.nombre}" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.direccion')}">
+						<h:outputText value="#{sede.direccion}" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.colonia')}">
+						<h:outputText value="#{sede.colonia}" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.codPostal')}">
+						<h:outputText value="#{sede.codigoPostal}" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.estatus')}">
+						<h:outputText
+							value="#{sede.activo eq true ? 'Activo' : 'Inactivo'}" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.fechaReg')}">
+						<h:outputText value="#{sede.fechaRegistro}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.acciones')}"
+						styleClass="text-center">
+
+						<p:commandButton id="editSede" ajax="true" process="@this"
+							update="frmEditar:pnlEditar" action="#{sedeInfraBean.verSede}"
+							styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+							<f:setPropertyActionListener value="#{sede}"
+								target="#{sedeInfraBean.sedeEditar}" />
+						</p:commandButton>
+						<p:tooltip
+							value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.ttip.editar')}"
+							for="editSede" position="top" />
+
+						<p:commandButton id="areasSedeAsig" immediate="true"
+							action="#{sedeInfraBean.consultarAreas}"
+							oncomplete="PF('mAreas').show();"
+							styleClass="btn-icon btn btn-default icono_sisi ss_adm_config"
+							update="@form" ajax="true">
+							<f:setPropertyActionListener value="#{sede}"
+								target="#{sedeInfraBean.sedeSeleccionada}" />
+						</p:commandButton>
+						<p:tooltip
+							value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.ttip.asignarAreas')}"
+							for="areasSedeAsig" position="top" />
+
+						<p:commandButton id="delAreasSede" immediate="true"
+							action="#{sedeInfraBean.consultarAreas}"
+							oncomplete="PF('mAreasElim').show();"
+							styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar"
+							update="@form" ajax="true">
+							<f:setPropertyActionListener value="#{sede}"
+								target="#{sedeInfraBean.sedeSeleccionada}" />
+						</p:commandButton>
+						<p:tooltip
+							value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.ttip.eliminarAreas')}"
+							for="delAreasSede" position="top" />
+
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+
+
+
+			<p:dialog id="modalAreas" modal="true" widgetVar="mAreas"
+				draggable="false" resizable="false" closable="false"
+				position="center" width="600"
+				header="#{sistema.obtenerTexto('gw.logInfra.adminsedes.modal.titulo.asigna')}">
+
+				<p:pickList id="pickListAreas" value="#{sedeInfraBean.listaAreas}"
+					var="area" itemLabel="#{area.nombre}" itemValue="#{area}"
+					converter="entityConverter"
+					addLabel="#{sistema.obtenerTexto('gw.global.picklist.agregar')}"
+					addAllLabel="#{sistema.obtenerTexto('gw.global.picklist.agregartodos')}"
+					removeLabel="#{sistema.obtenerTexto('gw.global.picklist.eliminar')}"
+					removeAllLabel="#{sistema.obtenerTexto('gw.global.picklist.eliminartodos')}">
+					<p:ajax event="transfer" listener="#{sedeInfraBean.handleTransfer}"
+						update="btnAsignar" />
+
+					<f:facet name="sourceCaption">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.pick.etiqueta.disp')}" />
+					</f:facet>
+					<f:facet name="targetCaption">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.pick.etiqueta.asig')}" />
+
+					</f:facet>
+				</p:pickList>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton id="btnAsignar"
+								disabled="#{sedeInfraBean.hayTransferencia eq false}"
+								value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.btn.guardar')}"
+								process="pickListAreas, @this" validateClient="false"
+								action="#{sedeInfraBean.guardaAreasSede}" ajax="true"
+								update="@form" onsuccess="PF('mAreas').hide();"
+								styleClass="btn btn-primary pull-right" />
+							<p:commandButton onclick="PF('mAreas').hide(); return false;"
+								styleClass="btn btn-default pull-right"
+								value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.btn.cancelar')}" />
+						</div>
+					</div>
+
+				</f:facet>
+
+			</p:dialog>
+			<p:dialog id="modalAreasElim" modal="true" widgetVar="mAreasElim"
+				draggable="false" resizable="false" closable="false"
+				position="center" styleClass="medidaModal"
+				header="#{sistema.obtenerTexto('gw.logInfra.adminsedes.modal.titulo.eliminaArea')}">
+
+				<p:pickList id="pckListAreasAsig"
+					value="#{sedeInfraBean.listaAreasAEliminar}" var="area"
+					converter="entityConverter" itemLabel="#{area.nombre}"
+					itemValue="#{area}"
+					addLabel="#{sistema.obtenerTexto('gw.global.picklist.agregar')}"
+					addAllLabel="#{sistema.obtenerTexto('gw.global.picklist.agregartodos')}"
+					removeLabel="#{sistema.obtenerTexto('gw.global.picklist.eliminar')}"
+					removeAllLabel="#{sistema.obtenerTexto('gw.global.picklist.eliminartodos')}">
+					<p:ajax event="transfer"
+						listener="#{sedeInfraBean.handleTransferDel}" update="btnEliminar" />
+					<f:facet name="sourceCaption">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.pick.etiqueta.asignada')}" />
+					</f:facet>
+					<f:facet name="targetCaption">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.pick.etiqueta.elim')}" />
+					</f:facet>
+				</p:pickList>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton id="btnEliminar"
+								disabled="#{sedeInfraBean.hayTransferencia eq false}"
+								value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.btn.aceptar')}"
+								process="pckListAreasAsig, @this"
+								action="#{sedeInfraBean.eliminaAreasSede}"
+								onsuccess="PF('mAreasElim').hide()"
+								styleClass="btn btn-primary pull-right" />
+
+							<p:commandButton onclick="PF('mAreasElim').hide(); return false;"
+								styleClass="btn btn-default pull-right"
+								value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.btn.cancelar')}" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+
+		</h:form>
+
+		<p:dialog id="modalEditarSede" modal="true" widgetVar="mdlEditarSede"
+			appendTo="@(body)" draggable="false" resizable="false" dynamic="true"
+			closable="false" position="top" width="1024" height="250"
+			header="Editar sede">
+			<h:form id="frmEditar">
+				<p:outputPanel id="pnlEditar">
+					<div class="form-group">
+
+						<div class="row">
+							<div class="col-md-4">
+								<p:outputLabel styleClass="requerido bloque"
+									value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.nombre')}" />
+								<!-- Longitud de campo -->
+								<p:inputText id="nomSedeEdi" required="true" maxlength="60"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+									placeholder="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.nombre')}"
+									value="#{sedeInfraBean.sedeEditar.nombre}"
+									styleClass="form-control" />
+								<p:message for="nomSedeEdi" />
+							</div>
+
+							<div class="col-md-4">
+								<p:outputLabel styleClass="requerido bloque"
+									value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.dependencia')}" />
+
+								<p:commandButton id="btnDependencia" value="Dependencia"
+									action="#{sedeInfraBean.mostrarTreeTable()}" process="@this"
+									update="@form:panelTree"
+									styleClass="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only btn btn-primary quitaMargen" />
+								<p:outputPanel id="panelTree">
+									<p:treeTable required="true"
+										rendered="#{sedeInfraBean.mostrarTree eq true}"
+										styleClass="ui-shadow estiloDependencia" id="treeTableEdit"
+										requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+										value="#{sedeInfraBean.arbolOrgGubernamental2}"
+										var="dependencia" selectionMode="single"
+										selection="#{sedeInfraBean.nodoOrgGubernamentalSelEdit}">
+										<p:ajax event="select" process="@this"
+											listener="#{sedeInfraBean.onNodeSelectDependenciaEdit}" />
+
+										<p:column
+											headerText="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.orgsGub')}">
+											<h:outputText value="#{dependencia.nombre}" />
+										</p:column>
+									</p:treeTable>
+								</p:outputPanel>
+								<p:message for="treeTableEdit" />
+
+							</div>
+
+							<div class="col-md-4">
+								<p:outputLabel for="selUbiSedeEdi" styleClass="requerido bloque"
+									value="#{sistema.obtenerTexto('gw.logInfra.busqAreasConfig.etiqueta.ubicacion')}" />
+								<p:selectOneMenu required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+									value="#{sedeInfraBean.sedeEditar.catUbicacionTerritorial.id}"
+									id="selUbiSedeEdi" styleClass="col-xs-12">
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										noSelectionOption="true" />
+									<f:selectItems value="#{sedeInfraBean.catUbicacionTerr}"
+										var="ubi" itemLabel="#{ubi.nombre}" itemValue="#{ubi.id}" />
+								</p:selectOneMenu>
+								<p:message for="selUbiSedeEdi" />
+							</div>
+						</div>
+
+					</div>
+
+					<div class="form-group">
+
+						<div class="row">
+							<div class="col-md-4">
+								<p:outputLabel for="inptDirEdi"
+									value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.direccion')}"
+									styleClass="bloque" />
+								<!-- Longitud de campo -->
+								<p:inputText id="inptDirEdi" maxlength="60"
+									placeholder="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.direccion')}"
+									value="#{sedeInfraBean.sedeEditar.direccion}"
+									styleClass="form-control" />
+							</div>
+
+							<div class="col-md-4">
+								<p:outputLabel for="inptColEdi"
+									value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.colonia')}"
+									styleClass="bloque" />
+								<!-- Longitud de campo -->
+								<p:inputText id="inptColEdi" maxlength="60"
+									placeholder="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.colonia')}"
+									value="#{sedeInfraBean.sedeEditar.colonia}"
+									styleClass="form-control" />
+							</div>
+
+							<div class="col-md-4">
+								<p:outputLabel for="inptCpEdi"
+									value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.codPostal')}"
+									styleClass="bloque" />
+								<!-- Longitud de campo -->
+								<p:inputText id="inptCpEdi" styleClass="form-control"
+									maxlength="5"
+									placeholder="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.codPostal')}"
+									value="#{sedeInfraBean.sedeEditar.codigoPostal}">
+									<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+								</p:inputText>
+							</div>
+						</div>
+
+					</div>
+
+					<div class="row flexBoton">
+						<div class="col-md-4">
+							<p:outputLabel for="inptSwtEdi"
+								value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.etiqueta.estatus')}"
+								styleClass="bloque" />
+							<p:inputSwitch id="inptSwtEdi"
+								value="#{sedeInfraBean.sedeEditar.activo}" onLabel="Activo"
+								offLabel="Inactivo">
+								<p:ajax process="@this" />
+							</p:inputSwitch>
+						</div>
+
+						<div class="col-md-8 text-right">
+							<br /> <br /> <br /> <br />
+							<p:commandButton value="Cancelar" update="frmEditar:pnlEditar"
+								action="#{sedeInfraBean.cerrarTreeTable()}" process="@this"
+								oncomplete="PF('mdlEditarSede').hide()" ajax="true"
+								styleClass="btn btn-default">
+
+							</p:commandButton>
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.logInfra.adminsedes.btn.guardar')}"
+								action="#{sedeInfraBean.guardarSedeAlEditar}" ajax="true"
+								styleClass="btn btn-primary"
+								process="@this frmEditar:inptSwtEdi frmEditar:inptCpEdi frmEditar:inptColEdi frmEditar:inptDirEdi frmEditar:selUbiSedeEdi frmEditar:nomSedeEdi"
+								update="frmCrear frmEditar">
+
+							</p:commandButton>
+
+						</div>
+
+					</div>
+				</p:outputPanel>
+			</h:form>
+		</p:dialog>
+
+	</ui:define>
+</ui:composition>

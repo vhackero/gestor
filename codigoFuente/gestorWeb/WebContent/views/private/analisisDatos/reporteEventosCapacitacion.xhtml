@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>Analisis de datos - Reporte de eventos de capacitación</li>
+		<li class="active">Reporte de eventos de capacitación</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form id="bevtCapFrm">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<f:validateBean disabled="true">
+				<p:panel header="Búsqueda de datos del evento del capacitación"
+					showCollapseLink="false" collapsible="false">
+
+					<div class="form-group">
+
+						<div class="row">
+
+							<div class="col-md-3">
+								<p:outputLabel value="Tipo de competencia:" for="tpoCmpSel"
+									styleClass="bloque" />
+								<p:selectOneMenu id="tpoCmpSel" required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+									value="#{reporteEventosCapacitacionBean.filtro.fichaDescriptivaPrograma.tipoCompetencia}"
+									autoWidth="false"
+									valueChangeListener="#{reporteEventosCapacitacionBean.onChangeTpoCompetencia}"
+									styleClass="col-xs-12">
+									<p:ajax update="ejeCapSel" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+									<f:selectItems
+										value="#{reporteEventosCapacitacionBean.listaTiposCompetencias}"
+										var="tpoComp" itemLabel="#{tpoComp.nombre}"
+										itemValue="#{tpoComp.id}" />
+								</p:selectOneMenu>
+							</div>
+
+							<div class="col-md-3">
+								<p:outputLabel value="Eje de capacitación:" for="ejeCapSel"
+									styleClass="bloque" />
+								<p:selectOneMenu id="ejeCapSel" required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+									value="#{reporteEventosCapacitacionBean.filtro.fichaDescriptivaPrograma.ejeCapacitacion}"
+									styleClass="col-xs-12">
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										value="#{null}" />
+									<f:selectItems
+										value="#{reporteEventosCapacitacionBean.listaEjesCapacitacion}"
+										var="ejeCap" itemValue="#{ejeCap.id}"
+										itemLabel="#{ejeCap.nombre}" />
+								</p:selectOneMenu>
+							</div>
+
+							<div class="col-md-3">
+								<p:outputLabel value="Modalidad" for="modalidad"
+									styleClass="bloque" />
+								<p:selectOneMenu id="modalidad" required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+									value="#{reporteEventosCapacitacionBean.filtro.catModalidadPlanPrograma}"
+									converter="catalogoComunConverter" styleClass="col-xs-12">
+									<p:ajax event="change" process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+									<f:selectItems
+										value="#{reporteEventosCapacitacionBean.modalidadEventoCapList}"
+										var="modalidad" itemLabel="#{modalidad.nombre}"
+										itemValue="#{modalidad}" />
+								</p:selectOneMenu>
+							</div>
+							<div class="col-md-3">
+								<p:outputLabel value="Estatus" for="estatus" styleClass="bloque" />
+								<p:selectOneMenu id="estatus"
+									value="#{reporteEventosCapacitacionBean.filtro.catEstadoEventoCapacitacion}"
+									converter="catalogoComunConverter" styleClass="col-xs-12">
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItems
+										value="#{reporteEventosCapacitacionBean.listaEstatusEC}"
+										var="estadoEventCap" itemLabel="#{estadoEventCap.nombre}"
+										itemValue="#{estadoEventCap}" />
+								</p:selectOneMenu>
+							</div>
+						</div>
+
+						<div class="row">
+
+							<div class="col-md-3">
+								<p:outputLabel value="Tipo de rengo de fechas" for="tipofecha"
+									styleClass="bloque" />
+								<f:validateBean disabled="true">
+									<p:selectOneMenu id="tipofecha" required="false"
+										value="#{reporteEventosCapacitacionBean.tipoDatoFechas}"
+										autoWidth="false" styleClass="col-xs-12">
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											itemValue="#{null}" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.ga.label.ite')}"
+											itemValue="#{1}" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.ga.label.ie')}"
+											itemValue="#{2}" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.ga.label.te')}"
+											itemValue="#{3}" />
+									</p:selectOneMenu>
+								</f:validateBean>
+
+							</div>
+
+							<div class="col-md-3">
+								<p:outputLabel value="Fecha	registro:" />
+							</div>
+							<div class="col-md-3">
+
+								<p:outputLabel value="Inicial:" styleClass="bloque" />
+								<p:calendar id="fc_fechaInicial" navigator="true"
+									value="#{reporteEventosCapacitacionBean.filtro.fechaInicial}"
+									styleClass="calendario"
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+									yearRange="c-100:c+100" locale="es"
+									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									showOn="button" readonlyInput="true">
+									<p:ajax event="dateSelect" process="@this" />
+								</p:calendar>
+							</div>
+
+							<div class="col-md-3">
+								<p:outputLabel value="Final:" styleClass="bloque" />
+								<p:calendar navigator="true"
+									value="#{reporteEventosCapacitacionBean.filtro.fechaFinal}"
+									styleClass="calendario" id="fc_fechaFinal"
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+									yearRange="c-100:c+100" locale="es" readonlyInput="true"
+									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									showOn="button">
+									<p:ajax event="dateSelect" process="@this" />
+								</p:calendar>
+							</div>
+
+
+						</div>
+
+						<!-- 				Buscar usuarios -->
+						<div class="row">
+							<div class="col-md-12">
+								<p:commandButton styleClass="btn btn-primary pull-right"
+									value="Buscar" update="tblEventosCapacitacion"
+									action="#{reporteEventosCapacitacionBean.busquedaEventosCapacitacionCriterios}"
+									ajax="false" />
+							</div>
+						</div>
+
+					</div>
+
+				</p:panel>
+			</f:validateBean>
+
+			<!-- Import Enum -->
+			<p:importEnum
+				type="mx.gob.sedesol.basegestor.commons.utils.GeneroEnum"
+				var="GENERO" allSuffix="ALL_ENUM_VALUES" />
+
+
+			<p:panel header="Resultado de la búsqueda">
+				<p:dataTable
+					value="#{reporteEventosCapacitacionBean.eventoCapacitacionDTOList}"
+					id="tblEventosCapacitacion" var="eventoCapacitacion"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					paginator="true" paginatorPosition="bottom"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+					<f:facet name="header">
+						<p:outputLabel
+							value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+
+						<p:commandButton id="toggler" type="button"
+							value="Columna de datos" styleClass="pull-right btn btn-primary"
+							icon="ui-icon-carat-1-s" />
+						<p:columnToggler datasource="tblEventosCapacitacion"
+							trigger="toggler" />
+					</f:facet>
+
+					<!-- Datos evento de capacitacion -->
+					<!-- Nombre del programa de capacitacion -->
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[0]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Nombre del programa de capacitacion" />
+						</f:facet>
+
+						<p:outputLabel
+							value="#{eventoCapacitacion.fichaDescriptivaPrograma.nombreTentativo}" />
+					</p:column>
+
+
+					<!-- cv del evento de capacitacion -->
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[1]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Clave del EC" />
+						</f:facet>
+
+						<p:outputLabel value="#{eventoCapacitacion.cveEventoCap}" />
+					</p:column>
+					<!-- Nombre del evento de capacitacion  -->
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[2]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Nombre del EC" />
+						</f:facet>
+
+						<p:outputLabel value="#{eventoCapacitacion.nombreEc}" />
+					</p:column>
+					<!-- Tipo competencia  -->
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[3]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Tipo Competencia" />
+						</f:facet>
+
+						<p:outputLabel
+							value="#{reporteEventosCapacitacionBean.obtieneNombreTpoCompetencia(
+								eventoCapacitacion.fichaDescriptivaPrograma.tipoCompetencia)}" />
+					</p:column>
+					<!-- Eje capacitacion  -->
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[4]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Eje capacitación" />
+						</f:facet>
+
+						<p:outputLabel
+							value="#{reporteEventosCapacitacionBean.
+								obtieneNombreEjeCapacit(eventoCapacitacion.fichaDescriptivaPrograma.ejeCapacitacion)}" />
+					</p:column>
+					<!-- Modalidad -->
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[5]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Modalidad" />
+						</f:facet>
+
+						<p:outputLabel
+							value="#{eventoCapacitacion.catModalidadPlanPrograma.nombre}" />
+					</p:column>
+					<!-- Estatus  -->
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[6]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Estatus" />
+						</f:facet>
+
+						<p:outputLabel
+							value="#{eventoCapacitacion.catEstadoEventoCapacitacion.nombre}" />
+					</p:column>
+					<!-- Fecha Inicial  -->
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[7]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Fecha Inicial" />
+						</f:facet>
+
+						<p:outputLabel value="#{eventoCapacitacion.fechaInicial}" />
+					</p:column>
+
+					<!-- Fecha final  -->
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[8]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Fecha Final" />
+						</f:facet>
+
+						<p:outputLabel value="#{eventoCapacitacion.fechaFinal}" />
+					</p:column>
+
+					<!-- Nivel de ensenanza  -->
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[9]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Nivel de enseñanza" />
+						</f:facet>
+
+						<p:outputLabel
+							value="#{eventoCapacitacion.fichaDescriptivaPrograma.catNivelEnsenanzaPrograma.nombre}" />
+					</p:column>
+
+
+					<!--Dirigido a   -->
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[10]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Dirigido a" />
+						</f:facet>
+						<p:outputLabel
+							value="#{reporteEventosCapacitacionBean.obtenerDirigidoA(eventoCapacitacion.idDirigido)}" />
+					</p:column>
+
+					<!--Destinatarios    -->
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[11]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Destinatarios" />
+						</f:facet>
+						<p:outputLabel
+							value="#{reporteEventosCapacitacionBean.obtenerTipoDestinatario(eventoCapacitacion.idDestinatario)}" />
+					</p:column>
+
+					<!--Categoria   -->
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[12]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Categoria " />
+						</f:facet>
+						<p:outputLabel value="#{eventoCapacitacion.categoriaEC.nombre}" />
+					</p:column>
+
+
+					<!--Coordinador academico   -->
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[13]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Coordinador Academico " />
+						</f:facet>
+						<p:outputLabel
+							value="#{eventoCapacitacion.responsableCoordinadorAcademico.
+									personaResponsabilidad.tblPersona.nombreCompleto}" />
+					</p:column>
+
+					<!-- Numero de participantes -->
+
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[14]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Numero Participantes" />
+						</f:facet>
+						<p:outputLabel
+							value="#{reporteEventosCapacitacionBean.obtenerValorDeMapaNumeroParticipantes(eventoCapacitacion.id)}" />
+					</p:column>
+
+
+
+					<!-- Participantes Masculinos -->
+
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[15]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Hombres" />
+						</f:facet>
+						<p:outputLabel
+							value="#{reporteEventosCapacitacionBean.obtenerValorDeMapaGeneroNumeroParticipantes(eventoCapacitacion.id,GENERO.MASCULINO.valor)}" />
+					</p:column>
+
+					<!-- Participantes Femeninos -->
+
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[16]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Mujeres" />
+						</f:facet>
+						<p:outputLabel
+							value="#{reporteEventosCapacitacionBean.obtenerValorDeMapaGeneroNumeroParticipantes(eventoCapacitacion.id,GENERO.FEMENINO.valor)}" />
+					</p:column>
+
+
+					<!-- Porcentaje de asistencias-->
+
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[17]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Porcentaje de asistencias" />
+						</f:facet>
+						<p:outputLabel
+							value="#{reporteEventosCapacitacionBean.obtenerValorDeMapaPorcentajeAsistencia(eventoCapacitacion.id)}" />
+					</p:column>
+
+
+					<!-- Tipo de evento de capacitacion -->
+
+					<p:column visible="#{reporteEventosCapacitacionBean.visible[18]}"
+						exportable="true">
+						<f:facet name="header">
+							<p:outputLabel value="Tipo de evento de capacitación" />
+						</f:facet>
+						<p:outputLabel
+							value="#{eventoCapacitacion.fichaDescriptivaPrograma.catTipoEventoEc.nombre}" />
+					</p:column>
+
+				</p:dataTable>
+			</p:panel>
+
+			<div class="row">
+
+				<div class="col-md-5">
+					<p:commandLink id="btnReporte" ajax="false" styleClass="pull-right">
+						<p:dataExporter type="xls" target="tblEventosCapacitacion"
+							fileName="analisisDatosEventosCapacitacion" pageOnly="true" />
+						<p:graphicImage library="images" width="150" height="35"
+							name="analisis_datos/descargar.png" styleClass="foto" />
+					</p:commandLink>
+					<p:outputLabel value="Reporte de excel:" styleClass="pull-right"
+						for="btnReporte" />
+				</div>
+				<div class="col-md-2" />
+				<div class="col-md-5">
+					<p:selectOneMenu id="informePrediseñado" required="false"
+						value="#{reporteEventosCapacitacionBean.informePredisenadoSeleccionado}"
+						autoWidth="false" styleClass="col-xs-12">
+						<f:selectItem itemLabel="Seleccione" itemValue="#{null}" />
+					</p:selectOneMenu>
+
+				</div>
+				<div class="col-md-5">
+					<p:commandButton value="Generar"
+						styleClass="btn btn-primary pull-right">
+					</p:commandButton>
+
+				</div>
+
+			</div>
+		</h:form>
+	</ui:define>
+</ui:composition>

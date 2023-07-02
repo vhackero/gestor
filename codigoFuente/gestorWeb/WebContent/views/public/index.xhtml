@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layoutSinMenu.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<!-- Elementos que se renderizan en la zona de Cabecera  -->
+	<ui:define name="cabecera">
+
+	</ui:define>
+	<!-- /cabecera -->
+
+	<!-- Elementos que se Renderizan en la zona del Título de página -->
+	<ui:define name="titular">
+
+
+		<div id="casosExito" data-interval="5000" data-pause="hover"
+			data-wrap="true" data-ride="carousel" style="height: 320px;"
+			class="carousel slide   ">
+			<ol class="carousel-indicators">
+				<li data-target="#casosExito" data-slide-to="0" class="active"></li>
+				<li data-target="#casosExito" data-slide-to="1"></li>
+				<li data-target="#casosExito" data-slide-to="2"></li>
+			</ol>
+
+			<div class="carousel-inner" role="listbox">
+
+				<!-- c:forEach var="caso" items="#{casosExitoBean.carrusel}" varStatus="contadorCaso">
+					<div style="background-image: url('#{resource[caso.url]}');" class="item">
+					</div>
+				</c:forEach-->
+
+				<div
+					style="background-image: url('#{resource['images/anuncios/anuncio_01.jpg']}');"
+					class="item active">
+					<img src="#{resource[caso.url]}"></img>
+				</div>
+
+				<div
+					style="background-image: url('#{resource['images/anuncios/anuncio_02.jpg']}');"
+					class="item ">
+					<img src="#{resource[caso.url]}"></img>
+				</div>
+
+				<div
+					style="background-image: url('#{resource['images/anuncios/anuncio_03.jpg']}');"
+					class="item ">
+					<img src="#{resource[caso.url]}"></img>
+				</div>
+
+			</div>
+
+			<a class="left carousel-control" href="#casosExito" role="button"
+				data-slide="prev"><span class="glyphicon glyphicon-chevron-left"
+				aria-hidden="true"></span><span class="sr-only">Previous</span></a><a
+				class="right carousel-control" href="#casosExito" role="button"
+				data-slide="next"><span
+				class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span><span
+				class="sr-only">Next</span></a>
+		</div>
+		<!-- /#anuncios -->
+	</ui:define>
+	<!-- /titular -->
+
+	<!-- Elementos que se renderizan en la zona de Contenido -->
+	<ui:define name="contenido">
+		<h:form id="form">
+			<h:panelGroup class="cursosPublicoGeneral container" layout="block">
+				<p:remoteCommand name="filtrarCursos" update="cursos"
+					actionListener="#{cursosBean.filtarCursos}" />
+				<div class="row">
+					<div class="col-md-12">
+						<div class="row">
+							<div
+								class="input-group col-sm-6 col-md-4 col-lg-3 pull-right buscarCursos">
+								<p:inputText class="form-control" placeholder="Buscar cursos"
+									onkeyup="if(this.value.length>0 || this.value.length==0) filtrarCursos();"
+									value="#{cursosBean.filtroCursos}" />
+								<span class="input-group-addon"><i
+									class="fa fa-search fa-fw fa-flip-horizontal"></i></span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<h1>Cursos</h1>
+						<hr />
+					</div>
+				</div>
+
+				<div class="row cursos">
+					<h:panelGroup id="cursos" layout="block">
+
+						<ui:repeat var="curso" varStatus="estadoCurso"
+							value="#{cursosBean.cursosPublicoGeneral}">
+
+							<p:remoteCommand id="asignaCurso" process="@this"
+								name="asignaCurso" update="@form"
+								action="#{cursosBean.asignaCursoSeleccionado(curso)}"
+								onsuccess="PF('dlgInteresado').show()">
+
+
+							</p:remoteCommand>
+
+
+
+							<div class="col-md-4 col-lg-3 col-sm-2 curso">
+								<p:commandLink onclick="event.preventDefault()"
+									style="color:black;text-decoration:none" update="@form"
+									oncomplete="PF('dlgInteresado').show()"
+									actionListener="#{cursosBean.asignaCursoSeleccionado(curso)}">
+
+									<h:panelGroup class="imagen"
+										style="background-image:url('#{curso.imagen}')" layout="block">
+										<h:outputText value="Nuevo" class="nuevo"
+											rendered="#{curso.nuevo}" />
+										<h:outputText value="Proximamente" class="proximamente"
+											rendered="#{curso.proximamente}" />
+									</h:panelGroup>
+									<h4 class="nombre-curso">
+										<h:outputText value="#{curso.nombreCurso}" />
+									</h4>
+									<p class="descripcion">
+										<h:outputText
+											value="#{curso.descripcion.length() > 200 ? curso.descripcion.substring(0,200) : curso.descripcion}" />
+									</p>
+									<div class="row">
+										<div class="col-xs-6 text-left">
+											<h:outputText value="Nivel: #{curso.nivel}" class="nivel" />
+										</div>
+										<div class="col-xs-6 text-right">
+											<h:outputText value="Duración: #{curso.duracion}"
+												styleClass="duracion" />
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12 text-right valoracion">
+											<c:forEach begin="1" end="5" varStatus="contadorEstrellas">
+												<p:button icon="fa fa-star" styleClass="starIcon"
+													onclick="return false;"
+													rendered="#{contadorEstrellas.count lt curso.valoracionCurso+1}" />
+												<p:button icon="fa fa-star-o" styleClass="starIcon"
+													onclick="return false;"
+													rendered="#{contadorEstrellas.count gt curso.valoracionCurso}" />
+
+											</c:forEach>
+										</div>
+									</div>
+
+
+
+								</p:commandLink>
+							</div>
+						</ui:repeat>
+					</h:panelGroup>
+				</div>
+			</h:panelGroup>
+
+
+			<p:dialog id="interesado" position="center" resizable="false"
+				styleClass="interesado" header="Contacto" responsive="true"
+				dynamic="true" modal="true" appendTo="@(body)" width="900"
+				closable="true" widgetVar="dlgInteresado">
+				<p:panel id="panel">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel value="Eje de capacitación: " styleClass="bloque" />
+								<h:outputText value="#{cursosBean.ejeCapacitacion}" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel value="Tipo de competencia: " styleClass="bloque" />
+								<h:outputText value="#{cursosBean.tipoCompetencia}" />
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel value="Modalidad: " styleClass="bloque" />
+								<h:outputText value="#{cursosBean.modalidad}" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel value="Nivel de enseñanza: " styleClass="bloque" />
+								<h:outputText value="#{cursosBean.nivelEnsenanza}" />
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel value="Carga horaria registrada en el programa: "
+									styleClass="bloque" />
+								<h:outputText value="#{cursosBean.cargaHoraria}" />
+							</div>
+						</div>
+					</div>
+					<div class="row">
+
+						<div class="col-md-6" style="height:300px;overflow-y:scroll">
+							<h:panelGroup class="imagen"
+								style="background-image:url('#{cursosBean.cursoSelec.imagen}')"
+								layout="block">
+								<h:outputText value="Nuevo" class="nuevo"
+									rendered="#{cursosBean.cursoSelec.nuevo}" />
+								<h:outputText value="Proximamente" class="proximamente"
+									rendered="#{cursosBean.cursoSelec.proximamente}" />
+							</h:panelGroup>
+							<h4 class="nombre-curso">
+								<h:outputText value="#{cursosBean.cursoSelec.nombreCurso}" />
+							</h4>
+							<p class="descripcion">
+								<h:outputText
+									value="#{cursosBean.cursoSelec.descripcion.length() > 300 ? cursosBean.cursoSelec.descripcion.substring(0,200) : cursosBean.cursoSelec.descripcion}" />
+							</p>
+
+						</div>
+						<div class="col-md-6">
+							<h:outputLabel value="Nombre" styleClass="bloque requerido" />
+
+							<p:inputText id="nomIntPub"
+								value="#{cursosBean.nombreInteresado}" styleClass="form-control"
+								required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
+							<p:message for="nomIntPub" />
+
+							<h:outputLabel value="Correo electronico"
+								styleClass="bloque requerido" />
+							<p:inputText id="emailIntPub"
+								value="#{cursosBean.correoInteresado}" styleClass="form-control"
+								required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
+							<p:message for="emailIntPub" />
+
+							<h:outputLabel value="Mensaje" styleClass="bloque requerido" />
+							<p:inputTextarea id="areaIntPub" rows="2"
+								value="#{cursosBean.mensajeInteresado}" required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
+							<p:message for="areaIntPub" />
+
+
+						</div>
+					</div>
+
+				</p:panel>
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton styleClass="btn btn-primary pull-right"
+							value="Enviar" action="#{cursosBean.registroEnCurso}"
+							update="@form" ajax="true" />
+						<p:commandButton id="btnFinProg" ajax="true"
+							action="#{cursosBean.cancelarContacto}"
+							styleClass="btn btn-default pull-right" value="Cancelar"
+							update="@form" oncomplete="PF('dlgInteresado').hide()" />
+					</div>
+				</div>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+
+</ui:composition>

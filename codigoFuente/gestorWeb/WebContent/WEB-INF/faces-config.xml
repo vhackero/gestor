@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd"
+	version="2.2">
+
+	<application>
+        <el-resolver>
+                org.springframework.web.jsf.el.SpringBeanFacesELResolver
+        </el-resolver>
+         <locale-config>
+	            <default-locale>es</default-locale>
+	            <supported-locale>en</supported-locale>
+	        </locale-config>
+	        <resource-bundle>
+	            <base-name>mx.gob.sedesol.gestorweb.i18n.messages</base-name>
+	            <var>msgGestorWeb</var>
+	        </resource-bundle>
+	        
+	        <resource-bundle>
+	            <base-name>mx.gob.sedesol.gestorweb.application.application</base-name>
+	            <var>appProperties</var>
+	        </resource-bundle>
+	        
+    </application>
+    
+    <!--  CASOS DE NAVEGACION -->
+    <navigation-rule>
+		<from-view-id>/views/*</from-view-id>
+		
+		<navigation-case>
+			<from-outcome>PANTALLA_INICIO</from-outcome>
+			<to-view-id>/views/private/home.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>EVENTOS</from-outcome>
+			<to-view-id>/views/public/pages/eventos.xhtml</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		
+		<navigation-case>
+			<from-outcome>ADMIN_USUARIOS</from-outcome>
+			<to-view-id>/views/private/administracion/usuario/AdministraUsuarios.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>REGISTRO_USUARIO_INTERNO</from-outcome>
+			<to-view-id>/views/private/administracion/usuario/RegistroUsuarioInterno.xhtml</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>REGISTRO_USUARIO_EXTERNO</from-outcome>
+			<to-view-id>/views/private/administracion/usuario/RegistroUsuarioExterno.xhtml</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>ROLES</from-outcome>
+			<to-view-id>/views/private/administracion/roles/Roles.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>ROLES_PERMISOS</from-outcome>
+			<to-view-id>/views/private/administracion/roles/PermisosRol.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>FUNCIONALIDADES</from-outcome>
+			<to-view-id>/views/private/administracion/funcionalidades/Funcionalidades.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>TEXTOS_SISTEMA</from-outcome>
+			<to-view-id>/views/private/administracion/funcionalidades/TextosSistema.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>BUSQUEDA_TEXTOS_SISTEMA</from-outcome>
+			<to-view-id>/views/private/administracion/funcionalidades/BusquedaTextosSistema.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>ACTIVIDADES_USUARIO</from-outcome>
+			<to-view-id>/views/private/administracion/actividades/ActividadesUsuario.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>IMAGENES_DOCS</from-outcome>
+			<to-view-id>/views/private/plantillas/CreadorPlantillas.xhtml</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>PLANTILLAS_DOCS</from-outcome>
+			<to-view-id>/views/private/administracion/plantillasDocumentos/Plantillas.xhtml</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>PLANTILLA_DOC</from-outcome>
+			<to-view-id>/views/private/administracion/plantillasDocumentos/Plantilla.xhtml</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		
+		<navigation-case>
+			<from-outcome>NAVEGA_IMAGENES_DOCUMENTOS</from-outcome>
+			<to-view-id>/views/private/plantillas/CreadorPlantillas.xhtml</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		
+		<navigation-case>
+			<from-outcome>MUNICIPIOS</from-outcome>
+			<to-view-id>/views/private/administracion/estructuraTerritorial/Municipios.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>ASENTAMIENTOS</from-outcome>
+			<to-view-id>/views/private/administracion/estructuraTerritorial/Asentamientos.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>CARGA_USUARIOS</from-outcome>
+			<to-view-id>/views/private/administracion/usuario/CargaUsuarios.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>CONSULTA_BITACORA</from-outcome>
+			<to-view-id>/views/private/administracion/bitacora/ConsultarBitacora.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>CLASIFICACION_BADGES</from-outcome>
+			<to-view-id>/views/private/administracion/gamificacionBadges/clasificacionBadges.xhtml</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>BADGES</from-outcome>
+			<to-view-id>/views/private/administracion/gamificacionBadges/badges.xhtml</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>CONSULTA_BITACORA_PERSONAS</from-outcome>
+			<to-view-id>/views/private/administracion/bitacora/BusquedaPersonas.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>TEMAS</from-outcome>
+			<to-view-id>/views/private/administracion/temas/Temas.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>ARCHIVOS_TEMA</from-outcome>
+			<to-view-id>/views/private/administracion/temas/ArchivosTema.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>ARCHIVO_TEMA</from-outcome>
+			<to-view-id>/views/private/administracion/temas/ArchivoTema.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>ASIGNACION_ROLES</from-outcome>
+			<to-view-id>/views/private/administracion/roles/asignaRolesUsuario.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>NOTIFICACIONES_SISTEMA</from-outcome>
+			<to-view-id>/views/private/administracion/notificaciones/ConsultaNotificacionesSistema.xhtml</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>NOTIFICACIONES</from-outcome>
+			<to-view-id>/views/private/administracion/notificaciones/ConsultaNotificaciones.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>NOTIFICACION_DETALLE</from-outcome>
+			<to-view-id>/views/private/administracion/notificaciones/NotificacionDetalle.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>NOTIFICACION_EDICION</from-outcome>
+			<to-view-id>/views/private/administracion/notificaciones/Notificacion.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>NOTIFICACION_RESPONDER</from-outcome>
+			<to-view-id>/views/private/administracion/notificaciones/Mensaje.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>NOTIFICACION_PERSONAS</from-outcome>
+			<to-view-id>/views/private/administracion/notificaciones/BusquedaPersonas.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>PARAMETROS_SISTEMA</from-outcome>
+			<to-view-id>/views/private/administracion/parametros/ParametrosSistema.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>CAT_PLANES_PROG</from-outcome>
+			<to-view-id>/views/private/administracion/catalogos/catalogosPlanesProgramas.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>CAT_GESTION_ESCOLAR</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/catalogos/catalogosGestionEscolar.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		
+		<navigation-case>
+			<from-outcome>ORG_GUB</from-outcome>
+			<to-view-id>/views/private/planesProgramas/adminOrgGubernamentales.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>UNIDADES_RESPONSABLES</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/catalogos/UnidadesResponsables.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>PROGRAMAS_SOCIALES</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/catalogos/ProgramasSociales.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>PLANTILLAS_MENSAJES</from-outcome>
+			<to-view-id>/views/private/administracion/notificaciones/Plantillas.xhtml</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>EDICION_PLANTILLA_NOTIFICACION</from-outcome>
+			<to-view-id>/views/private/administracion/notificaciones/Plantilla.xhtml</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>ADMIN_CAT_PLAN_PROG</from-outcome>
+			<to-view-id>/views/private/administracion/catalogos/catalogosPlanesProgramas.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>MALLA_CURRICULAR</from-outcome>
+			<to-view-id>/views/private/planesProgramas/adminPlanPrograma.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>BUSQUEDA_PROGRAMA_CAP</from-outcome>
+			<to-view-id>/views/private/planesProgramas/busquedaPrograma.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>EJE_COMPETENCIAS</from-outcome>
+			<to-view-id>/views/private/planesProgramas/CompetenciasPorEje.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>ADMINISTRAR_COMPETENCIAS</from-outcome>
+			<to-view-id>/views/private/planesProgramas/AdministrarCompetencias.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>NUEVO_PROGRAMA_CAP</from-outcome>
+			<to-view-id>/views/private/planesProgramas/nuevoProgramaCapacitacion.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+	
+		
+		<navigation-case>
+			<from-outcome>FEC_PROGRAMA</from-outcome>
+			<to-view-id>/views/private/planesProgramas/programaCapacitacionFEC.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>FEC_EDITAR_PROGRAMA</from-outcome>
+			<to-view-id>/views/private/planesProgramas/nuevoProgramaCapacitacion.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		
+		<navigation-case>
+			<from-outcome>BUSQUEDA_PLANES</from-outcome>
+			<to-view-id>/views/private/planesProgramas/busquedaPlanes.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>NUEVO_PLAN</from-outcome>
+			<to-view-id>/views/private/planesProgramas/nuevoPlan.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>COMP_POR_EJE</from-outcome>
+			<to-view-id>/views/private/planesProgramas/competenciasPorEje.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>AGREGAR_COMPETENCIAS</from-outcome>
+			<to-view-id>/views/private/planesProgramas/AgregarCompetenciaEspecifica.jsf</to-view-id>
+			<redirect/>
+		</navigation-case>
+		
+	<navigation-case>
+		<from-outcome>CATALOGOS_ENCUESTA</from-outcome>
+		<to-view-id>/views/private/encuestas/adminCatEncuesta.jsf</to-view-id>
+		<redirect />
+	</navigation-case>
+	<navigation-case>
+		<from-outcome>ADMIN_ENCUESTA</from-outcome>
+		<to-view-id>/views/private/encuestas/adminEncuesta.jsf</to-view-id>
+		<redirect />
+	</navigation-case>
+	<navigation-case>
+		<from-outcome>SEGUIMIENTO_ENCUESTA</from-outcome>
+		<to-view-id>/views/private/encuestas/SeguimientoEncuestas.jsf</to-view-id>
+		<redirect />
+	</navigation-case>
+	<navigation-case>
+		<from-outcome>ENCUESTAS_PENDIENTES</from-outcome>
+		<to-view-id>/views/private/encuestas/EncuestasPendientes.jsf</to-view-id>
+		<redirect />
+	</navigation-case>
+	<navigation-case>
+		<from-outcome>CONTESTA_ENCUESTA</from-outcome>
+		<to-view-id>/views/private/encuestas/ResponderEncuesta.jsf</to-view-id>
+		<redirect />
+	</navigation-case>
+	<navigation-case>
+		<from-outcome>DETALLE_ENCUESTADOS_PENDIENTES</from-outcome>
+		<to-view-id>/views/private/encuestas/DetalleEncuestadosPendientes.jsf</to-view-id>
+		<redirect />
+	</navigation-case>
+	<navigation-case>
+		<from-outcome>REGISTRA_ENCUESTA</from-outcome>
+		<to-view-id>/views/private/encuestas/adminEncuestaAlta.jsf</to-view-id>
+		<redirect/>
+	</navigation-case>
+	<navigation-case>
+		<from-outcome>DETALLE_ENCUESTA</from-outcome>
+		<to-view-id>/views/private/encuestas/detalleEncuesta.jsf</to-view-id>
+		<redirect />
+	</navigation-case>
+		
+	<navigation-case>
+		<from-outcome>RECURSOS_MOODLE</from-outcome>
+		<to-view-id>/views/private/planesProgramas/agregaActividadRecursoMoodle.jsf</to-view-id>
+		<redirect />
+	</navigation-case>
+
+		<navigation-case>
+			<from-outcome>CATALOGOS_GESTION_ESCOLAR</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/catalogos/catalogosGestionEscolar.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>AGREGAR_RESPONSABLE</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/responsabilidades/AgregarResponsable.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>RESPONSABLES_EVE_CAP</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/responsabilidades/ResponsablesEventoCapacitacion.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+
+		<navigation-case>
+			<from-outcome>CATALOGO_ASISTENCIA_ESCOLAR</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/catalogos/catalogoAsistencia.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+
+		<navigation-case>
+			<from-outcome>NUEVO_EVENTO_CAPACITACION</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/nuevoEventoCapacitacion.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>MATRICULACION_EVENTO</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/MatriculacionEvento.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>REGISTRO_ASISTENCIAS</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/registroAsistenciaEventoCap.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+
+		<navigation-case>
+
+			<from-outcome>DATOS_GENERALES_EC</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/datosEventoCapacitacion.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>EXPEDIENTE_GRUPO</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/expedienteGrupo.xhtml</to-view-id>					
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>BUSQUEDA_EVENTO_CAP</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/busquedaEventoCapacitacion.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>REG_NUEVO_EVENT_CAP</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/RegistroEventoCapacitacion.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>CALIFICACIONES_EVENTO</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/calificacionesGposEventoCap.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+
+		<navigation-case>
+			<from-outcome>NAVEGA_DOCUMENTAR_FOA</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/documentarFoa.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+
+		<navigation-case>
+			<from-outcome>MODIFICA_SEG_AVA</from-outcome>	
+			<to-view-id>/views/private/gestionAprendizaje/modificarSeguimientoAva.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	
+		<navigation-case>
+			<from-outcome>CATALOGO_GEST_APRENDIZAJE</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/catalogosMetodologia.xhtml</to-view-id>
+		</navigation-case>
+
+		<navigation-case>
+			<from-outcome>AMBIENTES_VIRTUALES_APRENDIZAJE</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/busquedaAmbienteVirtualAprendizaje.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		
+		<navigation-case>
+			<from-outcome>CAT_GESTION_APRENDIZAJE</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/catalogosGestionAprendizaje.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+				
+		
+		<!-- LOGISTICA E INFRAESTRUCTURA -->
+		<navigation-case>
+			<from-outcome>CATALOGOS_LOGISTICA_INFRA</from-outcome>
+			<to-view-id>/views/private/logisticaInfraestructura/catalogos/catalogosLogisticaInf.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>LOGISTICA_CONFIG_SEDES</from-outcome>
+			<to-view-id>views/private/logisticaInfraestructura/catalogos/adminSedeInfraestructura.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>RECURSOS</from-outcome>
+			<to-view-id>/views/private/logisticaInfraestructura/Recursos.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>BUSQUEDA_AREAS_INFRA</from-outcome>
+			<to-view-id>/views/private/logisticaInfraestructura/ConsultaAreas.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>CONFIGURACION_AREAS_INFRA</from-outcome>
+			<to-view-id>/views/private/logisticaInfraestructura/ConfigurarAreas.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>PERSONALIZACION_AREAS_INFRA</from-outcome>
+			<to-view-id>/views/private/logisticaInfraestructura/personalizacionAreaInfra.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>SOLICITA_RESERVACION_AREA</from-outcome>
+			<to-view-id>/views/private/logisticaInfraestructura/reservacionAreaInfra.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+
+		<!-- ANALISIS DE DATOS -->
+		<navigation-case>
+			<from-outcome>ANALISIS_USUARIO</from-outcome>
+			<to-view-id>/views/private/analisisDatos/ReporteUsuarios.jsf</to-view-id>
+	                <redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>ANALISIS_GESTION_ESCOLAR</from-outcome>
+			<to-view-id>/views/private/analisisDatos/reporteGestionEscolar.jsf</to-view-id>
+	                <redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>ANALISIS_EVENTOS</from-outcome>
+			<to-view-id>/views/private/analisisDatos/reporteEventos.jsf</to-view-id>
+	                <redirect />
+		</navigation-case>
+		
+		
+
+		<!-- Mis cursos -->
+		<navigation-case>
+			<from-outcome>MIS_CURSOS</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/misCursos.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<!-- Tareas Programadas -->
+		<navigation-case>
+			<from-outcome>TAREAS_PROGRAMADAS</from-outcome>
+			<to-view-id>/views/private/administracion/tareasProgramadas/tareasProgramadas.xhtml</to-view-id>					
+			<redirect />
+		</navigation-case>
+		
+		
+		
+		
+		<!-- Mi perfil gestion aprendizaje -->
+		<navigation-case>
+			<from-outcome>MI_PERFIL_GE</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/miPerfil.xhtml</to-view-id>					
+			<redirect />
+		</navigation-case>
+		
+			<!-- Mi cursos gestion aprendizaje -->
+		<navigation-case>
+			<from-outcome>CURSOS_DISPONIBLES</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/cursos.xhtml</to-view-id>					
+			<redirect />
+		</navigation-case>
+		
+		
+		<navigation-case>
+			<from-outcome>MIS_CURSOS_PRIVADOS</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/misCursos.xhtml</to-view-id>					
+			<redirect />
+		</navigation-case>
+		
+		
+			<!-- Mis logros gestion aprendizaje -->
+		<navigation-case>
+			<from-outcome>MIS_LOGROS_GE</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/misLogros.xhtml</to-view-id>					
+			<redirect />
+		</navigation-case>
+		
+			<!-- Constancias gestion aprendizaje -->
+		<navigation-case>
+			<from-outcome>CONSTANCIAS_GE</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/constancias.xhtml</to-view-id>					
+			<redirect />
+		</navigation-case>
+
+			<!-- Expediente gestion aprendizaje -->		
+		<navigation-case>
+			<from-outcome>EXPEDIENTE_ALUMNO</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/ExpedienteAlumno.xhtml</to-view-id>					
+			<redirect />
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>BUSCAR_EXPEDIENTE_ALUMNO</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/ExpedienteAlumnoBuscar.xhtml</to-view-id>					
+			<redirect />
+		</navigation-case>
+		
+	</navigation-rule>
+</faces-config>

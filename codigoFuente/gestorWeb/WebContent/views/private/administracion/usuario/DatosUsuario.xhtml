@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+	<p:panel id="pnlTipoUsuario"
+		header="#{sistema.obtenerTexto('gw.usuarios.etiquetaPanel.tipoUsuario')}">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel for="somTipoUsuario"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.clasificacion')}:"
+						styleClass="bloque requerido" />
+					<p:selectOneRadio id="somTipoUsuario" styleClass="text-center"
+						required="true" disabled="true"
+						value="#{adminPersonaBean.datos.persona.tipoUsuario}"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
+						<p:ajax listener="#{adminPersonaBean.cambiarTipoUsuario()}" />
+						<f:selectItems value="#{adminPersonaBean.tiposUsuarios}"
+							var="tipo" itemValue="#{tipo.getValor()}"
+							itemLabel="#{tipo.getDescripcion()}" />
+					</p:selectOneRadio>
+					<p:message for="somTipoUsuario" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="txtNombreUsuario"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.usuario')}:"
+						styleClass="requerido" />
+					<!-- Longitud de campo -->
+					<p:inputText id="txtNombreUsuario" widgetVar="nombreUsuario"
+						disabled="true" value="#{adminPersonaBean.datos.persona.usuario}"
+						maxlength="30"
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.usuario')}"
+						styleClass="form-control textoMinus" />
+					<p:message for="txtNombreUsuario" />
+				</div>
+
+				<div class="col-md-2">
+					<p:outputLabel rendered="false"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.rolesasignados')}:"
+						styleClass="bloque" />
+
+				</div>
+
+				<div class="col-md-2">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.estatusUsuario')}:"
+						styleClass="bloque" />
+					<p:inputSwitch value="#{adminPersonaBean.datos.persona.activo}"
+						disabled="true"
+						onLabel="#{sistema.obtenerTexto('gw.usuarios.switch.activo')}"
+						offLabel="#{sistema.obtenerTexto('gw.usuarios.switch.inactivo')}" />
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4">
+					<p:outputLabel
+						value="#{sistema.obtenerTexto('gw.usuarios.texto.imgperfil')}: "
+						styleClass="bloque" />
+					<p:outputPanel id="imgFotoUsuario" styleClass="imgPerfil">
+						<img src="#{adminPersonaBean.datos.persona.rutaCompletaFoto}" />
+						<p:fileUpload value="#{notificacionesBean.archivoCargar}" label=""
+							mode="advanced" auto="true" sizeLimit="50000000" disabled="true"
+							invalidSizeMessage="#{sistema.obtenerTexto('gw.global.archivo.tamanio.limite')}"
+							fileUploadListener="#{adminPersonaBean.fileUploadListener}"
+							update="imgFotoUsuario" />
+					</p:outputPanel>
+
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="txtRolesAsignados"
+						value="#{sistema.obtenerTexto('gw.usuarios.texto.nuevorol')}:"
+						styleClass="bloque" />
+					<p:inputText id="txtRolesAsignados" disabled="true"
+						rendered="false" value="#{adminPersonaBean.rolesAsignados}"
+						styleClass="form-control orgGubOpacity" />
+					<p:commandButton id="btnAsignar" value="Ver" style="margin:0"
+						onclick="PF('mRol').show();" styleClass="btn btn-primary asignar" />
+
+					<p:commandButton
+						value="Cambiar #{sistema.obtenerTexto('gw.usuarios.etiqueta.contrasena')}"
+						rendered="#{not adminPersonaBean.nuevaPersona}" disabled="true" 
+						action="#{adminPersonaBean.mostrarContrasenias()}" process="@this"
+						ajax="true" update="pnlContrasenias"
+						style="width:160px; margin-top:10px;display:none"
+						styleClass="btn btn-primary quitaMargen" />
+				</div>
+
+
+				<div class="col-md-4">
+
+					<p:outputPanel id="pnlContrasenias">
+						<p:outputPanel rendered="#{adminPersonaBean.mostrarContrasenia}">
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-12">
+										<p:outputLabel for="txtContrasenia" rendered="false"
+											value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.contrasena')}:"
+											styleClass="#{adminPersonaBean.nuevaPersona?'requerido':''}" />
+										<!-- Longitud de campo -->
+										<p:password id="txtContrasenia" styleClass="form-control"
+											value="#{adminPersonaBean.datos.persona.nuevaContrasenia}"
+											match="txtConfirmarContrasenia" maxlength="180"
+											rendered="false"
+											validatorMessage="#{sistema.obtenerTexto('gw.global.msg.dato.debeconincidir')}"
+											required="#{adminPersonaBean.nuevaPersona}"
+											requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+											placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.contrasena')}" />
+										<p:message for="txtContrasenia" />
+									</div>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-md-12">
+									<p:outputLabel for="txtConfirmarContrasenia" rendered="false"
+										value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.confcontrasena')}:"
+										styleClass="#{adminPersonaBean.nuevaPersona?'requerido':''} bloque" />
+									<!-- Longitud de campo -->
+									<p:password id="txtConfirmarContrasenia" rendered="false"
+										styleClass="form-control" maxlength="180"
+										value="#{adminPersonaBean.datos.persona.confirmacionContrasenia}"
+										placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.confcontrasena')}"
+										required="#{adminPersonaBean.nuevaPersona}"
+										requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
+									<p:message for="txtConfirmarContrasenia" />
+
+								</div>
+							</div>
+						</p:outputPanel>
+					</p:outputPanel>
+
+				</div>
+			</div>
+		</div>
+
+	</p:panel>
+
+</ui:composition>

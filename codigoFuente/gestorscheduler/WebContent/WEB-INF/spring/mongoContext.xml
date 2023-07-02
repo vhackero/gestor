@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+       xsi:schemaLocation="http://www.springframework.org/schema/data/mongo 
+                http://www.springframework.org/schema/data/mongo/spring-mongo.xsd
+		http://www.springframework.org/schema/beans 
+                http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <!-- Seeds -->
+    <bean id="mongoSeedListID" class="java.util.ArrayList">
+        <constructor-arg>
+            <list>
+                <ref bean="mongoSeedlID" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="mongoSeedlID" class="com.mongodb.ServerAddress">
+        <constructor-arg type="java.lang.String" name="host" value="localhost" />
+        <constructor-arg type="int" name="port" value="27017" />
+    </bean>
+
+    <!-- Credentials -->
+    <bean id="mongoCredentialListID" class="java.util.ArrayList">
+        <constructor-arg>
+            <list>
+                <ref bean="mongoCredentialID" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="mongoCredentialID" class="com.mongodb.MongoCredential">
+        <constructor-arg name="mechanism" value = "#{T(com.mongodb.AuthenticationMechanism).SCRAM_SHA_1}" />
+        <constructor-arg type="java.lang.String" name="userName" value="eLearning" />
+        <constructor-arg type="java.lang.String" name="source" value="eLearning" />
+        <constructor-arg type="char[]" name="password" value="sisi.123@" />
+    </bean>
+
+    <!-- MongoClient -->
+    <bean id="mongoClientID" class="com.mongodb.MongoClient">
+        <constructor-arg ref="mongoSeedListID" />
+        <constructor-arg ref="mongoCredentialID"  />
+    </bean>
+
+    <!-- MongoDbFactory -->
+    <bean id="simpleMongoDbFactoryID" class="org.springframework.data.mongodb.core.SimpleMongoDbFactory">
+        <constructor-arg ref="mongoClientID" />
+        <constructor-arg name="databaseName" value="eLearning" />
+    </bean>
+
+    <!-- MongoTemplate -->
+    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+        <constructor-arg ref="simpleMongoDbFactoryID" />
+    </bean>
+	
+    <mongo:repositories base-package="mx.gob.sedesol.basegestor.mongo.repositories" />
+
+</beans>

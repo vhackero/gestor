@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>Catálogos</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.insignias')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h:form id="frBadgets">
+			<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.insignias')}</h1>
+			<hr />
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton action="#{badgetBean.nuevoBadget()}" ajax="true"
+						process="@this" rendered="false"
+						value="#{sistema.obtenerTexto('gw.badget.boton.agregar')}"
+						styleClass="pull-right btn btn-primary"
+						oncomplete="PF('mBadget').show();" update="frBadgets:contenido">
+					</p:commandButton>
+					<p:outputLabel rendered="false"
+						value="#{sistema.obtenerTexto('gw.badge.texto.nuevo.badge')}:"
+						styleClass="pull-right agregaHeight" />
+				</div>
+			</div>
+
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.textos.menu.administracion.insignias')}">
+				<p:dataTable id="tblBadget" widgetVar="tblBadget" reflow="true"
+					tableStyleClass="table" paginator="true" paginatorPosition="bottom"
+					rows="10" rowsPerPageTemplate="5,10,15" styleClass="badgets"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					value="#{badgetBean.badgets}" var="b"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}">
+					<f:facet name="header">
+						<p:outputPanel styleClass="text-right">
+							<p:outputLabel for="globalFilter"
+								value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}:" />
+							<p:inputText id="globalFilter" onkeyup="PF('tblBadget').filter()"
+								placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+						</p:outputPanel>
+					</f:facet>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.badge.columna.id')}"
+						sortBy="#{b.idBadge}" filterMatchMode="contains"
+						filterBy="#{b.idBadge}" filterStyle="display:none">
+						<h:outputText value="#{b.idBadge}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.badge.columna.nombre')}"
+						sortBy="#{b.nombre}" filterMatchMode="contains"
+						filterBy="#{b.nombre}" filterStyle="display:none">
+						<h:outputText value="#{b.nombre}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.badge.columna.descripcion')}"
+						sortBy="#{b.descripcion}" filterMatchMode="contains"
+						filterBy="#{b.descripcion}" filterStyle="display:none">
+						<h:outputText value="#{b.descripcion}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.badge.columna.clasificacion')}"
+						sortBy="#{b.idClasificacionBadge}" filterMatchMode="contains"
+						filterBy="#{b.idClasificacionBadge}" filterStyle="display:none">
+						<h:outputText value="#{badgetBean.obtenerClasificacion(b.idClasificacionBadge)}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.badge.columna.imagen')}"
+						id="rutaImagen">
+						<img src="#{b.rutaCompleta}" height="40px" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.badge.columna.calMaxima')}"
+						sortBy="#{b.calificacionMaxima}" filterMatchMode="contains"
+						filterBy="#{b.calificacionMaxima}" filterStyle="display:none">
+						<h:outputText value="#{b.calificacionMaxima}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.badge.columna.calMinima')}"
+						sortBy="#{b.calificacionMinima}" filterMatchMode="contains"
+						filterBy="#{b.calificacionMinima}" filterStyle="display:none">
+						<h:outputText value="#{b.calificacionMinima}" />
+					</p:column>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.badge.columna.acciones')}"
+						styleClass="text-center">
+						<p:commandButton
+							styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod"
+							id="editartoolBad" action="#{badgetBean.cargarBadget()}"
+							process="@this" oncomplete="PF('mBadget').show();" ajax="true"
+							update="frBadgets:contenido">
+							<f:setPropertyActionListener value="#{b}"
+								target="#{badgetBean.badgetModificar}" />
+						</p:commandButton>
+						<p:tooltip for="editartoolBad"
+							value="#{sistema.obtenerTexto('gw.roles.boton.editar')}"
+							position="top" />
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+			<p:dialog id="mdlBadge"
+				header="#{sistema.obtenerTexto('gw.badge.modal.titulo')}"
+				widgetVar="mBadget" modal="true" resizable="false" draggable="false"
+				closable="false" styleClass="medidaModal" position="center"
+				role="dialog">
+				<p:outputPanel id="contenido">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel value="Imagen: " style="text-align:center"
+									styleClass="bloque" />
+								<p:outputPanel id="imgFotoBadge" styleClass="imgPerfil">
+									<p:outputPanel id="imgFotoBadgeInterior">
+										<img src="#{badgetBean.badget.rutaCompleta}" />
+									</p:outputPanel>
+									<p:fileUpload value="#{badgetBean.archivoCargar}" label=""
+										mode="advanced" auto="true" sizeLimit="50000000"
+										invalidSizeMessage="#{sistema.obtenerTexto('gw.global.archivo.tamanio.limite')}"
+										update="imgFotoBadgeInterior"
+										fileUploadListener="#{badgetBean.fileUploadListener}"
+										allowTypes="/(\.|\/)(gif|jpe?g|png)$/" />
+								</p:outputPanel>
+								<p:spacer height="20" />
+
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="nombre" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.nombre')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="nombre" maxlength="60"
+									placeholder="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.nombre')}"
+									value="#{badgetBean.badget.nombre}" styleClass="form-control" />
+								<p:message for="nombre" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel for="descripcion" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.descripcion')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="descripcion" maxlength="100"
+									placeholder="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.descripcion')}"
+									value="#{badgetBean.badget.descripcion}"
+									styleClass="form-control" />
+								<p:message for="descripcion" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="calificacionMaxima" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.calificacionMax')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="calificacionMaxima"
+									widgetVar="calificacionMaxima" maxlength="8"
+									placeholder="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.calificacionMax')}"
+									value="#{badgetBean.badget.calificacionMaxima}" disabled="true"
+									styleClass="form-control">
+									<p:keyFilter regEx="/[0-9]/" />
+								</p:inputText>
+								<p:message for="calificacionMaxima" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel for="calificacionMinima" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.calificacionMinima')}:" />
+								<!-- Longitud de campo -->
+								<p:inputText id="calificacionMinima"
+									widgetVar="calificacionMinima" maxlength="8" disabled="true"
+									placeholder="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.calificacionMinima')}"
+									value="#{badgetBean.badget.calificacionMinima}"
+									styleClass="form-control">
+									<p:keyFilter regEx="/[0-9]/" />
+								</p:inputText>
+								<p:message for="calificacionMinima" />
+
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="clasificaciones" styleClass="requerido"
+									value="Clasificación:" />
+								<p:selectOneMenu id="clasificaciones" autoWidth="true" disabled="true"
+									value="#{badgetBean.badget.idClasificacionBadge}">
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+									<f:selectItems value="#{badgetBean.clasificaciones}" var="tipo"
+										itemValue="#{tipo.idClasificacionBadge}"
+										itemLabel="#{tipo.nombre}" />
+								</p:selectOneMenu>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+								<p:outputLabel
+									value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+							</div>
+						</div>
+					</div>
+				</p:outputPanel>
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.badge.modal.boton.guardar')}"
+								action="#{badgetBean.guardarBadget()}" ajax="true"
+								update="frBadgets:tblBadget contenido"
+								styleClass="btn btn-primary pull-right" />
+							<p:commandButton type="button" onclick="PF('mBadget').hide();"
+								styleClass="btn btn-default pull-right"
+								value="#{sistema.obtenerTexto('gw.badge.modal.boton.cancelar')}" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

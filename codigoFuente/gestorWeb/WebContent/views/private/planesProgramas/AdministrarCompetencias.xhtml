@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.planesprogramas.etiqueta.menu.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.administracion.catalogos.btn.adm.competencias')}</li>
+	</ui:define>
+	
+	<span> Perrin: #{sistema.obtenerTexto('gw.planesprogramas.etiqueta.menu.titulo')}</span>
+
+	<ui:define name="content">
+		<h1>
+			<p:outputLabel styleClass="h1"
+				value="#{sistema.obtenerTexto('gw.administracion.catalogos.btn.adm.competencias')}" />
+		</h1>
+		<hr />
+		<h:form id="adminCompEsp">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.planes.acciones.agregar')}"
+							oncomplete="PF('modCompWid').show()" ajax="true"
+							update="opCompetencias" process="@this"
+							action="#{competenciaEspecificaBean.nuevaCompetencia()}"
+							styleClass="btn btn-primary pull-right" />
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.planes.etiqueta.nueva')}:"
+							styleClass="pull-right agregaHeight" />
+					</div>
+				</div>
+			</div>
+
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.administracion.catalogos.dialog.competencias')}"
+				id="pnlAdmComp">
+				<p:dataTable value="#{competenciaEspecificaBean.listaCompetencias}"
+					id="tblComp" tableStyleClass="table" var="competencia"
+					paginator="true" widgetVar="tblCompetencias"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					paginatorPosition="bottom" rows="10" rowsPerPageTemplate="5,10"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+
+					<f:facet name="header">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputPanel styleClass="text-right">
+									<p:outputLabel for="globalFilter"
+										value="#{sistema.obtenerTexto('gw.administracion.catalogos.acciones.buscar')}:" />
+									<p:inputText id="globalFilter"
+										onkeyup="PF('tblCompetencias').filter()"
+										placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+								</p:outputPanel>
+							</div>
+						</div>
+					</f:facet>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.administracion.catalogos.etiqueta.nombre.comp.esp')}"
+						sortBy="#{competencia.nombre}" filterMatchMode="contains"
+						filterBy="#{competencia.nombre}" filterStyle="display:none">
+						<h:outputText value="#{competencia.nombre}" styleClass="pull-left" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.administracion.catalogos.etiqueta.comp.desc')}"
+						sortBy="#{competencia.descripcion}" filterMatchMode="contains"
+						filterBy="#{competencia.descripcion}" filterStyle="display:none">
+						<h:outputText value="#{competencia.descripcion}" />
+					</p:column>
+
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.administracion.catalogos.etiqueta.comp.pond')}"
+						sortBy="#{competencia.ponderacion}" filterMatchMode="contains"
+						filterBy="#{competencia.ponderacion}" filterStyle="display:none">
+						<h:outputText value="#{competencia.ponderacion}" />
+					</p:column>
+
+					<p:column styleClass="text-center"
+						headerText="#{sistema.obtenerTexto('gw.administracion.catalogos.etiqueta.acciones')}">
+						<p:commandButton id="editar" ajax="true" process="@this"
+							styleClass="btn btn-default btn-icon icono_sisi ss_gn_mod"
+							action="#{competenciaEspecificaBean.modificaCompetencia()}"
+							oncomplete="PF('modCompWid').show()" update="adminCompEsp">
+							<f:setPropertyActionListener value="#{competencia}"
+								target="#{competenciaEspecificaBean.competenciaModificar}" />
+						</p:commandButton>
+						<p:tooltip for="editar" position="top"
+							value="#{sistema.obtenerTexto('gw.administracion.catalogos.tooltip.editar')}" />
+					</p:column>
+
+
+
+				</p:dataTable>
+				<p:dialog id="dialogModifComp" draggable="false" resizable="false"
+					position="center" closable="false" modal="true"
+					widgetVar="modCompWid" styleClass="medidaModal"
+					header="#{sistema.obtenerTexto('gw.administracion.catalogos.tblheader.competencia')}">
+
+					<p:outputPanel id="opCompetencias">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-12">
+									<p:outputLabel for="compNombre" styleClass="bloque requerido"
+										value="#{sistema.obtenerTexto('gw.administracion.catalogos.etiqueta.nombre.comp.esp')}" />
+									<!-- Longitud de campo -->
+									<p:inputText id="compNombre" styleClass="form-control"
+										required="true" maxlength="150"
+										requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+										value="#{competenciaEspecificaBean.competencia.nombre}">
+									</p:inputText>
+									<p:message for="compNombre" />
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-12">
+									<p:outputLabel for="minMax"
+										value="#{sistema.obtenerTexto('gw.administracion.catalogos.etiqueta.comp.pond')}" />
+									<!-- Longitud de campo -->
+									<p:spinner id="minMax" maxlength="3"
+										value="#{competenciaEspecificaBean.competencia.ponderacion}"
+										min="0" max="100">
+										<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+									</p:spinner>
+								</div>
+							</div>
+						</div>
+						<div class="row form-group">
+							<div class="col-md-12">
+								<p:outputLabel styleClass="bloque" for="area"
+									value="#{sistema.obtenerTexto('gw.administracion.catalogos.etiqueta.comp.desc')}" />
+								<!-- Longitud de campo -->
+								<p:inputTextarea id="area" rows="5" autoResize="false"
+									styleClass="form-control" maxlength="255"
+									value="#{competenciaEspecificaBean.competencia.descripcion}" />
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel value="Datos obligatorios" styleClass="requerido" />
+							</div>
+						</div>
+					</p:outputPanel>
+					<f:facet name="footer">
+						<div class="row">
+							<div class="col-md-12">
+								<p:commandButton
+									value="#{sistema.obtenerTexto('gw.administracion.catalogos.modal.boton.guardar')}"
+									action="#{competenciaEspecificaBean.guardarCompetencia()}"
+									ajax="true" update="tblComp opCompetencias"
+									styleClass="btn btn-primary pull-right" />
+								<p:commandButton
+									value="#{sistema.obtenerTexto('gw.administracion.catalogos.modal.boton.cancelar')}"
+									type="button" onclick="PF('modCompWid').hide();"
+									styleClass="btn btn-default pull-right" />
+							</div>
+						</div>
+
+					</f:facet>
+
+				</p:dialog>
+
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>

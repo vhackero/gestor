@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.titulo.gestionaprendizaje.texto')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.titulo.ambientes.texto.ava')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:head>
+			<script type="text/javascript">
+				
+			</script>
+		</h:head>
+		<h:form>
+			<h1>Badges</h1>
+			<hr />
+
+			<!-- Panel búsqueda de ambientes virtuales -->
+			<p:panel id="pbusqueda"
+				header="Badges"
+				showCollapseLink="false" collapsible="false">
+				<div class="ui-fluid">
+					<!-- Row 1 -->
+					<div class="form-group">
+						<div class="row">
+						</div>
+
+						<!-- Row 2 -->
+						<div class="form-group">
+						</div>
+
+						<!-- Row 3 -->
+						<div class="form-group">
+							<div class="row">
+							</div>
+						</div>
+
+						<!-- Row 4 -->
+						<div class="form-group">
+							<div class="row">
+								
+							</div>
+						</div>
+					</div>
+				</div>
+			</p:panel>
+
+		</h:form>
+	</ui:define>
+</ui:composition>

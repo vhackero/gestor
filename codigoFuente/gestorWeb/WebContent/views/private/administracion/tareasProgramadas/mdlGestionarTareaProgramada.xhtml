@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	<p:dialog id="mdlGestionarTareaProgramada"
+		header="#{sistema.obtenerTexto(schedulerBean.tituloMdlGestionarTProgramada)}"
+		widgetVar="mdlGestionarTareaProgramada" width="800" modal="true"
+		resizable="false" draggable="false" closable="false" position="center">
+		<p:outputPanel id="contenidoEditartareaProgramada">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12 text-center">
+						<p:outputLabel styleClass="bloque"
+							value="#{sistema.obtenerTexto('gw.tareasprogramadas.lbl.clave')}:"
+							rendered="#{!schedulerBean.esCampoClaveEditable}" />
+						<h:outputText rendered="#{!schedulerBean.esCampoClaveEditable}"
+							value="#{schedulerBean.tareaProgramadaSeleccionda.clave}" />
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel for="txtNombre" styleClass="requerido"
+							value="#{sistema.obtenerTexto('gw.tareasprogramadas.lbl.nombretareaprogramada')}:" />
+						<!-- Longitud de campo -->
+						<p:inputText id="txtNombre"
+							placeholder="#{sistema.obtenerTexto('gw.tareasprogramadas.placeholder.nombretareaprogramada')}"
+							required="true" maxlength="255"
+							value="#{schedulerBean.tareaProgramadaSeleccionda.nombreTarea}"
+							requiredMessage="#{sistema.obtenerTexto('gw.tareasprogramadas.validationmsj.nombretareaprogramada')}"
+							styleClass="form-control" />
+						<p:message for="txtNombre" />
+					</div>
+					<div class="col-md-6">
+						<p:outputLabel for="txtDescripcion" styleClass="requerido"
+							value="#{sistema.obtenerTexto('gw.tareasprogramadas.lbl.descripcion')}:" />
+						<!-- Longitud de campo -->
+						<p:inputText id="txtDescripcion"
+							placeholder="#{sistema.obtenerTexto('gw.tareasprogramadas.placeholder.descripcion')}"
+							required="true" maxlength="512"
+							value="#{schedulerBean.tareaProgramadaSeleccionda.descripcion}"
+							requiredMessage="#{sistema.obtenerTexto('gw.tareasprogramadas.validationmsj.descripcion')}"
+							styleClass="form-control noCursor" />
+						<p:message for="txtDescripcion" />
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<p:outputLabel for="bolActivo" styleClass="requerido"
+						value="#{sistema.obtenerTexto('gw.tareasprogramadas.lbl.estatus')}:" />
+					<p:selectOneRadio id="bolActivo"
+						valueChangeListener="#{schedulerBean.onchangeTareaProgramadaEstatus}"
+						value="#{schedulerBean.tareaProgramadaSeleccionda.activo}"
+						required="true" styleClass="radioBoton"
+						requiredMessage="#{sistema.obtenerTexto('gw.tareasprogramadas.validationmsj.estatus')}">
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.tareasprogramadas.lbl.activo')}"
+							itemValue="true" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.tareasprogramadas.lbl.inactivo')}"
+							itemValue="false" />
+						<p:ajax process="@this" />
+					</p:selectOneRadio>
+					<p:message for="bolActivo" />
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12 text-center">
+						<p:outputLabel value="Programación de la tarea:" />
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.tareasprogramadas.lbl.elclicloejecucionsera')}:"
+							styleClass="requerido" />
+						<p:selectOneMenu id="selCicloEjecucion"
+							value="#{schedulerBean.cicloEjecucionSeleccionado}"
+							autoWidth="false" styleClass="col-xs-12" required="true"
+							requiredMessage="#{sistema.obtenerTexto('gw.tareasprogramadas.validationmsj.cicloejecucion')}">
+							<p:ajax event="change" update="panelEjecucionSemanalMensual"
+								process="@this"
+								listener="#{schedulerBean.onChangeTpoCicloEjecucion}" />
+							<f:selectItem
+								itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								itemValue="#{null}" />
+							<f:selectItems value="#{schedulerBean.ciclosDeEjecucion}"
+								var="ejecucion" itemLabel="#{ejecucion.nombre}"
+								itemValue="#{ejecucion}" />
+						</p:selectOneMenu>
+						<p:message for="selCicloEjecucion" />
+					</div>
+					<div class="col-md-6">
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.tareasprogramadas.lbl.horaejecucion')}"
+							styleClass="requerido bloque" />
+						<p:calendar id="horaEjecucion" styleClass="calendario"
+							value="#{schedulerBean.horaDeEjecucion}"
+							pattern="HH:mm" locale="es" timeOnly="true"
+							 required="true" readonlyInput="true"
+							requiredMessage="#{sistema.obtenerTexto('gw.tareasprogramadas.validationmsj.horaejecucion')}">
+							
+							<p:ajax event="dateSelect" process="@this" />
+						</p:calendar>
+						<p:message for="horaEjecucion" />
+					</div>
+				</div>
+			</div>
+			<p:outputPanel id="panelEjecucionSemanalMensual">
+				<!-- Panel de ejecucion mensual  -->
+				<p:outputPanel id="outSelMensual"
+					rendered="#{schedulerBean.esElmSelMensualVisible}">
+					<div class="row">
+						<div class="col-md-4">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.tareasprogramadas.lbl.selectmesdiaeje')}:"
+								styleClass="requerido" />
+							<p:calendar id="fcfechaEjecucion" navigator="true"
+								value="#{schedulerBean.mesDeEjecucion}" styleClass="calendario"
+								pattern="#{sistema.obtenerTexto(schedulerBean.formatoFechaMesSeleccionado)}"
+								yearRange="c-100:c+100" locale="es"
+								placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								showOn="button" readonlyInput="true" required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.tareasprogramadas.validationmsj.selectmesdiaeje')}">
+								<p:ajax event="dateSelect" process="@this" />
+							</p:calendar>
+							<p:message for="fcfechaEjecucion" />
+						</div>
+						<div class="col-md-6 col-md-offset-2">
+							<p:outputLabel styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.tareasprogramadas.lbl.ejecutarcadames')}:" />
+							<p:selectBooleanCheckbox id="checProcesarTodosLosMeses"
+								value="#{schedulerBean.esProcesarTodosLosMesesActivo}">
+								<p:ajax process="@this"
+									listener="#{schedulerBean.onChangeCheckEjecutarCadaMes}"
+									update="fcfechaEjecucion" />
+							</p:selectBooleanCheckbox>
+							<p:tooltip for="checProcesarTodosLosMeses"
+								value="#{sistema.obtenerTexto('gw.tareasprogramadas.tooltip.ejecutarcadames')}" />
+						</div>
+					</div>
+				</p:outputPanel>
+				<!-- Panel de ejecucion semanal  -->
+				<p:outputPanel id="outSelSemanal"
+					rendered="#{schedulerBean.esElmSelSemanalVisible}">
+					<div class="row">
+						<div class="col-md-6">
+							<p:outputLabel for="selCicloEjecucion" styleClass="requerido"
+								value="#{sistema.obtenerTexto('gw.tareasprogramadas.lbl.diasemana')}" />
+							<p:selectOneMenu id="selDiaDeLaSemana"
+								value="#{schedulerBean.diaDeLaSemanaSeleccionado}"
+								autoWidth="false" styleClass="col-xs-12" required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.tareasprogramadas.validationmsj.diasemana')}">
+								<p:ajax process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" />
+								<f:selectItems value="#{schedulerBean.diasDeLaSemana}" var="dia"
+									itemLabel="#{dia.nombre}" itemValue="#{dia}" />
+							</p:selectOneMenu>
+							<p:message for="selDiaDeLaSemana" />
+						</div>
+					</div>
+				</p:outputPanel>
+			</p:outputPanel>
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+						<p:outputLabel
+							value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+					</div>
+				</div>
+			</div>
+		</p:outputPanel>
+
+		<div class="row">
+			<div class="col-md-12">
+				<p:commandButton
+					value="#{sistema.obtenerTexto('gw.tareasprogramadas.btn.guardar')}"
+					action="#{schedulerBean.persisteTareaProgramada}"
+					styleClass="btn btn-primary pull-right"
+					update="contenidoEditartareaProgramada,panelTareas"
+					process="mdlGestionarTareaProgramada"
+					oncomplete="if (args &amp;&amp; !args.validationFailed) PF('mdlGestionarTareaProgramada').hide();" />
+				<p:commandButton
+					value="#{sistema.obtenerTexto('gw.tareasprogramadas.btn.cancelar')}"
+					actionListener="#{schedulerBean.reiniciarValores}"
+					styleClass="btn btn-default pull-right" update="@form"
+					process="@this"
+					oncomplete="PF('mdlGestionarTareaProgramada').hide();" />
+			</div>
+		</div>
+
+	</p:dialog>
+</ui:composition>

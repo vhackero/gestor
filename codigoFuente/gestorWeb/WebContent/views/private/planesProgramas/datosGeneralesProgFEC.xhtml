@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+<div class="form-group">
+	<div class="row">
+		<div class="col-md-12">
+			<p:outputLabel
+				value="#{sistema.obtenerTexto('gw.planesprogramas.texto.planeacion')}" />
+		</div>
+	</div>
+
+</div>
+
+
+
+<div class="row">
+	<div class="col-md-4">
+		<p:outputLabel styleClass="requerido bloque "
+			value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.fechaSol')}:" />
+	</div>
+	<div class="col-md-4">
+		<p:outputLabel styleClass="bloque requerido"
+			value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.fechaProd')}:" />
+	</div>
+	<div class="col-md-4">
+		<p:outputLabel styleClass="requerido bloque"
+			value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.fechaEC')}:" />
+	</div>
+</div>
+
+
+<div class="form-group">
+	<div class="row">
+		<div class="col-md-3">
+			<p:calendar id="fx_solicitud" locale="es" navigator="true"
+				styleClass="calendario"
+				pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+				placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+				value="#{programaCapacitacionBean.programa.fechaSolicitud}"
+				mindate="#{programaCapacitacionBean.programa.fechaVigInicial}"
+				maxdate="#{programaCapacitacionBean.programa.fechaVigFinal}"
+				showOn="button" readonlyInput="true">
+				<p:ajax event="dateSelect" update="fx_prod" />
+				<p:ajax event="change" update="fx_prod" />
+			</p:calendar>
+			<p:message for="fx_solicitud" />
+		</div>
+		<div class="col-md-3 col-md-offset-1">
+			<p:calendar id="fx_prod"
+				pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+				navigator="true" styleClass="calendario" readonlyInput="true"
+				placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+				mindate="#{programaCapacitacionBean.programa.fechaSolicitud}"
+				maxdate="#{programaCapacitacionBean.programa.fechaVigFinal}"
+				value="#{programaCapacitacionBean.programa.fechaProduccion}"
+				showOn="button">
+				<p:ajax event="dateSelect" update="fx_arranque" />
+				<p:ajax event="change" update="fx_arranque" />
+			</p:calendar>
+			<p:message for="fx_prod" />
+		</div>
+		<div class="col-md-3 col-md-offset-1">
+			<p:calendar id="fx_arranque" navigator="true" styleClass="calendario"
+				readonlyInput="true"
+				pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+				placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+				mindate="#{programaCapacitacionBean.programa.fechaProduccion}"
+				maxdate="#{programaCapacitacionBean.programa.fechaVigFinal}"
+				value="#{programaCapacitacionBean.programa.fechaArranque}"
+				showOn="button">
+				<p:ajax event="dateSelect" process="@this" />
+			</p:calendar>
+			<p:message for="fx_arranque" />
+
+		</div>
+	</div>
+</div>
+<div class="form-group agregaMargenTopX">
+	<div class="row">
+		<div class="col-md-4">
+			<p:outputLabel styleClass="bloque requerido"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.areaResp')}:" />
+
+			<p:outputPanel id="pnlBtnAreaResp" autoUpdate="false">
+				<p:commandButton id="areaRespABtn"
+					onmouseover="PF('overPnlAreaResp').show();" process="@this"
+					styleClass="#{programaCapacitacionBean.opcAreaResp ? 'btn btn-user-selected' : 'btn btn-primary'} quitaMargen btnEnOverlay"
+					value="#{programaCapacitacionBean.opcAreaResp ? sistema.obtenerTexto('gw.progCapacitacion.etiqueta.opcSeleccionada') : sistema.obtenerTexto('gw.progCapacitacion.etiqueta.seleccioneOp')}"
+					type="button" />
+			</p:outputPanel>
+
+			<p:overlayPanel dismissable="true" showCloseIcon="true"
+				for="areaRespABtn" showEffect="fade" hideEffect="fade"
+				widgetVar="overPnlAreaResp">
+
+				<p:treeTable id="areaRespTree" scrollable="true" scrollWidth="600"
+					value="#{programaCapacitacionBean.arbolOrgGubAreaResp}"
+					var="areaResp" selectionMode="single" styleClass="areaResp"
+					selection="#{programaCapacitacionBean.nodoAreaRespSel}">
+					<p:ajax event="select"
+						listener="#{programaCapacitacionBean.onNodeSelectAreaResp}"
+						update="formNvoProg:tabViewFec:pnlBtnAreaResp" />
+					<f:facet name="header">
+					#{sistema.obtenerTexto('gw.planesprogramas.texto.estructorg')}
+									</f:facet>
+					<p:column
+						headerText="#{sistema.obtenerTexto('gw.planesprogramas.texto.orggub')}">
+						<h:outputText value="#{areaResp.nombre}" />
+					</p:column>
+				</p:treeTable>
+
+			</p:overlayPanel>
+			<p:message for="areaRespTree" />
+		</div>
+		<div class="col-md-4">
+			<p:outputLabel styleClass="bloque requerido"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.tpoEvento')}:" />
+			<p:selectOneMenu id="eveCap" styleClass="col-xs-12"
+				value="#{programaCapacitacionBean.programa.catTipoEventoEc.id}"
+				valueChangeListener="#{programaCapacitacionBean.onChangeEventoCap}">
+				<p:ajax process="@this" />
+				<f:selectItem
+					itemLabel="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.seleccione')}"
+					itemValue="#{null}" />
+				<f:selectItems value="#{programaCapacitacionBean.catEventoCapacit}"
+					var="eventoCap" itemLabel="#{eventoCap.nombre}"
+					itemValue="#{eventoCap.id}" />
+			</p:selectOneMenu>
+			<p:message for="eveCap" />
+		</div>
+		<div class="col-md-4">
+			<p:outputLabel styleClass="bloque requerido"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.nvlConoc')}:" />
+			<p:selectOneMenu id="nvlConoc" styleClass="col-xs-12"
+				value="#{programaCapacitacionBean.programa.catNivelConocimiento.id}"
+				valueChangeListener="#{programaCapacitacionBean.onChangeNivelConoc}">
+				<p:ajax process="@this" />
+				<f:selectItem
+					itemLabel="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.seleccione')}"
+					itemValue="#{null}" />
+				<f:selectItems value="#{programaCapacitacionBean.catNivelConocim}"
+					var="nivelConoc" itemLabel="#{nivelConoc.nombre}"
+					itemValue="#{nivelConoc.id}" />
+			</p:selectOneMenu>
+			<p:message for="nvlConoc" />
+		</div>
+	</div>
+</div>
+<div class="form-group agregaMargenTopX">
+	<div class="row agregaMargenTop">
+		<div class="col-md-12">
+			<p:outputLabel styleClass="bloque requerido" for="justAcad"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.justificacion')}:" />
+			<!-- Longitud de campo -->
+			<p:inputTextarea rows="2" id="justAcad" styleClass="altoMaximo"
+				maxlength="2000"
+				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.justificacion')}"
+				value="#{programaCapacitacionBean.programa.justificacionAcademica}">
+				<p:ajax process="@this" />
+			</p:inputTextarea>
+			<p:message for="justAcad" />
+		</div>
+	</div>
+</div>
+<div class="form-group agregaMargenTop">
+	<div class="row">
+		<div class="col-md-6">
+			<p:outputLabel styleClass="bloque requerido" for="idTxtAreaResponsables"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.responsables')}:" />
+			<p:inputTextarea id="idTxtAreaResponsables"
+				styleClass="altoMaximo" 
+				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.responsablesTextArea')}"
+				value="#{programaCapacitacionBean.responsablesDatosGenerales}">
+				<p:ajax process="@this" event="blur"
+					listener="#{programaCapacitacionBean.setResponsableAlProgramaListener}" />
+			</p:inputTextarea>
+		</div>
+		<div class="col-md-6">
+			<p:outputLabel styleClass="bloque requerido" for="idTxtAreaAutores"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.autores')}:" />
+			<p:inputTextarea id="idTxtAreaAutores" 
+				styleClass="altoMaximo"
+				value="#{programaCapacitacionBean.autoresDatosGenerales}"
+				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.autoresTextArea')}">
+				<p:ajax process="@this" event="blur"
+					listener="#{programaCapacitacionBean.setAutoresAlProgramaListener}" />
+			</p:inputTextarea>
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class="row">
+		<div class="col-md-12">
+			<p:outputLabel styleClass="requerido bloque" for="descProg"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.desc')}:" />
+			<!-- Longitud de campo -->
+			<p:inputTextarea rows="2" id="descProg" styleClass="altoMaximo"
+				maxlength="2000"
+				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.descripcion')}"
+				value="#{programaCapacitacionBean.programa.descripcion}">
+				<p:ajax process="@this" />
+			</p:inputTextarea>
+			<p:message for="descProg" />
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class="row">
+		<div class="col-md-12">
+			<p:outputLabel styleClass="requerido bloque" for="conocPrev"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.conocprevios')}:" />
+			<!-- Longitud de campo -->
+			<p:inputTextarea rows="2" id="conocPrev" styleClass="altoMaximo"
+				maxlength="2000"
+				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.conocprevios')}"
+				value="#{programaCapacitacionBean.programa.conocimietosPrevios}">
+				<p:ajax process="@this" />
+			</p:inputTextarea>
+			<p:message for="conocPrev" />
+		</div>
+	</div>
+</div>
+<div class="form-group">
+	<div class="row">
+		<div class="col-md-12">
+			<p:outputLabel styleClass="requerido bloque" for="perfilIng"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.perfilIng')}:" />
+			<!-- Longitud de campo -->
+			<p:inputTextarea rows="2" id="perfilIng" styleClass="altoMaximo"
+				maxlength="2000"
+				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.perfilIng')}"
+				value="#{programaCapacitacionBean.programa.perfilIngreso}">
+				<p:ajax process="@this" />
+			</p:inputTextarea>
+			<p:message for="perfilIng" />
+		</div>
+	</div>
+</div>
+
+<div class="form-group">
+	<div class="row">
+		<div class="col-md-12">
+			<p:outputLabel styleClass="bloque requerido" for="perfilEg"
+				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.perfilEg')}:" />
+			<!-- Longitud de campo -->
+			<p:inputTextarea rows="2" id="perfilEg" styleClass="altoMaximo"
+				maxlength="2000"
+				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.perfilEg')}"
+				value="#{programaCapacitacionBean.programa.perfilEgreso}">
+				<p:ajax process="@this" />
+			</p:inputTextarea>
+			<p:message for="perfilEg" />
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+		<p:outputLabel
+			value=" #{sistema.obtenerTexto('gw.encuestas.etiqueta.obligatorios')}" />
+	</div>
+</div>
+</html>

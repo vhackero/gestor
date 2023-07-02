@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.personalizacion')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.edicionDeTextos')}</li>
+	</ui:define>
+	<ui:define name="content">
+		<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.edicionDeTextos')}</h1>
+		<hr />
+		<h:form id="frmFiltradoTextos">
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.textos.titulo.panel.superior')}"
+				styleClass="fondoPrimario">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6 col-xs-12">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.textos.etiqueta.modulo')}:" />
+							<p:selectOneMenu id="somModulo"
+								value="#{textoSistemaBean.idModulo}" effect="fade"
+								styleClass="col-xs-12" onchange="correccionSelectores()">
+								<p:ajax listener="#{textoSistemaBean.cargarComponentes()}"
+									update="somComponente" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{0}" />
+								<f:selectItems value="#{textoSistemaBean.modulos}" var="modulo"
+									itemValue="#{modulo.idFuncionalidad}"
+									itemLabel="#{modulo.descripcion}" />
+							</p:selectOneMenu>
+						</div>
+						<div class="col-md-6 col-xs-12">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.textos.sistema.etiqueta.componente')}:" />
+							<p:selectOneMenu id="somComponente"
+								disabled="#{textoSistemaBean.idModulo eq 0}"
+								value="#{textoSistemaBean.idComponente}" effect="fade"
+								styleClass="col-xs-12" onchange="correccionSelectores()">
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="0" />
+								<f:selectItems value="#{textoSistemaBean.componentes}"
+									var="componente" itemValue="#{componente.idFuncionalidad}"
+									itemLabel="#{componente.descripcion}" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6 col-xs-12">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.textos.sistema.etiqueta.texto')}:" />
+							<p:inputText value="#{textoSistemaBean.valor}"
+								styleClass="form-control" />
+						</div>
+
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12 col-xs-12">
+							<sec:authorize access="hasPermission(null, 'FUN_TEX' ) ">
+								<p:commandButton
+									value="#{sistema.obtenerTexto('gw.textos.sistema.boton.buscar')}"
+									action="#{textoSistemaBean.buscar()}" ajax="true"
+									update="frmTextosSistema:tblTextos"
+									styleClass="btn btn-primary pull-right" />
+							</sec:authorize>
+
+						</div>
+					</div>
+				</div>
+
+			</p:panel>
+
+			<br />
+			<br />
+		</h:form>
+		<h:form id="frmTextosSistema">
+			<p:panel
+				header="#{sistema.obtenerTexto('gw.textos.titulo.panel.inferior')}"
+				styleClass="fondoPrimario">
+				<div class="row">
+					<div class="col-md-12">
+						<p:dataTable id="tblTextos" reflow="true"
+							value="#{textoSistemaBean.textosSistema}" var="texto"
+							paginator="true" rows="10" widgetVar="tblTextos"
+							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+							rowsPerPageTemplate="5,10,15" paginatorPosition="bottom"
+							currentPageReportTemplate="({currentPage} de {totalPages})"
+							tableStyleClass="table"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+							<f:facet name="header">
+								<p:outputPanel styleClass="text-right">
+									<p:outputLabel for="globalFilter"
+										value="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.busqueda')}" />
+									<p:inputText id="globalFilter"
+										onkeyup="PF('tblTextos').filter()"
+										placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
+								</p:outputPanel>
+							</f:facet>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.textos.columna.clave')}"
+								sortBy="#{texto.clave}" filterMatchMode="contains"
+								filterBy="#{texto.clave}" filterStyle="display:none">
+								<h:outputText value="#{texto.clave}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.textos.columna.valor')}"
+								sortBy="#{texto.valor}" filterMatchMode="contains"
+								filterBy="#{texto.valor}" filterStyle="display:none">
+								<h:outputText value="#{texto.valor}" />
+							</p:column>
+							<p:column
+								headerText="#{sistema.obtenerTexto('gw.textos.columna.acciones')}"
+								styleClass="text-center">
+								<sec:authorize access="hasPermission(null, 'TEX_SIS_EDI' ) ">
+									<p:commandButton id="btnEditar"
+										action="#{textoSistemaBean.cargarTextoSistema()}"
+										process="@this" ajax="true"
+										update="frmTextosSistema:contenido"
+										oncomplete="PF('amodal').show();"
+										styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+										<f:setPropertyActionListener value="#{texto}"
+											target="#{textoSistemaBean.textoSistemaModificar}" />
+									</p:commandButton>
+									<p:tooltip id="toolTipFade" for="btnEditar"
+										value="#{sistema.obtenerTexto('gw.textos.boton.editar')}"
+										position="top" />
+								</sec:authorize>
+							</p:column>
+						</p:dataTable>
+					</div>
+				</div>
+			</p:panel>
+			<p:dialog header="#{sistema.obtenerTexto('gw.textos.modal.titulo')}"
+				widgetVar="amodal" modal="true" resizable="false" draggable="false"
+				closable="false" styleClass="medidaModal" position="center"
+				role="dialog">
+				<p:outputPanel id="contenido">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<p:outputLabel for="txtClave" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.textos.modal.etiqueta.clave')}" />
+								<!-- Longitud de campo -->
+								<p:inputText id="txtClave" maxlength="80"
+									value="#{textoSistemaBean.textoSistema.clave}" disabled="true"
+									styleClass="form-control" />
+								<p:message for="txtClave" />
+							</div>
+							<div class="col-md-6">
+								<p:outputLabel for="txtValor" styleClass="requerido"
+									value="#{sistema.obtenerTexto('gw.textos.modal.etiqueta.valor')}" />
+								<!-- Longitud de campo -->
+								<p:inputTextarea id="txtValor" maxlength="750"
+									value="#{textoSistemaBean.textoSistema.valor}"
+									styleClass="form-control" />
+								<p:message for="txtValor" />
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
+								<p:outputLabel
+									value=" #{sistema.obtenerTexto('gw.global.etiqueta.obligatorios')}" />
+							</div>
+						</div>
+					</div>
+				</p:outputPanel>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.textos.modal.boton.guardar')}"
+								action="#{textoSistemaBean.guardarTextoSistema()}" ajax="true"
+								update="contenido frmTextosSistema:tblTextos"
+								styleClass="pull-right btn btn-primary" />
+							<p:commandButton
+								value="#{sistema.obtenerTexto('gw.textos.modal.boton.cancelar')}"
+								onclick="PF('amodal').hide();"
+								styleClass="pull-right btn btn-default" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+		</h:form>
+
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition template="/templates/layout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:components="http://java.sun.com/jsf/composite/components">
+
+    <ui:define name="breadcrumb">
+        <li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+        <li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+        <li class="active">#{sistema.obtenerTexto('gw.ge.cat.catasis')}</li>
+    </ui:define>
+    <ui:define name="content">
+        <h:form id ="formf">
+            <p:ajaxStatus onstart="PF('dialogLayout').show()" onsuccess="PF('dialogLayout').hide()" />
+
+            <div class="row">
+                <div class="col-md-4">
+                    <p:accordionPanel multiple="true" activeIndex="null" id="acordion" styleClass="acordeoncatalogo">
+
+						
+                            <p:tab id="tab#{cat.id}" title="#{sistema.obtenerTexto('gw.ge.cat.catasis')}"  >
+                                <p:commandLink value="#{sistema.obtenerTexto('gw.ge.cat.registrar')}" process="@this" id="link#{cat.id}"
+                                               action="#{catAsistenciaBean.generaComponenteReg}"
+                                               update="formf" />
+                                <br />
+                                <p:commandLink value="#{sistema.obtenerTexto('gw.ge.cat.visualizar')}" process="@this" id="link2#{cat.id}"
+                                               action="#{catAsistenciaBean.obtenerDatosCatSel}" update="formf" />
+                            </p:tab>
+
+                    </p:accordionPanel>
+                </div>
+
+                <div class="col-md-8" >
+                    <components:regCatAsistenciaEscolar
+                            idCat="#{catAsistenciaBean.idCat}"
+                            nombreCat="#{catAsistenciaBean.nombreCat}"
+                            catalogoDTO="#{catAsistenciaBean.asistenciaDTO}"
+                            rendered="#{catAsistenciaBean.muestraCompReg}"
+                            accionBtnGuardar="#{catAsistenciaBean.guardarRegCatalogo}" />
+
+
+                    <br />
+                    <components:verCatAsistenciaEscolar
+                            idCat="#{catAsistenciaBean.idCat}"
+                            nombreCat="#{catAsistenciaBean.nombreCat}"
+                            listaElemCat="#{catAsistenciaBean.lstAsistenciaDTO}"
+                            rendered="#{catAsistenciaBean.muestraCompTabla}"
+                            listenerCambioEstatus="#{catAsistenciaBean.cambioEstatusCatSelec}"
+                            accionEditRegCatalogo="#{catAsistenciaBean.editaRegCatSeleccionado}"
+                            catalogoDTOSel="#{catAsistenciaBean.asistenciaDTO}" />
+
+                </div>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

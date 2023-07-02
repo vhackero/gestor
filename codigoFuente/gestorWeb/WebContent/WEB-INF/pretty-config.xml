@@ -1,0 +1,191 @@
+<pretty-config xmlns="http://ocpsoft.org/schema/rewrite-config-prettyfaces" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://ocpsoft.org/xml/ns/prettyfaces/rewrite-config-prettyfaces.xsd http://ocpsoft.org/schema/rewrite-config-prettyfaces">
+	 
+	 <url-mapping id="login">
+		<pattern value="/login" />
+		<view-id value="/views/public/login/login.xhtml" />
+	</url-mapping>
+
+	<!-- MAPEO DE RUTAS DEL SITIO PRIVADO -->
+
+	<url-mapping>
+		<pattern value="/tablero" />
+		<view-id value="/views/private/home.xhtml" />
+	</url-mapping>
+
+	<!-- LISTA DE TAREAS -->
+	<url-mapping>
+		<pattern value="/lista-de-tareas" />
+		<view-id
+			value="/views/private/administracion/actividades/ActividadesUsuario.xhtml" />
+	</url-mapping>
+
+	<!-- NOTIFICACIONES -->
+	<url-mapping>
+		<pattern value="/notificaciones" />
+		<view-id
+			value="/views/private/administracion/notificaciones/ConsultaNotificacionesSistema.xhtml" />
+	</url-mapping>
+
+	<!-- MENSAJES -->
+	<url-mapping>
+		<pattern value="/mensajes" />
+		<view-id
+			value="/views/private/administracion/notificaciones/ConsultaNotificaciones.xhtml" />
+	</url-mapping>
+
+	<url-mapping>
+		<pattern value="/mensajes/nuevo-mensaje" />
+		<view-id
+			value="/views/private/administracion/notificaciones/Notificacion.xhtml" />
+	</url-mapping>
+
+	<url-mapping>
+		<pattern
+			value="/mensajes/nuevo-mensaje/seleccionar-destinatarios" />
+		<view-id
+			value="/views/private/administracion/notificaciones/BusquedaPersonas.xhtml" />
+	</url-mapping>
+
+	<url-mapping>
+		<pattern value="/mensajes/detalles-del-mensaje" />
+		<view-id
+			value="/views/private/administracion/notificaciones/NotificacionDetalle.xhtml" />
+	</url-mapping>
+
+	<url-mapping>
+		<pattern value="/mensajes/detalles-del-mensaje/responder" />
+		<view-id
+			value="/views/private/administracion/notificaciones/Mensaje.xhtml" />
+	</url-mapping>
+
+	<!-- MIS CURSOS -->
+	<url-mapping>
+		<pattern value="/mis-cursos" />
+		<view-id
+			value="/views/private/gestionAprendizaje/alumnoView/misCursos.xhtml" />
+	</url-mapping>
+
+	<!-- MIS LOGROS -->
+	<url-mapping>
+		<pattern value="/mis-logros" />
+		<view-id
+			value="/views/private/gestionAprendizaje/alumnoView/misLogros.xhtml" />
+	</url-mapping>
+
+	<!-- EXPEDIENTE ACADEMICO -->
+	<url-mapping>
+		<pattern value="/expediente-academico" />
+		<view-id
+			value="/views/private/gestionAprendizaje/alumnoView/constancias.xhtml" />
+	</url-mapping>
+
+	<!-- MI PERFIL -->
+	<url-mapping>
+		<pattern value="/mi-perfil" />
+		<view-id
+			value="/views/private/gestionAprendizaje/alumnoView/miPerfil.xhtml" />
+	</url-mapping>
+
+	<!-- USUARIOS -->
+	<url-mapping>
+		<pattern value="/administracion/usuarios" />
+		<view-id
+			value="/views/private/administracion/usuario/AdministraUsuarios.xhtml" />
+	</url-mapping>
+
+	<url-mapping>
+		<pattern value="/administracion/usuarios/usuario-interno" />
+		<view-id
+			value="/views/private/administracion/usuario/RegistroUsuarioInterno.xhtml" />
+	</url-mapping>
+
+	<url-mapping>
+		<pattern value="/administracion/usuarios/usuario-externo" />
+		<view-id
+			value="/views/private/administracion/usuario/RegistroUsuarioExterno.xhtml" />
+	</url-mapping>
+
+	<url-mapping>
+		<pattern value="/administracion/usuarios/carga-masiva" />
+		<view-id
+			value="/views/private/administracion/usuario/CargaUsuarios.xhtml" />
+	</url-mapping>
+
+	<!-- ROLES Y PERMISOS -->
+	<url-mapping>
+		<pattern value="/administracion/roles-y-permisos" />
+		<view-id
+			value="/views/private/administracion/roles/Roles.xhtml" />
+	</url-mapping>
+
+	<url-mapping>
+		<pattern
+			value="/administracion/roles-y-permisos/editar-roles-y-permisos" />
+		<view-id
+			value="/views/private/administracion/roles/PermisosRol.xhtml" />
+	</url-mapping>
+
+	<!-- BITACORAS -->
+	<url-mapping>
+		<pattern value="/administracion/bitacoras" />
+		<view-id
+			value="/views/private/administracion/bitacora/ConsultarBitacora.xhtml" />
+	</url-mapping>
+
+	<url-mapping>
+		<pattern value="/administracion/bitacoras/seleccionar-persona" />
+		<view-id
+			value="/views/private/administracion/bitacora/BusquedaPersonas.xhtml" />
+	</url-mapping>
+
+	<!-- INTERFAZ -->
+	<url-mapping>
+		<pattern
+			value="/administracion/personalizacion/interfaz-grafica" />
+		<view-id
+			value="/views/private/administracion/temas/Temas.xhtml" />
+	</url-mapping>
+
+	<url-mapping>
+		<pattern
+			value="/administracion/personalizacion/interfaz-grafica/lista-de-archivos" />
+		<view-id
+			value="/views/private/administracion/temas/ArchivosTema.xhtml" />
+	</url-mapping>
+
+	<!-- EDICIÓN DE TEXTOS -->
+	<url-mapping>
+		<pattern
+			value="/administracion/personalizacion/edicion-de-textos" />
+		<view-id
+			value="/views/private/administracion/funcionalidades/BusquedaTextosSistema.xhtml" />
+	</url-mapping>
+
+	<!-- PLANTILLAS DE NOTIFICACIONES -->
+	<url-mapping>
+		<pattern
+			value="/administracion/personalizacion/plantillas-de-notificaciones" />
+		<view-id
+			value="/views/private/administracion/notificaciones/Plantillas.xhtml" />
+	</url-mapping>
+
+	<url-mapping>
+		<pattern
+			value="/administracion/personalizacion/plantillas-de-notificaciones/nueva-plantilla-de-notificacion" />
+		<view-id
+			value="/views/private/administracion/notificaciones/Plantilla.xhtml" />
+	</url-mapping>
+
+	<!-- IMAGENES DE DOCUMENTOS -->
+	<url-mapping>
+		<pattern
+			value="/administracion/personalizacion/imagenes-de-documentos" />
+		<view-id
+			value="/views/private/plantillas/CreadorPlantillas.xhtml" />
+	</url-mapping>
+
+
+
+
+
+</pretty-config>
