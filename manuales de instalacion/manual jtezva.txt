@@ -1,3 +1,15 @@
+# Diagrama de arquitectura
+
+- basegestor: proyecto java que no se ejecuta, solo se genera el .jar
+- gestorweb: proyecto java que corre en Wildfly, usa dependencia el jar del punto anterior
+- gestorscheduler: proyecto java que corre tareas programadas, aún no lo reviso
+- dos bases de datos MySQL: están en la carpeta codigoFuente/bd
+- base de datos Mongo (no tiene tablas?), más adelante se detalla
+- en teoría debe haber un moodle ejecutandose en PHP en algún lado... pendiente
+
+
+# Instrucciones de instalación en ambiente local
+
 - Instalar MySQL server
 - Crear ambas bases de datos
 - Importar ambos scripts (carpeta bd) para poblar las bases
@@ -11,8 +23,9 @@
 - Instalarle el Jboss Tools al eclipse (ver TUTORIAL GESTOR)
 - Instalarle el Wildfly al eclipse (ver TUTORIAL GESTOR)
 - Crearle su conexión mysql y datasource al Wildfly,
-  ver TUTORIAL GESTOR buscar "Ir a la carpeta de donde se almacenará nuestra carpeta WildFly"
-  el paso 2 es dentro de modules\system\layers\base\com
+  ver TUTORIAL GESTOR buscar "Ir a la carpeta de donde se almacenará nuestra carpeta WildFly", NOTA:
+  [1] el paso 2 es dentro de modules\system\layers\base\com
+  [2] hay que poner el nombre de la base de datos correcto
 
 - Importar proyecto basegestor
 - clic derecho > Maven > Update Project .... NOTA:
