@@ -16,14 +16,16 @@
 	<title><h:outputText
 			value="#{sistema.obtenerTexto('gw.global.titulo')}" /></title>
 	<link rel="shortcut icon" type="image/x-icon"
-		href="/recursos/Privado/#{sistema.obtenerTemaPrivado()}/img/favicon.ico" />
+		href="#{resource['Privado:base/img/favicon.ico']}" />
 
 	<h:outputStylesheet library="DevExtreme" name="dx.common.css" />
 	<h:outputStylesheet library="DevExtreme" name="dx.light.css" />
 	<h:outputStylesheet library="bootstrap" name="css/bootstrap.min.css" />
 
 	<link rel="stylesheet" type="text/css"
-		href="/recursos/Privado/#{sistema.obtenerTemaPrivado()}/css/sb-admin-2.css" />
+		href="#{resource['Privado:base/css/sb-admin-2.css']}" />
+	<link rel="stylesheet" type="text/css"
+		href="#{resource['Privado:base/css/style.css']}" />
 
 	<ui:insert name="head"></ui:insert>
 
@@ -59,7 +61,7 @@
 	<h:outputScript library="DevExtreme" name="dx.all.js" />
 
 	<script
-		src="/recursos/Privado/#{sistema.obtenerTemaPrivado()}/js/script.js"></script>
+		src="#{resource['Privado:base/js/script.js']}"></script>
 	<h:outputScript library="js" name="analisisDatos.js" />
 	<h:outputScript library="js" name="reporteUsuarios.js" />
 	<h:outputScript library="js" name="reporteEventos.js" />
