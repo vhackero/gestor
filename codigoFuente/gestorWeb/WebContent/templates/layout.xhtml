@@ -16,14 +16,42 @@
 	<title><h:outputText
 			value="#{sistema.obtenerTexto('gw.global.titulo')}" /></title>
 	<link rel="shortcut icon" type="image/x-icon"
-		href="/recursos/Privado/#{sistema.obtenerTemaPrivado()}/img/favicon.ico" />
+		href="#{resource['Privado:base/img/favicon.ico']}" />
 
 	<h:outputStylesheet library="DevExtreme" name="dx.common.css" />
 	<h:outputStylesheet library="DevExtreme" name="dx.light.css" />
 	<h:outputStylesheet library="bootstrap" name="css/bootstrap.min.css" />
+	
+	<link rel="stylesheet" type="text/css"
+		href="#{resource['Privado:base/css/style.css']}" />
+	<style>
+		@font-face {
+			font-family: 'SISIeLearning';
+			src:  url("#{resource['Privado:base/css/fonts/SISIeLearning.eot?zaf756']}");
+			src:  url("#{resource['Privado:base/css/fonts/SISIeLearning.eot?zaf756#iefix']}") format('embedded-opentype'),
+    		url("#{resource['Privado:base/css/fonts/SISIeLearning.ttf?zaf756']}") format('truetype'),
+    		url("#{resource['Privado:base/css/fonts/SISIeLearning.woff?zaf756']}") format('woff'),
+    		url("#{resource['Privado:base/css/fonts/SISIeLearning.svg?zaf756#SISIeLearning']}") format('svg');
+  			font-weight: normal;
+  			font-style: normal;
+		}
+	</style>
 
 	<link rel="stylesheet" type="text/css"
-		href="/recursos/Privado/#{sistema.obtenerTemaPrivado()}/css/sb-admin-2.css" />
+		href="#{resource['Privado:base/css/sb-admin-2.css']}" />
+	<style>
+		@font-face {
+  			font-family: 'Open Sans';
+  			src: url("#{resource['Privado:base/css/fonts/Open_Sans/OpenSans-Regular-webfont.eot']}");
+  			src: url("#{resource['Privado:base/css/fonts/Open_Sans/OpenSans-Regular-webfont.eot?#iefix']}") format('embedded-opentype'),
+				url("#{resource['Privado:base/css/fonts/Open_Sans/OpenSans-Regular-webfont.woff']}") format('woff'),
+				url("#{resource['Privado:base/css/fonts/Open_Sans/OpenSans-Regular-webfont.ttf']}") format('truetype'),
+				url("#{resource['Privado:base/css/fonts/Open_Sans/OpenSans-Regular-webfont.svg#open_sansregular']}") format('svg');
+  			font-weight: normal;
+  			font-style: normal;
+		}
+	</style>
+	
 
 	<ui:insert name="head"></ui:insert>
 
@@ -59,7 +87,7 @@
 	<h:outputScript library="DevExtreme" name="dx.all.js" />
 
 	<script
-		src="/recursos/Privado/#{sistema.obtenerTemaPrivado()}/js/script.js"></script>
+		src="#{resource['Privado:base/js/script.js']}"></script>
 	<h:outputScript library="js" name="analisisDatos.js" />
 	<h:outputScript library="js" name="reporteUsuarios.js" />
 	<h:outputScript library="js" name="reporteEventos.js" />
