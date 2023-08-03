@@ -1,0 +1,23 @@
+name: Autodeploy sandbox
+
+on: 
+  push:
+    branches: [ sandbox ]
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy project
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.HOST_SANDBOX }}
+          username: ${{ secrets.USERNAME_SANDBOX }}
+          key_path: "devops/id_rsa"
+          script_stop: true
+          script: |
+            cd ~/projects/artifacts/devops-gestor
+            bash deploy-sandbox.sh
