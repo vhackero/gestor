@@ -14,9 +14,9 @@
 		</f:facet>
 			
 		<title><h:outputText value="#{sistema.obtenerTexto('gw.global.titulo')}" /></title>
-		<link rel="shortcut icon" type="image/x-icon" href="/recursos/Publico/#{sistema.obtenerTemaPublico()}/img/favicon.ico"/>
-		<link rel="stylesheet" type="text/css" href="/recursos/Publico/#{sistema.obtenerTemaPublico()}/css/custom.css" />
-		<script src="/recursos/Publico/#{sistema.obtenerTemaPublico()}/js/script.js"></script>
+		<link rel="shortcut icon" type="image/x-icon" href="#{resource['Publico:base/img/favicon.ico']}"/>
+		<link rel="stylesheet" type="text/css" href="#{resource['Publico:base/css/custom.css']}" />
+		<script src="#{resource['Publico:base/js/script.js']}"></script>
 		
 		<ui:insert name="cabecera" />
 	</h:head>

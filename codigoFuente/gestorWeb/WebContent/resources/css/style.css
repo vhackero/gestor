@@ -1,0 +1,381 @@
+@font-face {
+  font-family: 'SISIeLearning';
+  src:  url('fonts/SISIeLearning.eot?zaf756');
+  src:  url('fonts/SISIeLearning.eot?zaf756#iefix') format('embedded-opentype'),
+    url('fonts/SISIeLearning.ttf?zaf756') format('truetype'),
+    url('fonts/SISIeLearning.woff?zaf756') format('woff'),
+    url('fonts/SISIeLearning.svg?zaf756#SISIeLearning') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="ss_"], [class*=" ss_"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'SISIeLearning' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  font-size:18px;
+  margin-right:5px;
+  padding-left:7px;
+
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ss_ad_gestesco:before {
+  content: "\e93c";
+}
+.ss_ad_interfaz:before {
+  content: "\e937";
+}
+.ss_ad_notifi:before {
+  content: "\e906";
+}
+.ss_adm_admin:before {
+  content: "\e903";
+}
+.ss_adm_agrecata:before {
+  content: "\e93f";
+}
+.ss_adm_catal:before {
+  content: "\e90b";
+}
+.ss_adm_catalencue:before {
+  content: "\e941";
+}
+.ss_adm_cataloprogra:before {
+  content: "\e901";
+}
+.ss_adm_catgest:before {
+  content: "\e950";
+}
+.ss_adm_config:before {
+  content: "\e94d";
+}
+.ss_adm_consulbita:before {
+  content: "\e95e";
+}
+.ss_adm_desexcel:before {
+  content: "\e960";
+}
+.ss_adm_editex:before {
+  content: "\e902";
+}
+.ss_adm_listatareas:before {
+  content: "\e90d";
+}
+.ss_adm_local:before {
+  content: "\e90c";
+}
+.ss_adm_logisinfra:before {
+  content: "\e904";
+}
+.ss_adm_mensajes:before {
+  content: "\e905";
+}
+.ss_adm_modulos:before {
+  content: "\e936";
+}
+.ss_adm_orgaguber:before {
+  content: "\e951";
+}
+.ss_adm_parsis:before {
+  content: "\e94e";
+}
+.ss_adm_person:before {
+  content: "\e947";
+}
+.ss_adm_planmens:before {
+  content: "\e908";
+}
+.ss_adm_plantilla:before {
+  content: "\e94f";
+}
+.ss_adm_programsoci:before {
+  content: "\e952";
+}
+.ss_adm_recursos:before {
+  content: "\e953";
+}
+.ss_adm_rolpermi:before {
+  content: "\e909";
+}
+.ss_adm_temas:before {
+  content: "\e95f";
+}
+.ss_adm_uniresp:before {
+  content: "\e955";
+}
+.ss_adm_usuarios:before {
+  content: "\e90a";
+}
+.ss_anda_analisis:before {
+  content: "\e900";
+}
+.ss_anda_program:before {
+  content: "\e93b";
+}
+.ss_anda_usuario:before {
+  content: "\e944";
+}
+.ss_da_corr:before {
+  content: "\e90e";
+}
+.ss_da_inco:before {
+  content: "\e90f";
+}
+.ss_da_mas:before {
+  content: "\e910";
+}
+.ss_da_menos:before {
+  content: "\e911";
+}
+.ss_en_conteencu:before {
+  content: "\e956";
+}
+.ss_en_desemp:before {
+  content: "\e92d";
+}
+.ss_en_encuesta:before {
+  content: "\e948";
+}
+.ss_en_encuevalu:before {
+  content: "\e93d";
+}
+.ss_en_gestencues:before {
+  content: "\e94a";
+}
+.ss_en_segencue:before {
+  content: "\e949";
+}
+.ss_ga_adjunt:before {
+  content: "\e912";
+}
+.ss_ga_amvirtual:before {
+  content: "\e914";
+}
+.ss_ga_asgresp:before {
+  content: "\e938";
+}
+.ss_ga_gestion:before {
+  content: "\e913";
+}
+.ss_ga_iniprod:before {
+  content: "\e939";
+}
+.ss_ga_logros:before {
+  content: "\e915";
+}
+.ss_ga_semaforo:before {
+  content: "\e916";
+}
+.ss_ga_urldesac:before {
+  content: "\e917";
+}
+.ss_ge_auditar:before {
+  content: "\e94b";
+}
+.ss_ge_constancias:before {
+  content: "\e919";
+}
+.ss_ge_evencapaci:before {
+  content: "\e91a";
+}
+.ss_ge_expediente:before {
+  content: "\e91b";
+}
+.ss_ge_gestesco:before {
+  content: "\e93e";
+}
+.ss_ge_respeven:before {
+  content: "\e95b";
+}
+.ss_gn_activar:before {
+  content: "\e91d";
+}
+.ss_gn_agrerol:before {
+  content: "\e91f";
+}
+.ss_gn_archivar:before {
+  content: "\e91e";
+}
+.ss_gn_asisten:before {
+  content: "\e920";
+}
+.ss_gn_aula:before {
+  content: "\e921";
+}
+.ss_gn_avan:before {
+  content: "\e942";
+}
+.ss_gn_ayuda:before {
+  content: "\e922";
+}
+.ss_gn_baja:before {
+  content: "\e923";
+}
+.ss_gn_bloq:before {
+  content: "\e924";
+}
+.ss_gn_calen:before {
+  content: "\e925";
+}
+.ss_gn_califica:before {
+  content: "\e926";
+}
+.ss_gn_cancelar:before {
+  content: "\e927";
+}
+.ss_gn_cargar:before {
+  content: "\e93a";
+}
+.ss_gn_clonar:before {
+  content: "\e928";
+}
+.ss_gn_desblo:before {
+  content: "\e929";
+}
+.ss_gn_desc:before {
+  content: "\e92a";
+}
+.ss_gn_eliminar:before {
+  content: "\e92b";
+}
+.ss_expor:before {
+  content: "\e92c";
+}
+.ss_gn_inicio:before {
+  content: "\e92e";
+}
+.ss_gn_matri:before {
+  content: "\e92f";
+}
+.ss_gn_medalla:before {
+  content: "\e930";
+}
+.ss_gn_mod:before {
+  content: "\e931";
+}
+.ss_gn_recordar:before {
+  content: "\e946";
+}
+.ss_gn_regre:before {
+  content: "\e945";
+}
+.ss_gn_urlact:before {
+  content: "\e932";
+}
+.ss_gn_verimg:before {
+  content: "\e940";
+}
+.ss_gn_vis:before {
+  content: "\e933";
+}
+.ss_la_configareas:before {
+  content: "\e934";
+}
+.ss_lo_aprovecha:before {
+  content: "\e943";
+}
+.ss_lo_ava .path1:before {
+  content: "\e966";
+  color: rgb(7, 3, 8);
+}
+.ss_lo_ava .path2:before {
+  content: "\e967";
+  margin-left: -1em;
+  color: rgb(0, 0, 0);
+}
+.ss_lo_ava .path3:before {
+  content: "\e968";
+  margin-left: -1em;
+  color: rgb(10, 8, 11);
+}
+.ss_lo_ava .path4:before {
+  content: "\e969";
+  margin-left: -1em;
+  color: rgb(10, 8, 11);
+}
+.ss_lo_ava .path5:before {
+  content: "\e96a";
+  margin-left: -1em;
+  color: rgb(10, 8, 11);
+}
+.ss_lo_eventos .path1:before {
+  content: "\e96b";
+  color: rgb(0, 0, 0);
+}
+.ss_lo_eventos .path2:before {
+  content: "\e96c";
+  margin-left: -1em;
+  color: rgb(0, 0, 0);
+}
+.ss_lo_eventos .path3:before {
+  content: "\e96d";
+  margin-left: -1em;
+  color: rgb(0, 0, 0);
+}
+.ss_lo_eventos .path4:before {
+  content: "\e96e";
+  margin-left: -1em;
+  color: rgb(10, 8, 11);
+}
+.ss_lo_eventos .path5:before {
+  content: "\e96f";
+  margin-left: -1em;
+  color: rgb(10, 8, 11);
+}
+.ss_lo_eventos .path6:before {
+  content: "\e970";
+  margin-left: -1em;
+  color: rgb(10, 8, 11);
+}
+.ss_lo_gami .path1:before {
+  content: "\e962";
+  color: rgb(0, 0, 0);
+}
+.ss_lo_gami .path2:before {
+  content: "\e963";
+  margin-left: -1em;
+  color: rgb(10, 8, 11);
+}
+.ss_lo_gami .path3:before {
+  content: "\e964";
+  margin-left: -1em;
+  color: rgb(10, 8, 11);
+}
+.ss_lo_gami .path4:before {
+  content: "\e965";
+  margin-left: -1em;
+  color: rgb(10, 8, 11);
+}
+.ss_lo_logis:before {
+  content: "\e95d";
+}
+.ss_lo_logist:before {
+  content: "\e957";
+}
+.ss_lo_reservarea:before {
+  content: "\e959";
+}
+.ss_pp_admicompe:before {
+  content: "\e958";
+}
+.ss_pp_compeje:before {
+  content: "\e95a";
+}
+.ss_pp_planestudio:before {
+  content: "\e95c";
+}
+.ss_pp_progra:before {
+  content: "\e935";
+}
+.ss_pp_programcapa:before {
+  content: "\e961";
+}
