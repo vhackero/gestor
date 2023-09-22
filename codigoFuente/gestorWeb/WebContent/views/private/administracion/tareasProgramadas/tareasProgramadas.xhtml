@@ -38,9 +38,9 @@
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-12">
-							<p:outputLabel value="Atención:" styleClass="agregaMargenDerecho" />
+							<p:outputLabel value="Atenciï¿½n:" styleClass="agregaMargenDerecho" />
 							<h:outputText
-								value="Aunque usted cree una nueva tarea programada se deberá solicitar al área correspondiente ya que esta funcionalidad solo es administrativa." />
+								value="Aunque usted cree una nueva tarea programada se deberï¿½ solicitar al ï¿½rea correspondiente ya que esta funcionalidad solo es administrativa." />
 						</div>
 					</div>
 				</div>
@@ -90,7 +90,7 @@
 						headerText="#{sistema.obtenerTexto('gw.tareasprogramadas.panel.col.activo')}"
 						styleClass="text-center">
 						<p:inputSwitch value="#{tareaProgramada.activo}" disabled="true"
-							onLabel="Sí" offLabel="No" />
+							onLabel="Sï¿½" offLabel="No" />
 					</p:column>
 
 					<!-- Fecha de registro  -->
@@ -117,7 +117,7 @@
 						headerText="#{sistema.obtenerTexto('gw.tareasprogramadas.panel.col.acciones')}"
 						styleClass="text-center">
 						<p:commandButton
-							styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod"
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-pen-to-square"
 							id="editarTareaProgramada"
 							actionListener="#{schedulerBean.asignaTareaSeleccionada(tareaProgramada)}"
 							process="@this"

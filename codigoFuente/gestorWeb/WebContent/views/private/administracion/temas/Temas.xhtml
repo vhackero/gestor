@@ -77,7 +77,7 @@
 							<p:commandButton id="btnEditar" action="#{temaBean.cargarTema()}"
 								process="@this" ajax="true" update="@form"
 								oncomplete="PF('mTema').show();"
-								styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod"
+								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-pen-to-square"
 								disabled="#{tema.activo or tema.idTema == 1 or tema.idTema == 2}">
 
 								<f:setPropertyActionListener value="#{tema}"
@@ -89,7 +89,7 @@
 							<p:commandButton id="btnUpload" process="@this" ajax="true"
 								update="@form" oncomplete="PF('mCargaArchivo').show();"
 								disabled="#{tema.activo or tema.idTema == 1 or tema.idTema == 2}"
-								styleClass="btn-icon btn btn-default icono_sisi ss_gn_cargar">
+								styleClass="btn-icon btn btn-default icono_sisi fa-solid fa-upload">
 								<f:setPropertyActionListener value="#{tema}"
 									target="#{temaBean.tema}" />
 							</p:commandButton>
@@ -100,7 +100,7 @@
 								action="#{temaBean.cargarArchivosTema()}" ajax="false"
 								immediate="true" process="@this"
 								disabled="#{tema.activo or tema.idTema == 1 or tema.idTema == 2}"
-								styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye">
 
 								<f:setPropertyActionListener value="#{tema}"
 									target="#{temaBean.tema}" />
@@ -110,7 +110,7 @@
 								position="top" />
 
 							<p:commandButton
-								styleClass="btn-icon btn btn-default icono_sisi ss_da_corr"
+								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-play"
 								id="btnActivar" oncomplete="PF('mConfirmacion').show();"
 								ajax="true" update="@form" disabled="#{tema.activo}"
 								process="@this">

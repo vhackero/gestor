@@ -44,7 +44,7 @@
 				<p:commandButton id="btn-detalle" ajax="true"
 					action="#{notificacionesBean.actualizarEstatusNotificacion()}"
 					update="detalleMensaje tblNotificacionesSistema" process="@this"
-					styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis"
+					styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye"
 					oncomplete="PF('detalleMensaje').show();">
 					<f:setPropertyActionListener value="#{notificacion}"
 						target="#{notificacionesBean.notificacionSistema}" />

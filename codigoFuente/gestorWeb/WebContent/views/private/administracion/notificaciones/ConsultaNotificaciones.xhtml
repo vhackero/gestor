@@ -72,7 +72,7 @@
 							styleClass="text-center">
 							<p:commandButton id="acciones"
 								action="#{notificacionesBean.detalleNotificacion()}"
-								 styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+								 styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye">
 								<f:setPropertyActionListener value="#{notificacion}"
 									target="#{notificacionesBean.notificacionModificar}" />
 							</p:commandButton>
@@ -80,7 +80,7 @@
 								value="#{sistema.obtenerTexto('gw.mensajes.consulta.boton.detalle')}"
 								position="top" />
 							<p:commandButton id="eliminar" ajax="true" 
-								styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar"
+								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-trash"
 								oncomplete="PF('mConfirmacion').show();">
 								<f:setPropertyActionListener value="#{notificacion}"
 									target="#{notificacionesBean.notificacion}" />
@@ -130,7 +130,7 @@
 							styleClass="text-center">
 							<p:commandButton id="detalle"
 								action="#{notificacionesBean.detalleEnviado()}"
-								styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye">
 								<f:setPropertyActionListener value="#{notificacion}"
 									target="#{notificacionesBean.notificacion}" />
 							</p:commandButton>
@@ -179,7 +179,7 @@
 							<p:commandButton id="detalleBorradores"
 								
 								action="#{notificacionesBean.cargarNotificacion()}" 
-								styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis">
+								styleClass="btn btn-icon btn-default icono_sisi fa fa-solid fa-eye">
 								<f:setPropertyActionListener value="#{notificacion}"
 									target="#{notificacionesBean.notificacionModificar}" />
 							</p:commandButton>
@@ -227,7 +227,7 @@
 							<p:commandButton id="eliminados"
 								
 								action="#{notificacionesBean.detalleNotificacion()}"
-								styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis">
+								styleClass="btn btn-icon btn-default icono_sisi fa fa-solid fa-eye">
 								<f:setPropertyActionListener value="#{notificacion}"
 									target="#{notificacionesBean.notificacionModificar}" />
 							</p:commandButton>

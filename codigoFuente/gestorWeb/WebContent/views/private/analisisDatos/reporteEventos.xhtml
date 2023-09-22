@@ -9,17 +9,17 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>Análisis de datos</li>
-		<li class="active">Reporte de eventos de capacitación</li>
+		<li>Anï¿½lisis de datos</li>
+		<li class="active">Reporte de eventos de capacitaciï¿½n</li>
 	</ui:define>
 	<ui:define name="content">
-		<h1>Reporte de eventos de capacitación</h1>
+		<h1>Reporte de eventos de capacitaciï¿½n</h1>
 		<hr />
 		<p:ajaxStatus onstart="PF('dialogLayout').show()"
 			onsuccess="PF('dialogLayout').hide()" />
 		<h:form id="form">
 			<f:validateBean disabled="true">
-				<p:panel header="Búsqueda de eventos de capacitación">
+				<p:panel header="Bï¿½squeda de eventos de capacitaciï¿½n">
 					<div class="form-group">
 						<div class="row">
 
@@ -31,7 +31,7 @@
 									styleClass="form-control" />
 							</div>
 							<div class="col-md-6">
-								<p:outputLabel value="Nombre del evento de capacitación: "
+								<p:outputLabel value="Nombre del evento de capacitaciï¿½n: "
 									styleClass="bloque" />
 								<p:inputText
 									value="#{reporteGestionEscolarBean.filtros.nombreEc}"
@@ -140,7 +140,7 @@
 			</f:validateBean>
 			<div class="row">
 				<div class="col-md-12">
-					<p:panel header="Resultado de la búsqueda">
+					<p:panel header="Resultado de la bï¿½squeda">
 						<p:dataTable value="#{reporteGestionEscolarBean.infoEventos}"
 							reflow="true"
 							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
@@ -156,7 +156,7 @@
 								<div class="row flexY">
 									<div class="col-md-8">
 										<p:outputLabel
-											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+											value="Para agregar mï¿½s datos en tu reporte, selecciona en el siguiente menï¿½ los necesarios." />
 									</div>
 									<div class="col-md-4">
 										<p:commandButton id="toggler" type="button"
@@ -222,7 +222,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[5]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Eje de capacitación" />
+									<h:outputText value="Eje de capacitaciï¿½n" />
 								</f:facet>
 
 								<h:outputText value="#{infoEvento.nombreEjeCapacitacion}" />
@@ -245,7 +245,7 @@
 									action="#{reporteGestionEscolarBean.generarExpediente}"
 									ajax="true" process="@this" update="@form"
 									oncomplete="PF('modalExpediente').show()"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye">
 									<f:setPropertyActionListener value="#{infoEvento}"
 										target="#{reporteGestionEscolarBean.infoEvento}" />
 								</p:commandButton>
@@ -255,7 +255,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[8]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="¿Cuenta con programa social?" />
+									<h:outputText value="ï¿½Cuenta con programa social?" />
 								</f:facet>
 								<h:outputText value="#{infoEvento.cuentaConProgramaSocial}" />
 							</p:column>

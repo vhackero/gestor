@@ -71,7 +71,7 @@
 						styleClass="text-center">
 						<sec:authorize access="hasPermission(null, 'ROL_EDI' ) ">
 							<p:commandButton
-								styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod"
+								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-pen-to-square"
 								id="editartooltip" action="#{rolBean.cargarRol()}"
 								process="@this" oncomplete="PF('mRol').show();" ajax="true"
 								update="frmRoles:contenido">
@@ -84,7 +84,7 @@
 						</sec:authorize>
 						<sec:authorize access="hasPermission(null, 'ROL_PERM' ) ">
 							<p:commandButton
-								styleClass="btn-icon btn btn-default icono_sisi ss_adm_rolpermi"
+								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-key"
 								id="permisos" action="#{rolBean.cargarPermisos()}"
 								immediate="true" ajax="false">
 								<f:setPropertyActionListener value="#{rol}"

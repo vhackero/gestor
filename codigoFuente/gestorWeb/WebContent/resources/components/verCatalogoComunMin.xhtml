@@ -55,7 +55,7 @@
 			</p:column>
 
 			<p:column  headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.acciones')}" styleClass="text-center">
-				<p:commandButton styleClass="btn btn-default btn-icon icono_sisi ss_gn_mod" ajax="true"
+				<p:commandButton styleClass="btn btn-default btn-icon icono_sisi fa fa-solid fa-pen-to-square" ajax="true"
 					update="@form" process="@this" id="campo"
 					action="#{cc.attrs.accionEditRegCatalogo}" onstart="PF('statusDialog').hide()">
 					<f:setPropertyActionListener value="#{elemCat}"

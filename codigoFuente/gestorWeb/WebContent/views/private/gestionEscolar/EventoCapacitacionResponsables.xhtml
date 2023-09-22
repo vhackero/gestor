@@ -85,7 +85,7 @@
 							headerText="#{sistema.obtenerTexto('gw.ge.texto.acciones')}"
 							styleClass="text-center">
 							<p:commandButton id="eliminar1"
-								styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
+								styleClass="btn btn-icon btn-default icono_sisi fa fa-solid fa-trash"
 								action="#{capturaEventoCapacitacion.eliminarCoordinador()}"
 								process="@this" ajax="true"
 								update="tblCoordAcad @form:somCoordinadores">
@@ -164,7 +164,7 @@
 							headerText="#{sistema.obtenerTexto('gw.ge.texto.acciones')}"
 							styleClass="text-center">
 							<p:commandButton id="eliminar2"
-								styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
+								styleClass="btn btn-icon btn-default icono_sisi fa fa-solid fa-trash"
 								process="@this" update="tblFacilitador @form:somFacilitadores"
 								ajax="true"
 								action="#{capturaEventoCapacitacion.eliminarFacilitador()}">
@@ -254,7 +254,7 @@
 								action="#{capturaEventoCapacitacion.eliminarProductores()}"
 								process="@this" ajax="true"
 								update="tblResponsableProduccion @form:somConstructores"
-								styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar">
+								styleClass="btn btn-icon btn-default icono_sisi fa fa-solid fa-trash">
 								<f:setPropertyActionListener value="#{resp}"
 									target="#{capturaEventoCapacitacion.productor}" />
 							</p:commandButton>

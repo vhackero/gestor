@@ -267,7 +267,7 @@
 						<p:commandButton ajax="true" update="@form" id="clonar"
 							disabled="#{!(encuesta.encuestaEstatus.id == ESTATUS_ENCUESTA.PUBLICAR.id) }"
 							action="#{encuestaBean.clonarEncuesta}"
-							styleClass="btn-icon btn btn-default icono_sisi ss_gn_clonar">
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-copy">
 							<f:setPropertyActionListener value="#{encuesta}"
 								target="#{encuestaBean.encuestaSel}" />
 						</p:commandButton>
@@ -278,7 +278,7 @@
 						<p:commandButton ajax="true" process="@form" update="@form"
 							disabled="#{!(encuesta.encuestaEstatus.id == ESTATUS_ENCUESTA.BORRADOR.id or encuesta.encuestaEstatus.id == ESTATUS_ENCUESTA.COMENTARIOS.id)}"
 							id="editar" action="#{encuestaBean.navegaEditarEncuesta}"
-							styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-pen-to-square">
 							<f:setPropertyActionListener value="#{encuesta}"
 								target="#{encuestaBean.encuestaSel}" />
 						</p:commandButton>
@@ -290,7 +290,7 @@
 						<p:commandButton ajax="true" update="@form" id="ver"
 							disabled="#{!(encuesta.encuestaEstatus.id == ESTATUS_ENCUESTA.REVISION.id)}"
 							action="#{encuestaBean.navegaVerEncuesta}"
-							styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye">
 							<f:setPropertyActionListener value="#{encuesta}"
 								target="#{encuestaBean.encuestaSel}" />
 						</p:commandButton>
@@ -301,7 +301,7 @@
 						<p:commandButton id="eliminar"
 							oncomplete="PF('mdlEliminar').show();"
 							disabled="#{!(encuesta.encuestaEstatus.id == ESTATUS_ENCUESTA.BORRADOR.id)}"
-							styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar"
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-trash"
 							ajax="true" process="@this" update="@form">
 							<f:setPropertyActionListener value="#{encuesta}"
 								target="#{encuestaBean.encuestaSel}" />

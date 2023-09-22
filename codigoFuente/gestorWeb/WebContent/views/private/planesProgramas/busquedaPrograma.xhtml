@@ -269,7 +269,7 @@
 								<p:commandButton id="verProg" process="@this" immediate="true"
 									rendered="#{programa.catStatusPrograma.id == ESTATUS_PROG.FINAL.id}"
 									ajax="false"
-									class="btn-icon btn btn-default icono_sisi ss_gn_vis"
+									class="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye"
 									actionListener="#{reporteProgramaBean.verFECenVisor(programa)}"
 									onsuccess="PF('visorPDFProg').show();">
 								</p:commandButton>
@@ -281,7 +281,7 @@
 									rendered="#{programa.catStatusPrograma.id == ESTATUS_PROG.BORRADOR.id}"
 									immediate="true" ajax="true"
 									action="#{programaCapacitacionBean.editaProgramaCapacitacion}"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-pen-to-square">
 									<f:setPropertyActionListener value="#{programa}"
 										target="#{programaCapacitacionBean.programaSeleccionado}" />
 								</p:commandButton>
@@ -293,7 +293,7 @@
 									process="@this" immediate="true"
 									rendered="#{programa.catStatusPrograma.id == ESTATUS_PROG.FINAL.id}"
 									id="clonProg" ajax="true"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_clonar">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-copy">
 									<f:setPropertyActionListener value="#{programa}"
 										target="#{programaCapacitacionBean.programaSeleccionado}" />
 								</p:commandButton>
@@ -318,7 +318,7 @@
 									rendered="#{programa.catStatusPrograma.id == ESTATUS_PROG.CANCELADO.id}"
 									action="#{programaCapacitacionBean.eliminaProgCapacitacion}"
 									ajax="true" update="@form"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-trash">
 									<f:setPropertyActionListener value="#{programa}"
 										target="#{programaCapacitacionBean.programaSeleccionado}" />
 								</p:commandButton>
@@ -342,7 +342,7 @@
 									rendered="#{programa.catStatusPrograma.id eq ESTATUS_PROG.BORRADOR.id}"
 									action="#{programaCapacitacionBean.bloqueaProgCapacitacion}"
 									ajax="true" update="@form"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_bloq">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-ban">
 									<f:setPropertyActionListener value="#{programa}"
 										target="#{programaCapacitacionBean.programaSeleccionado}" />
 								</p:commandButton>
