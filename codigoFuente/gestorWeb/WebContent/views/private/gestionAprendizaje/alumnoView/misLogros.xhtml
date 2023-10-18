@@ -31,7 +31,7 @@
 								<div class="col-md-12 contenedorTrofeos">
 									<div class="contenedorTrofeo">
 										<div class="trofeo">
-											<span class="ss_ga_logros oro"></span>
+											<span class="fa fa-solid fa-trophy" style="color: #faa919; font-size: 32px;"></span>
 										</div>
 										<div class="baseTrofeo">
 											<p:outputLabel
@@ -42,7 +42,7 @@
 
 									<div class="contenedorTrofeo">
 										<div class="trofeo">
-											<span class="ss_ga_logros plata"></span>
+											<span class="fa fa-light fa-award" style="color: #808080; font-size: 32px;"></span>
 										</div>
 										<div class="baseTrofeo plata">
 											<p:outputLabel
@@ -135,7 +135,8 @@
 								<p:outputPanel layout="block"
 									rendered="#{misLogrosBean.insignia1 eq 'insigniaBloqueada'}">
 									<div class="contenedorIconoBloq">
-										<span class="ss_gn_bloq"></span>
+										<img class="#{misLogrosBean.insignia1}"
+								        src="#{resource['insignias:insignias01_peque.png']}" />
 									</div>
 								</p:outputPanel>
 							</p:outputPanel>
@@ -145,7 +146,8 @@
 								<p:outputPanel layout="block"
 									rendered="#{misLogrosBean.insignia2 eq 'insigniaBloqueada'}">
 									<div class="contenedorIconoBloq">
-										<span class="ss_gn_bloq"></span>
+										<img class="#{misLogrosBean.insignia2}"
+								        src="#{resource['insignias:insignias02_peque.png']}" />
 									</div>
 								</p:outputPanel>
 
@@ -156,7 +158,8 @@
 								<p:outputPanel layout="block"
 									rendered="#{misLogrosBean.insignia3 eq 'insigniaBloqueada'}">
 									<div class="contenedorIconoBloq">
-										<span class="ss_gn_bloq"></span>
+										<img class="#{misLogrosBean.insignia3}"
+								        src="#{resource['insignias:insignias03_peque.png']}" />
 									</div>
 								</p:outputPanel>
 							</p:outputPanel>
@@ -166,7 +169,8 @@
 								<p:outputPanel layout="block"
 									rendered="#{misLogrosBean.insignia4 eq 'insigniaBloqueada'}">
 									<div class="contenedorIconoBloq">
-										<span class="ss_gn_bloq"></span>
+										<img class="#{misLogrosBean.insignia4}"
+								        src="#{resource['insignias:insignias04_peque.png']}" />
 									</div>
 								</p:outputPanel>
 							</p:outputPanel>
@@ -185,11 +189,11 @@
 							<div class="col-md-4">
 								<p:outputPanel rendered="#{(not misLogrosBean.contenedorLogros.logros.isEmpty()) and (misLogrosBean.contenedorLogros.logros.get(0).trofeo eq 1)}"
 									styleClass="text-center">
-									<span class="ss_ga_logros trofeoOro" style="font-size:50px"></span>
+									<span class="fa fa-trophy trofeoOro" style="font-size:50px"></span>
 								</p:outputPanel>
 								<p:outputPanel rendered="#{(not misLogrosBean.contenedorLogros.logros.isEmpty()) and (misLogrosBean.contenedorLogros.logros.get(0).trofeo eq 2)}"
 									styleClass="text-center">
-									<span class="ss_ga_logros trofeoPlata" style="font-size:50px"></span>
+									<span class="fa fa-trophy trofeoPlata" style="font-size:50px"></span>
 								</p:outputPanel>
 
 
@@ -216,11 +220,11 @@
 								<p:column headerText="Trofeo">
 									<p:outputPanel rendered="#{logro.trofeo eq 1}"
 										styleClass="text-center">
-										<span class="ss_ga_logros trofeoOro tamanioTrofeoTabla"></span>
+										<span class="fa fa-trophy trofeoOro tamanioTrofeoTabla"></span>
 									</p:outputPanel>
 									<p:outputPanel rendered="#{logro.trofeo eq 2}"
 										styleClass="text-center">
-										<span class="ss_ga_logros trofeoPlata tamanioTrofeoTabla"></span>
+										<span class="fa fa-trophy trofeoPlata tamanioTrofeoTabla"></span>
 									</p:outputPanel>
 								</p:column>
 								<p:column headerText="Nombre del curso">

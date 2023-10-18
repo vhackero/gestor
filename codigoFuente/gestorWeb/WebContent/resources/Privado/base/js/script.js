@@ -169,7 +169,7 @@ $(function() {
     });
 
     /*Reemplaza el icono del boton en imagen de perfil*/
-    $('.imgPerfil .ui-button-icon-left.ui-icon.ui-c.ui-icon-plusthick').removeClass().addClass('ss_gn_mod').addClass('estilosUploadIcon');
+    $('.imgPerfil .ui-button-icon-left.ui-icon.ui-c.ui-icon-plusthick').removeClass().addClass('fa-solid fa-pen-to-square').addClass('estilosUploadIcon');
 
     /*Agrega un icono a los input tipo password para que puedan ver su contraseña*/
     agregaIconoPassword = function(pintar) {

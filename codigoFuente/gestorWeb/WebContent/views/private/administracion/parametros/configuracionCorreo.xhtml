@@ -106,7 +106,7 @@
 
 									<p:column headerText="Eliminar">
 										<p:commandButton value="eliminar" update="@form"
-											styleClass="quitaMargen btn-icon btn btn-default icono_sisi ss_gn_eliminar">
+											styleClass="quitaMargen btn-icon btn btn-default icono_sisi fa fa-solid fa-trash">
 											<p:collector value="#{destinatario}"
 												removeFrom="#{configCorreoBean.datosCorreo.destinatarios}"
 												unique="true" />
@@ -154,7 +154,7 @@
 
 									<p:column headerText="Eliminar">
 										<p:commandButton value="eliminar" update="listParaCC"
-											styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar">
+											styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-trash">
 											<p:collector value="#{destinatarioCC}"
 												removeFrom="#{configCorreoBean.datosCorreo.destinatariosCC}"
 												unique="true" />

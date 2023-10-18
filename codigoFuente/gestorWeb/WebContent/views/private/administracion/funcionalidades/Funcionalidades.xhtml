@@ -57,7 +57,7 @@
 								action="#{funcionalidadBean.nuevaFuncionalidad()}"
 								process="@this" ajax="true" update="frmTree:contenido"
 								oncomplete="PF('amodal').show();"
-								styleClass="btn-icon btn btn-default icono_sisi ss_adm_agrecata">
+								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-square-plus">
 								<f:setPropertyActionListener value="#{funcion}"
 									target="#{funcionalidadBean.funcionalidadPadre}" />
 							</p:commandButton>
@@ -70,7 +70,7 @@
 								action="#{funcionalidadBean.cargaFuncionalidad()}"
 								process="@this" ajax="true" update="frmTree:contenido"
 								oncomplete="PF('amodal').show();"
-								styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-pen-to-square">
 								<f:setPropertyActionListener value="#{funcion}"
 									target="#{funcionalidadBean.funcionalidadModificar}" />
 							</p:commandButton>
@@ -83,7 +83,7 @@
 							<p:commandButton id="text"
 								action="#{funcionalidadBean.cargarTextosSistema()}"
 								process="@this" ajax="false" immediate="true"
-								styleClass="btn-icon btn btn-default icono_sisi ss_adm_editex">
+								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-text-height">
 								<f:setPropertyActionListener value="#{funcion}"
 									target="#{funcionalidadBean.funcionalidadModificar}" />
 							</p:commandButton>
