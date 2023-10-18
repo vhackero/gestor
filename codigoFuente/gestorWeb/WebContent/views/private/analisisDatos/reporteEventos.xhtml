@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE html>
+<meta charset="UTF-8">
 <ui:composition template="/templates/layout.xhtml"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
@@ -9,17 +10,17 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>An�lisis de datos</li>
-		<li class="active">Reporte de eventos de capacitaci�n</li>
+		<li>Análisis de datos</li>
+		<li class="active">Reporte de eventos de capacitación</li>
 	</ui:define>
 	<ui:define name="content">
-		<h1>Reporte de eventos de capacitaci�n</h1>
+		<h1>Reporte de eventos de capacitación</h1>
 		<hr />
 		<p:ajaxStatus onstart="PF('dialogLayout').show()"
 			onsuccess="PF('dialogLayout').hide()" />
 		<h:form id="form">
 			<f:validateBean disabled="true">
-				<p:panel header="B�squeda de eventos de capacitaci�n">
+				<p:panel header="Búsqueda de eventos de capacitación">
 					<div class="form-group">
 						<div class="row">
 
@@ -31,7 +32,7 @@
 									styleClass="form-control" />
 							</div>
 							<div class="col-md-6">
-								<p:outputLabel value="Nombre del evento de capacitaci�n: "
+								<p:outputLabel value="Nombre del evento de capacitación: "
 									styleClass="bloque" />
 								<p:inputText
 									value="#{reporteGestionEscolarBean.filtros.nombreEc}"
@@ -140,7 +141,7 @@
 			</f:validateBean>
 			<div class="row">
 				<div class="col-md-12">
-					<p:panel header="Resultado de la b�squeda">
+					<p:panel header="Resultado de la búsqueda">
 						<p:dataTable value="#{reporteGestionEscolarBean.infoEventos}"
 							reflow="true"
 							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
@@ -156,7 +157,7 @@
 								<div class="row flexY">
 									<div class="col-md-8">
 										<p:outputLabel
-											value="Para agregar m�s datos en tu reporte, selecciona en el siguiente men� los necesarios." />
+											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
 									</div>
 									<div class="col-md-4">
 										<p:commandButton id="toggler" type="button"
@@ -222,7 +223,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[5]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Eje de capacitaci�n" />
+									<h:outputText value="Eje de capacitación" />
 								</f:facet>
 
 								<h:outputText value="#{infoEvento.nombreEjeCapacitacion}" />
@@ -255,7 +256,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[8]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="�Cuenta con programa social?" />
+									<h:outputText value="¿Cuenta con programa social?" />
 								</f:facet>
 								<h:outputText value="#{infoEvento.cuentaConProgramaSocial}" />
 							</p:column>

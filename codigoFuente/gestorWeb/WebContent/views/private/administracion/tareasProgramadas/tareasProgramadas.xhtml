@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE html>
+<meta charset="UTF-8">
 <ui:composition template="/templates/layout.xhtml"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
@@ -38,9 +39,9 @@
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-12">
-							<p:outputLabel value="Atenci�n:" styleClass="agregaMargenDerecho" />
+							<p:outputLabel value="Atención:" styleClass="agregaMargenDerecho" />
 							<h:outputText
-								value="Aunque usted cree una nueva tarea programada se deber� solicitar al �rea correspondiente ya que esta funcionalidad solo es administrativa." />
+								value="Aunque usted cree una nueva tarea programada se deberá solicitar al área correspondiente ya que esta funcionalidad solo es administrativa." />
 						</div>
 					</div>
 				</div>
@@ -90,7 +91,7 @@
 						headerText="#{sistema.obtenerTexto('gw.tareasprogramadas.panel.col.activo')}"
 						styleClass="text-center">
 						<p:inputSwitch value="#{tareaProgramada.activo}" disabled="true"
-							onLabel="S�" offLabel="No" />
+							onLabel="Sí" offLabel="No" />
 					</p:column>
 
 					<!-- Fecha de registro  -->
