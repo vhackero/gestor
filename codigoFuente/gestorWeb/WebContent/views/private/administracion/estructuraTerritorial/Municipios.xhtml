@@ -109,7 +109,7 @@
 								action="#{localizacionBean.cargarMunicipio()}" process="@this"
 								ajax="true" update="frmMunicipios:contenido"
 								oncomplete="PF('aModal').show();"
-								styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-pen-to-square">
 								<f:setPropertyActionListener value="#{municipio}"
 									target="#{localizacionBean.municipioModificar}" />
 							</p:commandButton>
@@ -121,7 +121,7 @@
 							<p:commandButton id="btn-cargar"
 								action="#{localizacionBean.cargarAsentamientos()}"
 								immediate="true" ajax="false"
-								styleClass="btn-icon btn btn-default ss_adm_local icono_sisi">
+								styleClass="btn-icon btn btn-default fa fa-solid fa-location-dot icono_sisi">
 								<f:setPropertyActionListener value="#{municipio}"
 									target="#{localizacionBean.municipio}" />
 							</p:commandButton>

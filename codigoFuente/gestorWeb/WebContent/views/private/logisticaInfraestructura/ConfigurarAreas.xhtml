@@ -221,7 +221,7 @@
 								styleClass="text-center">
 								<p:commandButton id="eliminar"
 									disabled="#{areasBean.verConfigArea}"
-									styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
+									styleClass="btn btn-icon btn-default icono_sisi fa fa-solid fa-trash"
 									oncomplete="PF('wdgBorrarImagen').show();" ajax="true"
 									process="@this">
 									<f:setPropertyActionListener value="#{imagen}"
@@ -316,7 +316,7 @@
 								styleClass="text-center">
 								<p:commandButton id="eliminarRecursosTec"
 									disabled="#{areasBean.verConfigArea}"
-									styleClass="btn btn-default btn-icon icono_sisi ss_gn_eliminar"
+									styleClass="btn btn-default btn-icon icono_sisi fa fa-solid fa-trash"
 									update="@form" ajax="true" process="@this"
 									action="#{areasBean.eliminarRecursoTec}">
 									<f:setPropertyActionListener value="#{rt}"
@@ -401,7 +401,7 @@
 								headerText="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.acciones')}"
 								styleClass="text-center">
 								<p:commandButton id="eliminarRecursosMob"
-									styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
+									styleClass="btn btn-icon btn-default icono_sisi fa fa-solid fa-trash"
 									update="@form" process="@this"
 									disabled="#{areasBean.verConfigArea}"
 									action="#{areasBean.eliminarRecursoMobi}">

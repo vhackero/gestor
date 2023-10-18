@@ -6,6 +6,7 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:sec="http://www.springframework.org/security/tags">
+	<script src="https://kit.fontawesome.com/153b08498d.js" crossorigin="anonymous"></script>
 	<div class="bloque-enlinea sidebar-contenedor">
 		<h:form id="frmMenu">
 			<div class="navbar-default sidebar" role="navigation">
@@ -22,7 +23,8 @@
 								<sec:authorize access="hasPermission(null, 'ADMIN') ">
 									<li><a href="#"
 										title="#{sistema.obtenerTexto('gw.textos.menu.administracion')}">
-											<i class="ss_adm_admin"></i> <span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion')}</span>
+
+											<i class="fa fa-solid fa-gears"></i> <span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion')}</span>
 											<span class="fa arrow"></span>
 									</a>
 										<ul class="nav nav-second-level">
@@ -32,7 +34,7 @@
 													<li><h:commandLink
 															action="#{menuGestorBean.navegaAdministracionUsuarios}"
 															title="#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.administrarUsuarios')}">
-															<i class="ss_adm_usuarios"></i>
+															<i class="fa fa-solid fa-users-gear"></i>
 															<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.administrarUsuarios')}</span>
 														</h:commandLink></li>
 												</sec:authorize>
@@ -42,7 +44,7 @@
 												<sec:authorize access="hasPermission(null, 'ROLES')">
 													<li><h:commandLink action="#{rolBean.init()}"
 															title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.roles')}">
-															<i class="ss_adm_rolpermi"></i>
+															<i class="fa fa-key"></i>
 															<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.roles')}</span>
 														</h:commandLink></li>
 												</sec:authorize>
@@ -53,7 +55,7 @@
 													<li><h:commandLink
 															action="#{menuGestorBean.navegaConsultaBitacora}"
 															title="#{sistema.obtenerTexto('gw.textos.menu.administracion.consultarBitacora')}">
-															<i class="ss_adm_consulbita"></i>
+															<i class="fa fa-solid fa-folder-open"></i>
 															<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.consultarBitacora')}</span>
 														</h:commandLink></li>
 												</sec:authorize>
@@ -63,7 +65,7 @@
 												<sec:authorize access="hasPermission(null, 'PERS_SIS')">
 													<li><a href="#"
 														title="#{sistema.obtenerTexto('gw.textos.menu.administracion.personalizacion')}">
-															<i class="ss_adm_person"></i> <span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.personalizacion')}</span>
+															<i class="fa fa-paintbrush"></i> <span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.personalizacion')}</span>
 															<span class="fa arrow"></span>
 													</a>
 														<ul class="nav nav-third-level">
@@ -73,7 +75,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaTemas()}"
 																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.temas')}">
-																			<i class="ss_ad_interfaz"></i>
+																			<i class="fa fa-solid fa-laptop-code"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.temas')}</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -85,7 +87,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaBusquedaTextosSistema()}"
 																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.textos')}">
-																			<i class="ss_adm_editex"></i>
+																			<i class="fa fa-solid fa-pen-to-square"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.textos')}</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -96,7 +98,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaPlantillaMensajes}"
 																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.mensajes.plantillas')}">
-																			<i class="ss_adm_planmens"></i>
+																			<i class="fa fa-regular fa-bell"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.mensajes.plantillas')}</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -109,7 +111,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaImagenesDocumentos()}"
 																			title="Imágenes de documentos">
-																			<i class="ss_adm_plantilla"></i>
+																			<i class="fa fa-solid fa-file-image"></i>
 																			<span class="m-label">Imágenes de documentos</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -123,7 +125,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaPlantillasDocumentos()}"
 																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.plantillas.docs')}">
-																			<i class="ss_adm_plantilla"></i>
+																			<i class="fa fa-solid fa-file-lines"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.plantillas.docs')}</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -141,7 +143,7 @@
 												<sec:authorize access="hasPermission(null, 'PAR_SIS')">
 													<li><a href="#"
 														title="#{sistema.obtenerTexto('gw.textos.menu.configuracion')}">
-															<i class="ss_adm_config"></i> <span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.configuracion')}</span>
+															<i class="fa fa-solid fa-screwdriver-wrench"></i> <span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.configuracion')}</span>
 															<span class="fa arrow"></span>
 													</a>
 														<ul class="nav nav-third-level">
@@ -151,7 +153,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaParametrosSistema()}"
 																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.parametros.sistema')}">
-																			<i class="ss_adm_parsis"></i>
+																			<i class="fa fa-solid fa-sliders"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.parametros.sistema')}</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -161,7 +163,7 @@
 																<li><h:commandLink 
 																		action="#{menuGestorBean.navegaTareasProgramadas}"
 																		title="#{sistema.obtenerTexto('gw.textos.menu.tareasprogramadas')}">
-																		<i class="ss_gn_asisten"></i>
+																		<i class="fa fa-solid fa-calendar-day"></i>
 																		<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.tareasprogramadas')}</span>
 																	</h:commandLink></li>
 															</ui:fragment>
@@ -174,7 +176,7 @@
 												<sec:authorize access="hasPermission(null, 'CATALOGOS')">
 													<li><a href="#"
 														title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}">
-															<i class="ss_adm_catal"></i> <span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</span>
+															<i class="fa fa-solid fa-database"></i> <span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos')}</span>
 															<span class="fa arrow"></span>
 													</a>
 														<ul class="nav nav-third-level">
@@ -184,7 +186,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaFuncionalidades}"
 																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.modulos')}">
-																			<i class="ss_adm_modulos"></i>
+																			<i class="fa fa-solid fa-cubes"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.modulos')}</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -195,7 +197,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaMunicipios}"
 																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.localizacion')}">
-																			<i class="ss_adm_local"></i>
+																			<i class="fa fa-solid fa-location-dot"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.localizacion')}</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -206,7 +208,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaRecursos}"
 																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.recursos')}">
-																			<i class="ss_adm_recursos"></i>
+																			<i class="fa fa-solid fa-box-open"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.recursos')}</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -218,7 +220,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaCatPlanesProgramas}"
 																			title="#{sistema.obtenerTexto('gw.administracion.catalogos.cpp')}">
-																			<i class="ss_adm_cataloprogra"></i>
+																			<i class="fa fa-solid fa-book-open"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.administracion.catalogos.cpp')}</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -230,7 +232,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaCatGestionEscolar}"
 																			title="#{sistema.obtenerTexto('gw.administracion.catalogos.cge')}">
-																			<i class="ss_adm_catgest"></i>
+																			<i class="fa fa-chalkboard-user"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.administracion.catalogos.cge')}</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -242,7 +244,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaCatGestionAprendizaje}"
 																			title="#{sistema.obtenerTexto('gw.administracion.catalogos.cga')}">
-																			<i class="ss_adm_catgest"></i>
+																			<i class="fa fa-solid fa-user-graduate"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.administracion.catalogos.cga')}</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -254,7 +256,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaCatEncuestas}"
 																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogosenc')}">
-																			<i class="ss_adm_catalencue"></i>
+																			<i class="fa fa-solid fa-clipboard-list"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogosenc')}</span>
 
 																		</h:commandLink></li>
@@ -267,7 +269,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaCatsLogisticaInfraestructura}"
 																			title="#{sistema.obtenerTexto('gw.administracion.catalogos.catlogi')}">
-																			<i class="ss_adm_logisinfra"></i>
+																			<i class="fa fa-solid fa-dolly"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.administracion.catalogos.catlogi')}</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -279,7 +281,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaAdminSedeInfra}"
 																			title="#{sistema.obtenerTexto('gw.administracion.catalogos.logisticaInfra.sedes')}">
-																			<i class="ss_adm_logisinfra"></i>
+																			<i class="fa fa-solid fa-screwdriver-wrench"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.administracion.catalogos.logisticaInfra.sedes')}</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -292,7 +294,7 @@
 																	<li><h:commandLink
 																			action="#{menuGestorBean.navegaOrganismosGubernamentales}"
 																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.orggub')}">
-																			<i class="ss_adm_orgaguber"></i>
+																			<i class="fa fa-solid fa-building"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.catalogos.orggub')}
 																			</span>
 																		</h:commandLink></li>
@@ -306,7 +308,7 @@
 																	<li><h:commandLink
 																			action="#{unidadesResponsablesBean.cargarUnidades()}"
 																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.unidades.responsables')}">
-																			<i class="ss_adm_uniresp"></i>
+																			<i class="fa fa-solid fa-building"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.unidades.responsables')}</span>
 																		</h:commandLink></li>
 
@@ -318,7 +320,7 @@
 																	<li><h:commandLink
 																			action="#{programasSocialesBean.cargarProgramas()}"
 																			title="#{sistema.obtenerTexto('gw.textos.menu.administracion.programas.sociales')}">
-																			<i class="ss_adm_programsoci"></i>
+																			<i class="fa fa-solid fa-book-open"></i>
 																			<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.programas.sociales')}</span>
 																		</h:commandLink></li>
 																</sec:authorize>
@@ -326,14 +328,14 @@
 															<ui:fragment>
 																<li><h:commandLink action="#{clasBadgeBean.init()}"
 																		title="#{sistema.obtenerTexto('gw.textos.menu.administracion.class.insignias')}">
-																		<i class="ss_ge_constancias"></i>
+																		<i class="fa fa-solid fa-ranking-star"></i>
 																		<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.class.insignias')}</span>
 																	</h:commandLink></li>
 															</ui:fragment>
 															<ui:fragment>
 																<li><h:commandLink action="#{badgetBean.init()}"
 																		title="#{sistema.obtenerTexto('gw.textos.menu.administracion.insignias')}">
-																		<i class="ss_gn_medalla"></i>
+																		<i class="fa fa-medal"></i>
 																		<span class="m-label">#{sistema.obtenerTexto('gw.textos.menu.administracion.insignias')}</span>
 																	</h:commandLink></li>
 															</ui:fragment>
@@ -349,7 +351,7 @@
 								<sec:authorize access="hasPermission(null, 'PLANES_PROGRAMAS') ">
 									<li><a href="#"
 										title="#{sistema.obtenerTexto('gw.planesprogramas.etiqueta.menu.titulo')}">
-											<i class="ss_pp_progra"></i> <span class="m-label">#{sistema.obtenerTexto('gw.planesprogramas.etiqueta.menu.titulo')}</span>
+											<i class="fa fa-solid fa-book-open"></i> <span class="m-label">#{sistema.obtenerTexto('gw.planesprogramas.etiqueta.menu.titulo')}</span>
 											<span class="fa arrow"></span>
 									</a>
 										<ul class="nav nav-second-level">
@@ -371,7 +373,7 @@
 													<li><h:commandLink
 															action="#{menuGestorBean.navegaBusquedaProgramas}"
 															title="#{sistema.obtenerTexto('gw.planes.titulo.progsCapacitacion')}">
-															<i class="ss_pp_programcapa"></i>
+															<i class="fa fa-laptop-file"></i>
 															<span class="m-label">#{sistema.obtenerTexto('gw.planes.titulo.progsCapacitacion')}</span>
 														</h:commandLink></li>
 												</sec:authorize>
@@ -383,7 +385,7 @@
 													<li><h:commandLink
 															action="#{menuGestorBean.navegaCompetenciasPorEje}"
 															title="#{sistema.obtenerTexto('gw.administracion.catalogos.titulo.eje.comp')}">
-															<i class="ss_pp_compeje"></i>
+															<i class="fa fa-solid fa-shuffle"></i>
 															<span class="m-label">#{sistema.obtenerTexto('gw.administracion.catalogos.titulo.eje.comp')}</span>
 														</h:commandLink></li>
 												</sec:authorize>
@@ -395,7 +397,7 @@
 													<li><h:commandLink
 															action="#{competenciaEspecificaBean.administrarCompetencias}"
 															title="#{sistema.obtenerTexto('gw.administracion.catalogos.btn.adm.competencias')}">
-															<i class="ss_pp_admicompe"></i>
+															<i class="fa fa-solid fa-table-list"></i>
 															<span class="m-label">#{sistema.obtenerTexto('gw.administracion.catalogos.btn.adm.competencias')}</span>
 														</h:commandLink></li>
 												</sec:authorize>
@@ -408,7 +410,7 @@
 								<sec:authorize access="hasPermission(null, 'GES_ESC') ">
 									<li><a href="#"
 										title="#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}">
-											<i class="ss_ge_gestesco"></i> <span class="m-label">#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</span>
+											<i class="fa fa-chalkboard-user"></i> <span class="m-label">#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</span>
 											<span class="fa arrow"></span>
 									</a>
 										<ul class="nav nav-second-level">
@@ -425,7 +427,7 @@
 													<li><h:commandLink
 															action="#{menuGestorBean.navegaBusquedaEventosCapacitacion}"
 															title="#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCap')}">
-															<i class="ss_ge_evencapaci"></i>
+															<i class="fa fa-calendar-days"></i>
 															<span class="m-label">#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCap')}</span>
 														</h:commandLink></li>
 												</sec:authorize>
@@ -433,19 +435,19 @@
 											<li><h:commandLink
 													action="#{menuGestorBean.navegaResponsablesEventoCapacitacion}"
 													title="#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}">
-													<i class="ss_ge_respeven"></i>
+													<i class="fa fa-solid fa-user-tie"></i>
 													<span class="m-label">#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}</span>
 												</h:commandLink></li>
 											<li><h:commandLink
 													action="#{menuGestorBean.navegaExpedienteAlumoBuscar}"
 													title="#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}">
-													<i class="ss_ge_expediente"></i>
+													<i class="fa fa-solid fa-id-card"></i>
 													<span class="m-label">#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}</span>
 												</h:commandLink></li>
 											<li><h:commandLink
 													action="#{menuGestorBean.navegaExpedienteGrupo}"
 													title="Expediente de alumnos por grupo">
-													<i class="ss_en_conteencu"></i>
+													<i class="fa fa-users-viewfinder"></i>
 													<span class="m-label">Expediente de alumnos por
 														grupo</span>
 												</h:commandLink></li>
@@ -460,14 +462,14 @@
 								<sec:authorize access="hasPermission(null, 'GES_APREN') ">
 									<li><a href="#"
 										title="#{sistema.obtenerTexto('gw.titulo.gestionaprendizaje.texto')}">
-											<i class="ss_ga_gestion"></i> <span class="m-label">#{sistema.obtenerTexto('gw.titulo.gestionaprendizaje.texto')}</span>
+											<i class="fa fa-solid fa-user-graduate"></i> <span class="m-label">#{sistema.obtenerTexto('gw.titulo.gestionaprendizaje.texto')}</span>
 											<span class="fa arrow"></span>
 									</a>
 										<ul class="nav nav-second-level">
 											<li><h:commandLink
 													action="#{menuGestorBean.navegaAmbientesVirtualesAprendizaje}"
 													title="#{sistema.obtenerTexto('gw.titulo.ambientes.texto.ava.parentesis')}">
-													<i class="ss_ga_amvirtual"></i>
+													<i class="fa fa-solid fa-computer"></i>
 													<span class="m-label">#{sistema.obtenerTexto('gw.titulo.ambientes.texto.ava.parentesis')}</span>
 
 												</h:commandLink></li>
@@ -482,7 +484,7 @@
 									<li><h:commandLink
 											action="#{menuGestorBean.navegaMisCursosDisponibles}"
 											title="Cursos disponibles">
-											<i class="ss_pp_progra"></i>
+											<i class="fa fa-solid fa-book-open"></i>
 											<span class="m-label">Cursos disponibles</span>
 
 										</h:commandLink></li>
@@ -494,7 +496,7 @@
 								<sec:authorize access="hasPermission(null, 'MIS_CURSOS') ">
 									<li><h:commandLink
 											action="#{menuGestorBean.navegaMisCursos}" title="Mis cursos">
-											<i class="ss_lo_aprovecha"></i>
+											<i class="fa fa-solid fa-graduation-cap"></i>
 											<span class="m-label">Mis cursos</span>
 
 										</h:commandLink></li>
@@ -506,7 +508,7 @@
 								<sec:authorize access="hasPermission(null, 'MIS_LOGROS') ">
 									<li><h:commandLink
 											action="#{menuGestorBean.navegaMisLogros}" title="Mis logros">
-											<i class="ss_ga_logros"></i>
+											<i class="fa fa-trophy"></i>
 											<span class="m-label">Mis logros</span>
 
 										</h:commandLink></li>
@@ -519,7 +521,7 @@
 									<li><h:commandLink
 											action="#{menuGestorBean.navegaConstancias}"
 											title="Expediente académico">
-											<i class="ss_ge_expediente"></i>
+											<i class="fa fa-solid fa-book"></i>
 											<span class="m-label">Expediente académico</span>
 
 										</h:commandLink></li>
@@ -531,7 +533,7 @@
 
 								<li><a href="#"
 									title="#{sistema.obtenerTexto('gw.encuestas.menu.titulo')}">
-										<i class="ss_en_encuevalu"></i> <span class="m-label">#{sistema.obtenerTexto('gw.encuestas.menu.titulo')}</span>
+										<i class="fa fa-solid fa-clipboard-list"></i> <span class="m-label">#{sistema.obtenerTexto('gw.encuestas.menu.titulo')}</span>
 										<span class="fa arrow"></span>
 								</a>
 									<ul class="nav nav-second-level">
@@ -541,7 +543,7 @@
 												<li><h:commandLink
 														action="#{menuGestorBean.navegaAdminEncuesta}"
 														title="#{sistema.obtenerTexto('gw.encuestas.consulta.titulo')}">
-														<i class="ss_en_gestencues"></i>
+														<i class="fa fa-solid fa-paste"></i>
 														<span class="m-label">#{sistema.obtenerTexto('gw.encuestas.consulta.titulo')}</span>
 													</h:commandLink></li>
 											</sec:authorize>
@@ -552,7 +554,7 @@
 												<li><h:commandLink
 														action="#{menuGestorBean.navegaSeguimientoEncuesta}"
 														title="#{sistema.obtenerTexto('gw.encuestas.seguimiento.titulo')}">
-														<i class="ss_en_segencue"></i>
+														<i class="fa fa-solid fa-list-check"></i>
 														<span class="m-label">#{sistema.obtenerTexto('gw.encuestas.seguimiento.titulo')}</span>
 													</h:commandLink></li>
 											</sec:authorize>
@@ -565,7 +567,7 @@
 												<li><h:commandLink
 														action="#{menuGestorBean.navegaEncuestasPendientes}"
 														title="#{sistema.obtenerTexto('gw.encuestas.contestar.titulo')}">
-														<i class="ss_en_conteencu"></i>
+														<i class="fa fa-solid fa-clipboard-check"></i>
 														<span class="m-label">#{sistema.obtenerTexto('gw.encuestas.contestar.titulo')}</span>
 													</h:commandLink></li>
 											</sec:authorize>
@@ -577,7 +579,7 @@
 								<sec:authorize access="hasPermission(null, 'LOG_ACA_INF')">
 									<li><a href="#"
 										title="#{sistema.obtenerTexto('gw.logistica.etiqueta.menu.titulo')}">
-											<i class="ss_lo_logist"></i> <span class="m-label">#{sistema.obtenerTexto('gw.logistica.etiqueta.menu.titulo')}</span>
+											<i class="fa fa-solid fa-dolly"></i> <span class="m-label">#{sistema.obtenerTexto('gw.logistica.etiqueta.menu.titulo')}</span>
 											<span class="fa arrow"></span>
 									</a>
 										<ul class="nav nav-second-level">
@@ -587,14 +589,14 @@
 													<li><h:commandLink
 															action="#{menuGestorBean.navegaConfiguracionAreas}"
 															title="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.menu.titulo')}">
-															<i class="ss_la_configareas"></i>
+															<i class="fa fa-solid fa-door-open"></i>
 															<span class="m-label">#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.menu.titulo')}</span>
 
 														</h:commandLink></li>
 													<li><h:commandLink
 															action="#{menuGestorBean.navegaReservacionAreas}"
 															title="#{sistema.obtenerTexto('gw.logistica.etiqueta.menu.reservacion')}">
-															<i class="ss_lo_reservarea"></i>
+															<i class="fa fa-solid fa-building"></i>
 															<span class="m-label">#{sistema.obtenerTexto('gw.logistica.etiqueta.menu.reservacion')}</span>
 														</h:commandLink></li>
 												</sec:authorize>
@@ -607,7 +609,7 @@
 								<sec:authorize access="hasPermission(null, 'ANA_DAT')">
 									<li><a href="#"
 										title="#{sistema.obtenerTexto('gw.analisis.etiqueta.menu.titulo')}">
-											<i class="ss_anda_analisis"></i> <span class="m-label">
+											<i class="fa fa-magnifying-glass-chart"></i> <span class="m-label">
 												#{sistema.obtenerTexto('gw.analisis.etiqueta.menu.titulo')}
 										</span> <span class="fa arrow"></span>
 									</a>
@@ -619,7 +621,7 @@
 													<li><h:commandLink
 															action="#{menuGestorBean.navegaAnalisisUsuarios}"
 															title="Reporte de usuarios">
-															<i class="ss_adm_usuarios"></i>
+															<i class="fa fa-solid fa-user"></i>
 															<span class="m-label">Reporte de usuarios</span>
 
 														</h:commandLink></li>
@@ -631,7 +633,7 @@
 													<li><h:commandLink rendered="false"
 															action="/views/private/analisisDatos/reporteProgramas.xhtml"
 															title="Reporte de programas">
-															<i class="ss_adm_usuarios"></i>
+															<i class="fa fa-solid fa-user"></i>
 															<span class="m-label">Reporte de programas</span>
 
 														</h:commandLink></li>
@@ -644,7 +646,7 @@
 													<li><h:commandLink
 															action="#{menuGestorBean.navegaAnalisisGestionEscolar}"
 															title="Reporte de gestión escolar">
-															<i class="ss_ge_gestesco"></i>
+															<i class="fa fa-solid fa-chalkboard-user"></i>
 															<span class="m-label">Reporte de gestión escolar</span>
 
 														</h:commandLink></li>
@@ -657,7 +659,7 @@
 													<li><h:commandLink
 															action="#{menuGestorBean.navegaAnalisisEventos}"
 															title="Reporte de eventos de capacitación">
-															<i class="ss_ge_expediente"></i>
+															<i class="fa fa-solid fa-book"></i>
 															<span class="m-label">Reporte de eventos de
 																capacitación</span>
 
@@ -673,7 +675,7 @@
 													<li><h:commandLink rendered="false"
 															action="/views/private/analisisDatos/reporteAmbientesVirtuales.xhtml"
 															title="Reporte de ambientes virtuales de aprendizaje">
-															<i class="ss_ge_gestesco"></i>
+															<i class="fa fa-solid fa-chalkboard-user"></i>
 															<span class="m-label">Reporte de ambientes
 																virtuales de aprendizaje</span>
 
@@ -687,7 +689,7 @@
 													<li><h:commandLink rendered="false"
 															action="/views/private/analisisDatos/reporteReservaciones.xhtml"
 															title="Áreas y recursos">
-															<i class="ss_la_configareas"></i>
+															<i class="fa fa-solid fa-door-open"></i>
 															<span class="m-label">Áreas y recursos</span>
 
 														</h:commandLink></li>
@@ -699,7 +701,7 @@
 													<li><h:commandLink rendered="false"
 															action="/views/private/analisisDatos/graficas.xhtml"
 															title="Programas">
-															<i class="ss_la_configareas"></i>
+															<i class="fa fa-solid fa-door-open"></i>
 															<span class="m-label">Programas</span>
 
 														</h:commandLink></li>
@@ -714,7 +716,7 @@
 								<sec:authorize
 									access="hasPermission(null, 'GES_APREN_VIST_ALUMNO')">
 									<li><a href="#" title="Mi perfil"> <i
-											class="ss_adm_usuarios"></i> <span class="m-label">
+											class=" fa fa-solid fa-user"></i> <span class="m-label">
 												#{sistema.obtenerTexto('gw.miperfil.etiqueta.menu.titulo')}
 										</span> <span class="fa arrow"></span>
 									</a>
@@ -727,7 +729,7 @@
 													<li><h:commandLink
 															action="#{menuGestorBean.navegaMisCursos}"
 															title="Mis Cursos">
-															<i class="ss_pp_progra"></i>
+															<i class="fa fa-solid fa-book-open"></i>
 															<span class="m-label">#{sistema.obtenerTexto('gw.miperfil.etiqueta.menu.miscursos')}</span>
 
 														</h:commandLink></li>

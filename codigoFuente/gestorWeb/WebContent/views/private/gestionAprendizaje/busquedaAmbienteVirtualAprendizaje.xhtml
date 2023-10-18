@@ -417,7 +417,7 @@
 								</f:facet>
 								<p:commandButton id="btnUnidadDidactica" process="@this"
 									rendered="#{ambientesVirtualesAvaBean.validaAccionUnidadDidacticaAva(ava)}"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis"
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye"
 									actionListener="#{ambientesVirtualesAvaBean.armaArbol(ava)}"
 									oncomplete="PF('modEstructuraUnidadDidactica').show()"
 									update="formBusquedaAva:dlgEstructuraUnidadDidactica">
@@ -475,7 +475,7 @@
 								<!-- Modificar seguimiento AVA -->
 								<p:commandButton id="btnModificarSeguimientoAva" process="@this"
 									rendered="#{ambientesVirtualesAvaBean.validaAccionModificarSeguimientoAva(ava)}"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod"
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-pen-to-square"
 									action="#{modificarSeguimientoAVABean.navegaModificarSeguimientoAVA}">
 									<f:setPropertyActionListener value="#{ava}"
 										target="#{modificarSeguimientoAVABean.ambienteVirtualAprendizajeDTO}" />
@@ -507,7 +507,7 @@
 
 								<!-- Ver FOA -->
 								<p:commandButton id="verFoa"
-									styleClass="btn btn-default btn-icon icono_sisi ss_gn_vis"
+									styleClass="btn btn-default btn-icon icono_sisi fa fa-solid fa-eye"
 									rendered="#{ambientesVirtualesAvaBean.estatusSeleccionado.id eq 2}"
 									oncomplete="PF('modalElegirUnidad').show()" process="@this"
 									update="@form:pnlUnidadesReporte" ajax="true"

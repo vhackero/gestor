@@ -270,7 +270,7 @@
 
 						<p:commandButton ajax="true" update="@form" id="ver"
 							action="#{planBean.navegaEstructuraPlan}"
-							styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis">
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye">
 							<f:setPropertyActionListener value="#{plan}"
 								target="#{planBean.planSelecBusq}" />
 						</p:commandButton>
@@ -278,7 +278,7 @@
 
 						<p:commandButton ajax="true" update="@form" id="editar"
 							action="#{planBean.navegaEditarPlan}"
-							styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-pen-to-square">
 							<f:setPropertyActionListener value="#{plan}"
 								target="#{planBean.planSelecBusq}" />
 						</p:commandButton>
@@ -286,7 +286,7 @@
 
 						<p:commandButton ajax="true" update="@form" id="clonar"
 							action="#{planBean.clonarPlan}"
-							styleClass="btn-icon btn btn-default icono_sisi ss_gn_clonar">
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-copy">
 							<f:setPropertyActionListener value="#{plan}"
 								target="#{planBean.planSelecBusq}" />
 						</p:commandButton>

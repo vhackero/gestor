@@ -387,7 +387,7 @@
 								<!-- Asistencia -->
 								<p:commandButton id="btnAsistencia"
 									rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id) and not(evento.catModalidadPlanPrograma.id eq 1)}"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_asisten"
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-calendar-day"
 									process="@this" ajax="true"
 									action="#{eventoCapacitacionBean.navegaRegistrarAsistenciasEventoCap()}">
 									<f:setPropertyActionListener value="#{evento.idEvento}"
@@ -422,7 +422,7 @@
 									rendered="#{evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.BORRADOR.id}"
 									action="#{capturaEventoCapacitacion.cargarEventoCapacitacion()}"
 									process="@this" ajax="false" immediate="true"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-pen-to-square">
 									<f:setPropertyActionListener value="#{evento}"
 										target="#{capturaEventoCapacitacion.evento}" />
 								</p:commandButton>
@@ -441,7 +441,7 @@
 								<p:commandButton id="btnBloq"
 									action="#{capturaEventoCapacitacion.bloquearEvento()}"
 									rendered="#{evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.BORRADOR.id}"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_bloq">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-ban">
 									<f:setPropertyActionListener value="#{evento}"
 										target="#{capturaEventoCapacitacion.evento}" />
 								</p:commandButton>
@@ -477,7 +477,7 @@
 									rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.CONCLUIDOS.id) or
 																	 	(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.CALENDARIZADO.id) or
 																	 	(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id)																	 	}"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_vis"
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye"
 									update="@form:reporte" ajax="true"
 									action="#{eventoCapacitacionBean.verReporte}"
 									oncomplete="PF('modalReporte').show()" process="@this">

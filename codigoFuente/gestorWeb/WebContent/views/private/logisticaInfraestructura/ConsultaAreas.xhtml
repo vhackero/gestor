@@ -200,7 +200,7 @@
 								styleClass="text-center">
 								<p:commandButton immediate="true" id="configurar"
 									action="#{areasBean.navegaConfiguracionArea}"
-									styleClass="btn btn-default btn-icon icono_sisi ss_gn_mod"
+									styleClass="btn btn-default btn-icon icono_sisi fa fa-solid fa-pen-to-square"
 									update="tblAreas" ajax="true">
 									<f:setPropertyActionListener value="#{area}"
 										target="#{areasBean.areaSeleccionada}" />
@@ -209,7 +209,7 @@
 									value="#{sistema.obtenerTexto('gw.logisticainfra.tooltip.configurar')}" />
 								<p:commandButton immediate="true" id="ver"
 									action="#{areasBean.navegaVisualizacionArea}"
-									styleClass="btn btn-default btn-icon icono_sisi ss_gn_vis"
+									styleClass="btn btn-default btn-icon icono_sisi fa fa-solid fa-eye"
 									update="tblAreas" ajax="true">
 									<f:setPropertyActionListener value="#{area}"
 										target="#{areasBean.areaSeleccionada}" />

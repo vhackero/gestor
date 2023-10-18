@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
+<meta charset="UTF-8">
 <!DOCTYPE html>
 <ui:composition template="/templates/layout.xhtml"
 	xmlns="http://www.w3.org/1999/xhtml"
@@ -79,7 +80,7 @@
 						styleClass="text-center">
 						<p:commandButton id="elimina"
 							oncomplete="PF('wModalEliminar').show();"
-							styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
+							styleClass="btn btn-icon btn-default icono_sisi fa fa-solid fa-trash"
 							ajax="true" process="@this">
 							<f:setPropertyActionListener value="#{recurso}"
 								target="#{recursosBean.recursoElim}" />
@@ -94,7 +95,7 @@
 				styleClass="medidaModal">
 				<div class="row">
 					<div class="col-md-12">
-						<p:outputLabel value="¿Está seguro que desea eliminar el recurso?" />
+						<p:outputLabel value="Â¿EstÃ¡ seguro que desea eliminar el recurso?" />
 					</div>
 				</div>
 				<f:facet name="footer">

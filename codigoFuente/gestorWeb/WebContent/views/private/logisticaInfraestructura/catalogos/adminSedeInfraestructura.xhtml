@@ -207,7 +207,7 @@
 
 						<p:commandButton id="editSede" ajax="true" process="@this"
 							update="frmEditar:pnlEditar" action="#{sedeInfraBean.verSede}"
-							styleClass="btn-icon btn btn-default icono_sisi ss_gn_mod">
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-pen-to-square">
 							<f:setPropertyActionListener value="#{sede}"
 								target="#{sedeInfraBean.sedeEditar}" />
 						</p:commandButton>
@@ -218,7 +218,7 @@
 						<p:commandButton id="areasSedeAsig" immediate="true"
 							action="#{sedeInfraBean.consultarAreas}"
 							oncomplete="PF('mAreas').show();"
-							styleClass="btn-icon btn btn-default icono_sisi ss_adm_config"
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-screwdriver-wrench"
 							update="@form" ajax="true">
 							<f:setPropertyActionListener value="#{sede}"
 								target="#{sedeInfraBean.sedeSeleccionada}" />
@@ -230,7 +230,7 @@
 						<p:commandButton id="delAreasSede" immediate="true"
 							action="#{sedeInfraBean.consultarAreas}"
 							oncomplete="PF('mAreasElim').show();"
-							styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar"
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-trash"
 							update="@form" ajax="true">
 							<f:setPropertyActionListener value="#{sede}"
 								target="#{sedeInfraBean.sedeSeleccionada}" />

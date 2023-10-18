@@ -194,7 +194,7 @@
 									<p:commandButton id="editarmsg"
 										action="#{plantillasMensajesBean.cargarMensaje()}"
 										process="@this" immediate="true" ajax="false"
-										styleClass="btn btn-default btn-icon icono_sisi ss_gn_mod">
+										styleClass="btn btn-default btn-icon icono_sisi fa fa-solid fa-pen-to-square">
 										<f:setPropertyActionListener value="#{mensaje}"
 											target="#{plantillasMensajesBean.mensajeModificar}" />
 									</p:commandButton>
@@ -259,7 +259,7 @@
 										action="#{plantillasMensajesBean.cargarVariable()}"
 										process="@this" ajax="true" update="frmPlntNtf:contenido"
 										oncomplete="PF('amodal').show()"
-										styleClass="btn btn-default btn-icon icono_sisi ss_gn_mod">
+										styleClass="btn btn-default btn-icon icono_sisi fa-solid fa-pen-to-square">
 										<f:setPropertyActionListener value="#{variable}"
 											target="#{plantillasMensajesBean.variableModificar}" />
 									</p:commandButton>
