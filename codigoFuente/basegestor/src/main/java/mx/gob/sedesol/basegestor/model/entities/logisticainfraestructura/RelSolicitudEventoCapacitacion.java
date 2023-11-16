@@ -38,7 +38,7 @@ public class RelSolicitudEventoCapacitacion implements Serializable {
 	private Integer idReservacionEC;
 	
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 
 	@Column(name="usuario_modifico")

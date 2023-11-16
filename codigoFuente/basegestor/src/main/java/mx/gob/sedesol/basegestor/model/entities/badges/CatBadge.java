@@ -58,10 +58,10 @@ public class CatBadge implements java.io.Serializable {
 	@Basic(optional = false)
 	@Column(name = "usuario_modifico")
 	private Long usuarioModifico;
-	@Column(name = "fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date fechaRegistro;
-	@Column(name = "fecha_actualizacion")
+	@Column(name="fecha_actualizacion", insertable = false, updatable=false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date fechaActualizacion;
 	@Basic(optional = false)

@@ -51,7 +51,7 @@ public class TblPersona implements Serializable {
 	private String curp;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "fecha_actualizacion")
+	@Column(name="fecha_actualizacion", insertable = false, updatable=false)
 	private Date fechaActualizacion;
 
 	@Temporal(TemporalType.DATE)
@@ -59,7 +59,7 @@ public class TblPersona implements Serializable {
 	private Date fechaNacimiento;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 
 	@Column(name = "genero")

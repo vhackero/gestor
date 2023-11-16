@@ -26,10 +26,10 @@ public class RelCatRelacionOtrosObjetosFoa implements Serializable {
 	@Column(name="id_cat_relacion_otros_objetos")
 	private Integer idCatRelacionOtrosObjetos;
 	
-	@Column(name="fecha_actualizacion")
+	@Column(name="fecha_actualizacion", insertable = false, updatable=false)
 	private Date fechaActualizacion;
 
-	@Column(name="fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 
 	@Column(name="usuario_modifico")

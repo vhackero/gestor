@@ -41,11 +41,11 @@ public class RelElementosMultimediaFoa implements Serializable
 	private Integer idElementoMultimediaFoa;
 	
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_actualizacion")
+	@Column(name="fecha_actualizacion", insertable = false, updatable=false)
 	private Date fechaActualziacion;
 
 	@Column(name="usuario_modifico")

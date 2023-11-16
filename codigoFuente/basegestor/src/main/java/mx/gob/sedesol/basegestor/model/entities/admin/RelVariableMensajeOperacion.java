@@ -90,7 +90,7 @@ public class RelVariableMensajeOperacion implements java.io.Serializable {
 	}
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "fecha_actualizacion", length = 19)
+	@Column(name="fecha_actualizacion", length = 19)
 	public Date getFechaActualizacion() {
 		return this.fechaActualizacion;
 	}

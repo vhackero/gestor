@@ -26,7 +26,7 @@ public class TblOpcionesPregunta implements Serializable {
 	private String descripcion;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_actualizacion")
+	@Column(name="fecha_actualizacion", insertable = false, updatable=false)
 	private Date fechaActualizacion;
 
 	@Temporal(TemporalType.TIMESTAMP)

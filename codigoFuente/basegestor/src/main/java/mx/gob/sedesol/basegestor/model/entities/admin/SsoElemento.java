@@ -43,10 +43,10 @@ public class SsoElemento implements Serializable {
 	@Column
 	private String tipoFuente;
 	
-	@Column(name="fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 	
-	@Column(name="fecha_actualizacion")
+	@Column(name="fecha_actualizacion", insertable = false, updatable=false)
 	private Date fechaActualizacion;
 	
 	@Column(name = "usuario_modifico")

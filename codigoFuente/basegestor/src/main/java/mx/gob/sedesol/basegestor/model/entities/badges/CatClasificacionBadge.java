@@ -45,10 +45,10 @@ public class CatClasificacionBadge implements Serializable {
     @Column(name = "usuario_modifico")
     private Long usuarioModifico;
     @Basic(optional = false)
-    @Column(name = "fecha_registro")
+    @Column(name="fecha_registro", insertable = false, updatable=false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaRegistro;
-    @Column(name = "fecha_actualizacion")
+    @Column(name="fecha_actualizacion", insertable = false, updatable=false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaActualizacion;
     @Column(name = "orden")

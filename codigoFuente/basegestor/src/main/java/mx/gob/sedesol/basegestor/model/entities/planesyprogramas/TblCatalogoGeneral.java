@@ -28,7 +28,7 @@ public class TblCatalogoGeneral implements Serializable {
 	private Integer activo;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 
 	@Column(name="usuario_modifico")

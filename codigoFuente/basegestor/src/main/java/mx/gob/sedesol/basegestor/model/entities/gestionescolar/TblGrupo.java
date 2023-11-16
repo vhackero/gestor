@@ -34,7 +34,7 @@ public class TblGrupo implements Serializable {
 	private Date fachaActualizacion;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 
 	private String nombre;
