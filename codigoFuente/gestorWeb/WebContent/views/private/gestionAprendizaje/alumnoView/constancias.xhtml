@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE html>
+<meta charset="UTF-8">
 <ui:composition template="/templates/layout.xhtml"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
@@ -7,15 +8,15 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:p="http://primefaces.org/ui">
 	<ui:define name="breadcrumb">
-		<li class="active">Expediente acad�mico</li>
+		<li class="active">Expediente académico</li>
 	</ui:define>
 	<ui:define name="content">
 		<f:event type="preRenderView" listener="#{constanciasBean.init}" />
 		<h:form>
-			<h1>Expediente acad�mico</h1>
+			<h1>Expediente académico</h1>
 			<hr />
 
-			<p:panel header="Expediente acad�mico del alumno">
+			<p:panel header="Expediente académico del alumno">
 				<div class="row">
 					<div class="col-md-12">
 						<p:dataTable var="evento" value="#{constanciasBean.eventos}"
@@ -45,7 +46,7 @@
 								filterStyle="display:none">
 								<h:outputText value="#{evento.modalidad}" />
 							</p:column>
-							<p:column headerText="Fecha de finalizaci�n"
+							<p:column headerText="Fecha de finalización"
 								sortBy="#{evento.fecha}" filterMatchMode="contains"
 								filterBy="#{evento.fecha}" filterStyle="display:none">
 								<h:outputText value="#{evento.fecha}">
@@ -78,7 +79,7 @@
 								filterStyle="display:none">
 								<h:outputText value="#{evento.porcentajeAsistencia}" />
 							</p:column>
-							<p:column headerText="Calificaci�n final"
+							<p:column headerText="Calificación final"
 								sortBy="#{evento.calificacionFinal}" filterMatchMode="contains"
 								filterBy="#{evento.calificacionFinal}"
 								filterStyle="display:none">
@@ -111,7 +112,7 @@
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-12 flex-derecha">
-							<p:outputLabel value="Expediente acad�mico:"
+							<p:outputLabel value="Expediente académico:"
 								styleClass="margenDerecho" />
 							<p:commandButton value="Generar"
 								disabled="#{empty constanciasBean.eventos}"
@@ -150,7 +151,7 @@
 
 		<p:dialog id="reporte" dynamic="true" responsive="true" modal="true"
 			closable="false" resizable="false" position="center"
-			styleClass="modalAbsoluto" header="Expediente acad�mico" width="900"
+			styleClass="modalAbsoluto" header="Expediente académico" width="900"
 			widgetVar="modalReporte">
 
 			<div class="form-group">
