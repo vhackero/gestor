@@ -21,7 +21,7 @@
 				<div class="row">
 					<div class="col-md-12">
 						<sec:authorize access="hasPermission(null, 'FUN_AGR' )">
-							<p:commandButton id="agregar" rendered="false"
+							<p:commandButton id="agregar" rendered="true"
 								value="#{sistema.obtenerTexto('gw.funcionalidades.boton.principal.agregar')}"
 								action="#{funcionalidadBean.nuevaFuncionalidad()}"
 								process="@this" ajax="true" update="frmTree:contenido"

@@ -117,7 +117,7 @@
 						<div class="row">
 							<div class="col-md-3">
 								<p:outputLabel styleClass="bloque"
-									rendered="false"
+									rendered="true"
 									value="Generar evaluación:" />
 								<p:commandButton process="@this" ajax="true" value="Generar evaluación"
 									action="#{calificacionGpoEventoCapBean.generaTablaCalifGrupo}"
@@ -126,7 +126,7 @@
 									rendered="#{not(calificacionGpoEventoCapBean.modLineaMixto)}" />
 
 								<p:spinner min="0" maxlength="1" max="9" 
-									rendered="false"
+									rendered="true"
 									value="#{calificacionGpoEventoCapBean.numEvaluaciones}"
 									disabled="#{calificacionGpoEventoCapBean.cerrarActa or calificacionGpoEventoCapBean.modalidadEnLinea}">
 									<p:ajax process="@this"
@@ -324,10 +324,10 @@
 									fileName="calificaciones_" />
 							</p:commandButton>
 
-							<p:outputLabel value="PDF" rendered="false"
+							<p:outputLabel value="PDF" rendered="true"
 								styleClass="margenIzquierdo pull-right agregaHeight" />
 							<p:commandButton id="btnDescargarPdf" ajax="false"
-								rendered="false"
+								rendered="true"
 								disabled="#{calificacionGpoEventoCapBean.tablaAuxCalif.isEmpty()}"
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc pull-right">
 								<p:dataExporter type="pdf" target="dtCalificaciones"
