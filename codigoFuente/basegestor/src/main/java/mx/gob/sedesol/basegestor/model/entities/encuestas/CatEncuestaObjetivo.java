@@ -71,7 +71,7 @@ public class CatEncuestaObjetivo implements Serializable {
 
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_actualizacion")
+	@Column(name="fecha_actualizacion", insertable = false, updatable=false)
 	public Date getFechaActualizacion() {
 		return this.fechaActualizacion;
 	}

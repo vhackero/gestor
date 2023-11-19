@@ -14,7 +14,7 @@
 						styleClass="requerido" />
 					<!-- Longitud de campo -->
 					<p:inputText id="txtCURP" styleClass="form-control"
-						validator="#{adminPersonaBean.validarFormatoCurp}" disabled="true"
+						validator="#{adminPersonaBean.validarFormatoCurp}" disabled="false"
 						value="#{adminPersonaBean.datos.persona.curp}" maxlength="18"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.curp')}">
 						<p:keyFilter regEx="/[A-Z]|[0-9]/" preventPaste="false" />
@@ -28,7 +28,7 @@
 						rendered="#{adminPersonaBean.datos.persona.tipoUsuario == 2}" />
 					<p:commandButton value="Verificar"
 						action="#{adminPersonaBean.validarCURP()}" process="@this"
-						ajax="true" immediate="true" disabled="true"
+						ajax="true" immediate="true" disabled="false"
 						update="txtNombrePersona, txtApellidoPaterno, txtApellidoMaterno"
 						styleClass="btn btn-primary removeMarginLeft"
 						rendered="#{adminPersonaBean.datos.persona.tipoUsuario == 2}" />
@@ -43,7 +43,7 @@
 						styleClass="requerido" />
 					<!-- Longitud de campo -->
 					<p:inputText id="txtNombrePersona" styleClass="form-control"
-						value="#{adminPersonaBean.datos.persona.nombre}" maxlength="45" disabled="true"
+						value="#{adminPersonaBean.datos.persona.nombre}" maxlength="45" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.nombre')}">
 						<p:keyFilter regEx="/[a-z ]/i" preventPaste="false" />
 					</p:inputText>
@@ -56,7 +56,7 @@
 					<!-- Longitud de campo -->
 					<p:inputText id="txtApellidoPaterno" styleClass="form-control"
 						value="#{adminPersonaBean.datos.persona.apellidoPaterno}"
-						maxlength="45" disabled="true"
+						maxlength="45" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.primerApellido')}">
 						<p:keyFilter regEx="/[a-z ]/i" preventPaste="false" />
 					</p:inputText>
@@ -68,7 +68,7 @@
 					<!-- Longitud de campo -->
 					<p:inputText id="txtApellidoMaterno" styleClass="form-control"
 						value="#{adminPersonaBean.datos.persona.apellidoMaterno}"
-						maxlength="45" disabled="true"
+						maxlength="45" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.segundoApellido')}">
 						<p:keyFilter regEx="/[a-z ]/i" preventPaste="false" />
 					</p:inputText>
@@ -83,7 +83,7 @@
 				<div class="col-md-4">
 					<p:outputLabel for="somGenero"
 						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.genero')}:" />
-					<p:selectOneMenu id="somGenero" disabled="true"
+					<p:selectOneMenu id="somGenero" disabled="false"
 						value="#{adminPersonaBean.datos.persona.genero}"
 						styleClass="col-xs-12" onchange="correccionSelectores()">
 
@@ -100,7 +100,7 @@
 						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.fechaNacimiento')}:"
 						styleClass="bloque requerido" />
 					<p:calendar id="cldFechaNacimiento" navigator="true"
-						styleClass="calendario" yearRange="c-100:c+0" disabled="true"
+						styleClass="calendario" yearRange="c-100:c+0" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 						value="#{adminPersonaBean.datos.persona.fechaNacimiento}"
 						showOn="button" locale="es" readonlyInput="true"
@@ -115,7 +115,7 @@
 					<p:selectOneMenu id="somNacionalidad" required="true"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 						value="#{adminPersonaBean.datos.persona.nacionalidad.idPais}"
-						styleClass="col-xs-12 medidaMinima" disabled="true"
+						styleClass="col-xs-12 medidaMinima" disabled="false"
 						onchange="correccionSelectores()">
 
 						<f:selectItem

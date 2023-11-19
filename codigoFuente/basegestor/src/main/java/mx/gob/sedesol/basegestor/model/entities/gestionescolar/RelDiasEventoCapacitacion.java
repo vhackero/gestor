@@ -20,7 +20,7 @@ public class RelDiasEventoCapacitacion implements Serializable {
 	private Integer id;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_actualizacion")
+	@Column(name="fecha_actualizacion", insertable = false, updatable=false)
 	private Date fechaActualizacion;
 
 	@Temporal(TemporalType.TIMESTAMP)
@@ -28,7 +28,7 @@ public class RelDiasEventoCapacitacion implements Serializable {
 	private Date fechaEventoCapacitacion;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 
 	@ManyToOne(fetch=FetchType.LAZY)

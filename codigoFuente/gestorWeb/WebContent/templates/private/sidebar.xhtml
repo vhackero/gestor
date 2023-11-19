@@ -359,7 +359,7 @@
 											<ui:fragment
 												rendered="#{menuGestorBean.rolTienePermiso('PLANES')}">
 												<sec:authorize access="hasPermission(null, 'PLANES' ) ">
-													<li><h:commandLink rendered="false"
+													<li><h:commandLink rendered="true"
 															action="#{menuGestorBean.navegaPlanProgMallaCurricular}"
 															title="#{sistema.obtenerTexto('gw.planesprogramas.plandeestudio.titulo')}">
 															<i class="ss_pp_planestudio"></i>
@@ -630,7 +630,7 @@
 
 											<ui:fragment>
 												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
-													<li><h:commandLink rendered="false"
+													<li><h:commandLink rendered="true"
 															action="/views/private/analisisDatos/reporteProgramas.xhtml"
 															title="Reporte de programas">
 															<i class="fa fa-solid fa-user"></i>
@@ -672,7 +672,7 @@
 											<ui:fragment
 												rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT')}">
 												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
-													<li><h:commandLink rendered="false"
+													<li><h:commandLink rendered="true"
 															action="/views/private/analisisDatos/reporteAmbientesVirtuales.xhtml"
 															title="Reporte de ambientes virtuales de aprendizaje">
 															<i class="fa fa-solid fa-chalkboard-user"></i>
@@ -686,7 +686,7 @@
 											<ui:fragment
 												rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT')}">
 												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
-													<li><h:commandLink rendered="false"
+													<li><h:commandLink rendered="true"
 															action="/views/private/analisisDatos/reporteReservaciones.xhtml"
 															title="Áreas y recursos">
 															<i class="fa fa-solid fa-door-open"></i>
@@ -698,7 +698,7 @@
 											<ui:fragment
 												rendered="#{menuGestorBean.rolTienePermiso('LOG_ACA_INF')}">
 												<sec:authorize access="hasPermission(null, 'LOG_ACA_INF')">
-													<li><h:commandLink rendered="false"
+													<li><h:commandLink rendered="true"
 															action="/views/private/analisisDatos/graficas.xhtml"
 															title="Programas">
 															<i class="fa fa-solid fa-door-open"></i>

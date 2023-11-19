@@ -14,7 +14,7 @@
 					<!-- Longitud de campo -->
 					<p:inputText id="txtNumEmpleado" styleClass="form-control"
 						value="#{adminPersonaBean.datos.datosLaborales.numeroEmpleado}"
-						maxlength="30" disabled="true"
+						maxlength="30" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.numEmpleado')}">
 						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
 					</p:inputText>
@@ -25,8 +25,8 @@
 						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.existeEmpleado')}:"
 						rendered="#{adminPersonaBean.datos.persona.tipoUsuario == 1}" />
 					<p:commandButton value="Verificar" 
-						styleClass="btn btn-primary quitaMargen" disabled="true"
-						rendered="false" />
+						styleClass="btn btn-primary quitaMargen" disabled="false"
+						rendered="true" />
 				</div>
 			</div>
 		</div>
@@ -39,7 +39,7 @@
 					<!-- Longitud de campo -->
 					<p:inputText id="txtNbInstitucion" styleClass="form-control"
 						value="#{adminPersonaBean.datos.datosLaborales.institucion}"
-						maxlength="45" disabled="true"
+						maxlength="45" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.nomInstitucion')}" />
 					<p:message for="txtNbInstitucion" />
 				</div>
@@ -49,7 +49,7 @@
 					<!-- Longitud de campo -->
 					<p:inputText id="txtUnidadAdscripcion" styleClass="form-control"
 						value="#{adminPersonaBean.datos.datosLaborales.unidadAdscripcion}"
-						maxlength="45" disabled="true"
+						maxlength="45" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.unidadAdscripcion')}" />
 					<p:message for="txtUnidadAdscripcion" />
 				</div>
@@ -59,7 +59,7 @@
 					<!-- Longitud de campo -->
 					<p:inputText id="txtAreaAdscripcion" styleClass="form-control"
 						value="#{adminPersonaBean.datos.datosLaborales.areaAdscripcion}"
-						maxlength="45" disabled="true"
+						maxlength="45" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.areaAdscripcion')}" />
 					<p:message for="txtAreaAdscripcion" />
 				</div>
@@ -74,14 +74,14 @@
 					<!-- Longitud de campo -->
 					<p:inputText id="txtPuesto" styleClass="form-control"
 						value="#{adminPersonaBean.datos.datosLaborales.puesto}"
-						maxlength="45" disabled="true"
+						maxlength="45" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.puesto')}" />
 					<p:message for="txtPuesto" />
 				</div>
 				<div class="col-md-4">
 					<p:outputLabel for="isProgramaSocial" styleClass="bloque"
 						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.programaSocial')}:" />
-					<p:inputSwitch id="isProgramaSocial" disabled="true"
+					<p:inputSwitch id="isProgramaSocial" disabled="false"
 						value="#{adminPersonaBean.datos.datosLaborales.programaSocial}"
 						onLabel="#{sistema.obtenerTexto('gw.usuarios.switch.si')}"
 						offLabel="#{sistema.obtenerTexto('gw.usuarios.switch.no')}"></p:inputSwitch>
@@ -91,7 +91,7 @@
 					<p:outputLabel for="somSedeLaboral"
 						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.sedeLaboral')}:"
 						styleClass="requerido" />
-					<p:selectOneMenu id="somSedeLaboral" disabled="true"
+					<p:selectOneMenu id="somSedeLaboral" disabled="false"
 						value="#{adminPersonaBean.datos.datosLaborales.sede.idEntidadFederativa}"
 						validator="#{adminPersonaBean.validarSedeLaboral}"
 						valueChangeListener="#{adminPersonaBean.onChangeSede}"
@@ -120,7 +120,7 @@
 						value="#{adminPersonaBean.datos.datosLaborales.municipio.idMunicipio}"
 						validator="#{adminPersonaBean.validarMunicipioLaboral}"
 						valueChangeListener="#{adminPersonaBean.onChangeMunicipio}"
-						disabled="true"
+						disabled="false"
 						styleClass="col-xs-12" onchange="correccionSelectores()">
 						<f:selectItem itemValue="#{0}"
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
@@ -133,7 +133,7 @@
 				<div class="col-md-4">
 					<p:outputLabel for="somOrdenGobierno"
 						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.ordenGobierno')}:" />
-					<p:selectOneMenu id="somOrdenGobierno" disabled="true"
+					<p:selectOneMenu id="somOrdenGobierno" disabled="false"
 						value="#{adminPersonaBean.datos.datosLaborales.idOrdenGobierno}"
 						styleClass="col-xs-12" onchange="correccionSelectores()">
 						<f:selectItem
@@ -150,7 +150,7 @@
 					<!-- Longitud de campo -->
 					<p:inputText id="txtTipoContratacion" styleClass="form-control"
 						value="#{adminPersonaBean.datos.datosLaborales.tipoContratacion}"
-						maxlength="45" disabled="true"
+						maxlength="45" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.tipoContrato')}" />
 					<p:message for="txtTipoContratacion" />
 				</div>
@@ -167,7 +167,7 @@
 					<p:calendar id="calFechaRegistro" styleClass="calendario"
 						pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 						yearRange="c-100:c+100" locale="es" navigator="true"
-						showOn="button" readonlyInput="true" disabled="true"
+						showOn="button" readonlyInput="true" disabled="false"
 						maxdate="#{adminPersonaBean.fechaActual}"
 						placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 						value="#{adminPersonaBean.datos.datosLaborales.fechaIngreso}" />
@@ -180,7 +180,7 @@
 					<!-- Longitud de campo -->
 					<p:inputText id="txtTelefono" styleClass="form-control"
 						value="#{adminPersonaBean.datos.telefonoFijo.telefono}"
-						maxlength="11" disabled="true"
+						maxlength="11" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.telefono')}">
 						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
 					</p:inputText>
@@ -192,7 +192,7 @@
 					<!-- Longitud de campo -->
 					<p:inputText id="txtExtension" styleClass="form-control"
 						value="#{adminPersonaBean.datos.telefonoFijo.extension}"
-						maxlength="5" disabled="true"
+						maxlength="5" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.extension')}">
 						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
 					</p:inputText>
@@ -202,7 +202,7 @@
 					<p:outputLabel for="txtCelular"
 						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.celular')}:" />
 					<!-- Longitud de campo -->
-					<p:inputText id="txtCelular" styleClass="form-control" disabled="true"
+					<p:inputText id="txtCelular" styleClass="form-control" disabled="false"
 						value="#{adminPersonaBean.datos.celular.telefono}" maxlength="10"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.celular')}">
 						<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
@@ -221,7 +221,7 @@
 					<!-- Longitud de campo -->
 					<p:inputText id="txtCorreoElectronico" styleClass="form-control"
 						type="email" validator="#{adminPersonaBean.validarCorreo}"
-						maxlength="45" disabled="true"
+						maxlength="45" disabled="false"
 						value="#{adminPersonaBean.datos.personaCorreo.correoElectronico}"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.correo')}" />
 					<p:message for="txtCorreoElectronico" />

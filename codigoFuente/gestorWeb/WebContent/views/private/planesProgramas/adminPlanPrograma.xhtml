@@ -59,11 +59,11 @@
 						<p:menuitem id="delete_#{arbolPlan.data.id}" value="#{sistema.obtenerTexto('gw.planesprogramas.btn.eliminar')}"
 							action="#{planProgramaBean.eliminaObjCurricular}" update="@form"
 							ajax="true" />
-						<p:menuitem rendered="false" id="show_#{arbolPlan.data.id}"
+						<p:menuitem rendered="true" id="show_#{arbolPlan.data.id}"
 							value="#{sistema.obtenerTexto('gw.planesprogramas.menu.verprogramas')}"
 							action="#{planProgramaBean.muestraProgramasDelNodo}"
 							update="@form" ajax="true" />
-						<p:menuitem rendered="false" id="temario_#{arbolPlan.data.id}"
+						<p:menuitem rendered="true" id="temario_#{arbolPlan.data.id}"
 							value="#{sistema.obtenerTexto('gw.planesprogramas.menu.agregartemas')}"
 							action="#{planProgramaBean.generaEstructuraTematicaProg}"
 							update="@form" ajax="true" />

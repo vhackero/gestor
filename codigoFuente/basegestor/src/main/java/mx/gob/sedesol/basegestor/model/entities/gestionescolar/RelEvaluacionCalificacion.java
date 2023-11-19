@@ -23,7 +23,7 @@ public class RelEvaluacionCalificacion implements Serializable {
 	private Double calificacion;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 
 	@Column(name="usuario_modifico")

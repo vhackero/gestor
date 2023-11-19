@@ -17,7 +17,7 @@ public class RelEjeCompetencia implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 
 	@Id

@@ -625,13 +625,13 @@
 								<p:tooltip for="ver1" value="Ver" position="top" />
 
 								<p:commandButton id="dwnldPdfReservEC" ajax="false"
-									update="@form" rendered="false"
+									update="@form" rendered="true"
 									styleClass="btn-icon btn btn-default icono_sisi ss_gn_desc"
 									actionListener="#{reservacionAreaBean.descargarPDFReservacionEC(reservCap)}">
 									<p:fileDownload value="#{reservacionAreaBean.pdfReservacion}" />
 								</p:commandButton>
 								<p:tooltip for="dwnldPdfReservEC" value="Descargar"
-									rendered="false" position="top" />
+									rendered="true" position="top" />
 
 								<p:commandButton id="btnvalidar"
 									styleClass="btn btn-icon btn-default icono_sisi ss_gn_activar colorverde"
@@ -720,7 +720,7 @@
 							<p:tooltip for="ver5" value="Ver" position="top" />
 
 							<p:commandButton id="dwnldPdfReservEG" ajax="false"
-								update="@form" immediate="true" rendered="false"
+								update="@form" immediate="true" rendered="true"
 								styleClass="btn-icon btn btn-default icono_sisi ss_gn_desc"
 								actionListener="#{reservacionAreaBean.descargarPDFReservacionEG(reservGen)}">
 								<p:fileDownload value="#{reservacionAreaBean.pdfReservacion}" />

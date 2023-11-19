@@ -33,11 +33,11 @@ public class DetEstUnidadDidactica implements Serializable {
 	private String nombreUnidad;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_actualizacion")
+	@Column(name="fecha_actualizacion", insertable = false, updatable=false)
 	private Date fechaActualizacion;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 
 	@Column(name="fuentes_informacion", columnDefinition="TEXT")

@@ -80,9 +80,9 @@
 					<div class="form-group">
 						<div class="row">
 							<div class="col-md-6 col-xs-12">
-								<p:outputLabel rendered="false" styleClass="bloque"
+								<p:outputLabel rendered="true" styleClass="bloque"
 									value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.estatus')}:" />
-								<p:selectOneMenu rendered="false"
+								<p:selectOneMenu rendered="true"
 									value="#{programaCapacitacionBean.programa.catStatusPrograma}"
 									converter="catalogoComunConverter" styleClass="col-xs-12">
 									<p:ajax event="change" process="@this" />

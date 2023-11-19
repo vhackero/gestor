@@ -42,7 +42,7 @@ public class TblPlantilla implements Serializable {
 	private Date fechaCreacion;
 	
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_actualizacion")
+	@Column(name="fecha_actualizacion", insertable = false, updatable=false)
 	private Date fechaActualizacion;
 
 

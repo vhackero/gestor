@@ -49,7 +49,7 @@ public class TblPersonaReporteUsuario implements Serializable {
 	private Date fechaNacimiento;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 
 	@Column(name = "genero")

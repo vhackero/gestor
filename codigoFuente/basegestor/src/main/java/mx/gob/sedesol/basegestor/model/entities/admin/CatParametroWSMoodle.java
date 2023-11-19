@@ -161,7 +161,7 @@ public class CatParametroWSMoodle implements java.io.Serializable {
 	 * @return the fechaActualizacion
 	 */
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "fecha_actualizacion", nullable = false, length = 19)
+	@Column(name="fecha_actualizacion", nullable = false, length = 19)
 	public Date getFechaActualizacion() {
 		return fechaActualizacion;
 	}

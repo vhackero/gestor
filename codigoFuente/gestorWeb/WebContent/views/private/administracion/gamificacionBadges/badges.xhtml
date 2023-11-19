@@ -17,12 +17,12 @@
 			<div class="row">
 				<div class="col-md-12">
 					<p:commandButton action="#{badgetBean.nuevoBadget()}" ajax="true"
-						process="@this" rendered="false"
+						process="@this" rendered="true"
 						value="#{sistema.obtenerTexto('gw.badget.boton.agregar')}"
 						styleClass="pull-right btn btn-primary"
 						oncomplete="PF('mBadget').show();" update="frBadgets:contenido">
 					</p:commandButton>
-					<p:outputLabel rendered="false"
+					<p:outputLabel rendered="true"
 						value="#{sistema.obtenerTexto('gw.badge.texto.nuevo.badge')}:"
 						styleClass="pull-right agregaHeight" />
 				</div>

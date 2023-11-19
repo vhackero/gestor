@@ -41,7 +41,7 @@ public class TblEventoGeneral implements Serializable {
 	private Integer eventoPrivado;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 
 	@Column(name="nombre")

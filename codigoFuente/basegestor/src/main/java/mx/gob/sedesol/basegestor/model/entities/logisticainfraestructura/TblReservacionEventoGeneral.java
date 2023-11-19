@@ -49,7 +49,7 @@ public class TblReservacionEventoGeneral implements Serializable {
 	private Date fechaModificacion;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 
 	@Column(name = "id_area_sede")

@@ -38,7 +38,7 @@ public class TblPlan implements Serializable {
 	private Integer idPlan;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_actualizacion")
+	@Column(name="fecha_actualizacion", insertable = false, updatable=false)
 	private Date fechaActualizacion;
 
 	@Temporal(TemporalType.TIMESTAMP)
@@ -46,7 +46,7 @@ public class TblPlan implements Serializable {
 	private Date fechaInicio;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 
 	@Temporal(TemporalType.TIMESTAMP)

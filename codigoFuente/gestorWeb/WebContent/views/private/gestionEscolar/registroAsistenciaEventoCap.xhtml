@@ -374,10 +374,10 @@
 								disabled="#{registroAsistenciaBean.cmdSalvarDisabled}"
 								styleClass="btn btn-icon btn-default icono_sisi ss_adm_desexcel">
 							</p:commandButton>
-							<p:outputLabel rendered="false"
+							<p:outputLabel rendered="true"
 								value="#{sistema.obtenerTexto('gw.ge.texto.descargar')}"
 								styleClass="pull-right agregaHeight separaLabel" />
-							<p:commandButton ajax="false" rendered="false"
+							<p:commandButton ajax="false" rendered="true"
 								actionListener="#{registroAsistenciaBean.getReporte(1)}"
 								disabled="#{registroAsistenciaBean.cmdSalvarDisabled}"
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc pull-right ">

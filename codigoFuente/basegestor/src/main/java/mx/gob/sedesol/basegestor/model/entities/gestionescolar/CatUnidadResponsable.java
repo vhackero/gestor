@@ -29,11 +29,11 @@ public class CatUnidadResponsable implements Serializable {
 	private Boolean activo;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 	
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_actualizacion")
+	@Column(name="fecha_actualizacion", insertable = false, updatable=false)
 	private Date fechaActualizacion;
 
 	@Column(name="usuario_modifico")

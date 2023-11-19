@@ -21,15 +21,15 @@
 			<div class="row">
 				<div class="col-md-12">
 					<sec:authorize access="hasPermission(null,'PER_AGR')">
-						<p:commandButton id="btnCargaMasiva" rendered="false"
+						<p:commandButton id="btnCargaMasiva" rendered="true"
 							action="#{cargaMasivaUsuariosBean.inicioCargaUsuarios()}"
 							value="#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.cargaMasiva')}"
 							styleClass="pull-right btn btn-primary" />
 						<p:commandButton id="btnIndividual"
-							action="#{adminPersonaBean.agregarPersona()}"  rendered="false"
+							action="#{adminPersonaBean.agregarPersona()}"  rendered="true"
 							value="#{sistema.obtenerTexto('gw.adminPersona.boton.agregar')}"
 							ajax="true" styleClass="pull-right btn btn-primary" />
-						<p:outputLabel rendered="false"
+						<p:outputLabel rendered="true"
 							value="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.nuevoUsuario')}:"
 							styleClass="pull-right agregaHeight" />
 					</sec:authorize>
@@ -144,7 +144,7 @@
 								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.activo')}"
 								sortBy="#{persona.activo}" filterMatchMode="contains"
 								filterBy="#{persona.activo}" filterStyle="display:none">
-								<p:inputSwitch id="swchActivo" disabled="true"
+								<p:inputSwitch id="swchActivo" disabled="false"
 									valueChangeListener="#{adminPersonaBean.cambioEstatusPersona}"
 									value="#{persona.activo}" onLabel="Sí" offLabel="No">
 									<p:ajax update="@form" />

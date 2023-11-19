@@ -32,7 +32,7 @@ public class RelProgramaCompEspecifica implements Serializable {
 	private Long usuarioModifico;
 	
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_registro")
+	@Column(name="fecha_registro", insertable = false, updatable=false)
 	private Date fechaRegistro;
 	
 	@ManyToOne

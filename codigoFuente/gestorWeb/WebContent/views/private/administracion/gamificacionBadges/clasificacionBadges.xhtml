@@ -16,14 +16,14 @@
 			<hr />
 			<div class="row">
 				<div class="col-md-12">
-					<p:commandButton rendered="false"
+					<p:commandButton rendered="true"
 						value="#{sistema.obtenerTexto('gw.badget.boton.agregar')}"
 						oncomplete="PF('mClass').show();"
 						action="#{clasBadgeBean.nuevaClass()}" update="frmClass:contenido"
 						process="@this" ajax="true"
 						styleClass="pull-right btn btn-primary">
 					</p:commandButton>
-					<p:outputLabel rendered="false"
+					<p:outputLabel rendered="true"
 						value="#{sistema.obtenerTexto('gw.badge.texto.nueva.class')}:"
 						styleClass="pull-right agregaHeight" />
 				</div>
