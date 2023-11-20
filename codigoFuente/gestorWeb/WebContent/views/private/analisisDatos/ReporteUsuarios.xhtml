@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE html>
+<meta charset="UTF-8">
 <ui:composition template="/templates/layout.xhtml"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
@@ -9,7 +10,7 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>An�lisis de datos</li>
+		<li>Análisis de datos</li>
 		<li class="active">Reporte de usuarios</li>
 	</ui:define>
 	<ui:define name="content">
@@ -21,11 +22,11 @@
 			<f:validateBean disabled="true">
 				<div class="row">
 					<div class="col-md-12">
-						<p:panel header="B�squeda de datos del usuario">
+						<p:panel header="Búsqueda de datos del usuario">
 							<div class="form-group">
 								<div class="row">
 									<div class="col-md-3">
-										<p:outputLabel value="Clasificaci�n de usuario:"
+										<p:outputLabel value="Clasificación de usuario:"
 											for="selClasificacion" styleClass="bloque" />
 										<p:selectOneMenu id="selClasificacion" styleClass="col-xs-12"
 											value="#{reporteUsuariosBean.criterios.persona.tipoUsuario}">
@@ -87,7 +88,7 @@
 									</div>
 
 									<div class="col-md-3">
-										<p:outputLabel value="G�nero:" for="selGenero"
+										<p:outputLabel value="Género:" for="selGenero"
 											styleClass="bloque" />
 										<p:selectOneMenu id="selGenero" styleClass="col-xs-12"
 											value="#{reporteUsuariosBean.criterios.persona.genero}">
@@ -187,7 +188,7 @@
 			</f:validateBean>
 			<div class="row">
 				<div class="col-md-12">
-					<p:panel header="Resultado de la b�squeda">
+					<p:panel header="Resultado de la búsqueda">
 						<p:dataTable value="#{reporteUsuariosBean.tblDatosPersona}"
 							reflow="true"
 							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
@@ -202,7 +203,7 @@
 								<div class="row flexY">
 									<div class="col-md-8">
 										<p:outputLabel
-											value="Para agregar m�s datos en tu reporte, selecciona en el siguiente men� los necesarios." />
+											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
 									</div>
 									<div class="col-md-4">
 										<p:commandButton id="toggler" type="button"
@@ -232,7 +233,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[1]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Clasificaci�n" />
+									<h:outputText value="Clasificación" />
 								</f:facet>
 
 								<h:outputText value="Externo"
@@ -293,7 +294,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[7]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="G�nero" />
+									<h:outputText value="Género" />
 								</f:facet>
 
 								<h:outputText
@@ -306,7 +307,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[8]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Instituci�n" />
+									<h:outputText value="Institución" />
 								</f:facet>
 
 								<h:outputText value="#{datosPer.datosLaborales.institucion}" />
@@ -315,7 +316,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[9]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Unidad de adscripci�n" />
+									<h:outputText value="Unidad de adscripción" />
 								</f:facet>
 
 								<h:outputText
@@ -325,7 +326,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[10]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="�rea de adscripci�n" />
+									<h:outputText value="Área de adscripción" />
 								</f:facet>
 
 								<h:outputText value="#{datosPer.datosLaborales.areaAdscripcion}" />
@@ -398,7 +399,7 @@
 								fileName="analisisDatosUsuarios" pageOnly="false" />
 						</p:commandButton>
 
-						<p:outputLabel value="Informe predise�ado:"
+						<p:outputLabel value="Informe prediseñado:"
 							style="margin-bottom:0" styleClass="margenDerecho" />
 
 
@@ -425,7 +426,7 @@
 				id="modalInformeUsuarios" draggable="false" closable="false"
 				position="center" width="900" dynamic="true"
 				styleClass="modalAnalisisDatos modalAbsoluto"
-				header="#{reporteUsuariosBean.renderizarEstado ?'Usuarios por entidad federativa':'Informe predise�ado general de usuarios'}">
+				header="#{reporteUsuariosBean.renderizarEstado ?'Usuarios por entidad federativa':'Informe prediseñado general de usuarios'}">
 				<div class="row">
 					<div class="col-md-12" style="text-align: right">
 						<p:outputPanel layout="block"
@@ -576,7 +577,7 @@
 							<div id="nivelDeConocimiento" class="medidaGrafica"></div>
 						</div>
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="NIVEL DE ENSE�ANZA"
+							<p:outputLabel value="NIVEL DE ENSEÑANZA"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="nivelDeEnsenanza" class="medidaGrafica"></div>
 						</div>

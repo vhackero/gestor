@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE html>
+<meta charset="UTF-8">
 <ui:composition template="/templates/layout.xhtml"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
@@ -9,8 +10,8 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>An�lisis de datos</li>
-		<li class="active">�reas y recursos</li>
+		<li>Análisis de datos</li>
+		<li class="active">Áreas y recursos</li>
 	</ui:define>
 	<ui:define name="content">
 
@@ -18,7 +19,7 @@
 			<div class="row">
 				<div class="col-md-12">
 
-					<p:panel header="B�squeda de reservaciones de �reas">
+					<p:panel header="Búsqueda de reservaciones de áreas">
 						<div class="form-group">
 							<div class="row">
 								<div class="col-md-4">
@@ -38,7 +39,7 @@
 								</div>
 
 								<div class="col-md-4">
-									<p:outputLabel value="�rea:" for="selArea" styleClass="bloque" />
+									<p:outputLabel value="Área:" for="selArea" styleClass="bloque" />
 									<p:selectOneMenu id="selArea" styleClass="col-xs-12"
 										value="#{reporteReservacionesBean.criteriosBusq.idArea}">
 										<f:selectItem
@@ -69,7 +70,7 @@
 						<div class="form-group">
 							<div class="row">
 								<div class="col-md-4">
-									<p:outputLabel value="Estatus reservaci�n:" for="selEstatus"
+									<p:outputLabel value="Estatus reservación:" for="selEstatus"
 										styleClass="bloque" />
 									<p:selectOneMenu id="selEstatus" styleClass="col-xs-12"
 										value="#{reporteReservacionesBean.criteriosBusq.idEstatusReservacion}">
@@ -122,7 +123,7 @@
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<p:panel header="Resultado de la b�squeda">
+					<p:panel header="Resultado de la búsqueda">
 
 						<p:dataTable value="#{reporteReservacionesBean.tblReservaciones}"
 							tableStyleClass="table" id="tblReservaciones" var="reservacion"
@@ -138,7 +139,7 @@
 								<div class="row flexY">
 									<div class="col-md-8">
 										<p:outputLabel
-											value="Para agregar m�s datos en tu reporte, selecciona en el siguiente men� los necesarios." />
+											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
 									</div>
 									<div class="col-md-4">
 										<p:commandButton id="toggler" type="button"
@@ -155,7 +156,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[0]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="�rea" />
+									<p:outputLabel value="Área" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.areaSede.catArea.nombre}" />
@@ -202,7 +203,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[5]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Estatus reservaci�n" />
+									<p:outputLabel value="Estatus reservación" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.estatusReservacion.nombre}" />
@@ -220,7 +221,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[7]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Distribuci�n" />
+									<p:outputLabel value="Distribución" />
 								</f:facet>
 
 								<p:outputLabel
@@ -230,7 +231,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[8]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Servicio de cafeter�a" />
+									<p:outputLabel value="Servicio de cafetería" />
 								</f:facet>
 
 								<p:outputLabel
@@ -249,7 +250,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[10]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Hora de t�rmino" />
+									<p:outputLabel value="Hora de término" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.horaFinal()}" />
@@ -258,7 +259,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[11]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Ubicaci�n" />
+									<p:outputLabel value="Ubicación" />
 								</f:facet>
 
 								<p:outputLabel
@@ -292,7 +293,7 @@
 								name="analisis_datos/descargar.png"
 								styleClass="foto margenDerecho" />
 						</p:commandLink>
-						<p:outputLabel value="Informe predise�ado"
+						<p:outputLabel value="Informe prediseñado"
 							styleClass="margenDerecho" />
 						<p:commandButton value="Generar"
 							styleClass="margenDerecho btn btn-primary"
