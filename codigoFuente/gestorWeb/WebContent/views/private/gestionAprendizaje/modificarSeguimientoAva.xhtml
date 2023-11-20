@@ -298,7 +298,7 @@
 								<p:commandButton id="btnDownload" process="@this" ajax="false"
 									onclick="PrimeFaces.monitorDownload(start, stop);"
 									rendered="#{unidad.fichaDescriptivaObjetoAprendizaje.estatusDF}"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_desc"
+									styleClass="btn-icon btn btn-default fa fa-regular fa-circle-down"
 									actionListener="#{fichaObjetoAprendizajeBean.descargarXML(unidad)}">
 									<p:fileDownload
 										value="#{fichaObjetoAprendizajeBean.fileDownload}" />
@@ -426,7 +426,7 @@
 									styleClass="agregaHeight" />
 
 								<p:commandButton id="btnUrlAva"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_urlact "
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-earth-americas"
 									ajax="false"
 									onclick="window.open('#{modificarSeguimientoAVABean.navegarAUrlExterna()}');return false;"
 									disabled="false" target="_blank" />

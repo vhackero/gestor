@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE html>
+<meta charset="UTF-8">
 <ui:composition template="/templates/layout.xhtml"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
@@ -9,7 +10,7 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>Análisis de datos</li>
+		<li>AnÃ¡lisis de datos</li>
 		<li class="active">Reporte de ambientes virtuales de aprendizaje</li>
 	</ui:define>
 	<ui:define name="content">
@@ -21,7 +22,7 @@
 			<f:validateBean disabled="true">
 				<div class="row">
 					<div class="col-md-12">
-						<p:panel header="Búsqueda de datos en gestión del aprendizaje"
+						<p:panel header="BÃºsqueda de datos en gestiÃ³n del aprendizaje"
 							id="pnlBusqueda">
 							<div class="form-group">
 								<div class="row">
@@ -75,7 +76,7 @@
 							<div class="form-group">
 								<div class="row">
 									<div class="col-md-3">
-										<p:outputLabel value="Nivel de enseñanza:" styleClass="bloque" />
+										<p:outputLabel value="Nivel de enseÃ±anza:" styleClass="bloque" />
 										<p:selectOneMenu styleClass="col-xs-12:"
 											value="#{reporteAvaBean.filtros.fichaDescriptivaPrograma.catNivelEnsenanzaPrograma.id}">
 											<p:ajax event="change" process="@this" />
@@ -175,7 +176,7 @@
 
 			<div class="row">
 				<div class="col-md-12">
-					<p:panel header="Resultado de la búsqueda">
+					<p:panel header="Resultado de la bÃºsqueda">
 						<p:dataTable value="#{reporteAvaBean.eventosCapacitacion}"
 							reflow="true"
 							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
@@ -190,7 +191,7 @@
 								<div class="row flexY">
 									<div class="col-md-8">
 										<p:outputLabel
-											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+											value="Para agregar mÃ¡s datos en tu reporte, selecciona en el siguiente menÃº los necesarios." />
 									</div>
 									<div class="col-md-4">
 										<p:commandButton id="toggler" type="button"
@@ -232,7 +233,7 @@
 							<p:column visible="#{reporteAvaBean.visible[3]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Eje de capacitación" />
+									<h:outputText value="Eje de capacitaciÃ³n" />
 								</f:facet>
 
 								<h:outputText
@@ -293,7 +294,7 @@
 								fileName="analisisDatosEventos" pageOnly="false" />
 						</p:commandButton>
 
-						<p:outputLabel value="Informe prediseñado:"
+						<p:outputLabel value="Informe prediseÃ±ado:"
 							style="margin-bottom:0" styleClass="margenDerecho" />
 
 						<p:commandButton value="Generar"

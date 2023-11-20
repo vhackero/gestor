@@ -497,7 +497,7 @@
 									ajax="false" actionListener="#{ambientesVirtualesAvaBean.guardarBitacoraAva(ava)}"
 									onclick="window.open('#{ambientesVirtualesAvaBean.navegarAUrlExterna(ava)}');return false;"
 									rendered="#{ambientesVirtualesAvaBean.validaAccionUrlAva(ava)}"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_urlact"
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-earth-americas"
 									target="_blank">
 								</p:commandButton>
 								<p:tooltip for="btnUrlAva"
@@ -524,7 +524,7 @@
 									rendered="#{ambientesVirtualesAvaBean.validaAccionDesactivarAva(ava)}"
 									disabled="#{(ambientesVirtualesAvaBean.validaActasCerradas(ava.eventoCapacitacion.idEvento))}"
 									update="dtResultBusqAva"
-									styleClass="btn-icon btn btn-default icono_sisi ss_ga_urldesac">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye-slash">
 
 									<p:confirm header="Confirmación"
 										message="#{sistema.obtenerTexto('¿Desea desactivar el AVA ? Los participantes no tendrán acceso a el mismo. .')}" />
@@ -539,7 +539,7 @@
 									rendered="true"
 									actionListener="#{ambientesVirtualesAvaBean.archivarAva(ava)}"
 									update="dtResultBusqAva"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_archivar">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-up-right-from-square">
 									<p:confirm
 										header="#{sistema.obtenerTexto('gw.ga.label.archivarava')}"
 										message="#{sistema.obtenerTexto('gw.ga.label.archivaravamsj')}"
