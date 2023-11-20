@@ -38,7 +38,7 @@
 	<div class="row">
 		<div class="col-md-3">
 			<p:calendar id="fx_solicitud" locale="es" navigator="true"
-				styleClass="calendario"
+				styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 				pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 				placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 				value="#{programaCapacitacionBean.programa.fechaSolicitud}"
@@ -53,7 +53,7 @@
 		<div class="col-md-3 col-md-offset-1">
 			<p:calendar id="fx_prod"
 				pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
-				navigator="true" styleClass="calendario" readonlyInput="true"
+				navigator="true" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days" readonlyInput="true"
 				placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 				mindate="#{programaCapacitacionBean.programa.fechaSolicitud}"
 				maxdate="#{programaCapacitacionBean.programa.fechaVigFinal}"
@@ -65,7 +65,7 @@
 			<p:message for="fx_prod" />
 		</div>
 		<div class="col-md-3 col-md-offset-1">
-			<p:calendar id="fx_arranque" navigator="true" styleClass="calendario"
+			<p:calendar id="fx_arranque" navigator="true" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 				readonlyInput="true"
 				pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 				placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"

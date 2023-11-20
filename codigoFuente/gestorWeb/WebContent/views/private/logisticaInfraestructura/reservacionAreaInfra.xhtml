@@ -626,7 +626,7 @@
 
 								<p:commandButton id="dwnldPdfReservEC" ajax="false"
 									update="@form" rendered="true"
-									styleClass="btn-icon btn btn-default fa fa-regular fa-circle-down"
+									styleClass="btn-icon btn btn-default fa fa-regular fa-circle-down margin: auto; text-align: center;"
 									actionListener="#{reservacionAreaBean.descargarPDFReservacionEC(reservCap)}">
 									<p:fileDownload value="#{reservacionAreaBean.pdfReservacion}" />
 								</p:commandButton>
@@ -721,7 +721,7 @@
 
 							<p:commandButton id="dwnldPdfReservEG" ajax="false"
 								update="@form" immediate="true" rendered="true"
-								styleClass="btn-icon btn btn-default fa fa-regular fa-circle-down"
+								styleClass="btn-icon btn btn-default fa fa-regular fa-circle-down margin: auto; text-align: center;"
 								actionListener="#{reservacionAreaBean.descargarPDFReservacionEG(reservGen)}">
 								<p:fileDownload value="#{reservacionAreaBean.pdfReservacion}" />
 							</p:commandButton>

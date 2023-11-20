@@ -51,7 +51,7 @@
 											<h:outputText value="El mensaje contiene un archivo adjunto:"
 												rendered="#{mensaje.archivo != null and (mensaje.archivo.nombre != null and not mensaje.archivo.nombre.isEmpty())}" />
 											<p:commandButton ajax="false" id="btnDescargarAdjunto"
-												styleClass="btn-icon btn btn-default fa fa-regular fa-circle-down"
+												styleClass="btn-icon btn btn-default fa fa-regular fa-circle-down margin: auto; text-align: center;"
 												onclick="PrimeFaces.monitorDownload(start, stop);"
 												rendered="#{mensaje.archivo != null and (mensaje.archivo.nombre != null and not mensaje.archivo.nombre.isEmpty())}">
 												<f:setPropertyActionListener value="#{mensaje}"

@@ -165,7 +165,7 @@
 							<div class="col-md-6">
 								<p:outputLabel for="fechaInicio" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 									value="#{sistema.obtenerTexto('gw.actividades.modal.etiqueta.fecha.inicio')}:" />
-								<p:calendar id="fechaInicio" styleClass="bloque calendario"
+								<p:calendar id="fechaInicio" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 									showButtonPanel="false"
 									mindate="#{actividadesBean.obtenerFechaActual()}"
 									showOn="button" readonlyInput="true" pattern="dd/MM/yyyy HH:mm"
@@ -180,7 +180,7 @@
 							<div class="col-md-6">
 								<p:outputLabel for="ffinal" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 									value="#{sistema.obtenerTexto('gw.actividades.modal.etiqueta.fecha.fin')}:" />
-								<p:calendar id="ffinal" styleClass="bloque calendario"
+								<p:calendar id="ffinal" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 									locale="es" navigator="true" readonlyInput="true"
 									mindate="#{actividadesBean.cadenaFechaMinima}"
 									disabled="#{actividadesBean.actividad.fechaInicio eq null}"

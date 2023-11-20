@@ -147,7 +147,7 @@
 									value="#{sistema.obtenerTexto('gw.encuesta.texto.desde')}: "
 									styleClass="agregaHeight separaLabelEncuesta" />
 								<p:calendar id="fecha_inicio"
-									styleClass="calendario calendarioEncuesta"
+									styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 									yearRange="c-100:c+100" locale="es" navigator="true"
 									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -161,7 +161,7 @@
 									value="#{sistema.obtenerTexto('gw.encuesta.texto.hasta')}: "
 									styleClass="agregaHeight separaLabelEncuesta" />
 								<p:calendar id="fecha_fin"
-									styleClass="calendario calendarioEncuesta"
+									styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 									yearRange="c-100:c+100" locale="es"
 									mindate="#{encuestaBean.encuesta.fechaCreacion}"

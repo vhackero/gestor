@@ -298,7 +298,7 @@
 								<p:commandButton id="btnDownload" process="@this" ajax="false"
 									onclick="PrimeFaces.monitorDownload(start, stop);"
 									rendered="#{unidad.fichaDescriptivaObjetoAprendizaje.estatusDF}"
-									styleClass="btn-icon btn btn-default fa fa-regular fa-circle-down"
+									styleClass="btn-icon btn btn-default fa fa-regular fa-circle-down margin: auto; text-align: center;"
 									actionListener="#{fichaObjetoAprendizajeBean.descargarXML(unidad)}">
 									<p:fileDownload
 										value="#{fichaObjetoAprendizajeBean.fileDownload}" />

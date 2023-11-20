@@ -9,8 +9,8 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>Análisis de datos</li>
-		<li class="active">Áreas y recursos</li>
+		<li>Anï¿½lisis de datos</li>
+		<li class="active">ï¿½reas y recursos</li>
 	</ui:define>
 	<ui:define name="content">
 
@@ -18,7 +18,7 @@
 			<div class="row">
 				<div class="col-md-12">
 
-					<p:panel header="Búsqueda de reservaciones de áreas">
+					<p:panel header="Bï¿½squeda de reservaciones de ï¿½reas">
 						<div class="form-group">
 							<div class="row">
 								<div class="col-md-4">
@@ -38,7 +38,7 @@
 								</div>
 
 								<div class="col-md-4">
-									<p:outputLabel value="Área:" for="selArea" styleClass="bloque" />
+									<p:outputLabel value="ï¿½rea:" for="selArea" styleClass="bloque" />
 									<p:selectOneMenu id="selArea" styleClass="col-xs-12"
 										value="#{reporteReservacionesBean.criteriosBusq.idArea}">
 										<f:selectItem
@@ -69,7 +69,7 @@
 						<div class="form-group">
 							<div class="row">
 								<div class="col-md-4">
-									<p:outputLabel value="Estatus reservación:" for="selEstatus"
+									<p:outputLabel value="Estatus reservaciï¿½n:" for="selEstatus"
 										styleClass="bloque" />
 									<p:selectOneMenu id="selEstatus" styleClass="col-xs-12"
 										value="#{reporteReservacionesBean.criteriosBusq.idEstatusReservacion}">
@@ -86,7 +86,7 @@
 								<div class="col-md-4">
 									<p:outputLabel value="Fecha de registro inicial:"
 										for="selInicial" styleClass="bloque" />
-									<p:calendar id="selInicial" styleClass="calendario"
+									<p:calendar id="selInicial" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 										yearRange="c-100:c+100" locale="es" navigator="true"
 										placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -97,7 +97,7 @@
 								<div class="col-md-4">
 									<p:outputLabel value="Fecha de registro final:" for="selFinal"
 										styleClass="bloque" />
-									<p:calendar id="selFinal" styleClass="calendario"
+									<p:calendar id="selFinal" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 										yearRange="c-100:c+100" locale="es" navigator="true"
 										placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -122,7 +122,7 @@
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<p:panel header="Resultado de la búsqueda">
+					<p:panel header="Resultado de la bï¿½squeda">
 
 						<p:dataTable value="#{reporteReservacionesBean.tblReservaciones}"
 							tableStyleClass="table" id="tblReservaciones" var="reservacion"
@@ -138,7 +138,7 @@
 								<div class="row flexY">
 									<div class="col-md-8">
 										<p:outputLabel
-											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+											value="Para agregar mï¿½s datos en tu reporte, selecciona en el siguiente menï¿½ los necesarios." />
 									</div>
 									<div class="col-md-4">
 										<p:commandButton id="toggler" type="button"
@@ -155,7 +155,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[0]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Área" />
+									<p:outputLabel value="ï¿½rea" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.areaSede.catArea.nombre}" />
@@ -202,7 +202,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[5]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Estatus reservación" />
+									<p:outputLabel value="Estatus reservaciï¿½n" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.estatusReservacion.nombre}" />
@@ -220,7 +220,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[7]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Distribución" />
+									<p:outputLabel value="Distribuciï¿½n" />
 								</f:facet>
 
 								<p:outputLabel
@@ -230,7 +230,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[8]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Servicio de cafetería" />
+									<p:outputLabel value="Servicio de cafeterï¿½a" />
 								</f:facet>
 
 								<p:outputLabel
@@ -249,7 +249,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[10]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Hora de término" />
+									<p:outputLabel value="Hora de tï¿½rmino" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.horaFinal()}" />
@@ -258,7 +258,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[11]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Ubicación" />
+									<p:outputLabel value="Ubicaciï¿½n" />
 								</f:facet>
 
 								<p:outputLabel
@@ -292,7 +292,7 @@
 								name="analisis_datos/descargar.png"
 								styleClass="foto margenDerecho" />
 						</p:commandLink>
-						<p:outputLabel value="Informe prediseñado"
+						<p:outputLabel value="Informe prediseï¿½ado"
 							styleClass="margenDerecho" />
 						<p:commandButton value="Generar"
 							styleClass="margenDerecho btn btn-primary"

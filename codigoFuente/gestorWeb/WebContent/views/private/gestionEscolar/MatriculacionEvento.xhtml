@@ -280,7 +280,7 @@
 										<p:outputLabel for="fechaInicio" styleClass="bloque"
 											value="#{sistema.obtenerTexto('gw.matriculacion.etiqueta.fecha')}:" />
 
-										<p:calendar id="fechaInicio" styleClass="calendario"
+										<p:calendar id="fechaInicio" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 											value="#{matriculacionEventoBean.filtrosLote.fechaInicio}"
 											readonlyInput="true" navigator="true" locale="es"
 											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -393,7 +393,7 @@
 									disabled="#{matriculacionEventoBean.grupo.actaCerrada eq true or empty matriculacionEventoBean.grupo}"
 									action="#{matriculacionEventoBean.matricularIndividual()}"
 									ajax="true" update="@(.containerMtr form)"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-id-badge">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-id-badge margin: auto; text-align: center;">
 									<f:setPropertyActionListener value="#{datos}"
 										target="#{matriculacionEventoBean.persona}" />
 								</p:commandButton>

@@ -9,11 +9,11 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>Análisis de datos</li>
-		<li class="active">Reporte de gestión escolar</li>
+		<li>Anï¿½lisis de datos</li>
+		<li class="active">Reporte de gestiï¿½n escolar</li>
 	</ui:define>
 	<ui:define name="content">
-		<h1>Reporte de gestión escolar</h1>
+		<h1>Reporte de gestiï¿½n escolar</h1>
 		<hr />
 		<p:ajaxStatus onstart="PF('dialogLayout').show()"
 			onsuccess="PF('dialogLayout').hide()" />
@@ -21,7 +21,7 @@
 			<f:validateBean disabled="true">
 				<div class="row">
 					<div class="col-md-12">
-						<p:panel header="Búsqueda de eventos de capacitación"
+						<p:panel header="Bï¿½squeda de eventos de capacitaciï¿½n"
 							id="pnlBusqueda">
 							<div class="form-group">
 								<div class="row">
@@ -105,20 +105,20 @@
 							<div class="form-group">
 								<div class="row">
 									<div class="col-md-6">
-										<p:outputLabel value="Nombre del evento de capacitación: "
+										<p:outputLabel value="Nombre del evento de capacitaciï¿½n: "
 											styleClass="bloque" />
 										<p:inputText
 											value="#{reporteGestionEscolarBean.filtros.nombreEc}"
 											styleClass="form-control" />
 									</div>
 									<div class="col-md-3">
-										<p:outputLabel value="Clasificación de la información:"
+										<p:outputLabel value="Clasificaciï¿½n de la informaciï¿½n:"
 											styleClass="bloque" />
 										<p:selectOneMenu styleClass="col-xs-12"
 											value="#{reporteGestionEscolarBean.filtros.privado}">
 											<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
 											<f:selectItem itemLabel="Privado" itemValue="#{false}" />
-											<f:selectItem itemLabel="Público" itemValue="#{true}" />
+											<f:selectItem itemLabel="Pï¿½blico" itemValue="#{true}" />
 
 										</p:selectOneMenu>
 									</div>
@@ -177,7 +177,7 @@
 										<p:calendar id="fechaInicial" navigator="true"
 											disabled="#{reporteGestionEscolarBean.tipoDatoFechas == null}"
 											value="#{reporteGestionEscolarBean.filtros.fechaInicial}"
-											styleClass="calendario"
+											styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 											yearRange="c-100:c+100" locale="es"
 											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -191,7 +191,7 @@
 										<p:calendar navigator="true"
 											disabled="#{reporteGestionEscolarBean.tipoDatoFechas == null}"
 											value="#{reporteGestionEscolarBean.filtros.fechaFinal}"
-											styleClass="calendario" id="fechaFinal"
+											styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days" id="fechaFinal"
 											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 											yearRange="c-100:c+100" locale="es" readonlyInput="true"
 											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -224,7 +224,7 @@
 
 			<div class="row">
 				<div class="col-md-12">
-					<p:panel header="Resultado de la búsqueda">
+					<p:panel header="Resultado de la bï¿½squeda">
 
 
 
@@ -243,7 +243,7 @@
 								<div class="row flexY">
 									<div class="col-md-8">
 										<p:outputLabel
-											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+											value="Para agregar mï¿½s datos en tu reporte, selecciona en el siguiente menï¿½ los necesarios." />
 									</div>
 									<div class="col-md-4">
 										<p:commandButton id="toggler" type="button"
@@ -286,7 +286,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[3]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Eje de capacitación" />
+									<h:outputText value="Eje de capacitaciï¿½n" />
 								</f:facet>
 
 								<h:outputText
@@ -341,7 +341,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[9]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Número de participantes" />
+									<h:outputText value="Nï¿½mero de participantes" />
 								</f:facet>
 								<h:outputText
 									value="#{reporteGestionEscolarBean.obtenerCantidadAlumnosPorEvento(evento.idEvento)}" />
@@ -350,7 +350,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[10]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Ubicación geográfica" />
+									<h:outputText value="Ubicaciï¿½n geogrï¿½fica" />
 								</f:facet>
 								<h:outputText
 									value="#{reporteGestionEscolarBean.obtenerNombreEntidadPorId(evento.idEntidadFederativa)}" />
@@ -391,7 +391,7 @@
 								fileName="analisisDatosEventos" pageOnly="false" />
 						</p:commandButton>
 
-						<p:outputLabel value="Informe prediseñado:"
+						<p:outputLabel value="Informe prediseï¿½ado:"
 							style="margin-bottom:0" styleClass="margenDerecho" />
 
 						<p:commandButton value="Generar"
@@ -415,7 +415,7 @@
 				id="modalInformeEventos" draggable="false" closable="false"
 				position="center" width="900"
 				styleClass="modalAnalisisDatos modalAbsoluto"
-				header="#{reporteGestionEscolarBean.renderizarEstado ?'Eventos de capacitación por entidad federativa':'Informe prediseñado general de eventos de capacitación'}">
+				header="#{reporteGestionEscolarBean.renderizarEstado ?'Eventos de capacitaciï¿½n por entidad federativa':'Informe prediseï¿½ado general de eventos de capacitaciï¿½n'}">
 				<div class="row">
 					<div class="col-md-12 text-right">
 
@@ -485,7 +485,7 @@
 					<div class="row">
 						<div class="col-md-12 fondoGris">
 							<p:outputLabel
-								value="CANTIDAD DE EVENTOS POR EJE DE CAPACITACIÓN"
+								value="CANTIDAD DE EVENTOS POR EJE DE CAPACITACIï¿½N"
 								styleClass="bloque text-center tituloSuperior" />
 							<div id="ejeCapEventos"></div>
 						</div>
@@ -524,7 +524,7 @@
 						</div>
 						<!-- GRAFICA USUARIOS POR ESTATUS -->
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="CLASIFICACIÓN DE LA INFORMACIÓN"
+							<p:outputLabel value="CLASIFICACIï¿½N DE LA INFORMACIï¿½N"
 								styleClass="bloque text-center tituloPastel" />
 							<div id="privadosEventos" class="medidaGrafica"></div>
 						</div>

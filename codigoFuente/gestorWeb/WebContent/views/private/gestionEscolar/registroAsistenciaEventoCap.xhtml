@@ -177,7 +177,7 @@
 							<div id="divCalendar" class="col-md-3">
 								<p:outputLabel
 									value="#{sistema.obtenerTexto('gw.ge.texto.agregardia')}:" />
-								<p:calendar id="diaEvento" styleClass="calendario"
+								<p:calendar id="diaEvento" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 									disabled="#{registroAsistenciaBean.grupo.actaCerrada eq true or registroAsistenciaBean.grupo.idGrupo eq 0}"
 									showOn="button" readonlyInput="true" navigator="true"
 									value="#{registroAsistenciaBean.diaEvento}"
@@ -380,7 +380,7 @@
 							<p:commandButton ajax="false" rendered="true"
 								actionListener="#{registroAsistenciaBean.getReporte(1)}"
 								disabled="#{registroAsistenciaBean.cmdSalvarDisabled}"
-								styleClass="btn btn-icon btn-default fa fa-regular fa-circle-down">
+								styleClass="btn btn-icon btn-default fa fa-regular fa-circle-down margin: auto; text-align: center;">
 							</p:commandButton>
 						</div>
 					</div>
