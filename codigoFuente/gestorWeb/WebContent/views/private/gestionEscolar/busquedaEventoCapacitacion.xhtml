@@ -170,7 +170,7 @@
 							<div class="col-md-3">
 								<p:outputLabel styleClass="bloque"
 									value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechaInicial')}:" />
-								<p:calendar id="fc_fechaInicial" styleClass="calendario"
+								<p:calendar id="fc_fechaInicial" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 									yearRange="c-100:c+100" locale="es"
 									disabled="#{empty eventoCapacitacionBean.tipoDatoFechas}"
@@ -188,7 +188,7 @@
 							<div class="col-md-3">
 								<p:outputLabel styleClass="bloque"
 									value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechafinal')}:" />
-								<p:calendar id="fc_fechaFinal" styleClass="calendario"
+								<p:calendar id="fc_fechaFinal" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 									mindate="#{eventoCapacitacionBean.filtros.fechaInicial}"
 									disabled="#{empty eventoCapacitacionBean.filtros.fechaInicial}"
 									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
@@ -377,7 +377,7 @@
 												(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id)}"
 									action="#{matriculacionEventoBean.cargarGrupos()}"
 									process="@this" ajax="true"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-id-badge">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-id-badge margin: auto; text-align: center;">
 									<f:setPropertyActionListener value="#{evento}"
 										target="#{matriculacionEventoBean.evento}" />
 								</p:commandButton>
@@ -401,7 +401,7 @@
 									action="#{calificacionGpoEventoCapBean.inicializaDatosCalif}"
 									process="@this" ajax="true"
 									rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id)}"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-star">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-star margin: auto; text-align: center;">
 									<f:setPropertyActionListener value="#{evento}"
 										target="#{calificacionGpoEventoCapBean.evento}" />
 								</p:commandButton>
@@ -493,7 +493,7 @@
 									rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.CONCLUIDOS.id) or
 																		(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.CALENDARIZADO.id) or
 																		(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id)}"
-									styleClass="btn-icon btn btn-default fa fa-regular fa-circle-down"
+									styleClass="btn-icon btn btn-default fa fa-regular fa-circle-down margin: auto; text-align: center;"
 									actionListener="#{eventoCapacitacionBean.descargarReporteEvento(evento)}"
 									immediate="true" ajax="false">
 									<p:fileDownload value="#{eventoCapacitacionBean.reportePDF}" />

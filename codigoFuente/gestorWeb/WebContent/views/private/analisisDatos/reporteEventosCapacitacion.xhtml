@@ -9,15 +9,15 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>Analisis de datos - Reporte de eventos de capacitación</li>
-		<li class="active">Reporte de eventos de capacitación</li>
+		<li>Analisis de datos - Reporte de eventos de capacitaciï¿½n</li>
+		<li class="active">Reporte de eventos de capacitaciï¿½n</li>
 	</ui:define>
 	<ui:define name="content">
 		<h:form id="bevtCapFrm">
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
 			<f:validateBean disabled="true">
-				<p:panel header="Búsqueda de datos del evento del capacitación"
+				<p:panel header="Bï¿½squeda de datos del evento del capacitaciï¿½n"
 					showCollapseLink="false" collapsible="false">
 
 					<div class="form-group">
@@ -44,7 +44,7 @@
 							</div>
 
 							<div class="col-md-3">
-								<p:outputLabel value="Eje de capacitación:" for="ejeCapSel"
+								<p:outputLabel value="Eje de capacitaciï¿½n:" for="ejeCapSel"
 									styleClass="bloque" />
 								<p:selectOneMenu id="ejeCapSel" required="true"
 									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
@@ -126,7 +126,7 @@
 								<p:outputLabel value="Inicial:" styleClass="bloque" />
 								<p:calendar id="fc_fechaInicial" navigator="true"
 									value="#{reporteEventosCapacitacionBean.filtro.fechaInicial}"
-									styleClass="calendario"
+									styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 									yearRange="c-100:c+100" locale="es"
 									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -139,7 +139,7 @@
 								<p:outputLabel value="Final:" styleClass="bloque" />
 								<p:calendar navigator="true"
 									value="#{reporteEventosCapacitacionBean.filtro.fechaFinal}"
-									styleClass="calendario" id="fc_fechaFinal"
+									styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days" id="fc_fechaFinal"
 									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 									yearRange="c-100:c+100" locale="es" readonlyInput="true"
 									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -172,7 +172,7 @@
 				var="GENERO" allSuffix="ALL_ENUM_VALUES" />
 
 
-			<p:panel header="Resultado de la búsqueda">
+			<p:panel header="Resultado de la bï¿½squeda">
 				<p:dataTable
 					value="#{reporteEventosCapacitacionBean.eventoCapacitacionDTOList}"
 					id="tblEventosCapacitacion" var="eventoCapacitacion"
@@ -184,7 +184,7 @@
 
 					<f:facet name="header">
 						<p:outputLabel
-							value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+							value="Para agregar mï¿½s datos en tu reporte, selecciona en el siguiente menï¿½ los necesarios." />
 
 						<p:commandButton id="toggler" type="button"
 							value="Columna de datos" styleClass="pull-right btn btn-primary"
@@ -239,7 +239,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[4]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Eje capacitación" />
+							<p:outputLabel value="Eje capacitaciï¿½n" />
 						</f:facet>
 
 						<p:outputLabel
@@ -290,7 +290,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[9]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Nivel de enseñanza" />
+							<p:outputLabel value="Nivel de enseï¿½anza" />
 						</f:facet>
 
 						<p:outputLabel
@@ -392,7 +392,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[18]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Tipo de evento de capacitación" />
+							<p:outputLabel value="Tipo de evento de capacitaciï¿½n" />
 						</f:facet>
 						<p:outputLabel
 							value="#{eventoCapacitacion.fichaDescriptivaPrograma.catTipoEventoEc.nombre}" />
@@ -415,7 +415,7 @@
 				</div>
 				<div class="col-md-2" />
 				<div class="col-md-5">
-					<p:selectOneMenu id="informePrediseñado" required="false"
+					<p:selectOneMenu id="informePrediseï¿½ado" required="false"
 						value="#{reporteEventosCapacitacionBean.informePredisenadoSeleccionado}"
 						autoWidth="false" styleClass="col-xs-12">
 						<f:selectItem itemLabel="Seleccione" itemValue="#{null}" />

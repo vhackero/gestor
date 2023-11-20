@@ -159,7 +159,7 @@
 							<p:calendar id="finiPlan"
 								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 								yearRange="c-100:c+100" locale="es" navigator="true"
-								styleClass="calendario"
+								styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 								placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 								value="#{planBean.plan.fechaInicio}" showOn="button"
 								readonlyInput="true">
@@ -174,7 +174,7 @@
 
 							<p:outputLabel for="ffinPlan" styleClass="bloque"
 								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.fechaFin')}:" />
-							<p:calendar id="ffinPlan" styleClass="calendario"
+							<p:calendar id="ffinPlan" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 								yearRange="c-100:c+100" locale="es" readonlyInput="true"
 								mindate="#{planBean.plan.fechaInicio}" navigator="true"

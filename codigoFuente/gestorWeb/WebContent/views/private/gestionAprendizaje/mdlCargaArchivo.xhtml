@@ -92,7 +92,7 @@
 								<p:commandButton id="btnDescargar" ajax="false" immediate="true"
 									disabled="#{modificarSeguimientoAVABean.botonDescargaEsActivo}"
 									update="dtResultArchivos" process="@this"
-									styleClass="btn-icon btn btn-default fa fa-regular fa-circle-down"
+									styleClass="btn-icon btn btn-default fa fa-regular fa-circle-down margin: auto; text-align: center;"
 									actionListener="#{modificarSeguimientoAVABean.descargaArchivos(archivo)}">
 									<p:fileDownload
 										value="#{modificarSeguimientoAVABean.fileDownload}" />

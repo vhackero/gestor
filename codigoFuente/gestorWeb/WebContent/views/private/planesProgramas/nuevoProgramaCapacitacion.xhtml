@@ -252,7 +252,7 @@
 								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 								yearRange="c-100:c+100" locale="es" navigator="true"
 								value="#{programaCapacitacionBean.programa.fechaVigInicial}"
-								showOn="button" readonlyInput="true" styleClass="calendario"
+								showOn="button" readonlyInput="true" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 								placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}">
 								<p:ajax event="change" update="ffinProg" />
 								<p:ajax event="dateSelect" update="ffinProg" />
@@ -268,7 +268,7 @@
 								mindate="#{programaCapacitacionBean.programa.fechaVigInicial}"
 								yearRange="c-100:c+100" locale="es" navigator="true"
 								value="#{programaCapacitacionBean.programa.fechaVigFinal}"
-								showOn="button" readonlyInput="true" styleClass="calendario"
+								showOn="button" readonlyInput="true" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
 								placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}">
 								<p:ajax event="dateSelect" update="@this" />
 								<p:ajax event="change" update="@this" />
