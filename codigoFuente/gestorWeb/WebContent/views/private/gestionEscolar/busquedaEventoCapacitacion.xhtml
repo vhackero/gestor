@@ -343,7 +343,7 @@
 								<!-- Auditar -->
 
 								<p:commandButton id="btnAuditar" rendered="true"
-									styleClass="btn-icon btn btn-default icono_sisi ss_ge_auditar" />
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-square-check" />
 
 								<p:tooltip for="btnAuditar" rendered="true"
 									value="#{sistema.obtenerTexto('gw.gestionescolar.label.accesosEventoCap')}"
@@ -359,7 +359,7 @@
 								<p:commandButton id="btnLinea"
 									rendered="#{eventoCapacitacionBean.mostrarBtnEnLinea(evento)}"
 									onclick="window.open('#{eventoCapacitacionBean.obtenerRutaLMS(evento)}');return false;"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_urlact">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-earth-americas">
 								</p:commandButton>
 								<p:tooltip for="btnLinea"
 									value="#{sistema.obtenerTexto('gw.gestionescolar.label.lineaEventoCa')}"
@@ -377,7 +377,7 @@
 												(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id)}"
 									action="#{matriculacionEventoBean.cargarGrupos()}"
 									process="@this" ajax="true"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_matri">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-id-badge">
 									<f:setPropertyActionListener value="#{evento}"
 										target="#{matriculacionEventoBean.evento}" />
 								</p:commandButton>
@@ -401,7 +401,7 @@
 									action="#{calificacionGpoEventoCapBean.inicializaDatosCalif}"
 									process="@this" ajax="true"
 									rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id)}"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_califica">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-star">
 									<f:setPropertyActionListener value="#{evento}"
 										target="#{calificacionGpoEventoCapBean.evento}" />
 								</p:commandButton>
@@ -431,7 +431,7 @@
 								<p:commandButton id="btnConcluir"
 									oncomplete="PF('wConcluirEvento').show()"
 									rendered="#{evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id}"
-									styleClass="btn-icon btn btn-default icono_sisi ss_ge_auditar">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-square-check">
 									<f:setPropertyActionListener value="#{evento}"
 										target="#{capturaEventoCapacitacion.evento}" />
 								</p:commandButton>
@@ -493,7 +493,7 @@
 									rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.CONCLUIDOS.id) or
 																		(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.CALENDARIZADO.id) or
 																		(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id)}"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_desc"
+									styleClass="btn-icon btn btn-default fa fa-regular fa-circle-down"
 									actionListener="#{eventoCapacitacionBean.descargarReporteEvento(evento)}"
 									immediate="true" ajax="false">
 									<p:fileDownload value="#{eventoCapacitacionBean.reportePDF}" />

@@ -393,7 +393,7 @@
 									disabled="#{matriculacionEventoBean.grupo.actaCerrada eq true or empty matriculacionEventoBean.grupo}"
 									action="#{matriculacionEventoBean.matricularIndividual()}"
 									ajax="true" update="@(.containerMtr form)"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_matri">
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-id-badge">
 									<f:setPropertyActionListener value="#{datos}"
 										target="#{matriculacionEventoBean.persona}" />
 								</p:commandButton>

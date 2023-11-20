@@ -85,7 +85,7 @@ public final class ConstantesGestor {
 			"css/sb-admin-2.min.css",
 			"css/timeline.css",
 			"img/elearning_logo_d.png",
-			"img/elearning_logo_largo.png",
+			"img/Log.Educación-UnADM-10-color.png",
 			"img/favicon.ico",
 			"js/script.js"};
 	
@@ -94,7 +94,7 @@ public final class ConstantesGestor {
 			"css/custom.css.map",
 			"css/custom.min.css",
 			"img/elearning_logo_d.png",
-			"img/elearning_logo_largo.png",
+			"img/Log.Educación-UnADM-10-color.png",
 			"img/elearning_logo_negativo.png",
 			"img/favicon.ico",
 			"js/script.js"};
