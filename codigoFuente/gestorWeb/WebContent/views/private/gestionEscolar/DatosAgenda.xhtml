@@ -23,7 +23,7 @@
 				<div class="col-md-4">
 					<p:outputLabel for="fechaInicio" styleClass="requerido bloque"
 						value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechaInicial')}:" />
-					<p:calendar id="fechaInicio" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
+					<p:calendar id="fechaInicio" styleClass="requerido"
 						yearRange="c-100:c+100"
 						value="#{capturaEventoCapacitacion.datos.evento.fechaInicial}"
 						pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
@@ -40,7 +40,7 @@
 				<div class="col-md-4">
 					<p:outputLabel for="fechaFinal" styleClass="requerido bloque"
 						value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechafinal')}:" />
-					<p:calendar id="fechaFinal" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
+					<p:calendar id="fechaFinal" styleClass="requerido"
 						mindate="#{capturaEventoCapacitacion.datos.evento.fechaInicial}"
 						readonlyInput="true"
 						disabled="#{capturaEventoCapacitacion.datos.evento.fechaInicial eq null}"

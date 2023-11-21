@@ -87,7 +87,7 @@
 								<div class="col-md-4">
 									<p:outputLabel value="Fecha de registro inicial:"
 										for="selInicial" styleClass="bloque" />
-									<p:calendar id="selInicial" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
+									<p:calendar id="selInicial" styleClass="requerido"
 										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 										yearRange="c-100:c+100" locale="es" navigator="true"
 										placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -98,7 +98,7 @@
 								<div class="col-md-4">
 									<p:outputLabel value="Fecha de registro final:" for="selFinal"
 										styleClass="bloque" />
-									<p:calendar id="selFinal" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
+									<p:calendar id="selFinal" styleClass="requerido"
 										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 										yearRange="c-100:c+100" locale="es" navigator="true"
 										placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"

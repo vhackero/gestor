@@ -181,7 +181,7 @@
 									<p:calendar navigator="true"
 										value="#{seguimientoEncuestaBean.filtros.tblEvento.fechaFinal}"
 										disabled="#{seguimientoEncuestaBean.tipoDatoFechas == null}"
-										styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days" id="fc_fechaFinal"
+										styleClass="requerido" id="fc_fechaFinal"
 										mindate="#{seguimientoEncuestaBean.filtros.tblEvento.fechaInicial}"
 										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 										yearRange="c-100:c+100" locale="es" readonlyInput="true"
