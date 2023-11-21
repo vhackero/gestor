@@ -182,6 +182,8 @@ public class PlanBean extends BaseBean {
 	 * nivel
 	 */
 	private void generaItemsOrgGubs() {
+		logger.info("****generaItemsOrgGubs****");
+		logger.info(""+ObjectUtils.isNotNull(catOrgGubs));
 
 		if (ObjectUtils.isNotNull(catOrgGubs)) {
 
@@ -201,6 +203,7 @@ public class PlanBean extends BaseBean {
 					logger.info(""+orgG.getLstHijosOrgGub().size());
 
 					for (OrgGubernamentalDTO orgGHijo : orgG.getLstHijosOrgGub()) {
+						logger.info(""+orgGHijo.getNombre());
 						arrayItems[i] = new SelectItem(orgGHijo, orgGHijo.getNombre());
 						i++;
 					}
