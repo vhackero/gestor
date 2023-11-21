@@ -48,7 +48,7 @@
 									yearRange="c-100:c+100" locale="es" navigator="true"
 									mindate="#{scheduleView.fechaActual}" readonlyInput="true"
 									value="#{scheduleView.fechaVigInicial}" mode="inline"
-									styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
+									styleClass="requerido"
 									
 									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}">
 									<p:ajax event="change" update="ffinProg, fechaVigInicial, fechaVigFinal " />
@@ -70,7 +70,7 @@
 									mindate="#{scheduleView.fechaVigInicial}"
 									yearRange="c-100:c+100" locale="es" navigator="true"
 									value="#{scheduleView.fechaVigFinal}" mode="inline"
-									readonlyInput="true" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
+									readonlyInput="true" styleClass="requerido"
 									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}">
 									<p:ajax event="dateSelect" update="@this, fechaVigFinal" />
 									<p:ajax event="change" update="@this, fechaVigFinal" />

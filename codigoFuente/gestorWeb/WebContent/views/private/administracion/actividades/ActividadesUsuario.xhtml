@@ -163,9 +163,9 @@
 					<div class="form-group">
 						<div class="row">
 							<div class="col-md-6">
-								<p:outputLabel for="fechaInicio" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
+								<p:outputLabel for="fechaInicio" styleClass="requerido"
 									value="#{sistema.obtenerTexto('gw.actividades.modal.etiqueta.fecha.inicio')}:" />
-								<p:calendar id="fechaInicio" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
+								<p:calendar id="fechaInicio" styleClass="requerido"
 									showButtonPanel="false"
 									mindate="#{actividadesBean.obtenerFechaActual()}"
 									showOn="button" readonlyInput="true" pattern="dd/MM/yyyy HH:mm"
@@ -178,9 +178,9 @@
 								<p:message for="fechaInicio" />
 							</div>
 							<div class="col-md-6">
-								<p:outputLabel for="ffinal" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
+								<p:outputLabel for="ffinal" styleClass="requerido"
 									value="#{sistema.obtenerTexto('gw.actividades.modal.etiqueta.fecha.fin')}:" />
-								<p:calendar id="ffinal" styleClass="btn-icon btn btn-default fa fa-solid fa-calendar-days"
+								<p:calendar id="ffinal" styleClass="requerido"
 									locale="es" navigator="true" readonlyInput="true"
 									mindate="#{actividadesBean.cadenaFechaMinima}"
 									disabled="#{actividadesBean.actividad.fechaInicio eq null}"
