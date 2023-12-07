@@ -99,6 +99,7 @@ public class PlantillasMensajesBean extends BaseBean {
 
     public String guardarMensaje() {
         ResultadoDTO<MensajeOperacionDTO> resultado;
+        mensaje.setFechaActualizacion(new Date());
         if (nuevo) {
             resultado = mensajeOperacionService.guardar(mensaje);
         } else {
@@ -150,6 +151,7 @@ public class PlantillasMensajesBean extends BaseBean {
 
     public void guardarVariable() {
         ResultadoDTO<VariableMensajeOperacionDTO> resultado;
+        variable.setFechaActualizacion(new Date());
 
         if (nuevo) {
             resultado = variableMensajeOperacionService.guardar(variable);
