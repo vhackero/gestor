@@ -1,14 +1,14 @@
-/*@font-face {
-  font-family: 'SISIeLearning';
-  src:  url('fonts/SISIeLearning.eot?zaf756');
-  src:  url('fonts/SISIeLearning.eot?zaf756#iefix') format('embedded-opentype'),
-    url('fonts/SISIeLearning.ttf?zaf756') format('truetype'),
-    url('fonts/SISIeLearning.woff?zaf756') format('woff'),
-    url('fonts/SISIeLearning.svg?zaf756#SISIeLearning') format('svg');
-  font-weight: normal;
-  font-style: normal;
+@font-face {
+	font-family: 'SISIeLearning';
+	src:  url("#{resource['Privado:base/css/fonts/SISIeLearning.eot']}");
+	src:  url("#{resource['Privado:base/css/fonts/SISIeLearning.eot']}") format('embedded-opentype'),
+    	url("#{resource['Privado:base/css/fonts/SISIeLearning.ttf']}") format('truetype'),
+    	url("#{resource['Privado:base/css/fonts/SISIeLearning.woff']}") format('woff'),
+    	url("#{resource['Privado:base/css/fonts/SISIeLearning.svg']}") format('svg');
+  	font-weight: normal;
+  	font-style: normal;
 }
-*/
+
 [class^="ss_"], [class*=" ss_"] {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'SISIeLearning' !important;
