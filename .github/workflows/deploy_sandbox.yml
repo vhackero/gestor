@@ -19,5 +19,5 @@ jobs:
           key_path: "devops/id_rsa"
           script_stop: true
           script: |
-            cd ~/projects/artifacts/devops-gestor
-            bash deploy-sandbox.sh
+            cd ~/artifacts
+            bash deploy-gestor.sh
