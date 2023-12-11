@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html>
-<meta charset="UTF-8">
 <ui:composition template="/templates/layout.xhtml"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
@@ -285,13 +284,11 @@
 					<div class="col-md-12 floatFlexCentrarY margenInferior">
 						<p:outputLabel value="Reporte de excel:"
 							styleClass="margenDerecho" for="btnReporte" />
-						<p:commandLink id="btnReporte" ajax="false"
-							styleClass="margenDerecho">
+						<p:commandLink id="btnReporte" value="Descargar"
+							style="margin-left:0; margin-right:10px"
+							styleClass="btn btn-primary" ajax="false">
 							<p:dataExporter type="xls" target="tblReservaciones"
 								fileName="analisisDatosReservaciones" pageOnly="true" />
-							<p:graphicImage library="images" width="150" height="35"
-								name="analisis_datos/descargar.png"
-								styleClass="foto margenDerecho" />
 						</p:commandLink>
 						<p:outputLabel value="Informe prediseñado"
 							styleClass="margenDerecho" />

@@ -362,7 +362,7 @@
 	</navigation-case>
 	<navigation-case>
 		<from-outcome>CONTESTA_ENCUESTA</from-outcome>
-		<to-view-id>/views/private/encuestas/ResponderEncuesta.jsf</to-view-id>
+		<to-view-id>/views/private/encuestas/responderEncuesta.jsf</to-view-id>
 		<redirect />
 	</navigation-case>
 	<navigation-case>

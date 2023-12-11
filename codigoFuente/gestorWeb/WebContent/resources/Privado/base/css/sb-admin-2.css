@@ -1,11 +1,16 @@
-/*@import 'style.css';
+@import "#{resource['Privado:base/css/style.css']}";
+
 @font-face {
-  font-family: 'Open Sans';
-  src: url('fonts/Open_Sans/OpenSans-Regular-webfont.eot');
-  src: url('fonts/Open_Sans/OpenSans-Regular-webfont.eot?#iefix') format('embedded-opentype'), url('fonts/Open_Sans/OpenSans-Regular-webfont.woff') format('woff'), url('fonts/Open_Sans/OpenSans-Regular-webfont.ttf') format('truetype'), url('fonts/Open_Sans/OpenSans-Regular-webfont.svg#open_sansregular') format('svg');
-  font-weight: normal;
-  font-style: normal;
-}*/
+  	font-family: 'Open Sans';
+  	src: url("#{resource['Privado:base/css/fonts/Open_Sans/OpenSans-Regular-webfont.eot']}");
+  	src: url("#{resource['Privado:base/css/fonts/Open_Sans/OpenSans-Regular-webfont.eot']}") format('embedded-opentype'),
+		url("#{resource['Privado:base/css/fonts/Open_Sans/OpenSans-Regular-webfont.woff']}") format('woff'),
+		url("#{resource['Privado:base/css/fonts/Open_Sans/OpenSans-Regular-webfont.ttf']}") format('truetype'),
+		url("#{resource['Privado:base/css/fonts/Open_Sans/OpenSans-Regular-webfont.svg']}") format('svg');
+  	font-weight: normal;
+  	font-style: normal;
+}
+
 .ui-widget {
   font-size: 14px;
 }
