@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html>
-<meta charset="UTF-8">
 <ui:composition template="/templates/layout.xhtml"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
@@ -281,7 +280,7 @@
 					</p:panel>
 				</div>
 			</div>
-			<div class="form-group" style="display: none">
+			<div class="form-group">
 				<div class="row">
 					<div class="col-md-12 floatFlexCentrarY margenInferior">
 						<p:outputLabel value="Reporte de excel:" style="margin-bottom:0"
@@ -295,12 +294,12 @@
 						</p:commandButton>
 
 						<p:outputLabel value="Informe prediseñado:"
-							style="margin-bottom:0" styleClass="margenDerecho" />
+							styleClass="margenDerecho" />
 
 						<p:commandButton value="Generar"
 							disabled="#{reporteAvaBean.eventosCapacitacion.isEmpty()}"
 							onclick="graficasEventos();"
-							styleClass="btn btn-primary margenDerecho quitaMargen" />
+							styleClass="btn btn-primary margenDerecho" />
 
 						<p:remoteCommand name="graficasEventos"
 							action="#{reporteAvaBean.generarEstadisticas}"
