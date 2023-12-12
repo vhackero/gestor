@@ -9,6 +9,17 @@
   	font-style: normal;
 }
 
+.ui-slider .ui-slider-handle{
+	background-color: white;
+}
+.ui-slider-horizontal{
+	height: 0.4em;
+    background-color: #a7a7a7 !important;
+}
+.ui-timepicker-div dl dd{
+	margin-top: 15px;	
+}
+
 [class^="ss_"], [class*=" ss_"] {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'SISIeLearning' !important;

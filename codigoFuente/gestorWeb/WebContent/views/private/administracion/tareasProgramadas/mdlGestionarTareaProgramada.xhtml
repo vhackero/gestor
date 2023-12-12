@@ -104,7 +104,7 @@
 						<p:calendar id="horaEjecucion" styleClass="requerido"
 							value="#{schedulerBean.horaDeEjecucion}"
 							pattern="HH:mm" locale="es" timeOnly="true"
-							 required="true" readonlyInput="true"
+							 required="true"
 							requiredMessage="#{sistema.obtenerTexto('gw.tareasprogramadas.validationmsj.horaejecucion')}">
 							
 							<p:ajax event="dateSelect" process="@this" />
