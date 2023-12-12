@@ -324,12 +324,12 @@
 									fileName="calificaciones_" />
 							</p:commandButton>
 
-							<p:outputLabel value="PDF" rendered="true"
-								styleClass="margenIzquierdo pull-right agregaHeight" />
+							<p:outputLabel value="Descargar: " rendered="true"
+								styleClass="margenIzquierdo agregaHeight" />
 							<p:commandButton id="btnDescargarPdf" ajax="false"
 								rendered="true"
 								disabled="#{calificacionGpoEventoCapBean.tablaAuxCalif.isEmpty()}"
-								styleClass="btn btn-icon btn-default fa fa-regular fa-circle-down margin: auto; text-align: center;">
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc">
 								<p:dataExporter type="pdf" target="dtCalificaciones"
 									fileName="calificaciones_" />
 							</p:commandButton>
