@@ -199,11 +199,21 @@ public class TblFichaDescriptivaPrograma implements Serializable {
 	@Column(name="id_categoria_mdl")
 	private Integer idCategoriaMdl;
 	
+	@Column(name="tipo")
+	private String tipo;
+	
 //	@OneToOne(fetch=FetchType.LAZY)
 //	@JoinColumn(name="id_estructura_personal_externo")
 //	private TblEstPersonalExterno catDirigidoAExterno;
 
 	public TblFichaDescriptivaPrograma() {
+	}
+	
+	public String getTipo() {
+		return tipo;
+	}
+	public void setTipo(String tipo) {
+		this.tipo = tipo;
 	}
 
 	public Integer getIdPrograma() {

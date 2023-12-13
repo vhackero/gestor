@@ -65,5 +65,6 @@ public class TblFichaDescriptivaPrograma_ {
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, Boolean>encuestaKp;
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, CatInstitucionesCertificadora> catInstitucionesCertificadora;
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, String> calificacionMinAprobatoria;
-
+	
+	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, String> tipo;
 }

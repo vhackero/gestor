@@ -97,7 +97,10 @@ public class ProgramaCapacitacionBean extends BaseBean {
 
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
-
+	
+	private String tipoPrograma;
+	private String tipo;
+	
 	private String tpoCompSelec;
 	private String ejeCapacitSel;
 	private List<CatalogoComunDTO> catStatusPrograma;
@@ -2069,6 +2072,19 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			programa.setCatNivelConocimiento(null);
 		}
 	}
+	
+	/**
+	 *
+	 * @param e
+	 */
+	public void onChangeTipoPrograma(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			tipo = (String) e.getNewValue();
+			programa.setTipo((String) e.getNewValue());
+		} else {
+			programa.setTipo(null);
+		}
+	}
 
 	/**
 	 *
@@ -2114,6 +2130,11 @@ public class ProgramaCapacitacionBean extends BaseBean {
 		boolean isValido = Boolean.TRUE;
 		if (ObjectUtils.isNull(prog)) {
 			isValido = Boolean.FALSE;
+		}
+		
+		if (ObjectUtils.isNull(prog.getTipo())) {
+			isValido = Boolean.FALSE;
+			mensajes.add("Tipo de programa es requerido");
 		}
 
 		if (ObjectUtils.isNull(prog.getTipoCompetencia())) {
@@ -2540,7 +2561,22 @@ public class ProgramaCapacitacionBean extends BaseBean {
 		nombreProgramaClon = StringUtils.EMPTY;
 	}
 	// SETTERS & GETTERS
+	
+	/**
+	 * @return the Typo
+	 */
+	public String getTipo() {
+		return tipo;
+	}
 
+	/**
+	 * @param Typo
+	 */
+	public void setTipo(String tipo) {
+		this.tipo = tipo;
+	}
+	
+	
 	/**
 	 * @return the leyendaBusqueda
 	 */
