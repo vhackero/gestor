@@ -125,12 +125,20 @@ public class FichaDescProgramaDTO implements Serializable {
 	
 	private PersonaDTO coordinadorAcademico;
 	private Integer idCategoriaMdl;
-        private BitacoraDTO bitacoraDTO;
-	
+    private BitacoraDTO bitacoraDTO;
+
+    private String tipo;    
+        
 	public FichaDescProgramaDTO(){
 		
 	}
 	
+	public String getTipo() {
+		return tipo;
+	}
+	public void setTipo(String tipo) {
+		this.tipo = tipo;
+	}
 
 	public Integer getIdPrograma() {
 		return idPrograma;

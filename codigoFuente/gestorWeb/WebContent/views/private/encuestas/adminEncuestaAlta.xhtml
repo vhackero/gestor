@@ -352,11 +352,11 @@
 							<!-- 	Guarda como revision -->
 							<p:commandButton id="btn_finalizar"
 								value="#{sistema.obtenerTexto('gw.encuestas.alta.etiqueta.finalizar')}"
-								ajax="true" process="@this,@form" update="dlg_mensaje_sistema"
+								ajax="true" process="@this" update="dlg_mensaje_sistema"
 								onclick="return validarCreacionEncuesta();"
 								validateClient="true" styleClass="btn btn-primary pull-right"
 								action="#{registraEncuestaBean.finalizaMensaje}"
-								oncomplete="PF('dlg').show();">
+								oncomplete="PF('dlg').show(); return false;">
 
 							</p:commandButton>
 

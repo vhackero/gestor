@@ -214,7 +214,7 @@ public class EncuestaBean extends BaseBean {
                 }
 
             } else {
-                encuestaMSG = "Únicamente se puede borrar une encuesta en el estado de creación por defecto.";
+                encuestaMSG = "Únicamente se puede borrar una encuesta en el estado de creación por defecto.";
             }
             setRenderDialog(Boolean.TRUE);
             agregarMsgInfo(encuestaMSG, null);
