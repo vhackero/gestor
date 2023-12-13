@@ -32,7 +32,9 @@
 						disabled="false" value="#{adminPersonaBean.datos.persona.usuario}"
 						maxlength="30"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.usuario')}"
-						styleClass="form-control textoMinus" />
+						styleClass="form-control textoMinus"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 					<p:message for="txtNombreUsuario" />
 				</div>
 

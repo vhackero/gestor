@@ -340,7 +340,9 @@
 									maxlength="150"
 									placeholder="#{sistema.obtenerTexto('gw.logistica.texto.nombre')}"
 									value="#{reservacionAreaBean.eventoGeneral.nombre}"
-									rendered="#{reservacionAreaBean.eventoGenerico}">
+									rendered="#{reservacionAreaBean.eventoGenerico}"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">>
 									<p:ajax process="@this" />
 								</p:inputText>
 							</div>
@@ -372,7 +374,9 @@
 								<p:inputText styleClass="form-control" id="solicitado"
 									maxlength="150"
 									placeholder="#{sistema.obtenerTexto('gw.logistica.texto.solicitado')}"
-									value="#{reservacionAreaBean.solRes.solicitante}">
+									value="#{reservacionAreaBean.solRes.solicitante}"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 									<p:ajax process="@this" />
 								</p:inputText>
 								<p:message for="solicitado" />
@@ -386,7 +390,9 @@
 								<p:inputText styleClass="form-control" id="correoevt"
 									maxlength="200"
 									placeholder="#{sistema.obtenerTexto('gw.logistica.texto.correo')}"
-									value="#{reservacionAreaBean.solRes.emailSolicitante}">
+									value="#{reservacionAreaBean.solRes.emailSolicitante}"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 									<p:ajax process="@this" />
 								</p:inputText>
 								<p:message for="correoevt" />

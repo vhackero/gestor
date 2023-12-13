@@ -89,7 +89,9 @@
 					<!-- Longitud de campo -->
 					<p:inputTextarea id="txtObjetivoGeneral" styleClass="form-control"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.objetivoGeneral}"
-						maxlength="2000">
+						maxlength="2000"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
 					<p:message for="txtObjetivoGeneral" />
@@ -107,6 +109,8 @@
 					<p:inputTextarea id="txtProposito" styleClass="form-control"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.proposito}"
 						maxlength="500"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 						placeholder="Es la descripción de lo que los alumnos serán capaces de realizar a partir del OA. Deberán de relacionarse con los conocimientos, habilidades, actitudes y valores a ser aprendidos.">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
@@ -123,7 +127,9 @@
 					<!-- Longitud de campo -->
 					<p:inputTextarea id="txtRequisitos" styleClass="form-control"
 						maxlength="500"
-						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.requisitosConocimientosPrevios}">
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.requisitosConocimientosPrevios}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
 					<p:message for="txtRequisitos" />
@@ -140,7 +146,9 @@
 					<p:inputTextarea id="txtDescripcionContenido"
 						styleClass="form-control" maxlength="2000"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.descripcionContenido}"
-						placeholder="Se presenta un resumen del contenido del OA, es decir, se brinda un panorama general de la temática a tratar.">
+						placeholder="Se presenta un resumen del contenido del OA, es decir, se brinda un panorama general de la temática a tratar."
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
 					<p:message for="txtDescripcionContenido" />
@@ -157,7 +165,9 @@
 					<p:inputTextarea id="txtTemasRelacionados"
 						styleClass="form-control" maxlength="500"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.temasRelacionados}"
-						placeholder="Se enuncian los temas que se encuentran estrechamente relacionados con el OA, y que pueden servir de referencia para la comprensión y ubicación del tema tratado.">
+						placeholder="Se enuncian los temas que se encuentran estrechamente relacionados con el OA, y que pueden servir de referencia para la comprensión y ubicación del tema tratado."
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
 					<p:message for="txtTemasRelacionados" />
@@ -192,7 +202,9 @@
 					<p:inputTextarea id="txtTratamientoEditorial"
 						styleClass="form-control" maxlength="2000"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.tratamientoEditorial}"
-						placeholder="Se describirá de manera general los lineamientos de edición para el correcto lenguaje gramatical del curso.">
+						placeholder="Se describirá de manera general los lineamientos de edición para el correcto lenguaje gramatical del curso."
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
 					<p:message for="txtTratamientoEditorial" />
@@ -209,7 +221,9 @@
 					<p:inputTextarea id="txtPalabrasClave" styleClass="form-control"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.palabrasClave}"
 						maxlength="2000"
-						placeholder="Las palabras clave describen el contenido abordado por el Objeto Educativo y permitirán el fácil acceso y búsqueda puntual de los objetos educativos. En este espacio es posible escribir de tres a diez palabras clave, separadas por una coma. Evite escribir frases u oraciones.">
+						placeholder="Las palabras clave describen el contenido abordado por el Objeto Educativo y permitirán el fácil acceso y búsqueda puntual de los objetos educativos. En este espacio es posible escribir de tres a diez palabras clave, separadas por una coma. Evite escribir frases u oraciones."
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
 					<p:message for="txtPalabrasClave" />

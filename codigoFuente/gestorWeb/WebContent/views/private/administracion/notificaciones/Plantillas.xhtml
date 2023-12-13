@@ -287,7 +287,9 @@
 								<!-- Longitud de campo -->
 								<p:inputText id="campoClave"
 									value="#{plantillasMensajesBean.variable.clave}"
-									styleClass="form-control" maxlength="45" />
+									styleClass="form-control" maxlength="45"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
 								<p:message for="campoClave" />
 							</div>
 							<div class="col-md-6">
@@ -296,7 +298,9 @@
 								<!-- Longitud de campo -->
 								<p:inputText id="campoDescripcion"
 									value="#{plantillasMensajesBean.variable.descripcion}"
-									styleClass="form-control" maxlength="100" />
+									styleClass="form-control" maxlength="100"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
 								<p:message for="campoDescripcion" />
 							</div>
 						</div>

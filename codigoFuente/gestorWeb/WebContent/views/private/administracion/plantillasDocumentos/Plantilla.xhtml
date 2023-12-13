@@ -46,7 +46,9 @@
 							<p:inputText id="txtNombre" maxlength="60"
 								placeholder="#{sistema.obtenerTexto('gw.admin.plantillas.campo.nombre')}"
 								value="#{plantillasDocumentosBean.plantilla.nombre}"
-								styleClass="form-control" />
+								styleClass="form-control"
+								required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
 							<p:message for="txtNombre" />
 						</div>
 
@@ -114,7 +116,9 @@
 								<p:inputTextarea id="txtParrafo1" maxlength="100"
 									placeholder="#{sistema.obtenerTexto('gw.admin.plantillas.campo.parrafo1')}"
 									value="#{plantillasDocumentosBean.plantilla.parrafo1}"
-									styleClass="form-control" />
+									styleClass="form-control"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 								<p:message for="txtParrafo1" />
 							</div>
 						</div>
@@ -129,7 +133,9 @@
 								<p:inputTextarea id="txtParrafo2" maxlength="100"
 									placeholder="#{sistema.obtenerTexto('gw.admin.plantillas.campo.parrafo2')}"
 									value="#{plantillasDocumentosBean.plantilla.parrafo2}"
-									styleClass="form-control" />
+									styleClass="form-control"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 								<p:message for="txtParrafo2" />
 							</div>
 						</div>
@@ -144,7 +150,9 @@
 								<p:inputTextarea id="txtParrafo3" maxlength="200"
 									placeholder="#{sistema.obtenerTexto('gw.admin.plantillas.campo.parrafo3')}"
 									value="#{plantillasDocumentosBean.plantilla.parrafo3}"
-									styleClass="form-control" />
+									styleClass="form-control"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 								<p:message for="txtParrafo3" />
 							</div>
 						</div>

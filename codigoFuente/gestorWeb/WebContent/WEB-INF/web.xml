@@ -10,6 +10,10 @@
     	<extension>ico</extension>
     	<mime-type>image/x-icon</mime-type>
 	</mime-mapping>
+	<mime-mapping>
+		<extension>svg</extension>
+		<mime-type>image/svg+xml</mime-type>
+	</mime-mapping>
 
 	<mime-mapping>
 		<extension>ttf</extension>
@@ -92,6 +96,10 @@
 	<servlet-mapping>
 		<servlet-name>Faces Servlet</servlet-name>
 		<url-pattern>*.html</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>/resources/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

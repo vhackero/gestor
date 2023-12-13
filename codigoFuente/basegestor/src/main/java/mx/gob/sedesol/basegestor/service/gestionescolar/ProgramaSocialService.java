@@ -7,6 +7,8 @@ import mx.gob.sedesol.basegestor.service.admin.CommonService;
 
 public interface ProgramaSocialService extends CommonService<ProgramaSocialDTO, Integer> {
 	
-	List<ProgramaSocialDTO> obtenerProgramasPorUnidad(Integer idUnidadResponsable);;
+	List<ProgramaSocialDTO> obtenerProgramasPorUnidad(Integer idUnidadResponsable);
+
+	boolean findDuplicateClave(ProgramaSocialDTO programaSocialDTO);
 
 }

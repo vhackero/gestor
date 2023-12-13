@@ -34,7 +34,9 @@
 					<p:inputTextarea id="txtAreaTiempoEstudio"
 						styleClass="form-control" maxlength="50"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.tiempoTipicoAprendizaje}"
-						placeholder="Tiempo aproximado o típico que necesitan para asimilar el objeto  los destinatarios objetivo típicos.">
+						placeholder="Tiempo aproximado o típico que necesitan para asimilar el objeto  los destinatarios objetivo típicos."
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
 					<p:message for="txtAreaTiempoEstudio" />
@@ -53,7 +55,9 @@
 					<!-- Longitud de campo -->
 					<p:inputTextarea id="txtRangoEdad" styleClass="form-control"
 						maxlength="100"
-						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.rangoTipicoDeEdad}">
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.rangoTipicoDeEdad}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
 					<p:message for="txtRangoEdad" />
@@ -224,7 +228,9 @@
 					<!-- Longitud de campo -->
 					<p:inputTextarea id="txtEvaluacionAprendizaje"
 						styleClass="form-control" maxlength="2000"
-						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.evaluacionDelAprendizaje}">
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.evaluacionDelAprendizaje}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
 					<p:message for="txtEvaluacionAprendizaje" />
