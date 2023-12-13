@@ -26,12 +26,14 @@ public class AuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
             AuthenticationException exception) throws IOException, ServletException {
         
 		log.error(exception.getMessage(), exception);
-		if(exception.getMessage().equalsIgnoreCase("User is disabled"))
+		if(exception.getMessage().equalsIgnoreCase("User is disabled")){
 			request.getSession().setAttribute(ConstantesGestorWeb.ERRORES_LOGIN, "El usuario se encuentra inactivo.");
-		if(exception.getMessage().equalsIgnoreCase("Bad credentials"))
+		}else if(exception.getMessage().equalsIgnoreCase("Bad credentials")){
 			request.getSession().setAttribute(ConstantesGestorWeb.ERRORES_LOGIN, "Credenciales incorrectas, vuelve a intentarlo.");
-		else
+		}else{
 			request.getSession().setAttribute(ConstantesGestorWeb.ERRORES_LOGIN, exception.getMessage());
+		}
+		System.out.println(request.getSession());
 		
 		redirectStrategy.sendRedirect(request, response, "/login?errorLogin=true");
         

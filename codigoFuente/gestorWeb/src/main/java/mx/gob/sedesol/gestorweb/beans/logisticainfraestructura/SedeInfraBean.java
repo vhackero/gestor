@@ -87,6 +87,7 @@ public class SedeInfraBean extends BaseBean {
 
 		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CON_CAT_CON_SED", "", requestActual(),
 				TipoServicioEnum.LOCAL);
+		consultarAreas();
 
 	}
 

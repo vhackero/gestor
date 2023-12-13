@@ -184,6 +184,7 @@ public class FuncionalidadBean extends BaseBean {
 
 	public void guardarTextoSistema() {
 		ResultadoDTO<TextoSistemaDTO> resultado;
+		textoSistema.setFechaActualizacion(new Date());
 		if (nueva) {
 			resultado = textoSistemaService.guardar(textoSistema);
 		} else {
