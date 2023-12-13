@@ -96,10 +96,14 @@ public class ProgramasSocialesBean extends BaseBean {
 
     public void guardarPrograma() {
         logger.info("guardar_programa");
-        if (nueva) {
-            almacenarPrograma();
-        } else {
-            actualizarPrograma();
+        if (programaSocialService.findDuplicateClave(programa)) {
+            agregarMsgError("Ya existe la Clave", null, sistema);
+        }else {
+            if (nueva) {
+                almacenarPrograma();
+            } else {
+                actualizarPrograma();
+            }
         }
     }
 

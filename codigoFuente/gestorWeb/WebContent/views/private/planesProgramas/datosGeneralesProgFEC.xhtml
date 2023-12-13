@@ -202,7 +202,9 @@
 			<p:inputTextarea rows="2" id="descProg" styleClass="altoMaximo"
 				maxlength="2000"
 				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.descripcion')}"
-				value="#{programaCapacitacionBean.programa.descripcion}">
+				value="#{programaCapacitacionBean.programa.descripcion}"
+				required="true"
+				requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 				<p:ajax process="@this" />
 			</p:inputTextarea>
 			<p:message for="descProg" />
@@ -218,7 +220,9 @@
 			<p:inputTextarea rows="2" id="conocPrev" styleClass="altoMaximo"
 				maxlength="2000"
 				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.conocprevios')}"
-				value="#{programaCapacitacionBean.programa.conocimietosPrevios}">
+				value="#{programaCapacitacionBean.programa.conocimietosPrevios}"
+				required="true"
+				requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 				<p:ajax process="@this" />
 			</p:inputTextarea>
 			<p:message for="conocPrev" />
@@ -234,7 +238,9 @@
 			<p:inputTextarea rows="2" id="perfilIng" styleClass="altoMaximo"
 				maxlength="2000"
 				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.marcaAgua.perfilIng')}"
-				value="#{programaCapacitacionBean.programa.perfilIngreso}">
+				value="#{programaCapacitacionBean.programa.perfilIngreso}"
+				required="true"
+				requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 				<p:ajax process="@this" />
 			</p:inputTextarea>
 			<p:message for="perfilIng" />

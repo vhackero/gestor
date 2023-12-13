@@ -35,7 +35,9 @@
 						<div class="col-md-10">
 							<p:inputText id="txtNombreEC"
 								value="#{capturaEventoCapacitacion.datos.evento.nombreEc}"
-								styleClass="form-control" maxlength="64">
+								styleClass="form-control" maxlength="64"
+								required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 								<p:ajax process="@this" update="@form" />
 							</p:inputText>
 							<p:message for="txtNombreEC" />
@@ -66,7 +68,9 @@
 							<p:inputText disabled="true"
 								value="#{capturaEventoCapacitacion.nombreImagen}"
 								styleClass="form-control inputDeshabilitado"
-								style="margin-top:4px" />
+								style="margin-top:4px"
+								required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 						</div>
 						<div class="col-md-4">
 							<p:fileUpload styleClass="cargarArchivo contenedorCargaImagen"

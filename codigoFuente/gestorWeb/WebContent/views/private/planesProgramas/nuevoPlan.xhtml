@@ -46,7 +46,9 @@
 							<!-- Longitud de campo -->
 							<p:inputText id="nomPlan" styleClass="form-control"
 								value="#{planBean.plan.nombre}" maxlength="150"
-								placeholder="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.nombre')}" />
+								placeholder="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.nombre')}"
+								required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 							<p:message for="nomPlan" />
 						</div>
 
@@ -57,7 +59,9 @@
 							<p:inputText id="idPlan" styleClass="form-control"
 								value="#{planBean.plan.identificador}"
 								placeholder="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.identificador')}"
-								disabled="true" />
+								disabled="true"
+								required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 							<p:message for="idPlan" />
 						</div>
 

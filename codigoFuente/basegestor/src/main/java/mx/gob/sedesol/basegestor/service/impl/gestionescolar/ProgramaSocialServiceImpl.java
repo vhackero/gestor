@@ -123,6 +123,12 @@ public class ProgramaSocialServiceImpl extends ComunValidacionService<ProgramaSo
     }
 
     @Override
+    public boolean findDuplicateClave(ProgramaSocialDTO programaSocialDTO) {
+        return programaSocialRepo.findAll().stream().anyMatch(o -> o.getClave().equals(programaSocialDTO.getClave()))
+                && !programaSocialRepo.findAll().stream().anyMatch(o -> o.getNombre().equals(programaSocialDTO.getNombre()));
+    }
+
+    @Override
     public void validarPersistencia(ProgramaSocialDTO dto, ResultadoDTO<ProgramaSocialDTO> resultado) {
         if (ObjectUtils.isNullOrEmpty(dto.getClave())) {
             resultado.setMensajeError(MensajesSistemaEnum.MSG_GENERAL_CLAVE_REQ);

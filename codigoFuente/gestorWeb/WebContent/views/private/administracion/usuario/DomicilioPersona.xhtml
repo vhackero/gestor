@@ -105,7 +105,9 @@
 					<p:inputText id="txtCalle" styleClass="form-control"
 						value="#{adminPersonaBean.datos.domicilioPersona.calle}"
 						maxlength="200" disabled="false"
-						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.calle')}" />
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.calle')}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 					<p:message for="txtCalle" />
 				</div>
 
@@ -118,7 +120,9 @@
 						<p:inputText id="txtNumExterior" styleClass="form-control"
 							value="#{adminPersonaBean.datos.domicilioPersona.numeroExterior}"
 							maxlength="6" disabled="false"
-							placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.numExterior')}">
+							placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.numExterior')}"
+							required="true"
+							requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 							<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
 						</p:inputText>
 						<p:message for="txtNumExterior" />

@@ -104,6 +104,11 @@ public class MunicipioServiceImpl extends ComunValidacionService<MunicipioDTO> i
 		}
 		return resultado;
 	}
+	@Override
+	public boolean findDuplicateMunicipio(MunicipioDTO municipioDTO) {
+		return municipioRepo.findAll().stream().anyMatch(o -> o.getIdMunicipio().equals(municipioDTO.getIdMunicipio()))
+				&& !municipioRepo.findAll().stream().anyMatch(o -> o.getNombre().equals(municipioDTO.getNombre()));
+	}
 
 	@Override
 	public void validarPersistencia(MunicipioDTO dto, ResultadoDTO<MunicipioDTO> resultado) {
