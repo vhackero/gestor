@@ -8,13 +8,13 @@
 	xmlns:p="http://primefaces.org/ui">
 
 	<ui:define name="breadcrumb">
-		<li>Análisis de datos</li>
+		<li>AnÃ¡lisis de datos</li>
 		<li class="active">Programas</li>
 	</ui:define>
 
 	<ui:define name="content">
 		<h:form id="form">
-			<h1>Análisis de datos</h1>
+			<h1>AnÃ¡lisis de datos</h1>
 			<hr />
 			<div class="row">
 				<div class="col-md-4">
@@ -22,7 +22,7 @@
 						action="#{graficasBean.totalProgramasEstatusBorrador}"
 						oncomplete="cargaGraficasProgramas(xhr, status, args); ajustaColorLabel();" />
 					<p:commandButton value="Estadisticas Programas" process="@this"
-						styleClass="btn btn-primary quitaMargen"
+						styleClass="btn btn-primary quitaMargen" style="width: 180px"
 						onclick="graficasProgramas(); PF('modalAnalisis').show(); " />
 				</div>
 			</div>
@@ -30,7 +30,7 @@
 			<p:dialog widgetVar="modalAnalisis" modal="true" resizable="false"
 				draggable="false" closable="false" position="center" width="900"
 				styleClass="modalAnalisisDatos modalAbsoluto"
-				header="Programas de capacitación">
+				header="Programas de capacitaciÃ³n">
 					<div class="row">
 						<div class="col-md-4 text-center fondoGris">
 							<p:outputLabel value="TOTAL" styleClass="bloque labelSuperior" />
@@ -42,38 +42,38 @@
 							<p:outputLabel value="TIPO DE COMPETENCIA"
 								styleClass="bloque labelSuperior" />
 							<p:outputLabel value="0" styleClass="bloque numeroGrande" id="totalEstrategicos" />
-							<p:outputLabel value="Estratégicos"
+							<p:outputLabel value="EstratÃ©gicos"
 								styleClass="bloque labelInferior" />
 						</div>
 						<div class="col-md-4 text-center fondoGris">
 							<p:outputLabel value="TIPO DE COMPETENCIA"
 								styleClass="bloque labelSuperior" />
 							<p:outputLabel value="0" styleClass="bloque numeroGrande" id="totalGestion" />
-							<p:outputLabel value="De gestión"
+							<p:outputLabel value="De gestiÃ³n"
 								styleClass="bloque labelInferior" />
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="PROGRAMA DE TIPO ESTRATÉGICO"
+							<p:outputLabel value="PROGRAMA DE TIPO ESTRATÃ‰GICO"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="progTipoEstrategico" class="medidaGrafica"></div>
 						</div>
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="PROGRAMA DE TIPO DE GESTIÓN"
+							<p:outputLabel value="PROGRAMA DE TIPO DE GESTIÃ“N"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="progTipoDeGestion" class="medidaGrafica"></div>
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="NUM. DE PROGRAMAS POR ÁREA RESPONSABLE"
+							<p:outputLabel value="NUM. DE PROGRAMAS POR ÃREA RESPONSABLE"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="progAreaResponsable" class="medidaGrafica"></div>
 						</div>
 						<div class="col-md-6 fondoGris">
 							<p:outputLabel
-								value="NUM. DE PROGRAMAS POR TIPO DE EVENTO DE CAPACITACIÓN"
+								value="NUM. DE PROGRAMAS POR TIPO DE EVENTO DE CAPACITACIÃ“N"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="progTipoEventoCapacitacion" class="medidaGrafica"></div>
 						</div>
@@ -85,7 +85,7 @@
 							<div id="nivelDeConocimiento" class="medidaGrafica"></div>
 						</div>
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="NIVEL DE ENSEÑANZA"
+							<p:outputLabel value="NIVEL DE ENSEÃ‘ANZA"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="nivelDeEnsenanza" class="medidaGrafica"></div>
 						</div>
