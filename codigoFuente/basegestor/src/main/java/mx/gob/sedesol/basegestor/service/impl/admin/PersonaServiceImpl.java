@@ -499,6 +499,7 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 		datos.setDatosAcademicos(obtenerDatosAcademicosPorIdPersona(usuarioModifico, usuarioModifico));
 		datos.getDatosAcademicos().setTblPersona(persona);
 		datos.getDatosAcademicos().setIdPersona(persona.getIdPersona().intValue());
+		datos.getPersona().setRutaFoto(persona.getRutaFoto());
 		return datos;
 	}
 

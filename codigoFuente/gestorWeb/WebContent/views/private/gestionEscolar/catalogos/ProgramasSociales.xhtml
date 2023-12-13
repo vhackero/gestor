@@ -135,7 +135,9 @@
 								<p:inputText id="txtClave" maxlength="100"
 									placeholder="#{sistema.obtenerTexto('gw.programas.sociales.campo.clave')}"
 									value="#{programasSocialesBean.programa.clave}"
-									styleClass="form-control" />
+									styleClass="form-control"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 								<p:message for="txtClave" />
 							</div>
 
@@ -150,7 +152,9 @@
 								<p:inputText id="txtNombre" maxlength="100"
 									placeholder="#{sistema.obtenerTexto('gw.programas.sociales.campo.nombre')}"
 									value="#{programasSocialesBean.programa.nombre}"
-									styleClass="form-control" />
+									styleClass="form-control"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 								<p:message for="txtNombre" />
 							</div>
 

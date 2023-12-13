@@ -97,7 +97,9 @@
 								<p:inputText id="txtNombre"
 									placeholder="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.nombre')}"
 									value="#{clasBadgeBean.clasificacion.nombre}"
-									styleClass="form-control" maxlength="50" />
+									styleClass="form-control" maxlength="50"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
 								<p:message for="txtNombre" />
 							</div>
 							<div class="col-md-6">
@@ -107,7 +109,9 @@
 								<p:inputText id="txtDescr"
 									placeholder="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.descripcion')}"
 									value="#{clasBadgeBean.clasificacion.descripcion}"
-									styleClass="form-control" maxlength="100" />
+									styleClass="form-control" maxlength="100"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
 								<p:message for="txtDescr" />
 							</div>
 						</div>

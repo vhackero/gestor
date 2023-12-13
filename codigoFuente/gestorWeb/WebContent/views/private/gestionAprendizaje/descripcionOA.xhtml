@@ -56,7 +56,9 @@
 					<p:inputTextarea id="txtResumen" styleClass="form-control"
 						maxlength="2000"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.resumen}"
-						placeholder="Describe el contenido del objeto educativo, el propósito y una visión panorámica de los temas o tópicos, resaltando la utilidad del material para el usuario. Escribir el resumen en un máximo de 100 palabras.">
+						placeholder="Describe el contenido del objeto educativo, el propósito y una visión panorámica de los temas o tópicos, resaltando la utilidad del material para el usuario. Escribir el resumen en un máximo de 100 palabras."
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
 					<p:message for="txtResumen" />
@@ -72,7 +74,9 @@
 						<!-- Longitud de campo -->
 					<p:inputText id="txtVersion" maxlength="100"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.version}"
-						styleClass="form-control">
+						styleClass="form-control"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputText>
 					<p:message for="txtVersion" />
@@ -84,7 +88,9 @@
 						<!-- Longitud de campo -->
 					<p:inputText id="txtEdicion" maxlength="255"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.lugarEdicion}"
-						styleClass="form-control">
+						styleClass="form-control"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputText>
 					<p:message for="txtEdicion" />
@@ -118,7 +124,9 @@
 						<!-- Longitud de campo -->
 					<p:inputTextarea id="txtEvaluacionAprendizaje"
 						styleClass="form-control" maxlength="2000"
-						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.ambitoAplicacion}">
+						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.ambitoAplicacion}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
 					<p:message for="txtEvaluacionAprendizaje" />
@@ -213,7 +221,9 @@
 						<!-- Longitud de campo -->
 					<p:inputText id="tiempoEstimado" maxlength="20"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.tiempoEstimadoRepLectura}"
-						styleClass="form-control">
+						styleClass="form-control"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 
 						<p:ajax process="@this" />
 					</p:inputText>
@@ -247,6 +257,8 @@
 						<!-- Longitud de campo -->
 					<p:inputTextarea id="txtResponsable" maxlength="2000"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.responsableAcademico}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 						placeholder="Son las personas que participaron de manera directa en la elaboración del material fuente. Se entiende por 'directa' los que aportaron el contenido académico o los que compilaron el material editado.">
 						<p:ajax process="@this" />
 					</p:inputTextarea>

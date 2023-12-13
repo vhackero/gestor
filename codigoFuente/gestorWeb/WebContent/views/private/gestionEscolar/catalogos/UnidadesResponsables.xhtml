@@ -105,7 +105,9 @@
 								<p:inputText id="txtClave" maxlength="100"
 									placeholder="#{sistema.obtenerTexto('gw.unidades.responsables.campo.clave')}"
 									value="#{unidadesResponsablesBean.unidad.clave}"
-									styleClass="form-control" />
+									styleClass="form-control"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 								<p:message for="txtClave" />
 							</div>
 						</div>
@@ -119,7 +121,9 @@
 								<p:inputText id="txtNombre" maxlength="100"
 									placeholder="#{sistema.obtenerTexto('gw.unidades.responsables.campo.nombre')}"
 									value="#{unidadesResponsablesBean.unidad.nombre}"
-									styleClass="form-control" />
+									styleClass="form-control"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 								<p:message for="txtNombre" />
 							</div>
 						</div>

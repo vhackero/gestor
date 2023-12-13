@@ -148,7 +148,9 @@
 								<p:inputText id="descripcion" maxlength="100"
 									placeholder="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.descripcion')}"
 									value="#{badgetBean.badget.descripcion}"
-									styleClass="form-control" />
+									styleClass="form-control"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
 								<p:message for="descripcion" />
 							</div>
 						</div>
@@ -163,7 +165,9 @@
 									widgetVar="calificacionMaxima" maxlength="8"
 									placeholder="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.calificacionMax')}"
 									value="#{badgetBean.badget.calificacionMaxima}" disabled="true"
-									styleClass="form-control">
+									styleClass="form-control"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 									<p:keyFilter regEx="/[0-9]/" />
 								</p:inputText>
 								<p:message for="calificacionMaxima" />
@@ -176,7 +180,9 @@
 									widgetVar="calificacionMinima" maxlength="8" disabled="true"
 									placeholder="#{sistema.obtenerTexto('gw.badge.modal.etiqueta.calificacionMinima')}"
 									value="#{badgetBean.badget.calificacionMinima}"
-									styleClass="form-control">
+									styleClass="form-control"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 									<p:keyFilter regEx="/[0-9]/" />
 								</p:inputText>
 								<p:message for="calificacionMinima" />

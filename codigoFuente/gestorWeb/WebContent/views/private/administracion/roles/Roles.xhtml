@@ -112,7 +112,9 @@
 								<p:inputText id="txtNombre"
 									placeholder="#{sistema.obtenerTexto('gw.roles.modal.etiqueta.nombre')}"
 									value="#{rolBean.rol.nombre}" styleClass="form-control"
-									maxlength="30">
+									maxlength="30"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 								</p:inputText>
 								<p:message for="txtNombre" />
 							</div>
@@ -123,7 +125,9 @@
 								<p:inputText id="txtClave"
 									placeholder="#{sistema.obtenerTexto('gw.roles.modal.etiqueta.clave')}"
 									value="#{rolBean.rol.clave}" disabled="#{not rolBean.nuevo}"
-									styleClass="form-control noCursor" maxlength="50">
+									styleClass="form-control noCursor" maxlength="50"
+									required="true"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 									<p:keyFilter regEx="/[A-Z_]/" preventPaste="false" />
 								</p:inputText>
 								<p:message for="txtClave" />

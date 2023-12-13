@@ -3,6 +3,7 @@ package mx.gob.sedesol.basegestor.service.impl.admin;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProgramaSocialDTO;
 import org.apache.log4j.Logger;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -113,6 +114,12 @@ public class AsentamientoServiceImpl extends ComunValidacionService<Asentamiento
 			resultado.agregaMensaje(MensajesSistemaEnum.ADMIN_MSG_ELIMINACION_EXITOSA.getId());
 		}
 		return resultado;
+	}
+
+	@Override
+	public boolean findDuplicateAsentamiento(AsentamientoDTO asentamientoDTO) {
+		return asentamientoRepo.findAll().stream().anyMatch(o -> o.getCodigoPostal().equals(asentamientoDTO.getCodigoPostal()))
+				&& !asentamientoRepo.findAll().stream().anyMatch(o -> o.getNombre().equals(asentamientoDTO.getNombre()));
 	}
 
 	@Override
