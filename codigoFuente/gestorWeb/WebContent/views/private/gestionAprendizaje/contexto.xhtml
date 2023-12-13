@@ -68,7 +68,9 @@
 					<p:inputTextarea id="txtCondiciones" maxlength="500"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.condicionesUso}"
 						styleClass="form-control"
-						placeholder="Ingresar los comentarios sobre las condiciones de uso del Objeto de Aprendizaje.">
+						placeholder="Ingresar los comentarios sobre las condiciones de uso del Objeto de Aprendizaje."
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
 					<p:message for="txtCondiciones" />
@@ -106,7 +108,9 @@
 					<p:inputTextarea id="txtDescripcion" maxlength="500"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.descripcionObjetoRelacionado}"
 						styleClass="form-control"
-						placeholder="Ingresar  la descripción del Objeto de Aprendizaje con el cuál tiene relación este OA.">
+						placeholder="Ingresar  la descripción del Objeto de Aprendizaje con el cuál tiene relación este OA."
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
 					<p:message for="txtDescripcion" />
@@ -121,7 +125,9 @@
 					<!-- Longitud de campo -->
 					<p:inputTextarea id="txtAnotacion" maxlength="100"
 						value="#{fichaObjetoAprendizajeBean.foaEtapaDTO.anotacion}"
-						styleClass="form-control">
+						styleClass="form-control"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax process="@this" />
 					</p:inputTextarea>
 					<p:message for="txtAnotacion" />

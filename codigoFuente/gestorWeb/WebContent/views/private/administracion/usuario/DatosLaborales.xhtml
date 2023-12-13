@@ -40,7 +40,9 @@
 					<p:inputText id="txtNbInstitucion" styleClass="form-control"
 						value="#{adminPersonaBean.datos.datosLaborales.institucion}"
 						maxlength="45" disabled="false"
-						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.nomInstitucion')}" />
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.nomInstitucion')}" 
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 					<p:message for="txtNbInstitucion" />
 				</div>
 				<div class="col-md-4">
@@ -223,7 +225,9 @@
 						type="email" validator="#{adminPersonaBean.validarCorreo}"
 						maxlength="45" disabled="false"
 						value="#{adminPersonaBean.datos.personaCorreo.correoElectronico}"
-						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.correo')}" />
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.correo')}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 					<p:message for="txtCorreoElectronico" />
 				</div>
 			</div>

@@ -139,7 +139,7 @@
 								<!-- Longitud de campo -->
 								<p:inputText id="txtNombre" value="#{temaBean.tema.nombre}"
 									styleClass="form-control" required="true"
-									requiredMessage="Dato requerido" maxlength="45"
+									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" maxlength="45"
 									placeholder="#{sistema.obtenerTexto('gw.temas.modal.etiqueta.nombre')}" />
 								<p:message for="txtNombre" />
 							</div>

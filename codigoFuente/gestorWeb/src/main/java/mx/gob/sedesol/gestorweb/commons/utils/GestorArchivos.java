@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -117,6 +118,7 @@ public class GestorArchivos {
 	public static void unzipFunction(String zipFile, String destinationFolder) {
 
 		// if the output directory doesn't exist, create it
+		destinationFolder = Paths.get(destinationFolder).toString();
 		createDirectory(destinationFolder);
 
 		try(ZipInputStream zipInput = new ZipInputStream(new FileInputStream(zipFile))) {

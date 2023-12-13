@@ -16,7 +16,9 @@
 					<p:inputText id="txtCURP" styleClass="form-control"
 						validator="#{adminPersonaBean.validarFormatoCurp}" disabled="false"
 						value="#{adminPersonaBean.datos.persona.curp}" maxlength="18"
-						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.curp')}">
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.curp')}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:keyFilter regEx="/[A-Z]|[0-9]/" preventPaste="false" />
 					</p:inputText>
 					<p:message id="mtxtCURP" for="txtCURP" />
@@ -44,7 +46,9 @@
 					<!-- Longitud de campo -->
 					<p:inputText id="txtNombrePersona" styleClass="form-control"
 						value="#{adminPersonaBean.datos.persona.nombre}" maxlength="45" disabled="false"
-						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.nombre')}">
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.nombre')}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:keyFilter regEx="/[a-z ]/i" preventPaste="false" />
 					</p:inputText>
 					<p:message for="txtNombrePersona" />
@@ -57,7 +61,9 @@
 					<p:inputText id="txtApellidoPaterno" styleClass="form-control"
 						value="#{adminPersonaBean.datos.persona.apellidoPaterno}"
 						maxlength="45" disabled="false"
-						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.primerApellido')}">
+						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.primerApellido')}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:keyFilter regEx="/[a-z ]/i" preventPaste="false" />
 					</p:inputText>
 					<p:message for="txtApellidoPaterno" />

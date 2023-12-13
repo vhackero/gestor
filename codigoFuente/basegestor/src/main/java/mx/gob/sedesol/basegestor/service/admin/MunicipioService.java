@@ -8,4 +8,5 @@ public interface MunicipioService extends CommonService<MunicipioDTO, String> {
 	
 	List<MunicipioDTO> buscarPorEntidadFederativa(int idEntidadFederativa);
 
+	boolean findDuplicateMunicipio(MunicipioDTO municipioDTO);
 }

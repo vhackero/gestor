@@ -105,28 +105,32 @@ public class LocalizacionBean extends BaseBean {
 
 	public String guardarMunicipio() {
 		ResultadoDTO<MunicipioDTO> resultado;
-		if (nuevo) {
-			resultado = municipioService.guardar(municipio);
-		} else {
-			resultado = municipioService.actualizar(municipio);
-		}
-		if (resultado.getResultado() == ResultadoTransaccionEnum.EXITOSO) {
-
+		if (municipioService.findDuplicateMunicipio(municipio)) {
+			agregarMsgError("Ya existe el ID", null, sistema);
+		}else {
 			if (nuevo) {
-				bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CRE_MUN",
-						String.valueOf(resultado.getDto().getIdMunicipio()), requestActual(), TipoServicioEnum.LOCAL);
+				resultado = municipioService.guardar(municipio);
 			} else {
-				bitacoraBean.guardarBitacora(idPersonaEnSesion(), "EDI_MUN",
-						String.valueOf(resultado.getDto().getIdMunicipio()), requestActual(), TipoServicioEnum.LOCAL);
+				resultado = municipioService.actualizar(municipio);
 			}
-			if (!ObjectUtils.isNullOrCero(idEntidadFederativa)) {
-				entidadFederativaDTO = entidadFederativaService.buscarPorId(idEntidadFederativa);
-				municipios = municipioService.buscarPorEntidadFederativa(idEntidadFederativa);
+			if (resultado.getResultado() == ResultadoTransaccionEnum.EXITOSO) {
+
+				if (nuevo) {
+					bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CRE_MUN",
+							String.valueOf(resultado.getDto().getIdMunicipio()), requestActual(), TipoServicioEnum.LOCAL);
+				} else {
+					bitacoraBean.guardarBitacora(idPersonaEnSesion(), "EDI_MUN",
+							String.valueOf(resultado.getDto().getIdMunicipio()), requestActual(), TipoServicioEnum.LOCAL);
+				}
+				if (!ObjectUtils.isNullOrCero(idEntidadFederativa)) {
+					entidadFederativaDTO = entidadFederativaService.buscarPorId(idEntidadFederativa);
+					municipios = municipioService.buscarPorEntidadFederativa(idEntidadFederativa);
+				}
+				RequestContext.getCurrentInstance().execute("PF('aModal').hide();");
+				agregarMsgInfo(resultado.getMensajes().get(0), null, sistema);
+			} else {
+				agregarMsgError(resultado.getMensajes(), null, sistema);
 			}
-			RequestContext.getCurrentInstance().execute("PF('aModal').hide();");
-			agregarMsgInfo(resultado.getMensajes().get(0), null, sistema);
-		} else {
-			agregarMsgError(resultado.getMensajes(), null, sistema);
 		}
 		return "";
 	}
@@ -158,27 +162,31 @@ public class LocalizacionBean extends BaseBean {
 	public void guardarAsentamiento() {
 		ResultadoDTO<AsentamientoDTO> resultado;
 
-		if (nuevo) {
-			resultado = asentamientoService.guardar(asentamiento);
-		} else {
-			resultado = asentamientoService.actualizar(asentamiento);
-		}
-		if (resultado.getResultado() == ResultadoTransaccionEnum.EXITOSO) {
-
+		if (asentamientoService.findDuplicateAsentamiento(asentamiento)) {
+			agregarMsgError("Ya existe el ID", null, sistema);
+		}else {
 			if (nuevo) {
-				bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CRE_MUN",
-						String.valueOf(resultado.getDto().getIdAsentamiento()), requestActual(),
-						TipoServicioEnum.LOCAL);
+				resultado = asentamientoService.guardar(asentamiento);
 			} else {
-				bitacoraBean.guardarBitacora(idPersonaEnSesion(), "EDI_MUN",
-						String.valueOf(resultado.getDto().getIdAsentamiento()), requestActual(),
-						TipoServicioEnum.LOCAL);
+				resultado = asentamientoService.actualizar(asentamiento);
 			}
-			cargarListaAsentamientos();
-			RequestContext.getCurrentInstance().execute("PF('amodal').hide();");
-			agregarMsgInfo(resultado.getMensajes().get(0), null, sistema);
-		} else {
-			agregarMsgError(resultado.getMensajes(), null, sistema);
+			if (resultado.getResultado() == ResultadoTransaccionEnum.EXITOSO) {
+
+				if (nuevo) {
+					bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CRE_MUN",
+							String.valueOf(resultado.getDto().getIdAsentamiento()), requestActual(),
+							TipoServicioEnum.LOCAL);
+				} else {
+					bitacoraBean.guardarBitacora(idPersonaEnSesion(), "EDI_MUN",
+							String.valueOf(resultado.getDto().getIdAsentamiento()), requestActual(),
+							TipoServicioEnum.LOCAL);
+				}
+				cargarListaAsentamientos();
+				RequestContext.getCurrentInstance().execute("PF('amodal').hide();");
+				agregarMsgInfo(resultado.getMensajes().get(0), null, sistema);
+			} else {
+				agregarMsgError(resultado.getMensajes(), null, sistema);
+			}
 		}
 	}
 
