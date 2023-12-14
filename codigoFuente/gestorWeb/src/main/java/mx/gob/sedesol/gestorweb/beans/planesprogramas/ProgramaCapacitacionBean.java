@@ -233,7 +233,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 		} else if (ObjectUtils.isNull(programa) || ObjectUtils.isNull(programa.getIdPrograma())) {
 
 			// Nuevo programa
-			leyendaBusqueda = "Listado de Programas de capacitación creados";
+			leyendaBusqueda = "Listado de Programas de estudios creados";
 			controlEstTematica = new ControlEstTematicaDTO();
 			programa = new FichaDescProgramaDTO();
 			programa.setTipoCompetencia(0);
