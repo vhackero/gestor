@@ -20,6 +20,8 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoPlan_;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan_;
 
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatCreditosPlan_;
+
 public class PlanEspecificacion implements Specification<TblPlan> {
 	
 	private PlanDTO filtro;
@@ -59,6 +61,10 @@ public class PlanEspecificacion implements Specification<TblPlan> {
 			
 			if(ObjectUtils.isNotNull(filtro.getCatAlcancePlan())){
 				predicates.add(cb.equal(root.join(TblPlan_.catAlcancePlan).get(CatAlcancePlan_.id),filtro.getCatAlcancePlan().getId()));
+			}
+
+			if(ObjectUtils.isNotNull(filtro.getCatCreditosPlan())){
+				predicates.add(cb.equal(root.join(TblPlan_.catCreditosPlan).get(CatCreditosPlan_.id),filtro.getCatCreditosPlan().getId()));
 			}
 
 		}

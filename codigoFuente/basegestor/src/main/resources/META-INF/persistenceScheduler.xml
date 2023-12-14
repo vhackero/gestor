@@ -86,6 +86,8 @@
 		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCompEspecifica</class>
 		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblEstPersonalExterno</class>
 		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaPersonalExterno</class>
+        
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatCreditosPlan</class>
 		<!-- Fin Planes y programas -->
 
 		<!-- Inicia seccion encuestas -->

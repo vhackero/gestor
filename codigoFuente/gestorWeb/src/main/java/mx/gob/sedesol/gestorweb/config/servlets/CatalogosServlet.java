@@ -44,6 +44,7 @@ import mx.gob.sedesol.basegestor.service.badges.ClasificacionBadgeService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.EstPersonalExternoService;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatCreditosPlan;
 /**
  * Servlet implementation class CatalogosServlet
  */
@@ -107,7 +108,10 @@ public class CatalogosServlet extends HttpServlet {
 	@Autowired	
 	private transient CatalogoComunService<CatTipoResponsabilidadEc, Integer> catTipoResponsabilidadEc;
 	@Autowired	
-	private transient CatalogoComunService<CatElementosMultimedia, Integer> catalogoElementosMultimedia; 
+	private transient CatalogoComunService<CatElementosMultimedia, Integer> catalogoElementosMultimedia;
+	
+	@Autowired
+	private transient CatalogoComunService<CatCreditosPlan, Integer> catCreditosPlanService;
 
 	/**
 	 * 
@@ -161,6 +165,9 @@ public class CatalogosServlet extends HttpServlet {
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_INSTITUCIIONES_CERTIFICADORAS, catInstitucionesCertificadora.findAll(CatInstitucionesCertificadora.class));
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_TIPO_CARGA_HORARIA, catTipoCargaHoraria.findAll(CatTpoCargaHoraria.class));
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_MATERIAL_DIDACTICO, catMatsDidacticosService.findAll(CatMaterialDidactico.class));
+
+		
+		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_CREDITOS_PLAN, catCreditosPlanService.findAll(CatCreditosPlan.class));
 		//config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_EST_PERSONAL_EXTERNO, estPersonalExternoService.obtenerEstPersonalExtPadres());
 		//fin planes y programas
 		

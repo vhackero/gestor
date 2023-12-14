@@ -84,6 +84,30 @@
 						</div>
 					</div>
 				</div>
+				
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque requerido"
+								value="Especificar créditos:" />
+							<f:validateBean disabled="true">
+								<p:selectOneMenu value="#{planBean.plan.catCreditosPlan.id}"
+									valueChangeListener="#{planBean.onChangeCreditosPlan}"
+									autoWidth="false" styleClass="col-xs-12">
+									<p:ajax event="change" process="@this" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+									<f:selectItems value="#{planBean.catCreditosPlan}" var="credito"
+										itemLabel="#{credito.nombre}" itemValue="#{credito.id}" />
+								</p:selectOneMenu>
+							</f:validateBean>
+
+						</div>
+					</div>
+				</div>
+				
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-4 col-xs-12">
