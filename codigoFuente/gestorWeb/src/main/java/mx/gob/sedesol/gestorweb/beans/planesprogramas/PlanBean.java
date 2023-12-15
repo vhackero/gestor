@@ -13,6 +13,8 @@ import javax.faces.model.SelectItem;
 import javax.faces.model.SelectItemGroup;
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesBitacora;
 
+import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.*;
+import mx.gob.sedesol.basegestor.service.planesyprogramas.PeriodoService;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -20,10 +22,6 @@ import org.apache.log4j.Logger;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.OrgGubernamentalDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
-import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
-import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.RelPlanAptitudDTO;
-import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.RelPlanConocimientoDTO;
-import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.RelPlanHabilidadDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.mongo.service.BitacoraService;
@@ -56,6 +54,7 @@ public class PlanBean extends BaseBean {
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
 
+	private List<CatalogoComunDTO> catPeriodo;
 	private List<CatalogoComunDTO> catTpoPlan;
 	private List<CatalogoComunDTO> catModalidadPlan;
 	private List<CatalogoComunDTO> catalEstatusPlan;
@@ -66,6 +65,8 @@ public class PlanBean extends BaseBean {
 	private List<CatalogoComunDTO> catAptitutesPlan;
 	private List<CatalogoComunDTO> catHabilidadesPlan;
 	private List<CatalogoComunDTO> catDocsExpidePlan;
+	
+	private List<CatalogoComunDTO> catCreditosPlan;
 
 	private List<SelectItem> itemsOrgGubs;
 
@@ -104,6 +105,7 @@ public class PlanBean extends BaseBean {
 			// Flujo Nuevo Plan
 			plan = new PlanDTO();
 			plan.setCatTipoPlan(new CatalogoComunDTO());
+			plan.setCatPeriodo(new CatalogoComunDTO());
 			plan.setCatAlcancePlan(new CatalogoComunDTO());
 			plan.setCatCompetenciasPlan(new CatalogoComunDTO());
 			plan.setCatDocumentosExpidePlan(new CatalogoComunDTO());
@@ -112,6 +114,8 @@ public class PlanBean extends BaseBean {
 			plan.setCatNivelEnsenanzaPrograma(new CatalogoComunDTO());
 			plan.setTblOrganismoGubernamental(new OrgGubernamentalDTO());
 			plan.setIdentificador(planServiceFacade.generaIdentificadorPlan());
+			
+			plan.setCatCreditosPlan(new CatalogoComunDTO());
 
 			filtroPlan = new PlanDTO();
 			setEdicionPlan(Boolean.FALSE);
@@ -153,7 +157,8 @@ public class PlanBean extends BaseBean {
 
 		plan = new PlanDTO();
 		logger.debug("Consultando catalogos de planes desde sesion");
-
+		catPeriodo = (List<CatalogoComunDTO>) getSession().getServletContext()
+				.getAttribute(ConstantesGestorWeb.CAT_PERIODOS);
 		catTpoPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_TPO_PLAN);
 		catModalidadPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
@@ -174,6 +179,9 @@ public class PlanBean extends BaseBean {
 				.getAttribute(ConstantesGestorWeb.CAT_COMPETENCIAS_PLAN);
 		catDocsExpidePlan = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_DOCS_EXPIDE_PLAN);
+		
+		catCreditosPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
+				.getAttribute(ConstantesGestorWeb.CAT_CREDITOS_PLAN);
 
 	}
 
@@ -229,6 +237,12 @@ public class PlanBean extends BaseBean {
 		}
 	}
 
+	public void onChangePeriodo(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			plan.setCatPeriodo(this.getValorDeCatalogo(catPeriodo, ((Integer) e.getNewValue())));
+		}
+	}
+
 	public void onChangeNvEnsePlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			plan.setCatNivelEnsenanzaPrograma(this.getValorDeCatalogo(catNivelEnsPlan, ((Integer) e.getNewValue())));
@@ -244,6 +258,12 @@ public class PlanBean extends BaseBean {
 	public void onChangeAlcancePlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			plan.setCatAlcancePlan(this.getValorDeCatalogo(catAlcancePlan, ((Integer) e.getNewValue())));
+		}
+	}
+	
+	public void onChangeCreditosPlan(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			plan.setCatCreditosPlan(this.getValorDeCatalogo(catCreditosPlan, ((Integer) e.getNewValue())));
 		}
 	}
 
@@ -336,6 +356,8 @@ public class PlanBean extends BaseBean {
 			filtroPlan.setCatTipoPlan(new CatalogoComunDTO());
 			filtroPlan.setCatAlcancePlan(new CatalogoComunDTO());
 			filtroPlan.setCatEstatusPlan(new CatalogoComunDTO());
+			
+			filtroPlan.setCatCreditosPlan(new CatalogoComunDTO());
 
 		}
 	}
@@ -345,6 +367,7 @@ public class PlanBean extends BaseBean {
 	 */
 	public void guardaNuevoPlan() {
 		logger.info("########## PERSISTENCIA DEl PLAN ########");
+		logger.info("plan: " + plan.getNombre() + "  periodo: " + plan.getCatPeriodo().getId() + " - " + plan.getCatPeriodo().getNombre());
 		plan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
 		ResultadoDTO<PlanDTO> resultado = planServiceFacade.guardaNuevoPlan(plan,
 				this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
@@ -481,6 +504,21 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
+	 * @return the catPeriodo
+	 */
+	public List<CatalogoComunDTO> getCatPeriodo() {
+		return catPeriodo;
+	}
+
+	/**
+	 * @param catPeriodo
+	 *            the catPeriodo to set
+	 */
+	public void setCatPeriodo(List<CatalogoComunDTO> catPeriodo) {
+		this.catPeriodo = catPeriodo;
+	}
+
+	/**
 	 * @return the catModalidadPlan
 	 */
 	public List<CatalogoComunDTO> getCatModalidadPlan() {
@@ -508,6 +546,21 @@ public class PlanBean extends BaseBean {
 	 */
 	public void setCatAlcancePlan(List<CatalogoComunDTO> catAlcancePlan) {
 		this.catAlcancePlan = catAlcancePlan;
+	}
+	
+	/**
+	 * @return the catAlcancePlan
+	 */
+	public List<CatalogoComunDTO> getCatCreditosPlan() {
+		return catCreditosPlan;
+	}
+
+	/**
+	 * @param catAlcancePlan
+	 *            the catAlcancePlan to set
+	 */
+	public void setCatCreditosPlan(List<CatalogoComunDTO> catCreditosPlan) {
+		this.catCreditosPlan = catCreditosPlan;
 	}
 
 	/**

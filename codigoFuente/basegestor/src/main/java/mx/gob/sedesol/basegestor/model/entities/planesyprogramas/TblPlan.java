@@ -21,7 +21,6 @@ import javax.persistence.TemporalType;
 
 import mx.gob.sedesol.basegestor.model.entities.admin.TblOrganismoGubernamental;
 
-
 /**
  * The persistent class for the tbl_planes database table.
  * 
@@ -124,6 +123,10 @@ public class TblPlan implements Serializable {
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="id_tpo_plan")
 	private CatTipoPlan catTipoPlan;
+
+	@OneToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="id_periodo")
+	private CatPeriodo catPeriodo;
 	
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="id_alcance_plan")
@@ -131,6 +134,10 @@ public class TblPlan implements Serializable {
 	
 	@Column(name="id_categoria_mdl")
 	private Integer idCategoriaMdl;
+	
+	@OneToOne(fetch=FetchType.LAZY, targetEntity = CatCreditosPlan.class)
+	@JoinColumn(name="id_creditos_plan")
+	private CatCreditosPlan catCreditosPlan;
 
 	public TblPlan() {
 	}
@@ -153,6 +160,14 @@ public class TblPlan implements Serializable {
 
 	public Date getFechaInicio() {
 		return this.fechaInicio;
+	}
+
+	public CatPeriodo getCatPeriodo() {
+		return catPeriodo;
+	}
+
+	public void setCatPeriodo(CatPeriodo catPeriodo) {
+		this.catPeriodo = catPeriodo;
 	}
 
 	public void setFechaInicio(Date fechaInicio) {
@@ -347,6 +362,20 @@ public class TblPlan implements Serializable {
 	 */
 	public void setCatAlcancePlan(CatAlcancePlan catAlcancePlan) {
 		this.catAlcancePlan = catAlcancePlan;
+	}
+	
+	/**
+	 * @return the catCreditosPlan
+	 */
+	public CatCreditosPlan getCatCreditosPlan() {
+		return catCreditosPlan;
+	}
+
+	/**
+	 * @param catCreditosPlan the catCreditosPlan to set
+	 */
+	public void setCatCreditosPlan(CatCreditosPlan catCreditosPlan) {
+		this.catCreditosPlan = catCreditosPlan;
 	}
 
 	/**

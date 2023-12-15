@@ -57,6 +57,7 @@
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatAmbientesAprendizajeEc</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoEventoEc</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatStatusPrograma</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatPeriodo</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblEntidad</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelCatalogoGeneralValor</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblCatalogoGeneral</class>
@@ -87,6 +88,8 @@
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCompEspecifica</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblEstPersonalExterno</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaPersonalExterno</class>
+        
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatCreditosPlan</class>
         <!-- Fin Planes y programas -->
 
         <!-- Inicia seccion encuestas -->

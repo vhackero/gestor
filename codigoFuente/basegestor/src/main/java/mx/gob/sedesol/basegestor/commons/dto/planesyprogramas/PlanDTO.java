@@ -53,11 +53,15 @@ public class PlanDTO implements Serializable{
 	private OrgGubernamentalDTO tblOrganismoGubernamental;
 	@NotNull(message=MensajesSistemaEnum.Constantes.GESTOR_WEB_GENERAL_DATO_REQUERIDO)
 	private CatalogoComunDTO catTipoPlan;
+	@NotNull(message=MensajesSistemaEnum.Constantes.GESTOR_WEB_GENERAL_DATO_REQUERIDO)
+	private CatalogoComunDTO catPeriodo;
 	private CatalogoComunDTO catAlcancePlan;
 	private boolean ponderacion;
 	private Integer version;
 	private Integer idCategoriaMdl;
 	private BitacoraDTO bitacoraDTO;
+
+	private CatalogoComunDTO catCreditosPlan;
 	
 	/**
 	 * @return the idPlan
@@ -71,6 +75,15 @@ public class PlanDTO implements Serializable{
 	public void setIdPlan(Integer idPlan) {
 		this.idPlan = idPlan;
 	}
+
+	public CatalogoComunDTO getCatPeriodo() {
+		return catPeriodo;
+	}
+
+	public void setCatPeriodo(CatalogoComunDTO catPeriodo) {
+		this.catPeriodo = catPeriodo;
+	}
+
 	/**
 	 * @return the fechaActualizacion
 	 */
@@ -403,4 +416,17 @@ public class PlanDTO implements Serializable{
         this.bitacoraDTO = bitacoraDTO;
     }
 	
+    
+    /**
+	 * @return the catCreditosPlan
+	 */
+	public CatalogoComunDTO getCatCreditosPlan() {
+		return catCreditosPlan;
+	}
+	/**
+	 * @param catCreditosPlan the catCreditosPlan to set
+	 */
+	public void setCatCreditosPlan(CatalogoComunDTO catCreditosPlan) {
+		this.catCreditosPlan = catCreditosPlan;
+	}
 }
