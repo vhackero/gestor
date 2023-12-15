@@ -124,6 +124,10 @@ public class TblPlan implements Serializable {
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="id_tpo_plan")
 	private CatTipoPlan catTipoPlan;
+
+	@OneToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="id_periodo")
+	private CatPeriodo catPeriodo;
 	
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="id_alcance_plan")
@@ -153,6 +157,14 @@ public class TblPlan implements Serializable {
 
 	public Date getFechaInicio() {
 		return this.fechaInicio;
+	}
+
+	public CatPeriodo getCatPeriodo() {
+		return catPeriodo;
+	}
+
+	public void setCatPeriodo(CatPeriodo catPeriodo) {
+		this.catPeriodo = catPeriodo;
 	}
 
 	public void setFechaInicio(Date fechaInicio) {
