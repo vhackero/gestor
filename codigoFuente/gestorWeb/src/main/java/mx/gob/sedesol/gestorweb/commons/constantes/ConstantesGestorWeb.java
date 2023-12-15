@@ -157,6 +157,8 @@ public final class ConstantesGestorWeb {
 	public static final String CAT_TIPOS_CORREO = "cat_tipos_correo";
 	public static final String CAT_ROLES = "cat_roles";
 	public static final String CAT_TPO_PLAN ="cat_tipo_plan";
+	public static final String CAT_PERIODOS ="cat_periodos";
+
 	public static final String CAT_MODALIDAD_PLAN_PROG ="cat_modalidad_plan_programas";
 	public static final String CAT_ESTATUS_PLAN ="cat_estatus_plan";
 	public static final String CAT_ALCANCE_PLAN ="cat_alcance_plan";

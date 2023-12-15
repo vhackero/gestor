@@ -68,6 +68,8 @@ public class CatalogosServlet extends HttpServlet {
 	@Autowired
 	private transient CatalogoComunService<CatTipoPlan, Integer> catTipoPlanService;
 	@Autowired
+	private transient CatalogoComunService<CatPeriodo, Integer> catPeriodoService;
+	@Autowired
 	private transient CatalogoComunService<CatAlcancePlan, Integer> catAlcancePlanService;
 	@Autowired
 	private transient OrgGubernamentalService orgGubernamentalService;
@@ -146,6 +148,7 @@ public class CatalogosServlet extends HttpServlet {
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_CLASIFICACIONES_BADGE, getClasificacionBadgeService());
 		//fin Admin
 		//PLanes y programas
+		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_PERIODOS, catPeriodoService.findAll(CatPeriodo.class));
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_TPO_PLAN, catTipoPlanService.findAll(CatTipoPlan.class));
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_MODALIDAD_PLAN_PROG, catModalidadPlanPlanService.findAll(CatModalidadPlanPrograma.class));
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_ESTATUS_PLAN, catEstatusPlanService.findAll(CatEstatusPlan.class));
