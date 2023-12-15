@@ -65,6 +65,8 @@ public class PlanBean extends BaseBean {
 	private List<CatalogoComunDTO> catAptitutesPlan;
 	private List<CatalogoComunDTO> catHabilidadesPlan;
 	private List<CatalogoComunDTO> catDocsExpidePlan;
+	
+	private List<CatalogoComunDTO> catCreditosPlan;
 
 	private List<SelectItem> itemsOrgGubs;
 
@@ -112,6 +114,8 @@ public class PlanBean extends BaseBean {
 			plan.setCatNivelEnsenanzaPrograma(new CatalogoComunDTO());
 			plan.setTblOrganismoGubernamental(new OrgGubernamentalDTO());
 			plan.setIdentificador(planServiceFacade.generaIdentificadorPlan());
+			
+			plan.setCatCreditosPlan(new CatalogoComunDTO());
 
 			filtroPlan = new PlanDTO();
 			setEdicionPlan(Boolean.FALSE);
@@ -175,6 +179,9 @@ public class PlanBean extends BaseBean {
 				.getAttribute(ConstantesGestorWeb.CAT_COMPETENCIAS_PLAN);
 		catDocsExpidePlan = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_DOCS_EXPIDE_PLAN);
+		
+		catCreditosPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
+				.getAttribute(ConstantesGestorWeb.CAT_CREDITOS_PLAN);
 
 	}
 
@@ -242,6 +249,12 @@ public class PlanBean extends BaseBean {
 	public void onChangeAlcancePlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			plan.setCatAlcancePlan(this.getValorDeCatalogo(catAlcancePlan, ((Integer) e.getNewValue())));
+		}
+	}
+	
+	public void onChangeCreditosPlan(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			plan.setCatCreditosPlan(this.getValorDeCatalogo(catCreditosPlan, ((Integer) e.getNewValue())));
 		}
 	}
 
@@ -334,6 +347,8 @@ public class PlanBean extends BaseBean {
 			filtroPlan.setCatTipoPlan(new CatalogoComunDTO());
 			filtroPlan.setCatAlcancePlan(new CatalogoComunDTO());
 			filtroPlan.setCatEstatusPlan(new CatalogoComunDTO());
+			
+			filtroPlan.setCatCreditosPlan(new CatalogoComunDTO());
 
 		}
 	}
@@ -522,6 +537,21 @@ public class PlanBean extends BaseBean {
 	 */
 	public void setCatAlcancePlan(List<CatalogoComunDTO> catAlcancePlan) {
 		this.catAlcancePlan = catAlcancePlan;
+	}
+	
+	/**
+	 * @return the catAlcancePlan
+	 */
+	public List<CatalogoComunDTO> getCatCreditosPlan() {
+		return catCreditosPlan;
+	}
+
+	/**
+	 * @param catAlcancePlan
+	 *            the catAlcancePlan to set
+	 */
+	public void setCatCreditosPlan(List<CatalogoComunDTO> catCreditosPlan) {
+		this.catCreditosPlan = catCreditosPlan;
 	}
 
 	/**

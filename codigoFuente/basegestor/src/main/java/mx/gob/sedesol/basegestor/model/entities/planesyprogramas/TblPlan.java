@@ -21,7 +21,6 @@ import javax.persistence.TemporalType;
 
 import mx.gob.sedesol.basegestor.model.entities.admin.TblOrganismoGubernamental;
 
-
 /**
  * The persistent class for the tbl_planes database table.
  * 
@@ -135,6 +134,10 @@ public class TblPlan implements Serializable {
 	
 	@Column(name="id_categoria_mdl")
 	private Integer idCategoriaMdl;
+	
+	@OneToOne(fetch=FetchType.LAZY, targetEntity = CatCreditosPlan.class)
+	@JoinColumn(name="id_creditos_plan")
+	private CatCreditosPlan catCreditosPlan;
 
 	public TblPlan() {
 	}
@@ -359,6 +362,20 @@ public class TblPlan implements Serializable {
 	 */
 	public void setCatAlcancePlan(CatAlcancePlan catAlcancePlan) {
 		this.catAlcancePlan = catAlcancePlan;
+	}
+	
+	/**
+	 * @return the catCreditosPlan
+	 */
+	public CatCreditosPlan getCatCreditosPlan() {
+		return catCreditosPlan;
+	}
+
+	/**
+	 * @param catCreditosPlan the catCreditosPlan to set
+	 */
+	public void setCatCreditosPlan(CatCreditosPlan catCreditosPlan) {
+		this.catCreditosPlan = catCreditosPlan;
 	}
 
 	/**
