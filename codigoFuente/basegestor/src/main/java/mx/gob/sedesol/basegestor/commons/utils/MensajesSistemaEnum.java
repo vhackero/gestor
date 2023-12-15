@@ -403,7 +403,7 @@ public enum MensajesSistemaEnum {
 	public static class Constantes{
 		
 		//
-		public static final String GESTOR_WEB_GENERAL_DATO_REQUERIDO ="gw.global.msg.dato.req";
+		public static final String GESTOR_WEB_GENERAL_DATO_REQUERIDO ="El campo es requerido";
 		public static final String GESTOR_WEB_GENERAL_EMAIL ="gw.global.msg.email";
 		
 		//MODULO DE LOGISTICA E INFRAESTRUCTURA 
