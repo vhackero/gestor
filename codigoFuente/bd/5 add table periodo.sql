@@ -1,22 +1,12 @@
-create or replace table des_sisi_gestor.cat_periodos
-(
-    id_periodo          int auto_increment
-        primary key,
-    nombre              varchar(200)                         not null,
-    activo              tinyint(1) default 1                 null,
-    fecha_registro      timestamp  default CURRENT_TIMESTAMP not null,
-    fecha_actualizacion timestamp  default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
-    usuario_modifico    bigint                               null
-);
-
-INSERT INTO cat_periodos (id_periodo, fecha_actualizacion, fecha_registro, nombre, usuario_modifico, activo)
-VALUES (1, NOW(), NOW(), 'Semestral', 1, 1);
-INSERT INTO cat_periodos (fecha_actualizacion, fecha_registro, nombre, usuario_modifico, activo)
-VALUES (NOW(), NOW(), 'Anual', 1, 1);
-INSERT INTO cat_periodos (fecha_actualizacion, fecha_registro, nombre, usuario_modifico, activo)
-VALUES (NOW(), NOW(), 'Trimestral', 1, 1);
-INSERT INTO cat_periodos (fecha_actualizacion, fecha_registro, nombre, usuario_modifico, activo)
-VALUES (NOW(), NOW(), 'Cuatrimestral', 1, 1);
+create table cat_periodos(
+    id_periodo          int auto_increment        primary key,
+    nombre              varchar(200)                         not null,    activo              tinyint(1) default 1                 null,
+    fecha_registro      timestamp  default CURRENT_TIMESTAMP not null,    fecha_actualizacion timestamp  default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
+    usuario_modifico    bigint                               null);
+INSERT INTO des_sisi_gestor.cat_periodos (id_periodo, nombre, activo, fecha_registro, fecha_actualizacion, usuario_modifico) VALUES (1, 'Semestral', 1, '2023-12-14 15:55:34', '2023-12-14 15:56:43', 2);
+INSERT INTO des_sisi_gestor.cat_periodos (id_periodo, nombre, activo, fecha_registro, fecha_actualizacion, usuario_modifico) VALUES (2, 'Anual', 1, '2023-12-14 15:55:34', '2023-12-14 15:56:43', 2);
+INSERT INTO des_sisi_gestor.cat_periodos (id_periodo, nombre, activo, fecha_registro, fecha_actualizacion, usuario_modifico) VALUES (3, 'Trimestral', 1, '2023-12-14 15:55:34', '2023-12-14 15:56:43', 2);
+INSERT INTO des_sisi_gestor.cat_periodos (id_periodo, nombre, activo, fecha_registro, fecha_actualizacion, usuario_modifico) VALUES (4, 'Cuatrimestral', 1, '2023-12-14 15:55:34', '2023-12-14 15:56:43', 2);
 
 ALTER TABLE tbl_planes ADD COLUMN id_periodo INT NOT NULL;
 UPDATE tbl_planes SET id_periodo = 1 WHERE id_periodo IS NULL;
