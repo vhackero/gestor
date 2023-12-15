@@ -2751,7 +2751,7 @@ span.ui-icon-close:hover {
 }
 .ui-datatable table tbody tr td .flexible.ui-row-editor .ui-icon-pencil {
   background: none;
-  text-indent: auto;
+  text-indent: initial;
   font: normal normal normal 14px/1 FontAwesome;
   font-size: inherit;
   text-rendering: auto;
@@ -2789,7 +2789,7 @@ span.ui-icon-close:hover {
 }
 .ui-datatable table tbody tr td .flexible.ui-row-editor .ui-icon-check {
   background: none;
-  text-indent: auto;
+  text-indent: initial;
   font: normal normal normal 14px/1 FontAwesome;
   font-size: inherit;
   text-rendering: auto;
@@ -3595,6 +3595,12 @@ a.porcentajeAsis:active {
   line-height: 1;
   margin-left: 0px;
   font-size: 18px;
+  
+    color: #333;
+    position: absolute;
+    margin-top: 5px !important;
+    margin-left: 5px !important;
+    display: flex;
 }
 .ui-row-editor.ui-helper-clearfix.flexible .ui-icon.ui-icon-close {
   margin-top: 1px;
@@ -3610,6 +3616,12 @@ a.porcentajeAsis:active {
   line-height: 1;
   margin-left: 0px;
   font-size: 18px;
+  
+    color: #333;
+    position: absolute;
+    margin-top: -4px !important;
+    margin-left: -5px !important;
+    display: flex;
 }
 .ui-datatable-tablewrapper thead tr th {
   text-align: center;
