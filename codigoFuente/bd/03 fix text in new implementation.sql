@@ -20,3 +20,4 @@ UPDATE des_sisi_gestor.tbl_textos_sistema SET valor = 'Tipo de evento formativo'
 UPDATE des_sisi_gestor.tbl_textos_sistema SET valor = 'Descripción del programa de estudios' WHERE (clave = 'gw.progCapacitacion.nuevo.etiqueta.desc');
 UPDATE des_sisi_gestor.tbl_textos_sistema SET valor = 'Carga horaria' WHERE (clave = 'gw.progCapacitacion.nuevo.etiqueta.cargaHorCap');
 UPDATE des_sisi_gestor.tbl_textos_sistema SET valor = 'Edición de  programa de estudios' WHERE (clave = 'gw.progCapacitacion.etiqueta.editarPrograma');
+UPDATE des_sisi_gestor.tbl_textos_sistema SET valor = "Nivel de estudios" WHERE (clave = "gw.plan.nuevo.etiqueta.nvlEnsenanza");
