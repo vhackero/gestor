@@ -215,6 +215,14 @@
 					<p:column>
 						<f:facet name="header">
 							<h:outputText
+									value="Periodo" />
+						</f:facet>
+						<h:outputText value="#{plan.catPeriodo.nombre}" />
+					</p:column>
+
+					<p:column>
+						<f:facet name="header">
+							<h:outputText
 								value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.alcancePlan')}" />
 						</f:facet>
 						<h:outputText value="#{plan.catAlcancePlan.nombre}" />

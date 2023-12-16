@@ -206,7 +206,7 @@ public class EncuestaBean extends BaseBean {
 
                 if (resultado != null) {
                     if (resultado.getMensajeError() == null) {
-                        encuestaMSG = resultado.getResultado().name();
+                        encuestaMSG = "¡Encuesta borrada correctamente!";
                     } else {
                         encuestaMSG = resultado.getResultado().name();
                         agregarMsgError(encuestaMSG, null);
