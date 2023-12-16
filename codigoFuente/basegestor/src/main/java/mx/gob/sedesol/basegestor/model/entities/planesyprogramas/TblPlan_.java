@@ -40,4 +40,5 @@ public class TblPlan_ {
 	public static volatile ListAttribute<TblPlan, RelPlanHabilidad> relPlanHabilidades;
 
 	public static volatile SingularAttribute<TblPlan, CatCreditosPlan> catCreditosPlan;
+	public static volatile SingularAttribute<TblPlan, CatDivisionesPlan> catDivisionesPlan;
 }

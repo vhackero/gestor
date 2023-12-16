@@ -183,6 +183,7 @@ public final class ConstantesGestorWeb {
 	public static final String CAT_CLASIFICACIONES_BADGE = "cat_clasificaciones";
 	
 	public static final String CAT_CREDITOS_PLAN ="cat_creditos_plan";
+	public static final String CAT_DIVISIONES_PLAN ="cat_divisiones_plan";
 	
 	//REL_EJE_COMPETENCIA
 	public static final String REL_EJE_COMPETENCIA = "EJE_COMPETENCIAS";

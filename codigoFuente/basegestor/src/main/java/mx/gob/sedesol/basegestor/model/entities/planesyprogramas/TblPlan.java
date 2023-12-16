@@ -138,6 +138,10 @@ public class TblPlan implements Serializable {
 	@OneToOne(fetch=FetchType.LAZY, targetEntity = CatCreditosPlan.class)
 	@JoinColumn(name="id_creditos_plan")
 	private CatCreditosPlan catCreditosPlan;
+	
+	@OneToOne(fetch=FetchType.LAZY, targetEntity = CatDivisionesPlan.class)
+	@JoinColumn(name="id_divisiones_plan")
+	private CatDivisionesPlan catDivisionesPlan;
 
 	public TblPlan() {
 	}
@@ -376,6 +380,20 @@ public class TblPlan implements Serializable {
 	 */
 	public void setCatCreditosPlan(CatCreditosPlan catCreditosPlan) {
 		this.catCreditosPlan = catCreditosPlan;
+	}
+
+	/**
+	 * @return the catDivisionesPlan
+	 */
+	public CatDivisionesPlan getCatDivisionesPlan() {
+		return catDivisionesPlan;
+	}
+
+	/**
+	 * @param catDivisionesPlan the catDivisionesPlan to set
+	 */
+	public void setCatDivisionesPlan(CatDivisionesPlan catDivisionesPlan) {
+		this.catDivisionesPlan = catDivisionesPlan;
 	}
 
 	/**

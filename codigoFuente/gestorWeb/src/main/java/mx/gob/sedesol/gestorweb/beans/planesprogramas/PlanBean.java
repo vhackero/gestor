@@ -67,6 +67,7 @@ public class PlanBean extends BaseBean {
 	private List<CatalogoComunDTO> catDocsExpidePlan;
 	
 	private List<CatalogoComunDTO> catCreditosPlan;
+	private List<CatalogoComunDTO> catDivisionesPlan;
 
 	private List<SelectItem> itemsOrgGubs;
 
@@ -116,6 +117,7 @@ public class PlanBean extends BaseBean {
 			plan.setIdentificador(planServiceFacade.generaIdentificadorPlan());
 			
 			plan.setCatCreditosPlan(new CatalogoComunDTO());
+			plan.setCatDivisionesPlan(new CatalogoComunDTO());
 
 			filtroPlan = new PlanDTO();
 			setEdicionPlan(Boolean.FALSE);
@@ -182,6 +184,8 @@ public class PlanBean extends BaseBean {
 		
 		catCreditosPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_CREDITOS_PLAN);
+		catDivisionesPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
+				.getAttribute(ConstantesGestorWeb.CAT_DIVISIONES_PLAN);
 
 	}
 
@@ -255,6 +259,12 @@ public class PlanBean extends BaseBean {
 	public void onChangeCreditosPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			plan.setCatCreditosPlan(this.getValorDeCatalogo(catCreditosPlan, ((Integer) e.getNewValue())));
+		}
+	}
+	
+	public void onChangeDivisionesPlan(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			plan.setCatDivisionesPlan(this.getValorDeCatalogo(catDivisionesPlan, ((Integer) e.getNewValue())));
 		}
 	}
 
@@ -349,6 +359,7 @@ public class PlanBean extends BaseBean {
 			filtroPlan.setCatEstatusPlan(new CatalogoComunDTO());
 			
 			filtroPlan.setCatCreditosPlan(new CatalogoComunDTO());
+			filtroPlan.setCatDivisionesPlan(new CatalogoComunDTO());
 
 		}
 	}
@@ -540,18 +551,33 @@ public class PlanBean extends BaseBean {
 	}
 	
 	/**
-	 * @return the catAlcancePlan
+	 * @return the catCreditosPlan
 	 */
 	public List<CatalogoComunDTO> getCatCreditosPlan() {
 		return catCreditosPlan;
 	}
 
 	/**
-	 * @param catAlcancePlan
-	 *            the catAlcancePlan to set
+	 * @param catCreditosPlan
+	 *            the catCreditosPlan to set
 	 */
 	public void setCatCreditosPlan(List<CatalogoComunDTO> catCreditosPlan) {
 		this.catCreditosPlan = catCreditosPlan;
+	}
+	
+	/**
+	 * @return the catDivisionesPlan
+	 */
+	public List<CatalogoComunDTO> getCatDivisionesPlan() {
+		return catDivisionesPlan;
+	}
+
+	/**
+	 * @param catDivisionesPlan
+	 *            the catDivisionessPlan to set
+	 */
+	public void setCatDivisionesPlan(List<CatalogoComunDTO> catDivisionesPlan) {
+		this.catDivisionesPlan = catDivisionesPlan;
 	}
 
 	/**
