@@ -437,6 +437,7 @@ public class PlanDTO implements Serializable{
 
 	public void setCatTipoCompetencia(CatalogoComunDTO catTipoCompetencia) {
 		this.catTipoCompetencia = catTipoCompetencia;
+	}
 	/**
 	 * @return the catDivisionesPlan
 	 */
