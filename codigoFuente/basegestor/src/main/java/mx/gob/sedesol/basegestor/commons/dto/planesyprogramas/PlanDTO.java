@@ -62,6 +62,7 @@ public class PlanDTO implements Serializable{
 	private BitacoraDTO bitacoraDTO;
 
 	private CatalogoComunDTO catCreditosPlan;
+	private CatalogoComunDTO catDivisionesPlan;
 	
 	/**
 	 * @return the idPlan
@@ -428,5 +429,18 @@ public class PlanDTO implements Serializable{
 	 */
 	public void setCatCreditosPlan(CatalogoComunDTO catCreditosPlan) {
 		this.catCreditosPlan = catCreditosPlan;
+	}
+
+	/**
+	 * @return the catDivisionesPlan
+	 */
+	public CatalogoComunDTO getCatDivisionesPlan() {
+		return catDivisionesPlan;
+	}
+	/**
+	 * @param catDivisionesPlan the catDivisionesPlan to set
+	 */
+	public void setCatDivisionesPlan(CatalogoComunDTO catDivisionesPlan) {
+		this.catDivisionesPlan = catDivisionesPlan;
 	}
 }

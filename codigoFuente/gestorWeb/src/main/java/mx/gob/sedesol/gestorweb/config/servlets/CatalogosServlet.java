@@ -45,6 +45,7 @@ import mx.gob.sedesol.basegestor.service.planesyprogramas.EstPersonalExternoServ
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatCreditosPlan;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatDivisionesPlan;
 /**
  * Servlet implementation class CatalogosServlet
  */
@@ -114,6 +115,8 @@ public class CatalogosServlet extends HttpServlet {
 	
 	@Autowired
 	private transient CatalogoComunService<CatCreditosPlan, Integer> catCreditosPlanService;
+	@Autowired
+	private transient CatalogoComunService<CatDivisionesPlan, Integer> catDivisionesPlanService;
 
 	/**
 	 * 
@@ -171,6 +174,7 @@ public class CatalogosServlet extends HttpServlet {
 
 		
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_CREDITOS_PLAN, catCreditosPlanService.findAll(CatCreditosPlan.class));
+		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_DIVISIONES_PLAN, catDivisionesPlanService.findAll(CatDivisionesPlan.class));
 		//config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_EST_PERSONAL_EXTERNO, estPersonalExternoService.obtenerEstPersonalExtPadres());
 		//fin planes y programas
 		
