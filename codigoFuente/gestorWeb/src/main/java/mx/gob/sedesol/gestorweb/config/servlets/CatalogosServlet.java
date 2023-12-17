@@ -35,6 +35,7 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatObjetoCurric
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatStatusPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoEventoEc;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoPlan;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoCompetencia;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTpoCargaHoraria;
 import mx.gob.sedesol.basegestor.service.admin.CatalogoComunService;
 import mx.gob.sedesol.basegestor.service.admin.OrgGubernamentalService;
@@ -70,6 +71,8 @@ public class CatalogosServlet extends HttpServlet {
 	private transient CatalogoComunService<CatTipoPlan, Integer> catTipoPlanService;
 	@Autowired
 	private transient CatalogoComunService<CatPeriodo, Integer> catPeriodoService;
+	@Autowired
+	private transient CatalogoComunService<CatTipoCompetencia, Integer> catTipoCompetencia;
 	@Autowired
 	private transient CatalogoComunService<CatAlcancePlan, Integer> catAlcancePlanService;
 	@Autowired
@@ -152,6 +155,7 @@ public class CatalogosServlet extends HttpServlet {
 		//fin Admin
 		//PLanes y programas
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_PERIODOS, catPeriodoService.findAll(CatPeriodo.class));
+		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_TIPOS_COMPETENCIA, catTipoCompetencia.findAll(CatTipoCompetencia.class));
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_TPO_PLAN, catTipoPlanService.findAll(CatTipoPlan.class));
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_MODALIDAD_PLAN_PROG, catModalidadPlanPlanService.findAll(CatModalidadPlanPrograma.class));
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_ESTATUS_PLAN, catEstatusPlanService.findAll(CatEstatusPlan.class));
