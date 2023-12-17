@@ -21,6 +21,7 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan_;
 
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatCreditosPlan_;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatDivisionesPlan_;
 
 public class PlanEspecificacion implements Specification<TblPlan> {
 	
@@ -65,6 +66,10 @@ public class PlanEspecificacion implements Specification<TblPlan> {
 
 			if(ObjectUtils.isNotNull(filtro.getCatCreditosPlan())){
 				predicates.add(cb.equal(root.join(TblPlan_.catCreditosPlan).get(CatCreditosPlan_.id),filtro.getCatCreditosPlan().getId()));
+			}
+
+			if(ObjectUtils.isNotNull(filtro.getCatDivisionesPlan())){
+				predicates.add(cb.equal(root.join(TblPlan_.catDivisionesPlan).get(CatDivisionesPlan_.id),filtro.getCatDivisionesPlan().getId()));
 			}
 
 		}
