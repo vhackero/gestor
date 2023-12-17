@@ -367,7 +367,27 @@
 						</div>
 					</div>
 				</div>
-
+				<div class="form-group">
+				<div class="row">
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel
+								value="Tipo de Competencia:"
+								styleClass="requerido bloque" />
+						<p:selectOneMenu id="tpoCompetencia"
+										 value="#{planBean.plan.catTipoCompetencia.id}"
+										 valueChangeListener="#{planBean.onChangeCompetenciaPlan}"
+										 autoWidth="false" styleClass="col-xs-12">
+							<p:ajax event="change" process="@this" styleClass="col-xs-12" />
+							<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+							<f:selectItems value="#{planBean.catTpoCompetencia}" var="tpoCompetencia"
+										   itemLabel="#{tpoCompetencia.nombre}" itemValue="#{tpoCompetencia.id}" />
+						</p:selectOneMenu>
+						<p:message for="tpoCompetencia" />
+					</div>
+				</div>
+				</div>
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-4 col-xs-12">

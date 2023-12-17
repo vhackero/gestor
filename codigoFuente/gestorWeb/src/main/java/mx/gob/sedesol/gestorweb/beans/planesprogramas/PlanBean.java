@@ -11,10 +11,8 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 import javax.faces.model.SelectItemGroup;
-import mx.gob.sedesol.basegestor.commons.constantes.ConstantesBitacora;
 
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.*;
-import mx.gob.sedesol.basegestor.service.planesyprogramas.PeriodoService;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -56,6 +54,7 @@ public class PlanBean extends BaseBean {
 
 	private List<CatalogoComunDTO> catPeriodo;
 	private List<CatalogoComunDTO> catTpoPlan;
+	private List<CatalogoComunDTO> catTpoCompetencia;
 	private List<CatalogoComunDTO> catModalidadPlan;
 	private List<CatalogoComunDTO> catalEstatusPlan;
 	private List<CatalogoComunDTO> catAlcancePlan;
@@ -106,6 +105,7 @@ public class PlanBean extends BaseBean {
 			plan = new PlanDTO();
 			plan.setCatTipoPlan(new CatalogoComunDTO());
 			plan.setCatPeriodo(new CatalogoComunDTO());
+			plan.setCatTipoCompetencia(new CatalogoComunDTO());
 			plan.setCatAlcancePlan(new CatalogoComunDTO());
 			plan.setCatCompetenciasPlan(new CatalogoComunDTO());
 			plan.setCatDocumentosExpidePlan(new CatalogoComunDTO());
@@ -159,6 +159,8 @@ public class PlanBean extends BaseBean {
 		logger.debug("Consultando catalogos de planes desde sesion");
 		catPeriodo = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_PERIODOS);
+		catTpoCompetencia = (List<CatalogoComunDTO>) getSession().getServletContext()
+				.getAttribute(ConstantesGestorWeb.CAT_TIPOS_COMPETENCIA);
 		catTpoPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_TPO_PLAN);
 		catModalidadPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
@@ -231,6 +233,11 @@ public class PlanBean extends BaseBean {
 	public void onChangePeriodo(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			plan.setCatPeriodo(this.getValorDeCatalogo(catPeriodo, ((Integer) e.getNewValue())));
+		}
+	}
+	public void onChangeTpoCompetencia(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			plan.setCatTipoCompetencia(this.getValorDeCatalogo(catTpoCompetencia, ((Integer) e.getNewValue())));
 		}
 	}
 
@@ -358,7 +365,6 @@ public class PlanBean extends BaseBean {
 	 */
 	public void guardaNuevoPlan() {
 		logger.info("########## PERSISTENCIA DEl PLAN ########");
-		logger.info("plan: " + plan.getNombre() + "  periodo: " + plan.getCatPeriodo().getId() + " - " + plan.getCatPeriodo().getNombre());
 		plan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
 		ResultadoDTO<PlanDTO> resultado = planServiceFacade.guardaNuevoPlan(plan,
 				this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
@@ -507,6 +513,14 @@ public class PlanBean extends BaseBean {
 	 */
 	public void setCatPeriodo(List<CatalogoComunDTO> catPeriodo) {
 		this.catPeriodo = catPeriodo;
+	}
+
+	public List<CatalogoComunDTO> getCatTpoCompetencia() {
+		return catTpoCompetencia;
+	}
+
+	public void setCatTpoCompetencia(List<CatalogoComunDTO> catTpoCompetencia) {
+		this.catTpoCompetencia = catTpoCompetencia;
 	}
 
 	/**

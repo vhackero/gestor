@@ -127,7 +127,11 @@ public class TblPlan implements Serializable {
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="id_periodo")
 	private CatPeriodo catPeriodo;
-	
+
+	@OneToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="id_tpo_competencia")
+	private CatTipoCompetencia catTpoCompetencia;
+
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="id_alcance_plan")
 	private CatAlcancePlan catAlcancePlan;
@@ -406,4 +410,11 @@ public class TblPlan implements Serializable {
 		this.idCategoriaMdl = idCategoriaMdl;
 	}
 
+	public CatTipoCompetencia getCatTpoCompetencia() {
+		return catTpoCompetencia;
+	}
+
+	public void setCatTpoCompetencia(CatTipoCompetencia catTpoCompetencia) {
+		this.catTpoCompetencia = catTpoCompetencia;
+	}
 }
