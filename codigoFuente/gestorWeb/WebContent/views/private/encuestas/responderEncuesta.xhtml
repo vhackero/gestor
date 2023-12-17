@@ -1,109 +1,126 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:f="http://java.sun.com/jsf/core">
-	<p:panel id="p_pregunta">
-		<div class="row">
-			<div class="col-md-12 espacioPregutaRespuesta">
-				<h3>
-					<h:outputText id="p_nombre"
-						value="#{contestarEncuestaBean.pregunta.index}.- #{contestarEncuestaBean.pregunta.nombre}" />
-				</h3>
-			</div>
-		</div>
-		<div class="row flex">
-			<p:commandLink id="btn_opc_1"
-				update="p_pregunta, dlg_mensaje_sistema"
-				oncomplete="cargarEventos();"
-				actionListener="#{contestarEncuestaBean.respondePregunta}"
-				ajax="true">
-				<div class="contenedorTooltip">
-					<!--  <p:outputLabel value="Me molesta" styleClass="propiedadTooltip" /> -->
-				</div>
-				<h:graphicImage library="images" width="70" height="70"
-					name="escala_encuestas/e2.png" styleClass="imgEncuesta inactiva" />
-				<f:setPropertyActionListener value="2"
-					target="#{contestarEncuestaBean.respuesta.ponderacion}" />
-			</p:commandLink>
 
+	 <ui:define name="breadcrumb">
+		<li>Encuesta</li>
+		
+		<li class="active">
+			<p:outputLabel value="Contestar encuesta" />
+		</li>
 
-			<p:commandLink id="btn_opc_2"
-				update="p_pregunta, dlg_mensaje_sistema"
-				oncomplete="cargarEventos();" ajax="true"
-				actionListener="#{contestarEncuestaBean.respondePregunta}">
-				<div class="contenedorTooltip">
-					<!-- <p:outputLabel value="Me disgusta" styleClass="propiedadTooltip" />  -->
-				</div>
-				<h:graphicImage library="images" width="70" height="70"
-					name="escala_encuestas/e4.png" styleClass="imgEncuesta inactiva" />
-				<f:setPropertyActionListener value="4"
-					target="#{contestarEncuestaBean.respuesta.ponderacion}" />
-			</p:commandLink>
+	</ui:define>
 
+	<ui:define name="content">
 
-			<p:commandLink id="btn_opc_3"
-				update="p_pregunta, dlg_mensaje_sistema"
-				oncomplete="cargarEventos();" ajax="true"
-				actionListener="#{contestarEncuestaBean.respondePregunta}">
-				<div class="contenedorTooltip">
-					<!--  <p:outputLabel value="Me agrada" styleClass="propiedadTooltip" /> -->
-				</div>
-				<h:graphicImage library="images" width="70" height="70"
-					name="escala_encuestas/e6.png" styleClass="imgEncuesta inactiva" />
-				<f:setPropertyActionListener value="6"
-					target="#{contestarEncuestaBean.respuesta.ponderacion}" />
-			</p:commandLink>
-
-			<p:commandLink id="btn_opc_4"
-				update="p_pregunta, dlg_mensaje_sistema"
-				oncomplete="cargarEventos();" ajax="true"
-				actionListener="#{contestarEncuestaBean.respondePregunta}">
-				<div class="contenedorTooltip">
-					<!-- <p:outputLabel value="Me gusta" styleClass="propiedadTooltip" />  -->
-				</div>
-				<h:graphicImage library="images" width="70" height="70"
-					name="escala_encuestas/e8.png" styleClass="imgEncuesta inactiva" />
-				<f:setPropertyActionListener value="8"
-					target="#{contestarEncuestaBean.respuesta.ponderacion}" />
-			</p:commandLink>
-
-
-			<p:commandLink id="btn_opc_5"
-				update="p_pregunta, dlg_mensaje_sistema"
-				oncomplete="cargarEventos();" ajax="true"
-				actionListener="#{contestarEncuestaBean.respondePregunta}">
-				<div class="contenedorTooltip">
-					<!-- <p:outputLabel value="Me encanta" styleClass="propiedadTooltip" />  -->
-				</div>
-				<h:graphicImage library="images" width="70" height="70"
-					name="escala_encuestas/e10.png" styleClass="imgEncuesta inactiva" />
-				<f:setPropertyActionListener value="10"
-					target="#{contestarEncuestaBean.respuesta.ponderacion}" />
-			</p:commandLink>
-		</div>
-	</p:panel>
-	<p:dialog id="dlg_mensaje_sistema" header="Mensaje del sistema"
-		responsive="true" closable="true" appendTo="@(body)" draggable="false"
-		modal="true" height="80" width="480" resizable="false"
-		visible="#{contestarEncuestaBean.renderFinDialog}">
-
-
-		<h3>#{sistema.obtenerTexto('gw.encuesta.texto.terminado')}</h3>
-
-		<f:facet name="footer">
+		<p:panel id="p_pregunta">
 			<div class="row">
-				<div class="col-md-12">
-					<p:commandButton
-						value="#{sistema.obtenerTexto('gw.encuesta.btn.aceptar')}"
-						styleClass="btn btn-primary pull-right"
-						update="@this, dlg_mensaje_sistema"
-						process="@this, dlg_mensaje_sistema" ajax="true"
-						action="#{contestarEncuestaBean.closeDialog}" />
+				<div class="col-md-12 espacioPregutaRespuesta">
+					<h3>
+						<h:outputText id="p_nombre"
+							value="#{contestarEncuestaBean.pregunta.index}.- #{contestarEncuestaBean.pregunta.nombre}" />
+					</h3>
 				</div>
 			</div>
+			<div class="row flex">
+				<p:commandLink id="btn_opc_1"
+					update="p_pregunta, dlg_mensaje_sistema"
+					oncomplete="cargarEventos();"
+					actionListener="#{contestarEncuestaBean.respondePregunta}"
+					ajax="true">
+					<div class="contenedorTooltip">
+						<!--  <p:outputLabel value="Me molesta" styleClass="propiedadTooltip" /> -->
+					</div>
+					<h:graphicImage library="images" width="70" height="70"
+						name="escala_encuestas/e2.png" styleClass="imgEncuesta inactiva" />
+					<f:setPropertyActionListener value="2"
+						target="#{contestarEncuestaBean.respuesta.ponderacion}" />
+				</p:commandLink>
 
-		</f:facet>
 
-	</p:dialog>
+				<p:commandLink id="btn_opc_2"
+					update="p_pregunta, dlg_mensaje_sistema"
+					oncomplete="cargarEventos();" ajax="true"
+					actionListener="#{contestarEncuestaBean.respondePregunta}">
+					<div class="contenedorTooltip">
+						<!-- <p:outputLabel value="Me disgusta" styleClass="propiedadTooltip" />  -->
+					</div>
+					<h:graphicImage library="images" width="70" height="70"
+						name="escala_encuestas/e4.png" styleClass="imgEncuesta inactiva" />
+					<f:setPropertyActionListener value="4"
+						target="#{contestarEncuestaBean.respuesta.ponderacion}" />
+				</p:commandLink>
+
+
+				<p:commandLink id="btn_opc_3"
+					update="p_pregunta, dlg_mensaje_sistema"
+					oncomplete="cargarEventos();" ajax="true"
+					actionListener="#{contestarEncuestaBean.respondePregunta}">
+					<div class="contenedorTooltip">
+						<!--  <p:outputLabel value="Me agrada" styleClass="propiedadTooltip" /> -->
+					</div>
+					<h:graphicImage library="images" width="70" height="70"
+						name="escala_encuestas/e6.png" styleClass="imgEncuesta inactiva" />
+					<f:setPropertyActionListener value="6"
+						target="#{contestarEncuestaBean.respuesta.ponderacion}" />
+				</p:commandLink>
+
+				<p:commandLink id="btn_opc_4"
+					update="p_pregunta, dlg_mensaje_sistema"
+					oncomplete="cargarEventos();" ajax="true"
+					actionListener="#{contestarEncuestaBean.respondePregunta}">
+					<div class="contenedorTooltip">
+						<!-- <p:outputLabel value="Me gusta" styleClass="propiedadTooltip" />  -->
+					</div>
+					<h:graphicImage library="images" width="70" height="70"
+						name="escala_encuestas/e8.png" styleClass="imgEncuesta inactiva" />
+					<f:setPropertyActionListener value="8"
+						target="#{contestarEncuestaBean.respuesta.ponderacion}" />
+				</p:commandLink>
+
+
+				<p:commandLink id="btn_opc_5"
+					update="p_pregunta, dlg_mensaje_sistema"
+					oncomplete="cargarEventos();" ajax="true"
+					actionListener="#{contestarEncuestaBean.respondePregunta}">
+					<div class="contenedorTooltip">
+						<!-- <p:outputLabel value="Me encanta" styleClass="propiedadTooltip" />  -->
+					</div>
+					<h:graphicImage library="images" width="70" height="70"
+						name="escala_encuestas/e10.png" styleClass="imgEncuesta inactiva" />
+					<f:setPropertyActionListener value="10"
+						target="#{contestarEncuestaBean.respuesta.ponderacion}" />
+				</p:commandLink>
+			</div>
+		</p:panel>
+		<p:dialog id="dlg_mensaje_sistema" header="Mensaje del sistema"
+			responsive="true" closable="true" appendTo="@(body)"
+			draggable="false" modal="true" height="80" width="480"
+			resizable="false" visible="#{contestarEncuestaBean.renderFinDialog}">
+
+
+			<h3>#{sistema.obtenerTexto('gw.encuesta.texto.terminado')}</h3>
+
+			<f:facet name="footer">
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.encuesta.btn.aceptar')}"
+							styleClass="btn btn-primary pull-right"
+							update="@this, dlg_mensaje_sistema"
+							process="@this, dlg_mensaje_sistema" ajax="true"
+							action="#{contestarEncuestaBean.closeDialog}" />
+					</div>
+				</div>
+
+			</f:facet>
+
+		</p:dialog>
+
+	</ui:define>
+
 </ui:composition>

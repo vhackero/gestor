@@ -82,10 +82,19 @@ public class PlanBean extends BaseBean {
 	private PlanDTO planSelecBusq;
 	private PlanDTO plan;
 	private boolean edicionPlan;
+	
+	private Integer elementsStruc = 1;
+	private String nameStruc = "";
+	private Integer subStrucLvl = 0;
+	private List<String> namesSubStruc = new ArrayList<String>();
+	private List<Integer> elementsSubStruc = new ArrayList<Integer>();
 
 	public PlanBean() {
 		initRecursos();
 		edicionPlan = Boolean.parseBoolean(getRequest().getParameter("edicion"));
+		
+		namesSubStruc.add("");
+		elementsSubStruc.add(1);
 	}
 
 	@PostConstruct
@@ -290,6 +299,31 @@ public class PlanBean extends BaseBean {
 				}
 			}
 		}
+	}
+	
+	
+	public void onChangeElementsSubs(ValueChangeEvent e) {
+		logger.error("aaaaaaaaaaaaaaaaaa");
+		logger.error(e);
+		
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			logger.error( (Integer) e.getNewValue() );
+			
+			subStrucLvl = (Integer) e.getNewValue();
+			
+			namesSubStruc = new ArrayList<String>();
+			elementsSubStruc = new ArrayList<Integer>();
+			for(int i=0;i<subStrucLvl;i++){
+				namesSubStruc.add("");
+				elementsSubStruc.add(1);
+			}
+			
+		}
+		logger.error("finishi uwu");
+	}
+	
+	public void onChangeTest(ValueChangeEvent e) {
+		logger.error("eeeeeeeeeeeeeeeeeeeeeee");
 	}
 
 	/**
@@ -843,5 +877,48 @@ public class PlanBean extends BaseBean {
 	public void setBitacoraService(BitacoraService bitacoraService) {
 		this.bitacoraService = bitacoraService;
 	}
+	
+	
 
+	public Integer getElementsStruc() {
+		return elementsStruc;
+	}
+
+	public void setElementsStruc(Integer elementsStruc) {
+		this.elementsStruc = elementsStruc;
+	}
+
+	public String getNameStruc() {
+		return nameStruc;
+	}
+
+	public void setNameStruc(String nameStruc) {
+		this.nameStruc = nameStruc;
+	}
+
+	public Integer getSubStrucLvl() {
+		return subStrucLvl;
+	}
+
+	public void setSubStrucLvl(Integer subStrucLvl) {
+		this.subStrucLvl = subStrucLvl;
+	}
+
+	public List<String> getNamesSubStruc() {
+		return namesSubStruc;
+	}
+
+	public void setNamesSubStruc(List<String> namesSubStruc) {
+		this.namesSubStruc = namesSubStruc;
+	}
+
+	public List<Integer> getElementsSubStruc() {
+		return elementsSubStruc;
+	}
+
+	public void setElementsSubStruc(List<Integer> elementsSubStruc) {
+		this.elementsSubStruc = elementsSubStruc;
+	}
+	
+	
 }
