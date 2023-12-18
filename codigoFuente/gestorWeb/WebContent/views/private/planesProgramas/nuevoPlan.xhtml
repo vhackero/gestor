@@ -177,8 +177,8 @@
 
 					<p:outputPanel id="pnlSubStruc">
 						<p:outputPanel rendered="#{planBean.subStrucLvl > 0}" >
-							<p:repeat value="#{planBean.elementsSubStruc}" var="subEl"
-								varStatus="varId" id="subStrucRender">
+							<c:forEach value="#{planBean.elementsSubStruc}" var="subEl"
+								varStatus="varId" id="subStrucRender" items="#{planBean.elementsSubStruc}">
 								<div class="row" style="margin-top: 20px;">
 									<div class="col-md-4 col-sm-12">
 										<p:outputLabel value="Subestructura nivel #{(varId.index+1).toString()}:" />
@@ -186,27 +186,48 @@
 									<div class="col-md-4 col-sm-12">
 										<p:outputLabel styleClass="bloque"
 											value="Nombre de los elementos de la subestructura: " />
-										<p:inputText id="subEl" styleClass="form-control"
+										<p:inputText id="name_#{varId.index}" styleClass="form-control"
 											value="#{planBean.namesSubStruc[vaId.index]}" maxlength="150"
 											placeholder="Nombre para las subestructuras" required="true"
-											requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
-										<p:message for="subEl" />
+											requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" >
+											
+											<f:ajax event="keyup" listener="#{planBean.onChangeNameSubsElements}" update="@this">
+												<f:param name="idx" value="#{varId.index}" />
+											</f:ajax>
+										</p:inputText>
+											
+										<p:message for="name_#{varId.index}" />
 									</div>
 									<div class="col-md-4 col-sm-12">
-										<p:outputLabel styleClass="bloque" for="sp2"
+										<p:outputLabel styleClass="bloque"
 											value="Número de elementos de la subestructura: " />
-										<p:spinner id="sp2" maxlength="2"
-											value="#{planBean.elementsSubStruc[varId.index]}" min="1"
-											max="20">
-											<p:ajax process="@this" />
+										<p:spinner id="numb_#{varId.index}" maxlength="2"
+											value="#{planBean.elementsSubStruc[varId.index]}" min="1" max="20">
+											
+											<f:ajax event="change" listener="#{planBean.onChangeSubsElements}" update="@this">
+												<f:param name="idx" value="#{varId.index}" />
+											</f:ajax>
+											
 											<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
 										</p:spinner>
 									</div>
 								</div>
-							</p:repeat>
+							</c:forEach>
 
 						</p:outputPanel>
 					</p:outputPanel>
+				</div>
+				
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4 col-xs-12">
+							<p:spinner id="testBtn" maxlength="2" value="2" min="1"
+								max="20" valueChangeListener="#{planBean.generarEstructura}">
+								<p:ajax process="@this" />
+								<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+							</p:spinner>
+						</div>
+					</div>
 				</div>
 
 				<div class="mx-5">

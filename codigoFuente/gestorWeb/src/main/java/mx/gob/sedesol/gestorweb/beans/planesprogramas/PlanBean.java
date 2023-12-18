@@ -30,6 +30,9 @@ import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.utils.BitacoraUtil;
 
+
+import mx.gob.sedesol.basegestor.service.impl.planesyprogramas.FECServiceFacade;
+
 @ViewScoped
 @ManagedBean
 public class PlanBean extends BaseBean {
@@ -87,6 +90,9 @@ public class PlanBean extends BaseBean {
 	private Integer subStrucLvl = 0;
 	private List<String> namesSubStruc = new ArrayList<String>();
 	private List<Integer> elementsSubStruc = new ArrayList<Integer>();
+	
+	@ManagedProperty(value = "#{fecServiceFacade}")
+    private FECServiceFacade fecServiceFacade;
 
 	public PlanBean() {
 		initRecursos();
@@ -312,6 +318,7 @@ public class PlanBean extends BaseBean {
 	public void onChangeElementsSubs(ValueChangeEvent e) {
 		logger.error("aaaaaaaaaaaaaaaaaa");
 		logger.error(e);
+		logger.error(e.getPhaseId());
 		
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			logger.error( (Integer) e.getNewValue() );
@@ -327,6 +334,64 @@ public class PlanBean extends BaseBean {
 			
 		}
 		logger.error("finishi uwu");
+	}
+	
+	public void onChangeSubsElements(ValueChangeEvent event) {
+		logger.error("aaaaaaaaaaaaaaaaaa");
+		logger.error((String) event.getComponent().getAttributes().get("idx"));
+		logger.error((String) event.getComponent().getAttributes().get("value"));
+		
+		/*if (ObjectUtils.isNotNull(e.getNewValue())) {
+			
+		}*/
+		
+		logger.error("finishi uwu");
+	}
+	
+	public void onChangeNameSubsElements(ValueChangeEvent event) {
+		logger.error("aaaaaaaaaaaaaaaaaa");
+		logger.error((String) event.getComponent().getAttributes().get("idx"));
+		logger.error((String) event.getComponent().getAttributes().get("value"));
+		
+		/*if (ObjectUtils.isNotNull(e.getNewValue())) {
+			
+		}*/
+		
+		logger.error("finishi uwu");
+	}
+	
+	public void generarEstructura(ValueChangeEvent e){
+		try {
+			logger.error(subStrucLvl);
+			logger.error(elementsStruc);
+			logger.error(nameStruc);
+			
+			logger.error("Nombres");
+			for(String nameS: namesSubStruc){
+				logger.error("Nombre: "+nameS);
+			}
+			
+			logger.error("Numeros");
+			for(Integer numbS: elementsSubStruc){
+				logger.error("Numb");
+				logger.error("Numero: "+numbS);
+				logger.error(numbS);
+			}
+			
+			logger.error("Creansdo malla");
+			MallaCurricularDTO malla = new MallaCurricularDTO();
+			malla.setNombre("testMalla");
+			
+			logger.error("Guardando mallas");
+			ResultadoDTO<MallaCurricularDTO> res = getFecServiceFacade().guardaMallaCurricular(malla);
+			logger.error(res.getDto().getId());
+			logger.error(res.getDto().getNombre());
+			
+			logger.error("se acabo 7u7");
+		}catch(Exception ex) {
+			logger.error("EEEEEEEEEEEEERRRRRRRRRRRRRRROOOOOOOOOOOORRRRRRRRRRRRRR");
+			logger.error(ex);
+		}
 	}
 	
 	public void onChangeTest(ValueChangeEvent e) {
@@ -934,5 +999,16 @@ public class PlanBean extends BaseBean {
 		this.elementsSubStruc = elementsSubStruc;
 	}
 	
+	public FECServiceFacade getFecServiceFacade() {
+        if (ObjectUtils.isNull(fecServiceFacade)) {
+            fecServiceFacade = new FECServiceFacade();
+        }
+
+        return fecServiceFacade;
+    }
+
+    public void setFecServiceFacade(FECServiceFacade fecServiceFacade) {
+        this.fecServiceFacade = fecServiceFacade;
+    }
 	
 }
