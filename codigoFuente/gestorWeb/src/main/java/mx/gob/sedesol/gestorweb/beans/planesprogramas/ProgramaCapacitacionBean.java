@@ -100,7 +100,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	
 	private String tipoPrograma;
 	private String tipo;
-	
+	private Integer idPlan;
 	private String tpoCompSelec;
 	private String ejeCapacitSel;
 	private List<CatalogoComunDTO> catStatusPrograma;
@@ -111,9 +111,11 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	private List<CatalogoComunDTO> catNivelConocim;
 	private List<CatalogoComunDTO> catInstitucionesCertificadoras;
 	private List<FichaDescProgramaDTO> programasBusqueda;
+	private List<NodoeHijosDTO> nodos;
 	private FichaDescProgramaDTO programaSeleccionado;
 	private FichaDescProgramaDTO programa;
 	private List<CatalogoComunDTO> catTpoComp;
+	private List<CatalogoComunDTO> planes;
 	private List<CatalogoComunDTO> catEjeCapacit;
 	private NodoeHijosDTO estPlanSedesol;
 	private List<CatalogoComunDTO> ejesCapacitacion;
@@ -761,16 +763,16 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	 */
 	private void generaEstructuraCatTpoCompetenciaPlan() {
 
-		List<NodoeHijosDTO> planes = new ArrayList<>();
-		List<MallaCurricularDTO> mallas = new ArrayList<>();
+		nodos = new ArrayList<>();
+		List<MallaCurricularDTO> mallas = getFecServiceFacade().getMallaCurricularService().obtieneMallasCurricularesDisponibles();
 
 		// List<MallaCurricularDTO> mallas =
 		// getFecServiceFacade().getMallaCurricularService().obtieneMallasCurricularesDisponibles();
 		// RN: Solo se presentara el plan de sedesol por el momento
-		MallaCurricularDTO mallaSedesol = getFecServiceFacade().getMallaCurricularService()
+		/*MallaCurricularDTO mallaSedesol = getFecServiceFacade().getMallaCurricularService()
 				.obtenerMallaCurricularPorId(1);
-		mallas.add(mallaSedesol);
-
+		mallas.add(mallaSedesol);*/
+		planes = new ArrayList<>();
 		for (MallaCurricularDTO m : mallas) {
 			NodoeHijosDTO nodog = new NodoeHijosDTO();
 			nodog.setNombre(m.getNombre());
@@ -783,13 +785,17 @@ public class ProgramaCapacitacionBean extends BaseBean {
 				this.generaCatxNivel(m.getLstHijosMallaCurr(), nodog, nodog.getNivel());
 			}
 
-			planes.add(nodog);
+			nodos.add(nodog);
+			CatalogoComunDTO cat = new CatalogoComunDTO();
+			cat.setId(nodog.getIdNodo());
+			cat.setNombre(nodog.getNombre());
+			planes.add(cat);
 		}
 
 		catTpoComp = new ArrayList<>();
 
 		// Genera el Catalogo Tipo de Competencia
-		estPlanSedesol = planes.get(ConstantesGestorWeb.INDICE_INICIAL);
+		estPlanSedesol = nodos.get(ConstantesGestorWeb.INDICE_INICIAL);
 		for (NodoeHijosDTO nh : estPlanSedesol.getNodosHijos()) {
 			CatalogoComunDTO cc = new CatalogoComunDTO();
 			cc.setId(nh.getIdNodo());
@@ -827,6 +833,35 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			CatalogoComunDTO estatus = (CatalogoComunDTO) e.getNewValue();
 			programasBusqueda = fecServiceFacade.getFichaDescProgramaService()
 					.consultaProgramasPorEstatus(estatus.getId());
+		}
+	}
+	
+	public void onChangePlan(ValueChangeEvent e) { // TODO:
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			Integer idPlanSel = (Integer) e.getNewValue();
+			if(idPlanSel != 0) {
+				catTpoComp = new ArrayList<>();
+				catEjeCapacit = new ArrayList<CatalogoComunDTO>();
+				int indiceEncontrado = -1; 
+				for(int index = 0; index < nodos.size(); index++) {
+					if(nodos.get(index).getIdNodo().equals(idPlanSel)) {
+						indiceEncontrado = index; 
+					}
+				}
+				if(indiceEncontrado != -1) {
+					catTpoComp = new ArrayList<CatalogoComunDTO>();
+					estPlanSedesol = nodos.get(indiceEncontrado);
+					for (NodoeHijosDTO nh : estPlanSedesol.getNodosHijos()) {
+						CatalogoComunDTO cc = new CatalogoComunDTO();
+						cc.setId(nh.getIdNodo());
+						cc.setNombre(nh.getNombre());
+						catTpoComp.add(cc);
+					}
+				}	
+			}else {
+				catTpoComp = new ArrayList<CatalogoComunDTO>();
+				catEjeCapacit = new ArrayList<CatalogoComunDTO>();
+			}
 		}
 	}
 
@@ -3603,5 +3638,24 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	public void setNumUniDidacticasAux(Integer numUniDidacticasAux) {
 		this.numUniDidacticasAux = numUniDidacticasAux;
 	}
+
+	public List<CatalogoComunDTO> getPlanes() {
+		return planes;
+	}
+
+	public void setPlanes(List<CatalogoComunDTO> planes) {
+		this.planes = planes;
+	}
+
+	public Integer getIdPlan() {
+		return idPlan;
+	}
+
+	public void setIdPlan(Integer idPlan) {
+		this.idPlan = idPlan;
+	}
+
+	
+	
 
 }

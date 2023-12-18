@@ -61,10 +61,7 @@
 									value="#{planBean.filtroPlan.tblOrganismoGubernamental}"
 									converter="orgGuberConverter" autoWidth="false"
 									styleClass="col-xs-12" onclick="ajustaAlto();">
-									<p:ajax event="change" process="@this" />
-									<f:selectItem 
-										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-										itemValue="#{null}" />
+									<p:ajax event="change" process="@this" />									
 									<f:selectItems value="#{planBean.itemsOrgGubs}" var="orgGub"
 										itemLabel="#{orgGub.label}" itemValue="#{orgGub}" />
 								</p:selectOneMenu>
