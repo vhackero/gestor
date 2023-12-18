@@ -38,11 +38,27 @@
 				header="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.titulo.competencias')}">
 				<div class="form-group">
 					<div class="row">
-						<div class="col-md-4 col-xs-12">
+						<div class="col-md-3 col-xs-12">
+							<p:outputLabel styleClass="requerido" value="Plan:" />
+							<p:selectOneMenu id="nvoPlan" styleClass="col-xs-12"
+								
+								value="#{programaCapacitacionBean.idPlan}"
+								valueChangeListener="#{programaCapacitacionBean.onChangePlan}">
+								<p:ajax update="@form" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{0}" />
+								<f:selectItems value="#{programaCapacitacionBean.planes}"
+									var="plan" itemLabel="#{plan.nombre}"
+									itemValue="#{plan.id}" />
+							</p:selectOneMenu>
+							<p:message for="nvoPlan" />
+						</div>
+						<div class="col-md-3 col-xs-12">
 							<p:outputLabel styleClass="requerido"
 								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.tpocomp')}:" />
 							<p:selectOneMenu id="nvoTpoComp" styleClass="col-xs-12"
-								
+								disabled="#{programaCapacitacionBean.idPlan eq 0 or programaCapacitacionBean.idPlan eq null or empty programaCapacitacionBean.catTpoComp}"
 								value="#{programaCapacitacionBean.programa.tipoCompetencia}"
 								valueChangeListener="#{programaCapacitacionBean.onChangeTpoCompetencia}">
 								<p:ajax update="nvoEjeCap" />
@@ -55,11 +71,11 @@
 							</p:selectOneMenu>
 							<p:message for="nvoTpoComp" />
 						</div>
-						<div class="col-md-4 col-xs-12">
+						<div class="col-md-3 col-xs-12">
 							<p:outputLabel styleClass="requerido"
 								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.ejecapacit')}:" />
 							<p:selectOneMenu id="nvoEjeCap" styleClass="col-xs-12"
-								disabled="#{programaCapacitacionBean.programa.tipoCompetencia eq 0}"
+								disabled="#{programaCapacitacionBean.programa.tipoCompetencia eq 0 or empty programaCapacitacionBean.catEjeCapacit}"
 								value="#{programaCapacitacionBean.programa.ejeCapacitacion}"
 								valueChangeListener="#{programaCapacitacionBean.onChangeEjeCapacitacion}">
 								<p:ajax process="@this" />
@@ -72,7 +88,7 @@
 							</p:selectOneMenu>
 							<p:message for="nvoEjeCap" />
 						</div>
-						<div class="col-md-4 col-xs-12">
+						<div class="col-md-3 col-xs-12">
 
 							<p:outputPanel id="pnlBtnCmpEsp" autoUpdate="false">
 								<p:outputLabel value="Competencias específicas"
