@@ -130,3 +130,4 @@ derby.log
 .factorypath
 
 WildFly 10.x.server
+.vscode/settings.json
