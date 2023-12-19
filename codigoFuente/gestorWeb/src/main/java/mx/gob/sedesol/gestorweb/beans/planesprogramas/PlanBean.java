@@ -88,8 +88,8 @@ public class PlanBean extends BaseBean {
 	private Integer elementsStruc = 1;
 	private String nameStruc = "";
 	private Integer subStrucLvl = 0;
-	private List<String> namesSubStruc = new ArrayList<String>();
-	private List<Integer> elementsSubStruc = new ArrayList<Integer>();
+	private ArrayList<String> namesSubStruc = new ArrayList<>();
+	private ArrayList<String> elementsSubStruc = new ArrayList<>();
 	
 	@ManagedProperty(value = "#{fecServiceFacade}")
     private FECServiceFacade fecServiceFacade;
@@ -99,7 +99,7 @@ public class PlanBean extends BaseBean {
 		edicionPlan = Boolean.parseBoolean(getRequest().getParameter("edicion"));
 		
 		namesSubStruc.add("");
-		elementsSubStruc.add(1);
+		elementsSubStruc.add("1");
 	}
 
 	@PostConstruct
@@ -315,51 +315,44 @@ public class PlanBean extends BaseBean {
 	}
 	
 	
+	
+	public void onChangeNameElements(ValueChangeEvent event) {
+		if (ObjectUtils.isNotNull(event.getNewValue())) {
+			nameStruc = (String) event.getNewValue();
+		}
+	}
+	
 	public void onChangeElementsSubs(ValueChangeEvent e) {
-		logger.error("aaaaaaaaaaaaaaaaaa");
-		logger.error(e);
-		logger.error(e.getPhaseId());
-		
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			logger.error( (Integer) e.getNewValue() );
-			
-			subStrucLvl = (Integer) e.getNewValue();
+			if((Integer) e.getNewValue() >= 3) {
+				subStrucLvl = 3;
+			}else {
+				subStrucLvl = (Integer) e.getNewValue();
+			}
 			
 			namesSubStruc = new ArrayList<String>();
-			elementsSubStruc = new ArrayList<Integer>();
+			elementsSubStruc = new ArrayList<String>();
 			for(int i=0;i<subStrucLvl;i++){
-				namesSubStruc.add("");
-				elementsSubStruc.add(1);
+				namesSubStruc.add("SubEstructura");
+				elementsSubStruc.add("1");
 			}
 			
 		}
-		logger.error("finishi uwu");
 	}
 	
 	public void onChangeSubsElements(ValueChangeEvent event) {
-		logger.error("aaaaaaaaaaaaaaaaaa");
-		logger.error((String) event.getComponent().getAttributes().get("idx"));
-		logger.error((String) event.getComponent().getAttributes().get("value"));
-		
-		/*if (ObjectUtils.isNotNull(e.getNewValue())) {
-			
-		}*/
-		
-		logger.error("finishi uwu");
+		if (ObjectUtils.isNotNull(event.getNewValue())) {
+			elementsSubStruc.set( (Integer) event.getComponent().getAttributes().get("idxA"), (String) event.getNewValue() );
+		}
 	}
 	
 	public void onChangeNameSubsElements(ValueChangeEvent event) {
-		logger.error("aaaaaaaaaaaaaaaaaa");
-		logger.error((String) event.getComponent().getAttributes().get("idx"));
-		logger.error((String) event.getComponent().getAttributes().get("value"));
-		
-		/*if (ObjectUtils.isNotNull(e.getNewValue())) {
-			
-		}*/
-		
-		logger.error("finishi uwu");
+		if (ObjectUtils.isNotNull(event.getNewValue())) {
+			namesSubStruc.set((Integer) event.getComponent().getAttributes().get("idxA"), (String) event.getNewValue());
+		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void generarEstructura(ValueChangeEvent e){
 		try {
 			logger.error(subStrucLvl);
@@ -371,21 +364,12 @@ public class PlanBean extends BaseBean {
 				logger.error("Nombre: "+nameS);
 			}
 			
-			logger.error("Numeros");
-			for(Integer numbS: elementsSubStruc){
-				logger.error("Numb");
+			logger.error("Numeros forEach");
+			for(String numbS: elementsSubStruc){
 				logger.error("Numero: "+numbS);
-				logger.error(numbS);
 			}
 			
-			logger.error("Creansdo malla");
-			MallaCurricularDTO malla = new MallaCurricularDTO();
-			malla.setNombre("testMalla");
 			
-			logger.error("Guardando mallas");
-			ResultadoDTO<MallaCurricularDTO> res = getFecServiceFacade().guardaMallaCurricular(malla);
-			logger.error(res.getDto().getId());
-			logger.error(res.getDto().getNombre());
 			
 			logger.error("se acabo 7u7");
 		}catch(Exception ex) {
@@ -479,7 +463,9 @@ public class PlanBean extends BaseBean {
 		ResultadoDTO<PlanDTO> resultado = planServiceFacade.guardaNuevoPlan(plan,
 				this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
 				this.obtieneListaCatalogoComun(aptitudesPlanSelec, ConstantesGestorWeb.CAT_APTITUDES_PLAN),
-				this.obtieneListaCatalogoComun(conocimsPlanSelec, ConstantesGestorWeb.CAT_CONOCIMIENTOS_PLAN));
+				this.obtieneListaCatalogoComun(conocimsPlanSelec, ConstantesGestorWeb.CAT_CONOCIMIENTOS_PLAN),
+				elementsStruc, nameStruc, subStrucLvl, namesSubStruc, elementsSubStruc
+				);
 
 		if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
 			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CRE_PLA",
@@ -983,19 +969,19 @@ public class PlanBean extends BaseBean {
 		this.subStrucLvl = subStrucLvl;
 	}
 
-	public List<String> getNamesSubStruc() {
+	public ArrayList<String> getNamesSubStruc() {
 		return namesSubStruc;
 	}
 
-	public void setNamesSubStruc(List<String> namesSubStruc) {
+	public void setNamesSubStruc(ArrayList<String> namesSubStruc) {
 		this.namesSubStruc = namesSubStruc;
 	}
 
-	public List<Integer> getElementsSubStruc() {
+	public ArrayList<String> getElementsSubStruc() {
 		return elementsSubStruc;
 	}
 
-	public void setElementsSubStruc(List<Integer> elementsSubStruc) {
+	public void setElementsSubStruc(ArrayList<String> elementsSubStruc) {
 		this.elementsSubStruc = elementsSubStruc;
 	}
 	
