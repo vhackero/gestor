@@ -21,6 +21,7 @@ public class TblPlan_ {
 	public static volatile SingularAttribute<TblPlan, String> fundamentacion;
 	public static volatile SingularAttribute<TblPlan, String> identificador;
 	public static volatile SingularAttribute<TblPlan, String> nombre;
+	public static volatile SingularAttribute<TblPlan, Integer> horasCredito;
 	public static volatile SingularAttribute<TblPlan, String> objetivos;
 	public static volatile SingularAttribute<TblPlan, String> perfilEgreso;
 	public static volatile SingularAttribute<TblPlan, String> perfilIngreso;

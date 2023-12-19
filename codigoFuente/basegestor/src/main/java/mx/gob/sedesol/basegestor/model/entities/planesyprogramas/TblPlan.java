@@ -59,6 +59,8 @@ public class TblPlan implements Serializable {
 
 	private String nombre;
 
+	private Integer horasCredito;
+
 	@Column(columnDefinition="TEXT")
 	private String objetivos;
 
@@ -220,6 +222,14 @@ public class TblPlan implements Serializable {
 
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
+	}
+
+	public Integer getHorasCredito() {
+		return horasCredito;
+	}
+
+	public void setHorasCredito(Integer horasCredito) {
+		this.horasCredito = horasCredito;
 	}
 
 	public String getObjetivos() {

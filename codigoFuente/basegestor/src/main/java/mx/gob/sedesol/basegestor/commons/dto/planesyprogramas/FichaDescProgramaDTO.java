@@ -24,6 +24,7 @@ public class FichaDescProgramaDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private Integer idPrograma;
+	private Integer idPlan;
 	@NotEmpty(message=MensajesSistemaEnum.Constantes.GESTOR_WEB_GENERAL_DATO_REQUERIDO)
 	private String conocimietosPrevios;
 	private String cvePrograma;
@@ -127,12 +128,29 @@ public class FichaDescProgramaDTO implements Serializable {
 	private Integer idCategoriaMdl;
     private BitacoraDTO bitacoraDTO;
 
-    private String tipo;    
+    private String tipo;
+	private Integer creditos;
         
 	public FichaDescProgramaDTO(){
 		
 	}
-	
+
+	public Integer getIdPlan() {
+		return idPlan;
+	}
+
+	public void setIdPlan(Integer idPlan) {
+		this.idPlan = idPlan;
+	}
+
+	public Integer getCreditos() {
+		return creditos;
+	}
+
+	public void setCreditos(Integer creditos) {
+		this.creditos = creditos;
+	}
+
 	public String getTipo() {
 		return tipo;
 	}
