@@ -6,16 +6,16 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:p="http://primefaces.org/ui">
 	<ui:define name="breadcrumb">
-		<li class="active">Mis cursos</li>
+		<li class="active">Mis asignaturas</li>
 	</ui:define>
 	<ui:define name="content">
 		<h:form id="formMisCursos">
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
-			<h1>Mis cursos</h1>
+			<h1>Mis asignaturas</h1>
 			<hr />
 			<p:panel id="misCursos"
-				header="#{sistema.obtenerTexto('gw.ga.panel.informacioncursosproceso')}">
+				header="Información de las asignaturas en proceso">
 				<div class="row">
 					<div class="col-md-12">
 						<p:dataTable id="dtResultadoBusquedaMisCursos"
@@ -32,7 +32,7 @@
 								sortBy="#{participante.grupo.evento.nombreEc}">
 								<f:facet name="header">
 									<h:outputText
-										value="#{sistema.obtenerTexto('gw.ga.label.nombrecurso')}" />
+										value="Nombre de las asignaturas" />
 								</f:facet>
 								<h:outputText
 									rendered="#{participante.grupo.evento.catModalidadPlanPrograma.id eq 2}"
@@ -135,7 +135,7 @@
 									<p:column styleClass="text-center">
 										<f:facet name="header">
 											<h:outputText
-												value="#{sistema.obtenerTexto('gw.ga.label.nombrecurso')}" />
+												value="Nombre de la asignatura" />
 										</f:facet>
 										<h:outputText value="#{evento.nombreEc}" />
 									</p:column>
