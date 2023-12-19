@@ -63,6 +63,7 @@ public class PlanDTO implements Serializable{
 	private CatalogoComunDTO catTipoCompetencia;
 	private CatalogoComunDTO catCreditosPlan;
 	private CatalogoComunDTO catDivisionesPlan;
+	private Integer horasCredito;
 	
 	/**
 	 * @return the idPlan
@@ -169,6 +170,15 @@ public class PlanDTO implements Serializable{
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
+
+	public Integer getHorasCredito() {
+		return horasCredito;
+	}
+
+	public void setHorasCredito(Integer horasCredito) {
+		this.horasCredito = horasCredito;
+	}
+
 	/**
 	 * @return the objetivos
 	 */

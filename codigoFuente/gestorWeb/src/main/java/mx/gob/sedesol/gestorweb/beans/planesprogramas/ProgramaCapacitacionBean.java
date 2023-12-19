@@ -13,6 +13,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.ValueChangeEvent;
 
+import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.log4j.Logger;
@@ -38,6 +39,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.VariableMensajeOperacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.CmpDinamicoUniDidacticaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.CompetenciaEspecificaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.ControlEstTematicaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.DetEstUniDidacticaDTO;
@@ -95,12 +97,16 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	@ManagedProperty("#{orgGubernamentalService}")
 	private OrgGubernamentalService orgGubernamentalService;
 
+	@ManagedProperty("#{planService}")
+	private PlanService planService;
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
 	
 	private String tipoPrograma;
 	private String tipo;
+	private Integer creditos;
 	private Integer idPlan;
+	private Integer idPlanCredito;
 	private String tpoCompSelec;
 	private String ejeCapacitSel;
 	private List<CatalogoComunDTO> catStatusPrograma;
@@ -139,6 +145,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	private List<CmpDinamicoUniDidacticaDTO> unidadesDidacticasProg;
 	private Integer numSubtemas;
 	private boolean ultimoTabProg;
+	private boolean obligatorio;
 	HashMap<Integer, String> temasIndexados = new HashMap<>();
 	private HashMap<Integer, String> unidadDidacticaSelect;
 	private HashMap<Integer, String> unidadDidacticaMS;
@@ -162,7 +169,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	private RelProgDuracionDTO relProgDuracionEvaluacion;
 	private List<CatalogoComunDTO> catTipoCargaHoraria;
 	private List<FichaDescProgramaDTO> programasList;
-	private Integer calificacionMinimaAprobatoria = 80;
+	private Integer calificacionMinimaAprobatoria = 60;
 	private String nombreTipoCompetencia;
 	private String nombreEjeCapacitacion;
 	private String responsableDatosGenerales;
@@ -840,6 +847,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			Integer idPlanSel = (Integer) e.getNewValue();
 			if(idPlanSel != 0) {
+				programa.setIdPlan(idPlanSel);
 				catTpoComp = new ArrayList<>();
 				catEjeCapacit = new ArrayList<CatalogoComunDTO>();
 				int indiceEncontrado = -1; 
@@ -862,6 +870,15 @@ public class ProgramaCapacitacionBean extends BaseBean {
 				catTpoComp = new ArrayList<CatalogoComunDTO>();
 				catEjeCapacit = new ArrayList<CatalogoComunDTO>();
 			}
+		}
+	}
+	public void isObligatorioCredito(Integer plan) {
+		PlanDTO plandto = planService.buscarPorId(plan);
+		if (plandto.getCatCreditosPlan().getId() == 2){
+			setObligatorio(Boolean.FALSE);
+		}else {
+			creditos = plandto.getHorasCredito();
+			setObligatorio(Boolean.TRUE);
 		}
 	}
 
@@ -952,7 +969,10 @@ public class ProgramaCapacitacionBean extends BaseBean {
 							.map(ce -> ce.getCatCompetenciaEspecifica().getNombre()).collect(Collectors.joining(","));
 				}
 			}
-		} else {// Navegacion
+		} else if (indexTabProg.equals(1)) {//Estandar de competencias
+			//Obtener los creditos por programa educastivo y realizar calculos de horas y minutos
+			isObligatorioCredito(programa.getIdPlan());
+		}else {// Navegacion
 			cpmTabViewProg.setActiveIndex(indexTabProg);
 			setUltimoTabProg(Boolean.FALSE);
 		}
@@ -1036,7 +1056,6 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			this.programa.setCatStatusPrograma(fecServiceFacade.getCatStatusProgramaService()
 					.buscarRegistroPorNombre(EstatusProgramaEnum.BORRADOR.getEtiqueta(), CatStatusPrograma.class));
 			this.programa.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
-
 			ResultadoDTO<FichaDescProgramaDTO> resTx = fecServiceFacade.guardarDatosPrograma(this.programa);
 			if (ObjectUtils.isNotNull(resTx) && resTx.getResultado().getValor()) {
 				getSession().setAttribute(ConstantesGestorWeb.OBJ_PROGRAMA, resTx.getDto());
@@ -1449,11 +1468,39 @@ public class ProgramaCapacitacionBean extends BaseBean {
 
 		return true;
 	}
+	public static List<Integer> getTime(float totalHoras) {
+		int horas = (int) totalHoras;
+		float minutosFloat = (totalHoras - horas) * 60;
+		int minutos = Math.round(minutosFloat);
 
-	/**
-	 *
-	 * @param e
-	 */
+		// Si los minutos son 60 o más, ajustamos las horas y reiniciamos los minutos
+		if (minutos >= 60) {
+			horas++;
+			minutos -= 60;
+		}
+		return Arrays.asList(horas, minutos);
+	}
+	public void onChangeCreditos(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			int TotalHoras = creditos * (Integer) e.getNewValue();
+			float teoria = (float) (TotalHoras * 0.40);
+			float evaluacion = (float) (TotalHoras * 0.35);
+			float practica = (float) (TotalHoras * 0.25);
+
+			//setear valores de calculos
+			List<Integer> teo = getTime(teoria);
+			this.relProgDuracionTeoria.setHorasInteger(teo.get(0));
+			this.relProgDuracionTeoria.setMinutosInteger(teo.get(1));
+
+			List<Integer> prac = getTime(practica);
+			this.relProgDuracionPractica.setHorasInteger(prac.get(0));
+			this.relProgDuracionPractica.setMinutosInteger(prac.get(1));
+
+			List<Integer> eval = getTime(evaluacion);
+			this.relProgDuracionEvaluacion.setHorasInteger(eval.get(0));
+			this.relProgDuracionEvaluacion.setMinutosInteger(eval.get(1));
+		}
+	}
 	public void onChangeProgramasSeriados(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			idProgramaSeriado = (String) e.getNewValue();
@@ -2598,20 +2645,27 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	// SETTERS & GETTERS
 	
 	/**
-	 * @return the Typo
+	 * @return the tipo
 	 */
 	public String getTipo() {
 		return tipo;
 	}
 
 	/**
-	 * @param Typo
+	 * @param tipo
 	 */
 	public void setTipo(String tipo) {
 		this.tipo = tipo;
 	}
-	
-	
+
+	public Integer getCreditos() {
+		return creditos;
+	}
+
+	public void setCreditos(Integer creditos) {
+		this.creditos = creditos;
+	}
+
 	/**
 	 * @return the leyendaBusqueda
 	 */
@@ -2700,6 +2754,14 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	 */
 	public void setControlEstTematica(ControlEstTematicaDTO controlEstTematica) {
 		this.controlEstTematica = controlEstTematica;
+	}
+
+	public Integer getIdPlanCredito() {
+		return idPlanCredito;
+	}
+
+	public void setIdPlanCredito(Integer idPlanCredito) {
+		this.idPlanCredito = idPlanCredito;
 	}
 
 	/**
@@ -3613,6 +3675,22 @@ public class ProgramaCapacitacionBean extends BaseBean {
 
 	public void setOrgGubernamentalService(OrgGubernamentalService orgGubernamentalService) {
 		this.orgGubernamentalService = orgGubernamentalService;
+	}
+
+	public PlanService getPlanService() {
+		return planService;
+	}
+
+	public void setPlanService(PlanService planService) {
+		this.planService = planService;
+	}
+
+	public boolean isObligatorio() {
+		return obligatorio;
+	}
+
+	public void setObligatorio(boolean obligatorio) {
+		this.obligatorio = obligatorio;
 	}
 
 	public BitacoraBean getBitacoraBean() {

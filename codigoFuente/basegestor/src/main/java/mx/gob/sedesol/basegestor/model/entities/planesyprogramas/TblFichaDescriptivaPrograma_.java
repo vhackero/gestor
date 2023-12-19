@@ -15,6 +15,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
 @StaticMetamodel(TblFichaDescriptivaPrograma.class)
 public class TblFichaDescriptivaPrograma_ {
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, Integer> idPrograma;
+	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, Integer> idPlan;
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, String> conocimietosPrevios;
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, String> cvePrograma;
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, String> descripcion;
@@ -67,4 +68,5 @@ public class TblFichaDescriptivaPrograma_ {
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, String> calificacionMinAprobatoria;
 	
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, String> tipo;
+	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, Integer> creditos;
 }

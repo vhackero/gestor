@@ -69,7 +69,6 @@ public class PlanBean extends BaseBean {
 	private List<CatalogoComunDTO> catDivisionesPlan;
 
 	private List<SelectItem> itemsOrgGubs;
-
 	private List<String> conocimsPlanSelec;
 	private List<String> habilidadesPlanSelec;
 	private List<String> aptitudesPlanSelec;
@@ -81,6 +80,7 @@ public class PlanBean extends BaseBean {
 	private PlanDTO planSelecBusq;
 	private PlanDTO plan;
 	private boolean edicionPlan;
+	private boolean creditos;
 
 	public PlanBean() {
 		initRecursos();
@@ -266,6 +266,13 @@ public class PlanBean extends BaseBean {
 	public void onChangeCreditosPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			plan.setCatCreditosPlan(this.getValorDeCatalogo(catCreditosPlan, ((Integer) e.getNewValue())));
+			if ((Integer) e.getNewValue() == 2) {
+				setCreditos(Boolean.FALSE);
+			} else {
+				setCreditos(Boolean.TRUE);
+			}
+		}else {
+			setCreditos(Boolean.TRUE);
 		}
 	}
 	
@@ -481,6 +488,12 @@ public class PlanBean extends BaseBean {
 		this.planServiceFacade = planServiceFacade;
 	}
 
+	public boolean isCreditos() {
+		return creditos;
+	}
+	public void setCreditos(boolean creditos) {
+		this.creditos = creditos;
+	}
 	/**
 	 * @return the filtroPlan
 	 */
