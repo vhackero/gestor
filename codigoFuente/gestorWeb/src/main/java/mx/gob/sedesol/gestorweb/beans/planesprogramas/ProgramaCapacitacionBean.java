@@ -127,6 +127,10 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	private TabView cpmTabViewProg;
 	private Integer numEstTematicas;
 	private Integer numUniDidacticas;
+	
+	//Subestructuras
+	private List<CatalogoComunDTO> catSubEstructuraNivel2;
+	private List<CatalogoComunDTO> catSubEstructuraNivel3;
 
 	private Integer numEstTematicasAux = 0;
 	private Integer numUniDidacticasAux = 0;
@@ -891,18 +895,71 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			}
 		}
 	}
+	
+	/**
+	 * Genera el catalogo de subestructuras nivel 2
+	 *
+	 * @param e
+	 */
+	public void onChangeEjeCapacitacion(ValueChangeEvent e) {
+
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+
+			Integer idSubEstructura = (Integer) e.getNewValue();
+			programa.setEjeCapacitacion(idSubEstructura);
+			catSubEstructuraNivel2 = new ArrayList<>();
+
+			for (NodoeHijosDTO nh : estPlanSedesol.getNodosHijos()) {
+				if (nh.getIdNodo().equals(idSubEstructura)) {
+					for (NodoeHijosDTO nint : nh.getNodosHijos()) {
+
+						CatalogoComunDTO cc = new CatalogoComunDTO();
+						cc.setId(nint.getIdNodo());
+						cc.setNombre(nint.getNombre());
+						catSubEstructuraNivel2.add(cc);
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Genera el catalogo de subestructuras nivel 2
+	 *
+	 * @param e
+	 */
+	public void onChangeSubEstructuraNivel2(ValueChangeEvent e) {
+
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+
+			Integer idSubEstructura = (Integer) e.getNewValue();
+			catSubEstructuraNivel3 = new ArrayList<>();
+
+			for (NodoeHijosDTO nh : estPlanSedesol.getNodosHijos()) {
+				if (nh.getIdNodo().equals(idSubEstructura)) {
+					for (NodoeHijosDTO nint : nh.getNodosHijos()) {
+
+						CatalogoComunDTO cc = new CatalogoComunDTO();
+						cc.setId(nint.getIdNodo());
+						cc.setNombre(nint.getNombre());
+						catSubEstructuraNivel3.add(cc);
+					}
+				}
+			}
+		}
+	}
 
 	/**
 	 * Obtiene los tipos de competencia por eje de capacitacion
 	 *
 	 * @param e
 	 */
-	public void onChangeEjeCapacitacion(ValueChangeEvent e) {
+	/*public void onChangeEjeCapacitacion(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			Integer idEjeCapacitacion = (Integer) e.getNewValue();
 			programa.setEjeCapacitacion(idEjeCapacitacion);
 		}
-	}
+	}*/
 
 	public void onChangeOrgGubPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
