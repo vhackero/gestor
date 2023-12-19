@@ -37,7 +37,7 @@
 		<div class="row">
 			<div class="col-md-6">
 				<h:form id="formMisCursos">
-					<p:panel header="Cursos" style="margin-top:0">
+					<p:panel header="Asignaturas" style="margin-top:0">
 						<p:dataTable id="dtResultadoBusquedaMisCursos"
 							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
 							reflow="true"
@@ -52,7 +52,7 @@
 								sortBy="#{participante.grupo.evento.nombreEc}">
 								<f:facet name="header">
 									<h:outputText
-										value="#{sistema.obtenerTexto('gw.ga.label.nombrecurso')}" />
+										value="Nombre de la asignatura" />
 								</f:facet>
 								<h:outputText
 									rendered="#{participante.grupo.evento.catModalidadPlanPrograma.id eq 2}"
