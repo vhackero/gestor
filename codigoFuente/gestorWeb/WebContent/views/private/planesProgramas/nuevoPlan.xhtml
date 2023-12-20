@@ -92,6 +92,9 @@
 								valueChangeListener="#{planBean.onChangePeriodo}"
 								autoWidth="false" styleClass="col-xs-12">
 								<p:ajax event="change" process="@this" styleClass="col-xs-12" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
 								<f:selectItems value="#{planBean.catPeriodo}" var="periodo"
 									itemLabel="#{periodo.nombre}" itemValue="#{periodo.id}" />
 							</p:selectOneMenu>
@@ -362,7 +365,7 @@
 								value="#{planBean.plan.catEstatusPlan.id}"
 								valueChangeListener="#{planBean.onChangeEstatusPlan}"
 								autoWidth="false" styleClass="col-xs-12">
-								<p:ajax event="change" update="estPLan" />
+								<p:ajax event="change" update="@this" />
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
@@ -478,9 +481,9 @@
 								styleClass="requerido bloque" />
 						<p:selectOneMenu id="tpoCompetencia"
 										 value="#{planBean.plan.catTipoCompetencia.id}"
-										 valueChangeListener="#{planBean.onChangeCompetenciaPlan}"
+										 valueChangeListener="#{planBean.onChangeTpoCompetencia}"
 										 autoWidth="false" styleClass="col-xs-12">
-							<p:ajax event="change" process="@this" styleClass="col-xs-12" />
+							<p:ajax event="change" process="@this" />
 							<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
