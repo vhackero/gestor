@@ -33,6 +33,7 @@ public class PersonaCargaDTO implements Serializable {
 	private String idMunicipio;
 	private String contraseniaEncriptada;
 	private String mensajeResultado;
+	private String hash;
 	
 	private boolean correcto;
 	
@@ -349,4 +350,11 @@ public class PersonaCargaDTO implements Serializable {
 		this.idPersona = idPersona;
 	}
 
+	public String getHash() {
+		return hash;
+	}
+
+	public void setHash(String hash) {
+		this.hash = hash;
+	}
 }
