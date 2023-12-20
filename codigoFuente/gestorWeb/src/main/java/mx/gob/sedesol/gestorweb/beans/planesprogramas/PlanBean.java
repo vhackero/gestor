@@ -30,6 +30,9 @@ import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.utils.BitacoraUtil;
 
+
+import mx.gob.sedesol.basegestor.service.impl.planesyprogramas.FECServiceFacade;
+
 @ViewScoped
 @ManagedBean
 public class PlanBean extends BaseBean {
@@ -69,7 +72,6 @@ public class PlanBean extends BaseBean {
 	private List<CatalogoComunDTO> catDivisionesPlan;
 
 	private List<SelectItem> itemsOrgGubs;
-
 	private List<String> conocimsPlanSelec;
 	private List<String> habilidadesPlanSelec;
 	private List<String> aptitudesPlanSelec;
@@ -81,10 +83,23 @@ public class PlanBean extends BaseBean {
 	private PlanDTO planSelecBusq;
 	private PlanDTO plan;
 	private boolean edicionPlan;
+	private boolean creditos;
+	
+	private Integer elementsStruc = 1;
+	private String nameStruc = "";
+	private Integer subStrucLvl = 0;
+	private ArrayList<String> namesSubStruc = new ArrayList<>();
+	private ArrayList<String> elementsSubStruc = new ArrayList<>();
+	
+	@ManagedProperty(value = "#{fecServiceFacade}")
+    private FECServiceFacade fecServiceFacade;
 
 	public PlanBean() {
 		initRecursos();
 		edicionPlan = Boolean.parseBoolean(getRequest().getParameter("edicion"));
+		
+		namesSubStruc.add("");
+		elementsSubStruc.add("1");
 	}
 
 	@PostConstruct
@@ -271,6 +286,13 @@ public class PlanBean extends BaseBean {
 	public void onChangeCreditosPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			plan.setCatCreditosPlan(this.getValorDeCatalogo(catCreditosPlan, ((Integer) e.getNewValue())));
+			if ((Integer) e.getNewValue() == 2) {
+				setCreditos(Boolean.FALSE);
+			} else {
+				setCreditos(Boolean.TRUE);
+			}
+		}else {
+			setCreditos(Boolean.TRUE);
 		}
 	}
 	
@@ -302,6 +324,74 @@ public class PlanBean extends BaseBean {
 				}
 			}
 		}
+	}
+	
+	
+	
+	public void onChangeNameElements(ValueChangeEvent event) {
+		if (ObjectUtils.isNotNull(event.getNewValue())) {
+			nameStruc = (String) event.getNewValue();
+		}
+	}
+	
+	public void onChangeElementsSubs(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			if((Integer) e.getNewValue() >= 3) {
+				subStrucLvl = 3;
+			}else {
+				subStrucLvl = (Integer) e.getNewValue();
+			}
+			
+			namesSubStruc = new ArrayList<String>();
+			elementsSubStruc = new ArrayList<String>();
+			for(int i=0;i<subStrucLvl;i++){
+				namesSubStruc.add("SubEstructura");
+				elementsSubStruc.add("1");
+			}
+			
+		}
+	}
+	
+	public void onChangeSubsElements(ValueChangeEvent event) {
+		if (ObjectUtils.isNotNull(event.getNewValue())) {
+			elementsSubStruc.set( (Integer) event.getComponent().getAttributes().get("idxA"), (String) event.getNewValue() );
+		}
+	}
+	
+	public void onChangeNameSubsElements(ValueChangeEvent event) {
+		if (ObjectUtils.isNotNull(event.getNewValue())) {
+			namesSubStruc.set((Integer) event.getComponent().getAttributes().get("idxA"), (String) event.getNewValue());
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void generarEstructura(ValueChangeEvent e){
+		try {
+			logger.error(subStrucLvl);
+			logger.error(elementsStruc);
+			logger.error(nameStruc);
+			
+			logger.error("Nombres");
+			for(String nameS: namesSubStruc){
+				logger.error("Nombre: "+nameS);
+			}
+			
+			logger.error("Numeros forEach");
+			for(String numbS: elementsSubStruc){
+				logger.error("Numero: "+numbS);
+			}
+			
+			
+			
+			logger.error("se acabo 7u7");
+		}catch(Exception ex) {
+			logger.error("EEEEEEEEEEEEERRRRRRRRRRRRRRROOOOOOOOOOOORRRRRRRRRRRRRR");
+			logger.error(ex);
+		}
+	}
+	
+	public void onChangeTest(ValueChangeEvent e) {
+		logger.error("eeeeeeeeeeeeeeeeeeeeeee");
 	}
 
 	/**
@@ -385,7 +475,9 @@ public class PlanBean extends BaseBean {
 		ResultadoDTO<PlanDTO> resultado = planServiceFacade.guardaNuevoPlan(plan,
 				this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
 				this.obtieneListaCatalogoComun(aptitudesPlanSelec, ConstantesGestorWeb.CAT_APTITUDES_PLAN),
-				this.obtieneListaCatalogoComun(conocimsPlanSelec, ConstantesGestorWeb.CAT_CONOCIMIENTOS_PLAN));
+				this.obtieneListaCatalogoComun(conocimsPlanSelec, ConstantesGestorWeb.CAT_CONOCIMIENTOS_PLAN),
+				elementsStruc, nameStruc, subStrucLvl, namesSubStruc, elementsSubStruc
+				);
 
 		if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
 			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CRE_PLA",
@@ -486,6 +578,12 @@ public class PlanBean extends BaseBean {
 		this.planServiceFacade = planServiceFacade;
 	}
 
+	public boolean isCreditos() {
+		return creditos;
+	}
+	public void setCreditos(boolean creditos) {
+		this.creditos = creditos;
+	}
 	/**
 	 * @return the filtroPlan
 	 */
@@ -862,5 +960,59 @@ public class PlanBean extends BaseBean {
 	public void setBitacoraService(BitacoraService bitacoraService) {
 		this.bitacoraService = bitacoraService;
 	}
+	
+	
 
+	public Integer getElementsStruc() {
+		return elementsStruc;
+	}
+
+	public void setElementsStruc(Integer elementsStruc) {
+		this.elementsStruc = elementsStruc;
+	}
+
+	public String getNameStruc() {
+		return nameStruc;
+	}
+
+	public void setNameStruc(String nameStruc) {
+		this.nameStruc = nameStruc;
+	}
+
+	public Integer getSubStrucLvl() {
+		return subStrucLvl;
+	}
+
+	public void setSubStrucLvl(Integer subStrucLvl) {
+		this.subStrucLvl = subStrucLvl;
+	}
+
+	public ArrayList<String> getNamesSubStruc() {
+		return namesSubStruc;
+	}
+
+	public void setNamesSubStruc(ArrayList<String> namesSubStruc) {
+		this.namesSubStruc = namesSubStruc;
+	}
+
+	public ArrayList<String> getElementsSubStruc() {
+		return elementsSubStruc;
+	}
+
+	public void setElementsSubStruc(ArrayList<String> elementsSubStruc) {
+		this.elementsSubStruc = elementsSubStruc;
+	}
+	
+	public FECServiceFacade getFecServiceFacade() {
+        if (ObjectUtils.isNull(fecServiceFacade)) {
+            fecServiceFacade = new FECServiceFacade();
+        }
+
+        return fecServiceFacade;
+    }
+
+    public void setFecServiceFacade(FECServiceFacade fecServiceFacade) {
+        this.fecServiceFacade = fecServiceFacade;
+    }
+	
 }

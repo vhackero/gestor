@@ -56,7 +56,7 @@
 						</div>
 						<div class="col-md-3 col-xs-12">
 							<p:outputLabel styleClass="requerido"
-								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.tpocomp')}:" />
+								value="Estructura:" />
 							<p:selectOneMenu id="nvoTpoComp" styleClass="col-xs-12"
 								disabled="#{programaCapacitacionBean.idPlan eq 0 or programaCapacitacionBean.idPlan eq null or empty programaCapacitacionBean.catTpoComp}"
 								value="#{programaCapacitacionBean.programa.tipoCompetencia}"
@@ -73,7 +73,7 @@
 						</div>
 						<div class="col-md-3 col-xs-12">
 							<p:outputLabel styleClass="requerido"
-								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.ejecapacit')}:" />
+								value="Subestructura:" />
 							<p:selectOneMenu id="nvoEjeCap" styleClass="col-xs-12"
 								disabled="#{programaCapacitacionBean.programa.tipoCompetencia eq 0 or empty programaCapacitacionBean.catEjeCapacit}"
 								value="#{programaCapacitacionBean.programa.ejeCapacitacion}"

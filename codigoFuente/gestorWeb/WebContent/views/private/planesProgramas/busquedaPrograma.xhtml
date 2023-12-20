@@ -42,7 +42,7 @@
 					<div class="row">
 						<div class="col-md-6 col-xs-12">
 							<p:outputLabel styleClass="bloque"
-								value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.tpocomp')}" />
+								value="Estructura" />
 							<p:selectOneMenu id="tpoCmpSel"
 								value="#{programaCapacitacionBean.programa.tipoCompetencia}"
 								autoWidth="false" styleClass="col-xs-12"
@@ -60,7 +60,7 @@
 						</div>
 						<div class="col-md-6 col-xs-12">
 							<p:outputLabel styleClass="bloque"
-								value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.ejecapacit')}:" />
+								value="Subestructura:" />
 							<p:selectOneMenu id="ejeCapSel"
 								disabled="#{programaCapacitacionBean.programa.tipoCompetencia eq 0}"
 								value="#{programaCapacitacionBean.programa.ejeCapacitacion}"
