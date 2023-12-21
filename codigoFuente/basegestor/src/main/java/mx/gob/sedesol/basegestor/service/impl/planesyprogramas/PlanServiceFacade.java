@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.RelMallaPlanDTO;
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
@@ -29,6 +30,7 @@ import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
 import mx.gob.sedesol.basegestor.service.admin.CatalogoComunService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
+import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaPlanService;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Categoria;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.RespuestaCrearCategorias;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.CrearCategoria;
@@ -48,6 +50,9 @@ public class PlanServiceFacade {
 
 	@Autowired
 	private ParametroWSMoodleService parametroWSMoodleService;
+	
+	@Autowired
+	private MallaPlanService mallaPlanService;
 
 	/**
 	 *
@@ -179,8 +184,7 @@ public class PlanServiceFacade {
 	 */
 	@Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)
 	public ResultadoDTO<PlanDTO> guardaNuevoPlan(PlanDTO plan, List<CatalogoComunDTO> habilidadesPlan,
-			List<CatalogoComunDTO> aptitudesPlan, List<CatalogoComunDTO> conocimientosPlan, Integer elementsStruc,
-			String nameStruc, Integer subStrucLvl, ArrayList<String> namesSubStruc, ArrayList<String> elementsSubStruc)
+			List<CatalogoComunDTO> aptitudesPlan, List<CatalogoComunDTO> conocimientosPlan, RelMallaPlanDTO relMallaPlan)
 			throws Exception {
 
 		ResultadoDTO<PlanDTO> resultado = new ResultadoDTO<>();
@@ -272,86 +276,121 @@ public class PlanServiceFacade {
 
 			// Se genera Estructura Moodle
 			if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
-				PlanDTO planSaved = resultado.getDto();
-
-				List<ParametroWSMoodleDTO> plataformas = parametroWSMoodleService.findAll();
-				if (!ObjectUtils.isNullOrEmpty(plataformas)) {
-
-					for (ParametroWSMoodleDTO ptf : plataformas) {
-
-						CrearCategoria categoriaWS = new CrearCategoria(ptf);
-						Categoria planCategoria = new Categoria();
-						planCategoria.setIdnumber(planSaved.getIdPlan().toString());
-						planCategoria.setName(planSaved.getNombre());
-
-						ArrayList<Categoria> categorias = new ArrayList<Categoria>();
-						categorias.add(planCategoria);
-
-						List<RespuestaCrearCategorias> respuestasWS = categoriaWS.crearCategoria(categorias);
-						if (ObjectUtils.isNotNull(respuestasWS)) {
-
-							int idCategoriaMdl = respuestasWS.get(ConstantesGestor.PRIMER_ELEMENTO).getId();
-
-							planSaved.setIdCategoriaMdl(idCategoriaMdl);
-							resultado = getPlanService().actualizar(planSaved);
-
-							MallaCurricularDTO mallaCurr = mallaCurricularService
-									.obtenerMallaCurricularPorIdPlan(planSaved.getIdPlan());
-							mallaCurr.setIdCategoriaMdl(idCategoriaMdl);
-							mallaCurr.setFechaActualizacion(new Date());
-							// mallaCurr.getBitacoraDTO().setIdUsuario(plan.getBitacoraDTO().getIdUsuario());
-							// mallaCurr.getBitacoraDTO().setFechaBitacora(new Date());
-							// mallaCurr.getBitacoraDTO().setIp(plan.getBitacoraDTO().getIp());
-							// mallaCurr.getBitacoraDTO().setNavegador(plan.getBitacoraDTO().getNavegador());
-							// mallaCurr.getBitacoraDTO().setFuncion(ConstantesBitacora.MALLA_CUR_EDITAR);
-							mallaCurricularService.actualizar(mallaCurr);
-
+				
+				ResultadoDTO<RelMallaPlanDTO> resultadoMalla = new ResultadoDTO<>();
+				
+				resultadoMalla = mallaPlanService.guardar(relMallaPlan);
+				
+				if(ObjectUtils.isNotNull(resultadoMalla) && resultadoMalla.getResultado().getValor()) {
+					if(resultado.getDto().getCatEstatusPlan().getNombre().equals("Ejecución")){
+						resultado = guardarDatosMoodle(resultado.getDto(), relMallaPlan);
+						
+						if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
+							resultadoMalla.getDto().setFecha_actualizacion(new Date());
+							resultadoMalla.getDto().setActivo(0);
+							
+							mallaPlanService.actualizar(resultadoMalla.getDto());
+						}else {
+							throw new Exception("¡No se pudieron guardar lo datos en Moodle!");
 						}
 					}
+				}else {
+					throw new Exception("¡No se pudo guardar el detalle de las estructuras y subestructuras!");
 				}
-
-			}
-
-			for (int i = 0; i < elementsStruc; i++) {
-				MallaCurricularDTO mallaLvl0 = guardarMalla(3, nameStruc + " " + (i + 1),
-						nuevoPlan.getUsuarioModifico(),
-						mallaCurricularService.obtenerMallaCurricularPorIdPlan(resultado.getDto().getIdPlan()))
-						.getDto();
-
-				int j, k, l = 0;
-
-				if (subStrucLvl > 0) {
-					for (j = 0; j < Integer.parseInt(elementsSubStruc.get(0)); j++) {
-						MallaCurricularDTO mallaLvl1 = guardarMalla(4, namesSubStruc.get(0) + " " + (j + 1),
-								nuevoPlan.getUsuarioModifico(), mallaLvl0).getDto();
-
-						if (subStrucLvl > 1) {
-							for (k = 0; k < Integer.parseInt(elementsSubStruc.get(1)); k++) {
-								MallaCurricularDTO mallaLvl2 = guardarMalla(4, namesSubStruc.get(1) + " " + (k + 1),
-										nuevoPlan.getUsuarioModifico(), mallaLvl1).getDto();
-
-								if (subStrucLvl > 2) {
-									for (l = 0; l < Integer.parseInt(elementsSubStruc.get(2)); l++) {
-										guardarMalla(4, namesSubStruc.get(2) + " " + (l + 1),
-												nuevoPlan.getUsuarioModifico(), mallaLvl2).getDto();
-									}
-								}
-							}
-						}
-					}
-				}
-
+				
 				logger.error("Datos guardados!");
+			}else {
+				throw new Exception("¡No se pudieron guardar los conocimientos, habilidades o competencias!");
 			}
 
 			logger.debug("finaliza persistencia de plan");
 			return resultado;
 		}
+		
+		throw new Exception("¡No se pudo guardar el plan!");
+	}
+	
+	public ResultadoDTO<PlanDTO> guardarDatosMoodle(PlanDTO planSaved, RelMallaPlanDTO relMallaPlan) throws ErrorWS{
+		ResultadoDTO<PlanDTO> respuesta = new ResultadoDTO<>();
 
-		return null;
+		List<ParametroWSMoodleDTO> plataformas = parametroWSMoodleService.findAll();
+		if (!ObjectUtils.isNullOrEmpty(plataformas)) {
+
+			for (ParametroWSMoodleDTO ptf : plataformas) {
+
+				CrearCategoria categoriaWS = new CrearCategoria(ptf);
+				Categoria planCategoria = new Categoria();
+				planCategoria.setIdnumber(planSaved.getIdPlan().toString());
+				planCategoria.setName(planSaved.getNombre());
+
+				ArrayList<Categoria> categorias = new ArrayList<Categoria>();
+				categorias.add(planCategoria);
+
+				List<RespuestaCrearCategorias> respuestasWS = categoriaWS.crearCategoria(categorias);
+				if (ObjectUtils.isNotNull(respuestasWS)) {
+
+					int idCategoriaMdl = respuestasWS.get(ConstantesGestor.PRIMER_ELEMENTO).getId();
+
+					planSaved.setIdCategoriaMdl(idCategoriaMdl);
+					respuesta = getPlanService().actualizar(planSaved);
+
+					MallaCurricularDTO mallaCurr = mallaCurricularService
+							.obtenerMallaCurricularPorIdPlan(planSaved.getIdPlan());
+					mallaCurr.setIdCategoriaMdl(idCategoriaMdl);
+					mallaCurr.setFechaActualizacion(new Date());
+					// mallaCurr.getBitacoraDTO().setIdUsuario(plan.getBitacoraDTO().getIdUsuario());
+					// mallaCurr.getBitacoraDTO().setFechaBitacora(new Date());
+					// mallaCurr.getBitacoraDTO().setIp(plan.getBitacoraDTO().getIp());
+					// mallaCurr.getBitacoraDTO().setNavegador(plan.getBitacoraDTO().getNavegador());
+					// mallaCurr.getBitacoraDTO().setFuncion(ConstantesBitacora.MALLA_CUR_EDITAR);
+					mallaCurricularService.actualizar(mallaCurr);
+
+				}
+			}
+			
+			if(ObjectUtils.isNotNull(planSaved.getCatPeriodo())) {
+				CatalogoComunDTO objetoEstructura = catObjCurrService.buscarRegistroPorNombre(ObjetoCurricularEnum.ESTRUCTURA.getNombre(), CatObjetoCurricular.class);
+				CatalogoComunDTO objetoSubestructura = catObjCurrService.buscarRegistroPorNombre(ObjetoCurricularEnum.SUB_ESTRUCTURA.getNombre(), CatObjetoCurricular.class);
+			
+				for (int i = 0; i < relMallaPlan.getElementosEstructuras(); i++) {
+					MallaCurricularDTO mallaLvl0 = guardarMalla(objetoEstructura, relMallaPlan.getNombreEstructuras() + " " + (i + 1),
+							planSaved.getUsuarioModifico(),
+							mallaCurricularService.obtenerMallaCurricularPorIdPlan(respuesta.getDto().getIdPlan()))
+							.getDto();
+
+					int j, k, l = 0;
+
+					if (relMallaPlan.getNiveles() > 0) {
+						for (j = 0; j < relMallaPlan.getElementosSubestructuras1(); j++) {
+							MallaCurricularDTO mallaLvl1 = guardarMalla(objetoSubestructura, relMallaPlan.getNombreSubestructuras1() + " " + (j + 1),
+									planSaved.getUsuarioModifico(), mallaLvl0).getDto();
+
+							if (relMallaPlan.getNiveles() > 1) {
+								for (k = 0; k < relMallaPlan.getElementosSubestructuras2(); k++) {
+									MallaCurricularDTO mallaLvl2 = guardarMalla(objetoSubestructura, relMallaPlan.getNombreSubestructuras2() + " " + (k + 1),
+											planSaved.getUsuarioModifico(), mallaLvl1).getDto();
+
+									if (relMallaPlan.getNiveles() > 2) {
+										for (l = 0; l < relMallaPlan.getElementosSubestructuras3(); l++) {
+											guardarMalla(objetoSubestructura, relMallaPlan.getNombreSubestructuras3() + " " + (l + 1),
+													planSaved.getUsuarioModifico(), mallaLvl2).getDto();
+										}
+									}
+								}
+							}
+						}
+					}
+					
+				}
+			}
+		}else {
+			throw new ErrorWS("¡No hay plataformas moodle configuradas!");
+		}
+		
+		return respuesta;
 	}
 
-	public ResultadoDTO<MallaCurricularDTO> guardarMalla(Integer idObjCurricular, String nombre, Long usuarioMod,
+	public ResultadoDTO<MallaCurricularDTO> guardarMalla(CatalogoComunDTO objetoCurricular, String nombre, Long usuarioMod,
 			MallaCurricularDTO mallaPadre) throws ErrorWS {
 		ResultadoDTO<MallaCurricularDTO> resultado = new ResultadoDTO<>();
 		
@@ -361,7 +400,7 @@ public class PlanServiceFacade {
 		mallaStru.setNombre(nombre);
 		mallaStru.setMallaCurricularPadre(mallaPadre);
 		mallaStru.setUsuarioModifico(usuarioMod);
-		mallaStru.setObjetoCurricular(catObjCurrService.buscarPorId(idObjCurricular, CatObjetoCurricular.class));
+		mallaStru.setObjetoCurricular(objetoCurricular);
 		
 		resultado = mallaCurricularService.guardar(mallaStru);
 		MallaCurricularDTO mallaGuardada = resultado.getDto();
@@ -400,7 +439,7 @@ public class PlanServiceFacade {
 
 	@Transactional(rollbackFor = Exception.class)
 	public ResultadoDTO<PlanDTO> editarPlan(PlanDTO plan, List<CatalogoComunDTO> habilidadesPlan,
-			List<CatalogoComunDTO> aptitudesPlan, List<CatalogoComunDTO> conocimientosPlan) {
+			List<CatalogoComunDTO> aptitudesPlan, List<CatalogoComunDTO> conocimientosPlan, RelMallaPlanDTO relMallaPlan) throws Exception {
 
 		ResultadoDTO<PlanDTO> resultado = null;
 		List<RelPlanHabilidadDTO> relHabilidades;
@@ -478,6 +517,24 @@ public class PlanServiceFacade {
 					relConocimientos.add(relConoc);
 				}
 				plan.setRelPlanConocimientos(relConocimientos);
+			}
+			
+			if(ObjectUtils.isNotNull(plan.getCatEstatusPlan())){
+				if(plan.getCatEstatusPlan().getNombre().equals("Ejecución")){
+					resultado = guardarDatosMoodle(plan, relMallaPlan);
+					
+					if(ObjectUtils.isNotNull(resultado) || ObjectUtils.isNotNull(resultado.getDto()) ){
+						plan = resultado.getDto();
+						
+						relMallaPlan.setActivo(0);
+					}else{
+						throw new Exception("¡No se pudieron guardar lo cambios en Mooodle!");
+					}
+				}
+			}
+			
+			if(ObjectUtils.isNotNull(relMallaPlan)) {
+				mallaPlanService.actualizar(relMallaPlan);
 			}
 
 			resultado = planService.actualizar(plan);
