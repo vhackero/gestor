@@ -21,11 +21,11 @@ public class TipoCompetenciaServiceImpl implements TipoCompetenciaService {
 
 	private ModelMapper modelMapper = new ModelMapper();
 
-	private static Type tpoCompetenciaDTO = new TypeToken<List<TipoCompetenciaDTO>>() {}.getType();
+	private static Type dto = new TypeToken<List<TipoCompetenciaDTO>>() {}.getType();
 
 	@Override
 	public List<TipoCompetenciaDTO> findAll() {
-		return modelMapper.map(tipoCompetenciaRepo.findAll(), tpoCompetenciaDTO);
+		return modelMapper.map(tipoCompetenciaRepo.findAll(), dto);
 	}
 
 	@Override
