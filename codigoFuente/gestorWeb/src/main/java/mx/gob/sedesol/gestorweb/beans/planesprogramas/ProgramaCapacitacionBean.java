@@ -133,15 +133,6 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	private TabView cpmTabViewProg;
 	private Integer numEstTematicas;
 	private Integer numUniDidacticas;
-	
-	//Subestructuras
-	private List<CatalogoComunDTO> catPlanes;
-	private List<CatalogoComunDTO> catEstructuras;
-	private List<CatalogoComunDTO> catSubEstructurasNivel1;
-	private List<CatalogoComunDTO> catSubEstructurasNivel2;
-	private List<CatalogoComunDTO> catSubEstructurasNivel3;
-	private Integer idPadrePrograma;
-	private Integer nivelMaximo = 1;
 
 	private Integer numEstTematicasAux = 0;
 	private Integer numUniDidacticasAux = 0;
@@ -300,8 +291,6 @@ public class ProgramaCapacitacionBean extends BaseBean {
 		this.generaCatEjesCapacitBusqueda();
 		this.generaArbolOrgGubernamental();
 		this.generaArbolEstPersonalExterno();
-		
-		this.generaEstructuraCatPlanes();
 
 		relProgDuracionTeoria = new RelProgDuracionDTO(
 				getTipoCargaHoraria(ConstantesGestorWeb.TIPO_CARGA_HORARIA_TEORIA));
@@ -327,7 +316,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			this.cargaCatalogosInicialesEdicion(programa);
 			this.generaVistaEstTematica();
 			this.validaDatosProgramaRequeridos(programa);
-			
+
 		} else {
 
 			PersonaDTO coordAcad = fecServiceFacade.getPersonaService()
@@ -775,8 +764,6 @@ public class ProgramaCapacitacionBean extends BaseBean {
 
 		return tposComp;
 	}
-	
-	
 
 	/**
 	 *
@@ -921,193 +908,18 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			}
 		}
 	}
-	
-	
-	
-	
-	/**
-	 * Genera el catalogo de planes
-	 *
-	 * @param e
-	 */
-	private void generaEstructuraCatPlanes() {
-
-		nodos = new ArrayList<>();
-		List<MallaCurricularDTO> mallas = getFecServiceFacade().getMallaCurricularService().obtieneMallasCurricularesDisponibles();
-		catPlanes = new ArrayList<>();
-		
-		for (MallaCurricularDTO m : mallas) {
-			NodoeHijosDTO nodog = new NodoeHijosDTO();
-			nodog.setNombre(m.getNombre());
-			nodog.setIdNodo(m.getId());
-			nodog.setIdPadre(m.getMallaCurricularPadre() != null ? m.getMallaCurricularPadre().getId() : null);
-			nodog.setIdObjCurr(m.getObjetoCurricular().getId());
-			nodog.setNivel(0);
-
-			if (!m.getLstHijosMallaCurr().isEmpty()) {
-				this.generaCatxNivel(m.getLstHijosMallaCurr(), nodog, nodog.getNivel());
-			}
-
-			nodos.add(nodog);
-			CatalogoComunDTO cat = new CatalogoComunDTO();
-			cat.setId(nodog.getIdNodo());
-			cat.setNombre(nodog.getNombre());
-			catPlanes.add(cat);
-		}
-	}
-	
-	/**
-	 * Genera el catalogo de estructuras
-	 *
-	 * @param e
-	 */
-	public void onChangeCatPlan(ValueChangeEvent e) {
-		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			Integer idPlanSel = (Integer) e.getNewValue();
-			if(idPlanSel != 0) {
-				catEstructuras = new ArrayList<>();
-				int indiceEncontrado = -1; 
-				for(int index = 0; index < nodos.size(); index++) {
-					if(nodos.get(index).getIdNodo().equals(idPlanSel)) {
-						indiceEncontrado = index; 
-					}
-				}
-				if(indiceEncontrado != -1) {
-					catEstructuras = new ArrayList<CatalogoComunDTO>();
-					estPlanSedesol = nodos.get(indiceEncontrado);
-					for (NodoeHijosDTO nh : estPlanSedesol.getNodosHijos()) {
-						CatalogoComunDTO cc = new CatalogoComunDTO();
-						cc.setId(nh.getIdNodo());
-						cc.setNombre(nh.getNombre());
-						catEstructuras.add(cc);
-					}
-				}	
-			}else {
-				catEstructuras = new ArrayList<CatalogoComunDTO>();
-				catSubEstructurasNivel1 = new ArrayList<CatalogoComunDTO>();
-				catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
-				catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
-			}
-		}
-	}
-	
-	/**
-	 * Genera el catalogo de subestructuras nivel 1
-	 *
-	 * @param e
-	 */
-	public void onChangeCatEstructura(ValueChangeEvent e) {
-
-		if (ObjectUtils.isNotNull(e.getNewValue())) {
-
-			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
-			catSubEstructurasNivel1 = new ArrayList<>();
-
-			for (NodoeHijosDTO nh : estPlanSedesol.getNodosHijos()) {
-				if (nh.getIdNodo().equals(idSubEstructura)) {
-					for (NodoeHijosDTO nint : nh.getNodosHijos()) {
-
-						CatalogoComunDTO cc = new CatalogoComunDTO();
-						cc.setId(nint.getIdNodo());
-						cc.setNombre(nint.getNombre());
-						catSubEstructurasNivel1.add(cc);
-					}
-				}
-			}
-			
-			idPadrePrograma = idSubEstructura;
-			if(catSubEstructurasNivel1.size() > 0){
-				nivelMaximo = 1;
-			}
-			
-		}
-	}
-	
-	/**
-	 * Genera el catalogo de subestructuras nivel 2
-	 *
-	 * @param e
-	 */
-	public void onChangeCatSubestructura1(ValueChangeEvent e) {
-
-		if (ObjectUtils.isNotNull(e.getNewValue())) {
-
-			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
-			catSubEstructurasNivel2 = new ArrayList<>();
-
-			for (NodoeHijosDTO nh : estPlanSedesol.getNodosHijos()) {
-				for (NodoeHijosDTO nSub : nh.getNodosHijos()) {
-					if (nSub.getIdNodo().equals(idSubEstructura)) {
-						for(NodoeHijosDTO nSubSub: nSub.getNodosHijos()) {
-							CatalogoComunDTO cc = new CatalogoComunDTO();
-							cc.setId(nSubSub.getIdNodo());
-							cc.setNombre(nSubSub.getNombre());
-							catSubEstructurasNivel2.add(cc);
-						}
-					}
-				}
-			}
-			
-			idPadrePrograma = idSubEstructura;
-			if(catSubEstructurasNivel2.size() > 0){
-				nivelMaximo = 2;
-			}
-			
-		}
-	}
-	
-	/**
-	 * Genera el catalogo de subestructuras nivel 3
-	 *
-	 * @param e
-	 */
-	public void onChangeCatSubestructura2(ValueChangeEvent e) {
-
-		if (ObjectUtils.isNotNull(e.getNewValue())) {
-
-			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
-			catSubEstructurasNivel3 = new ArrayList<>();
-
-			for (NodoeHijosDTO nh : estPlanSedesol.getNodosHijos()) {
-				for (NodoeHijosDTO nSub : nh.getNodosHijos()) {
-					for(NodoeHijosDTO nSubSub: nSub.getNodosHijos()) {
-						if (nSubSub.getIdNodo().equals(idSubEstructura)) {
-							for(NodoeHijosDTO nSubSubSub: nSubSub.getNodosHijos()) {
-								CatalogoComunDTO cc = new CatalogoComunDTO();
-								cc.setId(nSubSubSub.getIdNodo());
-								cc.setNombre(nSubSubSub.getNombre());
-								catSubEstructurasNivel3.add(cc);
-							}
-						}
-					}
-				}
-			}
-			
-			idPadrePrograma = idSubEstructura;
-			if(catSubEstructurasNivel3.size() > 0){
-				nivelMaximo = 3;
-			}
-		}
-	}
-	
-	public void onChangeCatSubestructura3(ValueChangeEvent e) {
-		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			idPadrePrograma = Integer.parseInt(e.getNewValue().toString());
-		}
-	}
-	
 
 	/**
 	 * Obtiene los tipos de competencia por eje de capacitacion
 	 *
 	 * @param e
 	 */
-	/*public void onChangeEjeCapacitacion(ValueChangeEvent e) {
+	public void onChangeEjeCapacitacion(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			Integer idEjeCapacitacion = (Integer) e.getNewValue();
 			programa.setEjeCapacitacion(idEjeCapacitacion);
 		}
-	}*/
+	}
 
 	public void onChangeOrgGubPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
@@ -3920,55 +3732,8 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	public void setIdPlan(Integer idPlan) {
 		this.idPlan = idPlan;
 	}
+
 	
 	
-	
-	public List<CatalogoComunDTO> getCatPlanes() {
-		return catPlanes;
-	}
 
-	public void setCatPlanes(List<CatalogoComunDTO> catPlanes) {
-		this.catPlanes = catPlanes;
-	}
-
-	public List<CatalogoComunDTO> getCatEstructuras() {
-		return catEstructuras;
-	}
-
-	public void setCatEstructuras(List<CatalogoComunDTO> catEstructuras) {
-		this.catEstructuras = catEstructuras;
-	}
-
-	public List<CatalogoComunDTO> getCatSubEstructurasNivel1() {
-		return catSubEstructurasNivel1;
-	}
-
-	public void setCatSubEstructurasNivel1(List<CatalogoComunDTO> catSubEstructurasNivel1) {
-		this.catSubEstructurasNivel1 = catSubEstructurasNivel1;
-	}
-
-	public List<CatalogoComunDTO> getCatSubEstructurasNivel2() {
-		return catSubEstructurasNivel2;
-	}
-
-	public void setCatSubEstructurasNivel2(List<CatalogoComunDTO> catSubEstructurasNivel2) {
-		this.catSubEstructurasNivel2 = catSubEstructurasNivel2;
-	}
-
-	public List<CatalogoComunDTO> getCatSubEstructurasNivel3() {
-		return catSubEstructurasNivel3;
-	}
-
-	public void setCatSubEstructurasNivel3(List<CatalogoComunDTO> catSubEstructurasNivel3) {
-		this.catSubEstructurasNivel3 = catSubEstructurasNivel3;
-	}
-
-	public Integer getNivelMaximo() {
-		return nivelMaximo;
-	}
-
-	public void setNivelMaximo(Integer nivelMaximo) {
-		this.nivelMaximo = nivelMaximo;
-	}
-	
 }
