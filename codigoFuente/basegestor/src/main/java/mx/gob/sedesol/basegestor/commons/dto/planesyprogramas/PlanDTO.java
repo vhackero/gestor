@@ -440,11 +440,15 @@ public class PlanDTO implements Serializable{
 	public void setCatCreditosPlan(CatalogoComunDTO catCreditosPlan) {
 		this.catCreditosPlan = catCreditosPlan;
 	}
-
+	/**
+	 * @return the catTipoCompetencia
+	 */
 	public CatalogoComunDTO getCatTipoCompetencia() {
 		return catTipoCompetencia;
 	}
-
+	/**
+	 * @param catTipoCompetencia the catTipoCompetencia to set
+	 */
 	public void setCatTipoCompetencia(CatalogoComunDTO catTipoCompetencia) {
 		this.catTipoCompetencia = catTipoCompetencia;
 	}
