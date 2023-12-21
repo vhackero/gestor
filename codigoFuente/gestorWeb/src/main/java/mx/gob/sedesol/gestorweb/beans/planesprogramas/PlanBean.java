@@ -358,36 +358,6 @@ public class PlanBean extends BaseBean {
 			namesSubStruc.set((Integer) event.getComponent().getAttributes().get("idxA"), (String) event.getNewValue());
 		}
 	}
-	
-	@SuppressWarnings("unchecked")
-	public void generarEstructura(ValueChangeEvent e){
-		try {
-			logger.error(subStrucLvl);
-			logger.error(elementsStruc);
-			logger.error(nameStruc);
-			
-			logger.error("Nombres");
-			for(String nameS: namesSubStruc){
-				logger.error("Nombre: "+nameS);
-			}
-			
-			logger.error("Numeros forEach");
-			for(String numbS: elementsSubStruc){
-				logger.error("Numero: "+numbS);
-			}
-			
-			
-			
-			logger.error("se acabo 7u7");
-		}catch(Exception ex) {
-			logger.error("EEEEEEEEEEEEERRRRRRRRRRRRRRROOOOOOOOOOOORRRRRRRRRRRRRR");
-			logger.error(ex);
-		}
-	}
-	
-	public void onChangeTest(ValueChangeEvent e) {
-		logger.error("eeeeeeeeeeeeeeeeeeeeeee");
-	}
 
 	/**
 	 * Metodo para clonar el objeto plan
@@ -467,12 +437,18 @@ public class PlanBean extends BaseBean {
 	public void guardaNuevoPlan() {
 		logger.info("########## PERSISTENCIA DEl PLAN ########");
 		plan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
-		ResultadoDTO<PlanDTO> resultado = planServiceFacade.guardaNuevoPlan(plan,
-				this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
-				this.obtieneListaCatalogoComun(aptitudesPlanSelec, ConstantesGestorWeb.CAT_APTITUDES_PLAN),
-				this.obtieneListaCatalogoComun(conocimsPlanSelec, ConstantesGestorWeb.CAT_CONOCIMIENTOS_PLAN),
-				elementsStruc, nameStruc, subStrucLvl, namesSubStruc, elementsSubStruc
-				);
+		ResultadoDTO<PlanDTO> resultado = null;
+		try {
+			resultado = planServiceFacade.guardaNuevoPlan(plan,
+					this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
+					this.obtieneListaCatalogoComun(aptitudesPlanSelec, ConstantesGestorWeb.CAT_APTITUDES_PLAN),
+					this.obtieneListaCatalogoComun(conocimsPlanSelec, ConstantesGestorWeb.CAT_CONOCIMIENTOS_PLAN),
+					elementsStruc, nameStruc, subStrucLvl, namesSubStruc, elementsSubStruc
+					);
+		} catch (Exception e) {
+			logger.error(e);
+			agregarMsgError("Ocurrio un error", null);
+		}
 
 		if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
 			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CRE_PLA",

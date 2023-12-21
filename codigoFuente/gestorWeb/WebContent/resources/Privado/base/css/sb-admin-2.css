@@ -2289,7 +2289,6 @@ button.ui-datepicker-trigger.ui-button.ui-widget.ui-state-default.ui-corner-all.
 }
 .requerido:before {
   content: '* ';
-  font-size: 15px;
   color: red;
   font-weight: 700;
 }
