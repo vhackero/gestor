@@ -352,6 +352,7 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 
 	private TblPersona almacenarDatosPersonales(PersonaDTO personaDto) {
 		personaDto.setContrasenia(personaDto.getContraseniaEncriptada());
+		personaDto.setUnidadAdministrativa(personaDto.getUnidadAdministrativa());
 		estableceSexoMedianteCurp(personaDto);
 		TblPersona persona = mapper.map(personaDto, TblPersona.class);
 		return personaRepo.save(persona);
@@ -1134,6 +1135,7 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 
 		datos.getPersona().setTipoUsuario(TipoUsuarioEnum.valueOf(personaCargaDTO.getTipoUsuario()).getValor());
 		datos.getPersona().setUsuario(personaCargaDTO.getUsuario());
+		datos.getPersona().setUnidadAdministrativa(personaCargaDTO.getHash());
 		datos.getPersona().setNuevaContrasenia(personaCargaDTO.getContrasenia());
 		datos.getPersona().setConfirmacionContrasenia(personaCargaDTO.getContrasenia());
 		datos.getPersona().setContraseniaEncriptada(personaCargaDTO.getContraseniaEncriptada());

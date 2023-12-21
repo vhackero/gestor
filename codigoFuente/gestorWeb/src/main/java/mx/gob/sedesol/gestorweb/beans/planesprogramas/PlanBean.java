@@ -120,18 +120,23 @@ public class PlanBean extends BaseBean {
 			// Flujo Nuevo Plan
 			plan = new PlanDTO();
 			plan.setCatTipoPlan(new CatalogoComunDTO());
+			plan.getCatTipoPlan().setId(2);
 			plan.setCatPeriodo(new CatalogoComunDTO());
 			plan.setCatTipoCompetencia(new CatalogoComunDTO());
 			plan.setCatAlcancePlan(new CatalogoComunDTO());
 			plan.setCatCompetenciasPlan(new CatalogoComunDTO());
+			plan.getCatCompetenciasPlan().setId(2);
 			plan.setCatDocumentosExpidePlan(new CatalogoComunDTO());
+			plan.getCatDocumentosExpidePlan().setId(1);
 			plan.setCatEstatusPlan(new CatalogoComunDTO());
 			plan.setCatModalidadPlanPrograma(new CatalogoComunDTO());
 			plan.setCatNivelEnsenanzaPrograma(new CatalogoComunDTO());
 			plan.setTblOrganismoGubernamental(new OrgGubernamentalDTO());
+			plan.getTblOrganismoGubernamental().setId(13);
 			plan.setIdentificador(planServiceFacade.generaIdentificadorPlan());
 			
 			plan.setCatCreditosPlan(new CatalogoComunDTO());
+			plan.getCatCreditosPlan().setId(1);
 			plan.setCatDivisionesPlan(new CatalogoComunDTO());
 
 			filtroPlan = new PlanDTO();
