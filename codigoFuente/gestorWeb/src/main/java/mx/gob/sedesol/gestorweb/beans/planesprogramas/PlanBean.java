@@ -120,17 +120,22 @@ public class PlanBean extends BaseBean {
 			// Flujo Nuevo Plan
 			plan = new PlanDTO();
 			plan.setCatTipoPlan(new CatalogoComunDTO());
+			plan.getCatTipoPlan().setId(2);
 			plan.setCatPeriodo(new CatalogoComunDTO());
 			plan.setCatAlcancePlan(new CatalogoComunDTO());
 			plan.setCatCompetenciasPlan(new CatalogoComunDTO());
+			plan.getCatCompetenciasPlan().setId(2);
 			plan.setCatDocumentosExpidePlan(new CatalogoComunDTO());
+			plan.getCatDocumentosExpidePlan().setId(1);
 			plan.setCatEstatusPlan(new CatalogoComunDTO());
 			plan.setCatModalidadPlanPrograma(new CatalogoComunDTO());
 			plan.setCatNivelEnsenanzaPrograma(new CatalogoComunDTO());
 			plan.setTblOrganismoGubernamental(new OrgGubernamentalDTO());
+			plan.getTblOrganismoGubernamental().setId(13);
 			plan.setIdentificador(planServiceFacade.generaIdentificadorPlan());
 			
 			plan.setCatCreditosPlan(new CatalogoComunDTO());
+			plan.getCatCreditosPlan().setId(1);
 			plan.setCatDivisionesPlan(new CatalogoComunDTO());
 			plan.setCatTipoCompetencia(new CatalogoComunDTO());
 
@@ -357,36 +362,6 @@ public class PlanBean extends BaseBean {
 			namesSubStruc.set((Integer) event.getComponent().getAttributes().get("idxA"), (String) event.getNewValue());
 		}
 	}
-	
-	@SuppressWarnings("unchecked")
-	public void generarEstructura(ValueChangeEvent e){
-		try {
-			logger.error(subStrucLvl);
-			logger.error(elementsStruc);
-			logger.error(nameStruc);
-			
-			logger.error("Nombres");
-			for(String nameS: namesSubStruc){
-				logger.error("Nombre: "+nameS);
-			}
-			
-			logger.error("Numeros forEach");
-			for(String numbS: elementsSubStruc){
-				logger.error("Numero: "+numbS);
-			}
-			
-			
-			
-			logger.error("se acabo 7u7");
-		}catch(Exception ex) {
-			logger.error("EEEEEEEEEEEEERRRRRRRRRRRRRRROOOOOOOOOOOORRRRRRRRRRRRRR");
-			logger.error(ex);
-		}
-	}
-	
-	public void onChangeTest(ValueChangeEvent e) {
-		logger.error("eeeeeeeeeeeeeeeeeeeeeee");
-	}
 
 	/**
 	 * Metodo para clonar el objeto plan
@@ -467,12 +442,18 @@ public class PlanBean extends BaseBean {
 		logger.info("########## PERSISTENCIA DEl PLAN ########");
 		plan.setCatPeriodo(!plan.getCatTipoPlan().getNombre().equals("Por Periodo") ? null : plan.getCatPeriodo());
 		plan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
-		ResultadoDTO<PlanDTO> resultado = planServiceFacade.guardaNuevoPlan(plan,
-				this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
-				this.obtieneListaCatalogoComun(aptitudesPlanSelec, ConstantesGestorWeb.CAT_APTITUDES_PLAN),
-				this.obtieneListaCatalogoComun(conocimsPlanSelec, ConstantesGestorWeb.CAT_CONOCIMIENTOS_PLAN),
-				elementsStruc, nameStruc, subStrucLvl, namesSubStruc, elementsSubStruc
-				);
+		ResultadoDTO<PlanDTO> resultado = null;
+		try {
+			resultado = planServiceFacade.guardaNuevoPlan(plan,
+					this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
+					this.obtieneListaCatalogoComun(aptitudesPlanSelec, ConstantesGestorWeb.CAT_APTITUDES_PLAN),
+					this.obtieneListaCatalogoComun(conocimsPlanSelec, ConstantesGestorWeb.CAT_CONOCIMIENTOS_PLAN),
+					elementsStruc, nameStruc, subStrucLvl, namesSubStruc, elementsSubStruc
+					);
+		} catch (Exception e) {
+			logger.error(e);
+			agregarMsgError("Ocurrio un error", null);
+		}
 
 		if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
 			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CRE_PLA",

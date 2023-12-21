@@ -108,7 +108,7 @@
 								<p:selectOneMenu value="#{planBean.plan.catCreditosPlan.id}"
 									valueChangeListener="#{planBean.onChangeCreditosPlan}"
 									autoWidth="false" styleClass="col-xs-12">
-									<p:ajax event="change" process="@this" update="horasCampo"/>
+									<p:ajax event="change" process="@this" update="horasCampo" />
 									<f:selectItem
 										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 										itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
@@ -120,11 +120,10 @@
 						</div>
 						<div class="col-md-4 col-xs-12">
 							<p:outputLabel styleClass="bloque requerido"
-										   value="Especificar horas por crédito:" />
+								value="Especificar horas por crédito:" />
 							<p:spinner id="horasCampo" maxlength="3"
-									   disabled="#{!planBean.creditos}"
-									   value="#{planBean.plan.horasCredito}"
-									   min="0" max="100">
+								disabled="#{!planBean.creditos}"
+								value="#{planBean.plan.horasCredito}" min="0" max="100">
 								<p:ajax process="@this" />
 								<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
 							</p:spinner>
@@ -153,8 +152,9 @@
 
 					</div>
 				</div>
-				
-				<hr />
+
+				<p:outputPanel rendered="#{!planBean.edicionPlan}">
+					<hr />
 
 				<div class="form-group" style="margin-bottom: 20px;">
 					<div class="row">
@@ -200,50 +200,55 @@
                         </p:outputPanel>
 					</div>
 
-					<p:outputPanel id="pnlSubStruc">
-						<p:outputPanel rendered="#{planBean.subStrucLvl > 0}" >
-							<c:forEach value="#{planBean.elementsSubStruc}" var="subEl"
-								varStatus="varId" id="subStrucRender" items="#{planBean.elementsSubStruc}">
-								<div class="row" style="margin-top: 20px;">
-									<div class="col-md-4 col-sm-12">
-										<p:outputLabel value="Subestructura nivel #{(varId.index+1).toString()}:" />
-									</div>
-									<div class="col-md-4 col-sm-12">
-										<p:outputLabel styleClass="bloque"
-											value="Nombre de los elementos de la subestructura: " />
-										<p:inputText id="namesubStr" styleClass="form-control"
-											value="#{planBean.namesSubStruc[varId.index]}" maxlength="150"
-											placeholder="Nombre para las subestructuras" required="true"
-											requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
-											valueChangeListener="#{planBean.onChangeNameSubsElements}"  >
+						<p:outputPanel id="pnlSubStruc">
+							<p:outputPanel rendered="#{planBean.subStrucLvl > 0}">
+								<c:forEach value="#{planBean.elementsSubStruc}" var="subEl"
+									varStatus="varId" id="subStrucRender"
+									items="#{planBean.elementsSubStruc}">
+									<div class="row" style="margin-top: 20px;">
+										<div class="col-md-4 col-sm-12">
+											<p:outputLabel
+												value="Subestructura nivel #{(varId.index+1).toString()}:" />
+										</div>
+										<div class="col-md-4 col-sm-12">
+											<p:outputLabel styleClass="bloque"
+												value="Nombre de los elementos de la subestructura: " />
+											<p:inputText id="namesubStr" styleClass="form-control"
+												value="#{planBean.namesSubStruc[varId.index]}"
+												maxlength="150" placeholder="Nombre para las subestructuras"
+												required="true"
+												requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+												valueChangeListener="#{planBean.onChangeNameSubsElements}">
 
-											<p:ajax process="@this" />
-											<f:attribute name="idxA" value="#{varId.index}" />
-										</p:inputText>
+												<p:ajax process="@this" />
+												<f:attribute name="idxA" value="#{varId.index}" />
+											</p:inputText>
 
-										<p:message for="namesubStr" />
-									</div>
-									<div class="col-md-4 col-sm-12">
-										<p:outputLabel styleClass="bloque"
-											value="Número de elementos de la subestructura: " />
-										<p:spinner id="numb_#{varId.index}" maxlength="2"
-											value="#{planBean.elementsSubStruc[varId.index]}" min="1" max="20"
-											valueChangeListener="#{planBean.onChangeSubsElements}" >
+											<p:message for="namesubStr" />
+										</div>
+										<div class="col-md-4 col-sm-12">
+											<p:outputLabel styleClass="bloque"
+												value="Número de elementos de la subestructura: " />
+											<p:spinner id="numb_#{varId.index}" maxlength="2"
+												value="#{planBean.elementsSubStruc[varId.index]}" min="1"
+												max="20"
+												valueChangeListener="#{planBean.onChangeSubsElements}">
 
-											<p:ajax process="@this" />
-											<f:attribute name="idxA" value="#{varId.index}" />
-											<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
-										</p:spinner>
+												<p:ajax process="@this" />
+												<f:attribute name="idxA" value="#{varId.index}" />
+												<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+											</p:spinner>
+										</div>
 									</div>
-								</div>
-							</c:forEach>
+								</c:forEach>
+							</p:outputPanel>
 						</p:outputPanel>
-					</p:outputPanel>
-				</div>
+					</div>
 
-				<div class="mx-5">
-					<hr />
-				</div>
+					<div class="mx-5">
+						<hr />
+					</div>
+				</p:outputPanel>
 
 				<div class="form-group">
 					<div class="row">
@@ -268,7 +273,6 @@
 						</div>
 
 						<div class="col-md-4 col-xs-12">
-
 							<p:outputLabel styleClass="requerido bloque"
 								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.nvlEnsenanza')}:" />
 							<p:selectOneMenu id="mnuNvlEns"
@@ -285,13 +289,8 @@
 							<p:message for="mnuNvlEns" />
 
 						</div>
-
-					</div>
-				</div>
-				<div class="form-group">
-					<div class="row">
+						
 						<div class="col-md-4 col-xs-12">
-
 							<p:outputLabel styleClass="bloque requerido"
 								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.competencias')}:" />
 							<p:selectOneMenu id="mnuCmpPlan"
@@ -307,6 +306,7 @@
 							<p:message for="mnuCmpPlan" />
 
 						</div>
+
 					</div>
 				</div>
 
@@ -366,7 +366,7 @@
 							<f:validateBean disabled="true">
 								<p:selectOneMenu value="#{planBean.plan.catAlcancePlan.id}"
 									valueChangeListener="#{planBean.onChangeAlcancePlan}"
-									autoWidth="false" styleClass="col-xs-12" id="alcancePlan" >
+									autoWidth="false" styleClass="col-xs-12" id="alcancePlan">
 									<p:ajax event="change" process="@this" />
 									<f:selectItem
 										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -387,7 +387,7 @@
 								value="#{planBean.plan.catEstatusPlan.id}"
 								valueChangeListener="#{planBean.onChangeEstatusPlan}"
 								autoWidth="false" styleClass="col-xs-12">
-								<p:ajax event="change" update="estPLan" />
+								<p:ajax event="change" update="@this" />
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
@@ -574,6 +574,7 @@
 								value="#{sistema.obtenerTexto('gw.plan.nuevo.boton.guardar')}"
 								action="#{planBean.guardaNuevoPlan}" ajax="true"
 								validateClient="true" update="@form, :growlLayout" />
+
 
 							<!--  -->
 

@@ -164,7 +164,7 @@ public final class ConstantesGestorWeb {
 	public static final String CAT_ALCANCE_PLAN ="cat_alcance_plan";
 	public static final String CAT_NIVEL_ENSE_PLAN_PROG ="cat_nivel_ensenanza_programa";
 	public static final String CAT_COMPETENCIAS_PLAN ="cat_competencias_plan";
-	public static final String CAT_CONOCIMIENTOS_PLAN ="cat_areas_conocimiento";
+	public static final String CAT_CONOCIMIENTOS_PLAN ="cat_conocimientos_plan";
 	public static final String CAT_APTITUDES_PLAN ="cat_aptitudes_plan";
 	public static final String CAT_HABILIDADES_PLAN ="cat_habilidades_plan";
 	public static final String CAT_DOCS_EXPIDE_PLAN ="cat_documentos_expide_plan";
