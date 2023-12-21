@@ -158,7 +158,6 @@ public final class ConstantesGestorWeb {
 	public static final String CAT_ROLES = "cat_roles";
 	public static final String CAT_TPO_PLAN ="cat_tipo_plan";
 	public static final String CAT_PERIODOS ="cat_periodos";
-	public static final String CAT_TIPOS_COMPETENCIA ="cat_tipos_competencia";
 
 	public static final String CAT_MODALIDAD_PLAN_PROG ="cat_modalidad_plan_programas";
 	public static final String CAT_ESTATUS_PLAN ="cat_estatus_plan";
@@ -185,7 +184,8 @@ public final class ConstantesGestorWeb {
 	
 	public static final String CAT_CREDITOS_PLAN ="cat_creditos_plan";
 	public static final String CAT_DIVISIONES_PLAN ="cat_divisiones_plan";
-	
+	public static final String CAT_TIPOS_COMPETENCIA ="cat_tipos_competencia";
+
 	//REL_EJE_COMPETENCIA
 	public static final String REL_EJE_COMPETENCIA = "EJE_COMPETENCIAS";
 	

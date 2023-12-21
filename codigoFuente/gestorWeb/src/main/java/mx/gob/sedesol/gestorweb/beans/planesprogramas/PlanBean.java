@@ -57,7 +57,6 @@ public class PlanBean extends BaseBean {
 
 	private List<CatalogoComunDTO> catPeriodo;
 	private List<CatalogoComunDTO> catTpoPlan;
-	private List<CatalogoComunDTO> catTpoCompetencia;
 	private List<CatalogoComunDTO> catModalidadPlan;
 	private List<CatalogoComunDTO> catalEstatusPlan;
 	private List<CatalogoComunDTO> catAlcancePlan;
@@ -70,7 +69,7 @@ public class PlanBean extends BaseBean {
 	
 	private List<CatalogoComunDTO> catCreditosPlan;
 	private List<CatalogoComunDTO> catDivisionesPlan;
-
+	private List<CatalogoComunDTO> catTipoCompetencia;
 	private List<SelectItem> itemsOrgGubs;
 	private List<String> conocimsPlanSelec;
 	private List<String> habilidadesPlanSelec;
@@ -84,6 +83,7 @@ public class PlanBean extends BaseBean {
 	private PlanDTO plan;
 	private boolean edicionPlan;
 	private boolean creditos;
+	private boolean tipoPlan;
 	
 	private Integer elementsStruc = 1;
 	private String nameStruc = "";
@@ -121,7 +121,6 @@ public class PlanBean extends BaseBean {
 			plan = new PlanDTO();
 			plan.setCatTipoPlan(new CatalogoComunDTO());
 			plan.setCatPeriodo(new CatalogoComunDTO());
-			plan.setCatTipoCompetencia(new CatalogoComunDTO());
 			plan.setCatAlcancePlan(new CatalogoComunDTO());
 			plan.setCatCompetenciasPlan(new CatalogoComunDTO());
 			plan.setCatDocumentosExpidePlan(new CatalogoComunDTO());
@@ -133,6 +132,7 @@ public class PlanBean extends BaseBean {
 			
 			plan.setCatCreditosPlan(new CatalogoComunDTO());
 			plan.setCatDivisionesPlan(new CatalogoComunDTO());
+			plan.setCatTipoCompetencia(new CatalogoComunDTO());
 
 			filtroPlan = new PlanDTO();
 			setEdicionPlan(Boolean.FALSE);
@@ -176,8 +176,6 @@ public class PlanBean extends BaseBean {
 		logger.debug("Consultando catalogos de planes desde sesion");
 		catPeriodo = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_PERIODOS);
-		catTpoCompetencia = (List<CatalogoComunDTO>) getSession().getServletContext()
-				.getAttribute(ConstantesGestorWeb.CAT_TIPOS_COMPETENCIA);
 		catTpoPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_TPO_PLAN);
 		catModalidadPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
@@ -203,7 +201,8 @@ public class PlanBean extends BaseBean {
 				.getAttribute(ConstantesGestorWeb.CAT_CREDITOS_PLAN);
 		catDivisionesPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_DIVISIONES_PLAN);
-
+		catTipoCompetencia = (List<CatalogoComunDTO>) getSession().getServletContext()
+				.getAttribute(ConstantesGestorWeb.CAT_TIPOS_COMPETENCIA);
 	}
 
 	/**
@@ -254,11 +253,6 @@ public class PlanBean extends BaseBean {
 			plan.setCatPeriodo(this.getValorDeCatalogo(catPeriodo, ((Integer) e.getNewValue())));
 		}
 	}
-	public void onChangeTpoCompetencia(ValueChangeEvent e) {
-		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatTipoCompetencia(this.getValorDeCatalogo(catTpoCompetencia, ((Integer) e.getNewValue())));
-		}
-	}
 
 	public void onChangeNvEnsePlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
@@ -294,6 +288,11 @@ public class PlanBean extends BaseBean {
 	public void onChangeDivisionesPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			plan.setCatDivisionesPlan(this.getValorDeCatalogo(catDivisionesPlan, ((Integer) e.getNewValue())));
+		}
+	}
+	public void onChangeTipoCompetencia(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			plan.setCatTipoCompetencia(this.getValorDeCatalogo(catTipoCompetencia, ((Integer) e.getNewValue())));
 		}
 	}
 
@@ -466,6 +465,7 @@ public class PlanBean extends BaseBean {
 	 */
 	public void guardaNuevoPlan() {
 		logger.info("########## PERSISTENCIA DEl PLAN ########");
+		plan.setCatPeriodo(!plan.getCatTipoPlan().getNombre().equals("Por Periodo") ? null : plan.getCatPeriodo());
 		plan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
 		ResultadoDTO<PlanDTO> resultado = planServiceFacade.guardaNuevoPlan(plan,
 				this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
@@ -488,6 +488,8 @@ public class PlanBean extends BaseBean {
 	 */
 	public void editarPlan() {
 		logger.info("########## EDITANDO DEl PLAN ########");
+		logger.info("Plan: " + plan.getNombre());
+		logger.info("Tipo Competencia: " + plan.getCatTipoCompetencia().getNombre());
 		plan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
 		ResultadoDTO<PlanDTO> resultado = planServiceFacade.editarPlan(plan,
 				this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
@@ -573,6 +575,14 @@ public class PlanBean extends BaseBean {
 		this.planServiceFacade = planServiceFacade;
 	}
 
+	public boolean isTipoPlan() {
+		return tipoPlan;
+	}
+
+	public void setTipoPlan(boolean tipoPlan) {
+		this.tipoPlan = tipoPlan;
+	}
+
 	public boolean isCreditos() {
 		return creditos;
 	}
@@ -622,14 +632,6 @@ public class PlanBean extends BaseBean {
 	 */
 	public void setCatPeriodo(List<CatalogoComunDTO> catPeriodo) {
 		this.catPeriodo = catPeriodo;
-	}
-
-	public List<CatalogoComunDTO> getCatTpoCompetencia() {
-		return catTpoCompetencia;
-	}
-
-	public void setCatTpoCompetencia(List<CatalogoComunDTO> catTpoCompetencia) {
-		this.catTpoCompetencia = catTpoCompetencia;
 	}
 
 	/**
@@ -690,6 +692,20 @@ public class PlanBean extends BaseBean {
 	 */
 	public void setCatDivisionesPlan(List<CatalogoComunDTO> catDivisionesPlan) {
 		this.catDivisionesPlan = catDivisionesPlan;
+	}
+	/**
+	 * @return the catTipoCompetencia
+	 */
+	public List<CatalogoComunDTO> getCatTipoCompetencia() {
+		return catTipoCompetencia;
+	}
+	/**
+	 * @param catTipoCompetencia
+	 *            the catTipoCompetencia to set
+	 */
+
+	public void setCatTipoCompetencia(List<CatalogoComunDTO> catTipoCompetencia) {
+		this.catTipoCompetencia = catTipoCompetencia;
 	}
 
 	/**

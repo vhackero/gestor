@@ -195,7 +195,8 @@ public class PlanServiceFacade {
 
 			// Se persiste el plan para generar Id y se procede a generar las relaciones
 			// multiples
-			logger.debug("Persistiendo el nuevo plan");
+			logger.error("Persistiendo el nuevo plan: " +plan.getCatTipoCompetencia().getNombre());
+
 			plan.setFechaRegistro(new Date());
 			plan.setVersion(ConstantesGestor.VERSION_UNO);
 
