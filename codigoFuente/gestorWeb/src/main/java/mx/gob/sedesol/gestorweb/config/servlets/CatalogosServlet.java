@@ -80,7 +80,9 @@ public class CatalogosServlet extends HttpServlet {
 	@Autowired
 	private transient CatalogoComunService<CatCompetenciasPlan, Integer> catCompPlanService;
 	@Autowired
-	private transient CatalogoComunService<CatAreasConocimiento, Integer> catConocimientoPlanService;
+	private transient CatalogoComunService<CatAreasConocimiento, Integer> catAreasConocimientoService;
+	@Autowired
+	private transient CatalogoComunService<CatConocimientosPlan, Integer> catConocimientoPlanService;
 	@Autowired
 	private transient CatalogoComunService<CatAptitudesPlan, Integer> catAptitudPlanService;
 	@Autowired
@@ -162,7 +164,7 @@ public class CatalogosServlet extends HttpServlet {
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_ALCANCE_PLAN, catAlcancePlanService.findAll(CatAlcancePlan.class));
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_NIVEL_ENSE_PLAN_PROG, catNivelEnsenanzaPlanService.findAll(CatNivelEnsenanzaPrograma.class));
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_COMPETENCIAS_PLAN, catCompPlanService.findAll(CatCompetenciasPlan.class));
-		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_CONOCIMIENTOS_PLAN, catConocimientoPlanService.findAll(CatAreasConocimiento.class));
+		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_CONOCIMIENTOS_PLAN, catConocimientoPlanService.findAll(CatConocimientosPlan.class));
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_APTITUDES_PLAN, catAptitudPlanService.findAll(CatAptitudesPlan.class));
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_HABILIDADES_PLAN,catHabilidadPlanService.findAll(CatHabilidadesPlan.class));
 		config.getServletContext().setAttribute(ConstantesGestorWeb.CAT_DOCS_EXPIDE_PLAN, catDocExpidePlanService.findAll(CatDocumentosExpidePlan.class));
