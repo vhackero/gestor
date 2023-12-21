@@ -13,7 +13,7 @@ public class CatTipoCompetencia implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="id")
-	private Integer idTpoCompetencia;
+	private Integer idTipoCompetencia;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="fecha_actualizacion", insertable = false, updatable=false)
@@ -35,12 +35,12 @@ public class CatTipoCompetencia implements Serializable {
 	public CatTipoCompetencia() {
 	}
 
-	public Integer getIdTpoCompetencia() {
-		return this.idTpoCompetencia;
+	public Integer getIdTipoCompetencia() {
+		return this.idTipoCompetencia;
 	}
 
-	public void setIdTpoCompetencia(Integer idTpoCompetencia) {
-		this.idTpoCompetencia = idTpoCompetencia;
+	public void setIdTipoCompetencia(Integer idTipoCompetencia) {
+		this.idTipoCompetencia = idTipoCompetencia;
 	}
 
 	public Date getFechaActualizacion() {

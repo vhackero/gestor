@@ -15,7 +15,7 @@ public class TipoCompetenciaDTO implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private Integer idTpoCompetencia;
+	private Integer idTipoCompetencia;
 	private Date fechaActualizacion;
 	private Date fechaRegistro;
 
@@ -26,12 +26,12 @@ public class TipoCompetenciaDTO implements Serializable{
 	private Integer activo;
 	private Long usuarioModifica;
 
-	public Integer getIdTpoCompetencia() {
-		return idTpoCompetencia;
+	public Integer getIdTipoCompetencia() {
+		return idTipoCompetencia;
 	}
 
-	public void setIdTpoCompetencia(Integer idTpoCompetencia) {
-		this.idTpoCompetencia = idTpoCompetencia;
+	public void setIdTipoCompetencia(Integer idTipoCompetencia) {
+		this.idTipoCompetencia = idTipoCompetencia;
 	}
 
 	public Long getUsuarioModifica() {
