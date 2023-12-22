@@ -12,6 +12,6 @@ import java.util.List;
 public interface TipoCompetenciaRepo extends JpaRepository<CatTipoCompetencia, Integer>, JpaSpecificationExecutor<CatTipoCompetencia> {
 
 	@Override
-	@Query("SELECT c FROM CatTipoCompetencia c ORDER BY c.idTpoCompetencia")
+	@Query("SELECT c FROM CatTipoCompetencia c ORDER BY c.idTipoCompetencia")
 	List<CatTipoCompetencia> findAll();
 }

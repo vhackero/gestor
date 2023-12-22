@@ -463,7 +463,7 @@ public class AdminPersonaBean extends BaseBean {
 
 	public String guardarPersona() {
 		datos.setRoles(listaRoles.getTarget());
-
+		datos.getPersona().setUnidadAdministrativa(datos.getPersona().getNuevaContrasenia());
 		if (!ObjectUtils.isNullOrEmpty(datos.getPersona().getNuevaContrasenia())) {
 			datos.getPersona().setContraseniaEncriptada(encoder.encode(datos.getPersona().getNuevaContrasenia()));
 		}
@@ -508,7 +508,7 @@ public class AdminPersonaBean extends BaseBean {
 
 	private String actualizarPersona() {
 		String ruta = null;
-
+		
 		ResultadoDTO<PersonaDTO> resultado = personaServiceFacade.actualizarPersona(datos);
 		if (resultado.getResultado() == ResultadoTransaccionEnum.EXITOSO) {
 

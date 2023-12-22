@@ -40,12 +40,27 @@
 				header="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.titulo')}">
 				<f:validateBean disabled="true">
 					<div class="row">
-						<div class="col-md-6 col-xs-12">
-							<p:outputLabel styleClass="bloque"
-								value="Estructura" />
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel styleClass="requerido" value="Plan:" />
+							<p:selectOneMenu id="nvoPlan" styleClass="col-xs-12"
+								value="#{programaCapacitacionBean.idPlan}"
+								valueChangeListener="#{programaCapacitacionBean.onChangePlan}">
+								<p:ajax update="@form" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{0}" />
+								<f:selectItems value="#{programaCapacitacionBean.planes}"
+									var="plan" itemLabel="#{plan.nombre}" itemValue="#{plan.id}" />
+							</p:selectOneMenu>
+							<p:message for="nvoPlan" />
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel styleClass="bloque" value="Estructura" />
 							<p:selectOneMenu id="tpoCmpSel"
 								value="#{programaCapacitacionBean.programa.tipoCompetencia}"
 								autoWidth="false" styleClass="col-xs-12"
+								disabled="#{programaCapacitacionBean.idPlan eq 0 or programaCapacitacionBean.idPlan eq null or empty programaCapacitacionBean.catTpoComp}"
 								valueChangeListener="#{programaCapacitacionBean.onChangeTpoCompetencia}">
 								<p:ajax update="@form" />
 								<f:selectItem
@@ -58,22 +73,27 @@
 
 							<p:message for="tpoCmpSel" />
 						</div>
-						<div class="col-md-6 col-xs-12">
-							<p:outputLabel styleClass="bloque"
-								value="Subestructura:" />
-							<p:selectOneMenu id="ejeCapSel"
-								disabled="#{programaCapacitacionBean.programa.tipoCompetencia eq 0}"
-								value="#{programaCapacitacionBean.programa.ejeCapacitacion}"
-								styleClass="col-xs-12">
-								<p:ajax event="change" process="@this" update="@form" />
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" />
-								<f:selectItems value="#{programaCapacitacionBean.catEjeCapacit}"
-									var="ejeCap" itemLabel="#{ejeCap.nombre}"
-									itemValue="#{ejeCap.id}" />
-							</p:selectOneMenu>
-							<p:message for="ejeCapSel" />
+
+					</div>
+
+					<div class="form-group" style="margin-top: 15px;">
+						<div class="row">
+							<div class="col-md-6 col-xs-12">
+								<p:outputLabel styleClass="bloque" value="Subestructura:" />
+								<p:selectOneMenu id="ejeCapSel"
+									disabled="#{programaCapacitacionBean.programa.tipoCompetencia eq 0}"
+									value="#{programaCapacitacionBean.programa.ejeCapacitacion}"
+									styleClass="col-xs-12">
+									<p:ajax event="change" process="@this" update="@form" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" />
+									<f:selectItems
+										value="#{programaCapacitacionBean.catEjeCapacit}" var="ejeCap"
+										itemLabel="#{ejeCap.nombre}" itemValue="#{ejeCap.id}" />
+								</p:selectOneMenu>
+								<p:message for="ejeCapSel" />
+							</div>
 						</div>
 					</div>
 

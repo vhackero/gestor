@@ -35,7 +35,6 @@
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatModeloPedagogicoPlan</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatNivelEnsenanzaPrograma</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoPlan</class>
-        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoCompetencia</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatObjetoCurricular</class>
         <class>mx.gob.sedesol.basegestor.model.entities.admin.TblTema</class>
         <class>mx.gob.sedesol.basegestor.model.entities.admin.CatParametroSistema</class>
@@ -49,6 +48,7 @@
         <!-- Planes y programas -->
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatActividadesAprendizajePrograma</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatAreasConocimiento</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatConocimientosPlan</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTecnicaDidacticaPrograma</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCargaHoraria</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaResponsable</class>
@@ -92,6 +92,7 @@
         
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatCreditosPlan</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatDivisionesPlan</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoCompetencia</class>
         <!-- Fin Planes y programas -->
 
         <!-- Inicia seccion encuestas -->

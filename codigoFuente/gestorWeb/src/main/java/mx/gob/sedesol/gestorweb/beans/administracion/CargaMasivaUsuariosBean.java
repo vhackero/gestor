@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -14,6 +15,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesBitacora;
 
+import org.apache.log4j.Logger;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
@@ -35,6 +37,7 @@ import mx.gob.sedesol.basegestor.mongo.service.BitacoraService;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.LoteCargaUsuarioService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaService;
+import mx.gob.sedesol.basegestor.service.impl.admin.PersonaServiceImpl;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.utils.BitacoraUtil;
@@ -66,7 +69,7 @@ public class CargaMasivaUsuariosBean extends BaseBean {
 	private BitacoraBean bitacoraBean;
 
 	private transient BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
+	private static final Logger logger = Logger.getLogger(PersonaServiceImpl.class);
 	private transient UploadedFile archivo;
 	private ResultadoCargaDTO resultado;
 	private List<LoteCargaUsuarioDTO> lotes;
@@ -125,10 +128,15 @@ public class CargaMasivaUsuariosBean extends BaseBean {
 	}
 
 	public String guardarLote() {
+		List<PersonaCargaDTO> personasToInsert = new ArrayList<PersonaCargaDTO>();
 		for (PersonaCargaDTO personaCarga : this.resultado.getRegistros()) {
+			personaCarga.setHash(personaCarga.getContrasenia());
+			personasToInsert.add(personaCarga);
 			personaCarga.setContraseniaEncriptada(encoder.encode(personaCarga.getContrasenia()));
 		}
-
+		
+		this.resultado.setRegistros(personasToInsert);
+		
 		ResultadoDTO<LoteCargaUsuarioDTO> resultadoGuardar = personaService.guardar(lote, this.resultado,
 				rutaCargaMasiva);
 		if (resultadoGuardar.getResultado() == ResultadoTransaccionEnum.EXITOSO) {
