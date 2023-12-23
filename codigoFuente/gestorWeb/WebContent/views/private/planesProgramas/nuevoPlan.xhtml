@@ -25,6 +25,16 @@
 	<ui:define name="content">
 
 		<h:form id="nuevoPlanForm">
+			<p:remoteCommand name="guardarRemote"
+				styleClass="btn btn-primary pull-right"
+				action="#{planBean.guardaNuevoPlan}" ajax="true"
+				process="nuevoPlanForm" validateClient="true" update="nuevoPlanForm" />
+
+			<p:remoteCommand name="editarRemote"
+				styleClass="btn btn-primary pull-right"
+				action="#{planBean.editarPlan}" ajax="true" process="nuevoPlanForm"
+				validateClient="true" update="nuevoPlanForm" />
+
 			<h1>
 				<p:outputLabel styleClass="h1" rendered="#{!planBean.edicionPlan}"
 					value="#{sistema.obtenerTexto('gw.plan.nuevo.titulo.nuevoPlan')}" />
@@ -51,7 +61,7 @@
 								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
 							<p:message for="nomPlan" />
 						</div>
-
+						
 						<div class="col-md-4 col-xs-12">
 							<p:outputLabel for="idPlan"
 								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.identificador')}:"
@@ -70,8 +80,10 @@
 							<p:selectOneMenu id="mnuTpoPlan"
 								value="#{planBean.plan.catTipoPlan.id}"
 								valueChangeListener="#{planBean.onChangeTpoPlan}"
+								disabled="#{planBean.edicionPlan}"
 								autoWidth="false" styleClass="col-xs-12">
-								<p:ajax event="change" process="@this" styleClass="col-xs-12" update="label label1"/>
+								<p:ajax event="change" process="@this" styleClass="col-xs-12"
+									update="label label1 pnlBtnsGuardar" />
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
@@ -86,20 +98,24 @@
 				<div class="form-group">
 					<div class="row">
 						<p:outputPanel id="label">
-						    <p:outputPanel rendered="#{planBean.plan.catTipoPlan.nombre eq 'Por Periodo'}">
-						        <div class="col-md-4 col-xs-12">
-							        <p:outputLabel value="Periodos:" styleClass="requerido bloque" />
-							        <p:selectOneMenu id="mnuPeriodo"
-							        	value="#{planBean.plan.catPeriodo.id == null ? null : planBean.plan.catPeriodo.id}"
-							        	valueChangeListener="#{planBean.onChangePeriodo}"
-                                        autoWidth="false" styleClass="col-xs-12">
-							        	<p:ajax event="change" process="@this" styleClass="col-xs-12" />
-							        	<f:selectItems value="#{planBean.catPeriodo}" var="periodo"
-							        		itemLabel="#{periodo.nombre}" itemValue="#{periodo.id}" />
-							        </p:selectOneMenu>
-						        	<p:message for="mnuPeriodo" />
-						        </div>
-                            </p:outputPanel>
+							<p:outputPanel
+								rendered="#{planBean.plan.catTipoPlan.nombre eq 'Por Periodo'}">
+								<div class="col-md-4 col-xs-12">
+									<p:outputLabel value="Periodos:" styleClass="requerido bloque" />
+									<p:selectOneMenu id="mnuPeriodo"
+										value="#{planBean.plan.catPeriodo.id == null ? null : planBean.plan.catPeriodo.id}"
+										valueChangeListener="#{planBean.onChangePeriodo}"
+										autoWidth="false" styleClass="col-xs-12">
+										<p:ajax event="change" process="@this" styleClass="col-xs-12" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+										<f:selectItems value="#{planBean.catPeriodo}" var="periodo"
+											itemLabel="#{periodo.nombre}" itemValue="#{periodo.id}" />
+									</p:selectOneMenu>
+									<p:message for="mnuPeriodo" />
+								</div>
+							</p:outputPanel>
 						</p:outputPanel>
 						<div class="col-md-4 col-xs-12">
 							<p:outputLabel styleClass="bloque requerido"
@@ -109,9 +125,9 @@
 									valueChangeListener="#{planBean.onChangeCreditosPlan}"
 									autoWidth="false" styleClass="col-xs-12">
 									<p:ajax event="change" process="@this" update="horasCampo" />
-									<f:selectItem
-										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-										itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
 									<f:selectItems value="#{planBean.catCreditosPlan}"
 										var="credito" itemLabel="#{credito.nombre}"
 										itemValue="#{credito.id}" />
@@ -140,9 +156,9 @@
 									valueChangeListener="#{planBean.onChangeDivisionesPlan}"
 									autoWidth="false" styleClass="col-xs-12">
 									<p:ajax event="change" process="@this" />
-									<f:selectItem
-										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-										itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
 									<f:selectItems value="#{planBean.catDivisionesPlan}"
 										var="division" itemLabel="#{division.nombre}"
 										itemValue="#{division.id}" />
@@ -153,102 +169,177 @@
 					</div>
 				</div>
 
-				<p:outputPanel rendered="#{!planBean.edicionPlan}">
-					<hr />
+				<hr />
 
-				<div class="form-group" style="margin-bottom: 20px;">
-					<div class="row">
-                        <p:outputPanel id="label1">
-                            <p:outputPanel rendered="#{planBean.plan.catTipoPlan.nombre eq 'Por Periodo'}">
-                                <div class="col-md-4 col-xs-12">
-                                    <p:outputLabel styleClass="bloque"
-                                                   value="Nombre de los elementos de la estructura "/>
-                                    <p:inputText id="nameStr" styleClass="form-control"
-                                                 value="#{planBean.nameStruc}" maxlength="150"
-                                                 placeholder="Nombre para las estructuras" required="true"
-                                                 valueChangeListener="#{planBean.onChangeNameElements}"
-                                                 requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
+				<p:outputPanel id="label1">
+					<p:outputPanel
+						rendered="#{planBean.plan.catTipoPlan.nombre eq 'Por Periodo' or ( planBean.edicionPlan and planBean.plan.catTipoPlan.nombre eq 'Por Periodo' )}">
 
-                                        <p:ajax process="@this"/>
-                                    </p:inputText>
-                                    <p:message for="nameStr"/>
-                                </div>
-                                <div class="col-md-4 col-xs-12">
-                                    <p:outputLabel styleClass="bloque" for="sp1"
-                                                   value="Número de elementos en la estructura:"/>
-                                    <p:spinner id="sp1" maxlength="3"
-                                               value="#{planBean.elementsStruc}" min="1" max="100"
-                                               valueChangeListener="#{planBean.onChangeElementsSubs}">
+						<div class="form-group" style="margin-bottom: 20px;">
+							<div class="row">
+								<div class="col-md-4 col-xs-12">
+									<p:outputLabel styleClass="bloque"
+										value="Nombre de los elementos de la estructura " />
+									<p:inputText id="nameStr" styleClass="form-control"
+										value="#{planBean.mallaPlan.nombreEstructuras}"
+										maxlength="150" placeholder="Nombre para las estructuras"
+										required="true" disabled="#{planBean.edicionPlan}"
+										valueChangeListener="#{planBean.onChangeNameElements}"
+										requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 
-                                        <p:ajax process="@this"/>
-                                        <p:keyFilter regEx="/[0-9]/" preventPaste="false"/>
-                                    </p:spinner>
-                                </div>
+										<p:ajax process="@this" />
+									</p:inputText>
+									<p:message for="nameStr" />
+								</div>
+								<div class="col-md-4 col-xs-12">
+									<p:outputLabel styleClass="bloque" for="sp1"
+										value="Número de elementos en la estructura:" />
+									<p:spinner id="sp1" maxlength="3"
+										value="#{planBean.mallaPlan.elementosEstructuras}" min="1"
+										max="100" disabled="#{planBean.edicionPlan}"
+										valueChangeListener="#{planBean.onChangeElementsEstruc}">
 
-                                <div class="col-md-4 col-xs-12">
-                                    <p:outputLabel styleClass="bloque" for="sp2"
-                                                   value="Nivel de profundidad de la subestructura:"/>
-                                    <p:spinner id="sp2" maxlength="1" min="0" max="3"
-                                               valueChangeListener="#{planBean.onChangeElementsSubs}"
-                                               value="#{planBean.subStrucLvl}">
+										<p:ajax process="@this" />
+										<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+									</p:spinner>
+								</div>
 
-                                        <p:ajax process="@this" update="pnlSubStruc"/>
-                                        <p:keyFilter regEx="/[0-9]/" preventPaste="false"/>
-                                    </p:spinner>
-                                </div>
-                            </p:outputPanel>
-                        </p:outputPanel>
-					</div>
+								<div class="col-md-4 col-xs-12">
+									<p:outputLabel styleClass="bloque" for="sp2"
+										value="Nivel de profundidad de la subestructura:" />
+									<p:spinner id="sp2" maxlength="1" min="0" max="3"
+										valueChangeListener="#{planBean.onChangeElementsSubs}"
+										value="#{planBean.mallaPlan.niveles}"
+										disabled="#{planBean.edicionPlan}">
 
-						<p:outputPanel id="pnlSubStruc">
-							<p:outputPanel rendered="#{planBean.subStrucLvl > 0}">
-								<c:forEach value="#{planBean.elementsSubStruc}" var="subEl"
-									varStatus="varId" id="subStrucRender"
-									items="#{planBean.elementsSubStruc}">
-									<div class="row" style="margin-top: 20px;">
-										<div class="col-md-4 col-sm-12">
-											<p:outputLabel
-												value="Subestructura nivel #{(varId.index+1).toString()}:" />
-										</div>
-										<div class="col-md-4 col-sm-12">
-											<p:outputLabel styleClass="bloque"
-												value="Nombre de los elementos de la subestructura: " />
-											<p:inputText id="namesubStr" styleClass="form-control"
-												value="#{planBean.namesSubStruc[varId.index]}"
-												maxlength="150" placeholder="Nombre para las subestructuras"
-												required="true"
-												requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
-												valueChangeListener="#{planBean.onChangeNameSubsElements}">
+										<p:ajax process="@this" update="pnlSubStruc1" />
+										<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+									</p:spinner>
+								</div>
+							</div>
+						</div>
 
-												<p:ajax process="@this" />
-												<f:attribute name="idxA" value="#{varId.index}" />
-											</p:inputText>
-
-											<p:message for="namesubStr" />
-										</div>
-										<div class="col-md-4 col-sm-12">
-											<p:outputLabel styleClass="bloque"
-												value="Número de elementos de la subestructura: " />
-											<p:spinner id="numb_#{varId.index}" maxlength="2"
-												value="#{planBean.elementsSubStruc[varId.index]}" min="1"
-												max="20"
-												valueChangeListener="#{planBean.onChangeSubsElements}">
-
-												<p:ajax process="@this" />
-												<f:attribute name="idxA" value="#{varId.index}" />
-												<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
-											</p:spinner>
-										</div>
+						<p:outputPanel id="pnlSubStruc1">
+							<p:outputPanel rendered="#{planBean.mallaPlan.niveles > 0}">
+								<div class="row" style="margin-top: 20px;">
+									<div class="col-md-4 col-sm-12">
+										<p:outputLabel value="Subestructura nivel 1:" />
 									</div>
-								</c:forEach>
-							</p:outputPanel>
-						</p:outputPanel>
-					</div>
+									<div class="col-md-4 col-sm-12">
+										<p:outputLabel styleClass="bloque"
+											value="Nombre de los elementos de la subestructura: " />
+										<p:inputText id="namesubStr1" styleClass="form-control"
+											value="#{planBean.mallaPlan.nombreSubestructuras1}"
+											maxlength="150" placeholder="Nombre para las subestructuras"
+											required="true" disabled="#{planBean.edicionPlan}"
+											requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+											valueChangeListener="#{planBean.onChangeNameSubsElements}">
 
-					<div class="mx-5">
-						<hr />
-					</div>
+											<p:ajax process="@this" />
+											<f:attribute name="idxA" value="1" />
+										</p:inputText>
+
+										<p:message for="namesubStr1" />
+									</div>
+									<div class="col-md-4 col-sm-12">
+										<p:outputLabel styleClass="bloque"
+											value="Número de elementos de la subestructura: " />
+										<p:spinner id="numb_1" maxlength="2"
+											value="#{planBean.mallaPlan.elementosSubestructuras1}"
+											min="1" max="20" disabled="#{planBean.edicionPlan}"
+											valueChangeListener="#{planBean.onChangeSubsElements}">
+
+											<p:ajax process="@this" />
+											<f:attribute name="idxA" value="1" />
+											<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+										</p:spinner>
+									</div>
+								</div>
+							</p:outputPanel>
+
+							<p:outputPanel rendered="#{planBean.mallaPlan.niveles > 1}">
+								<div class="row" style="margin-top: 20px;">
+									<div class="col-md-4 col-sm-12">
+										<p:outputLabel value="Subestructura nivel 2:" />
+									</div>
+									<div class="col-md-4 col-sm-12">
+										<p:outputLabel styleClass="bloque"
+											value="Nombre de los elementos de la subestructura: " />
+										<p:inputText id="namesubStr2" styleClass="form-control"
+											value="#{planBean.mallaPlan.nombreSubestructuras2}"
+											maxlength="150" placeholder="Nombre para las subestructuras"
+											required="true" disabled="#{planBean.edicionPlan}"
+											requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+											valueChangeListener="#{planBean.onChangeNameSubsElements}">
+
+											<p:ajax process="@this" />
+											<f:attribute name="idxA" value="2" />
+										</p:inputText>
+
+										<p:message for="namesubStr1" />
+									</div>
+									<div class="col-md-4 col-sm-12">
+										<p:outputLabel styleClass="bloque"
+											value="Número de elementos de la subestructura: " />
+										<p:spinner id="numb_2" maxlength="2"
+											value="#{planBean.mallaPlan.elementosSubestructuras2}"
+											min="1" max="20" disabled="#{planBean.edicionPlan}"
+											valueChangeListener="#{planBean.onChangeSubsElements}">
+
+											<p:ajax process="@this" />
+											<f:attribute name="idxA" value="2" />
+											<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+										</p:spinner>
+									</div>
+								</div>
+							</p:outputPanel>
+
+							<p:outputPanel rendered="#{planBean.mallaPlan.niveles > 2}">
+								<div class="row" style="margin-top: 20px;">
+									<div class="col-md-4 col-sm-12">
+										<p:outputLabel value="Subestructura nivel 3:" />
+									</div>
+									<div class="col-md-4 col-sm-12">
+										<p:outputLabel styleClass="bloque"
+											value="Nombre de los elementos de la subestructura: " />
+										<p:inputText id="namesubStr3" styleClass="form-control"
+											value="#{planBean.mallaPlan.nombreSubestructuras3}"
+											maxlength="150" placeholder="Nombre para las subestructuras"
+											required="true" disabled="#{planBean.edicionPlan}"
+											requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+											valueChangeListener="#{planBean.onChangeNameSubsElements}">
+
+											<p:ajax process="@this" />
+											<f:attribute name="idxA" value="3" />
+										</p:inputText>
+
+										<p:message for="namesubStr1" />
+									</div>
+									<div class="col-md-4 col-sm-12">
+										<p:outputLabel styleClass="bloque"
+											value="Número de elementos de la subestructura: " />
+										<p:spinner id="numb_3" maxlength="2"
+											value="#{planBean.mallaPlan.elementosSubestructuras3}"
+											min="1" max="20" disabled="#{planBean.edicionPlan}"
+											valueChangeListener="#{planBean.onChangeSubsElements}">
+
+											<p:ajax process="@this" />
+											<f:attribute name="idxA" value="3" />
+											<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+										</p:spinner>
+									</div>
+								</div>
+							</p:outputPanel>
+
+						</p:outputPanel>
+
+
+					</p:outputPanel>
 				</p:outputPanel>
+
+				<div class="mx-5">
+					<hr />
+				</div>
 
 				<div class="form-group">
 					<div class="row">
@@ -289,7 +380,7 @@
 							<p:message for="mnuNvlEns" />
 
 						</div>
-						
+
 						<div class="col-md-4 col-xs-12">
 							<p:outputLabel styleClass="bloque requerido"
 								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.competencias')}:" />
@@ -368,9 +459,9 @@
 									valueChangeListener="#{planBean.onChangeAlcancePlan}"
 									autoWidth="false" styleClass="col-xs-12" id="alcancePlan">
 									<p:ajax event="change" process="@this" />
-									<f:selectItem
-										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-										itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
 									<f:selectItems value="#{planBean.catAlcancePlan}" var="alcance"
 										itemLabel="#{alcance.nombre}" itemValue="#{alcance.id}" />
 								</p:selectOneMenu>
@@ -387,7 +478,8 @@
 								value="#{planBean.plan.catEstatusPlan.id}"
 								valueChangeListener="#{planBean.onChangeEstatusPlan}"
 								autoWidth="false" styleClass="col-xs-12">
-								<p:ajax event="change" update="@this" />
+								<p:ajax event="change"
+									update="@this, pnlBtnsGuardar" />
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
@@ -496,25 +588,27 @@
 					</div>
 				</div>
 				<div class="form-group">
-				<div class="row">
-					<div class="col-md-4 col-xs-12">
-						<p:outputLabel styleClass="requerido bloque"  value="Tipo de Competencia: "/>
-						<f:validateBean disabled="true">
-							<p:selectOneMenu id="tCompetencia" value="#{planBean.plan.catTipoCompetencia.id}"
-										 valueChangeListener="#{planBean.onChangeTipoCompetencia}"
-										 autoWidth="false" styleClass="col-xs-12">
-							<p:ajax event="change" process="@this" />
-							<f:selectItem
+					<div class="row">
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel styleClass="requerido bloque"
+								value="Tipo de Competencia: " />
+							<f:validateBean disabled="true">
+								<p:selectOneMenu id="tCompetencia"
+									value="#{planBean.plan.catTipoCompetencia.id}"
+									valueChangeListener="#{planBean.onChangeTipoCompetencia}"
+									autoWidth="false" styleClass="col-xs-12">
+									<p:ajax event="change" process="@this" />
+								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
-							<f:selectItems value="#{planBean.catTipoCompetencia}"
-										   var="tipoCompetencia" itemLabel="#{tipoCompetencia.nombre}"
-										   itemValue="#{tipoCompetencia.id}" />
-						</p:selectOneMenu>
-						<p:message for="tCompetencia" />
-						</f:validateBean>
+									<f:selectItems value="#{planBean.catTipoCompetencia}"
+										var="tipoCompetencia" itemLabel="#{tipoCompetencia.nombre}"
+										itemValue="#{tipoCompetencia.id}" />
+								</p:selectOneMenu>
+								<p:message for="tCompetencia" />
+							</f:validateBean>
+						</div>
 					</div>
-				</div>
 				</div>
 				<div class="form-group">
 					<div class="row">
@@ -567,29 +661,47 @@
 				<div class="form-group">
 					<div class="row">
 
-
 						<div class="col-md-12 col-xs-12">
-							<p:commandButton styleClass="btn btn-primary pull-right"
-								rendered="#{!planBean.edicionPlan}"
-								value="#{sistema.obtenerTexto('gw.plan.nuevo.boton.guardar')}"
-								action="#{planBean.guardaNuevoPlan}" ajax="true"
-								validateClient="true" update="@form, :growlLayout" />
 
+							<p:outputPanel id="pnlBtnsGuardar">
+								<p:outputPanel rendered="#{!planBean.edicionPlan}">
+									<p:commandButton styleClass="btn btn-primary pull-right"
+										rendered="#{not(planBean.plan.catEstatusPlan.nombre eq 'Ejecución') and not(planBean.plan.catTipoPlan.nombre eq 'Por Periodo')}"
+										value="Guardar" ajax="true" update="nuevoPlanForm" 
+										action="#{planBean.guardaNuevoPlan}"
+										process="nuevoPlanForm" validateClient="true" />
 
-							<!--  -->
+									<p:commandButton styleClass="btn btn-primary pull-right"
+										rendered="#{(planBean.plan.catEstatusPlan.nombre eq 'Ejecución') and not(planBean.plan.catTipoPlan.nombre eq 'Por Periodo')}"
+										value="Guardar" ajax="true"
+										oncomplete="PF('confirmarEstructura').show();" />
 
-							<p:commandButton styleClass="btn btn-primary pull-right"
-								rendered="#{planBean.edicionPlan}"
-								value="#{sistema.obtenerTexto('gw.plan.editar.boton.editar')}"
-								action="#{planBean.editarPlan}" ajax="true"
-								validateClient="true" update="@form,:growlLayout" />
+									<p:commandButton styleClass="btn btn-primary pull-right"
+										rendered="#{not(planBean.plan.catEstatusPlan.nombre eq 'Ejecución') and (planBean.plan.catTipoPlan.nombre eq 'Por Periodo')}"
+										value="Guardar" ajax="true" 
+										oncomplete="PF('confirmarEstructuraGuardar').show();" />
+
+									<p:commandButton styleClass="btn btn-primary pull-right"
+										rendered="#{(planBean.plan.catEstatusPlan.nombre eq 'Ejecución') and (planBean.plan.catTipoPlan.nombre eq 'Por Periodo')}"
+										value="Guardar" ajax="true" 
+										oncomplete="PF('confirmarEstructura').show();" />
+								</p:outputPanel>
+							</p:outputPanel>
+							
+							<p:outputPanel id="pnlBtnsEditar">
+								<p:outputPanel rendered="#{planBean.edicionPlan}">
+									<p:commandButton styleClass="btn btn-primary pull-right"
+										value="Editar" ajax="true" update="nuevoPlanForm" 
+										action="#{planBean.editarPlan}"
+										process="nuevoPlanForm" validateClient="true" />
+								</p:outputPanel>
+							</p:outputPanel>
 
 							<p:commandButton immediate="true" ajax="true"
 								id="btnRegresarPlanes" styleClass="btn btn-default pull-right"
 								action="#{planBean.regresaBusquedaPlanes}"
 								value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.regresar')}"
 								update="@form" />
-
 						</div>
 					</div>
 				</div>
@@ -598,6 +710,80 @@
 			</p:panel>
 
 		</h:form>
+
+		<p:dialog header="Confirmar plan en ejecución" responsive="true"
+			id="mdlConfirmarEstructura" closable="false" draggable="false"
+			appendTo="@(body)" modal="true" width="600" height="auto"
+			resizable="false" widgetVar="confirmarEstructura">
+			<h:form>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText
+								value="Se agregarán los elementos correspondientes al aula virtual y malla curricular"
+								styleClass="bloque" />
+							<h:outputText styleClass="colorRojo" style="margin-top:10px;"
+								value="Una vez agregados no podrán ser eliminados, ¿está de acuerdo?" />
+						</div>
+					</div>
+				</div>
+				<div class="row" style="margin-top: 15px;">
+					<div class="col-md-12 text-right">
+						<p:commandButton value="Cancelar" ajax="true"
+							onclick="PF('confirmarEstructura').hide()"
+							styleClass="btn btn-default" />
+
+						<p:commandButton value="Guardar"
+							oncomplete="PF('confirmarEstructura').hide()"
+							styleClass="btn btn-primary" onclick="guardarRemote()"
+							process="nuevoPlanForm" update="nuevoPlanForm"
+							rendered="#{not (planBean.edicionPlan)}" />
+
+						<p:commandButton value="Editar"
+							oncomplete="PF('confirmarEstructura').hide()"
+							styleClass="btn btn-primary" onclick="editarRemote()"
+							process="nuevoPlanForm" update="nuevoPlanForm"
+							rendered="#{planBean.edicionPlan}" />
+
+					</div>
+				</div>
+			</h:form>
+
+		</p:dialog>
+
+		<p:dialog header="Confirmar guardado de plan" responsive="true"
+			id="mdlConfirmarEstructuraGuardar" closable="false" draggable="false"
+			appendTo="@(body)" modal="true" width="600" height="auto"
+			resizable="false" widgetVar="confirmarEstructuraGuardar">
+			<h:form>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText
+								value="Se agregarán los elementos correspondientes a la malla curricular"
+								styleClass="bloque" />
+							<h:outputText styleClass="colorRojo" style="margin-top:10px;"
+								value="Una vez agregados no podrán ser eliminados, ¿está de acuerdo?" />
+						</div>
+					</div>
+				</div>
+				<div class="row" style="margin-top: 15px;">
+					<div class="col-md-12 text-right">
+						<p:commandButton value="Cancelar" ajax="true"
+							onclick="PF('confirmarEstructuraGuardar').hide()"
+							styleClass="btn btn-default" />
+
+						<p:commandButton value="Guardar"
+							oncomplete="PF('confirmarEstructuraGuardar').hide()"
+							styleClass="btn btn-primary" onclick="guardarRemote()"
+							process="nuevoPlanForm" update="nuevoPlanForm" />
+
+					</div>
+				</div>
+			</h:form>
+
+		</p:dialog>
+
 	</ui:define>
 </ui:composition>
 

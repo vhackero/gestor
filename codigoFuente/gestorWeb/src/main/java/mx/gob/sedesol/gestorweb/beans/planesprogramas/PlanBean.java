@@ -17,6 +17,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.RelMallaPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.OrgGubernamentalDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
@@ -25,11 +26,11 @@ import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.mongo.service.BitacoraService;
 import mx.gob.sedesol.basegestor.service.admin.OrgGubernamentalService;
 import mx.gob.sedesol.basegestor.service.impl.planesyprogramas.PlanServiceFacade;
+import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaPlanService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.utils.BitacoraUtil;
-
 
 import mx.gob.sedesol.basegestor.service.impl.planesyprogramas.FECServiceFacade;
 
@@ -55,6 +56,9 @@ public class PlanBean extends BaseBean {
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
 
+	@ManagedProperty("#{mallaPlanService}")
+	private MallaPlanService mallaPlanService;
+
 	private List<CatalogoComunDTO> catPeriodo;
 	private List<CatalogoComunDTO> catTpoPlan;
 	private List<CatalogoComunDTO> catModalidadPlan;
@@ -66,7 +70,7 @@ public class PlanBean extends BaseBean {
 	private List<CatalogoComunDTO> catAptitutesPlan;
 	private List<CatalogoComunDTO> catHabilidadesPlan;
 	private List<CatalogoComunDTO> catDocsExpidePlan;
-	
+
 	private List<CatalogoComunDTO> catCreditosPlan;
 	private List<CatalogoComunDTO> catDivisionesPlan;
 	private List<CatalogoComunDTO> catTipoCompetencia;
@@ -84,20 +88,22 @@ public class PlanBean extends BaseBean {
 	private boolean edicionPlan;
 	private boolean creditos;
 	private boolean tipoPlan;
-	
+
 	private Integer elementsStruc = 1;
 	private String nameStruc = "";
 	private Integer subStrucLvl = 0;
 	private ArrayList<String> namesSubStruc = new ArrayList<>();
 	private ArrayList<String> elementsSubStruc = new ArrayList<>();
-	
+
+	private RelMallaPlanDTO mallaPlan;
+
 	@ManagedProperty(value = "#{fecServiceFacade}")
-    private FECServiceFacade fecServiceFacade;
+	private FECServiceFacade fecServiceFacade;
 
 	public PlanBean() {
 		initRecursos();
 		edicionPlan = Boolean.parseBoolean(getRequest().getParameter("edicion"));
-		
+
 		namesSubStruc.add("");
 		elementsSubStruc.add("1");
 	}
@@ -114,33 +120,41 @@ public class PlanBean extends BaseBean {
 			this.llenaRelacionesPlanSel(plan);
 			if (ObjectUtils.isNotNull(plan)) {
 				getSession().removeAttribute(ConstantesGestorWeb.OBJ_PLAN_SELEC);
+				mallaPlan = mallaPlanService.findByIdPlan(plan.getIdPlan());
 			}
 
 		} else {
 			// Flujo Nuevo Plan
 			plan = new PlanDTO();
 			plan.setCatTipoPlan(new CatalogoComunDTO());
-			plan.getCatTipoPlan().setId(2);
 			plan.setCatPeriodo(new CatalogoComunDTO());
 			plan.setCatAlcancePlan(new CatalogoComunDTO());
 			plan.setCatCompetenciasPlan(new CatalogoComunDTO());
-			plan.getCatCompetenciasPlan().setId(2);
 			plan.setCatDocumentosExpidePlan(new CatalogoComunDTO());
-			plan.getCatDocumentosExpidePlan().setId(1);
 			plan.setCatEstatusPlan(new CatalogoComunDTO());
 			plan.setCatModalidadPlanPrograma(new CatalogoComunDTO());
 			plan.setCatNivelEnsenanzaPrograma(new CatalogoComunDTO());
 			plan.setTblOrganismoGubernamental(new OrgGubernamentalDTO());
-			plan.getTblOrganismoGubernamental().setId(13);
 			plan.setIdentificador(planServiceFacade.generaIdentificadorPlan());
-			
+
 			plan.setCatCreditosPlan(new CatalogoComunDTO());
-			plan.getCatCreditosPlan().setId(1);
 			plan.setCatDivisionesPlan(new CatalogoComunDTO());
 			plan.setCatTipoCompetencia(new CatalogoComunDTO());
 
 			filtroPlan = new PlanDTO();
 			setEdicionPlan(Boolean.FALSE);
+
+			mallaPlan = new RelMallaPlanDTO();
+			mallaPlan.setElementosEstructuras(1);
+			mallaPlan.setElementosSubestructuras1(1);
+			mallaPlan.setElementosSubestructuras2(1);
+			mallaPlan.setElementosSubestructuras3(1);
+			mallaPlan.setNiveles(0);
+			
+			mallaPlan.setNombreEstructuras("");
+			mallaPlan.setNombreSubestructuras1("");
+			mallaPlan.setNombreSubestructuras2("");
+			mallaPlan.setNombreSubestructuras3("");
 		}
 	}
 
@@ -151,6 +165,7 @@ public class PlanBean extends BaseBean {
 	 */
 	private void llenaRelacionesPlanSel(PlanDTO plan) {
 		if (ObjectUtils.isNotNull(plan)) {
+
 			if (!ObjectUtils.isNullOrEmpty(plan.getRelPlanConocimientos())) {
 				conocimsPlanSelec = new ArrayList<>();
 				for (RelPlanConocimientoDTO conoc : plan.getRelPlanConocimientos()) {
@@ -201,7 +216,7 @@ public class PlanBean extends BaseBean {
 				.getAttribute(ConstantesGestorWeb.CAT_COMPETENCIAS_PLAN);
 		catDocsExpidePlan = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_DOCS_EXPIDE_PLAN);
-		
+
 		catCreditosPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_CREDITOS_PLAN);
 		catDivisionesPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
@@ -243,73 +258,74 @@ public class PlanBean extends BaseBean {
 
 	public void onChangeModalidadPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatModalidadPlanPrograma(this.getValorDeCatalogo(catModalidadPlan, ((Integer) e.getNewValue())));
+			plan.setCatModalidadPlanPrograma(this.getValorDeCatalogo(catModalidadPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeTpoPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatTipoPlan(this.getValorDeCatalogo(catTpoPlan, ((Integer) e.getNewValue())));
+			plan.setCatTipoPlan(this.getValorDeCatalogo(catTpoPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangePeriodo(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatPeriodo(this.getValorDeCatalogo(catPeriodo, ((Integer) e.getNewValue())));
+			plan.setCatPeriodo(this.getValorDeCatalogo(catPeriodo, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeNvEnsePlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatNivelEnsenanzaPrograma(this.getValorDeCatalogo(catNivelEnsPlan, ((Integer) e.getNewValue())));
+			plan.setCatNivelEnsenanzaPrograma(this.getValorDeCatalogo(catNivelEnsPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeCompetenciaPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatCompetenciasPlan(this.getValorDeCatalogo(catCompPlan, ((Integer) e.getNewValue())));
+			plan.setCatCompetenciasPlan(this.getValorDeCatalogo(catCompPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeAlcancePlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatAlcancePlan(this.getValorDeCatalogo(catAlcancePlan, ((Integer) e.getNewValue())));
+			plan.setCatAlcancePlan(this.getValorDeCatalogo(catAlcancePlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
-	
+
 	public void onChangeCreditosPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatCreditosPlan(this.getValorDeCatalogo(catCreditosPlan, ((Integer) e.getNewValue())));
-			if ((Integer) e.getNewValue() == 2) {
+			plan.setCatCreditosPlan(this.getValorDeCatalogo(catCreditosPlan, (Integer.parseInt(e.getNewValue().toString()))));
+			if (Integer.parseInt(e.getNewValue().toString()) == 2) {
 				setCreditos(Boolean.FALSE);
 			} else {
 				setCreditos(Boolean.TRUE);
 			}
-		}else {
+		} else {
 			setCreditos(Boolean.TRUE);
 		}
 	}
-	
+
 	public void onChangeDivisionesPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatDivisionesPlan(this.getValorDeCatalogo(catDivisionesPlan, ((Integer) e.getNewValue())));
+			plan.setCatDivisionesPlan(this.getValorDeCatalogo(catDivisionesPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
+
 	public void onChangeTipoCompetencia(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatTipoCompetencia(this.getValorDeCatalogo(catTipoCompetencia, ((Integer) e.getNewValue())));
+			plan.setCatTipoCompetencia(this.getValorDeCatalogo(catTipoCompetencia, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeEstatusPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatEstatusPlan(this.getValorDeCatalogo(catalEstatusPlan, ((Integer) e.getNewValue())));
+			plan.setCatEstatusPlan(this.getValorDeCatalogo(catalEstatusPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeDocExpide(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatDocumentosExpidePlan(this.getValorDeCatalogo(catDocsExpidePlan, ((Integer) e.getNewValue())));
+			plan.setCatDocumentosExpidePlan(this.getValorDeCatalogo(catDocsExpidePlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
@@ -317,49 +333,66 @@ public class PlanBean extends BaseBean {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			for (OrgGubernamentalDTO orgGub : catOrgGubs) {
 				for (OrgGubernamentalDTO orgGubHijo : orgGub.getLstHijosOrgGub()) {
-					if (orgGubHijo.getId().equals((Integer) e.getNewValue())) {
+					if (orgGubHijo.getId().equals(Integer.parseInt(e.getNewValue().toString()))) {
 						plan.setTblOrganismoGubernamental(orgGubHijo);
 					}
 				}
 			}
 		}
 	}
-	
-	
-	
+
 	public void onChangeNameElements(ValueChangeEvent event) {
 		if (ObjectUtils.isNotNull(event.getNewValue())) {
-			nameStruc = (String) event.getNewValue();
+			mallaPlan.setNombreEstructuras((String) event.getNewValue());
 		}
 	}
-	
+
+	public void onChangeElementsEstruc(ValueChangeEvent event) {
+		if (ObjectUtils.isNotNull(event.getNewValue())) {
+			mallaPlan.setElementosEstructuras(Integer.parseInt(event.getNewValue().toString()));
+		}
+	}
+
 	public void onChangeElementsSubs(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			if((Integer) e.getNewValue() >= 3) {
-				subStrucLvl = 3;
-			}else {
-				subStrucLvl = (Integer) e.getNewValue();
+			if (Integer.parseInt(e.getNewValue().toString()) >= 3) {
+				mallaPlan.setNiveles(3);
+			} else {
+				mallaPlan.setNiveles(Integer.parseInt(e.getNewValue().toString()));
 			}
-			
-			namesSubStruc = new ArrayList<String>();
-			elementsSubStruc = new ArrayList<String>();
-			for(int i=0;i<subStrucLvl;i++){
-				namesSubStruc.add("SubEstructura");
-				elementsSubStruc.add("1");
-			}
-			
 		}
 	}
-	
+
 	public void onChangeSubsElements(ValueChangeEvent event) {
 		if (ObjectUtils.isNotNull(event.getNewValue())) {
-			elementsSubStruc.set( (Integer) event.getComponent().getAttributes().get("idxA"), (String) event.getNewValue() );
+			switch (Integer.parseInt(event.getComponent().getAttributes().get("idxA").toString())) {
+			case 1:
+				mallaPlan.setElementosSubestructuras1(Integer.parseInt(event.getNewValue().toString()));
+				break;
+			case 2:
+				mallaPlan.setElementosSubestructuras2(Integer.parseInt(event.getNewValue().toString()));
+				break;
+			case 3:
+				mallaPlan.setElementosSubestructuras3(Integer.parseInt(event.getNewValue().toString()));
+				break;
+			}
+
 		}
 	}
-	
+
 	public void onChangeNameSubsElements(ValueChangeEvent event) {
 		if (ObjectUtils.isNotNull(event.getNewValue())) {
-			namesSubStruc.set((Integer) event.getComponent().getAttributes().get("idxA"), (String) event.getNewValue());
+			switch (Integer.parseInt(event.getComponent().getAttributes().get("idxA").toString())) {
+			case 1:
+				mallaPlan.setNombreSubestructuras1(event.getNewValue().toString());
+				break;
+			case 2:
+				mallaPlan.setNombreSubestructuras2(event.getNewValue().toString());
+				break;
+			case 3:
+				mallaPlan.setNombreSubestructuras3(event.getNewValue().toString());
+				break;
+			}
 		}
 	}
 
@@ -374,8 +407,8 @@ public class PlanBean extends BaseBean {
 			clonPlan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
 			ResultadoDTO<PlanDTO> res = getPlanServiceFacade().clonarPlan(clonPlan);
 			if (ObjectUtils.isNotNull(res) && res.getResultado().getValor()) {
-				bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CLO_PLA",
-						String.valueOf(planSelecBusq.getIdPlan()), requestActual(), TipoServicioEnum.LOCAL);
+				bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CLO_PLA", String.valueOf(planSelecBusq.getIdPlan()),
+						requestActual(), TipoServicioEnum.LOCAL);
 
 				agregarMsgInfo("Se clonó correctamente el plan", null);
 			} else {
@@ -400,8 +433,8 @@ public class PlanBean extends BaseBean {
 	 * @return
 	 */
 	public String navegaEstructuraPlan() {
-		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "VER_PLA",
-				String.valueOf(planSelecBusq.getIdPlan()), requestActual(), TipoServicioEnum.LOCAL);
+		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "VER_PLA", String.valueOf(planSelecBusq.getIdPlan()),
+				requestActual(), TipoServicioEnum.LOCAL);
 		getSession().setAttribute(ConstantesGestorWeb.OBJ_PLAN_SELEC, planSelecBusq);
 		// planProgBean.setPlanSelec(planSelecBusq);
 		return ConstantesGestorWeb.NAVEGA_PLAN_PROGRAMA_MALLACURRICULAR;
@@ -416,11 +449,9 @@ public class PlanBean extends BaseBean {
 			logger.debug("Comienza busqueda de planes");
 			planesFiltrados = getPlanServiceFacade().getPlanService().buscaPlanesPorCriterios(filtroPlan);
 
-			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CON_PLA", "",
-					requestActual(), TipoServicioEnum.LOCAL);
+			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CON_PLA", "", requestActual(), TipoServicioEnum.LOCAL);
 			/**
-			 * Despues de la busqueda se limpian los criterios de busqueda de la
-			 * vista*
+			 * Despues de la busqueda se limpian los criterios de busqueda de la vista*
 			 */
 			filtroPlan.setNombre(StringUtils.EMPTY);
 			filtroPlan.setTblOrganismoGubernamental(null);
@@ -428,7 +459,7 @@ public class PlanBean extends BaseBean {
 			filtroPlan.setCatTipoPlan(new CatalogoComunDTO());
 			filtroPlan.setCatAlcancePlan(new CatalogoComunDTO());
 			filtroPlan.setCatEstatusPlan(new CatalogoComunDTO());
-			
+
 			filtroPlan.setCatCreditosPlan(new CatalogoComunDTO());
 			filtroPlan.setCatDivisionesPlan(new CatalogoComunDTO());
 
@@ -443,21 +474,21 @@ public class PlanBean extends BaseBean {
 		plan.setCatPeriodo(!plan.getCatTipoPlan().getNombre().equals("Por Periodo") ? null : plan.getCatPeriodo());
 		plan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
 		ResultadoDTO<PlanDTO> resultado = null;
+		
 		try {
 			resultado = planServiceFacade.guardaNuevoPlan(plan,
 					this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
 					this.obtieneListaCatalogoComun(aptitudesPlanSelec, ConstantesGestorWeb.CAT_APTITUDES_PLAN),
 					this.obtieneListaCatalogoComun(conocimsPlanSelec, ConstantesGestorWeb.CAT_CONOCIMIENTOS_PLAN),
-					elementsStruc, nameStruc, subStrucLvl, namesSubStruc, elementsSubStruc
-					);
+					mallaPlan);
 		} catch (Exception e) {
 			logger.error(e);
 			agregarMsgError("Ocurrio un error", null);
 		}
 
 		if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
-			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CRE_PLA",
-					String.valueOf(resultado.getDto().getIdPlan()), requestActual(), TipoServicioEnum.LOCAL);
+			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CRE_PLA", String.valueOf(resultado.getDto().getIdPlan()),
+					requestActual(), TipoServicioEnum.LOCAL);
 			agregarMsgInfo("Se guardo correctamente el plan", null);
 		} else {
 			agregarMsgError("Ocurrio un error", null);
@@ -465,20 +496,20 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
+	 * @throws Exception
 	 *
 	 */
-	public void editarPlan() {
+	public void editarPlan() throws Exception {
 		logger.info("########## EDITANDO DEl PLAN ########");
-		logger.info("Plan: " + plan.getNombre());
-		logger.info("Tipo Competencia: " + plan.getCatTipoCompetencia().getNombre());
 		plan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
 		ResultadoDTO<PlanDTO> resultado = planServiceFacade.editarPlan(plan,
 				this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
 				this.obtieneListaCatalogoComun(aptitudesPlanSelec, ConstantesGestorWeb.CAT_APTITUDES_PLAN),
-				this.obtieneListaCatalogoComun(conocimsPlanSelec, ConstantesGestorWeb.CAT_CONOCIMIENTOS_PLAN));
+				this.obtieneListaCatalogoComun(conocimsPlanSelec, ConstantesGestorWeb.CAT_CONOCIMIENTOS_PLAN),
+				mallaPlan);
 		if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
-			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "EDI_PLA",
-					String.valueOf(resultado.getDto().getIdPlan()), requestActual(), TipoServicioEnum.LOCAL);
+			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "EDI_PLA", String.valueOf(resultado.getDto().getIdPlan()),
+					requestActual(), TipoServicioEnum.LOCAL);
 			agregarMsgInfo("Se edito correctamente el plan", null);
 		} else {
 			agregarMsgError("Ocurrio un error", null);
@@ -549,8 +580,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param planServiceFacade
-	 *            the planServiceFacade to set
+	 * @param planServiceFacade the planServiceFacade to set
 	 */
 	public void setPlanServiceFacade(PlanServiceFacade planServiceFacade) {
 		this.planServiceFacade = planServiceFacade;
@@ -567,9 +597,11 @@ public class PlanBean extends BaseBean {
 	public boolean isCreditos() {
 		return creditos;
 	}
+
 	public void setCreditos(boolean creditos) {
 		this.creditos = creditos;
 	}
+
 	/**
 	 * @return the filtroPlan
 	 */
@@ -578,8 +610,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param filtroPlan
-	 *            the filtroPlan to set
+	 * @param filtroPlan the filtroPlan to set
 	 */
 	public void setFiltroPlan(PlanDTO filtroPlan) {
 		this.filtroPlan = filtroPlan;
@@ -593,8 +624,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param catTpoPlan
-	 *            the catTpoPlan to set
+	 * @param catTpoPlan the catTpoPlan to set
 	 */
 	public void setCatTpoPlan(List<CatalogoComunDTO> catTpoPlan) {
 		this.catTpoPlan = catTpoPlan;
@@ -608,8 +638,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param catPeriodo
-	 *            the catPeriodo to set
+	 * @param catPeriodo the catPeriodo to set
 	 */
 	public void setCatPeriodo(List<CatalogoComunDTO> catPeriodo) {
 		this.catPeriodo = catPeriodo;
@@ -623,8 +652,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param catModalidadPlan
-	 *            the catModalidadPlan to set
+	 * @param catModalidadPlan the catModalidadPlan to set
 	 */
 	public void setCatModalidadPlan(List<CatalogoComunDTO> catModalidadPlan) {
 		this.catModalidadPlan = catModalidadPlan;
@@ -638,13 +666,12 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param catAlcancePlan
-	 *            the catAlcancePlan to set
+	 * @param catAlcancePlan the catAlcancePlan to set
 	 */
 	public void setCatAlcancePlan(List<CatalogoComunDTO> catAlcancePlan) {
 		this.catAlcancePlan = catAlcancePlan;
 	}
-	
+
 	/**
 	 * @return the catCreditosPlan
 	 */
@@ -653,13 +680,12 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param catCreditosPlan
-	 *            the catCreditosPlan to set
+	 * @param catCreditosPlan the catCreditosPlan to set
 	 */
 	public void setCatCreditosPlan(List<CatalogoComunDTO> catCreditosPlan) {
 		this.catCreditosPlan = catCreditosPlan;
 	}
-	
+
 	/**
 	 * @return the catDivisionesPlan
 	 */
@@ -668,21 +694,21 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param catDivisionesPlan
-	 *            the catDivisionessPlan to set
+	 * @param catDivisionesPlan the catDivisionessPlan to set
 	 */
 	public void setCatDivisionesPlan(List<CatalogoComunDTO> catDivisionesPlan) {
 		this.catDivisionesPlan = catDivisionesPlan;
 	}
+
 	/**
 	 * @return the catTipoCompetencia
 	 */
 	public List<CatalogoComunDTO> getCatTipoCompetencia() {
 		return catTipoCompetencia;
 	}
+
 	/**
-	 * @param catTipoCompetencia
-	 *            the catTipoCompetencia to set
+	 * @param catTipoCompetencia the catTipoCompetencia to set
 	 */
 
 	public void setCatTipoCompetencia(List<CatalogoComunDTO> catTipoCompetencia) {
@@ -697,8 +723,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param catalEstatusPlan
-	 *            the catalEstatusPlan to set
+	 * @param catalEstatusPlan the catalEstatusPlan to set
 	 */
 	public void setCatalEstatusPlan(List<CatalogoComunDTO> catalEstatusPlan) {
 		this.catalEstatusPlan = catalEstatusPlan;
@@ -712,8 +737,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param itemsOrgGubs
-	 *            the itemsOrgGubs to set
+	 * @param itemsOrgGubs the itemsOrgGubs to set
 	 */
 	public void setItemsOrgGubs(List<SelectItem> itemsOrgGubs) {
 		this.itemsOrgGubs = itemsOrgGubs;
@@ -727,8 +751,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param planesFiltrados
-	 *            the planesFiltrados to set
+	 * @param planesFiltrados the planesFiltrados to set
 	 */
 	public void setPlanesFiltrados(List<PlanDTO> planesFiltrados) {
 		this.planesFiltrados = planesFiltrados;
@@ -742,8 +765,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param planSelecBusq
-	 *            the planSelecBusq to set
+	 * @param planSelecBusq the planSelecBusq to set
 	 */
 	public void setPlanSelecBusq(PlanDTO planSelecBusq) {
 		this.planSelecBusq = planSelecBusq;
@@ -757,8 +779,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param plan
-	 *            the plan to set
+	 * @param plan the plan to set
 	 */
 	public void setPlan(PlanDTO plan) {
 		this.plan = plan;
@@ -772,8 +793,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param catNivelEnsPlan
-	 *            the catNivelEnsPlan to set
+	 * @param catNivelEnsPlan the catNivelEnsPlan to set
 	 */
 	public void setCatNivelEnsPlan(List<CatalogoComunDTO> catNivelEnsPlan) {
 		this.catNivelEnsPlan = catNivelEnsPlan;
@@ -787,8 +807,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param catCompPlan
-	 *            the catCompPlan to set
+	 * @param catCompPlan the catCompPlan to set
 	 */
 	public void setCatCompPlan(List<CatalogoComunDTO> catCompPlan) {
 		this.catCompPlan = catCompPlan;
@@ -802,8 +821,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param catConocimientosPlan
-	 *            the catConocimientosPlan to set
+	 * @param catConocimientosPlan the catConocimientosPlan to set
 	 */
 	public void setCatConocimientosPlan(List<CatalogoComunDTO> catConocimientosPlan) {
 		this.catConocimientosPlan = catConocimientosPlan;
@@ -817,8 +835,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param catAptitutesPlan
-	 *            the catAptitutesPlan to set
+	 * @param catAptitutesPlan the catAptitutesPlan to set
 	 */
 	public void setCatAptitutesPlan(List<CatalogoComunDTO> catAptitutesPlan) {
 		this.catAptitutesPlan = catAptitutesPlan;
@@ -832,8 +849,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param catHabilidadesPlan
-	 *            the catHabilidadesPlan to set
+	 * @param catHabilidadesPlan the catHabilidadesPlan to set
 	 */
 	public void setCatHabilidadesPlan(List<CatalogoComunDTO> catHabilidadesPlan) {
 		this.catHabilidadesPlan = catHabilidadesPlan;
@@ -847,8 +863,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param catDocsExpidePlan
-	 *            the catDocsExpidePlan to set
+	 * @param catDocsExpidePlan the catDocsExpidePlan to set
 	 */
 	public void setCatDocsExpidePlan(List<CatalogoComunDTO> catDocsExpidePlan) {
 		this.catDocsExpidePlan = catDocsExpidePlan;
@@ -862,8 +877,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param conocimsPlanSelec
-	 *            the conocimsPlanSelec to set
+	 * @param conocimsPlanSelec the conocimsPlanSelec to set
 	 */
 	public void setConocimsPlanSelec(List<String> conocimsPlanSelec) {
 		this.conocimsPlanSelec = conocimsPlanSelec;
@@ -877,8 +891,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param habilidadesPlanSelec
-	 *            the habilidadesPlanSelec to set
+	 * @param habilidadesPlanSelec the habilidadesPlanSelec to set
 	 */
 	public void setHabilidadesPlanSelec(List<String> habilidadesPlanSelec) {
 		this.habilidadesPlanSelec = habilidadesPlanSelec;
@@ -892,8 +905,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param aptitudesPlanSelec
-	 *            the aptitudesPlanSelec to set
+	 * @param aptitudesPlanSelec the aptitudesPlanSelec to set
 	 */
 	public void setAptitudesPlanSelec(List<String> aptitudesPlanSelec) {
 		this.aptitudesPlanSelec = aptitudesPlanSelec;
@@ -907,8 +919,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param edicionPlan
-	 *            the edicionPlan to set
+	 * @param edicionPlan the edicionPlan to set
 	 */
 	public void setEdicionPlan(boolean edicionPlan) {
 		this.edicionPlan = edicionPlan;
@@ -922,8 +933,7 @@ public class PlanBean extends BaseBean {
 	}
 
 	/**
-	 * @param catOrgGubs
-	 *            the catOrgGubs to set
+	 * @param catOrgGubs the catOrgGubs to set
 	 */
 	public void setCatOrgGubs(List<OrgGubernamentalDTO> catOrgGubs) {
 		this.catOrgGubs = catOrgGubs;
@@ -952,8 +962,6 @@ public class PlanBean extends BaseBean {
 	public void setBitacoraService(BitacoraService bitacoraService) {
 		this.bitacoraService = bitacoraService;
 	}
-	
-	
 
 	public Integer getElementsStruc() {
 		return elementsStruc;
@@ -994,17 +1002,33 @@ public class PlanBean extends BaseBean {
 	public void setElementsSubStruc(ArrayList<String> elementsSubStruc) {
 		this.elementsSubStruc = elementsSubStruc;
 	}
-	
+
+	public RelMallaPlanDTO getMallaPlan() {
+		return mallaPlan;
+	}
+
+	public void setMallaPlan(RelMallaPlanDTO mallaPlan) {
+		this.mallaPlan = mallaPlan;
+	}
+
 	public FECServiceFacade getFecServiceFacade() {
-        if (ObjectUtils.isNull(fecServiceFacade)) {
-            fecServiceFacade = new FECServiceFacade();
-        }
+		if (ObjectUtils.isNull(fecServiceFacade)) {
+			fecServiceFacade = new FECServiceFacade();
+		}
 
-        return fecServiceFacade;
-    }
+		return fecServiceFacade;
+	}
 
-    public void setFecServiceFacade(FECServiceFacade fecServiceFacade) {
-        this.fecServiceFacade = fecServiceFacade;
-    }
+	public void setFecServiceFacade(FECServiceFacade fecServiceFacade) {
+		this.fecServiceFacade = fecServiceFacade;
+	}
+
+	public MallaPlanService getMallaPlanService() {
+		return mallaPlanService;
+	}
+
+	public void setMallaPlanService(MallaPlanService mallaPlanService) {
+		this.mallaPlanService = mallaPlanService;
+	}
 	
 }
