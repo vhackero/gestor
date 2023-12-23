@@ -1,7 +1,7 @@
 package mx.gob.sedesol.basegestor.model.entities.planesyprogramas;
 
+import java.math.BigInteger;
 import java.util.Date;
-
 import javax.annotation.Generated;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
@@ -14,22 +14,20 @@ public class RelMallaPlan_ {
 	
 	public static volatile SingularAttribute<RelMallaPlan, String> nombreEstructuras;
 	public static volatile SingularAttribute<RelMallaPlan, Integer> elementosEstructuras;
-	
 
 	public static volatile SingularAttribute<RelMallaPlan, Integer> niveles;
 
 	public static volatile SingularAttribute<RelMallaPlan, String> nombre_subestructuras_1;
 	public static volatile SingularAttribute<RelMallaPlan, Integer> elementos_subestructuras_1;
-	
 
 	public static volatile SingularAttribute<RelMallaPlan, String> nombre_subestructuras_2;
 	public static volatile SingularAttribute<RelMallaPlan, Integer> elementos_subestructuras_2;
-	
 
 	public static volatile SingularAttribute<RelMallaPlan, String> nombre_subestructuras_3;
 	public static volatile SingularAttribute<RelMallaPlan, Integer> elementos_subestructuras_3;
 	
-	public static volatile SingularAttribute<RelMallaPlan, String> activo;
+	public static volatile SingularAttribute<RelMallaPlan, Integer> activo;
 	public static volatile SingularAttribute<RelMallaPlan, Date> fechaRegistro;
-	public static volatile SingularAttribute<RelMallaPlan, Long> usuarioModifico;
+	public static volatile SingularAttribute<RelMallaPlan, Date> fechaActualzacion;
+	public static volatile SingularAttribute<RelMallaPlan, BigInteger> usuarioModifico;
 }

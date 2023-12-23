@@ -37,6 +37,7 @@ import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.RelUDidacticaTposC
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.RelUniDidacticaMaterialDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.SubtemasUDidacticaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.ValoresEstTematicaDTO;
+import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaPlanService;
 import mx.gob.sedesol.basegestor.commons.utils.DateUtils;
 import mx.gob.sedesol.basegestor.commons.utils.EstatusProgramaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
@@ -116,6 +117,9 @@ public class FECServiceFacade {
     private PersonaService personaService;
     @Autowired
     private ParametroWSMoodleService parametroWSMoodleService;
+
+    @Autowired
+    private MallaPlanService mallaPlanService;
 
     @Value("${ws.moodle.token}")
     private String token;
@@ -1268,6 +1272,13 @@ public class FECServiceFacade {
      */
     public OrgGubernamentalService getOrgGubernamentalService() {
         return orgGubernamentalService;
+    }
+
+    /**
+     * @return the mallaPlanService
+     */
+    public MallaPlanService getMallaPlanService() {
+        return mallaPlanService;
     }
 
     /**

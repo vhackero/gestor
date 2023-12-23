@@ -88,7 +88,7 @@ public class PlanBean extends BaseBean {
 	private boolean edicionPlan;
 	private boolean creditos;
 	private boolean tipoPlan;
-	
+
 	private Integer elementsStruc = 1;
 	private String nameStruc = "";
 	private Integer subStrucLvl = 0;
@@ -120,28 +120,24 @@ public class PlanBean extends BaseBean {
 			this.llenaRelacionesPlanSel(plan);
 			if (ObjectUtils.isNotNull(plan)) {
 				getSession().removeAttribute(ConstantesGestorWeb.OBJ_PLAN_SELEC);
+				mallaPlan = mallaPlanService.findByIdPlan(plan.getIdPlan());
 			}
 
 		} else {
 			// Flujo Nuevo Plan
 			plan = new PlanDTO();
 			plan.setCatTipoPlan(new CatalogoComunDTO());
-			plan.getCatTipoPlan().setId(2);
 			plan.setCatPeriodo(new CatalogoComunDTO());
 			plan.setCatAlcancePlan(new CatalogoComunDTO());
 			plan.setCatCompetenciasPlan(new CatalogoComunDTO());
-			plan.getCatCompetenciasPlan().setId(2);
 			plan.setCatDocumentosExpidePlan(new CatalogoComunDTO());
-			plan.getCatDocumentosExpidePlan().setId(1);
 			plan.setCatEstatusPlan(new CatalogoComunDTO());
 			plan.setCatModalidadPlanPrograma(new CatalogoComunDTO());
 			plan.setCatNivelEnsenanzaPrograma(new CatalogoComunDTO());
 			plan.setTblOrganismoGubernamental(new OrgGubernamentalDTO());
-			plan.getTblOrganismoGubernamental().setId(13);
 			plan.setIdentificador(planServiceFacade.generaIdentificadorPlan());
 
 			plan.setCatCreditosPlan(new CatalogoComunDTO());
-			plan.getCatCreditosPlan().setId(1);
 			plan.setCatDivisionesPlan(new CatalogoComunDTO());
 			plan.setCatTipoCompetencia(new CatalogoComunDTO());
 
@@ -149,6 +145,16 @@ public class PlanBean extends BaseBean {
 			setEdicionPlan(Boolean.FALSE);
 
 			mallaPlan = new RelMallaPlanDTO();
+			mallaPlan.setElementosEstructuras(1);
+			mallaPlan.setElementosSubestructuras1(1);
+			mallaPlan.setElementosSubestructuras2(1);
+			mallaPlan.setElementosSubestructuras3(1);
+			mallaPlan.setNiveles(0);
+			
+			mallaPlan.setNombreEstructuras("");
+			mallaPlan.setNombreSubestructuras1("");
+			mallaPlan.setNombreSubestructuras2("");
+			mallaPlan.setNombreSubestructuras3("");
 		}
 	}
 
@@ -159,9 +165,6 @@ public class PlanBean extends BaseBean {
 	 */
 	private void llenaRelacionesPlanSel(PlanDTO plan) {
 		if (ObjectUtils.isNotNull(plan)) {
-			if (ObjectUtils.isNotNull(plan.getIdPlan())) {
-				mallaPlan = mallaPlanService.findByIdPlan(plan.getIdPlan());
-			}
 
 			if (!ObjectUtils.isNullOrEmpty(plan.getRelPlanConocimientos())) {
 				conocimsPlanSelec = new ArrayList<>();
@@ -255,44 +258,44 @@ public class PlanBean extends BaseBean {
 
 	public void onChangeModalidadPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatModalidadPlanPrograma(this.getValorDeCatalogo(catModalidadPlan, ((Integer) e.getNewValue())));
+			plan.setCatModalidadPlanPrograma(this.getValorDeCatalogo(catModalidadPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeTpoPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatTipoPlan(this.getValorDeCatalogo(catTpoPlan, ((Integer) e.getNewValue())));
+			plan.setCatTipoPlan(this.getValorDeCatalogo(catTpoPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangePeriodo(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatPeriodo(this.getValorDeCatalogo(catPeriodo, ((Integer) e.getNewValue())));
+			plan.setCatPeriodo(this.getValorDeCatalogo(catPeriodo, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeNvEnsePlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatNivelEnsenanzaPrograma(this.getValorDeCatalogo(catNivelEnsPlan, ((Integer) e.getNewValue())));
+			plan.setCatNivelEnsenanzaPrograma(this.getValorDeCatalogo(catNivelEnsPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeCompetenciaPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatCompetenciasPlan(this.getValorDeCatalogo(catCompPlan, ((Integer) e.getNewValue())));
+			plan.setCatCompetenciasPlan(this.getValorDeCatalogo(catCompPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeAlcancePlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatAlcancePlan(this.getValorDeCatalogo(catAlcancePlan, ((Integer) e.getNewValue())));
+			plan.setCatAlcancePlan(this.getValorDeCatalogo(catAlcancePlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeCreditosPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatCreditosPlan(this.getValorDeCatalogo(catCreditosPlan, ((Integer) e.getNewValue())));
-			if ((Integer) e.getNewValue() == 2) {
+			plan.setCatCreditosPlan(this.getValorDeCatalogo(catCreditosPlan, (Integer.parseInt(e.getNewValue().toString()))));
+			if (Integer.parseInt(e.getNewValue().toString()) == 2) {
 				setCreditos(Boolean.FALSE);
 			} else {
 				setCreditos(Boolean.TRUE);
@@ -304,24 +307,25 @@ public class PlanBean extends BaseBean {
 
 	public void onChangeDivisionesPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatDivisionesPlan(this.getValorDeCatalogo(catDivisionesPlan, ((Integer) e.getNewValue())));
+			plan.setCatDivisionesPlan(this.getValorDeCatalogo(catDivisionesPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
+
 	public void onChangeTipoCompetencia(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatTipoCompetencia(this.getValorDeCatalogo(catTipoCompetencia, ((Integer) e.getNewValue())));
+			plan.setCatTipoCompetencia(this.getValorDeCatalogo(catTipoCompetencia, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeEstatusPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatEstatusPlan(this.getValorDeCatalogo(catalEstatusPlan, ((Integer) e.getNewValue())));
+			plan.setCatEstatusPlan(this.getValorDeCatalogo(catalEstatusPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeDocExpide(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatDocumentosExpidePlan(this.getValorDeCatalogo(catDocsExpidePlan, ((Integer) e.getNewValue())));
+			plan.setCatDocumentosExpidePlan(this.getValorDeCatalogo(catDocsExpidePlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
@@ -329,7 +333,7 @@ public class PlanBean extends BaseBean {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			for (OrgGubernamentalDTO orgGub : catOrgGubs) {
 				for (OrgGubernamentalDTO orgGubHijo : orgGub.getLstHijosOrgGub()) {
-					if (orgGubHijo.getId().equals((Integer) e.getNewValue())) {
+					if (orgGubHijo.getId().equals(Integer.parseInt(e.getNewValue().toString()))) {
 						plan.setTblOrganismoGubernamental(orgGubHijo);
 					}
 				}
@@ -339,36 +343,28 @@ public class PlanBean extends BaseBean {
 
 	public void onChangeNameElements(ValueChangeEvent event) {
 		if (ObjectUtils.isNotNull(event.getNewValue())) {
-			nameStruc = (String) event.getNewValue();
-
 			mallaPlan.setNombreEstructuras((String) event.getNewValue());
+		}
+	}
+
+	public void onChangeElementsEstruc(ValueChangeEvent event) {
+		if (ObjectUtils.isNotNull(event.getNewValue())) {
+			mallaPlan.setElementosEstructuras(Integer.parseInt(event.getNewValue().toString()));
 		}
 	}
 
 	public void onChangeElementsSubs(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			if ((Integer) e.getNewValue() >= 3) {
-				subStrucLvl = 3;
+			if (Integer.parseInt(e.getNewValue().toString()) >= 3) {
+				mallaPlan.setNiveles(3);
 			} else {
-				subStrucLvl = (Integer) e.getNewValue();
+				mallaPlan.setNiveles(Integer.parseInt(e.getNewValue().toString()));
 			}
-
-			namesSubStruc = new ArrayList<String>();
-			elementsSubStruc = new ArrayList<String>();
-			for (int i = 0; i < subStrucLvl; i++) {
-				namesSubStruc.add("SubEstructura");
-				elementsSubStruc.add("1");
-			}
-
-			mallaPlan.setElementosEstructuras(Integer.parseInt(e.getNewValue().toString()));
 		}
 	}
 
 	public void onChangeSubsElements(ValueChangeEvent event) {
 		if (ObjectUtils.isNotNull(event.getNewValue())) {
-			elementsSubStruc.set((Integer) event.getComponent().getAttributes().get("idxA"),
-					(String) event.getNewValue());
-
 			switch (Integer.parseInt(event.getComponent().getAttributes().get("idxA").toString())) {
 			case 1:
 				mallaPlan.setElementosSubestructuras1(Integer.parseInt(event.getNewValue().toString()));
@@ -386,8 +382,6 @@ public class PlanBean extends BaseBean {
 
 	public void onChangeNameSubsElements(ValueChangeEvent event) {
 		if (ObjectUtils.isNotNull(event.getNewValue())) {
-			namesSubStruc.set((Integer) event.getComponent().getAttributes().get("idxA"), (String) event.getNewValue());
-
 			switch (Integer.parseInt(event.getComponent().getAttributes().get("idxA").toString())) {
 			case 1:
 				mallaPlan.setNombreSubestructuras1(event.getNewValue().toString());
@@ -480,8 +474,7 @@ public class PlanBean extends BaseBean {
 		plan.setCatPeriodo(!plan.getCatTipoPlan().getNombre().equals("Por Periodo") ? null : plan.getCatPeriodo());
 		plan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
 		ResultadoDTO<PlanDTO> resultado = null;
-		mallaPlan.setActivo(1);
-
+		
 		try {
 			resultado = planServiceFacade.guardaNuevoPlan(plan,
 					this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
@@ -508,8 +501,6 @@ public class PlanBean extends BaseBean {
 	 */
 	public void editarPlan() throws Exception {
 		logger.info("########## EDITANDO DEl PLAN ########");
-		logger.info("Plan: " + plan.getNombre());
-		logger.info("Tipo Competencia: " + plan.getCatTipoCompetencia().getNombre());
 		plan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
 		ResultadoDTO<PlanDTO> resultado = planServiceFacade.editarPlan(plan,
 				this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
@@ -708,15 +699,16 @@ public class PlanBean extends BaseBean {
 	public void setCatDivisionesPlan(List<CatalogoComunDTO> catDivisionesPlan) {
 		this.catDivisionesPlan = catDivisionesPlan;
 	}
+
 	/**
 	 * @return the catTipoCompetencia
 	 */
 	public List<CatalogoComunDTO> getCatTipoCompetencia() {
 		return catTipoCompetencia;
 	}
+
 	/**
-	 * @param catTipoCompetencia
-	 *            the catTipoCompetencia to set
+	 * @param catTipoCompetencia the catTipoCompetencia to set
 	 */
 
 	public void setCatTipoCompetencia(List<CatalogoComunDTO> catTipoCompetencia) {
@@ -1031,4 +1023,12 @@ public class PlanBean extends BaseBean {
 		this.fecServiceFacade = fecServiceFacade;
 	}
 
+	public MallaPlanService getMallaPlanService() {
+		return mallaPlanService;
+	}
+
+	public void setMallaPlanService(MallaPlanService mallaPlanService) {
+		this.mallaPlanService = mallaPlanService;
+	}
+	
 }

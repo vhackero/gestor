@@ -1,15 +1,9 @@
 package mx.gob.sedesol.basegestor.model.entities.planesyprogramas;
 
+import java.io.Serializable;
+import javax.persistence.*;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 /**
  * The persistent class for the rel_malla_plan database table.
@@ -17,16 +11,14 @@ import javax.persistence.TemporalType;
  */
 @Entity
 @Table(name = "rel_malla_plan")
-@NamedQuery(name="RelMallaPlan.findByPlanId", query="SELECT r FROM RelEjeCompetencia r WHERE idPlan =")
 @IdClass(RelMallaPlan.class)
-public class RelMallaPlan {
+public class RelMallaPlan implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	@Id
 	@Column(name = "id")
 	private Integer id;
 	
-	@Id
 	@Column(name = "id_plan")
 	private Integer idPlan;
 	
@@ -66,7 +58,7 @@ public class RelMallaPlan {
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="fecha_actualizacion", insertable = false, updatable=false)
-	private Date fecha_actualizacion;
+	private Date fechaActualizacion;
 	
 	@Column(name = "activo")
 	private Integer activo;
@@ -103,20 +95,20 @@ public class RelMallaPlan {
 		this.elementosEstructuras = elementosEstructuras;
 	}
 
-	public Integer getNiveles() {
-		return niveles;
-	}
-
-	public void setNiveles(Integer niveles) {
-		this.niveles = niveles;
-	}
-
 	public String getNombreSubestructuras1() {
 		return nombreSubestructuras1;
 	}
 
 	public void setNombreSubestructuras1(String nombreSubestructuras1) {
 		this.nombreSubestructuras1 = nombreSubestructuras1;
+	}
+
+	public Integer getNiveles() {
+		return niveles;
+	}
+
+	public void setNiveles(Integer niveles) {
+		this.niveles = niveles;
 	}
 
 	public Integer getElementosSubestructuras1() {
@@ -175,12 +167,12 @@ public class RelMallaPlan {
 		this.fechaRegistro = fechaRegistro;
 	}
 
-	public Date getFecha_actualizacion() {
-		return fecha_actualizacion;
+	public Date getFechaActualizacion() {
+		return fechaActualizacion;
 	}
 
-	public void setFecha_actualizacion(Date fecha_actualizacion) {
-		this.fecha_actualizacion = fecha_actualizacion;
+	public void setFechaActualizacion(Date fechaActualizacion) {
+		this.fechaActualizacion = fechaActualizacion;
 	}
 
 	public Integer getActivo() {
