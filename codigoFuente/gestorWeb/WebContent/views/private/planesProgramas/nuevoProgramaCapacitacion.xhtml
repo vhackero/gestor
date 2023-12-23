@@ -34,99 +34,124 @@
 			</h:panelGrid>
 
 			<hr />
-			<p:panel id="pnlProgNvo"
-				header="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.titulo.competencias')}">
+
+
+			<p:panel id="pnlProgNuevo"
+				header="Estructura">
 				<div class="form-group">
 					<div class="row">
-						<div class="col-md-3 col-xs-12">
+						<div class="col-md-4 col-xs-12">
 							<p:outputLabel styleClass="requerido" value="Plan:" />
-							<p:selectOneMenu id="nvoPlan" styleClass="col-xs-12"
-								
+							<p:selectOneMenu id="nvoCatPlan" styleClass="col-xs-12"
 								value="#{programaCapacitacionBean.idPlan}"
-								valueChangeListener="#{programaCapacitacionBean.onChangePlan}">
+								valueChangeListener="#{programaCapacitacionBean.onChangeCatPlan}">
 								<p:ajax update="@form" />
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									itemValue="#{0}" />
-								<f:selectItems value="#{programaCapacitacionBean.planes}"
-									var="plan" itemLabel="#{plan.nombre}"
-									itemValue="#{plan.id}" />
+								<f:selectItems value="#{programaCapacitacionBean.catPlanes}"
+									var="plan" itemLabel="#{plan.nombre}" itemValue="#{plan.id}" />
 							</p:selectOneMenu>
-							<p:message for="nvoPlan" />
+							<p:message for="nvoCatPlan" />
 						</div>
-						<div class="col-md-3 col-xs-12">
-							<p:outputLabel styleClass="requerido"
-								value="Estructura:" />
-							<p:selectOneMenu id="nvoTpoComp" styleClass="col-xs-12"
-								disabled="#{programaCapacitacionBean.idPlan eq 0 or programaCapacitacionBean.idPlan eq null or empty programaCapacitacionBean.catTpoComp}"
-								value="#{programaCapacitacionBean.programa.tipoCompetencia}"
-								valueChangeListener="#{programaCapacitacionBean.onChangeTpoCompetencia}">
-								<p:ajax update="nvoEjeCap" />
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{0}" />
-								<f:selectItems value="#{programaCapacitacionBean.catTpoComp}"
-									var="tpoComp" itemLabel="#{tpoComp.nombre}"
-									itemValue="#{tpoComp.id}" />
-							</p:selectOneMenu>
-							<p:message for="nvoTpoComp" />
-						</div>
-						<div class="col-md-3 col-xs-12">
-							<p:outputLabel styleClass="requerido"
-								value="Subestructura:" />
-							<p:selectOneMenu id="nvoEjeCap" styleClass="col-xs-12"
-								disabled="#{programaCapacitacionBean.programa.tipoCompetencia eq 0 or empty programaCapacitacionBean.catEjeCapacit}"
-								value="#{programaCapacitacionBean.programa.ejeCapacitacion}"
-								valueChangeListener="#{programaCapacitacionBean.onChangeEjeCapacitacion}">
-								<p:ajax process="@this" />
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" />
-								<f:selectItems value="#{programaCapacitacionBean.catEjeCapacit}"
-									var="ejeCap" itemLabel="#{ejeCap.nombre}"
-									itemValue="#{ejeCap.id}" />
-							</p:selectOneMenu>
-							<p:message for="nvoEjeCap" />
-						</div>
-						<div class="col-md-3 col-xs-12">
 
-							<p:outputPanel id="pnlBtnCmpEsp" autoUpdate="false">
-								<p:outputLabel value="Competencias específicas"
-									styleClass="bloque requerido" />
-								<p:commandButton id="cmpEspecifBtn"
-									onmouseover="PF('pnlCmpEspeTree').show()"
-									disabled="#{programaCapacitacionBean.edicionPrograma}"
-									process="@this"
-									value="#{programaCapacitacionBean.conCompEspecificas ? sistema.obtenerTexto('gw.progCapacitacion.etiqueta.opcSeleccionada') : sistema.obtenerTexto('gw.progCapacitacion.etiqueta.seleccioneOp')}"
-									styleClass="#{programaCapacitacionBean.conCompEspecificas ? 'btn btn-user-selected' : 'btn btn-primary'} quitaMargen btnEnOverlay"
-									type="button" />
+						<p:outputPanel id="pnlEstructuras">
+							<p:outputPanel
+								rendered="#{not empty programaCapacitacionBean.catEstructuras}">
+								<div class="col-md-4 col-xs-12">
+									<p:outputLabel styleClass="requerido" value="Estructura:" />
+									<p:selectOneMenu id="nvoCatEstruc" styleClass="col-xs-12"
+										valueChangeListener="#{programaCapacitacionBean.onChangeCatEstructura}">
+										<p:ajax update="@form" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											itemValue="#{0}" />
+										<f:selectItems
+											value="#{programaCapacitacionBean.catEstructuras}"
+											var="estruc" itemLabel="#{estruc.nombre}"
+											itemValue="#{estruc.id}" />
+									</p:selectOneMenu>
+									<p:message for="nvoCatEstruc" />
+								</div>
 							</p:outputPanel>
-							<p:overlayPanel id="pnlCmpEsp"  dismissable="true"
-								showCloseIcon="true" styleClass="tamanioPanel"
-								rendered="#{!programaCapacitacionBean.edicionPrograma}"
-								for="cmpEspecifBtn" showEffect="fade" 
-								widgetVar="pnlCmpEspeTree" hideEffect="fade">
-								<p:treeTable id="arbolCmpEspe" styleClass="compEspProgCap" 
-									value="#{programaCapacitacionBean.arbolCompEspecificas}"
-									scrollable="true" var="compEspProg"
-									selectionMode="checkbox"
-									selection="#{programaCapacitacionBean.competenciasEspecifProg}">
-									<p:ajax event="select"
-										listener="#{programaCapacitacionBean.onNodeSelectCompEspecif}"
-										process="@this" update="frmEspProg:pnlBtnCmpEsp" />
-									<p:ajax event="unselect"
-										listener="#{programaCapacitacionBean.onNodeUnSelectCompEspecif}"
-										process="@this" update="frmEspProg:pnlBtnCmpEsp" />
-									
-									<p:column>
-										<h:outputText value="#{compEspProg.nombre}" />
-									</p:column>
-								</p:treeTable>
-							</p:overlayPanel>
-						</div>
+						</p:outputPanel>
+
+
+						<!--  SUBESTRUCTURAS  -->
+						<p:outputPanel id="pnlSubestructuras1">
+							<p:outputPanel
+								rendered="#{not empty programaCapacitacionBean.catSubEstructurasNivel1}">
+								<div class="col-md-4 col-xs-12">
+									<p:outputLabel styleClass="requerido" value="Subestructura 1:" />
+									<p:selectOneMenu id="nvoCatSubEstruc1" styleClass="col-xs-12"
+										valueChangeListener="#{programaCapacitacionBean.onChangeCatSubestructura1}">
+										<p:ajax update="@form" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											itemValue="#{0}" />
+										<f:selectItems
+											value="#{programaCapacitacionBean.catSubEstructurasNivel1}"
+											var="subEstruc1" itemLabel="#{subEstruc1.nombre}"
+											itemValue="#{subEstruc1.id}" />
+									</p:selectOneMenu>
+									<p:message for="nvoCatSubEstruc1" />
+								</div>
+							</p:outputPanel>
+						</p:outputPanel>
+
+
+
+
+						<p:outputPanel id="pnlSubestructuras2">
+							<p:outputPanel
+								rendered="#{not empty programaCapacitacionBean.catSubEstructurasNivel2}">
+								<div class="col-md-4 col-xs-12" style="margin-top: 15px;">
+									<p:outputLabel styleClass="requerido" value="Subestructura 2:" />
+									<p:selectOneMenu id="nvoCatSubEstruc2" styleClass="col-xs-12"
+										valueChangeListener="#{programaCapacitacionBean.onChangeCatSubestructura2}">
+										<p:ajax update="@form" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											itemValue="#{0}" />
+										<f:selectItems
+											value="#{programaCapacitacionBean.catSubEstructurasNivel2}"
+											var="subEstruc2" itemLabel="#{subEstruc2.nombre}"
+											itemValue="#{subEstruc2.id}" />
+									</p:selectOneMenu>
+									<p:message for="nvoCatSubEstruc2" />
+								</div>
+							</p:outputPanel>
+						</p:outputPanel>
+
+
+
+						<p:outputPanel id="pnlSubestructuras3">
+							<p:outputPanel
+								rendered="#{not empty programaCapacitacionBean.catSubEstructurasNivel3}">
+								<div class="col-md-4 col-xs-12" style="margin-top: 15px;">
+									<p:outputLabel styleClass="requerido" value="Subestructura 3:" />
+									<p:selectOneMenu id="nvoCatSubEstruc3" styleClass="col-xs-12"
+										valueChangeListener="#{programaCapacitacionBean.onChangeCatSubestructura3}">
+										<p:ajax update="@form" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											itemValue="#{0}" />
+										<f:selectItems
+											value="#{programaCapacitacionBean.catSubEstructurasNivel3}"
+											var="subEstruc3" itemLabel="#{subEstruc3.nombre}"
+											itemValue="#{subEstruc3.id}" />
+									</p:selectOneMenu>
+									<p:message for="nvoCatSubEstruc3" />
+								</div>
+							</p:outputPanel>
+						</p:outputPanel>
+
+
 					</div>
 				</div>
+
 			</p:panel>
+			
 			<p:panel id="pnlDef" header="Definición">
 				<div class="form-group">
 					<div class="row">
@@ -137,8 +162,7 @@
 							<p:inputText id="nombreProg" maxlength="255"
 								placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.nombre')}"
 								value="#{programaCapacitacionBean.programa.nombreTentativo}"
-								styleClass="form-control"
-								required="true"
+								styleClass="form-control" required="true"
 								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 								<p:ajax process="@this" />
 							</p:inputText>
@@ -184,9 +208,48 @@
 							<p:message for="modProg" />
 						</div>
 						
-						<div class="col-md-4 col-xs-12"> 
-							<h:outputLabel rendered="false" styleClass="bloque" value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.coordinadorAcad')}:" />
-							<p:inputText readonly="true" rendered="false" value="#{programaCapacitacionBean.programa.coordinadorAcademico.nombreCompleto}"  styleClass="form-control" />
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputPanel id="pnlBtnCmpEsp" autoUpdate="false">
+								<p:outputLabel value="Competencias específicas"
+									styleClass="bloque requerido" />
+								<p:commandButton id="cmpEspecifBtn"
+									onmouseover="PF('pnlCmpEspeTree').show()"
+									disabled="#{programaCapacitacionBean.edicionPrograma}"
+									process="@this"
+									value="#{programaCapacitacionBean.conCompEspecificas ? sistema.obtenerTexto('gw.progCapacitacion.etiqueta.opcSeleccionada') : sistema.obtenerTexto('gw.progCapacitacion.etiqueta.seleccioneOp')}"
+									styleClass="#{programaCapacitacionBean.conCompEspecificas ? 'btn btn-user-selected' : 'btn btn-primary'} quitaMargen btnEnOverlay"
+									type="button" />
+							</p:outputPanel>
+							<p:overlayPanel id="pnlCmpEsp" dismissable="true"
+								showCloseIcon="true" styleClass="tamanioPanel"
+								rendered="#{!programaCapacitacionBean.edicionPrograma}"
+								for="cmpEspecifBtn" showEffect="fade" widgetVar="pnlCmpEspeTree"
+								hideEffect="fade">
+								<p:treeTable id="arbolCmpEspe" styleClass="compEspProgCap"
+									value="#{programaCapacitacionBean.arbolCompEspecificas}"
+									scrollable="true" var="compEspProg" selectionMode="checkbox"
+									selection="#{programaCapacitacionBean.competenciasEspecifProg}">
+									<p:ajax event="select"
+										listener="#{programaCapacitacionBean.onNodeSelectCompEspecif}"
+										process="@this" update="frmEspProg:pnlBtnCmpEsp" />
+									<p:ajax event="unselect"
+										listener="#{programaCapacitacionBean.onNodeUnSelectCompEspecif}"
+										process="@this" update="frmEspProg:pnlBtnCmpEsp" />
+
+									<p:column>
+										<h:outputText value="#{compEspProg.nombre}" />
+									</p:column>
+								</p:treeTable>
+							</p:overlayPanel>
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+							<h:outputLabel rendered="false" styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.coordinadorAcad')}:" />
+							<p:inputText readonly="true" rendered="false"
+								value="#{programaCapacitacionBean.programa.coordinadorAcademico.nombreCompleto}"
+								styleClass="form-control" />
 						</div>
 
 						<div class="col-md-4 col-xs-12" style="display: none;">
@@ -194,7 +257,8 @@
 								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.dirigidoA')}:" />
 							<p:inputSwitch styleClass="bloque margenInferior"
 								value="#{programaCapacitacionBean.personalInterno}"
-								offLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.externo')}" onLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.interno')}">
+								offLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.externo')}"
+								onLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.interno')}">
 								<p:ajax process="@this" update="opDirigidoA" />
 							</p:inputSwitch>
 
@@ -241,7 +305,8 @@
 										<f:facet name="header">
 								           #{sistema.obtenerTexto('gw.planesprogramas.texto.estperext')}
 								        </f:facet>
-										<p:column headerText="#{sistema.obtenerTexto('gw.planesprogramas.texto.perext')}">
+										<p:column
+											headerText="#{sistema.obtenerTexto('gw.planesprogramas.texto.perext')}">
 											<h:outputText value="#{pExt.nombre}" />
 										</p:column>
 									</p:treeTable>
@@ -299,12 +364,15 @@
 				<div class="row">
 					<div class="col-md-12 col-xs-12">
 						<span><b>(</b></span><span class="colorRojo">*</span><span><b>)</b></span>
-						<p:outputLabel value="#{sistema.obtenerTexto('gw.planesprogramas.texto.obligatorios')}" />
-						<p:commandButton value="#{sistema.obtenerTexto('gw.planesprogramas.btn.continuar')}" ajax="true" update="@form"
-							process="@form"
+						<p:outputLabel
+							value="#{sistema.obtenerTexto('gw.planesprogramas.texto.obligatorios')}" />
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.planesprogramas.btn.continuar')}"
+							ajax="true" update="@form" process="@form"
 							action="#{programaCapacitacionBean.navegaDatosFECPrograma}"
 							validateClient="true" styleClass="btn btn-primary pull-right" />
-						<p:commandButton value="#{sistema.obtenerTexto('gw.planesprogramas.btn.cancelar')}"
+						<p:commandButton
+							value="#{sistema.obtenerTexto('gw.planesprogramas.btn.cancelar')}"
 							action="#{programaCapacitacionBean.cancelarPrograma}"
 							immediate="true" ajax="false"
 							styleClass="btn btn-default pull-right" />

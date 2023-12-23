@@ -7,29 +7,6 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:sec="http://www.springframework.org/security/tags">
 
-<div class="form-group agregaMargenTop">
-	<div class="row">
-		<div class="col-md-4">
-			<p:outputLabel styleClass="bloque"
-				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.tpocomp')}:" />
-			<h:outputText
-				value="#{programaCapacitacionBean.nombreTipoCompetencia}" />
-		</div>
-
-		<div class="col-md-4">
-			<p:outputLabel styleClass="bloque"
-				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.ejecapacit')}:" />
-			<h:outputText
-				value="#{programaCapacitacionBean.nombreEjeCapacitacion}" />
-		</div>
-
-		<div class="col-md-4">
-			<p:outputLabel styleClass="bloque"
-				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.compEspecif')}:" />
-			<h:outputText value="#{programaCapacitacionBean.compEspecificasProg}" />
-		</div>
-	</div>
-</div>
 <div class="form-group">
 	<div class="row">
 		<div class="col-md-4" style="display: none;">
