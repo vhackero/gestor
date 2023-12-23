@@ -74,11 +74,8 @@ public class PlanServiceImpl extends ComunValidacionService<PlanDTO> implements 
         if (ObjectUtils.isNotNull(res) && res.getResultado().getValor()) {
 
             try {
-                logger.error("Este es un error: "+dto.getCatTipoCompetencia().getNombre());
                 TblPlan planEnt = planMapper.map(dto, TblPlan.class);
-                logger.error("Este es un error2: "+planEnt.getCatTipoCompetencia().getNombre());
                 planEnt = planRepo.saveAndFlush(planEnt);
-                logger.error("Este es un error3: "+planEnt.getCatTipoCompetencia().getNombre());
                 res = new ResultadoDTO<PlanDTO>();
                 res.setDto(planMapper.map(planEnt, PlanDTO.class));
         //GUSTAVO --guardarBitacora(dto.getBitacoraDTO(), String.valueOf(planEnt.getIdPlan()));

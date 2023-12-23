@@ -292,15 +292,40 @@
 						</p:commandLink>
 						<p:outputLabel value="Informe prediseñado"
 							styleClass="margenDerecho" />
+						
+						
+				
 						<p:commandButton value="Generar"
-							styleClass="margenDerecho btn btn-primary"
-							action="#{reporteReservacionesBean.generaEstadisticas}" />
+							styleClass="btn btn-primary margenDerecho quitaMargen"
+							disabled="#{reporteReservacionesBean.tblReservaciones.isEmpty()}"
+							onclick="graficasReservaciones();" />
 
+						<p:remoteCommand name="graficasReservaciones"
+							action="#{reporteReservacionesBean.generaEstadisticas}"
+							oncomplete="cargaGraficasReservaciones(xhr, status, args); PF('modalAnalisis').show(); scrollArribaEventos();" />
+
+						<p:remoteCommand name="scrollArribaReservaciones"
+							action="#{reporteReservacionesBean.scrollArriba}" />
 					</div>
 				</div>
 			</div>
+			<p:dialog widgetVar="modalAnalisis" modal="true" resizable="false"
+				id="modalInformeReservaciones" draggable="false" closable="false"
+				position="center" width="900"
+				styleClass="modalAnalisisDatos modalAbsoluto"
+				header="#{'Informe prediseñado general de reservaciones'}">
+				
 
-		</h:form>
-
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:commandButton value="Cerrar"
+								onclick="PF('modalAnalisis').hide();"
+								styleClass="btn btn-default" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
+</h:form>
 	</ui:define>
 </ui:composition>
