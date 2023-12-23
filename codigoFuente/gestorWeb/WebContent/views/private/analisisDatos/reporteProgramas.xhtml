@@ -310,7 +310,7 @@
 							style="margin-left:0; margin-right:10px"
 							disabled="#{reporteGestionEscolarBean.eventosCapacitacion.isEmpty()}"
 							styleClass="btn btn-primary" ajax="false">
-							<p:dataExporter type="xls" target="tblEventosCapacitacion"
+							<p:dataExporter type="xls" target="tblProgramas"
 								fileName="analisisDatosEventos" pageOnly="false" />
 						</p:commandButton>
 
@@ -323,8 +323,8 @@
 							styleClass="btn btn-primary margenDerecho quitaMargen" />
 
 						<p:remoteCommand name="graficasEventos"
-							action="#{reporteGestionEscolarBean.generarEstadisticas}"
-							oncomplete="cargaGraficasEventos(xhr, status, args); PF('modalAnalisis').show(); scrollArribaEventos();" />
+							action="#{reporteGestionEscolarBean.generarEstadisticas}" update="@form"
+							oncomplete="cargaGraficasEventos(xhr, status, args); PF('modalAnalisis').show(); scrollArribaEventos();" />							
 
 						<p:remoteCommand name="scrollArribaEventos"
 							action="#{reporteGestionEscolarBean.scrollArriba}" />
@@ -333,6 +333,160 @@
 					</div>
 				</div>
 			</div>
+			
+			<p:dialog widgetVar="modalAnalisis" modal="true" resizable="false"
+				id="modalInformeEventos" draggable="false" closable="false"
+				position="center" width="900"
+				styleClass="modalAnalisisDatos modalAbsoluto"
+				header="#{reporteGestionEscolarBean.renderizarEstado ?'Programas por entidad federativa':'Informe prediseñado general de programas'}">
+				<div class="row">
+					<div class="col-md-12 text-right">
+
+						<p:outputPanel layout="block"
+							rendered="#{((reporteGestionEscolarBean.filtros.fechaInicial != null) and (reporteGestionEscolarBean.filtros.fechaFinal != null))}">
+
+							<p:outputLabel
+								value="EVENTOS QUE #{reporteGestionEscolarBean.tipoDatoFecha(reporteGestionEscolarBean.tipoDatoFechas)}"
+								styleClass="labelSuperior labelRangoFechas bloque"  style="margin:0"/>
+							<p:outputLabel />
+
+							<p:outputLabel
+								value="#{reporteGestionEscolarBean.filtros.fechaInicial}"
+								styleClass="labelSuperior labelFecha">
+								<f:convertDateTime type="date"
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+							</p:outputLabel>
+							<h:outputText value="y" style="margin-left:5px; margin-right:5px"
+								styleClass="labelSuperior labelFecha" />
+							<p:outputLabel
+								value="#{reporteGestionEscolarBean.filtros.fechaFinal}"
+								styleClass="labelSuperior labelFecha">
+								<f:convertDateTime type="date"
+									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+							</p:outputLabel>
+						</p:outputPanel>
+
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-5">
+						<p:outputPanel layout="block"
+							rendered="#{reporteGestionEscolarBean.renderizarEstado}">
+							<p:outputLabel value="ENTIDAD FEDERATIVA"
+								styleClass="bloque labelSuperior" />
+
+							<p:outputLabel
+								value="#{reporteGestionEscolarBean.obtenerNombreEntidadPorId(reporteGestionEscolarBean.filtros.idEntidadFederativa)}"
+								styleClass="bloque numeroGrande gEntidad" />
+						</p:outputPanel>
+					</div>
+				</div>
+
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-4 text-center fondoGris">
+							<p:outputLabel value="TOTAL" styleClass="bloque labelSuperior" />
+							<p:outputLabel value=""
+								styleClass="bloque numeroGrande gTotalEventos" />
+							<p:outputLabel value="Eventos" styleClass="bloque labelInferior" />
+						</div>
+
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12 fondoGris">
+							<p:outputLabel
+								value="CANTIDAD DE EVENTOS POR TIPO DE COMPETENCIA"
+								styleClass="bloque text-center tituloSuperior" />
+							<div id="competenciaEventos"></div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12 fondoGris">
+							<p:outputLabel
+								value="CANTIDAD DE EVENTOS POR EJE DE CAPACITACIÓN"
+								styleClass="bloque text-center tituloSuperior" />
+							<div id="ejeCapEventos"></div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+
+					<div class="row">
+						<div class="col-md-12 fondoGris">
+							<p:outputLabel value="CANTIDAD DE EVENTOS POR PROGRAMA"
+								styleClass="bloque text-center tituloSuperior" />
+							<div id="programaEventos"></div>
+
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:commandButton value="Ver lista de programas"
+								style="width:200px; margin-bottom:5px; margin-left:0px"
+								styleClass="btn btn-primary listaDeProgramas"
+								onclick="mostrarListaProgramas()" />
+							<div id="contenedorNombresProgramas" style="display: none;"
+								class="fondoGris"></div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<!-- GRAFICA EVENTOS POR MODALIDAD -->
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="MODALIDAD:"
+								styleClass="bloque text-center tituloPastel" />
+							<div id="modalidadEventos" class="medidaGrafica"></div>
+						</div>
+						<!-- GRAFICA USUARIOS POR ESTATUS -->
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="CLASIFICACIÓN DE LA INFORMACIÓN"
+								styleClass="bloque text-center tituloPastel" />
+							<div id="privadosEventos" class="medidaGrafica"></div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="TIPO DE EVENTO:"
+								styleClass="bloque text-center tituloPastel" />
+							<div id="tiposEventos" class="medidaGrafica"></div>
+						</div>
+						<div class="col-md-6 fondoGris">
+							<p:outputLabel value="DIRIGIDO A USUARIOS EXTERNOS:"
+								styleClass="bloque text-center tituloPastel" />
+							<div id="dirigidoEventos" class="medidaGrafica"></div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12 fondoGris">
+							<p:outputLabel value="CANTIDAD DE EVENTOS POR ENTIDAD FEDERATIVA"
+								styleClass="bloque text-center tituloSuperior gTituloEntidad" />
+							<div id="entidadEventos"></div>
+						</div>
+					</div>
+				</div>
+
+				<f:facet name="footer">
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:commandButton value="Cerrar"
+								onclick="PF('modalAnalisis').hide();"
+								styleClass="btn btn-default" />
+						</div>
+					</div>
+				</f:facet>
+			</p:dialog>
 		</h:form>
 
 

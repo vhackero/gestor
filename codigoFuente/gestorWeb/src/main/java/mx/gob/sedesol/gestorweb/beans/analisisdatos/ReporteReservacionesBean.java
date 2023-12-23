@@ -17,8 +17,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import mx.gob.sedesol.basegestor.commons.dto.analisisdatos.CritBusquedaReporteReservDTO;
+import mx.gob.sedesol.basegestor.commons.dto.analisisdatos.EstadisticasEventoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.analisisdatos.EstadisticasReservacionesDTO;
 import mx.gob.sedesol.basegestor.commons.dto.analisisdatos.ReporteReservacionesDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.ConfiguracionAreaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.CritBusquedaAreasConfigDTO;
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.RelSolicitudEventoCapacitacionDTO;
@@ -93,7 +95,17 @@ public class ReporteReservacionesBean extends BaseBean {
 		
 	}
 	
+	/*private EstadisticasReservacionesDTO generarEstadisticas(List<EstadisticasReservacionesDTO> reservaciones) {
+		EstadisticasReservacionesDTO estadisticas = new EstadisticasReservacionesDTO();
+
+		estadisticas.setTotalReservaciones(reservaciones.size());
+		
+
+		return estadisticas;
+	}*/
+	
 	public void onChangeSede(ValueChangeEvent e) {
+		System.out.println("Cambio de sede...");
 		if (ObjectUtils.isNotNull(e)) {
 			Integer idSede = (Integer) e.getNewValue();
 			CritBusquedaAreasConfigDTO criterios = new CritBusquedaAreasConfigDTO();
@@ -105,7 +117,10 @@ public class ReporteReservacionesBean extends BaseBean {
 		}
 
 	}
-
+	
+	public void scrollArriba() {
+		RequestContext.getCurrentInstance().scrollTo("form:modalInformeReservaciones");
+	}
 	public EstatusReservacionEnum[] estatusReservacion() {
 		return EstatusReservacionEnum.values();
 	}
