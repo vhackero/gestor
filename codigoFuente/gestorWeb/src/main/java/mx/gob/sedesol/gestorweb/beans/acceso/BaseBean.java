@@ -412,6 +412,7 @@ public abstract class BaseBean implements Serializable {
 
 		return catSubEstructuras3;
 	}
+	
 
 	/**
 	 * Metodo que genera el catalogo de Mallas curriculares por nivel de profudidad

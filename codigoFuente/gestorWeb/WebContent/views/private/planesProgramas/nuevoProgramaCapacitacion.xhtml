@@ -43,12 +43,12 @@
 						<div class="col-md-4 col-xs-12">
 							<p:outputLabel styleClass="requerido" value="Plan:" />
 							<p:selectOneMenu id="nvoCatPlan" styleClass="col-xs-12"
-								value="#{programaCapacitacionBean.idPlan}"
+								value="#{programaCapacitacionBean.idCatPlan}"
 								valueChangeListener="#{programaCapacitacionBean.onChangeCatPlan}">
 								<p:ajax update="@form" />
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{0}" />
+									itemValue="#{-1}" />
 								<f:selectItems value="#{programaCapacitacionBean.nodos}"
 									var="plan" itemLabel="#{plan.nombre}" itemValue="#{plan.idNodo}" />
 							</p:selectOneMenu>
@@ -61,6 +61,7 @@
 								<div class="col-md-4 col-xs-12">
 									<p:outputLabel styleClass="requerido" value="Estructura:" />
 									<p:selectOneMenu id="nvoCatEstruc" styleClass="col-xs-12"
+										value="#{programaCapacitacionBean.idCatEstructura}"
 										valueChangeListener="#{programaCapacitacionBean.onChangeCatEstructura}">
 										<p:ajax update="@form" />
 										<f:selectItem
@@ -84,6 +85,7 @@
 								<div class="col-md-4 col-xs-12">
 									<p:outputLabel styleClass="requerido" value="Subestructura 1:" />
 									<p:selectOneMenu id="nvoCatSubEstruc1" styleClass="col-xs-12"
+										value="#{programaCapacitacionBean.idCatSubEstructuraNivel1}"
 										valueChangeListener="#{programaCapacitacionBean.onChangeCatSubestructura1}">
 										<p:ajax update="@form" />
 										<f:selectItem
@@ -108,6 +110,7 @@
 								<div class="col-md-4 col-xs-12" style="margin-top: 15px;">
 									<p:outputLabel styleClass="requerido" value="Subestructura 2:" />
 									<p:selectOneMenu id="nvoCatSubEstruc2" styleClass="col-xs-12"
+										value="#{programaCapacitacionBean.idCatSubEstructuraNivel2}"
 										valueChangeListener="#{programaCapacitacionBean.onChangeCatSubestructura2}">
 										<p:ajax update="@form" />
 										<f:selectItem
@@ -131,6 +134,7 @@
 								<div class="col-md-4 col-xs-12" style="margin-top: 15px;">
 									<p:outputLabel styleClass="requerido" value="Subestructura 3:" />
 									<p:selectOneMenu id="nvoCatSubEstruc3" styleClass="col-xs-12"
+										value="#{programaCapacitacionBean.idCatSubEstructuraNivel3}"
 										valueChangeListener="#{programaCapacitacionBean.onChangeCatSubestructura3}">
 										<p:ajax update="@form" />
 										<f:selectItem
