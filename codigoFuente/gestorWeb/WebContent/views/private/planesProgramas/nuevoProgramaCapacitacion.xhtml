@@ -49,8 +49,8 @@
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									itemValue="#{0}" />
-								<f:selectItems value="#{programaCapacitacionBean.catPlanes}"
-									var="plan" itemLabel="#{plan.nombre}" itemValue="#{plan.id}" />
+								<f:selectItems value="#{programaCapacitacionBean.nodos}"
+									var="plan" itemLabel="#{plan.nombre}" itemValue="#{plan.idNodo}" />
 							</p:selectOneMenu>
 							<p:message for="nvoCatPlan" />
 						</div>
