@@ -13,233 +13,247 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
+import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.MallaCurricularDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
+import mx.gob.sedesol.basegestor.commons.utils.ObjetoCurricularEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatObjetoCurricular;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblMallaCurricular;
 import mx.gob.sedesol.basegestor.model.repositories.planesyprogramas.MallaCurricularRepo;
+import mx.gob.sedesol.basegestor.service.admin.CatalogoComunService;
 import mx.gob.sedesol.basegestor.service.admin.ComunValidacionService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService;
 
 @Service("mallaCurricularService")
-public class MallaCurricularServiceImpl extends ComunValidacionService<MallaCurricularDTO> implements MallaCurricularService {
+public class MallaCurricularServiceImpl extends ComunValidacionService<MallaCurricularDTO>
+		implements MallaCurricularService {
 
-    private static final Logger log = Logger.getLogger(MallaCurricularServiceImpl.class);
+	private static final Logger log = Logger.getLogger(MallaCurricularServiceImpl.class);
 
-    @Autowired
-    private MallaCurricularRepo mallaCurricularRepo;
-    private ModelMapper mallaCurrMapper = new ModelMapper();
+	@Autowired
+	private MallaCurricularRepo mallaCurricularRepo;
 
-    /**
-     * Metodo que regresa la lista de los planes registrados en
-     * TblMallaCurricular
-     */
-    @Override
-    public List<MallaCurricularDTO> findAll() {
+	@Autowired
+	private CatalogoComunService<CatObjetoCurricular, Integer> catObjCurrService;
 
-        List<TblMallaCurricular> lstPlanes = mallaCurricularRepo.findAll();
-        Type lstAux = new TypeToken<List<MallaCurricularDTO>>() {
-        }.getType();
+	private ModelMapper mallaCurrMapper = new ModelMapper();
 
-        return mallaCurrMapper.map(lstPlanes, lstAux);
-    }
+	/**
+	 * Metodo que regresa la lista de los planes registrados en TblMallaCurricular
+	 */
+	@Override
+	public List<MallaCurricularDTO> findAll() {
 
-    /**
-     * Servicio que busca un registro por identificador en la entidad
-     * TblMallaCurricular
-     */
-    @Override
-    public MallaCurricularDTO buscarPorId(Integer id) {
+		List<TblMallaCurricular> lstPlanes = mallaCurricularRepo.findAll();
+		Type lstAux = new TypeToken<List<MallaCurricularDTO>>() {
+		}.getType();
 
-        TblMallaCurricular mallaCurr = mallaCurricularRepo.findOne(id);
-        if (ObjectUtils.isNotNull(mallaCurr)) {
-            return mallaCurrMapper.map(mallaCurr, MallaCurricularDTO.class);
-        }
+		return mallaCurrMapper.map(lstPlanes, lstAux);
+	}
 
-        return null;
-    }
+	/**
+	 * Servicio que busca un registro por identificador en la entidad
+	 * TblMallaCurricular
+	 */
+	@Override
+	public MallaCurricularDTO buscarPorId(Integer id) {
 
-    public ResultadoDTO<MallaCurricularDTO> guardar(MallaCurricularDTO dto) {
+		TblMallaCurricular mallaCurr = mallaCurricularRepo.findOne(id);
+		if (ObjectUtils.isNotNull(mallaCurr)) {
+			return mallaCurrMapper.map(mallaCurr, MallaCurricularDTO.class);
+		}
 
-        ResultadoDTO<MallaCurricularDTO> res = sonDatosRequeridosValidos(TipoAccion.PERSISTENCIA, dto);
-        try {
-            if (ObjectUtils.isNotNull(res) && res.getResultado().getValor()) {
+		return null;
+	}
 
-                TblMallaCurricular mallaCurr = mallaCurrMapper.map(dto, TblMallaCurricular.class);
-                mallaCurr = mallaCurricularRepo.save(mallaCurr);
+	public ResultadoDTO<MallaCurricularDTO> guardar(MallaCurricularDTO dto) {
 
-                res = new ResultadoDTO<MallaCurricularDTO>();
-                res.setDto(mallaCurrMapper.map(mallaCurr, MallaCurricularDTO.class));
-            }
+		ResultadoDTO<MallaCurricularDTO> res = sonDatosRequeridosValidos(TipoAccion.PERSISTENCIA, dto);
+		try {
+			if (ObjectUtils.isNotNull(res) && res.getResultado().getValor()) {
 
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            res.setResultado(ResultadoTransaccionEnum.FALLIDO);
-            res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);
-            throw e;
-        }
-        return res;
-    }
+				TblMallaCurricular mallaCurr = mallaCurrMapper.map(dto, TblMallaCurricular.class);
+				mallaCurr = mallaCurricularRepo.save(mallaCurr);
 
-    @Override
-    public ResultadoDTO<MallaCurricularDTO> actualizar(MallaCurricularDTO dto) {
-        ResultadoDTO<MallaCurricularDTO> res = sonDatosRequeridosValidos(TipoAccion.ACTUALIZACION, dto);
-        try {
-            if (ObjectUtils.isNotNull(res) && res.getResultado().getValor()) {
+				res = new ResultadoDTO<MallaCurricularDTO>();
+				res.setDto(mallaCurrMapper.map(mallaCurr, MallaCurricularDTO.class));
+			}
 
-                TblMallaCurricular mallaCurr = mallaCurrMapper.map(dto, TblMallaCurricular.class);
-                mallaCurr = mallaCurricularRepo.saveAndFlush(mallaCurr);
-                res = new ResultadoDTO<MallaCurricularDTO>();
-                res.setDto(mallaCurrMapper.map(mallaCurr, MallaCurricularDTO.class));
-            }
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			res.setResultado(ResultadoTransaccionEnum.FALLIDO);
+			res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);
+			throw e;
+		}
+		return res;
+	}
 
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_FALLIDA);
-        }
-        return res;
-    }
+	@Override
+	public ResultadoDTO<MallaCurricularDTO> actualizar(MallaCurricularDTO dto) {
+		ResultadoDTO<MallaCurricularDTO> res = sonDatosRequeridosValidos(TipoAccion.ACTUALIZACION, dto);
+		try {
+			if (ObjectUtils.isNotNull(res) && res.getResultado().getValor()) {
 
-    @Transactional
-    public ResultadoDTO<MallaCurricularDTO> eliminar(MallaCurricularDTO dto) {
-        ResultadoDTO<MallaCurricularDTO> res = sonDatosRequeridosValidos(TipoAccion.ELIMINACION, dto);
-        try {
-            if (ObjectUtils.isNotNull(res) && res.getResultado().getValor()) {
+				TblMallaCurricular mallaCurr = mallaCurrMapper.map(dto, TblMallaCurricular.class);
+				mallaCurr = mallaCurricularRepo.saveAndFlush(mallaCurr);
+				res = new ResultadoDTO<MallaCurricularDTO>();
+				res.setDto(mallaCurrMapper.map(mallaCurr, MallaCurricularDTO.class));
+			}
 
-                TblMallaCurricular mallaCurr = mallaCurrMapper.map(dto, TblMallaCurricular.class);
-                mallaCurricularRepo.delete(mallaCurr);
-                res = new ResultadoDTO<MallaCurricularDTO>();
-                res.setDto(mallaCurrMapper.map(mallaCurr, MallaCurricularDTO.class));
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_FALLIDA);
+		}
+		return res;
+	}
 
-            //GUSTAVO --guardarBitacoraMalla(dto, String.valueOf(mallaCurr.getId()));
-            }
+	@Transactional
+	public ResultadoDTO<MallaCurricularDTO> eliminar(MallaCurricularDTO dto) {
+		ResultadoDTO<MallaCurricularDTO> res = sonDatosRequeridosValidos(TipoAccion.ELIMINACION, dto);
+		try {
+			if (ObjectUtils.isNotNull(res) && res.getResultado().getValor()) {
 
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ELIMINACION_FALLIDA);
-        }
-        return res;
-    }
+				TblMallaCurricular mallaCurr = mallaCurrMapper.map(dto, TblMallaCurricular.class);
+				mallaCurricularRepo.delete(mallaCurr);
+				res = new ResultadoDTO<MallaCurricularDTO>();
+				res.setDto(mallaCurrMapper.map(mallaCurr, MallaCurricularDTO.class));
 
-    /**
-     * Obtiene el registro de Malla curricular y sus objetos hijos por
-     * identificador
-     */
-    public MallaCurricularDTO obtenerMallaCurricularPorId(Integer id) {
-        List<TblMallaCurricular> lstAux = mallaCurricularRepo.buscarMallaCurricularPorId(id);
+				// GUSTAVO --guardarBitacoraMalla(dto, String.valueOf(mallaCurr.getId()));
+			}
 
-        if (!ObjectUtils.isNullOrEmpty(lstAux)) {
-            TblMallaCurricular entidad = lstAux.get(ConstantesGestor.PRIMER_ELEMENTO);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ELIMINACION_FALLIDA);
+		}
+		return res;
+	}
 
-            return mallaCurrMapper.map(entidad, MallaCurricularDTO.class);
-        }
+	/**
+	 * Obtiene el registro de Malla curricular y sus objetos hijos por identificador
+	 */
+	public MallaCurricularDTO obtenerMallaCurricularPorId(Integer id) {
+		List<TblMallaCurricular> lstAux = mallaCurricularRepo.buscarMallaCurricularPorId(id);
 
-        return null;
-    }
+		if (!ObjectUtils.isNullOrEmpty(lstAux)) {
+			TblMallaCurricular entidad = lstAux.get(ConstantesGestor.PRIMER_ELEMENTO);
 
-    public MallaCurricularDTO obtenerMallaCurricularPorIdPlan(Integer idPlan) {
-        List<TblMallaCurricular> lstAux = mallaCurricularRepo.buscarMallaCurricularPorIdPlan(idPlan);
+			return mallaCurrMapper.map(entidad, MallaCurricularDTO.class);
+		}
 
-        if (!ObjectUtils.isNullOrEmpty(lstAux)) {
-            TblMallaCurricular entidad = lstAux.get(ConstantesGestor.PRIMER_ELEMENTO);
+		return null;
+	}
 
-            return mallaCurrMapper.map(entidad, MallaCurricularDTO.class);
-        }
+	public MallaCurricularDTO obtenerMallaCurricularPorIdPlan(Integer idPlan) {
+		List<TblMallaCurricular> lstAux = mallaCurricularRepo.buscarMallaCurricularPorIdPlan(idPlan);
 
-        return null;
-    }
+		if (!ObjectUtils.isNullOrEmpty(lstAux)) {
+			TblMallaCurricular entidad = lstAux.get(ConstantesGestor.PRIMER_ELEMENTO);
 
-    /**
-     *
-     */
-    public List<MallaCurricularDTO> obtieneMallasCurricularesDisponibles() {
+			return mallaCurrMapper.map(entidad, MallaCurricularDTO.class);
+		}
 
-        List<MallaCurricularDTO> mallas = null;
-        List<TblMallaCurricular> lstAuxMallas = mallaCurricularRepo.findAll();
+		return null;
+	}
 
-        if (!ObjectUtils.isNullOrEmpty(lstAuxMallas)) {
-            mallas = new ArrayList<>();
-            for (TblMallaCurricular obj : lstAuxMallas) {
-                if (ObjectUtils.isNotNull(obj) && ObjectUtils.isNotNull(obj.getActivo())
-                        && obj.getActivo().equals(ConstantesGestor.ACTIVO)) {
-                    if (ObjectUtils.isNull(obj.getMallaCurricularPadre())) {
-                        MallaCurricularDTO objPadre = new MallaCurricularDTO();
-                        objPadre = mallaCurrMapper.map(obj, MallaCurricularDTO.class);
-                        mallas.add(objPadre);
-                    }
+	/**
+	 *
+	 */
+	public List<MallaCurricularDTO> obtieneMallasCurricularesDisponibles() {
 
-                }
-            }
-        }
-        return mallas;
-    }
+		List<MallaCurricularDTO> mallas = null;
+		List<TblMallaCurricular> lstAuxMallas = mallaCurricularRepo.findAll();
+		CatObjetoCurricular catPrograma = mallaCurrMapper.map(catObjCurrService.buscarRegistroPorNombre(
+				ObjetoCurricularEnum.PROGRAMA.getNombre(), CatObjetoCurricular.class), CatObjetoCurricular.class);
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Integer getNuevoIdMallaCurricular() {
-        return mallaCurricularRepo.getMaxIdMallaCurricular() + 1;
-    }
+		if (!ObjectUtils.isNullOrEmpty(lstAuxMallas)) {
+			mallas = new ArrayList<>();
+			for (TblMallaCurricular obj : lstAuxMallas) {
+				if (ObjectUtils.isNotNull(obj) && ObjectUtils.isNotNull(obj.getActivo())
+						&& obj.getActivo().equals(ConstantesGestor.ACTIVO)
+						&& ObjectUtils.isNotNull(obj.getIdCategoriaMdl())
+						&& !obj.getObjetoCurricular().getId().equals(catPrograma.getId())) {
+					if (ObjectUtils.isNull(obj.getMallaCurricularPadre())) {
+						MallaCurricularDTO objPadre = new MallaCurricularDTO();
+						objPadre = mallaCurrMapper.map(obj, MallaCurricularDTO.class);
+						mallas.add(objPadre);
+					}
 
-    @Override
-    public ResultadoDTO<MallaCurricularDTO> sonDatosRequeridosValidos(TipoAccion accion, MallaCurricularDTO dto) {
+				}
+			}
+		}
+		return mallas;
+	}
 
-        ResultadoDTO<MallaCurricularDTO> resultado = null;
+	@Transactional(isolation = Isolation.READ_COMMITTED)
+	public Integer getNuevoIdMallaCurricular() {
+		return mallaCurricularRepo.getMaxIdMallaCurricular() + 1;
+	}
 
-        if (ObjectUtils.isNotNull(dto)) {
-            resultado = new ResultadoDTO<MallaCurricularDTO>();
+	@Override
+	public ResultadoDTO<MallaCurricularDTO> sonDatosRequeridosValidos(TipoAccion accion, MallaCurricularDTO dto) {
 
-            switch (accion) {
-                case PERSISTENCIA:
+		ResultadoDTO<MallaCurricularDTO> resultado = null;
 
-                    if (ObjectUtils.isNullOrEmpty(dto.getNombre())) {
-                        resultado.setMensajeError(MensajesSistemaEnum.MALLA_CURR_NOMBRE_REQ);
-                    }
+		if (ObjectUtils.isNotNull(dto)) {
+			resultado = new ResultadoDTO<MallaCurricularDTO>();
 
-                    if (ObjectUtils.isNull(dto.getFechaRegistro())) {
-                        resultado.setMensajeError(MensajesSistemaEnum.MSG_GENERAL_FECHA_REGISTRO_REQ);
-                    }
-                    if (ObjectUtils.isNullOrEmpty(dto.getObjetoCurricular())) {
-                        resultado.setMensajeError(MensajesSistemaEnum.MALLA_CURR_TPO_OBJ_CURR_REQ);
-                    }
-                    break;
+			switch (accion) {
+			case PERSISTENCIA:
 
-                case ELIMINACION:
-                    if (ObjectUtils.isNull(dto.getId())) {
-                        resultado.setMensajeError(MensajesSistemaEnum.MALLA_CURR_ID_REQ);
-                    }
-                    break;
+				if (ObjectUtils.isNullOrEmpty(dto.getNombre())) {
+					resultado.setMensajeError(MensajesSistemaEnum.MALLA_CURR_NOMBRE_REQ);
+				}
 
-                case ACTUALIZACION:
+				if (ObjectUtils.isNull(dto.getFechaRegistro())) {
+					resultado.setMensajeError(MensajesSistemaEnum.MSG_GENERAL_FECHA_REGISTRO_REQ);
+				}
+				if (ObjectUtils.isNullOrEmpty(dto.getObjetoCurricular())) {
+					resultado.setMensajeError(MensajesSistemaEnum.MALLA_CURR_TPO_OBJ_CURR_REQ);
+				}
+				break;
 
-                    if (ObjectUtils.isNull(dto.getId())) {
-                        resultado.setMensajeError(MensajesSistemaEnum.MALLA_CURR_ID_REQ);
-                    }
-                    if (ObjectUtils.isNull(dto.getFechaActualizacion())) {
-                        resultado.setMensajeError(MensajesSistemaEnum.MSG_GENERAL_FECHA_EDICION_REQ);
-                    }
-                    if (ObjectUtils.isNull(dto.getUsuarioModifico())) {
-                        resultado.setMensajeError(MensajesSistemaEnum.MSG_GENERAL_USUARIO_MODIFICO_REQ);
-                    }
-                    break;
-            }
-        }
-        return resultado;
-    }
+			case ELIMINACION:
+				if (ObjectUtils.isNull(dto.getId())) {
+					resultado.setMensajeError(MensajesSistemaEnum.MALLA_CURR_ID_REQ);
+				}
+				break;
 
-    @Override
-    public void validarPersistencia(MallaCurricularDTO dto, ResultadoDTO<MallaCurricularDTO> resultado) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+			case ACTUALIZACION:
 
-    @Override
-    public void validarActualizacion(MallaCurricularDTO dto, ResultadoDTO<MallaCurricularDTO> resultado) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+				if (ObjectUtils.isNull(dto.getId())) {
+					resultado.setMensajeError(MensajesSistemaEnum.MALLA_CURR_ID_REQ);
+				}
+				if (ObjectUtils.isNull(dto.getFechaActualizacion())) {
+					resultado.setMensajeError(MensajesSistemaEnum.MSG_GENERAL_FECHA_EDICION_REQ);
+				}
+				if (ObjectUtils.isNull(dto.getUsuarioModifico())) {
+					resultado.setMensajeError(MensajesSistemaEnum.MSG_GENERAL_USUARIO_MODIFICO_REQ);
+				}
+				break;
+			}
+		}
+		return resultado;
+	}
 
-    @Override
-    public void validarEliminacion(MallaCurricularDTO dto, ResultadoDTO<MallaCurricularDTO> resultado) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+	@Override
+	public void validarPersistencia(MallaCurricularDTO dto, ResultadoDTO<MallaCurricularDTO> resultado) {
+		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose
+																		// Tools | Templates.
+	}
+
+	@Override
+	public void validarActualizacion(MallaCurricularDTO dto, ResultadoDTO<MallaCurricularDTO> resultado) {
+		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose
+																		// Tools | Templates.
+	}
+
+	@Override
+	public void validarEliminacion(MallaCurricularDTO dto, ResultadoDTO<MallaCurricularDTO> resultado) {
+		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose
+																		// Tools | Templates.
+	}
 }

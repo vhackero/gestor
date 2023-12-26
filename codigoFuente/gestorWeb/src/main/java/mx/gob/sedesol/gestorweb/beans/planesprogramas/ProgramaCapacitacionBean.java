@@ -13,6 +13,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.ValueChangeEvent;
 
+import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SerializationUtils;
@@ -102,6 +103,9 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
 	
+	@ManagedProperty("#{mallaCurricularService}")
+	private MallaCurricularService mallaCurricularService;
+	
 	private String tipoPrograma;
 	private String tipo;
 	private Integer creditos;
@@ -133,6 +137,14 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	private TabView cpmTabViewProg;
 	private Integer numEstTematicas;
 	private Integer numUniDidacticas;
+	
+	//Subestructuras
+	private List<CatalogoComunDTO> catPlanes;
+	private List<CatalogoComunDTO> catEstructuras;
+	private List<CatalogoComunDTO> catSubEstructurasNivel1;
+	private List<CatalogoComunDTO> catSubEstructurasNivel2;
+	private List<CatalogoComunDTO> catSubEstructurasNivel3;
+	private Integer nivelMaximo = 1;
 
 	private Integer numEstTematicasAux = 0;
 	private Integer numUniDidacticasAux = 0;
@@ -291,6 +303,8 @@ public class ProgramaCapacitacionBean extends BaseBean {
 		this.generaCatEjesCapacitBusqueda();
 		this.generaArbolOrgGubernamental();
 		this.generaArbolEstPersonalExterno();
+		
+		this.generaEstructuraCatPlanes();
 
 		relProgDuracionTeoria = new RelProgDuracionDTO(
 				getTipoCargaHoraria(ConstantesGestorWeb.TIPO_CARGA_HORARIA_TEORIA));
@@ -316,7 +330,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			this.cargaCatalogosInicialesEdicion(programa);
 			this.generaVistaEstTematica();
 			this.validaDatosProgramaRequeridos(programa);
-
+			
 		} else {
 
 			PersonaDTO coordAcad = fecServiceFacade.getPersonaService()
@@ -764,6 +778,8 @@ public class ProgramaCapacitacionBean extends BaseBean {
 
 		return tposComp;
 	}
+	
+	
 
 	/**
 	 *
@@ -908,18 +924,106 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			}
 		}
 	}
+	
+	/**
+	 * Genera el catalogo de planes
+	 *
+	 * @param e
+	 */
+	private void generaEstructuraCatPlanes() {
+		nodos = this.generarPlanes();
+	}
+	
+	/**
+	 * Genera el catalogo de estructuras
+	 *
+	 * @param e
+	 */
+	public void onChangeCatPlan(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			catEstructuras = this.generarEstructuras(nodos, Integer.parseInt(e.getNewValue().toString()));
+			
+			catSubEstructurasNivel1 = new ArrayList<CatalogoComunDTO>();
+			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
+			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+			programa.setEjeCapacitacion(Integer.parseInt(e.getNewValue().toString()));
+			nivelMaximo = 0;
+		}
+	}
+	
+	/**
+	 * Genera el catalogo de subestructuras nivel 1
+	 *
+	 * @param e
+	 */
+	public void onChangeCatEstructura(ValueChangeEvent e) {
+
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
+			
+			catSubEstructurasNivel1 = this.generarSubEstructuras1(nodos, idSubEstructura);
+			
+			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
+			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+			programa.setEjeCapacitacion(idSubEstructura);
+			nivelMaximo = 1;
+			
+		}
+	}
+	
+	/**
+	 * Genera el catalogo de subestructuras nivel 2
+	 *
+	 * @param e
+	 */
+	public void onChangeCatSubestructura1(ValueChangeEvent e) {
+
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
+			catSubEstructurasNivel2 = this.generarSubEstructuras2(nodos, idSubEstructura);
+			
+			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+			programa.setEjeCapacitacion(Integer.parseInt(e.getNewValue().toString()));
+			nivelMaximo = 2;
+			
+		}
+	}
+	
+	/**
+	 * Genera el catalogo de subestructuras nivel 3
+	 *
+	 * @param e
+	 */
+	public void onChangeCatSubestructura2(ValueChangeEvent e) {
+
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
+			catSubEstructurasNivel3 = this.generarSubEstructuras3(nodos, idSubEstructura);
+			
+			programa.setEjeCapacitacion(Integer.parseInt(e.getNewValue().toString()));
+			nivelMaximo = 3;
+		}
+	}
+	
+	public void onChangeCatSubestructura3(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			programa.setEjeCapacitacion(Integer.parseInt(e.getNewValue().toString()));
+			nivelMaximo = 4;
+		}
+	}
+	
 
 	/**
 	 * Obtiene los tipos de competencia por eje de capacitacion
 	 *
 	 * @param e
 	 */
-	public void onChangeEjeCapacitacion(ValueChangeEvent e) {
+	/*public void onChangeEjeCapacitacion(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			Integer idEjeCapacitacion = (Integer) e.getNewValue();
 			programa.setEjeCapacitacion(idEjeCapacitacion);
 		}
-	}
+	}*/
 
 	public void onChangeOrgGubPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
@@ -1051,11 +1155,10 @@ public class ProgramaCapacitacionBean extends BaseBean {
 
 			competenciasEspecifPrograma = generaRelProgramaCompEspecificas(this.programa);
 			this.programa.setRelProgramaComEspecificas(competenciasEspecifPrograma);
-			this.programa.setRelProgEstPersonalExterno(
-					this.generaRelProgEstPersonalExterno(this.programa, nodoEstPersonalExtSel));
-			this.programa.setCatStatusPrograma(fecServiceFacade.getCatStatusProgramaService()
-					.buscarRegistroPorNombre(EstatusProgramaEnum.BORRADOR.getEtiqueta(), CatStatusPrograma.class));
+			this.programa.setRelProgEstPersonalExterno( this.generaRelProgEstPersonalExterno(this.programa, nodoEstPersonalExtSel));
+			this.programa.setCatStatusPrograma(fecServiceFacade.getCatStatusProgramaService() .buscarRegistroPorNombre(EstatusProgramaEnum.BORRADOR.getEtiqueta(), CatStatusPrograma.class));
 			this.programa.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
+			
 			ResultadoDTO<FichaDescProgramaDTO> resTx = fecServiceFacade.guardarDatosPrograma(this.programa);
 			if (ObjectUtils.isNotNull(resTx) && resTx.getResultado().getValor()) {
 				getSession().setAttribute(ConstantesGestorWeb.OBJ_PROGRAMA, resTx.getDto());
@@ -1085,6 +1188,39 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			return false;
 
 		}
+		
+		if(programa.getEjeCapacitacion().equals(0)){
+			agregarMsgError("Seleccione el plan, estructura o subestructura a la que pertenece", null);
+			return false;
+		}
+		
+		switch(nivelMaximo) {
+			case 0:
+				if(catEstructuras.size() > 0){
+					agregarMsgError("Seleccione la estructura a la que pertenece", null);
+					return false;
+				}
+			break;
+			case 1:
+				if(catSubEstructurasNivel1.size() > 0){
+					agregarMsgError("Seleccione la subestructura a la que pertenece", null);
+					return false;
+				}
+			break;
+			case 2:
+				if(catSubEstructurasNivel2.size() > 0){
+					agregarMsgError("Seleccione la subestructura a la que pertenece", null);
+					return false;
+				}
+			break;
+			case 3:
+				if(catSubEstructurasNivel3.size() > 0){
+					agregarMsgError("Seleccione la subestructura a la que pertenece", null);
+					return false;
+				}
+			break;
+		}
+		
 		return true;
 	}
 
@@ -1860,9 +1996,10 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	}
 
 	/**
+	 * @throws Exception 
 	 *
 	 */
-	public void finalizarPrograma() {
+	public void finalizarPrograma() throws Exception {
 
 		FichaDescProgramaDTO programaFinal = this.guardaBorradorUnidDidacticas(programa, controlEstTematica,
 				numUniDidacticas, unidadesDidacticasProg);
@@ -1883,7 +2020,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 
 						CrearCategoria categoriaWS = new CrearCategoria(ptf);
 						Categoria planCategoria = new Categoria();
-						planCategoria.setIdnumber(programaFinal.getIdPrograma().toString());
+						//planCategoria.setIdnumber(programaFinal.getIdPrograma().toString());
 						planCategoria.setName(programaFinal.getNombreTentativo());
 
 						MallaCurricularDTO ejeCapProg = fecServiceFacade.getMallaCurricularService()
@@ -1905,7 +2042,17 @@ public class ProgramaCapacitacionBean extends BaseBean {
 							ResultadoDTO<FichaDescProgramaDTO> rxFinal = getFecServiceFacade()
 									.getFichaDescProgramaService().actualizar(programaFinal);
 							if (ObjectUtils.isNotNull(rxFinal) && rxFinal.getResultado().getValor()) {
-
+								
+								MallaCurricularDTO mallaP = new MallaCurricularDTO();
+								mallaP.setNombre(rxFinal.getDto().getNombreTentativo());
+								mallaP.setMallaCurricularPadre( mallaCurricularService.obtenerMallaCurricularPorId(rxFinal.getDto().getEjeCapacitacion()) );
+								mallaP.setUsuarioModifico(rxFinal.getDto().getUsuarioModifico());
+								mallaP.setFechaRegistro(new Date());
+								mallaP.setFechaActualizacion(new Date());
+								mallaP.setActivo(1);
+								mallaP.setIdCategoriaMdl(rxFinal.getDto().getIdCategoriaMdl());
+								getFecServiceFacade().guardaMallaCurricular(mallaP);
+								
 								bitacoraBean.guardarBitacora(idPersonaEnSesion(), "FIN_PRO",
 										String.valueOf(rxFinal.getDto().getIdPrograma()), requestActual(),
 										TipoServicioEnum.LOCAL);
@@ -3732,8 +3879,73 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	public void setIdPlan(Integer idPlan) {
 		this.idPlan = idPlan;
 	}
-
 	
 	
+	
+	public List<CatalogoComunDTO> getCatPlanes() {
+		return catPlanes;
+	}
 
+	public void setCatPlanes(List<CatalogoComunDTO> catPlanes) {
+		this.catPlanes = catPlanes;
+	}
+
+	public List<CatalogoComunDTO> getCatEstructuras() {
+		return catEstructuras;
+	}
+
+	public void setCatEstructuras(List<CatalogoComunDTO> catEstructuras) {
+		this.catEstructuras = catEstructuras;
+	}
+
+	public List<CatalogoComunDTO> getCatSubEstructurasNivel1() {
+		return catSubEstructurasNivel1;
+	}
+
+	public void setCatSubEstructurasNivel1(List<CatalogoComunDTO> catSubEstructurasNivel1) {
+		this.catSubEstructurasNivel1 = catSubEstructurasNivel1;
+	}
+
+	public List<CatalogoComunDTO> getCatSubEstructurasNivel2() {
+		return catSubEstructurasNivel2;
+	}
+
+	public void setCatSubEstructurasNivel2(List<CatalogoComunDTO> catSubEstructurasNivel2) {
+		this.catSubEstructurasNivel2 = catSubEstructurasNivel2;
+	}
+
+	public List<CatalogoComunDTO> getCatSubEstructurasNivel3() {
+		return catSubEstructurasNivel3;
+	}
+
+	public void setCatSubEstructurasNivel3(List<CatalogoComunDTO> catSubEstructurasNivel3) {
+		this.catSubEstructurasNivel3 = catSubEstructurasNivel3;
+	}
+
+	public Integer getNivelMaximo() {
+		return nivelMaximo;
+	}
+
+	public void setNivelMaximo(Integer nivelMaximo) {
+		this.nivelMaximo = nivelMaximo;
+	}
+
+	public MallaCurricularService getMallaCurricularService() {
+		return mallaCurricularService;
+	}
+
+	public void setMallaCurricularService(MallaCurricularService mallaCurricularService) {
+		this.mallaCurricularService = mallaCurricularService;
+	}
+	
+
+	public List<NodoeHijosDTO> getNodos() {
+		return nodos;
+	}
+
+	public void setNodos(List<NodoeHijosDTO> nodos) {
+		this.nodos = nodos;
+	}
+	
+	
 }
