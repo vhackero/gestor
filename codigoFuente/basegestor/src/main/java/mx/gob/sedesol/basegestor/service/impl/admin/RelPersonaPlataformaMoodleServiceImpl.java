@@ -148,19 +148,16 @@ public class RelPersonaPlataformaMoodleServiceImpl implements RelPersonaPlatafor
 	 * @param idPlataformaMoodle
 	 * @return
 	 */
-	public RelPersonaPlataformaMoodleDTO obtenerPersonaPlataformaMoodle(Integer idPersonaMoodle, Integer idPlataformaMoodle) {
+	public RelPersonaPlataformaMoodleDTO obtenerPersonaPlataformaMoodle(Integer idPersona, Integer idPlataformaMoodle) {
 		
 		List<RelPersonaPlataformaMoodle> lista = relPersonaPlataformaMoodleRepo
-				.obtenerPersonaPlataformaByPersonaMoodle(idPersonaMoodle, idPlataformaMoodle);
+				.obtenerPorPersonaPlataforma(Long.valueOf(idPersona), idPlataformaMoodle);
 		if (lista.isEmpty()) {
-			return null;
-		} else {
 			RelPersonaPlataformaMoodle aux =  lista.get(ConstantesGestor.PRIMER_ELEMENTO);
 			if(ObjectUtils.isNotNull(aux))
 				return mpPersonaPlat.map(aux, RelPersonaPlataformaMoodleDTO.class);
-			else 
-				return null;
 		}
+		return null;
 	}
 
 }
