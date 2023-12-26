@@ -42,7 +42,8 @@
 		<class>mx.gob.sedesol.basegestor.model.entities.admin.CatParametroWSMoodle</class>
 		<class>mx.gob.sedesol.basegestor.model.entities.badges.CatClasificacionBadge</class>
      	<class>mx.gob.sedesol.basegestor.model.entities.badges.CatBadge</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblCfgCron</class>                
+		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblCfgCron</class>  
+		<class>mx.gob.sedesol.basegestor.model.entities.admin.TblPersonaSige</class>              
 
 		<!-- Planes y programas -->
 		<class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatActividadesAprendizajePrograma</class>

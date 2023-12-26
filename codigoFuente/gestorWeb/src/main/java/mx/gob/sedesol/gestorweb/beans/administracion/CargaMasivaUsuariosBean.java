@@ -27,6 +27,8 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.BitacoraDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.LoteCargaUsuarioDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaCargaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
+// import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoCargaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
@@ -37,6 +39,7 @@ import mx.gob.sedesol.basegestor.mongo.service.BitacoraService;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.LoteCargaUsuarioService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaService;
+import mx.gob.sedesol.basegestor.service.admin.PersonaSigeService;
 import mx.gob.sedesol.basegestor.service.impl.admin.PersonaServiceImpl;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
@@ -61,6 +64,9 @@ public class CargaMasivaUsuariosBean extends BaseBean {
 
 	@ManagedProperty(name = "sistema", value = "#{sistema}")
 	private SistemaBean sistema;
+	
+	@ManagedProperty(value = "#{personaSigeService}")
+	private transient PersonaSigeService personaSigeService;
 
 	@ManagedProperty("#{bitacoraService}")
 	private BitacoraService bitacoraService;
@@ -88,6 +94,17 @@ public class CargaMasivaUsuariosBean extends BaseBean {
 		lote = new LoteCargaUsuarioDTO(getUsuarioEnSession().getIdPersona());
 		mostrarResultados = false;
 		return ConstantesGestorWeb.NAVEGA_CARGA_USUARIOS;
+	}
+	
+	public void obtenerUsuarios() {
+		logger.info("Hola q hace");
+		List<PersonaSigeDTO> personasSige = personaSigeService.findAll();
+		for(PersonaSigeDTO persona : personasSige) {
+			logger.info(persona.getNombre());
+			//TODO: llenar objetos 
+			//TODO: registrarlos mediante los datos necesaris
+			//TODO: crear excel para carga masiva ? 
+		}
 	}
 
 	public void fileUploadListener(FileUploadEvent e) {
@@ -272,4 +289,13 @@ public class CargaMasivaUsuariosBean extends BaseBean {
 	public void setBitacoraBean(BitacoraBean bitacoraBean) {
 		this.bitacoraBean = bitacoraBean;
 	}
+
+	public PersonaSigeService getPersonaSigeService() {
+		return personaSigeService;
+	}
+
+	public void setPersonaSigeService(PersonaSigeService personaSigeService) {
+		this.personaSigeService = personaSigeService;
+	}
+	
 }
