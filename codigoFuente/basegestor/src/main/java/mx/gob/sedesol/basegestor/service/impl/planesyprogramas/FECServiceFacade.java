@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
+import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.CmpDinamicoUniDidacticaDTO;
@@ -120,6 +121,9 @@ public class FECServiceFacade {
 
     @Autowired
     private MallaPlanService mallaPlanService;
+    
+    @Autowired
+	private CatalogoComunService<CatObjetoCurricular, Integer> catObjCurrService;
 
     @Value("${ws.moodle.token}")
     private String token;
@@ -142,41 +146,15 @@ public class FECServiceFacade {
 
         ResultadoDTO<MallaCurricularDTO> res = new ResultadoDTO<MallaCurricularDTO>();
         try {
-
+        	CatalogoComunDTO objetoPrograma = catObjCurrService.buscarRegistroPorNombre(
+					ObjetoCurricularEnum.PROGRAMA.getNombre(), CatObjetoCurricular.class);
+        	dto.setObjetoCurricular(objetoPrograma);
+        	
             res = mallaCurricularService.guardar(dto);
 
-            if (ObjectUtils.isNotNull(res) && res.getResultado().getValor()) {
-
-                MallaCurricularDTO mallaCurrSvd = res.getDto();
-
-                // Se genera Estructura Moodle
-                List<ParametroWSMoodleDTO> plataformas = parametroWSMoodleService.findAll();
-                if (!ObjectUtils.isNullOrEmpty(plataformas)) {
-
-                    for (ParametroWSMoodleDTO ptf : plataformas) {
-
-                        CrearCategoria categoriaWS = new CrearCategoria(ptf);
-                        Categoria mc = new Categoria();
-                        //Se comenta por conflictos con la plataforma moodle
-                        //mc.setIdnumber(mallaCurrSvd.getId().toString());
-                        mc.setName(mallaCurrSvd.getNombre());
-                        mc.setParent(dto.getIdCategoriaMdlPadre());
-
-                        ArrayList<Categoria> categorias = new ArrayList<Categoria>();
-                        categorias.add(mc);
-
-                        List<RespuestaCrearCategorias> respuestasWS = categoriaWS.crearCategoria(categorias);
-                        if (ObjectUtils.isNotNull(respuestasWS)) {
-
-                            int idCategoriaMdl = respuestasWS.get(ConstantesGestor.PRIMER_ELEMENTO).getId();
-
-                            mallaCurrSvd.setIdCategoriaMdl(idCategoriaMdl);
-                            mallaCurrSvd.setFechaActualizacion(new Date());
-                            res = mallaCurricularService.actualizar(mallaCurrSvd);
-
-                        }
-                    }
-                }
+            if (ObjectUtils.isNull(res) && !res.getResultado().getValor()) {
+            	res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);
+                throw new Exception();
             }
 
         } catch (Exception e) {
