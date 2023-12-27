@@ -49,8 +49,9 @@ public class TblFichaDescriptivaPrograma implements Serializable {
 
 	@Column(name="id_alcance_programa")
 	private Integer idAlcancePrograma;
-	/*@Column(name="id_plan")
-	private Integer idPlan;*/
+	
+	@Column(name="id_plan")
+	private Integer idPlan;
 
 	@Column(name="id_nivel_dominio_programa")
 	private Integer idNivelDominioPrograma;	
@@ -203,8 +204,9 @@ public class TblFichaDescriptivaPrograma implements Serializable {
 	
 	@Column(name="tipo")
 	private String tipo;
-	/*@Column(name="creditos")
-	private Integer creditos;*/
+	
+	@Column(name="creditos")
+	private Integer creditos;
 	
 //	@OneToOne(fetch=FetchType.LAZY)
 //	@JoinColumn(name="id_estructura_personal_externo")
@@ -212,7 +214,7 @@ public class TblFichaDescriptivaPrograma implements Serializable {
 
 	public TblFichaDescriptivaPrograma() {
 	}
-	/*
+	
 	public Integer getCreditos() {
 		return creditos;
 	}
@@ -227,7 +229,7 @@ public class TblFichaDescriptivaPrograma implements Serializable {
 
 	public void setIdPlan(Integer idPlan) {
 		this.idPlan = idPlan;
-	}*/
+	}
 	public String getTipo() {
 		return tipo;
 	}
