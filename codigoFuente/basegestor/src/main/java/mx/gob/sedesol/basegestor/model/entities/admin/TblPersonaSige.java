@@ -27,6 +27,9 @@ public class TblPersonaSige implements Serializable{
 	@Column(name = "matricula_sige")
 	private String matricula;
 	
+	@Column(name = "password_sige")
+	private String password;
+	
 	@Column(name = "nombre_sige")
 	private String nombre;
 
@@ -74,6 +77,14 @@ public class TblPersonaSige implements Serializable{
 
 	public void setMatricula(String matricula) {
 		this.matricula = matricula;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	public String getNombre() {

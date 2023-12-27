@@ -158,7 +158,6 @@ public class AdminPersonaBean extends BaseBean {
 					datos.setDatosAcademicos(personaDatosAcademicos());
 					
 					guardarPersona();
-					agregarMsgInfo("Proceso exitoso", "Usuarios importados");
 				}else {
 					logger.error("La persona ya existe: "+persona.getCurp());
 					agregarMsgError("La persona ya existe: "+persona.getCurp(), "Regiustro existente");
@@ -174,9 +173,9 @@ public class AdminPersonaBean extends BaseBean {
 		Long id = 2L; 
 		PersonaDTO personaInsertar = new PersonaDTO(id, "MX");
 		String usuario = persona.getNombre()+persona.getApellidoPaterno().substring(0, 1)+persona.getApellidoMaterno().substring(0, 1);
-		personaInsertar.setUsuario(usuario);
-		personaInsertar.setContrasenia(persona.getMatricula());//TODO: mejor curp ? 
-		personaInsertar.setNuevaContrasenia(persona.getMatricula());
+		personaInsertar.setUsuario(usuario.toLowerCase());
+		personaInsertar.setContrasenia(persona.getPassword());
+		personaInsertar.setNuevaContrasenia(persona.getPassword());
 		personaInsertar.setCurp(persona.getCurp());
 		personaInsertar.setNombre(persona.getNombre());
 		personaInsertar.setApellidoPaterno(persona.getApellidoPaterno());
@@ -184,7 +183,7 @@ public class AdminPersonaBean extends BaseBean {
 		personaInsertar.setFechaNacimiento(persona.getFechaNacimiento());
 		personaInsertar.setRfc(persona.getCurp().substring(0, 9));
 		personaInsertar.setCorreoElectronico(persona.getCorreoInstitucional());
-		personaInsertar.setConfirmacionContrasenia(persona.getMatricula());
+		personaInsertar.setConfirmacionContrasenia(persona.getPassword());
 		personaInsertar.setIdEntidadFederativa("01");
 		personaInsertar.setEntidadFederativa("Mexico");
 		personaInsertar.setIdMunicipio("12");

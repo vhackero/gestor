@@ -47,6 +47,7 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 			personaObj.setNivelSige(persona.getNivelSige());
 			personaObj.setPersonaIdSige(persona.getPersonaIdSige());
 			personaObj.setPerfilIdSige(persona.getPerfilIdSige());
+			personaObj.setPassword(persona.getPassword());
 			listaPersonas.add(personaObj);
 		}
 		
