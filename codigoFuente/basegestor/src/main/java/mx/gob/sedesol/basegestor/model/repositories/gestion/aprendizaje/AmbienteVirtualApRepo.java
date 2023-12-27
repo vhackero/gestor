@@ -77,6 +77,20 @@ public interface AmbienteVirtualApRepo extends
 			@Param("idTipoCom")           Integer idTipoCom,
 			@Param("idEjeCapacitacion")   Integer idEjeCapacitacion);
 	
+	@Query("SELECT ava FROM TblAmbienteVirtualAprendizaje        ava"
+			+ "	JOIN FETCH ava.eventoCapacitacion                eventoCap "
+			+ " JOIN FETCH eventoCap.fichaDescriptivaPrograma    programa"
+			+ " JOIN FETCH eventoCap.catModalidadPlanPrograma    modEvtCap "
+			+ " JOIN FETCH eventoCap.catEstadoEventoCapacitacion edoEvtCap "
+			+ " WHERE   modEvtCap.id             IN(:modalidadEvtCapList) "
+			+ " AND     edoEvtCap.id             IN(:estatusEvtCap) "
+			+ " AND     programa.ejeCapacitacion =:idEjeCapacitacion"
+			
+			)	
+	public List<TblAmbienteVirtualAprendizaje> consultarAvasPorEjeCapacitacion(
+			@Param("modalidadEvtCapList") List<Integer> modalidadEvtCapList,
+			@Param("estatusEvtCap")       List<Integer> estatusEvtCap,
+			@Param("idEjeCapacitacion")   Integer idEjeCapacitacion);
 	
 	@Query("SELECT ava FROM TblAmbienteVirtualAprendizaje ava"
 			+ " JOIN ava.eventoCapacitacion  evt "
