@@ -67,9 +67,8 @@
 								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.identificador')}:"
 								styleClass="requerido bloque" />
 							<p:inputText id="idPlan" styleClass="form-control"
-								value="#{planBean.plan.identificador}"
+								value="#{planBean.plan.identificador}" required="true"
 								placeholder="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.identificador')}"
-								disabled="true" required="true"
 								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
 							<p:message for="idPlan" />
 						</div>

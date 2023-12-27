@@ -2,6 +2,7 @@ package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -182,6 +183,22 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 	private Map<Integer, Boolean> actasCerradasPorIdEvtCapMap;
 
 	private UsuarioSessionDTO usuarioSessionDTO;
+	
+	
+	//Subestructuras
+		private List<CatalogoComunDTO> catPlanes;
+		private List<CatalogoComunDTO> catEstructuras;
+		private List<CatalogoComunDTO> catSubEstructurasNivel1;
+		private List<CatalogoComunDTO> catSubEstructurasNivel2;
+		private List<CatalogoComunDTO> catSubEstructurasNivel3;
+		
+		private Integer idCatPlan;
+		private Integer idCatEstructura;
+		private Integer idCatSubEstructuraNivel1;
+		private Integer idCatSubEstructuraNivel2;
+		private Integer idCatSubEstructuraNivel3;
+		private Integer ejeCapacitacion;
+		private List<NodoeHijosDTO> nodos;
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
@@ -224,7 +241,8 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 
 		this.generaEstructuraCatTpoCompetenciaPlan();
 		this.generaCatEjesCapacitBusqueda();
-
+		
+		this.generaEstructuraCatPlanes();
 	}
 
 	private List<AmbienteVirtualAprendizajeDTO> obtenerAmbientesvirtualAprendizaje(Integer idEstatusAva,
@@ -524,7 +542,12 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 		esNombreProgramaEditable = Boolean.FALSE;
 
 		esModalidadEditable = Boolean.FALSE;
-
+		
+		idCatPlan = 0;
+		catEstructuras = new ArrayList<CatalogoComunDTO>();
+		catSubEstructurasNivel1 = new ArrayList<CatalogoComunDTO>();
+		catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
+		catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
 	}
 
 	private void limpiaCriteriosBusqueda() {
@@ -571,12 +594,11 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			this.esNombreProgramaEditable = Boolean.TRUE;
 
-			Integer idEeCap = (Integer) e.getNewValue();
+			Integer idEeCap = Integer.parseInt(e.getNewValue().toString());
 			filtro.getFichaDescriptivaPrograma().setEjeCapacitacion(idEeCap);
 
-			avaFiltroBusquedaList = ambienteVirtualApService.consultarAvasPorTipoCompetenciaEjeCapacitacion(
+			avaFiltroBusquedaList = ambienteVirtualApService.consultarAvasPorEjeCapacitacion(
 					idModalidades, this.obtenerListaIdEstatusEventos(),
-					filtro.getFichaDescriptivaPrograma().getTipoCompetencia(),
 					filtro.getFichaDescriptivaPrograma().getEjeCapacitacion());
 			logger.info("La busqeda de ava por tpo competencia y eje de capacitacion " + "		retorno"
 					+ avaFiltroBusquedaList.size() + " Elementos");
@@ -1105,6 +1127,137 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 		}
 
 	}
+	
+	
+	/**
+	 * Genera el catalogo de planes
+	 *
+	 * @param e
+	 */
+	private void generaEstructuraCatPlanes() {
+		nodos = this.generarPlanes();
+		catPlanes = new ArrayList<>();
+		
+		for (NodoeHijosDTO nh : nodos) {
+			CatalogoComunDTO cc = new CatalogoComunDTO();
+			cc.setId(nh.getIdNodo());
+			cc.setNombre(nh.getNombre());
+			
+			catPlanes.add(cc);
+		}
+	}
+	
+	/**
+	 * Genera el catalogo de estructuras
+	 *
+	 * @param e
+	 */
+	public void onChangeCatPlan(ValueChangeEvent e) {
+		this.esNombreProgramaEditable = Boolean.FALSE;
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			Integer idPlanSel = Integer.parseInt(e.getNewValue().toString());
+			
+			catEstructuras = this.generarEstructuras(nodos, idPlanSel);
+			
+			catSubEstructurasNivel1 = new ArrayList<CatalogoComunDTO>();
+			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
+			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+			
+			ejeCapacitacion = idPlanSel;
+			
+			if(catEstructuras.size() == 0){
+				buscarPlanes();
+			}
+		}
+	}
+	
+	/**
+	 * Genera el catalogo de subestructuras nivel 1
+	 *
+	 * @param e
+	 */
+	public void onChangeCatEstructura(ValueChangeEvent e) {
+		this.esNombreProgramaEditable = Boolean.FALSE;
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
+			
+			catSubEstructurasNivel1 = this.generarSubEstructuras1(nodos, idSubEstructura);
+			
+			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
+			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+			ejeCapacitacion = idSubEstructura;
+			idCatEstructura = idSubEstructura;
+			
+			if(catSubEstructurasNivel1.size() == 0){
+				buscarPlanes();
+			}
+			
+		}
+	}
+	
+	/**
+	 * Genera el catalogo de subestructuras nivel 2
+	 *
+	 * @param e
+	 */
+	public void onChangeCatSubestructura1(ValueChangeEvent e) {
+		this.esNombreProgramaEditable = Boolean.FALSE;
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
+			catSubEstructurasNivel2 = this.generarSubEstructuras2(nodos, idSubEstructura);
+			
+			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+			ejeCapacitacion =  Integer.parseInt(e.getNewValue().toString());
+			idCatSubEstructuraNivel1 = idSubEstructura;
+			
+			if(catSubEstructurasNivel2.size() == 0){
+				buscarPlanes();
+			}
+			
+		}
+	}
+	
+	/**
+	 * Genera el catalogo de subestructuras nivel 3
+	 *
+	 * @param e
+	 */
+	public void onChangeCatSubestructura2(ValueChangeEvent e) {
+		this.esNombreProgramaEditable = Boolean.FALSE;
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
+			catSubEstructurasNivel3 = this.generarSubEstructuras3(nodos, idSubEstructura);
+			
+			ejeCapacitacion = Integer.parseInt(e.getNewValue().toString());
+			idCatSubEstructuraNivel2 = idSubEstructura;
+			
+			if(catSubEstructurasNivel3.size() == 0){
+				buscarPlanes();
+			}
+		}
+	}
+	
+	public void onChangeCatSubestructura3(ValueChangeEvent e) {
+		this.esNombreProgramaEditable = Boolean.FALSE;
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			ejeCapacitacion = Integer.parseInt(e.getNewValue().toString());
+
+			idCatSubEstructuraNivel3 = Integer.parseInt(e.getNewValue().toString());
+			
+			buscarPlanes();
+		}
+	}
+	
+	public void buscarPlanes() {
+		this.esNombreProgramaEditable = Boolean.TRUE;
+		filtro.getFichaDescriptivaPrograma().setEjeCapacitacion(ejeCapacitacion);
+
+		avaFiltroBusquedaList = ambienteVirtualApService.consultarAvasPorEjeCapacitacion(
+				idModalidades, this.obtenerListaIdEstatusEventos(),
+				filtro.getFichaDescriptivaPrograma().getEjeCapacitacion());
+		logger.info("La busqueda de ava por tpo competencia y eje de capacitacion " + "		retorno"
+				+ avaFiltroBusquedaList.size() + " Elementos");
+	}
 
 	/**
 	 * getter y setter
@@ -1400,5 +1553,103 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 	public void setCorreoNotificacionBean(CorreoNotificacionBean correoNotificacionBean) {
 		this.correoNotificacionBean = correoNotificacionBean;
 	}
+	
+	
+	public List<CatalogoComunDTO> getCatPlanes() {
+		return catPlanes;
+	}
 
+	public void setCatPlanes(List<CatalogoComunDTO> catPlanes) {
+		this.catPlanes = catPlanes;
+	}
+
+	public List<CatalogoComunDTO> getCatEstructuras() {
+		return catEstructuras;
+	}
+
+	public void setCatEstructuras(List<CatalogoComunDTO> catEstructuras) {
+		this.catEstructuras = catEstructuras;
+	}
+
+	public List<CatalogoComunDTO> getCatSubEstructurasNivel1() {
+		return catSubEstructurasNivel1;
+	}
+
+	public void setCatSubEstructurasNivel1(List<CatalogoComunDTO> catSubEstructurasNivel1) {
+		this.catSubEstructurasNivel1 = catSubEstructurasNivel1;
+	}
+
+	public List<CatalogoComunDTO> getCatSubEstructurasNivel2() {
+		return catSubEstructurasNivel2;
+	}
+
+	public void setCatSubEstructurasNivel2(List<CatalogoComunDTO> catSubEstructurasNivel2) {
+		this.catSubEstructurasNivel2 = catSubEstructurasNivel2;
+	}
+
+	public List<CatalogoComunDTO> getCatSubEstructurasNivel3() {
+		return catSubEstructurasNivel3;
+	}
+
+	public void setCatSubEstructurasNivel3(List<CatalogoComunDTO> catSubEstructurasNivel3) {
+		this.catSubEstructurasNivel3 = catSubEstructurasNivel3;
+	}
+
+	public Integer getIdCatPlan() {
+		return idCatPlan;
+	}
+
+	public void setIdCatPlan(Integer idCatPlan) {
+		this.idCatPlan = idCatPlan;
+	}
+
+	public Integer getIdCatEstructura() {
+		return idCatEstructura;
+	}
+
+	public void setIdCatEstructura(Integer idCatEstructura) {
+		this.idCatEstructura = idCatEstructura;
+	}
+
+	public Integer getIdCatSubEstructuraNivel1() {
+		return idCatSubEstructuraNivel1;
+	}
+
+	public void setIdCatSubEstructuraNivel1(Integer idCatSubEstructuraNivel1) {
+		this.idCatSubEstructuraNivel1 = idCatSubEstructuraNivel1;
+	}
+
+	public Integer getIdCatSubEstructuraNivel2() {
+		return idCatSubEstructuraNivel2;
+	}
+
+	public void setIdCatSubEstructuraNivel2(Integer idCatSubEstructuraNivel2) {
+		this.idCatSubEstructuraNivel2 = idCatSubEstructuraNivel2;
+	}
+
+	public Integer getIdCatSubEstructuraNivel3() {
+		return idCatSubEstructuraNivel3;
+	}
+
+	public void setIdCatSubEstructuraNivel3(Integer idCatSubEstructuraNivel3) {
+		this.idCatSubEstructuraNivel3 = idCatSubEstructuraNivel3;
+	}
+
+	public Integer getEjeCapacitacion() {
+		return ejeCapacitacion;
+	}
+
+	public void setEjeCapacitacion(Integer ejeCapacitacion) {
+		this.ejeCapacitacion = ejeCapacitacion;
+	}
+
+	public List<NodoeHijosDTO> getNodos() {
+		return nodos;
+	}
+
+	public void setNodos(List<NodoeHijosDTO> nodos) {
+		this.nodos = nodos;
+	}
+	
+	
 }
