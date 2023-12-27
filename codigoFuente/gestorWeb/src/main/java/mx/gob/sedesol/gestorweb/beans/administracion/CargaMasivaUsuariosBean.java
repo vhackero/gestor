@@ -64,10 +64,6 @@ public class CargaMasivaUsuariosBean extends BaseBean {
 
 	@ManagedProperty(name = "sistema", value = "#{sistema}")
 	private SistemaBean sistema;
-	
-	@ManagedProperty(value = "#{personaSigeService}")
-	private transient PersonaSigeService personaSigeService;
-
 	@ManagedProperty("#{bitacoraService}")
 	private BitacoraService bitacoraService;
 
@@ -94,17 +90,6 @@ public class CargaMasivaUsuariosBean extends BaseBean {
 		lote = new LoteCargaUsuarioDTO(getUsuarioEnSession().getIdPersona());
 		mostrarResultados = false;
 		return ConstantesGestorWeb.NAVEGA_CARGA_USUARIOS;
-	}
-	
-	public void obtenerUsuarios() {
-		logger.info("Hola q hace");
-		List<PersonaSigeDTO> personasSige = personaSigeService.findAll();
-		for(PersonaSigeDTO persona : personasSige) {
-			logger.info(persona.getNombre());
-			//TODO: llenar objetos 
-			//TODO: registrarlos mediante los datos necesaris
-			//TODO: crear excel para carga masiva ? 
-		}
 	}
 
 	public void fileUploadListener(FileUploadEvent e) {
@@ -288,14 +273,6 @@ public class CargaMasivaUsuariosBean extends BaseBean {
 
 	public void setBitacoraBean(BitacoraBean bitacoraBean) {
 		this.bitacoraBean = bitacoraBean;
-	}
-
-	public PersonaSigeService getPersonaSigeService() {
-		return personaSigeService;
-	}
-
-	public void setPersonaSigeService(PersonaSigeService personaSigeService) {
-		this.personaSigeService = personaSigeService;
 	}
 	
 }

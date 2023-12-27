@@ -22,7 +22,7 @@
 				<div class="col-md-5">
 					<sec:authorize access="hasPermission(null,'PER_AGR')">
 						<p:commandButton id="btnRegistro" rendered="true"
-							action="#{cargaMasivaUsuariosBean.obtenerUsuarios()}"
+							action="#{adminPersonaBean.obtenerUsuarios()}"
 							value="Importar datos"
 							styleClass="pull-right btn btn-primary" />
 						<p:outputLabel rendered="true"

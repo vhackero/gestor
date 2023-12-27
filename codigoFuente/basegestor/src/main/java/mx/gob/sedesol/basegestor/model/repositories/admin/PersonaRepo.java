@@ -32,4 +32,6 @@ public interface PersonaRepo extends JpaRepository<TblPersona,Long>, JpaSpecific
 			+ "WHERE a.codigoPostal like %?1%")
 	List<TblPersona> obtenerPersonaPorCodigoPostal(String codigoPostal);
 	
+	@Query("SELECT p FROM TblPersona p WHERE p.curp = ?1")
+	TblPersona obtieneCurp(String curp);
 }

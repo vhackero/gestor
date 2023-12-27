@@ -35,18 +35,27 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.MunicipioDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PaisDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaCorreoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDatosAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaRolDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaTelefonoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.RolDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.TipoCorreoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.TipoTelefonoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.UsuarioDatosLaboralesDTO;
+import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.SedeDTO;
 import mx.gob.sedesol.basegestor.commons.utils.GeneroEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.OrdenGobiernoEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.commons.utils.TipoUsuarioEnum;
+import mx.gob.sedesol.basegestor.model.especificaciones.DatosLaboralesEspecificacion;
 import mx.gob.sedesol.basegestor.mongo.service.BitacoraService;
+import mx.gob.sedesol.basegestor.service.admin.EntidadFederativaService;
+import mx.gob.sedesol.basegestor.service.admin.MunicipioService;
+import mx.gob.sedesol.basegestor.service.admin.PersonaSigeService;
 import mx.gob.sedesol.basegestor.service.impl.admin.PersonaServiceFacade;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
@@ -68,12 +77,18 @@ public class AdminPersonaBean extends BaseBean {
 
 	@ManagedProperty("#{bitacoraService}")
 	private BitacoraService bitacoraService;
+	
+	@ManagedProperty("#{entidadFederativaService}")
+	private EntidadFederativaService entidadFederativaService;
 
 	@ManagedProperty("#{sistema}")
 	private SistemaBean textosSistema;
 
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
+	
+	@ManagedProperty("#{municipioService}")
+	private MunicipioService municipioService;
 
 	private transient ModelMapper mapper = new ModelMapper();
 
@@ -106,6 +121,9 @@ public class AdminPersonaBean extends BaseBean {
 	private String rutaFotografias;
 	private String nombreFotoComun;
 	private String rutaUndertow;
+	
+	@ManagedProperty(value = "#{personaSigeService}")
+	private transient PersonaSigeService personaSigeService;
 
 	private static final String CURP_PATTERN = "[A-Z]{1}[AEIOU]{1}[A-Z]{2}[0-9]{2}"
 			+ "(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[0-1])" + "[HM]{1}"
@@ -123,6 +141,100 @@ public class AdminPersonaBean extends BaseBean {
 		listaSedes = personaServiceFacade.obtenerEntidadesPorPais(ConstantesGestor.ID_PAIS_MEXICO);
 
 		listaRoles = new DualListModel<>();
+	}
+	
+	public void obtenerUsuarios() {
+		List<PersonaSigeDTO> personasSige = personaSigeService.findAll();
+		for(PersonaSigeDTO persona : personasSige) {
+			try {
+				if(!personaServiceFacade.getPersonaService().existeCurp(persona.getCurp())) {
+					agregarPersona();
+					
+					PersonaDTO personaInsertar = crearPersona(persona);
+					datos.setPersona(personaInsertar);
+					datos.setDatosLaborales(datoslaborales(personaInsertar));
+					datos.setPersonaCorreo(personaCorreo());
+					datos.setDomicilioPersona(personaDomicilio());
+					datos.setDatosAcademicos(personaDatosAcademicos());
+					
+					guardarPersona();
+					agregarMsgInfo("Proceso exitoso", "Usuarios importados");
+				}else {
+					logger.error("La persona ya existe: "+persona.getCurp());
+					agregarMsgError("La persona ya existe: "+persona.getCurp(), "Regiustro existente");
+					continue;
+				}
+			}catch(Exception e) {
+				logger.error(e);
+			}
+		}
+	}
+	
+	private PersonaDTO crearPersona(PersonaSigeDTO persona) {
+		Long id = 2L; 
+		PersonaDTO personaInsertar = new PersonaDTO(id, "MX");
+		String usuario = persona.getNombre()+persona.getApellidoPaterno().substring(0, 1)+persona.getApellidoMaterno().substring(0, 1);
+		personaInsertar.setUsuario(usuario);
+		personaInsertar.setContrasenia(persona.getMatricula());//TODO: mejor curp ? 
+		personaInsertar.setNuevaContrasenia(persona.getMatricula());
+		personaInsertar.setCurp(persona.getCurp());
+		personaInsertar.setNombre(persona.getNombre());
+		personaInsertar.setApellidoPaterno(persona.getApellidoPaterno());
+		personaInsertar.setApellidoMaterno(persona.getApellidoMaterno());
+		personaInsertar.setFechaNacimiento(persona.getFechaNacimiento());
+		personaInsertar.setRfc(persona.getCurp().substring(0, 9));
+		personaInsertar.setCorreoElectronico(persona.getCorreoInstitucional());
+		personaInsertar.setConfirmacionContrasenia(persona.getMatricula());
+		personaInsertar.setIdEntidadFederativa("01");
+		personaInsertar.setEntidadFederativa("Mexico");
+		personaInsertar.setIdMunicipio("12");
+		personaInsertar.setMunicipio("Patriotismo");
+		personaInsertar.setIdDependencia("2-00");
+		personaInsertar.setClaveDependencia("11");
+		personaInsertar.setDependencia("Dependencia");
+		personaInsertar.setIdUnidadAdministrativa("11");
+		personaInsertar.setSso_status(String.valueOf(persona.getIdPersonaSige()));
+		
+		return personaInsertar;
+	}
+	
+	private UsuarioDatosLaboralesDTO datoslaborales(PersonaDTO persona) {
+		UsuarioDatosLaboralesDTO usuario = new UsuarioDatosLaboralesDTO(persona);
+		EntidadFederativaDTO sede = entidadFederativaService.buscarPorId(11);
+		List<MunicipioDTO> municipio = municipioService.buscarPorEntidadFederativa(11);
+		usuario.setInstitucion("UNADM");
+		usuario.setSede(sede);
+		usuario.setMunicipio(municipio.get(0));
+		usuario.setFechaIngreso(persona.getFechaActualizacion());
+		return usuario;
+	}
+	
+	private PersonaCorreoDTO personaCorreo() {
+		Long usuarioModifico = 2L;
+		PersonaCorreoDTO usuario = new PersonaCorreoDTO(usuarioModifico, 1);
+		TipoCorreoDTO correo = new TipoCorreoDTO();
+
+		correo.setDescripcion("Correo");
+		correo.setIdTipoCorreo(1);
+		correo.setActivo(1);
+		usuario.setCorreoElectronico(datos.getPersona().getCorreoElectronico());
+		usuario.setPersona(datos.getPersona());
+		usuario.setTipoCorreo(correo);
+		return usuario;
+	}
+	
+	private DomicilioPersonaDTO personaDomicilio() {
+		DomicilioPersonaDTO usuario = new DomicilioPersonaDTO();
+		usuario.setNumeroExterior("1");
+		usuario.setIdMunicipio("11");
+		usuario.setPersona(datos.getPersona());
+		usuario.setIdMunicipio("11");
+		usuario.setIdEntidadFederativa(11);
+		return usuario;
+	}
+	private PersonaDatosAcademicoDTO personaDatosAcademicos() {
+		PersonaDatosAcademicoDTO usuario = new PersonaDatosAcademicoDTO();
+		return usuario;
 	}
 
 	public void limpiarDatos() {
@@ -792,4 +904,29 @@ public class AdminPersonaBean extends BaseBean {
 	public void setBitacoraBean(BitacoraBean bitacoraBean) {
 		this.bitacoraBean = bitacoraBean;
 	}
+
+	public PersonaSigeService getPersonaSigeService() {
+		return personaSigeService;
+	}
+
+	public void setPersonaSigeService(PersonaSigeService personaSigeService) {
+		this.personaSigeService = personaSigeService;
+	}
+
+	public EntidadFederativaService getEntidadFederativaService() {
+		return entidadFederativaService;
+	}
+
+	public void setEntidadFederativaService(EntidadFederativaService entidadFederativaService) {
+		this.entidadFederativaService = entidadFederativaService;
+	}
+
+	public MunicipioService getMunicipioService() {
+		return municipioService;
+	}
+
+	public void setMunicipioService(MunicipioService municipioService) {
+		this.municipioService = municipioService;
+	}
+	
 }

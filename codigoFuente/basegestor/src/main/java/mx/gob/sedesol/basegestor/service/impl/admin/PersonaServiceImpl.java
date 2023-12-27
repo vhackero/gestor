@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.formula.functions.T;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1201,6 +1202,21 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 			dto.setFechaActualizacion(new Date());
 		}
 		return dto;
+	}
+	
+	@Override
+	public Boolean existeCurp(String curpParam) {
+		Boolean existe = false;
+		try {
+			TblPersona consultaCurp = personaRepo.obtieneCurp(curpParam);
+			if(consultaCurp != null) {
+				existe = true;
+			}
+		} catch (Exception e) {
+			logger.error(e);
+		}
+
+		return existe;
 	}
 
 	public PersonaDatosAcademicosService getPersonaDatosAcademicos() {
