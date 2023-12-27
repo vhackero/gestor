@@ -127,7 +127,7 @@
 								<p:outputLabel value="Inicial:" styleClass="bloque" />
 								<p:calendar id="fc_fechaInicial" navigator="true"
 									value="#{reporteEventosCapacitacionBean.filtro.fechaInicial}"
-									styleClass="fa fa-solid fa-calendar-days"
+									styleClass="requerido"
 									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 									yearRange="c-100:c+100" locale="es"
 									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -140,7 +140,7 @@
 								<p:outputLabel value="Final:" styleClass="bloque" />
 								<p:calendar navigator="true"
 									value="#{reporteEventosCapacitacionBean.filtro.fechaFinal}"
-									styleClass="fa fa-solid fa-calendar-days" id="fc_fechaFinal"
+									styleClass="requerido" id="fc_fechaFinal"
 									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 									yearRange="c-100:c+100" locale="es" readonlyInput="true"
 									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
