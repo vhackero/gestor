@@ -145,6 +145,9 @@ public class TblPersona implements Serializable {
 
 	@Column(name = "sso_registradoPor")
 	private String registradoPor;
+	
+	@Column(name = "sso_status")
+	private String sso_status;
 
 	public TblPersona() {
 	}
@@ -477,6 +480,14 @@ public class TblPersona implements Serializable {
 
 	public void setDatosLaborales(List<RelUsuarioDatosLaborales> datosLaborales) {
 		this.datosLaborales = datosLaborales;
+	}
+
+	public String getSso_status() {
+		return sso_status;
+	}
+
+	public void setSso_status(String sso_status) {
+		this.sso_status = sso_status;
 	}
 
 }

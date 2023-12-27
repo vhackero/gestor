@@ -53,6 +53,7 @@ import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
 import mx.gob.sedesol.basegestor.service.admin.CatalogoComunService;
 import mx.gob.sedesol.basegestor.service.admin.OrgGubernamentalService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaService;
+import mx.gob.sedesol.basegestor.service.admin.PersonaSigeService;
 import mx.gob.sedesol.basegestor.service.admin.RoleService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.PersonaResponsabilidadesService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.CompetenciaEspecificaService;
@@ -118,6 +119,8 @@ public class FECServiceFacade {
     private PersonaService personaService;
     @Autowired
     private ParametroWSMoodleService parametroWSMoodleService;
+    @Autowired
+    private PersonaSigeService personaSigeService;
 
     @Autowired
     private MallaPlanService mallaPlanService;
@@ -1336,5 +1339,13 @@ public class FECServiceFacade {
     public void setParametroWSMoodleService(ParametroWSMoodleService parametroWSMoodleService) {
         this.parametroWSMoodleService = parametroWSMoodleService;
     }
+
+	public PersonaSigeService getPersonaSigeService() {
+		return personaSigeService;
+	}
+
+	public void setPersonaSigeService(PersonaSigeService personaSigeService) {
+		this.personaSigeService = personaSigeService;
+	}
 
 }

@@ -19,7 +19,18 @@
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
 			<div class="row">
-				<div class="col-md-12">
+				<div class="col-md-5">
+					<sec:authorize access="hasPermission(null,'PER_AGR')">
+						<p:commandButton id="btnRegistro" rendered="true"
+							action="#{adminPersonaBean.obtenerUsuarios()}"
+							value="Importar datos"
+							styleClass="pull-right btn btn-primary" />
+						<p:outputLabel rendered="true"
+							value="Importar datos SIGE: "
+							styleClass="pull-right agregaHeight" />
+					</sec:authorize>
+				</div>
+				<div class="col-md-7">
 					<sec:authorize access="hasPermission(null,'PER_AGR')">
 						<p:commandButton id="btnCargaMasiva" rendered="true"
 							action="#{cargaMasivaUsuariosBean.inicioCargaUsuarios()}"

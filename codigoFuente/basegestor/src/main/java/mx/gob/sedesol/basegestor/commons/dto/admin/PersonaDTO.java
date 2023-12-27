@@ -97,6 +97,8 @@ public class PersonaDTO extends ComunDTO implements Serializable {
 	private String unidadAdministrativa;
 
 	private String registradoPor;
+	
+	private String sso_status;
 
 	private List<SsoElementoDTO> relPersonaElementos;
 	
@@ -629,6 +631,14 @@ public class PersonaDTO extends ComunDTO implements Serializable {
 
 	public void setDatosLaborales(List<UsuarioDatosLaboralesDTO> datosLaborales) {
 		this.datosLaborales = datosLaborales;
+	}
+
+	public String getSso_status() {
+		return sso_status;
+	}
+
+	public void setSso_status(String sso_status) {
+		this.sso_status = sso_status;
 	}
 
 }
