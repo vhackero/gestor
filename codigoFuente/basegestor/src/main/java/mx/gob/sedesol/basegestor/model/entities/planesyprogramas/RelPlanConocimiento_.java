@@ -11,7 +11,7 @@ public class RelPlanConocimiento_ {
 	public static volatile SingularAttribute<RelPlanConocimiento, Integer> activo;
 	public static volatile SingularAttribute<RelPlanConocimiento, Date> fechaRegistro;
 	public static volatile SingularAttribute<RelPlanConocimiento, Long> usuarioModifico;
-	public static volatile SingularAttribute<RelPlanConocimiento, CatAreasConocimiento> catAreasConocimiento;
+	public static volatile SingularAttribute<RelPlanConocimiento, CatConocimientosPlan> catAreasConocimiento;
 	public static volatile SingularAttribute<RelPlanConocimiento, TblPlan> tblPlan;
 	public static volatile SingularAttribute<RelPlanConocimiento, Integer> idPlan;
 	public static volatile SingularAttribute<RelPlanConocimiento, Integer> idCatConocimiento;

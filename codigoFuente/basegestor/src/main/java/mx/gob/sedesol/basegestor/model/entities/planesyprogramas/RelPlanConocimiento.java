@@ -4,44 +4,43 @@ import java.io.Serializable;
 import javax.persistence.*;
 import java.util.Date;
 
-
 /**
  * The persistent class for the rel_plan_conocimientos database table.
  * 
  */
 @Entity
-@Table(name="rel_plan_conocimientos")
+@Table(name = "rel_plan_conocimientos")
 @IdClass(RelPlanConocimientoPK.class)
 public class RelPlanConocimiento implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
-	@Column(name="id_plan")
+	@Column(name = "id_plan")
 	private Integer idPlan;
 
 	@Id
-	@Column(name="id_area_conocimiento")
+	@Column(name = "id_area_conocimiento")
 	private Integer idAreaConocimiento;
 
 	private Integer activo;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="fecha_registro", insertable = false, updatable=false)
+	@Column(name = "fecha_registro", insertable = false, updatable = false)
 	private Date fechaRegistro;
 
-	@Column(name="usuario_modifico")
+	@Column(name = "usuario_modifico")
 	private Long usuarioModifico;
 
-	//bi-directional many-to-one association to CatAreasConocimiento
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="id_area_conocimiento", insertable=false, updatable=false)
-	private CatAreasConocimiento catAreasConocimiento;
+	// bi-directional many-to-one association to CatAreasConocimiento
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "id_area_conocimiento", insertable = false, updatable = false)
+	private CatConocimientosPlan catAreasConocimiento;
 
-	//bi-directional many-to-one association to TblPlan
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="id_plan", insertable=false, updatable=false)
+	// bi-directional many-to-one association to TblPlan
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "id_plan", insertable = false, updatable = false)
 	private TblPlan tblPlan;
-	
+
 	public RelPlanConocimiento() {
 	}
 
@@ -114,18 +113,12 @@ public class RelPlanConocimiento implements Serializable {
 	public void setUsuarioModifico(Long usuarioModifico) {
 		this.usuarioModifico = usuarioModifico;
 	}
-
-	/**
-	 * @return the catAreasConocimiento
-	 */
-	public CatAreasConocimiento getCatAreasConocimiento() {
+	
+	public CatConocimientosPlan getCatAreasConocimiento() {
 		return catAreasConocimiento;
 	}
 
-	/**
-	 * @param catAreasConocimiento the catAreasConocimiento to set
-	 */
-	public void setCatAreasConocimiento(CatAreasConocimiento catAreasConocimiento) {
+	public void setCatAreasConocimiento(CatConocimientosPlan catAreasConocimiento) {
 		this.catAreasConocimiento = catAreasConocimiento;
 	}
 
