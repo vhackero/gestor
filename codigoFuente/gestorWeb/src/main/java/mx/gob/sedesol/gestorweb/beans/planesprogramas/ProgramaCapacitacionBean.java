@@ -350,7 +350,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			this.programa.setCoordinadorAcademico(coordAcad);
 		}
 
-		this.getNombreEjeCapTipoCom();
+		//this.getNombreEjeCapTipoCom();
 
 	}
 
@@ -944,6 +944,15 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	 */
 	private void generaEstructuraCatPlanes() {
 		nodos = this.generarPlanes();
+		catPlanes = new ArrayList<>();
+		
+		for (NodoeHijosDTO nh : nodos) {
+			CatalogoComunDTO cc = new CatalogoComunDTO();
+			cc.setId(nh.getIdNodo());
+			cc.setNombre(nh.getNombre());
+			
+			catPlanes.add(cc);
+		}
 	}
 	
 	/**
@@ -953,13 +962,16 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	 */
 	public void onChangeCatPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			catEstructuras = this.generarEstructuras(nodos, Integer.parseInt(e.getNewValue().toString()));
+			Integer idPlanSel = Integer.parseInt(e.getNewValue().toString());
+			
+			catEstructuras = this.generarEstructuras(nodos, idPlanSel);
 			
 			catSubEstructurasNivel1 = new ArrayList<CatalogoComunDTO>();
 			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
 			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
-			programa.setEjeCapacitacion(Integer.parseInt(e.getNewValue().toString()));
-			idCatPlan = Integer.parseInt(e.getNewValue().toString());
+			
+			programa.setEjeCapacitacion(idPlanSel);
+			programa.setIdPlan(idPlanSel);
 			nivelMaximo = 0;
 		}
 	}
@@ -1152,14 +1164,14 @@ public class ProgramaCapacitacionBean extends BaseBean {
 
 	/**
 	 *
-	 * @param idTpoComp
+	 * @param idPlan
 	 * @return
 	 */
-	public String obtieneNombreTpoCompetencia(Integer idTpoComp) {
+	public String obtieneNombrePlan(Integer idPlan) {
 
-		if (ObjectUtils.isNotNull(idTpoComp)) {
-			for (CatalogoComunDTO tpoCom : catTpoComp) {
-				if (tpoCom.getId().equals(idTpoComp)) {
+		if (ObjectUtils.isNotNull(idPlan)) {
+			for (CatalogoComunDTO tpoCom : catPlanes) {
+				if (tpoCom.getId().equals(idPlan)) {
 					return tpoCom.getNombre();
 				}
 			}
