@@ -13,6 +13,8 @@ public class PersonaSigeDTO extends ComunDTO implements Serializable {
 
 	private String matricula;
 	
+	private String password;
+	
 	private String nombre;
 
 	private String apellidoPaterno;
@@ -55,7 +57,15 @@ public class PersonaSigeDTO extends ComunDTO implements Serializable {
 
 	public void setMatricula(String matricula) {
 		this.matricula = matricula;
-	}	
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
 	public String getNombre() {
 		return nombre;
