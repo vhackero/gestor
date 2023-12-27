@@ -135,7 +135,7 @@ public class PlanBean extends BaseBean {
 			plan.setCatModalidadPlanPrograma(new CatalogoComunDTO());
 			plan.setCatNivelEnsenanzaPrograma(new CatalogoComunDTO());
 			plan.setTblOrganismoGubernamental(new OrgGubernamentalDTO());
-			plan.setIdentificador(planServiceFacade.generaIdentificadorPlan());
+			//plan.setIdentificador(planServiceFacade.generaIdentificadorPlan());
 
 			plan.setCatCreditosPlan(new CatalogoComunDTO());
 			plan.setCatDivisionesPlan(new CatalogoComunDTO());
