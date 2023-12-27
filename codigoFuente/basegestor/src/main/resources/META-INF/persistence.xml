@@ -43,6 +43,7 @@
         <class>mx.gob.sedesol.basegestor.model.entities.badges.CatClasificacionBadge</class>
         <class>mx.gob.sedesol.basegestor.model.entities.badges.CatBadge</class>
         <class>mx.gob.sedesol.basegestor.model.entities.admin.TblCfgCron</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.TblPersonaSige</class>
         <class>mx.gob.sedesol.basegestor.model.entities.admin.SsoElemento</class>
 
         <!-- Planes y programas -->

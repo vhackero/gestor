@@ -48,5 +48,7 @@ public interface PersonaService extends CommonService<PersonaDTO, Long> {
 	List<PersonaDTO> obtenerPersonaPorCodigoPostal(String codigoPostal);
 
 	ResultadoDTO<PersonaDTO> desactivarPersona(PersonaDTO persona);
+	
+	Boolean existeCurp(String curp);
 
 }
