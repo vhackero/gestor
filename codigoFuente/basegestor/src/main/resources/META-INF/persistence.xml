@@ -94,6 +94,7 @@
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatCreditosPlan</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatDivisionesPlan</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoCompetencia</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelMallaPlan</class>
         <!-- Fin Planes y programas -->
 
         <!-- Inicia seccion encuestas -->

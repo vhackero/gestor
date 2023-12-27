@@ -1,4 +1,14 @@
 $(function() {
+	/**
+	 * 2023/12/22
+	 * Falta aplicar las reglas de necogio para generar las graficas
+	 */
+	cargaGraficasReservaciones = function(xhr, status, args) {
+		
+		var reservaciones = jQuery.parseJSON(args.estadisticas);		
+		console.log(reservaciones);	
+		
+	}
 
 	cargaGraficasEventos = function(xhr, status, args) {
 

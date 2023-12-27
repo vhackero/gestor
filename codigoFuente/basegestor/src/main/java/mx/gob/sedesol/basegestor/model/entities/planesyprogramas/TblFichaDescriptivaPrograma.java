@@ -49,6 +49,7 @@ public class TblFichaDescriptivaPrograma implements Serializable {
 
 	@Column(name="id_alcance_programa")
 	private Integer idAlcancePrograma;
+	
 	@Column(name="id_plan")
 	private Integer idPlan;
 
@@ -203,6 +204,7 @@ public class TblFichaDescriptivaPrograma implements Serializable {
 	
 	@Column(name="tipo")
 	private String tipo;
+	
 	@Column(name="creditos")
 	private Integer creditos;
 	
@@ -212,6 +214,7 @@ public class TblFichaDescriptivaPrograma implements Serializable {
 
 	public TblFichaDescriptivaPrograma() {
 	}
+	
 	public Integer getCreditos() {
 		return creditos;
 	}

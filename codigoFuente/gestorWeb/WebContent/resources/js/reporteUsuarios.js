@@ -2,14 +2,16 @@ $(function() {
 
 	cargaGraficasUsuarios = function(xhr, status, args) {
 
+		
+		
 		var usuarios = jQuery.parseJSON(args.estadisticas);
 		console.log(usuarios);
 		console.log(usuarios.totalUsuarios);
-
+		console.log("Estadisticas: " + args.estadisticas);
 		// var dato1 = parseInt(args.progsBorrador);
 		// var dato2 = parseInt(args.progsFinal);
 		// var dato3 = parseInt(args.progsCancel);
-
+	
 		/* Paleta de colores */
 		var tresColores = [ 'rgb(84, 143, 203)', 'rgb(0, 0, 0)',
 				'rgb(199, 198, 198)' ];

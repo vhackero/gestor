@@ -126,8 +126,8 @@ public class ReporteGestionEscolarBean extends BaseBean {
 				.getAttribute(ConstantesGestorWeb.CAT_EVENTO_CAPACITACION);
 		listaEntidades = analisisDatosGestionEscolarFacade.obtenerEntidadesPorPais(ConstantesGestor.ID_PAIS_MEXICO);
 		listaDeTodosLosMunicipios = municipioService.findAll();
-		// generaEstructuraCatTpoCompetenciaPlan();
-		// generaCatEjesCapacitBusqueda();
+		generaEstructuraCatTpoCompetenciaPlan();
+		generaCatEjesCapacitBusqueda();
 		visible = Arrays.asList(true, true, true, true, true, true, true, true, false, false, false, false, false,
 				false, false, false, false, false);
 	}
