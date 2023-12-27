@@ -971,7 +971,8 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
 			
 			programa.setEjeCapacitacion(idPlanSel);
-			programa.setIdPlan(idPlanSel);
+			programa.setIdPlan(mallaCurricularService.buscarPorId(idPlanSel).getIdPlan());
+			
 			nivelMaximo = 0;
 		}
 	}

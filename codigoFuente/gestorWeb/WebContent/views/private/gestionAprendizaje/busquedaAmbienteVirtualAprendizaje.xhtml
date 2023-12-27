@@ -380,24 +380,13 @@
 								</f:facet>
 								<h:outputText value="#{ava.eventoCapacitacion.nombreEc}" />
 							</p:column>
-
 							<p:column styleClass="text-center">
 								<f:facet name="header">
 									<h:outputText
-										value="#{sistema.obtenerTexto('gw.ga.label.tipocomp')}" />
+										value="Programa de estudios" />
 								</f:facet>
 								<h:outputText
-									value="#{ambientesVirtualesAvaBean.obtieneNombreTpoCompetencia
-														(ava.eventoCapacitacion.fichaDescriptivaPrograma.tipoCompetencia)}" />
-							</p:column>
-							<p:column styleClass="text-center">
-								<f:facet name="header">
-									<h:outputText
-										value="#{sistema.obtenerTexto('gw.ga.label.ejecap')}" />
-								</f:facet>
-								<h:outputText
-									value="#{ambientesVirtualesAvaBean.obtieneNombreEjeCapacit
-														(ava.eventoCapacitacion.fichaDescriptivaPrograma.ejeCapacitacion)}" />
+									value="#{ava.eventoCapacitacion.fichaDescriptivaPrograma.nombreTentativo}" />
 							</p:column>
 							<p:column styleClass="text-center">
 								<f:facet name="header">
