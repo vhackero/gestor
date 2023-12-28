@@ -181,6 +181,21 @@ public class AmbienteVirtualApServiceImpl extends ComunValidacionService<Ambient
 
 		return ambienteVirtualApMapper.map(tblAmbienteVirtualAprendizajeList, objetoDTO);
 	}
+	
+	@Override
+	public List<AmbienteVirtualAprendizajeDTO> consultarAvasPorEjeCapacitacion(
+			List<Integer> modalidadEvtCapList, List<Integer> estatusEvtCap, Integer idEjeCapacitacion) {
+
+		List<TblAmbienteVirtualAprendizaje> tblAmbienteVirtualAprendizajeList = ambienteVirtualApRepo
+				.consultarAvasPorEjeCapacitacion(modalidadEvtCapList, estatusEvtCap, idEjeCapacitacion);
+
+		Type objetoDTO = new TypeToken<List<AmbienteVirtualAprendizajeDTO>>() {
+		}.getType();
+
+		logger.info("El tamanio de la lista retornada es " + tblAmbienteVirtualAprendizajeList.size());
+
+		return ambienteVirtualApMapper.map(tblAmbienteVirtualAprendizajeList, objetoDTO);
+	}
 
 	public List<AmbienteVirtualAprendizajeDTO> busquedaDeAvasConCriterios(EventoCapacitacionDTO filtro,
 			String tipoDatoFechas) {

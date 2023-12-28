@@ -27,6 +27,9 @@ public interface AmbienteVirtualApService {
 	(List<Integer> modalidadEvtCapList,List <Integer> estatusEvtCap,Integer idTipoCom,
 							Integer idEjeCapacitacion);
 	
+	List<AmbienteVirtualAprendizajeDTO> consultarAvasPorEjeCapacitacion(List<Integer> modalidadEvtCapList,
+			List <Integer> estatusEvtCap, Integer idEjeCapacitacion);
+	
 	List<AmbienteVirtualAprendizajeDTO> busquedaDeAvasConCriterios(EventoCapacitacionDTO filtro,String tipoDatoFechas);
 
 
