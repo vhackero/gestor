@@ -789,7 +789,7 @@ public class AmbienteVirtualApServiceImpl extends ComunValidacionService<Ambient
 		LoginWS loginWS = new LoginWS(parametroWSMoodleDTO);
 
 		try {
-			url = loginWS.generarAccesoMoodle(personaDTO.getUsuario(), personaDTO.getUnidadAdministrativa(), idCurso);
+			url = loginWS.generarAccesoMoodle(personaDTO.getUsuario(), personaDTO.getContrasenia(), idCurso);
 		} catch (Exception e) {
 			url = parametroWSMoodleDTO.getHost();
 			logger.error("Ocurrio un error al obtener la url para ingresar a el curso, se tomara la url por defatult :"
