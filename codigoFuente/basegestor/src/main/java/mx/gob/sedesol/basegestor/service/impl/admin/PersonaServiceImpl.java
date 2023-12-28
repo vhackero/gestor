@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.log4j.Logger;
@@ -1287,6 +1289,75 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 		}
 
 		return resultado;
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public Boolean guardarPersonas(List<CapturaPersonaDTO> datos) {	
+		boolean exito = false;
+		List<TblPersona> personaDTOToTbl = datos.stream()
+				.map(capturaPersonaDTO -> mapper.map(capturaPersonaDTO.getPersona(), TblPersona.class))
+				.collect(Collectors.toList());
+		List<TblPersona> personas = personaRepo.save(personaDTOToTbl);
+		IntStream.range(0, datos.size()).forEach(i -> {
+		    CapturaPersonaDTO capturaPersonaDTO = datos.get(i);
+		    TblPersona persona = personas.get(i);
+		    capturaPersonaDTO.getPersona().setIdPersona(persona.getIdPersona());
+		});
+		List<RelUsuarioDatosLaborales> usuarioDatosLaboralesDtoToTbl = datos.stream()
+		        .map(capturaPersonaDTO -> {
+		            RelUsuarioDatosLaborales relUsuarioDatosLaborales = mapper.map(capturaPersonaDTO.getDatosLaborales(), RelUsuarioDatosLaborales.class);
+		            PersonaDTO persona = capturaPersonaDTO.getPersona();
+		            relUsuarioDatosLaborales.getPersona().setIdPersona(persona.getIdPersona());
+		            return relUsuarioDatosLaborales;
+		        })
+		        .collect(Collectors.toList());
+		List<RelPersonaCorreo> correoDtoToTbl = datos.stream()
+				.map(capturaPersonaDTO -> {
+					RelPersonaCorreo personaCorreo = mapper.map(capturaPersonaDTO.getPersonaCorreo(), RelPersonaCorreo.class);
+					PersonaDTO persona = capturaPersonaDTO.getPersona();					
+					personaCorreo.getPersona().setIdPersona(persona.getIdPersona());
+					return personaCorreo;
+				})
+				.collect(Collectors.toList());
+		List<TblDomiciliosPersona> domicilioDtoToTbl = datos.stream()
+				.map(capturaPersonaDTO -> {
+					TblDomiciliosPersona domicilio = mapper.map(capturaPersonaDTO.getDomicilioPersona(), TblDomiciliosPersona.class);
+					PersonaDTO persona = capturaPersonaDTO.getPersona();
+					domicilio.getPersona().setIdPersona(persona.getIdPersona());
+					return domicilio;
+				})
+				.collect(Collectors.toList());
+		usuarioDatosLaboralesRepo.save(usuarioDatosLaboralesDtoToTbl);
+		personaCorreoRepo.save(correoDtoToTbl);
+		
+		List<RolDTO> listaPersonas = datos.stream()
+		        .map(CapturaPersonaDTO::getRoles)
+		        .flatMap(List::stream)
+		        .collect(Collectors.toList()); 
+		for (TblPersona persona : personaDTOToTbl) {
+	        List<RolDTO> rolesParaGuardar = estableceRolAlumnoPorDefecto(listaPersonas);
+	        for (RolDTO rol : rolesParaGuardar) {
+	            RelPersonaRol relPersonaRol = new RelPersonaRol(mapper.map(rol, CatRol.class), persona,
+	                    persona.getUsuarioModifico());
+	            personaRolesRepo.save(relPersonaRol);
+	        }
+	    }
+		
+		domicilioPersonaRepo.save(domicilioDtoToTbl);
+		List<SsoElementoDTO> listasso = datos.stream()
+		        .map(CapturaPersonaDTO::getElementos)
+		        .flatMap(List::stream)
+		        .collect(Collectors.toList()); 
+		for (TblPersona persona : personaDTOToTbl) {
+	        for (SsoElementoDTO dto : listasso) {
+	            SsoElemento entidad = mapper.map(dto, SsoElemento.class);
+	            entidad.setPersona(persona);
+	            ssoElementoRepo.saveAndFlush(entidad);
+	        }
+	    }
+		exito = true;
+		return exito;
 	}
 
 }
