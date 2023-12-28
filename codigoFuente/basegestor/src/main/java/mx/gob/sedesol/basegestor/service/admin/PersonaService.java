@@ -50,5 +50,7 @@ public interface PersonaService extends CommonService<PersonaDTO, Long> {
 	ResultadoDTO<PersonaDTO> desactivarPersona(PersonaDTO persona);
 	
 	Boolean existeCurp(String curp);
+	
+	Boolean guardarPersonas(List<CapturaPersonaDTO> datos);
 
 }

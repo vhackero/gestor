@@ -94,5 +94,31 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 	public void setPersonaSigeRepo(PersonaSigeRepo personaSigeRepo) {
 		this.personaSigeRepo = personaSigeRepo;
 	}
+
+	@Override
+	public List<PersonaSigeDTO> buscarNoRegistrados() {
+		List<PersonaSigeDTO> listaPersonas = new ArrayList<PersonaSigeDTO>();
+		List<TblPersonaSige> personas = personaSigeRepo.obtenetPersonasNoRegistradas();
+		for(TblPersonaSige persona : personas) {
+			PersonaSigeDTO personaObj = new PersonaSigeDTO();
+			personaObj.setIdPersonaSige(persona.getIdPersonaSige());
+			personaObj.setMatricula(persona.getMatricula());
+			personaObj.setNombre(persona.getNombre());
+			personaObj.setApellidoPaterno(persona.getApellidoPaterno());
+			personaObj.setApellidoMaterno(persona.getApellidoMaterno());
+			personaObj.setProgramaEducativo(persona.getProgramaEducativo());
+			personaObj.setDivision(persona.getDivision());
+			personaObj.setCorreoInstitucional(persona.getCorreoInstitucional());
+			personaObj.setFechaNacimiento(persona.getFechaNacimiento());
+			personaObj.setCurp(persona.getCurp());
+			personaObj.setNivelSige(persona.getNivelSige());
+			personaObj.setPersonaIdSige(persona.getPersonaIdSige());
+			personaObj.setPerfilIdSige(persona.getPerfilIdSige());
+			personaObj.setPassword(persona.getPassword());
+			listaPersonas.add(personaObj);
+		}
+		
+		return listaPersonas;
+	}
 	
 }
