@@ -35,18 +35,36 @@
 
 <div class="form-group">
 	<div class="row">
-		<div class="col-md-4">
-			<p:outputLabel styleClass="requerido bloque"
-						   value="Creditos por Programa Educativo:" />
-			<p:spinner id="cpe" maxlength="3"
-					   disabled="#{!programaCapacitacionBean.obligatorio}"
-					   value="#{programaCapacitacionBean.programa.creditos}"
-					   valueChangeListener="#{programaCapacitacionBean.onChangeCreditos}"
-					   min="0" max="50" styleClass="col-md-3">
-				<p:ajax process="@this" update="sp1,sp2,sp3,sp4,sp5,sp6"/>
-				<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
-			</p:spinner>
-		</div>
+
+		<p:outputPanel
+			rendered="#{programaCapacitacionBean.planPadre.catCreditosPlan.nombre eq 'Obligatorio'}">
+			<div class="col-md-4">
+				<p:outputLabel styleClass="bloque" value="Horas por crédito:"
+					disabled="true" />
+				<p:spinner disabled="true" styleClass="col-md-3"
+					value="#{programaCapacitacionBean.planPadre.horasCredito}">
+				</p:spinner>
+			</div>
+		</p:outputPanel>
+
+		<p:outputPanel id="pnlCreditosHora">
+			<p:outputPanel
+				rendered="#{programaCapacitacionBean.planPadre.catCreditosPlan.nombre eq 'Obligatorio'}">
+				<div class="col-md-4">
+					<p:outputLabel styleClass="requerido bloque"
+						value="Créditos por Programa de estudios: ">
+						<p:spinner id="cpe" maxlength="3"
+							value="#{programaCapacitacionBean.programa.creditos}"
+							valueChangeListener="#{programaCapacitacionBean.onChangeCreditos}"
+							min="0" max="50" styleClass="col-md-3">
+							<p:ajax process="@this" update="sp1,sp2,sp3,sp4,sp5,sp6" />
+							<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
+						</p:spinner>
+					</p:outputLabel>
+				</div>
+			</p:outputPanel>
+		</p:outputPanel>
+
 	</div>
 </div>
 <div class="row">
@@ -166,8 +184,6 @@
 	</div>
 </div>
 
-
-
 <div class="form-group agregaMasMargen">
 	<div class="row">
 		<div class="col-md-2">
@@ -205,28 +221,21 @@
 <div class="form-group agregaMasMargen">
 	<div class="row">
 		<div class="col-md-4">
-			<p:outputLabel styleClass="bloque"
-				value="Tipo de asignatura: " />
-			
+			<p:outputLabel styleClass="bloque" value="Tipo de asignatura: " />
+
 			<p:selectOneMenu id="idTipoPrograma"
 				valueChangeListener="#{programaCapacitacionBean.onChangeTipoPrograma}"
 				value="#{programaCapacitacionBean.programa.tipo}" effect="fade"
-				class="col-xs-12" >
+				class="col-xs-12">
 				<f:selectItem
 					itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 					itemValue="#{null}" />
-				<f:selectItem
-					itemLabel="Obligatoria"
-					itemValue="Obligatoria" />
-				<f:selectItem
-					itemLabel="Electiva"
-					itemValue="Electiva" />
-				<f:selectItem
-					itemLabel="Optativa"
-					itemValue="Optativa" />
+				<f:selectItem itemLabel="Obligatoria" itemValue="Obligatoria" />
+				<f:selectItem itemLabel="Electiva" itemValue="Electiva" />
+				<f:selectItem itemLabel="Optativa" itemValue="Optativa" />
 				<p:ajax process="@this" />
 			</p:selectOneMenu>
-			
+
 		</div>
 	</div>
 </div>

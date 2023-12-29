@@ -139,7 +139,7 @@ public class PlanBean extends BaseBean {
 
 			plan.setCatCreditosPlan(new CatalogoComunDTO());
 			plan.setCatDivisionesPlan(new CatalogoComunDTO());
-			plan.setCatTipoCompetencia(new CatalogoComunDTO());
+			plan.setCatTipoCompetencia(this.getValorDeCatalogo(catTipoCompetencia, 1));
 
 			filtroPlan = new PlanDTO();
 			setEdicionPlan(Boolean.FALSE);

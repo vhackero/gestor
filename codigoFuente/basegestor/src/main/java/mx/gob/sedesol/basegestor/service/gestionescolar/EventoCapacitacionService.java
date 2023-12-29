@@ -11,8 +11,8 @@ public interface EventoCapacitacionService {
 	List<EventoCapacitacionDTO>buscaEventosPorCriterios(EventoCapacitacionDTO filtro,String tipoDatoFechas);
 	List<EventoCapacitacionDTO> obtenerEventosConcluidos(Integer idPrograma, Integer idPlataforma);
 	EventoCapacitacionDTO getEvento(Integer idEvento);
-	ResultadoDTO<EventoCapacitacionDTO> guardarEventoCapacitacion(CapturaEventoCapacitacionDTO evento) throws Exception;
-	ResultadoDTO<EventoCapacitacionDTO> guardarBorrador(CapturaEventoCapacitacionDTO datos);
+	ResultadoDTO<EventoCapacitacionDTO> guardarEventoCapacitacion(CapturaEventoCapacitacionDTO evento, Boolean autonomo) throws Exception;
+	ResultadoDTO<EventoCapacitacionDTO> guardarBorrador(CapturaEventoCapacitacionDTO datos, Boolean autonomo);
 	CapturaEventoCapacitacionDTO obtenerEvento(EventoCapacitacionDTO evento);
 	List<EventoCapacitacionDTO> obtenerEventosPublicosEnEjec();
 	List<EventoCapacitacionDTO> consultaEventosPorTipoVisibilidad(boolean isPrivado);

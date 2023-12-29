@@ -61,7 +61,7 @@
 								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
 							<p:message for="nomPlan" />
 						</div>
-						
+
 						<div class="col-md-4 col-xs-12">
 							<p:outputLabel for="idPlan"
 								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.identificador')}:"
@@ -79,8 +79,8 @@
 							<p:selectOneMenu id="mnuTpoPlan"
 								value="#{planBean.plan.catTipoPlan.id}"
 								valueChangeListener="#{planBean.onChangeTpoPlan}"
-								disabled="#{planBean.edicionPlan}"
-								autoWidth="false" styleClass="col-xs-12">
+								disabled="#{planBean.edicionPlan}" autoWidth="false"
+								styleClass="col-xs-12">
 								<p:ajax event="change" process="@this" styleClass="col-xs-12"
 									update="label label1 pnlBtnsGuardar" />
 								<f:selectItem
@@ -106,9 +106,9 @@
 										valueChangeListener="#{planBean.onChangePeriodo}"
 										autoWidth="false" styleClass="col-xs-12">
 										<p:ajax event="change" process="@this" styleClass="col-xs-12" />
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+										<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
 										<f:selectItems value="#{planBean.catPeriodo}" var="periodo"
 											itemLabel="#{periodo.nombre}" itemValue="#{periodo.id}" />
 									</p:selectOneMenu>
@@ -124,9 +124,9 @@
 									valueChangeListener="#{planBean.onChangeCreditosPlan}"
 									autoWidth="false" styleClass="col-xs-12">
 									<p:ajax event="change" process="@this" update="horasCampo" />
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
 									<f:selectItems value="#{planBean.catCreditosPlan}"
 										var="credito" itemLabel="#{credito.nombre}"
 										itemValue="#{credito.id}" />
@@ -155,9 +155,9 @@
 									valueChangeListener="#{planBean.onChangeDivisionesPlan}"
 									autoWidth="false" styleClass="col-xs-12">
 									<p:ajax event="change" process="@this" />
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
 									<f:selectItems value="#{planBean.catDivisionesPlan}"
 										var="division" itemLabel="#{division.nombre}"
 										itemValue="#{division.id}" />
@@ -458,9 +458,9 @@
 									valueChangeListener="#{planBean.onChangeAlcancePlan}"
 									autoWidth="false" styleClass="col-xs-12" id="alcancePlan">
 									<p:ajax event="change" process="@this" />
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
+									<f:selectItem
+										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+										itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
 									<f:selectItems value="#{planBean.catAlcancePlan}" var="alcance"
 										itemLabel="#{alcance.nombre}" itemValue="#{alcance.id}" />
 								</p:selectOneMenu>
@@ -477,8 +477,7 @@
 								value="#{planBean.plan.catEstatusPlan.id}"
 								valueChangeListener="#{planBean.onChangeEstatusPlan}"
 								autoWidth="false" styleClass="col-xs-12">
-								<p:ajax event="change"
-									update="@this, pnlBtnsGuardar" />
+								<p:ajax event="change" update="@this, pnlBtnsGuardar" />
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
@@ -586,29 +585,29 @@
 						</div>
 					</div>
 				</div>
-				<div class="form-group">
-					<div class="row">
-						<div class="col-md-4 col-xs-12">
-							<p:outputLabel styleClass="requerido bloque"
-								value="Tipo de Competencia: " />
-							<f:validateBean disabled="true">
-								<p:selectOneMenu id="tCompetencia"
-									value="#{planBean.plan.catTipoCompetencia.id}"
-									valueChangeListener="#{planBean.onChangeTipoCompetencia}"
-									autoWidth="false" styleClass="col-xs-12">
-									<p:ajax event="change" process="@this" />
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />
-									<f:selectItems value="#{planBean.catTipoCompetencia}"
-										var="tipoCompetencia" itemLabel="#{tipoCompetencia.nombre}"
-										itemValue="#{tipoCompetencia.id}" />
-								</p:selectOneMenu>
-								<p:message for="tCompetencia" />
-							</f:validateBean>
+				<p:outputPanel rendered="false">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-4 col-xs-12">
+								<p:outputLabel styleClass="requerido bloque"
+									value="Tipo de Competencia: " />
+								<f:validateBean disabled="true">
+									<p:selectOneMenu id="tCompetencia"
+										value="#{planBean.plan.catTipoCompetencia.id}"
+										valueChangeListener="#{planBean.onChangeTipoCompetencia}"
+										autoWidth="false" styleClass="col-xs-12">
+										<p:ajax event="change" process="@this" />
+										<f:selectItems value="#{planBean.catTipoCompetencia}"
+											var="tipoCompetencia" itemLabel="#{tipoCompetencia.nombre}"
+											itemValue="#{tipoCompetencia.id}" />
+									</p:selectOneMenu>
+									<p:message for="tCompetencia" />
+								</f:validateBean>
+							</div>
 						</div>
 					</div>
-				</div>
+				</p:outputPanel>
+
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-4 col-xs-12">
@@ -666,9 +665,9 @@
 								<p:outputPanel rendered="#{!planBean.edicionPlan}">
 									<p:commandButton styleClass="btn btn-primary pull-right"
 										rendered="#{not(planBean.plan.catEstatusPlan.nombre eq 'Ejecución') and not(planBean.plan.catTipoPlan.nombre eq 'Por Periodo')}"
-										value="Guardar" ajax="true" update="nuevoPlanForm" 
-										action="#{planBean.guardaNuevoPlan}"
-										process="nuevoPlanForm" validateClient="true" />
+										value="Guardar" ajax="true" update="nuevoPlanForm"
+										action="#{planBean.guardaNuevoPlan}" process="nuevoPlanForm"
+										validateClient="true" />
 
 									<p:commandButton styleClass="btn btn-primary pull-right"
 										rendered="#{(planBean.plan.catEstatusPlan.nombre eq 'Ejecución') and not(planBean.plan.catTipoPlan.nombre eq 'Por Periodo')}"
@@ -677,22 +676,22 @@
 
 									<p:commandButton styleClass="btn btn-primary pull-right"
 										rendered="#{not(planBean.plan.catEstatusPlan.nombre eq 'Ejecución') and (planBean.plan.catTipoPlan.nombre eq 'Por Periodo')}"
-										value="Guardar" ajax="true" 
+										value="Guardar" ajax="true"
 										oncomplete="PF('confirmarEstructuraGuardar').show();" />
 
 									<p:commandButton styleClass="btn btn-primary pull-right"
 										rendered="#{(planBean.plan.catEstatusPlan.nombre eq 'Ejecución') and (planBean.plan.catTipoPlan.nombre eq 'Por Periodo')}"
-										value="Guardar" ajax="true" 
+										value="Guardar" ajax="true"
 										oncomplete="PF('confirmarEstructura').show();" />
 								</p:outputPanel>
 							</p:outputPanel>
-							
+
 							<p:outputPanel id="pnlBtnsEditar">
 								<p:outputPanel rendered="#{planBean.edicionPlan}">
 									<p:commandButton styleClass="btn btn-primary pull-right"
-										value="Editar" ajax="true" update="nuevoPlanForm" 
-										action="#{planBean.editarPlan}"
-										process="nuevoPlanForm" validateClient="true" />
+										value="Editar" ajax="true" update="nuevoPlanForm"
+										action="#{planBean.editarPlan}" process="nuevoPlanForm"
+										validateClient="true" />
 								</p:outputPanel>
 							</p:outputPanel>
 
