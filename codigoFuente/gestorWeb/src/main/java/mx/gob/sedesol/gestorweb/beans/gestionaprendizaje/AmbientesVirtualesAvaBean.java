@@ -199,6 +199,8 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 		private Integer idCatSubEstructuraNivel3;
 		private Integer ejeCapacitacion;
 		private List<NodoeHijosDTO> nodos;
+		
+	private List<CatalogoComunDTO> catEstadoEventoCapacitacion;
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
@@ -218,6 +220,9 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 		estadoAvaList = gestionAprendizajeServiceAdapter
 				.getCatalogoServiceByGestionAprendizajeEnum(CatGestionAprendizajeEnum.CAT_ESTADO_AVA)
 				.findAll(CatEstadoAva.class);
+		/** Se carga el catalogo CAT_ESTADO_EVENTO_CAPACITACION **/
+		catEstadoEventoCapacitacion = (List<CatalogoComunDTO>) getSession().getServletContext()
+				.getAttribute(ConstantesGestorWeb.CAT_ESTADO_EVENTO_CAPACITACION);
 
 		idEstatusAva = this.obtenerObjEstatusAva(EstatusAmbienteVirtualAprendizajeEnum.EN_SOLICITUD, estadoAvaList)
 				.getId();
@@ -356,6 +361,54 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 
 		this.validaMensajeResultadoTransaccion(resultadoDTO.getMensajes(), resultadoDTO.getResultado());
 
+	}
+	
+	public String activarAva(AmbienteVirtualAprendizajeDTO ambienteVirtualAprendizajeDTO) {
+		logger.info(("Activara el AVA " + ambienteVirtualAprendizajeDTO.getId()));
+
+		CatalogoComunDTO estatusAvaActivo = obtenerEstatusAva(EstatusAmbienteVirtualAprendizajeEnum.ACTIVO.getId(),
+				estadoAvaList);
+
+		CatalogoComunDTO edoEvtCapEnEjecucion = obtenerEdoEventoCapacitacionPorEnum(EstadoEventoCapEnum.EN_EJECUCION);
+
+		ResultadoDTO<AmbienteVirtualAprendizajeDTO> resultado = ambienteVirtualApService
+				.activaAvaEjecutaEventoCapacitacion(ambienteVirtualAprendizajeDTO, usuarioSessionDTO.getIdPersona(),
+						estatusAvaActivo, edoEvtCapEnEjecucion);
+		
+		if (resultado.getResultado().equals(ResultadoTransaccionEnum.EXITOSO)) {
+			this.borraAvaDeLaLista(resultado.getDto().getId(), ambienteVirtualAprendizajeDTOList);
+		}
+		
+		this.validaMensajeResultadoTransaccion(resultado.getMensajes(), resultado.getResultado());
+		logger.info("El resultado de la actualizacion del AVA fue " + resultado.getResultado());
+		return ConstantesGestorWeb.NAVEGA_AMBIENTES_VIRTUALES_APRENDIZAJE;
+	}
+	
+	private CatalogoComunDTO obtenerEdoEventoCapacitacionPorEnum(EstadoEventoCapEnum estadoEventoCapEnum) {
+
+		CatalogoComunDTO eventoCapacitacionEstadoEjecucion = null;
+
+		for (CatalogoComunDTO edoEventoCap : catEstadoEventoCapacitacion) {
+			if (estadoEventoCapEnum.getId().equals(edoEventoCap.getId())) {
+				eventoCapacitacionEstadoEjecucion = edoEventoCap;
+
+			}
+		}
+
+		return eventoCapacitacionEstadoEjecucion;
+	}
+
+	private CatalogoComunDTO obtenerEstatusAva(Integer idEstatus, List<CatalogoComunDTO> estadoAvaList) {
+		CatalogoComunDTO estatusAva = null;
+
+		for (CatalogoComunDTO estadoAva : estadoAvaList) {
+			if (estadoAva.getId().equals(idEstatus)) {
+				estatusAva = estadoAva;
+				logger.info("Es estatus " + idEstatus + " tiene el id " + estatusAva.getId());
+				break;
+			}
+		}
+		return estatusAva;
 	}
 
 	private void borraAvaDeLaLista(Integer idAva,
@@ -904,6 +957,18 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 
 		return !existeResponsable;
 	}
+	
+	public Boolean validaAutonomo(AmbienteVirtualAprendizajeDTO ambienteVirtualAprendizajeDTO) {
+		Boolean esVisible = Boolean.FALSE;
+		if (ObjectUtils.isNotNull(ambienteVirtualAprendizajeDTO)) {
+			if(ambienteVirtualAprendizajeDTO.getCatEstadoAva().getNombre().equals("En construcción") 
+					&& ambienteVirtualAprendizajeDTO.getAutonomo()==1){
+				esVisible = Boolean.TRUE;
+			}
+		}
+		
+		return esVisible;
+	}
 
 	public void desactivarAVA(AmbienteVirtualAprendizajeDTO ambienteVirtualAprendizajeDTO) {
 		logger.info(("Desactivara el AVA " + ambienteVirtualAprendizajeDTO.getId()));
@@ -1048,10 +1113,15 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 	 * @return
 	 */
 	public Boolean validaActasCerradas(Integer idEventoCapacitacion) {
+		Boolean resultado = Boolean.FALSE;
+		
+		try {
+			resultado = actasCerradasPorIdEvtCapMap.get(idEventoCapacitacion);
 
-		Boolean resultado = actasCerradasPorIdEvtCapMap.get(idEventoCapacitacion);
-
-		if (ObjectUtils.isNull(resultado)) {
+			if (ObjectUtils.isNull(resultado)) {
+				resultado = Boolean.FALSE;
+			}
+		}catch(Exception ex) {
 			resultado = Boolean.FALSE;
 		}
 

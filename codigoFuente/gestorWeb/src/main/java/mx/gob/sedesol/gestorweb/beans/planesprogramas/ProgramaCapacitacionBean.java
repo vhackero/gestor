@@ -15,6 +15,8 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.ValueChangeEvent;
+import javax.faces.model.SelectItem;
+import javax.faces.model.SelectItemGroup;
 
 import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
@@ -32,6 +34,7 @@ import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.DefaultTreeNode;
 import org.primefaces.model.StreamedContent;
 import org.primefaces.model.TreeNode;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesBitacora;
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
@@ -68,6 +71,7 @@ import mx.gob.sedesol.basegestor.commons.utils.EstatusProgramaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatStatusPrograma;
+import mx.gob.sedesol.basegestor.model.repositories.planesyprogramas.EjeCompetenciaRepo;
 import mx.gob.sedesol.basegestor.service.admin.OrgGubernamentalService;
 import mx.gob.sedesol.basegestor.service.impl.planesyprogramas.FECServiceFacade;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Categoria;
@@ -109,6 +113,9 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	@ManagedProperty("#{mallaCurricularService}")
 	private MallaCurricularService mallaCurricularService;
 	
+	@Autowired
+    private EjeCompetenciaRepo ejeCompetenciaRepo;
+	
 	private String tipoPrograma;
 	private String tipo;
 	private Integer creditos;
@@ -132,7 +139,6 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	private List<CatalogoComunDTO> catEjeCapacit;
 	private NodoeHijosDTO estPlanSedesol;
 	private List<CatalogoComunDTO> ejesCapacitacion;
-	private List<OrgGubernamentalDTO> catOrgGubs;
 	private boolean hideMsgsGuardar;
 	private Dialog cmpDialogNvoProg;
 	private boolean btnNavegaSig;
@@ -234,7 +240,11 @@ public class ProgramaCapacitacionBean extends BaseBean {
 
 	private String color;
 	private String labelCompetencias;
-
+	
+	private PlanDTO planPadre;
+	private List<SelectItem> itemsOrgGubs;
+	private List<OrgGubernamentalDTO> catOrgGubs;
+	
 	/**
 	 *
 	 */
@@ -246,7 +256,8 @@ public class ProgramaCapacitacionBean extends BaseBean {
 		// setPersonalInterno(Boolean.TRUE);
 
 		if (ObjectUtils.isNotNull(getSession().getAttribute(ConstantesGestorWeb.OBJ_PROGRAMA))) {
-
+			nivelMaximo = 10;
+			
 			controlEstTematica = new ControlEstTematicaDTO();
 			responsablesDatosGenerales = new String();
 			autoresDatosGenerales = new String();
@@ -260,6 +271,12 @@ public class ProgramaCapacitacionBean extends BaseBean {
 				edicionPrograma = (Boolean) getSession().getAttribute(ConstantesGestorWeb.EDICION_PROGRAMA);
 				getSession().removeAttribute(ConstantesGestorWeb.EDICION_PROGRAMA);
 			}
+			
+			if (ObjectUtils.isNotNull(getSession().getAttribute("OBJ_PLAN_PADRE"))) {
+				planPadre = (PlanDTO) getSession().getAttribute("OBJ_PLAN_PADRE");
+				
+				creditos = planPadre.getHorasCredito();
+			}
 
 		} else if (ObjectUtils.isNull(programa) || ObjectUtils.isNull(programa.getIdPrograma())) {
 
@@ -269,10 +286,11 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			programa = new FichaDescProgramaDTO();
 			programa.setTipoCompetencia(0);
 			programa.setCatTipoEventoEc(new CatalogoComunDTO());
-			programa.setOrganismoGubernamental(new OrgGubernamentalDTO());
+			programa.setAreaResponsable(new OrgGubernamentalDTO());
 			programa.setCatNivelConocimiento(new CatalogoComunDTO());
 			programa.setCatNivelEnsenanzaPrograma(new CatalogoComunDTO());
 			programa.setCatModalidad(new CatalogoComunDTO());
+			programa.setCreditos(0);
 
 			if (ObjectUtils.isNotNull(programa.getFechaVigInicial())) {
 				programa.setFechaSolicitud(DateUtils.agregaDiaHabilAFecha(programa.getFechaVigInicial()));
@@ -315,13 +333,20 @@ public class ProgramaCapacitacionBean extends BaseBean {
 		this.generaArbolEstPersonalExterno();
 		
 		this.generaEstructuraCatPlanes();
-
+		this.generaItemsOrgGubs();
+		
 		relProgDuracionTeoria = new RelProgDuracionDTO(
 				getTipoCargaHoraria(ConstantesGestorWeb.TIPO_CARGA_HORARIA_TEORIA));
 		relProgDuracionPractica = new RelProgDuracionDTO(
 				getTipoCargaHoraria(ConstantesGestorWeb.TIPO_CARGA_HORARIA_PRACTICA));
 		relProgDuracionEvaluacion = new RelProgDuracionDTO(
 				getTipoCargaHoraria(ConstantesGestorWeb.TIPO_CARGA_HORARIA_EVALUACION));
+		relProgDuracionTeoria.setHorasInteger(0);
+		relProgDuracionTeoria.setMinutosInteger(0);
+		relProgDuracionPractica.setHorasInteger(0);
+		relProgDuracionPractica.setMinutosInteger(0);
+		relProgDuracionEvaluacion.setHorasInteger(0);
+		relProgDuracionEvaluacion.setMinutosInteger(0);
 
 		// Carga las competencias especificas previamente guardadas
 		if (!ObjectUtils.isNullOrEmpty(this.programa.getRelProgramaComEspecificas())) {
@@ -342,7 +367,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			this.validaDatosProgramaRequeridos(programa);
 			
 			obtenerEstructuras();
-			
+			planPadre = programa.getPlan();
 		} else {
 
 			PersonaDTO coordAcad = fecServiceFacade.getPersonaService()
@@ -353,7 +378,38 @@ public class ProgramaCapacitacionBean extends BaseBean {
 		//this.getNombreEjeCapTipoCom();
 
 	}
+	
+	/**
+	 * Se genera componente que agrupa los organismos gubernamentales en Segundo
+	 * nivel
+	 */
+	private void generaItemsOrgGubs() {
 
+		if (ObjectUtils.isNotNull(catOrgGubs)) {
+
+			itemsOrgGubs = new ArrayList<>();
+
+			for (OrgGubernamentalDTO orgG : catOrgGubs) {
+
+				SelectItemGroup group = new SelectItemGroup(orgG.getNombre());
+				SelectItem[] arrayItems = null;
+
+				if (!orgG.getLstHijosOrgGub().isEmpty()) {
+
+					arrayItems = new SelectItem[orgG.getLstHijosOrgGub().size()];
+					int i = 0;
+
+					for (OrgGubernamentalDTO orgGHijo : orgG.getLstHijosOrgGub()) {
+						arrayItems[i] = new SelectItem(orgGHijo, orgGHijo.getNombre());
+						i++;
+					}
+				}
+				group.setSelectItems(arrayItems);
+				itemsOrgGubs.add(group);
+			}
+		}
+	}
+	
 	public void generaTemaUnidad() {
 		if (ObjectUtils.isNull(numEstTematicas))
 			numEstTematicas = 0;
@@ -871,41 +927,11 @@ public class ProgramaCapacitacionBean extends BaseBean {
 		}
 	}
 	
-	public void onChangePlan(ValueChangeEvent e) { // TODO:
-		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			Integer idPlanSel = (Integer) e.getNewValue();
-			if(idPlanSel != 0) {
-				programa.setIdPlan(idPlanSel);
-				catTpoComp = new ArrayList<>();
-				catEjeCapacit = new ArrayList<CatalogoComunDTO>();
-				int indiceEncontrado = -1; 
-				for(int index = 0; index < nodos.size(); index++) {
-					if(nodos.get(index).getIdNodo().equals(idPlanSel)) {
-						indiceEncontrado = index; 
-					}
-				}
-				if(indiceEncontrado != -1) {
-					catTpoComp = new ArrayList<CatalogoComunDTO>();
-					estPlanSedesol = nodos.get(indiceEncontrado);
-					for (NodoeHijosDTO nh : estPlanSedesol.getNodosHijos()) {
-						CatalogoComunDTO cc = new CatalogoComunDTO();
-						cc.setId(nh.getIdNodo());
-						cc.setNombre(nh.getNombre());
-						catTpoComp.add(cc);
-					}
-				}	
-			}else {
-				catTpoComp = new ArrayList<CatalogoComunDTO>();
-				catEjeCapacit = new ArrayList<CatalogoComunDTO>();
-			}
-		}
-	}
-	public void isObligatorioCredito(Integer plan) {
-		PlanDTO plandto = planService.buscarPorId(plan);
-		if (plandto.getCatCreditosPlan().getId() == 2){
+	public void isObligatorioCredito() {
+		if (planPadre.getCatCreditosPlan().getNombre().equals("Opcional")){
 			setObligatorio(Boolean.FALSE);
 		}else {
-			creditos = plandto.getHorasCredito();
+			creditos = planPadre.getHorasCredito();
 			setObligatorio(Boolean.TRUE);
 		}
 	}
@@ -970,8 +996,16 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
 			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
 			
+			Integer idTblPlan = mallaCurricularService.buscarPorId(idPlanSel).getIdPlan();
+			planPadre = planService.buscarPorId(idTblPlan);
+			
 			programa.setEjeCapacitacion(idPlanSel);
-			programa.setIdPlan(mallaCurricularService.buscarPorId(idPlanSel).getIdPlan());
+			programa.setPlan(planPadre);
+			programa.setCatNivelEnsenanzaPrograma(planPadre.getCatNivelEnsenanzaPrograma());
+			programa.setCatModalidad(planPadre.getCatModalidadPlanPrograma());
+			programa.setAreaResponsable(planPadre.getTblOrganismoGubernamental());
+			programa.setPerfilEgreso(planPadre.getPerfilEgreso());
+			programa.setPerfilIngreso(planPadre.getPerfilIngreso());
 			
 			nivelMaximo = 0;
 		}
@@ -1054,6 +1088,11 @@ public class ProgramaCapacitacionBean extends BaseBean {
 		MallaCurricularDTO mallaHijo = mallaCurricularService.obtenerMallaCurricularPorId(programa.getEjeCapacitacion());
 		MallaCurricularDTO mallaPadre = buscarPadre(mallaHijo);
 		
+		catEstructuras = new ArrayList<CatalogoComunDTO>();
+		catSubEstructurasNivel1 = new ArrayList<CatalogoComunDTO>();
+		catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
+		catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+		
 		if(ObjectUtils.isNotNull(mallaPadre)){
 			Collections.reverse(idsEstructura);
 			
@@ -1062,16 +1101,22 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			
 			if(!mallaHijo.getId().equals(mallaPadre.getId())) {
 				switch(idsEstructura.size()) {
+				default:
+				break;
 				case 4:
+					nivelMaximo = 4;
 					catSubEstructurasNivel3 = this.generarSubEstructuras3(nodos, idsEstructura.get(2));
 					idCatSubEstructuraNivel3 = idsEstructura.get(3);
 				case 3:
+					nivelMaximo = 3;
 					catSubEstructurasNivel2 = this.generarSubEstructuras2(nodos, idsEstructura.get(1));
 					idCatSubEstructuraNivel2 = idsEstructura.get(2);
 				case 2:
+					nivelMaximo = 2;
 					catSubEstructurasNivel1 = this.generarSubEstructuras1(nodos, idsEstructura.get(0));
 	 				idCatSubEstructuraNivel1 = idsEstructura.get(1);
 				case 1:
+					nivelMaximo = 1;
 					catEstructuras = this.generarEstructuras(nodos, mallaPadre.getId());
 					idCatEstructura = idsEstructura.get(0);
 				break;
@@ -1103,13 +1148,13 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			programa.setEjeCapacitacion(idEjeCapacitacion);
 		}
 	}*/
-
+	
 	public void onChangeOrgGubPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			for (OrgGubernamentalDTO orgGub : catOrgGubs) {
 				for (OrgGubernamentalDTO orgGubHijo : orgGub.getLstHijosOrgGub()) {
-					if (orgGubHijo.getId().equals((Integer) e.getNewValue())) {
-						programa.setOrganismoGubernamental(orgGubHijo);
+					if (orgGubHijo.getId().equals(Integer.parseInt(e.getNewValue().toString()))) {
+						programa.setAreaResponsable(orgGubHijo);
 					}
 				}
 			}
@@ -1154,7 +1199,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			}
 		} else if (indexTabProg.equals(1)) {//Estandar de competencias
 			//Obtener los creditos por programa educastivo y realizar calculos de horas y minutos
-			isObligatorioCredito(programa.getIdPlan());
+			isObligatorioCredito();
 		}else {// Navegacion
 			cpmTabViewProg.setActiveIndex(indexTabProg);
 			setUltimoTabProg(Boolean.FALSE);
@@ -1169,13 +1214,16 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	 * @return
 	 */
 	public String obtieneNombrePlan(Integer idPlan) {
-
+		String nombrePlan = "";
 		if (ObjectUtils.isNotNull(idPlan)) {
-			for (CatalogoComunDTO tpoCom : catPlanes) {
-				if (tpoCom.getId().equals(idPlan)) {
-					return tpoCom.getNombre();
-				}
+			
+			try{
+				nombrePlan = planService.buscarPorId( idPlan ).getNombre();
+			}catch(Exception ex) {
+				logger.error(ex);
 			}
+			
+			return nombrePlan;
 		}
 		return null;
 	}
@@ -1231,10 +1279,6 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			if (isEdicionPrograma()) {
 				getSession().setAttribute(ConstantesGestorWeb.EDICION_PROGRAMA, Boolean.TRUE);
 			}
-			
-			if(nivelMaximo == -1){
-				return "¡Seleccione un plan!";
-			}
 
 			competenciasEspecifPrograma = generaRelProgramaCompEspecificas(this.programa);
 			this.programa.setRelProgramaComEspecificas(competenciasEspecifPrograma);
@@ -1245,6 +1289,8 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			ResultadoDTO<FichaDescProgramaDTO> resTx = fecServiceFacade.guardarDatosPrograma(this.programa);
 			if (ObjectUtils.isNotNull(resTx) && resTx.getResultado().getValor()) {
 				getSession().setAttribute(ConstantesGestorWeb.OBJ_PROGRAMA, resTx.getDto());
+				getSession().setAttribute("OBJ_PLAN_PADRE", planPadre);
+				
 				return ConstantesGestorWeb.NAVEGA_FEC_PROGRAMA;
 			} else {
 				return ConstantesGestorWeb.NAVEGA_NUEVO_PROGRAMA_CAPACITACION;
@@ -1272,36 +1318,9 @@ public class ProgramaCapacitacionBean extends BaseBean {
 
 		}
 		
-		if(programa.getEjeCapacitacion().equals(0)){
-			agregarMsgError("Seleccione el plan, estructura o subestructura a la que pertenece", null);
+		if(nivelMaximo == -1){
+			agregarMsgError("¡Seleccione un plan!", null);
 			return false;
-		}
-		
-		switch(nivelMaximo) {
-			case 0:
-				if(catEstructuras.size() > 0){
-					agregarMsgError("Seleccione la estructura a la que pertenece", null);
-					return false;
-				}
-			break;
-			case 1:
-				if(catSubEstructurasNivel1.size() > 0){
-					agregarMsgError("Seleccione la subestructura a la que pertenece", null);
-					return false;
-				}
-			break;
-			case 2:
-				if(catSubEstructurasNivel2.size() > 0){
-					agregarMsgError("Seleccione la subestructura a la que pertenece", null);
-					return false;
-				}
-			break;
-			case 3:
-				if(catSubEstructurasNivel3.size() > 0){
-					agregarMsgError("Seleccione la subestructura a la que pertenece", null);
-					return false;
-				}
-			break;
 		}
 		
 		return true;
@@ -1562,6 +1581,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 		try {
 			if (indexTabProg.equals(-1)) {
 				getSession().setAttribute(ConstantesGestorWeb.OBJ_PROGRAMA, this.programa);
+				getSession().setAttribute("OBJ_PLAN_PADRE", planPadre);
 				getSession().setAttribute(ConstantesGestorWeb.EDICION_PROGRAMA, Boolean.TRUE);
 				getFacesContext().getExternalContext().redirect("nuevoProgramaCapacitacion.jsf?edicion=true");
 			}
@@ -1701,7 +1721,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	}
 	public void onChangeCreditos(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			int TotalHoras = creditos * (Integer) e.getNewValue();
+			int TotalHoras = planPadre.getHorasCredito() * (Integer) e.getNewValue();
 			float teoria = (float) (TotalHoras * 0.40);
 			float evaluacion = (float) (TotalHoras * 0.35);
 			float practica = (float) (TotalHoras * 0.25);
@@ -2187,6 +2207,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 
 			// ViewScoped
 			getSession().setAttribute(ConstantesGestorWeb.OBJ_PROGRAMA, programaSeleccionado);
+			getSession().setAttribute("OBJ_PLAN_PADRE", planPadre);
 			getSession().setAttribute(ConstantesGestorWeb.EDICION_PROGRAMA, Boolean.TRUE);
 
 			// SessionScoped
@@ -2703,14 +2724,16 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	 *
 	 */
 	private void generaArbolCompEspecificasXEje() {
-
 		arbolCompEspecificas = new CheckboxTreeNode(new NodoDTO(1, "Competencias Especificas"), null);
 		arbolCompEspecificas.setSelectable(Boolean.FALSE);
-		for (CatalogoComunDTO ejeCap : ejesCapacitacion) {
-			TreeNode ejeCapNodo = new CheckboxTreeNode(new NodoDTO(ejeCap.getId(), ejeCap.getNombre()),
+		
+		List<RelEjeCompetenciaDTO> relCompEsp = getFecServiceFacade().getEjeCompetenciaService()
+				.obtenerCompetenciasEspecificasPorEje(4);
+		for (RelEjeCompetenciaDTO ejeComp : relCompEsp) {
+			TreeNode compEsp = new CheckboxTreeNode(new NodoDTO(ejeComp.getCatCompetenciaEspecifica().getId(),
+					ejeComp.getCatCompetenciaEspecifica().getNombre(), ConstantesGestorWeb.TIPO_COMP_ESPECIFICA),
 					arbolCompEspecificas);
-			ejeCapNodo.setSelectable(Boolean.FALSE);
-			this.generaArbolComEspecifXEje(ejeCapNodo, ejeCap.getId());
+			compEsp.setExpanded(Boolean.FALSE);
 		}
 	}
 
@@ -4068,6 +4091,38 @@ public class ProgramaCapacitacionBean extends BaseBean {
 
 	public void setIdCatSubEstructuraNivel3(Integer idCatSubEstructuraNivel3) {
 		this.idCatSubEstructuraNivel3 = idCatSubEstructuraNivel3;
+	}
+
+	public PlanDTO getPlanPadre() {
+		return planPadre;
+	}
+
+	public void setPlanPadre(PlanDTO planPadre) {
+		this.planPadre = planPadre;
+	}
+
+	public EjeCompetenciaRepo getEjeCompetenciaRepo() {
+		return ejeCompetenciaRepo;
+	}
+
+	public void setEjeCompetenciaRepo(EjeCompetenciaRepo ejeCompetenciaRepo) {
+		this.ejeCompetenciaRepo = ejeCompetenciaRepo;
+	}
+
+	public List<RelProgCompEspecificaDTO> getCompetenciasEspecifPrograma() {
+		return competenciasEspecifPrograma;
+	}
+
+	public void setCompetenciasEspecifPrograma(List<RelProgCompEspecificaDTO> competenciasEspecifPrograma) {
+		this.competenciasEspecifPrograma = competenciasEspecifPrograma;
+	}
+
+	public List<SelectItem> getItemsOrgGubs() {
+		return itemsOrgGubs;
+	}
+
+	public void setItemsOrgGubs(List<SelectItem> itemsOrgGubs) {
+		this.itemsOrgGubs = itemsOrgGubs;
 	}
 	
 }

@@ -30,6 +30,7 @@ public class AmbienteVirtualAprendizajeDTO implements Serializable {
 	private String urlLms;
 	private Boolean esAvaArchivado;
 	private Integer idAvaClonLms;
+	private Integer autonomo;
 
 	public AmbienteVirtualAprendizajeDTO() {
 	}
@@ -162,4 +163,12 @@ public class AmbienteVirtualAprendizajeDTO implements Serializable {
 		this.idAvaClonLms = idAvaClonLms;
 	}
 
+	public Integer getAutonomo() {
+		return autonomo;
+	}
+
+	public void setAutonomo(Integer autonomo) {
+		this.autonomo = autonomo;
+	}
+	
 }

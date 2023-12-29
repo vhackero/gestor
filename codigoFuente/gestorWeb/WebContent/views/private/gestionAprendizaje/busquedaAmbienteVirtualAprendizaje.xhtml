@@ -575,11 +575,24 @@
 
 									<p:confirm header="Confirmación"
 										message="#{sistema.obtenerTexto('¿Desea desactivar el AVA ? Los participantes no tendrán acceso a el mismo. .')}" />
-
+								
 								</p:commandButton>
 								<p:tooltip for="btnDesactivarAva"
 									value="#{sistema.obtenerTexto('gw.ga.label.desactava')}"
 									position="top" />
+									
+								<!-- Activar AVA -->
+								<p:commandButton id="btnActivar" process="@this"
+									rendered="#{ambientesVirtualesAvaBean.validaAutonomo(ava)}"
+									actionListener="#{ambientesVirtualesAvaBean.activarAva(ava)}"
+									update="@form"
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-square-check">
+									
+									<p:confirm header="Confirmación"
+										message="#{sistema.obtenerTexto('¿Desea activar el AVA ? Esto lo activará en su aula virtual y pondrá en ejecución su evento.')}" />
+								</p:commandButton>
+								<p:tooltip for="btnActivar" value="Activar" position="top" />
+								
 								<!--Archivar -->
 								<p:commandButton id="btnArchivarAva" process="@this"
 									disabled="#{ava.esAvaArchivado}"
@@ -635,6 +648,7 @@
 								<p:tooltip for="btnProd"
 									value="#{sistema.obtenerTexto('gw.ga.btn.construccion')}"
 									position="top" />
+								
 							</p:column>
 						</p:dataTable>
 					</div>
