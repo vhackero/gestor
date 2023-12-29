@@ -127,8 +127,8 @@ public class AdminPersonaBean extends BaseBean {
 	
 	private boolean nuevaPersona;
 	private boolean mostrarContrasenia;
-	private boolean isLenguajeIndigena = false;
-	private boolean isDiscapacidad = false;
+	private boolean isLenguajeIndigena;
+	private boolean isDiscapacidad;
 	
 	private PersonaDTO personaSeleccionada;
 
