@@ -161,8 +161,7 @@ public class AdminPersonaBean extends BaseBean {
 		nuevaPersona = true;
 		mostrarContrasenia = true;
 		
-		listaDatos = new ArrayList<CapturaPersonaDTO>();
-		datos = new CapturaPersonaDTO();	
+		listaDatos = new ArrayList<CapturaPersonaDTO>();	
 		
 		listaMunicipiosLaboral = new ArrayList<>();
 		listaEntidades = personaServiceFacade.obtenerEntidadesPorPais(ConstantesGestor.ID_PAIS_MEXICO);
@@ -174,20 +173,21 @@ public class AdminPersonaBean extends BaseBean {
         	        CapturaPersonaDTO datos = new CapturaPersonaDTO();
         	        datos.getPersona().setRutaCompletaFoto(rutaCompletaFoto.toString());
     				datos.setRoles(listaRoles.getTarget());
-    				datos.setDomicilioPersona(personaDomicilio(asentamiento, usuarioModifico, idPais));
     				datos.setDatosAcademicos(personaDatosAcademicos());
     				
     				PersonaDTO personaInsertar = crearPersona(personaSige, usuarioModifico);
     				datos.setPersona(personaInsertar);
+    				datos.setDomicilioPersona(personaDomicilio(asentamiento, usuarioModifico, idPais, datos));
     				datos.setDatosLaborales(datoslaborales(personaInsertar, sede, municipio));
-    				datos.setPersonaCorreo(personaCorreo(usuarioModifico));
+    				datos.setPersonaCorreo(personaCorreo(usuarioModifico, datos));
     				datos.getPersona().setUnidadAdministrativa(datos.getPersona().getNuevaContrasenia());
     				datos.getPersona().setContraseniaEncriptada(encoder.encode(datos.getPersona().getNuevaContrasenia()));
         	        return datos;
         	    })
         	    .collect(Collectors.toList());
-		
+        logger.info("Hola");
         boolean exito = personaServiceFacade.getPersonaService().guardarPersonas(listaDatos);
+        logger.info(exito);
         if(exito) {
         	agregarMsgInfo("Registros insertados", "Exito");
         }else {
@@ -232,7 +232,7 @@ public class AdminPersonaBean extends BaseBean {
 		return usuario;
 	}
 	
-	private PersonaCorreoDTO personaCorreo(Long usuarioModifico) {
+	private PersonaCorreoDTO personaCorreo(Long usuarioModifico, CapturaPersonaDTO datos) {
 		PersonaCorreoDTO usuario = new PersonaCorreoDTO(usuarioModifico, 1);
 		TipoCorreoDTO correo = new TipoCorreoDTO();
 
@@ -245,7 +245,7 @@ public class AdminPersonaBean extends BaseBean {
 		return usuario;
 	}
 	
-	private DomicilioPersonaDTO personaDomicilio(AsentamientoDTO asentamiento, Long usuarioModifico,  String idPais) {
+	private DomicilioPersonaDTO personaDomicilio(AsentamientoDTO asentamiento, Long usuarioModifico,  String idPais, CapturaPersonaDTO datos) {
 		DomicilioPersonaDTO usuario = new DomicilioPersonaDTO(usuarioModifico, idPais);
 		usuario.setAsentamiento(asentamiento);
 		usuario.setNumeroExterior("1");
