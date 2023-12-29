@@ -151,6 +151,7 @@ public class AdminPersonaBean extends BaseBean {
 	}
 	
 	public void obtenerUsuarios() {
+		boolean exito = false; 
 		List<PersonaSigeDTO> personasSige = personaSigeService.buscarNoRegistrados();
 		listaRoles = new DualListModel<>(personaServiceFacade.obtenerTodosRoles(), new ArrayList<>());
 		Long usuarioModifico = 2L;
@@ -180,13 +181,16 @@ public class AdminPersonaBean extends BaseBean {
     				datos.setDomicilioPersona(personaDomicilio(asentamiento, usuarioModifico, idPais, datos));
     				datos.setDatosLaborales(datoslaborales(personaInsertar, sede, municipio));
     				datos.setPersonaCorreo(personaCorreo(usuarioModifico, datos));
-    				datos.getPersona().setUnidadAdministrativa(datos.getPersona().getNuevaContrasenia());
     				datos.getPersona().setContraseniaEncriptada(encoder.encode(datos.getPersona().getNuevaContrasenia()));
         	        return datos;
         	    })
         	    .collect(Collectors.toList());
         logger.info("Hola");
-        boolean exito = personaServiceFacade.getPersonaService().guardarPersonas(listaDatos);
+        try {
+        	exito = personaServiceFacade.getPersonaService().guardarPersonas(listaDatos);        	
+        }catch(Exception e) {
+        	exito = false; 
+        }
         logger.info(exito);
         if(exito) {
         	agregarMsgInfo("Registros insertados", "Exito");
@@ -197,11 +201,11 @@ public class AdminPersonaBean extends BaseBean {
 	
 	private PersonaDTO crearPersona(PersonaSigeDTO persona, Long usuarioModifico) {
 		PersonaDTO personaInsertar = new PersonaDTO(usuarioModifico, "MX");
-		String usuario = persona.getNombre()+persona.getApellidoPaterno().substring(0, 1);
-		personaInsertar.setUsuario(usuario.toLowerCase());
+		personaInsertar.setUsuario(persona.getMatricula().toUpperCase());
 		personaInsertar.setContrasenia(encoder.encode(persona.getPassword()));
 		personaInsertar.setNuevaContrasenia(encoder.encode(persona.getPassword()));
 		personaInsertar.setCurp(persona.getCurp());
+		personaInsertar.setUnidadAdministrativa(persona.getPassword());
 		personaInsertar.setNombre(persona.getNombre());
 		personaInsertar.setApellidoPaterno(persona.getApellidoPaterno());
 		personaInsertar.setApellidoMaterno(persona.getApellidoMaterno());
