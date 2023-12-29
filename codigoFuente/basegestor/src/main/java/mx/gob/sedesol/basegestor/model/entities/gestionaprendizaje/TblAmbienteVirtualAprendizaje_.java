@@ -21,4 +21,5 @@ public class TblAmbienteVirtualAprendizaje_ {
 	public static volatile SingularAttribute<TblAmbienteVirtualAprendizaje, CatEstadoAva> catEstadoAva;
 	public static volatile SingularAttribute<TblAmbienteVirtualAprendizaje, RelPersonaResponsabilidades> personaResponsabilidades;
 	public static volatile SingularAttribute<TblAmbienteVirtualAprendizaje, TblEvento> eventoCapacitacion;
+	public static volatile SingularAttribute<TblAmbienteVirtualAprendizaje, Integer> autonomo;
 }

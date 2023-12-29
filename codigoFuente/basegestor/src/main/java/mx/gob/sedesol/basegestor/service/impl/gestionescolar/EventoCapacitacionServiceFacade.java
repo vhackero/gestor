@@ -538,10 +538,10 @@ public class EventoCapacitacionServiceFacade {
 		return personaResponsabilidadesService.obtienePersonasPorResponsabilidad(idResponsabilidad);
 	}
 
-	public ResultadoDTO<EventoCapacitacionDTO> guardarEventoCapacitacion(CapturaEventoCapacitacionDTO evento) {
+	public ResultadoDTO<EventoCapacitacionDTO> guardarEventoCapacitacion(CapturaEventoCapacitacionDTO evento, Boolean autonomo) {
 		ResultadoDTO<EventoCapacitacionDTO> resultado = new ResultadoDTO<>();
 		try {
-			resultado = eventoCapacitacionService.guardarEventoCapacitacion(evento);
+			resultado = eventoCapacitacionService.guardarEventoCapacitacion(evento, autonomo);
 		} catch (Exception e) {
 			resultado.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);
 			logger.error(e.getMessage(), e);
@@ -549,10 +549,10 @@ public class EventoCapacitacionServiceFacade {
 		return resultado;
 	}
 
-	public ResultadoDTO<EventoCapacitacionDTO> guardarBorrador(CapturaEventoCapacitacionDTO evento) {
+	public ResultadoDTO<EventoCapacitacionDTO> guardarBorrador(CapturaEventoCapacitacionDTO evento, Boolean autonomo) {
 		ResultadoDTO<EventoCapacitacionDTO> resultado = new ResultadoDTO<>();
 		try {
-			resultado = eventoCapacitacionService.guardarBorrador(evento);
+			resultado = eventoCapacitacionService.guardarBorrador(evento, autonomo);
 		} catch (Exception e) {
 			resultado.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);
 			logger.error(e.getMessage(), e);

@@ -199,7 +199,6 @@ public class ModificarSeguimientoAVABean extends BaseBean {
 		estadoAvaList = gestionAprendizajeServiceAdapter
 				.getCatalogoServiceByGestionAprendizajeEnum(CatGestionAprendizajeEnum.CAT_ESTADO_AVA)
 				.findAll(CatEstadoAva.class);
-
 	}
 
 	private void obtenerResponsablesProdXUnidades(List<UnidadOaAvaDTO> unidadOaAvaDTOs) {
@@ -1832,8 +1831,12 @@ public class ModificarSeguimientoAVABean extends BaseBean {
 		ambienteVirtualAprendizajeDTO.setPorcentajeAvance(resultado.byteValue());
 		numeroUnidades = 0;
 	}
-
-	public String activarAva() {
+	
+	public String activacionAva(){
+		return activarAva(ambienteVirtualAprendizajeDTO);
+	}
+	
+	public String activarAva(AmbienteVirtualAprendizajeDTO ambienteVirtualAprendizajeDTO) {
 		logger.info(("Activara el AVA " + ambienteVirtualAprendizajeDTO.getId()));
 
 		CatalogoComunDTO estatusAvaActivo = obtenerEstatusAva(EstatusAmbienteVirtualAprendizajeEnum.ACTIVO.getId(),
@@ -1847,7 +1850,7 @@ public class ModificarSeguimientoAVABean extends BaseBean {
 
 		if (resultado.esCorrecto()) {
 			try {
-				this.mostrarCursoLms();
+				this.mostrarCursoLms(ambienteVirtualAprendizajeDTO);
 				bitacoraBean.guardarBitacora(idPersonaEnSesion(), "ACT_AVA", String.valueOf(resultado.getDto().getId()),
 						requestActual(), TipoServicioEnum.LOCAL);
 			} catch (ErrorWS e) {
@@ -1955,7 +1958,7 @@ public class ModificarSeguimientoAVABean extends BaseBean {
 		return ambienteVirtualApService.asignaColorSemaro(ava);
 	}
 
-	public void mostrarCursoLms() throws ErrorWS {
+	public void mostrarCursoLms(AmbienteVirtualAprendizajeDTO ambienteVirtualAprendizajeDTO) throws ErrorWS {
 		CursoWS cursoWS = new CursoWS(ambienteVirtualAprendizajeDTO.getPlataformaMoodle());
 		cursoWS.mostrarCurso(ambienteVirtualAprendizajeDTO.getIdCursoLms());
 
@@ -2221,5 +2224,4 @@ public class ModificarSeguimientoAVABean extends BaseBean {
 	public void setBitacoraBean(BitacoraBean bitacoraBean) {
 		this.bitacoraBean = bitacoraBean;
 	}
-
 }

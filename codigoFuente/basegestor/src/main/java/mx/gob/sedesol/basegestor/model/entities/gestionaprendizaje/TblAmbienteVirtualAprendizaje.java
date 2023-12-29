@@ -82,6 +82,8 @@ public class TblAmbienteVirtualAprendizaje implements Serializable {
 	@Column(name="id_ava_clon_lms")
 	private Integer idAvaClonLms;
 	
+	@Column(name="autonomo")
+	private Integer autonomo;
 	
 	public TblAmbienteVirtualAprendizaje() {
 	}
@@ -216,7 +218,13 @@ public class TblAmbienteVirtualAprendizaje implements Serializable {
 		this.idAvaClonLms = idAvaClonLms;
 	}
 
-	
-	
+	public Integer getAutonomo() {
+		return autonomo;
+	}
+
+	public void setAutonomo(Integer autonomo) {
+		this.autonomo = autonomo;
+	}
+
 	
 }
