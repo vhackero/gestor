@@ -79,6 +79,8 @@ import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoService;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.EventoCapacitacionServiceFacade;
 import mx.gob.sedesol.basegestor.service.impl.logisticainfraestructura.LogisticaInfraServiceFacade;
+import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService;
+import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Curso;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.CursoWS;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
@@ -145,6 +147,12 @@ public class CapturaEventoCapacitacion extends BaseBean {
 
 	@ManagedProperty("#{relEncuestaEventoCapacitacionService}")
 	private RelEncuestaEventoCapacitacionService relEncuestaEventoCapacitacionService;
+	
+	@ManagedProperty("#{planService}")
+	private PlanService planService;
+	
+	@ManagedProperty("#{mallaCurricularService}")
+	private MallaCurricularService mallaCurricularService;
 
 	private Integer idPlan;
 
@@ -223,7 +231,9 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	private ConfiguracionAreaDTO areaSeleccionada;
 	private List<CatalogoComunDTO> catAreasInfra;
 	/* FIN VARIABLES INFRAESTRUCTURA */
-
+	
+	private Boolean autonomo;
+	
 	private ModelMapper modelMapper = new ModelMapper();
 
 	public static final int PRIMER_CORREO_DE_LA_PERSONA = 0;
@@ -266,6 +276,8 @@ public class CapturaEventoCapacitacion extends BaseBean {
 		rutaImagenes = eventoCapacitacionServiceFacade.obtenerRutaAlmacenamientoImagenEvento();
 		nombreImagenComun = eventoCapacitacionServiceFacade.obtenerNombreImagenComun();
 		rutaUndertow = eventoCapacitacionServiceFacade.obtenerRutaUndertow();
+		
+		autonomo = true;
 	}
 
 	private void removerOpcionesDeAvaNoDisponibles() {
@@ -336,7 +348,9 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	}
 	public void onChangeCatPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			filtrosPrograma.setIdPlan(Integer.parseInt(e.getNewValue().toString()));
+			Integer planSel = Integer.parseInt(e.getNewValue().toString());
+			
+			filtrosPrograma.setPlan( planService.buscarPorId( mallaCurricularService.buscarPorId(planSel).getIdPlan() ) );
 			catEstructuras = this.generarEstructuras(nodos, Integer.parseInt(e.getNewValue().toString()));
 			catSubEstructurasNivel1 = new ArrayList<CatalogoComunDTO>();
 			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
@@ -809,7 +823,7 @@ public class CapturaEventoCapacitacion extends BaseBean {
 			datos.getEvento().getCatEstadoEventoCapacitacion().setId(ConstantesGestor.EVEN_CAP_ESTATUS_CALENDARIZADO);
 			establecerEstatus(datos.getEvento());
 			ResultadoDTO<EventoCapacitacionDTO> resultado = eventoCapacitacionServiceFacade
-					.guardarEventoCapacitacion(datos);
+					.guardarEventoCapacitacion(datos, autonomo);
 			if (resultado.getResultado() == ResultadoTransaccionEnum.EXITOSO) {
 				bitacoraBean.guardarBitacora(idPersonaEnSesion(), "FIN_CRE_EVT",
 						String.valueOf(resultado.getDto().getIdEvento()), requestActual(), TipoServicioEnum.LOCAL);
@@ -964,7 +978,7 @@ public class CapturaEventoCapacitacion extends BaseBean {
 		logger.info("guardar borrador bean " + datos.getEvento().getIdClasificacionAva());
 		datos.getEvento().setValorCalificacionDictamen(100 - datos.getEvento().getValorAsistenciaDictamen());
 		datos.getEvento().getCatEstadoEventoCapacitacion().setId(ConstantesGestor.EVEN_CAP_ESTATUS_BORRADOR);
-		ResultadoDTO<EventoCapacitacionDTO> resultado = eventoCapacitacionServiceFacade.guardarBorrador(datos);
+		ResultadoDTO<EventoCapacitacionDTO> resultado = eventoCapacitacionServiceFacade.guardarBorrador(datos, autonomo);
 		if (resultado.getResultado() == ResultadoTransaccionEnum.EXITOSO) {
 			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "GUA_BOR_EVT",
 					String.valueOf(resultado.getDto().getIdEvento()), requestActual(), TipoServicioEnum.LOCAL);
@@ -1966,4 +1980,31 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	public void setIdCapacitacion(Integer idCapacitacion) {
 		this.idCapacitacion = idCapacitacion;
 	}
+
+	public Boolean getAutonomo() {
+		return autonomo;
+	}
+
+	public void setAutonomo(Boolean autonomo) {
+		this.autonomo = autonomo;
+	}
+
+	public PlanService getPlanService() {
+		return planService;
+	}
+
+	public void setPlanService(PlanService planService) {
+		this.planService = planService;
+	}
+
+	public MallaCurricularService getMallaCurricularService() {
+		return mallaCurricularService;
+	}
+
+	public void setMallaCurricularService(MallaCurricularService mallaCurricularService) {
+		this.mallaCurricularService = mallaCurricularService;
+	}
+	
+	
+	
 }

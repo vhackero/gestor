@@ -82,41 +82,24 @@
 </div>
 <div class="form-group agregaMargenTopX">
 	<div class="row">
+	
 		<div class="col-md-4">
 			<p:outputLabel styleClass="bloque requerido"
 				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.areaResp')}:" />
 
-			<p:outputPanel id="pnlBtnAreaResp" autoUpdate="false">
-				<p:commandButton id="areaRespABtn"
-					onmouseover="PF('overPnlAreaResp').show();" process="@this"
-					styleClass="#{programaCapacitacionBean.opcAreaResp ? 'btn btn-user-selected' : 'btn btn-primary'} quitaMargen btnEnOverlay"
-					value="#{programaCapacitacionBean.opcAreaResp ? sistema.obtenerTexto('gw.progCapacitacion.etiqueta.opcSeleccionada') : sistema.obtenerTexto('gw.progCapacitacion.etiqueta.seleccioneOp')}"
-					type="button" />
-			</p:outputPanel>
-
-			<p:overlayPanel dismissable="true" showCloseIcon="true"
-				for="areaRespABtn" showEffect="fade" hideEffect="fade"
-				widgetVar="overPnlAreaResp">
-
-				<p:treeTable id="areaRespTree" scrollable="true" scrollWidth="600"
-					value="#{programaCapacitacionBean.arbolOrgGubAreaResp}"
-					var="areaResp" selectionMode="single" styleClass="areaResp"
-					selection="#{programaCapacitacionBean.nodoAreaRespSel}">
-					<p:ajax event="select"
-						listener="#{programaCapacitacionBean.onNodeSelectAreaResp}"
-						update="formNvoProg:tabViewFec:pnlBtnAreaResp" />
-					<f:facet name="header">
-					#{sistema.obtenerTexto('gw.planesprogramas.texto.estructorg')}
-									</f:facet>
-					<p:column
-						headerText="#{sistema.obtenerTexto('gw.planesprogramas.texto.orggub')}">
-						<h:outputText value="#{areaResp.nombre}" />
-					</p:column>
-				</p:treeTable>
-
-			</p:overlayPanel>
-			<p:message for="areaRespTree" />
+			<p:selectOneMenu id="sedePlan" autoWidth="false"
+				value="#{programaCapacitacionBean.programa.areaResponsable.id}"
+				valueChangeListener="#{programaCapacitacionBean.onChangeOrgGubPlan}"
+				styleClass="col-xs-12 sedePlanes">
+				<p:ajax event="change" process="@this" />
+				<f:selectItem
+					itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+					itemValue="#{null}"  />
+				<f:selectItems value="#{programaCapacitacionBean.listItemsOrgGubs}"
+					var="orgGub" itemLabel="#{orgGub.label}" itemValue="#{orgGub.id}" />
+			</p:selectOneMenu>
 		</div>
+		
 		<div class="col-md-4">
 			<p:outputLabel styleClass="bloque requerido"
 				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.tpoEvento')}:" />
@@ -170,10 +153,10 @@
 <div class="form-group agregaMargenTop">
 	<div class="row">
 		<div class="col-md-6">
-			<p:outputLabel styleClass="bloque requerido" for="idTxtAreaResponsables"
+			<p:outputLabel styleClass="bloque requerido"
+				for="idTxtAreaResponsables"
 				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.responsables')}:" />
-			<p:inputTextarea id="idTxtAreaResponsables"
-				styleClass="altoMaximo" 
+			<p:inputTextarea id="idTxtAreaResponsables" styleClass="altoMaximo"
 				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.responsablesTextArea')}"
 				value="#{programaCapacitacionBean.responsablesDatosGenerales}">
 				<p:ajax process="@this" event="blur"
@@ -183,8 +166,7 @@
 		<div class="col-md-6">
 			<p:outputLabel styleClass="bloque requerido" for="idTxtAreaAutores"
 				value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.autores')}:" />
-			<p:inputTextarea id="idTxtAreaAutores" 
-				styleClass="altoMaximo"
+			<p:inputTextarea id="idTxtAreaAutores" styleClass="altoMaximo"
 				value="#{programaCapacitacionBean.autoresDatosGenerales}"
 				placeholder="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.autoresTextArea')}">
 				<p:ajax process="@this" event="blur"
