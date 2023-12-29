@@ -67,6 +67,8 @@ public class PersonaDTO extends ComunDTO implements Serializable {
 	private List<PersonaCorreoDTO> personaCorreos;
 
 	private List<DomicilioPersonaDTO> domiciliosPersona;
+	
+	private List<DatoSociodemograficoDTO> datosSociodeograficosPersona;
 
 	private boolean seleccionado;
 	private String rutaCompletaFoto;
@@ -633,6 +635,14 @@ public class PersonaDTO extends ComunDTO implements Serializable {
 		this.datosLaborales = datosLaborales;
 	}
 
+	public List<DatoSociodemograficoDTO> getDatosSociodeograficosPersona() {
+		return datosSociodeograficosPersona;
+	}
+
+	public void setDatosSociodeograficosPersona(List<DatoSociodemograficoDTO> datosSociodeograficosPersona) {
+		this.datosSociodeograficosPersona = datosSociodeograficosPersona;
+	}
+	
 	public String getSso_status() {
 		return sso_status;
 	}

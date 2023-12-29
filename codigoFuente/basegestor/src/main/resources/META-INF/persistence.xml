@@ -32,7 +32,6 @@
         <class>mx.gob.sedesol.basegestor.model.entities.admin.RelMensajeOperacion</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatDocumentosExpidePlan</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatEstadoPrograma</class>
-        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatModeloPedagogicoPlan</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatNivelEnsenanzaPrograma</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoPlan</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatObjetoCurricular</class>
@@ -54,7 +53,6 @@
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCargaHoraria</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaResponsable</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaAutore</class>
-        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblMallaCurricular</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatAmbientesAprendizajeEc</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoEventoEc</class>
@@ -94,7 +92,6 @@
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatCreditosPlan</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatDivisionesPlan</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoCompetencia</class>
-        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelMallaPlan</class>
         <!-- Fin Planes y programas -->
 
         <!-- Inicia seccion encuestas -->
@@ -224,6 +221,10 @@
         <class>mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaRolReporteUsuario</class>
         <class>mx.gob.sedesol.basegestor.model.entities.admin.CatRolReporteUsuario</class>
         <class>mx.gob.sedesol.basegestor.model.entities.admin.RelUsuarioDatosLaboralesReporteUsuario</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatLenguajeIndigena</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatDiscapacidad</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.CatTipoDiscapacidad</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.admin.TblDatosSociodemograficosPersona</class>
         <!-- Fin optimizacion de entidades -->
 
         <!-- Fin de seccion de entidades optimizadas -->

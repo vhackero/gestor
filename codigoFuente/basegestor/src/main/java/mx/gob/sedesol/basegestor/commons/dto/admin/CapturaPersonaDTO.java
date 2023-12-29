@@ -18,6 +18,7 @@ public class CapturaPersonaDTO implements Serializable {
 	private List<RolDTO> roles;
 	private PersonaDatosAcademicoDTO datosAcademicos;
 	private List<SsoElementoDTO> elementos;
+	private DatoSociodemograficoDTO datosSociodemograficos;
 
 	
 	public CapturaPersonaDTO() {
@@ -31,10 +32,11 @@ public class CapturaPersonaDTO implements Serializable {
 		this.roles = new ArrayList<>();
 		this.elementos = new ArrayList<>();
 		this.datosAcademicos = new PersonaDatosAcademicoDTO();
+		this.datosSociodemograficos =  new DatoSociodemograficoDTO();
 	}
 	
 	public CapturaPersonaDTO(PersonaDTO persona, UsuarioDatosLaboralesDTO datosLaborales, PersonaTelefonoDTO telefonoFijo,
-			PersonaTelefonoDTO celular, PersonaCorreoDTO personaCorreo, DomicilioPersonaDTO domicilioPersona,
+			PersonaTelefonoDTO celular, PersonaCorreoDTO personaCorreo, DomicilioPersonaDTO domicilioPersona, DatoSociodemograficoDTO datosSociodemograficos,
 			List<RolDTO> roles) {
 		this.persona = persona;
 		this.datosLaborales = datosLaborales;
@@ -43,6 +45,7 @@ public class CapturaPersonaDTO implements Serializable {
 		this.personaCorreo = personaCorreo;
 		this.domicilioPersona = domicilioPersona;
 		this.roles = roles;
+		this.datosSociodemograficos = datosSociodemograficos;
 	}
 
 	public PersonaDTO getPersona() {
@@ -113,7 +116,7 @@ public class CapturaPersonaDTO implements Serializable {
 	public String toString() {
 		return "CapturaPersonaDTO [persona=" + persona + ", datosLaborales=" + datosLaborales + ", telefonoFijo="
 				+ telefonoFijo + ", celular=" + celular + ", personaCorreo=" + personaCorreo + ", domicilioPersona="
-				+ domicilioPersona + ", roles=" + roles + ", datosAcademicos=" + datosAcademicos + "]";
+				+ domicilioPersona + ", roles=" + roles + ", datosAcademicos=" + datosAcademicos + ", datosSociodemograficos=" + datosSociodemograficos + "]";
 	}
 
 	/**
@@ -138,7 +141,13 @@ public class CapturaPersonaDTO implements Serializable {
 		this.correoDePersonaEnBD = correoDePersonaEnBD;
 	}
 
+	public DatoSociodemograficoDTO getDatosSociodemograficos() {
+		return datosSociodemograficos;
+	}
 
+	public void setDatosSociodemograficos(DatoSociodemograficoDTO datosSociodemograficos) {
+		this.datosSociodemograficos = datosSociodemograficos;
+	}
 
 
 }
