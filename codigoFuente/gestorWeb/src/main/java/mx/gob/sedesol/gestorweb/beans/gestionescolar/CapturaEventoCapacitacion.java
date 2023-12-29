@@ -6,13 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -23,6 +17,9 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 
+import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
+import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService;
+import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
 import org.apache.log4j.Logger;
 import org.modelmapper.ModelMapper;
 import org.primefaces.component.tabview.Tab;
@@ -127,9 +124,13 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	@ManagedProperty(value = "#{logisticaInfraServiceFacade}")
 	private LogisticaInfraServiceFacade logisticaInfraServiceFacade;
 
+	@ManagedProperty("#{planService}")
+	private PlanService planService;
+
 	@ManagedProperty(value = "#{sistema}")
 	private SistemaBean sistema;
-
+	@ManagedProperty("#{mallaCurricularService}")
+	private MallaCurricularService mallaCurricularService;
 	@ManagedProperty(value = "#{eventoCapacitacionBean}")
 	private EventoCapacitacionBean eventoCapacitacionBean;
 
@@ -147,15 +148,8 @@ public class CapturaEventoCapacitacion extends BaseBean {
 
 	@ManagedProperty("#{relEncuestaEventoCapacitacionService}")
 	private RelEncuestaEventoCapacitacionService relEncuestaEventoCapacitacionService;
-	
-	@ManagedProperty("#{planService}")
-	private PlanService planService;
-	
-	@ManagedProperty("#{mallaCurricularService}")
-	private MallaCurricularService mallaCurricularService;
 
 	private Integer idPlan;
-
 	private List<CatalogoComunDTO> catEstructuras;
 	private List<CatalogoComunDTO> catSubEstructurasNivel1;
 	private List<CatalogoComunDTO> catSubEstructurasNivel2;
@@ -186,6 +180,7 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	private FichaDescProgramaDTO filtrosPrograma = new FichaDescProgramaDTO();
 
 	private List<FichaDescProgramaDTO> programas;
+	private List<Integer> idsEstructura;
 
 	private CapturaEventoCapacitacionDTO datos;
 	private EventoCapacitacionDTO evento;
@@ -227,7 +222,10 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	private List<StreamedContent> imagenes;
 	private List<File> arrayImagenes;
 	private Integer idCapacitacion;
-
+	private String idCatEstructura;
+	private String idCatSubEstructuraNivel1;
+	private String idCatSubEstructuraNivel2;
+	private String idCatSubEstructuraNivel3;
 	private ConfiguracionAreaDTO areaSeleccionada;
 	private List<CatalogoComunDTO> catAreasInfra;
 	/* FIN VARIABLES INFRAESTRUCTURA */
@@ -248,7 +246,6 @@ public class CapturaEventoCapacitacion extends BaseBean {
 		datos = new CapturaEventoCapacitacionDTO();
 		evento = new EventoCapacitacionDTO();
 		datos.setEvento(evento);
-
 		filtrosPrograma.setCatStatusPrograma(new CatalogoComunDTO());
 		filtrosPrograma.getCatStatusPrograma().setId(EstatusProgramaEnum.FINAL.getId());
 		this.generaEstructuraCatTpoCompetenciaPlan();
@@ -272,7 +269,7 @@ public class CapturaEventoCapacitacion extends BaseBean {
 				.consultaSedesPorOrgGubDepedencia(ConstantesGestorWeb.DGGPB);
 		inicializarAreasSede();
 		fechaReservacion = null;
-
+		//obtenerEstructuras();
 		rutaImagenes = eventoCapacitacionServiceFacade.obtenerRutaAlmacenamientoImagenEvento();
 		nombreImagenComun = eventoCapacitacionServiceFacade.obtenerNombreImagenComun();
 		rutaUndertow = eventoCapacitacionServiceFacade.obtenerRutaUndertow();
@@ -361,6 +358,7 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	public void onChangeCatEstructura(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
+			idCatEstructura = mallaCurricularService.obtenerMallaCurricularPorId(idSubEstructura).getNombre();
 			filtrosPrograma.setEjeCapacitacion(idSubEstructura);
 			catSubEstructurasNivel1 = this.generarSubEstructuras1(nodos, idSubEstructura);
 			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
@@ -372,6 +370,7 @@ public class CapturaEventoCapacitacion extends BaseBean {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
 			filtrosPrograma.setEjeCapacitacion(idSubEstructura);
+			idCatSubEstructuraNivel1 = mallaCurricularService.obtenerMallaCurricularPorId(idSubEstructura).getNombre();
 			catSubEstructurasNivel2 = this.generarSubEstructuras2(nodos, idSubEstructura);
 			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
 			nivelMaximo = 2;
@@ -380,6 +379,7 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	public void onChangeCatSubestructura2(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
+			idCatSubEstructuraNivel2 = mallaCurricularService.obtenerMallaCurricularPorId(idSubEstructura).getNombre();
 			filtrosPrograma.setEjeCapacitacion(idSubEstructura);
 			catSubEstructurasNivel3 = this.generarSubEstructuras3(nodos, idSubEstructura);
 			nivelMaximo = 3;
@@ -388,6 +388,7 @@ public class CapturaEventoCapacitacion extends BaseBean {
 
 	public void onChangeCatSubestructura3(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			idCatSubEstructuraNivel3 = mallaCurricularService.obtenerMallaCurricularPorId(Integer.parseInt(e.getNewValue().toString())).getNombre();
 			filtrosPrograma.setEjeCapacitacion(Integer.parseInt(e.getNewValue().toString()));
 			nivelMaximo = 4;
 		}
@@ -602,10 +603,8 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	}
 
 	public String llenarDatosPrograma() {
-		datos.getEvento().setNombreEc(null);
 		datos.getEvento().setIdPrograma(datos.getPrograma().getIdPrograma());
 		datos.getEvento().setFichaDescriptivaPrograma(datos.getPrograma());
-
 		Integer modalidadPrograma = datos.getEvento().getFichaDescriptivaPrograma().getCatModalidad().getId();
 		CatalogoComunDTO modalidadEvento = setModEvtPorProg(modalidadPrograma);
 		datos.getEvento().setCatModalidadPlanPrograma(modalidadEvento);
@@ -617,11 +616,14 @@ public class CapturaEventoCapacitacion extends BaseBean {
 		} else {
 			datos.getEvento().setCalificacionMinAprobatoria(datos.getPrograma().getCalificacionMinAprobatoria());
 		}
+		datos.getEvento().setNombreEc(datos.getPrograma().getNombreTentativo());
+		datos.getEvento().setObjetivoGeneralEc(datos.getPrograma().getObjetivosGenerales());
+		datos.getEvento().setPerfilEc(datos.getPrograma().getPerfilIngreso());
+		datos.getEvento().setRequisitosEc(datos.getPrograma().getConocimietosPrevios());
 		// Se establece el tipo de calificacion y el tipo de dictamen en
 		// automatico.
 		datos.getEvento().setTpoCalificacion(ConstantesGestor.TIPO_CALIFICACION_PROMEDIO);
 		datos.getEvento().setTpoDictamen(ConstantesGestor.TIPO_DICTAMEN_PROMEDIO);
-
 		calcularCargaHoraria();
 		indicePanel = 1;
 		return null;
@@ -656,6 +658,9 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	}
 
 	public String cargarDatosAgenda() {
+		datos.getEvento().setFechaInicial(datos.getPrograma().getFechaVigInicial());
+		datos.getEvento().setFechaFinal(datos.getPrograma().getFechaVigFinal());
+		datos.getEvento().setCategoriaEC(datos.getPrograma().getCatTipoEventoEc());
 		indicePanel = 2;
 		return null;
 	}
@@ -668,12 +673,18 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	private void calcularCargaHoraria() {
 		int numHoras = 0;
 		int numMinutos = 0;
-		for (RelProgDuracionDTO duracion : datos.getPrograma().getRelProgramaDuracion()) {
-			if (!ObjectUtils.isNullOrEmpty(duracion.getHoras())) {
-				numHoras += Integer.parseInt(duracion.getHoras());
-			}
-			if (!ObjectUtils.isNullOrEmpty(duracion.getMinutos())) {
-				numMinutos += Integer.parseInt(duracion.getMinutos());
+
+		PlanDTO plan = planService.buscarPorId(datos.getPrograma().getPlan().getIdPlan());
+		if (plan.getCatCreditosPlan().getNombre().equals("Obligatorio")){
+			numHoras = datos.getPrograma().getCreditos() * plan.getHorasCredito();
+		}else {
+			for (RelProgDuracionDTO duracion : datos.getPrograma().getRelProgramaDuracion()) {
+				if (!ObjectUtils.isNullOrEmpty(duracion.getHoras())) {
+					numHoras += Integer.parseInt(duracion.getHoras());
+				}
+				if (!ObjectUtils.isNullOrEmpty(duracion.getMinutos())) {
+					numMinutos += Integer.parseInt(duracion.getMinutos());
+				}
 			}
 		}
 		int minutosReales = numMinutos % 60;
@@ -1306,7 +1317,7 @@ public class CapturaEventoCapacitacion extends BaseBean {
 
 	public void onTabChange(TabChangeEvent event) {
 		Tab activeTab = event.getTab();
-
+		cargarDatosAgenda();
 		switch (activeTab.getId()) {
 		case "tabCero":
 			indicePanel = 0;
@@ -1607,6 +1618,14 @@ public class CapturaEventoCapacitacion extends BaseBean {
 
 	public void setLogisticaInfraServiceFacade(LogisticaInfraServiceFacade logisticaInfraServiceFacade) {
 		this.logisticaInfraServiceFacade = logisticaInfraServiceFacade;
+	}
+
+	public PlanService getPlanService() {
+		return planService;
+	}
+
+	public void setPlanService(PlanService planService) {
+		this.planService = planService;
 	}
 
 	public List<SolicitudReservAreaDTO> getListaReservaciones() {
@@ -1988,15 +2007,6 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	public void setAutonomo(Boolean autonomo) {
 		this.autonomo = autonomo;
 	}
-
-	public PlanService getPlanService() {
-		return planService;
-	}
-
-	public void setPlanService(PlanService planService) {
-		this.planService = planService;
-	}
-
 	public MallaCurricularService getMallaCurricularService() {
 		return mallaCurricularService;
 	}
@@ -2004,7 +2014,44 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	public void setMallaCurricularService(MallaCurricularService mallaCurricularService) {
 		this.mallaCurricularService = mallaCurricularService;
 	}
-	
-	
-	
+
+	public List<Integer> getIdsEstructura() {
+		return idsEstructura;
+	}
+
+	public void setIdsEstructura(List<Integer> idsEstructura) {
+		this.idsEstructura = idsEstructura;
+	}
+
+	public String getIdCatEstructura() {
+		return idCatEstructura;
+	}
+
+	public void setIdCatEstructura(String idCatEstructura) {
+		this.idCatEstructura = idCatEstructura;
+	}
+
+	public String getIdCatSubEstructuraNivel1() {
+		return idCatSubEstructuraNivel1;
+	}
+
+	public void setIdCatSubEstructuraNivel1(String idCatSubEstructuraNivel1) {
+		this.idCatSubEstructuraNivel1 = idCatSubEstructuraNivel1;
+	}
+
+	public String getIdCatSubEstructuraNivel2() {
+		return idCatSubEstructuraNivel2;
+	}
+
+	public void setIdCatSubEstructuraNivel2(String idCatSubEstructuraNivel2) {
+		this.idCatSubEstructuraNivel2 = idCatSubEstructuraNivel2;
+	}
+
+	public String getIdCatSubEstructuraNivel3() {
+		return idCatSubEstructuraNivel3;
+	}
+
+	public void setIdCatSubEstructuraNivel3(String idCatSubEstructuraNivel3) {
+		this.idCatSubEstructuraNivel3 = idCatSubEstructuraNivel3;
+	}
 }
