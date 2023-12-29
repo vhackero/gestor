@@ -99,55 +99,20 @@
 								value="#{capturaEventoCapacitacion.datos.programa.catNivelEnsenanzaPrograma.nombre}"
 								styleClass="form-control" />
 						</div>
-					</div>
-				</div>
-				<div class="form-group">
-					<div class="row">
-						<p:outputPanel id="pnlEstructuras">
-							<p:outputPanel
-									rendered="#{not empty capturaEventoCapacitacion.catEstructuras}">
-								<div class="col-md-4 col-xs-12">
-									<p:outputLabel value="Estructura:"/>
-									<p:inputText id="nvoCatEstruc" styleClass="form-control" disabled="true"
-												 value="#{capturaEventoCapacitacion.idCatEstructura}"/>
-									<p:message for="nvoCatEstruc"/>
-								</div>
-							</p:outputPanel>
-						</p:outputPanel>
-						<!--  SUBESTRUCTURAS  -->
-						<p:outputPanel id="pnlSubestructuras1">
-							<p:outputPanel
-									rendered="#{not empty capturaEventoCapacitacion.catSubEstructurasNivel1}">
-								<div class="col-md-4 col-xs-12">
-									<p:outputLabel value="Subestructura 1:"/>
-									<p:inputText id="nvoCatSubEstruc1" styleClass="form-control" disabled="true"
-												 value="#{capturaEventoCapacitacion.idCatSubEstructuraNivel1}"/>
-									<p:message for="nvoCatSubEstruc1"/>
-								</div>
-							</p:outputPanel>
-						</p:outputPanel>
-						<p:outputPanel id="pnlSubestructuras2">
-							<p:outputPanel
-									rendered="#{not empty capturaEventoCapacitacion.catSubEstructurasNivel2}">
-								<div class="col-md-4 col-xs-12">
-									<p:outputLabel value="Subestructura 2:"/>
-									<p:inputText id="nvoCatSubEstruc2" styleClass="form-control" disabled="true"
-												 value="#{capturaEventoCapacitacion.idCatSubEstructuraNivel2}"/>
-									<p:message for="nvoCatSubEstruc2"/>
-								</div>
-							</p:outputPanel>
-						</p:outputPanel>
-						<p:outputPanel id="pnlSubestructuras3">
-							<p:outputPanel
-									rendered="#{not empty capturaEventoCapacitacion.catSubEstructurasNivel3}">
-								<div class="col-md-4 col-xs-12">
-									<p:outputLabel value="Subestructura 3:"/>
-									<p:inputText id="nvoCatSubEstruc3" styleClass="form-control" disabled="true"
-												 value="#{capturaEventoCapacitacion.idCatSubEstructuraNivel3}"/>
-									<p:message for="nvoCatSubEstruc3"/>
-								</div>
-							</p:outputPanel>
-						</p:outputPanel>
+						<div class="col-md-4">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.tpocomp')}" />
+							<p:inputText disabled="true"
+								value="#{eventoCapacitacionBean.obtieneNombreTpoCompetencia(capturaEventoCapacitacion.datos.programa.tipoCompetencia)}"
+								styleClass="form-control" />
+						</div>
+						<div class="col-md-4">
+							<p:outputLabel
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.busqueda.etiqueta.ejecapacit')}:" />
+							<p:inputText disabled="true"
+								value="#{eventoCapacitacionBean.obtieneNombreEjeCapacit(capturaEventoCapacitacion.datos.programa.ejeCapacitacion)}"
+								styleClass="form-control" />
+						</div>
 					</div>
 				</div>
 				<div class="form-group">
@@ -338,7 +303,7 @@
 					<div class="row">
 						<div class="col-md-4">
 							<p:outputLabel
-								value="#{sistema.obtenerTexto('gw.ge.texto.duracion')}" />
+								value="#{sistema.obtenerTexto('gw.ge.texto.duracion')}:" />
 						</div>
 						<div class="col-md-8">
 							<p:outputLabel
