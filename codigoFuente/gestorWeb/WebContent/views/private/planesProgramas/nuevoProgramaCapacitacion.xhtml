@@ -179,7 +179,7 @@
 					<div class="row">
 						<div class="col-md-4 col-xs-12">
 							<p:outputLabel styleClass="requerido"
-								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.nivelEns')}:" />
+								value="Nivel de estudios:" />
 							<p:selectOneMenu id="nvlEnse"
 								value="#{programaCapacitacionBean.programa.catNivelEnsenanzaPrograma.id}"
 								styleClass="col-xs-12">
@@ -336,6 +336,8 @@
 							<p:outputLabel styleClass="bloque requerido"
 								value="#{sistema.obtenerTexto('gw.progCapacitacion.nuevo.etiqueta.fechaInicio')}:" />
 							<p:calendar id="finiProg"
+								mindate="#{programaCapacitacionBean.planPadre.fechaInicio}"
+								maxdate="#{programaCapacitacionBean.planPadre.fechaTermino}"
 								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 								yearRange="c-100:c+100" locale="es" navigator="true"
 								value="#{programaCapacitacionBean.programa.fechaVigInicial}"
@@ -353,6 +355,7 @@
 								disabled="#{programaCapacitacionBean.programa.fechaVigInicial eq null}"
 								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 								mindate="#{programaCapacitacionBean.programa.fechaVigInicial}"
+								maxdate="#{programaCapacitacionBean.planPadre.fechaTermino}"
 								yearRange="c-100:c+100" locale="es" navigator="true"
 								value="#{programaCapacitacionBean.programa.fechaVigFinal}"
 								showOn="button" readonlyInput="true" styleClass="requerido"

@@ -1,0 +1,1 @@
+ALTER TABLE `tbl_ambiente_virtual_aprendizaje` ADD `autonomo` TINYINT NULL DEFAULT 1;

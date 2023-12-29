@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -53,8 +54,10 @@ import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.commons.utils.TipoUsuarioEnum;
 import mx.gob.sedesol.basegestor.model.especificaciones.DatosLaboralesEspecificacion;
 import mx.gob.sedesol.basegestor.mongo.service.BitacoraService;
+import mx.gob.sedesol.basegestor.service.admin.AsentamientoService;
 import mx.gob.sedesol.basegestor.service.admin.EntidadFederativaService;
 import mx.gob.sedesol.basegestor.service.admin.MunicipioService;
+import mx.gob.sedesol.basegestor.service.admin.PersonaService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaSigeService;
 import mx.gob.sedesol.basegestor.service.impl.admin.PersonaServiceFacade;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
@@ -77,6 +80,9 @@ public class AdminPersonaBean extends BaseBean {
 
 	@ManagedProperty("#{bitacoraService}")
 	private BitacoraService bitacoraService;
+	
+	@ManagedProperty("#{asentamientoService}")
+	private AsentamientoService asentamientoService;
 	
 	@ManagedProperty("#{entidadFederativaService}")
 	private EntidadFederativaService entidadFederativaService;
@@ -103,6 +109,7 @@ public class AdminPersonaBean extends BaseBean {
 	private PersonaDTO persona;
 
 	private CapturaPersonaDTO datos;
+	private List<CapturaPersonaDTO> listaDatos;
 
 	private List<PaisDTO> listaPaises;
 	private List<EntidadFederativaDTO> listaEntidades;
@@ -144,46 +151,69 @@ public class AdminPersonaBean extends BaseBean {
 	}
 	
 	public void obtenerUsuarios() {
-		List<PersonaSigeDTO> personasSige = personaSigeService.findAll();
-		for(PersonaSigeDTO persona : personasSige) {
-			try {
-				if(!personaServiceFacade.getPersonaService().existeCurp(persona.getCurp())) {
-					agregarPersona();
-					
-					PersonaDTO personaInsertar = crearPersona(persona);
-					datos.setPersona(personaInsertar);
-					datos.setDatosLaborales(datoslaborales(personaInsertar));
-					datos.setPersonaCorreo(personaCorreo());
-					datos.setDomicilioPersona(personaDomicilio());
-					datos.setDatosAcademicos(personaDatosAcademicos());
-					
-					guardarPersona();
-				}else {
-					logger.error("La persona ya existe: "+persona.getCurp());
-					agregarMsgError("La persona ya existe: "+persona.getCurp(), "Regiustro existente");
-					continue;
-				}
-			}catch(Exception e) {
-				logger.error(e);
-			}
-		}
+		boolean exito = false; 
+		List<PersonaSigeDTO> personasSige = personaSigeService.buscarNoRegistrados();
+		listaRoles = new DualListModel<>(personaServiceFacade.obtenerTodosRoles(), new ArrayList<>());
+		Long usuarioModifico = 2L;
+		String idPais = "MX";
+		EntidadFederativaDTO sede = entidadFederativaService.buscarPorId(11);
+		List<MunicipioDTO> municipio = municipioService.buscarPorEntidadFederativa(11);
+		AsentamientoDTO asentamiento = asentamientoService.buscarPorId("100010407");
+		nuevaPersona = true;
+		mostrarContrasenia = true;
+		
+		listaDatos = new ArrayList<CapturaPersonaDTO>();	
+		
+		listaMunicipiosLaboral = new ArrayList<>();
+		listaEntidades = personaServiceFacade.obtenerEntidadesPorPais(ConstantesGestor.ID_PAIS_MEXICO);
+		listaMunicipiosDomicilio = new ArrayList<>();
+        StringBuilder rutaCompletaFoto = new StringBuilder(rutaUndertow);
+        rutaCompletaFoto.append(nombreFotoComun);
+        listaDatos = personasSige.parallelStream()
+        	    .map(personaSige -> {
+        	        CapturaPersonaDTO datos = new CapturaPersonaDTO();
+        	        datos.getPersona().setRutaCompletaFoto(rutaCompletaFoto.toString());
+    				datos.setRoles(listaRoles.getTarget());
+    				datos.setDatosAcademicos(personaDatosAcademicos());
+    				
+    				PersonaDTO personaInsertar = crearPersona(personaSige, usuarioModifico);
+    				datos.setPersona(personaInsertar);
+    				datos.setDomicilioPersona(personaDomicilio(asentamiento, usuarioModifico, idPais, datos));
+    				datos.setDatosLaborales(datoslaborales(personaInsertar, sede, municipio));
+    				datos.setPersonaCorreo(personaCorreo(usuarioModifico, datos));
+    				datos.getPersona().setContraseniaEncriptada(encoder.encode(datos.getPersona().getNuevaContrasenia()));
+        	        return datos;
+        	    })
+        	    .collect(Collectors.toList());
+        logger.info("Hola");
+        try {
+        	exito = personaServiceFacade.getPersonaService().guardarPersonas(listaDatos);        	
+        }catch(Exception e) {
+        	exito = false; 
+        }
+        logger.info(exito);
+        if(exito) {
+        	agregarMsgInfo("Registros insertados", "Exito");
+        }else {
+        	agregarMsgError("Registros no insertados", "Ocurrio un error");
+        }
 	}
 	
-	private PersonaDTO crearPersona(PersonaSigeDTO persona) {
-		Long id = 2L; 
-		PersonaDTO personaInsertar = new PersonaDTO(id, "MX");
-		String usuario = persona.getNombre()+persona.getApellidoPaterno().substring(0, 1)+persona.getApellidoMaterno().substring(0, 1);
-		personaInsertar.setUsuario(usuario.toLowerCase());
-		personaInsertar.setContrasenia(persona.getPassword());
-		personaInsertar.setNuevaContrasenia(persona.getPassword());
+	private PersonaDTO crearPersona(PersonaSigeDTO persona, Long usuarioModifico) {
+		PersonaDTO personaInsertar = new PersonaDTO(usuarioModifico, "MX");
+		personaInsertar.setUsuario(persona.getMatricula().toUpperCase());
+		personaInsertar.setContrasenia(encoder.encode(persona.getPassword()));
+		personaInsertar.setNuevaContrasenia(encoder.encode(persona.getPassword()));
 		personaInsertar.setCurp(persona.getCurp());
+		personaInsertar.setUnidadAdministrativa(persona.getPassword());
 		personaInsertar.setNombre(persona.getNombre());
 		personaInsertar.setApellidoPaterno(persona.getApellidoPaterno());
 		personaInsertar.setApellidoMaterno(persona.getApellidoMaterno());
 		personaInsertar.setFechaNacimiento(persona.getFechaNacimiento());
 		personaInsertar.setRfc(persona.getCurp().substring(0, 9));
 		personaInsertar.setCorreoElectronico(persona.getCorreoInstitucional());
-		personaInsertar.setConfirmacionContrasenia(persona.getPassword());
+		personaInsertar.setConfirmacionContrasenia(encoder.encode(persona.getPassword()));
+		personaInsertar.setContraseniaEncriptada(encoder.encode(persona.getPassword()));
 		personaInsertar.setIdEntidadFederativa("01");
 		personaInsertar.setEntidadFederativa("Mexico");
 		personaInsertar.setIdMunicipio("12");
@@ -197,10 +227,8 @@ public class AdminPersonaBean extends BaseBean {
 		return personaInsertar;
 	}
 	
-	private UsuarioDatosLaboralesDTO datoslaborales(PersonaDTO persona) {
+	private UsuarioDatosLaboralesDTO datoslaborales(PersonaDTO persona, EntidadFederativaDTO sede, List<MunicipioDTO> municipio) {
 		UsuarioDatosLaboralesDTO usuario = new UsuarioDatosLaboralesDTO(persona);
-		EntidadFederativaDTO sede = entidadFederativaService.buscarPorId(11);
-		List<MunicipioDTO> municipio = municipioService.buscarPorEntidadFederativa(11);
 		usuario.setInstitucion("UNADM");
 		usuario.setSede(sede);
 		usuario.setMunicipio(municipio.get(0));
@@ -208,8 +236,7 @@ public class AdminPersonaBean extends BaseBean {
 		return usuario;
 	}
 	
-	private PersonaCorreoDTO personaCorreo() {
-		Long usuarioModifico = 2L;
+	private PersonaCorreoDTO personaCorreo(Long usuarioModifico, CapturaPersonaDTO datos) {
 		PersonaCorreoDTO usuario = new PersonaCorreoDTO(usuarioModifico, 1);
 		TipoCorreoDTO correo = new TipoCorreoDTO();
 
@@ -222,13 +249,16 @@ public class AdminPersonaBean extends BaseBean {
 		return usuario;
 	}
 	
-	private DomicilioPersonaDTO personaDomicilio() {
-		DomicilioPersonaDTO usuario = new DomicilioPersonaDTO();
+	private DomicilioPersonaDTO personaDomicilio(AsentamientoDTO asentamiento, Long usuarioModifico,  String idPais, CapturaPersonaDTO datos) {
+		DomicilioPersonaDTO usuario = new DomicilioPersonaDTO(usuarioModifico, idPais);
+		usuario.setAsentamiento(asentamiento);
 		usuario.setNumeroExterior("1");
 		usuario.setIdMunicipio("11");
 		usuario.setPersona(datos.getPersona());
 		usuario.setIdMunicipio("11");
 		usuario.setIdEntidadFederativa(11);
+		usuario.setCalle("Reforma");
+		usuario.setNumeroExterior("001");
 		return usuario;
 	}
 	private PersonaDatosAcademicoDTO personaDatosAcademicos() {
@@ -926,6 +956,14 @@ public class AdminPersonaBean extends BaseBean {
 
 	public void setMunicipioService(MunicipioService municipioService) {
 		this.municipioService = municipioService;
+	}
+
+	public AsentamientoService getAsentamientoService() {
+		return asentamientoService;
+	}
+
+	public void setAsentamientoService(AsentamientoService asentamientoService) {
+		this.asentamientoService = asentamientoService;
 	}
 	
 }

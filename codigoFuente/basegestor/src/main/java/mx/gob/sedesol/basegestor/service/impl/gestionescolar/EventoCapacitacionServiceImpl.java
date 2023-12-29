@@ -220,7 +220,7 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public ResultadoDTO<EventoCapacitacionDTO> guardarBorrador(CapturaEventoCapacitacionDTO datos) {
+	public ResultadoDTO<EventoCapacitacionDTO> guardarBorrador(CapturaEventoCapacitacionDTO datos, Boolean autonomo) {
 		ResultadoDTO<EventoCapacitacionDTO> resultado = new ResultadoDTO<>();
 
 		TblEvento evento = modelMapper.map(datos.getEvento(), TblEvento.class);
@@ -230,7 +230,17 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		almacenarResponsables(datos.getCoordinadores(), eventoRespuesta);
 		almacenarResponsables(datos.getFacilitadores(), eventoRespuesta);
 		almacenarResponsables(datos.getProductores(), eventoRespuesta);
-
+		
+		if (datos.getEvento().getCatModalidadPlanPrograma().getId() == ConstantesGestor.MODALIDAD_LINEA || ((datos
+				.getEvento().getCatModalidadPlanPrograma().getId() == ConstantesGestor.MODALIDAD_MIXTO))) {
+			TblAmbienteVirtualAprendizaje ava = ambienteVirtualApRepo.obtenerAVAPorEvento(evento.getIdEvento());
+			
+			if(ObjectUtils.isNotNull(ava)){
+				ava.setAutonomo(autonomo ? 1 : 0);
+				ambienteVirtualApRepo.save(ava);
+			}
+		}
+		
 		resultado.setDto(modelMapper.map(eventoRespuesta, EventoCapacitacionDTO.class));
 		resultado.agregaMensaje(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_EXITOSO.getId());
 
@@ -251,7 +261,7 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public ResultadoDTO<EventoCapacitacionDTO> guardarEventoCapacitacion(CapturaEventoCapacitacionDTO datos)
+	public ResultadoDTO<EventoCapacitacionDTO> guardarEventoCapacitacion(CapturaEventoCapacitacionDTO datos, Boolean autonomo)
 			throws Exception {
 		ResultadoDTO<EventoCapacitacionDTO> resultado = validarEventoCapacitacion(datos);
 		if (resultado.esCorrecto()) {
@@ -259,7 +269,7 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 			TblEvento evento = modelMapper.map(datos.getEvento(), TblEvento.class);
 			TblEvento eventoRespuesta = eventoCapacitacionRepo.save(evento);
 			almacenarRelacionEncuestaEvento(eventoRespuesta.getIdEvento(), datos, eventoRespuesta.getUsuarioModifico());
-			procesarModalidad(datos, eventoRespuesta);
+			procesarModalidad(datos, eventoRespuesta, autonomo);
 
 			limpiarResponsables(eventoRespuesta);
 
@@ -350,16 +360,16 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		return datos;
 	}
 
-	private void procesarModalidad(CapturaEventoCapacitacionDTO datos, TblEvento evento) throws ErrorWS {
+	private void procesarModalidad(CapturaEventoCapacitacionDTO datos, TblEvento evento, Boolean autonomo) throws ErrorWS {
 
 		if (datos.getEvento().getCatModalidadPlanPrograma().getId() == ConstantesGestor.MODALIDAD_LINEA
 				|| ((datos.getEvento().getCatModalidadPlanPrograma().getId() == ConstantesGestor.MODALIDAD_MIXTO))) {
 
 			if (evento.getIdClasificacionAva() == ConstantesGestor.CLASIFICACION_AVA_NUEVO) {
-				crearEstructuraNueva(evento);
+				crearEstructuraNueva(evento, autonomo);
 			}
 			if (evento.getIdClasificacionAva() == ConstantesGestor.CLASIFICACION_AVA_EVENTO_ANTERIOR) {
-				copiarEstructuraEventoAnterior(evento);
+				copiarEstructuraEventoAnterior(evento, autonomo);
 			}
 
 		}
@@ -408,7 +418,7 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		return relEstUnidadDidacticaSinRepetir;
 	}
 
-	private void crearEstructuraNueva(TblEvento evento) throws ErrorWS {
+	private void crearEstructuraNueva(TblEvento evento, Boolean autonomo) throws ErrorWS {
 		List<RelEstructuraUnidadDidactica> estructuras = relEstructuraUDidacticaRepo
 				.obtieneRelEstUnidadDidPorPrograma(evento.getIdPrograma());
 		estructuras = obtenerListUnidDidactSinRepetir(estructuras);
@@ -428,6 +438,7 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		ava.setIdCursoLms(evento.getIdCursoLmsBorrador());
 		ava.setUrlLms(parametroWSMoodleService.buscarPorId(evento.getIdPlataformaLmsBorrador()).getHost()
 				+ "/course/view.php?id=" + ava.getIdCursoLms());
+		ava.setAutonomo(autonomo ? 1 : 0);
 		// TODO cambiar por culumna en parametroWSMoodleService
 		ambienteVirtualApRepo.save(ava);
 
@@ -476,7 +487,7 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		return seccion;
 	}
 
-	private void copiarEstructuraEventoAnterior(TblEvento evento) {
+	private void copiarEstructuraEventoAnterior(TblEvento evento, Boolean autonomo) {
 		TblAmbienteVirtualAprendizaje avaAnterior = ambienteVirtualApRepo
 				.obtenerAVAPorEvento(evento.getIdEventoCapacitacionAnterior());
 
@@ -493,6 +504,7 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 			ava.getCatEstadoAva().setId(ConstantesGestor.AVA_ESTADO_CONTRUCCION);
 			ava.setPorcentajeAvance(avaAnterior.getPorcentajeAvance());
 			ava.setIdCursoLms(avaAnterior.getIdCursoLms());
+			ava.setAutonomo(avaAnterior.getAutonomo());
 			ambienteVirtualApRepo.save(ava);
 
 			logger.info("####################### COPIAR UNIDADES DIDACTICAS");
