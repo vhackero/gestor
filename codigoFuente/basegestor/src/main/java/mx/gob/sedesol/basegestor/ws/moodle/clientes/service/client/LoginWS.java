@@ -26,7 +26,7 @@ public class LoginWS {
 		String accessToken = "";
 		ParametroWSMoodleDTO param = new ParametroWSMoodleDTO();
 		param.setHost(this.parametroWSMoodleDTO.getHost());
-		param.setOuth("local/wstemplate/tokensisi.php");
+		param.setOuth("/local/wstemplate/tokensisi.php");
 		param.setUsername(usuario);
 		param.setPassword(password);
 		//TokenController token = new TokenController(param);
@@ -34,12 +34,12 @@ public class LoginWS {
 		try {
 		    accessToken = performGetRequest(param);
 		    System.out.println("Respuesta del servicio web: " + accessToken);
-		    logger.info(this.parametroWSMoodleDTO.getHost()+"local/wstemplate/index_sin_login.php?courseid="+idCurso+"&token="+accessToken);
+		    logger.info(this.parametroWSMoodleDTO.getHost()+"/local/wstemplate/index_sin_login.php?courseid="+idCurso+"&token="+accessToken);
 		} catch (IOException e) {
 		    e.printStackTrace();
 		    System.out.println("Detalles del error: " + e.getMessage());
 		}
-		return this.parametroWSMoodleDTO.getHost()+"local/wstemplate/index_sin_login.php?courseid="+idCurso+"&token="+accessToken;
+		return this.parametroWSMoodleDTO.getHost()+"/local/wstemplate/index_sin_login.php?courseid="+idCurso+"&token="+accessToken;
 		//return this.parametroWSMoodleDTO.getHost()+"/local/wstemplate/index_sin_login.php?courseid="+idCurso+"&token="+accessToken;
 	}
 	
