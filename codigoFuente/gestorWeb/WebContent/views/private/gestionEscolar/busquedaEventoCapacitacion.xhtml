@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html>
 <ui:composition template="/templates/layout.xhtml"
-	xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:c="http://java.sun.com/jsp/jstl/core"
-	xmlns:sec="http://www.springframework.org/security/tags">
+				xmlns="http://www.w3.org/1999/xhtml"
+				xmlns:h="http://java.sun.com/jsf/html"
+				xmlns:ui="http://java.sun.com/jsf/facelets"
+				xmlns:f="http://java.sun.com/jsf/core"
+				xmlns:p="http://primefaces.org/ui"
+				xmlns:c="http://java.sun.com/jsp/jstl/core"
+				xmlns:sec="http://www.springframework.org/security/tags">
 
 
 	<ui:define name="breadcrumb">
@@ -22,21 +22,21 @@
 
 		<h:form id="frmBusqueda">
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
-				onsuccess="PF('dialogLayout').hide()" />
+						  onsuccess="PF('dialogLayout').hide()" />
 
 
 			<div class="row">
 				<div class="col-md-12">
 					<sec:authorize access="hasPermission(null, 'EC_AGR' ) ">
 						<p:commandButton
-							value="#{sistema.obtenerTexto('gw.ge.btn.crear')}"
-							styleClass="btn btn-primary pull-right"
-							update="frmBusquedaPrograma"
-							action="#{capturaEventoCapacitacion.nuevoEventoCapacitacion()}"
-							ajax="false" immediate="true" process="@this" />
+								value="#{sistema.obtenerTexto('gw.ge.btn.crear')}"
+								styleClass="btn btn-primary pull-right"
+								update="frmBusquedaPrograma"
+								action="#{capturaEventoCapacitacion.nuevoEventoCapacitacion()}"
+								ajax="false" immediate="true" process="@this" />
 						<p:outputLabel
-							value="#{sistema.obtenerTexto('gw.gestionescolar.label.nuevoEventCap')}:"
-							styleClass="pull-right agregaHeight" />
+								value="#{sistema.obtenerTexto('gw.gestionescolar.label.nuevoEventCap')}:"
+								styleClass="pull-right agregaHeight" />
 					</sec:authorize>
 				</div>
 			</div>
@@ -44,57 +44,113 @@
 
 
 			<p:panel id="fldBusqueda"
-				header="#{sistema.obtenerTexto('gw.gestionescolar.label.busquedaEventoC')}"
-				showCollapseLink="false" collapsible="false">
+					 header="#{sistema.obtenerTexto('gw.gestionescolar.label.busquedaEventoC')}"
+					 showCollapseLink="false" collapsible="false">
 				<f:validateBean disabled="true">
 					<!-- Row 1 -->
 					<div class="form-group">
 						<div class="row">
-
-							<!-- Tipo de competencia -->
-							<div class="col-md-6">
-								<p:outputLabel for="tpoCmpSel"
-									value="Estructura:"
-									styleClass="requerido" />
-								<p:selectOneMenu id="tpoCmpSel" required="true"
-									value="#{eventoCapacitacionBean.filtros.fichaDescriptivaPrograma.tipoCompetencia}"
-									valueChangeListener="#{eventoCapacitacionBean.onChangeTpoCompetencia}"
-									validator="#{eventoCapacitacionBean.validarEjeCapacitacion}"
-									styleClass="col-xs-12">
-									<p:ajax update="ejeCapSel" />
-									<f:selectItem itemValue="#{0}"
-										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
-									<f:selectItems
-										value="#{eventoCapacitacionBean.listaTiposCompetencias}"
-										var="tpoComp" itemLabel="#{tpoComp.nombre}"
-										itemValue="#{tpoComp.id}" />
+							<div class="col-md-4 col-xs-12">
+								<p:outputLabel styleClass="requerido" value="Plan:"/>
+								<p:selectOneMenu id="nvoCatPlan" styleClass="col-xs-12"
+												 value="#{eventoCapacitacionBean.idPlan}"
+												 valueChangeListener="#{eventoCapacitacionBean.onChangeCatPlan}">
+									<p:ajax update="@form"/>
+									<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											itemValue="#{0}"/>
+									<f:selectItems value="#{eventoCapacitacionBean.nodos}"
+												   var="plan" itemLabel="#{plan.nombre}" itemValue="#{plan.idNodo}"/>
 								</p:selectOneMenu>
-								<p:message for="tpoCmpSel" />
+								<p:message for="nvoCatPlan"/>
 							</div>
 
-							<!-- Eje de capacitacion -->
-							<div class="col-md-6">
+							<p:outputPanel id="pnlEstructuras">
+								<p:outputPanel
+										rendered="#{not empty eventoCapacitacionBean.catEstructuras}">
+									<div class="col-md-4 col-xs-12">
+										<p:outputLabel styleClass="requerido" value="Estructura:"/>
+										<p:selectOneMenu id="nvoCatEstruc" styleClass="col-xs-12"
+														 valueChangeListener="#{eventoCapacitacionBean.onChangeCatEstructura}">
+											<p:ajax update="@form"/>
+											<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+													itemValue="#{0}"/>
+											<f:selectItems
+													value="#{eventoCapacitacionBean.catEstructuras}"
+													var="estruc" itemLabel="#{estruc.nombre}"
+													itemValue="#{estruc.id}"/>
+										</p:selectOneMenu>
+										<p:message for="nvoCatEstruc"/>
+									</div>
+								</p:outputPanel>
+							</p:outputPanel>
 
-								<p:outputLabel for="ejeCapSel"
-									value="#{sistema.obtenerTexto('gw.gestionescolar.label.ejeCapacitacion')}:"
-									styleClass="requerido" />
+							<p:outputPanel id="pnlSubestructuras1">
+								<p:outputPanel
+										rendered="#{not empty eventoCapacitacionBean.catSubEstructurasNivel1}">
+									<div class="col-md-4 col-xs-12">
+										<p:outputLabel styleClass="requerido" value="Subestructura 1:"/>
+										<p:selectOneMenu id="nvoCatSubEstruc1" styleClass="col-xs-12"
+														 valueChangeListener="#{eventoCapacitacionBean.onChangeCatSubestructura1}">
+											<p:ajax update="@form"/>
+											<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+													itemValue="#{0}"/>
+											<f:selectItems
+													value="#{eventoCapacitacionBean.catSubEstructurasNivel1}"
+													var="subEstruc1" itemLabel="#{subEstruc1.nombre}"
+													itemValue="#{subEstruc1.id}"/>
+										</p:selectOneMenu>
+										<p:message for="nvoCatSubEstruc1"/>
+									</div>
+								</p:outputPanel>
+							</p:outputPanel>
 
-								<p:selectOneMenu id="ejeCapSel"
-									value="#{eventoCapacitacionBean.filtros.fichaDescriptivaPrograma.ejeCapacitacion}"
-									disabled="#{empty eventoCapacitacionBean.listaEjesCapacitacion}"
-									required="true"
-									validator="#{eventoCapacitacionBean.validarTipoCompetencia}"
-									styleClass="col-xs-12">
-									<p:ajax event="change" process="@this" />
-									<f:selectItem itemValue="#{0}"
-										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
-									<f:selectItems
-										value="#{eventoCapacitacionBean.listaEjesCapacitacion}"
-										var="ejeCap" itemValue="#{ejeCap.id}"
-										itemLabel="#{ejeCap.nombre}" />
-								</p:selectOneMenu>
-								<p:message for="ejeCapSel" id="msjEjeCapSel" />
-							</div>
+
+							<p:outputPanel id="pnlSubestructuras2">
+								<p:outputPanel
+										rendered="#{not empty eventoCapacitacionBean.catSubEstructurasNivel2}">
+									<div class="col-md-4 col-xs-12" style="margin-top: 15px;">
+										<p:outputLabel styleClass="requerido" value="Subestructura 2:"/>
+										<p:selectOneMenu id="nvoCatSubEstruc2" styleClass="col-xs-12"
+														 valueChangeListener="#{eventoCapacitacionBean.onChangeCatSubestructura2}">
+											<p:ajax update="@form"/>
+											<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+													itemValue="#{0}"/>
+											<f:selectItems
+													value="#{eventoCapacitacionBean.catSubEstructurasNivel2}"
+													var="subEstruc2" itemLabel="#{subEstruc2.nombre}"
+													itemValue="#{subEstruc2.id}"/>
+										</p:selectOneMenu>
+										<p:message for="nvoCatSubEstruc2"/>
+									</div>
+								</p:outputPanel>
+							</p:outputPanel>
+
+
+							<p:outputPanel id="pnlSubestructuras3">
+								<p:outputPanel
+										rendered="#{not empty eventoCapacitacionBean.catSubEstructurasNivel3}">
+									<div class="col-md-4 col-xs-12" style="margin-top: 15px;">
+										<p:outputLabel styleClass="requerido" value="Subestructura 3:"/>
+										<p:selectOneMenu id="nvoCatSubEstruc3" styleClass="col-xs-12"
+														 valueChangeListener="#{eventoCapacitacionBean.onChangeCatSubestructura3}">
+											<p:ajax update="@form"/>
+											<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+													itemValue="#{0}"/>
+											<f:selectItems
+													value="#{eventoCapacitacionBean.catSubEstructurasNivel3}"
+													var="subEstruc3" itemLabel="#{subEstruc3.nombre}"
+													itemValue="#{subEstruc3.id}"/>
+										</p:selectOneMenu>
+										<p:message for="nvoCatSubEstruc3"/>
+									</div>
+								</p:outputPanel>
+							</p:outputPanel>
+
 						</div>
 					</div>
 
@@ -104,21 +160,21 @@
 							<!-- Nombre del evento de capacitacion -->
 							<div class="col-md-6">
 								<p:outputLabel for="idNombreEc"
-									value="Estructura:" />
+											   value="Evento de capacitación:" />
 								<p:inputText id="idNombreEc"
-									placeholder="#{sistema.obtenerTexto('gw.gestionescolar.label.nombreEventoCap')}"
-									value="#{eventoCapacitacionBean.filtros.nombreEc}"
-									styleClass="form-control" />
+											 placeholder="#{sistema.obtenerTexto('gw.gestionescolar.label.nombreEventoCap')}"
+											 value="#{eventoCapacitacionBean.filtros.nombreEc}"
+											 styleClass="form-control" />
 								<p:message for="idNombreEc" />
 							</div>
 							<!-- Nombre dle programa de capacitacion  -->
 							<div class="col-md-6">
 								<p:outputLabel for="idNombrePrograma"
-									value="#{sistema.obtenerTexto('gw.gestionescolar.label.nombrePrograma')}:" />
+											   value="Nombre del programa de estudios:" />
 								<p:inputText id="idNombrePrograma"
-									placeholder="#{sistema.obtenerTexto('gw.gestionescolar.label.nombrePrograma')}"
-									value="#{eventoCapacitacionBean.filtros.fichaDescriptivaPrograma.nombreTentativo}"
-									styleClass="form-control" />
+											 placeholder="Nombre del programa de estudios"
+											 value="#{eventoCapacitacionBean.filtros.fichaDescriptivaPrograma.nombreTentativo}"
+											 styleClass="form-control" />
 							</div>
 						</div>
 					</div>
@@ -128,75 +184,75 @@
 							<!-- Modalidad -->
 							<div class="col-md-3">
 								<p:outputLabel
-									value="#{sistema.obtenerTexto('gw.gestionescolar.label.modalidad')}:" />
+										value="#{sistema.obtenerTexto('gw.gestionescolar.label.modalidad')}:" />
 								<p:selectOneMenu
-									value="#{eventoCapacitacionBean.filtros.catModalidadPlanPrograma}"
-									converter="catalogoComunConverter" required="false"
-									styleClass="col-xs-12">
+										value="#{eventoCapacitacionBean.filtros.catModalidadPlanPrograma}"
+										converter="catalogoComunConverter" required="false"
+										styleClass="col-xs-12">
 									<f:selectItem
-										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
 									<f:selectItems
-										value="#{eventoCapacitacionBean.listaModalidadesPrograma}"
-										var="modalidad" itemLabel="#{modalidad.nombre}"
-										itemValue="#{modalidad}" />
+											value="#{eventoCapacitacionBean.listaModalidadesPrograma}"
+											var="modalidad" itemLabel="#{modalidad.nombre}"
+											itemValue="#{modalidad}" />
 								</p:selectOneMenu>
 							</div>
 
 							<!-- Tipo rango fechas  -->
 							<div class="col-md-3">
 								<p:outputLabel
-									value="#{sistema.obtenerTexto('gw.ga.label.rangofechas')}:" />
+										value="#{sistema.obtenerTexto('gw.ga.label.rangofechas')}:" />
 								<p:selectOneMenu id="tipofecha" required="false"
-									value="#{eventoCapacitacionBean.tipoDatoFechas}"
-									autoWidth="false" styleClass="col-xs-12">
+												 value="#{eventoCapacitacionBean.tipoDatoFechas}"
+												 autoWidth="false" styleClass="col-xs-12">
 									<p:ajax update="fc_fechaInicial fc_fechaFinal" process="@this"
-										listener="#{eventoCapacitacionBean.validarComboFechas}" />
+											listener="#{eventoCapacitacionBean.validarComboFechas}" />
 									<f:selectItem
-										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-										itemValue="#{null}" />
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											itemValue="#{null}" />
 									<f:selectItem
-										itemLabel="#{sistema.obtenerTexto('gw.ga.label.ite')}"
-										itemValue="#{1}" />
+											itemLabel="#{sistema.obtenerTexto('gw.ga.label.ite')}"
+											itemValue="#{1}" />
 									<f:selectItem
-										itemLabel="#{sistema.obtenerTexto('gw.ga.label.ie')}"
-										itemValue="#{2}" />
+											itemLabel="#{sistema.obtenerTexto('gw.ga.label.ie')}"
+											itemValue="#{2}" />
 									<f:selectItem
-										itemLabel="#{sistema.obtenerTexto('gw.ga.label.te')}"
-										itemValue="#{3}" />
+											itemLabel="#{sistema.obtenerTexto('gw.ga.label.te')}"
+											itemValue="#{3}" />
 								</p:selectOneMenu>
 							</div>
 
 							<!-- Fecha Inicial  -->
 							<div class="col-md-3">
 								<p:outputLabel styleClass="bloque"
-									value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechaInicial')}:" />
+											   value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechaInicial')}:" />
 								<p:calendar id="fc_fechaInicial" styleClass="requerido"
-									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
-									yearRange="c-100:c+100" locale="es"
-									disabled="#{empty eventoCapacitacionBean.tipoDatoFechas}"
-									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									readonlyInput="true" navigator="true"
-									value="#{eventoCapacitacionBean.filtros.fechaInicial}"
-									showOn="button">
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											yearRange="c-100:c+100" locale="es"
+											disabled="#{empty eventoCapacitacionBean.tipoDatoFechas}"
+											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											readonlyInput="true" navigator="true"
+											value="#{eventoCapacitacionBean.filtros.fechaInicial}"
+											showOn="button">
 									<p:ajax event="dateSelect" process="@this"
-										update="fc_fechaFinal"
-										listener="#{eventoCapacitacionBean.validarFechas()}" />
+											update="fc_fechaFinal"
+											listener="#{eventoCapacitacionBean.validarFechas()}" />
 								</p:calendar>
 
 							</div>
 							<!-- Fecha Final -->
 							<div class="col-md-3">
 								<p:outputLabel styleClass="bloque"
-									value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechafinal')}:" />
+											   value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechafinal')}:" />
 								<p:calendar id="fc_fechaFinal" styleClass="requerido"
-									mindate="#{eventoCapacitacionBean.filtros.fechaInicial}"
-									disabled="#{empty eventoCapacitacionBean.filtros.fechaInicial}"
-									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
-									yearRange="c-100:c+100" locale="es"
-									placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									readonlyInput="true" navigator="true"
-									value="#{eventoCapacitacionBean.filtros.fechaFinal}"
-									showOn="button">
+											mindate="#{eventoCapacitacionBean.filtros.fechaInicial}"
+											disabled="#{empty eventoCapacitacionBean.filtros.fechaInicial}"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											yearRange="c-100:c+100" locale="es"
+											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											readonlyInput="true" navigator="true"
+											value="#{eventoCapacitacionBean.filtros.fechaFinal}"
+											showOn="button">
 									<p:ajax event="dateSelect" process="@this" />
 								</p:calendar>
 							</div>
@@ -208,18 +264,18 @@
 					<!-- Leyenda campos requeridos-->
 					<div class="col-md-4">
 						<p:outputLabel
-							value="#{sistema.obtenerTexto('gw.gestionescolar.label.camposRequeridos')}"
-							styleClass="requerido" />
+								value="#{sistema.obtenerTexto('gw.gestionescolar.label.camposRequeridos')}"
+								styleClass="requerido" />
 					</div>
 					<!-- Busqueda de Eventos de capacitacion -->
 					<div class="col-md-8 text-right">
 						<p:commandButton value="Limpiar campos" process="@this"
-							update="frmBusqueda frmtabla"
-							action="#{eventoCapacitacionBean.limpiarCampos}" ajax="true"
-							styleClass="btn btn-default" />
+										 update="frmBusqueda frmtabla"
+										 action="#{eventoCapacitacionBean.limpiarCampos}" ajax="true"
+										 styleClass="btn btn-default" />
 						<p:commandButton styleClass="btn btn-primary" value="Buscar"
-							action="#{eventoCapacitacionBean.buscarEventosCapacitacion}"
-							ajax="true" update="frmtabla frmBusqueda" />
+										 action="#{eventoCapacitacionBean.buscarEventosCapacitacion}"
+										 ajax="true" update="frmtabla frmBusqueda" />
 					</div>
 				</div>
 
@@ -229,8 +285,8 @@
 		<h:form id="frmtabla">
 
 			<p:importEnum
-				type="mx.gob.sedesol.gestorweb.commons.utils.EstadoEventoCapEnum"
-				var="ESTADO_EVENTO" allSuffix="ALL_ENUM_VALUES" />
+					type="mx.gob.sedesol.gestorweb.commons.utils.EstadoEventoCapEnum"
+					var="ESTADO_EVENTO" allSuffix="ALL_ENUM_VALUES" />
 
 			<p:panel header="#{sistema.obtenerTexto('gw.ge.texto.listadoec')}">
 
@@ -239,20 +295,20 @@
 						<!-- Modalidad -->
 						<div class="col-md-8">
 							<p:outputLabel
-								value="#{sistema.obtenerTexto('gw.ge.texto.estatus')}:"
-								styleClass="pull-right agregaHeight" />
+									value="#{sistema.obtenerTexto('gw.ge.texto.estatus')}:"
+									styleClass="pull-right agregaHeight" />
 						</div>
 						<div class="col-md-4">
 							<p:selectOneMenu
-								value="#{eventoCapacitacionBean.filtros.catEstadoEventoCapacitacion.id}"
-								valueChangeListener="#{eventoCapacitacionBean.onChangeBusquedaEstatus}"
-								styleClass="col-xs-12">
+									value="#{eventoCapacitacionBean.filtros.catEstadoEventoCapacitacion.id}"
+									valueChangeListener="#{eventoCapacitacionBean.onChangeBusquedaEstatus}"
+									styleClass="col-xs-12">
 								<p:ajax process="@this" update="dtResultBusqEventCap" />
 								<f:selectItem itemValue="#{null}"
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+											  itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
 								<f:selectItems value="#{eventoCapacitacionBean.listaEstatusEC}"
-									var="estadoEventCap" itemLabel="#{estadoEventCap.nombre}"
-									itemValue="#{estadoEventCap.id}" />
+											   var="estadoEventCap" itemLabel="#{estadoEventCap.nombre}"
+											   itemValue="#{estadoEventCap.id}" />
 							</p:selectOneMenu>
 						</div>
 					</div>
@@ -262,13 +318,13 @@
 				<div class="row">
 					<div class="col-md-12">
 						<p:dataTable id="dtResultBusqEventCap"
-							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
-							value="#{eventoCapacitacionBean.eventosCapacitacion}"
-							var="evento" paginator="true" rows="10"
-							paginatorPosition="bottom"
-							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
-							currentPageReportTemplate="({currentPage} de {totalPages})"
-							rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+									 emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+									 value="#{eventoCapacitacionBean.eventosCapacitacion}"
+									 var="evento" paginator="true" rows="10"
+									 paginatorPosition="bottom"
+									 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+									 currentPageReportTemplate="({currentPage} de {totalPages})"
+									 rowsPerPageTemplate="5,10,15" tableStyleClass="table">
 							<!-- Id del evento de capacitacion -->
 							<p:column styleClass="text-center">
 								<f:facet name="header">
@@ -280,34 +336,15 @@
 							<p:column>
 								<f:facet name="header">
 									<h:outputText
-										value="#{sistema.obtenerTexto('gw.gestionescolar.label.nombreEventoCap')}" />
+											value="#{sistema.obtenerTexto('gw.gestionescolar.label.nombreEventoCap')}" />
 								</f:facet>
 								<h:outputText value="#{evento.nombreEc}" />
-							</p:column>
-							<!-- tipo de competencia -->
-							<p:column>
-								<f:facet name="header">
-									<h:outputText
-										value="#{sistema.obtenerTexto('gw.gestionescolar.label.tipoCompetencia')}" />
-								</f:facet>
-								<h:outputText
-									value="#{eventoCapacitacionBean.obtieneNombreTpoCompetencia(evento.fichaDescriptivaPrograma.tipoCompetencia)}" />
-							</p:column>
-
-							<!-- Eje de capacitacion -->
-							<p:column>
-								<f:facet name="header">
-									<h:outputText
-										value="#{sistema.obtenerTexto('gw.gestionescolar.label.ejeCapacitacion')}" />
-								</f:facet>
-								<h:outputText
-									value="#{eventoCapacitacionBean.obtieneNombreEjeCapacit(evento.fichaDescriptivaPrograma.ejeCapacitacion)}" />
 							</p:column>
 							<!-- Modalidad -->
 							<p:column>
 								<f:facet name="header">
 									<h:outputText
-										value="#{sistema.obtenerTexto('gw.gestionescolar.label.modalidad')}" />
+											value="#{sistema.obtenerTexto('gw.gestionescolar.label.modalidad')}" />
 								</f:facet>
 								<h:outputText value="#{evento.catModalidadPlanPrograma.nombre}" />
 							</p:column>
@@ -316,191 +353,191 @@
 							<p:column>
 								<f:facet name="header">
 									<h:outputText
-										value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechaInicial')}" />
+											value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechaInicial')}" />
 								</f:facet>
 								<h:outputText value="#{evento.fechaInicial}">
 									<f:convertDateTime type="date"
-										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+													   pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
 								</h:outputText>
 							</p:column>
 							<!-- fecha final -->
 							<p:column>
 								<f:facet name="header">
 									<h:outputText
-										value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechafinal')}" />
+											value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechafinal')}" />
 								</f:facet>
 								<h:outputText value="#{evento.fechaFinal}">
 									<f:convertDateTime type="date"
-										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+													   pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
 								</h:outputText>
 							</p:column>
 
 							<!-- Auditar -->
 
 							<p:column
-								headerText="#{sistema.obtenerTexto('gw.gestionescolar.label.auditarEventoCa')}"
-								rendered="true" styleClass="text-center">
+									headerText="#{sistema.obtenerTexto('gw.gestionescolar.label.auditarEventoCa')}"
+									rendered="true" styleClass="text-center">
 								<!-- Auditar -->
 
 								<p:commandButton id="btnAuditar" rendered="true"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-square-check" />
+												 styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-square-check" />
 
 								<p:tooltip for="btnAuditar" rendered="true"
-									value="#{sistema.obtenerTexto('gw.gestionescolar.label.accesosEventoCap')}"
-									position="top" />
+										   value="#{sistema.obtenerTexto('gw.gestionescolar.label.accesosEventoCap')}"
+										   position="top" />
 							</p:column>
 
 							<!-- Accesos -->
 							<p:column
-								headerText="#{sistema.obtenerTexto('gw.gestionescolar.label.accesosEventoCap')}"
-								styleClass="text-center">
+									headerText="#{sistema.obtenerTexto('gw.gestionescolar.label.accesosEventoCap')}"
+									styleClass="text-center">
 
 								<!-- Linea -->
 								<p:commandButton id="btnLinea"
-									rendered="#{eventoCapacitacionBean.mostrarBtnEnLinea(evento)}"
-									onclick="window.open('#{eventoCapacitacionBean.obtenerRutaLMS(evento)}');return false;"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-earth-americas">
+												 rendered="#{eventoCapacitacionBean.mostrarBtnEnLinea(evento)}"
+												 onclick="window.open('#{eventoCapacitacionBean.obtenerRutaLMS(evento)}');return false;"
+												 styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-earth-americas">
 								</p:commandButton>
 								<p:tooltip for="btnLinea"
-									value="#{sistema.obtenerTexto('gw.gestionescolar.label.lineaEventoCa')}"
-									position="top" />
+										   value="#{sistema.obtenerTexto('gw.gestionescolar.label.lineaEventoCa')}"
+										   position="top" />
 							</p:column>
 
 							<!-- Participantes  -->
 							<p:column
-								headerText="#{sistema.obtenerTexto('gw.gestionescolar.label.participantesEventoCa')}"
-								rendered="#{eventoCapacitacionBean.visibleParticipantes}"
-								styleClass="text-center">
+									headerText="#{sistema.obtenerTexto('gw.gestionescolar.label.participantesEventoCa')}"
+									rendered="#{eventoCapacitacionBean.visibleParticipantes}"
+									styleClass="text-center">
 								<!-- Matricular -->
 								<p:commandButton id="btnMatricular"
-									rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.CALENDARIZADO.id) or
+												 rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.CALENDARIZADO.id) or
 												(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id)}"
-									action="#{matriculacionEventoBean.cargarGrupos()}"
-									process="@this" ajax="true"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-id-badge margin: auto; text-align: center;">
+												 action="#{matriculacionEventoBean.cargarGrupos()}"
+												 process="@this" ajax="true"
+												 styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-id-badge margin: auto; text-align: center;">
 									<f:setPropertyActionListener value="#{evento}"
-										target="#{matriculacionEventoBean.evento}" />
+																 target="#{matriculacionEventoBean.evento}" />
 								</p:commandButton>
 								<p:tooltip for="btnMatricular"
-									value="#{sistema.obtenerTexto('gw.gestionescolar.label.matricularEventoCa')}"
-									position="top" />
+										   value="#{sistema.obtenerTexto('gw.gestionescolar.label.matricularEventoCa')}"
+										   position="top" />
 								<!-- Asistencia -->
 								<p:commandButton id="btnAsistencia"
-									rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id) and not(evento.catModalidadPlanPrograma.id eq 1)}"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-calendar-day"
-									process="@this" ajax="true"
-									action="#{eventoCapacitacionBean.navegaRegistrarAsistenciasEventoCap()}">
+												 rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id) and not(evento.catModalidadPlanPrograma.id eq 1)}"
+												 styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-calendar-day"
+												 process="@this" ajax="true"
+												 action="#{eventoCapacitacionBean.navegaRegistrarAsistenciasEventoCap()}">
 									<f:setPropertyActionListener value="#{evento.idEvento}"
-										target="#{registroAsistenciaBean.idEvento}" />
+																 target="#{registroAsistenciaBean.idEvento}" />
 								</p:commandButton>
 								<p:tooltip for="btnAsistencia"
-									value="#{sistema.obtenerTexto('gw.gestionescolar.label.asistenciaEventoCa')}"
-									position="top" />
+										   value="#{sistema.obtenerTexto('gw.gestionescolar.label.asistenciaEventoCa')}"
+										   position="top" />
 								<!-- Calificaciones -->
 								<p:commandButton id="btnCalificaciones"
-									action="#{calificacionGpoEventoCapBean.inicializaDatosCalif}"
-									process="@this" ajax="true"
-									rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id)}"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-star margin: auto; text-align: center;">
+												 action="#{calificacionGpoEventoCapBean.inicializaDatosCalif}"
+												 process="@this" ajax="true"
+												 rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id)}"
+												 styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-star margin: auto; text-align: center;">
 									<f:setPropertyActionListener value="#{evento}"
-										target="#{calificacionGpoEventoCapBean.evento}" />
+																 target="#{calificacionGpoEventoCapBean.evento}" />
 								</p:commandButton>
 								<p:tooltip for="btnCalificaciones"
-									value="#{sistema.obtenerTexto('gw.gestionescolar.label.calificacionesEventoCa')}"
-									position="top" />
+										   value="#{sistema.obtenerTexto('gw.gestionescolar.label.calificacionesEventoCa')}"
+										   position="top" />
 							</p:column>
 
 
 
 							<!-- Acciones -->
 							<p:column
-								headerText="#{sistema.obtenerTexto('gw.gestionescolar.label.acciones')}"
-								rendered="#{eventoCapacitacionBean.visibleAcciones}"
-								styleClass="text-center">
+									headerText="#{sistema.obtenerTexto('gw.gestionescolar.label.acciones')}"
+									rendered="#{eventoCapacitacionBean.visibleAcciones}"
+									styleClass="text-center">
 
 								<p:commandButton id="btnEditar"
-									rendered="#{evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.BORRADOR.id}"
-									action="#{capturaEventoCapacitacion.cargarEventoCapacitacion()}"
-									process="@this" ajax="false" immediate="true"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-pen-to-square">
+												 rendered="#{evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.BORRADOR.id}"
+												 action="#{capturaEventoCapacitacion.cargarEventoCapacitacion()}"
+												 process="@this" ajax="false" immediate="true"
+												 styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-pen-to-square">
 									<f:setPropertyActionListener value="#{evento}"
-										target="#{capturaEventoCapacitacion.evento}" />
+																 target="#{capturaEventoCapacitacion.evento}" />
 								</p:commandButton>
 								<p:tooltip for="btnEditar" value="Editar" position="top" />
 
 								<p:commandButton id="btnConcluir"
-									oncomplete="PF('wConcluirEvento').show()"
-									rendered="#{evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id}"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-square-check">
+												 oncomplete="PF('wConcluirEvento').show()"
+												 rendered="#{evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id}"
+												 styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-square-check">
 									<f:setPropertyActionListener value="#{evento}"
-										target="#{capturaEventoCapacitacion.evento}" />
+																 target="#{capturaEventoCapacitacion.evento}" />
 								</p:commandButton>
 								<p:tooltip for="btnConcluir" value="Concluir" position="top" />
 
 								<!-- Bloquear -->
 								<p:commandButton id="btnBloq"
-									action="#{capturaEventoCapacitacion.bloquearEvento()}"
-									rendered="#{evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.BORRADOR.id}"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-ban">
+												 action="#{capturaEventoCapacitacion.bloquearEvento()}"
+												 rendered="#{evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.BORRADOR.id}"
+												 styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-ban">
 									<f:setPropertyActionListener value="#{evento}"
-										target="#{capturaEventoCapacitacion.evento}" />
+																 target="#{capturaEventoCapacitacion.evento}" />
 								</p:commandButton>
 								<p:tooltip for="btnBloq"
-									value="#{sistema.obtenerTexto('gw.gestionescolar.label.bloquearEventoCa')}"
-									position="top" />
+										   value="#{sistema.obtenerTexto('gw.gestionescolar.label.bloquearEventoCa')}"
+										   position="top" />
 
 								<!-- Desbloquear -->
 								<p:commandButton id="btnDesbloq"
-									action="#{capturaEventoCapacitacion.desbloquearEvento()}"
-									rendered="#{evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.BLOQUEADO.id}"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_desblo">
+												 action="#{capturaEventoCapacitacion.desbloquearEvento()}"
+												 rendered="#{evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.BLOQUEADO.id}"
+												 styleClass="btn-icon btn btn-default icono_sisi ss_gn_desblo">
 									<f:setPropertyActionListener value="#{evento}"
-										target="#{capturaEventoCapacitacion.evento}" />
+																 target="#{capturaEventoCapacitacion.evento}" />
 								</p:commandButton>
 								<p:tooltip for="btnDesbloq"
-									value="#{sistema.obtenerTexto('gw.gestionescolar.label.desbloquearEventoCa')}"
-									position="top" />
+										   value="#{sistema.obtenerTexto('gw.gestionescolar.label.desbloquearEventoCa')}"
+										   position="top" />
 
 
 								<!-- Cancelar -->
 								<p:commandButton id="btnCancelar"
-									action="#{capturaEventoCapacitacion.cancelarEvento()}"
-									rendered="#{evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.BLOQUEADO.id}"
-									styleClass="btn-icon btn btn-default icono_sisi ss_gn_cancelar">
+												 action="#{capturaEventoCapacitacion.cancelarEvento()}"
+												 rendered="#{evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.BLOQUEADO.id}"
+												 styleClass="btn-icon btn btn-default icono_sisi ss_gn_cancelar">
 									<f:setPropertyActionListener value="#{evento}"
-										target="#{capturaEventoCapacitacion.evento}" />
+																 target="#{capturaEventoCapacitacion.evento}" />
 								</p:commandButton>
 
 								<p:tooltip for="btnCancelar" value="Cancelar" position="top" />
 								<!-- Visualizar -->
 								<p:commandButton id="btnVer"
-									rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.CONCLUIDOS.id) or
+												 rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.CONCLUIDOS.id) or
 																	 	(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.CALENDARIZADO.id) or
 																	 	(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id)																	 	}"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye"
-									update="@form:reporte" ajax="true"
-									action="#{eventoCapacitacionBean.verReporte}"
-									oncomplete="PF('modalReporte').show()" process="@this">
+												 styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye"
+												 update="@form:reporte" ajax="true"
+												 action="#{eventoCapacitacionBean.verReporte}"
+												 oncomplete="PF('modalReporte').show()" process="@this">
 									<f:setPropertyActionListener value="#{evento}"
-										target="#{eventoCapacitacionBean.eventoReporte}" />
+																 target="#{eventoCapacitacionBean.eventoReporte}" />
 								</p:commandButton>
 
 								<p:tooltip for="btnVer"
-									value="#{sistema.obtenerTexto('gw.gestionescolar.label.visualizarEventoCaTT')}"
-									position="top" />
+										   value="#{sistema.obtenerTexto('gw.gestionescolar.label.visualizarEventoCaTT')}"
+										   position="top" />
 								<!-- Descargar -->
 								<p:commandButton id="btnDes"
-									rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.CONCLUIDOS.id) or
+												 rendered="#{(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.CONCLUIDOS.id) or
 																		(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.CALENDARIZADO.id) or
 																		(evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id)}"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-circle-down text-align: center;"
-									actionListener="#{eventoCapacitacionBean.descargarReporteEvento(evento)}"
-									immediate="true" ajax="false">
+												 styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-circle-down text-align: center;"
+												 actionListener="#{eventoCapacitacionBean.descargarReporteEvento(evento)}"
+												 immediate="true" ajax="false">
 									<p:fileDownload value="#{eventoCapacitacionBean.reportePDF}" />
 								</p:commandButton>
 								<p:tooltip for="btnDes"
-									value="#{sistema.obtenerTexto('gw.gestionescolar.label.descargarEventoCaTT')}"
-									position="top" />
+										   value="#{sistema.obtenerTexto('gw.gestionescolar.label.descargarEventoCaTT')}"
+										   position="top" />
 							</p:column>
 						</p:dataTable>
 					</div>
@@ -508,48 +545,48 @@
 			</p:panel>
 
 			<p:dialog id="reporte" dynamic="true" responsive="true" modal="true"
-				closable="false" resizable="false" position="center"
-				header="Datos evento de capacitación" width="900"
-				widgetVar="modalReporte">
+					  closable="false" resizable="false" position="center"
+					  header="Datos evento de capacitación" width="900"
+					  widgetVar="modalReporte">
 
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-12">
 							<p:media player="pdf"
-								value="#{eventoCapacitacionBean.reportePDF}" width="865"
-								height="400" styleClass="agregaBorde" />
+									 value="#{eventoCapacitacionBean.reportePDF}" width="865"
+									 height="400" styleClass="agregaBorde" />
 						</div>
 					</div>
 				</div>
 				<div class="row">
 					<div class="col-md-12">
 						<p:commandButton value="Cerrar"
-							styleClass="btn btn-default pull-right"
-							onclick="PF('modalReporte').hide();" />
+										 styleClass="btn btn-default pull-right"
+										 onclick="PF('modalReporte').hide();" />
 					</div>
 				</div>
 			</p:dialog>
 
 			<p:dialog id="mConcluirEvento" dynamic="true" responsive="true"
-				modal="true" closable="false" resizable="false" position="center"
-				header="Confirmación" width="600" height="auto"
-				widgetVar="wConcluirEvento">
+					  modal="true" closable="false" resizable="false" position="center"
+					  header="Confirmación" width="600" height="auto"
+					  widgetVar="wConcluirEvento">
 
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-12">
 							<h:outputText value="¿Está seguro que desea concluir el evento " />
 							<p:outputLabel
-								value="#{capturaEventoCapacitacion.evento.nombreEc}?" />
+									value="#{capturaEventoCapacitacion.evento.nombreEc}?" />
 						</div>
 					</div>
 				</div>
 				<div class="row">
 					<div class="col-md-12 text-right">
 						<p:commandButton value="Cancelar" styleClass="btn btn-default"
-							onclick="PF('wConcluirEvento').hide();" />
+										 onclick="PF('wConcluirEvento').hide();" />
 						<p:commandButton value="Aceptar" styleClass="btn btn-primary"
-							action="#{capturaEventoCapacitacion.concluirEvento(capturaEventoCapacitacion.evento)}" />
+										 action="#{capturaEventoCapacitacion.concluirEvento(capturaEventoCapacitacion.evento)}" />
 					</div>
 				</div>
 			</p:dialog>
