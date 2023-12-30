@@ -8,16 +8,21 @@ import org.springframework.stereotype.Service;
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.AsentamientoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CapturaPersonaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.DiscapacidadDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.EntidadFederativaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.LenguajeIndigenaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.MunicipioDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PaisDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaRolDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.RolDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.TipoDiscapacidadDTO;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.AsentamientoService;
+import mx.gob.sedesol.basegestor.service.admin.DiscapacidadService;
 import mx.gob.sedesol.basegestor.service.admin.EntidadFederativaService;
+import mx.gob.sedesol.basegestor.service.admin.LenguajeIndigenaService;
 import mx.gob.sedesol.basegestor.service.admin.MunicipioService;
 import mx.gob.sedesol.basegestor.service.admin.PaisService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaCorreoService;
@@ -63,10 +68,28 @@ public class PersonaServiceFacade {
 	@Autowired
 	private PersonaTelefonoService personaTelefonoService;
 	
+	@Autowired
+	private LenguajeIndigenaService lenguajeIndigenaService;
+	
+	@Autowired
+	private DiscapacidadService discapacidadService;
+
+	
 	public List<PaisDTO> obtenerPaises() {
 		return paisService.findAll();
 	}
-
+	
+	public List<LenguajeIndigenaDTO> obtenerLenguajesIndigenas() {
+		return lenguajeIndigenaService.findAll();
+	}
+	
+	public List<DiscapacidadDTO> obtenerListaDiscapacidades() {
+		return discapacidadService.findAll();
+	}
+	
+	public List<TipoDiscapacidadDTO> obtenerListaTiposDiscapacidadPorDiscapacidad(Integer idDiscapacidad) {
+		return discapacidadService.buscarTipoDiscapacidadPorDiscapacidad(idDiscapacidad);
+	}
 	public List<EntidadFederativaDTO> obtenerEntidadesPorPais(String idPais) {
 		return entidadFederativaService.obtenerEntidadesPorPais(idPais);
 	}
@@ -248,5 +271,23 @@ public class PersonaServiceFacade {
 	public void setPersonaTelefonoService(PersonaTelefonoService personaTelefonoService) {
 		this.personaTelefonoService = personaTelefonoService;
 	}
+
+	public LenguajeIndigenaService getLenguajeIndigenaService() {
+		return lenguajeIndigenaService;
+	}
+
+	public void setLenguajeIndigenaService(LenguajeIndigenaService lenguajeIndigenaService) {
+		this.lenguajeIndigenaService = lenguajeIndigenaService;
+	}
+
+	public DiscapacidadService getDiscapacidadService() {
+		return discapacidadService;
+	}
+
+	public void setDiscapacidadService(DiscapacidadService discapacidadService) {
+		this.discapacidadService = discapacidadService;
+	}
+	
+	
 
 }

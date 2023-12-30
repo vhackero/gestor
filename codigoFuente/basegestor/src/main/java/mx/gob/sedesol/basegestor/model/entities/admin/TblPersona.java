@@ -111,6 +111,10 @@ public class TblPersona implements Serializable {
 	
 	@OneToMany(mappedBy = "persona", fetch = FetchType.LAZY)
 	private List<RelUsuarioDatosLaborales> datosLaborales;
+	
+	// bi-directional many-to-one association to TblDatosSociodemograficosPersona
+	@OneToMany(mappedBy = "persona", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<TblDatosSociodemograficosPersona> datosSociodemograficosPersona;
 
 	/* Campos para tablas de INSSOFT */
 	@Column(name = "sso_idEntidadFederativa")
@@ -482,6 +486,14 @@ public class TblPersona implements Serializable {
 		this.datosLaborales = datosLaborales;
 	}
 
+	public List<TblDatosSociodemograficosPersona> getDatosSociodemograficosPersona() {
+		return datosSociodemograficosPersona;
+	}
+
+	public void setDatosSociodemograficosPersona(List<TblDatosSociodemograficosPersona> datosSociodemograficosPersona) {
+		this.datosSociodemograficosPersona = datosSociodemograficosPersona;
+	}
+	
 	public String getSso_status() {
 		return sso_status;
 	}
@@ -490,4 +502,5 @@ public class TblPersona implements Serializable {
 		this.sso_status = sso_status;
 	}
 
+	
 }
