@@ -30,8 +30,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.AsentamientoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CapturaPersonaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.DatoSociodemograficoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.DiscapacidadDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.DomicilioPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.EntidadFederativaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.LenguajeIndigenaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.MunicipioDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PaisDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaCorreoDTO;
@@ -43,6 +46,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaTelefonoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.RolDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.TipoCorreoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.TipoDiscapacidadDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.TipoTelefonoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.UsuarioDatosLaboralesDTO;
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.SedeDTO;
@@ -117,10 +121,15 @@ public class AdminPersonaBean extends BaseBean {
 	private List<AsentamientoDTO> listaAsentamientos;
 	private List<EntidadFederativaDTO> listaSedes;
 	private List<MunicipioDTO> listaMunicipiosLaboral;
-
+	private List<LenguajeIndigenaDTO> listaLenguasIndigenas;
+	private List<DiscapacidadDTO> listaDiscapacidades ;
+	private List<TipoDiscapacidadDTO> listaTiposDiscapacidad;
+	
 	private boolean nuevaPersona;
 	private boolean mostrarContrasenia;
-
+	private boolean isLenguajeIndigena;
+	private boolean isDiscapacidad;
+	
 	private PersonaDTO personaSeleccionada;
 
 	private boolean mostrarDialogoExito = false;
@@ -147,6 +156,7 @@ public class AdminPersonaBean extends BaseBean {
 		listaPaises = personaServiceFacade.obtenerPaises();
 		listaSedes = personaServiceFacade.obtenerEntidadesPorPais(ConstantesGestor.ID_PAIS_MEXICO);
 
+		listaLenguasIndigenas = personaServiceFacade.obtenerLenguajesIndigenas();		
 		listaRoles = new DualListModel<>();
 	}
 	
@@ -315,7 +325,8 @@ public class AdminPersonaBean extends BaseBean {
 				new PersonaCorreoDTO(getUsuarioEnSession().getIdPersona(), ConstantesGestor.TIPO_CORREO_INSTITUCIONAL));
 		datos.setDomicilioPersona(
 				new DomicilioPersonaDTO(getUsuarioEnSession().getIdPersona(), ConstantesGestor.ID_PAIS_MEXICO));
-
+		datos.setDatosSociodemograficos(new DatoSociodemograficoDTO(getUsuarioEnSession().getIdPersona()));
+		
 		listaMunicipiosLaboral = new ArrayList<>();
 		listaEntidades = personaServiceFacade.obtenerEntidadesPorPais(ConstantesGestor.ID_PAIS_MEXICO);
 		listaMunicipiosDomicilio = new ArrayList<>();
@@ -355,7 +366,12 @@ public class AdminPersonaBean extends BaseBean {
 		}
 		cargarRolesUsuario();
 		actualizarRolesUsuario();
-
+		
+		listaTiposDiscapacidad = personaServiceFacade.obtenerListaTiposDiscapacidadPorDiscapacidad(datos.getDatosSociodemograficos().getTipoDiscapacidad().getIdDiscapacidad());
+		validarTipoDiscapacidad();		
+		validarLenguajes();
+		
+		
 		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "VER_USU", String.valueOf(datos.getPersona().getIdPersona()),
 				requestActual(), TipoServicioEnum.LOCAL);
 
@@ -578,6 +594,34 @@ public class AdminPersonaBean extends BaseBean {
 		}
 	}
 
+	public void validarLenguajes() {		
+		if(isLenguajeIndigena) {
+			isLenguajeIndigena = false;
+		}else {
+			isLenguajeIndigena = true;
+		}
+	}
+	
+	public void validarTipoDiscapacidad() {		
+		if(isDiscapacidad) {
+			isDiscapacidad = false;
+		}else {
+			isDiscapacidad = true;
+			listaDiscapacidades = personaServiceFacade.obtenerListaDiscapacidades();				
+		}
+	}
+	
+	public void onChangeDiscapacidad(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			Integer valor = (Integer) e.getNewValue();
+			listaTiposDiscapacidad = personaServiceFacade.obtenerListaTiposDiscapacidadPorDiscapacidad(valor);
+		}else {
+			listaTiposDiscapacidad = null;
+		}
+	}
+	
+	
+	
 	public TipoUsuarioEnum[] getTiposUsuarios() {
 		return TipoUsuarioEnum.values();
 	}
@@ -933,7 +977,46 @@ public class AdminPersonaBean extends BaseBean {
 	public void setBitacoraBean(BitacoraBean bitacoraBean) {
 		this.bitacoraBean = bitacoraBean;
 	}
+	public List<LenguajeIndigenaDTO> getListaLenguasIndigenas() {
+		return listaLenguasIndigenas;
+	}
 
+	public void setListaLenguasIndigenas(List<LenguajeIndigenaDTO> listaLenguasIndigenas) {
+		this.listaLenguasIndigenas = listaLenguasIndigenas;
+	}
+
+		public List<DiscapacidadDTO> getListaDiscapacidades() {
+		return listaDiscapacidades;
+	}
+
+	public void setListaDiscapacidades(List<DiscapacidadDTO> listaDiscapacidades) {
+		this.listaDiscapacidades = listaDiscapacidades;
+	}
+
+	public List<TipoDiscapacidadDTO> getListaTiposDiscapacidad() {
+		return listaTiposDiscapacidad;
+	}
+
+	public void setListaTiposDiscapacidad(List<TipoDiscapacidadDTO> listaTiposDiscapacidad) {
+		this.listaTiposDiscapacidad = listaTiposDiscapacidad;
+	}
+
+	public boolean isLenguajeIndigena() {
+		return isLenguajeIndigena;
+	}
+
+	public void setLenguajeIndigena(boolean isLenguajeIndigena) {
+		this.isLenguajeIndigena = isLenguajeIndigena;
+	}
+
+	public boolean isDiscapacidad() {
+		return isDiscapacidad;
+	}
+
+	public void setDiscapacidad(boolean isDiscapacidad) {
+		this.isDiscapacidad = isDiscapacidad;
+	}
+	
 	public PersonaSigeService getPersonaSigeService() {
 		return personaSigeService;
 	}

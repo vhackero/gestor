@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+	<p:panel id="pnlDatosSociodemograficos"
+		header="#{sistema.obtenerTexto('gw.usuarios.etiquetaPanel.sociodemograficos')}">
+		<div class="form-group">
+			<div class="row">				
+				
+				<div class="col-md-4"> 
+					<p:outputLabel for="isLenguaIndigena" styleClass="bloque"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.hablalenguaindigena')}:" />
+					<p:inputSwitch id="isLenguaIndigena" disabled="false"
+						value="#{adminPersonaBean.datos.datosSociodemograficos.lenguaIndigena}"
+						onLabel="#{sistema.obtenerTexto('gw.usuarios.switch.si')}"
+						offLabel="#{sistema.obtenerTexto('gw.usuarios.switch.no')}">
+						<p:ajax event="change" immediate="true"
+						listener="#{adminPersonaBean.validarLenguajes()}" update="@parent"
+						process="@this" />
+					</p:inputSwitch>
+					<p:message for="isLenguaIndigena" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="cmbLenguaIndigena" styleClass="bloque"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.lenguaIndigena')}:" />
+					<p:selectOneMenu id="cmbLenguaIndigena" 
+						value="#{adminPersonaBean.datos.datosSociodemograficos.lenguajeIndigena.idLenguajeIndigena}"	
+						disabled="#{!adminPersonaBean.lenguajeIndigena}"					
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+						styleClass="col-xs-12">						
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{adminPersonaBean.listaLenguasIndigenas}"
+							var="lenguaje" itemValue="#{lenguaje.idLenguajeIndigena}"
+							itemLabel="#{lenguaje.getLenguaje()}" />
+					</p:selectOneMenu>
+					<p:message for="cmbLenguaIndigena" />
+				</div>
+				
+		</div>
+		</div>		
+				<div class="form-group">
+			<div class="row">			
+				<div class="col-md-4">
+					<p:outputLabel for="isDiscapacidad" styleClass="bloque"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.tienediscapacidad')}:" />
+					<p:inputSwitch id="isDiscapacidad" disabled="false"
+						value="#{adminPersonaBean.datos.datosSociodemograficos.tieneDiscapacidad}"
+						onLabel="#{sistema.obtenerTexto('gw.usuarios.switch.si')}"
+						offLabel="#{sistema.obtenerTexto('gw.usuarios.switch.no')}">
+						<p:ajax event="change" immediate="true"
+						listener="#{adminPersonaBean.validarTipoDiscapacidad()}" update="@parent"
+						process="@this" />
+					</p:inputSwitch>
+					<p:message for="isDiscapacidad" />
+				</div>
+				
+				<div class="col-md-4">
+					<p:outputLabel for="cmbDiscapacidades" styleClass="bloque"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.discapacidad')}:" />
+					<p:selectOneMenu id="cmbDiscapacidades"
+						value="#{adminPersonaBean.datos.datosSociodemograficos.tipoDiscapacidad.idDiscapacidad}"
+						valueChangeListener="#{adminPersonaBean.onChangeDiscapacidad}"
+						required="false" disabled="#{!adminPersonaBean.discapacidad}"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+						styleClass="col-xs-12" onchange="correccionSelectores()">		
+						<p:ajax update="cmbTipoDiscapacidad" />				
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{adminPersonaBean.listaDiscapacidades}"
+							var="discapacidad" itemValue="#{discapacidad.getIdDiscapacidad()}"
+							itemLabel="#{discapacidad.getDiscapacidad()}" />
+					</p:selectOneMenu>
+					<p:message for="cmbDiscapacidades" />
+				</div>
+				<div class="col-md-4">
+					<p:outputLabel for="cmbTipoDiscapacidad" styleClass="bloque"
+						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.tipodiscapacidad')}:" />
+					<p:selectOneMenu id="cmbTipoDiscapacidad"
+						value="#{adminPersonaBean.datos.datosSociodemograficos.tipoDiscapacidad.idTipoDiscapacidad}"						
+						required="false" disabled="#{!adminPersonaBean.discapacidad}"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+						styleClass="col-xs-12" onchange="correccionSelectores()">						
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{adminPersonaBean.listaTiposDiscapacidad}"
+							var="tipos" itemValue="#{tipos.getIdTipoDiscapacidad()}"
+							itemLabel="#{tipos.getTipoDiscapacidad()}" />
+					</p:selectOneMenu>
+					<p:message for="cmbTipoDiscapacidad" />
+				</div>
+			</div>
+		</div>
+
+		
+
+	</p:panel>
+</ui:composition>

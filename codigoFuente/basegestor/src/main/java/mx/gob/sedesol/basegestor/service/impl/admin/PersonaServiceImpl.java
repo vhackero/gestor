@@ -26,8 +26,11 @@ import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.AsentamientoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CapturaPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CorreoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.DatoSociodemograficoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.DiscapacidadDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.DomicilioPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.EntidadFederativaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.LenguajeIndigenaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.LoteCargaUsuarioDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.MunicipioDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PaisDTO;
@@ -63,6 +66,7 @@ import mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaRol;
 import mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaTelefono;
 import mx.gob.sedesol.basegestor.model.entities.admin.RelUsuarioDatosLaborales;
 import mx.gob.sedesol.basegestor.model.entities.admin.SsoElemento;
+import mx.gob.sedesol.basegestor.model.entities.admin.TblDatosSociodemograficosPersona;
 import mx.gob.sedesol.basegestor.model.entities.admin.TblDomiciliosPersona;
 import mx.gob.sedesol.basegestor.model.entities.admin.TblLoteCargaUsuario;
 import mx.gob.sedesol.basegestor.model.entities.admin.TblPersona;
@@ -71,6 +75,7 @@ import mx.gob.sedesol.basegestor.model.entities.admin.TblTextoSistema;
 import mx.gob.sedesol.basegestor.model.especificaciones.DatosLaboralesEspecificacion;
 import mx.gob.sedesol.basegestor.model.especificaciones.PersonaBasicaEspecificacion;
 import mx.gob.sedesol.basegestor.model.especificaciones.PersonaEspecificacion;
+import mx.gob.sedesol.basegestor.model.repositories.admin.DatoSociodemograficoPersonaRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.DomicilioPersonaRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.EntidadFederativaRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.LoteCargaUsuarioRepo;
@@ -141,6 +146,9 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 
 	@Autowired
 	private SsoElementoRepo ssoElementoRepo;
+	
+	@Autowired
+	private DatoSociodemograficoPersonaRepo datoSociodemograficoPersonaRepo;
 
 	private ModelMapper mapper = new ModelMapper();
 
@@ -379,6 +387,7 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 				almacenarRoles(datos.getRoles(), persona);
 				almacenarDomicilio(datos.getDomicilioPersona(), persona);
 				almacenarElementos(datos.getElementos(), persona);
+				almacenarDatosSociodemograficosPersona(datos.getDatosSociodemograficos(), persona);
 				resultado.setDto(mapper.map(persona, PersonaDTO.class));
 				resultado.agregaMensaje(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_EXITOSO.getId());
 			} catch (Exception e) {
@@ -497,6 +506,11 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 				obtenerDomicilio(persona.getIdPersona(), ConstantesGestor.ID_PAIS_MEXICO, usuarioModifico));
 		datos.getDomicilioPersona().setPersona(persona);
 
+		
+		datos.setDatosSociodemograficos(
+				obtenerDatoSociodemograficoPersona(persona.getIdPersona(), usuarioModifico));
+		datos.getDatosSociodemograficos().setPersona(persona);
+		
 		datos.setRoles(obtenerRolesPersona(persona.getUsuario()));
 		datos.setElementos(obtenerElementos(persona.getUsuario()));
 
@@ -846,6 +860,45 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 		return domicilio;
 	}
 
+	private void almacenarDatosSociodemograficosPersona(DatoSociodemograficoDTO sociodemografico, TblPersona persona) {
+		TblDatosSociodemograficosPersona datoSociodemograficoEntidad = mapper.map(sociodemografico, TblDatosSociodemograficosPersona.class);
+		datoSociodemograficoEntidad.setPersona(persona);					
+		if (ObjectUtils.isNotNull(datoSociodemograficoEntidad.getLenguajeIndigena())
+				|| ObjectUtils.isNotNull(datoSociodemograficoEntidad.getTipoDiscapacidad())){			
+				System.out.println("Guardando datos sociodemograficos...");
+				datoSociodemograficoPersonaRepo.save(datoSociodemograficoEntidad);
+		}
+
+	}
+
+	private DatoSociodemograficoDTO obtenerDatoSociodemograficoPersona(Long idPersona, Long usuarioModifico) {
+		TblDatosSociodemograficosPersona datosSociodemograficos = datoSociodemograficoPersonaRepo.obtenerDatosSociodemograficosPersona(idPersona);
+		System.out.println("datosSociodemograficos IDDISCAPACIDAD: "+datosSociodemograficos.getTipoDiscapacidad().getCatDiscapacidad().getIdDiscapacidad());
+		DatoSociodemograficoDTO datoSociodemograficoDTO;
+		if (ObjectUtils.isNull(datosSociodemograficos)) {			
+			datoSociodemograficoDTO = new DatoSociodemograficoDTO(usuarioModifico);
+		} else {
+			datoSociodemograficoDTO = mapper.map(datosSociodemograficos, DatoSociodemograficoDTO.class);
+			datoSociodemograficoDTO.setUsuarioModifico(usuarioModifico);
+			datoSociodemograficoDTO.setFechaActualizacion(new Date());
+			
+			datoSociodemograficoDTO.setTieneDiscapacidad(datoSociodemograficoDTO.isTieneDiscapacidad());			
+			datoSociodemograficoDTO.setLenguaIndigena(datoSociodemograficoDTO.isLenguaIndigena());
+			datoSociodemograficoDTO.setIdLenguaje(datoSociodemograficoDTO.getLenguajeIndigena().getIdLenguajeIndigena());
+				
+			System.out.println("obteniendo sociodmograficos");
+			datoSociodemograficoDTO.getTipoDiscapacidad().setIdDiscapacidad(datosSociodemograficos.getTipoDiscapacidad().getCatDiscapacidad().getIdDiscapacidad());
+			//datoSociodemograficoDTO.setIdDiscapacidad(datoSociodemograficoDTO.getTipoDiscapacidad().getIdDiscapacidad());
+			datoSociodemograficoDTO.getTipoDiscapacidad().setIdTipoDiscapacidad(datoSociodemograficoDTO.getTipoDiscapacidad().getIdTipoDiscapacidad());
+			//datoSociodemograficoDTO.setIdTipoDiscapacidad(datoSociodemograficoDTO.getTipoDiscapacidad().getIdTipoDiscapacidad());
+			
+			if (ObjectUtils.isNull(datoSociodemograficoDTO.getLenguajeIndigena())) {
+				datoSociodemograficoDTO.setLenguajeIndigena(new LenguajeIndigenaDTO());
+			}
+		}
+		return datoSociodemograficoDTO;
+	}
+	
 	private void almacenarRoles(List<RolDTO> roles, TblPersona persona) {
 		List<RolDTO> rolesParaGuardar = estableceRolAlumnoPorDefecto(roles);
 		for (RolDTO rol : rolesParaGuardar) {
