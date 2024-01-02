@@ -12,12 +12,12 @@
 
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
-		<li class="active">#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCap')}</li>
+		<li class="active">Eventos academicos</li>
 	</ui:define>
 
 	<ui:define name="content">
 
-		<h1>#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCap')}</h1>
+		<h1>Eventos academicos</h1>
 		<hr />
 
 		<h:form id="frmBusqueda">
@@ -35,7 +35,7 @@
 								action="#{capturaEventoCapacitacion.nuevoEventoCapacitacion()}"
 								ajax="false" immediate="true" process="@this" />
 						<p:outputLabel
-								value="#{sistema.obtenerTexto('gw.gestionescolar.label.nuevoEventCap')}:"
+								value="Nuevo evento académico:"
 								styleClass="pull-right agregaHeight" />
 					</sec:authorize>
 				</div>
@@ -44,7 +44,7 @@
 
 
 			<p:panel id="fldBusqueda"
-					 header="#{sistema.obtenerTexto('gw.gestionescolar.label.busquedaEventoC')}"
+					 header="Búsqueda de eventos académicos"
 					 showCollapseLink="false" collapsible="false">
 				<f:validateBean disabled="true">
 					<!-- Row 1 -->
@@ -160,9 +160,9 @@
 							<!-- Nombre del evento de capacitacion -->
 							<div class="col-md-6">
 								<p:outputLabel for="idNombreEc"
-											   value="Evento de capacitación:" />
+											   value="Nombre del evento académico:" />
 								<p:inputText id="idNombreEc"
-											 placeholder="#{sistema.obtenerTexto('gw.gestionescolar.label.nombreEventoCap')}"
+											 placeholder="Nombre del evento académico:"
 											 value="#{eventoCapacitacionBean.filtros.nombreEc}"
 											 styleClass="form-control" />
 								<p:message for="idNombreEc" />
@@ -288,7 +288,7 @@
 					type="mx.gob.sedesol.gestorweb.commons.utils.EstadoEventoCapEnum"
 					var="ESTADO_EVENTO" allSuffix="ALL_ENUM_VALUES" />
 
-			<p:panel header="#{sistema.obtenerTexto('gw.ge.texto.listadoec')}">
+			<p:panel header="Listado de eventos académicos">
 
 				<div class="form-group">
 					<div class="row">
@@ -336,10 +336,19 @@
 							<p:column>
 								<f:facet name="header">
 									<h:outputText
-											value="#{sistema.obtenerTexto('gw.gestionescolar.label.nombreEventoCap')}" />
+											value="Nombre del evento académico" />
 								</f:facet>
 								<h:outputText value="#{evento.nombreEc}" />
 							</p:column>
+							<!-- estructura del evento -->
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+											value="Estructura" />
+								</f:facet>
+								<h:outputText value="#{eventoCapacitacionBean.obtenerRuta(evento)}" />
+							</p:column>
+							
 							<!-- Modalidad -->
 							<p:column>
 								<f:facet name="header">
@@ -372,12 +381,11 @@
 								</h:outputText>
 							</p:column>
 
-							<!-- Auditar -->
+							<!-- Auditar 
 
 							<p:column
 									headerText="#{sistema.obtenerTexto('gw.gestionescolar.label.auditarEventoCa')}"
 									rendered="true" styleClass="text-center">
-								<!-- Auditar -->
 
 								<p:commandButton id="btnAuditar" rendered="true"
 												 styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-square-check" />
@@ -386,7 +394,8 @@
 										   value="#{sistema.obtenerTexto('gw.gestionescolar.label.accesosEventoCap')}"
 										   position="top" />
 							</p:column>
-
+							-->
+							
 							<!-- Accesos -->
 							<p:column
 									headerText="#{sistema.obtenerTexto('gw.gestionescolar.label.accesosEventoCap')}"

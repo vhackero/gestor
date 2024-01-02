@@ -126,18 +126,35 @@ public class PlanBean extends BaseBean {
 		} else {
 			// Flujo Nuevo Plan
 			plan = new PlanDTO();
-			plan.setCatTipoPlan(new CatalogoComunDTO());
-			plan.setCatPeriodo(new CatalogoComunDTO());
+			  
+			plan.setCatTipoPlan(getCat(catTpoPlan, "Por Periodo"));
+			plan.setCatPeriodo(getCat(catPeriodo, "Semestral"));
+			plan.setCatCreditosPlan(getCat(catCreditosPlan, "Obligatorio"));
+			setCreditos(Boolean.TRUE);
+			plan.setHorasCredito(0);
+			plan.setCatCompetenciasPlan(getCat(catCompPlan, "Opcional"));
+			plan.setCatDocumentosExpidePlan(getCat(catDocsExpidePlan, "Certificado"));
+			
+			plan.setTblOrganismoGubernamental(new OrgGubernamentalDTO());
+			for(OrgGubernamentalDTO orgG : catOrgGubs) {
+				if (!orgG.getLstHijosOrgGub().isEmpty()) {
+					for (OrgGubernamentalDTO orgGHijo : orgG.getLstHijosOrgGub()) {
+						if(orgGHijo.getNombre().equals("UnADM")){
+							plan.setTblOrganismoGubernamental(orgGHijo);
+							break;
+						}
+					}
+				}
+				if(orgG.getNombre().equals("UnADM")){
+					plan.setTblOrganismoGubernamental(orgG);
+					break;
+				}
+			}
+			
 			plan.setCatAlcancePlan(new CatalogoComunDTO());
-			plan.setCatCompetenciasPlan(new CatalogoComunDTO());
-			plan.setCatDocumentosExpidePlan(new CatalogoComunDTO());
 			plan.setCatEstatusPlan(new CatalogoComunDTO());
 			plan.setCatModalidadPlanPrograma(new CatalogoComunDTO());
 			plan.setCatNivelEnsenanzaPrograma(new CatalogoComunDTO());
-			plan.setTblOrganismoGubernamental(new OrgGubernamentalDTO());
-			//plan.setIdentificador(planServiceFacade.generaIdentificadorPlan());
-
-			plan.setCatCreditosPlan(new CatalogoComunDTO());
 			plan.setCatDivisionesPlan(new CatalogoComunDTO());
 			plan.setCatTipoCompetencia(this.getValorDeCatalogo(catTipoCompetencia, 1));
 
@@ -156,6 +173,19 @@ public class PlanBean extends BaseBean {
 			mallaPlan.setNombreSubestructuras2("");
 			mallaPlan.setNombreSubestructuras3("");
 		}
+	}
+	
+	public CatalogoComunDTO getCat(List<CatalogoComunDTO> catLista, String nombre){
+		CatalogoComunDTO catEncontrado = new CatalogoComunDTO();
+		
+		for(CatalogoComunDTO cat : catLista) {
+			if(cat.getNombre().equals(nombre)){
+				catEncontrado = cat;
+				break;
+			}
+		}
+		
+		return catEncontrado;
 	}
 
 	/**

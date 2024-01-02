@@ -633,7 +633,10 @@ public class CapturaEventoCapacitacion extends BaseBean {
 		// automatico.
 		datos.getEvento().setTpoCalificacion(ConstantesGestor.TIPO_CALIFICACION_PROMEDIO);
 		datos.getEvento().setTpoDictamen(ConstantesGestor.TIPO_DICTAMEN_PROMEDIO);
-
+		
+		datos.getEvento().setFechaInicial(datos.getPrograma().getFechaVigInicial());
+		datos.getEvento().setFechaFinal(datos.getPrograma().getFechaVigFinal());
+		
 		calcularCargaHoraria();
 		indicePanel = 1;
 		return null;
