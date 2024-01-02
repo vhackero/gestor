@@ -340,6 +340,15 @@
 								</f:facet>
 								<h:outputText value="#{evento.nombreEc}" />
 							</p:column>
+							<!-- estructura del evento -->
+							<p:column>
+								<f:facet name="header">
+									<h:outputText
+											value="Estructura" />
+								</f:facet>
+								<h:outputText value="#{eventoCapacitacionBean.obtenerRuta(evento)}" />
+							</p:column>
+							
 							<!-- Modalidad -->
 							<p:column>
 								<f:facet name="header">
@@ -372,12 +381,11 @@
 								</h:outputText>
 							</p:column>
 
-							<!-- Auditar -->
+							<!-- Auditar 
 
 							<p:column
 									headerText="#{sistema.obtenerTexto('gw.gestionescolar.label.auditarEventoCa')}"
 									rendered="true" styleClass="text-center">
-								<!-- Auditar -->
 
 								<p:commandButton id="btnAuditar" rendered="true"
 												 styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-square-check" />
@@ -386,7 +394,8 @@
 										   value="#{sistema.obtenerTexto('gw.gestionescolar.label.accesosEventoCap')}"
 										   position="top" />
 							</p:column>
-
+							-->
+							
 							<!-- Accesos -->
 							<p:column
 									headerText="#{sistema.obtenerTexto('gw.gestionescolar.label.accesosEventoCap')}"
