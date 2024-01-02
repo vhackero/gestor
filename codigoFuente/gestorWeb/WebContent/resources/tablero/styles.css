@@ -151,16 +151,11 @@
 	width: 30px;
 }
 
-@media (min-width: 300px) and (max-width: 400px) {
-  .carousel-inner {
-    height: 250px;
-  }
+.iframe-resize{
+	margin-top: 30px;
 }
 
 @media (min-width: 400px) and (max-width: 500px) {
-  .carousel-inner {
-    height: 270px;
-  }
 
   .formLogin {
     margin-top: 5%;
@@ -168,19 +163,12 @@
 }
 
 @media (min-width: 500px) and (max-width: 600px) {
-  .carousel-inner {
-    height: 280px;
-  }
-
   .formLogin {
     margin-top: 5%;
   }
 }
 
 @media (min-width: 600px) and (max-width: 700px) {
-  .carousel-inner {
-    height: 290px;
-  }
 
   .formLogin {
     margin-top: 5%;
@@ -188,9 +176,6 @@
 }
 
 @media (min-width: 700px) and (max-width: 800px) {
-  .carousel-inner {
-    height: 310px;
-  }
 
   .formLogin {
     margin-top: 5%;
@@ -198,47 +183,21 @@
 }
 
 @media (min-width: 800px) and (max-width: 900px) {
-  .carousel-inner {
-    height: 320px;
-  }
 
   .formLogin {
-    margin-top: 3%;
+    margin-top: 5%;
   }
 }
 
 @media (min-width: 900px) and (max-width: 950px) {
-  .carousel-inner {
-    height: 330px;
-  }
 
   .formLogin {
-    margin-top: 3%;
+    margin-top: 5%;
   }
 }
 
 @media (min-width: 950px) and (max-width: 990px) {
-  .carousel-inner {
-    height: 350px;
-  }
-
   .formLogin {
     margin-top: 3%;
-  }
-}
-
-@media (min-width: 990px) and (max-width: 1115px) {
-  .carousel-inner {
-    height: 350px;
-  }
-
-  .formLogin {
-    margin-top: 27%;
-  }
-}
-
-@media (min-width: 990px) {
-  .carousel-inner {
-    height: 350px;
   }
 }
