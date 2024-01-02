@@ -140,6 +140,17 @@
   height: auto;
 }
 
+.contenedorImagen{
+	display: inline-block;
+  	text-align: right;
+  	width: auto;
+  	float: right;
+}
+
+.imagenred{
+	width: 30px;
+}
+
 @media (min-width: 300px) and (max-width: 400px) {
   .carousel-inner {
     height: 250px;
