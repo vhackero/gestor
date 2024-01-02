@@ -657,6 +657,31 @@ public class EventoCapacitacionBean extends BaseBean {
 		}
 
 	}
+	
+	public String obtenerRuta(EventoCapacitacionDTO evento){
+		String ruta = "";
+		
+		MallaCurricularDTO mallaHijo = mallaCurricularService.obtenerMallaCurricularPorId(evento.getFichaDescriptivaPrograma().getEjeCapacitacion());
+		ruta += buscarPadre(mallaHijo, ruta);
+
+		/*
+		ruta += "/"+evento.getFichaDescriptivaPrograma().getNombreTentativo();
+		ruta += "/"+evento.getFichaDescriptivaPrograma().getPlan().getNombre();
+		*/
+		
+		return ruta.substring(1, ruta.length()-1);
+	}
+	
+	public String buscarPadre(MallaCurricularDTO malla, String nombres) {
+		if(ObjectUtils.isNull(malla.getMallaCurricularPadre())){
+			return nombres;
+		}
+		
+		nombres += "/"+malla.getNombre();
+		String padre = buscarPadre(malla.getMallaCurricularPadre(), nombres);
+		
+		return padre != null ? padre : null;
+	}
 
 	public String navegaRegistrarAsistenciasEventoCap() {
 		registroAsistenciaBean.init();

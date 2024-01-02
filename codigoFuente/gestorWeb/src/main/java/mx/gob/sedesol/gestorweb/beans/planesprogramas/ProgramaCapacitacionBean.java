@@ -375,8 +375,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			this.programa.setCoordinadorAcademico(coordAcad);
 		}
 
-		//this.getNombreEjeCapTipoCom();
-
+		progConEvaluacion = true;
 	}
 	
 	/**
