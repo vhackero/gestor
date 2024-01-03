@@ -677,7 +677,7 @@ public class EventoCapacitacionBean extends BaseBean {
 			return nombres;
 		}
 		
-		nombres += "/"+malla.getNombre();
+		nombres += " /"+malla.getNombre();
 		String padre = buscarPadre(malla.getMallaCurricularPadre(), nombres);
 		
 		return padre != null ? padre : null;
