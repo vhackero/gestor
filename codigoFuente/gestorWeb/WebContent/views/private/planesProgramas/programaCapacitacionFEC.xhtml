@@ -129,7 +129,7 @@
 							<p:commandButton immediate="true"
 								styleClass="btn btn-primary pull-right"
 								action="#{programaCapacitacionBean.nextTabProg}"
-								value="webos xd"
+								value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.continuar')}"
 								update="@form" id="btnContinuar"
 								rendered="#{!programaCapacitacionBean.ultimoTabProg}" />
 
