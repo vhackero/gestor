@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.service.impl.planesyprogramas;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -114,14 +115,21 @@ public class PlanServiceImpl extends ComunValidacionService<PlanDTO> implements 
 
     @Override
     public List<PlanDTO> buscaPlanesPorCriterios(PlanDTO filtro) {
-
-        try {
-            Type listAux = new TypeToken<List<PlanDTO>>() {
-            }.getType();
+    	List<PlanDTO> planesList = new ArrayList<PlanDTO>();
+        
+    	try {
             List<TblPlan> planes = planRepo.findAll(new PlanEspecificacion(filtro));
-
-            return planMapper.map(planes, listAux);
-
+            
+            for(TblPlan planAux : planes){
+            	try {
+            		planesList.add( planMapper.map(planAux, PlanDTO.class) );
+            	}catch(Exception ex) {
+            		logger.error("Hay un error en su plan "+planAux.getNombre()+" con id "+planAux.getIdPlan());
+            		logger.error(ex.getMessage());
+            	}
+            }
+            
+            return planesList;
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
