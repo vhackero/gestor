@@ -73,8 +73,7 @@
 							<p:message for="idPlan" />
 						</div>
 						<div class="col-md-4 col-xs-12">
-							<p:outputLabel
-								value="Tipo de estructura del programa educativo:"
+							<p:outputLabel value="Tipo de estructura del programa educativo:"
 								styleClass="requerido bloque" />
 							<p:selectOneMenu id="mnuTpoPlan"
 								value="#{planBean.plan.catTipoPlan.id}"
@@ -165,6 +164,21 @@
 							</f:validateBean>
 						</div>
 
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel styleClass="bloque"
+								value="Tipo de Competencia: " />
+							<f:validateBean disabled="true">
+								<p:selectOneMenu id="tCompetencia"
+									value="#{planBean.plan.catTipoCompetencia.id}"
+									valueChangeListener="#{planBean.onChangeTipoCompetencia}"
+									autoWidth="false" styleClass="col-xs-12">
+									<p:ajax event="change" process="@this" />
+									<f:selectItems value="#{planBean.catTipoCompetencia}"
+										var="tipoCompetencia" itemLabel="#{tipoCompetencia.nombre}"
+										itemValue="#{tipoCompetencia.id}" />
+								</p:selectOneMenu>
+							</f:validateBean>
+						</div>
 					</div>
 				</div>
 
@@ -585,78 +599,113 @@
 						</div>
 					</div>
 				</div>
-				<p:outputPanel rendered="false">
-					<div class="form-group">
-						<div class="row">
-							<div class="col-md-4 col-xs-12">
-								<p:outputLabel styleClass="requerido bloque"
-									value="Tipo de Competencia: " />
-								<f:validateBean disabled="true">
-									<p:selectOneMenu id="tCompetencia"
-										value="#{planBean.plan.catTipoCompetencia.id}"
-										valueChangeListener="#{planBean.onChangeTipoCompetencia}"
-										autoWidth="false" styleClass="col-xs-12">
-										<p:ajax event="change" process="@this" />
-										<f:selectItems value="#{planBean.catTipoCompetencia}"
-											var="tipoCompetencia" itemLabel="#{tipoCompetencia.nombre}"
-											itemValue="#{tipoCompetencia.id}" />
-									</p:selectOneMenu>
-									<p:message for="tCompetencia" />
-								</f:validateBean>
-							</div>
-						</div>
-					</div>
-				</p:outputPanel>
 
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-4 col-xs-12">
 
-							<p:outputLabel styleClass="bloque"
-								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.conocimientos')}:" />
-							<p:selectCheckboxMenu id="conocsPlan"
-								value="#{planBean.conocimsPlanSelec}"
-								label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-								filter="true" filterMatchMode="startsWith"
-								styleClass="col-xs-12">
-								<f:selectItems value="#{planBean.catConocimientosPlan}"
-									var="conoc" itemLabel="#{conoc.nombre}" itemValue="#{conoc.id}" />
-							</p:selectCheckboxMenu>
+							<p:outputPanel id="pnlBtnCmpEsp" autoUpdate="false">
+								<p:outputLabel value="Conocimientos:"
+									styleClass="bloque requerido" />
+								<p:commandButton id="cmpEspecifBtn"
+									onmouseover="PF('pnlCmpEspeTree').show()" process="@this"
+									value="#{sistema.obtenerTexto('gw.progCapacitacion.etiqueta.seleccioneOp')}"
+									styleClass="btn btn-primary quitaMargen btnEnOverlay"
+									type="button" />
+							</p:outputPanel>
+							<p:overlayPanel id="pnlCmpEsp" dismissable="true"
+								showCloseIcon="true" styleClass="tamanioPanel"
+								for="cmpEspecifBtn" showEffect="fade" widgetVar="pnlCmpEspeTree"
+								hideEffect="fade">
+								<p:treeTable id="arbolCmpEspe" styleClass="compEspProgCap"
+									value="#{planBean.arbolConocimientos}" scrollable="true"
+									var="compEspProg" selectionMode="checkbox"
+									selection="#{planBean.conocimientos}">
 
+									<p:ajax event="select"
+										listener="#{planBean.onNodeSelectCompEspecif}" process="@this"
+										update="nuevoPlanForm:pnlBtnCmpEsp" />
+									<p:ajax event="unselect"
+										listener="#{planBean.onNodeUnSelectCompEspecif}"
+										process="@this" update="nuevoPlanForm:pnlBtnCmpEsp" />
+
+									<p:column>
+										<h:outputText value="#{compEspProg.nombre}" />
+									</p:column>
+								</p:treeTable>
+							</p:overlayPanel>
 						</div>
 
 						<div class="col-md-4 col-xs-12">
+							<p:outputPanel id="pnlBtnHabilidades" autoUpdate="false">
+								<p:outputLabel value="Habilidades:"
+									styleClass="bloque requerido" />
+								<p:commandButton id="habilidadesBtn"
+									onmouseover="PF('pnlHabilidadesTree').show()" process="@this"
+									value="#{sistema.obtenerTexto('gw.progCapacitacion.etiqueta.seleccioneOp')}"
+									styleClass="btn btn-primary quitaMargen btnEnOverlay"
+									type="button" />
+							</p:outputPanel>
+							<p:overlayPanel id="pnlCmpHabilidades" dismissable="true"
+								showCloseIcon="true" styleClass="tamanioPanel"
+								for="habilidadesBtn" showEffect="fade"
+								widgetVar="pnlHabilidadesTree" hideEffect="fade">
+								<p:treeTable id="arbolHabilidades" styleClass="compEspProgCap"
+									value="#{planBean.arbolHabilidades}" scrollable="true"
+									var="compEspProg" selectionMode="checkbox"
+									selection="#{planBean.habilidades}">
 
-							<p:outputLabel styleClass="bloque"
-								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.habilidades')}:" />
-							<p:selectCheckboxMenu value="#{planBean.habilidadesPlanSelec}"
-								label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-								filter="true" filterMatchMode="startsWith"
-								styleClass="col-xs-12">
-								<f:selectItems value="#{planBean.catHabilidadesPlan}"
-									var="habilidad" itemLabel="#{habilidad.nombre}"
-									itemValue="#{habilidad.id}" />
-							</p:selectCheckboxMenu>
+									<p:ajax event="select"
+										listener="#{planBean.onNodeSelectHabilidades}" process="@this"
+										update="nuevoPlanForm:pnlBtnHabilidades" />
+									<p:ajax event="unselect"
+										listener="#{planBean.onNodeUnSelectHabilidades}"
+										process="@this" update="nuevoPlanForm:pnlBtnHabilidades" />
 
+									<p:column>
+										<h:outputText value="#{compEspProg.nombre}" />
+									</p:column>
+								</p:treeTable>
+							</p:overlayPanel>
 						</div>
 
 						<div class="col-md-4 col-xs-12">
+							<p:outputPanel id="pnlBtnAptitudes" autoUpdate="false">
+								<p:outputLabel value="Aptitudes y actitudes:"
+									styleClass="bloque requerido" />
+								<p:commandButton id="aptitudesBtn"
+									onmouseover="PF('pnlAptitudesTree').show()" process="@this"
+									
+									value="#{sistema.obtenerTexto('gw.progCapacitacion.etiqueta.seleccioneOp')}"
+									styleClass="btn btn-primary quitaMargen btnEnOverlay"
+									type="button" />
+							</p:outputPanel>
+							<p:overlayPanel id="pnlCmpAptitudes" dismissable="true"
+								showCloseIcon="true" styleClass="tamanioPanel"
+								for="aptitudesBtn" showEffect="fade"
+								widgetVar="pnlAptitudesTree" hideEffect="fade">
+								<p:treeTable id="arbolCmpAptitudes" styleClass="compEspProgCap"
+									value="#{planBean.arbolAptitudes}" scrollable="true"
+									var="compEspProg" selectionMode="checkbox"
+									selection="#{planBean.aptitudes}">
 
-							<p:outputLabel styleClass="bloque"
-								value="#{sistema.obtenerTexto('gw.plan.nuevo.etiqueta.aptitudes')}:" />
-							<p:selectCheckboxMenu value="#{planBean.aptitudesPlanSelec}"
-								label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-								filter="true" filterMatchMode="startsWith"
-								styleClass="col-xs-12">
-								<f:selectItems value="#{planBean.catAptitutesPlan}"
-									var="aptitud" itemLabel="#{aptitud.nombre}"
-									itemValue="#{aptitud.id}" />
-							</p:selectCheckboxMenu>
+									<p:ajax event="select"
+										listener="#{planBean.onNodeSelectAptitudes}" process="@this"
+										update="nuevoPlanForm:pnlBtnAptitudes" />
+									<p:ajax event="unselect"
+										listener="#{planBean.onNodeUnSelectAptitudes}" process="@this"
+										update="nuevoPlanForm:pnlBtnAptitudes" />
 
+									<p:column>
+										<h:outputText value="#{compEspProg.nombre}" />
+									</p:column>
+								</p:treeTable>
+							</p:overlayPanel>
 						</div>
 					</div>
 				</div>
-				<div class="form-group">
+
+				<div class="form-group" style="margin-top:50px; margin-bottom:100px;">
 					<div class="row">
 
 						<div class="col-md-12 col-xs-12">
