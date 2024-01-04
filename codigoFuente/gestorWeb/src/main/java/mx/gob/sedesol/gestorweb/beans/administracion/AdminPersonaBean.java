@@ -306,6 +306,9 @@ public class AdminPersonaBean extends BaseBean {
 	public String agregarPersona() {
 		nuevaPersona = true;
 		mostrarContrasenia = true;
+		isLenguajeIndigena = false;
+		isDiscapacidad = false;
+		
 
 		datos = new CapturaPersonaDTO();
 
