@@ -418,28 +418,29 @@ public class AdminPersonaBean extends BaseBean {
 		}
 	}
 
+	@SuppressWarnings("unlikely-arg-type")
 	public void onChangeSede(ValueChangeEvent e) {
 		Integer valor = (Integer) e.getNewValue();
-		if (!valor.equals(0)) {
+		datos.getDatosLaborales().getSede().setIdEntidadFederativa(null);
+		datos.getDatosLaborales().getSede().setNombre(null);
+		listaMunicipiosLaboral = new ArrayList<>();
+		
+		if (!valor.equals(0) || !valor.equals("0")) {
 			listaMunicipiosLaboral = personaServiceFacade.obtenerMunicipiosPorEntidad(valor);
 			// obtenerNombreEntidad
 			datos.getDatosLaborales().getSede().setNombre(obtenerNombreEntidad(valor));
-		} else {
-			datos.getDatosLaborales().getSede().setIdEntidadFederativa(null);
-			datos.getDatosLaborales().getSede().setNombre(null);
-			listaMunicipiosLaboral = new ArrayList<>();
 		}
-
 	}
 
+	@SuppressWarnings("unlikely-arg-type")
 	public void onChangeMunicipioLaboral(ValueChangeEvent e) {
 		Integer valor = (Integer) e.getNewValue();
-		if (!valor.equals(0)) {
+		datos.getDatosLaborales().getMunicipio().setIdMunicipio(null);
+		datos.getDatosLaborales().getMunicipio().setNombre(null);
+		listaMunicipiosLaboral = new ArrayList<>();
+		
+		if (!valor.equals(0) || !valor.equals("0")) {
 			datos.getDatosLaborales().getMunicipio().setNombre(obtenerNombreMunicipio(valor));
-		} else {
-			datos.getDatosLaborales().getMunicipio().setIdMunicipio(null);
-			datos.getDatosLaborales().getMunicipio().setNombre(null);
-			listaMunicipiosLaboral = new ArrayList<>();
 		}
 	}
 
@@ -480,7 +481,7 @@ public class AdminPersonaBean extends BaseBean {
 		context = FacesContext.getCurrentInstance();
 		String id = (String) value;
 		if (!ObjectUtils.isNullOrEmpty(id)) {
-			if (id.equals(0)) {
+			if (id.equals(0) || id.equals("0")) {
 				throw new ValidatorException(
 						new FacesMessage(FacesMessage.SEVERITY_ERROR, "El dato es requerido.", null));
 			}
@@ -560,7 +561,8 @@ public class AdminPersonaBean extends BaseBean {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 
 			String valor = (String) e.getNewValue();
-			listaAsentamientos = personaServiceFacade.obtenerAsentamientosPorMunicipio(valor);
+			
+			listaAsentamientos = valor.equals("0") ? new ArrayList<>() : personaServiceFacade.obtenerAsentamientosPorMunicipio(valor);
 		}
 	}
 
