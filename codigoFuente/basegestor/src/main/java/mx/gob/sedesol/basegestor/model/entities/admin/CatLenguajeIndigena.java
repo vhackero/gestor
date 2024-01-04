@@ -1,9 +1,13 @@
 package mx.gob.sedesol.basegestor.model.entities.admin;
 
 import java.io.Serializable;
-import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 
 
 /**
@@ -32,10 +36,6 @@ public class CatLenguajeIndigena implements Serializable {
 
 	@Column(name="usuario_modifico")
 	private int usuarioModifico;
-
-	// bi-directional many-to-one association to TblDatosSociodemograficosPersona
-	@OneToMany(mappedBy = "lenguajeIndigena", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private List<TblDatosSociodemograficosPersona> datosSociodemograficosPersona;
 		
 	public CatLenguajeIndigena() {
 	}
@@ -87,14 +87,5 @@ public class CatLenguajeIndigena implements Serializable {
 	public void setUsuarioModifico(int usuarioModifico) {
 		this.usuarioModifico = usuarioModifico;
 	}
-
-	public List<TblDatosSociodemograficosPersona> getDatosSociodemograficosPersona() {
-		return datosSociodemograficosPersona;
-	}
-
-	public void setDatosSociodemograficosPersona(List<TblDatosSociodemograficosPersona> datosSociodemograficosPersona) {
-		this.datosSociodemograficosPersona = datosSociodemograficosPersona;
-	}
-
 	
 }
