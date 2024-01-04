@@ -1,10 +1,16 @@
 package mx.gob.sedesol.basegestor.model.entities.admin;
 
 import java.io.Serializable;
-import javax.persistence.*;
-import java.sql.Timestamp;
-import java.util.List;
 import java.math.BigInteger;
+import java.sql.Timestamp;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 
 
 /**
@@ -39,10 +45,6 @@ public class CatTipoDiscapacidad implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="id_discapacidad")
 	private CatDiscapacidad catDiscapacidad;
-	
-	// bi-directional many-to-one association to TblDatosSociodemograficosPersona
-	@OneToMany(mappedBy = "tipoDiscapacidad", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private List<TblDatosSociodemograficosPersona> datosSociodemograficosPersona;
 
 	public CatTipoDiscapacidad() {
 	}
@@ -102,13 +104,4 @@ public class CatTipoDiscapacidad implements Serializable {
 	public void setCatDiscapacidad(CatDiscapacidad catDiscapacidad) {
 		this.catDiscapacidad = catDiscapacidad;
 	}
-
-	public List<TblDatosSociodemograficosPersona> getDatosSociodemograficosPersona() {
-		return datosSociodemograficosPersona;
-	}
-
-	public void setDatosSociodemograficosPersona(List<TblDatosSociodemograficosPersona> datosSociodemograficosPersona) {
-		this.datosSociodemograficosPersona = datosSociodemograficosPersona;
-	}
-
 }
