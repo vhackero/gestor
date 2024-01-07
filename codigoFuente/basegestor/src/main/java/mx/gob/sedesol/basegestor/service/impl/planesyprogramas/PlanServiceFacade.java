@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.RelMallaPlanDTO;
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
+import mx.gob.sedesol.basegestor.commons.dto.admin.AsentamientoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
@@ -578,6 +579,12 @@ public class PlanServiceFacade {
 
 		return identif;
 	}
+	 
+		
+	public List<PlanDTO> findAllPlanes() {
+		return planService.findAll();
+	}
+
 
 	/**
 	 * @return the planService
