@@ -848,6 +848,15 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		return modelMapper.map(eventos, listaEventosCapacitacion);
 	}
 
+	public List<EventoCapacitacionDTO> obtenerEventosPorNombrePrograma(String programa) {
+		List<TblEvento> eventos = eventoCapacitacionRepo.obtenerEventosPorNombrePrograma(programa);
+		Type listaEventosCapacitacion = new TypeToken<List<EventoCapacitacionDTO>>() {
+		}.getType();
+
+		return modelMapper.map(eventos, listaEventosCapacitacion);
+	}
+	
+	
 	@Override
 	public void validarPersistencia(EventoCapacitacionDTO dto, ResultadoDTO<EventoCapacitacionDTO> resultado) {
 		throw new UnsupportedOperationException("Not supported yet."); // To

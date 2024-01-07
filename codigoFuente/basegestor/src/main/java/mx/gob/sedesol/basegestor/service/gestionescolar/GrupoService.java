@@ -7,6 +7,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionResumenDTO;
 
 public interface GrupoService {
 	
@@ -28,6 +29,9 @@ public interface GrupoService {
 			ParametroWSMoodleDTO parametroWSMoodleDTO);
 
 	Map<Integer,Boolean> validaActasCerradas(List<Integer> idEventoCapacitacion);
+	
+	List<GrupoDTO> generarGruposDispersion(EventoCapacitacionDTO evento, 
+			TblInscripcionResumenDTO inscripcionResumen, Long usuarioModifico);
 	
 
 }

@@ -184,7 +184,11 @@ public class TblEvento implements Serializable {
 
 	@Column(name = "privado", columnDefinition = "TINYINT(1)")
 	private Boolean privado;
-
+	
+	// bi-directional many-to-one association to TblInscripcion
+	@OneToMany(mappedBy = "eventoCapacitacion")
+	private List<TblInscripcion> inscripciones;
+	
 	public TblEvento() {
 	}
 
@@ -597,6 +601,14 @@ public class TblEvento implements Serializable {
 
 	public void setRelEncuestaEvento(List<RelEncuestaEventoCapacitacion> relEncuestaEvento) {
 		this.relEncuestaEvento = relEncuestaEvento;
+	}
+
+	public List<TblInscripcion> getInscripciones() {
+		return inscripciones;
+	}
+
+	public void setInscripciones(List<TblInscripcion> inscripciones) {
+		this.inscripciones = inscripciones;
 	}
 
 }

@@ -652,4 +652,11 @@ public class EventoCapacitacionDTO implements Serializable {
 		this.relEncuestaEvento = relEncuestaEvento;
 	}
 
+	@Override
+	public String toString() {
+		return "EventoCapacitacionDTO [idEvento=" + idEvento + ", idPrograma=" + idPrograma + ", cveEventoCap="
+				+ cveEventoCap + ", nombreEc=" + nombreEc + "]";
+	}
+
+	
 }
