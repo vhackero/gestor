@@ -17,6 +17,7 @@ import org.modelmapper.PropertyMap;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
@@ -91,20 +92,38 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 	public List<GrupoDTO> generarGruposDispersion( EventoCapacitacionDTO evento, TblInscripcionResumenDTO inscripcionResumen,  Long usuarioModifico) {
 
 		List<GrupoDTO> gruposDTO = new ArrayList<GrupoDTO>();
+		List<GrupoDTO> gruposExistentesDTO = findAll();
 		
-		//for (TblInscripcionResumenDTO inscripcionResumen: listaInscripcionResumen ) {
-			Integer numeroGrupos = inscripcionResumen.getNoGrupos();
-			if(inscripcionResumen.getGrupoResto() != null) {
-				numeroGrupos =numeroGrupos+inscripcionResumen.getGrupoResto() ;
+		
+		Integer numeroGrupos = inscripcionResumen.getNoGrupos();
+		if(inscripcionResumen.getGrupoResto() != null) {
+			numeroGrupos =numeroGrupos+inscripcionResumen.getGrupoResto() ;
+		}
+		List<String> nombresGrupo = generarNombresGrupoDispercion(inscripcionResumen.getGrupo(), numeroGrupos);
+		List<String> nombresGrupoFinales = new ArrayList<String>();
+		
+		for (String nombreGrupo: nombresGrupo) {
+			boolean existe = false; 
+			for (GrupoDTO grupo: gruposExistentesDTO) {	
+				//System.out.println(" nombreGrupoActual: " + nombreGrupo + " - existente: "+ grupo.getNombre());
+				if(grupo.getNombre().equals(nombreGrupo)) {
+					existe = true;
+					System.out.println(" existe: " + existe + " - " + grupo.getNombre());
+					break;
+				}	
 			}
-			List<String> nombresGrupo = generarNombresGrupoDispercion(inscripcionResumen.getGrupo(), numeroGrupos);
-			
-			System.out.println(" generarGruposDispersion >>  nombresGrupo: " + nombresGrupo.size());
-			//List<String> inscrip=   obtenerListaInscripcionesByIdPLan(33);
-		    Optional.ofNullable(nombresGrupo).orElse(Collections.emptyList()).stream()
-	        .forEach(System.out::println);
-			gruposDTO = almacenarGrupo(nombresGrupo, evento, usuarioModifico);
-		//}
+			if (!existe) {
+				System.out.println(" Se agrega grupo: " + nombreGrupo );
+				nombresGrupoFinales.add(nombreGrupo);
+			}
+		}
+		
+		System.out.println(" generarGruposDispersion >>  nombresGrupo: " + nombresGrupoFinales.size());
+		
+	    Optional.ofNullable(nombresGrupoFinales).orElse(Collections.emptyList()).stream()
+        .forEach(System.out::println);
+		gruposDTO = almacenarGrupo(nombresGrupoFinales, evento, usuarioModifico);
+		
 		
 	
 		return gruposDTO;
@@ -356,6 +375,16 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 		alumnoGrupo.setUserid(idPersonaMoodle);
 		listaAlumnosGrupo.add(alumnoGrupo);
 		return listaAlumnosGrupo;
+	}
+	
+	@Override
+	public List<GrupoDTO> findAll() {
+
+		Type lstAux = new TypeToken<List<GrupoDTO>>() {
+        }.getType();
+        List<TblGrupo> entidades = grupoRepo.findAll();
+        return modelMapper.map(entidades, lstAux);
+		
 	}
 
 	@Override
