@@ -28,6 +28,24 @@
 			<div class="row">
 				<div class="col-md-12">
 					<sec:authorize access="hasPermission(null, 'EC_AGR' ) ">
+					
+						<p:outputLabel
+									value="Dispersion:"
+									styleClass="pull-right agregaHeight" />
+							<p:selectCheckboxMenu id="planesMenu"
+									value="#{dispersionBean.planesSelec}"
+									label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									styleClass="col-xs-12">
+									<f:selectItems value="#{dispersionBean.listaPlanes}"
+										var="plan" itemLabel="#{plan.nombre}" itemValue="#{plan.idPlan}" />
+							</p:selectCheckboxMenu>
+						
+							<p:commandButton
+									value="Dispersar"
+									styleClass="btn btn-primary pull-right"
+									update="frmBusquedaPrograma"
+									action="#{dispersionBean.dispersar()}"
+									ajax="false" immediate="true" process="@this" />
 						<p:commandButton
 								value="#{sistema.obtenerTexto('gw.ge.btn.crear')}"
 								styleClass="btn btn-primary pull-right"
