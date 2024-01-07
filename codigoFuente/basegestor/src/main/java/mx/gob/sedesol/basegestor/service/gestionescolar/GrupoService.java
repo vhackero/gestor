@@ -11,6 +11,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionResume
 
 public interface GrupoService {
 	
+	List<GrupoDTO> findAll();
+	
 	public List<GrupoDTO> getGruposByEvento(Integer idEvento);
 
 	GrupoDTO generarGrupo(Integer idEvento, Long usuarioModifico);
