@@ -19,6 +19,7 @@ import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
 import mx.gob.sedesol.basegestor.service.admin.CorreoElectronicoService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaService;
+import mx.gob.sedesol.basegestor.service.gestion.aprendizaje.AmbienteVirtualApService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.DispersionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.EventoCapacitacionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
@@ -37,6 +38,9 @@ public class DispersionServiceFacade {
 
 	@Autowired
 	private ParametroWSMoodleService parametroWSMoodleService;
+	
+	@Autowired
+	private AmbienteVirtualApService ambienteVirtualApService;
 
 	@Autowired
 	private GrupoService grupoService;
@@ -186,6 +190,14 @@ public class DispersionServiceFacade {
 
 	public void setParametroWSMoodleService(ParametroWSMoodleService parametroWSMoodleService) {
 		this.parametroWSMoodleService = parametroWSMoodleService;
+	}
+	
+	public AmbienteVirtualApService getAmbienteVirtualApService() {
+		return ambienteVirtualApService;
+	}
+
+	public void setAmbienteVirtualApService(AmbienteVirtualApService ambienteVirtualApService) {
+		this.ambienteVirtualApService = ambienteVirtualApService;
 	}
 
 	public CorreoElectronicoService getCorreoElectronicoService() {

@@ -19,6 +19,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDatosDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.AmbienteVirtualAprendizajeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
@@ -26,6 +27,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionResumenDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
+import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.DispersionServiceFacade;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
@@ -75,10 +77,9 @@ public class DispersionBean extends BaseBean {
 	private EventoCapacitacionDTO evento;
 	private GrupoDTO grupo;
 	
-	
 	private Integer idGrupo;
 	private int numeroGrupos;
-	
+	private Integer idCursoLms;
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
@@ -89,7 +90,6 @@ public class DispersionBean extends BaseBean {
 	}
 	
 	public void dispersar() {
-		
 		System.out.println("planesSelec >>>>>>>>>>>>> ");
 	    Optional.ofNullable(planesSelec).orElse(Collections.emptyList()).stream()
          .forEach(System.out::println);
@@ -99,7 +99,7 @@ public class DispersionBean extends BaseBean {
 	    List<TblInscripcionResumenDTO> lista=   obtenerListaInscripcionResumen(programas);
 	    Optional.ofNullable(lista).orElse(Collections.emptyList()).stream()
         .forEach(System.out::println);
-	    
+	
 	   /*   System.out.println("listaInscripciones >>>>>>>>>>>>> ");
 	   List<TblInscripcionDTO> inscrip=   obtenerListaInscripcionesByProgramas(programas);
 	    Optional.ofNullable(inscrip).orElse(Collections.emptyList()).stream()
@@ -140,9 +140,22 @@ public class DispersionBean extends BaseBean {
 			Optional.ofNullable(eventos).orElse(Collections.emptyList()).stream()
 	        .forEach(System.out::println);
 			if(!eventos.isEmpty()) {
+				evento = eventos.get(0);
+				AmbienteVirtualAprendizajeDTO ava = dispersionServiceFacade.getAmbienteVirtualApService()
+						.obtenerAVAPorEvento(evento.getIdEvento());
+				if (ObjectUtils.isNotNull(ava)) {
+					idCursoLms = ava.getIdCursoLms();
+					parametroWSMoodleDTO = ava.getPlataformaMoodle();
+					evento.setIdCursoLmsBorrador(idCursoLms);
+					evento.setIdPlataformaLmsBorrador(parametroWSMoodleDTO.getIdParametroWSMoodle());
+				} else {
+					idCursoLms = evento.getIdCursoLmsBorrador();
+					parametroWSMoodleDTO = dispersionServiceFacade.getParametroWSMoodleService()
+							.buscarPorId(evento.getIdPlataformaLmsBorrador());
+				}
 				//crearLogica para crear Mapa de grupos AQUI 
-				grupos.addAll(dispersionServiceFacade.getGrupoService().generarGruposDispersion(eventos.get(0), inscripcionResumen,
-						getUsuarioEnSession().getIdPersona()));
+				grupos.addAll(dispersionServiceFacade.getGrupoService().generarGruposDispersion(evento, inscripcionResumen,
+						getUsuarioEnSession().getIdPersona(), parametroWSMoodleDTO));
 				//bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CRE_GPO", "", requestActual(), TipoServicioEnum.LOCAL);
 			}
 			
@@ -476,6 +489,14 @@ public class DispersionBean extends BaseBean {
 
 	public void setNumeroGrupos(int numeroGrupos) {
 		this.numeroGrupos = numeroGrupos;
+	}
+
+	public Integer getIdCursoLms() {
+		return idCursoLms;
+	}
+
+	public void setIdCursoLms(Integer idCursoLms) {
+		this.idCursoLms = idCursoLms;
 	}
 
 	/* INICIO DE GETS Y SETS */

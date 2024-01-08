@@ -89,7 +89,8 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 	}
 
  	@Override
-	public List<GrupoDTO> generarGruposDispersion( EventoCapacitacionDTO evento, TblInscripcionResumenDTO inscripcionResumen,  Long usuarioModifico) {
+	public List<GrupoDTO> generarGruposDispersion( EventoCapacitacionDTO evento, TblInscripcionResumenDTO inscripcionResumen,  
+			Long usuarioModifico, ParametroWSMoodleDTO parametroWSMoodleDTO) {
 
 		List<GrupoDTO> gruposDTO = new ArrayList<GrupoDTO>();
 		List<GrupoDTO> gruposExistentesDTO = findAll();
@@ -122,7 +123,7 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 		
 	    Optional.ofNullable(nombresGrupoFinales).orElse(Collections.emptyList()).stream()
         .forEach(System.out::println);
-		gruposDTO = almacenarGrupo(nombresGrupoFinales, evento, usuarioModifico);
+		gruposDTO = almacenarGruposMoodle(evento, usuarioModifico, nombresGrupoFinales, parametroWSMoodleDTO);
 		
 		
 	
