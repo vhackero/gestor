@@ -52,5 +52,7 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 	@Query("UPDATE TblEvento e SET e.catEstadoEventoCapacitacion.id = ?1 WHERE e.id = ?2 ")
 	public void cambiarEstatusEvento(Integer idEstatus, Integer idEvento);
 	
+	@Query("SELECT evt FROM TblEvento evt WHERE evt.fichaDescriptivaPrograma.nombreTentativo = :programa")
+	public List<TblEvento> obtenerEventosPorNombrePrograma(@Param("programa") String programa);
 
 }

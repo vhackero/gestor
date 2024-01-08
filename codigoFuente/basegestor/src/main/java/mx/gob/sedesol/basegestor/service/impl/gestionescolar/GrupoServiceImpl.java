@@ -2,10 +2,12 @@ package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -15,6 +17,7 @@ import org.modelmapper.PropertyMap;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
@@ -22,6 +25,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PersonaResponsabilidadesDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionResumenDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelPersonaResponsabilidades;
@@ -84,6 +88,47 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 		return modelMapper.map(lista, objetoDTO);
 	}
 
+ 	@Override
+	public List<GrupoDTO> generarGruposDispersion( EventoCapacitacionDTO evento, TblInscripcionResumenDTO inscripcionResumen,  Long usuarioModifico) {
+
+		List<GrupoDTO> gruposDTO = new ArrayList<GrupoDTO>();
+		List<GrupoDTO> gruposExistentesDTO = findAll();
+		
+		
+		Integer numeroGrupos = inscripcionResumen.getNoGrupos();
+		if(inscripcionResumen.getGrupoResto() != null) {
+			numeroGrupos =numeroGrupos+inscripcionResumen.getGrupoResto() ;
+		}
+		List<String> nombresGrupo = generarNombresGrupoDispercion(inscripcionResumen.getGrupo(), numeroGrupos);
+		List<String> nombresGrupoFinales = new ArrayList<String>();
+		
+		for (String nombreGrupo: nombresGrupo) {
+			boolean existe = false; 
+			for (GrupoDTO grupo: gruposExistentesDTO) {	
+				//System.out.println(" nombreGrupoActual: " + nombreGrupo + " - existente: "+ grupo.getNombre());
+				if(grupo.getNombre().equals(nombreGrupo)) {
+					existe = true;
+					System.out.println(" existe: " + existe + " - " + grupo.getNombre());
+					break;
+				}	
+			}
+			if (!existe) {
+				System.out.println(" Se agrega grupo: " + nombreGrupo );
+				nombresGrupoFinales.add(nombreGrupo);
+			}
+		}
+		
+		System.out.println(" generarGruposDispersion >>  nombresGrupo: " + nombresGrupoFinales.size());
+		
+	    Optional.ofNullable(nombresGrupoFinales).orElse(Collections.emptyList()).stream()
+        .forEach(System.out::println);
+		gruposDTO = almacenarGrupo(nombresGrupoFinales, evento, usuarioModifico);
+		
+		
+	
+		return gruposDTO;
+	}
+	
 	@Override
 	public List<GrupoDTO> generarGrupos(EventoCapacitacionDTO evento, int numeroGrupos, Long usuarioModifico,
 			ParametroWSMoodleDTO parametroWSMoodleDTO) {
@@ -121,6 +166,8 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 	private List<GrupoDTO> almacenarGrupo(List<String> nombresGrupo, EventoCapacitacionDTO evento,
 			Long usuarioModifico) {
 		List<GrupoDTO> grupos = new ArrayList<>();
+		System.out.println("almacenarGrupo>>>>>> "+nombresGrupo.size());
+		
 		for (String nombre : nombresGrupo) {
 			TblGrupo grupoEnt = new TblGrupo();
 			grupoEnt.setEvento(modelMapper.map(evento, TblEvento.class));
@@ -157,6 +204,23 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 			nombresGrupo.add("EC-" + String.valueOf(evento.getIdEvento()) + "-G-" + maximo);
 			maximo++;
 		}
+		return nombresGrupo;
+	}
+	private List<String> generarNombresGrupoDispercion(String nombreGrupoBase, int numeroGrupos) {
+		List<String> nombresGrupo = new ArrayList<>();
+		String nombreGrupo = nombreGrupoBase.substring(0,19);
+		System.out.println(" generarNombresGrupoDispercion >>  nombreGrupoBase: " + nombreGrupoBase+ " <-> nombreGrupo:"+nombreGrupo);
+
+		 
+		
+		for (int i = 1; i <= numeroGrupos; i++) {
+			if(numeroGrupos<=9) {
+				nombresGrupo.add( nombreGrupo + "00" + i);
+			}else {
+				nombresGrupo.add( nombreGrupo + "0" + i);
+			}
+		}
+		//System.out.println(" generarNombresGrupoDispercion >>  nombresGrupo: " + nombresGrupo.size());
 		return nombresGrupo;
 	}
 
@@ -311,6 +375,16 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 		alumnoGrupo.setUserid(idPersonaMoodle);
 		listaAlumnosGrupo.add(alumnoGrupo);
 		return listaAlumnosGrupo;
+	}
+	
+	@Override
+	public List<GrupoDTO> findAll() {
+
+		Type lstAux = new TypeToken<List<GrupoDTO>>() {
+        }.getType();
+        List<TblGrupo> entidades = grupoRepo.findAll();
+        return modelMapper.map(entidades, lstAux);
+		
 	}
 
 	@Override

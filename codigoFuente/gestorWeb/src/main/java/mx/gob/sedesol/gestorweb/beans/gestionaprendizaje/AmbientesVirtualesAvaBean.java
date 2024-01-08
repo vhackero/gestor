@@ -375,13 +375,28 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 				.activaAvaEjecutaEventoCapacitacion(ambienteVirtualAprendizajeDTO, usuarioSessionDTO.getIdPersona(),
 						estatusAvaActivo, edoEvtCapEnEjecucion);
 		
-		if (resultado.getResultado().equals(ResultadoTransaccionEnum.EXITOSO)) {
-			this.borraAvaDeLaLista(resultado.getDto().getId(), ambienteVirtualAprendizajeDTOList);
+		if (resultado.esCorrecto() || resultado.getResultado().equals(ResultadoTransaccionEnum.EXITOSO)) {
+			try {
+				mostrarCursoLms(ambienteVirtualAprendizajeDTO);
+				bitacoraBean.guardarBitacora(idPersonaEnSesion(), "ACT_AVA", String.valueOf(resultado.getDto().getId()),
+						requestActual(), TipoServicioEnum.LOCAL);
+				
+				this.borraAvaDeLaLista(resultado.getDto().getId(), ambienteVirtualAprendizajeDTOList);
+			} catch (ErrorWS e) {
+				e.printStackTrace();
+				logger.error("Ocurrio un error al mostrar el curso en LMS");
+				resultado.agregaMensaje("Ocurrio un error al mostrar el curso en el LMS");
+			}
 		}
 		
 		this.validaMensajeResultadoTransaccion(resultado.getMensajes(), resultado.getResultado());
 		logger.info("El resultado de la actualizacion del AVA fue " + resultado.getResultado());
 		return ConstantesGestorWeb.NAVEGA_AMBIENTES_VIRTUALES_APRENDIZAJE;
+	}
+	
+	public void mostrarCursoLms(AmbienteVirtualAprendizajeDTO ambienteVirtualAprendizajeDTO) throws ErrorWS {
+		CursoWS cursoWS = new CursoWS(ambienteVirtualAprendizajeDTO.getPlataformaMoodle());
+		cursoWS.mostrarCurso(ambienteVirtualAprendizajeDTO.getIdCursoLms());
 	}
 	
 	private CatalogoComunDTO obtenerEdoEventoCapacitacionPorEnum(EstadoEventoCapEnum estadoEventoCapEnum) {

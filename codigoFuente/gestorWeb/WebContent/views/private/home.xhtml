@@ -58,7 +58,7 @@
 									rendered="#{participante.grupo.evento.catModalidadPlanPrograma.id eq 2}"
 									value="#{participante.grupo.evento.nombreEc}" />
 								<p:commandLink value="#{participante.grupo.evento.nombreEc}"
-									styleClass="subrayar-con-azul" target="_blank" ajax="false"
+									styleClass="subrayar-con-azul" target="_parent" ajax="false"
 									rendered="#{not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}"
 									action="#{misCursosBean.navegaUrlCursoLms(participante.grupo.evento.idEvento)}" />
 							</p:column>

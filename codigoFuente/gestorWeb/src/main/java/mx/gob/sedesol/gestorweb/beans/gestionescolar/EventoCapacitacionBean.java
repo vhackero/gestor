@@ -14,6 +14,8 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 
+import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService;
+import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
 import org.primefaces.model.StreamedContent;
@@ -56,7 +58,10 @@ public class EventoCapacitacionBean extends BaseBean {
 
 	private EventoCapacitacionDTO filtros;
 	private EventoCapacitacionDTO eventoReporte;
-
+	@ManagedProperty("#{planService}")
+	private PlanService planService;
+	@ManagedProperty("#{mallaCurricularService}")
+	private MallaCurricularService mallaCurricularService;
 	@ManagedProperty(value = "#{fecServiceFacade}")
 	private FECServiceFacade fecServiceFacade;
 
@@ -85,6 +90,16 @@ public class EventoCapacitacionBean extends BaseBean {
 
 	private String tipoDatoFechas;
 	private StreamedContent reportePDF;
+	private Integer idPlan;
+
+	private List<CatalogoComunDTO> catEstructuras;
+	private List<CatalogoComunDTO> catSubEstructurasNivel1;
+	private List<CatalogoComunDTO> catSubEstructurasNivel2;
+	private List<CatalogoComunDTO> catSubEstructurasNivel3;
+	private List<NodoeHijosDTO> nodos;
+	private List<CatalogoComunDTO> planes;
+	private Integer nivelMaximo = 1;
+	private Integer idCapacitacion;
 
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
@@ -95,6 +110,9 @@ public class EventoCapacitacionBean extends BaseBean {
 		FichaDescProgramaDTO descProgramaDTO = new FichaDescProgramaDTO();
 		CatalogoComunDTO catModalidad = new CatalogoComunDTO();
 		descProgramaDTO.setCatModalidad(catModalidad);
+		if (ObjectUtils.isNull(eventosCapacitacion)){
+
+		}
 
 	}
 
@@ -211,6 +229,8 @@ public class EventoCapacitacionBean extends BaseBean {
 
 		filtros.getFichaDescriptivaPrograma().setTipoCompetencia(null);
 		filtros.getFichaDescriptivaPrograma().setEjeCapacitacion(null);
+		filtros.getFichaDescriptivaPrograma().setIdPrograma(null);
+		filtros.getFichaDescriptivaPrograma().setPlan(null);
 		listaEjesCapacitacion = new ArrayList<>();
 
 		filtros.setNombreEc(null);
@@ -221,7 +241,7 @@ public class EventoCapacitacionBean extends BaseBean {
 		filtros.setFechaInicial(null);
 		filtros.setFechaFinal(null);
 		filtros.setCatEstadoEventoCapacitacion(new CatalogoComunDTO());
-
+		catEstructuras.clear();
 		eventosCapacitacion = new ArrayList<>();
 
 	}
@@ -356,12 +376,16 @@ public class EventoCapacitacionBean extends BaseBean {
 	 */
 	private void generaEstructuraCatTpoCompetenciaPlan() {
 
-		List<NodoeHijosDTO> planes = new ArrayList<>();
-		List<MallaCurricularDTO> mallas = new ArrayList<>();
+		nodos = new ArrayList<>();
+		List<MallaCurricularDTO> mallas = getFecServiceFacade().getMallaCurricularService().obtieneMallasCurricularesDisponibles();
 
-		MallaCurricularDTO mallaSedesol = eventoCapacitacionServiceFacade.obtenerMallaCurricular();
-		mallas.add(mallaSedesol);
-
+		// List<MallaCurricularDTO> mallas =
+		// getFecServiceFacade().getMallaCurricularService().obtieneMallasCurricularesDisponibles();
+		// RN: Solo se presentara el plan de sedesol por el momento
+		/*MallaCurricularDTO mallaSedesol = getFecServiceFacade().getMallaCurricularService()
+				.obtenerMallaCurricularPorId(1);
+		mallas.add(mallaSedesol);*/
+		planes = new ArrayList<>();
 		for (MallaCurricularDTO m : mallas) {
 			NodoeHijosDTO nodog = new NodoeHijosDTO();
 			nodog.setNombre(m.getNombre());
@@ -369,18 +393,20 @@ public class EventoCapacitacionBean extends BaseBean {
 			nodog.setIdPadre(m.getMallaCurricularPadre() != null ? m.getMallaCurricularPadre().getId() : null);
 			nodog.setIdObjCurr(m.getObjetoCurricular().getId());
 			nodog.setNivel(0);
-
 			if (!m.getLstHijosMallaCurr().isEmpty()) {
 				this.generaCatxNivel(m.getLstHijosMallaCurr(), nodog, nodog.getNivel());
 			}
-
-			planes.add(nodog);
+			nodos.add(nodog);
+			CatalogoComunDTO cat = new CatalogoComunDTO();
+			cat.setId(nodog.getIdNodo());
+			cat.setNombre(nodog.getNombre());
+			planes.add(cat);
 		}
 
 		listaTiposCompetencias = new ArrayList<>();
 
 		// Genera el Catalogo Tipo de Competencia
-		estPlanSedesol = planes.get(ConstantesGestorWeb.INDICE_INICIAL);
+		estPlanSedesol = nodos.get(ConstantesGestorWeb.INDICE_INICIAL);
 		for (NodoeHijosDTO nh : estPlanSedesol.getNodosHijos()) {
 			CatalogoComunDTO cc = new CatalogoComunDTO();
 			cc.setId(nh.getIdNodo());
@@ -388,7 +414,51 @@ public class EventoCapacitacionBean extends BaseBean {
 			listaTiposCompetencias.add(cc);
 		}
 	}
+	public void onChangeCatPlan(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			catEstructuras = this.generarEstructuras(nodos, Integer.parseInt(e.getNewValue().toString()));
+			filtros.getFichaDescriptivaPrograma().setPlan( planService.buscarPorId( mallaCurricularService.buscarPorId(Integer.parseInt(e.getNewValue().toString())).getIdPlan()));
+			//filtros.getFichaDescriptivaPrograma().setPlan(planService.buscarPorId(Integer.parseInt(e.getNewValue().toString())));
+			catSubEstructurasNivel1 = new ArrayList<CatalogoComunDTO>();
+			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
+			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+			nivelMaximo = 0;
+		}
+	}
+	public void onChangeCatEstructura(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
+			filtros.getFichaDescriptivaPrograma().setEjeCapacitacion(idSubEstructura);
+			catSubEstructurasNivel1 = this.generarSubEstructuras1(nodos, idSubEstructura);
+			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
+			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+			nivelMaximo = 1;
+		}
+	}
+	public void onChangeCatSubestructura1(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
+			filtros.getFichaDescriptivaPrograma().setEjeCapacitacion(idSubEstructura);
+			catSubEstructurasNivel2 = this.generarSubEstructuras2(nodos, idSubEstructura);
+			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+			nivelMaximo = 2;
+		}
+	}
+	public void onChangeCatSubestructura2(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
+			filtros.getFichaDescriptivaPrograma().setEjeCapacitacion(idSubEstructura);
+			catSubEstructurasNivel3 = this.generarSubEstructuras3(nodos, idSubEstructura);
+			nivelMaximo = 3;
+		}
+	}
 
+	public void onChangeCatSubestructura3(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			filtros.getFichaDescriptivaPrograma().setEjeCapacitacion(Integer.parseInt(e.getNewValue().toString()));
+			nivelMaximo = 4;
+		}
+	}
 	/**
 	 * Metodo que crea los ejes de capacitacion apartir del tipo de competencia
 	 * seleccionado
@@ -436,7 +506,8 @@ public class EventoCapacitacionBean extends BaseBean {
 	 * Metodo que obtiene el nombre de un tipo de competencia apartir de su id
 	 */
 	public String obtieneNombreTpoCompetencia(Integer idTpoComp) {
-
+		final String[] datos = {null};
+		listaTiposCompetencias.forEach(o -> datos[0] +=" " +o.getNombre());
 		if (ObjectUtils.isNotNull(idTpoComp)) {
 			for (CatalogoComunDTO tpoCom : listaTiposCompetencias) {
 				if (tpoCom.getId().equals(idTpoComp)) {
@@ -451,6 +522,8 @@ public class EventoCapacitacionBean extends BaseBean {
 	 * Metodo que obtienen el nombre de un eje de capacitacion apartir de su id
 	 */
 	public String obtieneNombreEjeCapacit(Integer idEjeCap) {
+		final String[] datos = {null};
+		ejesCapacitacion.forEach(o -> datos[0] +=" " +o.getNombre());
 		if (ObjectUtils.isNotNull(idEjeCap)) {
 			for (CatalogoComunDTO ejeCap : ejesCapacitacion) {
 				if (ejeCap.getId().compareTo(idEjeCap) == 0) {
@@ -481,7 +554,7 @@ public class EventoCapacitacionBean extends BaseBean {
 				if (ObjectUtils.isNotNull(evento.getCatModalidadPlanPrograma().getId())) {
 					if (evento.getCatModalidadPlanPrograma().getId().equals(ConstantesGestor.MODALIDAD_PRESENCIAL)
 							|| evento.getCatEstadoEventoCapacitacion().getId()
-									.intValue() != EstadoEventoCapEnum.EN_EJECUCION.getId().intValue()) {
+							.intValue() != EstadoEventoCapEnum.EN_EJECUCION.getId().intValue()) {
 						return false;
 					}
 				}
@@ -583,6 +656,31 @@ public class EventoCapacitacionBean extends BaseBean {
 			traerComponentesVisibles(MOSTRAR_TODOS);
 		}
 
+	}
+	
+	public String obtenerRuta(EventoCapacitacionDTO evento){
+		String ruta = "";
+		
+		MallaCurricularDTO mallaHijo = mallaCurricularService.obtenerMallaCurricularPorId(evento.getFichaDescriptivaPrograma().getEjeCapacitacion());
+		ruta += buscarPadre(mallaHijo, ruta);
+
+		/*
+		ruta += "/"+evento.getFichaDescriptivaPrograma().getNombreTentativo();
+		ruta += "/"+evento.getFichaDescriptivaPrograma().getPlan().getNombre();
+		*/
+		
+		return ruta.substring(1, ruta.length()-1);
+	}
+	
+	public String buscarPadre(MallaCurricularDTO malla, String nombres) {
+		if(ObjectUtils.isNull(malla.getMallaCurricularPadre())){
+			return nombres;
+		}
+		
+		nombres += " /"+malla.getNombre();
+		String padre = buscarPadre(malla.getMallaCurricularPadre(), nombres);
+		
+		return padre != null ? padre : null;
 	}
 
 	public String navegaRegistrarAsistenciasEventoCap() {
@@ -814,4 +912,93 @@ public class EventoCapacitacionBean extends BaseBean {
 		this.bitacoraBean = bitacoraBean;
 	}
 
+	public Integer getIdPlan() {
+		return idPlan;
+	}
+
+	public void setIdPlan(Integer idPlan) {
+		this.idPlan = idPlan;
+	}
+
+	public List<CatalogoComunDTO> getCatEstructuras() {
+		return catEstructuras;
+	}
+
+	public void setCatEstructuras(List<CatalogoComunDTO> catEstructuras) {
+		this.catEstructuras = catEstructuras;
+	}
+
+	public List<CatalogoComunDTO> getCatSubEstructurasNivel1() {
+		return catSubEstructurasNivel1;
+	}
+
+	public void setCatSubEstructurasNivel1(List<CatalogoComunDTO> catSubEstructurasNivel1) {
+		this.catSubEstructurasNivel1 = catSubEstructurasNivel1;
+	}
+
+	public List<CatalogoComunDTO> getCatSubEstructurasNivel2() {
+		return catSubEstructurasNivel2;
+	}
+
+	public void setCatSubEstructurasNivel2(List<CatalogoComunDTO> catSubEstructurasNivel2) {
+		this.catSubEstructurasNivel2 = catSubEstructurasNivel2;
+	}
+
+	public List<CatalogoComunDTO> getCatSubEstructurasNivel3() {
+		return catSubEstructurasNivel3;
+	}
+
+	public void setCatSubEstructurasNivel3(List<CatalogoComunDTO> catSubEstructurasNivel3) {
+		this.catSubEstructurasNivel3 = catSubEstructurasNivel3;
+	}
+
+	public List<NodoeHijosDTO> getNodos() {
+		return nodos;
+	}
+
+	public void setNodos(List<NodoeHijosDTO> nodos) {
+		this.nodos = nodos;
+	}
+
+	public List<CatalogoComunDTO> getPlanes() {
+		return planes;
+	}
+
+	public void setPlanes(List<CatalogoComunDTO> planes) {
+		this.planes = planes;
+	}
+
+
+
+	public Integer getNivelMaximo() {
+		return nivelMaximo;
+	}
+
+	public void setNivelMaximo(Integer nivelMaximo) {
+		this.nivelMaximo = nivelMaximo;
+	}
+
+	public Integer getIdCapacitacion() {
+		return idCapacitacion;
+	}
+
+	public void setIdCapacitacion(Integer idCapacitacion) {
+		this.idCapacitacion = idCapacitacion;
+	}
+
+	public PlanService getPlanService() {
+		return planService;
+	}
+
+	public void setPlanService(PlanService planService) {
+		this.planService = planService;
+	}
+
+	public MallaCurricularService getMallaCurricularService() {
+		return mallaCurricularService;
+	}
+
+	public void setMallaCurricularService(MallaCurricularService mallaCurricularService) {
+		this.mallaCurricularService = mallaCurricularService;
+	}
 }

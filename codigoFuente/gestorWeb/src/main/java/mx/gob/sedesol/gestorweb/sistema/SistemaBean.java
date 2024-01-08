@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.TextoSistemaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.TipoTemaEnum;
+import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.TemaService;
 import mx.gob.sedesol.basegestor.service.admin.TextoSistemaService;
 
@@ -28,6 +29,9 @@ public class SistemaBean implements Serializable {
 
 	@ManagedProperty(value = "#{textoSistemaService}")
 	private transient TextoSistemaService textoSistemaService;
+	
+	@ManagedProperty(value = "#{parametroSistemaService}")
+	private transient ParametroSistemaService parametroSistemaService;
 	
 	@ManagedProperty(value = "#{temaService}")
 	private transient TemaService temaService;
@@ -57,6 +61,10 @@ public class SistemaBean implements Serializable {
 		} else {
 			return clave;
 		}
+	}
+	
+	public String obtenerClave(String clave) {
+		return parametroSistemaService.obtenerParametro(clave);
 	}
 	
 	public void establecerTexto(String clave, String valor) {
@@ -99,6 +107,14 @@ public class SistemaBean implements Serializable {
 
 	public void setTemaService(TemaService temaService) {
 		this.temaService = temaService;
+	}
+
+	public ParametroSistemaService getParametroSistemaService() {
+		return parametroSistemaService;
+	}
+
+	public void setParametroSistemaService(ParametroSistemaService parametroSistemaService) {
+		this.parametroSistemaService = parametroSistemaService;
 	}
 
 }

@@ -7,7 +7,11 @@ import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
 import mx.gob.sedesol.basegestor.service.admin.CommonService;
 
 public interface PlanService extends CommonService<PlanDTO, Integer> {
-
+	
+	public List<PlanDTO> findAll();
+	
+	public PlanDTO buscarPorId(Integer id);
+	
 	public List<PlanDTO> buscaPlanesPorCriterios(PlanDTO filtro);
 	
 	public void eliminaHabilidadesPorIdPlan(Integer idPlan);

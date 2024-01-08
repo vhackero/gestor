@@ -16,6 +16,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PersonaResponsabilid
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
+import mx.gob.sedesol.basegestor.model.entities.admin.TblPersona;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelPersonaResponsabilidades;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.PersonaResponsabilidadesRepo;
 import mx.gob.sedesol.basegestor.service.admin.ComunValidacionService;
@@ -101,6 +102,7 @@ public class PersonaResponsabilidadesServiceImpl extends ComunValidacionService<
             if (ObjectUtils.isNotNull(res) && res.getResultado().getValor()) {
 
                 RelPersonaResponsabilidades perResp = mapper.map(dto, RelPersonaResponsabilidades.class);
+                perResp.setTblPersona(mapper.map(dto.getTblPersona(), TblPersona.class));
                 perResp = personaResponsabilidadesRepo.save(perResp);
 
                 res = new ResultadoDTO<>();

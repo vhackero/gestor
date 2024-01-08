@@ -11,17 +11,17 @@
 
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
-		<li class="active">#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}</li>
+		<li class="active">Responsables de eventos académicos</li>
 	</ui:define>
 
 	<ui:define name="content">
-		<h1>#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}</h1>
+		<h1>Responsables de eventos académicos</h1>
 		<hr />
 		<p:ajaxStatus onstart="PF('dialogLayout').show()"
 			onsuccess="PF('dialogLayout').hide()" />
 		<h:form id="formResponsables">
 			<p:panel
-				header="#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}">
+				header="Responsables de eventos académicos">
 				<div class="row">
 					<div class="col-md-4 col-xs-12">
 						<p:selectOneMenu

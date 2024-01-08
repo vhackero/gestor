@@ -20,6 +20,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import mx.gob.sedesol.basegestor.model.entities.admin.TblOrganismoGubernamental;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblInscripcion;
 
 /**
  * The persistent class for the tbl_planes database table.
@@ -149,6 +150,10 @@ public class TblPlan implements Serializable {
 	@JoinColumn(name="id_tpo_competencia")
 	private CatTipoCompetencia catTipoCompetencia;
 
+	//bi-directional many-to-one association to RelPlanHabilidad
+	@OneToMany(mappedBy="plan",cascade={CascadeType.ALL})
+	private List<TblInscripcion> inscripciones;
+	
 	public TblPlan() {
 	}
 
@@ -448,4 +453,13 @@ public class TblPlan implements Serializable {
 	public void setIdCategoriaMdl(Integer idCategoriaMdl) {
 		this.idCategoriaMdl = idCategoriaMdl;
 	}
+
+	public List<TblInscripcion> getInscripciones() {
+		return inscripciones;
+	}
+
+	public void setInscripciones(List<TblInscripcion> inscripciones) {
+		this.inscripciones = inscripciones;
+	}
+	
 }

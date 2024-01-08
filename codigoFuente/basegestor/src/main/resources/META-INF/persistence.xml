@@ -92,6 +92,10 @@
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatCreditosPlan</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatDivisionesPlan</class>
         <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatTipoCompetencia</class>
+        
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelMallaPlan</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatModeloPedagogicoPlan</class>
         <!-- Fin Planes y programas -->
 
         <!-- Inicia seccion encuestas -->
@@ -207,6 +211,9 @@
         <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelSolicitudEnrolamientoEvtCap</class>
         <class>mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaPlataformaMoodle</class>
 
+  		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatNombrePlanyPrograma</class>
+  		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblInscripcion</class>
+  		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblInscripcionResumen</class>
         <!-- Inicia optimizacion de entidades -->
         <!--Modulo
         de Usuarios  -->

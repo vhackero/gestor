@@ -8,6 +8,7 @@ package mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Alertas;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Curso;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Cursos;
@@ -154,18 +156,19 @@ public class CursoWS {
     }
     
     
-    public int crearCurso(Curso curso) throws ErrorWS{
+    public int crearCurso(Curso curso, TblEvento evento) throws ErrorWS{
         
         HashMap<String, Object> paramMap = new HashMap<>();
         //int x = 0;
         
         //for (Curso curso : cursos) {
+        long val2 = new Timestamp(evento.getFechaInicial().getTime() / 1000).getTime();
         int x = 0;
         paramMap.put("course[" + x + "][fullname]", curso.getFullname());
         paramMap.put("course[" + x + "][shortname]", curso.getShortname());
         paramMap.put("course[" + x + "][categoryid]", curso.getCategoryid());
         paramMap.put("course[" + x + "][idnumber]", curso.getIdnumber());
-        paramMap.put("course[" + x + "][startdate]", (int) (new Date().getTime() / 1000));
+        paramMap.put("course[" + x + "][startdate]", val2 );
         paramMap.put("course[" + x + "][summary]", curso.getSummary());
         paramMap.put("course[" + x + "][visible]", curso.getVisible());
         paramMap.put("course[" + x + "][numsections]", curso.getNumsections());

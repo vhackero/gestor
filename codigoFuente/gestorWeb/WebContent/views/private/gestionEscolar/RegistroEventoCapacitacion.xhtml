@@ -10,13 +10,13 @@
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
-		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCap')}</li>
-		<li class="active">#{sistema.obtenerTexto('gw.gestionescolar.label.nuevoevtcap')}</li> 
+		<li>Eventos académicos</li>
+		<li class="active">Nuevo evento académico</li> 
 	</ui:define>
 	<ui:define name="content">
 
 			<p:ajaxStatus onstart="PF('dialogLayout').show()" onsuccess="PF('dialogLayout').hide()"/>
-			<h1>#{sistema.obtenerTexto('gw.gestionescolar.label.nuevoevtcap')}</h1>
+			<h1>Nuevo evento académico</h1>
 			<hr /> 
 			
 			<p:tabView id="tabEventoCapacitacion" activeIndex="#{capturaEventoCapacitacion.indicePanel}">

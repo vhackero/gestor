@@ -1,9 +1,19 @@
 package mx.gob.sedesol.basegestor.model.entities.admin;
 
 import java.io.Serializable;
-import javax.persistence.*;
-import java.sql.Timestamp;
 import java.math.BigInteger;
+import java.sql.Timestamp;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 
 /**
@@ -35,18 +45,15 @@ public class TblDatosSociodemograficosPersona implements Serializable {
 
 	@Column(name="usuario_modifico")
 	private BigInteger usuarioModifico;
-	
-	//bi-directional many-to-one association to TblPersona
+
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="id_persona")
 	private TblPersona persona;
-		
-	//bi-directional many-to-one association to CatLenguajeIndigena
+
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="id_lenguaje")
 	private CatLenguajeIndigena lenguajeIndigena;
 		
-	//bi-directional many-to-one association to CatTipoDiscapacidad
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="id_tipo_discapacidad")
 	private CatTipoDiscapacidad tipoDiscapacidad;
