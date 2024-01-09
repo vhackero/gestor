@@ -35,9 +35,9 @@
 		  </div>
 
 		<div class="row">
-			<div class="col-md-6">
+			<div class="#{misLogrosBean.styleMisCursos}">
 				<h:form id="formMisCursos">
-					<p:panel header="Asignaturas" style="margin-top:0">
+					<p:panel header="Asignaturas " style="margin-top:0">
 						<p:dataTable id="dtResultadoBusquedaMisCursos"
 							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
 							reflow="true"
@@ -90,52 +90,55 @@
 				</h:form>
 			</div>
 			<div class="col-md-6">
-				<p:panel header="Logros" style="margin-top:0">
-					<div class="row">
-						<div class="col-md-6 contenedorTrofeos">
-							<div class="contenedorTrofeo">
-								<div class="trofeo">
-									<span class="fa fa-solid fa-trophy" style="color: #faa919; font-size: 32px;"></span>
+				<ui:fragment rendered="#{misLogrosBean.showLogros}"> 
+					<p:panel header="Logros" style="margin-top:0">
+						<div class="row">
+							<div class="col-md-6 contenedorTrofeos">
+								<div class="contenedorTrofeo">
+									<div class="trofeo">
+										<span class="fa fa-solid fa-trophy" style="color: #faa919; font-size: 32px;"></span>
+									</div>
+									<div class="baseTrofeo">
+									
+										<p:outputLabel
+											value="#{misLogrosBean.contenedorLogros.cantTrofeosOroPlata[0]}" />
+									</div>
+	
 								</div>
-								<div class="baseTrofeo">
-									<p:outputLabel
-										value="#{misLogrosBean.contenedorLogros.cantTrofeosOroPlata[0]}" />
+	
+								<div class="contenedorTrofeo">
+									<div class="trofeo">
+										<span class="fa fa-light fa-award" style="color: #808080; font-size: 32px;"></span>
+									</div>
+									<div class="baseTrofeo plata">
+										<p:outputLabel
+											value="#{misLogrosBean.contenedorLogros.cantTrofeosOroPlata[1]}" />
+									</div>
 								</div>
-
+	
 							</div>
-
-							<div class="contenedorTrofeo">
-								<div class="trofeo">
-									<span class="fa fa-light fa-award" style="color: #808080; font-size: 32px;"></span>
-								</div>
-								<div class="baseTrofeo plata">
-									<p:outputLabel
-										value="#{misLogrosBean.contenedorLogros.cantTrofeosOroPlata[1]}" />
-								</div>
+							<div class="col-md-6">
+								<p:outputPanel
+									rendered="#{misLogrosBean.contenedorLogros.badge != null}"
+									layout="block">
+									<p:outputPanel id="imgInsignia"
+										styleClass="imgInsigniaContenedor">
+										<img class="imgInsignia"
+											src="/recursos/insignias/#{misLogrosBean.contenedorLogros.badge.rutaImagen}" />
+									</p:outputPanel>
+									<p:outputPanel layout="block" styleClass="tablero-logros">
+										<p:outputLabel styleClass="tituloInsignia bloque"
+											value="#{misLogrosBean.contenedorLogros.badge.nombre}" />
+										<h:outputText
+											value="#{misLogrosBean.contenedorLogros.clasificacionBadge.nombre}"
+											styleClass="bloque tituloNivel" />
+	
+									</p:outputPanel>
+								</p:outputPanel>
 							</div>
-
 						</div>
-						<div class="col-md-6">
-							<p:outputPanel
-								rendered="#{misLogrosBean.contenedorLogros.badge != null}"
-								layout="block">
-								<p:outputPanel id="imgInsignia"
-									styleClass="imgInsigniaContenedor">
-									<img class="imgInsignia"
-										src="/recursos/insignias/#{misLogrosBean.contenedorLogros.badge.rutaImagen}" />
-								</p:outputPanel>
-								<p:outputPanel layout="block" styleClass="tablero-logros">
-									<p:outputLabel styleClass="tituloInsignia bloque"
-										value="#{misLogrosBean.contenedorLogros.badge.nombre}" />
-									<h:outputText
-										value="#{misLogrosBean.contenedorLogros.clasificacionBadge.nombre}"
-										styleClass="bloque tituloNivel" />
-
-								</p:outputPanel>
-							</p:outputPanel>
-						</div>
-					</div>
-				</p:panel>
+					</p:panel>
+				</ui:fragment>
 			</div>
 		</div>
 

@@ -3,6 +3,7 @@ package mx.gob.sedesol.basegestor.service.impl.gestion.aprendizaje;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -158,12 +159,18 @@ public class AmbienteVirtualApServiceImpl extends ComunValidacionService<Ambient
 		List<TblAmbienteVirtualAprendizaje> tblAmbienteVirtualAprendizajeList = ambienteVirtualApRepo
 				.consultarAvaPorEstatusYEventoCapacitacion(estatusAva, modalidadEvtCapList, estatusEvtCap);
 
-		Type objetoDTO = new TypeToken<List<AmbienteVirtualAprendizajeDTO>>() {
-		}.getType();
-
 		logger.info("El tamanio de la lista retornada es " + tblAmbienteVirtualAprendizajeList.size());
 
-		return ambienteVirtualApMapper.map(tblAmbienteVirtualAprendizajeList, objetoDTO);
+		List<AmbienteVirtualAprendizajeDTO> resList = new ArrayList<>();
+		for(TblAmbienteVirtualAprendizaje ava : tblAmbienteVirtualAprendizajeList){
+			try {
+				resList.add(ambienteVirtualApMapper.map(ava, AmbienteVirtualAprendizajeDTO.class));
+			}catch(Exception ex){
+				logger.error("Ocurrio un error en el ava con id "+ava.getId());
+			}
+		}
+		
+		return resList;
 	}
 
 	public List<AmbienteVirtualAprendizajeDTO> consultarAvasPorTipoCompetenciaEjeCapacitacion(
@@ -174,12 +181,18 @@ public class AmbienteVirtualApServiceImpl extends ComunValidacionService<Ambient
 				.consultarAvasPorTipoCompetenciaEjeCapacitacion(modalidadEvtCapList, estatusEvtCap, idTipoCom,
 						idEjeCapacitacion);
 
-		Type objetoDTO = new TypeToken<List<AmbienteVirtualAprendizajeDTO>>() {
-		}.getType();
-
 		logger.info("El tamanio de la lista retornada es " + tblAmbienteVirtualAprendizajeList.size());
-
-		return ambienteVirtualApMapper.map(tblAmbienteVirtualAprendizajeList, objetoDTO);
+		
+		List<AmbienteVirtualAprendizajeDTO> resList = new ArrayList<>();
+		for(TblAmbienteVirtualAprendizaje ava : tblAmbienteVirtualAprendizajeList){
+			try {
+				resList.add(ambienteVirtualApMapper.map(ava, AmbienteVirtualAprendizajeDTO.class));
+			}catch(Exception ex){
+				logger.error("Ocurrio un error en el ava con id "+ava.getId());
+			}
+		}
+		
+		return resList;
 	}
 	
 	@Override
@@ -189,12 +202,18 @@ public class AmbienteVirtualApServiceImpl extends ComunValidacionService<Ambient
 		List<TblAmbienteVirtualAprendizaje> tblAmbienteVirtualAprendizajeList = ambienteVirtualApRepo
 				.consultarAvasPorEjeCapacitacion(modalidadEvtCapList, estatusEvtCap, idEjeCapacitacion);
 
-		Type objetoDTO = new TypeToken<List<AmbienteVirtualAprendizajeDTO>>() {
-		}.getType();
-
 		logger.info("El tamanio de la lista retornada es " + tblAmbienteVirtualAprendizajeList.size());
 
-		return ambienteVirtualApMapper.map(tblAmbienteVirtualAprendizajeList, objetoDTO);
+		List<AmbienteVirtualAprendizajeDTO> resList = new ArrayList<>();
+		for(TblAmbienteVirtualAprendizaje ava : tblAmbienteVirtualAprendizajeList){
+			try {
+				resList.add(ambienteVirtualApMapper.map(ava, AmbienteVirtualAprendizajeDTO.class));
+			}catch(Exception ex){
+				logger.error("Ocurrio un error en el ava con id "+ava.getId());
+			}
+		}
+		
+		return resList;
 	}
 
 	public List<AmbienteVirtualAprendizajeDTO> busquedaDeAvasConCriterios(EventoCapacitacionDTO filtro,
@@ -386,11 +405,16 @@ public class AmbienteVirtualApServiceImpl extends ComunValidacionService<Ambient
 		List<TblAmbienteVirtualAprendizaje> tblAmbienteVirtualAprendizajeList = ambienteVirtualApRepo
 				.obtenerAVAsPorIdEventos(idEventos);
 
-		Type objetoDTO = new TypeToken<List<AmbienteVirtualAprendizajeDTO>>() {
-		}.getType();
-
-		return ambienteVirtualApMapper.map(tblAmbienteVirtualAprendizajeList, objetoDTO);
-
+		List<AmbienteVirtualAprendizajeDTO> resList = new ArrayList<>();
+		for(TblAmbienteVirtualAprendizaje ava : tblAmbienteVirtualAprendizajeList){
+			try {
+				resList.add(ambienteVirtualApMapper.map(ava, AmbienteVirtualAprendizajeDTO.class));
+			}catch(Exception ex){
+				logger.error("Ocurrio un error en el ava con id "+ava.getId());
+			}
+		}
+		
+		return resList;
 	}
 
 	public String asignaColorSemaro(AmbienteVirtualAprendizajeDTO ava) {

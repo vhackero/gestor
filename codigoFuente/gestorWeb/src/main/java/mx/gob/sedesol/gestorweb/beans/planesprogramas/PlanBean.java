@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
@@ -686,7 +687,7 @@ public class PlanBean extends BaseBean {
 	/**
 	 * Metodo persistente para guardar los datos del Plan
 	 */
-	public void guardaNuevoPlan() {
+	public String guardaNuevoPlan() {
 		logger.info("########## PERSISTENCIA DEl PLAN ########");
 		plan.setCatPeriodo(!plan.getCatTipoPlan().getNombre().equals("Por Periodo") ? null : plan.getCatPeriodo());
 		plan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
@@ -730,17 +731,18 @@ public class PlanBean extends BaseBean {
 		if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
 			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CRE_PLA", String.valueOf(resultado.getDto().getIdPlan()),
 					requestActual(), TipoServicioEnum.LOCAL);
-			agregarMsgInfo("Se guardo correctamente el plan", null);
+			agregarFlashMessage("Se guardo correctamente el plan", null, FacesMessage.SEVERITY_INFO);
 		} else {
-			agregarMsgError("Ocurrio un error", null);
+			agregarFlashMessage("Ocurrio un error", null, FacesMessage.SEVERITY_ERROR);
 		}
+		return this.regresaBusquedaPlanes();
 	}
 
 	/**
 	 * @throws Exception
 	 *
 	 */
-	public void editarPlan() throws Exception {
+	public String editarPlan() throws Exception {
 		logger.info("########## EDITANDO DEl PLAN ########");
 		plan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
 		
@@ -776,10 +778,11 @@ public class PlanBean extends BaseBean {
 		if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
 			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "EDI_PLA", String.valueOf(resultado.getDto().getIdPlan()),
 					requestActual(), TipoServicioEnum.LOCAL);
-			agregarMsgInfo("Se edito correctamente el plan", null);
+			agregarFlashMessage("Se edito correctamente el plan", null, FacesMessage.SEVERITY_INFO);
 		} else {
-			agregarMsgError("Ocurrio un error", null);
+			agregarFlashMessage("Ocurrio un error", null, FacesMessage.SEVERITY_ERROR);
 		}
+		return this.regresaBusquedaPlanes();
 	}
 
 	/**

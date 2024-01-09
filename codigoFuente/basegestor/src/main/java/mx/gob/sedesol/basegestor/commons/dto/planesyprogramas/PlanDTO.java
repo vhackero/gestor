@@ -64,6 +64,7 @@ public class PlanDTO implements Serializable{
 	private CatalogoComunDTO catCreditosPlan;
 	private CatalogoComunDTO catDivisionesPlan;
 	private Integer horasCredito;
+	private boolean tieneLogros;
 	
 	/**
 	 * @return the idPlan
@@ -464,4 +465,11 @@ public class PlanDTO implements Serializable{
 	public void setCatDivisionesPlan(CatalogoComunDTO catDivisionesPlan) {
 		this.catDivisionesPlan = catDivisionesPlan;
 	}
+	public boolean isTieneLogros() {
+		return tieneLogros;
+	}
+	public void setTieneLogros(boolean tieneLogros) {
+		this.tieneLogros = tieneLogros;
+	}
+	
 }

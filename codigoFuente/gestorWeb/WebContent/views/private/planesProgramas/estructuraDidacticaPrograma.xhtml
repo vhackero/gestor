@@ -84,15 +84,13 @@
 	<div class="row">
 		<div class="col-md-2">
 			<p:spinner value="#{programaCapacitacionBean.numEstTematicas}"
-				rendered="false" min="0" max="50" placeholder="00" maxlength="2"
-				disabled="#{programaCapacitacionBean.progConEstDid}">
+				rendered="false" min="0" max="50" placeholder="00" maxlength="2" >
 				<p:ajax listener="#{programaCapacitacionBean.generaTemasPrograma}"
 					update="temasCmps pnlGralCmps" />
 				<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
 			</p:spinner>
 			<p:inputText value="#{programaCapacitacionBean.numEstTematicasAux}"
-				min="0" max="50" id="tematicas" maxlength="2"
-				disabled="#{programaCapacitacionBean.progConEstDid}">
+				min="0" max="50" id="tematicas" maxlength="2" >
 				<p:ajax event="keyup" update="btnGenerarEst" />
 				<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
 			</p:inputText>
@@ -100,7 +98,7 @@
 		<div class="col-md-offset-2 col-md-2">
 			<p:spinner placeholder="00" maxlength="2" rendered="false"
 				value="#{programaCapacitacionBean.numUniDidacticas}" min="0"
-				max="50" disabled="#{programaCapacitacionBean.progConEstDid}">
+				max="50">
 				<p:ajax
 					listener="#{programaCapacitacionBean.generaUniDidacticasPrograma}"
 					update="pnlGralCmps" />
@@ -108,8 +106,7 @@
 			</p:spinner>
 
 			<p:inputText id="spnrUDid" maxlength="2"
-				value="#{programaCapacitacionBean.numUniDidacticasAux}"
-				disabled="#{programaCapacitacionBean.progConEstDid}">
+				value="#{programaCapacitacionBean.numUniDidacticasAux}" >
 				<p:ajax event="keyup" update="btnGenerarEst" />
 				<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
 			</p:inputText>
@@ -146,8 +143,7 @@
 							<!-- Longitud de campo -->
 							<p:inputText value="#{tema.nombreTema}" maxlength="200"
 								placeholder="#{sistema.obtenerTexto('gw.planesprogramas.texto.place.ingresa')}"
-								styleClass="form-control margenInferior"
-								disabled="#{programaCapacitacionBean.progConUnidDid}">
+								styleClass="form-control margenInferior" >
 								<p:ajax process="@this" />
 							</p:inputText>
 						</div>
@@ -167,8 +163,7 @@
 							</div>
 							<div class="col-md-8">
 								<p:selectCheckboxMenu value="#{list.unidadesTematicas}"
-									label="Temas" id="chkMany"
-									disabled="#{programaCapacitacionBean.progConUnidDid}"
+									label="Temas" id="chkMany" 
 									styleClass="col-xs-12">
 									<p:ajax process="@this" />
 									<f:selectItems value="#{programaCapacitacionBean.temasXUnidad}" />
@@ -189,8 +184,7 @@
 							</div>
 							<div class="col-md-8">
 								<p:selectOneMenu value="#{unidadDid.unidadTematica}"
-									autoWidth="true" styleClass="col-xs-12"
-									disabled="#{programaCapacitacionBean.progConUnidDid}">
+									autoWidth="true" styleClass="col-xs-12" >
 									<p:ajax process="@this" />
 									<f:selectItem itemValue="#{null}" itemLabel="Temas" />
 									<f:selectItems value="#{programaCapacitacionBean.temasXUnidad}"

@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 
 import java.lang.reflect.Type;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -161,8 +162,17 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 	@Override
 	public List<EventoCapacitacionDTO> consultaEventoPorEstatus(Integer idEstatus) {
 		List<TblEvento> res = eventoCapacitacionRepo.consultaEventoPorEstatus(idEstatus);
-
-		return modelMapper.map(res, tipoListaEvento);
+		List<EventoCapacitacionDTO> resList = new ArrayList<>();
+		
+		for(TblEvento evento : res) {
+			try {
+				resList.add( modelMapper.map(evento, EventoCapacitacionDTO.class) );
+			}catch(Exception ex) {
+				logger.error(ex);
+			}
+		}
+		
+		return resList;
 	}
 
 	@Override
@@ -307,13 +317,12 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		curso.setFullname(evento.getNombreEc());
 		curso.setCategoryid(ficha.getIdCategoriaMdl());
 		curso.setIdnumber(evento.getIdEvento().toString());
-		curso.setStartdate(evento.getFechaInicial().getTime());
 		curso.setSummary(evento.getObjetivoGeneralEc());
 		curso.setNumsections(numeroUnidades);
 
 		CursoWS cursoWS = new CursoWS(parametroWSMoodleService.buscarPorId(evento.getIdPlataformaLmsBorrador()));
 
-		Integer resultado = cursoWS.crearCurso(curso);
+		Integer resultado = cursoWS.crearCurso(curso, evento);
 
 		return resultado;
 	}

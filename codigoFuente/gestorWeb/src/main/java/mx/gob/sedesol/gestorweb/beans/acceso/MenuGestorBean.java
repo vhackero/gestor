@@ -79,11 +79,13 @@ public class MenuGestorBean extends BaseBean {
 	private String rutaFotoUsuario;
 
 	private Map<String, String> mapa;
+	private boolean showLogros;
 
 	private static final Logger logger = Logger.getLogger(MenuGestorBean.class);
 
 	@PostConstruct
 	public void init() {
+		logger.info("MenuGestorBean >>>>>>>>>>>>>>>>>>>>>>");
 		roles = new ArrayList<>();
 		List<PersonaRolDTO> rolesPersona = personaRolesService
 				.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
@@ -93,8 +95,12 @@ public class MenuGestorBean extends BaseBean {
 		}
 		if (ObjectUtils.isNullOrEmpty(roles)) {
 			idRol = null;
+			showLogros=false;
 		} else {
 			idRol = roles.get(0).getIdRol();
+			logger.info("idRol >>>>>>>>>>>>>>>>>>>>>>" +idRol);
+			mapa = personaRolesService.obtenerFuncionalidadesRol(idRol);
+			showLogros = mapa.containsKey("MIS_LOGROS");
 		}
 		actualizarMenu();
 
@@ -602,6 +608,14 @@ public class MenuGestorBean extends BaseBean {
 
 	public void setConstanciasBean(ConstanciasBean constanciasBean) {
 		this.constanciasBean = constanciasBean;
+	}
+
+	public boolean isShowLogros() {
+		return showLogros;
+	}
+
+	public void setShowLogros(boolean showLogros) {
+		this.showLogros = showLogros;
 	}
 
 }

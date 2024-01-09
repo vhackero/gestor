@@ -47,9 +47,9 @@
 					<div class="col-md-12">
 						<p:commandButton validateClient="true" widgetVar="nombre"
 							update="@form" styleClass="btn btn-primary pull-right"
-							id="btnGuardarUsuario" rendered="true"
+							id="btnGuardarUsuario" rendered="true" process="frmPrincipal"
 							value="#{sistema.obtenerTexto('gw.adminPersona.boton.aceptar')}"
-							ajax="false" action="#{adminPersonaBean.guardarPersona()}" />
+							ajax="false" action="#{adminPersonaBean.guardarPersona}" />
 						<p:commandButton styleClass="btn btn-default pull-right"
 							id="btnCancelarUsuario" 
 							value="Regresar"

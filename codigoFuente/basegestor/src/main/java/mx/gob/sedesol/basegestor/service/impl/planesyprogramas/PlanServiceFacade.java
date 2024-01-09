@@ -306,7 +306,6 @@ public class PlanServiceFacade {
 		Date fechaAct = new Date();
 
 		try {
-
 			plan.setRelPlanAptitudes(null);
 			plan.setRelPlanConocimientos(null);
 			plan.setRelPlanHabilidades(null);
@@ -318,7 +317,7 @@ public class PlanServiceFacade {
 			logger.debug("Editando el nuevo plan");
 			plan.setFechaActualizacion(fechaAct);
 
-			/*
+			
 			// RN: Actualizacion de Nombre de malla curricular
 			MallaCurricularDTO mallaCurr = mallaCurricularService.obtenerMallaCurricularPorIdPlan(plan.getIdPlan());
 			mallaCurr.setNombre(plan.getNombre());
@@ -330,7 +329,7 @@ public class PlanServiceFacade {
 			// mallaCurr.getBitacoraDTO().setNavegador(plan.getBitacoraDTO().getNavegador());
 			// mallaCurr.getBitacoraDTO().setFuncion(ConstantesBitacora.MALLA_CUR_EDITAR);
 			mallaCurricularService.actualizar(mallaCurr);
-			*/
+			
 
 			// Se generan las Relaciones de acuerdo a las listas de seleccion multiple
 			if (!ObjectUtils.isNullOrEmpty(habilidadesPlan)) {
