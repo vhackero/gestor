@@ -456,7 +456,14 @@
 							<p:message for="ffinPlan" />
 
 						</div>
+						<div class="col-md-4 col-xs-12">
 
+							<p:outputLabel styleClass="bloque"
+								value="Habilitar 'Mis Logros':" />
+							<p:inputSwitch value="#{planBean.plan.ponderacion}" onLabel="Si"
+								offLabel="No" />
+
+						</div>
 					</div>
 				</div>
 
@@ -491,7 +498,7 @@
 								value="#{planBean.plan.catEstatusPlan.id}"
 								valueChangeListener="#{planBean.onChangeEstatusPlan}"
 								autoWidth="false" styleClass="col-xs-12">
-								<p:ajax event="change" update="@this, pnlBtnsGuardar" />
+								<p:ajax event="change" update="@this" />
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									itemValue="#{null}" itemDisabled="#{planBean.edicionPlan}" />

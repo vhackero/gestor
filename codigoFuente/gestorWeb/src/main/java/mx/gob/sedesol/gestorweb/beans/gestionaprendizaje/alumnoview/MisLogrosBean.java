@@ -1,6 +1,8 @@
 package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -9,10 +11,13 @@ import javax.faces.bean.ViewScoped;
 
 import org.apache.log4j.Logger;
 
+import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaRolDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.RolDTO;
 import mx.gob.sedesol.basegestor.commons.dto.badges.BadgeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.ContenedorLogrosDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
+import mx.gob.sedesol.basegestor.service.admin.PersonaRolesService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
@@ -29,6 +34,9 @@ public class MisLogrosBean extends BaseBean {
 
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
+	
+	@ManagedProperty(value = "#{personaRolesService}")
+	private PersonaRolesService personaRolesService;
 
 	private ContenedorLogrosDTO contenedorLogros;
 	private List<BadgeDTO> listaBadges;
@@ -40,9 +48,12 @@ public class MisLogrosBean extends BaseBean {
 	private String insignia2 = "insigniaBloqueada";
 	private String insignia3 = "insigniaBloqueada";
 	private String insignia4 = "insigniaBloqueada";
+	private boolean showLogros;
+	private String styleMisCursos;
 
 	@PostConstruct
 	public void init() {
+		logger.info("Entra a mis logros bean >>>>>>>>>>>>>>>>>>>>>>");
 		Long idPersona = getUsuarioEnSession().getIdPersona();
 		contenedorLogros = getGrupoParticipanteService().obtenerLogrosPorIdParticipante(idPersona);
 		badge = contenedorLogros.getBadge();
@@ -51,8 +62,37 @@ public class MisLogrosBean extends BaseBean {
 			verificaBadgesDisponibles();
 			pintaBadges(badge.getNombre());
 		}
+		styleMisCursos="col-md-6";
+		showLogros=tieneLogros();
 	}
 
+	private boolean tieneLogros() {
+		logger.info("Entra a tieneLogros >>>>>>>>>>>>>>>>>>>>>>");
+		Map<String, String> mapa ;
+		Integer idRol;
+		List<PersonaRolDTO> rolesPersona = personaRolesService
+				.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
+		logger.info("Entra a rolesPersona >>>>>>>>>>>>>>>>>>>>>>" + rolesPersona);
+		
+		if (ObjectUtils.isNullOrEmpty(rolesPersona)) {
+			idRol = null;
+			showLogros=false;
+		} else {
+			idRol = rolesPersona.get(0).getRol().getIdRol();
+			logger.info("idRol >>>>>>>>>>>>>>>>>>>>>>" +idRol);
+			mapa = personaRolesService.obtenerFuncionalidadesRol(idRol);
+			logger.info("mapa >>>>>>>>>>>>>>>>>>>>>>" +mapa.size());
+			showLogros = mapa.containsKey("MIS_LOGROS");
+			logger.info("showLogros >>>>>>>>>>>>>>>>>>>>>>" +showLogros);
+			if(!showLogros) {
+				styleMisCursos="col-md-12";
+			}
+			
+		}
+		logger.info("styleMisCursos >>>>>>>>>>>>>>>>>>>>>>" +styleMisCursos);
+		return showLogros;
+	}
+	
 	private void verificaBadgesDisponibles() {
 		int contadorPosicionBadge = 0;
 		int posicionBadgeEnLista = 0;
@@ -215,5 +255,30 @@ public class MisLogrosBean extends BaseBean {
 	public void setBitacoraBean(BitacoraBean bitacoraBean) {
 		this.bitacoraBean = bitacoraBean;
 	}
+
+	public PersonaRolesService getPersonaRolesService() {
+		return personaRolesService;
+	}
+
+	public void setPersonaRolesService(PersonaRolesService personaRolesService) {
+		this.personaRolesService = personaRolesService;
+	}
+
+	public boolean isShowLogros() {
+		return showLogros;
+	}
+
+	public void setShowLogros(boolean showLogros) {
+		this.showLogros = showLogros;
+	}
+
+	public String getStyleMisCursos() {
+		return styleMisCursos;
+	}
+
+	public void setStyleMisCursos(String styleMisCursos) {
+		this.styleMisCursos = styleMisCursos;
+	}
+	
 
 }
