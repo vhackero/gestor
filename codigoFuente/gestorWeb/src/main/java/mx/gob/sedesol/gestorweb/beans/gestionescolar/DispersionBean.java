@@ -25,10 +25,13 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionResumenDTO;
+import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.ConfiguracionAreaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.RelAreaDistribucionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
+import mx.gob.sedesol.basegestor.model.especificaciones.PlanEspecificacion;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.DispersionServiceFacade;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
@@ -61,7 +64,8 @@ public class DispersionBean extends BaseBean {
 	private PlanService planService;
 	
 	private List<PlanDTO> listaPlanes;
-	private List<String> planesSelec;
+	private List<String> selectedPlanes;
+	
 	private List<TblInscripcionResumenDTO> listaInscripcionesResumen;
 	private List<TblInscripcionDTO> listaInscripciones;
 	
@@ -87,44 +91,49 @@ public class DispersionBean extends BaseBean {
 		listaPlanes = planService.findAll();
 		System.out.println(" DispersionBean >>>>>> "+ listaPlanes.size());
 		grupos= new ArrayList<GrupoDTO>();
+		setSelectedPlanes(new ArrayList<>());
 	}
 	
 	public void dispersar() {
 		System.out.println("planesSelec >>>>>>>>>>>>> ");
-	    Optional.ofNullable(planesSelec).orElse(Collections.emptyList()).stream()
+	    Optional.ofNullable(selectedPlanes).orElse(Collections.emptyList()).stream()
          .forEach(System.out::println);
-	    String programas = "Gestión Industrial";
-	   
+	 
 	    System.out.println("listaInscripcionesResumen >>>>>>>>>>>>> ");
-	    List<TblInscripcionResumenDTO> lista=   obtenerListaInscripcionResumen(programas);
+	    List<TblInscripcionResumenDTO> lista=   obtenerListaInscripcionResumen(selectedPlanes);
 	    Optional.ofNullable(lista).orElse(Collections.emptyList()).stream()
         .forEach(System.out::println);
 	
-	   /*   System.out.println("listaInscripciones >>>>>>>>>>>>> ");
-	   List<TblInscripcionDTO> inscrip=   obtenerListaInscripcionesByProgramas(programas);
-	    Optional.ofNullable(inscrip).orElse(Collections.emptyList()).stream()
-        .forEach(System.out::println);
-	    System.out.println("listaInscripciones >>>>>>>>>>>>> ");*/
-	    generarGrupos(lista);
-	   // crearMapaInscripcionesXGrupo(lista,inscrip, grupos);
-	
+	  System.out.println("listaInscripciones >>>>>>>>>>>>> ");
+	   List<TblInscripcionDTO> inscrip=   obtenerListaInscripcionesByProgramas(selectedPlanes);
+	  /* Optional.ofNullable(inscrip).orElse(Collections.emptyList()).stream()
+        .forEach(System.out::println);*/
+	    System.out.println("listaInscripciones >>>>>>>>>>>>> "+inscrip.size());
+	   generarGrupos(lista);
+	 //  crearMapaInscripcionesXGrupo(lista,inscrip, grupos);
 	}
 	
+	public void planesSelectChange() {		
+		if (!selectedPlanes.isEmpty()) {			
+			System.out.println("planes seleccionadas : " + selectedPlanes.size());			
+		} else {
+			System.out.println("seleccionar planes");
+		}
+	}
 	
-	public List<TblInscripcionResumenDTO>  obtenerListaInscripcionResumen(String programas) {
-		System.out.println("obtenerListaInscripcionResumen >>>>>>>>>>>>> ");
-		
+	public List<TblInscripcionResumenDTO>  obtenerListaInscripcionResumen(List<String> programas) {
+	 
 		listaInscripcionesResumen= dispersionServiceFacade.getInscripcionResumenByProgramaEducativo(programas);
-		
+		System.out.println("obtenerListaInscripcionResumen >>>>>>>>>>>>> "  + programas +" - " + + listaInscripcionesResumen.size());
 		return listaInscripcionesResumen;
 	}
 	
-	public List<TblInscripcionDTO>  obtenerListaInscripcionesByProgramas(String programas) {
-		System.out.println("obtenerListaInscripcionesByProgramas >>>>>>>>>>>>> " + programas);
+	public List<TblInscripcionDTO>  obtenerListaInscripcionesByProgramas(List<String> programas) {
+	//	System.out.println("obtenerListaInscripcionesByProgramas >>>>>>>>>>>>> " + programas);
 	
 		listaInscripciones= dispersionServiceFacade.getInscripcionesByProgramasEducativos(programas);
 		
-		System.out.println("listaInscripciones >>>>>>>>>>>>> " + listaInscripciones.size());
+		System.out.println("obtenerListaInscripcionesByProgramas >>>>>>>>>>>>> " + programas +" - " + listaInscripciones.size());
 		
 		return listaInscripciones;
 	}
@@ -134,7 +143,7 @@ public class DispersionBean extends BaseBean {
 		
 		System.out.println("generarGrupos >>>>>>>>>>>>> " );
 		for (TblInscripcionResumenDTO inscripcionResumen: listaInscripcionResumen ) {
-			List<EventoCapacitacionDTO> eventos = dispersionServiceFacade.getEventoCapacitacionService().obtenerEventosPorNombrePrograma(inscripcionResumen.getAsignatura());
+			List<EventoCapacitacionDTO> eventos = dispersionServiceFacade.getEventoCapacitacionService().obtenerEventosPorNombrePrograma(inscripcionResumen.getProgramaEducativo(), inscripcionResumen.getAsignatura());
 			System.out.println("lista de eventos >>>>>>>>>>>>> " + eventos.size());
 			
 			Optional.ofNullable(eventos).orElse(Collections.emptyList()).stream()
@@ -201,8 +210,10 @@ public class DispersionBean extends BaseBean {
 	public void crearMapaInscripcionesXGrupo(List<TblInscripcionResumenDTO> listaInscripcionResumen,
 				List<TblInscripcionDTO> listaInscripciones, List<GrupoDTO> listaGrupos) {
 		System.out.println("crearMapaInscripcionesXGrupo >>>>>>>>>>>>> ");
-		Map<String, List<TblInscripcionDTO>> mapaInscripciones= new HashMap<String, List<TblInscripcionDTO>>();
-		for(TblInscripcionResumenDTO resumen: listaInscripcionResumen) {
+		Map<String, List<TblInscripcionDTO>> mapaInscripciones= obtenerMapaIncripcionesxGrupoBase(listaInscripcionResumen,listaInscripciones);
+		Map<String, List<GrupoDTO>> mapaGrupos= obtenerGruposxGrupoBase(listaInscripcionResumen);
+		Map<String, Map<String,Integer>> mapaNoEstudiantesEnGrupo= obtenerNoEstudiantesEnGruposxGrupoBase(listaInscripcionResumen, mapaGrupos);
+		/*for(TblInscripcionResumenDTO resumen: listaInscripcionResumen) {
 			List<TblInscripcionDTO> inscripcionesByGrupoBase = new ArrayList<TblInscripcionDTO>();
 			for(TblInscripcionDTO ins: listaInscripciones) {
 				 if(resumen.getGrupo().equals(ins.getGroupbase())) {
@@ -211,7 +222,7 @@ public class DispersionBean extends BaseBean {
 			}
 			System.out.println("resumen.getGrupo() >>>>>>>>>>>>> " +resumen.getGrupo() + " - " +inscripcionesByGrupoBase.size() );
 			mapaInscripciones.put(resumen.getGrupo(), inscripcionesByGrupoBase);
-		}
+		}*/
 		
 		if(!mapaInscripciones.isEmpty()) {
 			for (Map.Entry<String, List<TblInscripcionDTO>> entry : mapaInscripciones.entrySet()) {
@@ -225,7 +236,7 @@ public class DispersionBean extends BaseBean {
 			    		  .orElse(null);
 			    
 			    System.out.println("resumen>>>>  " + resumen.toString());
-			    Map<String, List<GrupoDTO>> mapaGrupos= new HashMap<String, List<GrupoDTO>>();
+			   /* Map<String, List<GrupoDTO>> mapaGrupos= new HashMap<String, List<GrupoDTO>>();
 				for(GrupoDTO group: listaGrupos) {
 					List<GrupoDTO> gruposByGrupoBase = new ArrayList<GrupoDTO>();
 					System.out.println("mapagrupos >>>>>>>>>>>>> " +grupoBase.substring(0, 19) + " - " +group.getNombre().substring(0, 19) );
@@ -235,9 +246,9 @@ public class DispersionBean extends BaseBean {
 					 
 					System.out.println("mapaGrupos >>>>>>>>>>>>> " +grupoBase + " - " +gruposByGrupoBase.size() );
 					mapaGrupos.put(grupoBase, gruposByGrupoBase);
-				}
+				}*/
 			    
-			    if(resumen!=null && mapaGrupos !=null ) {
+			    if(resumen!=null /*&& mapaGrupos !=null */) {
 			    	if (grupoBase.equals(resumen.getGrupo())) {
 			    		System.out.println("grupoBase >>>>>>>>>>>>> " +grupoBase + " - resumen.getGrupo() -  " +resumen.getGrupo() );
 			    		
@@ -254,10 +265,58 @@ public class DispersionBean extends BaseBean {
 		 
 	}
 
-	public void obtnerG() {
-		
+	public Map<String, List<GrupoDTO>> obtenerGruposxGrupoBase(List<TblInscripcionResumenDTO> listaInscripcionResumen) {
+		Map<String, List<GrupoDTO>> mapaGrupos= new HashMap<String, List<GrupoDTO>>();
+		for(TblInscripcionResumenDTO resumen: listaInscripcionResumen) {
+			List<GrupoDTO> gruposByGrupoBase = new ArrayList<GrupoDTO>();
+			String grupoBase= resumen.getGrupo().substring(0, 19);
+			for(GrupoDTO grupo: grupos) {
+				String grupoActual=grupo.getNombre().substring(0, 19);
+				System.out.println("mapagrupos >>>>>>>>>>>>> " +grupoBase + " - " + grupoActual);
+				 if( grupoBase.equals(grupoActual)) {
+					 gruposByGrupoBase.add(grupo);
+				 }
+			}
+			System.out.println("resumen.getGrupo() >>>>>>>>>>>>> " +resumen.getGrupo() + " - " +gruposByGrupoBase.size() );
+			mapaGrupos.put(resumen.getGrupo(), gruposByGrupoBase);
+		}
+		return mapaGrupos;
 	}
 	
+	public Map<String, List<TblInscripcionDTO>> obtenerMapaIncripcionesxGrupoBase(List<TblInscripcionResumenDTO> listaInscripcionResumen,
+			List<TblInscripcionDTO> listaInscripciones) {
+		Map<String, List<TblInscripcionDTO>> mapaInscripciones= new HashMap<String, List<TblInscripcionDTO>>();
+		for(TblInscripcionResumenDTO resumen: listaInscripcionResumen) {
+			List<TblInscripcionDTO> inscripcionesByGrupoBase = new ArrayList<TblInscripcionDTO>();
+			for(TblInscripcionDTO ins: listaInscripciones) {
+				 if(resumen.getGrupo().equals(ins.getGroupbase())) {
+					 inscripcionesByGrupoBase.add(ins);
+				 }
+			}
+			System.out.println("resumen.getGrupo() >>>>>>>>>>>>> " +resumen.getGrupo() + " - " +inscripcionesByGrupoBase.size() );
+			mapaInscripciones.put(resumen.getGrupo(), inscripcionesByGrupoBase);
+		}
+		return mapaInscripciones;
+	}
+	
+	public Map<String, Map<String,Integer>> obtenerNoEstudiantesEnGruposxGrupoBase(List<TblInscripcionResumenDTO> listaInscripcionResumen, Map<String, List<GrupoDTO>> mapaGrupos) {
+		Map<String, Map<String,Integer>> mapa= new HashMap<String, Map<String,Integer>>();
+		for(TblInscripcionResumenDTO resumen: listaInscripcionResumen) {
+			Map<String,Integer> noAlumnosXGrupo = new HashMap<String,Integer>();
+			List<GrupoDTO> gruposDTOs = mapaGrupos.get(resumen.getGrupo());
+			 
+			for(int i=0; i<resumen.getNoGrupos();i++) {
+				noAlumnosXGrupo.put(gruposDTOs.get(i).getNombre(), resumen.getEstudiantesXGrupo()); 
+			}
+			noAlumnosXGrupo.put(gruposDTOs.get(gruposDTOs.size()).getNombre(), resumen.getEstudiantesResto()); 
+			System.out.println("No De alumnos por grupo >>>>>>>>>>>>> " );
+			noAlumnosXGrupo.forEach((key, value) -> System.out.println(key + "- " + value));
+			
+			System.out.println("resumen.getGrupo() >>>>>>>>>>>>> " +resumen.getGrupo() + " - " +noAlumnosXGrupo.size());
+			mapa.put(resumen.getGrupo(), noAlumnosXGrupo);
+		}
+		return mapa;
+	}
 
 	public void matricularPersonas() {
 		//todasPersonas = false;
@@ -377,14 +436,6 @@ public class DispersionBean extends BaseBean {
 		this.listaPlanes = listaPlanes;
 	}
 
-	public List<String> getPlanesSelec() {
-		return planesSelec;
-	}
-
-	public void setPlanesSelec(List<String> planesSelec) {
-		this.planesSelec = planesSelec;
-	}
-
 	public List<TblInscripcionResumenDTO> getListaInscripcionesResumen() {
 		return listaInscripcionesResumen;
 	}
@@ -499,6 +550,13 @@ public class DispersionBean extends BaseBean {
 		this.idCursoLms = idCursoLms;
 	}
 
+	public List<String> getSelectedPlanes() {
+		return selectedPlanes;
+	}
+
+	public void setSelectedPlanes(List<String> selectedPlanes) {
+		this.selectedPlanes = selectedPlanes;
+	}
 	/* INICIO DE GETS Y SETS */
 	
 }

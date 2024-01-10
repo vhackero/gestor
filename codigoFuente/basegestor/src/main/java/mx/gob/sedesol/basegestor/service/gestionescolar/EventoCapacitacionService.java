@@ -17,7 +17,7 @@ public interface EventoCapacitacionService {
 	List<EventoCapacitacionDTO> obtenerEventosPublicosEnEjec();
 	List<EventoCapacitacionDTO> consultaEventosPorTipoVisibilidad(boolean isPrivado);
 	List<EventoCapacitacionDTO> obtenerEventosPorPrograma(Integer idPrograma);
-	List<EventoCapacitacionDTO> obtenerEventosPorNombrePrograma(String programa);
+	List<EventoCapacitacionDTO> obtenerEventosPorNombrePrograma(String programa, String asignatura);
 	List<EventoCapacitacionDTO> obtenerTodosLosEventos();
 	boolean modificarEstatusEvento(Integer idEstatus, Integer idEvento);
 

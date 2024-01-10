@@ -94,10 +94,10 @@ public class DispersionServiceImpl
 
 
 	@Override
-	public List<TblInscripcionResumenDTO> getInscripcionResumenByProgramaEducativo(String programaEducativo) {
+	public List<TblInscripcionResumenDTO> getInscripcionResumenByProgramaEducativo(List<String> programasEducativos) {
 		List<TblInscripcionResumenDTO> listDTO;
 
-		List<TblInscripcionResumen> lista = inscripcionResumenRepo.getInscripcionResumenByProgramaEducativo(programaEducativo);
+		List<TblInscripcionResumen> lista = inscripcionResumenRepo.getInscripcionResumenByProgramaEducativo(programasEducativos);
 
 		Type objetoDTO = new TypeToken<List<TblInscripcionResumenDTO>>() {
 		}.getType();
@@ -122,7 +122,7 @@ public class DispersionServiceImpl
 	}
 	
 	@Override
-	public List<TblInscripcionDTO> getInscripcionesByProgramasEducativos(String programas) {
+	public List<TblInscripcionDTO> getInscripcionesByProgramasEducativos(List<String> programas) {
 		List<TblInscripcionDTO> listDTO;
 
 		List<TblInscripcion> lista = inscripcionRepo.getInscripcionesByProgramasEducativos(programas);

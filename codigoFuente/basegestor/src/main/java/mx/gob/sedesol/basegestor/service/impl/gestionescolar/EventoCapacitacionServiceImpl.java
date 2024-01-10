@@ -848,8 +848,8 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		return modelMapper.map(eventos, listaEventosCapacitacion);
 	}
 
-	public List<EventoCapacitacionDTO> obtenerEventosPorNombrePrograma(String programa) {
-		List<TblEvento> eventos = eventoCapacitacionRepo.obtenerEventosPorNombrePrograma(programa);
+	public List<EventoCapacitacionDTO> obtenerEventosPorNombrePrograma(String programa, String asignatura) {
+		List<TblEvento> eventos = eventoCapacitacionRepo.obtenerEventosPorNombrePrograma(programa, asignatura);
 		Type listaEventosCapacitacion = new TypeToken<List<EventoCapacitacionDTO>>() {
 		}.getType();
 

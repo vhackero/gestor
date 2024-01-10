@@ -1,29 +1,17 @@
 package mx.gob.sedesol.basegestor.service.gestionescolar;
 
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.data.repository.query.Param;
-
-import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
-import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
-import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.ContenedorLogrosDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionResumenDTO;
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblInscripcion;
 
 public interface DispersionService {
 	
-    List<TblInscripcionResumenDTO> getInscripcionResumenByProgramaEducativo(String programaEducativo);
+    List<TblInscripcionResumenDTO> getInscripcionResumenByProgramaEducativo(List<String> programaEducativo);
     
     List<TblInscripcionDTO> getInscripcionesByIdPlan(Integer idPlan);
     
-    List<TblInscripcionDTO> getInscripcionesByProgramasEducativos(String programas);
+    List<TblInscripcionDTO> getInscripcionesByProgramasEducativos(List<String> programas);
 	
 	
 /*	 

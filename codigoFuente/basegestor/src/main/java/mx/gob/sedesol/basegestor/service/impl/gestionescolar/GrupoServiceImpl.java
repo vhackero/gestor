@@ -98,7 +98,7 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 		
 		Integer numeroGrupos = inscripcionResumen.getNoGrupos();
 		if(inscripcionResumen.getGrupoResto() != null) {
-			numeroGrupos =numeroGrupos+inscripcionResumen.getGrupoResto() ;
+			numeroGrupos = numeroGrupos + inscripcionResumen.getGrupoResto();
 		}
 		List<String> nombresGrupo = generarNombresGrupoDispercion(inscripcionResumen.getGrupo(), numeroGrupos);
 		List<String> nombresGrupoFinales = new ArrayList<String>();
@@ -109,7 +109,7 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 				//System.out.println(" nombreGrupoActual: " + nombreGrupo + " - existente: "+ grupo.getNombre());
 				if(grupo.getNombre().equals(nombreGrupo)) {
 					existe = true;
-					System.out.println(" existe: " + existe + " - " + grupo.getNombre());
+					// System.out.println(" existe: " + existe + " - " + grupo.getNombre());
 					break;
 				}	
 			}
@@ -148,7 +148,9 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 
 	private List<GrupoDTO> almacenarGruposMoodle(EventoCapacitacionDTO evento, Long usuarioModifico,
 			List<String> nombresGrupo, ParametroWSMoodleDTO parametroWSMoodleDTO) {
-
+		logger.info("###almacenarGruposMoodle #" + evento.getIdEvento()+ " usuarioModifico:" +usuarioModifico +""+nombresGrupo.size()  );
+		
+		logger.info("###parametroWSMoodleDTO #" + parametroWSMoodleDTO.toString() );
 		List<GrupoDTO> gruposDTO = new ArrayList<>();
 		List<Grupo> grupos = generarGruposMoodle(evento, nombresGrupo);
 		CrearGrupo crearGrupoWS = new CrearGrupo(parametroWSMoodleDTO);
@@ -210,10 +212,8 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 	private List<String> generarNombresGrupoDispercion(String nombreGrupoBase, int numeroGrupos) {
 		List<String> nombresGrupo = new ArrayList<>();
 		String nombreGrupo = nombreGrupoBase.substring(0,19);
-		System.out.println(" generarNombresGrupoDispercion >>  nombreGrupoBase: " + nombreGrupoBase+ " <-> nombreGrupo:"+nombreGrupo);
+		//System.out.println(" generarNombresGrupoDispercion >>  nombreGrupoBase: " + nombreGrupoBase+ " <-> nombreGrupo:"+nombreGrupo);
 
-		 
-		
 		for (int i = 1; i <= numeroGrupos; i++) {
 			if(numeroGrupos<=9) {
 				nombresGrupo.add( nombreGrupo + "00" + i);

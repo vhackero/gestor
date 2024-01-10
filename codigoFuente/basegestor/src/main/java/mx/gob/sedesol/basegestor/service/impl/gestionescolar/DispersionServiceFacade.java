@@ -59,7 +59,7 @@ public class DispersionServiceFacade {
 	private ParametroSistemaService parametroSistemaService;
 
 	
-	public List<TblInscripcionResumenDTO> getInscripcionResumenByProgramaEducativo(String programaEducativo) {
+	public List<TblInscripcionResumenDTO> getInscripcionResumenByProgramaEducativo(List<String> programaEducativo) {
 		return dispersionService.getInscripcionResumenByProgramaEducativo(programaEducativo);
 	}
 	
@@ -67,7 +67,7 @@ public class DispersionServiceFacade {
 		return dispersionService.getInscripcionesByIdPlan(idPLan);
 	}
 	
-	public List<TblInscripcionDTO> getInscripcionesByProgramasEducativos(String programas) {
+	public List<TblInscripcionDTO> getInscripcionesByProgramasEducativos(List<String> programas) {
 		return dispersionService.getInscripcionesByProgramasEducativos(programas);
 	}
 	/*

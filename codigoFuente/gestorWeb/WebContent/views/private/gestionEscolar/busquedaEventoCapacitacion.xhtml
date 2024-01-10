@@ -33,11 +33,15 @@
 									value="Dispersion:"
 									styleClass="pull-right agregaHeight" />
 							<p:selectCheckboxMenu id="planesMenu"
-									value="#{dispersionBean.planesSelec}"
+									value="#{dispersionBean.selectedPlanes}" filter="true" filterMatchMode="startsWith" 
 									label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									styleClass="col-xs-12">
+									<p:ajax process="@this" update="@this" event="toggleSelect"
+									listener="#{dispersionBean.planesSelectChange}" />
+									<p:ajax process="@this" update="@this" event="change"
+									listener="#{dispersionBean.planesSelectChange()}" /> 										
 									<f:selectItems value="#{dispersionBean.listaPlanes}"
-										var="plan" itemLabel="#{plan.nombre}" itemValue="#{plan.idPlan}" />
+										var="plan" itemLabel="#{plan.nombre}" itemValue="#{plan.nombre}" />
 							</p:selectCheckboxMenu>
 						
 							<p:commandButton
