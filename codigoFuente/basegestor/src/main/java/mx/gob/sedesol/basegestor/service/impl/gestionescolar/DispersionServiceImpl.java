@@ -134,6 +134,23 @@ public class DispersionServiceImpl
 
 		return listDTO;
 	}
+	
+	@Override
+	public List<TblInscripcionDTO> getInscripcionesByIdPlanes(List<Integer> idPlanes) {
+		List<TblInscripcionDTO> listDTO;
+
+		List<TblInscripcion> lista = inscripcionRepo.getInscripcionesByIdPlanes(idPlanes);
+
+		Type objetoDTO = new TypeToken<List<TblInscripcionDTO>>() {
+		}.getType();
+
+		listDTO = modelMapper.map(lista, objetoDTO);
+
+		return listDTO;
+	}
+	
+	
+	
 	/*
 	@Override
 	public void validarPersistencia(RelGrupoParticipanteDTO dto, ResultadoDTO<RelGrupoParticipanteDTO> resultado) {

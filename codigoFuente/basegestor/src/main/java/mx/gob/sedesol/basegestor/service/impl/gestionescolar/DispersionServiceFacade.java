@@ -70,6 +70,10 @@ public class DispersionServiceFacade {
 	public List<TblInscripcionDTO> getInscripcionesByProgramasEducativos(List<String> programas) {
 		return dispersionService.getInscripcionesByProgramasEducativos(programas);
 	}
+	public List<TblInscripcionDTO> getInscripcionesByIdPlanes(List<Integer> idPlanes) {
+		return dispersionService.getInscripcionesByIdPlanes(idPlanes);
+	}
+	
 	/*
 
 

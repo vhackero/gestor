@@ -13,7 +13,7 @@ public interface DispersionService {
     
     List<TblInscripcionDTO> getInscripcionesByProgramasEducativos(List<String> programas);
 	
-	
+    List<TblInscripcionDTO> getInscripcionesByIdPlanes(List<Integer> idPlanes);
 /*	 
 	
 	List<RelGrupoParticipanteDTO> buscarAlumno(Integer idGrupo, String nombre);

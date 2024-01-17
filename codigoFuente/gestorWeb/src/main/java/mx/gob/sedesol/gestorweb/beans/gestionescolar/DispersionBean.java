@@ -25,13 +25,10 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionResumenDTO;
-import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.ConfiguracionAreaDTO;
-import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.RelAreaDistribucionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
-import mx.gob.sedesol.basegestor.model.especificaciones.PlanEspecificacion;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.DispersionServiceFacade;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
@@ -65,6 +62,7 @@ public class DispersionBean extends BaseBean {
 	
 	private List<PlanDTO> listaPlanes;
 	private List<String> selectedPlanes;
+	private List<Integer> selectedIdPlanes;
 	
 	private List<TblInscripcionResumenDTO> listaInscripcionesResumen;
 	private List<TblInscripcionDTO> listaInscripciones;
@@ -98,18 +96,22 @@ public class DispersionBean extends BaseBean {
 		System.out.println("planesSelec >>>>>>>>>>>>> ");
 	    Optional.ofNullable(selectedPlanes).orElse(Collections.emptyList()).stream()
          .forEach(System.out::println);
+	   
+	    List<PlanDTO> listaPlanesSeleccionados= obtenerListaPlanesByIds();
+	    Optional.ofNullable(listaPlanesSeleccionados).orElse(Collections.emptyList()).stream()
+        .forEach(System.out::println);
 	 
-	    System.out.println("listaInscripcionesResumen >>>>>>>>>>>>> ");
-	    List<TblInscripcionResumenDTO> lista=   obtenerListaInscripcionResumen(selectedPlanes);
+	  System.out.println("listaInscripcionesResumen >>>>>>>>>>>>> ");
+	    List<TblInscripcionResumenDTO> lista=   obtenerListaInscripcionResumen(listaPlanesSeleccionados);
 	    Optional.ofNullable(lista).orElse(Collections.emptyList()).stream()
         .forEach(System.out::println);
 	
 	  System.out.println("listaInscripciones >>>>>>>>>>>>> ");
-	   List<TblInscripcionDTO> inscrip=   obtenerListaInscripcionesByProgramas(selectedPlanes);
+	   List<TblInscripcionDTO> inscrip=   obtenerListaInscripcionesByPLanes(listaPlanesSeleccionados);
 	  /* Optional.ofNullable(inscrip).orElse(Collections.emptyList()).stream()
         .forEach(System.out::println);*/
-	    System.out.println("listaInscripciones >>>>>>>>>>>>> "+inscrip.size());
-	   generarGrupos(lista);
+	   /* System.out.println("listaInscripciones >>>>>>>>>>>>> "+inscrip.size());
+	   generarGrupos(lista);*/
 	 //  crearMapaInscripcionesXGrupo(lista,inscrip, grupos);
 	}
 	
@@ -120,58 +122,111 @@ public class DispersionBean extends BaseBean {
 			System.out.println("seleccionar planes");
 		}
 	}
+
+	public List<PlanDTO> obtenerListaPlanesByIds() {
+		List<PlanDTO> planesSeleccionados = new ArrayList<PlanDTO>();
+
+		for (String nombrePlan : selectedPlanes) {
+			for (PlanDTO plan : listaPlanes) {
+				System.out.println("nombrePlan - " +nombrePlan + " - " + plan.getNombre());
+				if(nombrePlan.equals(plan.getNombre())) {
+					planesSeleccionados.add(plan);
+				}
+			}
+		}
+		System.out.println("obtenerListaPlanesByIds >>>>>>>>>>>>> "+ planesSeleccionados.size());
+
+		//return planService.obtenerPlanesPorIds(selectedIdPlanes);
+		return planesSeleccionados;
+	}
 	
-	public List<TblInscripcionResumenDTO>  obtenerListaInscripcionResumen(List<String> programas) {
+	public List<TblInscripcionResumenDTO>  obtenerListaInscripcionResumen(List<PlanDTO> planes) {
+		
+		List<String> programas = new ArrayList<String>();
+		for(PlanDTO plan: planes) {
+			programas.add(plan.getNombre());
+		}
 	 
 		listaInscripcionesResumen= dispersionServiceFacade.getInscripcionResumenByProgramaEducativo(programas);
 		System.out.println("obtenerListaInscripcionResumen >>>>>>>>>>>>> "  + programas +" - " + + listaInscripcionesResumen.size());
 		return listaInscripcionesResumen;
 	}
 	
-	public List<TblInscripcionDTO>  obtenerListaInscripcionesByProgramas(List<String> programas) {
-	//	System.out.println("obtenerListaInscripcionesByProgramas >>>>>>>>>>>>> " + programas);
-	
-		listaInscripciones= dispersionServiceFacade.getInscripcionesByProgramasEducativos(programas);
+	public List<TblInscripcionDTO>  obtenerListaInscripcionesByPLanes(List<PlanDTO> planes) {
+	//	System.out.println("obtenerListaInscripcionesByPLanes >>>>>>>>>>>>> " + programas);
+		List<Integer> idPlanes = new ArrayList<Integer>();
+		for(PlanDTO plan: planes) {
+			idPlanes.add(plan.getIdPlan());
+		}
+		listaInscripciones= dispersionServiceFacade.getInscripcionesByIdPlanes(idPlanes);
 		
-		System.out.println("obtenerListaInscripcionesByProgramas >>>>>>>>>>>>> " + programas +" - " + listaInscripciones.size());
+		System.out.println("obtenerListaInscripcionesByPLanes >>>>>>>>>>>>> " + idPlanes.size() +" - " + listaInscripciones.size());
 		
 		return listaInscripciones;
 	}
 
 
-	public void generarGrupos(List<TblInscripcionResumenDTO> listaInscripcionResumen) {
-		
-		System.out.println("generarGrupos >>>>>>>>>>>>> " );
-		for (TblInscripcionResumenDTO inscripcionResumen: listaInscripcionResumen ) {
-			List<EventoCapacitacionDTO> eventos = dispersionServiceFacade.getEventoCapacitacionService().obtenerEventosPorNombrePrograma(inscripcionResumen.getProgramaEducativo(), inscripcionResumen.getAsignatura());
-			System.out.println("lista de eventos >>>>>>>>>>>>> " + eventos.size());
+	public void generarGrupos() {
+
+		System.out.println("generarGrupos >>>>>>>>>>>>> ");
+
+		List<PlanDTO> listaPlanesSeleccionados = obtenerListaPlanesByIds();
+		Optional.ofNullable(listaPlanesSeleccionados).orElse(Collections.emptyList()).stream()
+				.forEach(System.out::println);
+
+		if (!listaPlanesSeleccionados.isEmpty()) {
+
+			System.out.println("listaInscripcionesResumen >>>>>>>>>>>>> ");
+			List<TblInscripcionResumenDTO> listaInscripcionResumen = obtenerListaInscripcionResumen(listaPlanesSeleccionados);
+			Optional.ofNullable(listaInscripcionResumen).orElse(Collections.emptyList()).stream().forEach(System.out::println);
 			
-			Optional.ofNullable(eventos).orElse(Collections.emptyList()).stream()
-	        .forEach(System.out::println);
-			if(!eventos.isEmpty()) {
-				evento = eventos.get(0);
-				AmbienteVirtualAprendizajeDTO ava = dispersionServiceFacade.getAmbienteVirtualApService()
-						.obtenerAVAPorEvento(evento.getIdEvento());
-				if (ObjectUtils.isNotNull(ava)) {
-					idCursoLms = ava.getIdCursoLms();
-					parametroWSMoodleDTO = ava.getPlataformaMoodle();
-					evento.setIdCursoLmsBorrador(idCursoLms);
-					evento.setIdPlataformaLmsBorrador(parametroWSMoodleDTO.getIdParametroWSMoodle());
-				} else {
-					idCursoLms = evento.getIdCursoLmsBorrador();
-					parametroWSMoodleDTO = dispersionServiceFacade.getParametroWSMoodleService()
-							.buscarPorId(evento.getIdPlataformaLmsBorrador());
+			for (PlanDTO plan : listaPlanesSeleccionados) {
+			//	System.out.println("plan > " + plan.getNombre() );
+				 for( TblInscripcionResumenDTO inscripcionResumen: listaInscripcionResumen) {
+					System.out.println("plan > " + plan.getNombre()+ " - "+ inscripcionResumen.getProgramaEducativo()  );
+					if (plan.getNombre().equals(inscripcionResumen.getProgramaEducativo())) {
+						System.out.println("Es el mismo programa educativo" );
+						List<EventoCapacitacionDTO> eventos = dispersionServiceFacade.getEventoCapacitacionService()
+								.obtenerEventosPorProgramaIdPlan(inscripcionResumen.getAsignatura(), plan.getIdPlan());
+						
+						System.out.println("lista de eventos >>>>>>>>>>>>> " + eventos.size());  
+						Optional.ofNullable(eventos).orElse(Collections.emptyList()).stream()
+						.forEach(System.out::println);
+						
+						Optional.ofNullable(eventos).orElse(Collections.emptyList()).stream().forEach(System.out::println);
+						if (!eventos.isEmpty()) {
+							//evento = eventos.get(0);
+							for (EventoCapacitacionDTO eve:eventos) {
+								AmbienteVirtualAprendizajeDTO ava = dispersionServiceFacade.getAmbienteVirtualApService()
+										.obtenerAVAPorEvento(eve.getIdEvento());
+								if (ObjectUtils.isNotNull(ava)) {
+									// idCursoLms = ava.getIdCursoLms();
+									parametroWSMoodleDTO = ava.getPlataformaMoodle();
+									eve.setIdCursoLmsBorrador(ava.getIdCursoLms());
+									eve.setIdPlataformaLmsBorrador(parametroWSMoodleDTO.getIdParametroWSMoodle());
+								} else {
+								//	idCursoLms = eve.getIdCursoLmsBorrador();
+									parametroWSMoodleDTO = dispersionServiceFacade.getParametroWSMoodleService()
+											.buscarPorId(eve.getIdPlataformaLmsBorrador());
+								}
+							}
+							
+							// crearLogica para crear Mapa de grupos AQUI
+							grupos.addAll(dispersionServiceFacade.getGrupoService().generarGruposDispersion(eventos,
+									inscripcionResumen, getUsuarioEnSession().getIdPersona(), parametroWSMoodleDTO));
+							// bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CRE_GPO", "",
+							// requestActual(), TipoServicioEnum.LOCAL);
+							 
+						}
+					}
+					
 				}
-				//crearLogica para crear Mapa de grupos AQUI 
-				grupos.addAll(dispersionServiceFacade.getGrupoService().generarGruposDispersion(evento, inscripcionResumen,
-						getUsuarioEnSession().getIdPersona(), parametroWSMoodleDTO));
-				//bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CRE_GPO", "", requestActual(), TipoServicioEnum.LOCAL);
+
 			}
-			
 		}
-		
-		System.out.println("generarGrupos >>>>>>>>>>>>> " +grupos.size() );
-		//contarAlumnosEnGrupos(grupos);
+
+		//System.out.println("generarGrupos >>>>>>>>>>>>> " + grupos.size());
+		// contarAlumnosEnGrupos(grupos);
 
 	}
 
@@ -557,6 +612,15 @@ public class DispersionBean extends BaseBean {
 	public void setSelectedPlanes(List<String> selectedPlanes) {
 		this.selectedPlanes = selectedPlanes;
 	}
+
+	public List<Integer> getSelectedIdPlanes() {
+		return selectedIdPlanes;
+	}
+
+	public void setSelectedIdPlanes(List<Integer> selectedIdPlanes) {
+		this.selectedIdPlanes = selectedIdPlanes;
+	}
+	
 	/* INICIO DE GETS Y SETS */
 	
 }

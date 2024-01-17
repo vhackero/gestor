@@ -24,46 +24,53 @@
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 						  onsuccess="PF('dialogLayout').hide()" />
 
+			<p:panel id="fldDispersar" header="Generar dispersión"
+				showCollapseLink="false" collapsible="false">
+				<f:validateBean disabled="true">
+					<div class="row">
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel styleClass="requerido" value="Plan:" />
+							<p:selectCheckboxMenu id="planesMenu"
+								value="#{dispersionBean.selectedPlanes}" filter="true"
+								filterMatchMode="startsWith"
+								label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								styleClass="col-xs-12">
+								<p:ajax process="@this" update="@this" event="toggleSelect"
+									listener="#{dispersionBean.planesSelectChange}" />
+								<p:ajax process="@this" update="@this" event="change"
+									listener="#{dispersionBean.planesSelectChange()}" />
+								<f:selectItems value="#{dispersionBean.listaPlanes}" var="plan"
+									itemLabel="#{plan.nombre}" itemValue="#{plan.nombre}" />
+							</p:selectCheckboxMenu>
+						</div>
+						<div class="col-md-12">
+							<p:commandButton value="Dispersar"
+								styleClass="btn btn-primary pull-right" update="fldDispersar"
+								action="#{dispersionBean.dispersar()}" ajax="false"
+								immediate="true" process="@this" />
+							<p:commandButton value="Crear grupos"
+								styleClass="btn btn-primary pull-right" update="fldDispersar"
+								action="#{dispersionBean.generarGrupos()}" ajax="false"
+								immediate="true" process="@this" />
+						</div>
+					</div>
+				</f:validateBean>
+			</p:panel>
 
 			<div class="row">
 				<div class="col-md-12">
 					<sec:authorize access="hasPermission(null, 'EC_AGR' ) ">
-					
-						<p:outputLabel
-									value="Dispersion:"
-									styleClass="pull-right agregaHeight" />
-							<p:selectCheckboxMenu id="planesMenu"
-									value="#{dispersionBean.selectedPlanes}" filter="true" filterMatchMode="startsWith" 
-									label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									styleClass="col-xs-12">
-									<p:ajax process="@this" update="@this" event="toggleSelect"
-									listener="#{dispersionBean.planesSelectChange}" />
-									<p:ajax process="@this" update="@this" event="change"
-									listener="#{dispersionBean.planesSelectChange()}" /> 										
-									<f:selectItems value="#{dispersionBean.listaPlanes}"
-										var="plan" itemLabel="#{plan.nombre}" itemValue="#{plan.nombre}" />
-							</p:selectCheckboxMenu>
-						
-							<p:commandButton
-									value="Dispersar"
-									styleClass="btn btn-primary pull-right"
-									update="frmBusquedaPrograma"
-									action="#{dispersionBean.dispersar()}"
-									ajax="false" immediate="true" process="@this" />
 						<p:commandButton
-								value="#{sistema.obtenerTexto('gw.ge.btn.crear')}"
-								styleClass="btn btn-primary pull-right"
-								update="frmBusquedaPrograma"
-								action="#{capturaEventoCapacitacion.nuevoEventoCapacitacion()}"
-								ajax="false" immediate="true" process="@this" />
-						<p:outputLabel
-								value="Nuevo evento académico:"
-								styleClass="pull-right agregaHeight" />
+							value="#{sistema.obtenerTexto('gw.ge.btn.crear')}"
+							styleClass="btn btn-primary pull-right"
+							update="frmBusquedaPrograma"
+							action="#{capturaEventoCapacitacion.nuevoEventoCapacitacion()}"
+							ajax="false" immediate="true" process="@this" />
+						<p:outputLabel value="Nuevo evento académico:"
+							styleClass="pull-right agregaHeight" />
 					</sec:authorize>
 				</div>
 			</div>
-
-
 
 			<p:panel id="fldBusqueda"
 					 header="Búsqueda de eventos académicos"

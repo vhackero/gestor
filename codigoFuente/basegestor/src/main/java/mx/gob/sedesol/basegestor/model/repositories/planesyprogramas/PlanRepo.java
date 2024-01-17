@@ -1,5 +1,7 @@
 package mx.gob.sedesol.basegestor.model.repositories.planesyprogramas;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -26,4 +28,8 @@ public interface PlanRepo extends JpaRepository<TblPlan, Integer>,JpaSpecificati
 	
 	@Query("select max(p.idPlan) from TblPlan p")
 	public Integer obtieneUltimoIdPlanes();
+	
+	@Query("select p from TblPlan p"
+			+ " where p.idPlan in (idPlanes)")
+	public List<TblPlan> obtenerPlanesPorIds(@Param("idPlan") List<Integer> idPlanes);
 }
