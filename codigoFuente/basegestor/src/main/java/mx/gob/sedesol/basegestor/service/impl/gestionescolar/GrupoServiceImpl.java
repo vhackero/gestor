@@ -96,11 +96,11 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 		List<GrupoDTO> gruposExistentesDTO = findAll();
 		
 		
-		Integer numeroGrupos = inscripcionResumen.getNoGrupos();
+		/*Integer numeroGrupos = inscripcionResumen.getNoGrupos();
 		if(inscripcionResumen.getGrupoResto() != null) {
 			numeroGrupos = numeroGrupos + inscripcionResumen.getGrupoResto();
-		}
-		List<String> nombresGrupo = generarNombresGrupoDispercion(inscripcionResumen.getGrupo(), numeroGrupos);
+		}*/
+		List<String> nombresGrupo = generarNombresGrupoDispercion(inscripcionResumen.getGrupo(), eventos.size());
 		List<String> nombresGrupoFinales = new ArrayList<String>();
 		
 		for (String nombreGrupo: nombresGrupo) {
@@ -123,8 +123,8 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 		
 	    Optional.ofNullable(nombresGrupoFinales).orElse(Collections.emptyList()).stream()
         .forEach(System.out::println);
-		gruposDTO = almacenarGruposMoodleDispersion(eventos, usuarioModifico, nombresGrupoFinales, parametroWSMoodleDTO);
-		
+		//gruposDTO = almacenarGruposMoodle(eventos.get(0), usuarioModifico, nombresGrupoFinales, parametroWSMoodleDTO);
+		gruposDTO = almacenarGrupo(nombresGrupoFinales, eventos.get(0), usuarioModifico);
 		
 	
 		return gruposDTO;
@@ -145,7 +145,7 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 		}
 		return gruposDTO;
 	}
-	private List<GrupoDTO> almacenarGruposMoodleDispersion(List<EventoCapacitacionDTO> eventos, Long usuarioModifico,
+	/*private List<GrupoDTO> almacenarGruposMoodleDispersion(List<EventoCapacitacionDTO> eventos, Long usuarioModifico,
 			List<String> nombresGrupo, ParametroWSMoodleDTO parametroWSMoodleDTO) {
 		logger.info("###almacenarGruposMoodle #   usuarioModifico:" +usuarioModifico +""+nombresGrupo.size()  );
 		
@@ -163,7 +163,7 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 			logger.error(e.getMessage(), e);
 		}
 		return gruposDTO;
-	}
+	}*/
 
 	private List<GrupoDTO> almacenarGruposMoodle(EventoCapacitacionDTO evento, Long usuarioModifico,
 			List<String> nombresGrupo, ParametroWSMoodleDTO parametroWSMoodleDTO) {

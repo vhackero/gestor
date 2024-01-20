@@ -67,13 +67,19 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 			"	    ir.asignatura  IN (:asignatura)\r\n" + 
 			"	  and ir.bloque = 2", nativeQuery = true)
 	public List<TblEvento> obtenerEventosPorNombrePrograma(@Param("programa") String programa, @Param("asignatura") String asignatura);*/
-	@Query("SELECT evt FROM TblEvento evt "
+/*	@Query("SELECT evt FROM TblEvento evt "
 			+ " JOIN  evt.inscripciones ins "
 			+ " JOIN  ins.fichaDescriptivaPrograma fdp "
 			+ " WHERE fdp.nombreTentativo like %:programa%"
 			+ " AND ins.plan.idPlan =:idPlan ")
 		//	+ " GROUP BY evt.idEvento")
-			//+ " AND ( fdp.tipo = 'Optativa' AND "
+			//+ " AND ( fdp.tipo = 'Optativa' AND "*/
+	@Query(value = "SELECT * FROM tbl_eventos e " + 
+			" inner join tbl_inscripciones i on e.id_programa = i.idprograma " + 
+			" inner join tbl_ficha_descriptiva_programa fdp on fdp.id_programa = e.id_programa " + 
+			" WHERE i.idplan =:idPlan and fdp.nombre_tentativo like %:programa% and e.id_estatus_ec = 2" + 		
+			" GROUP by e.id_evento " + 
+			" ORDER by i.idprograma, e.id_evento", nativeQuery = true)
 	public List<TblEvento> obtenerEventosPorIdProgramaIdPlan(@Param("programa") String programa, @Param("idPlan") Integer idPlan);
 	
 	@Query("SELECT evt FROM TblEvento evt "
