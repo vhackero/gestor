@@ -117,7 +117,7 @@ public class DispersionBean extends BaseBean {
         .forEach(System.out::println);*/
 	   /* System.out.println("listaInscripciones >>>>>>>>>>>>> "+inscrip.size());
 	   generarGrupos(lista);*/
-	 //  crearMapaInscripcionesXGrupo(lista,inscrip, grupos);
+	   crearMapaInscripcionesXGrupo(lista,inscrip, listaGruposXEvento);
 	}
 	
 	
@@ -126,6 +126,8 @@ public class DispersionBean extends BaseBean {
 		List<PlanDTO> listaPlanesSeleccionados = obtenerListaPlanesByIds();
 		Optional.ofNullable(listaPlanesSeleccionados).orElse(Collections.emptyList()).stream()
 				.forEach(System.out::println);
+		
+		List<GrupoDTO> listaGrupos = null;
 
 		List<Integer> listaEventos = new ArrayList<Integer>();		
 		if (!listaPlanesSeleccionados.isEmpty()) {
@@ -159,11 +161,11 @@ public class DispersionBean extends BaseBean {
 
 			}
 			
-			List<GrupoDTO> grupos = dispersionServiceFacade.obtenerGruposPorIdEventos(listaEventos);
+			listaGrupos = dispersionServiceFacade.obtenerGruposPorIdEventos(listaEventos);
 			System.out.println("Numero de Grupos>>>>>>> " + grupos.size());
 					
 		}
-		return grupos;
+		return listaGrupos;
 				
 	}
 	
@@ -318,7 +320,7 @@ public class DispersionBean extends BaseBean {
 				List<TblInscripcionDTO> listaInscripciones, List<GrupoDTO> listaGrupos) {
 		System.out.println("crearMapaInscripcionesXGrupo >>>>>>>>>>>>> ");
 		Map<String, List<TblInscripcionDTO>> mapaInscripciones= obtenerMapaIncripcionesxGrupoBase(listaInscripcionResumen,listaInscripciones);
-		Map<String, List<GrupoDTO>> mapaGrupos= obtenerGruposxGrupoBase(listaInscripcionResumen);
+		Map<String, List<GrupoDTO>> mapaGrupos= obtenerGruposxGrupoBase(listaInscripcionResumen, listaGrupos);
 		Map<String, Map<String,Integer>> mapaNoEstudiantesEnGrupo= obtenerNoEstudiantesEnGruposxGrupoBase(listaInscripcionResumen, mapaGrupos);
 		/*for(TblInscripcionResumenDTO resumen: listaInscripcionResumen) {
 			List<TblInscripcionDTO> inscripcionesByGrupoBase = new ArrayList<TblInscripcionDTO>();
@@ -365,6 +367,8 @@ public class DispersionBean extends BaseBean {
 			    		// Segregar inscripciones en grupos
 			    		// buscarpersonas
 			    		// Add personas a matricular
+			    		
+			    		System.out.println("::::GRUPOS OBTENIDOS::::"); 
 			    	}
 			    }
 			}
@@ -372,12 +376,12 @@ public class DispersionBean extends BaseBean {
 		 
 	}
 
-	public Map<String, List<GrupoDTO>> obtenerGruposxGrupoBase(List<TblInscripcionResumenDTO> listaInscripcionResumen) {
+	public Map<String, List<GrupoDTO>> obtenerGruposxGrupoBase(List<TblInscripcionResumenDTO> listaInscripcionResumen, List<GrupoDTO> listaGrupos) {
 		Map<String, List<GrupoDTO>> mapaGrupos= new HashMap<String, List<GrupoDTO>>();
 		for(TblInscripcionResumenDTO resumen: listaInscripcionResumen) {
 			List<GrupoDTO> gruposByGrupoBase = new ArrayList<GrupoDTO>();
 			String grupoBase= resumen.getGrupo().substring(0, 19);
-			for(GrupoDTO grupo: grupos) {
+			for(GrupoDTO grupo: listaGrupos) {
 				String grupoActual=grupo.getNombre().substring(0, 19);
 				System.out.println("mapagrupos >>>>>>>>>>>>> " +grupoBase + " - " + grupoActual);
 				 if( grupoBase.equals(grupoActual)) {
