@@ -151,6 +151,11 @@ public class DispersionServiceFacade {
 
 		return grupoService.getGruposByEvento(idEvento);
 	}
+	
+	public List<GrupoDTO> obtenerGruposPorIdEventos(List<Integer> eventos) {
+
+		return grupoService.getGruposPorIdEventos(eventos);
+	}
 
 	public List<RelGrupoParticipanteDTO> obtenerParticipantesPorEvento(Integer idEvento) {
 		return grupoParticipanteService.getParticipantesByEvento(idEvento);

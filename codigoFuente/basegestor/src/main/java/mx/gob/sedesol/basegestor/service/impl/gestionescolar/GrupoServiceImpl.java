@@ -87,6 +87,16 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 
 		return modelMapper.map(lista, objetoDTO);
 	}
+	
+	@Override
+	public List<GrupoDTO> getGruposPorIdEventos(List<Integer> eventos) {
+		List<TblGrupo> lista = grupoRepo.getGruposByEventos(eventos);
+
+		Type objetoDTO = new TypeToken<List<GrupoDTO>>() {
+		}.getType();
+
+		return modelMapper.map(lista, objetoDTO);
+	}
 
  	@Override
 	public List<GrupoDTO> generarGruposDispersion( List<EventoCapacitacionDTO> eventos, TblInscripcionResumenDTO inscripcionResumen,  

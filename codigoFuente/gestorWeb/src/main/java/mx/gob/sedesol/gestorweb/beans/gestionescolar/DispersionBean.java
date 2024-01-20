@@ -108,12 +108,65 @@ public class DispersionBean extends BaseBean {
 	
 	  System.out.println("listaInscripciones >>>>>>>>>>>>> ");
 	   List<TblInscripcionDTO> inscrip=   obtenerListaInscripcionesByPLanes(listaPlanesSeleccionados);
+	   
+	   System.out.println("listaGruposPorEvento >>>>>>>>>>>>> ");
+	    List<GrupoDTO> listaGruposXEvento=   obtenerListaGruposXEvento(listaPlanesSeleccionados);
+	    Optional.ofNullable(listaGruposXEvento).orElse(Collections.emptyList()).stream()
+       .forEach(System.out::println);
 	  /* Optional.ofNullable(inscrip).orElse(Collections.emptyList()).stream()
         .forEach(System.out::println);*/
 	   /* System.out.println("listaInscripciones >>>>>>>>>>>>> "+inscrip.size());
 	   generarGrupos(lista);*/
 	 //  crearMapaInscripcionesXGrupo(lista,inscrip, grupos);
 	}
+	
+	
+	public List<GrupoDTO> obtenerListaGruposXEvento(List<PlanDTO> planes) {		
+		System.out.println("ObetenerGruposGuardados >>>>>>>>>>>>> ");
+		List<PlanDTO> listaPlanesSeleccionados = obtenerListaPlanesByIds();
+		Optional.ofNullable(listaPlanesSeleccionados).orElse(Collections.emptyList()).stream()
+				.forEach(System.out::println);
+
+		List<Integer> listaEventos = new ArrayList<Integer>();		
+		if (!listaPlanesSeleccionados.isEmpty()) {
+
+			System.out.println("listaInscripcionesResumen >>>>>>>>>>>>> ");
+			List<TblInscripcionResumenDTO> listaInscripcionResumen = obtenerListaInscripcionResumen(listaPlanesSeleccionados);
+			Optional.ofNullable(listaInscripcionResumen).orElse(Collections.emptyList()).stream().forEach(System.out::println);
+			
+			for (PlanDTO plan : listaPlanesSeleccionados) {
+				 for( TblInscripcionResumenDTO inscripcionResumen: listaInscripcionResumen) {
+					System.out.println("plan > " + plan.getNombre()+ " - "+ inscripcionResumen.getProgramaEducativo()  );
+					if (plan.getNombre().equals(inscripcionResumen.getProgramaEducativo())) {
+						System.out.println("Es el mismo programa educativo" );
+						List<EventoCapacitacionDTO> eventos = dispersionServiceFacade.getEventoCapacitacionService()
+								.obtenerEventosPorProgramaIdPlan(inscripcionResumen.getAsignatura(), plan.getIdPlan());
+						
+						System.out.println("lista de eventos >>>>>>>>>>>>> " + eventos.size());  
+						Optional.ofNullable(eventos).orElse(Collections.emptyList()).stream()
+						.forEach(System.out::println);
+						
+						Optional.ofNullable(eventos).orElse(Collections.emptyList()).stream().forEach(System.out::println);
+						if (!eventos.isEmpty()) {
+							for (EventoCapacitacionDTO eve:eventos) {								
+								listaEventos.add(eve.getIdEvento());
+							}
+							 
+						}
+					}
+					
+				}
+
+			}
+			
+			List<GrupoDTO> grupos = dispersionServiceFacade.obtenerGruposPorIdEventos(listaEventos);
+			System.out.println("Numero de Grupos>>>>>>> " + grupos.size());
+					
+		}
+		return grupos;
+				
+	}
+	
 	
 	public void planesSelectChange() {		
 		if (!selectedPlanes.isEmpty()) {			
@@ -164,8 +217,7 @@ public class DispersionBean extends BaseBean {
 		
 		return listaInscripciones;
 	}
-
-
+	
 	public void generarGrupos() {
 
 		System.out.println("generarGrupos >>>>>>>>>>>>> ");

@@ -14,6 +14,8 @@ public interface GrupoService {
 	List<GrupoDTO> findAll();
 	
 	public List<GrupoDTO> getGruposByEvento(Integer idEvento);
+	
+	public List<GrupoDTO> getGruposPorIdEventos(List<Integer> eventos);
 
 	GrupoDTO generarGrupo(Integer idEvento, Long usuarioModifico);
 
