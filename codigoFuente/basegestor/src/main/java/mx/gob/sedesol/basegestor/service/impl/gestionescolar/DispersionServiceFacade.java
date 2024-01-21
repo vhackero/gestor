@@ -74,6 +74,10 @@ public class DispersionServiceFacade {
 		return dispersionService.getInscripcionesByIdPlanes(idPlanes);
 	}
 	
+	public List<TblInscripcionDTO> getInscripcionesByIdPlanPrograma(Integer idPlan, String programa) {
+		return dispersionService.getInscripcionesByIdPlanPrograma(idPlan,programa);
+	}
+	
 	/*
 
 

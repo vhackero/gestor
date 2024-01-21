@@ -234,13 +234,15 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 	@Override
 	public ResultadoDTO<RelGrupoParticipanteDTO> almacenarParticipantes(List<PersonaDTO> listaPersonas, GrupoDTO grupo,
 			EventoCapacitacionDTO evento, ParametroWSMoodleDTO parametroWSMoodleDTO) {
-
+		System.out.println("::::almacenarParticipantes::::"+ listaPersonas.size() + " - "+ grupo.getEvento()+ " - "+parametroWSMoodleDTO.getIdParametroWSMoodle()); 
 		ResultadoDTO<RelGrupoParticipanteDTO> resultado;
 
 		if (evento.getCatModalidadPlanPrograma().getId() == ConstantesGestor.MODALIDAD_LINEA
 				|| evento.getCatModalidadPlanPrograma().getId() == ConstantesGestor.MODALIDAD_MIXTO) {
+			System.out.println("::::MODALIDAD_LINEA:::: MODALIDAD_MIXTO "); 
 			resultado = almacenarAlumnosMoodle(listaPersonas, grupo, evento, parametroWSMoodleDTO);
 		} else {
+			System.out.println("::::almacenarAlumnosNormales "); 
 			resultado = almacenarAlumnosNormales(listaPersonas, grupo);
 		}
 		return resultado;
@@ -265,11 +267,15 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 
 	private ResultadoDTO<RelGrupoParticipanteDTO> almacenarAlumnosMoodle(List<PersonaDTO> listaPersonas, GrupoDTO grupo,
 			EventoCapacitacionDTO evento, ParametroWSMoodleDTO parametroWSMoodleDTO) {
+		System.out.println("::::almacenarAlumnosMoodle::::  listaPersonas "+ listaPersonas.size()); 
 		ResultadoDTO<RelGrupoParticipanteDTO> resultado = new ResultadoDTO<>();
 		List<Enrol> listaEnrol = new ArrayList<>();
 		List<AlumnoGrupo> listaAlumnosGrupo = new ArrayList<>();
 		List<RelGrupoParticipante> personasCorrectas = new ArrayList<>();
 		for (PersonaDTO persona : listaPersonas) {
+//			System.out.println("::::almacenarAlumnosMoodle::::  persona "+ persona); 
+//			System.out.println("::::almacenarAlumnosMoodle::::  parametroWSMoodleDTO "+ parametroWSMoodleDTO); 
+//			System.out.println("::::almacenarAlumnosMoodle::::  grupo "+ grupo); 
 			Integer idPersonaMoodle = relPersonaPlataformaMoodleService.obtenerIdMoodle(persona, parametroWSMoodleDTO,
 					grupo.getUsuarioModifico());
 			if (ObjectUtils.isNullOrCero(idPersonaMoodle)) {

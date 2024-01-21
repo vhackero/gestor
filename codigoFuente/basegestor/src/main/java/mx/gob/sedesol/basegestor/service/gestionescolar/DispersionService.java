@@ -14,36 +14,8 @@ public interface DispersionService {
     List<TblInscripcionDTO> getInscripcionesByProgramasEducativos(List<String> programas);
 	
     List<TblInscripcionDTO> getInscripcionesByIdPlanes(List<Integer> idPlanes);
-/*	 
-	
-	List<RelGrupoParticipanteDTO> buscarAlumno(Integer idGrupo, String nombre);
-	
-	List<RelGrupoParticipanteDTO> getParticipantesByGrupo(Integer idGrupo) ;
-	
-	List<RelGrupoParticipanteDTO> getParticipantesByEvento(Integer idEvento) ;
-
-	RelGrupoParticipanteDTO almacenarParticipante(GrupoDTO grupo, PersonaDTO persona, EventoCapacitacionDTO evento, ParametroWSMoodleDTO parametroWSMoodleDTO);
-
-	 
-
-	ResultadoDTO<RelGrupoParticipanteDTO> almacenarParticipantes(List<PersonaDTO> listaPersonas, GrupoDTO grupo,
-			EventoCapacitacionDTO evento, ParametroWSMoodleDTO parametroWSMoodleDTO);	
-	
-	Map<String,Long> obtenerParticipantesPorIdEventoCapacitacion(List<Integer> idEventosList);
-	
-	Map<String,Map<String,String>> obtenerGeneroParticipantesPorIdEventoCapacitacion(List<Integer> idEventosList);
-	
-    List<RelGrupoParticipanteDTO> obtenerEventosCapacitacionPorIdParticipante(Long idParticipante,Integer idEstatusEc);
     
-    List<RelGrupoParticipanteDTO> obtenEvtsEnLineayMixtosPorIdParticipante(Long idParticipante,Integer idEstatusEc);
-    
-    List<RelGrupoParticipanteDTO> obtenerAlumnosQueRecibieronConstPorIdGrupo(Integer idGrupo) throws Exception;
-    
-    ResultadoDTO<RelGrupoParticipanteDTO> actualizaRelGrupoParticipante(RelGrupoParticipanteDTO dto);
-    
-    List<RelGrupoParticipanteDTO> buscarParticipanteEnEvento(Integer idEvento, Long idPersona);
-
-	List<RelGrupoParticipanteDTO> getAlumnosQueRecibieronConstPorIdGrupo(Integer idGrupo) throws Exception; */
+    List<TblInscripcionDTO> getInscripcionesByIdPlanPrograma(Integer idPlan, String programa);
 }
 
 

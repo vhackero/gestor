@@ -34,4 +34,13 @@ public interface InscripcionRepo extends JpaRepository<TblInscripcion, Integer>,
 			+ " ORDER BY p.idPlan,fdp.idPrograma, evt.idEvento ")
 	public List<TblInscripcion> getInscripcionesByIdPlanes(@Param("idPlanes")List<Integer> idPlanes);
 	
+	@Query(" SELECT ins FROM TblInscripcion ins "
+			+ " JOIN ins.plan p "
+			+ " JOIN ins.fichaDescriptivaPrograma fdp "
+			+ " JOIN ins.eventoCapacitacion evt "
+			+ " WHERE p.idPlan = :idPlan"
+			+ " AND ins.asignatura = :programa "
+			+ " ORDER BY p.idPlan,fdp.idPrograma, evt.idEvento ")
+	public List<TblInscripcion> getInscripcionesByIdPlanPrograma(@Param("idPlan")Integer idPlan, @Param("programa")String programa);
+	
 }

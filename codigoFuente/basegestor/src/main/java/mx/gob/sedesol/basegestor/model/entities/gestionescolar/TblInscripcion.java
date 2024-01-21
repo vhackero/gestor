@@ -45,8 +45,8 @@ public class TblInscripcion implements Serializable {
 	@JoinColumn(name="idevento",insertable=false, updatable=false)
 	private TblEvento eventoCapacitacion;
 	 
-	//bi-directional many-to-one association to TblEvento
-	@ManyToOne
+	//bi-directional many-to-one association to TblPersona
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="IdpersonaSIGIE",insertable=false, updatable=false)
 	private TblPersona personaSige;
 
