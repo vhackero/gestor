@@ -93,6 +93,8 @@ public class RelPersonaPlataformaMoodleServiceImpl implements RelPersonaPlatafor
 	
 	@Override
 	public Integer obtenerIdMoodle(PersonaDTO persona, ParametroWSMoodleDTO parametroWSMoodleDTO, Long usuarioModifico) {
+		
+		System.out.println("::::obtenerIdMoodle:::: persona "+ persona.getIdPersona() +" - " + parametroWSMoodleDTO.getIdParametroWSMoodle()); 
 		List<RelPersonaPlataformaMoodle> lista = relPersonaPlataformaMoodleRepo
 				.obtenerPorPersonaPlataforma(persona.getIdPersona(), parametroWSMoodleDTO.getIdParametroWSMoodle());
 
