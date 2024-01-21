@@ -20,6 +20,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblInscripcion;
 
 /**
  * The persistent class for the tbl_persona database table.
@@ -115,6 +116,10 @@ public class TblPersona implements Serializable {
 	// bi-directional many-to-one association to TblDatosSociodemograficosPersona
 	@OneToMany(mappedBy = "persona", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<TblDatosSociodemograficosPersona> datosSociodemograficosPersona;
+	
+	// bi-directional many-to-one association to TblInscripcion
+	@OneToMany(mappedBy = "personaSige",cascade={CascadeType.ALL})
+	private List<TblInscripcion> inscripciones;
 
 	/* Campos para tablas de INSSOFT */
 	@Column(name = "sso_idEntidadFederativa")
@@ -494,6 +499,14 @@ public class TblPersona implements Serializable {
 		this.datosSociodemograficosPersona = datosSociodemograficosPersona;
 	}
 	
+	public List<TblInscripcion> getInscripciones() {
+		return inscripciones;
+	}
+
+	public void setInscripciones(List<TblInscripcion> inscripciones) {
+		this.inscripciones = inscripciones;
+	}
+
 	public String getSso_status() {
 		return sso_status;
 	}

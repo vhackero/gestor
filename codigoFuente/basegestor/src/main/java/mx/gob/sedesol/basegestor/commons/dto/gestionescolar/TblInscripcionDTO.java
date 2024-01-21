@@ -2,57 +2,63 @@ package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
 import java.io.Serializable;
 
+import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
+
 public class TblInscripcionDTO implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 
-	private int id;
-	private int alta;
+	private Integer id;
+	private Integer alta;
 	private String asignatura;
 	private String divisionSige;
 	private String groupbase;
-	private int idevento;
-	private int idpersonaSIGIE;
-	private int idplan;
-	private int idprograma;
+	private EventoCapacitacionDTO evento;
+	private PersonaDTO personaSige;
+	private PlanDTO plan;
+	private FichaDescProgramaDTO fichaDescriptivaPrograma;
 	private String nivelSige;
-	private int nuevoingreso;
+	private Integer nuevoingreso;
 	private String profileFieldPerfilUnadm;
 	private String programa;
-	private int recursamiento;
-	private int semestre;
+	private Integer recursamiento;
+	private Integer semestre;
 
+ 
+	
 	public TblInscripcionDTO() {
 	}
 
 	@Override
 	public String toString() {
 		return "TblInscripcionDTO [id=" + id + ", alta=" + alta + ", asignatura=" + asignatura + ", divisionSige="
-				+ divisionSige + ", groupbase=" + groupbase + ", idevento=" + idevento + ", idpersonaSIGIE="
-				+ idpersonaSIGIE + ", idplan=" + idplan + ", idprograma=" + idprograma + ", nivelSige=" + nivelSige
+				+ divisionSige + ", groupbase=" + groupbase + ", idevento=" + evento + ", idpersonaSIGIE="
+				+ personaSige + ", idplan=" + plan + ", idprograma=" + fichaDescriptivaPrograma + ", nivelSige=" + nivelSige
 				+ ", nuevoingreso=" + nuevoingreso + ", profileFieldPerfilUnadm=" + profileFieldPerfilUnadm
 				+ ", programa=" + programa + ", recursamiento=" + recursamiento + ", semestre=" + semestre + "]";
 	}
 
-	public int getId() {
-		return this.id;
+	public Integer getId() {
+		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
-	public int getAlta() {
-		return this.alta;
+	public Integer getAlta() {
+		return alta;
 	}
 
-	public void setAlta(int alta) {
+	public void setAlta(Integer alta) {
 		this.alta = alta;
 	}
 
 	public String getAsignatura() {
-		return this.asignatura;
+		return asignatura;
 	}
 
 	public void setAsignatura(String asignatura) {
@@ -60,7 +66,7 @@ public class TblInscripcionDTO implements Serializable {
 	}
 
 	public String getDivisionSige() {
-		return this.divisionSige;
+		return divisionSige;
 	}
 
 	public void setDivisionSige(String divisionSige) {
@@ -68,63 +74,63 @@ public class TblInscripcionDTO implements Serializable {
 	}
 
 	public String getGroupbase() {
-		return this.groupbase;
+		return groupbase;
 	}
 
 	public void setGroupbase(String groupbase) {
 		this.groupbase = groupbase;
 	}
 
-	public int getIdevento() {
-		return this.idevento;
+	public EventoCapacitacionDTO getEvento() {
+		return evento;
 	}
 
-	public void setIdevento(int idevento) {
-		this.idevento = idevento;
+	public void setEvento(EventoCapacitacionDTO evento) {
+		this.evento = evento;
+	}
+	
+	public PersonaDTO getPersonaSige() {
+		return personaSige;
 	}
 
-	public int getIdpersonaSIGIE() {
-		return this.idpersonaSIGIE;
+	public void setPersonaSige(PersonaDTO personaSige) {
+		this.personaSige = personaSige;
 	}
 
-	public void setIdpersonaSIGIE(int idpersonaSIGIE) {
-		this.idpersonaSIGIE = idpersonaSIGIE;
+	public PlanDTO getPlan() {
+		return plan;
 	}
 
-	public int getIdplan() {
-		return this.idplan;
+	public void setPlan(PlanDTO plan) {
+		this.plan = plan;
 	}
 
-	public void setIdplan(int idplan) {
-		this.idplan = idplan;
+	public FichaDescProgramaDTO getFichaDescriptivaPrograma() {
+		return fichaDescriptivaPrograma;
 	}
 
-	public int getIdprograma() {
-		return this.idprograma;
-	}
-
-	public void setIdprograma(int idprograma) {
-		this.idprograma = idprograma;
+	public void setFichaDescriptivaPrograma(FichaDescProgramaDTO fichaDescriptivaPrograma) {
+		this.fichaDescriptivaPrograma = fichaDescriptivaPrograma;
 	}
 
 	public String getNivelSige() {
-		return this.nivelSige;
+		return nivelSige;
 	}
 
 	public void setNivelSige(String nivelSige) {
 		this.nivelSige = nivelSige;
 	}
 
-	public int getNuevoingreso() {
-		return this.nuevoingreso;
+	public Integer getNuevoingreso() {
+		return nuevoingreso;
 	}
 
-	public void setNuevoingreso(int nuevoingreso) {
+	public void setNuevoingreso(Integer nuevoingreso) {
 		this.nuevoingreso = nuevoingreso;
 	}
 
 	public String getProfileFieldPerfilUnadm() {
-		return this.profileFieldPerfilUnadm;
+		return profileFieldPerfilUnadm;
 	}
 
 	public void setProfileFieldPerfilUnadm(String profileFieldPerfilUnadm) {
@@ -132,27 +138,26 @@ public class TblInscripcionDTO implements Serializable {
 	}
 
 	public String getPrograma() {
-		return this.programa;
+		return programa;
 	}
 
 	public void setPrograma(String programa) {
 		this.programa = programa;
 	}
 
-	public int getRecursamiento() {
-		return this.recursamiento;
+	public Integer getRecursamiento() {
+		return recursamiento;
 	}
 
-	public void setRecursamiento(int recursamiento) {
+	public void setRecursamiento(Integer recursamiento) {
 		this.recursamiento = recursamiento;
 	}
 
-	public int getSemestre() {
-		return this.semestre;
+	public Integer getSemestre() {
+		return semestre;
 	}
 
-	public void setSemestre(int semestre) {
+	public void setSemestre(Integer semestre) {
 		this.semestre = semestre;
 	}
-
 }

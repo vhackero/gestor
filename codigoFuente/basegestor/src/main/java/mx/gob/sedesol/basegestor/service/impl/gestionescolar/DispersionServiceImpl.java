@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
@@ -149,7 +150,20 @@ public class DispersionServiceImpl
 		return listDTO;
 	}
 	
-	
+	@Override
+	public List<TblInscripcionDTO> getInscripcionesByIdPlanPrograma(Integer idPlan, String programa) {
+		List<TblInscripcionDTO> listDTO;
+//		System.out.println("getInscripcionesByIdPlanPrograma >>>>>>>>>>>>> " + idPlan +" - "+ idPlan);
+		
+		List<TblInscripcion> lista = inscripcionRepo.getInscripcionesByIdPlanPrograma(idPlan, programa);
+		
+		Type objetoDTO = new TypeToken<List<TblInscripcionDTO>>() {
+		}.getType();
+
+		listDTO = modelMapper.map(lista, objetoDTO);
+
+		return listDTO;
+	}
 	
 	/*
 	@Override
