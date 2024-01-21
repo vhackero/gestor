@@ -1,13 +1,11 @@
 package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 
 import java.lang.reflect.Type;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
@@ -17,8 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
-import mx.gob.sedesol.basegestor.commons.dto.admin.BitacoraDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
@@ -848,8 +846,16 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		return modelMapper.map(eventos, listaEventosCapacitacion);
 	}
 
-	public List<EventoCapacitacionDTO> obtenerEventosPorNombrePrograma(String programa) {
-		List<TblEvento> eventos = eventoCapacitacionRepo.obtenerEventosPorNombrePrograma(programa);
+	public List<EventoCapacitacionDTO> obtenerEventosPorProgramaIdPlan(String programa, Integer idPlan) {
+		List<TblEvento> eventos = eventoCapacitacionRepo.obtenerEventosPorIdProgramaIdPlan(programa, idPlan);
+		Type listaEventosCapacitacion = new TypeToken<List<EventoCapacitacionDTO>>() {
+		}.getType();
+
+		return modelMapper.map(eventos, listaEventosCapacitacion);
+	}
+	
+	public List<EventoCapacitacionDTO> obtenerEventosPorIdPlan(Integer idPlan) {
+		List<TblEvento> eventos = eventoCapacitacionRepo.obtenerEventosPorIdProgramaIdPlan(idPlan);
 		Type listaEventosCapacitacion = new TypeToken<List<EventoCapacitacionDTO>>() {
 		}.getType();
 

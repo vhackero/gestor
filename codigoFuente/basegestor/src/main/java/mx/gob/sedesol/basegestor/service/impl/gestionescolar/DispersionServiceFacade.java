@@ -19,6 +19,7 @@ import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
 import mx.gob.sedesol.basegestor.service.admin.CorreoElectronicoService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaService;
+import mx.gob.sedesol.basegestor.service.gestion.aprendizaje.AmbienteVirtualApService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.DispersionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.EventoCapacitacionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
@@ -37,6 +38,9 @@ public class DispersionServiceFacade {
 
 	@Autowired
 	private ParametroWSMoodleService parametroWSMoodleService;
+	
+	@Autowired
+	private AmbienteVirtualApService ambienteVirtualApService;
 
 	@Autowired
 	private GrupoService grupoService;
@@ -55,7 +59,7 @@ public class DispersionServiceFacade {
 	private ParametroSistemaService parametroSistemaService;
 
 	
-	public List<TblInscripcionResumenDTO> getInscripcionResumenByProgramaEducativo(String programaEducativo) {
+	public List<TblInscripcionResumenDTO> getInscripcionResumenByProgramaEducativo(List<String> programaEducativo) {
 		return dispersionService.getInscripcionResumenByProgramaEducativo(programaEducativo);
 	}
 	
@@ -63,9 +67,13 @@ public class DispersionServiceFacade {
 		return dispersionService.getInscripcionesByIdPlan(idPLan);
 	}
 	
-	public List<TblInscripcionDTO> getInscripcionesByProgramasEducativos(String programas) {
+	public List<TblInscripcionDTO> getInscripcionesByProgramasEducativos(List<String> programas) {
 		return dispersionService.getInscripcionesByProgramasEducativos(programas);
 	}
+	public List<TblInscripcionDTO> getInscripcionesByIdPlanes(List<Integer> idPlanes) {
+		return dispersionService.getInscripcionesByIdPlanes(idPlanes);
+	}
+	
 	/*
 
 
@@ -143,6 +151,11 @@ public class DispersionServiceFacade {
 
 		return grupoService.getGruposByEvento(idEvento);
 	}
+	
+	public List<GrupoDTO> obtenerGruposPorIdEventos(List<Integer> eventos) {
+
+		return grupoService.getGruposPorIdEventos(eventos);
+	}
 
 	public List<RelGrupoParticipanteDTO> obtenerParticipantesPorEvento(Integer idEvento) {
 		return grupoParticipanteService.getParticipantesByEvento(idEvento);
@@ -186,6 +199,14 @@ public class DispersionServiceFacade {
 
 	public void setParametroWSMoodleService(ParametroWSMoodleService parametroWSMoodleService) {
 		this.parametroWSMoodleService = parametroWSMoodleService;
+	}
+	
+	public AmbienteVirtualApService getAmbienteVirtualApService() {
+		return ambienteVirtualApService;
+	}
+
+	public void setAmbienteVirtualApService(AmbienteVirtualApService ambienteVirtualApService) {
+		this.ambienteVirtualApService = ambienteVirtualApService;
 	}
 
 	public CorreoElectronicoService getCorreoElectronicoService() {

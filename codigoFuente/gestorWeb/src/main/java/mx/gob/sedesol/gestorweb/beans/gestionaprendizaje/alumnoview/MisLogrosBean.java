@@ -1,6 +1,5 @@
 package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,11 +11,9 @@ import javax.faces.bean.ViewScoped;
 import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaRolDTO;
-import mx.gob.sedesol.basegestor.commons.dto.admin.RolDTO;
 import mx.gob.sedesol.basegestor.commons.dto.badges.BadgeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.ContenedorLogrosDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
-import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.service.admin.PersonaRolesService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
@@ -53,7 +50,6 @@ public class MisLogrosBean extends BaseBean {
 
 	@PostConstruct
 	public void init() {
-		logger.info("Entra a mis logros bean >>>>>>>>>>>>>>>>>>>>>>");
 		Long idPersona = getUsuarioEnSession().getIdPersona();
 		contenedorLogros = getGrupoParticipanteService().obtenerLogrosPorIdParticipante(idPersona);
 		badge = contenedorLogros.getBadge();
@@ -67,29 +63,23 @@ public class MisLogrosBean extends BaseBean {
 	}
 
 	private boolean tieneLogros() {
-		logger.info("Entra a tieneLogros >>>>>>>>>>>>>>>>>>>>>>");
 		Map<String, String> mapa ;
 		Integer idRol;
 		List<PersonaRolDTO> rolesPersona = personaRolesService
 				.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
-		logger.info("Entra a rolesPersona >>>>>>>>>>>>>>>>>>>>>>" + rolesPersona);
 		
 		if (ObjectUtils.isNullOrEmpty(rolesPersona)) {
 			idRol = null;
 			showLogros=false;
 		} else {
 			idRol = rolesPersona.get(0).getRol().getIdRol();
-			logger.info("idRol >>>>>>>>>>>>>>>>>>>>>>" +idRol);
 			mapa = personaRolesService.obtenerFuncionalidadesRol(idRol);
-			logger.info("mapa >>>>>>>>>>>>>>>>>>>>>>" +mapa.size());
 			showLogros = mapa.containsKey("MIS_LOGROS");
-			logger.info("showLogros >>>>>>>>>>>>>>>>>>>>>>" +showLogros);
 			if(!showLogros) {
 				styleMisCursos="col-md-12";
 			}
-			
 		}
-		logger.info("styleMisCursos >>>>>>>>>>>>>>>>>>>>>>" +styleMisCursos);
+		 
 		return showLogros;
 	}
 	

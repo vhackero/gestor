@@ -2,7 +2,6 @@ package mx.gob.sedesol.basegestor.service.planesyprogramas;
 
 import java.util.List;
 
-
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
 import mx.gob.sedesol.basegestor.service.admin.CommonService;
 
@@ -21,5 +20,7 @@ public interface PlanService extends CommonService<PlanDTO, Integer> {
 	public void eliminAptitudesPorIdPlan(Integer idPlan);
 	
 	public Integer obtieneUltimoIdPlanes();
+	
+	public List<PlanDTO> obtenerPlanesPorIds(List<Integer> idPlanes);
 	
 }

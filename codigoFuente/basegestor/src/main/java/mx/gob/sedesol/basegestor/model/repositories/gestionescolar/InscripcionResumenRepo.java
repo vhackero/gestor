@@ -17,8 +17,9 @@ public interface InscripcionResumenRepo extends JpaRepository<TblInscripcionResu
 	
 
 	@Query("SELECT ins FROM TblInscripcionResumen ins "
-			+ " WHERE ins.programaEducativo =:programa"
-			+ " AND ins.noEstudiantes > 0 ")
-	public List<TblInscripcionResumen> getInscripcionResumenByProgramaEducativo(@Param("programa")String programa);
+			+ " WHERE ins.programaEducativo in (:programas)"
+			+ " AND ins.noEstudiantes > 0 "
+			+ " AND ins.bloque = 1")
+	public List<TblInscripcionResumen> getInscripcionResumenByProgramaEducativo(@Param("programas")List<String> programas);
 	
 }

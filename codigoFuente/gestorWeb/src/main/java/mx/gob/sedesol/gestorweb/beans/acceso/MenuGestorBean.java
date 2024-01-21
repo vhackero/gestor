@@ -85,7 +85,6 @@ public class MenuGestorBean extends BaseBean {
 
 	@PostConstruct
 	public void init() {
-		logger.info("MenuGestorBean >>>>>>>>>>>>>>>>>>>>>>");
 		roles = new ArrayList<>();
 		List<PersonaRolDTO> rolesPersona = personaRolesService
 				.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
@@ -98,7 +97,6 @@ public class MenuGestorBean extends BaseBean {
 			showLogros=false;
 		} else {
 			idRol = roles.get(0).getIdRol();
-			logger.info("idRol >>>>>>>>>>>>>>>>>>>>>>" +idRol);
 			mapa = personaRolesService.obtenerFuncionalidadesRol(idRol);
 			showLogros = mapa.containsKey("MIS_LOGROS");
 		}
