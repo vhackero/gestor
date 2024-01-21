@@ -153,4 +153,12 @@ public class GrupoDTO implements Serializable {
 		this.actaCerrada = actaCerrada;
 	}
 
+	@Override
+	public String toString() {
+		return "GrupoDTO [idGrupo=" + idGrupo + ", clave=" + clave + ", idEventoTemp=" + idEventoTemp + ", nombre="
+				+ nombre + ", evento=" + evento + "]";
+	}
+	
+	
+
 }

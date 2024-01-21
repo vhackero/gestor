@@ -14,6 +14,8 @@ public interface GrupoService {
 	List<GrupoDTO> findAll();
 	
 	public List<GrupoDTO> getGruposByEvento(Integer idEvento);
+	
+	public List<GrupoDTO> getGruposPorIdEventos(List<Integer> eventos);
 
 	GrupoDTO generarGrupo(Integer idEvento, Long usuarioModifico);
 
@@ -32,8 +34,8 @@ public interface GrupoService {
 
 	Map<Integer,Boolean> validaActasCerradas(List<Integer> idEventoCapacitacion);
 	
-	List<GrupoDTO> generarGruposDispersion(EventoCapacitacionDTO evento, 
-			TblInscripcionResumenDTO inscripcionResumen, Long usuarioModifico);
+	List<GrupoDTO> generarGruposDispersion(List<EventoCapacitacionDTO> eventos, TblInscripcionResumenDTO inscripcionResumen, 
+			Long usuarioModifico, ParametroWSMoodleDTO parametroWSMoodleDTO);
 	
 
 }

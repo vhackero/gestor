@@ -14,10 +14,12 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblInscripcion;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.model.especificaciones.PlanEspecificacion;
 import mx.gob.sedesol.basegestor.model.repositories.planesyprogramas.PlanRepo;
@@ -194,6 +196,22 @@ public class PlanServiceImpl extends ComunValidacionService<PlanDTO> implements 
     public Integer obtieneUltimoIdPlanes() {
         return planRepo.obtieneUltimoIdPlanes();
     }
+    
+    @Override
+    public List<PlanDTO> obtenerPlanesPorIds(List<Integer> idPlanes) {
+        
+        List<PlanDTO> listDTO;
+
+		List<TblPlan> lista = planRepo.obtenerPlanesPorIds(idPlanes);
+
+		Type objetoDTO = new TypeToken<List<TblInscripcionDTO>>() {
+		}.getType();
+
+		listDTO = planMapper.map(lista, objetoDTO);
+
+		return listDTO;
+    }
+
 
     @Override
     public void validarPersistencia(PlanDTO dto, ResultadoDTO<PlanDTO> resultado) {

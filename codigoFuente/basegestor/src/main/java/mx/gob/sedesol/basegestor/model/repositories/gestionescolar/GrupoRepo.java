@@ -33,6 +33,11 @@ public interface GrupoRepo extends JpaRepository<TblGrupo, Integer>, JpaSpecific
 	public List<TblGrupo> getGruposByEventoIdEventos(@Param("idEventosCapacitacion")List<Integer> idEventos,			
 			@Param("fechaActual")Date fechaActual);
 
+	@Query("SELECT grupo FROM TblGrupo grupo "
+			+ "JOIN grupo.evento evt "
+			+ "WHERE evt.idEvento IN (:idEvento)")
+	public List<TblGrupo> getGruposByEventos(@Param("idEvento")List<Integer> idVento);
+	
 
 
 }

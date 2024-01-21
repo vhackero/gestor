@@ -15,7 +15,6 @@ import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaD
 import mx.gob.sedesol.basegestor.commons.utils.DateUtils;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
-import mx.gob.sedesol.basegestor.model.entities.encuestas.RelEncuestaEventoCapacitacion;
 
 public class EventoCapacitacionDTO implements Serializable {
 
