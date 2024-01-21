@@ -134,8 +134,8 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 	    Optional.ofNullable(nombresGrupoFinales).orElse(Collections.emptyList()).stream()
         .forEach(System.out::println);
 		//gruposDTO = almacenarGruposMoodle(eventos.get(0), usuarioModifico, nombresGrupoFinales, parametroWSMoodleDTO);
-		gruposDTO = almacenarGrupo(nombresGrupoFinales, eventos.get(0), usuarioModifico);
-		
+		//gruposDTO = almacenarGrupo(nombresGrupoFinales, eventos.get(0), usuarioModifico);
+		gruposDTO = almacenarGruposMoodleDispersion( eventos, usuarioModifico,nombresGrupoFinales,parametroWSMoodleDTO);
 	
 		return gruposDTO;
 	}
@@ -155,25 +155,31 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 		}
 		return gruposDTO;
 	}
-	/*private List<GrupoDTO> almacenarGruposMoodleDispersion(List<EventoCapacitacionDTO> eventos, Long usuarioModifico,
+	private List<GrupoDTO> almacenarGruposMoodleDispersion(List<EventoCapacitacionDTO> eventos, Long usuarioModifico,
 			List<String> nombresGrupo, ParametroWSMoodleDTO parametroWSMoodleDTO) {
 		logger.info("###almacenarGruposMoodle #   usuarioModifico:" +usuarioModifico +""+nombresGrupo.size()  );
 		
 		logger.info("###parametroWSMoodleDTO #" + parametroWSMoodleDTO.toString() );
 		List<GrupoDTO> gruposDTO = new ArrayList<>();
-		List<Grupo> grupos = generarGruposMoodle(eventos.get(0), nombresGrupo);
+		List<Grupo> grupos = generarGruposMoodleDispersion(eventos, nombresGrupo);
 		CrearGrupo crearGrupoWS = new CrearGrupo(parametroWSMoodleDTO);
 		try {
 			List<Grupo> gruposResultado = crearGrupoWS.crearGrupos(grupos);
-			for (Grupo grupoResultado : gruposResultado) {
-				logger.info("###GMoodle" + grupoResultado.getName() + " " + grupoResultado.getId() + "#");
-				gruposDTO.add(almacenarGrupo(grupoResultado, eventos.get(0).getIdEvento(), usuarioModifico));
+			logger.info("### Se almacenaron: " + gruposResultado.size()+ " grupos.");
+			if(gruposResultado.size()== eventos.size()) {
+				for (Grupo grupoResultado : gruposResultado) {
+					logger.info("###GMoodle" + grupoResultado.getName() + " " + grupoResultado.getId() + "#");
+					gruposDTO.add(almacenarGrupo(grupoResultado, eventos.get(0).getIdEvento(), usuarioModifico));
+				}
+			}else {
+				logger.info("### Se almacenaron menos grupos que eventos #" );
 			}
+			
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
 		return gruposDTO;
-	}*/
+	}
 
 	private List<GrupoDTO> almacenarGruposMoodle(EventoCapacitacionDTO evento, Long usuarioModifico,
 			List<String> nombresGrupo, ParametroWSMoodleDTO parametroWSMoodleDTO) {
@@ -280,6 +286,17 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 		}
 		return grupos;
 	}
+	
+	private List<Grupo> generarGruposMoodleDispersion(List<EventoCapacitacionDTO> eventos, List<String> nombres) {
+		List<Grupo> grupos = new ArrayList<>();
+		for (int i=0; i< eventos.size();i ++) {
+			Grupo grupo = new Grupo();
+			grupo.setName(nombres.get(i));
+			grupo.setCourseid(eventos.get(i).getIdCursoLmsBorrador());
+			grupos.add(grupo);
+		}
+		return grupos;
+	}
 
 	private GrupoDTO almacenarGrupo(Grupo grupo, Integer idEvento, Long usuarioModifico) {
 		TblGrupo grupoEnt = new TblGrupo();
@@ -294,6 +311,7 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 
 		return modelMapper.map(grupoEnt, GrupoDTO.class);
 	}
+	
 
 	@Override
 	public GrupoDTO generarGrupo(Integer idEvento, Long usuarioModifico) {
