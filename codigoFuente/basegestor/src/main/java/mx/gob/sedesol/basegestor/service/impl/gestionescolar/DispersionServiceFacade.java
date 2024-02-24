@@ -77,67 +77,11 @@ public class DispersionServiceFacade {
 	public List<TblInscripcionDTO> getInscripcionesByIdPlanPrograma(Integer idPlan, String programa) {
 		return dispersionService.getInscripcionesByIdPlanPrograma(idPlan,programa);
 	}
-	
-	/*
-
-
-	public List<EventoCapacitacionDTO> consultaEventoPorEstatus(Integer idEstatus) {
-		return eventoCapacitacionService.consultaEventoPorEstatus(idEstatus);
-	}
-
-	public CapturaEventoCapacitacionDTO nuevoEventoCapacitacion(Long usuarioModifico) {
-		CapturaEventoCapacitacionDTO datos = new CapturaEventoCapacitacionDTO();
-		datos.setEvento(new EventoCapacitacionDTO());
-		return datos;
-	}
-
-	public List<EventoCapacitacionDTO> busquedaPorCriterios(EventoCapacitacionDTO filtros, String tipoDatoFechas) {
-		return eventoCapacitacionService.buscaEventosPorCriterios(filtros, tipoDatoFechas);
-	}
-
-	public EventoCapacitacionDTO busquedaPorID(EventoCapacitacionDTO filtros) {
-		return eventoCapacitacionService.getEvento(filtros.getIdEvento());
-	}
-
-	public List<FichaDescProgramaDTO> buscaProgramasPorCriterios(FichaDescProgramaDTO filtro) {
-		// return
-		// fichaDescProgramaService.buscaProgramasPorCriteriosDatosBasicos(filtro);
-		return fichaDescProgramaService.buscaProgramasPorCriterios(filtro);
-	}
-*/
 
 
 	public List<ParametroWSMoodleDTO> obtenerPlataformasMoodle() {
 		return parametroWSMoodleService.findAll();
 	}
-
-/*
-	public List<ProgramaSocialDTO> obtenerProgramasSociales() {
-		return getProgramaSocialService().findAll();
-	}
-
-
-	public ResultadoDTO<EventoCapacitacionDTO> guardarEventoCapacitacion(CapturaEventoCapacitacionDTO evento, Boolean autonomo) {
-		ResultadoDTO<EventoCapacitacionDTO> resultado = new ResultadoDTO<>();
-		try {
-			resultado = eventoCapacitacionService.guardarEventoCapacitacion(evento, autonomo);
-		} catch (Exception e) {
-			resultado.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);
-			logger.error(e.getMessage(), e);
-		}
-		return resultado;
-	}
-
-	public ResultadoDTO<EventoCapacitacionDTO> guardarBorrador(CapturaEventoCapacitacionDTO evento, Boolean autonomo) {
-		ResultadoDTO<EventoCapacitacionDTO> resultado = new ResultadoDTO<>();
-		try {
-			resultado = eventoCapacitacionService.guardarBorrador(evento, autonomo);
-		} catch (Exception e) {
-			resultado.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);
-			logger.error(e.getMessage(), e);
-		}
-		return resultado;
-	}*/
 
 	public RelGrupoParticipanteDTO almacenarParticipante(GrupoDTO grupo, PersonaDTO persona,
 			EventoCapacitacionDTO evento, ParametroWSMoodleDTO parametroWSMoodleDTO) {
