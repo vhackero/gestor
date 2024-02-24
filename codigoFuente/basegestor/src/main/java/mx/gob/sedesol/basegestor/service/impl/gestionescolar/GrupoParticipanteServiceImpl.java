@@ -242,7 +242,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 			System.out.println("::::MODALIDAD_LINEA:::: MODALIDAD_MIXTO "); 
 			resultado = almacenarAlumnosMoodle(listaPersonas, grupo, evento, parametroWSMoodleDTO);
 		} else {
-			System.out.println("::::almacenarAlumnosNormales "); 
+//			System.out.println("::::almacenarAlumnosNormales "); 
 			resultado = almacenarAlumnosNormales(listaPersonas, grupo);
 		}
 		return resultado;
@@ -273,9 +273,6 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 		List<AlumnoGrupo> listaAlumnosGrupo = new ArrayList<>();
 		List<RelGrupoParticipante> personasCorrectas = new ArrayList<>();
 		for (PersonaDTO persona : listaPersonas) {
-//			System.out.println("::::almacenarAlumnosMoodle::::  persona "+ persona); 
-//			System.out.println("::::almacenarAlumnosMoodle::::  parametroWSMoodleDTO "+ parametroWSMoodleDTO); 
-//			System.out.println("::::almacenarAlumnosMoodle::::  grupo "+ grupo); 
 			Integer idPersonaMoodle = relPersonaPlataformaMoodleService.obtenerIdMoodle(persona, parametroWSMoodleDTO,
 					grupo.getUsuarioModifico());
 			if (ObjectUtils.isNullOrCero(idPersonaMoodle)) {
