@@ -78,4 +78,11 @@ public class RelPersonaPlataformaMoodleDTO implements Serializable {
 	public void setUsuarioModifico(Long usuarioModifico) {
 		this.usuarioModifico = usuarioModifico;
 	}
+	@Override
+	public String toString() {
+		return "RelPersonaPlataformaMoodleDTO [idPersona=" + idPersona + ", idPlataformaMoodle=" + idPlataformaMoodle
+				+ ", idPersonaMoodle=" + idPersonaMoodle + ", fechaRegistro=" + fechaRegistro + ", usuarioModifico="
+				+ usuarioModifico + "]";
+	}
+	
 }
