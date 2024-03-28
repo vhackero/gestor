@@ -810,8 +810,10 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                             try {
                             RelPersonaPlataformaMoodleDTO personaMoodle = eventoCapacitacionServiceFacade
                                     .getRelPersonaPlataformaMoodle()
-                                    .obtenerPersonaPlataformaMoodle(g.getUserid(), plataforma.getIdParametroWSMoodle());
+                                    .obtenerPersonaPlataformaByPersonaMoodle(g.getUserid(), plataforma.getIdParametroWSMoodle());
 
+                            log.info("personaMoodle>> "+ personaMoodle.toString());
+                            
                             if (!containsPersona(personaMoodle.getIdPersona(), participantesMoodle)) {
                                 TablaCalificacionesDTO auxCal = new TablaCalificacionesDTO();
                                 auxCal.setParticipante(eventoCapacitacionServiceFacade.getPersonaService()
