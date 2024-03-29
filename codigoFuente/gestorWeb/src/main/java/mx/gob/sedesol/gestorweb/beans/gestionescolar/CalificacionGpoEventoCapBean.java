@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
@@ -13,6 +14,7 @@ import javax.faces.event.ValueChangeEvent;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
+import org.primefaces.event.FileUploadEvent;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
@@ -179,6 +181,11 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
     public void abrirDialogValidar() {
         RequestContext.getCurrentInstance().execute("PF('dlgCerrarActa').show()");
+    }
+    
+    public void handleFileUpload(FileUploadEvent event) {
+        FacesMessage msg = new FacesMessage("Successful", event.getFile().getFileName() + " is uploaded.");
+        FacesContext.getCurrentInstance().addMessage(null, msg);
     }
 
     /**
@@ -813,7 +820,6 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                                     .obtenerPersonaPlataformaByPersonaMoodle(g.getUserid(), plataforma.getIdParametroWSMoodle());
 
                             log.info("personaMoodle>> "+ personaMoodle.toString());
-                            
                             if (!containsPersona(personaMoodle.getIdPersona(), participantesMoodle)) {
                                 TablaCalificacionesDTO auxCal = new TablaCalificacionesDTO();
                                 auxCal.setParticipante(eventoCapacitacionServiceFacade.getPersonaService()
