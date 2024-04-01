@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.service.impl.admin;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -9,9 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.DiscapacidadDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.MunicipioDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.TipoDiscapacidadDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.model.entities.admin.CatDiscapacidad;
+import mx.gob.sedesol.basegestor.model.entities.admin.CatTipoDiscapacidad;
 import mx.gob.sedesol.basegestor.model.repositories.admin.DiscapacidadRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.TipoDiscapacidadRepo;
 import mx.gob.sedesol.basegestor.service.admin.DiscapacidadService;
@@ -50,7 +53,18 @@ public class DiscapacidadServiceImpl implements DiscapacidadService{
 	
 	@Override
 	public List<TipoDiscapacidadDTO> buscarTipoDiscapacidadPorDiscapacidad(int idDiscapacidad) {
-		return modelMapper.map(tipoDiscapacidadRepo.buscarPorDiscapacidad(idDiscapacidad), tipoListaTipoDiscapacidad);
+		
+		// ITTIVA se agrega validacion de lista de vacio
+		
+		List<CatTipoDiscapacidad> lista = tipoDiscapacidadRepo.buscarPorDiscapacidad(idDiscapacidad);
+		
+		if(!lista.isEmpty()) {
+			return modelMapper.map(lista, tipoListaTipoDiscapacidad);
+		}else {
+			List<TipoDiscapacidadDTO> regreso = new ArrayList<>();
+			return regreso;
+		}	
+		
 	}
 
 	
