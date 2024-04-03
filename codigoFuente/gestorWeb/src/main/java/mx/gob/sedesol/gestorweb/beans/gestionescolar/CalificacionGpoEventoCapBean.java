@@ -832,7 +832,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     /**
      * Consume WebService
      */
-    public void descargarPlantillaCalificaciones2() {
+    public void descargarPlantillaCalificaciones() {
 
         //tablaAuxCalif = new ArrayList<>();
         
@@ -889,8 +889,8 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
     }
     
-    public void descargarPlantillaCalificaciones() {
-    	log.info("estoy en el 2");
+    public void descargarPlantillaCalificaciones2() {
+  
 		ReporteConfig reporteConfig = new ReporteConfig();
 		reporteConfig.setDatos(null);
 		reporteConfig.setNombreReporte("Acta de Calificaciones");
