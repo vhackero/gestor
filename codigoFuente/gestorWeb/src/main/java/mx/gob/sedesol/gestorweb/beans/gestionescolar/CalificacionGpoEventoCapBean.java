@@ -878,12 +878,13 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     			params.put("pFolio", encabezado.getMatricula().toUpperCase());
     			params.put("pNombre", encabezado.getDocente());
     			params.put("LOGO", "");
-    			
-    			reporteConfig.setParametros(params);
+    			    			
     		}
+    		
+    		reporteConfig.setParametros(params);
 
     		plantillaPDF = ReporteUtil.getStreamedContentOfBytes(ReporteUtil.generar(reporteConfig),
-    				"application/pdf", "Constancia");		
+    				"application/pdf", "Acta_Calificaciones");		
     		
     		RequestContext.getCurrentInstance().execute("PF('visorPlantilla').show()");
     		RequestContext.getCurrentInstance().update("visorPdf");
