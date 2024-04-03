@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
+import javax.faces.application.FacesMessage;
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -21,6 +21,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
+
 import org.primefaces.model.StreamedContent;
 import org.primefaces.model.UploadedFile;
 
@@ -229,9 +230,6 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         RequestContext.getCurrentInstance().execute("PF('dlgCerrarActa').show()");
     }
     
-    public void abrirDialogCargar() {
-        RequestContext.getCurrentInstance().execute("PF('visorCargaArchivo').show()");
-    }
 
     /**
      * @param e
@@ -1033,7 +1031,6 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                                     .obtenerPersonaPlataformaByPersonaMoodle(g.getUserid(), plataforma.getIdParametroWSMoodle());
 
                             log.info("personaMoodle>> "+ personaMoodle.toString());
-                            
                             if (!containsPersona(personaMoodle.getIdPersona(), participantesMoodle)) {
                                 TablaCalificacionesDTO auxCal = new TablaCalificacionesDTO();
                                 auxCal.setParticipante(eventoCapacitacionServiceFacade.getPersonaService()
