@@ -1,5 +1,8 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,6 +18,7 @@ import javax.faces.event.ValueChangeEvent;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
+import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.StreamedContent;
 import org.primefaces.model.UploadedFile;
 
@@ -118,7 +122,6 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     private List<RelGrupoParticipanteDTO> participantesByGrupo;
     private List<TablaCalificacionesDTO> tablaAuxCalif;
 
-    // private List<TablaCalificacionesDTO> unmodifTblAuxCalif;
     private List<CalificacionECDTO> calificaciones;
 
     private boolean muestraTblCalif;
@@ -143,7 +146,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 	private StreamedContent plantillaPDF;
 	
 	/** ITTIVA */
-	private UploadedFile file;
+	//private UploadedFile file;
 
     public StreamedContent getPlantillaPDF() {
 		return plantillaPDF;
@@ -155,6 +158,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         tablaAuxCalif = new ArrayList<>();
         asistenciasPart = new ArrayList<>();
     }
+
 
     // @PostConstruct
     public String inicializaDatosCalif() {
@@ -219,6 +223,10 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
     public void abrirDialogValidar() {
         RequestContext.getCurrentInstance().execute("PF('dlgCerrarActa').show()");
+    }
+    
+    public void abrirDialogCargar() {
+        RequestContext.getCurrentInstance().execute("PF('visorCargaArchivo').show()");
     }
 
     /**
@@ -817,8 +825,17 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     }
     
     
-    
-    public void descargarPlantillaCalificaciones() {
+	/** ITTIVA */
+	public void handleFileUpload(FileUploadEvent event) {
+        UploadedFile file = event.getFile();
+        log.info("este es mi archivo");
+        log.info(file);
+        // Aquí puedes acceder a la información del archivo cargado
+        // utilizando la instancia de UploadedFile
+    }
+	
+    public void descargarPlantillaCalificaciones( ) {
+  
 		ReporteConfig reporteConfig = new ReporteConfig();
 		reporteConfig.setDatos(null);
 		reporteConfig.setNombreReporte("ActaCalificaciones");
@@ -880,9 +897,10 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
      *  CARGA ACTA
      *  @author ITTIVA
      */
-    public void cargarActa() {    	
+    public void cargarActa(FileUploadEvent file) {    	
+
     	
-    	try {
+    	try  (InputStream input = file.getFile().getInputstream(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
     		
     		log.info("INICIA CARGA PLANTILLA CALIFICACIONES !!!");
     		
@@ -890,10 +908,23 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         		
         		Acta acta = new Acta();
         		
+        		byte[] fileBytes = null;
+        		
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = input.read(buffer)) != -1) {
+                	output.write(buffer, 0, length);
+                }
+                fileBytes = output.toByteArray();  
+                
+                
+                acta.setBlob(fileBytes);
+                acta.setFechaCierre(new Date());
+        		
         		iCargaActaService.cargaActa(acta);
         		
-        		agregarMsgInfo( "CARGA DE ARCHIVO: "+ file.getFileName() + " - CORRECTA", null);
-        		log.info("CARGA DE ARCHIVO: "+ file.getFileName() + " - CORRECTA");		
+        		agregarMsgInfo( "CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA", null);
+        		log.info("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA");		
     
         	}else {
         		agregarMsgWarn( "SELECCIONE UN ARCHIVO !!!" , null );
@@ -904,8 +935,8 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         	log.info("TERMINA CARGA PLANTILLA CALIFICACIONES");
     		
     	} catch (Exception e) {    		
-            agregarMsgError("CARGA DE ARCHIVO: "+ file.getFileName() + " - ERROR", e.getMessage());
-            log.error("CARGA DE ARCHIVO: "+ file.getFileName() + " - ERROR");
+            agregarMsgError("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - ERROR", e.getMessage());
+            log.error("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - ERROR");
         }
     
     }

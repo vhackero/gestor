@@ -38,7 +38,7 @@ public class Acta implements Serializable {
 	private TblGrupo grupo;
 	
 	@Column(name="acta")
-	private Long blob;
+	private byte[] blob;
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "fecha_cierre")
@@ -65,14 +65,6 @@ public class Acta implements Serializable {
 		this.grupo = grupo;
 	}
 
-	public Long getBlob() {
-		return blob;
-	}
-
-	public void setBlob(Long blob) {
-		this.blob = blob;
-	}
-
 	public Date getFechaCierre() {
 		return fechaCierre;
 	}
@@ -87,6 +79,14 @@ public class Acta implements Serializable {
 
 	public void setUsuarioModifico(Long usuarioModifico) {
 		this.usuarioModifico = usuarioModifico;
+	}
+
+	public byte[] getBlob() {
+		return blob;
+	}
+
+	public void setBlob(byte[] blob) {
+		this.blob = blob;
 	}
 
 }
