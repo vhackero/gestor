@@ -3,10 +3,8 @@ package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,7 +13,6 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,13 +20,9 @@ import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajasDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionRecordDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CapturaEventoCapacitacionDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoActaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PersonaResponsabilidadesDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TablaCalificacionesDTO;
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.PersonalizacionAreaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.RelAreaRecursoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.RelPersonalizacionRecursoDTO;
@@ -157,68 +150,6 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 	Type tipoListaEvento = new TypeToken<List<EventoCapacitacionDTO>>() {
 	}.getType();
 
-	@Override
-	public EncabezadoActaDTO obtenerEncabezadoActa(Integer idEvento, Integer idGrupo){
-		
-		List<EncabezadoActaDTO> optional = eventoCapacitacionRepo.obtenerEncabezadoActa(idEvento, idGrupo);
-		EncabezadoActaDTO encabezado = null;
-		if(optional.size() > 0) {
-			encabezado = optional.get(0);
-		}
-		
-		return encabezado;
-	}
-	
-	@Override
-	public List<CalificacionRecordDTO> obtieneDetalleActa(Integer idEvento, Integer idCurso, List<TablaCalificacionesDTO> listaCalif){
-		List<CalificacionRecordDTO> lista = new ArrayList<CalificacionRecordDTO>(); 
-		List<Integer> idsMoodle = new ArrayList<Integer>();
-		for(TablaCalificacionesDTO dto : listaCalif) {
-			idsMoodle.add(dto.getIdPersonaMoodle());
-		}
-		
-		
-		List<BajasDTO> bajas = eventoCapacitacionRepo.obtenerBajas(idEvento, idCurso, idsMoodle);
-		HashMap<Integer, BajasDTO> mapaBajas = new HashMap<Integer, BajasDTO>();
-		if(bajas == null) {
-			bajas = new ArrayList<BajasDTO>();
-		}else {
-			for(BajasDTO dto : bajas) {
-				mapaBajas.put(dto.getIdpersonamoodle(), dto);
-			}
-		}
-		
-		int index = 1;
-		for(TablaCalificacionesDTO dto : listaCalif) {
-			
-			CalificacionRecordDTO cal = new CalificacionRecordDTO();
-			
-			cal.setNo(String.valueOf(index));
-			cal.setMatricula(dto.getParticipante().getUsuario().toUpperCase());
-			
-			StringBuilder sb = new StringBuilder();
-			sb.append(dto.getParticipante().getApellidoPaterno())
-			.append(" ")
-			.append(dto.getParticipante().getApellidoMaterno())
-			.append(" ")
-			.append(dto.getParticipante().getNombre());
-			cal.setEstudiante(sb.toString());
-
-			cal.setCalificacion(String.valueOf(dto.getCalifFinal()));
-			
-			//validamos si existe baja
-			if(mapaBajas.containsKey(dto.getIdPersonaMoodle())) {
-				cal.setCalificacion("NP");
-			}
-			lista.add(cal);
-			
-			index++;
-		}
-		
-		return lista;
-	} 
-	
-	
 	@Override
 	public List<EventoCapacitacionDTO> obtenerTodosLosEventos() {
 		// TODO Auto-generated method stub

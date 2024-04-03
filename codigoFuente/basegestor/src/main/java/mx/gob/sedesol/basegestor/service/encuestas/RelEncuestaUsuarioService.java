@@ -5,7 +5,6 @@ import java.util.List;
 import mx.gob.sedesol.basegestor.commons.dto.encuestas.EncuestaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.encuestas.RelEncuestaUsuarioDTO;
 import mx.gob.sedesol.basegestor.model.entities.encuestas.RelEncuestaUsuario;
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta;
 import mx.gob.sedesol.basegestor.service.admin.CommonService;
 
 public interface RelEncuestaUsuarioService extends CommonService<RelEncuestaUsuarioDTO, Integer>
@@ -23,6 +22,4 @@ public interface RelEncuestaUsuarioService extends CommonService<RelEncuestaUsua
 	List<RelEncuestaUsuarioDTO> consultarEncuestasAsignadas(List<Integer> clEventoList,Long clPersona,Boolean esActivo);
 	List<RelEncuestaUsuarioDTO> obtenerParticipantesEncuestasPorPrograma(Integer idPrograma);
 	String fecharLimite(Date fecha, Integer dias);
-	
-	public void cargaActa(Acta acta);
 }

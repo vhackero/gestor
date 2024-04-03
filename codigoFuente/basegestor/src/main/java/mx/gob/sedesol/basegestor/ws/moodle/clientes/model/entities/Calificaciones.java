@@ -32,8 +32,4 @@ public class Calificaciones {
         this.outcomes = outcomes;
     }
 
-	@Override
-	public String toString() {
-		return "Calificaciones [items=" + items + ", outcomes=" + outcomes + "]";
-	}
 }

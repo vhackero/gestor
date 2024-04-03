@@ -103,11 +103,4 @@ public class Elemntos {
     public void setGrades(List<Grado> grades) {
         this.grades = grades;
     }
-
-	@Override
-	public String toString() {
-		return "Elemntos [activityid=" + activityid + ", itemnumber=" + itemnumber + ", scaleid=" + scaleid + ", name="
-				+ name + ", grademin=" + grademin + ", grademax=" + grademax + ", gradepass=" + gradepass + ", locked="
-				+ locked + ", hidden=" + hidden + ", grades=" + grades + "]";
-	}
 }
