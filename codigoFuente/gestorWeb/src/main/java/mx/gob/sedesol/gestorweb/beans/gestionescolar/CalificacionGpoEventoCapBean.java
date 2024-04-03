@@ -1028,7 +1028,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                             try {
                             RelPersonaPlataformaMoodleDTO personaMoodle = eventoCapacitacionServiceFacade
                                     .getRelPersonaPlataformaMoodle()
-                                    .obtenerPersonaPlataformaByPersonaMoodle(g.getUserid(), plataforma.getIdParametroWSMoodle());
+                                    .obtenerPersonaPlataformaMoodle(g.getUserid(), plataforma.getIdParametroWSMoodle());
 
                             log.info("personaMoodle>> "+ personaMoodle.toString());
                             if (!containsPersona(personaMoodle.getIdPersona(), participantesMoodle)) {
