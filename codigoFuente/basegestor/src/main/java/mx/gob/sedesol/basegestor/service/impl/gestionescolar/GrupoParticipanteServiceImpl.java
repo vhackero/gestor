@@ -633,10 +633,13 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 
 	@Override
 	public List<EventoConstanciaDTO> getParticipanteByActaCerradaYconstancia(Long idPersona) {
+		idPersona = Long.valueOf(711) ;
 		List<RelGrupoParticipante> rgp = grupoParticipanteRepo.getParticipanteByActaCerradaYconstancia(idPersona);
 		List<EventoConstanciaDTO> eventos = new ArrayList<>();
 		List<RelEncuestaUsuarioDTO> encuestas = new ArrayList<>();
-		if (ObjectUtils.isNotNull(rgp)) {
+		
+		// ITTIVA se cambia validacion ya que esta erronea
+		if (!rgp.isEmpty()) {
 			String nombreDirectorGeneral = parametroSistemaService
 					.obtenerParametro(ConstantesGestor.NOMBRE_DIRECTOR_GENERAL);
 			String ciudadConstancia = parametroSistemaService.obtenerParametro(ConstantesGestor.CIUDAD_CONSTANCIA);

@@ -430,6 +430,7 @@ public class EventoCapacitacionBean extends BaseBean {
 			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
 			filtros.getFichaDescriptivaPrograma().setEjeCapacitacion(idSubEstructura);
 			catSubEstructurasNivel1 = this.generarSubEstructuras1(nodos, idSubEstructura);
+			logger.info(" catSubEstructurasNivel1 --> "+ catSubEstructurasNivel1.size() );
 			nombreEjeCapacitacion = getNombreElemento(idSubEstructura, catSubEstructurasNivel1);
 			logger.info(" nombreEjeCapacitacion --> "+ idSubEstructura + " - "+ nombreEjeCapacitacion);
 			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
@@ -442,6 +443,7 @@ public class EventoCapacitacionBean extends BaseBean {
 			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
 			filtros.getFichaDescriptivaPrograma().setEjeCapacitacion(idSubEstructura);
 			catSubEstructurasNivel2 = this.generarSubEstructuras2(nodos, idSubEstructura);
+			logger.info(" catSubEstructurasNivel2 --> "+ catSubEstructurasNivel2.size() );
 			nombreTpoCompetencia = getNombreElemento(idSubEstructura, catSubEstructurasNivel2);
 			logger.info(" nombreTpoCompetencia --> "+ idSubEstructura + " - "+ nombreTpoCompetencia);
 			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
@@ -683,7 +685,6 @@ public class EventoCapacitacionBean extends BaseBean {
 		
 		nombres += " /"+malla.getNombre();
 		String padre = buscarPadre(malla.getMallaCurricularPadre(), nombres);
-		
 		return padre != null ? padre : null;
 	}
 

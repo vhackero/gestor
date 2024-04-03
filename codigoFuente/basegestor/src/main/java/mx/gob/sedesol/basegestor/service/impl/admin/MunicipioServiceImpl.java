@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.service.impl.admin;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -39,7 +40,18 @@ public class MunicipioServiceImpl extends ComunValidacionService<MunicipioDTO> i
 
 	@Override
 	public List<MunicipioDTO> buscarPorEntidadFederativa(int idEntidadFederativa) {
-		return modelMapper.map(municipioRepo.buscarPorEntidadFederativa(idEntidadFederativa), tipoListaMunicipio);
+		
+		// ITTIVA Se agrega validacion de lista de vacio
+		
+		List<CatMunicipio> lista = municipioRepo.buscarPorEntidadFederativa(idEntidadFederativa);
+		
+		if(!lista.isEmpty()) {				
+			return modelMapper.map(lista, tipoListaMunicipio);		
+		}else {
+			List<MunicipioDTO> regreso = new ArrayList<>();
+			return regreso;
+		}
+
 	}
 
 	@Override

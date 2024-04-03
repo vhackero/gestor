@@ -171,7 +171,9 @@ public class EventoCapacitacionServiceFacade {
 			for (CalificacionECDTO evaluacion : calificaciones) {
 
 				RelGrupoEvaluacionDTO ge = new RelGrupoEvaluacionDTO();
-				GrupoDTO gpo = getGrupoService().buscarGrupoPorId(gpoSeleccionado.getIdGrupo());
+				
+				GrupoDTO gpo = gpoSeleccionado;
+				//GrupoDTO gpo = getGrupoService().buscarGrupoPorId(gpoSeleccionado.getIdGrupo());
 
 				if (ObjectUtils.isNotNull(gpo)) {
 
