@@ -20,6 +20,15 @@ public class CalificacionRecordDTO implements Serializable{
 	private String estudiante;
 	
 	private String calificacion;
+	
+	public CalificacionRecordDTO() {};
+	
+	public CalificacionRecordDTO(String no, String matricula, String estudiante, String calificacion) {
+		this.no = no;
+		this.matricula = matricula;
+		this.estudiante = estudiante;
+		this.calificacion = calificacion;
+	};
 
 	public String getNo() {
 		return no;

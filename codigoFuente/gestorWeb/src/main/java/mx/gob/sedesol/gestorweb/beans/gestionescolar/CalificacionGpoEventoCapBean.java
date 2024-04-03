@@ -31,6 +31,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenciaAuxDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionECDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CatAsistenciaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoActaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelAsistenciaDTO;
@@ -828,20 +829,71 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     }
     
     
-	/** ITTIVA */
-	public void handleFileUpload(FileUploadEvent event) {
-        UploadedFile file = event.getFile();
-        log.info("este es mi archivo");
-        log.info(file);
-        // Aquí puedes acceder a la información del archivo cargado
-        // utilizando la instancia de UploadedFile
+    /**
+     * Consume WebService
+     */
+    public void descargarPlantillaCalificaciones2() {
+
+        //tablaAuxCalif = new ArrayList<>();
+        
+        //generacion del reporte
+    		ReporteConfig reporteConfig = new ReporteConfig();
+    		reporteConfig.setDatos(null);
+    		reporteConfig.setNombreReporte("Acta de Calificaciones");
+    		reporteConfig.setPathJasper("/resources/jasperReport/actaCalificaciones/actaCalificaciones.jasper");
+    		reporteConfig.setTipoReporte(ReporteUtil.REPORTE_PDF);
+    		
+    		String LOGO = "/resources/jasperReport/LOGO_EDU_UNADM.png";
+    		InputStream strmLOGO = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(LOGO);
+    		
+    		HashMap<String, Object> params = new HashMap<>();
+    		
+    		List<CalificacionRecordDTO> listaCalificaciones = new ArrayList<CalificacionRecordDTO>();
+    		
+    		listaCalificaciones = eventoCapacitacionServiceFacade.getEventoCapacitacionService().obtieneDetalleActa(
+    				evento.getIdEvento(), evento.getIdCursoLmsBorrador() , tablaAuxCalif);
+    		
+    		JRBeanArrayDataSource dsCalificaciones2 = new JRBeanArrayDataSource(listaCalificaciones.toArray());
+    		params.put("dsCalificaciones", dsCalificaciones2);	
+
+    		EncabezadoActaDTO encabezado = eventoCapacitacionServiceFacade.getEventoCapacitacionService().obtenerEncabezadoActa(evento.getIdEvento(), grupoSelec.getIdGrupo());
+    		
+    		if(encabezado == null) {
+    			params.put("pProgramaEducativo", "No encontrado");
+    			params.put("pClavePE", "");
+    			params.put("pPeriodo", "");
+    			params.put("pAsignatura", "");
+    			params.put("pClaveAS", "");
+    			params.put("pGrupo", "");
+    			params.put("pFolio", "");
+    			params.put("pNombre", "");   
+    			params.put("LOGO", strmLOGO);   
+    		}else {
+    			params.put("pProgramaEducativo", encabezado.getPrograma());
+    			params.put("pClavePE", encabezado.getCveprograma());
+    			params.put("pPeriodo", encabezado.getPeriodo());
+    			params.put("pAsignatura", encabezado.getAsignatura());
+    			params.put("pClaveAS", encabezado.getCveAsignatura());
+    			params.put("pGrupo", encabezado.getGrupo());
+    			params.put("pFolio", encabezado.getMatricula().toUpperCase());
+    			params.put("pNombre", encabezado.getDocente());
+    			params.put("LOGO", "");
+    		}
+
+    		plantillaPDF = ReporteUtil.getStreamedContentOfBytes(ReporteUtil.generar(reporteConfig),
+    				"application/pdf", "Constancia");		
+    		
+    		RequestContext.getCurrentInstance().execute("PF('visorPlantilla').show()");
+    		RequestContext.getCurrentInstance().update("visorPdf");
+    		RequestContext.getCurrentInstance().scrollTo("visorPdf");
+
     }
-	
-    public void descargarPlantillaCalificaciones( ) {
-  
+    
+    public void descargarPlantillaCalificaciones() {
+    	log.info("estoy en el 2");
 		ReporteConfig reporteConfig = new ReporteConfig();
 		reporteConfig.setDatos(null);
-		reporteConfig.setNombreReporte("ActaCalificaciones");
+		reporteConfig.setNombreReporte("Acta de Calificaciones");
 		reporteConfig.setPathJasper("/resources/jasperReport/actaCalificaciones/actaCalificaciones.jasper");
 		reporteConfig.setTipoReporte(ReporteUtil.REPORTE_PDF);
 		
@@ -870,7 +922,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 		//reporteConfig.setDatos(listaCalificaciones);
 		
 		params.put("dsCalificaciones", dsCalificaciones2);	
-		params.put("LOGO", "");
+
 		params.put("pProgramaEducativo", "Programa");
 		params.put("pClavePE", "Clave");
 		params.put("pPeriodo", "Perio");
