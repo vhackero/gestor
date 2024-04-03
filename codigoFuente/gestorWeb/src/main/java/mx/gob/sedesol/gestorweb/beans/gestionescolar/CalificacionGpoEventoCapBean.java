@@ -39,11 +39,13 @@ import mx.gob.sedesol.basegestor.commons.utils.DictamenCalificacionEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoCalificacionECEnum;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDictamen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoCalificacionEc;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.ServiceException;
 import mx.gob.sedesol.basegestor.service.encuestas.RelEncuestaUsuarioService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.ICargaActaService;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.AsistenciaFacadeService;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.EventoCapacitacionServiceFacade;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Calificaciones;
@@ -72,6 +74,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
      */
     private static final long serialVersionUID = 1L;
     private static final Logger log = Logger.getLogger(CalificacionGpoEventoCapBean.class);
+    
+    @ManagedProperty(value = "#{cargaActaService}")
+    private ICargaActaService iCargaActaService;
 
     @ManagedProperty(value = "#{menuGestorBean}")
     private MenuGestorBean menuGestorBean;
@@ -113,15 +118,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     private List<RelGrupoParticipanteDTO> participantesByGrupo;
     private List<TablaCalificacionesDTO> tablaAuxCalif;
 
-    public UploadedFile getFile() {
-		return file;
-	}
-
-	public void setFile(UploadedFile file) {
-		this.file = file;
-	}
-
-	// private List<TablaCalificacionesDTO> unmodifTblAuxCalif;
+    // private List<TablaCalificacionesDTO> unmodifTblAuxCalif;
     private List<CalificacionECDTO> calificaciones;
 
     private boolean muestraTblCalif;
@@ -880,20 +877,37 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     }
     
     /**
-     *  CARGA LANTILLA CALIFICACIONES
+     *  CARGA ACTA
      *  @author ITTIVA
      */
-    public void cargarPlantillaCalificaciones() {
+    public void cargarActa() {    	
     	
-    	log.info("INICIA CARGA PLANTILLA CALIFICACIONES !!!");
-    	
-    	if(file != null) {
-    		agregarMsgInfo("Carga de archivo "+ file.getFileName() + " correcta", null);
-    	}
-    	
-    	
-    	log.info("TERMINA CARGA PLANTILLA CALIFICACIONES");
-    	
+    	try {
+    		
+    		log.info("INICIA CARGA PLANTILLA CALIFICACIONES !!!");
+    		
+    		if(file != null) {
+        		
+        		Acta acta = new Acta();
+        		
+        		iCargaActaService.cargaActa(acta);
+        		
+        		agregarMsgInfo( "CARGA DE ARCHIVO: "+ file.getFileName() + " - CORRECTA", null);
+        		log.info("CARGA DE ARCHIVO: "+ file.getFileName() + " - CORRECTA");		
+    
+        	}else {
+        		agregarMsgWarn( "SELECCIONE UN ARCHIVO !!!" , null );
+        		log.info("NO SE HA SELECCIONADO UN ARCHIVO");
+        	}
+        	
+        	
+        	log.info("TERMINA CARGA PLANTILLA CALIFICACIONES");
+    		
+    	} catch (Exception e) {    		
+            agregarMsgError("CARGA DE ARCHIVO: "+ file.getFileName() + " - ERROR", e.getMessage());
+            log.error("CARGA DE ARCHIVO: "+ file.getFileName() + " - ERROR");
+        }
+    
     }
     
 
