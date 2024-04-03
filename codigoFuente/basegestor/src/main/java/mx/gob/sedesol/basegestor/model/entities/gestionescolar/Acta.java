@@ -32,8 +32,7 @@ public class Acta implements Serializable {
 	@Column(name="id_acta")
 	private Integer idActa;
 	
-	//bi-directional many-to-one association to TblGrupo
-	@ManyToOne
+
 	@JoinColumn(name="id_grupo")
 	private Integer grupo;
 	
