@@ -288,28 +288,28 @@
 						</p:column>
 
 
-						<p:column>
-							<f:facet name="header">
-								<h:outputText value="Dictamen" />
-							</f:facet>
-							<f:validateBean disabled="true">
-								<p:selectOneMenu styleClass="col-xs-12"
-									value="#{partCalif.dictamen.id}"
-									rendered="#{not(calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}"
-									disabled="#{!(partCalif.conAsistencia) or calificacionGpoEventoCapBean.cerrarActa}">
-									<p:ajax process="@this" />
-									<f:selectItem
-										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-										noSelectionOption="true" />
-									<f:selectItems
-										value="#{calificacionGpoEventoCapBean.catDictamenes}"
-										var="dict" itemLabel="#{dict.nombre}" itemValue="#{dict.id}" />
-								</p:selectOneMenu>
-							</f:validateBean>
-							<h:outputText
-								rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}"
-								value="#{calificacionGpoEventoCapBean.obtenerNombreDictamen(partCalif.dictamen.id)}" />
-						</p:column>
+<!-- 						<p:column> -->
+<!-- 							<f:facet name="header"> -->
+<!-- 								<h:outputText value="Dictamen" /> -->
+<!-- 							</f:facet> -->
+<!-- 							<f:validateBean disabled="true"> -->
+<!-- 								<p:selectOneMenu styleClass="col-xs-12" -->
+<!-- 									value="#{partCalif.dictamen.id}" -->
+<!-- 									rendered="#{not(calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}" -->
+<!-- 									disabled="#{!(partCalif.conAsistencia) or calificacionGpoEventoCapBean.cerrarActa}"> -->
+<!-- 									<p:ajax process="@this" /> -->
+<!-- 									<f:selectItem -->
+<!-- 										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" -->
+<!-- 										noSelectionOption="true" /> -->
+<!-- 									<f:selectItems -->
+<!-- 										value="#{calificacionGpoEventoCapBean.catDictamenes}" -->
+<!-- 										var="dict" itemLabel="#{dict.nombre}" itemValue="#{dict.id}" /> -->
+<!-- 								</p:selectOneMenu> -->
+<!-- 							</f:validateBean> -->
+<!-- 							<h:outputText -->
+<!-- 								rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}" -->
+<!-- 								value="#{calificacionGpoEventoCapBean.obtenerNombreDictamen(partCalif.dictamen.id)}" /> -->
+<!-- 						</p:column> -->
 					</p:dataTable>
 					<!-- Tabla oculta para exportación -->
 					<p:dataTable id="exportTable"
@@ -352,41 +352,41 @@
 							</f:facet>
 							<h:outputText value="#{partCalif.participante.usuario}" />
 						</p:column>
-						<c:forEach items="#{calificacionGpoEventoCapBean.calificaciones}"
-							varStatus="indice" var="pc">
-							<p:column
-								rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}">
-								<f:facet name="header">
-									<h:outputText value="#{pc.nombreEvaluacion}" />
-								</f:facet>
-								<h:outputText
-									value="#{partCalif.calificacionEC[indice.index].calificacion}" />
-							</p:column>
+<!-- 						<c:forEach items="#{calificacionGpoEventoCapBean.calificaciones}" -->
+<!-- 							varStatus="indice" var="pc"> -->
+<!-- 							<p:column -->
+<!-- 								rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}"> -->
+<!-- 								<f:facet name="header"> -->
+<!-- 									<h:outputText value="#{pc.nombreEvaluacion}" /> -->
+<!-- 								</f:facet> -->
+<!-- 								<h:outputText -->
+<!-- 									value="#{partCalif.calificacionEC[indice.index].calificacion}" /> -->
+<!-- 							</p:column> -->
 
-							<p:column
-								rendered="#{not (calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}">
-								<f:facet name="header">
-									<h:outputText value="#{pc.nombreEvaluacion}" />
-								</f:facet>
-								<h:outputText
-									value="#{partCalif.calificacionEC[indice.index].calificacion}" />
-							</p:column>
-						</c:forEach>
+<!-- 							<p:column -->
+<!-- 								rendered="#{not (calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}"> -->
+<!-- 								<f:facet name="header"> -->
+<!-- 									<h:outputText value="#{pc.nombreEvaluacion}" /> -->
+<!-- 								</f:facet> -->
+<!-- 								<h:outputText -->
+<!-- 									value="#{partCalif.calificacionEC[indice.index].calificacion}" /> -->
+<!-- 							</p:column> -->
+<!-- 						</c:forEach> -->
 
-						<p:column>
-							<f:facet name="header">
-								<h:outputText value='Calificación Total' />
-							</f:facet>
-							<h:outputText value="#{partCalif.califTotal}" />
-						</p:column>
+<!-- 						<p:column> -->
+<!-- 							<f:facet name="header"> -->
+<!-- 								<h:outputText value='Calificación Total' /> -->
+<!-- 							</f:facet> -->
+<!-- 							<h:outputText value="#{partCalif.califTotal}" /> -->
+<!-- 						</p:column> -->
 
-						<p:column
-							rendered="#{not(calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}">
-							<f:facet name="header">
-								<h:outputText value="% Asistencia" />
-							</f:facet>
-							<h:outputText value="#{partCalif.asistencia}" />
-						</p:column>
+<!-- 						<p:column -->
+<!-- 							rendered="#{not(calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}"> -->
+<!-- 							<f:facet name="header"> -->
+<!-- 								<h:outputText value="% Asistencia" /> -->
+<!-- 							</f:facet> -->
+<!-- 							<h:outputText value="#{partCalif.asistencia}" /> -->
+<!-- 						</p:column> -->
 
 						<p:column>
 							<f:facet name="header">
@@ -395,14 +395,14 @@
 							<h:outputText value="#{partCalif.califFinal}" />
 						</p:column>
 
-						<p:column>
-							<f:facet name="header">
-								<h:outputText value="Dictamen" />
-							</f:facet>
-							<h:outputText
-								rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}"
-								value="#{calificacionGpoEventoCapBean.obtenerNombreDictamen(partCalif.dictamen.id)}" />
-						</p:column>
+<!-- 						<p:column> -->
+<!-- 							<f:facet name="header"> -->
+<!-- 								<h:outputText value="Dictamen" /> -->
+<!-- 							</f:facet> -->
+<!-- 							<h:outputText -->
+<!-- 								rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}" -->
+<!-- 								value="#{calificacionGpoEventoCapBean.obtenerNombreDictamen(partCalif.dictamen.id)}" /> -->
+<!-- 						</p:column> -->
 					</p:dataTable>
 					<div class="row">
 						<div class="col-md-12 text-right">
@@ -410,12 +410,7 @@
 
 
 
-							<p:outputLabel value="Cargar: " rendered="true"
-								styleClass="margenIzquierdo agregaHeight" />
-
-							<p:commandButton id="btnCargaArchivo"  
-								 onclick="PF('visorCargaArchivo').show()"
-								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc" />
+							
 
 				
 							<p:outputLabel value="Exportar XLS: "
@@ -427,7 +422,7 @@
 									fileName="calificaciones_" encoding="UTF-8" />
 							</p:commandButton>
 
-							<p:outputLabel value="Descargar: " rendered="true"
+							<p:outputLabel value="Descargar Calificaciones: " rendered="true"
 								styleClass="margenIzquierdo agregaHeight" />
 							<p:commandButton id="btnDescargarPdf" ajax="false"
 								rendered="true"
@@ -440,11 +435,26 @@
 
 							<p:outputLabel value="Descargar Acta: " rendered="true"
 								styleClass="margenIzquierdo agregaHeight" />
-							<p:commandButton id="btnActaCalificaciones" ajax="true"
+							<p:commandButton id="btnActaCalificaciones" ajax="true" disabled="true"
 								rendered="true"
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc"
 								action="#{calificacionGpoEventoCapBean.descargarPlantillaCalificaciones}" />
+								
+							<p:outputLabel value="Cargar Acta Firmada: " rendered="true"
+								styleClass="margenIzquierdo agregaHeight" />
 
+							<p:commandButton id="btnCargaArchivo"  disabled="true"
+								 onclick="PF('visorCargaArchivo').show()"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_cargar" />
+							
+							<p:outputLabel value="Descargar Acta Firmada: " rendered="true"
+								styleClass="margenIzquierdo agregaHeight" />
+							<p:commandButton id="btnActaCalificacionesFirmada" ajax="true" disabled="true"
+								rendered="true"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc"
+								action="#{calificacionGpoEventoCapBean.descargarPlantillaCalificaciones}" />
+								
+							
 
 						</div>
 					</div>

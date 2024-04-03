@@ -878,6 +878,8 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     			params.put("pFolio", encabezado.getMatricula().toUpperCase());
     			params.put("pNombre", encabezado.getDocente());
     			params.put("LOGO", "");
+    			
+    			reporteConfig.setParametros(params);
     		}
 
     		plantillaPDF = ReporteUtil.getStreamedContentOfBytes(ReporteUtil.generar(reporteConfig),
@@ -1283,12 +1285,12 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
         if (!ObjectUtils.isNullOrCero(evento.getValorCalificacionDictamen())) {
 
-            porcentajeCalTot = (califTotal * evento.getValorCalificacionDictamen()) / 100;
+            porcentajeCalTot = (califTotal * evento.getValorCalificacionDictamen()) / 10; // ITTIVA DE 100 A 10
         }
 
         if (!ObjectUtils.isNullOrCero(evento.getValorAsistenciaDictamen())) {
             Double asistb10 = (asistencia.doubleValue() / 10);
-            porcentajeAsist = (asistb10 * evento.getValorAsistenciaDictamen()) / 100;
+            porcentajeAsist = (asistb10 * evento.getValorAsistenciaDictamen()) / 10;
         }
 
         if (evento.getTpoDictamen().equals(TipoCalificacionECEnum.TPO_CAL_SUMA.getId())) {
@@ -1378,7 +1380,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 if (!ObjectUtils.isNullOrEmpty(evento.getCalificacionMinAprobatoria())) {
 
                     Double califMin = new Double(evento.getCalificacionMinAprobatoria());
-                    califMin = (califMin / 10);
+                    califMin = (califMin ); // ITTIVA se quita /10
 
                     if (tc.getCalifFinal().compareTo(califMin) >= 0) {
                         tc.setDictamen(obtieneDictamenById(DictamenCalificacionEnum.ACREDITADO.getId()));
