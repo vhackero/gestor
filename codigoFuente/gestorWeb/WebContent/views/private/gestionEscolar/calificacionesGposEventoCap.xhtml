@@ -139,7 +139,10 @@
 									rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) }"
 									value="Importar calificaciones" process="@this"
 									action="#{calificacionGpoEventoCapBean.obtieneCalifMoodleWS}"
-									ajax="true" styleClass="btn btn-primary pull-right"
+									ajax="true" styleClass="btn btn-primary pull-right" style="
+    height: 40px;
+    width: 170px;
+"
 									update="@form" />
 							</div>
 						</div>
@@ -503,6 +506,47 @@
 			styleClass="medidaModal" closable="false" header="Cerrar Acta"
 			widgetVar="dlgCerrarActa">
 			<h:form>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel
+								value="¡Importante!" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel
+								value="Apreciable docente:" />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel
+								value="• La generación de actas de calificaciones del periodo escolar vigente se habilita conforme a lo señalado en el calendario académico, esto depende del programa educativo en el que participa. No olvide atender las solicitudes de aclaración." />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel
+								value="• Conserve el acta original firmada en dos tantos con tinta azul pues, en apego a las disposiciones de la SEP y de la Secretaria de Salud se harán las notificaciones oportunas para su entrega." />
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:outputLabel
+								value="• Le recordamos que las actas de calificaciones tanto originales como en el SIGE representan el soporte de los estudios cursados por nuestros estudiantes, por ello, si tiene faltantes complételas a la brevedad." />
+
+						</div>
+					</div>
+				</div>
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-12">
