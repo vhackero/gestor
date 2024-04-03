@@ -1,10 +1,6 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
-<<<<<<< HEAD
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-=======
->>>>>>> local
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -15,16 +11,11 @@ import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 
-<<<<<<< HEAD
-import org.apache.log4j.Logger;
-import org.primefaces.context.RequestContext;
-import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.StreamedContent;
-=======
+
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
->>>>>>> local
+
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
@@ -66,11 +57,6 @@ import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.CorreoNotificacionBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.utils.ModalidadEnum;
-<<<<<<< HEAD
-import mx.gob.sedesol.gestorweb.commons.utils.ReporteUtil;
-import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
-=======
->>>>>>> local
 
 @SessionScoped
 @ManagedBean
@@ -199,10 +185,6 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     public void abrirDialogValidar() {
         RequestContext.getCurrentInstance().execute("PF('dlgCerrarActa').show()");
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> local
 
     /**
      * @param e

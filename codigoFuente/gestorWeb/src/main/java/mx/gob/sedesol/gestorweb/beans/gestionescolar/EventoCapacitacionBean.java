@@ -430,14 +430,8 @@ public class EventoCapacitacionBean extends BaseBean {
 			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
 			filtros.getFichaDescriptivaPrograma().setEjeCapacitacion(idSubEstructura);
 			catSubEstructurasNivel1 = this.generarSubEstructuras1(nodos, idSubEstructura);
-<<<<<<< HEAD
-			logger.info(" catSubEstructurasNivel1 --> "+ catSubEstructurasNivel1.size() );
-			nombreEjeCapacitacion = getNombreElemento(idSubEstructura, catSubEstructurasNivel1);
-			logger.info(" nombreEjeCapacitacion --> "+ idSubEstructura + " - "+ nombreEjeCapacitacion);
-=======
->>>>>>> local
 			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
-			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();   
 			nivelMaximo = 1;
 		}
 	}
@@ -446,12 +440,6 @@ public class EventoCapacitacionBean extends BaseBean {
 			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
 			filtros.getFichaDescriptivaPrograma().setEjeCapacitacion(idSubEstructura);
 			catSubEstructurasNivel2 = this.generarSubEstructuras2(nodos, idSubEstructura);
-<<<<<<< HEAD
-			logger.info(" catSubEstructurasNivel2 --> "+ catSubEstructurasNivel2.size() );
-			nombreTpoCompetencia = getNombreElemento(idSubEstructura, catSubEstructurasNivel2);
-			logger.info(" nombreTpoCompetencia --> "+ idSubEstructura + " - "+ nombreTpoCompetencia);
-=======
->>>>>>> local
 			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
 			nivelMaximo = 2;
 		}
