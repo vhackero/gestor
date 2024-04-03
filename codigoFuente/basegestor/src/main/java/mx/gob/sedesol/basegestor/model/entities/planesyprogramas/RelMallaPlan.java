@@ -11,7 +11,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "rel_malla_plan")
-@IdClass(RelMallaPlan.class)
+//@IdClass(RelMallaPlan.class)
 public class RelMallaPlan implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
