@@ -84,7 +84,7 @@
 					<div class="form-group">
 						<div class="row">
 							<div class="col-md-3">
-								<p:outputLabel styleClass="bloque" value="Facilitador" />
+								<p:outputLabel styleClass="bloque" value="Docente en línea" />
 								<h:outputText
 									value="#{calificacionGpoEventoCapBean.grupoSelec.facilitador.tblPersona.nombreCompleto}" />
 							</div>
@@ -137,7 +137,7 @@
 							<div class="col-md-8">
 								<p:commandButton
 									rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) }"
-									value="Cargar" process="@this"
+									value="Importar calificaciones" process="@this"
 									action="#{calificacionGpoEventoCapBean.obtieneCalifMoodleWS}"
 									ajax="true" styleClass="btn btn-primary pull-right"
 									update="@form" />
@@ -447,7 +447,7 @@
 								 onclick="PF('visorCargaArchivo').show()"
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_cargar" />
 							
-							<p:outputLabel value="Descargar Acta Firmada: " rendered="true"
+							<p:outputLabel value="Visualizar Acta Firmada: " rendered="true"
 								styleClass="margenIzquierdo agregaHeight" />
 							<p:commandButton id="btnActaCalificacionesFirmada" ajax="true" disabled="true"
 								rendered="true"
