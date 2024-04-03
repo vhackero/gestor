@@ -397,6 +397,16 @@
 					</p:dataTable>
 					<div class="row">
 						<div class="col-md-12 text-right">
+						
+							<p:outputLabel value="Cargar Acta: " rendered="true"
+								styleClass="margenIzquierdo agregaHeight" />
+							<h:form enctype="multipart/form-data">
+						        <p:fileUpload value="#{calificacionGpoEventoCapBean.file}" mode="simple" skinSimple="true"/>
+						
+						        <p:commandButton value="Submit" ajax="false" disabled="#{calificacionGpoEventoCapBean.tablaAuxCalif.isEmpty()}"
+						        	action="#{calificacionGpoEventoCapBean.cargarPlantillaCalificaciones}" styleClass="mt-3 ui-button-outlined block"/>
+						    </h:form>
+						
 							<p:outputLabel value="Exportar XLS: "
 								styleClass="margenIzquierdo agregaHeight" />
 							<p:commandButton id="btnDescargar" ajax="false"
@@ -496,6 +506,8 @@
 				</div>
 			</h:form>
 		</p:dialog>
+		
+		
 		
 		<p:dialog id="visorPdf" dynamic="true" responsive="true" modal="true"
 			closable="false" resizable="false" position="center"

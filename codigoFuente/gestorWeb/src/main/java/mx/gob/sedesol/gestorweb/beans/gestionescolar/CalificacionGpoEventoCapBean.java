@@ -16,6 +16,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
 import org.primefaces.model.StreamedContent;
+import org.primefaces.model.UploadedFile;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
@@ -112,7 +113,15 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     private List<RelGrupoParticipanteDTO> participantesByGrupo;
     private List<TablaCalificacionesDTO> tablaAuxCalif;
 
-    // private List<TablaCalificacionesDTO> unmodifTblAuxCalif;
+    public UploadedFile getFile() {
+		return file;
+	}
+
+	public void setFile(UploadedFile file) {
+		this.file = file;
+	}
+
+	// private List<TablaCalificacionesDTO> unmodifTblAuxCalif;
     private List<CalificacionECDTO> calificaciones;
 
     private boolean muestraTblCalif;
@@ -135,6 +144,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     
 	private StringBuilder rutaImagenes;
 	private StreamedContent plantillaPDF;
+	
+	/** ITTIVA */
+	private UploadedFile file;
 
     public StreamedContent getPlantillaPDF() {
 		return plantillaPDF;
@@ -865,6 +877,23 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 		RequestContext.getCurrentInstance().scrollTo("visorPdf");
 		
 		
+    }
+    
+    /**
+     *  CARGA LANTILLA CALIFICACIONES
+     *  @author ITTIVA
+     */
+    public void cargarPlantillaCalificaciones() {
+    	
+    	log.info("INICIA CARGA PLANTILLA CALIFICACIONES !!!");
+    	
+    	if(file != null) {
+    		agregarMsgInfo("Carga de archivo "+ file.getFileName() + " correcta", null);
+    	}
+    	
+    	
+    	log.info("TERMINA CARGA PLANTILLA CALIFICACIONES");
+    	
     }
     
 
