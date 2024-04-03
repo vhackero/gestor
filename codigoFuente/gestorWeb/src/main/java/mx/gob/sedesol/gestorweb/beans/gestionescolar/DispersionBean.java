@@ -92,7 +92,7 @@ public class DispersionBean extends BaseBean {
 	}
 	
 	public void dispersar() {
-		System.out.println(">>>>>>>>>>>>> DISPERSAR >>>>>>>>>>>>> ");
+
 		List<PlanDTO> listaPlanesSeleccionados = obtenerListaPlanesByIds();
 
 		List<TblInscripcionResumenDTO> listaInscripcionResumen = obtenerListaInscripcionResumen(
@@ -254,7 +254,7 @@ public class DispersionBean extends BaseBean {
 	
 	public void generarGrupos() {
 
-		System.out.println(">>>>>>>>>>>>> GENERAR GRUPOS >>>>>>>>>>>>> ");
+		System.out.println("generarGrupos >>>>>>>>>>>>> ");
 
 		List<PlanDTO> listaPlanesSeleccionados = obtenerListaPlanesByIds();
 	
@@ -334,23 +334,20 @@ public class DispersionBean extends BaseBean {
 	}
 
 	public void matricularPersonas( List<PersonaDTO> listaPersonas, GrupoDTO grupo, ParametroWSMoodleDTO parametroWSMoodleDTO ) {
-		System.out.println("matricularPersonas >>>>>>>>>>>>> " +listaPersonas.size()+ " - " +grupo.getNombre() );
 		grupo.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
 		grupo.setFachaActualizacion(new Date());
 
 		if (listaPersonas.isEmpty()) {
 			agregarMsgError("No se han seleccionado usuarios.", null, sistema);
-			System.out.println("No se han seleccionado usuarios. >>>>>>>>>>>>> " +listaPersonas.size()+ " - " +grupo.getNombre() );
 		} else {
 			ResultadoDTO<RelGrupoParticipanteDTO> resultado = dispersionServiceFacade
 					.getGrupoParticipanteService()
 					.almacenarParticipantes(listaPersonas, grupo, grupo.getEvento(), parametroWSMoodleDTO);
-			
-			System.out.println("resultado >>>>>>>>>>>>> " +resultado.getMensajes().toString() );
+
 			if (resultado.esCorrecto()) {
-			 
+
 				// TODO Enviar notificacion y correo a los usuarios matriculados
-			/*	String claveNotificacion = ConstantesGestorWeb.CLAVE_NOTIFICACION_AL_MATRICULAR_USUARIOS;
+				String claveNotificacion = ConstantesGestorWeb.CLAVE_NOTIFICACION_AL_MATRICULAR_USUARIOS;
 				String claveCorreo = ConstantesGestorWeb.CLAVE_CORREO_AL_MATRICULAR_USUARIOS;
 				correoNotificacionBean.notificarUsuariosMatriculados(claveNotificacion, claveCorreo, listaPersonas,
 						grupo, evento);
@@ -360,14 +357,19 @@ public class DispersionBean extends BaseBean {
 				participantes = dispersionServiceFacade.getGrupoParticipanteService()
 						.getParticipantesByGrupo(grupo.getIdGrupo());
 				agregaCantidadAlumnos(grupo.getIdGrupo(), participantes.size());
-*/
+//				for (RelGrupoParticipanteDTO alumno : participantes) {
+//					for (PersonaDatosDTO datos : personas) {
+//						if (alumno.getPersona().getIdPersona().equals(datos.getPersona().getIdPersona())) {
+//							listaEliminar.add(datos);
+//							break;
+//						}
+//					}
+//				}
 				for (String mensaje : resultado.getMensajes()) {
 					if (mensaje.contains(MensajesSistemaEnum.EC_REGISTRO_MOODLE_ERROR.getId())) {
 						agregarMsgError(mensaje, null);
-						System.out.println("ERROR >>>>>>>>>>>>> " +MensajesSistemaEnum.EC_REGISTRO_MOODLE_ERROR + " - " + mensaje);
 					} else {
 						agregarMsgInfo(mensaje, null);
-						System.out.println("INFO >>>>>>>>>>>>> " +mensaje );
 					}
 				}
 //				personas.removeAll(listaEliminar);
