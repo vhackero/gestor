@@ -35,7 +35,7 @@ public class Acta implements Serializable {
 	//bi-directional many-to-one association to TblGrupo
 	@ManyToOne
 	@JoinColumn(name="id_grupo")
-	private TblGrupo grupo;
+	private Integer grupo;
 	
 	@Column(name="acta")
 	private byte[] blob;
