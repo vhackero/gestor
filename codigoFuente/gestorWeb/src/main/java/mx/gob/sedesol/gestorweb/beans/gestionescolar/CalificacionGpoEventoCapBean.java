@@ -182,11 +182,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     public void abrirDialogValidar() {
         RequestContext.getCurrentInstance().execute("PF('dlgCerrarActa').show()");
     }
-    
-    public void handleFileUpload(FileUploadEvent event) {
-        FacesMessage msg = new FacesMessage("Successful", event.getFile().getFileName() + " is uploaded.");
-        FacesContext.getCurrentInstance().addMessage(null, msg);
-    }
+  
 
     /**
      * @param e
@@ -1071,12 +1067,12 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
         if (!ObjectUtils.isNullOrCero(evento.getValorCalificacionDictamen())) {
 
-            porcentajeCalTot = (califTotal * evento.getValorCalificacionDictamen()) / 100;
+            porcentajeCalTot = (califTotal * evento.getValorCalificacionDictamen()) / 10;
         }
 
         if (!ObjectUtils.isNullOrCero(evento.getValorAsistenciaDictamen())) {
             Double asistb10 = (asistencia.doubleValue() / 10);
-            porcentajeAsist = (asistb10 * evento.getValorAsistenciaDictamen()) / 100;
+            porcentajeAsist = (asistb10 * evento.getValorAsistenciaDictamen()) / 10;
         }
 
         if (evento.getTpoDictamen().equals(TipoCalificacionECEnum.TPO_CAL_SUMA.getId())) {

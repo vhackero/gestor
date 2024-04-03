@@ -416,16 +416,6 @@
 									fileName="calificaciones_" encoding="ISO-8859-15"/>
 							</p:commandButton>
 						</div>
-						<h:form>
-							<div class="col-md-12 text-right">
-							
-								<p:fileUpload listener="#{calificacionGpoEventoCapBean.handleFileUpload()}" mode="advanced"
-							                  update="messages" auto="true" sizeLimit="100000" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" 
-							                  disabled="#{calificacionGpoEventoCapBean.tablaAuxCalif.isEmpty()}"/>
-							         
-							    <p:growl id="messages" showDetail="true" />  
-							</div>
-						</h:form>
 					</div>
 					<div class="row">
 						<div
