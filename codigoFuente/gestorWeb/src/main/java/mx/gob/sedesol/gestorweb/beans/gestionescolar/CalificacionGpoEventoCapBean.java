@@ -15,6 +15,7 @@ import javax.faces.event.ValueChangeEvent;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
+import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.StreamedContent;
 import org.primefaces.model.UploadedFile;
 
@@ -113,12 +114,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     private List<RelGrupoParticipanteDTO> participantesByGrupo;
     private List<TablaCalificacionesDTO> tablaAuxCalif;
 
-    public UploadedFile getFile() {
-		return file;
-	}
-
+    
 	public void setFile(UploadedFile file) {
-		this.file = file;
+	//	this.file = file;
 	}
 
 	// private List<TablaCalificacionesDTO> unmodifTblAuxCalif;
@@ -146,7 +144,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 	private StreamedContent plantillaPDF;
 	
 	/** ITTIVA */
-	private UploadedFile file;
+	//private UploadedFile file;
 
     public StreamedContent getPlantillaPDF() {
 		return plantillaPDF;
@@ -158,6 +156,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         tablaAuxCalif = new ArrayList<>();
         asistenciasPart = new ArrayList<>();
     }
+
 
     // @PostConstruct
     public String inicializaDatosCalif() {
@@ -222,6 +221,10 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
     public void abrirDialogValidar() {
         RequestContext.getCurrentInstance().execute("PF('dlgCerrarActa').show()");
+    }
+    
+    public void abrirDialogCargar() {
+        RequestContext.getCurrentInstance().execute("PF('visorCargaArchivo').show()");
     }
 
     /**
@@ -820,8 +823,17 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     }
     
     
-    
-    public void descargarPlantillaCalificaciones() {
+	/** ITTIVA */
+	public void handleFileUpload(FileUploadEvent event) {
+        UploadedFile file = event.getFile();
+        log.info("este es mi archivo");
+        log.info(file);
+        // Aquí puedes acceder a la información del archivo cargado
+        // utilizando la instancia de UploadedFile
+    }
+	
+    public void descargarPlantillaCalificaciones( ) {
+  
 		ReporteConfig reporteConfig = new ReporteConfig();
 		reporteConfig.setDatos(null);
 		reporteConfig.setNombreReporte("ActaCalificaciones");
@@ -883,14 +895,16 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
      *  CARGA LANTILLA CALIFICACIONES
      *  @author ITTIVA
      */
-    public void cargarPlantillaCalificaciones() {
-    	
+    public void cargarPlantillaCalificaciones(FileUploadEvent event) {
+        UploadedFile file = event.getFile();
+        log.info("este es mi archivo");
+        log.info(file);
     	log.info("INICIA CARGA PLANTILLA CALIFICACIONES !!!");
     	
-    	if(file != null) {
-    		agregarMsgInfo("Carga de archivo "+ file.getFileName() + " correcta", null);
-    	}
-    	
+    //	if(file != null) {
+    //		agregarMsgInfo("Carga de archivo "+ file.getFileName() + " correcta", null);
+    //	}
+    //	
     	
     	log.info("TERMINA CARGA PLANTILLA CALIFICACIONES");
     	
