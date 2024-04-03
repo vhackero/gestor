@@ -79,7 +79,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     private static final long serialVersionUID = 1L;
     private static final Logger log = Logger.getLogger(CalificacionGpoEventoCapBean.class);
     
-    @ManagedProperty(value = "#{cargaActaService}")
+    @ManagedProperty(value = "#{iCargaActaService}")
     private ICargaActaService iCargaActaService;
 
     @ManagedProperty(value = "#{menuGestorBean}")
