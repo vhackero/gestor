@@ -214,6 +214,7 @@
   		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatNombrePlanyPrograma</class>
   		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblInscripcion</class>
   		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblInscripcionResumen</class>
+  		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta</class>
         <!-- Inicia optimizacion de entidades -->
         <!--Modulo
         de Usuarios  -->

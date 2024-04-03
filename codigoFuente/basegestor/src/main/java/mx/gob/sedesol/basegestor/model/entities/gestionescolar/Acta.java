@@ -9,11 +9,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import com.mysql.jdbc.Blob;
 
 /**
  * ENTITY ACTAS
@@ -36,9 +39,11 @@ public class Acta implements Serializable {
 	@Column(name="id_grupo")
 	private Integer grupo;
 	
+	@Lob
 	@Column(name="acta")
 	private byte[] blob;
 	
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "fecha_cierre")
 	private Date fechaCierre;
@@ -81,7 +86,7 @@ public class Acta implements Serializable {
 	public void setUsuarioModifico(Long usuarioModifico) {
 		this.usuarioModifico = usuarioModifico;
 	}
-
+ 
 	public byte[] getBlob() {
 		return blob;
 	}
@@ -89,5 +94,7 @@ public class Acta implements Serializable {
 	public void setBlob(byte[] blob) {
 		this.blob = blob;
 	}
+
+ 
 
 }

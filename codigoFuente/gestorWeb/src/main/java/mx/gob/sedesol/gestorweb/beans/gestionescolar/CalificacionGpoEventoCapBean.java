@@ -16,6 +16,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
+
+import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
@@ -915,8 +917,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 while ((length = input.read(buffer)) != -1) {
                 	output.write(buffer, 0, length);
                 }
-                fileBytes = output.toByteArray();  
-                
+                fileBytes = output.toByteArray();   
                 
                 acta.setBlob(fileBytes);
                 acta.setFechaCierre(new Date());
