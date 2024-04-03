@@ -8,10 +8,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import java.util.Optional;
-
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajasDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoActaDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
 
 @Repository
@@ -93,35 +89,5 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 		//	+ " GROUP BY evt.idEvento "
 			+ " ORDER BY evt.idPrograma")
 	public List<TblEvento> obtenerEventosPorIdProgramaIdPlan( @Param("idPlan") Integer idPlan);
-	
-	
-	@Query(value = "select	rpm.id_persona as idpersona, rpm.id_persona_moodle as personamoodle "
-			+ " from rel_personas_plataformas_moodle rpm "
-			+ " inner join tbl_persona p on p.id_persona = rpm.id_persona "
-			+ " inner join rel_persona_bajas rpb on rpb.id_persona = p.id_persona "
-			+ " inner join tbl_eventos e on	e.id_evento = rpb.id_evento "
-			+ " where e.id_evento = :idEvento	or e.id_curso_lms_borrador = :idCurso and rpm.id_persona_moodle in :idsMoodle", nativeQuery = true)
-	public List<BajasDTO> obtenerBajas(@Param("idEvento")Integer idEvento, @Param("idCurso")Integer idCurso, @Param("idsMoodle")List<Integer> idsMoodle);
-	
-	@Query(value = "SELECT (SELECT p.sso_idUsuario FROM rel_grupo_participante rgp "
-			+ "         INNER JOIN rel_persona_roles rpr ON rpr.id_persona = rgp.id_persona_participante "
-			+ "         INNER JOIN tbl_persona p ON rpr.id_persona = p.id_persona AND (p.sso_idUsuario NOT LIKE '%.%' AND p.sso_idUsuario NOT LIKE 'ES%' AND (p.sso_idUsuario LIKE 'DL%' OR p.sso_idUsuario LIKE 'FA%'))        WHERE rgp.id_grupo = tg.id AND rpr.id_rol = 3) as 'matricula' , "
-			+ "       (SELECT CONCAT(tp.sso_nombre,' ', tp.sso_apellidoPaterno, ' ',tp.sso_apellidoMaterno ) FROM rel_grupo_participante rgp "
-			+ "        INNER JOIN rel_persona_roles rpr ON rpr.id_persona = rgp.id_persona_participante "
-			+ "        INNER JOIN tbl_persona tp ON tp.id_persona = rpr.id_persona AND (tp.sso_idUsuario NOT LIKE '%.%' AND tp.sso_idUsuario NOT LIKE 'ES%' AND (tp.sso_idUsuario LIKE 'DL%' OR tp.sso_idUsuario LIKE 'FA%')) "
-			+ "        WHERE rgp.id_grupo = tg.id AND rpr.id_rol = 3)as 'docente', "
-			+ "       tp.nombre as 'programa', "
-			+ "       tp.identificador as 'cveprograma', "
-			+ "       tfd.nombre_tentativo as 'asignatura', "
-			+ "       cpp.clave_asig as 'cveasignatura', "
-			+ "       SUBSTRING_INDEX(tp.identificador, \"-\", -2)  as 'periodo', "
-			+ "       CONCAT(te.nombre_ec,' - ',tg.nombre) as 'grupo' "
-			+ " FROM tbl_eventos te "
-			+ "         INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_programa = te.id_programa "
-			+ "         INNER JOIN tbl_planes tp ON tp.id_plan = tfd.id_plan "
-			+ "         INNER JOIN tbl_grupos tg ON tg.id_evento = te.id_evento "
-			+ "         INNER JOIN cat_nombres_planesyprogramas cpp ON cpp.programa_educativo = tp.nombre AND tfd.nombre_tentativo = cpp.asignatura AND cpp.bloque NOT LIKE 'NA' "
-			+ "        WHERE te.id_evento = :idEvento AND tg.id = :idGrupo", nativeQuery = true)
-	public List<EncabezadoActaDTO> obtenerEncabezadoActa(@Param("idEvento")Integer idEvento, @Param("idGrupo")Integer idGrupo);
 
 }

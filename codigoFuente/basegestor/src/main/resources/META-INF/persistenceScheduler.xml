@@ -163,7 +163,6 @@
 		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblRespaldosAva</class>
 		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblRutaRespaldo</class>
 		<class>mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblUsuariosFtp</class>
-		<class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta</class>
 		
 		
 		

@@ -129,13 +129,4 @@ public class Grado {
         this.str_feedback = str_feedback;
     }
 
-	@Override
-	public String toString() {
-		return "Grado [userid=" + userid + ", grade=" + grade + ", locked=" + locked + ", hidden=" + hidden
-				+ ", overridden=" + overridden + ", feedback=" + feedback + ", feedbackformat=" + feedbackformat
-				+ ", usermodified=" + usermodified + ", datesubmitted=" + datesubmitted + ", dategraded=" + dategraded
-				+ ", str_grade=" + str_grade + ", str_long_grade=" + str_long_grade + ", str_feedback=" + str_feedback
-				+ "]";
-	}
-
 }

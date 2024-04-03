@@ -116,16 +116,17 @@
 					<div class="form-group">
 						<div class="row">
 							<div class="col-md-3">
-								<p:outputLabel styleClass="bloque" rendered="true"
+								<p:outputLabel styleClass="bloque"
+									rendered="true"
 									value="Generar evaluación:" />
-								<p:commandButton process="@this" ajax="true"
-									value="Generar evaluación"
+								<p:commandButton process="@this" ajax="true" value="Generar evaluación"
 									action="#{calificacionGpoEventoCapBean.generaTablaCalifGrupo}"
 									update="@form" styleClass="btn btn-primary" style="margin:0"
 									disabled="#{calificacionGpoEventoCapBean.cerrarActa or calificacionGpoEventoCapBean.modalidadEnLinea}"
 									rendered="#{not(calificacionGpoEventoCapBean.modLineaMixto)}" />
 
-								<p:spinner min="0" maxlength="1" max="9" rendered="true"
+								<p:spinner min="0" maxlength="1" max="9" 
+									rendered="true"
 									value="#{calificacionGpoEventoCapBean.numEvaluaciones}"
 									disabled="#{calificacionGpoEventoCapBean.cerrarActa or calificacionGpoEventoCapBean.modalidadEnLinea}">
 									<p:ajax process="@this"
@@ -201,7 +202,7 @@
 							</f:facet>
 							<h:outputText value="#{partCalif.participante.apellidoMaterno}" />
 						</p:column>
-
+						
 						<p:column>
 							<f:facet name="header">
 								<h:outputText value="Nombre de usuario" />
@@ -253,7 +254,7 @@
 								<h:outputText value="Calificación total" />
 							</f:facet>
 							<h:outputText value="#{partCalif.califTotal}">
-
+								
 							</h:outputText>
 						</p:column>
 
@@ -283,7 +284,7 @@
 								<h:outputText value="Calificación final" />
 							</f:facet>
 							<h:outputText value="#{partCalif.califFinal}">
-
+								 
 							</h:outputText>
 						</p:column>
 
@@ -312,10 +313,8 @@
 						</p:column>
 					</p:dataTable>
 					<!-- Tabla oculta para exportación -->
-					<p:dataTable id="exportTable"
-						value="#{calificacionGpoEventoCapBean.tablaAuxCalif}"
-						var="partCalif" rendered="false" style="display:none;">
-						<!-- Aquí "tablaAuxCalif" sería tu lista de datos sin elementos editables -->
+					<p:dataTable id="exportTable" value="#{calificacionGpoEventoCapBean.tablaAuxCalif}" var="partCalif"
+								 rendered="false" style="display:none;"> <!-- Aquí "tablaAuxCalif" sería tu lista de datos sin elementos editables -->
 
 						<!-- Columnas para la tabla oculta -->
 						<p:column>
@@ -352,24 +351,19 @@
 							</f:facet>
 							<h:outputText value="#{partCalif.participante.usuario}" />
 						</p:column>
-						<c:forEach items="#{calificacionGpoEventoCapBean.calificaciones}"
-							varStatus="indice" var="pc">
-							<p:column
-								rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}">
+						<c:forEach items="#{calificacionGpoEventoCapBean.calificaciones}" varStatus="indice" var="pc">
+							<p:column rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}">
 								<f:facet name="header">
 									<h:outputText value="#{pc.nombreEvaluacion}" />
 								</f:facet>
-								<h:outputText
-									value="#{partCalif.calificacionEC[indice.index].calificacion}" />
+								<h:outputText value="#{partCalif.calificacionEC[indice.index].calificacion}" />
 							</p:column>
 
-							<p:column
-								rendered="#{not (calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}">
+							<p:column rendered="#{not (calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}">
 								<f:facet name="header">
 									<h:outputText value="#{pc.nombreEvaluacion}" />
 								</f:facet>
-								<h:outputText
-									value="#{partCalif.calificacionEC[indice.index].calificacion}" />
+								<h:outputText value="#{partCalif.calificacionEC[indice.index].calificacion}" />
 							</p:column>
 						</c:forEach>
 
@@ -380,8 +374,7 @@
 							<h:outputText value="#{partCalif.califTotal}" />
 						</p:column>
 
-						<p:column
-							rendered="#{not(calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}">
+						<p:column rendered="#{not(calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}">
 							<f:facet name="header">
 								<h:outputText value="% Asistencia" />
 							</f:facet>
@@ -399,32 +392,18 @@
 							<f:facet name="header">
 								<h:outputText value="Dictamen" />
 							</f:facet>
-							<h:outputText
-								rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}"
-								value="#{calificacionGpoEventoCapBean.obtenerNombreDictamen(partCalif.dictamen.id)}" />
+							<h:outputText rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}" value="#{calificacionGpoEventoCapBean.obtenerNombreDictamen(partCalif.dictamen.id)}" />
 						</p:column>
 					</p:dataTable>
 					<div class="row">
 						<div class="col-md-12 text-right">
-
-
-
-
-							<p:outputLabel value="Cargar: " rendered="true"
-								styleClass="margenIzquierdo agregaHeight" />
-
-							<p:commandButton id="btnCargaArchivo"  
-								 onclick="PF('visorCargaArchivo').show()"
-								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc" />
-
-				
 							<p:outputLabel value="Exportar XLS: "
 								styleClass="margenIzquierdo agregaHeight" />
 							<p:commandButton id="btnDescargar" ajax="false"
 								disabled="#{calificacionGpoEventoCapBean.tablaAuxCalif.isEmpty()}"
 								styleClass="btn btn-default btn-icon icono_sisi ss_adm_desexcel">
 								<p:dataExporter type="xls" target="exportTable"
-									fileName="calificaciones_" encoding="UTF-8" />
+									fileName="calificaciones_" encoding="UTF-8"/>
 							</p:commandButton>
 
 							<p:outputLabel value="Descargar: " rendered="true"
@@ -434,29 +413,9 @@
 								disabled="#{calificacionGpoEventoCapBean.tablaAuxCalif.isEmpty()}"
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc">
 								<p:dataExporter type="pdf" target="exportTable"
-									fileName="calificaciones_" encoding="ISO-8859-15" />
+									fileName="calificaciones_" encoding="ISO-8859-15"/>
 							</p:commandButton>
-
-
-							<p:outputLabel value="Descargar Acta: " rendered="true"
-								styleClass="margenIzquierdo agregaHeight" />
-							<p:commandButton id="btnActaCalificaciones" ajax="true"
-								rendered="true"
-								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc"
-								action="#{calificacionGpoEventoCapBean.descargarPlantillaCalificaciones}" />
-
-
 						</div>
-						<h:form>
-							<div class="col-md-12 text-right">
-							
-								<p:fileUpload listener="#{calificacionGpoEventoCapBean.handleFileUpload()}" mode="advanced"
-							                  update="messages" auto="true" sizeLimit="100000" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" 
-							                  disabled="#{calificacionGpoEventoCapBean.tablaAuxCalif.isEmpty()}"/>
-							         
-							    <p:growl id="messages" showDetail="true" />  
-							</div>
-						</h:form>
 					</div>
 					<div class="row">
 						<div
@@ -526,48 +485,6 @@
 					</div>
 				</div>
 			</h:form>
-		</p:dialog>
-
-
-
-		<p:dialog id="visorCargaArchivo" dynamic="true" responsive="true"
-			modal="true" closable="true" resizable="false" position="center"
-			header="Carga Constancia de calificaciones firmada" width="900" widgetVar="visorCargaArchivo">
-			<div class="form-group"></div>
-			<div class="row">
-				<div class="col-md-12">
-					<p:outputLabel value="Cargar Acta: " rendered="true"
-						styleClass="margenIzquierdo agregaHeight" />
-					<h:form enctype="multipart/form-data">
-						<p:fileUpload
-							fileUploadListener="#{calificacionGpoEventoCapBean.cargarActa}"
-							mode="advanced" skinSimple="true" />
-
-					</h:form>
-				</div>
-			</div>
-		</p:dialog>
-
-		<p:dialog id="visorPdf" dynamic="true" responsive="true" modal="true"
-			closable="false" resizable="false" position="center"
-			header="Constancia" width="900" widgetVar="visorPlantilla">
-			<div class="form-group">
-				<div class="row">
-					<div class="col-md-12">
-						<p:media player="pdf"
-							value="#{calificacionGpoEventoCapBean.plantillaPDF}" width="865"
-							height="400" styleClass="agregaBorde" />
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-12">
-					<p:commandButton
-						value="#{sistema.obtenerTexto('gw.admin.plantillas.btn.cerrar')}"
-						styleClass="btn btn-default pull-right"
-						onclick="PF('visorPlantilla').hide();" />
-				</div>
-			</div>
 		</p:dialog>
 
 	</ui:define>
