@@ -17,7 +17,7 @@ import mx.gob.sedesol.basegestor.service.gestionescolar.ICargaActaService;
  * @author ITTIVA
  * 
  */
-@Service("iCargaActaService")
+@Service("cargaActaService")
 public class CargaActaService implements ICargaActaService{
 	
 	private static final Logger log = Logger.getLogger(CargaActaService.class);

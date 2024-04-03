@@ -53,6 +53,7 @@ import mx.gob.sedesol.basegestor.service.ServiceException;
 import mx.gob.sedesol.basegestor.service.encuestas.RelEncuestaUsuarioService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ICargaActaService;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.AsistenciaFacadeService;
+import mx.gob.sedesol.basegestor.service.impl.gestionescolar.CargaActaService;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.EventoCapacitacionServiceFacade;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Calificaciones;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Elemntos;
@@ -81,8 +82,8 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     private static final long serialVersionUID = 1L;
     private static final Logger log = Logger.getLogger(CalificacionGpoEventoCapBean.class);
     
-    @ManagedProperty(value = "#{iCargaActaService}")
-    private ICargaActaService iCargaActaService;
+//    @ManagedProperty(value = "#{cargaActaService}")
+//    private CargaActaService iCargaActaService;
 
     @ManagedProperty(value = "#{menuGestorBean}")
     private MenuGestorBean menuGestorBean;
@@ -922,7 +923,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 acta.setBlob(fileBytes);
                 acta.setFechaCierre(new Date());
         		
-        		iCargaActaService.cargaActa(acta);
+                relEncuestaUsuarioService.cargaActa(acta);
         		
         		agregarMsgInfo( "CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA", null);
         		log.info("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA");		
