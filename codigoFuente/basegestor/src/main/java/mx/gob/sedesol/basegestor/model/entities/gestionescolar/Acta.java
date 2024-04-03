@@ -56,11 +56,13 @@ public class Acta implements Serializable {
 		this.idActa = idActa;
 	}
 
-	public TblGrupo getGrupo() {
+	
+
+	public Integer getGrupo() {
 		return grupo;
 	}
 
-	public void setGrupo(TblGrupo grupo) {
+	public void setGrupo(Integer grupo) {
 		this.grupo = grupo;
 	}
 
