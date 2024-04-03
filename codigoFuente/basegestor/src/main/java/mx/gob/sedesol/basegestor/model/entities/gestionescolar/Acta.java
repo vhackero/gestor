@@ -33,7 +33,7 @@ public class Acta implements Serializable {
 	private Integer idActa;
 	
 
-	@JoinColumn(name="id_grupo")
+	@Column(name="id_grupo")
 	private Integer grupo;
 	
 	@Column(name="acta")
