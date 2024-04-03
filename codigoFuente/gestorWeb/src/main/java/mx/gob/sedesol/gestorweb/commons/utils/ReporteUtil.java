@@ -3,6 +3,7 @@ package mx.gob.sedesol.gestorweb.commons.utils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.util.Map;
 
@@ -20,18 +21,23 @@ import mx.gob.sedesol.gestorweb.commons.dto.ReporteConfig;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 import net.sf.jasperreports.export.SimpleXlsReportConfiguration;
+import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
+import net.sf.jasperreports.export.Exporter;
 
 public class ReporteUtil {
 
@@ -43,7 +49,68 @@ public class ReporteUtil {
     public static final String EXCEL_EXTENSION = ".xls";
     public static final Integer REPORTE_PDF = 1;
     public static final Integer REPORTE_EXCEL = 2;
+    
+    
+    public static byte[] generar2(ReporteConfig configuracionReporte) {
+    	
+        final InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(configuracionReporte.getPathJasper());
+        
+        JasperReport report;
+        byte[] salida = null;   
+        
+        try {
+			report = JasperCompileManager.compileReport(stream);
+			
+			final JasperPrint print = JasperFillManager.fillReport(report, configuracionReporte.getParametros(), new JREmptyDataSource());
+			
+			salida = generaAux(configuracionReporte.getTipoReporte(),salida, print);
+			
+		} catch (JRException e) {
+			logger.error(e.getMessage(), e);
+		}
+        
+        return salida;
+    }
+    
+    
+    /**
+     * generaAux
+     * auxiliar
+     * de
+     * genera
+     * exportar
+     * duplicidad
+     * @param pTipo pTipo
+     * @param salida salida
+     * @param print print
+     * @return byte[] byte[]
+     * @throws JRException JRException
+     */
+    public static byte[] generaAux(Integer pTipo,byte[] salida, JasperPrint print) throws JRException{
+        
+        if (REPORTE_EXCEL.equals(pTipo)) {
+        
+            SimpleXlsxReportConfiguration configuration = new SimpleXlsxReportConfiguration();
+            configuration.setOnePagePerSheet(false);
+            configuration.setIgnoreGraphics(false);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            Exporter exporter = new JRXlsxExporter();
+            exporter.setExporterInput(new SimpleExporterInput(print));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(byteArrayOutputStream));
+            exporter.setConfiguration(configuration);
+            exporter.exportReport();
+            salida = byteArrayOutputStream.toByteArray();
+        	
+        } else {
 
+        	salida = JasperExportManager.exportReportToPdf(print);
+        
+        }
+        
+        return salida;
+        
+    }    
+    
     /**
      */
     public static byte[] generar(ReporteConfig configuracionReporte) {

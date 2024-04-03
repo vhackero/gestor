@@ -370,7 +370,11 @@ public class AdminPersonaBean extends BaseBean {
 		cargarRolesUsuario();
 		actualizarRolesUsuario();
 		
-		listaTiposDiscapacidad = personaServiceFacade.obtenerListaTiposDiscapacidadPorDiscapacidad(datos.getDatosSociodemograficos().getTipoDiscapacidad().getIdDiscapacidad());
+		// ITTIVA valida la discapacidad , se agrega validacion para realizar la consulta ya que llega null la mayoria de peticiones
+		if(datos.getDatosSociodemograficos().isTieneDiscapacidad()){
+			listaTiposDiscapacidad = personaServiceFacade.obtenerListaTiposDiscapacidadPorDiscapacidad(datos.getDatosSociodemograficos().getTipoDiscapacidad().getIdDiscapacidad());
+		}
+		
 		validarTipoDiscapacidad();		
 		validarLenguajes();
 		
