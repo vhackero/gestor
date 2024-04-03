@@ -10,6 +10,8 @@ public interface RelPersonaPlataformaMoodleService {
 
 	Integer obtenerIdMoodle(PersonaDTO persona, ParametroWSMoodleDTO parametroWSMoodleDTO, Long usuarioModifico);
 	
-	public RelPersonaPlataformaMoodleDTO obtenerPersonaPlataformaMoodle(Integer idPersonaMoodle, Integer idPlataformaMoodle);
+	RelPersonaPlataformaMoodleDTO obtenerPersonaPlataformaMoodle(Integer idPersonaMoodle, Integer idPlataformaMoodle);
+	
+	RelPersonaPlataformaMoodleDTO obtenerPersonaPlataformaByPersonaMoodle(Integer idPersonaMoodle, Integer idPlataformaMoodle);
 
 }

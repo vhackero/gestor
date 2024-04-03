@@ -452,12 +452,15 @@ public class PlanBean extends BaseBean {
 	 * nivel
 	 */
 	private void generaItemsOrgGubs() {
+		logger.info("****generaItemsOrgGubs****");
+		logger.info(""+ObjectUtils.isNotNull(catOrgGubs));
 
 		if (ObjectUtils.isNotNull(catOrgGubs)) {
 
 			itemsOrgGubs = new ArrayList<>();
 
 			for (OrgGubernamentalDTO orgG : catOrgGubs) {
+				logger.info(""+orgG.getDescripcion());
 
 				SelectItemGroup group = new SelectItemGroup(orgG.getNombre());
 				SelectItem[] arrayItems = null;
@@ -466,12 +469,18 @@ public class PlanBean extends BaseBean {
 
 					arrayItems = new SelectItem[orgG.getLstHijosOrgGub().size()];
 					int i = 0;
+					
+					logger.info(""+orgG.getLstHijosOrgGub().size());
 
 					for (OrgGubernamentalDTO orgGHijo : orgG.getLstHijosOrgGub()) {
+						logger.info(""+orgGHijo.getNombre());
 						arrayItems[i] = new SelectItem(orgGHijo, orgGHijo.getNombre());
 						i++;
 					}
 				}
+				
+				logger.info(arrayItems);
+
 				group.setSelectItems(arrayItems);
 				itemsOrgGubs.add(group);
 			}

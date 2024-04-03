@@ -77,5 +77,11 @@ public class Resultado {
         this.grades = grades;
     }
 
+	@Override
+	public String toString() {
+		return "Resultado [activityid=" + activityid + ", itemnumber=" + itemnumber + ", scaleid=" + scaleid + ", name="
+				+ name + ", locked=" + locked + ", hidden=" + hidden + ", grades=" + grades + "]";
+	}
+
    
 }

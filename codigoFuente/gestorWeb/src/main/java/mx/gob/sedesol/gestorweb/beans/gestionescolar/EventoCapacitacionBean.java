@@ -430,6 +430,8 @@ public class EventoCapacitacionBean extends BaseBean {
 			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
 			filtros.getFichaDescriptivaPrograma().setEjeCapacitacion(idSubEstructura);
 			catSubEstructurasNivel1 = this.generarSubEstructuras1(nodos, idSubEstructura);
+			nombreEjeCapacitacion = getNombreElemento(idSubEstructura, catSubEstructurasNivel1);
+			logger.info(" nombreEjeCapacitacion --> "+ idSubEstructura + " - "+ nombreEjeCapacitacion);
 			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
 			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
 			nivelMaximo = 1;
@@ -440,6 +442,8 @@ public class EventoCapacitacionBean extends BaseBean {
 			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
 			filtros.getFichaDescriptivaPrograma().setEjeCapacitacion(idSubEstructura);
 			catSubEstructurasNivel2 = this.generarSubEstructuras2(nodos, idSubEstructura);
+			nombreTpoCompetencia = getNombreElemento(idSubEstructura, catSubEstructurasNivel2);
+			logger.info(" nombreTpoCompetencia --> "+ idSubEstructura + " - "+ nombreTpoCompetencia);
 			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
 			nivelMaximo = 2;
 		}
