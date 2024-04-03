@@ -2,8 +2,10 @@ package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
@@ -13,6 +15,7 @@ import javax.faces.event.ValueChangeEvent;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
+import org.primefaces.model.StreamedContent;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
@@ -37,6 +40,7 @@ import mx.gob.sedesol.basegestor.commons.utils.TipoCalificacionECEnum;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDictamen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoCalificacionEc;
+import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.ServiceException;
 import mx.gob.sedesol.basegestor.service.encuestas.RelEncuestaUsuarioService;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.AsistenciaFacadeService;
@@ -51,7 +55,12 @@ import mx.gob.sedesol.gestorweb.beans.acceso.MenuGestorBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.CorreoNotificacionBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
+import mx.gob.sedesol.gestorweb.commons.dto.ReporteConfig;
 import mx.gob.sedesol.gestorweb.commons.utils.ModalidadEnum;
+import mx.gob.sedesol.gestorweb.commons.utils.ReporteUtil;
+import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionRecordDTO;
 
 @SessionScoped
 @ManagedBean
@@ -87,6 +96,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
     @ManagedProperty("#{relEncuestaUsuarioService}")
     private RelEncuestaUsuarioService relEncuestaUsuarioService;
+    
+	/*@ManagedProperty(value = "#{parametroSistemaService}")
+	private transient ParametroSistemaService parametroSistemaService;*/    
 
     private Integer duracionEvento;
     private Integer numEvaluaciones;
@@ -120,8 +132,15 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     private boolean modalidadEnLinea;
     private String escalaMin;
     private String escalaMax;
+    
+	private StringBuilder rutaImagenes;
+	private StreamedContent plantillaPDF;
 
-    public CalificacionGpoEventoCapBean() {
+    public StreamedContent getPlantillaPDF() {
+		return plantillaPDF;
+	}
+
+	public CalificacionGpoEventoCapBean() {
         gruposXEventoCap = new ArrayList<>();
         tpoCalifSel = new CatalogoComunDTO();
         tablaAuxCalif = new ArrayList<>();
@@ -167,6 +186,18 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         modalidadEnum = ModalidadEnum.obtieneModalidadById(evento.getIdEvento());
         return ConstantesGestorWeb.NAVEGA_CALIFICACIONES_XEVENTO;
     }
+    
+    
+	/*@PostConstruct
+	public void init() {
+		rutaImagenes = new StringBuilder();
+		rutaImagenes.append(
+				parametroSistemaService.obtenerParametroConRutaCompleta(ConstantesGestor.PARAMETRO_RUTA_RECURSOS));
+		rutaImagenes.append(
+				parametroSistemaService.obtenerParametroRuta(ConstantesGestor.PARAMETRO_RUTA_IMAGENES_DOCUMENTOS));
+
+
+	}    */
 
     public String obtenerNombreDictamen(Integer idDictamen) {
         for (CatalogoComunDTO dictamen : catDictamenes) {
@@ -775,6 +806,67 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         }
 
     }
+    
+    
+    
+    public void descargarPlantillaCalificaciones() {
+		ReporteConfig reporteConfig = new ReporteConfig();
+		reporteConfig.setDatos(null);
+		reporteConfig.setNombreReporte("ActaCalificaciones");
+		reporteConfig.setPathJasper("/resources/jasperReport/actaCalificaciones/actaCalificaciones.jasper");
+		reporteConfig.setTipoReporte(ReporteUtil.REPORTE_PDF);
+		
+		HashMap<String, Object> params = new HashMap<>();
+		
+		CalificacionRecordDTO dto = new CalificacionRecordDTO();
+		dto.setNo("1");
+		dto.setMatricula("matricula");
+		dto.setEstudiante("Nombre del estudiante");
+		dto.setCalificacion("10");
+		
+		CalificacionRecordDTO dto2 = new CalificacionRecordDTO();
+		dto.setNo("1");
+		dto.setMatricula("matricula");
+		dto.setEstudiante("Nombre del estudiante");
+		dto.setCalificacion("10");
+		
+		List<CalificacionRecordDTO> listaCalificaciones = new ArrayList<CalificacionRecordDTO>();
+		listaCalificaciones.add(dto);
+		listaCalificaciones.add(dto2);
+		
+		//JRBeanCollectionDataSource dsCalificaciones = new JRBeanCollectionDataSource(listaCalificaciones);
+		
+		JRBeanArrayDataSource dsCalificaciones2 = new JRBeanArrayDataSource(listaCalificaciones.toArray());
+		
+		//reporteConfig.setDatos(listaCalificaciones);
+		
+		params.put("dsCalificaciones", dsCalificaciones2);	
+		params.put("LOGO", "");
+		params.put("pProgramaEducativo", "Programa");
+		params.put("pClavePE", "Clave");
+		params.put("pPeriodo", "Perio");
+		params.put("pAsignatura", "Asigna");
+		params.put("pClaveAS", "Clave");
+		params.put("pGrupo", "Grupo");
+		
+		params.put("pFolio", "Folio");
+		params.put("pNombre", "Nombre");
+		
+		// Se llenan datasource	
+		
+		
+		reporteConfig.setParametros(params);
+		
+		plantillaPDF = ReporteUtil.getStreamedContentOfBytes(ReporteUtil.generar(reporteConfig),
+				"application/pdf", "Constancia");		
+		
+		RequestContext.getCurrentInstance().execute("PF('visorPlantilla').show()");
+		RequestContext.getCurrentInstance().update("visorPdf");
+		RequestContext.getCurrentInstance().scrollTo("visorPdf");
+		
+		
+    }
+    
 
     /**
      * @param calMdlGpo
