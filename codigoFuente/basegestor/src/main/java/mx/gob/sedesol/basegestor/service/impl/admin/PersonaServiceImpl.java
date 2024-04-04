@@ -873,7 +873,8 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 
 	private DatoSociodemograficoDTO obtenerDatoSociodemograficoPersona(Long idPersona, Long usuarioModifico) {
 		TblDatosSociodemograficosPersona datosSociodemograficos = datoSociodemograficoPersonaRepo.obtenerDatosSociodemograficosPersona(idPersona);
-		System.out.println("datosSociodemograficos IDDISCAPACIDAD: "+datosSociodemograficos.getTipoDiscapacidad().getCatDiscapacidad().getIdDiscapacidad());
+		// ITTIVA se quita system ya que cuando no encuntra nada en bd, llega null y truena
+		//System.out.println("datosSociodemograficos IDDISCAPACIDAD: "+datosSociodemograficos.getTipoDiscapacidad().getCatDiscapacidad().getIdDiscapacidad());
 		DatoSociodemograficoDTO datoSociodemograficoDTO;
 		if (ObjectUtils.isNull(datosSociodemograficos)) {			
 			datoSociodemograficoDTO = new DatoSociodemograficoDTO(usuarioModifico);
