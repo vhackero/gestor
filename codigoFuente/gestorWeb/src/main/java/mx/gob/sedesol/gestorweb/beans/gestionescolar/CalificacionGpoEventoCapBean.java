@@ -914,6 +914,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     		RequestContext.getCurrentInstance().scrollTo("visorPdf");
 
     }
+    public String getIdFile() {
+        return  java.util.UUID.randomUUID().toString();
+    }
     
     public void descargarPlantillaCalificaciones2() {
   
@@ -1080,10 +1083,12 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 for (TablaCalificacionesDTO evalCal : participantesMoodle) {
                     List<CalificacionECDTO> califsPart = obtieneCalificacionesByIdPersonaMdl(evalCal.getIdPersonaMoodle(),
                             calMdlGpo);
+                    List<CalificacionECDTO> califsPart2 = obtieneCalificacionesByIdPersonaMdl2(evalCal.getIdPersonaMoodle(),
+                            calMdlGpo);
                     if (!ObjectUtils.isNullOrEmpty(califsPart)) {
                         evalCal.setCalificacionEC(califsPart);
                         evalCal.setDictamen(new CatalogoComunDTO());
-                        evalCal.setCalifTotal(this.obtieneSumaCalificaciones(califsPart));
+                        evalCal.setCalifTotal(califsPart2.get(0).getCalificacion());
                         evalCal.setTpoEvaluacion(ConstantesGestorWeb.TPO_CALIFICACION_PROMEDIO);
 
                         RelGrupoParticipanteDTO gpoPart = obtieneGpoParticipanteByIdPersona(
@@ -1143,6 +1148,39 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                     }
                 }
             }
+        }
+        return califPart;
+    }
+    
+    /**
+     * @param nombreEval
+     * @param idPersonaMdl
+     * @param calMdlGpo
+     * @return
+     */
+    private List<CalificacionECDTO> obtieneCalificacionesByIdPersonaMdl2(Integer idPersonaMdl,
+                                                                        Calificaciones calMdlGpo) {
+
+        List<CalificacionECDTO> califPart = new ArrayList<>();
+        for (Elemntos elm : calMdlGpo.getItems()) {
+        	if (elm.getActivityid().equals(ConstantesGestorWeb.MOODLE_ACTIVITY_COURSE)) {
+                for (Grado g : elm.getGrades()) {
+                    if (idPersonaMdl.equals(g.getUserid())) {
+
+                        // TODO: Base 10
+                        CalificacionECDTO cal = new CalificacionECDTO();
+
+                        cal.setNombreEvaluacion(elm.getName());
+                        if (!ObjectUtils.isNullOrCero(g.getGrade())) {                        	
+                            cal.setCalificacion(new Double(g.getGrade() ));
+                            if (evento.getTpoCalificacion().equals(TipoCalificacionECEnum.TPO_CAL_SUMA.getId())) {
+                                cal.setCalifPonderacion(g.getGrade() );
+                            }
+                        }
+                        califPart.add(cal);
+                    }
+                }
+        	   }
         }
         return califPart;
     }

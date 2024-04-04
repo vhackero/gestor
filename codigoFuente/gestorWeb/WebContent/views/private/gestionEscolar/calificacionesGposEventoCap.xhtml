@@ -610,7 +610,9 @@
 					<div class="col-md-12">
 						<p:media player="pdf"
 							value="#{calificacionGpoEventoCapBean.plantillaPDF}" width="865"
-							height="400" styleClass="agregaBorde" />
+							height="400" styleClass="agregaBorde">
+							 <f:param name="id" value="#{calificacionGpoEventoCapBean.idFile}" />
+						</p:media>
 					</div>
 				</div>
 			</div>
