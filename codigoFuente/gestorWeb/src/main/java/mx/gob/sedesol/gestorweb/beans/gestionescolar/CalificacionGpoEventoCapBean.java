@@ -869,27 +869,27 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     			params.put("pNombre", "");   
     			params.put("LOGO", strmLOGO);   
     		}else {
-    		//	log.info("========Encabezado========");
-        	//	log.info("Programa Edu: " +encabezado.getCveprograma());
-        	//	log.info("Cve PE: " +encabezado.getDocente());
-        	//	log.info("Periodo: " +encabezado.getPeriodo());
-        	//	log.info("Asign: " +encabezado.getGrupo());
-        	//	log.info("Cve Asig: " +encabezado.getMatricula());
-        	//	log.info("Grupo: " +encabezado.getPrograma());
-        	//	
-        	//	log.info("Folio: " +encabezado.getAsignatura().toUpperCase());
-        	//	log.info("Docente: " +encabezado.getCveAsignatura());    			
-    		//	
-        	//	params.put("pProgramaEducativo",encabezado.getCveprograma());
-        	//	params.put("pClavePE", encabezado.getDocente());
-        	//	params.put("pPeriodo", encabezado.getPeriodo());
-        	//	params.put("pAsignatura", encabezado.getGrupo());
-        	//	params.put("pClaveAS", encabezado.getMatricula());
-        	//	params.put("pGrupo", encabezado.getPrograma());
-        	//	params.put("pFolio", encabezado.getAsignatura().toUpperCase());
-        	//	params.put("pNombre", encabezado.getCveAsignatura());
-            //
-    		//	params.put("LOGO", strmLOGO);
+    			log.info("========Encabezado========");
+        		log.info("Programa Edu: " +encabezado.getCveprograma());
+        		log.info("Cve PE: " +encabezado.getDocente());
+        		log.info("Periodo: " +encabezado.getPeriodo());
+        		log.info("Asign: " +encabezado.getGrupo());
+        		log.info("Cve Asig: " +encabezado.getMatricula());
+        		log.info("Grupo: " +encabezado.getPrograma());
+        		
+        		log.info("Folio: " +encabezado.getAsignatura().toUpperCase());
+        		log.info("Docente: " +encabezado.getCveAsignatura());    			
+    			
+        		params.put("pProgramaEducativo",encabezado.getCveprograma());
+        		params.put("pClavePE", encabezado.getDocente());
+        		params.put("pPeriodo", encabezado.getPeriodo());
+        		params.put("pAsignatura", encabezado.getGrupo());
+        		params.put("pClaveAS", encabezado.getMatricula());
+        		params.put("pGrupo", encabezado.getPrograma());
+        		params.put("pFolio", encabezado.getAsignatura().toUpperCase());
+        		params.put("pNombre", encabezado.getCveAsignatura());
+            
+    			params.put("LOGO", strmLOGO);
     			
         		params.put("pProgramaEducativo",encabezado.getCveprograma());
         		params.put("pClavePE", encabezado.getDocente());
