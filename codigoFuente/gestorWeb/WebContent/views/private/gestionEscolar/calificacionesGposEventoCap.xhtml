@@ -238,7 +238,9 @@
 
 								<h:outputText
 									rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}"
-									value="#{partCalif.calificacionEC[indice.index].calificacion}" />
+									value="#{partCalif.calificacionEC[indice.index].calificacion}" >
+									<f:convertNumber pattern="##0" />
+								</h:outputText>
 								<p:spinner stepFactor="0.25"
 									rendered="#{not (calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}"
 									value="#{partCalif.calificacionEC[indice.index].calificacion}"
@@ -256,8 +258,8 @@
 								<h:outputText value="Calificación total" />
 							</f:facet>
 							<h:outputText value="#{partCalif.califTotal}">
-
-							</h:outputText>
+									<f:convertNumber pattern="##0" />
+								</h:outputText>
 						</p:column>
 
 						<p:column styleClass="text-center"
@@ -286,8 +288,8 @@
 								<h:outputText value="Calificación final" />
 							</f:facet>
 							<h:outputText value="#{partCalif.califFinal}">
-
-							</h:outputText>
+									<f:convertNumber pattern="##0" />
+								</h:outputText>
 						</p:column>
 
 
@@ -363,7 +365,9 @@
 									<h:outputText value="#{pc.nombreEvaluacion}" />
 								</f:facet>
 								<h:outputText
-									value="#{partCalif.calificacionEC[indice.index].calificacion}" />
+									value="#{partCalif.calificacionEC[indice.index].calificacion}" >
+									<f:convertNumber pattern="##0" />
+								</h:outputText>
 							</p:column>
 
 							<p:column
@@ -380,7 +384,9 @@
 							<f:facet name="header">
 								<h:outputText value='Calificación Total' />
 							</f:facet>
-							<h:outputText value="#{partCalif.califTotal}" />
+							<h:outputText value="#{partCalif.califTotal}" >
+									<f:convertNumber pattern="##0" />
+								</h:outputText>
 						</p:column>
 
 						<p:column
@@ -388,14 +394,18 @@
 							<f:facet name="header">
 								<h:outputText value="% Asistencia" />
 							</f:facet>
-							<h:outputText value="#{partCalif.asistencia}" />
+							<h:outputText value="#{partCalif.asistencia}" >
+									<f:convertNumber pattern="##0" />
+								</h:outputText>
 						</p:column>
 
 						<p:column>
 							<f:facet name="header">
 								<h:outputText value='Calificación Final' />
 							</f:facet>
-							<h:outputText value="#{partCalif.califFinal}" />
+							<h:outputText value="#{partCalif.califFinal}" >
+									<f:convertNumber pattern="##0" />
+								</h:outputText>
 						</p:column>
 
 						<p:column>

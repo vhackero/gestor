@@ -1110,10 +1110,10 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                         CalificacionECDTO cal = new CalificacionECDTO();
 
                         cal.setNombreEvaluacion(elm.getName());
-                        if (!ObjectUtils.isNullOrCero(g.getGrade())) {
-                            cal.setCalificacion(new Double(g.getGrade() / 10));
+                        if (!ObjectUtils.isNullOrCero(g.getGrade())) {                        	
+                            cal.setCalificacion(new Double(g.getGrade() ));
                             if (evento.getTpoCalificacion().equals(TipoCalificacionECEnum.TPO_CAL_SUMA.getId())) {
-                                cal.setCalifPonderacion(g.getGrade() / 10);
+                                cal.setCalifPonderacion(g.getGrade() );
                             }
                         }
                         califPart.add(cal);
