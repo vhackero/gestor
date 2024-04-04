@@ -431,7 +431,7 @@ public class EventoCapacitacionBean extends BaseBean {
 			filtros.getFichaDescriptivaPrograma().setEjeCapacitacion(idSubEstructura);
 			catSubEstructurasNivel1 = this.generarSubEstructuras1(nodos, idSubEstructura);
 			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
-			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();   
 			nivelMaximo = 1;
 		}
 	}
@@ -679,7 +679,6 @@ public class EventoCapacitacionBean extends BaseBean {
 		
 		nombres += " /"+malla.getNombre();
 		String padre = buscarPadre(malla.getMallaCurricularPadre(), nombres);
-		
 		return padre != null ? padre : null;
 	}
 

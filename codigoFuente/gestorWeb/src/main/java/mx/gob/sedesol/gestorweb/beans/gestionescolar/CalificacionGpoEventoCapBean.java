@@ -1,5 +1,6 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -10,16 +11,20 @@ import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 
+
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
 
+
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenciaAuxDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionECDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionRecordDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CatAsistenciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
@@ -1063,12 +1068,12 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
         if (!ObjectUtils.isNullOrCero(evento.getValorCalificacionDictamen())) {
 
-            porcentajeCalTot = (califTotal * evento.getValorCalificacionDictamen()) / 100;
+            porcentajeCalTot = (califTotal * evento.getValorCalificacionDictamen()) / 10;
         }
 
         if (!ObjectUtils.isNullOrCero(evento.getValorAsistenciaDictamen())) {
             Double asistb10 = (asistencia.doubleValue() / 10);
-            porcentajeAsist = (asistb10 * evento.getValorAsistenciaDictamen()) / 100;
+            porcentajeAsist = (asistb10 * evento.getValorAsistenciaDictamen()) / 10;
         }
 
         if (evento.getTpoDictamen().equals(TipoCalificacionECEnum.TPO_CAL_SUMA.getId())) {
