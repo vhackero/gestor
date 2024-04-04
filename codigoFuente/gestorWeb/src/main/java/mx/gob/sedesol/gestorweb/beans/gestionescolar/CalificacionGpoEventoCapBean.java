@@ -32,6 +32,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenciaAuxDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionECDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CatAsistenciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoActaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoActaImplDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelAsistenciaDTO;
@@ -149,6 +150,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 	private StringBuilder rutaImagenes;
 	private StreamedContent plantillaPDF;
 	
+	private EncabezadoActaImplDTO encabezadoI;
 	/** ITTIVA */
 	//private UploadedFile file;
 
@@ -161,8 +163,14 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         tpoCalifSel = new CatalogoComunDTO();
         tablaAuxCalif = new ArrayList<>();
         asistenciasPart = new ArrayList<>();
+        encabezadoI = new EncabezadoActaImplDTO();
+        encabezadoI.setDocente("");
+        plantillaPDF = null;
     }
 
+	public EncabezadoActaImplDTO getEncabezadoI() {
+		return encabezadoI;
+	}
 
     // @PostConstruct
     public String inicializaDatosCalif() {
@@ -821,6 +829,29 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
             // Se genera calificacion final
             this.calculaCalificacionesGpo(tablaAuxCalif, this.evento);
+            
+            EncabezadoActaDTO encabezado = eventoCapacitacionServiceFacade.getEventoCapacitacionService().obtenerEncabezadoActa(evento.getIdEvento(), grupoSelec.getIdGrupo());
+    		encabezadoI = new EncabezadoActaImplDTO();
+
+			log.info("========Encabezado========");
+    		log.info("Programa Edu: " +encabezado.getCveprograma());
+    		log.info("Cve PE: " +encabezado.getDocente());
+    		log.info("Periodo: " +encabezado.getPeriodo());
+    		log.info("Asign: " +encabezado.getGrupo());
+    		log.info("Cve Asig: " +encabezado.getMatricula());
+    		log.info("Grupo: " +encabezado.getPrograma());
+    		log.info("Folio: " +encabezado.getAsignatura().toUpperCase());
+    		log.info("Docente: " +encabezado.getCveAsignatura());    			
+
+    		encabezadoI.setPrograma(encabezado.getCveprograma());
+    		encabezadoI.setCveprograma(encabezado.getDocente());
+    		encabezadoI.setPeriodo(encabezado.getPeriodo());
+    		encabezadoI.setAsignatura(encabezado.getGrupo());
+    		encabezadoI.setCveAsignatura(encabezado.getMatricula());
+    		encabezadoI.setGrupo(encabezado.getPrograma());
+    		encabezadoI.setMatricula(encabezado.getAsignatura().toUpperCase());
+    		encabezadoI.setDocente(encabezado.getCveAsignatura());
+    		
             setMuestraTblCalif(Boolean.TRUE);
         } catch (ErrorWS e) {
             log.error(e.getMessage(), e);
@@ -858,56 +889,22 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
     		EncabezadoActaDTO encabezado = eventoCapacitacionServiceFacade.getEventoCapacitacionService().obtenerEncabezadoActa(evento.getIdEvento(), grupoSelec.getIdGrupo());
     		
-    		if(encabezado == null) {
-    			params.put("pProgramaEducativo", "No encontrado");
-    			params.put("pClavePE", "");
-    			params.put("pPeriodo", "");
-    			params.put("pAsignatura", "");
-    			params.put("pClaveAS", "");
-    			params.put("pGrupo", "");
-    			params.put("pFolio", "");
-    			params.put("pNombre", "");   
-    			params.put("LOGO", strmLOGO);   
-    		}else {
-    			log.info("========Encabezado========");
-        		log.info("Programa Edu: " +encabezado.getCveprograma());
-        		log.info("Cve PE: " +encabezado.getDocente());
-        		log.info("Periodo: " +encabezado.getPeriodo());
-        		log.info("Asign: " +encabezado.getGrupo());
-        		log.info("Cve Asig: " +encabezado.getMatricula());
-        		log.info("Grupo: " +encabezado.getPrograma());
-        		
-        		log.info("Folio: " +encabezado.getAsignatura().toUpperCase());
-        		log.info("Docente: " +encabezado.getCveAsignatura());    			
+    	   			
     			
-        		params.put("pProgramaEducativo",encabezado.getCveprograma());
-        		params.put("pClavePE", encabezado.getDocente());
-        		params.put("pPeriodo", encabezado.getPeriodo());
-        		params.put("pAsignatura", encabezado.getGrupo());
-        		params.put("pClaveAS", encabezado.getMatricula());
-        		params.put("pGrupo", encabezado.getPrograma());
-        		params.put("pFolio", encabezado.getAsignatura().toUpperCase());
-        		params.put("pNombre", encabezado.getCveAsignatura());
-            
-    			params.put("LOGO", strmLOGO);
-    			
-        		params.put("pProgramaEducativo",encabezado.getCveprograma());
-        		params.put("pClavePE", encabezado.getDocente());
-        		params.put("pPeriodo", encabezado.getPeriodo());
-        		params.put("pAsignatura", encabezado.getGrupo());
-        		params.put("pClaveAS", encabezado.getMatricula());
-        		params.put("pGrupo", encabezado.getPrograma());
-        		params.put("pFolio", encabezado.getAsignatura().toUpperCase());
-        		params.put("pNombre", encabezado.getCveAsignatura());
-
-    			params.put("LOGO", strmLOGO);
-    			    			
-    		}
+    		params.put("pProgramaEducativo",encabezadoI.getPrograma());
+    		params.put("pClavePE", encabezadoI.getCveprograma());
+    		params.put("pPeriodo", encabezadoI.getPeriodo());
+    		params.put("pAsignatura", encabezadoI.getAsignatura());
+    		params.put("pClaveAS", encabezadoI.getCveAsignatura());
+    		params.put("pGrupo", encabezadoI.getGrupo());
+    		params.put("pFolio", encabezadoI.getMatricula().toUpperCase());
+    		params.put("pNombre", encabezadoI.getDocente());
+    		params.put("LOGO", strmLOGO); 
     		
     		reporteConfig.setParametros(params);
 
     		plantillaPDF = ReporteUtil.getStreamedContentOfBytes(ReporteUtil.generar(reporteConfig),
-    				"application/pdf", "Acta_Calificaciones");		
+    				"application/pdf", "Acta de Calificaciones");		
     		
     		RequestContext.getCurrentInstance().execute("PF('visorPlantilla').show()");
     		RequestContext.getCurrentInstance().update("visorPdf");
