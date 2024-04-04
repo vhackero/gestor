@@ -149,7 +149,7 @@
 					</div>
 				</p:outputPanel>
 
-				<p:panel id="pnlCalif" header="Evaluaciones"
+				<p:panel id="pnlCalif" header="Calificaciones"
 					rendered="#{calificacionGpoEventoCapBean.muestraTblCalif}">
 
 					<p:importEnum
@@ -435,7 +435,7 @@
 									fileName="calificaciones_" encoding="UTF-8" />
 							</p:commandButton>
 
-							<p:outputLabel value="Descargar Calificaciones: " rendered="true"
+							<!--  <p:outputLabel value="Descargar Calificaciones: " rendered="true"
 								styleClass="margenIzquierdo agregaHeight" />
 							<p:commandButton id="btnDescargarPdf" ajax="false"
 								rendered="true"
@@ -443,7 +443,7 @@
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc">
 								<p:dataExporter type="pdf" target="exportTable"
 									fileName="calificaciones_" encoding="ISO-8859-15" />
-							</p:commandButton>
+							</p:commandButton> -->
 
 
 							<p:outputLabel value="Descargar Acta: " rendered="true"
@@ -474,7 +474,7 @@
 					<div class="row">
 						<div
 							class="col-md-12 displayFlex centrarMainAxis centrarCrossAxis invertirEjeFlex">
-							<p:outputLabel value="Cerrar Acta:" />
+							<p:outputLabel value="Confirmar Acta:" />
 							<p:inputSwitch value="#{calificacionGpoEventoCapBean.cerrarActa}"
 								disabled="#{calificacionGpoEventoCapBean.cerrarActa}"
 								onLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.si')}"

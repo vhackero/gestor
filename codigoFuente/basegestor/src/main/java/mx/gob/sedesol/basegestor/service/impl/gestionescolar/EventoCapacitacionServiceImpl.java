@@ -204,7 +204,7 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 			.append(dto.getParticipante().getNombre());
 			cal.setEstudiante(sb.toString());
 
-			cal.setCalificacion(String.valueOf(dto.getCalifFinal()));
+			cal.setCalificacion(String.valueOf(dto.getCalifFinal().intValue()));
 			
 			//validamos si existe baja
 			if(mapaBajas.containsKey(dto.getIdPersonaMoodle())) {
