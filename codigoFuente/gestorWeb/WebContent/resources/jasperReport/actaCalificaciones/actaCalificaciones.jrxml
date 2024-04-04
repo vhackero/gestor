@@ -30,7 +30,6 @@
 		<field name="estudiante" class="java.lang.String"/>
 		<field name="calificacion" class="java.lang.String"/>
 	</subDataset>
-	<parameter name="LOGO" class="java.io.InputStream"/>
 	<parameter name="dsCalificaciones" class="net.sf.jasperreports.engine.data.JRBeanArrayDataSource"/>
 	<parameter name="pProgramaEducativo" class="java.lang.String"/>
 	<parameter name="pClavePE" class="java.lang.String"/>
@@ -40,6 +39,7 @@
 	<parameter name="pGrupo" class="java.lang.String"/>
 	<parameter name="pFolio" class="java.lang.String"/>
 	<parameter name="pNombre" class="java.lang.String"/>
+	<parameter name="LOGO" class="java.io.InputStream"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -47,21 +47,18 @@
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="57" splitType="Stretch">
-			<image onErrorType="Blank">
-				<reportElement x="10" y="0" width="60" height="50" uuid="d4747d5d-0a1a-4b79-9694-bbf800489a1a">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
-			</image>
+		<band height="78" splitType="Stretch">
 			<staticText>
-				<reportElement x="200" y="10" width="290" height="30" uuid="f37e15fc-8d5e-4de3-ad06-9f10a7ca501c"/>
+				<reportElement x="250" y="24" width="290" height="30" uuid="f37e15fc-8d5e-4de3-ad06-9f10a7ca501c"/>
 				<textElement textAlignment="Center">
 					<font size="18" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ACTA DE CALIFICACIONES]]></text>
 			</staticText>
+			<image onErrorType="Blank">
+				<reportElement x="6" y="6" width="234" height="64" uuid="a180eb72-4674-4329-9490-e3043da15fa4"/>
+				<imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+			</image>
 		</band>
 	</title>
 	<pageHeader>
@@ -204,7 +201,7 @@
 					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
-					<datasetRun subDataset="dsReporteCalificaciones" uuid="f961e4f4-d290-435e-8005-c5aaeb2cbd05">
+					<datasetRun subDataset="dsReporteCalificaciones" uuid="5662b186-3758-46d8-96bd-d11e9e5bdcc6">
 						<dataSourceExpression><![CDATA[$P{dsCalificaciones}]]></dataSourceExpression>
 					</datasetRun>
 					<jr:column width="70" uuid="ad8836e4-2559-4325-a085-5a09d06e49e9">
