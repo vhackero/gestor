@@ -1397,41 +1397,41 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         // Calculo de calificaciones Totales y Finales
         try {
            for (TablaCalificacionesDTO tc : aux) {
-//                if (evento.getTpoCalificacion().equals(TipoCalificacionECEnum.TPO_CAL_SUMA.getId())) {
-//                    Double sum = new Double(0);
-//                    for (CalificacionECDTO cal : tc.getCalificacionEC()) {
-//                        if (!cal.getCalificacion().isNaN())
-//                            sum = sum + cal.getCalifPonderacion();
-//                    }
-//                    tc.setCalifTotal(sum);
-//
-//                } else if (evento.getTpoCalificacion().equals(TipoCalificacionECEnum.TPO_CAL_PROMEDIO.getId())) {
-//
-//                    /*
-//                     * Double sum = new Double(0); for (CalificacionECDTO cal :
-//                     * tc.getCalificacionEC()) { log.info("Calif ponderacion: " +
-//                     * cal.getCalifPonderacion()); log.info("Suma: " + sum); sum =
-//                     * sum + cal.getCalifPonderacion(); } tc.setCalifTotal(sum /
-//                     * tc.getCalificacionEC().size());
-//                     */
-//
-//                    Double sum = new Double(0);
-//                    for (int i = 0; i < tc.getCalificacionEC().size(); i++) {
-//                        if (!tc.getCalificacionEC().get(i).getCalificacion().isNaN())
-//                            sum = sum + tc.getCalificacionEC().get(i).getCalificacion();
-//                        log.info("Calif ponderacion: " + tc.getCalificacionEC().get(i).getCalifPonderacion());
-//                        log.info("Calificiacion normal: " + tc.getCalificacionEC().get(i).getCalificacion());
-//                        log.info("Suma: " + sum);
-//                    }
-//                    //tc.setCalifTotal(sum / tc.getCalificacionEC().size());
-//                }
-//                log.info("Calificacion total: " + tc.getCalifTotal());
-//                log.info("Asistencia" + tc.getAsistencia());
-//                if (ObjectUtils.isNull(tc.getAsistencia()))
-//                    //tc.setAsistencia("0");
-//                //tc.setCalifFinal(this.calculaCalificacionFinal(tc.getCalifTotal(), new Long(tc.getAsistencia()), evento)
-//                        //.doubleValue());
-//                log.info("Calificacion final: " + tc.getCalifFinal());
+                if (evento.getTpoCalificacion().equals(TipoCalificacionECEnum.TPO_CAL_SUMA.getId())) {
+                    Double sum = new Double(0);
+                    for (CalificacionECDTO cal : tc.getCalificacionEC()) {
+                        if (!cal.getCalificacion().isNaN())
+                            sum = sum + cal.getCalifPonderacion();
+                    }
+                    //tc.setCalifTotal(sum);
+
+                } else if (evento.getTpoCalificacion().equals(TipoCalificacionECEnum.TPO_CAL_PROMEDIO.getId())) {
+
+                    /*
+                     * Double sum = new Double(0); for (CalificacionECDTO cal :
+                     * tc.getCalificacionEC()) { log.info("Calif ponderacion: " +
+                     * cal.getCalifPonderacion()); log.info("Suma: " + sum); sum =
+                     * sum + cal.getCalifPonderacion(); } tc.setCalifTotal(sum /
+                     * tc.getCalificacionEC().size());
+                     */
+
+                    Double sum = new Double(0);
+                    for (int i = 0; i < tc.getCalificacionEC().size(); i++) {
+                        if (!tc.getCalificacionEC().get(i).getCalificacion().isNaN())
+                            sum = sum + tc.getCalificacionEC().get(i).getCalificacion();
+                        log.info("Calif ponderacion: " + tc.getCalificacionEC().get(i).getCalifPonderacion());
+                        log.info("Calificiacion normal: " + tc.getCalificacionEC().get(i).getCalificacion());
+                        log.info("Suma: " + sum);
+                    }
+                    //tc.setCalifTotal(sum / tc.getCalificacionEC().size());
+                }
+                log.info("Calificacion total: " + tc.getCalifTotal());
+                log.info("Asistencia" + tc.getAsistencia());
+                if (ObjectUtils.isNull(tc.getAsistencia()))
+                    tc.setAsistencia("0");
+                //tc.setCalifFinal(this.calculaCalificacionFinal(tc.getCalifTotal(), new Long(tc.getAsistencia()), evento)
+                        //.doubleValue());
+                log.info("Calificacion final: " + tc.getCalifFinal());
         	   
         	   
         	   
