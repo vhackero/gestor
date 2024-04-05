@@ -833,24 +833,17 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
             EncabezadoActaDTO encabezado = eventoCapacitacionServiceFacade.getEventoCapacitacionService().obtenerEncabezadoActa(evento.getIdEvento(), grupoSelec.getIdGrupo());
     		encabezadoI = new EncabezadoActaImplDTO();
 
-			log.info("========Encabezado========");
-    		log.info("Programa Edu: " +encabezado.getCveprograma());
-    		log.info("Cve PE: " +encabezado.getDocente());
-    		log.info("Periodo: " +encabezado.getPeriodo());
-    		log.info("Asign: " +encabezado.getGrupo());
-    		log.info("Cve Asig: " +encabezado.getMatricula());
-    		log.info("Grupo: " +encabezado.getPrograma());
-    		log.info("Folio: " +encabezado.getAsignatura().toUpperCase());
-    		log.info("Docente: " +encabezado.getCveAsignatura());    			
-
-    		encabezadoI.setPrograma(encabezado.getCveprograma());
-    		encabezadoI.setCveprograma(encabezado.getDocente());
-    		encabezadoI.setPeriodo(encabezado.getPeriodo());
-    		encabezadoI.setAsignatura(encabezado.getGrupo());
-    		encabezadoI.setCveAsignatura(encabezado.getMatricula());
-    		encabezadoI.setGrupo(encabezado.getPrograma());
-    		encabezadoI.setMatricula(encabezado.getAsignatura().toUpperCase());
-    		encabezadoI.setDocente(encabezado.getCveAsignatura());
+    		if(encabezado != null) {
+    			encabezadoI.setPrograma(encabezado.getCveprograma());
+        		encabezadoI.setCveprograma(encabezado.getDocente());
+        		encabezadoI.setPeriodo(encabezado.getPeriodo());
+        		encabezadoI.setAsignatura(encabezado.getGrupo());
+        		encabezadoI.setCveAsignatura(encabezado.getMatricula());
+        		encabezadoI.setGrupo(encabezado.getPrograma());
+        		encabezadoI.setMatricula(encabezado.getAsignatura().toUpperCase());
+        		encabezadoI.setDocente(encabezado.getCveAsignatura());
+    		}
+    		
     		
             setMuestraTblCalif(Boolean.TRUE);
         } catch (ErrorWS e) {
@@ -978,6 +971,53 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
      *  CARGA ACTA
      *  @author ITTIVA
      */
+    public void descargarActa() {    	
+
+    	
+    	try  (  ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+    		
+    		log.info("INICIA DESCARGA PLANTILLA CALIFICACIONES !!!");
+    		    plantillaPDF = null;
+        		Acta acta = new Acta();
+        		int grupo = grupoSelec.getIdGrupo();
+        		long user = getUsuarioEnSession().getIdPersona();
+        		byte[] fileBytes = null;
+        		
+                byte[] buffer = new byte[1024];
+                int length;
+                 
+                fileBytes = output.toByteArray();   
+                
+                acta.setBlob(fileBytes);
+                acta.setFechaCierre(new Date());
+        		acta.setGrupo(grupo);
+        		acta.setUsuarioModifico(user);
+        		
+        		acta = relEncuestaUsuarioService.descargaActa(grupo, user);
+        		plantillaPDF = ReporteUtil.getStreamedContentOfBytes(acta.getBlob(),"application/pdf", "Constancia Firmada");
+        		
+        		RequestContext.getCurrentInstance().execute("PF('visorPlantillaFirmada').show()");
+        		RequestContext.getCurrentInstance().update("visorPdfDescarga");
+        		RequestContext.getCurrentInstance().scrollTo("visorPdfDescarga");
+        		
+        		agregarMsgInfo( "DESCARGA DE ARCHIVO: " + " - CORRECTA", null);
+        		log.info("DESCARGA DE ARCHIVO: "+   " - CORRECTA");		
+    
+         
+        	
+        	log.info("TERMINA CARGA PLANTILLA CALIFICACIONES");
+    		
+    	} catch (Exception e) {    		
+            agregarMsgError("DESCARGA DE ARCHIVO: " + " - CORRECTA", e.getMessage());
+            log.error("DESCARGA DE ARCHIVO: " + " - ERROR");
+        }
+    
+    }
+    
+    /**
+     *  DESCARGA ACTA
+     *  @author ITTIVA
+     */
     public void cargarActa(FileUploadEvent file) {    	
 
     	
@@ -988,7 +1028,8 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     		if(file != null) {
         		
         		Acta acta = new Acta();
-        		
+        		int grupo = grupoSelec.getIdGrupo();
+        		long user = getUsuarioEnSession().getIdPersona();
         		byte[] fileBytes = null;
         		
                 byte[] buffer = new byte[1024];
@@ -1000,8 +1041,11 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 
                 acta.setBlob(fileBytes);
                 acta.setFechaCierre(new Date());
-        		
+        		acta.setGrupo(grupo);
+        		acta.setUsuarioModifico(user);
+        	
                 relEncuestaUsuarioService.cargaActa(acta);
+           
         		
         		agregarMsgInfo( "CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA", null);
         		log.info("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA");		
@@ -1020,8 +1064,6 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         }
     
     }
-    
-
     /**
      * @param calMdlGpo
      * @param plataforma
