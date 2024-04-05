@@ -1403,7 +1403,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 //                        if (!cal.getCalificacion().isNaN())
 //                            sum = sum + cal.getCalifPonderacion();
 //                    }
-//                    tc.setCalifTotal(sum);
+//                    tc.setCalifTotal(new Double(tc.getCalifTotal().intValue()));
 //
 //                } else if (evento.getTpoCalificacion().equals(TipoCalificacionECEnum.TPO_CAL_PROMEDIO.getId())) {
 //
@@ -1423,19 +1423,22 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 //                        log.info("Calificiacion normal: " + tc.getCalificacionEC().get(i).getCalificacion());
 //                        log.info("Suma: " + sum);
 //                    }
-//                    //tc.setCalifTotal(sum / tc.getCalificacionEC().size());
+//                    tc.setCalifTotal(new Double(tc.getCalifTotal().intValue()));
 //                }
-//                log.info("Calificacion total: " + tc.getCalifTotal());
-//                log.info("Asistencia" + tc.getAsistencia());
-//                if (ObjectUtils.isNull(tc.getAsistencia()))
-//                    //tc.setAsistencia("0");
-//                //tc.setCalifFinal(this.calculaCalificacionFinal(tc.getCalifTotal(), new Long(tc.getAsistencia()), evento)
-//                        //.doubleValue());
-//                log.info("Calificacion final: " + tc.getCalifFinal());
+                
+        	    tc.setCalifTotal( new Double(tc.getCalifTotal().intValue()) );
+                tc.setCalifFinal(new Double(tc.getCalifTotal().intValue()) );
+                log.info("Calificacion total: " + tc.getCalifTotal());
+                log.info("Asistencia" + tc.getAsistencia());
+                if (ObjectUtils.isNull(tc.getAsistencia()))
+                    tc.setAsistencia("0");
+                //tc.setCalifFinal(this.calculaCalificacionFinal(new Double(tc.getCalifTotal().intValue()), new Long(tc.getAsistencia()), evento)
+                       // .doubleValue());
+                log.info("Calificacion final: " + tc.getCalifFinal());
         	   
         	   
         	   
-        	   tc.setCalifTotal( new Double(tc.getCalifTotal().intValue()) );
+        	   
         	   
             }
 
@@ -1455,9 +1458,17 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                         tc.setDictamen(obtieneDictamenById(DictamenCalificacionEnum.NO_ACREDITADO.getId()));
                     } else {
                         tc.setDictamen(obtieneDictamenById(DictamenCalificacionEnum.EN_PROCESO.getId()));
-                    }
+                    }    
                 }
+                //tc.setCalifTotal(  );
             }
+            
+            for(TablaCalificacionesDTO tc : aux) {
+            	
+            	
+            	
+            }
+            
         } catch (Exception e) {
             agregarMsgError("No se encontro calificaciones en el Ambiente Virtual de Aprendizaje", e.getMessage());
         }
