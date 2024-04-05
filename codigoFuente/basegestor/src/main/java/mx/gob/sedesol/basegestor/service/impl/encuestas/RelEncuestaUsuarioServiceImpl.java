@@ -72,7 +72,16 @@ public class RelEncuestaUsuarioServiceImpl extends ComunValidacionService<RelEnc
 		log.info("SAVE CORRECTO");
 
 	}
+	
+	@Override
+	public Acta descargaActa(int idGrupo, long idUser) {		
+		
+		log.info("EJECUTANDO QUERY");
+		Acta resultado = new Acta();
+		resultado =  iCargaActaRepository.getActaByIdGrupoUser(idGrupo,idUser);
+		return resultado; 
 
+	}
 	@Override
 	public List<RelEncuestaUsuarioDTO> findAll() {
 		// TODO Auto-generated method stub
