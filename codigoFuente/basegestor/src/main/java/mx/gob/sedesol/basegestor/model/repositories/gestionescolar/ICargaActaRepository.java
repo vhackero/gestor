@@ -7,8 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta;
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblGrupo;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta; 
 
 /**
  *  ACTAS
@@ -18,9 +17,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblGrupo;
 @Repository
 public interface ICargaActaRepository extends JpaRepository<Acta, Integer> {
 	
-	@Query("SELECT grupo FROM Acta "
-			 
-			+ "WHERE id_grupo =:idGrupo AND usuario_modifico =:idUser")
+	@Query("SELECT acta FROM Acta acta WHERE id_grupo =:idGrupo AND usuario_modifico =:idUser")
 	public Acta getActaByIdGrupoUser(@Param("idGrupo")Integer idGrupo,@Param("idUser") long idUser);
 
 }

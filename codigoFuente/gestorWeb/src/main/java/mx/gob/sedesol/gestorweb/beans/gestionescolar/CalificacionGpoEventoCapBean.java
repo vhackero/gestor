@@ -977,7 +977,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     	try  (  ByteArrayOutputStream output = new ByteArrayOutputStream()) {
     		
     		log.info("INICIA DESCARGA PLANTILLA CALIFICACIONES !!!");
- 
+    		    plantillaPDF = null;
         		Acta acta = new Acta();
         		int grupo = grupoSelec.getIdGrupo();
         		long user = getUsuarioEnSession().getIdPersona();
@@ -997,8 +997,8 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         		plantillaPDF = ReporteUtil.getStreamedContentOfBytes(acta.getBlob(),"application/pdf", "Constancia Firmada");
         		
         		RequestContext.getCurrentInstance().execute("PF('visorPlantillaFirmada').show()");
-        		RequestContext.getCurrentInstance().update("visorPdf");
-        		RequestContext.getCurrentInstance().scrollTo("visorPdf");
+        		RequestContext.getCurrentInstance().update("visorPdfDescarga");
+        		RequestContext.getCurrentInstance().scrollTo("visorPdfDescarga");
         		
         		agregarMsgInfo( "DESCARGA DE ARCHIVO: " + " - CORRECTA", null);
         		log.info("DESCARGA DE ARCHIVO: "+   " - CORRECTA");		

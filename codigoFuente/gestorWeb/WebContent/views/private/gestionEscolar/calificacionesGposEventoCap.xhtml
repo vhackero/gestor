@@ -630,14 +630,14 @@
 		
 		<p:dialog id="visorPdfDescarga" dynamic="true" responsive="true" modal="true"
 			closable="false" resizable="false" position="center"
-			header="Constancia" width="900" widgetVar="visorPlantillaFirmada">
+			header="Acta Firmada" width="900" widgetVar="visorPlantillaFirmada">
 			<div class="form-group">
 				<div class="row">
 					<div class="col-md-12">
 						<p:media player="pdf"
 							value="#{calificacionGpoEventoCapBean.plantillaPDF}" width="865"
 							height="400" styleClass="agregaBorde">
-							 <f:param name="id" value="#{calificacionGpoEventoCapBean.idFile}" />
+							 <f:param name="idDes" value="#{calificacionGpoEventoCapBean.idFile}" />
 						</p:media>
 					</div>
 				</div>
@@ -647,7 +647,7 @@
 					<p:commandButton
 						value="#{sistema.obtenerTexto('gw.admin.plantillas.btn.cerrar')}"
 						styleClass="btn btn-default pull-right"
-						onclick="PF('visorPlantilla').hide();" />
+						onclick="PF('visorPlantillaFirmada').hide();" />
 				</div>
 			</div>
 		</p:dialog>
