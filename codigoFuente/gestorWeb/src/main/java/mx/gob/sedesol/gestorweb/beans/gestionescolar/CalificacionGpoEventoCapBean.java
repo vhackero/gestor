@@ -1403,7 +1403,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                         if (!cal.getCalificacion().isNaN())
                             sum = sum + cal.getCalifPonderacion();
                     }
-                    //tc.setCalifTotal(sum);
+                    tc.setCalifTotal(sum);
 
                 } else if (evento.getTpoCalificacion().equals(TipoCalificacionECEnum.TPO_CAL_PROMEDIO.getId())) {
 
@@ -1423,19 +1423,19 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                         log.info("Calificiacion normal: " + tc.getCalificacionEC().get(i).getCalificacion());
                         log.info("Suma: " + sum);
                     }
-                    //tc.setCalifTotal(sum / tc.getCalificacionEC().size());
+                    tc.setCalifTotal(sum / tc.getCalificacionEC().size());
                 }
                 log.info("Calificacion total: " + tc.getCalifTotal());
                 log.info("Asistencia" + tc.getAsistencia());
                 if (ObjectUtils.isNull(tc.getAsistencia()))
                     tc.setAsistencia("0");
-                //tc.setCalifFinal(this.calculaCalificacionFinal(tc.getCalifTotal(), new Long(tc.getAsistencia()), evento)
-                        //.doubleValue());
+                tc.setCalifFinal(this.calculaCalificacionFinal(tc.getCalifTotal(), new Long(tc.getAsistencia()), evento)
+                        .doubleValue());
                 log.info("Calificacion final: " + tc.getCalifFinal());
         	   
         	   
         	   
-        	   tc.setCalifTotal( new Double(tc.getCalifTotal().intValue()) );
+        	   //tc.setCalifTotal( new Double(tc.getCalifTotal().intValue()) );
         	   
             }
 
@@ -1456,8 +1456,18 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                     } else {
                         tc.setDictamen(obtieneDictamenById(DictamenCalificacionEnum.EN_PROCESO.getId()));
                     }
+                    
+                    
+                    
                 }
             }
+            
+            for(TablaCalificacionesDTO tc : aux) {
+            	
+            	tc.setCalifTotal( new Double(tc.getCalifTotal().intValue()) );
+            	
+            }
+            
         } catch (Exception e) {
             agregarMsgError("No se encontro calificaciones en el Ambiente Virtual de Aprendizaje", e.getMessage());
         }
