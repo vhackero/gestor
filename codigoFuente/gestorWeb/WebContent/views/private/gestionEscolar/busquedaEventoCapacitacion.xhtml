@@ -25,7 +25,7 @@
 						  onsuccess="PF('dialogLayout').hide()" />
 
 			<p:panel id="fldDispersar" header="Generar dispersión"
-				showCollapseLink="false" collapsible="false">
+				showCollapseLink="false" collapsible="false" visible="false">
 				<f:validateBean disabled="true">
 					<div class="row">
 						<div class="col-md-4 col-xs-12">
@@ -44,7 +44,7 @@
 							</p:selectCheckboxMenu>
 						</div>
 						<div class="col-md-12">
-							<p:commandButton value="DISPERSAR"
+							<p:commandButton value="Dispersar"
 								styleClass="btn btn-primary pull-right" update="fldDispersar"
 								action="#{dispersionBean.dispersar()}" ajax="false"
 								immediate="true" process="@this" />
