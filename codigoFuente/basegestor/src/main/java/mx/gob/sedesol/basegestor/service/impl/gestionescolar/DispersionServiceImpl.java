@@ -66,6 +66,19 @@ public class DispersionServiceImpl
 		listDTO = modelMapper.map(lista, objetoDTO);
 
 		return listDTO;
+	} 
+	@Override
+	public List<TblInscripcionResumenDTO> getInscripcionResumenByIdPlanesSemestreBloque(List<Integer> programasEducativos, Integer semestre, String bloque) {
+		List<TblInscripcionResumenDTO> listDTO;
+
+		List<TblInscripcionResumen> lista = inscripcionResumenRepo.getInscripcionResumenByIdPlanesSemestreBloque(programasEducativos, semestre, bloque);
+
+		Type objetoDTO = new TypeToken<List<TblInscripcionResumenDTO>>() {
+		}.getType();
+
+		listDTO = modelMapper.map(lista, objetoDTO);
+
+		return listDTO;
 	}
 	
 	@Override

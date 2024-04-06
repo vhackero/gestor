@@ -25,7 +25,7 @@
 						  onsuccess="PF('dialogLayout').hide()" />
 
 			<p:panel id="fldDispersar" header="Generar dispersión"
-				showCollapseLink="false" collapsible="false" visible="false">
+				showCollapseLink="false" collapsible="false" visible="true">
 				<f:validateBean disabled="true">
 					<div class="row">
 						<div class="col-md-4 col-xs-12">
@@ -43,7 +43,54 @@
 									itemLabel="#{plan.nombre}" itemValue="#{plan.nombre}" />
 							</p:selectCheckboxMenu>
 						</div>
+						<p:outputPanel id="pnlEstructuras2">
+								<p:outputPanel
+										rendered="#{not empty eventoCapacitacionBean.catEstructuras}">
+									<div class="col-md-4 col-xs-12">
+										<p:outputLabel styleClass="requerido" value="Estructura:"/>
+										<p:selectOneMenu id="nvoCatEstruc_2" styleClass="col-xs-12"
+														 valueChangeListener="#{eventoCapacitacionBean.onChangeCatEstructura}">
+											<p:ajax update="@form"/>
+											<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+													itemValue="#{0}"/>
+											<f:selectItems
+													value="#{eventoCapacitacionBean.catEstructuras}"
+													var="estruc" itemLabel="#{estruc.nombre}"
+													itemValue="#{estruc.id}"/>
+										</p:selectOneMenu>
+										<p:message for="nvoCatEstruc_2"/>
+									</div>
+								</p:outputPanel>
+							</p:outputPanel>
+
+							<p:outputPanel id="pnlSubestructuras_3">
+								<p:outputPanel
+										rendered="#{not empty eventoCapacitacionBean.catSubEstructurasNivel1}">
+									<div class="col-md-4 col-xs-12">
+										<p:outputLabel styleClass="requerido" value="Subestructura 1:"/>
+										<p:selectOneMenu id="nvoCatSubEstruc_2" styleClass="col-xs-12"
+														 valueChangeListener="#{eventoCapacitacionBean.onChangeCatSubestructura1}">
+											<p:ajax update="@form"/>
+											<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+													itemValue="#{0}"/>
+											<f:selectItems
+													value="#{eventoCapacitacionBean.catSubEstructurasNivel1}"
+													var="subEstruc1" itemLabel="#{subEstruc1.nombre}"
+													itemValue="#{subEstruc1.id}"/>
+										</p:selectOneMenu>
+										<p:message for="nvoCatSubEstruc_2"/>
+									</div>
+								</p:outputPanel>
+							</p:outputPanel>
 						<div class="col-md-12">
+							<!-- Leyenda campos requeridos-->
+							<div class="col-md-4">
+								<p:outputLabel
+										value="#{sistema.obtenerTexto('gw.gestionescolar.label.camposRequeridos')}"
+										styleClass="requerido" />
+							</div>
 							<p:commandButton value="Dispersar"
 								styleClass="btn btn-primary pull-right" update="fldDispersar"
 								action="#{dispersionBean.dispersar()}" ajax="false"

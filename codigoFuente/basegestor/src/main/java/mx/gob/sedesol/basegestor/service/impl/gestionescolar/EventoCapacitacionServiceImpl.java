@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,7 +14,6 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -917,6 +915,14 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 
 	public List<EventoCapacitacionDTO> obtenerEventosPorProgramaIdPlan(String programa, Integer idPlan) {
 		List<TblEvento> eventos = eventoCapacitacionRepo.obtenerEventosPorIdProgramaIdPlan(programa, idPlan);
+		Type listaEventosCapacitacion = new TypeToken<List<EventoCapacitacionDTO>>() {
+		}.getType();
+
+		return modelMapper.map(eventos, listaEventosCapacitacion);
+	}
+	
+	public List<EventoCapacitacionDTO> obtenerEventosPorIdProgramas(List<Integer> programas) {
+		List<TblEvento> eventos = eventoCapacitacionRepo.obtenerEventosPorIdProgramas(programas);
 		Type listaEventosCapacitacion = new TypeToken<List<EventoCapacitacionDTO>>() {
 		}.getType();
 

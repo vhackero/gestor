@@ -2,6 +2,9 @@ package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
 import java.io.Serializable;
 
+import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
+
 public class TblInscripcionResumenDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -14,16 +17,18 @@ public class TblInscripcionResumenDTO implements Serializable {
 	private String grupo;
 	private Integer grupoResto;
 	private Integer noEstudiantes;
-	private Integer noGrupos;
+//	private Integer noGrupos;
 	private String programaEducativo;
 	private Integer semestre;
+	private PlanDTO plan;
+	private FichaDescProgramaDTO fichaDescriptivaPrograma;
 
 	@Override
 	public String toString() {
 		return "TblInscripcionResumenDTO [id=" + id + ", asignatura=" + asignatura + ", bloque=" + bloque
 				+ ", claveAsignatura=" + claveAsignatura + ", estudiantesResto=" + estudiantesResto
 				+ ", estudiantesXGrupo=" + estudiantesXGrupo + ", grupo=" + grupo + ", grupoResto=" + grupoResto
-				+ ", noEstudiantes=" + noEstudiantes + ", noGrupos=" + noGrupos + ", programaEducativo="
+				+ ", noEstudiantes=" + noEstudiantes /*+ ", noGrupos=" + noGrupos */+ ", programaEducativo="
 				+ programaEducativo + ", semestre=" + semestre + "]";
 	}
 
@@ -102,13 +107,13 @@ public class TblInscripcionResumenDTO implements Serializable {
 		this.noEstudiantes = noEstudiantes;
 	}
 
-	public Integer getNoGrupos() {
-		return this.noGrupos;
-	}
-
-	public void setNoGrupos(Integer noGrupos) {
-		this.noGrupos = noGrupos;
-	}
+//	public Integer getNoGrupos() {
+//		return this.noGrupos;
+//	}
+//
+//	public void setNoGrupos(Integer noGrupos) {
+//		this.noGrupos = noGrupos;
+//	}
 
 	public String getProgramaEducativo() {
 		return this.programaEducativo;
@@ -125,5 +130,22 @@ public class TblInscripcionResumenDTO implements Serializable {
 	public void setSemestre(Integer semestre) {
 		this.semestre = semestre;
 	}
+
+	public PlanDTO getPlan() {
+		return plan;
+	}
+
+	public void setPlan(PlanDTO plan) {
+		this.plan = plan;
+	}
+
+	public FichaDescProgramaDTO getFichaDescriptivaPrograma() {
+		return fichaDescriptivaPrograma;
+	}
+
+	public void setFichaDescriptivaPrograma(FichaDescProgramaDTO fichaDescriptivaPrograma) {
+		this.fichaDescriptivaPrograma = fichaDescriptivaPrograma;
+	}
+	
 
 }

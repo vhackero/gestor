@@ -25,6 +25,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionResumenDTO;
+import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
@@ -82,6 +83,8 @@ public class DispersionBean extends BaseBean {
 	private Integer idGrupo;
 	private int numeroGrupos;
 	private Integer idCursoLms;
+	private Integer semestre;
+	private String bloque;
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
@@ -95,8 +98,10 @@ public class DispersionBean extends BaseBean {
 		System.out.println(">>>>>>>>>>>>> DISPERSAR >>>>>>>>>>>>> ");
 		List<PlanDTO> listaPlanesSeleccionados = obtenerListaPlanesByIds();
 
+		semestre=1;
+		bloque="1";
 		List<TblInscripcionResumenDTO> listaInscripcionResumen = obtenerListaInscripcionResumen(
-				listaPlanesSeleccionados);
+				listaPlanesSeleccionados, semestre, bloque);
 
 		List<GrupoDTO> listaGruposXEvento = obtenerListaGruposXEvento(listaPlanesSeleccionados,
 				listaInscripcionResumen);
@@ -113,15 +118,15 @@ public class DispersionBean extends BaseBean {
 
 		List<Integer> listaEventos = new ArrayList<Integer>();		
 		if (!listaPlanesSeleccionados.isEmpty() && !listaInscripcionResumen.isEmpty()) {
-			
-			for (PlanDTO plan : listaPlanesSeleccionados) {
-				 for( TblInscripcionResumenDTO inscripcionResumen: listaInscripcionResumen) {
+		List<Integer>listProgramasIds=	obtenerListaProgramasByIds(listaInscripcionResumen);
+//			for (PlanDTO plan : listaPlanesSeleccionados) {
+//				 for( TblInscripcionResumenDTO inscripcionResumen: listaInscripcionResumen) {
 //					System.out.println("plan > " + plan.getNombre()+ " - "+ inscripcionResumen.getProgramaEducativo()  );
-					if (plan.getNombre().equals(inscripcionResumen.getProgramaEducativo())) {
+//					if (plan.getNombre().equals(inscripcionResumen.getProgramaEducativo())) {
 //						System.out.println(" IdPlan: "+ plan.getIdPlan() +"inscripcionResumen.getAsignatura() "+ inscripcionResumen.getAsignatura() );
 						
 						List<EventoCapacitacionDTO> eventos = dispersionServiceFacade.getEventoCapacitacionService()
-								.obtenerEventosPorProgramaIdPlan(inscripcionResumen.getAsignatura(), plan.getIdPlan());
+								.obtenerEventosPorIdProgramas(listProgramasIds);
 						
 //						System.out.println("lista de eventos >>>>>>>>>>>>> " + eventos.size());  
 						Optional.ofNullable(eventos).orElse(Collections.emptyList()).stream()
@@ -139,9 +144,9 @@ public class DispersionBean extends BaseBean {
 							System.out.println("Numero de Grupos>>>>>>> listaGrupos " + listaGrupos.size());
 							 
 						}
-					}
-				}
-			}	
+//					}
+//				}
+//			}	
 		}
 		return listaGrupos;		
 	}
@@ -239,14 +244,27 @@ public class DispersionBean extends BaseBean {
 		return planesSeleccionados;
 	}
 	
-	public List<TblInscripcionResumenDTO>  obtenerListaInscripcionResumen(List<PlanDTO> planes) {
+	public List<Integer> obtenerListaProgramasByIds(List<TblInscripcionResumenDTO> listaInscripcionResumen) {
+		List<Integer> programasSeleccionados = new ArrayList<Integer>();
+
+//		for (String nombrePlan : selectedPlanes) {
+			for (TblInscripcionResumenDTO plan : listaInscripcionResumen) {
+//				if(nombrePlan.equals(plan.getNombre())) {
+				programasSeleccionados.add(plan.getId());
+//				}
+			}
+//		}
+		return programasSeleccionados;
+	}
+	
+	public List<TblInscripcionResumenDTO>  obtenerListaInscripcionResumen(List<PlanDTO> planes, Integer semestre, String bloque) {
 		
-		List<String> programas = new ArrayList<String>();
+		List<Integer> programas = new ArrayList<Integer>();
 		for(PlanDTO plan: planes) {
-			programas.add(plan.getNombre());
+			programas.add(plan.getIdPlan());
 		}
 	 
-		listaInscripcionesResumen= dispersionServiceFacade.getInscripcionResumenByProgramaEducativo(programas);
+		listaInscripcionesResumen= dispersionServiceFacade.getInscripcionResumenByIdPlanesSemestreBloque(programas, semestre, bloque);
 //		System.out.println("obtenerListaInscripcionResumen >>>>>>>>>>>>> "  + programas +" - " + + listaInscripcionesResumen.size());
 		return listaInscripcionesResumen;
 	}
@@ -255,13 +273,14 @@ public class DispersionBean extends BaseBean {
 	public void generarGrupos() {
 
 		System.out.println(">>>>>>>>>>>>> GENERAR GRUPOS >>>>>>>>>>>>> ");
-
+		semestre=1;
+		bloque="1";
 		List<PlanDTO> listaPlanesSeleccionados = obtenerListaPlanesByIds();
 	
 		if (!listaPlanesSeleccionados.isEmpty()) {
 
 			List<TblInscripcionResumenDTO> listaInscripcionResumen = obtenerListaInscripcionResumen(
-					listaPlanesSeleccionados);
+					listaPlanesSeleccionados, semestre, bloque);
 
 			for (PlanDTO plan : listaPlanesSeleccionados) {
 				for (TblInscripcionResumenDTO inscripcionResumen : listaInscripcionResumen) {
@@ -570,7 +589,23 @@ public class DispersionBean extends BaseBean {
 	public void setSelectedIdPlanes(List<Integer> selectedIdPlanes) {
 		this.selectedIdPlanes = selectedIdPlanes;
 	}
-	
+
+	public Integer getSemestre() {
+		return semestre;
+	}
+
+	public void setSemestre(Integer semestre) {
+		this.semestre = semestre;
+	}
+
+	public String getBloque() {
+		return bloque;
+	}
+
+	public void setBloque(String bloque) {
+		this.bloque = bloque;
+	}
+
 	/* INICIO DE GETS Y SETS */
 	
 }

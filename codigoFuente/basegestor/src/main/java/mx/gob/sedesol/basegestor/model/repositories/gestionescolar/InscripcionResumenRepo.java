@@ -22,4 +22,11 @@ public interface InscripcionResumenRepo extends JpaRepository<TblInscripcionResu
 			+ " AND ins.bloque = 1")
 	public List<TblInscripcionResumen> getInscripcionResumenByProgramaEducativo(@Param("programas")List<String> programas);
 	
+	@Query("SELECT ins FROM TblInscripcionResumen ins "
+			+ " WHERE ins.plan.idPlan in (:planes)"
+			+ " AND ins.noEstudiantes > 0 "
+			+ " AND ins.semestre = :semestre "
+			+ " AND ins.bloque = :bloque")
+	public List<TblInscripcionResumen> getInscripcionResumenByIdPlanesSemestreBloque(@Param("planes")List<Integer> planes, @Param("semestre") Integer semestre, @Param("bloque") String bloque);
+	
 }

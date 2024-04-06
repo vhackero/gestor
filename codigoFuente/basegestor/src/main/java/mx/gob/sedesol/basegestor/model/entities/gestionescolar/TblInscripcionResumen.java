@@ -3,6 +3,9 @@ package mx.gob.sedesol.basegestor.model.entities.gestionescolar;
 import java.io.Serializable;
 import javax.persistence.*;
 
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
+
 
 /**
  * The persistent class for the tbl_inscripcion_resumen database table.
@@ -38,13 +41,22 @@ public class TblInscripcionResumen implements Serializable {
 	@Column(name="no_estudiantes")
 	private Integer noEstudiantes;
 
-	@Column(name="no_grupos")
-	private Integer noGrupos;
+//	@Column(name="no_grupos")
+//	private Integer noGrupos;
 
 	@Column(name="programa_educativo")
 	private String programaEducativo;
 
 	private Integer semestre;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "id_plan")
+	private TblPlan plan;
+	
+	// bi-directional many-to-one association to TblFichaDescriptivaPrograma
+	@ManyToOne
+	@JoinColumn(name = "id_programa", insertable = false, updatable = false)
+	private TblFichaDescriptivaPrograma fichaDescriptivaPrograma;
 
 	public TblInscripcionResumen() {
 	}
@@ -121,13 +133,13 @@ public class TblInscripcionResumen implements Serializable {
 		this.noEstudiantes = noEstudiantes;
 	}
 
-	public Integer getNoGrupos() {
-		return this.noGrupos;
-	}
-
-	public void setNoGrupos(Integer noGrupos) {
-		this.noGrupos = noGrupos;
-	}
+//	public Integer getNoGrupos() {
+//		return this.noGrupos;
+//	}
+//
+//	public void setNoGrupos(Integer noGrupos) {
+//		this.noGrupos = noGrupos;
+//	}
 
 	public String getProgramaEducativo() {
 		return this.programaEducativo;
@@ -145,4 +157,19 @@ public class TblInscripcionResumen implements Serializable {
 		this.semestre = semestre;
 	}
 
+	public TblPlan getPlan() {
+		return plan;
+	}
+
+	public void setPlan(TblPlan plan) {
+		this.plan = plan;
+	}
+
+	public TblFichaDescriptivaPrograma getFichaDescriptivaPrograma() {
+		return fichaDescriptivaPrograma;
+	}
+
+	public void setFichaDescriptivaPrograma(TblFichaDescriptivaPrograma fichaDescriptivaPrograma) {
+		this.fichaDescriptivaPrograma = fichaDescriptivaPrograma;
+	}
 }

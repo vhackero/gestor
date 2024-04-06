@@ -56,28 +56,13 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 	@Query("UPDATE TblEvento e SET e.catEstadoEventoCapacitacion.id = ?1 WHERE e.id = ?2 ")
 	public void cambiarEstatusEvento(Integer idEstatus, Integer idEvento);
 	
+	@Query(value = "SELECT * FROM tbl_eventos e " + 
+			" inner join tbl_ficha_descriptiva_programa fdp on fdp.id_programa = e.id_programa " + 
+			" WHERE fdp.id_programa in (:programas) and e.id_estatus_ec = 2" + 		
+			" GROUP by e.id_evento " + 
+			" ORDER by dp.id_programa, e.id_evento", nativeQuery = true)
+	public List<TblEvento> obtenerEventosPorIdProgramas(@Param("programas")List<Integer> programas);
 	
-	/*@Query(value = "SELECT tp.id_plan, tp.nombre, tfdp.id_programa, tfdp.nombre_tentativo, te.id_evento, te.nombre_ec\r\n" + 
-			"	FROM tbl_eventos te\r\n" + 
-			"	         INNER JOIN tbl_ficha_descriptiva_programa  tfdp ON tfdp.id_programa = te.id_programa\r\n" + 
-			"	                  INNER JOIN tbl_planes tp ON tp.id_plan = tfdp.id_plan\r\n" + 
-			"	                  INNER JOIN tbl_inscripcion_resumen ir ON tp.nombre = ir.programa_educativo\r\n" + 
-			"	WHERE  (\r\n" + 
-			"	    (tfdp.tipo = 'Optativa' AND\r\n" + 
-			"	     tfdp.nombre_tentativo = REPLACE(REPLACE(REPLACE(CONCAT(ir.asignatura, ' ', ir.bloque), '1', 'I'), '2', 'II'), '3', 'III'))\r\n" + 
-			"	        OR (tfdp.tipo != 'Optativa' AND tfdp.nombre_tentativo = ir.asignatura)\r\n" + 
-			"	    )\r\n" + 
-			"	  and ir.programa_educativo  IN (:programa) AND\r\n" + 
-			"	    ir.asignatura  IN (:asignatura)\r\n" + 
-			"	  and ir.bloque = 2", nativeQuery = true)
-	public List<TblEvento> obtenerEventosPorNombrePrograma(@Param("programa") String programa, @Param("asignatura") String asignatura);*/
-/*	@Query("SELECT evt FROM TblEvento evt "
-			+ " JOIN  evt.inscripciones ins "
-			+ " JOIN  ins.fichaDescriptivaPrograma fdp "
-			+ " WHERE fdp.nombreTentativo like %:programa%"
-			+ " AND ins.plan.idPlan =:idPlan ")
-		//	+ " GROUP BY evt.idEvento")
-			//+ " AND ( fdp.tipo = 'Optativa' AND "*/
 	@Query(value = "SELECT * FROM tbl_eventos e " + 
 			" inner join tbl_inscripciones i on e.id_programa = i.idprograma " + 
 			" inner join tbl_ficha_descriptiva_programa fdp on fdp.id_programa = e.id_programa " + 

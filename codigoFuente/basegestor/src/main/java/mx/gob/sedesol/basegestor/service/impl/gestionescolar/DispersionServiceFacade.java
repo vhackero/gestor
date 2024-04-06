@@ -63,6 +63,10 @@ public class DispersionServiceFacade {
 		return dispersionService.getInscripcionResumenByProgramaEducativo(programaEducativo);
 	}
 	
+	public List<TblInscripcionResumenDTO> getInscripcionResumenByIdPlanesSemestreBloque(List<Integer> programaEducativo, Integer semestre, String bloque) {
+		return dispersionService.getInscripcionResumenByIdPlanesSemestreBloque(programaEducativo, semestre, bloque);
+	}
+	
 	public List<TblInscripcionDTO> getInscripcionesByIdPlan(Integer idPLan) {
 		return dispersionService.getInscripcionesByIdPlan(idPLan);
 	}
