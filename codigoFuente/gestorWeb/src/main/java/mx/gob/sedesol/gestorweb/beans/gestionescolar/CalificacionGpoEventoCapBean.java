@@ -1,35 +1,31 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 
-import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
-
-import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.StreamedContent;
-import org.primefaces.model.UploadedFile;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenciaAuxDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionECDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionRecordDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CatAsistenciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoActaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoActaImplDTO;
@@ -50,12 +46,9 @@ import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDictamen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoCalificacionEc;
-import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.ServiceException;
 import mx.gob.sedesol.basegestor.service.encuestas.RelEncuestaUsuarioService;
-import mx.gob.sedesol.basegestor.service.gestionescolar.ICargaActaService;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.AsistenciaFacadeService;
-import mx.gob.sedesol.basegestor.service.impl.gestionescolar.CargaActaService;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.EventoCapacitacionServiceFacade;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Calificaciones;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Elemntos;
@@ -71,8 +64,6 @@ import mx.gob.sedesol.gestorweb.commons.dto.ReporteConfig;
 import mx.gob.sedesol.gestorweb.commons.utils.ModalidadEnum;
 import mx.gob.sedesol.gestorweb.commons.utils.ReporteUtil;
 import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionRecordDTO;
 
 @SessionScoped
 @ManagedBean
@@ -151,6 +142,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 	private StreamedContent plantillaPDF;
 	
 	private EncabezadoActaImplDTO encabezadoI;
+	
+	private boolean deshabilitarDescargaActaFirmada;
+	private boolean deshabilitarCargaActaFirmada;
 	/** ITTIVA */
 	//private UploadedFile file;
 
@@ -790,11 +784,14 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     }
 
     /**
+     * Metodo del boton Importar Calificaciones
      * Consume WebService
      */
     public void obtieneCalifMoodleWS() {
 
         tablaAuxCalif = new ArrayList<>();
+        deshabilitarCargaActaFirmada=false;
+        deshabilitarDescargaActaFirmada=true;
 
         if (ObjectUtils.isNull(evento.getTpoCalificacion())) {
             agregarMsgInfo("Debes seleccionar el tipo de calificación", null);
@@ -882,9 +879,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
     		EncabezadoActaDTO encabezado = eventoCapacitacionServiceFacade.getEventoCapacitacionService().obtenerEncabezadoActa(evento.getIdEvento(), grupoSelec.getIdGrupo());
     		
-    	   			
-    			
-    		params.put("pProgramaEducativo",encabezadoI.getPrograma());
+     		params.put("pProgramaEducativo",encabezadoI.getPrograma());
     		params.put("pClavePE", encabezadoI.getCveprograma());
     		params.put("pPeriodo", encabezadoI.getPeriodo());
     		params.put("pAsignatura", encabezadoI.getAsignatura());
@@ -893,11 +888,15 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     		params.put("pFolio", encabezadoI.getMatricula().toUpperCase());
     		params.put("pNombre", encabezadoI.getDocente());
     		params.put("LOGO", strmLOGO); 
+ 
+    		String pFolioPrincipal= ""+encabezadoI.getCveprograma()+"-"+encabezadoI.getCveAsignatura()+"-"+grupoSelec.getNombre();
+    		params.put("pFolioPrincipal",pFolioPrincipal);
     		
     		reporteConfig.setParametros(params);
 
+    		String nombreDescargaReporte="Calificaciones_"+evento.getNombreEc()+" - "+ grupoSelec.getNombre();
     		plantillaPDF = ReporteUtil.getStreamedContentOfBytes(ReporteUtil.generar(reporteConfig),
-    				"application/pdf", "Acta de Calificaciones");		
+    				"application/pdf", nombreDescargaReporte);		
     		
     		RequestContext.getCurrentInstance().execute("PF('visorPlantilla').show()");
     		RequestContext.getCurrentInstance().update("visorPdf");
@@ -1008,7 +1007,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         	log.info("TERMINA CARGA PLANTILLA CALIFICACIONES");
     		
     	} catch (Exception e) {    		
-            agregarMsgError("DESCARGA DE ARCHIVO: " + " - CORRECTA", e.getMessage());
+            agregarMsgError("DESCARGA DE ARCHIVO: " + " - ERROR", e.getMessage());
             log.error("DESCARGA DE ARCHIVO: " + " - ERROR");
         }
     
@@ -1046,13 +1045,16 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         	
                 relEncuestaUsuarioService.cargaActa(acta);
            
-        		
-        		agregarMsgInfo( "CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA", null);
-        		log.info("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA");		
+        		deshabilitarCargaActaFirmada=true;
+        		deshabilitarDescargaActaFirmada=false;
+                agregarMsgInfo( "CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA", null);
+        		log.info("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA->" +deshabilitarCargaActaFirmada + deshabilitarDescargaActaFirmada );		
     
         	}else {
         		agregarMsgWarn( "SELECCIONE UN ARCHIVO !!!" , null );
         		log.info("NO SE HA SELECCIONADO UN ARCHIVO");
+        		deshabilitarCargaActaFirmada=false;
+        		deshabilitarDescargaActaFirmada=true;
         	}
         	
         	
@@ -1942,4 +1944,21 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         this.relEncuestaUsuarioService = relEncuestaUsuarioService;
     }
 
+	public boolean isDeshabilitarDescargaActaFirmada() {
+		return deshabilitarDescargaActaFirmada;
+	}
+
+	public void setDeshabilitarDescargaActaFirmada(boolean deshabilitarDescargaActaFirmada) {
+		this.deshabilitarDescargaActaFirmada = deshabilitarDescargaActaFirmada;
+	}
+
+	public boolean isDeshabilitarCargaActaFirmada() {
+		return deshabilitarCargaActaFirmada;
+	}
+
+	public void setDeshabilitarCargaActaFirmada(boolean deshabilitarCargaActaFirmada) {
+		this.deshabilitarCargaActaFirmada = deshabilitarCargaActaFirmada;
+	}
+
+	
 }
