@@ -734,7 +734,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
             grupoSelec.setActaCerrada(true);
             try {
                 if (ObjectUtils.isNotNull(grupoSelec.getEvento())) {
-                    if (ObjectUtils.isNotNull(grupoSelec.getEvento().getAplicaEncuesta())) {
+                    if (ObjectUtils.isNotNull(grupoSelec.getEvento().getAplicaEncuesta())) { //TODO
                         if (grupoSelec.getEvento().getAplicaEncuesta().booleanValue() == true) {
                             relEncuestaUsuarioService.asignarEncuestaParticipantes(grupoSelec.getIdGrupo(),
                                     grupoSelec.getEvento().getFechaFinal(), getUsuarioEnSession().getIdPersona());
@@ -758,7 +758,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
             String claveNotificacion = ConstantesGestorWeb.CLAVE_NOTIFICACION_AL_CERRAR_ACTA;
             String claveCorreo = ConstantesGestorWeb.CLAVE_CORREO_AL_CERRAR_ACTA;
-            correoNotificacionBean.notificarUsuariosActaCerrada(claveNotificacion, claveCorreo, grupoSelec);
+            correoNotificacionBean.notificarUsuariosActaCerrada(claveNotificacion, claveCorreo, grupoSelec); //comentar por ahora
 
             RequestContext.getCurrentInstance().execute("PF('dlgCerrarActa').hide()");
         } else {

@@ -139,11 +139,15 @@
 									rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) }"
 									value="Importar calificaciones" process="@this"
 									action="#{calificacionGpoEventoCapBean.obtieneCalifMoodleWS}"
-									ajax="true" styleClass="btn btn-primary pull-right" style="
-    height: 40px;
-    width: 170px;
-"
+									ajax="true" styleClass="btn btn-primary pull-right" style="height: 40px;width: 170px;"
 									update="@form" />
+								<p:commandButton id="btnActaCalificacionesFirmada2" ajax="true"  
+									rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) }"
+									styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis pull-right"
+									action="#{calificacionGpoEventoCapBean.descargarActa}" />
+								<p:outputLabel value="Descarga Acta Firmada: " 
+									styleClass="margenIzquierdo agregaHeight pull-right" />
+								
 							</div>
 						</div>
 					</div>
@@ -455,7 +459,7 @@
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis"
 								action="#{calificacionGpoEventoCapBean.descargarActa}" 
 								disabled="#{calificacionGpoEventoCapBean.deshabilitarDescargaActaFirmada}"/>
-							
+						<sec:authorize access="hasPermission(null, 'ADMIN' ) ">	
 							<p:outputLabel value="Eliminar Acta Firmada: " 
 								styleClass="margenIzquierdo agregaHeight" />
 							<p:commandButton id="btnEliminarActaFirmada" ajax="true"  
@@ -463,7 +467,7 @@
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
 								action="#{calificacionGpoEventoCapBean.eliminarActa}" 
 								disabled="#{calificacionGpoEventoCapBean.deshabilitarEliminarActaFirmada}"/>
-								
+						</sec:authorize>	
 							
 
 						</div>
@@ -489,7 +493,7 @@
 						<div class="col-md-12">
 							<p:outputPanel id="btnsNavCal" layout="block">
 								<p:commandButton styleClass="btn btn-primary pull-right"
-									disabled="#{ (not calificacionGpoEventoCapBean.grupoSeleccionado) or (calificacionGpoEventoCapBean.grupoSelec.actaCerrada eq true) or (calificacionGpoEventoCapBean.grupoSelec.idGrupo eq 0)}"
+									disabled="true"
 									value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.guardaBorrador')}"
 									process="@this" update="@form" id="btnContinuarCal"
 									action="#{calificacionGpoEventoCapBean.guardaCalifBorrador}" />
