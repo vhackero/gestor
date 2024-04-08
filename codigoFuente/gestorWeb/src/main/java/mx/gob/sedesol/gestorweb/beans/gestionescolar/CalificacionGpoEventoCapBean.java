@@ -145,6 +145,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 	
 	private boolean deshabilitarDescargaActaFirmada;
 	private boolean deshabilitarCargaActaFirmada;
+	private boolean deshabilitarEliminarActaFirmada;
 	/** ITTIVA */
 	//private UploadedFile file;
 
@@ -792,6 +793,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         tablaAuxCalif = new ArrayList<>();
         deshabilitarCargaActaFirmada=false;
         deshabilitarDescargaActaFirmada=true;
+        deshabilitarEliminarActaFirmada=true;
 
         if (ObjectUtils.isNull(evento.getTpoCalificacion())) {
             agregarMsgInfo("Debes seleccionar el tipo de calificación", null);
@@ -1044,11 +1046,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         		acta.setUsuarioModifico(user);
         	
                 relEncuestaUsuarioService.cargaActa(acta);
-           
-        		deshabilitarCargaActaFirmada=true;
-        		deshabilitarDescargaActaFirmada=false;
+
                 agregarMsgInfo( "CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA", null);
-        		log.info("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA->" +deshabilitarCargaActaFirmada + deshabilitarDescargaActaFirmada );		
+        		log.info("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA");		
     
         	}else {
         		agregarMsgWarn( "SELECCIONE UN ARCHIVO !!!" , null );
@@ -1065,6 +1065,25 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
             log.error("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - ERROR");
         }
     
+    }
+    
+	public void eliminarActa() {
+		log.info("INICIA ELIMINACION ACTA DE CALIFICACIONES !!!");
+
+		Acta acta = relEncuestaUsuarioService.descargaActa(grupoSelec.getIdGrupo(), getUsuarioEnSession().getIdPersona());
+		relEncuestaUsuarioService.eliminarActa(acta);
+		deshabilitarDescargaActaFirmada=true;
+		deshabilitarEliminarActaFirmada=true;
+		agregarMsgInfo("ELIMINAR ACTA: " + acta.getIdActa()+ " - CORRECTA", null);
+		log.info("ELIMINAR ACTA: " + acta.getIdActa() + " - CORRECTA");
+
+	}
+	
+    public void habilidarBotonDescargarActa() {
+    	log.info(">> habilidarBotonDescargarActa");
+    	deshabilitarCargaActaFirmada=true;
+		deshabilitarDescargaActaFirmada=false;
+		deshabilitarEliminarActaFirmada=false;
     }
     /**
      * @param calMdlGpo
@@ -1960,5 +1979,12 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 		this.deshabilitarCargaActaFirmada = deshabilitarCargaActaFirmada;
 	}
 
-	
+	public boolean isDeshabilitarEliminarActaFirmada() {
+		return deshabilitarEliminarActaFirmada;
+	}
+
+	public void setDeshabilitarEliminarActaFirmada(boolean deshabilitarEliminarActaFirmada) {
+		this.deshabilitarEliminarActaFirmada = deshabilitarEliminarActaFirmada;
+	}
+
 }

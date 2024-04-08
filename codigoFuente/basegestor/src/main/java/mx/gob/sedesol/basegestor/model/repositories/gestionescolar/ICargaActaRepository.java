@@ -18,6 +18,6 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta;
 public interface ICargaActaRepository extends JpaRepository<Acta, Integer> {
 	
 	@Query("SELECT acta FROM Acta acta WHERE id_grupo =:idGrupo AND usuario_modifico =:idUser")
-	public Acta getActaByIdGrupoUser(@Param("idGrupo")Integer idGrupo,@Param("idUser") long idUser);
+	public List<Acta> getActaByIdGrupoUser(@Param("idGrupo")Integer idGrupo,@Param("idUser") long idUser);
 
 }

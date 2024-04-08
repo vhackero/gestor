@@ -444,6 +444,8 @@
 								 onclick="PF('visorCargaArchivo').show()"
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_cargar" 
 								ajax="true" rendered="true"
+								update="@form frmCalif"
+								action="#{calificacionGpoEventoCapBean.habilidarBotonDescargarActa}"
 								disabled="#{calificacionGpoEventoCapBean.deshabilitarCargaActaFirmada}"/>
 							
 							<p:outputLabel value="Descarga Acta Firmada: " 
@@ -453,6 +455,14 @@
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis"
 								action="#{calificacionGpoEventoCapBean.descargarActa}" 
 								disabled="#{calificacionGpoEventoCapBean.deshabilitarDescargaActaFirmada}"/>
+							
+							<p:outputLabel value="Eliminar Acta Firmada: " 
+								styleClass="margenIzquierdo agregaHeight" />
+							<p:commandButton id="btnEliminarActaFirmada" ajax="true"  
+								rendered="true" update="@form frmCalif"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
+								action="#{calificacionGpoEventoCapBean.eliminarActa}" 
+								disabled="#{calificacionGpoEventoCapBean.deshabilitarEliminarActaFirmada}"/>
 								
 							
 
