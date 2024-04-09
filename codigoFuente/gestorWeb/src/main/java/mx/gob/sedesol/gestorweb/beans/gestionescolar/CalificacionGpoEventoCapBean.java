@@ -174,6 +174,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         tpoCalifSel = new CatalogoComunDTO();
         tablaAuxCalif = new ArrayList<>();
         asistenciasPart = new ArrayList<>();
+        encabezadoI = new EncabezadoActaImplDTO();
 
         grupoSelec = new GrupoDTO();
         grupoSelec.setIdGrupo(0);
