@@ -168,6 +168,7 @@ public class EventoCapacitacionServiceFacade {
 			List<RelGrupoEvaluacionDTO> gpoEvaluaciones = new ArrayList<RelGrupoEvaluacionDTO>();
 
 			// Se crean las evaluaciones
+			CatalogoComunDTO tipoCalifEc= getCatTipoCalificacionService().buscarPorId(evento.getIdEvento(), CatTipoCalificacionEc.class);
 			for (CalificacionECDTO evaluacion : calificaciones) {
 
 				RelGrupoEvaluacionDTO ge = new RelGrupoEvaluacionDTO();
@@ -179,8 +180,7 @@ public class EventoCapacitacionServiceFacade {
 
 					ge.setTblGrupo(gpo);
 					ge.setRelEvaluacionCalificaciones(new ArrayList<RelEvaluacionCalificacionDTO>());
-					ge.setCatTipoCalificacionEc(getCatTipoCalificacionService().buscarPorId(evento.getIdEvento(),
-							CatTipoCalificacionEc.class));
+					ge.setCatTipoCalificacionEc(tipoCalifEc); 
 
 					ge.setNombreEvaluacion(evaluacion.getNombreEvaluacion());
 					ge.setUsuarioModifico(usuarioReg);
@@ -220,8 +220,7 @@ public class EventoCapacitacionServiceFacade {
 						eval.setFechaRegistro(fechaRegistro);
 						eval.setUsuarioModifico(usuarioReg);
 						eval.setRelGrupoParticipante(partce);
-						eval.setDictamen(getCatDictamenService().buscarPorId(evaluacionPart.getDictamen().getId(),
-								CatDictamen.class));
+						eval.setDictamen(evaluacionPart.getDictamen());
 						eval.setNombreEvaluacion(calif.getNombreEvaluacion());
 
 						aux.add(eval);
@@ -232,7 +231,7 @@ public class EventoCapacitacionServiceFacade {
 
 			// Persistencia de datos
 			if (!ObjectUtils.isNullOrEmpty(gpoEvaluaciones)) {
-				for (RelGrupoEvaluacionDTO eval : gpoEvaluaciones) {
+				for (RelGrupoEvaluacionDTO eval : gpoEvaluaciones) { 
 					List<RelEvaluacionCalificacionDTO> califAux = this
 							.getCalificacionesByEvaluacion(eval.getNombreEvaluacion(), aux);
 					if (!ObjectUtils.isNullOrEmpty(califAux)) {

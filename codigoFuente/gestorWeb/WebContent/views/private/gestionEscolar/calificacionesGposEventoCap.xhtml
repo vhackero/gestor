@@ -146,7 +146,8 @@
 									styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis pull-right"
 									action="#{calificacionGpoEventoCapBean.descargarActa}" />
 								<p:outputLabel value="Descarga Acta Firmada: " 
-									styleClass="margenIzquierdo agregaHeight pull-right" />
+									styleClass="margenIzquierdo agregaHeight pull-right" 
+									rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) }"/>
 								
 							</div>
 						</div>
@@ -493,7 +494,7 @@
 						<div class="col-md-12">
 							<p:outputPanel id="btnsNavCal" layout="block">
 								<p:commandButton styleClass="btn btn-primary pull-right"
-									disabled="true"
+									disabled="false"
 									value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.guardaBorrador')}"
 									process="@this" update="@form" id="btnContinuarCal"
 									action="#{calificacionGpoEventoCapBean.guardaCalifBorrador}" />
