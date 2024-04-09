@@ -528,8 +528,10 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 if (ObjectUtils.isNotNull(resTx) && resTx.getResultado().getValor()) {
                     bitacoraBean.guardarBitacora(idPersonaEnSesion(), "REG_CAL", "", requestActual(),
                             TipoServicioEnum.LOCAL);
+                    log.info("Actualizacion correcta de calificaciones>>");
                     agregarMsgInfo("Actualizacion correcta de calificaciones", null);
                 } else {
+                	 log.error("Ocurrio un error al guardar calificaciones>>");
                     agregarMsgError("Ocurrio un error al guardar calificaciones", null);
                 }
 
@@ -543,14 +545,16 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 if (ObjectUtils.isNotNull(resTx) && resTx.getResultado().getValor()) {
                     bitacoraBean.guardarBitacora(idPersonaEnSesion(), "REG_CAL", "", requestActual(),
                             TipoServicioEnum.LOCAL);
-                    agregarMsgInfo("guardado Correcto de calificaciones", null);
+                    agregarMsgInfo("Guardado Correcto de calificaciones", null);
                 } else {
+                	log.info("Ocurrio un error al guardar calificaciones>> ");
                     agregarMsgError("Ocurrio un error al guardar calificaciones", null);
                 }
 
             }
 
         } catch (Exception e) {
+        	log.info("Ocurrio un error>>"+ e.getMessage());
             log.error(e.getMessage(), e);
         }
 
@@ -725,30 +729,33 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     }
 
     /**
-     *
+     * Cerrar acta
      */
     public void cierraActaGrupoEC() {
         if (validaCerrarActa()) {
-            setCerrarActa(Boolean.TRUE);
-            guardaCalifBorrador();
-            grupoSelec.setActaCerrada(true);
+           
+           guardaCalifBorrador();
+ 
             try {
                 if (ObjectUtils.isNotNull(grupoSelec.getEvento())) {
-                    if (ObjectUtils.isNotNull(grupoSelec.getEvento().getAplicaEncuesta())) { //TODO
-                        if (grupoSelec.getEvento().getAplicaEncuesta().booleanValue() == true) {
+                        if (grupoSelec.getEvento().getAplicaEncuesta()) {
                             relEncuestaUsuarioService.asignarEncuestaParticipantes(grupoSelec.getIdGrupo(),
                                     grupoSelec.getEvento().getFechaFinal(), getUsuarioEnSession().getIdPersona());
                             /*Asignando encuestas por defecto*/
                             relEncuestaUsuarioService.asignarEncuestasPorDefecto(grupoSelec.getIdGrupo(),
                                     grupoSelec.getEvento().getFechaFinal(), getUsuarioEnSession().getIdPersona());
 
+                        }else {
+                        	log.info("No Aplica Encuesta");
                         }
                     }
-
-                }
+                setCerrarActa(true);
+                grupoSelec.setActaCerrada(true);
             } catch (Exception e) {
                 log.info("No fue posible asignar las encuestas a los participantes.");
                 agregarMsgError("No fue posible asignar las encuestas a los participantes.", null);
+                setCerrarActa(false);
+                grupoSelec.setActaCerrada(false);
             }
 
             bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CER_ACT", String.valueOf(grupoSelec.getIdGrupo()),
@@ -756,10 +763,10 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
             // TODO Enviar notificacion y correo a los usuarios cuando se cierra
             // el acta
 
-            String claveNotificacion = ConstantesGestorWeb.CLAVE_NOTIFICACION_AL_CERRAR_ACTA;
+           /* String claveNotificacion = ConstantesGestorWeb.CLAVE_NOTIFICACION_AL_CERRAR_ACTA;
             String claveCorreo = ConstantesGestorWeb.CLAVE_CORREO_AL_CERRAR_ACTA;
             correoNotificacionBean.notificarUsuariosActaCerrada(claveNotificacion, claveCorreo, grupoSelec); //comentar por ahora
-
+*/
             RequestContext.getCurrentInstance().execute("PF('dlgCerrarActa').hide()");
         } else {
             setCerrarActa(Boolean.FALSE);

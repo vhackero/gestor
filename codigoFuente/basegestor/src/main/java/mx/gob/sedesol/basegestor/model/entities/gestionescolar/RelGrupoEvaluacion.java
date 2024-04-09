@@ -31,9 +31,9 @@ public class RelGrupoEvaluacion implements Serializable {
 	@Column(name="usuario_modifico")
 	private Long usuarioModifico;
 
-	//bi-directional many-to-one association to RelEvaluacionCalificacion
-	@OneToMany(mappedBy="relGrupoEvaluacion", cascade= CascadeType.ALL, fetch=FetchType.LAZY)
-	private List<RelEvaluacionCalificacion> relEvaluacionCalificaciones;
+//	//bi-directional many-to-one association to RelEvaluacionCalificacion
+//	@OneToMany(mappedBy="relGrupoEvaluacion", cascade= CascadeType.ALL, fetch=FetchType.LAZY)
+//	private List<RelEvaluacionCalificacion> relEvaluacionCalificaciones;
 
 	//bi-directional many-to-one association to TblGrupo
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -102,19 +102,19 @@ public class RelGrupoEvaluacion implements Serializable {
 		this.catTipoCalificacionEc = catTipoCalificacionEc;
 	}
 
-	/**
-	 * @return the relEvaluacionCalificaciones
-	 */
-	public List<RelEvaluacionCalificacion> getRelEvaluacionCalificaciones() {
-		return relEvaluacionCalificaciones;
-	}
-
-	/**
-	 * @param relEvaluacionCalificaciones the relEvaluacionCalificaciones to set
-	 */
-	public void setRelEvaluacionCalificaciones(List<RelEvaluacionCalificacion> relEvaluacionCalificaciones) {
-		this.relEvaluacionCalificaciones = relEvaluacionCalificaciones;
-	}
+//	/**
+//	 * @return the relEvaluacionCalificaciones
+//	 */
+//	public List<RelEvaluacionCalificacion> getRelEvaluacionCalificaciones() {
+//		return relEvaluacionCalificaciones;
+//	}
+//
+//	/**
+//	 * @param relEvaluacionCalificaciones the relEvaluacionCalificaciones to set
+//	 */
+//	public void setRelEvaluacionCalificaciones(List<RelEvaluacionCalificacion> relEvaluacionCalificaciones) {
+//		this.relEvaluacionCalificaciones = relEvaluacionCalificaciones;
+//	}
 
 	/**
 	 * @return the ponderacion
