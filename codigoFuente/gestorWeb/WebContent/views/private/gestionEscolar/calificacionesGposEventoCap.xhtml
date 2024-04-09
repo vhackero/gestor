@@ -54,7 +54,7 @@
 							<p:selectOneMenu
 								value="#{calificacionGpoEventoCapBean.grupoSelec.idGrupo}"
 								styleClass="col-xs-12">
-								<p:ajax event="valueChange" update="@form" process="@this"
+								<p:ajax event="valueChange" update="@form frmCalif" process="@this"
 									listener="#{calificacionGpoEventoCapBean.onChangeGpoEC()}" />
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -148,7 +148,17 @@
 								<p:outputLabel value="Descarga Acta Firmada: " 
 									styleClass="margenIzquierdo agregaHeight pull-right" 
 									rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) }"/>
-								
+								<sec:authorize access="hasPermission(null, 'ADMIN' ) ">	
+									<p:outputLabel value="Eliminar Acta Firmada: " 
+										styleClass="margenIzquierdo agregaHeight" 
+										rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) }"/>
+									<p:commandButton id="btnEliminarActaFirmada" ajax="true"  
+										rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) }"
+										update="@form frmCalif"
+										styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
+										action="#{calificacionGpoEventoCapBean.eliminarActa}" 
+										disabled="#{calificacionGpoEventoCapBean.deshabilitarEliminarActaFirmada}"/>
+								</sec:authorize>	
 							</div>
 						</div>
 					</div>
@@ -460,17 +470,6 @@
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis"
 								action="#{calificacionGpoEventoCapBean.descargarActa}" 
 								disabled="#{calificacionGpoEventoCapBean.deshabilitarDescargaActaFirmada}"/>
-						<sec:authorize access="hasPermission(null, 'ADMIN' ) ">	
-							<p:outputLabel value="Eliminar Acta Firmada: " 
-								styleClass="margenIzquierdo agregaHeight" />
-							<p:commandButton id="btnEliminarActaFirmada" ajax="true"  
-								rendered="true" update="@form frmCalif"
-								styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
-								action="#{calificacionGpoEventoCapBean.eliminarActa}" 
-								disabled="#{calificacionGpoEventoCapBean.deshabilitarEliminarActaFirmada}"/>
-						</sec:authorize>	
-							
-
 						</div>
 					</div>
 					<br/>
@@ -495,6 +494,7 @@
 							<p:outputPanel id="btnsNavCal" layout="block">
 								<p:commandButton styleClass="btn btn-primary pull-right"
 									disabled="false"
+									rendered="#{calificacionGpoEventoCapBean.muestraTblCalif}"
 									value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.guardaBorrador')}"
 									process="@this" update="@form" id="btnContinuarCal"
 									action="#{calificacionGpoEventoCapBean.guardaCalifBorrador}" />
@@ -599,7 +599,6 @@
 						<p:fileUpload
 							fileUploadListener="#{calificacionGpoEventoCapBean.cargarActa}"
 							mode="advanced" skinSimple="true" label="Elegir" uploadLabel="Cargar" cancelLabel="Cancelar" />
-<!-- 							oncomplete="desactivaCargaActas();();" -->
 					</h:form>
 				</div>
 			</div>
