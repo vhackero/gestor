@@ -20,7 +20,6 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.encuestas.EncuestaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.encuestas.RelEncuestaEventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.encuestas.RelEncuestaUsuarioDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoActaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesErrorEnum;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
@@ -87,14 +86,28 @@ public class RelEncuestaUsuarioServiceImpl extends ComunValidacionService<RelEnc
 	
 	@Override
 	public Acta descargaActa(int idGrupo, long idUser) {		
-		log.info("EJECUTANDO QUERY");
+		log.info("EJECUTANDO QUERY descargaActa");
 		List<Acta> optional = iCargaActaRepository.getActaByIdGrupoUser(idGrupo,idUser);
-		Acta resultado = new Acta();
+		
 		if(optional.size() > 0) {
-			resultado = optional.get(0);
+			return optional.get(0);
+		}else {
+			return null;
 		}
-		return resultado; 
-
+		
+	}
+	
+	@Override
+	public Acta getActaByIdGrupo(int idGrupo) {		
+		log.info("getActaByIdGrupo");
+		List<Acta> optional = iCargaActaRepository.getActaByIdGrupo(idGrupo);
+	
+		if(optional.size() > 0) {
+			return optional.get(0);
+		}else {
+			return null;
+		}
+		
 	}
 	@Override
 	public List<RelEncuestaUsuarioDTO> findAll() {
