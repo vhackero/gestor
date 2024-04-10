@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 import mx.gob.sedesol.basegestor.commons.dto.encuestas.EncuestaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.encuestas.RelEncuestaUsuarioDTO;
-import mx.gob.sedesol.basegestor.model.entities.encuestas.RelEncuestaUsuario;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta;
 import mx.gob.sedesol.basegestor.service.admin.CommonService;
 
@@ -27,4 +26,5 @@ public interface RelEncuestaUsuarioService extends CommonService<RelEncuestaUsua
 	public void cargaActa(Acta acta);
 	public void eliminarActa(Acta acta);
 	public Acta descargaActa(int idGrupo, long idUser);
+	public Acta getActaByIdGrupo(int idGrupo) ;
 }
