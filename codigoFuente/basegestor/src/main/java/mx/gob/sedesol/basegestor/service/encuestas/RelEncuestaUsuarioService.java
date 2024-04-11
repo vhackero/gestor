@@ -25,4 +25,5 @@ public interface RelEncuestaUsuarioService extends CommonService<RelEncuestaUsua
 	String fecharLimite(Date fecha, Integer dias);
 	
 	public void cargaActa(Acta acta);
+	public Acta descargaActa(int idGrupo, long idUser);
 }

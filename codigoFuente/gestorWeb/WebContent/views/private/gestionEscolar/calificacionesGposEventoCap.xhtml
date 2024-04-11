@@ -457,16 +457,16 @@
 							<p:outputLabel value="Cargar Acta Firmada: " rendered="true"
 								styleClass="margenIzquierdo agregaHeight" />
 
-							<p:commandButton id="btnCargaArchivo"  disabled="true"
+							<p:commandButton id="btnCargaArchivo"   
 								 onclick="PF('visorCargaArchivo').show()"
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_cargar" />
 							
-							<p:outputLabel value="Visualizar Acta Firmada: " rendered="true"
+							<p:outputLabel value="Descarga Acta Firmada: " rendered="true"
 								styleClass="margenIzquierdo agregaHeight" />
-							<p:commandButton id="btnActaCalificacionesFirmada" ajax="true" disabled="true"
+							<p:commandButton id="btnActaCalificacionesFirmada" ajax="true"  
 								rendered="true"
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis"
-								action="#{calificacionGpoEventoCapBean.descargarPlantillaCalificaciones}" />
+								action="#{calificacionGpoEventoCapBean.descargarActa}" />
 								
 							
 
@@ -624,6 +624,30 @@
 						value="#{sistema.obtenerTexto('gw.admin.plantillas.btn.cerrar')}"
 						styleClass="btn btn-default pull-right"
 						onclick="PF('visorPlantilla').hide();" />
+				</div>
+			</div>
+		</p:dialog>
+		
+		<p:dialog id="visorPdfDescarga" dynamic="true" responsive="true" modal="true"
+			closable="false" resizable="false" position="center"
+			header="Acta Firmada" width="900" widgetVar="visorPlantillaFirmada">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<p:media player="pdf"
+							value="#{calificacionGpoEventoCapBean.plantillaPDF}" width="865"
+							height="400" styleClass="agregaBorde">
+							 <f:param name="idDes" value="#{calificacionGpoEventoCapBean.idFile}" />
+						</p:media>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<p:commandButton
+						value="#{sistema.obtenerTexto('gw.admin.plantillas.btn.cerrar')}"
+						styleClass="btn btn-default pull-right"
+						onclick="PF('visorPlantillaFirmada').hide();" />
 				</div>
 			</div>
 		</p:dialog>
