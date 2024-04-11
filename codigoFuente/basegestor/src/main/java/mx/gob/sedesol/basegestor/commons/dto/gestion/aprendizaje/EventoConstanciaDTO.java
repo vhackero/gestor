@@ -28,6 +28,9 @@ public class EventoConstanciaDTO implements Serializable{
 	private Double calificacionFinal;
 	private Integer porcentajeAsistencia;
 	
+	private String nombreGrupo;
+
+	
 	public EventoConstanciaDTO(){
 		tipoConstancia = 0;
 	}
@@ -122,6 +125,13 @@ public class EventoConstanciaDTO implements Serializable{
 	}
 	public void setPorcentajeAsistencia(Integer porcentajeAsistencia) {
 		this.porcentajeAsistencia = porcentajeAsistencia;
+	}
+	
+	public String getNombreGrupo() {
+		return nombreGrupo;
+	}
+	public void setNombreGrupo(String nombreGrupo) {
+		this.nombreGrupo = nombreGrupo;
 	}
 
 }
