@@ -621,8 +621,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 
 		RelGrupoParticipante entity = modelMapper.map(dto, RelGrupoParticipante.class);
 		if (ObjectUtils.isNotNull(entity)) {
-			entity = grupoParticipanteRepo.saveAndFlush(entity);
-
+			entity = grupoParticipanteRepo.save(entity);
 			// GUSTAVO --guardarBitacoraGrupoParticipante(dto,
 			// String.valueOf(entity.getId()));
 
