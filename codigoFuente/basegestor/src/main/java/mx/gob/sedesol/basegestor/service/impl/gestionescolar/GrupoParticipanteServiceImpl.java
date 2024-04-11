@@ -633,7 +633,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 
 	@Override
 	public List<EventoConstanciaDTO> getParticipanteByActaCerradaYconstancia(Long idPersona) {
-		idPersona = Long.valueOf(711) ;
+		
 		List<RelGrupoParticipante> rgp = grupoParticipanteRepo.getParticipanteByActaCerradaYconstancia(idPersona);
 		List<EventoConstanciaDTO> eventos = new ArrayList<>();
 		List<RelEncuestaUsuarioDTO> encuestas = new ArrayList<>();
