@@ -366,7 +366,7 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 		try {
 
 			TblGrupo entidad = modelMapper.map(grupo, TblGrupo.class);
-			grupoRepo.saveAndFlush(entidad);
+			grupoRepo.save(entidad);
 
 			resultado.setDto(modelMapper.map(entidad, GrupoDTO.class));
 			resultado.agregaMensaje(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_EXITOSA.getId());

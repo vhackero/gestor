@@ -74,13 +74,40 @@ public class RelEncuestaUsuarioServiceImpl extends ComunValidacionService<RelEnc
 	}
 	
 	@Override
-	public Acta descargaActa(int idGrupo, long idUser) {		
+	public void eliminarActa(Acta acta) {		
 		
-		log.info("EJECUTANDO QUERY");
-		Acta resultado = new Acta();
-		resultado =  iCargaActaRepository.getActaByIdGrupoUser(idGrupo,idUser);
-		return resultado; 
+		log.info("eliminarActa QUERY");
+		
+		iCargaActaRepository.delete(acta);
+		
+		log.info("DELETE CORRECTO");
 
+	}
+	
+	@Override
+	public Acta descargaActa(int idGrupo, long idUser) {		
+		log.info("EJECUTANDO QUERY descargaActa");
+		List<Acta> optional = iCargaActaRepository.getActaByIdGrupoUser(idGrupo,idUser);
+		
+		if(optional.size() > 0) {
+			return optional.get(0);
+		}else {
+			return null;
+		}
+		
+	}
+	
+	@Override
+	public Acta getActaByIdGrupo(int idGrupo) {		
+		log.info("getActaByIdGrupo");
+		List<Acta> optional = iCargaActaRepository.getActaByIdGrupo(idGrupo);
+	
+		if(optional.size() > 0) {
+			return optional.get(0);
+		}else {
+			return null;
+		}
+		
 	}
 	@Override
 	public List<RelEncuestaUsuarioDTO> findAll() {
