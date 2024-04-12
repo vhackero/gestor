@@ -730,6 +730,8 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 					evento.setCalificacionTotal(calificacionTotal);
 					evento.setPorcentajeAsistencia(porcentajeAsistencia);
 					evento.setCalificacionFinal(new Double(grupoCalificacionFinal));
+					evento.setNombreGrupo(gp.getGrupo().getNombre());
+
 
 					eventos.add(evento);
 				}
