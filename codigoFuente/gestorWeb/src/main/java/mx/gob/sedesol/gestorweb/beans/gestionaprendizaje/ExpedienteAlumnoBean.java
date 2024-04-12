@@ -124,6 +124,19 @@ public class ExpedienteAlumnoBean extends BaseBean {
 				requestActual(), TipoServicioEnum.LOCAL);
 		return ConstantesGestorWeb.NAVEGA_EXPEDIENTE_ALUMNO;
 	}
+	
+	public String navegaExpedienteAlumno2(PersonaDTO persona) {
+		
+		personaDTO = persona;
+		
+		eventos = grupoParticipanteService.getParticipanteByActaCerradaYconstancia(personaDTO.getIdPersona());
+		
+		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "VER_EXP_ALM", String.valueOf(personaDTO.getIdPersona()),
+				requestActual(), TipoServicioEnum.LOCAL);
+		
+		return ConstantesGestorWeb.NAVEGA_EXPEDIENTE_ALUMNO;
+		
+	}
 
 	public String cancelar() {
 		return ConstantesGestorWeb.NAVEGA_BUSCAR_EXPEDIENTE_ALUMNO;
