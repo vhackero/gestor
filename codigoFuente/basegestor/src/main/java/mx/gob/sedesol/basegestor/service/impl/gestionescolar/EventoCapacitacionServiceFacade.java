@@ -228,7 +228,7 @@ public class EventoCapacitacionServiceFacade {
 					}
 				}
 			}
-
+			logger.info("Persistencia de datos>>");
 			// Persistencia de datos
 			if (!ObjectUtils.isNullOrEmpty(gpoEvaluaciones)) {
 				for (RelGrupoEvaluacionDTO eval : gpoEvaluaciones) { 
@@ -247,12 +247,14 @@ public class EventoCapacitacionServiceFacade {
 					}
 				}
 			}
-
+			logger.info("cerrarActa>>");
 			if (cerrarActa) {
 
 				for (RelGrupoParticipanteDTO rpg : participantesByGrupo) {
+					logger.info("1 actualizaRelGrupoParticipante>>");
 					ResultadoDTO<RelGrupoParticipanteDTO> resx = grupoParticipanteService
 							.actualizaRelGrupoParticipante(rpg);
+					logger.info("2	actualizaRelGrupoParticipante>>");
 					if (ObjectUtils.isNotNull(resx) && !resx.getResultado().getValor()) {
 						res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_FALLIDA);
 						throw new Exception("Error al Actualizar la relación grupo-participante");
@@ -260,11 +262,13 @@ public class EventoCapacitacionServiceFacade {
 				}
 
 				gpoSeleccionado.setActaCerrada(Boolean.TRUE);
+				logger.info("1 actualizarGrupo>>");
 				ResultadoDTO<GrupoDTO> resActGpo = grupoService.actualizarGrupo(gpoSeleccionado, usuarioReg);
-				if (ObjectUtils.isNotNull(resActGpo) && !resActGpo.getResultado().getValor()) {
-					res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_FALLIDA);
-					throw new Exception("Error al Actualizar el Grupo");
-				}
+				logger.info("12 actualizarGrupo>>" + resActGpo.getMensaje()+" - "+ resActGpo.getDto().toString());
+//				if (ObjectUtils.isNotNull(resActGpo) && !resActGpo.getResultado().getValor()) {
+//					res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_FALLIDA);
+//					throw new Exception("Error al Actualizar el Grupo");
+//				}
 			}
 
 		} catch (Exception e) {
