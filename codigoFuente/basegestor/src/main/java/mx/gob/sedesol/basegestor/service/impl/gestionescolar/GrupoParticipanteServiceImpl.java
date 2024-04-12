@@ -431,7 +431,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 
 			if (ObjectUtils.isNotNull(gp) && ObjectUtils.isNotNull(gp.getCalifFinal())) {
 
-				Double calificacionFinal = gp.getCalifFinal() * 10;
+				Double calificacionFinal = gp.getCalifFinal();
 				if (calificacionFinal.intValue() >= ConstantesGestor.CRITERIO_TROFEO_ORO.intValue()) {
 
 					String nombre = gp.getGrupo().getEvento().getNombreEc();
@@ -648,12 +648,12 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 				EventoConstanciaDTO evento = new EventoConstanciaDTO();
 				Double calificacionTotal = 0.0;
 				if (ObjectUtils.isNotNull(gp.getCalifTotal())) {
-					calificacionTotal = gp.getCalifTotal().doubleValue() * 10;
+					calificacionTotal = gp.getCalifTotal().doubleValue();
 				}
 
 				double grupoCalificacionFinal = 0;
 				if (ObjectUtils.isNotNull(gp.getCalifFinal())) {
-					grupoCalificacionFinal = gp.getCalifFinal().doubleValue() * 10;
+					grupoCalificacionFinal = gp.getCalifFinal().doubleValue();
 				}
 
 				double eventoCalificacionMinima = 0;
@@ -857,7 +857,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 		double alumnoCalifFinal;
 
 		for (RelGrupoParticipanteDTO rgp : listrgp) {
-			alumnoCalifFinal = rgp.getCalifFinal() * 10;
+			alumnoCalifFinal = rgp.getCalifFinal();
 			if (alumnoCalifFinal >= eventoCalifMinAprob) {
 				alumnosQueRecibieronConstancia.add(rgp);
 			}
