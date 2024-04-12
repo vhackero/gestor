@@ -441,26 +441,26 @@ public class MenuGestorBean extends BaseBean {
 	public String navegaExpedienteAlumoBuscar() {
 		logger.info("Navegando a Expedientes Academicos Busqueda o expediente alumno");
 		
-		roles = new ArrayList<>();
-		List<PersonaRolDTO> rolesPersona = personaRolesService
-				.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
-
-		for (PersonaRolDTO personaRol : rolesPersona) {
-			roles.add(personaRol.getRol());
-		}
-		
-		
-		if("Estudiante".equals(roles.get(0).getNombre())) {
-			
-			PersonaDTO persona = personaService.buscarPorId(getUsuarioEnSession().getIdPersona());
-	
-			return expedienteAlumnoBean.navegaExpedienteAlumno2(persona);			
-			
-		}else {
+//		roles = new ArrayList<>();
+//		List<PersonaRolDTO> rolesPersona = personaRolesService
+//				.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
+//
+//		for (PersonaRolDTO personaRol : rolesPersona) {
+//			roles.add(personaRol.getRol());
+//		}
+//		
+//		
+//		if("Estudiante".equals(roles.get(0).getNombre())) {
+//			
+//			PersonaDTO persona = personaService.buscarPorId(getUsuarioEnSession().getIdPersona());
+//	
+//			return expedienteAlumnoBean.navegaExpedienteAlumno2(persona);			
+//			
+//		}else {
 			
 			return ConstantesGestorWeb.NAVEGA_BUSCAR_EXPEDIENTE_ALUMNO;
 			
-		}
+		//}
 
 	}
 
