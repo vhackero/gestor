@@ -72,11 +72,11 @@ public class RelEncuestaUsuarioServiceImpl extends ComunValidacionService<RelEnc
 		log.info("SAVE CORRECTO");
 
 	}
-	
+	@Transactional(noRollbackFor = Exception.class)
 	@Override
 	public void eliminarActa(Acta acta) {		
 		
-		log.info("eliminarActa QUERY");
+		log.info("eliminarActa QUERY"+ acta.getIdActa());
 		
 		iCargaActaRepository.delete(acta);
 		
@@ -120,7 +120,8 @@ public class RelEncuestaUsuarioServiceImpl extends ComunValidacionService<RelEnc
 		// TODO Auto-generated method stub
 		return new RelEncuestaUsuarioDTO();
 	}
-
+	
+	
 	@Override
 	public ResultadoDTO<RelEncuestaUsuarioDTO> guardar(RelEncuestaUsuarioDTO dto) {
 		ResultadoDTO<RelEncuestaUsuarioDTO> resultado = sonDatosRequeridosValidos(TipoAccion.PERSISTENCIA, dto);

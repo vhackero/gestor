@@ -598,7 +598,8 @@
 					<h:form enctype="multipart/form-data">
 						<p:fileUpload
 							fileUploadListener="#{calificacionGpoEventoCapBean.cargarActa}"
-							mode="advanced" skinSimple="true" label="Elegir" uploadLabel="Cargar" cancelLabel="Cancelar" />
+							mode="advanced" skinSimple="true" label="Elegir" uploadLabel="Cargar" cancelLabel="Cancelar" 
+							multiple="false" fileLimit="1" fileLimitMessage="Solo se permite cargar una Acta"/>
 					</h:form>
 				</div>
 			</div>

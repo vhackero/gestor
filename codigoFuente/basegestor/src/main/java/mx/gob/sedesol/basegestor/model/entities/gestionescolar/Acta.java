@@ -5,6 +5,7 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,7 +17,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.mysql.jdbc.Blob;
+import mx.gob.sedesol.basegestor.model.entities.admin.TblPersona;
 
 /**
  * ENTITY ACTAS
@@ -48,8 +49,13 @@ public class Acta implements Serializable {
 	@Column(name = "fecha_cierre")
 	private Date fechaCierre;
 	
-	@Column(name="usuario_modifico")
-	private Long usuarioModifico;
+//	@Column(name="usuario_modifico")
+//	private Long usuarioModifico;
+	
+	//bi-directional many-to-one association to TblPersona
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "usuario_modifico")
+	private TblPersona tblPersona;
 	
 	//Getter y Setter
 
@@ -79,14 +85,21 @@ public class Acta implements Serializable {
 		this.fechaCierre = fechaCierre;
 	}
 
-	public Long getUsuarioModifico() {
-		return usuarioModifico;
+//	public Long getUsuarioModifico() {
+//		return usuarioModifico;
+//	}
+//
+//	public void setUsuarioModifico(Long usuarioModifico) {
+//		this.usuarioModifico = usuarioModifico;
+//	}
+	public TblPersona getTblPersona() {
+		return this.tblPersona;
 	}
 
-	public void setUsuarioModifico(Long usuarioModifico) {
-		this.usuarioModifico = usuarioModifico;
+	public void setTblPersona(TblPersona tblPersona) {
+		this.tblPersona = tblPersona;
 	}
- 
+
 	public byte[] getBlob() {
 		return blob;
 	}
