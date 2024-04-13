@@ -5,13 +5,10 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -34,31 +31,20 @@ public class Acta implements Serializable {
 	@Column(name="id_acta")
 	private Integer idActa;
 	
+	@Column(name="id_grupo")
+	private Integer grupo;
 
-//	@Column(name="id_grupo")
-//	private Integer grupo;
-	
-	//bi-directional many-to-one association to TblGrupo
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="id_grupo")
-	private TblGrupo tblGrupo;
-	
 	@Lob
 	@Column(name="acta")
 	private byte[] blob;
 	
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "fecha_cierre")
 	private Date fechaCierre;
 	
 	@Column(name="usuario_modifico")
 	private Long usuarioModifico;
-	
-//	//bi-directional many-to-one association to TblPersona
-//	@ManyToOne(fetch=FetchType.LAZY)
-//	@JoinColumn(name = "usuario_modifico")
-//	private TblPersona tblPersona;
+
 	
 	//Getter y Setter
 
@@ -72,20 +58,12 @@ public class Acta implements Serializable {
 
 	
 
-//	public Integer getGrupo() {
-//		return grupo;
-//	}
-//
-//	public void setGrupo(Integer grupo) {
-//		this.grupo = grupo;
-//	}
-	
-	public TblGrupo getTblGrupo() {
-		return this.tblGrupo;
+	public Integer getGrupo() {
+		return grupo;
 	}
 
-	public void setTblGrupo(TblGrupo tblGrupo) {
-		this.tblGrupo = tblGrupo;
+	public void setGrupo(Integer grupo) {
+		this.grupo = grupo;
 	}
 
 	public Date getFechaCierre() {
@@ -103,13 +81,6 @@ public class Acta implements Serializable {
 	public void setUsuarioModifico(Long usuarioModifico) {
 		this.usuarioModifico = usuarioModifico;
 	}
-//	public TblPersona getTblPersona() {
-//		return this.tblPersona;
-//	}
-//
-//	public void setTblPersona(TblPersona tblPersona) {
-//		this.tblPersona = tblPersona;
-//	}
 
 	public byte[] getBlob() {
 		return blob;
@@ -121,10 +92,8 @@ public class Acta implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Acta [idActa=" + idActa + ", grupo=" + tblGrupo.toString() + ", fechaCierre="
+		return "Acta [idActa=" + idActa + ", grupo=" + grupo + ", fechaCierre="
 				+ fechaCierre + ", usuarioModifico=" + usuarioModifico + "]";
 	}
-
- 
 
 }

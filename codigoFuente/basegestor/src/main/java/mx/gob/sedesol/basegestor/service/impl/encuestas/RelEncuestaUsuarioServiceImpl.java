@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
-import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.encuestas.EncuestaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.encuestas.RelEncuestaEventoCapacitacionDTO;
@@ -28,23 +27,19 @@ import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
 import mx.gob.sedesol.basegestor.model.entities.encuestas.RelEncuestaUsuario;
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta;
 import mx.gob.sedesol.basegestor.model.especificaciones.ConsultarEncuestasUsuarioEspecificacion;
 import mx.gob.sedesol.basegestor.model.repositories.encuestas.RelEncuestaUsuarioRepo;
-import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.ICargaActaRepository;
 import mx.gob.sedesol.basegestor.service.admin.ComunValidacionService;
 import mx.gob.sedesol.basegestor.service.encuestas.EncuestaService;
 import mx.gob.sedesol.basegestor.service.encuestas.RelEncuestaEventoCapacitacionService;
 import mx.gob.sedesol.basegestor.service.encuestas.RelEncuestaUsuarioService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
-import mx.gob.sedesol.basegestor.service.impl.gestionescolar.CargaActaService;
 
 @Service("relEncuestaUsuarioService")
 public class RelEncuestaUsuarioServiceImpl extends ComunValidacionService<RelEncuestaUsuarioDTO>
 		implements RelEncuestaUsuarioService {
 
 	private static final Logger logger = Logger.getLogger(RelEncuestaUsuarioServiceImpl.class);
-	private static final Logger log = Logger.getLogger(CargaActaService.class);
 	
 	@Autowired
 	private RelEncuestaUsuarioRepo relEncuestaUsuarioRepo;
@@ -60,62 +55,6 @@ public class RelEncuestaUsuarioServiceImpl extends ComunValidacionService<RelEnc
 
 	ModelMapper relEncuestaUsuarioMapper = new ModelMapper();
 	
-	@Autowired
-	private ICargaActaRepository iCargaActaRepository;
-	
-	@Override
-	public void cargaActa(Acta acta) {		
-		
-		log.info("EJECUTANDO QUERY");
-		
-		iCargaActaRepository.save(acta);
-		
-		log.info("SAVE CORRECTO");
-
-	}
-
-	@Override
-
-	public void eliminarActa(Acta acta) {		
-		
-		log.info("eliminarActa QUERY: "+ acta.getIdActa());
-		try {
-           
-            iCargaActaRepository.delete(acta.getIdActa());
-            
-            log.info("Resultado eliminar acta: "+ ResultadoTransaccionEnum.EXITOSO);
-       
-        } catch (Exception e) {
-            log.info("Resultado eliminar acta: "+ ResultadoTransaccionEnum.FALLIDO+ " -> "+ MensajesErrorEnum.ERROR_ELIMINAR_DATOS);
-            logger.error(e.getMessage(), e);
-            throw e;
-        }
-	}
-	
-	@Override
-	public Acta descargaActa(int idGrupo, long idUser) {		
-		log.info("EJECUTANDO QUERY descargaActa");
-		List<Acta> optional = iCargaActaRepository.getActaByIdGrupoUser(idGrupo,idUser);
-		
-		if(optional.size() > 0) {
-			return optional.get(0);
-		}else {
-			return null;
-		}
-		
-	}
-	
-	@Override
-	public Acta getActaByIdGrupo(int idGrupo) {
-		List<Acta> optional = iCargaActaRepository.getActaByIdGrupo(idGrupo);
-	
-		if(optional.size() > 0) {
-			return optional.get(0);
-		}else {
-			return null;
-		}
-		
-	}
 	@Override
 	public List<RelEncuestaUsuarioDTO> findAll() {
 		// TODO Auto-generated method stub

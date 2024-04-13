@@ -1,6 +1,5 @@
 package mx.gob.sedesol.basegestor.service.admin;
 
-import mx.gob.sedesol.basegestor.commons.dto.admin.BitacoraDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
