@@ -112,8 +112,8 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     @ManagedProperty("#{personaRolesService}")
     private PersonaRolesService personaRolesService;
     
-	/*@ManagedProperty(value = "#{parametroSistemaService}")
-	private transient ParametroSistemaService parametroSistemaService;*/    
+    @ManagedProperty("#{capturaEventoCapacitacion}")
+	private CapturaEventoCapacitacion capturaEventoCapacitacion;   
 
     private Integer duracionEvento;
     private Integer numEvaluaciones;
@@ -155,9 +155,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 	private boolean deshabilitarDescargaActaFirmada;
 	private boolean deshabilitarCargaActaFirmada;
 	private boolean deshabilitarEliminarActaFirmada;
-	/** ITTIVA */
-	//private UploadedFile file;
-
+	
     public StreamedContent getPlantillaPDF() {
 		return plantillaPDF;
 	}
@@ -217,6 +215,14 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
         modalidadEnum = ModalidadEnum.obtieneModalidadById(evento.getIdEvento());
         return ConstantesGestorWeb.NAVEGA_CALIFICACIONES_XEVENTO;
+    }
+    
+    
+    /** ITTIVA */
+    public void concluirEvento() {
+    	
+    	capturaEventoCapacitacion.concluirEvento(evento);    	
+    	
     }
     
     
@@ -2060,6 +2066,14 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
 	public void setPersonaRolesService(PersonaRolesService personaRolesService) {
 		this.personaRolesService = personaRolesService;
+	}
+
+	public CapturaEventoCapacitacion getCapturaEventoCapacitacion() {
+		return capturaEventoCapacitacion;
+	}
+
+	public void setCapturaEventoCapacitacion(CapturaEventoCapacitacion capturaEventoCapacitacion) {
+		this.capturaEventoCapacitacion = capturaEventoCapacitacion;
 	}
 
 }
