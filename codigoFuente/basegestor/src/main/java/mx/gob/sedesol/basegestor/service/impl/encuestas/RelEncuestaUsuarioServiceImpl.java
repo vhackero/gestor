@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
+import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.encuestas.EncuestaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.encuestas.RelEncuestaEventoCapacitacionDTO;
@@ -72,16 +73,23 @@ public class RelEncuestaUsuarioServiceImpl extends ComunValidacionService<RelEnc
 		log.info("SAVE CORRECTO");
 
 	}
-	@Transactional(noRollbackFor = Exception.class)
+
 	@Override
+
 	public void eliminarActa(Acta acta) {		
 		
-		log.info("eliminarActa QUERY"+ acta.getIdActa());
-		
-		iCargaActaRepository.delete(acta);
-		
-		log.info("DELETE CORRECTO");
-
+		log.info("eliminarActa QUERY: "+ acta.getIdActa());
+		try {
+           
+            iCargaActaRepository.delete(acta.getIdActa());
+            
+            log.info("Resultado eliminar acta: "+ ResultadoTransaccionEnum.EXITOSO);
+       
+        } catch (Exception e) {
+            log.info("Resultado eliminar acta: "+ ResultadoTransaccionEnum.FALLIDO+ " -> "+ MensajesErrorEnum.ERROR_ELIMINAR_DATOS);
+            logger.error(e.getMessage(), e);
+            throw e;
+        }
 	}
 	
 	@Override
@@ -98,8 +106,7 @@ public class RelEncuestaUsuarioServiceImpl extends ComunValidacionService<RelEnc
 	}
 	
 	@Override
-	public Acta getActaByIdGrupo(int idGrupo) {		
-		log.info("getActaByIdGrupo");
+	public Acta getActaByIdGrupo(int idGrupo) {
 		List<Acta> optional = iCargaActaRepository.getActaByIdGrupo(idGrupo);
 	
 		if(optional.size() > 0) {

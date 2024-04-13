@@ -49,6 +49,7 @@ import mx.gob.sedesol.basegestor.model.entities.admin.TblPersona;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDictamen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoCalificacionEc;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblGrupo;
 import mx.gob.sedesol.basegestor.service.ServiceException;
 import mx.gob.sedesol.basegestor.service.admin.PersonaRolesService;
 import mx.gob.sedesol.basegestor.service.encuestas.RelEncuestaUsuarioService;
@@ -297,7 +298,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                     // gpo
                     evaluacionesGpo = eventoCapacitacionServiceFacade.getRelGpoEvaluacionService()
                             .obtieneEvaluacionesPorIdGrupo(idGpo);
-                    log.info("getRelGpoEvaluacionService.obtieneEvaluacionesPorIdGrupo<<< "+evaluacionesGpo.size() );
+
                     if (!ObjectUtils.isNullOrEmpty(evaluacionesGpo)) {
                         tablaAuxCalif = generaTblCalifGpoEvaluaciones(evaluacionesGpo);
 
@@ -811,6 +812,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     }
 
     public String navegaBusqEventosCap() {
+    	encabezadoI = new EncabezadoActaImplDTO();
         return menuGestorBean.navegaBusquedaEventosCapacitacion();
     }
 
@@ -1005,46 +1007,27 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     public void descargarActa() {  
     	
     	List<PersonaRolDTO> roles = personaRolesService.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
-		log.info("roles !!! "+ roles.size());
 		boolean isAdmin=false;
 		
 		for (PersonaRolDTO rol: roles) {
-			log.info("rol.getRol().getIdRol() !!! "+rol.getRol().getIdRol());
 			if(rol.getRol().getIdRol().equals(ID_ROLE_ADMIN)||
 					rol.getRol().getIdRol().equals(ID_ROLE_COORDINADOR_ACADEMICO)||
 					rol.getRol().getIdRol().equals(ID_ROLE_RESPONSABLE_PRODUCCION )) {
 				isAdmin=true;
-				log.info(" isAdmin !!! ");
 			}
 		}
-		log.info(" isAdmin >> "+ isAdmin);
 		
-
-    	
-    	try  (  ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+    	try  (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
     		
     		log.info("INICIA DESCARGA PLANTILLA CALIFICACIONES !!!");
     		    plantillaPDF = null;
         		Acta acta = new Acta();
         		int grupo = grupoSelec.getIdGrupo();
         		long user = getUsuarioEnSession().getIdPersona();
-//        		byte[] fileBytes = null;
-//        		
-//                byte[] buffer = new byte[1024];
-//                int length;
-//                 
-//                fileBytes = output.toByteArray();   
-//                
-//                acta.setBlob(fileBytes);
-//                acta.setFechaCierre(new Date());
-//        		acta.setGrupo(grupo);
-//        		acta.setUsuarioModifico(user);
         		
         		acta = relEncuestaUsuarioService.descargaActa(grupo, user);
-        		log.info("11 acta !!!" + acta +" - "+ isAdmin +" - " +  grupo);
         		if(ObjectUtils.isNull(acta) && isAdmin) {
         			acta = relEncuestaUsuarioService.getActaByIdGrupo(grupo);
-        			log.info("22 acta !!!" + acta);
         		}
         		
         		if (ObjectUtils.isNotNull(acta)) {
@@ -1097,10 +1080,13 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 
                 acta.setBlob(fileBytes);
                 acta.setFechaCierre(new Date());
-        		acta.setGrupo(grupo);
-        		TblPersona persona = new TblPersona();
-        		persona.setIdPersona(getUsuarioEnSession().getIdPersona());
-        		acta.setTblPersona(persona);
+//                TblGrupo grupo = new TblGrupo();
+//                grupo.setIdGrupo( grupoSelec.getIdGrupo());
+//        		acta.setGrupo(grupo);
+//        		TblPersona persona = new TblPersona();
+//        		persona.setIdPersona(getUsuarioEnSession().getIdPersona());
+//        		acta.setTblPersona(persona);
+        		acta.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
         	
                 relEncuestaUsuarioService.cargaActa(acta);
 
@@ -1128,21 +1114,17 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 		log.info("INICIA ELIMINACION ACTA DE CALIFICACIONES !!!");
 		
 		List<PersonaRolDTO> roles = personaRolesService.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
-		log.info("roles !!! "+ roles.size());
 		boolean isAdmin=false;
 		
 		for (PersonaRolDTO rol: roles) {
-			log.info("rol.getRol().getIdRol() !!! "+rol.getRol().getIdRol());
 			if(rol.getRol().getIdRol().equals(ID_ROLE_ADMIN)) {
 				isAdmin=true;
-				log.info(" isAdmin !!! ");
 			}
 		}
-		log.info(" isAdmin >> "+ isAdmin);
 		if (isAdmin) {
 			Acta acta = relEncuestaUsuarioService.getActaByIdGrupo(grupoSelec.getIdGrupo());
 			if(ObjectUtils.isNotNull(acta)) {
-				log.info(" acta >> "+ acta.getIdActa());
+				log.info(" acta >> "+ acta.toString());
 				relEncuestaUsuarioService.eliminarActa(acta);
 				deshabilitarDescargaActaFirmada=true;
 				deshabilitarEliminarActaFirmada=true;
@@ -1164,7 +1146,6 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 	}
 	
     public void habilidarBotonDescargarActa() {
-    	log.info(">> habilidarBotonDescargarActa");
     	deshabilitarCargaActaFirmada=true;
 		deshabilitarDescargaActaFirmada=false;
 		deshabilitarEliminarActaFirmada=false;
