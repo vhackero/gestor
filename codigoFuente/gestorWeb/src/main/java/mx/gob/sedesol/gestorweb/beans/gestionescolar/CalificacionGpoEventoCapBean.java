@@ -1085,7 +1085,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         		
         		Acta acta = new Acta();
         		int grupo = grupoSelec.getIdGrupo();
-//        		long user = getUsuarioEnSession().getIdPersona();
+                long user = getUsuarioEnSession().getIdPersona();
         		byte[] fileBytes = null;
         		
                 byte[] buffer = new byte[1024];
@@ -1100,7 +1100,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         		acta.setGrupo(grupo);
         		TblPersona persona = new TblPersona();
         		persona.setIdPersona(getUsuarioEnSession().getIdPersona());
-        		acta.setTblPersona(persona);
+        		acta.setUsuarioModifico(user);
         	
                 relEncuestaUsuarioService.cargaActa(acta);
 

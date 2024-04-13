@@ -49,13 +49,13 @@ public class Acta implements Serializable {
 	@Column(name = "fecha_cierre")
 	private Date fechaCierre;
 	
-//	@Column(name="usuario_modifico")
-//	private Long usuarioModifico;
+	@Column(name="usuario_modifico")
+	private Long usuarioModifico;
 	
 	//bi-directional many-to-one association to TblPersona
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name = "usuario_modifico")
-	private TblPersona tblPersona;
+//	@ManyToOne(fetch=FetchType.LAZY)
+//	@JoinColumn(name = "usuario_modifico")
+//	private TblPersona tblPersona;
 	
 	//Getter y Setter
 
@@ -85,20 +85,14 @@ public class Acta implements Serializable {
 		this.fechaCierre = fechaCierre;
 	}
 
-//	public Long getUsuarioModifico() {
-//		return usuarioModifico;
-//	}
-//
-//	public void setUsuarioModifico(Long usuarioModifico) {
-//		this.usuarioModifico = usuarioModifico;
-//	}
-	public TblPersona getTblPersona() {
-		return this.tblPersona;
+	public Long getUsuarioModifico() {
+		return usuarioModifico;
 	}
 
-	public void setTblPersona(TblPersona tblPersona) {
-		this.tblPersona = tblPersona;
+	public void setUsuarioModifico(Long usuarioModifico) {
+		this.usuarioModifico = usuarioModifico;
 	}
+	 
 
 	public byte[] getBlob() {
 		return blob;

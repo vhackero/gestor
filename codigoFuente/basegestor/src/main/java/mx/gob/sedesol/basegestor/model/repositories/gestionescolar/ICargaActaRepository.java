@@ -3,9 +3,11 @@ package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta; 
 
@@ -22,5 +24,10 @@ public interface ICargaActaRepository extends JpaRepository<Acta, Integer> {
 	
 	@Query("SELECT acta FROM Acta acta WHERE id_grupo =:idGrupo")
 	public List<Acta> getActaByIdGrupo(@Param("idGrupo")Integer idGrupo);
+	
+ 
+	@Query(value = "DELETE  FROM tbl_acta  WHERE id_acta = :idActa", nativeQuery = true)
+	public void borraPorIdActa(@Param("idActa")Integer idActa);
+	
 
 }

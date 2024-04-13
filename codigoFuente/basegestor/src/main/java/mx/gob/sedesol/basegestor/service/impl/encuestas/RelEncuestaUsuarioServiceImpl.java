@@ -71,14 +71,14 @@ public class RelEncuestaUsuarioServiceImpl extends ComunValidacionService<RelEnc
 		
 		log.info("SAVE CORRECTO");
 
-	}
-	@Transactional(noRollbackFor = Exception.class)
+	} 
+	
 	@Override
 	public void eliminarActa(Acta acta) {		
 		
 		log.info("eliminarActa QUERY"+ acta.getIdActa());
 		
-		iCargaActaRepository.delete(acta);
+		iCargaActaRepository.borraPorIdActa(acta.getIdActa());
 		
 		log.info("DELETE CORRECTO");
 
