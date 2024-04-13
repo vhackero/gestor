@@ -45,6 +45,7 @@ import mx.gob.sedesol.basegestor.commons.utils.DictamenCalificacionEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoCalificacionECEnum;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
+import mx.gob.sedesol.basegestor.model.entities.admin.TblPersona;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDictamen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoCalificacionEc;
@@ -377,7 +378,6 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     private List<TablaCalificacionesDTO> generaTblCalifGpoEvaluaciones(List<RelGrupoEvaluacionDTO> evaluacionesGpo) {
 
     	log.info("generaTblCalifGpoEvaluaciones>> "+ evaluacionesGpo.size());
-    	log.info("Se genera el Array de Calificaciones>> ");
         // Se genera el Array de Calificaciones
         this.calificaciones = new ArrayList<CalificacionECDTO>();
         for (RelGrupoEvaluacionDTO eg : evaluacionesGpo) {
@@ -387,7 +387,6 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
             this.calificaciones.add(evalCal);
         }
         setNumEvaluaciones(this.calificaciones.size());
-        log.info("Se genera tabla de participantes primeramente>> ");
         // Se genera tabla de participantes primeramente
         List<TablaCalificacionesDTO> aux = new ArrayList<>();
         int i = 1;
@@ -772,11 +771,14 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                     }
                 setCerrarActa(true);
                 grupoSelec.setActaCerrada(true);
+                setMuestraTblCalif(false);
+                
             } catch (Exception e) {
                 log.info("No fue posible asignar las encuestas a los participantes.");
                 agregarMsgError("No fue posible asignar las encuestas a los participantes.", null);
                 setCerrarActa(false);
                 grupoSelec.setActaCerrada(false);
+                setMuestraTblCalif(true);
             }
 
             bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CER_ACT", String.valueOf(grupoSelec.getIdGrupo()),
@@ -1073,8 +1075,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
      *  DESCARGA ACTA
      *  @author ITTIVA
      */
-    public void cargarActa(FileUploadEvent file) {    	
-
+    public void cargarActa(FileUploadEvent file) {
     	
     	try  (InputStream input = file.getFile().getInputstream(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
     		
@@ -1084,7 +1085,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         		
         		Acta acta = new Acta();
         		int grupo = grupoSelec.getIdGrupo();
-        		long user = getUsuarioEnSession().getIdPersona();
+//        		long user = getUsuarioEnSession().getIdPersona();
         		byte[] fileBytes = null;
         		
                 byte[] buffer = new byte[1024];
@@ -1097,7 +1098,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 acta.setBlob(fileBytes);
                 acta.setFechaCierre(new Date());
         		acta.setGrupo(grupo);
-        		acta.setUsuarioModifico(user);
+        		TblPersona persona = new TblPersona();
+        		persona.setIdPersona(getUsuarioEnSession().getIdPersona());
+        		acta.setTblPersona(persona);
         	
                 relEncuestaUsuarioService.cargaActa(acta);
 
@@ -1138,12 +1141,20 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 		log.info(" isAdmin >> "+ isAdmin);
 		if (isAdmin) {
 			Acta acta = relEncuestaUsuarioService.getActaByIdGrupo(grupoSelec.getIdGrupo());
-			log.info(" acta >> "+ acta.getIdActa());
-			relEncuestaUsuarioService.eliminarActa(acta);
-			deshabilitarDescargaActaFirmada=true;
-			deshabilitarEliminarActaFirmada=true;
-			agregarMsgInfo("ELIMINAR ACTA: " + acta.getIdActa()+ " - CORRECTA", null);
-			log.info("ELIMINAR ACTA: " + acta.getIdActa() + " - CORRECTA");
+			if(ObjectUtils.isNotNull(acta)) {
+				log.info(" acta >> "+ acta.getIdActa());
+				relEncuestaUsuarioService.eliminarActa(acta);
+				deshabilitarDescargaActaFirmada=true;
+				deshabilitarEliminarActaFirmada=true;
+				setMuestraTblCalif(false);
+				setCerrarActa(false);
+				agregarMsgInfo("ELIMINAR ACTA: " + acta.getIdActa()+ " - CORRECTA", null);
+				log.info("ELIMINAR ACTA: " + acta.getIdActa() + " - CORRECTA");
+			}else{
+    			agregarMsgInfo( "No existe una acta asociada al grupo ", null);
+        		log.info( "No existe una acta asociada al grupo ");	
+			}
+			
 		}else {
 			agregarMsgWarn( "NO CUENTA CON LOS PERMISOS SUFICIENTES PARA REALIZAR ESTA ACCION !!!" , null );
 			log.info("NO CUENTA CON LOS PERMISOS SUFICIENTES PARA REALIZAR ESTA ACCION !!! " );

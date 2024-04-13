@@ -618,13 +618,13 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 
 	@Override
 	public ResultadoDTO<RelGrupoParticipanteDTO> actualizaRelGrupoParticipante(RelGrupoParticipanteDTO dto) {
-
+		logger.info("11  actualizaRelGrupoParticipante>>");
 		RelGrupoParticipante entity = modelMapper.map(dto, RelGrupoParticipante.class);
 		if (ObjectUtils.isNotNull(entity)) {
 			entity = grupoParticipanteRepo.save(entity);
 			// GUSTAVO --guardarBitacoraGrupoParticipante(dto,
 			// String.valueOf(entity.getId()));
-
+			logger.info("2  actualizaRelGrupoParticipante>>");
 		}
 
 		return null;

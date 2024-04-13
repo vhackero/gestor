@@ -364,10 +364,10 @@ public class GrupoServiceImpl extends ComunValidacionService<GrupoDTO> implement
 	public ResultadoDTO<GrupoDTO> actualizarGrupo(GrupoDTO grupo, Long usuarioModifico) {
 		ResultadoDTO<GrupoDTO> resultado = new ResultadoDTO<>();
 		try {
-
+			logger.info(">< actualizarGrupo >> ");
 			TblGrupo entidad = modelMapper.map(grupo, TblGrupo.class);
 			grupoRepo.save(entidad);
-
+			logger.info(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_EXITOSA.toString());
 			resultado.setDto(modelMapper.map(entidad, GrupoDTO.class));
 			resultado.agregaMensaje(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_EXITOSA.getId());
 		} catch (Exception e) {
