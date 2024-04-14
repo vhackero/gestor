@@ -443,7 +443,7 @@ public class BitacoraBean {
 
 		// EXPEDIENTE GRUPO
 		Elemento expedienteGrupo = new Elemento("CMP_EXP_GPO", "Expediente grupo", TipoElementoEnum.COMPONENTE);
-		Elemento eg1 = new Elemento("CON_EXP_ALM_GPO", "Consultar expediente de alumnos en grupo",
+		Elemento eg1 = new Elemento("CON_EXP_ALM_GPO", "Consultar expediente de estudiantes en grupo",
 				TipoElementoEnum.FUNCIONALIDAD);
 		Elemento eg2 = new Elemento("VER_CON_ALM", "Ver constancia del alumno", TipoElementoEnum.FUNCIONALIDAD);
 		Elemento eg3 = new Elemento("DES_CON_ALM", "Descargar constancia del alumno", TipoElementoEnum.FUNCIONALIDAD);

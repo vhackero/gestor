@@ -550,12 +550,12 @@
 								</p:commandButton>
 								<p:tooltip for="btnEditar" value="Editar" position="top" />
 
-								<p:commandButton id="btnConcluir"
+								<p:commandButton id="btnConcluir" process="@this" ajax="true"
 												 oncomplete="PF('wConcluirEvento').show()"
 												 rendered="#{evento.catEstadoEventoCapacitacion.id eq ESTADO_EVENTO.EN_EJECUCION.id}"
 												 styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-square-check">
 									<f:setPropertyActionListener value="#{evento}"
-																 target="#{capturaEventoCapacitacion.evento}" />
+																 target="#{calificacionGpoEventoCapBean.evento}" />
 								</p:commandButton>
 								<p:tooltip for="btnConcluir" value="Concluir" position="top" />
 
@@ -670,8 +670,9 @@
 					<div class="col-md-12 text-right">
 						<p:commandButton value="Cancelar" styleClass="btn btn-default"
 										 onclick="PF('wConcluirEvento').hide();" />
-						<p:commandButton value="Aceptar" styleClass="btn btn-primary"
-										 action="#{capturaEventoCapacitacion.concluirEvento(capturaEventoCapacitacion.evento)}" />
+						<p:commandButton value="Aceptar" styleClass="btn btn-primary" process="@this" ajax="true" 
+										 action="#{calificacionGpoEventoCapBean.concluirEvento}" />
+						
 					</div>
 				</div>
 			</p:dialog>

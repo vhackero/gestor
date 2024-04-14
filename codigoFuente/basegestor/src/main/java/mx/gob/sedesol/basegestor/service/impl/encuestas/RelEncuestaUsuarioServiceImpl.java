@@ -72,15 +72,42 @@ public class RelEncuestaUsuarioServiceImpl extends ComunValidacionService<RelEnc
 		log.info("SAVE CORRECTO");
 
 	}
+	@Transactional(noRollbackFor = Exception.class)
+	@Override
+	public void eliminarActa(Acta acta) {		
+		
+		log.info("eliminarActa QUERY"+ acta.getIdActa());
+		
+		iCargaActaRepository.delete(acta);
+		
+		log.info("DELETE CORRECTO");
+
+	}
 	
 	@Override
 	public Acta descargaActa(int idGrupo, long idUser) {		
+		log.info("EJECUTANDO QUERY descargaActa");
+		List<Acta> optional = iCargaActaRepository.getActaByIdGrupoUser(idGrupo,idUser);
 		
-		log.info("EJECUTANDO QUERY");
-		Acta resultado = new Acta();
-		resultado =  iCargaActaRepository.getActaByIdGrupoUser(idGrupo,idUser);
-		return resultado; 
-
+		if(optional.size() > 0) {
+			return optional.get(0);
+		}else {
+			return null;
+		}
+		
+	}
+	
+	@Override
+	public Acta getActaByIdGrupo(int idGrupo) {		
+		log.info("getActaByIdGrupo");
+		List<Acta> optional = iCargaActaRepository.getActaByIdGrupo(idGrupo);
+	
+		if(optional.size() > 0) {
+			return optional.get(0);
+		}else {
+			return null;
+		}
+		
 	}
 	@Override
 	public List<RelEncuestaUsuarioDTO> findAll() {
@@ -93,7 +120,8 @@ public class RelEncuestaUsuarioServiceImpl extends ComunValidacionService<RelEnc
 		// TODO Auto-generated method stub
 		return new RelEncuestaUsuarioDTO();
 	}
-
+	
+	
 	@Override
 	public ResultadoDTO<RelEncuestaUsuarioDTO> guardar(RelEncuestaUsuarioDTO dto) {
 		ResultadoDTO<RelEncuestaUsuarioDTO> resultado = sonDatosRequeridosValidos(TipoAccion.PERSISTENCIA, dto);

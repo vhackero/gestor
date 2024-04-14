@@ -54,7 +54,7 @@
 							<p:selectOneMenu
 								value="#{calificacionGpoEventoCapBean.grupoSelec.idGrupo}"
 								styleClass="col-xs-12">
-								<p:ajax event="valueChange" update="@form" process="@this"
+								<p:ajax event="valueChange" update="@form frmCalif" process="@this"
 									listener="#{calificacionGpoEventoCapBean.onChangeGpoEC()}" />
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -139,11 +139,26 @@
 									rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) }"
 									value="Importar calificaciones" process="@this"
 									action="#{calificacionGpoEventoCapBean.obtieneCalifMoodleWS}"
-									ajax="true" styleClass="btn btn-primary pull-right" style="
-    height: 40px;
-    width: 170px;
-"
+									ajax="true" styleClass="btn btn-primary pull-right" style="height: 40px;width: 170px;"
 									update="@form" />
+								<p:commandButton id="btnActaCalificacionesFirmada2" ajax="true"  
+									rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) }"
+									styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis pull-right"
+									action="#{calificacionGpoEventoCapBean.descargarActa}" />
+								<p:outputLabel value="Descarga Acta Firmada: " 
+									styleClass="margenIzquierdo agregaHeight pull-right" 
+									rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) }"/>
+								<sec:authorize access="hasPermission(null, 'ADMIN' ) ">	
+									<p:outputLabel value="Eliminar Acta Firmada: " 
+										styleClass="margenIzquierdo agregaHeight" 
+										rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) }"/>
+									<p:commandButton id="btnEliminarActaFirmada" ajax="true"  
+										rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) }"
+										update="@form frmCalif"
+										styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
+										action="#{calificacionGpoEventoCapBean.eliminarActa}" 
+										disabled="#{calificacionGpoEventoCapBean.deshabilitarEliminarActaFirmada}"/>
+								</sec:authorize>	
 							</div>
 						</div>
 					</div>
@@ -421,31 +436,14 @@
 					<div class="row">
 						<div class="col-md-12 text-right">
 
-
-
-
-							
-
-				
 							<p:outputLabel value="Exportar XLS: "
 								styleClass="margenIzquierdo agregaHeight" />
 							<p:commandButton id="btnDescargar" ajax="false"
 								disabled="#{calificacionGpoEventoCapBean.tablaAuxCalif.isEmpty()}"
 								styleClass="btn btn-default btn-icon icono_sisi ss_adm_desexcel">
 								<p:dataExporter type="xls" target="exportTable"
-									fileName="calificaciones_" encoding="UTF-8" />
+									fileName="calificaciones_#{eventoCapacitacionBean.eventoSelec.nombreEc}-#{calificacionGpoEventoCapBean.grupoSelec.nombre}" encoding="UTF-8" />
 							</p:commandButton>
-
-							<!--  <p:outputLabel value="Descargar Calificaciones: " rendered="true"
-								styleClass="margenIzquierdo agregaHeight" />
-							<p:commandButton id="btnDescargarPdf" ajax="false"
-								rendered="true"
-								disabled="#{calificacionGpoEventoCapBean.tablaAuxCalif.isEmpty()}"
-								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc">
-								<p:dataExporter type="pdf" target="exportTable"
-									fileName="calificaciones_" encoding="ISO-8859-15" />
-							</p:commandButton> -->
-
 
 							<p:outputLabel value="Descargar Acta: " rendered="true"
 								styleClass="margenIzquierdo agregaHeight" />
@@ -459,17 +457,19 @@
 
 							<p:commandButton id="btnCargaArchivo"   
 								 onclick="PF('visorCargaArchivo').show()"
-								styleClass="btn btn-icon btn-default icono_sisi ss_gn_cargar" />
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_cargar" 
+								ajax="true" rendered="true"
+								update="@form frmCalif"
+								action="#{calificacionGpoEventoCapBean.habilidarBotonDescargarActa}"
+								disabled="#{calificacionGpoEventoCapBean.deshabilitarCargaActaFirmada}"/>
 							
-							<p:outputLabel value="Descarga Acta Firmada: " rendered="true"
+							<p:outputLabel value="Descarga Acta Firmada: " 
 								styleClass="margenIzquierdo agregaHeight" />
 							<p:commandButton id="btnActaCalificacionesFirmada" ajax="true"  
 								rendered="true"
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis"
-								action="#{calificacionGpoEventoCapBean.descargarActa}" />
-								
-							
-
+								action="#{calificacionGpoEventoCapBean.descargarActa}" 
+								disabled="#{calificacionGpoEventoCapBean.deshabilitarDescargaActaFirmada}"/>
 						</div>
 					</div>
 					<br/>
@@ -493,7 +493,8 @@
 						<div class="col-md-12">
 							<p:outputPanel id="btnsNavCal" layout="block">
 								<p:commandButton styleClass="btn btn-primary pull-right"
-									disabled="#{ (not calificacionGpoEventoCapBean.grupoSeleccionado) or (calificacionGpoEventoCapBean.grupoSelec.actaCerrada eq true) or (calificacionGpoEventoCapBean.grupoSelec.idGrupo eq 0)}"
+									disabled="false"
+									rendered="#{calificacionGpoEventoCapBean.muestraTblCalif}"
 									value="#{sistema.obtenerTexto('gw.progCapacitacion.boton.guardaBorrador')}"
 									process="@this" update="@form" id="btnContinuarCal"
 									action="#{calificacionGpoEventoCapBean.guardaCalifBorrador}" />
@@ -554,7 +555,7 @@
 					<div class="row">
 						<div class="col-md-12">
 							<p:outputLabel
-								value="• Le recordamos que las actas de calificaciones tanto originales como en el SIGE representan el soporte de los estudios cursados por nuestros estudiantes, por ello, si tiene faltantes complételas a la brevedad." />
+								value="• Le recordamos que las actas de calificaciones tanto originales como en el SIGIE representan el soporte de los estudios cursados por nuestros estudiantes, por ello, si tiene faltantes complételas a la brevedad." />
 
 						</div>
 					</div>
@@ -588,7 +589,7 @@
 
 		<p:dialog id="visorCargaArchivo" dynamic="true" responsive="true"
 			modal="true" closable="true" resizable="false" position="center"
-			header="Carga Constancia de calificaciones firmada" width="900" widgetVar="visorCargaArchivo">
+			header="Carga Acta de calificaciones firmada" width="900" widgetVar="visorCargaArchivo">
 			<div class="form-group"></div>
 			<div class="row">
 				<div class="col-md-12">
@@ -597,8 +598,8 @@
 					<h:form enctype="multipart/form-data">
 						<p:fileUpload
 							fileUploadListener="#{calificacionGpoEventoCapBean.cargarActa}"
-							mode="advanced" skinSimple="true" />
-
+							mode="advanced" skinSimple="true" label="Elegir" uploadLabel="Cargar" cancelLabel="Cancelar" 
+							multiple="false" fileLimit="1" fileLimitMessage="Solo se permite cargar una Acta"/>
 					</h:form>
 				</div>
 			</div>

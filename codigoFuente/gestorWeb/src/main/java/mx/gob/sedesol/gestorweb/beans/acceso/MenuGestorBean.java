@@ -28,6 +28,7 @@ import mx.gob.sedesol.gestorweb.beans.administracion.AdminPersonaBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.NotificacionesBean;
 import mx.gob.sedesol.gestorweb.beans.analisisdatos.ReporteGestionEscolarBean;
+import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.ExpedienteAlumnoBean;
 import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview.ConstanciasBean;
 import mx.gob.sedesol.gestorweb.beans.gestionescolar.EventoCapacitacionBean;
 import mx.gob.sedesol.gestorweb.beans.logisticainfraestructura.AreasBean;
@@ -72,6 +73,9 @@ public class MenuGestorBean extends BaseBean {
 	
 	@ManagedProperty("#{constanciasBean}")
 	private ConstanciasBean constanciasBean;
+	
+	@ManagedProperty("#{expedienteAlumnoBean}")
+	private ExpedienteAlumnoBean expedienteAlumnoBean;
 	
 	private List<RolDTO> roles;
 	private Integer idRol;
@@ -435,8 +439,29 @@ public class MenuGestorBean extends BaseBean {
 	}
 
 	public String navegaExpedienteAlumoBuscar() {
-		logger.info("Navegando a Expedientes Academicos Busqueda");
-		return ConstantesGestorWeb.NAVEGA_BUSCAR_EXPEDIENTE_ALUMNO;
+		logger.info("Navegando a Expedientes Academicos Busqueda o expediente alumno");
+		
+//		roles = new ArrayList<>();
+//		List<PersonaRolDTO> rolesPersona = personaRolesService
+//				.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
+//
+//		for (PersonaRolDTO personaRol : rolesPersona) {
+//			roles.add(personaRol.getRol());
+//		}
+//		
+//		
+//		if("Estudiante".equals(roles.get(0).getNombre())) {
+//			
+//			PersonaDTO persona = personaService.buscarPorId(getUsuarioEnSession().getIdPersona());
+//	
+//			return expedienteAlumnoBean.navegaExpedienteAlumno2(persona);			
+//			
+//		}else {
+			
+			return ConstantesGestorWeb.NAVEGA_BUSCAR_EXPEDIENTE_ALUMNO;
+			
+		//}
+
 	}
 
 	public String navegaExpedienteGrupo() {
@@ -614,6 +639,14 @@ public class MenuGestorBean extends BaseBean {
 
 	public void setShowLogros(boolean showLogros) {
 		this.showLogros = showLogros;
+	}
+
+	public ExpedienteAlumnoBean getExpedienteAlumnoBean() {
+		return expedienteAlumnoBean;
+	}
+
+	public void setExpedienteAlumnoBean(ExpedienteAlumnoBean expedienteAlumnoBean) {
+		this.expedienteAlumnoBean = expedienteAlumnoBean;
 	}
 
 }

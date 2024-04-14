@@ -15,7 +15,7 @@
 			<h1>Expediente académico</h1>
 			<hr />
 
-			<p:panel header="Expediente académico del alumno">
+			<p:panel header="Expediente académico del estudiante">
 				<div class="row">
 					<div class="col-md-12">
 						<p:dataTable var="evento" value="#{constanciasBean.eventos}"
@@ -40,6 +40,11 @@
 								filterBy="#{evento.nombreEc}" filterStyle="display:none">
 								<h:outputText value="#{evento.nombreEc}" />
 							</p:column>
+						<p:column headerText="Nombre del Grupo"
+							sortBy="#{evento.nombreGrupo}" filterMatchMode="contains"
+							filterBy="#{evento.nombreGrupo}" filterStyle="display:none">
+							<h:outputText value="#{evento.nombreGrupo}" />
+						</p:column>
 							<p:column headerText="Modalidad" sortBy="#{evento.modalidad}"
 								filterMatchMode="contains" filterBy="#{evento.modalidad}"
 								filterStyle="display:none">
@@ -64,20 +69,19 @@
 									rendered="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
 									value="Para poder visualizar su constancia debe contestar la encuesta." />
 							</p:column>
-							<p:column headerText="Promedio de evaluaciones"
-								sortBy="#{evento.nombreEstatusEncuesta}"
-								filterMatchMode="contains"
-								filterBy="#{evento.calificacionTotal}"
-								filterStyle="display:none">
-								<h:outputText value="#{evento.calificacionTotal}" />
-							</p:column>
-							<p:column headerText="Porcentaje de asistencias"
-								sortBy="#{evento.porcentajeAsistencia}"
-								filterMatchMode="contains"
-								filterBy="#{evento.porcentajeAsistencia}"
-								filterStyle="display:none">
-								<h:outputText value="#{evento.porcentajeAsistencia}" />
-							</p:column>
+						<p:column headerText="Promedio de evaluaciones"
+						    sortBy="#{evento.nombreEstatusEncuesta}"
+						    filterMatchMode="contains" filterBy="#{evento.calificacionTotal}"
+						    filterStyle="display:none">
+						    <h:outputText value="#{evento.modalidad eq 'En línea' ? 'No aplica' : evento.calificacionTotal}" />
+						</p:column>
+						<p:column headerText="Porcentaje de asistencias"
+						    sortBy="#{evento.porcentajeAsistencia}"
+						    filterMatchMode="contains"
+						    filterBy="#{evento.porcentajeAsistencia}"
+						    filterStyle="display:none">
+						    <h:outputText value="#{evento.modalidad eq 'En línea' ? 'No aplica' : evento.porcentajeAsistencia}" />
+						</p:column>
 							<p:column headerText="Calificación final"
 								sortBy="#{evento.calificacionFinal}" filterMatchMode="contains"
 								filterBy="#{evento.calificacionFinal}"
