@@ -3,9 +3,11 @@ package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -77,12 +79,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
      */
     private static final long serialVersionUID = 1L;
     private static final Logger log = Logger.getLogger(CalificacionGpoEventoCapBean.class);
-    public static final int ID_ROLE_ADMIN = 1;
-    public static final int ID_ROLE_COORDINADOR_ACADEMICO = 5;		
-    public static final int ID_ROLE_RESPONSABLE_PRODUCCION = 7;
-    
-//    @ManagedProperty(value = "#{cargaActaService}")
-//    private CargaActaService iCargaActaService;
+    public static final String ROLE_ADMIN = "ROLE_ADMIN";
+    public static final String ROLE_COORDINADOR_ACADEMICO = "ROLE_COORDINADOR_ACADEMICO";		
+    public static final String ROLE_RESPONSABLE_PRODUCCION = "ROLE_RESPONSABLE_PRODUCCION";
 
     @ManagedProperty(value = "#{menuGestorBean}")
     private MenuGestorBean menuGestorBean;
@@ -158,6 +157,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 	private boolean deshabilitarDescargaActaFirmada;
 	private boolean deshabilitarCargaActaFirmada;
 	private boolean deshabilitarEliminarActaFirmada;
+	private List<String> rolesEnSession;
 	
     public StreamedContent getPlantillaPDF() {
 		return plantillaPDF;
@@ -215,6 +215,8 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         eventoCapacitacionBean.setEventoSelec(evento);
         escalaMin = "0";
         escalaMax = "10";
+        
+		rolesEnSession = getUsuarioEnSession().getRoles().stream().map(i -> i.toString()).collect(Collectors.toList());
 
         modalidadEnum = ModalidadEnum.obtieneModalidadById(evento.getIdEvento());
         return ConstantesGestorWeb.NAVEGA_CALIFICACIONES_XEVENTO;
@@ -774,7 +776,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 setCerrarActa(true);
                 grupoSelec.setActaCerrada(true);
                 setMuestraTblCalif(false);
-                
+                deshabilitarCargaActaFirmada=true;
+                deshabilitarDescargaActaFirmada=false;
+                deshabilitarEliminarActaFirmada=false;
             } catch (Exception e) {
                 log.info("No fue posible asignar las encuestas a los participantes.");
                 agregarMsgError("No fue posible asignar las encuestas a los participantes.", null);
@@ -1007,17 +1011,15 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
      */
     public void descargarActa() {  
     	
-    	List<PersonaRolDTO> roles = personaRolesService.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
 		boolean isAdmin=false;
 		
-		for (PersonaRolDTO rol: roles) {
-			if(rol.getRol().getIdRol().equals(ID_ROLE_ADMIN)||
-					rol.getRol().getIdRol().equals(ID_ROLE_COORDINADOR_ACADEMICO)||
-					rol.getRol().getIdRol().equals(ID_ROLE_RESPONSABLE_PRODUCCION )) {
-				isAdmin=true;
+		for (String rol : rolesEnSession) {
+			if (rol.equals(ROLE_ADMIN) || rol.equals(ROLE_COORDINADOR_ACADEMICO)
+					|| rol.equals(ROLE_RESPONSABLE_PRODUCCION)) {
+				isAdmin = true;
 			}
 		}
-		
+
     	try  (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
     		
     		log.info("INICIA DESCARGA PLANTILLA CALIFICACIONES !!!");
@@ -1102,12 +1104,10 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     
 	public void eliminarActa() {
 		log.info("INICIA ELIMINACION ACTA DE CALIFICACIONES !!!");
-		
-		List<PersonaRolDTO> roles = personaRolesService.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
 		boolean isAdmin=false;
 		
-		for (PersonaRolDTO rol: roles) {
-			if(rol.getRol().getIdRol().equals(ID_ROLE_ADMIN)) {
+		for (String rol: rolesEnSession) {
+			if(rol.equals(ROLE_ADMIN)) {
 				isAdmin=true;
 			}
 		}
@@ -1120,6 +1120,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 				deshabilitarEliminarActaFirmada=true;
 				setMuestraTblCalif(false);
 				setCerrarActa(false);
+				grupoSelec.setActaCerrada(false);
 				agregarMsgInfo("ELIMINAR ACTA: " + acta.getIdActa()+ " - CORRECTA", null);
 				log.info("ELIMINAR ACTA: " + acta.getIdActa() + " - CORRECTA");
 			}else{
@@ -1131,8 +1132,6 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 			agregarMsgWarn( "NO CUENTA CON LOS PERMISOS SUFICIENTES PARA REALIZAR ESTA ACCION !!!" , null );
 			log.info("NO CUENTA CON LOS PERMISOS SUFICIENTES PARA REALIZAR ESTA ACCION !!! " );
 		}
-		
-
 	}
 	
     public void habilidarBotonDescargarActa() {
@@ -2064,6 +2063,14 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
 	public void setActaService(ActaService actaService) {
 		this.actaService = actaService;
+	}
+
+	public List<String> getRolesEnSession() {
+		return rolesEnSession;
+	}
+
+	public void setRolesEnSession(List<String> rolesEnSession) {
+		this.rolesEnSession = rolesEnSession;
 	}
 
 }
