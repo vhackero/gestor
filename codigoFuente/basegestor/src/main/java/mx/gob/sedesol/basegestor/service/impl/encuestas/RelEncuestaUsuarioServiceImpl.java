@@ -53,61 +53,9 @@ public class RelEncuestaUsuarioServiceImpl extends ComunValidacionService<RelEnc
 	@Autowired
 	private EncuestaService encuestaService;
 
+	
 	ModelMapper relEncuestaUsuarioMapper = new ModelMapper();
 	
-<<<<<<< HEAD
-	@Autowired
-	private ICargaActaRepository iCargaActaRepository;
-	
-	@Override
-	public void cargaActa(Acta acta) {		
-		
-		log.info("EJECUTANDO QUERY");
-		
-		iCargaActaRepository.save(acta);
-		
-		log.info("SAVE CORRECTO");
-
-	} 
-	
-	@Override
-	public void eliminarActa(Acta acta) {		
-		
-		log.info("eliminarActa QUERY"+ acta.getIdActa());
-		
-		iCargaActaRepository.borraPorIdActa(acta.getIdActa());
-		
-		log.info("DELETE CORRECTO");
-
-	}
-	
-	@Override
-	public Acta descargaActa(int idGrupo, long idUser) {		
-		log.info("EJECUTANDO QUERY descargaActa");
-		List<Acta> optional = iCargaActaRepository.getActaByIdGrupoUser(idGrupo,idUser);
-		
-		if(optional.size() > 0) {
-			return optional.get(0);
-		}else {
-			return null;
-		}
-		
-	}
-	
-	@Override
-	public Acta getActaByIdGrupo(int idGrupo) {		
-		log.info("getActaByIdGrupo");
-		List<Acta> optional = iCargaActaRepository.getActaByIdGrupo(idGrupo);
-	
-		if(optional.size() > 0) {
-			return optional.get(0);
-		}else {
-			return null;
-		}
-		
-	}
-=======
->>>>>>> 568af9df6a08c64f569234186e1e9a89cf5b5092
 	@Override
 	public List<RelEncuestaUsuarioDTO> findAll() {
 		// TODO Auto-generated method stub
