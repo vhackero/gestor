@@ -160,6 +160,15 @@ public class TblGrupo implements Serializable {
 	public void setActaCerrada(boolean actaCerrada) {
 		this.actaCerrada = actaCerrada;
 	}
+
+	@Override
+	public String toString() {
+		return "TblGrupo [idGrupo=" + idGrupo + ", clave=" + clave + ", descripcion=" + descripcion
+				+ ", fachaActualizacion=" + fachaActualizacion + ", fechaRegistro=" + fechaRegistro + ", nombre="
+				+ nombre + ", usuarioModifico=" + usuarioModifico + ", idMoodle=" + idMoodle + ", numMaxAlumnos="
+				+ numMaxAlumnos + ", facilitador=" + facilitador + ", evento=" + evento + ", actaCerrada=" + actaCerrada
+				+ "]";
+	}
 	
 	
 

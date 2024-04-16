@@ -3,7 +3,6 @@ package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import mx.gob.sedesol.basegestor.commons.constantes.ConstantesBitacora;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

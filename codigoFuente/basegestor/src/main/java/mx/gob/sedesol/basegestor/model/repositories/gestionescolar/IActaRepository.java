@@ -17,7 +17,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta;
  * 
  */
 @Repository
-public interface ICargaActaRepository extends JpaRepository<Acta, Integer> {
+public interface IActaRepository extends JpaRepository<Acta, Integer> {
 	
 	@Query("SELECT acta FROM Acta acta WHERE id_grupo =:idGrupo AND usuario_modifico =:idUser")
 	public List<Acta> getActaByIdGrupoUser(@Param("idGrupo")Integer idGrupo,@Param("idUser") long idUser);
@@ -25,9 +25,8 @@ public interface ICargaActaRepository extends JpaRepository<Acta, Integer> {
 	@Query("SELECT acta FROM Acta acta WHERE id_grupo =:idGrupo")
 	public List<Acta> getActaByIdGrupo(@Param("idGrupo")Integer idGrupo);
 	
- 
-	@Query(value = "DELETE  FROM tbl_acta  WHERE id_acta = :idActa", nativeQuery = true)
+	@Modifying
+	@Query(value = "DELETE  FROM tbl_actas WHERE id_acta = :idActa", nativeQuery = true)
 	public void borraPorIdActa(@Param("idActa")Integer idActa);
-	
 
 }

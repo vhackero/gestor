@@ -5,19 +5,14 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import mx.gob.sedesol.basegestor.model.entities.admin.TblPersona;
 
 /**
  * ENTITY ACTAS
@@ -36,26 +31,19 @@ public class Acta implements Serializable {
 	@Column(name="id_acta")
 	private Integer idActa;
 	
-
 	@Column(name="id_grupo")
 	private Integer grupo;
-	
+
 	@Lob
 	@Column(name="acta")
 	private byte[] blob;
 	
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "fecha_cierre")
 	private Date fechaCierre;
 	
 	@Column(name="usuario_modifico")
 	private Long usuarioModifico;
-	
-	//bi-directional many-to-one association to TblPersona
-//	@ManyToOne(fetch=FetchType.LAZY)
-//	@JoinColumn(name = "usuario_modifico")
-//	private TblPersona tblPersona;
 	
 	//Getter y Setter
 
@@ -102,6 +90,10 @@ public class Acta implements Serializable {
 		this.blob = blob;
 	}
 
- 
+	@Override
+	public String toString() {
+		return "Acta [idActa=" + idActa + ", grupo=" + grupo + ", fechaCierre="
+				+ fechaCierre + ", usuarioModifico=" + usuarioModifico + "]";
+	}
 
 }

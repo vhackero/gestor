@@ -6,7 +6,6 @@ import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
-import mx.gob.sedesol.basegestor.commons.constantes.ConstantesBitacora;
 
 import org.apache.log4j.Logger;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -23,7 +22,6 @@ import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.service.admin.OrgGubernamentalService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
-import mx.gob.sedesol.gestorweb.commons.utils.BitacoraUtil;
 
 @ManagedBean
 @ViewScoped

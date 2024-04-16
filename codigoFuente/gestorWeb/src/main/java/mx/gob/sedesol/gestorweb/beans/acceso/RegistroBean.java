@@ -10,7 +10,6 @@ import java.util.ResourceBundle;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
-import mx.gob.sedesol.basegestor.commons.constantes.ConstantesBitacora;
 
 import org.apache.log4j.Logger;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,7 +29,6 @@ import mx.gob.sedesol.basegestor.service.admin.PersonaCorreoService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaService;
 import mx.gob.sedesol.basegestor.service.admin.TiposCorreoService;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
-import mx.gob.sedesol.gestorweb.commons.utils.BitacoraUtil;
 import mx.gob.sedesol.gestorweb.sistema.SistemaBean;
 
 @ViewScoped
