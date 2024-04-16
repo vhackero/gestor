@@ -56,13 +56,6 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 	public void cambiarEstatusEvento(Integer idEstatus, Integer idEvento);
 	
 	@Query(value = "SELECT * FROM tbl_eventos e " + 
-			" inner join tbl_ficha_descriptiva_programa fdp on fdp.id_programa = e.id_programa " + 
-			" WHERE fdp.id_programa in (:programas) and e.id_estatus_ec = 2" + 		
-			" GROUP by e.id_evento " + 
-			" ORDER by dp.id_programa, e.id_evento", nativeQuery = true)
-	public List<TblEvento> obtenerEventosPorIdProgramas(@Param("programas")List<Integer> programas);
-	
-	@Query(value = "SELECT * FROM tbl_eventos e " + 
 			" inner join tbl_inscripciones i on e.id_programa = i.idprograma " + 
 			" inner join tbl_ficha_descriptiva_programa fdp on fdp.id_programa = e.id_programa " + 
 			" WHERE i.idplan =:idPlan and fdp.nombre_tentativo like %:programa% and e.id_estatus_ec = 2" + 		
@@ -74,7 +67,6 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 			+ " JOIN evt.inscripciones ins "
 			+ " WHERE evt.idPrograma = ins.fichaDescriptivaPrograma.idPrograma"
 			+ " AND ins.plan.idPlan =:idPlan"
-		//	+ " GROUP BY evt.idEvento "
 			+ " ORDER BY evt.idPrograma")
 	public List<TblEvento> obtenerEventosPorIdProgramaIdPlan( @Param("idPlan") Integer idPlan);
 	
@@ -85,8 +77,8 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 			+ " inner join rel_persona_bajas rpb on rpb.id_persona = p.id_persona "
 			+ " inner join tbl_eventos e on	e.id_evento = rpb.id_evento "
 			+ " inner join rel_motivo_baja rb on rb.id_motivo_baja = rpb.motivo_baja_id "
-			+ " where e.id_evento = :idEvento	or e.id_curso_lms_borrador = :idCurso "
-			+ " and rpb.contabilizar = 1 and (rb.tipo_baja_id = 2 OR rb.tipo_baja_id = 1) "
+			+ " where (e.id_evento = :idEvento  or e.id_curso_lms_borrador = :idCurso )"
+			+ " and rpb.contabilizar = 1  and (rb.tipo_baja_id = 2 OR rb.tipo_baja_id = 1)"
 			+ " and rpm.id_persona_moodle in :idsMoodle", nativeQuery = true)
 	public List<BajasDTO> obtenerBajas(@Param("idEvento")Integer idEvento, @Param("idCurso")Integer idCurso, @Param("idsMoodle")List<Integer> idsMoodle);
 	

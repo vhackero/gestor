@@ -3,9 +3,11 @@ package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -17,7 +19,6 @@ import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.StreamedContent;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
@@ -25,6 +26,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaRolDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ActaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenciaAuxDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionECDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionRecordDTO;
@@ -45,13 +47,12 @@ import mx.gob.sedesol.basegestor.commons.utils.DictamenCalificacionEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoCalificacionECEnum;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
-import mx.gob.sedesol.basegestor.model.entities.admin.TblPersona;
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Acta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDictamen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoCalificacionEc;
 import mx.gob.sedesol.basegestor.service.ServiceException;
 import mx.gob.sedesol.basegestor.service.admin.PersonaRolesService;
 import mx.gob.sedesol.basegestor.service.encuestas.RelEncuestaUsuarioService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.ActaService;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.AsistenciaFacadeService;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.EventoCapacitacionServiceFacade;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Calificaciones;
@@ -78,12 +79,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
      */
     private static final long serialVersionUID = 1L;
     private static final Logger log = Logger.getLogger(CalificacionGpoEventoCapBean.class);
-    public static final int ID_ROLE_ADMIN = 1;
-    public static final int ID_ROLE_COORDINADOR_ACADEMICO = 5;		
-    public static final int ID_ROLE_RESPONSABLE_PRODUCCION = 7;
-    
-//    @ManagedProperty(value = "#{cargaActaService}")
-//    private CargaActaService iCargaActaService;
+    public static final String ROLE_ADMIN = "ROLE_ADMIN";
+    public static final String ROLE_COORDINADOR_ACADEMICO = "ROLE_COORDINADOR_ACADEMICO";		
+    public static final String ROLE_RESPONSABLE_PRODUCCION = "ROLE_RESPONSABLE_PRODUCCION";
 
     @ManagedProperty(value = "#{menuGestorBean}")
     private MenuGestorBean menuGestorBean;
@@ -112,6 +110,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     
     @ManagedProperty("#{personaRolesService}")
     private PersonaRolesService personaRolesService;
+    
+    @ManagedProperty("#{actaService}")
+    private ActaService actaService;
     
     @ManagedProperty("#{capturaEventoCapacitacion}")
 	private CapturaEventoCapacitacion capturaEventoCapacitacion;   
@@ -148,7 +149,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     private String escalaMin;
     private String escalaMax;
     
-	private StringBuilder rutaImagenes;
+//	private StringBuilder rutaImagenes;
 	private StreamedContent plantillaPDF;
 	
 	private EncabezadoActaImplDTO encabezadoI;
@@ -156,6 +157,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 	private boolean deshabilitarDescargaActaFirmada;
 	private boolean deshabilitarCargaActaFirmada;
 	private boolean deshabilitarEliminarActaFirmada;
+	private List<String> rolesEnSession;
 	
     public StreamedContent getPlantillaPDF() {
 		return plantillaPDF;
@@ -213,6 +215,8 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         eventoCapacitacionBean.setEventoSelec(evento);
         escalaMin = "0";
         escalaMax = "10";
+        
+		rolesEnSession = getUsuarioEnSession().getRoles().stream().map(i -> i.toString()).collect(Collectors.toList());
 
         modalidadEnum = ModalidadEnum.obtieneModalidadById(evento.getIdEvento());
         return ConstantesGestorWeb.NAVEGA_CALIFICACIONES_XEVENTO;
@@ -297,7 +301,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                     // gpo
                     evaluacionesGpo = eventoCapacitacionServiceFacade.getRelGpoEvaluacionService()
                             .obtieneEvaluacionesPorIdGrupo(idGpo);
-                    log.info("getRelGpoEvaluacionService.obtieneEvaluacionesPorIdGrupo<<< "+evaluacionesGpo.size() );
+
                     if (!ObjectUtils.isNullOrEmpty(evaluacionesGpo)) {
                         tablaAuxCalif = generaTblCalifGpoEvaluaciones(evaluacionesGpo);
 
@@ -772,7 +776,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 setCerrarActa(true);
                 grupoSelec.setActaCerrada(true);
                 setMuestraTblCalif(false);
-                
+                deshabilitarCargaActaFirmada=true;
+                deshabilitarDescargaActaFirmada=false;
+                deshabilitarEliminarActaFirmada=false;
             } catch (Exception e) {
                 log.info("No fue posible asignar las encuestas a los participantes.");
                 agregarMsgError("No fue posible asignar las encuestas a los participantes.", null);
@@ -811,6 +817,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     }
 
     public String navegaBusqEventosCap() {
+    	encabezadoI = new EncabezadoActaImplDTO();
         return menuGestorBean.navegaBusquedaEventosCapacitacion();
     }
 
@@ -909,7 +916,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     		JRBeanArrayDataSource dsCalificaciones2 = new JRBeanArrayDataSource(listaCalificaciones.toArray());
     		params.put("dsCalificaciones", dsCalificaciones2);	
 
-    		EncabezadoActaDTO encabezado = eventoCapacitacionServiceFacade.getEventoCapacitacionService().obtenerEncabezadoActa(evento.getIdEvento(), grupoSelec.getIdGrupo());
+//    		EncabezadoActaDTO encabezado = eventoCapacitacionServiceFacade.getEventoCapacitacionService().obtenerEncabezadoActa(evento.getIdEvento(), grupoSelec.getIdGrupo());
     		
      		params.put("pProgramaEducativo",encabezadoI.getPrograma());
     		params.put("pClavePE", encabezadoI.getCveprograma());
@@ -1004,47 +1011,26 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
      */
     public void descargarActa() {  
     	
-    	List<PersonaRolDTO> roles = personaRolesService.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
-		log.info("roles !!! "+ roles.size());
 		boolean isAdmin=false;
 		
-		for (PersonaRolDTO rol: roles) {
-			log.info("rol.getRol().getIdRol() !!! "+rol.getRol().getIdRol());
-			if(rol.getRol().getIdRol().equals(ID_ROLE_ADMIN)||
-					rol.getRol().getIdRol().equals(ID_ROLE_COORDINADOR_ACADEMICO)||
-					rol.getRol().getIdRol().equals(ID_ROLE_RESPONSABLE_PRODUCCION )) {
-				isAdmin=true;
-				log.info(" isAdmin !!! ");
+		for (String rol : rolesEnSession) {
+			if (rol.equals(ROLE_ADMIN) || rol.equals(ROLE_COORDINADOR_ACADEMICO)
+					|| rol.equals(ROLE_RESPONSABLE_PRODUCCION)) {
+				isAdmin = true;
 			}
 		}
-		log.info(" isAdmin >> "+ isAdmin);
-		
 
-    	
-    	try  (  ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+    	try  (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
     		
     		log.info("INICIA DESCARGA PLANTILLA CALIFICACIONES !!!");
     		    plantillaPDF = null;
-        		Acta acta = new Acta();
+        		ActaDTO acta = new ActaDTO();
         		int grupo = grupoSelec.getIdGrupo();
         		long user = getUsuarioEnSession().getIdPersona();
-//        		byte[] fileBytes = null;
-//        		
-//                byte[] buffer = new byte[1024];
-//                int length;
-//                 
-//                fileBytes = output.toByteArray();   
-//                
-//                acta.setBlob(fileBytes);
-//                acta.setFechaCierre(new Date());
-//        		acta.setGrupo(grupo);
-//        		acta.setUsuarioModifico(user);
         		
-        		acta = relEncuestaUsuarioService.descargaActa(grupo, user);
-        		log.info("11 acta !!!" + acta +" - "+ isAdmin +" - " +  grupo);
+        		acta = actaService.getActaByGrupoUser(grupo, user);
         		if(ObjectUtils.isNull(acta) && isAdmin) {
-        			acta = relEncuestaUsuarioService.getActaByIdGrupo(grupo);
-        			log.info("22 acta !!!" + acta);
+        			acta = actaService.getActaByIdGrupo(grupo);
         		}
         		
         		if (ObjectUtils.isNotNull(acta)) {
@@ -1083,8 +1069,8 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     		
     		if(file != null) {
         		
-        		Acta acta = new Acta();
-        		int grupo = grupoSelec.getIdGrupo();
+        		ActaDTO acta = new ActaDTO();
+//        		int grupo = grupoSelec.getIdGrupo();
 //        		long user = getUsuarioEnSession().getIdPersona();
         		byte[] fileBytes = null;
         		
@@ -1097,57 +1083,44 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 
                 acta.setBlob(fileBytes);
                 acta.setFechaCierre(new Date());
-        		acta.setGrupo(grupo);
-        		TblPersona persona = new TblPersona();
-        		persona.setIdPersona(getUsuarioEnSession().getIdPersona());
-        		acta.setTblPersona(persona);
+                acta.setGrupo( grupoSelec.getIdGrupo());
+        		acta.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
         	
-                relEncuestaUsuarioService.cargaActa(acta);
+                actaService.guardar(acta);
 
                 agregarMsgInfo( "CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA", null);
         		log.info("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA");		
     
-        	}else {
-        		agregarMsgWarn( "SELECCIONE UN ARCHIVO !!!" , null );
-        		log.info("NO SE HA SELECCIONADO UN ARCHIVO");
-        		deshabilitarCargaActaFirmada=false;
-        		deshabilitarDescargaActaFirmada=true;
         	}
-        	
         	
         	log.info("TERMINA CARGA PLANTILLA CALIFICACIONES");
     		
     	} catch (Exception e) {    		
             agregarMsgError("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - ERROR", e.getMessage());
-            log.error("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - ERROR");
+            log.error("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - ERROR "+ e.getMessage());
         }
     
     }
     
 	public void eliminarActa() {
 		log.info("INICIA ELIMINACION ACTA DE CALIFICACIONES !!!");
-		
-		List<PersonaRolDTO> roles = personaRolesService.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
-		log.info("roles !!! "+ roles.size());
 		boolean isAdmin=false;
 		
-		for (PersonaRolDTO rol: roles) {
-			log.info("rol.getRol().getIdRol() !!! "+rol.getRol().getIdRol());
-			if(rol.getRol().getIdRol().equals(ID_ROLE_ADMIN)) {
+		for (String rol: rolesEnSession) {
+			if(rol.equals(ROLE_ADMIN)) {
 				isAdmin=true;
-				log.info(" isAdmin !!! ");
 			}
 		}
-		log.info(" isAdmin >> "+ isAdmin);
 		if (isAdmin) {
-			Acta acta = relEncuestaUsuarioService.getActaByIdGrupo(grupoSelec.getIdGrupo());
+			ActaDTO acta = actaService.getActaByIdGrupo(grupoSelec.getIdGrupo());
 			if(ObjectUtils.isNotNull(acta)) {
-				log.info(" acta >> "+ acta.getIdActa());
-				relEncuestaUsuarioService.eliminarActa(acta);
+				log.info(" acta >> "+ acta.toString());
+				actaService.eliminar(acta);
 				deshabilitarDescargaActaFirmada=true;
 				deshabilitarEliminarActaFirmada=true;
 				setMuestraTblCalif(false);
 				setCerrarActa(false);
+				grupoSelec.setActaCerrada(false);
 				agregarMsgInfo("ELIMINAR ACTA: " + acta.getIdActa()+ " - CORRECTA", null);
 				log.info("ELIMINAR ACTA: " + acta.getIdActa() + " - CORRECTA");
 			}else{
@@ -1159,12 +1132,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 			agregarMsgWarn( "NO CUENTA CON LOS PERMISOS SUFICIENTES PARA REALIZAR ESTA ACCION !!!" , null );
 			log.info("NO CUENTA CON LOS PERMISOS SUFICIENTES PARA REALIZAR ESTA ACCION !!! " );
 		}
-		
-
 	}
 	
     public void habilidarBotonDescargarActa() {
-    	log.info(">> habilidarBotonDescargarActa");
     	deshabilitarCargaActaFirmada=true;
 		deshabilitarDescargaActaFirmada=false;
 		deshabilitarEliminarActaFirmada=false;
@@ -1330,21 +1300,11 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         return califPart;
     }
 
-    /**
-     * @param calificaciones
-     * @return
-     */
-    private Double obtieneSumaCalificaciones(List<CalificacionECDTO> calificaciones) {
-        double sum = new Double(ConstantesGestorWeb.NUMERO_CERO);
-        for (CalificacionECDTO cal : calificaciones) {
-            sum = sum + cal.getCalificacion();
-        }
-        return sum;
-    }
-
-    /**
-     *
-     */
+//    /**
+//     * @param calificaciones
+//     * @return
+//     */
+ 
     public void visualizaAsistenciaUsuario(Integer idGpoParticipante) {
 
         // participanteCalSel.toString();
@@ -1428,7 +1388,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         ResultadoDTO res = null;
         try {
 
-            res = asistenciaFacadeService.guardarRelAsistencia(this.getUsuarioEnSession().getIdPersona(),
+        	res = asistenciaFacadeService.guardarRelAsistencia(this.getUsuarioEnSession().getIdPersona(),
                     asistenciasPart);
             if (ObjectUtils.isNotNull(res) && res.getResultado().getValor()) {
 
@@ -1544,35 +1504,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         // Calculo de calificaciones Totales y Finales
         try {
            for (TablaCalificacionesDTO tc : aux) {
-//                if (evento.getTpoCalificacion().equals(TipoCalificacionECEnum.TPO_CAL_SUMA.getId())) {
-//                    Double sum = new Double(0);
-//                    for (CalificacionECDTO cal : tc.getCalificacionEC()) {
-//                        if (!cal.getCalificacion().isNaN())
-//                            sum = sum + cal.getCalifPonderacion();
-//                    }
-//                    tc.setCalifTotal(new Double(tc.getCalifTotal().intValue()));
-//
-//                } else if (evento.getTpoCalificacion().equals(TipoCalificacionECEnum.TPO_CAL_PROMEDIO.getId())) {
-//
-//                    /*
-//                     * Double sum = new Double(0); for (CalificacionECDTO cal :
-//                     * tc.getCalificacionEC()) { log.info("Calif ponderacion: " +
-//                     * cal.getCalifPonderacion()); log.info("Suma: " + sum); sum =
-//                     * sum + cal.getCalifPonderacion(); } tc.setCalifTotal(sum /
-//                     * tc.getCalificacionEC().size());
-//                     */
-//
-//                    Double sum = new Double(0);
-//                    for (int i = 0; i < tc.getCalificacionEC().size(); i++) {
-//                        if (!tc.getCalificacionEC().get(i).getCalificacion().isNaN())
-//                            sum = sum + tc.getCalificacionEC().get(i).getCalificacion();
-//                        log.info("Calif ponderacion: " + tc.getCalificacionEC().get(i).getCalifPonderacion());
-//                        log.info("Calificiacion normal: " + tc.getCalificacionEC().get(i).getCalificacion());
-//                        log.info("Suma: " + sum);
-//                    }
-//                    tc.setCalifTotal(new Double(tc.getCalifTotal().intValue()));
-//                }
-                
+
         	    tc.setCalifTotal( new Double(tc.getCalifTotal().intValue()) );
                 tc.setCalifFinal(new Double(tc.getCalifTotal().intValue()) );
                 log.info("Calificacion total: " + tc.getCalifTotal());
@@ -1597,7 +1529,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 if (!ObjectUtils.isNullOrEmpty(evento.getCalificacionMinAprobatoria())) {
 
                     Double califMin = new Double(evento.getCalificacionMinAprobatoria());
-                    califMin = (califMin ); // ITTIVA se quita /10
+//                    califMin = (califMin ); // ITTIVA se quita /10
 
                     if (tc.getCalifFinal().compareTo(califMin) >= 0) {
                         tc.setDictamen(obtieneDictamenById(DictamenCalificacionEnum.ACREDITADO.getId()));
@@ -1610,11 +1542,11 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 //tc.setCalifTotal(  );
             }
             
-            for(TablaCalificacionesDTO tc : aux) {
-            	
-            	
-            	
-            }
+//            for(TablaCalificacionesDTO tc : aux) {
+//            	
+//            	
+//            	
+//            }
             
         } catch (Exception e) {
             agregarMsgError("No se encontro calificaciones en el Ambiente Virtual de Aprendizaje", e.getMessage());
@@ -2085,6 +2017,22 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
 	public void setCapturaEventoCapacitacion(CapturaEventoCapacitacion capturaEventoCapacitacion) {
 		this.capturaEventoCapacitacion = capturaEventoCapacitacion;
+	}
+
+	public ActaService getActaService() {
+		return actaService;
+	}
+
+	public void setActaService(ActaService actaService) {
+		this.actaService = actaService;
+	}
+
+	public List<String> getRolesEnSession() {
+		return rolesEnSession;
+	}
+
+	public void setRolesEnSession(List<String> rolesEnSession) {
+		this.rolesEnSession = rolesEnSession;
 	}
 
 }
