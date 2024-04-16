@@ -44,7 +44,6 @@ public class Acta implements Serializable {
 	
 	@Column(name="usuario_modifico")
 	private Long usuarioModifico;
-
 	
 	//Getter y Setter
 
@@ -81,6 +80,7 @@ public class Acta implements Serializable {
 	public void setUsuarioModifico(Long usuarioModifico) {
 		this.usuarioModifico = usuarioModifico;
 	}
+	 
 
 	public byte[] getBlob() {
 		return blob;
