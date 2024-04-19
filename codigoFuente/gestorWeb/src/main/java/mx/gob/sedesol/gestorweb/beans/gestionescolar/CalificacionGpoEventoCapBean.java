@@ -3,7 +3,6 @@ package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +23,6 @@ import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
-import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaRolDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ActaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenciaAuxDTO;
@@ -158,6 +156,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 	private boolean deshabilitarCargaActaFirmada;
 	private boolean deshabilitarEliminarActaFirmada;
 	private List<String> rolesEnSession;
+	private boolean tieneRolAdmin;
 	
     public StreamedContent getPlantillaPDF() {
 		return plantillaPDF;
@@ -218,6 +217,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         
 		rolesEnSession = getUsuarioEnSession().getRoles().stream().map(i -> i.toString()).collect(Collectors.toList());
 
+		tieneRolAdmin = tieneRolAdmin();
         modalidadEnum = ModalidadEnum.obtieneModalidadById(evento.getIdEvento());
         return ConstantesGestorWeb.NAVEGA_CALIFICACIONES_XEVENTO;
     }
@@ -1011,12 +1011,12 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
      */
     public void descargarActa() {  
     	
-		boolean isAdmin=false;
+	  boolean tienePermiso=false;
 		
 		for (String rol : rolesEnSession) {
 			if (rol.equals(ROLE_ADMIN) || rol.equals(ROLE_COORDINADOR_ACADEMICO)
 					|| rol.equals(ROLE_RESPONSABLE_PRODUCCION)) {
-				isAdmin = true;
+				tienePermiso = true;
 			}
 		}
 
@@ -1029,7 +1029,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         		long user = getUsuarioEnSession().getIdPersona();
         		
         		acta = actaService.getActaByGrupoUser(grupo, user);
-        		if(ObjectUtils.isNull(acta) && isAdmin) {
+        		if(ObjectUtils.isNull(acta) && tienePermiso) {
         			acta = actaService.getActaByIdGrupo(grupo);
         		}
         		
@@ -1070,8 +1070,6 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     		if(file != null) {
         		
         		ActaDTO acta = new ActaDTO();
-//        		int grupo = grupoSelec.getIdGrupo();
-//        		long user = getUsuarioEnSession().getIdPersona();
         		byte[] fileBytes = null;
         		
                 byte[] buffer = new byte[1024];
@@ -1089,8 +1087,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 actaService.guardar(acta);
 
                 agregarMsgInfo( "CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA", null);
-        		log.info("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA");		
-    
+        		log.info("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA");
         	}
         	
         	log.info("TERMINA CARGA PLANTILLA CALIFICACIONES");
@@ -1104,14 +1101,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     
 	public void eliminarActa() {
 		log.info("INICIA ELIMINACION ACTA DE CALIFICACIONES !!!");
-		boolean isAdmin=false;
-		
-		for (String rol: rolesEnSession) {
-			if(rol.equals(ROLE_ADMIN)) {
-				isAdmin=true;
-			}
-		}
-		if (isAdmin) {
+		if (tieneRolAdmin) {
 			ActaDTO acta = actaService.getActaByIdGrupo(grupoSelec.getIdGrupo());
 			if(ObjectUtils.isNotNull(acta)) {
 				log.info(" acta >> "+ acta.toString());
@@ -1565,6 +1555,18 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
             }
         }
         return null;
+    }
+    
+    
+    private boolean tieneRolAdmin() {
+    	boolean resultado=false;
+		
+		for (String rol : rolesEnSession) {
+			if (rol.equals(ROLE_ADMIN)) {
+				resultado = true;
+			}
+		}
+    	return resultado;
     }
 
     /* SETTERS & GETTERS */
@@ -2035,4 +2037,11 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 		this.rolesEnSession = rolesEnSession;
 	}
 
+	public boolean isTieneRolAdmin() {
+		return tieneRolAdmin;
+	}
+
+	public void setTieneRolAdmin(boolean tieneRolAdmin) {
+		this.tieneRolAdmin = tieneRolAdmin;
+	}
 }
