@@ -432,6 +432,17 @@
 														</h:commandLink></li>
 												</sec:authorize>
 											</ui:fragment>
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('EC_BUS')}">
+												<sec:authorize access="hasPermission(null, 'EC_BUS') ">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaGenerarDispersion}"
+															title="Dispersiones">
+															<i class="fa fa-calendar-days"></i>
+															<span class="m-label">Dispersiones</span>
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
 											<li><h:commandLink
 													action="#{menuGestorBean.navegaResponsablesEventoCapacitacion}"
 													title="#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}">

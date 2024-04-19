@@ -1,16 +1,22 @@
 package mx.gob.sedesol.basegestor.model.entities.gestionescolar;
 
 import java.io.Serializable;
+import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import mx.gob.sedesol.basegestor.model.entities.admin.TblPersona;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
@@ -28,6 +34,8 @@ public class TblInscripcion implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@Column(name="id")
 	private Integer id;
 
 	private Integer alta;
@@ -73,6 +81,21 @@ public class TblInscripcion implements Serializable {
 	private Integer recursamiento;
 
 	private Integer semestre;
+	
+	private String bloque;
+	
+	@Column(name="clave_asig")
+	private String claveAsig;
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="fecha_registro", insertable = false, updatable=false)
+	private Date fechaRegistro;
+	
+//	//bi-directional many-to-one association to TblProcesoInscripcion
+//	@ManyToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
+//	@JoinColumn(name="proceso_inscripcion_id")
+//	private TblProcesoInscripcion procesoInscripcion;	
+//	
 
 	public TblInscripcion() {
 	}
@@ -197,4 +220,35 @@ public class TblInscripcion implements Serializable {
 		this.semestre = semestre;
 	}
 
+	public String getBloque() {
+		return bloque;
+	}
+
+	public void setBloque(String bloque) {
+		this.bloque = bloque;
+	}
+
+	public String getClaveAsig() {
+		return claveAsig;
+	}
+
+	public void setClaveAsig(String claveAsig) {
+		this.claveAsig = claveAsig;
+	}
+
+	public Date getFechaRegistro() {
+		return fechaRegistro;
+	}
+
+	public void setFechaRegistro(Date fechaRegistro) {
+		this.fechaRegistro = fechaRegistro;
+	}
+
+//	public TblProcesoInscripcion getProcesoInscripcion() {
+//		return procesoInscripcion;
+//	}
+//
+//	public void setProcesoInscripcion(TblProcesoInscripcion procesoInscripcion) {
+//		this.procesoInscripcion = procesoInscripcion;
+//	}
 }

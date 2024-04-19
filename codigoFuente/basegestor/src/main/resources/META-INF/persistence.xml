@@ -233,6 +233,8 @@
         <class>mx.gob.sedesol.basegestor.model.entities.admin.CatDiscapacidad</class>
         <class>mx.gob.sedesol.basegestor.model.entities.admin.CatTipoDiscapacidad</class>
         <class>mx.gob.sedesol.basegestor.model.entities.admin.TblDatosSociodemograficosPersona</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblConvocatoria</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblProcesosInscripcion</class>
         <!-- Fin optimizacion de entidades -->
 
         <!-- Fin de seccion de entidades optimizadas -->

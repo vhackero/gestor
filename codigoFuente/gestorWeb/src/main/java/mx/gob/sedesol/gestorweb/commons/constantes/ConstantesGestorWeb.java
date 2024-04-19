@@ -121,7 +121,8 @@ public final class ConstantesGestorWeb {
 	public static final String NAVEGA_DETALLE_ENCUESTA = "DETALLE_ENCUESTA";
 	public static final String NAVEGA_REGISTRA_ENCUESTA = "REGISTRA_ENCUESTA";
 	
-	public static final String NAVEGA_BUSQUEDA_EVENTO_CAP = "BUSQUEDA_EVENTO_CAP";
+	public static final String NAVEGA_BUSQUEDA_EVENTO_CAP = "BUSQUEDA_EVENTO_CAP"; 
+	public static final String NAVEGA_GENERA_DISPERSION = "GENERA_DISPERSION";
 	public static final String NAVEGA_RESPONSABLES_EVE_CAP = "RESPONSABLES_EVE_CAP";
 	
 	public static final String NAVEGA_UNIDADES_RESPONSABLES = "UNIDADES_RESPONSABLES";

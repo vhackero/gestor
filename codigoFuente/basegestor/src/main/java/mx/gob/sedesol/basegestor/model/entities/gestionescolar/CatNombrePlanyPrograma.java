@@ -17,6 +17,8 @@ public class CatNombrePlanyPrograma implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@Column(name="id")
 	private int id;
 
 	private byte activo;
@@ -45,6 +47,11 @@ public class CatNombrePlanyPrograma implements Serializable {
 
 	@Column(name="usuario_modifico")
 	private BigInteger usuarioModifico;
+
+	//bi-directional many-to-one association to RelGrupoEvaluacion
+	@ManyToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
+	@JoinColumn(name="convocatoria_id")
+	private TblConvocatoria convocatoria;
 
 	public CatNombrePlanyPrograma() {
 	}

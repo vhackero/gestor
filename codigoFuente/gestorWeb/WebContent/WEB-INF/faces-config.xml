@@ -449,6 +449,12 @@
 		</navigation-case>
 		
 		<navigation-case>
+			<from-outcome>GENERA_DISPERSION</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/generarDispersion.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
 			<from-outcome>REG_NUEVO_EVENT_CAP</from-outcome>
 			<to-view-id>/views/private/gestionEscolar/RegistroEventoCapacitacion.xhtml</to-view-id>
 			<redirect />

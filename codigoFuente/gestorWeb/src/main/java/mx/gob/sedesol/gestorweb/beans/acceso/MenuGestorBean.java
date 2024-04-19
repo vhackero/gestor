@@ -363,7 +363,11 @@ public class MenuGestorBean extends BaseBean {
 		logger.info("Navegando a pantalla de busqueda de eventos capacitacion");
 		inicializaBusquedaEventos();
 		return ConstantesGestorWeb.NAVEGA_BUSQUEDA_EVENTO_CAP;
-
+	}
+	public String navegaGenerarDispersion() {
+		logger.info("Navegando a pantalla de dispersiones");
+		inicializaBusquedaEventos();
+		return ConstantesGestorWeb.NAVEGA_GENERA_DISPERSION;
 	}
 
 	public String navegaAmbientesVirtualesAprendizaje() {

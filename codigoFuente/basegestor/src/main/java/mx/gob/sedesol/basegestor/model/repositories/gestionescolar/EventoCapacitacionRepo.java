@@ -70,6 +70,13 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 			+ " ORDER BY evt.idPrograma")
 	public List<TblEvento> obtenerEventosPorIdProgramaIdPlan( @Param("idPlan") Integer idPlan);
 	
+	@Query("SELECT evt FROM TblEvento evt "
+			+ " JOIN evt.inscripciones ins "
+			+ " WHERE evt.idPrograma = ins.fichaDescriptivaPrograma.idPrograma"
+			+ " AND ins.plan.idPlan in (:programas)"
+			+ " ORDER BY evt.idPrograma")
+	public List<TblEvento> obtenerEventosPorIdProgramas( @Param("programas") List<Integer> programas);
+	
 	
 	@Query(value = "select	rpm.id_persona as idpersona, rpm.id_persona_moodle as personamoodle "
 			+ " from rel_personas_plataformas_moodle rpm "

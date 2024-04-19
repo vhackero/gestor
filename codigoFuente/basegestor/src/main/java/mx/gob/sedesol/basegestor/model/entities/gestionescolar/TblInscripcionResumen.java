@@ -18,143 +18,71 @@ public class TblInscripcionResumen implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@Column(name="id_proceso")
 	private Integer id;
-
-	private String asignatura;
-
-	private String bloque;
-
-	@Column(name="clave_asignatura")
-	private String claveAsignatura;
-
-	@Column(name="estudiantes_resto")
-	private Integer estudiantesResto;
-
-	@Column(name="estudiantes_x_grupo")
-	private Integer estudiantesXGrupo;
-
-	private String grupo;
-
-	@Column(name="grupo_resto")
-	private Integer grupoResto;
-
-	@Column(name="no_estudiantes")
-	private Integer noEstudiantes;
-
-//	@Column(name="no_grupos")
-//	private Integer noGrupos;
-
-	@Column(name="programa_educativo")
-	private String programaEducativo;
-
-	private Integer semestre;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "id_plan")
-	private TblPlan plan;
+	private String grupo;
 	
 	// bi-directional many-to-one association to TblFichaDescriptivaPrograma
 	@ManyToOne
 	@JoinColumn(name = "id_programa", insertable = false, updatable = false)
 	private TblFichaDescriptivaPrograma fichaDescriptivaPrograma;
+	
+	@Column(name="programa_educativo")
+	private String programaEducativo;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "id_plan")
+	private TblPlan plan;
 
+	private String asignatura;
+	
+	@Column(name="clave_asignatura")
+	private String claveAsignatura;
+
+	private Integer semestre;
+	
+	private String bloque;
+
+	//bi-directional many-to-one association to RelGrupoEvaluacion
+	@ManyToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
+	@JoinColumn(name="convocatoria_id")
+	private TblConvocatoria convocatoria;
+	
 	public TblInscripcionResumen() {
 	}
 
 	public Integer getId() {
-		return this.id;
+		return id;
 	}
 
 	public void setId(Integer id) {
 		this.id = id;
 	}
 
-	public String getAsignatura() {
-		return this.asignatura;
-	}
-
-	public void setAsignatura(String asignatura) {
-		this.asignatura = asignatura;
-	}
-
-	public String getBloque() {
-		return this.bloque;
-	}
-
-	public void setBloque(String bloque) {
-		this.bloque = bloque;
-	}
-
-	public String getClaveAsignatura() {
-		return this.claveAsignatura;
-	}
-
-	public void setClaveAsignatura(String claveAsignatura) {
-		this.claveAsignatura = claveAsignatura;
-	}
-
-	public Integer getEstudiantesResto() {
-		return this.estudiantesResto;
-	}
-
-	public void setEstudiantesResto(Integer estudiantesResto) {
-		this.estudiantesResto = estudiantesResto;
-	}
-
-	public Integer getEstudiantesXGrupo() {
-		return this.estudiantesXGrupo;
-	}
-
-	public void setEstudiantesXGrupo(Integer estudiantesXGrupo) {
-		this.estudiantesXGrupo = estudiantesXGrupo;
-	}
-
 	public String getGrupo() {
-		return this.grupo;
+		return grupo;
 	}
 
 	public void setGrupo(String grupo) {
 		this.grupo = grupo;
 	}
 
-	public Integer getGrupoResto() {
-		return this.grupoResto;
+	public TblFichaDescriptivaPrograma getFichaDescriptivaPrograma() {
+		return fichaDescriptivaPrograma;
 	}
 
-	public void setGrupoResto(Integer grupoResto) {
-		this.grupoResto = grupoResto;
+	public void setFichaDescriptivaPrograma(TblFichaDescriptivaPrograma fichaDescriptivaPrograma) {
+		this.fichaDescriptivaPrograma = fichaDescriptivaPrograma;
 	}
-
-	public Integer getNoEstudiantes() {
-		return this.noEstudiantes;
-	}
-
-	public void setNoEstudiantes(Integer noEstudiantes) {
-		this.noEstudiantes = noEstudiantes;
-	}
-
-//	public Integer getNoGrupos() {
-//		return this.noGrupos;
-//	}
-//
-//	public void setNoGrupos(Integer noGrupos) {
-//		this.noGrupos = noGrupos;
-//	}
 
 	public String getProgramaEducativo() {
-		return this.programaEducativo;
+		return programaEducativo;
 	}
 
 	public void setProgramaEducativo(String programaEducativo) {
 		this.programaEducativo = programaEducativo;
-	}
-
-	public Integer getSemestre() {
-		return this.semestre;
-	}
-
-	public void setSemestre(Integer semestre) {
-		this.semestre = semestre;
 	}
 
 	public TblPlan getPlan() {
@@ -165,11 +93,44 @@ public class TblInscripcionResumen implements Serializable {
 		this.plan = plan;
 	}
 
-	public TblFichaDescriptivaPrograma getFichaDescriptivaPrograma() {
-		return fichaDescriptivaPrograma;
+	public String getAsignatura() {
+		return asignatura;
 	}
 
-	public void setFichaDescriptivaPrograma(TblFichaDescriptivaPrograma fichaDescriptivaPrograma) {
-		this.fichaDescriptivaPrograma = fichaDescriptivaPrograma;
+	public void setAsignatura(String asignatura) {
+		this.asignatura = asignatura;
 	}
+
+	public String getClaveAsignatura() {
+		return claveAsignatura;
+	}
+
+	public void setClaveAsignatura(String claveAsignatura) {
+		this.claveAsignatura = claveAsignatura;
+	}
+
+	public Integer getSemestre() {
+		return semestre;
+	}
+
+	public void setSemestre(Integer semestre) {
+		this.semestre = semestre;
+	}
+
+	public String getBloque() {
+		return bloque;
+	}
+
+	public void setBloque(String bloque) {
+		this.bloque = bloque;
+	}
+
+	public TblConvocatoria getConvocatoria() {
+		return convocatoria;
+	}
+
+	public void setConvocatoria(TblConvocatoria convocatoria) {
+		this.convocatoria = convocatoria;
+	}
+
 }
