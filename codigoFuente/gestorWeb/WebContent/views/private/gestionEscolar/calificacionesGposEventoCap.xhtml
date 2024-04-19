@@ -151,9 +151,9 @@
 								<sec:authorize access="hasPermission(null, 'ADMIN' ) ">	
 									<p:outputLabel value="Eliminar Acta Firmada: " 
 										styleClass="margenIzquierdo agregaHeight" 
-										rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) }"/>
+										rendered="#{(calificacionGpoEventoCapBean.tieneRolAdmin and calificacionGpoEventoCapBean.cerrarActa)}"/>
 									<p:commandButton id="btnEliminarActaFirmada" ajax="true"  
-										rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) }"
+										rendered="#{(calificacionGpoEventoCapBean.tieneRolAdmin and calificacionGpoEventoCapBean.cerrarActa)}"
 										update="@form frmCalif"
 										styleClass="btn btn-icon btn-default icono_sisi ss_gn_eliminar"
 										action="#{calificacionGpoEventoCapBean.eliminarActa}" 
