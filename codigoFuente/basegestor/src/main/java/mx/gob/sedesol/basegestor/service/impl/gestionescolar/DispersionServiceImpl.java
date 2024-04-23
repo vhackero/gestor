@@ -12,25 +12,39 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblConvocatoriaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionResumenDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblProcesoInscripcionDTO;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblConvocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblInscripcion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblInscripcionResumen;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblProcesoInscripcion;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.ConvocatoriaRepo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.InscripcionRepo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.InscripcionResumenRepo;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.ProcesoInscripcionRepo;
+import mx.gob.sedesol.basegestor.service.admin.ComunValidacionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.DispersionService;
 
 @Service("dispersionServiceImpl")
 public class DispersionServiceImpl 
-//extends ComunValidacionService<RelGrupoParticipanteDTO>
+extends ComunValidacionService<TblInscripcionResumenDTO>
 		implements DispersionService {
 
 	private static final Logger logger = Logger.getLogger(DispersionServiceImpl.class);
 
 	@Autowired
 	private InscripcionResumenRepo inscripcionResumenRepo;
+	
+	@Autowired
+	private ConvocatoriaRepo convocatoriaRepo;
+	
+	@Autowired
+	private ProcesoInscripcionRepo procesoInscripcionRepo;
 	
 	@Autowired
 	private InscripcionRepo inscripcionRepo;
@@ -136,5 +150,47 @@ public class DispersionServiceImpl
 
 		return listDTO;
 	}
+
+	@Override
+	public List<TblConvocatoriaDTO> obtenerConvocatorias() {
+
+		List<TblConvocatoria> lista = convocatoriaRepo.findAll();
+
+		Type objetoDTO = new TypeToken<List<TblConvocatoriaDTO>>() {
+		}.getType();
+
+		return modelMapper.map(lista, objetoDTO);
+	}
+	
+	@Override
+	public List<TblProcesoInscripcionDTO> obtenerProcesosInscripcionByConvocatoriaId(Integer convocatoriaId) {
+
+//		List<TblProcesoInscripcion> lista = procesoInscripcionRepo.obtenerProcesosInscripcionPorConvocatoriaId(convocatoriaId);
+		List<TblProcesoInscripcion> lista = procesoInscripcionRepo.findAll();
+
+		Type objetoDTO = new TypeToken<List<TblProcesoInscripcionDTO>>() {
+		}.getType();
+
+		return modelMapper.map(lista, objetoDTO);
+	}
+
+	@Override
+	public void validarPersistencia(TblInscripcionResumenDTO dto, ResultadoDTO<TblInscripcionResumenDTO> resultado) {
+		// TODO Auto-generated method stub
+	}
+
+
+	@Override
+	public void validarActualizacion(TblInscripcionResumenDTO dto, ResultadoDTO<TblInscripcionResumenDTO> resultado) {
+		// TODO Auto-generated method stub
+	}
+
+
+	@Override
+	public void validarEliminacion(TblInscripcionResumenDTO dto, ResultadoDTO<TblInscripcionResumenDTO> resultado) {
+		// TODO Auto-generated method stub
+	}
+	
+	
 	
 }

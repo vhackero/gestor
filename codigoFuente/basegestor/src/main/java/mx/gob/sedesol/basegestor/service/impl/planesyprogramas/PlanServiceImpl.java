@@ -19,7 +19,6 @@ import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblInscripcion;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.model.especificaciones.PlanEspecificacion;
 import mx.gob.sedesol.basegestor.model.repositories.planesyprogramas.PlanRepo;

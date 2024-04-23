@@ -3,10 +3,6 @@ package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
 
 import java.io.Serializable;
-import javax.persistence.*;
-
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
-
 import java.util.Date;
 import java.util.List;
 

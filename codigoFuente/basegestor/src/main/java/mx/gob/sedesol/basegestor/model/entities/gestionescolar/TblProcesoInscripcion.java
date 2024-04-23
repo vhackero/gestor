@@ -21,7 +21,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="tbl_procesos_inscripcion")
-@NamedQuery(name="TblProcesoInscripcion.findAll", query="SELECT t FROM TblProcesoInscripcion t")
+@NamedQuery(name="TblProcesoInscripcion.findAll", query="SELECT pi FROM TblProcesoInscripcion pi")
 public class TblProcesoInscripcion implements Serializable {
 	private static final long serialVersionUID = 1L;
 

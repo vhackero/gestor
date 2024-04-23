@@ -35,15 +35,15 @@
 							<div class="col-md-3">
 								<p:outputLabel styleClass="requerido" value="Convocatoria:" />
 								<p:selectOneMenu
-									value="#{eventoCapacitacionBean.filtros.catModalidadPlanPrograma}"
-									converter="catalogoComunConverter" required="false"
+									value="#{dispersionBean.idConvocatoriaSelect}"
+									converter="catalogoComunConverter" required="true"
 									styleClass="col-xs-12">
 									<f:selectItem
 										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
 									<f:selectItems
-										value="#{eventoCapacitacionBean.listaModalidadesPrograma}"
-										var="modalidad" itemLabel="#{modalidad.nombre}"
-										itemValue="#{modalidad}" />
+										value="#{dispersionBean.listaConvocatorias}"
+										var="convocatoria" itemLabel="#{convocatoria.nombre}"
+										itemValue="#{convocatoria.convocatoriaId}" />
 								</p:selectOneMenu>
 							</div>
 

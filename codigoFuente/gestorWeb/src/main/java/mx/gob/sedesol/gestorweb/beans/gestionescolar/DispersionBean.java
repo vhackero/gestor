@@ -23,19 +23,18 @@ import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.AmbienteVirtual
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblConvocatoriaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionResumenDTO;
-import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblProcesoInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
-import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.DispersionServiceFacade;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.CorreoNotificacionBean;
-import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.sistema.SistemaBean;
 
 @SessionScoped
@@ -72,6 +71,8 @@ public class DispersionBean extends BaseBean {
 	private List<PersonaDatosDTO> personas;
 	private List<RelGrupoParticipanteDTO> participantes;
 	List<PersonaDTO> listaPersonas = new ArrayList<>();
+	private List<TblConvocatoriaDTO> listaConvocatorias;
+	private List<TblProcesoInscripcionDTO> listaProcesosInscripcion;
 
 	private ParametroWSMoodleDTO parametroWSMoodleDTO;
 	private PersonaDTO filtrosPersona; 
@@ -85,11 +86,13 @@ public class DispersionBean extends BaseBean {
 	private Integer idCursoLms;
 	private Integer semestre;
 	private String bloque;
+	private Integer idConvocatoriaSelect;
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public void iniciaRecursos() {
 		listaPlanes = planService.findAll();
+		listaConvocatorias = dispersionServiceFacade.obtenerConvocatorias();
 		grupos= new ArrayList<GrupoDTO>();
 		setSelectedPlanes(new ArrayList<>());
 	}
@@ -604,6 +607,30 @@ public class DispersionBean extends BaseBean {
 
 	public void setBloque(String bloque) {
 		this.bloque = bloque;
+	}
+
+	public List<TblConvocatoriaDTO> getListaConvocatorias() {
+		return listaConvocatorias;
+	}
+
+	public void setListaConvocatorias(List<TblConvocatoriaDTO> listaConvocatorias) {
+		this.listaConvocatorias = listaConvocatorias;
+	}
+
+	public List<TblProcesoInscripcionDTO> getListaProcesosInscripcion() {
+		return listaProcesosInscripcion;
+	}
+
+	public void setListaProcesosInscripcion(List<TblProcesoInscripcionDTO> listaProcesosInscripcion) {
+		this.listaProcesosInscripcion = listaProcesosInscripcion;
+	}
+
+	public Integer getIdConvocatoriaSelect() {
+		return idConvocatoriaSelect;
+	}
+
+	public void setIdConvocatoriaSelect(Integer idConvocatoriaSelect) {
+		this.idConvocatoriaSelect = idConvocatoriaSelect;
 	}
 
 	/* INICIO DE GETS Y SETS */

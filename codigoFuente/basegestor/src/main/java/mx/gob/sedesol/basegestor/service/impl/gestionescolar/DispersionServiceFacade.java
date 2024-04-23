@@ -12,9 +12,12 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CapturaEventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProgramaSocialDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblConvocatoriaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblInscripcionResumenDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TblProcesoInscripcionDTO;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
 import mx.gob.sedesol.basegestor.service.admin.CorreoElectronicoService;
@@ -97,6 +100,15 @@ public class DispersionServiceFacade {
 			alumno = null;
 		}
 		return alumno;
+	}
+	
+	
+	public List<TblConvocatoriaDTO> obtenerConvocatorias() {
+		return dispersionService.obtenerConvocatorias();
+	}
+	
+	public List<TblProcesoInscripcionDTO> obtenerProcesosInscripcionByConvocatoriaId(Integer convocatoriaId) {
+		return dispersionService.obtenerProcesosInscripcionByConvocatoriaId(convocatoriaId);
 	}
 
 	public List<GrupoDTO> obtenerGruposPorIdEvento(Integer idEvento) {
