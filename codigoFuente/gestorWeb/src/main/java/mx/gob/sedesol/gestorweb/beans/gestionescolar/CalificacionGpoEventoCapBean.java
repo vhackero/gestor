@@ -163,6 +163,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 	}
 
 	public CalificacionGpoEventoCapBean() {
+		muestraTblCalif = false;
         gruposXEventoCap = new ArrayList<>();
         tpoCalifSel = new CatalogoComunDTO();
         tablaAuxCalif = new ArrayList<>();
@@ -273,7 +274,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 setModalidadEnLinea(Boolean.FALSE);
 
                 setGrupoSeleccionado(Boolean.TRUE);
-                setCerrarActa(Boolean.FALSE);
+//                setCerrarActa(Boolean.FALSE);
                 setTablaAuxCalif(new ArrayList<>());
                 setNumEvaluaciones(0);
 
@@ -284,6 +285,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 if (ObjectUtils.isNotNull(grupoSelec)) {
 
                     setCerrarActa(grupoSelec.isActaCerrada());
+                    setMuestraTblCalif(!grupoSelec.isActaCerrada());
+               
+                    
                     participantesByGrupo = eventoCapacitacionServiceFacade.getRegistroAsistenciaService()
                             .getGrupoParticipante(grupoSelec.getIdEventoTemp(), idGpo);
                     grupoSelec.setNumAlumnosMatriculados(participantesByGrupo.size());
@@ -311,8 +315,6 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                                 gpoPart.add(cal.getRelGrupoParticipante());
                             }
                         }
-
-                        setMuestraTblCalif(Boolean.TRUE);
                         setConCalifPrevias(Boolean.TRUE);
 
                     } else {
@@ -542,7 +544,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
         try {
 
-            if (isConCalifPrevias()) {
+         /*  if (isConCalifPrevias()) { TODO
 
                 ResultadoDTO<RelGrupoEvaluacionDTO> resTx = eventoCapacitacionServiceFacade
                         .actualizaCalificacionesECPresencial(calificaciones, grupoSelec, evento, isCerrarActa(),
@@ -559,7 +561,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                     agregarMsgError("Ocurrio un error al guardar calificaciones", null);
                 }
 
-            } else {
+            } else {*/
 
                 ResultadoDTO<RelGrupoEvaluacionDTO> resTx = eventoCapacitacionServiceFacade
                         .guardaCalificacionesECPresencial(calificaciones, grupoSelec, evento,
@@ -575,11 +577,13 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                     agregarMsgError("Ocurrio un error al guardar calificaciones", null);
                 }
 
-            }
+           // }
 
         } catch (Exception e) {
+        	agregarMsgError("Ocurrio un error al guardar calificaciones", null);
         	log.info("Ocurrio un error>>"+ e.getMessage());
             log.error(e.getMessage(), e);
+            setMuestraTblCalif(Boolean.TRUE);
         }
 
     }
@@ -799,6 +803,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
             RequestContext.getCurrentInstance().execute("PF('dlgCerrarActa').hide()");
         } else {
             setCerrarActa(Boolean.FALSE);
+            setMuestraTblCalif(true);
         }
     }
 
