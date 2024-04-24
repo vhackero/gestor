@@ -250,10 +250,8 @@ public class EventoCapacitacionServiceFacade {
 			if (cerrarActa) {
 
 				for (RelGrupoParticipanteDTO rpg : participantesByGrupo) {
-					logger.info("1 actualizaRelGrupoParticipante>>");
 					ResultadoDTO<RelGrupoParticipanteDTO> resx = grupoParticipanteService
 							.actualizaRelGrupoParticipante(rpg);
-					logger.info("2	actualizaRelGrupoParticipante>>");
 					if (ObjectUtils.isNotNull(resx) && !resx.getResultado().getValor()) {
 						res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_FALLIDA);
 						throw new Exception("Error al Actualizar la relación grupo-participante");
@@ -262,12 +260,9 @@ public class EventoCapacitacionServiceFacade {
 
 				gpoSeleccionado.setActaCerrada(Boolean.TRUE);
 				logger.info("1 actualizarGrupo>>");
-				ResultadoDTO<GrupoDTO> resActGpo = grupoService.actualizarGrupo(gpoSeleccionado, usuarioReg);
+				ResultadoDTO<GrupoDTO> resActGpo = actualizarEstatusActa(gpoSeleccionado, usuarioReg, true);
 				logger.info("12 actualizarGrupo>>" + resActGpo.getMensaje()+" - "+ resActGpo.getDto().toString());
-//				if (ObjectUtils.isNotNull(resActGpo) && !resActGpo.getResultado().getValor()) {
-//					res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_FALLIDA);
-//					throw new Exception("Error al Actualizar el Grupo");
-//				}
+				
 			}
 
 		} catch (Exception e) {
@@ -278,6 +273,28 @@ public class EventoCapacitacionServiceFacade {
 		return res;
 	}
 
+	
+	public ResultadoDTO<GrupoDTO> actualizarEstatusActa(GrupoDTO gpoSeleccionado, Long usuarioReg, boolean cerrarActa)
+			throws Exception {
+		logger.info("actualizarEstatusActa>>");
+		ResultadoDTO<GrupoDTO> resActGpo = null;
+
+		try {
+			gpoSeleccionado.setActaCerrada(cerrarActa);
+			resActGpo = grupoService.actualizarGrupo(gpoSeleccionado, usuarioReg);
+			if (ObjectUtils.isNotNull(resActGpo) && !resActGpo.getResultado().getValor()) {
+				resActGpo.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_FALLIDA);
+				throw new Exception("Error al Actualizar el Grupo");
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			resActGpo.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);
+		}
+
+		return resActGpo;
+	}
+	
+	
 	/**
 	 *
 	 * @param nombreEval
