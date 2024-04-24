@@ -179,7 +179,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
     // @PostConstruct
     public String inicializaDatosCalif() {
-
+    	muestraTblCalif = false;
         gruposXEventoCap = new ArrayList<>();
         tpoCalifSel = new CatalogoComunDTO();
         tablaAuxCalif = new ArrayList<>();
@@ -266,6 +266,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     public void onChangeGpoEC() {
 
         Integer idGpo = grupoSelec.getIdGrupo();
+        muestraTblCalif = false;
         if (!ObjectUtils.isNullOrCero(idGpo)) {
 
             if (grupoTieneMatriculados(idGpo)) {
@@ -534,7 +535,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
             }
 
         }
-        setMuestraTblCalif(Boolean.TRUE);
+//        setMuestraTblCalif(Boolean.TRUE);
     }
 
     /**
@@ -544,7 +545,17 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
         try {
 
-         /*  if (isConCalifPrevias()) { TODO
+         if (isConCalifPrevias()) { 
+        	 
+        	 ResultadoDTO<GrupoDTO> resTx = eventoCapacitacionServiceFacade.actualizarEstatusActa(grupoSelec,
+						getUsuarioEnSession().getIdPersona(), isCerrarActa());
+
+				if (!ObjectUtils.isNotNull(resTx) && !resTx.getResultado().getValor()) {
+					log.error("Ocurrio un error al actualizar estatus del acta >> ");
+					agregarMsgError("Ocurrio un error al actualizar estatus del acta", null);
+				}
+        	 
+        	 /*TODO
 
                 ResultadoDTO<RelGrupoEvaluacionDTO> resTx = eventoCapacitacionServiceFacade
                         .actualizaCalificacionesECPresencial(calificaciones, grupoSelec, evento, isCerrarActa(),
@@ -559,9 +570,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 } else {
                 	 log.error("Ocurrio un error al guardar calificaciones>>");
                     agregarMsgError("Ocurrio un error al guardar calificaciones", null);
-                }
+                }*/
 
-            } else {*/
+            } else {
 
                 ResultadoDTO<RelGrupoEvaluacionDTO> resTx = eventoCapacitacionServiceFacade
                         .guardaCalificacionesECPresencial(calificaciones, grupoSelec, evento,
@@ -577,13 +588,13 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                     agregarMsgError("Ocurrio un error al guardar calificaciones", null);
                 }
 
-           // }
+          }
 
         } catch (Exception e) {
         	agregarMsgError("Ocurrio un error al guardar calificaciones", null);
         	log.info("Ocurrio un error>>"+ e.getMessage());
             log.error(e.getMessage(), e);
-            setMuestraTblCalif(Boolean.TRUE);
+//            setMuestraTblCalif(Boolean.TRUE);
         }
 
     }
@@ -759,53 +770,54 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     /**
      * Cerrar acta
      */
-    public void cierraActaGrupoEC() {
-        if (validaCerrarActa()) {
-           
-           guardaCalifBorrador();
- 
-            try {
-                if (ObjectUtils.isNotNull(grupoSelec.getEvento())) {
-                        if (grupoSelec.getEvento().getAplicaEncuesta()) {
-                            relEncuestaUsuarioService.asignarEncuestaParticipantes(grupoSelec.getIdGrupo(),
-                                    grupoSelec.getEvento().getFechaFinal(), getUsuarioEnSession().getIdPersona());
-                            /*Asignando encuestas por defecto*/
-                            relEncuestaUsuarioService.asignarEncuestasPorDefecto(grupoSelec.getIdGrupo(),
-                                    grupoSelec.getEvento().getFechaFinal(), getUsuarioEnSession().getIdPersona());
+	public void cierraActaGrupoEC() {
+		if (validaCerrarActa()) {
 
-                        }else {
-                        	log.info("No Aplica Encuesta");
-                        }
-                    }
-                setCerrarActa(true);
-                grupoSelec.setActaCerrada(true);
-                setMuestraTblCalif(false);
-                deshabilitarCargaActaFirmada=true;
-                deshabilitarDescargaActaFirmada=false;
-                deshabilitarEliminarActaFirmada=false;
-            } catch (Exception e) {
-                log.info("No fue posible asignar las encuestas a los participantes.");
-                agregarMsgError("No fue posible asignar las encuestas a los participantes.", null);
-                setCerrarActa(false);
-                grupoSelec.setActaCerrada(false);
-                setMuestraTblCalif(true);
-            }
+			guardaCalifBorrador();
 
-            bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CER_ACT", String.valueOf(grupoSelec.getIdGrupo()),
-                    requestActual(), TipoServicioEnum.LOCAL);
-            // TODO Enviar notificacion y correo a los usuarios cuando se cierra
-            // el acta
+			try {
+				if (ObjectUtils.isNotNull(grupoSelec.getEvento())) {
+					if (grupoSelec.getEvento().getAplicaEncuesta()) {
+						relEncuestaUsuarioService.asignarEncuestaParticipantes(grupoSelec.getIdGrupo(),
+								grupoSelec.getEvento().getFechaFinal(), getUsuarioEnSession().getIdPersona());
+						/* Asignando encuestas por defecto */
+						relEncuestaUsuarioService.asignarEncuestasPorDefecto(grupoSelec.getIdGrupo(),
+								grupoSelec.getEvento().getFechaFinal(), getUsuarioEnSession().getIdPersona());
 
-           /* String claveNotificacion = ConstantesGestorWeb.CLAVE_NOTIFICACION_AL_CERRAR_ACTA;
-            String claveCorreo = ConstantesGestorWeb.CLAVE_CORREO_AL_CERRAR_ACTA;
-            correoNotificacionBean.notificarUsuariosActaCerrada(claveNotificacion, claveCorreo, grupoSelec); //comentar por ahora
-*/
-            RequestContext.getCurrentInstance().execute("PF('dlgCerrarActa').hide()");
-        } else {
-            setCerrarActa(Boolean.FALSE);
+					} else {
+						log.info("No Aplica Encuesta");
+					}
+				}
+				setCerrarActa(true);
+				grupoSelec.setActaCerrada(true);
+				setMuestraTblCalif(false);
+				deshabilitarCargaActaFirmada = true;
+				deshabilitarDescargaActaFirmada = false;
+				deshabilitarEliminarActaFirmada = false;
+				bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CER_ACT", String.valueOf(grupoSelec.getIdGrupo()),
+						requestActual(), TipoServicioEnum.LOCAL);
+				// TODO Enviar notificacion y correo a los usuarios cuando se cierra el acta
+				/*
+				 * String claveNotificacion =
+				 * ConstantesGestorWeb.CLAVE_NOTIFICACION_AL_CERRAR_ACTA; String claveCorreo =
+				 * ConstantesGestorWeb.CLAVE_CORREO_AL_CERRAR_ACTA;
+				 * correoNotificacionBean.notificarUsuariosActaCerrada(claveNotificacion,
+				 * claveCorreo, grupoSelec); //comentar por ahora
+				 */
+				RequestContext.getCurrentInstance().execute("PF('dlgCerrarActa').hide()");
+			} catch (Exception e) {
+				log.info("Hubo un error en el cierre de Actas");
+				agregarMsgError("Hubo un error en el cierre de Actas", null);
+				setCerrarActa(false);
+				grupoSelec.setActaCerrada(false);
+				setMuestraTblCalif(true);
+			}
+		
+		} else {
+			setCerrarActa(Boolean.FALSE);
             setMuestraTblCalif(true);
-        }
-    }
+		}
+	}
 
     /**
      *
@@ -886,7 +898,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     		}
     		
 //    		Acta acta = relEncuestaUsuarioService.descargaActa(grupoSelec.getIdGrupo(), user);
-            setMuestraTblCalif(Boolean.TRUE);
+//            setMuestraTblCalif(Boolean.TRUE);
         } catch (ErrorWS e) {
             log.error(e.getMessage(), e);
         }
@@ -1090,7 +1102,8 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
         		acta.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
         	
                 actaService.guardar(acta);
-
+                
+                RequestContext.getCurrentInstance().execute("PF('visorCargaArchivo').hide()");
                 agregarMsgInfo( "CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA", null);
         		log.info("CARGA DE ARCHIVO: "+ file.getFile().getFileName() + " - CORRECTA");
         	}
@@ -1106,26 +1119,42 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     
 	public void eliminarActa() {
 		log.info("INICIA ELIMINACION ACTA DE CALIFICACIONES !!!");
-		if (tieneRolAdmin) {
-			ActaDTO acta = actaService.getActaByIdGrupo(grupoSelec.getIdGrupo());
-			if(ObjectUtils.isNotNull(acta)) {
-				log.info(" acta >> "+ acta.toString());
-				actaService.eliminar(acta);
-				deshabilitarDescargaActaFirmada=true;
-				deshabilitarEliminarActaFirmada=true;
-				setMuestraTblCalif(false);
-				setCerrarActa(false);
-				grupoSelec.setActaCerrada(false);
-				agregarMsgInfo("ELIMINAR ACTA: " + acta.getIdActa()+ " - CORRECTA", null);
-				log.info("ELIMINAR ACTA: " + acta.getIdActa() + " - CORRECTA");
-			}else{
-    			agregarMsgInfo( "No existe una acta asociada al grupo ", null);
-        		log.info( "No existe una acta asociada al grupo ");	
+		try {
+			if (tieneRolAdmin && ObjectUtils.isNotNull(grupoSelec)) {
+				ActaDTO acta = actaService.getActaByIdGrupo(grupoSelec.getIdGrupo());
+				// agregar abrir el acta
+				if (ObjectUtils.isNotNull(acta)) {
+					log.info(" acta >> " + acta.toString());
+					ResultadoDTO<ActaDTO> resEli = actaService.eliminar(acta);
+
+					if (ObjectUtils.isNotNull(resEli) && resEli.getResultado().getValor()) {
+
+						ResultadoDTO<GrupoDTO> resTx = eventoCapacitacionServiceFacade.actualizarEstatusActa(grupoSelec,
+								getUsuarioEnSession().getIdPersona(), false);
+
+						if (!ObjectUtils.isNotNull(resTx) && !resTx.getResultado().getValor()) {
+							log.error("Ocurrio un error al actualizar estatus del acta >> ");
+							agregarMsgError("Ocurrio un error al actualizar estatus del acta", null);
+						}
+					}
+					deshabilitarDescargaActaFirmada = true;
+					deshabilitarEliminarActaFirmada = true;
+					setMuestraTblCalif(false);
+					setCerrarActa(false);
+					grupoSelec.setActaCerrada(false);
+					agregarMsgInfo("ELIMINAR ACTA: " + acta.getIdActa() + " - CORRECTA", null);
+					log.info("ELIMINAR ACTA: " + acta.getIdActa() + " - CORRECTA");
+				} else {
+					agregarMsgInfo("No existe una acta asociada al grupo ", null);
+					log.info("No existe una acta asociada al grupo ");
+				}
+
+			} else {
+				agregarMsgWarn("NO CUENTA CON LOS PERMISOS SUFICIENTES PARA REALIZAR ESTA ACCION !!!", null);
+				log.info("NO CUENTA CON LOS PERMISOS SUFICIENTES PARA REALIZAR ESTA ACCION !!! ");
 			}
-			
-		}else {
-			agregarMsgWarn( "NO CUENTA CON LOS PERMISOS SUFICIENTES PARA REALIZAR ESTA ACCION !!!" , null );
-			log.info("NO CUENTA CON LOS PERMISOS SUFICIENTES PARA REALIZAR ESTA ACCION !!! " );
+		} catch (Exception e) {
+			agregarMsgWarn("Ocurrio un error al eliminar el acta !!!", null);
 		}
 	}
 	
@@ -1502,24 +1531,17 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 
         	    tc.setCalifTotal( new Double(tc.getCalifTotal().intValue()) );
                 tc.setCalifFinal(new Double(tc.getCalifTotal().intValue()) );
-                log.info("Calificacion total: " + tc.getCalifTotal());
-                log.info("Asistencia" + tc.getAsistencia());
+//                log.info("Calificacion total: " + tc.getCalifTotal());
+//                log.info("Asistencia" + tc.getAsistencia());
                 if (ObjectUtils.isNull(tc.getAsistencia()))
                     tc.setAsistencia("0");
                 //tc.setCalifFinal(this.calculaCalificacionFinal(new Double(tc.getCalifTotal().intValue()), new Long(tc.getAsistencia()), evento)
                        // .doubleValue());
-                log.info("Calificacion final: " + tc.getCalifFinal());
-        	   
-        	   
-        	   
-        	   
-        	   
+//                log.info("Calificacion final: " + tc.getCalifFinal());
+
             }
 
             // Se establece el dictamen
-        	
-        
-
             for (TablaCalificacionesDTO tc : aux) {
                 if (!ObjectUtils.isNullOrEmpty(evento.getCalificacionMinAprobatoria())) {
 
@@ -1536,13 +1558,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 }
                 //tc.setCalifTotal(  );
             }
-            
-//            for(TablaCalificacionesDTO tc : aux) {
-//            	
-//            	
-//            	
-//            }
-            
+  
         } catch (Exception e) {
             agregarMsgError("No se encontro calificaciones en el Ambiente Virtual de Aprendizaje", e.getMessage());
         }
