@@ -13,4 +13,8 @@ public interface RelGpoEvaluacionService extends CommonService<RelGrupoEvaluacio
 	public List<RelEvaluacionCalificacionDTO> obtieneEvaluacionesByIdGpoEval(Integer idGpoEval);
 	
 	public void eliminaEvaluacionesByIdGpoEvaluacion(Integer idGpoEval) throws Exception;
+	
+	void eliminaGrupoEvaluacionByIdGrupo(Integer idGrupo) throws Exception;
+	
+	void eliminaEvaluacionesByIdGrupo(Integer idGrupo) throws Exception;
 }

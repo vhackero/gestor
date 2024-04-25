@@ -8,6 +8,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelEvaluacionCalificacionDTO;
@@ -117,14 +118,38 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
 
         return res;
     }
-
-    public void eliminaEvaluacionesByIdGpoEvaluacion(RelGrupoEvaluacionDTO dto) throws Exception {
+    
+    @Transactional
+   	@Override
+    public void eliminaEvaluacionesByIdGpoEvaluacion(Integer idGpoEval) throws Exception {
         try {
-            relGpoEvaluacionRepo.eliminaEvaluacionesByIdGpoEvaluacion(dto.getIdGpoEvaluacion());
+            relGpoEvaluacionRepo.eliminaEvaluacionesByIdGpoEvaluacion(idGpoEval);
     //GUSTAVO --guardarBitacora(dto.getBitacoraDTO(), String.valueOf(dto.getIdGpoEvaluacion()));
 
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e); 
+            throw e;
+        }
+    }
+    
+    @Transactional
+	@Override
+    public void eliminaGrupoEvaluacionByIdGrupo(Integer idGrupo) throws Exception {
+        try {
+            relGpoEvaluacionRepo.eliminaGrupoEvaluacionByIdGrupo(idGrupo);
+        } catch (Exception e) {
+        	logger.error(" ERRROR eliminaGrupoEvaluacionByIdGrupo>> "+e.getMessage(), e); 
+            throw e;
+        }
+    }
+
+    @Transactional
+	@Override
+    public void eliminaEvaluacionesByIdGrupo(Integer idGrupo) throws Exception {
+        try {
+            relGpoEvaluacionRepo.eliminaEvaluacionesByIdGrupo(idGrupo);
+        } catch (Exception e) {
+            logger.error(" ERRROR eliminaEvaluacionesByIdGrupo>> "+e.getMessage(), e); 
             throw e;
         }
     }
@@ -198,9 +223,9 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
 
     }
 
-    @Override
-    public void eliminaEvaluacionesByIdGpoEvaluacion(Integer idGpoEval) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+//    @Override
+//    public void eliminaEvaluacionesByIdGpoEvaluacion(Integer idGpoEval) throws Exception {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
 
 }

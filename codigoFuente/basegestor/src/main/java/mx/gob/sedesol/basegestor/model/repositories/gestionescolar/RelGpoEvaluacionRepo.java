@@ -23,4 +23,18 @@ public interface RelGpoEvaluacionRepo extends JpaRepository<RelGrupoEvaluacion, 
 	@Modifying(clearAutomatically = true)
 	@Query("DELETE FROM RelEvaluacionCalificacion rec WHERE rec.relGrupoEvaluacion.idGpoEvaluacion = :idGpoEval")
 	public void eliminaEvaluacionesByIdGpoEvaluacion(@Param("idGpoEval") Integer idGpoEval);
+	
+	@Modifying(clearAutomatically = true)
+	@Query("DELETE FROM RelGrupoEvaluacion rge WHERE rge.tblGrupo.idGrupo = :idGrupo")
+	public void eliminaGrupoEvaluacionByIdGrupo(@Param("idGrupo") Integer idGrupo);
+
+	@Modifying(clearAutomatically = true)
+	@Query(value = "DELETE FROM rel_evaluacion_calificacion "
+			+ "		WHERE id_eval_calificacion in ("
+			+ "			SELECT DISTINCT(ec.id_eval_calificacion) "
+			+ "			FROM rel_evaluacion_calificacion ec "
+			+ "			inner JOIN rel_grupo_participante gp"
+			+ "			WHERE gp.id_grupo = :idGrupo)", nativeQuery = true)
+	public void eliminaEvaluacionesByIdGrupo(@Param("idGrupo") Integer idGrupo);
+
 }
