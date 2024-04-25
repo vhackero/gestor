@@ -45,6 +45,8 @@ public interface GrupoParticipanteService {
     List<RelGrupoParticipanteDTO> buscarParticipanteEnEvento(Integer idEvento, Long idPersona);
 
 	List<RelGrupoParticipanteDTO> getAlumnosQueRecibieronConstPorIdGrupo(Integer idGrupo) throws Exception;
+	
+	void actualizaRelGrupoParticipantebyGrupo(Integer idGrupo) throws Exception;
 }
 
 

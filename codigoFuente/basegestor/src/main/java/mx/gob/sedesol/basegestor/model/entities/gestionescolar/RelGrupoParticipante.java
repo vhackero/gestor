@@ -70,13 +70,9 @@ public class RelGrupoParticipante implements Serializable {
 	public RelGrupoParticipante() {
 	}
 
-	
-
 	public Integer getId() {
 		return id;
 	}
-
-
 
 	public void setId(Integer id) {
 		this.id = id;

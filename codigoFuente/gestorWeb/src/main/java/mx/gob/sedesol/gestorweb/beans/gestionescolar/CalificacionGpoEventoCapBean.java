@@ -286,9 +286,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
                 if (ObjectUtils.isNotNull(grupoSelec)) {
 
                     setCerrarActa(grupoSelec.isActaCerrada());
-                    setMuestraTblCalif(!grupoSelec.isActaCerrada());
-               
-                    
+   
                     participantesByGrupo = eventoCapacitacionServiceFacade.getRegistroAsistenciaService()
                             .getGrupoParticipante(grupoSelec.getIdEventoTemp(), idGpo);
                     grupoSelec.setNumAlumnosMatriculados(participantesByGrupo.size());
@@ -898,7 +896,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     		}
     		
 //    		Acta acta = relEncuestaUsuarioService.descargaActa(grupoSelec.getIdGrupo(), user);
-//            setMuestraTblCalif(Boolean.TRUE);
+            setMuestraTblCalif(Boolean.TRUE);
         } catch (ErrorWS e) {
             log.error(e.getMessage(), e);
         }
@@ -1124,6 +1122,9 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 				ActaDTO acta = actaService.getActaByIdGrupo(grupoSelec.getIdGrupo());
 				// agregar abrir el acta
 				if (ObjectUtils.isNotNull(acta)) {
+					
+					eventoCapacitacionServiceFacade.actualizaCalificacionesAlEliminarActa(grupoSelec);
+					
 					log.info(" acta >> " + acta.toString());
 					ResultadoDTO<ActaDTO> resEli = actaService.eliminar(acta);
 
@@ -1154,6 +1155,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 				log.info("NO CUENTA CON LOS PERMISOS SUFICIENTES PARA REALIZAR ESTA ACCION !!! ");
 			}
 		} catch (Exception e) {
+			log.error("Ocurrio un error al eliminar el acta >> "+ e.getMessage());
 			agregarMsgWarn("Ocurrio un error al eliminar el acta !!!", null);
 		}
 	}

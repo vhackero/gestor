@@ -629,6 +629,16 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 
 		return null;
 	}
+	
+	@Transactional
+	@Override
+	public void actualizaRelGrupoParticipantebyGrupo(Integer idGrupo) throws Exception {
+		logger.info("11  actualizaRelGrupoParticipantebyGrupo>>");
+
+		grupoParticipanteRepo.actualizarRelGrupoParticipanteByGrupo(idGrupo);
+
+		logger.info("2  actualizaRelGrupoParticipante>>"); 
+	}
 
 	@Override
 	public List<EventoConstanciaDTO> getParticipanteByActaCerradaYconstancia(Long idPersona) {

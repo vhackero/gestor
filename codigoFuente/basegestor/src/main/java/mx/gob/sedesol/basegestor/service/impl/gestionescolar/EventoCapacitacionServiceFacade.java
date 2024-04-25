@@ -461,6 +461,25 @@ public class EventoCapacitacionServiceFacade {
 		return res;
 	}
 
+	public void actualizaCalificacionesAlEliminarActa(GrupoDTO gpoSeleccionado) throws Exception {
+		try {
+
+			// Se eliminan evaluacion calificaciones
+			relGpoEvaluacionService.eliminaEvaluacionesByIdGrupo(gpoSeleccionado.getIdGrupo());
+
+			// Se eliminan grupoEvaluaciones
+			relGpoEvaluacionService.eliminaGrupoEvaluacionByIdGrupo(gpoSeleccionado.getIdGrupo());
+			
+			// Se actualizan a null las calificaciones de los participantes del grupo
+			grupoParticipanteService.actualizaRelGrupoParticipantebyGrupo(gpoSeleccionado.getIdGrupo());
+
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			throw e;
+		}
+	}
+	
+	
 	/**
 	 *
 	 * @param nomEvaluacion

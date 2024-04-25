@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -113,5 +114,12 @@ public interface GrupoParticipanteRepo extends JpaRepository<RelGrupoParticipant
 			+ " AND (evtModalidad.id = 1 OR evtModalidad.id = 3)")
 	public List<RelGrupoParticipante> obtenEvtsEnLineayMixtosPorIdParticipante(
 					@Param("idParticipante")Long idParticipante,@Param("idEstatusEc")Integer idEstatusEc);
+	
+	
+	@Modifying(clearAutomatically = true)
+	@Query("UPDATE RelGrupoParticipante rgp "
+			+ " SET rgp.califTotal = null, rgp.porcentajeAsist = null, rgp.califFinal = null  " 
+			+ " WHERE rgp.grupo.idGrupo = :idGrupo ")
+	public void actualizarRelGrupoParticipanteByGrupo(@Param("idGrupo")Integer idGrupo);
 	
 }
