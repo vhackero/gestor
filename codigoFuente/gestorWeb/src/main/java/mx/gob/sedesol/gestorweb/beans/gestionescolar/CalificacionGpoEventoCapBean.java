@@ -263,109 +263,135 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
     /**
      * @param e
      */
-    public void onChangeGpoEC() {
+	public void onChangeGpoEC() {
 
-        Integer idGpo = grupoSelec.getIdGrupo();
-        muestraTblCalif = false;
-        if (!ObjectUtils.isNullOrCero(idGpo)) {
+		Integer idGpo = grupoSelec.getIdGrupo();
+		muestraTblCalif = false;
+		if (!ObjectUtils.isNullOrCero(idGpo)) {
 
-            if (grupoTieneMatriculados(idGpo)) {
+			if (grupoTieneMatriculados(idGpo)) {
 
-                setModLineaMixto(Boolean.FALSE);
-                setModalidadEnLinea(Boolean.FALSE);
+				setModLineaMixto(Boolean.FALSE);
+				setModalidadEnLinea(Boolean.FALSE);
 
-                setGrupoSeleccionado(Boolean.TRUE);
+				setGrupoSeleccionado(Boolean.TRUE);
 //                setCerrarActa(Boolean.FALSE);
-                setTablaAuxCalif(new ArrayList<>());
-                setNumEvaluaciones(0);
+				setTablaAuxCalif(new ArrayList<>());
+				setNumEvaluaciones(0);
 
                 catDictamenes = eventoCapacitacionServiceFacade.getCatDictamenService().findAll(CatDictamen.class);
 
-                grupoSelec = eventoCapacitacionServiceFacade.getGrupoService().buscarGrupoPorId(idGpo);
+				grupoSelec = eventoCapacitacionServiceFacade.getGrupoService().buscarGrupoPorId(idGpo);
 
-                if (ObjectUtils.isNotNull(grupoSelec)) {
+				if (ObjectUtils.isNotNull(grupoSelec)) {
 
-                    setCerrarActa(grupoSelec.isActaCerrada());
-   
-                    participantesByGrupo = eventoCapacitacionServiceFacade.getRegistroAsistenciaService()
-                            .getGrupoParticipante(grupoSelec.getIdEventoTemp(), idGpo);
-                    grupoSelec.setNumAlumnosMatriculados(participantesByGrupo.size());
-                    asistenciaFacadeService.getRegistroAsistenciaService()
-                            .calcularPorcentajeAsistencia(participantesByGrupo);
+					setCerrarActa(grupoSelec.isActaCerrada());
 
-                    List<RelDiasEventoCapacitacionDTO> lstAux = eventoCapacitacionServiceFacade
-                            .getRelDiasEventoCapacitacionService().getDiasEventoByGrupo(grupoSelec.getIdGrupo());
-                    if (ObjectUtils.isNotNull(lstAux)) {
-                        duracionEvento = lstAux.size();
-                    }
+					participantesByGrupo = eventoCapacitacionServiceFacade.getRegistroAsistenciaService()
+							.getGrupoParticipante(grupoSelec.getIdEventoTemp(), idGpo);
+					grupoSelec.setNumAlumnosMatriculados(participantesByGrupo.size());
+					
 
-                    modalidadEnum = ModalidadEnum.obtieneModalidadById(evento.getCatModalidadPlanPrograma().getId());
-                    // Consulta si existen registros de evaluacion asociados al
-                    // gpo
-                    evaluacionesGpo = eventoCapacitacionServiceFacade.getRelGpoEvaluacionService()
-                            .obtieneEvaluacionesPorIdGrupo(idGpo);
+					obtieneEncabezadoActa(evento.getIdEvento(), grupoSelec.getIdGrupo());
 
-                    if (!ObjectUtils.isNullOrEmpty(evaluacionesGpo)) {
-                        tablaAuxCalif = generaTblCalifGpoEvaluaciones(evaluacionesGpo);
+					if (!grupoSelec.isActaCerrada()) {
+						asistenciaFacadeService.getRegistroAsistenciaService()
+								.calcularPorcentajeAsistencia(participantesByGrupo);
 
-                        List<RelGrupoParticipanteDTO> gpoPart = new ArrayList<>();
-                        for (RelGrupoEvaluacionDTO eval : evaluacionesGpo) {
-                            for (RelEvaluacionCalificacionDTO cal : eval.getRelEvaluacionCalificaciones()) {
-                                gpoPart.add(cal.getRelGrupoParticipante());
-                            }
-                        }
-                        setConCalifPrevias(Boolean.TRUE);
+						List<RelDiasEventoCapacitacionDTO> lstAux = eventoCapacitacionServiceFacade
+								.getRelDiasEventoCapacitacionService().getDiasEventoByGrupo(grupoSelec.getIdGrupo());
+						if (ObjectUtils.isNotNull(lstAux)) {
+							duracionEvento = lstAux.size();
+						}
 
-                    } else {
-                        // En caso de no exisitir Registros
-                        if (!ObjectUtils.isNullOrEmpty(participantesByGrupo)) {
-                            setConCalifPrevias(Boolean.FALSE);
-                        }
-                    }
+						modalidadEnum = ModalidadEnum
+								.obtieneModalidadById(evento.getCatModalidadPlanPrograma().getId());
+						// Consulta si existen registros de evaluacion asociados al
+						// gpo
+						evaluacionesGpo = eventoCapacitacionServiceFacade.getRelGpoEvaluacionService()
+								.obtieneEvaluacionesPorIdGrupo(idGpo);
 
-                    try {
-                        switch (modalidadEnum) {
+						if (!ObjectUtils.isNullOrEmpty(evaluacionesGpo)) {
+							tablaAuxCalif = generaTblCalifGpoEvaluaciones(evaluacionesGpo);
 
-                            case ENLINEA:
-                                // obtieneTiposCalificacionPromSuma();
-                                setModLineaMixto(Boolean.TRUE);
-                                setModalidadEnLinea(Boolean.TRUE);
-                                break;
+							List<RelGrupoParticipanteDTO> gpoPart = new ArrayList<>();
+							for (RelGrupoEvaluacionDTO eval : evaluacionesGpo) {
+								for (RelEvaluacionCalificacionDTO cal : eval.getRelEvaluacionCalificaciones()) {
+									gpoPart.add(cal.getRelGrupoParticipante());
+								}
+							}
+							setConCalifPrevias(Boolean.TRUE);
 
-                            case PRESENCIAL:
-                                setModalidadEnLinea(Boolean.FALSE);
-                                tposCalificacionEc = eventoCapacitacionServiceFacade.getCatTipoCalificacionService()
-                                        .findAll(CatTipoCalificacionEc.class);
-                                break;
+						} else {
+							// En caso de no exisitir Registros
+							if (!ObjectUtils.isNullOrEmpty(participantesByGrupo)) {
+								setConCalifPrevias(Boolean.FALSE);
+							}
+						}
 
-                            case MIXTO:
-                                // setModalidadEnLinea(Boolean.FALSE);
-                                // obtieneTiposCalificacionPromSuma();
-                                setModLineaMixto(Boolean.TRUE);
-                                break;
+						try {
+							switch (modalidadEnum) {
 
-                            default:
-                                break;
-                        }
+							case ENLINEA:
+								// obtieneTiposCalificacionPromSuma();
+								setModLineaMixto(Boolean.TRUE);
+								setModalidadEnLinea(Boolean.TRUE);
+								break;
 
-                    } catch (Exception e) {
-                        log.error(e.getMessage(), e);
-                    }
-                }
+							case PRESENCIAL:
+								setModalidadEnLinea(Boolean.FALSE);
+								tposCalificacionEc = eventoCapacitacionServiceFacade.getCatTipoCalificacionService()
+										.findAll(CatTipoCalificacionEc.class);
+								break;
 
-            } else {
-                grupoSelec.setNumAlumnosMatriculados(0);
-                tablaAuxCalif = new ArrayList<>();
-                setMuestraTblCalif(Boolean.FALSE);
-                setGrupoSeleccionado(Boolean.FALSE);
-            }
-        } else if (idGpo.equals(0)) {
-            tablaAuxCalif = new ArrayList<>();
-            setMuestraTblCalif(Boolean.FALSE);
-            setGrupoSeleccionado(Boolean.FALSE);
-        }
-    }
+							case MIXTO:
+								// setModalidadEnLinea(Boolean.FALSE);
+								// obtieneTiposCalificacionPromSuma();
+								setModLineaMixto(Boolean.TRUE);
+								break;
 
+							default:
+								break;
+							}
+
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+						}
+					}
+
+				}
+
+			} else {
+				grupoSelec.setNumAlumnosMatriculados(0);
+				tablaAuxCalif = new ArrayList<>();
+				setMuestraTblCalif(Boolean.FALSE);
+				setGrupoSeleccionado(Boolean.FALSE);
+			}
+		} else if (idGpo.equals(0)) {
+			tablaAuxCalif = new ArrayList<>();
+			setMuestraTblCalif(Boolean.FALSE);
+			setGrupoSeleccionado(Boolean.FALSE);
+		}
+	}
+
+	public void obtieneEncabezadoActa(Integer idEvento, Integer idGrupo) {
+		EncabezadoActaDTO encabezado = eventoCapacitacionServiceFacade.getEventoCapacitacionService()
+				.obtenerEncabezadoActa(evento.getIdEvento(), grupoSelec.getIdGrupo());
+		encabezadoI = new EncabezadoActaImplDTO();
+
+		if (encabezado != null) {
+			encabezadoI.setPrograma(encabezado.getCveprograma());
+			encabezadoI.setCveprograma(encabezado.getDocente());
+			encabezadoI.setPeriodo(encabezado.getPeriodo());
+			encabezadoI.setAsignatura(encabezado.getGrupo());
+			encabezadoI.setCveAsignatura(encabezado.getMatricula());
+			encabezadoI.setGrupo(encabezado.getPrograma());
+			encabezadoI.setMatricula(encabezado.getAsignatura().toUpperCase());
+			encabezadoI.setDocente(encabezado.getCveAsignatura());
+		}
+
+	}
+	
     public boolean grupoTieneMatriculados(Integer idGrupo) {
         List<RelGrupoParticipanteDTO> rgp = eventoCapacitacionServiceFacade.getGrupoParticipanteService()
                 .getParticipantesByGrupo(idGrupo);
@@ -881,20 +907,8 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
             // Se genera calificacion final
             this.calculaCalificacionesGpo(tablaAuxCalif, this.evento);
             
-            EncabezadoActaDTO encabezado = eventoCapacitacionServiceFacade.getEventoCapacitacionService().obtenerEncabezadoActa(evento.getIdEvento(), grupoSelec.getIdGrupo());
-    		encabezadoI = new EncabezadoActaImplDTO();
-
-    		if(encabezado != null) {
-    			encabezadoI.setPrograma(encabezado.getCveprograma());
-        		encabezadoI.setCveprograma(encabezado.getDocente());
-        		encabezadoI.setPeriodo(encabezado.getPeriodo());
-        		encabezadoI.setAsignatura(encabezado.getGrupo());
-        		encabezadoI.setCveAsignatura(encabezado.getMatricula());
-        		encabezadoI.setGrupo(encabezado.getPrograma());
-        		encabezadoI.setMatricula(encabezado.getAsignatura().toUpperCase());
-        		encabezadoI.setDocente(encabezado.getCveAsignatura());
-    		}
-    		
+            obtieneEncabezadoActa(evento.getIdEvento(), grupoSelec.getIdGrupo());
+            
 //    		Acta acta = relEncuestaUsuarioService.descargaActa(grupoSelec.getIdGrupo(), user);
             setMuestraTblCalif(Boolean.TRUE);
         } catch (ErrorWS e) {
