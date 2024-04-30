@@ -86,18 +86,28 @@ public class MenuGestorBean extends BaseBean {
 
 	private Map<String, String> mapa;
 	private boolean showLogros;
+	private boolean showPerfil=false;
+
+	public boolean isShowPerfil() {
+		return showPerfil;
+	}
 
 	private static final Logger logger = Logger.getLogger(MenuGestorBean.class);
 
 	@PostConstruct
 	public void init() {
+		showPerfil=false;
 		roles = new ArrayList<>();
 		List<PersonaRolDTO> rolesPersona = personaRolesService
 				.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
-
+		
 		for (PersonaRolDTO personaRol : rolesPersona) {
 			roles.add(personaRol.getRol());
+			if(personaRol.getRol().getIdRol() == 1) {
+				showPerfil = true;
+			}
 		}
+		
 		if (ObjectUtils.isNullOrEmpty(roles)) {
 			idRol = null;
 			showLogros=false;
