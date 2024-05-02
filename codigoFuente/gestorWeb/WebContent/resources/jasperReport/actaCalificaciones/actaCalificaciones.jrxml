@@ -50,22 +50,22 @@
 	<title>
 		<band height="190" splitType="Stretch">
 			<staticText>
-				<reportElement x="150" y="10" width="230" height="30" uuid="f37e15fc-8d5e-4de3-ad06-9f10a7ca501c"/>
+				<reportElement x="244" y="0" width="290" height="30" uuid="f37e15fc-8d5e-4de3-ad06-9f10a7ca501c"/>
 				<textElement textAlignment="Center">
 					<font size="18" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Historial Academico]]></text>
+				<text><![CDATA[ACTA DE CALIFICACIONES]]></text>
 			</staticText>
 			<image onErrorType="Blank">
-				<reportElement x="0" y="0" width="140" height="64" uuid="a180eb72-4674-4329-9490-e3043da15fa4"/>
+				<reportElement x="0" y="0" width="234" height="64" uuid="a180eb72-4674-4329-9490-e3043da15fa4"/>
 				<imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
 			</image>
 			<staticText>
-				<reportElement x="150" y="46" width="50" height="18" uuid="8bc6eaf1-16dc-479d-8af8-e9a56ab8efe4"/>
+				<reportElement x="284" y="41" width="50" height="18" uuid="8bc6eaf1-16dc-479d-8af8-e9a56ab8efe4"/>
 				<text><![CDATA[Folio:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="200" y="45" width="210" height="20" uuid="6b05607e-10a8-4fc4-98bf-a6aa28ee4fd7"/>
+				<reportElement x="334" y="40" width="210" height="20" uuid="6b05607e-10a8-4fc4-98bf-a6aa28ee4fd7"/>
 				<textFieldExpression><![CDATA[$P{pFolioPrincipal}]]></textFieldExpression>
 			</textField>
 			<staticText>
@@ -152,10 +152,6 @@
 				</box>
 				<textFieldExpression><![CDATA[$P{pAsignatura}]]></textFieldExpression>
 			</textField>
-			<image hAlign="Right" onErrorType="Blank">
-				<reportElement x="410" y="0" width="140" height="64" uuid="3feab0fe-5c99-4060-9b16-f125618de15c"/>
-				<imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
-			</image>
 		</band>
 	</title>
 	<pageHeader>
