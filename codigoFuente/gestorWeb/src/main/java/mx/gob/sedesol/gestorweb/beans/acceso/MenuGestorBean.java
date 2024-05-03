@@ -13,6 +13,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 
 import org.apache.log4j.Logger;
+import org.springframework.security.core.GrantedAuthority;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
@@ -33,6 +34,7 @@ import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview.ConstanciasB
 import mx.gob.sedesol.gestorweb.beans.gestionescolar.EventoCapacitacionBean;
 import mx.gob.sedesol.gestorweb.beans.logisticainfraestructura.AreasBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
+import mx.gob.sedesol.gestorweb.commons.dto.UsuarioSessionDTO;
 import mx.gob.sedesol.gestorweb.commons.utils.ObjectUtils;
 
 @SessionScoped
@@ -84,18 +86,28 @@ public class MenuGestorBean extends BaseBean {
 
 	private Map<String, String> mapa;
 	private boolean showLogros;
+	private boolean showPerfil=false;
+
+	public boolean isShowPerfil() {
+		return showPerfil;
+	}
 
 	private static final Logger logger = Logger.getLogger(MenuGestorBean.class);
 
 	@PostConstruct
 	public void init() {
+		showPerfil=false;
 		roles = new ArrayList<>();
 		List<PersonaRolDTO> rolesPersona = personaRolesService
 				.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
-
+		
 		for (PersonaRolDTO personaRol : rolesPersona) {
 			roles.add(personaRol.getRol());
+			if(personaRol.getRol().getIdRol() == 1) {
+				showPerfil = true;
+			}
 		}
+		
 		if (ObjectUtils.isNullOrEmpty(roles)) {
 			idRol = null;
 			showLogros=false;
@@ -412,7 +424,16 @@ public class MenuGestorBean extends BaseBean {
 
 	public String navegaMiPerfil() {
 		logger.info("Navegando a mi perfil");
-		return ConstantesGestorWeb.NAVEGA_MI_PERFIL_GE;
+		String navegacion = ConstantesGestorWeb.NAVEGA_TABLERO;
+		List<GrantedAuthority> authorities = getUsuarioEnSession().getRoles();
+		
+	    for (GrantedAuthority grantedAuthority : authorities) {
+	        if ("ROLE_ADMIN".equals(grantedAuthority.getAuthority())) {
+	        	navegacion = ConstantesGestorWeb.NAVEGA_MI_PERFIL_GE;
+	        	break;
+	        }
+	    }
+		return navegacion;
 	}
 
 	public String navegaMisCursosDisponibles() {
