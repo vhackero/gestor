@@ -7,15 +7,117 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:p="http://primefaces.org/ui">
 	<ui:define name="breadcrumb">
-		<li class="active">Expediente académico</li>
+		<li class="active">Historial académico</li>
 	</ui:define>
 	<ui:define name="content">
 		<f:event type="preRenderView" listener="#{constanciasBean.init}" />
 		<h:form>
-			<h1>Expediente académico</h1>
+			<h1>Historial académico</h1>
 			<hr />
 
-			<p:panel header="Expediente académico del estudiante">
+			<p:panel header="Historial académico del estudiante">
+				<div class="row">
+					<div class="col-md-12">
+
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-3 col-xs-12">
+									<h:outputLabel value="Matricula" styleClass="bloque" />
+									<h:outputText
+										value="#{constanciasBean.historialAcademico.matricula}">
+
+									</h:outputText>
+								</div>
+								<div class="col-md-3 col-xs-12">
+									<h:outputLabel value="Programa Educativo" styleClass="bloque" />
+									<h:outputText
+										value="#{constanciasBean.historialAcademico.programaEducativo} ">
+
+									</h:outputText>
+								</div>
+								<div class="col-md-3 col-xs-12">
+									<h:outputLabel value="Promedio" styleClass="bloque" />
+									<h:outputText
+										value="#{constanciasBean.historialAcademico.promedio}">
+										<f:convertNumber pattern="#0.00" />
+									</h:outputText>
+								</div>
+
+
+								<div class="col-md-3 col-xs-12">
+									<h:outputLabel value="Créditos" styleClass="bloque" />
+									<h:outputText
+										value="#{constanciasBean.historialAcademico.creditos} ">
+
+									</h:outputText>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-3 col-xs-12">
+									<h:outputLabel value="Aprobadas" styleClass="bloque" />
+									<h:outputText
+										value="#{constanciasBean.historialAcademico.aprobadas}">
+
+									</h:outputText>
+								</div>
+								<div class="col-md-3 col-xs-12">
+									<h:outputLabel value="Reprobadas" styleClass="bloque" />
+									<h:outputText
+										value="#{constanciasBean.historialAcademico.reprobadas} ">
+
+									</h:outputText>
+								</div>
+								<div class="col-md-3 col-xs-12">
+									<h:outputLabel value="No Presentadas" styleClass="bloque" />
+									<h:outputText
+										value="#{constanciasBean.historialAcademico.nopresentadas} ">
+
+									</h:outputText>
+								</div>
+
+
+								<div class="col-md-3 col-xs-12">
+									<h:outputLabel value="Total" styleClass="bloque" />
+									<h:outputText
+										value="#{constanciasBean.historialAcademico.total} ">
+
+									</h:outputText>
+								</div>
+							</div>
+						</div>
+
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-3 col-xs-12">
+									<h:outputLabel value="Estatus" styleClass="bloque" />
+									<h:outputText
+										value="#{constanciasBean.historialAcademico.estatus} ">
+
+									</h:outputText>
+								</div>
+
+								<div class="col-md-3 col-xs-12">
+									<h:outputLabel value="Nivel" styleClass="bloque" />
+									<h:outputText
+										value="#{constanciasBean.historialAcademico.nivel} ">
+
+									</h:outputText>
+								</div>
+								<div class="col-md-3 col-xs-12">
+									<h:outputLabel value="Fecha de Consulta" styleClass="bloque" />
+									<h:outputText
+										value="#{constanciasBean.historialAcademico.fechaConsulta}">
+										<f:convertDateTime pattern="dd/MM/yyyy" />
+									</h:outputText>
+								</div>
+							</div>
+						</div>
+
+
+					</div>
+				</div>
 				<div class="row">
 					<div class="col-md-12">
 						<p:dataTable var="evento" value="#{constanciasBean.eventos}"
@@ -40,11 +142,41 @@
 								filterBy="#{evento.nombreEc}" filterStyle="display:none">
 								<h:outputText value="#{evento.nombreEc}" />
 							</p:column>
-						<p:column headerText="Nombre del Grupo"
-							sortBy="#{evento.nombreGrupo}" filterMatchMode="contains"
-							filterBy="#{evento.nombreGrupo}" filterStyle="display:none">
-							<h:outputText value="#{evento.nombreGrupo}" />
-						</p:column>
+							<p:column headerText="Nombre del Grupo"
+								sortBy="#{evento.nombreGrupo}" filterMatchMode="contains"
+								filterBy="#{evento.nombreGrupo}" filterStyle="display:none">
+								<h:outputText value="#{evento.nombreGrupo}" />
+							</p:column>
+							<p:column headerText="c/s"
+								sortBy="#{evento.cs}" filterMatchMode="contains"
+								filterBy="#{evento.cs}" filterStyle="display:none">
+								<h:outputText value="#{evento.cs}" />
+							</p:column>
+							<p:column headerText="Clave SEP"
+								sortBy="#{evento.clavesep}" filterMatchMode="contains"
+								filterBy="#{evento.clavesep}" filterStyle="display:none">
+								<h:outputText value="#{evento.clavesep}" />
+							</p:column>
+							<p:column headerText="Créditos"
+								sortBy="#{evento.creditos}" filterMatchMode="contains"
+								filterBy="#{evento.creditos}" filterStyle="display:none">
+								<h:outputText value="#{evento.creditos}" />
+							</p:column>
+							<p:column headerText="Periodo"
+								sortBy="#{evento.periodo}" filterMatchMode="contains"
+								filterBy="#{evento.periodo}" filterStyle="display:none">
+								<h:outputText value="#{evento.periodo}" />
+							</p:column>
+							<p:column headerText="Tipo de evaluacion"
+								sortBy="#{evento.tipoEvaluacion}" filterMatchMode="contains"
+								filterBy="#{evento.tipoEvaluacion}" filterStyle="display:none">
+								<h:outputText value="#{evento.tipoEvaluacion}" />
+							</p:column>
+							<p:column headerText="No. acta"
+								sortBy="#{evento.nActa}" filterMatchMode="contains"
+								filterBy="#{evento.nActa}" filterStyle="display:none">
+								<h:outputText value="#{evento.nActa}" />
+							</p:column>
 							<p:column headerText="Modalidad" sortBy="#{evento.modalidad}"
 								filterMatchMode="contains" filterBy="#{evento.modalidad}"
 								filterStyle="display:none">
@@ -69,19 +201,22 @@
 									rendered="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
 									value="Para poder visualizar su constancia debe contestar la encuesta." />
 							</p:column>
-						<p:column headerText="Promedio de evaluaciones"
-						    sortBy="#{evento.nombreEstatusEncuesta}"
-						    filterMatchMode="contains" filterBy="#{evento.calificacionTotal}"
-						    filterStyle="display:none">
-						    <h:outputText value="#{evento.modalidad eq 'En línea' ? 'No aplica' : evento.calificacionTotal}" />
-						</p:column>
-						<p:column headerText="Porcentaje de asistencias"
-						    sortBy="#{evento.porcentajeAsistencia}"
-						    filterMatchMode="contains"
-						    filterBy="#{evento.porcentajeAsistencia}"
-						    filterStyle="display:none">
-						    <h:outputText value="#{evento.modalidad eq 'En línea' ? 'No aplica' : evento.porcentajeAsistencia}" />
-						</p:column>
+							<p:column headerText="Promedio de evaluaciones"
+								sortBy="#{evento.nombreEstatusEncuesta}"
+								filterMatchMode="contains"
+								filterBy="#{evento.calificacionTotal}"
+								filterStyle="display:none">
+								<h:outputText
+									value="#{evento.modalidad eq 'En línea' ? 'No aplica' : evento.calificacionTotal}" />
+							</p:column>
+							<p:column headerText="Porcentaje de asistencias"
+								sortBy="#{evento.porcentajeAsistencia}"
+								filterMatchMode="contains"
+								filterBy="#{evento.porcentajeAsistencia}"
+								filterStyle="display:none">
+								<h:outputText
+									value="#{evento.modalidad eq 'En línea' ? 'No aplica' : evento.porcentajeAsistencia}" />
+							</p:column>
 							<p:column headerText="Calificación final"
 								sortBy="#{evento.calificacionFinal}" filterMatchMode="contains"
 								filterBy="#{evento.calificacionFinal}"

@@ -6,16 +6,45 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:p="http://primefaces.org/ui">
 	<ui:define name="breadcrumb">
-		<li class="active">Mis asignaturas</li>
+		<li class="active">Tira de materias</li>
 	</ui:define>
 	<ui:define name="content">
 		<h:form id="formMisCursos">
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
-			<h1>Mis asignaturas</h1>
+			<h1>Tira de materias</h1>
 			<hr />
 			<p:panel id="misCursos"
 				header="Información de las asignaturas en proceso">
+								<div class="row">
+					<div class="col-md-12">
+
+						<div class="form-group">
+							<div class="row">
+							
+							
+								<div class="col-md-3 col-xs-12">
+									<h:outputLabel value="Programa educativo" styleClass="bloque" />
+									<h:outputText
+										value="#{misCursosBean.tiraMaterias.programaEducativo}">
+
+									</h:outputText>
+								</div>
+								
+								<div class="col-md-3 col-xs-12">
+									<h:outputLabel value="Matricula" styleClass="bloque" />
+									<h:outputText
+										value="#{misCursosBean.tiraMaterias.matricula}">
+
+									</h:outputText>
+								</div>
+
+							</div>
+						</div>
+
+
+					</div>
+				</div>
 				<div class="row">
 					<div class="col-md-12">
 						<p:dataTable id="dtResultadoBusquedaMisCursos"

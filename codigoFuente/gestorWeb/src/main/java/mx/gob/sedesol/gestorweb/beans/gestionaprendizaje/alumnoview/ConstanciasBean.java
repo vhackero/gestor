@@ -16,6 +16,7 @@ import org.primefaces.model.StreamedContent;
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PlantillaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.DateUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoDocumentoEnum;
@@ -26,6 +27,7 @@ import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
 import mx.gob.sedesol.gestorweb.commons.dto.ReporteConfig;
+import mx.gob.sedesol.gestorweb.commons.dto.UsuarioSessionDTO;
 import mx.gob.sedesol.gestorweb.commons.utils.ReporteUtil;
 
 @SessionScoped
@@ -55,11 +57,18 @@ public class ConstanciasBean extends BaseBean {
 	private StreamedContent reportePDF;
 	private StreamedContent constanciaPDF;
 	private EventoConstanciaDTO eventoSeleccionado;
+	private HistorialAcademicoDTO historialAcademico;
+	private UsuarioSessionDTO idPersona2;
+
+
+
 
 	@PostConstruct
 	public void init() {
 		idPersona = getUsuarioEnSession().getIdPersona();
-		eventos = grupoParticipanteService.getParticipanteByActaCerradaYconstancia(idPersona);
+		idPersona2 = getUsuarioEnSession();
+		eventos = grupoParticipanteService.getParticipanteByActaCerradaYconstancia2(idPersona);
+		historialAcademico = grupoParticipanteService.consultaDatosHistorialAcademico(idPersona.toString());
 		
 	}
 	
@@ -157,6 +166,15 @@ public class ConstanciasBean extends BaseBean {
 		parrafoSalida = parrafoSalida.replace("$_num_horas_", eventoSeleccionado.getDuracionHrs());
 		return parrafoSalida;
 	}
+	
+	public HistorialAcademicoDTO getHistorialAcademico() {
+		return historialAcademico;
+	}
+
+
+	public void setHistorialAcademico(HistorialAcademicoDTO historialAcademico) {
+		this.historialAcademico = historialAcademico;
+	}
 
 	public List<EventoConstanciaDTO> getEventos() {
 		return eventos;
@@ -228,6 +246,16 @@ public class ConstanciasBean extends BaseBean {
 
 	public void setBitacoraBean(BitacoraBean bitacoraBean) {
 		this.bitacoraBean = bitacoraBean;
+	}
+
+
+	public UsuarioSessionDTO getIdPersona2() {
+		return idPersona2;
+	}
+
+
+	public void setIdPersona2(UsuarioSessionDTO idPersona2) {
+		this.idPersona2 = idPersona2;
 	}
 
 }
