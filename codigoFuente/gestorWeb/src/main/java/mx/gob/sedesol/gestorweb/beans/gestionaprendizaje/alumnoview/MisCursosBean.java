@@ -21,7 +21,9 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.encuestas.RelEncuestaUsuarioDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.AmbienteVirtualAprendizajeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.CatEncuestasYEvaluacionesEnum;
 import mx.gob.sedesol.basegestor.commons.utils.EncuestaTipoEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
@@ -115,6 +117,9 @@ public class MisCursosBean extends BaseBean {
 	private Integer idEstatusSeleccionado;
 	private Boolean esColumnaCompetenciasVisible;
 	private List<AmbienteVirtualAprendizajeDTO> avaList;
+	private HistorialAcademicoDTO tiraMaterias;
+	private List<TiraMateriaDTO> tiraMateriasLista2;
+
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
@@ -138,6 +143,12 @@ public class MisCursosBean extends BaseBean {
 		participanteEventosCapacitacionEnEjecucion = grupoParticipanteService
 				.obtenerEventosCapacitacionPorIdParticipante(usuarioEnSesion.getIdPersona(),
 						obtenerEstadoEventoCapacitacionPorNombre(EstadoEventoCapEnum.EN_EJECUCION.getId()).getId());
+		
+		
+		tiraMaterias = grupoParticipanteService.consultaTiraMaterias(usuarioEnSesion.getIdPersona().toString());
+//		tiraMateriasLista2 = grupoParticipanteService.consultaTiraMaterias2(usuarioEnSesion.getIdPersona().toString());
+
+
 
 		/**
 		 * Elimina los estatus de evento de capacitacion que no sean en
@@ -189,6 +200,14 @@ public class MisCursosBean extends BaseBean {
 		this.obtenerEncuestas(idEventoCapacitacionEnEjecucion, idEventoCapacitacionConcluidos);
 
 		esColumnaCompetenciasVisible = Boolean.TRUE;
+	}
+
+	public List<TiraMateriaDTO> getTiraMateriasLista2() {
+		return tiraMateriasLista2;
+	}
+
+	public void setTiraMateriasLista2(List<TiraMateriaDTO> tiraMateriasLista2) {
+		this.tiraMateriasLista2 = tiraMateriasLista2;
 	}
 
 	public Integer obtenerAvanceOa(Integer idEventoCapacitacion) {
@@ -695,6 +714,14 @@ public class MisCursosBean extends BaseBean {
 
 	public void setBitacoraBean(BitacoraBean bitacoraBean) {
 		this.bitacoraBean = bitacoraBean;
+	}
+
+	public HistorialAcademicoDTO getTiraMaterias() {
+		return tiraMaterias;
+	}
+
+	public void setTiraMaterias(HistorialAcademicoDTO tiraMaterias) {
+		this.tiraMaterias = tiraMaterias;
 	}
 
 }

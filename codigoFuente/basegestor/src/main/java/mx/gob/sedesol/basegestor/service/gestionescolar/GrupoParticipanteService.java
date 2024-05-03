@@ -10,7 +10,9 @@ import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.ContenedorLogro
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 
 public interface GrupoParticipanteService {
 	List<EventoConstanciaDTO> getParticipanteByActaCerradaYconstancia(Long idPersona);
@@ -47,6 +49,16 @@ public interface GrupoParticipanteService {
 	List<RelGrupoParticipanteDTO> getAlumnosQueRecibieronConstPorIdGrupo(Integer idGrupo) throws Exception;
 	
 	void actualizaRelGrupoParticipantebyGrupo(Integer idGrupo) throws Exception;
+	
+	HistorialAcademicoDTO consultaDatosHistorialAcademico(String id_persona);
+	
+	HistorialAcademicoDTO consultaTiraMaterias(String id_persona);
+
+	List<TiraMateriaDTO> consultaTiraMaterias2(String id_persona);
+
+	List<EventoConstanciaDTO> getParticipanteByActaCerradaYconstancia2(Long idPersona);
+
+
 }
 
 

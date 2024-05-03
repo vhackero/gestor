@@ -33,8 +33,11 @@ import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanci
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GroupByGestionEscolarDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoListaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LogrosDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
@@ -46,6 +49,7 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCarg
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCompEspecifica;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.GrupoParticipanteRepo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.GrupoRepo;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IHistorialAcademicoRepo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.RelProgCompEspecificaRepo;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
@@ -94,6 +98,9 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 
 	@Autowired
 	private ParametroSistemaService parametroSistemaService;
+	
+	@Autowired
+	private IHistorialAcademicoRepo iHistorialAcademicoRepo;
 
 	@PostConstruct
 	public void init() {
@@ -873,5 +880,169 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 		}
 		return alumnosQueRecibieronConstancia;
 	}
+
+	@Override
+	public HistorialAcademicoDTO consultaDatosHistorialAcademico(String id_persona) {
+		
+		HistorialAcademicoDTO datosHistorialAcademico = iHistorialAcademicoRepo.consultaDatosHistorialAcademico(id_persona);
+		
+		if (datosHistorialAcademico == null ) {
+			return new HistorialAcademicoDTO();
+		}
+		return datosHistorialAcademico;
+	}
+	
+	@Override
+	public HistorialAcademicoDTO consultaTiraMaterias(String id_persona) {
+		
+		HistorialAcademicoDTO datosHistorialAcademico = iHistorialAcademicoRepo.consultaTiraMaterias(id_persona);
+		
+		if (datosHistorialAcademico == null ) {
+			return new HistorialAcademicoDTO();
+		}
+		return datosHistorialAcademico;
+	}
+	
+	@Override
+	public List<TiraMateriaDTO> consultaTiraMaterias2(String id_persona) {
+		
+		List<TiraMateriaDTO> datosHistorialAcademico = iHistorialAcademicoRepo.consultaTiraMaterias2(id_persona);
+		
+		if (datosHistorialAcademico.isEmpty()) {
+			return new ArrayList<TiraMateriaDTO>();
+		}
+		return datosHistorialAcademico;
+	}
+	
+	@Override
+	public List<EventoConstanciaDTO> getParticipanteByActaCerradaYconstancia2(Long idPersona) {
+		
+		List<RelGrupoParticipante> rgp = grupoParticipanteRepo.getParticipanteByActaCerradaYconstancia(idPersona);
+		List<HistorialAcademicoListaDTO> rgpC = iHistorialAcademicoRepo.getParticipanteByActaCerradaYconstancia2(idPersona.toString());
+
+		List<EventoConstanciaDTO> eventos = new ArrayList<>();
+		List<RelEncuestaUsuarioDTO> encuestas = new ArrayList<>();
+		
+		// ITTIVA se cambia validacion ya que esta erronea
+		if (!rgp.isEmpty()) {
+			String nombreDirectorGeneral = parametroSistemaService
+					.obtenerParametro(ConstantesGestor.NOMBRE_DIRECTOR_GENERAL);
+			String ciudadConstancia = parametroSistemaService.obtenerParametro(ConstantesGestor.CIUDAD_CONSTANCIA);
+
+			for (RelGrupoParticipante gp : rgp) {
+				EventoConstanciaDTO evento = new EventoConstanciaDTO();
+				Double calificacionTotal = 0.0;
+				if (ObjectUtils.isNotNull(gp.getCalifTotal())) {
+					calificacionTotal = gp.getCalifTotal().doubleValue();
+				}
+
+				double grupoCalificacionFinal = 0;
+				if (ObjectUtils.isNotNull(gp.getCalifFinal())) {
+					grupoCalificacionFinal = gp.getCalifFinal().doubleValue();
+				}
+
+				double eventoCalificacionMinima = 0;
+				if (ObjectUtils.isNotNull(gp.getGrupo().getEvento())) {
+					if (ObjectUtils.isNotNull(gp.getGrupo().getEvento().getCalificacionMinAprobatoria())) {
+						String califString = gp.getGrupo().getEvento().getCalificacionMinAprobatoria();
+						eventoCalificacionMinima = Double.parseDouble(califString);
+
+						if (grupoCalificacionFinal >= eventoCalificacionMinima) {
+							evento.setTipoConstancia(1);
+
+						} else {
+							evento.setTipoConstancia(0);
+
+						}
+
+					}
+				}
+
+				Integer porcentajeAsistencia = 0;
+				if (ObjectUtils.isNotNull(gp.getPorcentajeAsist())) {
+					porcentajeAsistencia = gp.getPorcentajeAsist();
+				}
+
+				if (ObjectUtils.isNull(evento.getTipoConstancia()) || evento.getTipoConstancia().intValue() != 1) {
+
+					Integer porcentajeAsistenciaMinimo = 0;
+					if (ObjectUtils.isNotNull(gp.getGrupo().getEvento())) {
+						if (ObjectUtils.isNotNull(gp.getGrupo().getEvento().getProcentajeMinAsistencia())) {
+							porcentajeAsistenciaMinimo = gp.getGrupo().getEvento().getProcentajeMinAsistencia();
+							if (porcentajeAsistencia.intValue() >= porcentajeAsistenciaMinimo.intValue()) {
+								evento.setTipoConstancia(2);
+							} else {
+								evento.setTipoConstancia(0);
+							}
+						}
+					}
+				}
+
+				if (evento.getTipoConstancia() != 0) {
+					String nombreEc = gp.getGrupo().getEvento().getNombreEc();
+					String modalidad = gp.getGrupo().getEvento().getCatModalidadPlanPrograma().getNombre();
+					Date fecha = gp.getGrupo().getEvento().getFechaFinal();
+
+					String nombreAcreditado = gp.getPersona().getNombre() + " " + gp.getPersona().getApellidoPaterno()
+							+ " " + gp.getPersona().getApellidoMaterno();
+					String calificacion = String.valueOf(grupoCalificacionFinal);
+					String nombrePrograma = gp.getGrupo().getEvento().getFichaDescriptivaPrograma()
+							.getNombreTentativo();
+					String direccion = ciudadConstancia;
+					String directorGral = nombreDirectorGeneral;
+					String duracionHrs = calcularDuracion(
+							gp.getGrupo().getEvento().getFichaDescriptivaPrograma().getRelProgramaDuracion());
+					if (gp.getGrupo().getEvento().getAplicaEncuesta().booleanValue() == true) {
+						encuestas = relEncuestaUsuarioService.consultarEncuestasAsignadas(
+								gp.getGrupo().getEvento().getIdEvento(), gp.getPersona().getIdPersona(), 1, true);
+						if (encuestas.isEmpty()) {
+							evento.setNombreEstatusEncuesta("Realizada");
+						} else {
+							evento.setNombreEstatusEncuesta("Pendiente");
+						}
+					} else {
+						evento.setNombreEstatusEncuesta("No aplica");
+					}
+					
+
+
+					evento.setNombreEc(nombreEc);
+					evento.setModalidad(modalidad);
+					evento.setFecha(fecha);
+					evento.setCalificacion(calificacion);
+					evento.setNombreAcreditado(nombreAcreditado);
+					evento.setNombrePrograma(nombrePrograma);
+					evento.setDireccion(direccion);
+					evento.setDirectorGral(directorGral);
+					evento.setDuracionHrs(duracionHrs);
+					evento.setCalificacionTotal(calificacionTotal);
+					evento.setPorcentajeAsistencia(porcentajeAsistencia);
+					evento.setCalificacionFinal(new Double(grupoCalificacionFinal));
+					evento.setNombreGrupo(gp.getGrupo().getNombre());
+					
+					for (HistorialAcademicoListaDTO rgpC2 : rgpC) {
+						
+						if(rgpC2.getGrupo_participante_id().equals(gp.getId()))
+						{
+							evento.setCs(rgpC2.getCs());
+							evento.setClavesep(rgpC2.getClavesep());
+							evento.setClave(rgpC2.getClave());
+							evento.setCreditos(rgpC2.getCreditos());
+							evento.setPeriodo(rgpC2.getPeriodo());
+							evento.setTipoEvaluacion(rgpC2.getTipoEvaluacion());
+							evento.setnActa(rgpC2.getnActa());
+
+						}
+					}
+
+
+					eventos.add(evento);
+				}
+			}
+		}
+		return eventos;
+	}
+
+
 
 }
