@@ -38,6 +38,8 @@ public interface GrupoParticipanteService {
 	
     List<RelGrupoParticipanteDTO> obtenerEventosCapacitacionPorIdParticipante(Long idParticipante,Integer idEstatusEc);
     
+    List<RelGrupoParticipanteDTO> obtenerEventosCapacitacionPorIdParticipante2(Long idParticipante,Integer idEstatusEc);
+    
     List<RelGrupoParticipanteDTO> obtenEvtsEnLineayMixtosPorIdParticipante(Long idParticipante,Integer idEstatusEc);
     
     List<RelGrupoParticipanteDTO> obtenerAlumnosQueRecibieronConstPorIdGrupo(Integer idGrupo) throws Exception;
@@ -54,7 +56,7 @@ public interface GrupoParticipanteService {
 	
 	HistorialAcademicoDTO consultaTiraMaterias(String id_persona);
 
-	List<TiraMateriaDTO> consultaTiraMaterias2(String id_persona);
+	List<TiraMateriaDTO> consultaTiraMaterias2(Long id_persona, Integer idEstatusEc);
 
 	List<EventoConstanciaDTO> getParticipanteByActaCerradaYconstancia2(Long idPersona);
 

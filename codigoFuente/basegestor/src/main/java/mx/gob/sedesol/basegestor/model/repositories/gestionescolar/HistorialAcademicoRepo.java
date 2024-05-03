@@ -145,33 +145,39 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 	}
 
 	@Override
-	public List<TiraMateriaDTO> consultaTiraMaterias2(String id_persona) {
+	public List<TiraMateriaDTO> consultaTiraMaterias2(Long id_persona, Integer idEstatusEc) {
 
 		List<TiraMateriaDTO> regresa = new ArrayList<TiraMateriaDTO>();
 		List<Object[]> lista = new ArrayList<>();
 
-		String consulta = "SELECT SUBSTRING_INDEX(e.cve_evento_cap, \"-\", 1) as cveasignatura,\r\n"
-				+ "       fd.nombre_tentativo asigantura,\r\n" + "       CONCAT('B',cnp.bloque) bloque,\r\n"
-				+ "       CONCAT(e.nombre_ec,' - ',g.nombre) grupo,\r\n"
-				+ "       (SELECT CONCAT(tp.sso_nombre,' ', tp.sso_apellidoPaterno,' ', tp.sso_apellidoMaterno)\r\n"
+		String consulta = "SELECT gp.id id, fd.identificador_final as clave, (SELECT CONCAT(SUBSTRING(mc.nombre,1,1),cnp.bloque)\r\n"
+				+ "FROM tbl_ficha_descriptiva_programa fdp\r\n"
+				+ "INNER JOIN tbl_malla_curricular mc ON mc.id = fdp.id_eje_capacitacion\r\n"
+				+ "WHERE fdp.id_programa = e.id_programa) as bloquemodulo,\r\n"
+				+ "CONCAT(e.nombre_ec ,' - ',g.nombre) as grupo,\r\n"
+				+ "    (SELECT CONCAT(tp.sso_nombre,' ', tp.sso_apellidoPaterno,' ', tp.sso_apellidoMaterno)\r\n"
 				+ "        FROM tbl_persona tp\r\n"
 				+ "        INNER JOIN rel_persona_roles rpr ON rpr.id_persona = tp.id_persona\r\n"
 				+ "        INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = rpr.id_persona\r\n"
 				+ "        INNER JOIN tbl_grupos gpro ON gpro.id = rgp.id_grupo\r\n"
-				+ "        INNER JOIN tbl_eventos te ON te.id_evento = e.id_evento\r\n"
+				+ "        INNER JOIN tbl_eventos te ON te.id_evento = gpro.id_evento\r\n"
 				+ "        WHERE gpro.id =  g.id AND  rpr.id_rol = 3 AND (tp.sso_idUsuario NOT LIKE '%.%' AND tp.sso_idUsuario NOT LIKE 'ES%' AND (tp.sso_idUsuario LIKE 'DL%' OR tp.sso_idUsuario LIKE 'FA%'))) docente,\r\n"
-				+ "       CONCAT('SIN ASESOR ASIGNADO') asesor\r\n" + "FROM tbl_persona p\r\n"
-				+ "         INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = p.id_persona AND rgp.calificacion_final is null\r\n"
-				+ "         INNER JOIN tbl_grupos g ON g.id = rgp.id_grupo AND g.acta_cerrada = 0\r\n"
-				+ "         INNER JOIN tbl_eventos e ON e.id_evento = g.id_evento\r\n"
-				+ "         INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa #AND id_tipo_evento_programa = 5\r\n"
-				+ "         INNER JOIN cat_nombres_planesyprogramas cnp ON cnp.clave_asig = fd.identificador_final AND e.cve_evento_cap LIKE CONCAT('%',cnp.clave_asig,'%') AND e.cve_evento_cap LIKe CONCAT('%',cnp.semestre,'%') AND e.cve_evento_cap LIKe CONCAT('%',cnp.bloque,'%')\r\n"
-				+ "         INNER JOIN tbl_planes pl ON pl.id_plan = fd.id_plan\r\n"
-				+ "         INNER JOIN cat_nivel_ensenanza_programa cne ON cne.id = pl.id_nivel_ensenanza\r\n"
-				+ "WHERE p.id_persona = :id_persona";
+				+ "        CONCAT('SIN ASESOR ASIGNADO') asesor\r\n"
+				+ "                  FROM rel_grupo_participante gp\r\n"
+				+ "                  INNER JOIN tbl_grupos g on g.id = gp.id_grupo\r\n"
+				+ "                  INNER JOIN tbl_persona t on t.id_persona = gp.id_persona_participante\r\n"
+				+ "                  INNER JOIN tbl_eventos e on e.id_evento = g.id_evento\r\n"
+				+ "                  INNER JOIN cat_estado_evento_capacitacion c on  c.id  = e.id_estatus_ec\r\n"
+				+ "                  INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa\r\n"
+				+ "                  INNER JOIN cat_nombres_planesyprogramas cnp ON cnp.clave_asig = fd.identificador_final AND e.cve_evento_cap LIKE CONCAT('%',cnp.clave_asig,'%') AND e.cve_evento_cap LIKe CONCAT('%',cnp.semestre,'%') AND e.cve_evento_cap LIKe CONCAT('%',cnp.bloque,'%')\r\n"
+				+ "                  INNER JOIN tbl_planes pl ON pl.id_plan = fd.id_plan\r\n"
+				+ "WHERE\r\n"
+				+ "  c.id = :idEstatusEc AND t.id_persona = :id_persona AND g.acta_cerrada = 0";
 
 		Query query = entityManager.createNativeQuery(consulta);
 		query.setParameter("id_persona", id_persona);
+		query.setParameter("idEstatusEc", idEstatusEc);
+
 
 		lista = query.getResultList();
 
@@ -189,12 +195,13 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 	private TiraMateriaDTO creaDtoconsultaTiraMaterias(Object[] obj) {
 
 		TiraMateriaDTO regresa = new TiraMateriaDTO();
-
-		regresa.setAsigantura(obj[0].toString());
-		regresa.setBloque(obj[1].toString());
-		regresa.setGrupo(obj[2].toString());
-		regresa.setDocente(obj[3].toString());
-		regresa.setAsesor(obj[4].toString());
+		
+		regresa.setId_grupo((Integer) (obj[0]));
+		regresa.setClave(obj[1].toString());
+		regresa.setBloque(obj[2].toString());
+		regresa.setGrupo(obj[3].toString());
+		regresa.setDocente(obj[4].toString());
+		regresa.setAsesor(obj[5].toString());
 
 		return regresa;
 	}

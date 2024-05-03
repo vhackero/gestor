@@ -3,19 +3,15 @@ package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 public class TiraMateriaDTO {
 	
 	
-	private String asigantura;
+	private int id_grupo;
 	private String bloque;
 	private String grupo;
 	private String docente;
 	private String asesor;
+	private String clave;
+
 	
-	
-	public String getAsigantura() {
-		return asigantura;
-	}
-	public void setAsigantura(String asigantura) {
-		this.asigantura = asigantura;
-	}
+
 	public String getBloque() {
 		return bloque;
 	}
@@ -39,6 +35,18 @@ public class TiraMateriaDTO {
 	}
 	public void setAsesor(String asesor) {
 		this.asesor = asesor;
+	}
+	public int getId_grupo() {
+		return id_grupo;
+	}
+	public void setId_grupo(int id_grupo) {
+		this.id_grupo = id_grupo;
+	}
+	public String getClave() {
+		return clave;
+	}
+	public void setClave(String clave) {
+		this.clave = clave;
 	}
 
 }

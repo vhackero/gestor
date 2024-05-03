@@ -34,6 +34,14 @@ public class RelGrupoParticipanteDTO implements Serializable {
 	private Double califTotal;
 	private Integer	porcentajeAsist;
 	private Double califFinal;
+
+
+	private String bloque;
+	private String grupoNombre;
+	private String docente;
+	private String asesor;
+	
+	
 	
 	public RelGrupoParticipanteDTO() { 
 		
@@ -230,5 +238,44 @@ public class RelGrupoParticipanteDTO implements Serializable {
 		this.califFinal = califFinal;
 	}
 
+
+	public String getBloque() {
+		return bloque;
+	}
+
+
+	public void setBloque(String bloque) {
+		this.bloque = bloque;
+	}
+
+
+	public String getGrupoNombre() {
+		return grupoNombre;
+	}
+
+
+	public void setGrupoNombre(String grupoNombre) {
+		this.grupoNombre = grupoNombre;
+	}
+
+
+	public String getDocente() {
+		return docente;
+	}
+
+
+	public void setDocente(String docente) {
+		this.docente = docente;
+	}
+
+
+	public String getAsesor() {
+		return asesor;
+	}
+
+
+	public void setAsesor(String asesor) {
+		this.asesor = asesor;
+	}
 
 }

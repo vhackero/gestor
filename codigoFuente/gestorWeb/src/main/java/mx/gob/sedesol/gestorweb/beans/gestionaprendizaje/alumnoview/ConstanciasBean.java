@@ -58,7 +58,6 @@ public class ConstanciasBean extends BaseBean {
 	private StreamedContent constanciaPDF;
 	private EventoConstanciaDTO eventoSeleccionado;
 	private HistorialAcademicoDTO historialAcademico;
-	private UsuarioSessionDTO idPersona2;
 
 
 
@@ -66,7 +65,6 @@ public class ConstanciasBean extends BaseBean {
 	@PostConstruct
 	public void init() {
 		idPersona = getUsuarioEnSession().getIdPersona();
-		idPersona2 = getUsuarioEnSession();
 		eventos = grupoParticipanteService.getParticipanteByActaCerradaYconstancia2(idPersona);
 		historialAcademico = grupoParticipanteService.consultaDatosHistorialAcademico(idPersona.toString());
 		
@@ -246,16 +244,6 @@ public class ConstanciasBean extends BaseBean {
 
 	public void setBitacoraBean(BitacoraBean bitacoraBean) {
 		this.bitacoraBean = bitacoraBean;
-	}
-
-
-	public UsuarioSessionDTO getIdPersona2() {
-		return idPersona2;
-	}
-
-
-	public void setIdPersona2(UsuarioSessionDTO idPersona2) {
-		this.idPersona2 = idPersona2;
 	}
 
 }

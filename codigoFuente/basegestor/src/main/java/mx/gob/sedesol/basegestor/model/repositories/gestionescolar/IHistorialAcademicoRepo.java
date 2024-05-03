@@ -12,7 +12,7 @@ public interface IHistorialAcademicoRepo {
 
 	HistorialAcademicoDTO consultaTiraMaterias(String id_persona);
 
-	List<TiraMateriaDTO> consultaTiraMaterias2(String id_persona);
+	List<TiraMateriaDTO> consultaTiraMaterias2(Long id_persona, Integer idEstatusEc);
 
 	List<HistorialAcademicoListaDTO> getParticipanteByActaCerradaYconstancia2(String id_persona);
 	
