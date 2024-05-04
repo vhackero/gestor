@@ -610,6 +610,36 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 
 		return modelMapper.map(relGrupoParticipanteList, objetoDTO);
 	}
+	
+	public List<RelGrupoParticipanteDTO> obtenerEventosCapacitacionPorIdParticipante2(Long idParticipante,
+			Integer idEstatusEc) {
+
+		List<RelGrupoParticipante> relGrupoParticipanteList = grupoParticipanteRepo
+				.obtenerEventosCapacitacionPorIdParticipante2(idParticipante, idEstatusEc);
+
+		Type objetoDTO = new TypeToken<List<RelGrupoParticipanteDTO>>() {
+		}.getType();
+
+		List<RelGrupoParticipanteDTO> listaGrupoParticipante1 = modelMapper.map(relGrupoParticipanteList, objetoDTO);
+		
+		List<TiraMateriaDTO> listaGrupoParticipante2 = consultaTiraMaterias2(idParticipante, idEstatusEc);
+
+		for (RelGrupoParticipanteDTO relGrupoParticipanteDTO : listaGrupoParticipante1) {
+
+			for (TiraMateriaDTO tiraMateriaDTO2 : listaGrupoParticipante2) {
+				if(tiraMateriaDTO2.getId_grupo() == relGrupoParticipanteDTO.getId()) {
+					relGrupoParticipanteDTO.setClave(tiraMateriaDTO2.getClave());
+					relGrupoParticipanteDTO.setBloque(tiraMateriaDTO2.getBloque());
+					relGrupoParticipanteDTO.setGrupoNombre(tiraMateriaDTO2.getGrupo());
+					relGrupoParticipanteDTO.setDocente(tiraMateriaDTO2.getDocente());
+					relGrupoParticipanteDTO.setAsesor(tiraMateriaDTO2.getAsesor());
+				}
+			}
+
+		}
+		
+		return listaGrupoParticipante1;
+	}
 
 	public List<RelGrupoParticipanteDTO> obtenEvtsEnLineayMixtosPorIdParticipante(Long idParticipante,
 			Integer idEstatusEc) {
@@ -904,9 +934,9 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 	}
 	
 	@Override
-	public List<TiraMateriaDTO> consultaTiraMaterias2(String id_persona) {
+	public List<TiraMateriaDTO> consultaTiraMaterias2(Long id_persona, Integer idEstatusEc) {
 		
-		List<TiraMateriaDTO> datosHistorialAcademico = iHistorialAcademicoRepo.consultaTiraMaterias2(id_persona);
+		List<TiraMateriaDTO> datosHistorialAcademico = iHistorialAcademicoRepo.consultaTiraMaterias2(id_persona, idEstatusEc);
 		
 		if (datosHistorialAcademico.isEmpty()) {
 			return new ArrayList<TiraMateriaDTO>();

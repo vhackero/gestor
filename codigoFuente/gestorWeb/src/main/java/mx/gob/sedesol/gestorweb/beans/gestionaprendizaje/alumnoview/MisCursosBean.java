@@ -108,6 +108,8 @@ public class MisCursosBean extends BaseBean {
 	private List<CatalogoComunDTO> catEstadoEventoCapacitacionList;
 	private UsuarioSessionDTO usuarioEnSesion;
 	private List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion;
+	private List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion2;
+
 	private List<EventoCapacitacionDTO> eventoCapacitacionList;
 	private CatalogoComunDTO estatusEcSeleccionado;
 	private List<RelEncuestaUsuarioDTO> relEncuestaUsuarioEvtConcList;
@@ -118,7 +120,6 @@ public class MisCursosBean extends BaseBean {
 	private Boolean esColumnaCompetenciasVisible;
 	private List<AmbienteVirtualAprendizajeDTO> avaList;
 	private HistorialAcademicoDTO tiraMaterias;
-	private List<TiraMateriaDTO> tiraMateriasLista2;
 
 
 	@SuppressWarnings("unchecked")
@@ -144,9 +145,12 @@ public class MisCursosBean extends BaseBean {
 				.obtenerEventosCapacitacionPorIdParticipante(usuarioEnSesion.getIdPersona(),
 						obtenerEstadoEventoCapacitacionPorNombre(EstadoEventoCapEnum.EN_EJECUCION.getId()).getId());
 		
+		participanteEventosCapacitacionEnEjecucion2 = grupoParticipanteService
+				.obtenerEventosCapacitacionPorIdParticipante2(usuarioEnSesion.getIdPersona(),
+						obtenerEstadoEventoCapacitacionPorNombre(EstadoEventoCapEnum.EN_EJECUCION.getId()).getId());
 		
 		tiraMaterias = grupoParticipanteService.consultaTiraMaterias(usuarioEnSesion.getIdPersona().toString());
-//		tiraMateriasLista2 = grupoParticipanteService.consultaTiraMaterias2(usuarioEnSesion.getIdPersona().toString());
+
 
 
 
@@ -200,14 +204,6 @@ public class MisCursosBean extends BaseBean {
 		this.obtenerEncuestas(idEventoCapacitacionEnEjecucion, idEventoCapacitacionConcluidos);
 
 		esColumnaCompetenciasVisible = Boolean.TRUE;
-	}
-
-	public List<TiraMateriaDTO> getTiraMateriasLista2() {
-		return tiraMateriasLista2;
-	}
-
-	public void setTiraMateriasLista2(List<TiraMateriaDTO> tiraMateriasLista2) {
-		this.tiraMateriasLista2 = tiraMateriasLista2;
 	}
 
 	public Integer obtenerAvanceOa(Integer idEventoCapacitacion) {
@@ -681,6 +677,15 @@ public class MisCursosBean extends BaseBean {
 	public void setParticipanteEventosCapacitacionEnEjecucion(
 			List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion) {
 		this.participanteEventosCapacitacionEnEjecucion = participanteEventosCapacitacionEnEjecucion;
+	}
+	
+	public List<RelGrupoParticipanteDTO> getParticipanteEventosCapacitacionEnEjecucion2() {
+		return participanteEventosCapacitacionEnEjecucion2;
+	}
+
+	public void setParticipanteEventosCapacitacionEnEjecucion2(
+			List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion2) {
+		this.participanteEventosCapacitacionEnEjecucion2 = participanteEventosCapacitacionEnEjecucion2;
 	}
 
 	public Boolean getEsColumnaCompetenciasVisible() {

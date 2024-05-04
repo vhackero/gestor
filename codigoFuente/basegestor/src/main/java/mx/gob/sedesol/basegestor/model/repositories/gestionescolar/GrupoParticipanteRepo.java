@@ -100,6 +100,18 @@ public interface GrupoParticipanteRepo extends JpaRepository<RelGrupoParticipant
 			+ " AND persona.idPersona =:idParticipante ")
 	public List<RelGrupoParticipante> obtenerEventosCapacitacionPorIdParticipante(
 					@Param("idParticipante")Long idParticipante,@Param("idEstatusEc")Integer idEstatusEc);
+	
+	
+	@Query("SELECT gpoParticipante FROM RelGrupoParticipante gpoParticipante "
+			+ " JOIN gpoParticipante.grupo gpo"
+			+ " JOIN gpoParticipante.persona persona"
+			+ " JOIN gpo.evento evt"
+			+ " JOIN evt.catEstadoEventoCapacitacion edoEvtCap"
+			+ " WHERE "
+			+ " edoEvtCap.id =:idEstatusEc "
+			+ " AND persona.idPersona =:idParticipante AND gpo.actaCerrada = 0")
+	public List<RelGrupoParticipante> obtenerEventosCapacitacionPorIdParticipante2(
+					@Param("idParticipante")Long idParticipante,@Param("idEstatusEc")Integer idEstatusEc);
 		
 	
 	@Query("SELECT gpoParticipante FROM RelGrupoParticipante gpoParticipante "
