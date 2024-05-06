@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 
 public class HistorialAcademicoDTO {
 	
-	
+	private String nombre;
 	private String matricula;
 	private String programaEducativo;
 	private BigDecimal promedio;
@@ -20,6 +20,13 @@ public class HistorialAcademicoDTO {
 	private BigInteger total;
 	
 	
+	
+	public String getNombre() {
+		return nombre;
+	}
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
 	public String getMatricula() {
 		return matricula;
 	}

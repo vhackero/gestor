@@ -27,7 +27,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 
 		HistorialAcademicoDTO regresa = new HistorialAcademicoDTO();
 
-		String consulta = "SELECT  DISTINCT(p.sso_idUsuario) matricula,\r\n"
+		String consulta = "SELECT  DISTINCT(p.sso_idUsuario) matricula,CONCAT(p.sso_nombre,' ',p.sso_apellidoPaterno,' ',p.sso_apellidoMaterno) as nombre,\r\n"
 				+ "                CONCAT(cne.nombre,' en ', pl.nombre) programaEducativo,\r\n"
 				+ "                (SELECT SUM(rgp.calificacion_final)/COUNT(rgp.calificacion_final)\r\n"
 				+ "                 FROM tbl_persona tp\r\n"
@@ -94,17 +94,19 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 
 		if (!lista.isEmpty()) {
 			for (Object[] obj : lista) {
+				
 				regresa.setMatricula(obj[0].toString());
-				regresa.setProgramaEducativo(obj[1].toString());
-				regresa.setPromedio((BigDecimal) obj[2]);
-				regresa.setCreditos((BigDecimal) obj[3]);
-				regresa.setAprobadas((BigInteger) obj[4]);
-				regresa.setReprobadas((BigInteger) obj[5]);
-				regresa.setNopresentadas((BigInteger) obj[6]);
-				regresa.setEstatus(obj[7].toString());
-				regresa.setNivel(obj[8].toString());
-				regresa.setFechaConsulta((Timestamp) obj[9]);
-				BigInteger total = ((BigInteger) obj[4]).add((BigInteger) obj[5]).add((BigInteger) obj[6]);
+				regresa.setNombre(obj[1].toString());
+				regresa.setProgramaEducativo(obj[2].toString());
+				regresa.setPromedio((BigDecimal) obj[3]);
+				regresa.setCreditos((BigDecimal) obj[4]);
+				regresa.setAprobadas((BigInteger) obj[5]);
+				regresa.setReprobadas((BigInteger) obj[6]);
+				regresa.setNopresentadas((BigInteger) obj[7]);
+				regresa.setEstatus(obj[8].toString());
+				regresa.setNivel(obj[9].toString());
+				regresa.setFechaConsulta((Timestamp) obj[10]);
+				BigInteger total = ((BigInteger) obj[5]).add((BigInteger) obj[6]).add((BigInteger) obj[7]);
 				regresa.setTotal(total);
 			}
 		}
@@ -172,7 +174,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				+ "                  INNER JOIN cat_nombres_planesyprogramas cnp ON cnp.clave_asig = fd.identificador_final AND e.cve_evento_cap LIKE CONCAT('%',cnp.clave_asig,'%') AND e.cve_evento_cap LIKe CONCAT('%',cnp.semestre,'%') AND e.cve_evento_cap LIKe CONCAT('%',cnp.bloque,'%')\r\n"
 				+ "                  INNER JOIN tbl_planes pl ON pl.id_plan = fd.id_plan\r\n"
 				+ "WHERE\r\n"
-				+ "  c.id = :idEstatusEc AND t.id_persona = :id_persona AND g.acta_cerrada = 0";
+				+ "  c.id = :idEstatusEc AND t.id_persona = :id_persona AND g.acta_cerrada = 0";
 
 		Query query = entityManager.createNativeQuery(consulta);
 		query.setParameter("id_persona", id_persona);
@@ -226,7 +228,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				+ "                  INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa\r\n"
 				+ "                  INNER JOIN tbl_planes pl ON pl.id_plan = fd.id_plan\r\n"
 				+ "                  INNER JOIN cat_nombres_planesyprogramas cnp ON cnp.clave_asig = fd.identificador_final AND e.cve_evento_cap LIKE CONCAT('%',cnp.clave_asig,'%') AND e.cve_evento_cap LIKe CONCAT('%',cnp.semestre,'%') AND e.cve_evento_cap LIKe CONCAT('%',cnp.bloque,'%')\r\n"
-				+ "WHERE t.id_persona = :id_persona\r\n" + "  AND g.acta_cerrada = 1\r\n" + "  AND e.constancia = 1;";
+				+ "WHERE t.id_persona = :id_persona AND g.acta_cerrada = 1 AND e.constancia = 1;";
 
 		Query query = entityManager.createNativeQuery(consulta);
 		query.setParameter("id_persona", id_persona);
