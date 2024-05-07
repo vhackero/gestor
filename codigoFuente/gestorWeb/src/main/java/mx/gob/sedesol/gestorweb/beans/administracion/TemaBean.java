@@ -248,7 +248,7 @@ public class TemaBean extends BaseBean {
 		rutaAlmacenamiento.append("/");
 		rutaAlmacenamiento.append(tema.getRuta());
 		rutaAlmacenamiento.append("/");
-		rutaAlmacenamiento.append(ConstantesGestor.RUTA_IMAGENES);
+		//rutaAlmacenamiento.append(ConstantesGestor.RUTA_IMAGENES);
 
 		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "VER_ARC_TEM", String.valueOf(tema.getIdTema()),
 				requestActual(), TipoServicioEnum.LOCAL);
