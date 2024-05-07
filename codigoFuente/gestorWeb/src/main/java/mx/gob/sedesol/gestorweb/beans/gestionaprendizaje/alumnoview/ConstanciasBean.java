@@ -100,25 +100,38 @@ public class ConstanciasBean extends BaseBean {
 		InputStream strmLOGO_UNADM = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(LOGO_UNADM);
 		String LOGO_SEP = "/resources/jasperReport/LOGO_SEP.png";
 		InputStream strmLOGO_SEP = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(LOGO_SEP);
-		
+
+		log.info("Nombre:"+historialAcademico.getNombre());
+		log.info("Matri:"+historialAcademico.getMatricula());
+		log.info("ClaveInst:"+historialAcademico.getClaveInst());
+		log.info("Proga:"+historialAcademico.getProgramaEducativo());
+		log.info("Clave:"+historialAcademico.getClave());
+		log.info("Total Cred;"+historialAcademico.getTotalCreditos());
+		log.info("Nivel:"+historialAcademico.getNivel());
+		log.info("Promedio:"+historialAcademico.getPromedio());
+		log.info("Credi:"+historialAcademico.getCreditos());
+		log.info("Aprob: "+historialAcademico.getAprobadas());
+		log.info("Reprob: "+historialAcademico.getReprobadas());
+		log.info("NoPresen: "+historialAcademico.getNopresentadas());
+		log.info("Total: "+historialAcademico.getTotal());
+		log.info("Fecha: "+historialAcademico.getFechaConsulta());
+
 		params.put("LOGO_UNADM",strmLOGO_UNADM);
 		params.put("LOGO_SEP",strmLOGO_SEP);
 		params.put("NOMBRE", historialAcademico.getNombre());
 		params.put("MATRICULA",historialAcademico.getMatricula());
-		params.put("CLAVE_INSTITUCION","");
+		params.put("CLAVE_INSTITUCION",historialAcademico.getClaveInst());
 		params.put("PROG_EDUCATIVO",historialAcademico.getProgramaEducativo());
-		params.put("CLAVE", "");
+		params.put("CLAVE", historialAcademico.getClave());
 		params.put("NIVEL", historialAcademico.getNivel());
-		
 		params.put("PROMEDIO", historialAcademico.getPromedio().intValue());
 		params.put("CREDITOS", historialAcademico.getCreditos().intValue());
-		
+		params.put("TOTAL_CREDITOS",historialAcademico.getTotalCreditos().intValue());
 		params.put("APROBADAS", historialAcademico.getAprobadas().intValue());
 		params.put("REPROBADAS", historialAcademico.getReprobadas().intValue());
 		params.put("NO_PRESENTADAS", historialAcademico.getNopresentadas().intValue());
 		params.put("TOTAL", historialAcademico.getTotal().intValue());
-
-		params.put("FECHA_CONSULTA", historialAcademico.getFechaConsulta().toString());
+		params.put("FECHA_CONSULTA", historialAcademico.getFechaConsulta());
 		
 		
 		//Parametros de datos
