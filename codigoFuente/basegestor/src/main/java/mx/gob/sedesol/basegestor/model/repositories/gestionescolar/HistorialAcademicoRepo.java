@@ -2,7 +2,9 @@ package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Timestamp;
+import java.sql.Blob;
+import java.sql.Date;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,65 +29,74 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 
 		HistorialAcademicoDTO regresa = new HistorialAcademicoDTO();
 
-		String consulta = "SELECT  DISTINCT(p.sso_idUsuario) matricula,CONCAT(p.sso_nombre,' ',p.sso_apellidoPaterno,' ',p.sso_apellidoMaterno) as nombre,\r\n"
-				+ "                CONCAT(cne.nombre,' en ', pl.nombre) programaEducativo,\r\n"
-				+ "                (SELECT SUM(rgp.calificacion_final)/COUNT(rgp.calificacion_final)\r\n"
-				+ "                 FROM tbl_persona tp\r\n"
-				+ "                          INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\r\n"
-				+ "                 WHERE tp.id_persona = p.id_persona  AND NOT EXISTS (SELECT NULL\r\n"
-				+ "                                                                     FROM rel_persona_bajas t2\r\n"
-				+ "                                                                              INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\r\n"
-				+ "                                                                     WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) promedio,\r\n"
-				+ "                (SELECT SUM(tblf.creditos)\r\n" + "                 FROM tbl_persona tp\r\n"
-				+ "                          INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\r\n"
-				+ "                          INNER JOIN tbl_grupos tblg ON tblg.id = rgp.id_grupo\r\n"
-				+ "                          INNER JOIN tbl_eventos tble ON tble.id_evento = tblg.id_evento\r\n"
-				+ "                          INNER JOIN tbl_ficha_descriptiva_programa tblf ON tblf.id_programa = tble.id_programa\r\n"
-				+ "                 WHERE tp.id_persona = p.id_persona  AND rgp.calificacion_final >= tble.calificacion_min_aprobatoria AND NOT EXISTS (SELECT NULL\r\n"
-				+ "                                                                                                                                     FROM rel_persona_bajas t2\r\n"
-				+ "                                                                                                                                              INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\r\n"
-				+ "                                                                                                                                     WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) creditos,\r\n"
-				+ "                (SELECT COUNT(rgp.calificacion_final)\r\n"
-				+ "                 FROM tbl_persona tp\r\n"
-				+ "                          INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\r\n"
-				+ "                          INNER JOIN tbl_grupos tblg ON tblg.id = rgp.id_grupo\r\n"
-				+ "                          INNER JOIN tbl_eventos tble ON tble.id_evento = tblg.id_evento\r\n"
-				+ "                          INNER JOIN tbl_ficha_descriptiva_programa tblf ON tblf.id_programa = tble.id_programa\r\n"
-				+ "                 WHERE tp.id_persona = p.id_persona  AND rgp.calificacion_final >= tble.calificacion_min_aprobatoria AND NOT EXISTS (SELECT NULL\r\n"
-				+ "                                                                                                                                     FROM rel_persona_bajas t2\r\n"
-				+ "                                                                                                                                              INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\r\n"
-				+ "                                                                                                                                     WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) aprobadas,\r\n"
-				+ "                (SELECT COUNT(rgp.calificacion_final)\r\n"
-				+ "                 FROM tbl_persona tp\r\n"
-				+ "                          INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\r\n"
-				+ "                          INNER JOIN tbl_grupos tblg ON tblg.id = rgp.id_grupo\r\n"
-				+ "                          INNER JOIN tbl_eventos tble ON tble.id_evento = tblg.id_evento\r\n"
-				+ "                          INNER JOIN tbl_ficha_descriptiva_programa tblf ON tblf.id_programa = tble.id_programa\r\n"
-				+ "                 WHERE tp.id_persona = p.id_persona  AND rgp.calificacion_final < tble.calificacion_min_aprobatoria AND NOT EXISTS (SELECT NULL\r\n"
-				+ "                                                                                                                                    FROM rel_persona_bajas t2\r\n"
-				+ "                                                                                                                                             INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\r\n"
-				+ "                                                                                                                                    WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) reprobadas,\r\n"
-				+ "                (SELECT COUNT(rgp.id_grupo)\r\n" + "                 FROM tbl_persona tp\r\n"
-				+ "                          INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\r\n"
-				+ "                          INNER JOIN tbl_grupos tblg ON tblg.id = rgp.id_grupo\r\n"
-				+ "                          INNER JOIN tbl_eventos tble ON tble.id_evento = tblg.id_evento\r\n"
-				+ "                          INNER JOIN tbl_ficha_descriptiva_programa tblf ON tblf.id_programa = tble.id_programa\r\n"
-				+ "                 WHERE tp.id_persona = p.id_persona  AND  EXISTS (SELECT t2.id_baja\r\n"
-				+ "                                                                  FROM rel_persona_bajas t2\r\n"
-				+ "                                                                           INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\r\n"
-				+ "                                                                  WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) nopresentadas,\r\n"
-				+ "                CONCAT(cr.nombre,' ', cne.nombre,' ',IF(p.activo = 1,'activo','inactivo')) estatus,\r\n"
-				+ "                cne.nombre nivel,\r\n" + "                NOW() fecha_consulta\r\n"
-				+ "FROM tbl_persona p\r\n"
-				+ "         INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = p.id_persona AND rgp.calificacion_final is not  null\r\n"
-				+ "         INNER JOIN rel_persona_roles pr ON pr.id_persona = p.id_persona AND pr.id_rol = 2\r\n"
-				+ "         INNER JOIN cat_roles cr ON cr.id_rol = pr.id_rol\r\n"
-				+ "         INNER JOIN tbl_grupos g ON g.id = rgp.id_grupo AND g.acta_cerrada = 1\r\n"
-				+ "         INNER JOIN tbl_eventos e ON e.id_evento = g.id_evento\r\n"
-				+ "         INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa\r\n"
-				+ "         INNER JOIN tbl_planes pl ON pl.id_plan = fd.id_plan\r\n"
-				+ "         INNER JOIN cat_nivel_ensenanza_programa cne ON cne.id = pl.id_nivel_ensenanza\r\n"
-				+ "WHERE p.id_persona = :id_persona";
+		String consulta = "SELECT  DISTINCT(p.sso_idUsuario) matricula,\n" +
+				"                CONCAT(cne.nombre,' en ', pl.nombre) programaEducativo,\n" +
+				"                (SELECT SUM(rgp.calificacion_final)/COUNT(rgp.calificacion_final)\n" +
+				"                 FROM tbl_persona tp\n" +
+				"                          INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\n" +
+				"                 WHERE tp.id_persona = p.id_persona  AND NOT EXISTS (SELECT NULL\n" +
+				"                                                                     FROM rel_persona_bajas t2\n" +
+				"                                                                              INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\n" +
+				"                                                                     WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) promedio,\n" +
+				"                (SELECT SUM(tblf.creditos)\n" +
+				"                 FROM tbl_persona tp\n" +
+				"                          INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\n" +
+				"                          INNER JOIN tbl_grupos tblg ON tblg.id = rgp.id_grupo\n" +
+				"                          INNER JOIN tbl_eventos tble ON tble.id_evento = tblg.id_evento\n" +
+				"                          INNER JOIN tbl_ficha_descriptiva_programa tblf ON tblf.id_programa = tble.id_programa\n" +
+				"                 WHERE tp.id_persona = p.id_persona  AND rgp.calificacion_final >= tble.calificacion_min_aprobatoria AND NOT EXISTS (SELECT NULL\n" +
+				"                                                                                                                                     FROM rel_persona_bajas t2\n" +
+				"                                                                                                                                              INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\n" +
+				"                                                                                                                         WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) creditos,\n" +
+				"                CONCAT(350)  as totalCreditos,\n" +
+				"                (SELECT COUNT(rgp.calificacion_final)\n" +
+				"                 FROM tbl_persona tp\n" +
+				"                          INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\n" +
+				"                          INNER JOIN tbl_grupos tblg ON tblg.id = rgp.id_grupo\n" +
+				"                          INNER JOIN tbl_eventos tble ON tble.id_evento = tblg.id_evento\n" +
+				"                          INNER JOIN tbl_ficha_descriptiva_programa tblf ON tblf.id_programa = tble.id_programa\n" +
+				"                 WHERE tp.id_persona = p.id_persona  AND rgp.calificacion_final >= tble.calificacion_min_aprobatoria AND NOT EXISTS (SELECT NULL\n" +
+				"                                                                                                                                     FROM rel_persona_bajas t2\n" +
+				"                                                                                                                                              INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\n" +
+				"                                                                                                                                     WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) aprobadas,\n" +
+				"                (SELECT COUNT(rgp.calificacion_final)\n" +
+				"                 FROM tbl_persona tp\n" +
+				"                          INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\n" +
+				"                          INNER JOIN tbl_grupos tblg ON tblg.id = rgp.id_grupo\n" +
+				"                          INNER JOIN tbl_eventos tble ON tble.id_evento = tblg.id_evento\n" +
+				"                          INNER JOIN tbl_ficha_descriptiva_programa tblf ON tblf.id_programa = tble.id_programa\n" +
+				"                 WHERE tp.id_persona = p.id_persona  AND rgp.calificacion_final < tble.calificacion_min_aprobatoria AND NOT EXISTS (SELECT NULL\n" +
+				"                                                                                                                                    FROM rel_persona_bajas t2\n" +
+				"                                                                                                                                             INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\n" +
+				"                                                                                                                                    WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) reprobadas,\n" +
+				"                (SELECT COUNT(rgp.id_grupo)\n" +
+				"                 FROM tbl_persona tp\n" +
+				"                          INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\n" +
+				"                          INNER JOIN tbl_grupos tblg ON tblg.id = rgp.id_grupo\n" +
+				"                          INNER JOIN tbl_eventos tble ON tble.id_evento = tblg.id_evento\n" +
+				"                          INNER JOIN tbl_ficha_descriptiva_programa tblf ON tblf.id_programa = tble.id_programa\n" +
+				"                 WHERE tp.id_persona = p.id_persona  AND  EXISTS (SELECT t2.id_baja\n" +
+				"                                                                  FROM rel_persona_bajas t2\n" +
+				"                                                                           INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\n" +
+				"                                                                  WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) nopresentadas,\n" +
+				"                CONCAT(cr.nombre,' ', cne.nombre,' ',IF(p.activo = 1,'activo','inactivo')) estatus,\n" +
+				"                cne.nombre nivel,\n" +
+				"                DATE_FORMAT(NOW(),'%d/%m/%Y') fecha_consulta,\n" +
+				"                CONCAT(p.sso_nombre,' ',p.sso_apellidoPaterno,' ',p.sso_apellidoMaterno) as nombre,\n" +
+				"                og.descripcion claveinstitucion,\n" +
+				"                mc.descripcion clave\n" +
+				"FROM tbl_persona p\n" +
+				"         INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = p.id_persona AND rgp.calificacion_final is not  null\n" +
+				"         INNER JOIN rel_persona_roles pr ON pr.id_persona = p.id_persona AND pr.id_rol = 2\n" +
+				"         INNER JOIN cat_roles cr ON cr.id_rol = pr.id_rol\n" +
+				"         INNER JOIN tbl_grupos g ON g.id = rgp.id_grupo AND g.acta_cerrada = 1\n" +
+				"         INNER JOIN tbl_eventos e ON e.id_evento = g.id_evento\n" +
+				"         INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa\n" +
+				"         INNER JOIN tbl_planes pl ON pl.id_plan = fd.id_plan\n" +
+				"         INNER JOIN tbl_malla_curricular mc ON mc.id_plan = pl.id_plan\n" +
+				"         INNER JOIN tbl_organismos_gubernamentales og ON og.id = pl.id_org_gub\n" +
+				"         INNER JOIN cat_nivel_ensenanza_programa cne ON cne.id = pl.id_nivel_ensenanza\n" +
+				"WHERE p.id_persona  = :id_persona";
 
 		Query query = entityManager.createNativeQuery(consulta);
 		query.setParameter("id_persona", id_persona);
@@ -96,16 +107,19 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 			for (Object[] obj : lista) {
 				
 				regresa.setMatricula(obj[0].toString());
-				regresa.setNombre(obj[1].toString());
-				regresa.setProgramaEducativo(obj[2].toString());
-				regresa.setPromedio((BigDecimal) obj[3]);
-				regresa.setCreditos((BigDecimal) obj[4]);
-				regresa.setAprobadas((BigInteger) obj[5]);
-				regresa.setReprobadas((BigInteger) obj[6]);
-				regresa.setNopresentadas((BigInteger) obj[7]);
+				regresa.setProgramaEducativo(obj[1].toString());
+				regresa.setPromedio(new BigDecimal(obj[2].toString()));
+				regresa.setCreditos(new BigDecimal(obj[3].toString()));
+				regresa.setTotalCreditos(new BigInteger(obj[4].toString()));
+				regresa.setAprobadas(new BigInteger(obj[5].toString()));
+				regresa.setReprobadas(new BigInteger(obj[6].toString()));
+				regresa.setNopresentadas(new BigInteger(obj[7].toString()));
 				regresa.setEstatus(obj[8].toString());
 				regresa.setNivel(obj[9].toString());
-				regresa.setFechaConsulta((Timestamp) obj[10]);
+				regresa.setFechaConsulta(obj[10].toString());
+				regresa.setNombre(obj[11].toString());
+				regresa.setClaveInst(obj[12].toString());
+				regresa.setClave(obj[13].toString());
 				BigInteger total = ((BigInteger) obj[5]).add((BigInteger) obj[6]).add((BigInteger) obj[7]);
 				regresa.setTotal(total);
 			}
