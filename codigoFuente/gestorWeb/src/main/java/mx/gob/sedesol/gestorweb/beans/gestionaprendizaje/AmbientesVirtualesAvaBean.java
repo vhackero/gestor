@@ -227,7 +227,7 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 		idEstatusAva = this.obtenerObjEstatusAva(EstatusAmbienteVirtualAprendizajeEnum.EN_SOLICITUD, estadoAvaList)
 				.getId();
 
-		modalidadEventoCapList = eliminarModalidadPresencial(modalidadEventoCapList);
+		//modalidadEventoCapList = eliminarModalidadPresencial(modalidadEventoCapList);
 		idModalidades = this.obteneridModalidadEvCap(modalidadEventoCapList);
 
 		idEstatusEntCap = this.obtenerEstatusEvtCap(EstadoEventoCapEnum.CALENDARIZADO, estadoEventoCapList);
