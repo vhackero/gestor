@@ -6,7 +6,10 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -43,6 +46,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.encuestas.EncuestaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CapturaEventoCapacitacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CveEventoCapDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PersonaResponsabilidadesDTO;
@@ -247,6 +251,43 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	public static final int DE_EVENTO_CAP_ANTERIOR = 1;
 	public static final int DE_CURSO_MOODLE = 2;
 	public static final int NUEVO_AVA = 3;
+	
+	/**============ITTIVA CVE_EVENTO_CAP*/
+	private List<String> cepCatPeriodo;
+	private List<String> cepCatElementos;
+	private String cepEstructura;
+	private String cepSubEstructura;
+	private String cepPeriodo;
+	private String cepElemento;
+	
+	public void setCepPeriodo(String cepPeriodo) {
+		this.cepPeriodo = cepPeriodo;
+	}
+	public void setCepElemento(String cepElemento) {
+		this.cepElemento = cepElemento;
+	}
+	public List<String> getCepCatPeriodo() {
+		return cepCatPeriodo;
+	}
+	public void setCepCatPeriodo(List<String> cepCatPeriodo) {
+		this.cepCatPeriodo = cepCatPeriodo;
+	}
+	public List<String> getCepCatElementos() {
+		return cepCatElementos;
+	}
+	public String getCepPeriodo() {
+		return cepPeriodo;
+	}
+	public String getCepElemento() {
+		return cepElemento;
+	}	
+	public String getCepEstructura() {
+		return cepEstructura;
+	}
+	public String getCepSubEstructura() {
+		return cepSubEstructura;
+	}
+	/**============ITTIVA CVE_EVENTO_CAP*/	
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
@@ -283,6 +324,19 @@ public class CapturaEventoCapacitacion extends BaseBean {
 		nombreImagenComun = eventoCapacitacionServiceFacade.obtenerNombreImagenComun();
 		rutaUndertow = eventoCapacitacionServiceFacade.obtenerRutaUndertow();
 		autonomo = true;
+		
+		/**============ITTIVA CVE_EVENTO_CAP*/
+		Date date = new Date();
+		LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		int year  = localDate.getYear();
+		cepCatPeriodo = new ArrayList<String>();
+		int limit = 9;
+		for(int i=0; i<=(limit-1);i++) {
+			cepCatPeriodo.add(String.valueOf(year));
+			year++;
+		}
+		cepCatElementos = Arrays.asList("1","2","3","4","5","6","7","8","9","10","11","12");
+		/**============ITTIVA CVE_EVENTO_CAP*/
 	}
 
 	private void removerOpcionesDeAvaNoDisponibles() {
@@ -365,6 +419,16 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	}
 	public void onChangeCatEstructura(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			
+			for(CatalogoComunDTO item :catEstructuras) {
+				int vce = Integer.valueOf(e.getNewValue().toString());
+				int idCat = item.getId(); 
+				if( vce == idCat) {
+					cepEstructura = item.getNombre();
+					break;
+				}
+			}
+			
 			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
 			idCatEstructura = mallaCurricularService.obtenerMallaCurricularPorId(idSubEstructura).getNombre();
 			filtrosPrograma.setEjeCapacitacion(idSubEstructura);
@@ -376,6 +440,17 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	}
 	public void onChangeCatSubestructura1(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			
+			
+			for(CatalogoComunDTO item :catSubEstructurasNivel1) {
+				int vce = Integer.valueOf(e.getNewValue().toString());
+				int idSubCat = item.getId(); 
+				if( vce == idSubCat) {
+					cepSubEstructura = item.getNombre();
+					break;
+				}				
+			}
+			
 			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
 			idCatSubEstructuraNivel1 = mallaCurricularService.obtenerMallaCurricularPorId(idSubEstructura).getNombre();
 			filtrosPrograma.setEjeCapacitacion(idSubEstructura);
@@ -845,6 +920,14 @@ public class CapturaEventoCapacitacion extends BaseBean {
 			datos.getEvento().setValorCalificacionDictamen(100 - datos.getEvento().getValorAsistenciaDictamen());
 			datos.getEvento().getCatEstadoEventoCapacitacion().setId(ConstantesGestor.EVEN_CAP_ESTATUS_CALENDARIZADO);
 			establecerEstatus(datos.getEvento());
+			
+			CveEventoCapDTO cec = new CveEventoCapDTO();
+			cec.setCepEstructura(cepEstructura);
+			cec.setCepSubEstructura(cepSubEstructura);
+			cec.setCepPeriodo(cepPeriodo);
+			cec.setCepElemento(cepElemento);
+			datos.setCec(cec);
+
 			ResultadoDTO<EventoCapacitacionDTO> resultado = eventoCapacitacionServiceFacade
 					.guardarEventoCapacitacion(datos, autonomo);
 			if (resultado.getResultado() == ResultadoTransaccionEnum.EXITOSO) {

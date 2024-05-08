@@ -21,6 +21,9 @@ public interface FichaDescProgramaRepo extends JpaRepository<TblFichaDescriptiva
 	@Query("SELECT prg FROM TblFichaDescriptivaPrograma prg WHERE prg.catStatusPrograma.id = :idEstatus ORDER BY prg.fechaActualizacion desc")
 	public List<TblFichaDescriptivaPrograma> consultaProgramasPorEstatus(@Param("idEstatus")Integer idEstatus);
 
+	@Query("SELECT prg FROM TblFichaDescriptivaPrograma prg WHERE prg.idPrograma = :idPrograma AND prg.nombreTentativo = :nombreTentativo")
+	public List<TblFichaDescriptivaPrograma> consultaProgramasPorIdNombre(@Param("idPrograma")Integer idPrograma, @Param("nombreTentativo")String nombreTentativo);	
+	
 	@Query("SELECT prg FROM TblFichaDescriptivaPrograma prg "
 			//+ " JOIN FETCH prg.catStatusPrograma csp"
 			+ " WHERE"

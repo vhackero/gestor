@@ -4,6 +4,7 @@ import java.util.List;
 
 
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.service.admin.CommonService;
 
 public interface FichaDescProgramaService extends CommonService<FichaDescProgramaDTO, Integer> {
@@ -44,5 +45,7 @@ public interface FichaDescProgramaService extends CommonService<FichaDescProgram
 	public Integer totalNivelConocimientoById(Integer idNivelConocimiento);
 	
 	public Integer totalTipoEventoById(Integer idEvento);
+	
+	public TblFichaDescriptivaPrograma consultaProgramasPorIdNombre(Integer idPrograma,String nombreTentativo);
 	
 }

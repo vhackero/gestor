@@ -3,7 +3,8 @@ package mx.gob.sedesol.basegestor.commons.utils;
 
 
 public enum MensajesErrorEnum {
-	
+	ERROR_CEC_PERIODO_REQ("ERROR_CEC_PERIODO_REQ","El periodo es requerido"),
+	ERROR_CEC_ELEMENTO_REQ("ERROR_CEC_PERIODO_REQ","El elemento es requerido"),
 	EXITO_PERSISTENCIA_DATOS("EXITO_PERSISTE_DATOS", "El registro se guardo con exito."),
 	EXITO_ACTUALIZACION_DATOS("EXITO_ACTUALIZ_DATOS", "El registro se actualizo con exito."),
 	EXITO_ELIMINACION_DATOS("EXITO_ELIMINA_DATOS", "El registro se elimino con exito."),
