@@ -147,24 +147,29 @@
 								filterBy="#{evento.nombreGrupo}" filterStyle="display:none">
 								<h:outputText value="#{evento.nombreGrupo}" />
 							</p:column>
-							<p:column headerText="c/s"
-								sortBy="#{evento.cs}" filterMatchMode="contains"
-								filterBy="#{evento.cs}" filterStyle="display:none">
+							<p:column headerText="c/s" sortBy="#{evento.cs}"
+								filterMatchMode="contains" filterBy="#{evento.cs}"
+								filterStyle="display:none">
 								<h:outputText value="#{evento.cs}" />
 							</p:column>
-							<p:column headerText="Clave SEP"
-								sortBy="#{evento.clavesep}" filterMatchMode="contains"
-								filterBy="#{evento.clavesep}" filterStyle="display:none">
+							<p:column headerText="clave" sortBy="#{evento.clave}"
+								filterMatchMode="contains" filterBy="#{evento.clave}"
+								filterStyle="display:none">
+								<h:outputText value="#{evento.clave}" />
+							</p:column>
+							<p:column headerText="Clave SEP" sortBy="#{evento.clavesep}"
+								filterMatchMode="contains" filterBy="#{evento.clavesep}"
+								filterStyle="display:none">
 								<h:outputText value="#{evento.clavesep}" />
 							</p:column>
-							<p:column headerText="Créditos"
-								sortBy="#{evento.creditos}" filterMatchMode="contains"
-								filterBy="#{evento.creditos}" filterStyle="display:none">
+							<p:column headerText="Créditos" sortBy="#{evento.creditos}"
+								filterMatchMode="contains" filterBy="#{evento.creditos}"
+								filterStyle="display:none">
 								<h:outputText value="#{evento.creditos}" />
 							</p:column>
-							<p:column headerText="Periodo"
-								sortBy="#{evento.periodo}" filterMatchMode="contains"
-								filterBy="#{evento.periodo}" filterStyle="display:none">
+							<p:column headerText="Periodo" sortBy="#{evento.periodo}"
+								filterMatchMode="contains" filterBy="#{evento.periodo}"
+								filterStyle="display:none">
 								<h:outputText value="#{evento.periodo}" />
 							</p:column>
 							<p:column headerText="Tipo de evaluacion"
@@ -172,9 +177,9 @@
 								filterBy="#{evento.tipoEvaluacion}" filterStyle="display:none">
 								<h:outputText value="#{evento.tipoEvaluacion}" />
 							</p:column>
-							<p:column headerText="No. acta"
-								sortBy="#{evento.nActa}" filterMatchMode="contains"
-								filterBy="#{evento.nActa}" filterStyle="display:none">
+							<p:column headerText="No. acta" sortBy="#{evento.nActa}"
+								filterMatchMode="contains" filterBy="#{evento.nActa}"
+								filterStyle="display:none">
 								<h:outputText value="#{evento.nActa}" />
 							</p:column>
 							<p:column headerText="Modalidad" sortBy="#{evento.modalidad}"
