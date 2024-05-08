@@ -1,26 +1,5 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
-import javax.annotation.PostConstruct;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.SessionScoped;
-import javax.faces.context.FacesContext;
-import javax.faces.event.ValueChangeEvent;
-
-import org.apache.commons.io.Charsets;
-import org.apache.log4j.Logger;
-import org.primefaces.context.RequestContext;
-import org.primefaces.model.DefaultStreamedContent;
-import org.primefaces.model.StreamedContent;
-
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PlantillaDTO;
@@ -29,6 +8,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.MallaCurricularDTO;
+import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.RelProgDuracionDTO;
 import mx.gob.sedesol.basegestor.commons.utils.DateUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
@@ -39,14 +19,35 @@ import mx.gob.sedesol.basegestor.service.admin.PlantillaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.EventoCapacitacionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoService;
+import mx.gob.sedesol.basegestor.service.impl.planesyprogramas.FECServiceFacade;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.FichaDescProgramaService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService;
+import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.dto.NodoeHijosDTO;
 import mx.gob.sedesol.gestorweb.commons.dto.ReporteConfig;
 import mx.gob.sedesol.gestorweb.commons.utils.ReporteUtil;
+import org.apache.commons.io.Charsets;
+import org.apache.log4j.Logger;
+import org.primefaces.context.RequestContext;
+import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.StreamedContent;
+
+import javax.annotation.PostConstruct;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.SessionScoped;
+import javax.faces.context.FacesContext;
+import javax.faces.event.ValueChangeEvent;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @SessionScoped
 @ManagedBean
@@ -86,6 +87,28 @@ public class ExpedienteEventoBean extends BaseBean {
 	private List<GrupoDTO> listaGrupos;
 	private List<RelGrupoParticipanteDTO> alumnosConConstancia;
 	private NodoeHijosDTO estructuraPlanSedesol;
+
+// Nuevo
+	private List<NodoeHijosDTO> nodos;
+	@ManagedProperty("#{planService}")
+	private PlanService planService;
+	@ManagedProperty(value = "#{fecServiceFacade}")
+	private FECServiceFacade fecServiceFacade;
+	private List<CatalogoComunDTO> planes;
+	private List<CatalogoComunDTO> listaTiposCompetencias;
+	private NodoeHijosDTO estPlanSedesol;
+	private Integer idPlan;
+	private List<CatalogoComunDTO> catEstructuras;
+	private List<CatalogoComunDTO> catSubEstructurasNivel1;
+	private List<CatalogoComunDTO> catSubEstructurasNivel2;
+	private List<CatalogoComunDTO> catSubEstructurasNivel3;
+	private EventoCapacitacionDTO filtros;
+	private Integer nivelMaximo = 1;
+
+	////
+
+
+
 	private FichaDescProgramaDTO filtroPrograma;
 	private Integer idPrograma;
 	private Integer idEvento;
@@ -108,11 +131,15 @@ public class ExpedienteEventoBean extends BaseBean {
 		idEvento = new Integer(0);
 		idGrupo = new Integer(0);
 		alumnosConConstancia = new ArrayList<>();
+
+		//Nuevo
+		filtros = new EventoCapacitacionDTO();
 	}
 
 	@PostConstruct
 	public void iniciarRecursos() {
 		generaEstructuraTipoCompetencia();
+		this.generaEstructuraCatTpoCompetenciaPlan();
 	}
 
 	public void limpiarFiltro() {
@@ -152,6 +179,89 @@ public class ExpedienteEventoBean extends BaseBean {
 			getCatalogoTipoComp().add(cc);
 		}
 	}
+
+	private void generaEstructuraCatTpoCompetenciaPlan() {
+
+		nodos = new ArrayList<>();
+		List<MallaCurricularDTO> mallas = getFecServiceFacade().getMallaCurricularService().obtieneMallasCurricularesDisponibles();
+
+		// List<MallaCurricularDTO> mallas =
+		// getFecServiceFacade().getMallaCurricularService().obtieneMallasCurricularesDisponibles();
+		// RN: Solo se presentara el plan de sedesol por el momento
+		/*MallaCurricularDTO mallaSedesol = getFecServiceFacade().getMallaCurricularService()
+				.obtenerMallaCurricularPorId(1);
+		mallas.add(mallaSedesol);*/
+		planes = new ArrayList<>();
+		for (MallaCurricularDTO m : mallas) {
+			NodoeHijosDTO nodog = new NodoeHijosDTO();
+			nodog.setNombre(m.getNombre());
+			nodog.setIdNodo(m.getId());
+			nodog.setIdPadre(m.getMallaCurricularPadre() != null ? m.getMallaCurricularPadre().getId() : null);
+			nodog.setIdObjCurr(m.getObjetoCurricular().getId());
+			nodog.setNivel(0);
+			if (!m.getLstHijosMallaCurr().isEmpty()) {
+				this.generaCatxNivel(m.getLstHijosMallaCurr(), nodog, nodog.getNivel());
+			}
+			nodos.add(nodog);
+			CatalogoComunDTO cat = new CatalogoComunDTO();
+			cat.setId(nodog.getIdNodo());
+			cat.setNombre(nodog.getNombre());
+			planes.add(cat);
+		}
+
+		listaTiposCompetencias = new ArrayList<>();
+
+		// Genera el Catalogo Tipo de Competencia
+		estPlanSedesol = nodos.get(ConstantesGestorWeb.INDICE_INICIAL);
+		for (NodoeHijosDTO nh : estPlanSedesol.getNodosHijos()) {
+			CatalogoComunDTO cc = new CatalogoComunDTO();
+			cc.setId(nh.getIdNodo());
+			cc.setNombre(nh.getNombre());
+			listaTiposCompetencias.add(cc);
+		}
+	}
+
+	public void onChangeCatPlan(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			catEstructuras = this.generarEstructuras(nodos, Integer.parseInt(e.getNewValue().toString()));
+			Integer idPlan =mallaCurricularService.buscarPorId(Integer.parseInt(e.getNewValue().toString())).getIdPlan();
+			PlanDTO plandto =planService.buscarPorId(idPlan);
+			filtros.getFichaDescriptivaPrograma().setPlan(plandto);
+			//filtros.getFichaDescriptivaPrograma().setPlan(planService.buscarPorId(Integer.parseInt(e.getNewValue().toString())));
+			catSubEstructurasNivel1 = new ArrayList<CatalogoComunDTO>();
+			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
+			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+			nivelMaximo = 0;
+		}
+	}
+
+	public void onChangeCatEstructura(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
+			filtros.getFichaDescriptivaPrograma().setEjeCapacitacion(idSubEstructura);
+			catSubEstructurasNivel1 = this.generarSubEstructuras1(nodos, idSubEstructura);
+			catSubEstructurasNivel2 = new ArrayList<CatalogoComunDTO>();
+			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+			nivelMaximo = 1;
+		}
+	}
+public void onChangeCatSubestructura1(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue())) {
+			Integer idSubEstructura = Integer.parseInt(e.getNewValue().toString());
+			filtros.getFichaDescriptivaPrograma().setEjeCapacitacion(idSubEstructura);
+			catSubEstructurasNivel2 = this.generarSubEstructuras2(nodos, idSubEstructura);
+			catSubEstructurasNivel3 = new ArrayList<CatalogoComunDTO>();
+
+			listaProgramas = fichaDescProgramaService.buscaProgramasPorCriterios(filtros.getFichaDescriptivaPrograma());
+
+
+			nivelMaximo = 2;
+		}
+	}
+
+
+
+
 
 	/**
 	 * Metodo que genera el catalogo de Mallas curriculares por nivel de
@@ -628,6 +738,72 @@ public class ExpedienteEventoBean extends BaseBean {
 
 	public void setPlantillaConstancia(PlantillaDTO plantillaConstancia) {
 		this.plantillaConstancia = plantillaConstancia;
+	}
+
+
+
+
+	/////Nuevo
+	public Integer getIdPlan() {
+		return idPlan;
+	}
+	public void setIdPlan(Integer idPlan) {
+		this.idPlan = idPlan;
+	}
+
+	public List<CatalogoComunDTO> getCatEstructuras() {
+		return catEstructuras;
+	}
+
+	public void setCatEstructuras(List<CatalogoComunDTO> catEstructuras) {
+		this.catEstructuras = catEstructuras;
+	}
+
+	public List<CatalogoComunDTO> getCatSubEstructurasNivel1() {
+		return catSubEstructurasNivel1;
+	}
+
+	public void setCatSubEstructurasNivel1(List<CatalogoComunDTO> catSubEstructurasNivel1) {
+		this.catSubEstructurasNivel1 = catSubEstructurasNivel1;
+	}
+
+	public List<CatalogoComunDTO> getCatSubEstructurasNivel2() {
+		return catSubEstructurasNivel2;
+	}
+
+	public void setCatSubEstructurasNivel2(List<CatalogoComunDTO> catSubEstructurasNivel2) {
+		this.catSubEstructurasNivel2 = catSubEstructurasNivel2;
+	}
+
+	public List<CatalogoComunDTO> getCatSubEstructurasNivel3() {
+		return catSubEstructurasNivel3;
+	}
+
+	public void setCatSubEstructurasNivel3(List<CatalogoComunDTO> catSubEstructurasNivel3) {
+		this.catSubEstructurasNivel3 = catSubEstructurasNivel3;
+	}
+	public List<NodoeHijosDTO> getNodos() {
+		return nodos;
+	}
+
+	public void setNodos(List<NodoeHijosDTO> nodos) {
+		this.nodos = nodos;
+	}
+
+	public PlanService getPlanService() {
+		return planService;
+	}
+
+	public void setPlanService(PlanService planService) {
+		this.planService = planService;
+	}
+
+	public EventoCapacitacionDTO getFiltros() {
+		return filtros;
+	}
+
+	public void setFiltros(EventoCapacitacionDTO filtros) {
+		this.filtros = filtros;
 	}
 
 }

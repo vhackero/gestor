@@ -20,12 +20,75 @@
 			<hr />
 			<f:validateBean disabled="true">
 				<p:panel header="Búsqueda de grupo">
-
+					<!--Estructura Nueva-->
 					<div class="form-group">
+						<div class="row">
+							<div class="col-md-4 col-xs-12">
+								<p:outputLabel styleClass="requerido" value="Plan:"/>
+								<p:selectOneMenu id="nvoCatPlan" styleClass="col-xs-12"
+												 value="#{expedienteEventoBean.idPlan}"
+												 valueChangeListener="#{expedienteEventoBean.onChangeCatPlan}">
+									<p:ajax update="@form"/>
+									<f:selectItem
+											itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											itemValue="#{0}"/>
+									<f:selectItems value="#{expedienteEventoBean.nodos}"
+												   var="plan" itemLabel="#{plan.nombre}" itemValue="#{plan.idNodo}"/>
+								</p:selectOneMenu>
+								<p:message for="nvoCatPlan"/>
+							</div>
+
+							<p:outputPanel id="pnlEstructuras">
+								<p:outputPanel
+										rendered="#{not empty expedienteEventoBean.catEstructuras}">
+									<div class="col-md-4 col-xs-12">
+										<p:outputLabel styleClass="requerido" value="Estructura:"/>
+										<p:selectOneMenu id="nvoCatEstruc" styleClass="col-xs-12"
+														 valueChangeListener="#{expedienteEventoBean.onChangeCatEstructura}">
+											<p:ajax update="@form"/>
+											<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+													itemValue="#{0}"/>
+											<f:selectItems
+													value="#{expedienteEventoBean.catEstructuras}"
+													var="estruc" itemLabel="#{estruc.nombre}"
+													itemValue="#{estruc.id}"/>
+										</p:selectOneMenu>
+										<p:message for="nvoCatEstruc"/>
+									</div>
+								</p:outputPanel>
+							</p:outputPanel>
+
+							<p:outputPanel id="pnlSubestructuras1">
+								<p:outputPanel
+										rendered="#{not empty expedienteEventoBean.catSubEstructurasNivel1}">
+									<div class="col-md-4 col-xs-12">
+										<p:outputLabel styleClass="requerido" value="Subestructura 1:"/>
+										<p:selectOneMenu id="nvoCatSubEstruc1" styleClass="col-xs-12"
+														 valueChangeListener="#{expedienteEventoBean.onChangeCatSubestructura1}">
+											<p:ajax update="@form"/>
+											<f:selectItem
+													itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+													itemValue="#{0}"/>
+											<f:selectItems
+													value="#{expedienteEventoBean.catSubEstructurasNivel1}"
+													var="subEstruc1" itemLabel="#{subEstruc1.nombre}"
+													itemValue="#{subEstruc1.id}"/>
+										</p:selectOneMenu>
+										<p:message for="nvoCatSubEstruc1"/>
+									</div>
+								</p:outputPanel>
+							</p:outputPanel>
+
+						</div>
+					</div>
+
+					<div class="form-group" hidden="true">
 						<div class="row">
 							<div class="col-md-6">
 								<p:outputLabel styleClass="bloque" value="Tipo de competencia:" />
 								<p:selectOneMenu id="tipoCompetencia"
+												 disabled="true"
 									value="#{expedienteEventoBean.filtroPrograma.tipoCompetencia}"
 									autoWidth="true" styleClass="col-xs-12"
 									valueChangeListener="#{expedienteEventoBean.onChangeTipoCompetencia}">
@@ -42,7 +105,7 @@
 								<p:outputLabel styleClass="bloque" value="Eje de capacitación:" />
 								<p:selectOneMenu id="ejeCapacitacion"
 									value="#{expedienteEventoBean.filtroPrograma.ejeCapacitacion}"
-									disabled="#{expedienteEventoBean.filtroPrograma.tipoCompetencia eq 0}"
+									disabled="true"
 									styleClass="col-xs-12" autoWidth="true"
 									valueChangeListener="#{expedienteEventoBean.onChangeEjeCapacitacion}">
 									<p:ajax event="change" process="@this" update="@form" />
@@ -62,7 +125,7 @@
 							<div class="col-md-6">
 								<p:outputLabel styleClass="bloque" value="Nombre del programa:" />
 								<p:selectOneMenu id="programa"
-									disabled="#{expedienteEventoBean.filtroPrograma.ejeCapacitacion eq 0}"
+									disabled="#{empty expedienteEventoBean.listaProgramas}"
 									value="#{expedienteEventoBean.idPrograma}"
 									styleClass="col-xs-12">
 									<p:ajax listener="#{expedienteEventoBean.onProgramaChange()}"
