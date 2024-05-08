@@ -80,6 +80,57 @@
 		</div>
 		<div class="form-group">
 			<div class="row">
+
+				<div class="col-md-4">
+				
+					<p:outputLabel for="categAnioPerioEventosCap" styleClass="requerido bloque"
+						value="Año Periodo:" />
+
+					<p:selectOneMenu id="categAnioPerioEventosCap"
+						value="#{capturaEventoCapacitacion.cepPeriodo}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+						styleClass="col-xs-12">
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems
+							value="#{capturaEventoCapacitacion.cepCatPeriodo}"
+							var="periodo" itemLabel="#{periodo}"
+							itemValue="#{periodo}" />
+					</p:selectOneMenu>
+					<p:message for="categAnioPerioEventosCap" />
+									
+				</div>
+			
+				<div class="col-md-4">
+
+				<div class="col-md-8">
+				
+					<p:outputLabel for="categElementosEventosCap" styleClass="requerido bloque"
+						value="Número de elementos:" />
+
+					<p:selectOneMenu id="categElementosEventosCap"
+						value="#{capturaEventoCapacitacion.cepElemento}"
+						required="true"
+						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+						styleClass="col-xs-6">
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems
+							value="#{capturaEventoCapacitacion.cepCatElementos}"
+							var="elemento" itemLabel="#{elemento}"
+							itemValue="#{elemento}" />
+					</p:selectOneMenu>
+					<p:message for="categElementosEventosCap" />
+									
+				</div>
+				</div>
+			
+			</div>
+		</div>			
+			
+		<div class="form-group">
+			<div class="row">
 				<div class="col-md-4">
 					<p:outputLabel for="modalidad" styleClass="requerido bloque"
 						value="#{sistema.obtenerTexto('gw.gestionescolar.label.modalidad')}" />

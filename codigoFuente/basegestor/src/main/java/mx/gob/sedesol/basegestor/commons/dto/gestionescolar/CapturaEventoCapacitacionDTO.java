@@ -36,6 +36,17 @@ public class CapturaEventoCapacitacionDTO implements Serializable {
 	private SolicitudReservacionDTO solicitud;
 
 	private List<ReservacionEventoCapacitacionDTO> reservaciones;
+	
+	private CveEventoCapDTO cec;
+	
+
+	public CveEventoCapDTO getCec() {
+		return cec;
+	}
+
+	public void setCec(CveEventoCapDTO cec) {
+		this.cec = cec;
+	}
 
 	public CapturaEventoCapacitacionDTO() {
 		evento = new EventoCapacitacionDTO();

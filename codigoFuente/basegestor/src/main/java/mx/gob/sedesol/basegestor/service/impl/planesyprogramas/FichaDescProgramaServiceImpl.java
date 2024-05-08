@@ -141,6 +141,22 @@ public class FichaDescProgramaServiceImpl extends ComunValidacionService<FichaDe
     /**
      *
      */
+    public TblFichaDescriptivaPrograma consultaProgramasPorIdNombre(Integer idPrograma,String nombreTentativo) {
+
+        List<TblFichaDescriptivaPrograma> res = fichaDescProgramaRepo.consultaProgramasPorIdNombre(
+        		idPrograma, nombreTentativo
+        		);
+        TblFichaDescriptivaPrograma item = null;
+        
+        if (!ObjectUtils.isNullOrEmpty(res)) {
+        	item = res.get(0);
+        }
+
+        return item;
+    }
+
+    
+    
     public List<FichaDescProgramaDTO> consultaProgramasPorEstatus(Integer idEstatus) {
 
         List<FichaDescProgramaDTO> list = null;
@@ -156,7 +172,9 @@ public class FichaDescProgramaServiceImpl extends ComunValidacionService<FichaDe
 
         return list;
     }
-
+    
+    
+    
     /**
      * Se utiliza Java Reflection para asignar nulo las relaciones (Many to One)
      * con la tabla principal ya que de no hacerlo se cicla el objeto mapper.

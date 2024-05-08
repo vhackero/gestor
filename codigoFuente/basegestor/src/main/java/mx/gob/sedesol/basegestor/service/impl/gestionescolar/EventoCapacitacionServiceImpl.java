@@ -26,6 +26,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionRecordDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CapturaEventoCapacitacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CveEventoCapDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoActaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PersonaResponsabilidadesDTO;
@@ -37,6 +38,7 @@ import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.RelSolicit
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.ReservacionEventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.SolicitudReservacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
+import mx.gob.sedesol.basegestor.commons.utils.MensajesErrorEnum;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoUsuarioEnum;
@@ -55,6 +57,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelReponsableProd
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelEstructuraUnidadDidactica;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCompEspecifica;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.especificaciones.EventoCapEspecificacion;
 import mx.gob.sedesol.basegestor.model.repositories.gestion.aprendizaje.AmbienteVirtualApRepo;
 import mx.gob.sedesol.basegestor.model.repositories.gestion.aprendizaje.CargaArchivosOaRepo;
@@ -343,6 +346,13 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		ResultadoDTO<EventoCapacitacionDTO> resultado = validarEventoCapacitacion(datos);
 		if (resultado.esCorrecto()) {
 
+			CveEventoCapDTO cec = datos.getCec();
+			TblFichaDescriptivaPrograma dp = fichaDescProgramaService.consultaProgramasPorIdNombre(
+					datos.getPrograma().getIdPrograma(), datos.getPrograma().getNombreTentativo());
+			cec.setCepIdentificadorFinal(dp.getIdentificadorFinal());
+			
+			String cecS = generaClaveEventoCap(cec);
+			datos.getEvento().setCveEventoCap(cecS);
 			TblEvento evento = modelMapper.map(datos.getEvento(), TblEvento.class);
 			TblEvento eventoRespuesta = eventoCapacitacionRepo.save(evento);
 			almacenarRelacionEncuestaEvento(eventoRespuesta.getIdEvento(), datos, eventoRespuesta.getUsuarioModifico());
@@ -366,6 +376,35 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		return resultado;
 	}
 
+	/**
+	 * tbl_ficha_descriptiva_programa.identificador_final +
+     * Identificadores de Estructuras y subestructuras +
+     * Periodo
+	 * @author ITTIVA
+	 * @param dto
+	 * @return
+	 */
+	private String generaClaveEventoCap(CveEventoCapDTO dto) {
+		
+		StringBuilder sb = new StringBuilder();
+		
+		String splEstructura[] =  dto.getCepEstructura().split(" ");
+		String splSubEstructura[] =  dto.getCepSubEstructura().split(" ");
+		
+		sb.append(dto.getCepIdentificadorFinal());
+		sb.append("-");
+		sb.append(splSubEstructura[0].substring(0, 1));
+		sb.append(splSubEstructura[1].substring(0, 1));
+		sb.append(splEstructura[0].substring(0, 1));
+		sb.append(splEstructura[1].substring(0, 1));
+		sb.append("-");
+		sb.append(dto.getCepPeriodo());
+		sb.append("-");
+		sb.append(dto.getCepElemento());
+		
+		return sb.toString();
+	}
+	
 	private void almacenarRelacionEncuestaEvento(Integer idEvento, CapturaEventoCapacitacionDTO datos,
 			Long usuarioModifico) {
 		if (ObjectUtils.isNotNull(datos.getEncuesta())) {
@@ -756,6 +795,17 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 	private ResultadoDTO<EventoCapacitacionDTO> validarEventoCapacitacion(CapturaEventoCapacitacionDTO datos) {
 		ResultadoDTO<EventoCapacitacionDTO> resultado = new ResultadoDTO<>();
 
+		if (ObjectUtils.isNullOrEmpty(datos.getCec().getCepPeriodo())) {
+			resultado.setMensajeError(MensajesErrorEnum.ERROR_CEC_PERIODO_REQ);
+		}
+		if (ObjectUtils.isNullOrEmpty(datos.getCec().getCepElemento())) {
+			resultado.setMensajeError(MensajesErrorEnum.ERROR_CEC_ELEMENTO_REQ);
+		}
+		
+		if (ObjectUtils.isNullOrEmpty(datos.getEvento().getNombreEc())) {
+			resultado.setMensajeError(MensajesSistemaEnum.EC_NOMBRE_EVT_REQ);
+		}
+		
 		if (ObjectUtils.isNullOrEmpty(datos.getEvento().getNombreEc())) {
 			resultado.setMensajeError(MensajesSistemaEnum.EC_NOMBRE_EVT_REQ);
 		}
