@@ -35,6 +35,7 @@ public class RelMallaPlanServiceImpl extends ComunValidacionService<RelMallaPlan
 		ResultadoDTO<RelMallaPlanDTO> res = null;
 		try {
 			RelMallaPlan mallaPlan = mallaPlanMapper.map(dto, RelMallaPlan.class);
+			mallaPlan.setId(0);
 			mallaPlan = mallaPlanRepo.save(mallaPlan);
 
 			res = new ResultadoDTO<RelMallaPlanDTO>();
