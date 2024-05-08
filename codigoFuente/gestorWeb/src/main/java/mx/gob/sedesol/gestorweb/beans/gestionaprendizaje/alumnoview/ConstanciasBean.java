@@ -61,7 +61,6 @@ public class ConstanciasBean extends BaseBean {
 	private StreamedContent constanciaPDF;
 	private EventoConstanciaDTO eventoSeleccionado;
 	private HistorialAcademicoDTO historialAcademico;
-	private TiraMateriaDTO tiraMateri;
 
 
 
