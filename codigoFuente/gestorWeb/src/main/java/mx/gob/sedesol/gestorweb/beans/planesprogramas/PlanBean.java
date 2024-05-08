@@ -30,6 +30,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.OrgGubernamentalDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatDivisionesPlan;
 import mx.gob.sedesol.basegestor.mongo.service.BitacoraService;
 import mx.gob.sedesol.basegestor.service.admin.OrgGubernamentalService;
 import mx.gob.sedesol.basegestor.service.impl.planesyprogramas.PlanServiceFacade;

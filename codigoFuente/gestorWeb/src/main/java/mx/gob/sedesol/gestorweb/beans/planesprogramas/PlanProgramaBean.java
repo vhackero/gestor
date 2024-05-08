@@ -103,18 +103,24 @@ public class PlanProgramaBean extends BaseBean {
     public void generaEstructuraPlan() {
 
         MallaCurricularDTO mallaPlanSel = fecServiceFacade.getMallaCurricularService().obtenerMallaCurricularPorIdPlan(planSelec.getIdPlan());
+        
         estructuraPlanes.add(mallaPlanSel);
         //estructuraPlanes = getFecServiceFacade().getMallaCurricularService().obtieneMallasCurricularesDisponibles();
         //Crea la estructura de planes
         if (!ObjectUtils.isNullOrEmpty(estructuraPlanes)) {
-            lstArbolesPlanes = new ArrayList<TreeNode>();
-
-            for (MallaCurricularDTO plan : estructuraPlanes) {
-                TreeNode arbolPlanesProgramas = new DefaultTreeNode(new NodoDTO(plan.getId(), plan.getNombre(), plan.getObjetoCurricular().getNombre(), planSelec.getIdCategoriaMdl()), null);
-                arbolPlanesProgramas.setExpanded(true);
-                generaEstructuraInternaPlan(arbolPlanesProgramas, plan.getLstHijosMallaCurr());
-                lstArbolesPlanes.add(arbolPlanesProgramas);
-            }
+        	
+        	if(estructuraPlanes.get(0) != null) {        		
+        	
+	            lstArbolesPlanes = new ArrayList<TreeNode>();
+	
+	            for (MallaCurricularDTO plan : estructuraPlanes) {
+	                TreeNode arbolPlanesProgramas = new DefaultTreeNode(new NodoDTO(plan.getId(), plan.getNombre(), plan.getObjetoCurricular().getNombre(), planSelec.getIdCategoriaMdl()), null);
+	                arbolPlanesProgramas.setExpanded(true);
+	                generaEstructuraInternaPlan(arbolPlanesProgramas, plan.getLstHijosMallaCurr());
+	                lstArbolesPlanes.add(arbolPlanesProgramas);
+	            }
+	            
+        	}
         }
 
     }
