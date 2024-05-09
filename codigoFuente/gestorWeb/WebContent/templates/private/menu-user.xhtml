@@ -5,17 +5,21 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:sec="http://www.springframework.org/security/tags"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
-	
-	<c:if test="#{menuGestorBean.showPerfil}">
-	
-	<li class="text-center"><h:form>
-			<p:commandLink value="Perfil" ajax="true"
-				action="#{menuGestorBean.navegaMiPerfil}"></p:commandLink>
-		</h:form></li>
-	
-	</c:if>
-	
+
+	<ui:fragment
+		rendered="#{menuGestorBean.rolTienePermiso('MI_PERFIL')}">
+		<sec:authorize access="hasPermission(null, 'MI_PERFIL')">
+
+			<li class="text-center"><h:form>
+					<p:commandLink value="Perfil" ajax="true"
+						action="#{menuGestorBean.navegaMiPerfil}"></p:commandLink>
+				</h:form></li>
+		</sec:authorize>
+	</ui:fragment>
+
+
 	<li class="text-center"><h:form>
 			<p:commandLink value="Mis cursos" ajax="true"
 				action="#{menuGestorBean.navegaMisCursos}"></p:commandLink>
