@@ -23,6 +23,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.AmbienteVirtual
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.CatEncuestasYEvaluacionesEnum;
 import mx.gob.sedesol.basegestor.commons.utils.EncuestaTipoEnum;
@@ -120,6 +121,7 @@ public class MisCursosBean extends BaseBean {
 	private Boolean esColumnaCompetenciasVisible;
 	private List<AmbienteVirtualAprendizajeDTO> avaList;
 	private HistorialAcademicoDTO tiraMaterias;
+	private List<TiraMateriaBajaDTO> tiraMateriasBaja;
 
 
 	@SuppressWarnings("unchecked")
@@ -148,6 +150,8 @@ public class MisCursosBean extends BaseBean {
 		participanteEventosCapacitacionEnEjecucion2 = grupoParticipanteService
 				.obtenerEventosCapacitacionPorIdParticipante2(usuarioEnSesion.getIdPersona(),
 						obtenerEstadoEventoCapacitacionPorNombre(EstadoEventoCapEnum.EN_EJECUCION.getId()).getId());
+		
+		tiraMateriasBaja = grupoParticipanteService.consultaTiraMateriasBaja(usuarioEnSesion.getIdPersona());
 		
 		tiraMaterias = grupoParticipanteService.consultaTiraMaterias(usuarioEnSesion.getIdPersona().toString());
 
@@ -727,6 +731,14 @@ public class MisCursosBean extends BaseBean {
 
 	public void setTiraMaterias(HistorialAcademicoDTO tiraMaterias) {
 		this.tiraMaterias = tiraMaterias;
+	}
+
+	public List<TiraMateriaBajaDTO> getTiraMateriasBaja() {
+		return tiraMateriasBaja;
+	}
+
+	public void setTiraMateriasBaja(List<TiraMateriaBajaDTO> tiraMateriasBaja) {
+		this.tiraMateriasBaja = tiraMateriasBaja;
 	}
 
 }
