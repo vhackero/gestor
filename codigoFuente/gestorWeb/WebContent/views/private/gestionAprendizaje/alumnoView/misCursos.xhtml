@@ -16,13 +16,13 @@
 			<hr />
 			<p:panel id="misCursos"
 				header="Información de las asignaturas en proceso">
-								<div class="row">
+				<div class="row">
 					<div class="col-md-12">
 
 						<div class="form-group">
 							<div class="row">
-							
-							
+
+
 								<div class="col-md-3 col-xs-12">
 									<h:outputLabel value="Programa educativo" styleClass="bloque" />
 									<h:outputText
@@ -30,11 +30,10 @@
 
 									</h:outputText>
 								</div>
-								
+
 								<div class="col-md-3 col-xs-12">
 									<h:outputLabel value="Matricula" styleClass="bloque" />
-									<h:outputText
-										value="#{misCursosBean.tiraMaterias.matricula}">
+									<h:outputText value="#{misCursosBean.tiraMaterias.matricula}">
 
 									</h:outputText>
 								</div>
@@ -60,8 +59,7 @@
 							<p:column styleClass="text-center"
 								sortBy="#{participante.grupo.evento.nombreEc}">
 								<f:facet name="header">
-									<h:outputText
-										value="Nombre de las asignaturas" />
+									<h:outputText value="Nombre de las asignaturas" />
 								</f:facet>
 								<h:outputText
 									rendered="#{participante.grupo.evento.catModalidadPlanPrograma.id eq 2}"
@@ -82,54 +80,43 @@
 									value="#{participante.grupo.evento.catModalidadPlanPrograma.nombre}" />
 							</p:column>
 							<!-- Clave -->
-							<p:column styleClass="text-center"
-								sortBy="#{participante.clave}">
+							<p:column styleClass="text-center" sortBy="#{participante.clave}">
 								<f:facet name="header">
-									<h:outputText
-										value="Clave" />
+									<h:outputText value="Clave" />
 								</f:facet>
-								<h:outputText
-									value="#{participante.clave}" />
+								<h:outputText value="#{participante.clave}" />
 							</p:column>
 							<!-- Bloque / Modulo -->
 							<p:column styleClass="text-center"
 								sortBy="#{participante.bloque}">
 								<f:facet name="header">
-									<h:outputText
-										value="Bloque / Módulo" />
+									<h:outputText value="Bloque / Módulo" />
 								</f:facet>
-								<h:outputText
-									value="#{participante.bloque}" />
+								<h:outputText value="#{participante.bloque}" />
 							</p:column>
 							<!-- Grupo -->
 							<p:column styleClass="text-center"
 								sortBy="#{participante.grupo.nombre}">
 								<f:facet name="header">
-									<h:outputText
-										value="Grupo" />
+									<h:outputText value="Grupo" />
 								</f:facet>
-								<h:outputText
-									value="#{participante.grupo.nombre}" />
+								<h:outputText value="#{participante.grupo.nombre}" />
 							</p:column>
 							<!-- Docente -->
 							<p:column styleClass="text-center"
 								sortBy="#{participante.docente}">
 								<f:facet name="header">
-									<h:outputText
-										value="Docente" />
+									<h:outputText value="Docente" />
 								</f:facet>
-								<h:outputText
-									value="#{participante.docente}" />
+								<h:outputText value="#{participante.docente}" />
 							</p:column>
 							<!-- Docente -->
 							<p:column styleClass="text-center"
 								sortBy="#{participante.asesor}">
 								<f:facet name="header">
-									<h:outputText
-										value="Asesor" />
+									<h:outputText value="Asesor" />
 								</f:facet>
-								<h:outputText
-									value="#{participante.asesor}" />
+								<h:outputText value="#{participante.asesor}" />
 							</p:column>
 							<!-- Porcentaje de avance -->
 							<p:column styleClass="text-center">
@@ -200,6 +187,7 @@
 								</p:selectOneMenu>
 							</div>
 						</div>
+						
 						<div class="row">
 							<div class="col-md-12">
 								<p:dataTable id="dtResultadoBusquedaMisCursosEstatus"
@@ -213,8 +201,7 @@
 									<!-- Nombre del curso -->
 									<p:column styleClass="text-center">
 										<f:facet name="header">
-											<h:outputText
-												value="Nombre de la asignatura" />
+											<h:outputText value="Nombre de la asignatura" />
 										</f:facet>
 										<h:outputText value="#{evento.nombreEc}" />
 									</p:column>
@@ -260,6 +247,45 @@
 								</p:dataTable>
 							</div>
 						</div>
+
+						<div class="row">
+							<div class="col-md-12">
+								<p:dataTable id="dtResultadoBusquedaMisCursosEstatus2"
+									emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+									reflow="true" value="#{misCursosBean.tiraMateriasBaja}"
+									var="evento" paginator="true" rows="10"
+									paginatorPosition="bottom"
+									paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+									currentPageReportTemplate="({currentPage} de {totalPages})"
+									rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+									
+									<!-- Nombre Materia -->
+									<p:column styleClass="text-center">
+										<f:facet name="header">
+											<h:outputText
+												value="Nombre de las asignarturas" />
+										</f:facet>
+										<h:outputText
+											value="#{evento.nombreMateria}" />
+									</p:column>
+									<!-- Periodo -->
+									<p:column styleClass="text-center">
+										<f:facet name="header">
+											<h:outputText value="Periodo" />
+										</f:facet>
+										<h:outputText value="#{evento.periodo}" />
+									</p:column>
+									<!--Tipo Baja -->
+									<p:column styleClass="text-center">
+										<f:facet name="header">
+											<h:outputText value="Tipo de baja" />
+										</f:facet>
+										<h:outputText value="#{evento.tipoBaja}" />
+									</p:column>
+								</p:dataTable>
+							</div>
+						</div>
+
 					</div>
 				</div>
 			</p:panel>
