@@ -37,6 +37,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDT
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoListaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LogrosDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
@@ -940,6 +941,17 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 		
 		if (datosHistorialAcademico.isEmpty()) {
 			return new ArrayList<TiraMateriaDTO>();
+		}
+		return datosHistorialAcademico;
+	}
+	
+	@Override
+	public List<TiraMateriaBajaDTO> consultaTiraMateriasBaja(Long id_persona) {
+		
+		List<TiraMateriaBajaDTO> datosHistorialAcademico = iHistorialAcademicoRepo.consultaTiraMateriasBaja(id_persona);
+		
+		if (datosHistorialAcademico.isEmpty()) {
+			return new ArrayList<TiraMateriaBajaDTO>();
 		}
 		return datosHistorialAcademico;
 	}

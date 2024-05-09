@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoListaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 
 @Repository
@@ -118,8 +119,8 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				regresa.setNivel(obj[9].toString());
 				regresa.setFechaConsulta(obj[10].toString());
 				regresa.setNombre(obj[11].toString());
-				regresa.setClaveInst(obj[12].toString());
-				regresa.setClave(obj[13].toString());
+				regresa.setClaveInst(obj[12] != null ? obj[12].toString() : null );
+				regresa.setClave(obj[13] != null ? obj[13].toString() : null );
 				BigInteger total = ((BigInteger) obj[5]).add((BigInteger) obj[6]).add((BigInteger) obj[7]);
 				regresa.setTotal(total);
 			}
@@ -273,6 +274,38 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 		regresa.setnActa(obj[7].toString());
 
 		return regresa;
+	}
+	
+	@Override
+	public List<TiraMateriaBajaDTO> consultaTiraMateriasBaja(Long id_persona) {
+
+		List<TiraMateriaBajaDTO>  regresa = new ArrayList<TiraMateriaBajaDTO>();
+
+		String consulta = "SELECT fd.nombre_tentativo asignatura, SUBSTRING_INDEX(e.cve_evento_cap, \"-\", -2)  periodo, tb.nombre tipobaja \r\n"
+				+ "FROM rel_persona_bajas t2\r\n"
+				+ "         INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id\r\n"
+				+ "         INNER JOIN cat_tipo_bajas tb ON tb.id_tipo_baja = mb2.tipo_baja_id\r\n"
+				+ "         INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = t2.id_programa\r\n"
+				+ "         INNER JOIN tbl_eventos e ON e.id_evento = t2.id_evento\r\n"
+				+ "WHERE t2.id_persona = :id_persona";
+
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("id_persona", id_persona);
+
+		List<Object[]> lista = query.getResultList();
+
+		if (!lista.isEmpty()) {
+			for (Object[] obj : lista) {
+				TiraMateriaBajaDTO dato = new TiraMateriaBajaDTO();
+				dato.setNombreMateria(obj[0] != null ? obj[0].toString() : null );
+				dato.setPeriodo(obj[1] != null ? obj[1].toString() : null );
+				dato.setTipoBaja(obj[2] != null ? obj[2].toString() : null );
+				regresa.add(dato);
+			}
+		}
+
+		return regresa;
+
 	}
 
 }
