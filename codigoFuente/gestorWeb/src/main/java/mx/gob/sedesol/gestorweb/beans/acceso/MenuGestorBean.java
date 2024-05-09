@@ -424,16 +424,7 @@ public class MenuGestorBean extends BaseBean {
 
 	public String navegaMiPerfil() {
 		logger.info("Navegando a mi perfil");
-		String navegacion = ConstantesGestorWeb.NAVEGA_TABLERO;
-		List<GrantedAuthority> authorities = getUsuarioEnSession().getRoles();
-		
-	    for (GrantedAuthority grantedAuthority : authorities) {
-	        if ("ROLE_ADMIN".equals(grantedAuthority.getAuthority())) {
-	        	navegacion = ConstantesGestorWeb.NAVEGA_MI_PERFIL_GE;
-	        	break;
-	        }
-	    }
-		return navegacion;
+		return ConstantesGestorWeb.NAVEGA_MI_PERFIL_GE;
 	}
 
 	public String navegaMisCursosDisponibles() {

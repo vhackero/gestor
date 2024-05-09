@@ -19,6 +19,8 @@
 			<h1>Mi perfil</h1>
 			<hr />
 			<div class="row">
+					<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('PRF_PER')}">
+				<sec:authorize access="hasPermission(null, 'PRF_PER' ) ">
 				<div class="col-md-6">
 					<p:panel header="Perfil" styleClass="quitaMargenTop">
 						<div class="row">
@@ -48,6 +50,11 @@
 						</div>
 					</p:panel>
 				</div>
+				</sec:authorize>
+				</ui:fragment>
+				
+				<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('PRF_SEM')}">
+				<sec:authorize access="hasPermission(null, 'PRF_SEM' ) ">
 				<div class="col-md-6">
 					<p:panel header="Semblanza" styleClass="quitaMargenTop">
 						<div class="row">
@@ -60,8 +67,12 @@
 						</div>
 					</p:panel>
 				</div>
+				</sec:authorize>
+				</ui:fragment>
 			</div>
 			<div class="row">
+				<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('PRF_DTP')}">
+				<sec:authorize access="hasPermission(null, 'PRF_DTP' ) ">
 				<div class="col-md-12">
 					<p:panel header="Datos personales">
 						<div class="form-group">
@@ -121,8 +132,12 @@
 						</div>
 					</p:panel>
 				</div>
+				</sec:authorize>
+				</ui:fragment>
 			</div>
 			<div class="row">
+				<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('PRF_DOM')}">
+				<sec:authorize access="hasPermission(null, 'PRF_DOM' ) ">
 				<div class="col-md-12">
 					<p:panel header="Domicilio">
 						<div class="form-group">
@@ -222,8 +237,12 @@
 
 					</p:panel>
 				</div>
+				</sec:authorize>
+				</ui:fragment>
 			</div>
 			<div class="row">
+				<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('PRF_DTL')}">
+				<sec:authorize access="hasPermission(null, 'PRF_DTL' ) ">
 				<div class="col-md-12">
 					<p:panel header="Datos laborales">
 						<div class="form-group">
@@ -331,6 +350,8 @@
 						</div>
 					</p:panel>
 				</div>
+				</sec:authorize>
+				</ui:fragment>
 			</div>
 			<div class="row">
 				<div class="col-md-12">
@@ -340,6 +361,8 @@
 				</div>
 			</div>
 			<div class="form-group agregaPaddingBot">
+				<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('PRF_UPD')}">
+				<sec:authorize access="hasPermission(null, 'PRF_UPD' ) ">
 				<div class="row">					
 					<div class="col-md-6">
 						<p:commandButton value="Actualizar"
@@ -347,6 +370,8 @@
 							styleClass="btn btn-primary pull-right" />
 					</div>
 				</div>
+				</sec:authorize>
+				</ui:fragment>
 			</div>
 
 		</h:form>

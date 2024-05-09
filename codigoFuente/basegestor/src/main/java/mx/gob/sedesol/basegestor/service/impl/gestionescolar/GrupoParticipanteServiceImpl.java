@@ -657,8 +657,31 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 	@Override
 	public ResultadoDTO<RelGrupoParticipanteDTO> actualizaRelGrupoParticipante(RelGrupoParticipanteDTO dto) {
 		logger.info("11  actualizaRelGrupoParticipante>>");
-		RelGrupoParticipante entity = modelMapper.map(dto, RelGrupoParticipante.class);
-		if (ObjectUtils.isNotNull(entity)) {
+		
+		//RelGrupoParticipante entity = modelMapper.map(dto, RelGrupoParticipante.class);
+		
+		RelGrupoParticipante entity = new RelGrupoParticipante();
+		entity.setCalifFinal(dto.getCalifFinal());
+		entity.setCalifTotal(dto.getCalifTotal());
+		entity.setFechaActualizacion(dto.getFechaActualizacion());
+		entity.setFechaRegistro(dto.getFechaRegistro());
+		
+		TblGrupo grupo = modelMapper.map(dto.getGrupo(), TblGrupo.class);
+		
+		entity.setGrupo(grupo);
+		entity.setIdPersonaLms(dto.getIdPersonaLms());
+		
+		TblPersona persona = modelMapper.map(dto.getPersona(), TblPersona.class);
+		
+		entity.setPersona(persona);
+		entity.setPorcentajeAsist(dto.getPorcentajeAsist());
+		entity.setUsuarioModifico(dto.getUsuarioModifico());
+		
+		
+		
+		
+		
+		if (ObjectUtils.isNotNull(entity)) {			
 			entity = grupoParticipanteRepo.save(entity);
 			// GUSTAVO --guardarBitacoraGrupoParticipante(dto,
 			// String.valueOf(entity.getId()));
