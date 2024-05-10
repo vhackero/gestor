@@ -82,26 +82,26 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 			+ " and rpm.id_persona_moodle in :idsMoodle", nativeQuery = true)
 	public List<BajasDTO> obtenerBajas(@Param("idEvento")Integer idEvento, @Param("idCurso")Integer idCurso, @Param("idsMoodle")List<Integer> idsMoodle);
 	
-	@Query(value = "SELECT\n" +
-			"    (SELECT p.sso_idUsuario FROM rel_grupo_participante rgp\n" +
-			"                                     INNER JOIN rel_persona_roles rpr ON rpr.id_persona = rgp.id_persona_participante\n" +
-			"                                     INNER JOIN tbl_persona p ON rpr.id_persona = p.id_persona AND (p.sso_idUsuario NOT LIKE '%.%' AND p.sso_idUsuario NOT LIKE 'ES%' AND (p.sso_idUsuario LIKE 'DL%' OR p.sso_idUsuario LIKE 'FA%'))        WHERE rgp.id_grupo = tg.id AND rpr.id_rol = 3) as matricula ,\n" +
-			"    (SELECT CONCAT(tp.sso_nombre,' ', tp.sso_apellidoPaterno, ' ',tp.sso_apellidoMaterno ) FROM rel_grupo_participante rgp\n" +
-			"                                                                                                    INNER JOIN rel_persona_roles rpr ON rpr.id_persona = rgp.id_persona_participante\n" +
-			"                                                                                                    INNER JOIN tbl_persona tp ON tp.id_persona = rpr.id_persona AND (tp.sso_idUsuario NOT LIKE '%.%' AND tp.sso_idUsuario NOT LIKE 'ES%' AND (tp.sso_idUsuario LIKE 'DL%' OR tp.sso_idUsuario LIKE 'FA%'))\n" +
-			"     WHERE rgp.id_grupo = tg.id AND rpr.id_rol = 3)as docente,\n" +
-			"    tp.nombre as programa,\n" +
-			"    tp.identificador as cveprograma,\n" +
-			"    tfd.nombre_tentativo as asignatura,\n" +
-			"    SUBSTRING_INDEX(te.cve_evento_cap, ''-'', 1) as cveasignatura,\n" +
-			"    SUBSTRING_INDEX(te.cve_evento_cap, ''-'', -2) as periodo,\n" +
-			"    CONCAT(te.nombre_ec,' - ',tg.nombre) as grupo\n" +
-			"    #CONCAT('OR-',SUBSTRING_INDEX(tp.identificador, '-', 1),'-',SUBSTRING_INDEX(SUBSTRING_INDEX(tp.identificador, '-', -2),'-',1),'-',te.cve_evento_cap,'-',SUBSTRING_INDEX(SUBSTRING_INDEX(te.nombre_ec,'|',-1),' ',-1),te.id_evento)\n" +
-			"FROM tbl_eventos te\n" +
-			"         INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_programa = te.id_programa\n" +
-			"         INNER JOIN tbl_planes tp ON tp.id_plan = tfd.id_plan\n" +
-			"         INNER JOIN tbl_grupos tg ON tg.id_evento = te.id_evento\n" +
-			"         INNER JOIN cat_nombres_planesyprogramas cpp ON cpp.programa_educativo = tp.nombre AND tfd.nombre_tentativo = cpp.asignatura AND cpp.bloque NOT LIKE 'NA'\n" +
-			"WHERE te.id_evento = :idEvento AND tg.id = :idGrupo", nativeQuery = true)
+	@Query(value = "SELECT\n"
+			+ "    (SELECT p.sso_idUsuario FROM rel_grupo_participante rgp\n"
+			+ "                                     INNER JOIN rel_persona_roles rpr ON rpr.id_persona = rgp.id_persona_participante\n"
+			+ "                                     INNER JOIN tbl_persona p ON rpr.id_persona = p.id_persona AND (p.sso_idUsuario NOT LIKE '%.%' AND p.sso_idUsuario NOT LIKE 'ES%' AND (p.sso_idUsuario LIKE 'DL%' OR p.sso_idUsuario LIKE 'FA%'))        WHERE rgp.id_grupo = tg.id AND rpr.id_rol = 3) as matricula ,\n"
+			+ "    (SELECT CONCAT(tp.sso_nombre,' ', tp.sso_apellidoPaterno, ' ',tp.sso_apellidoMaterno ) FROM rel_grupo_participante rgp\n"
+			+ "                                                                                                    INNER JOIN rel_persona_roles rpr ON rpr.id_persona = rgp.id_persona_participante\n"
+			+ "                                                                                                    INNER JOIN tbl_persona tp ON tp.id_persona = rpr.id_persona AND (tp.sso_idUsuario NOT LIKE '%.%' AND tp.sso_idUsuario NOT LIKE 'ES%' AND (tp.sso_idUsuario LIKE 'DL%' OR tp.sso_idUsuario LIKE 'FA%'))\n"
+			+ "     WHERE rgp.id_grupo = tg.id AND rpr.id_rol = 3)as docente,\n"
+			+ "    tp.nombre as programa,\n"
+			+ "    tp.identificador as cveprograma,\n"
+			+ "    tfd.nombre_tentativo as asignatura,\n"
+			+ "    SUBSTRING_INDEX(te.cve_evento_cap, '-', 1) as cveasignatura,\n"
+			+ "    SUBSTRING_INDEX(te.cve_evento_cap, '-', -2) as periodo,\n"
+			+ "    CONCAT(te.nombre_ec,' - ',tg.nombre) as grupo\n"
+			+ "    #CONCAT('OR-',SUBSTRING_INDEX(tp.identificador, '-', 1),'-',SUBSTRING_INDEX(SUBSTRING_INDEX(tp.identificador, '-', -2),'-',1),'-',te.cve_evento_cap,'-',SUBSTRING_INDEX(SUBSTRING_INDEX(te.nombre_ec,'|',-1),' ',-1),te.id_evento)\n"
+			+ "FROM tbl_eventos te\n"
+			+ "         INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_programa = te.id_programa\n"
+			+ "         INNER JOIN tbl_planes tp ON tp.id_plan = tfd.id_plan\n"
+			+ "         INNER JOIN tbl_grupos tg ON tg.id_evento = te.id_evento\n"
+			+ "         INNER JOIN cat_nombres_planesyprogramas cpp ON cpp.programa_educativo = tp.nombre AND tfd.nombre_tentativo = cpp.asignatura AND cpp.bloque NOT LIKE 'NA'\n"
+			+ "WHERE te.id_evento = :idEvento AND tg.id = :idGrupo", nativeQuery = true)
 	public List<EncabezadoActaDTO> obtenerEncabezadoActa(@Param("idEvento")Integer idEvento, @Param("idGrupo")Integer idGrupo);
 }
