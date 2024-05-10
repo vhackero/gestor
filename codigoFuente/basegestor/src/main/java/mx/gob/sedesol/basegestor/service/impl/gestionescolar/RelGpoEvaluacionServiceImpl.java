@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 
 import java.lang.reflect.Type;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +63,19 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
                 
             	RelGrupoEvaluacion entidad = new RelGrupoEvaluacion();
             	
-            	CatTipoCalificacionEc tipo = mapperGpoEval.map(dto.getCatTipoCalificacionEc(), CatTipoCalificacionEc.class);
+            	//CatTipoCalificacionEc tipo = mapperGpoEval.map(dto.getCatTipoCalificacionEc(), CatTipoCalificacionEc.class);
+            	
+            	CatTipoCalificacionEc tipo = new CatTipoCalificacionEc();
+            	
+            	tipo.setActivo(dto.getCatTipoCalificacionEc().getActivo());
+            	tipo.setDescripcion(dto.getCatTipoCalificacionEc().getDescripcion());
+            	tipo.setFechaActualizacion(dto.getCatTipoCalificacionEc().getFechaActualizacion());
+            	tipo.setFechaRegistro(dto.getCatTipoCalificacionEc().getFechaRegistro());
+            	tipo.setId(dto.getCatTipoCalificacionEc().getId());
+            	tipo.setNombre(dto.getCatTipoCalificacionEc().getNombre());
+            	tipo.setOrden(dto.getCatTipoCalificacionEc().getOrden());
+            	BigInteger id = BigInteger.valueOf(dto.getCatTipoCalificacionEc().getUsuarioModifico());
+            	tipo.setUsuarioModifico(id);
             	
             	entidad.setCatTipoCalificacionEc(tipo);
             	entidad.setFechaRegistro(dto.getFechaRegistro());
