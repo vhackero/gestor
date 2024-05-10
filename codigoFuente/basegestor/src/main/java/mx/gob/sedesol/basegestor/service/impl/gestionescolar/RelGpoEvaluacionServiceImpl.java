@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -16,7 +17,10 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoEvaluacionDT
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoCalificacionEc;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelEvaluacionCalificacion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelGrupoEvaluacion;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblGrupo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.RelGpoEvaluacionRepo;
 import mx.gob.sedesol.basegestor.service.admin.ComunValidacionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.RelGpoEvaluacionService;
@@ -54,7 +58,45 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
 
             try {
 
-                RelGrupoEvaluacion entidad = mapperGpoEval.map(dto, RelGrupoEvaluacion.class);
+                //RelGrupoEvaluacion entidad = mapperGpoEval.map(dto, RelGrupoEvaluacion.class);
+                
+            	RelGrupoEvaluacion entidad = new RelGrupoEvaluacion();
+            	
+            	CatTipoCalificacionEc tipo = mapperGpoEval.map(dto.getCatTipoCalificacionEc(), CatTipoCalificacionEc.class);
+            	
+            	entidad.setCatTipoCalificacionEc(tipo);
+            	entidad.setFechaRegistro(dto.getFechaRegistro());
+            	entidad.setIdGpoEvaluacion(dto.getIdGpoEvaluacion());
+                entidad.setNombreEvaluacion(dto.getNombreEvaluacion());
+                entidad.setPonderacion(dto.getPonderacion());
+                
+                List<RelEvaluacionCalificacion> lista = new ArrayList<RelEvaluacionCalificacion>();
+                
+                for(RelEvaluacionCalificacionDTO calif : dto.getRelEvaluacionCalificaciones()) {
+                	
+                	RelEvaluacionCalificacion eva = new RelEvaluacionCalificacion();
+                	
+                	eva.setCalificacion(eva.getCalificacion());
+                	eva.setDictamen(eva.getDictamen());
+                	eva.setFechaRegistro(eva.getFechaRegistro());
+                	eva.setIdEvalCalificacion(eva.getIdEvalCalificacion());
+                	eva.setRelGrupoEvaluacion(eva.getRelGrupoEvaluacion());
+                	eva.setRelGrupoParticipante(eva.getRelGrupoParticipante());
+                	eva.setUsuarioModifico(calif.getUsuarioModifico());
+                	
+                	lista.add(eva);
+                	
+                }           
+           
+                entidad.setRelEvaluacionCalificaciones(lista);
+                
+                TblGrupo grupo = mapperGpoEval.map(dto.getTblGrupo(), TblGrupo.class);
+                
+                entidad.setTblGrupo(grupo);
+                entidad.setUsuarioModifico(dto.getUsuarioModifico());
+                
+                
+                
                 entidad = relGpoEvaluacionRepo.save(entidad);
                 res.setDto(mapperGpoEval.map(entidad, RelGrupoEvaluacionDTO.class));
         //GUSTAVO --guardarBitacora(dto.getBitacoraDTO(), String.valueOf(dto.getIdGpoEvaluacion()));
