@@ -1169,9 +1169,13 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 				logger.info(resultado.getMensajes().get(ConstantesGestor.PRIMER_ELEMENTO));
 				TblTextoSistema texto = textoSistemaRepo
 						.findOne(resultado.getMensajes().get(ConstantesGestor.PRIMER_ELEMENTO));
+				String correo = resultado.getMensajes().get(ConstantesGestor.PRIMER_ELEMENTO);
 				if (ObjectUtils.isNotNull(texto)) {
 					logger.info(texto.getValor());
 					persona.setMensajeResultado(texto.getValor());
+				} else if("gw.admin.personas.correo.existe".equals(correo)){
+					logger.info("Error correo ya existe");
+					persona.setMensajeResultado("Error correo ya existe");
 				} else {
 					persona.setMensajeResultado(ConstantesGestor.MENSAJE_INCORRECTO);
 				}
