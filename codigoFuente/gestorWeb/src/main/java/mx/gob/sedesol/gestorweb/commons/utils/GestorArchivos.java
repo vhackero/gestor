@@ -59,6 +59,16 @@ public class GestorArchivos {
 			}
 		}
 		final boolean folderCreado = strRutaArchivos.mkdirs();
+		
+		final File ruta1 = new File(ruta+"/css");
+		ruta1.mkdir();
+		
+		final File ruta2 = new File(ruta+"/img");
+		ruta2.mkdir();
+		
+		final File ruta3 = new File(ruta+"/js");
+		ruta3.mkdir();
+		
 
 		if (folderCreado) {
 			resultadoDTO.setResultado(ResultadoTransaccionEnum.EXITOSO);
@@ -128,12 +138,16 @@ public class GestorArchivos {
 			while (ObjectUtils.isNotNull(entry)) {
 				String filePath = destinationFolder + File.separator + entry.getName();
 				logger.info("Unzip file " + entry.getName() + " to " + filePath);
+				
+				String file2 = filePath.replace( "/" , "\\" );
+				
+				logger.info("replace: " + file2);
 
 				// create the directories of the zip directory
 				if (entry.isDirectory()) {
-					createDirectory(filePath);
+					createDirectory(file2);
 				} else {
-					 extractFile(zipInput, filePath);
+					 extractFile(zipInput, file2);
 				}
 				// close ZipEntry and take the next one
 				zipInput.closeEntry();
@@ -183,10 +197,20 @@ public class GestorArchivos {
 
 	public static List<ArchivoDTO> obtenerArchivos(String ruta) {
 		List<ArchivoDTO> archivos = new ArrayList<>();
-		File directorio = new File(ruta);
+		File directorioCss = new File(ruta+"css");
+		File directorioImg = new File(ruta+"img");
+		File directorioJs = new File(ruta+"js");
 		
-		if (directorio.exists() && directorio.isDirectory()) {
-			llenarListaArchivosDirectorio(archivos, directorio);
+		if (directorioCss.exists() && directorioCss.isDirectory()) {
+			llenarListaArchivosDirectorio(archivos, directorioCss);
+		}
+		
+		if(directorioImg.exists() && directorioImg.isDirectory()) {
+			llenarListaArchivosDirectorio(archivos, directorioImg);
+		}
+		
+		if(directorioJs.exists() && directorioJs.isDirectory()) {
+			llenarListaArchivosDirectorio(archivos, directorioJs);
 		}
 		
 		return archivos;

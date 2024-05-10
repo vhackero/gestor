@@ -170,7 +170,7 @@ public class TemaBean extends BaseBean {
 			rutaAlmacenamiento.append("/");
 			rutaAlmacenamiento.append(tema.getRuta());
 			rutaAlmacenamiento.append("/");
-
+		
 			String rutaArchivo = rutaAlmacenamiento.toString() + archivoCargar.getFileName();
 
 			if (GestorArchivos.reemplazarCarpeta(rutaAlmacenamiento.toString()).getResultado().getValor()
@@ -254,6 +254,7 @@ public class TemaBean extends BaseBean {
 				requestActual(), TipoServicioEnum.LOCAL);
 
 		archivos = GestorArchivos.obtenerArchivos(rutaAlmacenamiento.toString());
+		
 		return ConstantesGestorWeb.NAVEGA_ARCHIVOS_TEMA;
 	}
 
