@@ -392,7 +392,6 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		String splSubEstructura[] =  dto.getCepSubEstructura().split(" ");
 		
 		sb.append(dto.getCepIdentificadorFinal());
-		sb.append("-");
 		sb.append(splSubEstructura[0].substring(0, 1));
 		sb.append(splSubEstructura[1].substring(0, 1));
 		sb.append(splEstructura[0].substring(0, 1));
