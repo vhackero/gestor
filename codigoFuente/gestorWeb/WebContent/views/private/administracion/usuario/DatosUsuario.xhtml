@@ -104,7 +104,7 @@
 											value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.contrasena')}:"
 											styleClass="#{adminPersonaBean.nuevaPersona?'requerido':''}" />
 										<!-- Longitud de campo -->
-										<p:password id="txtContrasenia" styleClass="form-control"
+										<p:inputText id="txtContrasenia" styleClass="form-control"
 											value="#{adminPersonaBean.datos.persona.nuevaContrasenia}"
 											match="txtConfirmarContrasenia" maxlength="180"
 											rendered="true"
@@ -123,7 +123,7 @@
 										value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.confcontrasena')}:"
 										styleClass="#{adminPersonaBean.nuevaPersona?'requerido':''} bloque" />
 									<!-- Longitud de campo -->
-									<p:password id="txtConfirmarContrasenia" rendered="true"
+									<p:inputText id="txtConfirmarContrasenia" rendered="true"
 										styleClass="form-control" maxlength="180"
 										value="#{adminPersonaBean.datos.persona.confirmacionContrasenia}"
 										placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.confcontrasena')}"

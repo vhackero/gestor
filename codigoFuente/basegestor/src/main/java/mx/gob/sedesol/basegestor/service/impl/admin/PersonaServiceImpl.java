@@ -59,6 +59,7 @@ import mx.gob.sedesol.basegestor.commons.utils.UtilidadesCargaMasiva;
 import mx.gob.sedesol.basegestor.model.entities.admin.CatEntidadFederativa;
 import mx.gob.sedesol.basegestor.model.entities.admin.CatMunicipio;
 import mx.gob.sedesol.basegestor.model.entities.admin.CatRol;
+import mx.gob.sedesol.basegestor.model.entities.admin.CatTipoDiscapacidad;
 import mx.gob.sedesol.basegestor.model.entities.admin.RelLoteUsuario;
 import mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaCorreo;
 import mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaDatosAcademico;
@@ -861,12 +862,15 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 	}
 
 	private void almacenarDatosSociodemograficosPersona(DatoSociodemograficoDTO sociodemografico, TblPersona persona) {
-		TblDatosSociodemograficosPersona datoSociodemograficoEntidad = mapper.map(sociodemografico, TblDatosSociodemograficosPersona.class);
-		datoSociodemograficoEntidad.setPersona(persona);					
-		if (ObjectUtils.isNotNull(datoSociodemograficoEntidad.getLenguajeIndigena())
-				|| ObjectUtils.isNotNull(datoSociodemograficoEntidad.getTipoDiscapacidad())){			
-				System.out.println("Guardando datos sociodemograficos...");
-				datoSociodemograficoPersonaRepo.save(datoSociodemograficoEntidad);
+		TblDatosSociodemograficosPersona dato = mapper.map(sociodemografico, TblDatosSociodemograficosPersona.class);
+		dato.setPersona(persona);					
+		if (ObjectUtils.isNotNull(dato.getLenguajeIndigena())
+				|| ObjectUtils.isNotNull(dato.getTipoDiscapacidad())){			
+				System.out.println("Guardando datos sociodemograficos...");	
+				if(dato.getLenguajeIndigena().getIdLenguaje() == 0) {
+					dato.getLenguajeIndigena().setIdLenguaje(27);
+				}
+				datoSociodemograficoPersonaRepo.save(dato);
 		}
 
 	}
