@@ -167,7 +167,7 @@ public class EventoCapacitacionServiceFacade {
 			List<RelGrupoEvaluacionDTO> gpoEvaluaciones = new ArrayList<RelGrupoEvaluacionDTO>();
 
 			// Se crean las evaluaciones
-			CatalogoComunDTO tipoCalifEc= getCatTipoCalificacionService().buscarPorId(evento.getIdEvento(), CatTipoCalificacionEc.class);
+			CatalogoComunDTO tipoCalifEc= getCatTipoCalificacionService().buscarPorId(4, CatTipoCalificacionEc.class);
 			for (CalificacionECDTO evaluacion : calificaciones) {
 
 				RelGrupoEvaluacionDTO ge = new RelGrupoEvaluacionDTO();
