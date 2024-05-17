@@ -37,6 +37,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatClasificacionA
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDestinatariosEc;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDictamen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoCalificacionEc;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.GrupoParticipanteRepo;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
 import mx.gob.sedesol.basegestor.service.admin.CatalogoComunService;
@@ -138,6 +139,9 @@ public class EventoCapacitacionServiceFacade {
 
 	@Autowired
 	private LoteUsuarioService loteUsuarioService;
+	
+	@Autowired
+	private GrupoParticipanteRepo grupoParticipanteRepo;
 
 	/**
 	 * ñ
@@ -159,6 +163,8 @@ public class EventoCapacitacionServiceFacade {
 			throws Exception {
 
 		ResultadoDTO<RelGrupoEvaluacionDTO> res = null;
+		
+		int idGrupo = 0;
 
 		try {
 
@@ -174,6 +180,7 @@ public class EventoCapacitacionServiceFacade {
 				
 				GrupoDTO gpo = gpoSeleccionado;
 				//GrupoDTO gpo = getGrupoService().buscarGrupoPorId(gpoSeleccionado.getIdGrupo());
+				idGrupo = gpo.getIdGrupo();
 
 				if (ObjectUtils.isNotNull(gpo)) {
 
@@ -248,6 +255,8 @@ public class EventoCapacitacionServiceFacade {
 			}
 			logger.info("cerrarActa>>");
 			if (cerrarActa) {
+				
+				grupoParticipanteRepo.borrarPorIdGrupo(idGrupo);
 
 				for (RelGrupoParticipanteDTO rpg : participantesByGrupo) {
 					ResultadoDTO<RelGrupoParticipanteDTO> resx = grupoParticipanteService

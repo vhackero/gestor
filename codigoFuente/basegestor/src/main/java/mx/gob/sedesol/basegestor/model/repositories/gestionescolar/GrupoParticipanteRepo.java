@@ -134,4 +134,8 @@ public interface GrupoParticipanteRepo extends JpaRepository<RelGrupoParticipant
 			+ " WHERE rgp.grupo.idGrupo = :idGrupo ")
 	public void actualizarRelGrupoParticipanteByGrupo(@Param("idGrupo")Integer idGrupo);
 	
+	@Modifying
+	@Query(value = " DELETE FROM rel_grupo_participante where id_grupo = :idGrupo" , nativeQuery = true)
+	public void borrarPorIdGrupo(@Param("idGrupo") Integer idGrupo);
+	
 }
