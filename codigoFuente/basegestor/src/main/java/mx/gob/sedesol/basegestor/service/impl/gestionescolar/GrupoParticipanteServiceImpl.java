@@ -676,12 +676,9 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 		entity.setPersona(persona);
 		entity.setPorcentajeAsist(dto.getPorcentajeAsist());
 		entity.setUsuarioModifico(dto.getUsuarioModifico());
-		
-		
-		
-		
-		
-		if (ObjectUtils.isNotNull(entity)) {			
+			
+		if (ObjectUtils.isNotNull(entity)) {				
+			
 			entity = grupoParticipanteRepo.save(entity);
 			// GUSTAVO --guardarBitacoraGrupoParticipante(dto,
 			// String.valueOf(entity.getId()));
