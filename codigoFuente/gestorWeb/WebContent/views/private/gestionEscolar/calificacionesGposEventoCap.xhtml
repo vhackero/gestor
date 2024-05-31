@@ -115,9 +115,9 @@
 					</div>
 					<div class="form-group">
 						<div class="row">
-							<div class="col-md-3">
+							<div class="col-md-3" >
 								<p:outputLabel styleClass="bloque" rendered="true"
-									value="Generar evaluación:" />
+									value="Generar evaluación:" disabled="#{calificacionGpoEventoCapBean.modalidadEnLinea}"/>
 								<p:commandButton process="@this" ajax="true"
 									value="Generar evaluación"
 									action="#{calificacionGpoEventoCapBean.generaTablaCalifGrupo}"
