@@ -257,7 +257,7 @@ public class EventoCapacitacionServiceFacade {
 			if (cerrarActa) {
 				
 				grupoParticipanteRepo.borrarPorIdGrupo(idGrupo);
-
+				
 				for (RelGrupoParticipanteDTO rpg : participantesByGrupo) {
 					ResultadoDTO<RelGrupoParticipanteDTO> resx = grupoParticipanteService
 							.actualizaRelGrupoParticipante(rpg);

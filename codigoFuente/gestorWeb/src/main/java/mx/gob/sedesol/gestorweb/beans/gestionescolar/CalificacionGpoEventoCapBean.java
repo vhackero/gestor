@@ -820,6 +820,7 @@ public class CalificacionGpoEventoCapBean extends BaseBean {
 				deshabilitarEliminarActaFirmada = false;
 				bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CER_ACT", String.valueOf(grupoSelec.getIdGrupo()),
 						requestActual(), TipoServicioEnum.LOCAL);
+				modalidadEnLinea = true;
 				// TODO Enviar notificacion y correo a los usuarios cuando se cierra el acta
 				/*
 				 * String claveNotificacion =
