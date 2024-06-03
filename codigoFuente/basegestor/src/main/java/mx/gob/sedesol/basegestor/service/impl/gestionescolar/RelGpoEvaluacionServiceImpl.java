@@ -18,9 +18,11 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoEvaluacionDT
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDictamen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoCalificacionEc;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelEvaluacionCalificacion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelGrupoEvaluacion;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelGrupoParticipante;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblGrupo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.RelGpoEvaluacionRepo;
 import mx.gob.sedesol.basegestor.service.admin.ComunValidacionService;
@@ -35,6 +37,9 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
     private RelGpoEvaluacionRepo relGpoEvaluacionRepo;
 
     private ModelMapper mapperGpoEval = new ModelMapper();
+    private ModelMapper mapperDictamen = new ModelMapper();
+    private ModelMapper mapperRelGrupoEval = new ModelMapper();
+    private ModelMapper mapperRelGrupoPart = new ModelMapper();
 
     @Override
     public List<RelGrupoEvaluacionDTO> findAll() {
@@ -89,12 +94,21 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
                 	
                 	RelEvaluacionCalificacion eva = new RelEvaluacionCalificacion();
                 	
-                	eva.setCalificacion(eva.getCalificacion());
-                	eva.setDictamen(eva.getDictamen());
-                	eva.setFechaRegistro(eva.getFechaRegistro());
-                	eva.setIdEvalCalificacion(eva.getIdEvalCalificacion());
-                	eva.setRelGrupoEvaluacion(eva.getRelGrupoEvaluacion());
-                	eva.setRelGrupoParticipante(eva.getRelGrupoParticipante());
+                	eva.setCalificacion(calif.getCalificacion());                	
+                	
+                	CatDictamen dictamen = mapperDictamen.map(calif.getDictamen(), CatDictamen.class);
+                	eva.setDictamen(dictamen);
+                	
+                	eva.setFechaRegistro(calif.getRelGrupoEvaluacion().getFechaRegistro());
+                	
+                	eva.setIdEvalCalificacion(calif.getIdEvalCalificacion());
+                	
+                	RelGrupoEvaluacion relGrupo = mapperRelGrupoEval.map(calif.getRelGrupoEvaluacion(), RelGrupoEvaluacion.class);
+                	eva.setRelGrupoEvaluacion(relGrupo);
+                	
+                	RelGrupoParticipante relPart = mapperRelGrupoPart.map(calif.getRelGrupoParticipante(), RelGrupoParticipante.class);
+                	eva.setRelGrupoParticipante(relPart);
+             
                 	eva.setUsuarioModifico(calif.getUsuarioModifico());
                 	
                 	lista.add(eva);
