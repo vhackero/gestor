@@ -4,6 +4,7 @@ import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.modelmapper.ModelMapper;
@@ -23,6 +24,8 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoCalificaci
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelEvaluacionCalificacion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelGrupoEvaluacion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelGrupoParticipante;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelPersonaResponsabilidades;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblGrupo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.RelGpoEvaluacionRepo;
 import mx.gob.sedesol.basegestor.service.admin.ComunValidacionService;
@@ -62,7 +65,7 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
         ResultadoDTO<RelGrupoEvaluacionDTO> res = sonDatosRequeridosValidos(TipoAccion.PERSISTENCIA, dto);
         if (ObjectUtils.isNotNull(res) && res.getResultado().getValor()) {
 
-            try {
+        	try {
 
                 //RelGrupoEvaluacion entidad = mapperGpoEval.map(dto, RelGrupoEvaluacion.class);
                 
@@ -90,7 +93,10 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
                 
                 List<RelEvaluacionCalificacion> lista = new ArrayList<RelEvaluacionCalificacion>();
                 
-                for(RelEvaluacionCalificacionDTO calif : dto.getRelEvaluacionCalificaciones()) {
+                List<RelEvaluacionCalificacionDTO> ls = new ArrayList<>();
+                ls.add(dto.getRelEvaluacionCalificaciones().get(0));
+                
+                for(RelEvaluacionCalificacionDTO calif : ls) {
                 	
                 	RelEvaluacionCalificacion eva = new RelEvaluacionCalificacion();
                 	
@@ -103,12 +109,19 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
                 	
                 	eva.setIdEvalCalificacion(calif.getIdEvalCalificacion());
                 	
-                	RelGrupoEvaluacion relGrupo = mapperRelGrupoEval.map(calif.getRelGrupoEvaluacion(), RelGrupoEvaluacion.class);
-                	eva.setRelGrupoEvaluacion(relGrupo);
                 	
+//                	RelGrupoEvaluacion relGrupo = mapperRelGrupoEval.map(calif.getRelGrupoEvaluacion(), RelGrupoEvaluacion.class);
+//                	eva.setRelGrupoEvaluacion(relGrupo);
+
+//                	RelGrupoEvaluacion relGrupo = new RelGrupoEvaluacion();
+//                    relGrupo.setIdGpoEvaluacion(calif.getRelGrupoEvaluacion().getTblGrupo().getIdGrupo());
+//
+//                    eva.setRelGrupoEvaluacion(relGrupo);
+                   
+                	//SET PARTICIPANTE
                 	RelGrupoParticipante relPart = mapperRelGrupoPart.map(calif.getRelGrupoParticipante(), RelGrupoParticipante.class);
                 	eva.setRelGrupoParticipante(relPart);
-             
+                	
                 	eva.setUsuarioModifico(calif.getUsuarioModifico());
                 	
                 	lista.add(eva);
@@ -116,6 +129,12 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
                 }           
            
                 entidad.setRelEvaluacionCalificaciones(lista);
+
+                //Se quito por que no lo realizaba bien
+                //List<RelEvaluacionCalificacion> lis = 
+                //dto.getRelEvaluacionCalificaciones().stream().map(RelEvaluacionCalificacionDTO -> listaM.map(RelEvaluacionCalificacionDTO, RelEvaluacionCalificacion.class)).collect(Collectors.toList());
+
+                //entidad.setRelEvaluacionCalificaciones(dto.getRelEvaluacionCalificaciones());
                 
                 TblGrupo grupo = mapperGpoEval.map(dto.getTblGrupo(), TblGrupo.class);
                 
@@ -127,7 +146,7 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
                 entidad = relGpoEvaluacionRepo.save(entidad);
                 res.setDto(mapperGpoEval.map(entidad, RelGrupoEvaluacionDTO.class));
         //GUSTAVO --guardarBitacora(dto.getBitacoraDTO(), String.valueOf(dto.getIdGpoEvaluacion()));
-
+                logger.info("-" );
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
                 res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);

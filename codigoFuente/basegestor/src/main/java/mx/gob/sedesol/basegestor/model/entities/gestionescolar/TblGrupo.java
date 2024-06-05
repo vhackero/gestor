@@ -1,4 +1,4 @@
-package mx.gob.sedesol.basegestor.model.entities.gestionescolar;
+	package mx.gob.sedesol.basegestor.model.entities.gestionescolar;
 
 import java.io.Serializable;
 import java.util.Date;
