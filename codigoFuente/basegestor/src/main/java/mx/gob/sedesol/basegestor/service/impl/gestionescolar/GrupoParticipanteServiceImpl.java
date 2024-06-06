@@ -631,7 +631,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 				if(tiraMateriaDTO2.getId_grupo() == relGrupoParticipanteDTO.getId()) {
 					relGrupoParticipanteDTO.setClave(tiraMateriaDTO2.getClave());
 					relGrupoParticipanteDTO.setBloque(tiraMateriaDTO2.getBloque());
-					relGrupoParticipanteDTO.setGrupoNombre(tiraMateriaDTO2.getGrupo());
+					relGrupoParticipanteDTO.setNombre(tiraMateriaDTO2.getGrupo());
 					relGrupoParticipanteDTO.setDocente(tiraMateriaDTO2.getDocente());
 					relGrupoParticipanteDTO.setAsesor(tiraMateriaDTO2.getAsesor());
 				}

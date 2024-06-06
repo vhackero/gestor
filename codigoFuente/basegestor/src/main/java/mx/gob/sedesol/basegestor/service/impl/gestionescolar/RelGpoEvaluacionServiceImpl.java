@@ -62,13 +62,9 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
         ResultadoDTO<RelGrupoEvaluacionDTO> res = sonDatosRequeridosValidos(TipoAccion.PERSISTENCIA, dto);
         if (ObjectUtils.isNotNull(res) && res.getResultado().getValor()) {
 
-            try {
-
-                //RelGrupoEvaluacion entidad = mapperGpoEval.map(dto, RelGrupoEvaluacion.class);
+        	try {
                 
             	RelGrupoEvaluacion entidad = new RelGrupoEvaluacion();
-            	
-            	//CatTipoCalificacionEc tipo = mapperGpoEval.map(dto.getCatTipoCalificacionEc(), CatTipoCalificacionEc.class);
             	
             	CatTipoCalificacionEc tipo = new CatTipoCalificacionEc();
             	
@@ -90,6 +86,9 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
                 
                 List<RelEvaluacionCalificacion> lista = new ArrayList<RelEvaluacionCalificacion>();
                 
+//                List<RelEvaluacionCalificacionDTO> ls = new ArrayList<>();
+//                ls.add(dto.getRelEvaluacionCalificaciones().get(0));
+                
                 for(RelEvaluacionCalificacionDTO calif : dto.getRelEvaluacionCalificaciones()) {
                 	
                 	RelEvaluacionCalificacion eva = new RelEvaluacionCalificacion();
@@ -102,13 +101,15 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
                 	eva.setFechaRegistro(calif.getRelGrupoEvaluacion().getFechaRegistro());
                 	
                 	eva.setIdEvalCalificacion(calif.getIdEvalCalificacion());
-                	
+                	                	
+                	//SET EVLAUACIONES
                 	RelGrupoEvaluacion relGrupo = mapperRelGrupoEval.map(calif.getRelGrupoEvaluacion(), RelGrupoEvaluacion.class);
                 	eva.setRelGrupoEvaluacion(relGrupo);
-                	
+                   
+                	//SET PARTICIPANTE                	                	
                 	RelGrupoParticipante relPart = mapperRelGrupoPart.map(calif.getRelGrupoParticipante(), RelGrupoParticipante.class);
                 	eva.setRelGrupoParticipante(relPart);
-             
+                	
                 	eva.setUsuarioModifico(calif.getUsuarioModifico());
                 	
                 	lista.add(eva);
@@ -122,12 +123,10 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
                 entidad.setTblGrupo(grupo);
                 entidad.setUsuarioModifico(dto.getUsuarioModifico());
                 
-                
-                
                 entidad = relGpoEvaluacionRepo.save(entidad);
                 res.setDto(mapperGpoEval.map(entidad, RelGrupoEvaluacionDTO.class));
-        //GUSTAVO --guardarBitacora(dto.getBitacoraDTO(), String.valueOf(dto.getIdGpoEvaluacion()));
-
+       
+                logger.info("-" );
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
                 res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);
@@ -136,6 +135,7 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
 
         return res;
     }
+    
 
     @Override
     public ResultadoDTO<RelGrupoEvaluacionDTO> actualizar(RelGrupoEvaluacionDTO dto) {

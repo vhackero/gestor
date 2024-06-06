@@ -245,6 +245,7 @@ public class EventoCapacitacionServiceFacade {
 						califAux.stream().forEach(c -> c.setRelGrupoEvaluacion(eval));
 						eval.setRelEvaluacionCalificaciones(califAux);
 						res = relGpoEvaluacionService.guardar(eval);
+						
 						if (ObjectUtils.isNotNull(res) && !res.getResultado().getValor()) {
 							res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_FALLIDA);
 							throw new Exception("Error al guardar actualizacion del Grupo");
@@ -257,6 +258,10 @@ public class EventoCapacitacionServiceFacade {
 			if (cerrarActa) {
 				
 				grupoParticipanteRepo.borrarPorIdGrupo(idGrupo);
+				
+				//provicional
+//				List<RelGrupoParticipanteDTO> list = new ArrayList<RelGrupoParticipanteDTO>();
+//				list.add(participantesByGrupo.get(1));
 				
 				for (RelGrupoParticipanteDTO rpg : participantesByGrupo) {
 					ResultadoDTO<RelGrupoParticipanteDTO> resx = grupoParticipanteService

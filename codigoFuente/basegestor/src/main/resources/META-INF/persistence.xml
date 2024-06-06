@@ -237,7 +237,7 @@
 
         <!-- Fin de seccion de entidades optimizadas -->
         <properties>
-            <property name="hibernate.show_sql" value="false" />
+            <property name="hibernate.show_sql" value="true" />
         </properties>
 
     </persistence-unit>

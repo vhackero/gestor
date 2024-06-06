@@ -37,7 +37,7 @@ public class RelGrupoParticipanteDTO implements Serializable {
 
 
 	private String bloque;
-	private String grupoNombre;
+	private String nombre;
 	private String docente;
 	private String asesor;
 	
@@ -249,13 +249,13 @@ public class RelGrupoParticipanteDTO implements Serializable {
 	}
 
 
-	public String getGrupoNombre() {
-		return grupoNombre;
+	public String getNombre() {
+		return nombre;
 	}
 
 
-	public void setGrupoNombre(String grupoNombre) {
-		this.grupoNombre = grupoNombre;
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
 	}
 
 
