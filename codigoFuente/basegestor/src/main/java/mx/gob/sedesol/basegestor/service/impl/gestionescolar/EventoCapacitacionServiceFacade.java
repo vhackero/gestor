@@ -260,10 +260,10 @@ public class EventoCapacitacionServiceFacade {
 				grupoParticipanteRepo.borrarPorIdGrupo(idGrupo);
 				
 				//provicional
-				List<RelGrupoParticipanteDTO> list = new ArrayList<RelGrupoParticipanteDTO>();
-				list.add(participantesByGrupo.get(1));
+//				List<RelGrupoParticipanteDTO> list = new ArrayList<RelGrupoParticipanteDTO>();
+//				list.add(participantesByGrupo.get(1));
 				
-				for (RelGrupoParticipanteDTO rpg : list) {
+				for (RelGrupoParticipanteDTO rpg : participantesByGrupo) {
 					ResultadoDTO<RelGrupoParticipanteDTO> resx = grupoParticipanteService
 							.actualizaRelGrupoParticipante(rpg);
 					if (ObjectUtils.isNotNull(resx) && !resx.getResultado().getValor()) {
