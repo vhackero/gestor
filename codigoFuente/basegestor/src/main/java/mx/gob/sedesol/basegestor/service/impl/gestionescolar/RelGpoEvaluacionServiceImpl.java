@@ -40,6 +40,8 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
     private ModelMapper mapperDictamen = new ModelMapper();
     private ModelMapper mapperRelGrupoEval = new ModelMapper();
     private ModelMapper mapperRelGrupoPart = new ModelMapper();
+    
+    private ModelMapper global = new ModelMapper();
 
     @Override
     public List<RelGrupoEvaluacionDTO> findAll() {
@@ -64,67 +66,70 @@ public class RelGpoEvaluacionServiceImpl extends ComunValidacionService<RelGrupo
 
         	try {
                 
-            	RelGrupoEvaluacion entidad = new RelGrupoEvaluacion();
-            	
-            	CatTipoCalificacionEc tipo = new CatTipoCalificacionEc();
-            	
-            	tipo.setActivo(dto.getCatTipoCalificacionEc().getActivo());
-            	tipo.setDescripcion(dto.getCatTipoCalificacionEc().getDescripcion());
-            	tipo.setFechaActualizacion(dto.getCatTipoCalificacionEc().getFechaActualizacion());
-            	tipo.setFechaRegistro(dto.getCatTipoCalificacionEc().getFechaRegistro());
-            	tipo.setId(dto.getCatTipoCalificacionEc().getId());
-            	tipo.setNombre(dto.getCatTipoCalificacionEc().getNombre());
-            	tipo.setOrden(dto.getCatTipoCalificacionEc().getOrden());
-            	BigInteger id = BigInteger.valueOf(dto.getCatTipoCalificacionEc().getUsuarioModifico());
-            	tipo.setUsuarioModifico(id);
-            	
-            	entidad.setCatTipoCalificacionEc(tipo);
-            	entidad.setFechaRegistro(dto.getFechaRegistro());
-            	entidad.setIdGpoEvaluacion(dto.getIdGpoEvaluacion());
-                entidad.setNombreEvaluacion(dto.getNombreEvaluacion());
-                entidad.setPonderacion(dto.getPonderacion());
-                
-                List<RelEvaluacionCalificacion> lista = new ArrayList<RelEvaluacionCalificacion>();
-                
-//                List<RelEvaluacionCalificacionDTO> ls = new ArrayList<>();
-//                ls.add(dto.getRelEvaluacionCalificaciones().get(0));
-                
-                for(RelEvaluacionCalificacionDTO calif : dto.getRelEvaluacionCalificaciones()) {
-                	
-                	RelEvaluacionCalificacion eva = new RelEvaluacionCalificacion();
-                	
-                	eva.setCalificacion(calif.getCalificacion());                	
-                	
-                	CatDictamen dictamen = mapperDictamen.map(calif.getDictamen(), CatDictamen.class);
-                	eva.setDictamen(dictamen);
-                	
-                	eva.setFechaRegistro(calif.getRelGrupoEvaluacion().getFechaRegistro());
-                	
-                	eva.setIdEvalCalificacion(calif.getIdEvalCalificacion());
-                	                	
-                	//SET EVLAUACIONES
-                	RelGrupoEvaluacion relGrupo = mapperRelGrupoEval.map(calif.getRelGrupoEvaluacion(), RelGrupoEvaluacion.class);
-                	eva.setRelGrupoEvaluacion(relGrupo);
-                   
-                	//SET PARTICIPANTE                	                	
-                	RelGrupoParticipante relPart = mapperRelGrupoPart.map(calif.getRelGrupoParticipante(), RelGrupoParticipante.class);
-                	eva.setRelGrupoParticipante(relPart);
-                	
-                	eva.setUsuarioModifico(calif.getUsuarioModifico());
-                	
-                	lista.add(eva);
-                	
-                }           
-           
-                entidad.setRelEvaluacionCalificaciones(lista);
-                
-                TblGrupo grupo = mapperGpoEval.map(dto.getTblGrupo(), TblGrupo.class);
-                
-                entidad.setTblGrupo(grupo);
-                entidad.setUsuarioModifico(dto.getUsuarioModifico());
-                
-                entidad = relGpoEvaluacionRepo.save(entidad);
-                res.setDto(mapperGpoEval.map(entidad, RelGrupoEvaluacionDTO.class));
+        		
+        		RelGrupoEvaluacion globa = global.map(dto, RelGrupoEvaluacion.class);
+        		
+//            	RelGrupoEvaluacion entidad = new RelGrupoEvaluacion();
+//            	
+//            	CatTipoCalificacionEc tipo = new CatTipoCalificacionEc();
+//            	
+//            	tipo.setActivo(dto.getCatTipoCalificacionEc().getActivo());
+//            	tipo.setDescripcion(dto.getCatTipoCalificacionEc().getDescripcion());
+//            	tipo.setFechaActualizacion(dto.getCatTipoCalificacionEc().getFechaActualizacion());
+//            	tipo.setFechaRegistro(dto.getCatTipoCalificacionEc().getFechaRegistro());
+//            	tipo.setId(dto.getCatTipoCalificacionEc().getId());
+//            	tipo.setNombre(dto.getCatTipoCalificacionEc().getNombre());
+//            	tipo.setOrden(dto.getCatTipoCalificacionEc().getOrden());
+//            	BigInteger id = BigInteger.valueOf(dto.getCatTipoCalificacionEc().getUsuarioModifico());
+//            	tipo.setUsuarioModifico(id);
+//            	
+//            	entidad.setCatTipoCalificacionEc(tipo);
+//            	entidad.setFechaRegistro(dto.getFechaRegistro());
+//            	entidad.setIdGpoEvaluacion(dto.getIdGpoEvaluacion());
+//                entidad.setNombreEvaluacion(dto.getNombreEvaluacion());
+//                entidad.setPonderacion(dto.getPonderacion());
+//                
+//                List<RelEvaluacionCalificacion> lista = new ArrayList<RelEvaluacionCalificacion>();
+//                
+////                List<RelEvaluacionCalificacionDTO> ls = new ArrayList<>();
+////                ls.add(dto.getRelEvaluacionCalificaciones().get(0));
+//                
+//                for(RelEvaluacionCalificacionDTO calif : dto.getRelEvaluacionCalificaciones()) {
+//                	
+//                	RelEvaluacionCalificacion eva = new RelEvaluacionCalificacion();
+//                	
+//                	eva.setCalificacion(calif.getCalificacion());                	
+//                	
+//                	CatDictamen dictamen = mapperDictamen.map(calif.getDictamen(), CatDictamen.class);
+//                	eva.setDictamen(dictamen);
+//                	
+//                	eva.setFechaRegistro(calif.getRelGrupoEvaluacion().getFechaRegistro());
+//                	
+//                	eva.setIdEvalCalificacion(calif.getIdEvalCalificacion());
+//                	                	
+//                	//SET EVLAUACIONES
+//                	RelGrupoEvaluacion relGrupo = mapperRelGrupoEval.map(calif.getRelGrupoEvaluacion(), RelGrupoEvaluacion.class);
+//                	eva.setRelGrupoEvaluacion(relGrupo);
+//                   
+//                	//SET PARTICIPANTE                	                	
+//                	RelGrupoParticipante relPart = mapperRelGrupoPart.map(calif.getRelGrupoParticipante(), RelGrupoParticipante.class);
+//                	eva.setRelGrupoParticipante(relPart);
+//                	
+//                	eva.setUsuarioModifico(calif.getUsuarioModifico());
+//                	
+//                	lista.add(eva);
+//                	
+//                }           
+//           
+//                entidad.setRelEvaluacionCalificaciones(lista);
+//                
+//                TblGrupo grupo = mapperGpoEval.map(dto.getTblGrupo(), TblGrupo.class);
+//                
+//                entidad.setTblGrupo(grupo);
+//                entidad.setUsuarioModifico(dto.getUsuarioModifico());
+
+                globa = relGpoEvaluacionRepo.save(globa);
+                res.setDto(mapperGpoEval.map(globa, RelGrupoEvaluacionDTO.class));
        
                 logger.info("-" );
             } catch (Exception e) {
