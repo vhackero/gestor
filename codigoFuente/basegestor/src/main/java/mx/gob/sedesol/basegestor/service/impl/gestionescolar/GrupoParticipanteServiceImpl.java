@@ -660,6 +660,9 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 		
 		//RelGrupoParticipante entity = modelMapper.map(dto, RelGrupoParticipante.class);
 		
+		logger.info("final : " + dto.getCalifFinal());
+		logger.info("total : " + dto.getCalifTotal());
+		
 		RelGrupoParticipante entity = new RelGrupoParticipante();
 		entity.setCalifFinal(dto.getCalifFinal());
 		entity.setCalifTotal(dto.getCalifTotal());
