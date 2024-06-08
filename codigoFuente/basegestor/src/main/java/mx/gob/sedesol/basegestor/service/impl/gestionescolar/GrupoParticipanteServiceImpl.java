@@ -680,9 +680,16 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 		entity.setPorcentajeAsist(dto.getPorcentajeAsist());
 		entity.setUsuarioModifico(dto.getUsuarioModifico());
 			
-		if (ObjectUtils.isNotNull(entity)) {				
+		if (ObjectUtils.isNotNull(entity)) {	
 			
-			entity = grupoParticipanteRepo.save(entity);
+			Integer id = dto.getId();
+			Double califTotal = dto.getCalifTotal();
+			Integer porcentajeAsist = dto.getPorcentajeAsist();
+			Double calificacion_final = dto.getCalifFinal();
+			
+			grupoParticipanteRepo.actualizarRelGrupoParticipanteCalificaciones( id , califTotal, porcentajeAsist, calificacion_final );
+			
+			//entity = grupoParticipanteRepo.save(entity);
 			// GUSTAVO --guardarBitacoraGrupoParticipante(dto,
 			// String.valueOf(entity.getId()));
 			logger.info("2  actualizaRelGrupoParticipante>>");

@@ -257,11 +257,13 @@ public class EventoCapacitacionServiceFacade {
 			logger.info("cerrarActa>>");
 			if (cerrarActa) {
 				
-				grupoParticipanteRepo.borrarPorIdGrupo(idGrupo);
+				//grupoParticipanteRepo.borrarPorIdGrupo(idGrupo);
 				
 				//provicional
 //				List<RelGrupoParticipanteDTO> list = new ArrayList<RelGrupoParticipanteDTO>();
 //				list.add(participantesByGrupo.get(1));
+				
+				logger.info("grupo : "+idGrupo);
 				
 				for (RelGrupoParticipanteDTO rpg : participantesByGrupo) {
 					ResultadoDTO<RelGrupoParticipanteDTO> resx = grupoParticipanteService
