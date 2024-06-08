@@ -133,6 +133,15 @@ public interface GrupoParticipanteRepo extends JpaRepository<RelGrupoParticipant
 			+ " SET rgp.califTotal = null, rgp.porcentajeAsist = null, rgp.califFinal = null  " 
 			+ " WHERE rgp.grupo.idGrupo = :idGrupo ")
 	public void actualizarRelGrupoParticipanteByGrupo(@Param("idGrupo")Integer idGrupo);
+
+	@Modifying(clearAutomatically = true)
+	@Query("UPDATE RelGrupoParticipante rgp "
+			+ " SET rgp.califTotal = :califTotal, rgp.porcentajeAsist = :porcentajeAsist, rgp.califFinal = :califFinal  " 
+			+ " WHERE rgp.id = :id ")
+	public void actualizarRelGrupoParticipanteCalificaciones(@Param("id")Integer id,
+															 @Param("califTotal")Double califTotal, 
+															 @Param("porcentajeAsist")Integer porcentajeAsist, 
+															 @Param("califFinal")Double califFinal);
 	
 	@Modifying
 	@Query(value = " DELETE FROM rel_grupo_participante where id_grupo = :idGrupo" , nativeQuery = true)
