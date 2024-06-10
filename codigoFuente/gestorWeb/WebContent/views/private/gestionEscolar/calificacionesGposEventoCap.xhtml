@@ -116,16 +116,16 @@
 					<div class="form-group">
 						<div class="row">
 							<div class="col-md-3" >
-								<p:outputLabel styleClass="bloque" rendered="true"
+								<p:outputLabel styleClass="bloque" rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) }"
 									value="Generar evaluación:" disabled="#{calificacionGpoEventoCapBean.modalidadEnLinea}"/>
 								<p:commandButton process="@this" ajax="true"
 									value="Generar evaluación"
 									action="#{calificacionGpoEventoCapBean.generaTablaCalifGrupo}"
 									update="@form" styleClass="btn btn-primary" style="margin:0"
 									disabled="#{calificacionGpoEventoCapBean.cerrarActa or calificacionGpoEventoCapBean.modalidadEnLinea}"
-									rendered="#{not(calificacionGpoEventoCapBean.modLineaMixto)}" />
+									rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) }" />
 
-								<p:spinner min="0" maxlength="1" max="9" rendered="true"
+								<p:spinner min="0" maxlength="1" max="9" rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) }"
 									value="#{calificacionGpoEventoCapBean.numEvaluaciones}"
 									disabled="#{calificacionGpoEventoCapBean.cerrarActa or calificacionGpoEventoCapBean.modalidadEnLinea}">
 									<p:ajax process="@this"
@@ -141,15 +141,18 @@
 									action="#{calificacionGpoEventoCapBean.obtieneCalifMoodleWS}"
 									ajax="true" styleClass="btn btn-primary pull-right" style="height: 40px;width: 170px;"
 									update="@form" />
-								<p:commandButton id="btnActaCalificacionesFirmada2" ajax="true"  
-									rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) }"
-									styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis pull-right"
-									action="#{calificacionGpoEventoCapBean.descargarActa}" />
-								<p:outputLabel value="Descarga Acta Firmada: " 
-									styleClass="margenIzquierdo agregaHeight pull-right" 
-									rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and calificacionGpoEventoCapBean.cerrarActa) }"/>
+								
 								<sec:authorize access="hasPermission(null, 'ADMIN' ) ">	
-									<p:outputLabel value="Eliminar Acta Firmada: " 
+								
+									<p:commandButton id="btnActaCalificacionesFirmada2" ajax="true"  
+										rendered="#{(calificacionGpoEventoCapBean.tieneRolAdmin and calificacionGpoEventoCapBean.cerrarActa) }"
+										styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis pull-right"
+										action="#{calificacionGpoEventoCapBean.descargarActa}" />
+									<p:outputLabel value="Descarga Acta Firmada: " 
+										styleClass="margenIzquierdo agregaHeight pull-right" 
+										rendered="#{(calificacionGpoEventoCapBean.tieneRolAdmin and calificacionGpoEventoCapBean.cerrarActa) }"/>
+
+									<p:outputLabel value="Eliminar Acta Firmada: 2" 
 										styleClass="margenIzquierdo agregaHeight" 
 										rendered="#{(calificacionGpoEventoCapBean.tieneRolAdmin and calificacionGpoEventoCapBean.cerrarActa)}"/>
 									<p:commandButton id="btnEliminarActaFirmada" ajax="true"  
