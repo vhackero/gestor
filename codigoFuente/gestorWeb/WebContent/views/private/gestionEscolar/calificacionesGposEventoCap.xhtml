@@ -143,12 +143,12 @@
 									update="@form" />
 								
 								<p:commandButton id="btnActaCalificacionesFirmada2" ajax="true"  
-									rendered="#{(calificacionGpoEventoCapBean.tieneRolAdmin and calificacionGpoEventoCapBean.cerrarActa) }"
+									rendered="#{( calificacionGpoEventoCapBean.cerrarActa) }"
 									styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis pull-right"
 									action="#{calificacionGpoEventoCapBean.descargarActa}" />
 								<p:outputLabel value="Descarga Acta Firmada: " 
 									styleClass="margenIzquierdo agregaHeight pull-right" 
-									rendered="#{(calificacionGpoEventoCapBean.tieneRolAdmin and calificacionGpoEventoCapBean.cerrarActa) }"/>
+									rendered="#{(calificacionGpoEventoCapBean.cerrarActa) }"/>
 
 								<sec:authorize access="hasPermission(null, 'ADMIN' ) ">								
 									
