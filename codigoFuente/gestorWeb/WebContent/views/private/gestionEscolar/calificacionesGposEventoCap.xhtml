@@ -142,15 +142,16 @@
 									ajax="true" styleClass="btn btn-primary pull-right" style="height: 40px;width: 170px;"
 									update="@form" />
 								
-								<sec:authorize access="hasPermission(null, 'ADMIN' ) ">	
-								
-									<p:commandButton id="btnActaCalificacionesFirmada2" ajax="true"  
-										rendered="#{(calificacionGpoEventoCapBean.tieneRolAdmin and calificacionGpoEventoCapBean.cerrarActa) }"
-										styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis pull-right"
-										action="#{calificacionGpoEventoCapBean.descargarActa}" />
-									<p:outputLabel value="Descarga Acta Firmada: " 
-										styleClass="margenIzquierdo agregaHeight pull-right" 
-										rendered="#{(calificacionGpoEventoCapBean.tieneRolAdmin and calificacionGpoEventoCapBean.cerrarActa) }"/>
+								<p:commandButton id="btnActaCalificacionesFirmada2" ajax="true"  
+									rendered="#{(calificacionGpoEventoCapBean.tieneRolAdmin and calificacionGpoEventoCapBean.cerrarActa) }"
+									styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis pull-right"
+									action="#{calificacionGpoEventoCapBean.descargarActa}" />
+								<p:outputLabel value="Descarga Acta Firmada: " 
+									styleClass="margenIzquierdo agregaHeight pull-right" 
+									rendered="#{(calificacionGpoEventoCapBean.tieneRolAdmin and calificacionGpoEventoCapBean.cerrarActa) }"/>
+
+								<sec:authorize access="hasPermission(null, 'ADMIN' ) ">								
+									
 
 									<p:outputLabel value="Eliminar Acta Firmada:" 
 										styleClass="margenIzquierdo agregaHeight" 
