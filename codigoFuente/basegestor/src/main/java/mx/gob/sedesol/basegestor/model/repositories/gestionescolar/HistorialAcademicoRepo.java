@@ -110,7 +110,14 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				regresa.setMatricula(obj[0].toString());
 				regresa.setProgramaEducativo(obj[1].toString());
 				regresa.setPromedio(new BigDecimal(obj[2].toString()));
-				regresa.setCreditos(new BigDecimal(obj[3].toString()));
+				
+				//ITTIVA EN
+				if( obj[3] == null){
+					regresa.setCreditos(new BigDecimal(0));
+				}else{
+					regresa.setCreditos(new BigDecimal(obj[3].toString()));
+				}
+				
 				regresa.setTotalCreditos(new BigInteger(obj[4].toString()));
 				regresa.setAprobadas(new BigInteger(obj[5].toString()));
 				regresa.setReprobadas(new BigInteger(obj[6].toString()));
