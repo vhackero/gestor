@@ -1050,7 +1050,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 					}
 				}
 
-				if (evento.getTipoConstancia() != 0) {
+				//if (evento.getTipoConstancia() != 0) {
 					String nombreEc = gp.getGrupo().getEvento().getNombreEc();
 					String modalidad = gp.getGrupo().getEvento().getCatModalidadPlanPrograma().getNombre();
 					Date fecha = gp.getGrupo().getEvento().getFechaFinal();
@@ -1109,7 +1109,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 
 
 					eventos.add(evento);
-				}
+				//}
 			}
 		}
 		return eventos;
