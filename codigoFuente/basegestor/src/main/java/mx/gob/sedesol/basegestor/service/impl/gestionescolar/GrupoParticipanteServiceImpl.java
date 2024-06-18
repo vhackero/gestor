@@ -37,6 +37,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDT
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoListaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LogrosDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBaja2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
@@ -992,6 +993,8 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 		List<RelGrupoParticipante> rgp = grupoParticipanteRepo.getParticipanteByActaCerradaYconstancia(idPersona);
 		List<HistorialAcademicoListaDTO> rgpC = iHistorialAcademicoRepo.getParticipanteByActaCerradaYconstancia2(idPersona.toString());
 
+		List<TiraMateriaBaja2DTO> bajas = iHistorialAcademicoRepo.consultaTiraMateriasBaja2(idPersona);
+		
 		List<EventoConstanciaDTO> eventos = new ArrayList<>();
 		List<RelEncuestaUsuarioDTO> encuestas = new ArrayList<>();
 		
@@ -1089,7 +1092,29 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 					evento.setDuracionHrs(duracionHrs);
 					evento.setCalificacionTotal(calificacionTotal);
 					evento.setPorcentajeAsistencia(porcentajeAsistencia);
-					evento.setCalificacionFinal(new Double(grupoCalificacionFinal));
+					
+					// ITTIVA validacion si es una materia baja
+					
+					if(!bajas.isEmpty()) {
+
+						for (TiraMateriaBaja2DTO baja : bajas) {
+
+							String idg = gp.getGrupo().getIdGrupo().toString();
+							String idgb = baja.getIdGrupo().toString();
+	
+							if(idg.equals(idgb) ) {
+								evento.setCalificacionFinal(new Double(666.0));
+								break;
+							} 
+	
+						}
+						
+					} else {
+						evento.setCalificacionFinal(new Double(grupoCalificacionFinal));
+					}
+
+					
+
 					evento.setNombreGrupo(gp.getGrupo().getNombre());
 					
 					for (HistorialAcademicoListaDTO rgpC2 : rgpC) {
