@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoListaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBaja2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 
@@ -313,6 +314,39 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				dato.setNombreMateria(obj[0] != null ? obj[0].toString() : null );
 				dato.setPeriodo(obj[1] != null ? obj[1].toString() : null );
 				dato.setTipoBaja(obj[2] != null ? obj[2].toString() : null );
+				regresa.add(dato);
+			}
+		}
+
+		return regresa;
+
+	}
+
+	@Override
+	public List<TiraMateriaBaja2DTO> consultaTiraMateriasBaja2(Long id_persona) {
+
+		List<TiraMateriaBaja2DTO>  regresa = new ArrayList<TiraMateriaBaja2DTO>();
+
+		String consulta = "SELECT t2.id_grupo grupo, t2.id_persona persona  \r\n"
+				+ "FROM rel_persona_bajas t2\r\n"
+				+ "         INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id\r\n"
+				+ "         INNER JOIN cat_tipo_bajas tb ON tb.id_tipo_baja = mb2.tipo_baja_id\r\n"
+				+ "         INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = t2.id_programa\r\n"
+				+ "         INNER JOIN tbl_eventos e ON e.id_evento = t2.id_evento\r\n"
+				+ "WHERE t2.id_persona = :id_persona";
+
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("id_persona", id_persona);
+
+		List<Object[]> lista = query.getResultList();
+
+		if (!lista.isEmpty()) {
+			for (Object[] obj : lista) {
+				TiraMateriaBaja2DTO dato = new TiraMateriaBaja2DTO();
+				Integer i = Integer.valueOf(obj[0].toString());
+				dato.setIdGrupo((i) );				
+//				Integer ii = Integer.valueOf(obj[1].toString());
+//				dato.setIdPersona(ii);
 				regresa.add(dato);
 			}
 		}

@@ -4,6 +4,7 @@ import java.util.List;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoListaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBaja2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 
@@ -18,6 +19,7 @@ public interface IHistorialAcademicoRepo {
 	List<HistorialAcademicoListaDTO> getParticipanteByActaCerradaYconstancia2(String id_persona);
 	
 	List<TiraMateriaBajaDTO> consultaTiraMateriasBaja(Long id_persona);
-
+	
+	List<TiraMateriaBaja2DTO> consultaTiraMateriasBaja2(Long id_persona);
 	
 }

@@ -226,7 +226,9 @@
 								sortBy="#{evento.calificacionFinal}" filterMatchMode="contains"
 								filterBy="#{evento.calificacionFinal}"
 								filterStyle="display:none">
-								<h:outputText value="#{evento.calificacionFinal}" />
+								<!--<h:outputText value="#{evento.calificacionFinal}" /-->
+								<h:outputText
+									value="#{evento.calificacionFinal eq '666.0' ? 'NP' : evento.calificacionFinal}" />
 							</p:column>
 							<p:column headerText="Constancias" styleClass="text-center">
 								<p:commandButton action="#{constanciasBean.generarConstancia}"
