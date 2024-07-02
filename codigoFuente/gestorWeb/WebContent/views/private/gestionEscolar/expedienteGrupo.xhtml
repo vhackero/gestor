@@ -10,13 +10,13 @@
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
-		<li>Expediente de alumnos por grupo</li>
+		<li>Expediente de estudiantes por grupo</li>
 	</ui:define>
 	<ui:define name="content">
 		<h:form>
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
-			<h1>Expediente de alumnos por grupo</h1>
+			<h1>Expediente de estudiantes por grupo</h1>
 			<hr />
 			<f:validateBean disabled="true">
 				<p:panel header="Búsqueda de grupo">
@@ -192,37 +192,37 @@
 						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
 						currentPageReportTemplate="({currentPage} de {totalPages})"
 						rowsPerPageTemplate="5,10,15" tableStyleClass="table">
-						<p:column headerText="Id alumno: " styleClass="text-center">
+						<p:column headerText="Id estudiante " styleClass="text-center">
 							<h:outputText value="#{alumno.persona.idPersona}" />
 						</p:column>
-						<p:column headerText="Nombre del alumno: "
+						<p:column headerText="Nombre del estudiante "
 							styleClass="text-center">
 							<h:outputText value="#{alumno.persona.nombreCompleto}" />
 						</p:column>
 						<p:column headerText="Calificación final" styleClass="text-center">
-							<h:outputText value="#{alumno.califFinal * 10}" />
+							<h:outputText value="#{alumno.califFinal}" />
 						</p:column>
-						<p:column headerText="Constancias" styleClass="text-center">
-							<p:commandButton id="btnVerConstancia" process="@this"
-								actionListener="#{expedienteEventoBean.verConstancia(alumno)}"
-								ajax="true"
-								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye">
-							</p:commandButton>
-							<p:tooltip for="btnVerConstancia" position="top" value="Ver" />
-							<p:commandButton id="btnDescargarConstancia" process="@this"
-								onclick="PrimeFaces.monitorDownload(start, stop);"
-								actionListener="#{expedienteEventoBean.descargarConstancia(alumno)}"
-								ajax="false"
-								styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-circle-down text-align: center;">
-								<p:fileDownload value="#{expedienteEventoBean.constanciaPDF}" />
-							</p:commandButton>
-							<p:tooltip for="btnDescargarConstancia" position="top"
-								value="Descargar" />
-						</p:column>
+<!-- 						<p:column headerText="Constancias" styleClass="text-center"> -->
+<!-- 							<p:commandButton id="btnVerConstancia" process="@this" -->
+<!-- 								actionListener="#{expedienteEventoBean.verConstancia(alumno)}" -->
+<!-- 								ajax="true" -->
+<!-- 								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye"> -->
+<!-- 							</p:commandButton> -->
+<!-- 							<p:tooltip for="btnVerConstancia" position="top" value="Ver" /> -->
+<!-- 							<p:commandButton id="btnDescargarConstancia" process="@this" -->
+<!-- 								onclick="PrimeFaces.monitorDownload(start, stop);" -->
+<!-- 								actionListener="#{expedienteEventoBean.descargarConstancia(alumno)}" -->
+<!-- 								ajax="false" -->
+<!-- 								styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-circle-down text-align: center;"> -->
+<!-- 								<p:fileDownload value="#{expedienteEventoBean.constanciaPDF}" /> -->
+<!-- 							</p:commandButton> -->
+<!-- 							<p:tooltip for="btnDescargarConstancia" position="top" -->
+<!-- 								value="Descargar" /> -->
+<!-- 						</p:column> -->
 
 					</p:dataTable>
 					<div class="row flexY">
-						<div class="col-md-12 text-right">
+						<div class="col-md-12 text-right" hidden="true">
 							<p:outputLabel value="Constancias: " />
 							<p:commandButton id="btnDescargarTodasLasConstancia"
 								value="Descargar" process="@this"
