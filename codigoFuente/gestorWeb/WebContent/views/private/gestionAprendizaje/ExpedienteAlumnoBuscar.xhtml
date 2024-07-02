@@ -31,7 +31,7 @@
 								<div class="row">
 									<div class="col-md-4 col-xs-12">
 										<p:outputLabel for="somTipoUsuario"
-											value="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.tipousuario')}" />
+											value="Clasificación de estudiante" />
 										<p:selectOneMenu id="somTipoUsuario"
 											value="#{expedienteAcademicoBean.personaFiltros.tipoUsuario}"
 											styleClass="col-xs-12">
@@ -54,9 +54,9 @@
 									</div>
 									<div class="col-md-4 col-xs-12">
 										<p:outputLabel for="txtUsuario"
-											value="Usuario:" />
+											value="Estudiante:" />
 										<p:inputText id="txtUsuario"
-											placeholder="Usuario"
+											placeholder="Estudiante"
 											value="#{expedienteAcademicoBean.personaFiltros.usuario}"
 											styleClass="form-control" />
 									</div>
@@ -111,7 +111,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<p:panel
-						header="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.personas')}">
+						header="Estudiantes">
 						<p:dataTable value="#{expedienteAcademicoBean.personas}"
 							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
 							var="persona" paginator="true" rows="10" widgetVar="tblPersonas"
@@ -131,7 +131,7 @@
 							</f:facet>
 							
 							<p:column
-								headerText="Usuario"
+								headerText="Estudiante"
 								sortBy="#{persona.usuario}" filterMatchMode="contains"
 								filterBy="#{persona.usuario}" filterStyle="display:none">
 								<h:outputText
@@ -148,7 +148,7 @@
 
 
 							<p:column
-								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.tipo')}"
+								headerText="Tipo de estudiante"
 								sortBy="#{persona.tipoUsuario}" filterMatchMode="contains"
 								filterBy="#{persona.tipoUsuario}" filterStyle="display:none">
 								<h:outputText
