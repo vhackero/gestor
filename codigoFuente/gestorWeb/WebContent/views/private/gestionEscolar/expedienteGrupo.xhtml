@@ -221,6 +221,76 @@
 <!-- 						</p:column> -->
 
 					</p:dataTable>
+					<br/>
+
+
+					<!-- Tabla oculta para exportación -->
+					<p:dataTable id="exportTable"
+						value="#{expedienteEventoBean.alumnosConConstancia}"
+						var="partCalif" rendered="false" style="display:none;">
+						<!-- Aquí "tablaAuxCalif" sería tu lista de datos sin elementos editables -->
+
+						<!-- Columnas para la tabla oculta -->
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="Id estudiante " />
+							</f:facet>
+							<h:outputText value="#{partCalif.persona.nombreCompleto}" />
+						</p:column>
+
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="Nombre del estudiante " />
+							</f:facet>
+							<h:outputText value="#{partCalif.persona.nombreCompleto}" />
+						</p:column>
+
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="Calificación final" />
+							</f:facet>
+							<h:outputText value="#{partCalif.califFinal}" />
+						</p:column>
+
+						
+						
+					</p:dataTable>
+
+					<br/>
+
+
+					<div class="row">
+						<div class="col-md-12 text-right">
+
+							<p:outputLabel value="Exportar XLS: "
+								styleClass="margenIzquierdo agregaHeight" />
+							<p:commandButton id="btnDescargar" ajax="false"
+								disabled="#{expedienteEventoBean.alumnosConConstancia.isEmpty()}"
+								styleClass="btn btn-default btn-icon icono_sisi ss_adm_desexcel">
+								<p:dataExporter type="xls" target="exportTable"
+									fileName="#{expedienteEventoBean.eventoNombre}" encoding="UTF-8" />
+							</p:commandButton>
+
+							
+							<p:outputLabel value="Descargar PDF: " rendered="true"
+							styleClass="margenIzquierdo agregaHeight" />
+							<p:commandButton id="btnDescargarPdf" ajax="false"
+								rendered="true"
+								disabled="#{expedienteEventoBean.alumnosConConstancia.isEmpty()}"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc">
+								<p:dataExporter type="pdf" target="exportTable"
+									fileName="#{expedienteEventoBean.grup}" encoding="ISO-8859-15"/>
+							</p:commandButton>
+
+						</div>
+					</div>
+					<br/>
+
+
+
+
+
+
 					<div class="row flexY">
 						<div class="col-md-12 text-right" hidden="true">
 							<p:outputLabel value="Constancias: " />

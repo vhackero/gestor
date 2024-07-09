@@ -28,6 +28,7 @@ import mx.gob.sedesol.basegestor.service.admin.PlantillaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
+import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.dto.ReporteConfig;
 import mx.gob.sedesol.gestorweb.commons.dto.UsuarioSessionDTO;
 import mx.gob.sedesol.gestorweb.commons.utils.ReporteUtil;
@@ -71,6 +72,22 @@ public class ConstanciasBean extends BaseBean {
 		eventos = grupoParticipanteService.getParticipanteByActaCerradaYconstancia2(idPersona);
 		historialAcademico = grupoParticipanteService.consultaDatosHistorialAcademico(idPersona.toString());
 		
+	}
+
+	public List<EventoConstanciaDTO> getEventosAdmin( Long id){
+
+		eventos = grupoParticipanteService.getParticipanteByActaCerradaYconstancia2(id);
+
+		return eventos;
+
+	}
+
+	public HistorialAcademicoDTO getHistorialAdmin( Long id){
+
+		historialAcademico = grupoParticipanteService.consultaDatosHistorialAcademico(id.toString());
+
+		return historialAcademico;
+
 	}
 	
 

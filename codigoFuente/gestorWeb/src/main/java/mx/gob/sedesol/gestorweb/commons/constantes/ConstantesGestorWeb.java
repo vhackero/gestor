@@ -54,6 +54,7 @@ public final class ConstantesGestorWeb {
 	public static final String NAVEGA_MIS_CURSOS_PRIVADOS = "MIS_CURSOS_PRIVADOS";
 	public static final String NAVEGA_MIS_LOGROS_GE ="MIS_LOGROS_GE";
 	public static final String NAVEGA_CONSTANCIAS ="CONSTANCIAS_GE";
+	public static final String NAVEGA_CONSTANCIAS_ADMIN = "CONSTANCIAS_GE_ADMIN";
 	
 	public static final String NAVEGA_REGISTRO_ASISTENCIAS ="REGISTRO_ASISTENCIAS";
 	
