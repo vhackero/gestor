@@ -107,7 +107,9 @@ public class ExpedienteEventoBean extends BaseBean {
 
 	////
 
-
+	private String grupoNombre;
+	private String eventoNombre;
+	private String grup;
 
 	private FichaDescProgramaDTO filtroPrograma;
 	private Integer idPrograma;
@@ -342,6 +344,15 @@ public void onChangeCatSubestructura1(ValueChangeEvent e) {
 	public void buscarAlumnosAprobados() {
 		try {
 			alumnosConConstancia = getGrupoParticipanteService().getAlumnosQueRecibieronConstPorIdGrupo(idGrupo);
+			
+			grupoNombre = alumnosConConstancia.get(0).getGrupo().getNombre() + " " + alumnosConConstancia.get(0).getGrupo().getEvento().getNombreEc();
+
+			eventoNombre = grupoNombre.replace(' ', '_');
+
+			grup = alumnosConConstancia.get(0).getGrupo().getNombre();
+
+			//evento = ;
+			
 			if (!alumnosConConstancia.isEmpty()) {
 				bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CON_EXP_ALM_GPO", String.valueOf(idGrupo),
 						requestActual(), TipoServicioEnum.LOCAL);
@@ -349,6 +360,30 @@ public void onChangeCatSubestructura1(ValueChangeEvent e) {
 		} catch (Exception e) {
 			agregarMsgError("Existe un valor nulo en la base de datos.", null);
 		}
+	}
+
+	public String getGrup() {
+		return grup;
+	}
+
+	public void setGrup(String grup) {
+		this.grup = grup;
+	}
+
+	public String getEventoNombre() {
+		return eventoNombre;
+	}
+
+	public void setEventoNombre(String eventoNombre) {
+		this.eventoNombre = eventoNombre;
+	}
+
+	public String getGrupoNombre() {
+		return grupoNombre;
+	}
+
+	public void setGrupoNombre(String grupoNombre) {
+		this.grupoNombre = grupoNombre;
 	}
 
 	/***
