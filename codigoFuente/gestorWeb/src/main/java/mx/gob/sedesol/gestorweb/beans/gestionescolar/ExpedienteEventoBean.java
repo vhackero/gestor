@@ -46,6 +46,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -343,15 +344,19 @@ public void onChangeCatSubestructura1(ValueChangeEvent e) {
 
 	public void buscarAlumnosAprobados() {
 		try {
-			alumnosConConstancia = getGrupoParticipanteService().getAlumnosQueRecibieronConstPorIdGrupo(idGrupo);
 			
-			grupoNombre = alumnosConConstancia.get(0).getGrupo().getNombre() + " " + alumnosConConstancia.get(0).getGrupo().getEvento().getNombreEc();
+			List<RelGrupoParticipanteDTO> alumnosConConstancia2 = new ArrayList<>();			
+			
+			alumnosConConstancia2 = getGrupoParticipanteService().getAlumnosQueRecibieronConstPorIdGrupo(idGrupo);
 
-			eventoNombre = grupoNombre.replace(' ', '_');
+			if (!alumnosConConstancia2.isEmpty()) {
 
-			grup = alumnosConConstancia.get(0).getGrupo().getNombre();
+					alumnosConConstancia = alumnosConConstancia2.stream().filter(RelGrupoParticipanteDTO -> RelGrupoParticipanteDTO.getCalifFinal() != null).collect(Collectors.toList());
+					grupoNombre = alumnosConConstancia.get(0).getGrupo().getNombre() + " " + alumnosConConstancia.get(0).getGrupo().getEvento().getNombreEc();
 
-			//evento = ;
+					eventoNombre = grupoNombre.replace(' ', '_');
+					grup = alumnosConConstancia.get(0).getGrupo().getNombre();
+			}
 			
 			if (!alumnosConConstancia.isEmpty()) {
 				bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CON_EXP_ALM_GPO", String.valueOf(idGrupo),
