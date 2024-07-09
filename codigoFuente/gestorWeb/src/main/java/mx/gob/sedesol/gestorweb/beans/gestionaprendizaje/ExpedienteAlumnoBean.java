@@ -1,5 +1,6 @@
 package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PlantillaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.DateUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoDocumentoEnum;
@@ -27,9 +29,11 @@ import mx.gob.sedesol.basegestor.service.admin.PlantillaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
+import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview.ConstanciasBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.dto.ReporteConfig;
 import mx.gob.sedesol.gestorweb.commons.utils.ReporteUtil;
+import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
 
 @SessionScoped
 @ManagedBean
@@ -49,6 +53,17 @@ public class ExpedienteAlumnoBean extends BaseBean {
 
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
+	
+	@ManagedProperty("#{constanciasBean}")
+	ConstanciasBean constanciasBean;
+	
+	public ConstanciasBean getConstanciasBean() {
+		return constanciasBean;
+	}
+
+	public void setConstanciasBean(ConstanciasBean constanciasBean) {
+		this.constanciasBean = constanciasBean;
+	}
 
 	private List<EventoConstanciaDTO> eventos;
 	private PersonaDTO personaDTO;
@@ -56,6 +71,11 @@ public class ExpedienteAlumnoBean extends BaseBean {
 	private EventoConstanciaDTO eventoSeleccionado;
 
 	private StreamedContent constanciaPDF;
+	
+	// ITTIVA
+	private HistorialAcademicoDTO historial;	
+	private List<EventoConstanciaDTO> listaEventos;
+	private StreamedContent reportePDF;
 
 	public ExpedienteAlumnoBean() {
 		personaDTO = new PersonaDTO();
@@ -119,12 +139,118 @@ public class ExpedienteAlumnoBean extends BaseBean {
 	}
 
 	public String navegaExpedienteAlumno() {
-		eventos = grupoParticipanteService.getParticipanteByActaCerradaYconstancia(personaDTO.getIdPersona());
-		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "VER_EXP_ALM", String.valueOf(personaDTO.getIdPersona()),
-				requestActual(), TipoServicioEnum.LOCAL);
-		return ConstantesGestorWeb.NAVEGA_EXPEDIENTE_ALUMNO;
+	
+		Long id = personaDTO.getIdPersona();
+		
+		log.info("id persona xxx : " + id);
+		
+		listaEventos = new ArrayList<>();
+		listaEventos = constanciasBean.getEventosAdmin(id);
+		
+		historial = new HistorialAcademicoDTO();		
+		historial = constanciasBean.getHistorialAdmin(id);
+				
+		return ConstantesGestorWeb.NAVEGA_CONSTANCIAS_ADMIN;
+		
+		// funcionalidad anterior
+//		eventos = grupoParticipanteService.getParticipanteByActaCerradaYconstancia(personaDTO.getIdPersona());
+//		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "VER_EXP_ALM", String.valueOf(personaDTO.getIdPersona()),
+//				requestActual(), TipoServicioEnum.LOCAL);
+
+		//return ConstantesGestorWeb.NAVEGA_EXPEDIENTE_ALUMNO;
+		
+	}
+
+	public void generarReporte() {
+
+		String rutaFondoConstancia = FacesContext.getCurrentInstance().getExternalContext().getRequestScheme() + "://"
+				+ FacesContext.getCurrentInstance().getExternalContext().getRequestServerName() + ":"
+				+ FacesContext.getCurrentInstance().getExternalContext().getRequestServerPort()
+				+ "/recursos/documentos/fondoConstancia.png";
+
+		reportePDF = null;
+
+		ReporteConfig reporteConfig = new ReporteConfig();
+		reporteConfig.setDatos(listaEventos);
+		reporteConfig.setNombreReporte("Plantilla_SISI");
+		reporteConfig.setPathJasper("/resources/jasperReport/gestionAprendizaje/expediente_academico.jasper");
+
+		reporteConfig.setTipoReporte(ReporteUtil.REPORTE_PDF);
+
+		HashMap<String, Object> params = new HashMap<>();
+		
+		
+		//Parametros de Encabezado
+		
+		String LOGO_UNADM = "/resources/jasperReport/LOGO_EDU_UNADM.png";
+		InputStream strmLOGO_UNADM = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(LOGO_UNADM);
+		String LOGO_SEP = "/resources/jasperReport/LOGO_SEP.png";
+		InputStream strmLOGO_SEP = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(LOGO_SEP);
+
+		log.info("Nombre:"+historial.getNombre());
+		log.info("Matri:"+historial.getMatricula());
+		log.info("ClaveInst:"+historial.getClaveInst());
+		log.info("Proga:"+historial.getProgramaEducativo());
+		log.info("Clave:"+historial.getClave());
+		log.info("Total Cred;"+historial.getTotalCreditos());
+		log.info("Nivel:"+historial.getNivel());
+		log.info("Promedio:"+historial.getPromedio());
+		log.info("Credi:"+historial.getCreditos());
+		log.info("Aprob: "+historial.getAprobadas());
+		log.info("Reprob: "+historial.getReprobadas());
+		log.info("NoPresen: "+historial.getNopresentadas());
+		log.info("Total: "+historial.getTotal());
+		log.info("Fecha: "+historial.getFechaConsulta());
+
+		params.put("LOGO_UNADM",strmLOGO_UNADM);
+		params.put("LOGO_SEP",strmLOGO_SEP);
+		params.put("NOMBRE", historial.getNombre());
+		params.put("MATRICULA",historial.getMatricula());
+		params.put("CLAVE_INSTITUCION",historial.getClaveInst());
+		params.put("PROG_EDUCATIVO",historial.getProgramaEducativo());
+		params.put("CLAVE", historial.getClave());
+		params.put("NIVEL", historial.getNivel());
+		params.put("PROMEDIO", historial.getPromedio().intValue());
+		params.put("CREDITOS", historial.getCreditos().intValue());
+		params.put("TOTAL_CREDITOS",historial.getTotalCreditos().intValue());
+		params.put("APROBADAS", historial.getAprobadas().intValue());
+		params.put("REPROBADAS", historial.getReprobadas().intValue());
+		params.put("NO_PRESENTADAS", historial.getNopresentadas().intValue());
+		params.put("TOTAL", historial.getTotal().intValue());
+		params.put("FECHA_CONSULTA", historial.getFechaConsulta());
+		
+		
+		//Parametros de datos
+		JRBeanArrayDataSource dsHistorial = new JRBeanArrayDataSource(listaEventos.toArray());
+		params.put("dsHistorial", dsHistorial);
+		
+		reporteConfig.setParametros(params);
+
+		setReportePDF(ReporteUtil.getStreamedContentOfBytes(ReporteUtil.generar(reporteConfig), "application/pdf",
+				historial.getMatricula()+"_Historial_academico"));
+		RequestContext.getCurrentInstance().update("reporte");
+
+		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "GEN_EXP_ACA_PDF", "", requestActual(),
+				TipoServicioEnum.LOCAL);
+
 	}
 	
+	public List<EventoConstanciaDTO> getListaEventos() {
+		return listaEventos;
+	}
+
+	public void setListaEventos(List<EventoConstanciaDTO> listaEventos) {
+		this.listaEventos = listaEventos;
+	}
+
+	public HistorialAcademicoDTO getHistorial() {
+		return historial;
+	}
+
+	public void setHistorial(HistorialAcademicoDTO historial) {
+		this.historial = historial;
+	}
+
 	public String navegaExpedienteAlumno2(PersonaDTO persona) {
 		
 		personaDTO = persona;
@@ -236,5 +362,13 @@ public class ExpedienteAlumnoBean extends BaseBean {
 
 	public void setBitacoraBean(BitacoraBean bitacoraBean) {
 		this.bitacoraBean = bitacoraBean;
+	}
+
+	public StreamedContent getReportePDF() {
+		return reportePDF;
+	}
+
+	public void setReportePDF(StreamedContent reportePDF) {
+		this.reportePDF = reportePDF;
 	}
 }

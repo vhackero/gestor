@@ -609,6 +609,13 @@
 			<redirect />
 		</navigation-case>
 
+			<!-- Constancias gestion aprendizaje -->
+		<navigation-case>
+			<from-outcome>CONSTANCIAS_GE_ADMIN</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/constanciasAdmin.xhtml</to-view-id>					
+			<redirect />
+		</navigation-case>
+
 			<!-- Expediente gestion aprendizaje -->		
 		<navigation-case>
 			<from-outcome>EXPEDIENTE_ALUMNO</from-outcome>
