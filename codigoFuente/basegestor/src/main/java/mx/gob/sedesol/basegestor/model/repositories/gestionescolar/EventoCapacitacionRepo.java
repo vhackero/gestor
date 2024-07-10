@@ -48,7 +48,7 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 	@Query("SELECT evt FROM TblEvento evt WHERE evt.privado = 0 AND evt.catEstadoEventoCapacitacion.id = 3")
 	public List<TblEvento> obtenerEventosPublicosEnEjec();
 	
-	@Query("SELECT evt FROM TblEvento evt WHERE evt.catEstadoEventoCapacitacion=2 AND evt.idPrograma = :idPrograma")
+	@Query("SELECT evt FROM TblEvento evt WHERE evt.catEstadoEventoCapacitacion IN (2,3) AND evt.idPrograma = :idPrograma")
 	public List<TblEvento> obtenerEventosPorPrograma(@Param("idPrograma") Integer idPrograma);
 	
 	@Modifying(clearAutomatically = true)
