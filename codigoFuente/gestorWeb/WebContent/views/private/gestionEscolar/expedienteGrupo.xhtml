@@ -195,6 +195,10 @@
 						<p:column headerText="Id estudiante " styleClass="text-center">
 							<h:outputText value="#{alumno.persona.idPersona}" />
 						</p:column>
+						<p:column headerText="Matricula"
+							styleClass="text-center">
+							<h:outputText value="#{alumno.persona.usuario}" />
+						</p:column>
 						<p:column headerText="Nombre del estudiante "
 							styleClass="text-center">
 							<h:outputText value="#{alumno.persona.nombreCompleto}" />
@@ -261,6 +265,13 @@
 
 					<div class="row">
 						<div class="col-md-12 text-right">
+
+							<p:outputLabel value="Descargar Calificaciones: " rendered="true"
+								styleClass="margenIzquierdo agregaHeight" />
+							<p:commandButton id="btnActaCalificaciones" ajax="true" 
+								rendered="true"
+								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc"
+								action="#{expedienteEventoBean.descargarPlantillaCalificaciones}" />
 
 							<p:outputLabel value="Exportar XLS: "
 								styleClass="margenIzquierdo agregaHeight" />
@@ -339,6 +350,30 @@
 				PF('dialogLayout').hide();
 			}
 		</script>
+
+		<p:dialog id="visorPdf" dynamic="true" responsive="true" modal="true"
+		closable="false" resizable="false" position="center"
+		header="Calificaciones" width="900" widgetVar="visorPlantilla">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<p:media player="pdf"
+						value="#{expedienteEventoBean.plantillaPDF}" width="865"
+						height="400" styleClass="agregaBorde">
+						<f:param name="id" value="#{expedienteEventoBean.idFile}" />
+					</p:media>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<p:commandButton
+					value="#{sistema.obtenerTexto('gw.admin.plantillas.btn.cerrar')}"
+					styleClass="btn btn-default pull-right"
+					onclick="PF('visorPlantilla').hide();" />
+			</div>
+		</div>
+		</p:dialog>
 
 	</ui:define>
 </ui:composition>

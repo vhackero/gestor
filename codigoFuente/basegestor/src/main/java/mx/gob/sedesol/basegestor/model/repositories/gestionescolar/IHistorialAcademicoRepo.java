@@ -2,6 +2,8 @@ package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 
 import java.util.List;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CuerpoPdfDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoPdfDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoListaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBaja2DTO;
@@ -21,5 +23,9 @@ public interface IHistorialAcademicoRepo {
 	List<TiraMateriaBajaDTO> consultaTiraMateriasBaja(Long id_persona);
 	
 	List<TiraMateriaBaja2DTO> consultaTiraMateriasBaja2(Long id_persona);
+
+	EncabezadoPdfDTO consultaEncabezadoPdf(int idGrupo);
+
+	List<CuerpoPdfDTO> consultaCuerpoPdf(int idGrupo);
 	
 }

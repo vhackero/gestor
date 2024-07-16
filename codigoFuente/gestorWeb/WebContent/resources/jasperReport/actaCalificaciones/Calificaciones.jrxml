@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version last-->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="actaCalificaciones" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f17f74c1-3dd4-45e9-b06f-5c9ababebefa">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<topPen lineWidth="0.5" lineColor="#B8D0E3"/>
+			<bottomPen lineWidth="0.5" lineColor="#B8D0E3"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#7BA8DD">
+		<box>
+			<topPen lineWidth="0.5" lineColor="#B8D0E3"/>
+			<bottomPen lineWidth="0.5" lineColor="#B8D0E3"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<topPen lineWidth="0.5" lineColor="#B8D0E3"/>
+			<bottomPen lineWidth="0.5" lineColor="#B8D0E3"/>
+		</box>
+	</style>
+	<subDataset name="dsReporteCalificaciones" uuid="4597e91f-9b6c-4e7d-ad23-5092f47b1699">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+		<queryString>
+			<![CDATA[]]>
+		</queryString>
+		<field name="numero" class="java.lang.String"/>
+		<field name="matricula" class="java.lang.String"/>
+		<field name="nombre" class="java.lang.String"/>
+		<field name="calificacion" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="dsCalificaciones" class="net.sf.jasperreports.engine.data.JRBeanArrayDataSource"/>
+	<parameter name="pPrograma" class="java.lang.String"/>
+	<parameter name="pAsignatura" class="java.lang.String"/>
+	<parameter name="pGrupo" class="java.lang.String"/>
+	<parameter name="pNombre" class="java.lang.String"/>
+	<parameter name="pMatricula" class="java.lang.String"/>
+	<parameter name="LOGO" class="java.io.InputStream"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="207" splitType="Stretch">
+			<staticText>
+				<reportElement x="260" y="23" width="290" height="30" uuid="f37e15fc-8d5e-4de3-ad06-9f10a7ca501c"/>
+				<textElement textAlignment="Center">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CALIFICACIONES]]></text>
+			</staticText>
+			<image onErrorType="Blank">
+				<reportElement x="3" y="10" width="250" height="55" uuid="a180eb72-4674-4329-9490-e3043da15fa4"/>
+				<imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement mode="Opaque" x="2" y="87" width="550" height="20" backcolor="#7BA8DD" uuid="7f464daa-6dc0-467c-b81e-b16cc4db6502"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+				</box>
+				<text><![CDATA[Programa educativo]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="2" y="107" width="550" height="20" isPrintWhenDetailOverflows="true" uuid="4caac34c-7084-4320-9f39-ecd4f9998eaf"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+				</box>
+				<textFieldExpression><![CDATA[$P{pPrograma}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="2" y="127" width="549" height="20" backcolor="#7BA8DD" uuid="5a361ea6-3cf4-4c19-aad8-45a94a617de8"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+				</box>
+				<text><![CDATA[Asignatura]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="3" y="147" width="549" height="20" isPrintWhenDetailOverflows="true" uuid="687c4ec0-37ee-4fd9-a057-55097a8ccd2d"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+				</box>
+				<textFieldExpression><![CDATA[$P{pAsignatura}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="3" y="167" width="549" height="20" backcolor="#7BA8DD" uuid="45ccca2b-1de5-4493-94ab-031f3c382ab7"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+				</box>
+				<text><![CDATA[Grupo]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="2" y="187" width="550" height="20" isPrintWhenDetailOverflows="true" uuid="0b67515c-28c8-4f64-b29c-9bfc1c259694"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+				</box>
+				<textFieldExpression><![CDATA[$P{pGrupo}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="62" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="2" y="0" width="180" height="20" backcolor="#7BA8DD" uuid="4fafb35e-64e3-4d07-8957-19368781babf"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+				</box>
+				<text><![CDATA[Folio]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="2" y="20" width="180" height="18" isPrintWhenDetailOverflows="true" uuid="657121ee-d8ff-460f-a923-04b078b0bb35"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+				</box>
+				<textFieldExpression><![CDATA[$P{pMatricula}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="182" y="20" width="370" height="18" isPrintWhenDetailOverflows="true" uuid="8f1baa44-9f8e-4841-bc6f-87b7ecda2646"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+				</box>
+				<textFieldExpression><![CDATA[$P{pNombre}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="182" y="0" width="370" height="20" backcolor="#7BA8DD" uuid="f6e083fd-c208-4b9a-8da5-af288fcd9090"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+				</box>
+				<text><![CDATA[Nombre]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="87" splitType="Stretch">
+			<componentElement>
+				<reportElement x="0" y="15" width="550" height="50" uuid="261b889f-e46f-4d18-ad3d-3156a416f5da">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
+					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
+					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
+					<datasetRun subDataset="dsReporteCalificaciones" uuid="5662b186-3758-46d8-96bd-d11e9e5bdcc6">
+						<dataSourceExpression><![CDATA[$P{dsCalificaciones}]]></dataSourceExpression>
+					</datasetRun>
+					<jr:column width="70" uuid="ad8836e4-2559-4325-a085-5a09d06e49e9">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<box>
+								<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+							</box>
+							<staticText>
+								<reportElement mode="Opaque" x="0" y="0" width="70" height="20" backcolor="#7BA8DD" uuid="74ea6a27-a037-491f-924a-fa66c9b349d4"/>
+								<box>
+									<pen lineColor="#B8D0E3"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[No.]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="15">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<box>
+								<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+							</box>
+							<textField>
+								<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="70" height="15" isPrintWhenDetailOverflows="true" uuid="cb6ecb3d-4755-47b7-a865-3638f1c47ce2"/>
+								<textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="119" uuid="2ccc70f8-10d2-4cdd-bf9e-41fcd3c038bf">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<staticText>
+								<reportElement mode="Opaque" x="0" y="0" width="119" height="20" backcolor="#7BA8DD" uuid="b55bde16-e06b-4513-bd35-a8d9034fad4b"/>
+								<box>
+									<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Matrícula]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="15">
+							<box>
+								<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+							</box>
+							<textField>
+								<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="119" height="15" isPrintWhenDetailOverflows="true" uuid="3fda2b12-76a0-4b19-8014-d0e90c111dfd"/>
+								<textFieldExpression><![CDATA[$F{matricula}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="261" uuid="949639c7-0641-4b08-9232-7be8064180c4">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<staticText>
+								<reportElement mode="Opaque" x="0" y="0" width="261" height="20" backcolor="#7BA8DD" uuid="3e2325e4-46dc-4cbd-b9c5-247771ccc044"/>
+								<box>
+									<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Nombre Estudiante]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="15">
+							<box>
+								<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+							</box>
+							<textField>
+								<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="261" height="15" isPrintWhenDetailOverflows="true" uuid="1ddb47b4-bb5c-49f4-8e03-7220c74b3c1b"/>
+								<textFieldExpression><![CDATA[$F{nombre}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="99" uuid="aa0ac37c-9aa1-4f91-bc96-ea549befa0ba">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<staticText>
+								<reportElement mode="Opaque" x="0" y="0" width="99" height="20" backcolor="#7BA8DD" uuid="cc0670f0-9747-4d47-a6b9-f799540f6f45"/>
+								<box>
+									<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="9" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Calificación]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="15">
+							<box>
+								<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
+							</box>
+							<textField>
+								<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="99" height="15" isPrintWhenDetailOverflows="true" uuid="4e998687-e231-455d-b137-c33d27971f48"/>
+								<textFieldExpression><![CDATA[$F{calificacion}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="45" splitType="Stretch">
+			<staticText>
+				<reportElement x="80" y="10" width="366" height="21" uuid="79438d8e-2044-4b1c-be83-20b5ea7148eb"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Universidad Abierta y a Distancia de México]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+</jasperReport>
