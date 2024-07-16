@@ -14,6 +14,8 @@ import javax.persistence.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CuerpoPdfDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoPdfDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoListaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBaja2DTO;
@@ -354,5 +356,93 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 		return regresa;
 
 	}
+
+
+	@Override
+	public EncabezadoPdfDTO consultaEncabezadoPdf(int idGrupo) {
+
+		EncabezadoPdfDTO  regresa = new EncabezadoPdfDTO();
+
+		String consulta = "SELECT tpl.nombre programa, fdp.nombre_tentativo asignatura, e.nombre_ec grupo,\r\n" + 
+				"							(SELECT CONCAT(p.sso_nombre,' ', p.sso_apellidoPaterno,' ', p.sso_apellidoMaterno)\r\n" + 
+				"								FROM rel_grupo_participante rgp\r\n" + 
+				"										INNER JOIN rel_persona_roles rpr ON rpr.id_persona = rgp.id_persona_participante\r\n" + 
+				"										INNER JOIN tbl_persona p ON rpr.id_persona = p.id_persona AND (p.sso_idUsuario NOT LIKE '%.%' AND p.sso_idUsuario NOT LIKE 'ES%' AND (p.sso_idUsuario LIKE 'DL%' OR p.sso_idUsuario LIKE 'FA%')) WHERE rgp.id_grupo = g.id AND rpr.id_rol = 3) as nombre,\r\n" + 
+				"							(SELECT p.sso_idUsuario FROM rel_grupo_participante rgp\r\n" + 
+				"																INNER JOIN rel_persona_roles rpr ON rpr.id_persona = rgp.id_persona_participante\r\n" + 
+				"																INNER JOIN tbl_persona p ON rpr.id_persona = p.id_persona AND (p.sso_idUsuario NOT LIKE '%.%' AND p.sso_idUsuario NOT LIKE 'ES%' AND (p.sso_idUsuario LIKE 'DL%' OR p.sso_idUsuario LIKE 'FA%')) WHERE rgp.id_grupo = g.id AND rpr.id_rol = 3) as matricula\r\n" + 
+				"									FROM tbl_planes tpl\r\n" + 
+				"										JOIN tbl_ficha_descriptiva_programa fdp ON fdp.id_plan =  tpl.id_plan\r\n" + 
+				"										JOIN tbl_eventos e ON fdp.id_programa = e.id_programa\r\n" + 
+				"										JOIN tbl_grupos g ON g.id_evento =  e.id_evento\r\n" + 
+				"								WHERE g.id=:idGrupo";
+
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("idGrupo", idGrupo);
+
+		List<Object[]> lista = query.getResultList();
+
+		if (!lista.isEmpty()) {
+			for (Object[] obj : lista) {
+
+				regresa.setPrograma(obj[0].toString());
+				regresa.setAsignatura(obj[1].toString());
+				regresa.setGrupo(obj[2].toString());
+				regresa.setNombre(obj[3].toString());
+				regresa.setMatricula(obj[4].toString());
+
+			}
+		}
+
+		return regresa;
+
+	}
+
+
+
+	@Override
+	public List<CuerpoPdfDTO> consultaCuerpoPdf(int idGrupo) {
+
+		List<CuerpoPdfDTO> regresa = new ArrayList<CuerpoPdfDTO>();
+
+		List<Object[]> lista = new ArrayList<>();
+
+		String consulta = "SELECT tp.sso_idUsuario matricula, CONCAT(tp.sso_apellidoPaterno, ' ', IF(tp.sso_apellidoMaterno != '', CONCAT(tp.sso_apellidoMaterno, ' '),'' ), tp.sso_nombre) nombre, gp.calificacion_final calificacion\r\n" + 
+				"FROM rel_grupo_participante gp\r\n" + 
+				"         JOIN tbl_persona tp ON tp.id_persona = gp.id_persona_participante\r\n" + 
+				"         JOIN tbl_grupos g ON gp.id_grupo = g.id\r\n" + 
+				"         JOIN tbl_eventos e ON g.id_evento = e.id_evento\r\n" + 
+				"WHERE g.id = :idGrupo \r\n" + 
+				"  AND g.acta_cerrada = 1 AND tp.activo = 1 AND gp.calificacion_final IS NOT NULL\r\n" + 
+				"ORDER BY tp.sso_idUsuario";
+
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("idGrupo", idGrupo);
+
+		lista = query.getResultList();
+
+		int consecutivo = 1;
+
+		if (!lista.isEmpty()) {
+			for (Object[] obj : lista) {
+				
+				CuerpoPdfDTO cuerpoPdfDTO = new CuerpoPdfDTO();
+				
+				String con = String.valueOf(consecutivo++);
+				cuerpoPdfDTO.setNumero(con);
+				cuerpoPdfDTO.setMatricula(obj[0].toString());
+				cuerpoPdfDTO.setNombre(obj[1].toString());
+				cuerpoPdfDTO.setCalificacion(obj[2].toString());
+				
+				
+				regresa.add(cuerpoPdfDTO);
+			}
+		}
+
+		return regresa;
+
+	}
+
+	
 
 }

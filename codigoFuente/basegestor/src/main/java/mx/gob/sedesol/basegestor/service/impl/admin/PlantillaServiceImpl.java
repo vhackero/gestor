@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.service.impl.admin;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -14,6 +15,8 @@ import mx.gob.sedesol.basegestor.commons.constantes.ConstantesBitacora;
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PlantillaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CuerpoPdfDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoPdfDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
@@ -21,6 +24,7 @@ import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
 import mx.gob.sedesol.basegestor.commons.utils.TipoDocumentoEnum;
 import mx.gob.sedesol.basegestor.model.entities.admin.TblPlantilla;
 import mx.gob.sedesol.basegestor.model.repositories.admin.PlantillaRepo;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IHistorialAcademicoRepo;
 import mx.gob.sedesol.basegestor.service.admin.ComunValidacionService;
 import mx.gob.sedesol.basegestor.service.admin.PlantillaService;
 
@@ -31,6 +35,10 @@ public class PlantillaServiceImpl extends ComunValidacionService<PlantillaDTO> i
 
     @Autowired
     private PlantillaRepo plantillaRepo;
+
+
+    @Autowired
+    private IHistorialAcademicoRepo iHistorialAcademicoRepo;
 
     private ModelMapper plantillaMaper = new ModelMapper();
 
@@ -181,4 +189,27 @@ public class PlantillaServiceImpl extends ComunValidacionService<PlantillaDTO> i
             res.setMensajeError(MensajesSistemaEnum.MSG_GENERAL_USUARIO_MODIFICO_REQ);
         }
     }
+
+    @Override
+    public EncabezadoPdfDTO consultaEncabezadoPdf(int idGrupo) {
+
+       EncabezadoPdfDTO  regresa = new EncabezadoPdfDTO();
+
+       regresa = iHistorialAcademicoRepo.consultaEncabezadoPdf(idGrupo);
+
+        return regresa;
+    }
+
+    @Override
+    public List<CuerpoPdfDTO> consultaCuerpoPdf(int idGrupo) {
+
+       List<CuerpoPdfDTO> regresa = new ArrayList<CuerpoPdfDTO>();
+
+       regresa = iHistorialAcademicoRepo.consultaCuerpoPdf(idGrupo);
+
+        return regresa;
+    }
+
+
+
 }

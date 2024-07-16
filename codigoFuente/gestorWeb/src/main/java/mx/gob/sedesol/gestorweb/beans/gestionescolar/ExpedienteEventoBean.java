@@ -1,8 +1,12 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
+import java.io.InputStream;
+
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PlantillaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CuerpoPdfDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoPdfDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
@@ -14,6 +18,7 @@ import mx.gob.sedesol.basegestor.commons.utils.DateUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoDocumentoEnum;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IHistorialAcademicoRepo;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.PlantillaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.EventoCapacitacionService;
@@ -29,11 +34,14 @@ import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.dto.NodoeHijosDTO;
 import mx.gob.sedesol.gestorweb.commons.dto.ReporteConfig;
 import mx.gob.sedesol.gestorweb.commons.utils.ReporteUtil;
+import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
+
 import org.apache.commons.io.Charsets;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -54,6 +62,7 @@ import java.util.zip.ZipOutputStream;
 @ManagedBean
 public class ExpedienteEventoBean extends BaseBean {
 
+	private static final Logger log = Logger.getLogger(CalificacionGpoEventoCapBean.class);
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(ExpedienteEventoBean.class);
 
@@ -80,6 +89,8 @@ public class ExpedienteEventoBean extends BaseBean {
 
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
+
+
 
 	private List<CatalogoComunDTO> catalogoTipoComp;
 	private List<CatalogoComunDTO> catalogoEjeCap;
@@ -123,6 +134,12 @@ public class ExpedienteEventoBean extends BaseBean {
 	private StreamedContent constanciaPDF;
 	private StreamedContent constanciasZip;
 
+	private StreamedContent plantillaPDF;
+
+	 public StreamedContent getPlantillaPDF() {
+		return plantillaPDF;
+	}
+
 	public ExpedienteEventoBean() {
 		filtroPrograma = new FichaDescProgramaDTO();
 		filtroPrograma.setTipoCompetencia(0);
@@ -137,6 +154,8 @@ public class ExpedienteEventoBean extends BaseBean {
 
 		//Nuevo
 		filtros = new EventoCapacitacionDTO();
+
+		 plantillaPDF = null;
 	}
 
 	@PostConstruct
@@ -595,6 +614,62 @@ public void onChangeCatSubestructura1(ValueChangeEvent e) {
 		int horasReales = numHoras + horasRestantes;
 		return String.valueOf(horasReales);
 	}
+
+
+	 /**
+     * Consume WebService
+     */
+    public void descargarPlantillaCalificaciones() {
+
+       EncabezadoPdfDTO  encabezado = new EncabezadoPdfDTO();
+
+	   List<CuerpoPdfDTO> cuerpo = new ArrayList<CuerpoPdfDTO>();
+        
+        //generacion del reporte
+    		ReporteConfig reporteConfig = new ReporteConfig();
+    		reporteConfig.setDatos(null);
+    		reporteConfig.setNombreReporte("Calificaciones");
+    		reporteConfig.setPathJasper("/resources/jasperReport/actaCalificaciones/Calificaciones.jasper");
+    		reporteConfig.setTipoReporte(ReporteUtil.REPORTE_PDF);
+    		
+    		String LOGO = "/resources/jasperReport/LOGO_EDU_UNADM.png";
+    		InputStream strmLOGO = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(LOGO);
+    		
+    		HashMap<String, Object> params = new HashMap<>();
+    		
+    		 		
+    		encabezado = plantillaService.consultaEncabezadoPdf(idGrupo) ;
+			cuerpo = plantillaService.consultaCuerpoPdf(idGrupo);    		
+    		
+    		JRBeanArrayDataSource dsCalificaciones2 = new JRBeanArrayDataSource(cuerpo.toArray());
+    		params.put("dsCalificaciones", dsCalificaciones2);	
+
+     		params.put("pPrograma",encabezado.getPrograma());
+    		params.put("pAsignatura", encabezado.getAsignatura());
+    		params.put("pGrupo", encabezado.getGrupo());
+    		params.put("pNombre", encabezado.getNombre());
+    		params.put("pMatricula", encabezado.getMatricula());
+
+    		params.put("LOGO", strmLOGO); 
+    		
+    		reporteConfig.setParametros(params);
+
+    		String nombreDescargaReporte="Calificaciones por Grupo_";//+encabezado.getPrograma()+" - "+ encabezado.getGrupo();
+    		
+    		plantillaPDF = ReporteUtil.getStreamedContentOfBytes(ReporteUtil.generar(reporteConfig),
+    				"application/pdf", nombreDescargaReporte);		
+    		
+    		RequestContext.getCurrentInstance().execute("PF('visorPlantilla').show()");
+    		RequestContext.getCurrentInstance().update("visorPdf");
+    		RequestContext.getCurrentInstance().scrollTo("visorPdf");
+
+    }
+
+	public String getIdFile() {
+        return  java.util.UUID.randomUUID().toString();
+    }
+
+	
 
 	public MallaCurricularService getMallaCurricularService() {
 		return mallaCurricularService;
