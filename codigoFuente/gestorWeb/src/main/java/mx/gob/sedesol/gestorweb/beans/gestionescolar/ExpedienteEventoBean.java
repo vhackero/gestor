@@ -364,13 +364,28 @@ public void onChangeCatSubestructura1(ValueChangeEvent e) {
 	public void buscarAlumnosAprobados() {
 		try {
 			
-			List<RelGrupoParticipanteDTO> alumnosConConstancia2 = new ArrayList<>();			
+			List<RelGrupoParticipanteDTO> alumnosConConstancia2 = new ArrayList<>();	
+
+			List<RelGrupoParticipanteDTO> alumnosConConstancia3 = new ArrayList<>();			
 			
 			alumnosConConstancia2 = getGrupoParticipanteService().getAlumnosQueRecibieronConstPorIdGrupo(idGrupo);
 
 			if (!alumnosConConstancia2.isEmpty()) {
 
-					alumnosConConstancia = alumnosConConstancia2.stream().filter(RelGrupoParticipanteDTO -> RelGrupoParticipanteDTO.getCalifFinal() != null).collect(Collectors.toList());
+				int valor = 1;
+				
+				for(RelGrupoParticipanteDTO g :  alumnosConConstancia2){
+					
+					Long val = Long.valueOf(valor++);
+					
+					g.getPersona().setIdPersona(val); 
+
+					alumnosConConstancia3.add(g);
+
+				}
+
+					alumnosConConstancia = alumnosConConstancia3.stream().filter(RelGrupoParticipanteDTO -> RelGrupoParticipanteDTO.getCalifFinal() != null).collect(Collectors.toList());
+					
 					grupoNombre = alumnosConConstancia.get(0).getGrupo().getNombre() + " " + alumnosConConstancia.get(0).getGrupo().getEvento().getNombreEc();
 
 					eventoNombre = grupoNombre.replace(' ', '_');
@@ -654,7 +669,7 @@ public void onChangeCatSubestructura1(ValueChangeEvent e) {
     		
     		reporteConfig.setParametros(params);
 
-    		String nombreDescargaReporte="Calificaciones por Grupo_";//+encabezado.getPrograma()+" - "+ encabezado.getGrupo();
+    		String nombreDescargaReporte="Calificaciones por Grupo_"+encabezado.getPrograma()+" - "+ encabezado.getGrupo();
     		
     		plantillaPDF = ReporteUtil.getStreamedContentOfBytes(ReporteUtil.generar(reporteConfig),
     				"application/pdf", nombreDescargaReporte);		
