@@ -192,7 +192,7 @@
 						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
 						currentPageReportTemplate="({currentPage} de {totalPages})"
 						rowsPerPageTemplate="5,10,15" tableStyleClass="table">
-						<p:column headerText="Id estudiante " styleClass="text-center">
+						<p:column headerText="No." styleClass="text-center">
 							<h:outputText value="#{alumno.persona.idPersona}" />
 						</p:column>
 						<p:column headerText="Matricula"
@@ -237,9 +237,16 @@
 						<!-- Columnas para la tabla oculta -->
 						<p:column>
 							<f:facet name="header">
-								<h:outputText value="Id estudiante " />
+								<h:outputText value="No." />
 							</f:facet>
 							<h:outputText value="#{partCalif.persona.idPersona}" />
+						</p:column>
+
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="Matricula" />
+							</f:facet>
+							<h:outputText value="#{partCalif.persona.usuario}" />
 						</p:column>
 
 						<p:column>
@@ -283,7 +290,7 @@
 							</p:commandButton>
 
 							
-							<p:outputLabel value="Descargar PDF: " rendered="true"
+							<!-- <p:outputLabel value="Descargar PDF: " rendered="true"
 							styleClass="margenIzquierdo agregaHeight" />
 							<p:commandButton id="btnDescargarPdf" ajax="false"
 								rendered="true"
@@ -291,7 +298,7 @@
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc">
 								<p:dataExporter type="pdf" target="exportTable"
 									fileName="#{expedienteEventoBean.grup}" encoding="ISO-8859-15"/>
-							</p:commandButton>
+							</p:commandButton> -->
 
 						</div>
 					</div>
