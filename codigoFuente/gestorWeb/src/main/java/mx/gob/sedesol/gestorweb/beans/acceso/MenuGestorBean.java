@@ -416,6 +416,12 @@ public class MenuGestorBean extends BaseBean {
 		return ConstantesGestorWeb.NAVEGA_MIS_CURSOS;
 	}
 
+	//ITTIVA 666
+	public String navegaMisConvocatorias() {
+		logger.info("Navegando a mis convocatorias");
+		return ConstantesGestorWeb.NAVEGA_MIS_CONVOCATORIAS;
+	}
+
 	public String navegaTareasProgramadas() {
 		logger.info("Navegando a tareas programadas");
 		inicializaTareasProgramadas();

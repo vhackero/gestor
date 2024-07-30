@@ -554,7 +554,12 @@
 	                <redirect />
 		</navigation-case>
 		
-		
+		<!-- ITTIVA 666 MIS CONVOCATORIAS -->
+		<navigation-case>
+			<from-outcome>MIS_CONVOCATORIAS</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/busquedaConvocatorias.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
 
 		<!-- Mis cursos -->
 		<navigation-case>
