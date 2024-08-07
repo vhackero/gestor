@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	<f:validateBean disabled="true">
+
+
+		<div class="form-group">
+
+			<div class="row">
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel for="somConvocatoria" value="Convocatoria" />
+					<p:selectOneMenu id="somConvocatoria"
+						value="#{adminPersonaBean.personaFiltros.convocatoria}"
+						styleClass="col-xs-12" onchange="correccionSelectores()">
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="" />
+						<f:selectItems value="#{adminPersonaBean.listaConvocatorias}"
+							var="convocatoria" itemValue="#{convocatoria.id}"
+							itemLabel="#{convocatoria.nombre}" />
+						<p:ajax update="btnRegistro" event="change" />
+
+					</p:selectOneMenu>
+				</div>
+
+			</div>
+
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel for="somFuenteExterna" value="Fuente Externa" />
+					<p:selectOneMenu id="somFuenteExterna"
+						value="#{adminPersonaBean.personaFiltros.fuenteExterna}"
+						styleClass="col-xs-12" onchange="correccionSelectores()">
+
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+						<f:selectItems value="#{adminPersonaBean.listaFuenteExternas}"
+							var="fuenteExternas" itemValue="#{fuenteExternas.id}"
+							itemLabel="#{fuenteExternas.nombre}" />
+						<p:ajax update="btnRegistro" event="change" />
+
+					</p:selectOneMenu>
+				</div>
+
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel for="somVincularUsuarios" value="Vincular usuarios"
+						style="display: block; margin-bottom: 5px;" />
+					<p:inputSwitch id="somVincularUsuarios"
+						value="#{adminPersonaBean.personaFiltros.vincularUsuario}"
+						onLabel="Sí" offLabel="No" styleClass="col-xs-12" />
+				</div>
+			</div>
+		</div>
+
+
+	</f:validateBean>
+</ui:composition>
+

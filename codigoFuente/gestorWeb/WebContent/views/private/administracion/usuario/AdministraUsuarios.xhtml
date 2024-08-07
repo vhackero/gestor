@@ -19,17 +19,7 @@
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
 			<div class="row">
-				<div class="col-md-5">
-					<sec:authorize access="hasPermission(null,'PER_AGR')">
-						<p:commandButton id="btnRegistro" rendered="true"
-							action="#{adminPersonaBean.obtenerUsuarios()}"
-							value="Importar datos"
-							styleClass="pull-right btn btn-primary" />
-						<p:outputLabel rendered="true"
-							value="Importar datos SIGE: "
-							styleClass="pull-right agregaHeight" />
-					</sec:authorize>
-				</div>
+				<div class="col-md-5"></div>
 				<div class="col-md-7">
 					<sec:authorize access="hasPermission(null,'PER_AGR')">
 						<p:commandButton id="btnCargaMasiva" rendered="true"
@@ -37,7 +27,7 @@
 							value="#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.cargaMasiva')}"
 							styleClass="pull-right btn btn-primary" />
 						<p:commandButton id="btnIndividual"
-							action="#{adminPersonaBean.agregarPersona()}"  rendered="true"
+							action="#{adminPersonaBean.agregarPersona()}" rendered="true"
 							value="#{sistema.obtenerTexto('gw.adminPersona.boton.agregar')}"
 							ajax="true" styleClass="pull-right btn btn-primary" />
 						<p:outputLabel rendered="true"
@@ -47,6 +37,26 @@
 				</div>
 			</div>
 
+			<div class="row">
+				<div class="col-md-12">
+					<p:panel id="filtroImportarUsuarios"
+						header="Importar datos de fuente externa">
+
+						<ui:include src="../componentes/filtroImportarUsuarios.xhtml" />
+
+						<div class="row">
+							<div class="col-md-12">
+								<sec:authorize access="hasPermission(null,'PER_AGR')">
+									<p:commandButton id="btnRegistro" rendered="true"
+										action="#{adminPersonaBean.obtenerUsuarios()}"
+										value="Importar datos" styleClass="pull-right btn btn-primary" 
+										disabled="#{adminPersonaBean.importarButtonDisabled}"/>
+								</sec:authorize>
+							</div>
+						</div>
+					</p:panel>
+				</div>
+			</div>
 
 			<div class="row">
 				<div class="col-md-12">
@@ -172,9 +182,7 @@
 										<f:setPropertyActionListener value="#{persona}"
 											target="#{adminPersonaBean.persona}" />
 									</p:commandButton>
-									<p:tooltip for="btnEditar"
-										value="Ver usuario"
-										position="top" />
+									<p:tooltip for="btnEditar" value="Ver usuario" position="top" />
 								</sec:authorize>
 								<sec:authorize access="hasPermission(null, 'PER_ROLES_AGR' ) ">
 									<p:commandButton id="key"
@@ -185,9 +193,7 @@
 											target="#{adminPersonaBean.personaSeleccionada}" />
 									</p:commandButton>
 								</sec:authorize>
-								<p:tooltip for="key"
-									value="Ver roles"
-									position="top" />
+								<p:tooltip for="key" value="Ver roles" position="top" />
 							</p:column>
 						</p:dataTable>
 
@@ -197,8 +203,7 @@
 
 			<p:dialog id="modalRoles" widgetVar="mRol" modal="true"
 				draggable="false" resizable="false" closable="false"
-				position="center" styleClass="medidaModal"
-				header="Roles">
+				position="center" styleClass="medidaModal" header="Roles">
 
 				<p:pickList id="pickListRoles"
 					value="#{adminPersonaBean.listaRoles}" var="rol"
@@ -229,8 +234,7 @@
 								styleClass="btn btn-primary pull-right" />
 							<p:commandButton id="btnCancelarRol"
 								onclick="PF('mRol').hide(); return false;"
-								styleClass="btn btn-default pull-right"
-								value="Cerrar" />
+								styleClass="btn btn-default pull-right" value="Cerrar" />
 						</div>
 					</div>
 

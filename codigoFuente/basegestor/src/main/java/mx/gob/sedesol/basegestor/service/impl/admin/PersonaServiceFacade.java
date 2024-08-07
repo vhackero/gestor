@@ -15,9 +15,11 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.MunicipioDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PaisDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaRolDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.RolDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.TipoDiscapacidadDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.SelectImportarDTO;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.AsentamientoService;
 import mx.gob.sedesol.basegestor.service.admin.DiscapacidadService;
@@ -31,6 +33,7 @@ import mx.gob.sedesol.basegestor.service.admin.PersonaService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaTelefonoService;
 import mx.gob.sedesol.basegestor.service.admin.RoleService;
 import mx.gob.sedesol.basegestor.service.admin.UsuarioDatosLaboralesService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.UsuariosImportarService;
 
 @Service("personaServiceFacade")
 public class PersonaServiceFacade {
@@ -73,6 +76,9 @@ public class PersonaServiceFacade {
 	
 	@Autowired
 	private DiscapacidadService discapacidadService;
+	
+	@Autowired
+	private UsuariosImportarService usuariosImportarService;
 
 	
 	public List<PaisDTO> obtenerPaises() {
@@ -143,9 +149,16 @@ public class PersonaServiceFacade {
 		return personaRolesService.obtieneRelPersonaRolesPorUsuario(usuario);
 	}
 
-	public ResultadoDTO<PersonaRolDTO> almacenarRolesUsuario(PersonaDTO persona, List<RolDTO> roles,
-			long usuarioModifico) {
-		return personaRolesService.almacenarRolesUsuario(persona, roles, usuarioModifico);
+	public List<SelectImportarDTO> consultaConvocatorias() {
+		return usuariosImportarService.consultaConvocatorias();
+	}
+	
+	public List<SelectImportarDTO> consultaFuenteExterna() {
+		return usuariosImportarService.consultaFuenteExterna();
+	}
+	
+	public List<PersonaSigeDTO> consultaPersonasImportar(String fuenteExterna, String convocatoria) {
+		return usuariosImportarService.consultaPersonasImportar(fuenteExterna, convocatoria);
 	}
 
 	public String obtenerRutaAlmacenamientoFotosUsuario() {
@@ -182,6 +195,11 @@ public class PersonaServiceFacade {
 		rutaAlmacenamiento
 				.append(parametroSistemaService.obtenerParametroRuta(ConstantesGestor.PARAMETRO_RUTA_INSIGNIAS));
 		return rutaAlmacenamiento.toString();
+	}
+	
+	public ResultadoDTO<PersonaRolDTO> almacenarRolesUsuario(PersonaDTO persona, List<RolDTO> roles,
+			long usuarioModifico) {
+		return personaRolesService.almacenarRolesUsuario(persona, roles, usuarioModifico);
 	}
 
 	public PersonaService getPersonaService() {
