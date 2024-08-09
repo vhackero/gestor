@@ -51,6 +51,6 @@ public interface PersonaService extends CommonService<PersonaDTO, Long> {
 	
 	Boolean existeCurp(String curp);
 	
-	Boolean guardarPersonas(List<CapturaPersonaDTO> datos);
+	Boolean guardarPersonas(List<CapturaPersonaDTO> datos, String fuenteExterna, String convocatoria, boolean vincularUsuario);
 
 }

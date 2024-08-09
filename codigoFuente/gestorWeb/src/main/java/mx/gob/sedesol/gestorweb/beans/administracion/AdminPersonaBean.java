@@ -48,6 +48,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.RolDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.TipoCorreoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.TipoDiscapacidadDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.UsuarioDatosLaboralesDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.SelectImportarDTO;
 import mx.gob.sedesol.basegestor.commons.utils.GeneroEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.OrdenGobiernoEnum;
@@ -120,7 +121,11 @@ public class AdminPersonaBean extends BaseBean {
 	private List<LenguajeIndigenaDTO> listaLenguasIndigenas;
 	private List<DiscapacidadDTO> listaDiscapacidades ;
 	private List<TipoDiscapacidadDTO> listaTiposDiscapacidad;
-	
+	private List<SelectImportarDTO> listaConvocatorias;
+	private List<SelectImportarDTO> listaFuenteExternas;
+	private List<SelectImportarDTO> listaPersonasImportar;
+
+
 	private boolean nuevaPersona;
 	private boolean mostrarContrasenia;
 	private boolean isLenguajeIndigena;
@@ -151,14 +156,20 @@ public class AdminPersonaBean extends BaseBean {
 
 		listaPaises = personaServiceFacade.obtenerPaises();
 		listaSedes = personaServiceFacade.obtenerEntidadesPorPais(ConstantesGestor.ID_PAIS_MEXICO);
-
 		listaLenguasIndigenas = personaServiceFacade.obtenerLenguajesIndigenas();		
 		listaRoles = new DualListModel<>();
+		
+		listaConvocatorias = personaServiceFacade.consultaConvocatorias();
+		listaFuenteExternas = personaServiceFacade.consultaFuenteExterna();
+		
+
 	}
 	
 	public void obtenerUsuarios() {
+
 		boolean exito = false; 
-		List<PersonaSigeDTO> personasSige = personaSigeService.buscarNoRegistrados();
+
+
 		listaRoles = new DualListModel<>(personaServiceFacade.obtenerTodosRoles(), new ArrayList<>());
 		Long usuarioModifico = 2L;
 		String idPais = "MX";
@@ -173,6 +184,21 @@ public class AdminPersonaBean extends BaseBean {
 		listaMunicipiosLaboral = new ArrayList<>();
 		listaEntidades = personaServiceFacade.obtenerEntidadesPorPais(ConstantesGestor.ID_PAIS_MEXICO);
 		listaMunicipiosDomicilio = new ArrayList<>();
+		
+		String convocatoria = personaFiltros.getConvocatoria();
+		String fuenteExterna = personaFiltros.getFuenteExterna();
+		
+
+		
+		boolean vincularUsuario = personaFiltros.getVincularUsuario();
+		
+		if(convocatoria == null ||  fuenteExterna == null ) {
+			return;
+		}
+		
+		List<PersonaSigeDTO> personasSige = personaServiceFacade.consultaPersonasImportar(fuenteExterna, convocatoria);
+	
+		
         StringBuilder rutaCompletaFoto = new StringBuilder(rutaUndertow);
         rutaCompletaFoto.append(nombreFotoComun);
         listaDatos = personasSige.parallelStream()
@@ -193,7 +219,7 @@ public class AdminPersonaBean extends BaseBean {
         	    .collect(Collectors.toList());
         logger.info("Hola");
         try {
-        	exito = personaServiceFacade.getPersonaService().guardarPersonas(listaDatos);        	
+        	exito = personaServiceFacade.getPersonaService().guardarPersonas(listaDatos, fuenteExterna, convocatoria, vincularUsuario);        	
         }catch(Exception e) {
         	exito = false; 
         }
@@ -278,6 +304,13 @@ public class AdminPersonaBean extends BaseBean {
 	}
 
 	public void buscarPersonaPorCriterios() {
+		personas = personaServiceFacade.getPersonaService().busquedaPorCriteriosPersonaBasica(personaFiltros);
+		if (!personas.isEmpty()) {
+			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "BUS_USU", "", requestActual(), TipoServicioEnum.LOCAL);
+		}
+	}
+	
+	public void buscarPersonaPorCriterios1() {
 		personas = personaServiceFacade.getPersonaService().busquedaPorCriteriosPersonaBasica(personaFiltros);
 		if (!personas.isEmpty()) {
 			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "BUS_USU", "", requestActual(), TipoServicioEnum.LOCAL);
@@ -815,6 +848,13 @@ public class AdminPersonaBean extends BaseBean {
 			logger.error(e.getMessage(), e);
 		}
 	}
+	
+    public boolean isImportarButtonDisabled() {
+		String convocatoria = personaFiltros.getConvocatoria();
+		String fuenteExterna = personaFiltros.getFuenteExterna();
+        return convocatoria == null || convocatoria.isEmpty() || fuenteExterna == null || fuenteExterna.isEmpty();
+    }
+
 
 	public PersonaDTO getPersona() {
 		return persona;
@@ -1052,6 +1092,30 @@ public class AdminPersonaBean extends BaseBean {
 
 	public void setAsentamientoService(AsentamientoService asentamientoService) {
 		this.asentamientoService = asentamientoService;
+	}
+	
+	public List<SelectImportarDTO> getListaConvocatorias() {
+		return listaConvocatorias;
+	}
+
+	public void setListaConvocatorias(List<SelectImportarDTO> listaConvocatorias) {
+		this.listaConvocatorias = listaConvocatorias;
+	}
+
+	public List<SelectImportarDTO> getListaFuenteExternas() {
+		return listaFuenteExternas;
+	}
+
+	public void setListaFuenteExternas(List<SelectImportarDTO> listaFuenteExternas) {
+		this.listaFuenteExternas = listaFuenteExternas;
+	}
+
+	public List<SelectImportarDTO> getListaPersonasImportar() {
+		return listaPersonasImportar;
+	}
+
+	public void setListaPersonasImportar(List<SelectImportarDTO> listaPersonasImportar) {
+		this.listaPersonasImportar = listaPersonasImportar;
 	}
 	
 }

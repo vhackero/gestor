@@ -102,6 +102,12 @@ public class PersonaDTO extends ComunDTO implements Serializable {
 	
 	private String sso_status;
 
+	private String convocatoria;
+	
+	private String fuenteExterna;
+	
+	private Boolean vincularUsuario;
+	
 	private List<SsoElementoDTO> relPersonaElementos;
 	
 	private List<UsuarioDatosLaboralesDTO> datosLaborales;
@@ -649,6 +655,30 @@ public class PersonaDTO extends ComunDTO implements Serializable {
 
 	public void setSso_status(String sso_status) {
 		this.sso_status = sso_status;
+	}
+	
+	public String getConvocatoria() {
+		return convocatoria;
+	}
+
+	public void setConvocatoria(String convocatoria) {
+		this.convocatoria = convocatoria;
+	}
+
+	public String getFuenteExterna() {
+		return fuenteExterna;
+	}
+
+	public void setFuenteExterna(String fuenteExterna) {
+		this.fuenteExterna = fuenteExterna;
+	}
+
+	public Boolean getVincularUsuario() {
+		return vincularUsuario;
+	}
+
+	public void setVincularUsuario(Boolean vincularUsuario) {
+		this.vincularUsuario = vincularUsuario;
 	}
 
 }

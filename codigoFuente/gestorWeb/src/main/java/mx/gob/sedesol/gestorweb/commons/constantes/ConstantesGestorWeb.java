@@ -407,6 +407,8 @@ public final class ConstantesGestorWeb {
 	//Badges
 	public static final Integer ID_ESTATUS_DEFAULT = 1;
 	public static final String NAVEGA_MIS_CURSOS="MIS_CURSOS";
+	//ITTIVA 666
+	public static final String NAVEGA_MIS_CONVOCATORIAS="MIS_CONVOCATORIAS";
 	public static final String NAVEGA_TAREAS_PROGRAMADAS = "TAREAS_PROGRAMADAS";
 	
 	//Posterior al dia en que finaliza un evento de capacitación las fechas de apertura de las encuestas se abren a los días:
