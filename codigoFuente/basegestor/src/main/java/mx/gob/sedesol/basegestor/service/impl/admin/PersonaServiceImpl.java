@@ -385,6 +385,7 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 			try {
 				resultado = new ResultadoDTO<>();
 				TblPersona persona = almacenarDatosPersonales(datos.getPersona());
+				//ES AQUI DONDE METEMOS A LA OTRA TABLA 
 				almacenarDatosLaborales(datos.getDatosLaborales(), persona);
 				almacenarTelefono(datos.getTelefonoFijo(), persona);
 				almacenarTelefono(datos.getCelular(), persona);
