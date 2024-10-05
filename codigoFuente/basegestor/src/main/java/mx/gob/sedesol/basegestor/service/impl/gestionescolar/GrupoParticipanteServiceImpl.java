@@ -44,6 +44,7 @@ import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
 import mx.gob.sedesol.basegestor.model.entities.admin.TblPersona;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelGrupoParticipante;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblGrupo;
@@ -51,6 +52,7 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCarg
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCompEspecifica;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.GrupoParticipanteRepo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.GrupoRepo;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IConvocatoriaRepository;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IHistorialAcademicoRepo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.RelProgCompEspecificaRepo;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
@@ -103,6 +105,8 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 	
 	@Autowired
 	private IHistorialAcademicoRepo iHistorialAcademicoRepo;
+	
+	
 
 	@PostConstruct
 	public void init() {
@@ -1140,6 +1144,9 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 		return eventos;
 	}
 
-
+	
+	
+	
+	
 
 }

@@ -1,207 +1,84 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE html>
 <ui:composition template="/templates/layout.xhtml"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:c="http://java.sun.com/jsp/jstl/core"
-	xmlns:sec="http://www.springframework.org/security/tags">
+	xmlns:p="http://primefaces.org/ui">
 
 	<ui:define name="breadcrumb">
 		<li>Convocatorias</li>
-		
+
 	</ui:define>
 
 	<ui:define name="content">
 		<h:form>
-			<h1><p:outputLabel styleClass="h1" value="Convocatorias"/></h1>
-            
-            
-			<p:ajaxStatus onstart="PF('dialogLayout').show()" onsuccess="PF('dialogLayout').hide()" />
-			
+			<h1>
+				<p:outputLabel styleClass="h1" value="Convocatorias" />
+			</h1>
+
+
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+
 			<br />
-			
+
 			<div class="form-group ">
-			
-				
-				
+
+
+
 
 				<div class="row">
 
 					<div class="col-md-4 col-xs-12">
-						<p:commandButton
-						value="Nueva convocatoria"
-						action="#{planBean.navegaCrearNuevoPlan}" ajax="false"
-						immediate="true" process="@this"
-						styleClass="btn btn-primary " />
-						
+
+
+
+						<p:commandButton value="Nueva convocatoria"
+							action="#{convocatoriasBean.navegaNuevoConvocatoria}"
+							ajax="false" immediate="true" process="@this"
+							styleClass="btn btn-primary" />
+
 					</div>
 
 					<div class="col-md-4 col-xs-12">
 
-						<p:commandButton  style="width: 200px;"
-						value="Consultar convocatoria"
-						action="#{planBean.navegaCrearNuevoPlan}" ajax="false"
-						immediate="true" process="@this"
-						styleClass="btn btn-primary " />
-						
+						<p:commandButton style="width: 200px;"
+							value="Consultar convocatoria"
+							action="#{convocatoriasBean.navegaConsultaConvocatoria}"
+							ajax="false" immediate="true" process="@this"
+							styleClass="btn btn-primary" />
+
 					</div>
 
-					<div class="col-md-4 col-xs-12">
-						<p:commandButton style="width: 250px;"
+					<p:commandButton style="width: 250px;"
 						value="Consultar tablero de resumen"
-						action="#{planBean.navegaCrearNuevoPlan}" ajax="false"
-						immediate="true" process="@this"
-						styleClass="btn btn-primary " />
-						
-					</div>
-					
-					
+						action="#{convocatoriasBean.navegaConsultaTablero}" ajax="false"
+						immediate="true" process="@this" styleClass="btn btn-primary" />
+
 				</div>
 
-	
-				
+
+			</div>
+			
+			
+			
+			<div >
+
+
+
+
 			</div>
 
-			<p:panel header="Nueva Convocatoria"
-				 id="fldBusqPlan">
-				<f:validateBean disabled="true">
-				
-				
-					<div class="form-group">
-						<div class="row">
-
-							<div class="col-md-4 col-xs-12">
-
-								<p:outputLabel styleClass="bloque" for="filtroplannombre"
-									value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.nombre')}:" />
-								<p:inputText id="filtroplannombre" onkeypress="if (event.keyCode == 13) { return false; }"
-									value="#{planBean.filtroPlan.nombre}" styleClass="form-control" />
-
-							</div>
-
-							<div class="col-md-4 col-xs-12">
-
-								<p:outputLabel styleClass="bloque"
-									value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.orgGub')}:" />
-								<p:selectOneMenu id="institucion"
-									value="#{planBean.filtroPlan.tblOrganismoGubernamental}"
-									converter="orgGuberConverter" autoWidth="false"
-									styleClass="col-xs-12" onclick="ajustaAlto();">
-									<p:ajax event="change" process="@this" />									
-									<f:selectItems value="#{planBean.itemsOrgGubs}" var="orgGub"
-										itemLabel="#{orgGub.label}" itemValue="#{orgGub}" />
-								</p:selectOneMenu>
-
-							</div>
-
-							<div class="col-md-4 col-xs-12">
-
-								<p:outputLabel styleClass="bloque"
-									value="#{sistema.obtenerTexto('gw.plan.busqueda.etiqueta.modalidad')}:" />
-								<p:selectOneMenu
-									value="#{planBean.filtroPlan.catModalidadPlanPrograma}"
-									converter="catalogoComunConverter" styleClass="col-xs-12">
-									<p:ajax event="change" process="@this" />
-									<f:selectItem
-										itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-										itemValue="#{null}" />
-									<f:selectItems value="#{planBean.catModalidadPlan}"
-										var="modalidad" itemLabel="#{modalidad.nombre}"
-										itemValue="#{modalidad}" />
-								</p:selectOneMenu>
-
-							</div>
-
-						</div>
-					</div>
-
-
-					<div class="form-group">
-						<div class="row">
-
-							<div class="col-md-4 col-xs-12">
-
-								<p:outputLabel styleClass="bloque" for="filtroconvocatorianombre"
-									value="Nombre de la convocatoria:" rendered="true" />
-								<p:inputText id="filtroconvocatorianombre"
-									value="" styleClass="form-control" />
-
-							</div>
-
-							<div class="col-md-4 col-xs-12">
-
-								<p:outputLabel styleClass="bloque" for="filtroconvocatorianombreCorto"
-									value="Nombre de la convocatoria:" rendered="true" />
-								<p:inputText id="filtroconvocatorianombreCorto"
-									value="" styleClass="form-control" />
-
-							</div>
-
-							<div class="col-md-4 col-xs-12">
-
-								<p:outputLabel styleClass="bloque" for="filtroconvocatoriadescrripcion"
-									value="Nombre de la convocatoria:" rendered="true" />
-								<p:inputText id="filtroconvocatoriadescrripcion"
-									value="" styleClass="form-control" />
-
-							</div>
-
-							
-					
-						</div>
-					</div>
-
-				</f:validateBean>
-
-				<div class="row">
-					
-
-
-						<!-- Fecha Inicial  -->
-						<div class="col-md-4">
-							<p:outputLabel styleClass="bloque"
-										   value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechaInicial')}:" />
-							<p:calendar id="fc_fechaInicial" styleClass="requerido"
-										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
-										yearRange="c-100:c+100" locale="es"
-										disabled="#{empty eventoCapacitacionBean.tipoDatoFechas}"
-										placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-										readonlyInput="true" navigator="true"
-										value="#{eventoCapacitacionBean.filtros.fechaInicial}"
-										showOn="button">
-								<p:ajax event="dateSelect" process="@this"
-										update="fc_fechaFinal"
-										listener="#{eventoCapacitacionBean.validarFechas()}" />
-							</p:calendar>
-
-						</div>
-						<!-- Fecha Final -->
-						<div class="col-md-4 col-xs-12">
-							<p:outputLabel styleClass="bloque"
-										   value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechafinal')}:" />
-							<p:calendar id="fc_fechaFinal" styleClass="requerido"
-										mindate="#{eventoCapacitacionBean.filtros.fechaInicial}"
-										disabled="#{empty eventoCapacitacionBean.filtros.fechaInicial}"
-										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
-										yearRange="c-100:c+100" locale="es"
-										placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-										readonlyInput="true" navigator="true"
-										value="#{eventoCapacitacionBean.filtros.fechaFinal}"
-										showOn="button">
-								<p:ajax event="dateSelect" process="@this" />
-							</p:calendar>
-						</div>
-						
-					
-				</div>
-
-			</p:panel>
-
-
 			
+		
+	
+	
+		
+
+
+			<!-- Incluir dinámicamente el archivo .xhtml basado en la propiedad 'paginaActual' -->
+			<ui:include src="#{convocatoriasBean.paginaActual}" />
 
 
 

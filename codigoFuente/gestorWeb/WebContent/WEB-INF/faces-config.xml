@@ -633,5 +633,24 @@
 			<redirect />
 		</navigation-case>
 		
+			<!-- CONVOCATORIAS-->
+		<navigation-case>
+			<from-outcome>NAVEGA_NUEVA_CONVOCATORIAS</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/nuevaConvocatoria.xhtml</to-view-id>					
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>NAVEGA_CONSULTA_CONVOCATORIAS</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/consultaConvocatoria.xhtml</to-view-id>					
+			<redirect />
+		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>NAVEGA_CONSULTA_TABLERO_CONVOCATORIAS</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/consultaTableroConvocatoria.xhtml</to-view-id>					
+			<redirect />
+		</navigation-case>
+		
 	</navigation-rule>
 </faces-config>

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+
+	<p:panel header="Consulta Convocatoria">
+
+
+		<div class="form-group">
+			<div class="row">
+
+				<div class="col-md-4 col-xs-12">
+
+					<p:outputLabel styleClass="bloque requerido" for="consulNombreConvocatoria"
+						value="Nombre:" rendered="true" />
+					<p:inputText id="consulNombreConvocatoria"
+						value="#{convocatoriasBean.convocatoriaParamConsulta.consulNombreConvocatoria}"
+						styleClass="form-control" />
+						
+
+				</div>
+
+				<div class="col-md-4 col-xs-12">
+
+					<p:outputLabel styleClass="bloque" for="consulNombreCorto"
+						value="Nombre corto:" rendered="true" />
+					<p:inputText id="consulNombreCorto" 
+						value="#{convocatoriasBean.convocatoriaParamConsulta.consulNombreCorto}"
+						styleClass="form-control" />
+
+				</div>
+
+				<div class="col-md-4 col-xs-12">
+
+					<p:outputLabel styleClass="bloque" value="Estatus:" />
+					<p:selectOneMenu
+						value="#{convocatoriasBean.valueConvocatoriaEstatus}"
+						styleClass="col-xs-12">
+						<p:ajax event="change" process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="#{null}" />
+						<f:selectItems value="#{convocatoriasBean.estatusLista}"
+							var="modalidad" itemLabel="#{modalidad.nombreEstatus}"
+							itemValue="#{modalidad.valorEstatus}" />
+					</p:selectOneMenu>
+
+				</div>
+
+
+
+
+
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel for="fechaInicio" styleClass="bloque"
+						value="Fecha de apertura:" />
+					<p:calendar id="fechaInicio" styleClass="requerido"
+						showButtonPanel="false"
+						mindate="#{convocatoriasBean.obtenerFechaActual()}"
+						showOn="button" readonlyInput="true" pattern="dd/MM/yyyy"
+						placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+						value="#{convocatoriasBean.consulFechaApertura}" locale="es"
+						navigator="true" yearRange="c-0:c+100">
+						<p:ajax process="@this" update="ffinal" event="change"
+							listener="#{convocatoriasBean.onDateChange}" />
+					</p:calendar>
+					<p:message for="fechaInicio" />
+				</div>
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel for="ffinal" styleClass="bloque"
+						value="Fecha de cierre:" />
+					<p:calendar id="ffinal" styleClass="requerido" locale="es"
+						navigator="true" readonlyInput="true"
+						mindate="#{convocatoriasBean.cadenaFechaMinima}"
+						disabled="#{convocatoriasBean.consulFechaApertura eq null}"
+						value="#{convocatoriasBean.consulFechaCierre}" showOn="button"
+						placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+						yearRange="c-0:c+100" pattern="dd/MM/yyyy" showButtonPanel="false">
+						<p:ajax process="@this" event="change" />
+
+					</p:calendar>
+					<p:message for="ffinal" />
+				</div>
+
+
+
+
+				<div class="col-md-4 col-xs-12">
+
+					<p:outputLabel styleClass="bloque" value="Nivel educativo:" />
+					<p:selectOneMenu
+						value="#{convocatoriasBean.valueConvocatoriaNivel}"
+						styleClass="col-xs-12">
+						<p:ajax event="change" process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="#{null}" />
+						<f:selectItems value="#{convocatoriasBean.listaNivelEducativo}"
+							var="modalidad" itemLabel="#{modalidad.nombre}"
+							itemValue="#{modalidad.id}" />
+					</p:selectOneMenu>
+
+				</div>
+
+
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<div class="row">
+
+				<div class="col-md-12 text-right">
+				
+					<p:commandButton styleClass="btn btn-primary" value="Cancelar"
+						action="#{eventoCapacitacionBean.buscarEventosCapacitacion}"
+						ajax="true" />
+						
+						<p:commandButton value="Limpiar campos" process="@this"
+										 update="@form"
+										 action="#{convocatoriasBean.limpiarCampos}" ajax="true"
+										 styleClass="btn btn-default" />
+
+					
+						<p:commandButton id="btnBusquedaAvas" process="@form" ajax="true"
+							update="@form" styleClass="btn btn-primary pull-right"
+							action="#{convocatoriasBean.consultarFiltros}"
+							value="#{sistema.obtenerTexto('gw.ga.btn.buscar')}" />
+					
+					
+					
+				</div>
+			</div>
+		</div>
+
+		
+
+	</p:panel>
+	
+	
+	<div class="row">
+			<div class="col-md-12">
+				<p:dataTable id="id"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					reflow="true" value="#{convocatoriasBean.listaConvocatoria2}"
+					var="convo" paginator="true" rows="10" paginatorPosition="bottom"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+					<!-- Nombre Materia -->
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Convocatoria" />
+						</f:facet>
+						<h:outputText value="#{convo.nombre}" />
+					</p:column>
+					
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Nombre Corto" />
+						</f:facet>
+						<h:outputText value="#{convo.nombreCorto}" />
+					</p:column>
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Fecha apertura" />
+						</f:facet>
+						<h:outputText value="#{convo.fecha_Apertura}" />
+					</p:column>
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Fecha cierre" />
+						</f:facet>
+						<h:outputText value="#{convo.fechaCierre}" />
+					</p:column>
+					
+				</p:dataTable>
+			</div>
+		</div>
+
+
+</ui:composition>

@@ -19,6 +19,7 @@ import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.*;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.jfree.util.Log;
 import org.primefaces.event.NodeSelectEvent;
 import org.primefaces.event.NodeUnselectEvent;
 import org.primefaces.model.CheckboxTreeNode;
@@ -30,9 +31,14 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.OrgGubernamentalDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatDivisionesPlan;
 import mx.gob.sedesol.basegestor.mongo.service.BitacoraService;
 import mx.gob.sedesol.basegestor.service.admin.OrgGubernamentalService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.ActaService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.ConvocatoriaService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.basegestor.service.impl.planesyprogramas.PlanServiceFacade;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaPlanService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
@@ -66,6 +72,8 @@ public class PlanBean extends BaseBean {
 
 	@ManagedProperty("#{mallaPlanService}")
 	private MallaPlanService mallaPlanService;
+	
+	
 
 	private List<CatalogoComunDTO> catPeriodo;
 	private List<CatalogoComunDTO> catTpoPlan;
@@ -104,7 +112,7 @@ public class PlanBean extends BaseBean {
 	private ArrayList<String> elementsSubStruc = new ArrayList<>();
 
 	private RelMallaPlanDTO mallaPlan;
-	
+
 	private TreeNode arbolConocimientos;
 	private TreeNode[] conocimientos;
 	private TreeNode arbolHabilidades;
@@ -112,8 +120,16 @@ public class PlanBean extends BaseBean {
 	private TreeNode arbolAptitudes;
 	private TreeNode[] aptitudes;
 
+	
+
 	@ManagedProperty(value = "#{fecServiceFacade}")
 	private FECServiceFacade fecServiceFacade;
+	
+	
+	
+
+	
+
 
 	public PlanBean() {
 		initRecursos();
@@ -141,7 +157,7 @@ public class PlanBean extends BaseBean {
 		} else {
 			// Flujo Nuevo Plan
 			plan = new PlanDTO();
-			  
+
 			plan.setCatTipoPlan(getCat(catTpoPlan, "Por Periodo"));
 			plan.setCatPeriodo(getCat(catPeriodo, "Semestral"));
 			plan.setCatCreditosPlan(getCat(catCreditosPlan, "Obligatorio"));
@@ -149,23 +165,23 @@ public class PlanBean extends BaseBean {
 			plan.setHorasCredito(0);
 			plan.setCatCompetenciasPlan(getCat(catCompPlan, "Opcional"));
 			plan.setCatDocumentosExpidePlan(getCat(catDocsExpidePlan, "Certificado"));
-			
+
 			plan.setTblOrganismoGubernamental(new OrgGubernamentalDTO());
-			for(OrgGubernamentalDTO orgG : catOrgGubs) {
+			for (OrgGubernamentalDTO orgG : catOrgGubs) {
 				if (!orgG.getLstHijosOrgGub().isEmpty()) {
 					for (OrgGubernamentalDTO orgGHijo : orgG.getLstHijosOrgGub()) {
-						if(orgGHijo.getNombre().equals("UnADM")){
+						if (orgGHijo.getNombre().equals("UnADM")) {
 							plan.setTblOrganismoGubernamental(orgGHijo);
 							break;
 						}
 					}
 				}
-				if(orgG.getNombre().equals("UnADM")){
+				if (orgG.getNombre().equals("UnADM")) {
 					plan.setTblOrganismoGubernamental(orgG);
 					break;
 				}
 			}
-			
+
 			plan.setCatAlcancePlan(getCat(catAlcancePlan, "Publico"));
 			plan.setCatEstatusPlan(new CatalogoComunDTO());
 			plan.setCatModalidadPlanPrograma(new CatalogoComunDTO());
@@ -183,24 +199,29 @@ public class PlanBean extends BaseBean {
 			mallaPlan.setElementosSubestructuras2(1);
 			mallaPlan.setElementosSubestructuras3(1);
 			mallaPlan.setNiveles(0);
-			
+
 			mallaPlan.setNombreEstructuras("");
 			mallaPlan.setNombreSubestructuras1("");
 			mallaPlan.setNombreSubestructuras2("");
 			mallaPlan.setNombreSubestructuras3("");
 		}
 	}
+
 	
-	public CatalogoComunDTO getCat(List<CatalogoComunDTO> catLista, String nombre){
+	
+
+	
+
+	public CatalogoComunDTO getCat(List<CatalogoComunDTO> catLista, String nombre) {
 		CatalogoComunDTO catEncontrado = new CatalogoComunDTO();
-		
-		for(CatalogoComunDTO cat : catLista) {
-			if(cat.getNombre().equals(nombre)){
+
+		for (CatalogoComunDTO cat : catLista) {
+			if (cat.getNombre().equals(nombre)) {
 				catEncontrado = cat;
 				break;
 			}
 		}
-		
+
 		return catEncontrado;
 	}
 
@@ -218,7 +239,7 @@ public class PlanBean extends BaseBean {
 				List<Integer> comEspecifIds = plan.getRelPlanConocimientos().stream()
 						.map(c -> c.getIdAreaConocimiento()).collect(Collectors.toList());
 				obtieneValorCompEspecifSelec(arbolConocimientos, comEspecifIds, conocimientos, indexCmpsEsp);
-				
+
 				conocimsPlanSelec = new ArrayList<>();
 				for (RelPlanConocimientoDTO conoc : plan.getRelPlanConocimientos()) {
 					conocimsPlanSelec.add(conoc.getCatAreasConocimiento().getId().toString());
@@ -228,10 +249,10 @@ public class PlanBean extends BaseBean {
 			if (!ObjectUtils.isNullOrEmpty(plan.getRelPlanAptitudes())) {
 				int indexCmpsEsp = 0;
 				aptitudes = new TreeNode[plan.getRelPlanAptitudes().size()];
-				List<Integer> comEspecifIds = plan.getRelPlanAptitudes().stream()
-						.map(c -> c.getIdAptitud()).collect(Collectors.toList());
+				List<Integer> comEspecifIds = plan.getRelPlanAptitudes().stream().map(c -> c.getIdAptitud())
+						.collect(Collectors.toList());
 				obtieneValorCompEspecifSelec(arbolAptitudes, comEspecifIds, aptitudes, indexCmpsEsp);
-				
+
 				aptitudesPlanSelec = new ArrayList<>();
 				for (RelPlanAptitudDTO relApt : plan.getRelPlanAptitudes()) {
 					aptitudesPlanSelec.add(relApt.getCatAptitudesPlan().getId().toString());
@@ -241,10 +262,10 @@ public class PlanBean extends BaseBean {
 			if (!ObjectUtils.isNullOrEmpty(plan.getRelPlanHabilidades())) {
 				int indexCmpsEsp = 0;
 				habilidades = new TreeNode[plan.getRelPlanHabilidades().size()];
-				List<Integer> comEspecifIds = plan.getRelPlanHabilidades().stream()
-						.map(c -> c.getIdHabilidad()).collect(Collectors.toList());
+				List<Integer> comEspecifIds = plan.getRelPlanHabilidades().stream().map(c -> c.getIdHabilidad())
+						.collect(Collectors.toList());
 				obtieneValorCompEspecifSelec(arbolHabilidades, comEspecifIds, habilidades, indexCmpsEsp);
-				
+
 				habilidadesPlanSelec = new ArrayList<>();
 				for (RelPlanHabilidadDTO relApt : plan.getRelPlanHabilidades()) {
 					habilidadesPlanSelec.add(relApt.getCatHabilidadesPlan().getId().toString());
@@ -279,8 +300,7 @@ public class PlanBean extends BaseBean {
 				.getAttribute(ConstantesGestorWeb.CAT_DIVISIONES_PLAN);
 		catTipoCompetencia = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_TIPOS_COMPETENCIA);
-		
-		
+
 		catConocimientosPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_CONOCIMIENTOS_PLAN);
 		catHabilidadesPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
@@ -289,12 +309,12 @@ public class PlanBean extends BaseBean {
 				.getAttribute(ConstantesGestorWeb.CAT_APTITUDES_PLAN);
 		catCompPlan = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_COMPETENCIAS_PLAN);
-		
+
 		generarArbolConocimientos();
 		generarArbolAptitudes();
 		generarArbolHabilidades();
 	}
-	
+
 	/**
 	 *
 	 */
@@ -302,50 +322,50 @@ public class PlanBean extends BaseBean {
 		CatalogoComunDTO catCono = new CatalogoComunDTO();
 		catCono.setId(-1);
 		catCono.setNombre("Conocimientos");
-		
+
 		CatalogoComunDTO catBas = new CatalogoComunDTO();
 		catBas.setId(-1);
 		catBas.setNombre("Básicas");
-		
+
 		CatalogoComunDTO catProf = new CatalogoComunDTO();
 		catProf.setId(-1);
 		catProf.setNombre("Profesionales");
-		
+
 		CatalogoComunDTO catTrans = new CatalogoComunDTO();
 		catTrans.setId(-1);
 		catTrans.setNombre("Transversales");
-		
+
 		arbolConocimientos = new CheckboxTreeNode(catCono, null);
 		arbolConocimientos.setSelectable(Boolean.FALSE);
-		
+
 		TreeNode ramaBasic = new CheckboxTreeNode(catBas, arbolConocimientos);
 		ramaBasic.setSelectable(Boolean.FALSE);
-		
+
 		TreeNode ramaProf = new CheckboxTreeNode(catProf, arbolConocimientos);
 		ramaProf.setSelectable(Boolean.FALSE);
-		
+
 		TreeNode ramaTrans = new CheckboxTreeNode(catTrans, arbolConocimientos);
 		ramaTrans.setSelectable(Boolean.FALSE);
-		
+
 		for (CatalogoComunDTO catCon : catConocimientosPlan) {
-			switch(catCon.getDescripcion()) {
+			switch (catCon.getDescripcion()) {
 			case "1":
 				TreeNode nodoBasic = new CheckboxTreeNode(catCon, ramaBasic);
 				nodoBasic.setExpanded(Boolean.FALSE);
-			break;
+				break;
 			case "2":
 				TreeNode nodoProf = new CheckboxTreeNode(catCon, ramaProf);
 				nodoProf.setExpanded(Boolean.FALSE);
-			break;
+				break;
 			case "3":
 				TreeNode nodoTrans = new CheckboxTreeNode(catCon, ramaTrans);
 				nodoTrans.setExpanded(Boolean.FALSE);
-			break;
+				break;
 			}
-			
+
 		}
 	}
-	
+
 	/**
 	 *
 	 */
@@ -353,50 +373,50 @@ public class PlanBean extends BaseBean {
 		CatalogoComunDTO catCono = new CatalogoComunDTO();
 		catCono.setId(-1);
 		catCono.setNombre("Aptitudes");
-		
+
 		CatalogoComunDTO catBas = new CatalogoComunDTO();
 		catBas.setId(-2);
 		catBas.setNombre("Básicas");
-		
+
 		CatalogoComunDTO catProf = new CatalogoComunDTO();
 		catProf.setId(-3);
 		catProf.setNombre("Profesionales");
-		
+
 		CatalogoComunDTO catTrans = new CatalogoComunDTO();
 		catTrans.setId(-4);
 		catTrans.setNombre("Transversales");
-		
+
 		arbolAptitudes = new CheckboxTreeNode(catCono, null);
 		arbolAptitudes.setSelectable(Boolean.FALSE);
-		
+
 		TreeNode ramaBasic = new CheckboxTreeNode(catBas, arbolAptitudes);
 		ramaBasic.setSelectable(Boolean.FALSE);
-		
+
 		TreeNode ramaProf = new CheckboxTreeNode(catProf, arbolAptitudes);
 		ramaProf.setSelectable(Boolean.FALSE);
-		
+
 		TreeNode ramaTrans = new CheckboxTreeNode(catTrans, arbolAptitudes);
 		ramaTrans.setSelectable(Boolean.FALSE);
-		
+
 		for (CatalogoComunDTO catCon : catAptitutesPlan) {
-			switch(catCon.getDescripcion()) {
+			switch (catCon.getDescripcion()) {
 			case "1":
 				TreeNode nodoBasic = new CheckboxTreeNode(catCon, ramaBasic);
 				nodoBasic.setExpanded(Boolean.FALSE);
-			break;
+				break;
 			case "2":
 				TreeNode nodoProf = new CheckboxTreeNode(catCon, ramaProf);
 				nodoProf.setExpanded(Boolean.FALSE);
-			break;
+				break;
 			case "3":
 				TreeNode nodoTrans = new CheckboxTreeNode(catCon, ramaTrans);
 				nodoTrans.setExpanded(Boolean.FALSE);
-			break;
+				break;
 			}
-			
+
 		}
 	}
-	
+
 	/**
 	 *
 	 */
@@ -404,47 +424,47 @@ public class PlanBean extends BaseBean {
 		CatalogoComunDTO catCono = new CatalogoComunDTO();
 		catCono.setId(-1);
 		catCono.setNombre("Habilidades");
-		
+
 		CatalogoComunDTO catBas = new CatalogoComunDTO();
 		catBas.setId(-2);
 		catBas.setNombre("Básicas");
-		
+
 		CatalogoComunDTO catProf = new CatalogoComunDTO();
 		catProf.setId(-3);
 		catProf.setNombre("Profesionales");
-		
+
 		CatalogoComunDTO catTrans = new CatalogoComunDTO();
 		catTrans.setId(-4);
 		catTrans.setNombre("Transversales");
-		
+
 		arbolHabilidades = new CheckboxTreeNode(catCono, null);
 		arbolHabilidades.setSelectable(Boolean.FALSE);
-		
+
 		TreeNode ramaBasic = new CheckboxTreeNode(catBas, arbolHabilidades);
 		ramaBasic.setSelectable(Boolean.FALSE);
-		
+
 		TreeNode ramaProf = new CheckboxTreeNode(catProf, arbolHabilidades);
 		ramaProf.setSelectable(Boolean.FALSE);
-		
+
 		TreeNode ramaTrans = new CheckboxTreeNode(catTrans, arbolHabilidades);
 		ramaTrans.setSelectable(Boolean.FALSE);
-		
+
 		for (CatalogoComunDTO catCon : catHabilidadesPlan) {
-			switch(catCon.getDescripcion()) {
+			switch (catCon.getDescripcion()) {
 			case "1":
 				TreeNode nodoBasic = new CheckboxTreeNode(catCon, ramaBasic);
 				nodoBasic.setExpanded(Boolean.FALSE);
-			break;
+				break;
 			case "2":
 				TreeNode nodoProf = new CheckboxTreeNode(catCon, ramaProf);
 				nodoProf.setExpanded(Boolean.FALSE);
-			break;
+				break;
 			case "3":
 				TreeNode nodoTrans = new CheckboxTreeNode(catCon, ramaTrans);
 				nodoTrans.setExpanded(Boolean.FALSE);
-			break;
+				break;
 			}
-			
+
 		}
 	}
 
@@ -481,7 +501,8 @@ public class PlanBean extends BaseBean {
 
 	public void onChangeModalidadPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatModalidadPlanPrograma(this.getValorDeCatalogo(catModalidadPlan, (Integer.parseInt(e.getNewValue().toString()))));
+			plan.setCatModalidadPlanPrograma(
+					this.getValorDeCatalogo(catModalidadPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
@@ -499,25 +520,29 @@ public class PlanBean extends BaseBean {
 
 	public void onChangeNvEnsePlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatNivelEnsenanzaPrograma(this.getValorDeCatalogo(catNivelEnsPlan, (Integer.parseInt(e.getNewValue().toString()))));
+			plan.setCatNivelEnsenanzaPrograma(
+					this.getValorDeCatalogo(catNivelEnsPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeCompetenciaPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatCompetenciasPlan(this.getValorDeCatalogo(catCompPlan, (Integer.parseInt(e.getNewValue().toString()))));
+			plan.setCatCompetenciasPlan(
+					this.getValorDeCatalogo(catCompPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeAlcancePlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatAlcancePlan(this.getValorDeCatalogo(catAlcancePlan, (Integer.parseInt(e.getNewValue().toString()))));
+			plan.setCatAlcancePlan(
+					this.getValorDeCatalogo(catAlcancePlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeCreditosPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatCreditosPlan(this.getValorDeCatalogo(catCreditosPlan, (Integer.parseInt(e.getNewValue().toString()))));
+			plan.setCatCreditosPlan(
+					this.getValorDeCatalogo(catCreditosPlan, (Integer.parseInt(e.getNewValue().toString()))));
 			if (Integer.parseInt(e.getNewValue().toString()) == 2) {
 				setCreditos(Boolean.FALSE);
 			} else {
@@ -530,25 +555,29 @@ public class PlanBean extends BaseBean {
 
 	public void onChangeDivisionesPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatDivisionesPlan(this.getValorDeCatalogo(catDivisionesPlan, (Integer.parseInt(e.getNewValue().toString()))));
+			plan.setCatDivisionesPlan(
+					this.getValorDeCatalogo(catDivisionesPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeTipoCompetencia(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatTipoCompetencia(this.getValorDeCatalogo(catTipoCompetencia, (Integer.parseInt(e.getNewValue().toString()))));
+			plan.setCatTipoCompetencia(
+					this.getValorDeCatalogo(catTipoCompetencia, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeEstatusPlan(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatEstatusPlan(this.getValorDeCatalogo(catalEstatusPlan, (Integer.parseInt(e.getNewValue().toString()))));
+			plan.setCatEstatusPlan(
+					this.getValorDeCatalogo(catalEstatusPlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
 	public void onChangeDocExpide(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			plan.setCatDocumentosExpidePlan(this.getValorDeCatalogo(catDocsExpidePlan, (Integer.parseInt(e.getNewValue().toString()))));
+			plan.setCatDocumentosExpidePlan(
+					this.getValorDeCatalogo(catDocsExpidePlan, (Integer.parseInt(e.getNewValue().toString()))));
 		}
 	}
 
@@ -693,32 +722,32 @@ public class PlanBean extends BaseBean {
 		plan.setCatPeriodo(!plan.getCatTipoPlan().getNombre().equals("Por Periodo") ? null : plan.getCatPeriodo());
 		plan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
 		ResultadoDTO<PlanDTO> resultado = null;
-		
+
 		try {
 			conocimsPlanSelec = new ArrayList<>();
-			for(TreeNode nodCon : conocimientos) {
+			for (TreeNode nodCon : conocimientos) {
 				CatalogoComunDTO catCon = (CatalogoComunDTO) nodCon.getData();
-				if(!catCon.getId().toString().contains("-")){
-					conocimsPlanSelec.add( catCon.getId().toString() );
+				if (!catCon.getId().toString().contains("-")) {
+					conocimsPlanSelec.add(catCon.getId().toString());
 				}
 			}
-			
+
 			habilidadesPlanSelec = new ArrayList<>();
-			for(TreeNode nodCon : habilidades) {
+			for (TreeNode nodCon : habilidades) {
 				CatalogoComunDTO catCon = (CatalogoComunDTO) nodCon.getData();
-				if(!catCon.getId().toString().contains("-")){
-					habilidadesPlanSelec.add( catCon.getId().toString() );
+				if (!catCon.getId().toString().contains("-")) {
+					habilidadesPlanSelec.add(catCon.getId().toString());
 				}
 			}
-			
+
 			aptitudesPlanSelec = new ArrayList<>();
-			for(TreeNode nodCon : aptitudes) {
+			for (TreeNode nodCon : aptitudes) {
 				CatalogoComunDTO catCon = (CatalogoComunDTO) nodCon.getData();
-				if(!catCon.getId().toString().contains("-")){
-					aptitudesPlanSelec.add( catCon.getId().toString() );
+				if (!catCon.getId().toString().contains("-")) {
+					aptitudesPlanSelec.add(catCon.getId().toString());
 				}
 			}
-			
+
 			resultado = planServiceFacade.guardaNuevoPlan(plan,
 					this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
 					this.obtieneListaCatalogoComun(aptitudesPlanSelec, ConstantesGestorWeb.CAT_APTITUDES_PLAN),
@@ -746,31 +775,31 @@ public class PlanBean extends BaseBean {
 	public String editarPlan() throws Exception {
 		logger.info("########## EDITANDO DEl PLAN ########");
 		plan.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
-		
+
 		conocimsPlanSelec = new ArrayList<>();
-		for(TreeNode nodCon : conocimientos) {
+		for (TreeNode nodCon : conocimientos) {
 			CatalogoComunDTO catCon = (CatalogoComunDTO) nodCon.getData();
-			if(!catCon.getId().toString().contains("-")){
-				conocimsPlanSelec.add( catCon.getId().toString() );
+			if (!catCon.getId().toString().contains("-")) {
+				conocimsPlanSelec.add(catCon.getId().toString());
 			}
 		}
-		
+
 		habilidadesPlanSelec = new ArrayList<>();
-		for(TreeNode nodCon : habilidades) {
+		for (TreeNode nodCon : habilidades) {
 			CatalogoComunDTO catCon = (CatalogoComunDTO) nodCon.getData();
-			if(!catCon.getId().toString().contains("-")){
-				habilidadesPlanSelec.add( catCon.getId().toString() );
+			if (!catCon.getId().toString().contains("-")) {
+				habilidadesPlanSelec.add(catCon.getId().toString());
 			}
 		}
-		
+
 		aptitudesPlanSelec = new ArrayList<>();
-		for(TreeNode nodCon : aptitudes) {
+		for (TreeNode nodCon : aptitudes) {
 			CatalogoComunDTO catCon = (CatalogoComunDTO) nodCon.getData();
-			if(!catCon.getId().toString().contains("-")){
-				aptitudesPlanSelec.add( catCon.getId().toString() );
+			if (!catCon.getId().toString().contains("-")) {
+				aptitudesPlanSelec.add(catCon.getId().toString());
 			}
 		}
-		
+
 		ResultadoDTO<PlanDTO> resultado = planServiceFacade.editarPlan(plan,
 				this.obtieneListaCatalogoComun(habilidadesPlanSelec, ConstantesGestorWeb.CAT_HABILIDADES_PLAN),
 				this.obtieneListaCatalogoComun(aptitudesPlanSelec, ConstantesGestorWeb.CAT_APTITUDES_PLAN),
@@ -837,7 +866,7 @@ public class PlanBean extends BaseBean {
 
 		return cat;
 	}
-	
+
 	/**
 	 *
 	 * @param event
@@ -866,7 +895,7 @@ public class PlanBean extends BaseBean {
 			conocimientos = (TreeNode[]) aux.toArray();
 		}
 	}
-	
+
 	/**
 	 *
 	 * @param event
@@ -895,7 +924,7 @@ public class PlanBean extends BaseBean {
 			habilidades = (TreeNode[]) aux.toArray();
 		}
 	}
-	
+
 	/**
 	 *
 	 * @param event
@@ -924,7 +953,7 @@ public class PlanBean extends BaseBean {
 			aptitudes = (TreeNode[]) aux.toArray();
 		}
 	}
-	
+
 	/**
 	 *
 	 * @param compEspecificas
@@ -939,7 +968,7 @@ public class PlanBean extends BaseBean {
 		}
 		return false;
 	}
-	
+
 	/**
 	 *
 	 * @param arbol
@@ -960,7 +989,7 @@ public class PlanBean extends BaseBean {
 			}
 		}
 	}
-	
+
 	/**
 	 * @return the planServiceFacade
 	 */
@@ -1471,4 +1500,5 @@ public class PlanBean extends BaseBean {
 	public void setAptitudes(TreeNode[] aptitudes) {
 		this.aptitudes = aptitudes;
 	}
+
 }
