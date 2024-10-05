@@ -181,8 +181,6 @@ public class ConvocatoriasBean extends BaseBean {
 	
 	public void consultarFiltros() {
 		
-		
-	
 		logger.info("***********************Inicio Consulta convocatorias filtros***********************");
 		
 		logger.info("NOMBRE CONVOCATORIA " + convocatoriaParamConsulta.getConsulNombreConvocatoria());
