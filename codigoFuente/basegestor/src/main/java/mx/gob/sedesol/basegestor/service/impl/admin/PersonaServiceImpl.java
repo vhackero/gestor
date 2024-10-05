@@ -79,6 +79,7 @@ import mx.gob.sedesol.basegestor.model.especificaciones.PersonaEspecificacion;
 import mx.gob.sedesol.basegestor.model.repositories.admin.DatoSociodemograficoPersonaRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.DomicilioPersonaRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.EntidadFederativaRepo;
+import mx.gob.sedesol.basegestor.model.repositories.admin.IUsuariosImportarRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.LoteCargaUsuarioRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.LoteUsuarioRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.MunicipioRepo;
@@ -150,6 +151,9 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 	
 	@Autowired
 	private DatoSociodemograficoPersonaRepo datoSociodemograficoPersonaRepo;
+	
+	@Autowired
+	private IUsuariosImportarRepo usuariosImportarRepo;
 
 	private ModelMapper mapper = new ModelMapper();
 
@@ -381,6 +385,7 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 			try {
 				resultado = new ResultadoDTO<>();
 				TblPersona persona = almacenarDatosPersonales(datos.getPersona());
+				//ES AQUI DONDE METEMOS A LA OTRA TABLA 
 				almacenarDatosLaborales(datos.getDatosLaborales(), persona);
 				almacenarTelefono(datos.getTelefonoFijo(), persona);
 				almacenarTelefono(datos.getCelular(), persona);
@@ -1355,7 +1360,7 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public Boolean guardarPersonas(List<CapturaPersonaDTO> datos) {	
+	public Boolean guardarPersonas(List<CapturaPersonaDTO> datos,String fuenteExterna, String convocatoria, boolean vincularUsuario) {	
 		boolean exito = false;
 		List<TblPersona> personaDTOToTbl = datos.stream()
 				.map(capturaPersonaDTO -> mapper.map(capturaPersonaDTO.getPersona(), TblPersona.class))
@@ -1365,6 +1370,9 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 		    CapturaPersonaDTO capturaPersonaDTO = datos.get(i);
 		    TblPersona persona = personas.get(i);
 		    capturaPersonaDTO.getPersona().setIdPersona(persona.getIdPersona());
+		    if(vincularUsuario){
+		    	usuariosImportarRepo.insertAspirante(persona.getIdPersona().toString(), fuenteExterna, convocatoria);
+		    }
 		});
 		List<RelUsuarioDatosLaborales> usuarioDatosLaboralesDtoToTbl = datos.stream()
 		        .map(capturaPersonaDTO -> {

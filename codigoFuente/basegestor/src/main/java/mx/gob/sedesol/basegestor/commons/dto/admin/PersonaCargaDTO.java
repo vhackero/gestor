@@ -28,6 +28,8 @@ public class PersonaCargaDTO implements Serializable {
 	private String municipio;
 	private String orden;
 	private String puesto;
+	private String convocatoria;
+	private String plan;
 	private Date fechaNacimientoDate;
 	private Integer idEntidadFederativa;
 	private String idMunicipio;
@@ -54,6 +56,8 @@ public class PersonaCargaDTO implements Serializable {
 	private boolean municipioCorrecto;
 	private boolean ordenCorrecto;
 	private boolean puestoCorrecto;
+	private boolean convocatoriaCorrecto;
+	private boolean planCorrecto;
 	
 	public PersonaCargaDTO() {
 		this.correcto = true;
@@ -75,6 +79,8 @@ public class PersonaCargaDTO implements Serializable {
 		this.municipioCorrecto = true;
 		this.ordenCorrecto = true;
 		this.puestoCorrecto = true;
+		this.convocatoriaCorrecto = true;
+		this.planCorrecto = true;
 	}
 	
 	public String getPrograma() {
@@ -175,6 +181,21 @@ public class PersonaCargaDTO implements Serializable {
 	public void setPuesto(String puesto) {
 		this.puesto = puesto;
 	}
+	public String getConvocatoria() {
+		return convocatoria;
+	}
+
+	public void setConvocatoria(String convocatoria) {
+		this.convocatoria = convocatoria;
+	}
+
+	public String getPlan() {
+		return plan;
+	}
+
+	public void setPlan(String plan) {
+		this.plan = plan;
+	}
 	public boolean isCorrecto() {
 		return correcto;
 	}
@@ -258,6 +279,19 @@ public class PersonaCargaDTO implements Serializable {
 	}
 	public void setPuestoCorrecto(boolean puestoCorrecto) {
 		this.puestoCorrecto = puestoCorrecto;
+	}
+	public boolean isConvocatoriaCorrecto() {
+		return convocatoriaCorrecto;
+	}
+
+	public void setConvocatoriaCorrecto(boolean convocatoriaCorrecto) {
+		this.convocatoriaCorrecto = convocatoriaCorrecto;
+	}
+	public boolean isPlanCorrecto() {
+		return planCorrecto;
+	}
+	public void setPlanCorrecto(boolean planCorrecto) {
+		this.planCorrecto = planCorrecto;
 	}
 	public String getUsuario() {
 		return usuario;

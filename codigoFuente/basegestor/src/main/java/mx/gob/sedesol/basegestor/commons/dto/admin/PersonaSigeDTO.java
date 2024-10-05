@@ -1,7 +1,7 @@
 package mx.gob.sedesol.basegestor.commons.dto.admin;
 
 import java.io.Serializable;
-import java.sql.Date;
+import java.util.Date;
 
 import mx.gob.sedesol.basegestor.commons.dto.ComunDTO;
 
@@ -119,8 +119,8 @@ public class PersonaSigeDTO extends ComunDTO implements Serializable {
 		return fechaNacimiento;
 	}
 
-	public void setFechaNacimiento(java.util.Date date) {
-		this.fechaNacimiento = (Date) date;
+	public void setFechaNacimiento(Date date) {
+		this.fechaNacimiento =  date;
 	}
 
 	public String getCurp() {

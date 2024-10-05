@@ -65,6 +65,8 @@ public final class ConstantesGestor {
 	public static final String COLUMNA_MUNICIPIO = "municipio";
 	public static final String COLUMNA_ORDEN = "orden_gob";
 	public static final String COLUMNA_PUESTO = "puesto";
+	public static final String COLUMNA_CONVOCATORIA = "convocatoria_id";
+	public static final String COLUMNA_PLAN = "plan_id";
 	
 	public static final String MENSAJE_CORRECTO = "Correcto";
 	public static final String MENSAJE_INCORRECTO = "Ocurri\u00F3 un error al guardar el registro";

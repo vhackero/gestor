@@ -100,7 +100,8 @@ public class UtilidadesCargaMasiva {
 				dto.setMunicipio(obtenerValor(filaXssf, indiceFila++));
 				dto.setOrden(obtenerValor(filaXssf, indiceFila++));
 				dto.setPuesto(obtenerValor(filaXssf, indiceFila++));
-				
+				dto.setConvocatoria(obtenerValor(filaXssf, indiceFila++));
+				dto.setPlan(obtenerValor(filaXssf, indiceFila++));
 				validarPersona(dto, entidades, municipios);
 
 				personas.add(dto);
@@ -170,7 +171,9 @@ public class UtilidadesCargaMasiva {
 				dto.setMunicipio(obtenerValor(filaHssf, indiceFila++));
 				dto.setOrden(obtenerValor(filaHssf, indiceFila++));
 				dto.setPuesto(obtenerValor(filaHssf, indiceFila++));
-				
+				dto.setConvocatoria(obtenerValor(filaHssf, indiceFila++));
+				dto.setPlan(obtenerValor(filaHssf, indiceFila++));
+
 				validarPersona(dto, entidades, municipios);
 
 				personas.add(dto);
@@ -220,6 +223,16 @@ public class UtilidadesCargaMasiva {
 		validarTipoUsuario(dto);
 		if (ObjectUtils.isNullOrEmpty(dto.getUsuario())) {
 			dto.setUsuarioCorrecto(false);
+			dto.setCorrecto(false);
+		}
+		
+		if (ObjectUtils.isNullOrEmpty(dto.getConvocatoria())) {
+			dto.setConvocatoriaCorrecto(false);
+			dto.setCorrecto(false);
+		}
+		
+		if (ObjectUtils.isNullOrEmpty(dto.getPlan())) {
+			dto.setPlanCorrecto(false);
 			dto.setCorrecto(false);
 		}
 		
@@ -380,6 +393,9 @@ public class UtilidadesCargaMasiva {
 			dto.setMunicipio(usuariosImport.get(ConstantesGestor.COLUMNA_MUNICIPIO));
 			dto.setOrden(usuariosImport.get(ConstantesGestor.COLUMNA_ORDEN));
 			dto.setPuesto(usuariosImport.get(ConstantesGestor.COLUMNA_PUESTO));
+			dto.setConvocatoria(usuariosImport.get(ConstantesGestor.COLUMNA_CONVOCATORIA));
+			dto.setPlan(usuariosImport.get(ConstantesGestor.COLUMNA_PLAN));
+
 			validarPersona(dto, entidades, municipios);
 			personas.add(dto);
 		}
@@ -427,6 +443,8 @@ public class UtilidadesCargaMasiva {
 				llenarCelda(fila, estilo, dto.getMunicipio(), dto.isMunicipioCorrecto(), numeroColumna++);
 				llenarCelda(fila, estilo, dto.getOrden(), dto.isOrdenCorrecto(), numeroColumna++);
 				llenarCelda(fila, estilo, dto.getPuesto(), dto.isPuestoCorrecto(), numeroColumna++);
+				llenarCelda(fila, estilo, dto.getConvocatoria(), dto.isConvocatoriaCorrecto(), numeroColumna++);
+				llenarCelda(fila, estilo, dto.getPlan(), dto.isPlanCorrecto(), numeroColumna++);
 				llenarCelda(fila, estilo, dto.getMensajeResultado(), true, numeroColumna);
 				numeroFila++;
 			}
@@ -498,7 +516,11 @@ public class UtilidadesCargaMasiva {
 		celda.setCellValue(ConstantesGestor.COLUMNA_MUNICIPIO);
 		celda = fila.createCell(indiceFila++);
 		celda.setCellValue(ConstantesGestor.COLUMNA_ORDEN);
-		celda = fila.createCell(indiceFila);
+		celda = fila.createCell(indiceFila++);
 		celda.setCellValue(ConstantesGestor.COLUMNA_PUESTO);
+		celda = fila.createCell(indiceFila++);
+		celda.setCellValue(ConstantesGestor.COLUMNA_CONVOCATORIA);
+		celda = fila.createCell(indiceFila);
+		celda.setCellValue(ConstantesGestor.COLUMNA_PLAN);
 	}
 }
