@@ -560,14 +560,14 @@
 			<to-view-id>/views/private/gestionAprendizaje/alumnoView/busquedaConvocatorias.xhtml</to-view-id>
 			<redirect />
 		</navigation-case>
- 
-				
-		<!-- ITTIVA el padrino MIS CONVOCATORIAS -->
+		
+		<!-- ITTIVA 666 MIS CONVOCATORIAS -->
 		<navigation-case>
-			<from-outcome>MIS_INSCRIPCIONES</from-outcome>
-			<to-view-id>/views/private/gestionAprendizaje/alumnoView/busquedaInscripciones.xhtml</to-view-id>
+			<from-outcome>MIS_DISPERSIONES</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/busquedaDispersiones</to-view-id>
 			<redirect />
 		</navigation-case>
+ 
 
 		<!-- Mis cursos -->
 		<navigation-case>

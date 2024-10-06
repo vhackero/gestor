@@ -493,6 +493,19 @@
 							
 							<!-- ITTIVA 666-->
 							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('MIS_DISPERSIONES')}">
+								<sec:authorize access="hasPermission(null, 'MIS_DISPERSIONES') ">
+									<li><h:commandLink
+											action="#{menuGestorBean.navegaMisDispersiones}" title="Dispersiones">
+											<i class="fa fa-solid fa-id-card"></i>
+											<span class="m-label">Dispersiones</span>
+
+										</h:commandLink></li>
+								</sec:authorize>
+							</ui:fragment>
+							
+							<!-- ITTIVA 666-->
+							<ui:fragment
 								rendered="#{menuGestorBean.rolTienePermiso('MIS_CONVOCATORIAS')}">
 								<sec:authorize access="hasPermission(null, 'MIS_CONVOCATORIAS') ">
 									<li><h:commandLink
@@ -503,21 +516,6 @@
 										</h:commandLink></li>
 								</sec:authorize>
 							</ui:fragment>
-
-
-	<!-- ITTIVA 666-->
-							<ui:fragment
-								rendered="#{menuGestorBean.rolTienePermiso('MIS_INSCRIPCIONES')}">
-								<sec:authorize access="hasPermission(null, 'MIS_INSCRIPCIONES') ">
-									<li><h:commandLink
-											action="#{menuGestorBean.navegaMisInscripciones}" title="Inscripciones">
-											<i class="fa fa-solid fa-id-card"></i>
-											<span class="m-label">Inscripciones</span>
-
-										</h:commandLink></li>
-								</sec:authorize>
-							</ui:fragment>
-
 
 
 							<ui:fragment

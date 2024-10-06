@@ -14,7 +14,7 @@
 	<ui:define name="content">
 		<h:form>
 			<h1>
-				<p:outputLabel styleClass="h1" value="Inscripciones" />
+				<p:outputLabel styleClass="h1" value="Convocatorias" />
 			</h1>
 
 
@@ -34,8 +34,8 @@
 
 
 
-						<p:commandButton value="Nuevo proceso de inscripción"
-							action="#{inscripcionesBean.navegaNuevaInsrcipcion}"
+						<p:commandButton value="Nueva Dispersion"
+							action="#{dispersionesBean.navegaNuevoConvocatoria}"
 							ajax="false" immediate="true" process="@this"
 							styleClass="btn btn-primary" />
 
@@ -78,7 +78,7 @@
 
 
 			<!-- Incluir dinámicamente el archivo .xhtml basado en la propiedad 'paginaActual' -->
-			<ui:include src="#{inscripcionesBean.paginaActual}" />
+			<ui:include src="#{dispersionesBean.paginaActual}" />
 
 
 
