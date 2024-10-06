@@ -412,6 +412,8 @@ public final class ConstantesGestorWeb {
 	public static final String NAVEGA_NUEVA_CONVOCATORIAS="NAVEGA_NUEVA_CONVOCATORIAS";
 	public static final String NAVEGA_CONSULTA_CONVOCATORIAS="NAVEGA_CONSULTA_CONVOCATORIAS";
 	public static final String NAVEGA_CONSULTA_TABLERO_CONVOCATORIAS="NAVEGA_CONSULTA_TABLERO_CONVOCATORIAS";
+	//el padrino ittiva
+	public static final String NAVEGA_MIS_INSCRIPCIONES="MIS_INSCRIPCIONES";
 	
 	public static final String NAVEGA_TAREAS_PROGRAMADAS = "TAREAS_PROGRAMADAS";
 	

@@ -31,6 +31,7 @@ import mx.gob.sedesol.gestorweb.beans.administracion.NotificacionesBean;
 import mx.gob.sedesol.gestorweb.beans.analisisdatos.ReporteGestionEscolarBean;
 import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.ExpedienteAlumnoBean;
 import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview.ConstanciasBean;
+import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview.InscripcionesBean;
 import mx.gob.sedesol.gestorweb.beans.gestionescolar.EventoCapacitacionBean;
 import mx.gob.sedesol.gestorweb.beans.logisticainfraestructura.AreasBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
@@ -75,6 +76,10 @@ public class MenuGestorBean extends BaseBean {
 	
 	@ManagedProperty("#{constanciasBean}")
 	private ConstanciasBean constanciasBean;
+	
+	@ManagedProperty("#{inscripcionesBean}")
+	private InscripcionesBean inscripcionesBean;
+	
 	
 	@ManagedProperty("#{expedienteAlumnoBean}")
 	private ExpedienteAlumnoBean expedienteAlumnoBean;
@@ -421,6 +426,14 @@ public class MenuGestorBean extends BaseBean {
 		logger.info("Navegando a mis convocatorias");
 		return ConstantesGestorWeb.NAVEGA_MIS_CONVOCATORIAS;
 	}
+	
+	
+	public String navegaMisInscripciones() {
+		logger.info("Navegando a mis INSCRIPCIONES");
+		return ConstantesGestorWeb.NAVEGA_MIS_INSCRIPCIONES;
+	}
+	
+	
 
 	public String navegaTareasProgramadas() {
 		logger.info("Navegando a tareas programadas");
@@ -651,6 +664,15 @@ public class MenuGestorBean extends BaseBean {
 		this.constanciasBean = constanciasBean;
 	}
 
+	public InscripcionesBean getInscripcionesBean() {
+		return inscripcionesBean;
+	}
+
+	public void setInscripcionesBean(InscripcionesBean inscripcionesBean) {
+		this.inscripcionesBean = inscripcionesBean;
+	}
+	
+	
 	public boolean isShowLogros() {
 		return showLogros;
 	}

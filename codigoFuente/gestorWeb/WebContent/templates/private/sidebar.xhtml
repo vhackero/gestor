@@ -504,6 +504,22 @@
 								</sec:authorize>
 							</ui:fragment>
 
+
+	<!-- ITTIVA 666-->
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('MIS_INSCRIPCIONES')}">
+								<sec:authorize access="hasPermission(null, 'MIS_INSCRIPCIONES') ">
+									<li><h:commandLink
+											action="#{menuGestorBean.navegaMisInscripciones}" title="Inscripciones">
+											<i class="fa fa-solid fa-id-card"></i>
+											<span class="m-label">Inscripciones</span>
+
+										</h:commandLink></li>
+								</sec:authorize>
+							</ui:fragment>
+
+
+
 							<ui:fragment
 								rendered="#{menuGestorBean.rolTienePermiso('MIS_CURSOS')}">
 								<sec:authorize access="hasPermission(null, 'MIS_CURSOS') ">
