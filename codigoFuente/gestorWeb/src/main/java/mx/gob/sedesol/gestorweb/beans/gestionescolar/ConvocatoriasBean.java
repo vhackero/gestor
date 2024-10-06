@@ -156,7 +156,7 @@ public class ConvocatoriasBean extends BaseBean {
 
 		
 
-		
+		convocatoriaService.altaConvocatorias();
 
 	}
 	
@@ -527,6 +527,14 @@ public class ConvocatoriasBean extends BaseBean {
 
 	public void setElminarConvo(Convocatoria elminarConvo) {
 		this.elminarConvo = elminarConvo;
+	}
+
+	public ConvocatoriaParamNueva getConvocatoriaParamNueva() {
+		return convocatoriaParamNueva;
+	}
+
+	public void setConvocatoriaParamNueva(ConvocatoriaParamNueva convocatoriaParamNueva) {
+		this.convocatoriaParamNueva = convocatoriaParamNueva;
 	}
 
 	
