@@ -11,6 +11,7 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.event.ValueChangeEvent;
 
 import org.apache.log4j.Logger;
+import org.primefaces.context.RequestContext;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.ActividadDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EstatusDTO;
@@ -20,6 +21,7 @@ import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamNueva;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConvocatoriaService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
@@ -66,7 +68,7 @@ public class ConvocatoriasBean extends BaseBean {
 	private Date altaFechaAlta;
 	private Integer altaCupoLimite;
 	
-	
+	private ConvocatoriaParamNueva convocatoriaParamNueva = new ConvocatoriaParamNueva();
 
 	// CONSULTA CONVOCATORIA
 	private ConvocatoriaParamConsulta convocatoriaParamConsulta = new ConvocatoriaParamConsulta();
@@ -132,11 +134,14 @@ public class ConvocatoriasBean extends BaseBean {
 		
 	}
 	
-	public void eliminar() {
+	public void eliminar() throws Exception {
 		
 		logger.info(" INICIA ELIMINAR  ");
 		
-		convocatoriaService.eliminar(elminarConvo);
+		convocatoriaService.eliminarConvocatorias(elminarConvo);
+		consultarFiltros();
+		
+		RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion3').show()");
 		
 		logger.info(" TERMINA ELIMINAR  ");
 		
@@ -217,7 +222,7 @@ public class ConvocatoriasBean extends BaseBean {
 		
 		
 		if(convocatoriaParamConsulta.getValueConvocatoriaEstatus() == null ) {
-			convocatoriaParamConsulta.setValueConvocatoriaEstatus("0");
+			convocatoriaParamConsulta.setValueConvocatoriaEstatus("");
 		}
 		if(convocatoriaParamConsulta.getConsulFechaApertura() == null ) {
 			convocatoriaParamConsulta.setConsulFechaApertura("");
@@ -236,10 +241,23 @@ public class ConvocatoriasBean extends BaseBean {
 		logger.info("FECHA CIERRE : " + convocatoriaParamConsulta.getConsulFechaCierre());
 		logger.info("NIVEL EDUCATIVO : " + convocatoriaParamConsulta.getConsulNivelEducativo());
 		
+		
+		if("".equals(convocatoriaParamConsulta.getConsulNombreConvocatoria()) || "".equals(convocatoriaParamConsulta.getConsulFechaApertura()) || 
+				"".equals(convocatoriaParamConsulta.getConsulFechaCierre()) ) {
 			
-		listaConvocatoria2 = convocatoriaService.consultarConvocatoriasFiltros(convocatoriaParamConsulta);
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion2').show()");
 			
+		} else {
 			
+			listaConvocatoria2 = convocatoriaService.consultarConvocatoriasFiltros(convocatoriaParamConsulta);
+			
+			if(listaConvocatoria2.isEmpty()) {
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion').show()");
+			}
+			
+		}
+	
+		
 		logger.info("***********************Termina Consulta convocatorias filtros***********************");
 			
 		}

@@ -68,7 +68,7 @@
 					<p:calendar id="fechaInicio" styleClass="requerido"
 						showButtonPanel="false"
 						mindate="#{convocatoriasBean.obtenerFechaActual()}"
-						showOn="button" readonlyInput="true" pattern="dd/MM/yyyy"
+						showOn="button" readonlyInput="true" pattern="dd/MM/yyyy HH:mm"
 						placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 						value="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura}" locale="es"
 						navigator="true" yearRange="c-0:c+100">
@@ -83,10 +83,10 @@
 					<p:calendar id="ffinal" styleClass="requerido" locale="es"
 						navigator="true" readonlyInput="true"
 						mindate="#{convocatoriasBean.cadenaFechaMinima}"
-						disabled="#{convocatoriasBean.consulFechaApertura eq null}"
+						disabled="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura eq ''}"
 						value="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaCierre}" showOn="button"
 						placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-						yearRange="c-0:c+100" pattern="dd/MM/yyyy" showButtonPanel="false">
+						yearRange="c-0:c+100" pattern="dd/MM/yyyy HH:mm" showButtonPanel="false">
 						<p:ajax process="@this" event="change" />
 
 					</p:calendar>
@@ -193,11 +193,81 @@
 							<f:setPropertyActionListener value="#{convo}"
 								target="#{convocatoriasBean.elminarConvo}" />
 						</p:commandButton>
+						
+						<p:commandButton ajax="true" update="@form"
+							action="#{convocatoriasBean.eliminar}"
+							icon="fa fa-pencil" styleClass="btn-icon btn btn-default">
+							<f:setPropertyActionListener value="#{convo}"
+								target="#{convocatoriasBean.elminarConvo}" />
+						</p:commandButton>
+						
+						
 					</p:column>
+					
+					
 					
 				</p:dataTable>
 			</div>
 		</div>
 
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion" header="Informativo" dynamic="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText styleClass="bloque"
+							value="No se encontraron convocatorias." />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dlgValidarSeleccion').hide()" />
+				</div>
+			</div>
+		</p:dialog>
+		
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion2" header="Informativo" dynamic="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText styleClass="bloque"
+							value="Ingrese los datos marcados como obligatorios." />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dlgValidarSeleccion2').hide()" />
+				</div>
+			</div>
+		</p:dialog>
+		
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion3" header="Informativo" dynamic="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText styleClass="bloque"
+							value="Convocatoria eliminada correctamente." />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dlgValidarSeleccion3').hide()" />
+				</div>
+			</div>
+		</p:dialog>
 
 </ui:composition>

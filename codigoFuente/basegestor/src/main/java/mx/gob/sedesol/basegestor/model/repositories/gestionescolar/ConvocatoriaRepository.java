@@ -152,7 +152,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 			isPrimerFiltro = true;
 		}
 		
-		if (!("0").equals(convocatoriaParamConsulta.getValueConvocatoriaEstatus())) {
+		if (!("").equals(convocatoriaParamConsulta.getValueConvocatoriaEstatus())) {
 			filtro.append(validaOperador(isPrimerFiltro)+"tb.activo = ").append(convocatoriaParamConsulta.getValueConvocatoriaEstatus()).append(" ");
 			isPrimerFiltro = true;
 		}
@@ -272,25 +272,17 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 	@Override
 	public void eliminarConvocatorias(Convocatoria elminarConvo) {
 
-		List<ConvocatoriaNivelEducativo> lista = new ArrayList<ConvocatoriaNivelEducativo>();
-
 		String consulta = "DELETE FROM tbl_convocatoria WHERE convocatoria_id = :id";
 		String consulta2 = "DELETE FROM rel_convocatoria_planesyprogramas WHERE id_convocatoria = :id";
 
+		Query query2 = entityManager.createNativeQuery(consulta2);
+        query2.setParameter("id", elminarConvo.getConvocatoriaId());
+        query2.executeUpdate();
+        
 		Query query = entityManager.createNativeQuery(consulta);
         query.setParameter("id", elminarConvo.getConvocatoriaId());
         query.executeUpdate();
-        
-        Query query2 = entityManager.createNativeQuery(consulta);
-        query2.setParameter("id", elminarConvo.getConvocatoriaId());
-        query2.executeUpdate();
-
-        
-		query.getResultList();
-
-		
-		
-
+ 
 	}
 
 }
