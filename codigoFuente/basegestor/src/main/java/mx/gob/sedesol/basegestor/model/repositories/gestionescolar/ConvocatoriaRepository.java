@@ -10,9 +10,11 @@ import javax.persistence.Query;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
 
 @Repository
@@ -101,14 +103,23 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 	
 	
 	@Override
-	public List<Convocatoria> consultarConvocatoriasFiltros() {
+	public List<Convocatoria> consultarConvocatoriasFiltros(ConvocatoriaParamConsulta convocatoriaParamConsulta) {
 
 		List<Convocatoria> lista = new ArrayList<Convocatoria>();
 
-		String consulta = "SELECT tb.convocatoria_id,tb.nombre,tb.nombre_corto,tb.descripcion,tb.fecha_apertura,tb.fecha_cierre,\r\n"
-				+ "tb.semestre,tb.tipo,tb.url_convocatoria,tb.activo,tb.fecha_alta,tb.fecha_modificacion,tb.cupo_limite FROM tbl_convocatoria tb WHERE tb.activo = 1";
-
-		Query query = entityManager.createNativeQuery(consulta);
+//		String consulta = "SELECT tb.convocatoria_id,tb.nombre,tb.nombre_corto,tb.descripcion,tb.fecha_apertura,tb.fecha_cierre,\r\n"
+//				+ "tb.semestre,tb.tipo,tb.url_convocatoria,tb.activo,tb.fecha_alta,tb.fecha_modificacion,tb.cupo_limite FROM tbl_convocatoria tb WHERE tb.activo = 1";
+		
+		String consulta = "SELECT DISTINCT(tb.convocatoria_id),tb.nombre,tb.nombre_corto,tb.descripcion,tb.fecha_apertura,tb.fecha_cierre, tb.semestre,tb.tipo,tb.url_convocatoria,tb.activo,tb.fecha_alta,tb.fecha_modificacion,tb.cupo_limite \r\n"
+				+ "FROM tbl_convocatoria tb\r\n"
+				+ "         INNER JOIN rel_convocatoria_planesyprogramas rcpp ON rcpp.id_convocatoria = tb.convocatoria_id\r\n"
+				+ "         INNER JOIN cat_nivel_ensenanza_programa cne ON cne.id = rcpp.id_nivel_ensenanza ";
+		
+		String queryFiltro = obtieneFiltro(convocatoriaParamConsulta);
+		
+		String es = " AND cne.activo = 1";
+		
+		Query query = entityManager.createNativeQuery(consulta.concat(queryFiltro).concat(es));
 
 		List<Object[]> listaQuery = query.getResultList();
 
@@ -124,6 +135,65 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		return lista;
 
 	}
+	
+	private String obtieneFiltro(ConvocatoriaParamConsulta convocatoriaParamConsulta) {
+		
+		StringBuilder filtro = new StringBuilder("");
+		boolean isPrimerFiltro = false;
+		
+		
+		if (!("").equals(convocatoriaParamConsulta.getConsulNombreConvocatoria())) {
+			filtro.append(validaOperador(isPrimerFiltro)+"tb.nombre = '").append(convocatoriaParamConsulta.getConsulNombreConvocatoria()).append("'").append(" ");
+			isPrimerFiltro = true;
+		}
+		
+		if (!("").equals(convocatoriaParamConsulta.getConsulNombreCorto())) {
+			filtro.append(validaOperador(isPrimerFiltro)+"tb.nombre_corto = '").append(convocatoriaParamConsulta.getConsulNombreCorto()).append("'").append(" ");
+			isPrimerFiltro = true;
+		}
+		
+		if (!("0").equals(convocatoriaParamConsulta.getValueConvocatoriaEstatus())) {
+			filtro.append(validaOperador(isPrimerFiltro)+"tb.activo = ").append(convocatoriaParamConsulta.getValueConvocatoriaEstatus()).append(" ");
+			isPrimerFiltro = true;
+		}
+		
+		if (!("0").equals(convocatoriaParamConsulta.getConsulNivelEducativo())) {
+			filtro.append(validaOperador(isPrimerFiltro)+"rcpp.id_nivel_ensenanza = ").append(convocatoriaParamConsulta.getConsulNivelEducativo()).append(" ");
+			isPrimerFiltro = true;
+		}
+		
+		
+		obtieneFiltroFechas(filtro, convocatoriaParamConsulta, isPrimerFiltro);
+		
+		return filtro.toString();
+		
+	}
+	
+	private StringBuilder obtieneFiltroFechas(StringBuilder filtro, ConvocatoriaParamConsulta filter, boolean isPrimerFiltro) {
+		
+		if (!filter.getConsulFechaApertura().trim().equals("") && !filter.getConsulFechaCierre().trim().equals("")) {
+			filtro.append(validaOperador(isPrimerFiltro)+"tb.fecha_apertura BETWEEN '")
+			.append(filter.getConsulFechaApertura()).append("' AND '").append(filter.getConsulFechaApertura()).append("'");
+		}
+		
+		if (!filter.getConsulFechaApertura().trim().equals("") && !filter.getConsulFechaCierre().trim().equals("")) {
+			filtro.append(validaOperador(isPrimerFiltro)+"tb.fecha_cierre BETWEEN '")
+			.append(filter.getConsulFechaCierre()).append("' AND '").append(filter.getConsulFechaCierre()).append("'");
+		}
+		
+		return filtro;
+		
+	}
+	
+	 public static String validaOperador(boolean filtro) {
+			String operador = "";
+			if (!filtro) {
+				operador = " WHERE ";
+			} else {
+				operador = " AND ";
+			}			
+			return operador;
+		}
 	
 	private Convocatoria mapeo2(Object[] obj) {
 
@@ -192,6 +262,31 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		Query query = entityManager.createNativeQuery(consulta);
 
 		 query.getResultList();
+
+		
+		
+
+	}
+	
+	@Transactional
+	@Override
+	public void eliminarConvocatorias(Convocatoria elminarConvo) {
+
+		List<ConvocatoriaNivelEducativo> lista = new ArrayList<ConvocatoriaNivelEducativo>();
+
+		String consulta = "DELETE FROM tbl_convocatoria WHERE convocatoria_id = :id";
+		String consulta2 = "DELETE FROM rel_convocatoria_planesyprogramas WHERE id_convocatoria = :id";
+
+		Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("id", elminarConvo.getConvocatoriaId());
+        query.executeUpdate();
+        
+        Query query2 = entityManager.createNativeQuery(consulta);
+        query2.setParameter("id", elminarConvo.getConvocatoriaId());
+        query2.executeUpdate();
+
+        
+		query.getResultList();
 
 		
 		

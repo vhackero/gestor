@@ -77,6 +77,20 @@ public class ConvocatoriasBean extends BaseBean {
 	private String consulFechaCierre;
 	private Integer consulNivelEducativo;
 	private Integer valueConvocatoriaEstatus;
+	
+	
+	Convocatoria elminarConvo ;
+	
+	public ConvocatoriasBean (){
+		
+		estatusLista = new ArrayList<>();
+		// Crear los objetos EstatusDTO
+		EstatusDTO activo = new EstatusDTO(1, "ACTIVO");
+		EstatusDTO inactivo = new EstatusDTO(0, "INACTIVO");
+		estatusLista.add(activo);
+		estatusLista.add(inactivo);
+		
+	}
 
 	// redireccion opciones y llenado de campos
 
@@ -93,12 +107,7 @@ public class ConvocatoriasBean extends BaseBean {
 		listaTableResumen = new ArrayList<ConvocatoriaTableroResumen>();
 		valueConvocatoria = 0;
 
-		estatusLista = new ArrayList<>();
-		// Crear los objetos EstatusDTO
-		EstatusDTO activo = new EstatusDTO(1, "ACTIVO");
-		EstatusDTO inactivo = new EstatusDTO(0, "INACTIVO");
-		estatusLista.add(activo);
-		estatusLista.add(inactivo);
+		
 
 		consultarNivelEducativo();
 		
@@ -111,6 +120,26 @@ public class ConvocatoriasBean extends BaseBean {
 		consultarConvocatorias();
 		listaConvocatoria2 = new ArrayList<Convocatoria>();
 		return null;
+	}
+	
+	
+	public void cancelar() {
+		
+		this.paginaActual = "";
+		listaConvocatoria2 = new ArrayList<Convocatoria>();
+		listaTableResumen = new ArrayList<ConvocatoriaTableroResumen>();
+		valueConvocatoria = 0;
+		
+	}
+	
+	public void eliminar() {
+		
+		logger.info(" INICIA ELIMINAR  ");
+		
+		convocatoriaService.eliminar(elminarConvo);
+		
+		logger.info(" TERMINA ELIMINAR  ");
+		
 	}
 	
 	
@@ -179,24 +208,44 @@ public class ConvocatoriasBean extends BaseBean {
 	}
 	
 	
+	
+	
+	
 	public void consultarFiltros() {
 		
 		logger.info("***********************Inicio Consulta convocatorias filtros***********************");
 		
-		logger.info("NOMBRE CONVOCATORIA " + convocatoriaParamConsulta.getConsulNombreConvocatoria());
-		logger.info("NOMBRE CONVOCATORIA " + convocatoriaParamConsulta.getConsulNombreCorto());
-		logger.info("NOMBRE CONVOCATORIA " + convocatoriaParamConsulta.getValueConvocatoriaEstatus());
-		logger.info("NOMBRE CONVOCATORIA " + convocatoriaParamConsulta.getConsulFechaApertura());
-		logger.info("NOMBRE CONVOCATORIA " + convocatoriaParamConsulta.getConsulFechaCierre());
-		logger.info("NOMBRE CONVOCATORIA " + convocatoriaParamConsulta.getConsulNivelEducativo());
+		
+		if(convocatoriaParamConsulta.getValueConvocatoriaEstatus() == null ) {
+			convocatoriaParamConsulta.setValueConvocatoriaEstatus("0");
+		}
+		if(convocatoriaParamConsulta.getConsulFechaApertura() == null ) {
+			convocatoriaParamConsulta.setConsulFechaApertura("");
+		}
+		if(convocatoriaParamConsulta.getConsulFechaCierre() == null ) {
+			convocatoriaParamConsulta.setConsulFechaCierre("");
+		}
+		if(convocatoriaParamConsulta.getConsulNivelEducativo() == null ) {
+			convocatoriaParamConsulta.setConsulNivelEducativo("0");
+		}
+		
+		logger.info("NOMBRE : " + convocatoriaParamConsulta.getConsulNombreConvocatoria());
+		logger.info("NOMBRE CORTO : " + convocatoriaParamConsulta.getConsulNombreCorto());
+		logger.info("ESTATUS : " + convocatoriaParamConsulta.getValueConvocatoriaEstatus());
+		logger.info("FECHA APERTURA : " + convocatoriaParamConsulta.getConsulFechaApertura());
+		logger.info("FECHA CIERRE : " + convocatoriaParamConsulta.getConsulFechaCierre());
+		logger.info("NIVEL EDUCATIVO : " + convocatoriaParamConsulta.getConsulNivelEducativo());
+		
 			
-		listaConvocatoria2 = convocatoriaService.consultarConvocatoriasFiltros();
+		listaConvocatoria2 = convocatoriaService.consultarConvocatoriasFiltros(convocatoriaParamConsulta);
 			
 			
 		logger.info("***********************Termina Consulta convocatorias filtros***********************");
 			
 		}
 
+	
+	
 
 	// consutlar tablero metodos
 
@@ -452,6 +501,14 @@ public class ConvocatoriasBean extends BaseBean {
 
 	public void setListaConvocatoria2(List<Convocatoria> listaConvocatoria2) {
 		this.listaConvocatoria2 = listaConvocatoria2;
+	}
+
+	public Convocatoria getElminarConvo() {
+		return elminarConvo;
+	}
+
+	public void setElminarConvo(Convocatoria elminarConvo) {
+		this.elminarConvo = elminarConvo;
 	}
 
 	

@@ -11,6 +11,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IConvocatoriaRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConvocatoriaService;
@@ -50,9 +51,9 @@ public class ConvocatoriaServiceImpl implements ConvocatoriaService {
 	}
 	
 	@Override
-	public List<Convocatoria> consultarConvocatoriasFiltros() {
+	public List<Convocatoria> consultarConvocatoriasFiltros(ConvocatoriaParamConsulta convocatoriaParamConsulta) {
 		
-		List<Convocatoria> lista = iConvocatoriaRepository.consultarConvocatoriasFiltros();
+		List<Convocatoria> lista = iConvocatoriaRepository.consultarConvocatoriasFiltros(convocatoriaParamConsulta);
 		
 		if (lista.isEmpty()) {
 			return new ArrayList<Convocatoria>();
@@ -80,6 +81,13 @@ public class ConvocatoriaServiceImpl implements ConvocatoriaService {
 			return new ArrayList<ConvocatoriaNivelEducativo>();
 		}
 		return lista;
+	}
+	
+	@Override
+	public void eliminarConvocatorias(Convocatoria elminarConvo) {
+		
+		iConvocatoriaRepository.eliminarConvocatorias(elminarConvo);		
+		
 	}
 
 

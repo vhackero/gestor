@@ -39,7 +39,7 @@
 
 					<p:outputLabel styleClass="bloque" value="Estatus:" />
 					<p:selectOneMenu
-						value="#{convocatoriasBean.valueConvocatoriaEstatus}"
+						value="#{convocatoriasBean.convocatoriaParamConsulta.valueConvocatoriaEstatus}"
 						styleClass="col-xs-12">
 						<p:ajax event="change" process="@this" />
 						<f:selectItem
@@ -70,7 +70,7 @@
 						mindate="#{convocatoriasBean.obtenerFechaActual()}"
 						showOn="button" readonlyInput="true" pattern="dd/MM/yyyy"
 						placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-						value="#{convocatoriasBean.consulFechaApertura}" locale="es"
+						value="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura}" locale="es"
 						navigator="true" yearRange="c-0:c+100">
 						<p:ajax process="@this" update="ffinal" event="change"
 							listener="#{convocatoriasBean.onDateChange}" />
@@ -84,7 +84,7 @@
 						navigator="true" readonlyInput="true"
 						mindate="#{convocatoriasBean.cadenaFechaMinima}"
 						disabled="#{convocatoriasBean.consulFechaApertura eq null}"
-						value="#{convocatoriasBean.consulFechaCierre}" showOn="button"
+						value="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaCierre}" showOn="button"
 						placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 						yearRange="c-0:c+100" pattern="dd/MM/yyyy" showButtonPanel="false">
 						<p:ajax process="@this" event="change" />
@@ -100,7 +100,7 @@
 
 					<p:outputLabel styleClass="bloque" value="Nivel educativo:" />
 					<p:selectOneMenu
-						value="#{convocatoriasBean.valueConvocatoriaNivel}"
+						value="#{convocatoriasBean.convocatoriaParamConsulta.valueConvocatoriaEstatus}"
 						styleClass="col-xs-12">
 						<p:ajax event="change" process="@this" />
 						<f:selectItem
@@ -122,9 +122,10 @@
 
 				<div class="col-md-12 text-right">
 				
-					<p:commandButton styleClass="btn btn-primary" value="Cancelar"
-						action="#{eventoCapacitacionBean.buscarEventosCapacitacion}"
-						ajax="true" />
+					<p:commandButton value="Cancelar" process="@this"
+										 update="@form"
+										 action="#{convocatoriasBean.cancelar}" ajax="true"
+										 styleClass="btn btn-default" />
 						
 						<p:commandButton value="Limpiar campos" process="@this"
 										 update="@form"
@@ -183,6 +184,15 @@
 							<h:outputText value="Fecha cierre" />
 						</f:facet>
 						<h:outputText value="#{convo.fechaCierre}" />
+					</p:column>
+					
+					<p:column styleClass="text-center">
+						<p:commandButton ajax="true" update="@form"
+							action="#{convocatoriasBean.eliminar}"
+							icon="fa fa-trash" styleClass="btn-icon btn btn-default">
+							<f:setPropertyActionListener value="#{convo}"
+								target="#{convocatoriasBean.elminarConvo}" />
+						</p:commandButton>
 					</p:column>
 					
 				</p:dataTable>

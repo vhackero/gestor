@@ -11,19 +11,9 @@ public class ConvocatoriaParamConsulta implements Serializable {
 	private String consulNombreCorto;
 	private String consulFechaApertura;
 	private String consulFechaCierre;
-	private Integer consulNivelEducativo;
-	private Integer valueConvocatoriaEstatus;
-	
-	
-	public ConvocatoriaParamConsulta() {
-		super();
-		this.consulNombreConvocatoria = consulNombreConvocatoria;
-		this.consulNombreCorto = consulNombreCorto;
-		this.consulFechaApertura = consulFechaApertura;
-		this.consulFechaCierre = consulFechaCierre;
-		this.consulNivelEducativo = consulNivelEducativo;
-		this.valueConvocatoriaEstatus = valueConvocatoriaEstatus;
-	}
+	private String consulNivelEducativo;
+	private String valueConvocatoriaEstatus;
+		
 	public String getConsulNombreConvocatoria() {
 		return consulNombreConvocatoria;
 	}
@@ -50,16 +40,20 @@ public class ConvocatoriaParamConsulta implements Serializable {
 	public void setConsulFechaCierre(String consulFechaCierre) {
 		this.consulFechaCierre = consulFechaCierre;
 	}
-	public Integer getConsulNivelEducativo() {
+
+	public String getConsulNivelEducativo() {
 		return consulNivelEducativo;
 	}
-	public void setConsulNivelEducativo(Integer consulNivelEducativo) {
+
+	public void setConsulNivelEducativo(String consulNivelEducativo) {
 		this.consulNivelEducativo = consulNivelEducativo;
 	}
-	public Integer getValueConvocatoriaEstatus() {
+
+	public String getValueConvocatoriaEstatus() {
 		return valueConvocatoriaEstatus;
 	}
-	public void setValueConvocatoriaEstatus(Integer valueConvocatoriaEstatus) {
+
+	public void setValueConvocatoriaEstatus(String valueConvocatoriaEstatus) {
 		this.valueConvocatoriaEstatus = valueConvocatoriaEstatus;
 	}
 	
