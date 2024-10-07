@@ -45,7 +45,7 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 	@Override
 	public void altaConvocatorias() {
 		
-		iConvocatoriaRepository.altaConvocatorias();		
+		//iConvocatoriaRepository.altaConvocatorias();		
 		
 	}
 
