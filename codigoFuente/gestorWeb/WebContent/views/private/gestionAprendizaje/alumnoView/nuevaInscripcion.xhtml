@@ -6,190 +6,187 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core">
-	
-	
-	
-	<p:panel header="Nueva Convocatoria">
-	
-	<div class="form-group">
-					<div class="row">
 
-						<div class="col-md-4 col-xs-12">
+	<p:panel header="Nuevo Proceso de Inscripción">
 
-							<p:outputLabel styleClass="bloque" for="altaNombreConvocatoria"
-								value="Nombre de la convocatoria:" rendered="true" />
-							<p:inputText id="altaNombreConvocatoria"
-								value="#{convocatoriasBean.altaNombreConvocatoria}"
-								styleClass="form-control" />
+		<h:form id="formNuevoProceso">
 
-						</div>
+			<div class="form-group">
+				<div class="row">
 
-						<div class="col-md-4 col-xs-12">
+					<!-- Convocatoria - Select -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="convocatoria"
+							value="Convocatoria:" />
+						<p:selectOneMenu id="convocatoria"
+							value="#{inscripocionesBean.convocatoriaSeleccionada}">
 
-							<p:outputLabel styleClass="bloque" for="altaNombreCorto"
-								value="Nombre de la convocatoria:" rendered="true" />
-							<p:inputText id="altaNombreCorto"
-								value="#{convocatoriasBean.altaNombreCorto}"
-								styleClass="form-control" />
+							<!-- Llamar al método cuando cambia la selección -->
+							<p:ajax event="change"
+								listener="#{inscripocionesBean.consultarConvocatorias}"
+								update="@form" />
 
-						</div>
-
-						<div class="col-md-4 col-xs-12">
-
-							<p:outputLabel styleClass="bloque" for="altaDescripcion"
-								value="Nombre de la convocatoria:" rendered="true" />
-							<p:inputText id="altaDescripcion"
-								value="#{convocatoriasBean.altaDescripcion}"
-								styleClass="form-control" />
-
-						</div>
-
-
-
+							<!-- Opciones del Select -->
+							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+							<f:selectItems value="#{inscripocionesBean.listaConvocatoria}"
+								var="convocatoria" itemLabel="#{convocatoria.nombre}"
+								itemValue="#{convocatoria}" />
+						</p:selectOneMenu>
 					</div>
-				</div>
-				
-				<div class="form-group">
-					<div class="row">
+					<!-- Tipo de proceso - Select -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="tipoProceso"
+							value="Tipo de proceso:" />
+						<p:selectOneMenu id="tipoProceso"
+							value="#{inscripocionesBean.procesoSeleccionada}">
 
+							<!-- Llamar al método cuando cambia la selección -->
+							<p:ajax event="change"
+								listener="#{inscripocionesBean.consultaTipoProceso}"
+								update="@form" />
 
-
-						<!-- Fecha Inicial  -->
-						<div class="col-md-4">
-							<p:outputLabel styleClass="bloque"
-								value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechaInicial')}:" />
-							<p:calendar id="fc_fechaInicial" styleClass="requerido"
-								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
-								yearRange="c-100:c+100" locale="es"
-								disabled="#{empty eventoCapacitacionBean.tipoDatoFechas}"
-								placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-								readonlyInput="true" navigator="true"
-								value="#{eventoCapacitacionBean.filtros.fechaInicial}"
-								showOn="button">
-								<p:ajax event="dateSelect" process="@this"
-									update="fc_fechaFinal"
-									listener="#{eventoCapacitacionBean.validarFechas()}" />
-							</p:calendar>
-
-						</div>
-						<!-- Fecha Final -->
-						<div class="col-md-4 col-xs-12">
-							<p:outputLabel styleClass="bloque"
-								value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechafinal')}:" />
-							<p:calendar id="fc_fechaFinal" styleClass="requerido"
-								mindate="#{eventoCapacitacionBean.filtros.fechaInicial}"
-								disabled="#{empty eventoCapacitacionBean.filtros.fechaInicial}"
-								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
-								yearRange="c-100:c+100" locale="es"
-								placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-								readonlyInput="true" navigator="true"
-								value="#{eventoCapacitacionBean.filtros.fechaFinal}"
-								showOn="button">
-								<p:ajax event="dateSelect" process="@this" />
-							</p:calendar>
-						</div>
-
-
-						<div class="col-md-4 col-xs-12">
-
-							<p:outputLabel styleClass="bloque" value="Nivel educativo:" />
-							<p:selectOneMenu
-								value="#{planBean.filtroPlan.catModalidadPlanPrograma}"
-								converter="catalogoComunConverter" styleClass="col-xs-12">
-								<p:ajax event="change" process="@this" />
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" />
-								<f:selectItems value="#{planBean.catModalidadPlan}"
-									var="modalidad" itemLabel="#{modalidad.nombre}"
-									itemValue="#{modalidad}" />
-							</p:selectOneMenu>
-
-						</div>
-
-
+							<!-- Opciones del Select -->
+							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+							<f:selectItems value="#{inscripocionesBean.listaTipoProceso}"
+								var="tipoProceso" itemLabel="#{tipoProceso.nombre}"
+								itemValue="#{tipoProceso}" />
+						</p:selectOneMenu>
 					</div>
-				</div>
 
-
-				<div class="form-group">
-					<div class="row">
-
-
-						<div class="col-md-4 col-xs-12">
-
-							<p:outputLabel styleClass="bloque" for="altaUrl"
-								value="URL de la convocatoria(PDF):" rendered="true" />
-							<p:inputText id="altaUrl" value="#{convocatoriasBean.altaUrl}"
-								styleClass="form-control" />
-
-						</div>
-
-						<div class="col-md-4 col-xs-12">
-
-							<p:outputLabel styleClass="bloque" value="Estatus:" />
-							<p:selectOneMenu value="#{convocatoriasBean.altaEstatus}"
-								styleClass="col-xs-12">
-								<p:ajax event="change" process="@this" />
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" />
-								<f:selectItems value="#{convocatoriasBea.estatusLista}"
-									var="estatus" itemLabel="#{estatus.nombreEstatus}"
-									itemValue="#{estatus.valorEstatus}" />
-
-							</p:selectOneMenu>
-
-						</div>
-
-
+					<!-- Nombre - Input -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="nombre" value="Nombre:" />
+						<p:inputText id="nombre" value="#{procesoBean.nombre}"
+							styleClass="form-control" />
 					</div>
+
+
+
 				</div>
+			</div>
 
-				<div class="form-group">
-					<div class="row">
-
-
-						<!-- Fecha Inicial  -->
-						<div class="col-md-4">
-							<p:outputLabel styleClass="bloque" value="Fecha Alta:" />
-							<p:calendar id="fc_fechaIncial" styleClass="requerido"
-								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
-								yearRange="c-100:c+100" locale="es"
-								disabled="#{empty eventoCapacitacionBean.tipoDatoFechas}"
-								placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-								readonlyInput="true" navigator="true" value="" showOn="button">
-								<p:ajax event="dateSelect" process="@this"
-									update="fc_fechaIncial"
-									listener="#{eventoCapacitacionBean.validarFechas()}" />
-							</p:calendar>
-
-						</div>
-
-						<div class="col-md-4 col-xs-12">
-
-							<p:outputLabel styleClass="bloque" value="Cupo Límite:" />
-							<p:selectOneMenu
-								value="#{planBean.filtroPlan.catModalidadPlanPrograma}"
-								converter="catalogoComunConverter" styleClass="col-xs-12">
-								<p:ajax event="change" process="@this" />
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" />
-								<f:selectItems value="#{planBean.catModalidadPlan}"
-									var="modalidad" itemLabel="#{modalidad.nombre}"
-									itemValue="#{modalidad}" />
-							</p:selectOneMenu>
-
-						</div>
-
-
+			<div class="form-group">
+				<div class="row">
+					<!-- Clave de proceso - Input -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="claveProceso"
+							value="Clave de proceso:" />
+						<p:inputText id="claveProceso" value="#{procesoBean.claveProceso}"
+							styleClass="form-control" />
 					</div>
-				</div>
-	
-		
+					<!-- Descripción - Input -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="descripcion"
+							value="Descripción:" />
+						<p:inputTextarea id="descripcion"
+							value="#{procesoBean.descripcion}" styleClass="form-control"
+							rows="3" />
+					</div>
+					<!-- Semestre - Select -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="semestre"
+							value="Semestre:" />
+						<p:selectOneMenu id="semestre" value="#{procesoBean.semestre}"
+							styleClass="col-xs-12">
+							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+							<f:selectItems value="#{procesoBean.listaSemestres}"
+								var="semestre" itemLabel="#{semestre.nombre}"
+								itemValue="#{semestre}" />
+						</p:selectOneMenu>
+					</div>
 
-		
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+
+
+
+					<!-- Fecha inicio - Input -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="fechaInicio"
+							value="Fecha inicio:" />
+						<p:calendar id="fechaInicio" value="#{procesoBean.fechaInicio}"
+							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
+							readonlyInput="true" yearRange="c-100:c+100"
+							placeholder="Seleccionar" />
+					</div>
+
+					<!-- Fecha fin - Input -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="fechaFin"
+							value="Fecha fin:" />
+						<p:calendar id="fechaFin" value="#{procesoBean.fechaFin}"
+							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
+							readonlyInput="true" yearRange="c-100:c+100"
+							placeholder="Seleccionar" />
+					</div>
+
+
+					<!-- Plan - Select -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="plan" value="Plan:" />
+			<p:selectOneMenu id="plan"
+							value="#{inscripocionesBean.planSeleccionada}">
+
+							<!-- Llamar al método cuando cambia la selección -->
+							<p:ajax event="change"
+								listener="#{inscripocionesBean.consultarPlan}"
+								update="@form" />
+
+							<!-- Opciones del Select -->
+							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+							<f:selectItems value="#{inscripocionesBean.listaPlanes}"
+								var="tblPlan" itemLabel="#{tblPlan.nombre}"
+								itemValue="#{tblPlan}" />
+						</p:selectOneMenu>
+					</div>
+
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+
+					<!-- Programa - Select -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="programa"
+							value="Programa:" />
+						<p:selectOneMenu id="programa" value="#{procesoBean.programa}"
+							styleClass="col-xs-12">
+							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+							<f:selectItems value="#{procesoBean.listaProgramas}"
+								var="programa" itemLabel="#{programa.nombre}"
+								itemValue="#{programa}" />
+						</p:selectOneMenu>
+					</div>
+
+
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+
+
+					<!-- Opciones (Aceptar, Cancelar, Limpiar campos) -->
+					<div class="col-md-8 col-xs-12">
+						<div class="botones">
+							<p:commandButton value="Aceptar" action="#{procesoBean.guardar}"
+								update="@form" icon="pi pi-check" />
+							<p:commandButton value="Cancelar"
+								action="#{procesoBean.cancelar}" immediate="true"
+								icon="pi pi-times" />
+							<p:commandButton value="Limpiar campos"
+								action="#{procesoBean.limpiar}" update="@form"
+								icon="pi pi-refresh" />
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</h:form>
+
 	</p:panel>
-	
+
 </ui:composition>

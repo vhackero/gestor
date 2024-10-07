@@ -34,8 +34,8 @@
 
 
 
-						<p:commandButton value="Nuevo proceso de inscripción"
-							action="#{inscripcionesBean.navegaNuevaInsrcipcion}"
+						<p:commandButton value="Nuevo proceso de inscripción" style="width: 300px;"
+							action="#{inscripocionesBean.navegaNuevoConvocatoria}"
 							ajax="false" immediate="true" process="@this"
 							styleClass="btn btn-primary" />
 
@@ -43,17 +43,17 @@
 
 					<div class="col-md-4 col-xs-12">
 
-						<p:commandButton style="width: 200px;"
-							value="Consultar convocatoria"
-							action="#{convocatoriasBean.navegaConsultaConvocatoria}"
+						<p:commandButton style="width: 300px;"
+							value="Consultar proceso de inscripción"
+							action="#{inscripocionesBean.navegaConsultaInscripciones}"
 							ajax="false" immediate="true" process="@this"
 							styleClass="btn btn-primary" />
 
 					</div>
 
-					<p:commandButton style="width: 250px;"
-						value="Consultar tablero de resumen"
-						action="#{convocatoriasBean.navegaConsultaTablero}" ajax="false"
+					<p:commandButton style="width: 300px;"
+						value="Consultar tablero resumen"
+						action="#{inscripocionesBean.navegaConsultaTablero}" ajax="false"
 						immediate="true" process="@this" styleClass="btn btn-primary" />
 
 				</div>
@@ -78,7 +78,7 @@
 
 
 			<!-- Incluir dinámicamente el archivo .xhtml basado en la propiedad 'paginaActual' -->
-			<ui:include src="#{inscripcionesBean.paginaActual}" />
+			<ui:include src="#{inscripocionesBean.paginaActual}" />
 
 
 

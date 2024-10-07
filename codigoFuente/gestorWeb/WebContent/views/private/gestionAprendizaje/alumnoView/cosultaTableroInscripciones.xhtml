@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+
+
+	<p:panel header="Consulta Tablero Inscripciones">
+
+
+		<div class="form-group">
+			<div class="row">
+
+				<!-- Convocatoria - Select -->
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel styleClass="bloque" for="convocatoria"
+						value="Convocatoria:" />
+					<p:selectOneMenu id="convocatoria"
+						value="#{inscripocionesBean.convocatoriaSeleccionada}">
+
+						<!-- Llamar al método cuando cambia la selección -->
+						<p:ajax event="change" process="@this"/>
+
+						<!-- Opciones del Select -->
+						<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+						<f:selectItems value="#{inscripocionesBean.listaConvocatoria}"
+							var="convocatoria" itemLabel="#{convocatoria.nombre}"
+							itemValue="#{convocatoria}" />
+					</p:selectOneMenu>
+				</div>
+				<!-- Tipo de proceso - Select -->
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel styleClass="bloque" for="tipoProceso"
+						value="Tipo de proceso:" />
+					<p:selectOneMenu id="tipoProceso"
+						value="#{inscripocionesBean.procesoSeleccionada}">
+
+						<!-- Llamar al método cuando cambia la selección -->
+						<p:ajax event="change"
+							listener="#{inscripocionesBean.consultaTipoProceso}"
+							update="@form" />
+
+						<!-- Opciones del Select -->
+						<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+						<f:selectItems value="#{inscripocionesBean.listaTipoProceso}"
+							var="tipoProceso" itemLabel="#{tipoProceso.nombre}"
+							itemValue="#{tipoProceso}" />
+					</p:selectOneMenu>
+				</div>
+
+				<!-- Nombre - Input -->
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel styleClass="bloque" for="nombre" value="Nombre:" />
+					<p:inputText id="nombre" value="#{inscripocionesBean.tableroParamConsulta.consulNombreCorto}"
+						styleClass="form-control" />
+				</div>
+
+
+
+			</div>
+		</div>
+		
+		<!-- Row 4 -->
+				<div class="row">
+					<!-- Busqueda de Eventos de capacitacion -->
+					<div class="col-md-12">
+						<p:commandButton id="btnBusquedaAvas" process="@form" ajax="true"
+							update="@form" styleClass="btn btn-primary pull-right"
+							action="#{inscripocionesBean.consultarTableroResumen}"
+							value="#{sistema.obtenerTexto('gw.ga.btn.buscar')}" />
+					</div>
+				</div>
+
+	</p:panel>
+	
+	
+		<div class="row">
+			<div class="col-md-12">
+				<p:dataTable id="id"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					reflow="true" value="#{inscripocionesBean.listaTableResumen}"
+					var="convo" paginator="true" rows="10" paginatorPosition="bottom"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+					<!-- Nombre Materia -->
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Convocatoria" />
+						</f:facet>
+						<h:outputText value="#{convo.idPrograma}" />
+					</p:column>
+					<!-- Periodo -->
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Plan" />
+						</f:facet>
+						<h:outputText value="#{convo.plan}" />
+					</p:column>
+					<!--Tipo Baja -->
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Programa" />
+						</f:facet>
+						<h:outputText value="#{convo.programa}" />
+					</p:column>
+								<!--Tipo Baja -->
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Clave" />
+						</f:facet>
+						<h:outputText value="#{convo.clave}" />
+					</p:column>
+								<!--Tipo Baja -->
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Semestre" />
+						</f:facet>
+						<h:outputText value="#{convo.semestre}" />
+					</p:column>
+								<!--Tipo Baja -->
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Bloque" />
+						</f:facet>
+						<h:outputText value="#{convo.bloque}" />
+					</p:column>
+											<!--Tipo Baja -->
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="No. de usuarios con inscripción" />
+						</f:facet>
+						<h:outputText value="#{convo.noEstudiantesInscritos}" />
+					</p:column>
+				</p:dataTable>
+			</div>
+		</div>
+
+</ui:composition>
