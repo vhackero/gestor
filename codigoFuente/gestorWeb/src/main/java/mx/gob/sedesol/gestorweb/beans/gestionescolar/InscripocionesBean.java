@@ -10,7 +10,12 @@ import javax.faces.bean.ViewScoped;
 import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesConsultaResumen;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesTableroResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConvocatoriaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionesService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
@@ -22,7 +27,11 @@ public class InscripocionesBean extends BaseBean {
 	private String convocatoriaSeleccionada;
 	
 	private String procesoSeleccionada;
+	
+	private String planSeleccionada;
 
+	
+	private String convocatoriaSeleccionada2;
 
 	/**
 	 * Serialization
@@ -37,13 +46,20 @@ public class InscripocionesBean extends BaseBean {
 	@ManagedProperty("#{inscripcionesService}")
 	private InscripcionesService inscripcionesService;
 	
-	
+	private ConvocatoriaParamConsulta tableroParamConsulta = new ConvocatoriaParamConsulta();
 	
 	List<Convocatoria> listaConvocatoria;
 	
 	List<TipoProceso> listaTipoProceso;
 	
+	List<TblPlan> listaPlanes;
+
+	List<InscripcionesTableroResumen> listaTableResumen;
 	
+
+	List<InscripcionesConsultaResumen> listaFiltrosResumen;
+	
+	 
 	// REDIRECCION OPCIONES
 		private String paginaActual;
 	
@@ -52,11 +68,26 @@ public class InscripocionesBean extends BaseBean {
 		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/nuevaInscripcion.xhtml";
 		consultarConvocatorias();
 		consultaTipoProceso();
+		consultarPlan();
 		return null; // Mantener en la misma página
 	}
 
 
-
+	public String navegaConsultaInscripciones()  throws Exception{
+		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/cosultaInscripciones.xhtml";
+		consultarConvocatorias();
+		consultaTipoProceso();
+		consultarPlan();
+		return null; // Mantener en la misma página
+	}
+	
+	public String navegaConsultaTablero()  throws Exception{
+		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/cosultaTableroInscripciones.xhtml";
+		consultarConvocatorias();
+		consultaTipoProceso();
+		consultarPlan();
+		return null; // Mantener en la misma página
+	}
 
 	// consutlar tablero metodos
 
@@ -78,6 +109,55 @@ public class InscripocionesBean extends BaseBean {
 
 	}
 	
+	// consutlar planes
+
+	public void consultarPlan() throws Exception {
+
+		listaPlanes = inscripcionesService.consultarPlan();
+
+		logger.info("Termina consulta   listaPlanes select");
+		logger.info(listaPlanes);
+
+	}
+	
+	public void consultarTableroResumen() throws Exception {
+
+		listaTableResumen = new ArrayList<InscripcionesTableroResumen>();
+
+		listaTableResumen = inscripcionesService.consultarTableroResumen(tableroParamConsulta);
+
+		logger.info("Termina consulta lista tabla resumenn tabla");
+
+	}
+	
+	
+	
+	public void consultarFiltros() throws Exception {
+
+		listaFiltrosResumen = new ArrayList<InscripcionesConsultaResumen>();
+
+		listaFiltrosResumen = inscripcionesService.consultarFiltros(tableroParamConsulta);
+
+		logger.info("Termina consulta lista tabla resumenn tabla");
+
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	public List<InscripcionesConsultaResumen> getListaFiltrosResumen() {
+		return listaFiltrosResumen;
+	}
+
+
+	public void setListaFiltrosResumen(List<InscripcionesConsultaResumen> listaFiltrosResumen) {
+		this.listaFiltrosResumen = listaFiltrosResumen;
+	}
+
 
 	public String getPaginaActual() {
 		return paginaActual;
@@ -159,6 +239,64 @@ public class InscripocionesBean extends BaseBean {
 
 	public void setProcesoSeleccionada(String procesoSeleccionada) {
 		this.procesoSeleccionada = procesoSeleccionada;
+	}
+
+
+
+
+	public String getPlanSeleccionada() {
+		return planSeleccionada;
+	}
+
+
+
+
+	public void setPlanSeleccionada(String planSeleccionada) {
+		this.planSeleccionada = planSeleccionada;
+	}
+
+
+
+
+	public List<TblPlan> getListaPlanes() {
+		return listaPlanes;
+	}
+
+
+
+
+	public void setListaPlanes(List<TblPlan> listaPlanes) {
+		this.listaPlanes = listaPlanes;
+	}
+
+
+	public String getConvocatoriaSeleccionada2() {
+		return convocatoriaSeleccionada2;
+	}
+
+
+	public void setConvocatoriaSeleccionada2(String convocatoriaSeleccionada2) {
+		this.convocatoriaSeleccionada2 = convocatoriaSeleccionada2;
+	}
+
+
+	public ConvocatoriaParamConsulta getTableroParamConsulta() {
+		return tableroParamConsulta;
+	}
+
+
+	public void setTableroParamConsulta(ConvocatoriaParamConsulta tableroParamConsulta) {
+		this.tableroParamConsulta = tableroParamConsulta;
+	}
+
+
+	public List<InscripcionesTableroResumen> getListaTableResumen() {
+		return listaTableResumen;
+	}
+
+
+	public void setListaTableResumen(List<InscripcionesTableroResumen> listaTableResumen) {
+		this.listaTableResumen = listaTableResumen;
 	}
 
 	

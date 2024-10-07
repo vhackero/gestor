@@ -16,7 +16,10 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesConsultaResumen;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesTableroResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 
 @Repository
 public class InscripcionesRepository implements IinscripcionesRepository {
@@ -48,6 +51,147 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 
 	}
 
+	
+	@Override
+	public List<TblPlan> consultarPlan() {
+
+		List<TblPlan> lista = new ArrayList<TblPlan>();
+
+		String consulta = "select tp.id_plan, tp.nombre from tbl_planes tp where tp.id_estatus_plan = 1";
+
+		Query query = entityManager.createNativeQuery(consulta);
+
+		List<Object[]> listaQuery = query.getResultList();
+
+		if (!listaQuery.isEmpty()) {
+			for (Object[] obj : listaQuery) {
+
+				TblPlan tblPlan = mapeoTblPlan(obj);
+				lista.add(tblPlan);
+
+			}
+		}
+
+		return lista;
+
+	}
+
+	@Override
+	public List<InscripcionesTableroResumen> consultarTableroResumen(ConvocatoriaParamConsulta tableroParamConsulta) {
+
+		List<InscripcionesTableroResumen> lista = new ArrayList<InscripcionesTableroResumen>();
+
+		String consulta = "SELECT tp.nombre plan,fd.id_programa, fd.nombre_tentativo programa, fd.identificador_final clave, (SELECT tmc2.nombre FROM tbl_malla_curricular tmc2 WHERE tmc2.id = tmc.id_padre) semestre, tmc.nombre bloque,  count(ti.id) no_estudiantes_inscritos FROM tbl_inscripciones ti\r\n"
+				+ "                                                              INNER JOIN rel_proceso_inscipcion_planesyprogramas rpi ON rpi.id_programa = ti.idprograma AND rpi.id_plan = ti.idplan\r\n"
+				+ "                                                              INNER JOIN tbl_procesos_inscripcion tpi ON tpi.proceso_inscripcion_id =  rpi.id_proceso_inscripcion\r\n"
+				+ "                                                              INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = ti.idprograma and ti.idplan = fd.id_plan\r\n"
+				+ "                                                              INNER JOIN tbl_planes tp ON tp.id_plan = ti.idplan\r\n"
+				+ "                                                              INNER JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion\r\n"
+				+ "WHERE   (  tpi.id_categoria_proceso = 1 )\r\n"
+				+ "group by rpi.id_programa";
+
+		Query query = entityManager.createNativeQuery(consulta);
+
+		List<Object[]> listaQuery = query.getResultList();
+
+		if (!listaQuery.isEmpty()) {
+			for (Object[] obj : listaQuery) {
+
+				InscripcionesTableroResumen tblPlan = tableroInscrip(obj);
+				lista.add(tblPlan);
+
+			}
+		}
+
+		return lista;
+
+	}
+
+	@Override
+	public List<InscripcionesConsultaResumen> consultarFiltros(ConvocatoriaParamConsulta tableroParamConsulta) {
+
+		List<InscripcionesConsultaResumen> lista = new ArrayList<InscripcionesConsultaResumen>();
+
+		String consulta = "select\r\n"
+				+ "	tp.proceso_inscripcion_id,\r\n"
+				+ "	tp.convocatoria_id,\r\n"
+				+ "	tc.nombre convocatoria,\r\n"
+				+ "	tp.nombre nombre,\r\n"
+				+ "	tp.fecha_inicio,\r\n"
+				+ "	tp.fecha_fin,\r\n"
+				+ "	cp.nombre tipo_proceso,\r\n"
+				+ "	if(tp.estatus = 0,\r\n"
+				+ "	'inactivo',\r\n"
+				+ "	'activo') estatus\r\n"
+				+ "from\r\n"
+				+ "	tbl_procesos_inscripcion tp\r\n"
+				+ "inner join tbl_convocatoria tc on\r\n"
+				+ "	tc.convocatoria_id = tp.convocatoria_id\r\n"
+				+ "inner join cat_procesos_inscripcion cp on\r\n"
+				+ "	cp.id_proceso = tp.id_tipo_proceso\r\n"
+				+ "where\r\n"
+				+ "	tp.id_categoria_proceso = 1";
+
+		Query query = entityManager.createNativeQuery(consulta);
+
+		List<Object[]> listaQuery = query.getResultList();
+
+		if (!listaQuery.isEmpty()) {
+			for (Object[] obj : listaQuery) {
+
+				InscripcionesConsultaResumen tblPlan = mapFiltrosInscrip(obj);
+				lista.add(tblPlan);
+
+			}
+		}
+
+		return lista;
+
+	}
+	 
+	private InscripcionesConsultaResumen mapFiltrosInscrip(Object[] obj) {
+
+		InscripcionesConsultaResumen regresa = new InscripcionesConsultaResumen();
+
+			regresa.setProcesoInscripcionId(obj[0].toString());
+			regresa.setIdConvocatoria(obj[1].toString());
+			regresa.setNombreConvocatoria(obj[2].toString());
+			regresa.setNombre(obj[3].toString());
+			regresa.setFecIni(obj[4].toString());
+			regresa.setFecFin(obj[5].toString());
+			regresa.setTipoProceso(obj[6].toString());
+			regresa.setEstatus(obj[7].toString());
+
+			return regresa;
+		}
+	 
+	
+		private InscripcionesTableroResumen tableroInscrip(Object[] obj) {
+
+		 InscripcionesTableroResumen regresa = new InscripcionesTableroResumen();
+
+			regresa.setPlan(obj[0].toString());
+			regresa.setIdPrograma(obj[1].toString());
+			regresa.setPrograma(obj[2].toString());
+			regresa.setClave(obj[3].toString());
+			regresa.setSemestre(obj[4].toString());
+			regresa.setBloque(obj[5].toString());
+			regresa.setNoEstudiantesInscritos(obj[6].toString());
+
+			return regresa;
+		}
+	 
+	 
+	private TblPlan mapeoTblPlan(Object[] obj) {
+
+		TblPlan regresa = new TblPlan();
+
+		regresa.setIdPlan((Integer) obj[0]);
+		regresa.setNombre(obj[1].toString());
+
+		return regresa;
+	}
+	
 	private TipoProceso mapeo(Object[] obj) {
 
 		TipoProceso regresa = new TipoProceso();

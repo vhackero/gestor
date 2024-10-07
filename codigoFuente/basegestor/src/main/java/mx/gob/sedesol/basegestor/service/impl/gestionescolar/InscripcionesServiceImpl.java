@@ -13,7 +13,10 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesConsultaResumen;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesTableroResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IConvocatoriaRepository;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IinscripcionesRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConvocatoriaService;
@@ -58,6 +61,45 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		}
 		return lista;
 	}
+	
+	
+	@Override
+	public List<TblPlan> consultarPlan() {
+		
+		List<TblPlan> lista = iinscripcionesRepository.consultarPlan();
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<TblPlan>();
+		}
+		return lista;
+	}
+	
+	@Override
+	public List<InscripcionesTableroResumen> consultarTableroResumen(ConvocatoriaParamConsulta tableroParamConsulta) {
+		
+		List<InscripcionesTableroResumen> lista = iinscripcionesRepository.consultarTableroResumen(tableroParamConsulta);
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<InscripcionesTableroResumen>();
+		}
+		return lista;
+	}
+	
+	
+	
+	@Override
+	public List<InscripcionesConsultaResumen> consultarFiltros(ConvocatoriaParamConsulta tableroParamConsulta) {
+		
+		List<InscripcionesConsultaResumen> lista = iinscripcionesRepository.consultarFiltros(tableroParamConsulta);
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<InscripcionesConsultaResumen>();
+		}
+		return lista;
+	}
+	
+	
+
 	
 	
 	@Override

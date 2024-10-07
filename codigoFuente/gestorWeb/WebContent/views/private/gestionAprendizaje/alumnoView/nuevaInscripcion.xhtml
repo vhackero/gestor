@@ -127,11 +127,19 @@
 					<!-- Plan - Select -->
 					<div class="col-md-4 col-xs-12">
 						<p:outputLabel styleClass="bloque" for="plan" value="Plan:" />
-						<p:selectOneMenu id="plan" value="#{procesoBean.plan}"
-							styleClass="col-xs-12">
+			<p:selectOneMenu id="plan"
+							value="#{inscripocionesBean.planSeleccionada}">
+
+							<!-- Llamar al método cuando cambia la selección -->
+							<p:ajax event="change"
+								listener="#{inscripocionesBean.consultarPlan}"
+								update="@form" />
+
+							<!-- Opciones del Select -->
 							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-							<f:selectItems value="#{procesoBean.listaPlanes}" var="plan"
-								itemLabel="#{plan.nombre}" itemValue="#{plan}" />
+							<f:selectItems value="#{inscripocionesBean.listaPlanes}"
+								var="tblPlan" itemLabel="#{tblPlan.nombre}"
+								itemValue="#{tblPlan}" />
 						</p:selectOneMenu>
 					</div>
 
