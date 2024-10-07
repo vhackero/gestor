@@ -28,7 +28,7 @@ public class DispersionesBean extends BaseBean {
 	
 	
 	public String navegaNuevoConvocatoria() {
-		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/nuevaDispersion.xhtml";
+		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/nuevaInscripcion.xhtml";
 		
 		return null; // Mantener en la misma página
 	}

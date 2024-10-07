@@ -563,8 +563,8 @@
 		
 		<!-- ITTIVA 666 MIS CONVOCATORIAS -->
 		<navigation-case>
-			<from-outcome>MIS_DISPERSIONES</from-outcome>
-			<to-view-id>/views/private/gestionAprendizaje/alumnoView/busquedaDispersiones</to-view-id>
+			<from-outcome>MIS_INSCRIPCIONES</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/busquedaInscripciones</to-view-id>
 			<redirect />
 		</navigation-case>
  
