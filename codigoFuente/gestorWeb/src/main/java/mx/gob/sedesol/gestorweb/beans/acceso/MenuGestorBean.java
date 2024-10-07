@@ -421,6 +421,12 @@ public class MenuGestorBean extends BaseBean {
 		logger.info("Navegando a mis convocatorias");
 		return ConstantesGestorWeb.NAVEGA_MIS_CONVOCATORIAS;
 	}
+	
+	//ITTIVA 666
+		public String navegaMisInscripciones() {
+			logger.info("Navegando a mis dispersiones");
+			return ConstantesGestorWeb.NAVEGA_MIS_INSCRIPCIONES;
+		}
 
 	public String navegaTareasProgramadas() {
 		logger.info("Navegando a tareas programadas");
@@ -650,7 +656,7 @@ public class MenuGestorBean extends BaseBean {
 	public void setConstanciasBean(ConstanciasBean constanciasBean) {
 		this.constanciasBean = constanciasBean;
 	}
-
+	
 	public boolean isShowLogros() {
 		return showLogros;
 	}

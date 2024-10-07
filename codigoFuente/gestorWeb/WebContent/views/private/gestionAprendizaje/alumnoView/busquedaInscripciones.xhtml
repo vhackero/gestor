@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="breadcrumb">
+		<li>Convocatorias</li>
+
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form>
+			<h1>
+				<p:outputLabel styleClass="h1" value="Inscripciones" />
+			</h1>
+
+
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+
+			<br />
+
+			<div class="form-group ">
+
+
+
+
+				<div class="row">
+
+					<div class="col-md-4 col-xs-12">
+
+
+
+						<p:commandButton value="Nuevo proceso de inscripción" style="width: 300px;"
+							action="#{inscripocionesBean.navegaNuevoConvocatoria}"
+							ajax="false" immediate="true" process="@this"
+							styleClass="btn btn-primary" />
+
+					</div>
+
+					<div class="col-md-4 col-xs-12">
+
+						<p:commandButton style="width: 300px;"
+							value="Consultar proceso de inscripción"
+							action="#{inscripocionesBean.navegaConsultaInscripciones}"
+							ajax="false" immediate="true" process="@this"
+							styleClass="btn btn-primary" />
+
+					</div>
+
+					<p:commandButton style="width: 300px;"
+						value="Consultar tablero resumen"
+						action="#{inscripocionesBean.navegaConsultaTablero}" ajax="false"
+						immediate="true" process="@this" styleClass="btn btn-primary" />
+
+				</div>
+
+
+			</div>
+			
+			
+			
+			<div >
+
+
+
+
+			</div>
+
+			
+		
+	
+	
+		
+
+
+			<!-- Incluir dinámicamente el archivo .xhtml basado en la propiedad 'paginaActual' -->
+			<ui:include src="#{inscripocionesBean.paginaActual}" />
+
+
+
+		</h:form>
+	</ui:define>
+</ui:composition>

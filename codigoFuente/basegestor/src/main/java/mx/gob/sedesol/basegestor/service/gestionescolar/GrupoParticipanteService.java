@@ -14,6 +14,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDT
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 
 public interface GrupoParticipanteService {
 	List<EventoConstanciaDTO> getParticipanteByActaCerradaYconstancia(Long idPersona);
@@ -62,7 +63,6 @@ public interface GrupoParticipanteService {
 	List<EventoConstanciaDTO> getParticipanteByActaCerradaYconstancia2(Long idPersona);
 
 	List<TiraMateriaBajaDTO> consultaTiraMateriasBaja(Long id_persona);
-
 
 }
 

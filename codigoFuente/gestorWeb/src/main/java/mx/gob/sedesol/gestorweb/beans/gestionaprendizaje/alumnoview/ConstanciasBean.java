@@ -1,6 +1,8 @@
 package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,6 +18,7 @@ import org.primefaces.model.StreamedContent;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PlantillaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EstatusDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
@@ -64,15 +67,22 @@ public class ConstanciasBean extends BaseBean {
 	private HistorialAcademicoDTO historialAcademico;
 
 
+	
+	
 
+
+
+	
 
 	@PostConstruct
 	public void init() {
 		idPersona = getUsuarioEnSession().getIdPersona();
 		eventos = grupoParticipanteService.getParticipanteByActaCerradaYconstancia2(idPersona);
 		historialAcademico = grupoParticipanteService.consultaDatosHistorialAcademico(idPersona.toString());
-		
+
 	}
+
+	
 
 	public List<EventoConstanciaDTO> getEventosAdmin( Long id){
 
@@ -308,5 +318,9 @@ public class ConstanciasBean extends BaseBean {
 	public void setBitacoraBean(BitacoraBean bitacoraBean) {
 		this.bitacoraBean = bitacoraBean;
 	}
+
+
+
+	
 
 }
