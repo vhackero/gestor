@@ -96,11 +96,16 @@ public class ConvocatoriasBean extends BaseBean {
 
 	// redireccion opciones y llenado de campos
 
-	public String navegaNuevoConvocatoria() {
+	public String navegaNuevoConvocatoria() throws Exception {
 		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/nuevaConvocatoria.xhtml";
 		listaTableResumen = new ArrayList<ConvocatoriaTableroResumen>();
 		valueConvocatoria = 0;
 		listaConvocatoria2 = new ArrayList<Convocatoria>();
+		
+		convocatoriaParamNueva.setAltaFechaAlta(new Date());
+		
+		consultarNivelEducativo();
+		
 		return null; // Mantener en la misma página
 	}
 
@@ -134,6 +139,20 @@ public class ConvocatoriasBean extends BaseBean {
 		
 	}
 	
+	
+	public void editarConvocatoria() {
+		
+		RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion4').show()");
+		
+	}
+	
+	
+	public void guardarConvocatoria() {
+		
+		RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion4').show()");
+		
+	}
+	
 	public void eliminar() throws Exception {
 		
 		logger.info(" INICIA ELIMINAR  ");
@@ -156,12 +175,28 @@ public class ConvocatoriasBean extends BaseBean {
 
 		
 
-		convocatoriaService.altaConvocatorias();
+		convocatoriaService.altaConvocatorias(convocatoriaParamNueva);
 
 	}
 	
 	
+	public void validarFechas() {
+		if (ObjectUtils.isNotNull(convocatoriaParamConsulta.getConsulFechaCierre())) {
+			if (convocatoriaParamConsulta.getConsulFechaCierre().before(convocatoriaParamConsulta.getConsulFechaApertura())) {
+				convocatoriaParamConsulta.setConsulFechaCierre(convocatoriaParamConsulta.getConsulFechaApertura());
+			}
+		}
+
+	}
 	
+	public void validarFechasAlta() {
+		if (ObjectUtils.isNotNull(convocatoriaParamNueva.getAltaFechaCierre())) {
+			if (convocatoriaParamNueva.getAltaFechaCierre().before(convocatoriaParamNueva.getAltaFechaApertura())) {
+				convocatoriaParamNueva.setAltaFechaCierre(convocatoriaParamNueva.getAltaFechaApertura());
+			}
+		}
+
+	}
 
 	// consulta convocatorias
 
@@ -173,42 +208,17 @@ public class ConvocatoriasBean extends BaseBean {
 
 	}
 
-	public String obtenerFechaActual() {
-
-		Calendar cal = Calendar.getInstance();
-
-		Date fecha = cal.getTime();
-
-		return DateUtils.convierteDateAString(fecha, "dd/MM/yyyy HH:mm");
-	}
-
-	private ActividadDTO actividad;
-	private String cadenaFechaMinima;
-
-	public void onDateChange() {
-		actividad.setFechaFin(null);
-		obtenerFechaFinal();
-	}
-
-	public void obtenerFechaFinal() {
-		if (ObjectUtils.isNotNull(actividad.getFechaInicio())) {
-			Calendar fechaInicio = Calendar.getInstance();
-			fechaInicio.setTime(actividad.getFechaInicio());
-			Calendar fechaMinimaCalendar = Calendar.getInstance();
-			fechaMinimaCalendar.setTime(actividad.getFechaInicio());
-			fechaMinimaCalendar.set(Calendar.HOUR_OF_DAY, fechaInicio.get(Calendar.HOUR_OF_DAY) + 2);
-			fechaMinimaCalendar.set(Calendar.MINUTE, fechaInicio.get(Calendar.MINUTE));
-			cadenaFechaMinima = DateUtils.convierteDateAString(fechaMinimaCalendar.getTime(), "dd/MM/yyyy HH:mm");
-
-		} else {
-			cadenaFechaMinima = DateUtils.convierteDateAString(new Date(), "dd/MM/yyyy HH:mm");
-		}
-	}
+	
+	
+	
+	
+	
 	
 	public void limpiarCampos() {
 		
 		listaConvocatoria2 = new ArrayList<Convocatoria>();
 		convocatoriaParamConsulta = new ConvocatoriaParamConsulta();
+		convocatoriaParamNueva = new ConvocatoriaParamNueva();
 		
 	}
 	
@@ -224,12 +234,7 @@ public class ConvocatoriasBean extends BaseBean {
 		if(convocatoriaParamConsulta.getValueConvocatoriaEstatus() == null ) {
 			convocatoriaParamConsulta.setValueConvocatoriaEstatus("");
 		}
-		if(convocatoriaParamConsulta.getConsulFechaApertura() == null ) {
-			convocatoriaParamConsulta.setConsulFechaApertura("");
-		}
-		if(convocatoriaParamConsulta.getConsulFechaCierre() == null ) {
-			convocatoriaParamConsulta.setConsulFechaCierre("");
-		}
+		
 		if(convocatoriaParamConsulta.getConsulNivelEducativo() == null ) {
 			convocatoriaParamConsulta.setConsulNivelEducativo("0");
 		}
@@ -242,8 +247,9 @@ public class ConvocatoriasBean extends BaseBean {
 		logger.info("NIVEL EDUCATIVO : " + convocatoriaParamConsulta.getConsulNivelEducativo());
 		
 		
-		if("".equals(convocatoriaParamConsulta.getConsulNombreConvocatoria()) || "".equals(convocatoriaParamConsulta.getConsulFechaApertura()) || 
-				"".equals(convocatoriaParamConsulta.getConsulFechaCierre()) ) {
+		if( "".equals(convocatoriaParamConsulta.getConsulNombreConvocatoria()) ||
+			convocatoriaParamConsulta.getConsulFechaApertura() == null  || 
+					convocatoriaParamConsulta.getConsulFechaCierre() == null ) {
 			
 			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion2').show()");
 			
@@ -361,13 +367,7 @@ public class ConvocatoriasBean extends BaseBean {
 		this.valueConvocatoriaNivel = valueConvocatoriaNivel;
 	}
 
-	public String getCadenaFechaMinima() {
-		return cadenaFechaMinima;
-	}
 
-	public void setCadenaFechaMinima(String cadenaFechaMinima) {
-		this.cadenaFechaMinima = cadenaFechaMinima;
-	}
 
 	public ConvocatoriaParamConsulta getConvocatoriaParamConsulta() {
 		return convocatoriaParamConsulta;
@@ -505,13 +505,6 @@ public class ConvocatoriasBean extends BaseBean {
 		this.altaCupoLimite = altaCupoLimite;
 	}
 
-	public ActividadDTO getActividad() {
-		return actividad;
-	}
-
-	public void setActividad(ActividadDTO actividad) {
-		this.actividad = actividad;
-	}
 
 	public List<Convocatoria> getListaConvocatoria2() {
 		return listaConvocatoria2;

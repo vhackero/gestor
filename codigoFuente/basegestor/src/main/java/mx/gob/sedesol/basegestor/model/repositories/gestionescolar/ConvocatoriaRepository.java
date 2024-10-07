@@ -2,8 +2,11 @@ package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 
 import java.math.BigInteger;
 import java.sql.Date;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamNueva;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
 
 @Repository
@@ -171,15 +175,28 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 	
 	private StringBuilder obtieneFiltroFechas(StringBuilder filtro, ConvocatoriaParamConsulta filter, boolean isPrimerFiltro) {
 		
-		if (!filter.getConsulFechaApertura().trim().equals("") && !filter.getConsulFechaCierre().trim().equals("")) {
+		if (filter.getConsulFechaApertura() != null && filter.getConsulFechaCierre() != null) {
+			
+			DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+			ZonedDateTime zonedDateTime = ZonedDateTime.parse(filter.getConsulFechaApertura().toString(), inputFormatter);
+			DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			String formattedDate = zonedDateTime.format(outputFormatter);
+			
 			filtro.append(validaOperador(isPrimerFiltro)+"tb.fecha_apertura BETWEEN '")
-			.append(filter.getConsulFechaApertura()).append("' AND '").append(filter.getConsulFechaApertura()).append("'");
+			.append(formattedDate).append("' AND '").append(formattedDate).append("'");
 		}
 		
-		if (!filter.getConsulFechaApertura().trim().equals("") && !filter.getConsulFechaCierre().trim().equals("")) {
+		if (filter.getConsulFechaApertura()!= null && filter.getConsulFechaCierre() != null) {
+			
+			DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+			ZonedDateTime zonedDateTime = ZonedDateTime.parse(filter.getConsulFechaCierre().toString(), inputFormatter);
+			DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			String formattedDate = zonedDateTime.format(outputFormatter);
+			
 			filtro.append(validaOperador(isPrimerFiltro)+"tb.fecha_cierre BETWEEN '")
-			.append(filter.getConsulFechaCierre()).append("' AND '").append(filter.getConsulFechaCierre()).append("'");
+			.append(formattedDate).append("' AND '").append(formattedDate).append("'");
 		}
+
 		
 		return filtro;
 		
@@ -251,17 +268,19 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		return regresa;
 	}
 	
-	
+	@Transactional
 	@Override
-	public void altaConvocatorias() {
+	public void altaConvocatorias(ConvocatoriaParamNueva convocatoriaParamNueva) {
 
-		List<ConvocatoriaNivelEducativo> lista = new ArrayList<ConvocatoriaNivelEducativo>();
+		String consulta = "INSERT INTO cat_nivel_ensenanza_programa (id, nombre, activo) VALUES (:id, :nombre, :activo)";
 
-		String consulta = "SELECT cne.id, cne.nombre FROM cat_nivel_ensenanza_programa cne WHERE cne.activo = 1";
-
+		
 		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("id", 123);  // Sustituye con el valor que necesites
+		query.setParameter("nombre", "Nombre del programa");
+		query.setParameter("activo", 1);
 
-		 query.getResultList();
+		int filasAfectadas = query.executeUpdate();
 
 		
 		

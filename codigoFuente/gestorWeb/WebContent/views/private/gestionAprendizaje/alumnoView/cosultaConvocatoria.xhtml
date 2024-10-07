@@ -63,36 +63,38 @@
 			<div class="row">
 
 				<div class="col-md-4 col-xs-12">
-					<p:outputLabel for="fechaInicio" styleClass="bloque"
-						value="Fecha de apertura:" />
-					<p:calendar id="fechaInicio" styleClass="requerido"
-						showButtonPanel="false"
-						mindate="#{convocatoriasBean.obtenerFechaActual()}"
-						showOn="button" readonlyInput="true" pattern="dd/MM/yyyy HH:mm"
-						placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-						value="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura}" locale="es"
-						navigator="true" yearRange="c-0:c+100">
-						<p:ajax process="@this" update="ffinal" event="change"
-							listener="#{convocatoriasBean.onDateChange}" />
-					</p:calendar>
-					<p:message for="fechaInicio" />
-				</div>
-				<div class="col-md-4 col-xs-12">
-					<p:outputLabel for="ffinal" styleClass="bloque"
-						value="Fecha de cierre:" />
-					<p:calendar id="ffinal" styleClass="requerido" locale="es"
-						navigator="true" readonlyInput="true"
-						mindate="#{convocatoriasBean.cadenaFechaMinima}"
-						disabled="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura eq ''}"
-						value="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaCierre}" showOn="button"
-						placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-						yearRange="c-0:c+100" pattern="dd/MM/yyyy HH:mm" showButtonPanel="false">
-						<p:ajax process="@this" event="change" />
+								<p:outputLabel styleClass="bloque"
+											   value="Fecha de apertura:" />
+								<p:calendar id="fc_fechaInicial" styleClass="requerido"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											yearRange="c-100:c+100" locale="es"
+											
+											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											readonlyInput="true" navigator="true"
+											value="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura}"
+											showOn="button">
+									<p:ajax event="dateSelect" process="@this"
+											update="fc_fechaFinal"
+											listener="#{eventoCapacitacionBean.validarFechas()}" />
+								</p:calendar>
 
-					</p:calendar>
-					<p:message for="ffinal" />
-				</div>
-
+							</div>
+							<!-- Fecha Final -->
+							<div class="col-md-4 col-xs-12">
+								<p:outputLabel styleClass="bloque"
+											   value="Fecha de cierre:" />
+								<p:calendar id="fc_fechaFinal" styleClass="requerido"
+											mindate="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura}"
+											disabled="#{empty convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura}"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											yearRange="c-100:c+100" locale="es"
+											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											readonlyInput="true" navigator="true"
+											value="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaCierre}"
+											showOn="button">
+									<p:ajax event="dateSelect" process="@this" />
+								</p:calendar>
+							</div>
 
 
 
@@ -195,10 +197,9 @@
 						</p:commandButton>
 						
 						<p:commandButton ajax="true" update="@form"
-							action="#{convocatoriasBean.eliminar}"
+							action="#{convocatoriasBean.editarConvocatoria}"
 							icon="fa fa-pencil" styleClass="btn-icon btn btn-default">
-							<f:setPropertyActionListener value="#{convo}"
-								target="#{convocatoriasBean.elminarConvo}" />
+							
 						</p:commandButton>
 						
 						
@@ -266,6 +267,26 @@
 				<div class="col-md-12 text-right">
 					<p:commandButton value="Cerrar" styleClass="btn btn-default"
 						onclick="PF('dlgValidarSeleccion3').hide()" />
+				</div>
+			</div>
+		</p:dialog>
+		
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion4" header="Informativo" dynamic="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText styleClass="bloque"
+							value="Error." />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dlgValidarSeleccion4').hide()" />
 				</div>
 			</div>
 		</p:dialog>

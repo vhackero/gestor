@@ -10,12 +10,12 @@ public class ConvocatoriaParamNueva implements Serializable {
 	private String altaNombreConvocatoria;
 	private String altaNombreCorto;
 	private String altaDescripcion;
-	private String altaFechaApertura;
-	private String altaFechaCierre;
+	private Date altaFechaApertura;
+	private Date altaFechaCierre;
 	private String altaNivelEducativo;
 	private String altaUrl;
 	private String altaEstatus;
-	private String altaFechaAlta;
+	private Date altaFechaAlta;
 	private String altaCupoLimite;
 	
 	public String getAltaNombreConvocatoria() {
@@ -36,18 +36,7 @@ public class ConvocatoriaParamNueva implements Serializable {
 	public void setAltaDescripcion(String altaDescripcion) {
 		this.altaDescripcion = altaDescripcion;
 	}
-	public String getAltaFechaApertura() {
-		return altaFechaApertura;
-	}
-	public void setAltaFechaApertura(String altaFechaApertura) {
-		this.altaFechaApertura = altaFechaApertura;
-	}
-	public String getAltaFechaCierre() {
-		return altaFechaCierre;
-	}
-	public void setAltaFechaCierre(String altaFechaCierre) {
-		this.altaFechaCierre = altaFechaCierre;
-	}
+	
 	public String getAltaNivelEducativo() {
 		return altaNivelEducativo;
 	}
@@ -66,18 +55,32 @@ public class ConvocatoriaParamNueva implements Serializable {
 	public void setAltaEstatus(String altaEstatus) {
 		this.altaEstatus = altaEstatus;
 	}
-	public String getAltaFechaAlta() {
-		return altaFechaAlta;
-	}
-	public void setAltaFechaAlta(String altaFechaAlta) {
-		this.altaFechaAlta = altaFechaAlta;
-	}
+	
 	public String getAltaCupoLimite() {
 		return altaCupoLimite;
 	}
 	public void setAltaCupoLimite(String altaCupoLimite) {
 		this.altaCupoLimite = altaCupoLimite;
 	}
+	public Date getAltaFechaApertura() {
+		return altaFechaApertura;
+	}
+	public void setAltaFechaApertura(Date altaFechaApertura) {
+		this.altaFechaApertura = altaFechaApertura;
+	}
+	public Date getAltaFechaCierre() {
+		return altaFechaCierre;
+	}
+	public void setAltaFechaCierre(Date altaFechaCierre) {
+		this.altaFechaCierre = altaFechaCierre;
+	}
+	public Date getAltaFechaAlta() {
+		return altaFechaAlta;
+	}
+	public void setAltaFechaAlta(Date altaFechaAlta) {
+		this.altaFechaAlta = altaFechaAlta;
+	}
+	
 	
 	
 

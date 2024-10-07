@@ -9,8 +9,8 @@ public class ConvocatoriaParamConsulta implements Serializable {
 	
 	private String consulNombreConvocatoria;
 	private String consulNombreCorto;
-	private String consulFechaApertura;
-	private String consulFechaCierre;
+	private Date consulFechaApertura;
+	private Date consulFechaCierre;
 	private String consulNivelEducativo;
 	private String valueConvocatoriaEstatus;
 		
@@ -28,19 +28,19 @@ public class ConvocatoriaParamConsulta implements Serializable {
 	}
 	
 	
-	public String getConsulFechaApertura() {
+
+	public Date getConsulFechaApertura() {
 		return consulFechaApertura;
 	}
-	public void setConsulFechaApertura(String consulFechaApertura) {
+	public void setConsulFechaApertura(Date consulFechaApertura) {
 		this.consulFechaApertura = consulFechaApertura;
 	}
-	public String getConsulFechaCierre() {
+	public Date getConsulFechaCierre() {
 		return consulFechaCierre;
 	}
-	public void setConsulFechaCierre(String consulFechaCierre) {
+	public void setConsulFechaCierre(Date consulFechaCierre) {
 		this.consulFechaCierre = consulFechaCierre;
 	}
-
 	public String getConsulNivelEducativo() {
 		return consulNivelEducativo;
 	}
