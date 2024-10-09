@@ -22,6 +22,7 @@ import javax.faces.validator.ValidatorException;
 
 import org.apache.log4j.Logger;
 import org.modelmapper.ModelMapper;
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.DualListModel;
 import org.primefaces.model.UploadedFile;
@@ -81,10 +82,10 @@ public class AdminPersonaBean extends BaseBean {
 
 	@ManagedProperty("#{bitacoraService}")
 	private BitacoraService bitacoraService;
-	
+
 	@ManagedProperty("#{asentamientoService}")
 	private AsentamientoService asentamientoService;
-	
+
 	@ManagedProperty("#{entidadFederativaService}")
 	private EntidadFederativaService entidadFederativaService;
 
@@ -93,7 +94,7 @@ public class AdminPersonaBean extends BaseBean {
 
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
-	
+
 	@ManagedProperty("#{municipioService}")
 	private MunicipioService municipioService;
 
@@ -119,18 +120,17 @@ public class AdminPersonaBean extends BaseBean {
 	private List<EntidadFederativaDTO> listaSedes;
 	private List<MunicipioDTO> listaMunicipiosLaboral;
 	private List<LenguajeIndigenaDTO> listaLenguasIndigenas;
-	private List<DiscapacidadDTO> listaDiscapacidades ;
+	private List<DiscapacidadDTO> listaDiscapacidades;
 	private List<TipoDiscapacidadDTO> listaTiposDiscapacidad;
 	private List<SelectImportarDTO> listaConvocatorias;
 	private List<SelectImportarDTO> listaFuenteExternas;
 	private List<SelectImportarDTO> listaPersonasImportar;
 
-
 	private boolean nuevaPersona;
 	private boolean mostrarContrasenia;
 	private boolean isLenguajeIndigena;
 	private boolean isDiscapacidad;
-	
+
 	private PersonaDTO personaSeleccionada;
 
 	private boolean mostrarDialogoExito = false;
@@ -138,7 +138,7 @@ public class AdminPersonaBean extends BaseBean {
 	private String rutaFotografias;
 	private String nombreFotoComun;
 	private String rutaUndertow;
-	
+
 	@ManagedProperty(value = "#{personaSigeService}")
 	private transient PersonaSigeService personaSigeService;
 
@@ -156,19 +156,17 @@ public class AdminPersonaBean extends BaseBean {
 
 		listaPaises = personaServiceFacade.obtenerPaises();
 		listaSedes = personaServiceFacade.obtenerEntidadesPorPais(ConstantesGestor.ID_PAIS_MEXICO);
-		listaLenguasIndigenas = personaServiceFacade.obtenerLenguajesIndigenas();		
+		listaLenguasIndigenas = personaServiceFacade.obtenerLenguajesIndigenas();
 		listaRoles = new DualListModel<>();
-		
+
 		listaConvocatorias = personaServiceFacade.consultaConvocatorias();
 		listaFuenteExternas = personaServiceFacade.consultaFuenteExterna();
-		
 
 	}
-	
+
 	public void obtenerUsuarios() {
 
-		boolean exito = false; 
-
+		boolean exito = false;
 
 		listaRoles = new DualListModel<>(personaServiceFacade.obtenerTodosRoles(), new ArrayList<>());
 		Long usuarioModifico = 2L;
@@ -178,59 +176,62 @@ public class AdminPersonaBean extends BaseBean {
 		AsentamientoDTO asentamiento = asentamientoService.buscarPorId("100010407");
 		nuevaPersona = true;
 		mostrarContrasenia = true;
-		
-		listaDatos = new ArrayList<CapturaPersonaDTO>();	
-		
+
+		listaDatos = new ArrayList<CapturaPersonaDTO>();
+
 		listaMunicipiosLaboral = new ArrayList<>();
 		listaEntidades = personaServiceFacade.obtenerEntidadesPorPais(ConstantesGestor.ID_PAIS_MEXICO);
 		listaMunicipiosDomicilio = new ArrayList<>();
-		
+
 		String convocatoria = personaFiltros.getConvocatoria();
 		String fuenteExterna = personaFiltros.getFuenteExterna();
-		
 
-		
 		boolean vincularUsuario = personaFiltros.getVincularUsuario();
-		
-		if(convocatoria == null ||  fuenteExterna == null ) {
+
+		if (convocatoria == null || fuenteExterna == null) {
 			return;
 		}
-		
+
 		List<PersonaSigeDTO> personasSige = personaServiceFacade.consultaPersonasImportar(fuenteExterna, convocatoria);
-	
-		
-        StringBuilder rutaCompletaFoto = new StringBuilder(rutaUndertow);
-        rutaCompletaFoto.append(nombreFotoComun);
-        listaDatos = personasSige.parallelStream()
-        	    .map(personaSige -> {
-        	        CapturaPersonaDTO datos = new CapturaPersonaDTO();
-        	        datos.getPersona().setRutaCompletaFoto(rutaCompletaFoto.toString());
-    				datos.setRoles(listaRoles.getTarget());
-    				datos.setDatosAcademicos(personaDatosAcademicos());
-    				
-    				PersonaDTO personaInsertar = crearPersona(personaSige, usuarioModifico);
-    				datos.setPersona(personaInsertar);
-    				datos.setDomicilioPersona(personaDomicilio(asentamiento, usuarioModifico, idPais, datos));
-    				datos.setDatosLaborales(datoslaborales(personaInsertar, sede, municipio));
-    				datos.setPersonaCorreo(personaCorreo(usuarioModifico, datos));
-    				datos.getPersona().setContraseniaEncriptada(encoder.encode(datos.getPersona().getNuevaContrasenia()));
-        	        return datos;
-        	    })
-        	    .collect(Collectors.toList());
-        logger.info("Hola");
-        try {
-        	exito = personaServiceFacade.getPersonaService().guardarPersonas(listaDatos, fuenteExterna, convocatoria, vincularUsuario);        	
-        }catch(Exception e) {
-        	exito = false; 
-        }
-        logger.info(exito);
-        if(exito) {
-        	agregarMsgInfo("Registros insertados", "Exito");
-        }else {
-        	agregarMsgError("Registros no insertados", "Ocurrio un error");
-        }
+
+		if (personasSige == null || personasSige.isEmpty()) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion').show()");
+			return;
+		}
+
+		StringBuilder rutaCompletaFoto = new StringBuilder(rutaUndertow);
+		rutaCompletaFoto.append(nombreFotoComun);
+		listaDatos = personasSige.parallelStream().map(personaSige -> {
+			CapturaPersonaDTO datos = new CapturaPersonaDTO();
+			datos.getPersona().setRutaCompletaFoto(rutaCompletaFoto.toString());
+			datos.setRoles(listaRoles.getTarget());
+			datos.setDatosAcademicos(personaDatosAcademicos());
+
+			PersonaDTO personaInsertar = crearPersona(personaSige, usuarioModifico);
+			datos.setPersona(personaInsertar);
+			datos.setDomicilioPersona(personaDomicilio(asentamiento, usuarioModifico, idPais, datos));
+			datos.setDatosLaborales(datoslaborales(personaInsertar, sede, municipio));
+			datos.setPersonaCorreo(personaCorreo(usuarioModifico, datos));
+			datos.getPersona().setContraseniaEncriptada(encoder.encode(datos.getPersona().getNuevaContrasenia()));
+			return datos;
+		}).collect(Collectors.toList());
+
+		logger.info("Hola");
+		try {
+			exito = personaServiceFacade.getPersonaService().guardarPersonas(listaDatos, convocatoria,
+					vincularUsuario);
+		} catch (Exception e) {
+			exito = false;
+		}
+		logger.info(exito);
+		if (exito) {
+			agregarMsgInfo("Registros insertados", "Exito");
+		} else {
+			agregarMsgError("Registros no insertados", "Ocurrio un error");
+		}
+
 	}
-	
+
 	private PersonaDTO crearPersona(PersonaSigeDTO persona, Long usuarioModifico) {
 		PersonaDTO personaInsertar = new PersonaDTO(usuarioModifico, "MX");
 		personaInsertar.setUsuario(persona.getMatricula().toUpperCase());
@@ -246,6 +247,7 @@ public class AdminPersonaBean extends BaseBean {
 		personaInsertar.setCorreoElectronico(persona.getCorreoInstitucional());
 		personaInsertar.setConfirmacionContrasenia(encoder.encode(persona.getPassword()));
 		personaInsertar.setContraseniaEncriptada(encoder.encode(persona.getPassword()));
+		personaInsertar.setFuenteExterna(persona.getProgramaEducativo());
 		personaInsertar.setIdEntidadFederativa("01");
 		personaInsertar.setEntidadFederativa("Mexico");
 		personaInsertar.setIdMunicipio("12");
@@ -255,11 +257,12 @@ public class AdminPersonaBean extends BaseBean {
 		personaInsertar.setDependencia("Dependencia");
 		personaInsertar.setIdUnidadAdministrativa("11");
 		personaInsertar.setSso_status(String.valueOf(persona.getIdPersonaSige()));
-		
+
 		return personaInsertar;
 	}
-	
-	private UsuarioDatosLaboralesDTO datoslaborales(PersonaDTO persona, EntidadFederativaDTO sede, List<MunicipioDTO> municipio) {
+
+	private UsuarioDatosLaboralesDTO datoslaborales(PersonaDTO persona, EntidadFederativaDTO sede,
+			List<MunicipioDTO> municipio) {
 		UsuarioDatosLaboralesDTO usuario = new UsuarioDatosLaboralesDTO(persona);
 		usuario.setInstitucion("UNADM");
 		usuario.setSede(sede);
@@ -267,7 +270,7 @@ public class AdminPersonaBean extends BaseBean {
 		usuario.setFechaIngreso(persona.getFechaActualizacion());
 		return usuario;
 	}
-	
+
 	private PersonaCorreoDTO personaCorreo(Long usuarioModifico, CapturaPersonaDTO datos) {
 		PersonaCorreoDTO usuario = new PersonaCorreoDTO(usuarioModifico, 1);
 		TipoCorreoDTO correo = new TipoCorreoDTO();
@@ -280,8 +283,9 @@ public class AdminPersonaBean extends BaseBean {
 		usuario.setTipoCorreo(correo);
 		return usuario;
 	}
-	
-	private DomicilioPersonaDTO personaDomicilio(AsentamientoDTO asentamiento, Long usuarioModifico,  String idPais, CapturaPersonaDTO datos) {
+
+	private DomicilioPersonaDTO personaDomicilio(AsentamientoDTO asentamiento, Long usuarioModifico, String idPais,
+			CapturaPersonaDTO datos) {
 		DomicilioPersonaDTO usuario = new DomicilioPersonaDTO(usuarioModifico, idPais);
 		usuario.setAsentamiento(asentamiento);
 		usuario.setNumeroExterior("1");
@@ -293,6 +297,7 @@ public class AdminPersonaBean extends BaseBean {
 		usuario.setNumeroExterior("001");
 		return usuario;
 	}
+
 	private PersonaDatosAcademicoDTO personaDatosAcademicos() {
 		PersonaDatosAcademicoDTO usuario = new PersonaDatosAcademicoDTO();
 		return usuario;
@@ -309,7 +314,7 @@ public class AdminPersonaBean extends BaseBean {
 			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "BUS_USU", "", requestActual(), TipoServicioEnum.LOCAL);
 		}
 	}
-	
+
 	public void buscarPersonaPorCriterios1() {
 		personas = personaServiceFacade.getPersonaService().busquedaPorCriteriosPersonaBasica(personaFiltros);
 		if (!personas.isEmpty()) {
@@ -337,7 +342,6 @@ public class AdminPersonaBean extends BaseBean {
 		mostrarContrasenia = true;
 		isLenguajeIndigena = false;
 		isDiscapacidad = false;
-		
 
 		datos = new CapturaPersonaDTO();
 
@@ -358,18 +362,16 @@ public class AdminPersonaBean extends BaseBean {
 		datos.setDomicilioPersona(
 				new DomicilioPersonaDTO(getUsuarioEnSession().getIdPersona(), ConstantesGestor.ID_PAIS_MEXICO));
 		datos.setDatosSociodemograficos(new DatoSociodemograficoDTO(getUsuarioEnSession().getIdPersona()));
-		
+
 		listaMunicipiosLaboral = new ArrayList<>();
 		listaEntidades = personaServiceFacade.obtenerEntidadesPorPais(ConstantesGestor.ID_PAIS_MEXICO);
 		listaMunicipiosDomicilio = new ArrayList<>();
 
 		return ConstantesGestorWeb.NAVEGA_REGISTRO_USUARIO_INTERNO;
 	}
-	
-
 
 	public String cargarDatosPersona() {
-		
+
 		nuevaPersona = false;
 		mostrarContrasenia = false;
 
@@ -398,16 +400,17 @@ public class AdminPersonaBean extends BaseBean {
 		}
 		cargarRolesUsuario();
 		actualizarRolesUsuario();
-		
-		// ITTIVA valida la discapacidad , se agrega validacion para realizar la consulta ya que llega null la mayoria de peticiones
-		if(datos.getDatosSociodemograficos().isTieneDiscapacidad()){
-			listaTiposDiscapacidad = personaServiceFacade.obtenerListaTiposDiscapacidadPorDiscapacidad(datos.getDatosSociodemograficos().getTipoDiscapacidad().getIdDiscapacidad());
+
+		// ITTIVA valida la discapacidad , se agrega validacion para realizar la
+		// consulta ya que llega null la mayoria de peticiones
+		if (datos.getDatosSociodemograficos().isTieneDiscapacidad()) {
+			listaTiposDiscapacidad = personaServiceFacade.obtenerListaTiposDiscapacidadPorDiscapacidad(
+					datos.getDatosSociodemograficos().getTipoDiscapacidad().getIdDiscapacidad());
 		}
-		
-		validarTipoDiscapacidad();		
+
+		validarTipoDiscapacidad();
 		validarLenguajes();
-		
-		
+
 		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "VER_USU", String.valueOf(datos.getPersona().getIdPersona()),
 				requestActual(), TipoServicioEnum.LOCAL);
 
@@ -457,7 +460,7 @@ public class AdminPersonaBean extends BaseBean {
 		datos.getDatosLaborales().getSede().setIdEntidadFederativa(null);
 		datos.getDatosLaborales().getSede().setNombre(null);
 		listaMunicipiosLaboral = new ArrayList<>();
-		
+
 		if (!valor.equals(0) || !valor.equals("0")) {
 			listaMunicipiosLaboral = personaServiceFacade.obtenerMunicipiosPorEntidad(valor);
 			// obtenerNombreEntidad
@@ -471,7 +474,7 @@ public class AdminPersonaBean extends BaseBean {
 		datos.getDatosLaborales().getMunicipio().setIdMunicipio(null);
 		datos.getDatosLaborales().getMunicipio().setNombre(null);
 		listaMunicipiosLaboral = new ArrayList<>();
-		
+
 		if (!valor.equals(0) || !valor.equals("0")) {
 			datos.getDatosLaborales().getMunicipio().setNombre(obtenerNombreMunicipio(valor));
 		}
@@ -594,8 +597,9 @@ public class AdminPersonaBean extends BaseBean {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 
 			String valor = (String) e.getNewValue();
-			
-			listaAsentamientos = valor.equals("0") ? new ArrayList<>() : personaServiceFacade.obtenerAsentamientosPorMunicipio(valor);
+
+			listaAsentamientos = valor.equals("0") ? new ArrayList<>()
+					: personaServiceFacade.obtenerAsentamientosPorMunicipio(valor);
 		}
 	}
 
@@ -632,34 +636,32 @@ public class AdminPersonaBean extends BaseBean {
 		}
 	}
 
-	public void validarLenguajes() {		
-		if(isLenguajeIndigena) {
+	public void validarLenguajes() {
+		if (isLenguajeIndigena) {
 			isLenguajeIndigena = false;
-		}else {
+		} else {
 			isLenguajeIndigena = true;
 		}
 	}
-	
-	public void validarTipoDiscapacidad() {		
-		if(isDiscapacidad) {
+
+	public void validarTipoDiscapacidad() {
+		if (isDiscapacidad) {
 			isDiscapacidad = false;
-		}else {
+		} else {
 			isDiscapacidad = true;
-			listaDiscapacidades = personaServiceFacade.obtenerListaDiscapacidades();				
+			listaDiscapacidades = personaServiceFacade.obtenerListaDiscapacidades();
 		}
 	}
-	
+
 	public void onChangeDiscapacidad(ValueChangeEvent e) {
 		if (ObjectUtils.isNotNull(e.getNewValue())) {
 			Integer valor = (Integer) e.getNewValue();
 			listaTiposDiscapacidad = personaServiceFacade.obtenerListaTiposDiscapacidadPorDiscapacidad(valor);
-		}else {
+		} else {
 			listaTiposDiscapacidad = null;
 		}
 	}
-	
-	
-	
+
 	public TipoUsuarioEnum[] getTiposUsuarios() {
 		return TipoUsuarioEnum.values();
 	}
@@ -731,7 +733,7 @@ public class AdminPersonaBean extends BaseBean {
 
 	private String actualizarPersona() {
 		String ruta = null;
-		
+
 		ResultadoDTO<PersonaDTO> resultado = personaServiceFacade.actualizarPersona(datos);
 		if (resultado.getResultado() == ResultadoTransaccionEnum.EXITOSO) {
 
@@ -848,13 +850,12 @@ public class AdminPersonaBean extends BaseBean {
 			logger.error(e.getMessage(), e);
 		}
 	}
-	
-    public boolean isImportarButtonDisabled() {
+
+	public boolean isImportarButtonDisabled() {
 		String convocatoria = personaFiltros.getConvocatoria();
 		String fuenteExterna = personaFiltros.getFuenteExterna();
-        return convocatoria == null || convocatoria.isEmpty() || fuenteExterna == null || fuenteExterna.isEmpty();
-    }
-
+		return convocatoria == null || convocatoria.isEmpty() || fuenteExterna == null || fuenteExterna.isEmpty();
+	}
 
 	public PersonaDTO getPersona() {
 		return persona;
@@ -872,8 +873,7 @@ public class AdminPersonaBean extends BaseBean {
 	}
 
 	/**
-	 * @param personaSeleccionada
-	 *            the personaSeleccionada to set
+	 * @param personaSeleccionada the personaSeleccionada to set
 	 */
 	public void setPersonaSeleccionada(PersonaDTO personaSeleccionada) {
 		this.personaSeleccionada = personaSeleccionada;
@@ -1022,6 +1022,7 @@ public class AdminPersonaBean extends BaseBean {
 	public void setBitacoraBean(BitacoraBean bitacoraBean) {
 		this.bitacoraBean = bitacoraBean;
 	}
+
 	public List<LenguajeIndigenaDTO> getListaLenguasIndigenas() {
 		return listaLenguasIndigenas;
 	}
@@ -1030,7 +1031,7 @@ public class AdminPersonaBean extends BaseBean {
 		this.listaLenguasIndigenas = listaLenguasIndigenas;
 	}
 
-		public List<DiscapacidadDTO> getListaDiscapacidades() {
+	public List<DiscapacidadDTO> getListaDiscapacidades() {
 		return listaDiscapacidades;
 	}
 
@@ -1061,7 +1062,7 @@ public class AdminPersonaBean extends BaseBean {
 	public void setDiscapacidad(boolean isDiscapacidad) {
 		this.isDiscapacidad = isDiscapacidad;
 	}
-	
+
 	public PersonaSigeService getPersonaSigeService() {
 		return personaSigeService;
 	}
@@ -1093,7 +1094,7 @@ public class AdminPersonaBean extends BaseBean {
 	public void setAsentamientoService(AsentamientoService asentamientoService) {
 		this.asentamientoService = asentamientoService;
 	}
-	
+
 	public List<SelectImportarDTO> getListaConvocatorias() {
 		return listaConvocatorias;
 	}
@@ -1117,5 +1118,5 @@ public class AdminPersonaBean extends BaseBean {
 	public void setListaPersonasImportar(List<SelectImportarDTO> listaPersonasImportar) {
 		this.listaPersonasImportar = listaPersonasImportar;
 	}
-	
+
 }

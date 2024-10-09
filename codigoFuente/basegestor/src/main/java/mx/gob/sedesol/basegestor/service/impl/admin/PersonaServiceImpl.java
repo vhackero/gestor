@@ -1360,7 +1360,7 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public Boolean guardarPersonas(List<CapturaPersonaDTO> datos,String fuenteExterna, String convocatoria, boolean vincularUsuario) {	
+	public Boolean guardarPersonas(List<CapturaPersonaDTO> datos, String convocatoria, boolean vincularUsuario) {	
 		boolean exito = false;
 		List<TblPersona> personaDTOToTbl = datos.stream()
 				.map(capturaPersonaDTO -> mapper.map(capturaPersonaDTO.getPersona(), TblPersona.class))
@@ -1371,7 +1371,7 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 		    TblPersona persona = personas.get(i);
 		    capturaPersonaDTO.getPersona().setIdPersona(persona.getIdPersona());
 		    if(vincularUsuario){
-		    	usuariosImportarRepo.insertAspirante(persona.getIdPersona().toString(), fuenteExterna, convocatoria);
+		    	usuariosImportarRepo.insertAspirante(persona.getIdPersona().toString(), capturaPersonaDTO.getPersona().getFuenteExterna(), convocatoria);
 		    }
 		});
 		List<RelUsuarioDatosLaborales> usuarioDatosLaboralesDtoToTbl = datos.stream()

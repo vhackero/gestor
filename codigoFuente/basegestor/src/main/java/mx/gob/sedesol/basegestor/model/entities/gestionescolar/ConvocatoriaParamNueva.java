@@ -37,12 +37,7 @@ public class ConvocatoriaParamNueva implements Serializable {
 		this.altaDescripcion = altaDescripcion;
 	}
 	
-	public String getAltaNivelEducativo() {
-		return altaNivelEducativo;
-	}
-	public void setAltaNivelEducativo(String altaNivelEducativo) {
-		this.altaNivelEducativo = altaNivelEducativo;
-	}
+	
 	public String getAltaUrl() {
 		return altaUrl;
 	}
@@ -80,8 +75,12 @@ public class ConvocatoriaParamNueva implements Serializable {
 	public void setAltaFechaAlta(Date altaFechaAlta) {
 		this.altaFechaAlta = altaFechaAlta;
 	}
-	
-	
+	public String getAltaNivelEducativo() {
+		return altaNivelEducativo;
+	}
+	public void setAltaNivelEducativo(String altaNivelEducativo) {
+		this.altaNivelEducativo = altaNivelEducativo;
+	}
 	
 
 }
