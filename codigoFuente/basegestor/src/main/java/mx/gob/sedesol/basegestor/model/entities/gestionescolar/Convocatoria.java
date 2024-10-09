@@ -18,59 +18,45 @@ import javax.persistence.TemporalType;
  * @author ITTIVA
  * 
  */
-@Entity
-@Table(name="tbl_convocatoria")
-@NamedQuery(name="Convocatoria.findAll", query="SELECT r FROM Convocatoria r")
 public class Convocatoria implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="convocatoria_id")
 	private Integer convocatoriaId;
 	
-	@Column(name="nombre")
 	private String nombre;
 	
-	@Column(name="nombre_corto")
 	private String nombreCorto;
 	
-	@Column(name="descripcion")
 	private String descripcion;
 	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "fecha_apertura")
 	private Date fecha_Apertura;
 	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "fecha_cierre")
 	private Date fechaCierre;
 	
-	@Column(name="semestre")
 	private Integer semestre;
 	
-	@Column(name="tipo", nullable = false, columnDefinition = "TINYINT(1)")
 	private String tipo;
 	
-	@Column(name="url_convocatoria")
 	private String urlConvocatoria;
 	
-
-	@Column(name="activo", nullable = false, columnDefinition = "TINYINT(1)")
 	private String activo;
 	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "fecha_alta")
 	private Date fechaAlta;
 	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "fecha_modificacion")
 	private Date fechaModificacion;
 	
-	@Column(name="cupo_limite")
 	private Integer cupoLimite;
 	
+	private String nombreNivel;
+	
+	public String getNombreNivel() {
+		return nombreNivel;
+	}
+
+	public void setNombreNivel(String nombreNivel) {
+		this.nombreNivel = nombreNivel;
+	}
 
 	public Integer getConvocatoriaId() {
 		return convocatoriaId;
