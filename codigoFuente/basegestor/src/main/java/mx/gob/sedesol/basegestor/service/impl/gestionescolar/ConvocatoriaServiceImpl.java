@@ -11,6 +11,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativoCompl;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamNueva;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
@@ -80,6 +81,17 @@ public class ConvocatoriaServiceImpl implements ConvocatoriaService {
 		
 		if (lista.isEmpty()) {
 			return new ArrayList<ConvocatoriaNivelEducativo>();
+		}
+		return lista;
+	}
+	
+	@Override
+	public List<ConvocatoriaNivelEducativoCompl> consultarNivelEducativoCompleto() {
+		
+		List<ConvocatoriaNivelEducativoCompl> lista = iConvocatoriaRepository.consultarNivelEducativoCompleto();
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<ConvocatoriaNivelEducativoCompl>();
 		}
 		return lista;
 	}

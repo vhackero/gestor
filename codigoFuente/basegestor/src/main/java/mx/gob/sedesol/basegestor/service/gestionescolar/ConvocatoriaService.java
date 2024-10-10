@@ -4,6 +4,7 @@ import java.util.List;
 
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativoCompl;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamNueva;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
@@ -27,5 +28,7 @@ public interface ConvocatoriaService extends CommonService<Convocatoria, Integer
 	public void altaConvocatorias(ConvocatoriaParamNueva convocatoriaParamNueva);
 	
 	public void eliminarConvocatorias(Convocatoria elminarConvo);
+	
+	public List<ConvocatoriaNivelEducativoCompl> consultarNivelEducativoCompleto();
 
 }
