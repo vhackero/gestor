@@ -380,12 +380,17 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 		ResultadoDTO<PersonaDTO> resultado = sonDatosRequeridosValidos(TipoAccion.PERSISTENCIA, datos.getPersona());
 		resultado.setDto(datos.getPersona());
 		validarCorreo(TipoAccion.PERSISTENCIA, datos.getPersonaCorreo(), datos.getCorreoDePersonaEnBD(), resultado);
-
+		if (datos.getPersona().getConvocatoria() != "0" && datos.getPersona().getFuenteExterna() != "0") {
+			validarAspirante(datos.getPersona(),resultado);
+		}
 		if (resultado.getResultado().getValor()) {
 			try {
 				resultado = new ResultadoDTO<>();
 				TblPersona persona = almacenarDatosPersonales(datos.getPersona());
 				//ES AQUI DONDE METEMOS A LA OTRA TABLA 
+				if (datos.getPersona().getConvocatoria() != "0" && datos.getPersona().getFuenteExterna() != "0") {
+					almacenarAspirante(datos.getPersona(), persona);
+				}
 				almacenarDatosLaborales(datos.getDatosLaborales(), persona);
 				almacenarTelefono(datos.getTelefonoFijo(), persona);
 				almacenarTelefono(datos.getCelular(), persona);
@@ -735,6 +740,25 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 		datosLaboralesEntidad.setOrdenGobierno(estableceNombreOrdenGobierno(datosLaborales.getIdOrdenGobierno()));
 		datosLaboralesEntidad.setPersona(persona);
 		usuarioDatosLaboralesRepo.save(datosLaboralesEntidad);
+	}
+	
+	
+	private void almacenarAspirante(PersonaDTO dto, TblPersona persona) {
+		usuariosImportarRepo.insertAspirante(persona.getIdPersona().toString(), dto.getFuenteExterna(), dto.getConvocatoria());
+
+	}
+	
+	private void validarAspirante(PersonaDTO dto, ResultadoDTO<PersonaDTO> resultado) {
+		if (ObjectUtils.isNullOrEmpty(dto.getConvocatoria()) || ObjectUtils.isNullOrEmpty(dto.getFuenteExterna()) ) {
+			resultado.setMensajeError(MensajesSistemaEnum.ADMIN_PERSONAS_PLAN_CONVOCATORIA_REQ);
+			logger.info("Error plan o convocatoria requerido");
+		} else {
+			if (!usuariosImportarRepo.verificarRelacionConvocatoria(dto.getFuenteExterna(), dto.getConvocatoria())) {
+				resultado.setMensajeError(MensajesSistemaEnum.ADMIN_PERSONAS_PLAN_CONVOCATORIA_NO_EXISTE);
+				logger.info("Error no existe plan o convocatoria");
+			}
+		}
+
 	}
 
 	private String estableceNombreOrdenGobierno(String idOrdenGobierno) {
@@ -1214,6 +1238,9 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 		datos.getPersona().setApellidoPaterno(personaCargaDTO.getApellidoPaterno());
 		datos.getPersona().setApellidoMaterno(personaCargaDTO.getApellidoMaterno());
 		datos.getPersona().setFechaNacimiento(personaCargaDTO.getFechaNacimientoDate());
+		datos.getPersona().setFuenteExterna(personaCargaDTO.getPlan());
+		datos.getPersona().setConvocatoria(personaCargaDTO.getConvocatoria());
+
 		datos.getDatosLaborales()
 				.setProgramaSocial(personaCargaDTO.getPrograma().equals(ContieneProgramaEnum.SI.getValor()));
 		datos.getDatosLaborales().setInstitucion(personaCargaDTO.getInstitucion());

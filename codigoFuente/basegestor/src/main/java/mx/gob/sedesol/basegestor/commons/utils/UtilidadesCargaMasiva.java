@@ -32,22 +32,23 @@ import com.csvreader.CsvReader;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaCargaDTO;
-import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoCargaDTO;
-import mx.gob.sedesol.basegestor.model.entities.admin.TblPersona;
+
 
 public class UtilidadesCargaMasiva {
-	
+
+
+
 	private static final Logger logger = Logger.getLogger(UtilidadesCargaMasiva.class);
-	
+
 	private UtilidadesCargaMasiva() {
 		throw new IllegalAccessError(ConstantesGestor.CLASE_UTILIDADES);
 	}
 
-	public static List<PersonaCargaDTO> cargarDocumento(String ruta, Map<String, Integer> entidades, 
-			Map<String , String> municipios) {
+	public static List<PersonaCargaDTO> cargarDocumento(String ruta, Map<String, Integer> entidades,
+			Map<String, String> municipios) {
 
-		try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(ruta)); 
+		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(ruta));
 				FileInputStream fis = new FileInputStream(ruta)) {
 
 			if (POIFSFileSystem.hasPOIFSHeader(bis)) {
@@ -66,13 +67,13 @@ public class UtilidadesCargaMasiva {
 		}
 	}
 
-	public static List<PersonaCargaDTO> leerExcelXML(FileInputStream fis, Map<String, Integer> entidades, 
-			Map<String , String> municipios) throws IOException {
+	public static List<PersonaCargaDTO> leerExcelXML(FileInputStream fis, Map<String, Integer> entidades,
+			Map<String, String> municipios) throws IOException {
 
 		List<PersonaCargaDTO> personas = new ArrayList<>();
 
-		try(XSSFWorkbook libro = new XSSFWorkbook(fis)) {
-			
+		try (XSSFWorkbook libro = new XSSFWorkbook(fis)) {
+
 			XSSFSheet hoja = libro.getSheetAt(0);
 
 			Iterator<Row> filas = hoja.iterator();
@@ -112,7 +113,7 @@ public class UtilidadesCargaMasiva {
 
 		return personas;
 	}
-	
+
 	private static String obtenerValor(Row fila, int columna) {
 		final int tipoNumerico = 0;
 		final int tipoCadena = 1;
@@ -129,7 +130,7 @@ public class UtilidadesCargaMasiva {
 			return null;
 		}
 	}
-	
+
 	private static String obtenerCadena(Row fila, int columna) {
 		if (ObjectUtils.isNotNull(fila.getCell(columna))) {
 			return fila.getCell(columna).getStringCellValue();
@@ -138,12 +139,12 @@ public class UtilidadesCargaMasiva {
 		}
 	}
 
-	public static List<PersonaCargaDTO> leerExcelFS(FileInputStream fis, Map<String, Integer> entidades, 
-			Map<String , String> municipios) throws IOException {
+	public static List<PersonaCargaDTO> leerExcelFS(FileInputStream fis, Map<String, Integer> entidades,
+			Map<String, String> municipios) throws IOException {
 		List<PersonaCargaDTO> personas = new ArrayList<>();
 
-		try(HSSFWorkbook libro = new HSSFWorkbook(fis)) {
-			
+		try (HSSFWorkbook libro = new HSSFWorkbook(fis)) {
+
 			HSSFSheet hoja = libro.getSheetAt(0);
 
 			Iterator<Row> filas = hoja.rowIterator();
@@ -152,7 +153,7 @@ public class UtilidadesCargaMasiva {
 			while (filas.hasNext()) {
 				HSSFRow filaHssf = (HSSFRow) filas.next();
 				int indiceFila = 0;
-				
+
 				PersonaCargaDTO dto = new PersonaCargaDTO();
 				dto.setTipoUsuario(obtenerValor(filaHssf, indiceFila++));
 				dto.setUsuario(obtenerValor(filaHssf, indiceFila++));
@@ -183,7 +184,7 @@ public class UtilidadesCargaMasiva {
 		}
 		return personas;
 	}
-	
+
 	private static String obtenerValor(HSSFRow fila, int columna) {
 		final int tipoNumerico = 0;
 		final int tipoCadena = 1;
@@ -193,7 +194,7 @@ public class UtilidadesCargaMasiva {
 				return fila.getCell(columna).getStringCellValue();
 			case tipoNumerico:
 				return String.valueOf(fila.getCell(columna).getNumericCellValue());
-			
+
 			default:
 				return "";
 			}
@@ -201,7 +202,7 @@ public class UtilidadesCargaMasiva {
 			return null;
 		}
 	}
-	
+
 	private static void obtenerFecha(HSSFRow fila, int columna, PersonaCargaDTO dto) {
 		final int tipoNumerico = 0;
 		if (ObjectUtils.isNotNull(fila.getCell(columna)) && fila.getCell(columna).getCellType() == tipoNumerico) {
@@ -216,26 +217,26 @@ public class UtilidadesCargaMasiva {
 			dto.setFechaNacimiento(obtenerValor(fila, columna));
 		}
 	}
-	
-	private static void validarPersona(PersonaCargaDTO dto, Map<String, Integer> entidades, 
-			Map<String , String> municipios) {
+
+	private static void validarPersona(PersonaCargaDTO dto, Map<String, Integer> entidades,
+			Map<String, String> municipios) {
 
 		validarTipoUsuario(dto);
 		if (ObjectUtils.isNullOrEmpty(dto.getUsuario())) {
 			dto.setUsuarioCorrecto(false);
 			dto.setCorrecto(false);
 		}
-		
+
 		if (ObjectUtils.isNullOrEmpty(dto.getConvocatoria())) {
 			dto.setConvocatoriaCorrecto(false);
 			dto.setCorrecto(false);
 		}
-		
+
 		if (ObjectUtils.isNullOrEmpty(dto.getPlan())) {
 			dto.setPlanCorrecto(false);
 			dto.setCorrecto(false);
 		}
-		
+
 		if (ObjectUtils.isNullOrEmpty(dto.getContrasenia())) {
 			dto.setContraseniaCorrecto(false);
 			dto.setCorrecto(false);
@@ -266,16 +267,17 @@ public class UtilidadesCargaMasiva {
 			dto.setCorrecto(false);
 		}
 		validarOrdenGobierno(dto);
+
+		validarConvocatoriaYPlan(dto);
 	}
-	
+
 	private static void validarTipoUsuario(PersonaCargaDTO dto) {
-		if (ObjectUtils.isNullOrEmpty(dto.getTipoUsuario()) 
-				|| !esTipoUsuarioValido(dto.getTipoUsuario())) {
+		if (ObjectUtils.isNullOrEmpty(dto.getTipoUsuario()) || !esTipoUsuarioValido(dto.getTipoUsuario())) {
 			dto.setTipoUsuarioCorrecto(false);
 			dto.setCorrecto(false);
 		}
 	}
-	
+
 	private static boolean esTipoUsuarioValido(String tipo) {
 		boolean resultado = false;
 		for (TipoUsuarioEnum tipoUsuario : TipoUsuarioEnum.values()) {
@@ -286,14 +288,14 @@ public class UtilidadesCargaMasiva {
 		}
 		return resultado;
 	}
-	
+
 	private static void validarPrograma(PersonaCargaDTO dto) {
 		if (ObjectUtils.isNullOrEmpty(dto.getPrograma()) || !esProgramaValido(dto.getPrograma())) {
 			dto.setProgramaCorrecto(false);
 			dto.setCorrecto(false);
 		}
 	}
-	
+
 	private static boolean esProgramaValido(String programa) {
 		boolean resultado = false;
 		for (ContieneProgramaEnum contienePrograma : ContieneProgramaEnum.values()) {
@@ -303,45 +305,42 @@ public class UtilidadesCargaMasiva {
 		}
 		return resultado;
 	}
-	
+
 	private static void validarCurp(PersonaCargaDTO dto) {
-		if (ObjectUtils.isNullOrEmpty(dto.getCurp()) || 
-				!CurpUtils.validaCurpConRegExp(dto.getCurp())) {
+		if (ObjectUtils.isNullOrEmpty(dto.getCurp()) || !CurpUtils.validaCurpConRegExp(dto.getCurp())) {
 			dto.setCurpCorrecto(false);
 			dto.setCorrecto(false);
 		}
 	}
-	
-	
-	
+
 	private static void validarCorreo(PersonaCargaDTO dto) {
-		if (ObjectUtils.isNullOrEmpty(dto.getCorreo()) || 
-				!CorreoElectronicoUtils.esCorreoElectronicoValido(dto.getCorreo())) {
+		if (ObjectUtils.isNullOrEmpty(dto.getCorreo())
+				|| !CorreoElectronicoUtils.esCorreoElectronicoValido(dto.getCorreo())) {
 			dto.setCorreoCorrecto(false);
 			dto.setCorrecto(false);
 		}
 	}
-	
+
 	private static boolean esSedeValida(PersonaCargaDTO dto, Map<String, Integer> entidades) {
 		if (ObjectUtils.isNullOrEmpty(dto.getSede()) || !entidades.containsKey(dto.getSede())) {
 			dto.setSedeCorrecto(false);
 		} else {
 			dto.setIdEntidadFederativa(entidades.get(dto.getSede()));
 			dto.setSedeCorrecto(true);
-		} 
+		}
 		return dto.isSedeCorrecto();
 	}
-	
+
 	private static boolean esMunicipioValido(PersonaCargaDTO dto, Map<String, String> municipios) {
 		if (ObjectUtils.isNullOrEmpty(dto.getMunicipio()) || !municipios.containsKey(dto.getMunicipio())) {
 			dto.setMunicipioCorrecto(false);
 		} else {
 			dto.setIdMunicipio(municipios.get(dto.getMunicipio()));
 			dto.setMunicipioCorrecto(true);
-		} 
+		}
 		return dto.isMunicipioCorrecto();
 	}
-	
+
 	private static void validarOrdenGobierno(PersonaCargaDTO dto) {
 		if (ObjectUtils.isNullOrEmpty(dto.getOrden())) {
 			dto.setOrdenCorrecto(true);
@@ -354,19 +353,34 @@ public class UtilidadesCargaMasiva {
 			}
 		}
 	}
-	
+
 	private static boolean esOrdenGobiernoValido(String orden) {
 		boolean resultado = false;
 		for (OrdenGobiernoEnum ordenGobierno : OrdenGobiernoEnum.values()) {
-			if(orden.equalsIgnoreCase(ordenGobierno.getDescripcion())) {
+			if (orden.equalsIgnoreCase(ordenGobierno.getDescripcion())) {
 				resultado = true;
 			}
-		}	
+		}
 		return resultado;
 	}
 
-	public static List<PersonaCargaDTO> leerCVS(String ruta, Map<String, Integer> entidades, 
-			Map<String , String> municipios) throws IOException {
+	private static void validarConvocatoriaYPlan(PersonaCargaDTO dto) {
+
+		if (ObjectUtils.isNullOrEmpty(dto.getConvocatoria()) || ObjectUtils.isNullOrEmpty(dto.getPlan())) {
+			dto.setConvocatoriaCorrecto(false);
+			dto.setPlanCorrecto(false);
+			dto.setCorrecto(false);
+		} else {
+			dto.setConvocatoriaCorrecto(true);
+			dto.setPlanCorrecto(true);
+			dto.setCorrecto(true);
+
+		}
+
+	}
+
+	public static List<PersonaCargaDTO> leerCVS(String ruta, Map<String, Integer> entidades,
+			Map<String, String> municipios) throws IOException {
 		List<PersonaCargaDTO> personas = new ArrayList<>();
 
 		CsvReader usuariosImport = new CsvReader(ruta);
@@ -374,7 +388,7 @@ public class UtilidadesCargaMasiva {
 
 		while (usuariosImport.readRecord()) {
 			PersonaCargaDTO dto = new PersonaCargaDTO();
-			
+
 			dto.setTipoUsuario(usuariosImport.get(ConstantesGestor.COLUMNA_TIPO_USUARIO));
 			dto.setUsuario(usuariosImport.get(ConstantesGestor.COLUMNA_USUARIO));
 			dto.setContrasenia(usuariosImport.get(ConstantesGestor.COLUMNA_CONTRASENIA));
@@ -384,7 +398,8 @@ public class UtilidadesCargaMasiva {
 			dto.setApellidoPaterno(usuariosImport.get(ConstantesGestor.COLUMNA_APELLIDO_PATERNO));
 			dto.setApellidoMaterno(usuariosImport.get(ConstantesGestor.COLUMNA_APELLIDO_MATERNO));
 			dto.setFechaNacimiento(usuariosImport.get(ConstantesGestor.COLUMNA_FECHA_NACIMIENTO));
-			//TODO dto.setFechaNacimientoDate(usuariosImport.get(ConstantesGestor.COLUMNA_FECHA_NACIMIENTO));
+			// TODO
+			// dto.setFechaNacimientoDate(usuariosImport.get(ConstantesGestor.COLUMNA_FECHA_NACIMIENTO));
 			dto.setInstitucion(usuariosImport.get(ConstantesGestor.COLUMNA_INSTITUCION));
 			dto.setCorreo(usuariosImport.get(ConstantesGestor.COLUMNA_CORREO));
 			dto.setTelefono(usuariosImport.get(ConstantesGestor.COLUMNA_TELEFONO));
@@ -402,30 +417,30 @@ public class UtilidadesCargaMasiva {
 		usuariosImport.close();
 		return personas;
 	}
-	
+
 	public static void crearDocumento(ResultadoCargaDTO resultado, String ruta) {
 		UUID uuid = UUID.randomUUID();
-		
+
 		resultado.setRutaArchivo(uuid.toString());
 		resultado.setRutaCompleta(ruta + uuid.toString());
-		
+
 		try (HSSFWorkbook libro = new HSSFWorkbook();
 				FileOutputStream archivo = new FileOutputStream(new File(resultado.getRutaCompleta()))) {
-		
+
 			HSSFSheet hoja = libro.createSheet("Usuarios");
-			
+
 			Row filaEncabezados = hoja.createRow(0);
 			llenarEncabezados(filaEncabezados);
-			
+
 			HSSFCellStyle estilo = libro.createCellStyle();
 			estilo.setFillForegroundColor(HSSFColor.RED.index);
 			estilo.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-			
+
 			int numeroFila = 1;
 			for (PersonaCargaDTO dto : resultado.getRegistros()) {
 				Row fila = hoja.createRow(numeroFila);
 				int numeroColumna = 0;
-				
+
 				llenarCelda(fila, estilo, dto.getTipoUsuario(), dto.isTipoUsuarioCorrecto(), numeroColumna++);
 				llenarCelda(fila, estilo, dto.getUsuario(), dto.isUsuarioCorrecto(), numeroColumna++);
 				llenarCelda(fila, estilo, dto.getContrasenia(), dto.isContraseniaCorrecto(), numeroColumna++);
@@ -448,40 +463,40 @@ public class UtilidadesCargaMasiva {
 				llenarCelda(fila, estilo, dto.getMensajeResultado(), true, numeroColumna);
 				numeroFila++;
 			}
-			
+
 			libro.write(archivo);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
-	
+
 	public static byte[] crearPlantilla() throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		try(HSSFWorkbook libro = new HSSFWorkbook()) {
-		
+		try (HSSFWorkbook libro = new HSSFWorkbook()) {
+
 			HSSFSheet hoja = libro.createSheet("Usuarios");
-			
+
 			Row filaEncabezados = hoja.createRow(0);
 			llenarEncabezados(filaEncabezados);
 
-		    libro.write(bos);
-		    
+			libro.write(bos);
+
 		} finally {
-		    bos.close();
+			bos.close();
 		}
-		
+
 		return bos.toByteArray();
 	}
-	
+
 	private static void llenarCelda(Row fila, HSSFCellStyle estilo, String campo, boolean correcto, int numeroColumna) {
 		Cell celda = fila.createCell(numeroColumna);
 		celda.setCellValue(campo);
-		
+
 		if (!correcto) {
 			celda.setCellStyle(estilo);
 		}
 	}
-	
+
 	private static void llenarEncabezados(Row fila) {
 		int indiceFila = 0;
 		Cell celda = fila.createCell(indiceFila++);
