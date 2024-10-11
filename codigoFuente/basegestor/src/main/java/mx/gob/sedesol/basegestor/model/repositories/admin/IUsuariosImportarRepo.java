@@ -15,5 +15,7 @@ public interface IUsuariosImportarRepo {
 
 	void insertAspirante(String idPersonaRegistrada, String programaEducativo, String idConvocatoria);
 
+	boolean verificarRelacionConvocatoria(String planId, String convocatoriaId);
+
 	
 }

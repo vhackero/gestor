@@ -123,5 +123,22 @@ public class UsuariosImportarRepo implements IUsuariosImportarRepo {
 	    }
 	    return null;
 	}
+	
+	@Override
+	public boolean verificarRelacionConvocatoria(String planId, String convocatoriaId) {
+	    String consulta = "SELECT IF(COUNT(tc.convocatoria_id) > 0, 1, 0) AS existe_relacion " +
+	                      "FROM tbl_convocatoria tc " +
+	                      "INNER JOIN rel_convocatoria_planesyprogramas rcpp " +
+	                      "ON rcpp.id_convocatoria = tc.convocatoria_id AND rcpp.id_plan = :plan_id " +
+	                      "WHERE tc.convocatoria_id = :convocatoria_id";
+	    
+	    Integer resultado = (Integer) entityManager.createNativeQuery(consulta)
+	            .setParameter("plan_id", planId)
+	            .setParameter("convocatoria_id", convocatoriaId)
+	            .getSingleResult();
+
+	    return resultado == 1;
+	}
+
 
 }

@@ -149,6 +149,10 @@ public enum MensajesSistemaEnum {
 	ADMIN_PERSONAS_CONTRASENIAS_DIFERENTES("gw.admin.personas.contrasenias.diferentes"),
 	ERROR_VALIDA_TOKEN("gw.admin.personas.valida.token.error"),
 	ERROR_USUARIO_NO_EXISTE("gw.admin.personas.usuario.no.existe"),
+	ADMIN_PERSONAS_PLAN_CONVOCATORIA_NO_EXISTE("gw.admin.personas.plan.convocatoria.no.existe"),
+	ADMIN_PERSONAS_PLAN_CONVOCATORIA_REQ("gw.admin.personas.plan.convocatoria.req"),
+
+
 	
 	//MODULO DE DOMICILIO PERSONA
 	DOMICILIO_PERSONA_ID_REQ("gw.domicilio.persona.id.req"),

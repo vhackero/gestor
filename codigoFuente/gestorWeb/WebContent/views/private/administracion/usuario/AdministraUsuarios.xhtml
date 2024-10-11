@@ -22,10 +22,12 @@
 				<div class="col-md-5"></div>
 				<div class="col-md-7">
 					<sec:authorize access="hasPermission(null,'PER_AGR')">
-						<p:commandButton id="btnCargaMasiva" rendered="true"
-							action="#{cargaMasivaUsuariosBean.inicioCargaUsuarios()}"
-							value="#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.cargaMasiva')}"
-							styleClass="pull-right btn btn-primary" />
+						<sec:authorize access="hasPermission(null,'CARG_MASI')">
+							<p:commandButton id="btnCargaMasiva" rendered="true"
+								action="#{cargaMasivaUsuariosBean.inicioCargaUsuarios()}"
+								value="#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.cargaMasiva')}"
+								styleClass="pull-right btn btn-primary" />
+						</sec:authorize>
 						<p:commandButton id="btnIndividual"
 							action="#{adminPersonaBean.agregarPersona()}" rendered="true"
 							value="#{sistema.obtenerTexto('gw.adminPersona.boton.agregar')}"
@@ -39,22 +41,25 @@
 
 			<div class="row">
 				<div class="col-md-12">
-					<p:panel id="filtroImportarUsuarios"
-						header="Importar datos de fuente externa">
+					<sec:authorize access="hasPermission(null,'IMP_FUEN_EXT')">
+						<p:panel id="filtroImportarUsuarios"
+							header="Importar datos de fuente externa">
 
-						<ui:include src="../componentes/filtroImportarUsuarios.xhtml" />
+							<ui:include src="../componentes/filtroImportarUsuarios.xhtml" />
 
-						<div class="row">
-							<div class="col-md-12">
-								<sec:authorize access="hasPermission(null,'PER_AGR')">
-									<p:commandButton id="btnRegistro" rendered="true"
-										action="#{adminPersonaBean.obtenerUsuarios()}"
-										value="Importar datos" styleClass="pull-right btn btn-primary" 
-										disabled="#{adminPersonaBean.importarButtonDisabled}"/>
-								</sec:authorize>
+							<div class="row">
+								<div class="col-md-12">
+									<sec:authorize access="hasPermission(null,'IMP_FUEN_EXT')">
+										<p:commandButton id="btnRegistro" rendered="true"
+											action="#{adminPersonaBean.obtenerUsuarios()}"
+											value="Importar datos"
+											styleClass="pull-right btn btn-primary"
+											disabled="#{adminPersonaBean.importarButtonDisabled}" />
+									</sec:authorize>
+								</div>
 							</div>
-						</div>
-					</p:panel>
+						</p:panel>
+					</sec:authorize>
 				</div>
 			</div>
 
