@@ -227,16 +227,6 @@ public class UtilidadesCargaMasiva {
 			dto.setCorrecto(false);
 		}
 
-		if (ObjectUtils.isNullOrEmpty(dto.getConvocatoria())) {
-			dto.setConvocatoriaCorrecto(false);
-			dto.setCorrecto(false);
-		}
-
-		if (ObjectUtils.isNullOrEmpty(dto.getPlan())) {
-			dto.setPlanCorrecto(false);
-			dto.setCorrecto(false);
-		}
-
 		if (ObjectUtils.isNullOrEmpty(dto.getContrasenia())) {
 			dto.setContraseniaCorrecto(false);
 			dto.setCorrecto(false);
@@ -266,9 +256,15 @@ public class UtilidadesCargaMasiva {
 		if (!esMunicipioValido(dto, municipios)) {
 			dto.setCorrecto(false);
 		}
+		if (ObjectUtils.isNullOrEmpty(dto.getConvocatoria())) {
+			dto.setConvocatoriaCorrecto(false);
+			dto.setCorrecto(false);
+		}
+		if (ObjectUtils.isNullOrEmpty(dto.getPlan())) {
+			dto.setPlanCorrecto(false);
+			dto.setCorrecto(false);
+		}
 		validarOrdenGobierno(dto);
-
-		validarConvocatoriaYPlan(dto);
 	}
 
 	private static void validarTipoUsuario(PersonaCargaDTO dto) {
@@ -362,21 +358,6 @@ public class UtilidadesCargaMasiva {
 			}
 		}
 		return resultado;
-	}
-
-	private static void validarConvocatoriaYPlan(PersonaCargaDTO dto) {
-
-		if (ObjectUtils.isNullOrEmpty(dto.getConvocatoria()) || ObjectUtils.isNullOrEmpty(dto.getPlan())) {
-			dto.setConvocatoriaCorrecto(false);
-			dto.setPlanCorrecto(false);
-			dto.setCorrecto(false);
-		} else {
-			dto.setConvocatoriaCorrecto(true);
-			dto.setPlanCorrecto(true);
-			dto.setCorrecto(true);
-
-		}
-
 	}
 
 	public static List<PersonaCargaDTO> leerCVS(String ruta, Map<String, Integer> entidades,
