@@ -133,8 +133,12 @@ public class UsuariosImportarRepo implements IUsuariosImportarRepo {
 	                      "WHERE tc.convocatoria_id = :convocatoria_id";
 	    
 		Query query = entityManager.createNativeQuery(consulta);
-		query.setParameter("plan_id", planId);
-		query.setParameter("convocatoria_id", convocatoriaId);
+		
+		Integer plan = Integer.parseInt(planId);
+		Integer convocatoria = Integer.parseInt(convocatoriaId);
+
+		query.setParameter("plan_id", plan);
+		query.setParameter("convocatoria_id", convocatoria);
 		Integer resultado = 0;
 		Object[] obj = (Object[]) query.getSingleResult();
 		if (obj != null) {

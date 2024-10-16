@@ -380,7 +380,7 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 		ResultadoDTO<PersonaDTO> resultado = sonDatosRequeridosValidos(TipoAccion.PERSISTENCIA, datos.getPersona());
 		resultado.setDto(datos.getPersona());
 		validarCorreo(TipoAccion.PERSISTENCIA, datos.getPersonaCorreo(), datos.getCorreoDePersonaEnBD(), resultado);
-		if (datos.getPersona().getConvocatoria() != "0.0" && datos.getPersona().getFuenteExterna() != "0.0") {
+		if (!datos.getPersona().getConvocatoria().equals("0.0") && !datos.getPersona().getFuenteExterna().equals("0.0")) {
 			validarAspirante(datos.getPersona(),resultado);
 		}
 		if (resultado.getResultado().getValor()) {
@@ -388,7 +388,7 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 				resultado = new ResultadoDTO<>();
 				TblPersona persona = almacenarDatosPersonales(datos.getPersona());
 				//ES AQUI DONDE METEMOS A LA OTRA TABLA 
-				if (datos.getPersona().getConvocatoria() != "0.0" && datos.getPersona().getFuenteExterna() != "0.0") {
+				if (!datos.getPersona().getConvocatoria().equals("0.0") && !datos.getPersona().getFuenteExterna().equals("0.0")) {
 					almacenarAspirante(datos.getPersona(), persona);
 				}
 				almacenarDatosLaborales(datos.getDatosLaborales(), persona);
