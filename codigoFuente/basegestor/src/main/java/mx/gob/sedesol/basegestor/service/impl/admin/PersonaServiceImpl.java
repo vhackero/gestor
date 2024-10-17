@@ -744,7 +744,12 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 	
 	
 	private void almacenarAspirante(PersonaDTO dto, TblPersona persona) {
-		usuariosImportarRepo.insertAspirante(persona.getIdPersona().toString(), dto.getFuenteExterna(), dto.getConvocatoria());
+		
+		String[] partes = dto.getFuenteExterna().split("\\.");
+				
+		String[] partes2 = dto.getConvocatoria().split("\\.");	
+
+		usuariosImportarRepo.insertAspirante(persona.getIdPersona().toString(),partes[0].toString() , partes2[0].toString());
 
 	}
 	
