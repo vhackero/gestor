@@ -427,6 +427,12 @@ public class MenuGestorBean extends BaseBean {
 			logger.info("Navegando a mis dispersiones");
 			return ConstantesGestorWeb.NAVEGA_MIS_INSCRIPCIONES;
 		}
+		
+	//ITTIVA 666
+	public String navegaInscripcion() {
+		logger.info("Navegando a inscripcion");
+		return ConstantesGestorWeb.NAVEGA_INSCRIPCION;
+	}
 
 	public String navegaTareasProgramadas() {
 		logger.info("Navegando a tareas programadas");
