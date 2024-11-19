@@ -567,8 +567,7 @@
 			<to-view-id>/views/private/gestionAprendizaje/alumnoView/busquedaInscripciones</to-view-id>
 			<redirect />
 		</navigation-case>
-		
-		
+
 		<!-- ITTIVA 666 MIS_DISPERSIONES -->
 		<navigation-case>
 			<from-outcome>MIS_DISPERSIONES</from-outcome>
@@ -576,8 +575,14 @@
 			<redirect />
 		</navigation-case>
 		
-		
-		
+
+		<!-- ITTIVA 666 MIS INSCRIPCION -->
+		<navigation-case>
+			<from-outcome>INSCRIPCION</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/inscripcion.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+
  
 
 		<!-- Mis cursos -->
