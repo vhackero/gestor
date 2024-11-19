@@ -12,8 +12,16 @@ public class InscripcionDTO {
     private Long idPlan;
     private String plan;
     private String programa;
+    private Long idConvocatoria;
 
-    // Getters y Setters
+    public Long getIdConvocatoria() {
+		return idConvocatoria;
+	}
+
+    public void setIdConvocatoria(Long idConvocatoria) {
+        this.idConvocatoria = idConvocatoria;
+    }
+
     public Long getIdPersona() {
         return idPersona;
     }

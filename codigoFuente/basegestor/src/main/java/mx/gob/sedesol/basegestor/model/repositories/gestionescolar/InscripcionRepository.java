@@ -1,6 +1,8 @@
 package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -8,12 +10,16 @@ import javax.persistence.Query;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionInsertDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasInsDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasPasadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMaxMinDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 
 @Repository
 public class InscripcionRepository implements IinscripcionRepository {
@@ -36,12 +42,14 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "    tpa.id_plan id_plan,\r\n"
 				+ "    tpl.nombre plan,\r\n"
 				+ "    tfd.nombre_tentativo programa,\r\n"
-				+ "    tp.sso_idUsuario\r\n"
+				+ "    tp.sso_idUsuario,\r\n"
+				+ "    tpa.id_convocatoria\r\n"
 				+ "FROM tbl_persona  tp\r\n"
 				+ "         INNER JOIN rel_persona_correo rpc ON rpc.id_persona = tp.id_persona\r\n"
 				+ "         INNER JOIN tbl_persona_aspirante tpa ON tpa.id_persona = rpc.id_persona\r\n"
 				+ "         INNER JOIN tbl_planes tpl ON tpl.id_plan = tpa.id_plan\r\n"
 				+ "         INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_plan = tpl.id_plan\r\n"
+				+ "        INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpa.id_convocatoria AND  tc.activo=1\r\n"
 				+ "WHERE tp.id_persona = :id_persona";
 
 		Query query = entityManager.createNativeQuery(consulta);
@@ -100,7 +108,76 @@ public class InscripcionRepository implements IinscripcionRepository {
 		return lista;
 
 	}
+	
+	@Override
+	public List<InscripcionMateriasDTO> consultarMateriasPorConvocatoria(String id_plan, String id_convocatoria, String id_estructura) {
 
+		List<InscripcionMateriasDTO> lista = new ArrayList<InscripcionMateriasDTO>();
+
+		String consulta = "SELECT tp.identificador clave_plan, tfd.identificador_final clave_progrma, tp.id_plan id_plan, tp.nombre nombre_plan, tfd.id_programa id_programa ,tfd.nombre_tentativo programa,\r\n"
+				+ "       tmc.nombre subestructura,\r\n"
+				+ "       (SELECT tmc2.nombre FROM tbl_malla_curricular tmc2 WHERE tmc2.id = tmc.id_padre ) estructura,\r\n"
+				+ "       cne.nombre nivel_ensenanza,\r\n"
+				+ "       cdp.nombre division,\r\n"
+				+ "       tfd.tipo tipo_programa,\r\n"
+				+ "       tfd.id_programa_antecedente seriada\r\n"
+				+ "FROM tbl_planes tp\r\n"
+				+ "         INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_plan = tp.id_plan\r\n"
+				+ "         INNER JOIN tbl_malla_curricular tmc ON tmc.id = tfd.id_eje_capacitacion\r\n"
+				+ "         INNER JOIN cat_nivel_ensenanza_programa cne ON cne.id = tp.id_nivel_ensenanza\r\n"
+				+ "         INNER JOIN cat_divisiones_plan cdp ON cdp.id = tp.id_divisiones_plan\r\n"
+				+ "         INNER JOIN rel_convocatoria_planesyprogramas rcp ON tp.id_plan = rcp.id_plan AND tfd.id_programa = rcp.id_programa\r\n"
+				+ "WHERE tp.id_plan = :id_plan AND rcp.id_convocatoria = :id_convocatoria AND EXISTS\r\n"
+				+ "    (SELECT tmc3.nombre FROM tbl_malla_curricular tmc3 WHERE tmc3.id = tmc.id_padre AND SUBSTRING(tmc3.nombre, -1) IN (:id_estructura)) AND\r\n"
+				+ "      tfd.identificador_final is not null AND tfd.identificador_final != ''";
+
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("id_plan", id_plan);
+		query.setParameter("id_convocatoria", id_convocatoria);
+		List<String> estructuras = Arrays.asList(id_estructura.split(","));
+		query.setParameter("id_estructura", estructuras);
+		List<Object[]> listaQuery = query.getResultList();
+
+		if (!listaQuery.isEmpty()) {
+			for (Object[] obj : listaQuery) {
+
+				InscripcionMateriasDTO convocatoria = mapeoMaterias(obj);
+				lista.add(convocatoria);
+
+			}
+		}
+
+		return lista;
+
+	}
+	
+	@Override
+	public Long consultarNumeroEstructura(String id_plan_infopersona) {
+
+		String consulta = "SELECT rmp.id_plan plan,\r\n"
+				+ "       rmp.elementos_estructuras num_estructuras\r\n"
+				+ "    From rel_malla_plan rmp\r\n"
+				+ "WHERE rmp.id_plan=:id_plan_infopersona and rmp.activo=1;";
+
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("id_plan_infopersona", id_plan_infopersona);
+
+
+		List<Object[]> listaQuery = query.getResultList();
+		
+		Long numeroEstructura = 0l;
+		
+		if (!listaQuery.isEmpty()) {
+			for (Object[] obj : listaQuery) {
+                     
+				numeroEstructura = Long.valueOf(obj[1].toString());     
+
+			}
+		}
+
+		return numeroEstructura;
+
+	}
 
 	@Override
 	public InscripcionMaxMinDTO consultarMaxMin(String id_plan) {
@@ -200,6 +277,125 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 	}
 	
+	@Override
+	public List<IntentosAsignaturasDTO> consultarIntentosAsignaturas(String id_persona) {
+
+		List<IntentosAsignaturasDTO> lista = new ArrayList<IntentosAsignaturasDTO>();
+
+		
+		String consulta = "SELECT COUNT(if(rgp.calificacion_final < 60, 1,0)) as intentos_reprobados,\r\n"
+				+ "    tpl.id_plan id_plan,\r\n"
+				+ "    fd.id_programa id_programa\r\n"
+				+ "FROM tbl_persona tp\r\n"
+				+ "         INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona AND calificacion_final IS NOT NULL\r\n"
+				+ "         INNER JOIN tbl_grupos tg ON tg.id = rgp.id_grupo\r\n"
+				+ "         INNER JOIN tbl_eventos te ON te.id_evento = tg.id_evento\r\n"
+				+ "         INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = te.id_programa\r\n"
+				+ "         INNER JOIN tbl_planes tpl ON tpl.id_plan = fd.id_plan\r\n"
+				+ "         INNER JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion\r\n"
+				+ "WHERE tp.id_persona = :id_persona and rgp.calificacion_final < 60 group by te.id_programa";
+
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("id_persona", id_persona);
+
+
+		List<Object[]> listaQuery = query.getResultList();
+
+		if (!listaQuery.isEmpty()) {
+			for (Object[] obj : listaQuery) {
+
+				IntentosAsignaturasDTO convocatoria = mapeoIntentosAsignaturas(obj);
+				lista.add(convocatoria);
+
+			}
+		}
+
+		return lista;
+
+	}
+	
+	@Override
+	public Boolean consultarNuevoIngreso(String id_persona) {
+
+		String consulta = "SELECT * from tbl_persona tp\r\n"
+				+ "WHERE NOT EXISTS(SELECT * FROM tbl_inscripciones ti WHERE ti.semestre=1 AND ti.Idpersona=tp.id_persona) AND id_persona=:id_persona\r\n"
+				+ "  AND NOT EXISTS(SELECT * from rel_persona_bajas rpb WHERE rpb.id_persona = tp.id_persona)";
+
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("id_persona", id_persona);
+
+
+		List<Object[]> listaQuery = query.getResultList();
+
+		if (!listaQuery.isEmpty()) {
+			return true;
+		}
+
+		return false;
+
+	}
+	
+	@Override
+	public List<InscripcionBajasDTO> consultarBajas(String id_persona) {
+
+		List<InscripcionBajasDTO> lista = new ArrayList<InscripcionBajasDTO>();
+
+		
+		String consulta = "SELECT rpb.id_plan, rpb.id_programa, ctb.id_tipo_baja, ctb.nombre tipo_baja, ctb.fecha_modificacion FROM rel_persona_bajas rpb\r\n"
+				+ "         INNER JOIN rel_motivo_baja rmb ON rmb.id_motivo_baja = rpb.motivo_baja_id\r\n"
+				+ "         INNER JOIN cat_tipo_bajas ctb ON ctb.id_tipo_baja = rmb.tipo_baja_id\r\n"
+				+ "         WHERE rpb.id_persona = :id_persona";
+
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("id_persona", id_persona);
+
+
+		List<Object[]> listaQuery = query.getResultList();
+
+		if (!listaQuery.isEmpty()) {
+			for (Object[] obj : listaQuery) {
+
+				InscripcionBajasDTO convocatoria = mapeoPersonaBaja(obj);
+				lista.add(convocatoria);
+
+			}
+		}
+
+		return lista;
+
+	}
+	
+	@Override
+	@Transactional
+	public void insertarRegistro(InscripcionInsertDTO dto) {
+	    String sql = "INSERT INTO tbl_inscripciones (Idpersona, programa, asignatura, groupbase, idplan, idprograma, " +
+	                 "idevento, nivel, division, profile_field_perfil, bloque, clave_asig, nuevoingreso, " +
+	                 "recursamiento, alta, semestre, fecha_registro) " +
+	                 "VALUES ( :Idpersona, :programa, :asignatura, :groupbase, :idplan, :idprograma, :idevento, " +
+	                 ":nivel, :division, :profileFieldPerfil, :bloque, :claveAsig, :nuevoIngreso, :recursamiento, " +
+	                 ":alta, :semestre, :fechaRegistro)";
+
+	    entityManager.createNativeQuery(sql)
+	            .setParameter("Idpersona", dto.getIdPersona())
+	            .setParameter("programa", dto.getPrograma())
+	            .setParameter("asignatura", dto.getAsignatura())
+	            .setParameter("groupbase", dto.getGroupBase())
+	            .setParameter("idplan", dto.getIdPlan())
+	            .setParameter("idprograma", dto.getIdPrograma())
+	            .setParameter("idevento", dto.getIdEvento())
+	            .setParameter("nivel", dto.getNivel())
+	            .setParameter("division", dto.getDivision())
+	            .setParameter("profileFieldPerfil", dto.getProfileFieldPerfil())
+	            .setParameter("bloque", dto.getBloque())
+	            .setParameter("claveAsig", dto.getClaveAsig())
+	            .setParameter("nuevoIngreso", dto.getNuevoIngreso())
+	            .setParameter("recursamiento", dto.getRecursamiento())
+	            .setParameter("alta", dto.getAlta())
+	            .setParameter("semestre", dto.getSemestre())
+	            .setParameter("fechaRegistro", dto.getFechaRegistro())
+	            .executeUpdate();
+	}
+	
 	private InscripcionMateriasInsDTO mapeoInscripcionMateria(Object[] obj) {
 		InscripcionMateriasInsDTO materia = new InscripcionMateriasInsDTO();
 
@@ -256,20 +452,22 @@ public class InscripcionRepository implements IinscripcionRepository {
 	
 	private InscripcionDTO mapeo(Object[] obj) {
 
-		InscripcionDTO regresa = new InscripcionDTO();
+	    InscripcionDTO regresa = new InscripcionDTO();
 
-	    regresa.setIdPersona(Long.valueOf(obj[0].toString()));     
-	    regresa.setNombreUsuario(obj[1].toString());            
-	    regresa.setNombre(obj[2].toString());                  
-	    regresa.setPrimerApellido(obj[3].toString());               
-	    regresa.setSegundoApellido(obj[4].toString());             
-	    regresa.setCorreo(obj[5].toString());                       
-	    regresa.setIdPlan(Long.valueOf(obj[6].toString()));          
-	    regresa.setPlan(obj[7].toString());                         
-	    regresa.setPrograma(obj[8].toString());                     
+	    regresa.setIdPersona(Long.valueOf(obj[0].toString()));
+	    regresa.setNombreUsuario(obj[1].toString());
+	    regresa.setNombre(obj[2].toString());
+	    regresa.setPrimerApellido(obj[3].toString());
+	    regresa.setSegundoApellido(obj[4].toString());
+	    regresa.setCorreo(obj[5].toString());
+	    regresa.setIdPlan(Long.valueOf(obj[6].toString()));
+	    regresa.setPlan(obj[7].toString());
+	    regresa.setPrograma(obj[8].toString());
+	    regresa.setIdConvocatoria(Long.valueOf(obj[10].toString()));
 
-		return regresa;
+	    return regresa;
 	}
+
 	
 	private InscripcionMateriasDTO mapeoMaterias(Object[] obj) {
 
@@ -292,6 +490,34 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 	    return programa;
 	}
+	
+	private IntentosAsignaturasDTO mapeoIntentosAsignaturas(Object[] obj) {
+
+		IntentosAsignaturasDTO programa = new IntentosAsignaturasDTO();
+
+	    programa.setIntetosReprobados(Long.valueOf(obj[0].toString()));                   
+	    programa.setIdPlan(Long.valueOf(obj[1].toString()));     
+	    programa.setIdPrograma(Long.valueOf(obj[2].toString()));               
+
+	    return programa;
+	}
+	
+	
+	private InscripcionBajasDTO mapeoPersonaBaja(Object[] obj) {
+
+		InscripcionBajasDTO personaBaja = new InscripcionBajasDTO();
+
+	    personaBaja.setIdPlan(Long.valueOf(obj[0].toString()));
+	    personaBaja.setIdPrograma(Long.valueOf(obj[1].toString()));
+	    personaBaja.setIdTipoBaja(Long.valueOf(obj[2].toString()));
+	    personaBaja.setTipoBaja(obj[3].toString());
+	    personaBaja.setFechaModificacion(LocalDateTime.parse(obj[4].toString()));
+
+	    return personaBaja;
+	}
+	
+	
+	
 
 
 }
