@@ -7,14 +7,14 @@
 	xmlns:p="http://primefaces.org/ui">
 
 	<ui:define name="breadcrumb">
-		<li>Convocatorias</li>
+		<li>Dispersiones</li>
 
 	</ui:define>
 
 	<ui:define name="content">
 		<h:form>
 			<h1>
-				<p:outputLabel styleClass="h1" value="Convocatorias" />
+				<p:outputLabel styleClass="h1" value="Proceso de dispersión" />
 			</h1>
 
 
@@ -34,7 +34,7 @@
 
 
 
-						<p:commandButton value="Nueva Dispersion"
+						<p:commandButton value="Nuevo proceso de dispersión" style="width: 250px;"
 							action="#{dispersionesBean.navegaNuevoConvocatoria}"
 							ajax="false" immediate="true" process="@this"
 							styleClass="btn btn-primary" />
@@ -43,8 +43,8 @@
 
 					<div class="col-md-4 col-xs-12">
 
-						<p:commandButton style="width: 200px;"
-							value="Consultar convocatoria"
+						<p:commandButton style="width: 250px;"
+							value="Consultar dispersión"
 							action="#{convocatoriasBean.navegaConsultaConvocatoria}"
 							ajax="false" immediate="true" process="@this"
 							styleClass="btn btn-primary" />
@@ -52,7 +52,7 @@
 					</div>
 
 					<p:commandButton style="width: 250px;"
-						value="Consultar tablero de resumen"
+						value="Dispersión"
 						action="#{convocatoriasBean.navegaConsultaTablero}" ajax="false"
 						immediate="true" process="@this" styleClass="btn btn-primary" />
 
@@ -69,12 +69,6 @@
 
 
 			</div>
-
-			
-		
-	
-	
-		
 
 
 			<!-- Incluir dinámicamente el archivo .xhtml basado en la propiedad 'paginaActual' -->

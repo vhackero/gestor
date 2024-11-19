@@ -6,190 +6,206 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core">
-	
-	
-	
-	<p:panel header="Nueva Dispersion">
-	
-	<div class="form-group">
-					<div class="row">
-
-						<div class="col-md-4 col-xs-12">
-
-							<p:outputLabel styleClass="bloque" for="altaNombreConvocatoria"
-								value="Nombre de la convocatoria:" rendered="true" />
-							<p:inputText id="altaNombreConvocatoria"
-								value="#{convocatoriasBean.altaNombreConvocatoria}"
-								styleClass="form-control" />
-
-						</div>
-
-						<div class="col-md-4 col-xs-12">
-
-							<p:outputLabel styleClass="bloque" for="altaNombreCorto"
-								value="Nombre de la convocatoria:" rendered="true" />
-							<p:inputText id="altaNombreCorto"
-								value="#{convocatoriasBean.altaNombreCorto}"
-								styleClass="form-control" />
-
-						</div>
-
-						<div class="col-md-4 col-xs-12">
-
-							<p:outputLabel styleClass="bloque" for="altaDescripcion"
-								value="Nombre de la convocatoria:" rendered="true" />
-							<p:inputText id="altaDescripcion"
-								value="#{convocatoriasBean.altaDescripcion}"
-								styleClass="form-control" />
-
-						</div>
 
 
 
-					</div>
+	<p:panel header="Nueva Convocatoria">
+
+
+
+		<div class="form-group">
+			<div class="row">
+
+				<div class="col-md-4 col-xs-12">
+
+					<p:outputLabel styleClass="bloque" value="Convocatoria:" />
+
+					<p:selectOneMenu id="convocatoria"
+						styleClass="col-xs-12">
+						<p:ajax event="change" process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="#{null}" />
+						<f:selectItems value="#{dispersionesBean.listaConvocatoria}"
+							var="modalidad" itemLabel="#{modalidad.nombre}"
+							itemValue="#{modalidad.convocatoriaId}" />
+					</p:selectOneMenu>
+
 				</div>
 				
-				<div class="form-group">
-					<div class="row">
+				<div class="col-md-4 col-xs-12">
 
+					<p:outputLabel styleClass="bloque requerido" value="Tipo de proceso de inscripción:" />
+					<p:selectOneMenu id="tipoInscripcion"
+						value="#{convocatoriasBean.convocatoriaParamNueva.altaEstatus}"
+						styleClass="col-xs-12" required="true"
+						requiredMessage="El estatus es obligatorio.">
+						<p:ajax event="change" process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="#{null}" />
+						<f:selectItems value="#{convocatoriasBean.estatusLista}"
+							var="modalidad" itemLabel="#{modalidad.nombreEstatus}"
+							itemValue="#{modalidad.valorEstatus}" />
 
+					</p:selectOneMenu>
+					<p:message for="tipoInscripcion" display="text" />
+				</div>
+				
+				<div class="col-md-4 col-xs-12">
 
-						<!-- Fecha Inicial  -->
-						<div class="col-md-4">
-							<p:outputLabel styleClass="bloque"
-								value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechaInicial')}:" />
-							<p:calendar id="fc_fechaInicial" styleClass="requerido"
-								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
-								yearRange="c-100:c+100" locale="es"
-								disabled="#{empty eventoCapacitacionBean.tipoDatoFechas}"
-								placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-								readonlyInput="true" navigator="true"
-								value="#{eventoCapacitacionBean.filtros.fechaInicial}"
-								showOn="button">
-								<p:ajax event="dateSelect" process="@this"
-									update="fc_fechaFinal"
-									listener="#{eventoCapacitacionBean.validarFechas()}" />
-							</p:calendar>
+					<p:outputLabel styleClass="bloque requerido" value="Proceso de inscripción:" />
+					<p:selectOneMenu id="procesoInscripcion"
+						value="#{convocatoriasBean.convocatoriaParamNueva.altaEstatus}"
+						styleClass="col-xs-12" required="true"
+						requiredMessage="El estatus es obligatorio.">
+						<p:ajax event="change" process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="#{null}" />
+						<f:selectItems value="#{convocatoriasBean.estatusLista}"
+							var="modalidad" itemLabel="#{modalidad.nombreEstatus}"
+							itemValue="#{modalidad.valorEstatus}" />
 
-						</div>
-						<!-- Fecha Final -->
-						<div class="col-md-4 col-xs-12">
-							<p:outputLabel styleClass="bloque"
-								value="#{sistema.obtenerTexto('gw.gestionescolar.label.fechafinal')}:" />
-							<p:calendar id="fc_fechaFinal" styleClass="requerido"
-								mindate="#{eventoCapacitacionBean.filtros.fechaInicial}"
-								disabled="#{empty eventoCapacitacionBean.filtros.fechaInicial}"
-								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
-								yearRange="c-100:c+100" locale="es"
-								placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-								readonlyInput="true" navigator="true"
-								value="#{eventoCapacitacionBean.filtros.fechaFinal}"
-								showOn="button">
-								<p:ajax event="dateSelect" process="@this" />
-							</p:calendar>
-						</div>
-
-
-						<div class="col-md-4 col-xs-12">
-
-							<p:outputLabel styleClass="bloque" value="Nivel educativo:" />
-							<p:selectOneMenu
-								value="#{planBean.filtroPlan.catModalidadPlanPrograma}"
-								converter="catalogoComunConverter" styleClass="col-xs-12">
-								<p:ajax event="change" process="@this" />
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" />
-								<f:selectItems value="#{planBean.catModalidadPlan}"
-									var="modalidad" itemLabel="#{modalidad.nombre}"
-									itemValue="#{modalidad}" />
-							</p:selectOneMenu>
-
-						</div>
-
-
-					</div>
+					</p:selectOneMenu>
+					<p:message for="procesoInscripcion" display="text" />
 				</div>
 
-
-				<div class="form-group">
-					<div class="row">
-
-
-						<div class="col-md-4 col-xs-12">
-
-							<p:outputLabel styleClass="bloque" for="altaUrl"
-								value="URL de la convocatoria(PDF):" rendered="true" />
-							<p:inputText id="altaUrl" value="#{convocatoriasBean.altaUrl}"
-								styleClass="form-control" />
-
-						</div>
-
-						<div class="col-md-4 col-xs-12">
-
-							<p:outputLabel styleClass="bloque" value="Estatus:" />
-							<p:selectOneMenu value="#{convocatoriasBean.altaEstatus}"
-								styleClass="col-xs-12">
-								<p:ajax event="change" process="@this" />
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" />
-								<f:selectItems value="#{convocatoriasBea.estatusLista}"
-									var="estatus" itemLabel="#{estatus.nombreEstatus}"
-									itemValue="#{estatus.valorEstatus}" />
-
-							</p:selectOneMenu>
-
-						</div>
-
-
-					</div>
-				</div>
-
-				<div class="form-group">
-					<div class="row">
-
-
-						<!-- Fecha Inicial  -->
-						<div class="col-md-4">
-							<p:outputLabel styleClass="bloque" value="Fecha Alta:" />
-							<p:calendar id="fc_fechaIncial" styleClass="requerido"
-								pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
-								yearRange="c-100:c+100" locale="es"
-								disabled="#{empty eventoCapacitacionBean.tipoDatoFechas}"
-								placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-								readonlyInput="true" navigator="true" value="" showOn="button">
-								<p:ajax event="dateSelect" process="@this"
-									update="fc_fechaIncial"
-									listener="#{eventoCapacitacionBean.validarFechas()}" />
-							</p:calendar>
-
-						</div>
-
-						<div class="col-md-4 col-xs-12">
-
-							<p:outputLabel styleClass="bloque" value="Cupo Límite:" />
-							<p:selectOneMenu
-								value="#{planBean.filtroPlan.catModalidadPlanPrograma}"
-								converter="catalogoComunConverter" styleClass="col-xs-12">
-								<p:ajax event="change" process="@this" />
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" />
-								<f:selectItems value="#{planBean.catModalidadPlan}"
-									var="modalidad" itemLabel="#{modalidad.nombre}"
-									itemValue="#{modalidad}" />
-							</p:selectOneMenu>
-
-						</div>
-
-
-					</div>
-				</div>
-	
+			</div>
+		</div>
 		
-
 		
+		
+		<div class="form-group">
+			<div class="row">
+
+				<div class="col-md-4 col-xs-12">
+
+					<p:outputLabel styleClass="bloque requerido" value="Tipo de matriculación:" />
+					<p:selectOneMenu id="tipoMatriculacion"
+						value="#{convocatoriasBean.convocatoriaParamNueva.altaEstatus}"
+						styleClass="col-xs-12" required="true"
+						requiredMessage="El estatus es obligatorio.">
+						<p:ajax event="change" process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="#{null}" />
+						<f:selectItems value="#{convocatoriasBean.estatusLista}"
+							var="modalidad" itemLabel="#{modalidad.nombreEstatus}"
+							itemValue="#{modalidad.valorEstatus}" />
+
+					</p:selectOneMenu>
+					<p:message for="convocatoria" display="text" />
+				</div>
+				
+				<div class="col-md-4 col-xs-12">
+
+					<p:outputLabel styleClass="bloque requerido" value="Plan:" />
+					<p:selectOneMenu id="plan"
+						value="#{convocatoriasBean.convocatoriaParamNueva.altaEstatus}"
+						styleClass="col-xs-12" required="true"
+						requiredMessage="El estatus es obligatorio.">
+						<p:ajax event="change" process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="#{null}" />
+						<f:selectItems value="#{convocatoriasBean.estatusLista}"
+							var="modalidad" itemLabel="#{modalidad.nombreEstatus}"
+							itemValue="#{modalidad.valorEstatus}" />
+
+					</p:selectOneMenu>
+					<p:message for="tipoInscripcion" display="text" />
+				</div>
+				
+				<div class="col-md-4 col-xs-12">
+
+					<p:outputLabel styleClass="bloque requerido" value="Programa:" />
+					<p:selectOneMenu id="programa"
+						value="#{convocatoriasBean.convocatoriaParamNueva.altaEstatus}"
+						styleClass="col-xs-12" required="true"
+						requiredMessage="El estatus es obligatorio.">
+						<p:ajax event="change" process="@this" />
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="#{null}" />
+						<f:selectItems value="#{convocatoriasBean.estatusLista}"
+							var="modalidad" itemLabel="#{modalidad.nombreEstatus}"
+							itemValue="#{modalidad.valorEstatus}" />
+
+					</p:selectOneMenu>
+					<p:message for="procesoInscripcion" display="text" />
+				</div>
+
+			</div>
+		</div>
+
+
+
+		<div class="form-group">
+			<div class="row">
+
+				<div class="col-md-12 text-right">
+
+					<p:commandButton value="Cancelar" process="@this" update="@form"
+						action="#{convocatoriasBean.cancelar}" ajax="true"
+						styleClass="btn btn-default" />
+
+					<p:commandButton value="Limpiar campos" process="@this"
+						update="@form" action="#{convocatoriasBean.limpiarCampos}"
+						ajax="true" styleClass="btn btn-default" />
+
+
+					<p:commandButton id="btnBusquedaAvas" process="@form" ajax="true"
+						update="@form" styleClass="btn btn-primary pull-right"
+						action="#{convocatoriasBean.altaConvocatorias}" value="Guardar" />
+
+
+
+				</div>
+			</div>
+		</div>
+
+
 	</p:panel>
-	
+
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccion8" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="Ingrese los datos marcados como obligatorios." />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccion8').hide()" />
+			</div>
+		</div>
+	</p:dialog>
+
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccion9" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="Convocatoria generada exitosamente." />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccion9').hide()" />
+			</div>
+		</div>
+	</p:dialog>
+
 </ui:composition>

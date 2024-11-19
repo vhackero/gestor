@@ -20,8 +20,9 @@
 						value="Nombre:" rendered="true" />
 					<p:inputText id="consulNombreConvocatoria"
 						value="#{convocatoriasBean.convocatoriaParamConsulta.consulNombreConvocatoria}"
-						styleClass="form-control" />
-						
+						styleClass="form-control"  required="true"
+                				 requiredMessage="El campo es requerido"/>
+						<p:message for="consulNombreConvocatoria" display="text" />
 
 				</div>
 
@@ -72,12 +73,13 @@
 											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 											readonlyInput="true" navigator="true"
 											value="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura}"
-											showOn="button">
+											showOn="button"  required="true"
+                							requiredMessage="La fecha de cierre es obligatoria.">
 									<p:ajax event="dateSelect" process="@this"
 											update="fc_fechaFinal"
-											listener="#{eventoCapacitacionBean.validarFechas()}" />
+											listener="#{convocatoriasBean.validarFechas()}" />
 								</p:calendar>
-
+ 								<p:message for="fc_fechaInicial" display="text" />
 							</div>
 							<!-- Fecha Final -->
 							<div class="col-md-4 col-xs-12">
@@ -91,9 +93,11 @@
 											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 											readonlyInput="true" navigator="true"
 											value="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaCierre}"
-											showOn="button">
+											showOn="button"  required="true"
+                							requiredMessage="La fecha de cierre es obligatoria.">
 									<p:ajax event="dateSelect" process="@this" />
 								</p:calendar>
+								 <p:message for="fc_fechaFinal" display="text" />
 							</div>
 
 
@@ -209,12 +213,14 @@
 								target="#{convocatoriasBean.elminarConvo}" />
 						</p:commandButton>
 						
-						<p:commandButton ajax="true" update="@form"
-							action="#{convocatoriasBean.editarConvocatoria}"
-							icon="fa fa-pencil" styleClass="btn-icon btn btn-default">
+						<p:commandButton id="edita" process="@this"
+							styleClass="btn-icon btn btn-default"
+							icon="fa fa-pencil" 
+							 oncomplete="PF('editaConvocatoria2').show()">
 							
 						</p:commandButton>
 						
+					
 						
 					</p:column>
 					
