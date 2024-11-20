@@ -1,5 +1,6 @@
 package mx.gob.sedesol.basegestor.model.repositories.admin;
 
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import javax.persistence.Query;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.SelectImportarDTO;
@@ -105,9 +107,10 @@ public class UsuariosImportarRepo implements IUsuariosImportarRepo {
 		return listaPersonas;
 	}
 
+	@Transactional
 	@Override
 	public void insertAspirante(String idPersonaRegistrada, String programaEducativo, String idConvocatoria) {
-		String consulta = "INSERT INTO tbl_persona_aspirante (id_persona_aspirante, id_persona, id_plan, id_convocatoria) VALUES (NULL, ?, ?, ?)";
+		String consulta = "INSERT INTO tbl_persona_aspirante ( id_persona, id_plan, id_convocatoria) VALUES ( ?, ?, ?)";
 		entityManager.createNativeQuery(consulta).setParameter(1, idPersonaRegistrada)
 				.setParameter(2, programaEducativo).setParameter(3, idConvocatoria).executeUpdate();
 	}
@@ -132,11 +135,28 @@ public class UsuariosImportarRepo implements IUsuariosImportarRepo {
 	                      "ON rcpp.id_convocatoria = tc.convocatoria_id AND rcpp.id_plan = :plan_id " +
 	                      "WHERE tc.convocatoria_id = :convocatoria_id";
 	    
-	    Integer resultado = (Integer) entityManager.createNativeQuery(consulta)
-	            .setParameter("plan_id", planId)
-	            .setParameter("convocatoria_id", convocatoriaId)
-	            .getSingleResult();
+		Query query = entityManager.createNativeQuery(consulta);
+		
+		String[] partes = planId.split("\\.");
+		Integer plan = Integer.parseInt(partes[0]);
+	
 
+		query.setParameter("plan_id", plan);
+		
+		String[] partes2 = convocatoriaId.split("\\.");		
+		Integer convocatoria2 = Integer.parseInt(partes2[0]);
+
+		
+		query.setParameter("convocatoria_id", convocatoria2);
+		Integer resultado = 0;
+		
+		List<BigInteger> lista = query.getResultList();
+		
+		if (!lista.isEmpty()) {
+			 BigInteger rel = lista.get(0);
+			 resultado = rel.intValue();
+		}
+		
 	    return resultado == 1;
 	}
 

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="breadcrumb">
+		<li>Inscripción</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<f:event type="preRenderView" listener="#{inscripcionBean.init}" />
+		<h:form id="mainForm">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()" onsuccess="PF('dialogLayout').hide()" />
+
+			<h1>
+				<p:outputLabel styleClass="h1" value="Inscripción" />
+			</h1>
+
+			<p:panel id="pnlEditEjeComp" header="Inscripción">
+				<div class="row flexCentrarXY" style="align-items: flex-end">
+					<div class="col-md-3 col-xs-12">
+						<h:outputLabel value="Plan" styleClass="bloque" />
+						<h:outputText value="#{inscripcionBean.infoPersona.plan}" />
+					</div>
+
+					<div class="col-md-6 col-xs-12">
+						<h:outputLabel value="Matricula" styleClass="bloque" />
+						<h:outputText value="#{inscripcionBean.infoPersona.nombreUsuario}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<p:dataTable id="tblEditaComp"
+								value="#{inscripcionBean.listadatosMaterias}"
+								tableStyleClass="table" var="inscripcion" paginator="false"
+								emptyMessage="No hay materias disponibles para inscribir">
+
+								<p:column styleClass="text-center">
+									<f:facet name="header">
+										<h:outputText value="Curso/Asignatura" />
+									</f:facet>
+									<h:outputText value="#{inscripcion.nombreTentativoPrograma}" />
+								</p:column>
+
+								<p:column styleClass="text-center">
+									<f:facet name="header">
+										<h:outputText value="Semestre" />
+									</f:facet>
+									<h:outputText value="#{inscripcion.estructura}" />
+								</p:column>
+
+								<p:column styleClass="text-center">
+									<f:facet name="header">
+										<h:outputText value="Bloque" />
+									</f:facet>
+									<h:outputText value="#{inscripcion.subestructura}" />
+								</p:column>
+
+								<p:column headerText="Seleccionar" styleClass="text-center">
+								    <h:outputText value="Obligatoria" rendered="#{inscripcion.tipoPrograma eq 'Obligatoria'}" />
+								    <p:selectBooleanCheckbox value="#{inscripcion.check}" rendered="#{inscripcion.tipoPrograma ne 'Obligatoria'}" />
+								</p:column>
+
+							</p:dataTable>
+						</div>
+					</div>
+				</div>
+
+				<!-- Sección de términos y condiciones controlada por mostrarTerminosCondiciones -->
+				<h:panelGroup rendered="#{inscripcionBean.mostrarTerminosCondiciones}">
+					<div class="row" style="text-align: center; margin-top: 20px;">
+					    <p:selectBooleanCheckbox id="chkTerminos" value="#{inscripcionBean.aceptaTerminos}">
+					        <f:ajax event="change" render="finalizarBtn" />
+					    </p:selectBooleanCheckbox>
+					    <h:outputText value=" Acepto los " />
+					    <h:outputLink value="#{inscripcionBean.terminosCondiciones}" target="_blank">términos y condiciones</h:outputLink>
+					</div>
+				</h:panelGroup>
+
+				<div class="row" style="text-align: center; margin-top: 20px;">
+				    <div class="col-md-6 col-xs-12">
+				        <p:commandButton value="Cancelar"
+				            action="#{inscripcionBean.cancelar}"
+				            ajax="false" immediate="true" process="@form"
+				            styleClass="btn btn-default" />
+				    </div>
+				
+				    <div class="col-md-6 col-xs-12">
+						<p:commandButton id="finalizarBtn" style="width: 200px;"
+						    value="Finalizar inscripción"
+						    action="#{inscripcionBean.finalizarInscripcion}"
+						    ajax="false" process="@form"
+						    styleClass="btn btn-primary"/>
+				    </div>
+				</div>
+			</p:panel>
+		</h:form>
+		
+			<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccion" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque" value="#{inscripcionBean.mensaje}" />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccion').hide()" />
+			</div>
+		</div>
+	</p:dialog>
+	
+	</ui:define>
+
+
+</ui:composition>

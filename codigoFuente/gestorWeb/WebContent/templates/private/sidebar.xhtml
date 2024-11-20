@@ -516,6 +516,31 @@
 										</h:commandLink></li>
 								</sec:authorize>
 							</ui:fragment>
+							
+
+							
+							<!-- ITTIVA 666-->
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('MIS_DISPERSIONES')}">
+								<sec:authorize access="hasPermission(null, 'MIS_DISPERSIONES') ">
+									<li><h:commandLink
+											action="#{menuGestorBean.navegaMisDispersiones}" title="Dispersiones">
+											<i class="fa fa-solid fa-id-card"></i>
+											<span class="m-label">Dispersiones</span>
+
+							<!-- ITTIVA 666-->
+							<ui:fragment
+								rendered="#{menuGestorBean.rolTienePermiso('INSCRIPCION')}">
+								<sec:authorize access="hasPermission(null, 'INSCRIPCION') ">
+									<li><h:commandLink
+											action="#{menuGestorBean.navegaInscripcion}" title="Inscripcion">
+											<i class="fa fa-solid fa-id-card"></i>
+											<span class="m-label">Inscripcion</span>
+
+
+										</h:commandLink></li>
+								</sec:authorize>
+							</ui:fragment>
 
 
 							<ui:fragment
