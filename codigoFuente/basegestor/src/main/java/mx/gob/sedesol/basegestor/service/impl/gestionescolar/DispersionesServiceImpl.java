@@ -1,16 +1,37 @@
 package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Dispersiones;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IDispersionesRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.DispersionesService;
 
 @Service("dispersionesService")
 public class DispersionesServiceImpl implements DispersionesService{
+	
+	
+	@Autowired
+	private IDispersionesRepository iDispersionesRepository;
+	
+	
+	
+	@Override
+	public List<ProcesosInscripcion> consultarProcesoInscripcion() {
+		
+		List<ProcesosInscripcion> lista = iDispersionesRepository.consultarProcesoInscripcion();
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<ProcesosInscripcion>();
+		}
+		return lista;
+	}
 
 	
 	
