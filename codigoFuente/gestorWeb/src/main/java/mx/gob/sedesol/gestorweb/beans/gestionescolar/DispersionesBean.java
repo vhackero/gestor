@@ -11,8 +11,11 @@ import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EstatusDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConvocatoriaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.DispersionesService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionesService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 
 @ManagedBean
@@ -30,10 +33,15 @@ public class DispersionesBean extends BaseBean {
 
 	@ManagedProperty("#{convocatoriaService}")
 	private ConvocatoriaService convocatoriaService;
+	
+	@ManagedProperty("#{inscripcionesService}")
+	private InscripcionesService inscripcionesService;
 
 	////////////
 	private List<EstatusDTO> estatusLista;
 	List<Convocatoria> listaConvocatoria;
+	List<TipoProceso> listaTipoProceso;
+	List<ProcesosInscripcion> listaProcesosInscripcion;
 
 	// REDIRECCION OPCIONES
 	private String paginaActual;
@@ -56,10 +64,13 @@ public class DispersionesBean extends BaseBean {
 		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/nuevaDispersion.xhtml";
 		
 		consultarConvocatorias();
+		consultaTipoProceso();
 
 		return null;
 
 	}
+	
+	
 
 	///////////////////////////////////
 
@@ -68,6 +79,23 @@ public class DispersionesBean extends BaseBean {
 		listaConvocatoria = convocatoriaService.consultarConvocatorias();
 
 		logger.info("Termina consulta lista convocatorias select");
+
+	}
+	
+	
+	public void consultaTipoProceso() throws Exception {
+
+		listaTipoProceso = inscripcionesService.consultarTipoProceso();
+
+		logger.info("Termina consulta listaTipoProceso select");
+
+	}
+	
+	public void consultarProcesoInscripcion() throws Exception {
+
+		listaProcesosInscripcion = dispersionesService.consultarProcesoInscripcion();
+
+		logger.info("Termina consulta listaProcesosInscripcion select");
 
 	}
 	
@@ -107,5 +135,31 @@ public class DispersionesBean extends BaseBean {
 	public void setPaginaActual(String paginaActual) {
 		this.paginaActual = paginaActual;
 	}
+
+	public InscripcionesService getInscripcionesService() {
+		return inscripcionesService;
+	}
+
+	public void setInscripcionesService(InscripcionesService inscripcionesService) {
+		this.inscripcionesService = inscripcionesService;
+	}
+
+	public List<TipoProceso> getListaTipoProceso() {
+		return listaTipoProceso;
+	}
+
+	public void setListaTipoProceso(List<TipoProceso> listaTipoProceso) {
+		this.listaTipoProceso = listaTipoProceso;
+	}
+
+	public List<ProcesosInscripcion> getListaProcesosInscripcion() {
+		return listaProcesosInscripcion;
+	}
+
+	public void setListaProcesosInscripcion(List<ProcesosInscripcion> listaProcesosInscripcion) {
+		this.listaProcesosInscripcion = listaProcesosInscripcion;
+	}
+	
+	
 
 }
