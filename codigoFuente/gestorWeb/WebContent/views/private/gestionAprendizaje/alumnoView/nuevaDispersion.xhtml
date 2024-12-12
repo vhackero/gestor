@@ -44,7 +44,7 @@
 							itemValue="#{null}" />
 						<f:selectItems value="#{dispersionesBean.listaTipoProceso}"
 							var="modalidad" itemLabel="#{modalidad.nombre}"
-							itemValue="#{modalidad.nombre}" />
+							itemValue="#{modalidad.idProceso}" />
 					</p:selectOneMenu>
 					
 				</div>
@@ -53,19 +53,15 @@
 
 					<p:outputLabel styleClass="bloque requerido" value="Proceso de inscripción:" />
 					<p:selectOneMenu id="procesoInscripcion"
-						value="#{convocatoriasBean.convocatoriaParamNueva.altaEstatus}"
-						styleClass="col-xs-12" required="true"
-						requiredMessage="El estatus es obligatorio.">
+						styleClass="col-xs-12">
 						<p:ajax event="change" process="@this" />
 						<f:selectItem
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
-						<f:selectItems value="#{convocatoriasBean.estatusLista}"
-							var="modalidad" itemLabel="#{modalidad.nombreEstatus}"
-							itemValue="#{modalidad.valorEstatus}" />
-
+						<f:selectItems value="#{dispersionesBean.listaProcesosInscripcion}"
+							var="modalidad" itemLabel="#{modalidad.nombre}"
+							itemValue="#{modalidad.idProcesoInscripcion}" />
 					</p:selectOneMenu>
-					<p:message for="procesoInscripcion" display="text" />
 				</div>
 
 			</div>
@@ -79,20 +75,16 @@
 				<div class="col-md-4 col-xs-12">
 
 					<p:outputLabel styleClass="bloque requerido" value="Tipo de matriculación:" />
-					<p:selectOneMenu id="tipoMatriculacion"
-						value="#{convocatoriasBean.convocatoriaParamNueva.altaEstatus}"
-						styleClass="col-xs-12" required="true"
-						requiredMessage="El estatus es obligatorio.">
+					<p:selectOneMenu id="tipoMatricula"
+						styleClass="col-xs-12">
 						<p:ajax event="change" process="@this" />
 						<f:selectItem
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
-						<f:selectItems value="#{convocatoriasBean.estatusLista}"
-							var="modalidad" itemLabel="#{modalidad.nombreEstatus}"
-							itemValue="#{modalidad.valorEstatus}" />
-
+						<f:selectItems value="#{dispersionesBean.listaTipoMatriculacion}"
+							var="modalidad" itemLabel="#{modalidad.nombre}"
+							itemValue="#{modalidad.idTipoMatriculacion}" />
 					</p:selectOneMenu>
-					<p:message for="convocatoria" display="text" />
 				</div>
 				
 				<div class="col-md-4 col-xs-12">

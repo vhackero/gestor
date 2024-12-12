@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Dispersiones;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoMatriculacion;
 
 @Repository
 public class DispersionesRepository implements IDispersionesRepository {
@@ -54,6 +55,42 @@ public class DispersionesRepository implements IDispersionesRepository {
 		ProcesosInscripcion regresa = new ProcesosInscripcion();
 		
 		regresa.setIdProcesoInscripcion((Integer) obj[0]);
+		regresa.setNombre(obj[1].toString());
+	
+		return regresa;
+	}
+	
+	
+	@Override
+	public List<TipoMatriculacion> consultarTipoMatriculacion() {
+
+		List<TipoMatriculacion> lista = new ArrayList<TipoMatriculacion>();
+
+		String consulta = "SELECT ctp.id_tipo_matriculacion, ctp.nombre FROM cat_tipo_matriculacion ctp WHERE ctp.estatus = 1";
+
+		Query query = entityManager.createNativeQuery(consulta);
+
+		List<Object[]> listaQuery = query.getResultList();
+
+		if (!listaQuery.isEmpty()) {
+			for (Object[] obj : listaQuery) {
+
+				TipoMatriculacion dispersiones = mapeo2(obj);
+				lista.add(dispersiones);
+
+			}
+		}
+
+		return lista;
+
+	}
+	
+	
+	private TipoMatriculacion mapeo2(Object[] obj) {
+
+		TipoMatriculacion regresa = new TipoMatriculacion();
+		
+		regresa.setIdTipoMatriculacion((Integer) obj[0]);
 		regresa.setNombre(obj[1].toString());
 	
 		return regresa;
