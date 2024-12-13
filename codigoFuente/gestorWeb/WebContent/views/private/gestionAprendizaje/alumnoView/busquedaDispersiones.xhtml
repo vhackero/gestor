@@ -4,7 +4,8 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:p="http://primefaces.org/ui">
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
 
 	<ui:define name="breadcrumb">
 		<li>Dispersiones</li>
@@ -30,18 +31,18 @@
 
 				<div class="row">
 
-					<div class="col-md-4 col-xs-12">
+
+					<sec:authorize access="hasPermission(null,'DISPER_NUEVA')">
 
 
+						<p:commandButton value="Nuevo proceso de dispersión"
+							style="width: 250px;"
+							action="#{dispersionesBean.navegaNuevoConvocatoria}" ajax="false"
+							immediate="true" process="@this" styleClass="btn btn-primary" />
 
-						<p:commandButton value="Nuevo proceso de dispersión" style="width: 250px;"
-							action="#{dispersionesBean.navegaNuevoConvocatoria}"
-							ajax="false" immediate="true" process="@this"
-							styleClass="btn btn-primary" />
+					</sec:authorize>
 
-					</div>
-
-					<div class="col-md-4 col-xs-12">
+					<sec:authorize access="hasPermission(null,'DISPER_CONSUL')">
 
 						<p:commandButton style="width: 250px;"
 							value="Consultar dispersión"
@@ -49,26 +50,24 @@
 							ajax="false" immediate="true" process="@this"
 							styleClass="btn btn-primary" />
 
-					</div>
+					</sec:authorize>
 
-					<p:commandButton style="width: 250px;"
-						value="Dispersión"
-						action="#{convocatoriasBean.navegaConsultaTablero}" ajax="false"
-						immediate="true" process="@this" styleClass="btn btn-primary" />
+					<sec:authorize access="hasPermission(null,'DISPERSION')">
+
+						<p:commandButton style="width: 250px;" value="Dispersión"
+							action="#{convocatoriasBean.navegaConsultaTablero}" ajax="false"
+							immediate="true" process="@this" styleClass="btn btn-primary" />
+
+					</sec:authorize>
 
 				</div>
 
 
 			</div>
-			
-			
-			
-			<div >
 
 
 
-
-			</div>
+			<div></div>
 
 
 			<!-- Incluir dinámicamente el archivo .xhtml basado en la propiedad 'paginaActual' -->
