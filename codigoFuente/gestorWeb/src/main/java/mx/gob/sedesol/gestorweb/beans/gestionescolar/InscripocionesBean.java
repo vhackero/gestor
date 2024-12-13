@@ -6,6 +6,7 @@ import java.util.List;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import javax.faces.bean.SessionScoped;
 
 import org.apache.log4j.Logger;
 
@@ -29,8 +30,9 @@ public class InscripocionesBean extends BaseBean {
 	private String procesoSeleccionada;
 	
 	private String planSeleccionada;
-
 	
+	private String nombreSeleccionado;
+
 	private String convocatoriaSeleccionada2;
 
 	/**
@@ -53,6 +55,8 @@ public class InscripocionesBean extends BaseBean {
 	List<TipoProceso> listaTipoProceso;
 	
 	List<TblPlan> listaPlanes;
+	
+	List<TipoProceso> listaNombres;
 
 	List<InscripcionesTableroResumen> listaTableResumen;
 	
@@ -121,8 +125,12 @@ public class InscripocionesBean extends BaseBean {
 	}
 	
 	public void consultarTableroResumen() throws Exception {
+		
 
 		listaTableResumen = new ArrayList<InscripcionesTableroResumen>();
+        tableroParamConsulta.setValueConvocatoriaEstatus(convocatoriaSeleccionada);
+        tableroParamConsulta.setConsulNivelEducativo(procesoSeleccionada);
+        tableroParamConsulta.setConsulNombreCorto(nombreSeleccionado);
 
 		listaTableResumen = inscripcionesService.consultarTableroResumen(tableroParamConsulta);
 
@@ -143,7 +151,16 @@ public class InscripocionesBean extends BaseBean {
 	}
 	
 	
-	
+    public void onSelectChange() {
+        if (convocatoriaSeleccionada != null && procesoSeleccionada != null) {
+            tableroParamConsulta.setValueConvocatoriaEstatus(convocatoriaSeleccionada);
+            tableroParamConsulta.setConsulNivelEducativo(procesoSeleccionada);
+            listaNombres = inscripcionesService.consultarNombre(tableroParamConsulta);
+            
+    		logger.info("Termina consulta listaNombres select");
+
+        }
+    }
 	
 	
 	
@@ -265,6 +282,18 @@ public class InscripocionesBean extends BaseBean {
 
 
 
+	public void setListaNombres(List<TipoProceso> listaNombres) {
+		this.listaNombres = listaNombres;
+	}
+	
+	
+	public List<TipoProceso> getListaNombres() {
+		return listaNombres;
+	}
+
+
+
+
 	public void setListaPlanes(List<TblPlan> listaPlanes) {
 		this.listaPlanes = listaPlanes;
 	}
@@ -297,6 +326,16 @@ public class InscripocionesBean extends BaseBean {
 
 	public void setListaTableResumen(List<InscripcionesTableroResumen> listaTableResumen) {
 		this.listaTableResumen = listaTableResumen;
+	}
+
+
+	public String getNombreSeleccionado() {
+		return nombreSeleccionado;
+	}
+
+
+	public void setNombreSeleccionado(String nombreSeleccionado) {
+		this.nombreSeleccionado = nombreSeleccionado;
 	}
 
 	

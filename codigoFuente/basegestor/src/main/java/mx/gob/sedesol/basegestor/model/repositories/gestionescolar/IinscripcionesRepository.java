@@ -20,5 +20,7 @@ public interface IinscripcionesRepository {
 	List<InscripcionesTableroResumen> consultarTableroResumen(ConvocatoriaParamConsulta tableroParamConsulta);
 	
 	List<InscripcionesConsultaResumen> consultarFiltros(ConvocatoriaParamConsulta tableroParamConsulta);
+
+	List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta);
  
 }

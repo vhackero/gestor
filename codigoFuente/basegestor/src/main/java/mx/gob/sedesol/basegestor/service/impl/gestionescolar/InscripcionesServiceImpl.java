@@ -34,9 +34,6 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 	private static final Logger logger = Logger.getLogger(InscripcionesServiceImpl.class);
 	
 	@Autowired
-	private IConvocatoriaRepository iConvocatoriaRepository;
-	
-	@Autowired
 	private IinscripcionesRepository iinscripcionesRepository;
 	
 	
@@ -62,6 +59,17 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		return lista;
 	}
 	
+	
+	@Override
+	public List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta) {
+		
+		List<TipoProceso> lista = iinscripcionesRepository.consultarNombre(tableroParamConsulta);
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<TipoProceso>();
+		}
+		return lista;
+	}
 	
 	@Override
 	public List<TblPlan> consultarPlan() {

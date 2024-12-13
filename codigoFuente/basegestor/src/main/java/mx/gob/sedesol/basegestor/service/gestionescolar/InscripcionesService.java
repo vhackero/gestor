@@ -28,9 +28,9 @@ public interface InscripcionesService extends CommonService<Convocatoria, Intege
 	
 	public List<InscripcionesConsultaResumen> consultarFiltros(ConvocatoriaParamConsulta tableroParamConsulta);
 	
-	 
-	
 	public void altaConvocatorias();
+
+	List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta);
 	 
 
 }

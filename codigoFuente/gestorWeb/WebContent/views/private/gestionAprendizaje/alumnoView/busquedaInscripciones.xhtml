@@ -4,7 +4,9 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:p="http://primefaces.org/ui">
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+	
 
 	<ui:define name="breadcrumb">
 		<li>Convocatorias</li>
@@ -51,10 +53,13 @@
 
 					</div>
 
-					<p:commandButton style="width: 300px;"
-						value="Consultar tablero resumen"
-						action="#{inscripocionesBean.navegaConsultaTablero}" ajax="false"
-						immediate="true" process="@this" styleClass="btn btn-primary" />
+						<sec:authorize access="hasPermission(null,'TABLERO_RESUMEN')">
+							<p:commandButton style="width: 300px;"
+								value="Consultar tablero resumen"
+								action="#{inscripocionesBean.navegaConsultaTablero}"
+								ajax="false" immediate="true" process="@this"
+								styleClass="btn btn-primary" />
+						</sec:authorize>
 
 				</div>
 

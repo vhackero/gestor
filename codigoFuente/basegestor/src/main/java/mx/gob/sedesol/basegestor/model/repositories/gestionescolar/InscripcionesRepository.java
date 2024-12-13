@@ -75,6 +75,34 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		return lista;
 
 	}
+	
+	@Override
+	public List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta) {
+
+		List<TipoProceso> lista = new ArrayList<TipoProceso>();
+
+		String consulta = "SELECT t.*\r\n"
+				+ "FROM tbl_procesos_inscripcion t\r\n"
+				+ "WHERE convocatoria_id = :id_convocatoria_selecionada AND id_tipo_proceso = :id_del_tipo_proceso AND id_categoria_proceso = 1";
+
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("id_convocatoria_selecionada", tableroParamConsulta.getValueConvocatoriaEstatus());
+		query.setParameter("id_del_tipo_proceso", tableroParamConsulta.getConsulNivelEducativo());
+
+		List<Object[]> listaQuery = query.getResultList();
+
+		if (!listaQuery.isEmpty()) {
+			for (Object[] obj : listaQuery) {
+
+				TipoProceso convocatoria = mapeo(obj);
+				lista.add(convocatoria);
+
+			}
+		}
+
+		return lista;
+
+	}
 
 	@Override
 	public List<InscripcionesTableroResumen> consultarTableroResumen(ConvocatoriaParamConsulta tableroParamConsulta) {
@@ -87,10 +115,16 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 				+ "                                                              INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = ti.idprograma and ti.idplan = fd.id_plan\r\n"
 				+ "                                                              INNER JOIN tbl_planes tp ON tp.id_plan = ti.idplan\r\n"
 				+ "                                                              INNER JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion\r\n"
-				+ "WHERE   (  tpi.id_categoria_proceso = 1 )\r\n"
+				+ "WHERE tpi.convocatoria_id = :id_convocatoria_selecionada AND tpi.id_tipo_proceso = :id_del_tipo_proceso  AND (ti.fecha_registro >= tpi.fecha_inicio AND ti.fecha_registro <= tpi.fecha_fin) AND (tpi.proceso_inscripcion_id = :id_del_nombre_selecionado AND tpi.id_categoria_proceso = 1 )\r\n"
 				+ "group by rpi.id_programa";
 
 		Query query = entityManager.createNativeQuery(consulta);
+		
+		query.setParameter("id_convocatoria_selecionada", tableroParamConsulta.getValueConvocatoriaEstatus());
+		query.setParameter("id_del_tipo_proceso", tableroParamConsulta.getConsulNivelEducativo());
+		query.setParameter("id_del_nombre_selecionado", tableroParamConsulta.getConsulNombreCorto());
+
+
 
 		List<Object[]> listaQuery = query.getResultList();
 
