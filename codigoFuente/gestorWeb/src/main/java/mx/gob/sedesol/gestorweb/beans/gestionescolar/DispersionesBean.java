@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EstatusDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoMatriculacion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConvocatoriaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.DispersionesService;
@@ -42,7 +43,8 @@ public class DispersionesBean extends BaseBean {
 	List<Convocatoria> listaConvocatoria;
 	List<TipoProceso> listaTipoProceso;
 	List<ProcesosInscripcion> listaProcesosInscripcion;
-
+	List<TipoMatriculacion> listaTipoMatriculacion;
+	
 	// REDIRECCION OPCIONES
 	private String paginaActual;
 
@@ -65,6 +67,8 @@ public class DispersionesBean extends BaseBean {
 		
 		consultarConvocatorias();
 		consultaTipoProceso();
+		consultarProcesoInscripcion();
+		consultarTipoMatriculacion();
 
 		return null;
 
@@ -96,6 +100,14 @@ public class DispersionesBean extends BaseBean {
 		listaProcesosInscripcion = dispersionesService.consultarProcesoInscripcion();
 
 		logger.info("Termina consulta listaProcesosInscripcion select");
+
+	}
+	
+	public void consultarTipoMatriculacion() throws Exception {
+
+		listaTipoMatriculacion = dispersionesService.consultarTipoMatriculacion();
+
+		logger.info("Termina consulta listaTipoMatriculacion select");
 
 	}
 	
@@ -158,6 +170,14 @@ public class DispersionesBean extends BaseBean {
 
 	public void setListaProcesosInscripcion(List<ProcesosInscripcion> listaProcesosInscripcion) {
 		this.listaProcesosInscripcion = listaProcesosInscripcion;
+	}
+
+	public List<TipoMatriculacion> getListaTipoMatriculacion() {
+		return listaTipoMatriculacion;
+	}
+
+	public void setListaTipoMatriculacion(List<TipoMatriculacion> listaTipoMatriculacion) {
+		this.listaTipoMatriculacion = listaTipoMatriculacion;
 	}
 	
 	

@@ -8,7 +8,7 @@
 	xmlns:f="http://java.sun.com/jsf/core">
 
 
-	<p:panel header="Consulta Convocatoria">
+	<p:panel header="Consulta Convocatoria" rendered="#{convocatoriasBean.mostrarConsultaConvocatoria}">
 
 
 		<div class="form-group">
@@ -149,13 +149,9 @@
 				</div>
 			</div>
 		</div>
-
 		
-
-	</p:panel>
-	
-	
-	<div class="row">
+		
+		<div class="row" >
 			<div class="col-md-12">
 				<p:dataTable id="id"
 					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
@@ -213,12 +209,14 @@
 								target="#{convocatoriasBean.elminarConvo}" />
 						</p:commandButton>
 						
-						<p:commandButton id="edita" process="@this"
-							styleClass="btn-icon btn btn-default"
-							icon="fa fa-pencil" 
-							 oncomplete="PF('editaConvocatoria2').show()">
-							
+						<p:commandButton ajax="true" update="@form"
+							action="#{convocatoriasBean.editarConvocatoria}"
+							icon="fa fa-pencil" styleClass="btn-icon btn btn-default">
+							<f:setPropertyActionListener value="#{convo}"
+								target="#{convocatoriasBean.elminarConvo}" />
 						</p:commandButton>
+						
+						
 						
 					
 						
@@ -229,6 +227,235 @@
 				</p:dataTable>
 			</div>
 		</div>
+
+		
+
+	</p:panel>
+	
+	
+	
+		
+		
+		<p:panel header="Editar Convocatoria" rendered="#{convocatoriasBean.mostrarNuevaConvocatoria}">
+	
+	<div class="form-group">
+					<div class="row">
+
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque requerido" for="altaNombreConvocatoria"
+								value="Nombre de la convocatoria:" rendered="true" />
+							<p:inputText id="altaNombreConvocatoria"
+								value="#{convocatoriasBean.convocatoriaParamNueva.altaNombreConvocatoria}"
+								styleClass="form-control  " 
+								 required="true"
+                				 requiredMessage="El campo es requerido"
+                				  widgetVar="nombreConvocatoriaInput"
+      							  onkeyup="PF('nombreCortoInput').jq.val(this.value.substring(0, 3) + ' ' + new Date().getFullYear() + '-1');" />
+                				
+ 							<p:message for="altaNombreConvocatoria" display="text" />
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque requerido" for="altaNombreCorto"
+								value="Nombre corto:" rendered="true" />
+							<p:inputText id="altaNombreCorto"
+								value="#{convocatoriasBean.convocatoriaParamNueva.altaNombreCorto}"
+								styleClass="form-control" required="true"
+                				 requiredMessage="El campo es requerido"  widgetVar="nombreCortoInput" /> 
+ 							<p:message for="altaNombreConvocatoria" display="text" />
+
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque" for="altaDescripcion"
+								value="Descripción:" rendered="true" />
+							<p:inputTextarea  id="altaDescripcion"
+											value="#{convocatoriasBean.convocatoriaParamNueva.altaDescripcion}"
+											styleClass="form-control"  
+											 rows="5" cols="30" 
+			                    			 autoResize="false" />
+
+						</div>
+
+
+
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<div class="row">
+
+
+
+						<div class="col-md-4">
+								<p:outputLabel styleClass="bloque requerido"
+											   value="Fecha de apertura:" />
+								<p:calendar id="fc_fechaInicialAlta" 
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											yearRange="c-100:c+100" locale="es"
+											
+											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											readonlyInput="true" navigator="true"
+											value="#{convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
+											showOn="button" required="true"
+                							requiredMessage="La fecha de cierre es obligatoria.">
+									<p:ajax event="dateSelect" process="@this"
+											update="fc_fechaFinalAlta"
+											listener="#{convocatoriasBean.validarFechasAlta()}" />
+								</p:calendar>
+								<p:message for="fc_fechaInicialAlta" display="text" />
+
+							</div>
+							<!-- Fecha Final -->
+							<div class="col-md-4">
+								<p:outputLabel styleClass="bloque requerido"
+											   value="Fecha de cierre:" />
+								<p:calendar id="fc_fechaFinalAlta" 
+											mindate="#{convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
+											disabled="#{empty convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											yearRange="c-100:c+100" locale="es"
+											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											readonlyInput="true" navigator="true"
+											value="#{convocatoriasBean.convocatoriaParamNueva.altaFechaCierre}"
+											showOn="button"   required="true"
+                							requiredMessage="La fecha de cierre es obligatoria.">
+									<p:ajax event="dateSelect" process="@this" />
+								</p:calendar>
+								 <p:message for="fc_fechaFinalAlta" display="text" />
+							</div>
+
+
+							<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque requerido" value="Nivel educativo:" />
+							
+							<p:selectOneMenu  value="#{convocatoriasBean.convocatoriaParamNueva.altaNivelEducativo}" id="altaNivelEducativo" 
+								styleClass="col-xs-12" required="true" 
+                    			 requiredMessage="El nivel educativo es obligatorio.">
+                    			 
+								<p:ajax event="change" process="@this" />
+								
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" />
+								<f:selectItems value="#{convocatoriasBean.listaNivelEducativoCompl}"
+									var="modalidad" itemLabel="#{modalidad.nombreivelEnsenanza} > #{modalidad.nombrePlan} > #{modalidad.nombrePrograma}"
+									itemValue="#{modalidad}"  />
+
+							</p:selectOneMenu >
+							<p:message for="altaNivelEducativo" display="text" />
+						</div>
+
+
+					</div>
+				</div>
+
+
+				<div class="form-group">
+					<div class="row">
+
+
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque" for="altaUrl"
+								value="URL de la convocatoria(PDF):" rendered="true" />
+							<p:inputText id="altaUrl" value="#{convocatoriasBean.convocatoriaParamNueva.altaUrl}"
+								styleClass="form-control" />
+
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque requerido" value="Estatus:" />
+							<p:selectOneMenu id="altaEstatus"  value="#{convocatoriasBean.convocatoriaParamNueva.altaEstatus}"
+								styleClass="col-xs-12"  required="true" 
+                     requiredMessage="El estatus es obligatorio.">
+								<p:ajax event="change" process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" />
+								<f:selectItems value="#{convocatoriasBean.estatusLista}"
+									var="modalidad" itemLabel="#{modalidad.nombreEstatus}"
+									itemValue="#{modalidad.valorEstatus}" />
+
+							</p:selectOneMenu>
+							 <p:message for="altaEstatus" display="text" />
+						</div>
+
+
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="row">
+
+
+						<!-- Fecha Inicial  -->
+						<div class="col-md-4">
+							<p:outputLabel styleClass="bloque requerido" value="Fecha Alta:" />
+							<p:calendar id="fc_fechaFinal2" 
+											disabled="true"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											yearRange="c-100:c+100" locale="es"
+											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+											readonlyInput="true" navigator="true"
+											value="#{convocatoriasBean.convocatoriaParamNueva.altaFechaAlta}"
+											showOn="button"  >
+									<p:ajax event="dateSelect" process="@this" />
+									
+							
+							</p:calendar>
+						
+						</div>
+
+						<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque" for="altaDescripcion"
+								value="Cupo Límite:" rendered="true" />
+							<p:inputText id="altaCupoLimite"
+								value="#{convocatoriasBean.convocatoriaParamNueva.altaCupoLimite}"
+								styleClass="form-control" />
+
+						</div>
+						
+
+
+					</div>
+				</div>
+	
+		<div class="form-group">
+			<div class="row">
+
+				<div class="col-md-12 text-right">
+				
+					<p:commandButton value="Cancelar" process="@this"
+										 update="@form"
+										 action="#{convocatoriasBean.cancelar2}" ajax="true"
+										 styleClass="btn btn-default" />
+						
+						<p:commandButton value="Limpiar campos" process="@this"
+										 update="@form"
+										 action="#{convocatoriasBean.limpiarCampos}" ajax="true"
+										 styleClass="btn btn-default" />
+
+					
+						<p:commandButton id="btnBusquedaAvas2" process="@form" ajax="true"
+							update="@form" styleClass="btn btn-primary pull-right"
+							action="#{convocatoriasBean.altaConvocatorias}"
+							value="Guardar" />
+					
+					
+					
+				</div>
+			</div>
+		</div>
+
+		
+	</p:panel>
 
 	<p:dialog appendTo="@(body)" draggable="false" position="center"
 			resizable="false" closable="false" modal="true" width="600px"
@@ -329,5 +556,8 @@
 				</div>
 			</div>
 		</p:dialog>
+		
+	
+		
 
 </ui:composition>
