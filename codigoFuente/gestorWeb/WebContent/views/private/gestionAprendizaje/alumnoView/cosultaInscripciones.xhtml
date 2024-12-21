@@ -5,7 +5,8 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:f="http://java.sun.com/jsf/core">
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
 
 
 	<p:panel header="Consulta Inscripciones">
@@ -170,15 +171,15 @@
 						<f:facet name="header">
 							<h:outputText value="Fecha inicio" />
 						</f:facet>
-						<h:outputText value="#{convo.fecIni}" />
+						<h:outputText value="#{fn:substring(convo.fecIni, 0, 10)}"/>
 					</p:column>
 
 					<!-- Nombre Materia -->
 					<p:column styleClass="text-center">
-						<f:facet name="header">
-							<h:outputText value="Fecha fin" />
-						</f:facet>
-						<h:outputText value="#{convo.fecFin}" />
+					    <f:facet name="header">
+					        <h:outputText value="Fecha fin" />
+					    </f:facet>
+					    <h:outputText value="#{fn:substring(convo.fecFin, 0, 10)}" />
 					</p:column>
 
 					<!-- Nombre Materia -->
