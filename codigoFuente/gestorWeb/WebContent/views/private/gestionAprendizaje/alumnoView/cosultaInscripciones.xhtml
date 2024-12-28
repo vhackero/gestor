@@ -5,31 +5,26 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:f="http://java.sun.com/jsf/core">
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
 
 
 	<p:panel header="Consulta Inscripciones">
-
 		<div class="form-group">
 			<div class="row">
 
 				<!-- Convocatoria - Select -->
 				<div class="col-md-4 col-xs-12">
-					<p:outputLabel styleClass="bloque" for="convocatoria"
+					<p:outputLabel styleClass="requerido" for="convocatoria"
 						value="Convocatoria:" />
 					<p:selectOneMenu id="convocatoria"
-						value="#{inscripocionesBean.convocatoriaSeleccionada}">
-
-						<!-- Llamar al método cuando cambia la selección -->
-						<p:ajax event="change"
-							listener="#{inscripocionesBean.consultarConvocatorias}"
-							update="@form" />
+						value="#{inscripocionesBean.convocatoriaSeleccionada2}">
 
 						<!-- Opciones del Select -->
 						<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
 						<f:selectItems value="#{inscripocionesBean.listaConvocatoria}"
 							var="convocatoria" itemLabel="#{convocatoria.nombre}"
-							itemValue="#{convocatoria}" />
+							itemValue="#{convocatoria.convocatoriaId}" />
 					</p:selectOneMenu>
 				</div>
 				<!-- Tipo de proceso - Select -->
@@ -37,25 +32,21 @@
 					<p:outputLabel styleClass="bloque" for="tipoProceso"
 						value="Tipo de proceso:" />
 					<p:selectOneMenu id="tipoProceso"
-						value="#{inscripocionesBean.procesoSeleccionada}">
-
-						<!-- Llamar al método cuando cambia la selección -->
-						<p:ajax event="change"
-							listener="#{inscripocionesBean.consultaTipoProceso}"
-							update="@form" />
+						value="#{inscripocionesBean.procesoSeleccionada2}">
 
 						<!-- Opciones del Select -->
 						<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
 						<f:selectItems value="#{inscripocionesBean.listaTipoProceso}"
 							var="tipoProceso" itemLabel="#{tipoProceso.nombre}"
-							itemValue="#{tipoProceso}" />
+							itemValue="#{tipoProceso.idProceso}" />
 					</p:selectOneMenu>
 				</div>
 
 				<!-- Nombre - Input -->
 				<div class="col-md-4 col-xs-12">
 					<p:outputLabel styleClass="bloque" for="nombre" value="Nombre:" />
-					<p:inputText id="nombre" value="#{inscripocionesBean.tableroParamConsulta.consulNombreCorto}"
+					<p:inputText id="nombre"
+						value="#{inscripocionesBean.consultaParamConsulta.consulNombreCorto}"
 						styleClass="form-control" />
 				</div>
 
@@ -64,69 +55,50 @@
 			</div>
 		</div>
 
-	 
+
 
 		<div class="form-group">
 			<div class="row">
 
 
 
-<!-- 				Fecha inicio - Input -->
-<!-- 				<div class="col-md-4 col-xs-12"> -->
-<!-- 					<p:outputLabel styleClass="bloque" for="fechaInicio" -->
-<!-- 						value="Fecha inicio:" /> -->
-<!-- 					<p:calendar id="fechaInicio" value="#{procesoBean.fechaInicio}" -->
-<!-- 						pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true" -->
-<!-- 						readonlyInput="true" yearRange="c-100:c+100" -->
-<!-- 						placeholder="Seleccionar" /> -->
-<!-- 				</div> -->
-
-<!-- 				Fecha fin - Input -->
-<!-- 				<div class="col-md-4 col-xs-12"> -->
-<!-- 					<p:outputLabel styleClass="bloque" for="fechaFin" -->
-<!-- 						value="Fecha fin:" /> -->
-<!-- 					<p:calendar id="fechaFin" value="#{procesoBean.fechaFin}" -->
-<!-- 						pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true" -->
-<!-- 						readonlyInput="true" yearRange="c-100:c+100" -->
-<!-- 						placeholder="Seleccionar" /> -->
-<!-- 				</div> -->
-
-
-				<!-- Plan - Select -->
+				<!-- 			Fecha inicio - Input -->
 				<div class="col-md-4 col-xs-12">
-					<p:outputLabel styleClass="bloque" for="plan" value="Plan:" />
-					<p:selectOneMenu id="plan"
-						value="#{inscripocionesBean.planSeleccionada}">
-
-						<!-- Llamar al método cuando cambia la selección -->
-						<p:ajax event="change"
-							listener="#{inscripocionesBean.consultarPlan}" update="@form" />
-
-						<!-- Opciones del Select -->
-						<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-						<f:selectItems value="#{inscripocionesBean.listaPlanes}"
-							var="tblPlan" itemLabel="#{tblPlan.nombre}"
-							itemValue="#{tblPlan}" />
-					</p:selectOneMenu>
+					<p:outputLabel styleClass="bloque" for="fechaInicio"
+						value="Fecha inicio:" />
+					<p:calendar id="fechaInicio"
+						value="#{inscripocionesBean.fechaInicio}" pattern="dd/MM/yyyy"
+						locale="es" showOn="button" navigator="true" readonlyInput="true"
+						yearRange="c-100:c+100" placeholder="Seleccionar" />
 				</div>
+
+				<!-- 			Fecha fin - Input -->
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel styleClass="bloque" for="fechaFin"
+						value="Fecha fin:" />
+					<p:calendar id="fechaFin" value="#{inscripocionesBean.fechaFin}"
+						pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
+						readonlyInput="true" yearRange="c-100:c+100"
+						placeholder="Seleccionar" />
+				</div>
+
+
+
 
 			</div>
 		</div>
 
-	 
-		 
+
+
 
 		<div class="form-group">
 			<div class="row">
 
 				<div class="col-md-12 text-right">
 
-					<p:commandButton value="Cancelar" process="@this" update="@form"
-						action="#{convocatoriasBean.cancelar}" ajax="true"
-						styleClass="btn btn-default" />
 
 					<p:commandButton value="Limpiar campos" process="@this"
-						update="@form" action="#{convocatoriasBean.limpiarCampos}"
+						update="@form" action="#{inscripocionesBean.limpiarCampos}"
 						ajax="true" styleClass="btn btn-default" />
 
 
@@ -145,108 +117,137 @@
 
 	</p:panel>
 
+	<h:panelGroup id="tablaConsulta" >
+		<div class="row">
+			<div class="col-md-9 col-xs-12"></div>
+			<div class="col-md-3 col-xs-12">
+				<!-- Select para filtrar estatus -->
+				<p:outputLabel styleClass="bloque" for="filtroEstatus"
+					value="Estatus:" />
+				<p:selectOneMenu id="filtroEstatus"
+					value="#{inscripocionesBean.filtroEstatus}">
 
-	<div class="row">
-		<div class="col-md-12">
-			<p:dataTable id="id"
-				emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
-				reflow="true" value="#{inscripocionesBean.listaFiltrosResumen}"
-				var="convo" paginator="true" rows="10" paginatorPosition="bottom"
-				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
-				currentPageReportTemplate="({currentPage} de {totalPages})"
-				rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+					<p:ajax event="change"
+						listener="#{inscripocionesBean.onSelectChangeEstatus}"
+						process="@this" update="@form" />
 
-				<!-- Nombre Materia -->
-				<p:column styleClass="text-center">
-					<f:facet name="header">
-						<h:outputText value="Convocatoria" />
-					</f:facet>
-					<h:outputText value="#{convo.nombreConvocatoria}" />
-				</p:column>
-				
-						<!-- Nombre Materia -->
-				<p:column styleClass="text-center">
-					<f:facet name="header">
-						<h:outputText value="Nombre" />
-					</f:facet>
-					<h:outputText value="#{convo.nombre}" />
-				</p:column>
-				
-						<!-- Nombre Materia -->
-				<p:column styleClass="text-center">
-					<f:facet name="header">
-						<h:outputText value="Fecha inicio" />
-					</f:facet>
-					<h:outputText value="#{convo.fecIni}" />
-				</p:column>
-				
-						<!-- Nombre Materia -->
-				<p:column styleClass="text-center">
-					<f:facet name="header">
-						<h:outputText value="Fecha fin" />
-					</f:facet>
-					<h:outputText value="#{convo.fecFin}" />
-				</p:column>
-				
-						<!-- Nombre Materia -->
-				<p:column styleClass="text-center">
-					<f:facet name="header">
-						<h:outputText value="Tipo de proceso" />
-					</f:facet>
-					<h:outputText value="#{convo.tipoProceso}" />
-				</p:column>
-				
-						<!-- Nombre Materia -->
-				<p:column styleClass="text-center">
-					<f:facet name="header">
-						<h:outputText value="Estatus" />
-					</f:facet>
-					<h:outputText value="#{convo.estatus}" />
-				</p:column>
-				
-			 
-<!-- 				<p:column styleClass="text-center"> -->
-<!-- 					<f:facet name="header"> -->
-<!-- 						<h:outputText value="Nombre Corto" /> -->
-<!-- 					</f:facet> -->
-<!-- 					<h:outputText value="#{convo.nombreCorto}" /> -->
-<!-- 				</p:column> -->
-<!-- 				<p:column styleClass="text-center"> -->
-<!-- 					<f:facet name="header"> -->
-<!-- 						<h:outputText value="Fecha apertura" /> -->
-<!-- 					</f:facet> -->
-<!-- 					<h:outputText value="#{convo.fecha_Apertura}" /> -->
-<!-- 				</p:column> -->
-<!-- 				<p:column styleClass="text-center"> -->
-<!-- 					<f:facet name="header"> -->
-<!-- 						<h:outputText value="Fecha cierre" /> -->
-<!-- 					</f:facet> -->
-<!-- 					<h:outputText value="#{convo.fechaCierre}" /> -->
-<!-- 				</p:column> -->
-
-				<p:column styleClass="text-center">
-					<p:commandButton ajax="true" update="@form"
-						action="#{convocatoriasBean.eliminar}" icon="fa fa-trash"
-						styleClass="btn-icon btn btn-default">
-						<f:setPropertyActionListener value="#{convo}"
-							target="#{convocatoriasBean.elminarConvo}" />
-					</p:commandButton>
-
-					<p:commandButton ajax="true" update="@form"
-						action="#{convocatoriasBean.eliminar}" icon="fa fa-pencil"
-						styleClass="btn-icon btn btn-default">
-						<f:setPropertyActionListener value="#{convo}"
-							target="#{convocatoriasBean.elminarConvo}" />
-					</p:commandButton>
-
-
-				</p:column>
-
-
-
-			</p:dataTable>
+					<f:selectItem itemLabel="Todos" itemValue="" />
+					<f:selectItems value="#{inscripocionesBean.listaEstatus}"
+						var="estatus" itemLabel="#{estatus}" itemValue="#{estatus}" />
+					<p:ajax update="id" />
+				</p:selectOneMenu>
+			</div>
 		</div>
-	</div>
+
+
+		<div class="row">
+			<div class="col-md-12">
+				<p:dataTable id="id"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					reflow="true" value="#{inscripocionesBean.listaFiltrosResumen}"
+					var="convo" paginator="true" rows="10" paginatorPosition="bottom"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+					<!-- Nombre Materia -->
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Convocatoria" />
+						</f:facet>
+						<h:outputText value="#{convo.nombreConvocatoria}" />
+					</p:column>
+
+					<!-- Nombre Materia -->
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Nombre" />
+						</f:facet>
+						<h:outputText value="#{convo.nombre}" />
+					</p:column>
+
+					<!-- Nombre Materia -->
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Fecha inicio" />
+						</f:facet>
+						<h:outputText value="#{fn:substring(convo.fecIni, 0, 10)}"/>
+					</p:column>
+
+					<!-- Nombre Materia -->
+					<p:column styleClass="text-center">
+					    <f:facet name="header">
+					        <h:outputText value="Fecha fin" />
+					    </f:facet>
+					    <h:outputText value="#{fn:substring(convo.fecFin, 0, 10)}" />
+					</p:column>
+
+					<!-- Nombre Materia -->
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Tipo de proceso" />
+						</f:facet>
+						<h:outputText value="#{convo.tipoProceso}" />
+					</p:column>
+
+					<!-- Nombre Materia -->
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Estatus" />
+						</f:facet>
+						<h:outputText value="#{convo.estatus}" />
+					</p:column>
+
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Acciones" />
+						</f:facet>
+
+
+				        <p:commandButton icon="fa fa-trash" styleClass="btn-icon btn btn-default" 
+				            oncomplete="PF('dlgConfirmarEliminar').show()"
+				            actionListener="#{inscripocionesBean.prepararEliminar(convo)}" />
+
+						<p:commandButton ajax="true" update="@form"
+							action="#{inscripocionesBean.habilitarEdicion(convo)}"
+							icon="fa fa-pencil" styleClass="btn-icon btn btn-default" />
+
+
+					</p:column>
+
+
+
+				</p:dataTable>
+			</div>
+		</div>
+
+	</h:panelGroup>
+	
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+	    resizable="false" closable="false" modal="true" width="400px"
+	    widgetVar="dlgConfirmarEliminacion" header="Confirmación" dynamic="true">
+	    <h:form id="formEliminarConfirmar">
+	        <div class="form-group">
+	            <div class="row">
+	                <div class="col-md-12">
+	                    <h:outputText styleClass="bloque"
+	                        value="¿Está seguro de que desea eliminar este registro?" />
+	                </div>
+	            </div>
+	        </div>
+	        <div class="row">
+	            <div class="col-md-12 text-right">
+	                <p:commandButton value="Sí" styleClass="btn btn-danger"
+	                    actionListener="#{inscripocionesBean.eliminarRegistroConfirmado}"
+	                    update="formPrincipal" 
+	                    oncomplete="PF('dlgConfirmarEliminacion').hide()" />
+	                <p:commandButton value="No" styleClass="btn btn-default"
+	                    onclick="PF('dlgConfirmarEliminacion').hide()" />
+	            </div>
+	        </div>
+	    </h:form>
+	</p:dialog>
+
 
 	<p:dialog appendTo="@(body)" draggable="false" position="center"
 		resizable="false" closable="false" modal="true" width="600px"
@@ -308,4 +309,19 @@
 		</div>
 	</p:dialog>
 
+	<p:dialog id="dlgConfirmarEliminar" widgetVar="dlgConfirmarEliminar"
+		modal="true" header="Confirmación" closable="false" resizable="false"
+		width="400px">
+		<h:outputText
+			value="¿Está seguro de que desea eliminar este proceso"
+			styleClass="bloque" />
+		<h:panelGroup style="text-align: right; margin-top: 20px;">
+			<p:commandButton value="Sí" styleClass="btn btn-danger"
+				actionListener="#{inscripocionesBean.eliminarRegistroConfirmado}"
+				update="@form tablaConsulta"
+				oncomplete="PF('dlgConfirmarEliminar').hide()" />
+			<p:commandButton value="No" styleClass="btn btn-default"
+				onclick="PF('dlgConfirmarEliminar').hide()" />
+		</h:panelGroup>
+	</p:dialog>
 </ui:composition>

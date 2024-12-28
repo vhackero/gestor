@@ -13,6 +13,7 @@ public class ProcesosInscripcion implements Serializable {
 	
 	private Integer idProcesoInscripcion;
 	private String nombre;
+	
 	public Integer getIdProcesoInscripcion() {
 		return idProcesoInscripcion;
 	}

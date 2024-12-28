@@ -1,5 +1,6 @@
 package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,9 +35,6 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 	private static final Logger logger = Logger.getLogger(InscripcionesServiceImpl.class);
 	
 	@Autowired
-	private IConvocatoriaRepository iConvocatoriaRepository;
-	
-	@Autowired
 	private IinscripcionesRepository iinscripcionesRepository;
 	
 	
@@ -62,6 +60,17 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		return lista;
 	}
 	
+	
+	@Override
+	public List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta) {
+		
+		List<TipoProceso> lista = iinscripcionesRepository.consultarNombre(tableroParamConsulta);
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<TipoProceso>();
+		}
+		return lista;
+	}
 	
 	@Override
 	public List<TblPlan> consultarPlan() {
@@ -97,6 +106,37 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		}
 		return lista;
 	}
+	
+	@Override
+    public boolean updateProcesoInscripcion(
+            Long procesoInscripcionId,
+            String nombre,
+            LocalDateTime fechaInicio,
+            LocalDateTime fechaFin,
+            int estatus,
+            Long idTipoProceso,
+            Long convocatoriaId) {
+
+        // Actualizar el registro
+        iinscripcionesRepository.updateProcesoInscripcion(
+                procesoInscripcionId,
+                nombre,
+                fechaInicio,
+                fechaFin,
+                estatus,
+                idTipoProceso,
+                convocatoriaId
+        );
+
+        return true;
+    }
+	
+    @Override
+    public void deleteProcesoInscripcion(Long procesoInscripcionId) {
+
+        iinscripcionesRepository.deleteProcesoInscripcion(procesoInscripcionId);
+    }
+	
 	
 	
 

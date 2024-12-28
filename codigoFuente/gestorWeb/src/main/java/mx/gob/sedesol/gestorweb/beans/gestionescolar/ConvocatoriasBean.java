@@ -63,6 +63,7 @@ public class ConvocatoriasBean extends BaseBean {
 
 	// CONSULTA CONVOCATORIA
 	private List<EstatusDTO> estatusLista;
+	private List<EstatusDTO> estatusLista2;
 
 	// ALTA CONVOCATORIA
 	private String altaNombreConvocatoria;
@@ -91,6 +92,9 @@ public class ConvocatoriasBean extends BaseBean {
 	
 	Convocatoria elminarConvo ;
 	
+	private boolean mostrarConsultaConvocatoria = true;
+	private boolean mostrarNuevaConvocatoria = false;
+	
 	@PostConstruct
     public void init() {
         convocatoriaParamNueva = new ConvocatoriaParamNueva(); // Inicializar el objeto
@@ -104,6 +108,8 @@ public class ConvocatoriasBean extends BaseBean {
 		EstatusDTO inactivo = new EstatusDTO(0, "INACTIVO");
 		estatusLista.add(activo);
 		estatusLista.add(inactivo);
+		
+		
 		
 	}
 
@@ -153,17 +159,46 @@ public class ConvocatoriasBean extends BaseBean {
 	}
 	
 	
+	public void cancelar2() {
+		
+		 this.mostrarConsultaConvocatoria = true;
+		 this.mostrarNuevaConvocatoria = false;
+		
+	}
+	
+	
 	public void editarConvocatoria() {
 		
 		logger.info(" INICIA EDITAR  ");
 		
+		//consultar convocatiro por id
+		//guardar resultado en el dto alta convotaria para mostrar en pantalla
 		
-		if(esFechaActual(elminarConvo.getFecha_Apertura().toString())) {
-			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion7').show()");
-		}else {
-			//convocatoriaService.eliminarConvocatorias(elminarConvo);		
-			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion3').show()");			
-		}
+		
+		this.mostrarConsultaConvocatoria = false;
+		this.mostrarNuevaConvocatoria = true;
+		
+
+		logger.info(" TERMINA EDITAR  ");
+		
+	}
+	
+	
+	public void editarConvocatoriaBD() {
+		
+		logger.info(" INICIA EDITAR  ");
+		
+		//realizar update en bd
+		
+		
+		//llenar dto consulta nombre con las variables de alta nombre que se utilizaron en el update
+		
+		
+		// ejecutas el consulta filtros	
+		
+		 
+		this.mostrarConsultaConvocatoria = true;
+		 this.mostrarNuevaConvocatoria = false;
 		
 
 		logger.info(" TERMINA EDITAR  ");
@@ -172,6 +207,14 @@ public class ConvocatoriasBean extends BaseBean {
 	
 	
 		
+	public List<EstatusDTO> getEstatusLista2() {
+		return estatusLista2;
+	}
+
+	public void setEstatusLista2(List<EstatusDTO> estatusLista2) {
+		this.estatusLista2 = estatusLista2;
+	}
+
 	public void eliminar() throws Exception {
 		
 		logger.info(" INICIA ELIMINAR  ");
@@ -616,6 +659,22 @@ public class ConvocatoriasBean extends BaseBean {
 
 	public void setListaNivelEducativoCompl(List<ConvocatoriaNivelEducativoCompl> listaNivelEducativoCompl) {
 		this.listaNivelEducativoCompl = listaNivelEducativoCompl;
+	}
+
+	public boolean isMostrarConsultaConvocatoria() {
+		return mostrarConsultaConvocatoria;
+	}
+
+	public void setMostrarConsultaConvocatoria(boolean mostrarConsultaConvocatoria) {
+		this.mostrarConsultaConvocatoria = mostrarConsultaConvocatoria;
+	}
+
+	public boolean isMostrarNuevaConvocatoria() {
+		return mostrarNuevaConvocatoria;
+	}
+
+	public void setMostrarNuevaConvocatoria(boolean mostrarNuevaConvocatoria) {
+		this.mostrarNuevaConvocatoria = mostrarNuevaConvocatoria;
 	}
 
 	

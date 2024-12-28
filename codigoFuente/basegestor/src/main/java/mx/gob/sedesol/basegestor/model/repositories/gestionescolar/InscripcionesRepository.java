@@ -2,10 +2,13 @@ package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 
 import java.math.BigInteger;
 import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +78,34 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		return lista;
 
 	}
+	
+	@Override
+	public List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta) {
+
+		List<TipoProceso> lista = new ArrayList<TipoProceso>();
+
+		String consulta = "SELECT t.*\r\n"
+				+ "FROM tbl_procesos_inscripcion t\r\n"
+				+ "WHERE convocatoria_id = :id_convocatoria_selecionada AND id_tipo_proceso = :id_del_tipo_proceso AND id_categoria_proceso = 1";
+
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("id_convocatoria_selecionada", tableroParamConsulta.getValueConvocatoriaEstatus());
+		query.setParameter("id_del_tipo_proceso", tableroParamConsulta.getConsulNivelEducativo());
+
+		List<Object[]> listaQuery = query.getResultList();
+
+		if (!listaQuery.isEmpty()) {
+			for (Object[] obj : listaQuery) {
+
+				TipoProceso convocatoria = mapeo(obj);
+				lista.add(convocatoria);
+
+			}
+		}
+
+		return lista;
+
+	}
 
 	@Override
 	public List<InscripcionesTableroResumen> consultarTableroResumen(ConvocatoriaParamConsulta tableroParamConsulta) {
@@ -87,10 +118,16 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 				+ "                                                              INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = ti.idprograma and ti.idplan = fd.id_plan\r\n"
 				+ "                                                              INNER JOIN tbl_planes tp ON tp.id_plan = ti.idplan\r\n"
 				+ "                                                              INNER JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion\r\n"
-				+ "WHERE   (  tpi.id_categoria_proceso = 1 )\r\n"
+				+ "WHERE tpi.convocatoria_id = :id_convocatoria_selecionada AND tpi.id_tipo_proceso = :id_del_tipo_proceso  AND (ti.fecha_registro >= tpi.fecha_inicio AND ti.fecha_registro <= tpi.fecha_fin) AND (tpi.proceso_inscripcion_id = :id_del_nombre_selecionado AND tpi.id_categoria_proceso = 1 )\r\n"
 				+ "group by rpi.id_programa";
 
 		Query query = entityManager.createNativeQuery(consulta);
+		
+		query.setParameter("id_convocatoria_selecionada", tableroParamConsulta.getValueConvocatoriaEstatus());
+		query.setParameter("id_del_tipo_proceso", tableroParamConsulta.getConsulNivelEducativo());
+		query.setParameter("id_del_nombre_selecionado", tableroParamConsulta.getConsulNombreCorto());
+
+
 
 		List<Object[]> listaQuery = query.getResultList();
 
@@ -110,43 +147,74 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 	@Override
 	public List<InscripcionesConsultaResumen> consultarFiltros(ConvocatoriaParamConsulta tableroParamConsulta) {
 
-		List<InscripcionesConsultaResumen> lista = new ArrayList<InscripcionesConsultaResumen>();
+	    List<InscripcionesConsultaResumen> lista = new ArrayList<>();
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-		String consulta = "select\r\n"
-				+ "	tp.proceso_inscripcion_id,\r\n"
-				+ "	tp.convocatoria_id,\r\n"
-				+ "	tc.nombre convocatoria,\r\n"
-				+ "	tp.nombre nombre,\r\n"
-				+ "	tp.fecha_inicio,\r\n"
-				+ "	tp.fecha_fin,\r\n"
-				+ "	cp.nombre tipo_proceso,\r\n"
-				+ "	if(tp.estatus = 0,\r\n"
-				+ "	'inactivo',\r\n"
-				+ "	'activo') estatus\r\n"
-				+ "from\r\n"
-				+ "	tbl_procesos_inscripcion tp\r\n"
-				+ "inner join tbl_convocatoria tc on\r\n"
-				+ "	tc.convocatoria_id = tp.convocatoria_id\r\n"
-				+ "inner join cat_procesos_inscripcion cp on\r\n"
-				+ "	cp.id_proceso = tp.id_tipo_proceso\r\n"
-				+ "where\r\n"
-				+ "	tp.id_categoria_proceso = 1";
+	    // Inicializar consulta base
+	    StringBuilder consulta = new StringBuilder(
+	        "SELECT tp.proceso_inscripcion_id, \n" +
+	        "tp.convocatoria_id, \n" +
+	        "tc.nombre convocatoria, \n" +
+	        "tp.nombre nombre, \n" +
+	        "tp.fecha_inicio, \n" +
+	        "tp.fecha_fin, \n" +
+	        "cp.nombre tipo_proceso, \n" +
+	        "IF(tp.estatus = 0, 'Inactivo', 'Activo') estatus,\n" +
+	        "tp.id_tipo_proceso\n"+
+	        "FROM tbl_procesos_inscripcion tp\n" +
+	        "INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tp.convocatoria_id\n" +
+	        "INNER JOIN cat_procesos_inscripcion cp ON cp.id_proceso = tp.id_tipo_proceso\n" +
+	        "WHERE tp.id_categoria_proceso = 1\n" +
+	        "AND tp.convocatoria_id = :id_convocatoria_selecionada "
+	    );
 
-		Query query = entityManager.createNativeQuery(consulta);
+	    // Variables auxiliares para agregar filtros opcionales
+	    boolean hasNombre = tableroParamConsulta.getConsulNombreCorto() != null && !tableroParamConsulta.getConsulNombreCorto().isEmpty();
+	    boolean hasTipoProceso = tableroParamConsulta.getConsulNivelEducativo() != null;
+	    boolean hasFechaInicio = tableroParamConsulta.getConsulFechaApertura() != null;
+	    boolean hasFechaFin = tableroParamConsulta.getConsulFechaCierre() != null;
 
-		List<Object[]> listaQuery = query.getResultList();
+	    // Añadir filtros opcionales
+	    if (hasNombre) {
+	        consulta.append("AND tp.nombre LIKE :nombre ");
+	    }
+	    if (hasTipoProceso) {
+	        consulta.append("AND tp.id_tipo_proceso = :id_tipo_proceso ");
+	    }
+	    if (hasFechaInicio && hasFechaFin) {
+	        consulta.append("AND tp.fecha_inicio >= :fecha_inicio AND tp.fecha_fin <= :fecha_fin ");
+	    }
 
-		if (!listaQuery.isEmpty()) {
-			for (Object[] obj : listaQuery) {
+	    Query query = entityManager.createNativeQuery(consulta.toString());
 
-				InscripcionesConsultaResumen tblPlan = mapFiltrosInscrip(obj);
-				lista.add(tblPlan);
+	    // Parámetro obligatorio
+	    query.setParameter("id_convocatoria_selecionada", tableroParamConsulta.getValueConvocatoriaEstatus());
 
-			}
-		}
+	    // Parámetros opcionales
+	    if (hasNombre) {
+	        query.setParameter("nombre", "%" + tableroParamConsulta.getConsulNombreCorto() + "%");
+	    }
+	    if (hasTipoProceso) {
+	        query.setParameter("id_tipo_proceso", tableroParamConsulta.getConsulNivelEducativo());
+	    }
+	    if (hasFechaInicio && hasFechaFin) {
+	        String fechaInicioStr = sdf.format(tableroParamConsulta.getConsulFechaApertura());
+	        String fechaFinStr = sdf.format(tableroParamConsulta.getConsulFechaCierre());
+	        query.setParameter("fecha_inicio", fechaInicioStr);
+	        query.setParameter("fecha_fin", fechaFinStr);
+	    }
 
-		return lista;
+	    // Ejecutar consulta
+	    List<Object[]> listaQuery = query.getResultList();
 
+	    if (!listaQuery.isEmpty()) {
+	        for (Object[] obj : listaQuery) {
+	            InscripcionesConsultaResumen tblPlan = mapFiltrosInscrip(obj);
+	            lista.add(tblPlan);
+	        }
+	    }
+
+	    return lista;
 	}
 	 
 	private InscripcionesConsultaResumen mapFiltrosInscrip(Object[] obj) {
@@ -161,6 +229,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 			regresa.setFecFin(obj[5].toString());
 			regresa.setTipoProceso(obj[6].toString());
 			regresa.setEstatus(obj[7].toString());
+			regresa.setIdTipoProceso(obj[8].toString());
 
 			return regresa;
 		}
@@ -200,6 +269,88 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		regresa.setNombre(obj[1].toString());
 
 		return regresa;
+	}
+	
+	@Override
+	public Object getProcesoInscripcionById(Long procesoInscripcionId) {
+        String query = "SELECT * FROM tbl_procesos_inscripcion WHERE proceso_inscripcion_id = :procesoInscripcionId";
+        try {
+            return entityManager.createNativeQuery(query)
+                                .setParameter("procesoInscripcionId", procesoInscripcionId)
+                                .getSingleResult();
+        } catch (NoResultException e) {
+            return null; // No se encontró el registro
+        }
+    }
+
+    // Método para actualizar los campos permitidos
+	@Transactional
+	@Override
+	public void updateProcesoInscripcion(
+	        Long procesoInscripcionId,
+	        String nombre,
+	        LocalDateTime fechaInicio,
+	        LocalDateTime fechaFin,
+	        int estatus,
+	        Long idTipoProceso,
+	        Long convocatoriaId) {
+
+	    String query = "UPDATE tbl_procesos_inscripcion " +
+	                   "SET nombre = ?, " +
+	                   "fecha_inicio = ?, " +
+	                   "fecha_fin = ?, " +
+	                   "estatus = ?, " +
+	                   "id_tipo_proceso = ?, " +
+	                   "convocatoria_id = ? " +
+	                   "WHERE proceso_inscripcion_id = ?";
+
+	    entityManager.createNativeQuery(query)
+	                 .setParameter(1, nombre)
+	                 .setParameter(2, fechaInicio)
+	                 .setParameter(3, fechaFin)
+	                 .setParameter(4, estatus)
+	                 .setParameter(5, idTipoProceso)
+	                 .setParameter(6, convocatoriaId)
+	                 .setParameter(7, procesoInscripcionId)
+	                 .executeUpdate();
+	}
+	
+	@Transactional
+	@Override
+	public void deleteProcesoInscripcion(Long procesoInscripcionId) {
+	    try {
+	        // 1. Eliminar registros relacionados en tbl_terminosycondiciones
+	        String deleteTerminosQuery = "DELETE FROM tbl_terminosycondiciones WHERE id_proceso_inscripcion = ?";
+	        entityManager.createNativeQuery(deleteTerminosQuery)
+	                     .setParameter(1, procesoInscripcionId)
+	                     .executeUpdate();
+
+	        // 2. Eliminar registros relacionados en tbl_encuestas_contestadas
+	        String deleteEncuestasQuery = "DELETE FROM tbl_encuestas_contestadas WHERE id_proceso_inscripcion = ?";
+	        entityManager.createNativeQuery(deleteEncuestasQuery)
+	                     .setParameter(1, procesoInscripcionId)
+	                     .executeUpdate();
+
+	        // 3. Eliminar registros relacionados en tbl_dispersiones
+	        String deleteDispersionesQuery = "DELETE FROM tbl_dispersiones WHERE id_proceso_inscripcion = ?";
+	        entityManager.createNativeQuery(deleteDispersionesQuery)
+	                     .setParameter(1, procesoInscripcionId)
+	                     .executeUpdate();
+
+	        // 4. Eliminar registros relacionados en rel_proceso_inscipcion_planesyprogramas
+	        String deleteRelacionesQuery = "DELETE FROM rel_proceso_inscipcion_planesyprogramas WHERE id_proceso_inscripcion = ?";
+	        entityManager.createNativeQuery(deleteRelacionesQuery)
+	                     .setParameter(1, procesoInscripcionId)
+	                     .executeUpdate();
+
+	        // 5. Eliminar el registro principal en tbl_procesos_inscripcion
+	        String deletePrincipalQuery = "DELETE FROM tbl_procesos_inscripcion WHERE proceso_inscripcion_id = ?";
+	        entityManager.createNativeQuery(deletePrincipalQuery)
+	                     .setParameter(1, procesoInscripcionId)
+	                     .executeUpdate();
+	    } catch (Exception e) {
+	        throw new RuntimeException("Error al eliminar el proceso de inscripción y sus relaciones", e);
+	    }
 	}
 //	
 //	@Override

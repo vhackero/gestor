@@ -1,5 +1,6 @@
 package mx.gob.sedesol.basegestor.service.gestionescolar;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
@@ -28,9 +29,14 @@ public interface InscripcionesService extends CommonService<Convocatoria, Intege
 	
 	public List<InscripcionesConsultaResumen> consultarFiltros(ConvocatoriaParamConsulta tableroParamConsulta);
 	
-	 
-	
 	public void altaConvocatorias();
+
+	List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta);
+
+	boolean updateProcesoInscripcion(Long procesoInscripcionId, String nombre, LocalDateTime fechaInicio,
+			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId);
+
+	void deleteProcesoInscripcion(Long procesoInscripcionId);
 	 
 
 }

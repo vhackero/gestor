@@ -10,6 +10,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Dispersiones;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoMatriculacion;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IDispersionesRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.DispersionesService;
 
@@ -35,7 +36,16 @@ public class DispersionesServiceImpl implements DispersionesService{
 
 	
 	
-	
+	@Override
+	public List<TipoMatriculacion> consultarTipoMatriculacion() {
+		
+		List<TipoMatriculacion> lista = iDispersionesRepository.consultarTipoMatriculacion();
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<TipoMatriculacion>();
+		}
+		return lista;
+	}
 	
 	
 	
