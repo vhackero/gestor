@@ -22,7 +22,7 @@
 								value="#{convocatoriasBean.convocatoriaParamNueva.altaNombreConvocatoria}"
 								styleClass="form-control  " 
 								 required="true"
-                				 requiredMessage="El campo es requerido"
+                				 requiredMessage="El nombre de la convocatoria es requerido"
                 				  widgetVar="nombreConvocatoriaInput"
       							  onkeyup="PF('nombreCortoInput').jq.val(this.value.substring(0, 3) + ' ' + new Date().getFullYear() + '-1');" />
                 				
@@ -36,7 +36,7 @@
 							<p:inputText id="altaNombreCorto"
 								value="#{convocatoriasBean.convocatoriaParamNueva.altaNombreCorto}"
 								styleClass="form-control" required="true"
-                				 requiredMessage="El campo es requerido"  widgetVar="nombreCortoInput" /> 
+                				 requiredMessage="El nombre corto es requerido"  widgetVar="nombreCortoInput" /> 
  							<p:message for="altaNombreConvocatoria" display="text" />
 
 						</div>
@@ -76,7 +76,7 @@
 											showOn="button" required="true"
                 							requiredMessage="La fecha de cierre es obligatoria.">
 									<p:ajax event="dateSelect" process="@this"
-											update="fc_fechaFinalAlta"
+											update="fc_fechaInicialAlta"
 											listener="#{convocatoriasBean.validarFechasAlta()}" />
 								</p:calendar>
 								<p:message for="fc_fechaInicialAlta" display="text" />
@@ -103,25 +103,27 @@
 
 
 							<div class="col-md-4 col-xs-12">
+					<p:outputLabel styleClass="bloque requerido"
+						value="Nivel educativo:" />
 
-							<p:outputLabel styleClass="bloque requerido" value="Nivel educativo:" />
-							
-							<p:selectOneMenu  value="#{convocatoriasBean.convocatoriaParamNueva.altaNivelEducativo}" id="altaNivelEducativo" 
-								styleClass="col-xs-12" required="true" 
-                    			 requiredMessage="El nivel educativo es obligatorio.">
-                    			 
-								<p:ajax event="change" process="@this" />
-								
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" />
-								<f:selectItems value="#{convocatoriasBean.listaNivelEducativoCompl}"
-									var="modalidad" itemLabel="#{modalidad.nombreivelEnsenanza} > #{modalidad.nombrePlan} > #{modalidad.nombrePrograma}"
-									itemValue="#{modalidad}"  />
+					<p:selectCheckboxMenu
+						value="#{convocatoriasBean.convocatoriaParamNueva.listaNivelEducativoCompl}"
+						id="altaNivelEducativo" styleClass="col-xs-12" required="true"
+						requiredMessage="El nivel educativo es obligatorio.">
 
-							</p:selectOneMenu >
-							<p:message for="altaNivelEducativo" display="text" />
-						</div>
+						<p:ajax event="change" process="@this" />
+
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="#{null}" />
+						<f:selectItems
+							value="#{convocatoriasBean.listaNivelEducativoCompl}"
+							var="modalidad"
+							itemLabel="#{modalidad.nombreivelEnsenanza} > #{modalidad.nombrePlan} > #{modalidad.nombrePrograma}"
+							itemValue="#{modalidad}" />
+					</p:selectCheckboxMenu>
+					<p:message for="altaNivelEducativo" display="text" />
+				</div>
 
 
 					</div>
@@ -202,27 +204,19 @@
 	
 		<div class="form-group">
 			<div class="row">
-
 				<div class="col-md-12 text-right">
-				
 					<p:commandButton value="Cancelar" process="@this"
 										 update="@form"
 										 action="#{convocatoriasBean.cancelar}" ajax="true"
 										 styleClass="btn btn-default" />
-						
 						<p:commandButton value="Limpiar campos" process="@this"
 										 update="@form"
 										 action="#{convocatoriasBean.limpiarCampos}" ajax="true"
-										 styleClass="btn btn-default" />
-
-					
+										 styleClass="btn btn-default" />				
 						<p:commandButton id="btnBusquedaAvas" process="@form" ajax="true"
 							update="@form" styleClass="btn btn-primary pull-right"
 							action="#{convocatoriasBean.altaConvocatorias}"
 							value="Guardar" />
-					
-					
-					
 				</div>
 			</div>
 		</div>

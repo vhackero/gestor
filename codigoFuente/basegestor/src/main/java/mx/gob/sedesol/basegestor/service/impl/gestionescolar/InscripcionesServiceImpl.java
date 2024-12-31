@@ -13,9 +13,11 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionParamNueva;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesConsultaResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesTableroResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IConvocatoriaRepository;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IinscripcionesRepository;
@@ -46,7 +48,15 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		
 	}
 
+	@Override
+	public void altaInscripciones(InscripcionParamNueva inscripcionParamNueva) {
+		iinscripcionesRepository.altaInscripcion(inscripcionParamNueva);
+	}
 	
+	@Override
+	public void altaInscripcionesExtra(InscripcionParamNueva inscripcionParamNueva) {
+		iinscripcionesRepository.altaInscripcionExtra(inscripcionParamNueva);
+	}
 	
 	@Override
 	public List<TipoProceso> consultarTipoProceso() {
@@ -72,12 +82,22 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 	}
 	
 	@Override
-	public List<TblPlan> consultarPlan() {
+	public List<TblPlan> consultarPlan(InscripcionParamNueva inscripcionParamNueva) {
 		
-		List<TblPlan> lista = iinscripcionesRepository.consultarPlan();
+		List<TblPlan> lista = iinscripcionesRepository.consultarPlan(inscripcionParamNueva);
 		
 		if (lista.isEmpty()) {
 			return new ArrayList<TblPlan>();
+		}
+		return lista;
+	}
+	
+	@Override
+	public List<TblFichaDescriptivaPrograma> consultarPrograma(InscripcionParamNueva inscripcionParamNueva){
+		List<TblFichaDescriptivaPrograma> lista = iinscripcionesRepository.consultarPrograma(inscripcionParamNueva);
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<TblFichaDescriptivaPrograma>();
 		}
 		return lista;
 	}
@@ -150,6 +170,10 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
+
+
 	
  
 

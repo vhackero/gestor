@@ -15,6 +15,8 @@ public interface IConvocatoriaRepository {
 	
 	List<Convocatoria> consultarConvocatoriasFiltros(ConvocatoriaParamConsulta convocatoriaParamConsulta);
 	
+	List<Convocatoria> consultarConvocatoriasId(Convocatoria convocatoriaParamConsulta);
+	
 	List<ConvocatoriaTableroResumen> consultarTableroResumen(Integer convocatoriaId);
 	
 	List<ConvocatoriaNivelEducativo> consultarNivelEducativo();
@@ -22,6 +24,8 @@ public interface IConvocatoriaRepository {
 	List<ConvocatoriaNivelEducativoCompl> consultarNivelEducativoCompleto();
 	
 	public void altaConvocatorias(ConvocatoriaParamNueva convocatoriaParamNueva);
+	
+	public void actualizarConvocatorias(ConvocatoriaParamNueva convocatoriaParamNueva, int idConvocatoria);
 	
 	public void eliminarConvocatorias(Convocatoria elminarConvo);
 
