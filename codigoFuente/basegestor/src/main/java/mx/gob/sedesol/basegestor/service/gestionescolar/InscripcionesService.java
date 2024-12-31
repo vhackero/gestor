@@ -41,10 +41,11 @@ public interface InscripcionesService extends CommonService<Convocatoria, Intege
 
 	List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta);
 
+	public List<TblPlan> consultarPlan();
 	boolean updateProcesoInscripcion(Long procesoInscripcionId, String nombre, LocalDateTime fechaInicio,
 			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId);
 
-	void deleteProcesoInscripcion(Long procesoInscripcionId);
+	void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId);
 	 
 
 }

@@ -49,15 +49,7 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		
 	}
 
-	@Override
-	public void altaInscripciones(InscripcionParamNueva inscripcionParamNueva) {
-		iinscripcionesRepository.altaInscripcion(inscripcionParamNueva);
-	}
 	
-	@Override
-	public void altaInscripcionesExtra(InscripcionParamNueva inscripcionParamNueva) {
-		iinscripcionesRepository.altaInscripcionExtra(inscripcionParamNueva);
-	}
 	
 	@Override
 	public List<TipoProceso> consultarTipoProceso() {
@@ -83,22 +75,12 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 	}
 	
 	@Override
-	public List<TblPlan> consultarPlan(InscripcionParamNueva inscripcionParamNueva) {
+	public List<TblPlan> consultarPlan() {
 		
-		List<TblPlan> lista = iinscripcionesRepository.consultarPlan(inscripcionParamNueva);
+		List<TblPlan> lista = iinscripcionesRepository.consultarPlan();
 		
 		if (lista.isEmpty()) {
 			return new ArrayList<TblPlan>();
-		}
-		return lista;
-	}
-	
-	@Override
-	public List<TblFichaDescriptivaPrograma> consultarPrograma(InscripcionParamNueva inscripcionParamNueva){
-		List<TblFichaDescriptivaPrograma> lista = iinscripcionesRepository.consultarPrograma(inscripcionParamNueva);
-		
-		if (lista.isEmpty()) {
-			return new ArrayList<TblFichaDescriptivaPrograma>();
 		}
 		return lista;
 	}
@@ -152,9 +134,9 @@ public class InscripcionesServiceImpl implements InscripcionesService {
     }
 	
     @Override
-    public void deleteProcesoInscripcion(Long procesoInscripcionId) {
+    public void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId) {
 
-        iinscripcionesRepository.deleteProcesoInscripcion(procesoInscripcionId);
+        iinscripcionesRepository.deleteProcesoInscripcion(procesoInscripcionId, convocatoriaId);
     }
 	
 	
@@ -205,7 +187,35 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 
 
 
+	@Override
+	public List<TblPlan> consultarPlan(InscripcionParamNueva inscripcionParamNueva) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
+
+
+	@Override
+	public List<TblFichaDescriptivaPrograma> consultarPrograma(InscripcionParamNueva inscripcionParamNueva) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	public void altaInscripciones(InscripcionParamNueva inscripcionParamNueva) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+	@Override
+	public void altaInscripcionesExtra(InscripcionParamNueva inscripcionParamNueva) {
+		// TODO Auto-generated method stub
+		
+	}
 	
  
 

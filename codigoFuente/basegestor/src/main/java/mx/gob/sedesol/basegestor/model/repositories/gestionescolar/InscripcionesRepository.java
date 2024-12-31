@@ -19,11 +19,9 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionParamNueva;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesConsultaResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesTableroResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
-import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 
 @Repository
@@ -321,7 +319,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 	
 	@Transactional
 	@Override
-	public void deleteProcesoInscripcion(Long procesoInscripcionId) {
+	public void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId) {
 	    try {
 	        // 1. Eliminar registros relacionados en tbl_terminosycondiciones
 	        String deleteTerminosQuery = "DELETE FROM tbl_terminosycondiciones WHERE id_proceso_inscripcion = ?";
@@ -350,7 +348,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 	        // 5. Eliminar registros relacionados en rel_proceso_inscipcion_planesyprogramas
 	        String deleteResumenQuery = "DELETE FROM tbl_inscripcion_resumen WHERE id_convocatoria = ?";
 	        entityManager.createNativeQuery(deleteResumenQuery)
-	                     .setParameter(1, procesoInscripcionId)
+	                     .setParameter(1, convocatoriaId)
 	                     .executeUpdate();
 	        
 	        // 6. Eliminar el registro principal en tbl_procesos_inscripcion
@@ -591,39 +589,5 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 // 
 //	}
 
-
-	@Override
-	public List<TblPlan> consultarPlan(InscripcionParamNueva inscripcionParamNueva) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public List<TblFichaDescriptivaPrograma> consultarPrograma(InscripcionParamNueva inscripcionParamNueva) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public List<TblPlan> consultarPlanConvocatoria(InscripcionParamNueva inscripcionParamNueva) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public void altaInscripcion(InscripcionParamNueva inscripcionParamNueva) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	@Override
-	public void altaInscripcionExtra(InscripcionParamNueva inscripcionParamNueva) {
-		// TODO Auto-generated method stub
-		
-	}
-
 }
+

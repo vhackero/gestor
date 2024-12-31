@@ -7,22 +7,16 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionParamNueva;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesConsultaResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesTableroResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
-import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 
 public interface IinscripcionesRepository {
 	
 	List<TipoProceso> consultarTipoProceso();
 	
-	List<TblPlan> consultarPlan(InscripcionParamNueva inscripcionParamNueva);
-	
-	List<TblFichaDescriptivaPrograma> consultarPrograma(InscripcionParamNueva inscripcionParamNueva);
-	
-	List<TblPlan> consultarPlanConvocatoria(InscripcionParamNueva inscripcionParamNueva);
+	List<TblPlan> consultarPlan();
 	
 	List<InscripcionesTableroResumen> consultarTableroResumen(ConvocatoriaParamConsulta tableroParamConsulta);
 	
@@ -30,18 +24,12 @@ public interface IinscripcionesRepository {
 
 	List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta);
 
-	public void altaInscripcion(InscripcionParamNueva inscripcionParamNueva);
-	
-	public void altaInscripcionExtra(InscripcionParamNueva inscripcionParamNueva);
-
-
 	Object getProcesoInscripcionById(Long procesoInscripcionId);
 
 	void updateProcesoInscripcion(Long procesoInscripcionId, String nombre, LocalDateTime fechaInicio,
 			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId);
 
-	void deleteProcesoInscripcion(Long procesoInscripcionId);
+	void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId);
 
-	List<TblPlan> consultarPlan();
  
 }
