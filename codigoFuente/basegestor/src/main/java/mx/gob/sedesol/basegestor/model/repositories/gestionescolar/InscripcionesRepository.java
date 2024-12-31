@@ -319,7 +319,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 	
 	@Transactional
 	@Override
-	public void deleteProcesoInscripcion(Long procesoInscripcionId) {
+	public void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId) {
 	    try {
 	        // 1. Eliminar registros relacionados en tbl_terminosycondiciones
 	        String deleteTerminosQuery = "DELETE FROM tbl_terminosycondiciones WHERE id_proceso_inscripcion = ?";
@@ -346,10 +346,10 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 	                     .executeUpdate();
 	        
 	        // 5. Eliminar registros relacionados en rel_proceso_inscipcion_planesyprogramas
-//	        String deleteResumenQuery = "DELETE FROM tbl_resumen_inscripcion WHERE proceso_inscripcion_id = ?";
-//	        entityManager.createNativeQuery(deleteResumenQuery)
-//	                     .setParameter(1, procesoInscripcionId)
-//	                     .executeUpdate();
+	        String deleteResumenQuery = "DELETE FROM tbl_inscripcion_resumen WHERE id_convocatoria = ?";
+	        entityManager.createNativeQuery(deleteResumenQuery)
+	                     .setParameter(1, convocatoriaId)
+	                     .executeUpdate();
 	        
 	        // 6. Eliminar el registro principal en tbl_procesos_inscripcion
 	        String deletePrincipalQuery = "DELETE FROM tbl_procesos_inscripcion WHERE proceso_inscripcion_id = ?";
