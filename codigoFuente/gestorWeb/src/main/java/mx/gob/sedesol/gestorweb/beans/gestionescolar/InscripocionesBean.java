@@ -259,24 +259,40 @@ public class InscripocionesBean extends BaseBean {
 	}
 
 	public void habilitarEdicion(InscripcionesConsultaResumen registro) throws Exception {
+	    // 1) Parseamos las fechas de inicio y fin desde el registro
+	    SimpleDateFormat formatoEntrada = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+	    try {
+	        this.fechaInicioEdit = formatoEntrada.parse(registro.getFecIni());
+	        this.fechaFinEdit = formatoEntrada.parse(registro.getFecFin());
+	    } catch (ParseException e) {
+	        e.printStackTrace();
+	        // Manejo de error en caso de no poder parsear
+	    }
 
-		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/actualizaInscripciones.xhtml";
-		consultarConvocatorias();
-		consultaTipoProceso();
-		consultarPlan();
+	    // 2) Validamos si se puede o no editar
+	    //    - No se puede editar si la fecha de inicio es hoy
+	    //    - O si ya finalizó el periodo activo (la fecha actual es posterior a fechaFinEdit)
+	    Date hoy = new Date();
 
-		registroSeleccionado = registro;
-		SimpleDateFormat formatoEntrada = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+	    // Para comparar únicamente la parte de fecha (día, mes y año), sin considerar horas/minutos
+	    SimpleDateFormat formatoDia = new SimpleDateFormat("yyyyMMdd");
+	    boolean fechaInicioEsHoy = formatoDia.format(fechaInicioEdit).equals(formatoDia.format(hoy));
+	    boolean periodoActivoTerminado = hoy.after(fechaFinEdit);
 
-		try {
-			fechaInicioEdit = formatoEntrada.parse(registro.getFecIni());
-			fechaFinEdit = formatoEntrada.parse(registro.getFecFin());
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	    if (fechaInicioEsHoy || periodoActivoTerminado) {
+	        // 3) Si NO se puede editar, mostramos el diálogo y salimos del método
+	        RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccionEditarBorrar').show()");
+	        return;
+	    }
 
-		this.mostrarFormularioEdicion = true;
+	    // 4) Si sí se puede editar, continuamos con la ejecución normal
+	    this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/actualizaInscripciones.xhtml";
+	    consultarConvocatorias();
+	    consultaTipoProceso();
+	    consultarPlan();
+
+	    registroSeleccionado = registro;
+	    this.mostrarFormularioEdicion = true;
 	}
 
 //	public void elminarConvo(InscripcionesConsultaResumen registro) {
@@ -323,6 +339,33 @@ public class InscripocionesBean extends BaseBean {
 	
 	public void prepararEliminar(InscripcionesConsultaResumen registro) {
 	    this.registroParaEliminar = registro;
+	    SimpleDateFormat formatoEntrada = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+	    try {
+	        this.fechaInicioEdit = formatoEntrada.parse(registro.getFecIni());
+	        this.fechaFinEdit = formatoEntrada.parse(registro.getFecFin());
+	    } catch (ParseException e) {
+	        e.printStackTrace();
+	        // Manejo de error en caso de no poder parsear
+	    }
+
+	    // 2) Validamos si se puede o no editar
+	    //    - No se puede editar si la fecha de inicio es hoy
+	    //    - O si ya finalizó el periodo activo (la fecha actual es posterior a fechaFinEdit)
+	    Date hoy = new Date();
+
+	    // Para comparar únicamente la parte de fecha (día, mes y año), sin considerar horas/minutos
+	    SimpleDateFormat formatoDia = new SimpleDateFormat("yyyyMMdd");
+	    boolean fechaInicioEsHoy = formatoDia.format(fechaInicioEdit).equals(formatoDia.format(hoy));
+	    boolean periodoActivoTerminado = hoy.after(fechaFinEdit);
+
+	    if (fechaInicioEsHoy || periodoActivoTerminado) {
+	        // 3) Si NO se puede editar, mostramos el diálogo y salimos del método
+	        RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccionEditarBorrar').show()");
+	        return;
+	    }
+	    
+		RequestContext.getCurrentInstance().execute("PF('dlgConfirmarEliminar').show()");
+
 	    logger.info("Preparando eliminación para: " + registro.getNombre());
 	}
 	
@@ -332,6 +375,7 @@ public class InscripocionesBean extends BaseBean {
 	            Long procesoInscripcionId = Long.parseLong(registroParaEliminar.getProcesoInscripcionId());
 	            inscripcionesService.deleteProcesoInscripcion(procesoInscripcionId);
 	            logger.info("Registro eliminado correctamente con ID: " + procesoInscripcionId);
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccionDelete').show()");
 	            consultarFiltros(); // Refresca la lista después de eliminar
 	        }
 	    } catch (Exception e) {
