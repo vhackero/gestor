@@ -1,5 +1,6 @@
 package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
@@ -28,9 +29,19 @@ public interface IinscripcionesRepository {
 	List<InscripcionesConsultaResumen> consultarFiltros(ConvocatoriaParamConsulta tableroParamConsulta);
 
 	List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta);
-	
+
 	public void altaInscripcion(InscripcionParamNueva inscripcionParamNueva);
 	
 	public void altaInscripcionExtra(InscripcionParamNueva inscripcionParamNueva);
+
+
+	Object getProcesoInscripcionById(Long procesoInscripcionId);
+
+	void updateProcesoInscripcion(Long procesoInscripcionId, String nombre, LocalDateTime fechaInicio,
+			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId);
+
+	void deleteProcesoInscripcion(Long procesoInscripcionId);
+
+	List<TblPlan> consultarPlan();
  
 }
