@@ -21,7 +21,7 @@
 					<p:inputText id="consulNombreConvocatoria"
 						value="#{convocatoriasBean.convocatoriaParamConsulta.consulNombreConvocatoria}"
 						styleClass="form-control"  required="true"
-                				 requiredMessage="El campo es requerido"/>
+                				 requiredMessage="El nombre de la convocatoria es requerido"/>
 						<p:message for="consulNombreConvocatoria" display="text" />
 
 				</div>
@@ -52,10 +52,6 @@
 					</p:selectOneMenu>
 
 				</div>
-
-
-
-
 
 			</div>
 		</div>
@@ -162,6 +158,13 @@
 					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
 
 					<!-- Nombre Materia -->
+					<p:column style="display: none" styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Convocatoria" />
+						</f:facet>
+						<h:outputText value="#{convo.convocatoriaId}" />
+					</p:column>
+					
 					<p:column styleClass="text-center">
 						<f:facet name="header">
 							<h:outputText value="Convocatoria" />
@@ -213,17 +216,9 @@
 							action="#{convocatoriasBean.editarConvocatoria}"
 							icon="fa fa-pencil" styleClass="btn-icon btn btn-default">
 							<f:setPropertyActionListener value="#{convo}"
-								target="#{convocatoriasBean.elminarConvo}" />
+								target="#{convocatoriasBean.editarConv}" />
 						</p:commandButton>
-						
-						
-						
-					
-						
 					</p:column>
-					
-					
-					
 				</p:dataTable>
 			</div>
 		</div>
@@ -249,7 +244,7 @@
 								value="#{convocatoriasBean.convocatoriaParamNueva.altaNombreConvocatoria}"
 								styleClass="form-control  " 
 								 required="true"
-                				 requiredMessage="El campo es requerido"
+                				 requiredMessage="El nombre de la convocatoria es requerido"
                 				  widgetVar="nombreConvocatoriaInput"
       							  onkeyup="PF('nombreCortoInput').jq.val(this.value.substring(0, 3) + ' ' + new Date().getFullYear() + '-1');" />
                 				
@@ -331,24 +326,28 @@
 
 							<div class="col-md-4 col-xs-12">
 
-							<p:outputLabel styleClass="bloque requerido" value="Nivel educativo:" />
-							
-							<p:selectOneMenu  value="#{convocatoriasBean.convocatoriaParamNueva.altaNivelEducativo}" id="altaNivelEducativo" 
-								styleClass="col-xs-12" required="true" 
-                    			 requiredMessage="El nivel educativo es obligatorio.">
-                    			 
-								<p:ajax event="change" process="@this" />
-								
-								<f:selectItem
-									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-									itemValue="#{null}" />
-								<f:selectItems value="#{convocatoriasBean.listaNivelEducativoCompl}"
-									var="modalidad" itemLabel="#{modalidad.nombreivelEnsenanza} > #{modalidad.nombrePlan} > #{modalidad.nombrePrograma}"
-									itemValue="#{modalidad}"  />
+					<p:outputLabel styleClass="bloque requerido"
+						value="Nivel educativo:" />
 
-							</p:selectOneMenu >
-							<p:message for="altaNivelEducativo" display="text" />
-						</div>
+					<p:selectCheckboxMenu
+						value="#{convocatoriasBean.convocatoriaParamNueva.listaNivelEducativoCompl}"
+						id="altaNivelEducativo" styleClass="col-xs-12" required="false"
+						requiredMessage="El nivel educativo es obligatorio.">
+
+						<p:ajax event="change" process="@this" />
+
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="#{null}" />
+						<f:selectItems
+							value="#{convocatoriasBean.listaNivelEducativoCompl}"
+							var="modalidad"
+							itemLabel="#{modalidad.nombreivelEnsenanza} > #{modalidad.nombrePlan} > #{modalidad.nombrePrograma}"
+							itemValue="#{modalidad}" />
+
+					</p:selectCheckboxMenu>
+					<p:message for="altaNivelEducativo" display="text" />
+				</div>
 
 
 					</div>
@@ -445,7 +444,7 @@
 					
 						<p:commandButton id="btnBusquedaAvas2" process="@form" ajax="true"
 							update="@form" styleClass="btn btn-primary pull-right"
-							action="#{convocatoriasBean.altaConvocatorias}"
+							action="#{convocatoriasBean.editarConvocatoriaBD}"
 							value="Guardar" />
 					
 					
@@ -544,7 +543,7 @@
 				<div class="row">
 					<div class="col-md-12">
 						<h:outputText styleClass="bloque"
-							value="La convocatoria no puede ser eliminada/editada ya que la fecha apertura es igual al dia actual." />
+							value="La convocatoria no puede ser eliminada/editada ya que la fecha apertura es igual o menor al dia actual." />
 					</div>
 				</div>
 			</div>
@@ -555,9 +554,27 @@
 						onclick="PF('dlgValidarSeleccion7').hide()" />
 				</div>
 			</div>
-		</p:dialog>
+		</p:dialog>	
 		
-	
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion77" header="Informativo" dynamic="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText styleClass="bloque"
+							value="La convocatoria se a actualizado correctamente." />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dlgValidarSeleccion77').hide()" />
+				</div>
+			</div>
+		</p:dialog>	
 		
 
 </ui:composition>

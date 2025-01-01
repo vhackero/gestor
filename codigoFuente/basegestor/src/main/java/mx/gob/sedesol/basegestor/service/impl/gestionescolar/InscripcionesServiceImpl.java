@@ -14,9 +14,11 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionParamNueva;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesConsultaResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesTableroResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IConvocatoriaRepository;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IinscripcionesRepository;
@@ -132,9 +134,9 @@ public class InscripcionesServiceImpl implements InscripcionesService {
     }
 	
     @Override
-    public void deleteProcesoInscripcion(Long procesoInscripcionId) {
+    public void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId) {
 
-        iinscripcionesRepository.deleteProcesoInscripcion(procesoInscripcionId);
+        iinscripcionesRepository.deleteProcesoInscripcion(procesoInscripcionId, convocatoriaId);
     }
 	
 	
@@ -181,6 +183,38 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 	public ResultadoDTO<Convocatoria> sonDatosRequeridosValidos(TipoAccion accion, Convocatoria dto) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+
+
+	@Override
+	public List<TblPlan> consultarPlan(InscripcionParamNueva inscripcionParamNueva) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	public List<TblFichaDescriptivaPrograma> consultarPrograma(InscripcionParamNueva inscripcionParamNueva) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	public void altaInscripciones(InscripcionParamNueva inscripcionParamNueva) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+	@Override
+	public void altaInscripcionesExtra(InscripcionParamNueva inscripcionParamNueva) {
+		// TODO Auto-generated method stub
+		
 	}
 	
  

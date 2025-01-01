@@ -112,12 +112,13 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 
 		List<InscripcionesTableroResumen> lista = new ArrayList<InscripcionesTableroResumen>();
 
-		String consulta = "SELECT tp.nombre plan,fd.id_programa, fd.nombre_tentativo programa, fd.identificador_final clave, (SELECT tmc2.nombre FROM tbl_malla_curricular tmc2 WHERE tmc2.id = tmc.id_padre) semestre, tmc.nombre bloque,  count(ti.id) no_estudiantes_inscritos FROM tbl_inscripciones ti\r\n"
-				+ "                                                              INNER JOIN rel_proceso_inscipcion_planesyprogramas rpi ON rpi.id_programa = ti.idprograma AND rpi.id_plan = ti.idplan\r\n"
-				+ "                                                              INNER JOIN tbl_procesos_inscripcion tpi ON tpi.proceso_inscripcion_id =  rpi.id_proceso_inscripcion\r\n"
-				+ "                                                              INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = ti.idprograma and ti.idplan = fd.id_plan\r\n"
-				+ "                                                              INNER JOIN tbl_planes tp ON tp.id_plan = ti.idplan\r\n"
-				+ "                                                              INNER JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion\r\n"
+		String consulta = "SELECT tc.nombre convocatoria ,tp.nombre plan,fd.id_programa, fd.nombre_tentativo programa, fd.identificador_final clave, (SELECT tmc2.nombre FROM tbl_malla_curricular tmc2 WHERE tmc2.id = tmc.id_padre) semestre, tmc.nombre bloque,  count(ti.id) no_estudiantes_inscritos FROM tbl_inscripciones ti\r\n"
+				+ "                                                                                                                                                                                                                                                                INNER JOIN rel_proceso_inscipcion_planesyprogramas rpi ON rpi.id_programa = ti.idprograma AND rpi.id_plan = ti.idplan\r\n"
+				+ "                                                                                                                                                                                                                                                                INNER JOIN tbl_procesos_inscripcion tpi ON tpi.proceso_inscripcion_id =  rpi.id_proceso_inscripcion\r\n"
+				+ "                                                                                                                                                                                                                                                                INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = ti.idprograma and ti.idplan = fd.id_plan\r\n"
+				+ "                                                                                                                                                                                                                                                                INNER JOIN tbl_planes tp ON tp.id_plan = ti.idplan\r\n"
+				+ "                                                                                                                                                                                                                                                                INNER JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion\r\n"
+				+ "                                                                                                                                                                                                                                                                INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpi.convocatoria_id\r\n"
 				+ "WHERE tpi.convocatoria_id = :id_convocatoria_selecionada AND tpi.id_tipo_proceso = :id_del_tipo_proceso  AND (ti.fecha_registro >= tpi.fecha_inicio AND ti.fecha_registro <= tpi.fecha_fin) AND (tpi.proceso_inscripcion_id = :id_del_nombre_selecionado AND tpi.id_categoria_proceso = 1 )\r\n"
 				+ "group by rpi.id_programa";
 
@@ -238,14 +239,15 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		private InscripcionesTableroResumen tableroInscrip(Object[] obj) {
 
 		 InscripcionesTableroResumen regresa = new InscripcionesTableroResumen();
-
-			regresa.setPlan(obj[0].toString());
-			regresa.setIdPrograma(obj[1].toString());
-			regresa.setPrograma(obj[2].toString());
-			regresa.setClave(obj[3].toString());
-			regresa.setSemestre(obj[4].toString());
-			regresa.setBloque(obj[5].toString());
-			regresa.setNoEstudiantesInscritos(obj[6].toString());
+		 
+			regresa.setConvocatoria(obj[0].toString());
+			regresa.setPlan(obj[1].toString());
+			regresa.setIdPrograma(obj[2].toString());
+			regresa.setPrograma(obj[3].toString());
+			regresa.setClave(obj[4].toString());
+			regresa.setSemestre(obj[5].toString());
+			regresa.setBloque(obj[6].toString());
+			regresa.setNoEstudiantesInscritos(obj[7].toString());
 
 			return regresa;
 		}
@@ -317,7 +319,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 	
 	@Transactional
 	@Override
-	public void deleteProcesoInscripcion(Long procesoInscripcionId) {
+	public void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId) {
 	    try {
 	        // 1. Eliminar registros relacionados en tbl_terminosycondiciones
 	        String deleteTerminosQuery = "DELETE FROM tbl_terminosycondiciones WHERE id_proceso_inscripcion = ?";
@@ -342,8 +344,14 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 	        entityManager.createNativeQuery(deleteRelacionesQuery)
 	                     .setParameter(1, procesoInscripcionId)
 	                     .executeUpdate();
-
-	        // 5. Eliminar el registro principal en tbl_procesos_inscripcion
+	        
+	        // 5. Eliminar registros relacionados en rel_proceso_inscipcion_planesyprogramas
+	        String deleteResumenQuery = "DELETE FROM tbl_inscripcion_resumen WHERE id_convocatoria = ?";
+	        entityManager.createNativeQuery(deleteResumenQuery)
+	                     .setParameter(1, convocatoriaId)
+	                     .executeUpdate();
+	        
+	        // 6. Eliminar el registro principal en tbl_procesos_inscripcion
 	        String deletePrincipalQuery = "DELETE FROM tbl_procesos_inscripcion WHERE proceso_inscripcion_id = ?";
 	        entityManager.createNativeQuery(deletePrincipalQuery)
 	                     .setParameter(1, procesoInscripcionId)
@@ -582,3 +590,4 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 //	}
 
 }
+

@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +25,14 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParam
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamNueva;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
 
+
 @Repository
 public class ConvocatoriaRepository implements IConvocatoriaRepository {
 
 	@Autowired
 	public EntityManager entityManager;
 	
+	private static final Logger logger = Logger.getLogger(ConvocatoriaRepository.class);
 	
 	String query1 = "INSERT INTO tbl_convocatoria\r\n"
 			+ "(\r\n"
@@ -42,6 +45,18 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 			+ "(id_convocatoria,id_nivel_ensenanza,id_plan,id_programa,fecha_modificacion)\r\n"
 			+ "VALUES ";
 
+	String query4 = "UPDATE tbl_convocatoria c " +
+            "SET c.nombre = :nombre, " +
+            "    c.nombre_corto = :nombreCorto, " +
+            "    c.descripcion = :descripcion, " +
+            "    c.fecha_apertura = :fechaApertura, " +
+            "    c.fecha_cierre = :fechaCierre, " +
+            "    c.url_convocatoria = :urlConvocatoria, " +
+            "    c.fecha_alta = :fechaAlta, " +
+            "    c.cupo_limite = :cupoLimite " +
+            "WHERE c.convocatoria_id = :id";
+
+	
 	@Override
 	public List<Convocatoria> consultarConvocatorias() {
 
@@ -118,6 +133,40 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		regresa.setTotal(total);
 
 		return regresa;
+	}
+	
+	@Override
+	public List<Convocatoria> consultarConvocatoriasId(Convocatoria convocatoriaParamConsulta){
+		List<Convocatoria> lista = new ArrayList<Convocatoria>();
+
+//		String consulta = "SELECT tb.convocatoria_id,tb.nombre,tb.nombre_corto,tb.descripcion,tb.fecha_apertura,tb.fecha_cierre,\r\n"
+//				+ "tb.semestre,tb.tipo,tb.url_convocatoria,tb.activo,tb.fecha_alta,tb.fecha_modificacion,tb.cupo_limite FROM tbl_convocatoria tb WHERE tb.activo = 1";
+		
+		String consulta = "SELECT DISTINCT(tb.convocatoria_id),tb.nombre,tb.nombre_corto,tb.descripcion,tb.fecha_apertura,tb.fecha_cierre, tb.semestre,tb.tipo,tb.url_convocatoria,tb.activo,tb.fecha_alta,tb.fecha_modificacion,tb.cupo_limite, cne.nombre as nomNivel \r\n"
+				+ "FROM tbl_convocatoria tb\r\n"
+				+ "         INNER JOIN rel_convocatoria_planesyprogramas rcpp ON rcpp.id_convocatoria = tb.convocatoria_id\r\n"
+				+ "         INNER JOIN cat_nivel_ensenanza_programa cne ON cne.id = rcpp.id_nivel_ensenanza AND cne.activo = 1\r\n"
+				+ "			WHERE tb.convocatoria_id = :idConvocatoria";
+		
+		
+		Query query = entityManager.createNativeQuery(consulta);
+
+		query.setParameter("idConvocatoria", convocatoriaParamConsulta.getConvocatoriaId());
+		
+		logger.info(consulta);
+		
+		List<Object[]> listaQuery = query.getResultList();
+
+		if (!listaQuery.isEmpty()) {
+			for (Object[] obj : listaQuery) {
+
+				Convocatoria convocatoria = mapeo2(obj);
+				lista.add(convocatoria);
+
+			}
+		}
+
+		return lista;
 	}
 	
 	
@@ -341,6 +390,89 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 	
 	@Transactional
 	@Override
+	public void actualizarConvocatorias(ConvocatoriaParamNueva convocatoriaParamNueva, int idConvocatoria) {
+		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+		
+		ZonedDateTime zonedDateTime = ZonedDateTime.parse(convocatoriaParamNueva.getAltaFechaApertura().toString(), inputFormatter);
+		ZonedDateTime zonedDateTime2 = ZonedDateTime.parse(convocatoriaParamNueva.getAltaFechaCierre().toString(), inputFormatter);
+//		ZonedDateTime zonedDateTime3 = ZonedDateTime.parse(convocatoriaParamNueva.getAltaFechaAlta().toString(), inputFormatter);
+		
+		DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");		
+
+		String fecha1 = zonedDateTime.format(outputFormatter);
+		String fecha2 = zonedDateTime2.format(outputFormatter);
+		String fecha3 = zonedDateTime.format(outputFormatter);
+		
+		
+
+		
+		Query query = entityManager.createNativeQuery(query4);
+
+		
+		
+		query.setParameter("nombre", convocatoriaParamNueva.getAltaNombreConvocatoria());
+		query.setParameter("nombreCorto", convocatoriaParamNueva.getAltaNombreCorto());
+		query.setParameter("descripcion", convocatoriaParamNueva.getAltaDescripcion());
+		query.setParameter("fechaApertura", fecha1);
+		query.setParameter("fechaCierre", fecha2);
+		query.setParameter("urlConvocatoria", convocatoriaParamNueva.getAltaUrl());
+		query.setParameter("fechaAlta", fecha3);
+		query.setParameter("cupoLimite", convocatoriaParamNueva.getAltaCupoLimite());
+		//query.setParameter("fechaModificacion", convocatoriaParamNueva.get);
+		query.setParameter("id", idConvocatoria);
+
+		
+		int filasAfectadas = query.executeUpdate();
+		
+		if(filasAfectadas >= 0) {
+			
+			Query query02 = entityManager.createNativeQuery(query2);
+			
+			int id = (Integer) query02.getSingleResult();
+			
+			if(id >= 0) {
+				
+				Pattern pattern = Pattern.compile("id\\w+=(\\d+)");
+				
+				
+		        Matcher matcher = null;
+		        
+				List<?> lista = convocatoriaParamNueva.getListaNivelEducativoCompl();
+
+				for (int i = 0; i < lista.size(); i++) {
+				     matcher = pattern.matcher(lista.get(i).toString());
+				     int idNivelEnsenanza = -1;
+				        int idPlan = -1;
+				        int idPrograma = -1;
+				        
+				        int index = 0;
+				        while (matcher.find()) {
+				            int value = Integer.parseInt(matcher.group(1));
+				            // Asignar los valores a diferentes variables basadas en el orden de aparición
+				            if (index == 0) {
+				                idNivelEnsenanza = value;
+				            } else if (index == 1) {
+				                idPlan = value;
+				            } else if (index == 2) {
+				                idPrograma = value;
+				            }
+				            index++;
+				        }
+				        
+				        String query32 = "("+id+"," + idNivelEnsenanza +"," + idPlan +"," + idPrograma +",'"+ fecha3 +"')";
+						
+						Query query03 = entityManager.createNativeQuery(query3.concat(query32));
+					
+						int filasAfectadas2 = query03.executeUpdate();
+				}
+			}
+			
+		}
+
+	}
+	
+	@Transactional
+	@Override
 	public void altaConvocatorias(ConvocatoriaParamNueva convocatoriaParamNueva) {
 
 		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
@@ -354,6 +486,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		String fecha1 = zonedDateTime.format(outputFormatter);
 		String fecha2 = zonedDateTime2.format(outputFormatter);
 		String fecha3 = zonedDateTime3.format(outputFormatter);
+		//String fecha3 = "2024-12-12 17:52:52";
 		
 		String sql2 = " ( "
 				+ " '"+ convocatoriaParamNueva.getAltaNombreConvocatoria() + "' ,"
@@ -383,31 +516,42 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 			if(id >= 0) {
 				
 				Pattern pattern = Pattern.compile("id\\w+=(\\d+)");
-		        Matcher matcher = pattern.matcher(convocatoriaParamNueva.getAltaNivelEducativo());
-		        
-		        int idNivelEnsenanza = -1;
-		        int idPlan = -1;
-		        int idPrograma = -1;
-		        
-		        int index = 0;
-		        while (matcher.find()) {
-		            int value = Integer.parseInt(matcher.group(1));
-		            // Asignar los valores a diferentes variables basadas en el orden de aparición
-		            if (index == 0) {
-		                idNivelEnsenanza = value;
-		            } else if (index == 1) {
-		                idPlan = value;
-		            } else if (index == 2) {
-		                idPrograma = value;
-		            }
-		            index++;
-		        }
-		        
-		        String query32 = "("+id+"," + idNivelEnsenanza +"," + idPlan +"," + idPrograma +",'"+ fecha3 +"')";
 				
-				Query query03 = entityManager.createNativeQuery(query3.concat(query32));
-			
-				int filasAfectadas2 = query03.executeUpdate();
+				
+		        Matcher matcher = null;
+		        
+				List<?> lista = convocatoriaParamNueva.getListaNivelEducativoCompl();
+
+				for (int i = 0; i < lista.size(); i++) {
+				     matcher = pattern.matcher(lista.get(i).toString());
+				     int idNivelEnsenanza = -1;
+				        int idPlan = -1;
+				        int idPrograma = -1;
+				        
+				        int index = 0;
+				        while (matcher.find()) {
+				            int value = Integer.parseInt(matcher.group(1));
+				            // Asignar los valores a diferentes variables basadas en el orden de aparición
+				            if (index == 0) {
+				                idNivelEnsenanza = value;
+				            } else if (index == 1) {
+				                idPlan = value;
+				            } else if (index == 2) {
+				                idPrograma = value;
+				            }
+				            index++;
+				        }
+				        
+				        String query32 = "("+id+"," + idNivelEnsenanza +"," + idPlan +"," + idPrograma +",'"+ fecha3 +"')";
+						
+						Query query03 = entityManager.createNativeQuery(query3.concat(query32));
+					
+						int filasAfectadas2 = query03.executeUpdate();
+				}
+
+
+		        
+		        
 				
 				
 			}

@@ -2,6 +2,7 @@ package mx.gob.sedesol.basegestor.model.entities.gestionescolar;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 public class ConvocatoriaParamNueva implements Serializable {
 
@@ -12,11 +13,21 @@ public class ConvocatoriaParamNueva implements Serializable {
 	private String altaDescripcion;
 	private Date altaFechaApertura;
 	private Date altaFechaCierre;
-	private String altaNivelEducativo;
+	//private String altaNivelEducativo;
+	private List<Modalidad> listaNivelEducativoCompl;
 	private String altaUrl;
 	private String altaEstatus;
 	private Date altaFechaAlta;
 	private String altaCupoLimite;
+	
+	public List<Modalidad> getListaNivelEducativoCompl() {
+	    return listaNivelEducativoCompl;
+	}
+
+	public void setListaNivelEducativoCompl(List<Modalidad> listaNivelEducativoCompl) {
+	    this.listaNivelEducativoCompl = listaNivelEducativoCompl;
+	}
+
 	
 	public String getAltaNombreConvocatoria() {
 		return altaNombreConvocatoria;
@@ -75,12 +86,12 @@ public class ConvocatoriaParamNueva implements Serializable {
 	public void setAltaFechaAlta(Date altaFechaAlta) {
 		this.altaFechaAlta = altaFechaAlta;
 	}
-	public String getAltaNivelEducativo() {
-		return altaNivelEducativo;
-	}
-	public void setAltaNivelEducativo(String altaNivelEducativo) {
-		this.altaNivelEducativo = altaNivelEducativo;
-	}
+//	public String getAltaNivelEducativo() {
+//		return altaNivelEducativo;
+//	}
+//	public void setAltaNivelEducativo(String altaNivelEducativo) {
+//		this.altaNivelEducativo = altaNivelEducativo;
+//	}
 	
 
 }

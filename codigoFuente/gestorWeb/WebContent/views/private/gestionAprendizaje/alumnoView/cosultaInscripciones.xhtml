@@ -204,8 +204,7 @@
 						</f:facet>
 
 
-				        <p:commandButton icon="fa fa-trash" styleClass="btn-icon btn btn-default" 
-				            oncomplete="PF('dlgConfirmarEliminar').show()"
+				        <p:commandButton icon="fa fa-trash" styleClass="btn-icon btn btn-default"
 				            actionListener="#{inscripocionesBean.prepararEliminar(convo)}" />
 
 						<p:commandButton ajax="true" update="@form"
@@ -268,6 +267,46 @@
 			</div>
 		</div>
 	</p:dialog>
+	
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccionDelete" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="Proceso de inscripción eliminado correctamente." />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccionDelete').hide()" />
+			</div>
+		</div>
+	</p:dialog>
+	
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccionEditarBorrar" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="No se puede eliminar o editar este registro." />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccionEditarBorrar').hide()" />
+			</div>
+		</div>
+	</p:dialog>
 
 	<p:dialog appendTo="@(body)" draggable="false" position="center"
 		resizable="false" closable="false" modal="true" width="600px"
@@ -296,7 +335,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<h:outputText styleClass="bloque"
-						value="Convocatoria eliminada correctamente." />
+						value="Información actualizada correctamente." />
 				</div>
 			</div>
 		</div>
