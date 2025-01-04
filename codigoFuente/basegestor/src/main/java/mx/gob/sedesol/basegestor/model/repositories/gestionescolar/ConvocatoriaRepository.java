@@ -55,6 +55,22 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
             "    c.fecha_alta = :fechaAlta, " +
             "    c.cupo_limite = :cupoLimite " +
             "WHERE c.convocatoria_id = :id";
+	
+	String query5 = "SELECT pr.convocatoria_id, pr.nombre FROM tbl_convocatoria pr " +
+			"  WHERE pr.convocatoria_id = :idConv ";
+//			"  AND pr.id_plan = :idPlan " +
+//			"  AND pr.id_programa = :idPrograma ";
+	
+	String query6 = "SELECT c.id, c.id_plan, c.id_programa, c.fecha_modificacion FROM rel_convocatoria_planesyprogramas c " +
+            "	 WHERE c.id_convocatoria = :idConvocatoria " +
+            "	 AND c.id_plan = :idPlanP " +
+			"	 AND c.id_programa = :idProgramaP";
+	
+	String query7 = "UPDATE rel_convocatoria_planesyprogramas c " +
+            "SET c.id_plan = :idPlan, " +
+            "    c.id_programa = :idPrograma, " +
+            "    c.fecha_modificacion = :fchModificacion " +
+            "	 WHERE c.id = :idUp" ;
 
 	
 	@Override
@@ -458,12 +474,49 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 				            }
 				            index++;
 				        }
+				        Query query05 = entityManager.createNativeQuery(query5);
+				        query05.setParameter("idConv", idConvocatoria);
+				        //query05.setParameter("idPrograma", idPrograma);
+				        //query05.setParameter("idPlan", idPlan);
 				        
-				        String query32 = "("+id+"," + idNivelEnsenanza +"," + idPlan +"," + idPrograma +",'"+ fecha3 +"')";
-						
-						Query query03 = entityManager.createNativeQuery(query3.concat(query32));
-					
-						int filasAfectadas2 = query03.executeUpdate();
+				        List<Object[]> listaProgramaPlan = query05.getResultList(); 
+				        
+				        for (Object[] object : listaProgramaPlan) {
+				        	
+//				        	object[0] = idConvocatoria;
+//				        	object[1] = idPlan;
+//				        	object[2] = idPrograma;
+				        	
+				        	Query query06 = entityManager.createNativeQuery(query6);
+				            //Buscar
+					        query06.setParameter("idConvocatoria", object[0]);
+					        query06.setParameter("idPlanP", idPlan);
+					        query06.setParameter("idProgramaP", idPrograma);
+				        	
+					        
+					        List<Object[]> listaConvPlanPrograma = query06.getResultList();
+					    
+					        for (Object[] object2 : listaConvPlanPrograma) {
+					        	
+					        	Query query07 = entityManager.createNativeQuery(query7);
+					        	//Actualizar
+					        	query07.setParameter("idPlan", idPlan);
+					        	query07.setParameter("idPrograma", idPrograma);
+					        	query07.setParameter("fchModificacion", fecha2);
+					        	
+					        	//Buscar
+					        	query07.setParameter("idUp", object2[1]);
+					        	
+					        	query07.executeUpdate();
+
+					        	
+					        }
+		
+						}
+				        
+				        //String query32 = "("+id+"," + idNivelEnsenanza +"," + idPlan +"," + idPrograma +",'"+ fecha3 +"')";
+						//Query query03 = entityManager.createNativeQuery(query3.concat(query32));
+						//int filasAfectadas2 = query03.executeUpdate();
 				}
 			}
 			

@@ -15,6 +15,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivel
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionParamNueva;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionPlanesProgramas;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesConsultaResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesTableroResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
@@ -74,17 +75,7 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		return lista;
 	}
 	
-	@Override
-	public List<TblPlan> consultarPlan() {
-		
-		List<TblPlan> lista = iinscripcionesRepository.consultarPlan();
-		
-		if (lista.isEmpty()) {
-			return new ArrayList<TblPlan>();
-		}
-		return lista;
-	}
-	
+
 	@Override
 	public List<InscripcionesTableroResumen> consultarTableroResumen(ConvocatoriaParamConsulta tableroParamConsulta) {
 		
@@ -96,6 +87,18 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		return lista;
 	}
 	
+
+	@Override
+	public void altaInscripciones(InscripcionParamNueva inscripcionParamNueva) {
+		iinscripcionesRepository.altaInscripcion(inscripcionParamNueva);
+	}
+	
+	
+	@Override
+	public void altaInscripcionesExtra(InscripcionParamNueva inscripcionParamNueva) {
+		iinscripcionesRepository.altaInscripcionExtra(inscripcionParamNueva);
+	}
+
 	
 	
 	@Override
@@ -189,33 +192,38 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 
 	@Override
 	public List<TblPlan> consultarPlan(InscripcionParamNueva inscripcionParamNueva) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		List<TblPlan> lista = iinscripcionesRepository.consultarPlan(inscripcionParamNueva);
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<TblPlan>();
+		}
+		return lista;
 	}
 
+	
+	@Override
+	public List<InscripcionPlanesProgramas> consultarPlanPrograma(InscripcionParamNueva inscripcionParamNueva) {
+		List<InscripcionPlanesProgramas> lista = iinscripcionesRepository.consultarPlanPrograma(inscripcionParamNueva);
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<InscripcionPlanesProgramas>();
+		}
+		return lista;
+	}
 
 
 	@Override
 	public List<TblFichaDescriptivaPrograma> consultarPrograma(InscripcionParamNueva inscripcionParamNueva) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 
 
-	@Override
-	public void altaInscripciones(InscripcionParamNueva inscripcionParamNueva) {
-		// TODO Auto-generated method stub
-		
-	}
 
 
 
-	@Override
-	public void altaInscripcionesExtra(InscripcionParamNueva inscripcionParamNueva) {
-		// TODO Auto-generated method stub
-		
-	}
+
 	
  
 

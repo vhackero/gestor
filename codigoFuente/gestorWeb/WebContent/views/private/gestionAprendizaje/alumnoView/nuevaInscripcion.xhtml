@@ -333,43 +333,21 @@
 				
 								<!-- Plan - Select -->
 					<div class="col-md-4 col-xs-12" >
-						<p:outputLabel styleClass="bloque requerido" for="plan2" value="Plan:" />
-			<p:selectCheckboxMenu id="plan2" value="#{inscripocionesBean.inscripcionParamNueva.listaPlanesValor}" required="true"
+						<p:outputLabel styleClass="bloque requerido" for="plan2" value="Plan / Programa:" />
+			<p:selectCheckboxMenu id="plan2" value="#{inscripocionesBean.inscripcionParamNueva.planesProgramas}" required="true"
                 				 requiredMessage="El campo es requerido">
 
 							<!-- Llamar al método cuando cambia la selección -->
 							<p:ajax event="change"
-								listener="#{inscripocionesBean.consultarPlan}"
 								update="@form" />
 
 							<!-- Opciones del Select -->
-							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-							<f:selectItems value="#{inscripocionesBean.listaPlanes}"
-								var="tblPlan" itemLabel="#{tblPlan.nombre}"
-								itemValue="#{tblPlan.idPlan}" />
+							<f:selectItem itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" itemValue="#{null}" />
+							<f:selectItems value="#{inscripocionesBean.listaPlanProgramas}"
+								var="tblPlan" itemLabel="#{tblPlan.nombrePlan} > #{tblPlan.nombrePrograma}"
+								itemValue="#{tblPlan}" />
 						</p:selectCheckboxMenu>
 						 <p:message for="plan2" display="text" />
-					</div>
-
-					<!-- Programa - Select -->
-					<div class="col-md-4 col-xs-12">
-						<p:outputLabel styleClass="bloque requerido" for="programa2"
-							value="Programa:" />
-						<p:selectCheckboxMenu id="programa2" value="#{inscripocionesBean.inscripcionParamNueva.listaProgramaValor}"
-							styleClass="col-xs-12"  required="true"
-                				 requiredMessage="El campo es requerido">
-                				 
-                				 <!-- Llamar al método cuando cambia la selección -->
-							<p:ajax event="change"
-								listener="#{inscripocionesBean.consultarPrograma2}"
-								update="@form" />
-                				 
-							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-							<f:selectItems value="#{inscripocionesBean.listaPrograma}"
-								var="programa" itemLabel="#{programa.nombreTentativo}"
-								itemValue="#{programa.idPrograma}" />
-						</p:selectCheckboxMenu>
-						<p:message for="programa2" display="text" />
 					</div>
 					
 					<div class="col-md-4 col-xs-12">
@@ -426,6 +404,26 @@
 		
 		<p:dialog appendTo="@(body)" draggable="false" position="center"
 			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion55" header="Informativo" dynamic="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText styleClass="bloque"
+							value="Los planes y programas ya existen con la convocatoria seleccionada." />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dlgValidarSeleccion55').hide()" />
+				</div>
+			</div>
+		</p:dialog>
+		
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
 			widgetVar="dlgValidarSeleccion9" header="Informativo" dynamic="true">
 			<div class="form-group">
 				<div class="row">
@@ -440,6 +438,26 @@
 				<div class="col-md-12 text-right">
 					<p:commandButton value="Cerrar" styleClass="btn btn-default"
 						onclick="PF('dlgValidarSeleccion9').hide()" />
+				</div>
+			</div>
+		</p:dialog>
+		
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion99" header="Informativo" dynamic="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText styleClass="bloque"
+							value="La fecha actual es mayor a la del cierre" />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dlgValidarSeleccion99').hide()" />
 				</div>
 			</div>
 		</p:dialog>

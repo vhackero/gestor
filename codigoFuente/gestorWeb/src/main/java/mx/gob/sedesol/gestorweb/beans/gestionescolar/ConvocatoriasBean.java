@@ -142,12 +142,10 @@ public class ConvocatoriasBean extends BaseBean {
 		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/cosultaConvocatoria.xhtml";
 		listaTableResumen = new ArrayList<ConvocatoriaTableroResumen>();
 		valueConvocatoria = 0;
-
 		
-
 		consultarNivelEducativo();
 		
-
+		consultarNivelEducativoCompleto();
 		return null;
 	}
 
