@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+
+	
+	<h:panelGroup id="formEdicion">
+		<p:panel header="Editar Registro">
+			<div class="form-group">
+
+				<div class="row">
+
+					<!-- ID de Convocatoria -->
+
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="idConvocatoriaEdit"
+							value="Convocatoria:" />
+						<p:selectOneMenu id="idConvocatoriaEdit"
+							value="#{inscripocionesBean.registroSeleccionado.idConvocatoria}">
+
+							<!-- Opciones del Select -->
+							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+							<f:selectItems value="#{inscripocionesBean.listaConvocatoria}"
+								var="convocatoria" itemLabel="#{convocatoria.nombre}"
+								itemValue="#{convocatoria.convocatoriaId}" />
+						</p:selectOneMenu>
+					</div>
+
+
+
+					<!-- Tipo de Proceso -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel for="tipoProcesoEdit" value="Tipo de Proceso:"
+							styleClass="bloque" />
+						<p:selectOneMenu id="tipoProcesoEdit"
+							value="#{inscripocionesBean.registroSeleccionado.idTipoProceso}">
+							<f:selectItems value="#{inscripocionesBean.listaTipoProceso}"
+								var="tipo" itemLabel="#{tipo.nombre}"
+								itemValue="#{tipo.idProceso}" />
+						</p:selectOneMenu>
+					</div>
+					<!-- Estatus -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel for="estatusEdit" value="Estatus:"
+							styleClass="bloque" />
+						<p:selectOneMenu id="estatusEdit"
+							value="#{inscripocionesBean.registroSeleccionado.estatus}">
+							<f:selectItems value="#{inscripocionesBean.listaEstatus}" />
+						</p:selectOneMenu>
+					</div>
+
+
+				</div>
+				<div class="row">
+
+					<!-- Nombre -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="nombreEdit"
+							value="Nombre:" />
+						<p:inputText id="nombreEdit"
+							value="#{inscripocionesBean.registroSeleccionado.nombre}"
+							styleClass="form-control" />
+					</div>
+
+
+					<!-- Fecha de Inicio -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="fecIniEdit"
+							value="Fecha de inicio:" />
+						<p:calendar id="fecIniEdit"
+							value="#{inscripocionesBean.fechaInicioEdit}"
+							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
+							readonlyInput="true" yearRange="c-100:c+100"
+							placeholder="Seleccionar" />
+					</div>
+
+					<!-- Fecha de Fin -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="fecFinEdit"
+							value="Fecha de Fin:" />
+						<p:calendar id="fecFinEdit"
+							value="#{inscripocionesBean.fechaFinEdit}"
+							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
+							readonlyInput="true" yearRange="c-100:c+100"
+							placeholder="Seleccionar" />
+					</div>
+				</div>
+			</div>
+				<div class="form-group text-right">
+					<p:commandButton value="Guardar"
+					    actionListener="#{inscripocionesBean.guardarCambios}" 
+					    ajax="true" update="@form" styleClass="btn btn-primary" />
+					<p:commandButton value="Cancelar"
+					    actionListener="#{inscripocionesBean.cancelarEdicion}" 
+					    ajax="true" update="@form" styleClass="btn btn-default" />
+	
+				</div>
+		</p:panel>
+	</h:panelGroup>
+</ui:composition>

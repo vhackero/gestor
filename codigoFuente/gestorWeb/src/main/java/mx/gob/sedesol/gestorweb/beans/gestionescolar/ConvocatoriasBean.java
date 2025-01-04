@@ -48,6 +48,16 @@ public class ConvocatoriasBean extends BaseBean {
 
 	// REDIRECCION OPCIONES
 	private String paginaActual;
+	
+	private Convocatoria editarConv;
+
+	public Convocatoria getEditarConv() {
+		return editarConv;
+	}
+
+	public void setEditarConv(Convocatoria editarConv) {
+		this.editarConv = editarConv;
+	}
 
 	// nivel educativo
 	private List<ConvocatoriaNivelEducativo> listaNivelEducativo;
@@ -132,12 +142,10 @@ public class ConvocatoriasBean extends BaseBean {
 		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/cosultaConvocatoria.xhtml";
 		listaTableResumen = new ArrayList<ConvocatoriaTableroResumen>();
 		valueConvocatoria = 0;
-
 		
-
 		consultarNivelEducativo();
 		
-
+		consultarNivelEducativoCompleto();
 		return null;
 	}
 
@@ -169,17 +177,71 @@ public class ConvocatoriasBean extends BaseBean {
 	
 	public void editarConvocatoria() {
 		
-		logger.info(" INICIA EDITAR  ");
+		if(esFechaActual(editarConv.getFecha_Apertura().toString())) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion7').show()");
+		}else {
+			logger.info(" INICIA EDITAR  ");
+			
+			//consultar convocatiro por id
+			logger.info("***********************Inicio Consulta convocatorias ID***********************");
+			
+			
+			if(convocatoriaParamConsulta.getValueConvocatoriaEstatus() == null ) {
+				convocatoriaParamConsulta.setValueConvocatoriaEstatus("");
+			}
+			
+			if(convocatoriaParamConsulta.getConsulNivelEducativo() == null ) {
+				convocatoriaParamConsulta.setConsulNivelEducativo("0");
+			}
+			
+			logger.info("NOMBRE : " + convocatoriaParamConsulta.getConsulNombreConvocatoria());
+			logger.info("NOMBRE CORTO : " + convocatoriaParamConsulta.getConsulNombreCorto());
+			logger.info("ESTATUS : " + convocatoriaParamConsulta.getValueConvocatoriaEstatus());
+			logger.info("FECHA APERTURA : " + convocatoriaParamConsulta.getConsulFechaApertura());
+			logger.info("FECHA CIERRE : " + convocatoriaParamConsulta.getConsulFechaCierre());
+			logger.info("NIVEL EDUCATIVO : " + convocatoriaParamConsulta.getConsulNivelEducativo());
+			logger.info(editarConv);
+			
+			
+			if( "".equals(convocatoriaParamConsulta.getConsulNombreConvocatoria()) ||
+				convocatoriaParamConsulta.getConsulFechaApertura() == null  || 
+						convocatoriaParamConsulta.getConsulFechaCierre() == null ) {
+				
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion2').show()");
+				
+			} else {
+				
+				listaConvocatoria2 = convocatoriaService.consultarConvocatoriasId(editarConv);
+				
+				if(listaConvocatoria2.isEmpty()) {
+					RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion').show()");
+				}
+				
+			}
 		
-		//consultar convocatiro por id
-		//guardar resultado en el dto alta convotaria para mostrar en pantalla
+			
+			logger.info("***********************Termina Consulta convocatorias ID***********************");
+			
+			//guardar resultado en el dto alta convotaria para mostrar en pantalla
+			convocatoriaParamNueva.setAltaCupoLimite(listaConvocatoria2.get(0).getCupoLimite().toString());
+			convocatoriaParamNueva.setAltaDescripcion(listaConvocatoria2.get(0).getDescripcion());
+			convocatoriaParamNueva.setAltaEstatus(listaConvocatoria2.get(0).getActivo());
+			convocatoriaParamNueva.setAltaFechaAlta(listaConvocatoria2.get(0).getFechaAlta());
+			convocatoriaParamNueva.setAltaFechaApertura(listaConvocatoria2.get(0).getFecha_Apertura());
+			convocatoriaParamNueva.setAltaFechaCierre(listaConvocatoria2.get(0).getFechaCierre());
+			convocatoriaParamNueva.setAltaNombreConvocatoria(listaConvocatoria2.get(0).getNombre());
+			convocatoriaParamNueva.setAltaNombreCorto(listaConvocatoria2.get(0).getNombreCorto());
+			convocatoriaParamNueva.setAltaUrl(listaConvocatoria2.get(0).getUrlConvocatoria());
+			
+			
+			this.mostrarNuevaConvocatoria = true;
+			this.mostrarConsultaConvocatoria = false;
+			
+			
+			logger.info(" TERMINA EDITAR  ");;			
+		}
 		
 		
-		this.mostrarConsultaConvocatoria = false;
-		this.mostrarNuevaConvocatoria = true;
-		
-
-		logger.info(" TERMINA EDITAR  ");
 		
 	}
 	
@@ -190,16 +252,67 @@ public class ConvocatoriasBean extends BaseBean {
 		
 		//realizar update en bd
 		
+		logger.info("***********************Inicio Alta Convocatoria ID***********************");
+		
+		logger.info("nombre de la convocaria    : " + convocatoriaParamNueva.getAltaNombreConvocatoria());
+		logger.info("nombre corto               : " + convocatoriaParamNueva.getAltaNombreCorto());
+		logger.info("descripcion                : " + convocatoriaParamNueva.getAltaDescripcion());
+		logger.info("fecha de apertura          : " + convocatoriaParamNueva.getAltaFechaApertura());
+		logger.info("fecha cierre               : " + convocatoriaParamNueva.getAltaFechaCierre());
+		logger.info("nivel educativo            : " + convocatoriaParamNueva.getListaNivelEducativoCompl());
+		logger.info("url                        : " + convocatoriaParamNueva.getAltaUrl());
+		logger.info("estatus                    : " + convocatoriaParamNueva.getAltaEstatus());
+		logger.info("fecha alta                 : " + convocatoriaParamNueva.getAltaFechaAlta());
+		logger.info("cupo limite                : " + convocatoriaParamNueva.getAltaCupoLimite());
+		
+		if( "".equals(convocatoriaParamNueva.getAltaNombreConvocatoria()) ||
+			"".equals(convocatoriaParamNueva.getAltaNombreCorto()) ||
+			convocatoriaParamNueva.getAltaFechaApertura() == null  || 
+			convocatoriaParamNueva.getAltaEstatus() == null  || 
+			/*convocatoriaParamNueva.getListaNivelEducativoCompl() == null  ||*/ 
+			convocatoriaParamNueva.getAltaFechaCierre() == null ) {
+				
+				//RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion8').show()");
+				
+			} else {
+				
+				if("".equals(convocatoriaParamNueva.getAltaCupoLimite())) {
+					convocatoriaParamNueva.setAltaCupoLimite("0");
+				}
+				
+				listaConvocatoria2 = convocatoriaService.consultarConvocatoriasFiltros(convocatoriaParamConsulta);
+				
+				convocatoriaService.actualizarConvocatorias(convocatoriaParamNueva, listaConvocatoria2.get(0).getConvocatoriaId());
+				
+				
+				
+				//RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion9').show()");
+	
+				
+			}
+
+		logger.info("***********************Termina Alta Convocatoria***********************");
+		
+		List<?> lista = convocatoriaParamNueva.getListaNivelEducativoCompl();
 		
 		//llenar dto consulta nombre con las variables de alta nombre que se utilizaron en el update
-		
+		convocatoriaParamConsulta = new ConvocatoriaParamConsulta();
+		convocatoriaParamConsulta.setConsulNombreConvocatoria(convocatoriaParamNueva.getAltaNombreConvocatoria());
+		convocatoriaParamConsulta.setConsulFechaApertura(convocatoriaParamNueva.getAltaFechaApertura());
+		convocatoriaParamConsulta.setConsulFechaCierre(convocatoriaParamNueva.getAltaFechaCierre());
+		convocatoriaParamConsulta.setConsulNivelEducativo(convocatoriaParamConsulta.getConsulNivelEducativo());
+		convocatoriaParamConsulta.setConsulNombreCorto(convocatoriaParamNueva.getAltaNombreCorto());
+		convocatoriaParamConsulta.setValueConvocatoriaEstatus(convocatoriaParamNueva.getAltaEstatus());
 		
 		// ejecutas el consulta filtros	
 		
-		 
-		this.mostrarConsultaConvocatoria = true;
-		 this.mostrarNuevaConvocatoria = false;
+		consultarFiltros();
 		
+		 
+		 this.mostrarConsultaConvocatoria = true;
+		 this.mostrarNuevaConvocatoria = false;
+//		 convocatoriaParamConsulta = new ConvocatoriaParamConsulta();
+		 RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion77').show()");
 
 		logger.info(" TERMINA EDITAR  ");
 		
@@ -227,9 +340,6 @@ public class ConvocatoriasBean extends BaseBean {
 			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion3').show()");			
 		}
 		
-		
-		
-		
 		logger.info(" TERMINA ELIMINAR  ");
 		
 	}
@@ -240,7 +350,7 @@ public class ConvocatoriasBean extends BaseBean {
             Date fechaIngresada = dateFormat.parse(fechaStr);
             LocalDate fechaIngresadaLocal = fechaIngresada.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate fechaActual = LocalDate.now();
-            return fechaIngresadaLocal.equals(fechaActual);
+            return !fechaIngresadaLocal.isAfter(fechaActual);
         } catch (ParseException e) {
             // Manejar error si la fecha no es válida
             System.out.println("Error al parsear la fecha: " + e.getMessage());
@@ -262,7 +372,7 @@ public class ConvocatoriasBean extends BaseBean {
 		logger.info("descripcion                : " + convocatoriaParamNueva.getAltaDescripcion());
 		logger.info("fecha de apertura          : " + convocatoriaParamNueva.getAltaFechaApertura());
 		logger.info("fecha cierre               : " + convocatoriaParamNueva.getAltaFechaCierre());
-		logger.info("nivel educativo            : " + convocatoriaParamNueva.getAltaNivelEducativo());
+		logger.info("nivel educativo            : " + convocatoriaParamNueva.getListaNivelEducativoCompl());
 		logger.info("url                        : " + convocatoriaParamNueva.getAltaUrl());
 		logger.info("estatus                    : " + convocatoriaParamNueva.getAltaEstatus());
 		logger.info("fecha alta                 : " + convocatoriaParamNueva.getAltaFechaAlta());
@@ -272,7 +382,7 @@ public class ConvocatoriasBean extends BaseBean {
 			"".equals(convocatoriaParamNueva.getAltaNombreCorto()) ||
 			convocatoriaParamNueva.getAltaFechaApertura() == null  || 
 			convocatoriaParamNueva.getAltaEstatus() == null  || 
-			convocatoriaParamNueva.getAltaNivelEducativo() == null  || 
+			convocatoriaParamNueva.getListaNivelEducativoCompl() == null  || 
 			convocatoriaParamNueva.getAltaFechaCierre() == null ) {
 				
 				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion8').show()");
@@ -284,6 +394,8 @@ public class ConvocatoriasBean extends BaseBean {
 				}
 				
 				convocatoriaService.altaConvocatorias(convocatoriaParamNueva);
+				
+				convocatoriaParamNueva = new ConvocatoriaParamNueva();
 				
 				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion9').show()");
 				

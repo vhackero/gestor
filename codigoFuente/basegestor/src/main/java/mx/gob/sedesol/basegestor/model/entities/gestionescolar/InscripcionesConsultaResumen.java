@@ -15,6 +15,7 @@ public class InscripcionesConsultaResumen implements Serializable {
 	private String fecFin;
 	private String tipoProceso;
 	private String estatus;
+	private String idTipoProceso;
 	
 	public String getProcesoInscripcionId() {
 		return procesoInscripcionId;
@@ -66,6 +67,12 @@ public class InscripcionesConsultaResumen implements Serializable {
 	}
 	public static long getSerialversionuid() {
 		return serialVersionUID;
+	}
+	public String getIdTipoProceso() {
+		return idTipoProceso;
+	}
+	public void setIdTipoProceso(String idTipoProceso) {
+		this.idTipoProceso = idTipoProceso;
 	}
 	 
 	

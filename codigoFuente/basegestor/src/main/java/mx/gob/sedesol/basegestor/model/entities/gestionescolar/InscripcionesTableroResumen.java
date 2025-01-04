@@ -7,6 +7,7 @@ public class InscripcionesTableroResumen implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
+	private String convocatoria;
 	private String plan;
 	private String idPrograma;
 	private String programa;
@@ -58,6 +59,12 @@ public class InscripcionesTableroResumen implements Serializable {
 	}
 	public static long getSerialversionuid() {
 		return serialVersionUID;
+	}
+	public String getConvocatoria() {
+		return convocatoria;
+	}
+	public void setConvocatoria(String convocatoria) {
+		this.convocatoria = convocatoria;
 	} 
 	
 	

@@ -21,11 +21,15 @@ public interface ConvocatoriaService extends CommonService<Convocatoria, Integer
 	
 	public List<Convocatoria> consultarConvocatoriasFiltros(ConvocatoriaParamConsulta convocatoriaParamConsulta);
 	
+	public List<Convocatoria> consultarConvocatoriasId(Convocatoria convocatoriaParamConsulta);
+	
 	public List<ConvocatoriaTableroResumen> consultarTableroResumen(Integer convocatoriaId);
 	
 	public List<ConvocatoriaNivelEducativo> consultarNivelEducativo();
 	
 	public void altaConvocatorias(ConvocatoriaParamNueva convocatoriaParamNueva);
+	
+	public void actualizarConvocatorias(ConvocatoriaParamNueva convocatoriaParamNueva, int idConvocatoria);
 	
 	public void eliminarConvocatorias(Convocatoria elminarConvo);
 	

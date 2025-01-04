@@ -7,19 +7,18 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core">
 
-	<p:panel header="Nuevo Proceso de Inscripción">
-
-		<h:form id="formNuevoProceso">
+	<p:panel header="Nuevo Proceso de Inscripción" rendered="#{inscripocionesBean.mostrarConsultaConvocatoria}">
 
 			<div class="form-group">
 				<div class="row">
 
 					<!-- Convocatoria - Select -->
 					<div class="col-md-4 col-xs-12">
-						<p:outputLabel styleClass="bloque" for="convocatoria"
+						<p:outputLabel styleClass="bloque requerido" for="convocatoria"
 							value="Convocatoria:" />
 						<p:selectOneMenu id="convocatoria"
-							value="#{inscripocionesBean.convocatoriaSeleccionada}">
+							value="#{inscripocionesBean.inscripcionParamNueva.convocatoriaSeleccionada}" required="true"
+                				 requiredMessage="El campo es requerido" >
 
 							<!-- Llamar al método cuando cambia la selección -->
 							<p:ajax event="change"
@@ -30,34 +29,38 @@
 							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
 							<f:selectItems value="#{inscripocionesBean.listaConvocatoria}"
 								var="convocatoria" itemLabel="#{convocatoria.nombre}"
-								itemValue="#{convocatoria}" />
+								itemValue="#{convocatoria.convocatoriaId}" />
 						</p:selectOneMenu>
+						<p:message for="convocatoria" display="text" />
 					</div>
 					<!-- Tipo de proceso - Select -->
 					<div class="col-md-4 col-xs-12">
-						<p:outputLabel styleClass="bloque" for="tipoProceso"
+						<p:outputLabel styleClass="bloque requerido" for="tipoProceso"
 							value="Tipo de proceso:" />
 						<p:selectOneMenu id="tipoProceso"
-							value="#{inscripocionesBean.procesoSeleccionada}">
-
+							value="#{inscripocionesBean.inscripcionParamNueva.procesoSeleccionada}" required="true"
+                				 requiredMessage="El campo es requerido" >
 							<!-- Llamar al método cuando cambia la selección -->
 							<p:ajax event="change"
-								listener="#{inscripocionesBean.consultaTipoProceso}"
+								listener="#{inscripocionesBean.consultaTipoProceso2}"
 								update="@form" />
 
 							<!-- Opciones del Select -->
 							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
 							<f:selectItems value="#{inscripocionesBean.listaTipoProceso}"
 								var="tipoProceso" itemLabel="#{tipoProceso.nombre}"
-								itemValue="#{tipoProceso}" />
+								itemValue="#{tipoProceso.idProceso}" />
 						</p:selectOneMenu>
+						<p:message for="tipoProceso" display="text" />
 					</div>
 
 					<!-- Nombre - Input -->
 					<div class="col-md-4 col-xs-12">
-						<p:outputLabel styleClass="bloque" for="nombre" value="Nombre:" />
-						<p:inputText id="nombre" value="#{procesoBean.nombre}"
-							styleClass="form-control" />
+						<p:outputLabel styleClass="bloque requerido" for="nombre" value="Nombre:" />
+						<p:inputText id="nombre" value="#{inscripocionesBean.inscripcionParamNueva.nombre}"
+							styleClass="form-control" required="true"
+                				 requiredMessage="El campo es requerido" onkeyup="PF('nombreCortoInput').jq.val(this.value.substring(0, 3).toUpperCase() + '-' + (this.value.split(' ')[1] ? this.value.split(' ')[1].substring(0, 3).toUpperCase() : '') + '-' + new Date().getFullYear() + '-1');"/>
+							<p:message for="nombre" display="text" />
 					</div>
 
 
@@ -71,26 +74,26 @@
 					<div class="col-md-4 col-xs-12">
 						<p:outputLabel styleClass="bloque" for="claveProceso"
 							value="Clave de proceso:" />
-						<p:inputText id="claveProceso" value="#{procesoBean.claveProceso}"
-							styleClass="form-control" />
+						<p:inputText id="claveProceso" value="#{inscripocionesBean.inscripcionParamNueva.calveProceso}"
+							styleClass="form-control" widgetVar="nombreCortoInput" />
 					</div>
 					<!-- Descripción - Input -->
 					<div class="col-md-4 col-xs-12">
 						<p:outputLabel styleClass="bloque" for="descripcion"
 							value="Descripción:" />
 						<p:inputTextarea id="descripcion"
-							value="#{procesoBean.descripcion}" styleClass="form-control"
+							value="#{inscripocionesBean.inscripcionParamNueva.descripcion}" styleClass="form-control"
 							rows="3" />
 					</div>
 					<!-- Semestre - Select -->
 					<div class="col-md-4 col-xs-12">
 						<p:outputLabel styleClass="bloque" for="semestre"
 							value="Semestre:" />
-						<p:selectOneMenu id="semestre" value="#{procesoBean.semestre}"
+						<p:selectOneMenu id="semestre" value="#{inscripocionesBean.inscripcionParamNueva.semestre}"
 							styleClass="col-xs-12">
 							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-							<f:selectItems value="#{procesoBean.listaSemestres}"
-								var="semestre" itemLabel="#{semestre.nombre}"
+							<f:selectItems value="#{inscripocionesBean.listaSemestres}"
+								var="semestre" itemLabel="#{semestre}"
 								itemValue="#{semestre}" />
 						</p:selectOneMenu>
 					</div>
@@ -105,88 +108,398 @@
 
 					<!-- Fecha inicio - Input -->
 					<div class="col-md-4 col-xs-12">
-						<p:outputLabel styleClass="bloque" for="fechaInicio"
+						<p:outputLabel styleClass="bloque requerido" for="fechaInicio"
 							value="Fecha inicio:" />
-						<p:calendar id="fechaInicio" value="#{procesoBean.fechaInicio}"
+						<p:calendar id="fechaInicio" value="#{inscripocionesBean.inscripcionParamNueva.fechaInicio}"
 							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
-							placeholder="Seleccionar" />
+							placeholder="Seleccionar" required="true"
+                				 requiredMessage="El campo es requerido"/>
+                				 <p:message for="fechaInicio" display="text" />
 					</div>
 
 					<!-- Fecha fin - Input -->
 					<div class="col-md-4 col-xs-12">
-						<p:outputLabel styleClass="bloque" for="fechaFin"
+						<p:outputLabel styleClass="bloque requerido" for="fechaFin"
 							value="Fecha fin:" />
-						<p:calendar id="fechaFin" value="#{procesoBean.fechaFin}"
+						<p:calendar id="fechaFin" value="#{inscripocionesBean.inscripcionParamNueva.fechaFin}"
 							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
-							placeholder="Seleccionar" />
+							placeholder="Seleccionar" required="true"
+                				 requiredMessage="El campo es requerido"/>
+                				 <p:message for="fechaFin" display="text" />
+					</div>
+					
+					<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque" value="Estatus:" />
+							<p:selectOneMenu id="altaEstatus"  value="#{inscripocionesBean.inscripcionParamNueva.altaEstatus}"
+								styleClass="col-xs-12" >
+								<p:ajax event="change" process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" />
+								<f:selectItems value="#{convocatoriasBean.estatusLista}"
+									var="modalidad" itemLabel="#{modalidad.nombreEstatus}"
+									itemValue="#{modalidad.valorEstatus}" />
+
+							</p:selectOneMenu>
+							 <p:message for="altaEstatus" display="text" />
+						</div>
+
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="row">
+
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="perfil" value="Perfil:" />
+						<p:inputText id="perfil" value="#{inscripocionesBean.inscripcionParamNueva.perfil}"
+							styleClass="form-control" />
 					</div>
 
 
-					<!-- Plan - Select -->
-					<div class="col-md-4 col-xs-12">
-						<p:outputLabel styleClass="bloque" for="plan" value="Plan:" />
-			<p:selectOneMenu id="plan"
-							value="#{inscripocionesBean.planSeleccionada}">
+				</div>
+			</div>
+			<div class="form-group">
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cancelar" process="@this"
+										 update="@form"
+										 action="#{inscripocionesBean.cancelar}" ajax="true"
+										 styleClass="btn btn-default" />
+						<p:commandButton value="Limpiar campos" process="@this"
+										 update="@form"
+										 action="#{inscripocionesBean.limpiarCampos}" ajax="true"
+										 styleClass="btn btn-default" />				
+						<p:commandButton id="btnBusquedaAvas" process="@form" ajax="true"
+							update="@form" styleClass="btn btn-primary pull-right"
+							action="#{inscripocionesBean.altaInscripcion}"
+							value="Guardar" />
+				</div>
+			</div>
+		</div>
 
+	</p:panel>
+	
+		<p:panel header="Nuevo Proceso de Inscripción" rendered="#{inscripocionesBean.mostrarNuevaConvocatoria}">
+
+			<div class="form-group">
+				<div class="row">
+
+					<!-- Convocatoria - Select -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque requerido" for="convocatoria2"
+							value="Convocatoria:" />
+						<p:selectOneMenu id="convocatoria2"
+							value="#{inscripocionesBean.inscripcionParamNueva.convocatoriaSeleccionada}" required="true"
+                				 requiredMessage="El campo es requerido">
 							<!-- Llamar al método cuando cambia la selección -->
 							<p:ajax event="change"
-								listener="#{inscripocionesBean.consultarPlan}"
+								listener="#{inscripocionesBean.consultarConvocatorias}"
 								update="@form" />
 
 							<!-- Opciones del Select -->
 							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-							<f:selectItems value="#{inscripocionesBean.listaPlanes}"
-								var="tblPlan" itemLabel="#{tblPlan.nombre}"
-								itemValue="#{tblPlan}" />
+							<f:selectItems value="#{inscripocionesBean.listaConvocatoria}"
+								var="convocatoria" itemLabel="#{convocatoria.nombre}"
+								itemValue="#{convocatoria.convocatoriaId}" />
 						</p:selectOneMenu>
+						<p:message for="convocatoria2" display="text" />
 					</div>
-
-				</div>
-			</div>
-
-			<div class="form-group">
-				<div class="row">
-
-					<!-- Programa - Select -->
+					<!-- Tipo de proceso - Select -->
 					<div class="col-md-4 col-xs-12">
-						<p:outputLabel styleClass="bloque" for="programa"
-							value="Programa:" />
-						<p:selectOneMenu id="programa" value="#{procesoBean.programa}"
-							styleClass="col-xs-12">
+						<p:outputLabel styleClass="bloque requerido" for="tipoProceso2"
+							value="Tipo de proceso:" />
+						<p:selectOneMenu id="tipoProceso2"
+							value="#{inscripocionesBean.inscripcionParamNueva.procesoSeleccionada}" required="true"
+                				 requiredMessage="El campo es requerido">
+							<!-- Llamar al método cuando cambia la selección -->
+							<p:ajax event="change"
+								listener="#{inscripocionesBean.consultaTipoProceso2}"
+								update="@form" />
+
+							<!-- Opciones del Select -->
 							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-							<f:selectItems value="#{procesoBean.listaProgramas}"
-								var="programa" itemLabel="#{programa.nombre}"
-								itemValue="#{programa}" />
+							<f:selectItems value="#{inscripocionesBean.listaTipoProceso}"
+								var="tipoProceso" itemLabel="#{tipoProceso.nombre}"
+								itemValue="#{tipoProceso.idProceso}" />
 						</p:selectOneMenu>
+						<p:message for="tipoProceso2" display="text" />
 					</div>
 
-
+					<!-- Nombre - Input -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque requerido" for="nombre2" value="Nombre:" />
+						<p:inputText id="nombre2" value="#{inscripocionesBean.inscripcionParamNueva.nombre}"
+							styleClass="form-control" required="true"
+                				 requiredMessage="El campo es requerido" onkeyup="PF('nombreCortoInput').jq.val(this.value.substring(0, 3).toUpperCase() + '-' + (this.value.split(' ')[1] ? this.value.split(' ')[1].substring(0, 3).toUpperCase() : '') + '-' + new Date().getFullYear() + '-1');"/>
+							<p:message for="nombre2" display="text" />
+					</div>
+					
 				</div>
 			</div>
+
+			<div class="form-group">
+				<div class="row">
+					<!-- Clave de proceso - Input -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque requerido" for="claveProceso2"
+							value="Clave de proceso:" />
+						<p:inputText id="claveProceso2" value="#{inscripocionesBean.inscripcionParamNueva.calveProceso}"
+							styleClass="form-control" required="true"
+                				 requiredMessage="El campo es requerido" widgetVar="nombreCortoInput"/>
+							<p:message for="claveProceso2" display="text" />
+					</div>
+					
+					<!-- Descripción - Input -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="descripcion2"
+							value="Descripción:" />
+						<p:inputTextarea id="descripcion2"
+							value="#{inscripocionesBean.inscripcionParamNueva.descripcion}" styleClass="form-control"
+							rows="3" />
+					</div>
+					<!-- Semestre - Select -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque requerido" for="semestre2"
+							value="Semestre:" />
+						<p:selectOneMenu id="semestre2" value="#{inscripocionesBean.inscripcionParamNueva.semestre}"
+							styleClass="col-xs-12" >
+							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+							<f:selectItems value="#{inscripocionesBean.listaSemestres}"
+								var="semestre" itemLabel="#{semestre}"
+								itemValue="#{semestre}" />
+						</p:selectOneMenu>
+						<p:message for="semestre2" display="text" />
+					</div>
+					
+				</div>
+			</div>
+
 			<div class="form-group">
 				<div class="row">
 
 
-					<!-- Opciones (Aceptar, Cancelar, Limpiar campos) -->
-					<div class="col-md-8 col-xs-12">
-						<div class="botones">
-							<p:commandButton value="Aceptar" action="#{procesoBean.guardar}"
-								update="@form" icon="pi pi-check" />
-							<p:commandButton value="Cancelar"
-								action="#{procesoBean.cancelar}" immediate="true"
-								icon="pi pi-times" />
-							<p:commandButton value="Limpiar campos"
-								action="#{procesoBean.limpiar}" update="@form"
-								icon="pi pi-refresh" />
-						</div>
+
+					<!-- Fecha inicio - Input -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque requerido" for="fechaInicio2"
+							value="Fecha inicio:" />
+						<p:calendar id="fechaInicio2" value="#{inscripocionesBean.inscripcionParamNueva.fechaInicio}"
+							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
+							readonlyInput="true" yearRange="c-100:c+100"
+							placeholder="Seleccionar" required="true"
+                				 requiredMessage="El campo es requerido"/>
+							<p:message for="fechaInicio2" display="text" />
 					</div>
+					
+					<!-- Fecha fin - Input -->
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque requerido" for="fechaFin2"
+							value="Fecha fin:" />
+						<p:calendar id="fechaFin2" value="#{inscripocionesBean.inscripcionParamNueva.fechaFin}"
+							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
+							readonlyInput="true" yearRange="c-100:c+100"
+							placeholder="Seleccionar" required="true"
+                				 requiredMessage="El campo es requerido"/>
+							<p:message for="fechaFin2" display="text" />
+					</div>
+					
+					<div class="col-md-4 col-xs-12">
+
+							<p:outputLabel styleClass="bloque requerido" value="Estatus:" />
+							<p:selectOneMenu id="altaEstatus2"  value="#{inscripocionesBean.inscripcionParamNueva.altaEstatus}"
+								styleClass="col-xs-12"  required="true" 
+                     requiredMessage="El estatus es obligatorio.">
+								<p:ajax event="change" process="@this" />
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+									itemValue="#{null}" />
+								<f:selectItems value="#{convocatoriasBean.estatusLista}"
+									var="modalidad" itemLabel="#{modalidad.nombreEstatus}"
+									itemValue="#{modalidad.valorEstatus}" />
+
+							</p:selectOneMenu>
+							 <p:message for="altaEstatus2" display="text" />
+						</div>
 
 				</div>
 			</div>
-		</h:form>
+
+			<div class="form-group">
+				<div class="row">
+				
+								<!-- Plan - Select -->
+					<div class="col-md-4 col-xs-12" >
+						<p:outputLabel styleClass="bloque requerido" for="plan2" value="Plan / Programa:" />
+			<p:selectCheckboxMenu id="plan2" value="#{inscripocionesBean.inscripcionParamNueva.planesProgramas}" required="true"
+                				 requiredMessage="El campo es requerido">
+
+							<!-- Llamar al método cuando cambia la selección -->
+							<p:ajax event="change"
+								update="@form" />
+
+							<!-- Opciones del Select -->
+							<f:selectItem itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" itemValue="#{null}" />
+							<f:selectItems value="#{inscripocionesBean.listaPlanProgramas}"
+								var="tblPlan" itemLabel="#{tblPlan.nombrePlan} > #{tblPlan.nombrePrograma}"
+								itemValue="#{tblPlan}" />
+						</p:selectCheckboxMenu>
+						 <p:message for="plan2" display="text" />
+					</div>
+					
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="perfil2" value="Perfil:" />
+						<p:inputText id="perfil2" value="#{inscripocionesBean.inscripcionParamNueva.perfil}"
+							styleClass="form-control" required="true"
+                				 requiredMessage="El campo es requerido" />
+							<p:message for="perfil2" display="text" />
+					</div>
+
+
+				</div>
+			</div>
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cancelar" process="@this"
+										 update="@form"
+										 action="#{inscripocionesBean.cancelar}" ajax="true"
+										 styleClass="btn btn-default" />
+						<p:commandButton value="Limpiar campos" process="@this"
+										 update="@form"
+										 action="#{inscripocionesBean.limpiarCampos}" ajax="true"
+										 styleClass="btn btn-default" />				
+						<p:commandButton id="btnBusquedaAvas2" process="@form" ajax="true"
+							update="@form" styleClass="btn btn-primary pull-right"
+							action="#{inscripocionesBean.altaInscripcionExtra}"
+							value="Guardar" />
+				</div>
+			</div>
+		</div>
 
 	</p:panel>
+	
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion8" header="Informativo" dynamic="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText styleClass="bloque"
+							value="Ingrese los datos marcados como obligatorios." />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dlgValidarSeleccion8').hide()" />
+				</div>
+			</div>
+		</p:dialog>
+		
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion55" header="Informativo" dynamic="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText styleClass="bloque"
+							value="Los planes y programas ya existen con la convocatoria seleccionada." />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dlgValidarSeleccion55').hide()" />
+				</div>
+			</div>
+		</p:dialog>
+		
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion9" header="Informativo" dynamic="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText styleClass="bloque"
+							value="Convocatoria generada exitosamente." />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dlgValidarSeleccion9').hide()" />
+				</div>
+			</div>
+		</p:dialog>
+		
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion99" header="Informativo" dynamic="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText styleClass="bloque"
+							value="La fecha actual es mayor a la del cierre" />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dlgValidarSeleccion99').hide()" />
+				</div>
+			</div>
+		</p:dialog>
+		
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion88" header="Informativo" dynamic="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText styleClass="bloque"
+							value="Inscipcion ya existente." />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dlgValidarSeleccion88').hide()" />
+				</div>
+			</div>
+		</p:dialog>
+		
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion89" header="Informativo" dynamic="true">
+			<div class="form-group">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText styleClass="bloque"
+							value="No existe un proceso ordinario." />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						onclick="PF('dlgValidarSeleccion89').hide()" />
+				</div>
+			</div>
+		</p:dialog>
 
 </ui:composition>

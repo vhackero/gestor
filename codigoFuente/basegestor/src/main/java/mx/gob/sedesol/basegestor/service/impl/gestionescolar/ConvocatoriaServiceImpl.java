@@ -40,11 +40,28 @@ public class ConvocatoriaServiceImpl implements ConvocatoriaService {
 		
 	}
 	
+	@Override
+	public void actualizarConvocatorias(ConvocatoriaParamNueva convocatoriaParamNueva, int idConvocatoria) {
+		
+		iConvocatoriaRepository.actualizarConvocatorias(convocatoriaParamNueva, idConvocatoria);		
+		
+	}
+	
 	
 	@Override
 	public List<Convocatoria> consultarConvocatorias() {
 		
 		List<Convocatoria> lista = iConvocatoriaRepository.consultarConvocatorias();
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<Convocatoria>();
+		}
+		return lista;
+	}
+	
+	@Override
+	public List<Convocatoria> consultarConvocatoriasId(Convocatoria convocatoriaParamConsulta){
+		List<Convocatoria> lista = iConvocatoriaRepository.consultarConvocatoriasId(convocatoriaParamConsulta);
 		
 		if (lista.isEmpty()) {
 			return new ArrayList<Convocatoria>();
