@@ -180,51 +180,90 @@ public class ConvocatoriasBean extends BaseBean {
 	
 	
 	public void editarConvocatoria() {
-	    if (esFechaActual(editarConv.getFecha_Apertura().toString())) {
-	        RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion7').show()");
-	    } else {
-	        logger.info("INICIA EDITAR");
-
-	        // Validaciones iniciales
-	        if ("".equals(convocatoriaParamConsulta.getConsulNombreConvocatoria()) ||
-	            convocatoriaParamConsulta.getConsulFechaApertura() == null || 
-	            convocatoriaParamConsulta.getConsulFechaCierre() == null) {
-	            RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion2').show()");
-	            return;
-	        }
-
-	        // Consultas
-	        listaConvocatoria2 = convocatoriaService.consultarConvocatoriasId(editarConv);
-	        listaPlanesProgramas = convocatoriaService.consultarPlanesProgramasId(editarConv);
-
-	        if (listaConvocatoria2.isEmpty()) {
-	            RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion').show()");
-	            return;
-	        }
-
-	        // Asignar valores seleccionados
-	        convocatoriaParamNueva.setListaPlanPrograma(listaPlanesProgramas); // Todas las opciones
-	        convocatoriaParamNueva.setListaPlanProgramaNivel(new ArrayList<>(listaPlanesProgramas)); // Valores seleccionados
-
-	        // Asignar otros valores
-	        Convocatoria conv = listaConvocatoria2.get(0);
-	        convocatoriaParamNueva.setAltaCupoLimite(conv.getCupoLimite().toString());
-	        convocatoriaParamNueva.setAltaDescripcion(conv.getDescripcion());
-	        convocatoriaParamNueva.setAltaEstatus(conv.getActivo());
-	        convocatoriaParamNueva.setAltaFechaAlta(conv.getFechaAlta());
-	        convocatoriaParamNueva.setAltaFechaApertura(conv.getFecha_Apertura());
-	        convocatoriaParamNueva.setAltaFechaCierre(conv.getFechaCierre());
-	        convocatoriaParamNueva.setAltaNombreConvocatoria(conv.getNombre());
-	        convocatoriaParamNueva.setAltaNombreCorto(conv.getNombreCorto());
-	        convocatoriaParamNueva.setAltaUrl(conv.getUrlConvocatoria());
-
-	        this.mostrarNuevaConvocatoria = true;
-	        this.mostrarConsultaConvocatoria = false;
-
-	        logger.info("TERMINA EDITAR");
-	    }
+		
+		if(esFechaActual(editarConv.getFecha_Apertura().toString())) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion7').show()");
+		}else {
+			logger.info(" INICIA EDITAR  ");
+			
+			//consultar convocatiro por id
+			logger.info("***********************Inicio Consulta convocatorias ID***********************");
+			
+			
+			if(convocatoriaParamConsulta.getValueConvocatoriaEstatus() == null ) {
+				convocatoriaParamConsulta.setValueConvocatoriaEstatus("");
+			}
+			
+			if(convocatoriaParamConsulta.getConsulNivelEducativo() == null ) {
+				convocatoriaParamConsulta.setConsulNivelEducativo("0");
+			}
+			
+			logger.info("NOMBRE : " + convocatoriaParamConsulta.getConsulNombreConvocatoria());
+			logger.info("NOMBRE CORTO : " + convocatoriaParamConsulta.getConsulNombreCorto());
+			logger.info("ESTATUS : " + convocatoriaParamConsulta.getValueConvocatoriaEstatus());
+			logger.info("FECHA APERTURA : " + convocatoriaParamConsulta.getConsulFechaApertura());
+			logger.info("FECHA CIERRE : " + convocatoriaParamConsulta.getConsulFechaCierre());
+			logger.info("NIVEL EDUCATIVO : " + convocatoriaParamConsulta.getConsulNivelEducativo());
+			logger.info(editarConv);
+			
+			
+			if( "".equals(convocatoriaParamConsulta.getConsulNombreConvocatoria()) ||
+				convocatoriaParamConsulta.getConsulFechaApertura() == null  || 
+						convocatoriaParamConsulta.getConsulFechaCierre() == null ) {
+				
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion2').show()");
+				
+			} else {
+				
+				listaConvocatoria2 = convocatoriaService.consultarConvocatoriasId(editarConv);
+				listaPlanesProgramas = convocatoriaService.consultarPlanesProgramasId(editarConv);
+				
+				if(listaConvocatoria2.isEmpty()) {
+					RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion').show()");
+				}
+				
+			}
+		
+			
+			logger.info("***********************Termina Consulta convocatorias ID***********************");
+			
+			//guardar resultado en el dto alta convotaria para mostrar en pantalla
+			convocatoriaParamNueva.setAltaCupoLimite(listaConvocatoria2.get(0).getCupoLimite().toString());
+			convocatoriaParamNueva.setAltaDescripcion(listaConvocatoria2.get(0).getDescripcion());
+			convocatoriaParamNueva.setAltaEstatus(listaConvocatoria2.get(0).getActivo());
+			convocatoriaParamNueva.setAltaFechaAlta(listaConvocatoria2.get(0).getFechaAlta());
+			convocatoriaParamNueva.setAltaFechaApertura(listaConvocatoria2.get(0).getFecha_Apertura());
+			convocatoriaParamNueva.setAltaFechaCierre(listaConvocatoria2.get(0).getFechaCierre());
+			convocatoriaParamNueva.setAltaNombreConvocatoria(listaConvocatoria2.get(0).getNombre());
+			convocatoriaParamNueva.setAltaNombreCorto(listaConvocatoria2.get(0).getNombreCorto());
+			convocatoriaParamNueva.setAltaUrl(listaConvocatoria2.get(0).getUrlConvocatoria());
+			convocatoriaParamNueva.setListaPlanPrograma(listaPlanesProgramas);
+			
+			listaNivelEducativoCompl2 = new ArrayList<ConvocatoriaNivelEducativoCompl>();
+					
+			
+			for (ConvocatoriaNivelEducativoCompl modalidad : convocatoriaParamNueva.getListaPlanPrograma()) {
+				// Método que define si se debe seleccionar
+				listaNivelEducativoCompl2.add(modalidad);
+		    }
+			
+			convocatoriaParamNueva.setListaPlanProgramaNivel(listaNivelEducativoCompl2);
+			
+			listaNivelEducativoCompl = convocatoriaService.consultarNivelEducativoCompleto();
+			
+			//convocatoriaParamNueva.setListaPlanProgramaNivel(listaNivelEducativoCompl);
+			convocatoriaParamNueva.setListaPlanPrograma(listaNivelEducativoCompl);
+			
+			this.mostrarNuevaConvocatoria = true;
+			this.mostrarConsultaConvocatoria = false;
+			
+			
+			logger.info(" TERMINA EDITAR  ");;			
+		}
+		
+		
+		
 	}
-
 	
 	
 	public void editarConvocatoriaBD() {
