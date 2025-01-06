@@ -19,6 +19,7 @@ import javax.faces.bean.ViewScoped;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EstatusDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativoCompl;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
@@ -51,6 +52,8 @@ public class InscripocionesBean extends BaseBean {
 	private String convocatoriaSeleccionada2;
 
 	private String procesoSeleccionada2;
+
+	private List<EstatusDTO> estatusLista;
 
 	private Date fechaInicio;
 
@@ -129,6 +132,13 @@ public class InscripocionesBean extends BaseBean {
 		procesoSeleccionada = null;
 		planSeleccionada = null;
 		nombreSeleccionado = null;
+		
+		estatusLista = new ArrayList<>();
+		// Crear los objetos EstatusDTO
+		EstatusDTO activo = new EstatusDTO(1, "ACTIVO");
+		EstatusDTO inactivo = new EstatusDTO(0, "INACTIVO");
+		estatusLista.add(activo);
+		estatusLista.add(inactivo);
 
 		convocatoriaSeleccionada2 = null;
 		procesoSeleccionada2 = null;
@@ -210,9 +220,9 @@ public class InscripocionesBean extends BaseBean {
 				
 				if (inscripcionParamNueva.getFechaMayor()) {
 					RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion99').show()");
+				}else if (inscripcionParamNueva.getInscripcionOrdinaria()) {
+					RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion89').show()");
 				}
-				
-				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion89').show()");
 			}
 		}
 		
@@ -386,14 +396,25 @@ public class InscripocionesBean extends BaseBean {
 
 	}
 
-	public void limpiarCampos() {
+	public void limpiarCampos() throws Exception {
 		consultaParamConsulta = new ConvocatoriaParamConsulta();
+		inscripcionParamNueva = new InscripcionParamNueva();
+		//navegaNuevoConvocatoria();
 		convocatoriaSeleccionada2 = null;
+		listaTipoProceso = null;
+		estatusLista = null;
 		procesoSeleccionada2 = null;
+		listaSemestres = null;
+		listaConvocatoria = null;
 		fechaInicio = null;
 		fechaFin = null;
 		listaFiltrosResumen = null;
 		listaFiltrosResumenOG = null;
+	}
+	
+	public void cancelar() throws Exception {
+		inscripcionParamNueva = new InscripcionParamNueva();
+		this.paginaActual = "";
 	}
 
 	public void habilitarEdicion(InscripcionesConsultaResumen registro) throws Exception {
@@ -682,6 +703,14 @@ public class InscripocionesBean extends BaseBean {
 		this.tableroParamConsulta = tableroParamConsulta;
 	}
 
+	public List<EstatusDTO> getEstatusLista() {
+		return estatusLista;
+	}
+
+	public void setEstatusLista(List<EstatusDTO> estatusLista) {
+		this.estatusLista = estatusLista;
+	}
+	
 	public List<InscripcionesTableroResumen> getListaTableResumen() {
 		return listaTableResumen;
 	}

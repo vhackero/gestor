@@ -17,6 +17,8 @@ public interface IConvocatoriaRepository {
 	
 	List<Convocatoria> consultarConvocatoriasId(Convocatoria convocatoriaParamConsulta);
 	
+	List<ConvocatoriaNivelEducativoCompl> consultarPlanesProgramasId(Convocatoria convocatoriaParamConsulta);
+	
 	List<ConvocatoriaTableroResumen> consultarTableroResumen(Integer convocatoriaId);
 	
 	List<ConvocatoriaNivelEducativo> consultarNivelEducativo();

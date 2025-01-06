@@ -616,8 +616,12 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		String consulta4 = "SELECT * FROM des_sisi_gestor.rel_convocatoria_planesyprogramas\r\n"
 				+ "where id_convocatoria = :convocaroriaId AND id_plan = :planId and id_programa = :programaId";
 		
+		String consulta5 = "select count(*) from des_sisi_gestor.tbl_procesos_inscripcion\r\n"
+				+ "WHERE convocatoria_id = :convocatoriaId\r\n"
+				+ "AND id_tipo_proceso = :tipoProceso";
 
-		Query query3 = entityManager.createNativeQuery(consulta3);
+		
+		//Query query3 = entityManager.createNativeQuery(consulta3);
 		
 		List<?> planProgramaLista = inscripcionParamNueva.getPlanesProgramas();
 		
@@ -656,31 +660,46 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		if (false) {
 			inscripcionParamNueva.setPlanProgramaBoolean(true);
 		}else {
-		
-			Query query2 = entityManager.createNativeQuery(consulta2);
+			
+			Query query5 = entityManager.createNativeQuery(consulta5);
+			query5.setParameter("convocatoriaId", idConvocatoria);
+			query5.setParameter("tipoProceso", idProceso);
+			Object extras = query5.getSingleResult();
+			Integer extarasNum = Integer.parseInt(extras.toString());
+			Query query2 = null;
+			Object listaQuery = null;
 			idProceso = 1;
+		
+			query2 = entityManager.createNativeQuery(consulta2);
 //			query2.setParameter("fechaInicio", inscripcionParamNueva.getNombre());
 //			query2.setParameter("fechaFin", inscripcionParamNueva.getCalveProceso());
 			query2.setParameter("idTipoProceso", idProceso);
 			query2.setParameter("convocatoriaId", idConvocatoria);
 
-			List<Object[]> listaQuery = query2.getResultList();
+			listaQuery = query2.getSingleResult();
 			
 
-			if (!listaQuery.isEmpty()) {
+			if (listaQuery != null) {
 				  // Formato de la fecha con hora
-				idProceso = 2;
+				//idProceso = 2;
+				if (extarasNum > 1) {
+					idProceso = 1;
+				}else {
+					idProceso = 2;
+				}
+				String fechaStr = listaQuery.toString();
+				fechaStr = fechaStr.split("\\.")[0]; // Elimina la parte después del punto
 		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 		        // Convertir las cadenas a LocalDateTime
 		        LocalDateTime fchActual = LocalDateTime.parse(fecha2, formatter);
+		        LocalDateTime fchFin = LocalDateTime.parse(fechaStr, formatter);
 				
-				for (Object[] obj : listaQuery) {
-
-
+				//for (Object[] obj : listaQuery) {
 					
-					if (false) {
+					if (fchFin.isAfter(fchActual)) {
 						inscripcionParamNueva.setFechaMayor(true);
+						inscripcionParamNueva.setInscripcionOrdinaria(true);
 					}else {
 
 						Query query = entityManager.createNativeQuery(consulta);
@@ -737,7 +756,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 						}
 						inscripcionParamNueva.setFechaMayor(false);
 					}
-				}
+				//}
 
 			} else {
 				inscripcionParamNueva.setInscripcionOrdinaria(true);
