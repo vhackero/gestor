@@ -126,6 +126,11 @@ public class ConvocatoriasBean extends BaseBean {
 	// redireccion opciones y llenado de campos
 
 	public String navegaNuevoConvocatoria() throws Exception {
+		
+		
+		listaNivelEducativoCompl = new ArrayList<ConvocatoriaNivelEducativoCompl>();
+		
+		
 		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/nuevaConvocatoria.xhtml";
 		listaTableResumen = new ArrayList<ConvocatoriaTableroResumen>();
 		valueConvocatoria = 0;
@@ -134,6 +139,8 @@ public class ConvocatoriasBean extends BaseBean {
 		convocatoriaParamNueva.setAltaFechaAlta(new Date());
 		
 		consultarNivelEducativoCompleto();
+		
+		convocatoriaParamNueva = new ConvocatoriaParamNueva();
 		
 		return null; // Mantener en la misma página
 	}
