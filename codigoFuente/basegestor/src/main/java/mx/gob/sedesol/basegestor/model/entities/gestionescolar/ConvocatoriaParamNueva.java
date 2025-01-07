@@ -15,6 +15,8 @@ public class ConvocatoriaParamNueva implements Serializable {
 	private Date altaFechaCierre;
 	//private String altaNivelEducativo;
 	private List<Modalidad> listaNivelEducativoCompl;
+	List<ConvocatoriaNivelEducativoCompl> listaPlanPrograma;
+	List<ConvocatoriaNivelEducativoCompl> listaPlanProgramaNivel;
 	private String altaUrl;
 	private String altaEstatus;
 	private Date altaFechaAlta;
@@ -22,6 +24,14 @@ public class ConvocatoriaParamNueva implements Serializable {
 	
 	public List<Modalidad> getListaNivelEducativoCompl() {
 	    return listaNivelEducativoCompl;
+	}
+
+	public List<ConvocatoriaNivelEducativoCompl> getListaPlanProgramaNivel() {
+		return listaPlanProgramaNivel;
+	}
+
+	public void setListaPlanProgramaNivel(List<ConvocatoriaNivelEducativoCompl> listaPlanProgramaNivel) {
+		this.listaPlanProgramaNivel = listaPlanProgramaNivel;
 	}
 
 	public void setListaNivelEducativoCompl(List<Modalidad> listaNivelEducativoCompl) {
@@ -85,6 +95,14 @@ public class ConvocatoriaParamNueva implements Serializable {
 	}
 	public void setAltaFechaAlta(Date altaFechaAlta) {
 		this.altaFechaAlta = altaFechaAlta;
+	}
+	
+	public List<ConvocatoriaNivelEducativoCompl> getListaPlanPrograma() {
+		return listaPlanPrograma;
+	}
+
+	public void setListaPlanPrograma(List<ConvocatoriaNivelEducativoCompl> listaPlanPrograma) {
+		this.listaPlanPrograma = listaPlanPrograma;
 	}
 //	public String getAltaNivelEducativo() {
 //		return altaNivelEducativo;

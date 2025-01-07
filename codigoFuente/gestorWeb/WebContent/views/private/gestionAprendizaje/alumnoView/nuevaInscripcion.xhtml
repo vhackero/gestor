@@ -18,7 +18,7 @@
 							value="Convocatoria:" />
 						<p:selectOneMenu id="convocatoria"
 							value="#{inscripocionesBean.inscripcionParamNueva.convocatoriaSeleccionada}" required="true"
-                				 requiredMessage="El campo es requerido" >
+                				 requiredMessage="El campo convocatoria es requerido" >
 
 							<!-- Llamar al método cuando cambia la selección -->
 							<p:ajax event="change"
@@ -39,7 +39,7 @@
 							value="Tipo de proceso:" />
 						<p:selectOneMenu id="tipoProceso"
 							value="#{inscripocionesBean.inscripcionParamNueva.procesoSeleccionada}" required="true"
-                				 requiredMessage="El campo es requerido" >
+                				 requiredMessage="El campo tipo proceso es requerido" >
 							<!-- Llamar al método cuando cambia la selección -->
 							<p:ajax event="change"
 								listener="#{inscripocionesBean.consultaTipoProceso2}"
@@ -59,7 +59,7 @@
 						<p:outputLabel styleClass="bloque requerido" for="nombre" value="Nombre:" />
 						<p:inputText id="nombre" value="#{inscripocionesBean.inscripcionParamNueva.nombre}"
 							styleClass="form-control" required="true"
-                				 requiredMessage="El campo es requerido" onkeyup="PF('nombreCortoInput').jq.val(this.value.substring(0, 3).toUpperCase() + '-' + (this.value.split(' ')[1] ? this.value.split(' ')[1].substring(0, 3).toUpperCase() : '') + '-' + new Date().getFullYear() + '-1');"/>
+                				 requiredMessage="El campo nombre es requerido" onkeyup="PF('nombreCortoInput').jq.val(this.value.substring(0, 3).toUpperCase() + '-' + (this.value.split(' ')[1] ? this.value.split(' ')[1].substring(0, 3).toUpperCase() : '') + '-' + new Date().getFullYear() + '-1');"/>
 							<p:message for="nombre" display="text" />
 					</div>
 
@@ -114,7 +114,7 @@
 							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
 							placeholder="Seleccionar" required="true"
-                				 requiredMessage="El campo es requerido"/>
+                				 requiredMessage="El campo fecha inicio es requerido"/>
                 				 <p:message for="fechaInicio" display="text" />
 					</div>
 
@@ -126,7 +126,7 @@
 							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
 							placeholder="Seleccionar" required="true"
-                				 requiredMessage="El campo es requerido"/>
+                				 requiredMessage="El campo fecha fin es requerido"/>
                 				 <p:message for="fechaFin" display="text" />
 					</div>
 					
@@ -139,7 +139,7 @@
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									itemValue="#{null}" />
-								<f:selectItems value="#{convocatoriasBean.estatusLista}"
+								<f:selectItems value="#{inscripocionesBean.estatusLista}"
 									var="modalidad" itemLabel="#{modalidad.nombreEstatus}"
 									itemValue="#{modalidad.valorEstatus}" />
 
@@ -291,7 +291,7 @@
 							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
 							placeholder="Seleccionar" required="true"
-                				 requiredMessage="El campo es requerido"/>
+                				 requiredMessage="El campo fecha inicio es requerido"/>
 							<p:message for="fechaInicio2" display="text" />
 					</div>
 					
@@ -303,7 +303,7 @@
 							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
 							placeholder="Seleccionar" required="true"
-                				 requiredMessage="El campo es requerido"/>
+                				 requiredMessage="El campo fecha fin es requerido"/>
 							<p:message for="fechaFin2" display="text" />
 					</div>
 					
