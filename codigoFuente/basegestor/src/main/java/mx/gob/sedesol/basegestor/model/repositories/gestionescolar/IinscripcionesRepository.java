@@ -7,21 +7,34 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionParamNueva;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionPlanesProgramas;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesConsultaResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesTableroResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 
 public interface IinscripcionesRepository {
 	
 	List<TipoProceso> consultarTipoProceso();
 	
-	List<TblPlan> consultarPlan();
+	List<TblPlan> consultarPlan(InscripcionParamNueva inscripcionParamNueva);
+	
+	List<InscripcionPlanesProgramas> consultarPlanPrograma(InscripcionParamNueva inscripcionParamNueva);
+	
+	//List<TblFichaDescriptivaPrograma> consultarPrograma();
 	
 	List<InscripcionesTableroResumen> consultarTableroResumen(ConvocatoriaParamConsulta tableroParamConsulta);
 	
 	List<InscripcionesConsultaResumen> consultarFiltros(ConvocatoriaParamConsulta tableroParamConsulta);
+	
+	List<InscripcionesTableroResumen> altaInscripciones(InscripcionParamNueva inscripcionParamNueva);
 
+	void altaInscripcion(InscripcionParamNueva inscripcionParamNueva);
+	
+	void altaInscripcionExtra(InscripcionParamNueva inscripcionParamNueva);
+	
 	List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta);
 
 	Object getProcesoInscripcionById(Long procesoInscripcionId);

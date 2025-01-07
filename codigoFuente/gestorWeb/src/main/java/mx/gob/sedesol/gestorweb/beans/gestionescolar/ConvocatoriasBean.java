@@ -62,12 +62,16 @@ public class ConvocatoriasBean extends BaseBean {
 	// nivel educativo
 	private List<ConvocatoriaNivelEducativo> listaNivelEducativo;
 	private List<ConvocatoriaNivelEducativoCompl> listaNivelEducativoCompl;
+	private List<ConvocatoriaNivelEducativoCompl> listaNivelEducativoCompl2;
 	
+
+
 	int valueConvocatoriaNivel;
 
 	// CONSULTA TABLERO
 	List<Convocatoria> listaConvocatoria;
 	List<Convocatoria> listaConvocatoria2;
+	List<ConvocatoriaNivelEducativoCompl> listaPlanesProgramas;
 	List<ConvocatoriaTableroResumen> listaTableResumen;
 	int valueConvocatoria;
 
@@ -126,6 +130,11 @@ public class ConvocatoriasBean extends BaseBean {
 	// redireccion opciones y llenado de campos
 
 	public String navegaNuevoConvocatoria() throws Exception {
+		
+		
+		listaNivelEducativoCompl = new ArrayList<ConvocatoriaNivelEducativoCompl>();
+		
+		
 		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/nuevaConvocatoria.xhtml";
 		listaTableResumen = new ArrayList<ConvocatoriaTableroResumen>();
 		valueConvocatoria = 0;
@@ -135,6 +144,8 @@ public class ConvocatoriasBean extends BaseBean {
 		
 		consultarNivelEducativoCompleto();
 		
+		convocatoriaParamNueva = new ConvocatoriaParamNueva();
+		
 		return null; // Mantener en la misma página
 	}
 
@@ -142,12 +153,10 @@ public class ConvocatoriasBean extends BaseBean {
 		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/cosultaConvocatoria.xhtml";
 		listaTableResumen = new ArrayList<ConvocatoriaTableroResumen>();
 		valueConvocatoria = 0;
-
 		
-
 		consultarNivelEducativo();
 		
-
+		consultarNivelEducativoCompleto();
 		return null;
 	}
 
@@ -214,6 +223,7 @@ public class ConvocatoriasBean extends BaseBean {
 			} else {
 				
 				listaConvocatoria2 = convocatoriaService.consultarConvocatoriasId(editarConv);
+				listaPlanesProgramas = convocatoriaService.consultarPlanesProgramasId(editarConv);
 				
 				if(listaConvocatoria2.isEmpty()) {
 					RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion').show()");
@@ -234,7 +244,22 @@ public class ConvocatoriasBean extends BaseBean {
 			convocatoriaParamNueva.setAltaNombreConvocatoria(listaConvocatoria2.get(0).getNombre());
 			convocatoriaParamNueva.setAltaNombreCorto(listaConvocatoria2.get(0).getNombreCorto());
 			convocatoriaParamNueva.setAltaUrl(listaConvocatoria2.get(0).getUrlConvocatoria());
+			convocatoriaParamNueva.setListaPlanPrograma(listaPlanesProgramas);
 			
+			listaNivelEducativoCompl2 = new ArrayList<ConvocatoriaNivelEducativoCompl>();
+					
+			
+			for (ConvocatoriaNivelEducativoCompl modalidad : convocatoriaParamNueva.getListaPlanPrograma()) {
+				// Método que define si se debe seleccionar
+				listaNivelEducativoCompl2.add(modalidad);
+		    }
+			
+			convocatoriaParamNueva.setListaPlanProgramaNivel(listaNivelEducativoCompl2);
+			
+			listaNivelEducativoCompl = convocatoriaService.consultarNivelEducativoCompleto();
+			
+			//convocatoriaParamNueva.setListaPlanProgramaNivel(listaNivelEducativoCompl);
+			convocatoriaParamNueva.setListaPlanPrograma(listaNivelEducativoCompl);
 			
 			this.mostrarNuevaConvocatoria = true;
 			this.mostrarConsultaConvocatoria = false;
@@ -742,6 +767,13 @@ public class ConvocatoriasBean extends BaseBean {
 		this.altaCupoLimite = altaCupoLimite;
 	}
 
+	public List<ConvocatoriaNivelEducativoCompl> getListaNivelEducativoCompl2() {
+		return listaNivelEducativoCompl2;
+	}
+
+	public void setListaNivelEducativoCompl2(List<ConvocatoriaNivelEducativoCompl> listaNivelEducativoCompl2) {
+		this.listaNivelEducativoCompl2 = listaNivelEducativoCompl2;
+	}
 
 	public List<Convocatoria> getListaConvocatoria2() {
 		return listaConvocatoria2;

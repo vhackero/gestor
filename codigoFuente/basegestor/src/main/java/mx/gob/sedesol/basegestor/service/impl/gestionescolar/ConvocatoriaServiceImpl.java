@@ -103,6 +103,16 @@ public class ConvocatoriaServiceImpl implements ConvocatoriaService {
 	}
 	
 	@Override
+	public List<ConvocatoriaNivelEducativoCompl> consultarPlanesProgramasId(Convocatoria convocatoriaParamConsulta){
+		List<ConvocatoriaNivelEducativoCompl> lista = iConvocatoriaRepository.consultarPlanesProgramasId(convocatoriaParamConsulta);
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<ConvocatoriaNivelEducativoCompl>();
+		}
+		return lista;
+	}
+	
+	@Override
 	public List<ConvocatoriaNivelEducativoCompl> consultarNivelEducativoCompleto() {
 		
 		List<ConvocatoriaNivelEducativoCompl> lista = iConvocatoriaRepository.consultarNivelEducativoCompleto();

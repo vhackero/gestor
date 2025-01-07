@@ -21,22 +21,28 @@ public class InscripcionParamNueva  implements Serializable{
 	private boolean  inscripcionExistente = false;
 	
 	private boolean  inscripcionOrdinaria = false;
-
-	public boolean getInscripcionOrdinaria() {
-		return inscripcionOrdinaria;
+	
+	private boolean  planProgramaBoolean = false;
+	
+	private boolean  fechaMayor = false;
+	
+	public boolean getFechaMayor() {
+		return fechaMayor;
 	}
 
-	public void setInscripcionOrdinaria(boolean inscripcionOrdinaria) {
-		this.inscripcionOrdinaria = inscripcionOrdinaria;
+	public void setFechaMayor(boolean fechaMayor) {
+		this.fechaMayor = fechaMayor;
 	}
 
-	public boolean getInscripcionExistente() {
-		return inscripcionExistente;
+	public boolean getPlanProgramaBoolean() {
+		return planProgramaBoolean;
 	}
 
-	public void setInscripcionExistente(boolean inscripcionExistente) {
-		this.inscripcionExistente = inscripcionExistente;
+	public void setPlanProgramaBoolean(boolean planProgramaBoolean) {
+		this.planProgramaBoolean = planProgramaBoolean;
 	}
+
+	List<InscripcionPlanesProgramas> planesProgramas;
 
 	private List<Convocatoria> listaConvocatoria;
 	
@@ -47,6 +53,15 @@ public class InscripcionParamNueva  implements Serializable{
 	List<String> listaPlanesValor;
 	
 	List<String> listaProgramaValor;
+
+
+	List<TipoProceso> listaNombres;
+	
+	private String convocatoriaSeleccionada;
+
+	public String getConvocatoriaSeleccionada() {
+		return convocatoriaSeleccionada;
+	}
 	
 	public List<String> getListaProgramaValor() {
 		return listaProgramaValor;
@@ -62,14 +77,6 @@ public class InscripcionParamNueva  implements Serializable{
 
 	public void setListaPlanesValor(List<String> listaPlanesValor) {
 		this.listaPlanesValor = listaPlanesValor;
-	}
-
-	List<TipoProceso> listaNombres;
-	
-	private String convocatoriaSeleccionada;
-
-	public String getConvocatoriaSeleccionada() {
-		return convocatoriaSeleccionada;
 	}
 
 	public void setConvocatoriaSeleccionada(String convocatoriaSeleccionada) {
@@ -145,6 +152,31 @@ public class InscripcionParamNueva  implements Serializable{
 	public String getPerfil() {
 		return perfil;
 	}
+	
+	public List<InscripcionPlanesProgramas> getPlanesProgramas() {
+		return planesProgramas;
+	}
+
+	public void setPlanesProgramas(List<InscripcionPlanesProgramas> planesProgramas) {
+		this.planesProgramas = planesProgramas;
+	}
+
+	public boolean getInscripcionOrdinaria() {
+		return inscripcionOrdinaria;
+	}
+
+	public void setInscripcionOrdinaria(boolean inscripcionOrdinaria) {
+		this.inscripcionOrdinaria = inscripcionOrdinaria;
+	}
+
+	public boolean getInscripcionExistente() {
+		return inscripcionExistente;
+	}
+
+	public void setInscripcionExistente(boolean inscripcionExistente) {
+		this.inscripcionExistente = inscripcionExistente;
+	}
+
 
 	public void setPerfil(String perfil) {
 		this.perfil = perfil;

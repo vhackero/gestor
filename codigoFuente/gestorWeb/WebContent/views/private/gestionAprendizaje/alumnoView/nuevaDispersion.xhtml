@@ -9,7 +9,7 @@
 
 
 
-	<p:panel header="Nueva Convocatoria">
+	<p:panel header="Nuevo proceso de dispersión">
 
 
 
@@ -18,10 +18,10 @@
 
 				<div class="col-md-4 col-xs-12">
 
-					<p:outputLabel styleClass="bloque" value="Convocatoria:" />
+					<p:outputLabel styleClass="bloque requerido" value="Convocatoria:" />
 
-					<p:selectOneMenu id="convocatoria"
-						styleClass="col-xs-12">
+					<p:selectOneMenu id="convocatoria" required="true" 
+                    			 requiredMessage="La convocatoria es obligatorio." styleClass="col-xs-12">
 						<p:ajax event="change" process="@this" />
 						<f:selectItem
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -30,13 +30,15 @@
 							var="modalidad" itemLabel="#{modalidad.nombre}"
 							itemValue="#{modalidad.convocatoriaId}" />
 					</p:selectOneMenu>
+					<p:message for="convocatoria" display="text" />
 
 				</div>
 				
 				<div class="col-md-4 col-xs-12">
 
 					<p:outputLabel styleClass="bloque requerido" value="Tipo de proceso de inscripción:" />
-					<p:selectOneMenu id="tipoProceso"
+					<p:selectOneMenu id="tipoProceso" required="true" 
+                    			 requiredMessage="El tipo de proceso es obligatorio."
 						styleClass="col-xs-12">
 						<p:ajax event="change" process="@this" />
 						<f:selectItem
@@ -46,13 +48,15 @@
 							var="modalidad" itemLabel="#{modalidad.nombre}"
 							itemValue="#{modalidad.idProceso}" />
 					</p:selectOneMenu>
+					<p:message for="tipoProceso" display="text" />
 					
 				</div>
 				
 				<div class="col-md-4 col-xs-12">
 
 					<p:outputLabel styleClass="bloque requerido" value="Proceso de inscripción:" />
-					<p:selectOneMenu id="procesoInscripcion"
+					<p:selectOneMenu id="procesoInscripcion" required="true" 
+                    			 requiredMessage="El proceso es obligatorio."
 						styleClass="col-xs-12">
 						<p:ajax event="change" process="@this" />
 						<f:selectItem
@@ -62,6 +66,7 @@
 							var="modalidad" itemLabel="#{modalidad.nombre}"
 							itemValue="#{modalidad.idProcesoInscripcion}" />
 					</p:selectOneMenu>
+					<p:message for="procesoInscripcion" display="text" />
 				</div>
 
 			</div>
@@ -75,7 +80,8 @@
 				<div class="col-md-4 col-xs-12">
 
 					<p:outputLabel styleClass="bloque requerido" value="Tipo de matriculación:" />
-					<p:selectOneMenu id="tipoMatricula"
+					<p:selectOneMenu id="tipoMatricula" required="true" 
+                    			 requiredMessage="El tipo de matriculacion es obligatorio."
 						styleClass="col-xs-12">
 						<p:ajax event="change" process="@this" />
 						<f:selectItem
@@ -85,6 +91,7 @@
 							var="modalidad" itemLabel="#{modalidad.nombre}"
 							itemValue="#{modalidad.idTipoMatriculacion}" />
 					</p:selectOneMenu>
+					<p:message for="tipoMatricula" display="text" />
 				</div>
 				
 				<div class="col-md-4 col-xs-12">

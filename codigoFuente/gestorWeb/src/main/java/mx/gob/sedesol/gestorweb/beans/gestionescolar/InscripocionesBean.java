@@ -19,11 +19,17 @@ import javax.faces.bean.ViewScoped;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EstatusDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativoCompl;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionParamNueva;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionPlanesProgramas;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesConsultaResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesTableroResumen;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.PlanesProgramas;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConvocatoriaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionesService;
@@ -47,6 +53,8 @@ public class InscripocionesBean extends BaseBean {
 
 	private String procesoSeleccionada2;
 
+	private List<EstatusDTO> estatusLista;
+
 	private Date fechaInicio;
 
 	private Date fechaFin;
@@ -54,6 +62,9 @@ public class InscripocionesBean extends BaseBean {
 	private Date fechaInicioEdit;
 
 	private Date fechaFinEdit;
+	
+	private boolean mostrarConsultaConvocatoria = true;
+	private boolean mostrarNuevaConvocatoria = false;
 
 	private String filtroEstatus;
 	private List<String> listaEstatus;
@@ -91,10 +102,29 @@ public class InscripocionesBean extends BaseBean {
 	List<InscripcionesConsultaResumen> listaFiltrosResumen;
 
 	List<InscripcionesConsultaResumen> listaFiltrosResumenOG;
+	
+	private List<InscripcionPlanesProgramas> listaPlanProgramas; //PlanesProgramas
+	
+	List<PlanesProgramas> planesProgramas;
+
+	private InscripcionParamNueva inscripcionParamNueva = new InscripcionParamNueva();
+	
+	List<TblFichaDescriptivaPrograma> listaPrograma;
+	
+	private List<String> listaSemestres;
+	
+	private List<?> listaProgramas;
+	
+	private String perfil;
+	
+	private String semestre;
+	
+	private String programa;
 
 	// REDIRECCION OPCIONES
 	private String paginaActual;
 
+	
 	@PostConstruct
 	public void initConsultaProceso() {
 		// Reiniciar variables de consulta
@@ -102,6 +132,13 @@ public class InscripocionesBean extends BaseBean {
 		procesoSeleccionada = null;
 		planSeleccionada = null;
 		nombreSeleccionado = null;
+		
+		estatusLista = new ArrayList<>();
+		// Crear los objetos EstatusDTO
+		EstatusDTO activo = new EstatusDTO(1, "ACTIVO");
+		EstatusDTO inactivo = new EstatusDTO(0, "INACTIVO");
+		estatusLista.add(activo);
+		estatusLista.add(inactivo);
 
 		convocatoriaSeleccionada2 = null;
 		procesoSeleccionada2 = null;
@@ -123,6 +160,11 @@ public class InscripocionesBean extends BaseBean {
 
 		// Ocultar formulario de edición
 		mostrarFormularioEdicion = false;
+		
+		 listaSemestres = new ArrayList<>();
+	        for (int i = 1; i <= 24; i++) {
+	            listaSemestres.add(String.valueOf(i));
+	        }
 
 		logger.info("El bean InscripocionesBean ha sido inicializado.");
 	}
@@ -151,6 +193,61 @@ public class InscripocionesBean extends BaseBean {
 		consultarPlan();
 		return null; // Mantener en la misma página
 	}
+	
+	public void altaInscripcionExtra() throws Exception {
+		
+		logger.info("***********************Inicio Alta Inscripcion Extraordinaria***********************");
+		
+		logger.info("nombre de la convocaria    : " + inscripcionParamNueva.getConvocatoriaSeleccionada());
+		logger.info("nombre corto               : " + inscripcionParamNueva.getProcesoSeleccionada());
+		
+		if (listaConvocatoria == null) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion8').show()");
+		}
+		
+		inscripcionesService.altaInscripcionesExtra(inscripcionParamNueva);
+		
+		if (inscripcionParamNueva.getPlanProgramaBoolean()) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion55').show()");
+		}else {
+			if (!inscripcionParamNueva.getInscripcionOrdinaria()) {
+				inscripcionParamNueva = new InscripcionParamNueva();
+				
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion9').show()");
+				
+				navegaNuevoConvocatoria();
+			}else {
+				
+				if (inscripcionParamNueva.getFechaMayor()) {
+					RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion99').show()");
+				}else if (inscripcionParamNueva.getInscripcionOrdinaria()) {
+					RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion89').show()");
+				}
+			}
+		}
+		
+		
+	}
+	
+	public void consultaTipoProceso2() throws Exception {
+
+		listaTipoProceso = inscripcionesService.consultarTipoProceso();
+		
+		if ("2".equalsIgnoreCase(inscripcionParamNueva.getProcesoSeleccionada())) {
+	        // Cargar planes asociados a la convocatoria seleccionada
+			this.mostrarConsultaConvocatoria = false;
+			this.mostrarNuevaConvocatoria = true;
+	    }else {
+	    	this.mostrarConsultaConvocatoria = true;
+			this.mostrarNuevaConvocatoria = false;
+	    }
+
+		logger.info(inscripcionParamNueva.getProcesoSeleccionada());
+		logger.info("Termina consulta listaTipoProceso select");
+		logger.info(listaTipoProceso);
+		
+
+	}
 
 	// consutlar tablero metodos
 
@@ -158,9 +255,39 @@ public class InscripocionesBean extends BaseBean {
 
 		listaConvocatoria = convocatoriaService.consultarConvocatorias();
 
+		inscripcionParamNueva.setListaConvocatoria(listaConvocatoria);
+		
+		consultarPlanesProgramas();
+		
 		logger.info("Termina consulta lista convocatorias select");
 		logger.info(listaConvocatoria);
 
+	}
+	
+	
+	public void altaInscripcion() throws Exception {
+		
+		logger.info("***********************Inicio Alta Inscripcion Ordinaria***********************");
+		
+		logger.info("nombre de la convocaria    : " + inscripcionParamNueva.getConvocatoriaSeleccionada());
+		logger.info("nombre corto               : " + inscripcionParamNueva.getProcesoSeleccionada());
+		
+		if (listaConvocatoria == null) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion8').show()");
+		}
+		
+		inscripcionesService.altaInscripciones(inscripcionParamNueva);
+		
+		if (!inscripcionParamNueva.getInscripcionExistente()) {
+			inscripcionParamNueva = new InscripcionParamNueva();
+			
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion9').show()");
+			
+			navegaNuevoConvocatoria();
+		}else {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion88').show()");
+		}
+		
 	}
 
 	public void consultaTipoProceso() throws Exception {
@@ -176,10 +303,31 @@ public class InscripocionesBean extends BaseBean {
 
 	public void consultarPlan() throws Exception {
 
-		listaPlanes = inscripcionesService.consultarPlan(null);
+		listaPlanes = inscripcionesService.consultarPlan(inscripcionParamNueva);
 
 		logger.info("Termina consulta   listaPlanes select");
 		logger.info(listaPlanes);
+
+	}
+	
+	public void consultarPrograma() throws Exception {
+
+		listaPrograma = inscripcionesService.consultarPrograma(inscripcionParamNueva);
+		
+		logger.info("Termina consulta   listaPlanes select");
+		logger.info(listaPlanes);
+
+	}
+	
+	public void consultarPlanesProgramas() {
+		listaPlanProgramas = inscripcionesService.consultarPlanPrograma(inscripcionParamNueva);
+		logger.info(listaPlanProgramas);
+	}
+	
+	public void consultarPrograma2() throws Exception {
+		
+		logger.info("Termina consulta   listaPlanes select");
+		logger.info(listaPrograma);
 
 	}
 
@@ -248,14 +396,25 @@ public class InscripocionesBean extends BaseBean {
 
 	}
 
-	public void limpiarCampos() {
+	public void limpiarCampos() throws Exception {
 		consultaParamConsulta = new ConvocatoriaParamConsulta();
+		inscripcionParamNueva = new InscripcionParamNueva();
+		//navegaNuevoConvocatoria();
 		convocatoriaSeleccionada2 = null;
+		listaTipoProceso = null;
+		estatusLista = null;
 		procesoSeleccionada2 = null;
+		listaSemestres = null;
+		listaConvocatoria = null;
 		fechaInicio = null;
 		fechaFin = null;
 		listaFiltrosResumen = null;
 		listaFiltrosResumenOG = null;
+	}
+	
+	public void cancelar() throws Exception {
+		inscripcionParamNueva = new InscripcionParamNueva();
+		this.paginaActual = "";
 	}
 
 	public void habilitarEdicion(InscripcionesConsultaResumen registro) throws Exception {
@@ -544,6 +703,14 @@ public class InscripocionesBean extends BaseBean {
 		this.tableroParamConsulta = tableroParamConsulta;
 	}
 
+	public List<EstatusDTO> getEstatusLista() {
+		return estatusLista;
+	}
+
+	public void setEstatusLista(List<EstatusDTO> estatusLista) {
+		this.estatusLista = estatusLista;
+	}
+	
 	public List<InscripcionesTableroResumen> getListaTableResumen() {
 		return listaTableResumen;
 	}
@@ -607,5 +774,84 @@ public class InscripocionesBean extends BaseBean {
 	public void setFechaFinEdit(Date fechaFinEdit) {
 		this.fechaFinEdit = fechaFinEdit;
 	}
+	
+	public List<TblFichaDescriptivaPrograma> getListaPrograma() {
+		return listaPrograma;
+	}
 
+	public void setListaPrograma(List<TblFichaDescriptivaPrograma> listaPrograma) {
+		this.listaPrograma = listaPrograma;
+	}
+	
+	public InscripcionParamNueva getInscripcionParamNueva() {
+		return inscripcionParamNueva;
+	}
+
+	public void setInscripcionParamNueva(InscripcionParamNueva inscripcionParamNueva) {
+		this.inscripcionParamNueva = inscripcionParamNueva;
+	}
+	
+	public boolean isMostrarConsultaConvocatoria() {
+		return mostrarConsultaConvocatoria;
+	}
+
+	public void setMostrarConsultaConvocatoria(boolean mostrarConsultaConvocatoria) {
+		this.mostrarConsultaConvocatoria = mostrarConsultaConvocatoria;
+	}
+
+	public boolean isMostrarNuevaConvocatoria() {
+		return mostrarNuevaConvocatoria;
+	}
+
+	public void setMostrarNuevaConvocatoria(boolean mostrarNuevaConvocatoria) {
+		this.mostrarNuevaConvocatoria = mostrarNuevaConvocatoria;
+	}
+
+	public List<?> getListaProgramas() {
+		return listaProgramas;
+	}
+
+	public void setListaProgramas(List<?> listaProgramas) {
+		this.listaProgramas = listaProgramas;
+	}
+	
+	public String getSemestre() {
+		return semestre;
+	}
+
+	public void setSemestre(String semestre) {
+		this.semestre = semestre;
+	}
+	
+	public List<String> getListaSemestres() {
+		return listaSemestres;
+	}
+
+	public void setListaSemestres(List<String> listaSemestres) {
+		this.listaSemestres = listaSemestres;
+	}
+
+	public String getPerfil() {
+		return perfil;
+	}
+	
+	public String getPrograma() {
+		return programa;
+	}
+
+	public void setPrograma(String programa) {
+		this.programa = programa;
+	}
+
+	public void setPerfil(String perfil) {
+		this.perfil = perfil;
+	}
+	
+	public List<InscripcionPlanesProgramas> getListaPlanProgramas() {
+		return listaPlanProgramas;
+	}
+
+	public void setListaPlanProgramas(List<InscripcionPlanesProgramas> listaPlanProgramas) {
+		this.listaPlanProgramas = listaPlanProgramas;
+	}
 }

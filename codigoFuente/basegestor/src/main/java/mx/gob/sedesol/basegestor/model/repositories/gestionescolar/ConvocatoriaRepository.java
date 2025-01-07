@@ -55,6 +55,22 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
             "    c.fecha_alta = :fechaAlta, " +
             "    c.cupo_limite = :cupoLimite " +
             "WHERE c.convocatoria_id = :id";
+	
+	String query5 = "SELECT pr.convocatoria_id, pr.nombre FROM tbl_convocatoria pr " +
+			"  WHERE pr.convocatoria_id = :idConv ";
+//			"  AND pr.id_plan = :idPlan " +
+//			"  AND pr.id_programa = :idPrograma ";
+	
+	String query6 = "SELECT c.id, c.id_plan, c.id_programa, c.fecha_modificacion FROM rel_convocatoria_planesyprogramas c " +
+            "	 WHERE c.id_convocatoria = :idConvocatoria " +
+            "	 AND c.id_plan = :idPlanP " +
+			"	 AND c.id_programa = :idProgramaP";
+	
+	String query7 = "UPDATE rel_convocatoria_planesyprogramas c " +
+            "SET c.id_plan = :idPlan, " +
+            "    c.id_programa = :idPrograma, " +
+            "    c.fecha_modificacion = :fchModificacion " +
+            "	 WHERE c.id = :idUp" ;
 
 	
 	@Override
@@ -136,10 +152,52 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 	}
 	
 	@Override
+	public List<ConvocatoriaNivelEducativoCompl> consultarPlanesProgramasId(Convocatoria convocatoriaParamConsulta){
+		
+		List<ConvocatoriaNivelEducativoCompl> lista = new ArrayList<ConvocatoriaNivelEducativoCompl>();
+		String consulta = "select id_plan, id_programa from des_sisi_gestor.rel_convocatoria_planesyprogramas\r\n"
+				+ "WHERE id_convocatoria = :idConvocatoria";
+		
+		String consulta2 = " SELECT cnp.id id_nivel_ensenanza, cnp.nombre nivel_ensenaza, tp.id_plan id_plan, tp.nombre plan, fdp.id_programa id_programa, fdp.nombre_tentativo programa\r\n"
+				+ "FROM tbl_planes tp\r\n"
+				+ "         INNER JOIN tbl_ficha_descriptiva_programa fdp ON fdp.id_plan = tp.id_plan AND fdp.identificador_final IS not NULL AND fdp.identificador_final != ''\r\n"
+				+ "         INNER JOIN cat_nivel_ensenanza_programa cnp ON fdp.id_nivel_programa = cnp.id\r\n"
+				+ "         INNER JOIN tbl_malla_curricular mc ON mc.id_plan = tp.id_plan AND mc.activo =1 \r\n"
+				+ "			WHERE tp.id_plan = :idPlan AND fdp.id_programa =:idPrograma";
+		
+		Query query = entityManager.createNativeQuery(consulta);
+
+		query.setParameter("idConvocatoria", convocatoriaParamConsulta.getConvocatoriaId());
+		
+		List<Object[]> listaPlanPrograma = query.getResultList();
+
+		if (!listaPlanPrograma.isEmpty()) {
+			
+			for (Object[] planPrograma : listaPlanPrograma) {
+
+				Query query2 = entityManager.createNativeQuery(consulta2);
+
+				query2.setParameter("idPlan", planPrograma[0]);
+				query2.setParameter("idPrograma", planPrograma[1]);
+				
+				List<Object[]> listaPlanProgramaCompl = query2.getResultList();
+				
+				for (Object[] planProgramaCompl : listaPlanProgramaCompl) {
+					ConvocatoriaNivelEducativoCompl convocatoria = mapeoNivelComp(planProgramaCompl);
+					lista.add(convocatoria);
+				}
+
+			}
+		}
+
+		return lista;
+	}
+	
+	@Override
 	public List<Convocatoria> consultarConvocatoriasId(Convocatoria convocatoriaParamConsulta){
 		List<Convocatoria> lista = new ArrayList<Convocatoria>();
 
-//		String consulta = "SELECT tb.convocatoria_id,tb.nombre,tb.nombre_corto,tb.descripcion,tb.fecha_apertura,tb.fecha_cierre,\r\n"
+//		String consulta = "SELECT tb.convocatoria_id,tb.nombre,tb.nombre_corto,tb.descripcion,tb.fecha_apertura,tb.fecha_cierre,\r\n" 
 //				+ "tb.semestre,tb.tipo,tb.url_convocatoria,tb.activo,tb.fecha_alta,tb.fecha_modificacion,tb.cupo_limite FROM tbl_convocatoria tb WHERE tb.activo = 1";
 		
 		String consulta = "SELECT DISTINCT(tb.convocatoria_id),tb.nombre,tb.nombre_corto,tb.descripcion,tb.fecha_apertura,tb.fecha_cierre, tb.semestre,tb.tipo,tb.url_convocatoria,tb.activo,tb.fecha_alta,tb.fecha_modificacion,tb.cupo_limite, cne.nombre as nomNivel \r\n"
@@ -148,12 +206,11 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 				+ "         INNER JOIN cat_nivel_ensenanza_programa cne ON cne.id = rcpp.id_nivel_ensenanza AND cne.activo = 1\r\n"
 				+ "			WHERE tb.convocatoria_id = :idConvocatoria";
 		
-		
 		Query query = entityManager.createNativeQuery(consulta);
 
 		query.setParameter("idConvocatoria", convocatoriaParamConsulta.getConvocatoriaId());
 		
-		logger.info(consulta);
+		//logger.info(consulta);
 		
 		List<Object[]> listaQuery = query.getResultList();
 
@@ -422,7 +479,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		query.setParameter("id", idConvocatoria);
 
 		
-		int filasAfectadas = query.executeUpdate();
+		int filasAfectadas = query.executeUpdate();//duda
 		
 		if(filasAfectadas >= 0) {
 			
@@ -437,7 +494,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 				
 		        Matcher matcher = null;
 		        
-				List<?> lista = convocatoriaParamNueva.getListaNivelEducativoCompl();
+				List<?> lista = convocatoriaParamNueva.getListaPlanProgramaNivel();
 
 				for (int i = 0; i < lista.size(); i++) {
 				     matcher = pattern.matcher(lista.get(i).toString());
@@ -458,12 +515,60 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 				            }
 				            index++;
 				        }
+				        Query query05 = entityManager.createNativeQuery(query5);//duda
+				        query05.setParameter("idConv", idConvocatoria);
+				        //query05.setParameter("idPrograma", idPrograma);
+				        //query05.setParameter("idPlan", idPlan);
 				        
-				        String query32 = "("+id+"," + idNivelEnsenanza +"," + idPlan +"," + idPrograma +",'"+ fecha3 +"')";
-						
-						Query query03 = entityManager.createNativeQuery(query3.concat(query32));
-					
-						int filasAfectadas2 = query03.executeUpdate();
+				        List<Object[]> listaProgramaPlan = query05.getResultList(); 
+				        
+				        for (Object[] object : listaProgramaPlan) {
+				        	
+//				        	object[0] = idConvocatoria;
+//				        	object[1] = idPlan;
+//				        	object[2] = idPrograma;
+				        	
+				        	String idConv = object[0].toString();
+				        	Integer valorConv = Integer.parseInt(idConv.toString());
+				        	
+				        	Query query06 = entityManager.createNativeQuery(query6);
+				            //Buscar
+					        query06.setParameter("idConvocatoria",valorConv);
+					        query06.setParameter("idPlanP", idPlan);
+					        query06.setParameter("idProgramaP", idPrograma);
+				        	
+					        
+					        List<Object[]> listaConvPlanPrograma = query06.getResultList();
+					        
+					        if (!listaConvPlanPrograma.isEmpty()) {
+					        	
+					        	 for (Object[] object2 : listaConvPlanPrograma) {
+							        	
+							        	Query query07 = entityManager.createNativeQuery(query7);
+							        	//Actualizar
+							        	query07.setParameter("idPlan", idPlan);
+							        	query07.setParameter("idPrograma", idPrograma);
+							        	query07.setParameter("fchModificacion", fecha2);
+							        	String idPyP = object2[0].toString();
+							        	Integer valorId = Integer.parseInt(idPyP.toString());
+							        	//Buscar
+							        	query07.setParameter("idUp", valorId);
+							        	
+							        	query07.executeUpdate();
+							        	
+							        }
+								
+							} else {
+								String query32 = "("+valorConv+"," + idNivelEnsenanza +"," + idPlan +"," + idPrograma +",'"+ fecha3 +"')";
+								Query query03 = entityManager.createNativeQuery(query3.concat(query32));
+								int filasAfectadas2 = query03.executeUpdate();
+							}
+		
+						}
+				        
+				        //String query32 = "("+id+"," + idNivelEnsenanza +"," + idPlan +"," + idPrograma +",'"+ fecha3 +"')";
+						//Query query03 = entityManager.createNativeQuery(query3.concat(query32));
+						//int filasAfectadas2 = query03.executeUpdate();
 				}
 			}
 			
