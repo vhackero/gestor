@@ -374,7 +374,9 @@ public class InscripocionesBean extends BaseBean {
 	        if (registroParaEliminar != null) {
 	            Long procesoInscripcionId = Long.parseLong(registroParaEliminar.getProcesoInscripcionId());
 	            Long convocatoriaId = Long.parseLong(registroParaEliminar.getIdConvocatoria());
-	            inscripcionesService.deleteProcesoInscripcion(procesoInscripcionId, convocatoriaId);
+	            String tipoProceso = registroParaEliminar.getTipoProceso();
+
+	            inscripcionesService.deleteProcesoInscripcion(procesoInscripcionId, convocatoriaId, tipoProceso);
 	            logger.info("Registro eliminado correctamente con ID: " + procesoInscripcionId);
 				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccionDelete').show()");
 	            consultarFiltros(); // Refresca la lista después de eliminar
