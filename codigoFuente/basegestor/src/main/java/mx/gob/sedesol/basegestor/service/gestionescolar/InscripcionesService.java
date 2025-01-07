@@ -8,6 +8,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivel
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionParamNueva;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionPlanesProgramas;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesConsultaResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesTableroResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
@@ -38,10 +39,11 @@ public interface InscripcionesService extends CommonService<Convocatoria, Intege
 	public void altaInscripciones(InscripcionParamNueva inscripcionParamNueva);
 	
 	public void altaInscripcionesExtra(InscripcionParamNueva inscripcionParamNueva);
+	
+	public List<InscripcionPlanesProgramas> consultarPlanPrograma(InscripcionParamNueva inscripcionParamNueva);
 
 	List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta);
 
-	public List<TblPlan> consultarPlan();
 	boolean updateProcesoInscripcion(Long procesoInscripcionId, String nombre, LocalDateTime fechaInicio,
 			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId);
 

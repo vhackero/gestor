@@ -330,17 +330,14 @@
 						value="Nivel educativo:" />
 
 					<p:selectCheckboxMenu
-						value="#{convocatoriasBean.convocatoriaParamNueva.listaNivelEducativoCompl}"
+						value="#{convocatoriasBean.convocatoriaParamNueva.listaPlanProgramaNivel}"
 						id="altaNivelEducativo" styleClass="col-xs-12" required="false"
-						requiredMessage="El nivel educativo es obligatorio.">
+						requiredMessage="El nivel educativo es obligatorio." label="Seleccionar">
 
 						<p:ajax event="change" process="@this" />
 
-						<f:selectItem
-							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-							itemValue="#{null}" />
 						<f:selectItems
-							value="#{convocatoriasBean.listaNivelEducativoCompl}"
+							value="#{convocatoriasBean.convocatoriaParamNueva.listaPlanPrograma}"
 							var="modalidad"
 							itemLabel="#{modalidad.nombreivelEnsenanza} > #{modalidad.nombrePlan} > #{modalidad.nombrePrograma}"
 							itemValue="#{modalidad}" />
