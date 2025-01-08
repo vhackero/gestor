@@ -20,9 +20,10 @@
 
 					<p:outputLabel styleClass="bloque requerido" value="Convocatoria:" />
 
-					<p:selectOneMenu id="convocatoria" required="true" 
+					<p:selectOneMenu id="convocatoria" required="true"  value="#{dispersionesBean.dispercionParametros.idConvocatoriaSeleccionada}"
                     			 requiredMessage="La convocatoria es obligatorio." styleClass="col-xs-12">
-						<p:ajax event="change" process="@this" />
+						<p:ajax event="change" process="@this" update="@form"
+											listener="#{dispersionesBean.consultarPlan}" />
 						<f:selectItem
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
@@ -37,10 +38,11 @@
 				<div class="col-md-4 col-xs-12">
 
 					<p:outputLabel styleClass="bloque requerido" value="Tipo de proceso de inscripción:" />
-					<p:selectOneMenu id="tipoProceso" required="true" 
+					<p:selectOneMenu id="tipoProceso" required="true"  value="#{dispersionesBean.dispercionParametros.idTipoProceso}"
                     			 requiredMessage="El tipo de proceso es obligatorio."
 						styleClass="col-xs-12">
-						<p:ajax event="change" process="@this" />
+						<p:ajax event="change" process="@this" update="@form"
+											listener="#{dispersionesBean.consultarProcesoInscripcion}" />
 						<f:selectItem
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
@@ -55,10 +57,11 @@
 				<div class="col-md-4 col-xs-12">
 
 					<p:outputLabel styleClass="bloque requerido" value="Proceso de inscripción:" />
-					<p:selectOneMenu id="procesoInscripcion" required="true" 
+					<p:selectOneMenu id="procesoInscripcion" required="true" value="#{dispersionesBean.dispercionParametros.idProcesoInscripcion}"
                     			 requiredMessage="El proceso es obligatorio."
 						styleClass="col-xs-12">
-						<p:ajax event="change" process="@this" />
+						<p:ajax event="change" process="@this"
+											listener="#{dispersionesBean.consultarProcesoInscripcion}" />
 						<f:selectItem
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
@@ -80,7 +83,7 @@
 				<div class="col-md-4 col-xs-12">
 
 					<p:outputLabel styleClass="bloque requerido" value="Tipo de matriculación:" />
-					<p:selectOneMenu id="tipoMatricula" required="true" 
+					<p:selectOneMenu id="tipoMatricula" required="true" value="#{dispersionesBean.dispercionParametros.idTipoMatriculacion}"
                     			 requiredMessage="El tipo de matriculacion es obligatorio."
 						styleClass="col-xs-12">
 						<p:ajax event="change" process="@this" />
@@ -96,36 +99,37 @@
 				
 				<div class="col-md-4 col-xs-12">
 
-					<p:outputLabel styleClass="bloque requerido" value="Plan:" />
-					<p:selectOneMenu id="plan"
-						value="#{convocatoriasBean.convocatoriaParamNueva.altaEstatus}"
+					<p:outputLabel styleClass="bloque requerido" value="Plan:" rendered="#{dispersionesBean.mostrarPlanYPrograma}" />
+					<p:selectOneMenu id="plan" rendered="#{dispersionesBean.mostrarPlanYPrograma}"
+						value="#{dispersionesBean.dispercionParametros.idPlan}"
 						styleClass="col-xs-12" required="true"
 						requiredMessage="El estatus es obligatorio.">
-						<p:ajax event="change" process="@this" />
+						<p:ajax event="change" process="@this" update="@form"
+											listener="#{dispersionesBean.consultarPrograma}" />
 						<f:selectItem
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
-						<f:selectItems value="#{convocatoriasBean.estatusLista}"
-							var="modalidad" itemLabel="#{modalidad.nombreEstatus}"
-							itemValue="#{modalidad.valorEstatus}" />
+						<f:selectItems value="#{dispersionesBean.listaPlanes}"
+							var="modalidad" itemLabel="#{modalidad.nombre}"
+							itemValue="#{modalidad.idPlan}" />
 
 					</p:selectOneMenu>
 				</div>
 				
-				<div class="col-md-4 col-xs-12">
+				<div class="col-md-4 col-xs-12" >
 
-					<p:outputLabel styleClass="bloque requerido" value="Programa:" />
-					<p:selectOneMenu id="programa"
-						value="#{convocatoriasBean.convocatoriaParamNueva.altaEstatus}"
+					<p:outputLabel styleClass="bloque requerido" value="Programa:" rendered="#{dispersionesBean.mostrarPlanYPrograma}" />
+					<p:selectOneMenu id="programa" rendered="#{dispersionesBean.mostrarPlanYPrograma}"
+						value="#{dispersionesBean.dispercionParametros.idPrograma}"
 						styleClass="col-xs-12" required="true"
 						requiredMessage="El estatus es obligatorio.">
 						<p:ajax event="change" process="@this" />
 						<f:selectItem
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
-						<f:selectItems value="#{convocatoriasBean.estatusLista}"
-							var="modalidad" itemLabel="#{modalidad.nombreEstatus}"
-							itemValue="#{modalidad.valorEstatus}" />
+						<f:selectItems value="#{dispersionesBean.listaPrograma}"
+							var="modalidad" itemLabel="#{modalidad.nombreTentativo}"
+							itemValue="#{modalidad.idPrograma}" />
 
 					</p:selectOneMenu>
 					<p:message for="procesoInscripcion" display="text" />

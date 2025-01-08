@@ -9,8 +9,11 @@ import org.springframework.stereotype.Service;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Dispersiones;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParam;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoMatriculacion;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IDispersionesRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.DispersionesService;
 
@@ -24,12 +27,33 @@ public class DispersionesServiceImpl implements DispersionesService{
 	
 	
 	@Override
-	public List<ProcesosInscripcion> consultarProcesoInscripcion() {
+	public List<ProcesosInscripcion> consultarProcesoInscripcion(DispersionesParam dispercionParametros) {
 		
-		List<ProcesosInscripcion> lista = iDispersionesRepository.consultarProcesoInscripcion();
+		List<ProcesosInscripcion> lista = iDispersionesRepository.consultarProcesoInscripcion(dispercionParametros);
 		
 		if (lista.isEmpty()) {
 			return new ArrayList<ProcesosInscripcion>();
+		}
+		return lista;
+	}
+	
+	@Override
+	public List<TblPlan> consultarPlan(DispersionesParam dispercionParametros){
+		
+	List<TblPlan> lista = iDispersionesRepository.consultarPlan(dispercionParametros);
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<TblPlan>();
+		}
+		return lista;
+	}
+	
+	@Override
+	public List<TblFichaDescriptivaPrograma> consultarPrograma(DispersionesParam dispercionParametros){
+		List<TblFichaDescriptivaPrograma> lista = iDispersionesRepository.consultarPrograma(dispercionParametros);
+		
+		if (lista.isEmpty()) {
+			return new ArrayList<TblFichaDescriptivaPrograma>();
 		}
 		return lista;
 	}

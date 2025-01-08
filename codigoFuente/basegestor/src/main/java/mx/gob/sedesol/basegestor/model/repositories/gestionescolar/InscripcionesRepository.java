@@ -436,9 +436,9 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 				+ "WHERE rcp.id_convocatoria = :idConv";
 
 		String consulta6 = "INSERT INTO tbl_inscripcion_resumen "
-				+ "(grupo, programa_educativo, asignatura, clave_asignatura, semestre, bloque, no_estudiantes,no_grupos,estudiantes_x_grupo, grupo_resto, estudiantes_resto) "
+				+ "(grupo, programa_educativo, asignatura, clave_asignatura, semestre, bloque, no_estudiantes,no_grupos,estudiantes_x_grupo, grupo_resto, estudiantes_resto, id_programa, id_plan, id_convocatoria ) "
 				+ "VALUES "
-				+ "(:grupo, :programaEducativo, :asignatura, :claveAsignatura, :semestre, :bloque, :numeroEstudiantes, :numeroGrupos, :estudiantesPorGrupo, :grupoResto, :estudiantesResto)\r\n";
+				+ "(:grupo, :programaEducativo, :asignatura, :claveAsignatura, :semestre, :bloque, :numeroEstudiantes, :numeroGrupos, :estudiantesPorGrupo, :grupoResto, :estudiantesResto, :idPrograma, :idPlan, :idConvocatoria)\r\n";
 
 		Query query2 = entityManager.createNativeQuery(consulta2);
 
@@ -500,6 +500,9 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 			for (Object[] row : listaResumen) {
 				Query query6 = entityManager.createNativeQuery(consulta6);
 
+				query6.setParameter("idPrograma", row[2]);
+				query6.setParameter("idPlan", row[1]);
+				query6.setParameter("idConvocatoria", row[0]);
 				query6.setParameter("grupo", row[3]);
 				query6.setParameter("programaEducativo", row[4]);
 				query6.setParameter("asignatura", row[5]);
