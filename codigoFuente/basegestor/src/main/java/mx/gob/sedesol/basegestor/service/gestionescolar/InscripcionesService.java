@@ -47,7 +47,8 @@ public interface InscripcionesService extends CommonService<Convocatoria, Intege
 	boolean updateProcesoInscripcion(Long procesoInscripcionId, String nombre, LocalDateTime fechaInicio,
 			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId);
 
-	void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId);
+	void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId, String tipoProceso);
+
 	 
 
 }
