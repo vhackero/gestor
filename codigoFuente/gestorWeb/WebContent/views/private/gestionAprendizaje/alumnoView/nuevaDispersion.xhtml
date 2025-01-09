@@ -28,7 +28,7 @@
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
 						<f:selectItems value="#{dispersionesBean.listaConvocatoria}"
-							var="modalidad" itemLabel="#{modalidad.convocatoriaId}"
+							var="modalidad" itemLabel="#{modalidad.nombre}"
 							itemValue="#{modalidad.convocatoriaId}" />
 					</p:selectOneMenu>
 					<p:message for="convocatoria" display="text" />
@@ -47,7 +47,7 @@
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
 						<f:selectItems value="#{dispersionesBean.listaTipoProceso}"
-							var="modalidad" itemLabel="#{modalidad.idProceso}"
+							var="modalidad" itemLabel="#{modalidad.nombre}"
 							itemValue="#{modalidad.idProceso}" />
 					</p:selectOneMenu>
 					<p:message for="tipoProceso" display="text" />
@@ -66,7 +66,7 @@
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
 						<f:selectItems value="#{dispersionesBean.listaProcesosInscripcion}"
-							var="modalidad" itemLabel="#{modalidad.idProcesoInscripcion}"
+							var="modalidad" itemLabel="#{modalidad.nombre}"
 							itemValue="#{modalidad.idProcesoInscripcion}" />
 					</p:selectOneMenu>
 					<p:message for="procesoInscripcion" display="text" />
@@ -99,11 +99,10 @@
 				
 				<div class="col-md-4 col-xs-12">
 
-					<p:outputLabel styleClass="bloque requerido" value="Plan:" rendered="#{dispersionesBean.mostrarPlanYPrograma}" />
-					<p:selectOneMenu id="plan" rendered="#{dispersionesBean.mostrarPlanYPrograma}"
+					<p:outputLabel styleClass="bloque" value="Plan:" />
+					<p:selectOneMenu id="plan"
 						value="#{dispersionesBean.dispercionParametros.idPlan}"
-						styleClass="col-xs-12" required="true"
-						requiredMessage="El estatus es obligatorio.">
+						styleClass="col-xs-12" >
 						<p:ajax event="change" process="@this" update="@form"
 											listener="#{dispersionesBean.consultarPrograma}" />
 						<f:selectItem
@@ -118,11 +117,10 @@
 				
 				<div class="col-md-4 col-xs-12" >
 
-					<p:outputLabel styleClass="bloque requerido" value="Programa:" rendered="#{dispersionesBean.mostrarPlanYPrograma}" />
+					<p:outputLabel styleClass="bloque" value="Programa:" rendered="#{dispersionesBean.mostrarPlanYPrograma}" />
 					<p:selectOneMenu id="programa" rendered="#{dispersionesBean.mostrarPlanYPrograma}"
 						value="#{dispersionesBean.dispercionParametros.idPrograma}"
-						styleClass="col-xs-12" required="true"
-						requiredMessage="El estatus es obligatorio.">
+						styleClass="col-xs-12" >
 						<p:ajax event="change" process="@this" />
 						<f:selectItem
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -132,7 +130,6 @@
 							itemValue="#{modalidad.idPrograma}" />
 
 					</p:selectOneMenu>
-					<p:message for="procesoInscripcion" display="text" />
 				</div>
 
 			</div>
@@ -146,7 +143,7 @@
 				<div class="col-md-12 text-right">
 
 					<p:commandButton value="Cancelar" process="@this" update="@form"
-						action="#{convocatoriasBean.cancelar}" ajax="true"
+						action="#{dispersionesBean.cancelar}" ajax="true"
 						styleClass="btn btn-default" />
 
 					<p:commandButton value="Limpiar campos" process="@this"
@@ -194,7 +191,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<h:outputText styleClass="bloque"
-						value="Inscripcion generada exitosamente." />
+						value="Nuevo proceso de dispersión creado correctamente." />
 				</div>
 			</div>
 		</div>

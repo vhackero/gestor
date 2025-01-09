@@ -94,8 +94,22 @@ public class DispersionesBean extends BaseBean {
 
 	}
 	
+	public void  cancelar() throws Exception {
+		this.paginaActual = "";
+		
+		dispercionParametros = new DispersionesParam();
+		
+		consultarConvocatorias();
+		consultaTipoProceso();
+		//consultarProcesoInscripcion();
+		consultarTipoMatriculacion();
+	}
+	
 	public void limpiarCampos() {
 		dispercionParametros = new DispersionesParam();
+		listaProcesosInscripcion = null;
+		listaPlanes = null;
+		listaPrograma = null;
 		
 	}
 	
