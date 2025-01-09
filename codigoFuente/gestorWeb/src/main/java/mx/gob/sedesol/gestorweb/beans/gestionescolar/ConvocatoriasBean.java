@@ -448,7 +448,20 @@ public class ConvocatoriasBean extends BaseBean {
 				convocatoriaParamNueva.setAltaFechaCierre(convocatoriaParamNueva.getAltaFechaApertura());
 			}
 		}
+		
+		 // Establecer la fecha de alta si no está configurada
+	    if (ObjectUtils.isNull(convocatoriaParamNueva.getAltaFechaAlta()) || !ObjectUtils.isNull(convocatoriaParamNueva.getAltaFechaAlta())) {
+	        convocatoriaParamNueva.setAltaFechaAlta(convocatoriaParamNueva.getAltaFechaApertura());
+	    }
 
+	}
+	
+	public void validarFechasAlta2() {
+		if (ObjectUtils.isNotNull(convocatoriaParamNueva.getAltaFechaCierre())) {
+			if (convocatoriaParamNueva.getAltaFechaCierre().before(convocatoriaParamNueva.getAltaFechaApertura())) {
+				convocatoriaParamNueva.setAltaFechaCierre(convocatoriaParamNueva.getAltaFechaApertura());
+			}
+		}
 	}
 
 	// consulta convocatorias

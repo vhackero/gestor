@@ -137,9 +137,9 @@ public class InscripcionesServiceImpl implements InscripcionesService {
     }
 	
     @Override
-    public void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId) {
+    public void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId, String tipoProceso) {
 
-        iinscripcionesRepository.deleteProcesoInscripcion(procesoInscripcionId, convocatoriaId);
+        iinscripcionesRepository.deleteProcesoInscripcion(procesoInscripcionId, convocatoriaId, tipoProceso);
     }
 	
 	

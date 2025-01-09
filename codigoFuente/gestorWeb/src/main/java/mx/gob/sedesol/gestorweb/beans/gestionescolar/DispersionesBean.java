@@ -3,17 +3,24 @@ package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.log4j.Logger;
+import org.primefaces.context.RequestContext;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EstatusDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamNueva;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParam;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoMatriculacion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersiones;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConvocatoriaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.DispersionesService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionesService;
@@ -44,9 +51,20 @@ public class DispersionesBean extends BaseBean {
 	List<TipoProceso> listaTipoProceso;
 	List<ProcesosInscripcion> listaProcesosInscripcion;
 	List<TipoMatriculacion> listaTipoMatriculacion;
-	
+	List<TblPlan> listaPlanes;
+	List<TblFichaDescriptivaPrograma> listaPrograma;
+	DispersionesParam dispercionParametros;
+
 	// REDIRECCION OPCIONES
 	private String paginaActual;
+	
+	private boolean mostrarPlanYPrograma = true;
+
+	
+	@PostConstruct
+    public void init() {
+		dispercionParametros = new DispersionesParam(); // Inicializar el objeto
+    }
 
 	public DispersionesBean() {
 
@@ -65,18 +83,73 @@ public class DispersionesBean extends BaseBean {
 
 		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/nuevaDispersion.xhtml";
 		
+		dispercionParametros = new DispersionesParam();
+		
 		consultarConvocatorias();
 		consultaTipoProceso();
-		consultarProcesoInscripcion();
+		//consultarProcesoInscripcion();
 		consultarTipoMatriculacion();
 
 		return null;
 
 	}
 	
+	public void  cancelar() throws Exception {
+		this.paginaActual = "";
+		
+		dispercionParametros = new DispersionesParam();
+		
+		consultarConvocatorias();
+		consultaTipoProceso();
+		//consultarProcesoInscripcion();
+		consultarTipoMatriculacion();
+	}
+	
+	public void limpiarCampos() {
+		dispercionParametros = new DispersionesParam();
+		listaProcesosInscripcion = null;
+		listaPlanes = null;
+		listaPrograma = null;
+		
+	}
 	
 
 	///////////////////////////////////
+	
+	
+	public void altaDisperciones() {
+		
+		
+		if (dispercionParametros.getIdTipoProceso() == 1) {
+			
+			List<TblDispersiones> validacionDispercion = dispersionesService.validarDispercionExistente(dispercionParametros);
+			
+			if (!validacionDispercion.isEmpty()) {
+				dispersionesService.altaDisperciones(dispercionParametros);
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion1').show()");
+			}else {
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion2').show()");
+			}
+			
+		} else {
+			
+			List<TblDispersiones> validacionDispercionOrdinario = dispersionesService.validarDispercionExistenteOrdinario(dispercionParametros);
+			
+			if (dispercionParametros.getExistente() == 1 ) {
+				dispersionesService.altaDisperciones(dispercionParametros);
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion1').show()");
+			}else {
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion3').show()");
+			}
+
+		}
+		
+		
+		
+		
+		
+		
+	}
 
 	public void consultarConvocatorias() throws Exception {
 
@@ -84,6 +157,18 @@ public class DispersionesBean extends BaseBean {
 
 		logger.info("Termina consulta lista convocatorias select");
 
+	}
+	
+	public void consultarPlan() {
+		listaPlanes = dispersionesService.consultarPlan(dispercionParametros);
+		
+		logger.info("Termina consulta listaPlanes select");
+	}
+	
+	public void consultarPrograma() {
+		listaPrograma = dispersionesService.consultarPrograma(dispercionParametros);
+		
+		logger.info("Termina consulta listaPlanes select");
 	}
 	
 	
@@ -97,8 +182,14 @@ public class DispersionesBean extends BaseBean {
 	
 	public void consultarProcesoInscripcion() throws Exception {
 
-		listaProcesosInscripcion = dispersionesService.consultarProcesoInscripcion();
+		listaProcesosInscripcion = dispersionesService.consultarProcesoInscripcion(dispercionParametros);
 
+		 if (dispercionParametros.getIdTipoProceso() == 1 ) { 
+		        mostrarPlanYPrograma = false; // Ocultar "Plan" y "Programa"
+		    } else {
+		        mostrarPlanYPrograma = true; // Mostrar "Plan" y "Programa"
+		    }
+		
 		logger.info("Termina consulta listaProcesosInscripcion select");
 
 	}
@@ -180,6 +271,37 @@ public class DispersionesBean extends BaseBean {
 		this.listaTipoMatriculacion = listaTipoMatriculacion;
 	}
 	
+	public DispersionesParam getDispercionParametros() {
+		return dispercionParametros;
+	}
+
+	public void setDispercionParametros(DispersionesParam dispercionParametros) {
+		this.dispercionParametros = dispercionParametros;
+	}
 	
+	public boolean isMostrarPlanYPrograma() {
+	    return mostrarPlanYPrograma;
+	}
+
+	public void setMostrarPlanYPrograma(boolean mostrarPlanYPrograma) {
+	    this.mostrarPlanYPrograma = mostrarPlanYPrograma;
+	}
+	
+	public List<TblPlan> getListaPlanes() {
+		return listaPlanes;
+	}
+
+	public void setListaPlanes(List<TblPlan> listaPlanes) {
+		this.listaPlanes = listaPlanes;
+	}
+
+	public List<TblFichaDescriptivaPrograma> getListaPrograma() {
+		return listaPrograma;
+	}
+
+	public void setListaPrograma(List<TblFichaDescriptivaPrograma> listaPrograma) {
+		this.listaPrograma = listaPrograma;
+	}
+
 
 }
