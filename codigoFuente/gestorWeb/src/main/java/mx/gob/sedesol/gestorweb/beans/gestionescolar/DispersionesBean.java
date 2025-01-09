@@ -9,6 +9,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.log4j.Logger;
+import org.primefaces.context.RequestContext;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EstatusDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
@@ -17,6 +18,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParam
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoMatriculacion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersiones;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConvocatoriaService;
@@ -92,9 +94,48 @@ public class DispersionesBean extends BaseBean {
 
 	}
 	
+	public void limpiarCampos() {
+		dispercionParametros = new DispersionesParam();
+		
+	}
 	
 
 	///////////////////////////////////
+	
+	
+	public void altaDisperciones() {
+		
+		
+		if (dispercionParametros.getIdTipoProceso() == 1) {
+			
+			List<TblDispersiones> validacionDispercion = dispersionesService.validarDispercionExistente(dispercionParametros);
+			
+			if (!validacionDispercion.isEmpty()) {
+				dispersionesService.altaDisperciones(dispercionParametros);
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion1').show()");
+			}else {
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion2').show()");
+			}
+			
+		} else {
+			
+			List<TblDispersiones> validacionDispercionOrdinario = dispersionesService.validarDispercionExistenteOrdinario(dispercionParametros);
+			
+			if (dispercionParametros.getExistente() == 1 ) {
+				dispersionesService.altaDisperciones(dispercionParametros);
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion1').show()");
+			}else {
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion3').show()");
+			}
+
+		}
+		
+		
+		
+		
+		
+		
+	}
 
 	public void consultarConvocatorias() throws Exception {
 

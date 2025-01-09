@@ -12,6 +12,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Dispersiones;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParam;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoMatriculacion;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersiones;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IDispersionesRepository;
@@ -25,6 +26,36 @@ public class DispersionesServiceImpl implements DispersionesService{
 	private IDispersionesRepository iDispersionesRepository;
 	
 	
+	
+	@Override
+	public void altaDisperciones(DispersionesParam dispercionParametros){
+		
+		iDispersionesRepository.altaDisperciones(dispercionParametros);
+		
+	}
+	
+	 @Override
+	 public List<TblDispersiones> validarDispercionExistente(DispersionesParam dispercionParametros){
+		 
+		 List<TblDispersiones> lista = iDispersionesRepository.validarDispercionExistente(dispercionParametros);
+			
+			if (lista.isEmpty()) {
+				return lista;
+			}
+			return lista;	
+	 }
+	
+	 @Override
+	 public List<TblDispersiones> validarDispercionExistenteOrdinario(DispersionesParam dispercionParametros){
+		 
+		 List<TblDispersiones> lista = iDispersionesRepository.validarDispercionExistenteOrdinario(dispercionParametros);
+			
+			if (lista.isEmpty()) {
+				return lista;
+			}
+			return lista;	
+		 
+	 }
 	
 	@Override
 	public List<ProcesosInscripcion> consultarProcesoInscripcion(DispersionesParam dispercionParametros) {

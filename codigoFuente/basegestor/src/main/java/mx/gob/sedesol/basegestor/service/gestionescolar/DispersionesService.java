@@ -6,6 +6,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Dispersiones;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParam;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoMatriculacion;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersiones;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.service.admin.CommonService;
@@ -17,6 +18,12 @@ public interface DispersionesService extends CommonService<Dispersiones, Integer
 	public List<TblPlan> consultarPlan(DispersionesParam dispercionParametros);
 	
 	public List<TblFichaDescriptivaPrograma> consultarPrograma(DispersionesParam dispercionParametros);
+	
+	public void altaDisperciones(DispersionesParam dispercionParametros);
+	
+	public List<TblDispersiones> validarDispercionExistente(DispersionesParam dispercionParametros);
+	
+	public List<TblDispersiones> validarDispercionExistenteOrdinario(DispersionesParam dispercionParametros);
 	
 	public List<TipoMatriculacion> consultarTipoMatriculacion();
 

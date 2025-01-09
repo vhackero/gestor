@@ -20,6 +20,16 @@ public class DispersionesParam implements Serializable {
 	private Integer idPlan;
 
 	private Integer idPrograma;
+	
+	private Integer existente;
+
+	public Integer getExistente() {
+		return existente;
+	}
+
+	public void setExistente(Integer existente) {
+		this.existente = existente;
+	}
 
 	public Integer getIdPlan() {
 		return idPlan;

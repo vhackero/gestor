@@ -28,7 +28,7 @@
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
 						<f:selectItems value="#{dispersionesBean.listaConvocatoria}"
-							var="modalidad" itemLabel="#{modalidad.nombre}"
+							var="modalidad" itemLabel="#{modalidad.convocatoriaId}"
 							itemValue="#{modalidad.convocatoriaId}" />
 					</p:selectOneMenu>
 					<p:message for="convocatoria" display="text" />
@@ -47,7 +47,7 @@
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
 						<f:selectItems value="#{dispersionesBean.listaTipoProceso}"
-							var="modalidad" itemLabel="#{modalidad.nombre}"
+							var="modalidad" itemLabel="#{modalidad.idProceso}"
 							itemValue="#{modalidad.idProceso}" />
 					</p:selectOneMenu>
 					<p:message for="tipoProceso" display="text" />
@@ -66,7 +66,7 @@
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
 						<f:selectItems value="#{dispersionesBean.listaProcesosInscripcion}"
-							var="modalidad" itemLabel="#{modalidad.nombre}"
+							var="modalidad" itemLabel="#{modalidad.idProcesoInscripcion}"
 							itemValue="#{modalidad.idProcesoInscripcion}" />
 					</p:selectOneMenu>
 					<p:message for="procesoInscripcion" display="text" />
@@ -150,13 +150,13 @@
 						styleClass="btn btn-default" />
 
 					<p:commandButton value="Limpiar campos" process="@this"
-						update="@form" action="#{convocatoriasBean.limpiarCampos}"
+						update="@form" action="#{dispersionesBean.limpiarCampos}"
 						ajax="true" styleClass="btn btn-default" />
 
 
 					<p:commandButton id="btnBusquedaAvas" process="@form" ajax="true"
 						update="@form" styleClass="btn btn-primary pull-right"
-						action="#{convocatoriasBean.altaConvocatorias}" value="Guardar" />
+						action="#{dispersionesBean.altaDisperciones}" value="Guardar" />
 
 
 
@@ -189,12 +189,12 @@
 
 	<p:dialog appendTo="@(body)" draggable="false" position="center"
 		resizable="false" closable="false" modal="true" width="600px"
-		widgetVar="dlgValidarSeleccion9" header="Informativo" dynamic="true">
+		widgetVar="dlgValidarSeleccion1" header="Informativo" dynamic="true">
 		<div class="form-group">
 			<div class="row">
 				<div class="col-md-12">
 					<h:outputText styleClass="bloque"
-						value="Convocatoria generada exitosamente." />
+						value="Inscripcion generada exitosamente." />
 				</div>
 			</div>
 		</div>
@@ -202,7 +202,47 @@
 		<div class="row">
 			<div class="col-md-12 text-right">
 				<p:commandButton value="Cerrar" styleClass="btn btn-default"
-					onclick="PF('dlgValidarSeleccion9').hide()" />
+					onclick="PF('dlgValidarSeleccion1').hide()" />
+			</div>
+		</div>
+	</p:dialog>
+	
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccion2" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="Ya existen registros asociados." />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccion2').hide()" />
+			</div>
+		</div>
+	</p:dialog>
+	
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccion3" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="'Para poder crear un proceso extraordinario primero se debe crear un proceso ordinario." />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccion3').hide()" />
 			</div>
 		</div>
 	</p:dialog>
