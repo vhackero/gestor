@@ -10,161 +10,130 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Dispersiones;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParam;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParamNuevo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoMatriculacion;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersiones;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersionesBusqueda;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IDispersionesRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.DispersionesService;
 
 @Service("dispersionesService")
-public class DispersionesServiceImpl implements DispersionesService{
-	
-	
+public class DispersionesServiceImpl implements DispersionesService {
+
 	@Autowired
 	private IDispersionesRepository iDispersionesRepository;
-	
-	
-	
+
 	@Override
-	public void altaDisperciones(DispersionesParam dispercionParametros){
-		
+	public void altaDisperciones(DispersionesParam dispercionParametros) {
+
 		iDispersionesRepository.altaDisperciones(dispercionParametros);
-		
+
+	}
+
+	@Override
+	public List<TblDispersionesBusqueda> consultaDisperciones(DispersionesParam dispercionParametros) {
+
+		List<TblDispersionesBusqueda> lista = iDispersionesRepository.consultaDisperciones(dispercionParametros);
+
+		if (lista.isEmpty()) {
+			return lista;
+		}
+		return lista;
+
+	}
+
+	@Override
+	public void borrarDispercsion(TblDispersionesBusqueda tblBusqueda) {
+		iDispersionesRepository.borrarDispercsion(tblBusqueda);
+	}
+
+	@Override
+	public List<TblDispersionesBusqueda> actualizarDispersion(DispersionesParamNuevo dispercionParametros) {
+
+		List<TblDispersionesBusqueda> lista = iDispersionesRepository.actualizarDispersion(dispercionParametros);
+
+		if (lista.isEmpty()) {
+			return lista;
+		}
+		return lista;
+
 	}
 	
-	 @Override
-	 public List<TblDispersiones> validarDispercionExistente(DispersionesParam dispercionParametros){
-		 
-		 List<TblDispersiones> lista = iDispersionesRepository.validarDispercionExistente(dispercionParametros);
-			
-			if (lista.isEmpty()) {
-				return lista;
-			}
-			return lista;	
-	 }
-	
-	 @Override
-	 public List<TblDispersiones> validarDispercionExistenteOrdinario(DispersionesParam dispercionParametros){
-		 
-		 List<TblDispersiones> lista = iDispersionesRepository.validarDispercionExistenteOrdinario(dispercionParametros);
-			
-			if (lista.isEmpty()) {
-				return lista;
-			}
-			return lista;	
-		 
-	 }
-	
+	@Override
+	public void actualizarDispersionExc(DispersionesParamNuevo dispercionParametros){
+		 iDispersionesRepository.actualizarDispersionExc(dispercionParametros);
+
+	}
+
+	@Override
+	public List<TblDispersiones> validarDispercionExistente(DispersionesParam dispercionParametros) {
+
+		List<TblDispersiones> lista = iDispersionesRepository.validarDispercionExistente(dispercionParametros);
+
+		if (lista.isEmpty()) {
+			return lista;
+		}
+		return lista;
+	}
+
+	@Override
+	public List<TblDispersiones> validarDispercionExistenteOrdinario(DispersionesParam dispercionParametros) {
+
+		List<TblDispersiones> lista = iDispersionesRepository.validarDispercionExistenteOrdinario(dispercionParametros);
+
+		if (lista.isEmpty()) {
+			return lista;
+		}
+		return lista;
+
+	}
+
 	@Override
 	public List<ProcesosInscripcion> consultarProcesoInscripcion(DispersionesParam dispercionParametros) {
-		
+
 		List<ProcesosInscripcion> lista = iDispersionesRepository.consultarProcesoInscripcion(dispercionParametros);
-		
+
 		if (lista.isEmpty()) {
 			return new ArrayList<ProcesosInscripcion>();
 		}
 		return lista;
 	}
-	
+
 	@Override
-	public List<TblPlan> consultarPlan(DispersionesParam dispercionParametros){
-		
-	List<TblPlan> lista = iDispersionesRepository.consultarPlan(dispercionParametros);
-		
+	public List<TblPlan> consultarPlan(DispersionesParam dispercionParametros) {
+
+		List<TblPlan> lista = iDispersionesRepository.consultarPlan(dispercionParametros);
+
 		if (lista.isEmpty()) {
 			return new ArrayList<TblPlan>();
 		}
 		return lista;
 	}
-	
+
 	@Override
-	public List<TblFichaDescriptivaPrograma> consultarPrograma(DispersionesParam dispercionParametros){
+	public List<TblFichaDescriptivaPrograma> consultarPrograma(DispersionesParam dispercionParametros) {
 		List<TblFichaDescriptivaPrograma> lista = iDispersionesRepository.consultarPrograma(dispercionParametros);
-		
+
 		if (lista.isEmpty()) {
 			return new ArrayList<TblFichaDescriptivaPrograma>();
 		}
 		return lista;
 	}
 
-	
-	
 	@Override
 	public List<TipoMatriculacion> consultarTipoMatriculacion() {
-		
+
 		List<TipoMatriculacion> lista = iDispersionesRepository.consultarTipoMatriculacion();
-		
+
 		if (lista.isEmpty()) {
 			return new ArrayList<TipoMatriculacion>();
 		}
 		return lista;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	@Override
 	public List<Dispersiones> findAll() {
 		// TODO Auto-generated method stub
