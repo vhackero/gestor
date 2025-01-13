@@ -8,13 +8,16 @@ import javax.persistence.Query;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Dispersiones;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParam;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParamNuevo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoMatriculacion;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersiones;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersionesBusqueda;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 
@@ -24,6 +27,7 @@ public class DispersionesRepository implements IDispersionesRepository {
 	@Autowired
 	public EntityManager entityManager;
 	
+	Integer IdDispercion;
 	
 	@Override
 	public void altaDisperciones(DispersionesParam dispercionParametros){
@@ -146,7 +150,118 @@ public class DispersionesRepository implements IDispersionesRepository {
 	}
 	
 	
+	@Transactional
+	@Override
+	public void borrarDispercsion(TblDispersionesBusqueda tblBusqueda) {
+		
+		String consultaBorrarDispersion = "DELETE FROM tbl_dispersiones WHERE id_dispersion = :idDispersion";
+		
+		Query query = entityManager.createNativeQuery(consultaBorrarDispersion);
+        query.setParameter("idDispersion", tblBusqueda.getIdDispersion());
+        query.executeUpdate();
+		
+	}
 	
+	
+	@Override
+	public List<TblDispersionesBusqueda> consultaDisperciones(DispersionesParam dispercionParametros){
+		
+		List<TblDispersionesBusqueda> lista = new ArrayList<TblDispersionesBusqueda>();
+		
+		String consultaBusquedaDispercion = "	SELECT\r\n"
+				+ "    tbd.id_dispersion, tp.id_plan, tp.nombre plan, fd.id_programa,\r\n"
+				+ "    fd.nombre_tentativo programa, fd.identificador_final clave,\r\n"
+				+ "    IF((SELECT tmc2.nombre FROM tbl_malla_curricular tmc2 WHERE tmc2.id = tmc.id_padre ) IS NOT NULL, (SELECT tmc2.nombre FROM tbl_malla_curricular tmc2 WHERE tmc2.id = tmc.id_padre ), '')semestre ,\r\n"
+				+ "    tmc.nombre bloque, count(ti.id) no_estudiantes_inscritos, tbd.no_grupos,\r\n"
+				+ "    tbd.estudiantes_x_grupo, tbd.grupo_resto, tbd.estudiantes_resto\r\n"
+				+ "	    FROM tbl_inscripciones ti\r\n"
+				+ "         INNER JOIN rel_proceso_inscipcion_planesyprogramas rpi ON rpi.id_programa = ti.idprograma AND rpi.id_plan = ti.idplan\r\n"
+				+ "         INNER JOIN tbl_procesos_inscripcion tpi ON tpi.proceso_inscripcion_id =  rpi.id_proceso_inscripcion\r\n"
+				+ "         INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = ti.idprograma and ti.idplan = fd.id_plan\r\n"
+				+ "         INNER JOIN tbl_planes tp ON tp.id_plan = ti.idplan\r\n"
+				+ "         INNER JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion\r\n"
+				+ "         INNER JOIN tbl_inscripcion_resumen tir2 ON fd.identificador_final = tir2.clave_asignatura AND tir2.no_estudiantes > 0 AND tir2.bloque = SUBSTRING_INDEX(tmc.nombre,' ',-1) AND tir2.semestre = tpi.semestre\r\n"
+				+ "         INNER JOIN tbl_dispersiones tbd ON tbd.id_inscripcion_resumen = tir2.id AND tbd.id_proceso_inscripcion = tpi.proceso_inscripcion_id\r\n"
+				+ "		WHERE tpi.convocatoria_id = :idConvocatoria AND tpi.id_tipo_proceso = :idTipoProceso\r\n"
+				+ "  AND tpi.proceso_inscripcion_id = :idProcesoInscripcion AND tpi.id_categoria_proceso = 1\r\n"
+				+ "  AND (ti.fecha_registro >= tpi.fecha_inicio AND ti.fecha_registro <= tpi.fecha_fin)\r\n"
+				+ "  group by tbd.id_dispersion, tp.id_plan, tp.nombre, fd.id_programa,\r\n"
+				+ "    fd.nombre_tentativo, fd.identificador_final,\r\n"
+				+ "    tmc.nombre, tpi.proceso_inscripcion_id, tir2.id, tbd.no_grupos,\r\n"
+				+ "    tbd.estudiantes_x_grupo, tbd.grupo_resto, tbd.estudiantes_resto";
+		
+		Query queryConsultaDispercion = entityManager.createNativeQuery(consultaBusquedaDispercion);
+		
+		queryConsultaDispercion.setParameter("idConvocatoria", dispercionParametros.getIdConvocatoriaSeleccionada());
+		queryConsultaDispercion.setParameter("idTipoProceso", dispercionParametros.getIdTipoProceso());
+		queryConsultaDispercion.setParameter("idProcesoInscripcion", dispercionParametros.getIdProcesoInscripcion());
+
+		List<Object[]> listaBusqueda = queryConsultaDispercion.getResultList();
+
+		if (!listaBusqueda.isEmpty()) {
+			for (Object[] obj : listaBusqueda) {
+				
+				TblDispersionesBusqueda dispersiones = mapeoDispercionBusqueda(obj);
+				lista.add(dispersiones);
+
+			}
+		}
+		
+		return lista;
+		
+	}
+	
+	@Transactional
+	@Override
+	public void actualizarDispersionExc(DispersionesParamNuevo dispercionParametros){
+		
+		String actualizarDispersion = "UPDATE tbl_dispersiones c " +
+	            "SET c.no_grupos = :noGrupos, " +
+	            "    c.estudiantes_x_grupo = :estudiantesGrupo, " +
+	            "    c.grupo_resto = :grupoResto, " +
+	            "    c.estudiantes_resto = :estudianteResto " +
+	            "WHERE c.id_dispersion = :id";
+		
+		Query queryCtualizar = entityManager.createNativeQuery(actualizarDispersion);
+		queryCtualizar.setParameter("noGrupos", dispercionParametros.getNoGrupos());
+		queryCtualizar.setParameter("estudiantesGrupo", dispercionParametros.getEstudiantesGrupo());
+		queryCtualizar.setParameter("grupoResto", dispercionParametros.getGrupoResto());
+		queryCtualizar.setParameter("estudianteResto", dispercionParametros.getCupoResto());
+		queryCtualizar.setParameter("id",IdDispercion );
+		queryCtualizar.executeUpdate();
+		
+	}
+	
+	@Transactional
+	@Override
+	public List<TblDispersionesBusqueda> actualizarDispersion(DispersionesParamNuevo dispercionParametros){
+		
+		List<TblDispersionesBusqueda> lista = new ArrayList<TblDispersionesBusqueda>();
+		
+		String consultarDispersionId = "SELECT dis.id_dispersion, dis.no_grupos, dis.estudiantes_x_grupo, dis.grupo_resto, dis.estudiantes_resto, dis.no_total_estudiantes FROM tbl_dispersiones dis " +
+				"	WHERE dis.id_dispersion = :idDispersion ";
+		
+		
+		
+		
+		Query query = entityManager.createNativeQuery(consultarDispersionId);
+		query.setParameter("idDispersion", dispercionParametros.getIdDispersion());
+		
+		List<Object[]> listaDispersion = query.getResultList();
+		
+		
+		if (!listaDispersion.isEmpty()) {
+			for (Object[] obj : listaDispersion) {
+
+				TblDispersionesBusqueda dispersiones = mapeoDispersionActu(obj);
+				lista.add(dispersiones);
+				IdDispercion = lista.get(0).getIdDispersion();
+
+			}
+		}
+		
+		return lista;
+	}
 	
 	@Override
 	public List<ProcesosInscripcion> consultarProcesoInscripcion(DispersionesParam dispercionParametros) {
@@ -243,6 +358,21 @@ public class DispersionesRepository implements IDispersionesRepository {
 	}
 	
 	
+	private TblDispersionesBusqueda mapeoDispersionActu(Object[] obj) {
+
+		TblDispersionesBusqueda regresa = new TblDispersionesBusqueda();
+		
+		regresa.setIdDispersion((Integer) obj[0]);
+		regresa.setGruposGenerales((Integer) obj[1]);
+		regresa.setCupoGeneral((Integer) obj[2]);
+		regresa.setGrupoResto((Integer) obj[3]);
+		regresa.setCupoResto((Integer) obj[4]);
+		regresa.setNoEstudiantes((Integer) obj[5]);
+	
+		return regresa;
+	}
+	
+	
 	private ProcesosInscripcion mapeo(Object[] obj) {
 
 		ProcesosInscripcion regresa = new ProcesosInscripcion();
@@ -253,7 +383,28 @@ public class DispersionesRepository implements IDispersionesRepository {
 		return regresa;
 	}
 	
-	private TblDispersiones mapeoDispercion(Object[] obj) {
+	
+	private TblDispersionesBusqueda mapeoDispercionBusqueda(Object[] obj) { 
+
+		TblDispersionesBusqueda regresa = new TblDispersionesBusqueda();
+		regresa.setIdDispersion((Integer) obj[0]);
+		regresa.setPlan(obj[2].toString());
+		regresa.setPrograma(obj[4].toString());
+		regresa.setClave(obj[5].toString());
+		regresa.setSemestre(obj[6].toString());
+		regresa.setBloque(obj[7].toString());
+		regresa.setNoEstudiantes((Integer) obj[8]);
+		regresa.setGruposGenerales((Integer) obj[9]);
+		regresa.setCupoGeneral((Integer) obj[10]);
+		regresa.setGrupoResto((Integer) obj[11]);
+		regresa.setCupoResto((Integer) obj[12]);
+		
+	
+		return regresa;
+	}
+	
+	
+	private TblDispersiones mapeoDispercion(Object[] obj) { 
 
 		TblDispersiones regresa = new TblDispersiones();
 		
