@@ -685,4 +685,23 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
  
 	}
 
+	@Transactional
+	@Override
+	public void eliminarPlanesProgramas(ConvocatoriaParamNueva convocatoriaParamNueva, int idConvocatoria) {
+		
+		String consulta2 = " DELETE FROM rel_convocatoria_planesyprogramas WHERE id_convocatoria = :idConvocatoria " +
+				"AND id_plan = :idPlan AND id_programa = :idPrograma";
+
+		for (ConvocatoriaNivelEducativoCompl planProgramas : convocatoriaParamNueva.getListaPlanProgramaEliminar()) {
+		
+			Query query2 = entityManager.createNativeQuery(consulta2);
+	        query2.setParameter("idConvocatoria", idConvocatoria);
+	        query2.setParameter("idPlan", planProgramas.getIdPlan());
+	        query2.setParameter("idPrograma", planProgramas.getIdPrograma());
+	        query2.executeUpdate();
+			
+		}
+		
+	}
+	
 }
