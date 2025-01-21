@@ -12,6 +12,15 @@ public class ConvocatoriaNivelEducativoCompl implements Serializable {
 	private String nombrePlan;
 	private Integer idPrograma;
 	private String nombrePrograma;
+	   private Boolean seleccionado;
+
+	    public Boolean getSeleccionado() {
+	        return seleccionado;
+	    }
+
+	    public void setSeleccionado(Boolean seleccionado) {
+	        this.seleccionado = seleccionado;
+	    }
 	
 	 @Override
 	    public String toString() {
