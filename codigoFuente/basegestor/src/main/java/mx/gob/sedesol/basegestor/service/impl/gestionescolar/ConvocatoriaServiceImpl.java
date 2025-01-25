@@ -47,6 +47,11 @@ public class ConvocatoriaServiceImpl implements ConvocatoriaService {
 		
 	}
 	
+	@Override
+	public void eliminarPlanesProgramas(ConvocatoriaParamNueva convocatoriaParamNueva, int idConvocatoria) {
+		iConvocatoriaRepository.eliminarPlanesProgramas(convocatoriaParamNueva, idConvocatoria);
+	}
+	
 	
 	@Override
 	public List<Convocatoria> consultarConvocatorias() {

@@ -299,7 +299,7 @@
                 							requiredMessage="La fecha de cierre es obligatoria.">
 									<p:ajax event="dateSelect" process="@this"
 											update="fc_fechaFinalAlta"
-											listener="#{convocatoriasBean.validarFechasAlta()}" />
+											listener="#{convocatoriasBean.validarFechasAlta2()}" />
 								</p:calendar>
 								<p:message for="fc_fechaInicialAlta" display="text" />
 
@@ -334,7 +334,7 @@
 						id="altaNivelEducativo" styleClass="col-xs-12" required="false"
 						requiredMessage="El nivel educativo es obligatorio." label="Seleccionar">
 
-						<p:ajax event="change" process="@this" />
+						<p:ajax event="change" process="@this" listener="#{convocatoriasBean.onChange}" />
 
 						<f:selectItems
 							value="#{convocatoriasBean.convocatoriaParamNueva.listaPlanPrograma}"

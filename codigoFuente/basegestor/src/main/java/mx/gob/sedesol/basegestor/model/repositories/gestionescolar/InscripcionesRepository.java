@@ -402,9 +402,9 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 				+ "WHERE rcp.id_convocatoria = :idConv";
 
 		String consulta6 = "INSERT INTO tbl_inscripcion_resumen "
-				+ "(grupo, programa_educativo, asignatura, clave_asignatura, semestre, bloque, no_estudiantes,no_grupos,estudiantes_x_grupo, grupo_resto, estudiantes_resto) "
+				+ "(grupo, programa_educativo, asignatura, clave_asignatura, semestre, bloque, no_estudiantes,no_grupos,estudiantes_x_grupo, grupo_resto, estudiantes_resto, id_programa, id_plan, id_convocatoria ) "
 				+ "VALUES "
-				+ "(:grupo, :programaEducativo, :asignatura, :claveAsignatura, :semestre, :bloque, :numeroEstudiantes, :numeroGrupos, :estudiantesPorGrupo, :grupoResto, :estudiantesResto)\r\n";
+				+ "(:grupo, :programaEducativo, :asignatura, :claveAsignatura, :semestre, :bloque, :numeroEstudiantes, :numeroGrupos, :estudiantesPorGrupo, :grupoResto, :estudiantesResto, :idPrograma, :idPlan, :idConvocatoria)\r\n";
 
 		Query query2 = entityManager.createNativeQuery(consulta2);
 
@@ -435,6 +435,11 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 			inscripcionParamNueva.setInscripcionExistente(false);
 			// Ejecutar la consulta
 			query.executeUpdate();
+			
+			 String consultaIdGenerado = "SELECT LAST_INSERT_ID()";  // Para MySQL
+			 Query queryIdGenerado = entityManager.createNativeQuery(consultaIdGenerado);
+			 Object idGenerado = queryIdGenerado.getSingleResult();
+			
 
 			Query query3 = entityManager.createNativeQuery(consulta3);
 
@@ -444,12 +449,13 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 
 			for (Object[] row : listaConvocatoria) {
 				Query query4 = entityManager.createNativeQuery(consulta4);
+				
 
 				Object id = row[0];
 				Object idPlan = row[2];
 				Object idPrograma = row[3];
 
-				query4.setParameter("idProceso", 1);
+				query4.setParameter("idProceso", idGenerado);
 				query4.setParameter("idPlan", idPlan);
 				query4.setParameter("idPrograma", idPrograma);
 				query4.setParameter("fchModificacion", fecha3);
@@ -466,6 +472,9 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 			for (Object[] row : listaResumen) {
 				Query query6 = entityManager.createNativeQuery(consulta6);
 
+				query6.setParameter("idPrograma", row[2]);
+				query6.setParameter("idPlan", row[1]);
+				query6.setParameter("idConvocatoria", row[0]);
 				query6.setParameter("grupo", row[3]);
 				query6.setParameter("programaEducativo", row[4]);
 				query6.setParameter("asignatura", row[5]);
@@ -689,6 +698,9 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 						// Ejecutar la consulta
 						query.executeUpdate();
 						
+						 String consultaIdGenerado = "SELECT LAST_INSERT_ID()";  // Para MySQL
+						 Query queryIdGenerado = entityManager.createNativeQuery(consultaIdGenerado);
+						 Object idGenerado = queryIdGenerado.getSingleResult();
 						
 						for (int i = 0; i < planProgramaLista.size(); i++) {
 							String valor = planProgramaLista.get(i).toString();
@@ -712,7 +724,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 //						        String query32 = "("+id+"," + idNivelEnsenanza +"," + idPlan +"," + idPrograma +",'"+ fecha3 +"')";
 								
 								Query query03 = entityManager.createNativeQuery(consulta3);
-								query03.setParameter("idProceso", 1);
+								query03.setParameter("idProceso", idGenerado);
 								query03.setParameter("idPlan", idPlan);
 								query03.setParameter("idPrograma", idPrograma);
 								query03.setParameter("fchModificacion", fecha3);

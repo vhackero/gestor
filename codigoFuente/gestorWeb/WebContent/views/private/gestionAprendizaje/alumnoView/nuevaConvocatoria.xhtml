@@ -76,7 +76,7 @@
 											showOn="button" required="true"
                 							requiredMessage="La fecha de cierre es obligatoria.">
 									<p:ajax event="dateSelect" process="@this"
-											update="fc_fechaFinalAlta"
+											update="fc_fechaFinalAlta fc_fechaFinal2"
 											listener="#{convocatoriasBean.validarFechasAlta()}" />
 								</p:calendar>
 								<p:message for="fc_fechaInicialAlta" display="text" />

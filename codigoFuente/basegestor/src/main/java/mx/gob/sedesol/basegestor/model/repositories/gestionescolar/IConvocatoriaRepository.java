@@ -30,5 +30,7 @@ public interface IConvocatoriaRepository {
 	public void actualizarConvocatorias(ConvocatoriaParamNueva convocatoriaParamNueva, int idConvocatoria);
 	
 	public void eliminarConvocatorias(Convocatoria elminarConvo);
+	
+	public void eliminarPlanesProgramas(ConvocatoriaParamNueva convocatoriaParamNueva, int idConvocatoria);
 
 }

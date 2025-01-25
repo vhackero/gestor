@@ -52,7 +52,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
             "    c.fecha_apertura = :fechaApertura, " +
             "    c.fecha_cierre = :fechaCierre, " +
             "    c.url_convocatoria = :urlConvocatoria, " +
-            "    c.fecha_alta = :fechaAlta, " +
+           // "    c.fecha_alta = :fechaAlta, " +
             "    c.cupo_limite = :cupoLimite " +
             "WHERE c.convocatoria_id = :id";
 	
@@ -452,13 +452,13 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		
 		ZonedDateTime zonedDateTime = ZonedDateTime.parse(convocatoriaParamNueva.getAltaFechaApertura().toString(), inputFormatter);
 		ZonedDateTime zonedDateTime2 = ZonedDateTime.parse(convocatoriaParamNueva.getAltaFechaCierre().toString(), inputFormatter);
-//		ZonedDateTime zonedDateTime3 = ZonedDateTime.parse(convocatoriaParamNueva.getAltaFechaAlta().toString(), inputFormatter);
+		//ZonedDateTime zonedDateTime3 = ZonedDateTime.parse(convocatoriaParamNueva.getAltaFechaAlta().toString(), inputFormatter);
 		
 		DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");		
 
 		String fecha1 = zonedDateTime.format(outputFormatter);
 		String fecha2 = zonedDateTime2.format(outputFormatter);
-		String fecha3 = zonedDateTime.format(outputFormatter);
+		//String fecha3 = zonedDateTime3.format(outputFormatter);
 		
 		
 
@@ -473,7 +473,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		query.setParameter("fechaApertura", fecha1);
 		query.setParameter("fechaCierre", fecha2);
 		query.setParameter("urlConvocatoria", convocatoriaParamNueva.getAltaUrl());
-		query.setParameter("fechaAlta", fecha3);
+		//query.setParameter("fechaAlta", fecha3);
 		query.setParameter("cupoLimite", convocatoriaParamNueva.getAltaCupoLimite());
 		//query.setParameter("fechaModificacion", convocatoriaParamNueva.get);
 		query.setParameter("id", idConvocatoria);
@@ -559,7 +559,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 							        }
 								
 							} else {
-								String query32 = "("+valorConv+"," + idNivelEnsenanza +"," + idPlan +"," + idPrograma +",'"+ fecha3 +"')";
+								String query32 = "("+valorConv+"," + idNivelEnsenanza +"," + idPlan +"," + idPrograma +",'"+ fecha2 +"')";
 								Query query03 = entityManager.createNativeQuery(query3.concat(query32));
 								int filasAfectadas2 = query03.executeUpdate();
 							}
@@ -685,4 +685,23 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
  
 	}
 
+	@Transactional
+	@Override
+	public void eliminarPlanesProgramas(ConvocatoriaParamNueva convocatoriaParamNueva, int idConvocatoria) {
+		
+		String consulta2 = " DELETE FROM rel_convocatoria_planesyprogramas WHERE id_convocatoria = :idConvocatoria " +
+				"AND id_plan = :idPlan AND id_programa = :idPrograma";
+
+		for (ConvocatoriaNivelEducativoCompl planProgramas : convocatoriaParamNueva.getListaPlanProgramaEliminar()) {
+		
+			Query query2 = entityManager.createNativeQuery(consulta2);
+	        query2.setParameter("idConvocatoria", idConvocatoria);
+	        query2.setParameter("idPlan", planProgramas.getIdPlan());
+	        query2.setParameter("idPrograma", planProgramas.getIdPrograma());
+	        query2.executeUpdate();
+			
+		}
+		
+	}
+	
 }

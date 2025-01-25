@@ -33,6 +33,8 @@ public interface ConvocatoriaService extends CommonService<Convocatoria, Integer
 	
 	public void actualizarConvocatorias(ConvocatoriaParamNueva convocatoriaParamNueva, int idConvocatoria);
 	
+	public void eliminarPlanesProgramas(ConvocatoriaParamNueva convocatoriaParamNueva, int idConvocatoria);
+	
 	public void eliminarConvocatorias(Convocatoria elminarConvo);
 	
 	public List<ConvocatoriaNivelEducativoCompl> consultarNivelEducativoCompleto();
