@@ -28,7 +28,7 @@
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
 						<f:selectItems value="#{dispersionesBean.listaConvocatoria}"
-							var="modalidad" itemLabel="#{modalidad.convocatoriaId}"
+							var="modalidad" itemLabel="#{modalidad.nombre}"
 							itemValue="#{modalidad.convocatoriaId}" />
 					</p:selectOneMenu>
 					<p:message for="convocatoria" display="text" />
