@@ -52,6 +52,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
             "    c.fecha_apertura = :fechaApertura, " +
             "    c.fecha_cierre = :fechaCierre, " +
             "    c.url_convocatoria = :urlConvocatoria, " +
+            "    c.activo = :activo, " +
            // "    c.fecha_alta = :fechaAlta, " +
             "    c.cupo_limite = :cupoLimite " +
             "WHERE c.convocatoria_id = :id";
@@ -217,7 +218,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		if (!listaQuery.isEmpty()) {
 			for (Object[] obj : listaQuery) {
 
-				Convocatoria convocatoria = mapeo2(obj);
+				Convocatoria convocatoria = mapeo3(obj);
 				lista.add(convocatoria);
 
 			}
@@ -366,6 +367,35 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		return regresa;
 	}
 	
+	private Convocatoria mapeo3(Object[] obj) {
+
+		Convocatoria regresa = new Convocatoria();
+
+		regresa.setConvocatoriaId((Integer) obj[0]);
+		regresa.setNombre(obj[1].toString());
+		regresa.setNombreCorto(obj[2].toString());
+		regresa.setDescripcion(obj[3].toString());
+		regresa.setFecha_Apertura((java.util.Date) obj[4]);
+		regresa.setFechaCierre((java.util.Date) obj[5]);
+		regresa.setSemestre((Integer) obj[6]);
+		regresa.setTipo( obj[7].toString());
+		regresa.setUrlConvocatoria(obj[8].toString());
+
+		regresa.setActivo(obj[9].toString());
+//		if( "1".equals(obj[9].toString()) ) {
+//			regresa.setActivo( "ACTIVO ");
+//		} else if( "0".equals(obj[9].toString()) ) {
+//			regresa.setActivo( "INACTIVO" );
+//		}		
+//		
+		regresa.setFechaAlta((java.util.Date) obj[10]);
+		regresa.setFechaModificacion((java.util.Date) obj[11]);
+		regresa.setCupoLimite((Integer) obj[12]);
+		regresa.setNombreNivel( obj[13].toString());
+
+		return regresa;
+	}
+	
 	
 	@Override
 	public List<ConvocatoriaNivelEducativo> consultarNivelEducativo() {
@@ -472,6 +502,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		query.setParameter("descripcion", convocatoriaParamNueva.getAltaDescripcion());
 		query.setParameter("fechaApertura", fecha1);
 		query.setParameter("fechaCierre", fecha2);
+		query.setParameter("activo", convocatoriaParamNueva.getAltaEstatus());
 		query.setParameter("urlConvocatoria", convocatoriaParamNueva.getAltaUrl());
 		//query.setParameter("fechaAlta", fecha3);
 		query.setParameter("cupoLimite", convocatoriaParamNueva.getAltaCupoLimite());
