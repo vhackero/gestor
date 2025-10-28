@@ -131,3 +131,6 @@ derby.log
 
 /.apt_generated/
 /.apt_generated_tests/
+/moodle-modelo/
+/mysql-init/
+/mysql_data/
