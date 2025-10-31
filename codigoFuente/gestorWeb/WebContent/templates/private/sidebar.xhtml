@@ -444,17 +444,28 @@
 													<i class="fa fa-solid fa-id-card"></i>
 													<span class="m-label">#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}</span>
 												</h:commandLink></li>
-											<li><h:commandLink
-													action="#{menuGestorBean.navegaExpedienteGrupo}"
-													title="Expediente de estudiantes por grupo">
-													<i class="fa fa-users-viewfinder"></i>
-													<span class="m-label">Expediente de estudiantes por
-														grupo</span>
-												</h:commandLink></li>
+                                                                                        <li><h:commandLink
+                                                                                                        action="#{menuGestorBean.navegaExpedienteGrupo}"
+                                                                                                        title="Expediente de estudiantes por grupo">
+                                                                                                        <i class="fa fa-users-viewfinder"></i>
+                                                                                                        <span class="m-label">Expediente de estudiantes por
+                                                                                                                grupo</span>
+                                                                                                </h:commandLink></li>
+                                                                                        <ui:fragment
+                                                                                                rendered="#{menuGestorBean.rolTienePermiso('MIS_CONVOCATORIAS')}">
+                                                                                                <sec:authorize access="hasPermission(null, 'MIS_CONVOCATORIAS') ">
+                                                                                                        <li><h:commandLink
+                                                                                                                        action="#{menuGestorBean.navegaMisConvocatorias}" title="Convocatorias">
+                                                                                                                        <i class="fa fa-solid fa-id-card"></i>
+                                                                                                                        <span class="m-label">Convocatorias</span>
+
+                                                                                                                </h:commandLink></li>
+                                                                                                </sec:authorize>
+                                                                                        </ui:fragment>
 
 
 
-										</ul></li>
+                                                                                </ul></li>
 								</sec:authorize>
 							</ui:fragment>
 							<ui:fragment
@@ -504,22 +515,7 @@
 								</sec:authorize>
 							</ui:fragment>
 							
-							<!-- ITTIVA 666-->
-							<ui:fragment
-								rendered="#{menuGestorBean.rolTienePermiso('MIS_CONVOCATORIAS')}">
-								<sec:authorize access="hasPermission(null, 'MIS_CONVOCATORIAS') ">
-									<li><h:commandLink
-											action="#{menuGestorBean.navegaMisConvocatorias}" title="Convocatorias">
-											<i class="fa fa-solid fa-id-card"></i>
-											<span class="m-label">Convocatorias</span>
-
-										</h:commandLink></li>
-								</sec:authorize>
-							</ui:fragment>
-							
-
-							
-							<!-- ITTIVA 666-->
+                                                        <!-- ITTIVA 666-->
 							<ui:fragment
 								rendered="#{menuGestorBean.rolTienePermiso('MIS_DISPERSIONES')}">
 								<sec:authorize access="hasPermission(null, 'MIS_DISPERSIONES') ">
