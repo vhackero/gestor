@@ -4,9 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>mx.gob.sedesol</groupId>
     <artifactId>gestorweb</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
-
+ st
     <profiles>
         <profile>
             <id>desarrollo</id>
@@ -102,13 +101,6 @@
     </build>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>5.12.1</version>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
@@ -259,12 +251,12 @@
             <version>6.1</version><!-- jtezva 2023-08-01-->
         </dependency>
 
-        <!--
+        <!-- -->
         <dependency>
             <groupId>org.primefaces.extensions</groupId>
             <artifactId>all-themes</artifactId>
             <version>1.0.8</version>
-        </dependency-->
+        </dependency>
 
         <!-- Extensiones de prime -->
         <dependency>
@@ -349,9 +341,9 @@
         </dependency-->
 
 <dependency>
-    <groupId>com.itextpdf</groupId>
-    <artifactId>itextpdf</artifactId>
-    <version>5.5.6</version>
+    <groupId>com.lowagie</groupId>
+    <artifactId>itext</artifactId>
+    <version>4.2.2</version>
     <type>pom</type>
 </dependency>
 
