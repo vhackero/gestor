@@ -1,0 +1,58 @@
+services:
+  mysql:
+    image: mariadb:10.4
+    container_name: gestorweb_mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: gestor
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    command: --max_allowed_packet=256M
+    networks:
+      - gestorweb_network
+
+  mongodb:
+    image: mongo:7.0.4
+    container_name: gestorweb_mongodb-db
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      MONGO_INITDB_DATABASE: eLearning
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - gestorweb_network
+
+
+  moodle:
+    build:
+      context: ./moodle-modelo
+      dockerfile: Dockerfile
+    container_name: gestorweb_moodle-app
+    restart: always
+    ports:
+      #- externo:interno
+      - "80:80"
+    volumes:
+      - ./moodle-modelo:/var/www/html/moodle-modelo
+      - ./moodle-modelo/moodledata41:/var/www/moodledata
+      - ./moodle-modelo/php.ini:/usr/local/etc/php/php.ini:ro
+    depends_on:
+      - mysql
+    networks:
+      - gestorweb_network
+
+
+volumes:
+  mysql_data:
+  mongodb_data:
+
+networks:
+  gestorweb_network:
