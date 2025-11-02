@@ -4,8 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>mx.gob.sedesol</groupId>
     <artifactId>gestorweb</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
- st
+
     <profiles>
         <profile>
             <id>desarrollo</id>
@@ -101,6 +102,13 @@
     </build>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>5.12.1</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
