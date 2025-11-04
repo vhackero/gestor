@@ -159,10 +159,11 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		String consulta = "select id_plan, id_programa from des_sisi_gestor.rel_convocatoria_planesyprogramas\r\n"
 				+ "WHERE id_convocatoria = :idConvocatoria";
 		
-		String consulta2 = " SELECT cnp.id id_nivel_ensenanza, cnp.nombre nivel_ensenaza, tp.id_plan id_plan, tp.nombre plan, fdp.id_programa id_programa, fdp.nombre_tentativo programa\r\n"
-				+ "FROM tbl_planes tp\r\n"
-				+ "         INNER JOIN tbl_ficha_descriptiva_programa fdp ON fdp.id_plan = tp.id_plan AND fdp.identificador_final IS not NULL AND fdp.identificador_final != ''\r\n"
-				+ "         INNER JOIN cat_nivel_ensenanza_programa cnp ON fdp.id_nivel_programa = cnp.id\r\n"
+                String consulta2 = " SELECT cnp.id id_nivel_ensenanza, cnp.nombre nivel_ensenaza, tp.id_plan id_plan, tp.nombre plan, fdp.id_programa id_programa, fdp.nombre_tentativo programa,\r\n"
+                                + "        (SELECT mcr.nombre FROM tbl_malla_curricular mcr WHERE mcr.id = fdp.id_eje_capacitacion) bloque\r\n"
+                                + "FROM tbl_planes tp\r\n"
+                                + "         INNER JOIN tbl_ficha_descriptiva_programa fdp ON fdp.id_plan = tp.id_plan AND fdp.identificador_final IS not NULL AND fdp.identificador_final != ''\r\n"
+                                + "         INNER JOIN cat_nivel_ensenanza_programa cnp ON fdp.id_nivel_programa = cnp.id\r\n"
 				+ "         INNER JOIN tbl_malla_curricular mc ON mc.id_plan = tp.id_plan AND mc.activo =1 \r\n"
 				+ "			WHERE tp.id_plan = :idPlan AND fdp.id_programa =:idPrograma";
 		
@@ -427,11 +428,12 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 
 		List<ConvocatoriaNivelEducativoCompl> lista = new ArrayList<ConvocatoriaNivelEducativoCompl>();
 
-		String consulta = " SELECT cnp.id id_nivel_ensenanza, cnp.nombre nivel_ensenaza, tp.id_plan id_plan, tp.nombre plan, fdp.id_programa id_programa, fdp.nombre_tentativo programa\r\n"
-				+ "FROM tbl_planes tp\r\n"
-				+ "         INNER JOIN tbl_ficha_descriptiva_programa fdp ON fdp.id_plan = tp.id_plan AND fdp.identificador_final IS not NULL AND fdp.identificador_final != ''\r\n"
-				+ "         INNER JOIN cat_nivel_ensenanza_programa cnp ON fdp.id_nivel_programa = cnp.id\r\n"
-				+ "         INNER JOIN tbl_malla_curricular mc ON mc.id_plan = tp.id_plan AND mc.activo =1";
+                String consulta = " SELECT cnp.id id_nivel_ensenanza, cnp.nombre nivel_ensenaza, tp.id_plan id_plan, tp.nombre plan, fdp.id_programa id_programa, fdp.nombre_tentativo programa,\r\n"
+                                + "        (SELECT mcr.nombre FROM tbl_malla_curricular mcr WHERE mcr.id = fdp.id_eje_capacitacion) bloque\r\n"
+                                + "FROM tbl_planes tp\r\n"
+                                + "         INNER JOIN tbl_ficha_descriptiva_programa fdp ON fdp.id_plan = tp.id_plan AND fdp.identificador_final IS not NULL AND fdp.identificador_final != ''\r\n"
+                                + "         INNER JOIN cat_nivel_ensenanza_programa cnp ON fdp.id_nivel_programa = cnp.id\r\n"
+                                + "         INNER JOIN tbl_malla_curricular mc ON mc.id_plan = tp.id_plan AND mc.activo =1";
 
 		Query query = entityManager.createNativeQuery(consulta);
 
@@ -459,11 +461,12 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		regresa.setIdPlan((Integer) obj[2]);
 		regresa.setNombrePlan(obj[3].toString());
 		regresa.setIdPrograma((Integer) obj[4]);
-		regresa.setNombrePrograma(obj[5].toString());
+                regresa.setNombrePrograma(obj[5].toString());
+                regresa.setNombreBloque(obj[6] != null ? obj[6].toString() : null);
 
-		return regresa;
-		
-	}
+                return regresa;
+
+        }
 	
 	private ConvocatoriaNivelEducativo mapeoNivel(Object[] obj) {
 
