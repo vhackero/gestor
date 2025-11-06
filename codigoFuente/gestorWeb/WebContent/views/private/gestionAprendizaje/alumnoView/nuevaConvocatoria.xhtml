@@ -113,11 +113,11 @@
 
 						<p:ajax event="change" process="@this" />
 				        
-						<f:selectItems
-							value="#{convocatoriasBean.listaNivelEducativoCompl}"
-							var="modalidad"
-							itemLabel="#{modalidad.nombreivelEnsenanza} > #{modalidad.nombrePlan} > #{modalidad.nombrePrograma}"
-							itemValue="#{modalidad}" />
+                                                <f:selectItems
+                                                        value="#{convocatoriasBean.listaNivelEducativoCompl}"
+                                                        var="modalidad"
+                                                        itemLabel="#{modalidad.nombreivelEnsenanza} > #{modalidad.nombrePlan} > #{modalidad.nombrePrograma} > #{modalidad.nombreBloque}"
+                                                        itemValue="#{modalidad}" />
 					</p:selectCheckboxMenu>
 					<p:message for="altaNivelEducativo" display="text" />
 				</div>

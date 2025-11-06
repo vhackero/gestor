@@ -115,9 +115,9 @@
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									itemValue="#{null}" />
-								<f:selectItems value="#{convocatoriasBean.listaNivelEducativoCompl}"
-									var="modalidad" itemLabel="#{modalidad.nombreivelEnsenanza} > #{modalidad.nombrePlan} > #{modalidad.nombrePrograma}"
-									itemValue="#{modalidad}"  />
+                                                                <f:selectItems value="#{convocatoriasBean.listaNivelEducativoCompl}"
+                                                                        var="modalidad" itemLabel="#{modalidad.nombreivelEnsenanza} > #{modalidad.nombrePlan} > #{modalidad.nombrePrograma} > #{modalidad.nombreBloque}"
+                                                                        itemValue="#{modalidad}"  />
 
 							</p:selectOneMenu >
 							<p:message for="altaNivelEducativo" display="text" />
