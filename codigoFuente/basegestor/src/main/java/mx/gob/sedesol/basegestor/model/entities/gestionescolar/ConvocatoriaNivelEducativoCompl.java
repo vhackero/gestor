@@ -10,9 +10,10 @@ public class ConvocatoriaNivelEducativoCompl implements Serializable {
 	private String nombreivelEnsenanza;
 	private Integer idPlan;
 	private String nombrePlan;
-	private Integer idPrograma;
-	private String nombrePrograma;
-	   private Boolean seleccionado;
+        private Integer idPrograma;
+        private String nombrePrograma;
+        private String nombreBloque;
+           private Boolean seleccionado;
 
 	    public Boolean getSeleccionado() {
 	        return seleccionado;
@@ -28,8 +29,9 @@ public class ConvocatoriaNivelEducativoCompl implements Serializable {
 	                + ", nombreNivelEnsenanza=" + nombreivelEnsenanza 
 	                + ", idPlan=" + idPlan 
 	                + ", nombrePlan=" + nombrePlan 
-	                + ", idPrograma=" + idPrograma 
-	                + ", nombrePrograma=" + nombrePrograma + "]";
+                        + ", idPrograma=" + idPrograma
+                        + ", nombrePrograma=" + nombrePrograma
+                        + ", nombreBloque=" + nombreBloque + "]";
 	    }
 	 
 	public Integer getIdNivelEnsenanza() {
@@ -65,9 +67,17 @@ public class ConvocatoriaNivelEducativoCompl implements Serializable {
 	public String getNombrePrograma() {
 		return nombrePrograma;
 	}
-	public void setNombrePrograma(String nombrePrograma) {
-		this.nombrePrograma = nombrePrograma;
-	}
+        public void setNombrePrograma(String nombrePrograma) {
+                this.nombrePrograma = nombrePrograma;
+        }
+
+        public String getNombreBloque() {
+                return nombreBloque;
+        }
+
+        public void setNombreBloque(String nombreBloque) {
+                this.nombreBloque = nombreBloque;
+        }
 	
 	
 
