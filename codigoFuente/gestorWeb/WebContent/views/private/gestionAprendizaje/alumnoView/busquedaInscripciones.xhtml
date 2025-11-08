@@ -17,22 +17,11 @@
 			<h1>
 				<p:outputLabel styleClass="h1" value="Inscripciones" />
 			</h1>
-
-
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
-
 			<br />
-
 			<div class="form-group ">
-
-
-
-
 				<div class="row">
-
-
-
 					<sec:authorize access="hasPermission(null,'INSCRIP_NUEVA')">
 
 						<p:commandButton value="Nuevo proceso de inscripción"
@@ -60,26 +49,10 @@
 							immediate="true" process="@this" styleClass="btn btn-primary" />
 					</sec:authorize>
 				</div>
-
-
 			</div>
-
-
-
 			<div></div>
-
-
-
-
-
-
-
-
 			<!-- Incluir dinámicamente el archivo .xhtml basado en la propiedad 'paginaActual' -->
 			<ui:include src="#{inscripocionesBean.paginaActual}" />
-
-
-
 		</h:form>
 	</ui:define>
 </ui:composition>

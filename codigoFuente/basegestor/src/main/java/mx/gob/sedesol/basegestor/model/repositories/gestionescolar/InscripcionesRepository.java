@@ -2,7 +2,9 @@ package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 
 import java.math.BigInteger;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -37,8 +39,15 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 @Repository
 public class InscripcionesRepository implements IinscripcionesRepository {
 
+	private static final int TIPO_PROCESO_ORDINARIO = 1;
+	private static final int TIPO_PROCESO_EXTRAORDINARIO = 2;
+	private static final int LONGITUD_DEFAULT_PERFIL = 10;
+	private static final Pattern PLAN_PROGRAMA_PATTERN = Pattern.compile("id\\w+=(\\d+)");
+
 	@Autowired
 	public EntityManager entityManager;
+
+	private Integer longitudMaximaPerfilCache;
 
 	@Override
 	public List<TipoProceso> consultarTipoProceso() {
@@ -62,6 +71,217 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 
 		return lista;
 
+	}
+
+	@Override
+	public List<TipoProceso> consultarTipoProcesoDisponibles(Integer convocatoriaId, LocalDateTime fechaActual) {
+		List<TipoProceso> tipos = consultarTipoProceso();
+		if (convocatoriaId == null) {
+			return tipos;
+		}
+
+		int totalOrdinarios = contarProcesosPorTipo(convocatoriaId, TIPO_PROCESO_ORDINARIO);
+		LocalDateTime fechaReferencia = fechaActual != null ? fechaActual : LocalDateTime.now();
+
+		if (totalOrdinarios <= 0) {
+			return filtrarTiposPorId(tipos, TIPO_PROCESO_ORDINARIO);
+		}
+
+		LocalDateTime fechaFinOrdinario = obtenerFechaFinProcesoOrdinario(convocatoriaId);
+		if (fechaFinOrdinario != null && fechaFinOrdinario.isAfter(fechaReferencia)) {
+			return new ArrayList<>();
+		}
+
+		return filtrarTiposPorId(tipos, TIPO_PROCESO_EXTRAORDINARIO);
+	}
+
+	private List<TipoProceso> filtrarTiposPorId(List<TipoProceso> tipos, int tipoId) {
+		List<TipoProceso> filtrados = new ArrayList<>();
+		if (tipos == null) {
+			return filtrados;
+		}
+		for (TipoProceso tipo : tipos) {
+			if (tipo != null && tipo.getIdProceso() != null && tipo.getIdProceso().intValue() == tipoId) {
+				filtrados.add(tipo);
+			}
+		}
+		return filtrados;
+	}
+
+	@Override
+	public int contarProcesosPorTipo(Integer convocatoriaId, int tipoProcesoId) {
+		if (convocatoriaId == null) {
+			return 0;
+		}
+
+		String sql = "SELECT COUNT(*) FROM tbl_procesos_inscripcion WHERE convocatoria_id = :convocatoriaId AND id_tipo_proceso = :tipoProceso";
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("convocatoriaId", convocatoriaId);
+		query.setParameter("tipoProceso", tipoProcesoId);
+
+		Object resultado = query.getSingleResult();
+		return resultado != null ? ((Number) resultado).intValue() : 0;
+	}
+
+	@Override
+	public LocalDateTime obtenerFechaFinProcesoOrdinario(Integer convocatoriaId) {
+		if (convocatoriaId == null) {
+			return null;
+		}
+
+		String sql = "SELECT MAX(fecha_fin) FROM tbl_procesos_inscripcion WHERE convocatoria_id = :convocatoriaId AND id_tipo_proceso = :tipoProceso";
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("convocatoriaId", convocatoriaId);
+		query.setParameter("tipoProceso", TIPO_PROCESO_ORDINARIO);
+		Object resultado = query.getSingleResult();
+
+		if (resultado == null) {
+			return null;
+		}
+
+		if (resultado instanceof Timestamp) {
+			return ((Timestamp) resultado).toLocalDateTime();
+		} else if (resultado instanceof Date) {
+			return ((Date) resultado).toLocalDate().atStartOfDay();
+		} else if (resultado instanceof String) {
+			return Timestamp.valueOf(((String) resultado).replace("T", " ")).toLocalDateTime();
+		}
+
+		return null;
+	}
+
+	@Override
+	public Integer obtenerSiguienteConsecutivoProceso() {
+		String sql = "SELECT IFNULL(MAX(proceso_inscripcion_id),0) + 1 FROM tbl_procesos_inscripcion";
+		Query query = entityManager.createNativeQuery(sql);
+		Object resultado = query.getSingleResult();
+		return resultado != null ? ((Number) resultado).intValue() : 1;
+	}
+
+	@Override
+	public boolean existePlanProgramaExtraordinario(Integer convocatoriaId, int idPlan, int idPrograma,
+			LocalDateTime fechaActual) {
+		if (convocatoriaId == null) {
+			return false;
+		}
+
+		String sql = "SELECT COUNT(*) "
+				+ "FROM rel_proceso_inscipcion_planesyprogramas r "
+				+ "INNER JOIN tbl_procesos_inscripcion p ON p.proceso_inscripcion_id = r.id_proceso_inscripcion "
+				+ "WHERE p.convocatoria_id = :convocatoriaId "
+				+ "AND p.id_tipo_proceso = :tipoProceso "
+				+ "AND r.id_plan = :idPlan "
+				+ "AND r.id_programa = :idPrograma "
+				+ "AND p.fecha_fin >= :fechaActual";
+
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("convocatoriaId", convocatoriaId);
+		query.setParameter("tipoProceso", TIPO_PROCESO_EXTRAORDINARIO);
+		query.setParameter("idPlan", idPlan);
+		query.setParameter("idPrograma", idPrograma);
+		LocalDateTime referencia = fechaActual != null ? fechaActual : LocalDateTime.now();
+		query.setParameter("fechaActual", Timestamp.valueOf(referencia));
+
+		Object resultado = query.getSingleResult();
+		return resultado != null && ((Number) resultado).intValue() > 0;
+	}
+
+	private String prepararClaveProceso(InscripcionParamNueva inscripcionParamNueva, int consecutivo) {
+		String clave = inscripcionParamNueva.getCalveProceso();
+		if (clave == null || clave.trim().isEmpty()) {
+			clave = generarClaveProcesoInterno(inscripcionParamNueva.getNombre(), consecutivo);
+		}
+		return clave.trim().toUpperCase();
+	}
+
+	private String generarClaveProcesoInterno(String nombre, int consecutivo) {
+		String base = nombre != null ? nombre.trim().toUpperCase() : "";
+		String[] partes = base.isEmpty() ? new String[0] : base.split("\\s+");
+
+		String primera = partes.length > 0 ? abreviarPalabra(partes[0]) : "PRC";
+		String segunda = partes.length > 1 ? abreviarPalabra(partes[1]) : "GEN";
+		String anio = String.valueOf(LocalDate.now().getYear());
+
+		return String.format("%s-%s-%s-%d", primera, segunda, anio, consecutivo);
+	}
+
+	private String abreviarPalabra(String palabra) {
+		if (palabra == null || palabra.isEmpty()) {
+			return "XXX";
+		}
+		String normalizada = palabra.replaceAll("[^A-Z0-9]", "").toUpperCase();
+		if (normalizada.isEmpty()) {
+			normalizada = palabra.toUpperCase();
+		}
+		return normalizada.length() <= 3 ? normalizada : normalizada.substring(0, 3);
+	}
+
+	private String prepararPerfil(String perfil) {
+		if (perfil == null) {
+			return null;
+		}
+		String limpio = perfil.trim();
+		if (limpio.isEmpty()) {
+			return null;
+		}
+		int longitudMaxima = obtenerLongitudMaximaPerfil();
+		if (limpio.length() <= longitudMaxima) {
+			return limpio;
+		}
+		return limpio.substring(0, longitudMaxima);
+	}
+
+	private int obtenerLongitudMaximaPerfil() {
+		if (longitudMaximaPerfilCache != null && longitudMaximaPerfilCache > 0) {
+			return longitudMaximaPerfilCache;
+		}
+		try {
+			Query query = entityManager.createNativeQuery(
+					"SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.columns "
+							+ "WHERE table_schema = DATABASE() AND table_name = 'tbl_procesos_inscripcion' "
+							+ "AND column_name = 'perfil'");
+			Object resultado = query.getSingleResult();
+				if (resultado instanceof Number) {
+					longitudMaximaPerfilCache = ((Number) resultado).intValue();
+				} else if (resultado != null) {
+					longitudMaximaPerfilCache = Integer.parseInt(resultado.toString());
+				}
+		} catch (Exception e) {
+			System.out.println(
+					"[InscripcionesRepository] No fue posible obtener la longitud del campo perfil, se usará el valor por defecto "
+							+ LONGITUD_DEFAULT_PERFIL + ". Detalle: " + e.getMessage());
+			longitudMaximaPerfilCache = LONGITUD_DEFAULT_PERFIL;
+		}
+			if (longitudMaximaPerfilCache == null || longitudMaximaPerfilCache <= 0) {
+				longitudMaximaPerfilCache = LONGITUD_DEFAULT_PERFIL;
+			} else if (longitudMaximaPerfilCache > 0) {
+				longitudMaximaPerfilCache = Math.max(1, longitudMaximaPerfilCache);
+			}
+			return longitudMaximaPerfilCache;
+		}
+
+	private int[] obtenerIdsPlanPrograma(Object elemento) {
+		int[] valores = new int[] { -1, -1 };
+
+		if (elemento instanceof InscripcionPlanesProgramas) {
+			InscripcionPlanesProgramas ipp = (InscripcionPlanesProgramas) elemento;
+			if (ipp.getIdPlan() != null) {
+				valores[0] = ipp.getIdPlan();
+			}
+			if (ipp.getIdPrograma() != null) {
+				valores[1] = ipp.getIdPrograma();
+			}
+			return valores;
+		}
+
+		String texto = elemento != null ? elemento.toString() : "";
+		Matcher matcher = PLAN_PROGRAMA_PATTERN.matcher(texto);
+		int index = 0;
+		while (matcher.find() && index < valores.length) {
+			valores[index] = Integer.parseInt(matcher.group(1));
+			index++;
+		}
+		return valores;
 	}
 
 	@Override
@@ -340,52 +560,67 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 	@Override
 	@Transactional
 	public void altaInscripcion(InscripcionParamNueva inscripcionParamNueva) {
+		if (inscripcionParamNueva == null) {
+			return;
+		}
+
 		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+		DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 		ZonedDateTime zonedDateTime = ZonedDateTime.parse(inscripcionParamNueva.getFechaInicio().toString(),
 				inputFormatter);
 		ZonedDateTime zonedDateTime2 = ZonedDateTime.parse(inscripcionParamNueva.getFechaFin().toString(),
 				inputFormatter);
-
 		ZonedDateTime currentDateTime = ZonedDateTime.now();
-
-		DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 		String fecha1 = zonedDateTime.format(outputFormatter);
 		String fecha2 = zonedDateTime2.format(outputFormatter);
 		String fecha3 = currentDateTime.format(outputFormatter);
 
-		String valorSeleccionado = inscripcionParamNueva.getConvocatoriaSeleccionada();
-
-		String valorSeleccionado2 = inscripcionParamNueva.getProcesoSeleccionada();
-
+		String valorConvocatoria = inscripcionParamNueva.getConvocatoriaSeleccionada();
+		String valorTipoProceso = inscripcionParamNueva.getProcesoSeleccionada();
 		String semestreValor = inscripcionParamNueva.getSemestre();
 
-		Integer semestreNum = Integer.parseInt(semestreValor);
+		Integer idConvocatoria = valorConvocatoria != null ? Integer.parseInt(valorConvocatoria) : null;
+		Integer idTipoProceso = valorTipoProceso != null ? Integer.parseInt(valorTipoProceso) : null;
+		Integer semestreNum = semestreValor != null ? Integer.parseInt(semestreValor) : 0;
 
-		Integer idConvocatoria = Integer.parseInt(valorSeleccionado);
+		if (idConvocatoria == null || idTipoProceso == null) {
+			inscripcionParamNueva.setInscripcionExistente(true);
+			return;
+		}
 
-		Integer idProceso = Integer.parseInt(valorSeleccionado2);
+		if (idTipoProceso == TIPO_PROCESO_ORDINARIO
+				&& contarProcesosPorTipo(idConvocatoria, TIPO_PROCESO_ORDINARIO) > 0) {
+			inscripcionParamNueva.setInscripcionExistente(true);
+			return;
+		}
+
+		int consecutivo = obtenerSiguienteConsecutivoProceso();
+		String claveProceso = prepararClaveProceso(inscripcionParamNueva, consecutivo);
+		inscripcionParamNueva.setCalveProceso(claveProceso);
+		String perfilNormalizado = prepararPerfil(inscripcionParamNueva.getPerfil());
+		inscripcionParamNueva.setPerfil(perfilNormalizado);
+		if (perfilNormalizado != null) {
+			System.out.println(
+					"[InscripcionesRepository] Perfil normalizado (alta ordinaria) longitud=" + perfilNormalizado.length());
+		} else {
+			System.out.println("[InscripcionesRepository] Perfil normalizado (alta ordinaria) es null");
+		}
 
 		String consulta = "INSERT INTO tbl_procesos_inscripcion "
 				+ "(nombre, clave_proceso, descripcion, fecha_inicio, fecha_fin, id_tipo_proceso, estatus, semestre, perfil, convocatoria_id, id_categoria_proceso) "
 				+ "VALUES "
 				+ "(:nombre, :claveProceso, :descripcion, :fechaInicio, :fechaFin, :idTipoProceso, :estatus, :semestre, :perfil, :convocatoriaId, :idCategoriaProceso)";
 
-		String consulta2 = "SELECT convocatoria_id \r\n" + "FROM des_sisi_gestor.tbl_procesos_inscripcion \r\n" 
-				+ "  WHERE :fechaInicio = fecha_inicio \r\n"
-				+ "  AND :fechaFin = fecha_fin \r\n"
-				+ "  AND id_tipo_proceso = :idTipoProceso\r\n"
-				+ "  AND convocatoria_id = :convocatoriaId\r\n";
-
-		String consulta3 = "select id, id_convocatoria, id_plan, id_programa from rel_convocatoria_planesyprogramas \r\n"
+		String consultaRelConvocatoria = "select id, id_convocatoria, id_plan, id_programa from rel_convocatoria_planesyprogramas \r\n"
 				+ "WHERE id_convocatoria = :idConvocatoria";
 
-		String consulta4 = "INSERT INTO rel_proceso_inscipcion_planesyprogramas "
+		String consultaRelacionProcesos = "INSERT INTO rel_proceso_inscipcion_planesyprogramas "
 				+ "(id_proceso_inscripcion, id_plan, id_programa, fecha_modificacion) " + "VALUES "
 				+ "(:idProceso, :idPlan, :idPrograma, :fchModificacion)";
 
-		String consulta5 = "SELECT\r\n" + "    rcp.id_convocatoria,\r\n" + "    tp.id_plan,\r\n"
+		String consultaResumenBase = "SELECT\r\n" + "    rcp.id_convocatoria,\r\n" + "    tp.id_plan,\r\n"
 				+ "    tfdp.id_programa,\r\n"
 				+ "    CONCAT(substring_index(tp.identificador,'-',1),'-',tfdp.identificador_final,substr(tmc.nombre,1,1),substring_index(tmc.nombre,' ',-1),substr(tmc2.nombre,1,1),substring_index(tmc2.nombre,' ',-1),'-',CONCAT(DATE_FORMAT(tc.fecha_apertura, '%y'), LPAD(MONTH(tc.fecha_apertura), 2, '0')),'-',substr(tmc.nombre,1,1),substring_index(tmc.nombre,' ',-1),'-','000') grupo,\r\n"
 				+ "    tp.nombre programa_educativa,\r\n" + "    tfdp.nombre_tentativo asignatura,\r\n"
@@ -401,98 +636,69 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 				+ "JOIN tbl_malla_curricular tmc2 ON tmc2.id = tmc.id_padre\r\n"
 				+ "WHERE rcp.id_convocatoria = :idConv";
 
-		String consulta6 = "INSERT INTO tbl_inscripcion_resumen "
+		String consultaInsertResumen = "INSERT INTO tbl_inscripcion_resumen "
 				+ "(grupo, programa_educativo, asignatura, clave_asignatura, semestre, bloque, no_estudiantes,no_grupos,estudiantes_x_grupo, grupo_resto, estudiantes_resto, id_programa, id_plan, id_convocatoria ) "
 				+ "VALUES "
-				+ "(:grupo, :programaEducativo, :asignatura, :claveAsignatura, :semestre, :bloque, :numeroEstudiantes, :numeroGrupos, :estudiantesPorGrupo, :grupoResto, :estudiantesResto, :idPrograma, :idPlan, :idConvocatoria)\r\n";
+				+ "(:grupo, :programaEducativo, :asignatura, :claveAsignatura, :semestre, :bloque, :numeroEstudiantes, :numeroGrupos, :estudiantesPorGrupo, :grupoResto, :estudiantesResto, :idPrograma, :idPlan, :idConvocatoria)";
 
-		Query query2 = entityManager.createNativeQuery(consulta2);
+		Query queryInsert = entityManager.createNativeQuery(consulta);
+		queryInsert.setParameter("nombre", inscripcionParamNueva.getNombre());
+		queryInsert.setParameter("claveProceso", claveProceso);
+		queryInsert.setParameter("descripcion", inscripcionParamNueva.getDescripcion());
+		queryInsert.setParameter("fechaInicio", fecha1);
+		queryInsert.setParameter("fechaFin", fecha2);
+		queryInsert.setParameter("idTipoProceso", idTipoProceso);
+		queryInsert.setParameter("estatus", inscripcionParamNueva.getAltaEstatus());
+		queryInsert.setParameter("semestre", semestreNum);
+		queryInsert.setParameter("perfil", inscripcionParamNueva.getPerfil());
+		queryInsert.setParameter("convocatoriaId", idConvocatoria);
+		queryInsert.setParameter("idCategoriaProceso", 1);
 
-		query2.setParameter("fechaInicio", fecha1);
-		query2.setParameter("fechaFin", fecha2);
-		query2.setParameter("idTipoProceso", idProceso);
-		query2.setParameter("convocatoriaId", idConvocatoria);
+		queryInsert.executeUpdate();
+		inscripcionParamNueva.setInscripcionExistente(false);
 
+		Query queryIdGenerado = entityManager.createNativeQuery("SELECT LAST_INSERT_ID()");
+		Object idGenerado = queryIdGenerado.getSingleResult();
 
-		List<Object[]> listaQuery = query2.getResultList();
+		Query queryRelConvocatoria = entityManager.createNativeQuery(consultaRelConvocatoria);
+		queryRelConvocatoria.setParameter("idConvocatoria", idConvocatoria);
 
-		if (listaQuery.isEmpty()) {
-			Query query = entityManager.createNativeQuery(consulta);
+		List<Object[]> listaConvocatoria = queryRelConvocatoria.getResultList();
+		for (Object[] row : listaConvocatoria) {
+			Object idPlan = row[2];
+			Object idPrograma = row[3];
 
-			// Asignar los parámetros
-			query.setParameter("nombre", inscripcionParamNueva.getNombre());
-			query.setParameter("claveProceso", inscripcionParamNueva.getCalveProceso());
-			query.setParameter("descripcion", inscripcionParamNueva.getDescripcion());
-			query.setParameter("fechaInicio", fecha1);
-			query.setParameter("fechaFin", fecha2);
-			query.setParameter("idTipoProceso", idProceso);
-			query.setParameter("estatus", inscripcionParamNueva.getAltaEstatus());
-			query.setParameter("semestre", semestreNum);
-			query.setParameter("perfil", inscripcionParamNueva.getPerfil());
-			query.setParameter("convocatoriaId", idConvocatoria);
-			query.setParameter("idCategoriaProceso", 1);
-
-			inscripcionParamNueva.setInscripcionExistente(false);
-			// Ejecutar la consulta
-			query.executeUpdate();
-			
-			 String consultaIdGenerado = "SELECT LAST_INSERT_ID()";  // Para MySQL
-			 Query queryIdGenerado = entityManager.createNativeQuery(consultaIdGenerado);
-			 Object idGenerado = queryIdGenerado.getSingleResult();
-			
-
-			Query query3 = entityManager.createNativeQuery(consulta3);
-
-			query3.setParameter("idConvocatoria", idConvocatoria);
-
-			List<Object[]> listaConvocatoria = query3.getResultList();
-
-			for (Object[] row : listaConvocatoria) {
-				Query query4 = entityManager.createNativeQuery(consulta4);
-				
-
-				Object id = row[0];
-				Object idPlan = row[2];
-				Object idPrograma = row[3];
-
-				query4.setParameter("idProceso", idGenerado);
-				query4.setParameter("idPlan", idPlan);
-				query4.setParameter("idPrograma", idPrograma);
-				query4.setParameter("fchModificacion", fecha3);
-
-				query4.executeUpdate();
-			}
-
-			Query query5 = entityManager.createNativeQuery(consulta5);
-
-			query5.setParameter("idConv", idConvocatoria);
-
-			List<Object[]> listaResumen = query5.getResultList();
-
-			for (Object[] row : listaResumen) {
-				Query query6 = entityManager.createNativeQuery(consulta6);
-
-				query6.setParameter("idPrograma", row[2]);
-				query6.setParameter("idPlan", row[1]);
-				query6.setParameter("idConvocatoria", row[0]);
-				query6.setParameter("grupo", row[3]);
-				query6.setParameter("programaEducativo", row[4]);
-				query6.setParameter("asignatura", row[5]);
-				query6.setParameter("claveAsignatura", row[6]);
-				query6.setParameter("semestre", row[7]);
-				query6.setParameter("bloque", row[8]);
-				query6.setParameter("numeroEstudiantes", row[9]);
-				query6.setParameter("numeroGrupos", row[10]);
-				query6.setParameter("estudiantesPorGrupo", row[11]);
-				query6.setParameter("grupoResto", row[12]);
-				query6.setParameter("estudiantesResto", row[13]);
-				query6.executeUpdate();
-			}
-
-		} else {
-			inscripcionParamNueva.setInscripcionExistente(true);
+			Query queryRelacion = entityManager.createNativeQuery(consultaRelacionProcesos);
+			queryRelacion.setParameter("idProceso", idGenerado);
+			queryRelacion.setParameter("idPlan", idPlan);
+			queryRelacion.setParameter("idPrograma", idPrograma);
+			queryRelacion.setParameter("fchModificacion", fecha3);
+			queryRelacion.executeUpdate();
 		}
 
+		Query queryResumen = entityManager.createNativeQuery(consultaResumenBase);
+		queryResumen.setParameter("idConv", idConvocatoria);
+
+		List<Object[]> listaResumen = queryResumen.getResultList();
+		for (Object[] row : listaResumen) {
+			Query queryInsertResumen = entityManager.createNativeQuery(consultaInsertResumen);
+
+			queryInsertResumen.setParameter("idPrograma", row[2]);
+			queryInsertResumen.setParameter("idPlan", row[1]);
+			queryInsertResumen.setParameter("idConvocatoria", row[0]);
+			queryInsertResumen.setParameter("grupo", row[3]);
+			queryInsertResumen.setParameter("programaEducativo", row[4]);
+			queryInsertResumen.setParameter("asignatura", row[5]);
+			queryInsertResumen.setParameter("claveAsignatura", row[6]);
+			queryInsertResumen.setParameter("semestre", row[7]);
+			queryInsertResumen.setParameter("bloque", row[8]);
+			queryInsertResumen.setParameter("numeroEstudiantes", row[9]);
+			queryInsertResumen.setParameter("numeroGrupos", row[10]);
+			queryInsertResumen.setParameter("estudiantesPorGrupo", row[11]);
+			queryInsertResumen.setParameter("grupoResto", row[12]);
+			queryInsertResumen.setParameter("estudiantesResto", row[13]);
+			queryInsertResumen.executeUpdate();
+		}
 	}
 
 	@Override
@@ -548,198 +754,116 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 	@Transactional
 	public void altaInscripcionExtra(InscripcionParamNueva inscripcionParamNueva) {
 
+		if (inscripcionParamNueva == null) {
+			return;
+		}
+
 		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
-
-		ZonedDateTime zonedDateTime = ZonedDateTime.parse(inscripcionParamNueva.getFechaInicio().toString(),
-				inputFormatter);
-		ZonedDateTime zonedDateTime2 = ZonedDateTime.parse(inscripcionParamNueva.getFechaFin().toString(),
-				inputFormatter);
-
 		DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-		ZonedDateTime currentDateTime = ZonedDateTime.now();
+		ZonedDateTime zonedInicio = ZonedDateTime.parse(inscripcionParamNueva.getFechaInicio().toString(),
+				inputFormatter);
+		ZonedDateTime zonedFin = ZonedDateTime.parse(inscripcionParamNueva.getFechaFin().toString(), inputFormatter);
+		ZonedDateTime zonedActual = ZonedDateTime.now();
+		LocalDateTime fechaActual = zonedActual.toLocalDateTime();
 
-		String fecha1 = zonedDateTime.format(outputFormatter);
-		String fecha2 = zonedDateTime2.format(outputFormatter);
-		String fecha3 = currentDateTime.format(outputFormatter);
+		String fechaInicio = zonedInicio.format(outputFormatter);
+		String fechaFin = zonedFin.format(outputFormatter);
+		String fechaModificacion = zonedActual.format(outputFormatter);
 
-		String valorSeleccionado = inscripcionParamNueva.getConvocatoriaSeleccionada();
+		Integer idConvocatoria = inscripcionParamNueva.getConvocatoriaSeleccionada() != null
+				? Integer.parseInt(inscripcionParamNueva.getConvocatoriaSeleccionada())
+				: null;
+		Integer semestreNum = inscripcionParamNueva.getSemestre() != null
+				? Integer.parseInt(inscripcionParamNueva.getSemestre())
+				: 0;
 
-		String valorSeleccionado2 = inscripcionParamNueva.getProcesoSeleccionada();
+		if (idConvocatoria == null) {
+			inscripcionParamNueva.setInscripcionOrdinaria(true);
+			return;
+		}
 
-		String semestreValor = inscripcionParamNueva.getSemestre();
+		if (contarProcesosPorTipo(idConvocatoria, TIPO_PROCESO_ORDINARIO) <= 0) {
+			inscripcionParamNueva.setInscripcionOrdinaria(true);
+			return;
+		}
 
-		Integer idConvocatoria = Integer.parseInt(valorSeleccionado);
+		LocalDateTime fechaFinOrdinario = obtenerFechaFinProcesoOrdinario(idConvocatoria);
+		if (fechaFinOrdinario != null && fechaFinOrdinario.isAfter(fechaActual)) {
+			inscripcionParamNueva.setFechaMayor(true);
+			inscripcionParamNueva.setInscripcionOrdinaria(true);
+			return;
+		}
 
-		Integer idProceso = Integer.parseInt(valorSeleccionado2);
+		List<?> planesProgramasSeleccionados = inscripcionParamNueva.getPlanesProgramas();
+		if (planesProgramasSeleccionados == null || planesProgramasSeleccionados.isEmpty()) {
+			inscripcionParamNueva.setPlanProgramaBoolean(true);
+			return;
+		}
 
-		Integer semestreNum = Integer.parseInt(semestreValor);
+		for (Object elemento : planesProgramasSeleccionados) {
+			int[] ids = obtenerIdsPlanPrograma(elemento);
+			if (ids[0] > 0 && ids[1] > 0
+					&& existePlanProgramaExtraordinario(idConvocatoria, ids[0], ids[1], fechaActual)) {
+				inscripcionParamNueva.setPlanProgramaBoolean(true);
+				return;
+			}
+		}
 
-		String consulta = "INSERT INTO tbl_procesos_inscripcion "
+		int consecutivo = obtenerSiguienteConsecutivoProceso();
+		String claveProceso = prepararClaveProceso(inscripcionParamNueva, consecutivo);
+		inscripcionParamNueva.setCalveProceso(claveProceso);
+		String perfilNormalizado = prepararPerfil(inscripcionParamNueva.getPerfil());
+		inscripcionParamNueva.setPerfil(perfilNormalizado);
+		if (perfilNormalizado != null) {
+			System.out.println(
+					"[InscripcionesRepository] Perfil normalizado (alta extraordinaria) longitud=" + perfilNormalizado.length());
+		} else {
+			System.out.println("[InscripcionesRepository] Perfil normalizado (alta extraordinaria) es null");
+		}
+
+		String consultaInsertProceso = "INSERT INTO tbl_procesos_inscripcion "
 				+ "(nombre, clave_proceso, descripcion, fecha_inicio, fecha_fin, id_tipo_proceso, estatus, semestre, perfil, convocatoria_id, id_categoria_proceso) "
 				+ "VALUES "
 				+ "(:nombre, :claveProceso, :descripcion, :fechaInicio, :fechaFin, :idTipoProceso, :estatus, :semestre, :perfil, :convocatoriaId, :idCategoriaProceso)";
 
-		String consulta2 =  "SELECT MAX(fecha_fin) \r\n" + "FROM des_sisi_gestor.tbl_procesos_inscripcion \r\n" 
-				+ "  WHERE convocatoria_id = :convocatoriaId \r\n"
-				+ "  AND id_tipo_proceso = :idTipoProceso\r\n";
+		String consultaRelacion = "INSERT INTO rel_proceso_inscipcion_planesyprogramas "
+				+ "(id_proceso_inscripcion, id_plan, id_programa, fecha_modificacion) "
+				+ "VALUES (:idProceso, :idPlan, :idPrograma, :fchModificacion)";
 
-		String consulta3 = "INSERT INTO rel_proceso_inscipcion_planesyprogramas "
-				+ "(id_proceso_inscripcion, id_plan, id_programa, fecha_modificacion) " + "VALUES "
-				+ "(:idProceso, :idPlan, :idPrograma, :fchModificacion)";
-		
-		String consulta4 = "SELECT * FROM des_sisi_gestor.rel_convocatoria_planesyprogramas\r\n"
-				+ "where id_convocatoria = :convocaroriaId AND id_plan = :planId and id_programa = :programaId";
-		
-		String consulta5 = "select count(*) from des_sisi_gestor.tbl_procesos_inscripcion\r\n"
-				+ "WHERE convocatoria_id = :convocatoriaId\r\n"
-				+ "AND id_tipo_proceso = :tipoProceso";
+		Query insertProceso = entityManager.createNativeQuery(consultaInsertProceso);
+		insertProceso.setParameter("nombre", inscripcionParamNueva.getNombre());
+		insertProceso.setParameter("claveProceso", claveProceso);
+		insertProceso.setParameter("descripcion", inscripcionParamNueva.getDescripcion());
+		insertProceso.setParameter("fechaInicio", fechaInicio);
+		insertProceso.setParameter("fechaFin", fechaFin);
+		insertProceso.setParameter("idTipoProceso", TIPO_PROCESO_EXTRAORDINARIO);
+		insertProceso.setParameter("estatus", inscripcionParamNueva.getAltaEstatus());
+		insertProceso.setParameter("semestre", semestreNum);
+		insertProceso.setParameter("perfil", inscripcionParamNueva.getPerfil());
+		insertProceso.setParameter("convocatoriaId", idConvocatoria);
+		insertProceso.setParameter("idCategoriaProceso", 1);
+		insertProceso.executeUpdate();
 
-		
-		//Query query3 = entityManager.createNativeQuery(consulta3);
-		
-		List<?> planProgramaLista = inscripcionParamNueva.getPlanesProgramas();
-		
-		Matcher matcher = null;
-		
-		Pattern pattern = Pattern.compile("id\\w+=(\\d+)");
-		
-//		Query query4 = entityManager.createNativeQuery(consulta4);
-//		
-//		for (int i = 0; i < planProgramaLista.size(); i++) {
-//			String valor = planProgramaLista.get(i).toString();
-//		     matcher = pattern.matcher(valor);
-//		     int idNivelEnsenanza = -1;
-//		        int idPlan = -1;
-//		        int idPrograma = -1;
-//		        
-//		        int index = 0;
-//		        while (matcher.find()) {
-//		            int value = Integer.parseInt(matcher.group(1));
-//		            // Asignar los valores a diferentes variables basadas en el orden de aparición
-//		            if (index == 0) {
-//		            	idPlan = value;
-//		            } else if (index == 1) {
-//		            	idPrograma = value;
-//		            } 
-//		            index++;
-//		        }
-//		       
-//		    	query4.setParameter("planId", idPlan);
-//				query4.setParameter("programaId", idPrograma);
-//				query4.setParameter("convocaroriaId", idConvocatoria);
-//		}		
-//
-//		List<Object[]> listaPlanPrograma = query4.getResultList();
-		
-		if (false) {
-			inscripcionParamNueva.setPlanProgramaBoolean(true);
-		}else {
-			
-			Query query5 = entityManager.createNativeQuery(consulta5);
-			query5.setParameter("convocatoriaId", idConvocatoria);
-			query5.setParameter("tipoProceso", idProceso);
-			Object extras = query5.getSingleResult();
-			Integer extarasNum = Integer.parseInt(extras.toString());
-			Query query2 = null;
-			Object listaQuery = null;
-			idProceso = 1;
-		
-			query2 = entityManager.createNativeQuery(consulta2);
-//			query2.setParameter("fechaInicio", inscripcionParamNueva.getNombre());
-//			query2.setParameter("fechaFin", inscripcionParamNueva.getCalveProceso());
-			query2.setParameter("idTipoProceso", idProceso);
-			query2.setParameter("convocatoriaId", idConvocatoria);
+		Query queryIdGenerado = entityManager.createNativeQuery("SELECT LAST_INSERT_ID()");
+		Object idGenerado = queryIdGenerado.getSingleResult();
 
-			listaQuery = query2.getSingleResult();
-			
-
-			if (listaQuery != null) {
-				  // Formato de la fecha con hora
-				//idProceso = 2;
-				if (extarasNum > 1) {
-					idProceso = 1;
-				}else {
-					idProceso = 2;
-				}
-				String fechaStr = listaQuery.toString();
-				fechaStr = fechaStr.split("\\.")[0]; // Elimina la parte después del punto
-		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-		        // Convertir las cadenas a LocalDateTime
-		        LocalDateTime fchActual = LocalDateTime.parse(fecha2, formatter);
-		        LocalDateTime fchFin = LocalDateTime.parse(fechaStr, formatter);
-				
-				//for (Object[] obj : listaQuery) {
-					
-					if (fchFin.isAfter(fchActual)) {
-						inscripcionParamNueva.setFechaMayor(true);
-						inscripcionParamNueva.setInscripcionOrdinaria(true);
-					}else {
-
-						Query query = entityManager.createNativeQuery(consulta);
-
-						// Asignar los parámetros
-						query.setParameter("nombre", inscripcionParamNueva.getNombre());
-						query.setParameter("claveProceso", inscripcionParamNueva.getCalveProceso());
-						query.setParameter("descripcion", inscripcionParamNueva.getDescripcion());
-						query.setParameter("fechaInicio", fecha1);
-						query.setParameter("fechaFin", fecha2);
-						query.setParameter("idTipoProceso", idProceso);
-						query.setParameter("estatus", inscripcionParamNueva.getAltaEstatus());
-						query.setParameter("semestre", semestreNum);
-						query.setParameter("perfil", inscripcionParamNueva.getPerfil());
-						query.setParameter("convocatoriaId", idConvocatoria);
-						query.setParameter("idCategoriaProceso", 1);
-
-						inscripcionParamNueva.setInscripcionOrdinaria(false);
-
-						inscripcionParamNueva.setPlanProgramaBoolean(false);
-						// Ejecutar la consulta
-						query.executeUpdate();
-						
-						 String consultaIdGenerado = "SELECT LAST_INSERT_ID()";  // Para MySQL
-						 Query queryIdGenerado = entityManager.createNativeQuery(consultaIdGenerado);
-						 Object idGenerado = queryIdGenerado.getSingleResult();
-						
-						for (int i = 0; i < planProgramaLista.size(); i++) {
-							String valor = planProgramaLista.get(i).toString();
-						     matcher = pattern.matcher(valor);
-						     int idNivelEnsenanza = -1;
-						        int idPlan = -1;
-						        int idPrograma = -1;
-						        
-						        int index = 0;
-						        while (matcher.find()) {
-						            int value = Integer.parseInt(matcher.group(1));
-						            // Asignar los valores a diferentes variables basadas en el orden de aparición
-						            if (index == 0) {
-						            	idPlan = value;
-						            } else if (index == 1) {
-						            	idPrograma = value;
-						            } 
-						            index++;
-						        }
-						        
-//						        String query32 = "("+id+"," + idNivelEnsenanza +"," + idPlan +"," + idPrograma +",'"+ fecha3 +"')";
-								
-								Query query03 = entityManager.createNativeQuery(consulta3);
-								query03.setParameter("idProceso", idGenerado);
-								query03.setParameter("idPlan", idPlan);
-								query03.setParameter("idPrograma", idPrograma);
-								query03.setParameter("fchModificacion", fecha3);
-								
-							
-								int filasAfectadas2 = query03.executeUpdate();
-						}
-						inscripcionParamNueva.setFechaMayor(false);
-					}
-				//}
-
-			} else {
-				inscripcionParamNueva.setInscripcionOrdinaria(true);
+		for (Object elemento : planesProgramasSeleccionados) {
+			int[] ids = obtenerIdsPlanPrograma(elemento);
+			if (ids[0] <= 0 || ids[1] <= 0) {
+				continue;
 			}
+			Query insertRelacion = entityManager.createNativeQuery(consultaRelacion);
+			insertRelacion.setParameter("idProceso", idGenerado);
+			insertRelacion.setParameter("idPlan", ids[0]);
+			insertRelacion.setParameter("idPrograma", ids[1]);
+			insertRelacion.setParameter("fchModificacion", fechaModificacion);
+			insertRelacion.executeUpdate();
 		}
+
+		inscripcionParamNueva.setInscripcionOrdinaria(false);
+		inscripcionParamNueva.setPlanProgramaBoolean(false);
+		inscripcionParamNueva.setFechaMayor(false);
 	}
 	
 	@Transactional
