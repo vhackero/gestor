@@ -63,6 +63,11 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		return lista;
 	}
 	
+	@Override
+	public List<TipoProceso> consultarTipoProcesoDisponibles(Integer convocatoriaId) {
+		return iinscripcionesRepository.consultarTipoProcesoDisponibles(convocatoriaId, LocalDateTime.now());
+	}
+	
 	
 	@Override
 	public List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta) {
@@ -90,12 +95,22 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 
 	@Override
 	public void altaInscripciones(InscripcionParamNueva inscripcionParamNueva) {
+		if (inscripcionParamNueva != null
+				&& (inscripcionParamNueva.getCalveProceso() == null
+						|| inscripcionParamNueva.getCalveProceso().trim().isEmpty())) {
+			inscripcionParamNueva.setCalveProceso(generarClaveProceso(inscripcionParamNueva.getNombre()));
+		}
 		iinscripcionesRepository.altaInscripcion(inscripcionParamNueva);
 	}
 	
 	
 	@Override
 	public void altaInscripcionesExtra(InscripcionParamNueva inscripcionParamNueva) {
+		if (inscripcionParamNueva != null
+				&& (inscripcionParamNueva.getCalveProceso() == null
+						|| inscripcionParamNueva.getCalveProceso().trim().isEmpty())) {
+			inscripcionParamNueva.setCalveProceso(generarClaveProceso(inscripcionParamNueva.getNombre()));
+		}
 		iinscripcionesRepository.altaInscripcionExtra(inscripcionParamNueva);
 	}
 
@@ -216,6 +231,34 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 	@Override
 	public List<TblFichaDescriptivaPrograma> consultarPrograma(InscripcionParamNueva inscripcionParamNueva) {
 		return null;
+	}
+
+	@Override
+	public String generarClaveProceso(String nombre) {
+		int consecutivo = iinscripcionesRepository.obtenerSiguienteConsecutivoProceso();
+		return generarClave(nombre, consecutivo);
+	}
+
+	private String generarClave(String nombre, int consecutivo) {
+		String base = nombre != null ? nombre.trim().toUpperCase() : "";
+		String[] partes = base.isEmpty() ? new String[0] : base.split("\\s+");
+
+		String primera = partes.length > 0 ? abreviar(partes[0]) : "PRC";
+		String segunda = partes.length > 1 ? abreviar(partes[1]) : "GEN";
+		String anio = String.valueOf(java.time.LocalDate.now().getYear());
+
+		return String.format("%s-%s-%s-%d", primera, segunda, anio, consecutivo);
+	}
+
+	private String abreviar(String palabra) {
+		if (palabra == null || palabra.isEmpty()) {
+			return "XXX";
+		}
+		String normalizada = palabra.replaceAll("[^A-Z0-9]", "").toUpperCase();
+		if (normalizada.isEmpty()) {
+			normalizada = palabra.toUpperCase();
+		}
+		return normalizada.length() <= 3 ? normalizada : normalizada.substring(0, 3);
 	}
 
 

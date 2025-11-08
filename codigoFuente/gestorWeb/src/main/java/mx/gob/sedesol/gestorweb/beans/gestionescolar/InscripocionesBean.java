@@ -121,6 +121,10 @@ public class InscripocionesBean extends BaseBean {
 	
 	private String programa;
 
+	private boolean sinTiposProcesoDisponibles;
+	
+	private String mensajeEliminacion = "Proceso de inscripción eliminado correctamente.";
+
 	// REDIRECCION OPCIONES
 	private String paginaActual;
 
@@ -157,14 +161,12 @@ public class InscripocionesBean extends BaseBean {
 		registroSeleccionado = null;
 		tableroParamConsulta = new ConvocatoriaParamConsulta();
 		consultaParamConsulta = new ConvocatoriaParamConsulta();
+		inscripcionParamNueva = new InscripcionParamNueva();
 
 		// Ocultar formulario de edición
 		mostrarFormularioEdicion = false;
 		
-		 listaSemestres = new ArrayList<>();
-	        for (int i = 1; i <= 24; i++) {
-	            listaSemestres.add(String.valueOf(i));
-	        }
+		inicializarListaSemestres();
 
 		logger.info("El bean InscripocionesBean ha sido inicializado.");
 	}
@@ -178,11 +180,11 @@ public class InscripocionesBean extends BaseBean {
 	}
 
 	public String navegaConsultaInscripciones() throws Exception {
+		initConsultaProceso();
 		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/cosultaInscripciones.xhtml";
 		consultarConvocatorias();
 		consultaTipoProceso();
 		consultarPlan();
-		initConsultaProceso();
 		return null; // Mantener en la misma página
 	}
 
@@ -230,23 +232,8 @@ public class InscripocionesBean extends BaseBean {
 	}
 	
 	public void consultaTipoProceso2() throws Exception {
-
-		listaTipoProceso = inscripcionesService.consultarTipoProceso();
-		
-		if ("2".equalsIgnoreCase(inscripcionParamNueva.getProcesoSeleccionada())) {
-	        // Cargar planes asociados a la convocatoria seleccionada
-			this.mostrarConsultaConvocatoria = false;
-			this.mostrarNuevaConvocatoria = true;
-	    }else {
-	    	this.mostrarConsultaConvocatoria = true;
-			this.mostrarNuevaConvocatoria = false;
-	    }
-
-		logger.info(inscripcionParamNueva.getProcesoSeleccionada());
-		logger.info("Termina consulta listaTipoProceso select");
-		logger.info(listaTipoProceso);
-		
-
+		consultaTipoProceso();
+		onTipoProcesoChange();
 	}
 
 	// consutlar tablero metodos
@@ -292,7 +279,9 @@ public class InscripocionesBean extends BaseBean {
 
 	public void consultaTipoProceso() throws Exception {
 
-		listaTipoProceso = inscripcionesService.consultarTipoProceso();
+		actualizarListaTipoProceso();
+		seleccionarTipoProcesoPorDefecto();
+		actualizarVisibilidadPaneles();
 
 		logger.info("Termina consulta listaTipoProceso select");
 		logger.info(listaTipoProceso);
@@ -308,6 +297,62 @@ public class InscripocionesBean extends BaseBean {
 		logger.info("Termina consulta   listaPlanes select");
 		logger.info(listaPlanes);
 
+	}
+
+	private void actualizarListaTipoProceso() throws Exception {
+		String convocatoriaSeleccionada = inscripcionParamNueva.getConvocatoriaSeleccionada();
+		if (convocatoriaSeleccionada != null) {
+			Integer idConvocatoria = Integer.parseInt(convocatoriaSeleccionada);
+			listaTipoProceso = inscripcionesService.consultarTipoProcesoDisponibles(idConvocatoria);
+		} else {
+			listaTipoProceso = inscripcionesService.consultarTipoProceso();
+		}
+		if (listaTipoProceso == null || listaTipoProceso.isEmpty()) {
+			inscripcionParamNueva.setProcesoSeleccionada(null);
+		}
+		sinTiposProcesoDisponibles = convocatoriaSeleccionada != null
+				&& (listaTipoProceso == null || listaTipoProceso.isEmpty());
+	}
+
+	private void seleccionarTipoProcesoPorDefecto() {
+		if (listaTipoProceso != null && listaTipoProceso.size() == 1) {
+			TipoProceso unico = listaTipoProceso.get(0);
+			if (unico != null && unico.getIdProceso() != null) {
+				inscripcionParamNueva.setProcesoSeleccionada(String.valueOf(unico.getIdProceso()));
+			}
+		}
+	}
+
+	public void onConvocatoriaSeleccionada() throws Exception {
+		consultaTipoProceso();
+		consultarPlan();
+		consultarPlanesProgramas();
+	}
+
+	public void onTipoProcesoChange() {
+		actualizarVisibilidadPaneles();
+		if (!mostrarNuevaConvocatoria) {
+			inscripcionParamNueva.setPlanesProgramas(null);
+		}
+	}
+
+	private void actualizarVisibilidadPaneles() {
+		String procesoSeleccionado = inscripcionParamNueva.getProcesoSeleccionada();
+		if ("2".equalsIgnoreCase(procesoSeleccionado)) {
+			this.mostrarConsultaConvocatoria = false;
+			this.mostrarNuevaConvocatoria = true;
+		} else {
+			this.mostrarConsultaConvocatoria = true;
+			this.mostrarNuevaConvocatoria = false;
+		}
+	}
+
+	public void sugerirClaveProceso() {
+		String nombreProceso = inscripcionParamNueva.getNombre();
+		if (nombreProceso != null && !nombreProceso.trim().isEmpty()) {
+			String clave = inscripcionesService.generarClaveProceso(nombreProceso);
+			inscripcionParamNueva.setCalveProceso(clave);
+		}
 	}
 	
 	public void consultarPrograma() throws Exception {
@@ -399,17 +444,25 @@ public class InscripocionesBean extends BaseBean {
 	public void limpiarCampos() throws Exception {
 		consultaParamConsulta = new ConvocatoriaParamConsulta();
 		inscripcionParamNueva = new InscripcionParamNueva();
-		//navegaNuevoConvocatoria();
 		convocatoriaSeleccionada2 = null;
-		listaTipoProceso = null;
-		estatusLista = null;
 		procesoSeleccionada2 = null;
-		listaSemestres = null;
-		listaConvocatoria = null;
 		fechaInicio = null;
 		fechaFin = null;
 		listaFiltrosResumen = null;
 		listaFiltrosResumenOG = null;
+
+		inicializarListaSemestres();
+		consultarConvocatorias();
+		consultaTipoProceso();
+		consultarPlan();
+		consultarPlanesProgramas();
+	}
+
+	private void inicializarListaSemestres() {
+		listaSemestres = new ArrayList<>();
+		for (int i = 1; i <= 24; i++) {
+			listaSemestres.add(String.valueOf(i));
+		}
 	}
 	
 	public void cancelar() throws Exception {
@@ -537,11 +590,14 @@ public class InscripocionesBean extends BaseBean {
 
 	            inscripcionesService.deleteProcesoInscripcion(procesoInscripcionId, convocatoriaId, tipoProceso);
 	            logger.info("Registro eliminado correctamente con ID: " + procesoInscripcionId);
+				mensajeEliminacion = "Proceso de inscripción eliminado correctamente.";
 				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccionDelete').show()");
 	            consultarFiltros(); // Refresca la lista después de eliminar
 	        }
 	    } catch (Exception e) {
 	        logger.error("Error al eliminar el registro.", e);
+	        mensajeEliminacion = "error al intentar eliminar el proceso de inscripción";
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccionDelete').show()");
 	    }
 	}
 	
@@ -855,5 +911,21 @@ public class InscripocionesBean extends BaseBean {
 
 	public void setListaPlanProgramas(List<InscripcionPlanesProgramas> listaPlanProgramas) {
 		this.listaPlanProgramas = listaPlanProgramas;
+	}
+
+	public boolean isSinTiposProcesoDisponibles() {
+		return sinTiposProcesoDisponibles;
+	}
+
+	public void setSinTiposProcesoDisponibles(boolean sinTiposProcesoDisponibles) {
+		this.sinTiposProcesoDisponibles = sinTiposProcesoDisponibles;
+	}
+
+	public String getMensajeEliminacion() {
+		return mensajeEliminacion;
+	}
+
+	public void setMensajeEliminacion(String mensajeEliminacion) {
+		this.mensajeEliminacion = mensajeEliminacion;
 	}
 }

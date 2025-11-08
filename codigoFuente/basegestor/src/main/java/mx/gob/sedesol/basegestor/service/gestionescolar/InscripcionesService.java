@@ -26,6 +26,8 @@ public interface InscripcionesService extends CommonService<Convocatoria, Intege
  
 	public List<TipoProceso> consultarTipoProceso();
 	
+	List<TipoProceso> consultarTipoProcesoDisponibles(Integer convocatoriaId);
+
 	public List<TblPlan> consultarPlan(InscripcionParamNueva inscripcionParamNueva);
 	
 	public List<TblFichaDescriptivaPrograma> consultarPrograma(InscripcionParamNueva inscripcionParamNueva);
@@ -48,6 +50,8 @@ public interface InscripcionesService extends CommonService<Convocatoria, Intege
 			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId);
 
 	void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId, String tipoProceso);
+
+	String generarClaveProceso(String nombre);
 
 	 
 

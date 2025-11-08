@@ -19,6 +19,17 @@ public interface IinscripcionesRepository {
 	
 	List<TipoProceso> consultarTipoProceso();
 	
+	List<TipoProceso> consultarTipoProcesoDisponibles(Integer convocatoriaId, LocalDateTime fechaActual);
+	
+	int contarProcesosPorTipo(Integer convocatoriaId, int tipoProcesoId);
+	
+	LocalDateTime obtenerFechaFinProcesoOrdinario(Integer convocatoriaId);
+	
+	Integer obtenerSiguienteConsecutivoProceso();
+	
+	boolean existePlanProgramaExtraordinario(Integer convocatoriaId, int idPlan, int idPrograma,
+			LocalDateTime fechaActual);
+
 	List<TblPlan> consultarPlan(InscripcionParamNueva inscripcionParamNueva);
 	
 	List<InscripcionPlanesProgramas> consultarPlanPrograma(InscripcionParamNueva inscripcionParamNueva);
