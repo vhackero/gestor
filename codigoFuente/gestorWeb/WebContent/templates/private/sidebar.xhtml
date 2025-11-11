@@ -462,6 +462,17 @@
 																							</sec:authorize>
 																						</ui:fragment>
 
+											<ui:fragment
+													rendered="#{menuGestorBean.rolTienePermiso('MIS_DISPERSIONES')}">
+												<sec:authorize access="hasPermission(null, 'MIS_DISPERSIONES') ">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaMisDispersiones}" title="Dispersiones">
+														<i class="fa fa-solid fa-id-card"></i>
+														<span class="m-label">Dispersiones</span>
+
+													</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
                                                                                         <li><h:commandLink
                                                                                                         action="#{menuGestorBean.navegaExpedienteAlumoBuscar}"
                                                                                                         title="#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}">
@@ -515,18 +526,7 @@
 								</sec:authorize>
 							</ui:fragment>
 
-                                                        <!-- ITTIVA 666-->
-                                                        <ui:fragment
-                                                                rendered="#{menuGestorBean.rolTienePermiso('MIS_DISPERSIONES')}">
-								<sec:authorize access="hasPermission(null, 'MIS_DISPERSIONES') ">
-									<li><h:commandLink
-											action="#{menuGestorBean.navegaMisDispersiones}" title="Dispersiones">
-											<i class="fa fa-solid fa-id-card"></i>
-											<span class="m-label">Dispersiones</span>
-											
-							</h:commandLink></li>
-								</sec:authorize>
-							</ui:fragment>
+
 
 							<!-- ITTIVA 666-->
 							<ui:fragment
