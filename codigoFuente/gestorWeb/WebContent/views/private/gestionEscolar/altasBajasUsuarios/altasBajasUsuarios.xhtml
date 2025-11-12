@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:sec="http://www.springframework.org/security/tags">
+
+    <ui:define name="breadcrumb">
+        <li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+        <li class="active">#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.titulo')}</li>
+    </ui:define>
+
+    <ui:define name="content">
+        <ui:fragment rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR')}">
+            <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR') ">
+                <h1>#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.titulo')}</h1>
+                <hr />
+
+                <h:form id="frmAltasBajas">
+                    <p:messages id="msgsAltasBajas" autoUpdate="true" closable="true" />
+
+                    <div class="row">
+                        <div class="col-md-6 col-xs-12">
+                            <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.seccion.altas')}"
+                                     styleClass="panel-primary">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.descripcion.altas')}" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 text-right">
+                                        <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaAlta')}"
+                                                         action="#{altasBajasUsuariosBean.irNuevaAlta}"
+                                                         icon="fa fa-user-plus"
+                                                         styleClass="btn btn-primary"
+                                                         ajax="false"
+                                                         rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR_ALT')}" />
+                                    </div>
+                                </div>
+                            </p:panel>
+                        </div>
+                        <div class="col-md-6 col-xs-12">
+                            <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.seccion.bajas')}"
+                                     styleClass="panel-primary">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.descripcion.bajas')}" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 text-right">
+                                        <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaBaja')}"
+                                                         action="#{altasBajasUsuariosBean.irNuevaBaja}"
+                                                         icon="fa fa-user-minus"
+                                                         styleClass="btn btn-primary"
+                                                         ajax="false"
+                                                         rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR_BAJ')}" />
+                                        <p:spacer width="5" />
+                                        <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.consultarBaja')}"
+                                                         action="#{altasBajasUsuariosBean.irConsultarBaja}"
+                                                         icon="fa fa-search"
+                                                         styleClass="btn btn-default"
+                                                         ajax="false"
+                                                         rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR_CON')}" />
+                                    </div>
+                                </div>
+                            </p:panel>
+                        </div>
+                    </div>
+                </h:form>
+            </sec:authorize>
+        </ui:fragment>
+    </ui:define>
+</ui:composition>

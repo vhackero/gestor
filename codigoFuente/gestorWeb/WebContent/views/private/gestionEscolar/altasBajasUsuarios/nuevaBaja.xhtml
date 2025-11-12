@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:sec="http://www.springframework.org/security/tags">
+
+    <ui:define name="breadcrumb">
+        <li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+        <li>#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.titulo')}</li>
+        <li class="active">#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaBaja')}</li>
+    </ui:define>
+
+    <ui:define name="content">
+        <ui:fragment rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR_BAJ')}">
+            <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_BAJ') ">
+                <h1>#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaBaja')}</h1>
+                <hr />
+
+                <h:form id="frmNuevaBaja">
+                    <p:messages id="msgsNuevaBaja" autoUpdate="true" closable="true" />
+
+                    <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaBaja')}"
+                             styleClass="panel-primary">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.mensaje.pendiente')}" />
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 15px;">
+                            <div class="col-md-12 text-right">
+                                <p:commandButton value="#{sistema.obtenerTexto('gw.ge.texto.regresar')}"
+                                                 action="#{altasBajasUsuariosBean.regresarAlModulo}"
+                                                 icon="fa fa-arrow-left"
+                                                 styleClass="btn btn-default"
+                                                 ajax="false" />
+                            </div>
+                        </div>
+                    </p:panel>
+                </h:form>
+            </sec:authorize>
+        </ui:fragment>
+    </ui:define>
+</ui:composition>
