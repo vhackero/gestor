@@ -23,7 +23,7 @@
 					<p:selectOneMenu id="convocatoria" required="true"  value="#{dispersionesBean.dispercionParametros.idConvocatoriaSeleccionada}"
                     			 requiredMessage="La convocatoria es obligatorio." styleClass="col-xs-12">
 						<p:ajax event="change" process="@this" update="@form"
-											listener="#{dispersionesBean.consultarPlan}" />
+											listener="#{dispersionesBean.onConvocatoriaChange}" />
 						<f:selectItem
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
@@ -97,40 +97,25 @@
 					<p:message for="tipoMatricula" display="text" />
 				</div>
 				
-				<div class="col-md-4 col-xs-12">
+				<ui:fragment rendered="#{dispersionesBean.mostrarPlanYPrograma}">
+					<div class="col-md-4 col-xs-12">
 
-					<p:outputLabel styleClass="bloque" value="Plan:" />
-					<p:selectOneMenu id="plan"
-						value="#{dispersionesBean.dispercionParametros.idPlan}"
-						styleClass="col-xs-12" >
-						<p:ajax event="change" process="@this" update="@form"
-											listener="#{dispersionesBean.consultarPrograma}" />
-						<f:selectItem
-							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-							itemValue="#{null}" />
-						<f:selectItems value="#{dispersionesBean.listaPlanes}"
-							var="modalidad" itemLabel="#{modalidad.nombre}"
-							itemValue="#{modalidad.idPlan}" />
+					<p:outputLabel styleClass="bloque requerido" for="planPrograma" value="Plan / Programa:" />
+					<p:selectCheckboxMenu id="planPrograma"
+						value="#{dispersionesBean.planesProgramasSeleccionados}"
+						styleClass="col-xs-12" converter="entityConverter"
+						required="#{dispersionesBean.mostrarPlanYPrograma}"
+                    	requiredMessage="El plan / programa es obligatorio.">
+						<p:ajax event="change" process="@this" update="@form" />
+						<f:selectItems value="#{dispersionesBean.listaPlanProgramas}"
+							var="planPrograma"
+							itemLabel="#{planPrograma.nombrePlan} &gt; #{planPrograma.nombrePrograma}"
+							itemValue="#{planPrograma}" />
 
-					</p:selectOneMenu>
-				</div>
-				
-				<div class="col-md-4 col-xs-12" >
-
-					<p:outputLabel styleClass="bloque" value="Programa:" rendered="#{dispersionesBean.mostrarPlanYPrograma}" />
-					<p:selectOneMenu id="programa" rendered="#{dispersionesBean.mostrarPlanYPrograma}"
-						value="#{dispersionesBean.dispercionParametros.idPrograma}"
-						styleClass="col-xs-12" >
-						<p:ajax event="change" process="@this" />
-						<f:selectItem
-							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-							itemValue="#{null}" />
-						<f:selectItems value="#{dispersionesBean.listaPrograma}"
-							var="modalidad" itemLabel="#{modalidad.nombreTentativo}"
-							itemValue="#{modalidad.idPrograma}" />
-
-					</p:selectOneMenu>
-				</div>
+					</p:selectCheckboxMenu>
+					<p:message for="planPrograma" display="text" />
+					</div>
+				</ui:fragment>
 
 			</div>
 		</div>
@@ -211,7 +196,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<h:outputText styleClass="bloque"
-						value="Ya existen registros asociados." />
+						value="Ya existen registros asociados a proceso de inscripción." />
 				</div>
 			</div>
 		</div>
@@ -231,7 +216,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<h:outputText styleClass="bloque"
-						value="'Para poder crear un proceso extraordinario primero se debe crear un proceso ordinario." />
+						value="Para poder crear un proceso extraordinario primero se debe crear un proceso ordinario." />
 				</div>
 			</div>
 		</div>
@@ -240,6 +225,26 @@
 			<div class="col-md-12 text-right">
 				<p:commandButton value="Cerrar" styleClass="btn btn-default"
 					onclick="PF('dlgValidarSeleccion3').hide()" />
+			</div>
+		</div>
+	</p:dialog>
+
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccion9" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="Ya existe un proceso de dispersión ordinario para la convocatoria seleccionada." />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccion9').hide()" />
 			</div>
 		</div>
 	</p:dialog>

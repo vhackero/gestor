@@ -13,13 +13,12 @@ import org.primefaces.context.RequestContext;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EstatusDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamNueva;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParam;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParamNuevo;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionPlanesProgramas;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoMatriculacion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
-import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersiones;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersionesBusqueda;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
@@ -37,6 +36,10 @@ public class DispersionesBean extends BaseBean {
 	 */
 	private static final long serialVersionUID = 5929433407465074144L;
 	private static final Logger logger = Logger.getLogger(DispersionesBean.class);
+	
+	private static final int TIPO_PROCESO_ORDINARIO = 1;
+	private static final int TIPO_PROCESO_EXTRAORDINARIO = 2;
+	private static final int MAX_VALOR_LISTAS = 500;
 
 	@ManagedProperty("#{dispersionesService}")
 	private DispersionesService dispersionesService;
@@ -54,6 +57,9 @@ public class DispersionesBean extends BaseBean {
 	private List<String> listaCupoGeneral;
 	private List<String> listaGrupoRestante;
 	private List<String> listaCupoRestanre;
+	private List<InscripcionPlanesProgramas> listaPlanProgramas;
+	private List<InscripcionPlanesProgramas> planesProgramasSeleccionados;
+	private List<InscripcionPlanesProgramas> planesProgramasBusquedaSeleccionados;
 	List<TipoProceso> listaTipoProceso;
 	List<ProcesosInscripcion> listaProcesosInscripcion;
 	List<TipoMatriculacion> listaTipoMatriculacion;
@@ -72,33 +78,23 @@ public class DispersionesBean extends BaseBean {
 	// REDIRECCION OPCIONES
 	private String paginaActual;
 
-	private boolean mostrarPlanYPrograma = true;
+	private boolean mostrarPlanYPrograma = false;
 	
 	private boolean mostrarConsultaDispersion = true;
 	private boolean mostrarNuevaDispersion = false;
+	private Integer idProgramaPlanSeleccionado;
 
 	@PostConstruct
 	public void init() {
 		dispercionParametros = new DispersionesParam(); // Inicializar el objeto
-		listaGrupoGeneral = new ArrayList<>();
-        for (int i = 1; i <= 100; i++) {
-        	listaGrupoGeneral.add(String.valueOf(i));
-        }
-        
-        listaCupoGeneral = new ArrayList<>();
-        for (int i = 1; i <= 100; i++) {
-        	listaCupoGeneral.add(String.valueOf(i));
-        }
-        
-        listaGrupoRestante = new ArrayList<>();
-        for (int i = 1; i <= 100; i++) {
-        	listaGrupoRestante.add(String.valueOf(i));
-        }
-        
-        listaCupoRestanre = new ArrayList<>();
-        for (int i = 1; i <= 100; i++) {
-        	listaCupoRestanre.add(String.valueOf(i));
-        }
+		listaProcesosInscripcion = new ArrayList<>();
+		listaPlanes = new ArrayList<>();
+		listaPrograma = new ArrayList<>();
+		listaPlanProgramas = new ArrayList<>();
+		planesProgramasSeleccionados = new ArrayList<>();
+		planesProgramasBusquedaSeleccionados = new ArrayList<>();
+		idProgramaPlanSeleccionado = null;
+		inicializarListasEdicion();
 	}
 
 	public DispersionesBean() {
@@ -118,7 +114,7 @@ public class DispersionesBean extends BaseBean {
 
 		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/nuevaDispersion.xhtml";
 
-		dispercionParametros = new DispersionesParam();
+		limpiarCampos();
 
 		consultarConvocatorias();
 		consultaTipoProceso();
@@ -133,7 +129,7 @@ public class DispersionesBean extends BaseBean {
 
 		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/consultaDispersion.xhtml";
 
-		dispercionParametros = new DispersionesParam();
+		limpiarCampos();
 
 		consultarConvocatorias();
 		consultaTipoProceso();
@@ -160,37 +156,56 @@ public class DispersionesBean extends BaseBean {
 
 	public void limpiarCampos() {
 		dispercionParametros = new DispersionesParam();
-		listaProcesosInscripcion = null;
-		listaPlanes = null;
-		listaPrograma = null;
-		listaDispercionBusqueda = null;
+		listaProcesosInscripcion = new ArrayList<>();
+		listaPlanes = new ArrayList<>();
+		listaPrograma = new ArrayList<>();
+		listaPlanProgramas = new ArrayList<>();
+		planesProgramasSeleccionados = new ArrayList<>();
+		planesProgramasBusquedaSeleccionados = new ArrayList<>();
+		listaDispercionBusqueda = new ArrayList<>();
+		mostrarPlanYPrograma = false;
+		idProgramaPlanSeleccionado = null;
 
+	}
+	
+	public void onConvocatoriaChange() {
+		dispercionParametros.setIdTipoProceso(null);
+		dispercionParametros.setIdProcesoInscripcion(null);
+		listaProcesosInscripcion = new ArrayList<>();
+		ocultarPlanPrograma();
 	}
 	
 	public void actualizarDispersion () {
 		
-		if (editarDispersion.getCupoGeneral() == null || editarDispersion.getGrupoResto() == null ||
-				editarDispersion.getCupoGeneral()== null || editarDispersion.getCupoResto() == null) {
+		if (editarDispersion == null || editarDispersion.getIdDispersion() == null) {
 			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion5').show()");
-		} else {
-			//editarDispersion.setIdDispersion(editarDispersion.getIdDispersion());
-			//List<TblDispersionesBusqueda> lista = dispersionesService.actualizarDispersion(editarDispersion);
-			dispersionNuevo = new DispersionesParamNuevo();
-			dispersionNuevo.setIdDispersion(editarDispersion.getIdDispersion());
+			return;
+		}
+		
+		dispersionNuevo = new DispersionesParamNuevo();
+		dispersionNuevo.setIdDispersion(editarDispersion.getIdDispersion());
+		dispersionNuevo.setNoGrupos(editarDispersion.getGruposGenerales());
+		dispersionNuevo.setEstudiantesGrupo(editarDispersion.getCupoGeneral());
+		dispersionNuevo.setGrupoResto(editarDispersion.getGrupoResto());
+		dispersionNuevo.setCupoResto(editarDispersion.getCupoResto());
+		
+			asegurarValorEnLista(listaGrupoGeneral, dispersionNuevo.getNoGrupos());
+			asegurarValorEnLista(listaCupoGeneral, dispersionNuevo.getEstudiantesGrupo());
+			asegurarValorEnLista(listaGrupoRestante, dispersionNuevo.getGrupoResto());
+			asegurarValorEnLista(listaCupoRestanre, dispersionNuevo.getCupoResto());
+			idProgramaPlanSeleccionado = null;
+			
 			this.mostrarConsultaDispersion = false;
 			this.mostrarNuevaDispersion = true;
 		}
-		
-		
-	}
 	
 	public void actualizaDispersionDB() {///////////////////
 		
 		Integer sumTotal;
 		
-		if (dispersionNuevo.getCupoResto() == null || dispersionNuevo.getEstudiantesGrupo() == null ||
+		if (dispersionNuevo == null || dispersionNuevo.getCupoResto() == null || dispersionNuevo.getEstudiantesGrupo() == null ||
 				dispersionNuevo.getGrupoResto() == null || dispersionNuevo.getNoGrupos() == null) {
-			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion2').show()");
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion8').show()");
 		} else {
 			List<TblDispersionesBusqueda> lista = dispersionesService.actualizarDispersion(dispersionNuevo);
 			if (lista.isEmpty()) {
@@ -199,16 +214,32 @@ public class DispersionesBean extends BaseBean {
 				
 				sumTotal = (dispersionNuevo.getNoGrupos() * dispersionNuevo.getEstudiantesGrupo())
 						+ (dispersionNuevo.getGrupoResto() * dispersionNuevo.getCupoResto());
+				Integer totalRegistrado = lista.get(0).getNoEstudiantes();
 				
-				if (sumTotal == lista.get(0).getNoEstudiantes()) {
-					dispersionesService.actualizarDispersionExc(dispersionNuevo);
-					RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion7').show()");
-					busquedaDispersion();
-					this.mostrarConsultaDispersion = true;
-					this.mostrarNuevaDispersion = false;
-					
+				logger.info(String.format(
+						"Validando dispersión (id=%d) con noGrupos=%d, cupoGeneral=%d, gruposResto=%d, cupoResto=%d, sumaCalculada=%d, estudiantesRegistrados=%d",
+						dispersionNuevo.getIdDispersion(),
+						dispersionNuevo.getNoGrupos(),
+						dispersionNuevo.getEstudiantesGrupo(),
+						dispersionNuevo.getGrupoResto(),
+						dispersionNuevo.getCupoResto(),
+						sumTotal,
+						totalRegistrado));
+				
+				if (sumTotal != null && sumTotal.equals(totalRegistrado)) {
+					boolean actualizada = dispersionesService.actualizarDispersionExc(dispersionNuevo);
+					if (actualizada) {
+						RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion7').show()");
+						busquedaDispersion();
+						this.mostrarConsultaDispersion = true;
+						this.mostrarNuevaDispersion = false;
+					} else {
+						logger.warn(String.format("No se pudo actualizar la dispersión con id=%d en base de datos.",
+								dispersionNuevo.getIdDispersion()));
+						RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccionErrorUpdate').show()");
+					}
 				} else {
-					RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion8').show()");
+					RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccionSuma').show()");
 				}
 			}
 		}
@@ -218,14 +249,14 @@ public class DispersionesBean extends BaseBean {
 
 		logger.info("***********************Inicio Consulta dispercion***********************");
 
-		if (dispercionParametros.getIdConvocatoriaSeleccionada() == null || dispercionParametros.getIdTipoProceso() == null) {
-			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion2').show()");
-		} else {
-			listaDispercionBusqueda = dispersionesService.consultaDisperciones(dispercionParametros);
-			//busquedaDis(listaDispercionBusqueda);
-			if (listaDispercionBusqueda.isEmpty()) {
-				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion3').show()");
-			}
+		if (!filtrosBusquedaCompletos()) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion5').show()");
+			return;
+		}
+		
+		listaDispercionBusqueda = consultarDispersionesConFiltros();
+		if (listaDispercionBusqueda.isEmpty()) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion3').show()");
 		}
 
 	}
@@ -285,7 +316,26 @@ public class DispersionesBean extends BaseBean {
 
 		logger.info(" INICIA ELIMINAR  ");
 
+		if (elminarDispersion == null || elminarDispersion.getIdDispersion() == null) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion5').show()");
+			return;
+		}
+		
+		boolean tieneRelaciones = dispersionesService.existeRelDispersionGrupo(elminarDispersion.getIdDispersion());
+		if (tieneRelaciones) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccionDispersionRelacion').show()");
+			logger.warn(String.format("No se puede eliminar la dispersión %d porque tiene relaciones en rel_dispersiones_grupo.",
+				elminarDispersion.getIdDispersion()));
+			return;
+		}
+
 		dispersionesService.borrarDispercsion(elminarDispersion);
+		
+		if (filtrosBusquedaCompletos()) {
+			busquedaDispersion();
+		} else {
+			listaDispercionBusqueda = new ArrayList<>();
+		}
 		
 		RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion4').show()");	
 
@@ -297,33 +347,96 @@ public class DispersionesBean extends BaseBean {
 
 		logger.info("***********************Inicio Alta de Dispersiones***********************");
 
-		if (dispercionParametros.getIdTipoProceso() == 1) {
-
-			List<TblDispersiones> validacionDispercion = dispersionesService
-					.validarDispercionExistente(dispercionParametros);
-
-			if (!validacionDispercion.isEmpty()) {
-				dispersionesService.altaDisperciones(dispercionParametros);
-				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion1').show()");
-			} else {
-				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion2').show()");
-			}
-
-		} else {
-
-			List<TblDispersiones> validacionDispercionOrdinario = dispersionesService
-					.validarDispercionExistenteOrdinario(dispercionParametros);
-
-			if (dispercionParametros.getExistente() == 1) {
-				dispersionesService.altaDisperciones(dispercionParametros);
-				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion1').show()");
-			} else {
-				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion3').show()");
-			}
-
+		if (!camposRequeridosCompletos()) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion8').show()");
+			return;
 		}
 
+		Long usuarioId = getUsuarioEnSession() != null ? getUsuarioEnSession().getIdPersona() : null;
+		dispercionParametros.setIdUsuarioAccion(usuarioId);
+
+		boolean existeDispersion = dispersionesService.validarDispercionExistente(dispercionParametros);
+		if (existeDispersion) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion2').show()");
+			return;
+		}
+
+		boolean existeOrdinaria = dispersionesService.validarDispercionExistenteOrdinario(dispercionParametros);
+
+		if (esOrdinario() && existeOrdinaria) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion9').show()");
+			return;
+		}
+
+		if (esExtraordinario() && !existeOrdinaria) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion3').show()");
+			return;
+		}
+
+		registrarNuevaDispersion();
+
 		logger.info("***********************Fin Alta de Dispersiones***********************");
+	}
+	
+	private void registrarNuevaDispersion() {
+		if (esExtraordinario()) {
+			for (InscripcionPlanesProgramas planPrograma : planesProgramasSeleccionados) {
+				if (planPrograma == null) {
+					continue;
+				}
+				dispercionParametros.setIdPlan(planPrograma.getIdPlan());
+				dispercionParametros.setIdPrograma(planPrograma.getIdPrograma());
+				dispersionesService.altaDisperciones(dispercionParametros);
+			}
+			dispercionParametros.setIdPlan(null);
+			dispercionParametros.setIdPrograma(null);
+		} else {
+			dispersionesService.altaDisperciones(dispercionParametros);
+		}
+		limpiarCampos();
+		RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion1').show()");
+	}
+
+	private boolean camposRequeridosCompletos() {
+		if (dispercionParametros.getIdConvocatoriaSeleccionada() == null
+				|| dispercionParametros.getIdTipoProceso() == null
+				|| dispercionParametros.getIdProcesoInscripcion() == null
+				|| dispercionParametros.getIdTipoMatriculacion() == null) {
+			return false;
+		}
+		if (esExtraordinario() && !tienePlanesProgramasSeleccionados()) {
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean esOrdinario() {
+		return dispercionParametros.getIdTipoProceso() != null
+				&& dispercionParametros.getIdTipoProceso().intValue() == TIPO_PROCESO_ORDINARIO;
+	}
+	
+	private boolean esExtraordinario() {
+		return dispercionParametros.getIdTipoProceso() != null
+				&& dispercionParametros.getIdTipoProceso().intValue() == TIPO_PROCESO_EXTRAORDINARIO;
+	}
+	
+	private boolean tienePlanesProgramasSeleccionados() {
+		return planesProgramasSeleccionados != null && !planesProgramasSeleccionados.isEmpty();
+	}
+	
+	private boolean tienePlanesBusquedaSeleccionados() {
+		return planesProgramasBusquedaSeleccionados != null && !planesProgramasBusquedaSeleccionados.isEmpty();
+	}
+	
+	private void ocultarPlanPrograma() {
+		mostrarPlanYPrograma = false;
+		dispercionParametros.setIdPlan(null);
+		dispercionParametros.setIdPrograma(null);
+		listaPlanes = new ArrayList<>();
+		listaPrograma = new ArrayList<>();
+		listaPlanProgramas = new ArrayList<>();
+		planesProgramasSeleccionados = new ArrayList<>();
+		idProgramaPlanSeleccionado = null;
 	}
 
 	public void consultarConvocatorias() throws Exception {
@@ -335,12 +448,20 @@ public class DispersionesBean extends BaseBean {
 	}
 
 	public void consultarPlan() {
+		if (dispercionParametros.getIdConvocatoriaSeleccionada() == null) {
+			listaPlanes = new ArrayList<>();
+			return;
+		}
 		listaPlanes = dispersionesService.consultarPlan(dispercionParametros);
 
 		logger.info("Termina consulta listaPlanes select");
 	}
 
 	public void consultarPrograma() {
+		if (dispercionParametros.getIdPlan() == null) {
+			listaPrograma = new ArrayList<>();
+			return;
+		}
 		listaPrograma = dispersionesService.consultarPrograma(dispercionParametros);
 
 		logger.info("Termina consulta listaPlanes select");
@@ -356,12 +477,22 @@ public class DispersionesBean extends BaseBean {
 
 	public void consultarProcesoInscripcion() throws Exception {
 
+		if (dispercionParametros.getIdConvocatoriaSeleccionada() == null
+				|| dispercionParametros.getIdTipoProceso() == null) {
+			listaProcesosInscripcion = new ArrayList<>();
+			dispercionParametros.setIdProcesoInscripcion(null);
+			ocultarPlanPrograma();
+			return;
+		}
+
 		listaProcesosInscripcion = dispersionesService.consultarProcesoInscripcion(dispercionParametros);
 
-		if (dispercionParametros.getIdTipoProceso() == 1) {
-			mostrarPlanYPrograma = false; // Ocultar "Plan" y "Programa"
+		if (esExtraordinario()) {
+			mostrarPlanYPrograma = true;
+			consultarPlan();
+			consultarPlanesProgramas();
 		} else {
-			mostrarPlanYPrograma = true; // Mostrar "Plan" y "Programa"
+			ocultarPlanPrograma();
 		}
 
 		logger.info("Termina consulta listaProcesosInscripcion select");
@@ -554,5 +685,135 @@ public class DispersionesBean extends BaseBean {
 		this.listaCupoRestanre = listaCupoRestanre;
 	}
 
+	public List<InscripcionPlanesProgramas> getListaPlanProgramas() {
+		return listaPlanProgramas;
+	}
+
+	public void setListaPlanProgramas(List<InscripcionPlanesProgramas> listaPlanProgramas) {
+		this.listaPlanProgramas = listaPlanProgramas;
+	}
+
+	public List<InscripcionPlanesProgramas> getPlanesProgramasSeleccionados() {
+		return planesProgramasSeleccionados;
+	}
+
+	public void setPlanesProgramasSeleccionados(List<InscripcionPlanesProgramas> planesProgramasSeleccionados) {
+		this.planesProgramasSeleccionados = planesProgramasSeleccionados;
+	}
+
+	public List<InscripcionPlanesProgramas> getPlanesProgramasBusquedaSeleccionados() {
+		return planesProgramasBusquedaSeleccionados;
+	}
+
+	public void setPlanesProgramasBusquedaSeleccionados(
+			List<InscripcionPlanesProgramas> planesProgramasBusquedaSeleccionados) {
+		this.planesProgramasBusquedaSeleccionados = planesProgramasBusquedaSeleccionados;
+	}
+
+	public Integer getIdProgramaPlanSeleccionado() {
+		return idProgramaPlanSeleccionado;
+	}
+
+	public void setIdProgramaPlanSeleccionado(Integer idProgramaPlanSeleccionado) {
+		this.idProgramaPlanSeleccionado = idProgramaPlanSeleccionado;
+	}
+	
+	public void consultarPlanesProgramas() {
+		if (dispercionParametros.getIdConvocatoriaSeleccionada() == null) {
+			listaPlanProgramas = new ArrayList<>();
+			planesProgramasSeleccionados = new ArrayList<>();
+			return;
+		}
+		listaPlanProgramas = dispersionesService.consultarPlanesProgramas(dispercionParametros);
+		planesProgramasSeleccionados = new ArrayList<>();
+		planesProgramasBusquedaSeleccionados = new ArrayList<>();
+		idProgramaPlanSeleccionado = null;
+		dispercionParametros.setIdPlan(null);
+		dispercionParametros.setIdPrograma(null);
+	}
+	
+	public void onPlanProgramaSeleccionado() {
+		if (idProgramaPlanSeleccionado == null || listaPlanProgramas == null) {
+			dispercionParametros.setIdPlan(null);
+			dispercionParametros.setIdPrograma(null);
+			return;
+		}
+		
+		for (InscripcionPlanesProgramas planPrograma : listaPlanProgramas) {
+			if (planPrograma.getIdPrograma() != null
+					&& planPrograma.getIdPrograma().equals(idProgramaPlanSeleccionado)) {
+				dispercionParametros.setIdPlan(planPrograma.getIdPlan());
+				dispercionParametros.setIdPrograma(planPrograma.getIdPrograma());
+				return;
+			}
+		}
+	}
+	
+	
+	private void inicializarListasEdicion() {
+		listaGrupoGeneral = construirListaNumerica(MAX_VALOR_LISTAS);
+		listaCupoGeneral = construirListaNumerica(MAX_VALOR_LISTAS);
+		listaGrupoRestante = construirListaNumerica(MAX_VALOR_LISTAS);
+		listaCupoRestanre = construirListaNumerica(MAX_VALOR_LISTAS);
+	}
+	
+	private List<String> construirListaNumerica(int limite) {
+		List<String> lista = new ArrayList<>();
+		for (int i = 1; i <= limite; i++) {
+			lista.add(String.valueOf(i));
+		}
+		return lista;
+	}
+	
+	private void asegurarValorEnLista(List<String> lista, Integer valor) {
+		if (lista == null || valor == null) {
+			return;
+		}
+		String valorComoTexto = valor.toString();
+		if (!lista.contains(valorComoTexto)) {
+			lista.add(valorComoTexto);
+		}
+	}
+	
+	private boolean filtrosBusquedaCompletos() {
+		return dispercionParametros.getIdConvocatoriaSeleccionada() != null
+				&& dispercionParametros.getIdTipoProceso() != null
+				&& dispercionParametros.getIdProcesoInscripcion() != null;
+	}
+	
+	private List<TblDispersionesBusqueda> consultarDispersionesConFiltros() {
+		List<TblDispersionesBusqueda> resultados = new ArrayList<>();
+		
+		dispercionParametros.setIdPlan(null);
+		dispercionParametros.setIdPrograma(null);
+		
+		if (esExtraordinario() && tienePlanesBusquedaSeleccionados()) {
+			List<Integer> idsPlan = new ArrayList<>();
+			List<Integer> idsPrograma = new ArrayList<>();
+			for (InscripcionPlanesProgramas planPrograma : planesProgramasBusquedaSeleccionados) {
+				if (planPrograma != null) {
+					idsPlan.add(planPrograma.getIdPlan());
+					idsPrograma.add(planPrograma.getIdPrograma());
+				}
+			}
+			dispercionParametros.setListaIdPlan(idsPlan);
+			dispercionParametros.setListaIdPrograma(idsPrograma);
+		} else {
+			dispercionParametros.setListaIdPlan(null);
+			dispercionParametros.setListaIdPrograma(null);
+		}
+		
+		List<TblDispersionesBusqueda> parciales = dispersionesService.consultaDisperciones(dispercionParametros);
+		if (parciales != null && !parciales.isEmpty()) {
+			resultados.addAll(parciales);
+		}
+		
+		dispercionParametros.setListaIdPlan(null);
+		dispercionParametros.setListaIdPrograma(null);
+		dispercionParametros.setIdPlan(null);
+		dispercionParametros.setIdPrograma(null);
+		
+		return resultados;
+	}
 	
 }

@@ -23,7 +23,7 @@
 					<p:selectOneMenu id="convocatoria" required="true"  value="#{dispersionesBean.dispercionParametros.idConvocatoriaSeleccionada}"
                     			 requiredMessage="La convocatoria es obligatorio." styleClass="col-xs-12">
 						<p:ajax event="change" process="@this" update="@form"
-											listener="#{dispersionesBean.consultarPlan}" />
+											listener="#{dispersionesBean.onConvocatoriaChange}" />
 						<f:selectItem
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
@@ -80,40 +80,22 @@
 		<div class="form-group">
 			<div class="row">
 				
-				<div class="col-md-4 col-xs-12">
-
-					<p:outputLabel styleClass="bloque" value="Plan:" />
-					<p:selectOneMenu id="plan"
-						value="#{dispersionesBean.dispercionParametros.idPlan}"
-						styleClass="col-xs-12" >
-						<p:ajax event="change" process="@this" update="@form"
-											listener="#{dispersionesBean.consultarPrograma}" />
-						<f:selectItem
-							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-							itemValue="#{null}" />
-						<f:selectItems value="#{dispersionesBean.listaPlanes}"
-							var="modalidad" itemLabel="#{modalidad.nombre}"
-							itemValue="#{modalidad.idPlan}" />
-
-					</p:selectOneMenu>
-				</div>
-				
-				<div class="col-md-4 col-xs-12" >
-
-					<p:outputLabel styleClass="bloque" value="Programa:"/>
-					<p:selectOneMenu id="programa" 
-						value="#{dispersionesBean.dispercionParametros.idPrograma}"
-						styleClass="col-xs-12" >
-						<p:ajax event="change" process="@this" />
-						<f:selectItem
-							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-							itemValue="#{null}" />
-						<f:selectItems value="#{dispersionesBean.listaPrograma}"
-							var="modalidad" itemLabel="#{modalidad.nombreTentativo}"
-							itemValue="#{modalidad.idPrograma}" />
-
-					</p:selectOneMenu>
-				</div>
+				<ui:fragment rendered="#{dispersionesBean.mostrarPlanYPrograma}">
+					<div class="col-md-4 col-xs-12">
+	
+						<p:outputLabel styleClass="bloque" value="Plan / Programa:" />
+						<p:selectCheckboxMenu id="planProgramaConsulta"
+							value="#{dispersionesBean.planesProgramasBusquedaSeleccionados}"
+							styleClass="col-xs-12" converter="entityConverter"
+							label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}">
+							<f:selectItems value="#{dispersionesBean.listaPlanProgramas}"
+								var="planPrograma"
+								itemLabel="#{planPrograma.nombrePlan} &gt; #{planPrograma.nombrePrograma}"
+								itemValue="#{planPrograma}" />
+	
+						</p:selectCheckboxMenu>
+					</div>
+				</ui:fragment>
 
 			</div>
 		</div>
@@ -243,7 +225,7 @@
 
 	
 	
-	<p:panel header="Nuevo proceso de dispersión" rendered="#{dispersionesBean.mostrarNuevaDispersion}">
+		<p:panel header="Editar proceso de dispersión" rendered="#{dispersionesBean.mostrarNuevaDispersion}">
 
 
 
@@ -252,56 +234,37 @@
 
 				<div class="col-md-4 col-xs-12">
 
-					<p:outputLabel styleClass="bloque requerido" value="Grupos Generales" />
-
-					<p:selectOneMenu id="convocatoria2" required="true"  value="#{dispersionesBean.dispersionNuevo.noGrupos}"
-                    			 requiredMessage="Los grupos generales es obligatorio." styleClass="col-xs-12">
-						<p:ajax event="change" process="@this" update="@form"
-											 />
-						<f:selectItem
-							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-							itemValue="#{null}" />
-						<f:selectItems value="#{dispersionesBean.listaGrupoGeneral}"
-							var="grupoGeneral" itemLabel="#{grupoGeneral}"
-							itemValue="#{grupoGeneral}" />
-					</p:selectOneMenu>
-					<p:message for="convocatoria2" display="text" />
+					<p:outputLabel styleClass="bloque requerido" for="gruposGenerales" value="Grupos generales:" />
+					<p:inputText id="gruposGenerales" value="#{dispersionesBean.dispersionNuevo.noGrupos}"
+						required="true" requiredMessage="Los grupos generales son obligatorios."
+						styleClass="form-control" type="number" min="0">
+						<f:validateLongRange minimum="0" />
+					</p:inputText>
+					<p:message for="gruposGenerales" display="text" />
 
 				</div>
 				
 				<div class="col-md-4 col-xs-12">
 
-					<p:outputLabel styleClass="bloque requerido" value="Cupo General" />
-					<p:selectOneMenu id="tipoProceso2" required="true"  value="#{dispersionesBean.dispersionNuevo.estudiantesGrupo}"
-                    			 requiredMessage="El cupo general es obligatorio."
-						styleClass="col-xs-12">
-						<p:ajax event="change" process="@this" update="@form" />
-						<f:selectItem
-							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-							itemValue="#{null}" />
-						<f:selectItems value="#{dispersionesBean.listaCupoGeneral}"
-							var="cupoGeneral" itemLabel="#{cupoGeneral}"
-							itemValue="#{cupoGeneral}" />
-					</p:selectOneMenu>
-					<p:message for="tipoProceso2" display="text" />
+					<p:outputLabel styleClass="bloque requerido" for="cupoGeneral" value="Cupo general:" />
+					<p:inputText id="cupoGeneral" value="#{dispersionesBean.dispersionNuevo.estudiantesGrupo}"
+						required="true" requiredMessage="El cupo general es obligatorio."
+						styleClass="form-control" type="number" min="0">
+						<f:validateLongRange minimum="0" />
+					</p:inputText>
+					<p:message for="cupoGeneral" display="text" />
 					
 				</div>
 				
 				<div class="col-md-4 col-xs-12">
 
-					<p:outputLabel styleClass="bloque requerido" value="Proceso de inscripción:" />
-					<p:selectOneMenu id="procesoInscripcion2" required="true" value="#{dispersionesBean.dispersionNuevo.grupoResto}"
-                    			 requiredMessage="El grupo restante es obligatorio."
-						styleClass="col-xs-12">
-						<p:ajax event="change" process="@this" />
-						<f:selectItem
-							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-							itemValue="#{null}" />
-						<f:selectItems value="#{dispersionesBean.listaGrupoRestante}"
-							var="grupoResto" itemLabel="#{grupoResto}"
-							itemValue="#{grupoResto}" />
-					</p:selectOneMenu>
-					<p:message for="procesoInscripcion2" display="text" />
+					<p:outputLabel styleClass="bloque requerido" for="gruposResto" value="Grupos resto:" />
+					<p:inputText id="gruposResto" value="#{dispersionesBean.dispersionNuevo.grupoResto}"
+						required="true" requiredMessage="Los grupos resto son obligatorios."
+						styleClass="form-control" type="number" min="0">
+						<f:validateLongRange minimum="0" />
+					</p:inputText>
+					<p:message for="gruposResto" display="text" />
 				</div>
 			</div>
 		</div>
@@ -309,23 +272,25 @@
 		<div class="form-group">
 			<div class="row">
 				
-					<div class="col-md-4 col-xs-12">
+				<div class="col-md-4 col-xs-12">
 
-					<p:outputLabel styleClass="bloque requerido" value="Proceso de inscripción:" />
-					<p:selectOneMenu id="procesoInscripcion3" required="true" value="#{dispersionesBean.dispersionNuevo.cupoResto}"
-                    			 requiredMessage="El grupo restante es obligatorio."
-						styleClass="col-xs-12">
-						<p:ajax event="change" process="@this" />
-						<f:selectItem
-							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-							itemValue="#{null}" />
-						<f:selectItems value="#{dispersionesBean.listaCupoRestanre}"
-							var="cupoResto" itemLabel="#{cupoResto}"
-							itemValue="#{cupoResto}" />
-					</p:selectOneMenu>
-					<p:message for="procesoInscripcion3" display="text" />
+					<p:outputLabel styleClass="bloque requerido" for="cupoResto" value="Cupo resto:" />
+					<p:inputText id="cupoResto" value="#{dispersionesBean.dispersionNuevo.cupoResto}"
+						required="true" requiredMessage="El cupo resto es obligatorio."
+						styleClass="form-control" type="number" min="0">
+						<f:validateLongRange minimum="0" />
+					</p:inputText>
+					<p:message for="cupoResto" display="text" />
 				</div>
 
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel styleClass="bloque" value="Estudiantes inscritos: #{dispersionesBean.editarDispersion.noEstudiantes}" />
+				</div>
 			</div>
 		</div>
 
@@ -370,6 +335,66 @@
 			<div class="col-md-12 text-right">
 				<p:commandButton value="Cerrar" styleClass="btn btn-default"
 					onclick="PF('dlgValidarSeleccion8').hide()" />
+			</div>
+		</div>
+	</p:dialog>
+	
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccionSuma" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="La sumatoria de grupos y cupos debe ser igual al número de estudiantes inscritos." />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccionSuma').hide()" />
+			</div>
+		</div>
+	</p:dialog>
+	
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccionErrorUpdate" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="No fue posible actualizar la dispersión. Inténtelo nuevamente más tarde." />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccionErrorUpdate').hide()" />
+			</div>
+		</div>
+	</p:dialog>
+	
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccionDispersionRelacion" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="No se puede eliminar la dispersión porque ya tiene grupos generados." />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccionDispersionRelacion').hide()" />
 			</div>
 		</div>
 	</p:dialog>
@@ -441,7 +466,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<h:outputText styleClass="bloque"
-						value="Se elimino la convocatoria correctamente." />
+						value="Se eliminó la dispersión correctamente." />
 				</div>
 			</div>
 		</div>
@@ -461,7 +486,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<h:outputText styleClass="bloque"
-						value="Se deben llenar lso campos de busqueda." />
+						value="Se deben llenar los campos de búsqueda." />
 				</div>
 			</div>
 		</div>

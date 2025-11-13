@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * The persistent class for the tbl_ficha_descriptiva_programa database table.
@@ -33,11 +34,14 @@ public class TblDispersiones implements Serializable {
 	@Column(name = "id_dispercion")
 	private Integer idDispercion;
 
-	@Column(name = "id_inscripcion_resumen")
-	private Integer idInscripcionResumen;
-	
 	@Column(name = "id_proceso_inscripcion")
 	private Integer idProcesoInscripcion;
+	
+	@Transient
+	private Integer idPlan;
+	
+	@Column(name = "id_programa")
+	private Integer idPrograma;
 	
 	@Column(name = "no_total_estudiantes")
 	private Integer noTotalesEstudiantes;
@@ -78,20 +82,28 @@ public class TblDispersiones implements Serializable {
 		this.idDispercion = idDispercion;
 	}
 
-	public Integer getIdInscripcionResumen() {
-		return idInscripcionResumen;
-	}
-
-	public void setIdInscripcionResumen(Integer idInscripcionResumen) {
-		this.idInscripcionResumen = idInscripcionResumen;
-	}
-
 	public Integer getIdProcesoInscripcion() {
 		return idProcesoInscripcion;
 	}
 
 	public void setIdProcesoInscripcion(Integer idProcesoInscripcion) {
 		this.idProcesoInscripcion = idProcesoInscripcion;
+	}
+	
+	public Integer getIdPlan() {
+		return idPlan;
+	}
+
+	public void setIdPlan(Integer idPlan) {
+		this.idPlan = idPlan;
+	}
+
+	public Integer getIdPrograma() {
+		return idPrograma;
+	}
+
+	public void setIdPrograma(Integer idPrograma) {
+		this.idPrograma = idPrograma;
 	}
 
 	public Integer getNoTotalesEstudiantes() {

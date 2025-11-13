@@ -11,9 +11,9 @@ import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Dispersiones;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParam;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParamNuevo;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionPlanesProgramas;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoMatriculacion;
-import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersiones;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersionesBusqueda;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
@@ -51,6 +51,11 @@ public class DispersionesServiceImpl implements DispersionesService {
 	}
 
 	@Override
+	public boolean existeRelDispersionGrupo(Integer idDispersion) {
+		return iDispersionesRepository.existeRelDispersionGrupo(idDispersion);
+	}
+
+	@Override
 	public List<TblDispersionesBusqueda> actualizarDispersion(DispersionesParamNuevo dispercionParametros) {
 
 		List<TblDispersionesBusqueda> lista = iDispersionesRepository.actualizarDispersion(dispercionParametros);
@@ -63,32 +68,19 @@ public class DispersionesServiceImpl implements DispersionesService {
 	}
 	
 	@Override
-	public void actualizarDispersionExc(DispersionesParamNuevo dispercionParametros){
-		 iDispersionesRepository.actualizarDispersionExc(dispercionParametros);
+	public boolean actualizarDispersionExc(DispersionesParamNuevo dispercionParametros){
+		 return iDispersionesRepository.actualizarDispersionExc(dispercionParametros);
 
 	}
 
 	@Override
-	public List<TblDispersiones> validarDispercionExistente(DispersionesParam dispercionParametros) {
-
-		List<TblDispersiones> lista = iDispersionesRepository.validarDispercionExistente(dispercionParametros);
-
-		if (lista.isEmpty()) {
-			return lista;
-		}
-		return lista;
+	public boolean validarDispercionExistente(DispersionesParam dispercionParametros) {
+		return iDispersionesRepository.validarDispercionExistente(dispercionParametros);
 	}
 
 	@Override
-	public List<TblDispersiones> validarDispercionExistenteOrdinario(DispersionesParam dispercionParametros) {
-
-		List<TblDispersiones> lista = iDispersionesRepository.validarDispercionExistenteOrdinario(dispercionParametros);
-
-		if (lista.isEmpty()) {
-			return lista;
-		}
-		return lista;
-
+	public boolean validarDispercionExistenteOrdinario(DispersionesParam dispercionParametros) {
+		return iDispersionesRepository.validarDispercionExistenteOrdinario(dispercionParametros);
 	}
 
 	@Override
@@ -130,6 +122,15 @@ public class DispersionesServiceImpl implements DispersionesService {
 
 		if (lista.isEmpty()) {
 			return new ArrayList<TipoMatriculacion>();
+		}
+		return lista;
+	}
+	
+	@Override
+	public List<InscripcionPlanesProgramas> consultarPlanesProgramas(DispersionesParam dispercionParametros) {
+		List<InscripcionPlanesProgramas> lista = iDispersionesRepository.consultarPlanesProgramas(dispercionParametros);
+		if (lista.isEmpty()) {
+			return new ArrayList<InscripcionPlanesProgramas>();
 		}
 		return lista;
 	}

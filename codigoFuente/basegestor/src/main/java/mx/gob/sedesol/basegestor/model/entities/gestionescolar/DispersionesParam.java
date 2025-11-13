@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.model.entities.gestionescolar;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class DispersionesParam implements Serializable {
 
@@ -20,16 +21,12 @@ public class DispersionesParam implements Serializable {
 	private Integer idPlan;
 
 	private Integer idPrograma;
-	
-	private Integer existente;
 
-	public Integer getExistente() {
-		return existente;
-	}
+	private Long idUsuarioAccion;
 
-	public void setExistente(Integer existente) {
-		this.existente = existente;
-	}
+	private List<Integer> listaIdPlan;
+
+	private List<Integer> listaIdPrograma;
 
 	public Integer getIdPlan() {
 		return idPlan;
@@ -45,6 +42,30 @@ public class DispersionesParam implements Serializable {
 
 	public void setIdPrograma(Integer idPrograma) {
 		this.idPrograma = idPrograma;
+	}
+
+	public List<Integer> getListaIdPlan() {
+		return listaIdPlan;
+	}
+
+	public void setListaIdPlan(List<Integer> listaIdPlan) {
+		this.listaIdPlan = listaIdPlan;
+	}
+
+	public List<Integer> getListaIdPrograma() {
+		return listaIdPrograma;
+	}
+
+	public void setListaIdPrograma(List<Integer> listaIdPrograma) {
+		this.listaIdPrograma = listaIdPrograma;
+	}
+
+	public Long getIdUsuarioAccion() {
+		return idUsuarioAccion;
+	}
+
+	public void setIdUsuarioAccion(Long idUsuarioAccion) {
+		this.idUsuarioAccion = idUsuarioAccion;
 	}
 	
 	public Integer getIdConvocatoriaSeleccionada() {
