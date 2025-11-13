@@ -22,84 +22,43 @@
                 <h:form id="frmAltasBajas">
                     <p:messages id="msgsAltasBajas" autoUpdate="true" closable="true" />
 
-                    <ui:fragment rendered="#{empty altasBajasUsuariosBean.paginaActual}">
+                    <div class="form-group">
                         <div class="row">
-                            <div class="col-md-6 col-xs-12">
-                                <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_ALT')">
-                                    <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.seccion.altas')}"
-                                             styleClass="panel-primary">
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.descripcion.altas')}" />
-                                            </div>
-                                        </div>
-                                        <div class="row" style="margin-top: 15px;">
-                                            <div class="col-md-12 text-right">
-                                                <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.seccion.altas')}"
-                                                                 action="#{altasBajasUsuariosBean.irNuevaAlta}"
-                                                                 ajax="false"
-                                                                 immediate="true"
-                                                                 process="@this"
-                                                                 styleClass="btn btn-primary btn-block" />
-                                            </div>
-                                        </div>
-                                    </p:panel>
-                                </sec:authorize>
-                            </div>
-                            <div class="col-md-6 col-xs-12">
-                                <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_BAJ') or hasPermission(null, 'ALT_BAJ_USR_CON')">
-                                    <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.seccion.bajas')}"
-                                             styleClass="panel-primary">
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.descripcion.bajas')}" />
-                                            </div>
-                                        </div>
-                                        <div class="row" style="margin-top: 15px;">
-                                            <div class="col-md-12 text-right">
-                                                <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.seccion.bajas')}"
-                                                                 action="#{altasBajasUsuariosBean.mostrarOpcionesBajas}"
-                                                                 ajax="true"
-                                                                 process="@this"
-                                                                 update="frmAltasBajas"
-                                                                 styleClass="btn btn-primary btn-block" />
-                                            </div>
-                                        </div>
+                            <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_ALT')">
+                                <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaAlta')}"
+                                                 action="#{altasBajasUsuariosBean.irNuevaAlta}"
+                                                 ajax="false"
+                                                 immediate="true"
+                                                 process="@this"
+                                                 styleClass="btn btn-primary"
+                                                 style="margin-right: 15px;" />
+                            </sec:authorize>
 
-                                        <ui:fragment rendered="#{altasBajasUsuariosBean.mostrarOpcionesBajas}">
-                                            <div class="row" style="margin-top: 15px;">
-                                                <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_BAJ')">
-                                                    <div class="col-md-6 col-xs-12">
-                                                        <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaBaja')}"
-                                                                         action="#{altasBajasUsuariosBean.irNuevaBaja}"
-                                                                         ajax="false"
-                                                                         immediate="true"
-                                                                         process="@this"
-                                                                         styleClass="btn btn-primary btn-block" />
-                                                    </div>
-                                                </sec:authorize>
-                                                <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_CON')">
-                                                    <div class="col-md-6 col-xs-12" style="margin-top: 10px;">
-                                                        <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.consultarBaja')}"
-                                                                         action="#{altasBajasUsuariosBean.irConsultarBaja}"
-                                                                         ajax="false"
-                                                                         immediate="true"
-                                                                         process="@this"
-                                                                         styleClass="btn btn-primary btn-block" />
-                                                    </div>
-                                                </sec:authorize>
-                                            </div>
-                                        </ui:fragment>
-                                    </p:panel>
-                                </sec:authorize>
-                            </div>
+                            <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_BAJ')">
+                                <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaBaja')}"
+                                                 action="#{altasBajasUsuariosBean.irNuevaBaja}"
+                                                 ajax="false"
+                                                 immediate="true"
+                                                 process="@this"
+                                                 styleClass="btn btn-primary"
+                                                 style="margin-right: 15px;" />
+                            </sec:authorize>
+
+                            <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_CON')">
+                                <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.consultarBaja')}"
+                                                 action="#{altasBajasUsuariosBean.irConsultarBaja}"
+                                                 ajax="false"
+                                                 immediate="true"
+                                                 process="@this"
+                                                 styleClass="btn btn-primary" />
+                            </sec:authorize>
                         </div>
+                    </div>
+
+                    <ui:fragment rendered="#{not empty altasBajasUsuariosBean.paginaActual}">
+                        <ui:include src="#{altasBajasUsuariosBean.paginaActual}" />
                     </ui:fragment>
                 </h:form>
-
-                <ui:fragment rendered="#{not empty altasBajasUsuariosBean.paginaActual}">
-                    <ui:include src="#{altasBajasUsuariosBean.paginaActual}" />
-                </ui:fragment>
             </sec:authorize>
         </ui:fragment>
     </ui:define>
