@@ -1,0 +1,102 @@
+package mx.gob.sedesol.gestorweb.beans.gestionescolar;
+
+import javax.annotation.PostConstruct;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ViewScoped;
+
+import org.apache.log4j.Logger;
+
+import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
+
+@ManagedBean
+@ViewScoped
+public class AltasBajasUsuariosBean extends BaseBean {
+
+    private static final long serialVersionUID = 1L;
+
+    private static final Logger LOGGER = Logger.getLogger(AltasBajasUsuariosBean.class);
+
+    private String paginaActual;
+    private boolean mostrarOpcionesBajas;
+    private boolean mostrarOpcionesAltas;
+
+    @PostConstruct
+    public void init() {
+        LOGGER.info("Inicializando módulo de altas y bajas de usuarios");
+        paginaActual = null;
+        mostrarOpcionesBajas = false;
+        mostrarOpcionesAltas = false;
+    }
+
+    public String irNuevaAlta() {
+        LOGGER.info("Navegando a la vista de nueva alta de usuario");
+        this.paginaActual = "/views/private/gestionEscolar/altasBajasUsuarios/nuevaAlta.xhtml";
+        this.mostrarOpcionesBajas = false;
+        this.mostrarOpcionesAltas = true;
+        return null;
+    }
+
+    public String irNuevaBaja() {
+        LOGGER.info("Navegando a la vista de nueva baja de usuario");
+        this.paginaActual = "/views/private/gestionEscolar/altasBajasUsuarios/nuevaBaja.xhtml";
+        this.mostrarOpcionesBajas = true;
+        this.mostrarOpcionesAltas = false;
+        return null;
+    }
+
+    public String irConsultarBaja() {
+        LOGGER.info("Navegando a la vista de consulta de bajas de usuario");
+        this.paginaActual = "/views/private/gestionEscolar/altasBajasUsuarios/consultaBaja.xhtml";
+        this.mostrarOpcionesBajas = true;
+        this.mostrarOpcionesAltas = false;
+        return null;
+    }
+
+    public String mostrarOpcionesBajas() {
+        LOGGER.info("Mostrando opciones de bajas de usuarios");
+        this.mostrarOpcionesBajas = true;
+        this.paginaActual = null;
+        this.mostrarOpcionesAltas = false;
+        return null;
+    }
+
+    public String mostrarOpcionesAltas() {
+        LOGGER.info("Mostrando opciones de altas de usuarios");
+        this.mostrarOpcionesAltas = true;
+        this.mostrarOpcionesBajas = false;
+        this.paginaActual = null;
+        return null;
+    }
+
+    public String regresarAlModulo() {
+        LOGGER.info("Regresando al módulo de altas y bajas de usuarios");
+        this.paginaActual = null;
+        this.mostrarOpcionesBajas = false;
+        this.mostrarOpcionesAltas = false;
+        return null;
+    }
+
+    public String getPaginaActual() {
+        return paginaActual;
+    }
+
+    public void setPaginaActual(String paginaActual) {
+        this.paginaActual = paginaActual;
+    }
+
+    public boolean isMostrarOpcionesBajas() {
+        return mostrarOpcionesBajas;
+    }
+
+    public void setMostrarOpcionesBajas(boolean mostrarOpcionesBajas) {
+        this.mostrarOpcionesBajas = mostrarOpcionesBajas;
+    }
+
+    public boolean isMostrarOpcionesAltas() {
+        return mostrarOpcionesAltas;
+    }
+
+    public void setMostrarOpcionesAltas(boolean mostrarOpcionesAltas) {
+        this.mostrarOpcionesAltas = mostrarOpcionesAltas;
+    }
+}

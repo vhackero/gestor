@@ -405,6 +405,30 @@
 			<redirect />
 		</navigation-case>
 
+                <navigation-case>
+                        <from-outcome>ALTAS_BAJAS_USUARIOS</from-outcome>
+                        <to-view-id>/views/private/gestionEscolar/altasBajasUsuarios/altasBajasUsuarios.xhtml</to-view-id>
+                        <redirect />
+                </navigation-case>
+
+                <navigation-case>
+                        <from-outcome>NUEVA_ALTA_USUARIO</from-outcome>
+                        <to-view-id>/views/private/gestionEscolar/altasBajasUsuarios/nuevaAlta.xhtml</to-view-id>
+                        <redirect />
+                </navigation-case>
+
+                <navigation-case>
+                        <from-outcome>NUEVA_BAJA_USUARIO</from-outcome>
+                        <to-view-id>/views/private/gestionEscolar/altasBajasUsuarios/nuevaBaja.xhtml</to-view-id>
+                        <redirect />
+                </navigation-case>
+
+                <navigation-case>
+                        <from-outcome>CONSULTA_BAJA_USUARIO</from-outcome>
+                        <to-view-id>/views/private/gestionEscolar/altasBajasUsuarios/consultaBaja.xhtml</to-view-id>
+                        <redirect />
+                </navigation-case>
+
 		<navigation-case>
 			<from-outcome>CATALOGO_ASISTENCIA_ESCOLAR</from-outcome>
 			<to-view-id>/views/private/gestionEscolar/catalogos/catalogoAsistencia.jsf</to-view-id>

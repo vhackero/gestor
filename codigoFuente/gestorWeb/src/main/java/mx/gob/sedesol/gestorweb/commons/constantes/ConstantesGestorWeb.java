@@ -144,7 +144,12 @@ public final class ConstantesGestorWeb {
 	public static final String NAVEGA_EXPEDIENTE_ALUMNO = "EXPEDIENTE_ALUMNO";
 	public static final String NAVEGA_BUSCAR_EXPEDIENTE_ALUMNO = "BUSCAR_EXPEDIENTE_ALUMNO";
 	public static final String NAVEGA_EXPEDIENTE_GRUPO = "EXPEDIENTE_GRUPO";
-	
+
+        public static final String NAVEGA_ALTAS_BAJAS_USUARIOS = "ALTAS_BAJAS_USUARIOS";
+        public static final String NAVEGA_NUEVA_ALTA_USUARIO = "NUEVA_ALTA_USUARIO";
+        public static final String NAVEGA_NUEVA_BAJA_USUARIO = "NUEVA_BAJA_USUARIO";
+        public static final String NAVEGA_CONSULTA_BAJA_USUARIO = "CONSULTA_BAJA_USUARIO";
+
 	public static final String NAVEGA_EDICION_PLANTILLA_NOTIFICACION = "EDICION_PLANTILLA_NOTIFICACION";
 	
 	

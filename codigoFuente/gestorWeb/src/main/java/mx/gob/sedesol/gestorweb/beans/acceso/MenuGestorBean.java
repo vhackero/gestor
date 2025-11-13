@@ -505,6 +505,11 @@ public class MenuGestorBean extends BaseBean {
 		return ConstantesGestorWeb.NAVEGA_EXPEDIENTE_GRUPO;
 	}
 
+	public String navegaAltasBajasUsuarios() {
+		logger.info("Navegando a módulo de altas y bajas de usuarios");
+		return ConstantesGestorWeb.NAVEGA_ALTAS_BAJAS_USUARIOS;
+	}
+
 	public void inicializaMisCursos(){
 		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "VER_MIS_CUR", "", requestActual(), TipoServicioEnum.LOCAL);
 	}

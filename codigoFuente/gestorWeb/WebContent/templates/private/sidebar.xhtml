@@ -439,6 +439,17 @@
                                                                                                         <span class="m-label">Responsables de eventos académicos</span>
                                                                                                 </h:commandLink></li>
                                                                                         <ui:fragment
+                                                                                                rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR')}">
+                                                                                                <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR') ">
+                                                                                                        <li><h:commandLink
+                                                                                                                        action="#{menuGestorBean.navegaAltasBajasUsuarios}"
+                                                                                                                        title="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.titulo')}">
+                                                                                                                        <i class="fa fa-user-plus"></i>
+                                                                                                                        <span class="m-label">#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.titulo')}</span>
+                                                                                                                </h:commandLink></li>
+                                                                                                </sec:authorize>
+                                                                                        </ui:fragment>
+                                                                                        <ui:fragment
                                                                                                 rendered="#{menuGestorBean.rolTienePermiso('MIS_CONVOCATORIAS')}">
                                                                                                 <sec:authorize access="hasPermission(null, 'MIS_CONVOCATORIAS') ">
                                                                                                         <li><h:commandLink
