@@ -9,9 +9,6 @@
 
     <ui:fragment rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR_ALT')}">
         <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_ALT') ">
-            <h1>#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaAlta')}</h1>
-            <hr />
-
             <h:form id="frmNuevaAlta">
                 <p:messages id="msgsNuevaAlta" autoUpdate="true" closable="true" />
 
