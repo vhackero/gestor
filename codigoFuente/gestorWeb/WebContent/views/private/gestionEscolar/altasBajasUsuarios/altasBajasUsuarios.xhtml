@@ -25,10 +25,10 @@
                     <div class="form-group">
                         <div class="row">
                             <p:outputPanel id="panelBotones" layout="block">
-                                <h:panelGroup rendered="#{!altasBajasUsuariosBean.mostrarOpcionesBajas}">
+                                <h:panelGroup rendered="#{!altasBajasUsuariosBean.mostrarOpcionesBajas and !altasBajasUsuariosBean.mostrarOpcionesAltas}">
                                     <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_ALT')">
                                         <p:commandButton value="ALTAS"
-                                                         action="#{altasBajasUsuariosBean.irNuevaAlta}"
+                                                         action="#{altasBajasUsuariosBean.mostrarOpcionesAltas}"
                                                          ajax="false"
                                                          immediate="true"
                                                          process="@this"
@@ -40,6 +40,18 @@
                                         access="hasPermission(null, 'ALT_BAJ_USR_BAJ') or hasPermission(null, 'ALT_BAJ_USR_CON')">
                                         <p:commandButton value="BAJAS"
                                                          action="#{altasBajasUsuariosBean.mostrarOpcionesBajas}"
+                                                         ajax="false"
+                                                         immediate="true"
+                                                         process="@this"
+                                                         styleClass="btn btn-primary"
+                                                         style="width: 220px;" />
+                                    </sec:authorize>
+                                </h:panelGroup>
+
+                                <h:panelGroup rendered="#{altasBajasUsuariosBean.mostrarOpcionesAltas}">
+                                    <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_ALT')">
+                                        <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaAlta')}"
+                                                         action="#{altasBajasUsuariosBean.irNuevaAlta}"
                                                          ajax="false"
                                                          immediate="true"
                                                          process="@this"

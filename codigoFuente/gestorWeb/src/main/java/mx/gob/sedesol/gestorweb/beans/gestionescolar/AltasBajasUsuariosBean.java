@@ -18,18 +18,21 @@ public class AltasBajasUsuariosBean extends BaseBean {
 
     private String paginaActual;
     private boolean mostrarOpcionesBajas;
+    private boolean mostrarOpcionesAltas;
 
     @PostConstruct
     public void init() {
         LOGGER.info("Inicializando módulo de altas y bajas de usuarios");
         paginaActual = null;
         mostrarOpcionesBajas = false;
+        mostrarOpcionesAltas = false;
     }
 
     public String irNuevaAlta() {
         LOGGER.info("Navegando a la vista de nueva alta de usuario");
         this.paginaActual = "/views/private/gestionEscolar/altasBajasUsuarios/nuevaAlta.xhtml";
         this.mostrarOpcionesBajas = false;
+        this.mostrarOpcionesAltas = true;
         return null;
     }
 
@@ -37,6 +40,7 @@ public class AltasBajasUsuariosBean extends BaseBean {
         LOGGER.info("Navegando a la vista de nueva baja de usuario");
         this.paginaActual = "/views/private/gestionEscolar/altasBajasUsuarios/nuevaBaja.xhtml";
         this.mostrarOpcionesBajas = true;
+        this.mostrarOpcionesAltas = false;
         return null;
     }
 
@@ -44,12 +48,22 @@ public class AltasBajasUsuariosBean extends BaseBean {
         LOGGER.info("Navegando a la vista de consulta de bajas de usuario");
         this.paginaActual = "/views/private/gestionEscolar/altasBajasUsuarios/consultaBaja.xhtml";
         this.mostrarOpcionesBajas = true;
+        this.mostrarOpcionesAltas = false;
         return null;
     }
 
     public String mostrarOpcionesBajas() {
         LOGGER.info("Mostrando opciones de bajas de usuarios");
         this.mostrarOpcionesBajas = true;
+        this.paginaActual = null;
+        this.mostrarOpcionesAltas = false;
+        return null;
+    }
+
+    public String mostrarOpcionesAltas() {
+        LOGGER.info("Mostrando opciones de altas de usuarios");
+        this.mostrarOpcionesAltas = true;
+        this.mostrarOpcionesBajas = false;
         this.paginaActual = null;
         return null;
     }
@@ -58,6 +72,7 @@ public class AltasBajasUsuariosBean extends BaseBean {
         LOGGER.info("Regresando al módulo de altas y bajas de usuarios");
         this.paginaActual = null;
         this.mostrarOpcionesBajas = false;
+        this.mostrarOpcionesAltas = false;
         return null;
     }
 
@@ -75,5 +90,13 @@ public class AltasBajasUsuariosBean extends BaseBean {
 
     public void setMostrarOpcionesBajas(boolean mostrarOpcionesBajas) {
         this.mostrarOpcionesBajas = mostrarOpcionesBajas;
+    }
+
+    public boolean isMostrarOpcionesAltas() {
+        return mostrarOpcionesAltas;
+    }
+
+    public void setMostrarOpcionesAltas(boolean mostrarOpcionesAltas) {
+        this.mostrarOpcionesAltas = mostrarOpcionesAltas;
     }
 }
