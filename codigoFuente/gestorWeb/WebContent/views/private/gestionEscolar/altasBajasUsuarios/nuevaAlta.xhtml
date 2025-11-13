@@ -1,47 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html>
-<ui:composition template="/templates/layout.xhtml"
-                xmlns="http://www.w3.org/1999/xhtml"
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="http://java.sun.com/jsf/html"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:f="http://java.sun.com/jsf/core"
                 xmlns:p="http://primefaces.org/ui"
                 xmlns:sec="http://www.springframework.org/security/tags">
 
-    <ui:define name="breadcrumb">
-        <li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
-        <li>#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.titulo')}</li>
-        <li class="active">#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaAlta')}</li>
-    </ui:define>
+    <ui:fragment rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR_ALT')}">
+        <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_ALT') ">
+            <h:form id="frmNuevaAlta">
+                <p:messages id="msgsNuevaAlta" autoUpdate="true" closable="true" />
 
-    <ui:define name="content">
-        <ui:fragment rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR_ALT')}">
-            <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_ALT') ">
-                <h1>#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaAlta')}</h1>
-                <hr />
-
-                <h:form id="frmNuevaAlta">
-                    <p:messages id="msgsNuevaAlta" autoUpdate="true" closable="true" />
-
-                    <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaAlta')}"
-                             styleClass="panel-primary">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.mensaje.pendiente')}" />
-                            </div>
+                <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaAlta')}"
+                         styleClass="panel-primary">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.mensaje.pendiente')}" />
                         </div>
-                        <div class="row" style="margin-top: 15px;">
-                            <div class="col-md-12 text-right">
-                                <p:commandButton value="#{sistema.obtenerTexto('gw.ge.texto.regresar')}"
-                                                 action="#{altasBajasUsuariosBean.regresarAlModulo}"
-                                                 icon="fa fa-arrow-left"
-                                                 styleClass="btn btn-default"
-                                                 ajax="false" />
-                            </div>
+                    </div>
+                    <div class="row" style="margin-top: 15px;">
+                        <div class="col-md-12 text-right">
+                            <p:commandButton value="#{sistema.obtenerTexto('gw.ge.texto.regresar')}"
+                                             action="#{altasBajasUsuariosBean.regresarAlModulo}"
+                                             styleClass="btn btn-default"
+                                             ajax="false" />
                         </div>
-                    </p:panel>
-                </h:form>
-            </sec:authorize>
-        </ui:fragment>
-    </ui:define>
+                    </div>
+                </p:panel>
+            </h:form>
+        </sec:authorize>
+    </ui:fragment>
 </ui:composition>

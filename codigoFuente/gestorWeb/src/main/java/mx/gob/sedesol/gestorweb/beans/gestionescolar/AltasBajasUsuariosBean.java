@@ -7,7 +7,6 @@ import javax.faces.bean.ViewScoped;
 import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
-import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 
 @ManagedBean
 @ViewScoped
@@ -17,28 +16,64 @@ public class AltasBajasUsuariosBean extends BaseBean {
 
     private static final Logger LOGGER = Logger.getLogger(AltasBajasUsuariosBean.class);
 
+    private String paginaActual;
+    private boolean mostrarOpcionesBajas;
+
     @PostConstruct
     public void init() {
         LOGGER.info("Inicializando módulo de altas y bajas de usuarios");
+        paginaActual = null;
+        mostrarOpcionesBajas = false;
     }
 
     public String irNuevaAlta() {
         LOGGER.info("Navegando a la vista de nueva alta de usuario");
-        return ConstantesGestorWeb.NAVEGA_NUEVA_ALTA_USUARIO;
+        this.paginaActual = "/views/private/gestionEscolar/altasBajasUsuarios/nuevaAlta.xhtml";
+        this.mostrarOpcionesBajas = false;
+        return null;
     }
 
     public String irNuevaBaja() {
         LOGGER.info("Navegando a la vista de nueva baja de usuario");
-        return ConstantesGestorWeb.NAVEGA_NUEVA_BAJA_USUARIO;
+        this.paginaActual = "/views/private/gestionEscolar/altasBajasUsuarios/nuevaBaja.xhtml";
+        this.mostrarOpcionesBajas = true;
+        return null;
     }
 
     public String irConsultarBaja() {
         LOGGER.info("Navegando a la vista de consulta de bajas de usuario");
-        return ConstantesGestorWeb.NAVEGA_CONSULTA_BAJA_USUARIO;
+        this.paginaActual = "/views/private/gestionEscolar/altasBajasUsuarios/consultaBaja.xhtml";
+        this.mostrarOpcionesBajas = true;
+        return null;
+    }
+
+    public String mostrarOpcionesBajas() {
+        LOGGER.info("Mostrando opciones de bajas de usuarios");
+        this.mostrarOpcionesBajas = true;
+        this.paginaActual = null;
+        return null;
     }
 
     public String regresarAlModulo() {
         LOGGER.info("Regresando al módulo de altas y bajas de usuarios");
-        return ConstantesGestorWeb.NAVEGA_ALTAS_BAJAS_USUARIOS;
+        this.paginaActual = null;
+        this.mostrarOpcionesBajas = false;
+        return null;
+    }
+
+    public String getPaginaActual() {
+        return paginaActual;
+    }
+
+    public void setPaginaActual(String paginaActual) {
+        this.paginaActual = paginaActual;
+    }
+
+    public boolean isMostrarOpcionesBajas() {
+        return mostrarOpcionesBajas;
+    }
+
+    public void setMostrarOpcionesBajas(boolean mostrarOpcionesBajas) {
+        this.mostrarOpcionesBajas = mostrarOpcionesBajas;
     }
 }
