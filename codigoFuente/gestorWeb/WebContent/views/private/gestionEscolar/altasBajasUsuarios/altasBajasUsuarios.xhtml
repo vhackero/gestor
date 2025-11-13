@@ -27,7 +27,7 @@
                             <p:outputPanel id="panelBotones" layout="block">
                                 <h:panelGroup rendered="#{!altasBajasUsuariosBean.mostrarOpcionesBajas and !altasBajasUsuariosBean.mostrarOpcionesAltas}">
                                     <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_ALT')">
-                                        <p:commandButton value="ALTAS"
+                                        <p:commandButton value="Altas"
                                                          action="#{altasBajasUsuariosBean.mostrarOpcionesAltas}"
                                                          ajax="false"
                                                          immediate="true"
@@ -38,7 +38,7 @@
 
                                     <sec:authorize
                                         access="hasPermission(null, 'ALT_BAJ_USR_BAJ') or hasPermission(null, 'ALT_BAJ_USR_CON')">
-                                        <p:commandButton value="BAJAS"
+                                        <p:commandButton value="Bajas"
                                                          action="#{altasBajasUsuariosBean.mostrarOpcionesBajas}"
                                                          ajax="false"
                                                          immediate="true"
