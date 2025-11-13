@@ -381,17 +381,30 @@ public class DispersionesRepository implements IDispersionesRepository {
 		if (dispercionParametros.getIdConvocatoriaSeleccionada() == null) {
 			return lista;
 		}
-
-		String consulta = "SELECT tp.id_plan, tp.nombre plan, tfd.id_programa, tfd.nombre_tentativo programa\r\n"
-				+ "FROM tbl_convocatoria tc\r\n"
-				+ "         INNER JOIN rel_convocatoria_planesyprogramas rcpp ON rcpp.id_convocatoria = tc.convocatoria_id\r\n"
-				+ "         INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_plan = rcpp.id_plan ANd tfd.id_programa = rcpp.id_programa\r\n"
-				+ "         INNER JOIN tbl_planes tp ON tp.id_plan = tfd.id_plan\r\n"
-				+ "         INNER JOIN tbl_malla_curricular tmc ON tmc.id_plan = tp.id_plan AND tmc.activo = 1\r\n"
-				+ "WHERE tc.convocatoria_id = :idConvocatoria";
-
-		Query query = entityManager.createNativeQuery(consulta);
+		
+		boolean filtrarPorProceso = dispercionParametros.getIdProcesoInscripcion() != null;
+		StringBuilder consulta = new StringBuilder("SELECT tp.id_plan, tp.nombre plan, tfd.id_programa, tfd.nombre_tentativo programa\r\n");
+		if (filtrarPorProceso) {
+			consulta.append("FROM rel_proceso_inscipcion_planesyprogramas rpip\r\n")
+				.append("         JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_programa = rpip.id_programa\r\n")
+				.append("         JOIN tbl_planes tp ON tp.id_plan = tfd.id_plan\r\n")
+				.append("         JOIN tbl_procesos_inscripcion tpi ON tpi.proceso_inscripcion_id = rpip.id_proceso_inscripcion\r\n")
+				.append("WHERE rpip.id_proceso_inscripcion = :idProcesoInscripcion\r\n")
+				.append("  AND tpi.convocatoria_id = :idConvocatoria");
+		} else {
+			consulta.append("FROM tbl_convocatoria tc\r\n")
+				.append("         INNER JOIN rel_convocatoria_planesyprogramas rcpp ON rcpp.id_convocatoria = tc.convocatoria_id\r\n")
+				.append("         INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_plan = rcpp.id_plan AND tfd.id_programa = rcpp.id_programa\r\n")
+				.append("         INNER JOIN tbl_planes tp ON tp.id_plan = tfd.id_plan\r\n")
+				.append("         INNER JOIN tbl_malla_curricular tmc ON tmc.id_plan = tp.id_plan AND tmc.activo = 1\r\n")
+				.append("WHERE tc.convocatoria_id = :idConvocatoria");
+		}
+		
+		Query query = entityManager.createNativeQuery(consulta.toString());
 		query.setParameter("idConvocatoria", dispercionParametros.getIdConvocatoriaSeleccionada());
+		if (filtrarPorProceso) {
+			query.setParameter("idProcesoInscripcion", dispercionParametros.getIdProcesoInscripcion());
+		}
 
 		List<Object[]> listaQuery = query.getResultList();
 
