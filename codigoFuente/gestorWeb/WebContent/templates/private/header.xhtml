@@ -26,40 +26,52 @@
 			</div>
 			<!-- /.navbar-header -->
 
-			<ul class="nav navbar-top-links item2">
-				<li class="boton-header" id="tareas"><p:commandButton
-						id="btnActividadesUsuario" ajax="true"
-						action="#{menuGestorBean.navegaActividadesUsuario()}"
-						styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-rectangle-list tareas icono-btn-header" />
-					<p:tooltip for="btnActividadesUsuario" position="bottom"
-						value="Lista de tareas"></p:tooltip></li>
-				<li class="boton-header"><p:commandButton
-						id="btnHeaderNotificaciones" ajax="true"
-						action="#{notificacionesBean.cargarNotificacionesSistema()}"
-						styleClass="btn-icon btn btn-default icono_sisi fa fa-bell tareas icono-btn-header" />
-					<p:tooltip for="btnHeaderNotificaciones" position="bottom"
-						value="Notificaciones"></p:tooltip></li>
+                        <ul class="nav navbar-top-links item2">
+                                <li class="boton-header" id="tareas">
+                                        <h:form id="frmBtnActividades" prependId="false" style="display:inline;">
+                                                <p:commandButton id="btnActividadesUsuario" ajax="true"
+                                                        action="#{menuGestorBean.navegaActividadesUsuario()}"
+                                                        styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-rectangle-list tareas icono-btn-header" />
+                                        </h:form>
+                                        <p:tooltip for="btnActividadesUsuario" position="bottom"
+                                                value="Lista de tareas"></p:tooltip>
+                                </li>
+                                <li class="boton-header">
+                                        <h:form id="frmBtnNotificaciones" prependId="false" style="display:inline;">
+                                                <p:commandButton id="btnHeaderNotificaciones" ajax="true"
+                                                        action="#{notificacionesBean.cargarNotificacionesSistema()}"
+                                                        styleClass="btn-icon btn btn-default icono_sisi fa fa-bell tareas icono-btn-header" />
+                                        </h:form>
+                                        <p:tooltip for="btnHeaderNotificaciones" position="bottom"
+                                                value="Notificaciones"></p:tooltip>
+                                </li>
 
-				<li class="boton-header"><p:commandButton
-						id="btnHeaderMensajes" ajax="true"
-						actionListener="#{notificacionesBean.cargarNotificacionesSistema()}"
-						action="#{menuGestorBean.navegaNotificaciones()}"
-						styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-envelope tareas icono-btn-header">
-					</p:commandButton></li>
-				<p:tooltip for="btnHeaderMensajes" position="bottom"
-					value="Mensajes"></p:tooltip>
-				<ui:fragment
-					rendered="#{menuGestorBean.rolTienePermiso('LOG_ACA_INF')}">
-					<sec:authorize access="hasPermission(null, 'LOG_ACA_INF')">
-						<li class="boton-header"><p:commandButton
-								id="btnHeaderReservaciones" ajax="true"
-								action="#{menuGestorBean.navegaReservacionAreas}"
-								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-calendar-days tareas icono-btn-header">
-							</p:commandButton></li>
-						<p:tooltip for="btnHeaderReservaciones" position="bottom"
-							value="Reservaciones"></p:tooltip>
-					</sec:authorize>
-				</ui:fragment>
+                                <li class="boton-header">
+                                        <h:form id="frmBtnMensajes" prependId="false" style="display:inline;">
+                                                <p:commandButton id="btnHeaderMensajes" ajax="true"
+                                                        actionListener="#{notificacionesBean.cargarNotificacionesSistema()}"
+                                                        action="#{menuGestorBean.navegaNotificaciones()}"
+                                                        styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-envelope tareas icono-btn-header">
+                                                </p:commandButton>
+                                        </h:form>
+                                </li>
+                                <p:tooltip for="btnHeaderMensajes" position="bottom"
+                                        value="Mensajes"></p:tooltip>
+                                <ui:fragment
+                                        rendered="#{menuGestorBean.rolTienePermiso('LOG_ACA_INF')}">
+                                        <sec:authorize access="hasPermission(null, 'LOG_ACA_INF')">
+                                                <li class="boton-header">
+                                                        <h:form id="frmBtnReservaciones" prependId="false" style="display:inline;">
+                                                                <p:commandButton id="btnHeaderReservaciones" ajax="true"
+                                                                        action="#{menuGestorBean.navegaReservacionAreas}"
+                                                                        styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-calendar-days tareas icono-btn-header">
+                                                                </p:commandButton>
+                                                        </h:form>
+                                                </li>
+                                                <p:tooltip for="btnHeaderReservaciones" position="bottom"
+                                                        value="Reservaciones"></p:tooltip>
+                                        </sec:authorize>
+                                </ui:fragment>
 
 				<li class="dropdown visible-xs"><a class="dropdown-toggle"
 					data-toggle="dropdown" href="#"> <i class="fa fa-user fa-fw"></i>
