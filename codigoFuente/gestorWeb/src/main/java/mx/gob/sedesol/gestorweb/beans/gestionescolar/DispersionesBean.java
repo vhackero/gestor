@@ -490,13 +490,27 @@ public class DispersionesBean extends BaseBean {
 		if (esExtraordinario()) {
 			mostrarPlanYPrograma = true;
 			consultarPlan();
-			consultarPlanesProgramas();
+			if (dispercionParametros.getIdProcesoInscripcion() != null) {
+				consultarPlanesProgramas();
+			} else {
+				listaPlanProgramas = new ArrayList<>();
+			}
 		} else {
 			ocultarPlanPrograma();
 		}
 
 		logger.info("Termina consulta listaProcesosInscripcion select");
 
+	}
+	
+	public void onProcesoInscripcionSeleccionado() {
+		if (!mostrarPlanYPrograma || dispercionParametros.getIdProcesoInscripcion() == null) {
+			listaPlanProgramas = new ArrayList<>();
+			planesProgramasSeleccionados = new ArrayList<>();
+			planesProgramasBusquedaSeleccionados = new ArrayList<>();
+			return;
+		}
+		consultarPlanesProgramas();
 	}
 
 	public void consultarTipoMatriculacion() throws Exception {
