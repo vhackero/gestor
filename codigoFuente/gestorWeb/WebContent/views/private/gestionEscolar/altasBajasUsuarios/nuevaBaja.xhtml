@@ -9,26 +9,26 @@
 
     <ui:fragment rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR_BAJ')}">
         <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_BAJ') ">
-            <h:form id="frmNuevaBaja">
-                <p:messages id="msgsNuevaBaja" autoUpdate="true" closable="true" />
+            <p:messages id="msgsNuevaBaja" autoUpdate="true" closable="true" />
 
-                <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaBaja')}"
-                         styleClass="panel-primary">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.mensaje.pendiente')}" />
-                        </div>
+            <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaBaja')}"
+                     styleClass="panel-primary">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.mensaje.pendiente')}" />
                     </div>
-                    <div class="row" style="margin-top: 15px;">
-                        <div class="col-md-12 text-right">
-                            <p:commandButton value="#{sistema.obtenerTexto('gw.ge.texto.regresar')}"
-                                             action="#{altasBajasUsuariosBean.regresarAlModulo}"
-                                             styleClass="btn btn-default"
-                                             ajax="false" />
-                        </div>
+                </div>
+                <div class="row" style="margin-top: 15px;">
+                    <div class="col-md-12 text-right">
+                        <p:commandButton value="#{sistema.obtenerTexto('gw.ge.texto.regresar')}"
+                                         action="#{altasBajasUsuariosBean.regresarAlModulo}"
+                                         styleClass="btn btn-default"
+                                         ajax="false"
+                                         process="@form"
+                                         update="@form" />
                     </div>
-                </p:panel>
-            </h:form>
+                </div>
+            </p:panel>
         </sec:authorize>
     </ui:fragment>
 </ui:composition>
