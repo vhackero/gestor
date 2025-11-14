@@ -2110,8 +2110,9 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			programaFinal.setCatStatusPrograma((getFecServiceFacade().getCatStatusProgramaService()
 					.buscarPorId(EstatusProgramaEnum.FINAL.getId(), CatStatusPrograma.class)));
 			this.asignaRelacionesPrograma(programaFinal);
-			programaFinal.setIdentificadorFinal(
-					getFecServiceFacade().generaClaveProgramaPlanSedesol(programaFinal.getIdPrograma()));
+			//programaFinal.setIdentificadorFinal(
+			//		getFecServiceFacade().generaClaveProgramaPlanSedesol(programaFinal.getIdPrograma()));
+			programaFinal.setCvePrograma(programaFinal.getIdentificadorFinal());
 
 			// TODO: Consumir WS
 			try {
