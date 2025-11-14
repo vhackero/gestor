@@ -28,6 +28,7 @@
                                 <h:panelGroup rendered="#{!altasBajasUsuariosBean.mostrarOpcionesBajas and !altasBajasUsuariosBean.mostrarOpcionesAltas}">
                                     <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_ALT')">
                                         <p:commandButton value="Altas"
+                                                         form="frmAltasBajas"
                                                          action="#{altasBajasUsuariosBean.mostrarOpcionesAltas}"
                                                          ajax="false"
                                                          immediate="true"
@@ -39,6 +40,7 @@
                                     <sec:authorize
                                         access="hasPermission(null, 'ALT_BAJ_USR_BAJ') or hasPermission(null, 'ALT_BAJ_USR_CON')">
                                         <p:commandButton value="Bajas"
+                                                         form="frmAltasBajas"
                                                          action="#{altasBajasUsuariosBean.mostrarOpcionesBajas}"
                                                          ajax="false"
                                                          immediate="true"
@@ -51,6 +53,7 @@
                                 <h:panelGroup rendered="#{altasBajasUsuariosBean.mostrarOpcionesAltas}">
                                     <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_ALT')">
                                         <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaAlta')}"
+                                                         form="frmAltasBajas"
                                                          action="#{altasBajasUsuariosBean.irNuevaAlta}"
                                                          ajax="false"
                                                          immediate="true"
@@ -63,6 +66,7 @@
                                 <h:panelGroup rendered="#{altasBajasUsuariosBean.mostrarOpcionesBajas}">
                                     <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_BAJ')">
                                         <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaBaja')}"
+                                                         form="frmAltasBajas"
                                                          action="#{altasBajasUsuariosBean.irNuevaBaja}"
                                                          ajax="false"
                                                          immediate="true"
@@ -73,6 +77,7 @@
 
                                     <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_CON')">
                                         <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.consultarBaja')}"
+                                                         form="frmAltasBajas"
                                                          action="#{altasBajasUsuariosBean.irConsultarBaja}"
                                                          ajax="false"
                                                          immediate="true"
