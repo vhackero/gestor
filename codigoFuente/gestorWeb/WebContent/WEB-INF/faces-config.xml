@@ -569,12 +569,18 @@
 		</navigation-case>
 
 		<!-- ITTIVA 666 MIS_DISPERSIONES -->
-		<navigation-case>
-			<from-outcome>MIS_DISPERSIONES</from-outcome>
-			<to-view-id>/views/private/gestionAprendizaje/alumnoView/busquedaDispersiones</to-view-id>
-			<redirect />
-		</navigation-case>
-		
+                <navigation-case>
+                        <from-outcome>MIS_DISPERSIONES</from-outcome>
+                        <to-view-id>/views/private/gestionAprendizaje/alumnoView/busquedaDispersiones</to-view-id>
+                        <redirect />
+                </navigation-case>
+
+                <navigation-case>
+                        <from-outcome>ALTAS_BAJAS_USUARIOS</from-outcome>
+                        <to-view-id>/views/private/gestionEscolar/altasBajasUsuarios/altasBajasUsuarios.xhtml</to-view-id>
+                        <redirect />
+                </navigation-case>
+
 
 		<!-- ITTIVA 666 MIS INSCRIPCION -->
 		<navigation-case>

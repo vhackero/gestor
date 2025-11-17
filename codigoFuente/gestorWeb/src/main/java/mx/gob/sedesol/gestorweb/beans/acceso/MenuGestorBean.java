@@ -416,23 +416,28 @@ public class MenuGestorBean extends BaseBean {
 		return ConstantesGestorWeb.NAVEGA_MIS_CURSOS;
 	}
 
-	//ITTIVA 666
-	public String navegaMisConvocatorias() {
-		logger.info("Navegando a mis convocatorias");
-		return ConstantesGestorWeb.NAVEGA_MIS_CONVOCATORIAS;
-	}
-	
-	//ITTIVA 666
-		public String navegaMisDispersiones() {
-			logger.info("Navegando a mis dispersiones");
-			return ConstantesGestorWeb.NAVEGA_MIS_DISPERSIONES;
-		}
-	
-	//ITTIVA 666
-		public String navegaMisInscripciones() {
-			logger.info("Navegando a mis inscripciones");
-			return ConstantesGestorWeb.NAVEGA_MIS_INSCRIPCIONES;
-		}
+        //ITTIVA 666
+        public String navegaMisConvocatorias() {
+                logger.info("Navegando a mis convocatorias");
+                return ConstantesGestorWeb.NAVEGA_MIS_CONVOCATORIAS;
+        }
+
+        //ITTIVA 666
+                public String navegaMisDispersiones() {
+                        logger.info("Navegando a mis dispersiones");
+                        return ConstantesGestorWeb.NAVEGA_MIS_DISPERSIONES;
+                }
+
+        //ITTIVA 666
+                public String navegaMisInscripciones() {
+                        logger.info("Navegando a mis inscripciones");
+                        return ConstantesGestorWeb.NAVEGA_MIS_INSCRIPCIONES;
+                }
+
+        public String navegaAltasBajasUsuarios() {
+                logger.info("Navegando a altas y bajas de usuarios");
+                return ConstantesGestorWeb.NAVEGA_ALTAS_BAJAS_USUARIOS;
+        }
 		
 	//ITTIVA 666
 	public String navegaInscripcion() {

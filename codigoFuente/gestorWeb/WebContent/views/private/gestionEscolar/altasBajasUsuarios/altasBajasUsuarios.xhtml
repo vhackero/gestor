@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition template="/templates/layout.xhtml"
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:p="http://primefaces.org/ui"
+        xmlns:sec="http://www.springframework.org/security/tags">
+
+        <ui:define name="breadcrumb">
+                <li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+                <li class="active">#{sistema.obtenerTexto('gw.altasbajasusuarios.titulo')}</li>
+        </ui:define>
+
+        <ui:define name="content">
+                <h:form>
+                        <h1>
+                                <p:outputLabel styleClass="h1" value="#{sistema.obtenerTexto('gw.altasbajasusuarios.titulo')}" />
+                        </h1>
+
+                        <p:ajaxStatus onstart="PF('dialogLayout').show()"
+                                onsuccess="PF('dialogLayout').hide()" />
+
+                        <br />
+
+                        <div class="form-group">
+                                <div class="row">
+                                        <ui:fragment rendered="#{!altasBajasUsuariosBean.mostrarOpcionesBaja}">
+                                                <sec:authorize access="hasPermission(null,'ALT_BAJ_USR_ALT')">
+                                                        <p:commandButton value="#{sistema.obtenerTexto('gw.altasbajasusuarios.boton.altas')}"
+                                                                action="#{altasBajasUsuariosBean.navegaNuevaAlta}"
+                                                                ajax="false" immediate="true" process="@this"
+                                                                styleClass="btn btn-primary" />
+                                                </sec:authorize>
+                                                <sec:authorize access="hasPermission(null,'ALT_BAJ_USR_BAJ') or hasPermission(null,'ALT_BAJ_USR_CON')">
+                                                        <p:commandButton value="#{sistema.obtenerTexto('gw.altasbajasusuarios.boton.bajas')}"
+                                                                action="#{altasBajasUsuariosBean.prepararBajas}"
+                                                                ajax="false" immediate="true" process="@this"
+                                                                styleClass="btn btn-primary" />
+                                                </sec:authorize>
+                                        </ui:fragment>
+                                        <ui:fragment rendered="#{altasBajasUsuariosBean.mostrarOpcionesBaja}">
+                                                <sec:authorize access="hasPermission(null,'ALT_BAJ_USR_BAJ')">
+                                                        <p:commandButton value="#{sistema.obtenerTexto('gw.altasbajasusuarios.boton.nuevaBaja')}"
+                                                                action="#{altasBajasUsuariosBean.navegaNuevaBaja}"
+                                                                ajax="false" immediate="true" process="@this"
+                                                                styleClass="btn btn-primary" />
+                                                </sec:authorize>
+                                                <sec:authorize access="hasPermission(null,'ALT_BAJ_USR_CON')">
+                                                        <p:commandButton value="#{sistema.obtenerTexto('gw.altasbajasusuarios.boton.consultarBaja')}"
+                                                                action="#{altasBajasUsuariosBean.navegaConsultaBaja}"
+                                                                ajax="false" immediate="true" process="@this"
+                                                                styleClass="btn btn-primary" />
+                                                </sec:authorize>
+                                                <p:commandButton value="#{sistema.obtenerTexto('gw.altasbajasusuarios.boton.regresar')}"
+                                                        action="#{altasBajasUsuariosBean.regresarOpcionesPrincipales}"
+                                                        ajax="false" immediate="true" process="@this"
+                                                        styleClass="btn btn-primary" />
+                                        </ui:fragment>
+                                </div>
+                        </div>
+
+                        <ui:include src="#{altasBajasUsuariosBean.paginaActual}" />
+                </h:form>
+        </ui:define>
+</ui:composition>

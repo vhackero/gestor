@@ -441,7 +441,7 @@
                                                                                         <ui:fragment
                                                                                                 rendered="#{menuGestorBean.rolTienePermiso('MIS_CONVOCATORIAS')}">
                                                                                                 <sec:authorize access="hasPermission(null, 'MIS_CONVOCATORIAS') ">
-                                                                                                        <li><h:commandLink
+                                                                                                <li><h:commandLink
                                                                                                                         action="#{menuGestorBean.navegaMisConvocatorias}" title="Convocatorias">
                                                                                                                         <i class="fa fa-solid fa-id-card"></i>
                                                                                                                         <span class="m-label">Convocatorias</span>
@@ -450,8 +450,8 @@
                                                                                                 </sec:authorize>
                                                                                         </ui:fragment>
 
-																						<ui:fragment
-																								rendered="#{menuGestorBean.rolTienePermiso('MIS_INSCRIPCIONES')}">
+                                                                                                                               <ui:fragment
+                                                                                                                               rendered="#{menuGestorBean.rolTienePermiso('MIS_INSCRIPCIONES')}">
 																							<sec:authorize access="hasPermission(null, 'MIS_INSCRIPCIONES') ">
 																								<li><h:commandLink
 																										action="#{menuGestorBean.navegaMisInscripciones}" title="Inscripciones">
@@ -465,19 +465,30 @@
 											<ui:fragment
 													rendered="#{menuGestorBean.rolTienePermiso('MIS_DISPERSIONES')}">
 												<sec:authorize access="hasPermission(null, 'MIS_DISPERSIONES') ">
-													<li><h:commandLink
-															action="#{menuGestorBean.navegaMisDispersiones}" title="Dispersiones">
-														<i class="fa fa-solid fa-id-card"></i>
-														<span class="m-label">Dispersiones</span>
+                                                                                                <li><h:commandLink
+                                                                                                                        action="#{menuGestorBean.navegaMisDispersiones}" title="Dispersiones">
+                                                                                                                <i class="fa fa-solid fa-id-card"></i>
+                                                                                                                <span class="m-label">Dispersiones</span>
 
-													</h:commandLink></li>
-												</sec:authorize>
-											</ui:fragment>
+                                                                                                        </h:commandLink></li>
+                                                                                                </sec:authorize>
+                                                                                        </ui:fragment>
+                                                                                        <ui:fragment
+                                                                                                        rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR')}">
+                                                                                                <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR') ">
+                                                                                                        <li><h:commandLink
+                                                                                                                        action="#{menuGestorBean.navegaAltasBajasUsuarios}"
+                                                                                                                        title="#{sistema.obtenerTexto('gw.altasbajasusuarios.titulo')}">
+                                                                                                                        <i class="fa fa-user-plus"></i>
+                                                                                                                        <span class="m-label">#{sistema.obtenerTexto('gw.altasbajasusuarios.titulo')}</span>
+                                                                                                                </h:commandLink></li>
+                                                                                                </sec:authorize>
+                                                                                        </ui:fragment>
                                                                                         <li><h:commandLink
                                                                                                         action="#{menuGestorBean.navegaExpedienteAlumoBuscar}"
                                                                                                         title="#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}">
                                                                                                         <i class="fa fa-solid fa-id-card"></i>
-													<span class="m-label">#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}</span>
+                                                                                                        <span class="m-label">#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}</span>
 												</h:commandLink></li>
 											<li><h:commandLink
 													action="#{menuGestorBean.navegaExpedienteGrupo}"

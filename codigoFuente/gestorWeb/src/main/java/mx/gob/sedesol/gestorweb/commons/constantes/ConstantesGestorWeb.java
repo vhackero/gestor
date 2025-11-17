@@ -410,7 +410,8 @@ public final class ConstantesGestorWeb {
 	//ITTIVA 666
 	public static final String NAVEGA_MIS_CONVOCATORIAS="MIS_CONVOCATORIAS";
 	public static final String NAVEGA_MIS_INSCRIPCIONES="MIS_INSCRIPCIONES";
-	public static final String NAVEGA_MIS_DISPERSIONES="MIS_DISPERSIONES";
+        public static final String NAVEGA_MIS_DISPERSIONES="MIS_DISPERSIONES";
+        public static final String NAVEGA_ALTAS_BAJAS_USUARIOS="ALTAS_BAJAS_USUARIOS";
 	
 	public static final String NAVEGA_INSCRIPCION="INSCRIPCION";
 	public static final String NAVEGA_NUEVA_CONVOCATORIAS="NAVEGA_NUEVA_CONVOCATORIAS";
