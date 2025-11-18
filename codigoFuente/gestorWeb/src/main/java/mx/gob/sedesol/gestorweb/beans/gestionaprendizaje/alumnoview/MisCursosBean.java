@@ -2,8 +2,13 @@ package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -122,38 +127,61 @@ public class MisCursosBean extends BaseBean {
 	private List<AmbienteVirtualAprendizajeDTO> avaList;
 	private HistorialAcademicoDTO tiraMaterias;
 	private List<TiraMateriaBajaDTO> tiraMateriasBaja;
+	private final Map<Integer, Integer> avanceOaPorEvento = Collections
+			.synchronizedMap(new HashMap<Integer, Integer>());
+	private final Set<Integer> avanceOaConError = Collections.synchronizedSet(new HashSet<Integer>());
+	private final Set<Integer> avanceOaEnProceso = Collections.synchronizedSet(new HashSet<Integer>());
 
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public void init() {
+		long inicioTotal = System.currentTimeMillis();
+		logger.info("[MisCursosBean] Inicio init");
 		/**
 		 * Obtiene el usuario en sesion
 		 */
 		usuarioEnSesion = this.getUsuarioEnSession();
+		logger.info("[MisCursosBean] Usuario en sesión: " + usuarioEnSesion.getIdPersona());
 
 		/**
 		 * Obtiene el catalogo de los estados del evento de capacitacion
 		 */
 		/** Se carga el catalogo CAT_CLASIFICACION_ARCHIVO_OA **/
+		long tCatEstadosIni = System.currentTimeMillis();
 		catEstadoEventoCapacitacionList = (List<CatalogoComunDTO>) getSession().getServletContext()
 				.getAttribute(ConstantesGestorWeb.CAT_ESTADO_EVENTO_CAPACITACION);
+		logger.info("[MisCursosBean] catEstadoEventoCapacitacionList en "
+				+ (System.currentTimeMillis() - tCatEstadosIni) + " ms");
 
 		/**
 		 * Obtiene los eventos de capacitacion ligados a el usuario en session
 		 * en estatus En ejecucion
 		 */
+		long tEventosEnEjecIni = System.currentTimeMillis();
 		participanteEventosCapacitacionEnEjecucion = grupoParticipanteService
 				.obtenerEventosCapacitacionPorIdParticipante(usuarioEnSesion.getIdPersona(),
 						obtenerEstadoEventoCapacitacionPorNombre(EstadoEventoCapEnum.EN_EJECUCION.getId()).getId());
+		logger.info("[MisCursosBean] participanteEventosCapacitacionEnEjecucion en "
+				+ (System.currentTimeMillis() - tEventosEnEjecIni) + " ms, registros: "
+				+ (participanteEventosCapacitacionEnEjecucion != null ? participanteEventosCapacitacionEnEjecucion.size() : 0));
 		
+		long tEventosEnEjec2Ini = System.currentTimeMillis();
 		participanteEventosCapacitacionEnEjecucion2 = grupoParticipanteService
 				.obtenerEventosCapacitacionPorIdParticipante2(usuarioEnSesion.getIdPersona(),
 						obtenerEstadoEventoCapacitacionPorNombre(EstadoEventoCapEnum.EN_EJECUCION.getId()).getId());
+		logger.info("[MisCursosBean] participanteEventosCapacitacionEnEjecucion2 en "
+				+ (System.currentTimeMillis() - tEventosEnEjec2Ini) + " ms, registros: "
+				+ (participanteEventosCapacitacionEnEjecucion2 != null ? participanteEventosCapacitacionEnEjecucion2.size() : 0));
 		
+		long tTiraBajaIni = System.currentTimeMillis();
 		tiraMateriasBaja = grupoParticipanteService.consultaTiraMateriasBaja(usuarioEnSesion.getIdPersona());
+		logger.info("[MisCursosBean] tiraMateriasBaja en " + (System.currentTimeMillis() - tTiraBajaIni) + " ms, registros: "
+				+ (tiraMateriasBaja != null ? tiraMateriasBaja.size() : 0));
 		
+		long tTiraIni = System.currentTimeMillis();
 		tiraMaterias = grupoParticipanteService.consultaTiraMaterias(usuarioEnSesion.getIdPersona().toString());
+		logger.info("[MisCursosBean] tiraMaterias en " + (System.currentTimeMillis() - tTiraIni) + " ms");
 
 
 
@@ -162,34 +190,50 @@ public class MisCursosBean extends BaseBean {
 		 * Elimina los estatus de evento de capacitacion que no sean en
 		 * solicitud y concluidos
 		 */
+		long tEliminarEstatusIni = System.currentTimeMillis();
 		catEstadoEventoCapacitacionList = this.eliminarEstatusEventoCapacitacion();
+		logger.info("[MisCursosBean] eliminarEstatusEventoCapacitacion en "
+				+ (System.currentTimeMillis() - tEliminarEstatusIni) + " ms");
 
 		/**
 		 * 
 		 * Obtiene Ava por id del Evento Cap
 		 */
 
+		long tAvaIni = System.currentTimeMillis();
 		avaList = obtenerAvasPorEventoCapacitacionas(
 				this.obtenerIdEventoPorRelParticipantes(participanteEventosCapacitacionEnEjecucion));
+		logger.info("[MisCursosBean] avaList en " + (System.currentTimeMillis() - tAvaIni) + " ms, registros: "
+				+ (avaList != null ? avaList.size() : 0));
 
 		/**
 		 * Obtiene los eventos de capacitacion ligados a el usuario en session
 		 * en estatus Concluidos
 		 */
+		long tEventosConcluidosIni = System.currentTimeMillis();
 		List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEstatus = grupoParticipanteService
 				.obtenerEventosCapacitacionPorIdParticipante(usuarioEnSesion.getIdPersona(),
 						obtenerEstadoEventoCapacitacionPorNombre(EstadoEventoCapEnum.CONCLUIDOS.getId()).getId());
+		logger.info("[MisCursosBean] participanteEventosCapacitacionEstatus (concluidos) en "
+				+ (System.currentTimeMillis() - tEventosConcluidosIni) + " ms, registros: "
+				+ (participanteEventosCapacitacionEstatus != null ? participanteEventosCapacitacionEstatus.size() : 0));
 
 		idEstatusSeleccionado = obtenerEstadoEventoCapacitacionPorNombre(EstadoEventoCapEnum.CONCLUIDOS.getId())
 				.getId();
 
+		long tEventosListIni = System.currentTimeMillis();
 		eventoCapacitacionList = obtenerEventosDelGrupoParticipante(participanteEventosCapacitacionEstatus);
+		logger.info("[MisCursosBean] eventoCapacitacionList en " + (System.currentTimeMillis() - tEventosListIni) + " ms, registros: "
+				+ (eventoCapacitacionList != null ? eventoCapacitacionList.size() : 0));
 		/**
 		 * obtener los tipos de encuesta
 		 */
+		long tEncuestaTipoIni = System.currentTimeMillis();
 		encuestaTipoList = encuestaServiceAdapter
 				.getCatalogoServiceByEncuestasEnum(CatEncuestasYEvaluacionesEnum.CAT_ENCUESTAS_TIPO)
 				.findAll(CatEncuestaTipo.class);
+		logger.info("[MisCursosBean] encuestaTipoList en " + (System.currentTimeMillis() - tEncuestaTipoIni) + " ms, registros: "
+				+ (encuestaTipoList != null ? encuestaTipoList.size() : 0));
 		tipoEncuestaSeleccionado = this.obtenerTipoEncuesta(EncuestaTipoEnum.REACCION, encuestaTipoList);
 
 		/**
@@ -205,9 +249,12 @@ public class MisCursosBean extends BaseBean {
 		 * Obtiene las encuestas que estan ligadas a el usuario y al evento de
 		 * capacitacion
 		 */
+		long tEncuestasIni = System.currentTimeMillis();
 		this.obtenerEncuestas(idEventoCapacitacionEnEjecucion, idEventoCapacitacionConcluidos);
+		logger.info("[MisCursosBean] obtenerEncuestas en " + (System.currentTimeMillis() - tEncuestasIni) + " ms");
 
 		esColumnaCompetenciasVisible = Boolean.TRUE;
+		logger.info("[MisCursosBean] fin init, total " + (System.currentTimeMillis() - inicioTotal) + " ms");
 	}
 
 	public Integer obtenerAvanceOa(Integer idEventoCapacitacion) {
@@ -228,11 +275,51 @@ public class MisCursosBean extends BaseBean {
 		try {
 			avanceDeLosOas = cursoWS.obtenerAvanceOAS(ambienteVirtualAprendizajeDTO.getIdCursoLms(), idPersonaLMS);
 		} catch (ErrorWS e) {
-			e.printStackTrace();
-			logger.info("Ocurrio un error");
+			logger.info("Ocurrio un error", e);
 		}
 
 		return avanceDeLosOas;
+	}
+	
+	public void cargarAvanceOaAjax(Integer idEventoCapacitacion) {
+		if (idEventoCapacitacion == null) {
+			return;
+		}
+		if (avanceOaEnProceso.contains(idEventoCapacitacion)) {
+			return;
+		}
+		avanceOaEnProceso.add(idEventoCapacitacion);
+		try {
+			avanceOaConError.remove(idEventoCapacitacion);
+			// Se usa la lógica existente para obtener el avance y se almacena en memoria.
+			Integer avanceDeLosOas = obtenerAvanceOa(idEventoCapacitacion);
+			if (avanceDeLosOas == null) {
+				avanceDeLosOas = 0;
+			}
+			avanceOaPorEvento.put(idEventoCapacitacion, avanceDeLosOas);
+		} catch (Exception e) {
+			logger.error("Ocurrio un error al obtener el avance del evento " + idEventoCapacitacion, e);
+			avanceOaConError.add(idEventoCapacitacion);
+		} finally {
+			avanceOaEnProceso.remove(idEventoCapacitacion);
+		}
+	}
+
+	public Integer obtenerAvanceGuardado(Integer idEventoCapacitacion) {
+		return avanceOaPorEvento.get(idEventoCapacitacion);
+	}
+
+	public boolean esAvanceDisponible(Integer idEventoCapacitacion) {
+		return avanceOaPorEvento.containsKey(idEventoCapacitacion);
+	}
+
+	public boolean esAvancePendiente(Integer idEventoCapacitacion) {
+		return !avanceOaPorEvento.containsKey(idEventoCapacitacion) && !avanceOaConError.contains(idEventoCapacitacion)
+				&& !avanceOaEnProceso.contains(idEventoCapacitacion);
+	}
+
+	public boolean esAvanceConError(Integer idEventoCapacitacion) {
+		return avanceOaConError.contains(idEventoCapacitacion);
 	}
 
 	private Integer obtenerIdPersonaLmsPorIdPersonaGestor(PersonaDTO persona, ParametroWSMoodleDTO parametroWSMoodleDTO,
