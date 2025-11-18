@@ -10,7 +10,10 @@
     <ui:fragment rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR_CON')}">
         <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_CON') ">
             <h:form id="frmConsultaBaja">
-                <p:messages id="msgsConsultaBaja" autoUpdate="true" closable="true" />
+                <p:messages id="msgsConsultaBaja"
+                             autoUpdate="true"
+                             closable="true"
+                             for="@form" />
 
                 <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.consultarBaja')}"
                          styleClass="panel-primary">
