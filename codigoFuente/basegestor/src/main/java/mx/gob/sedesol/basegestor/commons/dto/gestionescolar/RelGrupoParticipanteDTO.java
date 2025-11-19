@@ -43,21 +43,8 @@ public class RelGrupoParticipanteDTO implements Serializable {
 	
 	
 	
-	public RelGrupoParticipanteDTO() { 
-		
+	public RelGrupoParticipanteDTO() {
 		asistencias = new ArrayList<>();
-		for(int x=0; x<30; x++){
-			
-			AsistenciaAuxDTO asistenciaAuxDTO = new AsistenciaAuxDTO();
-			asistenciaAuxDTO.setIdDiaCapacitacion(1);
-			asistenciaAuxDTO.setIdtipoAsistencia(2);
-			
-			asistencias.add(asistenciaAuxDTO);
-			
-		}	
-		
-
-		
 	}
 	
 
@@ -111,6 +98,15 @@ public class RelGrupoParticipanteDTO implements Serializable {
 
   
 	public List<AsistenciaAuxDTO> getAsistencias() {
+		if (asistencias == null || asistencias.isEmpty()) {
+			asistencias = new ArrayList<>();
+			for (int x = 0; x < 30; x++) {
+				AsistenciaAuxDTO asistenciaAuxDTO = new AsistenciaAuxDTO();
+				asistenciaAuxDTO.setIdDiaCapacitacion(1);
+				asistenciaAuxDTO.setIdtipoAsistencia(2);
+				asistencias.add(asistenciaAuxDTO);
+			}
+		}
 		return asistencias;
 	}
 

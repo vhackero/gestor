@@ -124,12 +124,33 @@
 									<h:outputText
 										value="#{sistema.obtenerTexto('gw.ga.label.porcentajeavance')}" />
 								</f:facet>
-								<!-- Progress bar -->
-								<p:progressBar id="progressBarAvanceEvento" ajax="true"
-									labelTemplate="{value}%"
-									rendered="#{not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}"
-									value="#{misCursosBean.obtenerAvanceOa(participante.grupo.evento.idEvento)}"
-									displayOnly="true" style="width:100%" styleClass="pull-right" />
+								<p:outputPanel id="avancePanel"
+									layout="block"
+									rendered="#{not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}">
+									<p:progressBar id="progressBarAvanceEvento" ajax="true"
+										labelTemplate="{value}%"
+										rendered="#{misCursosBean.esAvanceDisponible(participante.grupo.evento.idEvento)}"
+										value="#{misCursosBean.obtenerAvanceGuardado(participante.grupo.evento.idEvento)}"
+										displayOnly="true" style="width:100%" styleClass="pull-right" />
+									<h:panelGroup layout="block" styleClass="text-center"
+										rendered="#{misCursosBean.esAvanceConError(participante.grupo.evento.idEvento)}">
+										<h:outputText value="No se pudo cargar el avance." />
+										<br />
+										<p:commandLink value="Reintentar" process="@this"
+											onclick="cargarAvance_#{participante.grupo.evento.idEvento}(); return false;" />
+									</h:panelGroup>
+									<h:panelGroup layout="block" styleClass="text-center"
+										rendered="#{misCursosBean.esAvancePendiente(participante.grupo.evento.idEvento)}">
+										<i class="fa fa-spinner fa-spin"></i>
+									</h:panelGroup>
+									<p:remoteCommand name="cargarAvance_#{participante.grupo.evento.idEvento}"
+										actionListener="#{misCursosBean.cargarAvanceOaAjax(participante.grupo.evento.idEvento)}"
+										process="@this"
+										update="@parent"
+										global="false" async="true"
+										rendered="#{misCursosBean.esAvancePendiente(participante.grupo.evento.idEvento) or misCursosBean.esAvanceConError(participante.grupo.evento.idEvento)}"
+										autoRun="#{misCursosBean.esAvancePendiente(participante.grupo.evento.idEvento)}" />
+								</p:outputPanel>
 							</p:column>
 							<!-- Encuesta final -->
 							<p:column styleClass="text-center">

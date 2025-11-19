@@ -28,6 +28,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.badges.BadgeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.badges.ClasificacionBadgeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.encuestas.RelEncuestaUsuarioDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.ContenedorLogrosDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
@@ -44,6 +45,7 @@ import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
 import mx.gob.sedesol.basegestor.model.entities.admin.TblPersona;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatEstadoEventoCapacitacion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelGrupoParticipante;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
@@ -611,10 +613,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 		List<RelGrupoParticipante> relGrupoParticipanteList = grupoParticipanteRepo
 				.obtenerEventosCapacitacionPorIdParticipante(idParticipante, idEstatusEc);
 
-		Type objetoDTO = new TypeToken<List<RelGrupoParticipanteDTO>>() {
-		}.getType();
-
-		return modelMapper.map(relGrupoParticipanteList, objetoDTO);
+		return mapearLigero(relGrupoParticipanteList);
 	}
 	
 	public List<RelGrupoParticipanteDTO> obtenerEventosCapacitacionPorIdParticipante2(Long idParticipante,
@@ -623,11 +622,8 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 		List<RelGrupoParticipante> relGrupoParticipanteList = grupoParticipanteRepo
 				.obtenerEventosCapacitacionPorIdParticipante2(idParticipante, idEstatusEc);
 
-		Type objetoDTO = new TypeToken<List<RelGrupoParticipanteDTO>>() {
-		}.getType();
+		List<RelGrupoParticipanteDTO> listaGrupoParticipante1 = mapearLigero(relGrupoParticipanteList);
 
-		List<RelGrupoParticipanteDTO> listaGrupoParticipante1 = modelMapper.map(relGrupoParticipanteList, objetoDTO);
-		
 		List<TiraMateriaDTO> listaGrupoParticipante2 = consultaTiraMaterias2(idParticipante, idEstatusEc);
 
 		for (RelGrupoParticipanteDTO relGrupoParticipanteDTO : listaGrupoParticipante1) {
@@ -643,8 +639,65 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 			}
 
 		}
-		
+
 		return listaGrupoParticipante1;
+	}
+
+	private List<RelGrupoParticipanteDTO> mapearLigero(List<RelGrupoParticipante> entidades) {
+		List<RelGrupoParticipanteDTO> respuesta = new ArrayList<>(entidades.size());
+		for (RelGrupoParticipante entidad : entidades) {
+			RelGrupoParticipanteDTO dto = new RelGrupoParticipanteDTO();
+			if (ObjectUtils.isNotNull(entidad.getId())) {
+				dto.setId(entidad.getId());
+			}
+			dto.setCalifFinal(entidad.getCalifFinal());
+			dto.setCalifTotal(entidad.getCalifTotal());
+			dto.setPorcentajeAsist(entidad.getPorcentajeAsist());
+			dto.setIdPersonaLms(entidad.getIdPersonaLms());
+
+			if (ObjectUtils.isNotNull(entidad.getPersona()) && ObjectUtils.isNotNull(entidad.getPersona().getIdPersona())) {
+				PersonaDTO personaDTO = new PersonaDTO();
+				personaDTO.setIdPersona(entidad.getPersona().getIdPersona());
+				dto.setPersona(personaDTO);
+			}
+
+			TblGrupo grupo = entidad.getGrupo();
+			if (ObjectUtils.isNotNull(grupo)) {
+				GrupoDTO grupoDTO = new GrupoDTO();
+				grupoDTO.setIdGrupo(grupo.getIdGrupo());
+				grupoDTO.setClave(grupo.getClave());
+				grupoDTO.setNombre(grupo.getNombre());
+				grupoDTO.setActaCerrada(grupo.isActaCerrada());
+
+				TblEvento evento = grupo.getEvento();
+				if (ObjectUtils.isNotNull(evento)) {
+					EventoCapacitacionDTO eventoDTO = new EventoCapacitacionDTO();
+					eventoDTO.setIdEvento(evento.getIdEvento());
+					eventoDTO.setNombreEc(evento.getNombreEc());
+					eventoDTO.setFechaInicial(evento.getFechaInicial());
+					eventoDTO.setFechaFinal(evento.getFechaFinal());
+					eventoDTO.setCveEventoCap(evento.getCveEventoCap());
+					eventoDTO.setCatEstadoEventoCapacitacion(convertirCatalogo(evento.getCatEstadoEventoCapacitacion()));
+					grupoDTO.setEvento(eventoDTO);
+				}
+
+				dto.setGrupo(grupoDTO);
+			}
+
+			respuesta.add(dto);
+		}
+		return respuesta;
+	}
+
+	private CatalogoComunDTO convertirCatalogo(CatEstadoEventoCapacitacion cat) {
+		if (ObjectUtils.isNull(cat)) {
+			return null;
+		}
+		CatalogoComunDTO dto = new CatalogoComunDTO();
+		dto.setId(cat.getId());
+		dto.setNombre(cat.getNombre());
+		dto.setDescripcion(cat.getDescripcion());
+		return dto;
 	}
 
 	public List<RelGrupoParticipanteDTO> obtenEvtsEnLineayMixtosPorIdParticipante(Long idParticipante,
@@ -927,7 +980,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 	 * Compara la calificacion final del alumno con la calificacion min
 	 * aprobatoria del evento
 	 * 
-	 * @param rgp
+	 * @param listrgp
 	 * @return
 	 */
 	private List<RelGrupoParticipanteDTO> filtrarAlumnosPorCalificacionAprobatoria(

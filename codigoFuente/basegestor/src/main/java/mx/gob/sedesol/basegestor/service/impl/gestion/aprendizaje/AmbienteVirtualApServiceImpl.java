@@ -405,16 +405,66 @@ public class AmbienteVirtualApServiceImpl extends ComunValidacionService<Ambient
 		List<TblAmbienteVirtualAprendizaje> tblAmbienteVirtualAprendizajeList = ambienteVirtualApRepo
 				.obtenerAVAsPorIdEventos(idEventos);
 
-		List<AmbienteVirtualAprendizajeDTO> resList = new ArrayList<>();
-		for(TblAmbienteVirtualAprendizaje ava : tblAmbienteVirtualAprendizajeList){
+		List<AmbienteVirtualAprendizajeDTO> resList = new ArrayList<>(tblAmbienteVirtualAprendizajeList.size());
+		for (TblAmbienteVirtualAprendizaje ava : tblAmbienteVirtualAprendizajeList) {
 			try {
-				resList.add(ambienteVirtualApMapper.map(ava, AmbienteVirtualAprendizajeDTO.class));
-			}catch(Exception ex){
-				logger.error("Ocurrio un error en el ava con id "+ava.getId());
+				resList.add(mapearLigero(ava));
+			} catch (Exception ex) {
+				logger.error("Ocurrio un error en el ava con id " + ava.getId(), ex);
 			}
 		}
-		
+
 		return resList;
+	}
+	
+	private AmbienteVirtualAprendizajeDTO mapearLigero(TblAmbienteVirtualAprendizaje ava) {
+		AmbienteVirtualAprendizajeDTO dto = new AmbienteVirtualAprendizajeDTO();
+		dto.setId(ava.getId());
+		dto.setIdCursoLms(ava.getIdCursoLms());
+		dto.setUrlLms(ava.getUrlLms());
+		dto.setPorcentajeAvance(ava.getPorcentajeAvance());
+		dto.setEsAvaArchivado(ava.getEsAvaArchivado());
+		dto.setValidacionAva(ava.getValidacionAva());
+		dto.setAutonomo(ava.getAutonomo());
+
+		if (ObjectUtils.isNotNull(ava.getCatEstadoAva())) {
+			CatalogoComunDTO estado = new CatalogoComunDTO();
+			estado.setId(ava.getCatEstadoAva().getId());
+			estado.setNombre(ava.getCatEstadoAva().getNombre());
+			dto.setCatEstadoAva(estado);
+		}
+
+		if (ObjectUtils.isNotNull(ava.getEventoCapacitacion())) {
+			EventoCapacitacionDTO evento = new EventoCapacitacionDTO();
+			evento.setIdEvento(ava.getEventoCapacitacion().getIdEvento());
+			evento.setNombreEc(ava.getEventoCapacitacion().getNombreEc());
+			evento.setFechaInicial(ava.getEventoCapacitacion().getFechaInicial());
+			evento.setFechaFinal(ava.getEventoCapacitacion().getFechaFinal());
+			evento.setCveEventoCap(ava.getEventoCapacitacion().getCveEventoCap());
+			dto.setEventoCapacitacion(evento);
+		}
+
+		if (ObjectUtils.isNotNull(ava.getPlataformaMoodle())) {
+			ParametroWSMoodleDTO plataforma = new ParametroWSMoodleDTO();
+			plataforma.setIdParametroWSMoodle(ava.getPlataformaMoodle().getIdParametroWSMoodle());
+			plataforma.setHost(ava.getPlataformaMoodle().getHost());
+			plataforma.setPath(ava.getPlataformaMoodle().getPath());
+			plataforma.setService(ava.getPlataformaMoodle().getService());
+			plataforma.setServer(ava.getPlataformaMoodle().getServer());
+			plataforma.setUsername(ava.getPlataformaMoodle().getUsername());
+			plataforma.setPassword(ava.getPlataformaMoodle().getPassword());
+			plataforma.setOuth(ava.getPlataformaMoodle().getOuth());
+			plataforma.setNombre(ava.getPlataformaMoodle().getNombre());
+			plataforma.setDescripcion(ava.getPlataformaMoodle().getDescripcion());
+			plataforma.setActivo(ava.getPlataformaMoodle().getActivo());
+			plataforma.setFechaRegistro(ava.getPlataformaMoodle().getFechaRegistro());
+			plataforma.setFechaActualizacion(ava.getPlataformaMoodle().getFechaActualizacion());
+			plataforma.setUsuarioModifico(ava.getPlataformaMoodle().getUsuarioModifico());
+			plataforma.setOrden(ava.getPlataformaMoodle().getOrden());
+			dto.setPlataformaMoodle(plataforma);
+		}
+
+		return dto;
 	}
 
 	public String asignaColorSemaro(AmbienteVirtualAprendizajeDTO ava) {
@@ -660,8 +710,8 @@ public class AmbienteVirtualApServiceImpl extends ComunValidacionService<Ambient
 	}
 
 	@Transactional(rollbackFor = Exception.class)
-	private ResultadoDTO<AmbienteVirtualAprendizajeDTO> guardaInformacionRespaldoAva(TblRespaldosAva tblRespaldosAva,
-			AmbienteVirtualAprendizajeDTO ava, Long usuarioModifico) {
+    public ResultadoDTO<AmbienteVirtualAprendizajeDTO> guardaInformacionRespaldoAva(TblRespaldosAva tblRespaldosAva,
+                                                                                    AmbienteVirtualAprendizajeDTO ava, Long usuarioModifico) {
 		ResultadoDTO<AmbienteVirtualAprendizajeDTO> rs = new ResultadoDTO<AmbienteVirtualAprendizajeDTO>();
 
 		try {
