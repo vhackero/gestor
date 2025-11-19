@@ -74,7 +74,7 @@
 											readonlyInput="true" navigator="true"
 											value="#{convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
 											showOn="button" required="true"
-                							requiredMessage="La fecha de cierre es obligatoria.">
+                							requiredMessage="La fecha de apertura es obligatoria.">
 									<p:ajax event="dateSelect" process="@this"
 											update="fc_fechaFinalAlta fc_fechaFinal2"
 											listener="#{convocatoriasBean.validarFechasAlta()}" />

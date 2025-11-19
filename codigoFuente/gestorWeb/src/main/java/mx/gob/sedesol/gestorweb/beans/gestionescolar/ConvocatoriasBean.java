@@ -421,20 +421,25 @@ public class ConvocatoriasBean extends BaseBean {
 		this.estatusLista2 = estatusLista2;
 	}
 
-	public void eliminar() throws Exception {
-		
+	public void eliminar() {
+
 		logger.info(" INICIA ELIMINAR  ");
-		
-		
-		if(esFechaActual(elminarConvo.getFecha_Apertura().toString())) {
-			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion7').show()");
-		}else {
-			convocatoriaService.eliminarConvocatorias(elminarConvo);		
-			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion3').show()");			
+
+		try {
+			if (esFechaActual(elminarConvo.getFecha_Apertura().toString())) {
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion7').show()");
+			} else {
+				convocatoriaService.eliminarConvocatorias(elminarConvo);
+				consultarFiltros();
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion3').show()");
+			}
+		} catch (Exception e) {
+			logger.error("Error al eliminar la convocatoria", e);
+			agregarMsgError("Error", "Ocurrió un problema al eliminar la convocatoria.");
 		}
-		
+
 		logger.info(" TERMINA ELIMINAR  ");
-		
+
 	}
 	
 	public boolean esFechaActual(String fechaStr) {

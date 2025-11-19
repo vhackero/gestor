@@ -70,7 +70,7 @@
 											readonlyInput="true" navigator="true"
 											value="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura}"
 											showOn="button"  required="true"
-                							requiredMessage="La fecha de cierre es obligatoria.">
+                							requiredMessage="La fecha de apertura es obligatoria.">
 									<p:ajax event="dateSelect" process="@this"
 											update="fc_fechaFinal"
 											listener="#{convocatoriasBean.validarFechas()}" />
@@ -296,7 +296,7 @@
 											readonlyInput="true" navigator="true"
 											value="#{convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
 											showOn="button" required="true"
-                							requiredMessage="La fecha de cierre es obligatoria.">
+                							requiredMessage="La fecha de apertura es obligatoria.">
 									<p:ajax event="dateSelect" process="@this"
 											update="fc_fechaFinalAlta"
 											listener="#{convocatoriasBean.validarFechasAlta2()}" />
@@ -339,7 +339,7 @@
 						<f:selectItems
 							value="#{convocatoriasBean.convocatoriaParamNueva.listaPlanPrograma}"
 							var="modalidad"
-							itemLabel="#{modalidad.nombreivelEnsenanza} > #{modalidad.nombrePlan} > #{modalidad.nombrePrograma}"
+							itemLabel="#{modalidad.nombreivelEnsenanza} > #{modalidad.nombrePlan} > #{modalidad.nombrePrograma} > #{modalidad.nombreBloque}"
 							itemValue="#{modalidad}" />
 
 					</p:selectCheckboxMenu>
