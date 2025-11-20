@@ -305,12 +305,17 @@ public class NotificacionServiceImpl extends ComunValidacionService<Notificacion
      * @return
      */
     private String obtenerNombreRemitente(long idPersona, Map<Long, PersonaDTO> mapa) {
-        PersonaDTO persona = mapa.get(idPersona);
-        if (ObjectUtils.isNull(persona)) {
-            return obtenerNombreRemitente(idPersona);
-        } else {
-            return persona.getNombreCompleto();
+        PersonaDTO persona = null;
+        if (ObjectUtils.isNotNull(mapa)) {
+            persona = mapa.get(idPersona);
         }
+        if (ObjectUtils.isNull(persona)) {
+            persona = personaService.buscarPorId(idPersona);
+            if (ObjectUtils.isNotNull(persona) && ObjectUtils.isNotNull(mapa)) {
+                mapa.put(idPersona, persona);
+            }
+        }
+        return ObjectUtils.isNotNull(persona) ? persona.getNombreCompleto() : "";
     }
 
     /**
