@@ -14,17 +14,17 @@ public interface BajaUsuarioService {
 
     Optional<Long> buscarPersonaPorMatricula(String matricula);
 
-    List<CatalogoOpcionDTO> obtenerPlanesPorPersona(Long idPersona);
+    List<CatalogoOpcionDTO> obtenerPlanes();
 
-    List<CatalogoOpcionDTO> obtenerSemestres(Long idPersona, Integer idPlan);
+    List<CatalogoOpcionDTO> obtenerSemestres(Integer idPlan);
 
-    List<CatalogoOpcionDTO> obtenerBloques(Long idPersona, Integer idPlan, Integer semestre);
+    List<CatalogoOpcionDTO> obtenerBloques(Integer idSemestre);
 
-    List<CatalogoOpcionDTO> obtenerProgramas(Long idPersona, Integer idPlan, Integer semestre, String bloque);
+    List<CatalogoOpcionDTO> obtenerProgramas(Integer idEjeCapacitacion);
 
-    List<CatalogoOpcionDTO> obtenerPeriodos(Integer idPlan);
+    List<CatalogoOpcionDTO> obtenerPeriodos();
 
-    List<CatalogoOpcionDTO> obtenerEventos(Integer idPlan, Integer idPrograma);
+    List<CatalogoOpcionDTO> obtenerEventos(String nombrePeriodo, Integer idPrograma);
 
     BajaDetalleDTO obtenerDetalleBaja(Long idPersona, Integer idPlan, Integer idPrograma, Integer idEvento);
 

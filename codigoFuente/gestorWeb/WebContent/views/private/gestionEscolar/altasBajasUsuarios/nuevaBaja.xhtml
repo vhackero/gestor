@@ -93,12 +93,13 @@
                                              value="#{nuevaBajaBean.nuevaBaja.bloque}"
                                              styleClass="form-control"
                                              style="width: 100%;"
-                                             disabled="#{empty nuevaBajaBean.bloques}">
+                                             disabled="#{empty nuevaBajaBean.bloques}"
+                                             converter="javax.faces.Integer">
                                 <f:selectItem itemLabel="Seleccione" itemValue="" />
                                 <f:selectItems value="#{nuevaBajaBean.bloques}"
                                                var="bloque"
                                                itemLabel="#{bloque.descripcion}"
-                                               itemValue="#{bloque.descripcion}" />
+                                               itemValue="#{bloque.id != null ? bloque.id.intValue() : null}" />
                                 <p:ajax event="change"
                                         listener="#{nuevaBajaBean.onBloqueChange}"
                                         update="programa evento" />
@@ -140,6 +141,9 @@
                                                var="per"
                                                itemLabel="#{per.descripcion}"
                                                itemValue="#{per.id != null ? per.id.intValue() : null}" />
+                                <p:ajax event="change"
+                                        listener="#{nuevaBajaBean.onPeriodoChange}"
+                                        update="evento" />
                             </p:selectOneMenu>
                         </div>
                         <div class="col-md-3 form-group">

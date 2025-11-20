@@ -32,33 +32,33 @@ public class BajaUsuarioServiceImpl implements BajaUsuarioService {
     }
 
     @Override
-    public List<CatalogoOpcionDTO> obtenerPlanesPorPersona(Long idPersona) {
-        return bajaUsuarioRepository.obtenerPlanesPorPersona(idPersona);
+    public List<CatalogoOpcionDTO> obtenerPlanes() {
+        return bajaUsuarioRepository.obtenerPlanes();
     }
 
     @Override
-    public List<CatalogoOpcionDTO> obtenerSemestres(Long idPersona, Integer idPlan) {
-        return bajaUsuarioRepository.obtenerSemestres(idPersona, idPlan);
+    public List<CatalogoOpcionDTO> obtenerSemestres(Integer idPlan) {
+        return bajaUsuarioRepository.obtenerSemestres(idPlan);
     }
 
     @Override
-    public List<CatalogoOpcionDTO> obtenerBloques(Long idPersona, Integer idPlan, Integer semestre) {
-        return bajaUsuarioRepository.obtenerBloques(idPersona, idPlan, semestre);
+    public List<CatalogoOpcionDTO> obtenerBloques(Integer idSemestre) {
+        return bajaUsuarioRepository.obtenerBloques(idSemestre);
     }
 
     @Override
-    public List<CatalogoOpcionDTO> obtenerProgramas(Long idPersona, Integer idPlan, Integer semestre, String bloque) {
-        return bajaUsuarioRepository.obtenerProgramas(idPersona, idPlan, semestre, bloque);
+    public List<CatalogoOpcionDTO> obtenerProgramas(Integer idEjeCapacitacion) {
+        return bajaUsuarioRepository.obtenerProgramas(idEjeCapacitacion);
     }
 
     @Override
-    public List<CatalogoOpcionDTO> obtenerPeriodos(Integer idPlan) {
-        return bajaUsuarioRepository.obtenerPeriodos(idPlan);
+    public List<CatalogoOpcionDTO> obtenerPeriodos() {
+        return bajaUsuarioRepository.obtenerPeriodos();
     }
 
     @Override
-    public List<CatalogoOpcionDTO> obtenerEventos(Integer idPlan, Integer idPrograma) {
-        return bajaUsuarioRepository.obtenerEventos(idPlan, idPrograma);
+    public List<CatalogoOpcionDTO> obtenerEventos(String nombrePeriodo, Integer idPrograma) {
+        return bajaUsuarioRepository.obtenerEventos(nombrePeriodo, idPrograma);
     }
 
     @Override

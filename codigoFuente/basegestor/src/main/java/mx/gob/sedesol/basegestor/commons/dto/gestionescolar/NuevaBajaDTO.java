@@ -14,7 +14,7 @@ public class NuevaBajaDTO implements Serializable {
     private Long idTipoBaja;
     private Integer idPlan;
     private Integer semestre;
-    private String bloque;
+    private Integer bloque;
     private Integer idPrograma;
     private Integer idPeriodo;
     private Integer idEvento;
@@ -65,11 +65,11 @@ public class NuevaBajaDTO implements Serializable {
         this.semestre = semestre;
     }
 
-    public String getBloque() {
+    public Integer getBloque() {
         return bloque;
     }
 
-    public void setBloque(String bloque) {
+    public void setBloque(Integer bloque) {
         this.bloque = bloque;
     }
 

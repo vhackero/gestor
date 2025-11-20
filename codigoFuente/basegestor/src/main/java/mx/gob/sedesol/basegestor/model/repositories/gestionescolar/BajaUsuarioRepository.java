@@ -48,72 +48,92 @@ public class BajaUsuarioRepository implements IBajaUsuarioRepository {
     }
 
     @Override
-    public List<CatalogoOpcionDTO> obtenerPlanesPorPersona(Long idPersona) {
-        String consulta = "SELECT DISTINCT ti.idplan, tp.nombre FROM tbl_inscripciones ti "
-                + " INNER JOIN tbl_planes tp ON tp.id_plan = ti.idplan"
-                + " WHERE ti.IdpersonaSIGIE = :idPersona ORDER BY tp.nombre";
-        Query query = entityManager.createNativeQuery(consulta);
-        query.setParameter("idPersona", idPersona);
-        return mapearCatalogos(query.getResultList());
+    public List<CatalogoOpcionDTO> obtenerPlanes() {
+        String consulta = "SELECT tmc.id, tmc.id_plan, tmc.nombre"
+                + " FROM tbl_malla_curricular tmc"
+                + " WHERE tmc.activo = 1 AND tmc.id_plan IS NOT NULL";
+        List<Object[]> resultado = entityManager.createNativeQuery(consulta).getResultList();
+        List<CatalogoOpcionDTO> planes = new ArrayList<>();
+        if (resultado != null) {
+            for (Object[] fila : resultado) {
+                CatalogoOpcionDTO dto = new CatalogoOpcionDTO();
+                dto.setId(fila[1] != null ? ((Number) fila[1]).longValue() : null);
+                dto.setDescripcion(fila[2] != null ? fila[2].toString() : "");
+                planes.add(dto);
+            }
+        }
+        return planes;
     }
 
     @Override
-    public List<CatalogoOpcionDTO> obtenerSemestres(Long idPersona, Integer idPlan) {
-        String consulta = "SELECT DISTINCT ti.semestre, CONCAT('Semestre ', ti.semestre)"
-                + " FROM tbl_inscripciones ti WHERE ti.IdpersonaSIGIE = :idPersona AND ti.idplan = :idPlan ORDER BY ti.semestre";
-        Query query = entityManager.createNativeQuery(consulta);
-        query.setParameter("idPersona", idPersona);
-        query.setParameter("idPlan", idPlan);
-        return mapearCatalogos(query.getResultList());
-    }
-
-    @Override
-    public List<CatalogoOpcionDTO> obtenerBloques(Long idPersona, Integer idPlan, Integer semestre) {
-        String consulta = "SELECT DISTINCT ti.bloque, ti.bloque FROM tbl_inscripciones ti"
-                + " WHERE ti.IdpersonaSIGIE = :idPersona AND ti.idplan = :idPlan"
-                + " AND (:semestre IS NULL OR ti.semestre = :semestre) ORDER BY ti.bloque";
-        Query query = entityManager.createNativeQuery(consulta);
-        query.setParameter("idPersona", idPersona);
-        query.setParameter("idPlan", idPlan);
-        query.setParameter("semestre", semestre);
-        return mapearCatalogos(query.getResultList());
-    }
-
-    @Override
-    public List<CatalogoOpcionDTO> obtenerProgramas(Long idPersona, Integer idPlan, Integer semestre, String bloque) {
-        String consulta = "SELECT DISTINCT ti.idprograma, ti.programa FROM tbl_inscripciones ti"
-                + " WHERE ti.IdpersonaSIGIE = :idPersona AND ti.idplan = :idPlan"
-                + " AND (:semestre IS NULL OR ti.semestre = :semestre)"
-                + " AND (:bloque IS NULL OR ti.bloque = :bloque) ORDER BY ti.programa";
-        Query query = entityManager.createNativeQuery(consulta);
-        query.setParameter("idPersona", idPersona);
-        query.setParameter("idPlan", idPlan);
-        query.setParameter("semestre", semestre);
-        query.setParameter("bloque", bloque);
-        return mapearCatalogos(query.getResultList());
-    }
-
-    @Override
-    public List<CatalogoOpcionDTO> obtenerPeriodos(Integer idPlan) {
-        String consulta = "SELECT cp.id_periodo, cp.nombre FROM tbl_planes tp"
-                + " INNER JOIN cat_periodos cp ON cp.id_periodo = tp.id_periodo"
-                + " WHERE tp.id_plan = :idPlan AND cp.activo = 1";
+    public List<CatalogoOpcionDTO> obtenerSemestres(Integer idPlan) {
+        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_plan = :idPlan";
         Query query = entityManager.createNativeQuery(consulta);
         query.setParameter("idPlan", idPlan);
         return mapearCatalogos(query.getResultList());
     }
 
     @Override
-    public List<CatalogoOpcionDTO> obtenerEventos(Integer idPlan, Integer idPrograma) {
-        String consulta = "SELECT DISTINCT ti.idevento, COALESCE(te.nombre_ec, CONCAT('Evento ', ti.idevento))"
-                + " FROM tbl_inscripciones ti"
-                + " LEFT JOIN tbl_eventos te ON te.id_evento = ti.idevento"
-                + " WHERE ti.idplan = :idPlan AND (:idPrograma IS NULL OR ti.idprograma = :idPrograma)"
-                + " ORDER BY 2";
+    public List<CatalogoOpcionDTO> obtenerBloques(Integer idSemestre) {
+        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_padre = :idSemestre";
         Query query = entityManager.createNativeQuery(consulta);
-        query.setParameter("idPlan", idPlan);
+        query.setParameter("idSemestre", idSemestre);
+        return mapearCatalogos(query.getResultList());
+    }
+
+    @Override
+    public List<CatalogoOpcionDTO> obtenerProgramas(Integer idEjeCapacitacion) {
+        String consulta = "SELECT * FROM tbl_ficha_descriptiva_programa tfdp WHERE tfdp.id_eje_capacitacion = :idEje";
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idEje", idEjeCapacitacion);
+        List<Object[]> resultado = query.getResultList();
+        List<CatalogoOpcionDTO> programas = new ArrayList<>();
+        if (resultado != null) {
+            for (Object[] fila : resultado) {
+                CatalogoOpcionDTO dto = new CatalogoOpcionDTO();
+                dto.setId(fila[0] != null ? ((Number) fila[0]).longValue() : null);
+                dto.setDescripcion(fila[2] != null ? fila[2].toString() : "");
+                programas.add(dto);
+            }
+        }
+        return programas;
+    }
+
+    @Override
+    public List<CatalogoOpcionDTO> obtenerPeriodos() {
+        String consulta = "SELECT tpi.nombre_periodo FROM tbl_periodos_inscripcion tpi";
+        List<?> resultado = entityManager.createNativeQuery(consulta).getResultList();
+        List<CatalogoOpcionDTO> periodos = new ArrayList<>();
+        if (resultado != null) {
+            long consecutivo = 1L;
+            for (Object fila : resultado) {
+                CatalogoOpcionDTO dto = new CatalogoOpcionDTO();
+                dto.setId(consecutivo++);
+                dto.setDescripcion(fila != null ? fila.toString() : "");
+                periodos.add(dto);
+            }
+        }
+        return periodos;
+    }
+
+    @Override
+    public List<CatalogoOpcionDTO> obtenerEventos(String nombrePeriodo, Integer idPrograma) {
+        String consulta = "SELECT * FROM tbl_eventos te WHERE te.cve_evento_cap LIKE CONCAT('%', :nombrePeriodo, '%')"
+                + " AND te.id_programa = :idPrograma";
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("nombrePeriodo", nombrePeriodo);
         query.setParameter("idPrograma", idPrograma);
-        return mapearCatalogos(query.getResultList());
+        List<Object[]> resultado = query.getResultList();
+        List<CatalogoOpcionDTO> eventos = new ArrayList<>();
+        if (resultado != null) {
+            for (Object[] fila : resultado) {
+                CatalogoOpcionDTO dto = new CatalogoOpcionDTO();
+                dto.setId(fila[0] != null ? ((Number) fila[0]).longValue() : null);
+                dto.setDescripcion(fila[3] != null ? fila[3].toString() : (fila[4] != null ? fila[4].toString() : ""));
+                eventos.add(dto);
+            }
+        }
+        return eventos;
     }
 
     @Override

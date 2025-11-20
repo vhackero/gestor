@@ -75,7 +75,7 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         }
 
         nuevaBaja.setIdPersona(persona.get());
-        planes = bajaUsuarioService.obtenerPlanesPorPersona(persona.get());
+        planes = bajaUsuarioService.obtenerPlanes();
         usuarioValidado = true;
 
         if (planes.isEmpty()) {
@@ -95,11 +95,9 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         nuevaBaja.setIdEvento(null);
         nuevaBaja.setIdPeriodo(null);
 
-        if (nuevaBaja.getIdPlan() != null && nuevaBaja.getIdPersona() != null) {
-            semestres = bajaUsuarioService.obtenerSemestres(nuevaBaja.getIdPersona(), nuevaBaja.getIdPlan());
-            periodos = bajaUsuarioService.obtenerPeriodos(nuevaBaja.getIdPlan());
-            programas = bajaUsuarioService.obtenerProgramas(nuevaBaja.getIdPersona(), nuevaBaja.getIdPlan(), null, null);
-            eventos = bajaUsuarioService.obtenerEventos(nuevaBaja.getIdPlan(), null);
+        if (nuevaBaja.getIdPlan() != null) {
+            semestres = bajaUsuarioService.obtenerSemestres(nuevaBaja.getIdPlan());
+            periodos = bajaUsuarioService.obtenerPeriodos();
         }
     }
 
@@ -111,9 +109,9 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         nuevaBaja.setIdPrograma(null);
         nuevaBaja.setIdEvento(null);
 
-        if (camposPlanCompletos()) {
-            bloques = bajaUsuarioService.obtenerBloques(nuevaBaja.getIdPersona(), nuevaBaja.getIdPlan(), nuevaBaja.getSemestre());
-            programas = bajaUsuarioService.obtenerProgramas(nuevaBaja.getIdPersona(), nuevaBaja.getIdPlan(), nuevaBaja.getSemestre(), null);
+        if (nuevaBaja.getSemestre() != null) {
+            bloques = bajaUsuarioService.obtenerBloques(nuevaBaja.getSemestre());
+            programas = bajaUsuarioService.obtenerProgramas(nuevaBaja.getSemestre());
         }
     }
 
@@ -122,16 +120,27 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         eventos.clear();
         nuevaBaja.setIdPrograma(null);
         nuevaBaja.setIdEvento(null);
-        if (camposPlanCompletos()) {
-            programas = bajaUsuarioService.obtenerProgramas(nuevaBaja.getIdPersona(), nuevaBaja.getIdPlan(), nuevaBaja.getSemestre(), nuevaBaja.getBloque());
+        if (nuevaBaja.getBloque() != null) {
+            programas = bajaUsuarioService.obtenerProgramas(nuevaBaja.getBloque());
         }
     }
 
     public void onProgramaChange() {
         eventos.clear();
         nuevaBaja.setIdEvento(null);
-        if (nuevaBaja.getIdPlan() != null && nuevaBaja.getIdPrograma() != null) {
-            eventos = bajaUsuarioService.obtenerEventos(nuevaBaja.getIdPlan(), nuevaBaja.getIdPrograma());
+        if (nuevaBaja.getIdPrograma() != null && nuevaBaja.getIdPeriodo() != null) {
+            String nombrePeriodo = obtenerDescripcionPorId(periodos, nuevaBaja.getIdPeriodo().longValue());
+            eventos = bajaUsuarioService.obtenerEventos(nombrePeriodo, nuevaBaja.getIdPrograma());
+        }
+    }
+
+    public void onPeriodoChange() {
+        eventos.clear();
+        nuevaBaja.setIdEvento(null);
+
+        if (nuevaBaja.getIdPrograma() != null && nuevaBaja.getIdPeriodo() != null) {
+            String nombrePeriodo = obtenerDescripcionPorId(periodos, nuevaBaja.getIdPeriodo().longValue());
+            eventos = bajaUsuarioService.obtenerEventos(nombrePeriodo, nuevaBaja.getIdPrograma());
         }
     }
 
@@ -191,8 +200,15 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
                 .anyMatch(nombre -> StringUtils.containsIgnoreCase(nombre, "parcial") || StringUtils.containsIgnoreCase(nombre, "temporal"));
     }
 
-    private boolean camposPlanCompletos() {
-        return nuevaBaja.getIdPlan() != null && nuevaBaja.getIdPersona() != null && nuevaBaja.getSemestre() != null;
+    private String obtenerDescripcionPorId(List<CatalogoOpcionDTO> opciones, Long idSeleccionado) {
+        if (opciones == null || idSeleccionado == null) {
+            return "";
+        }
+        return opciones.stream()
+                .filter(op -> op.getId() != null && op.getId().equals(idSeleccionado))
+                .map(CatalogoOpcionDTO::getDescripcion)
+                .findFirst()
+                .orElse("");
     }
 
     private void limpiarListasDependientes() {
