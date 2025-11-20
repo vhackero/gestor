@@ -18,16 +18,185 @@
                 <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaBaja')}"
                          styleClass="panel-primary">
                     <div class="row">
-                        <div class="col-md-12">
-                            <h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.mensaje.pendiente')}" />
+                        <div class="col-md-4">
+                            <p:outputLabel for="matricula" value="Matrícula/Usuario*" />
+                            <p:inputText id="matricula"
+                                         value="#{nuevaBajaBean.nuevaBaja.matricula}"
+                                         styleClass="form-control" />
+                        </div>
+                        <div class="col-md-2" style="margin-top: 22px;">
+                            <p:commandButton value="Buscar"
+                                             actionListener="#{nuevaBajaBean.buscarPorMatricula}"
+                                             process="matricula"
+                                             update="frmNuevaBaja"
+                                             icon="fa fa-search"
+                                             styleClass="btn btn-primary" />
+                        </div>
+                        <div class="col-md-6">
+                            <p:outputLabel for="tipoBaja" value="Tipo de baja*" />
+                            <p:selectOneMenu id="tipoBaja"
+                                             value="#{nuevaBajaBean.nuevaBaja.idTipoBaja}"
+                                             styleClass="form-control"
+                                             panelStyleClass="form-control">
+                                <f:selectItem itemLabel="Seleccione" itemValue="" />
+                                <f:selectItems value="#{nuevaBajaBean.tiposBaja}"
+                                               var="tipo"
+                                               itemLabel="#{tipo.descripcion}"
+                                               itemValue="#{tipo.id}" />
+                            </p:selectOneMenu>
                         </div>
                     </div>
+
                     <div class="row" style="margin-top: 15px;">
+                        <div class="col-md-6">
+                            <p:outputLabel for="plan" value="Plan*" />
+                            <p:selectOneMenu id="plan"
+                                             value="#{nuevaBajaBean.nuevaBaja.idPlan}"
+                                             styleClass="form-control"
+                                             panelStyleClass="form-control"
+                                             disabled="#{empty nuevaBajaBean.planes}"
+                                             required="true"
+                                             converter="javax.faces.Integer">
+                                <f:selectItem itemLabel="Seleccione" itemValue="" />
+                                <f:selectItems value="#{nuevaBajaBean.planes}"
+                                               var="plan"
+                                               itemLabel="#{plan.descripcion}"
+                                               itemValue="#{plan.id != null ? plan.id.intValue() : null}" />
+                                <p:ajax event="change"
+                                        listener="#{nuevaBajaBean.onPlanChange}"
+                                        update="semestre bloque programa periodo evento" />
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="col-md-3">
+                            <p:outputLabel for="semestre" value="Semestre" />
+                            <p:selectOneMenu id="semestre"
+                                             value="#{nuevaBajaBean.nuevaBaja.semestre}"
+                                             styleClass="form-control"
+                                             panelStyleClass="form-control"
+                                             disabled="#{empty nuevaBajaBean.semestres}"
+                                             required="#{nuevaBajaBean.bajaParcialOTemporal}"
+                                             converter="javax.faces.Integer">
+                                <f:selectItem itemLabel="Seleccione" itemValue="" />
+                                <f:selectItems value="#{nuevaBajaBean.semestres}"
+                                               var="sem"
+                                               itemLabel="#{sem.descripcion}"
+                                               itemValue="#{sem.id != null ? sem.id.intValue() : null}" />
+                                <p:ajax event="change"
+                                        listener="#{nuevaBajaBean.onSemestreChange}"
+                                        update="bloque programa evento" />
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="col-md-3">
+                            <p:outputLabel for="bloque" value="Bloque" />
+                            <p:selectOneMenu id="bloque"
+                                             value="#{nuevaBajaBean.nuevaBaja.bloque}"
+                                             styleClass="form-control"
+                                             panelStyleClass="form-control"
+                                             disabled="#{empty nuevaBajaBean.bloques}">
+                                <f:selectItem itemLabel="Seleccione" itemValue="" />
+                                <f:selectItems value="#{nuevaBajaBean.bloques}"
+                                               var="bloque"
+                                               itemLabel="#{bloque.descripcion}"
+                                               itemValue="#{bloque.descripcion}" />
+                                <p:ajax event="change"
+                                        listener="#{nuevaBajaBean.onBloqueChange}"
+                                        update="programa evento" />
+                            </p:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top: 15px;">
+                        <div class="col-md-6">
+                            <p:outputLabel for="programa" value="Asignatura/Programa" />
+                            <p:selectOneMenu id="programa"
+                                             value="#{nuevaBajaBean.nuevaBaja.idPrograma}"
+                                             styleClass="form-control"
+                                             panelStyleClass="form-control"
+                                             disabled="#{empty nuevaBajaBean.programas}"
+                                             required="#{nuevaBajaBean.bajaParcialOTemporal}"
+                                             converter="javax.faces.Integer">
+                                <f:selectItem itemLabel="Seleccione" itemValue="" />
+                                <f:selectItems value="#{nuevaBajaBean.programas}"
+                                               var="prog"
+                                               itemLabel="#{prog.descripcion}"
+                                               itemValue="#{prog.id != null ? prog.id.intValue() : null}" />
+                                <p:ajax event="change"
+                                        listener="#{nuevaBajaBean.onProgramaChange}"
+                                        update="evento" />
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="col-md-3">
+                            <p:outputLabel for="periodo" value="Periodo" />
+                            <p:selectOneMenu id="periodo"
+                                             value="#{nuevaBajaBean.nuevaBaja.idPeriodo}"
+                                             styleClass="form-control"
+                                             panelStyleClass="form-control"
+                                             disabled="#{empty nuevaBajaBean.periodos}"
+                                             required="#{nuevaBajaBean.bajaParcialOTemporal}"
+                                             converter="javax.faces.Integer">
+                                <f:selectItem itemLabel="Seleccione" itemValue="" />
+                                <f:selectItems value="#{nuevaBajaBean.periodos}"
+                                               var="per"
+                                               itemLabel="#{per.descripcion}"
+                                               itemValue="#{per.id != null ? per.id.intValue() : null}" />
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="col-md-3">
+                            <p:outputLabel for="evento" value="Evento" />
+                            <p:selectOneMenu id="evento"
+                                             value="#{nuevaBajaBean.nuevaBaja.idEvento}"
+                                             styleClass="form-control"
+                                             panelStyleClass="form-control"
+                                             disabled="#{empty nuevaBajaBean.eventos}"
+                                             converter="javax.faces.Integer">
+                                <f:selectItem itemLabel="Seleccione" itemValue="" />
+                                <f:selectItems value="#{nuevaBajaBean.eventos}"
+                                               var="evt"
+                                               itemLabel="#{evt.descripcion}"
+                                               itemValue="#{evt.id != null ? evt.id.intValue() : null}" />
+                            </p:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top: 15px;">
+                        <div class="col-md-12">
+                            <p:outputLabel for="motivo" value="Motivo*" />
+                            <p:inputTextarea id="motivo"
+                                             value="#{nuevaBajaBean.nuevaBaja.motivo}"
+                                             styleClass="form-control"
+                                             rows="3"
+                                             required="true" />
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top: 15px;">
+                        <div class="col-md-6">
+                            <p:outputLabel for="quienAplica" value="Quién aplica la baja" />
+                            <p:inputText id="quienAplica"
+                                         value="#{nuevaBajaBean.nuevaBaja.quienAplica}"
+                                         styleClass="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <p:outputLabel for="numeroSolicitud" value="Número de solicitud" />
+                            <p:inputText id="numeroSolicitud"
+                                         value="#{nuevaBajaBean.nuevaBaja.numeroSolicitud}"
+                                         styleClass="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top: 20px;">
                         <div class="col-md-12 text-right">
+                            <p:commandButton value="Agregar"
+                                             actionListener="#{nuevaBajaBean.aplicarBaja}"
+                                             process="@form"
+                                             update="frmNuevaBaja"
+                                             styleClass="btn btn-primary"
+                                             icon="fa fa-check" />
                             <p:commandButton value="#{sistema.obtenerTexto('gw.ge.texto.regresar')}"
                                              action="#{altasBajasUsuariosBean.regresarAlModulo}"
                                              styleClass="btn btn-default"
-                                             ajax="false" />
+                                             ajax="false"
+                                             icon="fa fa-undo" />
                         </div>
                     </div>
                 </p:panel>
