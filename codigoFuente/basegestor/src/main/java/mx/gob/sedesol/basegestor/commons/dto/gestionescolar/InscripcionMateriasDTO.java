@@ -14,9 +14,20 @@ public class InscripcionMateriasDTO {
     private String division;
     private String tipoPrograma;
     private Long idProgramaAntecedente;
-    private Boolean check;
+    private Integer periodo;
+    private String perfil;
+    private Boolean check; 
+    private Boolean disabled;
     
-    public String getClavePlan() {
+	public Boolean getDisabled() {
+		return disabled;
+	}
+	
+	public void setDisabled(Boolean disabled) {
+		this.disabled = disabled;
+	}
+	
+	public String getClavePlan() {
 		return clavePlan;
 	}
 	public void setClavePlan(String clavePlan) {
@@ -95,7 +106,30 @@ public class InscripcionMateriasDTO {
 		this.check = check;
 	}
 
-    
-    
-    
+	public Integer getPeriodo() {
+		return periodo;
+	}
+
+	public void setPeriodo(Integer periodo) {
+		this.periodo = periodo;
+	}
+
+	public String getPerfil() {
+		return perfil;
+	}
+
+	public void setPerfil(String perfil) {
+		this.perfil = perfil;
+	}
+
+	@Override
+	public String toString() {
+		return "InscripcionMateriasDTO [clavePlan=" + clavePlan + ", clavePrograma=" + clavePrograma + ", idPlan="
+				+ idPlan + ", nombrePlan=" + nombrePlan + ", idPrograma=" + idPrograma + ", nombreTentativoPrograma="
+				+ nombreTentativoPrograma + ", subestructura=" + subestructura + ", estructura=" + estructura
+				+ ", nivelEnsenanza=" + nivelEnsenanza + ", division=" + division + ", tipoPrograma=" + tipoPrograma
+				+ ", idProgramaAntecedente=" + idProgramaAntecedente + ", periodo=" + periodo + ", perfil=" + perfil
+				+ ", check=" + check + ", disabled=" + disabled + "]";
+	}
+	
 }

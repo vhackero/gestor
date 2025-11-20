@@ -1,30 +1,34 @@
 package mx.gob.sedesol.basegestor.service.gestionescolar;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionInsertDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasInsDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasPasadasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMaxMinDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 
 /**
- *  
+ * 
  * @author ITTIVA
  * 
  */
-public interface InscripcionService{
-	
+public interface InscripcionService {
+
 	InscripcionDTO consultaInformacionPersona(String id_persona);
 
 	List<InscripcionMateriasDTO> consultarMaterias(String id_plan);
 
-	InscripcionMaxMinDTO consultarMaxMin(String id_plan);
+	Optional<InscripcionMaxMinDTO> consultarMaxMin(Long idPlan);
 
-	List<InscripcionMateriasPasadasDTO> consultarMateriasCursadas(String id_plan);
+	List<InscripcionMateriasCursadasDTO> consultarMateriasCursadas(String id_plan);
 
 	List<InscripcionMateriasInsDTO> consultarMateriasInscritas(String idpersona, String plan);
 
@@ -41,7 +45,24 @@ public interface InscripcionService{
 
 	void insertarInscripciones(List<InscripcionInsertDTO> inscripciones);
 
+	List<InscripcionMateriasDTO> obtenerMateriasPorPeriodoInscripcion(Long idPlan, Date fechaActual,
+			Long idConvocatoria);
 
+	Boolean esEstudianteRegular(Long idPersona);
 
+	Boolean esEstudianteNuevoIngreso(Long idPersona);
+
+	Boolean existeInscripcionPrevia(InscripcionDTO infoPersona, Date fechaActual);
+
+	List<InscripcionMateriasCursadasDTO> obtenerMateriasCursadas(Long idPersona);
+
+	List<InscripcionMateriasReprobadasDTO> obtenerMateriasCursadasReprobadas(Long idPersona);
+
+	List<InscripcionMateriasDTO> obtenerMateriasElectivasDeOtrosPlanes(Long idPlanPersona, Date fechaActual,
+			Long idConvocatoria, String semestreCinco, String semestreSeis);
+
+	List<InscripcionBajasDTO> obtenerBajasDeMateriasSolicitadas(Long idPersona);
+
+	Optional<CreditosPlanDTO> obtenerCreditosTotalesPorPlan(Long idPlan);
 
 }

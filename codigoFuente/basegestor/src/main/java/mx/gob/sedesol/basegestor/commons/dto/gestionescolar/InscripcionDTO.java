@@ -93,4 +93,12 @@ public class InscripcionDTO {
     public void setPrograma(String programa) {
         this.programa = programa;
     }
+
+	@Override
+	public String toString() {
+		return "InscripcionDTO [idPersona=" + idPersona + ", nombreUsuario=" + nombreUsuario + ", nombre=" + nombre
+				+ ", primerApellido=" + primerApellido + ", segundoApellido=" + segundoApellido + ", correo=" + correo
+				+ ", idPlan=" + idPlan + ", plan=" + plan + ", programa=" + programa + ", idConvocatoria="
+				+ idConvocatoria + "]";
+	}
 }

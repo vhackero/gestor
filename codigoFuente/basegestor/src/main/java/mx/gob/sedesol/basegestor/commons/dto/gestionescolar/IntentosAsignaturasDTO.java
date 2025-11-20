@@ -2,18 +2,18 @@ package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
 public class IntentosAsignaturasDTO {
 
-    private Long intetosReprobados;
+    private Long intentosReprobados;
     private Long idPlan;
     private Long idPrograma;
     
-	public Long getIntetosReprobados() {
-		return intetosReprobados;
+	public Long getIntentosReprobados() {
+		return intentosReprobados;
 	}
-	
-	public void setIntetosReprobados(Long intetosReprobados) {
-		this.intetosReprobados = intetosReprobados;
+
+	public void setIntentosReprobados(Long intentosReprobados) {
+		this.intentosReprobados = intentosReprobados;
 	}
-    
+
 	public Long getIdPlan() {
 		return idPlan;
 	}

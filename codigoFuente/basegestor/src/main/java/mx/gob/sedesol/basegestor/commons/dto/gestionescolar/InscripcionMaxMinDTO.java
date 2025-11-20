@@ -1,51 +1,70 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
 public class InscripcionMaxMinDTO {
+	private Integer idMaxMin;
+	private String plan;
+	private Integer idPlan;
+	private String minProgramasPorPeriodo;
+	private String maxProgramasRegulares;
+	private String maxProgramasIrregulares;
+	private Integer programasPorPeriodo;
 
-    private Long idMaxMin;
-    private String plan;
-    private Long idPlan;
-    private String minimo;
-    private String maximoRegular;
-    
-    
-    public Long getIdMaxMin() {
+	public InscripcionMaxMinDTO() {
+	}
+
+	public Integer getIdMaxMin() {
 		return idMaxMin;
 	}
-	public void setIdMaxMin(Long idMaxMin) {
+
+	public void setIdMaxMin(Integer idMaxMin) {
 		this.idMaxMin = idMaxMin;
 	}
+
 	public String getPlan() {
 		return plan;
 	}
+
 	public void setPlan(String plan) {
 		this.plan = plan;
 	}
-	public Long getIdPlan() {
+
+	public Integer getIdPlan() {
 		return idPlan;
 	}
-	public void setIdPlan(Long idPlan) {
+
+	public void setIdPlan(Integer idPlan) {
 		this.idPlan = idPlan;
 	}
-	public String getMinimo() {
-		return minimo;
-	}
-	public void setMinimo(String minimo) {
-		this.minimo = minimo;
-	}
-	public String getMaximoRegular() {
-		return maximoRegular;
-	}
-	public void setMaximoRegular(String maximoRegular) {
-		this.maximoRegular = maximoRegular;
-	}
-	public String getMaximoIrregular() {
-		return maximoIrregular;
-	}
-	public void setMaximoIrregular(String maximoIrregular) {
-		this.maximoIrregular = maximoIrregular;
-	}
-	private String maximoIrregular;
 
-    
+	public String getMinProgramasPorPeriodo() {
+		return minProgramasPorPeriodo;
+	}
+
+	public void setMinProgramasPorPeriodo(String minProgramasPorPeriodo) {
+		this.minProgramasPorPeriodo = minProgramasPorPeriodo;
+	}
+
+	public String getMaxProgramasRegulares() {
+		return maxProgramasRegulares;
+	}
+
+	public void setMaxProgramasRegulares(String maxProgramasRegulares) {
+		this.maxProgramasRegulares = maxProgramasRegulares;
+	}
+
+	public String getMaxProgramasIrregulares() {
+		return maxProgramasIrregulares;
+	}
+
+	public void setMaxProgramasIrregulares(String maxProgramasIrregulares) {
+		this.maxProgramasIrregulares = maxProgramasIrregulares;
+	}
+
+	public Integer getProgramasPorPeriodo() {
+		return programasPorPeriodo;
+	}
+
+	public void setProgramasPorPeriodo(Integer programasPorPeriodo) {
+		this.programasPorPeriodo = programasPorPeriodo;
+	}
 }
