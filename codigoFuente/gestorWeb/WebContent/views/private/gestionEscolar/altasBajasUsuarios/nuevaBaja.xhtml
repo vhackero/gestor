@@ -9,7 +9,7 @@
 
     <ui:fragment rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR_BAJ')}">
         <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_BAJ') ">
-            <h:form id="frmNuevaBaja">
+            <h:form id="frmNuevaBaja" styleClass="form-horizontal">
                 <p:messages id="msgsNuevaBaja"
                              autoUpdate="true"
                              closable="true"
@@ -18,26 +18,27 @@
                 <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaBaja')}"
                          styleClass="panel-primary">
                     <div class="row">
-                        <div class="col-md-4">
-                            <p:outputLabel for="matricula" value="Matrícula/Usuario*" />
+                        <div class="col-md-4 form-group">
+                            <p:outputLabel for="matricula" value="Matrícula/Usuario*" styleClass="control-label" />
                             <p:inputText id="matricula"
                                          value="#{nuevaBajaBean.nuevaBaja.matricula}"
-                                         styleClass="form-control" />
+                                         styleClass="form-control"
+                                         style="width: 100%;" />
                         </div>
-                        <div class="col-md-2" style="margin-top: 22px;">
+                        <div class="col-md-2 form-group" style="margin-top: 22px;">
                             <p:commandButton value="Buscar"
                                              actionListener="#{nuevaBajaBean.buscarPorMatricula}"
                                              process="matricula"
                                              update="frmNuevaBaja"
                                              icon="fa fa-search"
-                                             styleClass="btn btn-primary" />
+                                             styleClass="btn btn-primary btn-block" />
                         </div>
-                        <div class="col-md-6">
-                            <p:outputLabel for="tipoBaja" value="Tipo de baja*" />
+                        <div class="col-md-6 form-group">
+                            <p:outputLabel for="tipoBaja" value="Tipo de baja*" styleClass="control-label" />
                             <p:selectOneMenu id="tipoBaja"
                                              value="#{nuevaBajaBean.nuevaBaja.idTipoBaja}"
                                              styleClass="form-control"
-                                             panelStyleClass="form-control">
+                                             style="width: 100%;">
                                 <f:selectItem itemLabel="Seleccione" itemValue="" />
                                 <f:selectItems value="#{nuevaBajaBean.tiposBaja}"
                                                var="tipo"
@@ -47,13 +48,13 @@
                         </div>
                     </div>
 
-                    <div class="row" style="margin-top: 15px;">
-                        <div class="col-md-6">
-                            <p:outputLabel for="plan" value="Plan*" />
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <p:outputLabel for="plan" value="Plan*" styleClass="control-label" />
                             <p:selectOneMenu id="plan"
                                              value="#{nuevaBajaBean.nuevaBaja.idPlan}"
                                              styleClass="form-control"
-                                             panelStyleClass="form-control"
+                                             style="width: 100%;"
                                              disabled="#{empty nuevaBajaBean.planes}"
                                              required="true"
                                              converter="javax.faces.Integer">
@@ -67,12 +68,12 @@
                                         update="semestre bloque programa periodo evento" />
                             </p:selectOneMenu>
                         </div>
-                        <div class="col-md-3">
-                            <p:outputLabel for="semestre" value="Semestre" />
+                        <div class="col-md-3 form-group">
+                            <p:outputLabel for="semestre" value="Semestre" styleClass="control-label" />
                             <p:selectOneMenu id="semestre"
                                              value="#{nuevaBajaBean.nuevaBaja.semestre}"
                                              styleClass="form-control"
-                                             panelStyleClass="form-control"
+                                             style="width: 100%;"
                                              disabled="#{empty nuevaBajaBean.semestres}"
                                              required="#{nuevaBajaBean.bajaParcialOTemporal}"
                                              converter="javax.faces.Integer">
@@ -86,12 +87,12 @@
                                         update="bloque programa evento" />
                             </p:selectOneMenu>
                         </div>
-                        <div class="col-md-3">
-                            <p:outputLabel for="bloque" value="Bloque" />
+                        <div class="col-md-3 form-group">
+                            <p:outputLabel for="bloque" value="Bloque" styleClass="control-label" />
                             <p:selectOneMenu id="bloque"
                                              value="#{nuevaBajaBean.nuevaBaja.bloque}"
                                              styleClass="form-control"
-                                             panelStyleClass="form-control"
+                                             style="width: 100%;"
                                              disabled="#{empty nuevaBajaBean.bloques}">
                                 <f:selectItem itemLabel="Seleccione" itemValue="" />
                                 <f:selectItems value="#{nuevaBajaBean.bloques}"
@@ -105,13 +106,13 @@
                         </div>
                     </div>
 
-                    <div class="row" style="margin-top: 15px;">
-                        <div class="col-md-6">
-                            <p:outputLabel for="programa" value="Asignatura/Programa" />
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <p:outputLabel for="programa" value="Asignatura/Programa" styleClass="control-label" />
                             <p:selectOneMenu id="programa"
                                              value="#{nuevaBajaBean.nuevaBaja.idPrograma}"
                                              styleClass="form-control"
-                                             panelStyleClass="form-control"
+                                             style="width: 100%;"
                                              disabled="#{empty nuevaBajaBean.programas}"
                                              required="#{nuevaBajaBean.bajaParcialOTemporal}"
                                              converter="javax.faces.Integer">
@@ -125,12 +126,12 @@
                                         update="evento" />
                             </p:selectOneMenu>
                         </div>
-                        <div class="col-md-3">
-                            <p:outputLabel for="periodo" value="Periodo" />
+                        <div class="col-md-3 form-group">
+                            <p:outputLabel for="periodo" value="Periodo" styleClass="control-label" />
                             <p:selectOneMenu id="periodo"
                                              value="#{nuevaBajaBean.nuevaBaja.idPeriodo}"
                                              styleClass="form-control"
-                                             panelStyleClass="form-control"
+                                             style="width: 100%;"
                                              disabled="#{empty nuevaBajaBean.periodos}"
                                              required="#{nuevaBajaBean.bajaParcialOTemporal}"
                                              converter="javax.faces.Integer">
@@ -141,12 +142,12 @@
                                                itemValue="#{per.id != null ? per.id.intValue() : null}" />
                             </p:selectOneMenu>
                         </div>
-                        <div class="col-md-3">
-                            <p:outputLabel for="evento" value="Evento" />
+                        <div class="col-md-3 form-group">
+                            <p:outputLabel for="evento" value="Evento" styleClass="control-label" />
                             <p:selectOneMenu id="evento"
                                              value="#{nuevaBajaBean.nuevaBaja.idEvento}"
                                              styleClass="form-control"
-                                             panelStyleClass="form-control"
+                                             style="width: 100%;"
                                              disabled="#{empty nuevaBajaBean.eventos}"
                                              converter="javax.faces.Integer">
                                 <f:selectItem itemLabel="Seleccione" itemValue="" />
@@ -158,33 +159,36 @@
                         </div>
                     </div>
 
-                    <div class="row" style="margin-top: 15px;">
-                        <div class="col-md-12">
-                            <p:outputLabel for="motivo" value="Motivo*" />
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <p:outputLabel for="motivo" value="Motivo*" styleClass="control-label" />
                             <p:inputTextarea id="motivo"
                                              value="#{nuevaBajaBean.nuevaBaja.motivo}"
                                              styleClass="form-control"
+                                             style="width: 100%;"
                                              rows="3"
                                              required="true" />
                         </div>
                     </div>
 
-                    <div class="row" style="margin-top: 15px;">
-                        <div class="col-md-6">
-                            <p:outputLabel for="quienAplica" value="Quién aplica la baja" />
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <p:outputLabel for="quienAplica" value="Quién aplica la baja" styleClass="control-label" />
                             <p:inputText id="quienAplica"
                                          value="#{nuevaBajaBean.nuevaBaja.quienAplica}"
-                                         styleClass="form-control" />
+                                         styleClass="form-control"
+                                         style="width: 100%;" />
                         </div>
-                        <div class="col-md-6">
-                            <p:outputLabel for="numeroSolicitud" value="Número de solicitud" />
+                        <div class="col-md-6 form-group">
+                            <p:outputLabel for="numeroSolicitud" value="Número de solicitud" styleClass="control-label" />
                             <p:inputText id="numeroSolicitud"
                                          value="#{nuevaBajaBean.nuevaBaja.numeroSolicitud}"
-                                         styleClass="form-control" />
+                                         styleClass="form-control"
+                                         style="width: 100%;" />
                         </div>
                     </div>
 
-                    <div class="row" style="margin-top: 20px;">
+                    <div class="row" style="margin-top: 10px;">
                         <div class="col-md-12 text-right">
                             <p:commandButton value="Agregar"
                                              actionListener="#{nuevaBajaBean.aplicarBaja}"
