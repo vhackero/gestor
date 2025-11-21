@@ -10,10 +10,26 @@
     <ui:fragment rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR_BAJ')}">
         <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_BAJ') ">
             <h:form id="frmNuevaBaja" styleClass="form-horizontal">
+                <p:ajaxStatus onstart="PF('dialogLayout').show()"
+                             onsuccess="PF('dialogLayout').hide()"
+                             onerror="PF('dialogLayout').hide()" />
                 <p:messages id="msgsNuevaBaja"
                              autoUpdate="true"
                              closable="true"
                              for="@form" />
+
+                <p:dialog id="dlgUsuarioNoEncontrado"
+                          widgetVar="dlgUsuarioNoEncontrado"
+                          header="Usuario no encontrado"
+                          modal="true"
+                          draggable="false"
+                          resizable="false"
+                          closable="true"
+                          appendTo="@(body)">
+                    <h:panelGroup layout="block" styleClass="text-center">
+                        <h:outputText value="#{nuevaBajaBean.mensajeUsuarioNoEncontrado}" />
+                    </h:panelGroup>
+                </p:dialog>
 
                 <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaBaja')}"
                          styleClass="panel-primary">

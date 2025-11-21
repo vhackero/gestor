@@ -12,6 +12,7 @@ import javax.faces.bean.ViewScoped;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.primefaces.context.RequestContext;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CatalogoOpcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.NuevaBajaDTO;
@@ -40,6 +41,7 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
     private List<CatalogoOpcionDTO> periodos;
     private List<CatalogoOpcionDTO> eventos;
     private boolean usuarioValidado;
+    private String mensajeUsuarioNoEncontrado;
 
     @PostConstruct
     public void init() {
@@ -52,6 +54,7 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         periodos = new ArrayList<>();
         eventos = new ArrayList<>();
         usuarioValidado = false;
+        mensajeUsuarioNoEncontrado = "";
         cargarTiposBaja();
     }
 
@@ -67,19 +70,35 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
             return;
         }
 
-        Optional<Long> persona = bajaUsuarioService.buscarPersonaPorMatricula(nuevaBaja.getMatricula());
-        if (!persona.isPresent()) {
-            agregarMsgError("No se encontró la matrícula ingresada", null);
-            usuarioValidado = false;
-            return;
-        }
+        try {
+            LOGGER.info("Iniciando búsqueda de usuario con matrícula: " + nuevaBaja.getMatricula());
+            Optional<Long> persona = bajaUsuarioService.buscarPersonaPorMatricula(nuevaBaja.getMatricula());
+            if (!persona.isPresent()) {
+                mensajeUsuarioNoEncontrado = "El usuario con matrícula " + nuevaBaja.getMatricula()
+                        + " no existe en el sistema. Verifique la información.";
+                LOGGER.warn("No se encontró información para la matrícula: " + nuevaBaja.getMatricula());
+                usuarioValidado = false;
+                RequestContext.getCurrentInstance().execute("PF('dlgUsuarioNoEncontrado').show();");
+                return;
+            }
 
-        nuevaBaja.setIdPersona(persona.get());
-        planes = bajaUsuarioService.obtenerPlanes();
-        usuarioValidado = true;
+            nuevaBaja.setIdPersona(persona.get());
+            LOGGER.info("Matrícula " + nuevaBaja.getMatricula() + " encontrada con id de persona: " + persona.get());
+            mensajeUsuarioNoEncontrado = "";
+            planes = bajaUsuarioService.obtenerPlanes();
+            LOGGER.info("Se recuperaron " + (planes != null ? planes.size() : 0)
+                    + " planes activos para la matrícula " + nuevaBaja.getMatricula());
+            usuarioValidado = true;
 
-        if (planes.isEmpty()) {
-            agregarMsgWarn("El usuario no cuenta con planes activos para aplicar baja", null);
+            if (planes.isEmpty()) {
+                agregarMsgWarn("El usuario no cuenta con planes activos para aplicar baja", null);
+            }
+        } catch (ServiceException se) {
+            LOGGER.error("Error de servicio al buscar la matrícula " + nuevaBaja.getMatricula(), se);
+            agregarMsgError("Ocurrió un error al recuperar la información del usuario. Intente nuevamente.", null);
+        } catch (Exception e) {
+            LOGGER.error("Error inesperado al buscar la matrícula " + nuevaBaja.getMatricula(), e);
+            agregarMsgError("No fue posible completar la búsqueda. Contacte al administrador del sistema.", null);
         }
     }
 
@@ -224,6 +243,7 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         nuevaBaja = new NuevaBajaDTO();
         limpiarListasDependientes();
         usuarioValidado = false;
+        mensajeUsuarioNoEncontrado = "";
         cargarTiposBaja();
     }
 
@@ -289,6 +309,14 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
 
     public void setEventos(List<CatalogoOpcionDTO> eventos) {
         this.eventos = eventos;
+    }
+
+    public String getMensajeUsuarioNoEncontrado() {
+        return mensajeUsuarioNoEncontrado;
+    }
+
+    public void setMensajeUsuarioNoEncontrado(String mensajeUsuarioNoEncontrado) {
+        this.mensajeUsuarioNoEncontrado = mensajeUsuarioNoEncontrado;
     }
 
     public BajaUsuarioService getBajaUsuarioService() {
