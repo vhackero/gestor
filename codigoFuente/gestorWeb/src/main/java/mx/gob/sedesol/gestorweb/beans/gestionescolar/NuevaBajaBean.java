@@ -78,7 +78,9 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
                         + " no existe en el sistema. Verifique la información.";
                 LOGGER.warn("No se encontró información para la matrícula: " + nuevaBaja.getMatricula());
                 usuarioValidado = false;
-                RequestContext.getCurrentInstance().execute("PF('dlgUsuarioNoEncontrado').show();");
+                RequestContext context = RequestContext.getCurrentInstance();
+                context.update("frmNuevaBaja:dlgUsuarioNoEncontrado");
+                context.execute("PF('dlgUsuarioNoEncontrado').show();");
                 return;
             }
 
@@ -112,8 +114,13 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         nuevaBaja.setIdPeriodo(null);
 
         if (nuevaBaja.getIdPlan() != null) {
+            LOGGER.info("Cargando semestres y periodos para el plan " + nuevaBaja.getIdPlan());
             semestres = bajaUsuarioService.obtenerSemestres(nuevaBaja.getIdPlan());
             periodos = bajaUsuarioService.obtenerPeriodos();
+            LOGGER.info("Semestres obtenidos: " + (semestres != null ? semestres.size() : 0)
+                    + ", periodos obtenidos: " + (periodos != null ? periodos.size() : 0));
+        } else {
+            LOGGER.info("Sin plan seleccionado, no se cargan semestres ni periodos");
         }
     }
 
@@ -126,8 +133,13 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         nuevaBaja.setIdEvento(null);
 
         if (nuevaBaja.getSemestre() != null) {
+            LOGGER.info("Cargando bloques y programas para el semestre " + nuevaBaja.getSemestre());
             bloques = bajaUsuarioService.obtenerBloques(nuevaBaja.getSemestre());
             programas = bajaUsuarioService.obtenerProgramas(nuevaBaja.getSemestre());
+            LOGGER.info("Bloques obtenidos: " + (bloques != null ? bloques.size() : 0)
+                    + ", programas obtenidos: " + (programas != null ? programas.size() : 0));
+        } else {
+            LOGGER.info("Sin semestre seleccionado, no se cargan bloques ni programas");
         }
     }
 
@@ -137,7 +149,11 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         nuevaBaja.setIdPrograma(null);
         nuevaBaja.setIdEvento(null);
         if (nuevaBaja.getBloque() != null) {
+            LOGGER.info("Cargando programas para el bloque " + nuevaBaja.getBloque());
             programas = bajaUsuarioService.obtenerProgramas(nuevaBaja.getBloque());
+            LOGGER.info("Programas obtenidos: " + (programas != null ? programas.size() : 0));
+        } else {
+            LOGGER.info("Sin bloque seleccionado, no se cargan programas");
         }
     }
 
@@ -146,7 +162,11 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         nuevaBaja.setIdEvento(null);
         if (nuevaBaja.getIdPrograma() != null && nuevaBaja.getIdPeriodo() != null) {
             String nombrePeriodo = obtenerDescripcionPorId(periodos, nuevaBaja.getIdPeriodo().longValue());
+            LOGGER.info("Cargando eventos para el programa " + nuevaBaja.getIdPrograma() + " y periodo " + nombrePeriodo);
             eventos = bajaUsuarioService.obtenerEventos(nombrePeriodo, nuevaBaja.getIdPrograma());
+            LOGGER.info("Eventos obtenidos: " + (eventos != null ? eventos.size() : 0));
+        } else {
+            LOGGER.info("Sin programa o periodo seleccionado, no se cargan eventos");
         }
     }
 
@@ -156,7 +176,11 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
 
         if (nuevaBaja.getIdPrograma() != null && nuevaBaja.getIdPeriodo() != null) {
             String nombrePeriodo = obtenerDescripcionPorId(periodos, nuevaBaja.getIdPeriodo().longValue());
+            LOGGER.info("Actualizando eventos para el programa " + nuevaBaja.getIdPrograma() + " y periodo " + nombrePeriodo);
             eventos = bajaUsuarioService.obtenerEventos(nombrePeriodo, nuevaBaja.getIdPrograma());
+            LOGGER.info("Eventos obtenidos tras cambio de periodo: " + (eventos != null ? eventos.size() : 0));
+        } else {
+            LOGGER.info("Sin programa o periodo seleccionado tras el cambio, no se actualizan eventos");
         }
     }
 
