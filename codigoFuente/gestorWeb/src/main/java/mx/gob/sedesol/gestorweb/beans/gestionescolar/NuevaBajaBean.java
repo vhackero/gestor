@@ -93,9 +93,6 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
             if (planes.isEmpty()) {
                 agregarMsgWarn("El usuario no cuenta con planes activos para aplicar baja", null);
             }
-        } catch (ServiceException se) {
-            LOGGER.error("Error de servicio al buscar la matrícula " + nuevaBaja.getMatricula(), se);
-            agregarMsgError("Ocurrió un error al recuperar la información del usuario. Intente nuevamente.", null);
         } catch (Exception e) {
             LOGGER.error("Error inesperado al buscar la matrícula " + nuevaBaja.getMatricula(), e);
             agregarMsgError("No fue posible completar la búsqueda. Contacte al administrador del sistema.", null);
