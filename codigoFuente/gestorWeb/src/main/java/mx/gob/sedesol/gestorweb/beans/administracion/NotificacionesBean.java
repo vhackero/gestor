@@ -13,7 +13,6 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
-import mx.gob.sedesol.basegestor.commons.constantes.ConstantesBitacora;
 
 import org.modelmapper.ModelMapper;
 import org.primefaces.event.FileUploadEvent;
@@ -39,7 +38,6 @@ import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
-import mx.gob.sedesol.gestorweb.commons.utils.BitacoraUtil;
 import mx.gob.sedesol.gestorweb.commons.utils.GestorArchivos;
 import mx.gob.sedesol.gestorweb.sistema.SistemaBean;
 
@@ -94,8 +92,9 @@ public class NotificacionesBean extends BaseBean {
 	@PostConstruct
 	public void init() {
 		mapaPersonas = new HashMap<>();
-		for (PersonaDTO persona : personaService.findAll()) {
-			mapaPersonas.put(persona.getIdPersona(), persona);
+		PersonaDTO personaActual = personaService.buscarPorId(getUsuarioEnSession().getIdPersona());
+		if (ObjectUtils.isNotNull(personaActual)) {
+			mapaPersonas.put(personaActual.getIdPersona(), personaActual);
 		}
 		enviados = notificacionService.obtenerNotificacionesPorRemitente(getUsuarioEnSession().getIdPersona(), true,
 				mapaPersonas);
