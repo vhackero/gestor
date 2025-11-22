@@ -9,15 +9,15 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosPlanDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionInsertDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasInsDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMaxMinDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademicaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IinscripcionRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
@@ -37,14 +37,14 @@ public class InscripcionServiceImpl implements InscripcionService {
 	private IinscripcionRepository inscripcionesRepository;
 
 	@Override
-	public InscripcionDTO consultaInformacionPersona(String id_persona) {
+	public InscripcionPersonaDTO obtenerInscripcionPorPersona(String idPersona) {
 
-		List<InscripcionDTO> listaInformacionPersona = inscripcionesRepository.consultarTipoProceso(id_persona);
+		List<InscripcionPersonaDTO> listaInformacionPersona = inscripcionesRepository.obtenerInscripcionPorPersona(idPersona);
 
 		if (listaInformacionPersona == null) {
-			return new InscripcionDTO();
+			return new InscripcionPersonaDTO();
 		}
-		InscripcionDTO regresaPersona = listaInformacionPersona.get(0);
+		InscripcionPersonaDTO regresaPersona = listaInformacionPersona.get(0);
 		return regresaPersona;
 	}
 
@@ -75,8 +75,8 @@ public class InscripcionServiceImpl implements InscripcionService {
 	}
 
 	@Override
-	public Optional<InscripcionMaxMinDTO> consultarMaxMin(Long idPlan) {
-		return inscripcionesRepository.consultarMaxMin(idPlan);
+	public Optional<LimitesCargaAcademicaDTO> obtenerLimitesCargaAcademicaPorPlan(Long idPlan) {
+		return inscripcionesRepository.obtenerLimitesCargaAcademicaPorPlan(idPlan);
 	}
 
 	@Override
@@ -160,7 +160,7 @@ public class InscripcionServiceImpl implements InscripcionService {
 	}
 
 	@Override
-	public Boolean existeInscripcionPrevia(InscripcionDTO infoPersona, Date fechaActual) {
+	public Boolean existeInscripcionPrevia(InscripcionPersonaDTO infoPersona, Date fechaActual) {
 		return inscripcionesRepository.existeInscripcionPrevia(infoPersona.getIdPersona(), infoPersona.getIdPlan(),
 				infoPersona.getIdConvocatoria(), fechaActual);
 	}
@@ -181,7 +181,7 @@ public class InscripcionServiceImpl implements InscripcionService {
 	}
 
 	@Override
-	public Optional<CreditosPlanDTO> obtenerCreditosTotalesPorPlan(Long idPlan) {
+	public Optional<CreditosTotalesPlanDTO> obtenerCreditosTotalesPorPlan(Long idPlan) {
 		return inscripcionesRepository.obtenerCreditosTotalesPorPlan(idPlan);
 	}
 

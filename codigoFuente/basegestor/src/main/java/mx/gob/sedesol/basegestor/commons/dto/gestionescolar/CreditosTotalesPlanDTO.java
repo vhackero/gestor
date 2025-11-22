@@ -1,6 +1,6 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
-public class CreditosPlanDTO {
+public class CreditosTotalesPlanDTO {
 	private Long idCreditosTotales;
 	private Long idPlan;
 	private Long totalCreditos;

@@ -4,24 +4,24 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosPlanDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionInsertDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasInsDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMaxMinDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademicaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 
 public interface IinscripcionRepository {
 
-	List<InscripcionDTO> consultarTipoProceso(String idPersona);
+	List<InscripcionPersonaDTO> obtenerInscripcionPorPersona(String idPersona);
 
 	List<InscripcionMateriasDTO> consultarMaterias(String id_plan);
 
-	Optional<InscripcionMaxMinDTO> consultarMaxMin(Long idPlan);
+	Optional<LimitesCargaAcademicaDTO> obtenerLimitesCargaAcademicaPorPlan(Long idPlan);
 
 	List<InscripcionMateriasCursadasDTO> consultarMateriasCursadas(String id_persona);
 
@@ -58,6 +58,6 @@ public interface IinscripcionRepository {
 
 	List<InscripcionBajasDTO> obtenerBajasDeMateriasSolicitadas(Long idPersona);
 
-	Optional<CreditosPlanDTO> obtenerCreditosTotalesPorPlan(Long idPlan);
+	Optional<CreditosTotalesPlanDTO> obtenerCreditosTotalesPorPlan(Long idPlan);
 
 }

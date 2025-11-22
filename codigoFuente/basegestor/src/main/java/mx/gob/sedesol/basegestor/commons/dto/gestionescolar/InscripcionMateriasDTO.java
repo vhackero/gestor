@@ -18,6 +18,7 @@ public class InscripcionMateriasDTO {
     private String perfil;
     private Boolean check; 
     private Boolean disabled;
+    private Boolean esMateriaSeriada;
     
 	public Boolean getDisabled() {
 		return disabled;
@@ -120,6 +121,14 @@ public class InscripcionMateriasDTO {
 
 	public void setPerfil(String perfil) {
 		this.perfil = perfil;
+	}
+	
+	public Boolean getEsMateriaSeriada() {
+		return esMateriaSeriada;
+	}
+
+	public void setEsMateriaSeriada(Boolean esMateriaSeriada) {
+		this.esMateriaSeriada = esMateriaSeriada;
 	}
 
 	@Override

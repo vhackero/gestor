@@ -20,21 +20,28 @@
 				<p:outputLabel styleClass="h1" value="Inscripción" />
 			</h1>
 
-			<p:panel id="pnlEditEjeComp" header="Inscripción">
+			<p:outputPanel styleClass="mt-2" rendered="#{inscripcionBean.mostrarAviso}">
+				<div class="alert alert-#{inscripcionBean.tipoAviso}" role="alert">#{inscripcionBean.textoAviso}</div>
+			</p:outputPanel>
+
+			<p:panel id="pnlEditEjeComp" header="Inscripción"
+				rendered="#{inscripcionBean.contextoInscripcion != null}">
 				<div class="row flexCentrarXY" style="align-items: flex-end">
 					<div class="col-md-3 col-xs-12">
 						<h:outputLabel value="Plan" styleClass="bloque" />
-						<h:outputText value="#{inscripcionBean.infoPersona.plan}" />
+						<h:outputText
+							value="#{inscripcionBean.contextoInscripcion.inscripcionPersona.plan}" />
 					</div>
 
 					<div class="col-md-6 col-xs-12">
 						<h:outputLabel value="Matricula" styleClass="bloque" />
-						<h:outputText value="#{inscripcionBean.infoPersona.nombreUsuario}" />
+						<h:outputText
+							value="#{inscripcionBean.contextoInscripcion.inscripcionPersona.nombreUsuario}" />
 					</div>
 				</div>
 
 				<p:outputPanel styleClass="mt-2"
-					rendered="#{inscripcionBean.mostrarMensajeSeriacion}">
+					rendered="#{inscripcionBean.contextoInscripcion.mostrarMensajeSeriacion}">
 					<div class="alert alert-info mb-0" role="alert">Estimad(a/o)
 						estudiante, la(s) asignaturas a las que deseas inscribirte están
 						condicionadas a la aprobación previa de según la seriación
@@ -44,8 +51,9 @@
 				<div class="form-group mt-1">
 					<div class="row">
 						<div class="col-md-12">
+
 							<p:dataTable id="tblEditaComp"
-								value="#{inscripcionBean.materiasDisponibles}"
+								value="#{inscripcionBean.contextoInscripcion.estadoAcademico.materiasDisponibles}"
 								tableStyleClass="table" var="inscripcion" paginator="false"
 								emptyMessage="No hay materias disponibles para inscribir">
 
@@ -81,19 +89,20 @@
 									<p:selectBooleanCheckbox disabled="#{inscripcion.disabled}"
 										value="#{inscripcion.check}" styleClass="cursor-pointer">
 										<p:ajax
-											listener="#{inscripcionBean.validarSeleccion(inscripcion)}"
+											listener="#{inscripcionBean.validarSeleccionMateria(inscripcion)}"
 											event="change" update="@this :pnlMensaje" />
 									</p:selectBooleanCheckbox>
 								</p:column>
 
 							</p:dataTable>
+
 						</div>
 					</div>
 				</div>
 
 				<!-- Sección de términos y condiciones controlada por mostrarTerminosCondiciones -->
 				<h:panelGroup
-					rendered="#{inscripcionBean.mostrarTerminosCondiciones or empty inscripcionBean.materiasDisponibles}">
+					rendered="#{inscripcionBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones}">
 					<div class="row" style="text-align: center; margin-top: 20px;">
 						<p:selectBooleanCheckbox id="chkTerminos"
 							value="#{inscripcionBean.aceptaTerminos}">
@@ -101,14 +110,14 @@
 						</p:selectBooleanCheckbox>
 						<h:outputText value=" Acepto los " />
 						<h:outputLink styleClass="terminos-condiciones"
-							value="#{inscripcionBean.terminosCondiciones}" target="_blank">términos y condiciones</h:outputLink>
+							value="#{inscripcionBean.contextoInscripcion.terminosCondiciones.enlaceTerminosCondiciones}"
+							target="_blank">términos y condiciones</h:outputLink>
 					</div>
 				</h:panelGroup>
 
-				<p:outputPanel id="panelFinalizar" styleClass="text-center mt-2"
-					rendered="#{not inscripcionBean.existeInscripcionPrevia or empty inscripcionBean.materiasDisponibles}">
+				<p:outputPanel id="panelFinalizar" styleClass="text-center mt-2">
 					<p:commandButton id="finalizarBtn"
-						disabled="#{inscripcionBean.mostrarTerminosCondiciones and not inscripcionBean.aceptaTerminos}"
+						disabled="#{inscripcionBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionBean.aceptaTerminos}"
 						value="Finalizar inscripción" update="@form :pnlMensaje"
 						action="#{inscripcionBean.finalizarInscripcion}"
 						styleClass="btn btn-primary" />
@@ -125,7 +134,7 @@
 					<div class="row">
 						<div class="col-md-12">
 							<h:outputText styleClass="bloque"
-								value="#{inscripcionBean.mensaje}" />
+								value="#{inscripcionBean.mensajeDialog}" />
 						</div>
 					</div>
 				</div>

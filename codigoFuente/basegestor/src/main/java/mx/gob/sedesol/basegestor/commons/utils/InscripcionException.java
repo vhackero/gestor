@@ -1,6 +1,6 @@
-package mx.gob.sedesol.gestorweb.exceptions;
+package mx.gob.sedesol.basegestor.commons.utils;
 
-public class InscripcionException extends Exception{
+public class InscripcionException extends RuntimeException {
 	
     /**
 	 * 

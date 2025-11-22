@@ -449,5 +449,7 @@ public final class ConstantesGestorWeb {
 	public static final int SEMESTRE_MINIMO_PARA_ELECTIVAS = 1;
 	public static final String NUMERO_SEMESTRE_CINCO = "1";
 	public static final String NUMERO_SEMESTRE_SEIS = "2";
+	public static final String TIPO_AVISO_INFO = "info";
+	public static final String TIPO_AVISO_SUCCESS = "success";
 
 }

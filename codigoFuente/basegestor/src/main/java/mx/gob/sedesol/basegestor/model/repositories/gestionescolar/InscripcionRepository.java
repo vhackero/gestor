@@ -17,15 +17,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosPlanDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionInsertDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasInsDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMaxMinDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademicaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 
 @Repository
@@ -34,40 +34,58 @@ public class InscripcionRepository implements IinscripcionRepository {
 	@Autowired
 	public EntityManager entityManager;
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<InscripcionDTO> consultarTipoProceso(String idPersona) {
+	public List<InscripcionPersonaDTO> obtenerInscripcionPorPersona(String idPersona) {
 
-		List<InscripcionDTO> lista = new ArrayList<InscripcionDTO>();
+	    StringBuilder sql = new StringBuilder();
+	    sql.append("SELECT tp.id_persona, ");
+	    sql.append("       tp.sso_idUsuario, ");
+	    sql.append("       tp.sso_nombre, ");
+	    sql.append("       tp.sso_apellidoMaterno, ");
+	    sql.append("       tp.sso_apellidoPaterno, ");
+	    sql.append("       rpc.sso_correoElectronico, ");
+	    sql.append("       tpa.id_plan, ");
+	    sql.append("       tpl.nombre, ");
+	    sql.append("       tfd.nombre_tentativo, ");
+	    sql.append("       tpa.id_convocatoria ");
+	    sql.append("FROM tbl_persona tp ");
+	    sql.append("INNER JOIN rel_persona_correo rpc ON rpc.id_persona = tp.id_persona ");
+	    sql.append("INNER JOIN tbl_persona_aspirante tpa ON tpa.id_persona = rpc.id_persona ");
+	    sql.append("INNER JOIN tbl_planes tpl ON tpl.id_plan = tpa.id_plan ");
+	    sql.append("INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_plan = tpl.id_plan ");
+	    sql.append("INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpa.id_convocatoria ");
+	    sql.append("WHERE tp.id_persona = :idPersona ");
+	    sql.append("  AND tc.activo = 1");
 
-		String consulta = "SELECT\r\n" + "    tp.id_persona id_persona,\r\n"
-				+ "    tp.sso_idUsuario nombre_usuario,\r\n" + "    tp.sso_nombre nombre,\r\n"
-				+ "    tp.sso_apellidoMaterno primer_apellido,\r\n" + "    tp.sso_apellidoPaterno segundo_apellido,\r\n"
-				+ "    rpc.sso_correoElectronico correo,\r\n" + "    tpa.id_plan id_plan,\r\n"
-				+ "    tpl.nombre plan,\r\n" + "    tfd.nombre_tentativo programa,\r\n" + "    tp.sso_idUsuario,\r\n"
-				+ "    tpa.id_convocatoria\r\n" + "FROM tbl_persona  tp\r\n"
-				+ "         INNER JOIN rel_persona_correo rpc ON rpc.id_persona = tp.id_persona\r\n"
-				+ "         INNER JOIN tbl_persona_aspirante tpa ON tpa.id_persona = rpc.id_persona\r\n"
-				+ "         INNER JOIN tbl_planes tpl ON tpl.id_plan = tpa.id_plan\r\n"
-				+ "         INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_plan = tpl.id_plan\r\n"
-				+ "        INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpa.id_convocatoria AND  tc.activo=1\r\n"
-				+ "WHERE tp.id_persona = :id_persona";
+	    List<Object[]> resultados = entityManager.createNativeQuery(sql.toString())
+	            .setParameter("idPersona", idPersona)
+	            .getResultList();
 
-		Query query = entityManager.createNativeQuery(consulta);
-		query.setParameter("id_persona", idPersona);
+	    List<InscripcionPersonaDTO> listaDTO = new ArrayList<>();
 
-		List<Object[]> listaQuery = query.getResultList();
+	    for (Object[] row : resultados) {
+	        listaDTO.add(mapearInscripcionPersona(row));
+	    }
 
-		if (!listaQuery.isEmpty()) {
-			for (Object[] obj : listaQuery) {
+	    return listaDTO;
 
-				InscripcionDTO convocatoria = mapeo(obj);
-				lista.add(convocatoria);
+	}
+	
+	private InscripcionPersonaDTO mapearInscripcionPersona(Object[] row) {
+	    InscripcionPersonaDTO dto = new InscripcionPersonaDTO();
+	    dto.setIdPersona(getLongValue(row[0]));
+	    dto.setNombreUsuario((String) row[1]);
+	    dto.setNombre((String) row[2]);
+	    dto.setPrimerApellido((String) row[3]);
+	    dto.setSegundoApellido((String) row[4]);
+	    dto.setCorreo((String) row[5]);
+	    dto.setIdPlan(getLongValue(row[6]));
+	    dto.setPlan((String) row[7]);
+	    dto.setPrograma((String) row[8]);
+	    dto.setIdConvocatoria(getLongValue(row[9]));
 
-			}
-		}
-
-		return lista;
-
+	    return dto;
 	}
 
 	@Override
@@ -173,7 +191,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Optional<InscripcionMaxMinDTO> consultarMaxMin(Long idPlan) {
+	public Optional<LimitesCargaAcademicaDTO> obtenerLimitesCargaAcademicaPorPlan(Long idPlan) {
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT ");
@@ -195,7 +213,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		}
 
 		Object[] row = resultados.get(0);
-		return Optional.of(mapeoMaxMin(row));
+		return Optional.of(mapearLimiteCargaAcademica(row));
 	}
 
 	@Override
@@ -345,7 +363,6 @@ public class InscripcionRepository implements IinscripcionRepository {
 	}
 
 	@Override
-	@Transactional
 	public void insertarRegistro(InscripcionInsertDTO dto) {
 		String sql = "INSERT INTO tbl_inscripciones (Idpersona, programa, asignatura, groupbase, idplan, idprograma, "
 				+ "idevento, nivel, division, profile_field_perfil, bloque, clave_asig, nuevoingreso, "
@@ -406,8 +423,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 		return programa;
 	}
 
-	private InscripcionMaxMinDTO mapeoMaxMin(Object[] row) {
-		InscripcionMaxMinDTO dto = new InscripcionMaxMinDTO();
+	private LimitesCargaAcademicaDTO mapearLimiteCargaAcademica(Object[] row) {
+		LimitesCargaAcademicaDTO dto = new LimitesCargaAcademicaDTO();
 
 		dto.setIdMaxMin(getIntegerValue(row[0])); // id_max_min
 		dto.setPlan((String) row[1]); // plan
@@ -420,9 +437,9 @@ public class InscripcionRepository implements IinscripcionRepository {
 		return dto;
 	}
 
-	private InscripcionDTO mapeo(Object[] obj) {
+	private InscripcionPersonaDTO mapeo(Object[] obj) {
 
-		InscripcionDTO regresa = new InscripcionDTO();
+		InscripcionPersonaDTO regresa = new InscripcionPersonaDTO();
 
 		regresa.setIdPersona(Long.valueOf(obj[0].toString()));
 		regresa.setNombreUsuario(obj[1].toString());
@@ -901,7 +918,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Optional<CreditosPlanDTO> obtenerCreditosTotalesPorPlan(Long idPlan) {
+	public Optional<CreditosTotalesPlanDTO> obtenerCreditosTotalesPorPlan(Long idPlan) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT ");
 		sql.append("    rctp.id_creditos_totales, ");
@@ -920,8 +937,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 		return Optional.of(mapearCreditosPlan(resultados.get(0)));
 	}
 
-	private CreditosPlanDTO mapearCreditosPlan(Object[] row) {
-		CreditosPlanDTO dto = new CreditosPlanDTO();
+	private CreditosTotalesPlanDTO mapearCreditosPlan(Object[] row) {
+		CreditosTotalesPlanDTO dto = new CreditosTotalesPlanDTO();
 		dto.setIdCreditosTotales(getLongValue(row[0]));
 		dto.setIdPlan(getLongValue(row[1]));
 		dto.setTotalCreditos(getLongValue(row[2]));

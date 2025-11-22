@@ -1,6 +1,6 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
-public class InscripcionMaxMinDTO {
+public class LimitesCargaAcademicaDTO {
 	private Integer idMaxMin;
 	private String plan;
 	private Integer idPlan;
@@ -9,7 +9,7 @@ public class InscripcionMaxMinDTO {
 	private String maxProgramasIrregulares;
 	private Integer programasPorPeriodo;
 
-	public InscripcionMaxMinDTO() {
+	public LimitesCargaAcademicaDTO() {
 	}
 
 	public Integer getIdMaxMin() {

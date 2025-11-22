@@ -4,15 +4,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosPlanDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionInsertDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasInsDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMaxMinDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademicaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 
 /**
@@ -22,11 +22,11 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasD
  */
 public interface InscripcionService {
 
-	InscripcionDTO consultaInformacionPersona(String id_persona);
+	InscripcionPersonaDTO obtenerInscripcionPorPersona(String idPersona);
 
 	List<InscripcionMateriasDTO> consultarMaterias(String id_plan);
 
-	Optional<InscripcionMaxMinDTO> consultarMaxMin(Long idPlan);
+	Optional<LimitesCargaAcademicaDTO> obtenerLimitesCargaAcademicaPorPlan(Long idPlan);
 
 	List<InscripcionMateriasCursadasDTO> consultarMateriasCursadas(String id_plan);
 
@@ -52,7 +52,7 @@ public interface InscripcionService {
 
 	Boolean esEstudianteNuevoIngreso(Long idPersona);
 
-	Boolean existeInscripcionPrevia(InscripcionDTO infoPersona, Date fechaActual);
+	Boolean existeInscripcionPrevia(InscripcionPersonaDTO infoPersona, Date fechaActual);
 
 	List<InscripcionMateriasCursadasDTO> obtenerMateriasCursadas(Long idPersona);
 
@@ -63,6 +63,6 @@ public interface InscripcionService {
 
 	List<InscripcionBajasDTO> obtenerBajasDeMateriasSolicitadas(Long idPersona);
 
-	Optional<CreditosPlanDTO> obtenerCreditosTotalesPorPlan(Long idPlan);
+	Optional<CreditosTotalesPlanDTO> obtenerCreditosTotalesPorPlan(Long idPlan);
 
 }

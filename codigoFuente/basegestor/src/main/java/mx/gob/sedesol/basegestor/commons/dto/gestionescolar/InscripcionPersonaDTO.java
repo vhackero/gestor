@@ -1,8 +1,6 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
-public class InscripcionDTO {
-
-    // Nuevos campos basados en el query
+public class InscripcionPersonaDTO {
     private Long idPersona;
     private String nombreUsuario;
     private String nombre;
