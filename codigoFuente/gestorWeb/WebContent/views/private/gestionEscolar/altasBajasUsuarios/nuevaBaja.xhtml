@@ -51,29 +51,31 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 form-group">
-                            <p:outputLabel for="plan" value="Plan*" styleClass="control-label" />
-                            <p:selectOneMenu id="plan"
-                                             value="#{nuevaBajaBean.nuevaBaja.idPlan}"
-                                             styleClass="form-control"
-                                             style="width: 100%;"
-                                             disabled="#{empty nuevaBajaBean.planes}"
-                                             required="true"
-                                             converter="javax.faces.Integer">
-                                <f:selectItem itemLabel="Seleccione" itemValue="" />
-                                <f:selectItems value="#{nuevaBajaBean.planes}"
-                                               var="plan"
-                                               itemLabel="#{plan.descripcion}"
-                                               itemValue="#{plan.id != null ? plan.id.intValue() : null}" />
-                                <p:ajax event="change"
-                                        listener="#{nuevaBajaBean.onPlanChange}"
-                                        update="detallesBaja" />
-                            </p:selectOneMenu>
+                    <p:outputPanel rendered="#{nuevaBajaBean.usuarioValidado}" layout="block">
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <p:outputLabel for="plan" value="Plan*" styleClass="control-label" />
+                                <p:selectOneMenu id="plan"
+                                                 value="#{nuevaBajaBean.nuevaBaja.idPlan}"
+                                                 styleClass="form-control"
+                                                 style="width: 100%;"
+                                                 disabled="#{empty nuevaBajaBean.planes}"
+                                                 required="true"
+                                                 converter="javax.faces.Integer">
+                                    <f:selectItem itemLabel="Seleccione" itemValue="" />
+                                    <f:selectItems value="#{nuevaBajaBean.planes}"
+                                                   var="plan"
+                                                   itemLabel="#{plan.descripcion}"
+                                                   itemValue="#{plan.id != null ? plan.id.intValue() : null}" />
+                                    <p:ajax event="change"
+                                            listener="#{nuevaBajaBean.onPlanChange}"
+                                            update="detallesBaja" />
+                                </p:selectOneMenu>
+                            </div>
                         </div>
-                    </div>
+                    </p:outputPanel>
 
-                    <p:outputPanel id="detallesBaja" layout="block" rendered="#{nuevaBajaBean.bajaParcialOTemporal}">
+                    <p:outputPanel id="detallesBaja" layout="block" rendered="#{nuevaBajaBean.bajaParcialOTemporal and nuevaBajaBean.usuarioValidado}">
                         <div class="row">
                             <div class="col-md-3 form-group">
                                 <p:outputLabel for="semestre" value="Semestre" styleClass="control-label" />

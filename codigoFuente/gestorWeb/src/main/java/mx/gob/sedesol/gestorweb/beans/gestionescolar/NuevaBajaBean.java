@@ -338,6 +338,14 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         this.eventos = eventos;
     }
 
+    public boolean isUsuarioValidado() {
+        return usuarioValidado;
+    }
+
+    public void setUsuarioValidado(boolean usuarioValidado) {
+        this.usuarioValidado = usuarioValidado;
+    }
+
     public BajaUsuarioService getBajaUsuarioService() {
         return bajaUsuarioService;
     }
