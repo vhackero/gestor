@@ -44,6 +44,9 @@
                                                var="tipo"
                                                itemLabel="#{tipo.descripcion}"
                                                itemValue="#{tipo.id}" />
+                                <p:ajax event="change"
+                                        listener="#{nuevaBajaBean.onTipoBajaChange}"
+                                        update="detallesBaja" />
                             </p:selectOneMenu>
                         </div>
                     </div>
@@ -65,103 +68,107 @@
                                                itemValue="#{plan.id != null ? plan.id.intValue() : null}" />
                                 <p:ajax event="change"
                                         listener="#{nuevaBajaBean.onPlanChange}"
-                                        update="semestre bloque programa periodo evento" />
-                            </p:selectOneMenu>
-                        </div>
-                        <div class="col-md-3 form-group">
-                            <p:outputLabel for="semestre" value="Semestre" styleClass="control-label" />
-                            <p:selectOneMenu id="semestre"
-                                             value="#{nuevaBajaBean.nuevaBaja.semestre}"
-                                             styleClass="form-control"
-                                             style="width: 100%;"
-                                             disabled="#{empty nuevaBajaBean.semestres}"
-                                             required="#{nuevaBajaBean.bajaParcialOTemporal}"
-                                             converter="javax.faces.Integer">
-                                <f:selectItem itemLabel="Seleccione" itemValue="" />
-                                <f:selectItems value="#{nuevaBajaBean.semestres}"
-                                               var="sem"
-                                               itemLabel="#{sem.descripcion}"
-                                               itemValue="#{sem.id != null ? sem.id.intValue() : null}" />
-                                <p:ajax event="change"
-                                        listener="#{nuevaBajaBean.onSemestreChange}"
-                                        update="bloque programa evento" />
-                            </p:selectOneMenu>
-                        </div>
-                        <div class="col-md-3 form-group">
-                            <p:outputLabel for="bloque" value="Bloque" styleClass="control-label" />
-                            <p:selectOneMenu id="bloque"
-                                             value="#{nuevaBajaBean.nuevaBaja.bloque}"
-                                             styleClass="form-control"
-                                             style="width: 100%;"
-                                             disabled="#{empty nuevaBajaBean.bloques}"
-                                             converter="javax.faces.Integer">
-                                <f:selectItem itemLabel="Seleccione" itemValue="" />
-                                <f:selectItems value="#{nuevaBajaBean.bloques}"
-                                               var="bloque"
-                                               itemLabel="#{bloque.descripcion}"
-                                               itemValue="#{bloque.id != null ? bloque.id.intValue() : null}" />
-                                <p:ajax event="change"
-                                        listener="#{nuevaBajaBean.onBloqueChange}"
-                                        update="programa evento" />
+                                        update="detallesBaja" />
                             </p:selectOneMenu>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 form-group">
-                            <p:outputLabel for="programa" value="Asignatura/Programa" styleClass="control-label" />
-                            <p:selectOneMenu id="programa"
-                                             value="#{nuevaBajaBean.nuevaBaja.idPrograma}"
-                                             styleClass="form-control"
-                                             style="width: 100%;"
-                                             disabled="#{empty nuevaBajaBean.programas}"
-                                             required="#{nuevaBajaBean.bajaParcialOTemporal}"
-                                             converter="javax.faces.Integer">
-                                <f:selectItem itemLabel="Seleccione" itemValue="" />
-                                <f:selectItems value="#{nuevaBajaBean.programas}"
-                                               var="prog"
-                                               itemLabel="#{prog.descripcion}"
-                                               itemValue="#{prog.id != null ? prog.id.intValue() : null}" />
-                                <p:ajax event="change"
-                                        listener="#{nuevaBajaBean.onProgramaChange}"
-                                        update="evento" />
-                            </p:selectOneMenu>
+                    <p:outputPanel id="detallesBaja" layout="block" rendered="#{nuevaBajaBean.bajaParcialOTemporal}">
+                        <div class="row">
+                            <div class="col-md-3 form-group">
+                                <p:outputLabel for="semestre" value="Semestre" styleClass="control-label" />
+                                <p:selectOneMenu id="semestre"
+                                                 value="#{nuevaBajaBean.nuevaBaja.semestre}"
+                                                 styleClass="form-control"
+                                                 style="width: 100%;"
+                                                 disabled="#{empty nuevaBajaBean.semestres}"
+                                                 required="#{nuevaBajaBean.bajaParcialOTemporal}"
+                                                 converter="javax.faces.Integer">
+                                    <f:selectItem itemLabel="Seleccione" itemValue="" />
+                                    <f:selectItems value="#{nuevaBajaBean.semestres}"
+                                                   var="sem"
+                                                   itemLabel="#{sem.descripcion}"
+                                                   itemValue="#{sem.id != null ? sem.id.intValue() : null}" />
+                                    <p:ajax event="change"
+                                            listener="#{nuevaBajaBean.onSemestreChange}"
+                                            update="detallesBaja" />
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <p:outputLabel for="bloque" value="Bloque" styleClass="control-label" />
+                                <p:selectOneMenu id="bloque"
+                                                 value="#{nuevaBajaBean.nuevaBaja.bloque}"
+                                                 styleClass="form-control"
+                                                 style="width: 100%;"
+                                                 disabled="#{empty nuevaBajaBean.bloques}"
+                                                 converter="javax.faces.Integer">
+                                    <f:selectItem itemLabel="Seleccione" itemValue="" />
+                                    <f:selectItems value="#{nuevaBajaBean.bloques}"
+                                                   var="bloque"
+                                                   itemLabel="#{bloque.descripcion}"
+                                                   itemValue="#{bloque.id != null ? bloque.id.intValue() : null}" />
+                                    <p:ajax event="change"
+                                            listener="#{nuevaBajaBean.onBloqueChange}"
+                                            update="detallesBaja" />
+                                </p:selectOneMenu>
+                            </div>
                         </div>
-                        <div class="col-md-3 form-group">
-                            <p:outputLabel for="periodo" value="Periodo" styleClass="control-label" />
-                            <p:selectOneMenu id="periodo"
-                                             value="#{nuevaBajaBean.nuevaBaja.idPeriodo}"
-                                             styleClass="form-control"
-                                             style="width: 100%;"
-                                             disabled="#{empty nuevaBajaBean.periodos}"
-                                             required="#{nuevaBajaBean.bajaParcialOTemporal}"
-                                             converter="javax.faces.Integer">
-                                <f:selectItem itemLabel="Seleccione" itemValue="" />
-                                <f:selectItems value="#{nuevaBajaBean.periodos}"
-                                               var="per"
-                                               itemLabel="#{per.descripcion}"
-                                               itemValue="#{per.id != null ? per.id.intValue() : null}" />
-                                <p:ajax event="change"
-                                        listener="#{nuevaBajaBean.onPeriodoChange}"
-                                        update="evento" />
-                            </p:selectOneMenu>
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <p:outputLabel for="programa" value="Asignatura/Programa" styleClass="control-label" />
+                                <p:selectOneMenu id="programa"
+                                                 value="#{nuevaBajaBean.nuevaBaja.idPrograma}"
+                                                 styleClass="form-control"
+                                                 style="width: 100%;"
+                                                 disabled="#{empty nuevaBajaBean.programas}"
+                                                 required="#{nuevaBajaBean.bajaParcialOTemporal}"
+                                                 converter="javax.faces.Integer">
+                                    <f:selectItem itemLabel="Seleccione" itemValue="" />
+                                    <f:selectItems value="#{nuevaBajaBean.programas}"
+                                                   var="prog"
+                                                   itemLabel="#{prog.descripcion}"
+                                                   itemValue="#{prog.id != null ? prog.id.intValue() : null}" />
+                                    <p:ajax event="change"
+                                            listener="#{nuevaBajaBean.onProgramaChange}"
+                                            update="evento" />
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <p:outputLabel for="periodo" value="Periodo" styleClass="control-label" />
+                                <p:selectOneMenu id="periodo"
+                                                 value="#{nuevaBajaBean.nuevaBaja.idPeriodo}"
+                                                 styleClass="form-control"
+                                                 style="width: 100%;"
+                                                 disabled="#{empty nuevaBajaBean.periodos}"
+                                                 required="#{nuevaBajaBean.bajaParcialOTemporal}"
+                                                 converter="javax.faces.Integer">
+                                    <f:selectItem itemLabel="Seleccione" itemValue="" />
+                                    <f:selectItems value="#{nuevaBajaBean.periodos}"
+                                                   var="per"
+                                                   itemLabel="#{per.descripcion}"
+                                                   itemValue="#{per.id != null ? per.id.intValue() : null}" />
+                                    <p:ajax event="change"
+                                            listener="#{nuevaBajaBean.onPeriodoChange}"
+                                            update="evento" />
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <p:outputLabel for="evento" value="Evento" styleClass="control-label" />
+                                <p:selectOneMenu id="evento"
+                                                 value="#{nuevaBajaBean.nuevaBaja.idEvento}"
+                                                 styleClass="form-control"
+                                                 style="width: 100%;"
+                                                 disabled="#{empty nuevaBajaBean.eventos}"
+                                                 converter="javax.faces.Integer">
+                                    <f:selectItem itemLabel="Seleccione" itemValue="" />
+                                    <f:selectItems value="#{nuevaBajaBean.eventos}"
+                                                   var="evt"
+                                                   itemLabel="#{evt.descripcion}"
+                                                   itemValue="#{evt.id != null ? evt.id.intValue() : null}" />
+                                </p:selectOneMenu>
+                            </div>
                         </div>
-                        <div class="col-md-3 form-group">
-                            <p:outputLabel for="evento" value="Evento" styleClass="control-label" />
-                            <p:selectOneMenu id="evento"
-                                             value="#{nuevaBajaBean.nuevaBaja.idEvento}"
-                                             styleClass="form-control"
-                                             style="width: 100%;"
-                                             disabled="#{empty nuevaBajaBean.eventos}"
-                                             converter="javax.faces.Integer">
-                                <f:selectItem itemLabel="Seleccione" itemValue="" />
-                                <f:selectItems value="#{nuevaBajaBean.eventos}"
-                                               var="evt"
-                                               itemLabel="#{evt.descripcion}"
-                                               itemValue="#{evt.id != null ? evt.id.intValue() : null}" />
-                            </p:selectOneMenu>
-                        </div>
-                    </div>
+                    </p:outputPanel>
 
                     <div class="row">
                         <div class="col-md-12 form-group">

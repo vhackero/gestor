@@ -59,6 +59,21 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         tiposBaja = bajaUsuarioService.obtenerTiposBaja();
     }
 
+    public void onTipoBajaChange() {
+        if (!isBajaParcialOTemporal()) {
+            nuevaBaja.setSemestre(null);
+            nuevaBaja.setBloque(null);
+            nuevaBaja.setIdPrograma(null);
+            nuevaBaja.setIdEvento(null);
+            nuevaBaja.setIdPeriodo(null);
+            semestres.clear();
+            bloques.clear();
+            programas.clear();
+            periodos.clear();
+            eventos.clear();
+        }
+    }
+
     public void buscarPorMatricula() {
         limpiarListasDependientes();
         if (StringUtils.isBlank(nuevaBaja.getMatricula())) {
