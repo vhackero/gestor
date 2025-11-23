@@ -40,6 +40,7 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
     private List<CatalogoOpcionDTO> periodos;
     private List<CatalogoOpcionDTO> eventos;
     private boolean usuarioValidado;
+    private boolean bajaParcialOTemporal;
 
     @PostConstruct
     public void init() {
@@ -52,6 +53,7 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         periodos = new ArrayList<>();
         eventos = new ArrayList<>();
         usuarioValidado = false;
+        bajaParcialOTemporal = false;
         cargarTiposBaja();
     }
 
@@ -60,18 +62,14 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
     }
 
     public void onTipoBajaChange() {
-        if (!isBajaParcialOTemporal()) {
-            nuevaBaja.setSemestre(null);
-            nuevaBaja.setBloque(null);
-            nuevaBaja.setIdPrograma(null);
-            nuevaBaja.setIdEvento(null);
-            nuevaBaja.setIdPeriodo(null);
-            semestres.clear();
-            bloques.clear();
-            programas.clear();
-            periodos.clear();
-            eventos.clear();
+        bajaParcialOTemporal = esBajaParcialOTemporalSeleccionada();
+
+        if (!bajaParcialOTemporal) {
+            limpiarDetallesBaja();
+            return;
         }
+
+        prepararListasDetalle();
     }
 
     public void buscarPorMatricula() {
@@ -99,43 +97,34 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
     }
 
     public void onPlanChange() {
-        semestres.clear();
-        bloques.clear();
-        programas.clear();
-        periodos.clear();
-        eventos.clear();
-        nuevaBaja.setSemestre(null);
-        nuevaBaja.setBloque(null);
-        nuevaBaja.setIdPrograma(null);
-        nuevaBaja.setIdEvento(null);
-        nuevaBaja.setIdPeriodo(null);
+        limpiarDetallesBaja();
 
-        if (nuevaBaja.getIdPlan() != null) {
+        if (bajaParcialOTemporal && nuevaBaja.getIdPlan() != null) {
             semestres = bajaUsuarioService.obtenerSemestres(nuevaBaja.getIdPlan());
             periodos = bajaUsuarioService.obtenerPeriodos();
         }
     }
 
     public void onSemestreChange() {
-        bloques.clear();
-        programas.clear();
-        eventos.clear();
         nuevaBaja.setBloque(null);
         nuevaBaja.setIdPrograma(null);
         nuevaBaja.setIdEvento(null);
+        bloques.clear();
+        programas.clear();
+        eventos.clear();
 
-        if (nuevaBaja.getSemestre() != null) {
+        if (bajaParcialOTemporal && nuevaBaja.getSemestre() != null) {
             bloques = bajaUsuarioService.obtenerBloques(nuevaBaja.getSemestre());
             programas = bajaUsuarioService.obtenerProgramas(nuevaBaja.getSemestre());
         }
     }
 
     public void onBloqueChange() {
-        programas.clear();
-        eventos.clear();
         nuevaBaja.setIdPrograma(null);
         nuevaBaja.setIdEvento(null);
-        if (nuevaBaja.getBloque() != null) {
+        programas.clear();
+        eventos.clear();
+        if (bajaParcialOTemporal && nuevaBaja.getBloque() != null) {
             programas = bajaUsuarioService.obtenerProgramas(nuevaBaja.getBloque());
         }
     }
@@ -143,7 +132,7 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
     public void onProgramaChange() {
         eventos.clear();
         nuevaBaja.setIdEvento(null);
-        if (nuevaBaja.getIdPrograma() != null && nuevaBaja.getIdPeriodo() != null) {
+        if (bajaParcialOTemporal && nuevaBaja.getIdPrograma() != null && nuevaBaja.getIdPeriodo() != null) {
             String nombrePeriodo = obtenerDescripcionPorId(periodos, nuevaBaja.getIdPeriodo().longValue());
             eventos = bajaUsuarioService.obtenerEventos(nombrePeriodo, nuevaBaja.getIdPrograma());
         }
@@ -153,7 +142,7 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         eventos.clear();
         nuevaBaja.setIdEvento(null);
 
-        if (nuevaBaja.getIdPrograma() != null && nuevaBaja.getIdPeriodo() != null) {
+        if (bajaParcialOTemporal && nuevaBaja.getIdPrograma() != null && nuevaBaja.getIdPeriodo() != null) {
             String nombrePeriodo = obtenerDescripcionPorId(periodos, nuevaBaja.getIdPeriodo().longValue());
             eventos = bajaUsuarioService.obtenerEventos(nombrePeriodo, nuevaBaja.getIdPrograma());
         }
@@ -161,6 +150,7 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
 
     public void aplicarBaja() {
         List<String> errores = new ArrayList<>();
+        bajaParcialOTemporal = esBajaParcialOTemporalSeleccionada();
         if (!usuarioValidado || nuevaBaja.getIdPersona() == null) {
             errores.add("Debe validar la matrícula antes de aplicar la baja");
         }
@@ -170,7 +160,7 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         if (nuevaBaja.getIdPlan() == null) {
             errores.add("Seleccione el plan");
         }
-        boolean bajaDetallada = isBajaParcialOTemporal();
+        boolean bajaDetallada = bajaParcialOTemporal;
         if (bajaDetallada) {
             if (nuevaBaja.getSemestre() == null) {
                 errores.add("Seleccione el semestre");
@@ -206,6 +196,38 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
     }
 
     public boolean isBajaParcialOTemporal() {
+        return bajaParcialOTemporal;
+    }
+
+    private void prepararListasDetalle() {
+        if (nuevaBaja.getIdPlan() == null) {
+            limpiarDetallesBaja();
+            return;
+        }
+
+        if (semestres.isEmpty()) {
+            semestres = bajaUsuarioService.obtenerSemestres(nuevaBaja.getIdPlan());
+        }
+        if (periodos.isEmpty()) {
+            periodos = bajaUsuarioService.obtenerPeriodos();
+        }
+        if (nuevaBaja.getSemestre() != null) {
+            if (bloques.isEmpty()) {
+                bloques = bajaUsuarioService.obtenerBloques(nuevaBaja.getSemestre());
+            }
+            if (programas.isEmpty()) {
+                programas = nuevaBaja.getBloque() != null
+                        ? bajaUsuarioService.obtenerProgramas(nuevaBaja.getBloque())
+                        : bajaUsuarioService.obtenerProgramas(nuevaBaja.getSemestre());
+            }
+        }
+        if (nuevaBaja.getIdPrograma() != null && nuevaBaja.getIdPeriodo() != null) {
+            String nombrePeriodo = obtenerDescripcionPorId(periodos, nuevaBaja.getIdPeriodo().longValue());
+            eventos = bajaUsuarioService.obtenerEventos(nombrePeriodo, nuevaBaja.getIdPrograma());
+        }
+    }
+
+    private boolean esBajaParcialOTemporalSeleccionada() {
         if (nuevaBaja.getIdTipoBaja() == null) {
             return false;
         }
@@ -213,6 +235,19 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
                 .filter(tipo -> tipo.getId().equals(nuevaBaja.getIdTipoBaja()))
                 .map(CatalogoOpcionDTO::getDescripcion)
                 .anyMatch(nombre -> StringUtils.containsIgnoreCase(nombre, "parcial") || StringUtils.containsIgnoreCase(nombre, "temporal"));
+    }
+
+    private void limpiarDetallesBaja() {
+        nuevaBaja.setSemestre(null);
+        nuevaBaja.setBloque(null);
+        nuevaBaja.setIdPrograma(null);
+        nuevaBaja.setIdPeriodo(null);
+        nuevaBaja.setIdEvento(null);
+        semestres.clear();
+        bloques.clear();
+        programas.clear();
+        periodos.clear();
+        eventos.clear();
     }
 
     private String obtenerDescripcionPorId(List<CatalogoOpcionDTO> opciones, Long idSeleccionado) {
@@ -228,17 +263,14 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
 
     private void limpiarListasDependientes() {
         planes.clear();
-        semestres.clear();
-        bloques.clear();
-        programas.clear();
-        periodos.clear();
-        eventos.clear();
+        limpiarDetallesBaja();
     }
 
     public void limpiarFormulario() {
         nuevaBaja = new NuevaBajaDTO();
         limpiarListasDependientes();
         usuarioValidado = false;
+        bajaParcialOTemporal = false;
         cargarTiposBaja();
     }
 
