@@ -64,19 +64,27 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
 
     public void buscarPorMatricula() {
         limpiarListasDependientes();
-        if (StringUtils.isBlank(nuevaBaja.getMatricula())) {
+        usuarioValidado = false;
+        nuevaBaja.setIdPersona(null);
+        String matriculaCapturada = nuevaBaja.getMatricula();
+        LOGGER.info("buscarPorMatricula invocado con valor capturado: '" + matriculaCapturada + "'");
+        String matriculaNormalizada = StringUtils.upperCase(StringUtils.trimToEmpty(matriculaCapturada));
+        nuevaBaja.setMatricula(matriculaNormalizada);
+
+        if (StringUtils.isBlank(matriculaNormalizada)) {
+            LOGGER.warn("Búsqueda cancelada: la matrícula está vacía o en blanco");
             agregarMsgError("Debe capturar la matrícula o usuario", null);
             usuarioValidado = false;
             return;
         }
 
         try {
-            LOGGER.info("Iniciando búsqueda de usuario con matrícula: " + nuevaBaja.getMatricula());
-            Optional<Long> persona = bajaUsuarioService.buscarPersonaPorMatricula(nuevaBaja.getMatricula());
+            LOGGER.info("Iniciando búsqueda de usuario con matrícula normalizada: " + matriculaNormalizada);
+            Optional<Long> persona = bajaUsuarioService.buscarPersonaPorMatricula(matriculaNormalizada);
             if (!persona.isPresent()) {
-                mensajeUsuarioNoEncontrado = "El usuario con matrícula " + nuevaBaja.getMatricula()
+                mensajeUsuarioNoEncontrado = "El usuario con matrícula " + matriculaNormalizada
                         + " no existe en el sistema. Verifique la información.";
-                LOGGER.warn("No se encontró información para la matrícula: " + nuevaBaja.getMatricula());
+                LOGGER.warn("No se encontró información para la matrícula: " + matriculaNormalizada);
                 usuarioValidado = false;
                 RequestContext context = RequestContext.getCurrentInstance();
                 context.update("frmNuevaBaja:dlgUsuarioNoEncontrado");
@@ -85,11 +93,11 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
             }
 
             nuevaBaja.setIdPersona(persona.get());
-            LOGGER.info("Matrícula " + nuevaBaja.getMatricula() + " encontrada con id de persona: " + persona.get());
+            LOGGER.info("Matrícula " + matriculaNormalizada + " encontrada con id de persona: " + persona.get());
             mensajeUsuarioNoEncontrado = "";
             planes = bajaUsuarioService.obtenerPlanes();
             LOGGER.info("Se recuperaron " + (planes != null ? planes.size() : 0)
-                    + " planes activos para la matrícula " + nuevaBaja.getMatricula());
+                    + " planes activos para la matrícula " + matriculaNormalizada);
             usuarioValidado = true;
 
             if (planes.isEmpty()) {
