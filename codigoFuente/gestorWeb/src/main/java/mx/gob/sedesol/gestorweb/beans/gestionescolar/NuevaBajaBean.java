@@ -73,7 +73,7 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
     }
 
     public void buscarPorMatricula() {
-        limpiarListasDependientes();
+        prepararNuevaBusqueda();
         if (StringUtils.isBlank(nuevaBaja.getMatricula())) {
             agregarMsgError("Debe capturar la matrícula o usuario", null);
             usuarioValidado = false;
@@ -266,11 +266,17 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         limpiarDetallesBaja();
     }
 
+    private void prepararNuevaBusqueda() {
+        limpiarListasDependientes();
+        nuevaBaja.setIdTipoBaja(null);
+        nuevaBaja.setIdPlan(null);
+        bajaParcialOTemporal = false;
+        usuarioValidado = false;
+    }
+
     public void limpiarFormulario() {
         nuevaBaja = new NuevaBajaDTO();
-        limpiarListasDependientes();
-        usuarioValidado = false;
-        bajaParcialOTemporal = false;
+        prepararNuevaBusqueda();
         cargarTiposBaja();
     }
 
