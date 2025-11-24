@@ -17,17 +17,166 @@
 
                 <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaBaja')}"
                          styleClass="panel-primary">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.mensaje.pendiente')}" />
+
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6 col-xs-12">
+                                <p:outputLabel styleClass="bloque requerido" for="matricula" value="Matrícula/Usuario:" />
+                                <p:inputText id="matricula"
+                                             value="#{nuevaBajaUsuarioBean.matriculaUsuario}"
+                                             styleClass="form-control"
+                                             required="true"
+                                             requiredMessage="La matrícula es obligatoria" />
+                                <p:message for="matricula" display="text" />
+                            </div>
+
+                            <div class="col-md-6 col-xs-12">
+                                <p:outputLabel styleClass="bloque requerido" for="tipoBaja" value="Tipo de baja:" />
+                                <p:selectOneMenu id="tipoBaja"
+                                                 value="#{nuevaBajaUsuarioBean.idTipoBaja}"
+                                                 styleClass="col-xs-12"
+                                                 required="true"
+                                                 requiredMessage="Seleccione un tipo de baja">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                    <f:selectItems value="#{nuevaBajaUsuarioBean.tiposBaja}" />
+                                </p:selectOneMenu>
+                                <p:message for="tipoBaja" display="text" />
+                            </div>
                         </div>
                     </div>
-                    <div class="row" style="margin-top: 15px;">
-                        <div class="col-md-12 text-right">
-                            <p:commandButton value="#{sistema.obtenerTexto('gw.ge.texto.regresar')}"
-                                             action="#{altasBajasUsuariosBean.regresarAlModulo}"
-                                             styleClass="btn btn-default"
-                                             ajax="false" />
+
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6 col-xs-12">
+                                <p:outputLabel styleClass="bloque requerido" for="plan" value="Plan:" />
+                                <p:selectOneMenu id="plan"
+                                                 value="#{nuevaBajaUsuarioBean.idPlan}"
+                                                 styleClass="col-xs-12"
+                                                 required="true"
+                                                 requiredMessage="Seleccione un plan">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                    <f:selectItems value="#{nuevaBajaUsuarioBean.planes}" />
+                                    <p:ajax event="change"
+                                            process="@this"
+                                            listener="#{nuevaBajaUsuarioBean.onPlanChange}"
+                                            update="semestre bloque programa" />
+                                </p:selectOneMenu>
+                                <p:message for="plan" display="text" />
+                            </div>
+
+                            <div class="col-md-6 col-xs-12">
+                                <p:outputLabel styleClass="bloque" for="semestre" value="Semestre:" />
+                                <p:selectOneMenu id="semestre"
+                                                 value="#{nuevaBajaUsuarioBean.idSemestre}"
+                                                 styleClass="col-xs-12">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                    <f:selectItems value="#{nuevaBajaUsuarioBean.semestres}" />
+                                    <p:ajax event="change"
+                                            process="@this"
+                                            listener="#{nuevaBajaUsuarioBean.onSemestreChange}"
+                                            update="bloque programa" />
+                                </p:selectOneMenu>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6 col-xs-12">
+                                <p:outputLabel styleClass="bloque" for="bloque" value="Bloque:" />
+                                <p:selectOneMenu id="bloque"
+                                                 value="#{nuevaBajaUsuarioBean.idBloque}"
+                                                 styleClass="col-xs-12">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                    <f:selectItems value="#{nuevaBajaUsuarioBean.bloques}" />
+                                    <p:ajax event="change"
+                                            process="@this"
+                                            listener="#{nuevaBajaUsuarioBean.onBloqueChange}"
+                                            update="programa" />
+                                </p:selectOneMenu>
+                            </div>
+
+                            <div class="col-md-6 col-xs-12">
+                                <p:outputLabel styleClass="bloque" for="programa" value="Asignatura/Programa:" />
+                                <p:selectOneMenu id="programa"
+                                                 value="#{nuevaBajaUsuarioBean.idPrograma}"
+                                                 styleClass="col-xs-12">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                    <f:selectItems value="#{nuevaBajaUsuarioBean.programas}" />
+                                </p:selectOneMenu>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6 col-xs-12">
+                                <p:outputLabel styleClass="bloque" for="periodo" value="Periodo:" />
+                                <p:selectOneMenu id="periodo"
+                                                 value="#{nuevaBajaUsuarioBean.idPeriodo}"
+                                                 styleClass="col-xs-12">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                    <f:selectItems value="#{nuevaBajaUsuarioBean.periodos}" />
+                                </p:selectOneMenu>
+                            </div>
+
+                            <div class="col-md-6 col-xs-12">
+                                <p:outputLabel styleClass="bloque" for="evento" value="Evento:" />
+                                <p:selectOneMenu id="evento"
+                                                 value="#{nuevaBajaUsuarioBean.idEvento}"
+                                                 styleClass="col-xs-12">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                    <f:selectItems value="#{nuevaBajaUsuarioBean.eventos}" />
+                                </p:selectOneMenu>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-12 col-xs-12">
+                                <p:outputLabel styleClass="bloque" for="motivo" value="Motivo:" />
+                                <p:inputTextarea id="motivo"
+                                                value="#{nuevaBajaUsuarioBean.motivo}"
+                                                styleClass="form-control"
+                                                rows="3" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6 col-xs-12">
+                                <p:outputLabel styleClass="bloque" for="quien" value="Quién aplica la baja:" />
+                                <p:inputText id="quien"
+                                             value="#{nuevaBajaUsuarioBean.quienAplica}"
+                                             styleClass="form-control" />
+                            </div>
+
+                            <div class="col-md-6 col-xs-12">
+                                <p:outputLabel styleClass="bloque" for="numero" value="Número de solicitud:" />
+                                <p:inputText id="numero"
+                                             value="#{nuevaBajaUsuarioBean.numeroSolicitud}"
+                                             styleClass="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-12 text-right">
+                                <p:commandButton value="Cancelar" process="@this"
+                                                 update="@form"
+                                                 action="#{altasBajasUsuariosBean.regresarAlModulo}"
+                                                 ajax="false"
+                                                 styleClass="btn btn-default" />
+
+                                <p:commandButton value="Agregar"
+                                                 actionListener="#{nuevaBajaUsuarioBean.registrarBaja}"
+                                                 process="@form"
+                                                 update="@form"
+                                                 styleClass="btn btn-primary pull-right" />
+                            </div>
                         </div>
                     </div>
                 </p:panel>
