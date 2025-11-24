@@ -13,6 +13,7 @@ import javax.faces.model.SelectItem;
 import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaSolicitudDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
 import mx.gob.sedesol.basegestor.service.gestionescolar.NuevaBajaService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
@@ -37,6 +38,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private String quienAplica;
     private String numeroSolicitud;
 
+    private List<NodoDTO> catalogoTiposBaja;
     private List<SelectItem> tiposBaja;
     private List<SelectItem> planes;
     private List<SelectItem> semestres;
@@ -45,6 +47,15 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private List<SelectItem> periodos;
     private List<SelectItem> eventos;
 
+    private boolean mostrarSemestre;
+    private boolean mostrarBloque;
+    private boolean mostrarPrograma;
+    private boolean mostrarPeriodo;
+    private boolean mostrarEvento;
+    private boolean esTipoDefinitiva;
+    private boolean esTipoTemporalOParcial;
+    private boolean esSinAsignaturas;
+
     @javax.faces.bean.ManagedProperty(value = "#{nuevaBajaService}")
     private NuevaBajaService nuevaBajaService;
 
@@ -52,7 +63,16 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     public void init() {
         LOGGER.info("Inicializando formulario de nueva baja de usuario");
         cargarCatalogos();
+        mostrarSemestre = true;
+        mostrarBloque = true;
+        mostrarPrograma = true;
+        mostrarPeriodo = true;
+        mostrarEvento = true;
         limpiarFormulario();
+    }
+
+    public void onTipoBajaChange() {
+        actualizarVisibilidadCampos();
     }
 
     public void onPlanChange() {
@@ -92,13 +112,34 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             errores.add("Seleccione un plan");
         }
 
+        if (semestreRequerido() && idSemestre == null) {
+            errores.add("Seleccione un semestre");
+        }
+
+        if (mostrarPrograma && idPrograma == null && !esTipoDefinitiva) {
+            errores.add("Seleccione un programa");
+        }
+
+        if (mostrarPeriodo && (idPeriodo == null || idPeriodo.trim().isEmpty()) && !esTipoDefinitiva) {
+            errores.add("Seleccione un periodo");
+        }
+
         if (!errores.isEmpty()) {
             errores.forEach(error -> agregarMsgError(error, null));
             return;
         }
 
-        agregarMsgInfo("Baja registrada correctamente", null);
-        limpiarFormulario();
+        try {
+            BajaSolicitudDTO solicitud = construirSolicitud();
+            nuevaBajaService.aplicarBaja(solicitud);
+            agregarMsgInfo("Baja aplicada correctamente", null);
+            limpiarFormulario();
+        } catch (IllegalArgumentException ex) {
+            agregarMsgError(ex.getMessage(), null);
+        } catch (Exception ex) {
+            LOGGER.error("Error al registrar la baja", ex);
+            agregarMsgError("Ocurrió un error al registrar la baja", null);
+        }
     }
 
     public void limpiarFormulario() {
@@ -118,10 +159,20 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         bloques = Collections.emptyList();
         programas = Collections.emptyList();
         eventos = Collections.emptyList();
+
+        esTipoDefinitiva = false;
+        esTipoTemporalOParcial = false;
+        esSinAsignaturas = false;
+        mostrarSemestre = true;
+        mostrarBloque = true;
+        mostrarPrograma = true;
+        mostrarPeriodo = true;
+        mostrarEvento = true;
     }
 
     private void cargarCatalogos() {
-        tiposBaja = convertirANodosSelectItem(nuevaBajaService.obtenerTiposBaja());
+        catalogoTiposBaja = nuevaBajaService.obtenerTiposBaja();
+        tiposBaja = convertirANodosSelectItem(catalogoTiposBaja);
         planes = convertirAPlanesSelectItem(nuevaBajaService.obtenerPlanes());
         periodos = convertirAPeriodosSelectItem(nuevaBajaService.obtenerPeriodos());
         eventos = Collections.emptyList();
@@ -155,6 +206,85 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             eventos = Collections.emptyList();
         }
         idEvento = null;
+    }
+
+    private void actualizarVisibilidadCampos() {
+        NodoDTO tipoSeleccionado = obtenerTipoSeleccionado();
+        String nombreTipo = tipoSeleccionado != null ? tipoSeleccionado.getNombre() : null;
+
+        esTipoDefinitiva = contieneTexto(nombreTipo, "definitiva");
+        esTipoTemporalOParcial = contieneTexto(nombreTipo, "temporal") || contieneTexto(nombreTipo, "parcial");
+        esSinAsignaturas = contieneTexto(nombreTipo, "sin asignaturas");
+
+        mostrarSemestre = !esTipoDefinitiva;
+        mostrarBloque = !esTipoDefinitiva && !esTipoTemporalOParcial;
+        mostrarPrograma = !esTipoDefinitiva;
+        mostrarPeriodo = !esTipoDefinitiva;
+        mostrarEvento = !esTipoDefinitiva;
+
+        if (esTipoDefinitiva) {
+            limpiarCamposAcademicos();
+        } else if (esTipoTemporalOParcial) {
+            idBloque = null;
+            bloques = Collections.emptyList();
+        } else if (semestres.isEmpty() && idPlan != null) {
+            semestres = obtenerSemestres(idPlan);
+        }
+    }
+
+    private void limpiarCamposAcademicos() {
+        idSemestre = null;
+        idBloque = null;
+        idPrograma = null;
+        idPeriodo = null;
+        idEvento = null;
+
+        semestres = Collections.emptyList();
+        bloques = Collections.emptyList();
+        programas = Collections.emptyList();
+        eventos = Collections.emptyList();
+    }
+
+    private BajaSolicitudDTO construirSolicitud() {
+        BajaSolicitudDTO solicitud = new BajaSolicitudDTO();
+        solicitud.setMatriculaUsuario(matriculaUsuario != null ? matriculaUsuario.trim() : null);
+        solicitud.setIdTipoBaja(idTipoBaja);
+        solicitud.setNombreTipoBaja(obtenerNombreTipoBaja());
+        solicitud.setIdPlan(idPlan);
+        solicitud.setIdSemestre(idSemestre);
+        solicitud.setIdBloque(idBloque);
+        solicitud.setIdPrograma(idPrograma);
+        solicitud.setIdPeriodo(idPeriodo);
+        solicitud.setIdEvento(idEvento);
+        solicitud.setMotivo(motivo);
+        solicitud.setQuienAplica(quienAplica);
+        solicitud.setNumeroSolicitud(numeroSolicitud);
+        return solicitud;
+    }
+
+    private NodoDTO obtenerTipoSeleccionado() {
+        if (catalogoTiposBaja == null || idTipoBaja == null) {
+            return null;
+        }
+        for (NodoDTO tipo : catalogoTiposBaja) {
+            if (tipo.getId() != null && idTipoBaja.equals(tipo.getId().longValue())) {
+                return tipo;
+            }
+        }
+        return null;
+    }
+
+    private String obtenerNombreTipoBaja() {
+        NodoDTO tipo = obtenerTipoSeleccionado();
+        return tipo != null ? tipo.getNombre() : null;
+    }
+
+    private boolean contieneTexto(String origen, String texto) {
+        return origen != null && texto != null && origen.toLowerCase().contains(texto.toLowerCase());
+    }
+
+    public boolean semestreRequerido() {
+        return mostrarSemestre && esTipoTemporalOParcial;
     }
 
     private List<SelectItem> convertirANodosSelectItem(List<NodoDTO> nodos) {
@@ -329,6 +459,46 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     public void setEventos(List<SelectItem> eventos) {
         this.eventos = eventos;
+    }
+
+    public boolean isMostrarSemestre() {
+        return mostrarSemestre;
+    }
+
+    public void setMostrarSemestre(boolean mostrarSemestre) {
+        this.mostrarSemestre = mostrarSemestre;
+    }
+
+    public boolean isMostrarBloque() {
+        return mostrarBloque;
+    }
+
+    public void setMostrarBloque(boolean mostrarBloque) {
+        this.mostrarBloque = mostrarBloque;
+    }
+
+    public boolean isMostrarPrograma() {
+        return mostrarPrograma;
+    }
+
+    public void setMostrarPrograma(boolean mostrarPrograma) {
+        this.mostrarPrograma = mostrarPrograma;
+    }
+
+    public boolean isMostrarPeriodo() {
+        return mostrarPeriodo;
+    }
+
+    public void setMostrarPeriodo(boolean mostrarPeriodo) {
+        this.mostrarPeriodo = mostrarPeriodo;
+    }
+
+    public boolean isMostrarEvento() {
+        return mostrarEvento;
+    }
+
+    public void setMostrarEvento(boolean mostrarEvento) {
+        this.mostrarEvento = mostrarEvento;
     }
 
     public NuevaBajaService getNuevaBajaService() {

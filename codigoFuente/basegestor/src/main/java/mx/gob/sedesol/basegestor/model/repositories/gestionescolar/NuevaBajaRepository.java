@@ -10,7 +10,10 @@ import javax.persistence.Query;
 import org.springframework.stereotype.Repository;
 
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaAplicacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class NuevaBajaRepository implements INuevaBajaRepository {
@@ -115,11 +118,116 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
         return eventos;
     }
 
+    @Override
+    @Transactional
+    public Long insertarMotivoBaja(Long idTipoBaja, String descripcion) {
+        String consulta = "INSERT INTO rel_motivo_baja (tipo_baja_id, descripcion) VALUES (:idTipoBaja, :descripcion)";
+        entityManager.createNativeQuery(consulta)
+                .setParameter("idTipoBaja", idTipoBaja)
+                .setParameter("descripcion", descripcion)
+                .executeUpdate();
+
+        Query query = entityManager.createNativeQuery("SELECT LAST_INSERT_ID()");
+        return obtenerLong(query.getSingleResult());
+    }
+
+    @Override
+    public Long obtenerIdProcesoBaja() {
+        String consulta = "SELECT tpi.id_tipo_proceso FROM tbl_procesos_inscripcion tpi WHERE  tpi.nombre LIKE 'bajas' limit 1";
+        Query query = entityManager.createNativeQuery(consulta);
+        Object resultado = query.getSingleResult();
+        return obtenerLong(resultado);
+    }
+
+    @Override
+    public Long obtenerIdPersonaPorMatricula(String matricula) {
+        String consulta = "SELECT tp.id_persona FROM tbl_persona tp WHERE tp.sso_idUsuario = :matricula LIMIT 1";
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("matricula", matricula);
+        List<?> resultados = query.getResultList();
+        return resultados.isEmpty() ? null : obtenerLong(resultados.get(0));
+    }
+
+    @Override
+    public BajaMatriculacionDTO consultarMatriculacionPorEvento(String matricula, Long idEvento) {
+        if (idEvento == null) {
+            return null;
+        }
+
+        String consulta = "SELECT\n"
+                + "    (SELECT tpl.id_plan FROM tbl_planes tpl\n"
+                + "        JOIN tbl_ficha_descriptiva_programa tfdp ON tpl.id_plan = tfdp.id_plan\n"
+                + "        JOIN tbl_eventos te ON te.id_programa = tfdp.id_programa AND te.id_evento = :idEvento) AS id_plan,\n"
+                + "    (SELECT tfdp.id_programa FROM tbl_ficha_descriptiva_programa tfdp\n"
+                + "        JOIN tbl_eventos te ON te.id_programa = tfdp.id_programa AND te.id_evento = :idEvento) AS id_programa,\n"
+                + "    (SELECT te.id_evento FROM tbl_eventos te\n"
+                + "        JOIN tbl_grupos tg ON tg.id_evento = te.id_evento\n"
+                + "        JOIN rel_grupo_participante rgp ON tg.id = rgp.id_grupo AND rgp.id_persona_participante = tp.id_persona\n"
+                + "     WHERE tg.id_evento = :idEvento) AS id_evento,\n"
+                + "    (SELECT tg.id FROM tbl_grupos tg\n"
+                + "              JOIN rel_grupo_participante rgp ON tg.id = rgp.id_grupo AND rgp.id_persona_participante = tp.id_persona\n"
+                + "              WHERE tg.id_evento = :idEvento ) AS id_grupo\n"
+                + "FROM tbl_persona tp WHERE tp.sso_idUsuario = :matricula";
+
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("matricula", matricula);
+        query.setParameter("idEvento", idEvento);
+        List<Object[]> resultados = query.getResultList();
+
+        if (resultados.isEmpty()) {
+            return null;
+        }
+
+        Object[] fila = resultados.get(0);
+        BajaMatriculacionDTO dto = new BajaMatriculacionDTO();
+        dto.setIdPlan(obtenerLong(fila[0]));
+        dto.setIdPrograma(obtenerLong(fila[1]));
+        dto.setIdEvento(obtenerLong(fila[2]));
+        dto.setIdGrupo(obtenerLong(fila[3]));
+        return dto;
+    }
+
+    @Override
+    public Integer obtenerIdUsuarioMoodle(String matricula) {
+        String consulta = "SELECT rppm.id_persona_moodle FROM rel_personas_plataformas_moodle rppm\n"
+                + "    JOIN tbl_persona tp ON tp.id_persona = rppm.id_persona\n"
+                + "WHERE  tp.sso_idUsuario = :matricula LIMIT 1";
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("matricula", matricula);
+        List<?> resultados = query.getResultList();
+        return resultados.isEmpty() ? null : obtenerEntero(resultados.get(0));
+    }
+
+    @Override
+    @Transactional
+    public void insertarBaja(BajaAplicacionDTO bajaAplicacionDTO) {
+        String consulta = "INSERT INTO rel_persona_bajas (id_persona, motivo_baja_id, proceso_id, id_plan, id_programa, id_evento, id_grupo, id_user_enrolments_lms, quien_aplica_baja, contabilizar, no_solicitud)"
+                + " VALUES (:idPersona, :motivoBajaId, :procesoId, :idPlan, :idPrograma, :idEvento, :idGrupo, :idUserEnrolmentsLms, :quienAplicaBaja, :contabilizar, :numeroSolicitud)";
+
+        entityManager.createNativeQuery(consulta)
+                .setParameter("idPersona", bajaAplicacionDTO.getIdPersona())
+                .setParameter("motivoBajaId", bajaAplicacionDTO.getMotivoBajaId())
+                .setParameter("procesoId", bajaAplicacionDTO.getProcesoId())
+                .setParameter("idPlan", bajaAplicacionDTO.getIdPlan())
+                .setParameter("idPrograma", bajaAplicacionDTO.getIdPrograma())
+                .setParameter("idEvento", bajaAplicacionDTO.getIdEvento())
+                .setParameter("idGrupo", bajaAplicacionDTO.getIdGrupo())
+                .setParameter("idUserEnrolmentsLms", bajaAplicacionDTO.getIdUserEnrolmentsLms())
+                .setParameter("quienAplicaBaja", bajaAplicacionDTO.getQuienAplicaBaja())
+                .setParameter("contabilizar", bajaAplicacionDTO.getContabilizar())
+                .setParameter("numeroSolicitud", bajaAplicacionDTO.getNumeroSolicitud())
+                .executeUpdate();
+    }
+
     private Integer obtenerEntero(Object valor) {
         return valor != null ? Integer.valueOf(valor.toString()) : null;
     }
 
     private String obtenerCadena(Object valor) {
         return valor != null ? valor.toString() : null;
+    }
+
+    private Long obtenerLong(Object valor) {
+        return valor != null ? Long.valueOf(valor.toString()) : null;
     }
 }

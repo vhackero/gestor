@@ -3,6 +3,7 @@ package mx.gob.sedesol.basegestor.service.gestionescolar;
 import java.util.List;
 
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaSolicitudDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
 
 public interface NuevaBajaService {
@@ -20,4 +21,6 @@ public interface NuevaBajaService {
     List<String> obtenerPeriodos();
 
     List<NodoDTO> obtenerEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma);
+
+    void aplicarBaja(BajaSolicitudDTO solicitud);
 }

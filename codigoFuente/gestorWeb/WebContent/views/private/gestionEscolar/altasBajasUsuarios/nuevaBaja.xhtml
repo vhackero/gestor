@@ -39,6 +39,10 @@
                                                  requiredMessage="Seleccione un tipo de baja">
                                     <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
                                     <f:selectItems value="#{nuevaBajaUsuarioBean.tiposBaja}" />
+                                    <p:ajax event="change"
+                                            process="@this"
+                                            listener="#{nuevaBajaUsuarioBean.onTipoBajaChange}"
+                                            update="plan semestrePanel bloquePanel programaPanel periodoPanel eventoPanel" />
                                 </p:selectOneMenu>
                                 <p:message for="tipoBaja" display="text" />
                             </div>
@@ -59,84 +63,103 @@
                                     <p:ajax event="change"
                                             process="@this"
                                             listener="#{nuevaBajaUsuarioBean.onPlanChange}"
-                                            update="semestre bloque programa evento" />
+                                            update="semestrePanel bloquePanel programaPanel periodoPanel eventoPanel" />
                                 </p:selectOneMenu>
                                 <p:message for="plan" display="text" />
                             </div>
 
-                            <div class="col-md-6 col-xs-12">
-                                <p:outputLabel styleClass="bloque" for="semestre" value="Semestre:" />
-                                <p:selectOneMenu id="semestre"
-                                                 value="#{nuevaBajaUsuarioBean.idSemestre}"
-                                                 styleClass="col-xs-12">
-                                    <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-                                    <f:selectItems value="#{nuevaBajaUsuarioBean.semestres}" />
-                                    <p:ajax event="change"
-                                            process="@this"
-                                            listener="#{nuevaBajaUsuarioBean.onSemestreChange}"
-                                            update="bloque programa evento" />
-                                </p:selectOneMenu>
-                            </div>
+                            <h:panelGroup id="semestrePanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarSemestre}">
+                                <div class="col-md-6 col-xs-12">
+                                    <p:outputLabel styleClass="bloque" for="semestre" value="Semestre:" />
+                                    <p:selectOneMenu id="semestre"
+                                                     value="#{nuevaBajaUsuarioBean.idSemestre}"
+                                                     styleClass="col-xs-12"
+                                                     required="#{nuevaBajaUsuarioBean.semestreRequerido()}"
+                                                     requiredMessage="Seleccione un semestre">
+                                        <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                        <f:selectItems value="#{nuevaBajaUsuarioBean.semestres}" />
+                                        <p:ajax event="change"
+                                                process="@this"
+                                                listener="#{nuevaBajaUsuarioBean.onSemestreChange}"
+                                                update="bloquePanel programaPanel eventoPanel" />
+                                    </p:selectOneMenu>
+                                    <p:message for="semestre" display="text" />
+                                </div>
+                            </h:panelGroup>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <div class="row">
-                            <div class="col-md-6 col-xs-12">
-                                <p:outputLabel styleClass="bloque" for="bloque" value="Bloque:" />
-                                <p:selectOneMenu id="bloque"
-                                                 value="#{nuevaBajaUsuarioBean.idBloque}"
-                                                 styleClass="col-xs-12">
-                                    <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-                                    <f:selectItems value="#{nuevaBajaUsuarioBean.bloques}" />
-                                    <p:ajax event="change"
-                                            process="@this"
-                                            listener="#{nuevaBajaUsuarioBean.onBloqueChange}"
-                                            update="programa evento" />
-                                </p:selectOneMenu>
-                            </div>
-
-                            <div class="col-md-6 col-xs-12">
-                                <p:outputLabel styleClass="bloque" for="programa" value="Asignatura/Programa:" />
-                                    <p:selectOneMenu id="programa"
-                                                     value="#{nuevaBajaUsuarioBean.idPrograma}"
+                            <h:panelGroup id="bloquePanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarBloque}">
+                                <div class="col-md-6 col-xs-12">
+                                    <p:outputLabel styleClass="bloque" for="bloque" value="Bloque:" />
+                                    <p:selectOneMenu id="bloque"
+                                                     value="#{nuevaBajaUsuarioBean.idBloque}"
                                                      styleClass="col-xs-12">
                                         <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-                                        <f:selectItems value="#{nuevaBajaUsuarioBean.programas}" />
+                                        <f:selectItems value="#{nuevaBajaUsuarioBean.bloques}" />
                                         <p:ajax event="change"
                                                 process="@this"
-                                                listener="#{nuevaBajaUsuarioBean.onProgramaChange}"
-                                                update="evento" />
+                                                listener="#{nuevaBajaUsuarioBean.onBloqueChange}"
+                                                update="programaPanel eventoPanel" />
                                     </p:selectOneMenu>
-                            </div>
+                                </div>
+                            </h:panelGroup>
+
+                            <h:panelGroup id="programaPanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarPrograma}">
+                                <div class="col-md-6 col-xs-12">
+                                    <p:outputLabel styleClass="bloque" for="programa" value="Asignatura/Programa:" />
+                                        <p:selectOneMenu id="programa"
+                                                         value="#{nuevaBajaUsuarioBean.idPrograma}"
+                                                         styleClass="col-xs-12"
+                                                         required="#{nuevaBajaUsuarioBean.mostrarPrograma}"
+                                                         requiredMessage="Seleccione un programa">
+                                            <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                            <f:selectItems value="#{nuevaBajaUsuarioBean.programas}" />
+                                            <p:ajax event="change"
+                                                    process="@this"
+                                                    listener="#{nuevaBajaUsuarioBean.onProgramaChange}"
+                                                    update="eventoPanel" />
+                                        </p:selectOneMenu>
+                                    <p:message for="programa" display="text" />
+                                </div>
+                            </h:panelGroup>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <div class="row">
-                            <div class="col-md-6 col-xs-12">
-                                <p:outputLabel styleClass="bloque" for="periodo" value="Periodo:" />
-                                    <p:selectOneMenu id="periodo"
-                                                     value="#{nuevaBajaUsuarioBean.idPeriodo}"
+                            <h:panelGroup id="periodoPanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarPeriodo}">
+                                <div class="col-md-6 col-xs-12">
+                                    <p:outputLabel styleClass="bloque" for="periodo" value="Periodo:" />
+                                        <p:selectOneMenu id="periodo"
+                                                         value="#{nuevaBajaUsuarioBean.idPeriodo}"
+                                                         styleClass="col-xs-12"
+                                                         required="#{nuevaBajaUsuarioBean.mostrarPeriodo}"
+                                                         requiredMessage="Seleccione un periodo">
+                                            <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                            <f:selectItems value="#{nuevaBajaUsuarioBean.periodos}" />
+                                            <p:ajax event="change"
+                                                    process="@this"
+                                                    listener="#{nuevaBajaUsuarioBean.onPeriodoChange}"
+                                                    update="eventoPanel" />
+                                        </p:selectOneMenu>
+                                    <p:message for="periodo" display="text" />
+                                </div>
+                            </h:panelGroup>
+
+                            <h:panelGroup id="eventoPanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarEvento}">
+                                <div class="col-md-6 col-xs-12">
+                                    <p:outputLabel styleClass="bloque" for="evento" value="Evento:" />
+                                    <p:selectOneMenu id="evento"
+                                                     value="#{nuevaBajaUsuarioBean.idEvento}"
                                                      styleClass="col-xs-12">
                                         <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-                                        <f:selectItems value="#{nuevaBajaUsuarioBean.periodos}" />
-                                        <p:ajax event="change"
-                                                process="@this"
-                                                listener="#{nuevaBajaUsuarioBean.onPeriodoChange}"
-                                                update="evento" />
+                                        <f:selectItems value="#{nuevaBajaUsuarioBean.eventos}" />
                                     </p:selectOneMenu>
-                            </div>
-
-                            <div class="col-md-6 col-xs-12">
-                                <p:outputLabel styleClass="bloque" for="evento" value="Evento:" />
-                                <p:selectOneMenu id="evento"
-                                                 value="#{nuevaBajaUsuarioBean.idEvento}"
-                                                 styleClass="col-xs-12">
-                                    <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-                                    <f:selectItems value="#{nuevaBajaUsuarioBean.eventos}" />
-                                </p:selectOneMenu>
-                            </div>
+                                </div>
+                            </h:panelGroup>
                         </div>
                     </div>
 
