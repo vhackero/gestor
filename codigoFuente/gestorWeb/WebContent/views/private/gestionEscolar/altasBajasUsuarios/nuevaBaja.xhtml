@@ -96,7 +96,9 @@
                                     <p:outputLabel styleClass="bloque" for="bloque" value="Bloque:" />
                                     <p:selectOneMenu id="bloque"
                                                      value="#{nuevaBajaUsuarioBean.idBloque}"
-                                                     styleClass="col-xs-12">
+                                                     styleClass="col-xs-12"
+                                                     required="#{nuevaBajaUsuarioBean.bloqueRequerido()}"
+                                                     requiredMessage="Seleccione un bloque">
                                         <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
                                         <f:selectItems value="#{nuevaBajaUsuarioBean.bloques}" />
                                         <p:ajax event="change"
@@ -104,6 +106,7 @@
                                                 listener="#{nuevaBajaUsuarioBean.onBloqueChange}"
                                                 update="programaPanel eventoPanel" />
                                     </p:selectOneMenu>
+                                    <p:message for="bloque" display="text" />
                                 </div>
                             </h:panelGroup>
 

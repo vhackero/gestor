@@ -116,11 +116,15 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             errores.add("Seleccione un semestre");
         }
 
-        if (mostrarPrograma && idPrograma == null && !esTipoDefinitiva) {
+        if (mostrarPrograma && idPrograma == null) {
             errores.add("Seleccione un programa");
         }
 
-        if (mostrarPeriodo && (idPeriodo == null || idPeriodo.trim().isEmpty()) && !esTipoDefinitiva) {
+        if (mostrarBloque && esTipoTemporalOParcial && idBloque == null) {
+            errores.add("Seleccione un bloque");
+        }
+
+        if (mostrarPeriodo && (idPeriodo == null || idPeriodo.trim().isEmpty())) {
             errores.add("Seleccione un periodo");
         }
 
@@ -216,28 +220,53 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         esTipoTemporalOParcial = contieneTexto(nombreTipo, "temporal") || contieneTexto(nombreTipo, "parcial");
         esSinAsignaturas = contieneTexto(nombreTipo, "sin asignaturas");
 
-        mostrarSemestre = !esTipoDefinitiva;
-        mostrarBloque = !esTipoDefinitiva && !esTipoTemporalOParcial;
-        mostrarPrograma = !esTipoDefinitiva;
-        mostrarPeriodo = !esTipoDefinitiva;
-        mostrarEvento = !esTipoDefinitiva;
+        mostrarSemestre = true;
+        mostrarBloque = true;
+        mostrarPrograma = true;
+        mostrarPeriodo = true;
+        mostrarEvento = true;
 
         if (esTipoDefinitiva) {
-            limpiarCamposAcademicos();
+            mostrarSemestre = false;
+            mostrarBloque = false;
+            mostrarPrograma = false;
+            mostrarEvento = false;
+            prepararValoresParaBajaDefinitiva();
         } else if (esTipoTemporalOParcial) {
-            idBloque = null;
-            bloques = Collections.emptyList();
-        } else if (semestres.isEmpty() && idPlan != null) {
-            semestres = obtenerSemestres(idPlan);
+            if (semestres.isEmpty() && idPlan != null) {
+                semestres = obtenerSemestres(idPlan);
+            }
+        } else {
+            mostrarBloque = true;
+            mostrarEvento = true;
+            restaurarValoresCamposOcultos();
+            if (semestres.isEmpty() && idPlan != null) {
+                semestres = obtenerSemestres(idPlan);
+            }
         }
     }
 
-    private void limpiarCamposAcademicos() {
+    private void prepararValoresParaBajaDefinitiva() {
         idSemestre = null;
         idBloque = null;
-        idPrograma = null;
-        idPeriodo = null;
-        idEvento = null;
+        idPrograma = 0L;
+        idEvento = 0L;
+
+        semestres = Collections.emptyList();
+        bloques = Collections.emptyList();
+        programas = Collections.emptyList();
+        eventos = Collections.emptyList();
+    }
+
+    private void restaurarValoresCamposOcultos() {
+        idSemestre = null;
+        idBloque = null;
+        if (Long.valueOf(0L).equals(idPrograma)) {
+            idPrograma = null;
+        }
+        if (Long.valueOf(0L).equals(idEvento)) {
+            idEvento = null;
+        }
 
         semestres = Collections.emptyList();
         bloques = Collections.emptyList();
@@ -285,6 +314,10 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     public boolean semestreRequerido() {
         return mostrarSemestre && esTipoTemporalOParcial;
+    }
+
+    public boolean bloqueRequerido() {
+        return mostrarBloque && esTipoTemporalOParcial;
     }
 
     private List<SelectItem> convertirANodosSelectItem(List<NodoDTO> nodos) {
