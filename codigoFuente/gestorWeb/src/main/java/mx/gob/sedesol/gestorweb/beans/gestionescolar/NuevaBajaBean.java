@@ -68,8 +68,9 @@ public class NuevaBajaBean extends BaseBean implements Serializable {
         nuevaBaja.setIdPersona(null);
         String matriculaCapturada = nuevaBaja.getMatricula();
         LOGGER.info("buscarPorMatricula invocado con valor capturado: '" + matriculaCapturada + "'");
-        String matriculaNormalizada = StringUtils.upperCase(StringUtils.trimToEmpty(matriculaCapturada));
+        String matriculaNormalizada = StringUtils.lowerCase(StringUtils.trimToEmpty(matriculaCapturada));
         nuevaBaja.setMatricula(matriculaNormalizada);
+        LOGGER.info("Matrícula normalizada (minúsculas): '" + matriculaNormalizada + "'");
 
         if (StringUtils.isBlank(matriculaNormalizada)) {
             LOGGER.warn("Búsqueda cancelada: la matrícula está vacía o en blanco");
