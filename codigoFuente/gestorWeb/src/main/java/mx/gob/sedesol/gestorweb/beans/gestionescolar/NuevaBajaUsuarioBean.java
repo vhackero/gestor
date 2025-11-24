@@ -3,9 +3,7 @@ package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -14,6 +12,9 @@ import javax.faces.model.SelectItem;
 
 import org.apache.log4j.Logger;
 
+import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
+import mx.gob.sedesol.basegestor.service.gestionescolar.NuevaBajaService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 
 @ManagedBean
@@ -30,7 +31,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private Long idSemestre;
     private Long idBloque;
     private Long idPrograma;
-    private Long idPeriodo;
+    private String idPeriodo;
     private Long idEvento;
     private String motivo;
     private String quienAplica;
@@ -44,32 +45,38 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private List<SelectItem> periodos;
     private List<SelectItem> eventos;
 
-    private Map<Long, List<SelectItem>> semestresPorPlan;
-    private Map<Long, List<SelectItem>> bloquesPorSemestre;
-    private Map<Long, List<SelectItem>> programasPorBloque;
-    private Map<Long, List<SelectItem>> programasPorSemestre;
+    @javax.faces.bean.ManagedProperty(value = "#{nuevaBajaService}")
+    private NuevaBajaService nuevaBajaService;
 
     @PostConstruct
     public void init() {
         LOGGER.info("Inicializando formulario de nueva baja de usuario");
-        inicializarCatalogos();
+        cargarCatalogos();
         limpiarFormulario();
     }
 
     public void onPlanChange() {
-        semestres = semestresPorPlan.getOrDefault(idPlan, Collections.emptyList());
+        semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
         idSemestre = null;
         onSemestreChange();
     }
 
     public void onSemestreChange() {
-        bloques = bloquesPorSemestre.getOrDefault(idSemestre, Collections.emptyList());
+        bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
         idBloque = null;
         actualizarProgramas();
     }
 
     public void onBloqueChange() {
         actualizarProgramas();
+    }
+
+    public void onPeriodoChange() {
+        actualizarEventos();
+    }
+
+    public void onProgramaChange() {
+        actualizarEventos();
     }
 
     public void registrarBaja() {
@@ -110,69 +117,74 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         semestres = Collections.emptyList();
         bloques = Collections.emptyList();
         programas = Collections.emptyList();
+        eventos = Collections.emptyList();
     }
 
-    private void inicializarCatalogos() {
-        tiposBaja = new ArrayList<>();
-        tiposBaja.add(new SelectItem(1L, "Baja temporal"));
-        tiposBaja.add(new SelectItem(2L, "Baja definitiva"));
-
-        planes = new ArrayList<>();
-        planes.add(new SelectItem(101L, "Plan de formación inicial"));
-        planes.add(new SelectItem(202L, "Plan de profesionalización"));
-
-        periodos = new ArrayList<>();
-        periodos.add(new SelectItem(301L, "2024-1"));
-        periodos.add(new SelectItem(302L, "2024-2"));
-
-        eventos = new ArrayList<>();
-        eventos.add(new SelectItem(401L, "Evento de inducción"));
-        eventos.add(new SelectItem(402L, "Evento de actualización"));
-
-        inicializarMapasDependencias();
-    }
-
-    private void inicializarMapasDependencias() {
-        semestresPorPlan = new HashMap<>();
-        semestresPorPlan.put(101L, crearListaSelectItem(1L, "Semestre 1", 2L, "Semestre 2"));
-        semestresPorPlan.put(202L, crearListaSelectItem(3L, "Semestre 1", 4L, "Semestre 2", 5L, "Semestre 3"));
-
-        bloquesPorSemestre = new HashMap<>();
-        bloquesPorSemestre.put(1L, crearListaSelectItem(11L, "Bloque A", 12L, "Bloque B"));
-        bloquesPorSemestre.put(2L, crearListaSelectItem(13L, "Bloque C"));
-        bloquesPorSemestre.put(3L, crearListaSelectItem(14L, "Bloque inicial"));
-
-        programasPorBloque = new HashMap<>();
-        programasPorBloque.put(11L, crearListaSelectItem(1011L, "Programa de introducción"));
-        programasPorBloque.put(12L, crearListaSelectItem(1012L, "Programa avanzado"));
-        programasPorBloque.put(14L, crearListaSelectItem(1013L, "Programa base"));
-
-        programasPorSemestre = new HashMap<>();
-        programasPorSemestre.put(2L, crearListaSelectItem(2011L, "Programa por semestre"));
-        programasPorSemestre.put(5L, crearListaSelectItem(2012L, "Programa optativo"));
-    }
-
-    private List<SelectItem> crearListaSelectItem(Object... datos) {
-        List<SelectItem> items = new ArrayList<>();
-        for (int i = 0; i < datos.length - 1; i += 2) {
-            items.add(new SelectItem(datos[i], String.valueOf(datos[i + 1])));
-        }
-        return items;
+    private void cargarCatalogos() {
+        tiposBaja = convertirANodosSelectItem(nuevaBajaService.obtenerTiposBaja());
+        planes = convertirAPlanesSelectItem(nuevaBajaService.obtenerPlanes());
+        periodos = convertirAPeriodosSelectItem(nuevaBajaService.obtenerPeriodos());
+        eventos = Collections.emptyList();
     }
 
     private void actualizarProgramas() {
-        if (idBloque != null && programasPorBloque.containsKey(idBloque)) {
-            programas = programasPorBloque.get(idBloque);
-            return;
-        }
-
-        if (idSemestre != null && programasPorSemestre.containsKey(idSemestre)) {
-            programas = programasPorSemestre.get(idSemestre);
+        Long idEjeCapacitacion = idBloque != null ? idBloque : idSemestre;
+        if (idEjeCapacitacion != null) {
+            programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idEjeCapacitacion));
         } else {
             programas = Collections.emptyList();
         }
 
         idPrograma = null;
+        actualizarEventos();
+    }
+
+    private List<SelectItem> obtenerSemestres(Long idPlanSeleccionado) {
+        return convertirANodosSelectItem(nuevaBajaService.obtenerSemestresPorPlan(idPlanSeleccionado));
+    }
+
+    private List<SelectItem> obtenerBloques(Long idSemestreSeleccionado) {
+        return convertirANodosSelectItem(nuevaBajaService.obtenerBloquesPorSemestre(idSemestreSeleccionado));
+    }
+
+    private void actualizarEventos() {
+        if (idPrograma != null && idPeriodo != null && !idPeriodo.trim().isEmpty()) {
+            eventos = convertirANodosSelectItem(
+                    nuevaBajaService.obtenerEventosPorPeriodoYPrograma(idPeriodo, idPrograma));
+        } else {
+            eventos = Collections.emptyList();
+        }
+        idEvento = null;
+    }
+
+    private List<SelectItem> convertirANodosSelectItem(List<NodoDTO> nodos) {
+        List<SelectItem> items = new ArrayList<>();
+        if (nodos != null) {
+            for (NodoDTO nodo : nodos) {
+                items.add(new SelectItem(nodo.getId() != null ? nodo.getId().longValue() : null, nodo.getNombre()));
+            }
+        }
+        return items;
+    }
+
+    private List<SelectItem> convertirAPlanesSelectItem(List<PlanBajaDTO> planesDisponibles) {
+        List<SelectItem> items = new ArrayList<>();
+        if (planesDisponibles != null) {
+            for (PlanBajaDTO plan : planesDisponibles) {
+                items.add(new SelectItem(plan.getIdPlan() != null ? plan.getIdPlan().longValue() : null, plan.getNombre()));
+            }
+        }
+        return items;
+    }
+
+    private List<SelectItem> convertirAPeriodosSelectItem(List<String> periodosDisponibles) {
+        List<SelectItem> items = new ArrayList<>();
+        if (periodosDisponibles != null) {
+            for (String periodo : periodosDisponibles) {
+                items.add(new SelectItem(periodo, periodo));
+            }
+        }
+        return items;
     }
 
     public String getMatriculaUsuario() {
@@ -223,11 +235,11 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         this.idPrograma = idPrograma;
     }
 
-    public Long getIdPeriodo() {
+    public String getIdPeriodo() {
         return idPeriodo;
     }
 
-    public void setIdPeriodo(Long idPeriodo) {
+    public void setIdPeriodo(String idPeriodo) {
         this.idPeriodo = idPeriodo;
     }
 
@@ -317,5 +329,13 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     public void setEventos(List<SelectItem> eventos) {
         this.eventos = eventos;
+    }
+
+    public NuevaBajaService getNuevaBajaService() {
+        return nuevaBajaService;
+    }
+
+    public void setNuevaBajaService(NuevaBajaService nuevaBajaService) {
+        this.nuevaBajaService = nuevaBajaService;
     }
 }

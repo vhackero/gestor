@@ -59,7 +59,7 @@
                                     <p:ajax event="change"
                                             process="@this"
                                             listener="#{nuevaBajaUsuarioBean.onPlanChange}"
-                                            update="semestre bloque programa" />
+                                            update="semestre bloque programa evento" />
                                 </p:selectOneMenu>
                                 <p:message for="plan" display="text" />
                             </div>
@@ -74,7 +74,7 @@
                                     <p:ajax event="change"
                                             process="@this"
                                             listener="#{nuevaBajaUsuarioBean.onSemestreChange}"
-                                            update="bloque programa" />
+                                            update="bloque programa evento" />
                                 </p:selectOneMenu>
                             </div>
                         </div>
@@ -92,18 +92,22 @@
                                     <p:ajax event="change"
                                             process="@this"
                                             listener="#{nuevaBajaUsuarioBean.onBloqueChange}"
-                                            update="programa" />
+                                            update="programa evento" />
                                 </p:selectOneMenu>
                             </div>
 
                             <div class="col-md-6 col-xs-12">
                                 <p:outputLabel styleClass="bloque" for="programa" value="Asignatura/Programa:" />
-                                <p:selectOneMenu id="programa"
-                                                 value="#{nuevaBajaUsuarioBean.idPrograma}"
-                                                 styleClass="col-xs-12">
-                                    <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-                                    <f:selectItems value="#{nuevaBajaUsuarioBean.programas}" />
-                                </p:selectOneMenu>
+                                    <p:selectOneMenu id="programa"
+                                                     value="#{nuevaBajaUsuarioBean.idPrograma}"
+                                                     styleClass="col-xs-12">
+                                        <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                        <f:selectItems value="#{nuevaBajaUsuarioBean.programas}" />
+                                        <p:ajax event="change"
+                                                process="@this"
+                                                listener="#{nuevaBajaUsuarioBean.onProgramaChange}"
+                                                update="evento" />
+                                    </p:selectOneMenu>
                             </div>
                         </div>
                     </div>
@@ -112,12 +116,16 @@
                         <div class="row">
                             <div class="col-md-6 col-xs-12">
                                 <p:outputLabel styleClass="bloque" for="periodo" value="Periodo:" />
-                                <p:selectOneMenu id="periodo"
-                                                 value="#{nuevaBajaUsuarioBean.idPeriodo}"
-                                                 styleClass="col-xs-12">
-                                    <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-                                    <f:selectItems value="#{nuevaBajaUsuarioBean.periodos}" />
-                                </p:selectOneMenu>
+                                    <p:selectOneMenu id="periodo"
+                                                     value="#{nuevaBajaUsuarioBean.idPeriodo}"
+                                                     styleClass="col-xs-12">
+                                        <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                        <f:selectItems value="#{nuevaBajaUsuarioBean.periodos}" />
+                                        <p:ajax event="change"
+                                                process="@this"
+                                                listener="#{nuevaBajaUsuarioBean.onPeriodoChange}"
+                                                update="evento" />
+                                    </p:selectOneMenu>
                             </div>
 
                             <div class="col-md-6 col-xs-12">
