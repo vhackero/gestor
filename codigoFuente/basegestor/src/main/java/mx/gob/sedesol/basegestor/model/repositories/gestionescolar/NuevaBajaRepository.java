@@ -201,8 +201,8 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @Override
     @Transactional
     public void insertarBaja(BajaAplicacionDTO bajaAplicacionDTO) {
-        String consulta = "INSERT INTO rel_persona_bajas (id_persona, motivo_baja_id, proceso_id, id_plan, id_programa, id_evento, id_grupo, id_user_enrolments_lms, quien_aplica_baja, contabilizar, no_solicitud)"
-                + " VALUES (:idPersona, :motivoBajaId, :procesoId, :idPlan, :idPrograma, :idEvento, :idGrupo, :idUserEnrolmentsLms, :quienAplicaBaja, :contabilizar, :numeroSolicitud)";
+        String consulta = "INSERT INTO rel_persona_bajas (id_persona, motivo_baja_id, proceso_id, id_plan, id_programa, id_evento, id_grupo, id_user_enrolments_lms, usuario_modifico, contabilizar, solicitud)"
+                + " VALUES (:idPersona, :motivoBajaId, :procesoId, :idPlan, :idPrograma, :idEvento, :idGrupo, :idUserEnrolmentsLms, :usuarioModifico, :contabilizar, :numeroSolicitud)";
 
         entityManager.createNativeQuery(consulta)
                 .setParameter("idPersona", bajaAplicacionDTO.getIdPersona())
@@ -213,7 +213,7 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
                 .setParameter("idEvento", bajaAplicacionDTO.getIdEvento())
                 .setParameter("idGrupo", bajaAplicacionDTO.getIdGrupo())
                 .setParameter("idUserEnrolmentsLms", bajaAplicacionDTO.getIdUserEnrolmentsLms())
-                .setParameter("quienAplicaBaja", bajaAplicacionDTO.getQuienAplicaBaja())
+                .setParameter("usuarioModifico", bajaAplicacionDTO.getQuienAplicaBaja() != null ? bajaAplicacionDTO.getQuienAplicaBaja() : "-")
                 .setParameter("contabilizar", bajaAplicacionDTO.getContabilizar())
                 .setParameter("numeroSolicitud", bajaAplicacionDTO.getNumeroSolicitud())
                 .executeUpdate();
