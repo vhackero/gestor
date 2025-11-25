@@ -17,17 +17,151 @@
 
                 <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.consultarBaja')}"
                          styleClass="panel-primary">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.mensaje.pendiente')}" />
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4 col-xs-12">
+                                <p:outputLabel for="matricula"
+                                               styleClass="bloque requerido"
+                                               value="Matrícula/Usuario:" />
+                                <p:inputText id="matricula"
+                                             value="#{consultaBajaUsuariosBean.matricula}"
+                                             styleClass="form-control"
+                                             required="true"
+                                             requiredMessage="La matrícula o usuario es obligatorio." />
+                                <p:message for="matricula" display="text" />
+                            </div>
+
+                            <div class="col-md-4 col-xs-12">
+                                <p:outputLabel for="periodo"
+                                               styleClass="bloque requerido"
+                                               value="Periodo:" />
+                                <p:selectOneMenu id="periodo"
+                                                 value="#{consultaBajaUsuariosBean.periodoSeleccionado}"
+                                                 styleClass="col-xs-12"
+                                                 required="true"
+                                                 requiredMessage="El periodo es obligatorio.">
+                                    <p:ajax event="change" process="@this" />
+                                    <f:selectItem itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" itemValue="#{null}" />
+                                    <f:selectItems value="#{consultaBajaUsuariosBean.periodos}"
+                                                   var="periodo"
+                                                   itemLabel="#{periodo.nombre}"
+                                                   itemValue="#{periodo.id}" />
+                                </p:selectOneMenu>
+                                <p:message for="periodo" display="text" />
+                            </div>
+
+                            <div class="col-md-4 col-xs-12">
+                                <p:outputLabel for="estatus"
+                                               styleClass="bloque requerido"
+                                               value="Estatus*" />
+                                <p:selectOneMenu id="estatus"
+                                                 value="#{consultaBajaUsuariosBean.estatusSeleccionado}"
+                                                 styleClass="col-xs-12"
+                                                 required="true"
+                                                 requiredMessage="El estatus es obligatorio.">
+                                    <p:ajax event="change" process="@this" />
+                                    <f:selectItem itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" itemValue="#{null}" />
+                                    <f:selectItem itemLabel="Aplicada" itemValue="1" />
+                                    <f:selectItem itemLabel="Pendiente" itemValue="0" />
+                                </p:selectOneMenu>
+                                <p:message for="estatus" display="text" />
+                            </div>
                         </div>
                     </div>
-                    <div class="row" style="margin-top: 15px;">
-                        <div class="col-md-12 text-right">
-                            <p:commandButton value="#{sistema.obtenerTexto('gw.ge.texto.regresar')}"
-                                             action="#{altasBajasUsuariosBean.regresarAlModulo}"
-                                             styleClass="btn btn-default"
-                                             ajax="false" />
+
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-12 text-right">
+                                <p:commandButton value="#{sistema.obtenerTexto('gw.ge.texto.regresar')}"
+                                                 action="#{altasBajasUsuariosBean.regresarAlModulo}"
+                                                 styleClass="btn btn-default"
+                                                 ajax="false" />
+
+                                <p:commandButton value="Limpiar campos"
+                                                 actionListener="#{consultaBajaUsuariosBean.limpiar}"
+                                                 process="@this"
+                                                 update="@form"
+                                                 styleClass="btn btn-default" />
+
+                                <p:commandButton id="btnBuscarBajas"
+                                                 process="@form"
+                                                 ajax="true"
+                                                 update="@form"
+                                                 styleClass="btn btn-primary pull-right"
+                                                 actionListener="#{consultaBajaUsuariosBean.buscar}"
+                                                 value="#{sistema.obtenerTexto('gw.ga.btn.buscar')}" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p:dataTable id="tablaBajas"
+                                         value="#{consultaBajaUsuariosBean.resultados}"
+                                         var="baja"
+                                         paginator="true"
+                                         rows="10"
+                                         paginatorPosition="bottom"
+                                         emptyMessage="No se encontraron registros"
+                                         tableStyleClass="table"
+                                         reflow="true">
+
+                                <p:column styleClass="text-center">
+                                    <f:facet name="header">
+                                        <h:outputText value="Matrícula" />
+                                    </f:facet>
+                                    <h:outputText value="#{baja.matricula}" />
+                                </p:column>
+
+                                <p:column styleClass="text-center">
+                                    <f:facet name="header">
+                                        <h:outputText value="Plan" />
+                                    </f:facet>
+                                    <h:outputText value="#{baja.plan}" />
+                                </p:column>
+
+                                <p:column styleClass="text-center">
+                                    <f:facet name="header">
+                                        <h:outputText value="Programa" />
+                                    </f:facet>
+                                    <h:outputText value="#{baja.programa}" />
+                                </p:column>
+
+                                <p:column styleClass="text-center">
+                                    <f:facet name="header">
+                                        <h:outputText value="Evento" />
+                                    </f:facet>
+                                    <h:outputText value="#{baja.evento}" />
+                                </p:column>
+
+                                <p:column styleClass="text-center">
+                                    <f:facet name="header">
+                                        <h:outputText value="Tipo de baja" />
+                                    </f:facet>
+                                    <h:outputText value="#{baja.tipoBaja}" />
+                                </p:column>
+
+                                <p:column styleClass="text-center">
+                                    <f:facet name="header">
+                                        <h:outputText value="Estructura" />
+                                    </f:facet>
+                                    <h:outputText value="#{baja.estructura}" />
+                                </p:column>
+
+                                <p:column styleClass="text-center">
+                                    <f:facet name="header">
+                                        <h:outputText value="Periodo" />
+                                    </f:facet>
+                                    <h:outputText value="#{baja.periodo}" />
+                                </p:column>
+
+                                <p:column styleClass="text-center">
+                                    <f:facet name="header">
+                                        <h:outputText value="Estatus" />
+                                    </f:facet>
+                                    <h:outputText value="#{consultaBajaUsuariosBean.obtenerNombreEstatus(baja.estatus)}" />
+                                </p:column>
+                            </p:dataTable>
                         </div>
                     </div>
                 </p:panel>
