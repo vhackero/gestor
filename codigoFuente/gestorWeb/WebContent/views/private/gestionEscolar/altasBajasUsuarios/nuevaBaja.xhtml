@@ -216,6 +216,74 @@
                         </div>
                     </div>
                 </p:panel>
+
+                <p:ajaxStatus onstart="PF('dialogLayout').show()" onsuccess="PF('dialogLayout').hide()" />
+
+                <p:dialog modal="true" appendTo="@(body)" widgetVar="dialogLayout"
+                          header="Cargando" draggable="false" closable="false" resizable="false"
+                          style="text-align: center;" dynamic="true">
+                    <p:graphicImage library="images" name="ajax-loader.gif" />
+                </p:dialog>
+
+                <p:dialog appendTo="@(body)" draggable="false" position="center"
+                          resizable="false" closable="false" modal="true" width="600px"
+                          widgetVar="dlgNuevaBajaValidacion" header="Informativo" dynamic="true">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h:outputText styleClass="bloque"
+                                              value="Ingrese los datos marcados como obligatorios." />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 text-right">
+                            <p:commandButton value="Cerrar" styleClass="btn btn-default"
+                                             onclick="PF('dlgNuevaBajaValidacion').hide()" />
+                        </div>
+                    </div>
+                </p:dialog>
+
+                <p:dialog appendTo="@(body)" draggable="false" position="center"
+                          resizable="false" closable="false" modal="true" width="600px"
+                          widgetVar="dlgNuevaBajaExito" header="Informativo" dynamic="true">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h:outputText styleClass="bloque"
+                                              value="#{nuevaBajaUsuarioBean.mensajeExitoDialogo}" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 text-right">
+                            <p:commandButton value="Cerrar" styleClass="btn btn-default"
+                                             oncomplete="PF('dlgNuevaBajaExito').hide()" />
+                        </div>
+                    </div>
+                </p:dialog>
+
+                <p:dialog appendTo="@(body)" draggable="false" position="center"
+                          resizable="false" closable="false" modal="true" width="600px"
+                          widgetVar="dlgNuevaBajaError" header="Informativo" dynamic="true">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h:outputText styleClass="bloque"
+                                              value="#{nuevaBajaUsuarioBean.mensajeErrorDialogo}" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 text-right">
+                            <p:commandButton value="Cerrar" styleClass="btn btn-default"
+                                             onclick="PF('dlgNuevaBajaError').hide()" />
+                        </div>
+                    </div>
+                </p:dialog>
             </h:form>
         </sec:authorize>
     </ui:fragment>
