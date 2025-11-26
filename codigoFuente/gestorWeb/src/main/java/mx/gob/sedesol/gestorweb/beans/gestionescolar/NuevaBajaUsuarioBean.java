@@ -11,6 +11,7 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.model.SelectItem;
 
 import org.apache.log4j.Logger;
+import org.primefaces.context.RequestContext;
 
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaSolicitudDTO;
@@ -52,6 +53,8 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private boolean mostrarPrograma;
     private boolean mostrarPeriodo;
     private boolean mostrarEvento;
+    private String mensajeErrorDialogo;
+    private String mensajeExitoDialogo;
     private boolean esTipoDefinitiva;
     private boolean esTipoTemporalOParcial;
     private boolean esSinAsignaturas;
@@ -129,21 +132,29 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         }
 
         if (!errores.isEmpty()) {
-            errores.forEach(error -> agregarMsgError(error, null));
+            mensajeErrorDialogo = "Ingrese los datos marcados como obligatorios.";
+            mostrarDialogo("dlgNuevaBajaValidacion");
             return;
         }
 
         try {
             BajaSolicitudDTO solicitud = construirSolicitud();
             nuevaBajaService.aplicarBaja(solicitud);
-            agregarMsgInfo("Baja aplicada correctamente", null);
+            mensajeExitoDialogo = "Baja aplicada correctamente";
+            mostrarDialogo("dlgNuevaBajaExito");
             limpiarFormulario();
         } catch (IllegalArgumentException ex) {
-            agregarMsgError(ex.getMessage(), null);
+            mensajeErrorDialogo = ex.getMessage();
+            mostrarDialogo("dlgNuevaBajaError");
         } catch (Exception ex) {
             LOGGER.error("Error al registrar la baja", ex);
-            agregarMsgError("Ocurrió un error al registrar la baja", null);
+            mensajeErrorDialogo = "Ocurrió un error al registrar la baja";
+            mostrarDialogo("dlgNuevaBajaError");
         }
+    }
+
+    private void mostrarDialogo(String widgetVar) {
+        RequestContext.getCurrentInstance().execute("PF('" + widgetVar + "').show()");
     }
 
     public void limpiarFormulario() {
@@ -492,6 +503,22 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     public void setEventos(List<SelectItem> eventos) {
         this.eventos = eventos;
+    }
+
+    public String getMensajeErrorDialogo() {
+        return mensajeErrorDialogo;
+    }
+
+    public void setMensajeErrorDialogo(String mensajeErrorDialogo) {
+        this.mensajeErrorDialogo = mensajeErrorDialogo;
+    }
+
+    public String getMensajeExitoDialogo() {
+        return mensajeExitoDialogo;
+    }
+
+    public void setMensajeExitoDialogo(String mensajeExitoDialogo) {
+        this.mensajeExitoDialogo = mensajeExitoDialogo;
     }
 
     public boolean isMostrarSemestre() {
