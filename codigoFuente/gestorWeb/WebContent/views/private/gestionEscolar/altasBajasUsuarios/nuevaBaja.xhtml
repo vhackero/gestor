@@ -217,18 +217,12 @@
                     </div>
                 </p:panel>
 
-                <p:ajaxStatus onstart="PF('dlgNuevaBajaCargando').show()" onsuccess="PF('dlgNuevaBajaCargando').hide()" />
+                <p:ajaxStatus onstart="PF('dialogLayout').show()" onsuccess="PF('dialogLayout').hide()" />
 
-                <p:dialog appendTo="@(body)" draggable="false" position="center"
-                          resizable="false" closable="false" modal="true" width="400px"
-                          widgetVar="dlgNuevaBajaCargando" header="Cargando" dynamic="true">
-                    <div class="form-group">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <h:outputText styleClass="bloque" value="Procesando, por favor espere..." />
-                            </div>
-                        </div>
-                    </div>
+                <p:dialog modal="true" appendTo="@(body)" widgetVar="dialogLayout"
+                          header="Cargando" draggable="false" closable="false" resizable="false"
+                          style="text-align: center;" dynamic="true">
+                    <p:graphicImage library="images" name="ajax-loader.gif" />
                 </p:dialog>
 
                 <p:dialog appendTo="@(body)" draggable="false" position="center"
