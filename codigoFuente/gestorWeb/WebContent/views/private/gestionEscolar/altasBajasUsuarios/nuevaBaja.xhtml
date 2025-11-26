@@ -260,7 +260,10 @@
                     <div class="row">
                         <div class="col-md-12 text-right">
                             <p:commandButton value="Cerrar" styleClass="btn btn-default"
-                                             onclick="PF('dlgNuevaBajaExito').hide()" />
+                                             process="@this"
+                                             update="@form"
+                                             actionListener="#{nuevaBajaUsuarioBean.limpiarFormulario}"
+                                             oncomplete="PF('dlgNuevaBajaExito').hide()" />
                         </div>
                     </div>
                 </p:dialog>
