@@ -141,8 +141,8 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             BajaSolicitudDTO solicitud = construirSolicitud();
             nuevaBajaService.aplicarBaja(solicitud);
             mensajeExitoDialogo = "Baja aplicada correctamente";
-            mostrarDialogo("dlgNuevaBajaExito");
             limpiarFormulario();
+            mostrarDialogo("dlgNuevaBajaExito");
         } catch (IllegalArgumentException ex) {
             mensajeErrorDialogo = ex.getMessage();
             mostrarDialogo("dlgNuevaBajaError");
