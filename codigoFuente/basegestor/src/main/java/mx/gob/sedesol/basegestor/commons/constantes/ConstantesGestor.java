@@ -203,6 +203,32 @@ public final class ConstantesGestor {
 	//NOTA: Este valor debe actulizarse tambien en ContantesGestorWeb.xml
 	
 	public static final Integer NUMERO_DIAS_ANADIDOS_AL_LIMITE_DE_ENCUESTA = 14;
+	
+	//Inscripcion
+	public static final String TEXTO_MATERIA_OBLIGATORIA = "Obligatoria";
+	public static final String TEXTO_MATERIA_OPTATIVA = "Optativa";
+	public static final String TEXTO_MATERIA_ELECTIVA = "Electiva";
+	public static final int SEMESTRE_MINIMO_PARA_ELECTIVAS = 1;
+	public static final String NUMERO_SEMESTRE_CINCO = "1";
+	public static final String NUMERO_SEMESTRE_SEIS = "2";
+	public static final Long LIMITE_REPROBACIONES_POR_MATERIA = 3l;
+	public static final Integer MATERIA_REPROBADA = 0;
+	public static final Integer MATERIA_APROBADA = 1;
+	public static final int NUMERO_MAXIMO_MATERIAS_REPROBADAS = 4;
+	public static final String NUMERO_PRIMER_ESTRUCTURA = "1";
+	public static final String ESPACIO_EN_BLANCO = " ";
+	public static final Double PORCENTAJE_CREDITOS_REQUERIDOS_SEPTIMO_SEMESTRE = 50.00;
+	public static final int SEXTO_SEMESTRE = 6;
+	public static final int OCTAVO_SEMESTRE = 8;
+	public static final int TERCER_SEMESTRE = 3;
+	public static final Long CANT_MATERIAS_OBLIGATORIAS_EST_REGULAR_PRIMER_SEMESTRE = 4l;
+	public static final Long CANT_MATERIAS_OPTATIVAS_EST_REGULAR_PRIMER_SEMESTRE = 2l;
+	public static final Long SIN_EVENTO = 0l;
+	public static final Integer NO_ES_ESTUDIANTE_NUEVO_INGRESO = 0;
+	public static final Integer ES_ESTUDIANTE_NUEVO_INGRESO = 1;
+	public static final Integer SOLICITO_ALTA_EL_ESTUDIANTE = 0;
+	public static final int RECURSANDO_MATERIA = 1;
+	public static final int CURSANDO_MATERIA_POR_PRIMERA_VEZ = 0;
 
 
 }

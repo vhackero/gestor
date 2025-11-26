@@ -11,32 +11,49 @@
 	</ui:define>
 
 	<ui:define name="content">
-		<f:event type="preRenderView" listener="#{inscripcionBean.init}" />
+
 		<h:form id="mainForm">
-			<p:ajaxStatus onstart="PF('dialogLayout').show()" onsuccess="PF('dialogLayout').hide()" />
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
 
 			<h1>
 				<p:outputLabel styleClass="h1" value="Inscripción" />
 			</h1>
 
-			<p:panel id="pnlEditEjeComp" header="Inscripción">
+			<p:outputPanel styleClass="mt-2" rendered="#{inscripcionBean.mostrarAviso}">
+				<div class="alert alert-#{inscripcionBean.tipoAviso}" role="alert">#{inscripcionBean.textoAviso}</div>
+			</p:outputPanel>
+
+			<p:panel id="pnlEditEjeComp" header="Inscripción"
+				rendered="#{inscripcionBean.contextoInscripcion != null}">
 				<div class="row flexCentrarXY" style="align-items: flex-end">
 					<div class="col-md-3 col-xs-12">
 						<h:outputLabel value="Plan" styleClass="bloque" />
-						<h:outputText value="#{inscripcionBean.infoPersona.plan}" />
+						<h:outputText
+							value="#{inscripcionBean.contextoInscripcion.inscripcionPersona.plan}" />
 					</div>
 
 					<div class="col-md-6 col-xs-12">
 						<h:outputLabel value="Matricula" styleClass="bloque" />
-						<h:outputText value="#{inscripcionBean.infoPersona.nombreUsuario}" />
+						<h:outputText
+							value="#{inscripcionBean.contextoInscripcion.inscripcionPersona.nombreUsuario}" />
 					</div>
 				</div>
 
-				<div class="form-group">
+				<p:outputPanel styleClass="mt-2"
+					rendered="#{inscripcionBean.contextoInscripcion.mostrarMensajeSeriacion}">
+					<div class="alert alert-info mb-0" role="alert">Estimad(a/o)
+						estudiante, la(s) asignaturas a las que deseas inscribirte están
+						condicionadas a la aprobación previa de según la seriación
+						establecida en tu plan de estudio</div>
+				</p:outputPanel>
+
+				<div class="form-group mt-1">
 					<div class="row">
 						<div class="col-md-12">
+
 							<p:dataTable id="tblEditaComp"
-								value="#{inscripcionBean.listadatosMaterias}"
+								value="#{inscripcionBean.contextoInscripcion.estadoAcademico.materiasDisponibles}"
 								tableStyleClass="table" var="inscripcion" paginator="false"
 								emptyMessage="No hay materias disponibles para inscribir">
 
@@ -45,6 +62,13 @@
 										<h:outputText value="Curso/Asignatura" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.nombreTentativoPrograma}" />
+								</p:column>
+
+								<p:column styleClass="text-center">
+									<f:facet name="header">
+										<h:outputText value="Tipo de asignatura" />
+									</f:facet>
+									<h:outputText value="#{inscripcion.tipoPrograma}" />
 								</p:column>
 
 								<p:column styleClass="text-center">
@@ -62,64 +86,68 @@
 								</p:column>
 
 								<p:column headerText="Seleccionar" styleClass="text-center">
-								    <h:outputText value="Obligatoria" rendered="#{inscripcion.tipoPrograma eq 'Obligatoria'}" />
-								    <p:selectBooleanCheckbox value="#{inscripcion.check}" rendered="#{inscripcion.tipoPrograma ne 'Obligatoria'}" />
+									<p:selectBooleanCheckbox disabled="#{inscripcion.disabled}"
+										value="#{inscripcion.check}" styleClass="cursor-pointer">
+										<p:ajax
+											listener="#{inscripcionBean.validarSeleccionMateria(inscripcion)}"
+											event="change" update="@this :pnlMensaje" />
+									</p:selectBooleanCheckbox>
 								</p:column>
 
 							</p:dataTable>
+
 						</div>
 					</div>
 				</div>
 
 				<!-- Sección de términos y condiciones controlada por mostrarTerminosCondiciones -->
-				<h:panelGroup rendered="#{inscripcionBean.mostrarTerminosCondiciones}">
+				<h:panelGroup
+					rendered="#{inscripcionBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones}">
 					<div class="row" style="text-align: center; margin-top: 20px;">
-					    <p:selectBooleanCheckbox id="chkTerminos" value="#{inscripcionBean.aceptaTerminos}">
-					        <f:ajax event="change" render="finalizarBtn" />
-					    </p:selectBooleanCheckbox>
-					    <h:outputText value=" Acepto los " />
-					    <h:outputLink value="#{inscripcionBean.terminosCondiciones}" target="_blank">términos y condiciones</h:outputLink>
+						<p:selectBooleanCheckbox id="chkTerminos"
+							value="#{inscripcionBean.aceptaTerminos}">
+							<p:ajax event="change" update="panelFinalizar" process="@this" />
+						</p:selectBooleanCheckbox>
+						<h:outputText value=" Acepto los " />
+						<h:outputLink styleClass="terminos-condiciones"
+							value="#{inscripcionBean.contextoInscripcion.terminosCondiciones.enlaceTerminosCondiciones}"
+							target="_blank">términos y condiciones</h:outputLink>
 					</div>
 				</h:panelGroup>
 
-				<div class="row" style="text-align: center; margin-top: 20px;">
-				    <div class="col-md-6 col-xs-12">
-				        <p:commandButton value="Cancelar"
-				            action="#{inscripcionBean.cancelar}"
-				            ajax="false" immediate="true" process="@form"
-				            styleClass="btn btn-default" />
-				    </div>
-				
-				    <div class="col-md-6 col-xs-12">
-						<p:commandButton id="finalizarBtn" style="width: 200px;"
-						    value="Finalizar inscripción"
-						    action="#{inscripcionBean.finalizarInscripcion}"
-						    ajax="false" process="@form"
-						    styleClass="btn btn-primary"/>
-				    </div>
-				</div>
+				<p:outputPanel id="panelFinalizar" styleClass="text-center mt-2">
+					<p:commandButton id="finalizarBtn"
+						disabled="#{inscripcionBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionBean.aceptaTerminos}"
+						value="Finalizar inscripción" update="@form :pnlMensaje"
+						action="#{inscripcionBean.finalizarInscripcion}"
+						styleClass="btn btn-primary" />
+				</p:outputPanel>
+
 			</p:panel>
 		</h:form>
-		
-			<p:dialog appendTo="@(body)" draggable="false" position="center"
-		resizable="false" closable="false" modal="true" width="600px"
-		widgetVar="dlgValidarSeleccion" header="Informativo" dynamic="true">
-		<div class="form-group">
-			<div class="row">
-				<div class="col-md-12">
-					<h:outputText styleClass="bloque" value="#{inscripcionBean.mensaje}" />
-				</div>
-			</div>
-		</div>
 
-		<div class="row">
-			<div class="col-md-12 text-right">
-				<p:commandButton value="Cerrar" styleClass="btn btn-default"
-					onclick="PF('dlgValidarSeleccion').hide()" />
-			</div>
-		</div>
-	</p:dialog>
-	
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion" header="Informativo" dynamic="true">
+			<p:outputPanel id="pnlMensaje">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText styleClass="bloque"
+								value="#{inscripcionBean.mensajeDialog}" />
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton value="Cerrar" styleClass="btn btn-default"
+							onclick="PF('dlgValidarSeleccion').hide()" />
+					</div>
+				</div>
+			</p:outputPanel>
+		</p:dialog>
+
 	</ui:define>
 
 
