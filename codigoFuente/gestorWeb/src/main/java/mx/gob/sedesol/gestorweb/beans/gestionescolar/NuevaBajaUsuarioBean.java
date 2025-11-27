@@ -229,9 +229,8 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     private void actualizarProgramas() {
-        Long idEjeCapacitacion = idBloque != null ? idBloque : idSemestre;
-        if (idEjeCapacitacion != null) {
-            programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idEjeCapacitacion));
+        if (idBloque != null) {
+            programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBloque));
         } else {
             programas = Collections.emptyList();
         }

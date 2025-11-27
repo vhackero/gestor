@@ -83,7 +83,9 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     @Override
     public List<NodoDTO> consultarProgramasPorEje(Long idEjeCapacitacion) {
-        String consulta = "SELECT tfdp.id_programa, tfdp.nombre_tentativo FROM tbl_ficha_descriptiva_programa tfdp WHERE tfdp.id_eje_capacitacion = :idEjeCapacitacion";
+        String consulta = "SELECT tfdp.id_programa, tfdp.nombre_tentativo "
+                + "FROM tbl_ficha_descriptiva_programa tfdp "
+                + "WHERE tfdp.id_eje_capacitacion IN (SELECT tmc.id FROM tbl_malla_curricular tmc WHERE tmc.id_padre = :idEjeCapacitacion)";
         Query query = entityManager.createNativeQuery(consulta);
         query.setParameter("idEjeCapacitacion", idEjeCapacitacion);
         List<Object[]> resultados = query.getResultList();
@@ -133,7 +135,8 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
                 + "    JOIN tbl_grupos tg ON tg.id = rgp.id_grupo "
                 + "    JOIN tbl_eventos te ON te.id_evento = tg.id_evento "
                 + "    JOIN tbl_ficha_descriptiva_programa fdp ON fdp.id_programa = te.id_programa "
-                + "    LEFT JOIN tbl_malla_curricular bloque ON bloque.id = fdp.id_eje_capacitacion "
+                + "    LEFT JOIN tbl_malla_curricular asignatura ON asignatura.id = fdp.id_eje_capacitacion "
+                + "    LEFT JOIN tbl_malla_curricular bloque ON bloque.id = asignatura.id_padre "
                 + "    LEFT JOIN tbl_malla_curricular semestre ON semestre.id = bloque.id_padre "
                 + "    LEFT JOIN tbl_malla_curricular plan ON plan.id = semestre.id_padre "
                 + "WHERE tp.sso_idUsuario = :matricula "
