@@ -229,6 +229,9 @@ public final class ConstantesGestor {
 	public static final Integer SOLICITO_ALTA_EL_ESTUDIANTE = 0;
 	public static final int RECURSANDO_MATERIA = 1;
 	public static final int CURSANDO_MATERIA_POR_PRIMERA_VEZ = 0;
-
+	
+	//Correo
+	public static final String INFORMACION_EXTRA_CORREO_INSCRIPCION = "INFORMACION_EXTRA";
+	public static final String URL_PAGINA_INICIO = "PAGINA_INICIO";
 
 }
