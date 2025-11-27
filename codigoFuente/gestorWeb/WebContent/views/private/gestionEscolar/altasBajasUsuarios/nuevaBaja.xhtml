@@ -26,7 +26,12 @@
                                              value="#{nuevaBajaUsuarioBean.matriculaUsuario}"
                                              styleClass="form-control"
                                              required="true"
-                                             requiredMessage="La matrícula es obligatoria" />
+                                             requiredMessage="La matrícula es obligatoria">
+                                    <p:ajax event="blur"
+                                            process="@this"
+                                            listener="#{nuevaBajaUsuarioBean.onMatriculaChange}"
+                                            update="camposBaja msgsNuevaBaja" />
+                                </p:inputText>
                                 <p:message for="matricula" display="text" />
                             </div>
 

@@ -6,6 +6,7 @@ import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaAplicacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelacionBajaDTO;
 
 public interface INuevaBajaRepository {
 
@@ -34,4 +35,6 @@ public interface INuevaBajaRepository {
     Integer obtenerIdUsuarioMoodle(String matricula);
 
     void insertarBaja(BajaAplicacionDTO bajaAplicacionDTO);
+
+    RelacionBajaDTO consultarRelacionPorMatricula(String matricula);
 }

@@ -10,6 +10,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaAplicacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaSolicitudDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelacionBajaDTO;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.INuevaBajaRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.NuevaBajaService;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +54,11 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
     @Override
     public List<NodoDTO> obtenerEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma) {
         return nuevaBajaRepository.consultarEventosPorPeriodoYPrograma(nombrePeriodo, idPrograma);
+    }
+
+    @Override
+    public RelacionBajaDTO obtenerRelacionPorMatricula(String matricula) {
+        return nuevaBajaRepository.consultarRelacionPorMatricula(matricula);
     }
 
     @Override

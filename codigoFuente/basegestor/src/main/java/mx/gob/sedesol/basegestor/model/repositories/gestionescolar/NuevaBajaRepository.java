@@ -13,6 +13,7 @@ import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaAplicacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelacionBajaDTO;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
@@ -116,6 +117,45 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
             eventos.add(new NodoDTO(obtenerEntero(fila[0]), obtenerCadena(fila[1])));
         }
         return eventos;
+    }
+
+    @Override
+    public RelacionBajaDTO consultarRelacionPorMatricula(String matricula) {
+        String consulta = "SELECT "
+                + "    plan.id AS id_plan, "
+                + "    semestre.id AS id_semestre, "
+                + "    bloque.id AS id_bloque, "
+                + "    fdp.id_programa AS id_programa, "
+                + "    (SELECT tpi.nombre_periodo FROM tbl_periodos_inscripcion tpi WHERE te.cve_evento_cap LIKE CONCAT('%', tpi.nombre_periodo, '%') LIMIT 1) AS periodo, "
+                + "    te.id_evento AS id_evento "
+                + "FROM tbl_persona tp "
+                + "    JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona "
+                + "    JOIN tbl_grupos tg ON tg.id = rgp.id_grupo "
+                + "    JOIN tbl_eventos te ON te.id_evento = tg.id_evento "
+                + "    JOIN tbl_ficha_descriptiva_programa fdp ON fdp.id_programa = te.id_programa "
+                + "    LEFT JOIN tbl_malla_curricular bloque ON bloque.id = fdp.id_eje_capacitacion "
+                + "    LEFT JOIN tbl_malla_curricular semestre ON semestre.id = bloque.id_padre "
+                + "    LEFT JOIN tbl_malla_curricular plan ON plan.id = semestre.id_padre "
+                + "WHERE tp.sso_idUsuario = :matricula "
+                + "ORDER BY te.id_evento DESC LIMIT 1";
+
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("matricula", matricula);
+        List<Object[]> resultados = query.getResultList();
+
+        if (resultados.isEmpty()) {
+            return null;
+        }
+
+        Object[] fila = resultados.get(0);
+        RelacionBajaDTO dto = new RelacionBajaDTO();
+        dto.setIdPlan(obtenerLong(fila[0]));
+        dto.setIdSemestre(obtenerLong(fila[1]));
+        dto.setIdBloque(obtenerLong(fila[2]));
+        dto.setIdPrograma(obtenerLong(fila[3]));
+        dto.setPeriodo(obtenerCadena(fila[4]));
+        dto.setIdEvento(obtenerLong(fila[5]));
+        return dto;
     }
 
     @Override

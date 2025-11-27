@@ -16,6 +16,7 @@ import org.primefaces.context.RequestContext;
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaSolicitudDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelacionBajaDTO;
 import mx.gob.sedesol.basegestor.service.gestionescolar.NuevaBajaService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 
@@ -76,6 +77,42 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     public void onTipoBajaChange() {
         actualizarVisibilidadCampos();
+    }
+
+    public void onMatriculaChange() {
+        limpiarCamposDependientes();
+
+        if (matriculaUsuario == null || matriculaUsuario.trim().isEmpty()) {
+            return;
+        }
+
+        RelacionBajaDTO relacion = nuevaBajaService.obtenerRelacionPorMatricula(matriculaUsuario.trim());
+
+        if (relacion != null && relacion.esRelacionValida()) {
+            idPlan = relacion.getIdPlan();
+            semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
+            idSemestre = relacion.getIdSemestre();
+
+            bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
+            idBloque = relacion.getIdBloque();
+
+            programas = idBloque != null
+                    ? convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBloque))
+                    : Collections.emptyList();
+            idPrograma = relacion.getIdPrograma();
+
+            idPeriodo = relacion.getPeriodo();
+            if (idPrograma != null && idPeriodo != null && !idPeriodo.trim().isEmpty()) {
+                eventos = convertirANodosSelectItem(
+                        nuevaBajaService.obtenerEventosPorPeriodoYPrograma(idPeriodo, idPrograma));
+            } else {
+                eventos = Collections.emptyList();
+            }
+            idEvento = relacion.getIdEvento();
+        } else {
+            agregarMsgWarn("La matrícula no tiene datos válidos",
+                    "No se encontraron relaciones activas para la matrícula proporcionada");
+        }
     }
 
     public void onPlanChange() {
@@ -160,20 +197,10 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     public void limpiarFormulario() {
         matriculaUsuario = null;
         idTipoBaja = null;
-        idPlan = null;
-        idSemestre = null;
-        idBloque = null;
-        idPrograma = null;
-        idPeriodo = null;
-        idEvento = null;
+        limpiarCamposDependientes();
         motivo = null;
         quienAplica = null;
         numeroSolicitud = null;
-
-        semestres = Collections.emptyList();
-        bloques = Collections.emptyList();
-        programas = Collections.emptyList();
-        eventos = Collections.emptyList();
 
         esTipoDefinitiva = false;
         esTipoTemporalOParcial = false;
@@ -321,6 +348,19 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     private boolean contieneTexto(String origen, String texto) {
         return origen != null && texto != null && origen.toLowerCase().contains(texto.toLowerCase());
+    }
+
+    private void limpiarCamposDependientes() {
+        idPlan = null;
+        idSemestre = null;
+        idBloque = null;
+        idPrograma = null;
+        idPeriodo = null;
+        idEvento = null;
+        semestres = Collections.emptyList();
+        bloques = Collections.emptyList();
+        programas = Collections.emptyList();
+        eventos = Collections.emptyList();
     }
 
     public boolean semestreRequerido() {
