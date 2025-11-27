@@ -205,19 +205,20 @@
                                                  update="@form"
                                                  action="#{altasBajasUsuariosBean.regresarAlModulo}"
                                                  ajax="false"
+                                                 onclick="PF('dialogLayout').show()"
                                                  styleClass="btn btn-default" />
 
                                 <p:commandButton value="Agregar"
                                                  actionListener="#{nuevaBajaUsuarioBean.registrarBaja}"
                                                  process="@form"
                                                  update="@form"
+                                                 onstart="PF('dialogLayout').show()"
+                                                 oncomplete="PF('dialogLayout').hide()"
                                                  styleClass="btn btn-primary pull-right" />
                             </div>
                         </div>
                     </div>
                 </p:panel>
-
-                <p:ajaxStatus onstart="PF('dialogLayout').show()" onsuccess="PF('dialogLayout').hide()" />
 
                 <p:dialog modal="true" appendTo="@(body)" widgetVar="dialogLayout"
                           header="Cargando" draggable="false" closable="false" resizable="false"
