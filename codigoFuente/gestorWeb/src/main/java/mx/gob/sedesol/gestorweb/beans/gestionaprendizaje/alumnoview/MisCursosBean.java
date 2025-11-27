@@ -16,6 +16,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.event.ValueChangeEvent;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 
@@ -29,7 +30,6 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDT
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBajaDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.CatEncuestasYEvaluacionesEnum;
 import mx.gob.sedesol.basegestor.commons.utils.EncuestaTipoEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
@@ -46,6 +46,7 @@ import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.CursoWS;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.util.ErrorWS;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
+import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview.MisCursosSnapshotContext.MisCursosSnapshot;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.dto.UsuarioSessionDTO;
 import mx.gob.sedesol.gestorweb.commons.utils.EstadoEventoCapEnum;
@@ -138,11 +139,51 @@ public class MisCursosBean extends BaseBean {
 	public void init() {
 		long inicioTotal = System.currentTimeMillis();
 		logger.info("[MisCursosBean] Inicio init");
+		try {
+			ExternalContext externalContext = getFacesContext().getExternalContext();
+			String viewId = getFacesContext().getViewRoot() != null ? getFacesContext().getViewRoot().getViewId() : "N/D";
+			String metodo = null;
+			String uri = null;
+			boolean ajax = getFacesContext().getPartialViewContext().isAjaxRequest();
+			Object request = externalContext.getRequest();
+			if (request instanceof HttpServletRequest) {
+				HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+				metodo = httpServletRequest.getMethod();
+				uri = httpServletRequest.getRequestURI();
+			}
+			logger.info("[MisCursosBean] init request -> viewId: " + viewId + ", metodo: " + metodo + ", uri: " + uri
+					+ ", ajax: " + ajax);
+		} catch (Exception e) {
+			logger.warn("[MisCursosBean] No fue posible registrar informacion de la peticion en init", e);
+		}
 		/**
 		 * Obtiene el usuario en sesion
 		 */
 		usuarioEnSesion = this.getUsuarioEnSession();
-		logger.info("[MisCursosBean] Usuario en sesión: " + usuarioEnSesion.getIdPersona());
+		MisCursosSnapshot snapshot = MisCursosSnapshotContext.obtenerSnapshot(getSession());
+		if (snapshot != null && snapshot.esValidoPara(usuarioEnSesion.getIdPersona(),
+				MisCursosSnapshotContext.obtenerCacheTtlMs())) {
+			logger.info("[MisCursosBean] Datos restaurados desde cache de sesión, se omite recarga fuerte");
+			restaurarDesdeSnapshot(snapshot);
+			return;
+		}
+
+		if (MisCursosSnapshotContext.esperarInicializacionEnProceso(getSession())) {
+			snapshot = MisCursosSnapshotContext.obtenerSnapshot(getSession());
+			if (snapshot != null && snapshot.esValidoPara(usuarioEnSesion.getIdPersona(),
+					MisCursosSnapshotContext.obtenerCacheTtlMs())) {
+				logger.info("[MisCursosBean] Datos restaurados tras esperar otra inicialización");
+				restaurarDesdeSnapshot(snapshot);
+				return;
+			}
+		}
+
+		boolean banderaInicializacion = false;
+		try {
+			MisCursosSnapshotContext.marcarInicializacionEnProceso(getSession());
+			banderaInicializacion = true;
+
+			logger.info("[MisCursosBean] Usuario en sesión: " + usuarioEnSesion.getIdPersona());
 
 		/**
 		 * Obtiene el catalogo de los estados del evento de capacitacion
@@ -253,8 +294,20 @@ public class MisCursosBean extends BaseBean {
 		this.obtenerEncuestas(idEventoCapacitacionEnEjecucion, idEventoCapacitacionConcluidos);
 		logger.info("[MisCursosBean] obtenerEncuestas en " + (System.currentTimeMillis() - tEncuestasIni) + " ms");
 
-		esColumnaCompetenciasVisible = Boolean.TRUE;
-		logger.info("[MisCursosBean] fin init, total " + (System.currentTimeMillis() - inicioTotal) + " ms");
+			esColumnaCompetenciasVisible = Boolean.TRUE;
+			logger.info("[MisCursosBean] fin init, total " + (System.currentTimeMillis() - inicioTotal) + " ms");
+			MisCursosSnapshotContext.guardarSnapshot(getSession(),
+					new MisCursosSnapshot(usuarioEnSesion.getIdPersona(), catEstadoEventoCapacitacionList,
+							participanteEventosCapacitacionEnEjecucion, participanteEventosCapacitacionEnEjecucion2,
+							eventoCapacitacionList, estatusEcSeleccionado, relEncuestaUsuarioEvtConcList,
+							relEncuestaUsuarioEvtEnEjecList, encuestaTipoList, tipoEncuestaSeleccionado, idEstatusSeleccionado,
+							esColumnaCompetenciasVisible, avaList, tiraMaterias, tiraMateriasBaja,
+							System.currentTimeMillis()));
+		} finally {
+			if (banderaInicializacion) {
+				MisCursosSnapshotContext.limpiarBanderaInicializacion(getSession());
+			}
+		}
 	}
 
 	public Integer obtenerAvanceOa(Integer idEventoCapacitacion) {
@@ -320,6 +373,23 @@ public class MisCursosBean extends BaseBean {
 
 	public boolean esAvanceConError(Integer idEventoCapacitacion) {
 		return avanceOaConError.contains(idEventoCapacitacion);
+	}
+
+	private void restaurarDesdeSnapshot(MisCursosSnapshot snapshot) {
+		this.catEstadoEventoCapacitacionList = snapshot.getCatEstadoEventoCapacitacionList();
+		this.participanteEventosCapacitacionEnEjecucion = snapshot.getParticipanteEventosCapacitacionEnEjecucion();
+		this.participanteEventosCapacitacionEnEjecucion2 = snapshot.getParticipanteEventosCapacitacionEnEjecucion2();
+		this.eventoCapacitacionList = snapshot.getEventoCapacitacionList();
+		this.estatusEcSeleccionado = snapshot.getEstatusEcSeleccionado();
+		this.relEncuestaUsuarioEvtConcList = snapshot.getRelEncuestaUsuarioEvtConcList();
+		this.relEncuestaUsuarioEvtEnEjecList = snapshot.getRelEncuestaUsuarioEvtEnEjecList();
+		this.encuestaTipoList = snapshot.getEncuestaTipoList();
+		this.tipoEncuestaSeleccionado = snapshot.getTipoEncuestaSeleccionado();
+		this.idEstatusSeleccionado = snapshot.getIdEstatusSeleccionado();
+		this.esColumnaCompetenciasVisible = snapshot.getEsColumnaCompetenciasVisible();
+		this.avaList = snapshot.getAvaList();
+		this.tiraMaterias = snapshot.getTiraMaterias();
+		this.tiraMateriasBaja = snapshot.getTiraMateriasBaja();
 	}
 
 	private Integer obtenerIdPersonaLmsPorIdPersonaGestor(PersonaDTO persona, ParametroWSMoodleDTO parametroWSMoodleDTO,

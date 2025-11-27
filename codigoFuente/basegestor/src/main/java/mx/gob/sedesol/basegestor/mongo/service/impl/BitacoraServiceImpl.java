@@ -100,9 +100,10 @@ public class BitacoraServiceImpl implements BitacoraService {
 
 	@Override
 	public void guardarBitacora(final BitacoraDTO bitacoraDTO) {
-
-		Bitacora bitacoraDocumento = modelMapper.map(bitacoraDTO, Bitacora.class);
-		new Thread(() -> bitacoraRepo.save(bitacoraDocumento)).start();
+		new Thread(() -> {
+			Bitacora bitacoraDocumento = modelMapper.map(bitacoraDTO, Bitacora.class);
+			bitacoraRepo.save(bitacoraDocumento);
+		}).start();
 		//logger.info("Bitacora:" + "Funcionalidad:" + bitacoraDTO.getFuncionalidad() + ". Id afectado: "
 		//		+ bitacoraDTO.getIdElementoAfectado());
 
