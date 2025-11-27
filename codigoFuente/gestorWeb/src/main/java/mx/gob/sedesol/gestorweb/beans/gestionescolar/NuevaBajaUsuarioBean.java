@@ -80,7 +80,9 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     public void onMatriculaInput() {
-        if (matriculaUsuario == null || matriculaUsuario.trim().isEmpty()) {
+        matriculaUsuario = matriculaUsuario != null ? matriculaUsuario.trim() : null;
+
+        if (matriculaUsuario == null || matriculaUsuario.isEmpty()) {
             limpiarCamposDependientes();
         }
     }

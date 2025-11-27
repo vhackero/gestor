@@ -122,7 +122,7 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @Override
     public RelacionBajaDTO consultarRelacionPorMatricula(String matricula) {
         String consulta = "SELECT "
-                + "    plan.id AS id_plan, "
+                + "    plan.id_plan AS id_plan, "
                 + "    semestre.id AS id_semestre, "
                 + "    bloque.id AS id_bloque, "
                 + "    fdp.id_programa AS id_programa, "
