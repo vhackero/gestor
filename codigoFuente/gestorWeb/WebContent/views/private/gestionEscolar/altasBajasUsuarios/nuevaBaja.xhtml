@@ -18,42 +18,38 @@
                 <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaBaja')}"
                          styleClass="panel-primary">
 
-                    <div class="form-group">
-                        <div class="row">
-                            <div class="col-md-6 col-xs-12">
-                                <p:outputLabel styleClass="bloque requerido" for="matricula" value="Matrícula/Usuario:" />
-                                <p:inputText id="matricula"
-                                             value="#{nuevaBajaUsuarioBean.matriculaUsuario}"
-                                             styleClass="form-control"
-                                             required="true"
-                                             requiredMessage="La matrícula es obligatoria" />
-                                <p:message for="matricula" display="text" />
-                            </div>
-
-                            <div class="col-md-6 col-xs-12">
-                                <p:outputLabel styleClass="bloque requerido" for="tipoBaja" value="Tipo de baja:" />
-                                <p:selectOneMenu id="tipoBaja"
-                                                 value="#{nuevaBajaUsuarioBean.idTipoBaja}"
-                                                 styleClass="col-xs-12"
-                                                 required="true"
-                                                 requiredMessage="Seleccione un tipo de baja">
-                                    <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-                                    <f:selectItems value="#{nuevaBajaUsuarioBean.tiposBaja}" />
-                                    <p:ajax event="change"
-                                            process="@this"
-                                            listener="#{nuevaBajaUsuarioBean.onTipoBajaChange}"
-                                            update="camposBaja" />
-                                </p:selectOneMenu>
-                                <p:message for="tipoBaja" display="text" />
-                            </div>
-                        </div>
-                    </div>
-
                     <h:panelGroup id="camposBaja" layout="block">
                         <div class="form-group">
                             <div class="row">
-                                <div class="col-md-6 col-xs-12">
-                                    <p:outputLabel styleClass="bloque requerido" for="plan" value="Plan:" />
+                                <div class="col-md-4 col-xs-12">
+                                    <p:outputLabel styleClass="bloque requerido" for="matricula" value="Matrícula/Usuario:" />
+                                    <p:inputText id="matricula"
+                                                 value="#{nuevaBajaUsuarioBean.matriculaUsuario}"
+                                                 styleClass="form-control"
+                                                 required="true"
+                                                 requiredMessage="La matrícula es obligatoria" />
+                                    <p:message for="matricula" display="text" />
+                                </div>
+
+                                <div class="col-md-4 col-xs-12">
+                                    <p:outputLabel styleClass="bloque requerido" for="tipoBaja" value="Tipo de baja:" />
+                                    <p:selectOneMenu id="tipoBaja"
+                                                     value="#{nuevaBajaUsuarioBean.idTipoBaja}"
+                                                     styleClass="col-xs-12"
+                                                     required="true"
+                                                     requiredMessage="Seleccione un tipo de baja">
+                                        <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                        <f:selectItems value="#{nuevaBajaUsuarioBean.tiposBaja}" />
+                                        <p:ajax event="change"
+                                                process="@this"
+                                                listener="#{nuevaBajaUsuarioBean.onTipoBajaChange}"
+                                                update="camposBaja" />
+                                    </p:selectOneMenu>
+                                    <p:message for="tipoBaja" display="text" />
+                                </div>
+
+                                <div class="col-md-4 col-xs-12">
+                                    <p:outputLabel styleClass="bloque requerido" for="plan" value="Plan de estudios:" />
                                     <p:selectOneMenu id="plan"
                                                      value="#{nuevaBajaUsuarioBean.idPlan}"
                                                      styleClass="col-xs-12"
@@ -68,135 +64,117 @@
                                     </p:selectOneMenu>
                                     <p:message for="plan" display="text" />
                                 </div>
+                            </div>
+                        </div>
 
-                                <h:panelGroup id="semestrePanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarSemestre}">
-                                    <div class="col-md-6 col-xs-12">
-                                        <p:outputLabel styleClass="bloque" for="semestre" value="Semestre:" />
-                                        <p:selectOneMenu id="semestre"
-                                                         value="#{nuevaBajaUsuarioBean.idSemestre}"
+                        <div class="form-group">
+                            <div class="row">
+                                <h:panelGroup id="semestrePanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarSemestre}" styleClass="col-md-3 col-xs-12">
+                                    <p:outputLabel styleClass="bloque" for="semestre" value="Semestre:" />
+                                    <p:selectOneMenu id="semestre"
+                                                     value="#{nuevaBajaUsuarioBean.idSemestre}"
+                                                     styleClass="col-xs-12"
+                                                     required="#{nuevaBajaUsuarioBean.semestreRequerido()}"
+                                                     requiredMessage="Seleccione un semestre">
+                                        <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                        <f:selectItems value="#{nuevaBajaUsuarioBean.semestres}" />
+                                        <p:ajax event="change"
+                                                process="@this"
+                                                listener="#{nuevaBajaUsuarioBean.onSemestreChange}"
+                                                update="camposBaja" />
+                                    </p:selectOneMenu>
+                                    <p:message for="semestre" display="text" />
+                                </h:panelGroup>
+
+                                <h:panelGroup id="bloquePanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarBloque}" styleClass="col-md-3 col-xs-12">
+                                    <p:outputLabel styleClass="bloque" for="bloque" value="Bloque:" />
+                                    <p:selectOneMenu id="bloque"
+                                                     value="#{nuevaBajaUsuarioBean.idBloque}"
+                                                     styleClass="col-xs-12"
+                                                     required="#{nuevaBajaUsuarioBean.bloqueRequerido()}"
+                                                     requiredMessage="Seleccione un bloque">
+                                        <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                        <f:selectItems value="#{nuevaBajaUsuarioBean.bloques}" />
+                                        <p:ajax event="change"
+                                                process="@this"
+                                                listener="#{nuevaBajaUsuarioBean.onBloqueChange}"
+                                                update="camposBaja" />
+                                    </p:selectOneMenu>
+                                    <p:message for="bloque" display="text" />
+                                </h:panelGroup>
+
+                                <h:panelGroup id="programaPanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarPrograma}" styleClass="col-md-3 col-xs-12">
+                                    <p:outputLabel styleClass="bloque" for="programa" value="Asignatura/Programa:" />
+                                        <p:selectOneMenu id="programa"
+                                                         value="#{nuevaBajaUsuarioBean.idPrograma}"
                                                          styleClass="col-xs-12"
-                                                         required="#{nuevaBajaUsuarioBean.semestreRequerido()}"
-                                                         requiredMessage="Seleccione un semestre">
+                                                         required="#{nuevaBajaUsuarioBean.mostrarPrograma}"
+                                                         requiredMessage="Seleccione un programa">
                                             <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-                                            <f:selectItems value="#{nuevaBajaUsuarioBean.semestres}" />
+                                            <f:selectItems value="#{nuevaBajaUsuarioBean.programas}" />
                                             <p:ajax event="change"
                                                     process="@this"
-                                                    listener="#{nuevaBajaUsuarioBean.onSemestreChange}"
+                                                    listener="#{nuevaBajaUsuarioBean.onProgramaChange}"
                                                     update="camposBaja" />
                                         </p:selectOneMenu>
-                                        <p:message for="semestre" display="text" />
-                                    </div>
+                                    <p:message for="programa" display="text" />
+                                </h:panelGroup>
+
+                                <h:panelGroup id="periodoPanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarPeriodo}" styleClass="col-md-3 col-xs-12">
+                                    <p:outputLabel styleClass="bloque" for="periodo" value="Periodo:" />
+                                        <p:selectOneMenu id="periodo"
+                                                         value="#{nuevaBajaUsuarioBean.idPeriodo}"
+                                                         styleClass="col-xs-12"
+                                                         required="#{nuevaBajaUsuarioBean.mostrarPeriodo}"
+                                                         requiredMessage="Seleccione un periodo">
+                                            <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                            <f:selectItems value="#{nuevaBajaUsuarioBean.periodos}" />
+                                            <p:ajax event="change"
+                                                    process="@this"
+                                                    listener="#{nuevaBajaUsuarioBean.onPeriodoChange}"
+                                                    update="camposBaja" />
+                                        </p:selectOneMenu>
+                                    <p:message for="periodo" display="text" />
                                 </h:panelGroup>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <div class="row">
-                                <h:panelGroup id="bloquePanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarBloque}">
-                                    <div class="col-md-6 col-xs-12">
-                                        <p:outputLabel styleClass="bloque" for="bloque" value="Bloque:" />
-                                        <p:selectOneMenu id="bloque"
-                                                         value="#{nuevaBajaUsuarioBean.idBloque}"
-                                                         styleClass="col-xs-12"
-                                                         required="#{nuevaBajaUsuarioBean.bloqueRequerido()}"
-                                                         requiredMessage="Seleccione un bloque">
-                                            <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-                                            <f:selectItems value="#{nuevaBajaUsuarioBean.bloques}" />
-                                            <p:ajax event="change"
-                                                    process="@this"
-                                                    listener="#{nuevaBajaUsuarioBean.onBloqueChange}"
-                                                    update="camposBaja" />
-                                        </p:selectOneMenu>
-                                        <p:message for="bloque" display="text" />
-                                    </div>
+                                <h:panelGroup id="eventoPanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarEvento}" styleClass="col-md-3 col-xs-12">
+                                    <p:outputLabel styleClass="bloque" for="evento" value="Evento:" />
+                                    <p:selectOneMenu id="evento"
+                                                     value="#{nuevaBajaUsuarioBean.idEvento}"
+                                                     styleClass="col-xs-12">
+                                        <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+                                        <f:selectItems value="#{nuevaBajaUsuarioBean.eventos}" />
+                                    </p:selectOneMenu>
                                 </h:panelGroup>
 
-                                <h:panelGroup id="programaPanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarPrograma}">
-                                    <div class="col-md-6 col-xs-12">
-                                        <p:outputLabel styleClass="bloque" for="programa" value="Asignatura/Programa:" />
-                                            <p:selectOneMenu id="programa"
-                                                             value="#{nuevaBajaUsuarioBean.idPrograma}"
-                                                             styleClass="col-xs-12"
-                                                             required="#{nuevaBajaUsuarioBean.mostrarPrograma}"
-                                                             requiredMessage="Seleccione un programa">
-                                                <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-                                                <f:selectItems value="#{nuevaBajaUsuarioBean.programas}" />
-                                                <p:ajax event="change"
-                                                        process="@this"
-                                                        listener="#{nuevaBajaUsuarioBean.onProgramaChange}"
-                                                        update="camposBaja" />
-                                            </p:selectOneMenu>
-                                        <p:message for="programa" display="text" />
-                                    </div>
-                                </h:panelGroup>
-                            </div>
-                        </div>
+                                <div class="col-md-3 col-xs-12">
+                                    <p:outputLabel styleClass="bloque" for="motivo" value="Motivo:" />
+                                    <p:inputTextarea id="motivo"
+                                                    value="#{nuevaBajaUsuarioBean.motivo}"
+                                                    styleClass="form-control"
+                                                    rows="3" />
+                                </div>
 
-                        <div class="form-group">
-                            <div class="row">
-                                <h:panelGroup id="periodoPanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarPeriodo}">
-                                    <div class="col-md-6 col-xs-12">
-                                        <p:outputLabel styleClass="bloque" for="periodo" value="Periodo:" />
-                                            <p:selectOneMenu id="periodo"
-                                                             value="#{nuevaBajaUsuarioBean.idPeriodo}"
-                                                             styleClass="col-xs-12"
-                                                             required="#{nuevaBajaUsuarioBean.mostrarPeriodo}"
-                                                             requiredMessage="Seleccione un periodo">
-                                                <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-                                                <f:selectItems value="#{nuevaBajaUsuarioBean.periodos}" />
-                                                <p:ajax event="change"
-                                                        process="@this"
-                                                        listener="#{nuevaBajaUsuarioBean.onPeriodoChange}"
-                                                        update="camposBaja" />
-                                            </p:selectOneMenu>
-                                        <p:message for="periodo" display="text" />
-                                    </div>
-                                </h:panelGroup>
+                                <div class="col-md-3 col-xs-12">
+                                    <p:outputLabel styleClass="bloque" for="quien" value="Quién aplica la baja:" />
+                                    <p:inputText id="quien"
+                                                 value="#{nuevaBajaUsuarioBean.quienAplica}"
+                                                 styleClass="form-control" />
+                                </div>
 
-                                <h:panelGroup id="eventoPanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarEvento}">
-                                    <div class="col-md-6 col-xs-12">
-                                        <p:outputLabel styleClass="bloque" for="evento" value="Evento:" />
-                                        <p:selectOneMenu id="evento"
-                                                         value="#{nuevaBajaUsuarioBean.idEvento}"
-                                                         styleClass="col-xs-12">
-                                            <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-                                            <f:selectItems value="#{nuevaBajaUsuarioBean.eventos}" />
-                                        </p:selectOneMenu>
-                                    </div>
-                                </h:panelGroup>
+                                <div class="col-md-3 col-xs-12">
+                                    <p:outputLabel styleClass="bloque" for="numero" value="Número de solicitud:" />
+                                    <p:inputText id="numero"
+                                                 value="#{nuevaBajaUsuarioBean.numeroSolicitud}"
+                                                 styleClass="form-control" />
+                                </div>
                             </div>
                         </div>
                     </h:panelGroup>
-
-                    <div class="form-group">
-                        <div class="row">
-                            <div class="col-md-12 col-xs-12">
-                                <p:outputLabel styleClass="bloque" for="motivo" value="Motivo:" />
-                                <p:inputTextarea id="motivo"
-                                                value="#{nuevaBajaUsuarioBean.motivo}"
-                                                styleClass="form-control"
-                                                rows="3" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="row">
-                            <div class="col-md-6 col-xs-12">
-                                <p:outputLabel styleClass="bloque" for="quien" value="Quién aplica la baja:" />
-                                <p:inputText id="quien"
-                                             value="#{nuevaBajaUsuarioBean.quienAplica}"
-                                             styleClass="form-control" />
-                            </div>
-
-                            <div class="col-md-6 col-xs-12">
-                                <p:outputLabel styleClass="bloque" for="numero" value="Número de solicitud:" />
-                                <p:inputText id="numero"
-                                             value="#{nuevaBajaUsuarioBean.numeroSolicitud}"
-                                             styleClass="form-control" />
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="form-group">
                         <div class="row">
