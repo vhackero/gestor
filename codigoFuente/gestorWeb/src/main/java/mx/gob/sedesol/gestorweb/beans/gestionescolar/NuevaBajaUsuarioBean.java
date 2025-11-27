@@ -79,6 +79,12 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         actualizarVisibilidadCampos();
     }
 
+    public void onMatriculaInput() {
+        if (matriculaUsuario == null || matriculaUsuario.trim().isEmpty()) {
+            limpiarCamposDependientes();
+        }
+    }
+
     public void onMatriculaChange() {
         limpiarCamposDependientes();
 
