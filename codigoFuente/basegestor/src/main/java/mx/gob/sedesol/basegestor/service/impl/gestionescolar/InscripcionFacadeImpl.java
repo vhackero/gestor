@@ -28,10 +28,10 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionInsertDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademicaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ResultadoElectivasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ResumenSeleccionMateriasDTO;
@@ -42,12 +42,13 @@ import mx.gob.sedesol.basegestor.commons.utils.InscripcionUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ParametrosSistemaEnum;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.CorreoElectronicoService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionFacade;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
 
 @Service("inscripcionFacade")
-public class InscripcionFacade {
+public class InscripcionFacadeImpl implements InscripcionFacade {
 
-	private static final Logger logger = Logger.getLogger(InscripcionFacade.class);
+	private static final Logger logger = Logger.getLogger(InscripcionFacadeImpl.class);
 
 	@Autowired
 	private InscripcionService inscripcionService;
@@ -58,7 +59,10 @@ public class InscripcionFacade {
 	@Autowired
 	private CorreoElectronicoService correoElectronicoService;
 
-	public InscripcionContextoDTO obtenerContextoInscripcion(Long idPersona) throws InscripcionException,InscripcionPreviaException {
+	@Transactional(readOnly = true)
+	@Override
+	public InscripcionContextoDTO obtenerContextoInscripcion(Long idPersona)
+			throws InscripcionException, InscripcionPreviaException {
 
 		Date fechaActual = new Date();
 
@@ -67,7 +71,8 @@ public class InscripcionFacade {
 		TerminosCondicionesDTO terminosCondiciones = obtenerTerminosCondiciones();
 		CreditosTotalesPlanDTO creditosTotalesPlan = obtenerCreditosTotalesPorPlan(persona.getIdPlan());
 		LimitesCargaAcademicaDTO limitesCargaAcademica = obtenerLimitesCargaAcademicaPorPlan(persona.getIdPlan());
-		EstadoAcademicoDTO estadoAcademico = obtenerEstadoAcademico(persona, fechaActual, creditosTotalesPlan);
+		EstadoAcademicoDTO estadoAcademico = obtenerEstadoAcademico(persona, fechaActual, creditosTotalesPlan,
+				limitesCargaAcademica);
 		InscripcionContextoDTO contexto = crearContextoInscripcion(persona, terminosCondiciones, creditosTotalesPlan,
 				limitesCargaAcademica, estadoAcademico);
 
@@ -75,12 +80,12 @@ public class InscripcionFacade {
 	}
 
 	@Transactional
-	public void finalizarInscripcion(Boolean aceptaTerminos, InscripcionContextoDTO contexto)
-			throws InscripcionException {
+	@Override
+	public void finalizarInscripcion(Boolean aceptaTerminos, InscripcionContextoDTO contexto) {
 		validarAceptaTerminos(aceptaTerminos);
 		validarSeleccionMateriasSegunEstatusAcademico(contexto);
 		insertarInscripcion(contexto);
-		//enviarCorreoInscripcion(contexto);
+		// enviarCorreoInscripcion(contexto);
 	}
 
 	private void insertarInscripcion(InscripcionContextoDTO contexto) {
@@ -93,7 +98,7 @@ public class InscripcionFacade {
 		return materiasDisponibles.stream().filter(materia -> materia.getCheck()).collect(Collectors.toList());
 	}
 
-	public void enviarCorreoInscripcion(InscripcionContextoDTO contexto) throws RuntimeException {
+	private void enviarCorreoInscripcion(InscripcionContextoDTO contexto) throws RuntimeException {
 		try {
 			List<InscripcionMateriasDTO> materiasSeleccionadas = obtenerMateriasSeleccionadas(
 					contexto.getEstadoAcademico().getMateriasDisponibles());
@@ -223,7 +228,7 @@ public class InscripcionFacade {
 		return verificarRecursamiento(materiasBajas, materiasReprobadas, materia.getClavePrograma());
 	}
 
-	public int verificarRecursamiento(List<InscripcionBajasDTO> materiasBajas,
+	private int verificarRecursamiento(List<InscripcionBajasDTO> materiasBajas,
 			List<InscripcionMateriasReprobadasDTO> materiasReprobadas, String clavePrograma) {
 
 		if (esMateriaDadaDeBaja(materiasBajas, clavePrograma)) {
@@ -269,7 +274,7 @@ public class InscripcionFacade {
 		return sb.toString();
 	}
 
-	public String generarPeriodo(InscripcionMateriasDTO materia) {
+	private String generarPeriodo(InscripcionMateriasDTO materia) {
 
 		// Obtener el año actual
 		int year = Calendar.getInstance().get(Calendar.YEAR);
@@ -457,8 +462,8 @@ public class InscripcionFacade {
 		}
 	}
 
-	public void validarSeleccionMateria(InscripcionMateriasDTO materiaSeleccionada, InscripcionContextoDTO contexto)
-			throws InscripcionException {
+	@Override
+	public void validarSeleccionMateria(InscripcionMateriasDTO materiaSeleccionada, InscripcionContextoDTO contexto) {
 
 		Double porcentajeCreditosCompletados = obtenerPorcentajeCreditosCompletados(contexto);
 		List<InscripcionMateriasReprobadasDTO> materiasReprobadas = obtenerMateriasReprobadas(contexto);
@@ -483,12 +488,14 @@ public class InscripcionFacade {
 		contexto.setCreditosTotalesPlan(creditosTotalesPlan);
 		contexto.setLimitesCargaAcademica(limitesCargaAcademica);
 		contexto.setEstadoAcademico(estadoAcademico);
-		contexto.setMostrarMensajeSeriacion(debeMostrarMensajeSeriacion(estadoAcademico));
+		contexto.setMensajeSeriacion(obtenerMensajeSeriacion(estadoAcademico));
+		contexto.setMensajeLimiteReprobacionesAlcanzado(obtenerMensajeLimiteReprobacionesAlcanzado(estadoAcademico));
 		return contexto;
 	}
 
 	private EstadoAcademicoDTO obtenerEstadoAcademico(InscripcionPersonaDTO persona, Date fechaActual,
-			CreditosTotalesPlanDTO creditosTotalesPlan) throws InscripcionException {
+			CreditosTotalesPlanDTO creditosTotalesPlan, LimitesCargaAcademicaDTO limitesCargaAcademica)
+			throws InscripcionException {
 		Boolean esNuevoIngreso = esNuevoIngreso(persona);
 
 		Boolean esRegular = esRegular(persona);
@@ -511,7 +518,7 @@ public class InscripcionFacade {
 				esRegular);
 
 		List<InscripcionMateriasDTO> materiasDisponibles = obtenerMateriasDisponiblesParaInscripcion(materiasOfertadas,
-				materiasCursadas, materiasReprobadas, esNuevoIngreso, esRegular);
+				materiasCursadas, materiasReprobadas, esNuevoIngreso, esRegular, limitesCargaAcademica);
 
 		List<InscripcionBajasDTO> materiasBajas = obtenerBajasDeMateriasSolicitadas(persona);
 
@@ -523,9 +530,12 @@ public class InscripcionFacade {
 
 	}
 
-	private Boolean debeMostrarMensajeSeriacion(EstadoAcademicoDTO estadoAcademico) {
-		return estadoAcademico.getMateriasDisponibles().stream()
-				.anyMatch(materia -> materia.getEsMateriaSeriada() != null && materia.getEsMateriaSeriada());
+	private String obtenerMensajeSeriacion(EstadoAcademicoDTO estadoAcademico) {
+		if (estadoAcademico.getMateriasDisponibles().stream()
+				.anyMatch(materia -> materia.getEsMateriaSeriada() != null && materia.getEsMateriaSeriada())) {
+			return "Estimad(a/o) estudiante, la(s) asignaturas a las que deseas inscribirte están condicionadas a la aprobación previa de según la seriación establecida en tu plan de estudio";
+		}
+		return "";
 	}
 
 	private EstadoAcademicoDTO crearEstadoAcademico(Boolean esNuevoIngreso, Boolean esRegular,
@@ -569,7 +579,6 @@ public class InscripcionFacade {
 			Boolean esNuevoIngreso, Boolean esRegular) throws InscripcionException {
 		List<InscripcionMateriasReprobadasDTO> materiasReprobadas = inscripcionService
 				.obtenerMateriasCursadasReprobadas(persona.getIdPersona());
-		validarLimiteReprobaciones(materiasReprobadas, esNuevoIngreso, esRegular);
 		return materiasReprobadas;
 	}
 
@@ -577,7 +586,8 @@ public class InscripcionFacade {
 		return inscripcionService.obtenerMateriasCursadas(persona.getIdPersona());
 	}
 
-	private void validarInscripcionPrevia(Date fechaActual, InscripcionPersonaDTO persona) throws InscripcionPreviaException {
+	private void validarInscripcionPrevia(Date fechaActual, InscripcionPersonaDTO persona)
+			throws InscripcionPreviaException {
 		Boolean existeInscripcionPrevia = inscripcionService.existeInscripcionPrevia(persona, fechaActual);
 
 		if (existeInscripcionPrevia) {
@@ -616,18 +626,42 @@ public class InscripcionFacade {
 	private List<InscripcionMateriasDTO> obtenerMateriasDisponiblesParaInscripcion(
 			List<InscripcionMateriasDTO> materiasOfertadas, List<InscripcionMateriasCursadasDTO> materiasCursadas,
 			List<InscripcionMateriasReprobadasDTO> materiasReprobadas, Boolean esEstudianteNuevoIngreso,
-			Boolean esEstudianteRegular) {
+			Boolean esEstudianteRegular, LimitesCargaAcademicaDTO limitesCargaAcademica) {
 
 		List<InscripcionMateriasDTO> materiasOfertadasSinAprobadas = excluirMateriasAprobadas(materiasOfertadas,
 				materiasCursadas);
 
+		List<InscripcionMateriasDTO> materiasOfertadasSinReprobadasConLimiteAlcanzado = excluirMateriasReprobadasConLimiteAlcanzado(
+				materiasOfertadasSinAprobadas, materiasReprobadas);
+
 		List<InscripcionMateriasDTO> materiasDeAcuerdoASituacionAcademica = obtenerMateriasDeAcuerdoASituacionAcademica(
-				materiasReprobadas, esEstudianteNuevoIngreso, esEstudianteRegular, materiasOfertadasSinAprobadas);
+				materiasReprobadas, esEstudianteNuevoIngreso, esEstudianteRegular,
+				materiasOfertadasSinReprobadasConLimiteAlcanzado, limitesCargaAcademica);
 
 		List<InscripcionMateriasDTO> materiasConSeriacionValidada = aplicarValidacionDeSeriacion(
 				materiasDeAcuerdoASituacionAcademica, materiasReprobadas, materiasCursadas);
 
 		return materiasConSeriacionValidada;
+	}
+
+	private List<InscripcionMateriasDTO> excluirMateriasReprobadasConLimiteAlcanzado(
+			List<InscripcionMateriasDTO> materiasOfertadasSinAprobadas,
+			List<InscripcionMateriasReprobadasDTO> materiasReprobadas) {
+		Set<String> clavesMateriasReprobadasConLimiteAlcanzado = obtenerClavesMateriasReprobadasConLimiteAlcanzado(
+				materiasReprobadas);
+
+		return materiasOfertadasSinAprobadas.stream()
+				.filter(materia -> !clavesMateriasReprobadasConLimiteAlcanzado.contains(materia.getClavePrograma()))
+				.collect(Collectors.toList());
+
+	}
+
+	private Set<String> obtenerClavesMateriasReprobadasConLimiteAlcanzado(
+			List<InscripcionMateriasReprobadasDTO> materiasReprobadas) {
+
+		return materiasReprobadas.stream().filter(
+				materia -> materia.getIntentosReprobados().equals(ConstantesGestor.LIMITE_REPROBACIONES_POR_MATERIA))
+				.map(InscripcionMateriasReprobadasDTO::getClavePrograma).collect(Collectors.toSet());
 	}
 
 	private List<InscripcionMateriasDTO> aplicarValidacionDeSeriacion(List<InscripcionMateriasDTO> materiasDisponibles,
@@ -692,8 +726,6 @@ public class InscripcionFacade {
 		materiaAntecedente.setCheck(Boolean.TRUE);
 		materiaAntecedente.setDisabled(Boolean.TRUE);
 		materiaAntecedente.setEsMateriaSeriada(Boolean.TRUE);
-
-//		mostrarMensajeSeriacion = Boolean.TRUE;
 	}
 
 	private Set<Long> obtenerIdsMateriasReprobadas(List<InscripcionMateriasReprobadasDTO> materiasReprobadas) {
@@ -707,7 +739,8 @@ public class InscripcionFacade {
 
 	private List<InscripcionMateriasDTO> obtenerMateriasDeAcuerdoASituacionAcademica(
 			List<InscripcionMateriasReprobadasDTO> materiasReprobadas, Boolean esEstudianteNuevoIngreso,
-			Boolean esEstudianteRegular, List<InscripcionMateriasDTO> materiasOfertadasSinAprobadas) {
+			Boolean esEstudianteRegular, List<InscripcionMateriasDTO> materiasOfertadasSinAprobadas,
+			LimitesCargaAcademicaDTO limitesCargaAcademica) {
 		// Estudiantes regulares de nuevo ingreso
 		if (esEstudianteNuevoIngreso && esEstudianteRegular) {
 			return obtenerMateriasEstudianteNuevoIngreso(materiasOfertadasSinAprobadas);
@@ -729,7 +762,7 @@ public class InscripcionFacade {
 			// Las materias reprobadas se vuelven obligatorias en la lista de materias
 			// ofertadas
 			List<InscripcionMateriasDTO> materiasConReprobadasMarcadas = marcarMateriasOfertadasReprobadas(
-					materiasOfertadasSinAprobadas, materiasReprobadas);
+					materiasOfertadasSinAprobadas, materiasReprobadas, limitesCargaAcademica);
 
 			// Regla para respetar el avance anual (Leer descripcion del metodo)
 			if (materiasReprobadas.size() < ConstantesGestor.NUMERO_MAXIMO_MATERIAS_REPROBADAS) {
@@ -859,7 +892,10 @@ public class InscripcionFacade {
 	}
 
 	private List<InscripcionMateriasDTO> marcarMateriasOfertadasReprobadas(
-			List<InscripcionMateriasDTO> materiasOfertadas, List<InscripcionMateriasReprobadasDTO> materiasReprobadas) {
+			List<InscripcionMateriasDTO> materiasOfertadas, List<InscripcionMateriasReprobadasDTO> materiasReprobadas,
+			LimitesCargaAcademicaDTO limitesCargaAcademica) {
+
+		int maxReprobadasPermitidasIrregulares = Integer.valueOf(limitesCargaAcademica.getMaxProgramasIrregulares());
 
 		/*
 		 * Las claves en las materias optativas se pueden repetir, por eso se le
@@ -868,13 +904,19 @@ public class InscripcionFacade {
 		Set<String> clavesMateriasReprobadas = materiasReprobadas.stream()
 				.map(InscripcionUtils::obtenerClaveUnicaPrograma).collect(Collectors.toSet());
 
-		materiasOfertadas.forEach(materia -> {
+		int cantidadMateriasMarcadas = 0;
+
+		for (InscripcionMateriasDTO materia : materiasOfertadas) {
 			boolean estaReprobada = clavesMateriasReprobadas.contains(InscripcionUtils.claveUnicaPrograma(materia));
-			if (estaReprobada && !InscripcionUtils.esMateriaElectiva(materia.getTipoPrograma())) {
+			if (estaReprobada && !InscripcionUtils.esMateriaElectiva(materia.getTipoPrograma())
+					&& cantidadMateriasMarcadas < maxReprobadasPermitidasIrregulares) {
 				materia.setCheck(Boolean.TRUE);
-				materia.setDisabled(Boolean.TRUE);
+				if (InscripcionUtils.esMateriaObligatoria(materia.getTipoPrograma())) {
+					materia.setDisabled(Boolean.TRUE);
+				}
+				cantidadMateriasMarcadas++;
 			}
-		});
+		}
 
 		return materiasOfertadas;
 
@@ -986,27 +1028,47 @@ public class InscripcionFacade {
 		return (totalHastaElMomento * 100.0) / totalCreditos;
 	}
 
-	private void validarLimiteReprobaciones(List<InscripcionMateriasReprobadasDTO> materiasReprobadasConIntentos,
-			Boolean esEstudianteNuevoIngreso, Boolean esEstudianteRegular) throws InscripcionException {
+	private String obtenerMensajeLimiteReprobacionesAlcanzado(EstadoAcademicoDTO estadoAcademico) {
+
+		List<InscripcionMateriasReprobadasDTO> materiasReprobadasConIntentos = estadoAcademico.getMateriasReprobadas();
+		Boolean esEstudianteNuevoIngreso = estadoAcademico.getEsNuevoIngreso();
+		Boolean esEstudianteRegular = estadoAcademico.getEsRegular();
+
 		if (esEstudianteNuevoIngreso || esEstudianteRegular) {
-			return;
+			return "";
 		}
 
 		// Solo aplica para estudiantes que NO sean de nuevo ingreso y que sean
 		// IRREGULARES
-		if (haAlcanzadoMaximoDeReprobaciones(materiasReprobadasConIntentos)) {
-			String mensaje = String.format(
-					"Estimad(a/o) estudiante, dada su situación académica en la que ha reprobado la misma asignatura más de %d veces no le es permitido realizar una nueva inscripción, contacte a la mesa de ayuda para revisar su caso.",
-					ConstantesGestor.LIMITE_REPROBACIONES_POR_MATERIA);
 
-			throw new InscripcionException(mensaje);
+		List<String> materiasConLimiteDeReprobacionesAlcanzados = obtenerNombresMateriasQueAlcanzaronLimiteReprobaciones(
+				materiasReprobadasConIntentos);
+		if (!materiasConLimiteDeReprobacionesAlcanzados.isEmpty()) {
+			return crearMensajeLimiteReprobacionesAlcanzado(materiasConLimiteDeReprobacionesAlcanzados);
 		}
+		return "";
+
 	}
 
-	private boolean haAlcanzadoMaximoDeReprobaciones(
-			List<InscripcionMateriasReprobadasDTO> materiasReprobadasConIntentos) {
-		return materiasReprobadasConIntentos.stream()
-				.anyMatch(mcr -> mcr.getIntentosReprobados().equals(ConstantesGestor.LIMITE_REPROBACIONES_POR_MATERIA));
+	private String crearMensajeLimiteReprobacionesAlcanzado(List<String> nombresMaterias) {
+
+		String materiasFormateadas = String.join(", ", nombresMaterias);
+
+		String prefijoMateria = nombresMaterias.size() > 1 ? "las materias: " : "la materia: ";
+
+		String mensaje = String.format(
+				"Estimad(a/o) estudiante, dada su situación académica en la que ha reprobado %s%s más de %d veces, no le es permitido realizar una nueva inscripción. "
+						+ "Contacte a la mesa de ayuda para revisar su caso.",
+				prefijoMateria, materiasFormateadas, ConstantesGestor.LIMITE_REPROBACIONES_POR_MATERIA);
+
+		return mensaje;
+	}
+
+	private List<String> obtenerNombresMateriasQueAlcanzaronLimiteReprobaciones(
+			List<InscripcionMateriasReprobadasDTO> materias) {
+		return materias.stream().filter(
+				materia -> materia.getIntentosReprobados().equals(ConstantesGestor.LIMITE_REPROBACIONES_POR_MATERIA))
+				.map(InscripcionMateriasReprobadasDTO::getNombrePrograma).collect(Collectors.toList());
 	}
 
 	private ResultadoElectivasDTO procesarMateriasElectivas(List<InscripcionMateriasDTO> materiasOfertadas,
@@ -1113,7 +1175,7 @@ public class InscripcionFacade {
 	}
 
 	public void validarSeleccionOptativas(InscripcionMateriasDTO materiaSeleccionada,
-			List<InscripcionMateriasDTO> materiasDisponibles) throws InscripcionException {
+			List<InscripcionMateriasDTO> materiasDisponibles) {
 		if (InscripcionUtils.esMateriaOptativa(materiaSeleccionada.getTipoPrograma())) {
 			if (esOptativaBloqueSemestreYaSeleccionada(materiaSeleccionada, materiasDisponibles)) {
 				throw new InscripcionException("Solo se permite seleccionar una optativa por bloque y semestre");
@@ -1126,29 +1188,54 @@ public class InscripcionFacade {
 
 	private boolean esClaveOptativaYaSeleccionada(InscripcionMateriasDTO materiaSeleccionada,
 			List<InscripcionMateriasDTO> materiasDisponibles) {
-		return materiasDisponibles.stream().filter(materia -> esIdProgramaDiferente(materiaSeleccionada, materia))
-				.filter(materia -> InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma()))
-				.anyMatch(materia -> esClaveProgramaIgual(materiaSeleccionada, materia));
+		
+		// Descartar de la lista la materia seleccionada
+		List<InscripcionMateriasDTO> primerFiltro = materiasDisponibles.stream()
+		.filter(materia -> !materiaSeleccionada.getIdPrograma().equals(materia.getIdPrograma())).collect(Collectors.toList());
+		
+		// Solo quedarse con materias optativas
+		List<InscripcionMateriasDTO> segundoFiltro = primerFiltro.stream().filter(materia -> InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma())).collect(Collectors.toList());
+		
+		// Validar si ya existe una materia marcada con la misma clave
+		boolean yaExisteUnaSeleccionada = segundoFiltro.stream().anyMatch(materia -> materia.getCheck().equals(Boolean.TRUE)
+				&& esClaveProgramaIgual(materiaSeleccionada, materia)); 
+		
+		return yaExisteUnaSeleccionada;
+		
+//		return materiasDisponibles.stream()
+//				.filter(materia -> !materiaSeleccionada.getIdPrograma().equals(materia.getIdPrograma()))
+//				.filter(materia -> InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma()))
+//				.anyMatch(materia -> materia.getCheck().equals(Boolean.TRUE)
+//						&& esClaveProgramaIgual(materiaSeleccionada, materia));
 	}
 
 	private boolean esClaveProgramaIgual(InscripcionMateriasDTO materiaSeleccionada, InscripcionMateriasDTO md) {
 		return md.getClavePrograma().equalsIgnoreCase(materiaSeleccionada.getClavePrograma());
 	}
 
-	private boolean esIdProgramaDiferente(InscripcionMateriasDTO materiaSeleccionada, InscripcionMateriasDTO md) {
-		return noEsLaMismaSeleccionada(md, materiaSeleccionada);
-	}
-
-	private boolean noEsLaMismaSeleccionada(InscripcionMateriasDTO materiaSeleccionada, InscripcionMateriasDTO m) {
-		return !materiaSeleccionada.getIdPrograma().equals(m.getIdPrograma());
-	}
-
 	private boolean esOptativaBloqueSemestreYaSeleccionada(InscripcionMateriasDTO materiaSeleccionada,
 			List<InscripcionMateriasDTO> materiasDisponibles) {
 		String bloqueSemestreBusqueda = materiaSeleccionada.getEstructura() + materiaSeleccionada.getSubestructura();
-		return materiasDisponibles.stream().filter(materia -> esIdProgramaDiferente(materiaSeleccionada, materia))
+
+		// Descartar de la lista la materia seleccionada
+		List<InscripcionMateriasDTO> primerFiltro = materiasDisponibles.stream()
+				.filter(materia -> !materiaSeleccionada.getIdPrograma().equals(materia.getIdPrograma()))
+				.collect(Collectors.toList());
+
+		// Solo quedarse con materias optativas
+		List<InscripcionMateriasDTO> segundoFiltro = primerFiltro.stream()
 				.filter(materia -> InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma()))
-				.anyMatch(materia -> esMismoSemestreBloque(bloqueSemestreBusqueda, materia));
+				.collect(Collectors.toList());
+
+		// Validar si ya existe una materia marcada con el mismo bloque y semestre
+		boolean esMismoSemestreBloque = segundoFiltro.stream()
+				.anyMatch(materia -> materia.getCheck().equals(Boolean.TRUE)
+						&& esMismoSemestreBloque(bloqueSemestreBusqueda, materia));
+
+		return esMismoSemestreBloque;
+//		return materiasDisponibles.stream().filter(materia -> !materiaSeleccionada.getIdPrograma().equals(materia.getIdPrograma()))
+//				.filter(materia -> InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma()))
+//				.anyMatch(materia -> esMismoSemestreBloque(bloqueSemestreBusqueda, materia));
 	}
 
 	private boolean esMismoSemestreBloque(String bloqueSemestreBusqueda, InscripcionMateriasDTO md) {
