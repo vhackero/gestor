@@ -3,6 +3,7 @@ package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 import java.util.List;
 
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaAplicacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
@@ -34,4 +35,6 @@ public interface INuevaBajaRepository {
     Integer obtenerIdUsuarioMoodle(String matricula);
 
     void insertarBaja(BajaAplicacionDTO bajaAplicacionDTO);
+
+    BajaMatriculaDetalleDTO consultarDatosPorMatricula(String matricula);
 }
