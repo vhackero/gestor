@@ -20,7 +20,8 @@
 				<p:outputLabel styleClass="h1" value="Inscripción" />
 			</h1>
 
-			<p:outputPanel styleClass="mt-2" rendered="#{inscripcionBean.mostrarAviso}">
+			<p:outputPanel styleClass="mt-2"
+				rendered="#{inscripcionBean.mostrarAviso}">
 				<div class="alert alert-#{inscripcionBean.tipoAviso}" role="alert">#{inscripcionBean.textoAviso}</div>
 			</p:outputPanel>
 
@@ -41,11 +42,13 @@
 				</div>
 
 				<p:outputPanel styleClass="mt-2"
-					rendered="#{inscripcionBean.contextoInscripcion.mostrarMensajeSeriacion}">
-					<div class="alert alert-info mb-0" role="alert">Estimad(a/o)
-						estudiante, la(s) asignaturas a las que deseas inscribirte están
-						condicionadas a la aprobación previa de según la seriación
-						establecida en tu plan de estudio</div>
+					rendered="#{not empty inscripcionBean.contextoInscripcion.mensajeSeriacion}">
+					<div class="alert alert-info mb-0" role="alert">#{inscripcionBean.contextoInscripcion.mensajeSeriacion}</div>
+				</p:outputPanel>
+
+				<p:outputPanel styleClass="mt-2"
+					rendered="#{not empty inscripcionBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}">
+					<div class="alert alert-info mb-0" role="alert">#{inscripcionBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}</div>
 				</p:outputPanel>
 
 				<div class="form-group mt-1">
