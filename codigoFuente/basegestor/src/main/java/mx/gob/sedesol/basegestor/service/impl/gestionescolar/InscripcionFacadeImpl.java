@@ -86,7 +86,17 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		validarAceptaTerminos(aceptaTerminos);
 		validarSeleccionMateriasSegunEstatusAcademico(contexto);
 		insertarInscripcion(contexto);
-		enviarCorreoInscripcion(contexto);
+		if (estaHabilitadoEnvioCorreoInscripcion()) {
+			enviarCorreoInscripcion(contexto);
+		}
+	}
+
+	private boolean estaHabilitadoEnvioCorreoInscripcion() {
+		String enviarCorreoInscripcion = parametroSistemaService
+				.obtenerParametro(ConstantesGestor.ENVIAR_CORREO_INSCRIPCION);
+
+		return enviarCorreoInscripcion != null
+				&& enviarCorreoInscripcion.equalsIgnoreCase(ConstantesGestor.ENVIO_DE_CORREO_INSCRIPCION_ACTIVO);
 	}
 
 	private void insertarInscripcion(InscripcionContextoDTO contexto) {
@@ -138,13 +148,11 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			String bloquesConMaterias) {
 
 		CorreoDTO correo = correoElectronicoService.asignaParametrosConfigCorreo();
-		correo.setTitulo("Confirmación de Inscripción");
-		correo.setAsunto("Inscripción Completa");
+		correo.setAsunto(obtenerAsuntoCorreoInscripcionParametroSistema());
 		correo.setDestinatarios(Collections.singletonList(correoDestino));
-
-		String cuentaAdmin = obtenerParametroSistemaCuentaAdminCorreo();
-		correo.setRemitente(cuentaAdmin);
-
+		correo.setCorreoRemitente(obtenerParametroSistemaCuentaAdminCorreo());
+		correo.setNombreRemitente(obtenerParametroSistemaNombreRemitenteCorreo());
+		
 		String informacionExtraCorreo = obtenerInformacionExtraCorreoParametroSistema();
 
 		String urlPaginaInicio = obtenerUrlPaginaInicioParametroSistema();
@@ -154,6 +162,17 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		correo.setContenido(contenido);
 
 		return correo;
+	}
+	
+	private String obtenerParametroSistemaNombreRemitenteCorreo() {
+		String nombreRemitente = parametroSistemaService.obtenerParametro(ConstantesGestor.REMITENTE_CORREO_INSCRIPCION);
+		return nombreRemitente != null ? nombreRemitente : ConstantesGestor.NOMBRE_POR_DEFECTO_REMITENTE_CORREO_INSCRIPCION;
+	}
+	
+
+	private String obtenerAsuntoCorreoInscripcionParametroSistema() {
+		String asunto = parametroSistemaService.obtenerParametro(ConstantesGestor.ASUNTO_CORREO_INSCRIPCION);
+		return asunto != null ? asunto : ConstantesGestor.ASUNTO_POR_DEFECTO_CORREO_INSCRIPCION;
 	}
 
 	private String obtenerUrlPaginaInicioParametroSistema() {
@@ -380,7 +399,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		ResumenSeleccionMateriasDTO resumen = construirResumenSeleccion(materiasDisponibles);
 
 		if (esNuevoIngreso(contexto) && esRegular(contexto)) {
-			validarCargaPrimerSemestre(resumen);
+			validarCargaPrimerSemestre(resumen, contexto);
 		}
 
 		if (!esNuevoIngreso(contexto)) {
@@ -453,7 +472,16 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	 * Los estudiantes regulares de nuevo ingreso deben seleccionar sus materias
 	 * obligatorias y optativas requeridas.
 	 */
-	private void validarCargaPrimerSemestre(ResumenSeleccionMateriasDTO resumen) {
+	private void validarCargaPrimerSemestre(ResumenSeleccionMateriasDTO resumen, InscripcionContextoDTO contexto) {
+		List<InscripcionMateriasDTO> materiasDisponibles = contexto.getEstadoAcademico().getMateriasDisponibles();
+		int cantidadMateriasOfertadas = materiasDisponibles.size();
+		Long cantidadMaxMaterias = ConstantesGestor.CANT_MATERIAS_OBLIGATORIAS_EST_REGULAR_PRIMER_SEMESTRE
+				+ ConstantesGestor.CANT_MATERIAS_OPTATIVAS_EST_REGULAR_PRIMER_SEMESTRE;
+
+		if (cantidadMateriasOfertadas < cantidadMaxMaterias) {
+			return;
+		}
+
 		if (esCargaAcademicaInvalidaPrimerSemestre(resumen.getObligatoriasSeleccionadas(),
 				resumen.getOptativasSeleccionadas())) {
 

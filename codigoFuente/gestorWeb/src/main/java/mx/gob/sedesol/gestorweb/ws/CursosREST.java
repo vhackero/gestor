@@ -131,7 +131,7 @@ public class CursosREST {
 								.setAsunto(request.getNombre() + "Esta interesado en el curso " + evento.getNombreEc());
 						correoDto
 								.setTitulo(request.getNombre() + "Esta interesado en el curso " + evento.getNombreEc());
-						correoDto.setRemitente(parametroSistemaService
+						correoDto.setCorreoRemitente(parametroSistemaService
 								.obtenerParametro(ParametrosSistemaEnum.PS_CONFIG_CORREO_CUENTA_ADMIN.getClave()));
 						correoDto.setContenido(request.getNombre());
 						correoDto.agregarDestinatario(request.getCorreo());
