@@ -267,6 +267,13 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         NodoDTO tipoSeleccionado = obtenerTipoSeleccionado();
         String nombreTipo = tipoSeleccionado != null ? tipoSeleccionado.getNombre() : null;
 
+        if (nombreTipo == null) {
+            esTipoDefinitiva = false;
+            esTipoTemporalOParcial = false;
+            esSinAsignaturas = false;
+            return;
+        }
+
         esTipoDefinitiva = contieneTexto(nombreTipo, "definitiva");
         esTipoTemporalOParcial = contieneTexto(nombreTipo, "temporal") || contieneTexto(nombreTipo, "parcial");
         esSinAsignaturas = contieneTexto(nombreTipo, "sin asignaturas");
