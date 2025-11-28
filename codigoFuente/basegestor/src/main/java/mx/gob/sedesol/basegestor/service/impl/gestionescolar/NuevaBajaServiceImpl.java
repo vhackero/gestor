@@ -68,9 +68,7 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
                 && datos.getIdSemestre() != null
                 && datos.getIdBloque() != null
                 && datos.getIdPrograma() != null
-                && datos.getIdEvento() != null
-                && datos.getPeriodo() != null
-                && !datos.getPeriodo().trim().isEmpty();
+                && datos.getIdEvento() != null;
 
         return relacionCompleta ? datos : null;
     }
