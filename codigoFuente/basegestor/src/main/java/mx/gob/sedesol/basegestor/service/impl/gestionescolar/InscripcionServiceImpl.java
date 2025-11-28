@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionInsertDTO;
@@ -39,7 +40,8 @@ public class InscripcionServiceImpl implements InscripcionService {
 	@Override
 	public InscripcionPersonaDTO obtenerInscripcionPorPersona(String idPersona) {
 
-		List<InscripcionPersonaDTO> listaInformacionPersona = inscripcionesRepository.obtenerInscripcionPorPersona(idPersona);
+		List<InscripcionPersonaDTO> listaInformacionPersona = inscripcionesRepository
+				.obtenerInscripcionPorPersona(idPersona);
 
 		if (listaInformacionPersona == null) {
 			return new InscripcionPersonaDTO();
@@ -190,6 +192,12 @@ public class InscripcionServiceImpl implements InscripcionService {
 			Long idConvocatoria, String semestreCinco, String semestreSeis) {
 		return inscripcionesRepository.obtenerMateriasElectivasDeOtrosPlanes(idPlanPersona, fechaActual, idConvocatoria,
 				semestreCinco, semestreSeis);
+	}
+
+	@Override
+	public Optional<EstadoInscripcionEstudianteDTO> obtenerEstadoInscripcionEstudiante(Long idPersona,
+			Long idProcesoInscripcion) {
+		return inscripcionesRepository.obtenerEstadoInscripcionEstudiante(idPersona, idProcesoInscripcion);
 	}
 
 }

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionInsertDTO;
@@ -38,54 +39,53 @@ public class InscripcionRepository implements IinscripcionRepository {
 	@Override
 	public List<InscripcionPersonaDTO> obtenerInscripcionPorPersona(String idPersona) {
 
-	    StringBuilder sql = new StringBuilder();
-	    sql.append("SELECT tp.id_persona, ");
-	    sql.append("       tp.sso_idUsuario, ");
-	    sql.append("       tp.sso_nombre, ");
-	    sql.append("       tp.sso_apellidoMaterno, ");
-	    sql.append("       tp.sso_apellidoPaterno, ");
-	    sql.append("       rpc.sso_correoElectronico, ");
-	    sql.append("       tpa.id_plan, ");
-	    sql.append("       tpl.nombre, ");
-	    sql.append("       tfd.nombre_tentativo, ");
-	    sql.append("       tpa.id_convocatoria ");
-	    sql.append("FROM tbl_persona tp ");
-	    sql.append("INNER JOIN rel_persona_correo rpc ON rpc.id_persona = tp.id_persona ");
-	    sql.append("INNER JOIN tbl_persona_aspirante tpa ON tpa.id_persona = rpc.id_persona ");
-	    sql.append("INNER JOIN tbl_planes tpl ON tpl.id_plan = tpa.id_plan ");
-	    sql.append("INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_plan = tpl.id_plan ");
-	    sql.append("INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpa.id_convocatoria ");
-	    sql.append("WHERE tp.id_persona = :idPersona ");
-	    sql.append("  AND tc.activo = 1");
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT tp.id_persona, ");
+		sql.append("       tp.sso_idUsuario, ");
+		sql.append("       tp.sso_nombre, ");
+		sql.append("       tp.sso_apellidoMaterno, ");
+		sql.append("       tp.sso_apellidoPaterno, ");
+		sql.append("       rpc.sso_correoElectronico, ");
+		sql.append("       tpa.id_plan, ");
+		sql.append("       tpl.nombre, ");
+		sql.append("       tfd.nombre_tentativo, ");
+		sql.append("       tpa.id_convocatoria ");
+		sql.append("FROM tbl_persona tp ");
+		sql.append("INNER JOIN rel_persona_correo rpc ON rpc.id_persona = tp.id_persona ");
+		sql.append("INNER JOIN tbl_persona_aspirante tpa ON tpa.id_persona = rpc.id_persona ");
+		sql.append("INNER JOIN tbl_planes tpl ON tpl.id_plan = tpa.id_plan ");
+		sql.append("INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_plan = tpl.id_plan ");
+		sql.append("INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpa.id_convocatoria ");
+		sql.append("WHERE tp.id_persona = :idPersona ");
+		sql.append("  AND tc.activo = 1");
 
-	    List<Object[]> resultados = entityManager.createNativeQuery(sql.toString())
-	            .setParameter("idPersona", idPersona)
-	            .getResultList();
+		List<Object[]> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("idPersona", idPersona)
+				.getResultList();
 
-	    List<InscripcionPersonaDTO> listaDTO = new ArrayList<>();
+		List<InscripcionPersonaDTO> listaDTO = new ArrayList<>();
 
-	    for (Object[] row : resultados) {
-	        listaDTO.add(mapearInscripcionPersona(row));
-	    }
+		for (Object[] row : resultados) {
+			listaDTO.add(mapearInscripcionPersona(row));
+		}
 
-	    return listaDTO;
+		return listaDTO;
 
 	}
-	
-	private InscripcionPersonaDTO mapearInscripcionPersona(Object[] row) {
-	    InscripcionPersonaDTO dto = new InscripcionPersonaDTO();
-	    dto.setIdPersona(getLongValue(row[0]));
-	    dto.setNombreUsuario((String) row[1]);
-	    dto.setNombre((String) row[2]);
-	    dto.setPrimerApellido((String) row[3]);
-	    dto.setSegundoApellido((String) row[4]);
-	    dto.setCorreo((String) row[5]);
-	    dto.setIdPlan(getLongValue(row[6]));
-	    dto.setPlan((String) row[7]);
-	    dto.setPrograma((String) row[8]);
-	    dto.setIdConvocatoria(getLongValue(row[9]));
 
-	    return dto;
+	private InscripcionPersonaDTO mapearInscripcionPersona(Object[] row) {
+		InscripcionPersonaDTO dto = new InscripcionPersonaDTO();
+		dto.setIdPersona(getLongValue(row[0]));
+		dto.setNombreUsuario((String) row[1]);
+		dto.setNombre((String) row[2]);
+		dto.setPrimerApellido((String) row[3]);
+		dto.setSegundoApellido((String) row[4]);
+		dto.setCorreo((String) row[5]);
+		dto.setIdPlan(getLongValue(row[6]));
+		dto.setPlan((String) row[7]);
+		dto.setPrograma((String) row[8]);
+		dto.setIdConvocatoria(getLongValue(row[9]));
+
+		return dto;
 	}
 
 	@Override
@@ -214,6 +214,101 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 		Object[] row = resultados.get(0);
 		return Optional.of(mapearLimiteCargaAcademica(row));
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Optional<EstadoInscripcionEstudianteDTO> obtenerEstadoInscripcionEstudiante(Long idPersona,
+			Long idProcesoInscripcion) {
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT ");
+		sql.append("    (NOT EXISTS( ");
+		sql.append("        SELECT 1 ");
+		sql.append("        FROM tbl_inscripciones ti ");
+		sql.append("        WHERE ti.Idpersona = tp.id_persona ");
+		sql.append("    )) AS esInscripcionOrdinariaInicial, ");
+		sql.append("    ");
+		sql.append("    (EXISTS( ");
+		sql.append("        SELECT 1 ");
+		sql.append("        FROM tbl_procesos_inscripcion tpi ");
+		sql.append("        WHERE NOT EXISTS( ");
+		sql.append("                SELECT 1 ");
+		sql.append("                FROM tbl_inscripciones ti2 ");
+		sql.append("                WHERE ti2.Idpersona = tp.id_persona ");
+		sql.append("              ) ");
+		sql.append("          AND tpi.proceso_inscripcion_id = :idProcesoInscripcion ");
+		sql.append("          AND tpi.id_tipo_proceso = 2 ");
+		sql.append("    )) AS esInscripcionExtraordinariaInicial, ");
+		sql.append("    ");
+		sql.append("    ( ");
+		sql.append("        SELECT MIN(n) ");
+		sql.append("        FROM ( ");
+		sql.append("            SELECT ");
+		sql.append("                a.n + b.n*10 + c.n*100 AS n ");
+		sql.append("            FROM ");
+		sql.append(
+				"                (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 ");
+		sql.append(
+				"                 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) a ");
+		sql.append("            CROSS JOIN ");
+		sql.append(
+				"                (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 ");
+		sql.append(
+				"                 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) b ");
+		sql.append("            CROSS JOIN ");
+		sql.append(
+				"                (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 ");
+		sql.append(
+				"                 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) c ");
+		sql.append("        ) AS nums ");
+		sql.append("        WHERE n > 0 ");
+		sql.append("          AND n <= ( ");
+		sql.append("                SELECT IFNULL(MAX(t.semestre), 1) + 1 ");
+		sql.append("                FROM tbl_inscripciones t ");
+		sql.append("                WHERE t.Idpersona = tp.id_persona ");
+		sql.append("          ) ");
+		sql.append("          AND n NOT IN ( ");
+		sql.append("                SELECT t2.semestre ");
+		sql.append("                FROM tbl_inscripciones t2 ");
+		sql.append("                WHERE t2.Idpersona = tp.id_persona ");
+		sql.append("          ) ");
+		sql.append("    ) AS semestreInscripcionOrdinaria ");
+		sql.append("FROM tbl_persona tp ");
+		sql.append("WHERE tp.id_persona = :idPersona");
+
+		List<Object[]> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("idPersona", idPersona)
+				.setParameter("idProcesoInscripcion", idProcesoInscripcion).getResultList();
+
+		if (resultados.isEmpty()) {
+			return Optional.empty();
+		}
+
+		Object[] row = resultados.get(0);
+		return Optional.of(mapearEstadoInscripcionEstudiante(row));
+	}
+
+	private EstadoInscripcionEstudianteDTO mapearEstadoInscripcionEstudiante(Object[] row) {
+		EstadoInscripcionEstudianteDTO dto = new EstadoInscripcionEstudianteDTO();
+
+		dto.setEsInscripcionOrdinariaInicial(getBooleanValue(row[0])); // esIncripcionOrdinariaInicial
+		dto.setEsInscripcionExtraordinariaInicial(getBooleanValue(row[1])); // esInscripcionExtraordinariaInicial
+		dto.setSemestreInscripcionOrdinaria(getIntegerValue(row[2])); // semestreInscripcionOrdinaria
+
+		return dto;
+	}
+
+	private Boolean getBooleanValue(Object value) {
+		if (value == null) {
+			return null;
+		}
+		if (value instanceof Boolean) {
+			return (Boolean) value;
+		}
+		if (value instanceof Number) {
+			return ((Number) value).intValue() != 0;
+		}
+		return Boolean.valueOf(value.toString());
 	}
 
 	@Override
@@ -558,7 +653,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("    tfd.tipo AS tipo_programa, ");
 		sql.append("    tfd.id_programa_antecedente AS seriada, ");
 		sql.append("    tpi.semestre AS periodo, ");
-		sql.append("    tpi.perfil AS perfil ");
+		sql.append("    tpi.perfil AS perfil, ");
+		sql.append("    tpi.proceso_inscripcion_id AS proceso_inscripcion_id ");
 		sql.append("FROM tbl_procesos_inscripcion tpi ");
 		sql.append("JOIN rel_proceso_inscipcion_planesyprogramas rpip ON rpip.id_plan = :idPlanInfopersona ");
 		sql.append("    AND tpi.proceso_inscripcion_id = rpip.id_proceso_inscripcion ");
@@ -608,6 +704,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setCheck(false); // Valor por defecto
 		dto.setPeriodo(getIntegerValue(row[12])); // tpi.semestre
 		dto.setPerfil((String) row[13]); // tpi.perfil
+		dto.setIdProcesoInscripcion(getLongValue(row[14])); //tpi.proceso_inscripcion_id
 
 		return dto;
 	}
@@ -814,7 +911,9 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("        	WHERE ");
 		sql.append("        		tmc2.id = tmc.id_padre");
 		sql.append("       ) AS estructura, ");
-		sql.append("       fd.id_programa_antecedente AS id_programa_antecedente ");
+		sql.append("       fd.id_programa_antecedente AS id_programa_antecedente, ");
+		sql.append("       fd.nombre_tentativo AS nombrePrograma, ");
+		sql.append("       fd.tipo AS tipo ");
 		sql.append("FROM tbl_persona tp ");
 		sql.append(
 				"INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona AND rgp.calificacion_final IS NOT NULL ");
@@ -859,7 +958,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setSubestructura((String) row[4]);
 		dto.setEstructura((String) row[5]);
 		dto.setIdProgramaAntecedente(getLongValue(row[6]));
-
+		dto.setNombrePrograma((String) row[7]);
+		dto.setTipoPrograma((String) row[8]);
 		return dto;
 	}
 
@@ -1011,7 +1111,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setDivision((String) row[9]);
 		dto.setTipoPrograma((String) row[10]);
 		dto.setIdProgramaAntecedente(getLongValue(row[11]));
-		
+
 		dto.setCheck(false);
 		dto.setDisabled(false);
 
