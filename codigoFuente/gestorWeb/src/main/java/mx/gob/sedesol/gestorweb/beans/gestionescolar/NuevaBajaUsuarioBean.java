@@ -109,9 +109,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             seleccionarSemestreDisponible();
             idBloque = datos.getIdBloque();
             actualizarBloques();
-            programas = idBloque != null
-                    ? convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBloque))
-                    : Collections.emptyList();
+            programas = obtenerProgramasPorSeleccion();
             idPrograma = mantenerSeleccionValida(idPrograma, datos.getIdPrograma(), programas);
             idPeriodo = datos.getPeriodo();
             eventos = idPeriodo != null && idPrograma != null
@@ -239,12 +237,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     private void actualizarProgramas() {
-        if (idBloque != null) {
-            programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBloque));
-        } else {
-            programas = Collections.emptyList();
-        }
-
+        programas = obtenerProgramasPorSeleccion();
         idPrograma = null;
         actualizarEventos();
     }
@@ -255,6 +248,15 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     private List<SelectItem> obtenerBloques(Long idSemestreSeleccionado) {
         return convertirANodosSelectItem(nuevaBajaService.obtenerBloquesPorSemestre(idSemestreSeleccionado));
+    }
+
+    private List<SelectItem> obtenerProgramasPorSeleccion() {
+        Long idBusqueda = idBloque != null ? idBloque : idSemestre;
+        if (idBusqueda == null) {
+            return Collections.emptyList();
+        }
+
+        return convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBusqueda));
     }
 
     private void actualizarBloques() {
