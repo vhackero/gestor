@@ -8,6 +8,8 @@ public class InscripcionMateriasReprobadasDTO {
 	private String estructura;
 	private String subestructura;
 	private Long idProgramaAntecedente;
+	private String nombrePrograma;
+	private String tipoPrograma;
 
 	public Long getIntentosReprobados() {
 		return intentosReprobados;
@@ -64,5 +66,20 @@ public class InscripcionMateriasReprobadasDTO {
 	public void setIdProgramaAntecedente(Long idProgramaAntecedente) {
 		this.idProgramaAntecedente = idProgramaAntecedente;
 	}
-	
+
+	public String getNombrePrograma() {
+		return nombrePrograma;
+	}
+
+	public void setNombrePrograma(String nombrePrograma) {
+		this.nombrePrograma = nombrePrograma;
+	}
+
+	public String getTipoPrograma() {
+		return tipoPrograma;
+	}
+
+	public void setTipoPrograma(String tipoPrograma) {
+		this.tipoPrograma = tipoPrograma;
+	}
 }
