@@ -130,7 +130,6 @@ public class CorreoUtil {
                 HtmlEmail email = new HtmlEmail();
                 email.setMailSession(session);
                 email.setFrom(dto.getRemitente(),"eLearning");
-                email.setCharset("UTF-8");
         		
         		if(!ObjectUtils.isNullOrEmpty(dto.getDestinatarios())){
         			for (String to : dto.getDestinatarios()) {

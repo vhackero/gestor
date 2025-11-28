@@ -19,7 +19,6 @@ public class InscripcionMateriasDTO {
     private Boolean check; 
     private Boolean disabled;
     private Boolean esMateriaSeriada;
-    private Long idProcesoInscripcion;
     
 	public Boolean getDisabled() {
 		return disabled;
@@ -130,14 +129,6 @@ public class InscripcionMateriasDTO {
 
 	public void setEsMateriaSeriada(Boolean esMateriaSeriada) {
 		this.esMateriaSeriada = esMateriaSeriada;
-	}
-	
-	public Long getIdProcesoInscripcion() {
-		return idProcesoInscripcion;
-	}
-
-	public void setIdProcesoInscripcion(Long idProcesoInscripcion) {
-		this.idProcesoInscripcion = idProcesoInscripcion;
 	}
 
 	@Override

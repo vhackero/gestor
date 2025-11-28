@@ -12,7 +12,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoD
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionPreviaException;
-import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionFacade;
+import mx.gob.sedesol.basegestor.service.impl.gestionescolar.InscripcionFacade;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 
