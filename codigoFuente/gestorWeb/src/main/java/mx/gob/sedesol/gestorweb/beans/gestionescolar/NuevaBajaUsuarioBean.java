@@ -9,6 +9,8 @@ import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.model.SelectItem;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
@@ -63,6 +65,9 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     @javax.faces.bean.ManagedProperty(value = "#{nuevaBajaService}")
     private NuevaBajaService nuevaBajaService;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @PostConstruct
     public void init() {
         LOGGER.info("Inicializando formulario de nueva baja de usuario");
@@ -101,6 +106,8 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             }
 
             idPlan = datos.getIdPlan();
+            idPrograma = datos.getIdPrograma();
+            completarSemestreYBloque(datos);
             semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
             idSemestre = datos.getIdSemestre();
             bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
@@ -109,7 +116,6 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             programas = idEjeCapacitacion != null
                     ? convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idEjeCapacitacion))
                     : Collections.emptyList();
-            idPrograma = datos.getIdPrograma();
             idPeriodo = datos.getPeriodo();
             eventos = idPeriodo != null && idPrograma != null
                     ? convertirANodosSelectItem(nuevaBajaService.obtenerEventosPorPeriodoYPrograma(idPeriodo, idPrograma))
@@ -264,6 +270,29 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             eventos = Collections.emptyList();
         }
         idEvento = null;
+    }
+
+    private void completarSemestreYBloque(BajaMatriculaDetalleDTO detalle) {
+        if (detalle == null || detalle.getIdPlan() == null || detalle.getIdPrograma() == null) {
+            return;
+        }
+
+        String consulta = "SELECT semestre, bloque "
+                + "FROM tbl_inscripcion_resumen "
+                + "WHERE id_plan = :idPlan "
+                + "AND id_programa = :idPrograma "
+                + "LIMIT 1";
+
+        List<?> resultados = entityManager.createNativeQuery(consulta)
+                .setParameter("idPlan", detalle.getIdPlan())
+                .setParameter("idPrograma", detalle.getIdPrograma())
+                .getResultList();
+
+        if (!resultados.isEmpty()) {
+            Object[] fila = (Object[]) resultados.get(0);
+            detalle.setIdSemestre(((Number) fila[0]).longValue());
+            detalle.setIdBloque(((Number) fila[1]).longValue());
+        }
     }
 
     private void actualizarVisibilidadCampos() {
