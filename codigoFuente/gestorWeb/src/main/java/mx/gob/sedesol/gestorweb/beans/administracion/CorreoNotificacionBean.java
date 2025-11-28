@@ -108,7 +108,7 @@ public class CorreoNotificacionBean extends BaseBean {
 			correoDto.setTitulo(MessageFormat.format(mensaje.getTitulo(), nombreEvento, nombreEncuesta));
 			correoDto.setAsunto(MessageFormat.format(mensaje.getTitulo(), nombreEvento, nombreEncuesta));
 			correoDto.setDestinatarios(correosUsuarios);
-			correoDto.setRemitente(getParametroSistemaService()
+			correoDto.setNombreRemitente(getParametroSistemaService()
 					.obtenerParametro(ParametrosSistemaEnum.PS_CONFIG_CORREO_CUENTA_ADMIN.getClave()));
 			correoDto.setContenido(MessageFormat.format(mensaje.getMensaje(), nombreEvento, nombreEncuesta));
 			correoElectronicoService.enviaCorreoElectronico(correoDto);
@@ -156,7 +156,7 @@ public class CorreoNotificacionBean extends BaseBean {
 			correoDto.setTitulo(MessageFormat.format(mensaje.getTitulo(), nombreEvento));
 			correoDto.setAsunto(MessageFormat.format(mensaje.getTitulo(), nombreEvento));
 			correoDto.setDestinatarios(correosUsuarios);
-			correoDto.setRemitente(getParametroSistemaService()
+			correoDto.setCorreoRemitente(getParametroSistemaService()
 					.obtenerParametro(ParametrosSistemaEnum.PS_CONFIG_CORREO_CUENTA_ADMIN.getClave()));
 			correoDto.setContenido(MessageFormat.format(mensaje.getMensaje(), nombreEvento));
 			correoElectronicoService.enviaCorreoElectronico(correoDto);
@@ -201,7 +201,7 @@ public class CorreoNotificacionBean extends BaseBean {
 			correoDto.setAsunto(MessageFormat.format(mensaje.getTitulo(), idEvento, nombreEvento, modalidad,
 					fechaInicio, fechaFin, nombreGrupo, nombreUsuario));
 			correoDto.setDestinatarios(correosUsuarios);
-			correoDto.setRemitente(getParametroSistemaService()
+			correoDto.setCorreoRemitente(getParametroSistemaService()
 					.obtenerParametro(ParametrosSistemaEnum.PS_CONFIG_CORREO_CUENTA_ADMIN.getClave()));
 			correoDto.setContenido(MessageFormat.format(mensaje.getMensaje(), idEvento, nombreEvento, modalidad,
 					fechaInicio, fechaFin, nombreGrupo, nombreUsuario));
@@ -296,7 +296,7 @@ public class CorreoNotificacionBean extends BaseBean {
 			correoDto.setAsunto(MessageFormat.format(mensaje.getTitulo(), idEvento, nombreEvento, modalidad,
 					fechaInicio, fechaFin, nombreTema));
 			correoDto.setDestinatarios(correoColaborador);
-			correoDto.setRemitente(getParametroSistemaService()
+			correoDto.setCorreoRemitente(getParametroSistemaService()
 					.obtenerParametro(ParametrosSistemaEnum.PS_CONFIG_CORREO_CUENTA_ADMIN.getClave()));
 			correoDto.setContenido(MessageFormat.format(mensaje.getMensaje(), idEvento, nombreEvento, modalidad,
 					fechaInicio, fechaFin, nombreTema));
@@ -364,7 +364,7 @@ public class CorreoNotificacionBean extends BaseBean {
 				correoDto.setAsunto(MessageFormat.format(mensaje.getTitulo(), idEvento, nombreEvento, modalidad,
 						fechaInicio, fechaFin));
 				correoDto.setDestinatarios(correosResponsables);
-				correoDto.setRemitente(getParametroSistemaService()
+				correoDto.setCorreoRemitente(getParametroSistemaService()
 						.obtenerParametro(ParametrosSistemaEnum.PS_CONFIG_CORREO_CUENTA_ADMIN.getClave()));
 				correoDto.setContenido(MessageFormat.format(mensaje.getMensaje(), idEvento, nombreEvento, modalidad,
 						fechaInicio, fechaFin));

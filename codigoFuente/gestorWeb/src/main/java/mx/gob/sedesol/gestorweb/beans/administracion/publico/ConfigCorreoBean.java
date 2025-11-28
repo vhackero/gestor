@@ -84,7 +84,7 @@ public class ConfigCorreoBean extends BaseBean {
         	
             //datosCorreo.setAsunto(datosCorreo.getTitulo());
             
-			datosCorreo.setRemitente(datosCorreo.getUsuarioCorreo());
+			datosCorreo.setCorreoRemitente(datosCorreo.getUsuarioCorreo());
             if (correoElectronicoService.enviaCorreoElectronico(datosCorreo)) {
 
                 para = StringUtils.EMPTY;

@@ -127,7 +127,7 @@ public class RegistroBean extends BaseBean {
 
                 correoDto.setTitulo(parametroSistemaService.obtenerParametro(ParametrosSistemaEnum.PS_TITULO_NOTIFICACION_CORREO.getClave()));
                 correoDto.setAsunto(parametroSistemaService.obtenerParametro(ParametrosSistemaEnum.PS_ASUNTO_CORREO_ACTIVACION_CTA.getClave()));
-                correoDto.setRemitente(parametroSistemaService.obtenerParametro(ParametrosSistemaEnum.PS_CONFIG_CORREO_CUENTA_ADMIN.getClave()));
+                correoDto.setCorreoRemitente(parametroSistemaService.obtenerParametro(ParametrosSistemaEnum.PS_CONFIG_CORREO_CUENTA_ADMIN.getClave()));
                 correoDto.setContenido(MessageFormat.format(
                         textosSistema.obtenerTexto(MensajesSistemaEnum.LOGIN_REGISTRO_CUENTA_POR_EMAIL.getId()),
                         rutaActivacion));

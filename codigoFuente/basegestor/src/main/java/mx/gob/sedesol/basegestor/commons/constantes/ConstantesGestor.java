@@ -233,5 +233,10 @@ public final class ConstantesGestor {
 	//Correo
 	public static final String INFORMACION_EXTRA_CORREO_INSCRIPCION = "INFORMACION_EXTRA";
 	public static final String URL_PAGINA_INICIO = "PAGINA_INICIO";
-
+	public static final String ENVIAR_CORREO_INSCRIPCION = "ENVIAR_CORREO_INSCRIPCION";
+	public static final String ENVIO_DE_CORREO_INSCRIPCION_ACTIVO = "1";
+	public static final String ASUNTO_CORREO_INSCRIPCION = "ASUNTO_CORREO_INSCRIPCION";
+	public static final String ASUNTO_POR_DEFECTO_CORREO_INSCRIPCION = "Inscripción";
+	public static final String REMITENTE_CORREO_INSCRIPCION = "REMITENTE_CORREO_INSCRIPCION";
+	public static final String NOMBRE_POR_DEFECTO_REMITENTE_CORREO_INSCRIPCION = "Remitente";
 }

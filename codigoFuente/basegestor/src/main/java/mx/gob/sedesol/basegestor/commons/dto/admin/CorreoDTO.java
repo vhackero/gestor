@@ -12,7 +12,8 @@ public class CorreoDTO {
 
     private List<String> destinatarios;
     private List<String> destinatariosCC;
-    private String remitente;
+    private String correoRemitente;
+    private String nombreRemitente;
     private String titulo;
     private String nombre;
     private String extraInfo;
@@ -66,19 +67,7 @@ public class CorreoDTO {
 		this.destinatarios = destinatarios;
 	}
 
-	/**
-	 * @return the remitente
-	 */
-	public String getRemitente() {
-		return remitente;
-	}
 
-	/**
-	 * @param remitente the remitente to set
-	 */
-	public void setRemitente(String remitente) {
-		this.remitente = remitente;
-	}
 
 	/**
 	 * @return the titulo
@@ -258,4 +247,20 @@ public class CorreoDTO {
 		this.destinatariosCC = destinatariosCC;
 	}
 
+	public String getNombreRemitente() {
+		return nombreRemitente;
+	}
+
+	public void setNombreRemitente(String nombreRemitente) {
+		this.nombreRemitente = nombreRemitente;
+	}
+
+	public String getCorreoRemitente() {
+		return correoRemitente;
+	}
+
+	public void setCorreoRemitente(String correoRemitente) {
+		this.correoRemitente = correoRemitente;
+	}
+	
 }
