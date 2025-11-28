@@ -84,8 +84,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         idSemestre = null;
         seleccionarSemestreDisponible();
 
-        bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
-        idBloque = null;
+        actualizarBloques();
         actualizarProgramas();
     }
 
@@ -108,10 +107,12 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             semestres = obtenerSemestres(idPlan);
             idSemestre = datos.getIdSemestre();
             seleccionarSemestreDisponible();
-            bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
             idBloque = datos.getIdBloque();
-            programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBloque != null ? idBloque : idSemestre));
-            idPrograma = datos.getIdPrograma();
+            actualizarBloques();
+            programas = idBloque != null
+                    ? convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBloque))
+                    : Collections.emptyList();
+            idPrograma = mantenerSeleccionValida(idPrograma, datos.getIdPrograma(), programas);
             idPeriodo = datos.getPeriodo();
             eventos = idPeriodo != null && idPrograma != null
                     ? convertirANodosSelectItem(nuevaBajaService.obtenerEventosPorPeriodoYPrograma(idPeriodo, idPrograma))
@@ -125,8 +126,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     public void onSemestreChange() {
-        bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
-        idBloque = null;
+        actualizarBloques();
         actualizarProgramas();
     }
 
@@ -239,9 +239,8 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     private void actualizarProgramas() {
-        Long idEjeCapacitacion = idBloque != null ? idBloque : idSemestre;
-        if (idEjeCapacitacion != null) {
-            programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idEjeCapacitacion));
+        if (idBloque != null) {
+            programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBloque));
         } else {
             programas = Collections.emptyList();
         }
@@ -256,6 +255,24 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     private List<SelectItem> obtenerBloques(Long idSemestreSeleccionado) {
         return convertirANodosSelectItem(nuevaBajaService.obtenerBloquesPorSemestre(idSemestreSeleccionado));
+    }
+
+    private void actualizarBloques() {
+        bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
+        if (bloques.isEmpty()) {
+            idBloque = null;
+            return;
+        }
+
+        if (idBloque != null) {
+            for (SelectItem bloque : bloques) {
+                if (idBloque.equals(obtenerValorLong(bloque.getValue()))) {
+                    return;
+                }
+            }
+        }
+
+        idBloque = obtenerValorLong(bloques.get(0).getValue());
     }
 
     private void actualizarEventos() {
@@ -293,6 +310,21 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             return ((Number) value).longValue();
         }
         return null;
+    }
+
+    private Long mantenerSeleccionValida(Long seleccionActual, Long seleccionPreferida, List<SelectItem> opciones) {
+        Long seleccion = seleccionPreferida != null ? seleccionPreferida : seleccionActual;
+        if (seleccion == null || opciones == null || opciones.isEmpty()) {
+            return null;
+        }
+
+        for (SelectItem opcion : opciones) {
+            if (seleccion.equals(obtenerValorLong(opcion.getValue()))) {
+                return seleccion;
+            }
+        }
+
+        return obtenerValorLong(opciones.get(0).getValue());
     }
 
     private void actualizarVisibilidadCampos() {
