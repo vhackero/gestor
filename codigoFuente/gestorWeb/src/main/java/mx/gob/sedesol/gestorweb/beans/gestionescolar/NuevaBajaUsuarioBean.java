@@ -82,7 +82,11 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     public void onPlanChange() {
         semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
         idSemestre = null;
-        onSemestreChange();
+        seleccionarSemestreDisponible();
+
+        bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
+        idBloque = null;
+        actualizarProgramas();
     }
 
     public void onMatriculaChange() {
@@ -103,7 +107,8 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             idPlan = datos.getIdPlan();
             semestres = obtenerSemestres(idPlan);
             idSemestre = datos.getIdSemestre();
-            bloques = obtenerBloques(idSemestre);
+            seleccionarSemestreDisponible();
+            bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
             idBloque = datos.getIdBloque();
             programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBloque != null ? idBloque : idSemestre));
             idPrograma = datos.getIdPrograma();
@@ -261,6 +266,33 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             eventos = Collections.emptyList();
         }
         idEvento = null;
+    }
+
+    private void seleccionarSemestreDisponible() {
+        if (semestres == null || semestres.isEmpty()) {
+            idSemestre = null;
+            return;
+        }
+
+        if (idSemestre != null) {
+            for (SelectItem semestre : semestres) {
+                if (idSemestre.equals(obtenerValorLong(semestre.getValue()))) {
+                    return;
+                }
+            }
+        }
+
+        idSemestre = obtenerValorLong(semestres.get(0).getValue());
+    }
+
+    private Long obtenerValorLong(Object value) {
+        if (value instanceof Long) {
+            return (Long) value;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        return null;
     }
 
     private void actualizarVisibilidadCampos() {
