@@ -58,21 +58,7 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
 
     @Override
     public BajaMatriculaDetalleDTO obtenerDatosPorMatricula(String matricula) {
-        BajaMatriculaDetalleDTO datos = nuevaBajaRepository.consultarDatosPorMatricula(matricula);
-
-        if (datos == null) {
-            return null;
-        }
-
-        boolean relacionCompleta = datos.getIdPlan() != null
-                && datos.getIdSemestre() != null
-                && datos.getIdBloque() != null
-                && datos.getIdPrograma() != null
-                && datos.getIdEvento() != null
-                && datos.getPeriodo() != null
-                && !datos.getPeriodo().trim().isEmpty();
-
-        return relacionCompleta ? datos : null;
+        return nuevaBajaRepository.consultarDatosPorMatricula(matricula);
     }
 
     @Override

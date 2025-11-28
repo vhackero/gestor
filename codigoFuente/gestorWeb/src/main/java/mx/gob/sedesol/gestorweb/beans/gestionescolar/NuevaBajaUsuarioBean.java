@@ -86,9 +86,8 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     public void onMatriculaChange() {
-        limpiarDatosDependientes();
-
         if (matriculaUsuario == null || matriculaUsuario.trim().isEmpty()) {
+            limpiarDatosDependientes();
             return;
         }
 
@@ -96,16 +95,20 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             BajaMatriculaDetalleDTO datos = nuevaBajaService.obtenerDatosPorMatricula(matriculaUsuario.trim());
 
             if (datos == null) {
+                limpiarDatosDependientes();
                 agregarMsgWarn("La matrícula no tiene datos válidos", null);
                 return;
             }
 
             idPlan = datos.getIdPlan();
-            semestres = obtenerSemestres(idPlan);
+            semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
             idSemestre = datos.getIdSemestre();
-            bloques = obtenerBloques(idSemestre);
+            bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
             idBloque = datos.getIdBloque();
-            programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBloque != null ? idBloque : idSemestre));
+            Long idEjeCapacitacion = idBloque != null ? idBloque : idSemestre;
+            programas = idEjeCapacitacion != null
+                    ? convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idEjeCapacitacion))
+                    : Collections.emptyList();
             idPrograma = datos.getIdPrograma();
             idPeriodo = datos.getPeriodo();
             eventos = idPeriodo != null && idPrograma != null
@@ -267,10 +270,15 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         NodoDTO tipoSeleccionado = obtenerTipoSeleccionado();
         String nombreTipo = tipoSeleccionado != null ? tipoSeleccionado.getNombre() : null;
 
-        if (nombreTipo == null) {
+        if (idTipoBaja == null) {
             esTipoDefinitiva = false;
             esTipoTemporalOParcial = false;
             esSinAsignaturas = false;
+            mostrarSemestre = true;
+            mostrarBloque = true;
+            mostrarPrograma = true;
+            mostrarPeriodo = true;
+            mostrarEvento = true;
             return;
         }
 
@@ -278,58 +286,41 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         esTipoTemporalOParcial = contieneTexto(nombreTipo, "temporal") || contieneTexto(nombreTipo, "parcial");
         esSinAsignaturas = contieneTexto(nombreTipo, "sin asignaturas");
 
-        mostrarSemestre = true;
-        mostrarBloque = true;
         mostrarPrograma = true;
         mostrarPeriodo = true;
         mostrarEvento = true;
 
         if (esTipoDefinitiva) {
-            mostrarSemestre = false;
-            mostrarBloque = false;
+            prepararValoresParaBajaDefinitiva();
             mostrarPrograma = false;
             mostrarEvento = false;
-            prepararValoresParaBajaDefinitiva();
         } else if (esTipoTemporalOParcial) {
             if (semestres.isEmpty() && idPlan != null) {
                 semestres = obtenerSemestres(idPlan);
             }
         } else {
-            mostrarBloque = true;
-            mostrarEvento = true;
             restaurarValoresCamposOcultos();
             if (semestres.isEmpty() && idPlan != null) {
                 semestres = obtenerSemestres(idPlan);
             }
         }
+
+        mostrarSemestre = idTipoBaja == null || idSemestre != null;
+        mostrarBloque = idTipoBaja == null || idBloque != null;
     }
 
     private void prepararValoresParaBajaDefinitiva() {
-        idSemestre = null;
-        idBloque = null;
         idPrograma = 0L;
         idEvento = 0L;
-
-        semestres = Collections.emptyList();
-        bloques = Collections.emptyList();
-        programas = Collections.emptyList();
-        eventos = Collections.emptyList();
     }
 
     private void restaurarValoresCamposOcultos() {
-        idSemestre = null;
-        idBloque = null;
         if (Long.valueOf(0L).equals(idPrograma)) {
             idPrograma = null;
         }
         if (Long.valueOf(0L).equals(idEvento)) {
             idEvento = null;
         }
-
-        semestres = Collections.emptyList();
-        bloques = Collections.emptyList();
-        programas = Collections.emptyList();
-        eventos = Collections.emptyList();
     }
 
     private BajaSolicitudDTO construirSolicitud() {
