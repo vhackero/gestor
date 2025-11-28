@@ -53,7 +53,7 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     @Override
     public List<NodoDTO> consultarSemestresPorPlan(Long idPlan) {
-        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_plan = :idPlan";
+        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_padre = :idPlan ORDER BY tmc.id";
         Query query = entityManager.createNativeQuery(consulta);
         query.setParameter("idPlan", idPlan);
         List<Object[]> resultados = query.getResultList();
@@ -68,7 +68,7 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     @Override
     public List<NodoDTO> consultarBloquesPorSemestre(Long idSemestre) {
-        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_padre = :idSemestre";
+        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_padre = :idSemestre ORDER BY tmc.id";
         Query query = entityManager.createNativeQuery(consulta);
         query.setParameter("idSemestre", idSemestre);
         List<Object[]> resultados = query.getResultList();
@@ -235,9 +235,9 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
                 + "JOIN tbl_grupos tg ON tg.id = rgp.id_grupo "
                 + "JOIN tbl_eventos te ON te.id_evento = tg.id_evento "
                 + "JOIN tbl_ficha_descriptiva_programa tfdp ON tfdp.id_programa = te.id_programa "
-                + "LEFT JOIN tbl_malla_curricular bloque ON bloque.id = tfdp.id_eje_capacitacion "
-                + "LEFT JOIN tbl_malla_curricular sem ON sem.id = bloque.id_padre "
-                + "LEFT JOIN tbl_planes tpl ON tpl.id_plan = tfdp.id_plan "
+                + "JOIN tbl_malla_curricular bloque ON bloque.id = tfdp.id_eje_capacitacion "
+                + "JOIN tbl_malla_curricular sem ON sem.id = bloque.id_padre "
+                + "JOIN tbl_planes tpl ON tpl.id_plan = tfdp.id_plan "
                 + "LEFT JOIN tbl_periodos_inscripcion tpi ON te.cve_evento_cap LIKE CONCAT('%', tpi.nombre_periodo, '%') "
                 + "WHERE tp.sso_idUsuario = :matricula "
                 + "ORDER BY te.id_evento DESC "
