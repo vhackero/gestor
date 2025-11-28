@@ -127,10 +127,10 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private String construirContenidoCorreo(String nombreCompleto, String periodo, String bloquesConMaterias,
 			String informacionExtraCorreo, String urlPaginaInicio) {
 
-		return MessageFormat.format("<p>Estimado estudiante {0}.</p>"
-				+ "<p>Te confirmamos que has concluido exitosamente tu inscripción. A continuación, te mostramos tus asignaturas para el período {1}:</p>"
+		return MessageFormat.format("<p>Estimado estudiante <strong>{0}</strong>.</p>"
+				+ "<p>Te confirmamos que has concluido exitosamente tu inscripción. A continuación, te mostramos tus asignaturas para el período <strong>{1}</strong>:</p>"
 				+ "<div>{2}</div>"
-				+ "<p>Podrás acceder a través de la siguiente url <a href=\"{3}\">{3}</a> ingresando tu usuario y contraseña </p>"
+				+ "<p>Podrás acceder a través de la siguiente url <a href=\"{3}\" target=\"_blank\">{3}</a> ingresando tu usuario y contraseña.</p>"
 				+ "<p>{4}</p>", nombreCompleto, periodo, bloquesConMaterias, urlPaginaInicio, informacionExtraCorreo);
 	}
 
@@ -223,7 +223,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		StringBuilder html = new StringBuilder("<ul>");
 
 		for (InscripcionMateriasDTO materia : materias) {
-			html.append("<li>*").append(materia.getNombreTentativoPrograma()).append("</li>");
+			html.append("<li>").append(materia.getNombreTentativoPrograma()).append("</li>");
 		}
 
 		html.append("</ul>");
