@@ -349,19 +349,12 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     private void restaurarValoresCamposOcultos() {
-        idSemestre = null;
-        idBloque = null;
         if (Long.valueOf(0L).equals(idPrograma)) {
             idPrograma = null;
         }
         if (Long.valueOf(0L).equals(idEvento)) {
             idEvento = null;
         }
-
-        semestres = Collections.emptyList();
-        bloques = Collections.emptyList();
-        programas = Collections.emptyList();
-        eventos = Collections.emptyList();
     }
 
     private BajaSolicitudDTO construirSolicitud() {
