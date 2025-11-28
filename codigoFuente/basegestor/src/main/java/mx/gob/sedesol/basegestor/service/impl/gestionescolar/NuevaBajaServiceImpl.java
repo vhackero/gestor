@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaAplicacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaSolicitudDTO;
@@ -53,6 +54,25 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
     @Override
     public List<NodoDTO> obtenerEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma) {
         return nuevaBajaRepository.consultarEventosPorPeriodoYPrograma(nombrePeriodo, idPrograma);
+    }
+
+    @Override
+    public BajaMatriculaDetalleDTO obtenerDatosPorMatricula(String matricula) {
+        BajaMatriculaDetalleDTO datos = nuevaBajaRepository.consultarDatosPorMatricula(matricula);
+
+        if (datos == null) {
+            return null;
+        }
+
+        boolean relacionCompleta = datos.getIdPlan() != null
+                && datos.getIdSemestre() != null
+                && datos.getIdBloque() != null
+                && datos.getIdPrograma() != null
+                && datos.getIdEvento() != null
+                && datos.getPeriodo() != null
+                && !datos.getPeriodo().trim().isEmpty();
+
+        return relacionCompleta ? datos : null;
     }
 
     @Override

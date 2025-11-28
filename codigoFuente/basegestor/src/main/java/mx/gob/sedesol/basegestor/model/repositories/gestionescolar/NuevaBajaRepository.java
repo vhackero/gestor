@@ -10,6 +10,7 @@ import javax.persistence.Query;
 import org.springframework.stereotype.Repository;
 
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaAplicacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
@@ -217,6 +218,48 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
                 .setParameter("contabilizar", bajaAplicacionDTO.getContabilizar())
                 .setParameter("numeroSolicitud", bajaAplicacionDTO.getNumeroSolicitud())
                 .executeUpdate();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public BajaMatriculaDetalleDTO consultarDatosPorMatricula(String matricula) {
+        String consulta = "SELECT DISTINCT "
+                + " tpl.id_plan, "
+                + " sem.id as id_semestre, "
+                + " bloque.id as id_bloque, "
+                + " tfdp.id_programa, "
+                + " tpi.nombre_periodo, "
+                + " te.id_evento "
+                + "FROM tbl_persona tp "
+                + "JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona "
+                + "JOIN tbl_grupos tg ON tg.id = rgp.id_grupo "
+                + "JOIN tbl_eventos te ON te.id_evento = tg.id_evento "
+                + "JOIN tbl_ficha_descriptiva_programa tfdp ON tfdp.id_programa = te.id_programa "
+                + "LEFT JOIN tbl_malla_curricular bloque ON bloque.id = tfdp.id_eje_capacitacion "
+                + "LEFT JOIN tbl_malla_curricular sem ON sem.id = bloque.id_padre "
+                + "LEFT JOIN tbl_planes tpl ON tpl.id_plan = tfdp.id_plan "
+                + "LEFT JOIN tbl_periodos_inscripcion tpi ON te.cve_evento_cap LIKE CONCAT('%', tpi.nombre_periodo, '%') "
+                + "WHERE tp.sso_idUsuario = :matricula "
+                + "ORDER BY te.id_evento DESC "
+                + "LIMIT 1";
+
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("matricula", matricula);
+        List<Object[]> resultados = query.getResultList();
+
+        if (resultados.isEmpty()) {
+            return null;
+        }
+
+        Object[] fila = resultados.get(0);
+        BajaMatriculaDetalleDTO dto = new BajaMatriculaDetalleDTO();
+        dto.setIdPlan(obtenerLong(fila[0]));
+        dto.setIdSemestre(obtenerLong(fila[1]));
+        dto.setIdBloque(obtenerLong(fila[2]));
+        dto.setIdPrograma(obtenerLong(fila[3]));
+        dto.setPeriodo(obtenerCadena(fila[4]));
+        dto.setIdEvento(obtenerLong(fila[5]));
+        return dto;
     }
 
     private Integer obtenerEntero(Object valor) {

@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
 
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaSolicitudDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
 import mx.gob.sedesol.basegestor.service.gestionescolar.NuevaBajaService;
@@ -82,6 +83,40 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
         idSemestre = null;
         onSemestreChange();
+    }
+
+    public void onMatriculaChange() {
+        limpiarDatosDependientes();
+
+        if (matriculaUsuario == null || matriculaUsuario.trim().isEmpty()) {
+            return;
+        }
+
+        try {
+            BajaMatriculaDetalleDTO datos = nuevaBajaService.obtenerDatosPorMatricula(matriculaUsuario.trim());
+
+            if (datos == null) {
+                agregarMsgWarn("La matrícula no tiene datos válidos", null);
+                return;
+            }
+
+            idPlan = datos.getIdPlan();
+            semestres = obtenerSemestres(idPlan);
+            idSemestre = datos.getIdSemestre();
+            bloques = obtenerBloques(idSemestre);
+            idBloque = datos.getIdBloque();
+            programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBloque != null ? idBloque : idSemestre));
+            idPrograma = datos.getIdPrograma();
+            idPeriodo = datos.getPeriodo();
+            eventos = idPeriodo != null && idPrograma != null
+                    ? convertirANodosSelectItem(nuevaBajaService.obtenerEventosPorPeriodoYPrograma(idPeriodo, idPrograma))
+                    : Collections.emptyList();
+            idEvento = datos.getIdEvento();
+            actualizarVisibilidadCampos();
+        } catch (Exception ex) {
+            LOGGER.error("Error al consultar datos por matrícula", ex);
+            agregarMsgError("La matrícula no tiene datos válidos", null);
+        }
     }
 
     public void onSemestreChange() {
@@ -160,20 +195,11 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     public void limpiarFormulario() {
         matriculaUsuario = null;
         idTipoBaja = null;
-        idPlan = null;
-        idSemestre = null;
-        idBloque = null;
-        idPrograma = null;
-        idPeriodo = null;
-        idEvento = null;
+        limpiarDatosDependientes();
+
         motivo = null;
         quienAplica = null;
         numeroSolicitud = null;
-
-        semestres = Collections.emptyList();
-        bloques = Collections.emptyList();
-        programas = Collections.emptyList();
-        eventos = Collections.emptyList();
 
         esTipoDefinitiva = false;
         esTipoTemporalOParcial = false;
@@ -183,6 +209,20 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         mostrarPrograma = true;
         mostrarPeriodo = true;
         mostrarEvento = true;
+    }
+
+    private void limpiarDatosDependientes() {
+        idPlan = null;
+        idSemestre = null;
+        idBloque = null;
+        idPrograma = null;
+        idPeriodo = null;
+        idEvento = null;
+
+        semestres = Collections.emptyList();
+        bloques = Collections.emptyList();
+        programas = Collections.emptyList();
+        eventos = Collections.emptyList();
     }
 
     private void cargarCatalogos() {
