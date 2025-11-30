@@ -25,7 +25,7 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     @Override
     public List<NodoDTO> consultarTiposBajaActivos() {
-        String consulta = "SELECT ctb.id_tipo_baja, ctb.nombre FROM cat_tipo_bajas ctb WHERE ctb.activo = 1";
+        String consulta = "SELECT * FROM cat_tipo_bajas ctb WHERE ctb.activo = 1";
         Query query = entityManager.createNativeQuery(consulta);
         List<Object[]> resultados = query.getResultList();
         List<NodoDTO> tiposBaja = new ArrayList<>();
@@ -53,9 +53,9 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     @Override
     public List<NodoDTO> consultarSemestresPorPlan(Long idPlan) {
-        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_plan = :idPlan";
+        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_plan = :id_seleccion_planes";
         Query query = entityManager.createNativeQuery(consulta);
-        query.setParameter("idPlan", idPlan);
+        query.setParameter("id_seleccion_planes", idPlan);
         List<Object[]> resultados = query.getResultList();
         List<NodoDTO> semestres = new ArrayList<>();
 
@@ -68,9 +68,9 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     @Override
     public List<NodoDTO> consultarBloquesPorSemestre(Long idSemestre) {
-        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_padre = :idSemestre";
+        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_padre = :id_seleccion_semestres";
         Query query = entityManager.createNativeQuery(consulta);
-        query.setParameter("idSemestre", idSemestre);
+        query.setParameter("id_seleccion_semestres", idSemestre);
         List<Object[]> resultados = query.getResultList();
         List<NodoDTO> bloques = new ArrayList<>();
 
@@ -83,9 +83,9 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     @Override
     public List<NodoDTO> consultarProgramasPorEje(Long idEjeCapacitacion) {
-        String consulta = "SELECT tfdp.id_programa, tfdp.nombre_tentativo FROM tbl_ficha_descriptiva_programa tfdp WHERE tfdp.id_eje_capacitacion = :idEjeCapacitacion";
+        String consulta = "SELECT tfdp.id_programa, tfdp.nombre_tentativo FROM tbl_ficha_descriptiva_programa tfdp WHERE tfdp.id_eje_capacitacion = :id_seleccion_bloques_o_semestre";
         Query query = entityManager.createNativeQuery(consulta);
-        query.setParameter("idEjeCapacitacion", idEjeCapacitacion);
+        query.setParameter("id_seleccion_bloques_o_semestre", idEjeCapacitacion);
         List<Object[]> resultados = query.getResultList();
         List<NodoDTO> programas = new ArrayList<>();
 
@@ -106,10 +106,10 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     @Override
     public List<NodoDTO> consultarEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma) {
-        String consulta = "SELECT te.id_evento, te.cve_evento_cap FROM tbl_eventos te WHERE te.cve_evento_cap LIKE CONCAT('%',:nombrePeriodo,'%') AND te.id_programa = :idPrograma";
+        String consulta = "SELECT te.id_evento, te.cve_evento_cap FROM tbl_eventos te WHERE te.cve_evento_cap LIKE CONCAT('%',:nombre_periodo_selecionada,'%') AND te.id_programa = :id_progrma_seleccionado";
         Query query = entityManager.createNativeQuery(consulta);
-        query.setParameter("nombrePeriodo", nombrePeriodo);
-        query.setParameter("idPrograma", idPrograma);
+        query.setParameter("nombre_periodo_selecionada", nombrePeriodo);
+        query.setParameter("id_progrma_seleccionado", idPrograma);
         List<Object[]> resultados = query.getResultList();
         List<NodoDTO> eventos = new ArrayList<>();
 
