@@ -60,19 +60,11 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
     public BajaMatriculaDetalleDTO obtenerDatosPorMatricula(String matricula) {
         BajaMatriculaDetalleDTO datos = nuevaBajaRepository.consultarDatosPorMatricula(matricula);
 
-        if (datos == null) {
+        if (datos == null || datos.getIdPlan() == null) {
             return null;
         }
 
-        boolean relacionCompleta = datos.getIdPlan() != null
-                && datos.getIdSemestre() != null
-                && datos.getIdBloque() != null
-                && datos.getIdPrograma() != null
-                && datos.getIdEvento() != null
-                && datos.getPeriodo() != null
-                && !datos.getPeriodo().trim().isEmpty();
-
-        return relacionCompleta ? datos : null;
+        return datos;
     }
 
     @Override

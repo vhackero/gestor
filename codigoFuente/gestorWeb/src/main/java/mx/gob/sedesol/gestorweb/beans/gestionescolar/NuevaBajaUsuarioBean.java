@@ -80,9 +80,11 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     public void onPlanChange() {
-        semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
         idSemestre = null;
-        onSemestreChange();
+        idBloque = null;
+        idPrograma = null;
+        idPeriodo = null;
+        cargarSemestresBloquesYProgramas(null, null, null, null, null);
     }
 
     public void onMatriculaChange() {
@@ -95,23 +97,12 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         try {
             BajaMatriculaDetalleDTO datos = nuevaBajaService.obtenerDatosPorMatricula(matriculaUsuario.trim());
 
-            if (datos == null) {
+            if (datos == null || datos.getIdPlan() == null) {
                 agregarMsgWarn("La matrícula no tiene datos válidos", null);
                 return;
             }
 
-            idPlan = datos.getIdPlan();
-            semestres = obtenerSemestres(idPlan);
-            idSemestre = datos.getIdSemestre();
-            bloques = obtenerBloques(idSemestre);
-            idBloque = datos.getIdBloque();
-            programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBloque != null ? idBloque : idSemestre));
-            idPrograma = datos.getIdPrograma();
-            idPeriodo = datos.getPeriodo();
-            eventos = idPeriodo != null && idPrograma != null
-                    ? convertirANodosSelectItem(nuevaBajaService.obtenerEventosPorPeriodoYPrograma(idPeriodo, idPrograma))
-                    : Collections.emptyList();
-            idEvento = datos.getIdEvento();
+            cargarInformacionAcademica(datos);
             actualizarVisibilidadCampos();
         } catch (Exception ex) {
             LOGGER.error("Error al consultar datos por matrícula", ex);
@@ -122,19 +113,19 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     public void onSemestreChange() {
         bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
         idBloque = null;
-        actualizarProgramas();
+        actualizarProgramasConSeleccion(null, idPeriodo, null);
     }
 
     public void onBloqueChange() {
-        actualizarProgramas();
+        actualizarProgramasConSeleccion(null, idPeriodo, null);
     }
 
     public void onPeriodoChange() {
-        actualizarEventos();
+        actualizarEventosConSeleccion(null);
     }
 
     public void onProgramaChange() {
-        actualizarEventos();
+        actualizarEventosConSeleccion(null);
     }
 
     public void registrarBaja() {
@@ -233,7 +224,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         eventos = Collections.emptyList();
     }
 
-    private void actualizarProgramas() {
+    private void actualizarProgramasConSeleccion(Long idProgramaPreferido, String periodoPreferido, Long idEventoPreferido) {
         Long idEjeCapacitacion = idBloque != null ? idBloque : idSemestre;
         if (idEjeCapacitacion != null) {
             programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idEjeCapacitacion));
@@ -241,26 +232,45 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             programas = Collections.emptyList();
         }
 
-        idPrograma = null;
-        actualizarEventos();
+        idPrograma = seleccionarId(programas, idProgramaPreferido);
+        if (periodoPreferido != null) {
+            idPeriodo = periodoPreferido;
+        }
+        actualizarEventosConSeleccion(idEventoPreferido);
     }
 
     private List<SelectItem> obtenerSemestres(Long idPlanSeleccionado) {
-        return convertirANodosSelectItem(nuevaBajaService.obtenerSemestresPorPlan(idPlanSeleccionado));
+        return convertirASemestresSelectItem(nuevaBajaService.obtenerSemestresPorPlan(idPlanSeleccionado));
     }
 
     private List<SelectItem> obtenerBloques(Long idSemestreSeleccionado) {
         return convertirANodosSelectItem(nuevaBajaService.obtenerBloquesPorSemestre(idSemestreSeleccionado));
     }
 
-    private void actualizarEventos() {
+    private void actualizarEventosConSeleccion(Long idEventoPreferido) {
         if (idPrograma != null && idPeriodo != null && !idPeriodo.trim().isEmpty()) {
             eventos = convertirANodosSelectItem(
                     nuevaBajaService.obtenerEventosPorPeriodoYPrograma(idPeriodo, idPrograma));
+            idEvento = seleccionarId(eventos, idEventoPreferido);
         } else {
             eventos = Collections.emptyList();
+            idEvento = null;
         }
-        idEvento = null;
+    }
+
+    private void cargarInformacionAcademica(BajaMatriculaDetalleDTO datos) {
+        idPlan = datos.getIdPlan();
+        cargarSemestresBloquesYProgramas(datos.getIdSemestre(), datos.getIdBloque(), datos.getIdPrograma(),
+                datos.getPeriodo(), datos.getIdEvento());
+    }
+
+    private void cargarSemestresBloquesYProgramas(Long idSemestrePreferido, Long idBloquePreferido,
+            Long idProgramaPreferido, String periodoPreferido, Long idEventoPreferido) {
+        semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
+        idSemestre = seleccionarId(semestres, idSemestrePreferido);
+        bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
+        idBloque = seleccionarId(bloques, idBloquePreferido);
+        actualizarProgramasConSeleccion(idProgramaPreferido, periodoPreferido, idEventoPreferido);
     }
 
     private void actualizarVisibilidadCampos() {
@@ -388,6 +398,20 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         return items;
     }
 
+    private List<SelectItem> convertirASemestresSelectItem(List<NodoDTO> nodos) {
+        List<SelectItem> items = new ArrayList<>();
+        if (nodos != null) {
+            for (NodoDTO nodo : nodos) {
+                String nombre = nodo.getNombre();
+                String etiquetaSemestre = nombre != null && !nombre.trim().isEmpty()
+                        ? "Semestre " + nombre.trim()
+                        : "Semestre";
+                items.add(new SelectItem(nodo.getId() != null ? nodo.getId().longValue() : null, etiquetaSemestre));
+            }
+        }
+        return items;
+    }
+
     private List<SelectItem> convertirAPlanesSelectItem(List<PlanBajaDTO> planesDisponibles) {
         List<SelectItem> items = new ArrayList<>();
         if (planesDisponibles != null) {
@@ -406,6 +430,23 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             }
         }
         return items;
+    }
+
+    private Long seleccionarId(List<SelectItem> items, Long idPreferido) {
+        if (items == null || items.isEmpty()) {
+            return null;
+        }
+
+        if (idPreferido != null) {
+            for (SelectItem item : items) {
+                if (idPreferido.equals(item.getValue())) {
+                    return idPreferido;
+                }
+            }
+        }
+
+        Object valor = items.get(0).getValue();
+        return valor instanceof Long ? (Long) valor : null;
     }
 
     public String getMatriculaUsuario() {
