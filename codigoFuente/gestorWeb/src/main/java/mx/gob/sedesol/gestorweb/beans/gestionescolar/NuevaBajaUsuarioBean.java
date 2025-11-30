@@ -80,11 +80,8 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     public void onPlanChange() {
-        semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
-        idSemestre = null;
-        seleccionarSemestreDisponible();
-
-        actualizarBloques();
+        cargarSemestres(idPlan, null);
+        cargarBloques(idSemestre, null);
         actualizarProgramas();
     }
 
@@ -104,11 +101,8 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             }
 
             idPlan = datos.getIdPlan();
-            semestres = obtenerSemestres(idPlan);
-            idSemestre = datos.getIdSemestre();
-            seleccionarSemestreDisponible();
-            idBloque = datos.getIdBloque();
-            actualizarBloques();
+            cargarSemestres(idPlan, datos.getIdSemestre());
+            cargarBloques(idSemestre, datos.getIdBloque());
             programas = obtenerProgramasPorSeleccion();
             idPrograma = mantenerSeleccionValida(idPrograma, datos.getIdPrograma(), programas);
             idPeriodo = datos.getPeriodo();
@@ -124,7 +118,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     public void onSemestreChange() {
-        actualizarBloques();
+        cargarBloques(idSemestre, null);
         actualizarProgramas();
     }
 
@@ -259,22 +253,9 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         return convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBusqueda));
     }
 
-    private void actualizarBloques() {
-        bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
-        if (bloques.isEmpty()) {
-            idBloque = null;
-            return;
-        }
-
-        if (idBloque != null) {
-            for (SelectItem bloque : bloques) {
-                if (idBloque.equals(obtenerValorLong(bloque.getValue()))) {
-                    return;
-                }
-            }
-        }
-
-        idBloque = obtenerValorLong(bloques.get(0).getValue());
+    private void cargarBloques(Long semestreSeleccionado, Long bloquePreferido) {
+        bloques = semestreSeleccionado != null ? obtenerBloques(semestreSeleccionado) : Collections.emptyList();
+        idBloque = mantenerSeleccionValida(idBloque, bloquePreferido, bloques);
     }
 
     private void actualizarEventos() {
@@ -287,21 +268,9 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         idEvento = null;
     }
 
-    private void seleccionarSemestreDisponible() {
-        if (semestres == null || semestres.isEmpty()) {
-            idSemestre = null;
-            return;
-        }
-
-        if (idSemestre != null) {
-            for (SelectItem semestre : semestres) {
-                if (idSemestre.equals(obtenerValorLong(semestre.getValue()))) {
-                    return;
-                }
-            }
-        }
-
-        idSemestre = obtenerValorLong(semestres.get(0).getValue());
+    private void cargarSemestres(Long planSeleccionado, Long semestrePreferido) {
+        semestres = planSeleccionado != null ? obtenerSemestres(planSeleccionado) : Collections.emptyList();
+        idSemestre = mantenerSeleccionValida(idSemestre, semestrePreferido, semestres);
     }
 
     private Long obtenerValorLong(Object value) {
@@ -358,14 +327,16 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             prepararValoresParaBajaDefinitiva();
         } else if (esTipoTemporalOParcial) {
             if (semestres.isEmpty() && idPlan != null) {
-                semestres = obtenerSemestres(idPlan);
+                cargarSemestres(idPlan, idSemestre);
+                cargarBloques(idSemestre, idBloque);
             }
         } else {
             mostrarBloque = true;
             mostrarEvento = true;
             restaurarValoresCamposOcultos();
             if (semestres.isEmpty() && idPlan != null) {
-                semestres = obtenerSemestres(idPlan);
+                cargarSemestres(idPlan, idSemestre);
+                cargarBloques(idSemestre, idBloque);
             }
         }
     }
