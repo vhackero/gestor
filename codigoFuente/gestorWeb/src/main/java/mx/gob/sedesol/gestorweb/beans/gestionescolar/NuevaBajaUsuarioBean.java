@@ -274,7 +274,13 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     private List<NodoDTO> obtenerHijosDeMallaCurricular(Long idPadre) {
-        return idPadre != null ? nuevaBajaService.obtenerBloquesPorSemestre(idPadre) : Collections.emptyList();
+        if (idPadre == null) {
+            return Collections.emptyList();
+        }
+
+        boolean esPlan = idPlan != null && idPlan.equals(idPadre);
+        return esPlan ? nuevaBajaService.obtenerSemestresPorPlan(idPadre)
+                : nuevaBajaService.obtenerBloquesPorSemestre(idPadre);
     }
 
     private void actualizarVisibilidadCampos() {
