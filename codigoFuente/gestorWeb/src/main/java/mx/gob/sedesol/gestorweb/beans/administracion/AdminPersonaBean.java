@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -542,26 +543,17 @@ public class AdminPersonaBean extends BaseBean {
 	}
 
 	public boolean correoExiste(String correo) {
-		List<PersonaCorreoDTO> listaDeCorreos = personaServiceFacade.getPersonaCorreoService().findAll();
+		Optional <PersonaCorreoDTO> correoPersonaOptional = Optional.ofNullable(personaServiceFacade.getPersonaCorreoService().buscaPersonaCorreoElectronico(correo));
 		if (nuevaPersona) {
-			for (PersonaCorreoDTO personaCorreo : listaDeCorreos) {
-				if (personaCorreo.getCorreoElectronico().equals(correo)) {
-					return true;
-				}
-			}
+			return correoPersonaOptional.isPresent();
 		} else {
 			Long idPersona = datos.getPersona().getIdPersona();
 			PersonaCorreoDTO personaCorreo = personaServiceFacade.getPersonaCorreoService()
 					.obtenerCorreoInstitucional(idPersona);
 			if (ObjectUtils.isNotNull(personaCorreo)) {
 				String correoActual = personaCorreo.getCorreoElectronico();
-				String correoNuevo = correo;
-				if (!correoActual.equals(correoNuevo)) {
-					for (PersonaCorreoDTO objetoCorreoPersona : listaDeCorreos) {
-						if (objetoCorreoPersona.getCorreoElectronico().equals(correoNuevo)) {
-							return true;
-						}
-					}
+				if (!correoActual.equals(correo)) {
+					return correoPersonaOptional.isPresent();
 				}
 			}
 
