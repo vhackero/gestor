@@ -240,7 +240,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     private List<SelectItem> obtenerSemestres(Long idPlanSeleccionado) {
-        return convertirASemestresSelectItem(nuevaBajaService.obtenerSemestresPorPlan(idPlanSeleccionado));
+        return convertirASemestresSelectItem(obtenerHijosDeMallaCurricular(idPlanSeleccionado));
     }
 
     private List<SelectItem> obtenerBloques(Long idSemestreSeleccionado) {
@@ -271,6 +271,10 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
         idBloque = seleccionarId(bloques, idBloquePreferido);
         actualizarProgramasConSeleccion(idProgramaPreferido, periodoPreferido, idEventoPreferido);
+    }
+
+    private List<NodoDTO> obtenerHijosDeMallaCurricular(Long idPadre) {
+        return idPadre != null ? nuevaBajaService.obtenerBloquesPorSemestre(idPadre) : Collections.emptyList();
     }
 
     private void actualizarVisibilidadCampos() {
