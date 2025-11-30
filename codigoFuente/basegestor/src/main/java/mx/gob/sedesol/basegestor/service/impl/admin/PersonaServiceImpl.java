@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import mx.gob.sedesol.basegestor.commons.dto.admin.TipoDiscapacidadDTO;
 import org.apache.commons.mail.EmailException;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.formula.functions.T;
@@ -404,8 +405,8 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 			} catch (Exception e) {
 				resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
 				resultado.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);
-				new Exception();
 				logger.error(e.getMessage(), e);
+				logCausaRaizTransaccion(e);
 			}
 		}
 		return resultado;
@@ -445,6 +446,13 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 
 				if (!ObjectUtils.isNullOrEmpty(datos.getPersona().getNuevaContrasenia())) {
 					datos.getPersona().setContrasenia(datos.getPersona().getContraseniaEncriptada());
+				} else if (ObjectUtils.isNullOrEmpty(datos.getPersona().getContrasenia())
+						&& ObjectUtils.isNotNull(datos.getPersona().getIdPersona())) {
+					// Si no se envió nueva contraseña ni la actual, recuperamos la almacenada para evitar nulos
+					TblPersona existente = personaRepo.findOne(datos.getPersona().getIdPersona());
+					if (ObjectUtils.isNotNull(existente)) {
+						datos.getPersona().setContrasenia(existente.getContrasenia());
+					}
 				}
 
 				estableceSexoMedianteCurp(datos.getPersona());
@@ -463,6 +471,8 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 
 				almacenarDatosAcademicos(datos.getDatosAcademicos(), resultadoPersona);
 
+				almacenarDatosSociodemograficosPersona(datos.getDatosSociodemograficos(), resultadoPersona);
+
 				reemplazarElementos(datos.getElementos(), resultadoPersona);
 
 				personaRolesService.almacenarRolesUsuario(mapper.map(resultadoPersona, PersonaDTO.class),
@@ -474,6 +484,7 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 				resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
 				resultado.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);
 				logger.error(e.getMessage(), e);
+				logCausaRaizTransaccion(e);
 			}
 		}
 
@@ -483,6 +494,15 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 	@Override
 	public CapturaPersonaDTO obtenerDatosPersona(PersonaDTO persona, Long usuarioModifico) {
 		CapturaPersonaDTO datos = new CapturaPersonaDTO();
+
+		// Aseguramos obtener todos los datos actuales desde BD (incluida nacionalidad)
+		if (ObjectUtils.isNotNull(persona) && ObjectUtils.isNotNull(persona.getIdPersona())) {
+			TblPersona personaBD = personaRepo.findOne(persona.getIdPersona());
+			if (ObjectUtils.isNotNull(personaBD)) {
+				persona = mapper.map(personaBD, PersonaDTO.class);
+			}
+		}
+
 		persona.setUsuarioModifico(usuarioModifico);
 		persona.setFechaActualizacion(new Date());
 		persona.setNuevaContrasenia(null);
@@ -584,6 +604,17 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 		}
 
 		return resultado;
+	}
+
+	/**
+	 * Log ayuda a identificar la causa raíz que marca rollback en la transacción.
+	 */
+	private void logCausaRaizTransaccion(Exception e) {
+		Throwable causa = e;
+		while (ObjectUtils.isNotNull(causa.getCause()) && causa.getCause() != causa) {
+			causa = causa.getCause();
+		}
+		logger.error("Causa raíz de rollback en actualización/guardado de persona:", causa);
 	}
 
 	@Override
@@ -896,17 +927,62 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 	}
 
 	private void almacenarDatosSociodemograficosPersona(DatoSociodemograficoDTO sociodemografico, TblPersona persona) {
-		TblDatosSociodemograficosPersona dato = mapper.map(sociodemografico, TblDatosSociodemograficosPersona.class);
-		dato.setPersona(persona);					
-		if (ObjectUtils.isNotNull(dato.getLenguajeIndigena())
-				|| ObjectUtils.isNotNull(dato.getTipoDiscapacidad())){			
-				System.out.println("Guardando datos sociodemograficos...");	
-				if(dato.getLenguajeIndigena().getIdLenguaje() == 0) {
-					dato.getLenguajeIndigena().setIdLenguaje(27);
-				}
-				datoSociodemograficoPersonaRepo.save(dato);
+		if (ObjectUtils.isNull(sociodemografico)) {
+			return;
 		}
 
+		boolean tieneLengua = sociodemografico.isLenguaIndigena()
+				&& ObjectUtils.isNotNull(sociodemografico.getLenguajeIndigena())
+				&& ObjectUtils.isNotNull(sociodemografico.getLenguajeIndigena().getIdLenguajeIndigena());
+
+		boolean tieneTipoDiscapacidad = sociodemografico.isTieneDiscapacidad()
+				&& ObjectUtils.isNotNull(sociodemografico.getTipoDiscapacidad())
+				&& ObjectUtils.isNotNull(sociodemografico.getTipoDiscapacidad().getIdTipoDiscapacidad());
+
+		TblDatosSociodemograficosPersona existente = datoSociodemograficoPersonaRepo
+				.obtenerDatosSociodemograficosPersona(persona.getIdPersona());
+
+		if (!tieneLengua && !tieneTipoDiscapacidad) {
+			// Si ya no hay datos sociodemográficos, elimina el registro existente
+			if (ObjectUtils.isNotNull(existente)) {
+				datoSociodemograficoPersonaRepo.delete(existente);
+			}
+			return;
+		}
+
+		if (!tieneLengua) {
+			sociodemografico.setLenguajeIndigena(null);
+		}
+		if (!tieneTipoDiscapacidad) {
+			sociodemografico.setTipoDiscapacidad(null);
+		}
+
+		TblDatosSociodemograficosPersona dato = mapper.map(sociodemografico, TblDatosSociodemograficosPersona.class);
+		dato.setPersona(persona);
+
+		// Reutilizar ID si ya existe registro para evitar duplicados
+		if (ObjectUtils.isNotNull(existente) && ObjectUtils.isNotNull(existente.getIdDatoSociodemograficoPersona())) {
+			dato.setIdDatoSociodemograficoPersona(existente.getIdDatoSociodemograficoPersona());
+		}
+
+		// Ajuste explícito de IDs por diferencias de nombres entre DTO y entidad
+		if (tieneLengua) {
+			if (ObjectUtils.isNotNull(dato.getLenguajeIndigena())
+					&& ObjectUtils.isNull(dato.getLenguajeIndigena().getIdLenguaje())) {
+				dato.getLenguajeIndigena().setIdLenguaje(sociodemografico.getLenguajeIndigena().getIdLenguajeIndigena());
+			}
+			if (dato.getLenguajeIndigena().getIdLenguaje() == 0) {
+				dato.getLenguajeIndigena().setIdLenguaje(27);
+			}
+		}
+
+		if (tieneTipoDiscapacidad && ObjectUtils.isNotNull(dato.getTipoDiscapacidad())
+				&& ObjectUtils.isNull(dato.getTipoDiscapacidad().getIdTipoDiscapacidad())) {
+			dato.getTipoDiscapacidad()
+					.setIdTipoDiscapacidad(sociodemografico.getTipoDiscapacidad().getIdTipoDiscapacidad());
+		}
+
+		datoSociodemograficoPersonaRepo.save(dato);
 	}
 
 	private DatoSociodemograficoDTO obtenerDatoSociodemograficoPersona(Long idPersona, Long usuarioModifico) {
@@ -920,19 +996,41 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 			datoSociodemograficoDTO = mapper.map(datosSociodemograficos, DatoSociodemograficoDTO.class);
 			datoSociodemograficoDTO.setUsuarioModifico(usuarioModifico);
 			datoSociodemograficoDTO.setFechaActualizacion(new Date());
-			
-			datoSociodemograficoDTO.setTieneDiscapacidad(datoSociodemograficoDTO.isTieneDiscapacidad());			
-			datoSociodemograficoDTO.setLenguaIndigena(datoSociodemograficoDTO.isLenguaIndigena());
-			datoSociodemograficoDTO.setIdLenguaje(datoSociodemograficoDTO.getLenguajeIndigena().getIdLenguajeIndigena());
-				
-			System.out.println("obteniendo sociodmograficos");
-			datoSociodemograficoDTO.getTipoDiscapacidad().setIdDiscapacidad(datosSociodemograficos.getTipoDiscapacidad().getCatDiscapacidad().getIdDiscapacidad());
-			//datoSociodemograficoDTO.setIdDiscapacidad(datoSociodemograficoDTO.getTipoDiscapacidad().getIdDiscapacidad());
-			datoSociodemograficoDTO.getTipoDiscapacidad().setIdTipoDiscapacidad(datoSociodemograficoDTO.getTipoDiscapacidad().getIdTipoDiscapacidad());
-			//datoSociodemograficoDTO.setIdTipoDiscapacidad(datoSociodemograficoDTO.getTipoDiscapacidad().getIdTipoDiscapacidad());
-			
+
 			if (ObjectUtils.isNull(datoSociodemograficoDTO.getLenguajeIndigena())) {
 				datoSociodemograficoDTO.setLenguajeIndigena(new LenguajeIndigenaDTO());
+			}
+			if (ObjectUtils.isNull(datoSociodemograficoDTO.getTipoDiscapacidad())) {
+				datoSociodemograficoDTO.setTipoDiscapacidad(new TipoDiscapacidadDTO());
+			}
+
+			// Normalizamos flags y referencias para evitar NPE en la vista
+			datoSociodemograficoDTO.setLenguaIndigena(Boolean.TRUE.equals(datoSociodemograficoDTO.isLenguaIndigena()));
+			datoSociodemograficoDTO.setTieneDiscapacidad(Boolean.TRUE.equals(datoSociodemograficoDTO.isTieneDiscapacidad()));
+
+			if (Boolean.TRUE.equals(datoSociodemograficoDTO.isLenguaIndigena())) {
+				if (ObjectUtils.isNotNull(datoSociodemograficoDTO.getLenguajeIndigena())) {
+					datoSociodemograficoDTO.setIdLenguaje(datoSociodemograficoDTO.getLenguajeIndigena().getIdLenguajeIndigena());
+				}
+				// Alinear idLenguajeIndigena con id de la entidad
+				if (ObjectUtils.isNotNull(datosSociodemograficos.getLenguajeIndigena())) {
+					datoSociodemograficoDTO.getLenguajeIndigena()
+							.setIdLenguajeIndigena(datosSociodemograficos.getLenguajeIndigena().getIdLenguaje());
+				}
+			} else {
+				datoSociodemograficoDTO.setLenguajeIndigena(new LenguajeIndigenaDTO());
+			}
+
+			if (Boolean.TRUE.equals(datoSociodemograficoDTO.isTieneDiscapacidad())
+					&& ObjectUtils.isNotNull(datosSociodemograficos.getTipoDiscapacidad())
+					&& ObjectUtils.isNotNull(datosSociodemograficos.getTipoDiscapacidad().getCatDiscapacidad())) {
+				datoSociodemograficoDTO.getTipoDiscapacidad()
+						.setIdDiscapacidad(datosSociodemograficos.getTipoDiscapacidad().getCatDiscapacidad().getIdDiscapacidad());
+				datoSociodemograficoDTO.getTipoDiscapacidad()
+						.setIdTipoDiscapacidad(datosSociodemograficos.getTipoDiscapacidad().getIdTipoDiscapacidad());
+			} else {
+				datoSociodemograficoDTO.setTieneDiscapacidad(false);
+				datoSociodemograficoDTO.setTipoDiscapacidad(new TipoDiscapacidadDTO());
 			}
 		}
 		return datoSociodemograficoDTO;

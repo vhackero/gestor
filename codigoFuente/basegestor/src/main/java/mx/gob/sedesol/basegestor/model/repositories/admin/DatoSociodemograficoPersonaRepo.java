@@ -14,11 +14,11 @@ public interface DatoSociodemograficoPersonaRepo
 		extends JpaRepository<TblDatosSociodemograficosPersona, Long>, JpaSpecificationExecutor<TblDatosSociodemograficosPersona> {		
 
 	@Query("SELECT ds FROM TblDatosSociodemograficosPersona ds "
-			+ "JOIN FETCH ds.tipoDiscapacidad td "		
+			+ "LEFT JOIN FETCH ds.tipoDiscapacidad td "
+			+ "LEFT JOIN FETCH ds.lenguajeIndigena li "
 			+ "WHERE ds.persona.idPersona = ?1")
 	TblDatosSociodemograficosPersona obtenerDatosSociodemograficosPersona(Long idPersona);
 	//List<TblDatosSociodemograficosPersona> obtenerDatosSociodemograficosPersona(Long idPersona);
 
 }
-
 

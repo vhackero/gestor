@@ -13,7 +13,7 @@
 						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.clasificacion')}:"
 						styleClass="bloque requerido" />
 					<p:selectOneRadio id="somTipoUsuario" styleClass="text-center"
-						required="true" disabled="false"
+						required="true" disabled="false" validateClient="true"
 						value="#{adminPersonaBean.datos.persona.tipoUsuario}"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:ajax listener="#{adminPersonaBean.cambiarTipoUsuario()}" />
@@ -33,7 +33,7 @@
 						maxlength="30"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.usuario')}"
 						styleClass="form-control textoMinus"
-						required="true"
+						required="true" validateClient="true"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 					<p:message for="txtNombreUsuario" />
 				</div>
@@ -109,7 +109,7 @@
 											match="txtConfirmarContrasenia" maxlength="180"
 											rendered="true"
 											validatorMessage="#{sistema.obtenerTexto('gw.global.msg.dato.debeconincidir')}"
-											required="#{adminPersonaBean.nuevaPersona}"
+											required="#{adminPersonaBean.nuevaPersona}" validateClient="true"
 											requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 											placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.contrasena')}" />
 										<p:message for="txtContrasenia" />
@@ -127,7 +127,7 @@
 										styleClass="form-control" maxlength="180"
 										value="#{adminPersonaBean.datos.persona.confirmacionContrasenia}"
 										placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.confcontrasena')}"
-										required="#{adminPersonaBean.nuevaPersona}"
+										required="#{adminPersonaBean.nuevaPersona}" validateClient="true"
 										requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
 									<p:message for="txtConfirmarContrasenia" />
 

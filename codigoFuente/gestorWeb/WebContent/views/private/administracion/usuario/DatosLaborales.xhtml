@@ -41,7 +41,7 @@
 						value="#{adminPersonaBean.datos.datosLaborales.institucion}"
 						maxlength="45" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.nomInstitucion')}" 
-						required="true"
+						required="true" validateClient="true"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 					<p:message for="txtNbInstitucion" />
 				</div>
@@ -225,7 +225,7 @@
 						maxlength="45" disabled="false"
 						value="#{adminPersonaBean.datos.personaCorreo.correoElectronico}"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.correo')}"
-						required="true"
+						required="true" validateClient="true"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 					<p:message for="txtCorreoElectronico" />
 				</div>
