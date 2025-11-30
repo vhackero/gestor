@@ -17,7 +17,7 @@
 						validator="#{adminPersonaBean.validarFormatoCurp}" disabled="false"
 						value="#{adminPersonaBean.datos.persona.curp}" maxlength="18"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.curp')}"
-						required="true"
+						required="true" validateClient="true"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:keyFilter regEx="/[A-Z]|[0-9]/" preventPaste="false" />
 					</p:inputText>
@@ -47,7 +47,7 @@
 					<p:inputText id="txtNombrePersona" styleClass="form-control"
 						value="#{adminPersonaBean.datos.persona.nombre}" maxlength="45" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.nombre')}"
-						required="true"
+						required="true" validateClient="true"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:keyFilter regEx="/[a-z ]/i" preventPaste="false" />
 					</p:inputText>
@@ -62,7 +62,7 @@
 						value="#{adminPersonaBean.datos.persona.apellidoPaterno}"
 						maxlength="45" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.primerApellido')}"
-						required="true"
+						required="true" validateClient="true"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 						<p:keyFilter regEx="/[a-z ]/i" preventPaste="false" />
 					</p:inputText>
@@ -122,10 +122,12 @@
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 						value="#{adminPersonaBean.datos.persona.nacionalidad.idPais}"
 						styleClass="col-xs-12 medidaMinima" disabled="false"
+						validateClient="true"
 						onchange="correccionSelectores()">
 
 						<f:selectItem
-							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" itemValue="#{null}"
+							noSelectionOption="true" />
 						<f:selectItems value="#{adminPersonaBean.listaPaises}" var="pais"
 							itemValue="#{pais.getIdPais()}" itemLabel="#{pais.getNombre()}" />
 					</p:selectOneMenu>

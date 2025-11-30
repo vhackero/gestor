@@ -403,9 +403,16 @@ public class AdminPersonaBean extends BaseBean {
 
 		// ITTIVA valida la discapacidad , se agrega validacion para realizar la
 		// consulta ya que llega null la mayoria de peticiones
-		if (datos.getDatosSociodemograficos().isTieneDiscapacidad()) {
+		if (datos.getDatosSociodemograficos().isTieneDiscapacidad()
+				&& ObjectUtils.isNotNull(datos.getDatosSociodemograficos().getTipoDiscapacidad())
+				&& ObjectUtils.isNotNull(datos.getDatosSociodemograficos().getTipoDiscapacidad().getIdDiscapacidad())) {
 			listaTiposDiscapacidad = personaServiceFacade.obtenerListaTiposDiscapacidadPorDiscapacidad(
 					datos.getDatosSociodemograficos().getTipoDiscapacidad().getIdDiscapacidad());
+		} else {
+			// Datos incompletos: limpiar bandera para evitar NPE en la vista
+			datos.getDatosSociodemograficos().setTieneDiscapacidad(false);
+			datos.getDatosSociodemograficos().setTipoDiscapacidad(new TipoDiscapacidadDTO());
+			listaTiposDiscapacidad = null;
 		}
 
 		validarTipoDiscapacidad();
@@ -637,19 +644,21 @@ public class AdminPersonaBean extends BaseBean {
 	}
 
 	public void validarLenguajes() {
-		if (isLenguajeIndigena) {
-			isLenguajeIndigena = false;
-		} else {
-			isLenguajeIndigena = true;
+		isLenguajeIndigena = datos.getDatosSociodemograficos().isLenguaIndigena();
+		if (!isLenguajeIndigena) {
+			datos.getDatosSociodemograficos().setLenguajeIndigena(new LenguajeIndigenaDTO());
+		} else if (ObjectUtils.isNull(datos.getDatosSociodemograficos().getLenguajeIndigena())) {
+			datos.getDatosSociodemograficos().setLenguajeIndigena(new LenguajeIndigenaDTO());
 		}
 	}
 
 	public void validarTipoDiscapacidad() {
+		isDiscapacidad = datos.getDatosSociodemograficos().isTieneDiscapacidad();
 		if (isDiscapacidad) {
-			isDiscapacidad = false;
-		} else {
-			isDiscapacidad = true;
 			listaDiscapacidades = personaServiceFacade.obtenerListaDiscapacidades();
+		} else {
+			datos.getDatosSociodemograficos().setTipoDiscapacidad(new TipoDiscapacidadDTO());
+			listaTiposDiscapacidad = null;
 		}
 	}
 
@@ -688,7 +697,12 @@ public class AdminPersonaBean extends BaseBean {
 
 	public String guardarPersona() {
 		datos.setRoles(listaRoles.getTarget());
-		datos.getPersona().setUnidadAdministrativa(datos.getPersona().getNuevaContrasenia());
+		if (!nuevaPersona) {
+			PersonaCorreoDTO correoOriginal = personaServiceFacade.getPersonaCorreoService()
+					.obtenerCorreoInstitucional(datos.getPersona().getIdPersona());
+			datos.setCorreoDePersonaEnBD(correoOriginal);
+		}
+		//datos.getPersona().setUnidadAdministrativa(datos.getPersona().getNuevaContrasenia());
 		if (!ObjectUtils.isNullOrEmpty(datos.getPersona().getNuevaContrasenia())) {
 			datos.getPersona().setContraseniaEncriptada(encoder.encode(datos.getPersona().getNuevaContrasenia()));
 		}

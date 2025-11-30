@@ -43,7 +43,7 @@
 					<p:selectOneMenu id="somEntidad" disabled="false"
 						value="#{adminPersonaBean.datos.domicilioPersona.idEntidadFederativa}"
 						valueChangeListener="#{adminPersonaBean.onChangeEntidad}"
-						required="true"
+						required="true" validateClient="true"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 						styleClass="col-xs-12" onchange="correccionSelectores()">
 						<p:ajax update="somMunicipioDomicilio" />
@@ -61,7 +61,7 @@
 					<p:selectOneMenu id="somMunicipioDomicilio"
 						value="#{adminPersonaBean.datos.domicilioPersona.idMunicipio}"
 						valueChangeListener="#{adminPersonaBean.onChangeMunicipio}"
-						required="true" disabled="false"
+						required="true" disabled="false" validateClient="true"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 						styleClass="col-xs-12" onchange="correccionSelectores()">
 						<p:ajax update="somLocalidad" />
@@ -86,7 +86,7 @@
 						styleClass="requerido" />
 					<p:selectOneMenu id="somLocalidad" disabled="false"
 						value="#{adminPersonaBean.datos.domicilioPersona.asentamiento.idAsentamiento}"
-						required="true"
+						required="true" validateClient="true"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 						class="col-xs-12" onchange="correccionSelectores()">
 						<f:selectItem
@@ -106,7 +106,7 @@
 						value="#{adminPersonaBean.datos.domicilioPersona.calle}"
 						maxlength="200" disabled="false"
 						placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.calle')}"
-						required="true"
+						required="true" validateClient="true"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"/>
 					<p:message for="txtCalle" />
 				</div>
@@ -121,7 +121,7 @@
 							value="#{adminPersonaBean.datos.domicilioPersona.numeroExterior}"
 							maxlength="6" disabled="false"
 							placeholder="#{sistema.obtenerTexto('gw.usuarios.etiqueta.numExterior')}"
-							required="true"
+							required="true" validateClient="true"
 							requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}">
 							<p:keyFilter regEx="/[0-9]/" preventPaste="false" />
 						</p:inputText>
