@@ -104,7 +104,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             cargarSemestres(idPlan, datos.getIdSemestre());
             cargarBloques(idSemestre, datos.getIdBloque());
             programas = obtenerProgramasPorSeleccion();
-            idPrograma = mantenerSeleccionValida(idPrograma, datos.getIdPrograma(), programas);
+            idPrograma = mantenerSeleccionValida(idPrograma, datos.getIdPrograma(), programas, false);
             idPeriodo = datos.getPeriodo();
             eventos = idPeriodo != null && idPrograma != null
                     ? convertirANodosSelectItem(nuevaBajaService.obtenerEventosPorPeriodoYPrograma(idPeriodo, idPrograma))
@@ -255,7 +255,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     private void cargarBloques(Long semestreSeleccionado, Long bloquePreferido) {
         bloques = semestreSeleccionado != null ? obtenerBloques(semestreSeleccionado) : Collections.emptyList();
-        idBloque = mantenerSeleccionValida(idBloque, bloquePreferido, bloques);
+        idBloque = mantenerSeleccionValida(idBloque, bloquePreferido, bloques, true);
     }
 
     private void actualizarEventos() {
@@ -270,7 +270,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     private void cargarSemestres(Long planSeleccionado, Long semestrePreferido) {
         semestres = planSeleccionado != null ? obtenerSemestres(planSeleccionado) : Collections.emptyList();
-        idSemestre = mantenerSeleccionValida(idSemestre, semestrePreferido, semestres);
+        idSemestre = mantenerSeleccionValida(idSemestre, semestrePreferido, semestres, true);
     }
 
     private Long obtenerValorLong(Object value) {
@@ -283,19 +283,21 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         return null;
     }
 
-    private Long mantenerSeleccionValida(Long seleccionActual, Long seleccionPreferida, List<SelectItem> opciones) {
+    private Long mantenerSeleccionValida(Long seleccionActual, Long seleccionPreferida, List<SelectItem> opciones, boolean tomarPrimeraSiNoHayCoincidencia) {
         Long seleccion = seleccionPreferida != null ? seleccionPreferida : seleccionActual;
-        if (seleccion == null || opciones == null || opciones.isEmpty()) {
+        if (opciones == null || opciones.isEmpty()) {
             return null;
         }
 
-        for (SelectItem opcion : opciones) {
-            if (seleccion.equals(obtenerValorLong(opcion.getValue()))) {
-                return seleccion;
+        if (seleccion != null) {
+            for (SelectItem opcion : opciones) {
+                if (seleccion.equals(obtenerValorLong(opcion.getValue()))) {
+                    return seleccion;
+                }
             }
         }
 
-        return obtenerValorLong(opciones.get(0).getValue());
+        return tomarPrimeraSiNoHayCoincidencia ? obtenerValorLong(opciones.get(0).getValue()) : null;
     }
 
     private void actualizarVisibilidadCampos() {
