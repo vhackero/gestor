@@ -20,6 +20,8 @@ public interface INuevaBajaRepository {
 
     List<NodoDTO> consultarProgramasPorEje(Long idEjeCapacitacion);
 
+    String obtenerTipoNodoMalla(Long idNodo);
+
     List<String> consultarPeriodosInscripcion();
 
     List<NodoDTO> consultarEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma);

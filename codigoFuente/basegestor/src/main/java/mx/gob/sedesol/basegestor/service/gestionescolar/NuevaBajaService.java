@@ -19,6 +19,8 @@ public interface NuevaBajaService {
 
     List<NodoDTO> obtenerProgramasPorEje(Long idEjeCapacitacion);
 
+    String obtenerTipoNodoMalla(Long idNodo);
+
     List<String> obtenerPeriodos();
 
     List<NodoDTO> obtenerEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma);

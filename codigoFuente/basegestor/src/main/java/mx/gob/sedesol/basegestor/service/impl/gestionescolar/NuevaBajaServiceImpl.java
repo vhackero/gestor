@@ -47,6 +47,11 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
     }
 
     @Override
+    public String obtenerTipoNodoMalla(Long idNodo) {
+        return nuevaBajaRepository.obtenerTipoNodoMalla(idNodo);
+    }
+
+    @Override
     public List<String> obtenerPeriodos() {
         return nuevaBajaRepository.consultarPeriodosInscripcion();
     }
@@ -60,7 +65,13 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
     public BajaMatriculaDetalleDTO obtenerDatosPorMatricula(String matricula) {
         BajaMatriculaDetalleDTO datos = nuevaBajaRepository.consultarDatosPorMatricula(matricula);
 
-        if (datos == null || datos.getIdPlan() == null) {
+        if (datos == null
+                || datos.getIdPlan() == null
+                || datos.getIdSemestre() == null
+                || datos.getIdBloque() == null
+                || datos.getIdPrograma() == null
+                || datos.getPeriodo() == null
+                || datos.getIdEvento() == null) {
             return null;
         }
 

@@ -53,7 +53,7 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     @Override
     public List<NodoDTO> consultarSemestresPorPlan(Long idPlan) {
-        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_plan = :idPlan";
+        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_padre = :idPlan";
         Query query = entityManager.createNativeQuery(consulta);
         query.setParameter("idPlan", idPlan);
         List<Object[]> resultados = query.getResultList();
@@ -260,6 +260,50 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
         dto.setPeriodo(obtenerCadena(fila[4]));
         dto.setIdEvento(obtenerLong(fila[5]));
         return dto;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public String obtenerTipoNodoMalla(Long idNodo) {
+        String consulta = "SELECT tmc.id_plan, tmc.id_padre FROM tbl_malla_curricular tmc WHERE tmc.id = :idNodo LIMIT 1";
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idNodo", idNodo);
+
+        List<Object[]> resultados = query.getResultList();
+        if (resultados.isEmpty()) {
+            return null;
+        }
+
+        Object[] fila = resultados.get(0);
+        Long idPlan = obtenerLong(fila[0]);
+        Long idPadre = obtenerLong(fila[1]);
+
+        if (idPlan != null && idPadre == null) {
+            return "PLAN";
+        }
+
+        if (idPadre != null) {
+            String consultaPadre = "SELECT tmc.id_plan, tmc.id_padre FROM tbl_malla_curricular tmc WHERE tmc.id = :idPadre LIMIT 1";
+            Query queryPadre = entityManager.createNativeQuery(consultaPadre);
+            queryPadre.setParameter("idPadre", idPadre);
+            List<Object[]> resultadosPadre = queryPadre.getResultList();
+
+            Long idPlanPadre = null;
+            Long idPadrePadre = null;
+            if (!resultadosPadre.isEmpty()) {
+                Object[] filaPadre = resultadosPadre.get(0);
+                idPlanPadre = obtenerLong(filaPadre[0]);
+                idPadrePadre = obtenerLong(filaPadre[1]);
+            }
+
+            if (idPlanPadre != null && (idPadrePadre == null || idPadrePadre.equals(0L))) {
+                return "SEMESTRE";
+            }
+
+            return "BLOQUE";
+        }
+
+        return null;
     }
 
     private Integer obtenerEntero(Object valor) {

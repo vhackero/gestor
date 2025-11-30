@@ -111,7 +111,11 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     public void onSemestreChange() {
-        bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
+        if (idSemestre != null && "SEMESTRE".equalsIgnoreCase(nuevaBajaService.obtenerTipoNodoMalla(idSemestre))) {
+            bloques = obtenerBloques(idSemestre);
+        } else {
+            bloques = Collections.emptyList();
+        }
         idBloque = null;
         actualizarProgramasConSeleccion(null, idPeriodo, null);
     }
@@ -225,9 +229,8 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     private void actualizarProgramasConSeleccion(Long idProgramaPreferido, String periodoPreferido, Long idEventoPreferido) {
-        Long idEjeCapacitacion = idBloque != null ? idBloque : idSemestre;
-        if (idEjeCapacitacion != null) {
-            programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idEjeCapacitacion));
+        if (idBloque != null) {
+            programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBloque));
         } else {
             programas = Collections.emptyList();
         }
@@ -268,7 +271,11 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             Long idProgramaPreferido, String periodoPreferido, Long idEventoPreferido) {
         semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
         idSemestre = seleccionarId(semestres, idSemestrePreferido);
-        bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
+        if (idSemestre != null && "SEMESTRE".equalsIgnoreCase(nuevaBajaService.obtenerTipoNodoMalla(idSemestre))) {
+            bloques = obtenerBloques(idSemestre);
+        } else {
+            bloques = Collections.emptyList();
+        }
         idBloque = seleccionarId(bloques, idBloquePreferido);
         actualizarProgramasConSeleccion(idProgramaPreferido, periodoPreferido, idEventoPreferido);
     }
@@ -278,9 +285,21 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             return Collections.emptyList();
         }
 
-        boolean esPlan = idPlan != null && idPlan.equals(idPadre);
-        return esPlan ? nuevaBajaService.obtenerSemestresPorPlan(idPadre)
-                : nuevaBajaService.obtenerBloquesPorSemestre(idPadre);
+        String tipoNodo = nuevaBajaService.obtenerTipoNodoMalla(idPadre);
+
+        if ("PLAN".equalsIgnoreCase(tipoNodo)) {
+            return nuevaBajaService.obtenerSemestresPorPlan(idPadre);
+        }
+
+        if ("SEMESTRE".equalsIgnoreCase(tipoNodo)) {
+            return nuevaBajaService.obtenerBloquesPorSemestre(idPadre);
+        }
+
+        if ("BLOQUE".equalsIgnoreCase(tipoNodo)) {
+            return nuevaBajaService.obtenerProgramasPorEje(idPadre);
+        }
+
+        return Collections.emptyList();
     }
 
     private void actualizarVisibilidadCampos() {
