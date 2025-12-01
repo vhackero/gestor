@@ -39,7 +39,9 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     @Override
     public List<PlanBajaDTO> consultarPlanesActivos() {
-        String consulta = "SELECT tmc.id, tmc.id_plan, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.activo = 1 AND tmc.id_plan IS NOT NULL";
+        String consulta = "SELECT tmc.id, tmc.id_plan, tmc.nombre "
+                + "FROM tbl_malla_curricular tmc "
+                + "WHERE tmc.activo = 1 AND tmc.id_plan IS NOT NULL AND tmc.id_padre IS NULL";
         Query query = entityManager.createNativeQuery(consulta);
         List<Object[]> resultados = query.getResultList();
         List<PlanBajaDTO> planes = new ArrayList<>();
@@ -53,7 +55,12 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     @Override
     public List<NodoDTO> consultarSemestresPorPlan(Long idPlan) {
-        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_plan = :idPlan";
+        String consulta = "SELECT hijo.id, hijo.nombre "
+                + "FROM tbl_malla_curricular hijo "
+                + "WHERE hijo.id_padre = (";
+        consulta += "    SELECT plan.id FROM tbl_malla_curricular plan "
+                + "    WHERE plan.id_plan = :idPlan AND plan.id_padre IS NULL LIMIT 1";
+        consulta += " ) AND hijo.activo = 1";
         Query query = entityManager.createNativeQuery(consulta);
         query.setParameter("idPlan", idPlan);
         List<Object[]> resultados = query.getResultList();
@@ -68,7 +75,8 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     @Override
     public List<NodoDTO> consultarBloquesPorSemestre(Long idSemestre) {
-        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_padre = :idSemestre";
+        String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc "
+                + "WHERE tmc.id_padre = :idSemestre AND tmc.activo = 1";
         Query query = entityManager.createNativeQuery(consulta);
         query.setParameter("idSemestre", idSemestre);
         List<Object[]> resultados = query.getResultList();
@@ -224,20 +232,20 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     public BajaMatriculaDetalleDTO consultarDatosPorMatricula(String matricula) {
         String consulta = "SELECT DISTINCT "
-                + " tpl.id_plan, "
+                + " tpa.id_plan, "
                 + " sem.id as id_semestre, "
                 + " bloque.id as id_bloque, "
                 + " tfdp.id_programa, "
                 + " tpi.nombre_periodo, "
                 + " te.id_evento "
                 + "FROM tbl_persona tp "
-                + "JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona "
-                + "JOIN tbl_grupos tg ON tg.id = rgp.id_grupo "
-                + "JOIN tbl_eventos te ON te.id_evento = tg.id_evento "
-                + "JOIN tbl_ficha_descriptiva_programa tfdp ON tfdp.id_programa = te.id_programa "
+                + "JOIN tbl_persona_aspirante tpa ON tpa.id_persona = tp.id_persona "
+                + "LEFT JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona "
+                + "LEFT JOIN tbl_grupos tg ON tg.id = rgp.id_grupo "
+                + "LEFT JOIN tbl_eventos te ON te.id_evento = tg.id_evento "
+                + "LEFT JOIN tbl_ficha_descriptiva_programa tfdp ON tfdp.id_programa = te.id_programa "
                 + "LEFT JOIN tbl_malla_curricular bloque ON bloque.id = tfdp.id_eje_capacitacion "
                 + "LEFT JOIN tbl_malla_curricular sem ON sem.id = bloque.id_padre "
-                + "LEFT JOIN tbl_planes tpl ON tpl.id_plan = tfdp.id_plan "
                 + "LEFT JOIN tbl_periodos_inscripcion tpi ON te.cve_evento_cap LIKE CONCAT('%', tpi.nombre_periodo, '%') "
                 + "WHERE tp.sso_idUsuario = :matricula "
                 + "ORDER BY te.id_evento DESC "

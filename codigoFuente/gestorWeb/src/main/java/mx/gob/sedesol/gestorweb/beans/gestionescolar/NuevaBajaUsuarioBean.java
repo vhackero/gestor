@@ -101,17 +101,32 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             }
 
             idPlan = datos.getIdPlan();
-            semestres = obtenerSemestres(idPlan);
+            semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
+
             idSemestre = datos.getIdSemestre();
-            bloques = obtenerBloques(idSemestre);
+            bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
+
             idBloque = datos.getIdBloque();
-            programas = convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idBloque != null ? idBloque : idSemestre));
-            idPrograma = datos.getIdPrograma();
-            idPeriodo = datos.getPeriodo();
-            eventos = idPeriodo != null && idPrograma != null
-                    ? convertirANodosSelectItem(nuevaBajaService.obtenerEventosPorPeriodoYPrograma(idPeriodo, idPrograma))
+            Long idEjeCapacitacion = idBloque != null ? idBloque : idSemestre;
+            programas = idEjeCapacitacion != null
+                    ? convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idEjeCapacitacion))
                     : Collections.emptyList();
-            idEvento = datos.getIdEvento();
+            idPrograma = datos.getIdPrograma();
+
+            if (idPeriodo == null) {
+                idPeriodo = datos.getPeriodo();
+            }
+
+            if (idPeriodo != null && idPrograma != null) {
+                eventos = convertirANodosSelectItem(
+                        nuevaBajaService.obtenerEventosPorPeriodoYPrograma(idPeriodo, idPrograma));
+            } else if (eventos == null) {
+                eventos = Collections.emptyList();
+            }
+
+            if (idEvento == null) {
+                idEvento = datos.getIdEvento();
+            }
             actualizarVisibilidadCampos();
         } catch (Exception ex) {
             LOGGER.error("Error al consultar datos por matrícula", ex);
