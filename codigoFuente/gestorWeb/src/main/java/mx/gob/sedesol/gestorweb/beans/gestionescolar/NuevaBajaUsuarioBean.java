@@ -173,40 +173,6 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     public void registrarBaja() {
-        List<String> errores = new ArrayList<>();
-
-        if (matriculaUsuario == null || matriculaUsuario.trim().isEmpty()) {
-            errores.add("La matrícula o usuario es obligatoria");
-        }
-        if (idTipoBaja == null) {
-            errores.add("Seleccione un tipo de baja");
-        }
-        if (idPlan == null) {
-            errores.add("Seleccione un plan");
-        }
-
-        if (semestreRequerido() && idSemestre == null) {
-            errores.add("Seleccione un semestre");
-        }
-
-        if (mostrarPrograma && idPrograma == null) {
-            errores.add("Seleccione un programa");
-        }
-
-        if (mostrarBloque && esTipoTemporalOParcial && idBloque == null) {
-            errores.add("Seleccione un bloque");
-        }
-
-        if (mostrarPeriodo && (idPeriodo == null || idPeriodo.trim().isEmpty())) {
-            errores.add("Seleccione un periodo");
-        }
-
-        if (!errores.isEmpty()) {
-            mensajeErrorDialogo = "Ingrese los datos marcados como obligatorios.";
-            mostrarDialogo("dlgNuevaBajaValidacion");
-            return;
-        }
-
         try {
             BajaSolicitudDTO solicitud = construirSolicitud();
             nuevaBajaService.aplicarBaja(solicitud);
