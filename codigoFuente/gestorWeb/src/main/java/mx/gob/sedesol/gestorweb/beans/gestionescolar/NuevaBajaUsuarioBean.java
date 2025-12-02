@@ -96,6 +96,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     public void onMatriculaChange() {
         limpiarDatosDependientes();
+        limpiarListasDesplegables();
         deshabilitarListas();
 
         if (matriculaUsuario == null || matriculaUsuario.trim().isEmpty()) {
@@ -104,6 +105,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         }
 
         try {
+            recargarListasBase();
             BajaMatriculaDetalleDTO datos = nuevaBajaService.obtenerDatosPorMatricula(matriculaUsuario.trim());
 
             if (datos == null) {
@@ -270,6 +272,15 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         eventos = Collections.emptyList();
     }
 
+    private void recargarListasBase() {
+        if (planes == null || planes.isEmpty()) {
+            planes = convertirAPlanesSelectItem(nuevaBajaService.obtenerPlanes());
+        }
+        if (periodos == null || periodos.isEmpty()) {
+            periodos = convertirAPeriodosSelectItem(nuevaBajaService.obtenerPeriodos());
+        }
+    }
+
     private void actualizarProgramas() {
         Long idEjeCapacitacion = idBloque != null ? idBloque : idSemestre;
         if (idEjeCapacitacion != null) {
@@ -373,6 +384,15 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         semestres = Collections.emptyList();
         bloques = Collections.emptyList();
         programas = Collections.emptyList();
+        eventos = Collections.emptyList();
+    }
+
+    private void limpiarListasDesplegables() {
+        planes = Collections.emptyList();
+        semestres = Collections.emptyList();
+        bloques = Collections.emptyList();
+        programas = Collections.emptyList();
+        periodos = Collections.emptyList();
         eventos = Collections.emptyList();
     }
 
