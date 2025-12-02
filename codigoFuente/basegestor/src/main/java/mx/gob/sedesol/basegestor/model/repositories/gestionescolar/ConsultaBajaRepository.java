@@ -42,7 +42,7 @@ public class ConsultaBajaRepository implements IConsultaBajaRepository {
                 + " LEFT JOIN tbl_eventos te ON te.id_evento = rpb.id_evento "
                 + " LEFT JOIN tbl_periodos_inscripcion tpi ON te.cve_evento_cap LIKE CONCAT('%', tpi.nombre_periodo, '%') "
                 + "WHERE rpb.contabilizar = :estatusSeleccionado "
-                + " AND tp.sso_idUsuario = :matricula "
+                + " AND TRIM(tp.sso_idUsuario) = :matricula "
                 + " AND TRIM(tpi.nombre_periodo) = :nombrePeriodo";
 
         Query query = entityManager.createNativeQuery(consulta);
