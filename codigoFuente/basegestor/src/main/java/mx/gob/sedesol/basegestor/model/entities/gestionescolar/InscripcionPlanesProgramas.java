@@ -13,12 +13,16 @@ public class InscripcionPlanesProgramas implements Serializable {
 	private String nombreivelEnsenanza;
 	private String nombrePlan;
 	private Integer idPrograma;
+	private String nombreBloque;
+	private String nombreSemestre;
 	
 	 @Override
 	    public String toString() {
 	        return "PlanesProgramas [ nombreNivelEnsenanza=" +  nombreivelEnsenanza 
 	                + ", idPlan=" + idPlan 
 	                + ", nombrePlan=" + nombrePlan 
+	                + ", nombreBloque=" + nombreBloque
+	                + ", nombreSemestre=" + nombreSemestre
 	                + ", idPrograma=" + idPrograma + "]";
 	    }
 	
@@ -52,6 +56,22 @@ public class InscripcionPlanesProgramas implements Serializable {
 	}
 	public void setNombrePrograma(String nombrePrograma) {
 		this.nombrePrograma = nombrePrograma;
+	}
+	public String getNombreBloque() {
+		return nombreBloque;
+	}
+
+
+	public void setNombreBloque(String nombreBloque) {
+		this.nombreBloque = nombreBloque;
+	}
+	public String getNombreSemestre() {
+		return nombreSemestre;
+	}
+
+
+	public void setNombreSemestre(String nombreSemestre) {
+		this.nombreSemestre = nombreSemestre;
 	}
 	private String nombrePrograma;
 
