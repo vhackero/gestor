@@ -95,14 +95,15 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     public void onMatriculaChange() {
+        if (matriculaUsuario == null || matriculaUsuario.trim().isEmpty()) {
+            limpiarFormulario();
+            limpiarListasDesplegables();
+            return;
+        }
+
         limpiarDatosDependientes();
         limpiarListasDesplegables();
         deshabilitarListas();
-
-        if (matriculaUsuario == null || matriculaUsuario.trim().isEmpty()) {
-            actualizarHabilitacionSecuencial();
-            return;
-        }
 
         try {
             recargarListasBase();
