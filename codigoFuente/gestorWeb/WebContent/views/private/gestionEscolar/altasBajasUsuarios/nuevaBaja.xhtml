@@ -202,9 +202,9 @@
                                                  styleClass="btn btn-default" />
 
                                 <p:commandButton value="Agregar"
-                                                 actionListener="#{nuevaBajaUsuarioBean.registrarBaja}"
+                                                 action="#{nuevaBajaUsuarioBean.registrarBaja}"
                                                  process="@form"
-                                                 update="@form"
+                                                 update="camposBaja msgsNuevaBaja"
                                                  onstart="PF('dialogLayout').show()"
                                                  oncomplete="PF('dialogLayout').hide()"
                                                  styleClass="btn btn-primary pull-right" />
