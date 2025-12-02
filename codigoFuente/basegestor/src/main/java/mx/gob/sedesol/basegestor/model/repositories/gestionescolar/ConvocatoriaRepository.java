@@ -429,11 +429,14 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		List<ConvocatoriaNivelEducativoCompl> lista = new ArrayList<ConvocatoriaNivelEducativoCompl>();
 
                 String consulta = " SELECT cnp.id id_nivel_ensenanza, cnp.nombre nivel_ensenaza, tp.id_plan id_plan, tp.nombre plan, fdp.id_programa id_programa, fdp.nombre_tentativo programa,\r\n"
-                                + "        (SELECT mcr.nombre FROM tbl_malla_curricular mcr WHERE mcr.id = fdp.id_eje_capacitacion) bloque\r\n"
+                                + " mcr.nombre bloque,\r\n"
+                                + "(SELECT mcrs.nombre FROM tbl_malla_curricular mcrs WHERE mcrs.id = mcr.id_padre)"	                		
                                 + "FROM tbl_planes tp\r\n"
                                 + "         INNER JOIN tbl_ficha_descriptiva_programa fdp ON fdp.id_plan = tp.id_plan AND fdp.identificador_final IS not NULL AND fdp.identificador_final != ''\r\n"
                                 + "         INNER JOIN cat_nivel_ensenanza_programa cnp ON fdp.id_nivel_programa = cnp.id\r\n"
-                                + "         INNER JOIN tbl_malla_curricular mc ON mc.id_plan = tp.id_plan AND mc.activo =1";
+                                + "         INNER JOIN tbl_malla_curricular mc ON mc.id_plan = tp.id_plan AND mc.activo =1"
+                                + " 		INNER JOIN tbl_malla_curricular mcr WHERE mcr.id = fdp.id_eje_capacitacion"
+                                + " order by tp.id_plan, (SELECT mcrs.nombre FROM tbl_malla_curricular mcrs WHERE mcrs.id = mcr.id_padre), mcr.nombre";
 
 		Query query = entityManager.createNativeQuery(consulta);
 
@@ -463,6 +466,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		regresa.setIdPrograma((Integer) obj[4]);
                 regresa.setNombrePrograma(obj[5].toString());
                 regresa.setNombreBloque(obj[6] != null ? obj[6].toString() : null);
+                regresa.setNombreSemestre(obj[7] != null ? obj[7].toString() : null);
 
                 return regresa;
 
