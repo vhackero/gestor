@@ -104,13 +104,6 @@
 
                                 <p:column styleClass="text-center">
                                     <f:facet name="header">
-                                        <h:outputText value="ID Baja" />
-                                    </f:facet>
-                                    <h:outputText value="#{baja.idBaja}" />
-                                </p:column>
-
-                                <p:column styleClass="text-center">
-                                    <f:facet name="header">
                                         <h:outputText value="Matrícula" />
                                     </f:facet>
                                     <h:outputText value="#{baja.matricula}" />
@@ -163,6 +156,22 @@
                                         <h:outputText value="Estatus" />
                                     </f:facet>
                                     <h:outputText value="#{consultaBajaUsuariosBean.obtenerNombreEstatus(baja.estatus)}" />
+                                </p:column>
+
+                                <p:column styleClass="text-center">
+                                    <f:facet name="header">
+                                        <h:outputText value="Acciones" />
+                                    </f:facet>
+
+                                    <p:commandButton type="button"
+                                                     icon="fa fa-pencil"
+                                                     styleClass="btn-icon btn btn-default"
+                                                     title="Editar" />
+
+                                    <p:commandButton type="button"
+                                                     icon="fa fa-trash"
+                                                     styleClass="btn-icon btn btn-default"
+                                                     title="Eliminar" />
                                 </p:column>
                             </p:dataTable>
                         </div>
