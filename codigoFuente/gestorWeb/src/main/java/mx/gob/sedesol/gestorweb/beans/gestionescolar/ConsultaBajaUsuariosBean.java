@@ -15,7 +15,6 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConsultaBajaService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
-import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 
 @ManagedBean
 @ViewScoped
@@ -29,7 +28,7 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
     private transient ConsultaBajaService consultaBajaService;
 
     private String matricula;
-    private Integer periodoSeleccionado;
+    private String periodoSeleccionado;
     private Integer estatusSeleccionado;
     private List<CatalogoComunDTO> periodos;
     private List<ConsultaBajaDTO> resultados;
@@ -41,13 +40,8 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
         cargarPeriodos();
     }
 
-    @SuppressWarnings("unchecked")
     private void cargarPeriodos() {
-        periodos = (List<CatalogoComunDTO>) getSession().getServletContext()
-                .getAttribute(ConstantesGestorWeb.CAT_PERIODOS);
-        if (periodos == null) {
-            periodos = new ArrayList<>();
-        }
+        periodos = consultaBajaService.obtenerPeriodos();
     }
 
     public void buscar() {
@@ -107,11 +101,11 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
         this.matricula = matricula;
     }
 
-    public Integer getPeriodoSeleccionado() {
+    public String getPeriodoSeleccionado() {
         return periodoSeleccionado;
     }
 
-    public void setPeriodoSeleccionado(Integer periodoSeleccionado) {
+    public void setPeriodoSeleccionado(String periodoSeleccionado) {
         this.periodoSeleccionado = periodoSeleccionado;
     }
 

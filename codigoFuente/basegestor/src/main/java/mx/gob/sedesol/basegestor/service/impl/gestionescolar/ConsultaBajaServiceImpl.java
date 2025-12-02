@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaBajaDTO;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IConsultaBajaRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConsultaBajaService;
@@ -20,11 +21,21 @@ public class ConsultaBajaServiceImpl implements ConsultaBajaService {
     private IConsultaBajaRepository consultaBajaRepository;
 
     @Override
-    public List<ConsultaBajaDTO> buscarBajas(String matricula, Integer idPeriodo, Integer estatus) {
+    public List<ConsultaBajaDTO> buscarBajas(String matricula, String periodo, Integer estatus) {
         try {
-            return consultaBajaRepository.buscarBajas(matricula, idPeriodo, estatus);
+            return consultaBajaRepository.buscarBajas(matricula, periodo, estatus);
         } catch (Exception ex) {
             LOGGER.error("Error al consultar bajas de usuarios", ex);
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<CatalogoComunDTO> obtenerPeriodos() {
+        try {
+            return consultaBajaRepository.obtenerPeriodos();
+        } catch (Exception ex) {
+            LOGGER.error("Error al consultar periodos de inscripción", ex);
             return new ArrayList<>();
         }
     }
