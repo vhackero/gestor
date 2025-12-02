@@ -82,14 +82,19 @@
                                 <p:commandButton id="btnBuscarBajas"
                                                  process="@form"
                                                  ajax="true"
-                                                 update="@form"
+                                                 update="frmConsultaBaja frmResultadosBaja:tablaBajas"
                                                  styleClass="btn btn-primary pull-right"
                                                  actionListener="#{consultaBajaUsuariosBean.buscar}"
                                                  value="#{sistema.obtenerTexto('gw.ga.btn.buscar')}" />
                             </div>
                         </div>
                     </div>
+                </p:panel>
+            </h:form>
 
+            <h:form id="frmResultadosBaja">
+                <p:panel header="Listado de bajas encontradas"
+                         styleClass="panel-primary">
                     <div class="row">
                         <div class="col-md-12">
                             <p:dataTable id="tablaBajas"
