@@ -185,10 +185,12 @@
                         <div class="row">
                             <div class="col-md-12 text-right">
                                 <p:commandButton value="Cancelar" process="@this"
-                                                 update="@form"
-                                                 action="#{altasBajasUsuariosBean.regresarAlModulo}"
-                                                 ajax="false"
-                                                 onclick="PF('dialogLayout').show()"
+                                                 update=":frmAltasBajas:panelBotones :frmAltasBajas:panelContenido"
+                                                 action="#{altasBajasUsuariosBean.mostrarOpcionesBajas}"
+                                                 ajax="true"
+                                                 immediate="true"
+                                                 onstart="PF('dialogLayout').show()"
+                                                 oncomplete="PF('dialogLayout').hide()"
                                                  styleClass="btn btn-default" />
 
                                 <p:commandButton value="Agregar"
