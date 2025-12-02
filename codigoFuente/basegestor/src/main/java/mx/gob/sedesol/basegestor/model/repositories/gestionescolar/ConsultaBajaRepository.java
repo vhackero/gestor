@@ -43,12 +43,12 @@ public class ConsultaBajaRepository implements IConsultaBajaRepository {
                 + " LEFT JOIN tbl_periodos_inscripcion tpi ON te.cve_evento_cap LIKE CONCAT('%', tpi.nombre_periodo, '%') "
                 + "WHERE rpb.contabilizar = :estatusSeleccionado "
                 + " AND tp.sso_idUsuario = :matricula "
-                + " AND tpi.nombre_periodo = :nombrePeriodo";
+                + " AND TRIM(tpi.nombre_periodo) = :nombrePeriodo";
 
         Query query = entityManager.createNativeQuery(consulta);
-        query.setParameter("estatusSeleccionado", estatus);
-        query.setParameter("matricula", matricula);
-        query.setParameter("nombrePeriodo", nombrePeriodo);
+        query.setParameter("estatusSeleccionado", Boolean.TRUE.equals(estatus) ? 1 : 0);
+        query.setParameter("matricula", matricula != null ? matricula.trim() : null);
+        query.setParameter("nombrePeriodo", nombrePeriodo != null ? nombrePeriodo.trim() : null);
 
         List<Object[]> resultados = query.getResultList();
         List<ConsultaBajaDTO> bajas = new ArrayList<>();
@@ -83,7 +83,7 @@ public class ConsultaBajaRepository implements IConsultaBajaRepository {
         if (!ObjectUtils.isNullOrEmpty(resultados)) {
             for (String nombrePeriodo : resultados) {
                 CatalogoComunDTO dto = new CatalogoComunDTO();
-                dto.setNombre(nombrePeriodo);
+                dto.setNombre(nombrePeriodo != null ? nombrePeriodo.trim() : null);
                 periodos.add(dto);
             }
         }

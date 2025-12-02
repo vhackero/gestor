@@ -52,7 +52,7 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
             return;
         }
 
-        resultados = consultaBajaService.buscarBajas(matricula.trim(), periodoSeleccionado, estatusSeleccionado);
+        resultados = consultaBajaService.buscarBajas(matricula.trim(), periodoSeleccionado.trim(), estatusSeleccionado);
 
         if (ObjectUtils.isNullOrEmpty(resultados)) {
             agregarMsgInfo("No se encontraron registros", null);
