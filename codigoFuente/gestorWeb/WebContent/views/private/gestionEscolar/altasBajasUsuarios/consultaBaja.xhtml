@@ -45,7 +45,7 @@
                                     <f:selectItems value="#{consultaBajaUsuariosBean.periodos}"
                                                    var="periodo"
                                                    itemLabel="#{periodo.nombre}"
-                                                   itemValue="#{periodo.id}" />
+                                                   itemValue="#{periodo.nombre}" />
                                 </p:selectOneMenu>
                                 <p:message for="periodo" display="text" />
                             </div>
@@ -61,8 +61,8 @@
                                                  requiredMessage="El estatus es obligatorio.">
                                     <p:ajax event="change" process="@this" />
                                     <f:selectItem itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" itemValue="#{null}" />
-                                    <f:selectItem itemLabel="Aplicada" itemValue="1" />
-                                    <f:selectItem itemLabel="Pendiente" itemValue="0" />
+                                    <f:selectItem itemLabel="Aplicada" itemValue="true" />
+                                    <f:selectItem itemLabel="Pendiente" itemValue="false" />
                                 </p:selectOneMenu>
                                 <p:message for="estatus" display="text" />
                             </div>
@@ -101,6 +101,13 @@
                                          emptyMessage="No se encontraron registros"
                                          tableStyleClass="table"
                                          reflow="true">
+
+                                <p:column styleClass="text-center">
+                                    <f:facet name="header">
+                                        <h:outputText value="ID Baja" />
+                                    </f:facet>
+                                    <h:outputText value="#{baja.idBaja}" />
+                                </p:column>
 
                                 <p:column styleClass="text-center">
                                     <f:facet name="header">
@@ -155,7 +162,7 @@
                                     <f:facet name="header">
                                         <h:outputText value="Estatus" />
                                     </f:facet>
-                                    <h:outputText value="#{consultaBajaUsuariosBean.obtenerNombreEstatus(baja.estatus)}" />
+                                    <h:outputText value="#{baja.estatus}" />
                                 </p:column>
                             </p:dataTable>
                         </div>

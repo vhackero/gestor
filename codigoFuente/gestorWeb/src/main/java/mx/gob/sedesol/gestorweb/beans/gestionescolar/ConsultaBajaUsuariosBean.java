@@ -15,7 +15,6 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConsultaBajaService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
-import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 
 @ManagedBean
 @ViewScoped
@@ -29,8 +28,8 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
     private transient ConsultaBajaService consultaBajaService;
 
     private String matricula;
-    private Integer periodoSeleccionado;
-    private Integer estatusSeleccionado;
+    private String periodoSeleccionado;
+    private Boolean estatusSeleccionado;
     private List<CatalogoComunDTO> periodos;
     private List<ConsultaBajaDTO> resultados;
 
@@ -41,10 +40,8 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
         cargarPeriodos();
     }
 
-    @SuppressWarnings("unchecked")
     private void cargarPeriodos() {
-        periodos = (List<CatalogoComunDTO>) getSession().getServletContext()
-                .getAttribute(ConstantesGestorWeb.CAT_PERIODOS);
+        periodos = consultaBajaService.obtenerPeriodos();
         if (periodos == null) {
             periodos = new ArrayList<>();
         }
@@ -69,8 +66,8 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
         resultados = new ArrayList<>();
     }
 
-    public String obtenerNombreEstatus(Integer estatus) {
-        if (estatus != null && estatus == 1) {
+    public String obtenerNombreEstatus(Boolean estatus) {
+        if (Boolean.TRUE.equals(estatus)) {
             return "Aplicada";
         }
         return "Pendiente";
@@ -107,19 +104,19 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
         this.matricula = matricula;
     }
 
-    public Integer getPeriodoSeleccionado() {
+    public String getPeriodoSeleccionado() {
         return periodoSeleccionado;
     }
 
-    public void setPeriodoSeleccionado(Integer periodoSeleccionado) {
+    public void setPeriodoSeleccionado(String periodoSeleccionado) {
         this.periodoSeleccionado = periodoSeleccionado;
     }
 
-    public Integer getEstatusSeleccionado() {
+    public Boolean getEstatusSeleccionado() {
         return estatusSeleccionado;
     }
 
-    public void setEstatusSeleccionado(Integer estatusSeleccionado) {
+    public void setEstatusSeleccionado(Boolean estatusSeleccionado) {
         this.estatusSeleccionado = estatusSeleccionado;
     }
 

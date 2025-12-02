@@ -2,6 +2,7 @@ package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
 public class ConsultaBajaDTO {
 
+    private Integer idBaja;
     private String matricula;
     private String plan;
     private String programa;
@@ -9,7 +10,15 @@ public class ConsultaBajaDTO {
     private String tipoBaja;
     private String estructura;
     private String periodo;
-    private Integer estatus;
+    private String estatus;
+
+    public Integer getIdBaja() {
+        return idBaja;
+    }
+
+    public void setIdBaja(Integer idBaja) {
+        this.idBaja = idBaja;
+    }
 
     public String getMatricula() {
         return matricula;
@@ -67,11 +76,11 @@ public class ConsultaBajaDTO {
         this.periodo = periodo;
     }
 
-    public Integer getEstatus() {
+    public String getEstatus() {
         return estatus;
     }
 
-    public void setEstatus(Integer estatus) {
+    public void setEstatus(String estatus) {
         this.estatus = estatus;
     }
 }
