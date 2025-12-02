@@ -56,6 +56,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private boolean mostrarEvento;
     private String mensajeErrorDialogo;
     private String mensajeExitoDialogo;
+    private String mensajeMatriculaNoRegistrada;
     private boolean esTipoDefinitiva;
     private boolean esTipoTemporalOParcial;
     private boolean esSinAsignaturas;
@@ -72,6 +73,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         mostrarPrograma = true;
         mostrarPeriodo = true;
         mostrarEvento = true;
+        mensajeMatriculaNoRegistrada = null;
         limpiarFormulario();
     }
 
@@ -96,7 +98,8 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             BajaMatriculaDetalleDTO datos = nuevaBajaService.obtenerDatosPorMatricula(matriculaUsuario.trim());
 
             if (datos == null) {
-                agregarMsgWarn("La matrícula no tiene datos válidos", null);
+                mensajeMatriculaNoRegistrada = "La matrícula no está registrada";
+                mostrarDialogo("dlgMatriculaNoRegistrada");
                 return;
             }
 
@@ -215,6 +218,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         motivo = null;
         quienAplica = null;
         numeroSolicitud = null;
+        mensajeMatriculaNoRegistrada = null;
 
         esTipoDefinitiva = false;
         esTipoTemporalOParcial = false;
@@ -581,6 +585,14 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     public void setMensajeExitoDialogo(String mensajeExitoDialogo) {
         this.mensajeExitoDialogo = mensajeExitoDialogo;
+    }
+
+    public String getMensajeMatriculaNoRegistrada() {
+        return mensajeMatriculaNoRegistrada;
+    }
+
+    public void setMensajeMatriculaNoRegistrada(String mensajeMatriculaNoRegistrada) {
+        this.mensajeMatriculaNoRegistrada = mensajeMatriculaNoRegistrada;
     }
 
     public boolean isMostrarSemestre() {

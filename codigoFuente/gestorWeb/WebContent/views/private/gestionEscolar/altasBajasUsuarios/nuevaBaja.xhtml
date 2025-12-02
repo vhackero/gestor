@@ -31,7 +31,9 @@
                                         <p:ajax event="blur"
                                                 process="@this"
                                                 listener="#{nuevaBajaUsuarioBean.onMatriculaChange}"
-                                                update="camposBaja msgsNuevaBaja" />
+                                                update="camposBaja msgsNuevaBaja"
+                                                onstart="PF('dialogLayout').show()"
+                                                oncomplete="PF('dialogLayout').hide()" />
                                     </p:inputText>
                                     <p:message for="matricula" display="text" />
                                 </div>
@@ -267,6 +269,26 @@
                         <div class="col-md-12 text-right">
                             <p:commandButton value="Cerrar" styleClass="btn btn-default"
                                              onclick="PF('dlgNuevaBajaError').hide()" />
+                        </div>
+                    </div>
+                </p:dialog>
+
+                <p:dialog appendTo="@(body)" draggable="false" position="center"
+                          resizable="false" closable="false" modal="true" width="600px"
+                          widgetVar="dlgMatriculaNoRegistrada" header="Informativo" dynamic="true">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h:outputText styleClass="bloque"
+                                              value="#{nuevaBajaUsuarioBean.mensajeMatriculaNoRegistrada}" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 text-right">
+                            <p:commandButton value="Cerrar" styleClass="btn btn-default"
+                                             onclick="PF('dlgMatriculaNoRegistrada').hide()" />
                         </div>
                     </div>
                 </p:dialog>
