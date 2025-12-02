@@ -60,6 +60,7 @@
                                     <p:selectOneMenu id="plan"
                                                      value="#{nuevaBajaUsuarioBean.idPlan}"
                                                      styleClass="col-xs-12"
+                                                     disabled="#{!nuevaBajaUsuarioBean.planHabilitado}"
                                                      required="true"
                                                      requiredMessage="Seleccione un plan">
                                         <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
@@ -81,6 +82,7 @@
                                     <p:selectOneMenu id="semestre"
                                                      value="#{nuevaBajaUsuarioBean.idSemestre}"
                                                      styleClass="col-xs-12"
+                                                     disabled="#{!nuevaBajaUsuarioBean.semestreHabilitado}"
                                                      required="#{nuevaBajaUsuarioBean.semestreRequerido()}"
                                                      requiredMessage="Seleccione un semestre">
                                         <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
@@ -98,6 +100,7 @@
                                     <p:selectOneMenu id="bloque"
                                                      value="#{nuevaBajaUsuarioBean.idBloque}"
                                                      styleClass="col-xs-12"
+                                                     disabled="#{!nuevaBajaUsuarioBean.bloqueHabilitado}"
                                                      required="#{nuevaBajaUsuarioBean.bloqueRequerido()}"
                                                      requiredMessage="Seleccione un bloque">
                                         <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
@@ -115,6 +118,7 @@
                                         <p:selectOneMenu id="programa"
                                                          value="#{nuevaBajaUsuarioBean.idPrograma}"
                                                          styleClass="col-xs-12"
+                                                         disabled="#{!nuevaBajaUsuarioBean.programaHabilitado}"
                                                          required="#{nuevaBajaUsuarioBean.mostrarPrograma}"
                                                          requiredMessage="Seleccione un programa">
                                             <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
@@ -132,6 +136,7 @@
                                         <p:selectOneMenu id="periodo"
                                                          value="#{nuevaBajaUsuarioBean.idPeriodo}"
                                                          styleClass="col-xs-12"
+                                                         disabled="#{!nuevaBajaUsuarioBean.periodoHabilitado}"
                                                          required="#{nuevaBajaUsuarioBean.mostrarPeriodo}"
                                                          requiredMessage="Seleccione un periodo">
                                             <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
@@ -152,7 +157,8 @@
                                     <p:outputLabel styleClass="bloque" for="evento" value="Evento:" />
                                     <p:selectOneMenu id="evento"
                                                      value="#{nuevaBajaUsuarioBean.idEvento}"
-                                                     styleClass="col-xs-12">
+                                                     styleClass="col-xs-12"
+                                                     disabled="#{!nuevaBajaUsuarioBean.eventoHabilitado}">
                                         <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
                                         <f:selectItems value="#{nuevaBajaUsuarioBean.eventos}" />
                                     </p:selectOneMenu>
