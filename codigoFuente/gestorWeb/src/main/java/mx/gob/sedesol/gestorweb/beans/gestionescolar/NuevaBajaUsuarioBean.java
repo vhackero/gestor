@@ -54,6 +54,13 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private boolean mostrarPrograma;
     private boolean mostrarPeriodo;
     private boolean mostrarEvento;
+    private boolean planHabilitado;
+    private boolean semestreHabilitado;
+    private boolean bloqueHabilitado;
+    private boolean programaHabilitado;
+    private boolean periodoHabilitado;
+    private boolean eventoHabilitado;
+    private boolean matriculaValida;
     private String mensajeErrorDialogo;
     private String mensajeExitoDialogo;
     private String mensajeMatriculaNoRegistrada;
@@ -89,8 +96,10 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     public void onMatriculaChange() {
         limpiarDatosDependientes();
+        deshabilitarListas();
 
         if (matriculaUsuario == null || matriculaUsuario.trim().isEmpty()) {
+            actualizarHabilitacionSecuencial();
             return;
         }
 
@@ -100,9 +109,11 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             if (datos == null) {
                 mensajeMatriculaNoRegistrada = "La matrícula no está registrada";
                 mostrarDialogo("dlgMatriculaNoRegistrada");
+                actualizarHabilitacionSecuencial();
                 return;
             }
 
+            matriculaValida = true;
             idPlan = datos.getIdPlan();
             semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
 
@@ -134,25 +145,31 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         } catch (Exception ex) {
             LOGGER.error("Error al consultar datos por matrícula", ex);
             agregarMsgError("La matrícula no tiene datos válidos", null);
+            deshabilitarListas();
         }
+        actualizarHabilitacionSecuencial();
     }
 
     public void onSemestreChange() {
         bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
         idBloque = null;
         actualizarProgramas();
+        actualizarHabilitacionSecuencial();
     }
 
     public void onBloqueChange() {
         actualizarProgramas();
+        actualizarHabilitacionSecuencial();
     }
 
     public void onPeriodoChange() {
         actualizarEventos();
+        actualizarHabilitacionSecuencial();
     }
 
     public void onProgramaChange() {
         actualizarEventos();
+        actualizarHabilitacionSecuencial();
     }
 
     public void registrarBaja() {
@@ -228,6 +245,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         mostrarPrograma = true;
         mostrarPeriodo = true;
         mostrarEvento = true;
+        deshabilitarListas();
     }
 
     private void limpiarDatosDependientes() {
@@ -280,6 +298,27 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             eventos = Collections.emptyList();
         }
         idEvento = null;
+        actualizarHabilitacionSecuencial();
+    }
+
+    private void deshabilitarListas() {
+        matriculaValida = false;
+        planHabilitado = false;
+        semestreHabilitado = false;
+        bloqueHabilitado = false;
+        programaHabilitado = false;
+        periodoHabilitado = false;
+        eventoHabilitado = false;
+    }
+
+    private void actualizarHabilitacionSecuencial() {
+        planHabilitado = matriculaValida;
+        semestreHabilitado = planHabilitado && mostrarSemestre && idPlan != null;
+        bloqueHabilitado = semestreHabilitado && mostrarBloque && idSemestre != null;
+        programaHabilitado = mostrarPrograma && (bloqueHabilitado || (semestreHabilitado && !mostrarBloque))
+                && (idSemestre != null || idBloque != null);
+        periodoHabilitado = mostrarPeriodo && programaHabilitado && idPrograma != null;
+        eventoHabilitado = mostrarEvento && periodoHabilitado && idPeriodo != null && !idPeriodo.trim().isEmpty();
     }
 
     private void actualizarVisibilidadCampos() {
@@ -290,6 +329,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             esTipoDefinitiva = false;
             esTipoTemporalOParcial = false;
             esSinAsignaturas = false;
+            actualizarHabilitacionSecuencial();
             return;
         }
 
@@ -321,6 +361,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
                 semestres = obtenerSemestres(idPlan);
             }
         }
+        actualizarHabilitacionSecuencial();
     }
 
     private void prepararValoresParaBajaDefinitiva() {
@@ -633,6 +674,54 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     public void setMostrarEvento(boolean mostrarEvento) {
         this.mostrarEvento = mostrarEvento;
+    }
+
+    public boolean isPlanHabilitado() {
+        return planHabilitado;
+    }
+
+    public void setPlanHabilitado(boolean planHabilitado) {
+        this.planHabilitado = planHabilitado;
+    }
+
+    public boolean isSemestreHabilitado() {
+        return semestreHabilitado;
+    }
+
+    public void setSemestreHabilitado(boolean semestreHabilitado) {
+        this.semestreHabilitado = semestreHabilitado;
+    }
+
+    public boolean isBloqueHabilitado() {
+        return bloqueHabilitado;
+    }
+
+    public void setBloqueHabilitado(boolean bloqueHabilitado) {
+        this.bloqueHabilitado = bloqueHabilitado;
+    }
+
+    public boolean isProgramaHabilitado() {
+        return programaHabilitado;
+    }
+
+    public void setProgramaHabilitado(boolean programaHabilitado) {
+        this.programaHabilitado = programaHabilitado;
+    }
+
+    public boolean isPeriodoHabilitado() {
+        return periodoHabilitado;
+    }
+
+    public void setPeriodoHabilitado(boolean periodoHabilitado) {
+        this.periodoHabilitado = periodoHabilitado;
+    }
+
+    public boolean isEventoHabilitado() {
+        return eventoHabilitado;
+    }
+
+    public void setEventoHabilitado(boolean eventoHabilitado) {
+        this.eventoHabilitado = eventoHabilitado;
     }
 
     public NuevaBajaService getNuevaBajaService() {
