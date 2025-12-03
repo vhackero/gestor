@@ -82,7 +82,7 @@
                                 <p:commandButton id="btnBuscarBajas"
                                                  process="@form"
                                                  ajax="true"
-                                                 update=":frmConsultaBaja :frmResultadosBaja:tablaBajas"
+                                                 update=":frmAltasBajas:frmConsultaBaja :frmResultadosBaja:tablaBajas"
                                                  styleClass="btn btn-primary pull-right"
                                                  actionListener="#{consultaBajaUsuariosBean.buscar}"
                                                  value="#{sistema.obtenerTexto('gw.ga.btn.buscar')}" />
