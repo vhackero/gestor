@@ -69,6 +69,8 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
             throw new IllegalArgumentException("No se encontró la matrícula proporcionada");
         }
 
+        nuevaBajaRepository.actualizarPersonaInactiva(idPersona);
+
         Long motivoId = nuevaBajaRepository.insertarMotivoBaja(solicitud.getIdTipoBaja(), solicitud.getMotivo());
         Long procesoId = nuevaBajaRepository.obtenerIdProcesoBaja();
 
