@@ -45,7 +45,7 @@
                                     <f:selectItems value="#{consultaBajaUsuariosBean.periodos}"
                                                    var="periodo"
                                                    itemLabel="#{periodo.nombre}"
-                                                   itemValue="#{periodo.id}" />
+                                                   itemValue="#{periodo.nombre}" />
                                 </p:selectOneMenu>
                                 <p:message for="periodo" display="text" />
                             </div>
@@ -82,14 +82,19 @@
                                 <p:commandButton id="btnBuscarBajas"
                                                  process="@form"
                                                  ajax="true"
-                                                 update="@form"
+                                                 update=":frmAltasBajas:frmConsultaBaja :frmAltasBajas:frmResultadosBaja:tablaBajas"
                                                  styleClass="btn btn-primary pull-right"
                                                  actionListener="#{consultaBajaUsuariosBean.buscar}"
                                                  value="#{sistema.obtenerTexto('gw.ga.btn.buscar')}" />
                             </div>
                         </div>
                     </div>
+                </p:panel>
+            </h:form>
 
+            <h:form id="frmResultadosBaja">
+                <p:panel header="Listado de bajas encontradas"
+                         styleClass="panel-primary">
                     <div class="row">
                         <div class="col-md-12">
                             <p:dataTable id="tablaBajas"
@@ -156,6 +161,22 @@
                                         <h:outputText value="Estatus" />
                                     </f:facet>
                                     <h:outputText value="#{consultaBajaUsuariosBean.obtenerNombreEstatus(baja.estatus)}" />
+                                </p:column>
+
+                                <p:column styleClass="text-center">
+                                    <f:facet name="header">
+                                        <h:outputText value="Acciones" />
+                                    </f:facet>
+
+                                    <p:commandButton type="button"
+                                                     icon="fa fa-pencil"
+                                                     styleClass="btn-icon btn btn-default"
+                                                     title="Editar" />
+
+                                    <p:commandButton type="button"
+                                                     icon="fa fa-trash"
+                                                     styleClass="btn-icon btn btn-default"
+                                                     title="Eliminar" />
                                 </p:column>
                             </p:dataTable>
                         </div>
