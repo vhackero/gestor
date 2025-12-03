@@ -56,11 +56,7 @@ public class SistemaBean implements Serializable {
 	}
 	
 	public String obtenerTexto(String clave) {
-		if (textos.containsKey(clave)) {
-			return textos.get(clave);
-		} else {
-			return clave;
-		}
+        return textos.getOrDefault(clave, clave);
 	}
 	
 	public String obtenerClave(String clave) {

@@ -15,7 +15,7 @@
 			<div class="navbar-header item1">
 				<button type="button" class="navbar-toggle" data-toggle="collapse"
 					data-target=".navbar-collapse">
-					<span class="sr-only">Toggle navigation</span> <span
+					<span class="sr-only">#{sistema.obtenerTexto('gw.header.toggleNavigation')}</span> <span
 						class="icon-bar"></span> <span class="icon-bar"></span> <span
 						class="icon-bar"></span>
 				</button>
@@ -32,13 +32,13 @@
 						action="#{menuGestorBean.navegaActividadesUsuario()}"
 						styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-rectangle-list tareas icono-btn-header" />
 					<p:tooltip for="btnActividadesUsuario" position="bottom"
-						value="Lista de tareas"></p:tooltip></li>
+						value="#{sistema.obtenerTexto('gw.header.tooltip.tareas')}"></p:tooltip></li>
 				<li class="boton-header"><p:commandButton
 						id="btnHeaderNotificaciones" ajax="true"
 						action="#{notificacionesBean.cargarNotificacionesSistema()}"
 						styleClass="btn-icon btn btn-default icono_sisi fa fa-bell tareas icono-btn-header" />
 					<p:tooltip for="btnHeaderNotificaciones" position="bottom"
-						value="Notificaciones"></p:tooltip></li>
+						value="#{sistema.obtenerTexto('gw.header.tooltip.notificaciones')}"></p:tooltip></li>
 
 				<li class="boton-header"><p:commandButton
 						id="btnHeaderMensajes" ajax="true"
@@ -47,7 +47,7 @@
 						styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-envelope tareas icono-btn-header">
 					</p:commandButton></li>
 				<p:tooltip for="btnHeaderMensajes" position="bottom"
-					value="Mensajes"></p:tooltip>
+					value="#{sistema.obtenerTexto('gw.header.tooltip.mensajes')}"></p:tooltip>
 				<ui:fragment
 					rendered="#{menuGestorBean.rolTienePermiso('LOG_ACA_INF')}">
 					<sec:authorize access="hasPermission(null, 'LOG_ACA_INF')">
@@ -57,7 +57,7 @@
 								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-calendar-days tareas icono-btn-header">
 							</p:commandButton></li>
 						<p:tooltip for="btnHeaderReservaciones" position="bottom"
-							value="Reservaciones"></p:tooltip>
+							value="#{sistema.obtenerTexto('gw.header.tooltip.reservaciones')}"></p:tooltip>
 					</sec:authorize>
 				</ui:fragment>
 
@@ -76,7 +76,7 @@
 
 						<div class="col-xs-7">
 							<div>
-								<strong>¡Bienvenido!</strong>,
+								<strong>#{sistema.obtenerTexto('gw.header.bienvenida')}</strong>,
 								#{loginBean.usuarioEnSession.usuario}
 							</div>
 							<h:form>
@@ -95,7 +95,7 @@
 								data-toggle="dropdown">
 
 								<a href="https://apurvacentrodeyoga.com/img/avatar-generico.png"></a>
-								<img src="https://apurvacentrodeyoga.com/img/avatar-generico.png" alt="Usuario" class="foto" />
+								<img src="https://apurvacentrodeyoga.com/img/avatar-generico.png" alt="#{sistema.obtenerTexto('gw.header.perfil.alt')}" class="foto" />
 
 							</button>
 							<ul class="dropdown-menu opcionesperfil">
