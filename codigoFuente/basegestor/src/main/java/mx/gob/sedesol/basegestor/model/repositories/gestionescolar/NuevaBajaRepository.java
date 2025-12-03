@@ -114,7 +114,7 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     @Override
     public List<NodoDTO> consultarEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma) {
-        String consulta = "SELECT te.id_evento, te.cve_evento_cap FROM tbl_eventos te WHERE te.cve_evento_cap LIKE CONCAT('%',:nombrePeriodo,'%') AND te.id_programa = :idPrograma";
+        String consulta = "SELECT te.id_evento, te.nombre_ec FROM tbl_eventos te WHERE te.cve_evento_cap LIKE CONCAT('%',:nombrePeriodo,'%') AND te.id_programa = :idPrograma";
         Query query = entityManager.createNativeQuery(consulta);
         query.setParameter("nombrePeriodo", nombrePeriodo);
         query.setParameter("idPrograma", idPrograma);
