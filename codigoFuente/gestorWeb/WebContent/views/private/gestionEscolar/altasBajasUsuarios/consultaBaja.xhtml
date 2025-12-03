@@ -89,7 +89,7 @@
                                                  styleClass="btn btn-primary pull-right"
                                                  actionListener="#{consultaBajaUsuariosBean.buscar}"
                                                  onstart="PF('dialogLayout').show()"
-                                                 oncomplete="PF('dialogLayout').hide(); if (args && args.sinResultados) {PF('dlgSinResultados').show();}"
+                                                  oncomplete="PF('dialogLayout').hide(); if (args &amp;&amp; args.sinResultados) {PF('dlgSinResultados').show();}"
                                                  value="#{sistema.obtenerTexto('gw.ga.btn.buscar')}" />
                             </div>
                         </div>
