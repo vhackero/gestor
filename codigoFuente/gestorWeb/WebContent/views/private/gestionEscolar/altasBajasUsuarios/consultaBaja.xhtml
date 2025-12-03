@@ -10,6 +10,9 @@
     <ui:fragment rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR_CON')}">
         <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_CON') ">
             <h:form id="frmConsultaBaja">
+                <p:ajaxStatus onstart="PF('dialogLayout').show()"
+                              onsuccess="PF('dialogLayout').hide()" />
+
                 <p:messages id="msgsConsultaBaja"
                              autoUpdate="true"
                              closable="true"
@@ -85,6 +88,8 @@
                                                  update=":frmAltasBajas:frmConsultaBaja :frmAltasBajas:frmResultadosBaja:tablaBajas"
                                                  styleClass="btn btn-primary pull-right"
                                                  actionListener="#{consultaBajaUsuariosBean.buscar}"
+                                                 onstart="PF('dialogLayout').show()"
+                                                 oncomplete="PF('dialogLayout').hide(); if (args && args.sinResultados) {PF('dlgSinResultados').show();}"
                                                  value="#{sistema.obtenerTexto('gw.ga.btn.buscar')}" />
                             </div>
                         </div>
@@ -183,6 +188,34 @@
                     </div>
                 </p:panel>
             </h:form>
+
+            <p:dialog appendTo="@(body)"
+                      draggable="false"
+                      position="center"
+                      resizable="false"
+                      closable="false"
+                      modal="true"
+                      width="600px"
+                      widgetVar="dlgSinResultados"
+                      header="Informativo"
+                      dynamic="true">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h:outputText styleClass="bloque"
+                                          value="No se encontraron registros para los criterios de búsqueda." />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <p:commandButton value="Cerrar"
+                                         styleClass="btn btn-default"
+                                         onclick="PF('dlgSinResultados').hide()" />
+                    </div>
+                </div>
+            </p:dialog>
         </sec:authorize>
     </ui:fragment>
 </ui:composition>
