@@ -22,7 +22,7 @@
                         <div class="form-group">
                             <div class="row">
                                 <div class="col-md-4 col-xs-12">
-                                    <p:outputLabel styleClass="bloque requerido" for="matricula" value="Matrícula/Usuario:" />
+                                    <p:outputLabel styleClass="bloque requerido" for="matricula" value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.matriculaUsuario')}:" />
                                     <p:inputText id="matricula"
                                                  value="#{nuevaBajaUsuarioBean.matriculaUsuario}"
                                                  styleClass="form-control"
@@ -39,7 +39,7 @@
                                 </div>
 
                                 <div class="col-md-4 col-xs-12">
-                                    <p:outputLabel styleClass="bloque requerido" for="tipoBaja" value="Tipo de baja:" />
+                                    <p:outputLabel styleClass="bloque requerido" for="tipoBaja" value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.tipoBaja')}:" />
                                     <p:selectOneMenu id="tipoBaja"
                                                      value="#{nuevaBajaUsuarioBean.idTipoBaja}"
                                                      styleClass="col-xs-12"
@@ -56,7 +56,7 @@
                                 </div>
 
                                 <div class="col-md-4 col-xs-12">
-                                    <p:outputLabel styleClass="bloque requerido" for="plan" value="Plan de estudios:" />
+                                    <p:outputLabel styleClass="bloque requerido" for="plan" value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.planEstudios')}:" />
                                     <p:selectOneMenu id="plan"
                                                      value="#{nuevaBajaUsuarioBean.idPlan}"
                                                      styleClass="col-xs-12"
@@ -78,7 +78,7 @@
                         <div class="form-group">
                             <div class="row">
                                 <h:panelGroup id="semestrePanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarSemestre}" styleClass="col-md-3 col-xs-12">
-                                    <p:outputLabel styleClass="bloque" for="semestre" value="Semestre:" />
+                                    <p:outputLabel styleClass="bloque" for="semestre" value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.semestre')}:" />
                                     <p:selectOneMenu id="semestre"
                                                      value="#{nuevaBajaUsuarioBean.idSemestre}"
                                                      styleClass="col-xs-12"
@@ -96,7 +96,7 @@
                                 </h:panelGroup>
 
                                 <h:panelGroup id="bloquePanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarBloque}" styleClass="col-md-3 col-xs-12">
-                                    <p:outputLabel styleClass="bloque" for="bloque" value="Bloque:" />
+                                    <p:outputLabel styleClass="bloque" for="bloque" value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.bloque')}:" />
                                     <p:selectOneMenu id="bloque"
                                                      value="#{nuevaBajaUsuarioBean.idBloque}"
                                                      styleClass="col-xs-12"
@@ -114,7 +114,7 @@
                                 </h:panelGroup>
 
                                 <h:panelGroup id="programaPanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarPrograma}" styleClass="col-md-3 col-xs-12">
-                                    <p:outputLabel styleClass="bloque" for="programa" value="Asignatura/Programa:" />
+                                    <p:outputLabel styleClass="bloque" for="programa" value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.asignaturaPrograma')}:" />
                                         <p:selectOneMenu id="programa"
                                                          value="#{nuevaBajaUsuarioBean.idPrograma}"
                                                          styleClass="col-xs-12"
@@ -132,7 +132,7 @@
                                 </h:panelGroup>
 
                                 <h:panelGroup id="periodoPanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarPeriodo}" styleClass="col-md-3 col-xs-12">
-                                    <p:outputLabel styleClass="bloque" for="periodo" value="Periodo:" />
+                                    <p:outputLabel styleClass="bloque" for="periodo" value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.periodo')}:" />
                                         <p:selectOneMenu id="periodo"
                                                          value="#{nuevaBajaUsuarioBean.idPeriodo}"
                                                          styleClass="col-xs-12"
@@ -154,7 +154,7 @@
                         <div class="form-group">
                             <div class="row">
                                 <h:panelGroup id="eventoPanel" layout="block" rendered="#{nuevaBajaUsuarioBean.mostrarEvento}" styleClass="col-md-3 col-xs-12">
-                                    <p:outputLabel styleClass="bloque" for="evento" value="Evento:" />
+                                    <p:outputLabel styleClass="bloque" for="evento" value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.evento')}:" />
                                     <p:selectOneMenu id="evento"
                                                      value="#{nuevaBajaUsuarioBean.idEvento}"
                                                      styleClass="col-xs-12"
@@ -165,7 +165,7 @@
                                 </h:panelGroup>
 
                                 <div class="col-md-3 col-xs-12">
-                                    <p:outputLabel styleClass="bloque" for="motivo" value="Motivo:" />
+                                    <p:outputLabel styleClass="bloque" for="motivo" value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.motivo')}:" />
                                     <p:inputTextarea id="motivo"
                                                     value="#{nuevaBajaUsuarioBean.motivo}"
                                                     styleClass="form-control"
@@ -173,14 +173,14 @@
                                 </div>
 
                                 <div class="col-md-3 col-xs-12">
-                                    <p:outputLabel styleClass="bloque" for="quien" value="Quién aplica la baja:" />
+                                    <p:outputLabel styleClass="bloque" for="quien" value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.quienAplicalaBaja')}:" />
                                     <p:inputText id="quien"
                                                  value="#{nuevaBajaUsuarioBean.quienAplica}"
                                                  styleClass="form-control" />
                                 </div>
 
                                 <div class="col-md-3 col-xs-12">
-                                    <p:outputLabel styleClass="bloque" for="numero" value="Número de solicitud:" />
+                                    <p:outputLabel styleClass="bloque" for="numero" value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.numeroSolicitud')}:" />
                                     <p:inputText id="numero"
                                                  value="#{nuevaBajaUsuarioBean.numeroSolicitud}"
                                                  styleClass="form-control" />
@@ -192,7 +192,7 @@
                     <div class="form-group">
                         <div class="row">
                             <div class="col-md-12 text-right">
-                                <p:commandButton value="Cancelar" process="@this"
+                                <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.boton.cancelar')}" process="@this"
                                                  update=":frmAltasBajas:panelBotones :frmAltasBajas:panelContenido"
                                                  action="#{altasBajasUsuariosBean.mostrarOpcionesBajas}"
                                                  ajax="true"
@@ -201,7 +201,7 @@
                                                  oncomplete="PF('dialogLayout').hide()"
                                                  styleClass="btn btn-default" />
 
-                                <p:commandButton value="Agregar"
+                                <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.boton.guardar')}"
                                                  action="#{nuevaBajaUsuarioBean.registrarBaja}"
                                                  process="@form"
                                                  update="camposBaja msgsNuevaBaja"

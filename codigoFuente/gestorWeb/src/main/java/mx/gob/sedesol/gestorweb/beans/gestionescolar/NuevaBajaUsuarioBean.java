@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.model.SelectItem;
 
@@ -19,6 +20,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaSolicitudDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
 import mx.gob.sedesol.basegestor.service.gestionescolar.NuevaBajaService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
+import mx.gob.sedesol.gestorweb.sistema.SistemaBean;
 
 @ManagedBean
 @ViewScoped
@@ -68,6 +70,9 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private boolean esTipoTemporalOParcial;
     private boolean esSinAsignaturas;
 
+    @ManagedProperty(value = "#{sistema}")
+    private SistemaBean sistema;
+
     @javax.faces.bean.ManagedProperty(value = "#{nuevaBajaService}")
     private NuevaBajaService nuevaBajaService;
 
@@ -107,7 +112,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             BajaMatriculaDetalleDTO datos = nuevaBajaService.obtenerDatosPorMatricula(matriculaUsuario.trim());
 
             if (datos == null) {
-                mensajeMatriculaNoRegistrada = "La matrícula no está registrada";
+                mensajeMatriculaNoRegistrada = sistema.obtenerTexto("gw.gestionescolar.altasbajas.nuevaBaja.mensaje.matriculaNoRegistrada");
                 mostrarDialogo("dlgMatriculaNoRegistrada");
                 actualizarHabilitacionSecuencial();
                 return;
@@ -144,7 +149,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             actualizarVisibilidadCampos();
         } catch (Exception ex) {
             LOGGER.error("Error al consultar datos por matrícula", ex);
-            agregarMsgError("La matrícula no tiene datos válidos", null);
+            agregarMsgError("gw.gestionescolar.altasbajas.nuevaBaja.mensaje.matriculaDatosNoValidos", null, sistema);
             deshabilitarListas();
         }
         actualizarHabilitacionSecuencial();
@@ -176,7 +181,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         try {
             BajaSolicitudDTO solicitud = construirSolicitud();
             nuevaBajaService.aplicarBaja(solicitud);
-            mensajeExitoDialogo = "Baja aplicada correctamente";
+            mensajeExitoDialogo = sistema.obtenerTexto("gw.gestionescolar.altasbajas.nuevaBaja.mensaje.bajaAplicadaCorrectamente");
             limpiarFormulario();
             mostrarDialogo("dlgNuevaBajaExito");
         } catch (IllegalArgumentException ex) {
@@ -600,6 +605,14 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     public void setMensajeMatriculaNoRegistrada(String mensajeMatriculaNoRegistrada) {
         this.mensajeMatriculaNoRegistrada = mensajeMatriculaNoRegistrada;
+    }
+
+    public SistemaBean getSistema() {
+        return sistema;
+    }
+
+    public void setSistema(SistemaBean sistema) {
+        this.sistema = sistema;
     }
 
     public boolean isMostrarSemestre() {
