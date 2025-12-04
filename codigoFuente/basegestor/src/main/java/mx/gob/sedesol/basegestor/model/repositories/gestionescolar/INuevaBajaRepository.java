@@ -30,6 +30,8 @@ public interface INuevaBajaRepository {
 
     Long obtenerIdPersonaPorMatricula(String matricula);
 
+    void actualizarPersonaInactiva(Long idPersona);
+
     BajaMatriculacionDTO consultarMatriculacionPorEvento(String matricula, Long idEvento);
 
     Integer obtenerIdUsuarioMoodle(String matricula);

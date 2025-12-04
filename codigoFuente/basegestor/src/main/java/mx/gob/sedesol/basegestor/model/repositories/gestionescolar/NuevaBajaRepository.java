@@ -158,6 +158,15 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     }
 
     @Override
+    @Transactional
+    public void actualizarPersonaInactiva(Long idPersona) {
+        String consulta = "UPDATE tbl_persona SET activo = 0 WHERE id_persona = :idPersona";
+        entityManager.createNativeQuery(consulta)
+                .setParameter("idPersona", idPersona)
+                .executeUpdate();
+    }
+
+    @Override
     public BajaMatriculacionDTO consultarMatriculacionPorEvento(String matricula, Long idEvento) {
         if (idEvento == null) {
             return null;
