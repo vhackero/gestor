@@ -8,36 +8,36 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>Tablero de control.</li>
+		<li>#{sistema.obtenerTexto('gw.home.breadcrumb')}</li>
 	</ui:define>
 	<ui:define name="content">
-		<h2>Tablero de control.</h2>
+		<h2>#{sistema.obtenerTexto('gw.home.titulo')}</h2>
 		<hr />
 		  <div class="cards">
 			<a class="card" href="https://aulavirtual.unadmexico.mx/mod/resource/view.php?id=20134" target="_blank">
-			  <img class="card-image" src="#{resource['images:calendario.jpg']}" alt="Calendario"/>
+			  <img class="card-image" src="#{resource['images:calendario.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.calendario')}"/>
 			</a>
 			<a class="card" href="https://aulavirtual.unadmexico.mx/mod/url/view.php?id=20248" target="_blank">
-			  <img class="card-image" src="#{resource['images:correo.jpg']}" alt="correo"/>
+			  <img class="card-image" src="#{resource['images:correo.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.correo')}"/>
 			</a>
 			<a class="card" href="https://aulavirtual.unadmexico.mx/mod/url/view.php?id=20247" target="_blank">
-			  <img class="card-image" src="#{resource['images:repositorio.jpg']}" alt="repositorio"/>
+			  <img class="card-image" src="#{resource['images:repositorio.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.repositorio')}"/>
 			</a>
 			<a class="card" href="https://aulavirtual.unadmexico.mx/mod/url/view.php?id=20242" target="_blank">
-			  <img class="card-image" src="#{resource['images:ayuda.jpg']}" alt="ayuda"/>
+			  <img class="card-image" src="#{resource['images:ayuda.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.ayuda')}"/>
 			</a>
 			<!-- <a class="card" href="https://sige.unadmexico.mx:28181/cas2/login?service=https%3A%2F%2Fsige.unadmexico.mx%3A28182%2Fsige%2Flogin%2Fcas" target="_blank">
 			  <img class="card-image" src="#{resource['images:tramites.jpg']}" alt="tramites"/>
 			</a> -->
 			<a class="card" href="https://aulavirtual.unadmexico.mx/mod/url/view.php?id=20246" target="_blank">
-			  <img class="card-image" src="#{resource['images:normateca.jpg']}" alt="normateca"/>
+			  <img class="card-image" src="#{resource['images:normateca.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.normateca')}"/>
 			</a>
 		  </div>
 
 		<div class="row">
 			<div class="#{misLogrosBean.styleMisCursos}">
 				<h:form id="formMisCursos">
-					<p:panel header="Asignaturas " style="margin-top:0">
+					<p:panel header="#{sistema.obtenerTexto('gw.home.asignaturas')}" style="margin-top:0">
 						<p:dataTable id="dtResultadoBusquedaMisCursos"
 							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
 							reflow="true"
@@ -52,7 +52,7 @@
 								sortBy="#{participante.grupo.evento.nombreEc}">
 								<f:facet name="header">
 									<h:outputText
-										value="Nombre de la asignatura" />
+										value="#{sistema.obtenerTexto('gw.home.col.nombreAsignatura')}" />
 								</f:facet>
 								<h:outputText
 									rendered="#{participante.grupo.evento.catModalidadPlanPrograma.id eq 2}"
@@ -66,7 +66,7 @@
 							<p:column styleClass="text-center"
 								sortBy="#{participante.grupo.evento.catModalidadPlanPrograma.nombre}">
 								<f:facet name="header">
-									<h:outputText value="Modalidad" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.home.col.modalidad')}" />
 								</f:facet>
 
 								<h:outputText
@@ -75,7 +75,7 @@
 							<!-- Porcentaje de avance -->
 							<p:column styleClass="text-center">
 								<f:facet name="header">
-									<h:outputText value="Avance" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.home.col.avance')}" />
 								</f:facet>
 								<!-- Progress bar -->
 								<p:outputPanel id="avancePanel"
@@ -88,9 +88,9 @@
 										displayOnly="true" style="width:100%" styleClass="pull-right" />
 									<h:panelGroup layout="block" styleClass="text-center"
 										rendered="#{misCursosBean.esAvanceConError(participante.grupo.evento.idEvento)}">
-										<h:outputText value="No se pudo cargar el avance." />
+										<h:outputText value="#{sistema.obtenerTexto('gw.home.avance.error')}" />
 										<br />
-										<p:commandLink value="Reintentar" process="@this"
+										<p:commandLink value="#{sistema.obtenerTexto('gw.home.avance.reintentar')}" process="@this"
 											onclick="cargarAvance_#{participante.grupo.evento.idEvento}(); return false;" />
 									</h:panelGroup>
 									<h:panelGroup layout="block" styleClass="text-center"
@@ -113,7 +113,7 @@
 			</div>
 			<div class="col-md-6">
 				<ui:fragment rendered="#{misLogrosBean.showLogros}"> 
-					<p:panel header="Logros" style="margin-top:0">
+					<p:panel header="#{sistema.obtenerTexto('gw.home.logros')}" style="margin-top:0">
 						<div class="row">
 							<div class="col-md-6 contenedorTrofeos">
 								<div class="contenedorTrofeo">

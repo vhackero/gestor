@@ -9,11 +9,11 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>Análisis de datos</li>
-		<li class="active">Reporte de gestión escolar</li>
+		<li>#{sistema.obtenerTexto('gw.analisis.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.analisis.reporteGestion.titulo')}</li>
 	</ui:define>
 	<ui:define name="content">
-		<h1>Reporte de gestión escolar</h1>
+		<h1>#{sistema.obtenerTexto('gw.analisis.reporteGestion.titulo')}</h1>
 		<hr />
 		<p:ajaxStatus onstart="PF('dialogLayout').show()"
 			onsuccess="PF('dialogLayout').hide()" />
@@ -21,17 +21,17 @@
 			<f:validateBean disabled="true">
 				<div class="row">
 					<div class="col-md-12">
-						<p:panel header="Búsqueda de eventos de capacitación"
+						<p:panel header="#{sistema.obtenerTexto('gw.analisis.reporteGestion.busqueda.titulo')}"
 							id="pnlBusqueda">
 							<div class="form-group">
 								<div class="row">
 									<div class="col-md-6">
-										<p:outputLabel value="Entidad federativa:" styleClass="bloque" />
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.entidad')}" styleClass="bloque" />
 										<p:selectOneMenu id="selectEntidad" styleClass="col-xs-12"
 											value="#{reporteGestionEscolarBean.filtros.idEntidadFederativa}"
 											valueChangeListener="#{reporteGestionEscolarBean.onEstadoChange}">
 											<p:ajax update="selectMunicipio" />
-											<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+											<f:selectItem itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" itemValue="#{null}" />
 											<f:selectItems
 												value="#{reporteGestionEscolarBean.listaEntidades}"
 												var="entidad" itemLabel="#{entidad.nombre}"
@@ -41,11 +41,11 @@
 									</div>
 
 									<div class="col-md-6">
-										<p:outputLabel value="Ciudad o municipio:" styleClass="bloque" />
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.municipio')}" styleClass="bloque" />
 										<p:selectOneMenu id="selectMunicipio" styleClass="col-xs-12"
 											disabled="#{reporteGestionEscolarBean.filtros.idEntidadFederativa == NULL}"
 											value="#{reporteGestionEscolarBean.filtros.idMunicipio}">
-											<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+											<f:selectItem itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" itemValue="#{null}" />
 											<f:selectItems
 												value="#{reporteGestionEscolarBean.listaMunicipios}"
 												var="municipio" itemLabel="#{municipio.nombre}"
@@ -57,13 +57,13 @@
 							<div class="form-group">
 								<div class="row">
 									<div class="col-md-4">
-										<p:outputLabel value="Tipo de competencia:"
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.tipoCompetencia')}"
 											styleClass="bloque" />
 										<p:selectOneMenu styleClass="col-xs-12"
 											valueChangeListener="#{reporteGestionEscolarBean.onChangeTpoCompetencia}"
 											value="#{reporteGestionEscolarBean.filtros.fichaDescriptivaPrograma.tipoCompetencia}">
 											<p:ajax update="selectEjeCapacitacion" />
-											<f:selectItem itemValue="#{null}" itemLabel="Seleccionar" />
+											<f:selectItem itemValue="#{null}" itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
 											<f:selectItems
 												value="#{reporteGestionEscolarBean.listaTiposCompetencias}"
 												var="competencia" itemLabel="#{competencia.nombre}"
@@ -71,7 +71,7 @@
 										</p:selectOneMenu>
 									</div>
 									<div class="col-md-4">
-										<p:outputLabel value="Eje de capacitacion:"
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.ejeCapacitacion')}"
 											styleClass="bloque" />
 										<p:selectOneMenu id="selectEjeCapacitacion"
 											styleClass="col-xs-12"
@@ -87,7 +87,7 @@
 										</p:selectOneMenu>
 									</div>
 									<div class="col-md-4">
-										<p:outputLabel value="Modalidad:" styleClass="bloque" />
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.modalidad')}" styleClass="bloque" />
 										<p:selectOneMenu styleClass="col-xs-12"
 											converter="entityConverter"
 											value="#{reporteGestionEscolarBean.filtros.catModalidadPlanPrograma}">
@@ -105,30 +105,30 @@
 							<div class="form-group">
 								<div class="row">
 									<div class="col-md-6">
-										<p:outputLabel value="Nombre del evento de capacitación: "
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.evento')}"
 											styleClass="bloque" />
 										<p:inputText
 											value="#{reporteGestionEscolarBean.filtros.nombreEc}"
 											styleClass="form-control" />
 									</div>
 									<div class="col-md-3">
-										<p:outputLabel value="Clasificación de la información:"
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.clasificacionInfo')}"
 											styleClass="bloque" />
 										<p:selectOneMenu styleClass="col-xs-12"
 											value="#{reporteGestionEscolarBean.filtros.privado}">
-											<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
-											<f:selectItem itemLabel="Privado" itemValue="#{false}" />
-											<f:selectItem itemLabel="Público" itemValue="#{true}" />
+											<f:selectItem itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" itemValue="#{null}" />
+											<f:selectItem itemLabel="#{sistema.obtenerTexto('gw.analisis.reporteGestion.valorPrivado')}" itemValue="#{false}" />
+											<f:selectItem itemLabel="#{sistema.obtenerTexto('gw.analisis.reporteGestion.valorPublico')}" itemValue="#{true}" />
 
 										</p:selectOneMenu>
 									</div>
 									<div class="col-md-3">
-										<p:outputLabel value="Tipo de evento:" styleClass="bloque" />
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.tipoEvento')}" styleClass="bloque" />
 										<p:selectOneMenu styleClass="col-xs-12" disabled="false"
 											converter="entityConverter"
 											value="#{reporteGestionEscolarBean.filtros.fichaDescriptivaPrograma.catTipoEventoEc}">
 											<p:ajax event="change" process="@this" />
-											<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+											<f:selectItem itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" itemValue="#{null}" />
 											<f:selectItems
 												value="#{reporteGestionEscolarBean.catEventoCapacit}"
 												var="eventoCap" itemLabel="#{eventoCap.nombre}"
@@ -140,11 +140,11 @@
 							<div class="form-group">
 								<div class="row">
 									<div class="col-md-3">
-										<p:outputLabel value="Dirigido a:" styleClass="bloque" />
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.dirigidoA')}" styleClass="bloque" />
 										<p:selectOneMenu styleClass="col-xs-12"
 											value="#{reporteGestionEscolarBean.filtros.idDirigido}">
 											<p:ajax process="@this" event="valueChange" />
-											<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+											<f:selectItem itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" itemValue="#{null}" />
 											<f:selectItems
 												value="#{reporteGestionEscolarBean.tiposUsuarios}"
 												var="tipo" itemValue="#{tipo.getValor()}"
@@ -152,7 +152,7 @@
 										</p:selectOneMenu>
 									</div>
 									<div class="col-md-3">
-										<p:outputLabel value="Tipo de rango de fecha:"
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.tipoRangoFecha')}"
 											styleClass="bloque" />
 										<p:selectOneMenu styleClass="col-xs-12"
 											value="#{reporteGestionEscolarBean.tipoDatoFechas}">
@@ -173,7 +173,7 @@
 										</p:selectOneMenu>
 									</div>
 									<div class="col-md-3">
-										<p:outputLabel value="Fecha inicial:" styleClass="bloque" />
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.fechaInicial')}" styleClass="bloque" />
 										<p:calendar id="fechaInicial" navigator="true"
 											disabled="#{reporteGestionEscolarBean.tipoDatoFechas == null}"
 											value="#{reporteGestionEscolarBean.filtros.fechaInicial}"
@@ -187,7 +187,7 @@
 
 									</div>
 									<div class="col-md-3">
-										<p:outputLabel value="Fecha final:" styleClass="bloque" />
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.fechaFinal')}" styleClass="bloque" />
 										<p:calendar navigator="true"
 											disabled="#{reporteGestionEscolarBean.tipoDatoFechas == null}"
 											value="#{reporteGestionEscolarBean.filtros.fechaFinal}"
@@ -205,10 +205,10 @@
 							<div class="form-group">
 								<div class="row">
 									<div class="col-md-12 text-right">
-										<p:commandButton value="Limpiar campos"
+										<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.limpiar')}"
 											actionListener="#{reporteGestionEscolarBean.limpiarCampos}"
 											ajax="true" update="@form" styleClass="btn btn-default" />
-										<p:commandButton value="Buscar" styleClass="btn btn-primary"
+										<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.buscar')}" styleClass="btn btn-primary"
 											update="@form" ajax="true"
 											action="#{reporteGestionEscolarBean.buscarEventosCapacitacion}" />
 									</div>
@@ -224,7 +224,7 @@
 
 			<div class="row">
 				<div class="col-md-12">
-					<p:panel header="Resultado de la búsqueda">
+					<p:panel header="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.resultado')}">
 
 
 
@@ -243,11 +243,11 @@
 								<div class="row flexY">
 									<div class="col-md-8">
 										<p:outputLabel
-											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+											value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.instruccion')}" />
 									</div>
 									<div class="col-md-4">
 										<p:commandButton id="toggler" type="button"
-											value="Columna de datos" style="width:200px"
+											value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.columnaDatos')}" style="width:200px"
 											styleClass="pull-right btn btn-default"
 											icon="ui-icon-carat-1-s" />
 										<p:columnToggler id="columnaSelectora"
@@ -261,7 +261,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[0]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Clave" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.clave')}" />
 								</f:facet>
 
 								<h:outputText value="#{evento.cveEventoCap}" />
@@ -269,7 +269,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[1]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Nombre del evento" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.nombreEvento')}" />
 								</f:facet>
 
 								<h:outputText value="#{evento.nombreEc}" />
@@ -277,7 +277,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[2]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Tipo de competencia" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.tipoCompetencia')}" />
 								</f:facet>
 
 								<h:outputText
@@ -286,7 +286,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[3]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Eje de capacitación" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.ejeCapacitacion')}" />
 								</f:facet>
 
 								<h:outputText
@@ -295,7 +295,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[4]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Modalidad" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.modalidad')}" />
 								</f:facet>
 
 								<h:outputText value="#{evento.catModalidadPlanPrograma.nombre}" />
@@ -303,7 +303,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[5]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Estatus" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.estatus')}" />
 								</f:facet>
 
 								<h:outputText
@@ -312,7 +312,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[6]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Fecha inicial" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.fechaInicial')}" />
 								</f:facet>
 								<h:outputText value="#{evento.fechaInicial}">
 									<f:convertDateTime type="date"
@@ -322,7 +322,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[7]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Fecha final" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.fechaFinal')}" />
 								</f:facet>
 								<h:outputText value="#{evento.fechaFinal}">
 									<f:convertDateTime type="date"
@@ -332,7 +332,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[8]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Nivel de conocimiento" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.col.nivelConocimiento')}" />
 								</f:facet>
 								<h:outputText
 									value="#{evento.fichaDescriptivaPrograma.catNivelConocimiento.nombre}" />
@@ -341,7 +341,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[9]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Número de participantes" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.col.participantes')}" />
 								</f:facet>
 								<h:outputText
 									value="#{reporteGestionEscolarBean.obtenerCantidadAlumnosPorEvento(evento.idEvento)}" />
@@ -350,7 +350,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[10]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Ubicación geográfica" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.col.ubicacion')}" />
 								</f:facet>
 								<h:outputText
 									value="#{reporteGestionEscolarBean.obtenerNombreEntidadPorId(evento.idEntidadFederativa)}" />
@@ -359,7 +359,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[11]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Promedio de asistencias" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.col.promedioAsistencias')}" />
 								</f:facet>
 								<h:outputText
 									value="#{reporteGestionEscolarBean.obtenerPromedioAsistencia(evento.idEvento)}" />
@@ -368,7 +368,7 @@
 							<p:column visible="#{reporteGestionEscolarBean.visible[12]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Promedio de calificaciones" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.col.promedioCalificaciones')}" />
 								</f:facet>
 								<h:outputText
 									value="#{reporteGestionEscolarBean.obtenerPromedioCalificacion(evento.idEvento)}" />
@@ -381,9 +381,9 @@
 			<div class="form-group">
 				<div class="row">
 					<div class="col-md-12 floatFlexCentrarY margenInferior">
-						<p:outputLabel value="Reporte de excel:" style="margin-bottom:0"
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.reporteExcel')}" style="margin-bottom:0"
 							styleClass="margenDerecho agregaHeight" for="btnReporte" />
-						<p:commandButton id="btnReporte" value="Descargar"
+						<p:commandButton id="btnReporte" value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.descargar')}"
 							style="margin-left:0; margin-right:10px"
 							disabled="#{reporteGestionEscolarBean.eventosCapacitacion.isEmpty()}"
 							styleClass="btn btn-primary" ajax="false">
@@ -391,10 +391,10 @@
 								fileName="analisisDatosEventos" pageOnly="false" />
 						</p:commandButton>
 
-						<p:outputLabel value="Informe prediseñado:"
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.informePredisenado')}"
 							style="margin-bottom:0" styleClass="margenDerecho" />
 
-						<p:commandButton value="Generar"
+						<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.generar')}"
 							disabled="#{reporteGestionEscolarBean.eventosCapacitacion.isEmpty()}"
 							onclick="graficasEventos();"
 							styleClass="btn btn-primary margenDerecho quitaMargen" />
@@ -415,15 +415,15 @@
 				id="modalInformeEventos" draggable="false" closable="false"
 				position="center" width="900"
 				styleClass="modalAnalisisDatos modalAbsoluto"
-				header="#{reporteGestionEscolarBean.renderizarEstado ?'Eventos de capacitación por entidad federativa':'Informe prediseñado general de eventos de capacitación'}">
+				header="#{reporteGestionEscolarBean.renderizarEstado ? sistema.obtenerTexto('gw.analisis.reporteGestion.modal.tituloEstado') : sistema.obtenerTexto('gw.analisis.reporteGestion.modal.tituloGeneral')}">
 				<div class="row">
 					<div class="col-md-12 text-right">
 
-						<p:outputPanel layout="block"
-							rendered="#{((reporteGestionEscolarBean.filtros.fechaInicial != null) and (reporteGestionEscolarBean.filtros.fechaFinal != null))}">
+							<p:outputPanel layout="block"
+								rendered="#{((reporteGestionEscolarBean.filtros.fechaInicial != null) and (reporteGestionEscolarBean.filtros.fechaFinal != null))}">
 
 							<p:outputLabel
-								value="EVENTOS QUE #{reporteGestionEscolarBean.tipoDatoFecha(reporteGestionEscolarBean.tipoDatoFechas)}"
+								value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.modal.eventosQue')} #{reporteGestionEscolarBean.tipoDatoFecha(reporteGestionEscolarBean.tipoDatoFechas)}"
 								styleClass="labelSuperior labelRangoFechas bloque"  style="margin:0"/>
 							<p:outputLabel />
 
@@ -433,7 +433,7 @@
 								<f:convertDateTime type="date"
 									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
 							</p:outputLabel>
-							<h:outputText value="y" style="margin-left:5px; margin-right:5px"
+							<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.modal.y')}" style="margin-left:5px; margin-right:5px"
 								styleClass="labelSuperior labelFecha" />
 							<p:outputLabel
 								value="#{reporteGestionEscolarBean.filtros.fechaFinal}"
@@ -449,7 +449,7 @@
 					<div class="col-md-5">
 						<p:outputPanel layout="block"
 							rendered="#{reporteGestionEscolarBean.renderizarEstado}">
-							<p:outputLabel value="ENTIDAD FEDERATIVA"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.modal.entidad')}"
 								styleClass="bloque labelSuperior" />
 
 							<p:outputLabel
@@ -463,10 +463,10 @@
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-4 text-center fondoGris">
-							<p:outputLabel value="TOTAL" styleClass="bloque labelSuperior" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.modal.total')}" styleClass="bloque labelSuperior" />
 							<p:outputLabel value=""
 								styleClass="bloque numeroGrande gTotalEventos" />
-							<p:outputLabel value="Eventos" styleClass="bloque labelInferior" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.modal.eventos')}" styleClass="bloque labelInferior" />
 						</div>
 
 					</div>
@@ -475,7 +475,7 @@
 					<div class="row">
 						<div class="col-md-12 fondoGris">
 							<p:outputLabel
-								value="CANTIDAD DE EVENTOS POR TIPO DE COMPETENCIA"
+								value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.modal.eventosTipoCompetencia')}"
 								styleClass="bloque text-center tituloSuperior" />
 							<div id="competenciaEventos"></div>
 						</div>
@@ -485,7 +485,7 @@
 					<div class="row">
 						<div class="col-md-12 fondoGris">
 							<p:outputLabel
-								value="CANTIDAD DE EVENTOS POR EJE DE CAPACITACIÓN"
+								value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.modal.eventosEjeCapacitacion')}"
 								styleClass="bloque text-center tituloSuperior" />
 							<div id="ejeCapEventos"></div>
 						</div>
@@ -495,7 +495,7 @@
 
 					<div class="row">
 						<div class="col-md-12 fondoGris">
-							<p:outputLabel value="CANTIDAD DE EVENTOS POR PROGRAMA"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.modal.eventosPrograma')}"
 								styleClass="bloque text-center tituloSuperior" />
 							<div id="programaEventos"></div>
 
@@ -505,7 +505,7 @@
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-12">
-							<p:commandButton value="Ver lista de programas"
+							<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.modal.verProgramas')}"
 								style="width:200px; margin-bottom:5px; margin-left:0px"
 								styleClass="btn btn-primary listaDeProgramas"
 								onclick="mostrarListaProgramas()" />
@@ -518,13 +518,13 @@
 					<div class="row">
 						<!-- GRAFICA EVENTOS POR MODALIDAD -->
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="MODALIDAD:"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.modal.modalidad')}"
 								styleClass="bloque text-center tituloPastel" />
 							<div id="modalidadEventos" class="medidaGrafica"></div>
 						</div>
 						<!-- GRAFICA USUARIOS POR ESTATUS -->
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="CLASIFICACIÓN DE LA INFORMACIÓN"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.modal.clasificacion')}"
 								styleClass="bloque text-center tituloPastel" />
 							<div id="privadosEventos" class="medidaGrafica"></div>
 						</div>
@@ -533,12 +533,12 @@
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="TIPO DE EVENTO:"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.modal.tipoEvento')}"
 								styleClass="bloque text-center tituloPastel" />
 							<div id="tiposEventos" class="medidaGrafica"></div>
 						</div>
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="DIRIGIDO A USUARIOS EXTERNOS:"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.modal.dirigidoExternos')}"
 								styleClass="bloque text-center tituloPastel" />
 							<div id="dirigidoEventos" class="medidaGrafica"></div>
 						</div>
@@ -547,7 +547,7 @@
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-12 fondoGris">
-							<p:outputLabel value="CANTIDAD DE EVENTOS POR ENTIDAD FEDERATIVA"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteGestion.modal.eventosEntidad')}"
 								styleClass="bloque text-center tituloSuperior gTituloEntidad" />
 							<div id="entidadEventos"></div>
 						</div>
@@ -557,7 +557,7 @@
 				<f:facet name="footer">
 					<div class="row">
 						<div class="col-md-12 text-right">
-							<p:commandButton value="Cerrar"
+							<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.cerrar')}"
 								onclick="PF('modalAnalisis').hide();"
 								styleClass="btn btn-default" />
 						</div>

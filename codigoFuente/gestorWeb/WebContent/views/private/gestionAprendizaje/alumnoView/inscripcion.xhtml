@@ -111,17 +111,17 @@
 							value="#{inscripcionBean.aceptaTerminos}">
 							<p:ajax event="change" update="panelFinalizar" process="@this" />
 						</p:selectBooleanCheckbox>
-						<h:outputText value=" Acepto los " />
+						<h:outputText value=" #{sistema.obtenerTexto('gw.alumno.inscripcion.aceptar')} " />
 						<h:outputLink styleClass="terminos-condiciones"
 							value="#{inscripcionBean.contextoInscripcion.terminosCondiciones.enlaceTerminosCondiciones}"
-							target="_blank">términos y condiciones</h:outputLink>
+							target="_blank">#{sistema.obtenerTexto('gw.alumno.inscripcion.terminos')}</h:outputLink>
 					</div>
 				</h:panelGroup>
 
 				<p:outputPanel id="panelFinalizar" styleClass="text-center mt-2">
 					<p:commandButton id="finalizarBtn"
 						disabled="#{inscripcionBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionBean.aceptaTerminos}"
-						value="Finalizar inscripción" update="@form :pnlMensaje"
+						value="#{sistema.obtenerTexto('gw.alumno.inscripcion.finalizar')}" update="@form :pnlMensaje"
 						action="#{inscripcionBean.finalizarInscripcion}"
 						styleClass="btn btn-primary" />
 				</p:outputPanel>
@@ -131,7 +131,7 @@
 
 		<p:dialog appendTo="@(body)" draggable="false" position="center"
 			resizable="false" closable="false" modal="true" width="600px"
-			widgetVar="dlgValidarSeleccion" header="Informativo" dynamic="true">
+			widgetVar="dlgValidarSeleccion" header="#{sistema.obtenerTexto('gw.alumno.inscripcion.informativo')}" dynamic="true">
 			<p:outputPanel id="pnlMensaje">
 				<div class="form-group">
 					<div class="row">
