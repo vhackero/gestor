@@ -91,7 +91,7 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         }
 
         Integer idUsuarioMoodle = matriculado ? nuevaBajaRepository.obtenerIdUsuarioMoodle(solicitud.getMatriculaUsuario()) : 0;
-        int contabilizar = (esDefinitiva || esSinAsignaturas) ? 1 : 0;
+        int contabilizar = 1;
 
         BajaAplicacionDTO bajaAplicacionDTO = new BajaAplicacionDTO(
                 idPersona,
