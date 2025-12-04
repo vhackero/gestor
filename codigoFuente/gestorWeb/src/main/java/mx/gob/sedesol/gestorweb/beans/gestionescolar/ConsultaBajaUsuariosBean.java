@@ -9,6 +9,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.log4j.Logger;
+import org.primefaces.context.RequestContext;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaBajaDTO;
@@ -46,14 +47,19 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
 
     public void buscar() {
         if (!validarCampos()) {
+            RequestContext.getCurrentInstance().addCallbackParam("sinResultados", false);
             return;
         }
 
         resultados = consultaBajaService.buscarBajas(matricula.trim(), periodoSeleccionado, estatusSeleccionado);
 
-        if (ObjectUtils.isNullOrEmpty(resultados)) {
+        boolean sinResultados = ObjectUtils.isNullOrEmpty(resultados);
+
+        if (sinResultados) {
             agregarMsgInfo("No se encontraron registros", null);
         }
+
+        RequestContext.getCurrentInstance().addCallbackParam("sinResultados", sinResultados);
     }
 
     public void limpiar() {
