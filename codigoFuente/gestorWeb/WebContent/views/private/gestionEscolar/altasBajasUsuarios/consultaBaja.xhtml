@@ -181,9 +181,11 @@
                                                      styleClass="btn-icon btn btn-default"
                                                      title="Editar" />
 
-                                    <p:commandButton type="button"
-                                                     icon="fa fa-trash"
+                                    <p:commandButton icon="fa fa-trash"
                                                      styleClass="btn-icon btn btn-default"
+                                                     process="@this"
+                                                     update=":frmAltasBajas:msgsConsultaBaja :frmAltasBajas:frmResultadosBaja:tablaBajas"
+                                                     actionListener="#{consultaBajaUsuariosBean.eliminar(baja)}"
                                                      title="Eliminar" />
                                 </p:column>
                             </p:dataTable>

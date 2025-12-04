@@ -69,6 +69,22 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
         resultados = new ArrayList<>();
     }
 
+    public void eliminar(ConsultaBajaDTO baja) {
+        if (ObjectUtils.isNullOrEmpty(baja) || ObjectUtils.isNullOrEmpty(baja.getIdBaja())) {
+            agregarMsgError("No fue posible identificar la baja a eliminar.", null);
+            return;
+        }
+
+        boolean eliminado = consultaBajaService.eliminarBaja(baja.getIdBaja());
+
+        if (eliminado) {
+            resultados.removeIf(registro -> registro.getIdBaja().equals(baja.getIdBaja()));
+            agregarMsgInfo("La baja se eliminó correctamente.", null);
+        } else {
+            agregarMsgError("Ocurrió un error al eliminar la baja.", null);
+        }
+    }
+
     public String obtenerNombreEstatus(Integer estatus) {
         if (estatus != null && estatus == 1) {
             return "Aplicada";

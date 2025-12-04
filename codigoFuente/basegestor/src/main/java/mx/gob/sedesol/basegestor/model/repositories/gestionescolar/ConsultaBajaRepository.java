@@ -90,4 +90,14 @@ public class ConsultaBajaRepository implements IConsultaBajaRepository {
 
         return periodos;
     }
+
+    @Override
+    public boolean eliminarBaja(Integer idBaja) {
+        String consulta = "DELETE FROM rel_persona_bajas WHERE id_baja = :idBaja";
+
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idBaja", idBaja);
+
+        return query.executeUpdate() > 0;
+    }
 }

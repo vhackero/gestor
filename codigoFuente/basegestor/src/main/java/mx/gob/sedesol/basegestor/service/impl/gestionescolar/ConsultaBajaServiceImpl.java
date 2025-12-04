@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaBajaDTO;
@@ -37,6 +38,17 @@ public class ConsultaBajaServiceImpl implements ConsultaBajaService {
         } catch (Exception ex) {
             LOGGER.error("Error al consultar periodos de inscripción", ex);
             return new ArrayList<>();
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean eliminarBaja(Integer idBaja) {
+        try {
+            return consultaBajaRepository.eliminarBaja(idBaja);
+        } catch (Exception ex) {
+            LOGGER.error("Error al eliminar la baja con id " + idBaja, ex);
+            return false;
         }
     }
 }
