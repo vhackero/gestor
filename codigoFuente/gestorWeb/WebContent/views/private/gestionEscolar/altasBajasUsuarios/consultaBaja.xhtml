@@ -79,7 +79,8 @@
                                 <p:commandButton value="Limpiar campos"
                                                  actionListener="#{consultaBajaUsuariosBean.limpiar}"
                                                  process="@this"
-                                                 update="@form"
+                                                 update=":frmAltasBajas:frmConsultaBaja :frmAltasBajas:frmResultadosBaja"
+                                                 resetValues="true"
                                                  styleClass="btn btn-default" />
 
                                 <p:commandButton id="btnBuscarBajas"
