@@ -1,4 +1,5 @@
--- Nuevos textos para header, sidebar y login
+BEGIN;
+
 INSERT INTO des_sisi_gestor.tbl_textos_sistema (clave, valor, id_funcionalidad, usuario_modifico) VALUES
   ('gw.header.toggleNavigation', 'Toggle navigation', 114, 1),
   ('gw.header.tooltip.tareas', 'Lista de tareas', 114, 1),
@@ -480,3 +481,5 @@ INSERT INTO des_sisi_gestor.tbl_textos_sistema (clave, valor, id_funcionalidad, 
   ('gw.public.cursos.cancelar', 'Cancelar', 182, 1),
   ('gw.public.cursos.carousel.anterior', 'Anterior', 182, 1),
   ('gw.public.cursos.carousel.siguiente', 'Siguiente', 182, 1);
+
+COMMIT;
