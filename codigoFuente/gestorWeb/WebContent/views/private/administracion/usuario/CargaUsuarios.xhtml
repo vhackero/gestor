@@ -35,7 +35,8 @@
 						styleClass="pull-right agregaHeight" />
 					<p:commandButton styleClass="iconoAyuda pull-right" rendered="false"
 						icon="fa fa-question-circle" onclick="PF('modal').show();" />
-					<p:outputLabel value="Ver:" style="color: red" rendered="false"
+					<p:outputLabel value="#{sistema.obtenerTexto('gw.cargamasiva.label.ver')}:"
+						style="color: red" rendered="false"
 						styleClass="pull-right agregaHeight" />
 
 				</div>
@@ -50,7 +51,7 @@
 					<div class="col-md-12">
 						<p:outputLabel styleClass="margenDerecho"
 							value="#{sistema.obtenerTexto('gw.cargamasiva.etiqueta.archivo')}" />
-						<h:outputText value="(.csv, .xls, .xlsl)" />
+						<h:outputText value="#{sistema.obtenerTexto('gw.cargamasiva.archivo.formatos')}" />
 
 
 					</div>
@@ -238,25 +239,25 @@
 					<div class="col-md-12">
 						<table class="table-bordered tablaAyuda" >
 						<tr class="text-center negrita">
-							<td>Tipo de usuario: (INTERNO/EXTERNO)</td>
-							<td>Usuario: (Alfanumérico)</td>
-							<td>Contraseña:(Alfanumérico)</td>
-							<td>Programa social: (SI/NO)</td>
-							<td>CURP:</td>
-							<td>Nombre:(TEXTO)</td>
-							<td>Primer apellido:(TEXTO)</td>
-							<td>Segundo apellido:(TEXTO)</td>
-							<td>Fecha de nacimiento (DD/MM/AA)</td>
-							<td>Institución:(TEXTO)</td>
-							<td>Correo eletrónico:</td>
-							<td>Teléfono:</td>
-							<td>Celular:</td>
-							<td>Sede: (ESTADO)</td>
-							<td>Municipio o delegación</td>
-							<td>Orden de gobierno: (FEDERAL, ESTATAL, MUNICIPAL, OTRO)</td>
-							<td>Puesto:(TEXTO)</td>
-							<td>Id de convocatoria: (AGREGAR 0 SI NO SE VINCULARÁ USUARIO)</td>
-							<td>Id plan: (AGREGAR 0 SI NO SE VINCULARÁ USUARIO)</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.tipoUsuario')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.usuario')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.contrasena')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.programaSocial')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.curp')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.nombre')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.primerApellido')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.segundoApellido')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.fechaNacimiento')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.institucion')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.correo')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.telefono')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.celular')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.sede')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.municipio')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.ordenGobierno')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.puesto')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.idConvocatoria')}</td>
+							<td>#{sistema.obtenerTexto('gw.cargamasiva.modal.col.idPlan')}</td>
 							
 						</tr>
 						</table>

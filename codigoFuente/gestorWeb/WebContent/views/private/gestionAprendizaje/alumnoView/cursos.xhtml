@@ -10,11 +10,11 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li class="active">Cursos disponibles</li>
+		<li class="active">#{sistema.obtenerTexto('gw.alumno.cursos.titulo')}</li>
 	</ui:define>
 	<ui:define name="content">
 		<h:form>
-			<h1>Cursos disponibles</h1>
+			<h1>#{sistema.obtenerTexto('gw.alumno.cursos.titulo')}</h1>
 			<hr />
 			<h:panelGroup class="cursosPublicoGeneral" layout="block">
 				<div class="form-group">
@@ -25,7 +25,7 @@
 								actionListener="#{cursosPrivadosBean.filtrarCursos}" />
 							<div
 								class="input-group col-md-4 col-lg-3 buscarCursos pull-right">
-								<p:inputText class="form-control" placeholder="Buscar cursos"
+								<p:inputText class="form-control" placeholder="#{sistema.obtenerTexto('gw.alumno.cursos.buscar')}"
 									onkeyup="if(this.value.length>0 || this.value.length==0) filtrarCursos();"
 									value="#{cursosPrivadosBean.filtroCursos}" />
 								<span class="input-group-addon"><i
@@ -69,14 +69,14 @@
 									</div>
 									<div class="row margenInferior">
 										<div class="col-xs-5 text-left">
-											<p:outputLabel value="Nivel: "
+											<p:outputLabel value="#{sistema.obtenerTexto('gw.alumno.cursos.nivel')} "
 												styleClass="margenDerechoMenor" />
 											<h:outputText
 												value="#{evento.fichaDescriptivaPrograma.catNivelConocimiento.nombre}"
 												styleClass="nivel" />
 										</div>
 										<div class="col-xs-7 text-right">
-											<p:outputLabel value="Duración (días): "
+											<p:outputLabel value="#{sistema.obtenerTexto('gw.alumno.cursos.duracion')} "
 												styleClass="margenDerechoMenor bloque" />
 											<h:outputText value="#{evento.obtenerDuracion()}"
 												styleClass="margenDerechoMenor" />
@@ -85,7 +85,7 @@
 									<div class="row">
 										<div class="col-md-12">
 											<p:outputLabel
-												value="Valoracion del curso por los participantes:" />
+												value="#{sistema.obtenerTexto('gw.alumno.cursos.valoracion')}" />
 										</div>
 									</div>
 
@@ -102,7 +102,7 @@
 									<div class="row">
 										<div class="col-md-12 text-right">
 											<p:commandButton styleClass="btn btn-primary"
-												value="Solicitar"
+												value="#{sistema.obtenerTexto('gw.alumno.cursos.solicitar')}"
 												action="#{cursosPrivadosBean.validarSolicitud()}">
 												<f:setPropertyActionListener value="#{evento}"
 													target="#{cursosPrivadosBean.eventoTemp}" />
@@ -125,7 +125,7 @@
 					<div class="row">
 						<div class="col-md-12">
 							<h:outputText
-								value="¿Deseas agregar una solicitud al evento de capacitación?" />
+								value="Â¿Deseas agregar una solicitud al evento de capacitaciÃ³n?" />
 						</div>
 					</div>
 				</div>

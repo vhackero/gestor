@@ -12,10 +12,10 @@
 		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
 		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.personalizacion')}</li>
 		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.temas')}</li>
-		<li class="active">Ver listado de archivos del tema</li>
+		<li class="active">#{sistema.obtenerTexto('gw.temas.archivos.listado.titulo')}</li>
 	</ui:define>
 	<ui:define name="content">
-		<h1>Ver listado de archivos del tema</h1>
+		<h1>#{sistema.obtenerTexto('gw.temas.archivos.listado.titulo')}</h1>
 		<hr />
 		<h:form id="frmArchivosTema">
 			<p:panel

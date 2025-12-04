@@ -6,13 +6,13 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:p="http://primefaces.org/ui">
 	<ui:define name="breadcrumb">
-		<li>Gamificación badges</li>
-		<li class="active">Clasificación badges</li>
+		<li>#{sistema.obtenerTexto('gw.gamificacion.badges.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.gamificacion.badges.clasificacion')}</li>
 	</ui:define>
 
 	<ui:define name="content">
 		<h:form>
-			<h1>Clasificación Badges</h1>
+			<h1>#{sistema.obtenerTexto('gw.gamificacion.badges.clasificacion')}</h1>
 			<hr />
 
 			<div class="row">
@@ -21,12 +21,12 @@
 						value="#{sistema.obtenerTexto('gw.roles.boton.agregar')}"
 						styleClass="pull-right btn btn-primary">
 					</p:commandButton>
-					<p:outputLabel value="Nueva clasificación" rendered="true"
+					<p:outputLabel value="#{sistema.obtenerTexto('gw.gamificacion.badges.nuevaClasificacion')}" rendered="true"
 						styleClass="pull-right agregaHeight" />
 				</div>
 			</div>
 
-			<p:panel header="Clasificación badges">
+			<p:panel header="#{sistema.obtenerTexto('gw.gamificacion.badges.clasificacion')}">
 
 				<p:dataTable id="tblRoles" reflow="true" tableStyleClass="table"
 					styleClass="roles" paginator="true" paginatorPosition="bottom"
@@ -55,6 +55,7 @@
 					</p:column>
 
 					<p:column headerText="Descripción">
+						<!-- TODO: agregar texto gestionado cuando haya atributo -->
 						<h:outputText value="valor" />
 					</p:column>
 
@@ -71,12 +72,12 @@
 						<p:commandButton
 							styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-key"
 							id="eliminar" ajax="false" />
-						<p:tooltip for="eliminar" value="Eliminar" position="top" />
+							<p:tooltip for="eliminar" value="#{sistema.obtenerTexto('gw.gamificacion.badges.eliminar')}" position="top" />
 					</p:column>
 				</p:dataTable>
 			</p:panel>
 
-			<p:dialog id="mdlRoles" header="Editar" widgetVar="mRol" modal="true"
+			<p:dialog id="mdlRoles" header="#{sistema.obtenerTexto('gw.gamificacion.badges.dialogo.editar')}" widgetVar="mRol" modal="true"
 				resizable="false" draggable="false" closable="false"
 				styleClass="medidaModal" position="center" role="dialog">
 

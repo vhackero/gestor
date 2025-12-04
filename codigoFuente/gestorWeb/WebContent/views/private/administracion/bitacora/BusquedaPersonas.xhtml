@@ -11,10 +11,10 @@
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
 		<li>#{sistema.obtenerTexto('gw.textos.menu.administracion.consultarBitacora')}</li>
-		<li class="active">Seleccionar persona</li>
+		<li class="active">#{sistema.obtenerTexto('gw.bitacora.seleccionarPersona')}</li>
 	</ui:define>
 	<ui:define name="content">
-		<h1>Seleccionar persona</h1>
+		<h1>#{sistema.obtenerTexto('gw.bitacora.seleccionarPersona')}</h1>
 		<hr />
 		<h:form id="formularioBitacora">
 			<div class="row">

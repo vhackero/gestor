@@ -11,10 +11,10 @@
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>>
 		<li>#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}</li>
-		<li class="active">Ver expediente del estudiante</li>
+		<li class="active">#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.verEstudiante')}</li>
 	</ui:define>
 	<ui:define name="content">
-		<h1>Ver expediente del estudiante</h1>
+		<h1>#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.verEstudiante')}</h1>
 		<hr />
 		<p:ajaxStatus onstart="PF('dialogLayout').show()"
 			onsuccess="PF('dialogLayout').hide()" />
@@ -44,7 +44,7 @@
 									</h:outputText>
 								</div>
 								<div class="col-md-4 col-xs-12">
-									<h:outputLabel value="Usuario" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.busqAvanzada.etiqueta.usuario')}" styleClass="bloque" />
 									<h:outputText
 										value="#{expedienteAlumnoBean.personaDTO.usuario} ">
 
@@ -109,18 +109,18 @@
 							<h:outputText value="#{evento.nombreEc}" />
 						</p:column>
 						
-						<p:column headerText="Nombre del Grupo"
+						<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.col.nombreGrupo')}"
 							sortBy="#{evento.nombreGrupo}" filterMatchMode="contains"
 							filterBy="#{evento.nombreGrupo}" filterStyle="display:none">
 							<h:outputText value="#{evento.nombreGrupo}" />
 						</p:column>
 						
-						<p:column headerText="Modalidad" sortBy="#{evento.modalidad}"
+						<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.modalidad')}" sortBy="#{evento.modalidad}"
 							filterMatchMode="contains" filterBy="#{evento.modalidad}"
 							filterStyle="display:none">
 							<h:outputText value="#{evento.modalidad}" /> 
 						</p:column>
-						<p:column headerText="Fecha de finalización"
+						<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.fechaFinalizacion')}"
 							sortBy="#{evento.fecha}" filterMatchMode="contains"
 							filterBy="#{evento.fecha}" filterStyle="display:none">
 							<h:outputText value="#{evento.fecha}">
@@ -128,7 +128,7 @@
 									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
 							</h:outputText>
 						</p:column>
-						<p:column headerText="Encuesta final"
+						<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.encuestaFinal')}"
 							sortBy="#{evento.nombreEstatusEncuesta}"
 							filterMatchMode="contains"
 							filterBy="#{evento.nombreEstatusEncuesta}"
@@ -136,20 +136,20 @@
 							<h:outputText value="#{evento.nombreEstatusEncuesta}"
 								styleClass="#{evento.nombreEstatusEncuesta eq 'Pendiente' ? 'colorRojo' : ''}" />
 						</p:column>
-						<p:column headerText="Promedio de evaluaciones"
+						<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.promedioEvaluaciones')}"
 						    sortBy="#{evento.nombreEstatusEncuesta}"
 						    filterMatchMode="contains" filterBy="#{evento.calificacionTotal}"
 						    filterStyle="display:none">
 						    <h:outputText value="#{evento.modalidad eq 'En línea' ? 'No aplica' : evento.calificacionTotal}" />
 						</p:column>
-						<p:column headerText="Porcentaje de asistencias"
+						<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.porcentajeAsistencias')}"
 						    sortBy="#{evento.porcentajeAsistencia}"
 						    filterMatchMode="contains"
 						    filterBy="#{evento.porcentajeAsistencia}"
 						    filterStyle="display:none">
 						    <h:outputText value="#{evento.modalidad eq 'En línea' ? 'No aplica' : evento.porcentajeAsistencia}" />
 						</p:column>
-						<p:column headerText="Calificación final"
+						<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.calificacionFinal')}"
 							sortBy="#{evento.calificacionFinal}" filterMatchMode="contains"
 							filterBy="#{evento.calificacionFinal}" filterStyle="display:none">
 							<h:outputText value="#{evento.calificacionFinal}" />
