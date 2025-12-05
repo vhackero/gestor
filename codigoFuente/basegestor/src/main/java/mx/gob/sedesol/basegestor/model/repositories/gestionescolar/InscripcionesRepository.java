@@ -525,7 +525,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 				+ "INNER JOIN des_sisi_gestor.tbl_malla_curricular tmc ON tmc.id_plan = tp.id_plan AND tmc.activo = 1\r\n"
 				+ "INNER JOIN tbl_malla_curricular mcr ON mcr.id = tfd.id_eje_capacitacion \r\n"
 				+ "WHERE tc.convocatoria_id = :idConvocatoria AND tp.id_plan = :idPlan \r\n"
-				+ "order by tp.id_plan, (SELECT mcrs.nombre FROM tbl_malla_curricular mcrs WHERE mcrs.id = mcr.id_padre), mcr.nombre";
+				+ "order by tp.id_plan, semestre, mcr.nombre";
 
 		String consulta2 = "SELECT DISTINCT (rcpp.id_plan), tp.nombre plan\r\n"
 				+ "FROM des_sisi_gestor.tbl_convocatoria tc\r\n"
