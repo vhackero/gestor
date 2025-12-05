@@ -11,10 +11,15 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.apache.log4j.Logger;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionGrupoEventoDTO;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionPreEvento;
+import mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblAmbienteVirtualAprendizaje;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParam;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParamNuevo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionPlanesProgramas;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblGrupo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoMatriculacion;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersionesBusqueda;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
@@ -174,7 +179,13 @@ public class DispersionesRepository implements IDispersionesRepository {
 				+ "    fd.nombre_tentativo programa, fd.identificador_final clave,\r\n"
 				+ "    IF((SELECT tmc2.nombre FROM tbl_malla_curricular tmc2 WHERE tmc2.id = tmc.id_padre ) IS NOT NULL, (SELECT tmc2.nombre FROM tbl_malla_curricular tmc2 WHERE tmc2.id = tmc.id_padre ), '')semestre ,\r\n"
 				+ "    tmc.nombre bloque, tbd.no_total_estudiantes, tbd.no_grupos,\r\n"
-				+ "    tbd.estudiantes_x_grupo, tbd.grupo_resto, tbd.estudiantes_resto\r\n"
+				+ "    tbd.estudiantes_x_grupo, tbd.grupo_resto, tbd.estudiantes_resto,\r\n"
+				+ "    tbd.tipo_matriculacion,\r\n"
+				+ "    COALESCE((SELECT COUNT(DISTINCT rdg.id_grupo) FROM rel_dispersiones_grupo rdg WHERE rdg.id_dispersion = tbd.id_dispersion), 0) grupos_creados,\r\n"
+				+ "    COALESCE((SELECT COUNT(*)\r\n"
+				+ "               FROM rel_grupo_participante rgp\r\n"
+				+ "               INNER JOIN rel_dispersiones_grupo rdg ON rdg.id_grupo = rgp.id_grupo\r\n"
+				+ "              WHERE rdg.id_dispersion = tbd.id_dispersion), 0) usuarios_matriculados\r\n"
 				+ "\t    FROM tbl_dispersiones tbd\r\n"
 				+ "         INNER JOIN tbl_procesos_inscripcion tpi ON tpi.proceso_inscripcion_id =  tbd.id_proceso_inscripcion\r\n"
 				+ "         INNER JOIN rel_proceso_inscipcion_planesyprogramas rpi ON rpi.id_proceso_inscripcion = tpi.proceso_inscripcion_id AND rpi.id_programa = tbd.id_programa\r\n"
@@ -483,7 +494,9 @@ public class DispersionesRepository implements IDispersionesRepository {
 
 		TblDispersionesBusqueda regresa = new TblDispersionesBusqueda();
 		regresa.setIdDispersion(((Number) obj[0]).intValue());
+		regresa.setIdPlan(((Number) obj[1]).intValue());
 		regresa.setPlan(obj[2].toString());
+		regresa.setIdPrograma(((Number) obj[3]).intValue());
 		regresa.setPrograma(obj[4].toString());
 		regresa.setClave(obj[5].toString());
 		regresa.setSemestre(obj[6].toString());
@@ -493,9 +506,27 @@ public class DispersionesRepository implements IDispersionesRepository {
 		regresa.setCupoGeneral(((Number) obj[10]).intValue());
 		regresa.setGrupoResto(((Number) obj[11]).intValue());
 		regresa.setCupoResto(((Number) obj[12]).intValue());
+		regresa.setTipoMatriculacion(obj[13] != null ? ((Number) obj[13]).intValue() : null);
+		regresa.setGruposCreados(obj[14] != null ? ((Number) obj[14]).intValue() : 0);
+		regresa.setUsuariosMatriculados(obj[15] != null ? ((Number) obj[15]).intValue() : 0);
 		
 	
 		return regresa;
+	}
+	
+	private DispersionPreEvento mapeoDispersionPreEvento(Object[] obj) {
+		DispersionPreEvento dto = new DispersionPreEvento();
+		dto.setNombrePlan(obj[0] != null ? obj[0].toString() : null);
+		dto.setNombrePrograma(obj[1] != null ? obj[1].toString() : null);
+		dto.setClavePrograma(obj[2] != null ? obj[2].toString() : null);
+		dto.setClaveParaEvento(obj[3] != null ? obj[3].toString() : null);
+		dto.setClaveParaGrupo(obj[4] != null ? obj[4].toString() : null);
+		dto.setBloque(obj[5] != null ? obj[5].toString() : null);
+		dto.setObjetivosGenerales(obj[6] != null ? obj[6].toString() : null);
+		dto.setPerfilEgreso(obj[7] != null ? obj[7].toString() : null);
+		dto.setRequisitosIngreso(obj[8] != null ? obj[8].toString() : null);
+		dto.setCalificacionMinAprobatoria(obj[9] != null ? obj[9].toString() : null);
+		return dto;
 	}
 	
 	private TblPlan mapeoPlan(Object[] obj) {
@@ -540,7 +571,182 @@ public class DispersionesRepository implements IDispersionesRepository {
 		}
 
 		return lista;
-
+		
+	}
+	
+	@Override
+	public DispersionPreEvento obtenerDatosPreviosEvento(Integer idPrograma) {
+		if (idPrograma == null) {
+			return null;
+		}
+		String consulta = "SELECT tp.nombre plan, tfdp.nombre_tentativo programa, tfdp.cve_programa clavePrograma,\r\n"
+				+ "    CONCAT(tfdp.cve_programa,SUBSTRING(tmc.nombre,1,1),SUBSTRING_INDEX(tmc.nombre,' ',-1),SUBSTRING(tmc2.nombre,1,1),SUBSTRING_INDEX(tmc2.nombre,' ',-1)) claveParaEvento,\r\n"
+				+ "    CONCAT(SUBSTRING_INDEX(tp.identificador,'-',1),'-',tfdp.cve_programa,SUBSTRING(tmc.nombre,1,1),SUBSTRING_INDEX(tmc.nombre,' ',-1),SUBSTRING(tmc2.nombre,1,1),SUBSTRING_INDEX(tmc2.nombre,' ',-1)) claveParaGrupo,\r\n"
+				+ "    CONCAT(SUBSTRING(tmc.nombre,1,1),SUBSTRING_INDEX(tmc.nombre,' ',-1)) bloque,\r\n"
+				+ "    tfdp.objetivos_generales, tfdp.perfil_egreso, tfdp.requisitos_ingreso, tfdp.calificacion_min_aprobatoria\r\n"
+				+ "    FROM tbl_ficha_descriptiva_programa tfdp\r\n"
+				+ "    JOIN tbl_planes tp ON tfdp.id_plan = tp.id_plan\r\n"
+				+ "    JOIN tbl_malla_curricular tmc ON tmc.id = tfdp.id_eje_capacitacion\r\n"
+				+ "    JOIN tbl_malla_curricular tmc2 ON tmc2.id = tmc.id_padre\r\n"
+				+ " WHERE tfdp.id_programa = :idPrograma";
+		
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("idPrograma", idPrograma);
+		List<Object[]> resultados = query.getResultList();
+		if (resultados == null || resultados.isEmpty()) {
+			return null;
+		}
+		return mapeoDispersionPreEvento(resultados.get(0));
+	}
+	
+	@Override
+	public TblEvento guardarEventoDispersion(TblEvento evento) {
+		entityManager.persist(evento);
+		entityManager.flush();
+		entityManager.refresh(evento);
+		return evento;
+	}
+	
+	@Override
+	public void actualizarEvento(TblEvento evento) {
+		entityManager.merge(evento);
+		entityManager.flush();
+	}
+	
+	@Override
+	public TblAmbienteVirtualAprendizaje guardarAmbienteVirtual(TblAmbienteVirtualAprendizaje ambienteVirtual) {
+		entityManager.persist(ambienteVirtual);
+		entityManager.flush();
+		entityManager.refresh(ambienteVirtual);
+		return ambienteVirtual;
+	}
+	
+	@Override
+	public TblGrupo guardarGrupoDispersion(TblGrupo grupo) {
+		entityManager.persist(grupo);
+		entityManager.flush();
+		entityManager.refresh(grupo);
+		return grupo;
+	}
+	
+	@Override
+	public void actualizarGrupoDispersion(TblGrupo grupo) {
+		entityManager.merge(grupo);
+		entityManager.flush();
+	}
+	
+	@Override
+	public void guardarRelacionDispersionGrupo(Integer idDispersion, Integer idEvento, Integer idGrupo, Long idPersona) {
+		String insert = "INSERT INTO rel_dispersiones_grupo(id_dispersion, id_evento, id_grupo, id_persona) "
+				+ " VALUES(:idDispersion, :idEvento, :idGrupo, :idPersona)";
+		Query query = entityManager.createNativeQuery(insert);
+		query.setParameter("idDispersion", idDispersion);
+		query.setParameter("idEvento", idEvento);
+		query.setParameter("idGrupo", idGrupo);
+		query.setParameter("idPersona", idPersona);
+		query.executeUpdate();
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<DispersionGrupoEventoDTO> obtenerRelacionesDispersion(Integer idDispersion) {
+		List<DispersionGrupoEventoDTO> resultado = new ArrayList<>();
+		if (idDispersion == null) {
+			return resultado;
+		}
+		String sql = "SELECT rdg.id_evento, rdg.id_grupo, te.id_curso_lms_borrador, te.id_plataforma_lms_borrador,\r\n"
+				+ "       te.modalidad, tg.num_max_alumnos, tg.id_moodle, tg.nombre,\r\n"
+				+ "       COALESCE((SELECT COUNT(*) FROM rel_grupo_participante rgp WHERE rgp.id_grupo = tg.id), 0) inscritos\r\n"
+				+ "  FROM rel_dispersiones_grupo rdg\r\n"
+				+ "       INNER JOIN tbl_eventos te ON te.id_evento = rdg.id_evento\r\n"
+				+ "       INNER JOIN tbl_grupos tg ON tg.id = rdg.id_grupo\r\n"
+				+ " WHERE rdg.id_dispersion = :idDispersion\r\n"
+				+ " ORDER BY tg.id";
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("idDispersion", idDispersion);
+		List<Object[]> registros = query.getResultList();
+		for (Object[] row : registros) {
+			DispersionGrupoEventoDTO dto = mapearGrupoEvento(row);
+			if (dto != null) {
+				resultado.add(dto);
+			}
+		}
+		return resultado;
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<DispersionGrupoEventoDTO> obtenerGruposOrdinariosPorPrograma(Integer idPrograma,
+			Integer idProcesoInscripcion) {
+		List<DispersionGrupoEventoDTO> resultado = new ArrayList<>();
+		if (idPrograma == null || idProcesoInscripcion == null) {
+			return resultado;
+		}
+		String sql = "SELECT rdg.id_evento, rdg.id_grupo, te.id_curso_lms_borrador, te.id_plataforma_lms_borrador,\r\n"
+				+ "       te.modalidad, tg.num_max_alumnos, tg.id_moodle, tg.nombre,\r\n"
+				+ "       COALESCE((SELECT COUNT(*) FROM rel_grupo_participante rgp WHERE rgp.id_grupo = tg.id), 0) inscritos\r\n"
+				+ "  FROM rel_dispersiones_grupo rdg\r\n"
+				+ "       INNER JOIN tbl_eventos te ON te.id_evento = rdg.id_evento\r\n"
+				+ "       INNER JOIN tbl_grupos tg ON tg.id = rdg.id_grupo\r\n"
+				+ "       INNER JOIN tbl_dispersiones td ON td.id_dispersion = rdg.id_dispersion\r\n"
+				+ " WHERE te.id_programa = :idPrograma\r\n"
+				+ "   AND td.id_proceso_inscripcion = :idProcesoInscripcion\r\n"
+				+ " ORDER BY rdg.id_evento, rdg.id_grupo";
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("idPrograma", idPrograma);
+		query.setParameter("idProcesoInscripcion", idProcesoInscripcion);
+		List<Object[]> registros = query.getResultList();
+		for (Object[] row : registros) {
+			DispersionGrupoEventoDTO dto = mapearGrupoEvento(row);
+			if (dto != null) {
+				resultado.add(dto);
+			}
+		}
+		return resultado;
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Long> obtenerPersonasMatriculacion(Integer idDispersion, Integer idConvocatoria, Integer idTipoProceso,
+			Integer idProcesoInscripcion) {
+		List<Long> personas = new ArrayList<>();
+		if (idDispersion == null || idConvocatoria == null || idTipoProceso == null || idProcesoInscripcion == null) {
+			return personas;
+		}
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT DISTINCT ti.idpersona ")
+		   .append("FROM tbl_inscripciones ti ")
+		   .append("INNER JOIN rel_proceso_inscipcion_planesyprogramas rpi ON rpi.id_programa = ti.idprograma AND rpi.id_plan = ti.idplan ")
+		   .append("INNER JOIN tbl_procesos_inscripcion tpi ON tpi.proceso_inscripcion_id = rpi.id_proceso_inscripcion ")
+		   .append("INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = ti.idprograma AND fd.id_plan = ti.idplan ")
+		   .append("INNER JOIN tbl_planes tp ON tp.id_plan = ti.idplan ")
+		   .append("INNER JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion ")
+		   .append("INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpi.convocatoria_id ")
+		   .append("WHERE tpi.convocatoria_id = :idConvocatoria ")
+		   .append("  AND tpi.id_tipo_proceso = :idTipoProceso ")
+		   .append("  AND ti.fecha_registro >= tpi.fecha_inicio AND ti.fecha_registro <= tpi.fecha_fin ")
+		   .append("  AND tpi.proceso_inscripcion_id = :idProcesoInscripcion ")
+		   .append("  AND EXISTS (SELECT 1 FROM tbl_dispersiones td ")
+		   .append("               WHERE td.id_dispersion = :idDispersion ")
+		   .append("                 AND td.id_proceso_inscripcion = tpi.proceso_inscripcion_id ")
+		   .append("                 AND td.id_programa = ti.idprograma) ")
+		   .append("  AND NOT EXISTS (SELECT 1 FROM rel_grupo_participante rgp ")
+		   .append("                   INNER JOIN rel_dispersiones_grupo rdg2 ON rdg2.id_grupo = rgp.id_grupo ")
+		   .append("                   WHERE rdg2.id_dispersion = :idDispersion ")
+		   .append("                     AND rgp.id_persona_participante = ti.idpersona) ")
+		   .append("ORDER BY ti.idpersona");
+		Query query = entityManager.createNativeQuery(sql.toString());
+		query.setParameter("idConvocatoria", idConvocatoria);
+		query.setParameter("idTipoProceso", idTipoProceso);
+		query.setParameter("idProcesoInscripcion", idProcesoInscripcion);
+		query.setParameter("idDispersion", idDispersion);
+		List<Number> registros = query.getResultList();
+		for (Number numero : registros) {
+			if (numero != null) {
+				personas.add(numero.longValue());
+			}
+		}
+		return personas;
 	}
 	
 	
@@ -552,6 +758,23 @@ public class DispersionesRepository implements IDispersionesRepository {
 		regresa.setNombre(obj[1].toString());
 	
 		return regresa;
+	}
+	
+	private DispersionGrupoEventoDTO mapearGrupoEvento(Object[] row) {
+		if (row == null) {
+			return null;
+		}
+		DispersionGrupoEventoDTO dto = new DispersionGrupoEventoDTO();
+		dto.setIdEvento(row[0] != null ? ((Number) row[0]).intValue() : null);
+		dto.setIdGrupo(row[1] != null ? ((Number) row[1]).intValue() : null);
+		dto.setIdCursoLms(row[2] != null ? ((Number) row[2]).intValue() : null);
+		dto.setIdPlataformaLms(row[3] != null ? ((Number) row[3]).intValue() : null);
+		dto.setIdModalidad(row[4] != null ? ((Number) row[4]).intValue() : null);
+		dto.setCapacidadTotal(row[5] != null ? ((Number) row[5]).intValue() : null);
+		dto.setIdGrupoMoodle(row[6] != null ? ((Number) row[6]).intValue() : null);
+		dto.setNombreGrupo(row[7] != null ? row[7].toString() : null);
+		dto.setInscritosActuales(row[8] != null ? ((Number) row[8]).intValue() : 0);
+		return dto;
 	}
 	
 	
