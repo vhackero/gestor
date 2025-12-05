@@ -41,8 +41,9 @@ public class Usuario {
     private String country;
     private String profileimageurlsmall;
     private String profileimageurl;
-    private List<CustomField> customFields; 
-    private List<Grupo> groups; 
+    private Integer suspended;
+    private List<CustomField> customFields;
+    private List<Grupo> groups;
     private List<Rol> roles;
     private List<Preferencia> preferences;
     private List<Curso> enrolledcourses;
@@ -423,6 +424,14 @@ public class Usuario {
      */
     public void setProfileimageurl(String profileImageUrl) {
         this.profileimageurl = profileImageUrl;
+    }
+
+    public Integer getSuspended() {
+        return suspended;
+    }
+
+    public void setSuspended(Integer suspended) {
+        this.suspended = suspended;
     }
 
     /**
