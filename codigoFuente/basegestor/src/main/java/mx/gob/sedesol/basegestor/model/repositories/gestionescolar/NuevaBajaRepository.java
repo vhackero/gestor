@@ -206,12 +206,38 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     }
 
     @Override
-    public Integer obtenerIdUsuarioMoodle(String matricula) {
-        String consulta = "SELECT rppm.id_persona_moodle FROM rel_personas_plataformas_moodle rppm\n"
-                + "    JOIN tbl_persona tp ON tp.id_persona = rppm.id_persona\n"
-                + "WHERE  tp.sso_idUsuario = :matricula LIMIT 1";
+    public Integer obtenerIdUsuarioMoodle(Long idPersona, Long idEvento) {
+        String consulta = "SELECT rppm.id_persona_moodle \n"
+                + "FROM tbl_persona tp\n"
+                + "JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\n"
+                + "JOIN tbl_grupos tg ON tg.id = rgp.id_grupo\n"
+                + "JOIN tbl_eventos te ON te.id_evento = tg.id_evento\n"
+                + "JOIN rel_personas_plataformas_moodle rppm ON rppm.id_persona = tp.id_persona \n"
+                + "    AND rppm.id_plataforma_moodle = te.id_plataforma_lms_borrador\n"
+                + "WHERE tp.id_persona = :idPersona\n"
+                + "    AND te.id_evento = :idEvento";
+
         Query query = entityManager.createNativeQuery(consulta);
-        query.setParameter("matricula", matricula);
+        query.setParameter("idPersona", idPersona);
+        query.setParameter("idEvento", idEvento);
+        List<?> resultados = query.getResultList();
+        return resultados.isEmpty() ? null : obtenerEntero(resultados.get(0));
+    }
+
+    @Override
+    public Integer obtenerIdCursoMoodle(Long idEvento) {
+        String consulta = "SELECT te.id_curso_lms_borrador FROM tbl_eventos te WHERE te.id_evento = :idEvento LIMIT 1";
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idEvento", idEvento);
+        List<?> resultados = query.getResultList();
+        return resultados.isEmpty() ? null : obtenerEntero(resultados.get(0));
+    }
+
+    @Override
+    public Integer obtenerIdPlataformaMoodle(Long idEvento) {
+        String consulta = "SELECT te.id_plataforma_lms_borrador FROM tbl_eventos te WHERE te.id_evento = :idEvento LIMIT 1";
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idEvento", idEvento);
         List<?> resultados = query.getResultList();
         return resultados.isEmpty() ? null : obtenerEntero(resultados.get(0));
     }
