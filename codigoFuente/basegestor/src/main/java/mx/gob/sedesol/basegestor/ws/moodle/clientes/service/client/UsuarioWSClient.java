@@ -144,24 +144,7 @@ public class UsuarioWSClient implements Serializable {
         int x = 0;
         //for (EnrolMents usuario : enrolments) {
                 paramMap.put("users[" + x + "][id]", usuario.getId());
-                if(usuario.getUsername()!=null){
-                        paramMap.put("users[" + x + "][username]", usuario.getUsername().toLowerCase());
-                }
-                if(usuario.getPassword()!=null){
-                        paramMap.put("users[" + x + "][password]", usuario.getPassword());
-                }
-                if(usuario.getFirstname()!=null){
-                        paramMap.put("users[" + x + "][firstname]", usuario.getFirstname());
-                }
-                if(usuario.getLastname()!=null){
-                        paramMap.put("users[" + x + "][lastname]", usuario.getLastname());
-                }
-                if(usuario.getEmail()!=null){
-                        paramMap.put("users[" + x + "][email]", usuario.getEmail());
-                }
-                if(usuario.getIdnumber()!=null){
-                        paramMap.put("users[" + x + "][idnumber]", usuario.getIdnumber());
-                }
+
                 if(usuario.getSuspended()!=null){
                         paramMap.put("users[" + x + "][suspended]", usuario.getSuspended());
                 }
