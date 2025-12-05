@@ -7,7 +7,7 @@
 	xmlns:p="http://primefaces.org/ui">
 
 	<ui:define name="breadcrumb">
-		<li>Inscripción</li>
+		<li>#{sistema.obtenerTexto('gw.alumno.inscripcion.titulo')}</li>
 	</ui:define>
 
 	<ui:define name="content">
@@ -17,7 +17,7 @@
 				onsuccess="PF('dialogLayout').hide()" />
 
 			<h1>
-				<p:outputLabel styleClass="h1" value="Inscripción" />
+				<p:outputLabel styleClass="h1" value="#{sistema.obtenerTexto('gw.alumno.inscripcion.titulo')}" />
 			</h1>
 
 			<p:outputPanel styleClass="mt-2"
@@ -25,7 +25,7 @@
 				<div class="alert alert-#{inscripcionBean.tipoAviso}" role="alert">#{inscripcionBean.textoAviso}</div>
 			</p:outputPanel>
 
-			<p:panel id="pnlEditEjeComp" header="Inscripción"
+			<p:panel id="pnlEditEjeComp" header="#{sistema.obtenerTexto('gw.alumno.inscripcion.titulo')}"
 				rendered="#{inscripcionBean.contextoInscripcion != null}">
 				<div class="row flexCentrarXY" style="align-items: flex-end">
 					<div class="col-md-3 col-xs-12">
@@ -111,17 +111,17 @@
 							value="#{inscripcionBean.aceptaTerminos}">
 							<p:ajax event="change" update="panelFinalizar" process="@this" />
 						</p:selectBooleanCheckbox>
-						<h:outputText value=" Acepto los " />
+						<h:outputText value=" #{sistema.obtenerTexto('gw.alumno.inscripcion.aceptar')} " />
 						<h:outputLink styleClass="terminos-condiciones"
 							value="#{inscripcionBean.contextoInscripcion.terminosCondiciones.enlaceTerminosCondiciones}"
-							target="_blank">términos y condiciones</h:outputLink>
+							target="_blank">#{sistema.obtenerTexto('gw.alumno.inscripcion.terminos')}</h:outputLink>
 					</div>
 				</h:panelGroup>
 
 				<p:outputPanel id="panelFinalizar" styleClass="text-center mt-2">
 					<p:commandButton id="finalizarBtn"
 						disabled="#{inscripcionBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionBean.aceptaTerminos}"
-						value="Finalizar inscripción" update="@form :pnlMensaje"
+						value="#{sistema.obtenerTexto('gw.alumno.inscripcion.finalizar')}" update="@form :pnlMensaje"
 						action="#{inscripcionBean.finalizarInscripcion}"
 						styleClass="btn btn-primary" />
 				</p:outputPanel>
@@ -131,7 +131,7 @@
 
 		<p:dialog appendTo="@(body)" draggable="false" position="center"
 			resizable="false" closable="false" modal="true" width="600px"
-			widgetVar="dlgValidarSeleccion" header="Informativo" dynamic="true">
+			widgetVar="dlgValidarSeleccion" header="#{sistema.obtenerTexto('gw.alumno.inscripcion.informativo')}" dynamic="true">
 			<p:outputPanel id="pnlMensaje">
 				<div class="form-group">
 					<div class="row">

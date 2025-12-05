@@ -9,14 +9,14 @@
 
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
-		<li class="active">Convocatorias</li>
+		<li class="active">#{sistema.obtenerTexto('gw.alumno.convocatorias.titulo')}</li>
 
 	</ui:define>
 
 	<ui:define name="content">
 		<h:form>
 			<h1>
-				<p:outputLabel styleClass="h1" value="Convocatorias" />
+				<p:outputLabel styleClass="h1" value="#{sistema.obtenerTexto('gw.alumno.convocatorias.titulo')}" />
 			</h1>
 
 
@@ -36,7 +36,7 @@
 
 					<sec:authorize access="hasPermission(null,'CONVO_NUEVA')">
 
-						<p:commandButton value="Nueva convocatoria"
+						<p:commandButton value="#{sistema.obtenerTexto('gw.alumno.convocatorias.nueva')}"
 							action="#{convocatoriasBean.navegaNuevoConvocatoria}"
 							ajax="false" immediate="true" process="@this"
 							styleClass="btn btn-primary" />
@@ -46,7 +46,7 @@
 					<sec:authorize access="hasPermission(null,'CONVO_CONSUL')">
 
 						<p:commandButton style="width: 200px;"
-							value="Consultar convocatoria"
+							value="#{sistema.obtenerTexto('gw.alumno.convocatorias.consultar')}"
 							action="#{convocatoriasBean.navegaConsultaConvocatoria}"
 							ajax="false" immediate="true" process="@this"
 							styleClass="btn btn-primary" />
@@ -56,7 +56,7 @@
 					<sec:authorize access="hasPermission(null,'CONVO_CONSUL_TAB')">
 
 						<p:commandButton style="width: 250px;"
-							value="Consultar tablero de resumen"
+							value="#{sistema.obtenerTexto('gw.alumno.convocatorias.tablero')}"
 							action="#{convocatoriasBean.navegaConsultaTablero}" ajax="false"
 							immediate="true" process="@this" styleClass="btn btn-primary" />
 

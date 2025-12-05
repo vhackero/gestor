@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -171,11 +172,6 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 			personaEnt.setDomiciliosPersonas(null);
 			personaEnt.setRelPersonaElementos(null);
 		}
-		return mapper.map(personas, personasDto);
-	}
-
-	public List<PersonaDTO> obtenerTodasLasPersonas() {
-		List<TblPersona> personas = personaRepo.findAll();
 		return mapper.map(personas, personasDto);
 	}
 
@@ -1142,42 +1138,16 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 	}
 
 	private boolean correoExisteAlGuardar(String correo) {
-		List<String> listaDeCorreos = obtenerCorreosDePersonas(obtenerTodasLasPersonas());
-		for (String personaCorreo : listaDeCorreos) {
-			if (personaCorreo.equals(correo)) {
-				return true;
-			}
-		}
-		return false;
+		Optional<PersonaCorreoDTO> personaCorreoOptional = Optional.ofNullable(personaCorreoService.buscaPersonaCorreoElectronico(correo));
+		return personaCorreoOptional.isPresent();
 	}
 
 	private boolean correoExisteAlActualizar(String correoNuevo, String correoDePersonaEnBD,
 			ResultadoDTO<PersonaDTO> resultado) {
 		if (correoNuevo.equals(correoDePersonaEnBD)) {
 			return false;
-		} else {
-			List<String> listaDeCorreos = obtenerCorreosDePersonas(obtenerTodasLasPersonas());
-			for (String correoDeLaLista : listaDeCorreos) {
-				if (correoNuevo.equals(correoDeLaLista)) {
-					return true;
-				}
-			}
 		}
-		return false;
-
-	}
-
-	private List<String> obtenerCorreosDePersonas(List<PersonaDTO> listaPersonas) {
-		List<String> listaCorreos = new ArrayList<>();
-		for (PersonaDTO personaDTO : listaPersonas) {
-			if (ObjectUtils.isNotNull(personaDTO.getPersonaCorreos())) {
-				if (!personaDTO.getPersonaCorreos().isEmpty()) {
-					listaCorreos.add(personaDTO.getPersonaCorreos().get(0).getCorreoElectronico());
-				}
-			}
-
-		}
-		return listaCorreos;
+		return correoExisteAlGuardar(correoNuevo);
 	}
 
 	private void validacionComun(PersonaDTO personaDto, ResultadoDTO<PersonaDTO> resultado) {

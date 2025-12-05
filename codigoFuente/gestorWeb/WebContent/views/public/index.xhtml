@@ -56,11 +56,11 @@
 
 			<a class="left carousel-control" href="#casosExito" role="button"
 				data-slide="prev"><span class="glyphicon glyphicon-chevron-left"
-				aria-hidden="true"></span><span class="sr-only">Previous</span></a><a
+				aria-hidden="true"></span><span class="sr-only">#{sistema.obtenerTexto('gw.public.cursos.carousel.anterior')}</span></a><a
 				class="right carousel-control" href="#casosExito" role="button"
 				data-slide="next"><span
 				class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span><span
-				class="sr-only">Next</span></a>
+				class="sr-only">#{sistema.obtenerTexto('gw.public.cursos.carousel.siguiente')}</span></a>
 		</div>
 		<!-- /#anuncios -->
 	</ui:define>
@@ -77,7 +77,7 @@
 						<div class="row">
 							<div
 								class="input-group col-sm-6 col-md-4 col-lg-3 pull-right buscarCursos">
-								<p:inputText class="form-control" placeholder="Buscar cursos"
+								<p:inputText class="form-control" placeholder="#{sistema.obtenerTexto('gw.public.cursos.buscar')}"
 									onkeyup="if(this.value.length>0 || this.value.length==0) filtrarCursos();"
 									value="#{cursosBean.filtroCursos}" />
 								<span class="input-group-addon"><i
@@ -88,7 +88,7 @@
 				</div>
 				<div class="row">
 					<div class="col-md-12">
-						<h1>Cursos</h1>
+						<h1>#{sistema.obtenerTexto('gw.public.cursos.titulo')}</h1>
 						<hr />
 					</div>
 				</div>
@@ -117,9 +117,9 @@
 
 									<h:panelGroup class="imagen"
 										style="background-image:url('#{curso.imagen}')" layout="block">
-										<h:outputText value="Nuevo" class="nuevo"
+										<h:outputText value="#{sistema.obtenerTexto('gw.public.cursos.nuevo')}" class="nuevo"
 											rendered="#{curso.nuevo}" />
-										<h:outputText value="Proximamente" class="proximamente"
+										<h:outputText value="#{sistema.obtenerTexto('gw.public.cursos.proximamente')}" class="proximamente"
 											rendered="#{curso.proximamente}" />
 									</h:panelGroup>
 									<h4 class="nombre-curso">
@@ -131,10 +131,10 @@
 									</p>
 									<div class="row">
 										<div class="col-xs-6 text-left">
-											<h:outputText value="Nivel: #{curso.nivel}" class="nivel" />
+											<h:outputText value="#{sistema.obtenerTexto('gw.public.cursos.nivel')} #{curso.nivel}" class="nivel" />
 										</div>
 										<div class="col-xs-6 text-right">
-											<h:outputText value="Duración: #{curso.duracion}"
+											<h:outputText value="#{sistema.obtenerTexto('gw.public.cursos.duracion')} #{curso.duracion}"
 												styleClass="duracion" />
 										</div>
 									</div>
@@ -163,34 +163,34 @@
 
 
 			<p:dialog id="interesado" position="center" resizable="false"
-				styleClass="interesado" header="Contacto" responsive="true"
+				styleClass="interesado" header="#{sistema.obtenerTexto('gw.public.cursos.contacto')}" responsive="true"
 				dynamic="true" modal="true" appendTo="@(body)" width="900"
 				closable="true" widgetVar="dlgInteresado">
 				<p:panel id="panel">
 					<div class="form-group">
 						<div class="row">
 							<div class="col-md-6">
-								<p:outputLabel value="Eje de capacitación: " styleClass="bloque" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.public.cursos.eje')}" styleClass="bloque" />
 								<h:outputText value="#{cursosBean.ejeCapacitacion}" />
 							</div>
 							<div class="col-md-6">
-								<p:outputLabel value="Tipo de competencia: " styleClass="bloque" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.public.cursos.tipoCompetencia')}" styleClass="bloque" />
 								<h:outputText value="#{cursosBean.tipoCompetencia}" />
 							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-6">
-								<p:outputLabel value="Modalidad: " styleClass="bloque" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.public.cursos.modalidad')}" styleClass="bloque" />
 								<h:outputText value="#{cursosBean.modalidad}" />
 							</div>
 							<div class="col-md-6">
-								<p:outputLabel value="Nivel de enseñanza: " styleClass="bloque" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.public.cursos.nivelEnsenanza')}" styleClass="bloque" />
 								<h:outputText value="#{cursosBean.nivelEnsenanza}" />
 							</div>
 						</div>
 						<div class="row">
 							<div class="col-md-12">
-								<p:outputLabel value="Carga horaria registrada en el programa: "
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.public.cursos.cargaHoraria')}"
 									styleClass="bloque" />
 								<h:outputText value="#{cursosBean.cargaHoraria}" />
 							</div>
@@ -202,9 +202,9 @@
 							<h:panelGroup class="imagen"
 								style="background-image:url('#{cursosBean.cursoSelec.imagen}')"
 								layout="block">
-								<h:outputText value="Nuevo" class="nuevo"
+								<h:outputText value="#{sistema.obtenerTexto('gw.public.cursos.nuevo')}" class="nuevo"
 									rendered="#{cursosBean.cursoSelec.nuevo}" />
-								<h:outputText value="Proximamente" class="proximamente"
+								<h:outputText value="#{sistema.obtenerTexto('gw.public.cursos.proximamente')}" class="proximamente"
 									rendered="#{cursosBean.cursoSelec.proximamente}" />
 							</h:panelGroup>
 							<h4 class="nombre-curso">
@@ -217,7 +217,7 @@
 
 						</div>
 						<div class="col-md-6">
-							<h:outputLabel value="Nombre" styleClass="bloque requerido" />
+							<h:outputLabel value="#{sistema.obtenerTexto('gw.public.cursos.nombre')}" styleClass="bloque requerido" />
 
 							<p:inputText id="nomIntPub"
 								value="#{cursosBean.nombreInteresado}" styleClass="form-control"
@@ -225,7 +225,7 @@
 								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
 							<p:message for="nomIntPub" />
 
-							<h:outputLabel value="Correo electronico"
+							<h:outputLabel value="#{sistema.obtenerTexto('gw.public.cursos.correo')}"
 								styleClass="bloque requerido" />
 							<p:inputText id="emailIntPub"
 								value="#{cursosBean.correoInteresado}" styleClass="form-control"
@@ -233,7 +233,7 @@
 								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
 							<p:message for="emailIntPub" />
 
-							<h:outputLabel value="Mensaje" styleClass="bloque requerido" />
+							<h:outputLabel value="#{sistema.obtenerTexto('gw.public.cursos.mensaje')}" styleClass="bloque requerido" />
 							<p:inputTextarea id="areaIntPub" rows="2"
 								value="#{cursosBean.mensajeInteresado}" required="true"
 								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}" />
@@ -247,11 +247,11 @@
 				<div class="row">
 					<div class="col-md-12">
 						<p:commandButton styleClass="btn btn-primary pull-right"
-							value="Enviar" action="#{cursosBean.registroEnCurso}"
+							value="#{sistema.obtenerTexto('gw.public.cursos.enviar')}" action="#{cursosBean.registroEnCurso}"
 							update="@form" ajax="true" />
 						<p:commandButton id="btnFinProg" ajax="true"
 							action="#{cursosBean.cancelarContacto}"
-							styleClass="btn btn-default pull-right" value="Cancelar"
+							styleClass="btn btn-default pull-right" value="#{sistema.obtenerTexto('gw.public.cursos.cancelar')}"
 							update="@form" oncomplete="PF('dlgInteresado').hide()" />
 					</div>
 				</div>

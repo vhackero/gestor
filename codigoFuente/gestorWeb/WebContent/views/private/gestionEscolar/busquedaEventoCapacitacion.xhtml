@@ -12,24 +12,24 @@
 
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
-		<li class="active">Eventos academicos</li>
+		<li class="active">#{sistema.obtenerTexto('gw.gestionescolar.eventos.titulo')}</li>
 	</ui:define>
 
 	<ui:define name="content">
 
-		<h1>Eventos academicos</h1>
+		<h1>#{sistema.obtenerTexto('gw.gestionescolar.eventos.titulo')}</h1>
 		<hr />
 
 		<h:form id="frmBusqueda">
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 						  onsuccess="PF('dialogLayout').hide()" />
 
-			<p:panel id="fldDispersar" header="Generar dispersión"
+			<p:panel id="fldDispersar" header="#{sistema.obtenerTexto('gw.gestionescolar.eventos.dispersion.header')}"
 				showCollapseLink="false" collapsible="false" visible="false">
 				<f:validateBean disabled="true">
 					<div class="row">
 						<div class="col-md-4 col-xs-12">
-							<p:outputLabel styleClass="requerido" value="Plan:" />
+							<p:outputLabel styleClass="requerido" value="#{sistema.obtenerTexto('gw.gestionescolar.eventos.dispersion.plan')}" />
 							<p:selectCheckboxMenu id="planesMenu"
 								value="#{dispersionBean.selectedPlanes}" filter="true"
 								filterMatchMode="startsWith"
@@ -44,11 +44,11 @@
 							</p:selectCheckboxMenu>
 						</div>
 						<div class="col-md-12">
-							<p:commandButton value="Dispersar"
+							<p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.eventos.dispersion.boton.dispersar')}"
 								styleClass="btn btn-primary pull-right" update="fldDispersar"
 								action="#{dispersionBean.dispersar()}" ajax="false"
 								immediate="true" process="@this" />
-							<p:commandButton value="Crear grupos"
+							<p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.eventos.dispersion.boton.crearGrupos')}"
 								styleClass="btn btn-primary pull-right" update="fldDispersar"
 								action="#{dispersionBean.generarGrupos()}" ajax="false"
 								immediate="true" process="@this" />
@@ -66,21 +66,21 @@
 							update="frmBusquedaPrograma"
 							action="#{capturaEventoCapacitacion.nuevoEventoCapacitacion()}"
 							ajax="false" immediate="true" process="@this" />
-						<p:outputLabel value="Nuevo evento académico:"
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.gestionescolar.eventos.nuevo.label')}:"
 							styleClass="pull-right agregaHeight" />
 					</sec:authorize>
 				</div>
 			</div>
 
 			<p:panel id="fldBusqueda"
-					 header="Búsqueda de eventos académicos"
+					 header="#{sistema.obtenerTexto('gw.gestionescolar.eventos.busqueda.header')}"
 					 showCollapseLink="false" collapsible="false">
 				<f:validateBean disabled="true">
 					<!-- Row 1 -->
 					<div class="form-group">
 						<div class="row">
 							<div class="col-md-4 col-xs-12">
-								<p:outputLabel styleClass="requerido" value="Plan:"/>
+								<p:outputLabel styleClass="requerido" value="#{sistema.obtenerTexto('gw.gestionescolar.eventos.busqueda.plan')}"/>
 								<p:selectOneMenu id="nvoCatPlan" styleClass="col-xs-12"
 												 value="#{eventoCapacitacionBean.idPlan}"
 												 valueChangeListener="#{eventoCapacitacionBean.onChangeCatPlan}">
@@ -98,7 +98,7 @@
 								<p:outputPanel
 										rendered="#{not empty eventoCapacitacionBean.catEstructuras}">
 									<div class="col-md-4 col-xs-12">
-										<p:outputLabel styleClass="requerido" value="Estructura:"/>
+										<p:outputLabel styleClass="requerido" value="#{sistema.obtenerTexto('gw.gestionescolar.eventos.busqueda.estructura')}"/>
 										<p:selectOneMenu id="nvoCatEstruc" styleClass="col-xs-12"
 														 valueChangeListener="#{eventoCapacitacionBean.onChangeCatEstructura}">
 											<p:ajax update="@form"/>
@@ -119,7 +119,7 @@
 								<p:outputPanel
 										rendered="#{not empty eventoCapacitacionBean.catSubEstructurasNivel1}">
 									<div class="col-md-4 col-xs-12">
-										<p:outputLabel styleClass="requerido" value="Subestructura 1:"/>
+										<p:outputLabel styleClass="requerido" value="#{sistema.obtenerTexto('gw.gestionescolar.eventos.busqueda.subestructura1')}"/>
 										<p:selectOneMenu id="nvoCatSubEstruc1" styleClass="col-xs-12"
 														 valueChangeListener="#{eventoCapacitacionBean.onChangeCatSubestructura1}">
 											<p:ajax update="@form"/>
@@ -141,7 +141,7 @@
 								<p:outputPanel
 										rendered="#{not empty eventoCapacitacionBean.catSubEstructurasNivel2}">
 									<div class="col-md-4 col-xs-12" style="margin-top: 15px;">
-										<p:outputLabel styleClass="requerido" value="Subestructura 2:"/>
+										<p:outputLabel styleClass="requerido" value="#{sistema.obtenerTexto('gw.gestionescolar.eventos.busqueda.subestructura2')}"/>
 										<p:selectOneMenu id="nvoCatSubEstruc2" styleClass="col-xs-12"
 														 valueChangeListener="#{eventoCapacitacionBean.onChangeCatSubestructura2}">
 											<p:ajax update="@form"/>
@@ -163,7 +163,7 @@
 								<p:outputPanel
 										rendered="#{not empty eventoCapacitacionBean.catSubEstructurasNivel3}">
 									<div class="col-md-4 col-xs-12" style="margin-top: 15px;">
-										<p:outputLabel styleClass="requerido" value="Subestructura 3:"/>
+										<p:outputLabel styleClass="requerido" value="#{sistema.obtenerTexto('gw.gestionescolar.eventos.busqueda.subestructura3')}"/>
 										<p:selectOneMenu id="nvoCatSubEstruc3" styleClass="col-xs-12"
 														 valueChangeListener="#{eventoCapacitacionBean.onChangeCatSubestructura3}">
 											<p:ajax update="@form"/>

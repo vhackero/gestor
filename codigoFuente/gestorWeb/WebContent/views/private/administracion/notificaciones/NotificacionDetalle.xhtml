@@ -10,10 +10,10 @@
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.mensajes.texto.mensajes')}</li>
-		<li class="active">Detalle del mensaje</li>
+		<li class="active">#{sistema.obtenerTexto('gw.mensajes.texto.detalle')}</li>
 	</ui:define>
 	<ui:define name="content">
-		<h1>Detalle del mensaje</h1>
+		<h1>#{sistema.obtenerTexto('gw.mensajes.texto.detalle')}</h1>
 		<hr />
 		<h:form>
 			<div class="form-group">
@@ -48,7 +48,7 @@
 									</div>
 									<div class="row">
 										<div class="col-md-12">
-											<h:outputText value="El mensaje contiene un archivo adjunto:"
+											<h:outputText value="#{sistema.obtenerTexto('gw.mensajes.detalle.adjunto')}"
 												rendered="#{mensaje.archivo != null and (mensaje.archivo.nombre != null and not mensaje.archivo.nombre.isEmpty())}" />
 											<p:commandButton ajax="false" id="btnDescargarAdjunto"
 												styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-circle-down text-align: center;"
@@ -59,7 +59,7 @@
 												<p:fileDownload
 													value="#{notificacionesBean.archivoDescargar}" />
 											</p:commandButton>
-											<p:tooltip value="Descargar" position="top"
+											<p:tooltip value="#{sistema.obtenerTexto('gw.mensajes.detalle.adjunto.descargar')}" position="top"
 												for="btnDescargarAdjunto" />
 										</div>
 									</div>

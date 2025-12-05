@@ -11,11 +11,11 @@
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.mensajes.texto.mensajes')}</li>
 		<li>#{sistema.obtenerTexto('gw.mensajes.texto.nuevomensaje')}</li>
-		<li class="active">Seleccionar destinatarios</li>
+		<li class="active">#{sistema.obtenerTexto('gw.mensajes.texto.seleccionarDestinatarios')}</li>
 	</ui:define>
 	<ui:define name="content">
 		<h:form enctype="multipart/form-data">
-			<h1>Seleccionar destinatarios</h1>
+			<h1>#{sistema.obtenerTexto('gw.mensajes.texto.seleccionarDestinatarios')}</h1>
 			<hr />
 			<p:panel
 				header="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.titulo.panel.superior')}"
@@ -52,9 +52,9 @@
 							<div class="col-md-4">
 								<div class="form-group">
 									<h:outputLabel for="nombreUsuario"
-										value="Nombre de usuario:" />
+										value="#{sistema.obtenerTexto('gw.mensajes.texto.nombreUsuario')}" />
 									<p:inputText id="nombreUsuario"
-										placeholder="Nombre de usuario"
+										placeholder="#{sistema.obtenerTexto('gw.mensajes.texto.nombreUsuario')}"
 										value="#{notificacionesBean.filtroPersona.usuario}"
 										styleClass="form-control" />
 								</div>
@@ -111,7 +111,7 @@
 						<div class="form-group">
 							<div class="row">
 								<div class="col-md-12 flex-derecha">
-									<p:outputLabel value="Todos los seleccionados:" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.mensajes.texto.todosSeleccionados')}" />
 									<p:commandButton ajax="true"
 										value="#{sistema.obtenerTexto('gw.mensaje.editar.modal.personas.boton.agregar')}"
 										action="#{notificacionesBean.agregarDestinatarios()}"

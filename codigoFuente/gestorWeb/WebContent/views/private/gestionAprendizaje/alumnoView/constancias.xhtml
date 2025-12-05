@@ -7,36 +7,36 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:p="http://primefaces.org/ui">
 	<ui:define name="breadcrumb">
-		<li class="active">Historial académico</li>
+		<li class="active">#{sistema.obtenerTexto('gw.alumno.constancias.historial')}</li>
 	</ui:define>
 	<ui:define name="content">
 		<f:event type="preRenderView" listener="#{constanciasBean.init}" />
 		<h:form>
-			<h1>Historial académico</h1>
+			<h1>#{sistema.obtenerTexto('gw.alumno.constancias.historial')}</h1>
 			<hr />
 
-			<p:panel header="Historial académico del estudiante">
+			<p:panel header="#{sistema.obtenerTexto('gw.alumno.constancias.historialEstudiante')}">
 				<div class="row">
 					<div class="col-md-12">
 
 						<div class="form-group">
 							<div class="row">
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Matricula" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.matricula')}" styleClass="bloque" />
 									<h:outputText
 										value="#{constanciasBean.historialAcademico.matricula}">
 
 									</h:outputText>
 								</div>
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Programa Educativo" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.programaEducativo')}" styleClass="bloque" />
 									<h:outputText
 										value="#{constanciasBean.historialAcademico.programaEducativo} ">
 
 									</h:outputText>
 								</div>
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Promedio" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.promedio')}" styleClass="bloque" />
 									<h:outputText
 										value="#{constanciasBean.historialAcademico.promedio}">
 										<f:convertNumber pattern="#0.00" />
@@ -45,7 +45,7 @@
 
 
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Créditos" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.creditos')}" styleClass="bloque" />
 									<h:outputText
 										value="#{constanciasBean.historialAcademico.creditos} de #{constanciasBean.historialAcademico.totalCreditos}">
 
@@ -56,21 +56,21 @@
 						<div class="form-group">
 							<div class="row">
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Aprobadas" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.aprobadas')}" styleClass="bloque" />
 									<h:outputText
 										value="#{constanciasBean.historialAcademico.aprobadas}">
 
 									</h:outputText>
 								</div>
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Reprobadas" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.reprobadas')}" styleClass="bloque" />
 									<h:outputText
 										value="#{constanciasBean.historialAcademico.reprobadas} ">
 
 									</h:outputText>
 								</div>
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="No Presentadas" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.noPresentadas')}" styleClass="bloque" />
 									<h:outputText
 										value="#{constanciasBean.historialAcademico.nopresentadas} ">
 
@@ -79,7 +79,7 @@
 
 
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Total" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.total')}" styleClass="bloque" />
 									<h:outputText
 										value="#{constanciasBean.historialAcademico.total} ">
 
@@ -91,7 +91,7 @@
 						<div class="form-group">
 							<div class="row">
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Estatus" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.estatus')}" styleClass="bloque" />
 									<h:outputText
 										value="#{constanciasBean.historialAcademico.estatus} ">
 
@@ -99,14 +99,14 @@
 								</div>
 
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Nivel" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.nivel')}" styleClass="bloque" />
 									<h:outputText
 										value="#{constanciasBean.historialAcademico.nivel} ">
 
 									</h:outputText>
 								</div>
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Fecha de Consulta" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.fechaConsulta')}" styleClass="bloque" />
 									<h:outputText
 										value="#{constanciasBean.historialAcademico.fechaConsulta}">
 										<f:convertDateTime pattern="dd/MM/yyyy" />
@@ -177,55 +177,55 @@
 								filterBy="#{evento.tipoEvaluacion}" filterStyle="display:none">
 								<h:outputText value="#{evento.tipoEvaluacion}" />
 							</p:column>
-							<p:column headerText="No. acta" sortBy="#{evento.nActa}"
-								filterMatchMode="contains" filterBy="#{evento.nActa}"
-								filterStyle="display:none">
-								<h:outputText value="#{evento.nActa}" />
-							</p:column>
-							<p:column headerText="Modalidad" sortBy="#{evento.modalidad}"
-								filterMatchMode="contains" filterBy="#{evento.modalidad}"
-								filterStyle="display:none">
-								<h:outputText value="#{evento.modalidad}" />
-							</p:column>
-							<p:column headerText="Fecha de finalización"
-								sortBy="#{evento.fecha}" filterMatchMode="contains"
-								filterBy="#{evento.fecha}" filterStyle="display:none">
+								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.noActa')}" sortBy="#{evento.nActa}"
+									filterMatchMode="contains" filterBy="#{evento.nActa}"
+									filterStyle="display:none">
+									<h:outputText value="#{evento.nActa}" />
+								</p:column>
+								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.modalidad')}" sortBy="#{evento.modalidad}"
+									filterMatchMode="contains" filterBy="#{evento.modalidad}"
+									filterStyle="display:none">
+									<h:outputText value="#{evento.modalidad}" />
+								</p:column>
+								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.fechaFinalizacion')}"
+									sortBy="#{evento.fecha}" filterMatchMode="contains"
+									filterBy="#{evento.fecha}" filterStyle="display:none">
 								<h:outputText value="#{evento.fecha}">
 									<f:convertDateTime type="date"
 										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
 								</h:outputText>
 							</p:column>
-							<p:column headerText="Encuesta final"
-								sortBy="#{evento.nombreEstatusEncuesta}"
-								filterMatchMode="contains"
-								filterBy="#{evento.nombreEstatusEncuesta}"
-								filterStyle="display:none">
+								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.encuestaFinal')}"
+									sortBy="#{evento.nombreEstatusEncuesta}"
+									filterMatchMode="contains"
+									filterBy="#{evento.nombreEstatusEncuesta}"
+									filterStyle="display:none">
 								<h:outputText id="enc" value="#{evento.nombreEstatusEncuesta}"
 									styleClass="#{evento.nombreEstatusEncuesta eq 'Pendiente' ? 'colorRojo' : ''}" />
 								<p:tooltip for="enc"
 									rendered="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
-									value="Para poder visualizar su constancia debe contestar la encuesta." />
+										value="#{sistema.obtenerTexto('gw.alumno.constancias.encuestaPendiente')}" />
 							</p:column>
-							<p:column headerText="Promedio de evaluaciones"
-								sortBy="#{evento.nombreEstatusEncuesta}"
-								filterMatchMode="contains"
-								filterBy="#{evento.calificacionTotal}"
-								filterStyle="display:none">
-								<h:outputText
-									value="#{evento.modalidad eq 'En línea' ? 'No aplica' : evento.calificacionTotal}" />
-							</p:column>
-							<p:column headerText="Porcentaje de asistencias"
-								sortBy="#{evento.porcentajeAsistencia}"
-								filterMatchMode="contains"
-								filterBy="#{evento.porcentajeAsistencia}"
-								filterStyle="display:none">
-								<h:outputText
-									value="#{evento.modalidad eq 'En línea' ? 'No aplica' : evento.porcentajeAsistencia}" />
-							</p:column>
-							<p:column headerText="Calificación final"
-								sortBy="#{evento.calificacionFinal}" filterMatchMode="contains"
-								filterBy="#{evento.calificacionFinal}"
-								filterStyle="display:none">
+								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.promedioEvaluaciones')}"
+									sortBy="#{evento.nombreEstatusEncuesta}"
+									filterMatchMode="contains"
+									filterBy="#{evento.calificacionTotal}"
+									filterStyle="display:none">
+									<h:outputText
+										value="#{evento.modalidad eq 'En línea' ? sistema.obtenerTexto('gw.alumno.constancias.noAplica') : evento.calificacionTotal}" />
+								</p:column>
+								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.porcentajeAsistencias')}"
+									sortBy="#{evento.porcentajeAsistencia}"
+									filterMatchMode="contains"
+									filterBy="#{evento.porcentajeAsistencia}"
+									filterStyle="display:none">
+									<h:outputText
+										value="#{evento.modalidad eq 'En línea' ? sistema.obtenerTexto('gw.alumno.constancias.noAplica') : evento.porcentajeAsistencia}" />
+								</p:column>
+								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.calificacionFinal')}"
+									sortBy="#{evento.calificacionFinal}" filterMatchMode="contains"
+									filterBy="#{evento.calificacionFinal}"
+									filterStyle="display:none">
 								<!--<h:outputText value="#{evento.calificacionFinal}" /-->
 								<h:outputText
 									value="#{evento.calificacionFinal eq '666.0' ? 'NP' : evento.calificacionFinal}" />
@@ -239,7 +239,7 @@
 									<f:setPropertyActionListener value="#{evento}"
 										target="#{constanciasBean.eventoSeleccionado}" />
 								</p:commandButton>
-								<p:tooltip for="btn1" position="top" value="Ver" />
+									<p:tooltip for="btn1" position="top" value="#{sistema.obtenerTexto('gw.alumno.constancias.ver')}" />
 								<p:commandButton id="btn2"
 									action="#{constanciasBean.generarConstancia}" ajax="true"
 									disabled="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
@@ -248,7 +248,7 @@
 									<f:setPropertyActionListener value="#{evento}"
 										target="#{constanciasBean.eventoSeleccionado}" />
 								</p:commandButton>
-								<p:tooltip for="btn2" value="Ver" position="top" />
+									<p:tooltip for="btn2" value="#{sistema.obtenerTexto('gw.alumno.constancias.ver')}" position="top" />
 							</p:column>
 						</p:dataTable>
 					</div>
@@ -257,13 +257,13 @@
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-12 flex-derecha">
-							<p:outputLabel value="Historial académico:"
-								styleClass="margenDerecho" />
-							<p:commandButton value="Imprimir"
-								disabled="#{empty constanciasBean.eventos}"
-								styleClass="btn btn-primary" style="width:170px"
-								action="#{constanciasBean.generarReporte}"
-								oncomplete="PF('modalReporte').show()" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.historial')}:"
+									styleClass="margenDerecho" />
+								<p:commandButton value="#{sistema.obtenerTexto('gw.alumno.constancias.imprimir')}"
+									disabled="#{empty constanciasBean.eventos}"
+									styleClass="btn btn-primary" style="width:170px"
+									action="#{constanciasBean.generarReporte}"
+									oncomplete="PF('modalReporte').show()" />
 						</div>
 					</div>
 				</div>
@@ -272,10 +272,10 @@
 
 		</h:form>
 
-		<p:dialog id="constancia" dynamic="true" responsive="true"
-			modal="true" closable="false" resizable="false" position="center"
-			styleClass="modalAbsoluto" header="Constancia" width="900"
-			widgetVar="modalConstancia">
+			<p:dialog id="constancia" dynamic="true" responsive="true"
+				modal="true" closable="false" resizable="false" position="center"
+				styleClass="modalAbsoluto" header="#{sistema.obtenerTexto('gw.alumno.constancias.modal.constancia')}" width="900"
+				widgetVar="modalConstancia">
 
 			<div class="form-group">
 				<div class="row">
@@ -287,17 +287,17 @@
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<p:commandButton value="Cerrar"
-						styleClass="btn btn-default pull-right"
-						onclick="PF('modalConstancia').hide();" />
+						<p:commandButton value="#{sistema.obtenerTexto('gw.alumno.constancias.cerrar')}"
+							styleClass="btn btn-default pull-right"
+							onclick="PF('modalConstancia').hide();" />
 				</div>
 			</div>
 		</p:dialog>
 
-		<p:dialog id="reporte" dynamic="true" responsive="true" modal="true"
-			closable="false" resizable="false" position="center"
-			styleClass="modalAbsoluto" header="Expediente académico" width="900"
-			widgetVar="modalReporte">
+			<p:dialog id="reporte" dynamic="true" responsive="true" modal="true"
+				closable="false" resizable="false" position="center"
+				styleClass="modalAbsoluto" header="#{sistema.obtenerTexto('gw.alumno.constancias.reporte.titulo')}" width="900"
+				widgetVar="modalReporte">
 
 			<div class="form-group">
 				<div class="row">
@@ -309,9 +309,9 @@
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<p:commandButton value="Cerrar"
-						styleClass="btn btn-default pull-right"
-						onclick="PF('modalReporte').hide();" />
+						<p:commandButton value="#{sistema.obtenerTexto('gw.alumno.constancias.cerrar')}"
+							styleClass="btn btn-default pull-right"
+							onclick="PF('modalReporte').hide();" />
 				</div>
 			</div>
 		</p:dialog>

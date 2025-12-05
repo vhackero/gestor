@@ -9,8 +9,8 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>Análisis de datos</li>
-		<li class="active">Áreas y recursos</li>
+		<li>#{sistema.obtenerTexto('gw.analisis.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.titulo')}</li>
 	</ui:define>
 	<ui:define name="content">
 
@@ -18,11 +18,11 @@
 			<div class="row">
 				<div class="col-md-12">
 
-					<p:panel header="Búsqueda de reservaciones de áreas">
+					<p:panel header="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.busqueda.titulo')}">
 						<div class="form-group">
 							<div class="row">
 								<div class="col-md-4">
-									<p:outputLabel value="Sede:" for="selSede" styleClass="bloque" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.sede')}" for="selSede" styleClass="bloque" />
 									<p:selectOneMenu id="selSede" styleClass="col-xs-12"
 										value="#{reporteReservacionesBean.criteriosBusq.idSede}"
 										valueChangeListener="#{reporteReservacionesBean.onChangeSede}">
@@ -38,7 +38,7 @@
 								</div>
 
 								<div class="col-md-4">
-									<p:outputLabel value="Área:" for="selArea" styleClass="bloque" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.area')}" for="selArea" styleClass="bloque" />
 									<p:selectOneMenu id="selArea" styleClass="col-xs-12"
 										value="#{reporteReservacionesBean.criteriosBusq.idArea}">
 										<f:selectItem
@@ -52,7 +52,7 @@
 								</div>
 
 								<div class="col-md-4">
-									<p:outputLabel value="Tipo evento:" for="selTipoEvento"
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.tipoEvento')}" for="selTipoEvento"
 										styleClass="bloque" />
 									<p:selectOneMenu id="selTipoEvento" styleClass="col-xs-12"
 										value="#{reporteReservacionesBean.criteriosBusq.tipoEvento}">
@@ -69,7 +69,7 @@
 						<div class="form-group">
 							<div class="row">
 								<div class="col-md-4">
-									<p:outputLabel value="Estatus reservación:" for="selEstatus"
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.estatus')}" for="selEstatus"
 										styleClass="bloque" />
 									<p:selectOneMenu id="selEstatus" styleClass="col-xs-12"
 										value="#{reporteReservacionesBean.criteriosBusq.idEstatusReservacion}">
@@ -84,7 +84,7 @@
 								</div>
 
 								<div class="col-md-4">
-									<p:outputLabel value="Fecha de registro inicial:"
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.fechaInicial')}"
 										for="selInicial" styleClass="bloque" />
 									<p:calendar id="selInicial" styleClass="requerido"
 										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
@@ -95,7 +95,7 @@
 								</div>
 
 								<div class="col-md-4">
-									<p:outputLabel value="Fecha de registro final:" for="selFinal"
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.fechaFinal')}" for="selFinal"
 										styleClass="bloque" />
 									<p:calendar id="selFinal" styleClass="requerido"
 										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
@@ -111,7 +111,7 @@
 						<div class="row">
 							<div class="col-md-12">
 								<p:commandButton styleClass="btn btn-primary pull-right"
-									value="Buscar" ajax="false" update="tblReservaciones"
+									value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.buscar')}" ajax="false" update="tblReservaciones"
 									action="#{reporteReservacionesBean.buscaPorCriterios}" />
 							</div>
 						</div>
@@ -122,7 +122,7 @@
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<p:panel header="Resultado de la búsqueda">
+					<p:panel header="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.resultado')}">
 
 						<p:dataTable value="#{reporteReservacionesBean.tblReservaciones}"
 							tableStyleClass="table" id="tblReservaciones" var="reservacion"
@@ -138,11 +138,11 @@
 								<div class="row flexY">
 									<div class="col-md-8">
 										<p:outputLabel
-											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+											value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.instruccion')}" />
 									</div>
 									<div class="col-md-4">
 										<p:commandButton id="toggler" type="button"
-											value="Columna de datos"
+											value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.columnaDatos')}"
 											styleClass="pull-right btn btn-primary"
 											icon="ui-icon-carat-1-s" />
 										<p:columnToggler datasource="tblReservaciones"
@@ -155,7 +155,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[0]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Área" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.col.area')}" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.areaSede.catArea.nombre}" />
@@ -164,7 +164,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[1]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Tipo de evento" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.col.tipoEvento')}" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.tipoEvento}" />
@@ -173,7 +173,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[2]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Nombre del evento" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.col.nombreEvento')}" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.nombreEvento}" />
@@ -182,17 +182,17 @@
 							<p:column visible="#{reporteReservacionesBean.visible[3]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Evento privado" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.col.eventoPrivado')}" />
 								</f:facet>
 
 								<p:outputLabel
-									value="#{reservacion.solicitud.privado eq 0 or reservacion.solicitud.privado eq null? 'No' : 'Si'}" />
+									value="#{reservacion.solicitud.privado eq 0 or reservacion.solicitud.privado eq null? sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.no') : sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.si')}" />
 							</p:column>
 
 							<p:column visible="#{reporteReservacionesBean.visible[4]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Solicitante" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.col.solicitante')}" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.solicitud.solicitante}" />
@@ -202,7 +202,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[5]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Estatus reservación" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.col.estatus')}" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.estatusReservacion.nombre}" />
@@ -211,7 +211,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[6]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Fecha de solicitud" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.col.fechaSolicitud')}" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.fechaCreacion}" />
@@ -220,7 +220,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[7]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Distribución" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.col.distribucion')}" />
 								</f:facet>
 
 								<p:outputLabel
@@ -230,17 +230,17 @@
 							<p:column visible="#{reporteReservacionesBean.visible[8]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Servicio de cafetería" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.col.servicioCafeteria')}" />
 								</f:facet>
 
 								<p:outputLabel
-									value="#{reservacion.personalizacion.servicioCafeteria eq 0 or reservacion.personalizacion.servicioCafeteria eq null? 'No' : 'Si'}" />
+									value="#{reservacion.personalizacion.servicioCafeteria eq 0 or reservacion.personalizacion.servicioCafeteria eq null? sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.no') : sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.si')}" />
 							</p:column>
 
 							<p:column visible="#{reporteReservacionesBean.visible[9]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Hora de inicio" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.col.horaInicio')}" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.horaInicial()}" />
@@ -249,7 +249,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[10]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Hora de término" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.col.horaFin')}" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.horaFinal()}" />
@@ -258,7 +258,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[11]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Ubicación" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.col.ubicacion')}" />
 								</f:facet>
 
 								<p:outputLabel
@@ -268,7 +268,7 @@
 							<p:column visible="#{reporteReservacionesBean.visible[12]}"
 								exportable="true">
 								<f:facet name="header">
-									<p:outputLabel value="Sede" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.col.sede')}" />
 								</f:facet>
 
 								<p:outputLabel value="#{reservacion.areaSede.catSede.nombre}" />
@@ -282,20 +282,20 @@
 			<div class="form-group">
 				<div class="row">
 					<div class="col-md-12 floatFlexCentrarY margenInferior">
-						<p:outputLabel value="Reporte de excel:"
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.reporteExcel')}"
 							styleClass="margenDerecho" for="btnReporte" />
-						<p:commandLink id="btnReporte" value="Descargar"
+						<p:commandLink id="btnReporte" value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.descargar')}"
 							style="margin-left:0; margin-right:10px"
 							styleClass="btn btn-primary" ajax="false">
 							<p:dataExporter type="xls" target="tblReservaciones"
 								fileName="analisisDatosReservaciones" pageOnly="true" />
 						</p:commandLink>
-						<p:outputLabel value="Informe prediseñado"
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.informePredisenado')}"
 							styleClass="margenDerecho" />
 						
 						
 				
-						<p:commandButton value="Generar"
+						<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.generar')}"
 							styleClass="btn btn-primary margenDerecho quitaMargen"
 							disabled="#{reporteReservacionesBean.tblReservaciones.isEmpty()}"
 							onclick="graficasReservaciones();" />
@@ -313,13 +313,13 @@
 				id="modalInformeReservaciones" draggable="false" closable="false"
 				position="center" width="900"
 				styleClass="modalAnalisisDatos modalAbsoluto"
-				header="#{'Informe prediseñado general de reservaciones'}">
+				header="#{sistema.obtenerTexto('gw.analisis.reporteReservaciones.modal.titulo')}">
 				
 
 				<f:facet name="footer">
 					<div class="row">
 						<div class="col-md-12 text-right">
-							<p:commandButton value="Cerrar"
+							<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.cerrar')}"
 								onclick="PF('modalAnalisis').hide();"
 								styleClass="btn btn-default" />
 						</div>

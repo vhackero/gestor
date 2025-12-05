@@ -9,11 +9,11 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>Análisis de datos</li>
-		<li class="active">Reporte de usuarios</li>
+si		<li>#{sistema.obtenerTexto('gw.analisis.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.titulo')}</li>
 	</ui:define>
 	<ui:define name="content">
-		<h1>Reporte de usuarios</h1>
+		<h1>#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.titulo')}</h1>
 		<hr />
 		<p:ajaxStatus onstart="PF('dialogLayout').show()"
 			onsuccess="PF('dialogLayout').hide()" />
@@ -21,16 +21,16 @@
 			<f:validateBean disabled="true">
 				<div class="row">
 					<div class="col-md-12">
-						<p:panel header="Búsqueda de datos del usuario">
+						<p:panel header="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.busqueda.titulo')}">
 							<div class="form-group">
 								<div class="row">
 									<div class="col-md-3">
-										<p:outputLabel value="Clasificación de usuario:"
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.clasificacion')}"
 											for="selClasificacion" styleClass="bloque" />
 										<p:selectOneMenu id="selClasificacion" styleClass="col-xs-12"
 											value="#{reporteUsuariosBean.criterios.persona.tipoUsuario}">
 											<f:selectItem noSelectionOption="true"
-												itemLabel="Seleccionar" />
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
 											<f:selectItems value="#{reporteUsuariosBean.tiposUsuario()}"
 												var="tipoU" itemLabel="#{tipoU.descripcion}"
 												itemValue="#{tipoU.valor}" />
@@ -38,12 +38,12 @@
 									</div>
 
 									<div class="col-md-3">
-										<p:outputLabel value="Estatus:" for="selEstatus"
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.estatus')}" for="selEstatus"
 											styleClass="bloque" />
 										<p:selectOneMenu id="selEstatus" styleClass="col-xs-12"
 											value="#{reporteUsuariosBean.criterios.persona.activo}">
 											<f:selectItem noSelectionOption="true"
-												itemLabel="Seleccionar" />
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
 											<f:selectItems
 												value="#{reporteUsuariosBean.estatusPersona()}"
 												var="estatus" itemLabel="#{estatus.descripcion}"
@@ -52,14 +52,14 @@
 									</div>
 
 									<div class="col-md-6">
-										<p:outputLabel value="Estado:" for="selEstado"
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.estado')}" for="selEstado"
 											styleClass="bloque" />
 										<p:selectOneMenu id="selEstado" styleClass="col-xs-12"
 											value="#{reporteUsuariosBean.criterios.idEntidadFederativa}"
 											valueChangeListener="#{reporteUsuariosBean.onEstadoChange}">
 											<p:ajax update="selCiudad" />
 											<f:selectItem noSelectionOption="true"
-												itemLabel="Seleccionar" />
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
 											<f:selectItems
 												value="#{reporteUsuariosBean.entidadesFederativas}"
 												var="entidad" itemLabel="#{entidad.nombre}"
@@ -71,14 +71,14 @@
 							<div class="form-group">
 								<div class="row">
 									<div class="col-md-3">
-										<p:outputLabel value="Ciudad o municipio:" for="selCiudad"
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.ciudad')}" for="selCiudad"
 											styleClass="bloque" />
 
 										<p:selectOneMenu id="selCiudad" styleClass="col-xs-12"
 											disabled="#{reporteUsuariosBean.criterios.idEntidadFederativa == 0}"
 											value="#{reporteUsuariosBean.criterios.idMunicipio}">
 											<f:selectItem noSelectionOption="true"
-												itemLabel="Seleccionar" />
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
 											<f:selectItems value="#{reporteUsuariosBean.municipios}"
 												var="municipio" itemLabel="#{municipio.nombre}"
 												itemValue="#{municipio.idMunicipio}" />
@@ -87,24 +87,24 @@
 									</div>
 
 									<div class="col-md-3">
-										<p:outputLabel value="Género:" for="selGenero"
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.genero')}" for="selGenero"
 											styleClass="bloque" />
 										<p:selectOneMenu id="selGenero" styleClass="col-xs-12"
 											value="#{reporteUsuariosBean.criterios.persona.genero}">
 											<f:selectItem noSelectionOption="true"
-												itemLabel="Seleccionar" />
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
 											<f:selectItems value="#{reporteUsuariosBean.generos()}"
 												var="genero" itemLabel="#{genero.descripcion}"
 												itemValue="#{genero.valor}" />
 										</p:selectOneMenu>
 									</div>
 									<div class="col-md-6">
-										<p:outputLabel value="Rango de edad:" for="rangoEdad"
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.rangoEdad')}" for="rangoEdad"
 											styleClass="bloque" />
 										<p:selectOneMenu id="rangoEdad" styleClass="col-xs-12"
 											value="#{reporteUsuariosBean.seleccionRangoEdad}">
 											<f:selectItem noSelectionOption="true"
-												itemLabel="Seleccionar" />
+												itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
 											<f:selectItems value="#{reporteUsuariosBean.rangoEdades}" />
 										</p:selectOneMenu>
 									</div>
@@ -139,7 +139,7 @@
 
 										<div class="row">
 											<div class="col-md-6">
-												<p:outputLabel value="Inicial:" styleClass="bloque" />
+												<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.fechaInicial')}" styleClass="bloque" />
 												<p:calendar id="fc_fechaInicial" styleClass="requerido"
 													pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 													yearRange="c-100:c+100" locale="es" navigator="true"
@@ -153,7 +153,7 @@
 											</div>
 
 											<div class="col-md-6">
-												<p:outputLabel value="Final:" styleClass="bloque" />
+												<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.fechaFinal')}" styleClass="bloque" />
 												<p:calendar id="fc_fechaFinal" styleClass="requerido"
 													pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 													yearRange="c-100:c+100" locale="es" navigator="true"
@@ -171,10 +171,10 @@
 							<!-- 				Buscar usuarios -->
 							<div class="row">
 								<div class="col-md-12 text-right">
-									<p:commandButton value="Limpiar campos"
+									<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.limpiar')}"
 										actionListener="#{reporteUsuariosBean.limpiarCampos}"
 										ajax="true" update="@form" styleClass="btn btn-default" />
-									<p:commandButton styleClass="btn btn-primary" value="Buscar"
+									<p:commandButton styleClass="btn btn-primary" value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.buscar')}"
 										update="@form"
 										action="#{reporteUsuariosBean.buscaUsuariosCriterios}"
 										ajax="true" />
@@ -187,7 +187,7 @@
 			</f:validateBean>
 			<div class="row">
 				<div class="col-md-12">
-					<p:panel header="Resultado de la búsqueda">
+					<p:panel header="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.resultado')}">
 						<p:dataTable value="#{reporteUsuariosBean.tblDatosPersona}"
 							reflow="true"
 							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
@@ -202,11 +202,11 @@
 								<div class="row flexY">
 									<div class="col-md-8">
 										<p:outputLabel
-											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+											value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.instruccion')}" />
 									</div>
 									<div class="col-md-4">
 										<p:commandButton id="toggler" type="button"
-											value="Columna de datos" style="width:200px"
+											value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.columnaDatos')}" style="width:200px"
 											styleClass="pull-right btn btn-default"
 											icon="ui-icon-carat-1-s" />
 										<p:columnToggler id="columnaSelectora"
@@ -222,29 +222,29 @@
 							<p:column visible="#{reporteUsuariosBean.visible[0]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Estatus" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.estatus')}" />
 								</f:facet>
 
 								<h:outputText
-									value="#{datosPer.domicilioPersona.persona.activo? 'Activo':'Inactivo'}" />
+									value="#{datosPer.domicilioPersona.persona.activo ? sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.activo') : sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.inactivo')}" />
 							</p:column>
 
 							<p:column visible="#{reporteUsuariosBean.visible[1]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Clasificación" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.clasificacion')}" />
 								</f:facet>
 
-								<h:outputText value="Externo"
+								<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.externo')}"
 									rendered="#{datosPer.domicilioPersona.persona.tipoUsuario eq 2}" />
-								<h:outputText value="Interno"
+								<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.interno')}"
 									rendered="#{datosPer.domicilioPersona.persona.tipoUsuario eq 1}" />
 							</p:column>
 
 							<p:column visible="#{reporteUsuariosBean.visible[2]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Nombre" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.nombre')}" />
 								</f:facet>
 
 								<h:outputText
@@ -254,7 +254,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[3]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Apellido paterno" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.apellidoPaterno')}" />
 								</f:facet>
 
 								<h:outputText
@@ -264,7 +264,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[4]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Apellido materno" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.apellidoMaterno')}" />
 								</f:facet>
 
 								<h:outputText
@@ -274,7 +274,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[5]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Fecha registro" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.fechaRegistro')}" />
 								</f:facet>
 
 								<h:outputText value="#{datosPer.fechaRegistro()}" />
@@ -283,7 +283,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[6]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Entidad Federativa" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.entidad')}" />
 								</f:facet>
 
 								<h:outputText
@@ -293,7 +293,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[7]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Género" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.genero')}" />
 								</f:facet>
 
 								<h:outputText
@@ -306,7 +306,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[8]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Institución" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.institucion')}" />
 								</f:facet>
 
 								<h:outputText value="#{datosPer.datosLaborales.institucion}" />
@@ -315,7 +315,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[9]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Unidad de adscripción" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.unidadAdscripcion')}" />
 								</f:facet>
 
 								<h:outputText
@@ -325,7 +325,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[10]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Área de adscripción" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.areaAdscripcion')}" />
 								</f:facet>
 
 								<h:outputText value="#{datosPer.datosLaborales.areaAdscripcion}" />
@@ -334,17 +334,17 @@
 							<p:column visible="#{reporteUsuariosBean.visible[11]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Pertenece a un programa social" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.programaSocial')}" />
 								</f:facet>
 
 								<h:outputText
-									value="#{datosPer.datosLaborales.programaSocial? 'Si':'No'}" />
+									value="#{datosPer.datosLaborales.programaSocial ? sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.si') : sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.no')}" />
 							</p:column>
 
 							<p:column visible="#{reporteUsuariosBean.visible[12]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Puesto" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.puesto')}" />
 								</f:facet>
 
 								<h:outputText value="#{datosPer.datosLaborales.puesto}" />
@@ -353,7 +353,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[13]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Orden de gobierno" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.ordenGobierno')}" />
 								</f:facet>
 
 								<h:outputText value="#{reporteUsuariosBean.obtenerNombreOrdenPorId(datosPer.datosLaborales.idOrdenGobierno)}" />
@@ -362,7 +362,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[14]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Roles" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.roles')}" />
 								</f:facet>
 
 								<h:outputText value="#{datosPer.roles()}" />
@@ -371,7 +371,7 @@
 							<p:column visible="#{reporteUsuariosBean.visible[15]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Edad" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.edad')}" />
 								</f:facet>
 
 								<h:outputText
@@ -388,24 +388,24 @@
 			<div class="form-group">
 				<div class="row">
 					<div class="col-md-12 floatFlexCentrarY margenInferior">
-						<p:outputLabel value="Reporte de excel:" style="margin-bottom:0"
-							styleClass="margenDerecho agregaHeight" for="btnReporte" />
-						<p:commandButton id="btnReporte" value="Descargar"
-							disabled="#{reporteUsuariosBean.tblDatosPersona.isEmpty()}"
-							style="margin-left:0; margin-right:10px"
-							styleClass="btn btn-primary" ajax="false">
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.reporteExcel')}" style="margin-bottom:0"
+								styleClass="margenDerecho agregaHeight" for="btnReporte" />
+							<p:commandButton id="btnReporte" value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.descargar')}"
+								disabled="#{reporteUsuariosBean.tblDatosPersona.isEmpty()}"
+								style="margin-left:0; margin-right:10px"
+								styleClass="btn btn-primary" ajax="false">
 							<p:dataExporter type="xls" target="tblPersonas"
 								fileName="analisisDatosUsuarios" pageOnly="false" />
 						</p:commandButton>
 
-						<p:outputLabel value="Informe prediseñado:"
-							style="margin-bottom:0" styleClass="margenDerecho" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.informePredisenado')}"
+								style="margin-bottom:0" styleClass="margenDerecho" />
 
 
-						<p:commandButton value="Generar"
-							disabled="#{reporteUsuariosBean.tblDatosPersona.isEmpty()}"
-							onclick="graficasUsuarios();"
-							styleClass="btn btn-primary margenDerecho quitaMargen" />
+							<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.generar')}"
+								disabled="#{reporteUsuariosBean.tblDatosPersona.isEmpty()}"
+								onclick="graficasUsuarios();"
+								styleClass="btn btn-primary margenDerecho quitaMargen" />
 
 						<p:remoteCommand name="graficasUsuarios"
 							action="#{reporteUsuariosBean.generaEstadisticas}" update="@form"
@@ -425,16 +425,16 @@
 				id="modalInformeUsuarios" draggable="false" closable="false"
 				position="center" width="900" 
 				styleClass="modalAnalisisDatos modalAbsoluto"
-				header="#{reporteUsuariosBean.renderizarEstado ?'Usuarios por entidad federativa':'Informe prediseñado general de usuarios'}">
+					header="#{reporteUsuariosBean.renderizarEstado ? sistema.obtenerTexto('gw.analisis.reporteUsuarios.modal.titulo.estado') : sistema.obtenerTexto('gw.analisis.reporteUsuarios.modal.titulo.general')}">
 				<div class="row">
 					<div class="col-md-12" style="text-align: right">
 						<p:outputPanel layout="block"
 							rendered="#{((reporteUsuariosBean.criterios.persona.fechaInicial != null) and (reporteUsuariosBean.criterios.persona.fechaFinal != null))}">
 
-							<p:outputLabel
-								value="REGISTRO DE USUARIOS QUE #{reporteUsuariosBean.tipoDatoFecha(reporteUsuariosBean.tipoDatoFechas)}"
-								styleClass="labelSuperior labelRangoFechas bloque"
-								style="margin:0" />
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.modal.registroUsuarios')} #{reporteUsuariosBean.tipoDatoFecha(reporteUsuariosBean.tipoDatoFechas)}"
+									styleClass="labelSuperior labelRangoFechas bloque"
+									style="margin:0" />
 							<p:outputLabel />
 
 							<p:outputLabel
@@ -443,8 +443,8 @@
 								<f:convertDateTime type="date"
 									pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
 							</p:outputLabel>
-							<h:outputText value="y" style="margin-left:5px; margin-right:5px"
-								styleClass="labelSuperior labelFecha" />
+								<h:outputText value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.modal.y')}" style="margin-left:5px; margin-right:5px"
+									styleClass="labelSuperior labelFecha" />
 							<p:outputLabel
 								value="#{reporteUsuariosBean.criterios.persona.fechaFinal}"
 								styleClass="labelSuperior labelFecha">
@@ -459,8 +459,8 @@
 					rendered="#{reporteUsuariosBean.renderizarEstado}">
 					<div class="row">
 						<div class="col-md-4">
-							<p:outputLabel value="ENTIDAD FEDERATIVA"
-								styleClass="bloque labelSuperior" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.modal.entidad')}"
+									styleClass="bloque labelSuperior" />
 							<p:outputLabel value="#{reporteUsuariosBean.nombreEntidad}"
 								styleClass="bloque numeroGrande gEntidad" />
 
@@ -468,8 +468,8 @@
 						<div class="col-md-8">
 							<p:outputPanel layout="block"
 								rendered="#{reporteUsuariosBean.renderizarMunicipio}">
-								<p:outputLabel value="CIUDAD O MUNICIPIO"
-									styleClass="bloque labelSuperior" />
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.modal.municipio')}"
+										styleClass="bloque labelSuperior" />
 								<p:outputLabel value="#{reporteUsuariosBean.nombreMunicipio}"
 									styleClass="bloque numeroGrande gMunicipio" />
 							</p:outputPanel>
@@ -481,35 +481,35 @@
 
 					<!-- CABECERA TOTAL USUARIOS -->
 					<div class="col-md-3 text-center fondoGris">
-						<p:outputLabel value="TOTAL" styleClass="bloque labelSuperior" />
-						<p:outputLabel value=""
-							styleClass="bloque numeroGrande gTotalUsuarios" />
-						<p:outputLabel value="Usuarios" styleClass="bloque labelInferior" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.modal.total')}" styleClass="bloque labelSuperior" />
+							<p:outputLabel value=""
+								styleClass="bloque numeroGrande gTotalUsuarios" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.titulo')}" styleClass="bloque labelInferior" />
 					</div>
 
 					<!-- CABECERA TIPO DE USUARIO EXTERNO -->
 					<div class="col-md-3 text-center fondoGris">
-						<p:outputLabel value="TIPOS DE USUARIOS"
-							styleClass="bloque labelSuperior" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.modal.tiposUsuarios')}"
+								styleClass="bloque labelSuperior" />
 						<p:outputLabel value=""
-							styleClass="bloque numeroGrande gTotalExternos" />
-						<p:outputLabel value="Externos" styleClass="bloque labelInferior" />
+							styleClass="bloque numeroGrande gTotal#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.externo')}s" />
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.externo')}s" styleClass="bloque labelInferior" />
 					</div>
 
 					<!-- CABECERA TIPO DE USUARIO INTERNO -->
 
 					<div class="col-md-3 text-center fondoGris">
-						<p:outputLabel value="TIPOS DE USUARIOS"
-							styleClass="bloque labelSuperior" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.modal.tiposUsuarios')}"
+								styleClass="bloque labelSuperior" />
 						<p:outputLabel value=""
-							styleClass="bloque numeroGrande gTotalInternos" />
-						<p:outputLabel value="Internos" styleClass="bloque labelInferior" />
+							styleClass="bloque numeroGrande gTotal#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.interno')}s" />
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.interno')}s" styleClass="bloque labelInferior" />
 					</div>
 
 					<!-- CABECERA USUARIOS EN LINEA -->
 
 					<div class="col-md-3 fondoGris">
-						<p:outputLabel value="EN LINEA" styleClass="bloque labelSuperior" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.modal.enLinea')}" styleClass="bloque labelSuperior" />
 						<div class="centrarHorizontal">
 							<p:outputPanel layout="block" styleClass="c100 p#{reporteUsuariosBean.obtenerPorcentajeUsuariosEnLinea()} small">
 								<span>#{reporteUsuariosBean.obtenerPorcentajeUsuariosEnLinea()}%</span>
@@ -525,45 +525,45 @@
 							value="#{reporteUsuariosBean.obtenerUsuariosEnLinea()}"
 							styleClass="bloque numeroGrande text-center"
 							style="margin-bottom:0" />
-						<p:outputLabel
-							value="#{reporteUsuariosBean.obtenerUsuariosEnLinea() == 1 ? 'Activo' : 'Activos'}"
-							styleClass="bloque labelInferior text-center"
-							style="margin-bottom:0" />
+							<p:outputLabel
+								value="#{reporteUsuariosBean.obtenerUsuariosEnLinea() == 1 ? sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.activo') : sistema.obtenerTexto('gw.analisis.reporteUsuarios.valor.activos')}"
+								styleClass="bloque labelInferior text-center"
+								style="margin-bottom:0" />
 
 					</div>
 				</div>
 				<div class="row">
-					<!-- GRAFICA USUARIOS POR GENERO -->
+					<!-- GRAFICA USUARIOS POR #{sistema.obtenerTexto('gw.analisis.reporteUsuarios.graf.genero')} -->
 					<div class="col-md-6 fondoGris">
-						<p:outputLabel value="GENERO"
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.graf.genero')}"
 							styleClass="bloque text-center labelSuperior" />
 						<div id="datosUsuariosGeneros" class="medidaGrafica"></div>
 					</div>
-					<!-- GRAFICA USUARIOS POR ESTATUS -->
+					<!-- GRAFICA USUARIOS POR #{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.estatus')} -->
 					<div class="col-md-6 fondoGris">
-						<p:outputLabel value="ESTATUS DE USUARIOS"
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.graf.estatusUsuarios')}"
 							styleClass="bloque text-center labelSuperior" />
-						<div id="datosUsuariosEstatus" class="medidaGrafica"></div>
+						<div id="datosUsuarios#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.estatus')}" class="medidaGrafica"></div>
 					</div>
 				</div>
 
 				<div class="row">
-					<!-- GRAFICA USUARIOS POR ORDEN DE GOBIERNO -->
+					<!-- GRAFICA #{sistema.obtenerTexto('gw.analisis.reporteUsuarios.graf.ordenGobierno')} -->
 					<div class="col-md-offset-3 col-md-6 fondoGris">
-						<p:outputLabel value="USUARIOS POR ORDEN DE GOBIERNO"
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.graf.ordenGobierno')}"
 							styleClass="bloque text-center labelSuperior" />
 						<div id="datosUsuariosOrdenGobierno" class="medidaGrafica"></div>
 					</div>
-					<!-- GRAFICA USUARIOS POR PUESTO -->
+					<!-- GRAFICA #{sistema.obtenerTexto('gw.analisis.reporteUsuarios.graf.puesto')} -->
 					<div class="col-md-6 fondoGris" style="display:none">
-						<p:outputLabel value="USUARIOS POR PUESTO"
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.graf.puesto')}"
 							styleClass="bloque text-center labelSuperior" />
 						<div id="datosUsuariosPuesto" class="medidaGrafica"></div>
 					</div>
 				</div>
 				<div class="row">
 					<div class="col-md-12 fondoGris">
-						<p:outputLabel value="USUARIOS POR RANGO DE EDADES"
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.graf.rangoEdades')}"
 							styleClass="bloque text-center tituloSuperior" />
 						<div id="rangoEdades"></div>
 					</div>
@@ -571,12 +571,12 @@
 				<p:panel rendered="true">
 					<div class="row">
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="NIVEL DE CONOCIMIENTOS"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.graf.nivelConocimientos')}"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="nivelDeConocimiento" class="medidaGrafica"></div>
 						</div>
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="NIVEL DE ENSEÑANZA"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.graf.nivelEnsenanza')}"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="nivelDeEnsenanza" class="medidaGrafica"></div>
 						</div>
@@ -584,12 +584,12 @@
 
 					<div class="row">
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="MODALIDAD"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.graf.modalidad')}"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="modalidad" class="medidaGrafica"></div>
 						</div>
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="ESTATUS"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.col.estatus')}"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="estatus" class="medidaGrafica"></div>
 						</div>
@@ -600,7 +600,7 @@
 				<f:facet name="footer">
 					<div class="row">
 						<div class="col-md-12">
-							<p:commandButton value="Cerrar"
+							<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.cerrar')}"
 								onclick="PF('modalAnalisis').hide();"
 								styleClass="btn btn-default pull-right" />
 						</div>

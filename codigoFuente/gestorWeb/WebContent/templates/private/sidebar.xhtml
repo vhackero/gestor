@@ -13,10 +13,10 @@
 				<div class="sidebar-nav navbar-collapse">
 					<p:outputPanel id="menuPrincipal" autoUpdate="false">
 						<ul class="nav nav-first-level" id="side-menu">
-							<li><a href="#"> <span class="m-label">Menú</span> <i
-									class="fa fa-bars fa-fw pull-right"></i>
-									<div class="clear"></div>
-							</a></li>
+								<li><a href="#"> <span class="m-label">#{sistema.obtenerTexto('gw.sidebar.menu')}</span> <i
+										class="fa fa-bars fa-fw pull-right"></i>
+										<div class="clear"></div>
+								</a></li>
 							<!-- Menú Construcción basada en permisos -->
 							<ui:fragment
 								rendered="#{menuGestorBean.rolTienePermiso('ADMIN')}">
@@ -106,15 +106,15 @@
 
 															<ui:fragment
 																rendered="#{menuGestorBean.rolTienePermiso('IMAGENES_DOCS')}">
-																<sec:authorize
-																	access="hasPermission(null, 'IMAGENES_DOCS')">
-																	<li><h:commandLink
-																			action="#{menuGestorBean.navegaImagenesDocumentos()}"
-																			title="Imágenes de documentos">
-																			<i class="fa fa-solid fa-file-image"></i>
-																			<span class="m-label">Imágenes de documentos</span>
-																		</h:commandLink></li>
-																</sec:authorize>
+																	<sec:authorize
+																		access="hasPermission(null, 'IMAGENES_DOCS')">
+																		<li><h:commandLink
+																				action="#{menuGestorBean.navegaImagenesDocumentos()}"
+																				title="#{sistema.obtenerTexto('gw.sidebar.imagenesDocumentos')}">
+																				<i class="fa fa-solid fa-file-image"></i>
+																				<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.imagenesDocumentos')}</span>
+																			</h:commandLink></li>
+																	</sec:authorize>
 															</ui:fragment>
 
 
@@ -423,21 +423,21 @@
                                         -->
 											<ui:fragment
 												rendered="#{menuGestorBean.rolTienePermiso('EC_BUS')}">
-												<sec:authorize access="hasPermission(null, 'EC_BUS') ">
-													<li><h:commandLink
-															action="#{menuGestorBean.navegaBusquedaEventosCapacitacion}"
-															title="#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCap')}">
-															<i class="fa fa-calendar-days"></i>
-															<span class="m-label">Evento académico</span>
-														</h:commandLink></li>
-												</sec:authorize>
-											</ui:fragment>
-                                                                                        <li><h:commandLink
-                                                                                                        action="#{menuGestorBean.navegaResponsablesEventoCapacitacion}"
-                                                                                                        title="#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}">
-                                                                                                        <i class="fa fa-solid fa-user-tie"></i>
-                                                                                                        <span class="m-label">Responsables de eventos académicos</span>
-                                                                                                </h:commandLink></li>
+													<sec:authorize access="hasPermission(null, 'EC_BUS') ">
+														<li><h:commandLink
+																action="#{menuGestorBean.navegaBusquedaEventosCapacitacion}"
+																title="#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCap')}">
+																<i class="fa fa-calendar-days"></i>
+																<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.eventoAcademico')}</span>
+															</h:commandLink></li>
+													</sec:authorize>
+												</ui:fragment>
+										                        <li><h:commandLink
+										                                        action="#{menuGestorBean.navegaResponsablesEventoCapacitacion}"
+										                                        title="#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}">
+										                                        <i class="fa fa-solid fa-user-tie"></i>
+										                                        <span class="m-label">#{sistema.obtenerTexto('gw.sidebar.responsablesEventoAcademico')}</span>
+										                                </h:commandLink></li>
                                                                                         <ui:fragment
                                                                                                 rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR')}">
                                                                                                 <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR') ">
@@ -451,35 +451,35 @@
                                                                                         </ui:fragment>
                                                                                         <ui:fragment
                                                                                                 rendered="#{menuGestorBean.rolTienePermiso('MIS_CONVOCATORIAS')}">
-                                                                                                <sec:authorize access="hasPermission(null, 'MIS_CONVOCATORIAS') ">
-                                                                                                        <li><h:commandLink
-                                                                                                                        action="#{menuGestorBean.navegaMisConvocatorias}" title="Convocatorias">
-                                                                                                                        <i class="fa fa-solid fa-id-card"></i>
-                                                                                                                        <span class="m-label">Convocatorias</span>
+												<sec:authorize access="hasPermission(null, 'MIS_CONVOCATORIAS') ">
+														<li><h:commandLink
+																		action="#{menuGestorBean.navegaMisConvocatorias}" title="#{sistema.obtenerTexto('gw.sidebar.convocatorias')}">
+																		<i class="fa fa-solid fa-id-card"></i>
+																		<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.convocatorias')}</span>
 
-                                                                                                                </h:commandLink></li>
-                                                                                                </sec:authorize>
+																</h:commandLink></li>
+												</sec:authorize>
                                                                                         </ui:fragment>
 
 																						<ui:fragment
 																								rendered="#{menuGestorBean.rolTienePermiso('MIS_INSCRIPCIONES')}">
-																							<sec:authorize access="hasPermission(null, 'MIS_INSCRIPCIONES') ">
-																								<li><h:commandLink
-																										action="#{menuGestorBean.navegaMisInscripciones}" title="Inscripciones">
-																									<i class="fa fa-solid fa-id-card"></i>
-																									<span class="m-label">Inscripciones</span>
+								<sec:authorize access="hasPermission(null, 'MIS_INSCRIPCIONES') ">
+									<li><h:commandLink
+											action="#{menuGestorBean.navegaMisInscripciones}" title="#{sistema.obtenerTexto('gw.sidebar.inscripciones')}">
+										<i class="fa fa-solid fa-id-card"></i>
+											<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.inscripciones')}</span>
 
-																								</h:commandLink></li>
-																							</sec:authorize>
+									</h:commandLink></li>
+								</sec:authorize>
 																						</ui:fragment>
 
 											<ui:fragment
 													rendered="#{menuGestorBean.rolTienePermiso('MIS_DISPERSIONES')}">
-												<sec:authorize access="hasPermission(null, 'MIS_DISPERSIONES') ">
-													<li><h:commandLink
-															action="#{menuGestorBean.navegaMisDispersiones}" title="Dispersiones">
-														<i class="fa fa-solid fa-id-card"></i>
-														<span class="m-label">Dispersiones</span>
+								<sec:authorize access="hasPermission(null, 'MIS_DISPERSIONES') ">
+									<li><h:commandLink
+											action="#{menuGestorBean.navegaMisDispersiones}" title="#{sistema.obtenerTexto('gw.sidebar.dispersiones')}">
+										<i class="fa fa-solid fa-id-card"></i>
+										<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.dispersiones')}</span>
 
 													</h:commandLink></li>
 												</sec:authorize>
@@ -490,13 +490,12 @@
                                                                                                         <i class="fa fa-solid fa-id-card"></i>
 													<span class="m-label">#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}</span>
 												</h:commandLink></li>
-											<li><h:commandLink
-													action="#{menuGestorBean.navegaExpedienteGrupo}"
-													title="Expediente de estudiantes por grupo">
-													<i class="fa fa-users-viewfinder"></i>
-													<span class="m-label">Expediente de estudiantes por
-														grupo</span>
-												</h:commandLink></li>
+												<li><h:commandLink
+														action="#{menuGestorBean.navegaExpedienteGrupo}"
+														title="#{sistema.obtenerTexto('gw.sidebar.expedienteEstudiantesGrupo')}">
+														<i class="fa fa-users-viewfinder"></i>
+														<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.expedienteEstudiantesGrupo')}</span>
+													</h:commandLink></li>
 
 
 
@@ -526,15 +525,15 @@
 
 							<ui:fragment
 								rendered="#{menuGestorBean.rolTienePermiso('CURSOS_DISP')}">
-								<sec:authorize access="hasPermission(null, 'CURSOS_DISP') ">
-									<li><h:commandLink
-											action="#{menuGestorBean.navegaMisCursosDisponibles}"
-											title="Cursos disponibles">
-											<i class="fa fa-solid fa-book-open"></i>
-											<span class="m-label">Asignaturas disponibles</span>
+									<sec:authorize access="hasPermission(null, 'CURSOS_DISP') ">
+										<li><h:commandLink
+												action="#{menuGestorBean.navegaMisCursosDisponibles}"
+												title="#{sistema.obtenerTexto('gw.sidebar.cursosDisponibles')}">
+												<i class="fa fa-solid fa-book-open"></i>
+												<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.asignaturasDisponibles')}</span>
 
-										</h:commandLink></li>
-								</sec:authorize>
+											</h:commandLink></li>
+									</sec:authorize>
 							</ui:fragment>
 
 
@@ -542,11 +541,11 @@
 							<!-- ITTIVA 666-->
 							<ui:fragment
 								rendered="#{menuGestorBean.rolTienePermiso('INSCRIPCION')}">
-								<sec:authorize access="hasPermission(null, 'INSCRIPCION') ">
-									<li><h:commandLink
-											action="#{menuGestorBean.navegaInscripcion}" title="Inscripcion">
-											<i class="fa fa-solid fa-id-card"></i>
-											<span class="m-label">Inscripcion</span>
+									<sec:authorize access="hasPermission(null, 'INSCRIPCION') ">
+										<li><h:commandLink
+												action="#{menuGestorBean.navegaInscripcion}" title="#{sistema.obtenerTexto('gw.sidebar.inscripcion')}">
+												<i class="fa fa-solid fa-id-card"></i>
+												<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.inscripcion')}</span>
 
 
 										</h:commandLink></li>
@@ -556,11 +555,11 @@
 
 							<ui:fragment
 								rendered="#{menuGestorBean.rolTienePermiso('MIS_CURSOS')}">
-								<sec:authorize access="hasPermission(null, 'MIS_CURSOS') ">
-									<li><h:commandLink
-											action="#{menuGestorBean.navegaMisCursos}" title="Mis cursos">
-											<i class="fa fa-solid fa-graduation-cap"></i>
-											<span class="m-label">Tira de materias</span>
+									<sec:authorize access="hasPermission(null, 'MIS_CURSOS') ">
+										<li><h:commandLink
+												action="#{menuGestorBean.navegaMisCursos}" title="#{sistema.obtenerTexto('gw.sidebar.misCursos')}">
+												<i class="fa fa-solid fa-graduation-cap"></i>
+												<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.tiraMaterias')}</span>
 
 										</h:commandLink></li>
 								</sec:authorize>
@@ -569,10 +568,10 @@
 							<ui:fragment
 								rendered="#{menuGestorBean.rolTienePermiso('MIS_LOGROS')}">
 								<sec:authorize access="hasPermission(null, 'MIS_LOGROS') ">
-									<li><h:commandLink
-											action="#{menuGestorBean.navegaMisLogros}" title="Mis logros">
-											<i class="fa fa-trophy"></i>
-											<span class="m-label">Mis logros</span>
+										<li><h:commandLink
+												action="#{menuGestorBean.navegaMisLogros}" title="#{sistema.obtenerTexto('gw.sidebar.misLogros')}">
+												<i class="fa fa-trophy"></i>
+												<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.misLogros')}</span>
 
 										</h:commandLink></li>
 								</sec:authorize>
@@ -581,11 +580,11 @@
 							<ui:fragment
 								rendered="#{menuGestorBean.rolTienePermiso('CONST')}">
 								<sec:authorize access="hasPermission(null, 'CONST') ">
-									<li><h:commandLink
-											action="#{menuGestorBean.navegaConstancias}"
-											title="Historial académico">
-											<i class="fa fa-solid fa-book"></i>
-											<span class="m-label">Historial académico</span>
+										<li><h:commandLink
+												action="#{menuGestorBean.navegaConstancias}"
+												title="#{sistema.obtenerTexto('gw.sidebar.historialAcademico')}">
+												<i class="fa fa-solid fa-book"></i>
+												<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.historialAcademico')}</span>
 
 										</h:commandLink></li>
 								</sec:authorize>
@@ -680,24 +679,24 @@
 
 											<ui:fragment
 												rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT')}">
-												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
-													<li><h:commandLink
-															action="#{menuGestorBean.navegaAnalisisUsuarios}"
-															title="Reporte de usuarios">
-															<i class="fa fa-solid fa-user"></i>
-															<span class="m-label">Reporte de usuarios</span>
+													<sec:authorize access="hasPermission(null, 'ANA_DAT')">
+														<li><h:commandLink
+																action="#{menuGestorBean.navegaAnalisisUsuarios}"
+																title="#{sistema.obtenerTexto('gw.sidebar.reporteUsuarios')}">
+																<i class="fa fa-solid fa-user"></i>
+																<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.reporteUsuarios')}</span>
 
 														</h:commandLink></li>
 												</sec:authorize>
 											</ui:fragment>
 
 											<ui:fragment>
-												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
-													<li><h:commandLink rendered="true"
-															action="/views/private/analisisDatos/reporteProgramas.xhtml"
-															title="Reporte de programas">
-															<i class="fa fa-solid fa-user"></i>
-															<span class="m-label">Reporte de programas</span>
+													<sec:authorize access="hasPermission(null, 'ANA_DAT')">
+														<li><h:commandLink rendered="true"
+																action="/views/private/analisisDatos/reporteProgramas.xhtml"
+																title="#{sistema.obtenerTexto('gw.sidebar.reporteProgramas')}">
+																<i class="fa fa-solid fa-user"></i>
+																<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.reporteProgramas')}</span>
 
 														</h:commandLink></li>
 												</sec:authorize>
@@ -705,12 +704,12 @@
 
 											<ui:fragment
 												rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT')}">
-												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
-													<li><h:commandLink
-															action="#{menuGestorBean.navegaAnalisisGestionEscolar}"
-															title="Reporte de gestión escolar">
-															<i class="fa fa-solid fa-chalkboard-user"></i>
-															<span class="m-label">Reporte de gestión escolar</span>
+													<sec:authorize access="hasPermission(null, 'ANA_DAT')">
+														<li><h:commandLink
+																action="#{menuGestorBean.navegaAnalisisGestionEscolar}"
+																title="#{sistema.obtenerTexto('gw.sidebar.reporteGestionEscolar')}">
+																<i class="fa fa-solid fa-chalkboard-user"></i>
+																<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.reporteGestionEscolar')}</span>
 
 														</h:commandLink></li>
 												</sec:authorize>
@@ -718,13 +717,12 @@
 
 											<ui:fragment
 												rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT')}">
-												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
-													<li><h:commandLink
-															action="#{menuGestorBean.navegaAnalisisEventos}"
-															title="Reporte de eventos de capacitación">
-															<i class="fa fa-solid fa-book"></i>
-															<span class="m-label">Reporte de eventos de
-																capacitación</span>
+													<sec:authorize access="hasPermission(null, 'ANA_DAT')">
+														<li><h:commandLink
+																action="#{menuGestorBean.navegaAnalisisEventos}"
+																title="#{sistema.obtenerTexto('gw.sidebar.reporteEventosCapacitacion')}">
+																<i class="fa fa-solid fa-book"></i>
+																<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.reporteEventosCapacitacion')}</span>
 
 														</h:commandLink></li>
 												</sec:authorize>
@@ -734,13 +732,12 @@
 
 											<ui:fragment
 												rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT')}">
-												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
-													<li><h:commandLink rendered="true"
-															action="/views/private/analisisDatos/reporteAmbientesVirtuales.xhtml"
-															title="Reporte de ambientes virtuales de aprendizaje">
-															<i class="fa fa-solid fa-chalkboard-user"></i>
-															<span class="m-label">Reporte de ambientes
-																virtuales de aprendizaje</span>
+													<sec:authorize access="hasPermission(null, 'ANA_DAT')">
+														<li><h:commandLink rendered="true"
+																action="/views/private/analisisDatos/reporteAmbientesVirtuales.xhtml"
+																title="#{sistema.obtenerTexto('gw.sidebar.reporteAmbientesVirtuales')}">
+																<i class="fa fa-solid fa-chalkboard-user"></i>
+																<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.reporteAmbientesVirtuales')}</span>
 
 														</h:commandLink></li>
 												</sec:authorize>
@@ -748,24 +745,24 @@
 
 											<ui:fragment
 												rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT')}">
-												<sec:authorize access="hasPermission(null, 'ANA_DAT')">
-													<li><h:commandLink rendered="true"
-															action="/views/private/analisisDatos/reporteReservaciones.xhtml"
-															title="Áreas y recursos">
-															<i class="fa fa-solid fa-door-open"></i>
-															<span class="m-label">Áreas y recursos</span>
+													<sec:authorize access="hasPermission(null, 'ANA_DAT')">
+														<li><h:commandLink rendered="true"
+																action="/views/private/analisisDatos/reporteReservaciones.xhtml"
+																title="#{sistema.obtenerTexto('gw.sidebar.areasRecursos')}">
+																<i class="fa fa-solid fa-door-open"></i>
+																<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.areasRecursos')}</span>
 
 														</h:commandLink></li>
 												</sec:authorize>
 											</ui:fragment>
 											<ui:fragment
 												rendered="#{menuGestorBean.rolTienePermiso('LOG_ACA_INF')}">
-												<sec:authorize access="hasPermission(null, 'LOG_ACA_INF')">
-													<li><h:commandLink rendered="true"
-															action="/views/private/analisisDatos/graficas.xhtml"
-															title="Programas">
-															<i class="fa fa-solid fa-door-open"></i>
-															<span class="m-label">Programas</span>
+													<sec:authorize access="hasPermission(null, 'LOG_ACA_INF')">
+														<li><h:commandLink rendered="true"
+																action="/views/private/analisisDatos/graficas.xhtml"
+																title="#{sistema.obtenerTexto('gw.sidebar.programas')}">
+																<i class="fa fa-solid fa-door-open"></i>
+																<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.programas')}</span>
 
 														</h:commandLink></li>
 												</sec:authorize>
@@ -778,9 +775,9 @@
 								rendered="#{menuGestorBean.rolTienePermiso('GES_APREN_VIST_ALUMNO')}">
 								<sec:authorize
 									access="hasPermission(null, 'GES_APREN_VIST_ALUMNO')">
-									<li><a href="#" title="Mi perfil"> <i
-											class=" fa fa-solid fa-user"></i> <span class="m-label">
-												#{sistema.obtenerTexto('gw.miperfil.etiqueta.menu.titulo')}
+										<li><a href="#" title="#{sistema.obtenerTexto('gw.miperfil.etiqueta.menu.titulo')}"> <i
+												class=" fa fa-solid fa-user"></i> <span class="m-label">
+													#{sistema.obtenerTexto('gw.miperfil.etiqueta.menu.titulo')}
 										</span> <span class="fa arrow"></span>
 									</a>
 										<ul class="nav nav-second-level">
@@ -789,9 +786,9 @@
 												rendered="#{menuGestorBean.rolTienePermiso('GES_APREN_VIST_ALUMNO')}">
 												<sec:authorize
 													access="hasPermission(null, 'GES_APREN_VIST_ALUMNO')">
-													<li><h:commandLink
-															action="#{menuGestorBean.navegaMisCursos}"
-															title="Mis Cursos">
+														<li><h:commandLink
+																action="#{menuGestorBean.navegaMisCursos}"
+																title="#{sistema.obtenerTexto('gw.miperfil.etiqueta.menu.miscursos')}">
 															<i class="fa fa-solid fa-book-open"></i>
 															<span class="m-label">#{sistema.obtenerTexto('gw.miperfil.etiqueta.menu.miscursos')}</span>
 

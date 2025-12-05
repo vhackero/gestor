@@ -6,16 +6,16 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:p="http://primefaces.org/ui">
 	<ui:define name="breadcrumb">
-		<li class="active">Tira de materias</li>
+		<li class="active">#{sistema.obtenerTexto('gw.alumno.misCursos.titulo')}</li>
 	</ui:define>
 	<ui:define name="content">
 		<h:form id="formMisCursos">
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
-			<h1>Tira de materias</h1>
+			<h1>#{sistema.obtenerTexto('gw.alumno.misCursos.titulo')}</h1>
 			<hr />
 			<p:panel id="misCursos"
-				header="Información de las asignaturas en proceso">
+				header="#{sistema.obtenerTexto('gw.alumno.misCursos.header')}">
 				<div class="row">
 					<div class="col-md-12">
 
@@ -24,7 +24,7 @@
 
 
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Programa educativo" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.misCursos.programaEducativo')}" styleClass="bloque" />
 									<h:outputText
 										value="#{misCursosBean.tiraMaterias.programaEducativo}">
 
@@ -32,7 +32,7 @@
 								</div>
 
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Matricula" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.misCursos.matricula')}" styleClass="bloque" />
 									<h:outputText value="#{misCursosBean.tiraMaterias.matricula}">
 
 									</h:outputText>
@@ -59,7 +59,7 @@
 							<p:column styleClass="text-center"
 								sortBy="#{participante.grupo.evento.nombreEc}">
 								<f:facet name="header">
-									<h:outputText value="Nombre de las asignaturas" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.alumno.misCursos.columna.asignatura')}" />
 								</f:facet>
 								<h:outputText
 									rendered="#{participante.grupo.evento.catModalidadPlanPrograma.id eq 2}"
@@ -82,7 +82,7 @@
 							<!-- Clave -->
 							<p:column styleClass="text-center" sortBy="#{participante.clave}">
 								<f:facet name="header">
-									<h:outputText value="Clave" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.alumno.misCursos.columna.clave')}" />
 								</f:facet>
 								<h:outputText value="#{participante.clave}" />
 							</p:column>
@@ -90,7 +90,7 @@
 							<p:column styleClass="text-center"
 								sortBy="#{participante.bloque}">
 								<f:facet name="header">
-									<h:outputText value="Bloque / Módulo" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.alumno.misCursos.columna.bloque')}" />
 								</f:facet>
 								<h:outputText value="#{participante.bloque}" />
 							</p:column>
@@ -98,7 +98,7 @@
 							<p:column styleClass="text-center"
 								sortBy="#{participante.grupo.nombre}">
 								<f:facet name="header">
-									<h:outputText value="Grupo" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.alumno.misCursos.columna.grupo')}" />
 								</f:facet>
 								<h:outputText value="#{participante.grupo.nombre}" />
 							</p:column>
@@ -106,7 +106,7 @@
 							<p:column styleClass="text-center"
 								sortBy="#{participante.docente}">
 								<f:facet name="header">
-									<h:outputText value="Docente" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.alumno.misCursos.columna.docente')}" />
 								</f:facet>
 								<h:outputText value="#{participante.docente}" />
 							</p:column>
@@ -114,7 +114,7 @@
 							<p:column styleClass="text-center"
 								sortBy="#{participante.asesor}">
 								<f:facet name="header">
-									<h:outputText value="Asesor" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.alumno.misCursos.columna.asesor')}" />
 								</f:facet>
 								<h:outputText value="#{participante.asesor}" />
 							</p:column>
