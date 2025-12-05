@@ -138,7 +138,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			String informacionExtraCorreo, String urlPaginaInicio) {
 
 		return MessageFormat.format("<p>Estimado estudiante <strong>{0}</strong>.</p>"
-				+ "<p>Te confirmamos que has concluido exitosamente tu inscripción. A continuación, te mostramos tus asignaturas para el período <strong>{1}</strong>:</p>"
+				+ "<p>Te confirmamos que has concluido exitosamente tu inscripción. A continuación, te mostramos tus unidades didácticas para el período <strong>{1}</strong>:</p>"
 				+ "<div>{2}</div>"
 				+ "<p>Podrás acceder a través de la siguiente url <a href=\"{3}\" target=\"_blank\">{3}</a> ingresando tu usuario y contraseña.</p>"
 				+ "<p>{4}</p>", nombreCompleto, periodo, bloquesConMaterias, urlPaginaInicio, informacionExtraCorreo);
@@ -419,7 +419,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 		if (resumen.getObligatoriasDisponibles() >= 2 && resumen.getObligatoriasSeleccionadas() < 2) {
 			throw new InscripcionException(
-					"Estimad(a/o) estudiante, debes seleccionar al menos 2 materias obligatorias.");
+					"Estimad(a/o) estudiante, debes seleccionar al menos 2 unidades didácticas obligatorias.");
 		}
 	}
 
@@ -434,7 +434,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			Integer maxProgramasRegulares = obtenerMaxProgramasRegulares(contexto);
 
 			if (resumen.getTotalSeleccionadas() > maxProgramasRegulares) {
-				throw new InscripcionException("Puedes seleccionar máximo " + maxProgramasRegulares + " materias");
+				throw new InscripcionException("Puedes seleccionar máximo " + maxProgramasRegulares + " unidades didácticas");
 			}
 			return;
 		}
@@ -445,7 +445,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		 */
 		Integer maxProgramasIrregulares = obtenerMaxProgramasIrregulares(contexto);
 		if (resumen.getTotalSeleccionadas() > maxProgramasIrregulares) {
-			throw new InscripcionException("Puedes seleccionar máximo " + maxProgramasIrregulares + " materias");
+			throw new InscripcionException("Puedes seleccionar máximo " + maxProgramasIrregulares + " unidades didácticas");
 		}
 	}
 
@@ -464,7 +464,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		}
 
 		if (resumen.getTotalSeleccionadas() < minProgramasPorPeriodo) {
-			throw new InscripcionException("Debes seleccionar al menos " + minProgramasPorPeriodo + " materia(s)");
+			throw new InscripcionException("Debes seleccionar al menos " + minProgramasPorPeriodo + " unidades didáctica(s)");
 		}
 	}
 
@@ -487,8 +487,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 			throw new InscripcionException("Para finalizar la inscripción, debe seleccionar "
 					+ ConstantesGestor.CANT_MATERIAS_OBLIGATORIAS_EST_REGULAR_PRIMER_SEMESTRE
-					+ " materias obligatorias y " + ConstantesGestor.CANT_MATERIAS_OPTATIVAS_EST_REGULAR_PRIMER_SEMESTRE
-					+ " materias optativas.");
+					+ " unidades didácticas obligatorias y " + ConstantesGestor.CANT_MATERIAS_OPTATIVAS_EST_REGULAR_PRIMER_SEMESTRE
+					+ " unidades didácticas optativas.");
 		}
 	}
 
@@ -553,7 +553,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 	private void validarAceptaTerminos(Boolean aceptaTerminos) {
 		if (Boolean.FALSE.equals(aceptaTerminos)) {
-			throw new InscripcionException("Acepta términos y condiciones");
+			throw new InscripcionException("Acepta los términos y condiciones");
 		}
 	}
 
@@ -645,7 +645,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private String obtenerMensajeSeriacion(EstadoAcademicoDTO estadoAcademico) {
 		if (estadoAcademico.getMateriasDisponibles().stream()
 				.anyMatch(materia -> materia.getEsMateriaSeriada() != null && materia.getEsMateriaSeriada())) {
-			return "Estimad(a/o) estudiante, la(s) asignaturas a las que deseas inscribirte están condicionadas a la aprobación previa de según la seriación establecida en tu plan de estudio";
+			return "Estimad(a/o) estudiante, la(s) unidades didácticas a las que deseas inscribirte están condicionadas a la aprobación previa de según la seriación establecida en tu plan de estudio";
 		}
 		return "";
 	}
@@ -855,7 +855,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			LimitesCargaAcademicaDTO limitesCargaAcademica, EstadoInscripcionEstudianteDTO estadoInscripcion) {
 
 		if (esInscripcionExtraordinariaInicial(estadoInscripcion)) {
-
+			//logger.info("esInscripcionExtraordinariaInicial");
 			// Filtra las materias ofertadas y se queda solo con las del semestre ordinario
 			// y todas las optativas ofertadas (de todos los semestres y bloques).
 			materiasOfertadas = obtenerMateriasSemestreInscripcionOrdinariaConOptativas(materiasOfertadas,
@@ -864,21 +864,25 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 		// Estudiantes regulares de nuevo ingreso
 		if (esEstudianteNuevoIngreso && esEstudianteRegular) {
+			//logger.info("Estudiantes regulares de nuevo ingreso");
 			return obtenerMateriasEstudianteNuevoIngreso(materiasOfertadas);
 		}
 
 		// Estudiantes regulares que no son de nuevo ingreso
 		if ((!esEstudianteNuevoIngreso && esEstudianteRegular) || esInscripcionOrdinariaInicial(estadoInscripcion)) {
+			//logger.info("Estudiantes regulares que no son de nuevo ingreso");
 			return obtenerMateriasPorAvanceAnualEstudianteRegular(materiasOfertadas);
 		}
 
 		// Estudiantes irregulares de nuevo ingreso
 		if (esEstudianteNuevoIngreso && !esEstudianteRegular) {
+			//logger.info("Estudiantes irregulares de nuevo ingreso");
 			return obtenerMateriasEstudianteNuevoIngreso(materiasOfertadas);
 		}
 
 		// Estudiantes irregulares que no son de nuevo ingreso
 		if (!esEstudianteNuevoIngreso && !esEstudianteRegular) {
+			//logger.info("Estudiantes irregulares que no son de nuevo ingreso");
 
 			// Las materias reprobadas se vuelven obligatorias en la lista de materias
 			// ofertadas
@@ -891,15 +895,18 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			// Regla para respetar el avance anual (Leer descripcion del metodo
 			// 'obtenerMateriasPorAvanceAnualIrregulares')
 			if (cantidadMateriasReprobadasObligatorias < ConstantesGestor.NUMERO_MAXIMO_MATERIAS_REPROBADAS) {
+				logger.info("Estudiantes irregulares de a 1 a 3 reprobadas");
 				return obtenerMateriasPorAvanceAnualIrregulares(materiasConReprobadasMarcadas, materiasReprobadas);
 			}
 
 			// Regla cuando el estudiante reprueba mas de 4 materias del mismo semestre
 			Map.Entry<String, Integer> semestreConMasReprobadas = buscarSemestreConMasReprobadas(materiasReprobadas);
 			if (semestreConMasReprobadas.getValue() > ConstantesGestor.NUMERO_MAXIMO_MATERIAS_REPROBADAS) {
+				logger.info("Estudiantes irregulares con más de 4 asignaturas reprobas en un semestre");
 				return filtrarPorSemestreUOptativas(materiasConReprobadasMarcadas, semestreConMasReprobadas.getKey());
 			}
-
+			
+			logger.info("Estudiantes irregulare con 4 o más reprobadas");
 			// Regla cuando el estudiante reprueba 4 o mas materias de diferentes semestres
 			return obtenerMateriasReprobadasUOptativas(materiasConReprobadasMarcadas, materiasReprobadas);
 		}
@@ -1315,7 +1322,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 				.count();
 
 		if (cantidadElectivasSeleccionadas > cantidadMaximaMateriasElectivas) {
-			throw new InscripcionException(String.format("Solo puedes seleccionar un máximo de %d materias electivas",
+			throw new InscripcionException(String.format("Solo puedes seleccionar un máximo de %d unidades didácticas electivas",
 					cantidadMaximaMateriasElectivas));
 		}
 
@@ -1329,9 +1336,9 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			List<InscripcionMateriasDTO> materiasDisponibles) {
 		if (InscripcionUtils.esMateriaOptativa(materiaSeleccionada.getTipoPrograma())) {
 			if (esOptativaBloqueSemestreYaSeleccionada(materiaSeleccionada, materiasDisponibles)) {
-				throw new InscripcionException("Solo se permite seleccionar una optativa por bloque y semestre");
+				throw new InscripcionException("Solo se permite seleccionar una unidad didáctica optativa por bloque, por favor revisa tu selección.");
 			} else if (esClaveOptativaYaSeleccionada(materiaSeleccionada, materiasDisponibles)) {
-				throw new InscripcionException("No es posible tomar la misma asignatura dos veces");
+				throw new InscripcionException("No es posible tomar la misma unidad didáctica dos veces, por favor revisa tu selección.");
 			}
 
 		}
@@ -1403,7 +1410,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		if (esMateriaMayorASextoSemestre(materiaSeleccionada)) {
 			if (porcentajeCreditosCompletados < ConstantesGestor.PORCENTAJE_CREDITOS_REQUERIDOS_SEPTIMO_SEMESTRE) {
 				throw new InscripcionException(
-						"Para seleccionar materias de este semestre, debes haber acreditado al menos el 50% del total de créditos de tu plan de estudios.");
+						"Para seleccionar unidades didácticas de este semestre, debes haber acreditado al menos el 50% del total de créditos de tu plan de estudios.");
 			}
 		}
 	}

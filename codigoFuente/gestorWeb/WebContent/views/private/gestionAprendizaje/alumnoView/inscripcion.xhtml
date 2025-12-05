@@ -62,14 +62,14 @@
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Curso/Asignatura" />
+										<h:outputText value="Curso/Unidad didáctica" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.nombreTentativoPrograma}" />
 								</p:column>
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Tipo de asignatura" />
+										<h:outputText value="Tipo de unidad didáctica" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.tipoPrograma}" />
 								</p:column>
@@ -118,7 +118,7 @@
 					</div>
 				</h:panelGroup>
 
-				<p:outputPanel id="panelFinalizar" styleClass="text-center mt-2">
+				<p:outputPanel id="panelFinalizar" styleClass="text-center mt-2" rendered="#{not empty inscripcionBean.contextoInscripcion.estadoAcademico.materiasDisponibles}">
 					<p:commandButton id="finalizarBtn"
 						disabled="#{inscripcionBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionBean.aceptaTerminos}"
 						value="#{sistema.obtenerTexto('gw.alumno.inscripcion.finalizar')}" update="@form :pnlMensaje"
