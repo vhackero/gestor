@@ -217,6 +217,43 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     }
 
     @Override
+    public Integer obtenerIdUsuarioMoodlePorPersonaYEvento(Long idPersona, Long idEvento) {
+        String consulta = "SELECT rppm.id_persona_moodle \n"
+                + "FROM tbl_persona tp\n"
+                + "JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\n"
+                + "JOIN tbl_grupos tg ON tg.id = rgp.id_grupo\n"
+                + "JOIN tbl_eventos te ON te.id_evento = tg.id_evento\n"
+                + "JOIN rel_personas_plataformas_moodle rppm ON rppm.id_persona = tp.id_persona \n"
+                + "    AND rppm.id_plataforma_moodle = te.id_plataforma_lms_borrador\n"
+                + "WHERE tp.id_persona = :idPersonaMatriculaIngresada \n"
+                + "    AND te.id_evento = :idEventoSelecionado";
+
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idPersonaMatriculaIngresada", idPersona);
+        query.setParameter("idEventoSelecionado", idEvento);
+        List<?> resultados = query.getResultList();
+        return resultados.isEmpty() ? null : obtenerEntero(resultados.get(0));
+    }
+
+    @Override
+    public Long obtenerIdCursoMoodlePorEvento(Long idEvento) {
+        String consulta = "SELECT te.id_curso_lms_borrador FROM tbl_eventos te WHERE te.id_evento = :idEvento LIMIT 1";
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idEvento", idEvento);
+        List<?> resultados = query.getResultList();
+        return resultados.isEmpty() ? null : obtenerLong(resultados.get(0));
+    }
+
+    @Override
+    public Integer obtenerIdPlataformaMoodlePorEvento(Long idEvento) {
+        String consulta = "SELECT te.id_plataforma_lms_borrador FROM tbl_eventos te WHERE te.id_evento = :idEvento LIMIT 1";
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idEvento", idEvento);
+        List<?> resultados = query.getResultList();
+        return resultados.isEmpty() ? null : obtenerEntero(resultados.get(0));
+    }
+
+    @Override
     @Transactional
     public void insertarBaja(BajaAplicacionDTO bajaAplicacionDTO) {
         String consulta = "INSERT INTO rel_persona_bajas (id_persona, motivo_baja_id, proceso_id, id_plan, id_programa, id_evento, id_grupo, id_user_enrolments_lms, usuario_modifico, contabilizar, solicitud)"

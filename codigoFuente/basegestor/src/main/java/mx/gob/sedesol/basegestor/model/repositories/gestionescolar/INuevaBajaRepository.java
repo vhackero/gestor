@@ -36,6 +36,12 @@ public interface INuevaBajaRepository {
 
     Integer obtenerIdUsuarioMoodle(String matricula);
 
+    Integer obtenerIdUsuarioMoodlePorPersonaYEvento(Long idPersona, Long idEvento);
+
+    Long obtenerIdCursoMoodlePorEvento(Long idEvento);
+
+    Integer obtenerIdPlataformaMoodlePorEvento(Long idEvento);
+
     void insertarBaja(BajaAplicacionDTO bajaAplicacionDTO);
 
     BajaMatriculaDetalleDTO consultarDatosPorMatricula(String matricula);
