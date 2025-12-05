@@ -76,8 +76,8 @@ public class InscripcionBean extends BaseBean {
 		try {
 			inscripcionFacade.finalizarInscripcion(aceptaTerminos, contextoInscripcion);
 			limpiarContextoInscripcion();
-			mostrarMensajeDialog("Inscripcion de materias completa");
-			mostrarAviso("Inscripcion de materias completa", ConstantesGestorWeb.TIPO_AVISO_SUCCESS);
+			mostrarMensajeDialog("Inscripción de unidades didácticas realizada con éxito, por favor, revisa tu correo institucional.");
+			mostrarAviso("Inscripción de unidades didácticas completada con exito.", ConstantesGestorWeb.TIPO_AVISO_SUCCESS);
 		} catch (InscripcionException ie) {
 			manejarErrorDeFinalizacion(ie);
 		} catch (Exception e) {
