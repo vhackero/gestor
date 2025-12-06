@@ -1006,9 +1006,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private List<InscripcionMateriasDTO> filtrarPorSemestreUOptativas(
 			List<InscripcionMateriasDTO> materiasConReprobadasMarcadas, String semestreConMasReprobadas) {
 		return materiasConReprobadasMarcadas.stream()
-				.filter(materia -> materia.getEstructura().equalsIgnoreCase(semestreConMasReprobadas)
-						|| InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma()))
-				.map(materia -> {
+				.filter(materia -> materia.getEstructura().equalsIgnoreCase(semestreConMasReprobadas)).map(materia -> {
 					if (materia.getEstructura().equalsIgnoreCase(semestreConMasReprobadas)
 							&& materia.getTipoPrograma().equalsIgnoreCase(ConstantesGestor.TEXTO_MATERIA_OBLIGATORIA)) {
 						materia.setCheck(Boolean.TRUE);
