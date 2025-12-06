@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignaturasPorSemestreDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
@@ -704,7 +705,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setCheck(false); // Valor por defecto
 		dto.setPeriodo(getIntegerValue(row[12])); // tpi.semestre
 		dto.setPerfil((String) row[13]); // tpi.perfil
-		dto.setIdProcesoInscripcion(getLongValue(row[14])); //tpi.proceso_inscripcion_id
+		dto.setIdProcesoInscripcion(getLongValue(row[14])); // tpi.proceso_inscripcion_id
 
 		return dto;
 	}
@@ -1115,6 +1116,62 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setCheck(false);
 		dto.setDisabled(false);
 
+		return dto;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<AprobacionAsignaturasPorSemestreDTO> obtenerAprobacionAsignaturasPorSemestre(Long idPlan,
+			Long idPersona) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT ");
+		sql.append("       tmcu2.id, ");
+		sql.append("       tmcu2.nombre, ");
+		sql.append("       (SELECT COUNT(tmll2.nombre) ");
+		sql.append("        FROM tbl_malla_curricular tmll ");
+		sql.append("        JOIN tbl_malla_curricular tmll2 ");
+		sql.append("          ON tmll2.id_padre = tmll.id ");
+		sql.append("         AND tmll2.activo = 1 ");
+		sql.append("        JOIN tbl_ficha_descriptiva_programa tlfdp ");
+		sql.append("          ON tlfdp.id_categoria_mdl = tmll2.id_categoria_mdl ");
+		sql.append("         AND tlfdp.tipo = 'Obligatoria' ");
+		sql.append("        WHERE tmll.id_padre = tmcu2.id ");
+		sql.append("       ) AS asignaturasObligatoriasPorPrograma, ");
+		sql.append("       (SELECT COUNT(rgp2.id_persona_participante) ");
+		sql.append("        FROM rel_grupo_participante rgp2 ");
+		sql.append("        INNER JOIN tbl_grupos tg2 ");
+		sql.append("          ON tg2.id = rgp2.id_grupo ");
+		sql.append("        INNER JOIN tbl_eventos te2 ");
+		sql.append("          ON te2.id_evento = tg2.id_evento ");
+		sql.append("        INNER JOIN tbl_ficha_descriptiva_programa fd2 ");
+		sql.append("          ON fd2.id_plan = :idPlan ");
+		sql.append("         AND fd2.id_programa = te2.id_programa ");
+		sql.append("         AND fd2.tipo = 'Obligatoria' ");
+		sql.append("        INNER JOIN tbl_malla_curricular tmcc ");
+		sql.append("          ON tmcc.id = fd2.id_eje_capacitacion ");
+		sql.append("        INNER JOIN tbl_malla_curricular tmcc2 ");
+		sql.append("          ON tmcc2.id = tmcc.id_padre ");
+		sql.append("        WHERE rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
+		sql.append("          AND tmcc2.nombre = tmcu2.nombre ");
+		sql.append("          AND rgp2.id_persona_participante = :idPersona ");
+		sql.append("       ) AS asignaturasAprobadas ");
+		sql.append("FROM tbl_malla_curricular tmcu ");
+		sql.append("INNER JOIN tbl_malla_curricular tmcu2 ");
+		sql.append("        ON tmcu2.id_padre = tmcu.id ");
+		sql.append("WHERE tmcu.id_plan = :idPlan");
+
+		List<Object[]> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("idPlan", idPlan)
+				.setParameter("idPersona", idPersona).getResultList();
+
+		return resultados.stream().map(this::mapearAprobacionAsignaturasPorSemestre).collect(Collectors.toList());
+	}
+
+	private AprobacionAsignaturasPorSemestreDTO mapearAprobacionAsignaturasPorSemestre(Object[] row) {
+		AprobacionAsignaturasPorSemestreDTO dto = new AprobacionAsignaturasPorSemestreDTO();
+		dto.setIdMallaCurricular(getLongValue(row[0])); // tmcu2.id
+		dto.setSemestre((String) row[1]); // tmcu2.nombre
+		dto.setAsignaturasObligatoriasPorPrograma(getLongValue(row[2])); // subquery COUNT(...)
+		dto.setAsignaturasAprobadas(getLongValue(row[3])); // subquery COUNT(...)
 		return dto;
 	}
 
