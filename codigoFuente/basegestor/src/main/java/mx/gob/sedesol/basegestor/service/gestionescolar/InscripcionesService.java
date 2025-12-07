@@ -43,6 +43,10 @@ public interface InscripcionesService extends CommonService<Convocatoria, Intege
 	public void altaInscripcionesExtra(InscripcionParamNueva inscripcionParamNueva);
 	
 	public List<InscripcionPlanesProgramas> consultarPlanPrograma(InscripcionParamNueva inscripcionParamNueva);
+	
+	List<InscripcionPlanesProgramas> consultarPlanProgramaPorProceso(Long procesoInscripcionId);
+	
+	void actualizarPlanesProgramasProceso(Long procesoInscripcionId, List<InscripcionPlanesProgramas> planesProgramas);
 
 	List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta);
 
