@@ -413,6 +413,7 @@ public final class ConstantesGestorWeb {
 	public static final String NAVEGA_MIS_DISPERSIONES = "MIS_DISPERSIONES";
 
 	public static final String NAVEGA_INSCRIPCION = "INSCRIPCION";
+	public static final String NAVEGA_REENVIO_CORREO = "REENVIO_CORREO";
 	public static final String NAVEGA_NUEVA_CONVOCATORIAS = "NAVEGA_NUEVA_CONVOCATORIAS";
 	public static final String NAVEGA_CONSULTA_CONVOCATORIAS = "NAVEGA_CONSULTA_CONVOCATORIAS";
 	public static final String NAVEGA_CONSULTA_TABLERO_CONVOCATORIAS = "NAVEGA_CONSULTA_TABLERO_CONVOCATORIAS";

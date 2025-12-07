@@ -7,8 +7,11 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.FiltroReenvioCorreoInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ReenvioCorreoInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
@@ -21,6 +24,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesTabl
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
+import mx.gob.sedesol.basegestor.model.repositories.admin.IPersonaRepository;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IConvocatoriaRepository;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IinscripcionesRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConvocatoriaService;
@@ -36,138 +40,109 @@ import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionesService;
 public class InscripcionesServiceImpl implements InscripcionesService {
 
 	private static final Logger logger = Logger.getLogger(InscripcionesServiceImpl.class);
-	
+
 	@Autowired
-	private IinscripcionesRepository iinscripcionesRepository;
-	
-	
-	
-	
+	private IinscripcionesRepository inscripcionesRepository;
+
+	@Autowired
+	private IPersonaRepository personaRepository;
+
 	@Override
 	public void altaConvocatorias() {
-		
-		//iConvocatoriaRepository.altaConvocatorias();		
-		
+
+		// iConvocatoriaRepository.altaConvocatorias();
+
 	}
 
-	
-	
 	@Override
 	public List<TipoProceso> consultarTipoProceso() {
-		
-		List<TipoProceso> lista = iinscripcionesRepository.consultarTipoProceso();
-		
+
+		List<TipoProceso> lista = inscripcionesRepository.consultarTipoProceso();
+
 		if (lista.isEmpty()) {
 			return new ArrayList<TipoProceso>();
 		}
 		return lista;
 	}
-	
+
 	@Override
 	public List<TipoProceso> consultarTipoProcesoDisponibles(Integer convocatoriaId) {
-		return iinscripcionesRepository.consultarTipoProcesoDisponibles(convocatoriaId, LocalDateTime.now());
+		return inscripcionesRepository.consultarTipoProcesoDisponibles(convocatoriaId, LocalDateTime.now());
 	}
-	
-	
+
 	@Override
 	public List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta) {
-		
-		List<TipoProceso> lista = iinscripcionesRepository.consultarNombre(tableroParamConsulta);
-		
+
+		List<TipoProceso> lista = inscripcionesRepository.consultarNombre(tableroParamConsulta);
+
 		if (lista.isEmpty()) {
 			return new ArrayList<TipoProceso>();
 		}
 		return lista;
 	}
-	
 
 	@Override
 	public List<InscripcionesTableroResumen> consultarTableroResumen(ConvocatoriaParamConsulta tableroParamConsulta) {
-		
-		List<InscripcionesTableroResumen> lista = iinscripcionesRepository.consultarTableroResumen(tableroParamConsulta);
-		
+
+		List<InscripcionesTableroResumen> lista = inscripcionesRepository.consultarTableroResumen(tableroParamConsulta);
+
 		if (lista.isEmpty()) {
 			return new ArrayList<InscripcionesTableroResumen>();
 		}
 		return lista;
 	}
-	
 
 	@Override
 	public void altaInscripciones(InscripcionParamNueva inscripcionParamNueva) {
-		if (inscripcionParamNueva != null
-				&& (inscripcionParamNueva.getCalveProceso() == null
-						|| inscripcionParamNueva.getCalveProceso().trim().isEmpty())) {
+		if (inscripcionParamNueva != null && (inscripcionParamNueva.getCalveProceso() == null
+				|| inscripcionParamNueva.getCalveProceso().trim().isEmpty())) {
 			inscripcionParamNueva.setCalveProceso(generarClaveProceso(inscripcionParamNueva.getNombre()));
 		}
-		iinscripcionesRepository.altaInscripcion(inscripcionParamNueva);
-	}
-	
-	
-	@Override
-	public void altaInscripcionesExtra(InscripcionParamNueva inscripcionParamNueva) {
-		if (inscripcionParamNueva != null
-				&& (inscripcionParamNueva.getCalveProceso() == null
-						|| inscripcionParamNueva.getCalveProceso().trim().isEmpty())) {
-			inscripcionParamNueva.setCalveProceso(generarClaveProceso(inscripcionParamNueva.getNombre()));
-		}
-		iinscripcionesRepository.altaInscripcionExtra(inscripcionParamNueva);
+		inscripcionesRepository.altaInscripcion(inscripcionParamNueva);
 	}
 
-	
-	
+	@Override
+	public void altaInscripcionesExtra(InscripcionParamNueva inscripcionParamNueva) {
+		if (inscripcionParamNueva != null && (inscripcionParamNueva.getCalveProceso() == null
+				|| inscripcionParamNueva.getCalveProceso().trim().isEmpty())) {
+			inscripcionParamNueva.setCalveProceso(generarClaveProceso(inscripcionParamNueva.getNombre()));
+		}
+		inscripcionesRepository.altaInscripcionExtra(inscripcionParamNueva);
+	}
+
 	@Override
 	public List<InscripcionesConsultaResumen> consultarFiltros(ConvocatoriaParamConsulta tableroParamConsulta) {
-		
-		List<InscripcionesConsultaResumen> lista = iinscripcionesRepository.consultarFiltros(tableroParamConsulta);
-		
+
+		List<InscripcionesConsultaResumen> lista = inscripcionesRepository.consultarFiltros(tableroParamConsulta);
+
 		if (lista.isEmpty()) {
 			return new ArrayList<InscripcionesConsultaResumen>();
 		}
 		return lista;
 	}
-	
+
 	@Override
-    public boolean updateProcesoInscripcion(
-            Long procesoInscripcionId,
-            String nombre,
-            LocalDateTime fechaInicio,
-            LocalDateTime fechaFin,
-            int estatus,
-            Long idTipoProceso,
-            Long convocatoriaId) {
+	public boolean updateProcesoInscripcion(Long procesoInscripcionId, String nombre, LocalDateTime fechaInicio,
+			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId) {
 
-        // Actualizar el registro
-        iinscripcionesRepository.updateProcesoInscripcion(
-                procesoInscripcionId,
-                nombre,
-                fechaInicio,
-                fechaFin,
-                estatus,
-                idTipoProceso,
-                convocatoriaId
-        );
+		// Actualizar el registro
+		inscripcionesRepository.updateProcesoInscripcion(procesoInscripcionId, nombre, fechaInicio, fechaFin, estatus,
+				idTipoProceso, convocatoriaId);
 
-        return true;
-    }
-	
-    @Override
-    public void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId, String tipoProceso) {
+		return true;
+	}
 
-        iinscripcionesRepository.deleteProcesoInscripcion(procesoInscripcionId, convocatoriaId, tipoProceso);
-    }
-	
-	
-	
+	@Override
+	public void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId, String tipoProceso) {
 
-	
-	
+		inscripcionesRepository.deleteProcesoInscripcion(procesoInscripcionId, convocatoriaId, tipoProceso);
+	}
+
 	@Override
 	public List<Convocatoria> findAll() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 
 	@Override
 	public Convocatoria buscarPorId(Integer id) {
@@ -175,13 +150,11 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		return null;
 	}
 
-
 	@Override
 	public ResultadoDTO<Convocatoria> guardar(Convocatoria dto) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 
 	@Override
 	public ResultadoDTO<Convocatoria> actualizar(Convocatoria dto) {
@@ -189,13 +162,11 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		return null;
 	}
 
-
 	@Override
 	public ResultadoDTO<Convocatoria> eliminar(Convocatoria dto) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 
 	@Override
 	public ResultadoDTO<Convocatoria> sonDatosRequeridosValidos(TipoAccion accion, Convocatoria dto) {
@@ -203,30 +174,26 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		return null;
 	}
 
-
-
 	@Override
 	public List<TblPlan> consultarPlan(InscripcionParamNueva inscripcionParamNueva) {
-		
-		List<TblPlan> lista = iinscripcionesRepository.consultarPlan(inscripcionParamNueva);
-		
+
+		List<TblPlan> lista = inscripcionesRepository.consultarPlan(inscripcionParamNueva);
+
 		if (lista.isEmpty()) {
 			return new ArrayList<TblPlan>();
 		}
 		return lista;
 	}
 
-	
 	@Override
 	public List<InscripcionPlanesProgramas> consultarPlanPrograma(InscripcionParamNueva inscripcionParamNueva) {
-		List<InscripcionPlanesProgramas> lista = iinscripcionesRepository.consultarPlanPrograma(inscripcionParamNueva);
-		
+		List<InscripcionPlanesProgramas> lista = inscripcionesRepository.consultarPlanPrograma(inscripcionParamNueva);
+
 		if (lista.isEmpty()) {
 			return new ArrayList<InscripcionPlanesProgramas>();
 		}
 		return lista;
 	}
-
 
 	@Override
 	public List<TblFichaDescriptivaPrograma> consultarPrograma(InscripcionParamNueva inscripcionParamNueva) {
@@ -235,7 +202,7 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 
 	@Override
 	public String generarClaveProceso(String nombre) {
-		int consecutivo = iinscripcionesRepository.obtenerSiguienteConsecutivoProceso();
+		int consecutivo = inscripcionesRepository.obtenerSiguienteConsecutivoProceso();
 		return generarClave(nombre, consecutivo);
 	}
 
@@ -261,13 +228,37 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		return normalizada.length() <= 3 ? normalizada : normalizada.substring(0, 3);
 	}
 
+	@Transactional(readOnly = true)
+	@Override
+	public List<ReenvioCorreoInscripcionDTO> obtenerInscripcionesParaReenvioConPaginacion(
+			FiltroReenvioCorreoInscripcionDTO filtro, int first, int pageSize) {
+		Long idProcesoInscripcion = filtro.getIdProcesoInscripcion();
+		Long estatusEnvio = filtro.getEstatusEnvio();
+		Long idPlan = filtro.getIdPlan();
+		Long idPrograma = filtro.getIdPrograma();
+		String matricula = obtenerMatricula(filtro);
 
+		return inscripcionesRepository.obtenerInscripcionesParaReenvioConPaginacion(idProcesoInscripcion, estatusEnvio,
+				idPlan, idPrograma, matricula, first, pageSize);
+	}
 
+	private String obtenerMatricula(FiltroReenvioCorreoInscripcionDTO filtro) {
+		if (filtro.getMatricula() == null || filtro.getMatricula().trim().isEmpty()) {
+			return null;
+		}
+		return filtro.getMatricula().trim();
+	}
 
-
-
-
-	
- 
+	@Transactional(readOnly = true)
+	@Override
+	public Long contarInscripcionesParaReenvio(FiltroReenvioCorreoInscripcionDTO filtro) {
+		Long idProcesoInscripcion = filtro.getIdProcesoInscripcion();
+		Long estatusEnvio = filtro.getEstatusEnvio();
+		Long idPlan = filtro.getIdPlan();
+		Long idPrograma = filtro.getIdPrograma();
+		String matricula = obtenerMatricula(filtro);
+		return inscripcionesRepository.contarInscripcionesParaReenvio(idProcesoInscripcion, estatusEnvio, idPlan,
+				idPrograma, matricula);
+	}
 
 }

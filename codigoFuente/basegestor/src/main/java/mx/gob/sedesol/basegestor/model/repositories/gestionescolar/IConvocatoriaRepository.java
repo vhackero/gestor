@@ -2,6 +2,7 @@ package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 
 import java.util.List;
 
+import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ConvocatoriaDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativoCompl;
@@ -32,5 +33,7 @@ public interface IConvocatoriaRepository {
 	public void eliminarConvocatorias(Convocatoria elminarConvo);
 	
 	public void eliminarPlanesProgramas(ConvocatoriaParamNueva convocatoriaParamNueva, int idConvocatoria);
+	
+	List<ConvocatoriaDTO> obtenerConvocatoriasActivas();
 
 }

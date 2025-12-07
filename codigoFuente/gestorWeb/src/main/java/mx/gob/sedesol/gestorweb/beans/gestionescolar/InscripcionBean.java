@@ -43,10 +43,10 @@ public class InscripcionBean extends BaseBean {
 	public void init() {
 		try {
 			inicializarInscripcion();
-		} catch (InscripcionException e) {
-			manejarErrorDeInscripcion(e);
 		} catch (InscripcionPreviaException ipe) {
 			mostrarAviso(ipe.getMessage(), ConstantesGestorWeb.TIPO_AVISO_INFO);
+		} catch (InscripcionException e) {
+			manejarErrorDeInscripcion(e);
 		} catch (Exception e) {
 			manejarErrorGeneral(e);
 		}

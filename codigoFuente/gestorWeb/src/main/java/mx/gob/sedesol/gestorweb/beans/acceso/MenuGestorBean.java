@@ -377,6 +377,11 @@ public class MenuGestorBean extends BaseBean {
 		return ConstantesGestorWeb.NAVEGA_BUSQUEDA_EVENTO_CAP;
 
 	}
+	
+	public String navegaReenvioCorreo() {
+		logger.info("Navegando a pantalla de reenvío de correos");
+		return ConstantesGestorWeb.NAVEGA_REENVIO_CORREO;
+	}
 
 	public String navegaAmbientesVirtualesAprendizaje() {
 		logger.info("Navegando a pantalla de ambientes virtuales de aprendizaje");

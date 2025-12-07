@@ -3,6 +3,8 @@ package mx.gob.sedesol.basegestor.service.gestionescolar;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.FiltroReenvioCorreoInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ReenvioCorreoInscripcionDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
@@ -17,31 +19,30 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.service.admin.CommonService;
 
 /**
- *  
+ * 
  * @author ITTIVA
  * 
  */
-public interface InscripcionesService extends CommonService<Convocatoria, Integer>{
-	
- 
+public interface InscripcionesService extends CommonService<Convocatoria, Integer> {
+
 	public List<TipoProceso> consultarTipoProceso();
-	
+
 	List<TipoProceso> consultarTipoProcesoDisponibles(Integer convocatoriaId);
 
 	public List<TblPlan> consultarPlan(InscripcionParamNueva inscripcionParamNueva);
-	
+
 	public List<TblFichaDescriptivaPrograma> consultarPrograma(InscripcionParamNueva inscripcionParamNueva);
-	
+
 	public List<InscripcionesTableroResumen> consultarTableroResumen(ConvocatoriaParamConsulta tableroParamConsulta);
-	
+
 	public List<InscripcionesConsultaResumen> consultarFiltros(ConvocatoriaParamConsulta tableroParamConsulta);
-	
+
 	public void altaConvocatorias();
-	
+
 	public void altaInscripciones(InscripcionParamNueva inscripcionParamNueva);
-	
+
 	public void altaInscripcionesExtra(InscripcionParamNueva inscripcionParamNueva);
-	
+
 	public List<InscripcionPlanesProgramas> consultarPlanPrograma(InscripcionParamNueva inscripcionParamNueva);
 
 	List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta);
@@ -53,6 +54,8 @@ public interface InscripcionesService extends CommonService<Convocatoria, Intege
 
 	String generarClaveProceso(String nombre);
 
-	 
+	List<ReenvioCorreoInscripcionDTO> obtenerInscripcionesParaReenvioConPaginacion(FiltroReenvioCorreoInscripcionDTO filtro, int first, int pageSize);
+
+	Long contarInscripcionesParaReenvio(FiltroReenvioCorreoInscripcionDTO filtro);
 
 }

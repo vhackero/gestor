@@ -1,6 +1,6 @@
 package mx.gob.sedesol.basegestor.commons.utils;
 
-public class InscripcionPreviaException extends RuntimeException {
+public class InscripcionPreviaException extends InscripcionException {
 	
     /**
 	 * 
