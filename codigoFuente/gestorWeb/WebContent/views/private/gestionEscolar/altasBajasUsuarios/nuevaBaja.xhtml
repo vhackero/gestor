@@ -73,6 +73,16 @@
                                     <p:message for="plan" display="text" />
                                 </div>
                             </div>
+
+                            <div class="row">
+                                <div class="col-md-4 col-xs-12">
+                                    <p:outputLabel styleClass="bloque" for="nombreEstudiante" value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.nombreEstudiante')}:" />
+                                    <p:inputText id="nombreEstudiante"
+                                                 value="#{nuevaBajaUsuarioBean.nombreEstudiante}"
+                                                 styleClass="form-control"
+                                                 readonly="true" />
+                                </div>
+                            </div>
                         </div>
 
                         <div class="form-group">
