@@ -22,7 +22,7 @@ public interface INuevaBajaRepository {
 
     List<String> consultarPeriodosInscripcion();
 
-    List<NodoDTO> consultarEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma);
+    List<NodoDTO> consultarEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma, String matricula);
 
     Long insertarMotivoBaja(Long idTipoBaja, String descripcion);
 
@@ -43,4 +43,6 @@ public interface INuevaBajaRepository {
     void insertarBaja(BajaAplicacionDTO bajaAplicacionDTO);
 
     BajaMatriculaDetalleDTO consultarDatosPorMatricula(String matricula);
+
+    boolean validarPlanYProgramaPorMatricula(String matricula, Long idPlan, Long idPrograma);
 }

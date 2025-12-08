@@ -141,7 +141,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
             if (idPeriodo != null && idPrograma != null) {
                 eventos = convertirANodosSelectItem(
-                        nuevaBajaService.obtenerEventosPorPeriodoYPrograma(idPeriodo, idPrograma));
+                        nuevaBajaService.obtenerEventosPorPeriodoYPrograma(idPeriodo, idPrograma, obtenerMatriculaNormalizada()));
             } else if (eventos == null) {
                 eventos = Collections.emptyList();
             }
@@ -269,12 +269,16 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private void actualizarEventos() {
         if (idPrograma != null && idPeriodo != null && !idPeriodo.trim().isEmpty()) {
             eventos = convertirANodosSelectItem(
-                    nuevaBajaService.obtenerEventosPorPeriodoYPrograma(idPeriodo, idPrograma));
+                    nuevaBajaService.obtenerEventosPorPeriodoYPrograma(idPeriodo, idPrograma, obtenerMatriculaNormalizada()));
         } else {
             eventos = Collections.emptyList();
         }
         idEvento = null;
         actualizarHabilitacionSecuencial();
+    }
+
+    private String obtenerMatriculaNormalizada() {
+        return matriculaUsuario != null ? matriculaUsuario.trim() : null;
     }
 
     private void deshabilitarListas() {

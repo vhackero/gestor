@@ -113,11 +113,21 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<NodoDTO> consultarEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma) {
-        String consulta = "SELECT te.id_evento, te.nombre_ec FROM tbl_eventos te WHERE te.cve_evento_cap LIKE CONCAT('%',:nombrePeriodo,'%') AND te.id_programa = :idPrograma";
+    public List<NodoDTO> consultarEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma, String matricula) {
+        if (matricula == null) {
+            return new ArrayList<>();
+        }
+
+        String consulta = "SELECT DISTINCT te.id_evento, te.nombre_ec FROM tbl_eventos te "
+                + "JOIN tbl_grupos tg ON tg.id_evento = te.id_evento "
+                + "JOIN rel_grupo_participante rgp ON rgp.id_grupo = tg.id "
+                + "JOIN tbl_persona tp ON tp.id_persona = rgp.id_persona_participante "
+                + "WHERE tp.sso_idUsuario = :matricula "
+                + "AND te.cve_evento_cap LIKE CONCAT('%',:nombrePeriodo,'%') AND te.id_programa = :idPrograma";
         Query query = entityManager.createNativeQuery(consulta);
         query.setParameter("nombrePeriodo", nombrePeriodo);
         query.setParameter("idPrograma", idPrograma);
+        query.setParameter("matricula", matricula);
         List<Object[]> resultados = query.getResultList();
         List<NodoDTO> eventos = new ArrayList<>();
 
@@ -305,6 +315,35 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
         dto.setPeriodo(obtenerCadena(fila[5]));
         dto.setIdEvento(obtenerLong(fila[6]));
         return dto;
+    }
+
+    @Override
+    public boolean validarPlanYProgramaPorMatricula(String matricula, Long idPlan, Long idPrograma) {
+        if (idPlan == null && idPrograma == null) {
+            return true;
+        }
+
+        if (matricula == null) {
+            return false;
+        }
+
+        String consulta = "SELECT COUNT(*) FROM tbl_persona tp "
+                + "LEFT JOIN tbl_persona_aspirante tpa ON tpa.id_persona = tp.id_persona "
+                + "WHERE tp.sso_idUsuario = :matricula "
+                + "AND (:idPlanSeleccionado IS NULL OR tpa.id_plan = :idPlanSeleccionado) "
+                + "AND EXISTS(SELECT 1 FROM rel_grupo_participante rgp2 "
+                + "    INNER JOIN tbl_grupos tg2 ON tg2.id = rgp2.id_grupo "
+                + "    INNER JOIN tbl_eventos te2 ON te2.id_evento = tg2.id_evento "
+                + "    WHERE rgp2.id_persona_participante = tp.id_persona "
+                + "      AND (:idProgramaSeleccionado IS NULL OR te2.id_programa = :idProgramaSeleccionado))";
+
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("matricula", matricula);
+        query.setParameter("idPlanSeleccionado", idPlan);
+        query.setParameter("idProgramaSeleccionado", idPrograma);
+
+        Object resultado = query.getSingleResult();
+        return resultado != null && Long.valueOf(resultado.toString()) > 0;
     }
 
     private Integer obtenerEntero(Object valor) {

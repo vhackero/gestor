@@ -63,8 +63,8 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
     }
 
     @Override
-    public List<NodoDTO> obtenerEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma) {
-        return nuevaBajaRepository.consultarEventosPorPeriodoYPrograma(nombrePeriodo, idPrograma);
+    public List<NodoDTO> obtenerEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma, String matricula) {
+        return nuevaBajaRepository.consultarEventosPorPeriodoYPrograma(nombrePeriodo, idPrograma, matricula);
     }
 
     @Override
@@ -78,6 +78,10 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         Long idPersona = nuevaBajaRepository.obtenerIdPersonaPorMatricula(solicitud.getMatriculaUsuario());
         if (idPersona == null) {
             throw new IllegalArgumentException("No se encontró la matrícula proporcionada");
+        }
+
+        if (!datosSeleccionadosValidos(solicitud)) {
+            throw new IllegalArgumentException("Los datos seleccionados no corresponden al estudiante");
         }
 
         nuevaBajaRepository.actualizarPersonaInactiva(idPersona);
@@ -123,6 +127,20 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
                 solicitud.getNumeroSolicitud());
 
         nuevaBajaRepository.insertarBaja(bajaAplicacionDTO);
+    }
+
+    private boolean datosSeleccionadosValidos(BajaSolicitudDTO solicitud) {
+        Long idPlanSeleccionado = solicitud.getIdPlan();
+        Long idProgramaSeleccionado = solicitud.getIdPrograma();
+
+        if (idProgramaSeleccionado != null && idProgramaSeleccionado == 0) {
+            idProgramaSeleccionado = null;
+        }
+
+        return nuevaBajaRepository.validarPlanYProgramaPorMatricula(
+                solicitud.getMatriculaUsuario(),
+                idPlanSeleccionado,
+                idProgramaSeleccionado);
     }
 
     private boolean contieneTexto(String origen, String texto) {
