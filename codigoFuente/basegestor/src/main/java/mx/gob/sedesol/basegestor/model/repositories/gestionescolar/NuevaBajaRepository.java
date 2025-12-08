@@ -267,6 +267,7 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @SuppressWarnings("unchecked")
     public BajaMatriculaDetalleDTO consultarDatosPorMatricula(String matricula) {
         String consulta = "SELECT DISTINCT "
+                + " CONCAT(tp.sso_nombre, ' ', tp.sso_apellidoPaterno, IF(tp.sso_apellidoMaterno != '', CONCAT(' ', tp.sso_apellidoMaterno),'')) AS nombre_completo, "
                 + " tpa.id_plan, "
                 + " sem.id as id_semestre, "
                 + " bloque.id as id_bloque, "
@@ -296,12 +297,13 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
 
         Object[] fila = resultados.get(0);
         BajaMatriculaDetalleDTO dto = new BajaMatriculaDetalleDTO();
-        dto.setIdPlan(obtenerLong(fila[0]));
-        dto.setIdSemestre(obtenerLong(fila[1]));
-        dto.setIdBloque(obtenerLong(fila[2]));
-        dto.setIdPrograma(obtenerLong(fila[3]));
-        dto.setPeriodo(obtenerCadena(fila[4]));
-        dto.setIdEvento(obtenerLong(fila[5]));
+        dto.setNombreCompleto(obtenerCadena(fila[0]));
+        dto.setIdPlan(obtenerLong(fila[1]));
+        dto.setIdSemestre(obtenerLong(fila[2]));
+        dto.setIdBloque(obtenerLong(fila[3]));
+        dto.setIdPrograma(obtenerLong(fila[4]));
+        dto.setPeriodo(obtenerCadena(fila[5]));
+        dto.setIdEvento(obtenerLong(fila[6]));
         return dto;
     }
 

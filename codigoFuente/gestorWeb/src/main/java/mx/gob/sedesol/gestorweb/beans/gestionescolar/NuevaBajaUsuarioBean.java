@@ -41,6 +41,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private String motivo;
     private String quienAplica;
     private String numeroSolicitud;
+    private String nombreEstudiante;
 
     private List<NodoDTO> catalogoTiposBaja;
     private List<SelectItem> tiposBaja;
@@ -102,6 +103,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     public void onMatriculaChange() {
         limpiarDatosDependientes();
         deshabilitarListas();
+        nombreEstudiante = null;
 
         if (matriculaUsuario == null || matriculaUsuario.trim().isEmpty()) {
             actualizarHabilitacionSecuencial();
@@ -119,6 +121,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             }
 
             matriculaValida = true;
+            nombreEstudiante = datos.getNombreCompleto();
             idPlan = datos.getIdPlan();
             semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
 
@@ -151,6 +154,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             LOGGER.error("Error al consultar datos por matrícula", ex);
             agregarMsgError("gw.gestionescolar.altasbajas.nuevaBaja.mensaje.matriculaDatosNoValidos", null, sistema);
             deshabilitarListas();
+            nombreEstudiante = null;
         }
         actualizarHabilitacionSecuencial();
     }
@@ -206,6 +210,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         motivo = null;
         quienAplica = null;
         numeroSolicitud = null;
+        nombreEstudiante = null;
         mensajeMatriculaNoRegistrada = null;
 
         esTipoDefinitiva = false;
@@ -525,6 +530,14 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     public void setNumeroSolicitud(String numeroSolicitud) {
         this.numeroSolicitud = numeroSolicitud;
+    }
+
+    public String getNombreEstudiante() {
+        return nombreEstudiante;
+    }
+
+    public void setNombreEstudiante(String nombreEstudiante) {
+        this.nombreEstudiante = nombreEstudiante;
     }
 
     public List<SelectItem> getTiposBaja() {

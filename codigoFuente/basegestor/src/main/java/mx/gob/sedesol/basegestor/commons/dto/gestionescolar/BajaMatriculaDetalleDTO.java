@@ -12,6 +12,7 @@ public class BajaMatriculaDetalleDTO implements Serializable {
     private Long idPrograma;
     private String periodo;
     private Long idEvento;
+    private String nombreCompleto;
 
     public Long getIdPlan() {
         return idPlan;
@@ -59,5 +60,13 @@ public class BajaMatriculaDetalleDTO implements Serializable {
 
     public void setIdEvento(Long idEvento) {
         this.idEvento = idEvento;
+    }
+
+    public String getNombreCompleto() {
+        return nombreCompleto;
+    }
+
+    public void setNombreCompleto(String nombreCompleto) {
+        this.nombreCompleto = nombreCompleto;
     }
 }
