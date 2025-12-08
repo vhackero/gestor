@@ -382,6 +382,11 @@ public class MenuGestorBean extends BaseBean {
 		logger.info("Navegando a pantalla de reenvío de correos");
 		return ConstantesGestorWeb.NAVEGA_REENVIO_CORREO;
 	}
+	
+	public String navegaInscripcionManual() {
+		logger.info("Navegando a pantalla de inscripción manual");
+		return ConstantesGestorWeb.NAVEGA_INSCRIPCION_MANUAL;
+	}
 
 	public String navegaAmbientesVirtualesAprendizaje() {
 		logger.info("Navegando a pantalla de ambientes virtuales de aprendizaje");

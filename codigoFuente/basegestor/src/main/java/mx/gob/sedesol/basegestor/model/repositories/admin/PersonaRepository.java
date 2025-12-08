@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.model.repositories.admin;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
@@ -14,7 +15,7 @@ public class PersonaRepository implements IPersonaRepository {
 	private EntityManager entityManager;
 
 	@Override
-	public Long obtenerIdPersonaPorMatricula(String matricula) {
+	public Optional<Long> obtenerIdPersonaPorMatricula(String matricula) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT ");
 		sql.append("    tp.id_persona ");
@@ -24,22 +25,7 @@ public class PersonaRepository implements IPersonaRepository {
 		List<?> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("matricula", matricula)
 				.getResultList();
 
-		if (resultados.isEmpty()) {
-			return null;
-		}
-
-		Object row = resultados.get(0);
-		return getLongValue(row);
-	}
-
-	private Long getLongValue(Object value) {
-		if (value == null) {
-			return null;
-		}
-		if (value instanceof Number) {
-			return ((Number) value).longValue();
-		}
-		return null;
+		return resultados.stream().findFirst().map(v -> ((Number) v).longValue());
 	}
 
 }

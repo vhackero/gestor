@@ -427,6 +427,18 @@
 														</h:commandLink></li>
 												</sec:authorize>
 											</ui:fragment>
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('INS_MANUAL')}">
+												<sec:authorize access="hasPermission(null, 'INS_MANUAL') ">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaInscripcionManual}"
+															title="Inscripción manual">
+															<i class="fa fa-book"></i>
+															<span class="m-label">Inscripción manual</span>
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+
 										</ul></li>
 								</sec:authorize>
 							</ui:fragment>

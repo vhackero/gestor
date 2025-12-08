@@ -36,4 +36,9 @@ public class EnvioCorreoServiceImpl implements EnvioCorreoService {
 		return envioCorreoRepository.obtenerMateriasParaReenvioCorreo(idPersona, idProcesoInscripcion);
 	}
 
+	@Override
+	public boolean existeRegistroResultadoEnvioCorreoInscripcion(Long idPersona, Long idProcesoInscripcion) {
+		return envioCorreoRepository.existeRegistroResultadoEnvioCorreoInscripcion(idPersona, idProcesoInscripcion);
+	}
+
 }

@@ -106,4 +106,19 @@ public class EnvioCorreoRepository implements IEnvioCorreoRepository {
 		);
 	}
 
+	@Override
+	public boolean existeRegistroResultadoEnvioCorreoInscripcion(Long idPersona, Long idProcesoInscripcion) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT COUNT(*) ");
+		sql.append("FROM tbl_envio_correo ");
+		sql.append("WHERE id_persona = :idPersona ");
+		sql.append("  AND id_proceso_inscripcion = :idProcesoInscripcion ");
+
+		Object resultado = entityManager.createNativeQuery(sql.toString()).setParameter("idPersona", idPersona)
+				.setParameter("idProcesoInscripcion", idProcesoInscripcion).getSingleResult();
+
+		Long count = getLongValue(resultado);
+		return count != null && count > 0;
+	}
+
 }

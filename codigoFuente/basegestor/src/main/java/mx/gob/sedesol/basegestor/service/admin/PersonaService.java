@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.service.admin;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.mail.EmailException;
 
@@ -16,6 +17,8 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.RolDTO;
 import mx.gob.sedesol.basegestor.model.entities.admin.TblPersona;
 
 public interface PersonaService extends CommonService<PersonaDTO, Long> {
+	
+	Optional<Long> obtenerIdPersonaPorMatricula(String matricula);
 
 	TblPersona buscarPorNombreUsuario(String usuario);
 

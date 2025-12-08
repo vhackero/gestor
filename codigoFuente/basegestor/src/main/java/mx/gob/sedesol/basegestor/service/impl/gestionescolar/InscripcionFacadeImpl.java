@@ -102,7 +102,6 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			return;
 		}
 		boolean correoEnviado = intentarEnviarCorreoInscripcionAlEstudiante(contexto);
-
 		int estadoEnvioCorreo = obtenerEstadoEnvioCorreoInscripcion(correoEnviado);
 		registrarResultadoEnvioCorreoInscripcion(contexto, estadoEnvioCorreo);
 	}
@@ -114,8 +113,20 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private void registrarResultadoEnvioCorreoInscripcion(InscripcionContextoDTO contexto, int estadoEnvioCorreo) {
 		Long idPersona = contexto.obtenerIdPersona();
 		Long idProcesoInscripcion = contexto.obtenerIdProcesoInscripcionDesdeMateriasDisponibles();
+		
+		//Por si alguna vez eliminan una inscripcion y olvidan eliminar el registro de envio de correo
+		//se deja esta actualización
+		if (existeRegistroResultadoEnvioCorreo(idPersona, idProcesoInscripcion)) {
+			envioCorreoService.actualizarResultadoEnvioCorreoInscripcion(idPersona, idProcesoInscripcion,
+					estadoEnvioCorreo);
+		} else {
+			envioCorreoService.registrarResultadoEnvioCorreoInscripcion(idPersona, idProcesoInscripcion,
+					estadoEnvioCorreo);
+		}
+	}
 
-		envioCorreoService.registrarResultadoEnvioCorreoInscripcion(idPersona, idProcesoInscripcion, estadoEnvioCorreo);
+	private boolean existeRegistroResultadoEnvioCorreo(Long idPersona, Long idProcesoInscripcion) {
+		return envioCorreoService.existeRegistroResultadoEnvioCorreoInscripcion(idPersona, idProcesoInscripcion);
 	}
 
 	private boolean estaHabilitadoEnvioCorreoInscripcion() {
@@ -157,7 +168,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		CorreoDTO correo = crearCorreoConfirmacionInscripcion(inscripcion.getCorreo(), nombreCompleto, periodoCompleto,
 				bloquesConMaterias);
 
-		return correoElectronicoService.enviaCorreoElectronico(correo);
+		return enviarCorreo(correo);
 
 	}
 
@@ -1513,22 +1524,13 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	public boolean intentarReenviarCorreoInscripcion(ReenvioCorreoInscripcionDTO inscripcion) {
 		boolean correoEnviado = intentarReenviarCorreoInscripcionAlEstudiante(inscripcion);
 		int estadoEnvioCorreo = obtenerEstadoEnvioCorreoInscripcion(correoEnviado);
-		actualizarResultadoEnvioCorreoInscripcion(inscripcion, estadoEnvioCorreo);
+		registrarResultadoEnvioCorreo(inscripcion, estadoEnvioCorreo);
 		return correoEnviado;
-	}
-
-	private void actualizarResultadoEnvioCorreoInscripcion(ReenvioCorreoInscripcionDTO inscripcion,
-			int estadoEnvioCorreo) {
-		Long idPersona = inscripcion.getIdPersona();
-		Long idProcesoInscripcion = inscripcion.getIdProcesoInscripcion();
-
-		envioCorreoService.actualizarResultadoEnvioCorreoInscripcion(idPersona, idProcesoInscripcion,
-				estadoEnvioCorreo);
 	}
 
 	private boolean intentarReenviarCorreoInscripcionAlEstudiante(ReenvioCorreoInscripcionDTO inscripcion) {
 		CorreoDTO correoDTO = crearCorreoDTO(inscripcion);
-		return correoElectronicoService.enviaCorreoElectronico(correoDTO);
+		return enviarCorreo(correoDTO);
 
 	}
 
@@ -1544,7 +1546,6 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 				bloquesConMaterias);
 		return correoDTO;
 	}
-
 
 	private Long obtenerElPeriodoDeLaPrimerMateria(List<ReenvioCorreoMateriasDTO> materias) {
 		return materias.get(0).getPeriodo();
@@ -1577,18 +1578,40 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			List<ReenvioCorreoMateriasDTO> materias) {
 		boolean correoEnviado = intentarReenviarCorreoInscripcionAlEstudiante(inscripcion, materias);
 		int estadoEnvioCorreo = obtenerEstadoEnvioCorreoInscripcion(correoEnviado);
-		actualizarResultadoEnvioCorreoInscripcion(inscripcion, estadoEnvioCorreo);
+		registrarResultadoEnvioCorreo(inscripcion, estadoEnvioCorreo);
 		return correoEnviado;
+	}
+
+	private void registrarResultadoEnvioCorreo(ReenvioCorreoInscripcionDTO inscripcion, int estadoEnvioCorreo) {
+		if (existeRegistroResultadoEnvioCorreo(inscripcion.getIdPersona(), inscripcion.getIdProcesoInscripcion())) {
+			actualizarResultadoEnvioCorreo(inscripcion, estadoEnvioCorreo);
+		} else {
+			guardarResultadoEnvioCorreo(inscripcion, estadoEnvioCorreo);
+		}
+	}
+
+	private void guardarResultadoEnvioCorreo(ReenvioCorreoInscripcionDTO inscripcion, int estadoEnvioCorreo) {
+		envioCorreoService.registrarResultadoEnvioCorreoInscripcion(inscripcion.getIdPersona(),
+				inscripcion.getIdProcesoInscripcion(), estadoEnvioCorreo);
+	}
+
+	private void actualizarResultadoEnvioCorreo(ReenvioCorreoInscripcionDTO inscripcion, int estadoEnvioCorreo) {
+		envioCorreoService.actualizarResultadoEnvioCorreoInscripcion(inscripcion.getIdPersona(),
+				inscripcion.getIdProcesoInscripcion(), estadoEnvioCorreo);
 	}
 
 	private boolean intentarReenviarCorreoInscripcionAlEstudiante(ReenvioCorreoInscripcionDTO inscripcion,
 			List<ReenvioCorreoMateriasDTO> materias) {
-		CorreoDTO correoDTO = crearCorreoDTO(inscripcion, materias);
-		return correoElectronicoService.enviaCorreoElectronico(correoDTO);
-
+		CorreoDTO correo = crearContenidoDelCorreo(inscripcion, materias);
+		return enviarCorreo(correo);
 	}
-	
-	private CorreoDTO crearCorreoDTO(ReenvioCorreoInscripcionDTO inscripcion, List<ReenvioCorreoMateriasDTO> materias) {
+
+	private boolean enviarCorreo(CorreoDTO correoDTO) {
+		return correoElectronicoService.enviaCorreoElectronico(correoDTO);
+	}
+
+	private CorreoDTO crearContenidoDelCorreo(ReenvioCorreoInscripcionDTO inscripcion,
+			List<ReenvioCorreoMateriasDTO> materias) {
 		Long periodo = obtenerElPeriodoDeLaPrimerMateria(materias);
 		String periodoCompleto = construirPeriodo(periodo);
 		String nombreCompleto = construirNombreCompleto(inscripcion);
@@ -1599,6 +1622,5 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 				bloquesConMaterias);
 		return correoDTO;
 	}
-
 
 }

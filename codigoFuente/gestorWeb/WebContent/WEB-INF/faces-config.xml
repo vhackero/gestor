@@ -475,6 +475,12 @@
 			<to-view-id>/views/private/inscripcion/reenvioCorreo.xhtml</to-view-id>
 			<redirect />
 		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>INSCRIPCION_MANUAL</from-outcome>
+			<to-view-id>/views/private/inscripcion/inscripcionManual.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
 
 		<navigation-case>
 			<from-outcome>REG_NUEVO_EVENT_CAP</from-outcome>

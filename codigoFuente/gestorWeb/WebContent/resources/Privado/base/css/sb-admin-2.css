@@ -5556,3 +5556,8 @@ a.terminos-condiciones{
 .ml-1{
 	margin-left:1.5rem !important;
 }
+
+.flex-bottom{
+	display:flex;
+	align-items: flex-end;
+}
