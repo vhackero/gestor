@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ModificacionInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ReenvioCorreoInscripcionDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionParamNueva;
@@ -937,7 +938,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		sql.append("        AND tec.id_persona = ti.Idpersona  ");
 		sql.append("     INNER JOIN tbl_persona tp ");
 		sql.append("         ON tp.id_persona = tec.id_persona ");
-		sql.append("        AND rgp.id_plan = ti.idplan "); 
+		sql.append("        AND rgp.id_plan = ti.idplan ");
 		sql.append("        AND tpi.proceso_inscripcion_id = rgp.id_proceso_inscripcion ");
 		sql.append("WHERE tpi.proceso_inscripcion_id = :idProcesoInscripcionSeleccionado ");
 		sql.append("  AND (:idPlanSeleccionado IS NULL OR ti.idplan = :idPlanSeleccionado) ");
@@ -948,8 +949,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		Query query = entityManager.createNativeQuery(sql.toString()).setParameter("estatusEnvio", estatusEnvio)
 				.setParameter("idProcesoInscripcionSeleccionado", idProcesoInscripcionSeleccionado)
 				.setParameter("idPlanSeleccionado", idPlanSeleccionado)
-				.setParameter("idProgramaSeleccionado", idProgramaSeleccionado)
-				.setParameter("matricula", matricula);
+				.setParameter("idProgramaSeleccionado", idProgramaSeleccionado).setParameter("matricula", matricula);
 
 		// Paginación
 		query.setFirstResult(first); // offset
@@ -967,7 +967,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		dto.setNombre((String) row[2]);
 		dto.setPrimerApellido((String) row[3]);
 		dto.setSegundoApellido((String) row[4]);
-		dto.setIdUsuario((String)row[5]);
+		dto.setIdUsuario((String) row[5]);
 		return dto;
 	}
 
@@ -1003,8 +1003,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		Query query = entityManager.createNativeQuery(sql.toString()).setParameter("estatusEnvio", estatusEnvio)
 				.setParameter("idProcesoInscripcionSeleccionado", idProcesoInscripcionSeleccionado)
 				.setParameter("idPlanSeleccionado", idPlanSeleccionado)
-				.setParameter("idProgramaSeleccionado", idProgramaSeleccionado)
-				.setParameter("matricula", matricula);
+				.setParameter("idProgramaSeleccionado", idProgramaSeleccionado).setParameter("matricula", matricula);
 
 		Number total = (Number) query.getSingleResult();
 		return total.longValue();
@@ -1018,6 +1017,68 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 			return ((Number) value).longValue();
 		}
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<ModificacionInscripcionDTO> obtenerMateriasParaModificarInscripcion(Long idPersona,
+			Long idProcesoInscripcion) {
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT ");
+		sql.append("    ti.id                          AS idInscripciones, ");
+		sql.append("    ti.asignatura                 AS programa, ");
+		sql.append("    tfdp.tipo                     AS tipoPrograma, ");
+		sql.append("    (SELECT tmc2.nombre ");
+		sql.append("       FROM tbl_malla_curricular tmc2 ");
+		sql.append("      WHERE tmc2.id = tmc.id_padre) AS semestre, ");
+		sql.append("    tmc.nombre                    AS bloque ");
+		sql.append("FROM tbl_inscripciones ti ");
+		sql.append("    INNER JOIN tbl_procesos_inscripcion tpi ");
+		sql.append("        ON ti.fecha_registro >= tpi.fecha_inicio ");
+		sql.append("       AND ti.fecha_registro <= tpi.fecha_fin ");
+		sql.append("    INNER JOIN rel_proceso_inscipcion_planesyprogramas rgp ");
+		sql.append("        ON rgp.id_programa = ti.idprograma ");
+		sql.append("    INNER JOIN tbl_ficha_descriptiva_programa tfdp ");
+		sql.append("        ON ti.idprograma = tfdp.id_programa ");
+		sql.append("    INNER JOIN tbl_malla_curricular tmc ");
+		sql.append("        ON tmc.id = tfdp.id_eje_capacitacion ");
+		sql.append("       AND rgp.id_plan = ti.idplan ");
+		sql.append("       AND tpi.proceso_inscripcion_id = rgp.id_proceso_inscripcion ");
+		sql.append("WHERE ti.Idpersona = :idPersona ");
+		sql.append("  AND tpi.proceso_inscripcion_id = :idProcesoInscripcionSeleccionado ");
+
+		List<Object[]> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("idPersona", idPersona)
+				.setParameter("idProcesoInscripcionSeleccionado", idProcesoInscripcion).getResultList();
+
+		return resultados.stream().map(this::mapearModificacionInscripcion).collect(Collectors.toList());
+	}
+
+	private ModificacionInscripcionDTO mapearModificacionInscripcion(Object[] row) {
+		ModificacionInscripcionDTO dto = new ModificacionInscripcionDTO();
+
+		dto.setIdInscripciones(getLongValue(row[0]));
+		dto.setPrograma((String) row[1]);
+		dto.setTipoPrograma((String) row[2]);
+		dto.setSemestre((String) row[3]);
+		dto.setBloque((String) row[4]);
+		dto.setChecked(true);
+
+		return dto;
+	}
+
+	@Override
+	public void eliminarInscripcionesPorIds(List<Long> ids) {
+		if (ids == null || ids.isEmpty()) {
+			return;
+		}
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM tbl_inscripciones ");
+		sql.append("WHERE id IN (:ids)");
+
+		entityManager.createNativeQuery(sql.toString()).setParameter("ids", ids).executeUpdate();
+
 	}
 
 }

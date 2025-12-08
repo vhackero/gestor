@@ -481,6 +481,12 @@
 			<to-view-id>/views/private/inscripcion/inscripcionManual.xhtml</to-view-id>
 			<redirect />
 		</navigation-case>
+		
+		<navigation-case>
+			<from-outcome>NAVEGA_MODIFICACION_INSCRIPCION</from-outcome>
+			<to-view-id>/views/private/inscripcion/modificacionInscripcion.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
 
 		<navigation-case>
 			<from-outcome>REG_NUEVO_EVENT_CAP</from-outcome>

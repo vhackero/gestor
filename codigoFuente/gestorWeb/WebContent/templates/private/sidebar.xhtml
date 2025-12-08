@@ -438,6 +438,17 @@
 														</h:commandLink></li>
 												</sec:authorize>
 											</ui:fragment>
+												<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('MOD_INS')}">
+												<sec:authorize access="hasPermission(null, 'MOD_INS') ">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaModificacionInscripcion}"
+															title="Inscripción manual">
+															<i class="fa fa-book"></i>
+															<span class="m-label">Modificar inscripción</span>
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
 
 										</ul></li>
 								</sec:authorize>

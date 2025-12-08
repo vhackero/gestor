@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.FiltroReenvioCorreoInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ModificacionInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ReenvioCorreoInscripcionDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
@@ -54,8 +55,13 @@ public interface InscripcionesService extends CommonService<Convocatoria, Intege
 
 	String generarClaveProceso(String nombre);
 
-	List<ReenvioCorreoInscripcionDTO> obtenerInscripcionesParaReenvioConPaginacion(FiltroReenvioCorreoInscripcionDTO filtro, int first, int pageSize);
+	List<ReenvioCorreoInscripcionDTO> obtenerInscripcionesParaReenvioConPaginacion(
+			FiltroReenvioCorreoInscripcionDTO filtro, int first, int pageSize);
 
 	Long contarInscripcionesParaReenvio(FiltroReenvioCorreoInscripcionDTO filtro);
+
+	List<ModificacionInscripcionDTO> obtenerMateriasParaModificarInscripcion(Long idPersona, Long idProcesoInscripcion);
+
+	void eliminarInscripcionesPorIds(List<Long> ids);
 
 }

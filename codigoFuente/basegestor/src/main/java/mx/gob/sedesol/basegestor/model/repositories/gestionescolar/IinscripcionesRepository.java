@@ -3,6 +3,7 @@ package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ModificacionInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ReenvioCorreoInscripcionDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
@@ -62,5 +63,9 @@ public interface IinscripcionesRepository {
 
 	Long contarInscripcionesParaReenvio(Long idProcesoInscripcionSeleccionado, Long estatusEnvio,
 			Long idPlanSeleccionado, Long idProgramaSeleccionado, String matricula);
+
+	List<ModificacionInscripcionDTO> obtenerMateriasParaModificarInscripcion(Long idPersona, Long idProcesoInscripcion);
+	
+	void eliminarInscripcionesPorIds(List<Long> ids);
 
 }

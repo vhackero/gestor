@@ -387,6 +387,11 @@ public class MenuGestorBean extends BaseBean {
 		logger.info("Navegando a pantalla de inscripción manual");
 		return ConstantesGestorWeb.NAVEGA_INSCRIPCION_MANUAL;
 	}
+	
+	public String navegaModificacionInscripcion() {
+		logger.info("Navegando a pantalla de modificación de inscripción");
+		return ConstantesGestorWeb.NAVEGA_MODIFICACION_INSCRIPCION;
+	}
 
 	public String navegaAmbientesVirtualesAprendizaje() {
 		logger.info("Navegando a pantalla de ambientes virtuales de aprendizaje");

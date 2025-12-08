@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.FiltroReenvioCorreoInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ModificacionInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ReenvioCorreoInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
@@ -259,6 +260,18 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		String matricula = obtenerMatricula(filtro);
 		return inscripcionesRepository.contarInscripcionesParaReenvio(idProcesoInscripcion, estatusEnvio, idPlan,
 				idPrograma, matricula);
+	}
+
+	@Override
+	public List<ModificacionInscripcionDTO> obtenerMateriasParaModificarInscripcion(Long idPersona,
+			Long idProcesoInscripcion) {
+		return inscripcionesRepository.obtenerMateriasParaModificarInscripcion(idPersona, idProcesoInscripcion);
+	}
+
+	@Transactional
+	@Override
+	public void eliminarInscripcionesPorIds(List<Long> ids) {
+		inscripcionesRepository.eliminarInscripcionesPorIds(ids);
 	}
 
 }
