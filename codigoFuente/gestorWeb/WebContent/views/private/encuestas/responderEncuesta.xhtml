@@ -7,9 +7,9 @@
 	xmlns:f="http://java.sun.com/jsf/core">
 
 	<ui:define name="breadcrumb">
-		<li>Encuesta</li>
+		<li>#{sistema.obtenerTexto('gw.encuestas.responder.breadcrumb')}</li>
 
-		<li class="active"><p:outputLabel value="Contestar encuesta" />
+		<li class="active"><p:outputLabel value="#{sistema.obtenerTexto('gw.encuestas.responder.titulo')}" />
 		</li>
 
 	</ui:define>
@@ -96,7 +96,7 @@
 				</p:commandLink>
 			</div>
 		</p:panel>
-		<p:dialog id="dlg_mensaje_sistema" header="Mensaje del sistema"
+		<p:dialog id="dlg_mensaje_sistema" header="#{sistema.obtenerTexto('gw.encuestas.responder.mensajeSistema')}"
 			responsive="true" closable="true" appendTo="@(body)"
 			draggable="false" modal="true" height="80" width="480"
 			resizable="false" visible="#{contestarEncuestaBean.renderFinDialog}">

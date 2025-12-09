@@ -10,15 +10,15 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>Analisis de datos - Reporte de eventos de capacitación</li>
-		<li class="active">Reporte de eventos de capacitación</li>
+		<li>#{sistema.obtenerTexto('gw.analisis.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.titulo')}</li>
 	</ui:define>
 	<ui:define name="content">
 		<h:form id="bevtCapFrm">
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
 			<f:validateBean disabled="true">
-				<p:panel header="Búsqueda de datos del evento del capacitación"
+				<p:panel header="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.busqueda.titulo')}"
 					showCollapseLink="false" collapsible="false">
 
 					<div class="form-group">
@@ -26,7 +26,7 @@
 						<div class="row">
 
 							<div class="col-md-3">
-								<p:outputLabel value="Tipo de competencia:" for="tpoCmpSel"
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.tipoCompetencia')}" for="tpoCmpSel"
 									styleClass="bloque" />
 								<p:selectOneMenu id="tpoCmpSel" required="true"
 									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
@@ -45,7 +45,7 @@
 							</div>
 
 							<div class="col-md-3">
-								<p:outputLabel value="Eje de capacitación:" for="ejeCapSel"
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.ejeCapacitacion')}" for="ejeCapSel"
 									styleClass="bloque" />
 								<p:selectOneMenu id="ejeCapSel" required="true"
 									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
@@ -62,7 +62,7 @@
 							</div>
 
 							<div class="col-md-3">
-								<p:outputLabel value="Modalidad" for="modalidad"
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.modalidad')}" for="modalidad"
 									styleClass="bloque" />
 								<p:selectOneMenu id="modalidad" required="true"
 									requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
@@ -78,7 +78,7 @@
 								</p:selectOneMenu>
 							</div>
 							<div class="col-md-3">
-								<p:outputLabel value="Estatus" for="estatus" styleClass="bloque" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.estatus')}" for="estatus" styleClass="bloque" />
 								<p:selectOneMenu id="estatus"
 									value="#{reporteEventosCapacitacionBean.filtro.catEstadoEventoCapacitacion}"
 									converter="catalogoComunConverter" styleClass="col-xs-12">
@@ -96,7 +96,7 @@
 						<div class="row">
 
 							<div class="col-md-3">
-								<p:outputLabel value="Tipo de rengo de fechas" for="tipofecha"
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.tipoRangoFecha')}" for="tipofecha"
 									styleClass="bloque" />
 								<f:validateBean disabled="true">
 									<p:selectOneMenu id="tipofecha" required="false"
@@ -120,11 +120,11 @@
 							</div>
 
 							<div class="col-md-3">
-								<p:outputLabel value="Fecha	registro:" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.fechaRegistro')}" />
 							</div>
 							<div class="col-md-3">
 
-								<p:outputLabel value="Inicial:" styleClass="bloque" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.fechaInicial')}" styleClass="bloque" />
 								<p:calendar id="fc_fechaInicial" navigator="true"
 									value="#{reporteEventosCapacitacionBean.filtro.fechaInicial}"
 									styleClass="requerido"
@@ -137,7 +137,7 @@
 							</div>
 
 							<div class="col-md-3">
-								<p:outputLabel value="Final:" styleClass="bloque" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.fechaFinal')}" styleClass="bloque" />
 								<p:calendar navigator="true"
 									value="#{reporteEventosCapacitacionBean.filtro.fechaFinal}"
 									styleClass="requerido" id="fc_fechaFinal"
@@ -156,7 +156,7 @@
 						<div class="row">
 							<div class="col-md-12">
 								<p:commandButton styleClass="btn btn-primary pull-right"
-									value="Buscar" update="tblEventosCapacitacion"
+									value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.buscar')}" update="tblEventosCapacitacion"
 									action="#{reporteEventosCapacitacionBean.busquedaEventosCapacitacionCriterios}"
 									ajax="false" />
 							</div>
@@ -185,10 +185,10 @@
 
 					<f:facet name="header">
 						<p:outputLabel
-							value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+							value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.instruccion')}" />
 
 						<p:commandButton id="toggler" type="button"
-							value="Columna de datos" styleClass="pull-right btn btn-primary"
+							value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.columnaDatos')}" styleClass="pull-right btn btn-primary"
 							icon="ui-icon-carat-1-s" />
 						<p:columnToggler datasource="tblEventosCapacitacion"
 							trigger="toggler" />
@@ -199,7 +199,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[0]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Nombre del programa de capacitacion" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.col.nombrePrograma')}" />
 						</f:facet>
 
 						<p:outputLabel
@@ -211,7 +211,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[1]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Clave del EC" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.col.claveEc')}" />
 						</f:facet>
 
 						<p:outputLabel value="#{eventoCapacitacion.cveEventoCap}" />
@@ -220,7 +220,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[2]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Nombre del EC" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.col.nombreEc')}" />
 						</f:facet>
 
 						<p:outputLabel value="#{eventoCapacitacion.nombreEc}" />
@@ -229,7 +229,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[3]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Tipo Competencia" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.columnas.tipoCompetencia')}" />
 						</f:facet>
 
 						<p:outputLabel
@@ -240,7 +240,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[4]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Eje capacitación" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.columnas.ejeCapacitacion')}" />
 						</f:facet>
 
 						<p:outputLabel
@@ -251,7 +251,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[5]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Modalidad" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.columnas.modalidad')}" />
 						</f:facet>
 
 						<p:outputLabel
@@ -261,7 +261,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[6]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Estatus" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.columnas.estatus')}" />
 						</f:facet>
 
 						<p:outputLabel
@@ -271,7 +271,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[7]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Fecha Inicial" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.columnas.fechaInicial')}" />
 						</f:facet>
 
 						<p:outputLabel value="#{eventoCapacitacion.fechaInicial}" />
@@ -281,7 +281,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[8]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Fecha Final" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.columnas.fechaFinal')}" />
 						</f:facet>
 
 						<p:outputLabel value="#{eventoCapacitacion.fechaFinal}" />
@@ -291,7 +291,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[9]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Nivel de enseñanza" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.col.nivelEnsenanza')}" />
 						</f:facet>
 
 						<p:outputLabel
@@ -303,7 +303,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[10]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Dirigido a" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.col.dirigidoA')}" />
 						</f:facet>
 						<p:outputLabel
 							value="#{reporteEventosCapacitacionBean.obtenerDirigidoA(eventoCapacitacion.idDirigido)}" />
@@ -313,7 +313,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[11]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Destinatarios" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.col.destinatarios')}" />
 						</f:facet>
 						<p:outputLabel
 							value="#{reporteEventosCapacitacionBean.obtenerTipoDestinatario(eventoCapacitacion.idDestinatario)}" />
@@ -323,7 +323,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[12]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Categoria " />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.col.categoria')}" />
 						</f:facet>
 						<p:outputLabel value="#{eventoCapacitacion.categoriaEC.nombre}" />
 					</p:column>
@@ -333,7 +333,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[13]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Coordinador Academico " />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.col.coordinador')}" />
 						</f:facet>
 						<p:outputLabel
 							value="#{eventoCapacitacion.responsableCoordinadorAcademico.
@@ -345,7 +345,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[14]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Numero Participantes" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.col.numeroParticipantes')}" />
 						</f:facet>
 						<p:outputLabel
 							value="#{reporteEventosCapacitacionBean.obtenerValorDeMapaNumeroParticipantes(eventoCapacitacion.id)}" />
@@ -358,7 +358,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[15]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Hombres" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.col.hombres')}" />
 						</f:facet>
 						<p:outputLabel
 							value="#{reporteEventosCapacitacionBean.obtenerValorDeMapaGeneroNumeroParticipantes(eventoCapacitacion.id,GENERO.MASCULINO.valor)}" />
@@ -369,7 +369,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[16]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Mujeres" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.col.mujeres')}" />
 						</f:facet>
 						<p:outputLabel
 							value="#{reporteEventosCapacitacionBean.obtenerValorDeMapaGeneroNumeroParticipantes(eventoCapacitacion.id,GENERO.FEMENINO.valor)}" />
@@ -381,7 +381,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[17]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Porcentaje de asistencias" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.col.porcentajeAsistencias')}" />
 						</f:facet>
 						<p:outputLabel
 							value="#{reporteEventosCapacitacionBean.obtenerValorDeMapaPorcentajeAsistencia(eventoCapacitacion.id)}" />
@@ -393,7 +393,7 @@
 					<p:column visible="#{reporteEventosCapacitacionBean.visible[18]}"
 						exportable="true">
 						<f:facet name="header">
-							<p:outputLabel value="Tipo de evento de capacitación" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteEventosCap.col.tipoEvento')}" />
 						</f:facet>
 						<p:outputLabel
 							value="#{eventoCapacitacion.fichaDescriptivaPrograma.catTipoEventoEc.nombre}" />
@@ -411,7 +411,7 @@
 						<p:graphicImage library="images" width="150" height="35"
 							name="analisis_datos/descargar.png" styleClass="foto" />
 					</p:commandLink>
-					<p:outputLabel value="Reporte de excel:" styleClass="pull-right"
+					<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.reporteExcel')}" styleClass="pull-right"
 						for="btnReporte" />
 				</div>
 				<div class="col-md-2" />
@@ -419,12 +419,12 @@
 					<p:selectOneMenu id="informePrediseñado" required="false"
 						value="#{reporteEventosCapacitacionBean.informePredisenadoSeleccionado}"
 						autoWidth="false" styleClass="col-xs-12">
-						<f:selectItem itemLabel="Seleccione" itemValue="#{null}" />
+						<f:selectItem itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" itemValue="#{null}" />
 					</p:selectOneMenu>
 
 				</div>
 				<div class="col-md-5">
-					<p:commandButton value="Generar"
+					<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.generar')}"
 						styleClass="btn btn-primary pull-right">
 					</p:commandButton>
 

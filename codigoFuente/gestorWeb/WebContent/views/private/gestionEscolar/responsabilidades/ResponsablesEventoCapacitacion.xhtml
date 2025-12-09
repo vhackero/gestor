@@ -11,17 +11,17 @@
 
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
-		<li class="active">Responsables de eventos académicos</li>
+		<li class="active">#{sistema.obtenerTexto('gw.gestionescolar.responsables.eventos.titulo')}</li>
 	</ui:define>
 
 	<ui:define name="content">
-		<h1>Responsables de eventos académicos</h1>
+		<h1>#{sistema.obtenerTexto('gw.gestionescolar.responsables.eventos.titulo')}</h1>
 		<hr />
 		<p:ajaxStatus onstart="PF('dialogLayout').show()"
 			onsuccess="PF('dialogLayout').hide()" />
 		<h:form id="formResponsables">
 			<p:panel
-				header="Responsables de eventos académicos">
+				header="#{sistema.obtenerTexto('gw.gestionescolar.responsables.eventos.titulo')}">
 				<div class="row">
 					<div class="col-md-4 col-xs-12">
 						<p:selectOneMenu
@@ -92,12 +92,12 @@
 			<p:dialog id="dialogConf" modal="true" position="center" responsive="true"
 				resizable="false"
 				closable="false" draggable="false" widgetVar="modConf"
-				styleClass="medidaModal" header="Eliminar responsable">
+				styleClass="medidaModal" header="#{sistema.obtenerTexto('gw.gestionescolar.responsables.dialogo.eliminar.titulo')}">
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-12">
 							<p:outputLabel
-								value="¿Está seguro que desea eliminar al responsable seleccionado?" />
+								value="#{sistema.obtenerTexto('gw.gestionescolar.responsables.dialogo.eliminar.mensaje')}" />
 
 						</div>
 					</div>

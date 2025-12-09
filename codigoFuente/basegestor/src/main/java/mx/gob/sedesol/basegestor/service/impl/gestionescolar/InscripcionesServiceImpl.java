@@ -195,6 +195,22 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 		}
 		return lista;
 	}
+	
+	@Override
+	public List<InscripcionPlanesProgramas> consultarPlanProgramaPorProceso(Long procesoInscripcionId) {
+		List<InscripcionPlanesProgramas> lista = inscripcionesRepository
+				.consultarPlanProgramaPorProceso(procesoInscripcionId);
+		if (lista == null || lista.isEmpty()) {
+			return new ArrayList<>();
+		}
+		return lista;
+	}
+	
+	@Override
+	public void actualizarPlanesProgramasProceso(Long procesoInscripcionId,
+			List<InscripcionPlanesProgramas> planesProgramas) {
+		inscripcionesRepository.actualizarPlanesProgramasProceso(procesoInscripcionId, planesProgramas);
+	}
 
 	@Override
 	public List<TblFichaDescriptivaPrograma> consultarPrograma(InscripcionParamNueva inscripcionParamNueva) {

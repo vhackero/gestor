@@ -245,4 +245,6 @@ public final class ConstantesGestor {
 	public static final String TEXTO_CORREO_NO_ENVIADO_INSCRIPCION = "No enviado";
 	public static final Integer PANEL_BUSQUEDA_INSCRIPCION_REENVIO_CORREO = 1;
 	public static final Integer PANEL_MATERIAS_REENVIO_CORREO = 2;
+	public static final int CANTIDAD_MAXIMA_MATERIAS_REPROBADAS = 5;
+	public static final long CANTIDAD_MAXIMA_MATERIAS_REPROBADAS_OPTATIVAS = 3;
 }

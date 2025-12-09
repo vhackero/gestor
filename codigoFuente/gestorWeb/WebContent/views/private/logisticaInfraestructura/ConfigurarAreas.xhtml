@@ -17,7 +17,7 @@
 			<h:outputText rendered="#{areasBean.editConfigArea}"
 				value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.editarConfig')}" />
 			<h:outputText rendered="#{areasBean.verConfigArea}"
-				value="Ver configuración de área" /></li>
+				value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.verConfig')}" /></li>
 	</ui:define>
 	<ui:define name="content">
 		<p:ajaxStatus onstart="PF('dialogLayout').show()"
@@ -39,7 +39,7 @@
 			</h:panelGrid>
 
 			<h:panelGrid rendered="#{areasBean.verConfigArea}">
-				<h1>Ver configuración de área</h1>
+				<h1>#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.verConfig')}</h1>
 			</h:panelGrid>
 
 			<hr />
@@ -437,7 +437,7 @@
 									itemLabel="#{d.nombre}" itemValue="#{d.id}" />
 							</p:selectCheckboxMenu>
 							<p:outputLabel rendered="#{areasBean.verConfigArea}"
-								value="Distribuciones seleccionadas:" styleClass="bloque" />
+								value="#{sistema.obtenerTexto('gw.configuracionAreas.etiqueta.distribucionesSeleccionadas')}" styleClass="bloque" />
 							<h:outputText rendered="#{areasBean.verConfigArea}"
 								value="#{areasBean.obtenerDistribuciones()}" />
 						</div>
@@ -473,7 +473,7 @@
 						<div class="col-md-4 col-xs-12">
 							<!-- Longitud de campo -->
 							<p:inputText required="true" type="email"
-								requiredMessage="Dato requerido."
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 								value="#{areasBean.areaSeleccionada.emailResponsable}"
 								disabled="#{areasBean.verConfigArea}" id="emailS"
 								maxlength="150" styleClass="form-control">
@@ -496,7 +496,7 @@
 						<div class="col-md-4 col-xs-12">
 							<p:selectOneMenu id="selEst" styleClass="col-xs-12" 
 								disabled="true" required="true"
-								requiredMessage="Dato requerido."
+								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 								value="#{areasBean.areaSeleccionada.catEstatusArea.id}"
 								converter="entityConverter">
 								<p:ajax process="@this" />

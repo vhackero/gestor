@@ -8,20 +8,20 @@
 	xmlns:p="http://primefaces.org/ui">
 
 	<ui:define name="breadcrumb">
-		<li>Análisis de datos</li>
-		<li class="active">Programas</li>
+		<li>#{sistema.obtenerTexto('gw.analisis.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.analisis.graficas.programas')}</li>
 	</ui:define>
 
 	<ui:define name="content">
 		<h:form id="form">
-			<h1>Análisis de datos</h1>
+			<h1>#{sistema.obtenerTexto('gw.analisis.titulo')}</h1>
 			<hr />
 			<div class="row">
 				<div class="col-md-4">
 					<p:remoteCommand name="graficasProgramas"
 						action="#{graficasBean.totalProgramasEstatusBorrador}"
 						oncomplete="cargaGraficasProgramas(xhr, status, args); ajustaColorLabel();" />
-					<p:commandButton value="Estadisticas Programas" process="@this"
+					<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.graficas.estadisticasProgramas')}" process="@this"
 						styleClass="btn btn-primary quitaMargen" style="width: 180px"
 						onclick="graficasProgramas(); PF('modalAnalisis').show(); " />
 				</div>
@@ -30,73 +30,73 @@
 			<p:dialog widgetVar="modalAnalisis" modal="true" resizable="false"
 				draggable="false" closable="false" position="center" width="900"
 				styleClass="modalAnalisisDatos modalAbsoluto"
-				header="Programas de capacitación">
+				header="#{sistema.obtenerTexto('gw.analisis.graficas.modal.titulo')}">
 					<div class="row">
 						<div class="col-md-4 text-center fondoGris">
-							<p:outputLabel value="TOTAL" styleClass="bloque labelSuperior" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.graficas.total')}" styleClass="bloque labelSuperior" />
 							<p:outputLabel value="0" styleClass="bloque numeroGrande" id="totalProgramas" />
-							<p:outputLabel value="Programas"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.graficas.programas')}"
 								styleClass="bloque labelInferior" />
 						</div>
 						<div class="col-md-4 text-center fondoGris">
-							<p:outputLabel value="TIPO DE COMPETENCIA"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.graficas.tipoCompetencia')}"
 								styleClass="bloque labelSuperior" />
 							<p:outputLabel value="0" styleClass="bloque numeroGrande" id="totalEstrategicos" />
-							<p:outputLabel value="Estratégicos"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.graficas.estrategicos')}"
 								styleClass="bloque labelInferior" />
 						</div>
 						<div class="col-md-4 text-center fondoGris">
-							<p:outputLabel value="TIPO DE COMPETENCIA"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.graficas.tipoCompetencia')}"
 								styleClass="bloque labelSuperior" />
 							<p:outputLabel value="0" styleClass="bloque numeroGrande" id="totalGestion" />
-							<p:outputLabel value="De gestión"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.graficas.gestion')}"
 								styleClass="bloque labelInferior" />
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="PROGRAMA DE TIPO ESTRATÉGICO"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.graficas.programaEstrategico')}"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="progTipoEstrategico" class="medidaGrafica"></div>
 						</div>
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="PROGRAMA DE TIPO DE GESTIÓN"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.graficas.programaGestion')}"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="progTipoDeGestion" class="medidaGrafica"></div>
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="NUM. DE PROGRAMAS POR ÁREA RESPONSABLE"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.graficas.programasAreaResponsable')}"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="progAreaResponsable" class="medidaGrafica"></div>
 						</div>
 						<div class="col-md-6 fondoGris">
 							<p:outputLabel
-								value="NUM. DE PROGRAMAS POR TIPO DE EVENTO DE CAPACITACIÓN"
+								value="#{sistema.obtenerTexto('gw.analisis.graficas.programasTipoEvento')}"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="progTipoEventoCapacitacion" class="medidaGrafica"></div>
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="NIVEL DE CONOCIMIENTOS"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.graficas.nivelConocimientos')}"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="nivelDeConocimiento" class="medidaGrafica"></div>
 						</div>
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="NIVEL DE ENSEÑANZA"
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.graficas.nivelEnsenanza')}"
 								styleClass="bloque text-center labelSuperior" />
 							<div id="nivelDeEnsenanza" class="medidaGrafica"></div>
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="MODALIDAD" styleClass="bloque text-center labelSuperior" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.graficas.modalidad')}" styleClass="bloque text-center labelSuperior" />
 							<div id="modalidad" class="medidaGrafica"></div>
 						</div>
 						<div class="col-md-6 fondoGris">
-							<p:outputLabel value="ESTATUS" styleClass="bloque text-center labelSuperior" />
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.graficas.estatus')}" styleClass="bloque text-center labelSuperior" />
 							<div id="estatus" class="medidaGrafica"></div>
 						</div>
 					</div>
@@ -104,7 +104,7 @@
 				<f:facet name="footer">
 					<div class="row">
 						<div class="col-md-12">
-							<p:commandButton value="Cerrar"
+							<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.cerrar')}"
 								onclick="PF('modalAnalisis').hide();"
 								styleClass="btn btn-default pull-right" />
 						</div>

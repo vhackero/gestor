@@ -39,6 +39,8 @@
 							styleClass="bloque" />
 						<p:selectOneMenu id="tipoProcesoEdit"
 							value="#{inscripocionesBean.registroSeleccionado.idTipoProceso}">
+							<p:ajax event="change" process="@this" update="@form"
+								listener="#{inscripocionesBean.onTipoProcesoEditChange}" />
 							<f:selectItems value="#{inscripocionesBean.listaTipoProceso}"
 								var="tipo" itemLabel="#{tipo.nombre}"
 								itemValue="#{tipo.idProceso}" />
@@ -53,7 +55,6 @@
 							<f:selectItems value="#{inscripocionesBean.listaEstatus}" />
 						</p:selectOneMenu>
 					</div>
-
 
 				</div>
 				<div class="row">
@@ -90,7 +91,24 @@
 							placeholder="Seleccionar" />
 					</div>
 				</div>
-			</div>
+					</div>
+				<ui:fragment rendered="#{inscripocionesBean.mostrarPlanProgramaEdicion}">
+					<div class="row">
+						<div class="col-md-4 col-xs-12">
+							<p:outputLabel styleClass="bloque" value="Plan / Programa:" />
+							<p:selectCheckboxMenu id="planProgramaEditar"
+								value="#{inscripocionesBean.planesProgramasEdicionSeleccionados}"
+								styleClass="col-xs-12"
+								label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}">
+								<f:selectItems
+									value="#{inscripocionesBean.listaPlanProgramasEdicion}"
+									var="planPrograma"
+									itemLabel="#{planPrograma.nombrePlan} &gt; #{planPrograma.nombreSemestre} &gt; #{planPrograma.nombreBloque} &gt; #{planPrograma.nombrePrograma}"
+									itemValue="#{planPrograma}" />
+							</p:selectCheckboxMenu>
+						</div>
+					</div>
+				</ui:fragment>
 				<div class="form-group text-right">
 					<p:commandButton value="Guardar"
 					    actionListener="#{inscripocionesBean.guardarCambios}" 

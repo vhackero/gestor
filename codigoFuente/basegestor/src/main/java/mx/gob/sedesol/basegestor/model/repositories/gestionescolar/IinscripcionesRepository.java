@@ -35,9 +35,11 @@ public interface IinscripcionesRepository {
 	List<TblPlan> consultarPlan(InscripcionParamNueva inscripcionParamNueva);
 
 	List<InscripcionPlanesProgramas> consultarPlanPrograma(InscripcionParamNueva inscripcionParamNueva);
-
-	// List<TblFichaDescriptivaPrograma> consultarPrograma();
-
+	
+	List<InscripcionPlanesProgramas> consultarPlanProgramaPorProceso(Long procesoInscripcionId);
+	
+	void actualizarPlanesProgramasProceso(Long procesoInscripcionId, List<InscripcionPlanesProgramas> planesProgramas);
+	
 	List<InscripcionesTableroResumen> consultarTableroResumen(ConvocatoriaParamConsulta tableroParamConsulta);
 
 	List<InscripcionesConsultaResumen> consultarFiltros(ConvocatoriaParamConsulta tableroParamConsulta);

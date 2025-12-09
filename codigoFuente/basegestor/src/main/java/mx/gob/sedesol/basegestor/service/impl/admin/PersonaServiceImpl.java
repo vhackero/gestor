@@ -179,11 +179,6 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 		return mapper.map(personas, personasDto);
 	}
 
-	public List<PersonaDTO> obtenerTodasLasPersonas() {
-		List<TblPersona> personas = personaRepo.findAll();
-		return mapper.map(personas, personasDto);
-	}
-
 	@Override
 	public PersonaDTO buscarPorId(Long idPersona) {
 		TblPersona personaEnt = personaRepo.findOne(idPersona);
@@ -1147,42 +1142,16 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 	}
 
 	private boolean correoExisteAlGuardar(String correo) {
-		List<String> listaDeCorreos = obtenerCorreosDePersonas(obtenerTodasLasPersonas());
-		for (String personaCorreo : listaDeCorreos) {
-			if (personaCorreo.equals(correo)) {
-				return true;
-			}
-		}
-		return false;
+		Optional<PersonaCorreoDTO> personaCorreoOptional = Optional.ofNullable(personaCorreoService.buscaPersonaCorreoElectronico(correo));
+		return personaCorreoOptional.isPresent();
 	}
 
 	private boolean correoExisteAlActualizar(String correoNuevo, String correoDePersonaEnBD,
 			ResultadoDTO<PersonaDTO> resultado) {
 		if (correoNuevo.equals(correoDePersonaEnBD)) {
 			return false;
-		} else {
-			List<String> listaDeCorreos = obtenerCorreosDePersonas(obtenerTodasLasPersonas());
-			for (String correoDeLaLista : listaDeCorreos) {
-				if (correoNuevo.equals(correoDeLaLista)) {
-					return true;
-				}
-			}
 		}
-		return false;
-
-	}
-
-	private List<String> obtenerCorreosDePersonas(List<PersonaDTO> listaPersonas) {
-		List<String> listaCorreos = new ArrayList<>();
-		for (PersonaDTO personaDTO : listaPersonas) {
-			if (ObjectUtils.isNotNull(personaDTO.getPersonaCorreos())) {
-				if (!personaDTO.getPersonaCorreos().isEmpty()) {
-					listaCorreos.add(personaDTO.getPersonaCorreos().get(0).getCorreoElectronico());
-				}
-			}
-
-		}
-		return listaCorreos;
+		return correoExisteAlGuardar(correoNuevo);
 	}
 
 	private void validacionComun(PersonaDTO personaDto, ResultadoDTO<PersonaDTO> resultado) {
