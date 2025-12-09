@@ -525,7 +525,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 				+ "INNER JOIN des_sisi_gestor.tbl_malla_curricular tmc ON tmc.id_plan = tp.id_plan AND tmc.activo = 1\r\n"
 				+ "INNER JOIN tbl_malla_curricular mcr ON mcr.id = tfd.id_eje_capacitacion \r\n"
 				+ "WHERE tc.convocatoria_id = :idConvocatoria AND tp.id_plan = :idPlan \r\n"
-				+ "order by tp.id_plan, (SELECT mcrs.nombre FROM tbl_malla_curricular mcrs WHERE mcrs.id = mcr.id_padre), mcr.nombre";
+				+ "order by tp.id_plan, semestre, mcr.nombre";
 
 		String consulta2 = "SELECT DISTINCT (rcpp.id_plan), tp.nombre plan\r\n"
 				+ "FROM des_sisi_gestor.tbl_convocatoria tc\r\n"
@@ -563,6 +563,36 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 			}
 		}
 
+		return lista;
+	}
+	
+	@Override
+	public List<InscripcionPlanesProgramas> consultarPlanProgramaPorProceso(Long procesoInscripcionId) {
+		List<InscripcionPlanesProgramas> lista = new ArrayList<>();
+		if (procesoInscripcionId == null) {
+			return lista;
+		}
+
+		String consulta = "SELECT DISTINCT tpi.convocatoria_id, tp.id_plan pll, tp.nombre plan, tfd.id_programa, "
+				+ "tfd.nombre_tentativo programa, rpi.id_plan, tp.nombre, mcr.nombre bloque, "
+				+ "(SELECT mcrs.nombre FROM tbl_malla_curricular mcrs WHERE mcrs.id = mcr.id_padre) semestre "
+				+ "FROM tbl_procesos_inscripcion tpi "
+				+ "INNER JOIN rel_proceso_inscipcion_planesyprogramas rpi ON rpi.id_proceso_inscripcion = tpi.proceso_inscripcion_id "
+				+ "INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_programa = rpi.id_programa AND tfd.id_plan = rpi.id_plan "
+				+ "INNER JOIN tbl_planes tp ON tp.id_plan = rpi.id_plan "
+				+ "INNER JOIN tbl_malla_curricular mcr ON mcr.id = tfd.id_eje_capacitacion "
+				+ "WHERE tpi.proceso_inscripcion_id = :procesoId";
+
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("procesoId", procesoInscripcionId);
+		List<Object[]> listaQuery = query.getResultList();
+
+		if (!listaQuery.isEmpty()) {
+			for (Object[] obj : listaQuery) {
+				InscripcionPlanesProgramas convocatoria = mapeoNivelComp(obj);
+				lista.add(convocatoria);
+			}
+		}
 		return lista;
 	}
 
@@ -920,6 +950,39 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 	    } catch (Exception e) {
 	        throw new RuntimeException("Error al eliminar el proceso de inscripción y sus relaciones", e);
 	    }
+	}
+	
+	@Override
+	@Transactional
+	public void actualizarPlanesProgramasProceso(Long procesoInscripcionId,
+			List<InscripcionPlanesProgramas> planesProgramas) {
+		if (procesoInscripcionId == null) {
+			return;
+		}
+
+		String deleteRelacionesQuery = "DELETE FROM rel_proceso_inscipcion_planesyprogramas WHERE id_proceso_inscripcion = :procesoId";
+		entityManager.createNativeQuery(deleteRelacionesQuery).setParameter("procesoId", procesoInscripcionId)
+				.executeUpdate();
+
+		if (planesProgramas == null || planesProgramas.isEmpty()) {
+			return;
+		}
+
+		String insertRelacion = "INSERT INTO rel_proceso_inscipcion_planesyprogramas "
+				+ "(id_proceso_inscripcion, id_plan, id_programa, fecha_modificacion) "
+				+ "VALUES (:idProceso, :idPlan, :idPrograma, :fchModificacion)";
+
+		Timestamp fechaModificacion = Timestamp.valueOf(LocalDateTime.now());
+
+		for (Object elemento : planesProgramas) {
+			int[] ids = obtenerIdsPlanPrograma(elemento);
+			if (ids[0] <= 0 || ids[1] <= 0) {
+				continue;
+			}
+			entityManager.createNativeQuery(insertRelacion).setParameter("idProceso", procesoInscripcionId)
+					.setParameter("idPlan", ids[0]).setParameter("idPrograma", ids[1])
+					.setParameter("fchModificacion", fechaModificacion).executeUpdate();
+		}
 	}
 
 	

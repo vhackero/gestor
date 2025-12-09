@@ -239,4 +239,6 @@ public final class ConstantesGestor {
 	public static final String ASUNTO_POR_DEFECTO_CORREO_INSCRIPCION = "Inscripción";
 	public static final String REMITENTE_CORREO_INSCRIPCION = "REMITENTE_CORREO_INSCRIPCION";
 	public static final String NOMBRE_POR_DEFECTO_REMITENTE_CORREO_INSCRIPCION = "Remitente";
+	public static final int CANTIDAD_MAXIMA_MATERIAS_REPROBADAS = 5;
+	public static final long CANTIDAD_MAXIMA_MATERIAS_REPROBADAS_OPTATIVAS = 3;
 }

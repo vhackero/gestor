@@ -78,6 +78,7 @@ public class InscripocionesBean extends BaseBean {
 	private static final long serialVersionUID = 5929433407465074144L;
 
 	private static final Logger logger = Logger.getLogger(InscripocionesBean.class);
+	private static final String ID_TIPO_PROCESO_EXTRAORDINARIO = "2";
 
 	@ManagedProperty("#{convocatoriaService}")
 	private ConvocatoriaService convocatoriaService;
@@ -104,6 +105,12 @@ public class InscripocionesBean extends BaseBean {
 	List<InscripcionesConsultaResumen> listaFiltrosResumenOG;
 	
 	private List<InscripcionPlanesProgramas> listaPlanProgramas; //PlanesProgramas
+	
+	private List<InscripcionPlanesProgramas> listaPlanProgramasEdicion = new ArrayList<>();
+	
+	private List<InscripcionPlanesProgramas> planesProgramasEdicionSeleccionados = new ArrayList<>();
+	
+	private boolean mostrarPlanProgramaEdicion;
 	
 	List<PlanesProgramas> planesProgramas;
 
@@ -167,6 +174,7 @@ public class InscripocionesBean extends BaseBean {
 		mostrarFormularioEdicion = false;
 		
 		inicializarListaSemestres();
+		ocultarPlanProgramaEdicion();
 
 		logger.info("El bean InscripocionesBean ha sido inicializado.");
 	}
@@ -335,6 +343,10 @@ public class InscripocionesBean extends BaseBean {
 			inscripcionParamNueva.setPlanesProgramas(null);
 		}
 	}
+	
+	public void onTipoProcesoEditChange() {
+		prepararPlanProgramaEdicion();
+	}
 
 	private void actualizarVisibilidadPaneles() {
 		String procesoSeleccionado = inscripcionParamNueva.getProcesoSeleccionada();
@@ -367,6 +379,89 @@ public class InscripocionesBean extends BaseBean {
 	public void consultarPlanesProgramas() {
 		listaPlanProgramas = inscripcionesService.consultarPlanPrograma(inscripcionParamNueva);
 		logger.info(listaPlanProgramas);
+	}
+	
+	private void prepararPlanProgramaEdicion() {
+		if (registroSeleccionado == null) {
+			ocultarPlanProgramaEdicion();
+			return;
+		}
+		boolean extraordinario = esTipoProcesoExtraordinario(registroSeleccionado.getIdTipoProceso());
+		mostrarPlanProgramaEdicion = extraordinario;
+		if (extraordinario) {
+			cargarPlanesProgramasEdicion();
+		} else {
+			ocultarPlanProgramaEdicion();
+		}
+	}
+	
+	private boolean esTipoProcesoExtraordinario(String idTipoProceso) {
+		return idTipoProceso != null && idTipoProceso.equals(ID_TIPO_PROCESO_EXTRAORDINARIO);
+	}
+	
+	private void cargarPlanesProgramasEdicion() {
+		if (registroSeleccionado == null || registroSeleccionado.getIdConvocatoria() == null) {
+			listaPlanProgramasEdicion = new ArrayList<>();
+			planesProgramasEdicionSeleccionados = new ArrayList<>();
+			return;
+		}
+		InscripcionParamNueva parametros = new InscripcionParamNueva();
+		parametros.setConvocatoriaSeleccionada(registroSeleccionado.getIdConvocatoria());
+		listaPlanProgramasEdicion = inscripcionesService.consultarPlanPrograma(parametros);
+		if (listaPlanProgramasEdicion == null) {
+			listaPlanProgramasEdicion = new ArrayList<>();
+		}
+
+		Long procesoId = obtenerIdProcesoSeleccionado();
+		if (procesoId == null) {
+			planesProgramasEdicionSeleccionados = new ArrayList<>();
+			return;
+		}
+		List<InscripcionPlanesProgramas> seleccionados = inscripcionesService.consultarPlanProgramaPorProceso(procesoId);
+		if (seleccionados == null || seleccionados.isEmpty()) {
+			planesProgramasEdicionSeleccionados = new ArrayList<>();
+			return;
+		}
+		planesProgramasEdicionSeleccionados = new ArrayList<>();
+		for (InscripcionPlanesProgramas seleccionado : seleccionados) {
+			InscripcionPlanesProgramas existente = buscarPlanPrograma(listaPlanProgramasEdicion, seleccionado);
+			if (existente != null) {
+				planesProgramasEdicionSeleccionados.add(existente);
+			}
+		}
+	}
+	
+	private void ocultarPlanProgramaEdicion() {
+		listaPlanProgramasEdicion = new ArrayList<>();
+		planesProgramasEdicionSeleccionados = new ArrayList<>();
+		mostrarPlanProgramaEdicion = false;
+	}
+	
+	private Long obtenerIdProcesoSeleccionado() {
+		if (registroSeleccionado == null || registroSeleccionado.getProcesoInscripcionId() == null) {
+			return null;
+		}
+		try {
+			return Long.parseLong(registroSeleccionado.getProcesoInscripcionId());
+		} catch (NumberFormatException e) {
+			logger.warn("No fue posible convertir el identificador del proceso de inscripción.", e);
+			return null;
+		}
+	}
+	
+	private InscripcionPlanesProgramas buscarPlanPrograma(List<InscripcionPlanesProgramas> origen,
+			InscripcionPlanesProgramas objetivo) {
+		if (origen == null || objetivo == null) {
+			return null;
+		}
+		for (InscripcionPlanesProgramas planPrograma : origen) {
+			if (planPrograma.getIdPlan() != null && planPrograma.getIdPrograma() != null && objetivo.getIdPlan() != null
+					&& objetivo.getIdPrograma() != null && planPrograma.getIdPlan().equals(objetivo.getIdPlan())
+					&& planPrograma.getIdPrograma().equals(objetivo.getIdPrograma())) {
+				return planPrograma;
+			}
+		}
+		return null;
 	}
 	
 	public void consultarPrograma2() throws Exception {
@@ -450,6 +545,7 @@ public class InscripocionesBean extends BaseBean {
 		fechaFin = null;
 		listaFiltrosResumen = null;
 		listaFiltrosResumenOG = null;
+		ocultarPlanProgramaEdicion();
 
 		inicializarListaSemestres();
 		consultarConvocatorias();
@@ -504,6 +600,7 @@ public class InscripocionesBean extends BaseBean {
 	    consultarPlan();
 
 	    registroSeleccionado = registro;
+		prepararPlanProgramaEdicion();
 	    this.mostrarFormularioEdicion = true;
 	}
 
@@ -524,6 +621,10 @@ public class InscripocionesBean extends BaseBean {
 	        Long convocatoriaId = Long.parseLong(registroSeleccionado.getIdConvocatoria());
 
 	        inscripcionesService.updateProcesoInscripcion(procesoInscripcionId, nombre, fechaInicio, fechaFin, estatus, idTipoProceso, convocatoriaId);
+	        
+	        if (esTipoProcesoExtraordinario(String.valueOf(idTipoProceso))) {
+	        	inscripcionesService.actualizarPlanesProgramasProceso(procesoInscripcionId, planesProgramasEdicionSeleccionados);
+	        }
 	        
 	        // Cambiar a la página de consulta
 	        this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/cosultaInscripciones.xhtml";
@@ -911,6 +1012,23 @@ public class InscripocionesBean extends BaseBean {
 
 	public void setListaPlanProgramas(List<InscripcionPlanesProgramas> listaPlanProgramas) {
 		this.listaPlanProgramas = listaPlanProgramas;
+	}
+	
+	public List<InscripcionPlanesProgramas> getListaPlanProgramasEdicion() {
+		return listaPlanProgramasEdicion;
+	}
+	
+	public List<InscripcionPlanesProgramas> getPlanesProgramasEdicionSeleccionados() {
+		return planesProgramasEdicionSeleccionados;
+	}
+	
+	public void setPlanesProgramasEdicionSeleccionados(
+			List<InscripcionPlanesProgramas> planesProgramasEdicionSeleccionados) {
+		this.planesProgramasEdicionSeleccionados = planesProgramasEdicionSeleccionados;
+	}
+	
+	public boolean isMostrarPlanProgramaEdicion() {
+		return mostrarPlanProgramaEdicion;
 	}
 
 	public boolean isSinTiposProcesoDisponibles() {
