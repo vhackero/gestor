@@ -247,4 +247,5 @@ public final class ConstantesGestor {
 	public static final Integer PANEL_MATERIAS_REENVIO_CORREO = 2;
 	public static final int CANTIDAD_MAXIMA_MATERIAS_REPROBADAS = 5;
 	public static final long CANTIDAD_MAXIMA_MATERIAS_REPROBADAS_OPTATIVAS = 3;
+	public static final String ANIO_INSCRIPCION = "ANIO_INSCRIPCION";
 }

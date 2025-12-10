@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -115,9 +114,10 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private void registrarResultadoEnvioCorreoInscripcion(InscripcionContextoDTO contexto, int estadoEnvioCorreo) {
 		Long idPersona = contexto.obtenerIdPersona();
 		Long idProcesoInscripcion = contexto.obtenerIdProcesoInscripcionDesdeMateriasDisponibles();
-		
-		//Por si alguna vez eliminan una inscripcion y olvidan eliminar el registro de envio de correo
-		//se deja esta actualización
+
+		// Por si alguna vez eliminan una inscripcion y olvidan eliminar el registro de
+		// envio de correo
+		// se deja esta actualización
 		if (existeRegistroResultadoEnvioCorreo(idPersona, idProcesoInscripcion)) {
 			envioCorreoService.actualizarResultadoEnvioCorreoInscripcion(idPersona, idProcesoInscripcion,
 					estadoEnvioCorreo);
@@ -165,7 +165,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 		String periodoCompleto = construirPeriodo(periodo);
 		String nombreCompleto = construirNombreCompleto(inscripcion);
-		String bloquesConMaterias = construirBloquesConMateriasHtml(materiasSeleccionadas);
+		String bloquesConMaterias = construirTextoBloquesConMaterias(materiasSeleccionadas);
 
 		CorreoDTO correo = crearCorreoConfirmacionInscripcion(inscripcion.getCorreo(), nombreCompleto, periodoCompleto,
 				bloquesConMaterias);
@@ -232,7 +232,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		return parametroSistemaService.obtenerParametro(ParametrosSistemaEnum.PS_CONFIG_CORREO_CUENTA_ADMIN.getClave());
 	}
 
-	private String construirBloquesConMateriasHtml(List<InscripcionMateriasDTO> materiasSeleccionadas) {
+	private String construirTextoBloquesConMaterias(List<InscripcionMateriasDTO> materiasSeleccionadas) {
 		Map<String, List<InscripcionMateriasDTO>> materiasPorBloque = agruparMateriasPorBloqueOrdenadas(
 				materiasSeleccionadas);
 
@@ -294,7 +294,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		return html.toString();
 	}
 
-	private String construirNombreCompleto(ReenvioCorreoInscripcionDTO inscripcion) {
+	private String construirTextoNombreCompleto(ReenvioCorreoInscripcionDTO inscripcion) {
 		StringBuilder nombreCompleto = new StringBuilder();
 
 		if (inscripcion.getNombre() != null) {
@@ -1619,27 +1619,41 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private boolean intentarReenviarCorreoInscripcionAlEstudiante(ReenvioCorreoInscripcionDTO inscripcion) {
 		CorreoDTO correoDTO = crearCorreoDTO(inscripcion);
 		return enviarCorreo(correoDTO);
-
 	}
 
 	private CorreoDTO crearCorreoDTO(ReenvioCorreoInscripcionDTO inscripcion) {
 		List<ReenvioCorreoMateriasDTO> materias = obtenerMateriasReenvioCorreo(inscripcion);
-		Long periodo = obtenerElPeriodoDeLaPrimerMateria(materias);
-		String periodoCompleto = construirPeriodo(periodo);
-		String nombreCompleto = construirNombreCompleto(inscripcion);
-		String bloquesConMaterias = construirBloquesConMateriasHtml(convertirAInscripcionMateriasDTO(materias));
-		String correo = obtenerCorreoDesdeIdPersona(inscripcion.getIdPersona());
+		String anioPeriodo = construirTextoAnioPeriodo(materias);
+		String nombreCompleto = construirTextoNombreCompleto(inscripcion);
+		String bloquesConMaterias = construirTextoBloquesConMaterias(convertirAInscripcionMateriasDTO(materias));
+		String correo = obtenerCorreoDestinatario(inscripcion.getIdPersona());
 
-		CorreoDTO correoDTO = crearCorreoConfirmacionInscripcion(correo, nombreCompleto, periodoCompleto,
-				bloquesConMaterias);
-		return correoDTO;
+		return crearCorreoConfirmacionInscripcion(correo, nombreCompleto, anioPeriodo, bloquesConMaterias);
 	}
 
-	private Long obtenerElPeriodoDeLaPrimerMateria(List<ReenvioCorreoMateriasDTO> materias) {
-		return materias.get(0).getPeriodo();
+	private String construirTextoAnioPeriodo(List<ReenvioCorreoMateriasDTO> materias) {
+		Long periodo = obtenerPeriodoPrimerMateria(materias);
+		String anio = obtenerParametroSistemaAnioInscripcion();
+		return crearFormatoAnioPeriodo(anio, periodo);
 	}
 
-	private String obtenerCorreoDesdeIdPersona(Long idPersona) {
+	private String crearFormatoAnioPeriodo(String anio, Long periodo) {
+		return anio + "-" + periodo;
+	}
+
+	private String obtenerParametroSistemaAnioInscripcion() {
+		return parametroSistemaService.obtenerParametro(ConstantesGestor.ANIO_INSCRIPCION);
+	}
+
+	private Long obtenerPeriodoPrimerMateria(List<ReenvioCorreoMateriasDTO> materias) {
+		if (materias == null || materias.isEmpty()) {
+			throw new IllegalArgumentException("La lista de materias al construir el correo no puede estar vacía");
+		}
+		ReenvioCorreoMateriasDTO primerMateria = materias.get(0);
+		return primerMateria.getPeriodo();
+	}
+
+	private String obtenerCorreoDestinatario(Long idPersona) {
 		InscripcionPersonaDTO inscripcionPersona = obtenerInscripcionPersona(idPersona);
 		return inscripcionPersona.getCorreo();
 	}
@@ -1700,15 +1714,11 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 	private CorreoDTO crearContenidoDelCorreo(ReenvioCorreoInscripcionDTO inscripcion,
 			List<ReenvioCorreoMateriasDTO> materias) {
-		Long periodo = obtenerElPeriodoDeLaPrimerMateria(materias);
-		String periodoCompleto = construirPeriodo(periodo);
-		String nombreCompleto = construirNombreCompleto(inscripcion);
-		String bloquesConMaterias = construirBloquesConMateriasHtml(convertirAInscripcionMateriasDTO(materias));
-		String correo = obtenerCorreoDesdeIdPersona(inscripcion.getIdPersona());
-
-		CorreoDTO correoDTO = crearCorreoConfirmacionInscripcion(correo, nombreCompleto, periodoCompleto,
-				bloquesConMaterias);
-		return correoDTO;
+		String anioPeriodo = construirTextoAnioPeriodo(materias);
+		String nombreCompleto = construirTextoNombreCompleto(inscripcion);
+		String bloquesConMaterias = construirTextoBloquesConMaterias(convertirAInscripcionMateriasDTO(materias));
+		String correoDestinatario = obtenerCorreoDestinatario(inscripcion.getIdPersona());
+		return crearCorreoConfirmacionInscripcion(correoDestinatario, nombreCompleto, anioPeriodo, bloquesConMaterias);
 	}
 
 }

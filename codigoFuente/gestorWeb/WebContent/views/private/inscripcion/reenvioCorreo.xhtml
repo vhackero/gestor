@@ -309,27 +309,29 @@
 			resizable="false" closable="false" modal="true" width="600px"
 			widgetVar="dlgMensajeConfirmacion" header="Confirmación"
 			dynamic="true">
-			<p:outputPanel>
-				<div class="form-group">
-					<div class="row">
-						<div class="col-md-12">
-							<h:outputText styleClass="bloque"
-								value="¿Está seguro de que desea reenviar el correo de inscripción?" />
+			<h:form id="frmConfirmacion">
+				<p:outputPanel>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<h:outputText styleClass="bloque"
+									value="¿Está seguro de que desea reenviar el correo de inscripción?" />
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-12 text-right">
-						<p:commandButton value="Aceptar"
-							action="#{reenvioCorreoBean.reenviarCorreoInscripcion}"
-							ajax="true" process="@this"
-							oncomplete="PF('dlgMensajeConfirmacion').hide()"
-							styleClass="btn btn-primary pull-right" />
-						<p:commandButton value="Cancelar" styleClass="btn btn-default"
-							onclick="PF('dlgMensajeConfirmacion').hide()" />
+					<div class="row">
+						<div class="col-md-12 text-right">
+							<p:commandButton value="Aceptar"
+								action="#{reenvioCorreoBean.reenviarCorreoInscripcion}"
+								ajax="true" process="@this" update=":pnlMensaje"
+								oncomplete="PF('dlgMensajeConfirmacion').hide()"
+								styleClass="btn btn-primary pull-right" />
+							<p:commandButton value="Cancelar" styleClass="btn btn-default"
+								onclick="PF('dlgMensajeConfirmacion').hide()" />
+						</div>
 					</div>
-				</div>
-			</p:outputPanel>
+				</p:outputPanel>
+			</h:form>
 		</p:dialog>
 
 		<p:dialog appendTo="@(body)" draggable="false" position="center"
