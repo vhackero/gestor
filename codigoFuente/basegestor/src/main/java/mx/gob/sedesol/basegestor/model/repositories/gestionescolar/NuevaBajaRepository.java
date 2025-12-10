@@ -235,6 +235,18 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     }
 
     @Override
+    public Integer obtenerIdUsuarioMoodlePorPersona(Long idPersona) {
+        String consulta = "SELECT rppm.id_persona_moodle \n"
+                + "FROM rel_personas_plataformas_moodle rppm \n"
+                + "WHERE rppm.id_persona = :idPersona LIMIT 1";
+
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idPersona", idPersona);
+        List<?> resultados = query.getResultList();
+        return resultados.isEmpty() ? null : obtenerEntero(resultados.get(0));
+    }
+
+    @Override
     public Integer obtenerIdCursoMoodle(Long idEvento) {
         String consulta = "SELECT te.id_curso_lms_borrador FROM tbl_eventos te WHERE te.id_evento = :idEvento LIMIT 1";
         Query query = entityManager.createNativeQuery(consulta);
@@ -248,6 +260,18 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
         String consulta = "SELECT te.id_plataforma_lms_borrador FROM tbl_eventos te WHERE te.id_evento = :idEvento LIMIT 1";
         Query query = entityManager.createNativeQuery(consulta);
         query.setParameter("idEvento", idEvento);
+        List<?> resultados = query.getResultList();
+        return resultados.isEmpty() ? null : obtenerEntero(resultados.get(0));
+    }
+
+    @Override
+    public Integer obtenerIdPlataformaMoodlePorPersona(Long idPersona) {
+        String consulta = "SELECT rppm.id_plataforma_moodle "
+                + "FROM rel_personas_plataformas_moodle rppm "
+                + "WHERE rppm.id_persona = :idPersona "
+                + "LIMIT 1";
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idPersona", idPersona);
         List<?> resultados = query.getResultList();
         return resultados.isEmpty() ? null : obtenerEntero(resultados.get(0));
     }
