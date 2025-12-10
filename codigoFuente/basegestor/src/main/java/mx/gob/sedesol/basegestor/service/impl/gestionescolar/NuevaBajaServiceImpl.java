@@ -94,6 +94,11 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         boolean esTemporalOParcial = contieneTexto(solicitud.getNombreTipoBaja(), "temporal")
                 || contieneTexto(solicitud.getNombreTipoBaja(), "parcial");
 
+        if (esDefinitiva) {
+            aplicarBajaDefinitiva(solicitud, idPersona, motivoId, procesoId);
+            return;
+        }
+
         BajaMatriculacionDTO matriculacion = nuevaBajaRepository.consultarMatriculacionPorEvento(
                 solicitud.getMatriculaUsuario(), solicitud.getIdEvento());
         boolean matriculado = matriculacion != null && matriculacion.getIdEvento() != null && matriculacion.getIdGrupo() != null;
@@ -109,26 +114,22 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
             idGrupo = 0L;
         }
 
-        if (esDefinitiva) {
-            idPrograma = 0L;
-            idEvento = 0L;
-            idGrupo = 0L;
-        }
-
         Integer idUserEnrolmentsLms = 0;
-        Integer idUsuarioMoodle = obtenerIdUsuarioMoodleParaSuspension(esDefinitiva, idPersona,
+        Integer idUsuarioMoodle = obtenerIdUsuarioMoodleParaSuspension(false, idPersona,
                 matriculado ? matriculacion.getIdEvento() : solicitud.getIdEvento());
 
-        if (esTemporalOParcial && matriculado) {
+        if (esTemporalOParcial) {
+            if (!matriculado) {
+                throw new IllegalStateException("El usuario no está matriculado en el evento seleccionado para aplicar la baja");
+            }
             idUserEnrolmentsLms = suspenderUsuarioEnCursoMoodle(idEvento, idUsuarioMoodle);
         }
 
-        if (esDefinitiva) {
-            suspenderUsuarioCompletoEnMoodle(idUsuarioMoodle,
-                    obtenerPlataformaMoodle(idEvento, idPersona));
+        if (esSinAsignaturas && !matriculado) {
+            idPlan = solicitud.getIdPlan();
         }
 
-        int contabilizar = (matriculado || esDefinitiva || esSinAsignaturas) ? 1 : 0;
+        int contabilizar = (matriculado || esSinAsignaturas) ? 1 : 0;
 
         BajaAplicacionDTO bajaAplicacionDTO = new BajaAplicacionDTO(
                 idPersona,
@@ -162,6 +163,28 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
 
     private boolean contieneTexto(String origen, String texto) {
         return origen != null && texto != null && origen.toLowerCase().contains(texto.toLowerCase());
+    }
+
+    private void aplicarBajaDefinitiva(BajaSolicitudDTO solicitud, Long idPersona, Long motivoId, Long procesoId) {
+        Long idPlan = solicitud.getIdPlan() != null ? solicitud.getIdPlan() : 0L;
+        Integer idUsuarioMoodle = obtenerIdUsuarioMoodleParaSuspension(true, idPersona, null);
+        ParametroWSMoodleDTO plataforma = obtenerPlataformaMoodle(null, idPersona);
+        suspenderUsuarioCompletoEnMoodle(idUsuarioMoodle, plataforma);
+
+        BajaAplicacionDTO bajaAplicacionDTO = new BajaAplicacionDTO(
+                idPersona,
+                motivoId,
+                procesoId,
+                idPlan,
+                0L,
+                0L,
+                0L,
+                0,
+                solicitud.getQuienAplica(),
+                1,
+                solicitud.getNumeroSolicitud());
+
+        nuevaBajaRepository.insertarBaja(bajaAplicacionDTO);
     }
 
     private Integer suspenderUsuarioEnCursoMoodle(Long idEvento, Integer idUsuarioMoodle) {
