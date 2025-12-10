@@ -168,20 +168,23 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
     private void aplicarBajaDefinitiva(BajaSolicitudDTO solicitud, Long idPersona, Long motivoId, Long procesoId) {
         Long idPlan = solicitud.getIdPlan() != null ? solicitud.getIdPlan() : 0L;
         Integer[] datosMoodle = nuevaBajaRepository.obtenerIdPersonaYPlataformaMoodle(idPersona);
-        if (datosMoodle == null || datosMoodle[0] == null) {
+        Integer idPersonaMoodle = datosMoodle != null ? datosMoodle[0] : null;
+        Integer idPlataformaMoodle = datosMoodle != null ? datosMoodle[1] : null;
+
+        if (idPersonaMoodle == null) {
             throw new IllegalArgumentException("No se encontró el usuario en Moodle para suspenderlo");
         }
 
-        if (datosMoodle[1] == null) {
+        if (idPlataformaMoodle == null) {
             throw new IllegalArgumentException("No se encontró la plataforma Moodle para la baja solicitada");
         }
 
-        ParametroWSMoodleDTO plataforma = parametroWSMoodleService.buscarPorId(datosMoodle[1]);
+        ParametroWSMoodleDTO plataforma = parametroWSMoodleService.buscarPorId(idPlataformaMoodle);
         if (plataforma == null) {
             throw new IllegalArgumentException("No se encontró la configuración de plataforma Moodle para la baja");
         }
 
-        suspenderUsuarioCompletoEnMoodle(datosMoodle[0], plataforma);
+        suspenderUsuarioCompletoEnMoodle(idPersonaMoodle, plataforma);
 
         BajaAplicacionDTO bajaAplicacionDTO = new BajaAplicacionDTO(
                 idPersona,
