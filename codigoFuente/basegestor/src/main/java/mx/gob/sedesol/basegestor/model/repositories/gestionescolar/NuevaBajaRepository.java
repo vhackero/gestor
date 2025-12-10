@@ -277,6 +277,26 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     }
 
     @Override
+    public Integer[] obtenerIdPersonaYPlataformaMoodle(Long idPersona) {
+        String consulta = "SELECT rppm.id_persona_moodle, rppm.id_plataforma_moodle\n"
+                + "      FROM tbl_persona tp\n"
+                + "      JOIN rel_personas_plataformas_moodle rppm \n"
+                + "          ON rppm.id_persona = tp.id_persona\n"
+                + "      WHERE tp.id_persona = :idPersonaMatriculaIngresada";
+
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idPersonaMatriculaIngresada", idPersona);
+        List<Object[]> resultados = query.getResultList();
+
+        if (resultados.isEmpty()) {
+            return null;
+        }
+
+        Object[] fila = resultados.get(0);
+        return new Integer[]{obtenerEntero(fila[0]), obtenerEntero(fila[1])};
+    }
+
+    @Override
     @Transactional
     public void insertarBaja(BajaAplicacionDTO bajaAplicacionDTO) {
         String consulta = "INSERT INTO rel_persona_bajas (id_persona, motivo_baja_id, proceso_id, id_plan, id_programa, id_evento, id_grupo, id_user_enrolments_lms, usuario_modifico, contabilizar, solicitud)"
