@@ -12,6 +12,7 @@ public class InscripcionMateriasCursadasDTO {
 	private Double calificacionFinal;
 	private Integer estatusAprobacion;
 	private Integer creditos;
+	private String tipoPrograma;
 
 	public String getPlan() {
 		return plan;
@@ -91,5 +92,13 @@ public class InscripcionMateriasCursadasDTO {
 
 	public void setCreditos(Integer creditos) {
 		this.creditos = creditos;
+	}
+
+	public String getTipoPrograma() {
+		return tipoPrograma;
+	}
+
+	public void setTipoPrograma(String tipoPrograma) {
+		this.tipoPrograma = tipoPrograma;
 	}
 }

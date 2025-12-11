@@ -81,6 +81,7 @@ import mx.gob.sedesol.basegestor.model.especificaciones.PersonaEspecificacion;
 import mx.gob.sedesol.basegestor.model.repositories.admin.DatoSociodemograficoPersonaRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.DomicilioPersonaRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.EntidadFederativaRepo;
+import mx.gob.sedesol.basegestor.model.repositories.admin.IPersonaRepository;
 import mx.gob.sedesol.basegestor.model.repositories.admin.IUsuariosImportarRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.LoteCargaUsuarioRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.LoteUsuarioRepo;
@@ -156,6 +157,9 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 	
 	@Autowired
 	private IUsuariosImportarRepo usuariosImportarRepo;
+	
+	@Autowired
+	private IPersonaRepository personaRepository;
 
 	private ModelMapper mapper = new ModelMapper();
 
@@ -1528,6 +1532,11 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 	    }
 		exito = true;
 		return exito;
+	}
+
+	@Override
+	public Optional<Long> obtenerIdPersonaPorMatricula(String matricula) {
+		return personaRepository.obtenerIdPersonaPorMatricula(matricula);
 	}
 
 }

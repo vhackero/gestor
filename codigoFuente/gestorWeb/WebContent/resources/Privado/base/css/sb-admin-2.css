@@ -5552,3 +5552,12 @@ a.terminos-condiciones{
 .mb-0{
 	margin-bottom:0;
 }
+
+.ml-1{
+	margin-left:1.5rem !important;
+}
+
+.flex-bottom{
+	display:flex;
+	align-items: flex-end;
+}

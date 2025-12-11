@@ -1,6 +1,5 @@
 package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 
-import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -9,11 +8,11 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -23,16 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativoCompl;
+import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ModificacionInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ReenvioCorreoInscripcionDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaParamConsulta;
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaTableroResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionParamNueva;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionPlanesProgramas;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesConsultaResumen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionesTableroResumen;
-import mx.gob.sedesol.basegestor.model.entities.gestionescolar.PlanesProgramas;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoProceso;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 
@@ -165,14 +161,10 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 			return false;
 		}
 
-		String sql = "SELECT COUNT(*) "
-				+ "FROM rel_proceso_inscipcion_planesyprogramas r "
+		String sql = "SELECT COUNT(*) " + "FROM rel_proceso_inscipcion_planesyprogramas r "
 				+ "INNER JOIN tbl_procesos_inscripcion p ON p.proceso_inscripcion_id = r.id_proceso_inscripcion "
-				+ "WHERE p.convocatoria_id = :convocatoriaId "
-				+ "AND p.id_tipo_proceso = :tipoProceso "
-				+ "AND r.id_plan = :idPlan "
-				+ "AND r.id_programa = :idPrograma "
-				+ "AND p.fecha_fin >= :fechaActual";
+				+ "WHERE p.convocatoria_id = :convocatoriaId " + "AND p.id_tipo_proceso = :tipoProceso "
+				+ "AND r.id_plan = :idPlan " + "AND r.id_programa = :idPrograma " + "AND p.fecha_fin >= :fechaActual";
 
 		Query query = entityManager.createNativeQuery(sql);
 		query.setParameter("convocatoriaId", convocatoriaId);
@@ -236,29 +228,29 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 			return longitudMaximaPerfilCache;
 		}
 		try {
-			Query query = entityManager.createNativeQuery(
-					"SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.columns "
+			Query query = entityManager
+					.createNativeQuery("SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.columns "
 							+ "WHERE table_schema = DATABASE() AND table_name = 'tbl_procesos_inscripcion' "
 							+ "AND column_name = 'perfil'");
 			Object resultado = query.getSingleResult();
-				if (resultado instanceof Number) {
-					longitudMaximaPerfilCache = ((Number) resultado).intValue();
-				} else if (resultado != null) {
-					longitudMaximaPerfilCache = Integer.parseInt(resultado.toString());
-				}
+			if (resultado instanceof Number) {
+				longitudMaximaPerfilCache = ((Number) resultado).intValue();
+			} else if (resultado != null) {
+				longitudMaximaPerfilCache = Integer.parseInt(resultado.toString());
+			}
 		} catch (Exception e) {
 			System.out.println(
 					"[InscripcionesRepository] No fue posible obtener la longitud del campo perfil, se usará el valor por defecto "
 							+ LONGITUD_DEFAULT_PERFIL + ". Detalle: " + e.getMessage());
 			longitudMaximaPerfilCache = LONGITUD_DEFAULT_PERFIL;
 		}
-			if (longitudMaximaPerfilCache == null || longitudMaximaPerfilCache <= 0) {
-				longitudMaximaPerfilCache = LONGITUD_DEFAULT_PERFIL;
-			} else if (longitudMaximaPerfilCache > 0) {
-				longitudMaximaPerfilCache = Math.max(1, longitudMaximaPerfilCache);
-			}
-			return longitudMaximaPerfilCache;
+		if (longitudMaximaPerfilCache == null || longitudMaximaPerfilCache <= 0) {
+			longitudMaximaPerfilCache = LONGITUD_DEFAULT_PERFIL;
+		} else if (longitudMaximaPerfilCache > 0) {
+			longitudMaximaPerfilCache = Math.max(1, longitudMaximaPerfilCache);
 		}
+		return longitudMaximaPerfilCache;
+	}
 
 	private int[] obtenerIdsPlanPrograma(Object elemento) {
 		int[] valores = new int[] { -1, -1 };
@@ -504,8 +496,6 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		regresa.setNombreBloque(obj[7] != null ? obj[7].toString() : null);
 		regresa.setNombreSemestre(obj[8] != null ? obj[8].toString() : null);
 
-		
-
 		return regresa;
 
 	}
@@ -641,8 +631,8 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		String perfilNormalizado = prepararPerfil(inscripcionParamNueva.getPerfil());
 		inscripcionParamNueva.setPerfil(perfilNormalizado);
 		if (perfilNormalizado != null) {
-			System.out.println(
-					"[InscripcionesRepository] Perfil normalizado (alta ordinaria) longitud=" + perfilNormalizado.length());
+			System.out.println("[InscripcionesRepository] Perfil normalizado (alta ordinaria) longitud="
+					+ perfilNormalizado.length());
 		} else {
 			System.out.println("[InscripcionesRepository] Perfil normalizado (alta ordinaria) es null");
 		}
@@ -855,8 +845,8 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		String perfilNormalizado = prepararPerfil(inscripcionParamNueva.getPerfil());
 		inscripcionParamNueva.setPerfil(perfilNormalizado);
 		if (perfilNormalizado != null) {
-			System.out.println(
-					"[InscripcionesRepository] Perfil normalizado (alta extraordinaria) longitud=" + perfilNormalizado.length());
+			System.out.println("[InscripcionesRepository] Perfil normalizado (alta extraordinaria) longitud="
+					+ perfilNormalizado.length());
 		} else {
 			System.out.println("[InscripcionesRepository] Perfil normalizado (alta extraordinaria) es null");
 		}
@@ -904,52 +894,42 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		inscripcionParamNueva.setPlanProgramaBoolean(false);
 		inscripcionParamNueva.setFechaMayor(false);
 	}
-	
+
 	@Transactional
 	@Override
 	public void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId, String tipoProceso) {
-	    try {
-	        // 1. Eliminar registros relacionados en tbl_terminosycondiciones
-	        String deleteTerminosQuery = "DELETE FROM tbl_terminosycondiciones WHERE id_proceso_inscripcion = ?";
-	        entityManager.createNativeQuery(deleteTerminosQuery)
-	                     .setParameter(1, procesoInscripcionId)
-	                     .executeUpdate();
+		try {
+			// 1. Eliminar registros relacionados en tbl_terminosycondiciones
+			String deleteTerminosQuery = "DELETE FROM tbl_terminosycondiciones WHERE id_proceso_inscripcion = ?";
+			entityManager.createNativeQuery(deleteTerminosQuery).setParameter(1, procesoInscripcionId).executeUpdate();
 
-	        // 2. Eliminar registros relacionados en tbl_encuestas_contestadas
-	        String deleteEncuestasQuery = "DELETE FROM tbl_encuestas_contestadas WHERE id_proceso_inscripcion = ?";
-	        entityManager.createNativeQuery(deleteEncuestasQuery)
-	                     .setParameter(1, procesoInscripcionId)
-	                     .executeUpdate();
+			// 2. Eliminar registros relacionados en tbl_encuestas_contestadas
+			String deleteEncuestasQuery = "DELETE FROM tbl_encuestas_contestadas WHERE id_proceso_inscripcion = ?";
+			entityManager.createNativeQuery(deleteEncuestasQuery).setParameter(1, procesoInscripcionId).executeUpdate();
 
-	        // 3. Eliminar registros relacionados en tbl_dispersiones
-	        String deleteDispersionesQuery = "DELETE FROM tbl_dispersiones WHERE id_proceso_inscripcion = ?";
-	        entityManager.createNativeQuery(deleteDispersionesQuery)
-	                     .setParameter(1, procesoInscripcionId)
-	                     .executeUpdate();    
-            //4. Eliminar registros en rel_proceso_inscipcion_planesyprogramas
-            String deleteRelacionesQuery = "DELETE FROM rel_proceso_inscipcion_planesyprogramas WHERE id_proceso_inscripcion = ?";
-            entityManager.createNativeQuery(deleteRelacionesQuery)
-                                                 .setParameter(1, procesoInscripcionId)
-                                                 .executeUpdate();
-	        
-	        if (tipoProceso.equalsIgnoreCase("Ordinario")) {
-	        	
-	            // 5. Eliminar registros en tbl_inscripcion_resumen
-		        String deleteResumenQuery = "DELETE FROM tbl_inscripcion_resumen WHERE id_convocatoria = ?";
-		        entityManager.createNativeQuery(deleteResumenQuery)
-		                     .setParameter(1, convocatoriaId)
-		                     .executeUpdate();
+			// 3. Eliminar registros relacionados en tbl_dispersiones
+			String deleteDispersionesQuery = "DELETE FROM tbl_dispersiones WHERE id_proceso_inscripcion = ?";
+			entityManager.createNativeQuery(deleteDispersionesQuery).setParameter(1, procesoInscripcionId)
+					.executeUpdate();
+			// 4. Eliminar registros en rel_proceso_inscipcion_planesyprogramas
+			String deleteRelacionesQuery = "DELETE FROM rel_proceso_inscipcion_planesyprogramas WHERE id_proceso_inscripcion = ?";
+			entityManager.createNativeQuery(deleteRelacionesQuery).setParameter(1, procesoInscripcionId)
+					.executeUpdate();
 
-	        }
-	        
-	        // 6. Eliminar el registro principal en tbl_procesos_inscripcion
-	        String deletePrincipalQuery = "DELETE FROM tbl_procesos_inscripcion WHERE proceso_inscripcion_id = ?";
-	        entityManager.createNativeQuery(deletePrincipalQuery)
-	                     .setParameter(1, procesoInscripcionId)
-	                     .executeUpdate();
-	    } catch (Exception e) {
-	        throw new RuntimeException("Error al eliminar el proceso de inscripción y sus relaciones", e);
-	    }
+			if (tipoProceso.equalsIgnoreCase("Ordinario")) {
+
+				// 5. Eliminar registros en tbl_inscripcion_resumen
+				String deleteResumenQuery = "DELETE FROM tbl_inscripcion_resumen WHERE id_convocatoria = ?";
+				entityManager.createNativeQuery(deleteResumenQuery).setParameter(1, convocatoriaId).executeUpdate();
+
+			}
+
+			// 6. Eliminar el registro principal en tbl_procesos_inscripcion
+			String deletePrincipalQuery = "DELETE FROM tbl_procesos_inscripcion WHERE proceso_inscripcion_id = ?";
+			entityManager.createNativeQuery(deletePrincipalQuery).setParameter(1, procesoInscripcionId).executeUpdate();
+		} catch (Exception e) {
+			throw new RuntimeException("Error al eliminar el proceso de inscripción y sus relaciones", e);
+		}
 	}
 	
 	@Override
@@ -985,240 +965,183 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		}
 	}
 
-	
-//	
-//	@Override
-//	public List<ConvocatoriaTableroResumen> consultarTableroResumen(Integer convocatoriaId) {
-//
-//		List<ConvocatoriaTableroResumen> lista = new ArrayList<ConvocatoriaTableroResumen>();
-//
-//		String consulta = "SELECT tc.nombre nombre_convocatoria, tp.nombre nombre_plan,  COUNT(tpa.id_persona_aspirante) total FROM tbl_persona_aspirante tpa\r\n"
-//				+ "INNER JOIN tbl_planes tp ON tp.id_plan = tpa.id_plan\r\n"
-//				+ "INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpa.id_convocatoria\r\n"
-//				+ "WHERE tpa.id_convocatoria = :convocatoriaId \r\n"
-//				+ "GROUP BY tpa.id_plan";
-//
-//		Query query = entityManager.createNativeQuery(consulta);
-//		query.setParameter("convocatoriaId", convocatoriaId);
-//		
-//		List<Object[]> listaQuery = query.getResultList();
-//
-//		if (!listaQuery.isEmpty()) {
-//			for (Object[] obj : listaQuery) {
-//
-//				ConvocatoriaTableroResumen convocatoria = mapeoTablero(obj);
-//				lista.add(convocatoria);
-//
-//			}
-//		}
-//
-//		return lista;
-//
-//	}
-//	
-//	
-//	
-//	
-//	private ConvocatoriaTableroResumen mapeoTablero(Object[] obj) {
-//
-//		ConvocatoriaTableroResumen regresa = new ConvocatoriaTableroResumen();
-//		
-//		regresa.setNombreConvocatoria(obj[0].toString());
-//		regresa.setNombrePlan(obj[1].toString());
-//		BigInteger total = (BigInteger) obj[2];
-//		regresa.setTotal(total);
-//
-//		return regresa;
-//	}
-//	
-//	
-//	@Override
-//	public List<Convocatoria> consultarConvocatoriasFiltros(ConvocatoriaParamConsulta convocatoriaParamConsulta) {
-//
-//		List<Convocatoria> lista = new ArrayList<Convocatoria>();
-//
-////		String consulta = "SELECT tb.convocatoria_id,tb.nombre,tb.nombre_corto,tb.descripcion,tb.fecha_apertura,tb.fecha_cierre,\r\n"
-////				+ "tb.semestre,tb.tipo,tb.url_convocatoria,tb.activo,tb.fecha_alta,tb.fecha_modificacion,tb.cupo_limite FROM tbl_convocatoria tb WHERE tb.activo = 1";
-//		
-//		String consulta = "SELECT DISTINCT(tb.convocatoria_id),tb.nombre,tb.nombre_corto,tb.descripcion,tb.fecha_apertura,tb.fecha_cierre, tb.semestre,tb.tipo,tb.url_convocatoria,tb.activo,tb.fecha_alta,tb.fecha_modificacion,tb.cupo_limite \r\n"
-//				+ "FROM tbl_convocatoria tb\r\n"
-//				+ "         INNER JOIN rel_convocatoria_planesyprogramas rcpp ON rcpp.id_convocatoria = tb.convocatoria_id\r\n"
-//				+ "         INNER JOIN cat_nivel_ensenanza_programa cne ON cne.id = rcpp.id_nivel_ensenanza ";
-//		
-//		String queryFiltro = obtieneFiltro(convocatoriaParamConsulta);
-//		
-//		String es = " AND cne.activo = 1";
-//		
-//		Query query = entityManager.createNativeQuery(consulta.concat(queryFiltro).concat(es));
-//
-//		List<Object[]> listaQuery = query.getResultList();
-//
-//		if (!listaQuery.isEmpty()) {
-//			for (Object[] obj : listaQuery) {
-//
-//				Convocatoria convocatoria = mapeo2(obj);
-//				lista.add(convocatoria);
-//
-//			}
-//		}
-//
-//		return lista;
-//
-//	}
-//	
-//	private String obtieneFiltro(ConvocatoriaParamConsulta convocatoriaParamConsulta) {
-//		
-//		StringBuilder filtro = new StringBuilder("");
-//		boolean isPrimerFiltro = false;
-//		
-//		
-//		if (!("").equals(convocatoriaParamConsulta.getConsulNombreConvocatoria())) {
-//			filtro.append(validaOperador(isPrimerFiltro)+"tb.nombre = '").append(convocatoriaParamConsulta.getConsulNombreConvocatoria()).append("'").append(" ");
-//			isPrimerFiltro = true;
-//		}
-//		
-//		if (!("").equals(convocatoriaParamConsulta.getConsulNombreCorto())) {
-//			filtro.append(validaOperador(isPrimerFiltro)+"tb.nombre_corto = '").append(convocatoriaParamConsulta.getConsulNombreCorto()).append("'").append(" ");
-//			isPrimerFiltro = true;
-//		}
-//		
-//		if (!("").equals(convocatoriaParamConsulta.getValueConvocatoriaEstatus())) {
-//			filtro.append(validaOperador(isPrimerFiltro)+"tb.activo = ").append(convocatoriaParamConsulta.getValueConvocatoriaEstatus()).append(" ");
-//			isPrimerFiltro = true;
-//		}
-//		
-//		if (!("0").equals(convocatoriaParamConsulta.getConsulNivelEducativo())) {
-//			filtro.append(validaOperador(isPrimerFiltro)+"rcpp.id_nivel_ensenanza = ").append(convocatoriaParamConsulta.getConsulNivelEducativo()).append(" ");
-//			isPrimerFiltro = true;
-//		}
-//		
-//		
-//		obtieneFiltroFechas(filtro, convocatoriaParamConsulta, isPrimerFiltro);
-//		
-//		return filtro.toString();
-//		
-//	}
-//	
-//	private StringBuilder obtieneFiltroFechas(StringBuilder filtro, ConvocatoriaParamConsulta filter, boolean isPrimerFiltro) {
-//		
-//		if (!filter.getConsulFechaApertura().trim().equals("") && !filter.getConsulFechaCierre().trim().equals("")) {
-//			filtro.append(validaOperador(isPrimerFiltro)+"tb.fecha_apertura BETWEEN '")
-//			.append(filter.getConsulFechaApertura()).append("' AND '").append(filter.getConsulFechaApertura()).append("'");
-//		}
-//		
-//		if (!filter.getConsulFechaApertura().trim().equals("") && !filter.getConsulFechaCierre().trim().equals("")) {
-//			filtro.append(validaOperador(isPrimerFiltro)+"tb.fecha_cierre BETWEEN '")
-//			.append(filter.getConsulFechaCierre()).append("' AND '").append(filter.getConsulFechaCierre()).append("'");
-//		}
-//		
-//		return filtro;
-//		
-//	}
-//	
-//	 public static String validaOperador(boolean filtro) {
-//			String operador = "";
-//			if (!filtro) {
-//				operador = " WHERE ";
-//			} else {
-//				operador = " AND ";
-//			}			
-//			return operador;
-//		}
-//	
-//	private Convocatoria mapeo2(Object[] obj) {
-//
-//		Convocatoria regresa = new Convocatoria();
-//
-//		regresa.setConvocatoriaId((Integer) obj[0]);
-//		regresa.setNombre(obj[1].toString());
-//		regresa.setNombreCorto(obj[2].toString());
-//		regresa.setDescripcion(obj[3].toString());
-//		regresa.setFecha_Apertura((java.util.Date) obj[4]);
-//		regresa.setFechaCierre((java.util.Date) obj[5]);
-//		regresa.setSemestre((Integer) obj[6]);
-//		regresa.setTipo( obj[7].toString());
-//		regresa.setUrlConvocatoria(obj[8].toString());
-//		regresa.setActivo( obj[9].toString());
-//		regresa.setFechaAlta((java.util.Date) obj[10]);
-//		regresa.setFechaModificacion((java.util.Date) obj[11]);
-//		regresa.setCupoLimite((Integer) obj[12]);
-//
-//		return regresa;
-//	}
-//	
-//	
-//	@Override
-//	public List<ConvocatoriaNivelEducativo> consultarNivelEducativo() {
-//
-//		List<ConvocatoriaNivelEducativo> lista = new ArrayList<ConvocatoriaNivelEducativo>();
-//
-//		String consulta = "SELECT cne.id, cne.nombre FROM cat_nivel_ensenanza_programa cne WHERE cne.activo = 1";
-//
-//		Query query = entityManager.createNativeQuery(consulta);
-//
-//		List<Object[]> listaQuery = query.getResultList();
-//
-//		if (!listaQuery.isEmpty()) {
-//			for (Object[] obj : listaQuery) {
-//
-//				ConvocatoriaNivelEducativo convocatoria = mapeoNivel(obj);
-//				lista.add(convocatoria);
-//
-//			}
-//		}
-//
-//		return lista;
-//
-//	}
-//	
-//	private ConvocatoriaNivelEducativo mapeoNivel(Object[] obj) {
-//
-//		ConvocatoriaNivelEducativo regresa = new ConvocatoriaNivelEducativo();
-//
-//		regresa.setId((Integer) obj[0]);
-//		regresa.setNombre(obj[1].toString());
-//
-//		return regresa;
-//	}
-//	
-//	
-//	@Override
-//	public void altaConvocatorias() {
-//
-//		List<ConvocatoriaNivelEducativo> lista = new ArrayList<ConvocatoriaNivelEducativo>();
-//
-//		String consulta = "SELECT cne.id, cne.nombre FROM cat_nivel_ensenanza_programa cne WHERE cne.activo = 1";
-//
-//		Query query = entityManager.createNativeQuery(consulta);
-//
-//		 query.getResultList();
-//
-//		
-//		
-//
-//	}
-//	
-//	@Transactional
-//	@Override
-//	public void eliminarConvocatorias(Convocatoria elminarConvo) {
-//
-//		String consulta = "DELETE FROM tbl_convocatoria WHERE convocatoria_id = :id";
-//		String consulta2 = "DELETE FROM rel_convocatoria_planesyprogramas WHERE id_convocatoria = :id";
-//
-//		Query query2 = entityManager.createNativeQuery(consulta2);
-//        query2.setParameter("id", elminarConvo.getConvocatoriaId());
-//        query2.executeUpdate();
-//        
-//		Query query = entityManager.createNativeQuery(consulta);
-//        query.setParameter("id", elminarConvo.getConvocatoriaId());
-//        query.executeUpdate();
-// 
-//	}
-
 	@Override
 	public List<InscripcionesTableroResumen> altaInscripciones(InscripcionParamNueva inscripcionParamNueva) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<ReenvioCorreoInscripcionDTO> obtenerInscripcionesParaReenvioConPaginacion(
+			Long idProcesoInscripcionSeleccionado, Long estatusEnvio, Long idPlanSeleccionado,
+			Long idProgramaSeleccionado, String matricula, int first, int pageSize) {
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT ");
+		sql.append("       tp.id_persona                 AS idPersona, ");
+		sql.append("       tpi.proceso_inscripcion_id    AS procesoInscripcion, ");
+		sql.append("       tp.sso_nombre                 AS nombre, ");
+		sql.append("       tp.sso_apellidoPaterno        AS primerApellido, ");
+		sql.append("       tp.sso_apellidoMaterno        AS segundoApellido, ");
+		sql.append("       tp.sso_idUsuario              AS usuario ");
+		sql.append("FROM tbl_inscripciones ti ");
+		sql.append("     INNER JOIN tbl_procesos_inscripcion tpi ");
+		sql.append("         ON ti.fecha_registro >= tpi.fecha_inicio ");
+		sql.append("        AND ti.fecha_registro <= tpi.fecha_fin ");
+		sql.append("     INNER JOIN rel_proceso_inscipcion_planesyprogramas rgp ");
+		sql.append("         ON rgp.id_programa = ti.idprograma ");
+		sql.append("     INNER JOIN tbl_ficha_descriptiva_programa tfdp ");
+		sql.append("         ON ti.idprograma = tfdp.id_programa ");
+		sql.append("     INNER JOIN tbl_malla_curricular tmc ");
+		sql.append("         ON tmc.id = tfdp.id_eje_capacitacion ");
+		sql.append("     INNER JOIN tbl_envio_correo tec ");
+		sql.append("         ON tec.id_proceso_inscripcion = tpi.proceso_inscripcion_id ");
+		sql.append("        AND tec.envio_correo = :estatusEnvio ");
+		sql.append("        AND tec.id_persona = ti.Idpersona  ");
+		sql.append("     INNER JOIN tbl_persona tp ");
+		sql.append("         ON tp.id_persona = tec.id_persona ");
+		sql.append("        AND rgp.id_plan = ti.idplan ");
+		sql.append("        AND tpi.proceso_inscripcion_id = rgp.id_proceso_inscripcion ");
+		sql.append("WHERE tpi.proceso_inscripcion_id = :idProcesoInscripcionSeleccionado ");
+		sql.append("  AND (:idPlanSeleccionado IS NULL OR ti.idplan = :idPlanSeleccionado) ");
+		sql.append("  AND (:idProgramaSeleccionado IS NULL OR ti.idprograma = :idProgramaSeleccionado) ");
+		sql.append("  AND (:matricula IS NULL OR tp.sso_idUsuario = :matricula) ");
+		sql.append("GROUP BY ti.Idpersona ");
+
+		Query query = entityManager.createNativeQuery(sql.toString()).setParameter("estatusEnvio", estatusEnvio)
+				.setParameter("idProcesoInscripcionSeleccionado", idProcesoInscripcionSeleccionado)
+				.setParameter("idPlanSeleccionado", idPlanSeleccionado)
+				.setParameter("idProgramaSeleccionado", idProgramaSeleccionado).setParameter("matricula", matricula);
+
+		// Paginación
+		query.setFirstResult(first); // offset
+		query.setMaxResults(pageSize); // límite
+
+		List<Object[]> resultados = query.getResultList();
+
+		return resultados.stream().map(this::mapearReenvioCorreoInscripcion).collect(Collectors.toList());
+	}
+
+	private ReenvioCorreoInscripcionDTO mapearReenvioCorreoInscripcion(Object[] row) {
+		ReenvioCorreoInscripcionDTO dto = new ReenvioCorreoInscripcionDTO();
+		dto.setIdPersona(getLongValue(row[0]));
+		dto.setIdProcesoInscripcion(getLongValue(row[1]));
+		dto.setNombre((String) row[2]);
+		dto.setPrimerApellido((String) row[3]);
+		dto.setSegundoApellido((String) row[4]);
+		dto.setIdUsuario((String) row[5]);
+		return dto;
+	}
+
+	@Override
+	public Long contarInscripcionesParaReenvio(Long idProcesoInscripcionSeleccionado, Long estatusEnvio,
+			Long idPlanSeleccionado, Long idProgramaSeleccionado, String matricula) {
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT COUNT(DISTINCT ti.Idpersona) ");
+		sql.append("FROM tbl_inscripciones ti ");
+		sql.append("     INNER JOIN tbl_procesos_inscripcion tpi ");
+		sql.append("         ON ti.fecha_registro >= tpi.fecha_inicio ");
+		sql.append("        AND ti.fecha_registro <= tpi.fecha_fin ");
+		sql.append("     INNER JOIN rel_proceso_inscipcion_planesyprogramas rgp ");
+		sql.append("         ON rgp.id_programa = ti.idprograma ");
+		sql.append("     JOIN tbl_ficha_descriptiva_programa tfdp ");
+		sql.append("         ON ti.idprograma = tfdp.id_programa ");
+		sql.append("     JOIN tbl_malla_curricular tmc ");
+		sql.append("         ON tmc.id = tfdp.id_eje_capacitacion ");
+		sql.append("     JOIN tbl_envio_correo tec ");
+		sql.append("         ON tec.id_proceso_inscripcion = tpi.proceso_inscripcion_id ");
+		sql.append("        AND tec.envio_correo = :estatusEnvio ");
+		sql.append("        AND tec.id_persona = ti.Idpersona  ");
+		sql.append("     JOIN tbl_persona tp ");
+		sql.append("         ON tp.id_persona = tec.id_persona ");
+		sql.append("        AND rgp.id_plan = ti.idplan ");
+		sql.append("        AND tpi.proceso_inscripcion_id = rgp.id_proceso_inscripcion ");
+		sql.append("WHERE tpi.proceso_inscripcion_id = :idProcesoInscripcionSeleccionado ");
+		sql.append("  AND (:idPlanSeleccionado IS NULL OR ti.idplan = :idPlanSeleccionado) ");
+		sql.append("  AND (:idProgramaSeleccionado IS NULL OR ti.idprograma = :idProgramaSeleccionado) ");
+		sql.append("  AND (:matricula IS NULL OR tp.sso_idUsuario = :matricula) ");
+
+		Query query = entityManager.createNativeQuery(sql.toString()).setParameter("estatusEnvio", estatusEnvio)
+				.setParameter("idProcesoInscripcionSeleccionado", idProcesoInscripcionSeleccionado)
+				.setParameter("idPlanSeleccionado", idPlanSeleccionado)
+				.setParameter("idProgramaSeleccionado", idProgramaSeleccionado).setParameter("matricula", matricula);
+
+		Number total = (Number) query.getSingleResult();
+		return total.longValue();
+	}
+
+	private Long getLongValue(Object value) {
+		if (value == null) {
+			return null;
+		}
+		if (value instanceof Number) {
+			return ((Number) value).longValue();
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<ModificacionInscripcionDTO> obtenerMateriasParaModificarInscripcion(Long idPersona,
+			Long idProcesoInscripcion) {
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT ");
+		sql.append("    ti.id                          AS idInscripciones, ");
+		sql.append("    ti.asignatura                 AS programa, ");
+		sql.append("    tfdp.tipo                     AS tipoPrograma, ");
+		sql.append("    (SELECT tmc2.nombre ");
+		sql.append("       FROM tbl_malla_curricular tmc2 ");
+		sql.append("      WHERE tmc2.id = tmc.id_padre) AS semestre, ");
+		sql.append("    tmc.nombre                    AS bloque ");
+		sql.append("FROM tbl_inscripciones ti ");
+		sql.append("    INNER JOIN tbl_procesos_inscripcion tpi ");
+		sql.append("        ON ti.fecha_registro >= tpi.fecha_inicio ");
+		sql.append("       AND ti.fecha_registro <= tpi.fecha_fin ");
+		sql.append("    INNER JOIN rel_proceso_inscipcion_planesyprogramas rgp ");
+		sql.append("        ON rgp.id_programa = ti.idprograma ");
+		sql.append("    INNER JOIN tbl_ficha_descriptiva_programa tfdp ");
+		sql.append("        ON ti.idprograma = tfdp.id_programa ");
+		sql.append("    INNER JOIN tbl_malla_curricular tmc ");
+		sql.append("        ON tmc.id = tfdp.id_eje_capacitacion ");
+		sql.append("       AND rgp.id_plan = ti.idplan ");
+		sql.append("       AND tpi.proceso_inscripcion_id = rgp.id_proceso_inscripcion ");
+		sql.append("WHERE ti.Idpersona = :idPersona ");
+		sql.append("  AND tpi.proceso_inscripcion_id = :idProcesoInscripcionSeleccionado ");
+
+		List<Object[]> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("idPersona", idPersona)
+				.setParameter("idProcesoInscripcionSeleccionado", idProcesoInscripcion).getResultList();
+
+		return resultados.stream().map(this::mapearModificacionInscripcion).collect(Collectors.toList());
+	}
+
+	private ModificacionInscripcionDTO mapearModificacionInscripcion(Object[] row) {
+		ModificacionInscripcionDTO dto = new ModificacionInscripcionDTO();
+
+		dto.setIdInscripciones(getLongValue(row[0]));
+		dto.setPrograma((String) row[1]);
+		dto.setTipoPrograma((String) row[2]);
+		dto.setSemestre((String) row[3]);
+		dto.setBloque((String) row[4]);
+		dto.setChecked(true);
+
+		return dto;
+	}
+
+	@Override
+	public void eliminarInscripcionesPorIds(List<Long> ids) {
+		if (ids == null || ids.isEmpty()) {
+			return;
+		}
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM tbl_inscripciones ");
+		sql.append("WHERE id IN (:ids)");
+
+		entityManager.createNativeQuery(sql.toString()).setParameter("ids", ids).executeUpdate();
+
 	}
 
 }
