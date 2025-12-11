@@ -827,7 +827,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 		List<InscripcionMateriasDTO> materiasDeAcuerdoASituacionAcademica = obtenerMateriasDeAcuerdoASituacionAcademica(
 				materiasReprobadas, esEstudianteNuevoIngreso, esEstudianteRegular,
-				materiasOfertadasSinReprobadasConLimiteAlcanzado, limitesCargaAcademica, estadoInscripcion, persona);
+				materiasOfertadasSinReprobadasConLimiteAlcanzado, limitesCargaAcademica, estadoInscripcion, persona,materiasCursadas);
 
 		List<InscripcionMateriasDTO> materiasConSeriacionValidada = aplicarValidacionDeSeriacion(
 				materiasDeAcuerdoASituacionAcademica, materiasReprobadas, materiasCursadas);
@@ -932,7 +932,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			List<InscripcionMateriasReprobadasDTO> materiasReprobadas, Boolean esEstudianteNuevoIngreso,
 			Boolean esEstudianteRegular, List<InscripcionMateriasDTO> materiasOfertadas,
 			LimitesCargaAcademicaDTO limitesCargaAcademica, EstadoInscripcionEstudianteDTO estadoInscripcion,
-			InscripcionPersonaDTO persona) {
+			InscripcionPersonaDTO persona,List<InscripcionMateriasCursadasDTO> materiasCursadas) {
 
 		if (esInscripcionExtraordinariaInicial(estadoInscripcion)) {
 			// logger.info("esInscripcionExtraordinariaInicial");
@@ -947,6 +947,10 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			// logger.info("Estudiantes regulares de nuevo ingreso");
 			return obtenerMateriasEstudianteNuevoIngreso(materiasOfertadas);
 		}
+		
+		
+		//Verifica si las materias a msotrar de tipo optativas son opcionales tomar
+		materiasOfertadas = modificaMateriasOptativasDeAcuerdoAProbacion(materiasOfertadas,materiasCursadas);
 
 		// Estudiantes regulares que no son de nuevo ingreso
 		if ((!esEstudianteNuevoIngreso && esEstudianteRegular) || esInscripcionOrdinariaInicial(estadoInscripcion)) {
@@ -992,6 +996,63 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			return obtenerMateriasReprobadasUOptativas(materiasConReprobadasMarcadas, materiasReprobadas);
 		}
 		return Collections.emptyList();
+	}
+
+	private List<InscripcionMateriasDTO> modificaMateriasOptativasDeAcuerdoAProbacion(
+			List<InscripcionMateriasDTO> materiasOfertadas, List<InscripcionMateriasCursadasDTO> materiasCursadas) {
+		
+		Map<Integer, Long> optativasAprobadasPorSemestre = materiasCursadas.stream()
+		        .filter(mc -> mc.getTipoPrograma() != null 
+		                && mc.getTipoPrograma().equalsIgnoreCase(ConstantesGestor.TEXTO_MATERIA_OPTATIVA))
+		        .filter(mc -> mc.getEstatusAprobacion() != null 
+		                && mc.getEstatusAprobacion().equals(ConstantesGestor.MATERIA_APROBADA))
+		        .collect(Collectors.groupingBy(
+		                mc -> {
+		                    try {
+		                        return InscripcionUtils.obtenerNumeroSemestre(mc.getEstructura());
+		                    } catch (Exception e) {
+		                        return -1; // semestre inválido
+		                    }
+		                },
+		                Collectors.counting()
+		        ));
+
+
+		// 2. Marcar las materias ofertadas usando el Map construido
+		materiasOfertadas.forEach(m -> {
+
+		    if (m.getTipoPrograma() != null 
+		            && m.getTipoPrograma().equalsIgnoreCase(ConstantesGestor.TEXTO_MATERIA_OPTATIVA)) {
+
+		        int semestreMateria;
+		        try {
+		            semestreMateria = InscripcionUtils.obtenerNumeroSemestre(m.getEstructura());
+		        } catch (Exception e) {
+		            return;
+		        }
+
+		        // obtener optativas aprobadas del semestre
+		        long optativasAprobadas = optativasAprobadasPorSemestre.getOrDefault(
+		                semestreMateria, 
+		                0L
+		        );
+
+		        // regla de negocio
+		        boolean habilitarOpcionales = 
+		                optativasAprobadas == ConstantesGestor.MATERIAS_OPTATIVAS_APROBADAS_POR_SEMESTRE;
+
+		        if (habilitarOpcionales) {
+		            if (m.getNombreTentativoPrograma() != null 
+		                    && !m.getNombreTentativoPrograma().contains("(Opcional)")) {
+
+		                m.setNombreTentativoPrograma(
+		                        m.getNombreTentativoPrograma() + " (Opcional)"
+		                );
+		            }
+		        }
+		    }
+		});
+		return materiasOfertadas;
 	}
 
 	private boolean estaSemestreDentroDeMateriasOfertadas(Map.Entry<String, Integer> semestreConMasReprobada,
@@ -1182,9 +1243,9 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			if (estaReprobada && !InscripcionUtils.esMateriaElectiva(materia.getTipoPrograma())
 					&& cantidadMateriasMarcadas < maxReprobadasPermitidasIrregulares) {
 				materia.setCheck(Boolean.TRUE);
-				if (InscripcionUtils.esMateriaObligatoria(materia.getTipoPrograma())) {
+				//if (InscripcionUtils.esMateriaObligatoria(materia.getTipoPrograma())) {
 					materia.setDisabled(Boolean.TRUE);
-				}
+				//}
 				cantidadMateriasMarcadas++;
 			}
 		}
