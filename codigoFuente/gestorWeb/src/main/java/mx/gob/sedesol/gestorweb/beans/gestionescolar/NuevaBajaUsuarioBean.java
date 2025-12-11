@@ -188,6 +188,10 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             mensajeExitoDialogo = sistema.obtenerTexto("gw.gestionescolar.altasbajas.nuevaBaja.mensaje.bajaAplicadaCorrectamente");
             limpiarFormulario();
             mostrarDialogo("dlgNuevaBajaExito");
+        } catch (IllegalStateException ex) {
+            LOGGER.warn("Se aplicó la baja con advertencias", ex);
+            mensajeErrorDialogo = ex.getMessage();
+            mostrarDialogo("dlgNuevaBajaError");
         } catch (IllegalArgumentException ex) {
             mensajeErrorDialogo = ex.getMessage();
             mostrarDialogo("dlgNuevaBajaError");
@@ -328,6 +332,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             mostrarBloque = false;
             mostrarPrograma = false;
             mostrarEvento = false;
+            mostrarPeriodo = false;
             prepararValoresParaBajaDefinitiva();
         } else if (esTipoTemporalOParcial) {
             if (semestres.isEmpty() && idPlan != null) {
@@ -347,8 +352,9 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private void prepararValoresParaBajaDefinitiva() {
         idSemestre = null;
         idBloque = null;
-        idPrograma = 0L;
-        idEvento = 0L;
+        idPrograma = null;
+        idPeriodo = null;
+        idEvento = null;
 
         semestres = Collections.emptyList();
         bloques = Collections.emptyList();
@@ -359,12 +365,9 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private void restaurarValoresCamposOcultos() {
         idSemestre = null;
         idBloque = null;
-        if (Long.valueOf(0L).equals(idPrograma)) {
-            idPrograma = null;
-        }
-        if (Long.valueOf(0L).equals(idEvento)) {
-            idEvento = null;
-        }
+        idPrograma = null;
+        idPeriodo = null;
+        idEvento = null;
 
         semestres = Collections.emptyList();
         bloques = Collections.emptyList();
