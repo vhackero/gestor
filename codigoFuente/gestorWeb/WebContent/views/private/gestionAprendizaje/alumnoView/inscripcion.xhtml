@@ -36,35 +36,35 @@
 						<p:dataTable id="tblEditaComp1"
 								value="#{inscripcionBean.obtenerInscripcionPrevia}"
 								tableStyleClass="table" var="inscripcion" paginator="false"
-								emptyMessage="No se encontraron unidades didácticas">
+								emptyMessage="#{sistema.obtenerTexto('gw.alumno.inscripcion.inscripcionPrevia.unidadesDidacticasVacias')}">
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Plan" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.inscripcionPrevia.plan')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.programa}" />
 								</p:column>
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Curso/Unidad didáctica" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.inscripcionPrevia.curso')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.asignatura}" />
 								</p:column>
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Tipo" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.inscripcionPrevia.tipo')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.tipoPrograma}" />
 								</p:column>
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Semestre" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.inscripcionPrevia.semestre')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.semestre}" />
 								</p:column>
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Bloque" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.inscripcionPrevia.bloque')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.bloque}" />
 								</p:column>
@@ -82,13 +82,13 @@
 				rendered="#{inscripcionBean.contextoInscripcion != null}">
 				<div class="row flexCentrarXY" style="align-items: flex-end">
 					<div class="col-md-3 col-xs-12">
-						<h:outputLabel value="Plan" styleClass="bloque" />
+						<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.inscripcion.panelCabecera.plan')}" styleClass="bloque" />
 						<h:outputText
 							value="#{inscripcionBean.contextoInscripcion.inscripcionPersona.plan}" />
 					</div>
 
 					<div class="col-md-6 col-xs-12">
-						<h:outputLabel value="Matricula" styleClass="bloque" />
+						<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.inscripcion.panelCabecera.matricula')}" styleClass="bloque" />
 						<h:outputText
 							value="#{inscripcionBean.contextoInscripcion.inscripcionPersona.nombreUsuario}" />
 					</div>
@@ -111,37 +111,37 @@
 							<p:dataTable id="tblEditaComp"
 								value="#{inscripcionBean.contextoInscripcion.estadoAcademico.materiasDisponibles}"
 								tableStyleClass="table" var="inscripcion" paginator="false"
-								emptyMessage="No hay unidades didácticas disponibles para inscribir">
+								emptyMessage="#{sistema.obtenerTexto('gw.alumno.inscripcion.unidadesDidacticasDisponibles.unidadesDidacticasVacias')}">
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Curso/Unidad didáctica" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.unidadesDidacticasDisponibles.curso')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.nombreTentativoPrograma}" />
 								</p:column>
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Tipo de unidad didáctica" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.unidadesDidacticasDisponibles.tipo')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.tipoPrograma}" />
 								</p:column>
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Semestre" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.unidadesDidacticasDisponibles.semestre')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.estructura}" />
 								</p:column>
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Bloque" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.unidadesDidacticasDisponibles.bloque')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.subestructura}" />
 								</p:column>
 
-								<p:column headerText="Seleccionar" styleClass="text-center">
+								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.inscripcion.unidadesDidacticasDisponibles.seleccionar')}" styleClass="text-center">
 									<p:selectBooleanCheckbox disabled="#{inscripcion.disabled}"
 										value="#{inscripcion.check}" styleClass="cursor-pointer">
 										<p:ajax
@@ -197,7 +197,7 @@
 
 				<div class="row">
 					<div class="col-md-12 text-right">
-						<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						<p:commandButton value="#{sistema.obtenerTexto('gw.alumno.inscripcion.modalValidacion.cerrar')}" styleClass="btn btn-default"
 							onclick="PF('dlgValidarSeleccion').hide()" />
 					</div>
 				</div>

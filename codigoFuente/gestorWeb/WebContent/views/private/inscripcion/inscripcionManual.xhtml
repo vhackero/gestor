@@ -7,8 +7,8 @@
 	xmlns:p="http://primefaces.org/ui">
 
 	<ui:define name="breadcrumb">
-		<li>Gestión de inscripción</li>
-		<li class="active">Inscripción manual</li>
+		<li>#{sistema.obtenerTexto('gw.inscripcionManual.breadcrumb.anterior')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.inscripcionManual.breadcrumb.activo')}</li>
 	</ui:define>
 
 	<ui:define name="content">
@@ -18,17 +18,17 @@
 				onsuccess="PF('dialogLayout').hide()" />
 
 			<h1>
-				<p:outputLabel styleClass="h1" value="Inscripción manual" />
+				<p:outputLabel styleClass="h1" value="#{sistema.obtenerTexto('gw.inscripcionManual.titulo')}" />
 			</h1>
 
-			<p:panel header="Inscripción" styleClass="fondoPrimario mt-2">
+			<p:panel header="#{sistema.obtenerTexto('gw.inscripcionManual.panelBusqueda.titulo')}" styleClass="fondoPrimario mt-2">
 				<div class="row flex-bottom">
 					<div class="col-md-4">
 						<div class="form-group mb-0">
 							<h:outputLabel for="matricula" styleClass="requerido"
-								value="Matrícula" />
-							<p:inputText id="matricula" placeholder="Usuario" required="true"
-								requiredMessage="La matrícula es obligatoria" maxlength="100"
+								value="#{sistema.obtenerTexto('gw.inscripcionManual.panelBusqueda.matricula')}" />
+							<p:inputText id="matricula" placeholder="#{sistema.obtenerTexto('gw.inscripcionManual.panelBusqueda.matricula')}" required="true"
+								requiredMessage="#{sistema.obtenerTexto('gw.inscripcionManual.panelBusqueda.matricula.obligatoria')}" maxlength="100"
 								value="#{inscripcionManualBean.matriculaIngresada}"
 								styleClass="form-control" />
 						</div>
@@ -36,7 +36,7 @@
 					</div>
 					<div class="col-md-8 text-right">
 						<p:commandButton id="btnBuscar" process="@this matricula" validateClient="true"
-							value="Buscar" update="@form :pnlMensaje" ajax="true"
+							value="#{sistema.obtenerTexto('gw.inscripcionManual.panelBusqueda.boton')}" update="@form :pnlMensaje" ajax="true"
 							action="#{inscripcionManualBean.buscarInscripcionDesdeMatricula}"
 							styleClass="btn btn-primary" />
 					</div>
@@ -51,17 +51,17 @@
 			</p:outputPanel>
 
 
-			<p:panel header="Inscripción"
+			<p:panel header="#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.titulo')}"
 				rendered="#{inscripcionManualBean.contextoInscripcion != null}">
 				<div class="row flexCentrarXY" style="align-items: flex-end">
 					<div class="col-md-3 col-xs-12">
-						<h:outputLabel value="Plan" styleClass="bloque" />
+						<h:outputLabel value="#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.plan')}" styleClass="bloque" />
 						<h:outputText
 							value="#{inscripcionManualBean.contextoInscripcion.inscripcionPersona.plan}" />
 					</div>
 
 					<div class="col-md-6 col-xs-12">
-						<h:outputLabel value="Matricula" styleClass="bloque" />
+						<h:outputLabel value="#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.matricula')}" styleClass="bloque" />
 						<h:outputText
 							value="#{inscripcionManualBean.contextoInscripcion.inscripcionPersona.nombreUsuario}" />
 					</div>
@@ -84,37 +84,37 @@
 							<p:dataTable id="tblEditaComp"
 								value="#{inscripcionManualBean.contextoInscripcion.estadoAcademico.materiasDisponibles}"
 								tableStyleClass="table" var="inscripcion" paginator="false"
-								emptyMessage="No hay materias disponibles para inscribir">
+								emptyMessage="#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.mensajeVacio')}">
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Curso/Asignatura" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.tablaColumna.curso')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.nombreTentativoPrograma}" />
 								</p:column>
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Tipo de asignatura" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.tablaColumna.tipo')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.tipoPrograma}" />
 								</p:column>
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Semestre" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.tablaColumna.semestre')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.estructura}" />
 								</p:column>
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Bloque" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.tablaColumna.bloque')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.subestructura}" />
 								</p:column>
 
-								<p:column headerText="Seleccionar" styleClass="text-center">
+								<p:column headerText="#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.tablaColumna.seleccionar')}" styleClass="text-center">
 									<p:selectBooleanCheckbox disabled="#{inscripcion.disabled}"
 										value="#{inscripcion.check}" styleClass="cursor-pointer">
 										<p:ajax
@@ -137,17 +137,17 @@
 							value="#{inscripcionManualBean.aceptaTerminos}">
 							<p:ajax event="change" update="panelFinalizar" process="@this" />
 						</p:selectBooleanCheckbox>
-						<h:outputText value=" Acepto los " />
+						<h:outputText value="#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.aceptoTerminosCondiciones')}" />
 						<h:outputLink styleClass="terminos-condiciones"
 							value="#{inscripcionManualBean.contextoInscripcion.terminosCondiciones.enlaceTerminosCondiciones}"
-							target="_blank">términos y condiciones</h:outputLink>
+							target="_blank">#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.terminosCondiciones')}</h:outputLink>
 					</div>
 				</h:panelGroup>
 
 				<p:outputPanel id="panelFinalizar" styleClass="text-center mt-2">
 					<p:commandButton id="finalizarBtn"
 						disabled="#{inscripcionManualBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionManualBean.aceptaTerminos}"
-						value="Finalizar inscripción" update="@form :pnlMensaje"
+						value="#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.boton.finalizarInscripcion')}" update="@form :pnlMensaje"
 						action="#{inscripcionManualBean.finalizarInscripcion}"
 						styleClass="btn btn-primary" />
 				</p:outputPanel>
@@ -157,7 +157,7 @@
 
 		<p:dialog appendTo="@(body)" draggable="false" position="center"
 			resizable="false" closable="false" modal="true" width="600px"
-			widgetVar="dlgValidarSeleccion" header="Informativo" dynamic="true">
+			widgetVar="dlgValidarSeleccion" header="#{sistema.obtenerTexto('gw.inscripcionManual.modalInformativo.titulo')}" dynamic="true">
 			<p:outputPanel id="pnlMensaje">
 				<div class="form-group">
 					<div class="row">
@@ -170,7 +170,7 @@
 
 				<div class="row">
 					<div class="col-md-12 text-right">
-						<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						<p:commandButton value="#{sistema.obtenerTexto('gw.inscripcionManual.modalInformativo.boton.cerrar')}" styleClass="btn btn-default"
 							onclick="PF('dlgValidarSeleccion').hide()" />
 					</div>
 				</div>
