@@ -167,6 +167,10 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
 
     private void aplicarBajaDefinitiva(BajaSolicitudDTO solicitud, Long idPersona, Long motivoId, Long procesoId) {
         Long idPlan = solicitud.getIdPlan() != null ? solicitud.getIdPlan() : 0L;
+        Long idPrograma = 0L;
+        Long idEvento = 0L;
+        Long idGrupo = 0L;
+        Integer idUserEnrolmentsLms = 0;
         Integer[] datosMoodle = nuevaBajaRepository.obtenerIdPersonaYPlataformaMoodle(idPersona);
         Integer idPersonaMoodle = datosMoodle != null ? datosMoodle[0] : null;
         Integer idPlataformaMoodle = datosMoodle != null ? datosMoodle[1] : null;
@@ -191,10 +195,10 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
                 motivoId,
                 procesoId,
                 idPlan,
-                0L,
-                0L,
-                0L,
-                0,
+                idPrograma,
+                idEvento,
+                idGrupo,
+                idUserEnrolmentsLms,
                 solicitud.getQuienAplica(),
                 1,
                 solicitud.getNumeroSolicitud());
