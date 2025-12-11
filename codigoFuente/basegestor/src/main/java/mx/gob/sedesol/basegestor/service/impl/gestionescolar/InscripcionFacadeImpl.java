@@ -366,7 +366,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		dto.setIdPlan(materia.getIdPlan());
 		dto.setIdPrograma(materia.getIdPrograma());
 		dto.setIdEvento(ConstantesGestor.SIN_EVENTO);
-		dto.setNivel(materia.getNivelEnsenanza());
+		dto.setNivel(generarAcronimoTresLetras(materia.getNivelEnsenanza()));
 		dto.setDivision(generarAcronimo(materia.getDivision()));
 		dto.setProfileFieldPerfil(obtenerPerfil(materia));
 		dto.setBloque(obtenerBloque(materia));
@@ -429,14 +429,14 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		sb.append(generarPeriodo(materia));
 		sb.append("-");
 		sb.append(generarAcronimo(materia.getSubestructura()));
-		sb.append("000");
+		sb.append("-000");
 		return sb.toString();
 	}
 
 	private String generarPeriodo(InscripcionMateriasDTO materia) {
 
 		// Obtener el año actual
-		int year = Calendar.getInstance().get(Calendar.YEAR);
+		String year = parametroSistemaService.obtenerParametro(ConstantesGestor.ANIO_INSCRIPCION);
 
 		// Obtener los últimos dos dígitos del año
 		String yearLastTwoDigits = String.valueOf(year).substring(2);
@@ -461,15 +461,25 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	}
 
 	private String generarAcronimo(String texto) {
-		String[] palabras = texto.split(" ");
-		StringBuilder acronimo = new StringBuilder();
-		for (String palabra : palabras) {
-			if (!palabra.isEmpty()) {
-				acronimo.append(palabra.charAt(0));
-			}
-		}
-		return acronimo.toString().toUpperCase();
+	    StringBuilder acronimo = new StringBuilder();
+	    for (char c : texto.toCharArray()) {
+	        if (Character.isUpperCase(c)) {
+	            acronimo.append(c);
+	        }
+	    }
+	    return acronimo.toString();
 	}
+	private String generarAcronimoTresLetras(String texto) {
+	    if (texto == null) {
+	        return "";
+	    }
+	    texto = texto.trim();
+	    if (texto.length() < 3) {
+	        return texto.toUpperCase();
+	    }
+	    return texto.substring(0, 3).toUpperCase();
+	}
+
 
 	private void validarSeleccionMateriasSegunEstatusAcademico(InscripcionContextoDTO contexto)
 			throws InscripcionException {
