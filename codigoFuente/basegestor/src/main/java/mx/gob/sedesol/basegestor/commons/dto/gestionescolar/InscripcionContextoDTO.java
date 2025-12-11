@@ -1,5 +1,8 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class InscripcionContextoDTO {
 
 	private InscripcionPersonaDTO inscripcionPersona;
@@ -83,5 +86,13 @@ public class InscripcionContextoDTO {
 		}
 
 		return idProceso;
+	}
+
+	public List<InscripcionMateriasDTO> obtenerMateriasSeleccionadas() {
+		if (estadoAcademico == null || estadoAcademico.getMateriasDisponibles() == null) {
+			throw new IllegalStateException("No hay materias disponibles.");
+		}
+		return estadoAcademico.getMateriasDisponibles().stream().filter(materia -> materia.getCheck())
+				.collect(Collectors.toList());
 	}
 }
