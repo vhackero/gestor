@@ -554,7 +554,15 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 		Integer minProgramasPorPeriodo = obtenerMinProgramasPorPeriodo(contexto);
 
-		if (cantidadMateriasOfertadas < minProgramasPorPeriodo) {
+		if (cantidadMateriasOfertadas < minProgramasPorPeriodo || materiasDisponibles.size() < minProgramasPorPeriodo ) {
+			int cantidadMateriasOfertadasmarcadas = (int) materiasDisponibles.stream()
+			        .filter(m -> m.getTipoPrograma() != null)
+			        .filter(m -> m.getCheck().equals(true) )
+			        .count();
+			if(cantidadMateriasOfertadasmarcadas == 0) {
+				throw new InscripcionException(
+						"Debes seleccionar al menos 1 unidades didáctica");
+			}
 			return;
 		}
 
