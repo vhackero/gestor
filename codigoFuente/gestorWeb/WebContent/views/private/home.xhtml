@@ -13,104 +13,114 @@
 	<ui:define name="content">
 		<h2>#{sistema.obtenerTexto('gw.home.titulo')}</h2>
 		<hr />
-		  <div class="cards">
-			<a class="card" href="https://aulavirtual.unadmexico.mx/mod/resource/view.php?id=20134" target="_blank">
-			  <img class="card-image" src="#{resource['images:calendario.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.calendario')}"/>
-			</a>
-			<a class="card" href="https://aulavirtual.unadmexico.mx/mod/url/view.php?id=20248" target="_blank">
-			  <img class="card-image" src="#{resource['images:correo.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.correo')}"/>
-			</a>
-			<a class="card" href="https://aulavirtual.unadmexico.mx/mod/url/view.php?id=20247" target="_blank">
-			  <img class="card-image" src="#{resource['images:repositorio.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.repositorio')}"/>
-			</a>
-			<a class="card" href="https://aulavirtual.unadmexico.mx/mod/url/view.php?id=20242" target="_blank">
-			  <img class="card-image" src="#{resource['images:ayuda.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.ayuda')}"/>
-			</a>
-			<!-- <a class="card" href="https://sige.unadmexico.mx:28181/cas2/login?service=https%3A%2F%2Fsige.unadmexico.mx%3A28182%2Fsige%2Flogin%2Fcas" target="_blank">
-			  <img class="card-image" src="#{resource['images:tramites.jpg']}" alt="tramites"/>
-			</a> -->
-			<a class="card" href="https://aulavirtual.unadmexico.mx/mod/url/view.php?id=20246" target="_blank">
-			  <img class="card-image" src="#{resource['images:normateca.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.normateca')}"/>
-			</a>
-		  </div>
+		<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('VER_TARJETAS')}">
+			<sec:authorize access="hasPermission(null, 'VER_TARJETAS') ">
+				  <div class="cards">
+					<a class="card" href="#{sistema.obtenerTexto('gw.home.href.calendario')}" target="_blank">
+					  <img class="card-image" src="#{resource['images:calendario.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.calendario')}"/>
+					</a>
+					<a class="card" href="#{sistema.obtenerTexto('gw.home.href.correo')}" target="_blank">
+					  <img class="card-image" src="#{resource['images:correo.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.correo')}"/>
+					</a>
+					<a class="card" href="#{sistema.obtenerTexto('gw.home.href.repositorio')}" target="_blank">
+					  <img class="card-image" src="#{resource['images:repositorio.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.repositorio')}"/>
+					</a>
+					<a class="card" href="#{sistema.obtenerTexto('gw.home.href.ayuda')}" target="_blank">
+					  <img class="card-image" src="#{resource['images:ayuda.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.ayuda')}"/>
+					</a>
+					<!-- <a class="card" href="https://sige.unadmexico.mx:28181/cas2/login?service=https%3A%2F%2Fsige.unadmexico.mx%3A28182%2Fsige%2Flogin%2Fcas" target="_blank">
+					  <img class="card-image" src="#{resource['images:tramites.jpg']}" alt="tramites"/>
+					</a> -->
+					<a class="card" href="#{sistema.obtenerTexto('gw.home.href.normateca')}" target="_blank">
+					  <img class="card-image" src="#{resource['images:normateca.jpg']}" alt="#{sistema.obtenerTexto('gw.home.card.normateca')}"/>
+					</a>
+				  </div>
+			 </sec:authorize>
+		  </ui:fragment>
 
 		<div class="row">
-			<div class="#{misLogrosBean.styleMisCursos}">
-				<h:form id="formMisCursos">
-					<p:panel header="#{sistema.obtenerTexto('gw.home.asignaturas')}" style="margin-top:0">
-						<p:dataTable id="dtResultadoBusquedaMisCursos"
-							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
-							reflow="true"
-							value="#{misCursosBean.participanteEventosCapacitacionEnEjecucion}"
-							var="participante" paginator="true" rows="10"
-							paginatorPosition="bottom"
-							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
-							currentPageReportTemplate="({currentPage} de {totalPages})"
-							rowsPerPageTemplate="5,10,15" tableStyleClass="table">
-							<!-- Nombre del curso -->
-							<p:column styleClass="text-center"
-								sortBy="#{participante.grupo.evento.nombreEc}">
-								<f:facet name="header">
+		<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('VER_ASIGNATURAS')}">
+			<sec:authorize access="hasPermission(null, 'VER_ASIGNATURAS') ">
+				<div class="#{misLogrosBean.styleMisCursos}">
+					<h:form id="formMisCursos">
+						<p:panel header="#{sistema.obtenerTexto('gw.home.asignaturas')}" style="margin-top:0">
+							<p:dataTable id="dtResultadoBusquedaMisCursos"
+								emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+								reflow="true"
+								value="#{misCursosBean.participanteEventosCapacitacionEnEjecucion}"
+								var="participante" paginator="true" rows="10"
+								paginatorPosition="bottom"
+								paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+								currentPageReportTemplate="({currentPage} de {totalPages})"
+								rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+								<!-- Nombre del curso -->
+								<p:column styleClass="text-center"
+									sortBy="#{participante.grupo.evento.nombreEc}">
+									<f:facet name="header">
+										<h:outputText
+											value="#{sistema.obtenerTexto('gw.home.col.nombreAsignatura')}" />
+									</f:facet>
 									<h:outputText
-										value="#{sistema.obtenerTexto('gw.home.col.nombreAsignatura')}" />
-								</f:facet>
-								<h:outputText
-									rendered="#{participante.grupo.evento.catModalidadPlanPrograma.id eq 2}"
-									value="#{participante.grupo.evento.nombreEc}" />
-								<p:commandLink value="#{participante.grupo.evento.nombreEc}"
-									styleClass="subrayar-con-azul" target="_parent" ajax="false"
-									rendered="#{not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}"
-									action="#{misCursosBean.navegaUrlCursoLms(participante.grupo.evento.idEvento)}" />
-							</p:column>
-
-							<p:column styleClass="text-center"
-								sortBy="#{participante.grupo.evento.catModalidadPlanPrograma.nombre}">
-								<f:facet name="header">
-									<h:outputText value="#{sistema.obtenerTexto('gw.home.col.modalidad')}" />
-								</f:facet>
-
-								<h:outputText
-									value="#{participante.grupo.evento.catModalidadPlanPrograma.nombre}" />
-							</p:column>
-							<!-- Porcentaje de avance -->
-							<p:column styleClass="text-center">
-								<f:facet name="header">
-									<h:outputText value="#{sistema.obtenerTexto('gw.home.col.avance')}" />
-								</f:facet>
-								<!-- Progress bar -->
-								<p:outputPanel id="avancePanel"
-									layout="block"
-									rendered="#{not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}">
-									<p:progressBar id="progressBarAvanceEvento" ajax="true"
-										labelTemplate="{value}%"
-										rendered="#{misCursosBean.esAvanceDisponible(participante.grupo.evento.idEvento)}"
-										value="#{misCursosBean.obtenerAvanceGuardado(participante.grupo.evento.idEvento)}"
-										displayOnly="true" style="width:100%" styleClass="pull-right" />
-									<h:panelGroup layout="block" styleClass="text-center"
-										rendered="#{misCursosBean.esAvanceConError(participante.grupo.evento.idEvento)}">
-										<h:outputText value="#{sistema.obtenerTexto('gw.home.avance.error')}" />
-										<br />
-										<p:commandLink value="#{sistema.obtenerTexto('gw.home.avance.reintentar')}" process="@this"
-											onclick="cargarAvance_#{participante.grupo.evento.idEvento}(); return false;" />
-									</h:panelGroup>
-									<h:panelGroup layout="block" styleClass="text-center"
-										rendered="#{misCursosBean.esAvancePendiente(participante.grupo.evento.idEvento)}">
-										<i class="fa fa-spinner fa-spin"></i>
-									</h:panelGroup>
-									<p:remoteCommand name="cargarAvance_#{participante.grupo.evento.idEvento}"
-										actionListener="#{misCursosBean.cargarAvanceOaAjax(participante.grupo.evento.idEvento)}"
-										process="@this"
-										update="@parent"
-										global="false" async="true"
-										rendered="#{misCursosBean.esAvancePendiente(participante.grupo.evento.idEvento) or misCursosBean.esAvanceConError(participante.grupo.evento.idEvento)}"
-										autoRun="#{misCursosBean.esAvancePendiente(participante.grupo.evento.idEvento)}" />
-								</p:outputPanel>
-							</p:column>
-						</p:dataTable>
-
-					</p:panel>
-				</h:form>
-			</div>
+										rendered="#{participante.grupo.evento.catModalidadPlanPrograma.id eq 2}"
+										value="#{participante.grupo.evento.nombreEc}" />
+									<p:commandLink value="#{participante.grupo.evento.nombreEc}"
+										styleClass="subrayar-con-azul" target="_parent" ajax="false"
+										rendered="#{not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}"
+										action="#{misCursosBean.navegaUrlCursoLms(participante.grupo.evento.idEvento)}" />
+								</p:column>
+	
+								<p:column styleClass="text-center"
+									sortBy="#{participante.grupo.evento.catModalidadPlanPrograma.nombre}">
+									<f:facet name="header">
+										<h:outputText value="#{sistema.obtenerTexto('gw.home.col.modalidad')}" />
+									</f:facet>
+	
+									<h:outputText
+										value="#{participante.grupo.evento.catModalidadPlanPrograma.nombre}" />
+								</p:column>
+								<!-- Porcentaje de avance -->
+								<p:column styleClass="text-center">
+									<f:facet name="header">
+										<h:outputText value="#{sistema.obtenerTexto('gw.home.col.avance')}" />
+									</f:facet>
+									<!-- Progress bar -->
+									<p:outputPanel id="avancePanel"
+										layout="block"
+										rendered="#{not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}">
+										<p:progressBar id="progressBarAvanceEvento" ajax="true"
+											labelTemplate="{value}%"
+											rendered="#{misCursosBean.esAvanceDisponible(participante.grupo.evento.idEvento)}"
+											value="#{misCursosBean.obtenerAvanceGuardado(participante.grupo.evento.idEvento)}"
+											displayOnly="true" style="width:100%" styleClass="pull-right" />
+										<h:panelGroup layout="block" styleClass="text-center"
+											rendered="#{misCursosBean.esAvanceConError(participante.grupo.evento.idEvento)}">
+											<h:outputText value="#{sistema.obtenerTexto('gw.home.avance.error')}" />
+											<br />
+											<p:commandLink value="#{sistema.obtenerTexto('gw.home.avance.reintentar')}" process="@this"
+												onclick="cargarAvance_#{participante.grupo.evento.idEvento}(); return false;" />
+										</h:panelGroup>
+										<h:panelGroup layout="block" styleClass="text-center"
+											rendered="#{misCursosBean.esAvancePendiente(participante.grupo.evento.idEvento)}">
+											<i class="fa fa-spinner fa-spin"></i>
+										</h:panelGroup>
+										<p:remoteCommand name="cargarAvance_#{participante.grupo.evento.idEvento}"
+											actionListener="#{misCursosBean.cargarAvanceOaAjax(participante.grupo.evento.idEvento)}"
+											process="@this"
+											update="@parent"
+											global="false" async="true"
+											rendered="#{misCursosBean.esAvancePendiente(participante.grupo.evento.idEvento) or misCursosBean.esAvanceConError(participante.grupo.evento.idEvento)}"
+											autoRun="#{misCursosBean.esAvancePendiente(participante.grupo.evento.idEvento)}" />
+									</p:outputPanel>
+								</p:column>
+							</p:dataTable>
+	
+						</p:panel>
+					</h:form>
+				</div>
+		 	</sec:authorize>
+		</ui:fragment>	
+		<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('VER_LOGROS')}">
+			<sec:authorize access="hasPermission(null, 'VER_LOGROS') ">
 			<div class="col-md-6">
 				<ui:fragment rendered="#{misLogrosBean.showLogros}"> 
 					<p:panel header="#{sistema.obtenerTexto('gw.home.logros')}" style="margin-top:0">
@@ -162,6 +172,8 @@
 					</p:panel>
 				</ui:fragment>
 			</div>
+			</sec:authorize>
+		</ui:fragment>
 		</div>
 
 

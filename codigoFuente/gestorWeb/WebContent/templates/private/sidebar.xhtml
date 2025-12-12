@@ -409,7 +409,7 @@
 										</ul></li>
 								</sec:authorize>
 							</ui:fragment>
-							<ui:fragment>
+							<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('GES_INS')}" >
 								<sec:authorize access="hasPermission(null, 'GES_INS') ">
 									<li><a href="#" title="#{sistema.obtenerTexto('gw.sidebar.gestionInscripcion')}"> <i
 											class="fa fa-list"></i> <span class="m-label">#{sistema.obtenerTexto('gw.sidebar.gestionInscripcion')}</span> <span class="fa arrow"></span>
