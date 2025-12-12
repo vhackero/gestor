@@ -25,16 +25,16 @@ import mx.gob.sedesol.basegestor.mongo.service.BitacoraService;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaRolesService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaService;
-import mx.gob.sedesol.gestorweb.beans.administracion.AdminPersonaBean;
+//import mx.gob.sedesol.gestorweb.beans.administracion.AdminPersonaBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.NotificacionesBean;
 import mx.gob.sedesol.gestorweb.beans.analisisdatos.ReporteGestionEscolarBean;
-import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.ExpedienteAlumnoBean;
-import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview.ConstanciasBean;
+//import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.ExpedienteAlumnoBean;
+//import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview.ConstanciasBean;
 import mx.gob.sedesol.gestorweb.beans.gestionescolar.EventoCapacitacionBean;
 import mx.gob.sedesol.gestorweb.beans.logisticainfraestructura.AreasBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
-import mx.gob.sedesol.gestorweb.commons.dto.UsuarioSessionDTO;
+//import mx.gob.sedesol.gestorweb.commons.dto.UsuarioSessionDTO;
 import mx.gob.sedesol.gestorweb.commons.utils.ObjectUtils;
 
 @SessionScoped
@@ -61,8 +61,8 @@ public class MenuGestorBean extends BaseBean {
 	@ManagedProperty(value = "#{eventoCapacitacionBean}")
 	private EventoCapacitacionBean eventoCapacitacionBean;
 
-	@ManagedProperty(value = "#{adminPersonaBean}")
-	private AdminPersonaBean adminPersonaBean;
+	//@ManagedProperty(value = "#{adminPersonaBean}")
+	//private AdminPersonaBean adminPersonaBean;
 
 	@ManagedProperty("#{bitacoraService}")
 	private BitacoraService bitacoraService;
@@ -73,11 +73,12 @@ public class MenuGestorBean extends BaseBean {
 	@ManagedProperty(value = "#{reporteGestionEscolarBean}")
 	private ReporteGestionEscolarBean reporteGestionEscolarBean;
 	
-	@ManagedProperty("#{constanciasBean}")
-	private ConstanciasBean constanciasBean;
 	
-	@ManagedProperty("#{expedienteAlumnoBean}")
-	private ExpedienteAlumnoBean expedienteAlumnoBean;
+	//@ManagedProperty("#{constanciasBean}")
+	//private ConstanciasBean constanciasBean;
+	
+	//@ManagedProperty("#{expedienteAlumnoBean}")
+	//private ExpedienteAlumnoBean expedienteAlumnoBean;
 	
 	private List<RolDTO> roles;
 	private Integer idRol;
@@ -200,7 +201,7 @@ public class MenuGestorBean extends BaseBean {
 	 */
 	public String navegaAdministracionUsuarios() {
 		logger.info("Navegando a modulo de administracion de usuarios");
-		inicializaAdminUsuarios();
+		//inicializaAdminUsuarios();
 		return ConstantesGestorWeb.NAVEGA_ADMIN_USUARIOS;
 	}
 
@@ -545,10 +546,11 @@ public class MenuGestorBean extends BaseBean {
 		eventoCapacitacionBean.getFiltros().setCatEstadoEventoCapacitacion(new CatalogoComunDTO());
 		eventoCapacitacionBean.setEventosCapacitacion(new ArrayList<>());
 	}
-
+/*
 	public void inicializaAdminUsuarios() {
 		adminPersonaBean.setPersonas(new ArrayList<>());
 	}
+	*/
 
 	public void inicializaTemas() {
 		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CON_TEM", "", requestActual(), TipoServicioEnum.LOCAL);
@@ -648,14 +650,14 @@ public class MenuGestorBean extends BaseBean {
 	public void setEventoCapacitacionBean(EventoCapacitacionBean eventoCapacitacionBean) {
 		this.eventoCapacitacionBean = eventoCapacitacionBean;
 	}
-
+/*
 	public AdminPersonaBean getAdminPersonaBean() {
 		return adminPersonaBean;
 	}
 
 	public void setAdminPersonaBean(AdminPersonaBean adminPersonaBean) {
 		this.adminPersonaBean = adminPersonaBean;
-	}
+	} */
 
 	public BitacoraService getBitacoraService() {
 		return bitacoraService;
@@ -681,6 +683,7 @@ public class MenuGestorBean extends BaseBean {
 		this.notificacionesBean = notificacionesBean;
 	}
 
+	/**
 	public ConstanciasBean getConstanciasBean() {
 		return constanciasBean;
 	}
@@ -688,6 +691,7 @@ public class MenuGestorBean extends BaseBean {
 	public void setConstanciasBean(ConstanciasBean constanciasBean) {
 		this.constanciasBean = constanciasBean;
 	}
+	**/
 	
 	public boolean isShowLogros() {
 		return showLogros;
@@ -697,6 +701,7 @@ public class MenuGestorBean extends BaseBean {
 		this.showLogros = showLogros;
 	}
 
+	/**
 	public ExpedienteAlumnoBean getExpedienteAlumnoBean() {
 		return expedienteAlumnoBean;
 	}
@@ -704,5 +709,6 @@ public class MenuGestorBean extends BaseBean {
 	public void setExpedienteAlumnoBean(ExpedienteAlumnoBean expedienteAlumnoBean) {
 		this.expedienteAlumnoBean = expedienteAlumnoBean;
 	}
+	**/
 
 }
