@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
+import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
 import org.apache.log4j.Logger;
@@ -37,7 +38,8 @@ import mx.gob.sedesol.gestorweb.commons.dto.UsuarioSessionDTO;
 import mx.gob.sedesol.gestorweb.commons.utils.ReporteUtil;
 import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
 
-@SessionScoped
+//@SessionScoped
+@ViewScoped
 @ManagedBean
 public class ConstanciasBean extends BaseBean {
 

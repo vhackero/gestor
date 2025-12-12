@@ -16,6 +16,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
+import javax.faces.bean.ViewScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
@@ -71,7 +72,8 @@ import mx.gob.sedesol.gestorweb.sistema.SistemaBean;
 import mx.gob.sedesol.gestorweb.ws.ServiciosExternos;
 
 @ManagedBean
-@SessionScoped
+@ViewScoped
+//@SessionScoped
 public class AdminPersonaBean extends BaseBean {
 
 	private static final long serialVersionUID = 1L;
