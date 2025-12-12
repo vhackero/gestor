@@ -547,7 +547,10 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private void validarMinimoMateriasPorPeriodo(ResumenSeleccionMateriasDTO resumen, InscripcionContextoDTO contexto)
 			throws InscripcionException {
 		List<InscripcionMateriasDTO> materiasDisponibles = contexto.getEstadoAcademico().getMateriasDisponibles();
-		int cantidadMateriasOfertadas = materiasDisponibles.size();
+		int cantidadMateriasOfertadas = (int) materiasDisponibles.stream()
+		        .filter(m -> m.getTipoPrograma() != null)
+		        .filter(m -> m.getTipoPrograma().equalsIgnoreCase(ConstantesGestor.TEXTO_MATERIA_OBLIGATORIA))
+		        .count();
 
 		Integer minProgramasPorPeriodo = obtenerMinProgramasPorPeriodo(contexto);
 
@@ -883,7 +886,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		Set<Long> idsMateriasCursadas = obtenerIdsMateriasCursadas(materiasCursadas);
 
 		Map<Long, InscripcionMateriasDTO> materiasMap = materiasDisponibles.stream()
-				.collect(Collectors.toMap(InscripcionMateriasDTO::getIdPrograma, materia -> materia));
+				.collect(Collectors.toMap(InscripcionMateriasDTO::getIdPrograma, materia -> materia, (a,b)->b));
 
 		for (InscripcionMateriasDTO materia : materiasDisponibles) {
 			if (esMateriaSeriada(materia)) {

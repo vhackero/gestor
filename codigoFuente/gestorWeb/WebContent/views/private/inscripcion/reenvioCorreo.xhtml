@@ -9,11 +9,11 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>Gestión de inscripción</li>
-		<li class="active">Reenvío de correo</li>
+		<li>#{sistema.obtenerTexto('gw.reenvioCorreo.breadcrumb.anterior')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.reenvioCorreo.breadcrumb.activo')}</li>
 	</ui:define>
 	<ui:define name="content">
-		<h1>Reenvío de correo</h1>
+		<h1>#{sistema.obtenerTexto('gw.reenvioCorreo.titulo')}</h1>
 		<hr />
 		<p:ajaxStatus onstart="PF('dialogLayout').show()"
 			onsuccess="PF('dialogLayout').hide()" />
@@ -22,13 +22,13 @@
 			<p:outputPanel rendered="#{reenvioCorreoBean.panelActivo == 1}">
 				<div class="row">
 					<div class="col-md-12">
-						<p:panel header="Búsqueda de inscripción"
+						<p:panel header="#{sistema.obtenerTexto('gw.reenvioCorreo.panelBusqueda.titulo')}"
 							styleClass="fondoPrimario">
 							<div class="row">
 								<div class="col-md-4">
 									<div class="form-group">
-										<h:outputLabel for="idUsuario" value="Usuario" />
-										<p:inputText id="idUsuario" placeholder="Usuario"
+										<h:outputLabel for="idUsuario" value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelBusqueda.matricula')}" />
+										<p:inputText id="idUsuario" placeholder="#{sistema.obtenerTexto('gw.reenvioCorreo.panelBusqueda.matricula')}"
 											value="#{reenvioCorreoBean.filtroBusqueda.matricula}"
 											styleClass="form-control" />
 									</div>
@@ -38,7 +38,7 @@
 								<div class="col-md-4">
 									<div class="form-group">
 										<h:outputLabel styleClass="requerido" for="idConvocatoria"
-											value="Convocatoria" />
+											value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelBusqueda.convocatoria')}" />
 										<p:selectOneMenu id="idConvocatoria"
 											value="#{reenvioCorreoBean.filtroBusqueda.idConvocatoria}"
 											class="col-xs-12">
@@ -57,7 +57,7 @@
 								<div class="col-md-4">
 									<div class="form-group">
 										<h:outputLabel styleClass="requerido"
-											for="idCatProcesoInscripcion" value="Tipo de proceso" />
+											for="idCatProcesoInscripcion" value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelBusqueda.tipoProceso')}" />
 										<p:selectOneMenu id="idCatProcesoInscripcion"
 											value="#{reenvioCorreoBean.filtroBusqueda.idTipoProceso}"
 											class="col-xs-12">
@@ -76,7 +76,7 @@
 								<div class="col-md-4">
 									<div class="form-group">
 										<h:outputLabel styleClass="requerido"
-											for="idProcesoInscripcion" value="Proceso de inscripción" />
+											for="idProcesoInscripcion" value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelBusqueda.procesoInscripcion')}" />
 										<p:selectOneMenu id="idProcesoInscripcion"
 											disabled="#{reenvioCorreoBean.filtroBusqueda.idConvocatoria == null or reenvioCorreoBean.filtroBusqueda.idTipoProceso == null}"
 											value="#{reenvioCorreoBean.filtroBusqueda.idProcesoInscripcion}"
@@ -98,7 +98,7 @@
 							<div class="row mt-1">
 								<div class="col-md-4">
 									<div class="form-group">
-										<h:outputLabel for="idPlan" value="Plan" />
+										<h:outputLabel for="idPlan" value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelBusqueda.plan')}" />
 										<p:selectOneMenu id="idPlan"
 											disabled="#{reenvioCorreoBean.filtroBusqueda.idProcesoInscripcion == null}"
 											value="#{reenvioCorreoBean.filtroBusqueda.idPlan}"
@@ -114,7 +114,7 @@
 								</div>
 								<div class="col-md-4">
 									<div class="form-group">
-										<h:outputLabel for="idPrograma" value="Programa" />
+										<h:outputLabel for="idPrograma" value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelBusqueda.programa')}" />
 										<p:selectOneMenu id="idPrograma"
 											disabled="#{reenvioCorreoBean.filtroBusqueda.idProcesoInscripcion == null or reenvioCorreoBean.filtroBusqueda.idPlan == null}"
 											value="#{reenvioCorreoBean.filtroBusqueda.idPrograma}"
@@ -131,7 +131,7 @@
 								<div class="col-md-4">
 									<div class="form-group">
 										<h:outputLabel styleClass="requerido" for="estatusEnvio"
-											value="Estado de envío" />
+											value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelBusqueda.estadoEnvio')}" />
 										<p:selectOneMenu id="estatusEnvio"
 											disabled="#{reenvioCorreoBean.filtroBusqueda.idProcesoInscripcion == null}"
 											value="#{reenvioCorreoBean.filtroBusqueda.estatusEnvio}"
@@ -157,7 +157,7 @@
 										action="#{reenvioCorreoBean.buscarUsuarios}" ajax="true"
 										process="@form" update="@form frmTabla"
 										styleClass="btn btn-primary pull-right" />
-									<p:commandButton value="Limpiar"
+									<p:commandButton value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelBusqueda.boton.limpiar')}"
 										action="#{reenvioCorreoBean.limpiarFiltroBusqueda}"
 										ajax="true" update="@form frmTabla"
 										styleClass="btn btn-default pull-right" />
@@ -174,7 +174,7 @@
 			<p:outputPanel rendered="#{reenvioCorreoBean.panelActivo == 1}">
 				<div class="row">
 					<div class="col-md-12">
-						<p:panel header="Resultados de la búsqueda"
+						<p:panel header="#{sistema.obtenerTexto('gw.reenvioCorreo.panelResultadoBusqueda.titulo')}"
 							styleClass="fondoPrimario">
 							<p:dataTable id="tblResultados"
 								value="#{reenvioCorreoBean.inscripciones}"
@@ -182,39 +182,39 @@
 								paginatorPosition="bottom"
 								paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
 								rowsPerPageTemplate="5,10,15" reflow="true" lazy="true"
-								rows="10" emptyMessage="No se encontraron datos">
+								rows="10" emptyMessage="#{sistema.obtenerTexto('gw.reenvioCorreo.panelResultadoBusqueda.mensajeVacio')}">
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Nombre" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelResultadoBusqueda.tablaColumna.nombre')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.nombre}" />
 								</p:column>
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Primer apellido" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelResultadoBusqueda.tablaColumna.primerApellido')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.primerApellido}" />
 								</p:column>
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Segundo apellido" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelResultadoBusqueda.tablaColumna.segundoApellido')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.segundoApellido}" />
 								</p:column>
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Usuario" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelResultadoBusqueda.tablaColumna.matricula')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.idUsuario}" />
 								</p:column>
 
 								<p:column headerText="Seleccionar" styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Acciones" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelResultadoBusqueda.tablaColumna.acciones')}" />
 									</f:facet>
 									<p:commandButton id="btnReenviarCorreo"
 										oncomplete="PF('dlgMensajeConfirmacion').show()"
@@ -223,7 +223,7 @@
 											target="#{reenvioCorreoBean.inscripcionSeleccionada}"
 											value="#{inscripcion}" />
 									</p:commandButton>
-									<p:tooltip for="btnReenviarCorreo" value="Reenviar correo"
+									<p:tooltip for="btnReenviarCorreo" value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelResultadoBusqueda.tablaColumna.tooltip1')}"
 										position="top" />
 									<p:commandButton id="btnVer" process="@this" ajax="true"
 										update="frmMaterias frmBusqueda frmTabla"
@@ -233,7 +233,7 @@
 											target="#{reenvioCorreoBean.inscripcionSeleccionada}"
 											value="#{inscripcion}" />
 									</p:commandButton>
-									<p:tooltip for="btnVer" value="Ver materias" position="top" />
+									<p:tooltip for="btnVer" value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelResultadoBusqueda.tablaColumna.tooltip2')}" position="top" />
 								</p:column>
 
 							</p:dataTable>
@@ -245,15 +245,15 @@
 
 		<h:form id="frmMaterias">
 			<p:outputPanel rendered="#{reenvioCorreoBean.panelActivo == 2}">
-				<p:panel header="Inscripción">
+				<p:panel header="#{sistema.obtenerTexto('gw.reenvioCorreo.panelMaterias.titulo')}">
 					<div class="row flexCentrarXY" style="align-items: flex-end">
 						<div class="col-md-3 col-xs-12">
-							<h:outputLabel value="Plan" styleClass="bloque" />
+							<h:outputLabel value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelMaterias.plan')}" styleClass="bloque" />
 							<h:outputText value="#{reenvioCorreoBean.nombrePlan}" />
 						</div>
 
 						<div class="col-md-6 col-xs-12">
-							<h:outputLabel value="Matricula" styleClass="bloque" />
+							<h:outputLabel value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelMaterias.matricula')}" styleClass="bloque" />
 							<h:outputText
 								value="#{reenvioCorreoBean.inscripcionSeleccionada.idUsuario}" />
 						</div>
@@ -262,43 +262,43 @@
 				<p:dataTable styleClass="mt-2"
 					value="#{reenvioCorreoBean.materiasEstudianteSeleccionado}"
 					tableStyleClass="table" var="inscripcion" paginator="false"
-					emptyMessage="No hay materias disponibles para inscribir">
+					emptyMessage="#{sistema.obtenerTexto('gw.reenvioCorreo.panelMaterias.mensajeVacio')}">
 
 					<p:column styleClass="text-center">
 						<f:facet name="header">
-							<h:outputText value="Curso/Asignatura" />
+							<h:outputText value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelMaterias.tablaColumna.curso')}" />
 						</f:facet>
 						<h:outputText value="#{inscripcion.programa}" />
 					</p:column>
 
 					<p:column styleClass="text-center">
 						<f:facet name="header">
-							<h:outputText value="Tipo de asignatura" />
+							<h:outputText value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelMaterias.tablaColumna.tipo')}" />
 						</f:facet>
 						<h:outputText value="#{inscripcion.tipoPrograma}" />
 					</p:column>
 
 					<p:column styleClass="text-center">
 						<f:facet name="header">
-							<h:outputText value="Semestre" />
+							<h:outputText value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelMaterias.tablaColumna.semestre')}" />
 						</f:facet>
 						<h:outputText value="#{inscripcion.semestre}" />
 					</p:column>
 
 					<p:column styleClass="text-center">
 						<f:facet name="header">
-							<h:outputText value="Bloque" />
+							<h:outputText value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelMaterias.tablaColumna.bloque')}" />
 						</f:facet>
 						<h:outputText value="#{inscripcion.bloque}" />
 					</p:column>
 
 				</p:dataTable>
 				<p:outputPanel styleClass="text-center mt-2">
-					<p:commandButton value="Cancelar" process="@this"
+					<p:commandButton value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelMaterias.boton.cancelar')}" process="@this"
 						update="frmMaterias frmBusqueda frmTabla"
 						action="#{reenvioCorreoBean.mostrarPanelBusquedaInscripcion}"
 						styleClass="btn btn-default" />
-					<p:commandButton value="Reenviar correo"
+					<p:commandButton value="#{sistema.obtenerTexto('gw.reenvioCorreo.panelMaterias.boton.reenviarCorreo')}"
 						onclick="PF('dlgMensajeConfirmacion').show()"
 						styleClass="btn btn-primary ml-1" />
 				</p:outputPanel>
@@ -307,7 +307,7 @@
 
 		<p:dialog appendTo="@(body)" draggable="false" position="center"
 			resizable="false" closable="false" modal="true" width="600px"
-			widgetVar="dlgMensajeConfirmacion" header="Confirmación"
+			widgetVar="dlgMensajeConfirmacion" header="#{sistema.obtenerTexto('gw.reenvioCorreo.modalConfirmacion.titulo')}"
 			dynamic="true">
 			<h:form id="frmConfirmacion">
 				<p:outputPanel>
@@ -315,18 +315,18 @@
 						<div class="row">
 							<div class="col-md-12">
 								<h:outputText styleClass="bloque"
-									value="¿Está seguro de que desea reenviar el correo de inscripción?" />
+									value="#{sistema.obtenerTexto('gw.reenvioCorreo.modalConfirmacion.mensaje')}" />
 							</div>
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-md-12 text-right">
-							<p:commandButton value="Aceptar"
+							<p:commandButton value="#{sistema.obtenerTexto('gw.reenvioCorreo.modalConfirmacion.boton.aceptar')}"
 								action="#{reenvioCorreoBean.reenviarCorreoInscripcion}"
 								ajax="true" process="@this" update=":pnlMensaje"
 								oncomplete="PF('dlgMensajeConfirmacion').hide()"
 								styleClass="btn btn-primary pull-right" />
-							<p:commandButton value="Cancelar" styleClass="btn btn-default"
+							<p:commandButton value="#{sistema.obtenerTexto('gw.reenvioCorreo.modalConfirmacion.boton.cancelar')}" styleClass="btn btn-default"
 								onclick="PF('dlgMensajeConfirmacion').hide()" />
 						</div>
 					</div>
@@ -336,7 +336,7 @@
 
 		<p:dialog appendTo="@(body)" draggable="false" position="center"
 			resizable="false" closable="false" modal="true" width="600px"
-			widgetVar="dlgMensaje" header="Informativo" dynamic="true">
+			widgetVar="dlgMensaje" header="#{sistema.obtenerTexto('gw.reenvioCorreo.modalInformativo.titulo')}" dynamic="true">
 			<p:outputPanel id="pnlMensaje">
 				<div class="form-group">
 					<div class="row">
@@ -348,7 +348,7 @@
 				</div>
 				<div class="row">
 					<div class="col-md-12 text-right">
-						<p:commandButton value="Cerrar" styleClass="btn btn-default"
+						<p:commandButton value="#{sistema.obtenerTexto('gw.reenvioCorreo.modalInformativo.boton.cerrar')}" styleClass="btn btn-default"
 							onclick="PF('dlgMensaje').hide()" />
 					</div>
 				</div>
