@@ -4,6 +4,11 @@
 		<pattern value="/login" />
 		<view-id value="/views/public/login/login.xhtml" />
 	</url-mapping>
+	
+	<url-mapping id="loginadm">
+		<pattern value="/loginadm" />
+		<view-id value="/views/public/login/loginadm.xhtml" />
+	</url-mapping>
 
 	<!-- MAPEO DE RUTAS DEL SITIO PRIVADO -->
 
