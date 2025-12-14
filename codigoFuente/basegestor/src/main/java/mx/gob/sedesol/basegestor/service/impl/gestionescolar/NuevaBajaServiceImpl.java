@@ -7,11 +7,11 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalle
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaAplicacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaSolicitudDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DatosMoodlePersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.INuevaBajaRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.NuevaBajaService;
 import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
-import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Usuario;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.CursoWS;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.UsuarioWSClient;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.util.ErrorWS;
@@ -63,8 +63,8 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
     }
 
     @Override
-    public List<NodoDTO> obtenerEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma) {
-        return nuevaBajaRepository.consultarEventosPorPeriodoYPrograma(nombrePeriodo, idPrograma);
+    public List<NodoDTO> obtenerEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma, String matricula) {
+        return nuevaBajaRepository.consultarEventosPorPeriodoYPrograma(nombrePeriodo, idPrograma, matricula);
     }
 
     @Override
@@ -85,28 +85,39 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         Long motivoId = nuevaBajaRepository.insertarMotivoBaja(solicitud.getIdTipoBaja(), solicitud.getMotivo());
         Long procesoId = nuevaBajaRepository.obtenerIdProcesoBaja();
 
-        BajaMatriculacionDTO matriculacion = nuevaBajaRepository.consultarMatriculacionPorEvento(
-                solicitud.getMatriculaUsuario(), solicitud.getIdEvento());
-        boolean matriculado = matriculacion != null && matriculacion.getIdEvento() != null && matriculacion.getIdGrupo() != null;
+        BajaMatriculacionDTO matriculacion = solicitud.getIdEvento() != null
+                ? nuevaBajaRepository.consultarMatriculacionPorEvento(solicitud.getMatriculaUsuario(), solicitud.getIdEvento())
+                : null;
 
         Long idPlan = matriculacion != null && matriculacion.getIdPlan() != null ? matriculacion.getIdPlan() : solicitud.getIdPlan();
         Long idPrograma = matriculacion != null && matriculacion.getIdPrograma() != null ? matriculacion.getIdPrograma() : solicitud.getIdPrograma();
-        Long idEvento = matriculado ? matriculacion.getIdEvento() : 0L;
-        Long idGrupo = matriculado ? matriculacion.getIdGrupo() : 0L;
+        validarPlanYPrograma(idPersona, idPlan, idPrograma);
 
         boolean esDefinitiva = contieneTexto(solicitud.getNombreTipoBaja(), "definitiva");
         boolean esSinAsignaturas = contieneTexto(solicitud.getNombreTipoBaja(), "sin asignaturas");
         boolean esTemporalOParcial = contieneTexto(solicitud.getNombreTipoBaja(), "temporal")
                 || contieneTexto(solicitud.getNombreTipoBaja(), "parcial");
 
-        if (!matriculado && esDefinitiva) {
-            idPrograma = 0L;
+        Long idEvento = obtenerEventoSeleccionado(esTemporalOParcial, solicitud, matriculacion);
+        Long idGrupo = matriculacion != null && matriculacion.getIdGrupo() != null ? matriculacion.getIdGrupo() : 0L;
+
+        Integer idUserEnrolmentsLms = 0;
+
+        if (esTemporalOParcial) {
+            validarEventoParaBajaParcial(matriculacion, idEvento);
+            Integer idUsuarioMoodle = nuevaBajaRepository.obtenerIdUsuarioMoodle(idPersona, idEvento);
+            if (idUsuarioMoodle == null) {
+                throw new IllegalArgumentException("No se encontró el usuario en Moodle para el evento seleccionado");
+            }
+            idUserEnrolmentsLms = suspenderUsuarioEnCurso(idEvento, idUsuarioMoodle);
+        } else if (esDefinitiva) {
+            DatosMoodlePersonaDTO datosMoodle = obtenerDatosMoodle(idPersona);
+            suspenderUsuarioDefinitivamente(datosMoodle.getIdPersonaMoodle(), datosMoodle.getIdPlataformaMoodle());
+            idPrograma = idPrograma != null ? idPrograma : 0L;
+            idEvento = 0L;
+            idGrupo = 0L;
         }
 
-        Long idEventoBaja = matriculado && matriculacion.getIdEvento() != null ? matriculacion.getIdEvento() : solicitud.getIdEvento();
-        Integer idUsuarioMoodle = idEventoBaja != null ? nuevaBajaRepository.obtenerIdUsuarioMoodle(idPersona, idEventoBaja) : null;
-        Integer idUserEnrolmentsLms = procesarSuspensionEnMoodle(esDefinitiva, esTemporalOParcial, idEventoBaja, idUsuarioMoodle);
-        idUserEnrolmentsLms = idUserEnrolmentsLms != null ? idUserEnrolmentsLms : 0;
         int contabilizar = 1;
 
         BajaAplicacionDTO bajaAplicacionDTO = new BajaAplicacionDTO(
@@ -129,48 +140,102 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         return origen != null && texto != null && origen.toLowerCase().contains(texto.toLowerCase());
     }
 
-    private Integer procesarSuspensionEnMoodle(boolean esDefinitiva, boolean esTemporalOParcial, Long idEvento,
-                                               Integer idUsuarioMoodle) {
-        if (idEvento == null || idEvento == 0 || idUsuarioMoodle == null) {
-            return 0;
+    private void validarPlanYPrograma(Long idPersona, Long idPlan, Long idPrograma) {
+        if (idPlan == null || idPrograma == null) {
+            throw new IllegalArgumentException("Debe seleccionar un plan y programa válidos para aplicar la baja");
         }
 
+        if (!nuevaBajaRepository.validarPlanProgramaPorPersona(idPersona, idPlan, idPrograma)) {
+            throw new IllegalArgumentException("El usuario no pertenece al plan y programa seleccionados");
+        }
+    }
+
+    private void validarEventoParaBajaParcial(BajaMatriculacionDTO matriculacion, Long idEvento) {
+        if (idEvento == null || idEvento == 0) {
+            throw new IllegalArgumentException("Debe seleccionar un evento válido para aplicar la baja parcial o temporal");
+        }
+
+        if (matriculacion == null || matriculacion.getIdEvento() == null || matriculacion.getIdGrupo() == null) {
+            throw new IllegalArgumentException("El usuario no se encuentra matriculado en el evento seleccionado");
+        }
+
+        if (!idEvento.equals(matriculacion.getIdEvento())) {
+            throw new IllegalArgumentException("El evento seleccionado no coincide con la matrícula del usuario");
+        }
+    }
+
+    private Long obtenerEventoSeleccionado(boolean esTemporalOParcial, BajaSolicitudDTO solicitud, BajaMatriculacionDTO matriculacion) {
+        if (!esTemporalOParcial) {
+            return solicitud.getIdEvento() != null ? solicitud.getIdEvento() : 0L;
+        }
+
+        if (matriculacion != null && matriculacion.getIdEvento() != null) {
+            return matriculacion.getIdEvento();
+        }
+
+        if (solicitud.getIdEvento() != null) {
+            return solicitud.getIdEvento();
+        }
+
+        throw new IllegalArgumentException("Debe seleccionar un evento para aplicar la baja parcial o temporal");
+    }
+
+    private Integer suspenderUsuarioEnCurso(Long idEvento, Integer idUsuarioMoodle) {
         Integer idPlataforma = nuevaBajaRepository.obtenerIdPlataformaMoodle(idEvento);
         if (idPlataforma == null) {
-            return 0;
+            throw new IllegalArgumentException("No se encontró la plataforma de Moodle para el evento seleccionado");
         }
 
         ParametroWSMoodleDTO plataforma = parametroWSMoodleService.buscarPorId(idPlataforma);
         if (plataforma == null) {
-            return 0;
+            throw new IllegalArgumentException("No se encontró la configuración de la plataforma Moodle");
         }
 
         try {
-            if (esTemporalOParcial) {
-                Integer idCurso = nuevaBajaRepository.obtenerIdCursoMoodle(idEvento);
-                if (idCurso == null) {
-                    throw new IllegalArgumentException("No se encontró el curso en Moodle para el evento seleccionado");
-                }
-                CursoWS cursoWS = new CursoWS(plataforma);
-                return cursoWS.suspenderUsuarioEnCurso(idCurso, idUsuarioMoodle, 1);
+            Integer idCurso = nuevaBajaRepository.obtenerIdCursoMoodle(idEvento);
+            if (idCurso == null) {
+                throw new IllegalArgumentException("No se encontró el curso en Moodle para el evento seleccionado");
             }
-
-            if (esDefinitiva) {
-                UsuarioWSClient usuarioWSClient = new UsuarioWSClient(plataforma);
-                Usuario usuario = new Usuario();
-                usuario.setId(idUsuarioMoodle);
-                usuario.setSuspended(1);
-                boolean suspendido = usuarioWSClient.actualizarUsuarioSuspender(usuario);
-                if (!suspendido) {
-                    throw new IllegalStateException("No fue posible suspender al usuario en Moodle");
-                }
-                return 0;
+            CursoWS cursoWS = new CursoWS(plataforma);
+            Integer idUserEnrolmentsLms = cursoWS.suspenderUsuarioEnCurso(idCurso, idUsuarioMoodle, 1);
+            if (idUserEnrolmentsLms == null) {
+                LOGGER.warn("El servicio Moodle no devolvió id_user_enrolments_lms para la suspensión parcial");
+                throw new IllegalStateException("No fue posible obtener el identificador de enrolment al suspender en Moodle");
             }
+            return idUserEnrolmentsLms;
         } catch (ErrorWS e) {
-            LOGGER.error("Error al comunicarse con Moodle durante la aplicación de la baja", e);
-            throw new IllegalStateException("No se pudo aplicar la baja en Moodle", e);
+            LOGGER.error("Error al suspender al usuario en el curso de Moodle", e);
+            throw new IllegalStateException("No se pudo suspender al usuario en el curso de Moodle", e);
+        }
+    }
+
+    private void suspenderUsuarioDefinitivamente(Integer idUsuarioMoodle, Integer idPlataforma) {
+        if (idUsuarioMoodle == null || idPlataforma == null) {
+            throw new IllegalArgumentException("No se cuenta con información suficiente para suspender al usuario en Moodle");
         }
 
-        return 0;
+        ParametroWSMoodleDTO plataforma = parametroWSMoodleService.buscarPorId(idPlataforma);
+        if (plataforma == null) {
+            throw new IllegalArgumentException("No se encontró la configuración de la plataforma Moodle");
+        }
+
+        try {
+            UsuarioWSClient usuarioWSClient = new UsuarioWSClient(plataforma);
+            boolean suspendido = usuarioWSClient.suspenderUsuarioDefinitivo(idUsuarioMoodle);
+            if (!suspendido) {
+                throw new IllegalStateException("No fue posible suspender al usuario en Moodle");
+            }
+        } catch (ErrorWS e) {
+            LOGGER.error("Error al suspender definitivamente al usuario en Moodle", e);
+            throw new IllegalStateException("No se pudo suspender definitivamente al usuario en Moodle", e);
+        }
+    }
+
+    private DatosMoodlePersonaDTO obtenerDatosMoodle(Long idPersona) {
+        List<DatosMoodlePersonaDTO> datosMoodle = nuevaBajaRepository.obtenerDatosMoodlePorPersona(idPersona);
+        if (datosMoodle == null || datosMoodle.isEmpty()) {
+            throw new IllegalArgumentException("No se encontró la relación del usuario con Moodle");
+        }
+        return datosMoodle.get(0);
     }
 }
