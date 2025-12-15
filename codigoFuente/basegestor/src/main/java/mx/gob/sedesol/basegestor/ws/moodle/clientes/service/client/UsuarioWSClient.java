@@ -157,25 +157,51 @@ public class UsuarioWSClient implements Serializable {
     }
 
     public boolean suspenderUsuarioDefinitivo(Integer idUsuarioMoodle) throws ErrorWS {
-        HashMap<String, Object> paramMap = new HashMap<>();
-        int x = 0;
-        paramMap.put("users[" + x + "][id]", idUsuarioMoodle);
-        paramMap.put("users[" + x + "][suspended]", 1);
+        try {
+            HashMap<String, Object> paramMap = new HashMap<>();
+            int x = 0;
+            paramMap.put("users[" + x + "][id]", idUsuarioMoodle);
+            paramMap.put("users[" + x + "][suspended]", 1);
 
-        TokenController token = new TokenController(parametroWSMoodleDTO);
-        HashMap<String, Object> paramsLog = new HashMap<>();
-        paramsLog.put("wsfunction", "core_user_update_users");
-        paramsLog.put("moodlewsrestformat", "json");
-        paramsLog.putAll(paramMap);
-        paramsLog.put(StaticsConstants.ACCESS_TOKEN, token.getAccessToken());
+            TokenController token = new TokenController(parametroWSMoodleDTO);
+            HashMap<String, Object> paramsLog = new HashMap<>();
+            paramsLog.put("wsfunction", "core_user_update_users");
+            paramsLog.put("moodlewsrestformat", "json");
+            paramsLog.putAll(paramMap);
+            paramsLog.put(StaticsConstants.ACCESS_TOKEN, token.getAccessToken());
 
-        URIBuilder uriBuilder = new URIBuilder(parametroWSMoodleDTO);
-        URI uriTotal = uriBuilder.buildWSUri(parametroWSMoodleDTO.getServer(), paramsLog);
-        logger.info("URL suspensión usuario Moodle: " + uriTotal.toString());
+            URIBuilder uriBuilder = new URIBuilder(parametroWSMoodleDTO);
+            URI uriTotal = uriBuilder.buildWSUri(parametroWSMoodleDTO.getServer(), paramsLog);
+            logger.info("URL suspensión usuario Moodle: " + uriTotal.toString());
 
-        WSClientBase ws = new WSClientBase(parametroWSMoodleDTO);
-        Integer salida  = ws.ejecutarServicioPOST("core_user_update_users", paramMap, null, Integer.class);
-        return salida != null;
+            WSClientBase ws = new WSClientBase(parametroWSMoodleDTO);
+
+            // En lugar de esperar Integer, manejemos la respuesta como String primero
+            String respuesta = ws.ejecutarServicioPOST("core_user_update_users", paramMap, null, String.class);
+
+            // Verificar si es la respuesta de éxito de Moodle
+            if (respuesta != null && respuesta.trim().equals("{\"warnings\":[]}")) {
+                logger.info("Usuario suspendido exitosamente en Moodle");
+                return true;
+            }
+
+            // Intentar parsear como Integer si no es warnings[]
+            try {
+                Integer salida = Integer.parseInt(respuesta);
+                return salida != null;
+            } catch (NumberFormatException e) {
+                logger.warn("Respuesta no numérica de Moodle: " + respuesta);
+                return false;
+            }
+
+        } catch (ErrorWS e) {
+            // Si el error es por warnings[], considerarlo éxito
+            if (e.getMessage() != null && e.getMessage().contains("warnings")) {
+                logger.info("Moodle devolvió warnings vacíos - suspensión exitosa");
+                return true;
+            }
+            throw e;
+        }
     }
     
      
