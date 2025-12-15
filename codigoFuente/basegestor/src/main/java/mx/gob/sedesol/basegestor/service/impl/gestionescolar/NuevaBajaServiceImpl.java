@@ -91,12 +91,23 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
 
         Long idPlan = matriculacion != null && matriculacion.getIdPlan() != null ? matriculacion.getIdPlan() : solicitud.getIdPlan();
         Long idPrograma = matriculacion != null && matriculacion.getIdPrograma() != null ? matriculacion.getIdPrograma() : solicitud.getIdPrograma();
-        validarPlanYPrograma(idPersona, idPlan, idPrograma);
+
 
         boolean esDefinitiva = contieneTexto(solicitud.getNombreTipoBaja(), "definitiva");
         boolean esSinAsignaturas = contieneTexto(solicitud.getNombreTipoBaja(), "sin asignaturas");
         boolean esTemporalOParcial = contieneTexto(solicitud.getNombreTipoBaja(), "temporal")
                 || contieneTexto(solicitud.getNombreTipoBaja(), "parcial");
+
+        if (esTemporalOParcial) {
+            if (idPlan == null || idPrograma == null) {
+                throw new IllegalArgumentException("Debe seleccionar un plan y programa válidos para aplicar la baja parcial/temporal");
+            }
+
+            if (!nuevaBajaRepository.validarPlanProgramaPorPersona(idPersona, idPlan, idPrograma)) {
+                throw new IllegalArgumentException("El usuario no pertenece al plan y programa seleccionados");
+            }
+        }
+        // Para bajas definitivas: NO validar plan/programa
 
         Long idEvento = obtenerEventoSeleccionado(esTemporalOParcial, solicitud, matriculacion);
         Long idGrupo = matriculacion != null && matriculacion.getIdGrupo() != null ? matriculacion.getIdGrupo() : 0L;
@@ -111,9 +122,21 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
             }
             idUserEnrolmentsLms = suspenderUsuarioEnCurso(idEvento, idUsuarioMoodle);
         } else if (esDefinitiva) {
-            DatosMoodlePersonaDTO datosMoodle = obtenerDatosMoodle(idPersona);
-            suspenderUsuarioDefinitivamente(datosMoodle.getIdPersonaMoodle(), datosMoodle.getIdPlataformaMoodle());
-            idPrograma = idPrograma != null ? idPrograma : 0L;
+            // BAJA DEFINITIVA: intentar suspender en Moodle
+            try {
+                DatosMoodlePersonaDTO datosMoodle = obtenerDatosMoodle(idPersona);
+                if (datosMoodle != null && datosMoodle.getIdPersonaMoodle() != null) {
+                    suspenderUsuarioDefinitivamente(datosMoodle.getIdPersonaMoodle(), datosMoodle.getIdPlataformaMoodle());
+                    LOGGER.info("Usuario suspendido en Moodle para baja definitiva - ID Moodle: " + datosMoodle.getIdPersonaMoodle());
+                } else {
+                    LOGGER.warn("Usuario no tiene cuenta Moodle, continuando con baja en SIGIE");
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Error al suspender en Moodle para baja definitiva, continuando: " + e.getMessage());
+
+            }
+
+            idPrograma = 0L;
             idEvento = 0L;
             idGrupo = 0L;
         }
@@ -124,7 +147,7 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
                 idPersona,
                 motivoId,
                 procesoId,
-                idPlan,
+                idPlan != null ? idPlan : 0L,  // Para definitiva puede ser 0
                 idPrograma != null ? idPrograma : 0L,
                 idEvento != null ? idEvento : 0L,
                 idGrupo != null ? idGrupo : 0L,
@@ -134,7 +157,12 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
                 solicitud.getNumeroSolicitud());
 
         nuevaBajaRepository.insertarBaja(bajaAplicacionDTO);
+
+        LOGGER.info("Baja aplicada exitosamente - Tipo: " + solicitud.getNombreTipoBaja() +
+                ", Matrícula: " + solicitud.getMatriculaUsuario() +
+                ", idUserEnrolmentsLms: " + idUserEnrolmentsLms);
     }
+
 
     private boolean contieneTexto(String origen, String texto) {
         return origen != null && texto != null && origen.toLowerCase().contains(texto.toLowerCase());
