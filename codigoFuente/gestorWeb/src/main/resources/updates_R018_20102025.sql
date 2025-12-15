@@ -14,6 +14,18 @@ SELECT
 FROM des_sisi_gestor.tbl_funcionalidades f
 WHERE f.clave = 'ALT_BAJ_USR_BAJ';
 
+--  Nombre del estudiante
+INSERT INTO des_sisi_gestor.tbl_textos_sistema (clave, valor, id_funcionalidad, fecha_registro, fecha_actualizacion, usuario_modifico)
+SELECT
+    'gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.nombreEstudiante',
+    'Nombre',
+    f.id_funcionalidad,
+    NOW(),
+    NOW(),
+    2
+FROM des_sisi_gestor.tbl_funcionalidades f
+WHERE f.clave = 'ALT_BAJ_USR_BAJ';
+
 -- Tipo de baja
 
 INSERT INTO des_sisi_gestor.tbl_textos_sistema (clave, valor, id_funcionalidad, fecha_registro, fecha_actualizacion, usuario_modifico)
