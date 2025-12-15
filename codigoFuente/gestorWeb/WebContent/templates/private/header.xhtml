@@ -27,12 +27,13 @@
 			<!-- /.navbar-header -->
 
 			<ul class="nav navbar-top-links item2">
-				<li class="boton-header" id="tareas"><p:commandButton
+			<!-- Se comentaron temporalmente para evitar que el usuario interactura con los botones -->
+				<!-- <li class="boton-header" id="tareas"><p:commandButton
 						id="btnActividadesUsuario" ajax="true"
 						action="#{menuGestorBean.navegaActividadesUsuario()}"
 						styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-rectangle-list tareas icono-btn-header" />
 					<p:tooltip for="btnActividadesUsuario" position="bottom"
-						value="#{sistema.obtenerTexto('gw.header.tooltip.tareas')}"></p:tooltip></li>
+						value="#{sistema.obtenerTexto('gw.header.tooltip.tareas')}"></p:tooltip></li> 
 				<li class="boton-header"><p:commandButton
 						id="btnHeaderNotificaciones" ajax="true"
 						action="#{notificacionesBean.cargarNotificacionesSistema()}"
@@ -40,14 +41,14 @@
 					<p:tooltip for="btnHeaderNotificaciones" position="bottom"
 						value="#{sistema.obtenerTexto('gw.header.tooltip.notificaciones')}"></p:tooltip></li>
 
-				<li class="boton-header"><p:commandButton
+					<li class="boton-header"><p:commandButton
 						id="btnHeaderMensajes" ajax="true"
 						actionListener="#{notificacionesBean.cargarNotificacionesSistema()}"
 						action="#{menuGestorBean.navegaNotificaciones()}"
 						styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-envelope tareas icono-btn-header">
 					</p:commandButton></li>
 				<p:tooltip for="btnHeaderMensajes" position="bottom"
-					value="#{sistema.obtenerTexto('gw.header.tooltip.mensajes')}"></p:tooltip>
+					value="#{sistema.obtenerTexto('gw.header.tooltip.mensajes')}"></p:tooltip> -->
 				<ui:fragment
 					rendered="#{menuGestorBean.rolTienePermiso('LOG_ACA_INF')}">
 					<sec:authorize access="hasPermission(null, 'LOG_ACA_INF')">
