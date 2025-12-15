@@ -6,26 +6,26 @@
 package mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+import java.net.URI;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.client.RestTemplate;
-
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
-import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Curso;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.EnrolMents;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Usuario;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Usuarios;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.controller.WSClientBase;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.util.ErrorWS;
+import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.util.StaticsConstants;
+import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.util.TokenController;
+import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.util.URIBuilder;
 
 public class UsuarioWSClient implements Serializable {
 	
@@ -154,6 +154,28 @@ public class UsuarioWSClient implements Serializable {
             return true;
         //}
 
+    }
+
+    public boolean suspenderUsuarioDefinitivo(Integer idUsuarioMoodle) throws ErrorWS {
+        HashMap<String, Object> paramMap = new HashMap<>();
+        int x = 0;
+        paramMap.put("users[" + x + "][id]", idUsuarioMoodle);
+        paramMap.put("users[" + x + "][suspended]", 1);
+
+        TokenController token = new TokenController(parametroWSMoodleDTO);
+        HashMap<String, Object> paramsLog = new HashMap<>();
+        paramsLog.put("wsfunction", "core_user_update_users");
+        paramsLog.put("moodlewsrestformat", "json");
+        paramsLog.putAll(paramMap);
+        paramsLog.put(StaticsConstants.ACCESS_TOKEN, token.getAccessToken());
+
+        URIBuilder uriBuilder = new URIBuilder(parametroWSMoodleDTO);
+        URI uriTotal = uriBuilder.buildWSUri(parametroWSMoodleDTO.getServer(), paramsLog);
+        logger.info("URL suspensión usuario Moodle: " + uriTotal.toString());
+
+        WSClientBase ws = new WSClientBase(parametroWSMoodleDTO);
+        Integer salida  = ws.ejecutarServicioPOST("core_user_update_users", paramMap, null, Integer.class);
+        return salida != null;
     }
     
      

@@ -21,7 +21,7 @@ public interface NuevaBajaService {
 
     List<String> obtenerPeriodos();
 
-    List<NodoDTO> obtenerEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma);
+    List<NodoDTO> obtenerEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma, String matricula);
 
     BajaMatriculaDetalleDTO obtenerDatosPorMatricula(String matricula);
 

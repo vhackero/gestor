@@ -13,6 +13,7 @@ import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaAplicacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DatosMoodlePersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -113,11 +114,16 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<NodoDTO> consultarEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma) {
-        String consulta = "SELECT te.id_evento, te.nombre_ec FROM tbl_eventos te WHERE te.cve_evento_cap LIKE CONCAT('%',:nombrePeriodo,'%') AND te.id_programa = :idPrograma";
+    public List<NodoDTO> consultarEventosPorPeriodoYPrograma(String nombrePeriodo, Long idPrograma, String matricula) {
+        String consulta = "SELECT te.id_evento, te.nombre_ec FROM tbl_eventos te \n"
+                + "JOIN tbl_grupos tg ON tg.id_evento = te.id_evento\n"
+                + "JOIN rel_grupo_participante rgp ON rgp.id_grupo = tg.id\n"
+                + "JOIN tbl_persona tp ON tp.id_persona = rgp.id_persona_participante\n"
+                + "WHERE tp.sso_idUsuario = :matricula AND te.cve_evento_cap LIKE CONCAT('%',:nombrePeriodo,'%') AND te.id_programa = :idPrograma";
         Query query = entityManager.createNativeQuery(consulta);
         query.setParameter("nombrePeriodo", nombrePeriodo);
         query.setParameter("idPrograma", idPrograma);
+        query.setParameter("matricula", matricula);
         List<Object[]> resultados = query.getResultList();
         List<NodoDTO> eventos = new ArrayList<>();
 
@@ -155,6 +161,27 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
         query.setParameter("matricula", matricula);
         List<?> resultados = query.getResultList();
         return resultados.isEmpty() ? null : obtenerLong(resultados.get(0));
+    }
+
+    @Override
+    public boolean validarPlanProgramaPorPersona(Long idPersona, Long idPlan, Long idPrograma) {
+        String consulta = "SELECT tp.id_persona\n"
+                + "FROM tbl_persona tp\n"
+                + "JOIN tbl_persona_aspirante tpa ON tpa.id_persona = tp.id_persona\n"
+                + "WHERE tpa.id_plan = :idPlanSeleccionado\n"
+                + "AND tp.id_persona = :idPersona\n"
+                + "AND EXISTS(SELECT rgp2.id_persona_participante FROM rel_grupo_participante rgp2\n"
+                + "    INNER JOIN tbl_grupos tg2 ON tg2.id = rgp2.id_grupo\n"
+                + "    INNER JOIN tbl_eventos te2 ON te2.id_evento = tg2.id_evento\n"
+                + "                                               WHERE te2.id_programa = :idProgramaSeleccionado\n"
+                + "                                               AND rgp2.id_persona_participante = tp.id_persona)";
+
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idPlanSeleccionado", idPlan);
+        query.setParameter("idProgramaSeleccionado", idPrograma);
+        query.setParameter("idPersona", idPersona);
+        List<?> resultados = query.getResultList();
+        return !resultados.isEmpty();
     }
 
     @Override
@@ -222,6 +249,22 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
         query.setParameter("idEvento", idEvento);
         List<?> resultados = query.getResultList();
         return resultados.isEmpty() ? null : obtenerEntero(resultados.get(0));
+    }
+
+    @Override
+    public List<DatosMoodlePersonaDTO> obtenerDatosMoodlePorPersona(Long idPersona) {
+        String consulta = "SELECT rppm.id_persona_moodle, rppm.id_plataforma_moodle FROM tbl_persona tp\n"
+                + "                                       JOIN rel_personas_plataformas_moodle rppm ON rppm.id_persona = tp.id_persona\n"
+                + "WHERE tp.id_persona = :idPersonaMatriculaIngresada";
+
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idPersonaMatriculaIngresada", idPersona);
+        List<Object[]> resultados = query.getResultList();
+        List<DatosMoodlePersonaDTO> datos = new ArrayList<>();
+        for (Object[] fila : resultados) {
+            datos.add(new DatosMoodlePersonaDTO(obtenerEntero(fila[0]), obtenerEntero(fila[1])));
+        }
+        return datos;
     }
 
     @Override
