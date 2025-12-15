@@ -343,8 +343,8 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private void prepararValoresParaBajaDefinitiva() {
         idSemestre = null;
         idBloque = null;
-        idPrograma = 0L;
-        idEvento = 0L;
+        idPrograma = null;
+        idEvento = null;
 
         semestres = Collections.emptyList();
         bloques = Collections.emptyList();
