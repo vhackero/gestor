@@ -147,7 +147,7 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
                 idPersona,
                 motivoId,
                 procesoId,
-                idPlan != null ? idPlan : 0L,  // Para definitiva puede ser 0
+                idPlan != null ? idPlan : 0L,
                 idPrograma != null ? idPrograma : 0L,
                 idEvento != null ? idEvento : 0L,
                 idGrupo != null ? idGrupo : 0L,
@@ -158,9 +158,6 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
 
         nuevaBajaRepository.insertarBaja(bajaAplicacionDTO);
 
-        LOGGER.info("Baja aplicada exitosamente - Tipo: " + solicitud.getNombreTipoBaja() +
-                ", Matrícula: " + solicitud.getMatriculaUsuario() +
-                ", idUserEnrolmentsLms: " + idUserEnrolmentsLms);
     }
 
 
