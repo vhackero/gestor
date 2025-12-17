@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +27,12 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDT
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MatricularDispersionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
+import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
 import mx.gob.sedesol.basegestor.model.entities.admin.CatParametroWSMoodle;
 import mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.CatEstadoAva;
+import mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.RelUnidadOaAva;
 import mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblAmbienteVirtualAprendizaje;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatCategoriaEventoCapacitacion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDestinatariosEc;
@@ -45,14 +50,22 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatModalidadPla
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersionesBusqueda;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCompEspecifica;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IDispersionesRepository;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.RelProgCompEspecificaRepo;
+import mx.gob.sedesol.basegestor.model.repositories.gestion.aprendizaje.RelUnidadOaAvaRepo;
+import mx.gob.sedesol.basegestor.model.repositories.planesyprogramas.RelEstructuraUDidacticaRepo;
 import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.DispersionesService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.EventoCapacitacionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Grupo;
+import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Seccion;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.CrearGrupo;
+import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.CursoWS;
+import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.SeccionWS;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelEstructuraUnidadDidactica;
 
 @Service("dispersionesService")
 public class DispersionesServiceImpl implements DispersionesService {
@@ -76,6 +89,15 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 	
 	@Autowired
 	private PersonaService personaService;
+	
+	@Autowired
+	private RelEstructuraUDidacticaRepo relEstructuraUDidacticaRepo;
+	
+	@Autowired
+	private RelProgCompEspecificaRepo relProgCompEspecificaRepo;
+	
+	@Autowired
+	private RelUnidadOaAvaRepo relUnidadOaAvaRepo;
 
 	@Override
 	public void altaDisperciones(DispersionesParam dispercionParametros) {
@@ -225,6 +247,8 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 		boolean multiEvento = esTipoEventosPorGrupo(solicitud.getTipoMatriculacion());
 		int eventosObjetivo = multiEvento ? totalGrupos : 1;
 		int gruposPorEvento = multiEvento ? 1 : totalGrupos;
+		List<RelEstructuraUnidadDidactica> estructurasPrograma = obtenerEstructurasPrograma(solicitud.getIdPrograma());
+		int numeroUnidadesCurso = !estructurasPrograma.isEmpty() ? estructurasPrograma.size() : Math.max(1, gruposPorEvento);
 		
 		int eventosCreados = 0;
 		int gruposCreados = 0;
@@ -235,15 +259,18 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 			evento = iDispersionesRepository.guardarEventoDispersion(evento);
 			eventosCreados++;
 			
-			Integer idCursoLms = crearCursoEnMoodle(solicitud, evento, gruposPorEvento);
+			Integer idCursoLms = crearCursoEnMoodle(solicitud, evento, numeroUnidadesCurso);
 			if (idCursoLms != null) {
 				evento.setIdCursoLmsBorrador(idCursoLms);
 				iDispersionesRepository.actualizarEvento(evento);
 			}
 			
+			TblAmbienteVirtualAprendizaje ava = null;
 			if (Boolean.TRUE.equals(solicitud.getVincularAva()) && solicitud.getIdPlataformaLms() != null) {
-				crearAmbienteVirtual(solicitud, evento, idCursoLms);
+				ava = crearAmbienteVirtual(solicitud, evento, idCursoLms);
 			}
+			
+			aprovisionarCursoEnMoodle(solicitud, evento, idCursoLms, ava, estructurasPrograma);
 			
 			for (int grupo = 1; grupo <= gruposPorEvento; grupo++) {
 				int capacidadGrupo = capacidad.obtenerCapacidad();
@@ -562,7 +589,7 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 		}
 	}
 	
-	private void crearAmbienteVirtual(CrearEventoDispersionDTO solicitud, TblEvento evento, Integer idCursoLms) {
+	private TblAmbienteVirtualAprendizaje crearAmbienteVirtual(CrearEventoDispersionDTO solicitud, TblEvento evento, Integer idCursoLms) {
 		TblAmbienteVirtualAprendizaje ava = new TblAmbienteVirtualAprendizaje();
 		ava.setActivo(Boolean.TRUE);
 		ava.setUsuarioModifico(solicitud.getIdUsuario());
@@ -579,7 +606,124 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 		ava.setValidacionAva(Boolean.FALSE);
 		ava.setEsAvaArchivado(Boolean.FALSE);
 		ava.setAutonomo(Boolean.TRUE.equals(solicitud.getEventoAutonomo()) ? 1 : 0);
-		iDispersionesRepository.guardarAmbienteVirtual(ava);
+		return iDispersionesRepository.guardarAmbienteVirtual(ava);
+	}
+	
+	private void aprovisionarCursoEnMoodle(CrearEventoDispersionDTO solicitud, TblEvento evento, Integer idCursoLms,
+			TblAmbienteVirtualAprendizaje ava, List<RelEstructuraUnidadDidactica> estructurasPrograma) {
+		if (idCursoLms == null || solicitud.getIdPlataformaLms() == null || !esModalidadEnLinea(evento)) {
+			return;
+		}
+		try {
+			ParametroWSMoodleDTO plataforma = parametroWSMoodleService.buscarPorId(solicitud.getIdPlataformaLms());
+			if (plataforma == null) {
+				return;
+			}
+			List<RelEstructuraUnidadDidactica> estructuras = estructurasPrograma;
+			if (estructuras == null || estructuras.isEmpty()) {
+				estructuras = obtenerEstructurasPrograma(evento.getIdPrograma());
+			}
+			guardarUnidadesAva(ava, estructuras, solicitud.getIdUsuario());
+			List<Seccion> secciones = construirSecciones(estructuras, idCursoLms);
+			if (!secciones.isEmpty()) {
+				SeccionWS seccionWS = new SeccionWS(plataforma);
+				seccionWS.actualizarSeccion(secciones);
+			}
+			registrarCompetenciasCurso(plataforma, evento.getIdPrograma(), idCursoLms);
+		} catch (Exception ex) {
+			logger.error("No fue posible aprovisionar el curso en Moodle para el evento " + evento.getIdEvento(), ex);
+		}
+	}
+	
+	private List<RelEstructuraUnidadDidactica> obtenerEstructurasPrograma(Integer idPrograma) {
+		if (idPrograma == null) {
+			return new ArrayList<>();
+		}
+		List<RelEstructuraUnidadDidactica> estructuras = relEstructuraUDidacticaRepo
+				.obtieneRelEstUnidadDidPorPrograma(idPrograma);
+		return obtenerListUnidDidactSinRepetir(estructuras);
+	}
+	
+	private List<RelEstructuraUnidadDidactica> obtenerListUnidDidactSinRepetir(
+			List<RelEstructuraUnidadDidactica> relEstUnidadDidactica) {
+		if (relEstUnidadDidactica == null) {
+			return new ArrayList<>();
+		}
+		Set<Integer> idsUnidadesDidacticas = new HashSet<>();
+		return relEstUnidadDidactica.stream()
+				.filter(e -> idsUnidadesDidacticas.add(e.getIdUnidadDidactica()))
+				.collect(Collectors.toList());
+	}
+	
+	private List<Seccion> construirSecciones(List<RelEstructuraUnidadDidactica> estructuras, Integer idCursoLms) {
+		List<Seccion> secciones = new ArrayList<>();
+		if (estructuras == null || estructuras.isEmpty() || idCursoLms == null) {
+			return secciones;
+		}
+		int secuencia = 1;
+		for (RelEstructuraUnidadDidactica estructura : estructuras) {
+			secciones.add(generarSeccion(estructura, idCursoLms, secuencia));
+			secuencia++;
+		}
+		return secciones;
+	}
+	
+	private Seccion generarSeccion(RelEstructuraUnidadDidactica estructura, Integer idCursoLms, int secuencia) {
+		Seccion seccion = new Seccion();
+		seccion.setId(secuencia);
+		seccion.setCourse(idCursoLms);
+		if (estructura != null && estructura.getDetEstUnidadDidactica() != null) {
+			seccion.setName(estructura.getDetEstUnidadDidactica().getNombreUnidad());
+			seccion.setSummary(estructura.getDetEstUnidadDidactica().getObjetivosEspecificos());
+		}
+		return seccion;
+	}
+	
+	private void registrarCompetenciasCurso(ParametroWSMoodleDTO plataforma, Integer idPrograma, Integer idCursoLms) {
+		if (plataforma == null || idPrograma == null || idCursoLms == null) {
+			return;
+		}
+		try {
+			List<RelProgramaCompEspecifica> comps = relProgCompEspecificaRepo.obtenerCompEspPorIdPrograma(idPrograma);
+			if (comps == null) {
+				return;
+			}
+			List<String> competencias = comps.stream()
+					.filter(rel -> rel.getCatCompetenciaEspecifica() != null)
+					.map(rel -> rel.getCatCompetenciaEspecifica().getNombre())
+					.collect(Collectors.toList());
+			if (competencias.isEmpty()) {
+				return;
+			}
+			CursoWS cursoWS = new CursoWS(plataforma);
+			cursoWS.registrarCompetencias(idCursoLms, competencias);
+		} catch (Exception ex) {
+			logger.error("No fue posible registrar competencias en Moodle para el curso " + idCursoLms, ex);
+		}
+	}
+	
+	private void guardarUnidadesAva(TblAmbienteVirtualAprendizaje ava, List<RelEstructuraUnidadDidactica> estructuras,
+			Long usuarioModifico) {
+		if (ava == null || estructuras == null || estructuras.isEmpty()) {
+			return;
+		}
+		for (RelEstructuraUnidadDidactica estructura : estructuras) {
+			RelUnidadOaAva unidad = new RelUnidadOaAva();
+			unidad.setAmbienteVirtualAprendizaje(ava);
+			unidad.setDetEstUnidadDidactica(estructura.getDetEstUnidadDidactica());
+			unidad.setUsuarioModifico(usuarioModifico);
+			unidad.setPorcentajeAvanceOa(Byte.valueOf((byte) 0));
+			relUnidadOaAvaRepo.save(unidad);
+		}
+	}
+	
+	private boolean esModalidadEnLinea(TblEvento evento) {
+		if (evento == null || evento.getCatModalidadPlanPrograma() == null
+				|| evento.getCatModalidadPlanPrograma().getId() == null) {
+			return false;
+		}
+		Integer modalidad = evento.getCatModalidadPlanPrograma().getId();
+		return modalidad.equals(ConstantesGestor.MODALIDAD_LINEA) || modalidad.equals(ConstantesGestor.MODALIDAD_MIXTO);
 	}
 	
 	private CatEstadoAva crearEstadoAva() {
