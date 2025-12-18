@@ -1210,7 +1210,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 						materia.setCheck(Boolean.TRUE);
 						materia.setDisabled(Boolean.TRUE);
 					} else {
-						materia.setCheck(Boolean.FALSE);
+						//materia.setDisabled(Boolean.FALSE); Comentado para el periodo actual
 					}
 					return materia;
 				}).collect(Collectors.toList());
