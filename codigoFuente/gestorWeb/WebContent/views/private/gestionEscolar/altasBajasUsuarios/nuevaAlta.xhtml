@@ -15,7 +15,7 @@
                             closable="true"
                             for="@form" />
 
-                <p:panel header="Importar datos de fuente externa"
+                <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiquetaPanel.importarDatosFuenteExt')}"
                          styleClass="panel-primary">
                     <div class="form-group">
                         <div class="row">
@@ -29,7 +29,7 @@
                             </div>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <p:outputLabel for="somFuenteExterna"
-                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.fuenteExterna')}:"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.etiqueta.fuenteExterna')}:"
                                                styleClass="requerido bloque" />
                                 <p:selectOneMenu id="somFuenteExterna"
                                                  styleClass="col-xs-12"
