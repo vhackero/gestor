@@ -21,7 +21,7 @@
                         <div class="row">
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <p:outputLabel for="txtMatriculaImportar"
-                                               value="* Matricula/Usuario"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.matriculaUsuario')}:"
                                                styleClass="requerido bloque" />
                                 <p:inputText id="txtMatriculaImportar"
                                              styleClass="form-control"
@@ -29,7 +29,7 @@
                             </div>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <p:outputLabel for="somFuenteExterna"
-                                               value="* Fuente Externa"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.fuenteExterna')}:"
                                                styleClass="requerido bloque" />
                                 <p:selectOneMenu id="somFuenteExterna"
                                                  styleClass="col-xs-12"
@@ -41,7 +41,7 @@
                     </div>
                     <div class="row" style="margin-top: 20px;">
                         <div class="col-md-12 text-right">
-                            <p:commandButton value="Importar"
+                            <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.btn.importar')}"
                                              type="button"
                                              styleClass="btn btn-primary" />
                         </div>
@@ -55,14 +55,14 @@
                             closable="true"
                             for="@form" />
 
-                <p:panel header="Nueva alta"
+                <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaAlta')}"
                          styleClass="panel-primary"
                          style="margin-top: 25px;">
                     <div class="form-group">
                         <div class="row">
                             <div class="col-md-4 col-sm-6 col-xs-12">
                                 <p:outputLabel for="txtMatriculaNuevaAlta"
-                                               value="* Matricula/Usuario"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.matriculaUsuario')}:"
                                                styleClass="requerido bloque" />
                                 <p:inputText id="txtMatriculaNuevaAlta"
                                              styleClass="form-control"
@@ -72,7 +72,7 @@
                         <div class="row" style="margin-top: 15px;">
                             <div class="col-md-4 col-sm-6 col-xs-12">
                                 <p:outputLabel for="somPlanEstudios"
-                                               value="* Plan de estudios"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.planEstudios')}:"
                                                styleClass="requerido bloque" />
                                 <p:selectOneMenu id="somPlanEstudios"
                                                  styleClass="col-xs-12"
@@ -82,7 +82,7 @@
                             </div>
                             <div class="col-md-4 col-sm-6 col-xs-12">
                                 <p:outputLabel for="somAsignaturaPrograma"
-                                               value="* Asignatura/Programa"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.asignaturaPrograma')}:"
                                                styleClass="requerido bloque" />
                                 <p:selectOneMenu id="somAsignaturaPrograma"
                                                  styleClass="col-xs-12"
@@ -92,7 +92,7 @@
                             </div>
                             <div class="col-md-4 col-sm-6 col-xs-12">
                                 <p:outputLabel for="somPeriodo"
-                                               value="* Periodo"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.periodo')}:"
                                                styleClass="requerido bloque" />
                                 <p:selectOneMenu id="somPeriodo"
                                                  styleClass="col-xs-12"
@@ -104,7 +104,7 @@
                         <div class="row" style="margin-top: 15px;">
                             <div class="col-md-4 col-sm-6 col-xs-12">
                                 <p:outputLabel for="somEvento"
-                                               value="* Evento"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.evento')}:"
                                                styleClass="requerido bloque" />
                                 <p:selectOneMenu id="somEvento"
                                                  styleClass="col-xs-12"
@@ -114,7 +114,7 @@
                             </div>
                             <div class="col-md-4 col-sm-6 col-xs-12">
                                 <p:outputLabel for="somGrupo"
-                                               value="* Grupo"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.etiqueta.grupo')}:"
                                                styleClass="requerido bloque" />
                                 <p:selectOneMenu id="somGrupo"
                                                  styleClass="col-xs-12"
@@ -126,15 +126,15 @@
                     </div>
                     <div class="row" style="margin-top: 20px;">
                         <div class="col-md-6 col-sm-6 col-xs-12">
-                            <p:outputLabel value="* Datos obligatorios"
+                            <p:outputLabel value="#{sistema.obtenerTexto('gw.gestionescolar.label.camposRequeridos')}"
                                            styleClass="requerido" />
                         </div>
                         <div class="col-md-6 col-sm-6 col-xs-12 text-right">
-                            <p:commandButton value="Cancelar"
+                            <p:commandButton value="#{sistema.obtenerTexto('gw.admin.plantillas.boton.cancelar')}"
                                              type="button"
                                              styleClass="btn btn-default"
                                              style="margin-right: 10px;" />
-                            <p:commandButton value="Matricular"
+                            <p:commandButton value="#{sistema.obtenerTexto('gw.matriculacion.btn.matricular')}"
                                              type="button"
                                              styleClass="btn btn-primary" />
                         </div>
