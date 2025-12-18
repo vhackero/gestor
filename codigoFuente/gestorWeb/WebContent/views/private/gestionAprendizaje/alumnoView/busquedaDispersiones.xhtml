@@ -9,7 +9,7 @@
 
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
-		<li class="active">#{sistema.obtenerTexto('gw.alumno.dispersiones.titulo')}</li>
+		<li>#{sistema.obtenerTexto('gw.alumno.dispersiones.titulo')}</li>
 
 	</ui:define>
 
@@ -56,7 +56,7 @@
 					<sec:authorize access="hasPermission(null,'DISPERSION')">
 
 						<p:commandButton style="width: 250px;" value="#{sistema.obtenerTexto('gw.alumno.dispersiones.tablero')}"
-							action="#{convocatoriasBean.navegaConsultaTablero}" ajax="false"
+							action="#{dispersionesBean.navegaDispersion}" ajax="false"
 							immediate="true" process="@this" styleClass="btn btn-primary" />
 
 					</sec:authorize>

@@ -1,12 +1,15 @@
 package mx.gob.sedesol.basegestor.service.gestionescolar;
 
 import java.util.List;
+
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionRecordDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CapturaEventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoActaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TablaCalificacionesDTO;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
+import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.util.ErrorWS;
 
 public interface EventoCapacitacionService {
 
@@ -28,6 +31,8 @@ public interface EventoCapacitacionService {
 	
 	List<CalificacionRecordDTO> obtieneDetalleActa(Integer idEvento, Integer idCurso, List<TablaCalificacionesDTO> listaCalif);
 	EncabezadoActaDTO obtenerEncabezadoActa(Integer idEvento, Integer idGrupo);
+	
+	Integer obtenerIdMoodle(TblEvento evento, int numeroUnidades) throws ErrorWS;
 
 
 }
