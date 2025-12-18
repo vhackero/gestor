@@ -44,8 +44,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("SELECT tp.id_persona, ");
 		sql.append("       tp.sso_idUsuario, ");
 		sql.append("       tp.sso_nombre, ");
-		sql.append("       tp.sso_apellidoMaterno, ");
 		sql.append("       tp.sso_apellidoPaterno, ");
+		sql.append("       tp.sso_apellidoMaterno, ");
 		sql.append("       rpc.sso_correoElectronico, ");
 		sql.append("       tpa.id_plan, ");
 		sql.append("       tpl.nombre, ");
