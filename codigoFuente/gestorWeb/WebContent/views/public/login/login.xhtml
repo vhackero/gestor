@@ -38,18 +38,15 @@
 
 	<ui:define name="contenido">
 			<p:outputPanel styleClass="mt-2 alert alert-info" layout="block"
-				rendered="#{sistema.obtenerClave('DESHABILITAR_ACCESO_LOGIN') eq 1}">								
-				Estimado usuario,<br/><br/>
-La Universidad Abierta y a Distancia de México (UnADM) está realizando mantenimiento en esta aplicación para mejorar nuestros servicios.<br/><br/>
-Por favor, intenta acceder más tarde. No es necesario reportar esta situación en la mesa de servicio.<br/><br/>
-Atentamente,<br/>
-<b>#OrgulloyCorazónUnADM</b>		
+				rendered="#{sistema.obtenerClave('DESHABILITAR_ACCESO_LOGIN') eq 1}">	
+				 <h:outputText value="#{sistema.obtenerTexto('gw.login.deshabilitado.mensaje')}"
+                  escape="false" />									
 			</p:outputPanel>
 		<div class="row">
 			<div class="#{sistema.obtenerClave('DESHABILITAR_ACCESO_LOGIN') eq 0 
                ? 'col-md-9' 
                : 'col-md-12'}">
-				 <iframe class="iframe-resize" style="width: 100%; min-height: 250px; height: 250px; display: table-cell; vertical-align: middle; overflow: hidden; overflow-y: hidden;" src="#{sistema.obtenerClave('RUTA_CARRUSEL')}" type="text/html" allowscriptaccess="always" scrolling="no" frameborder="0"></iframe>
+				 <iframe class="iframe-resize" style="width: 100%; min-height: 400px; height: 310px; display: table-cell; vertical-align: middle; overflow: hidden; overflow-y: hidden;" src="#{sistema.obtenerClave('RUTA_CARRUSEL')}" type="text/html" allowscriptaccess="always" scrolling="no" frameborder="0"></iframe>
 			</div>
 
 			<div class="col-md-3">

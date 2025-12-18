@@ -461,25 +461,25 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	}
 
 	private String generarAcronimo(String texto) {
-	    StringBuilder acronimo = new StringBuilder();
-	    for (char c : texto.toCharArray()) {
-	        if (Character.isUpperCase(c)) {
-	            acronimo.append(c);
-	        }
-	    }
-	    return acronimo.toString();
-	}
-	private String generarAcronimoTresLetras(String texto) {
-	    if (texto == null) {
-	        return "";
-	    }
-	    texto = texto.trim();
-	    if (texto.length() < 3) {
-	        return texto.toUpperCase();
-	    }
-	    return texto.substring(0, 3).toUpperCase();
+		StringBuilder acronimo = new StringBuilder();
+		for (char c : texto.toCharArray()) {
+			if (Character.isUpperCase(c)) {
+				acronimo.append(c);
+			}
+		}
+		return acronimo.toString();
 	}
 
+	private String generarAcronimoTresLetras(String texto) {
+		if (texto == null) {
+			return "";
+		}
+		texto = texto.trim();
+		if (texto.length() < 3) {
+			return texto.toUpperCase();
+		}
+		return texto.substring(0, 3).toUpperCase();
+	}
 
 	private void validarSeleccionMateriasSegunEstatusAcademico(InscripcionContextoDTO contexto)
 			throws InscripcionException {
@@ -547,21 +547,16 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private void validarMinimoMateriasPorPeriodo(ResumenSeleccionMateriasDTO resumen, InscripcionContextoDTO contexto)
 			throws InscripcionException {
 		List<InscripcionMateriasDTO> materiasDisponibles = contexto.getEstadoAcademico().getMateriasDisponibles();
-		int cantidadMateriasOfertadas = (int) materiasDisponibles.stream()
-		        .filter(m -> m.getTipoPrograma() != null)
-		        .filter(m -> m.getTipoPrograma().equalsIgnoreCase(ConstantesGestor.TEXTO_MATERIA_OBLIGATORIA))
-		        .count();
+		int cantidadMateriasOfertadas = (int) materiasDisponibles.stream().filter(m -> m.getTipoPrograma() != null)
+				.filter(m -> m.getTipoPrograma().equalsIgnoreCase(ConstantesGestor.TEXTO_MATERIA_OBLIGATORIA)).count();
 
 		Integer minProgramasPorPeriodo = obtenerMinProgramasPorPeriodo(contexto);
 
-		if (cantidadMateriasOfertadas < minProgramasPorPeriodo || materiasDisponibles.size() < minProgramasPorPeriodo ) {
+		if (cantidadMateriasOfertadas < minProgramasPorPeriodo || materiasDisponibles.size() < minProgramasPorPeriodo) {
 			int cantidadMateriasOfertadasmarcadas = (int) materiasDisponibles.stream()
-			        .filter(m -> m.getTipoPrograma() != null)
-			        .filter(m -> m.getCheck().equals(true) )
-			        .count();
-			if(cantidadMateriasOfertadasmarcadas == 0) {
-				throw new InscripcionException(
-						"Debes seleccionar al menos 1 unidades didáctica");
+					.filter(m -> m.getTipoPrograma() != null).filter(m -> m.getCheck().equals(true)).count();
+			if (cantidadMateriasOfertadasmarcadas == 0) {
+				throw new InscripcionException("Debes seleccionar al menos 1 unidades didáctica");
 			}
 			return;
 		}
@@ -894,7 +889,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		Set<Long> idsMateriasCursadas = obtenerIdsMateriasCursadas(materiasCursadas);
 
 		Map<Long, InscripcionMateriasDTO> materiasMap = materiasDisponibles.stream()
-				.collect(Collectors.toMap(InscripcionMateriasDTO::getIdPrograma, materia -> materia, (a,b)->b));
+				.collect(Collectors.toMap(InscripcionMateriasDTO::getIdPrograma, materia -> materia, (a, b) -> b));
 
 		for (InscripcionMateriasDTO materia : materiasDisponibles) {
 			if (esMateriaSeriada(materia)) {
@@ -1008,9 +1003,16 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 			// Regla para respetar el avance anual (Leer descripcion del metodo
 			// 'obtenerMateriasPorAvanceAnualIrregulares')
-			if (cantidadMateriasReprobadasObligatorias < ConstantesGestor.NUMERO_MAXIMO_MATERIAS_REPROBADAS) {
+			if (cantidadMateriasReprobadasObligatorias >= 1
+					&& cantidadMateriasReprobadasObligatorias <= ConstantesGestor.NUMERO_MAXIMO_MATERIAS_REPROBADAS) {
 				logger.info("Estudiantes irregulares de a 1 a 3 reprobadas");
 				return obtenerMateriasPorAvanceAnualIrregulares(materiasConReprobadasMarcadas, materiasReprobadas);
+			}
+
+			if (cantidadMateriasReprobadasObligatorias == 0) {
+				logger.info("Estudiantes irregulares sin reprobadas obligatorias");
+				return obtenerMateriasPorAvanceAnualSinTomarEnCuentaObligatorias(materiasConReprobadasMarcadas,
+						persona);
 			}
 
 			// Regla cuando el estudiante reprueba mas de 4 materias del mismo semestre
@@ -1191,6 +1193,27 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			}
 		}
 		return semestreMasReprobado;
+	}
+
+	private List<InscripcionMateriasDTO> obtenerMateriasPorAvanceAnualSinTomarEnCuentaObligatorias(
+			List<InscripcionMateriasDTO> materiasOfertadas, InscripcionPersonaDTO persona) {
+
+		String semestreDondeFaltanObligatorias = obtenerSemestre(persona.getIdPersona(), persona.getIdPlan(),
+				materiasOfertadas.get(0).getEstructura());
+
+		return materiasOfertadas.stream()
+				.filter(materia -> materia.getEstructura().equalsIgnoreCase(semestreDondeFaltanObligatorias)
+						|| materia.getTipoPrograma().equalsIgnoreCase(ConstantesGestor.TEXTO_MATERIA_OPTATIVA))
+				.map(materia -> {
+					if (materia.getEstructura().equalsIgnoreCase(semestreDondeFaltanObligatorias)
+							&& materia.getTipoPrograma().equalsIgnoreCase(ConstantesGestor.TEXTO_MATERIA_OBLIGATORIA)) {
+						materia.setCheck(Boolean.TRUE);
+						materia.setDisabled(Boolean.TRUE);
+					} else {
+						//materia.setDisabled(Boolean.FALSE); Comentado para el periodo actual
+					}
+					return materia;
+				}).collect(Collectors.toList());
 	}
 
 	/**
