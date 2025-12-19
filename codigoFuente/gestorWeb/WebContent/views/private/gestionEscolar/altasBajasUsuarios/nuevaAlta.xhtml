@@ -33,8 +33,13 @@
                                                styleClass="requerido bloque" />
                                 <p:selectOneMenu id="somFuenteExterna"
                                                  styleClass="col-xs-12"
-                                                 style="width: 100%;">
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.fuenteExternaSeleccionada}">
                                     <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaFuentesExternas}"
+                                                   var="fuente"
+                                                   itemLabel="#{fuente.nombre}"
+                                                   itemValue="#{fuente.id}" />
                                 </p:selectOneMenu>
                             </div>
                         </div>
@@ -76,18 +81,68 @@
                                                styleClass="requerido bloque" />
                                 <p:selectOneMenu id="somPlanEstudios"
                                                  styleClass="col-xs-12"
-                                                 style="width: 100%;">
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.planSeleccionado}">
                                     <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaPlanes}"
+                                                   var="plan"
+                                                   itemLabel="#{plan.nombre}"
+                                                   itemValue="#{plan.id}" />
+                                    <p:ajax listener="#{nuevaAltaUsuariosBean.onPlanChange}"
+                                            update="somSemestre somBloque somAsignaturaPrograma somPeriodo somEvento somGrupo" />
                                 </p:selectOneMenu>
                             </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12">
+                                <p:outputLabel for="somSemestre"
+                                               value="Semestre:"
+                                               styleClass="bloque" />
+                                <p:selectOneMenu id="somSemestre"
+                                                 styleClass="col-xs-12"
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.semestreSeleccionado}">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaSemestres}"
+                                                   var="semestre"
+                                                   itemLabel="#{semestre.nombre}"
+                                                   itemValue="#{semestre.id}" />
+                                    <p:ajax listener="#{nuevaAltaUsuariosBean.onSemestreChange}"
+                                            update="somBloque somAsignaturaPrograma somPeriodo somEvento somGrupo" />
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12">
+                                <p:outputLabel for="somBloque"
+                                               value="Bloque:"
+                                               styleClass="bloque" />
+                                <p:selectOneMenu id="somBloque"
+                                                 styleClass="col-xs-12"
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.bloqueSeleccionado}">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaBloques}"
+                                                   var="bloque"
+                                                   itemLabel="#{bloque.nombre}"
+                                                   itemValue="#{bloque.id}" />
+                                    <p:ajax listener="#{nuevaAltaUsuariosBean.onBloqueChange}"
+                                            update="somAsignaturaPrograma somPeriodo somEvento somGrupo" />
+                                </p:selectOneMenu>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 15px;">
                             <div class="col-md-4 col-sm-6 col-xs-12">
                                 <p:outputLabel for="somAsignaturaPrograma"
                                                value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.asignaturaPrograma')}:"
                                                styleClass="requerido bloque" />
                                 <p:selectOneMenu id="somAsignaturaPrograma"
                                                  styleClass="col-xs-12"
-                                                 style="width: 100%;">
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.programaSeleccionado}">
                                     <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaProgramas}"
+                                                   var="programa"
+                                                   itemLabel="#{programa.nombre}"
+                                                   itemValue="#{programa.id}" />
+                                    <p:ajax listener="#{nuevaAltaUsuariosBean.onProgramaChange}"
+                                            update="somEvento somGrupo" />
                                 </p:selectOneMenu>
                             </div>
                             <div class="col-md-4 col-sm-6 col-xs-12">
@@ -96,22 +151,36 @@
                                                styleClass="requerido bloque" />
                                 <p:selectOneMenu id="somPeriodo"
                                                  styleClass="col-xs-12"
-                                                 style="width: 100%;">
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.periodoSeleccionado}">
                                     <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaPeriodos}"
+                                                   var="periodo"
+                                                   itemLabel="#{periodo.nombre}"
+                                                   itemValue="#{periodo.id}" />
+                                    <p:ajax listener="#{nuevaAltaUsuariosBean.onPeriodoChange}"
+                                            update="somEvento somGrupo" />
                                 </p:selectOneMenu>
                             </div>
-                        </div>
-                        <div class="row" style="margin-top: 15px;">
                             <div class="col-md-4 col-sm-6 col-xs-12">
                                 <p:outputLabel for="somEvento"
                                                value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.evento')}:"
                                                styleClass="requerido bloque" />
                                 <p:selectOneMenu id="somEvento"
                                                  styleClass="col-xs-12"
-                                                 style="width: 100%;">
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.eventoSeleccionado}">
                                     <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaEventos}"
+                                                   var="evento"
+                                                   itemLabel="#{evento.nombre}"
+                                                   itemValue="#{evento.id}" />
+                                    <p:ajax listener="#{nuevaAltaUsuariosBean.onEventoChange}"
+                                            update="somGrupo" />
                                 </p:selectOneMenu>
                             </div>
+                        </div>
+                        <div class="row" style="margin-top: 15px;">
                             <div class="col-md-4 col-sm-6 col-xs-12">
                                 <p:outputLabel for="somGrupo"
                                                value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.etiqueta.grupo')}:"
@@ -120,6 +189,10 @@
                                                  styleClass="col-xs-12"
                                                  style="width: 100%;">
                                     <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaGrupos}"
+                                                   var="grupo"
+                                                   itemLabel="#{grupo.nombre}"
+                                                   itemValue="#{grupo.id}" />
                                 </p:selectOneMenu>
                             </div>
                         </div>
