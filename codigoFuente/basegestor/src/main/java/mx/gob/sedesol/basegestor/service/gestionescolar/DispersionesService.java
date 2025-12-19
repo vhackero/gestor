@@ -2,6 +2,12 @@ package mx.gob.sedesol.basegestor.service.gestionescolar;
 
 import java.util.List;
 
+import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CrearEventoDispersionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionCreacionResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculacionResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MatricularDispersionDTO;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionPreEvento;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Dispersiones;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParam;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParamNuevo;
@@ -40,5 +46,11 @@ public interface DispersionesService extends CommonService<Dispersiones, Integer
 	public boolean validarDispercionExistenteOrdinario(DispersionesParam dispercionParametros);
 	
 	public List<TipoMatriculacion> consultarTipoMatriculacion();
+	
+	public DispersionPreEvento obtenerDatosPreviosEvento(Integer idPrograma);
+	
+	public ResultadoDTO<DispersionCreacionResultadoDTO> crearEventosDispersion(CrearEventoDispersionDTO solicitud);
+	
+	public ResultadoDTO<DispersionMatriculacionResultadoDTO> matricularUsuariosDispersion(MatricularDispersionDTO solicitud);
 
 }

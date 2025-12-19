@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ConvocatoriaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
@@ -177,6 +178,10 @@ public class ConvocatoriaServiceImpl implements ConvocatoriaService {
 		return null;
 	}
 
-
+	@Override
+	public List<ConvocatoriaDTO> obtenerConvocatoriasActivas() {
+		return iConvocatoriaRepository.obtenerConvocatoriasActivas();
+	}
+	
 
 }

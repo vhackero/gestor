@@ -239,6 +239,14 @@ public final class ConstantesGestor {
 	public static final String ASUNTO_POR_DEFECTO_CORREO_INSCRIPCION = "Inscripción";
 	public static final String REMITENTE_CORREO_INSCRIPCION = "REMITENTE_CORREO_INSCRIPCION";
 	public static final String NOMBRE_POR_DEFECTO_REMITENTE_CORREO_INSCRIPCION = "Remitente";
+	public static final Integer SI_SE_ENVIO_CORREO = 1;
+	public static final Integer NO_SE_ENVIO_CORREO = 0;
+	public static final String TEXTO_CORREO_SI_ENVIADO_INSCRIPCION = "Enviado";
+	public static final String TEXTO_CORREO_NO_ENVIADO_INSCRIPCION = "No enviado";
+	public static final Integer PANEL_BUSQUEDA_INSCRIPCION_REENVIO_CORREO = 1;
+	public static final Integer PANEL_MATERIAS_REENVIO_CORREO = 2;
 	public static final int CANTIDAD_MAXIMA_MATERIAS_REPROBADAS = 5;
 	public static final long CANTIDAD_MAXIMA_MATERIAS_REPROBADAS_OPTATIVAS = 3;
+	public static final String ANIO_INSCRIPCION = "ANIO_INSCRIPCION";
+	public static final long MATERIAS_OPTATIVAS_APROBADAS_POR_SEMESTRE = 2;
 }

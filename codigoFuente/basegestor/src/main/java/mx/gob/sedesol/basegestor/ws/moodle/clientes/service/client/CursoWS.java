@@ -375,8 +375,8 @@ public class CursoWS {
         }
     }
 	
-	public  Integer obtenerAvanceOAS(int cursoId, int userId) throws ErrorWS {
-		Integer respuesta;
+        public  Integer obtenerAvanceOAS(int cursoId, int userId) throws ErrorWS {
+                Integer respuesta;
             HashMap<String, Object> paramMap = new HashMap<>();
             paramMap.put("courseid", cursoId);
             paramMap.put("userid", userId);
@@ -385,6 +385,18 @@ public class CursoWS {
             logger.info(respuesta);
         return respuesta;
     }
+
+        public Integer suspenderUsuarioEnCurso(int cursoId, int userId, int suspend) throws ErrorWS {
+                Integer respuesta;
+                HashMap<String, Object> paramMap = new HashMap<>();
+                paramMap.put("courseid", cursoId);
+                paramMap.put("userid", userId);
+                paramMap.put("suspend", suspend);
+                WSClientBase ws = new WSClientBase(parametroWSMoodleDTO);
+                respuesta = ws.ejecutarServicioPOST("local_update_enrolments_course", paramMap, null, Integer.class);
+                logger.info(respuesta);
+                return respuesta;
+        }
     
     
     

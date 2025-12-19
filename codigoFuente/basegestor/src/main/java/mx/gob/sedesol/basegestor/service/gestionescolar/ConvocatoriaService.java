@@ -2,6 +2,7 @@ package mx.gob.sedesol.basegestor.service.gestionescolar;
 
 import java.util.List;
 
+import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ConvocatoriaDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ConvocatoriaNivelEducativoCompl;
@@ -38,5 +39,7 @@ public interface ConvocatoriaService extends CommonService<Convocatoria, Integer
 	public void eliminarConvocatorias(Convocatoria elminarConvo);
 	
 	public List<ConvocatoriaNivelEducativoCompl> consultarNivelEducativoCompleto();
+	
+	List<ConvocatoriaDTO> obtenerConvocatoriasActivas();
 
 }

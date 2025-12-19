@@ -81,6 +81,7 @@ import mx.gob.sedesol.basegestor.model.especificaciones.PersonaEspecificacion;
 import mx.gob.sedesol.basegestor.model.repositories.admin.DatoSociodemograficoPersonaRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.DomicilioPersonaRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.EntidadFederativaRepo;
+import mx.gob.sedesol.basegestor.model.repositories.admin.IPersonaRepository;
 import mx.gob.sedesol.basegestor.model.repositories.admin.IUsuariosImportarRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.LoteCargaUsuarioRepo;
 import mx.gob.sedesol.basegestor.model.repositories.admin.LoteUsuarioRepo;
@@ -156,6 +157,9 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 	
 	@Autowired
 	private IUsuariosImportarRepo usuariosImportarRepo;
+	
+	@Autowired
+	private IPersonaRepository personaRepository;
 
 	private ModelMapper mapper = new ModelMapper();
 
@@ -377,7 +381,11 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 		ResultadoDTO<PersonaDTO> resultado = sonDatosRequeridosValidos(TipoAccion.PERSISTENCIA, datos.getPersona());
 		resultado.setDto(datos.getPersona());
 		validarCorreo(TipoAccion.PERSISTENCIA, datos.getPersonaCorreo(), datos.getCorreoDePersonaEnBD(), resultado);
-		if (!datos.getPersona().getConvocatoria().equals("0.0") && !datos.getPersona().getFuenteExterna().equals("0.0")) {
+		if (ObjectUtils.isNotNull(datos.getPersona().getConvocatoria())
+				&& ObjectUtils.isNullOrEmpty(datos.getPersona().getFuenteExterna())
+				&& !datos.getPersona().getConvocatoria().equals("0.0")
+				&& !datos.getPersona().getFuenteExterna().equals("0.0")
+		) {
 			validarAspirante(datos.getPersona(),resultado);
 		}
 		if (resultado.getResultado().getValor()) {
@@ -385,7 +393,11 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 				resultado = new ResultadoDTO<>();
 				TblPersona persona = almacenarDatosPersonales(datos.getPersona());
 				//ES AQUI DONDE METEMOS A LA OTRA TABLA 
-				if (!datos.getPersona().getConvocatoria().equals("0.0") && !datos.getPersona().getFuenteExterna().equals("0.0")) {
+				if (ObjectUtils.isNotNull(datos.getPersona().getConvocatoria())
+						&& ObjectUtils.isNullOrEmpty(datos.getPersona().getFuenteExterna())
+						&& !datos.getPersona().getConvocatoria().equals("0.0")
+						&& !datos.getPersona().getFuenteExterna().equals("0.0")
+				) {
 					almacenarAspirante(datos.getPersona(), persona);
 				}
 				almacenarDatosLaborales(datos.getDatosLaborales(), persona);
@@ -1528,6 +1540,11 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 	    }
 		exito = true;
 		return exito;
+	}
+
+	@Override
+	public Optional<Long> obtenerIdPersonaPorMatricula(String matricula) {
+		return personaRepository.obtenerIdPersonaPorMatricula(matricula);
 	}
 
 }
