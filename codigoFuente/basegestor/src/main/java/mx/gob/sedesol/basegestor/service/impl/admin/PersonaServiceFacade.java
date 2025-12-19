@@ -156,6 +156,34 @@ public class PersonaServiceFacade {
 	public List<SelectImportarDTO> consultaFuenteExterna() {
 		return usuariosImportarService.consultaFuenteExterna();
 	}
+
+	public List<SelectImportarDTO> consultaPlanesActivos() {
+		return usuariosImportarService.consultaPlanesActivos();
+	}
+
+	public List<SelectImportarDTO> consultaSemestresPorPlan(Integer idPlan) {
+		return usuariosImportarService.consultaSemestresPorPlan(idPlan);
+	}
+
+	public List<SelectImportarDTO> consultaBloquesPorSemestre(Integer idSemestre) {
+		return usuariosImportarService.consultaBloquesPorSemestre(idSemestre);
+	}
+
+	public List<SelectImportarDTO> consultaProgramasPorEje(Integer idEjeCapacitacion) {
+		return usuariosImportarService.consultaProgramasPorEje(idEjeCapacitacion);
+	}
+
+	public List<SelectImportarDTO> consultaPeriodosInscripcion() {
+		return usuariosImportarService.consultaPeriodosInscripcion();
+	}
+
+	public List<SelectImportarDTO> consultaEventosPorPeriodoYPrograma(String nombrePeriodo, Integer idPrograma) {
+		return usuariosImportarService.consultaEventosPorPeriodoYPrograma(nombrePeriodo, idPrograma);
+	}
+
+	public List<SelectImportarDTO> consultaGruposPorEvento(Integer idEvento) {
+		return usuariosImportarService.consultaGruposPorEvento(idEvento);
+	}
 	
 	public List<PersonaSigeDTO> consultaPersonasImportar(String fuenteExterna, String convocatoria) {
 		return usuariosImportarService.consultaPersonasImportar(fuenteExterna, convocatoria);

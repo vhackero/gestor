@@ -11,6 +11,20 @@ public interface IUsuariosImportarRepo {
 
 	List<SelectImportarDTO> consultaFuenteExterna();
 
+	List<SelectImportarDTO> consultaPlanesActivos();
+
+	List<SelectImportarDTO> consultaSemestresPorPlan(Integer idPlan);
+
+	List<SelectImportarDTO> consultaBloquesPorSemestre(Integer idSemestre);
+
+	List<SelectImportarDTO> consultaProgramasPorEje(Integer idEjeCapacitacion);
+
+	List<SelectImportarDTO> consultaPeriodosInscripcion();
+
+	List<SelectImportarDTO> consultaEventosPorPeriodoYPrograma(String nombrePeriodo, Integer idPrograma);
+
+	List<SelectImportarDTO> consultaGruposPorEvento(Integer idEvento);
+
 	List<PersonaSigeDTO> consultaPersonasImportar(String fuenteExterna, String convocatoria);
 
 	void insertAspirante(String idPersonaRegistrada, String programaEducativo, String idConvocatoria);

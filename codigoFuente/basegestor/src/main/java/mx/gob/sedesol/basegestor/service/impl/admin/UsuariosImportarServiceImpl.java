@@ -44,6 +44,41 @@ public class UsuariosImportarServiceImpl implements UsuariosImportarService{
 		return usuariosImportarRepo.consultaFuenteExterna();
 	}
 
+	@Override
+	public List<SelectImportarDTO> consultaPlanesActivos() {
+		return usuariosImportarRepo.consultaPlanesActivos();
+	}
+
+	@Override
+	public List<SelectImportarDTO> consultaSemestresPorPlan(Integer idPlan) {
+		return usuariosImportarRepo.consultaSemestresPorPlan(idPlan);
+	}
+
+	@Override
+	public List<SelectImportarDTO> consultaBloquesPorSemestre(Integer idSemestre) {
+		return usuariosImportarRepo.consultaBloquesPorSemestre(idSemestre);
+	}
+
+	@Override
+	public List<SelectImportarDTO> consultaProgramasPorEje(Integer idEjeCapacitacion) {
+		return usuariosImportarRepo.consultaProgramasPorEje(idEjeCapacitacion);
+	}
+
+	@Override
+	public List<SelectImportarDTO> consultaPeriodosInscripcion() {
+		return usuariosImportarRepo.consultaPeriodosInscripcion();
+	}
+
+	@Override
+	public List<SelectImportarDTO> consultaEventosPorPeriodoYPrograma(String nombrePeriodo, Integer idPrograma) {
+		return usuariosImportarRepo.consultaEventosPorPeriodoYPrograma(nombrePeriodo, idPrograma);
+	}
+
+	@Override
+	public List<SelectImportarDTO> consultaGruposPorEvento(Integer idEvento) {
+		return usuariosImportarRepo.consultaGruposPorEvento(idEvento);
+	}
+
 
 	@Override
 	public List<PersonaSigeDTO> consultaPersonasImportar(String fuenteExterna, String convocatoria) {
