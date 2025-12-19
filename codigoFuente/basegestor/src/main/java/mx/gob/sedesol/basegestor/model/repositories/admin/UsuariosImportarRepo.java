@@ -77,13 +77,19 @@ public class UsuariosImportarRepo implements IUsuariosImportarRepo {
 
 	@Override
 	public List<SelectImportarDTO> consultaSemestresPorPlan(Integer idPlan) {
-		String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_plan = :idPlan";
-		return obtenerSelectImportarDTO(consulta, "idPlan", idPlan);
+		StringBuilder consulta = new StringBuilder();
+		consulta.append("SELECT hijo.id, hijo.nombre ");
+		consulta.append("FROM tbl_malla_curricular hijo ");
+		consulta.append("WHERE hijo.id_padre = (");
+		consulta.append("    SELECT plan.id FROM tbl_malla_curricular plan ");
+		consulta.append("    WHERE plan.id_plan = :idPlan AND plan.id_padre IS NULL LIMIT 1");
+		consulta.append(") AND hijo.activo = 1");
+		return obtenerSelectImportarDTO(consulta.toString(), "idPlan", idPlan);
 	}
 
 	@Override
 	public List<SelectImportarDTO> consultaBloquesPorSemestre(Integer idSemestre) {
-		String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_padre = :idSemestre";
+		String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_padre = :idSemestre AND tmc.activo = 1";
 		return obtenerSelectImportarDTO(consulta, "idSemestre", idSemestre);
 	}
 

@@ -123,10 +123,6 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         listaProgramas.clear();
 
         Integer idEje = parseEntero(bloqueSeleccionado);
-        if (ObjectUtils.isNull(idEje)) {
-            idEje = parseEntero(semestreSeleccionado);
-        }
-
         if (ObjectUtils.isNotNull(idEje)) {
             listaProgramas = personaServiceFacade.consultaProgramasPorEje(idEje);
         }
