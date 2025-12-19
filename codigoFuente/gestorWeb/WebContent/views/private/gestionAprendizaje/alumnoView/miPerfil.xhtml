@@ -3,20 +3,20 @@
 <ui:composition template="/templates/layout.xhtml"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
-	xmlns:sec="http://www.springframework.org/security/tags">
-	<ui:define name="breadcrumb">
-		<li class="active">Mi perfil</li>
-	</ui:define>
-	<ui:define name="content">
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+		xmlns:sec="http://www.springframework.org/security/tags">
+		<ui:define name="breadcrumb">
+			<li class="active">#{sistema.obtenerTexto('gw.alumno.miPerfil.titulo')}</li>
+		</ui:define>
+		<ui:define name="content">
 
-		<h:form>
-			<p:ajaxStatus onstart="PF('dialogLayout').show()"
-				onsuccess="PF('dialogLayout').hide()" />
-			<h1>Mi perfil</h1>
+			<h:form>
+				<p:ajaxStatus onstart="PF('dialogLayout').show()"
+					onsuccess="PF('dialogLayout').hide()" />
+				<h1>#{sistema.obtenerTexto('gw.alumno.miPerfil.titulo')}</h1>
 			<hr />
 			<div class="row">
 					<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('PRF_PER')}">

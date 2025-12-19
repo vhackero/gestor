@@ -2,10 +2,15 @@ package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 
 import java.util.List;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionGrupoEventoDTO;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionPreEvento;
+import mx.gob.sedesol.basegestor.model.entities.gestionaprendizaje.TblAmbienteVirtualAprendizaje;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParam;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionesParamNuevo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.InscripcionPlanesProgramas;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.ProcesosInscripcion;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblGrupo;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TipoMatriculacion;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblDispersionesBusqueda;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
@@ -38,5 +43,25 @@ public interface IDispersionesRepository {
 	public List<TipoMatriculacion> consultarTipoMatriculacion();
 	
 	public List<InscripcionPlanesProgramas> consultarPlanesProgramas(DispersionesParam dispercionParametros);
+	
+	public DispersionPreEvento obtenerDatosPreviosEvento(Integer idPrograma);
+	
+		public TblEvento guardarEventoDispersion(TblEvento evento);
+		
+		public void actualizarEvento(TblEvento evento);
+		
+		public TblAmbienteVirtualAprendizaje guardarAmbienteVirtual(TblAmbienteVirtualAprendizaje ambienteVirtual);
+		
+		public TblGrupo guardarGrupoDispersion(TblGrupo grupo);
+		
+		public void actualizarGrupoDispersion(TblGrupo grupo);
+		
+		public List<DispersionGrupoEventoDTO> obtenerRelacionesDispersion(Integer idDispersion);
+		
+		public List<DispersionGrupoEventoDTO> obtenerGruposOrdinariosPorPrograma(Integer idPrograma, Integer idProcesoInscripcion);
+		
+		public List<Long> obtenerPersonasMatriculacion(Integer idDispersion, Integer idConvocatoria, Integer idTipoProceso, Integer idProcesoInscripcion);
+		
+		public void guardarRelacionDispersionGrupo(Integer idDispersion, Integer idEvento, Integer idGrupo, Long idPersona);
 
-}
+	}

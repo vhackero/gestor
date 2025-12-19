@@ -1,8 +1,6 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
-public class InscripcionDTO {
-
-    // Nuevos campos basados en el query
+public class InscripcionPersonaDTO {
     private Long idPersona;
     private String nombreUsuario;
     private String nombre;
@@ -93,4 +91,12 @@ public class InscripcionDTO {
     public void setPrograma(String programa) {
         this.programa = programa;
     }
+
+	@Override
+	public String toString() {
+		return "InscripcionDTO [idPersona=" + idPersona + ", nombreUsuario=" + nombreUsuario + ", nombre=" + nombre
+				+ ", primerApellido=" + primerApellido + ", segundoApellido=" + segundoApellido + ", correo=" + correo
+				+ ", idPlan=" + idPlan + ", plan=" + plan + ", programa=" + programa + ", idConvocatoria="
+				+ idConvocatoria + "]";
+	}
 }

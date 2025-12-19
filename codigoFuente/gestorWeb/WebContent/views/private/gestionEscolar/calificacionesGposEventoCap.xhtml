@@ -12,7 +12,7 @@
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.eventosCap')}</li>
-		<li class="active">Calificaciones</li>
+		<li class="active">#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.titulo')}</li>
 	</ui:define>
 
 	<ui:define name="content">
@@ -20,33 +20,33 @@
 			<!-- Panel Datos Generales Evento Capacitacion -->
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
-			<h1>Calificaciones</h1>
+			<h1>#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.titulo')}</h1>
 			<hr />
 			<ui:include src="datosGeneralesEventoCap.xhtml" />
 
-			<p:panel header="Calificaciones">
+			<p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.titulo')}">
 				<div class="row">
 					<div class="col-md-12">
 						<h:outputText
 							rendered="#{empty(calificacionGpoEventoCapBean.gruposXEventoCap)}"
 							styleClass="textoRojo"
-							value="El evento aún no tiene grupos asignados." />
+							value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.sinGrupos')}" />
 					</div>
 				</div>
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-3">
-							<p:outputLabel styleClass="bloque" value="Grupo:" />
+							<p:outputLabel styleClass="bloque" value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.grupo')}" />
 						</div>
 						<div class="col-md-3">
 							<p:outputLabel
 								rendered="#{not (calificacionGpoEventoCapBean.grupoSelec.idGrupo eq 0)}"
-								value="Estatus del acta:" />
+								value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.estatusActa')}" />
 						</div>
 						<div class="col-md-3">
 							<p:outputLabel
 								rendered="#{calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados eq 0 and not (calificacionGpoEventoCapBean.grupoSelec.idGrupo eq 0)}"
-								value="Número de alumnos" />
+								value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.numeroAlumnos')}" />
 						</div>
 					</div>
 					<div class="row">
@@ -68,13 +68,13 @@
 						<div class="col-md-3">
 							<h:outputText
 								rendered="#{not (calificacionGpoEventoCapBean.grupoSelec.idGrupo eq 0)}"
-								value="#{calificacionGpoEventoCapBean.grupoSelec.actaCerrada eq true?'Cerrada': 'Abierta'}"
+								value="#{calificacionGpoEventoCapBean.grupoSelec.actaCerrada eq true ? sistema.obtenerTexto('gw.gestionescolar.calificaciones.acta.cerrada') : sistema.obtenerTexto('gw.gestionescolar.calificaciones.acta.abierta')}"
 								styleClass="#{calificacionGpoEventoCapBean.grupoSelec.actaCerrada eq true ? 'textoRojo' : ''}" />
 						</div>
 						<div class="col-md-3">
 							<h:outputText
 								rendered="#{calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados eq 0 and not (calificacionGpoEventoCapBean.grupoSelec.idGrupo eq 0)}"
-								value="#{(calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados eq 0) ? 'No hay alumnos matriculados' : calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados }" />
+								value="#{(calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados eq 0) ? sistema.obtenerTexto('gw.gestionescolar.calificaciones.sinAlumnos') : calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados }" />
 						</div>
 					</div>
 				</div>
@@ -84,32 +84,32 @@
 					<div class="form-group">
 						<div class="row">
 							<div class="col-md-3">
-								<p:outputLabel styleClass="bloque" value="Docente en línea" />
+								<p:outputLabel styleClass="bloque" value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.docenteLinea')}" />
 								<h:outputText
 									value="#{calificacionGpoEventoCapBean.encabezadoI.docente}" />
 							</div>
 							<div class="col-md-3">
 								<p:outputLabel styleClass="bloque"
-									value="Fecha limite de llenado" />
+									value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.fechaLimite')}" />
 								<h:outputText
 									value="#{calificacionGpoEventoCapBean.evento.fechaLimiteLLenado}">
 									<f:convertDateTime pattern="dd/MM/yyyy" />
 								</h:outputText>
 							</div>
 							<div class="col-md-3">
-								<p:outputLabel styleClass="bloque" value="Número de estudiantes" />
+								<p:outputLabel styleClass="bloque" value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.numeroEstudiantes')}" />
 								<h:outputText
-									value="#{calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados eq 0 ? 'No hay alumnos matriculados': calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados }" />
+									value="#{calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados eq 0 ? sistema.obtenerTexto('gw.gestionescolar.calificaciones.sinAlumnos') : calificacionGpoEventoCapBean.grupoSelec.numAlumnosMatriculados }" />
 							</div>
 							<div class="col-md-3">
-								<p:outputLabel styleClass="bloque" value="Duración del evento"
+								<p:outputLabel styleClass="bloque" value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.duracionEvento')}"
 									rendered="#{not(calificacionGpoEventoCapBean.modLineaMixto)}" />
 								<h:outputText styleClass="margenDerechoMenor"
 									rendered="#{not(calificacionGpoEventoCapBean.modLineaMixto)}"
 									value="#{calificacionGpoEventoCapBean.duracionEvento}" />
 								<h:outputText
 									rendered="#{not(calificacionGpoEventoCapBean.modLineaMixto)}"
-									value="#{(calificacionGpoEventoCapBean.duracionEvento eq 1)?'día':'días'}" />
+									value="#{(calificacionGpoEventoCapBean.duracionEvento eq 1)? sistema.obtenerTexto('gw.gestionescolar.calificaciones.dia') : sistema.obtenerTexto('gw.gestionescolar.calificaciones.dias')}" />
 							</div>
 						</div>
 					</div>
@@ -117,9 +117,9 @@
 						<div class="row">
 							<div class="col-md-3" >
 								<p:outputLabel styleClass="bloque" rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) }"
-									value="Generar evaluación:" disabled="#{calificacionGpoEventoCapBean.modalidadEnLinea}"/>
+									value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.generarEvaluacion.label')}" disabled="#{calificacionGpoEventoCapBean.modalidadEnLinea}"/>
 								<p:commandButton process="@this" ajax="true"
-									value="Generar evaluación"
+									value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.generarEvaluacion.boton')}"
 									action="#{calificacionGpoEventoCapBean.generaTablaCalifGrupo}"
 									update="@form" styleClass="btn btn-primary" style="margin:0"
 									disabled="#{calificacionGpoEventoCapBean.cerrarActa or calificacionGpoEventoCapBean.modalidadEnLinea}"
@@ -137,7 +137,7 @@
 							<div class="col-md-8">
 								<p:commandButton
 									rendered="#{(calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) or (calificacionGpoEventoCapBean.modLineaMixto and !calificacionGpoEventoCapBean.cerrarActa) }"
-									value="Importar calificaciones" process="@this"
+									value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.importarCalificaciones')}" process="@this"
 									action="#{calificacionGpoEventoCapBean.obtieneCalifMoodleWS}"
 									ajax="true" styleClass="btn btn-primary pull-right" style="height: 40px;width: 170px;"
 									update="@form" />
@@ -146,14 +146,14 @@
 									rendered="#{( calificacionGpoEventoCapBean.cerrarActa) }"
 									styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis pull-right"
 									action="#{calificacionGpoEventoCapBean.descargarActa}" />
-								<p:outputLabel value="Descarga Acta Firmada: " 
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.descargaActa')}: " 
 									styleClass="margenIzquierdo agregaHeight pull-right" 
 									rendered="#{(calificacionGpoEventoCapBean.cerrarActa) }"/>
 
 								<sec:authorize access="hasPermission(null, 'ADMIN' ) ">								
 									
 
-									<p:outputLabel value="Eliminar Acta Firmada:" 
+									<p:outputLabel value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.eliminarActa')}: " 
 										styleClass="margenIzquierdo agregaHeight" 
 										rendered="#{(calificacionGpoEventoCapBean.tieneRolAdmin and calificacionGpoEventoCapBean.cerrarActa)}"/>
 									<p:commandButton id="btnEliminarActaFirmada" ajax="true"  
@@ -167,7 +167,7 @@
 					</div>
 				</p:outputPanel>
 
-				<p:panel id="pnlCalif" header="Calificaciones"
+				<p:panel id="pnlCalif" header="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.titulo')}"
 					rendered="#{calificacionGpoEventoCapBean.muestraTblCalif}">
 
 					<p:importEnum
@@ -197,12 +197,12 @@
 						</f:facet>
 
 						<!-- Id del evento de capacitacion -->
-						<p:column styleClass="text-center">
-							<f:facet name="header">
-								<h:outputText value="Número" />
-							</f:facet>
-							<h:outputText value="#{partCalif.consecutivo}" />
-						</p:column>
+							<p:column styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.numero')}" />
+								</f:facet>
+								<h:outputText value="#{partCalif.consecutivo}" />
+							</p:column>
 						<p:column>
 							<f:facet name="header">
 								<h:outputText
@@ -211,22 +211,22 @@
 							<h:outputText value="#{partCalif.participante.nombre}" />
 						</p:column>
 						<p:column>
-							<f:facet name="header">
-								<h:outputText value="Primer apellido" />
-							</f:facet>
+								<f:facet name="header">
+									<h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.primerApellido')}" />
+								</f:facet>
 							<h:outputText value="#{partCalif.participante.apellidoPaterno}" />
 						</p:column>
 						<p:column>
-							<f:facet name="header">
-								<h:outputText value="Segundo apellido" />
-							</f:facet>
+								<f:facet name="header">
+									<h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.segundoApellido')}" />
+								</f:facet>
 							<h:outputText value="#{partCalif.participante.apellidoMaterno}" />
 						</p:column>
 
 						<p:column>
-							<f:facet name="header">
-								<h:outputText value="Nombre de usuario" />
-							</f:facet>
+								<f:facet name="header">
+									<h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.usuario')}" />
+								</f:facet>
 							<h:outputText value="#{partCalif.participante.usuario}" />
 						</p:column>
 
@@ -236,7 +236,7 @@
 								<f:facet name="header">
 									<p:outputLabel
 										rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}"
-										value="Nombre evaluación:" />
+										value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.nombreEvaluacion')}" />
 									<h:outputText
 										rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}"
 										value="#{pc.nombreEvaluacion}" />
@@ -246,8 +246,8 @@
 									<p:inputText id="nombreEvaluacion"
 										value="#{pc.nombreEvaluacion}"
 										rendered="#{not calificacionGpoEventoCapBean.grupoSelec.actaCerrada eq true}"
-										placeholder="Nombre evaluación:"
-										title="Nombre de la evaluacion #{indice.index + 1}"
+										placeholder="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.nombreEvaluacion')}"
+										title="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.nombreEvaluacion.titulo')} #{indice.index + 1}"
 										styleClass="form-control margenInferior"
 										disabled="#{calificacionGpoEventoCapBean.modalidadEnLinea or (calificacionGpoEventoCapBean.grupoSelec.actaCerrada eq true)}">
 										<p:ajax process="@this" />
@@ -273,7 +273,7 @@
 
 						<p:column styleClass="text-center">
 							<f:facet name="header">
-								<h:outputText value="Calificación total" />
+								<h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.calificacionTotal')}" />
 							</f:facet>
 							<h:outputText value="#{partCalif.califTotal}" converter="javax.faces.Integer">
 									<f:convertNumber pattern="##0"/>
@@ -289,7 +289,7 @@
 									<f:setPropertyActionListener
 										value="#{calificacionGpoEventoCapBean.grupoSelec.evento.idEvento}"
 										target="#{registroAsistenciaBean.idEvento}" />
-									<h:outputText value="% Asistencia" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.asistencia')}" />
 								</p:commandLink>
 							</f:facet>
 
@@ -303,7 +303,7 @@
 
 						<p:column styleClass="text-center">
 							<f:facet name="header">
-								<h:outputText value="Calificación final" />
+								<h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.calificacionFinal')}" />
 							</f:facet>
 							<h:outputText value="#{partCalif.califTotal}">
 									<f:convertNumber pattern="##0" />
@@ -313,7 +313,7 @@
 
 						<p:column>
 							<f:facet name="header">
-								<h:outputText value="Dictamen" />
+								<h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.dictamen')}" />
 							</f:facet>
 							<f:validateBean disabled="true">
 								<p:selectOneMenu styleClass="col-xs-12"
@@ -350,29 +350,29 @@
 
 						<p:column>
 							<f:facet name="header">
-								<h:outputText value="Nombre" />
+								<h:outputText value="#{sistema.obtenerTexto('gw.ge.texto.nombre')}" />
 							</f:facet>
 							<h:outputText value="#{partCalif.participante.nombre}" />
 						</p:column>
 
-						<p:column>
-							<f:facet name="header">
-								<h:outputText value="Primer Apellido" />
-							</f:facet>
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.primerApellido')}" />
+								</f:facet>
 							<h:outputText value="#{partCalif.participante.apellidoPaterno}" />
 						</p:column>
 
 						<p:column>
-							<f:facet name="header">
-								<h:outputText value="Segundo Apellido" />
-							</f:facet>
+								<f:facet name="header">
+									<h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.segundoApellido')}" />
+								</f:facet>
 							<h:outputText value="#{partCalif.participante.apellidoMaterno}" />
 						</p:column>
 
 						<p:column>
-							<f:facet name="header">
-								<h:outputText value="Usuario" />
-							</f:facet>
+								<f:facet name="header">
+									<h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.usuario')}" />
+								</f:facet>
 							<h:outputText value="#{partCalif.participante.usuario}" />
 						</p:column>
 						<c:forEach items="#{calificacionGpoEventoCapBean.calificaciones}"
@@ -399,9 +399,9 @@
 						</c:forEach>
 
 						<p:column>
-							<f:facet name="header">
-								<h:outputText value='Calificación Total' />
-							</f:facet>
+								<f:facet name="header">
+									<h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.calificacionTotal')}" />
+								</f:facet>
 							<h:outputText value="#{partCalif.califTotal}" >
 									<f:convertNumber pattern="##0" />
 								</h:outputText>
@@ -409,8 +409,8 @@
 
 						<p:column
 							rendered="#{not(calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1)}">
-							<f:facet name="header">
-								<h:outputText value="% Asistencia" />
+									<f:facet name="header">
+										<h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.asistencia')}" />
 							</f:facet>
 							<h:outputText value="#{partCalif.asistencia}" >
 									<f:convertNumber pattern="##0" />
@@ -427,8 +427,8 @@
 						</p:column>
 
 						<p:column>
-							<f:facet name="header">
-								<h:outputText value="Dictamen" />
+								<f:facet name="header">
+									<h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.col.dictamen')}" />
 							</f:facet>
 							<h:outputText
 								rendered="#{calificacionGpoEventoCapBean.grupoSelec.evento.catModalidadPlanPrograma.id eq 1}"
@@ -439,7 +439,7 @@
 					<div class="row">
 						<div class="col-md-12 text-right">
 
-							<p:outputLabel value="Exportar XLS: "
+							<p:outputLabel value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.exportarXls')}: "
 								styleClass="margenIzquierdo agregaHeight" />
 							<p:commandButton id="btnDescargar" ajax="false"
 								disabled="#{calificacionGpoEventoCapBean.tablaAuxCalif.isEmpty()}"
@@ -448,15 +448,15 @@
 									fileName="calificaciones_#{eventoCapacitacionBean.eventoSelec.nombreEc}-#{calificacionGpoEventoCapBean.grupoSelec.nombre}" encoding="UTF-8" />
 							</p:commandButton>
 
-							<p:outputLabel value="Descargar Acta: " rendered="true"
-								styleClass="margenIzquierdo agregaHeight" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.descargarActa')}: " rendered="true"
+									styleClass="margenIzquierdo agregaHeight" />
 							<p:commandButton id="btnActaCalificaciones" ajax="true" 
 								rendered="true"
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_desc"
 								action="#{calificacionGpoEventoCapBean.descargarPlantillaCalificaciones}" />
 								
-							<p:outputLabel value="Cargar Acta Firmada: " rendered="true"
-								styleClass="margenIzquierdo agregaHeight" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.cargarActaFirmada')}: " rendered="true"
+									styleClass="margenIzquierdo agregaHeight" />
 
 							<p:commandButton id="btnCargaArchivo"   
 								 onclick="PF('visorCargaArchivo').show()"
@@ -466,8 +466,8 @@
 								action="#{calificacionGpoEventoCapBean.habilidarBotonDescargarActa}"
 								disabled="#{calificacionGpoEventoCapBean.deshabilitarCargaActaFirmada}"/>
 							
-							<p:outputLabel value="Descarga Acta Firmada: " 
-								styleClass="margenIzquierdo agregaHeight" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.descargaActa')}: " 
+									styleClass="margenIzquierdo agregaHeight" />
 							<p:commandButton id="btnActaCalificacionesFirmada" ajax="true"  
 								rendered="true"
 								styleClass="btn btn-icon btn-default icono_sisi ss_gn_vis"
@@ -479,7 +479,7 @@
 					<div class="row">
 						<div
 							class="col-md-12 displayFlex centrarMainAxis centrarCrossAxis invertirEjeFlex">
-							<p:outputLabel value="Confirmar Acta:" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.confirmarActa')}: " />
 							<p:inputSwitch value="#{calificacionGpoEventoCapBean.cerrarActa}"
 								disabled="#{calificacionGpoEventoCapBean.cerrarActa}"
 								onLabel="#{sistema.obtenerTexto('gw.planesprogramas.switch.si')}"
@@ -503,86 +503,86 @@
 									action="#{calificacionGpoEventoCapBean.guardaCalifBorrador}" />
 								<p:commandButton styleClass="btn btn-default pull-right"
 									action="#{calificacionGpoEventoCapBean.navegaBusqEventosCap}"
-									value="Regresar" update="@form" process="@this" ajax="true" />
+									value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.boton.regresar')}" update="@form" process="@this" ajax="true" />
 							</p:outputPanel>
 						</div>
 					</div>
 				</div>
 			</p:panel>
 
-			<p:dialog id="dlgAsistencias" closable="false" header="Asistencias"
-				widgetVar="dlgAsistPart" responsive="true" modal="true"
-				draggable="false" width="800" resizable="false" position="center">
-				<ui:include src="tablaAsistenciasEC.xhtml" />
-			</p:dialog>
+				<p:dialog id="dlgAsistencias" closable="false" header="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.asistencias.titulo')}"
+					widgetVar="dlgAsistPart" responsive="true" modal="true"
+					draggable="false" width="800" resizable="false" position="center">
+					<ui:include src="tablaAsistenciasEC.xhtml" />
+				</p:dialog>
 
 		</h:form>
-		<p:dialog id="dlgConfirmActa" responsive="true" modal="true"
-			draggable="false" resizable="false" position="center"
-			styleClass="medidaModal" closable="false" header="Cerrar Acta"
-			widgetVar="dlgCerrarActa">
-			<h:form>
-				<div class="form-group">
-					<div class="row">
-						<div class="col-md-12">
-							<p:outputLabel
-								value="¡Importante!" />
+			<p:dialog id="dlgConfirmActa" responsive="true" modal="true"
+				draggable="false" resizable="false" position="center"
+				styleClass="medidaModal" closable="false" header="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cerrarActa.titulo')}"
+				widgetVar="dlgCerrarActa">
+				<h:form>
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cerrarActa.importante')}" />
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="form-group">
-					<div class="row">
-						<div class="col-md-12">
-							<p:outputLabel
-								value="Apreciable docente:" />
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cerrarActa.saludo')}" />
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="form-group">
-					<div class="row">
-						<div class="col-md-12">
-							<p:outputLabel
-								value="• La generación de actas de calificaciones del periodo escolar vigente se habilita conforme a lo señalado en el calendario académico, esto depende del programa educativo en el que participa. No olvide atender las solicitudes de aclaración." />
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cerrarActa.mensaje1')}" />
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="form-group">
-					<div class="row">
-						<div class="col-md-12">
-							<p:outputLabel
-								value="• Conserve el acta original firmada en dos tantos con tinta azul pues, en apego a las disposiciones de la SEP y de la Secretaria de Salud se harán las notificaciones oportunas para su entrega." />
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cerrarActa.mensaje2')}" />
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="form-group">
-					<div class="row">
-						<div class="col-md-12">
-							<p:outputLabel
-								value="• Le recordamos que las actas de calificaciones tanto originales como en el SIGIE representan el soporte de los estudios cursados por nuestros estudiantes, por ello, si tiene faltantes complételas a la brevedad." />
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cerrarActa.mensaje3')}" />
 
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="form-group">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-12">
+								<p:outputLabel
+									value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cerrarActa.confirmacion')}" />
+							</div>
+						</div>
+					</div>
 					<div class="row">
-						<div class="col-md-12">
-							<p:outputLabel
-								value="Confirmar que desea cerrar actas, esta acción no se podra revertir" />
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-12 text-right">
-						<p:commandButton styleClass="btn btn-default" value="Cancelar"
-							ajax="true" onclick="PF('dlgCerrarActa').hide();"
-							update="@form frmCalif">
-							<f:setPropertyActionListener value="false"
-								target="#{calificacionGpoEventoCapBean.cerrarActa}" />
-						</p:commandButton>
-						<p:commandButton styleClass="btn btn-primary" value="Aceptar"
-							ajax="true"
-							action="#{calificacionGpoEventoCapBean.cierraActaGrupoEC}"
-							update="@form frmCalif" />
+						<div class="col-md-12 text-right">
+							<p:commandButton styleClass="btn btn-default" value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cerrarActa.cancelar')}"
+								ajax="true" onclick="PF('dlgCerrarActa').hide();"
+								update="@form frmCalif">
+								<f:setPropertyActionListener value="false"
+									target="#{calificacionGpoEventoCapBean.cerrarActa}" />
+							</p:commandButton>
+							<p:commandButton styleClass="btn btn-primary" value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cerrarActa.aceptar')}"
+								ajax="true"
+								action="#{calificacionGpoEventoCapBean.cierraActaGrupoEC}"
+								update="@form frmCalif" />
 					</div>
 				</div>
 			</h:form>
@@ -590,27 +590,27 @@
 
 
 
-		<p:dialog id="visorCargaArchivo" dynamic="true" responsive="true"
-			modal="true" closable="true" resizable="false" position="center"
-			header="Carga Acta de calificaciones firmada" width="900" widgetVar="visorCargaArchivo">
+			<p:dialog id="visorCargaArchivo" dynamic="true" responsive="true"
+				modal="true" closable="true" resizable="false" position="center"
+				header="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cargarActa.titulo')}" width="900" widgetVar="visorCargaArchivo">
 			<div class="form-group"></div>
 			<div class="row">
 				<div class="col-md-12">
-					<p:outputLabel value="Cargar Acta: " rendered="true"
-						styleClass="margenIzquierdo agregaHeight" />
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cargarActa.label')}" rendered="true"
+							styleClass="margenIzquierdo agregaHeight" />
 					<h:form enctype="multipart/form-data">
 						<p:fileUpload
-							fileUploadListener="#{calificacionGpoEventoCapBean.cargarActa}"
-							mode="advanced" skinSimple="true" label="Elegir" uploadLabel="Cargar" cancelLabel="Cancelar" 
-							multiple="false" fileLimit="1" fileLimitMessage="Solo se permite cargar una archivo"/>
+								fileUploadListener="#{calificacionGpoEventoCapBean.cargarActa}"
+								mode="advanced" skinSimple="true" label="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cargarActa.btn.elegir')}" uploadLabel="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cargarActa.btn.cargar')}" cancelLabel="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cargarActa.btn.cancelar')}" 
+								multiple="false" fileLimit="1" fileLimitMessage="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.dialogo.cargarActa.fileLimit')}"/>
 					</h:form>
 				</div>
 			</div>
 		</p:dialog>
 
-		<p:dialog id="visorPdf" dynamic="true" responsive="true" modal="true"
-			closable="false" resizable="false" position="center"
-			header="Constancia" width="900" widgetVar="visorPlantilla">
+			<p:dialog id="visorPdf" dynamic="true" responsive="true" modal="true"
+				closable="false" resizable="false" position="center"
+				header="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.visor.constancia')}" width="900" widgetVar="visorPlantilla">
 			<div class="form-group">
 				<div class="row">
 					<div class="col-md-12">
@@ -632,9 +632,9 @@
 			</div>
 		</p:dialog>
 		
-		<p:dialog id="visorPdfDescarga" dynamic="true" responsive="true" modal="true"
-			closable="false" resizable="false" position="center"
-			header="Acta Firmada" width="900" widgetVar="visorPlantillaFirmada">
+			<p:dialog id="visorPdfDescarga" dynamic="true" responsive="true" modal="true"
+				closable="false" resizable="false" position="center"
+				header="#{sistema.obtenerTexto('gw.gestionescolar.calificaciones.visor.actaFirmada')}" width="900" widgetVar="visorPlantillaFirmada">
 			<div class="form-group">
 				<div class="row">
 					<div class="col-md-12">

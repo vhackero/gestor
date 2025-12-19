@@ -13,12 +13,12 @@
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.responsables')}</li>
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.etiqueta.responsables.titulo')}</li>
-		<li class="active">Agregar responsables</li>
+		<li class="active">#{sistema.obtenerTexto('gw.gestionescolar.responsables.agregar.titulo')}</li>
 
 	</ui:define>
 
 	<ui:define name="content">
-		<h1>Agregar responsables</h1>
+		<h1>#{sistema.obtenerTexto('gw.gestionescolar.responsables.agregar.titulo')}</h1>
 		<hr />
 		<p:ajaxStatus onstart="PF('dialogLayout').show()"
 			onsuccess="PF('dialogLayout').hide()" />
@@ -33,10 +33,10 @@
 
 									<div class="col-md-3">
 										<p:outputLabel styleClass="bloque"
-											value="Usuario:"
+											value="#{sistema.obtenerTexto('gw.gestionescolar.responsables.etiqueta.usuario')}"
 											for="fitroUsuario" />
 										<p:inputText
-											placeholder="Usuario"
+											placeholder="#{sistema.obtenerTexto('gw.gestionescolar.responsables.etiqueta.usuario')}"
 											value="#{responsablesEventoCapBean.filtroPersona.usuario}"
 											id="fitroUsuario" styleClass="form-control" />
 									</div>
@@ -99,7 +99,7 @@
 										paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
 
 										<p:column
-											headerText="Usuario">
+											headerText="#{sistema.obtenerTexto('gw.gestionescolar.responsables.etiqueta.usuario')}">
 											<h:outputText value="#{responsable.usuario}" />
 										</p:column>
 

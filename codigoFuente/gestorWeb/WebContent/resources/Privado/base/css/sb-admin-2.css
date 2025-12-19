@@ -1884,7 +1884,7 @@ table.table tr td {
   color: #393C3E;
 }
 table.table tr:hover {
-  background: #fff;
+  background: #95959542;
 }
 .table {
   margin-bottom: 0 !important;
@@ -2131,9 +2131,12 @@ label {
 }
 .btn-primary:hover {
   color: #fff;
-  background-color: #286090 !important;
-  border-color: #286090 !important;
+  background-color: #286090;
+  border-color: #286090;
   margin-left: 15px;
+}
+button.btn-primary[disabled], button.btn-primary[disabled]:hover{
+  background-color: #5093a0;
 }
 .btn-default {
   color: #333;
@@ -2720,12 +2723,7 @@ span.ui-icon-pencil:hover {
   -ms-transform: scale(1);
   -webkit-transform: scale(1);
   transform: scale(1);
-  background-color: white;
-  
-    margin-top: 2px;
-    margin-left: 9px;
-    margin-right: 9px;*/
-  
+  background-color: white;  
   border: 1px solid rgba(16, 10, 10, 0.13);
   box-shadow: 0 1px 0 0 #444;
 }
@@ -3720,6 +3718,9 @@ table.ui-selectoneradio.ui-widget tr {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+.cursor-pointer{
+  cursor: pointer;
 }
 div[id$='cursos'] {
   display: flex;
@@ -5525,4 +5526,38 @@ div.perfil {
     display: flex;
     justify-content: space-around;
   }
+}
+
+.ui-chkbox ui-widget .ui-state-default, .ui-chkbox ui-widget .ui-widget-content .ui-state-default,.ui-chkbox ui-widget .ui-widget-header .ui-state-default{
+	border:none !important;
+}
+
+.ui-chkbox ui-widget .ui-icon-check{
+	margin:0 !important;
+}
+
+a.terminos-condiciones{
+	text-decoration: underline;
+    color: #5093a0;
+}
+
+.mt-2{
+	margin-top:2rem;	
+}
+
+.mt-1{
+	margin-top:1rem;
+}
+
+.mb-0{
+	margin-bottom:0;
+}
+
+.ml-1{
+	margin-left:1.5rem !important;
+}
+
+.flex-bottom{
+	display:flex;
+	align-items: flex-end;
 }

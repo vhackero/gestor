@@ -7,119 +7,203 @@
 	xmlns:p="http://primefaces.org/ui">
 
 	<ui:define name="breadcrumb">
-		<li>Inscripción</li>
+		<li>#{sistema.obtenerTexto('gw.alumno.inscripcion.titulo')}</li>
 	</ui:define>
 
 	<ui:define name="content">
-		<f:event type="preRenderView" listener="#{inscripcionBean.init}" />
+
 		<h:form id="mainForm">
-			<p:ajaxStatus onstart="PF('dialogLayout').show()" onsuccess="PF('dialogLayout').hide()" />
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
 
 			<h1>
-				<p:outputLabel styleClass="h1" value="Inscripción" />
+				<p:outputLabel styleClass="h1" value="#{sistema.obtenerTexto('gw.alumno.inscripcion.titulo')}" />
 			</h1>
 
-			<p:panel id="pnlEditEjeComp" header="Inscripción">
-				<div class="row flexCentrarXY" style="align-items: flex-end">
-					<div class="col-md-3 col-xs-12">
-						<h:outputLabel value="Plan" styleClass="bloque" />
-						<h:outputText value="#{inscripcionBean.infoPersona.plan}" />
-					</div>
-
-					<div class="col-md-6 col-xs-12">
-						<h:outputLabel value="Matricula" styleClass="bloque" />
-						<h:outputText value="#{inscripcionBean.infoPersona.nombreUsuario}" />
-					</div>
-				</div>
-
-				<div class="form-group">
+			<p:outputPanel styleClass="mt-2"
+				rendered="#{inscripcionBean.mostrarAviso}">
+								
+				<div class="alert alert-#{inscripcionBean.tipoAviso}" role="alert">#{inscripcionBean.textoAviso}</div>
+				
+				
+			</p:outputPanel>
+			
+			<p:outputPanel styleClass="mt-2"
+				rendered="#{not empty inscripcionBean.obtenerInscripcionPrevia}">
+				<div class="form-group mt-2">
 					<div class="row">
 						<div class="col-md-12">
-							<p:dataTable id="tblEditaComp"
-								value="#{inscripcionBean.listadatosMaterias}"
+						<p:dataTable id="tblEditaComp1"
+								value="#{inscripcionBean.obtenerInscripcionPrevia}"
 								tableStyleClass="table" var="inscripcion" paginator="false"
-								emptyMessage="No hay materias disponibles para inscribir">
+								emptyMessage="#{sistema.obtenerTexto('gw.alumno.inscripcion.inscripcionPrevia.unidadesDidacticasVacias')}">
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Curso/Asignatura" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.inscripcionPrevia.plan')}" />
+									</f:facet>
+									<h:outputText value="#{inscripcion.programa}" />
+								</p:column>
+								<p:column styleClass="text-center">
+									<f:facet name="header">
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.inscripcionPrevia.curso')}" />
+									</f:facet>
+									<h:outputText value="#{inscripcion.asignatura}" />
+								</p:column>
+								<p:column styleClass="text-center">
+									<f:facet name="header">
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.inscripcionPrevia.tipo')}" />
+									</f:facet>
+									<h:outputText value="#{inscripcion.tipoPrograma}" />
+								</p:column>
+								<p:column styleClass="text-center">
+									<f:facet name="header">
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.inscripcionPrevia.semestre')}" />
+									</f:facet>
+									<h:outputText value="#{inscripcion.semestre}" />
+								</p:column>
+								<p:column styleClass="text-center">
+									<f:facet name="header">
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.inscripcionPrevia.bloque')}" />
+									</f:facet>
+									<h:outputText value="#{inscripcion.bloque}" />
+								</p:column>
+
+								
+
+							</p:dataTable>
+									</div>
+					</div>
+				</div>
+				
+			</p:outputPanel>
+
+			<p:panel id="pnlEditEjeComp" header="#{sistema.obtenerTexto('gw.alumno.inscripcion.titulo')}"
+				rendered="#{inscripcionBean.contextoInscripcion != null}">
+				<div class="row flexCentrarXY" style="align-items: flex-end">
+					<div class="col-md-3 col-xs-12">
+						<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.inscripcion.panelCabecera.plan')}" styleClass="bloque" />
+						<h:outputText
+							value="#{inscripcionBean.contextoInscripcion.inscripcionPersona.plan}" />
+					</div>
+
+					<div class="col-md-6 col-xs-12">
+						<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.inscripcion.panelCabecera.matricula')}" styleClass="bloque" />
+						<h:outputText
+							value="#{inscripcionBean.contextoInscripcion.inscripcionPersona.nombreUsuario}" />
+					</div>
+				</div>
+
+				<p:outputPanel styleClass="mt-2"
+					rendered="#{not empty inscripcionBean.contextoInscripcion.mensajeSeriacion}">
+					<div class="alert alert-info mb-0" role="alert">#{inscripcionBean.contextoInscripcion.mensajeSeriacion}</div>
+				</p:outputPanel>
+
+				<p:outputPanel styleClass="mt-2"
+					rendered="#{not empty inscripcionBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}">
+					<div class="alert alert-info mb-0" role="alert">#{inscripcionBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}</div>
+				</p:outputPanel>
+
+				<div class="form-group mt-1">
+					<div class="row">
+						<div class="col-md-12">
+
+							<p:dataTable id="tblEditaComp"
+								value="#{inscripcionBean.contextoInscripcion.estadoAcademico.materiasDisponibles}"
+								tableStyleClass="table" var="inscripcion" paginator="false"
+								emptyMessage="#{sistema.obtenerTexto('gw.alumno.inscripcion.unidadesDidacticasDisponibles.unidadesDidacticasVacias')}">
+
+								<p:column styleClass="text-center">
+									<f:facet name="header">
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.unidadesDidacticasDisponibles.curso')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.nombreTentativoPrograma}" />
 								</p:column>
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Semestre" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.unidadesDidacticasDisponibles.tipo')}" />
+									</f:facet>
+									<h:outputText value="#{inscripcion.tipoPrograma}" />
+								</p:column>
+
+								<p:column styleClass="text-center">
+									<f:facet name="header">
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.unidadesDidacticasDisponibles.semestre')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.estructura}" />
 								</p:column>
 
 								<p:column styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="Bloque" />
+										<h:outputText value="#{sistema.obtenerTexto('gw.alumno.inscripcion.unidadesDidacticasDisponibles.bloque')}" />
 									</f:facet>
 									<h:outputText value="#{inscripcion.subestructura}" />
 								</p:column>
 
-								<p:column headerText="Seleccionar" styleClass="text-center">
-								    <h:outputText value="Obligatoria" rendered="#{inscripcion.tipoPrograma eq 'Obligatoria'}" />
-								    <p:selectBooleanCheckbox value="#{inscripcion.check}" rendered="#{inscripcion.tipoPrograma ne 'Obligatoria'}" />
+								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.inscripcion.unidadesDidacticasDisponibles.seleccionar')}" styleClass="text-center">
+									<p:selectBooleanCheckbox disabled="#{inscripcion.disabled}"
+										value="#{inscripcion.check}" styleClass="cursor-pointer">
+										<p:ajax
+											listener="#{inscripcionBean.validarSeleccionMateria(inscripcion)}"
+											event="change" update="@this :pnlMensaje" />
+									</p:selectBooleanCheckbox>
 								</p:column>
 
 							</p:dataTable>
+
 						</div>
 					</div>
 				</div>
 
 				<!-- Sección de términos y condiciones controlada por mostrarTerminosCondiciones -->
-				<h:panelGroup rendered="#{inscripcionBean.mostrarTerminosCondiciones}">
+				<h:panelGroup
+					rendered="#{inscripcionBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones}">
 					<div class="row" style="text-align: center; margin-top: 20px;">
-					    <p:selectBooleanCheckbox id="chkTerminos" value="#{inscripcionBean.aceptaTerminos}">
-					        <f:ajax event="change" render="finalizarBtn" />
-					    </p:selectBooleanCheckbox>
-					    <h:outputText value=" Acepto los " />
-					    <h:outputLink value="#{inscripcionBean.terminosCondiciones}" target="_blank">términos y condiciones</h:outputLink>
+						<p:selectBooleanCheckbox id="chkTerminos"
+							value="#{inscripcionBean.aceptaTerminos}">
+							<p:ajax event="change" update="panelFinalizar" process="@this" />
+						</p:selectBooleanCheckbox>
+						<h:outputText value=" #{sistema.obtenerTexto('gw.alumno.inscripcion.aceptar')} " />
+						<h:outputLink styleClass="terminos-condiciones"
+							value="#{inscripcionBean.contextoInscripcion.terminosCondiciones.enlaceTerminosCondiciones}"
+							target="_blank">#{sistema.obtenerTexto('gw.alumno.inscripcion.terminos')}</h:outputLink>
 					</div>
 				</h:panelGroup>
 
-				<div class="row" style="text-align: center; margin-top: 20px;">
-				    <div class="col-md-6 col-xs-12">
-				        <p:commandButton value="Cancelar"
-				            action="#{inscripcionBean.cancelar}"
-				            ajax="false" immediate="true" process="@form"
-				            styleClass="btn btn-default" />
-				    </div>
-				
-				    <div class="col-md-6 col-xs-12">
-						<p:commandButton id="finalizarBtn" style="width: 200px;"
-						    value="Finalizar inscripción"
-						    action="#{inscripcionBean.finalizarInscripcion}"
-						    ajax="false" process="@form"
-						    styleClass="btn btn-primary"/>
-				    </div>
-				</div>
+				<p:outputPanel id="panelFinalizar" styleClass="text-center mt-2" rendered="#{not empty inscripcionBean.contextoInscripcion.estadoAcademico.materiasDisponibles}">
+					<p:commandButton id="finalizarBtn"
+						disabled="#{inscripcionBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionBean.aceptaTerminos}"
+						value="#{sistema.obtenerTexto('gw.alumno.inscripcion.finalizar')}" update="@form :pnlMensaje"
+						action="#{inscripcionBean.finalizarInscripcion}"
+						styleClass="btn btn-primary" />
+				</p:outputPanel>
+
 			</p:panel>
 		</h:form>
-		
-			<p:dialog appendTo="@(body)" draggable="false" position="center"
-		resizable="false" closable="false" modal="true" width="600px"
-		widgetVar="dlgValidarSeleccion" header="Informativo" dynamic="true">
-		<div class="form-group">
-			<div class="row">
-				<div class="col-md-12">
-					<h:outputText styleClass="bloque" value="#{inscripcionBean.mensaje}" />
-				</div>
-			</div>
-		</div>
 
-		<div class="row">
-			<div class="col-md-12 text-right">
-				<p:commandButton value="Cerrar" styleClass="btn btn-default"
-					onclick="PF('dlgValidarSeleccion').hide()" />
-			</div>
-		</div>
-	</p:dialog>
-	
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgValidarSeleccion" header="#{sistema.obtenerTexto('gw.alumno.inscripcion.informativo')}" dynamic="true">
+			<p:outputPanel id="pnlMensaje">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText styleClass="bloque"
+								value="#{inscripcionBean.mensajeDialog}" />
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton value="#{sistema.obtenerTexto('gw.alumno.inscripcion.modalValidacion.cerrar')}" styleClass="btn btn-default"
+							onclick="PF('dlgValidarSeleccion').hide()" />
+					</div>
+				</div>
+			</p:outputPanel>
+		</p:dialog>
+
 	</ui:define>
 
 

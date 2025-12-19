@@ -10,21 +10,21 @@
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
-		<li>Expediente de estudiantes por grupo</li>
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.expediente.grupo.titulo')}</li>
 	</ui:define>
 	<ui:define name="content">
 		<h:form>
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
-			<h1>Expediente de estudiantes por grupo</h1>
+			<h1>#{sistema.obtenerTexto('gw.gestionescolar.expediente.grupo.titulo')}</h1>
 			<hr />
 			<f:validateBean disabled="true">
-				<p:panel header="Búsqueda de grupo">
+				<p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.expediente.grupo.busqueda.header')}">
 					<!--Estructura Nueva-->
 					<div class="form-group">
 						<div class="row">
 							<div class="col-md-4 col-xs-12">
-								<p:outputLabel styleClass="requerido" value="Plan:"/>
+								<p:outputLabel styleClass="requerido" value="#{sistema.obtenerTexto('gw.gestionescolar.expediente.grupo.plan')}"/>
 								<p:selectOneMenu id="nvoCatPlan" styleClass="col-xs-12"
 												 value="#{expedienteEventoBean.idPlan}"
 												 valueChangeListener="#{expedienteEventoBean.onChangeCatPlan}">
@@ -42,7 +42,7 @@
 								<p:outputPanel
 										rendered="#{not empty expedienteEventoBean.catEstructuras}">
 									<div class="col-md-4 col-xs-12">
-										<p:outputLabel styleClass="requerido" value="Estructura:"/>
+										<p:outputLabel styleClass="requerido" value="#{sistema.obtenerTexto('gw.gestionescolar.expediente.grupo.estructura')}"/>
 										<p:selectOneMenu id="nvoCatEstruc" styleClass="col-xs-12"
 														 valueChangeListener="#{expedienteEventoBean.onChangeCatEstructura}">
 											<p:ajax update="@form"/>

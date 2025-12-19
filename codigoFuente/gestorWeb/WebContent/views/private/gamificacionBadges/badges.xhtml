@@ -7,7 +7,7 @@
 	xmlns:p="http://primefaces.org/ui">
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.titulo.gestionaprendizaje.texto')}</li>
-		<li class="active">#{sistema.obtenerTexto('gw.titulo.ambientes.texto.ava')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.gamificacion.badges.titulo')}</li>
 	</ui:define>
 
 	<ui:define name="content">
@@ -17,12 +17,12 @@
 			</script>
 		</h:head>
 		<h:form>
-			<h1>Badges</h1>
+			<h1>#{sistema.obtenerTexto('gw.gamificacion.badges.titulo')}</h1>
 			<hr />
 
 			<!-- Panel búsqueda de ambientes virtuales -->
 			<p:panel id="pbusqueda"
-				header="Badges"
+				header="#{sistema.obtenerTexto('gw.gamificacion.badges.titulo')}"
 				showCollapseLink="false" collapsible="false">
 				<div class="ui-fluid">
 					<!-- Row 1 -->

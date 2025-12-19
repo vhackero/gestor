@@ -631,7 +631,7 @@ public class ReservacionAreaBean extends BaseBean {
 		correoDto.setAsunto("Nueva solicitud de reservación");
 		correoDto
 				.setDestinatarios(new ArrayList<String>(Arrays.asList(reservacion.getPerArea().getEmailResponsable())));
-		correoDto.setRemitente(parametroSistemaService
+		correoDto.setCorreoRemitente(parametroSistemaService
 				.obtenerParametro(ParametrosSistemaEnum.PS_CONFIG_CORREO_CUENTA_ADMIN.getClave()));
 		correoDto.setContenido(MessageFormat.format(
 				"<table>" + "<tr>"
@@ -662,7 +662,7 @@ public class ReservacionAreaBean extends BaseBean {
 		correoDto.setAsunto("Nueva solicitud de reservación");
 		correoDto
 				.setDestinatarios(new ArrayList<String>(Arrays.asList(reservacion.getPerArea().getEmailResponsable())));
-		correoDto.setRemitente(parametroSistemaService
+		correoDto.setCorreoRemitente(parametroSistemaService
 				.obtenerParametro(ParametrosSistemaEnum.PS_CONFIG_CORREO_CUENTA_ADMIN.getClave()));
 		correoDto.setContenido(MessageFormat.format(
 				"<table><tr>"

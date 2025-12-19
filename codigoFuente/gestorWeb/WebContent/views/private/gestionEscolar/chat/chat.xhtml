@@ -26,7 +26,7 @@
 
 						<p:dataList id="users" var="user" value="#{chatUsers.users}"
 							styleClass="usersList">
-							<f:facet name="header">Usuarios conectados</f:facet>
+							<f:facet name="header">#{sistema.obtenerTexto('gw.gestionescolar.chat.usuariosConectados')}</f:facet>
 
 							<p:commandButton title="Mensaje privado" icon="ui-icon-comment"
 								oncomplete="PF('pChat').show()"

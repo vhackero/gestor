@@ -7,36 +7,36 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:p="http://primefaces.org/ui">
 	<ui:define name="breadcrumb">
-		<li class="active">Historial académico</li>
+		<li class="active">#{sistema.obtenerTexto('gw.alumno.constancias.historial')}</li>
 	</ui:define>
 	<ui:define name="content">
 		<f:event type="preRenderView" listener="#{constanciasBean.init}" />
 		<h:form>
-			<h1>Historial académico</h1>
+			<h1>#{sistema.obtenerTexto('gw.alumno.constancias.historial')}</h1>
 			<hr />
 
-			<p:panel header="Historial académico del estudiante">
+			<p:panel header="#{sistema.obtenerTexto('gw.alumno.constancias.historialEstudiante')}">
 				<div class="row">
 					<div class="col-md-12">
 
 						<div class="form-group">
 							<div class="row">
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Matricula" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.matricula')}" styleClass="bloque" />
 									<h:outputText
 										value="#{expedienteAlumnoBean.historial.matricula}">
 
 									</h:outputText>
 								</div>
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Programa Educativo" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.programaEducativo')}" styleClass="bloque" />
 									<h:outputText
 										value="#{expedienteAlumnoBean.historial.programaEducativo} ">
 
 									</h:outputText>
 								</div>
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Promedio" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.promedio')}" styleClass="bloque" />
 									<h:outputText
 										value="#{expedienteAlumnoBean.historial.promedio}">
 										<f:convertNumber pattern="#0.00" />
@@ -45,7 +45,7 @@
 
 
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Créditos" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.creditos')}" styleClass="bloque" />
 									<h:outputText
 										value="#{expedienteAlumnoBean.historial.creditos} de #{expedienteAlumnoBean.historial.totalCreditos}">
 
@@ -56,21 +56,21 @@
 						<div class="form-group">
 							<div class="row">
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Aprobadas" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.aprobadas')}" styleClass="bloque" />
 									<h:outputText
 										value="#{expedienteAlumnoBean.historial.aprobadas}">
 
 									</h:outputText>
 								</div>
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Reprobadas" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.reprobadas')}" styleClass="bloque" />
 									<h:outputText
 										value="#{expedienteAlumnoBean.historial.reprobadas} ">
 
 									</h:outputText>
 								</div>
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="No Presentadas" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.noPresentadas')}" styleClass="bloque" />
 									<h:outputText
 										value="#{expedienteAlumnoBean.historial.nopresentadas} ">
 
@@ -79,7 +79,7 @@
 
 
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Total" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.total')}" styleClass="bloque" />
 									<h:outputText
 										value="#{expedienteAlumnoBean.historial.total} ">
 
@@ -91,7 +91,7 @@
 						<div class="form-group">
 							<div class="row">
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Estatus" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.estatus')}" styleClass="bloque" />
 									<h:outputText
 										value="#{expedienteAlumnoBean.historial.estatus} ">
 
@@ -99,14 +99,14 @@
 								</div>
 
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Nivel" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.nivel')}" styleClass="bloque" />
 									<h:outputText
 										value="#{expedienteAlumnoBean.historial.nivel} ">
 
 									</h:outputText>
 								</div>
 								<div class="col-md-3 col-xs-12">
-									<h:outputLabel value="Fecha de Consulta" styleClass="bloque" />
+									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.fechaConsulta')}" styleClass="bloque" />
 									<h:outputText
 										value="#{expedienteAlumnoBean.historial.fechaConsulta}">
 										<f:convertDateTime pattern="dd/MM/yyyy" />
@@ -204,7 +204,7 @@
 									styleClass="#{evento.nombreEstatusEncuesta eq 'Pendiente' ? 'colorRojo' : ''}" />
 								<p:tooltip for="enc"
 									rendered="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
-									value="Para poder visualizar su constancia debe contestar la encuesta." />
+									value="#{sistema.obtenerTexto('gw.alumno.constancias.encuestaPendiente')}" />
 							</p:column>
 							<p:column headerText="Promedio de evaluaciones"
 								sortBy="#{evento.nombreEstatusEncuesta}"
@@ -257,21 +257,21 @@
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-12 flex-derecha">
-							<p:outputLabel value="Historial académico:"
-								styleClass="margenDerecho" />
-							<p:commandButton value="Imprimir"
-								disabled="#{empty expedienteAlumnoBean.listaEventos}"
-								styleClass="btn btn-primary" style="width:170px"
-								action="#{expedienteAlumnoBean.generarReporte}"
-								oncomplete="PF('modalReporte').show()" />
+								<p:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.historial')}:"
+									styleClass="margenDerecho" />
+								<p:commandButton value="#{sistema.obtenerTexto('gw.alumno.constancias.imprimir')}"
+									disabled="#{empty expedienteAlumnoBean.listaEventos}"
+									styleClass="btn btn-primary" style="width:170px"
+									action="#{expedienteAlumnoBean.generarReporte}"
+									oncomplete="PF('modalReporte').show()" />
 						</div>
 					</div>
 
 					<div class="row">
 						<div class="col-md-12 text-right">
-							<p:commandButton value="Regresar"
-								styleClass="btn btn-default pull-right"
-								action="#{expedienteAlumnoBean.cancelar}" />
+								<p:commandButton value="#{sistema.obtenerTexto('gw.alumno.constancias.regresar')}"
+									styleClass="btn btn-default pull-right"
+									action="#{expedienteAlumnoBean.cancelar}" />
 						</div>
 					</div>
 
@@ -282,10 +282,10 @@
 
 		</h:form>
 
-		<p:dialog id="constancia" dynamic="true" responsive="true"
-			modal="true" closable="false" resizable="false" position="center"
-			styleClass="modalAbsoluto" header="Constancia" width="900"
-			widgetVar="modalConstancia">
+			<p:dialog id="constancia" dynamic="true" responsive="true"
+				modal="true" closable="false" resizable="false" position="center"
+				styleClass="modalAbsoluto" header="#{sistema.obtenerTexto('gw.alumno.constancias.modal.constancia')}" width="900"
+				widgetVar="modalConstancia">
 
 			<div class="form-group">
 				<div class="row">
@@ -297,9 +297,9 @@
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<p:commandButton value="Cerrar"
-						styleClass="btn btn-default pull-right"
-						onclick="PF('modalConstancia').hide();" />
+						<p:commandButton value="#{sistema.obtenerTexto('gw.alumno.constancias.cerrar')}"
+							styleClass="btn btn-default pull-right"
+							onclick="PF('modalConstancia').hide();" />
 				</div>
 			</div>
 		</p:dialog>

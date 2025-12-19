@@ -17,7 +17,7 @@
 						onLabel="#{sistema.obtenerTexto('gw.usuarios.switch.si')}"
 						offLabel="#{sistema.obtenerTexto('gw.usuarios.switch.no')}">
 						<p:ajax event="change" immediate="true"
-						listener="#{adminPersonaBean.validarLenguajes()}" update="@parent"
+						listener="#{adminPersonaBean.validarLenguajes()}" update="cmbLenguaIndigena"
 						process="@this" />
 					</p:inputSwitch>
 					<p:message for="isLenguaIndigena" />
@@ -27,8 +27,8 @@
 						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.lenguaIndigena')}:" />
 					<p:selectOneMenu id="cmbLenguaIndigena" 
 						value="#{adminPersonaBean.datos.datosSociodemograficos.lenguajeIndigena.idLenguajeIndigena}"	
-						disabled="#{!adminPersonaBean.lenguajeIndigena}"					
-						required="true"
+						disabled="#{!adminPersonaBean.datos.datosSociodemograficos.lenguaIndigena}"					
+						required="true" validateClient="true"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 						styleClass="col-xs-12">						
 						<f:selectItem
@@ -52,7 +52,7 @@
 						onLabel="#{sistema.obtenerTexto('gw.usuarios.switch.si')}"
 						offLabel="#{sistema.obtenerTexto('gw.usuarios.switch.no')}">
 						<p:ajax event="change" immediate="true"
-						listener="#{adminPersonaBean.validarTipoDiscapacidad()}" update="@parent"
+						listener="#{adminPersonaBean.validarTipoDiscapacidad()}" update="cmbDiscapacidades cmbTipoDiscapacidad"
 						process="@this" />
 					</p:inputSwitch>
 					<p:message for="isDiscapacidad" />
@@ -64,7 +64,8 @@
 					<p:selectOneMenu id="cmbDiscapacidades"
 						value="#{adminPersonaBean.datos.datosSociodemograficos.tipoDiscapacidad.idDiscapacidad}"
 						valueChangeListener="#{adminPersonaBean.onChangeDiscapacidad}"
-						required="false" disabled="#{!adminPersonaBean.discapacidad}"
+						required="#{adminPersonaBean.datos.datosSociodemograficos.tieneDiscapacidad}"
+						disabled="#{!adminPersonaBean.datos.datosSociodemograficos.tieneDiscapacidad}"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 						styleClass="col-xs-12" onchange="correccionSelectores()">		
 						<p:ajax update="cmbTipoDiscapacidad" />				
@@ -81,7 +82,8 @@
 						value="#{sistema.obtenerTexto('gw.usuarios.etiqueta.tipodiscapacidad')}:" />
 					<p:selectOneMenu id="cmbTipoDiscapacidad"
 						value="#{adminPersonaBean.datos.datosSociodemograficos.tipoDiscapacidad.idTipoDiscapacidad}"						
-						required="false" disabled="#{!adminPersonaBean.discapacidad}"
+						required="#{adminPersonaBean.datos.datosSociodemograficos.tieneDiscapacidad}"
+						disabled="#{!adminPersonaBean.datos.datosSociodemograficos.tieneDiscapacidad}"
 						requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 						styleClass="col-xs-12" onchange="correccionSelectores()">						
 						<f:selectItem

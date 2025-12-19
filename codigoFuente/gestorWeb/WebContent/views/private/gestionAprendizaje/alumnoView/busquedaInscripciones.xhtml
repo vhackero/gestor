@@ -9,13 +9,13 @@
 
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
-		<li>Inscripciones</li>
+		<li>#{sistema.obtenerTexto('gw.alumno.inscripciones.titulo')}</li>
 	</ui:define>
 
 	<ui:define name="content">
 		<h:form>
 			<h1>
-				<p:outputLabel styleClass="h1" value="Inscripciones" />
+				<p:outputLabel styleClass="h1" value="#{sistema.obtenerTexto('gw.alumno.inscripciones.titulo')}" />
 			</h1>
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
@@ -24,7 +24,7 @@
 				<div class="row">
 					<sec:authorize access="hasPermission(null,'INSCRIP_NUEVA')">
 
-						<p:commandButton value="Nuevo proceso de inscripción"
+						<p:commandButton value="#{sistema.obtenerTexto('gw.alumno.inscripciones.nuevo')}"
 							style="width: 300px;"
 							action="#{inscripocionesBean.navegaNuevoConvocatoria}"
 							ajax="false" immediate="true" process="@this"
@@ -35,7 +35,7 @@
 					<sec:authorize access="hasPermission(null,'INSCRIP_CONSUL')">
 
 						<p:commandButton style="width: 300px;"
-							value="Consultar proceso de inscripción"
+							value="#{sistema.obtenerTexto('gw.alumno.inscripciones.consultar')}"
 							action="#{inscripocionesBean.navegaConsultaInscripciones}"
 							ajax="false" immediate="true" process="@this"
 							styleClass="btn btn-primary" />
@@ -44,7 +44,7 @@
 					<sec:authorize access="hasPermission(null,'INSCRIP_CONSUL_TAB')">
 
 						<p:commandButton style="width: 300px;"
-							value="Consultar tablero resumen"
+							value="#{sistema.obtenerTexto('gw.alumno.inscripciones.tablero')}"
 							action="#{inscripocionesBean.navegaConsultaTablero}" ajax="false"
 							immediate="true" process="@this" styleClass="btn btn-primary" />
 					</sec:authorize>

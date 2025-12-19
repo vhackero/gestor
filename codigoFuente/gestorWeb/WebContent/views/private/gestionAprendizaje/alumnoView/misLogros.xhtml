@@ -6,7 +6,7 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:p="http://primefaces.org/ui">
 	<ui:define name="breadcrumb">
-		<li class="active">Mis logros</li>
+		<li class="active">#{sistema.obtenerTexto('gw.alumno.logros.titulo')}</li>
 	</ui:define>
 
 	<ui:define name="content">
@@ -14,7 +14,7 @@
 		<h:form id="formMisCursos">
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
-			<h1>Mis logros</h1>
+			<h1>#{sistema.obtenerTexto('gw.alumno.logros.titulo')}</h1>
 			<hr />
 			<div class="row mislogros">
 				<div class="col-md-7 contenedorDatosInsignia">

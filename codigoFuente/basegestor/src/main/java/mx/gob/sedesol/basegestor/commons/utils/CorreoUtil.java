@@ -109,6 +109,14 @@ public class CorreoUtil {
         		emailProperties.put("mail.smtp.auth", "true");
         		emailProperties.put("mail.smtp.starttls.enable", "true");
 
+                 emailProperties.put("mail.smtp.ssl.protocols", "TLSv1.2");
+
+                // Opcional: Para evitar problemas de certificados con antivirus
+                emailProperties.put("mail.smtp.ssl.trust", "*");
+
+                emailProperties.put("mail.smtp.connectiontimeout", "10000");
+                emailProperties.put("mail.smtp.timeout", "10000");
+
                 Authenticator auth = new Authenticator() {
                     public PasswordAuthentication getPasswordAuthentication() {
                         return new PasswordAuthentication(dto.getUsuarioCorreo(), dto.getPasswordCorreo());
@@ -121,7 +129,8 @@ public class CorreoUtil {
                 
                 HtmlEmail email = new HtmlEmail();
                 email.setMailSession(session);
-                email.setFrom(dto.getRemitente(),"eLearning");
+                email.setFrom(dto.getCorreoRemitente(),dto.getNombreRemitente());
+                email.setCharset("UTF-8");
         		
         		if(!ObjectUtils.isNullOrEmpty(dto.getDestinatarios())){
         			for (String to : dto.getDestinatarios()) {
@@ -161,6 +170,7 @@ public class CorreoUtil {
     		
     	}catch (Exception e) {
     		log.error(e.getMessage(),e);
+    		throw new EmailException(e.getMessage(),e);
     	}
     
     	

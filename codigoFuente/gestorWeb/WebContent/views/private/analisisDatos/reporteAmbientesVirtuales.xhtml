@@ -9,11 +9,11 @@
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 	xmlns:sec="http://www.springframework.org/security/tags">
 	<ui:define name="breadcrumb">
-		<li>Análisis de datos</li>
-		<li class="active">Reporte de ambientes virtuales de aprendizaje</li>
+		<li>#{sistema.obtenerTexto('gw.analisis.titulo')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.titulo')}</li>
 	</ui:define>
 	<ui:define name="content">
-		<h1>Reporte de ambientes virtuales de aprendizaje</h1>
+		<h1>#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.titulo')}</h1>
 		<hr />
 		<p:ajaxStatus onstart="PF('dialogLayout').show()"
 			onsuccess="PF('dialogLayout').hide()" />
@@ -21,19 +21,19 @@
 			<f:validateBean disabled="true">
 				<div class="row">
 					<div class="col-md-12">
-						<p:panel header="Búsqueda de datos en gestión del aprendizaje"
+						<p:panel header="#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.busqueda.titulo')}"
 							id="pnlBusqueda">
 							<div class="form-group">
 								<div class="row">
 									<div class="col-md-4">
-										<p:outputLabel value="Tipo de competencia:"
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.tipoCompetencia')}"
 											styleClass="bloque" />
 										<p:selectOneMenu
 											value="#{reporteAvaBean.filtros.fichaDescriptivaPrograma.tipoCompetencia}"
 											valueChangeListener="#{reporteAvaBean.onChangeTpoCompetencia}"
 											styleClass="col-xs-12">
 											<p:ajax update="selectEjeCapacitacion" />
-											<f:selectItem itemValue="#{null}" itemLabel="Seleccionar" />
+											<f:selectItem itemValue="#{null}" itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
 											<f:selectItems
 												value="#{reporteAvaBean.listaTiposCompetencias}"
 												var="competencia" itemLabel="#{competencia.nombre}"
@@ -41,7 +41,7 @@
 										</p:selectOneMenu>
 									</div>
 									<div class="col-md-4">
-										<p:outputLabel value="Eje de capacitacion:"
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.ejeCapacitacion')}"
 											styleClass="bloque" />
 										<p:selectOneMenu id="selectEjeCapacitacion"
 											styleClass="col-xs-12"
@@ -56,7 +56,7 @@
 										</p:selectOneMenu>
 									</div>
 									<div class="col-md-4">
-										<p:outputLabel value="Modalidad:" styleClass="bloque" />
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.modalidad')}" styleClass="bloque" />
 										<p:selectOneMenu styleClass="col-xs-12"
 											converter="entityConverter"
 											value="#{reporteAvaBean.filtros.catModalidadPlanPrograma}">
@@ -75,7 +75,7 @@
 							<div class="form-group">
 								<div class="row">
 									<div class="col-md-3">
-										<p:outputLabel value="Nivel de enseñanza:" styleClass="bloque" />
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.nivelEnsenanza')}" styleClass="bloque" />
 										<p:selectOneMenu styleClass="col-xs-12:"
 											value="#{reporteAvaBean.filtros.fichaDescriptivaPrograma.catNivelEnsenanzaPrograma.id}">
 											<p:ajax event="change" process="@this" />
@@ -88,7 +88,7 @@
 										</p:selectOneMenu>
 									</div>
 									<div class="col-md-3">
-										<p:outputLabel value="Estatus:" styleClass="bloque" />
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.estatus')}" styleClass="bloque" />
 										<p:selectOneMenu styleClass="col-xs-12"
 											converter="entityConverter"
 											value="#{reporteAvaBean.filtros.catEstadoEventoCapacitacion}">
@@ -106,7 +106,7 @@
 							<div class="form-group">
 								<div class="row">
 									<div class="col-md-3">
-										<p:outputLabel value="Tipo de rango de fecha:"
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.tipoRangoFecha')}"
 											styleClass="bloque" />
 										<p:selectOneMenu styleClass="col-xs-12"
 											value="#{reporteAvaBean.tipoDatoFechas}">
@@ -127,7 +127,7 @@
 										</p:selectOneMenu>
 									</div>
 									<div class="col-md-3">
-										<p:outputLabel value="Fecha inicial:" styleClass="bloque" />
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.fechaInicial')}" styleClass="bloque" />
 										<p:calendar id="fechaInicial" navigator="true"
 											disabled="#{reporteAvaBean.tipoDatoFechas == null}"
 											value="#{reporteAvaBean.filtros.fechaInicial}"
@@ -141,7 +141,7 @@
 
 									</div>
 									<div class="col-md-3">
-										<p:outputLabel value="Fecha final:" styleClass="bloque" />
+										<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteAmbientes.fechaFinal')}" styleClass="bloque" />
 										<p:calendar navigator="true"
 											disabled="#{reporteAvaBean.filtros.fechaInicial == null}"
 											value="#{reporteAvaBean.filtros.fechaFinal}"
@@ -157,10 +157,10 @@
 							</div>
 							<div class="row">
 								<div class="col-md-12 text-right">
-									<p:commandButton value="Limpiar campos"
+									<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.limpiar')}"
 										actionListener="#{reporteAvaBean.limpiarCampos}" ajax="true"
 										update="@form" styleClass="btn btn-default" />
-									<p:commandButton value="Buscar" styleClass="btn btn-primary"
+									<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.buscar')}" styleClass="btn btn-primary"
 										update="@form" ajax="true"
 										action="#{reporteAvaBean.buscarEventosCapacitacion}" />
 								</div>
@@ -175,7 +175,7 @@
 
 			<div class="row">
 				<div class="col-md-12">
-					<p:panel header="Resultado de la búsqueda">
+					<p:panel header="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.resultado')}">
 						<p:dataTable value="#{reporteAvaBean.eventosCapacitacion}"
 							reflow="true"
 							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
@@ -190,11 +190,11 @@
 								<div class="row flexY">
 									<div class="col-md-8">
 										<p:outputLabel
-											value="Para agregar más datos en tu reporte, selecciona en el siguiente menú los necesarios." />
+											value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.instruccion')}" />
 									</div>
 									<div class="col-md-4">
 										<p:commandButton id="toggler" type="button"
-											value="Columna de datos" style="width:200px"
+											value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.columnaDatos')}" style="width:200px"
 											styleClass="pull-right btn btn-default"
 											icon="ui-icon-carat-1-s" />
 										<p:columnToggler id="columnaSelectora"
@@ -207,7 +207,7 @@
 							<p:column visible="#{reporteAvaBean.visible[0]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Clave" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.clave')}" />
 								</f:facet>
 
 								<h:outputText value="#{evento.cveEventoCap}" />
@@ -215,7 +215,7 @@
 							<p:column visible="#{reporteAvaBean.visible[1]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Nombre del evento" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.nombreEvento')}" />
 								</f:facet>
 
 								<h:outputText value="#{evento.nombreEc}" />
@@ -223,7 +223,7 @@
 							<p:column visible="#{reporteAvaBean.visible[2]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Tipo de competencia" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.tipoCompetencia')}" />
 								</f:facet>
 
 								<h:outputText
@@ -232,7 +232,7 @@
 							<p:column visible="#{reporteAvaBean.visible[3]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Eje de capacitación" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.ejeCapacitacion')}" />
 								</f:facet>
 
 								<h:outputText
@@ -241,7 +241,7 @@
 							<p:column visible="#{reporteAvaBean.visible[4]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Modalidad" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.modalidad')}" />
 								</f:facet>
 
 								<h:outputText value="#{evento.catModalidadPlanPrograma.nombre}" />
@@ -249,7 +249,7 @@
 							<p:column visible="#{reporteAvaBean.visible[5]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Estatus" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.estatus')}" />
 								</f:facet>
 
 								<h:outputText
@@ -258,7 +258,7 @@
 							<p:column visible="#{reporteAvaBean.visible[6]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Fecha inicial" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.fechaInicial')}" />
 								</f:facet>
 								<h:outputText value="#{evento.fechaInicial}">
 									<f:convertDateTime type="date"
@@ -268,7 +268,7 @@
 							<p:column visible="#{reporteAvaBean.visible[7]}"
 								exportable="true">
 								<f:facet name="header">
-									<h:outputText value="Fecha final" />
+									<h:outputText value="#{sistema.obtenerTexto('gw.analisis.columnas.fechaFinal')}" />
 								</f:facet>
 								<h:outputText value="#{evento.fechaFinal}">
 									<f:convertDateTime type="date"
@@ -283,9 +283,9 @@
 			<div class="form-group">
 				<div class="row">
 					<div class="col-md-12 floatFlexCentrarY margenInferior">
-						<p:outputLabel value="Reporte de excel:" style="margin-bottom:0"
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.reporteExcel')}" style="margin-bottom:0"
 							styleClass="margenDerecho agregaHeight" for="btnReporte" />
-						<p:commandButton id="btnReporte" value="Descargar"
+						<p:commandButton id="btnReporte" value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.descargar')}"
 							style="margin-left:0; margin-right:10px"
 							disabled="#{reporteAvaBean.eventosCapacitacion.isEmpty()}"
 							styleClass="btn btn-primary" ajax="false">
@@ -293,10 +293,10 @@
 								fileName="analisisDatosEventos" pageOnly="false" />
 						</p:commandButton>
 
-						<p:outputLabel value="Informe prediseñado:"
+						<p:outputLabel value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.informePredisenado')}"
 							styleClass="margenDerecho" />
 
-						<p:commandButton value="Generar"
+						<p:commandButton value="#{sistema.obtenerTexto('gw.analisis.reporteUsuarios.generar')}"
 							disabled="#{reporteAvaBean.eventosCapacitacion.isEmpty()}"
 							onclick="graficasEventos();"
 							styleClass="btn btn-primary margenDerecho" />

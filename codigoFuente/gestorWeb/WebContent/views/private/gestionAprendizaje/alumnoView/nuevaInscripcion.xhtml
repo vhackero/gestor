@@ -347,11 +347,11 @@
 							<!-- Llamar al método cuando cambia la selección -->
 							<p:ajax event="change"
 								process="@this"
-								update="plan2 plan2Msg" />
+								 />
 
 							<!-- Opciones del Select -->
 							<f:selectItems value="#{inscripocionesBean.listaPlanProgramas}"
-								var="tblPlan" itemLabel="#{tblPlan.nombrePlan} > #{tblPlan.nombrePrograma}"
+								var="tblPlan" itemLabel="#{tblPlan.nombrePlan} > #{tblPlan.nombreSemestre} > #{tblPlan.nombreBloque} > #{tblPlan.nombrePrograma} "
 								itemValue="#{tblPlan}" />
 						</p:selectCheckboxMenu>
 						 <p:message id="plan2Msg" for="plan2" display="text" />

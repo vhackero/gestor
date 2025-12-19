@@ -147,7 +147,7 @@ public class LoginBean extends BaseBean {
 		CorreoDTO correoDto = correoElectronicoService.asignaParametrosConfigCorreo();
 		correoDto.setTitulo(parametroSistemaService.obtenerParametro(ParametrosSistemaEnum.PS_TITULO_NOTIFICACION_CORREO.getClave()));
 		correoDto.setAsunto(parametroSistemaService.obtenerParametro(ParametrosSistemaEnum.PS_ASUNTO_CORREO_RECUP_PASSWORD.getClave()));
-		correoDto.setRemitente(parametroSistemaService.obtenerParametro(ParametrosSistemaEnum.PS_CONFIG_CORREO_CUENTA_ADMIN.getClave()));
+		correoDto.setCorreoRemitente(parametroSistemaService.obtenerParametro(ParametrosSistemaEnum.PS_CONFIG_CORREO_CUENTA_ADMIN.getClave()));
 		correoDto.setContenido(MessageFormat.format(
 				textosSistema.obtenerTexto(MensajesSistemaEnum.LOGIN_MSG_RECUP_PSWD_EMAIL_ENVIADO.getId()), rutaActivacion));
 

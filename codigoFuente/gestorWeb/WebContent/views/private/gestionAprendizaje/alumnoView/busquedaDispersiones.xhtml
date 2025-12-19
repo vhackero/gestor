@@ -9,14 +9,14 @@
 
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
-		<li class="active">Dispersiones</li>
+		<li>#{sistema.obtenerTexto('gw.alumno.dispersiones.titulo')}</li>
 
 	</ui:define>
 
 	<ui:define name="content">
 		<h:form>
 			<h1>
-				<p:outputLabel styleClass="h1" value="Proceso de dispersión" />
+				<p:outputLabel styleClass="h1" value="#{sistema.obtenerTexto('gw.alumno.dispersiones.proceso')}" />
 			</h1>
 
 
@@ -36,7 +36,7 @@
 					<sec:authorize access="hasPermission(null,'DISPER_NUEVA')">
 
 
-						<p:commandButton value="Nuevo proceso de dispersión"
+						<p:commandButton value="#{sistema.obtenerTexto('gw.alumno.dispersiones.nuevo')}"
 							style="width: 250px;"
 							action="#{dispersionesBean.navegaNuevoDispersion}" ajax="false"
 							immediate="true" process="@this" styleClass="btn btn-primary" />
@@ -46,7 +46,7 @@
 					<sec:authorize access="hasPermission(null,'DISPER_CONSUL')">
 
 						<p:commandButton style="width: 250px;"
-							value="Consultar dispersión"
+							value="#{sistema.obtenerTexto('gw.alumno.dispersiones.consultar')}"
 							action="#{dispersionesBean.navegaConsultaDispersion}"
 							ajax="false" immediate="true" process="@this"
 							styleClass="btn btn-primary" />
@@ -55,8 +55,8 @@
 
 					<sec:authorize access="hasPermission(null,'DISPERSION')">
 
-						<p:commandButton style="width: 250px;" value="Dispersión"
-							action="#{convocatoriasBean.navegaConsultaTablero}" ajax="false"
+						<p:commandButton style="width: 250px;" value="#{sistema.obtenerTexto('gw.alumno.dispersiones.tablero')}"
+							action="#{dispersionesBean.navegaDispersion}" ajax="false"
 							immediate="true" process="@this" styleClass="btn btn-primary" />
 
 					</sec:authorize>

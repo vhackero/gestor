@@ -287,7 +287,7 @@ public class CursosBean extends BaseBean {
 			correoDto.setDestinatarios(new ArrayList<String>());
 			correoDto.setAsunto(nombreInteresado + "Esta interesado en el curso " + this.cursoSelec.getNombreCurso());
 			correoDto.setTitulo(nombreInteresado + "Esta interesado en el curso " + this.cursoSelec.getNombreCurso());
-			correoDto.setRemitente(parametroSistemaService
+			correoDto.setCorreoRemitente(parametroSistemaService
 					.obtenerParametro(ParametrosSistemaEnum.PS_CONFIG_CORREO_CUENTA_ADMIN.getClave()));
 			correoDto.setContenido(mensajeInteresado);
 			// correoDto.agregarDestinatario(this.cursoSelec.getCorreoRespCordinadorAcad());
