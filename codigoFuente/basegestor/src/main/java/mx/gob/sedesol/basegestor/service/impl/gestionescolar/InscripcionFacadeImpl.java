@@ -1207,8 +1207,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 				.map(materia -> {
 					if (materia.getEstructura().equalsIgnoreCase(semestreDondeFaltanObligatorias)
 							&& materia.getTipoPrograma().equalsIgnoreCase(ConstantesGestor.TEXTO_MATERIA_OBLIGATORIA)) {
-						materia.setCheck(Boolean.TRUE);
-						materia.setDisabled(Boolean.TRUE);
+						//materia.setCheck(Boolean.TRUE);
+						//materia.setDisabled(Boolean.TRUE);
 					} else {
 						//materia.setDisabled(Boolean.FALSE); Comentado para el periodo actual
 					}
