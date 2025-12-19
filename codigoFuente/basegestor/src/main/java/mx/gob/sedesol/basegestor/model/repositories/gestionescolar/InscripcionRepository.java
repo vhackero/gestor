@@ -44,8 +44,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("SELECT tp.id_persona, ");
 		sql.append("       tp.sso_idUsuario, ");
 		sql.append("       tp.sso_nombre, ");
-		sql.append("       tp.sso_apellidoMaterno, ");
 		sql.append("       tp.sso_apellidoPaterno, ");
+		sql.append("       tp.sso_apellidoMaterno, ");
 		sql.append("       rpc.sso_correoElectronico, ");
 		sql.append("       tpa.id_plan, ");
 		sql.append("       tpl.nombre, ");
@@ -845,7 +845,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 				"    (SELECT tmc2.nombre FROM tbl_malla_curricular tmc2 WHERE tmc2.id = tmc.id_padre) AS estructura, ");
 		sql.append("    rgp.calificacion_final AS calificacion_final, ");
 		sql.append("    IF(rgp.calificacion_final >= fd.calificacion_min_aprobatoria, 1, 0) AS estatus_aprobacion, ");
-		sql.append("    fd.creditos AS creditos ");
+		sql.append("    fd.creditos AS creditos, ");
+		sql.append("    fd.tipo AS tipoPrgrama ");
 		sql.append("FROM tbl_persona tp ");
 		sql.append(
 				"INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona AND calificacion_final IS NOT NULL ");
@@ -880,6 +881,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setCalificacionFinal(getDoubleValue(row[7]));
 		dto.setEstatusAprobacion(getIntegerValue(row[8]));
 		dto.setCreditos(getIntegerValue(row[9]));
+		dto.setTipoPrograma((String)(row[10]));
 
 		return dto;
 	}

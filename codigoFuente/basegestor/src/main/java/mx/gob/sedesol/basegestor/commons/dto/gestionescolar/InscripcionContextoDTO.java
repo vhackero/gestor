@@ -1,7 +1,7 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
-import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class InscripcionContextoDTO {
 
@@ -69,4 +69,30 @@ public class InscripcionContextoDTO {
 		this.mensajeLimiteReprobacionesAlcanzado = mensajeLimiteReprobacionesAlcanzado;
 	}
 
+	public Long obtenerIdPersona() {
+		return this.inscripcionPersona.getIdPersona();
+	}
+
+	public Long obtenerIdProcesoInscripcionDesdeMateriasDisponibles() {
+		if (estadoAcademico == null || estadoAcademico.getMateriasDisponibles() == null
+				|| estadoAcademico.getMateriasDisponibles().isEmpty()) {
+			throw new IllegalStateException("No hay materias disponibles para determinar el proceso de inscripción.");
+		}
+
+		Long idProceso = estadoAcademico.getMateriasDisponibles().get(0).getIdProcesoInscripcion();
+
+		if (idProceso == null) {
+			throw new IllegalStateException("La materia disponible no contiene idProcesoInscripcion.");
+		}
+
+		return idProceso;
+	}
+
+	public List<InscripcionMateriasDTO> obtenerMateriasSeleccionadas() {
+		if (estadoAcademico == null || estadoAcademico.getMateriasDisponibles() == null) {
+			throw new IllegalStateException("No hay materias disponibles.");
+		}
+		return estadoAcademico.getMateriasDisponibles().stream().filter(materia -> materia.getCheck())
+				.collect(Collectors.toList());
+	}
 }

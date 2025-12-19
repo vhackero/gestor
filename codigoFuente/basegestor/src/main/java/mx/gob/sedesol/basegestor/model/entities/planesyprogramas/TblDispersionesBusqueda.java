@@ -4,43 +4,50 @@ import java.io.Serializable;
 
 public class TblDispersionesBusqueda implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
-	Integer idDispersion;
+	private Integer idDispersion;
+	private Integer idPlan;
+	private Integer idPrograma;
+	private String plan;
+	private String programa;
+	private String clave;
+	private String semestre;
+	private String bloque;
+	private Integer noEstudiantes;
+	private Integer gruposGenerales;
+	private Integer cupoGeneral;
+	private Integer grupoResto;
+	private Integer cupoResto;
+	private String acciones;
+	private Integer tipoMatriculacion;
+	private Integer gruposCreados;
+	private Integer usuariosMatriculados;
+	private boolean crearGruposHabilitado;
+	private boolean matricularHabilitado;
 
-	String plan;
-	
-	String programa;
-	
-	String clave;
-	
-	String semestre;
-	
-	String bloque;
-	
-	Integer noEstudiantes;
-	
-	Integer gruposGenerales;
-	
-	Integer cupoGeneral;
-	
-	Integer grupoResto;
-	
-	Integer cupoResto;
-	
-	String acciones;
-
-	
-	
 	public Integer getIdDispersion() {
 		return idDispersion;
 	}
 
 	public void setIdDispersion(Integer idDispersion) {
 		this.idDispersion = idDispersion;
+	}
+	
+	public Integer getIdPlan() {
+		return idPlan;
+	}
+	
+	public void setIdPlan(Integer idPlan) {
+		this.idPlan = idPlan;
+	}
+	
+	public Integer getIdPrograma() {
+		return idPrograma;
+	}
+	
+	public void setIdPrograma(Integer idPrograma) {
+		this.idPrograma = idPrograma;
 	}
 
 	public String getPlan() {
@@ -129,6 +136,46 @@ public class TblDispersionesBusqueda implements Serializable {
 
 	public void setAcciones(String acciones) {
 		this.acciones = acciones;
+	}
+	
+	public Integer getTipoMatriculacion() {
+		return tipoMatriculacion;
+	}
+	
+	public void setTipoMatriculacion(Integer tipoMatriculacion) {
+		this.tipoMatriculacion = tipoMatriculacion;
+	}
+	
+	public Integer getGruposCreados() {
+		return gruposCreados;
+	}
+	
+	public void setGruposCreados(Integer gruposCreados) {
+		this.gruposCreados = gruposCreados;
+	}
+	
+	public Integer getUsuariosMatriculados() {
+		return usuariosMatriculados;
+	}
+	
+	public void setUsuariosMatriculados(Integer usuariosMatriculados) {
+		this.usuariosMatriculados = usuariosMatriculados;
+	}
+	
+	public boolean isCrearGruposHabilitado() {
+		return crearGruposHabilitado;
+	}
+	
+	public void setCrearGruposHabilitado(boolean crearGruposHabilitado) {
+		this.crearGruposHabilitado = crearGruposHabilitado;
+	}
+	
+	public boolean isMatricularHabilitado() {
+		return matricularHabilitado;
+	}
+	
+	public void setMatricularHabilitado(boolean matricularHabilitado) {
+		this.matricularHabilitado = matricularHabilitado;
 	}
 	
 	

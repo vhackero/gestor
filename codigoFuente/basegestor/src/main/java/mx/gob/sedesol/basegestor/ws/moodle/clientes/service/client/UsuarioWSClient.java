@@ -6,26 +6,26 @@
 package mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+import java.net.URI;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.client.RestTemplate;
-
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
-import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Curso;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.EnrolMents;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Usuario;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Usuarios;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.controller.WSClientBase;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.util.ErrorWS;
+import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.util.StaticsConstants;
+import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.util.TokenController;
+import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.util.URIBuilder;
 
 public class UsuarioWSClient implements Serializable {
 	
@@ -109,10 +109,10 @@ public class UsuarioWSClient implements Serializable {
     
     
     public boolean actualizarUsuario(Usuario usuario) throws ErrorWS{
-    	HashMap<String, Object> paramMap = new HashMap<>();
+        HashMap<String, Object> paramMap = new HashMap<>();
         int x = 0;
         //for (EnrolMents usuario : enrolments) {
-        	paramMap.put("users[" + x + "][id]", usuario.getId());
+                paramMap.put("users[" + x + "][id]", usuario.getId());
         	if(usuario.getUsername()!=null){
         		paramMap.put("users[" + x + "][username]", usuario.getUsername().toLowerCase());
         	}
@@ -125,18 +125,83 @@ public class UsuarioWSClient implements Serializable {
         	if(usuario.getLastname()!=null){
         		paramMap.put("users[" + x + "][lastname]", usuario.getLastname());
         	}
-        	if(usuario.getEmail()!=null){
-        		paramMap.put("users[" + x + "][email]", usuario.getEmail());
-        	}
-        	if(usuario.getIdnumber()!=null){
-        		paramMap.put("users[" + x + "][idnumber]", usuario.getIdnumber());
-        	}
+                if(usuario.getEmail()!=null){
+                        paramMap.put("users[" + x + "][email]", usuario.getEmail());
+                }
+                if(usuario.getIdnumber()!=null){
+                        paramMap.put("users[" + x + "][idnumber]", usuario.getIdnumber());
+                }
             WSClientBase ws = new WSClientBase(parametroWSMoodleDTO);
             Integer salida  = ws.ejecutarServicioPOST("core_user_update_users", paramMap, null, Integer.class);
             System.out.println(salida);;
             return true;
         //}
         
+    }
+
+    public boolean actualizarUsuarioSuspender(Usuario usuario) throws ErrorWS{
+        HashMap<String, Object> paramMap = new HashMap<>();
+        int x = 0;
+        //for (EnrolMents usuario : enrolments) {
+                paramMap.put("users[" + x + "][id]", usuario.getId());
+
+                if(usuario.getSuspended()!=null){
+                        paramMap.put("users[" + x + "][suspended]", usuario.getSuspended());
+                }
+            WSClientBase ws = new WSClientBase(parametroWSMoodleDTO);
+            Integer salida  = ws.ejecutarServicioPOST("core_user_update_users", paramMap, null, Integer.class);
+            System.out.println(salida);;
+            return true;
+        //}
+
+    }
+
+    public boolean suspenderUsuarioDefinitivo(Integer idUsuarioMoodle) throws ErrorWS {
+        try {
+            HashMap<String, Object> paramMap = new HashMap<>();
+            int x = 0;
+            paramMap.put("users[" + x + "][id]", idUsuarioMoodle);
+            paramMap.put("users[" + x + "][suspended]", 1);
+
+            TokenController token = new TokenController(parametroWSMoodleDTO);
+            HashMap<String, Object> paramsLog = new HashMap<>();
+            paramsLog.put("wsfunction", "core_user_update_users");
+            paramsLog.put("moodlewsrestformat", "json");
+            paramsLog.putAll(paramMap);
+            paramsLog.put(StaticsConstants.ACCESS_TOKEN, token.getAccessToken());
+
+            URIBuilder uriBuilder = new URIBuilder(parametroWSMoodleDTO);
+            URI uriTotal = uriBuilder.buildWSUri(parametroWSMoodleDTO.getServer(), paramsLog);
+            logger.info("URL suspensión usuario Moodle: " + uriTotal.toString());
+
+            WSClientBase ws = new WSClientBase(parametroWSMoodleDTO);
+
+            // En lugar de esperar Integer, manejemos la respuesta como String primero
+            String respuesta = ws.ejecutarServicioPOST("core_user_update_users", paramMap, null, String.class);
+
+            // Verificar si es la respuesta de éxito de Moodle
+            if (respuesta != null && respuesta.trim().equals("{\"warnings\":[]}")) {
+                logger.info("Usuario suspendido exitosamente en Moodle");
+                return true;
+            }
+
+            // Intentar parsear como Integer si no es warnings[]
+            try {
+                Integer salida = Integer.parseInt(respuesta);
+                return salida != null;
+            } catch (NumberFormatException e) {
+                logger.warn("Respuesta no numérica de Moodle: " + respuesta);
+                return false;
+            }
+
+        } catch (ErrorWS e) {
+            // Si el error es por warnings[], considerarlo éxito
+            if (e.getMessage() != null && e.getMessage().contains("warnings")) {
+                logger.info("Moodle devolvió warnings vacíos - suspensión exitosa");
+                return true;
+            }
+            throw e;
+        }
     }
     
      

@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.modificarInscripcion.breadcrumb.anterior')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.modificarInscripcion.breadcrumb.activo')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+
+		<h:form id="mainForm">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+
+			<h1>
+				<p:outputLabel styleClass="h1" value="#{sistema.obtenerTexto('gw.modificarInscripcion.titulo')}" />
+			</h1>
+
+			<p:panel header="#{sistema.obtenerTexto('gw.modificarInscripcion.panelBusqueda.titulo')}" styleClass="fondoPrimario">
+				<div class="row">
+					<div class="col-md-4">
+						<div class="form-group">
+							<h:outputLabel styleClass="requerido" for="idUsuario"
+								value="#{sistema.obtenerTexto('gw.modificarInscripcion.panelBusqueda.matricula')}" />
+							<p:inputText id="idUsuario" placeholder="#{sistema.obtenerTexto('gw.modificarInscripcion.panelBusqueda.matricula')}"
+								maxlength="100"
+								value="#{modificacionInscripcionBean.filtroBusqueda.matricula}"
+								styleClass="form-control">
+
+							</p:inputText>
+
+
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-4">
+						<div class="form-group">
+							<h:outputLabel styleClass="requerido" for="idConvocatoria"
+								value="#{sistema.obtenerTexto('gw.modificarInscripcion.panelBusqueda.convocatoria')}" />
+							<p:selectOneMenu id="idConvocatoria"
+								value="#{modificacionInscripcionBean.filtroBusqueda.idConvocatoria}"
+								class="col-xs-12">
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+								<f:selectItems
+									value="#{modificacionInscripcionBean.convocatorias}"
+									var="convocatoria" itemValue="#{convocatoria.id}"
+									itemLabel="#{convocatoria.nombre}" />
+								<p:ajax event="change"
+									process="@this idCatProcesoInscripcion idUsuario"
+									update="@form"
+									listener="#{modificacionInscripcionBean.onConvocatoriaChange}" />
+							</p:selectOneMenu>
+
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="form-group">
+							<h:outputLabel styleClass="requerido"
+								for="idCatProcesoInscripcion" value="#{sistema.obtenerTexto('gw.modificarInscripcion.panelBusqueda.tipoProceso')}" />
+							<p:selectOneMenu id="idCatProcesoInscripcion"
+								disabled="#{modificacionInscripcionBean.filtroBusqueda.idConvocatoria == null}"
+								value="#{modificacionInscripcionBean.filtroBusqueda.idTipoProceso}"
+								class="col-xs-12">
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+								<f:selectItems
+									value="#{modificacionInscripcionBean.tiposProcesoInscripcion}"
+									var="tipoProceso" itemValue="#{tipoProceso.id}"
+									itemLabel="#{tipoProceso.nombre}" />
+								<p:ajax event="change" process="@this idConvocatoria idUsuario"
+									update="@form"
+									listener="#{modificacionInscripcionBean.onTipoProcesoChange}" />
+							</p:selectOneMenu>
+
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="form-group">
+							<h:outputLabel styleClass="requerido" for="idProcesoInscripcion"
+								value="#{sistema.obtenerTexto('gw.modificarInscripcion.panelBusqueda.procesoInscripcion')}" />
+							<p:selectOneMenu id="idProcesoInscripcion"
+								disabled="#{modificacionInscripcionBean.filtroBusqueda.idTipoProceso == null}"
+								value="#{modificacionInscripcionBean.filtroBusqueda.idProcesoInscripcion}"
+								class="col-xs-12">
+								<f:selectItem
+									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}" />
+								<f:selectItems
+									value="#{modificacionInscripcionBean.procesosInscripcion}"
+									var="procesoInscripcion" itemValue="#{procesoInscripcion.id}"
+									itemLabel="#{procesoInscripcion.nombre}" />
+								<p:ajax event="change" update="@form" />
+							</p:selectOneMenu>
+
+						</div>
+					</div>
+				</div>
+				<div class="row mt-2">
+					<div class="col-md-12 text-right">
+						<p:commandButton id="btnBuscar"
+							value="#{sistema.obtenerTexto('gw.bitacora.modal.personas.boton.buscar')}"
+							action="#{modificacionInscripcionBean.buscarInscripcion}"
+							ajax="true" process="@form" update="@form frmTabla"
+							styleClass="btn btn-primary pull-right" />
+						<p:commandButton value="#{sistema.obtenerTexto('gw.modificarInscripcion.panelBusqueda.boton.limpiar')}"
+							action="#{modificacionInscripcionBean.limpiarFiltroBusqueda}"
+							ajax="true" update="@form frmTabla"
+							styleClass="btn btn-default pull-right" />
+					</div>
+				</div>
+			</p:panel>
+		</h:form>
+		<h:form id="frmTabla">
+			<p:dataTable styleClass="mt-2"
+				value="#{modificacionInscripcionBean.materias}"
+				tableStyleClass="table" var="inscripcion" paginator="false"
+				emptyMessage="#{sistema.obtenerTexto('gw.modificarInscripcion.tablaMaterias.mensajeVacio')}">
+
+				<p:column styleClass="text-center">
+					<f:facet name="header">
+						<h:outputText value="#{sistema.obtenerTexto('gw.modificarInscripcion.tablaMaterias.tablaColumna.curso')}" />
+					</f:facet>
+					<h:outputText value="#{inscripcion.programa}" />
+				</p:column>
+
+				<p:column styleClass="text-center">
+					<f:facet name="header">
+						<h:outputText value="#{sistema.obtenerTexto('gw.modificarInscripcion.tablaMaterias.tablaColumna.tipo')}" />
+					</f:facet>
+					<h:outputText value="#{inscripcion.tipoPrograma}" />
+				</p:column>
+
+				<p:column styleClass="text-center">
+					<f:facet name="header">
+						<h:outputText value="#{sistema.obtenerTexto('gw.modificarInscripcion.tablaMaterias.tablaColumna.semestre')}" />
+					</f:facet>
+					<h:outputText value="#{inscripcion.semestre}" />
+				</p:column>
+
+				<p:column styleClass="text-center">
+					<f:facet name="header">
+						<h:outputText value="#{sistema.obtenerTexto('gw.modificarInscripcion.tablaMaterias.tablaColumna.bloque')}" />
+					</f:facet>
+					<h:outputText value="#{inscripcion.bloque}" />
+				</p:column>
+
+				<p:column headerText="#{sistema.obtenerTexto('gw.modificarInscripcion.tablaMaterias.tablaColumna.seleccionar')}" styleClass="text-center">
+					<p:selectBooleanCheckbox value="#{inscripcion.checked}"
+						styleClass="cursor-pointer">
+						<p:ajax event="change" update="@this" />
+					</p:selectBooleanCheckbox>
+				</p:column>
+
+			</p:dataTable>
+
+			<p:outputPanel styleClass="mt-2"
+				rendered="#{not empty modificacionInscripcionBean.materias}">
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton id="btnEliminarInscripcion" style="width:200px"
+							value="#{sistema.obtenerTexto('gw.modificarInscripcion.tablaMaterias.boton.eliminar')}"
+							onclick="PF('dlgMensajeEliminacionConfirmacion').show()"
+							styleClass="btn btn-primary pull-right" />
+						<p:commandButton id="btnActualizarInscripcion" style="width:200px"
+							value="#{sistema.obtenerTexto('gw.modificarInscripcion.tablaMaterias.boton.actualizar')}"
+							onclick="PF('dlgMensajeModificacionConfirmacion').show()"
+							styleClass="btn btn-primary pull-right" />
+					</div>
+				</div>
+			</p:outputPanel>
+		</h:form>
+
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgMensajeModificacionConfirmacion" header="#{sistema.obtenerTexto('gw.modificarInscripcion.modalModificacionConf.titulo')}"
+			dynamic="true">
+			<p:outputPanel>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.modificarInscripcion.modalModificacionConf.mensaje')}" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton value="#{sistema.obtenerTexto('gw.modificarInscripcion.modalModificacionConf.boton.aceptar')}"
+							action="#{modificacionInscripcionBean.actualizarInscripcion}"
+							ajax="true" process="@this" update="frmTabla"
+							oncomplete="PF('dlgMensajeModificacionConfirmacion').hide()"
+							styleClass="btn btn-primary pull-right" />
+						<p:commandButton value="#{sistema.obtenerTexto('gw.modificarInscripcion.modalModificacionConf.boton.cancelar')}" styleClass="btn btn-default"
+							onclick="PF('dlgMensajeModificacionConfirmacion').hide()" />
+					</div>
+				</div>
+			</p:outputPanel>
+		</p:dialog>
+
+		<p:dialog appendTo="@(body)" draggable="false" position="center"
+			resizable="false" closable="false" modal="true" width="600px"
+			widgetVar="dlgMensajeEliminacionConfirmacion" header="#{sistema.obtenerTexto('gw.modificarInscripcion.modalEliminacionConf.titulo')}"
+			dynamic="true">
+			<p:outputPanel>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-md-12">
+							<h:outputText styleClass="bloque"
+								value="#{sistema.obtenerTexto('gw.modificarInscripcion.modalEliminacionConf.mensaje')}" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 text-right">
+						<p:commandButton value="#{sistema.obtenerTexto('gw.modificarInscripcion.modalEliminacionConf.boton.aceptar')}"
+							action="#{modificacionInscripcionBean.eliminarTodaInscripcion}"
+							ajax="true" process="@this" update="frmTabla"
+							oncomplete="PF('dlgMensajeEliminacionConfirmacion').hide()"
+							styleClass="btn btn-primary pull-right" />
+						<p:commandButton value="#{sistema.obtenerTexto('gw.modificarInscripcion.modalEliminacionConf.boton.cancelar')}" styleClass="btn btn-default"
+							onclick="PF('dlgMensajeEliminacionConfirmacion').hide()" />
+					</div>
+				</div>
+			</p:outputPanel>
+		</p:dialog>
+	</ui:define>
+
+</ui:composition>

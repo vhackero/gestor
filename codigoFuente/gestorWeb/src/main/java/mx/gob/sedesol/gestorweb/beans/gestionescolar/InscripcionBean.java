@@ -1,5 +1,6 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
+import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -10,11 +11,13 @@ import org.primefaces.context.RequestContext;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.inscripcion.InscripcionPreviaMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionPreviaException;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionFacade;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
+import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasService;
 
 @ManagedBean
 @ViewScoped
@@ -26,7 +29,10 @@ public class InscripcionBean extends BaseBean {
 
 	@ManagedProperty(value = "#{inscripcionFacade}")
 	private InscripcionFacade inscripcionFacade;
-
+	
+	@ManagedProperty(value = "#{inscripcionPreviaMateriasService}")
+	private InscripcionPreviaMateriasService inscripcionPreviaMateriasService;
+	
 	private String mensajeDialog;
 
 	private InscripcionContextoDTO contextoInscripcion;
@@ -38,20 +44,44 @@ public class InscripcionBean extends BaseBean {
 	private String tipoAviso;
 
 	private String textoAviso;
+	
+	
+	private List<InscripcionPreviaMateriasDTO> obtenerInscripcionPrevia;
 
 	@PostConstruct
 	public void init() {
 		try {
 			inicializarInscripcion();
+		} catch (InscripcionPreviaException ipe) {
+			cargarMateriasInscritas(getUsuarioEnSession().getIdPersona());
+			mostrarAviso(ipe.getMessage(), ConstantesGestorWeb.TIPO_AVISO_INFO);
 		} catch (InscripcionException e) {
 			manejarErrorDeInscripcion(e);
-		} catch (InscripcionPreviaException ipe) {
-			mostrarAviso(ipe.getMessage(), ConstantesGestorWeb.TIPO_AVISO_INFO);
 		} catch (Exception e) {
 			manejarErrorGeneral(e);
 		}
 	}
+	
+	public void cargarMateriasInscritas(Long idPersona) {
+		this.obtenerInscripcionPrevia = inscripcionPreviaMateriasService.obtenerInscripcionPrevia(idPersona);
+    }
+	
+	public InscripcionPreviaMateriasService getInscripcionPreviaMateriasService() {
+		return  inscripcionPreviaMateriasService;
+	}
 
+	public void setInscripcionPreviaMateriasService( InscripcionPreviaMateriasService inscripcionPreviaMateriasService) {
+		this.inscripcionPreviaMateriasService =  inscripcionPreviaMateriasService;
+	}
+	public List<InscripcionPreviaMateriasDTO> getObtenerInscripcionPrevia() {
+		return obtenerInscripcionPrevia;
+	}
+
+	public void setIObtenerInscripcionPrevia(List<InscripcionPreviaMateriasDTO> obtenerInscripcionPrevia) {
+		this.obtenerInscripcionPrevia = obtenerInscripcionPrevia;
+	}
+
+	
 	private void mostrarAviso(String mensaje, String tipo) {
 		textoAviso = mensaje;
 		mostrarAviso = Boolean.TRUE;
