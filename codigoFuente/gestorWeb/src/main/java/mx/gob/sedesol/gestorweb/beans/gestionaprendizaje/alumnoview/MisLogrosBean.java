@@ -45,24 +45,39 @@ public class MisLogrosBean extends BaseBean {
 	private String insignia2 = "insigniaBloqueada";
 	private String insignia3 = "insigniaBloqueada";
 	private String insignia4 = "insigniaBloqueada";
-	private boolean showLogros;
+private boolean showLogros;
 	private String styleMisCursos;
+	private final java.util.Map<String, Integer> metricInvocaciones = new java.util.concurrent.ConcurrentHashMap<>();
 
 	@PostConstruct
 	public void init() {
+		long inicio = System.currentTimeMillis();
+		logger.info("[MisLogrosBean] Inicio init");
 		Long idPersona = getUsuarioEnSession().getIdPersona();
+		long tLogros = System.currentTimeMillis();
 		contenedorLogros = getGrupoParticipanteService().obtenerLogrosPorIdParticipante(idPersona);
+		logger.info("[MisLogrosBean] obtenerLogrosPorIdParticipante en " + (System.currentTimeMillis() - tLogros)
+				+ " ms");
 		badge = contenedorLogros.getBadge();
 		listaBadges = contenedorLogros.getListaBadges();
 		if (ObjectUtils.isNotNull(badge)) {
+			long tVerificaBadges = System.currentTimeMillis();
 			verificaBadgesDisponibles();
+			logger.info("[MisLogrosBean] verificaBadgesDisponibles en "
+					+ (System.currentTimeMillis() - tVerificaBadges) + " ms");
+			long tPinta = System.currentTimeMillis();
 			pintaBadges(badge.getNombre());
+			logger.info("[MisLogrosBean] pintaBadges en " + (System.currentTimeMillis() - tPinta) + " ms");
 		}
 		styleMisCursos="col-md-6";
+		long tTieneLogros = System.currentTimeMillis();
 		showLogros=tieneLogros();
+		logger.info("[MisLogrosBean] tieneLogros en " + (System.currentTimeMillis() - tTieneLogros) + " ms");
+		logger.info("[MisLogrosBean] Fin init en " + (System.currentTimeMillis() - inicio) + " ms");
 	}
 
 	private boolean tieneLogros() {
+		long inicio = System.currentTimeMillis();
 		Map<String, String> mapa ;
 		Integer idRol;
 		List<PersonaRolDTO> rolesPersona = personaRolesService
@@ -79,7 +94,9 @@ public class MisLogrosBean extends BaseBean {
 				styleMisCursos="col-md-12";
 			}
 		}
-		 
+		
+		logger.info("[MisLogrosBean] tieneLogros? " + showLogros + ", roles=" + (rolesPersona != null ? rolesPersona.size() : 0)
+				+ " en " + (System.currentTimeMillis() - inicio) + " ms");
 		return showLogros;
 	}
 	
@@ -167,6 +184,8 @@ public class MisLogrosBean extends BaseBean {
 	}
 
 	public List<BadgeDTO> getListaBadges() {
+		long inicio = System.currentTimeMillis();
+		logInvocacionVista("getListaBadges", inicio, "total=" + (listaBadges != null ? listaBadges.size() : 0));
 		return listaBadges;
 	}
 
@@ -175,6 +194,8 @@ public class MisLogrosBean extends BaseBean {
 	}
 
 	public Integer getPuntosParaSigNivel() {
+		long inicio = System.currentTimeMillis();
+		logInvocacionVista("getPuntosParaSigNivel", inicio, "puntosParaSigNivel=" + puntosParaSigNivel);
 		return puntosParaSigNivel;
 	}
 
@@ -183,6 +204,8 @@ public class MisLogrosBean extends BaseBean {
 	}
 
 	public Integer getPuntosParaSigBadge() {
+		long inicio = System.currentTimeMillis();
+		logInvocacionVista("getPuntosParaSigBadge", inicio, "puntosParaSigBadge=" + puntosParaSigBadge);
 		return puntosParaSigBadge;
 	}
 
@@ -191,6 +214,8 @@ public class MisLogrosBean extends BaseBean {
 	}
 
 	public String getSigBadgeNombre() {
+		long inicio = System.currentTimeMillis();
+		logInvocacionVista("getSigBadgeNombre", inicio, "sigBadgeNombre=" + sigBadgeNombre);
 		return sigBadgeNombre;
 	}
 
@@ -199,6 +224,8 @@ public class MisLogrosBean extends BaseBean {
 	}
 
 	public String getInsignia1() {
+		long inicio = System.currentTimeMillis();
+		logInvocacionVista("getInsignia1", inicio, "insignia1=" + insignia1);
 		return insignia1;
 	}
 
@@ -207,6 +234,8 @@ public class MisLogrosBean extends BaseBean {
 	}
 
 	public String getInsignia2() {
+		long inicio = System.currentTimeMillis();
+		logInvocacionVista("getInsignia2", inicio, "insignia2=" + insignia2);
 		return insignia2;
 	}
 
@@ -215,6 +244,8 @@ public class MisLogrosBean extends BaseBean {
 	}
 
 	public String getInsignia3() {
+		long inicio = System.currentTimeMillis();
+		logInvocacionVista("getInsignia3", inicio, "insignia3=" + insignia3);
 		return insignia3;
 	}
 
@@ -223,6 +254,8 @@ public class MisLogrosBean extends BaseBean {
 	}
 
 	public String getInsignia4() {
+		long inicio = System.currentTimeMillis();
+		logInvocacionVista("getInsignia4", inicio, "insignia4=" + insignia4);
 		return insignia4;
 	}
 
@@ -231,11 +264,22 @@ public class MisLogrosBean extends BaseBean {
 	}
 
 	public BadgeDTO getBadge() {
+		long inicio = System.currentTimeMillis();
+		logInvocacionVista("getBadge", inicio, "badge=" + (badge != null ? badge.getNombre() : "null"));
 		return badge;
 	}
 
 	public void setBadge(BadgeDTO badge) {
 		this.badge = badge;
+	}
+
+
+	private void logInvocacionVista(String metodo, long inicio, String extra) {
+		int llamadas = metricInvocaciones.merge(metodo, 1, Integer::sum);
+		if (llamadas <= 5) {
+			logger.info("[MisLogrosBean] " + metodo + " #" + llamadas + " (" + extra + ") en "
+					+ (System.currentTimeMillis() - inicio) + " ms");
+		}
 	}
 
 	public BitacoraBean getBitacoraBean() {

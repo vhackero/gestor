@@ -132,6 +132,7 @@ public class MisCursosBean extends BaseBean {
 			.synchronizedMap(new HashMap<Integer, Integer>());
 	private final Set<Integer> avanceOaConError = Collections.synchronizedSet(new HashSet<Integer>());
 	private final Set<Integer> avanceOaEnProceso = Collections.synchronizedSet(new HashSet<Integer>());
+	private final Map<String, Integer> metricInvocaciones = Collections.synchronizedMap(new HashMap<String, Integer>());
 
 
 	@SuppressWarnings("unchecked")
@@ -200,9 +201,9 @@ public class MisCursosBean extends BaseBean {
 		 * en estatus En ejecucion
 		 */
 		long tEventosEnEjecIni = System.currentTimeMillis();
-		participanteEventosCapacitacionEnEjecucion = grupoParticipanteService
-				.obtenerEventosCapacitacionPorIdParticipante(usuarioEnSesion.getIdPersona(),
-						obtenerEstadoEventoCapacitacionPorNombre(EstadoEventoCapEnum.EN_EJECUCION.getId()).getId());
+//		participanteEventosCapacitacionEnEjecucion = grupoParticipanteService
+//				.obtenerEventosCapacitacionPorIdParticipante(usuarioEnSesion.getIdPersona(),
+//						obtenerEstadoEventoCapacitacionPorNombre(EstadoEventoCapEnum.EN_EJECUCION.getId()).getId());
 		logger.info("[MisCursosBean] participanteEventosCapacitacionEnEjecucion en "
 				+ (System.currentTimeMillis() - tEventosEnEjecIni) + " ms, registros: "
 				+ (participanteEventosCapacitacionEnEjecucion != null ? participanteEventosCapacitacionEnEjecucion.size() : 0));
@@ -252,18 +253,18 @@ public class MisCursosBean extends BaseBean {
 		 * en estatus Concluidos
 		 */
 		long tEventosConcluidosIni = System.currentTimeMillis();
-		List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEstatus = grupoParticipanteService
-				.obtenerEventosCapacitacionPorIdParticipante(usuarioEnSesion.getIdPersona(),
-						obtenerEstadoEventoCapacitacionPorNombre(EstadoEventoCapEnum.CONCLUIDOS.getId()).getId());
+//		List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEstatus = grupoParticipanteService
+//				.obtenerEventosCapacitacionPorIdParticipante(usuarioEnSesion.getIdPersona(),
+//						obtenerEstadoEventoCapacitacionPorNombre(EstadoEventoCapEnum.CONCLUIDOS.getId()).getId());
 		logger.info("[MisCursosBean] participanteEventosCapacitacionEstatus (concluidos) en "
 				+ (System.currentTimeMillis() - tEventosConcluidosIni) + " ms, registros: "
-				+ (participanteEventosCapacitacionEstatus != null ? participanteEventosCapacitacionEstatus.size() : 0));
+				);
 
 		idEstatusSeleccionado = obtenerEstadoEventoCapacitacionPorNombre(EstadoEventoCapEnum.CONCLUIDOS.getId())
 				.getId();
 
 		long tEventosListIni = System.currentTimeMillis();
-		eventoCapacitacionList = obtenerEventosDelGrupoParticipante(participanteEventosCapacitacionEstatus);
+		//eventoCapacitacionList = obtenerEventosDelGrupoParticipante(participanteEventosCapacitacionEstatus);
 		logger.info("[MisCursosBean] eventoCapacitacionList en " + (System.currentTimeMillis() - tEventosListIni) + " ms, registros: "
 				+ (eventoCapacitacionList != null ? eventoCapacitacionList.size() : 0));
 		/**
@@ -283,15 +284,15 @@ public class MisCursosBean extends BaseBean {
 		List<Integer> idEventoCapacitacionEnEjecucion = obtenerIdEventoPorRelParticipantes(
 				participanteEventosCapacitacionEnEjecucion);
 
-		List<Integer> idEventoCapacitacionConcluidos = obtenerIdEventoPorRelParticipantes(
-				participanteEventosCapacitacionEstatus);
+		//List<Integer> idEventoCapacitacionConcluidos = obtenerIdEventoPorRelParticipantes(
+		//		participanteEventosCapacitacionEstatus);
 
 		/**
 		 * Obtiene las encuestas que estan ligadas a el usuario y al evento de
 		 * capacitacion
 		 */
 		long tEncuestasIni = System.currentTimeMillis();
-		this.obtenerEncuestas(idEventoCapacitacionEnEjecucion, idEventoCapacitacionConcluidos);
+		//this.obtenerEncuestas(idEventoCapacitacionEnEjecucion, idEventoCapacitacionConcluidos);
 		logger.info("[MisCursosBean] obtenerEncuestas en " + (System.currentTimeMillis() - tEncuestasIni) + " ms");
 
 			esColumnaCompetenciasVisible = Boolean.TRUE;
@@ -311,6 +312,7 @@ public class MisCursosBean extends BaseBean {
 	}
 
 	public Integer obtenerAvanceOa(Integer idEventoCapacitacion) {
+		long inicio = System.currentTimeMillis();
 		Integer avanceDeLosOas = 0;
 		AmbienteVirtualAprendizajeDTO ambienteVirtualAprendizajeDTO;
 		PersonaDTO persona;
@@ -330,7 +332,8 @@ public class MisCursosBean extends BaseBean {
 		} catch (ErrorWS e) {
 			logger.info("Ocurrio un error", e);
 		}
-
+		logger.info("[MisCursosBean] obtenerAvanceOa idEvento=" + idEventoCapacitacion + " en "
+				+ (System.currentTimeMillis() - inicio) + " ms");
 		return avanceDeLosOas;
 	}
 	
@@ -338,6 +341,7 @@ public class MisCursosBean extends BaseBean {
 		if (idEventoCapacitacion == null) {
 			return;
 		}
+		long inicio = System.currentTimeMillis();
 		if (avanceOaEnProceso.contains(idEventoCapacitacion)) {
 			return;
 		}
@@ -355,24 +359,41 @@ public class MisCursosBean extends BaseBean {
 			avanceOaConError.add(idEventoCapacitacion);
 		} finally {
 			avanceOaEnProceso.remove(idEventoCapacitacion);
+			logger.info("[MisCursosBean] cargarAvanceOaAjax idEvento=" + idEventoCapacitacion + " en "
+					+ (System.currentTimeMillis() - inicio) + " ms");
 		}
 	}
 
 	public Integer obtenerAvanceGuardado(Integer idEventoCapacitacion) {
-		return avanceOaPorEvento.get(idEventoCapacitacion);
+		long inicio = System.currentTimeMillis();
+		Integer valor = avanceOaPorEvento.get(idEventoCapacitacion);
+		logInvocacionVista("obtenerAvanceGuardado", inicio,
+				"idEvento=" + idEventoCapacitacion + ", valor=" + valor);
+		return valor;
 	}
 
 	public boolean esAvanceDisponible(Integer idEventoCapacitacion) {
-		return avanceOaPorEvento.containsKey(idEventoCapacitacion);
+		long inicio = System.currentTimeMillis();
+		boolean disponible = avanceOaPorEvento.containsKey(idEventoCapacitacion);
+		logInvocacionVista("esAvanceDisponible", inicio,
+				"idEvento=" + idEventoCapacitacion + ", disponible=" + disponible);
+		return disponible;
 	}
 
 	public boolean esAvancePendiente(Integer idEventoCapacitacion) {
-		return !avanceOaPorEvento.containsKey(idEventoCapacitacion) && !avanceOaConError.contains(idEventoCapacitacion)
+		long inicio = System.currentTimeMillis();
+		boolean pendiente = !avanceOaPorEvento.containsKey(idEventoCapacitacion) && !avanceOaConError.contains(idEventoCapacitacion)
 				&& !avanceOaEnProceso.contains(idEventoCapacitacion);
+		logInvocacionVista("esAvancePendiente", inicio,
+				"idEvento=" + idEventoCapacitacion + ", pendiente=" + pendiente);
+		return pendiente;
 	}
 
 	public boolean esAvanceConError(Integer idEventoCapacitacion) {
-		return avanceOaConError.contains(idEventoCapacitacion);
+		long inicio = System.currentTimeMillis();
+		boolean error = avanceOaConError.contains(idEventoCapacitacion);
+		logInvocacionVista("esAvanceConError", inicio, "idEvento=" + idEventoCapacitacion + ", error=" + error);
+		return error;
 	}
 
 	private void restaurarDesdeSnapshot(MisCursosSnapshot snapshot) {
@@ -832,6 +853,11 @@ public class MisCursosBean extends BaseBean {
 	}
 
 	public List<RelGrupoParticipanteDTO> getParticipanteEventosCapacitacionEnEjecucion() {
+		long inicio = System.currentTimeMillis();
+		logInvocacionVista("getParticipanteEventosCapacitacionEnEjecucion", inicio,
+				"registros=" + (participanteEventosCapacitacionEnEjecucion != null
+						? participanteEventosCapacitacionEnEjecucion.size()
+						: 0));
 		return participanteEventosCapacitacionEnEjecucion;
 	}
 
@@ -896,6 +922,15 @@ public class MisCursosBean extends BaseBean {
 
 	public void setTiraMateriasBaja(List<TiraMateriaBajaDTO> tiraMateriasBaja) {
 		this.tiraMateriasBaja = tiraMateriasBaja;
+	}
+
+	private void logInvocacionVista(String metodo, long inicio, String extra) {
+		int llamadas = metricInvocaciones.merge(metodo, 1, Integer::sum);
+		// Limita el ruido: solo primeras 5 llamadas de cada método por vista
+		if (llamadas <= 5) {
+			logger.info("[MisCursosBean] " + metodo + " #" + llamadas + " (" + extra + ") en "
+					+ (System.currentTimeMillis() - inicio) + " ms");
+		}
 	}
 
 }

@@ -6,6 +6,12 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:sec="http://www.springframework.org/security/tags">
+	<h:outputScript>
+//<![CDATA[
+		// Console marker para medir render del header en el navegador
+		window.console && console.debug && console.debug('[header] render start');
+//]]>
+	</h:outputScript>
 	<script src="https://kit.fontawesome.com/153b08498d.js" crossorigin="anonymous"></script>
 
 	<!-- Navigation -->
@@ -113,5 +119,10 @@
 
 	</nav>
 	<!-- /.navbar-default -->
+	<h:outputScript>
+//<![CDATA[
+		window.console && console.debug && console.debug('[header] render end');
+//]]>
+	</h:outputScript>
 
 </ui:composition>

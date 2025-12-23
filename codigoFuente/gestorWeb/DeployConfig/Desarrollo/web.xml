@@ -80,6 +80,16 @@
     </servlet>
 
     <filter>
+        <filter-name>requestMetricsFilter</filter-name>
+        <filter-class>mx.gob.sedesol.gestorweb.config.filters.RequestMetricsFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>requestMetricsFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
         <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>

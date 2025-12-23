@@ -6,6 +6,12 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:sec="http://www.springframework.org/security/tags">
+	<h:outputScript>
+//<![CDATA[
+		// Console marker para medir render del sidebar en el navegador
+		window.console && console.debug && console.debug('[sidebar] render start');
+//]]>
+	</h:outputScript>
 	<script src="https://kit.fontawesome.com/153b08498d.js"
 		crossorigin="anonymous"></script>
 	<div class="bloque-enlinea sidebar-contenedor">
@@ -870,5 +876,9 @@
 			</div>
 		</h:form>
 	</div>
-
+	<h:outputScript>
+//<![CDATA[
+		window.console && console.debug && console.debug('[sidebar] render end');
+//]]>
+	</h:outputScript>
 </ui:composition>

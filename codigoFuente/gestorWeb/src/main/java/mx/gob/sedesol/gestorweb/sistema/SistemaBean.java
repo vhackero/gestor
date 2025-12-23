@@ -43,19 +43,27 @@ public class SistemaBean implements Serializable {
 	
 	@PostConstruct
 	public void iniciarTextos() {
-		
+		long inicio = System.currentTimeMillis();
+		logger.info("[SistemaBean] Inicio cargar textos");
 		java.util.logging.Logger mongoLogger = java.util.logging.Logger.getLogger( "org.mongodb.driver" );
 		mongoLogger.setLevel(Level.WARNING);
 		
+		long tFindAll = System.currentTimeMillis();
 		for (TextoSistemaDTO dto : textoSistemaService.findAll()) {
 			textos.put(dto.getClave(), dto.getValor());
 		}
+		logger.info("[SistemaBean] textos cargados en " + (System.currentTimeMillis() - tFindAll) + " ms. Total: "
+				+ textos.size());
 		
+		long tTemas = System.currentTimeMillis();
 		temaPrivado = temaService.obtenerTemaActivo(TipoTemaEnum.PRIVADO.getValor());
 		temaPublico = temaService.obtenerTemaActivo(TipoTemaEnum.PUBLICO.getValor());
+		logger.info("[SistemaBean] temas cargados en " + (System.currentTimeMillis() - tTemas) + " ms");
+		logger.info("[SistemaBean] Fin iniciarTextos en " + (System.currentTimeMillis() - inicio) + " ms");
 	}
 	
 	public String obtenerTexto(String clave) {
+		// método llamado con alta frecuencia; evitar logs por ruido
         return textos.getOrDefault(clave, clave);
 	}
 	

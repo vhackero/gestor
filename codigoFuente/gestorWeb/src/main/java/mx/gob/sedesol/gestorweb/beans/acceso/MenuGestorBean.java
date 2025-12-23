@@ -87,6 +87,7 @@ public class MenuGestorBean extends BaseBean {
 	private Map<String, String> mapa;
 	private boolean showLogros;
 	private boolean showPerfil=false;
+	private final Map<String, Integer> metricInvocaciones = new HashMap<>();
 
 	public boolean isShowPerfil() {
 		return showPerfil;
@@ -96,6 +97,7 @@ public class MenuGestorBean extends BaseBean {
 
 	@PostConstruct
 	public void init() {
+		long inicio = System.currentTimeMillis();
 		showPerfil=false;
 		roles = new ArrayList<>();
 		List<PersonaRolDTO> rolesPersona = personaRolesService
@@ -142,9 +144,15 @@ public class MenuGestorBean extends BaseBean {
 			rutaFotoUsuario = rutaUndertow
 					+ parametroSistemaService.obtenerParametro(ConstantesGestor.PARAMETRO_NOMBRE_FOTO_COMUN);
 		}
+
+		long tiempo = System.currentTimeMillis() - inicio;
+		logger.info(new StringBuilder("METRICAS_MENU -> usuario=")
+				.append(getUsuarioEnSession().getUsuario()).append(", roles=").append(roles.size()).append(", funcs=")
+				.append(mapa != null ? mapa.size() : 0).append(", tiempoMs=").append(tiempo).toString());
 	}
 
 	public void actualizarMenu() {
+		long inicio = System.currentTimeMillis();
 		if (ObjectUtils.isNull(idRol)) {
 			mapa = new HashMap<>();
 		} else {
@@ -155,11 +163,18 @@ public class MenuGestorBean extends BaseBean {
 					getFacesContext().getExternalContext().getRequestContextPath() + ConstantesGestorWeb.RUTA_TABLERO);
 		} catch (IOException e) {
 			logger.info(e.getMessage(), e);
+		} finally {
+			logger.info(new StringBuilder("METRICAS_MENU -> actualizarMenu tiempoMs=")
+					.append(System.currentTimeMillis() - inicio).append(", funcionalidades=")
+					.append(mapa != null ? mapa.size() : 0).toString());
 		}
 	}
 
 	public boolean rolTienePermiso(String claveFuncionalidad) {
-		return mapa.containsKey(claveFuncionalidad);
+		long inicio = System.currentTimeMillis();
+		boolean tiene = mapa.containsKey(claveFuncionalidad);
+		logInvocacionVista("rolTienePermiso", inicio, "func=" + claveFuncionalidad + ", tiene=" + tiene);
+		return tiene;
 	}
 
 	public String navegaPantallaInicio() {
@@ -703,6 +718,14 @@ public class MenuGestorBean extends BaseBean {
 
 	public void setExpedienteAlumnoBean(ExpedienteAlumnoBean expedienteAlumnoBean) {
 		this.expedienteAlumnoBean = expedienteAlumnoBean;
+	}
+
+	private void logInvocacionVista(String metodo, long inicio, String extra) {
+		int llamadas = metricInvocaciones.merge(metodo, 1, Integer::sum);
+		if (llamadas <= 10) {
+			logger.info("[MenuGestorBean] " + metodo + " #" + llamadas + " (" + extra + ") en "
+					+ (System.currentTimeMillis() - inicio) + " ms");
+		}
 	}
 
 }
