@@ -361,4 +361,58 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     private Long obtenerLong(Object valor) {
         return valor != null ? Long.valueOf(valor.toString()) : null;
     }
+
+    @Override
+    @Transactional
+    public void actualizarBaja(Long idBaja, BajaAplicacionDTO bajaAplicacionDTO) {
+        String consulta = "UPDATE rel_persona_bajas "
+                + "SET motivo_baja_id = :motivoBajaId, proceso_id = :procesoId, "
+                + "id_plan = :idPlan, id_programa = :idPrograma, id_evento = :idEvento, id_grupo = :idGrupo, "
+                + "id_user_enrolments_lms = :idUserEnrolmentsLms, usuario_modifico = :usuarioModifico, "
+                + "contabilizar = :contabilizar, solicitud = :numeroSolicitud "
+                + "WHERE id_baja = :idBaja";
+
+        entityManager.createNativeQuery(consulta)
+                .setParameter("motivoBajaId", bajaAplicacionDTO.getMotivoBajaId())
+                .setParameter("procesoId", bajaAplicacionDTO.getProcesoId())
+                .setParameter("idPlan", bajaAplicacionDTO.getIdPlan())
+                .setParameter("idPrograma", bajaAplicacionDTO.getIdPrograma())
+                .setParameter("idEvento", bajaAplicacionDTO.getIdEvento())
+                .setParameter("idGrupo", bajaAplicacionDTO.getIdGrupo())
+                .setParameter("idUserEnrolmentsLms", bajaAplicacionDTO.getIdUserEnrolmentsLms())
+                .setParameter("usuarioModifico", bajaAplicacionDTO.getQuienAplicaBaja() != null ? bajaAplicacionDTO.getQuienAplicaBaja() : "-")
+                .setParameter("contabilizar", bajaAplicacionDTO.getContabilizar())
+                .setParameter("numeroSolicitud", bajaAplicacionDTO.getNumeroSolicitud())
+                .setParameter("idBaja", idBaja)
+                .executeUpdate();
+    }
+
+    @Override
+    @Transactional
+    public void eliminarBaja(Long idBaja) {
+        String consulta = "DELETE FROM rel_persona_bajas WHERE id_baja = :idBaja";
+        entityManager.createNativeQuery(consulta)
+                .setParameter("idBaja", idBaja)
+                .executeUpdate();
+    }
+
+    @Override
+    @Transactional
+    public void actualizarMotivoBaja(Long idMotivoBaja, Long idTipoBaja, String descripcion) {
+        String consulta = "UPDATE rel_motivo_baja SET tipo_baja_id = :idTipoBaja, descripcion = :descripcion WHERE id_motivo_baja = :idMotivoBaja";
+        entityManager.createNativeQuery(consulta)
+                .setParameter("idTipoBaja", idTipoBaja)
+                .setParameter("descripcion", descripcion)
+                .setParameter("idMotivoBaja", idMotivoBaja)
+                .executeUpdate();
+    }
+
+    @Override
+    @Transactional
+    public void reactivarPersona(Long idPersona) {
+        String consulta = "UPDATE tbl_persona SET activo = 1 WHERE id_persona = :idPersona";
+        entityManager.createNativeQuery(consulta)
+                .setParameter("idPersona", idPersona)
+                .executeUpdate();
+    }
 }

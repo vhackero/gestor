@@ -17,6 +17,7 @@ import org.primefaces.context.RequestContext;
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaSolicitudDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
 import mx.gob.sedesol.basegestor.service.gestionescolar.NuevaBajaService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
@@ -70,6 +71,9 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private boolean esTipoDefinitiva;
     private boolean esTipoTemporalOParcial;
     private boolean esSinAsignaturas;
+    private boolean modoEdicion;
+    private Long idBajaEdicion;
+    private Long idMotivoBajaEdicion;
 
     @ManagedProperty(value = "#{sistema}")
     private SistemaBean sistema;
@@ -184,7 +188,14 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     public void registrarBaja() {
         try {
             BajaSolicitudDTO solicitud = construirSolicitud();
-            nuevaBajaService.aplicarBaja(solicitud);
+            if (modoEdicion) {
+                nuevaBajaService.actualizarBaja(idBajaEdicion, solicitud, idMotivoBajaEdicion);
+                modoEdicion = false;
+                idBajaEdicion = null;
+                idMotivoBajaEdicion = null;
+            } else {
+                nuevaBajaService.aplicarBaja(solicitud);
+            }
             mensajeExitoDialogo = sistema.obtenerTexto("gw.gestionescolar.altasbajas.nuevaBaja.mensaje.bajaAplicadaCorrectamente");
             limpiarFormulario();
             mostrarDialogo("dlgNuevaBajaExito");
@@ -202,6 +213,40 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         RequestContext.getCurrentInstance().execute("PF('" + widgetVar + "').show()");
     }
 
+    public void prepararEdicionDesdeConsulta(ConsultaBajaDTO baja) {
+        limpiarFormulario();
+        modoEdicion = true;
+        idBajaEdicion = baja.getIdBaja() != null ? baja.getIdBaja().longValue() : null;
+        idMotivoBajaEdicion = baja.getIdMotivoBaja();
+
+        matriculaUsuario = baja.getMatricula();
+        nombreEstudiante = baja.getNombreEstudiante();
+        idTipoBaja = baja.getIdTipoBaja() != null ? baja.getIdTipoBaja().longValue() : null;
+        idPlan = baja.getIdPlan();
+        semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
+        idSemestre = baja.getIdSemestre();
+        bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
+        idBloque = baja.getIdBloque();
+
+        Long idEjeCapacitacion = idBloque != null ? idBloque : idSemestre;
+        programas = idEjeCapacitacion != null
+                ? convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idEjeCapacitacion))
+                : Collections.emptyList();
+        idPrograma = baja.getIdPrograma();
+
+        idPeriodo = baja.getPeriodo();
+        actualizarEventos();
+        idEvento = baja.getIdEvento();
+
+        motivo = baja.getMotivo();
+        numeroSolicitud = baja.getNumeroSolicitud();
+        quienAplica = baja.getQuienAplica();
+
+        matriculaValida = true;
+        actualizarVisibilidadCampos();
+        actualizarHabilitacionSecuencial();
+    }
+
     public void limpiarFormulario() {
         matriculaUsuario = null;
         idTipoBaja = null;
@@ -216,6 +261,9 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         esTipoDefinitiva = false;
         esTipoTemporalOParcial = false;
         esSinAsignaturas = false;
+        modoEdicion = false;
+        idBajaEdicion = null;
+        idMotivoBajaEdicion = null;
         mostrarSemestre = true;
         mostrarBloque = true;
         mostrarPrograma = true;

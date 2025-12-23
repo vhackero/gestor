@@ -15,7 +15,10 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConsultaBajaService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.NuevaBajaService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
+import mx.gob.sedesol.gestorweb.beans.gestionescolar.AltasBajasUsuariosBean;
+import mx.gob.sedesol.gestorweb.beans.gestionescolar.NuevaBajaUsuarioBean;
 
 @ManagedBean
 @ViewScoped
@@ -27,6 +30,15 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
 
     @ManagedProperty(value = "#{consultaBajaService}")
     private transient ConsultaBajaService consultaBajaService;
+
+    @ManagedProperty(value = "#{nuevaBajaService}")
+    private transient NuevaBajaService nuevaBajaService;
+
+    @ManagedProperty(value = "#{nuevaBajaUsuarioBean}")
+    private NuevaBajaUsuarioBean nuevaBajaUsuarioBean;
+
+    @ManagedProperty(value = "#{altasBajasUsuariosBean}")
+    private AltasBajasUsuariosBean altasBajasUsuariosBean;
 
     private String matricula;
     private String periodoSeleccionado;
@@ -99,6 +111,32 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
         return valido;
     }
 
+    public void editar(ConsultaBajaDTO bajaSeleccionada) {
+        try {
+            nuevaBajaUsuarioBean.prepararEdicionDesdeConsulta(bajaSeleccionada);
+            altasBajasUsuariosBean.setPaginaActual("/views/private/gestionEscolar/altasBajasUsuarios/nuevaBaja.xhtml");
+            altasBajasUsuariosBean.setMostrarOpcionesBajas(true);
+            RequestContext.getCurrentInstance().update(":frmAltasBajas:panelBotones");
+            RequestContext.getCurrentInstance().update(":frmAltasBajas:panelContenido");
+        } catch (Exception ex) {
+            LOGGER.error("Error al preparar edición de baja", ex);
+            agregarMsgError("No fue posible preparar la edición de la baja seleccionada.", null);
+        }
+    }
+
+    public void eliminar(ConsultaBajaDTO bajaSeleccionada) {
+        try {
+            nuevaBajaService.eliminarBaja(bajaSeleccionada);
+            agregarMsgInfo("Baja eliminada correctamente", null);
+            buscar();
+        } catch (IllegalArgumentException ex) {
+            agregarMsgError(ex.getMessage(), null);
+        } catch (Exception ex) {
+            LOGGER.error("Error al eliminar la baja", ex);
+            agregarMsgError("Ocurrió un error al eliminar la baja seleccionada.", null);
+        }
+    }
+
     public String getMatricula() {
         return matricula;
     }
@@ -145,5 +183,29 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
 
     public void setConsultaBajaService(ConsultaBajaService consultaBajaService) {
         this.consultaBajaService = consultaBajaService;
+    }
+
+    public NuevaBajaService getNuevaBajaService() {
+        return nuevaBajaService;
+    }
+
+    public void setNuevaBajaService(NuevaBajaService nuevaBajaService) {
+        this.nuevaBajaService = nuevaBajaService;
+    }
+
+    public NuevaBajaUsuarioBean getNuevaBajaUsuarioBean() {
+        return nuevaBajaUsuarioBean;
+    }
+
+    public void setNuevaBajaUsuarioBean(NuevaBajaUsuarioBean nuevaBajaUsuarioBean) {
+        this.nuevaBajaUsuarioBean = nuevaBajaUsuarioBean;
+    }
+
+    public AltasBajasUsuariosBean getAltasBajasUsuariosBean() {
+        return altasBajasUsuariosBean;
+    }
+
+    public void setAltasBajasUsuariosBean(AltasBajasUsuariosBean altasBajasUsuariosBean) {
+        this.altasBajasUsuariosBean = altasBajasUsuariosBean;
     }
 }
