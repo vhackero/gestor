@@ -33,6 +33,7 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
     private Integer estatusSeleccionado;
     private List<CatalogoComunDTO> periodos;
     private List<ConsultaBajaDTO> resultados;
+    private ConsultaBajaDTO bajaSeleccionada;
 
     @PostConstruct
     public void init() {
@@ -67,6 +68,7 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
         periodoSeleccionado = null;
         estatusSeleccionado = null;
         resultados = new ArrayList<>();
+        bajaSeleccionada = null;
     }
 
     public String obtenerNombreEstatus(Integer estatus) {
@@ -97,6 +99,27 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
         }
 
         return valido;
+    }
+
+    public void prepararEliminacion(ConsultaBajaDTO baja) {
+        bajaSeleccionada = baja;
+    }
+
+    public void eliminar() {
+        try {
+            if (bajaSeleccionada == null || bajaSeleccionada.getIdBaja() == null) {
+                agregarMsgError("Seleccione un registro válido para eliminar.", null);
+                return;
+            }
+
+            consultaBajaService.eliminarBaja(bajaSeleccionada);
+            agregarMsgInfo("La baja se elimin\u00f3 correctamente.", null);
+            buscar();
+            bajaSeleccionada = null;
+        } catch (Exception e) {
+            LOGGER.error("Error al eliminar la baja", e);
+            agregarMsgError("Ocurri\u00f3 un error al eliminar la baja.", null);
+        }
     }
 
     public String getMatricula() {
@@ -137,6 +160,14 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
 
     public void setResultados(List<ConsultaBajaDTO> resultados) {
         this.resultados = resultados;
+    }
+
+    public ConsultaBajaDTO getBajaSeleccionada() {
+        return bajaSeleccionada;
+    }
+
+    public void setBajaSeleccionada(ConsultaBajaDTO bajaSeleccionada) {
+        this.bajaSeleccionada = bajaSeleccionada;
     }
 
     public ConsultaBajaService getConsultaBajaService() {

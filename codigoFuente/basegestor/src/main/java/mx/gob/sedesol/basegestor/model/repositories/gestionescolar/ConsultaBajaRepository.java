@@ -23,6 +23,7 @@ public class ConsultaBajaRepository implements IConsultaBajaRepository {
     public List<ConsultaBajaDTO> buscarBajas(String matricula, String periodo, Integer estatus) {
 
         String consulta = "SELECT rpb.id_baja AS id_baja, "
+                + " tp.id_persona AS id_persona, "
                 + " tp.sso_idUsuario AS matricula, "
                 + " tpl.nombre AS plan, "
                 + " tfdp.nombre_tentativo AS programa, "
@@ -56,14 +57,15 @@ public class ConsultaBajaRepository implements IConsultaBajaRepository {
             for (Object[] registro : resultados) {
                 ConsultaBajaDTO dto = new ConsultaBajaDTO();
                 dto.setIdBaja(registro[0] != null ? Integer.valueOf(registro[0].toString()) : null);
-                dto.setMatricula(registro[1] != null ? registro[1].toString() : "");
-                dto.setPlan(registro[2] != null ? registro[2].toString() : "");
-                dto.setPrograma(registro[3] != null ? registro[3].toString() : "");
-                dto.setEvento(registro[4] != null ? registro[4].toString() : "");
-                dto.setTipoBaja(registro[5] != null ? registro[5].toString() : "");
-                dto.setEstructura(registro[6] != null ? registro[6].toString() : "");
-                dto.setPeriodo(registro[7] != null ? registro[7].toString() : "");
-                dto.setEstatus(registro[8] != null ? Integer.valueOf(registro[8].toString()) : null);
+                dto.setIdPersona(registro[1] != null ? Long.valueOf(registro[1].toString()) : null);
+                dto.setMatricula(registro[2] != null ? registro[2].toString() : "");
+                dto.setPlan(registro[3] != null ? registro[3].toString() : "");
+                dto.setPrograma(registro[4] != null ? registro[4].toString() : "");
+                dto.setEvento(registro[5] != null ? registro[5].toString() : "");
+                dto.setTipoBaja(registro[6] != null ? registro[6].toString() : "");
+                dto.setEstructura(registro[7] != null ? registro[7].toString() : "");
+                dto.setPeriodo(registro[8] != null ? registro[8].toString() : "");
+                dto.setEstatus(registro[9] != null ? Integer.valueOf(registro[9].toString()) : null);
                 bajas.add(dto);
             }
         }
@@ -89,5 +91,19 @@ public class ConsultaBajaRepository implements IConsultaBajaRepository {
         }
 
         return periodos;
+    }
+
+    @Override
+    @javax.transaction.Transactional
+    public void eliminarBaja(Integer idBaja, Long idPersona, boolean esBajaDefinitiva) {
+        entityManager.createNativeQuery("DELETE FROM rel_persona_bajas WHERE id_baja = :idBaja")
+                .setParameter("idBaja", idBaja)
+                .executeUpdate();
+
+        if (esBajaDefinitiva && idPersona != null) {
+            entityManager.createNativeQuery("UPDATE tbl_persona SET activo = 1 WHERE id_persona = :idPersona")
+                    .setParameter("idPersona", idPersona)
+                    .executeUpdate();
+        }
     }
 }

@@ -39,4 +39,20 @@ public class ConsultaBajaServiceImpl implements ConsultaBajaService {
             return new ArrayList<>();
         }
     }
+
+    @Override
+    public void eliminarBaja(ConsultaBajaDTO baja) {
+        try {
+            if (baja == null || baja.getIdBaja() == null) {
+                throw new IllegalArgumentException("No se proporcionó la baja a eliminar");
+            }
+
+            boolean esBajaDefinitiva = baja != null && baja.getTipoBaja() != null
+                    && baja.getTipoBaja().toLowerCase().contains("definitiva");
+            consultaBajaRepository.eliminarBaja(baja.getIdBaja(), baja.getIdPersona(), esBajaDefinitiva);
+        } catch (Exception ex) {
+            LOGGER.error("Error al eliminar la baja de usuario", ex);
+            throw ex;
+        }
+    }
 }

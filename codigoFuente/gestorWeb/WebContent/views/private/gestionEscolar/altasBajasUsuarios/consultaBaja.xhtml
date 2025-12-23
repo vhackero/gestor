@@ -184,12 +184,53 @@
                                     <p:commandButton type="button"
                                                      icon="fa fa-trash"
                                                      styleClass="btn-icon btn btn-default"
-                                                     title="Eliminar" />
+                                                     title="Eliminar"
+                                                     process="@this"
+                                                     update=":frmAltasBajas:frmResultadosBaja:dlgEliminarBaja"
+                                                     actionListener="#{consultaBajaUsuariosBean.prepararEliminacion(baja)}"
+                                                     oncomplete="PF('dlgEliminarBaja').show();" />
                                 </p:column>
                             </p:dataTable>
                         </div>
                     </div>
                 </p:panel>
+
+                <p:dialog appendTo="@(body)"
+                      draggable="false"
+                      position="center"
+                      resizable="false"
+                      closable="true"
+                      modal="true"
+                      width="450px"
+                      widgetVar="dlgEliminarBaja"
+                      id="dlgEliminarBaja"
+                      header="Confirmar eliminación">
+                <h:panelGroup rendered="#{not empty consultaBajaUsuariosBean.bajaSeleccionada}">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h:outputText styleClass="bloque"
+                                              value="¿Desea eliminar la baja del usuario #{consultaBajaUsuariosBean.bajaSeleccionada.matricula}?" />
+                            </div>
+                        </div>
+                    </div>
+                </h:panelGroup>
+
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <p:commandButton value="Cancelar"
+                                         type="button"
+                                         styleClass="btn btn-default"
+                                         onclick="PF('dlgEliminarBaja').hide();" />
+                        <p:commandButton value="Aceptar"
+                                         styleClass="btn btn-primary"
+                                         process="@this"
+                                         actionListener="#{consultaBajaUsuariosBean.eliminar}"
+                                         update=":frmAltasBajas:frmConsultaBaja :frmAltasBajas:frmResultadosBaja"
+                                         oncomplete="PF('dlgEliminarBaja').hide();" />
+                    </div>
+                </div>
+                </p:dialog>
             </h:form>
 
             <p:dialog appendTo="@(body)"

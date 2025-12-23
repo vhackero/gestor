@@ -10,4 +10,6 @@ public interface IConsultaBajaRepository {
     List<ConsultaBajaDTO> buscarBajas(String matricula, String periodo, Integer estatus);
 
     List<CatalogoComunDTO> obtenerPeriodos();
+
+    void eliminarBaja(Integer idBaja, Long idPersona, boolean esBajaDefinitiva);
 }

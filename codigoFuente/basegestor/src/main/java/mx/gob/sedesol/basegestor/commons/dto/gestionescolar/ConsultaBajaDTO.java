@@ -3,6 +3,7 @@ package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 public class ConsultaBajaDTO {
 
     private Integer idBaja;
+    private Long idPersona;
     private String matricula;
     private String plan;
     private String programa;
@@ -26,6 +27,14 @@ public class ConsultaBajaDTO {
 
     public void setIdBaja(Integer idBaja) {
         this.idBaja = idBaja;
+    }
+
+    public Long getIdPersona() {
+        return idPersona;
+    }
+
+    public void setIdPersona(Long idPersona) {
+        this.idPersona = idPersona;
     }
 
     public String getPlan() {

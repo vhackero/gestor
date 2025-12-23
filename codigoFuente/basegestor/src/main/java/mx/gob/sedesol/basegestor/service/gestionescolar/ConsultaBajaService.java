@@ -10,4 +10,6 @@ public interface ConsultaBajaService {
     List<ConsultaBajaDTO> buscarBajas(String matricula, String periodo, Integer estatus);
 
     List<CatalogoComunDTO> obtenerPeriodos();
+
+    void eliminarBaja(ConsultaBajaDTO baja);
 }
