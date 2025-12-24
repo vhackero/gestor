@@ -318,7 +318,7 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
                 + " tpi.nombre_periodo, "
                 + " te.id_evento "
                 + "FROM tbl_persona tp "
-                + "JOIN tbl_persona_aspirante tpa ON tpa.id_persona = tp.id_persona "
+                + "LEFT JOIN tbl_persona_aspirante tpa ON tpa.id_persona = tp.id_persona "
                 + "LEFT JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona "
                 + "LEFT JOIN tbl_grupos tg ON tg.id = rgp.id_grupo "
                 + "LEFT JOIN tbl_eventos te ON te.id_evento = tg.id_evento "

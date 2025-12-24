@@ -41,7 +41,13 @@ public class Usuario {
     private String country;
     private String profileimageurlsmall;
     private String profileimageurl;
-    private Integer suspended;
+    private boolean  suspended;
+    private String auth;
+    private boolean confirmed;
+    private String lang;
+    private String theme;
+    private String timezone;
+    private Integer mailformat;
     private List<CustomField> customFields;
     private List<Grupo> groups;
     private List<Rol> roles;
@@ -426,13 +432,6 @@ public class Usuario {
         this.profileimageurl = profileImageUrl;
     }
 
-    public Integer getSuspended() {
-        return suspended;
-    }
-
-    public void setSuspended(Integer suspended) {
-        this.suspended = suspended;
-    }
 
     /**
      * @return the preferences
@@ -510,6 +509,62 @@ public class Usuario {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getAuth() {
+		return auth;
+	}
+
+	public void setAuth(String auth) {
+		this.auth = auth;
+	}
+
+	public boolean getConfirmed() {
+		return confirmed;
+	}
+
+	public void setConfirmed(boolean confirmed) {
+		this.confirmed = confirmed;
+	}
+
+	public String getLang() {
+		return lang;
+	}
+
+	public void setLang(String lang) {
+		this.lang = lang;
+	}
+
+	public String getTheme() {
+		return theme;
+	}
+
+	public void setTheme(String theme) {
+		this.theme = theme;
+	}
+
+	public String getTimezone() {
+		return timezone;
+	}
+
+	public void setTimezone(String timezone) {
+		this.timezone = timezone;
+	}
+
+	public Integer getMailformat() {
+		return mailformat;
+	}
+
+	public void setMailformat(Integer mailformat) {
+		this.mailformat = mailformat;
+	}
+
+	public boolean isSuspended() {
+		return suspended;
+	}
+
+	public void setSuspended(boolean suspended) {
+		this.suspended = suspended;
 	}
 
 }

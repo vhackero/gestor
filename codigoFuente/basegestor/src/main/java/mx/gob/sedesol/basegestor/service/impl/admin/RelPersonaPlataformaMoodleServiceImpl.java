@@ -95,53 +95,73 @@ public class RelPersonaPlataformaMoodleServiceImpl implements RelPersonaPlatafor
 	public Integer obtenerIdMoodle(PersonaDTO persona, ParametroWSMoodleDTO parametroWSMoodleDTO, Long usuarioModifico) {
 		
 		System.out.println("::::obtenerIdMoodle:::: persona "+ persona.getIdPersona() +" - " + parametroWSMoodleDTO.getIdParametroWSMoodle()); 
-		List<RelPersonaPlataformaMoodle> lista = relPersonaPlataformaMoodleRepo
-				.obtenerPorPersonaPlataforma(persona.getIdPersona(), parametroWSMoodleDTO.getIdParametroWSMoodle());
+		List<RelPersonaPlataformaMoodle> lista =
+		        relPersonaPlataformaMoodleRepo.obtenerPorPersonaPlataforma(
+		                persona.getIdPersona(),
+		                parametroWSMoodleDTO.getIdParametroWSMoodle()
+		        );
+
+		UsuarioWSClient wsClient = new UsuarioWSClient(parametroWSMoodleDTO);
+		String correoElectronico = personaCorreoService
+		        .obtenerCorreoInstitucional(persona.getIdPersona())
+		        .getCorreoElectronico();
+
+		Integer idMoodle = null;
+
+		try {
+		    idMoodle = wsClient.existeNombreUsuario(persona.getUsuario());
+
+		    if (ObjectUtils.isNullOrCero(idMoodle)) {
+		        idMoodle = wsClient.existeCorreo(correoElectronico);
+
+		        if (ObjectUtils.isNullOrCero(idMoodle)) {
+		            Usuario usuario = new Usuario();
+		            usuario.setUsername(persona.getUsuario());
+		            usuario.setPassword(persona.getContrasenia());
+		            usuario.setFirstname(persona.getNombre());
+		            usuario.setLastname(persona.getApellidoPaterno());
+		            usuario.setIdnumber(persona.getIdPersona().toString());
+		            usuario.setEmail(correoElectronico);
+
+		            idMoodle = wsClient.crearUsuario(usuario);
+		        } else {
+		            // posible inconsistencia: correo existe pero usuario no
+		            idMoodle = null;
+		        }
+		    }
+		} catch (Exception e) {
+		    logger.error(e.getMessage(), e);
+		}
+
+		if (ObjectUtils.isNullOrCero(idMoodle)) {
+		    return null;
+		}
 
 		if (lista.isEmpty()) {
-			UsuarioWSClient wsClient = new UsuarioWSClient(parametroWSMoodleDTO);
-			String correoElectronico = personaCorreoService.obtenerCorreoInstitucional(persona.getIdPersona())
-					.getCorreoElectronico();
-			Integer idMoodle = null;
+		    // 🔹 NO existe relación → crear nueva
+		    RelPersonaPlataformaMoodle entidad = new RelPersonaPlataformaMoodle();
+		    entidad.setIdPersona(persona.getIdPersona());
+		    entidad.setIdPlataformaMoodle(parametroWSMoodleDTO.getIdParametroWSMoodle());
+		    entidad.setIdPersonaMoodle(idMoodle);
+		    entidad.setUsuarioModifico(usuarioModifico);
+		    entidad.setFechaRegistro(new Date());
 
-			try {
-				idMoodle = wsClient.existeNombreUsuario(persona.getUsuario());
-
-				if (ObjectUtils.isNullOrCero(idMoodle)) {
-					idMoodle = wsClient.existeCorreo(correoElectronico);
-					if (ObjectUtils.isNullOrCero(idMoodle)) {
-						Usuario usuario = new Usuario();
-						usuario.setUsername(persona.getUsuario());
-						usuario.setPassword(persona.getContrasenia());
-						usuario.setFirstname(persona.getNombre());
-						usuario.setLastname(persona.getApellidoPaterno());
-						usuario.setIdnumber(persona.getIdPersona().toString());
-						usuario.setEmail(correoElectronico);
-						idMoodle = wsClient.crearUsuario(usuario);
-					} else {
-						//almacenar inconsistencia
-						idMoodle = null;
-					}
-				}
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-			}
-			if (ObjectUtils.isNullOrCero(idMoodle)) {
-				idMoodle = null;
-			}
-			if (!ObjectUtils.isNullOrCero(idMoodle)) {
-				RelPersonaPlataformaMoodle entidad = new RelPersonaPlataformaMoodle();
-				entidad.setIdPersona(persona.getIdPersona());
-				entidad.setIdPlataformaMoodle(parametroWSMoodleDTO.getIdParametroWSMoodle());
-				entidad.setIdPersonaMoodle(idMoodle);
-				entidad.setUsuarioModifico(usuarioModifico);
-				entidad.setFechaRegistro(new Date());
-				relPersonaPlataformaMoodleRepo.save(entidad);
-			}
-			return idMoodle;
+		    relPersonaPlataformaMoodleRepo.save(entidad);
 		} else {
-			return lista.get(ConstantesGestor.PRIMER_ELEMENTO).getIdPersonaMoodle();
+		    // 🔹 Existe relación pero puede estar incompleta
+		    RelPersonaPlataformaMoodle entidad = lista.get(ConstantesGestor.PRIMER_ELEMENTO);
+
+		    if (ObjectUtils.isNullOrCero(entidad.getIdPersonaMoodle())) {
+		        entidad.setIdPersonaMoodle(idMoodle);
+		        entidad.setUsuarioModifico(usuarioModifico);
+		        entidad.setFechaRegistro(new Date());
+
+		        relPersonaPlataformaMoodleRepo.save(entidad);
+		    }
 		}
+
+		return idMoodle;
+
 	}
 	
 	/**
