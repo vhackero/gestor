@@ -145,8 +145,8 @@ public class UsuarioWSClient implements Serializable {
         //for (EnrolMents usuario : enrolments) {
                 paramMap.put("users[" + x + "][id]", usuario.getId());
 
-                if(usuario.getSuspended()!=null){
-                        paramMap.put("users[" + x + "][suspended]", usuario.getSuspended());
+                if(usuario.isSuspended()){
+                        paramMap.put("users[" + x + "][suspended]", usuario.isSuspended() ? 1 : 0);
                 }
             WSClientBase ws = new WSClientBase(parametroWSMoodleDTO);
             Integer salida  = ws.ejecutarServicioPOST("core_user_update_users", paramMap, null, Integer.class);
@@ -208,20 +208,47 @@ public class UsuarioWSClient implements Serializable {
     
     public int existeNombreUsuario(String username) throws ErrorWS{
     	
-            List<Usuario> usuarios  = this.existeUsuario("username", username).getUsers();
-            if(usuarios!=null && usuarios.size()>0){
-            	return usuarios.get(0).getId();
-            }
-            return 0;
+    	 try {
+    	        List<Usuario> usuarios = this.existeUsuario("username", username).getUsers();
+
+    	        if (usuarios != null && !usuarios.isEmpty()) {
+    	            return usuarios.get(0).getId();
+    	        }
+
+    	    } catch (ErrorWS e) {
+    	        /*
+    	         * Moodle puede responder con warnings o sin users,
+    	         * lo cual NO debe romper la ejecución.
+    	         */
+    	        if (e.getErrorcode() == null || "invalidparameter".equals(e.getErrorcode())) {
+    	            return 0; // Usuario no existe
+    	        }
+    	        throw e; // Error real
+    	    }
+
+    	    return 0;
         
     }
     
     public int existeCorreo(String email) throws ErrorWS{
     	
-        List<Usuario> usuarios  = this.existeUsuario("email", email).getUsers();
-        if(usuarios!=null && usuarios.size()>0){
-        	return usuarios.get(0).getId();
+    	try {
+            List<Usuario> usuarios = this.existeUsuario("email", email).getUsers();
+
+            if (usuarios != null && !usuarios.isEmpty()) {
+                return usuarios.get(0).getId();
+            }
+
+        } catch (ErrorWS e) {
+            /*
+             * Moodle puede responder con warnings aunque no sea error real.
+             */
+            if (e.getErrorcode() == null || "invalidparameter".equals(e.getErrorcode())) {
+                return 0; // Correo no existe
+            }
+            throw e; // Error real
         }
+
         return 0;
     
 }
