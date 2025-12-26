@@ -126,23 +126,29 @@ public class WSClientBase {
         try {
         	object = template.postForObject(uri.toASCIIString(), request, tipo);
         	
-        }catch(Exception ex){
-        	//ex.printStackTrace();
-        	ex.getMessage();
-        	String json = null;
+        }catch (Exception ex) {
+
+            String json;
+            //ObjectMapper om = new ObjectMapper();
+
             try {
-            	uri = uriBuilder.buildWSUri(getDto().getServer(), param, urlVariables);
-            	json = template.getForObject(uri, String.class);
-                ErrorWS ee = om.readValue(json, ErrorWS.class);
-                ee.setJson(json);
-                throw ee;
-            } catch (IOException ex1) {
-            	logger.error(ex1);
-                throw new ErrorWS("No fue posible leer la estructura regresada: "+json,ex1);
-                //Logger.getLogger(WSClientBase.class.getName()).log(Level.SEVERE, null, ex1);
+                uri = uriBuilder.buildWSUri(getDto().getServer(), param, urlVariables);
+                json = template.getForObject(uri, String.class);
+
+                // 🔍 Detectar si ES un error de Moodle
+                if (json.contains("\"exception\"") || json.contains("\"errorcode\"")) {
+                    ErrorWS ee = om.readValue(json, ErrorWS.class);
+                    ee.setJson(json);
+                    throw ee;
+                }
+
+                // ❗ NO es error, es respuesta válida
+                return om.readValue(json, tipo);
+
+            } catch (IOException e) {
+                logger.error(e);
+                throw new ErrorWS("No fue posible interpretar la respuesta: " + e.getMessage(), e);
             }
-        	
-        	
         }
         return object;
     }
