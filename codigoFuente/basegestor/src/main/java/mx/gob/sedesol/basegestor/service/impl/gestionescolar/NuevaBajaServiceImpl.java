@@ -88,9 +88,12 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         BajaMatriculacionDTO matriculacion = solicitud.getIdEvento() != null
                 ? nuevaBajaRepository.consultarMatriculacionPorEvento(solicitud.getMatriculaUsuario(), solicitud.getIdEvento())
                 : null;
+        boolean usuarioMatriculado = matriculacion != null
+                && matriculacion.getIdEvento() != null
+                && matriculacion.getIdGrupo() != null;
 
-        Long idPlan = matriculacion != null && matriculacion.getIdPlan() != null ? matriculacion.getIdPlan() : solicitud.getIdPlan();
-        Long idPrograma = matriculacion != null && matriculacion.getIdPrograma() != null ? matriculacion.getIdPrograma() : solicitud.getIdPrograma();
+        Long idPlan = usuarioMatriculado && matriculacion.getIdPlan() != null ? matriculacion.getIdPlan() : solicitud.getIdPlan();
+        Long idPrograma = usuarioMatriculado && matriculacion.getIdPrograma() != null ? matriculacion.getIdPrograma() : solicitud.getIdPrograma();
 
 
         boolean esDefinitiva = contieneTexto(solicitud.getNombreTipoBaja(), "definitiva");
@@ -109,18 +112,22 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         }
         // Para bajas definitivas: NO validar plan/programa
 
-        Long idEvento = obtenerEventoSeleccionado(esTemporalOParcial, solicitud, matriculacion);
-        Long idGrupo = matriculacion != null && matriculacion.getIdGrupo() != null ? matriculacion.getIdGrupo() : 0L;
+        Long idEvento = usuarioMatriculado ? matriculacion.getIdEvento() : 0L;
+        Long idGrupo = usuarioMatriculado ? matriculacion.getIdGrupo() : 0L;
 
         Integer idUserEnrolmentsLms = 0;
 
         if (esTemporalOParcial) {
-            validarEventoParaBajaParcial(matriculacion, idEvento);
-            Integer idUsuarioMoodle = nuevaBajaRepository.obtenerIdUsuarioMoodle(idPersona, idEvento);
+            Long idEventoSeleccionado = obtenerEventoSeleccionado(esTemporalOParcial, solicitud, matriculacion);
+            validarEventoParaBajaParcial(matriculacion, idEventoSeleccionado);
+            Integer idUsuarioMoodle = nuevaBajaRepository.obtenerIdUsuarioMoodle(idPersona, idEventoSeleccionado);
             if (idUsuarioMoodle == null) {
                 throw new IllegalArgumentException("No se encontró el usuario en Moodle para el evento seleccionado");
             }
-            idUserEnrolmentsLms = suspenderUsuarioEnCurso(idEvento, idUsuarioMoodle);
+            idUserEnrolmentsLms = suspenderUsuarioEnCurso(idEventoSeleccionado, idUsuarioMoodle);
+            idEvento = matriculacion.getIdEvento();
+            idGrupo = matriculacion.getIdGrupo();
+            usuarioMatriculado = true;
         } else if (esDefinitiva) {
             // BAJA DEFINITIVA: intentar suspender en Moodle
             try {
@@ -141,7 +148,8 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
             idGrupo = 0L;
         }
 
-        int contabilizar = 1;
+        boolean debeContabilizar = usuarioMatriculado || esDefinitiva || esSinAsignaturas;
+        int contabilizar = debeContabilizar ? 1 : 0;
 
         BajaAplicacionDTO bajaAplicacionDTO = new BajaAplicacionDTO(
                 idPersona,
