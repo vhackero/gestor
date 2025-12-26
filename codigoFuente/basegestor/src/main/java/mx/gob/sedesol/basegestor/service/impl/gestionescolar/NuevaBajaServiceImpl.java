@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 
 import java.util.List;
+import java.util.Objects;
 
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalleDTO;
@@ -86,7 +87,49 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         if (idBaja == null) {
             throw new IllegalArgumentException("El identificador de la baja es obligatorio para actualizarla");
         }
-        procesarBaja(solicitud, idBaja, idMotivoBaja);
+        ConsultaBajaDTO bajaActual = nuevaBajaRepository.consultarBajaPorId(idBaja);
+        if (bajaActual == null) {
+            throw new IllegalArgumentException("No se encontró la baja a actualizar");
+        }
+
+        Long idTipoActual = bajaActual.getIdTipoBaja() != null ? bajaActual.getIdTipoBaja().longValue() : null;
+        Long idTipoSolicitud = solicitud.getIdTipoBaja() != null ? solicitud.getIdTipoBaja() : idTipoActual;
+        solicitud.setIdTipoBaja(idTipoSolicitud);
+
+        boolean cambioDeTipo = !Objects.equals(idTipoSolicitud, idTipoActual);
+
+        if (cambioDeTipo) {
+            procesarBaja(solicitud, idBaja, idMotivoBaja);
+            return;
+        }
+
+        Long idPersona = bajaActual.getIdPersona();
+        if (idPersona == null) {
+            throw new IllegalArgumentException("No se encontró la persona asociada a la baja");
+        }
+
+        Long motivoId = idMotivoBaja != null ? idMotivoBaja : bajaActual.getIdMotivoBaja();
+        if (motivoId == null) {
+            motivoId = nuevaBajaRepository.insertarMotivoBaja(solicitud.getIdTipoBaja(), solicitud.getMotivo());
+        } else {
+            nuevaBajaRepository.actualizarMotivoBaja(motivoId, solicitud.getIdTipoBaja(), solicitud.getMotivo());
+        }
+
+        Long procesoId = nuevaBajaRepository.obtenerIdProcesoBaja();
+        BajaAplicacionDTO bajaAplicacionDTO = new BajaAplicacionDTO(
+                idPersona,
+                motivoId,
+                procesoId,
+                bajaActual.getIdPlan(),
+                bajaActual.getIdPrograma(),
+                bajaActual.getIdEvento(),
+                bajaActual.getIdGrupo(),
+                bajaActual.getIdUserEnrolmentsLms(),
+                solicitud.getQuienAplica(),
+                bajaActual.getEstatus(),
+                solicitud.getNumeroSolicitud());
+
+        nuevaBajaRepository.actualizarBaja(idBaja, bajaAplicacionDTO);
     }
 
     @Override
