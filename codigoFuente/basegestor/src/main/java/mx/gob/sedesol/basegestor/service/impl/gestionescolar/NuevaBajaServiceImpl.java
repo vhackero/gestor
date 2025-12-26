@@ -7,11 +7,13 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalle
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaAplicacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaSolicitudDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DatosMoodlePersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.INuevaBajaRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.NuevaBajaService;
 import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
+import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Usuario;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.CursoWS;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.UsuarioWSClient;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.util.ErrorWS;
@@ -75,6 +77,50 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
     @Override
     @Transactional
     public void aplicarBaja(BajaSolicitudDTO solicitud) {
+        procesarBaja(solicitud, null, null);
+    }
+
+    @Override
+    @Transactional
+    public void actualizarBaja(Long idBaja, BajaSolicitudDTO solicitud, Long idMotivoBaja) {
+        if (idBaja == null) {
+            throw new IllegalArgumentException("El identificador de la baja es obligatorio para actualizarla");
+        }
+        procesarBaja(solicitud, idBaja, idMotivoBaja);
+    }
+
+    @Override
+    @Transactional
+    public void eliminarBaja(ConsultaBajaDTO baja) {
+        Long idPersona = baja.getIdPersona() != null ? baja.getIdPersona()
+                : nuevaBajaRepository.obtenerIdPersonaPorMatricula(baja.getMatricula());
+        if (idPersona == null) {
+            throw new IllegalArgumentException("No se encontró la matrícula proporcionada");
+        }
+
+        boolean esDefinitiva = contieneTexto(baja.getTipoBaja(), "definitiva");
+        boolean esTemporalOParcial = contieneTexto(baja.getTipoBaja(), "temporal")
+                || contieneTexto(baja.getTipoBaja(), "parcial");
+
+        nuevaBajaRepository.reactivarPersona(idPersona);
+
+        if (esTemporalOParcial && baja.getIdEvento() != null) {
+            reactivarUsuarioEnCurso(baja.getIdEvento(), idPersona);
+        } else if (esDefinitiva) {
+            try {
+                reactivarUsuarioDefinitivamente(idPersona);
+            } catch (Exception e) {
+                LOGGER.error("No se pudo reactivar al usuario en Moodle", e);
+                throw e;
+            }
+        }
+
+        if (baja.getIdBaja() != null) {
+            nuevaBajaRepository.eliminarBaja(baja.getIdBaja().longValue());
+        }
+    }
+
+    private void procesarBaja(BajaSolicitudDTO solicitud, Long idBaja, Long idMotivoBaja) {
         Long idPersona = nuevaBajaRepository.obtenerIdPersonaPorMatricula(solicitud.getMatriculaUsuario());
         if (idPersona == null) {
             throw new IllegalArgumentException("No se encontró la matrícula proporcionada");
@@ -82,7 +128,13 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
 
         nuevaBajaRepository.actualizarPersonaInactiva(idPersona);
 
-        Long motivoId = nuevaBajaRepository.insertarMotivoBaja(solicitud.getIdTipoBaja(), solicitud.getMotivo());
+        Long motivoId = idMotivoBaja != null ? idMotivoBaja
+                : nuevaBajaRepository.insertarMotivoBaja(solicitud.getIdTipoBaja(), solicitud.getMotivo());
+
+        if (idMotivoBaja != null) {
+            nuevaBajaRepository.actualizarMotivoBaja(idMotivoBaja, solicitud.getIdTipoBaja(), solicitud.getMotivo());
+        }
+
         Long procesoId = nuevaBajaRepository.obtenerIdProcesoBaja();
 
         BajaMatriculacionDTO matriculacion = solicitud.getIdEvento() != null
@@ -156,7 +208,13 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
                 contabilizar,
                 solicitud.getNumeroSolicitud());
 
-        nuevaBajaRepository.insertarBaja(bajaAplicacionDTO);
+        if (idBaja == null) {
+            nuevaBajaRepository.insertarBaja(bajaAplicacionDTO);
+        } else {
+            bajaAplicacionDTO.setMotivoBajaId(motivoId);
+            bajaAplicacionDTO.setQuienAplicaBaja(solicitud.getQuienAplica());
+            nuevaBajaRepository.actualizarBaja(idBaja, bajaAplicacionDTO);
+        }
 
     }
 
@@ -262,5 +320,55 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
             throw new IllegalArgumentException("No se encontró la relación del usuario con Moodle");
         }
         return datosMoodle.get(0);
+    }
+
+    private void reactivarUsuarioEnCurso(Long idEvento, Long idPersona) {
+        Integer idUsuarioMoodle = nuevaBajaRepository.obtenerIdUsuarioMoodle(idPersona, idEvento);
+        if (idUsuarioMoodle == null) {
+            throw new IllegalArgumentException("No se encontró el usuario en Moodle para el evento seleccionado");
+        }
+        Integer idPlataforma = nuevaBajaRepository.obtenerIdPlataformaMoodle(idEvento);
+        if (idPlataforma == null) {
+            throw new IllegalArgumentException("No se encontró la plataforma de Moodle para el evento seleccionado");
+        }
+        ParametroWSMoodleDTO plataforma = parametroWSMoodleService.buscarPorId(idPlataforma);
+        if (plataforma == null) {
+            throw new IllegalArgumentException("No se encontró la configuración de la plataforma Moodle");
+        }
+        try {
+            Integer idCurso = nuevaBajaRepository.obtenerIdCursoMoodle(idEvento);
+            if (idCurso == null) {
+                throw new IllegalArgumentException("No se encontró el curso en Moodle para el evento seleccionado");
+            }
+            CursoWS cursoWS = new CursoWS(plataforma);
+            Integer respuesta = cursoWS.suspenderUsuarioEnCurso(idCurso, idUsuarioMoodle, 0);
+            if (respuesta == null) {
+                throw new IllegalStateException("No fue posible reactivar al usuario en el curso de Moodle");
+            }
+        } catch (ErrorWS e) {
+            LOGGER.error("Error al reactivar al usuario en el curso de Moodle", e);
+            throw new IllegalStateException("No se pudo reactivar al usuario en el curso de Moodle", e);
+        }
+    }
+
+    private void reactivarUsuarioDefinitivamente(Long idPersona) {
+        DatosMoodlePersonaDTO datosMoodle = obtenerDatosMoodle(idPersona);
+        if (datosMoodle == null || datosMoodle.getIdPersonaMoodle() == null) {
+            throw new IllegalArgumentException("No se encontró el usuario en Moodle para reactivarlo");
+        }
+        ParametroWSMoodleDTO plataforma = parametroWSMoodleService.buscarPorId(datosMoodle.getIdPlataformaMoodle());
+        if (plataforma == null) {
+            throw new IllegalArgumentException("No se encontró la configuración de la plataforma Moodle");
+        }
+        UsuarioWSClient usuarioWSClient = new UsuarioWSClient(plataforma);
+        Usuario usuario = new Usuario();
+        usuario.setId(datosMoodle.getIdPersonaMoodle());
+        usuario.setSuspended(0);
+        try {
+            usuarioWSClient.actualizarUsuarioSuspender(usuario);
+        } catch (ErrorWS e) {
+            LOGGER.error("Error al reactivar al usuario en Moodle", e);
+            throw new IllegalStateException("No se pudo reactivar al usuario en Moodle", e);
+        }
     }
 }

@@ -48,4 +48,12 @@ public interface INuevaBajaRepository {
     void insertarBaja(BajaAplicacionDTO bajaAplicacionDTO);
 
     BajaMatriculaDetalleDTO consultarDatosPorMatricula(String matricula);
+
+    void actualizarBaja(Long idBaja, BajaAplicacionDTO bajaAplicacionDTO);
+
+    void eliminarBaja(Long idBaja);
+
+    void actualizarMotivoBaja(Long idMotivoBaja, Long idTipoBaja, String descripcion);
+
+    void reactivarPersona(Long idPersona);
 }

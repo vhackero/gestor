@@ -103,6 +103,10 @@
             <h:form id="frmResultadosBaja">
                 <p:panel header="Listado de bajas encontradas"
                          styleClass="panel-primary">
+                    <p:messages id="msgsResultadosBaja"
+                                 autoUpdate="true"
+                                 closable="true"
+                                 for="@form" />
                     <div class="row">
                         <div class="col-md-12">
                             <p:dataTable id="tablaBajas"
@@ -176,15 +180,20 @@
                                         <h:outputText value="Acciones" />
                                     </f:facet>
 
-                                    <p:commandButton type="button"
-                                                     icon="fa fa-pencil"
+                                    <p:commandButton icon="fa fa-pencil"
                                                      styleClass="btn-icon btn btn-default"
-                                                     title="Editar" />
+                                                     title="Editar"
+                                                     rendered="#{baja.estatus == 0}"
+                                                     process="@this"
+                                                     update=":frmAltasBajas:panelBotones :frmAltasBajas:panelContenido"
+                                                     actionListener="#{consultaBajaUsuariosBean.editar(baja)}" />
 
-                                    <p:commandButton type="button"
-                                                     icon="fa fa-trash"
+                                    <p:commandButton icon="fa fa-trash"
                                                      styleClass="btn-icon btn btn-default"
-                                                     title="Eliminar" />
+                                                     title="Eliminar"
+                                                     process="@this"
+                                                     update=":frmAltasBajas:frmResultadosBaja"
+                                                     actionListener="#{consultaBajaUsuariosBean.eliminar(baja)}" />
                                 </p:column>
                             </p:dataTable>
                         </div>
