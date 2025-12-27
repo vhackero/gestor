@@ -44,7 +44,8 @@ public class ConsultaBajaRepository implements IConsultaBajaRepository {
                 + " rmb.descripcion AS motivo, "
                 + " rpb.solicitud AS numero_solicitud, "
                 + " rpb.usuario_modifico AS quien_aplica, "
-                + " rpb.id_grupo AS id_grupo "
+                + " rpb.id_grupo AS id_grupo, "
+                + " rpb.proceso_id AS id_proceso "
                 + "FROM rel_persona_bajas rpb "
                 + " JOIN tbl_persona tp ON tp.id_persona = rpb.id_persona "
                 + " JOIN tbl_planes tpl ON tpl.id_plan = rpb.id_plan "
@@ -92,6 +93,7 @@ public class ConsultaBajaRepository implements IConsultaBajaRepository {
                 dto.setNumeroSolicitud(registro[20] != null ? registro[20].toString() : "");
                 dto.setQuienAplica(registro[21] != null ? registro[21].toString() : "");
                 dto.setIdGrupo(registro[22] != null ? Long.valueOf(registro[22].toString()) : null);
+                dto.setIdProceso(registro[23] != null ? Long.valueOf(registro[23].toString()) : null);
                 bajas.add(dto);
             }
         }

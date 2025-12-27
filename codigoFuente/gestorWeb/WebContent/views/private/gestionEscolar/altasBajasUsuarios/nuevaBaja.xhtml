@@ -26,6 +26,7 @@
                                     <p:inputText id="matricula"
                                                  value="#{nuevaBajaUsuarioBean.matriculaUsuario}"
                                                  styleClass="form-control"
+                                                 readonly="#{nuevaBajaUsuarioBean.matriculaBloqueada}"
                                                  required="true"
                                                  requiredMessage="La matrícula es obligatoria">
                                         <p:ajax event="blur"
@@ -51,6 +52,7 @@
                                     <p:selectOneMenu id="tipoBaja"
                                                      value="#{nuevaBajaUsuarioBean.idTipoBaja}"
                                                      styleClass="col-xs-12"
+                                                     disabled="#{nuevaBajaUsuarioBean.tipoBajaBloqueada}"
                                                      required="true"
                                                      requiredMessage="Seleccione un tipo de baja">
                                         <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
@@ -68,7 +70,7 @@
                                     <p:selectOneMenu id="plan"
                                                      value="#{nuevaBajaUsuarioBean.idPlan}"
                                                      styleClass="col-xs-12"
-                                                     disabled="#{!nuevaBajaUsuarioBean.planHabilitado}"
+                                                     disabled="#{nuevaBajaUsuarioBean.planBloqueado or !nuevaBajaUsuarioBean.planHabilitado}"
                                                      required="true"
                                                      requiredMessage="Seleccione un plan">
                                         <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
@@ -90,7 +92,7 @@
                                     <p:selectOneMenu id="semestre"
                                                      value="#{nuevaBajaUsuarioBean.idSemestre}"
                                                      styleClass="col-xs-12"
-                                                     disabled="#{!nuevaBajaUsuarioBean.semestreHabilitado}"
+                                                     disabled="#{nuevaBajaUsuarioBean.semestreBloqueado or !nuevaBajaUsuarioBean.semestreHabilitado}"
                                                      required="#{nuevaBajaUsuarioBean.semestreRequerido()}"
                                                      requiredMessage="Seleccione un semestre">
                                         <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
@@ -108,7 +110,7 @@
                                     <p:selectOneMenu id="bloque"
                                                      value="#{nuevaBajaUsuarioBean.idBloque}"
                                                      styleClass="col-xs-12"
-                                                     disabled="#{!nuevaBajaUsuarioBean.bloqueHabilitado}"
+                                                     disabled="#{nuevaBajaUsuarioBean.bloqueBloqueado or !nuevaBajaUsuarioBean.bloqueHabilitado}"
                                                      required="#{nuevaBajaUsuarioBean.bloqueRequerido()}"
                                                      requiredMessage="Seleccione un bloque">
                                         <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
@@ -126,7 +128,7 @@
                                         <p:selectOneMenu id="programa"
                                                          value="#{nuevaBajaUsuarioBean.idPrograma}"
                                                          styleClass="col-xs-12"
-                                                         disabled="#{!nuevaBajaUsuarioBean.programaHabilitado}"
+                                                         disabled="#{nuevaBajaUsuarioBean.programaBloqueado or !nuevaBajaUsuarioBean.programaHabilitado}"
                                                          required="#{nuevaBajaUsuarioBean.mostrarPrograma}"
                                                          requiredMessage="Seleccione un programa">
                                             <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
@@ -144,7 +146,7 @@
                                         <p:selectOneMenu id="periodo"
                                                          value="#{nuevaBajaUsuarioBean.idPeriodo}"
                                                          styleClass="col-xs-12"
-                                                         disabled="#{!nuevaBajaUsuarioBean.periodoHabilitado}"
+                                                         disabled="#{nuevaBajaUsuarioBean.periodoBloqueado or !nuevaBajaUsuarioBean.periodoHabilitado}"
                                                          required="#{nuevaBajaUsuarioBean.mostrarPeriodo}"
                                                          requiredMessage="Seleccione un periodo">
                                             <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
@@ -166,7 +168,7 @@
                                     <p:selectOneMenu id="evento"
                                                      value="#{nuevaBajaUsuarioBean.idEvento}"
                                                      styleClass="col-xs-12"
-                                                     disabled="#{!nuevaBajaUsuarioBean.eventoHabilitado}">
+                                                     disabled="#{nuevaBajaUsuarioBean.eventoBloqueado or !nuevaBajaUsuarioBean.eventoHabilitado}">
                                         <f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
                                         <f:selectItems value="#{nuevaBajaUsuarioBean.eventos}" />
                                     </p:selectOneMenu>
@@ -177,6 +179,7 @@
                                     <p:inputTextarea id="motivo"
                                                     value="#{nuevaBajaUsuarioBean.motivo}"
                                                     styleClass="form-control"
+                                                    readonly="#{nuevaBajaUsuarioBean.motivoBloqueado}"
                                                     rows="3" />
                                 </div>
 
@@ -184,14 +187,16 @@
                                     <p:outputLabel styleClass="bloque" for="quien" value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.quienAplicalaBaja')}:" />
                                     <p:inputText id="quien"
                                                  value="#{nuevaBajaUsuarioBean.quienAplica}"
-                                                 styleClass="form-control" />
+                                                 styleClass="form-control"
+                                                 readonly="#{nuevaBajaUsuarioBean.quienAplicaBloqueado}" />
                                 </div>
 
                                 <div class="col-md-3 col-xs-12">
                                     <p:outputLabel styleClass="bloque" for="numero" value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.numeroSolicitud')}:" />
                                     <p:inputText id="numero"
                                                  value="#{nuevaBajaUsuarioBean.numeroSolicitud}"
-                                                 styleClass="form-control" />
+                                                 styleClass="form-control"
+                                                 readonly="#{nuevaBajaUsuarioBean.numeroSolicitudBloqueada}" />
                                 </div>
                             </div>
                         </div>
