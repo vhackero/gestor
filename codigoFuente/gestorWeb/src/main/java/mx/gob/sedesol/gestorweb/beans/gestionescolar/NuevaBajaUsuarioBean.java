@@ -509,7 +509,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     private void actualizarBloqueoCampos() {
-        matriculaBloqueada = tieneValor(matriculaUsuario);
+        matriculaBloqueada = tieneTexto(matriculaUsuario);
         tipoBajaBloqueada = tieneValor(idTipoBaja);
         planBloqueado = tieneValor(idPlan);
         semestreBloqueado = tieneValor(idSemestre);
