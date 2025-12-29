@@ -2,11 +2,13 @@ package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
+import mx.gob.sedesol.gestorweb.beans.gestionescolar.NuevaBajaUsuarioBean;
 
 @ManagedBean
 @ViewScoped
@@ -20,6 +22,9 @@ public class AltasBajasUsuariosBean extends BaseBean {
     private boolean mostrarOpcionesBajas;
     private boolean mostrarOpcionesAltas;
 
+    @ManagedProperty(value = "#{nuevaBajaUsuarioBean}")
+    private NuevaBajaUsuarioBean nuevaBajaUsuarioBean;
+
     @PostConstruct
     public void init() {
         LOGGER.info("Inicializando módulo de altas y bajas de usuarios");
@@ -30,6 +35,7 @@ public class AltasBajasUsuariosBean extends BaseBean {
 
     public String irNuevaAlta() {
         LOGGER.info("Navegando a la vista de nueva alta de usuario");
+        limpiarFormularioNuevaBaja();
         this.paginaActual = "/views/private/gestionEscolar/altasBajasUsuarios/nuevaAlta.xhtml";
         this.mostrarOpcionesBajas = false;
         this.mostrarOpcionesAltas = true;
@@ -38,6 +44,7 @@ public class AltasBajasUsuariosBean extends BaseBean {
 
     public String irNuevaBaja() {
         LOGGER.info("Navegando a la vista de nueva baja de usuario");
+        limpiarFormularioNuevaBaja();
         this.paginaActual = "/views/private/gestionEscolar/altasBajasUsuarios/nuevaBaja.xhtml";
         this.mostrarOpcionesBajas = true;
         this.mostrarOpcionesAltas = false;
@@ -46,6 +53,7 @@ public class AltasBajasUsuariosBean extends BaseBean {
 
     public String irConsultarBaja() {
         LOGGER.info("Navegando a la vista de consulta de bajas de usuario");
+        limpiarFormularioNuevaBaja();
         this.paginaActual = "/views/private/gestionEscolar/altasBajasUsuarios/consultaBaja.xhtml";
         this.mostrarOpcionesBajas = true;
         this.mostrarOpcionesAltas = false;
@@ -54,6 +62,7 @@ public class AltasBajasUsuariosBean extends BaseBean {
 
     public String mostrarOpcionesBajas() {
         LOGGER.info("Mostrando opciones de bajas de usuarios");
+        limpiarFormularioNuevaBaja();
         this.mostrarOpcionesBajas = true;
         this.paginaActual = null;
         this.mostrarOpcionesAltas = false;
@@ -62,6 +71,7 @@ public class AltasBajasUsuariosBean extends BaseBean {
 
     public String mostrarOpcionesAltas() {
         LOGGER.info("Mostrando opciones de altas de usuarios");
+        limpiarFormularioNuevaBaja();
         this.mostrarOpcionesAltas = true;
         this.mostrarOpcionesBajas = false;
         this.paginaActual = null;
@@ -70,10 +80,17 @@ public class AltasBajasUsuariosBean extends BaseBean {
 
     public String regresarAlModulo() {
         LOGGER.info("Regresando al módulo de altas y bajas de usuarios");
+        limpiarFormularioNuevaBaja();
         this.paginaActual = null;
         this.mostrarOpcionesBajas = false;
         this.mostrarOpcionesAltas = false;
         return null;
+    }
+
+    private void limpiarFormularioNuevaBaja() {
+        if (nuevaBajaUsuarioBean != null) {
+            nuevaBajaUsuarioBean.limpiarFormulario();
+        }
     }
 
     public String getPaginaActual() {
@@ -98,5 +115,13 @@ public class AltasBajasUsuariosBean extends BaseBean {
 
     public void setMostrarOpcionesAltas(boolean mostrarOpcionesAltas) {
         this.mostrarOpcionesAltas = mostrarOpcionesAltas;
+    }
+
+    public NuevaBajaUsuarioBean getNuevaBajaUsuarioBean() {
+        return nuevaBajaUsuarioBean;
+    }
+
+    public void setNuevaBajaUsuarioBean(NuevaBajaUsuarioBean nuevaBajaUsuarioBean) {
+        this.nuevaBajaUsuarioBean = nuevaBajaUsuarioBean;
     }
 }
