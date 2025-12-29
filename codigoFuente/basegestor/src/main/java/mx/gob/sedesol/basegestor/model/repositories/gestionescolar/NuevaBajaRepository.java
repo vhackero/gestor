@@ -7,14 +7,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.*;
 import org.springframework.stereotype.Repository;
 
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalleDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaAplicacionDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculacionDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DatosMoodlePersonaDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
