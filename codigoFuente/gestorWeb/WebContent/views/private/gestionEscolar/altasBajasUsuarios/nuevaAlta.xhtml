@@ -71,7 +71,8 @@
                                                styleClass="requerido bloque" />
                                 <p:inputText id="txtMatriculaNuevaAlta"
                                              styleClass="form-control"
-                                             style="width: 100%;" />
+                                             style="width: 100%;"
+                                             value="#{nuevaAltaUsuariosBean.matriculaNuevaAlta}" />
                             </div>
                         </div>
                         <div class="row" style="margin-top: 15px;">
@@ -187,7 +188,8 @@
                                                styleClass="requerido bloque" />
                                 <p:selectOneMenu id="somGrupo"
                                                  styleClass="col-xs-12"
-                                                 style="width: 100%;">
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.grupoSeleccionado}">
                                     <f:selectItem itemLabel="Seleccionar" itemValue="" />
                                     <f:selectItems value="#{nuevaAltaUsuariosBean.listaGrupos}"
                                                    var="grupo"
@@ -208,8 +210,10 @@
                                              styleClass="btn btn-default"
                                              style="margin-right: 10px;" />
                             <p:commandButton value="#{sistema.obtenerTexto('gw.matriculacion.btn.matricular')}"
-                                             type="button"
-                                             styleClass="btn btn-primary" />
+                                             styleClass="btn btn-primary"
+                                             action="#{nuevaAltaUsuariosBean.guardarAlta}"
+                                             process="@form"
+                                             update="@form" />
                         </div>
                     </div>
                 </p:panel>
