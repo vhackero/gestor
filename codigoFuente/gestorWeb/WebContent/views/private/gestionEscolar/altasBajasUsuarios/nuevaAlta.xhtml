@@ -213,7 +213,10 @@
                                              styleClass="btn btn-primary"
                                              action="#{nuevaAltaUsuariosBean.guardarAlta}"
                                              process="@form"
-                                             update="@form" />
+                                             update="@form"
+                                             onstart="PF('dialogLayout').show();"
+                                             oncomplete="PF('dialogLayout').hide();"
+                                             onerror="PF('dialogLayout').hide();" />
                         </div>
                     </div>
                 </p:panel>
