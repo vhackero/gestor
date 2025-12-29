@@ -77,13 +77,18 @@
                             <div class="col-md-12 text-right">
 
                                 <p:commandButton value="Limpiar campos"
-                                                 actionListener="#{consultaBajaUsuariosBean.limpiar}"
                                                  process="@this"
+                                                 action="#{consultaBajaUsuariosBean.limpiar}"
                                                  update=":frmAltasBajas:frmConsultaBaja :frmAltasBajas:frmResultadosBaja"
+                                                 ajax="true"
+                                                 immediate="true"
                                                  resetValues="true"
-                                                 styleClass="btn btn-default">
-                                    <p:resetInput target=":frmAltasBajas:frmConsultaBaja :frmAltasBajas:frmResultadosBaja" />
-                                </p:commandButton>
+                                                 oncomplete="
+                                                  PF('widget_frmAltasBajas_frmConsultaBaja_periodo').selectValue('');
+                                                  PF('widget_frmAltasBajas_frmConsultaBaja_estatus').selectValue('');
+                                                  $('#frmAltasBajas\\:frmConsultaBaja\\:matricula').val('');
+                                                 "
+                                                 styleClass="btn btn-default" />
 
                                 <p:commandButton id="btnBuscarBajas"
                                                  process="@form"
