@@ -74,6 +74,17 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private boolean modoEdicion;
     private Long idBajaEdicion;
     private Long idMotivoBajaEdicion;
+    private boolean matriculaBloqueada;
+    private boolean tipoBajaBloqueada;
+    private boolean planBloqueado;
+    private boolean semestreBloqueado;
+    private boolean bloqueBloqueado;
+    private boolean programaBloqueado;
+    private boolean periodoBloqueado;
+    private boolean eventoBloqueado;
+    private boolean motivoBloqueado;
+    private boolean quienAplicaBloqueado;
+    private boolean numeroSolicitudBloqueada;
 
     @ManagedProperty(value = "#{sistema}")
     private SistemaBean sistema;
@@ -105,6 +116,9 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     public void onMatriculaChange() {
+        if (modoEdicion && matriculaBloqueada) {
+            return;
+        }
         limpiarDatosDependientes();
         deshabilitarListas();
         nombreEstudiante = null;
@@ -245,6 +259,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         matriculaValida = true;
         actualizarVisibilidadCampos();
         actualizarHabilitacionSecuencial();
+        actualizarBloqueoCampos();
     }
 
     public void limpiarFormulario() {
@@ -270,6 +285,7 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         mostrarPeriodo = true;
         mostrarEvento = true;
         deshabilitarListas();
+        desbloquearCampos();
     }
 
     private void limpiarDatosDependientes() {
@@ -490,6 +506,42 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             }
         }
         return items;
+    }
+
+    private void actualizarBloqueoCampos() {
+        matriculaBloqueada = tieneTexto(matriculaUsuario);
+        tipoBajaBloqueada = tieneValor(idTipoBaja);
+        planBloqueado = tieneValor(idPlan);
+        semestreBloqueado = tieneValor(idSemestre);
+        bloqueBloqueado = tieneValor(idBloque);
+        programaBloqueado = tieneValor(idPrograma);
+        periodoBloqueado = tieneTexto(idPeriodo);
+        eventoBloqueado = tieneValor(idEvento);
+        motivoBloqueado = tieneTexto(motivo);
+        quienAplicaBloqueado = tieneTexto(quienAplica);
+        numeroSolicitudBloqueada = tieneTexto(numeroSolicitud);
+    }
+
+    private void desbloquearCampos() {
+        matriculaBloqueada = false;
+        tipoBajaBloqueada = false;
+        planBloqueado = false;
+        semestreBloqueado = false;
+        bloqueBloqueado = false;
+        programaBloqueado = false;
+        periodoBloqueado = false;
+        eventoBloqueado = false;
+        motivoBloqueado = false;
+        quienAplicaBloqueado = false;
+        numeroSolicitudBloqueada = false;
+    }
+
+    private boolean tieneValor(Long valor) {
+        return valor != null && valor.longValue() != 0L;
+    }
+
+    private boolean tieneTexto(String valor) {
+        return valor != null && !valor.trim().isEmpty();
     }
 
     public String getMatriculaUsuario() {
@@ -770,5 +822,49 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     public void setNuevaBajaService(NuevaBajaService nuevaBajaService) {
         this.nuevaBajaService = nuevaBajaService;
+    }
+
+    public boolean isMatriculaBloqueada() {
+        return matriculaBloqueada;
+    }
+
+    public boolean isTipoBajaBloqueada() {
+        return tipoBajaBloqueada;
+    }
+
+    public boolean isPlanBloqueado() {
+        return planBloqueado;
+    }
+
+    public boolean isSemestreBloqueado() {
+        return semestreBloqueado;
+    }
+
+    public boolean isBloqueBloqueado() {
+        return bloqueBloqueado;
+    }
+
+    public boolean isProgramaBloqueado() {
+        return programaBloqueado;
+    }
+
+    public boolean isPeriodoBloqueado() {
+        return periodoBloqueado;
+    }
+
+    public boolean isEventoBloqueado() {
+        return eventoBloqueado;
+    }
+
+    public boolean isMotivoBloqueado() {
+        return motivoBloqueado;
+    }
+
+    public boolean isQuienAplicaBloqueado() {
+        return quienAplicaBloqueado;
+    }
+
+    public boolean isNumeroSolicitudBloqueada() {
+        return numeroSolicitudBloqueada;
     }
 }

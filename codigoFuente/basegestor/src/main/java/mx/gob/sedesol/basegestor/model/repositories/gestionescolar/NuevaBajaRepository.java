@@ -7,14 +7,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.*;
 import org.springframework.stereotype.Repository;
 
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalleDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaAplicacionDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculacionDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DatosMoodlePersonaDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
@@ -283,6 +279,44 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
         query.setParameter("idEvento", idEvento);
         List<?> resultados = query.getResultList();
         return resultados.isEmpty() ? null : obtenerEntero(resultados.get(0));
+    }
+
+    @Override
+    public ConsultaBajaDTO consultarBajaPorId(Long idBaja) {
+        String consulta = "SELECT rpb.id_baja, rpb.id_plan, rpb.id_programa, rpb.id_evento, rpb.id_grupo, "
+                + " rpb.id_user_enrolments_lms, rpb.contabilizar, rpb.solicitud, rpb.usuario_modifico, "
+                + " rpb.id_persona, rmb.descripcion, rmb.id_motivo_baja, rmb.tipo_baja_id, rpb.proceso_id, ctb.nombre AS tipo_baja "
+                + "FROM rel_persona_bajas rpb "
+                + " JOIN rel_motivo_baja rmb ON rmb.id_motivo_baja = rpb.motivo_baja_id "
+                + " JOIN cat_tipo_bajas ctb ON ctb.id_tipo_baja = rmb.tipo_baja_id "
+                + "WHERE rpb.id_baja = :idBaja";
+
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idBaja", idBaja);
+        List<?> resultados = query.getResultList();
+
+        if (resultados.isEmpty()) {
+            return null;
+        }
+
+        Object[] fila = (Object[]) resultados.get(0);
+        ConsultaBajaDTO dto = new ConsultaBajaDTO();
+        dto.setIdBaja(obtenerEntero(fila[0]));
+        dto.setIdPlan(obtenerLong(fila[1]));
+        dto.setIdPrograma(obtenerLong(fila[2]));
+        dto.setIdEvento(obtenerLong(fila[3]));
+        dto.setIdGrupo(obtenerLong(fila[4]));
+        dto.setIdUserEnrolmentsLms(obtenerEntero(fila[5]));
+        dto.setEstatus(obtenerEntero(fila[6]));
+        dto.setNumeroSolicitud(obtenerCadena(fila[7]));
+        dto.setQuienAplica(obtenerCadena(fila[8]));
+        dto.setIdPersona(obtenerLong(fila[9]));
+        dto.setMotivo(obtenerCadena(fila[10]));
+        dto.setIdMotivoBaja(obtenerLong(fila[11]));
+        dto.setIdTipoBaja(obtenerEntero(fila[12]));
+        dto.setIdProceso(obtenerLong(fila[13]));
+        dto.setTipoBaja(obtenerCadena(fila[14]));
+        return dto;
     }
 
     @Override

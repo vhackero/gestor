@@ -25,6 +25,7 @@ public class ConsultaBajaDTO {
     private String quienAplica;
     private String nombreEstudiante;
     private Long idGrupo;
+    private Long idProceso;
 
     public String getMatricula() {
         return matricula;
@@ -208,5 +209,13 @@ public class ConsultaBajaDTO {
 
     public void setIdGrupo(Long idGrupo) {
         this.idGrupo = idGrupo;
+    }
+
+    public Long getIdProceso() {
+        return idProceso;
+    }
+
+    public void setIdProceso(Long idProceso) {
+        this.idProceso = idProceso;
     }
 }
