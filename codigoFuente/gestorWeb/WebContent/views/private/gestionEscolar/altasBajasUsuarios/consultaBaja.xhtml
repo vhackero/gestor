@@ -77,13 +77,11 @@
                             <div class="col-md-12 text-right">
 
                                 <p:commandButton value="Limpiar campos"
-                                                 actionListener="#{consultaBajaUsuariosBean.limpiar}"
                                                  process="@this"
                                                  update=":frmAltasBajas:frmConsultaBaja :frmAltasBajas:frmResultadosBaja"
-                                                 resetValues="true"
-                                                 styleClass="btn btn-default">
-                                    <p:resetInput target=":frmAltasBajas:frmConsultaBaja :frmAltasBajas:frmResultadosBaja" />
-                                </p:commandButton>
+                                                 action="#{consultaBajaUsuariosBean.limpiar}"
+                                                 ajax="true"
+                                                 styleClass="btn btn-default" />
 
                                 <p:commandButton id="btnBuscarBajas"
                                                  process="@form"
