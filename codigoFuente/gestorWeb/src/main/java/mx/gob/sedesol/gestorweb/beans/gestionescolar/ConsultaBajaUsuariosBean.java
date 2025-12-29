@@ -84,6 +84,7 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
         resultados = new ArrayList<>();
         limpiarComponentes("frmAltasBajas:frmConsultaBaja");
         RequestContext.getCurrentInstance().reset(":frmAltasBajas:frmResultadosBaja");
+        RequestContext.getCurrentInstance().update(":frmAltasBajas:frmConsultaBaja");
     }
 
     private void limpiarComponentes(String clientId) {
