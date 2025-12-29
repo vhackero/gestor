@@ -7,6 +7,9 @@ import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import javax.faces.component.UIComponent;
+import javax.faces.component.UIInput;
+import javax.faces.context.FacesContext;
 
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
@@ -79,6 +82,32 @@ public class ConsultaBajaUsuariosBean extends BaseBean {
         periodoSeleccionado = null;
         estatusSeleccionado = null;
         resultados = new ArrayList<>();
+        limpiarComponentes("frmAltasBajas:frmConsultaBaja");
+        RequestContext.getCurrentInstance().reset(":frmAltasBajas:frmResultadosBaja");
+    }
+
+    private void limpiarComponentes(String clientId) {
+        FacesContext facesContext = FacesContext.getCurrentInstance();
+        if (facesContext == null) {
+            return;
+        }
+        UIComponent componente = facesContext.getViewRoot().findComponent(clientId);
+        if (componente != null) {
+            limpiarValores(componente);
+        }
+    }
+
+    private void limpiarValores(UIComponent componente) {
+        if (componente instanceof UIInput) {
+            UIInput input = (UIInput) componente;
+            input.setSubmittedValue(null);
+            input.setValue(null);
+            input.setLocalValueSet(false);
+            input.setValid(true);
+        }
+        for (UIComponent hijo : componente.getChildren()) {
+            limpiarValores(hijo);
+        }
     }
 
     public String obtenerNombreEstatus(Integer estatus) {
