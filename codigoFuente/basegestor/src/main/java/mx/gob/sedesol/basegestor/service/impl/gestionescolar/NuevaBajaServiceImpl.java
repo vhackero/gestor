@@ -141,7 +141,7 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
             idGrupo = 0L;
         }
 
-        int contabilizar = 1;
+        int contabilizar = (esDefinitiva || esSinAsignaturas) ? 1 : 0;
 
         BajaAplicacionDTO bajaAplicacionDTO = new BajaAplicacionDTO(
                 idPersona,
