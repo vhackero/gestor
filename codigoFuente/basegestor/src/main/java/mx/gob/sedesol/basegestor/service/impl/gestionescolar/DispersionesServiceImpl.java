@@ -22,6 +22,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CrearEventoDispersionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionCreacionResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionGrupoEventoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculaExistenteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculacionResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
@@ -211,6 +212,120 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 	@Override
 	public DispersionPreEvento obtenerDatosPreviosEvento(Integer idPrograma) {
 		return iDispersionesRepository.obtenerDatosPreviosEvento(idPrograma);
+	}
+	
+	@Override
+	public List<ProcesosInscripcion> consultarProcesosConDispersion() {
+		return iDispersionesRepository.consultarProcesosConDispersion();
+	}
+	
+	@Override
+	public List<ProcesosInscripcion> consultarProcesosSinDispersion() {
+		return iDispersionesRepository.consultarProcesosSinDispersion();
+	}
+	
+	@Override
+	public List<DispersionMatriculaExistenteDTO> consultarDispersionesExistentes(Integer idProcesoConDispersion,
+			Integer idProcesoMatricular) {
+		return iDispersionesRepository.consultarDispersionesExistentes(idProcesoConDispersion, idProcesoMatricular);
+	}
+	
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public ResultadoDTO<DispersionMatriculacionResultadoDTO> matricularDispersionExistente(DispersionMatriculaExistenteDTO dispersion, Long idUsuario) {
+		ResultadoDTO<DispersionMatriculacionResultadoDTO> resultado = new ResultadoDTO<>();
+		resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+		DispersionMatriculacionResultadoDTO detalle = new DispersionMatriculacionResultadoDTO();
+		resultado.setDto(detalle);
+		
+		if (dispersion == null || dispersion.getIdDispersion() == null
+				|| dispersion.getIdProcesoInscripcionMatricular() == null || dispersion.getIdPrograma() == null) {
+			resultado.agregaMensaje("La información para matricular es incompleta.");
+			return resultado;
+		}
+		
+		List<DispersionGrupoEventoDTO> grupos = iDispersionesRepository.obtenerRelacionesDispersion(dispersion.getIdDispersion());
+		if (grupos == null || grupos.isEmpty()) {
+			resultado.agregaMensaje("No se encontraron grupos asociados a la dispersión seleccionada.");
+			return resultado;
+		}
+		
+		Integer idNuevaDispersion = iDispersionesRepository.crearDispersionBasica(
+				dispersion.getIdProcesoInscripcionMatricular(),
+				dispersion.getIdPrograma(),
+				dispersion.getNoEstudiantesInscritos(),
+				0,
+				idUsuario);
+		if (idNuevaDispersion == null) {
+			resultado.agregaMensaje("No fue posible registrar la dispersión de destino.");
+			return resultado;
+		}
+		
+		for (DispersionGrupoEventoDTO grupo : grupos) {
+			iDispersionesRepository.guardarRelacionDispersionGrupo(idNuevaDispersion, grupo.getIdEvento(),
+					grupo.getIdGrupo(), idUsuario);
+		}
+		
+		List<Long> personas = iDispersionesRepository.obtenerPersonasMatriculaExistente(
+				dispersion.getIdProcesoInscripcionMatricular(), dispersion.getIdPrograma());
+		if (personas == null || personas.isEmpty()) {
+			resultado.agregaMensaje("No se encontraron inscripciones para matricular.");
+			return resultado;
+		}
+		
+		// Ordenamos grupos por id para aplicar recorrido de mayor a menor y viceversa
+		grupos.sort((a, b) -> a.getIdGrupo().compareTo(b.getIdGrupo()));
+		List<GrupoAsignacion> asignaciones = construirAsignaciones(grupos);
+		for (GrupoAsignacion asignacion : asignaciones) {
+			if (asignacion != null) {
+				asignacion.permitirCapacidadIlimitada();
+			}
+		}
+		RecorridoAlternado recorrido = new RecorridoAlternado(asignaciones.size());
+		Map<Long, PersonaDTO> cachePersonas = new HashMap<>();
+		for (Long idPersona : personas) {
+			PersonaDTO persona = obtenerPersonaPorId(idPersona, cachePersonas);
+			if (persona == null) {
+				continue;
+			}
+			Integer indice = recorrido.siguienteIndice();
+			if (indice == null || indice >= asignaciones.size()) {
+				continue;
+			}
+			asignaciones.get(indice).asignar(persona);
+		}
+		
+		int matriculados = 0;
+		int gruposProcesados = 0;
+		Map<Integer, ParametroWSMoodleDTO> cachePlataformas = new HashMap<>();
+		for (GrupoAsignacion asignacion : asignaciones) {
+			if (asignacion.personas.isEmpty()) {
+				continue;
+			}
+			ResultadoDTO<RelGrupoParticipanteDTO> respuesta = registrarParticipantes(asignacion, idUsuario,
+					cachePlataformas);
+			copiarMensajes(respuesta, resultado);
+			if (!respuesta.esCorrecto()) {
+				throw new RuntimeException("No fue posible matricular el grupo " + asignacion.info.getIdGrupo());
+			}
+			matriculados += asignacion.personas.size();
+			gruposProcesados++;
+		}
+		
+		detalle.setGruposProcesados(gruposProcesados);
+		detalle.setParticipantesDetectados(personas.size());
+		detalle.setParticipantesMatriculados(matriculados);
+		detalle.setParticipantesSinCupo(0);
+		
+		if (matriculados > 0) {
+			resultado.setResultado(ResultadoTransaccionEnum.EXITOSO);
+			resultado.agregaMensaje(String.format("Se han matriculado %d alumno(s) en %d grupo(s).", matriculados,
+					gruposProcesados));
+		} else {
+			resultado.agregaMensaje("No se asignaron participantes a los grupos seleccionados.");
+		}
+		
+		return resultado;
 	}
 	
 	@Override

@@ -10,6 +10,15 @@
 	<ui:fragment rendered="#{not dispersionesBean.mostrarFormularioCrearGrupos}">
 	<p:panel header="Dispersión">
 
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Matriculación en dispersiones existentes"
+					styleClass="btn btn-primary" style="width: 300px;"
+					action="#{dispersionesBean.navegaMatriculaDispersionExistente}"
+					process="@this" update="@form" />
+			</div>
+		</div>
+
 		<div class="form-group">
 			<div class="row">
 

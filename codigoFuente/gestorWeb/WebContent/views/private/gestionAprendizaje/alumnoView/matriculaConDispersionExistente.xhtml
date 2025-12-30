@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+	<p:panel header="Matriculación en dispersiones existentes">
+
+		<div class="form-group">
+			<div class="row">
+
+				<div class="col-md-6 col-xs-12">
+					<p:outputLabel styleClass="bloque requerido"
+						value="Proceso de inscripción con dispersión:" />
+					<p:selectOneMenu id="procesoConDispersion" required="true"
+						styleClass="col-xs-12"
+						value="#{dispersionesBean.dispercionParametros.idProcesoInscripcionConDispersion}">
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="#{null}" />
+						<f:selectItems
+							value="#{dispersionesBean.listaProcesosConDispersion}"
+							var="proc" itemLabel="#{proc.nombre}"
+							itemValue="#{proc.idProcesoInscripcion}" />
+					</p:selectOneMenu>
+					<p:message for="procesoConDispersion" display="text" />
+					<h:outputText styleClass="text-danger"
+						rendered="#{not empty dispersionesBean.mensajeProcesosConDispersion}"
+						value="#{dispersionesBean.mensajeProcesosConDispersion}" />
+				</div>
+
+				<div class="col-md-6 col-xs-12">
+					<p:outputLabel styleClass="bloque requerido"
+						value="Proceso de inscripción a matricular:" />
+					<p:selectOneMenu id="procesoAMatricular" required="true"
+						styleClass="col-xs-12"
+						value="#{dispersionesBean.dispercionParametros.idProcesoInscripcionMatricular}">
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="#{null}" />
+						<f:selectItems value="#{dispersionesBean.listaProcesosSinDispersion}"
+							var="tipo" itemLabel="#{tipo.nombre}"
+							itemValue="#{tipo.idProcesoInscripcion}" />
+					</p:selectOneMenu>
+					<p:message for="procesoAMatricular" display="text" />
+					<h:outputText styleClass="text-danger"
+						rendered="#{not empty dispersionesBean.mensajeProcesosSinDispersion}"
+						value="#{dispersionesBean.mensajeProcesosSinDispersion}" />
+				</div>
+
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+
+				<div class="col-md-12 text-right">
+
+					<p:commandButton value="Cancelar" process="@this" update="@form"
+						action="#{dispersionesBean.cancelar}" ajax="true"
+						styleClass="btn btn-default" />
+
+					<p:commandButton value="Limpiar campos" process="@this"
+						update="@form" action="#{dispersionesBean.limpiarCampos}"
+						ajax="true" styleClass="btn btn-default" />
+
+					<p:commandButton id="btnBusquedaDispersionExistente" process="@form"
+						ajax="true" update="@form" styleClass="btn btn-primary pull-right"
+						action="#{dispersionesBean.busquedaDispersionExistente}" value="Aceptar" />
+
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12">
+				<p:dataTable id="tablaDispersionExistente" reflow="true"
+					emptyMessage="#{dispersionesBean.mensajeTablaDispersionExistente}"
+					value="#{dispersionesBean.listaDispersionesExistentes}" var="dispercion"
+					paginator="true" rows="10" paginatorPosition="bottom"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+					<p:column styleClass="text-center" style="min-width:120px;">
+						<f:facet name="header">
+							<h:outputText value="Plan" />
+						</f:facet>
+						<h:outputText value="#{dispercion.plan}" />
+					</p:column>
+
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Programa" />
+						</f:facet>
+						<h:outputText value="#{dispercion.programa}" />
+					</p:column>
+
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Clave" />
+						</f:facet>
+						<h:outputText value="#{dispercion.clave}" />
+					</p:column>
+
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Semestre" />
+						</f:facet>
+						<h:outputText value="#{dispercion.semestre}" />
+					</p:column>
+
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Bloque" />
+						</f:facet>
+						<h:outputText value="#{dispercion.bloque}" />
+					</p:column>
+
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="No. de usuarios con inscripción" />
+						</f:facet>
+						<h:outputText value="#{dispercion.noEstudiantesInscritos}" />
+					</p:column>
+
+					<p:column styleClass="text-center" style="min-width:130px;">
+						<f:facet name="header">
+							<h:outputText value="Matricular usuarios" />
+						</f:facet>
+						<p:commandButton ajax="true" process="@this" update="@form"
+							action="#{dispersionesBean.matricularUsuariosDispersionExistente(dispercion)}"
+							icon="fa fa-graduation-cap" title="Matricular usuarios"
+							styleClass="btn-icon btn btn-default" />
+					</p:column>
+				</p:dataTable>
+			</div>
+		</div>
+
+		<p:confirmDialog widgetVar="dlgConfirmMatriculaExistente" header="Confirmación"
+			message="Este proceso no se puede deshacer, esta seguro(a) de continuar?"
+			severity="warn" closable="false">
+			<p:commandButton value="Si" styleClass="btn btn-primary"
+				process="@this" update=":formBusquedaDispersiones"
+				action="#{dispersionesBean.confirmarMatriculaUsuariosDispersionExistente}"
+				oncomplete="PF('dlgConfirmMatriculaExistente').hide();" />
+			<p:commandButton value="No" styleClass="btn btn-default"
+				type="button" onclick="PF('dlgConfirmMatriculaExistente').hide();" />
+		</p:confirmDialog>
+
+	</p:panel>
+
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgDispersionInfo" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="#{dispersionesBean.mensajeGestion}" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Aceptar" styleClass="btn btn-primary"
+						type="button" onclick="PF('dlgDispersionInfo').hide()" />
+				</div>
+			</div>
+		</div>
+	</p:dialog>
+
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgDispersionError" header="Error" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="#{dispersionesBean.mensajeGestion}" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Aceptar" styleClass="btn btn-primary"
+						type="button" onclick="PF('dlgDispersionError').hide()" />
+				</div>
+			</div>
+		</div>
+	</p:dialog>
+
+</ui:composition>
