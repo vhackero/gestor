@@ -169,7 +169,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         PersonaDTO persona = personaServiceFacade.obtenerPersonaPorId(idPersona.get());
         if (ObjectUtils.isNull(persona)) {
             LOGGER.warn("No se encontró la información del usuario");
-            mostrarDialogoError("No se encontró la información del usuario.");
+            mostrarDialogoError("No se encontró información asociada para registrar, por favor intenta, importar datos para continuar.");
             return;
         }
 
@@ -219,7 +219,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         }
 
         LOGGER.info("Alta registrada correctamente");
-        mostrarDialogoExito("Alta registrada correctamente.");
+        mostrarDialogoExito("Alta aplicada correctamente");
         limpiarFormulario();
     }
 
