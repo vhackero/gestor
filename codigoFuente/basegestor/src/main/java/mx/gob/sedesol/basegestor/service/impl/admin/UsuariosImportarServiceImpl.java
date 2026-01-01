@@ -85,5 +85,10 @@ public class UsuariosImportarServiceImpl implements UsuariosImportarService{
 		return usuariosImportarRepo.consultaPersonasImportar(fuenteExterna, convocatoria);
 	}
 
+	@Override
+	public Object[] consultaDetalleFuenteExterna(Integer idFuenteExterna) {
+		return usuariosImportarRepo.consultaDetalleFuenteExterna(idFuenteExterna);
+	}
+
 
 }

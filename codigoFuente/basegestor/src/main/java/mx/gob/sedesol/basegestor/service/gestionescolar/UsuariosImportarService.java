@@ -30,7 +30,8 @@ public interface UsuariosImportarService {
 	
 	List<PersonaSigeDTO> consultaPersonasImportar(String fuenteExterna, String convocatoria);
 
+	Object[] consultaDetalleFuenteExterna(Integer idFuenteExterna);
+
 
 }
-
 

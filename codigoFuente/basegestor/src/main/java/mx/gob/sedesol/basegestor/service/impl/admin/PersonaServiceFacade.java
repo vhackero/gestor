@@ -188,6 +188,10 @@ public class PersonaServiceFacade {
 	public List<PersonaSigeDTO> consultaPersonasImportar(String fuenteExterna, String convocatoria) {
 		return usuariosImportarService.consultaPersonasImportar(fuenteExterna, convocatoria);
 	}
+	
+	public Object[] consultaDetalleFuenteExterna(Integer idFuenteExterna) {
+		return usuariosImportarService.consultaDetalleFuenteExterna(idFuenteExterna);
+	}
 
 	public String obtenerRutaAlmacenamientoFotosUsuario() {
 		StringBuilder rutaAlmacenamiento = new StringBuilder(

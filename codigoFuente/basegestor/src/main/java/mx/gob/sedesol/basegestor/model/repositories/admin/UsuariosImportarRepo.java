@@ -238,5 +238,15 @@ public class UsuariosImportarRepo implements IUsuariosImportarRepo {
 	    return resultado == 1;
 	}
 
+	@Override
+	public Object[] consultaDetalleFuenteExterna(Integer idFuenteExterna) {
+		String consulta = "SELECT servidor, usuario, alias, nombre_base_datos, consulta FROM cat_fuentes_externas "
+				+ "WHERE id_fuente_externa = :idFuente AND activo = 1";
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("idFuente", idFuenteExterna);
+		List<?> resultado = query.getResultList();
+		return resultado != null && !resultado.isEmpty() ? (Object[]) resultado.get(0) : null;
+	}
+
 
 }

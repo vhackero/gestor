@@ -31,5 +31,6 @@ public interface IUsuariosImportarRepo {
 
 	boolean verificarRelacionConvocatoria(String planId, String convocatoriaId);
 
+	Object[] consultaDetalleFuenteExterna(Integer idFuenteExterna);
 	
 }

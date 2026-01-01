@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
+import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
+import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
 import mx.gob.sedesol.basegestor.model.entities.admin.TblPersonaSige;
 import mx.gob.sedesol.basegestor.model.repositories.admin.PersonaSigeRepo;
 import mx.gob.sedesol.basegestor.service.admin.ComunValidacionService;
@@ -55,38 +58,85 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 	}
 	@Override
 	public PersonaSigeDTO buscarPorId(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		if (ObjectUtils.isNull(id)) {
+			return null;
+		}
+		return personaSigeRepo.findById(id).map(persona -> mapper.map(persona, PersonaSigeDTO.class)).orElse(null);
 	}
 	@Override
 	public ResultadoDTO<PersonaSigeDTO> guardar(PersonaSigeDTO dto) {
-		// TODO Auto-generated method stub
-		return null;
+		ResultadoDTO<PersonaSigeDTO> resultado = new ResultadoDTO<>();
+		try {
+			validarPersistencia(dto, resultado);
+			if (!resultado.esCorrecto()) {
+				return resultado;
+			}
+			TblPersonaSige entidad = mapper.map(dto, TblPersonaSige.class);
+			entidad = personaSigeRepo.save(entidad);
+			resultado.setDto(mapper.map(entidad, PersonaSigeDTO.class));
+			resultado.setMensaje(MensajesSistemaEnum.ADMIN_MSG_REGISTRO_EXITOSO.getId());
+			resultado.setResultado(ResultadoTransaccionEnum.EXITOSO);
+		} catch (Exception ex) {
+			logger.error(ex.getMessage(), ex);
+			resultado.setMensajeError(MensajesSistemaEnum.MSG_ERROR_INTERNO, " " + ex.getMessage());
+		}
+		return resultado;
 	}
 	@Override
 	public ResultadoDTO<PersonaSigeDTO> actualizar(PersonaSigeDTO dto) {
-		// TODO Auto-generated method stub
-		return null;
+		ResultadoDTO<PersonaSigeDTO> resultado = new ResultadoDTO<>();
+		try {
+			validarActualizacion(dto, resultado);
+			if (!resultado.esCorrecto()) {
+				return resultado;
+			}
+			TblPersonaSige entidad = mapper.map(dto, TblPersonaSige.class);
+			entidad = personaSigeRepo.save(entidad);
+			resultado.setDto(mapper.map(entidad, PersonaSigeDTO.class));
+			resultado.setMensaje(MensajesSistemaEnum.ADMIN_MSG_REGISTRO_EXITOSO.getId());
+			resultado.setResultado(ResultadoTransaccionEnum.EXITOSO);
+		} catch (Exception ex) {
+			logger.error(ex.getMessage(), ex);
+			resultado.setMensajeError(MensajesSistemaEnum.MSG_ERROR_INTERNO, " " + ex.getMessage());
+		}
+		return resultado;
 	}
 	@Override
 	public ResultadoDTO<PersonaSigeDTO> eliminar(PersonaSigeDTO dto) {
-		// TODO Auto-generated method stub
-		return null;
+		ResultadoDTO<PersonaSigeDTO> resultado = new ResultadoDTO<>();
+		try {
+			validarEliminacion(dto, resultado);
+			if (!resultado.esCorrecto()) {
+				return resultado;
+			}
+			if (!ObjectUtils.isNull(dto.getIdPersonaSige())) {
+				personaSigeRepo.deleteById(dto.getIdPersonaSige());
+			}
+			resultado.setResultado(ResultadoTransaccionEnum.EXITOSO);
+			resultado.setMensaje(MensajesSistemaEnum.ADMIN_MSG_REGISTRO_EXITOSO.getId());
+		} catch (Exception ex) {
+			logger.error(ex.getMessage(), ex);
+			resultado.setMensajeError(MensajesSistemaEnum.MSG_ERROR_INTERNO, " " + ex.getMessage());
+		}
+		return resultado;
 	}
 	@Override
 	public void validarPersistencia(PersonaSigeDTO dto, ResultadoDTO<PersonaSigeDTO> resultado) {
-		// TODO Auto-generated method stub
-		
+		if (ObjectUtils.isNull(dto)) {
+			resultado.setMensajeError(MensajesSistemaEnum.MSG_ERROR_INTERNO, " DTO nulo");
+		}
 	}
 	@Override
 	public void validarActualizacion(PersonaSigeDTO dto, ResultadoDTO<PersonaSigeDTO> resultado) {
-		// TODO Auto-generated method stub
-		
+		if (ObjectUtils.isNull(dto) || ObjectUtils.isNull(dto.getIdPersonaSige())) {
+			resultado.setMensajeError(MensajesSistemaEnum.MSG_ERROR_INTERNO, " DTO nulo o sin identificador");
+		}
 	}
 	@Override
 	public void validarEliminacion(PersonaSigeDTO dto, ResultadoDTO<PersonaSigeDTO> resultado) {
-		// TODO Auto-generated method stub
-		
+		if (ObjectUtils.isNull(dto) || ObjectUtils.isNull(dto.getIdPersonaSige())) {
+			resultado.setMensajeError(MensajesSistemaEnum.MSG_ERROR_INTERNO, " DTO nulo o sin identificador");
+		}
 	}
 	public PersonaSigeRepo getPersonaSigeRepo() {
 		return personaSigeRepo;
