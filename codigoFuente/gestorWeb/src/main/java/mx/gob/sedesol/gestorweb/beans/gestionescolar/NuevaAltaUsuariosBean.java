@@ -285,7 +285,6 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
         mensajeValidacionDialogo = null;
         mensajeErrorDialogo = null;
-        mensajeExitoDialogo = null;
     }
 
     private void cargarProgramas() {
