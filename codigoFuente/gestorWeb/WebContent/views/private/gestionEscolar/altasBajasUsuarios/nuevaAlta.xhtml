@@ -228,6 +228,69 @@
                     </div>
                 </p:panel>
             </h:form>
+
+            <p:dialog appendTo="@(body)" draggable="false" position="center"
+                      resizable="false" closable="false" modal="true" width="600px"
+                      widgetVar="dlgNuevaAltaValidacion" header="Informativo" dynamic="true">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h:outputText styleClass="bloque"
+                                          value="#{nuevaAltaUsuariosBean.mensajeValidacionDialogo}" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.button.cerrar')}"
+                                         styleClass="btn btn-default"
+                                         onclick="PF('dlgNuevaAltaValidacion').hide()" />
+                    </div>
+                </div>
+            </p:dialog>
+
+            <p:dialog appendTo="@(body)" draggable="false" position="center"
+                      resizable="false" closable="false" modal="true" width="600px"
+                      widgetVar="dlgNuevaAltaExito" header="Informativo" dynamic="true">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h:outputText styleClass="bloque"
+                                          value="#{nuevaAltaUsuariosBean.mensajeExitoDialogo}" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.button.cerrar')}"
+                                         styleClass="btn btn-default"
+                                         onclick="PF('dlgNuevaAltaExito').hide()" />
+                    </div>
+                </div>
+            </p:dialog>
+
+            <p:dialog appendTo="@(body)" draggable="false" position="center"
+                      resizable="false" closable="false" modal="true" width="600px"
+                      widgetVar="dlgNuevaAltaError" header="Informativo" dynamic="true">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h:outputText styleClass="bloque"
+                                          value="#{nuevaAltaUsuariosBean.mensajeErrorDialogo}" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.button.cerrar')}"
+                                         styleClass="btn btn-default"
+                                         onclick="PF('dlgNuevaAltaError').hide()" />
+                    </div>
+                </div>
+            </p:dialog>
         </sec:authorize>
     </ui:fragment>
 </ui:composition>

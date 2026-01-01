@@ -12,6 +12,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
 import org.apache.log4j.Logger;
+import org.primefaces.context.RequestContext;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
@@ -57,6 +58,10 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
     private String periodoSeleccionado;
     private String eventoSeleccionado;
     private String grupoSeleccionado;
+
+    private String mensajeValidacionDialogo;
+    private String mensajeErrorDialogo;
+    private String mensajeExitoDialogo;
 
     @PostConstruct
     public void init() {
@@ -147,6 +152,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
     public void guardarAlta() {
         if (faltaAlgunCampoObligatorio()) {
             LOGGER.warn("Validación fallida: campos obligatorios incompletos");
+            mostrarDialogo("dlgNuevaAltaValidacion");
             return;
         }
 
@@ -155,23 +161,23 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                 .obtenerIdPersonaPorMatricula(matriculaNuevaAlta.trim());
 
         if (!idPersona.isPresent()) {
-            agregarMsgError("No se encontró la matrícula ingresada.", null);
             LOGGER.warn("No se encontró la matrícula ingresada");
+            mostrarDialogoError("No se encontró la matrícula ingresada.");
             return;
         }
 
         PersonaDTO persona = personaServiceFacade.obtenerPersonaPorId(idPersona.get());
         if (ObjectUtils.isNull(persona)) {
-            agregarMsgError("No se encontró la información del usuario.", null);
             LOGGER.warn("No se encontró la información del usuario");
+            mostrarDialogoError("No se encontró información asociada para registrar, por favor intenta, importar datos para continuar.");
             return;
         }
 
         Integer idEvento = parseEntero(eventoSeleccionado);
         Integer idGrupo = parseEntero(grupoSeleccionado);
         if (ObjectUtils.isNull(idEvento) || ObjectUtils.isNull(idGrupo)) {
-            agregarMsgError("No se pudo recuperar el evento o grupo seleccionado.", null);
             LOGGER.warn("Evento o grupo no seleccionados correctamente");
+            mostrarDialogoError("No se pudo recuperar el evento o grupo seleccionado.");
             return;
         }
 
@@ -180,14 +186,14 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         GrupoDTO grupo = eventoCapacitacionServiceFacade.getGrupoService().buscarGrupoPorId(idGrupo);
 
         if (ObjectUtils.isNull(evento) || ObjectUtils.isNull(grupo)) {
-            agregarMsgError("No se pudo recuperar la información seleccionada.", null);
             LOGGER.warn("No se pudo recuperar la información de evento o grupo");
+            mostrarDialogoError("No se pudo recuperar la información seleccionada.");
             return;
         }
 
         if (yaEstaMatriculado(idEvento, idPersona.get())) {
-            agregarMsgError("El usuario ya está matriculado en el evento seleccionado.", null);
             LOGGER.info("El usuario ya está matriculado en el evento seleccionado");
+            mostrarDialogoError("El usuario ya está matriculado en el evento seleccionado.");
             return;
         }
 
@@ -196,8 +202,8 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
         ParametroWSMoodleDTO parametroWSMoodleDTO = obtenerParametrosMoodle(evento);
         if (requiereMoodle(evento) && ObjectUtils.isNull(parametroWSMoodleDTO)) {
-            agregarMsgError("No se encontró la plataforma para matricular en el LMS.", null);
             LOGGER.error("No se encontró la plataforma para matricular en el LMS");
+            mostrarDialogoError("No se encontró la plataforma para matricular en el LMS.");
             return;
         }
 
@@ -207,13 +213,13 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                 evento, parametroWSMoodleDTO);
 
         if (ObjectUtils.isNull(participante)) {
-            agregarMsgError("No fue posible matricular al usuario.", null);
             LOGGER.error("No fue posible matricular al usuario");
+            mostrarDialogoError("No fue posible matricular al usuario.");
             return;
         }
 
-        agregarMsgInfo("Alta registrada correctamente.", null);
         LOGGER.info("Alta registrada correctamente");
+        mostrarDialogoExito("Alta aplicada correctamente");
         limpiarFormulario();
     }
 
@@ -245,13 +251,13 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
     private boolean faltaAlgunCampoObligatorio() {
         if (esVacio(matriculaNuevaAlta)) {
-            agregarMsgError("La matrícula es obligatoria.", null);
+            mensajeValidacionDialogo = "La matrícula es obligatoria.";
             return true;
         }
         if (esVacio(planSeleccionado) || esVacio(semestreSeleccionado) || esVacio(bloqueSeleccionado)
                 || esVacio(programaSeleccionado) || esVacio(periodoSeleccionado) || esVacio(eventoSeleccionado)
                 || esVacio(grupoSeleccionado)) {
-            agregarMsgError("Todos los campos son obligatorios.", null);
+            mensajeValidacionDialogo = "Ingrese los datos marcados como obligatorios.";
             return true;
         }
         return false;
@@ -276,6 +282,9 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         listaProgramas = new ArrayList<>();
         listaEventos = new ArrayList<>();
         listaGrupos = new ArrayList<>();
+
+        mensajeValidacionDialogo = null;
+        mensajeErrorDialogo = null;
     }
 
     private void cargarProgramas() {
@@ -414,6 +423,18 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         this.grupoSeleccionado = grupoSeleccionado;
     }
 
+    public String getMensajeValidacionDialogo() {
+        return mensajeValidacionDialogo;
+    }
+
+    public String getMensajeErrorDialogo() {
+        return mensajeErrorDialogo;
+    }
+
+    public String getMensajeExitoDialogo() {
+        return mensajeExitoDialogo;
+    }
+
     public void setPersonaServiceFacade(PersonaServiceFacade personaServiceFacade) {
         this.personaServiceFacade = personaServiceFacade;
     }
@@ -421,6 +442,20 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
     public void setEventoCapacitacionServiceFacade(
             EventoCapacitacionServiceFacade eventoCapacitacionServiceFacade) {
         this.eventoCapacitacionServiceFacade = eventoCapacitacionServiceFacade;
+    }
+
+    private void mostrarDialogo(String widgetVar) {
+        RequestContext.getCurrentInstance().execute("PF('" + widgetVar + "').show()");
+    }
+
+    private void mostrarDialogoError(String mensaje) {
+        mensajeErrorDialogo = mensaje;
+        mostrarDialogo("dlgNuevaAltaError");
+    }
+
+    private void mostrarDialogoExito(String mensaje) {
+        mensajeExitoDialogo = mensaje;
+        mostrarDialogo("dlgNuevaAltaExito");
     }
 
 }
