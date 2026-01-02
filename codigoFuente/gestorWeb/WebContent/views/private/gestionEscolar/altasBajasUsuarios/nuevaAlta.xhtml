@@ -25,7 +25,8 @@
                                                styleClass="requerido bloque" />
                                 <p:inputText id="txtMatriculaImportar"
                                              styleClass="form-control"
-                                             style="width: 100%;" />
+                                             style="width: 100%;"
+                                             value="#{nuevaAltaUsuariosBean.matriculaNuevaAlta}" />
                             </div>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <p:outputLabel for="somFuenteExterna"
@@ -47,7 +48,9 @@
                     <div class="row" style="margin-top: 20px;">
                         <div class="col-md-12 text-right">
                             <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.btn.importar')}"
-                                             type="button"
+                                             action="#{nuevaAltaUsuariosBean.importarDesdeFuenteExterna}"
+                                             update="@form"
+                                             process="@form"
                                              styleClass="btn btn-primary" />
                         </div>
                     </div>
