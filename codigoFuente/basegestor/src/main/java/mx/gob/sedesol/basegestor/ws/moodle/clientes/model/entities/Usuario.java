@@ -31,7 +31,7 @@ public class Usuario {
     private String department;
     private String institution;
     private String idnumber;
-    private int interests;
+    private String interests;
     private int firstaccess;
     private String lastaccess;
     private String description;
@@ -295,14 +295,14 @@ public class Usuario {
     /**
      * @return the interests
      */
-    public int getInterests() {
+    public String getInterests() {
         return interests;
     }
 
     /**
      * @param interests the interests to set
      */
-    public void setInterests(int interests) {
+    public void setInterests(String interests) {
         this.interests = interests;
     }
 
