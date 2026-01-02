@@ -458,4 +458,21 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         mostrarDialogo("dlgNuevaAltaExito");
     }
 
+    public void importarDesdeFuenteExterna() {
+        try {
+            if (ObjectUtils.isNull(fuenteExternaSeleccionada) || esVacio(fuenteExternaSeleccionada)) {
+                throw new IllegalArgumentException("Se requiere seleccionar una fuente externa.");
+            }
+            if (esVacio(matriculaNuevaAlta)) {
+                throw new IllegalArgumentException("La matrícula es obligatoria.");
+            }
+
+            personaServiceFacade.importarPersonaSigeDesdeFuente(fuenteExternaSeleccionada,
+                    matriculaNuevaAlta.trim());
+            mostrarDialogoExito("Información importada correctamente");
+        } catch (Exception e) {
+            LOGGER.error("Error al importar desde fuente externa", e);
+            mostrarDialogoError(e.getMessage());
+        }
+    }
 }

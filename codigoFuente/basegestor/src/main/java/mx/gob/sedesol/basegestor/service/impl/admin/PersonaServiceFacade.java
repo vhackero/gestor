@@ -20,6 +20,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.RolDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.TipoDiscapacidadDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.SelectImportarDTO;
+import mx.gob.sedesol.basegestor.model.entities.admin.TblPersonaSige;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.AsentamientoService;
 import mx.gob.sedesol.basegestor.service.admin.DiscapacidadService;
@@ -31,6 +32,7 @@ import mx.gob.sedesol.basegestor.service.admin.PersonaCorreoService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaRolesService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaTelefonoService;
+import mx.gob.sedesol.basegestor.service.admin.PersonaSigeService;
 import mx.gob.sedesol.basegestor.service.admin.RoleService;
 import mx.gob.sedesol.basegestor.service.admin.UsuarioDatosLaboralesService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.UsuariosImportarService;
@@ -79,6 +81,9 @@ public class PersonaServiceFacade {
 	
 	@Autowired
 	private UsuariosImportarService usuariosImportarService;
+
+	@Autowired
+	private PersonaSigeService personaSigeService;
 
 	
 	public List<PaisDTO> obtenerPaises() {
@@ -187,6 +192,10 @@ public class PersonaServiceFacade {
 	
 	public List<PersonaSigeDTO> consultaPersonasImportar(String fuenteExterna, String convocatoria) {
 		return usuariosImportarService.consultaPersonasImportar(fuenteExterna, convocatoria);
+	}
+
+	public TblPersonaSige importarPersonaSigeDesdeFuente(String idFuenteExterna, String matricula) throws Exception {
+		return personaSigeService.importarDesdeFuenteExterna(idFuenteExterna, matricula);
 	}
 
 	public String obtenerRutaAlmacenamientoFotosUsuario() {
