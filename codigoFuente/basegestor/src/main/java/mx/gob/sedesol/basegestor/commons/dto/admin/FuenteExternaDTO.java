@@ -10,6 +10,7 @@ public class FuenteExternaDTO implements Serializable {
     private String nombre;
     private String servidor;
     private String usuario;
+    private String contrasena;
     private String alias;
     private String nombreBaseDatos;
     private String consulta;
@@ -44,6 +45,14 @@ public class FuenteExternaDTO implements Serializable {
 
     public void setUsuario(String usuario) {
         this.usuario = usuario;
+    }
+
+    public String getContrasena() {
+        return contrasena;
+    }
+
+    public void setContrasena(String contrasena) {
+        this.contrasena = contrasena;
     }
 
     public String getAlias() {

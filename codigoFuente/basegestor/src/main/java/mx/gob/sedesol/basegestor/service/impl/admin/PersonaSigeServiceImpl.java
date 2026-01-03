@@ -22,7 +22,7 @@ import mx.gob.sedesol.basegestor.service.admin.PersonaSigeService;
 @Service("personaSigeService")
 public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDTO> implements PersonaSigeService{
 	
-	private static final Logger logger = Logger.getLogger(PersonaServiceImpl.class);
+	private static final Logger logger = Logger.getLogger(PersonaSigeServiceImpl.class);
 	
 	@Autowired
 	private PersonaSigeRepo personaSigeRepo;

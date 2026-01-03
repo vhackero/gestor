@@ -26,6 +26,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.FuenteExternaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
@@ -141,7 +142,9 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
             }
         } catch (Exception e) {
             LOGGER.error("Error al importar datos desde fuente externa", e);
-            agregarMsgError(e.getMessage(), null);
+            String mensaje = ObjectUtils.isNullOrEmpty(e.getMessage()) ? "Error al importar datos desde fuente externa"
+                    : e.getMessage();
+            agregarMsgError(mensaje, null);
         }
     }
 
@@ -387,14 +390,39 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         }
     }
 
+    private int contarOcurrencias(String cadena, String subcadena) {
+        if (esVacio(cadena) || esVacio(subcadena)) {
+            return 0;
+        }
+        int contador = 0;
+        int indice = cadena.indexOf(subcadena);
+        while (indice != -1) {
+            contador++;
+            indice = cadena.indexOf(subcadena, indice + subcadena.length());
+        }
+        return contador;
+    }
+
+    private int contarOcurrenciasIgnoreCase(String cadena, String subcadena) {
+        if (cadena == null || subcadena == null) {
+            return 0;
+        }
+        return contarOcurrencias(cadena.toLowerCase(), subcadena.toLowerCase());
+    }
+
     private String normalizarConsulta(String consulta) {
-        if (consulta.contains("?")) {
-            return consulta;
+        if (esVacio(consulta)) {
+            return null;
         }
-        if (consulta.toLowerCase().contains(":matricula")) {
-            return consulta.replaceAll("(?i):matricula", "?");
+        int numInterrogaciones = contarOcurrencias(consulta, "?");
+        int numMatricula = contarOcurrenciasIgnoreCase(consulta, ":matricula");
+        int numUsuario = contarOcurrenciasIgnoreCase(consulta, ":usuario");
+        int totalParametros = numInterrogaciones + numMatricula + numUsuario;
+        if (totalParametros != 1) {
+            return null;
         }
-        return null;
+        String consultaNormalizada = consulta.replaceAll("(?i):matricula", "?").replaceAll("(?i):usuario", "?");
+        return consultaNormalizada;
     }
 
     private Connection crearConexion(FuenteExternaDTO fuente) throws SQLException {
@@ -414,23 +442,11 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         if (!esVacio(fuente.getUsuario())) {
             propiedades.put("user", fuente.getUsuario());
         }
-        String password = obtenerPassword(fuente.getAlias());
+        String password = fuente.getContrasena();
         if (!esVacio(password)) {
             propiedades.put("password", password);
         }
         return DriverManager.getConnection(url, propiedades);
-    }
-
-    private String obtenerPassword(String alias) {
-        if (esVacio(alias)) {
-            return null;
-        }
-        String porPropiedad = System.getProperty("fuente.externa." + alias + ".password");
-        if (!esVacio(porPropiedad)) {
-            return porPropiedad;
-        }
-        String porAmbiente = System.getenv("FUENTE_EXTERNA_" + alias.toUpperCase() + "_PASSWORD");
-        return porAmbiente;
     }
 
     private PersonaSigeDTO mapearPersonaSige(ResultSet rs) throws SQLException {
@@ -446,8 +462,14 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         persona.setFechaNacimiento(obtenerFecha(rs, "fecha_nacimiento", "fecha_nacimiento_sige"));
         persona.setCurp(obtenerString(rs, "curp", "curp_sige"));
         persona.setNivelSige(obtenerString(rs, "nivel", "nivel_sige"));
-        persona.setPersonaIdSige(obtenerEntero(rs, "persona_id", "persona_id_sige"));
-        persona.setPerfilIdSige(obtenerEntero(rs, "perfil_id", "perfil_id_sige"));
+        Integer personaId = obtenerEntero(rs, "persona_id", "persona_id_sige");
+        Integer perfilId = obtenerEntero(rs, "perfil_id", "perfil_id_sige");
+        if (personaId != null) {
+            persona.setPersonaIdSige(personaId);
+        }
+        if (perfilId != null) {
+            persona.setPerfilIdSige(perfilId);
+        }
         return persona;
     }
 
@@ -470,13 +492,16 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         return null;
     }
 
-    private int obtenerEntero(ResultSet rs, String... columnas) throws SQLException {
+    private Integer obtenerEntero(ResultSet rs, String... columnas) throws SQLException {
         for (String columna : columnas) {
             if (tieneColumna(rs, columna)) {
-                return rs.getInt(columna);
+                Object valor = rs.getObject(columna);
+                if (valor instanceof Number) {
+                    return ((Number) valor).intValue();
+                }
             }
         }
-        return 0;
+        return null;
     }
 
     private boolean tieneColumna(ResultSet rs, String columna) throws SQLException {
@@ -494,13 +519,18 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         PersonaSigeDTO existente = personaSigeService.buscarPorMatricula(personaSige.getMatricula());
         if (ObjectUtils.isNotNull(existente)) {
             personaSige.setIdPersonaSige(existente.getIdPersonaSige());
-            if (ObjectUtils.isNull(personaSigeService.actualizar(personaSige).getDto())) {
-                LOGGER.warn("No se pudo actualizar la información de la persona SIGE");
-            }
+            manejarResultadoPersistencia(personaSigeService.actualizar(personaSige));
         } else {
-            if (ObjectUtils.isNull(personaSigeService.guardar(personaSige).getDto())) {
-                LOGGER.warn("No se pudo guardar la información de la persona SIGE");
-            }
+            manejarResultadoPersistencia(personaSigeService.guardar(personaSige));
+        }
+    }
+
+    private void manejarResultadoPersistencia(ResultadoDTO<PersonaSigeDTO> resultado) {
+        if (ObjectUtils.isNull(resultado) || !resultado.esCorrecto() || ObjectUtils.isNull(resultado.getDto())) {
+            String mensaje = resultado != null && !ObjectUtils.isNullOrEmpty(resultado.getMensajes())
+                    ? resultado.getMensajes().get(0)
+                    : "No se pudo guardar la información de la persona SIGE";
+            throw new RuntimeException(mensaje);
         }
     }
 

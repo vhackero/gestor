@@ -72,7 +72,7 @@ public class UsuariosImportarRepo implements IUsuariosImportarRepo {
 
 	@Override
 	public FuenteExternaDTO buscarFuenteExternaPorId(Integer idFuente) {
-		String consulta = "SELECT id_fuente_externa, nombre, servidor, usuario, alias, nombre_base_datos, consulta "
+		String consulta = "SELECT id_fuente_externa, nombre, servidor, usuario, contrasena, alias, nombre_base_datos, consulta "
 				+ "FROM cat_fuentes_externas WHERE activo = 1 AND id_fuente_externa = :idFuente";
 		Query query = entityManager.createNativeQuery(consulta);
 		query.setParameter("idFuente", idFuente);
@@ -86,9 +86,10 @@ public class UsuariosImportarRepo implements IUsuariosImportarRepo {
 		dto.setNombre(fila[1] != null ? fila[1].toString() : null);
 		dto.setServidor(fila[2] != null ? fila[2].toString() : null);
 		dto.setUsuario(fila[3] != null ? fila[3].toString() : null);
-		dto.setAlias(fila[4] != null ? fila[4].toString() : null);
-		dto.setNombreBaseDatos(fila[5] != null ? fila[5].toString() : null);
-		dto.setConsulta(fila[6] != null ? fila[6].toString() : null);
+		dto.setContrasena(fila[4] != null ? fila[4].toString() : null);
+		dto.setAlias(fila[5] != null ? fila[5].toString() : null);
+		dto.setNombreBaseDatos(fila[6] != null ? fila[6].toString() : null);
+		dto.setConsulta(fila[7] != null ? fila[7].toString() : null);
 		return dto;
 	}
 
