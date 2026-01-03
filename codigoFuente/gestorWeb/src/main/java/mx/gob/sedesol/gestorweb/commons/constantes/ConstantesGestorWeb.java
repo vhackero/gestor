@@ -411,6 +411,7 @@ public final class ConstantesGestorWeb {
 	public static final String NAVEGA_MIS_CONVOCATORIAS = "MIS_CONVOCATORIAS";
 	public static final String NAVEGA_MIS_INSCRIPCIONES = "MIS_INSCRIPCIONES";
 	public static final String NAVEGA_MIS_DISPERSIONES = "MIS_DISPERSIONES";
+	public static final String NAVEGA_MIS_MATRICULACIONES = "MIS_MATRICULACIONES";
 
 	public static final String NAVEGA_INSCRIPCION = "INSCRIPCION";
 	public static final String NAVEGA_REENVIO_CORREO = "REENVIO_CORREO";

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+		<li>#{sistema.obtenerTexto('gw.alumno.matriculacionmasiva.titulo')}</li>
+	</ui:define>
+
+<ui:define name="content">
+		<h:form id="frmMatriculacionMasiva" enctype="multipart/form-data">
+			<h1>#{sistema.obtenerTexto('gw.alumno.matriculacionmasiva.titulo')}</h1>
+
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+
+			<p:messages id="msgs" closable="true" showDetail="true" severity="info,error,fatal" />
+			
+			<p:confirmDialog widgetVar="dlgConfirmMatriculacion" showEffect="fade" hideEffect="fade" width="400">
+				<f:facet name="message">
+					<h:panelGroup>
+						<h:outputText value="¿Desea matricular masivamente a los usuarios del archivo?" />
+					</h:panelGroup>
+				</f:facet>
+				<p:commandButton value="Aceptar" type="button" styleClass="btn btn-primary"
+					icon="fa fa-check"
+					onclick="PF('dlgConfirmMatriculacion').hide(); document.getElementById('#{p:component('btnProcesarMatricula')}').click(); return false;" />
+				<p:commandButton value="Cancelar" type="button" styleClass="btn btn-default"
+					icon="fa fa-close" onclick="PF('dlgConfirmMatriculacion').hide();" />
+			</p:confirmDialog>
+			
+			<p:dialog widgetVar="dlgProcesandoMatricula" modal="true" closable="false" draggable="false"
+				resizable="false" showHeader="false" width="260">
+				<div style="text-align:center; padding:10px;">
+					<i class="fa fa-spinner fa-spin fa-3x" aria-hidden="true"></i>
+					<h:outputText value="Procesando matrícula..." styleClass="bloque" />
+				</div>
+			</p:dialog>
+
+			<div class="row" style="margin-bottom: 10px;">
+				<div class="col-md-12 text-right">
+					<span style="margin-right: 10px;">Descargar:</span>
+					<p:commandButton value="Plantilla" ajax="false" process="@this" update="msgs" styleClass="btn btn-primary">
+						<p:fileDownload value="#{matriculacionMasivaUsuariosBean.plantilla}" />
+					</p:commandButton>
+				</div>
+			</div>
+
+			<p:panel header="Eventos por periodo" styleClass="panel-default">
+				<div class="row">
+					<div class="col-md-6">
+						<h:outputLabel for="periodos" styleClass="requerido">Periodos:</h:outputLabel>
+						<p:selectOneMenu id="periodos" style="width:100%;"
+							value="#{matriculacionMasivaUsuariosBean.periodoSeleccionado}">
+							<p:ajax event="change" listener="#{matriculacionMasivaUsuariosBean.generarEventosPorPeriodo}"
+								process="@this" update="msgs" />
+							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" noSelectionOption="true" />
+							<f:selectItems value="#{matriculacionMasivaUsuariosBean.periodos}" var="periodo"
+								itemValue="#{periodo.idPeriodo}" itemLabel="#{periodo.nombrePeriodo}" />
+						</p:selectOneMenu>
+					</div>
+					<div class="col-md-3" style="margin-top: 24px;">
+						<p:commandButton value="Descargar" ajax="false" styleClass="btn btn-primary"
+							process="@form" update="msgs">
+							<p:fileDownload value="#{matriculacionMasivaUsuariosBean.reporteEventos}" />
+						</p:commandButton>
+					</div>
+				</div>
+			</p:panel>
+
+			<p:spacer height="15" />
+
+			<p:panel header="Matriculación masiva de usuarios" styleClass="panel-default">
+				<h:panelGroup id="resultadoMatriculacion">
+					<div class="row">
+						<div class="col-md-9">
+							<h:outputText value="Seleccionar archivo (.csv, .xls, .xlsx)" styleClass="bloque" />
+							<p:fileUpload mode="simple" value="#{matriculacionMasivaUsuariosBean.archivoMatriculacion}"
+								allowTypes="/(\\.|\\/)(csv|xls|xlsx)$/i" />
+						</div>
+						<div class="col-md-3" style="margin-top: 24px; display: flex; gap: 10px;">
+							<p:commandButton value="Seleccionar" type="button" styleClass="btn btn-primary"
+								onclick="PF('dlgConfirmMatriculacion').show();" />
+							<p:commandButton id="btnProcesarMatricula" style="display:none" ajax="false" type="submit"
+								process="@form" update="msgs resultadoMatriculacion"
+								onclick="PF('dlgProcesandoMatricula').show();"
+								actionListener="#{matriculacionMasivaUsuariosBean.procesarMatriculacionMasiva}" />
+							<p:commandButton value="Descargar resultado" ajax="false" styleClass="btn btn-default"
+								rendered="#{matriculacionMasivaUsuariosBean.resultadoDisponible}">
+								<p:fileDownload value="#{matriculacionMasivaUsuariosBean.resultadoMatriculacion}" />
+							</p:commandButton>
+						</div>
+					</div>
+					<h:panelGroup rendered="#{matriculacionMasivaUsuariosBean.resultadoDisponible}">
+						<div class="row" style="margin-top:10px;">
+							<div class="col-md-12">
+								<h:outputText value="#{matriculacionMasivaUsuariosBean.resumenMatriculacion}" />
+							</div>
+						</div>
+					</h:panelGroup>
+				</h:panelGroup>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>

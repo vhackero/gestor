@@ -550,6 +550,19 @@
 													<i class="fa fa-users-viewfinder"></i>
 													<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.expedienteEstudiantesGrupo')}</span>
 												</h:commandLink></li>
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('MIS_MATRICULACIONES')}">
+												<sec:authorize
+													access="hasPermission(null, 'MIS_MATRICULACIONES') ">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaMisMatriculaciones}"
+															title="#{sistema.obtenerTexto('gw.sidebar.matriculacionMasiva')}">
+															<i class="fa fa-solid fa-id-card"></i>
+															<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.matriculacionMasiva')}</span>
+
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
 
 
 
