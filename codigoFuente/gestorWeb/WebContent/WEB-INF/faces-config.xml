@@ -614,7 +614,12 @@
 			<to-view-id>/views/private/gestionAprendizaje/alumnoView/busquedaDispersiones</to-view-id>
 			<redirect />
 		</navigation-case>
-
+		
+		<navigation-case>
+			<from-outcome>MIS_MATRICULACIONES</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/matriculacionMasivaUsuarios</to-view-id>
+			<redirect />
+		</navigation-case>
 
 		<!-- ITTIVA 666 MIS INSCRIPCION -->
 		<navigation-case>
