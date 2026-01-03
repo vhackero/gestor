@@ -95,7 +95,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
     public void importarDesdeFuenteExterna() {
         try {
             if (esVacio(matriculaImportar) || esVacio(fuenteExternaSeleccionada)) {
-                agregarMsgWarn("Configurar correctamente los datos de la fuente externa", null);
+                agregarMsgWarn("Capture matrícula y seleccione fuente externa.", null);
                 return;
             }
 
@@ -527,9 +527,14 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
     private void manejarResultadoPersistencia(ResultadoDTO<PersonaSigeDTO> resultado) {
         if (ObjectUtils.isNull(resultado) || !resultado.esCorrecto() || ObjectUtils.isNull(resultado.getDto())) {
-            String mensaje = resultado != null && !ObjectUtils.isNullOrEmpty(resultado.getMensajes())
-                    ? resultado.getMensajes().get(0)
-                    : "No se pudo guardar la información de la persona SIGE";
+            String mensaje = "No se pudo guardar la información de la persona SIGE";
+            if (resultado != null) {
+                if (!ObjectUtils.isNullOrEmpty(resultado.getMensajes())) {
+                    mensaje = resultado.getMensajes().get(0);
+                } else if (!esVacio(resultado.getMensaje())) {
+                    mensaje = resultado.getMensaje();
+                }
+            }
             throw new RuntimeException(mensaje);
         }
     }
