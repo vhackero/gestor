@@ -1,10 +1,17 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -17,12 +24,15 @@ import org.primefaces.context.RequestContext;
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.FuenteExternaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.SelectImportarDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.service.impl.admin.PersonaServiceFacade;
+import mx.gob.sedesol.basegestor.service.admin.PersonaSigeService;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.EventoCapacitacionServiceFacade;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 
@@ -34,6 +44,9 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
     @ManagedProperty("#{personaServiceFacade}")
     private transient PersonaServiceFacade personaServiceFacade;
+
+    @ManagedProperty("#{personaSigeService}")
+    private transient PersonaSigeService personaSigeService;
 
     @ManagedProperty("#{eventoCapacitacionServiceFacade}")
     private transient EventoCapacitacionServiceFacade eventoCapacitacionServiceFacade;
@@ -49,6 +62,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
     private List<SelectImportarDTO> listaEventos;
     private List<SelectImportarDTO> listaGrupos;
 
+    private String matriculaImportar;
     private String matriculaNuevaAlta;
     private String fuenteExternaSeleccionada;
     private String planSeleccionado;
@@ -75,6 +89,60 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         listaProgramas = new ArrayList<>();
         listaEventos = new ArrayList<>();
         listaGrupos = new ArrayList<>();
+    }
+
+    public void importarDesdeFuenteExterna() {
+        try {
+            if (esVacio(matriculaImportar) || esVacio(fuenteExternaSeleccionada)) {
+                agregarMsgWarn("Configurar correctamente los datos de la fuente externa", null);
+                return;
+            }
+
+            Integer idFuente = parseEntero(fuenteExternaSeleccionada);
+            if (ObjectUtils.isNull(idFuente)) {
+                agregarMsgWarn("Configurar correctamente los datos de la fuente externa", null);
+                return;
+            }
+
+            FuenteExternaDTO fuente = personaServiceFacade.buscarFuenteExternaPorId(idFuente);
+            if (ObjectUtils.isNull(fuente) || esVacio(fuente.getConsulta())) {
+                agregarMsgWarn("Configurar correctamente los datos de la fuente externa", null);
+                return;
+            }
+
+            String consultaNormalizada = normalizarConsulta(fuente.getConsulta());
+            if (consultaNormalizada == null) {
+                agregarMsgWarn("Configurar correctamente los datos de la fuente externa", null);
+                return;
+            }
+
+            try (Connection conexion = crearConexion(fuente)) {
+                if (conexion == null) {
+                    agregarMsgError("No fue posible establecer conexión con la fuente externa.", null);
+                    return;
+                }
+                try (PreparedStatement ps = conexion.prepareStatement(consultaNormalizada)) {
+                    ps.setString(1, matriculaImportar.trim());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) {
+                            agregarMsgWarn("No se encontró información para la matrícula especificada.", null);
+                            return;
+                        }
+                        PersonaSigeDTO personaSige = mapearPersonaSige(rs);
+                        if (ObjectUtils.isNull(personaSige) || esVacio(personaSige.getMatricula())) {
+                            agregarMsgWarn("Configurar correctamente los datos de la fuente externa", null);
+                            return;
+                        }
+                        guardarPersonaSige(personaSige);
+                        matriculaNuevaAlta = personaSige.getMatricula();
+                        agregarMsgInfo("Información importada correctamente", null);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error al importar datos desde fuente externa", e);
+            agregarMsgError(e.getMessage(), null);
+        }
     }
 
     public void onPlanChange() {
@@ -319,6 +387,123 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         }
     }
 
+    private String normalizarConsulta(String consulta) {
+        if (consulta.contains("?")) {
+            return consulta;
+        }
+        if (consulta.toLowerCase().contains(":matricula")) {
+            return consulta.replaceAll("(?i):matricula", "?");
+        }
+        return null;
+    }
+
+    private Connection crearConexion(FuenteExternaDTO fuente) throws SQLException {
+        String url = fuente.getServidor();
+        if (ObjectUtils.isNull(url) || url.trim().isEmpty()) {
+            return null;
+        }
+        if (!url.toLowerCase().startsWith("jdbc:")) {
+            StringBuilder urlBuilder = new StringBuilder("jdbc:mysql://");
+            urlBuilder.append(url.trim());
+            if (!esVacio(fuente.getNombreBaseDatos())) {
+                urlBuilder.append("/").append(fuente.getNombreBaseDatos().trim());
+            }
+            url = urlBuilder.toString();
+        }
+        Properties propiedades = new Properties();
+        if (!esVacio(fuente.getUsuario())) {
+            propiedades.put("user", fuente.getUsuario());
+        }
+        String password = obtenerPassword(fuente.getAlias());
+        if (!esVacio(password)) {
+            propiedades.put("password", password);
+        }
+        return DriverManager.getConnection(url, propiedades);
+    }
+
+    private String obtenerPassword(String alias) {
+        if (esVacio(alias)) {
+            return null;
+        }
+        String porPropiedad = System.getProperty("fuente.externa." + alias + ".password");
+        if (!esVacio(porPropiedad)) {
+            return porPropiedad;
+        }
+        String porAmbiente = System.getenv("FUENTE_EXTERNA_" + alias.toUpperCase() + "_PASSWORD");
+        return porAmbiente;
+    }
+
+    private PersonaSigeDTO mapearPersonaSige(ResultSet rs) throws SQLException {
+        PersonaSigeDTO persona = new PersonaSigeDTO();
+        persona.setMatricula(obtenerString(rs, "matricula", "matricula_sige"));
+        persona.setPassword(obtenerString(rs, "password", "password_sige"));
+        persona.setNombre(obtenerString(rs, "nombre", "nombre_sige"));
+        persona.setApellidoPaterno(obtenerString(rs, "apellido_paterno", "apellidop_sige"));
+        persona.setApellidoMaterno(obtenerString(rs, "apellido_materno", "apellidom_sige"));
+        persona.setProgramaEducativo(obtenerString(rs, "programa_educativo", "programa_educativo_sige"));
+        persona.setDivision(obtenerString(rs, "division", "division_sige"));
+        persona.setCorreoInstitucional(obtenerString(rs, "correo_institucional", "correo_institucional_sige"));
+        persona.setFechaNacimiento(obtenerFecha(rs, "fecha_nacimiento", "fecha_nacimiento_sige"));
+        persona.setCurp(obtenerString(rs, "curp", "curp_sige"));
+        persona.setNivelSige(obtenerString(rs, "nivel", "nivel_sige"));
+        persona.setPersonaIdSige(obtenerEntero(rs, "persona_id", "persona_id_sige"));
+        persona.setPerfilIdSige(obtenerEntero(rs, "perfil_id", "perfil_id_sige"));
+        return persona;
+    }
+
+    private String obtenerString(ResultSet rs, String... columnas) throws SQLException {
+        for (String columna : columnas) {
+            if (tieneColumna(rs, columna)) {
+                return rs.getString(columna);
+            }
+        }
+        return null;
+    }
+
+    private Date obtenerFecha(ResultSet rs, String... columnas) throws SQLException {
+        for (String columna : columnas) {
+            if (tieneColumna(rs, columna)) {
+                java.sql.Date fecha = rs.getDate(columna);
+                return fecha != null ? new Date(fecha.getTime()) : null;
+            }
+        }
+        return null;
+    }
+
+    private int obtenerEntero(ResultSet rs, String... columnas) throws SQLException {
+        for (String columna : columnas) {
+            if (tieneColumna(rs, columna)) {
+                return rs.getInt(columna);
+            }
+        }
+        return 0;
+    }
+
+    private boolean tieneColumna(ResultSet rs, String columna) throws SQLException {
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnas = metaData.getColumnCount();
+        for (int i = 1; i <= columnas; i++) {
+            if (columna.equalsIgnoreCase(metaData.getColumnLabel(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void guardarPersonaSige(PersonaSigeDTO personaSige) {
+        PersonaSigeDTO existente = personaSigeService.buscarPorMatricula(personaSige.getMatricula());
+        if (ObjectUtils.isNotNull(existente)) {
+            personaSige.setIdPersonaSige(existente.getIdPersonaSige());
+            if (ObjectUtils.isNull(personaSigeService.actualizar(personaSige).getDto())) {
+                LOGGER.warn("No se pudo actualizar la información de la persona SIGE");
+            }
+        } else {
+            if (ObjectUtils.isNull(personaSigeService.guardar(personaSige).getDto())) {
+                LOGGER.warn("No se pudo guardar la información de la persona SIGE");
+            }
+        }
+    }
+
     public List<SelectImportarDTO> getListaFuentesExternas() {
         return listaFuentesExternas;
     }
@@ -357,6 +542,14 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
     public void setMatriculaNuevaAlta(String matriculaNuevaAlta) {
         this.matriculaNuevaAlta = matriculaNuevaAlta;
+    }
+
+    public String getMatriculaImportar() {
+        return matriculaImportar;
+    }
+
+    public void setMatriculaImportar(String matriculaImportar) {
+        this.matriculaImportar = matriculaImportar;
     }
 
     public String getFuenteExternaSeleccionada() {
@@ -437,6 +630,10 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
     public void setPersonaServiceFacade(PersonaServiceFacade personaServiceFacade) {
         this.personaServiceFacade = personaServiceFacade;
+    }
+
+    public void setPersonaSigeService(PersonaSigeService personaSigeService) {
+        this.personaSigeService = personaSigeService;
     }
 
     public void setEventoCapacitacionServiceFacade(

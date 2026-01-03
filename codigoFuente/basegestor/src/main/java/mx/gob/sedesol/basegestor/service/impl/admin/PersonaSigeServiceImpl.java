@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.utils.MensajesErrorEnum;
+import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
 import mx.gob.sedesol.basegestor.model.entities.admin.TblPersonaSige;
 import mx.gob.sedesol.basegestor.model.repositories.admin.PersonaSigeRepo;
 import mx.gob.sedesol.basegestor.service.admin.ComunValidacionService;
@@ -55,23 +57,49 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 	}
 	@Override
 	public PersonaSigeDTO buscarPorId(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		TblPersonaSige entidad = personaSigeRepo.findOne(id);
+		return entidad != null ? mapper.map(entidad, PersonaSigeDTO.class) : null;
 	}
 	@Override
 	public ResultadoDTO<PersonaSigeDTO> guardar(PersonaSigeDTO dto) {
-		// TODO Auto-generated method stub
-		return null;
+		ResultadoDTO<PersonaSigeDTO> resultado = new ResultadoDTO<>();
+		try {
+			TblPersonaSige entidad = mapper.map(dto, TblPersonaSige.class);
+			TblPersonaSige guardada = personaSigeRepo.save(entidad);
+			resultado.setDto(mapper.map(guardada, PersonaSigeDTO.class));
+		} catch (Exception e) {
+			logger.error("Error al guardar persona sige", e);
+			resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+			resultado.setMensajeError(MensajesErrorEnum.ERROR_PERSISTENCIA_DATOS, e.getMessage());
+		}
+		return resultado;
 	}
 	@Override
 	public ResultadoDTO<PersonaSigeDTO> actualizar(PersonaSigeDTO dto) {
-		// TODO Auto-generated method stub
-		return null;
+		ResultadoDTO<PersonaSigeDTO> resultado = new ResultadoDTO<>();
+		try {
+			TblPersonaSige entidad = mapper.map(dto, TblPersonaSige.class);
+			TblPersonaSige actualizada = personaSigeRepo.save(entidad);
+			resultado.setDto(mapper.map(actualizada, PersonaSigeDTO.class));
+		} catch (Exception e) {
+			logger.error("Error al actualizar persona sige", e);
+			resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+			resultado.setMensajeError(MensajesErrorEnum.ERROR_PERSISTENCIA_DATOS, e.getMessage());
+		}
+		return resultado;
 	}
 	@Override
 	public ResultadoDTO<PersonaSigeDTO> eliminar(PersonaSigeDTO dto) {
-		// TODO Auto-generated method stub
-		return null;
+		ResultadoDTO<PersonaSigeDTO> resultado = new ResultadoDTO<>();
+		try {
+			TblPersonaSige entidad = mapper.map(dto, TblPersonaSige.class);
+			personaSigeRepo.delete(entidad);
+		} catch (Exception e) {
+			logger.error("Error al eliminar persona sige", e);
+			resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+			resultado.setMensajeError(MensajesErrorEnum.ERROR_ELIMINAR_REGISTRO, e.getMessage());
+		}
+		return resultado;
 	}
 	@Override
 	public void validarPersistencia(PersonaSigeDTO dto, ResultadoDTO<PersonaSigeDTO> resultado) {
@@ -121,6 +149,12 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 		}
 		
 		return listaPersonas;
+	}
+
+	@Override
+	public PersonaSigeDTO buscarPorMatricula(String matricula) {
+		TblPersonaSige entidad = personaSigeRepo.findByMatricula(matricula);
+		return entidad != null ? mapper.map(entidad, PersonaSigeDTO.class) : null;
 	}
 	
 }
