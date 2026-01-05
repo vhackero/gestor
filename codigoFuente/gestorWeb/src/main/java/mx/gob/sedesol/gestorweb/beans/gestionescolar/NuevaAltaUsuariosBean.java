@@ -93,50 +93,97 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
     }
 
     public void importarDesdeFuenteExterna() {
+        String traceId = "IMP-" + System.currentTimeMillis();
         try {
+            LOGGER.info(String.format("[%s] Iniciando importación. Matricula: %s, Fuente seleccionada: %s", traceId,
+                    matriculaImportar != null ? matriculaImportar.trim() : null, fuenteExternaSeleccionada));
             if (esVacio(matriculaImportar) || esVacio(fuenteExternaSeleccionada)) {
                 agregarMsgWarn("Capture matrícula y seleccione fuente externa.", null);
+                LOGGER.warn(String.format("[%s] Faltan datos de entrada para importar.", traceId));
                 return;
             }
 
             Integer idFuente = parseEntero(fuenteExternaSeleccionada);
             if (ObjectUtils.isNull(idFuente)) {
-                agregarMsgWarn("Configurar correctamente los datos de la fuente externa", null);
+                agregarMsgWarn("Fuente externa inválida.", null);
+                LOGGER.warn(String.format("[%s] No se pudo parsear la fuente externa seleccionada: %s", traceId,
+                        fuenteExternaSeleccionada));
                 return;
             }
+            LOGGER.info(String.format("[%s] Fuente externa parseada. idFuente=%s", traceId, idFuente));
 
             FuenteExternaDTO fuente = personaServiceFacade.buscarFuenteExternaPorId(idFuente);
-            if (ObjectUtils.isNull(fuente) || esVacio(fuente.getConsulta())) {
-                agregarMsgWarn("Configurar correctamente los datos de la fuente externa", null);
+            if (ObjectUtils.isNull(fuente)) {
+                agregarMsgWarn("No se encontró la configuración de la fuente externa.", null);
+                LOGGER.warn(String.format("[%s] Fuente externa no encontrada. idFuente=%s", traceId, idFuente));
                 return;
             }
+            if (esVacio(fuente.getConsulta())) {
+                agregarMsgWarn("La fuente externa no tiene consulta configurada.", null);
+                LOGGER.warn(String.format("[%s] Consulta vacía para fuente id=%s", traceId, idFuente));
+                return;
+            }
+            LOGGER.info(String.format("[%s] Fuente obtenida. id=%s, nombre=%s, servidor=%s, usuario=%s, alias=%s, base=%s, consultaLen=%d, consultaPreview=%s",
+                    traceId, fuente.getId(), fuente.getNombre(), enmascararServidor(fuente.getServidor()),
+                    esVacio(fuente.getUsuario()) ? "N/A" : fuente.getUsuario(),
+                    esVacio(fuente.getAlias()) ? "N/A" : fuente.getAlias(),
+                    esVacio(fuente.getNombreBaseDatos()) ? "N/A" : fuente.getNombreBaseDatos(),
+                    fuente.getConsulta() != null ? fuente.getConsulta().length() : 0,
+                    truncar(fuente.getConsulta(), 200)));
 
             String consultaNormalizada = normalizarConsulta(fuente.getConsulta());
             if (consultaNormalizada == null) {
+                int numInterrogaciones = contarOcurrencias(fuente.getConsulta(), "?");
+                int numMatricula = contarOcurrenciasIgnoreCase(fuente.getConsulta(), ":matricula");
+                int numUsuario = contarOcurrenciasIgnoreCase(fuente.getConsulta(), ":usuario");
+                LOGGER.warn(String.format(
+                        "[%s] Consulta inválida. Parámetros encontrados -> ?: %d, :matricula: %d, :usuario: %d",
+                        traceId, numInterrogaciones, numMatricula, numUsuario));
                 agregarMsgWarn("Configurar correctamente los datos de la fuente externa", null);
                 return;
             }
+            LOGGER.info(String.format("[%s] Consulta normalizada lista. Preview=%s", traceId,
+                    truncar(consultaNormalizada, 200)));
 
             try (Connection conexion = crearConexion(fuente)) {
                 if (conexion == null) {
-                    agregarMsgError("No fue posible establecer conexión con la fuente externa.", null);
+                    agregarMsgError("No se pudo construir la conexión con la fuente externa.", null);
+                    LOGGER.warn(String.format("[%s] No se pudo construir la conexión (servidor vacío).", traceId));
                     return;
                 }
+                String urlConexion = construirUrlConexion(fuente);
+                LOGGER.info(String.format("[%s] Conexión creada. url=%s, userPresent=%s, passwordPresent=%s, passwordLength=%d",
+                        traceId, enmascararServidor(urlConexion), !esVacio(fuente.getUsuario()),
+                        fuente.getContrasena() != null, fuente.getContrasena() != null ? fuente.getContrasena().length() : 0));
                 try (PreparedStatement ps = conexion.prepareStatement(consultaNormalizada)) {
                     ps.setString(1, matriculaImportar.trim());
+                    LOGGER.info(String.format("[%s] Ejecutando consulta. SQL=%s, parametro1=%s", traceId,
+                            truncar(consultaNormalizada, 200), matriculaImportar.trim()));
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) {
                             agregarMsgWarn("No se encontró información para la matrícula especificada.", null);
+                            LOGGER.warn(String.format("[%s] ResultSet vacío para matrícula %s", traceId,
+                                    matriculaImportar.trim()));
                             return;
                         }
+                        LOGGER.info(String.format("[%s] ResultSet con datos. Columnas=%s", traceId,
+                                obtenerColumnas(rs)));
                         PersonaSigeDTO personaSige = mapearPersonaSige(rs);
                         if (ObjectUtils.isNull(personaSige) || esVacio(personaSige.getMatricula())) {
                             agregarMsgWarn("Configurar correctamente los datos de la fuente externa", null);
+                            LOGGER.warn(String.format("[%s] PersonaSige mapeada sin matrícula.", traceId));
                             return;
                         }
-                        guardarPersonaSige(personaSige);
+                        LOGGER.info(String.format(
+                                "[%s] Persona mapeada. Matricula=%s, Nombre=%s, Apellidos=%s %s, Correo=%s", traceId,
+                                personaSige.getMatricula(), personaSige.getNombre(),
+                                personaSige.getApellidoPaterno(), personaSige.getApellidoMaterno(),
+                                personaSige.getCorreoInstitucional()));
+                        guardarPersonaSige(personaSige, traceId);
                         matriculaNuevaAlta = personaSige.getMatricula();
                         agregarMsgInfo("Información importada correctamente", null);
+                        LOGGER.info(String.format("[%s] Importación exitosa para matrícula %s", traceId,
+                                matriculaNuevaAlta));
                     }
                 }
             }
@@ -421,22 +468,13 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         if (totalParametros != 1) {
             return null;
         }
-        String consultaNormalizada = consulta.replaceAll("(?i):matricula", "?").replaceAll("(?i):usuario", "?");
-        return consultaNormalizada;
+        return consulta.replaceAll("(?i):matricula", "?").replaceAll("(?i):usuario", "?");
     }
 
     private Connection crearConexion(FuenteExternaDTO fuente) throws SQLException {
-        String url = fuente.getServidor();
-        if (ObjectUtils.isNull(url) || url.trim().isEmpty()) {
+        String url = construirUrlConexion(fuente);
+        if (url == null) {
             return null;
-        }
-        if (!url.toLowerCase().startsWith("jdbc:")) {
-            StringBuilder urlBuilder = new StringBuilder("jdbc:mysql://");
-            urlBuilder.append(url.trim());
-            if (!esVacio(fuente.getNombreBaseDatos())) {
-                urlBuilder.append("/").append(fuente.getNombreBaseDatos().trim());
-            }
-            url = urlBuilder.toString();
         }
         Properties propiedades = new Properties();
         if (!esVacio(fuente.getUsuario())) {
@@ -515,12 +553,66 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         return false;
     }
 
-    private void guardarPersonaSige(PersonaSigeDTO personaSige) {
+    private String obtenerColumnas(ResultSet rs) throws SQLException {
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnas = metaData.getColumnCount();
+        List<String> nombres = new ArrayList<>();
+        for (int i = 1; i <= columnas; i++) {
+            nombres.add(metaData.getColumnLabel(i));
+        }
+        return nombres.toString();
+    }
+
+    private String construirUrlConexion(FuenteExternaDTO fuente) {
+        String url = fuente.getServidor();
+        if (ObjectUtils.isNull(url) || url.trim().isEmpty()) {
+            return null;
+        }
+        if (!url.toLowerCase().startsWith("jdbc:")) {
+            StringBuilder urlBuilder = new StringBuilder("jdbc:mysql://");
+            urlBuilder.append(url.trim());
+            if (!esVacio(fuente.getNombreBaseDatos())) {
+                urlBuilder.append("/").append(fuente.getNombreBaseDatos().trim());
+            }
+            url = urlBuilder.toString();
+        }
+        return url;
+    }
+
+    private String truncar(String valor, int max) {
+        if (valor == null) {
+            return null;
+        }
+        return valor.length() > max ? valor.substring(0, max) + "..." : valor;
+    }
+
+    private String enmascararServidor(String url) {
+        if (esVacio(url)) {
+            return url;
+        }
+        try {
+            int idxParams = url.indexOf("?");
+            String sinParametros = idxParams > 0 ? url.substring(0, idxParams) : url;
+            int idxCred = sinParametros.indexOf("@");
+            if (idxCred > 0) {
+                sinParametros = sinParametros.substring(idxCred + 1);
+            }
+            return truncar(sinParametros, 200);
+        } catch (Exception e) {
+            return truncar(url, 200);
+        }
+    }
+
+    private void guardarPersonaSige(PersonaSigeDTO personaSige, String traceId) {
         PersonaSigeDTO existente = personaSigeService.buscarPorMatricula(personaSige.getMatricula());
         if (ObjectUtils.isNotNull(existente)) {
             personaSige.setIdPersonaSige(existente.getIdPersonaSige());
+            LOGGER.info(String.format("[%s] Actualizando persona SIGE existente para matrícula %s", traceId,
+                    personaSige.getMatricula()));
             manejarResultadoPersistencia(personaSigeService.actualizar(personaSige));
         } else {
+            LOGGER.info(String.format("[%s] Insertando nueva persona SIGE para matrícula %s", traceId,
+                    personaSige.getMatricula()));
             manejarResultadoPersistencia(personaSigeService.guardar(personaSige));
         }
     }
@@ -534,6 +626,10 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                 } else if (!esVacio(resultado.getMensaje())) {
                     mensaje = resultado.getMensaje();
                 }
+                LOGGER.error(String.format(
+                        "Fallo en persistencia SIGE. esCorrecto=%s, mensaje=%s, mensajes=%s, mensajeError=%s",
+                        resultado.esCorrecto(), resultado.getMensaje(), resultado.getMensajes(),
+                        resultado.getMensajeError()));
             }
             throw new RuntimeException(mensaje);
         }
