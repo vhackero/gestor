@@ -50,7 +50,7 @@
                             <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.btn.importar')}"
                                              action="#{nuevaAltaUsuariosBean.importarDesdeFuenteExterna}"
                                              process="@form"
-                                             update="@form :frmNuevaAlta"
+                                             update="@form :frmAltasBajas:panelContenido :frmAltasBajas:msgsAltasBajas"
                                              onstart="PF('dialogLayout').show();"
                                              oncomplete="PF('dialogLayout').hide();"
                                              onerror="PF('dialogLayout').hide();"
