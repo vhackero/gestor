@@ -171,9 +171,10 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                                 obtenerColumnas(rs)));
                         PersonaSigeDTO personaSige = mapearPersonaSige(rs);
                         LOGGER.info(String.format(
-                                "[%s] Datos mapeo previo a validación de matrícula. Columnas=%s, username=%s, firstname=%s, lastname=%s, email=%s, password=%s, matriculaFinal=%s",
+                                "[%s] Datos mapeo previo a validación de matrícula. Columnas=%s, username=%s, firstname=%s, lastname=%s, email=%s, passwordPresent=%s, matriculaFinal=%s",
                                 traceId, obtenerColumnas(rs), obtenerString(rs, "username"), obtenerString(rs, "firstname"),
-                                obtenerString(rs, "lastname"), obtenerString(rs, "email"), obtenerString(rs, "password"),
+                                obtenerString(rs, "lastname"), obtenerString(rs, "email"),
+                                !esVacio(obtenerString(rs, "password")),
                                 ObjectUtils.isNull(personaSige) ? null : personaSige.getMatricula()));
                         if (ObjectUtils.isNull(personaSige) || esVacio(personaSige.getMatricula())) {
                             agregarMsgWarn(

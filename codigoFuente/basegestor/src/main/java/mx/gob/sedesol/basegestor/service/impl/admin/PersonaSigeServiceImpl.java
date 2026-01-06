@@ -90,7 +90,7 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 			if (dto.getPerfilIdSige() <= 0) {
 				dto.setPerfilIdSige(0);
 			}
-			TblPersonaSige entidad = mapper.map(dto, TblPersonaSige.class);
+			TblPersonaSige entidad = new TblPersonaSige();
 			copiarCamposImportacion(dto, entidad, true);
 			boolean passwordPresente = dto.getPassword() != null && !dto.getPassword().isEmpty();
 			logger.info(String.format("Insertando persona SIGE matricula=%s passwordPresent=%s personaIdSige=%d perfilIdSige=%d",
