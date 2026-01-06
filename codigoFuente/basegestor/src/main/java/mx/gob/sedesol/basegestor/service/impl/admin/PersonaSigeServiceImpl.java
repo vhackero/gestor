@@ -2,6 +2,7 @@ package mx.gob.sedesol.basegestor.service.impl.admin;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -224,6 +225,31 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 		}
 		if (actualizarIdsSiempre || dto.getPerfilIdSige() > 0) {
 			entidad.setPerfilIdSige(dto.getPerfilIdSige());
+		}
+		aplicarDefaultsNoNulos(entidad);
+	}
+	
+	private void aplicarDefaultsNoNulos(TblPersonaSige entidad) {
+		if (entidad.getCurp() == null) {
+			entidad.setCurp("");
+		}
+		if (entidad.getProgramaEducativo() == null) {
+			entidad.setProgramaEducativo("");
+		}
+		if (entidad.getDivision() == null) {
+			entidad.setDivision("");
+		}
+		if (entidad.getNivelSige() == null) {
+			entidad.setNivelSige("");
+		}
+		if (entidad.getFechaNacimiento() == null) {
+			entidad.setFechaNacimiento(new Date(0L));
+		}
+		if (entidad.getPersonaIdSige() <= 0) {
+			entidad.setPersonaIdSige(0);
+		}
+		if (entidad.getPerfilIdSige() <= 0) {
+			entidad.setPerfilIdSige(0);
 		}
 	}
 	
