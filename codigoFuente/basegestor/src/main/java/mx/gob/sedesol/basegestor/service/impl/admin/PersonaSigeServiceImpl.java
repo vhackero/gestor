@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.log4j.Logger;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.modelmapper.TypeToken;
 import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,16 +38,22 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 	private void initMapper() {
 		mapper.getConfiguration().setAmbiguityIgnored(true);
 		TypeMap<PersonaSigeDTO, TblPersonaSige> dtoToEntity = mapper.createTypeMap(PersonaSigeDTO.class, TblPersonaSige.class);
-		dtoToEntity.addMappings(m -> {
-			m.map(PersonaSigeDTO::getIdPersonaSige, TblPersonaSige::setIdPersonaSige);
-			m.map(PersonaSigeDTO::getPersonaIdSige, TblPersonaSige::setPersonaIdSige);
-			m.map(PersonaSigeDTO::getPerfilIdSige, TblPersonaSige::setPerfilIdSige);
+		dtoToEntity.addMappings(new PropertyMap<PersonaSigeDTO, TblPersonaSige>() {
+			@Override
+			protected void configure() {
+				map().setIdPersonaSige(source.getIdPersonaSige());
+				map().setPersonaIdSige(source.getPersonaIdSige());
+				map().setPerfilIdSige(source.getPerfilIdSige());
+			}
 		});
 		TypeMap<TblPersonaSige, PersonaSigeDTO> entityToDto = mapper.createTypeMap(TblPersonaSige.class, PersonaSigeDTO.class);
-		entityToDto.addMappings(m -> {
-			m.map(TblPersonaSige::getIdPersonaSige, PersonaSigeDTO::setIdPersonaSige);
-			m.map(TblPersonaSige::getPersonaIdSige, PersonaSigeDTO::setPersonaIdSige);
-			m.map(TblPersonaSige::getPerfilIdSige, PersonaSigeDTO::setPerfilIdSige);
+		entityToDto.addMappings(new PropertyMap<TblPersonaSige, PersonaSigeDTO>() {
+			@Override
+			protected void configure() {
+				map().setIdPersonaSige(source.getIdPersonaSige());
+				map().setPersonaIdSige(source.getPersonaIdSige());
+				map().setPerfilIdSige(source.getPerfilIdSige());
+			}
 		});
 	}
 	
