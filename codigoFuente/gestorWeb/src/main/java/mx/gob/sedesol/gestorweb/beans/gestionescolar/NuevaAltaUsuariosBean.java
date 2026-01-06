@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -169,8 +170,16 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                         LOGGER.info(String.format("[%s] ResultSet con datos. Columnas=%s", traceId,
                                 obtenerColumnas(rs)));
                         PersonaSigeDTO personaSige = mapearPersonaSige(rs);
+                        LOGGER.info(String.format(
+                                "[%s] Datos mapeo previo a validación de matrícula. Columnas=%s, username=%s, firstname=%s, lastname=%s, email=%s, passwordPresent=%s, matriculaFinal=%s",
+                                traceId, obtenerColumnas(rs), obtenerString(rs, "username"), obtenerString(rs, "firstname"),
+                                obtenerString(rs, "lastname"), obtenerString(rs, "email"),
+                                !esVacio(obtenerString(rs, "password")),
+                                ObjectUtils.isNull(personaSige) ? null : personaSige.getMatricula()));
                         if (ObjectUtils.isNull(personaSige) || esVacio(personaSige.getMatricula())) {
-                            agregarMsgWarn("Configurar correctamente los datos de la fuente externa", null);
+                            agregarMsgWarn(
+                                    "La fuente externa no devolvió matrícula (se esperaba username). Revise la consulta/mapeo.",
+                                    null);
                             LOGGER.warn(String.format("[%s] PersonaSige mapeada sin matrícula.", traceId));
                             return;
                         }
@@ -489,14 +498,43 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
     private PersonaSigeDTO mapearPersonaSige(ResultSet rs) throws SQLException {
         PersonaSigeDTO persona = new PersonaSigeDTO();
-        persona.setMatricula(obtenerString(rs, "matricula", "matricula_sige"));
+        String matricula = obtenerString(rs, "matricula", "matricula_sige");
+        if (esVacio(matricula) && tieneColumna(rs, "username")) {
+            matricula = rs.getString("username");
+        }
+        persona.setMatricula(matricula);
+
         persona.setPassword(obtenerString(rs, "password", "password_sige"));
-        persona.setNombre(obtenerString(rs, "nombre", "nombre_sige"));
-        persona.setApellidoPaterno(obtenerString(rs, "apellido_paterno", "apellidop_sige"));
-        persona.setApellidoMaterno(obtenerString(rs, "apellido_materno", "apellidom_sige"));
+
+        String nombre = obtenerString(rs, "nombre", "nombre_sige");
+        if (esVacio(nombre) && tieneColumna(rs, "firstname")) {
+            nombre = rs.getString("firstname");
+        }
+        persona.setNombre(nombre);
+
+        String apellidoPaterno = obtenerString(rs, "apellido_paterno", "apellidop_sige");
+        String apellidoMaterno = obtenerString(rs, "apellido_materno", "apellidom_sige");
+        if (esVacio(apellidoPaterno) && esVacio(apellidoMaterno) && tieneColumna(rs, "lastname")) {
+            String lastname = rs.getString("lastname");
+            if (!esVacio(lastname)) {
+                String[] partes = lastname.trim().split("\\s+");
+                if (partes.length > 0) {
+                    apellidoPaterno = partes[0];
+                    if (partes.length > 1) {
+                        apellidoMaterno = String.join(" ", Arrays.copyOfRange(partes, 1, partes.length));
+                    }
+                }
+            }
+        }
+        persona.setApellidoPaterno(apellidoPaterno);
+        persona.setApellidoMaterno(apellidoMaterno);
         persona.setProgramaEducativo(obtenerString(rs, "programa_educativo", "programa_educativo_sige"));
         persona.setDivision(obtenerString(rs, "division", "division_sige"));
-        persona.setCorreoInstitucional(obtenerString(rs, "correo_institucional", "correo_institucional_sige"));
+        String correo = obtenerString(rs, "correo_institucional", "correo_institucional_sige");
+        if (esVacio(correo) && tieneColumna(rs, "email")) {
+            correo = rs.getString("email");
+        }
+        persona.setCorreoInstitucional(correo);
         persona.setFechaNacimiento(obtenerFecha(rs, "fecha_nacimiento", "fecha_nacimiento_sige"));
         persona.setCurp(obtenerString(rs, "curp", "curp_sige"));
         persona.setNivelSige(obtenerString(rs, "nivel", "nivel_sige"));

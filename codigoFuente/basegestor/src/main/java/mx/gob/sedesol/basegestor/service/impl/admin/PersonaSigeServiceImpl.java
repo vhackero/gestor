@@ -2,11 +2,16 @@ package mx.gob.sedesol.basegestor.service.impl.admin;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.log4j.Logger;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.modelmapper.TypeToken;
+import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +34,29 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 	private ModelMapper mapper = new ModelMapper();
 	Type personaSigeDTO = new TypeToken<List<PersonaSigeDTO>>() {
 	}.getType();
+	
+	@PostConstruct
+	private void initMapper() {
+		mapper.getConfiguration().setAmbiguityIgnored(true);
+		TypeMap<PersonaSigeDTO, TblPersonaSige> dtoToEntity = mapper.createTypeMap(PersonaSigeDTO.class, TblPersonaSige.class);
+		dtoToEntity.addMappings(new PropertyMap<PersonaSigeDTO, TblPersonaSige>() {
+			@Override
+			protected void configure() {
+				map().setIdPersonaSige(source.getIdPersonaSige());
+				map().setPersonaIdSige(source.getPersonaIdSige());
+				map().setPerfilIdSige(source.getPerfilIdSige());
+			}
+		});
+		TypeMap<TblPersonaSige, PersonaSigeDTO> entityToDto = mapper.createTypeMap(TblPersonaSige.class, PersonaSigeDTO.class);
+		entityToDto.addMappings(new PropertyMap<TblPersonaSige, PersonaSigeDTO>() {
+			@Override
+			protected void configure() {
+				map().setIdPersonaSige(source.getIdPersonaSige());
+				map().setPersonaIdSige(source.getPersonaIdSige());
+				map().setPerfilIdSige(source.getPerfilIdSige());
+			}
+		});
+	}
 	
 	@Override
 	public List<PersonaSigeDTO> findAll() {
@@ -64,7 +92,17 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 	public ResultadoDTO<PersonaSigeDTO> guardar(PersonaSigeDTO dto) {
 		ResultadoDTO<PersonaSigeDTO> resultado = new ResultadoDTO<>();
 		try {
-			TblPersonaSige entidad = mapper.map(dto, TblPersonaSige.class);
+			if (dto.getPersonaIdSige() <= 0) {
+				dto.setPersonaIdSige(0);
+			}
+			if (dto.getPerfilIdSige() <= 0) {
+				dto.setPerfilIdSige(0);
+			}
+			TblPersonaSige entidad = new TblPersonaSige();
+			copiarCamposImportacion(dto, entidad, true);
+			boolean passwordPresente = dto.getPassword() != null && !dto.getPassword().isEmpty();
+			logger.info(String.format("Insertando persona SIGE matricula=%s passwordPresent=%s personaIdSige=%d perfilIdSige=%d",
+					entidad.getMatricula(), passwordPresente, entidad.getPersonaIdSige(), entidad.getPerfilIdSige()));
 			TblPersonaSige guardada = personaSigeRepo.save(entidad);
 			resultado.setDto(mapper.map(guardada, PersonaSigeDTO.class));
 		} catch (Exception e) {
@@ -78,8 +116,21 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 	public ResultadoDTO<PersonaSigeDTO> actualizar(PersonaSigeDTO dto) {
 		ResultadoDTO<PersonaSigeDTO> resultado = new ResultadoDTO<>();
 		try {
-			TblPersonaSige entidad = mapper.map(dto, TblPersonaSige.class);
-			TblPersonaSige actualizada = personaSigeRepo.save(entidad);
+			if (dto.getIdPersonaSige() == null) {
+				logger.info("DTO sin idPersonaSige, se realizará inserción en lugar de actualización.");
+				return guardar(dto);
+			}
+			TblPersonaSige existente = personaSigeRepo.findOne(dto.getIdPersonaSige());
+			if (existente == null) {
+				logger.info(String.format("No se encontró persona SIGE id=%s, se realizará inserción.", dto.getIdPersonaSige()));
+				return guardar(dto);
+			}
+			copiarCamposImportacion(dto, existente, false);
+			boolean passwordPresente = dto.getPassword() != null && !dto.getPassword().isEmpty();
+			logger.info(String.format("Actualizando persona SIGE id=%s matricula=%s passwordPresent=%s personaIdSige=%d perfilIdSige=%d",
+					existente.getIdPersonaSige(), existente.getMatricula(), passwordPresente, existente.getPersonaIdSige(),
+					existente.getPerfilIdSige()));
+			TblPersonaSige actualizada = personaSigeRepo.save(existente);
 			resultado.setDto(mapper.map(actualizada, PersonaSigeDTO.class));
 		} catch (Exception e) {
 			logger.error("Error al actualizar persona sige", e);
@@ -97,7 +148,7 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 		} catch (Exception e) {
 			logger.error("Error al eliminar persona sige", e);
 			resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
-			resultado.setMensajeError(MensajesErrorEnum.ERROR_ELIMINAR_REGISTRO, e.getMessage());
+			resultado.setMensajeError(MensajesErrorEnum.ERROR_ELIMINAR_DATOS, e.getMessage());
 		}
 		return resultado;
 	}
@@ -155,6 +206,51 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 	public PersonaSigeDTO buscarPorMatricula(String matricula) {
 		TblPersonaSige entidad = personaSigeRepo.findByMatricula(matricula);
 		return entidad != null ? mapper.map(entidad, PersonaSigeDTO.class) : null;
+	}
+	
+	private void copiarCamposImportacion(PersonaSigeDTO dto, TblPersonaSige entidad, boolean actualizarIdsSiempre) {
+		entidad.setMatricula(dto.getMatricula());
+		entidad.setNombre(dto.getNombre());
+		entidad.setApellidoPaterno(dto.getApellidoPaterno());
+		entidad.setApellidoMaterno(dto.getApellidoMaterno());
+		entidad.setProgramaEducativo(dto.getProgramaEducativo());
+		entidad.setDivision(dto.getDivision());
+		entidad.setCorreoInstitucional(dto.getCorreoInstitucional());
+		entidad.setFechaNacimiento(dto.getFechaNacimiento());
+		entidad.setCurp(dto.getCurp());
+		entidad.setNivelSige(dto.getNivelSige());
+		entidad.setPassword(dto.getPassword());
+		if (actualizarIdsSiempre || dto.getPersonaIdSige() > 0) {
+			entidad.setPersonaIdSige(dto.getPersonaIdSige());
+		}
+		if (actualizarIdsSiempre || dto.getPerfilIdSige() > 0) {
+			entidad.setPerfilIdSige(dto.getPerfilIdSige());
+		}
+		aplicarDefaultsNoNulos(entidad);
+	}
+	
+	private void aplicarDefaultsNoNulos(TblPersonaSige entidad) {
+		if (entidad.getCurp() == null) {
+			entidad.setCurp("");
+		}
+		if (entidad.getProgramaEducativo() == null) {
+			entidad.setProgramaEducativo("");
+		}
+		if (entidad.getDivision() == null) {
+			entidad.setDivision("");
+		}
+		if (entidad.getNivelSige() == null) {
+			entidad.setNivelSige("");
+		}
+		if (entidad.getFechaNacimiento() == null) {
+			entidad.setFechaNacimiento(new Date(0L));
+		}
+		if (entidad.getPersonaIdSige() <= 0) {
+			entidad.setPersonaIdSige(0);
+		}
+		if (entidad.getPerfilIdSige() <= 0) {
+			entidad.setPerfilIdSige(0);
+		}
 	}
 	
 }
