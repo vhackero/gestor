@@ -148,7 +148,7 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 		} catch (Exception e) {
 			logger.error("Error al eliminar persona sige", e);
 			resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
-			resultado.setMensajeError(MensajesErrorEnum.ERROR_ELIMINAR_REGISTRO, e.getMessage());
+			resultado.setMensajeError(MensajesErrorEnum.ERROR_ELIMINAR_DATOS, e.getMessage());
 		}
 		return resultado;
 	}
