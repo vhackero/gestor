@@ -238,13 +238,22 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         }
 
         int contabilizar;
-        if (idBaja != null) {
-            boolean informacionCompleta = datosCompletosParaContabilizar(idPlan, idPrograma, idEvento, idGrupo, idUserEnrolmentsLms);
+        if (esDefinitiva ||  esSinAsignaturas) {
+            contabilizar = 1;
+        }
+        else if (idBaja != null) {
+            boolean informacionCompleta = datosCompletosParaContabilizar(
+                    idPlan, idPrograma, idEvento, idGrupo, idUserEnrolmentsLms);
             contabilizar = informacionCompleta
                     ? 1
-                    : (bajaActual != null && bajaActual.getEstatus() != null ? bajaActual.getEstatus() : 1);
-        } else {
-            contabilizar = bajaActual != null && bajaActual.getEstatus() != null ? bajaActual.getEstatus() : 1;
+                    : (bajaActual != null && bajaActual.getEstatus() != null
+                    ? bajaActual.getEstatus()
+                    : 0);
+        }
+        else {
+            contabilizar = bajaActual != null && bajaActual.getEstatus() != null
+                    ? bajaActual.getEstatus()
+                    : 0;
         }
 
         BajaAplicacionDTO bajaAplicacionDTO = new BajaAplicacionDTO(
