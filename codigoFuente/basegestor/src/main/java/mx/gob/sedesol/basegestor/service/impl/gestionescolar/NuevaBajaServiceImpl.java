@@ -237,7 +237,24 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
             idGrupo = 0L;
         }
 
-        int contabilizar = bajaActual != null && bajaActual.getEstatus() != null ? bajaActual.getEstatus() : 1;
+        int contabilizar;
+        if (esDefinitiva ||  esSinAsignaturas) {
+            contabilizar = 1;
+        }
+        else if (idBaja != null) {
+            boolean informacionCompleta = datosCompletosParaContabilizar(
+                    idPlan, idPrograma, idEvento, idGrupo);
+            contabilizar = informacionCompleta
+                    ? 1
+                    : (bajaActual != null && bajaActual.getEstatus() != null
+                    ? bajaActual.getEstatus()
+                    : 0);
+        }
+        else {
+            contabilizar = bajaActual != null && bajaActual.getEstatus() != null
+                    ? bajaActual.getEstatus()
+                    : 0;
+        }
 
         BajaAplicacionDTO bajaAplicacionDTO = new BajaAplicacionDTO(
                 idPersona,
@@ -273,6 +290,13 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
 
     private boolean valorPresenteEntero(Integer valor) {
         return valor != null && valor.intValue() != 0;
+    }
+
+    private boolean datosCompletosParaContabilizar(Long idPlan, Long idPrograma, Long idEvento, Long idGrupo) {
+        return valorPresente(idPlan)
+                && valorPresente(idPrograma)
+                && valorPresente(idEvento)
+                && valorPresente(idGrupo);
     }
 
     private boolean textoVacio(String valor) {
