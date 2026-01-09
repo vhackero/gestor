@@ -243,7 +243,7 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         }
         else if (idBaja != null) {
             boolean informacionCompleta = datosCompletosParaContabilizar(
-                    idPlan, idPrograma, idEvento, idGrupo, idUserEnrolmentsLms);
+                    idPlan, idPrograma, idEvento, idGrupo);
             contabilizar = informacionCompleta
                     ? 1
                     : (bajaActual != null && bajaActual.getEstatus() != null
@@ -292,12 +292,11 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         return valor != null && valor.intValue() != 0;
     }
 
-    private boolean datosCompletosParaContabilizar(Long idPlan, Long idPrograma, Long idEvento, Long idGrupo, Integer idUserEnrolmentsLms) {
+    private boolean datosCompletosParaContabilizar(Long idPlan, Long idPrograma, Long idEvento, Long idGrupo) {
         return valorPresente(idPlan)
                 && valorPresente(idPrograma)
                 && valorPresente(idEvento)
-                && valorPresente(idGrupo)
-                && valorPresenteEntero(idUserEnrolmentsLms);
+                && valorPresente(idGrupo);
     }
 
     private boolean textoVacio(String valor) {
