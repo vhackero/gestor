@@ -28,5 +28,8 @@ public interface PersonaRolesRepo extends JpaRepository<RelPersonaRol, Long> {
 	@Modifying
 	@Query("DELETE FROM RelPersonaRol rpr WHERE rpr.idPersonaRol = :idPersonaRol")
 	void eliminaRelPersonaRolById(@Param("idPersonaRol") Long idPersonaRol);
+	
+	@Query("SELECT CASE WHEN COUNT(rpr) > 0 THEN true ELSE false END FROM RelPersonaRol rpr "
+			+ "WHERE rpr.persona.idPersona = :idPersona AND rpr.rol.idRol = :idRol")
+	boolean existeRelacionPersonaRol(@Param("idPersona") Long idPersona, @Param("idRol") Integer idRol);
 }
-
