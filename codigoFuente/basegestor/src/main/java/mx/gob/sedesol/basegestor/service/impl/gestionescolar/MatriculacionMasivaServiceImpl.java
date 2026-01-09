@@ -19,11 +19,15 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
+import mx.gob.sedesol.basegestor.model.entities.admin.CatRol;
+import mx.gob.sedesol.basegestor.model.entities.admin.RelPersonaRol;
+import mx.gob.sedesol.basegestor.model.entities.admin.TblPersona;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblGrupo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IMatriculacionMasivaRepository;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.GrupoParticipanteRepo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.GrupoRepo;
+import mx.gob.sedesol.basegestor.model.repositories.admin.PersonaRolesRepo;
 import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.MatriculacionMasivaService;
@@ -51,6 +55,9 @@ public class MatriculacionMasivaServiceImpl implements MatriculacionMasivaServic
 	
 	@Autowired
 	private GrupoParticipanteRepo grupoParticipanteRepo;
+	
+	@Autowired
+	private PersonaRolesRepo personaRolesRepo;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -113,6 +120,8 @@ public class MatriculacionMasivaServiceImpl implements MatriculacionMasivaServic
 					respuesta.add(resultado);
 					continue;
 				}
+				
+				registrarRolSiNoExiste(idPersona, resultado.getRol(), idUsuario);
 				
 				PersonaDTO persona = personaService.buscarPorId(idPersona);
 				EventoCapacitacionDTO evento = construirEvento(grupoEntidad.getEvento());
@@ -202,5 +211,24 @@ public class MatriculacionMasivaServiceImpl implements MatriculacionMasivaServic
 			return String.join("; ", resultado.getMensajes());
 		}
 		return "Error al matricular";
+	}
+	
+	private void registrarRolSiNoExiste(Long idPersona, Integer idRol, Long idUsuario) {
+		if (idPersona == null || idRol == null) {
+			return;
+		}
+		try {
+			if (personaRolesRepo.existeRelacionPersonaRol(idPersona, idRol)) {
+				return;
+			}
+			TblPersona persona = new TblPersona();
+			persona.setIdPersona(idPersona);
+			CatRol rol = new CatRol();
+			rol.setIdRol(idRol);
+			RelPersonaRol relacion = new RelPersonaRol(rol, persona, idUsuario != null ? idUsuario : 0L);
+			personaRolesRepo.save(relacion);
+		} catch (Exception ex) {
+			logger.error(String.format("No fue posible asignar el rol %d a la persona %d", idRol, idPersona), ex);
+		}
 	}
 }
