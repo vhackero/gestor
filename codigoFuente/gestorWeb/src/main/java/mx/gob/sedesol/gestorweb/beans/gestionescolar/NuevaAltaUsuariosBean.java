@@ -43,6 +43,10 @@ import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final List<String> COLUMNAS_REQUERIDAS = Arrays.asList("matricula_sige", "password_sige",
+            "nombre_sige", "apellidop_sige", "apellidom_sige", "programa_sige", "division_sige",
+            "correo_institucional_sige", "fecha_nacimiento_sige", "curp_sige", "nivel_sige", "persona_id_sige",
+            "perfil_id_sige");
 
     @ManagedProperty("#{personaServiceFacade}")
     private transient PersonaServiceFacade personaServiceFacade;
@@ -167,20 +171,38 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                                     matriculaImportar.trim()));
                             return;
                         }
+                        List<String> columnasFaltantes = validarColumnasRequeridas(rs);
+                        if (!columnasFaltantes.isEmpty()) {
+                            String columnasActuales = obtenerColumnas(rs);
+                            LOGGER.warn(String.format(
+                                    "[%s] ResultSet sin columnas requeridas. Faltantes=%s, Columnas=%s", traceId,
+                                    columnasFaltantes, columnasActuales));
+                            agregarMsgWarn("La consulta de la fuente externa no incluye las columnas requeridas: "
+                                    + String.join(", ", columnasFaltantes), null);
+                            return;
+                        }
                         LOGGER.info(String.format("[%s] ResultSet con datos. Columnas=%s", traceId,
                                 obtenerColumnas(rs)));
                         PersonaSigeDTO personaSige = mapearPersonaSige(rs);
                         LOGGER.info(String.format(
-                                "[%s] Datos mapeo previo a validación de matrícula. Columnas=%s, username=%s, firstname=%s, lastname=%s, email=%s, passwordPresent=%s, matriculaFinal=%s",
-                                traceId, obtenerColumnas(rs), obtenerString(rs, "username"), obtenerString(rs, "firstname"),
-                                obtenerString(rs, "lastname"), obtenerString(rs, "email"),
-                                !esVacio(obtenerString(rs, "password")),
+                                "[%s] Datos mapeo previo a validación de matrícula. Columnas=%s, passwordPresent=%s, matriculaFinal=%s",
+                                traceId, obtenerColumnas(rs), !esVacio(personaSige.getPassword()),
                                 ObjectUtils.isNull(personaSige) ? null : personaSige.getMatricula()));
                         if (ObjectUtils.isNull(personaSige) || esVacio(personaSige.getMatricula())) {
                             agregarMsgWarn(
-                                    "La fuente externa no devolvió matrícula (se esperaba username). Revise la consulta/mapeo.",
+                                    "La fuente externa no devolvió matrícula (se esperaba matricula_sige). Revise la consulta/mapeo.",
                                     null);
                             LOGGER.warn(String.format("[%s] PersonaSige mapeada sin matrícula.", traceId));
+                            return;
+                        }
+                        List<String> camposFaltantes = validarCamposObligatorios(personaSige);
+                        if (!camposFaltantes.isEmpty()) {
+                            LOGGER.warn(String.format("[%s] PersonaSige con campos obligatorios vacíos. Faltantes=%s",
+                                    traceId, camposFaltantes));
+                            agregarMsgWarn(
+                                    "La fuente externa devolvió campos obligatorios vacíos: "
+                                            + String.join(", ", camposFaltantes),
+                                    null);
                             return;
                         }
                         LOGGER.info(String.format(
@@ -498,48 +520,19 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
     private PersonaSigeDTO mapearPersonaSige(ResultSet rs) throws SQLException {
         PersonaSigeDTO persona = new PersonaSigeDTO();
-        String matricula = obtenerString(rs, "matricula", "matricula_sige");
-        if (esVacio(matricula) && tieneColumna(rs, "username")) {
-            matricula = rs.getString("username");
-        }
-        persona.setMatricula(matricula);
-
-        persona.setPassword(obtenerString(rs, "password", "password_sige"));
-
-        String nombre = obtenerString(rs, "nombre", "nombre_sige");
-        if (esVacio(nombre) && tieneColumna(rs, "firstname")) {
-            nombre = rs.getString("firstname");
-        }
-        persona.setNombre(nombre);
-
-        String apellidoPaterno = obtenerString(rs, "apellido_paterno", "apellidop_sige");
-        String apellidoMaterno = obtenerString(rs, "apellido_materno", "apellidom_sige");
-        if (esVacio(apellidoPaterno) && esVacio(apellidoMaterno) && tieneColumna(rs, "lastname")) {
-            String lastname = rs.getString("lastname");
-            if (!esVacio(lastname)) {
-                String[] partes = lastname.trim().split("\\s+");
-                if (partes.length > 0) {
-                    apellidoPaterno = partes[0];
-                    if (partes.length > 1) {
-                        apellidoMaterno = String.join(" ", Arrays.copyOfRange(partes, 1, partes.length));
-                    }
-                }
-            }
-        }
-        persona.setApellidoPaterno(apellidoPaterno);
-        persona.setApellidoMaterno(apellidoMaterno);
-        persona.setProgramaEducativo(obtenerString(rs, "programa_educativo", "programa_educativo_sige"));
-        persona.setDivision(obtenerString(rs, "division", "division_sige"));
-        String correo = obtenerString(rs, "correo_institucional", "correo_institucional_sige");
-        if (esVacio(correo) && tieneColumna(rs, "email")) {
-            correo = rs.getString("email");
-        }
-        persona.setCorreoInstitucional(correo);
-        persona.setFechaNacimiento(obtenerFecha(rs, "fecha_nacimiento", "fecha_nacimiento_sige"));
-        persona.setCurp(obtenerString(rs, "curp", "curp_sige"));
-        persona.setNivelSige(obtenerString(rs, "nivel", "nivel_sige"));
-        Integer personaId = obtenerEntero(rs, "persona_id", "persona_id_sige");
-        Integer perfilId = obtenerEntero(rs, "perfil_id", "perfil_id_sige");
+        persona.setMatricula(obtenerString(rs, "matricula_sige"));
+        persona.setPassword(obtenerString(rs, "password_sige"));
+        persona.setNombre(obtenerString(rs, "nombre_sige"));
+        persona.setApellidoPaterno(obtenerString(rs, "apellidop_sige"));
+        persona.setApellidoMaterno(obtenerString(rs, "apellidom_sige"));
+        persona.setProgramaEducativo(obtenerString(rs, "programa_sige"));
+        persona.setDivision(obtenerString(rs, "division_sige"));
+        persona.setCorreoInstitucional(obtenerString(rs, "correo_institucional_sige"));
+        persona.setFechaNacimiento(obtenerFecha(rs, "fecha_nacimiento_sige"));
+        persona.setCurp(obtenerString(rs, "curp_sige"));
+        persona.setNivelSige(obtenerString(rs, "nivel_sige"));
+        Integer personaId = obtenerEntero(rs, "persona_id_sige");
+        Integer perfilId = obtenerEntero(rs, "perfil_id_sige");
         if (personaId != null) {
             persona.setPersonaIdSige(personaId);
         }
@@ -599,6 +592,64 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
             nombres.add(metaData.getColumnLabel(i));
         }
         return nombres.toString();
+    }
+
+    private List<String> validarColumnasRequeridas(ResultSet rs) throws SQLException {
+        List<String> faltantes = new ArrayList<>();
+        for (String columna : COLUMNAS_REQUERIDAS) {
+            if (!tieneColumna(rs, columna)) {
+                faltantes.add(columna);
+            }
+        }
+        return faltantes;
+    }
+
+    private List<String> validarCamposObligatorios(PersonaSigeDTO personaSige) {
+        List<String> faltantes = new ArrayList<>();
+        if (ObjectUtils.isNull(personaSige)) {
+            faltantes.addAll(COLUMNAS_REQUERIDAS);
+            return faltantes;
+        }
+        if (esVacio(personaSige.getMatricula())) {
+            faltantes.add("matricula_sige");
+        }
+        if (esVacio(personaSige.getPassword())) {
+            faltantes.add("password_sige");
+        }
+        if (esVacio(personaSige.getNombre())) {
+            faltantes.add("nombre_sige");
+        }
+        if (esVacio(personaSige.getApellidoPaterno())) {
+            faltantes.add("apellidop_sige");
+        }
+        if (esVacio(personaSige.getApellidoMaterno())) {
+            faltantes.add("apellidom_sige");
+        }
+        if (esVacio(personaSige.getProgramaEducativo())) {
+            faltantes.add("programa_sige");
+        }
+        if (esVacio(personaSige.getDivision())) {
+            faltantes.add("division_sige");
+        }
+        if (esVacio(personaSige.getCorreoInstitucional())) {
+            faltantes.add("correo_institucional_sige");
+        }
+        if (ObjectUtils.isNull(personaSige.getFechaNacimiento())) {
+            faltantes.add("fecha_nacimiento_sige");
+        }
+        if (esVacio(personaSige.getCurp())) {
+            faltantes.add("curp_sige");
+        }
+        if (esVacio(personaSige.getNivelSige())) {
+            faltantes.add("nivel_sige");
+        }
+        if (ObjectUtils.isNull(personaSige.getPersonaIdSige())) {
+            faltantes.add("persona_id_sige");
+        }
+        if (ObjectUtils.isNull(personaSige.getPerfilIdSige())) {
+            faltantes.add("perfil_id_sige");
+        }
+        return faltantes;
     }
 
     private String construirUrlConexion(FuenteExternaDTO fuente) {
