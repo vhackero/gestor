@@ -2,7 +2,6 @@ package mx.gob.sedesol.basegestor.service.impl.admin;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -92,11 +91,11 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 	public ResultadoDTO<PersonaSigeDTO> guardar(PersonaSigeDTO dto) {
 		ResultadoDTO<PersonaSigeDTO> resultado = new ResultadoDTO<>();
 		try {
-			if (dto.getPersonaIdSige() <= 0) {
-				dto.setPersonaIdSige(0);
-			}
-			if (dto.getPerfilIdSige() <= 0) {
-				dto.setPerfilIdSige(0);
+			List<String> faltantes = validarCamposObligatorios(dto);
+			if (!faltantes.isEmpty()) {
+				resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+				resultado.setMensaje("No se guardó: faltan campos obligatorios: " + String.join(", ", faltantes));
+				return resultado;
 			}
 			TblPersonaSige entidad = new TblPersonaSige();
 			copiarCamposImportacion(dto, entidad, true);
@@ -108,7 +107,12 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 		} catch (Exception e) {
 			logger.error("Error al guardar persona sige", e);
 			resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
-			resultado.setMensajeError(MensajesErrorEnum.ERROR_PERSISTENCIA_DATOS, e.getMessage());
+			String mensajeAmigable = obtenerMensajeCampoNulo(e);
+			if (mensajeAmigable != null) {
+				resultado.setMensaje(mensajeAmigable);
+			} else {
+				resultado.setMensajeError(MensajesErrorEnum.ERROR_PERSISTENCIA_DATOS, e.getMessage());
+			}
 		}
 		return resultado;
 	}
@@ -119,6 +123,12 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 			if (dto.getIdPersonaSige() == null) {
 				logger.info("DTO sin idPersonaSige, se realizará inserción en lugar de actualización.");
 				return guardar(dto);
+			}
+			List<String> faltantes = validarCamposObligatorios(dto);
+			if (!faltantes.isEmpty()) {
+				resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+				resultado.setMensaje("No se actualizó: faltan campos obligatorios: " + String.join(", ", faltantes));
+				return resultado;
 			}
 			TblPersonaSige existente = personaSigeRepo.findOne(dto.getIdPersonaSige());
 			if (existente == null) {
@@ -135,7 +145,12 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 		} catch (Exception e) {
 			logger.error("Error al actualizar persona sige", e);
 			resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
-			resultado.setMensajeError(MensajesErrorEnum.ERROR_PERSISTENCIA_DATOS, e.getMessage());
+			String mensajeAmigable = obtenerMensajeCampoNulo(e);
+			if (mensajeAmigable != null) {
+				resultado.setMensaje(mensajeAmigable);
+			} else {
+				resultado.setMensajeError(MensajesErrorEnum.ERROR_PERSISTENCIA_DATOS, e.getMessage());
+			}
 		}
 		return resultado;
 	}
@@ -226,31 +241,88 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 		if (actualizarIdsSiempre || dto.getPerfilIdSige() > 0) {
 			entidad.setPerfilIdSige(dto.getPerfilIdSige());
 		}
-		aplicarDefaultsNoNulos(entidad);
 	}
 	
-	private void aplicarDefaultsNoNulos(TblPersonaSige entidad) {
-		if (entidad.getCurp() == null) {
-			entidad.setCurp("");
+	private List<String> validarCamposObligatorios(PersonaSigeDTO dto) {
+		List<String> faltantes = new ArrayList<>();
+		if (dto == null) {
+			faltantes.add("matricula");
+			faltantes.add("password");
+			faltantes.add("nombre");
+			faltantes.add("apellidoPaterno");
+			faltantes.add("apellidoMaterno");
+			faltantes.add("programaEducativo");
+			faltantes.add("division");
+			faltantes.add("correoInstitucional");
+			faltantes.add("fechaNacimiento");
+			faltantes.add("curp");
+			faltantes.add("nivelSige");
+			faltantes.add("personaIdSige");
+			faltantes.add("perfilIdSige");
+			return faltantes;
 		}
-		if (entidad.getProgramaEducativo() == null) {
-			entidad.setProgramaEducativo("");
+		if (esVacio(dto.getMatricula())) {
+			faltantes.add("matricula");
 		}
-		if (entidad.getDivision() == null) {
-			entidad.setDivision("");
+		if (esVacio(dto.getPassword())) {
+			faltantes.add("password");
 		}
-		if (entidad.getNivelSige() == null) {
-			entidad.setNivelSige("");
+		if (esVacio(dto.getNombre())) {
+			faltantes.add("nombre");
 		}
-		if (entidad.getFechaNacimiento() == null) {
-			entidad.setFechaNacimiento(new Date(0L));
+		if (esVacio(dto.getApellidoPaterno())) {
+			faltantes.add("apellidoPaterno");
 		}
-		if (entidad.getPersonaIdSige() <= 0) {
-			entidad.setPersonaIdSige(0);
+		if (esVacio(dto.getApellidoMaterno())) {
+			faltantes.add("apellidoMaterno");
 		}
-		if (entidad.getPerfilIdSige() <= 0) {
-			entidad.setPerfilIdSige(0);
+		if (esVacio(dto.getProgramaEducativo())) {
+			faltantes.add("programaEducativo");
 		}
+		if (esVacio(dto.getDivision())) {
+			faltantes.add("division");
+		}
+		if (esVacio(dto.getCorreoInstitucional())) {
+			faltantes.add("correoInstitucional");
+		}
+		if (dto.getFechaNacimiento() == null) {
+			faltantes.add("fechaNacimiento");
+		}
+		if (esVacio(dto.getCurp())) {
+			faltantes.add("curp");
+		}
+		if (esVacio(dto.getNivelSige())) {
+			faltantes.add("nivelSige");
+		}
+		if (dto.getPersonaIdSige() == null || dto.getPersonaIdSige() <= 0) {
+			faltantes.add("personaIdSige");
+		}
+		if (dto.getPerfilIdSige() == null || dto.getPerfilIdSige() <= 0) {
+			faltantes.add("perfilIdSige");
+		}
+		return faltantes;
+	}
+
+	private boolean esVacio(String valor) {
+		return valor == null || valor.trim().isEmpty();
+	}
+
+	private String obtenerMensajeCampoNulo(Exception e) {
+		Throwable causa = e;
+		while (causa != null) {
+			String mensaje = causa.getMessage();
+			if (mensaje != null && mensaje.contains("Column '") && mensaje.contains("cannot be null")) {
+				int inicio = mensaje.indexOf("Column '") + "Column '".length();
+				int fin = mensaje.indexOf("'", inicio);
+				if (fin > inicio) {
+					String campo = mensaje.substring(inicio, fin);
+					return "No se guardó: el campo requerido '" + campo
+							+ "' viene vacío. Revise la consulta de la fuente externa.";
+				}
+			}
+			causa = causa.getCause();
+		}
+		return null;
 	}
 	
 }
