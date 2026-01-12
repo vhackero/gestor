@@ -44,7 +44,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private static final List<String> COLUMNAS_REQUERIDAS = Arrays.asList("matricula_sige", "password_sige",
-            "nombre_sige", "apellidop_sige", "apellidom_sige", "programa_sige", "division_sige",
+            "nombre_sige", "apellidop_sige", "apellidom_sige", "programa_educativo_sige", "division_sige",
             "correo_institucional_sige", "fecha_nacimiento_sige", "curp_sige", "nivel_sige", "persona_id_sige",
             "perfil_id_sige");
 
@@ -525,7 +525,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         persona.setNombre(obtenerString(rs, "nombre_sige"));
         persona.setApellidoPaterno(obtenerString(rs, "apellidop_sige"));
         persona.setApellidoMaterno(obtenerString(rs, "apellidom_sige"));
-        persona.setProgramaEducativo(obtenerString(rs, "programa_sige"));
+        persona.setProgramaEducativo(obtenerString(rs, "programa_educativo_sige"));
         persona.setDivision(obtenerString(rs, "division_sige"));
         persona.setCorreoInstitucional(obtenerString(rs, "correo_institucional_sige"));
         persona.setFechaNacimiento(obtenerFecha(rs, "fecha_nacimiento_sige"));
@@ -626,7 +626,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
             faltantes.add("apellidom_sige");
         }
         if (esVacio(personaSige.getProgramaEducativo())) {
-            faltantes.add("programa_sige");
+            faltantes.add("programa_educativo_sige");
         }
         if (esVacio(personaSige.getDivision())) {
             faltantes.add("division_sige");

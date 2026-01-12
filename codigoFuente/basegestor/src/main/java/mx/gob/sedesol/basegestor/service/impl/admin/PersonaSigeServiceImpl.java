@@ -25,15 +25,15 @@ import mx.gob.sedesol.basegestor.service.admin.PersonaSigeService;
 
 @Service("personaSigeService")
 public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDTO> implements PersonaSigeService{
-	
+
 	private static final Logger logger = Logger.getLogger(PersonaSigeServiceImpl.class);
-	
+
 	@Autowired
 	private PersonaSigeRepo personaSigeRepo;
 	private ModelMapper mapper = new ModelMapper();
 	Type personaSigeDTO = new TypeToken<List<PersonaSigeDTO>>() {
 	}.getType();
-	
+
 	@PostConstruct
 	private void initMapper() {
 		mapper.getConfiguration().setAmbiguityIgnored(true);
@@ -56,7 +56,7 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 			}
 		});
 	}
-	
+
 	@Override
 	public List<PersonaSigeDTO> findAll() {
 		List<PersonaSigeDTO> listaPersonas = new ArrayList<PersonaSigeDTO>();
@@ -79,7 +79,7 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 			personaObj.setPassword(persona.getPassword());
 			listaPersonas.add(personaObj);
 		}
-		
+
 		return listaPersonas;
 	}
 	@Override
@@ -170,17 +170,17 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 	@Override
 	public void validarPersistencia(PersonaSigeDTO dto, ResultadoDTO<PersonaSigeDTO> resultado) {
 		// TODO Auto-generated method stub
-		
+
 	}
 	@Override
 	public void validarActualizacion(PersonaSigeDTO dto, ResultadoDTO<PersonaSigeDTO> resultado) {
 		// TODO Auto-generated method stub
-		
+
 	}
 	@Override
 	public void validarEliminacion(PersonaSigeDTO dto, ResultadoDTO<PersonaSigeDTO> resultado) {
 		// TODO Auto-generated method stub
-		
+
 	}
 	public PersonaSigeRepo getPersonaSigeRepo() {
 		return personaSigeRepo;
@@ -210,10 +210,10 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 				personaObj.setPersonaIdSige(persona.getPersonaIdSige());
 				personaObj.setPerfilIdSige(persona.getPerfilIdSige());
 				personaObj.setPassword(persona.getPassword());
-				listaPersonas.add(personaObj);				
+				listaPersonas.add(personaObj);
 			}
 		}
-		
+
 		return listaPersonas;
 	}
 
@@ -222,7 +222,7 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 		TblPersonaSige entidad = personaSigeRepo.findByMatricula(matricula);
 		return entidad != null ? mapper.map(entidad, PersonaSigeDTO.class) : null;
 	}
-	
+
 	private void copiarCamposImportacion(PersonaSigeDTO dto, TblPersonaSige entidad, boolean actualizarIdsSiempre) {
 		entidad.setMatricula(dto.getMatricula());
 		entidad.setNombre(dto.getNombre());
@@ -242,7 +242,7 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 			entidad.setPerfilIdSige(dto.getPerfilIdSige());
 		}
 	}
-	
+
 	private List<String> validarCamposObligatorios(PersonaSigeDTO dto) {
 		List<String> faltantes = new ArrayList<>();
 		if (dto == null) {
@@ -257,8 +257,8 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 			faltantes.add("fechaNacimiento");
 			faltantes.add("curp");
 			faltantes.add("nivelSige");
-			faltantes.add("personaIdSige");
-			faltantes.add("perfilIdSige");
+			faltantes.add("persona_id_sige");
+			faltantes.add("perfil_id_sige");
 			return faltantes;
 		}
 		if (esVacio(dto.getMatricula())) {
@@ -294,11 +294,11 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 		if (esVacio(dto.getNivelSige())) {
 			faltantes.add("nivelSige");
 		}
-		if (dto.getPersonaIdSige() == null || dto.getPersonaIdSige() <= 0) {
-			faltantes.add("personaIdSige");
+		if (dto.getPersonaIdSige() <= 0) {
+			faltantes.add("persona_id_sige");
 		}
-		if (dto.getPerfilIdSige() == null || dto.getPerfilIdSige() <= 0) {
-			faltantes.add("perfilIdSige");
+		if (dto.getPerfilIdSige() <= 0) {
+			faltantes.add("perfil_id_sige");
 		}
 		return faltantes;
 	}
@@ -324,5 +324,5 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 		}
 		return null;
 	}
-	
+
 }
