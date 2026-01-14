@@ -222,6 +222,8 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                                 personaSige.getCorreoInstitucional()));
                         guardarPersonaSige(personaSige, traceId);
                         matriculaNuevaAlta = personaSige.getMatricula();
+                        matriculaImportar = null;
+                        fuenteExternaSeleccionada = null;
                         mostrarDialogoExito(obtenerTextoSistema(
                                 "gw.gestionescolar.altasbajas.nuevaAlta.modal.importacionCorrecta"));
                         LOGGER.info(String.format("[%s] Importación exitosa para matrícula %s", traceId,
