@@ -136,13 +136,6 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                 LOGGER.warn(String.format("[%s] Consulta vacía para fuente id=%s", traceId, idFuente));
                 return;
             }
-            LOGGER.info(String.format("[%s] Fuente obtenida. id=%s, nombre=%s, servidor=%s, usuario=%s, alias=%s, base=%s, consultaLen=%d, consultaPreview=%s",
-                    traceId, fuente.getId(), fuente.getNombre(), enmascararServidor(fuente.getServidor()),
-                    esVacio(fuente.getUsuario()) ? "N/A" : fuente.getUsuario(),
-                    esVacio(fuente.getAlias()) ? "N/A" : fuente.getAlias(),
-                    esVacio(fuente.getNombreBaseDatos()) ? "N/A" : fuente.getNombreBaseDatos(),
-                    fuente.getConsulta() != null ? fuente.getConsulta().length() : 0,
-                    truncar(fuente.getConsulta(), 200)));
 
             String consultaNormalizada = normalizarConsulta(fuente.getConsulta());
             if (consultaNormalizada == null) {
@@ -156,8 +149,6 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                         "gw.gestionescolar.altasbajas.nuevaAlta.modal.configurarDatosFuente"));
                 return;
             }
-            LOGGER.info(String.format("[%s] Consulta normalizada lista. Preview=%s", traceId,
-                    truncar(consultaNormalizada, 200)));
 
             try (Connection conexion = crearConexion(fuente)) {
                 if (conexion == null) {
@@ -172,8 +163,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                         fuente.getContrasena() != null, fuente.getContrasena() != null ? fuente.getContrasena().length() : 0));
                 try (PreparedStatement ps = conexion.prepareStatement(consultaNormalizada)) {
                     ps.setString(1, matriculaImportar.trim());
-                    LOGGER.info(String.format("[%s] Ejecutando consulta. SQL=%s, parametro1=%s", traceId,
-                            truncar(consultaNormalizada, 200), matriculaImportar.trim()));
+
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) {
                             mostrarDialogoError(obtenerTextoSistema(
@@ -193,13 +183,9 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                                     + " " + String.join(", ", columnasFaltantes));
                             return;
                         }
-                        LOGGER.info(String.format("[%s] ResultSet con datos. Columnas=%s", traceId,
-                                obtenerColumnas(rs)));
+
                         PersonaSigeDTO personaSige = mapearPersonaSige(rs);
-                        LOGGER.info(String.format(
-                                "[%s] Datos mapeo previo a validación de matrícula. Columnas=%s, passwordPresent=%s, matriculaFinal=%s",
-                                traceId, obtenerColumnas(rs), !esVacio(personaSige.getPassword()),
-                                ObjectUtils.isNull(personaSige) ? null : personaSige.getMatricula()));
+
                         if (ObjectUtils.isNull(personaSige) || esVacio(personaSige.getMatricula())) {
                             mostrarDialogoError(obtenerTextoSistema(
                                     "gw.gestionescolar.altasbajas.nuevaAlta.modal.sinMatriculaSige"));
