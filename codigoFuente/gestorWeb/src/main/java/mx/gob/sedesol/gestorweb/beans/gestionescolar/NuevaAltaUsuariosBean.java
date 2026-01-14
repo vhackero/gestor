@@ -37,6 +37,7 @@ import mx.gob.sedesol.basegestor.service.impl.admin.PersonaServiceFacade;
 import mx.gob.sedesol.basegestor.service.admin.PersonaSigeService;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.EventoCapacitacionServiceFacade;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
+import mx.gob.sedesol.gestorweb.sistema.SistemaBean;
 
 @ManagedBean
 @ViewScoped
@@ -56,6 +57,9 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
     @ManagedProperty("#{eventoCapacitacionServiceFacade}")
     private transient EventoCapacitacionServiceFacade eventoCapacitacionServiceFacade;
+
+    @ManagedProperty("#{sistema}")
+    private transient SistemaBean sistema;
 
     private static final Logger LOGGER = Logger.getLogger(NuevaAltaUsuariosBean.class);
 
@@ -103,14 +107,16 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
             LOGGER.info(String.format("[%s] Iniciando importación. Matricula: %s, Fuente seleccionada: %s", traceId,
                     matriculaImportar != null ? matriculaImportar.trim() : null, fuenteExternaSeleccionada));
             if (esVacio(matriculaImportar) || esVacio(fuenteExternaSeleccionada)) {
-                mostrarDialogoValidacion("Capture matrícula y seleccione fuente externa.");
+                mostrarDialogoValidacion(obtenerTextoSistema(
+                        "gw.gestionescolar.altasbajas.nuevaAlta.modal.capturarModalFuente"));
                 LOGGER.warn(String.format("[%s] Faltan datos de entrada para importar.", traceId));
                 return;
             }
 
             Integer idFuente = parseEntero(fuenteExternaSeleccionada);
             if (ObjectUtils.isNull(idFuente)) {
-                mostrarDialogoError("Fuente externa inválida.");
+                mostrarDialogoError(obtenerTextoSistema(
+                        "gw.gestionescolar.altasbajas.nuevaAlta.modal.importacionCorrecta"));
                 LOGGER.warn(String.format("[%s] No se pudo parsear la fuente externa seleccionada: %s", traceId,
                         fuenteExternaSeleccionada));
                 return;
@@ -119,12 +125,14 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
             FuenteExternaDTO fuente = personaServiceFacade.buscarFuenteExternaPorId(idFuente);
             if (ObjectUtils.isNull(fuente)) {
-                mostrarDialogoError("No se encontró la configuración de la fuente externa.");
+                mostrarDialogoError(obtenerTextoSistema(
+                        "gw.gestionescolar.altasbajas.nuevaAlta.modal.sinConfigFuenteExterna"));
                 LOGGER.warn(String.format("[%s] Fuente externa no encontrada. idFuente=%s", traceId, idFuente));
                 return;
             }
             if (esVacio(fuente.getConsulta())) {
-                mostrarDialogoError("La fuente externa no tiene consulta configurada.");
+                mostrarDialogoError(obtenerTextoSistema(
+                        "gw.gestionescolar.altasbajas.nuevaAlta.modal.sinConsultaConfig"));
                 LOGGER.warn(String.format("[%s] Consulta vacía para fuente id=%s", traceId, idFuente));
                 return;
             }
@@ -144,7 +152,8 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                 LOGGER.warn(String.format(
                         "[%s] Consulta inválida. Parámetros encontrados -> ?: %d, :matricula: %d, :usuario: %d",
                         traceId, numInterrogaciones, numMatricula, numUsuario));
-                mostrarDialogoError("Configurar correctamente los datos de la fuente externa.");
+                mostrarDialogoError(obtenerTextoSistema(
+                        "gw.gestionescolar.altasbajas.nuevaAlta.modal.configurarDatosFuente"));
                 return;
             }
             LOGGER.info(String.format("[%s] Consulta normalizada lista. Preview=%s", traceId,
@@ -152,7 +161,8 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
             try (Connection conexion = crearConexion(fuente)) {
                 if (conexion == null) {
-                    mostrarDialogoError("No se pudo construir la conexión con la fuente externa.");
+                    mostrarDialogoError(obtenerTextoSistema(
+                            "gw.gestionescolar.altasbajas.nuevaAlta.modal.sinConexionFuenteExterna"));
                     LOGGER.warn(String.format("[%s] No se pudo construir la conexión (servidor vacío).", traceId));
                     return;
                 }
@@ -166,7 +176,8 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                             truncar(consultaNormalizada, 200), matriculaImportar.trim()));
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) {
-                            mostrarDialogoError("No se encontró información para la matrícula especificada.");
+                            mostrarDialogoError(obtenerTextoSistema(
+                                    "gw.gestionescolar.altasbajas.nuevaAlta.modal.matriculaNoEncontrada"));
                             LOGGER.warn(String.format("[%s] ResultSet vacío para matrícula %s", traceId,
                                     matriculaImportar.trim()));
                             return;
@@ -177,8 +188,9 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                             LOGGER.warn(String.format(
                                     "[%s] ResultSet sin columnas requeridas. Faltantes=%s, Columnas=%s", traceId,
                                     columnasFaltantes, columnasActuales));
-                            mostrarDialogoError("La consulta de la fuente externa no incluye las columnas requeridas: "
-                                    + String.join(", ", columnasFaltantes));
+                            mostrarDialogoError(obtenerTextoSistema(
+                                    "gw.gestionescolar.altasbajas.nuevaAlta.modal.consultaColumnasRequeridas")
+                                    + " " + String.join(", ", columnasFaltantes));
                             return;
                         }
                         LOGGER.info(String.format("[%s] ResultSet con datos. Columnas=%s", traceId,
@@ -189,8 +201,8 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                                 traceId, obtenerColumnas(rs), !esVacio(personaSige.getPassword()),
                                 ObjectUtils.isNull(personaSige) ? null : personaSige.getMatricula()));
                         if (ObjectUtils.isNull(personaSige) || esVacio(personaSige.getMatricula())) {
-                            mostrarDialogoError(
-                                    "La fuente externa no devolvió matrícula (se esperaba matricula_sige). Revise la consulta/mapeo.");
+                            mostrarDialogoError(obtenerTextoSistema(
+                                    "gw.gestionescolar.altasbajas.nuevaAlta.modal.sinMatriculaSige"));
                             LOGGER.warn(String.format("[%s] PersonaSige mapeada sin matrícula.", traceId));
                             return;
                         }
@@ -198,8 +210,9 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                         if (!camposFaltantes.isEmpty()) {
                             LOGGER.warn(String.format("[%s] PersonaSige con campos obligatorios vacíos. Faltantes=%s",
                                     traceId, camposFaltantes));
-                            mostrarDialogoError("La fuente externa devolvió campos obligatorios vacíos: "
-                                    + String.join(", ", camposFaltantes));
+                            mostrarDialogoError(obtenerTextoSistema(
+                                    "gw.gestionescolar.altasbajas.nuevaAlta.modal.camposObligatoriosVacios")
+                                    + " " + String.join(", ", camposFaltantes));
                             return;
                         }
                         LOGGER.info(String.format(
@@ -209,7 +222,8 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                                 personaSige.getCorreoInstitucional()));
                         guardarPersonaSige(personaSige, traceId);
                         matriculaNuevaAlta = personaSige.getMatricula();
-                        mostrarDialogoExito("Información importada correctamente.");
+                        mostrarDialogoExito(obtenerTextoSistema(
+                                "gw.gestionescolar.altasbajas.nuevaAlta.modal.importacionCorrecta"));
                         LOGGER.info(String.format("[%s] Importación exitosa para matrícula %s", traceId,
                                 matriculaNuevaAlta));
                     }
@@ -858,8 +872,16 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         this.eventoCapacitacionServiceFacade = eventoCapacitacionServiceFacade;
     }
 
+    public void setSistema(SistemaBean sistema) {
+        this.sistema = sistema;
+    }
+
     private void mostrarDialogo(String widgetVar) {
         RequestContext.getCurrentInstance().execute("PF('" + widgetVar + "').show()");
+    }
+
+    private String obtenerTextoSistema(String clave) {
+        return sistema != null ? sistema.obtenerTexto(clave) : clave;
     }
 
     private void mostrarDialogoValidacion(String mensaje) {
