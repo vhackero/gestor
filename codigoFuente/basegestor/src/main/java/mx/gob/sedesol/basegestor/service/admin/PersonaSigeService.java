@@ -7,4 +7,6 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
 public interface PersonaSigeService extends CommonService<PersonaSigeDTO, Long>{
 	
 	List<PersonaSigeDTO> buscarNoRegistrados();
+
+	PersonaSigeDTO buscarPorMatricula(String matricula);
 }

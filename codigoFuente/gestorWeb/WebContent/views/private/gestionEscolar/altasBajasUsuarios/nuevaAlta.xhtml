@@ -25,7 +25,8 @@
                                                styleClass="requerido bloque" />
                                 <p:inputText id="txtMatriculaImportar"
                                              styleClass="form-control"
-                                             style="width: 100%;" />
+                                             style="width: 100%;"
+                                             value="#{nuevaAltaUsuariosBean.matriculaImportar}" />
                             </div>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <p:outputLabel for="somFuenteExterna"
@@ -47,7 +48,12 @@
                     <div class="row" style="margin-top: 20px;">
                         <div class="col-md-12 text-right">
                             <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.btn.importar')}"
-                                             type="button"
+                                             action="#{nuevaAltaUsuariosBean.importarDesdeFuenteExterna}"
+                                             process="@form"
+                                             update="@form :frmAltasBajas:panelContenido :frmAltasBajas:msgsAltasBajas"
+                                             onstart="PF('dialogLayout').show();"
+                                             oncomplete="PF('dialogLayout').hide();"
+                                             onerror="PF('dialogLayout').hide();"
                                              styleClass="btn btn-primary" />
                         </div>
                     </div>
@@ -230,8 +236,9 @@
             </h:form>
 
             <p:dialog appendTo="@(body)" draggable="false" position="center"
-                      resizable="false" closable="false" modal="true" width="600px"
-                      widgetVar="dlgNuevaAltaValidacion" header="Informativo" dynamic="true">
+                      resizable="false" closable="false" modal="true"
+                      widgetVar="dlgNuevaAltaValidacion" header="Informativo" dynamic="true"
+                      styleClass="medidaModal">
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-12">
@@ -251,8 +258,9 @@
             </p:dialog>
 
             <p:dialog appendTo="@(body)" draggable="false" position="center"
-                      resizable="false" closable="false" modal="true" width="600px"
-                      widgetVar="dlgNuevaAltaExito" header="Informativo" dynamic="true">
+                      resizable="false" closable="false" modal="true"
+                      widgetVar="dlgNuevaAltaExito" header="Informativo" dynamic="true"
+                      styleClass="medidaModal">
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-12">
@@ -272,8 +280,9 @@
             </p:dialog>
 
             <p:dialog appendTo="@(body)" draggable="false" position="center"
-                      resizable="false" closable="false" modal="true" width="600px"
-                      widgetVar="dlgNuevaAltaError" header="Informativo" dynamic="true">
+                      resizable="false" closable="false" modal="true"
+                      widgetVar="dlgNuevaAltaError" header="Informativo" dynamic="true"
+                      styleClass="medidaModal">
                 <div class="form-group">
                     <div class="row">
                         <div class="col-md-12">

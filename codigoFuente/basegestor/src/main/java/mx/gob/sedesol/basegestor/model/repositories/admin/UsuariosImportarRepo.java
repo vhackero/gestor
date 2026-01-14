@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import mx.gob.sedesol.basegestor.commons.dto.admin.FuenteExternaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.SelectImportarDTO;
 
@@ -67,6 +68,29 @@ public class UsuariosImportarRepo implements IUsuariosImportarRepo {
 			}
 		}
 		return regresa;
+	}
+
+	@Override
+	public FuenteExternaDTO buscarFuenteExternaPorId(Integer idFuente) {
+		String consulta = "SELECT id_fuente_externa, nombre, servidor, usuario, contrasena, alias, nombre_base_datos, consulta "
+				+ "FROM cat_fuentes_externas WHERE activo = 1 AND id_fuente_externa = :idFuente";
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("idFuente", idFuente);
+		List<Object[]> resultado = query.getResultList();
+		if (resultado.isEmpty()) {
+			return null;
+		}
+		Object[] fila = resultado.get(0);
+		FuenteExternaDTO dto = new FuenteExternaDTO();
+		dto.setId(fila[0] != null ? Integer.parseInt(fila[0].toString()) : null);
+		dto.setNombre(fila[1] != null ? fila[1].toString() : null);
+		dto.setServidor(fila[2] != null ? fila[2].toString() : null);
+		dto.setUsuario(fila[3] != null ? fila[3].toString() : null);
+		dto.setContrasena(fila[4] != null ? fila[4].toString() : null);
+		dto.setAlias(fila[5] != null ? fila[5].toString() : null);
+		dto.setNombreBaseDatos(fila[6] != null ? fila[6].toString() : null);
+		dto.setConsulta(fila[7] != null ? fila[7].toString() : null);
+		return dto;
 	}
 
 	@Override

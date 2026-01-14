@@ -1,10 +1,18 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -17,26 +25,41 @@ import org.primefaces.context.RequestContext;
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.FuenteExternaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.SelectImportarDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.service.impl.admin.PersonaServiceFacade;
+import mx.gob.sedesol.basegestor.service.admin.PersonaSigeService;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.EventoCapacitacionServiceFacade;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
+import mx.gob.sedesol.gestorweb.sistema.SistemaBean;
 
 @ManagedBean
 @ViewScoped
 public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final List<String> COLUMNAS_REQUERIDAS = Arrays.asList("matricula_sige", "password_sige",
+            "nombre_sige", "apellidop_sige", "apellidom_sige", "programa_educativo_sige", "division_sige",
+            "correo_institucional_sige", "fecha_nacimiento_sige", "curp_sige", "nivel_sige", "persona_id_sige",
+            "perfil_id_sige");
 
     @ManagedProperty("#{personaServiceFacade}")
     private transient PersonaServiceFacade personaServiceFacade;
 
+    @ManagedProperty("#{personaSigeService}")
+    private transient PersonaSigeService personaSigeService;
+
     @ManagedProperty("#{eventoCapacitacionServiceFacade}")
     private transient EventoCapacitacionServiceFacade eventoCapacitacionServiceFacade;
+
+    @ManagedProperty("#{sistema}")
+    private transient SistemaBean sistema;
 
     private static final Logger LOGGER = Logger.getLogger(NuevaAltaUsuariosBean.class);
 
@@ -49,6 +72,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
     private List<SelectImportarDTO> listaEventos;
     private List<SelectImportarDTO> listaGrupos;
 
+    private String matriculaImportar;
     private String matriculaNuevaAlta;
     private String fuenteExternaSeleccionada;
     private String planSeleccionado;
@@ -75,6 +99,144 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         listaProgramas = new ArrayList<>();
         listaEventos = new ArrayList<>();
         listaGrupos = new ArrayList<>();
+    }
+
+    public void importarDesdeFuenteExterna() {
+        String traceId = "IMP-" + System.currentTimeMillis();
+        try {
+            LOGGER.info(String.format("[%s] Iniciando importación. Matricula: %s, Fuente seleccionada: %s", traceId,
+                    matriculaImportar != null ? matriculaImportar.trim() : null, fuenteExternaSeleccionada));
+            if (esVacio(matriculaImportar) || esVacio(fuenteExternaSeleccionada)) {
+                mostrarDialogoValidacion(obtenerTextoSistema(
+                        "gw.gestionescolar.altasbajas.nuevaAlta.modal.capturarModalFuente"));
+                LOGGER.warn(String.format("[%s] Faltan datos de entrada para importar.", traceId));
+                return;
+            }
+
+            Integer idFuente = parseEntero(fuenteExternaSeleccionada);
+            if (ObjectUtils.isNull(idFuente)) {
+                mostrarDialogoError(obtenerTextoSistema(
+                        "gw.gestionescolar.altasbajas.nuevaAlta.modal.fuenteInvalida"));
+                LOGGER.warn(String.format("[%s] No se pudo parsear la fuente externa seleccionada: %s", traceId,
+                        fuenteExternaSeleccionada));
+                return;
+            }
+            LOGGER.info(String.format("[%s] Fuente externa parseada. idFuente=%s", traceId, idFuente));
+
+            FuenteExternaDTO fuente = personaServiceFacade.buscarFuenteExternaPorId(idFuente);
+            if (ObjectUtils.isNull(fuente)) {
+                mostrarDialogoError(obtenerTextoSistema(
+                        "gw.gestionescolar.altasbajas.nuevaAlta.modal.sinConfigFuenteExterna"));
+                LOGGER.warn(String.format("[%s] Fuente externa no encontrada. idFuente=%s", traceId, idFuente));
+                return;
+            }
+            if (esVacio(fuente.getConsulta())) {
+                mostrarDialogoError(obtenerTextoSistema(
+                        "gw.gestionescolar.altasbajas.nuevaAlta.modal.sinConsultaConfig"));
+                LOGGER.warn(String.format("[%s] Consulta vacía para fuente id=%s", traceId, idFuente));
+                return;
+            }
+            LOGGER.info(String.format("[%s] Fuente obtenida. id=%s, nombre=%s, servidor=%s, usuario=%s, alias=%s, base=%s, consultaLen=%d, consultaPreview=%s",
+                    traceId, fuente.getId(), fuente.getNombre(), enmascararServidor(fuente.getServidor()),
+                    esVacio(fuente.getUsuario()) ? "N/A" : fuente.getUsuario(),
+                    esVacio(fuente.getAlias()) ? "N/A" : fuente.getAlias(),
+                    esVacio(fuente.getNombreBaseDatos()) ? "N/A" : fuente.getNombreBaseDatos(),
+                    fuente.getConsulta() != null ? fuente.getConsulta().length() : 0,
+                    truncar(fuente.getConsulta(), 200)));
+
+            String consultaNormalizada = normalizarConsulta(fuente.getConsulta());
+            if (consultaNormalizada == null) {
+                int numInterrogaciones = contarOcurrencias(fuente.getConsulta(), "?");
+                int numMatricula = contarOcurrenciasIgnoreCase(fuente.getConsulta(), ":matricula");
+                int numUsuario = contarOcurrenciasIgnoreCase(fuente.getConsulta(), ":usuario");
+                LOGGER.warn(String.format(
+                        "[%s] Consulta inválida. Parámetros encontrados -> ?: %d, :matricula: %d, :usuario: %d",
+                        traceId, numInterrogaciones, numMatricula, numUsuario));
+                mostrarDialogoError(obtenerTextoSistema(
+                        "gw.gestionescolar.altasbajas.nuevaAlta.modal.configurarDatosFuente"));
+                return;
+            }
+            LOGGER.info(String.format("[%s] Consulta normalizada lista. Preview=%s", traceId,
+                    truncar(consultaNormalizada, 200)));
+
+            try (Connection conexion = crearConexion(fuente)) {
+                if (conexion == null) {
+                    mostrarDialogoError(obtenerTextoSistema(
+                            "gw.gestionescolar.altasbajas.nuevaAlta.modal.sinConexionFuenteExterna"));
+                    LOGGER.warn(String.format("[%s] No se pudo construir la conexión (servidor vacío).", traceId));
+                    return;
+                }
+                String urlConexion = construirUrlConexion(fuente);
+                LOGGER.info(String.format("[%s] Conexión creada. url=%s, userPresent=%s, passwordPresent=%s, passwordLength=%d",
+                        traceId, enmascararServidor(urlConexion), !esVacio(fuente.getUsuario()),
+                        fuente.getContrasena() != null, fuente.getContrasena() != null ? fuente.getContrasena().length() : 0));
+                try (PreparedStatement ps = conexion.prepareStatement(consultaNormalizada)) {
+                    ps.setString(1, matriculaImportar.trim());
+                    LOGGER.info(String.format("[%s] Ejecutando consulta. SQL=%s, parametro1=%s", traceId,
+                            truncar(consultaNormalizada, 200), matriculaImportar.trim()));
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) {
+                            mostrarDialogoError(obtenerTextoSistema(
+                                    "gw.gestionescolar.altasbajas.nuevaAlta.modal.matriculaNoEncontrada"));
+                            LOGGER.warn(String.format("[%s] ResultSet vacío para matrícula %s", traceId,
+                                    matriculaImportar.trim()));
+                            return;
+                        }
+                        List<String> columnasFaltantes = validarColumnasRequeridas(rs);
+                        if (!columnasFaltantes.isEmpty()) {
+                            String columnasActuales = obtenerColumnas(rs);
+                            LOGGER.warn(String.format(
+                                    "[%s] ResultSet sin columnas requeridas. Faltantes=%s, Columnas=%s", traceId,
+                                    columnasFaltantes, columnasActuales));
+                            mostrarDialogoError(obtenerTextoSistema(
+                                    "gw.gestionescolar.altasbajas.nuevaAlta.modal.consultaColumnasRequeridas")
+                                    + " " + String.join(", ", columnasFaltantes));
+                            return;
+                        }
+                        LOGGER.info(String.format("[%s] ResultSet con datos. Columnas=%s", traceId,
+                                obtenerColumnas(rs)));
+                        PersonaSigeDTO personaSige = mapearPersonaSige(rs);
+                        LOGGER.info(String.format(
+                                "[%s] Datos mapeo previo a validación de matrícula. Columnas=%s, passwordPresent=%s, matriculaFinal=%s",
+                                traceId, obtenerColumnas(rs), !esVacio(personaSige.getPassword()),
+                                ObjectUtils.isNull(personaSige) ? null : personaSige.getMatricula()));
+                        if (ObjectUtils.isNull(personaSige) || esVacio(personaSige.getMatricula())) {
+                            mostrarDialogoError(obtenerTextoSistema(
+                                    "gw.gestionescolar.altasbajas.nuevaAlta.modal.sinMatriculaSige"));
+                            LOGGER.warn(String.format("[%s] PersonaSige mapeada sin matrícula.", traceId));
+                            return;
+                        }
+                        List<String> camposFaltantes = validarCamposObligatorios(personaSige);
+                        if (!camposFaltantes.isEmpty()) {
+                            LOGGER.warn(String.format("[%s] PersonaSige con campos obligatorios vacíos. Faltantes=%s",
+                                    traceId, camposFaltantes));
+                            mostrarDialogoError(obtenerTextoSistema(
+                                    "gw.gestionescolar.altasbajas.nuevaAlta.modal.camposObligatoriosVacios")
+                                    + " " + String.join(", ", camposFaltantes));
+                            return;
+                        }
+                        LOGGER.info(String.format(
+                                "[%s] Persona mapeada. Matricula=%s, Nombre=%s, Apellidos=%s %s, Correo=%s", traceId,
+                                personaSige.getMatricula(), personaSige.getNombre(),
+                                personaSige.getApellidoPaterno(), personaSige.getApellidoMaterno(),
+                                personaSige.getCorreoInstitucional()));
+                        guardarPersonaSige(personaSige, traceId);
+                        matriculaNuevaAlta = null;
+                        matriculaImportar = null;
+                        fuenteExternaSeleccionada = null;
+                        mostrarDialogoExito(obtenerTextoSistema(
+                                "gw.gestionescolar.altasbajas.nuevaAlta.modal.importacionCorrecta"));
+                        LOGGER.info(String.format("[%s] Importación exitosa para matrícula %s", traceId,
+                                matriculaNuevaAlta));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error al importar datos desde fuente externa", e);
+            String mensaje = ObjectUtils.isNullOrEmpty(e.getMessage()) ? "Error al importar datos desde fuente externa"
+                    : e.getMessage();
+            mostrarDialogoError(mensaje);
+        }
     }
 
     public void onPlanChange() {
@@ -319,6 +481,262 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         }
     }
 
+    private int contarOcurrencias(String cadena, String subcadena) {
+        if (esVacio(cadena) || esVacio(subcadena)) {
+            return 0;
+        }
+        int contador = 0;
+        int indice = cadena.indexOf(subcadena);
+        while (indice != -1) {
+            contador++;
+            indice = cadena.indexOf(subcadena, indice + subcadena.length());
+        }
+        return contador;
+    }
+
+    private int contarOcurrenciasIgnoreCase(String cadena, String subcadena) {
+        if (cadena == null || subcadena == null) {
+            return 0;
+        }
+        return contarOcurrencias(cadena.toLowerCase(), subcadena.toLowerCase());
+    }
+
+    private String normalizarConsulta(String consulta) {
+        if (esVacio(consulta)) {
+            return null;
+        }
+        int numInterrogaciones = contarOcurrencias(consulta, "?");
+        int numMatricula = contarOcurrenciasIgnoreCase(consulta, ":matricula");
+        int numUsuario = contarOcurrenciasIgnoreCase(consulta, ":usuario");
+        int totalParametros = numInterrogaciones + numMatricula + numUsuario;
+        if (totalParametros != 1) {
+            return null;
+        }
+        return consulta.replaceAll("(?i):matricula", "?").replaceAll("(?i):usuario", "?");
+    }
+
+    private Connection crearConexion(FuenteExternaDTO fuente) throws SQLException {
+        String url = construirUrlConexion(fuente);
+        if (url == null) {
+            return null;
+        }
+        Properties propiedades = new Properties();
+        if (!esVacio(fuente.getUsuario())) {
+            propiedades.put("user", fuente.getUsuario());
+        }
+        String password = fuente.getContrasena();
+        if (!esVacio(password)) {
+            propiedades.put("password", password);
+        }
+        return DriverManager.getConnection(url, propiedades);
+    }
+
+    private PersonaSigeDTO mapearPersonaSige(ResultSet rs) throws SQLException {
+        PersonaSigeDTO persona = new PersonaSigeDTO();
+        persona.setMatricula(obtenerString(rs, "matricula_sige"));
+        persona.setPassword(obtenerString(rs, "password_sige"));
+        persona.setNombre(obtenerString(rs, "nombre_sige"));
+        persona.setApellidoPaterno(obtenerString(rs, "apellidop_sige"));
+        persona.setApellidoMaterno(obtenerString(rs, "apellidom_sige"));
+        persona.setProgramaEducativo(obtenerString(rs, "programa_educativo_sige"));
+        persona.setDivision(obtenerString(rs, "division_sige"));
+        persona.setCorreoInstitucional(obtenerString(rs, "correo_institucional_sige"));
+        persona.setFechaNacimiento(obtenerFecha(rs, "fecha_nacimiento_sige"));
+        persona.setCurp(obtenerString(rs, "curp_sige"));
+        persona.setNivelSige(obtenerString(rs, "nivel_sige"));
+        Integer personaId = obtenerEntero(rs, "persona_id_sige");
+        Integer perfilId = obtenerEntero(rs, "perfil_id_sige");
+        if (personaId != null) {
+            persona.setPersonaIdSige(personaId);
+        }
+        if (perfilId != null) {
+            persona.setPerfilIdSige(perfilId);
+        }
+        return persona;
+    }
+
+    private String obtenerString(ResultSet rs, String... columnas) throws SQLException {
+        for (String columna : columnas) {
+            if (tieneColumna(rs, columna)) {
+                return rs.getString(columna);
+            }
+        }
+        return null;
+    }
+
+    private Date obtenerFecha(ResultSet rs, String... columnas) throws SQLException {
+        for (String columna : columnas) {
+            if (tieneColumna(rs, columna)) {
+                java.sql.Date fecha = rs.getDate(columna);
+                return fecha != null ? new Date(fecha.getTime()) : null;
+            }
+        }
+        return null;
+    }
+
+    private Integer obtenerEntero(ResultSet rs, String... columnas) throws SQLException {
+        for (String columna : columnas) {
+            if (tieneColumna(rs, columna)) {
+                Object valor = rs.getObject(columna);
+                if (valor instanceof Number) {
+                    return ((Number) valor).intValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    private boolean tieneColumna(ResultSet rs, String columna) throws SQLException {
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnas = metaData.getColumnCount();
+        for (int i = 1; i <= columnas; i++) {
+            if (columna.equalsIgnoreCase(metaData.getColumnLabel(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String obtenerColumnas(ResultSet rs) throws SQLException {
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnas = metaData.getColumnCount();
+        List<String> nombres = new ArrayList<>();
+        for (int i = 1; i <= columnas; i++) {
+            nombres.add(metaData.getColumnLabel(i));
+        }
+        return nombres.toString();
+    }
+
+    private List<String> validarColumnasRequeridas(ResultSet rs) throws SQLException {
+        List<String> faltantes = new ArrayList<>();
+        for (String columna : COLUMNAS_REQUERIDAS) {
+            if (!tieneColumna(rs, columna)) {
+                faltantes.add(columna);
+            }
+        }
+        return faltantes;
+    }
+
+    private List<String> validarCamposObligatorios(PersonaSigeDTO personaSige) {
+        List<String> faltantes = new ArrayList<>();
+        if (ObjectUtils.isNull(personaSige)) {
+            faltantes.addAll(COLUMNAS_REQUERIDAS);
+            return faltantes;
+        }
+        if (esVacio(personaSige.getMatricula())) {
+            faltantes.add("matricula_sige");
+        }
+        if (esVacio(personaSige.getPassword())) {
+            faltantes.add("password_sige");
+        }
+        if (esVacio(personaSige.getNombre())) {
+            faltantes.add("nombre_sige");
+        }
+        if (esVacio(personaSige.getApellidoPaterno())) {
+            faltantes.add("apellidop_sige");
+        }
+        if (esVacio(personaSige.getApellidoMaterno())) {
+            faltantes.add("apellidom_sige");
+        }
+        if (esVacio(personaSige.getProgramaEducativo())) {
+            faltantes.add("programa_educativo_sige");
+        }
+        if (esVacio(personaSige.getDivision())) {
+            faltantes.add("division_sige");
+        }
+        if (esVacio(personaSige.getCorreoInstitucional())) {
+            faltantes.add("correo_institucional_sige");
+        }
+        if (ObjectUtils.isNull(personaSige.getFechaNacimiento())) {
+            faltantes.add("fecha_nacimiento_sige");
+        }
+        if (esVacio(personaSige.getCurp())) {
+            faltantes.add("curp_sige");
+        }
+        if (esVacio(personaSige.getNivelSige())) {
+            faltantes.add("nivel_sige");
+        }
+        if (ObjectUtils.isNull(personaSige.getPersonaIdSige())) {
+            faltantes.add("persona_id_sige");
+        }
+        if (ObjectUtils.isNull(personaSige.getPerfilIdSige())) {
+            faltantes.add("perfil_id_sige");
+        }
+        return faltantes;
+    }
+
+    private String construirUrlConexion(FuenteExternaDTO fuente) {
+        String url = fuente.getServidor();
+        if (ObjectUtils.isNull(url) || url.trim().isEmpty()) {
+            return null;
+        }
+        if (!url.toLowerCase().startsWith("jdbc:")) {
+            StringBuilder urlBuilder = new StringBuilder("jdbc:mysql://");
+            urlBuilder.append(url.trim());
+            if (!esVacio(fuente.getNombreBaseDatos())) {
+                urlBuilder.append("/").append(fuente.getNombreBaseDatos().trim());
+            }
+            url = urlBuilder.toString();
+        }
+        return url;
+    }
+
+    private String truncar(String valor, int max) {
+        if (valor == null) {
+            return null;
+        }
+        return valor.length() > max ? valor.substring(0, max) + "..." : valor;
+    }
+
+    private String enmascararServidor(String url) {
+        if (esVacio(url)) {
+            return url;
+        }
+        try {
+            int idxParams = url.indexOf("?");
+            String sinParametros = idxParams > 0 ? url.substring(0, idxParams) : url;
+            int idxCred = sinParametros.indexOf("@");
+            if (idxCred > 0) {
+                sinParametros = sinParametros.substring(idxCred + 1);
+            }
+            return truncar(sinParametros, 200);
+        } catch (Exception e) {
+            return truncar(url, 200);
+        }
+    }
+
+    private void guardarPersonaSige(PersonaSigeDTO personaSige, String traceId) {
+        PersonaSigeDTO existente = personaSigeService.buscarPorMatricula(personaSige.getMatricula());
+        if (ObjectUtils.isNotNull(existente)) {
+            personaSige.setIdPersonaSige(existente.getIdPersonaSige());
+            LOGGER.info(String.format("[%s] Actualizando persona SIGE existente para matrícula %s", traceId,
+                    personaSige.getMatricula()));
+            manejarResultadoPersistencia(personaSigeService.actualizar(personaSige));
+        } else {
+            LOGGER.info(String.format("[%s] Insertando nueva persona SIGE para matrícula %s", traceId,
+                    personaSige.getMatricula()));
+            manejarResultadoPersistencia(personaSigeService.guardar(personaSige));
+        }
+    }
+
+    private void manejarResultadoPersistencia(ResultadoDTO<PersonaSigeDTO> resultado) {
+        if (ObjectUtils.isNull(resultado) || !resultado.esCorrecto() || ObjectUtils.isNull(resultado.getDto())) {
+            String mensaje = "No se pudo guardar la información de la persona SIGE";
+            if (resultado != null) {
+                if (!ObjectUtils.isNullOrEmpty(resultado.getMensajes())) {
+                    mensaje = resultado.getMensajes().get(0);
+                } else if (!esVacio(resultado.getMensaje())) {
+                    mensaje = resultado.getMensaje();
+                }
+                LOGGER.error(String.format(
+                        "Fallo en persistencia SIGE. esCorrecto=%s, mensaje=%s, mensajes=%s, mensajeError=%s",
+                        resultado.esCorrecto(), resultado.getMensaje(), resultado.getMensajes(),
+                        resultado.getMensajeError()));
+            }
+            throw new RuntimeException(mensaje);
+        }
+    }
+
     public List<SelectImportarDTO> getListaFuentesExternas() {
         return listaFuentesExternas;
     }
@@ -357,6 +775,14 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
     public void setMatriculaNuevaAlta(String matriculaNuevaAlta) {
         this.matriculaNuevaAlta = matriculaNuevaAlta;
+    }
+
+    public String getMatriculaImportar() {
+        return matriculaImportar;
+    }
+
+    public void setMatriculaImportar(String matriculaImportar) {
+        this.matriculaImportar = matriculaImportar;
     }
 
     public String getFuenteExternaSeleccionada() {
@@ -439,13 +865,30 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         this.personaServiceFacade = personaServiceFacade;
     }
 
+    public void setPersonaSigeService(PersonaSigeService personaSigeService) {
+        this.personaSigeService = personaSigeService;
+    }
+
     public void setEventoCapacitacionServiceFacade(
             EventoCapacitacionServiceFacade eventoCapacitacionServiceFacade) {
         this.eventoCapacitacionServiceFacade = eventoCapacitacionServiceFacade;
     }
 
+    public void setSistema(SistemaBean sistema) {
+        this.sistema = sistema;
+    }
+
     private void mostrarDialogo(String widgetVar) {
         RequestContext.getCurrentInstance().execute("PF('" + widgetVar + "').show()");
+    }
+
+    private String obtenerTextoSistema(String clave) {
+        return sistema != null ? sistema.obtenerTexto(clave) : clave;
+    }
+
+    private void mostrarDialogoValidacion(String mensaje) {
+        mensajeValidacionDialogo = mensaje;
+        mostrarDialogo("dlgNuevaAltaValidacion");
     }
 
     private void mostrarDialogoError(String mensaje) {

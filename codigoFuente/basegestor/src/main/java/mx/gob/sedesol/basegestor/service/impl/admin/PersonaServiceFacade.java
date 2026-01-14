@@ -19,6 +19,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.RolDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.TipoDiscapacidadDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.FuenteExternaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.SelectImportarDTO;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.AsentamientoService;
@@ -155,6 +156,10 @@ public class PersonaServiceFacade {
 	
 	public List<SelectImportarDTO> consultaFuenteExterna() {
 		return usuariosImportarService.consultaFuenteExterna();
+	}
+
+	public FuenteExternaDTO buscarFuenteExternaPorId(Integer idFuente) {
+		return usuariosImportarService.buscarFuenteExternaPorId(idFuente);
 	}
 
 	public List<SelectImportarDTO> consultaPlanesActivos() {
