@@ -324,14 +324,14 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
         if (!idPersona.isPresent()) {
             LOGGER.warn("No se encontró la matrícula ingresada");
-            mostrarDialogoError("No se encontró la matrícula ingresada.");
+            mostrarDialogoError(obtenerTextoSistema("gw.gestionescolar.altasbajas.nuevaAlta.modal.matriculaIngresadaNoEncontrada"));
             return;
         }
 
         PersonaDTO persona = personaServiceFacade.obtenerPersonaPorId(idPersona.get());
         if (ObjectUtils.isNull(persona)) {
             LOGGER.warn("No se encontró la información del usuario");
-            mostrarDialogoError("No se encontró información asociada para registrar, por favor intenta, importar datos para continuar.");
+            mostrarDialogoError(obtenerTextoSistema("gw.gestionescolar.altasbajas.nuevaAlta.modal.informacionNoEncontrada"));
             return;
         }
 
@@ -339,7 +339,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         Integer idGrupo = parseEntero(grupoSeleccionado);
         if (ObjectUtils.isNull(idEvento) || ObjectUtils.isNull(idGrupo)) {
             LOGGER.warn("Evento o grupo no seleccionados correctamente");
-            mostrarDialogoError("No se pudo recuperar el evento o grupo seleccionado.");
+            mostrarDialogoError(obtenerTextoSistema("gw.gestionescolar.altasbajas.nuevaAlta.modal.sinEventoGrupo"));
             return;
         }
 
@@ -349,13 +349,13 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
         if (ObjectUtils.isNull(evento) || ObjectUtils.isNull(grupo)) {
             LOGGER.warn("No se pudo recuperar la información de evento o grupo");
-            mostrarDialogoError("No se pudo recuperar la información seleccionada.");
+            mostrarDialogoError(obtenerTextoSistema("gw.gestionescolar.altasbajas.nuevaAlta.modal.sinInformacionRecuperada"));
             return;
         }
 
         if (yaEstaMatriculado(idEvento, idPersona.get())) {
             LOGGER.info("El usuario ya está matriculado en el evento seleccionado");
-            mostrarDialogoError("El usuario ya está matriculado en el evento seleccionado.");
+            mostrarDialogoError(obtenerTextoSistema("gw.gestionescolar.altasbajas.nuevaAlta.modal.usuarioYaMatriculadoEvento"));
             return;
         }
 
@@ -364,8 +364,8 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
         ParametroWSMoodleDTO parametroWSMoodleDTO = obtenerParametrosMoodle(evento);
         if (requiereMoodle(evento) && ObjectUtils.isNull(parametroWSMoodleDTO)) {
-            LOGGER.error("No se encontró la plataforma para matricular en el LMS");
-            mostrarDialogoError("No se encontró la plataforma para matricular en el LMS.");
+            LOGGER.error("No se encontró la plataforma para matricular");
+            mostrarDialogoError(obtenerTextoSistema("gw.gestionescolar.altasbajas.nuevaAlta.modal.noEncontradaPlataforma"));
             return;
         }
 
@@ -376,12 +376,12 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
         if (ObjectUtils.isNull(participante)) {
             LOGGER.error("No fue posible matricular al usuario");
-            mostrarDialogoError("No fue posible matricular al usuario.");
+            mostrarDialogoError(obtenerTextoSistema("gw.gestionescolar.altasbajas.nuevaAlta.modal.noMatriculacionUsuario"));
             return;
         }
 
         LOGGER.info("Alta registrada correctamente");
-        mostrarDialogoExito("Alta aplicada correctamente");
+        mostrarDialogoExito(obtenerTextoSistema("gw.gestionescolar.altasbajas.nuevaAlta.modal.altaAplicada"));
         limpiarFormulario();
     }
 
