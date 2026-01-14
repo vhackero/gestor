@@ -119,3 +119,50 @@ INSERT INTO des_sisi_gestor.tbl_textos_sistema (clave, valor, id_funcionalidad, 
    SELECT 'gw.gestionescolar.altasbajas.nuevaAlta.modal.sinConexionFuenteExterna', 'No se pudo construir la conexión con la fuente externa.', f.id_funcionalidad, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2
    FROM des_sisi_gestor.tbl_funcionalidades f
    WHERE f.clave = 'ALT_BAJ_USR_ALT';
+
+-- Modales para formulario de nueva alta
+
+INSERT INTO des_sisi_gestor.tbl_textos_sistema (clave, valor, id_funcionalidad, fecha_registro, fecha_actualizacion, usuario_modifico)
+  SELECT 'gw.gestionescolar.altasbajas.nuevaAlta.modal.matriculaIngresadaNoEncontrada', 'No se encontró la matrícula ingresada.' , f.id_funcionalidad, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2
+   FROM des_sisi_gestor.tbl_funcionalidades f
+   WHERE f.clave = 'ALT_BAJ_USR_ALT';
+
+
+INSERT INTO des_sisi_gestor.tbl_textos_sistema (clave, valor, id_funcionalidad, fecha_registro, fecha_actualizacion, usuario_modifico)
+  SELECT 'gw.gestionescolar.altasbajas.nuevaAlta.modal.informacionNoEncontrada', 'No se encontró información asociada para registrar, por favor intenta, importar datos para continuar.' , f.id_funcionalidad, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2
+   FROM des_sisi_gestor.tbl_funcionalidades f
+   WHERE f.clave = 'ALT_BAJ_USR_ALT';
+
+
+INSERT INTO des_sisi_gestor.tbl_textos_sistema (clave, valor, id_funcionalidad, fecha_registro, fecha_actualizacion, usuario_modifico)
+  SELECT 'gw.gestionescolar.altasbajas.nuevaAlta.modal.sinEventoGrupo', 'No se pudo recuperar el evento o grupo seleccionado.' , f.id_funcionalidad, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2
+   FROM des_sisi_gestor.tbl_funcionalidades f
+   WHERE f.clave = 'ALT_BAJ_USR_ALT';
+
+INSERT INTO des_sisi_gestor.tbl_textos_sistema (clave, valor, id_funcionalidad, fecha_registro, fecha_actualizacion, usuario_modifico)
+  SELECT 'gw.gestionescolar.altasbajas.nuevaAlta.modal.sinInformacionRecuperada', 'No se pudo recuperar la información seleccionada.' , f.id_funcionalidad, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2
+   FROM des_sisi_gestor.tbl_funcionalidades f
+   WHERE f.clave = 'ALT_BAJ_USR_ALT';
+
+INSERT INTO des_sisi_gestor.tbl_textos_sistema (clave, valor, id_funcionalidad, fecha_registro, fecha_actualizacion, usuario_modifico)
+  SELECT 'gw.gestionescolar.altasbajas.nuevaAlta.modal.usuarioYaMatriculadoEvento', 'El usuario ya está matriculado en el evento seleccionado.' , f.id_funcionalidad, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2
+   FROM des_sisi_gestor.tbl_funcionalidades f
+   WHERE f.clave = 'ALT_BAJ_USR_ALT';
+
+
+INSERT INTO des_sisi_gestor.tbl_textos_sistema (clave, valor, id_funcionalidad, fecha_registro, fecha_actualizacion, usuario_modifico)
+  SELECT 'gw.gestionescolar.altasbajas.nuevaAlta.modal.noEncontradaPlataforma', 'No se encontró la plataforma para matricular.' , f.id_funcionalidad, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2
+   FROM des_sisi_gestor.tbl_funcionalidades f
+   WHERE f.clave = 'ALT_BAJ_USR_ALT';
+
+
+INSERT INTO des_sisi_gestor.tbl_textos_sistema (clave, valor, id_funcionalidad, fecha_registro, fecha_actualizacion, usuario_modifico)
+  SELECT 'gw.gestionescolar.altasbajas.nuevaAlta.modal.noMatriculacionUsuario', 'No fue posible matricular al usuario.' , f.id_funcionalidad, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2
+   FROM des_sisi_gestor.tbl_funcionalidades f
+   WHERE f.clave = 'ALT_BAJ_USR_ALT';
+
+
+INSERT INTO des_sisi_gestor.tbl_textos_sistema (clave, valor, id_funcionalidad, fecha_registro, fecha_actualizacion, usuario_modifico)
+  SELECT 'gw.gestionescolar.altasbajas.nuevaAlta.modal.altaAplicada', 'Alta aplicada correctamente' , f.id_funcionalidad, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2
+   FROM des_sisi_gestor.tbl_funcionalidades f
+   WHERE f.clave = 'ALT_BAJ_USR_ALT';
