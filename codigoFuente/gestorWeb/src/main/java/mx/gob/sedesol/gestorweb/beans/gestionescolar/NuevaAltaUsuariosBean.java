@@ -116,7 +116,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
             Integer idFuente = parseEntero(fuenteExternaSeleccionada);
             if (ObjectUtils.isNull(idFuente)) {
                 mostrarDialogoError(obtenerTextoSistema(
-                        "gw.gestionescolar.altasbajas.nuevaAlta.modal.importacionCorrecta"));
+                        "gw.gestionescolar.altasbajas.nuevaAlta.modal.fuenteInvalida"));
                 LOGGER.warn(String.format("[%s] No se pudo parsear la fuente externa seleccionada: %s", traceId,
                         fuenteExternaSeleccionada));
                 return;
