@@ -221,7 +221,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                                 personaSige.getApellidoPaterno(), personaSige.getApellidoMaterno(),
                                 personaSige.getCorreoInstitucional()));
                         guardarPersonaSige(personaSige, traceId);
-                        matriculaNuevaAlta = personaSige.getMatricula();
+                        matriculaNuevaAlta = null;
                         matriculaImportar = null;
                         fuenteExternaSeleccionada = null;
                         mostrarDialogoExito(obtenerTextoSistema(
