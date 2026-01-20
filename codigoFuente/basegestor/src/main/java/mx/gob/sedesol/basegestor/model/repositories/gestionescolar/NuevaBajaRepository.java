@@ -7,14 +7,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.*;
 import org.springframework.stereotype.Repository;
 
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalleDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaAplicacionDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculacionDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DatosMoodlePersonaDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
@@ -286,6 +282,44 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     }
 
     @Override
+    public ConsultaBajaDTO consultarBajaPorId(Long idBaja) {
+        String consulta = "SELECT rpb.id_baja, rpb.id_plan, rpb.id_programa, rpb.id_evento, rpb.id_grupo, "
+                + " rpb.id_user_enrolments_lms, rpb.contabilizar, rpb.solicitud, rpb.usuario_modifico, "
+                + " rpb.id_persona, rmb.descripcion, rmb.id_motivo_baja, rmb.tipo_baja_id, rpb.proceso_id, ctb.nombre AS tipo_baja "
+                + "FROM rel_persona_bajas rpb "
+                + " JOIN rel_motivo_baja rmb ON rmb.id_motivo_baja = rpb.motivo_baja_id "
+                + " JOIN cat_tipo_bajas ctb ON ctb.id_tipo_baja = rmb.tipo_baja_id "
+                + "WHERE rpb.id_baja = :idBaja";
+
+        Query query = entityManager.createNativeQuery(consulta);
+        query.setParameter("idBaja", idBaja);
+        List<?> resultados = query.getResultList();
+
+        if (resultados.isEmpty()) {
+            return null;
+        }
+
+        Object[] fila = (Object[]) resultados.get(0);
+        ConsultaBajaDTO dto = new ConsultaBajaDTO();
+        dto.setIdBaja(obtenerEntero(fila[0]));
+        dto.setIdPlan(obtenerLong(fila[1]));
+        dto.setIdPrograma(obtenerLong(fila[2]));
+        dto.setIdEvento(obtenerLong(fila[3]));
+        dto.setIdGrupo(obtenerLong(fila[4]));
+        dto.setIdUserEnrolmentsLms(obtenerEntero(fila[5]));
+        dto.setEstatus(obtenerEntero(fila[6]));
+        dto.setNumeroSolicitud(obtenerCadena(fila[7]));
+        dto.setQuienAplica(obtenerCadena(fila[8]));
+        dto.setIdPersona(obtenerLong(fila[9]));
+        dto.setMotivo(obtenerCadena(fila[10]));
+        dto.setIdMotivoBaja(obtenerLong(fila[11]));
+        dto.setIdTipoBaja(obtenerEntero(fila[12]));
+        dto.setIdProceso(obtenerLong(fila[13]));
+        dto.setTipoBaja(obtenerCadena(fila[14]));
+        return dto;
+    }
+
+    @Override
     @Transactional
     public void insertarBaja(BajaAplicacionDTO bajaAplicacionDTO) {
         String consulta = "INSERT INTO rel_persona_bajas (id_persona, motivo_baja_id, proceso_id, id_plan, id_programa, id_evento, id_grupo, id_user_enrolments_lms, usuario_modifico, contabilizar, solicitud)"
@@ -360,5 +394,59 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
 
     private Long obtenerLong(Object valor) {
         return valor != null ? Long.valueOf(valor.toString()) : null;
+    }
+
+    @Override
+    @Transactional
+    public void actualizarBaja(Long idBaja, BajaAplicacionDTO bajaAplicacionDTO) {
+        String consulta = "UPDATE rel_persona_bajas "
+                + "SET motivo_baja_id = :motivoBajaId, proceso_id = :procesoId, "
+                + "id_plan = :idPlan, id_programa = :idPrograma, id_evento = :idEvento, id_grupo = :idGrupo, "
+                + "id_user_enrolments_lms = :idUserEnrolmentsLms, usuario_modifico = :usuarioModifico, "
+                + "contabilizar = :contabilizar, solicitud = :numeroSolicitud "
+                + "WHERE id_baja = :idBaja";
+
+        entityManager.createNativeQuery(consulta)
+                .setParameter("motivoBajaId", bajaAplicacionDTO.getMotivoBajaId())
+                .setParameter("procesoId", bajaAplicacionDTO.getProcesoId())
+                .setParameter("idPlan", bajaAplicacionDTO.getIdPlan())
+                .setParameter("idPrograma", bajaAplicacionDTO.getIdPrograma())
+                .setParameter("idEvento", bajaAplicacionDTO.getIdEvento())
+                .setParameter("idGrupo", bajaAplicacionDTO.getIdGrupo())
+                .setParameter("idUserEnrolmentsLms", bajaAplicacionDTO.getIdUserEnrolmentsLms())
+                .setParameter("usuarioModifico", bajaAplicacionDTO.getQuienAplicaBaja() != null ? bajaAplicacionDTO.getQuienAplicaBaja() : "-")
+                .setParameter("contabilizar", bajaAplicacionDTO.getContabilizar())
+                .setParameter("numeroSolicitud", bajaAplicacionDTO.getNumeroSolicitud())
+                .setParameter("idBaja", idBaja)
+                .executeUpdate();
+    }
+
+    @Override
+    @Transactional
+    public void eliminarBaja(Long idBaja) {
+        String consulta = "DELETE FROM rel_persona_bajas WHERE id_baja = :idBaja";
+        entityManager.createNativeQuery(consulta)
+                .setParameter("idBaja", idBaja)
+                .executeUpdate();
+    }
+
+    @Override
+    @Transactional
+    public void actualizarMotivoBaja(Long idMotivoBaja, Long idTipoBaja, String descripcion) {
+        String consulta = "UPDATE rel_motivo_baja SET tipo_baja_id = :idTipoBaja, descripcion = :descripcion WHERE id_motivo_baja = :idMotivoBaja";
+        entityManager.createNativeQuery(consulta)
+                .setParameter("idTipoBaja", idTipoBaja)
+                .setParameter("descripcion", descripcion)
+                .setParameter("idMotivoBaja", idMotivoBaja)
+                .executeUpdate();
+    }
+
+    @Override
+    @Transactional
+    public void reactivarPersona(Long idPersona) {
+        String consulta = "UPDATE tbl_persona SET activo = 1 WHERE id_persona = :idPersona";
+        entityManager.createNativeQuery(consulta)
+                .setParameter("idPersona", idPersona)
+                .executeUpdate();
     }
 }

@@ -17,6 +17,7 @@ import org.primefaces.context.RequestContext;
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaSolicitudDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
 import mx.gob.sedesol.basegestor.service.gestionescolar.NuevaBajaService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
@@ -70,6 +71,20 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     private boolean esTipoDefinitiva;
     private boolean esTipoTemporalOParcial;
     private boolean esSinAsignaturas;
+    private boolean modoEdicion;
+    private Long idBajaEdicion;
+    private Long idMotivoBajaEdicion;
+    private boolean matriculaBloqueada;
+    private boolean tipoBajaBloqueada;
+    private boolean planBloqueado;
+    private boolean semestreBloqueado;
+    private boolean bloqueBloqueado;
+    private boolean programaBloqueado;
+    private boolean periodoBloqueado;
+    private boolean eventoBloqueado;
+    private boolean motivoBloqueado;
+    private boolean quienAplicaBloqueado;
+    private boolean numeroSolicitudBloqueada;
 
     @ManagedProperty(value = "#{sistema}")
     private SistemaBean sistema;
@@ -101,6 +116,9 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     }
 
     public void onMatriculaChange() {
+        if (modoEdicion && matriculaBloqueada) {
+            return;
+        }
         limpiarDatosDependientes();
         deshabilitarListas();
         nombreEstudiante = null;
@@ -184,7 +202,14 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
     public void registrarBaja() {
         try {
             BajaSolicitudDTO solicitud = construirSolicitud();
-            nuevaBajaService.aplicarBaja(solicitud);
+            if (modoEdicion) {
+                nuevaBajaService.actualizarBaja(idBajaEdicion, solicitud, idMotivoBajaEdicion);
+                modoEdicion = false;
+                idBajaEdicion = null;
+                idMotivoBajaEdicion = null;
+            } else {
+                nuevaBajaService.aplicarBaja(solicitud);
+            }
             mensajeExitoDialogo = sistema.obtenerTexto("gw.gestionescolar.altasbajas.nuevaBaja.mensaje.bajaAplicadaCorrectamente");
             limpiarFormulario();
             mostrarDialogo("dlgNuevaBajaExito");
@@ -202,6 +227,41 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         RequestContext.getCurrentInstance().execute("PF('" + widgetVar + "').show()");
     }
 
+    public void prepararEdicionDesdeConsulta(ConsultaBajaDTO baja) {
+        limpiarFormulario();
+        modoEdicion = true;
+        idBajaEdicion = baja.getIdBaja() != null ? baja.getIdBaja().longValue() : null;
+        idMotivoBajaEdicion = baja.getIdMotivoBaja();
+
+        matriculaUsuario = baja.getMatricula();
+        nombreEstudiante = baja.getNombreEstudiante();
+        idTipoBaja = baja.getIdTipoBaja() != null ? baja.getIdTipoBaja().longValue() : null;
+        idPlan = baja.getIdPlan();
+        semestres = idPlan != null ? obtenerSemestres(idPlan) : Collections.emptyList();
+        idSemestre = baja.getIdSemestre();
+        bloques = idSemestre != null ? obtenerBloques(idSemestre) : Collections.emptyList();
+        idBloque = baja.getIdBloque();
+
+        Long idEjeCapacitacion = idBloque != null ? idBloque : idSemestre;
+        programas = idEjeCapacitacion != null
+                ? convertirANodosSelectItem(nuevaBajaService.obtenerProgramasPorEje(idEjeCapacitacion))
+                : Collections.emptyList();
+        idPrograma = baja.getIdPrograma();
+
+        idPeriodo = baja.getPeriodo();
+        actualizarEventos();
+        idEvento = baja.getIdEvento();
+
+        motivo = baja.getMotivo();
+        numeroSolicitud = baja.getNumeroSolicitud();
+        quienAplica = baja.getQuienAplica();
+
+        matriculaValida = true;
+        actualizarVisibilidadCampos();
+        actualizarHabilitacionSecuencial();
+        actualizarBloqueoCampos();
+    }
+
     public void limpiarFormulario() {
         matriculaUsuario = null;
         idTipoBaja = null;
@@ -216,12 +276,16 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
         esTipoDefinitiva = false;
         esTipoTemporalOParcial = false;
         esSinAsignaturas = false;
+        modoEdicion = false;
+        idBajaEdicion = null;
+        idMotivoBajaEdicion = null;
         mostrarSemestre = true;
         mostrarBloque = true;
         mostrarPrograma = true;
         mostrarPeriodo = true;
         mostrarEvento = true;
         deshabilitarListas();
+        desbloquearCampos();
     }
 
     private void limpiarDatosDependientes() {
@@ -442,6 +506,42 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
             }
         }
         return items;
+    }
+
+    private void actualizarBloqueoCampos() {
+        matriculaBloqueada = tieneTexto(matriculaUsuario);
+        tipoBajaBloqueada = tieneValor(idTipoBaja);
+        planBloqueado = tieneValor(idPlan);
+        semestreBloqueado = tieneValor(idSemestre);
+        bloqueBloqueado = tieneValor(idBloque);
+        programaBloqueado = tieneValor(idPrograma);
+        periodoBloqueado = tieneTexto(idPeriodo);
+        eventoBloqueado = tieneValor(idEvento);
+        motivoBloqueado = tieneTexto(motivo);
+        quienAplicaBloqueado = tieneTexto(quienAplica);
+        numeroSolicitudBloqueada = tieneTexto(numeroSolicitud);
+    }
+
+    private void desbloquearCampos() {
+        matriculaBloqueada = false;
+        tipoBajaBloqueada = false;
+        planBloqueado = false;
+        semestreBloqueado = false;
+        bloqueBloqueado = false;
+        programaBloqueado = false;
+        periodoBloqueado = false;
+        eventoBloqueado = false;
+        motivoBloqueado = false;
+        quienAplicaBloqueado = false;
+        numeroSolicitudBloqueada = false;
+    }
+
+    private boolean tieneValor(Long valor) {
+        return valor != null && valor.longValue() != 0L;
+    }
+
+    private boolean tieneTexto(String valor) {
+        return valor != null && !valor.trim().isEmpty();
     }
 
     public String getMatriculaUsuario() {
@@ -722,5 +822,49 @@ public class NuevaBajaUsuarioBean extends BaseBean implements Serializable {
 
     public void setNuevaBajaService(NuevaBajaService nuevaBajaService) {
         this.nuevaBajaService = nuevaBajaService;
+    }
+
+    public boolean isMatriculaBloqueada() {
+        return matriculaBloqueada;
+    }
+
+    public boolean isTipoBajaBloqueada() {
+        return tipoBajaBloqueada;
+    }
+
+    public boolean isPlanBloqueado() {
+        return planBloqueado;
+    }
+
+    public boolean isSemestreBloqueado() {
+        return semestreBloqueado;
+    }
+
+    public boolean isBloqueBloqueado() {
+        return bloqueBloqueado;
+    }
+
+    public boolean isProgramaBloqueado() {
+        return programaBloqueado;
+    }
+
+    public boolean isPeriodoBloqueado() {
+        return periodoBloqueado;
+    }
+
+    public boolean isEventoBloqueado() {
+        return eventoBloqueado;
+    }
+
+    public boolean isMotivoBloqueado() {
+        return motivoBloqueado;
+    }
+
+    public boolean isQuienAplicaBloqueado() {
+        return quienAplicaBloqueado;
+    }
+
+    public boolean isNumeroSolicitudBloqueada() {
+        return numeroSolicitudBloqueada;
     }
 }
