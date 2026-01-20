@@ -208,12 +208,14 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
 
         if (esTemporalOParcial) {
             if (!(idBaja != null && valorPresenteEntero(idUserEnrolmentsLms))) {
-                validarEventoParaBajaParcial(matriculacion, idEvento);
-                Integer idUsuarioMoodle = nuevaBajaRepository.obtenerIdUsuarioMoodle(idPersona, idEvento);
-                if (idUsuarioMoodle == null) {
-                    throw new IllegalArgumentException("No se encontró el usuario en Moodle para el evento seleccionado");
+                if(idEvento != 0) {
+                	validarEventoParaBajaParcial(matriculacion, idEvento);
+	                Integer idUsuarioMoodle = nuevaBajaRepository.obtenerIdUsuarioMoodle(idPersona, idEvento);
+	                if (idUsuarioMoodle == null) {
+	                    throw new IllegalArgumentException("No se encontró el usuario en Moodle para el evento seleccionado");
+	                }
+	                idUserEnrolmentsLms = suspenderUsuarioEnCurso(idEvento, idUsuarioMoodle);
                 }
-                idUserEnrolmentsLms = suspenderUsuarioEnCurso(idEvento, idUsuarioMoodle);
             }
         } else if (esDefinitiva) {
             // BAJA DEFINITIVA: intentar suspender en Moodle
@@ -238,7 +240,7 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         }
 
         int contabilizar;
-        if (esDefinitiva ||  esSinAsignaturas) {
+        if (esDefinitiva ||  esSinAsignaturas || idEvento != 0) {
             contabilizar = 1;
         }
         else if (idBaja != null) {
@@ -326,7 +328,7 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
     }
 
     private void validarEventoParaBajaParcial(BajaMatriculacionDTO matriculacion, Long idEvento) {
-        if (idEvento == null || idEvento == 0) {
+        if (idEvento == null ) {
             throw new IllegalArgumentException("Debe seleccionar un evento válido para aplicar la baja parcial o temporal");
         }
 
@@ -350,6 +352,10 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
 
         if (solicitud.getIdEvento() != null) {
             return solicitud.getIdEvento();
+        }
+        
+        if(solicitud.getIdEvento() == null ) {
+        	return 0L;
         }
 
         throw new IllegalArgumentException("Debe seleccionar un evento para aplicar la baja parcial o temporal");
