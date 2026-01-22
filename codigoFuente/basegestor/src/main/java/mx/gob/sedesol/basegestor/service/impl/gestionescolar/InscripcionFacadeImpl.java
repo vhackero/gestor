@@ -1000,11 +1000,13 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 			long cantidadMateriasReprobadasObligatorias = obtenerCantidadMateriasReprobadasObligatorias(
 					materiasReprobadas);
+			long cantidadDeMateriasREprobadasTotales = materiasReprobadas.size();
 
 			// Regla para respetar el avance anual (Leer descripcion del metodo
 			// 'obtenerMateriasPorAvanceAnualIrregulares')
 			if (cantidadMateriasReprobadasObligatorias >= 1
-					&& cantidadMateriasReprobadasObligatorias <= ConstantesGestor.NUMERO_MAXIMO_MATERIAS_REPROBADAS) {
+					&& cantidadMateriasReprobadasObligatorias <= ConstantesGestor.NUMERO_MAXIMO_MATERIAS_REPROBADAS
+					&& cantidadDeMateriasREprobadasTotales <= 3) {
 				logger.info("Estudiantes irregulares de a 1 a 3 reprobadas");
 				return obtenerMateriasPorAvanceAnualIrregulares(materiasConReprobadasMarcadas, materiasReprobadas);
 			}
