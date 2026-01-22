@@ -322,7 +322,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "    tmc.nombre subestructura,\r\n"
 				+ "    (SELECT tmc2.nombre FROM tbl_malla_curricular tmc2 WHERE tmc2.id = tmc.id_padre ) estructura,\r\n"
 				+ "    rgp.calificacion_final calificacion_final,\r\n"
-				+ "    if(rgp.calificacion_final >= 60, 1,0) estatus_aprobacion\r\n" + "FROM tbl_persona tp\r\n"
+				+ "    if(rgp.calificacion_final >= te.calificacion_min_aprobatoria , 1,0) estatus_aprobacion\r\n" + "FROM tbl_persona tp\r\n"
 				+ "         INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona AND calificacion_final IS NOT NULL\r\n"
 				+ "         INNER JOIN tbl_grupos tg ON tg.id = rgp.id_grupo\r\n"
 				+ "         INNER JOIN tbl_eventos te ON te.id_evento = tg.id_evento\r\n"
@@ -742,7 +742,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("    JOIN tbl_ficha_descriptiva_programa fd2 ON fd2.id_programa = te2.id_programa ");
 		sql.append("    WHERE rgp2.id_persona_participante = rgp.id_persona_participante ");
 		sql.append("    AND te2.id_programa = te.id_programa ");
-		sql.append("    AND rgp2.calificacion_final > fd2.calificacion_min_aprobatoria ");
+		sql.append("    AND rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
 		sql.append(")");
 
 		List<?> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("idPersona", idPersona)
@@ -935,7 +935,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("      INNER JOIN tbl_ficha_descriptiva_programa fd2 ON fd2.id_programa = te2.id_programa ");
 		sql.append("      WHERE fd2.cve_programa = fd.cve_programa ");
 		sql.append("        AND te2.id_programa = fd.id_programa ");
-		sql.append("        AND rgp2.calificacion_final > fd2.calificacion_min_aprobatoria ");
+		sql.append("        AND rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
 		sql.append("        AND rgp2.id_persona_participante = rgp.id_persona_participante ");
 		sql.append("  ) ");
 		sql.append("GROUP BY tpl.id_plan, fd.id_programa, fd.cve_programa");
