@@ -1250,6 +1250,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private Optional<String> buscarSemestreReprobadoMasAntiguo(
 			List<InscripcionMateriasReprobadasDTO> materiasCursadas) {
 		Optional<InscripcionMateriasReprobadasDTO> optionalMateria = materiasCursadas.stream()
+				.filter(dto -> ConstantesGestor.TEXTO_MATERIA_OBLIGATORIA
+	                    .equalsIgnoreCase(dto.getTipoPrograma()))
 				.sorted(Comparator.comparing(dto -> {
 					String estructura = dto.getEstructura();
 					if (estructura == null) {
