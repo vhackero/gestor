@@ -136,10 +136,7 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
             throw new IllegalArgumentException("No se encontró la matrícula proporcionada");
         }
 
-        // Solo aplicar lógica de inactivación en altas nuevas
-        if (idBaja == null) {
-            nuevaBajaRepository.actualizarPersonaInactiva(idPersona);
-        }
+        
 
         if (bajaActual != null && bajaActual.getIdTipoBaja() != null) {
             solicitud.setIdTipoBaja(bajaActual.getIdTipoBaja().longValue());
@@ -228,6 +225,7 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
                     } else {
                         LOGGER.warn("Usuario no tiene cuenta Moodle, continuando con baja en SIGIE");
                     }
+                    nuevaBajaRepository.actualizarPersonaInactiva(idPersona);
                 } catch (Exception e) {
                     LOGGER.warn("Error al suspender en Moodle para baja definitiva, continuando: " + e.getMessage());
 
