@@ -147,11 +147,32 @@ public class UsuarioWSClient implements Serializable {
 
                 if(usuario.isSuspended()){
                         paramMap.put("users[" + x + "][suspended]", usuario.isSuspended() ? 1 : 0);
+                }else {
+                	paramMap.put("users[" + x + "][suspended]",0);
                 }
+                
+            logger.info(usuario);
             WSClientBase ws = new WSClientBase(parametroWSMoodleDTO);
-            Integer salida  = ws.ejecutarServicioPOST("core_user_update_users", paramMap, null, Integer.class);
-            System.out.println(salida);;
-            return true;
+            //Integer salida  = ws.ejecutarServicioPOST("core_user_update_users", paramMap, null, Integer.class);
+            
+            String salida  = ws.ejecutarServicioPOST("core_user_update_users", paramMap, null, String.class);
+            System.out.println(salida);
+            
+         // Verificar si es la respuesta de éxito de Moodle
+            if (salida != null && salida.trim().equals("{\"warnings\":[]}")) {
+                logger.info("Usuario actualizado exitosamente en Moodle");
+                return true;
+            }
+
+            // Intentar parsear como Integer si no es warnings[]
+            try {
+                Integer salidaWS = Integer.parseInt(salida);
+                return salidaWS != null;
+            } catch (NumberFormatException e) {
+                logger.warn("Respuesta no numérica de Moodle: " + salida);
+                return false;
+            }
+            
         //}
 
     }

@@ -656,7 +656,9 @@ public class DispersionesRepository implements IDispersionesRepository {
 		}
 		String sql = "SELECT rdg.id_evento, rdg.id_grupo, te.id_curso_lms_borrador, te.id_plataforma_lms_borrador,\r\n"
 				+ "       te.modalidad, tg.num_max_alumnos, tg.id_moodle, tg.nombre,\r\n"
-				+ "       COALESCE((SELECT COUNT(*) FROM rel_grupo_participante rgp WHERE rgp.id_grupo = tg.id), 0) inscritos\r\n"
+				+ "       COALESCE((SELECT COUNT(*) FROM rel_grupo_participante rgp "
+				+ "		  JOIN tbl_persona_aspirante tpa ON tpa.id_persona = rgp.id_persona_participante"
+				+ " WHERE rgp.id_grupo = tg.id), 0) inscritos\r\n"
 				+ "  FROM rel_dispersiones_grupo rdg\r\n"
 				+ "       INNER JOIN tbl_eventos te ON te.id_evento = rdg.id_evento\r\n"
 				+ "       INNER JOIN tbl_grupos tg ON tg.id = rdg.id_grupo\r\n"

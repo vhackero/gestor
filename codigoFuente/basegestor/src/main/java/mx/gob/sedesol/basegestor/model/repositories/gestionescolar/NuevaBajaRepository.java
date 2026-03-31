@@ -164,12 +164,13 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
         String consulta = "SELECT tp.id_persona\n"
                 + "FROM tbl_persona tp\n"
                 + "JOIN tbl_persona_aspirante tpa ON tpa.id_persona = tp.id_persona\n"
-                + "WHERE tpa.id_plan = :idPlanSeleccionado\n"
-                + "AND tp.id_persona = :idPersona\n"
+                + "WHERE tp.id_persona = :idPersona\n"
                 + "AND EXISTS(SELECT rgp2.id_persona_participante FROM rel_grupo_participante rgp2\n"
                 + "    INNER JOIN tbl_grupos tg2 ON tg2.id = rgp2.id_grupo\n"
                 + "    INNER JOIN tbl_eventos te2 ON te2.id_evento = tg2.id_evento\n"
+                + "    INNER JOIN tbl_ficha_descriptiva_programa tfdp2 ON te2.id_programa = tfdp2.id_programa \n"
                 + "                                               WHERE te2.id_programa = :idProgramaSeleccionado\n"
+                + "												  AND tfdp2.id_plan = :idPlanSeleccionado\n"
                 + "                                               AND rgp2.id_persona_participante = tp.id_persona)";
 
         Query query = entityManager.createNativeQuery(consulta);
