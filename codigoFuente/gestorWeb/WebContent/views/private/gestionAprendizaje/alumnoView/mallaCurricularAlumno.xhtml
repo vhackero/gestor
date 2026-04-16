@@ -1,0 +1,1346 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="head">
+		<style type="text/css">
+			.malla-diagrama {
+				position: relative;
+				height: #{mallaCurricularAlumnoBean.diagramHeight}px;
+				width: #{mallaCurricularAlumnoBean.diagramWidth}px;
+				background: #ffffff;
+				transition: width 0.25s ease;
+			}
+			.malla-col-line {
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				width: 1px;
+				background: #e9edf2;
+				z-index: 1;
+			}
+			.malla-elemento {
+				position: absolute;
+				border: 1px solid #b0b0b0;
+				border-radius: 6px;
+				padding: 8px 12px;
+				background: #ffffff;
+				color: #333333;
+				font-size: 11px;
+				width: 210px;
+				box-sizing: border-box;
+				max-width: 220px;
+				word-wrap: break-word;
+				overflow-wrap: anywhere;
+				text-align: center;
+				overflow: hidden;
+				transition: left 0.25s ease, width 0.25s ease;
+				z-index: 2;
+			}
+			.malla-texto {
+				display: block;
+				max-width: 180px;
+				vertical-align: middle;
+				margin: 0 auto;
+				white-space: normal;
+				word-break: break-word;
+				overflow-wrap: anywhere;
+				line-height: 1.2;
+			}
+			.malla-texto.compacto {
+				display: none;
+				font-weight: bold;
+				letter-spacing: 0.2px;
+				font-size: inherit;
+			}
+			.malla-elemento.semestre .malla-texto.compacto {
+				font-size: 14px;
+			}
+			.malla-elemento.bloque .malla-texto.compacto {
+				font-size: 12px;
+			}
+			.malla-elemento.programa .malla-texto.compacto {
+				font-size: 11px;
+			}
+			.malla-elemento.colapsado.programa {
+				width: 64px !important;
+				height: 54px !important;
+				padding: 6px 6px 4px !important;
+				font-size: inherit;
+			}
+			.malla-elemento.colapsado.programa .malla-texto.full {
+				display: none;
+			}
+			.malla-elemento.colapsado.programa .malla-texto.compacto {
+				display: block;
+			}
+			.malla-elemento.colapsado.programa .malla-estado,
+			.malla-elemento.colapsado.programa .malla-creditos {
+				display: inline-flex;
+			}
+			.malla-elemento.colapsado.programa .malla-estado {
+				width: 16px;
+				height: 16px;
+				min-width: 16px;
+				min-height: 16px;
+				line-height: 16px;
+				font-size: 10px;
+				border-radius: 4px;
+				padding: 0;
+				gap: 0;
+			}
+			.malla-elemento.colapsado.programa .malla-programa-row {
+				position: static;
+				justify-content: center;
+				margin-top: 6px;
+				width: 100%;
+			}
+			.malla-elemento.colapsado.programa .malla-creditos,
+			.malla-elemento.colapsado.programa .malla-dependencia {
+				display: none;
+			}
+			.malla-elemento.colapsado.programa .malla-dependencia {
+				display: inline-flex;
+			}
+			.malla-elemento.colapsado.programa .malla-estado i,
+			.malla-elemento.colapsado.programa .malla-estado-text {
+				display: block;
+			}
+			.malla-elemento.colapsado.semestre,
+			.malla-elemento.colapsado.bloque {
+				width: 96px !important;
+				height: 34px !important;
+				padding: 3px 22px 3px 10px !important;
+				font-size: inherit;
+			}
+			.malla-elemento.colapsado.semestre {
+				width: 120px !important;
+			}
+			.malla-elemento.colapsado.semestre .malla-texto.full,
+			.malla-elemento.colapsado.bloque .malla-texto.full {
+				display: none;
+			}
+			.malla-elemento.colapsado.semestre .malla-texto.compacto,
+			.malla-elemento.colapsado.bloque .malla-texto.compacto {
+				display: block;
+			}
+			.malla-elemento.colapsado.semestre,
+			.malla-elemento.colapsado.bloque,
+			.malla-elemento.colapsado.programa {
+				text-align: center;
+			}
+			.malla-elemento.colapsado.semestre .malla-texto,
+			.malla-elemento.colapsado.bloque .malla-texto,
+			.malla-elemento.colapsado.programa .malla-texto {
+				text-align: center;
+				margin: 0 auto;
+			}
+			.malla-elemento.colapsado.semestre .malla-toggle,
+			.malla-elemento.colapsado.bloque .malla-toggle,
+			.malla-elemento.colapsado.semestre .malla-toggle-v,
+			.malla-elemento.colapsado.bloque .malla-toggle-v {
+				top: 50%;
+				transform: translateY(-50%);
+			}
+			.malla-toggle {
+				position: absolute;
+				top: 6px;
+				right: 8px;
+				width: 16px;
+				height: 16px;
+				border: none;
+				background-color: transparent;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+				cursor: pointer;
+				background-repeat: no-repeat;
+				background-position: center;
+				background-size: 14px 14px;
+			}
+			.malla-toggle.expanded {
+				background-image: url("#{resource['images/contraer.svg']}");
+				filter: brightness(0) invert(1);
+			}
+			.malla-toggle.collapsed {
+				background-image: url("#{resource['images/expandir.svg']}");
+				filter: brightness(0) invert(1);
+			}
+			.malla-toggle-v {
+				position: absolute;
+				top: 6px;
+				right: 28px;
+				width: 14px;
+				height: 14px;
+				border: none;
+				background-color: transparent;
+				cursor: pointer;
+				background-repeat: no-repeat;
+				background-position: center;
+				background-size: 12px 12px;
+			}
+			.malla-toggle-v.expanded {
+				background-image: url("#{resource['images/up.svg']}");
+				filter: brightness(0) invert(1);
+			}
+			.malla-toggle-v.collapsed {
+				background-image: url("#{resource['images/down.svg']}");
+				filter: brightness(0) invert(1);
+			}
+			.malla-estado {
+				position: static;
+				width: 20px;
+				height: 20px;
+				padding: 0;
+				border-radius: 4px;
+				border: 1px solid #506172;
+				font-size: 10px;
+				line-height: 20px;
+				color: #ffffff;
+				font-weight: bold;
+				box-sizing: border-box;
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				justify-content: center;
+				margin-top: 0;
+				max-width: 100%;
+				white-space: nowrap;
+			}
+			.malla-estado i {
+				font-size: 11px;
+			}
+			.icon-en-curso {
+				width: 11px;
+				height: 11px;
+				display: inline-block;
+				background-image: url("#{resource['images/en_curso.png']}");
+				background-repeat: no-repeat;
+				background-position: center;
+				background-size: 11px 11px;
+			}
+			.malla-estado.estatus-en-curso,
+			.malla-leyenda-box.estatus[style*='C19E00'],
+			.malla-table-icon.estatus-en-curso {
+				background: #ffffff !important;
+				border: 1px solid #C19E00 !important;
+			}
+			.malla-creditos {
+				position: static;
+				width: 20px;
+				height: 20px;
+				background: #111827;
+				border-radius: 4px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.malla-creditos-texto {
+				font-size: 9px;
+				color: #ffffff;
+				font-weight: bold;
+				line-height: 1;
+			}
+			.malla-dependencia {
+				position: static;
+				width: 20px;
+				height: 20px;
+				border-radius: 4px;
+				background: #3376e5;
+				border: 1px solid #3376e5;
+				color: #ffffff;
+				font-size: 11px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: help;
+			}
+			.malla-dependencia-icon {
+				width: 12px;
+				height: 12px;
+				background-repeat: no-repeat;
+				background-position: center;
+				background-size: 12px 12px;
+				display: inline-block;
+				background-image: url("#{resource['images/seriada.svg']}");
+				filter: brightness(0) invert(1);
+			}
+			.malla-ver-mas {
+				position: absolute;
+				top: 3px;
+				right: 8px;
+				width: 14px;
+				height: 14px;
+				background-repeat: no-repeat;
+				background-position: center;
+				background-size: 14px 14px;
+				background-image: url("#{resource['images/ver-mas.svg']}");
+				filter: none;
+			}
+			.malla-elemento.colapsado.programa .malla-ver-mas {
+				display: none;
+			}
+			.malla-programa-row {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 6px;
+				margin-top: auto;
+				min-height: 22px;
+				width: 100%;
+			}
+			.malla-leyenda-creditos {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+			}
+			.malla-creditos-demo {
+				position: relative;
+				width: 18px;
+				height: 18px;
+				background: #111827;
+				border-radius: 4px;
+				display: inline-block;
+				color: #ffffff;
+				font-size: 9px;
+				line-height: 18px;
+				text-align: center;
+			}
+			.malla-elemento.semestre {
+				background: #3b8ea5;
+				border: none;
+				font-weight: bold;
+				font-size: 14px;
+				color: #ffffff;
+				box-shadow: 0 2px 0 rgba(40, 82, 120, 0.18);
+				text-align: left;
+				padding-left: 12px;
+				padding-right: 28px;
+			}
+			.malla-elemento.semestre .malla-texto,
+			.malla-elemento.bloque .malla-texto {
+				margin: 0;
+				text-align: left;
+			}
+			.malla-elemento.en-curso {
+				border-color: #0f5c57;
+				box-shadow: 0 0 0 4px rgba(14, 165, 165, 0.45);
+				animation: pulso-curso 2.6s ease-in-out infinite;
+			}
+			.malla-elemento.programa.en-curso {
+				border-color: #0f5c57;
+			}
+			.malla-elemento.semestre.en-curso {
+				border-width: 2px;
+				font-weight: bold;
+			}
+			.malla-elemento.bloque.en-curso {
+				border-width: 2px;
+			}
+			@keyframes pulso-curso {
+				0% { box-shadow: 0 0 0 3px rgba(14, 165, 165, 0.25); }
+				50% { box-shadow: 0 0 0 7px rgba(14, 165, 165, 0.12); }
+				100% { box-shadow: 0 0 0 3px rgba(14, 165, 165, 0.25); }
+			}
+			.malla-elemento.bloque {
+				background: #8a8f98;
+				border: none;
+				font-weight: bold;
+				font-size: 12px;
+				color: #ffffff;
+				text-align: left;
+				padding-left: 12px;
+				padding-right: 28px;
+			}
+			.malla-elemento.programa {
+				background: #ffffff;
+				border-width: 2px;
+				border-left-width: 6px;
+				border-left-style: solid;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: flex-start;
+				padding-bottom: 8px;
+				font-size: 11px;
+			}
+			.malla-elemento.programa.bloqueada {
+				background: #e3e7ec;
+			}
+			.malla-elemento.programa .malla-texto.full {
+				margin-bottom: 6px;
+			}
+			.malla-leyenda {
+				margin-bottom: 12px;
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				flex-wrap: wrap;
+				align-items: flex-start;
+				font-size: 12px;
+				color: #333333;
+			}
+			.malla-leyenda-row {
+				display: flex;
+				gap: 24px;
+				flex-wrap: wrap;
+				align-items: center;
+				width: 100%;
+			}
+			.malla-resumen {
+				margin-bottom: 12px;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 18px;
+				align-items: center;
+				font-size: 12px;
+				color: #333333;
+			}
+			.malla-creditos-pill {
+				background: #15A449;
+				color: #ffffff;
+				border-radius: 6px;
+				padding: 6px 10px;
+				display: inline-flex;
+				gap: 12px;
+				align-items: center;
+				font-weight: bold;
+			}
+			.malla-resumen strong {
+				font-weight: bold;
+				color: #333333;
+			}
+			.malla-resumen-item {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+			}
+			.malla-resumen-item.promedio-right {
+				margin-left: auto;
+			}
+			.malla-resumen-item.total-right {
+				margin-left: 18px;
+			}
+			.malla-leyenda-group {
+				display: inline-flex;
+				align-items: center;
+				gap: 12px;
+				flex-wrap: wrap;
+			}
+			.malla-leyenda-group.indicadores {
+				flex: 1 1 auto;
+			}
+			.malla-leyenda-title {
+				font-weight: bold;
+				color: #333333;
+			}
+			.malla-leyenda-item {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+			}
+			.malla-leyenda-box {
+				width: 14px;
+				height: 14px;
+				border: 1px solid #d1d5db;
+				border-radius: 3px;
+				background: #ffffff;
+				border-left-width: 5px;
+				border-left-style: solid;
+			}
+			.malla-leyenda-box.estatus {
+				border-radius: 4px;
+				border-left-width: 1px;
+				border-left-style: solid;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				color: #ffffff;
+				font-size: 9px;
+			}
+			.malla-leyenda-box.estatus i {
+				font-size: 9px;
+			}
+			.malla-leyenda-box.estatus .icon-en-curso {
+				width: 9px;
+				height: 9px;
+				background-size: 9px 9px;
+			}
+			.malla-leyenda-box.serializada {
+				width: 18px;
+				height: 18px;
+				background: #3376e5;
+				border-color: #3376e5;
+			}
+			.malla-leyenda-box.serializada .malla-dependencia-icon {
+				width: 12px;
+				height: 12px;
+				background-size: 12px 12px;
+			}
+			.malla-tools {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin-left: auto;
+			}
+			.malla-tool-btn {
+				width: 30px;
+				height: 30px;
+				border-radius: 4px;
+				border: none;
+				background-color: #898989;
+				padding: 0;
+				cursor: pointer;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.malla-tool-btn.activo {
+				background-color: #6092A3;
+			}
+			.malla-tool-btn img {
+				width: 16px;
+				height: 16px;
+				filter: brightness(0) invert(1);
+			}
+			.malla-list-view {
+				display: none;
+				margin-top: 8px;
+				width: 100%;
+			}
+			.malla-list-semestre {
+				border: 1px solid #c8ccd1;
+				border-radius: 10px;
+				margin-bottom: 10px;
+				overflow: hidden;
+				background: #f7f7f8;
+			}
+			.malla-list-sem-header {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				padding: 12px 14px;
+				font-size: 18px;
+				font-weight: 600;
+				color: #6092A3;
+				border-left: 6px solid #6092A3;
+				cursor: pointer;
+			}
+			.malla-list-sem-toggle {
+				width: 14px;
+				height: 14px;
+				background-repeat: no-repeat;
+				background-position: center;
+				background-size: 12px 12px;
+				background-image: url("#{resource['images/contraer_v.svg']}");
+			}
+			.malla-list-semestre.colapsado .malla-list-sem-toggle {
+				background-image: url("#{resource['images/expandir_v.svg']}");
+			}
+			.malla-list-body {
+				padding: 0 10px 10px;
+			}
+			.malla-list-semestre.colapsado .malla-list-body {
+				display: none;
+			}
+			.malla-table {
+				width: 100%;
+				border-collapse: collapse;
+				background: #ffffff;
+			}
+			.malla-table th {
+				text-align: left;
+				font-size: 13px;
+				font-weight: 700;
+				color: #1e1f22;
+				padding: 10px 8px;
+				border-bottom: 1px solid #d7dbe0;
+			}
+			.malla-table td {
+				padding: 10px 8px;
+				border-bottom: 1px solid #eceef1;
+				vertical-align: middle;
+				font-size: 13px;
+			}
+			.malla-bloque-cell {
+				width: 64px;
+				font-weight: 700;
+			}
+			.malla-asig-cell {
+				border-left: 6px solid #B8DC9F;
+				padding-left: 10px !important;
+			}
+			.malla-indicadores-cell {
+				width: 120px;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.malla-table-icon {
+				width: 30px;
+				height: 28px;
+				border-radius: 5px;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				color: #fff;
+			}
+			.malla-table-icon i {
+				font-size: 14px;
+			}
+			.malla-table-icon .glyph {
+				font-size: 16px;
+				line-height: 1;
+				font-weight: 700;
+				color: #ffffff;
+			}
+			.malla-table-icon .icon-en-curso {
+				width: 12px;
+				height: 12px;
+				background-size: 12px 12px;
+			}
+			.malla-table-icon.seriada {
+				background: #3376e5;
+			}
+			.malla-table .estatus-aprobada,
+			.malla-table .estatus-acreditada {
+				color: #15A449;
+				font-weight: 700;
+			}
+			.malla-table .estatus-no-acreditada {
+				color: #FF0000;
+				font-weight: 700;
+			}
+			.malla-table .estatus-no-inscrita,
+			.malla-table .estatus-bloqueada {
+				color: #506172;
+				font-weight: 700;
+			}
+			.malla-table .estatus-en-curso {
+				color: #C19E00;
+				font-weight: 700;
+			}
+			/* When SVG is embedded inline, force white fill/stroke. */
+			.malla-tool-btn svg,
+			.malla-toggle svg,
+			.malla-toggle-v svg,
+			.malla-dependencia svg,
+			.malla-ver-mas svg {
+				fill: #ffffff;
+				stroke: #ffffff;
+			}
+			.malla-estado-text {
+				font-weight: 600;
+			}
+			.malla-tooltip-bubble {
+				position: fixed;
+				z-index: 99999;
+				max-width: 280px;
+				background: #f7f7f8;
+				color: #2f3135;
+				border: 1px solid #d7d9de;
+				border-radius: 8px;
+				padding: 10px 12px;
+				font-size: 10px;
+				line-height: 1.25;
+				box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+				opacity: 0;
+				pointer-events: none;
+				transform: translateY(4px);
+				transition: opacity 0.15s ease, transform 0.15s ease;
+				white-space: normal;
+			}
+			.malla-tooltip-bubble.visible {
+				opacity: 1;
+				transform: translateY(0);
+			}
+			.malla-tooltip-seriada {
+				text-align: center;
+			}
+			.malla-tooltip-seriada-title {
+				font-size: 12px;
+				font-weight: 400;
+				color: #666666;
+				margin-bottom: 8px;
+			}
+			.malla-tooltip-seriada-label {
+				display: block;
+				font-weight: 700;
+				color: #333333;
+				margin-top: 6px;
+			}
+			.malla-tooltip-seriada-value {
+				display: block;
+				color: #666666;
+				margin-top: 1px;
+				line-height: 1.15;
+			}
+		</style>
+	</ui:define>
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.sidebar.historialAcademico')}</li>
+		<li class="active">Malla curricular</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form>
+			<p:panel header="Malla curricular: #{mallaCurricularAlumnoBean.planNombre}">
+				<div class="malla-resumen">
+					<span class="malla-resumen-item">
+						<strong>Estatus del estudiante:</strong>
+						#{mallaCurricularAlumnoBean.estatusEstudiante}
+					</span>
+					<span class="malla-resumen-item promedio-right">
+						<strong>Promedio:</strong>
+						<h:outputText value="#{mallaCurricularAlumnoBean.promedioActual}">
+							<f:convertNumber maxFractionDigits="2" />
+						</h:outputText>
+					</span>
+					<span class="malla-resumen-item total-right">
+						<strong>Total de créditos:</strong>
+						#{mallaCurricularAlumnoBean.creditosAprobadosTotal} /
+						#{mallaCurricularAlumnoBean.creditosPlanTotal}
+					</span>
+					<span class="malla-creditos-pill">
+						<ui:repeat value="#{mallaCurricularAlumnoBean.creditosAprobadosPorTipoEntries}" var="entry">
+							<span>#{entry.key}: #{entry.value}</span>
+						</ui:repeat>
+					</span>
+				</div>
+				<div class="malla-leyenda">
+					<div class="malla-leyenda-row">
+						<div class="malla-leyenda-group">
+							<span class="malla-leyenda-title">Tipos</span>
+							<ui:repeat value="#{mallaCurricularAlumnoBean.tiposPrograma}" var="tipo">
+								<span class="malla-leyenda-item">
+									<span class="malla-leyenda-box" style="border-left-color: #{tipo.borderColor};"></span>
+									#{tipo.nombre}
+								</span>
+							</ui:repeat>
+						</div>
+					</div>
+					<div class="malla-leyenda-row">
+						<div class="malla-leyenda-group indicadores">
+							<span class="malla-leyenda-title">Indicadores</span>
+							<ui:repeat value="#{mallaCurricularAlumnoBean.estatusPrograma}" var="estatus">
+								<span class="malla-leyenda-item">
+								<span class="malla-leyenda-box estatus" style="#{estatus.nombre eq 'En curso' ? 'background:#ffffff;border:1px solid #C19E00;' : 'background:'.concat(estatus.backgroundColor).concat(';border-color:').concat(estatus.borderColor).concat(';')}">
+									<ui:fragment rendered="#{estatus.nombre eq 'En curso'}">
+										<span class="icon-en-curso"></span>
+									</ui:fragment>
+									<ui:fragment rendered="#{estatus.nombre ne 'En curso'}">
+										<i class="#{estatus.iconClass}"></i>
+									</ui:fragment>
+								</span>
+									#{estatus.nombre}
+								</span>
+							</ui:repeat>
+							<span class="malla-leyenda-item">
+								<span class="malla-creditos-demo" title="Créditos por materia">8</span>
+								Número de créditos
+							</span>
+							<span class="malla-leyenda-item">
+								<span class="malla-leyenda-box serializada" title="Materia con dependencia">
+									<span class="malla-dependencia-icon"></span>
+								</span>
+								Serializada
+							</span>
+						</div>
+						<div class="malla-tools">
+							<button type="button" class="malla-tool-btn" data-action="print" title="Imprimir">
+								<img alt="Imprimir" src="#{resource['images/imprimir.svg']}" />
+							</button>
+							<button type="button" class="malla-tool-btn" data-action="collapse-all" title="Contraer todo">
+								<img alt="Contraer"
+									data-src-column="#{resource['images/contraer.svg']}"
+									data-src-list="#{resource['images/contraer_v.svg']}"
+									src="#{resource['images/contraer.svg']}" />
+							</button>
+							<button type="button" class="malla-tool-btn" data-action="expand-all" title="Expandir todo">
+								<img alt="Expandir"
+									data-src-column="#{resource['images/expandir.svg']}"
+									data-src-list="#{resource['images/expandir_v.svg']}"
+									src="#{resource['images/expandir.svg']}" />
+							</button>
+							<button type="button" class="malla-tool-btn activo" data-view="columna" title="Vista por columna">
+								<img alt="Columna" src="#{resource['images/columna.svg']}" />
+							</button>
+							<button type="button" class="malla-tool-btn" data-view="lista" title="Vista en lista">
+								<img alt="Lista" src="#{resource['images/lista.svg']}" />
+							</button>
+						</div>
+					</div>
+				</div>
+				<div id="mallaRoot" class="malla-diagrama ui-widget-content"
+					data-semestre-actual="#{mallaCurricularAlumnoBean.semestreEnCurso}">
+					<ui:repeat value="#{mallaCurricularAlumnoBean.nodos}" var="nodo">
+						<div id="#{nodo.id}"
+							class="malla-elemento #{nodo.tipoCss} #{nodo.tipoProgramaCss} #{nodo.enCursoCss} #{nodo.bloqueadaCss}"
+							data-semestre="#{nodo.semestre}"
+							data-left="#{nodo.x}"
+							data-top="#{nodo.y}"
+							data-tipo="#{nodo.tipo}"
+							data-bloque="#{nodo.bloqueId}"
+							style="left: #{nodo.x}px; top: #{nodo.y}px; height: #{nodo.height}px; width: #{nodo.width}px; #{nodo.tipoStyle}">
+							<ui:fragment rendered="#{nodo.tipo eq 'SEMESTRE'}">
+								<span class="malla-toggle" data-semestre="#{nodo.semestre}"></span>
+								<span class="malla-toggle-v" data-semestre="#{nodo.semestre}"></span>
+							</ui:fragment>
+							<ui:fragment rendered="#{nodo.tipo eq 'BLOQUE'}">
+								<span class="malla-toggle-v" data-bloque="#{nodo.bloqueId}"></span>
+							</ui:fragment>
+							<span class="malla-texto full">#{nodo.texto}</span>
+							<span class="malla-texto compacto">#{nodo.textoCompacto}</span>
+							<ui:fragment rendered="#{nodo.tipo eq 'PROGRAMA'}">
+								<span class="malla-ver-mas" title="Ver más"></span>
+								<div class="malla-programa-row">
+									<ui:fragment rendered="#{nodo.creditos ne null}">
+										<span class="malla-creditos" data-tooltip="Créditos: #{nodo.creditos}">
+											<span class="malla-creditos-texto">#{nodo.creditos}</span>
+										</span>
+									</ui:fragment>
+									<span class="malla-estado #{nodo.estatusCss}" style="#{nodo.estatusStyle}"
+										data-tooltip="#{empty nodo.calificacion ? nodo.estatus : nodo.estatus.concat(' - Calificación: ').concat(nodo.calificacion)}">
+										<ui:fragment rendered="#{nodo.estatusCss eq 'estatus-en-curso'}">
+											<span class="icon-en-curso"></span>
+										</ui:fragment>
+										<ui:fragment rendered="#{nodo.estatusCss ne 'estatus-en-curso'}">
+											<i class="#{nodo.estatusIconClass}"></i>
+										</ui:fragment>
+									</span>
+									<ui:fragment rendered="#{nodo.tieneDependencias}">
+										<span class="malla-dependencia" data-tooltip="#{nodo.dependenciaTooltip}">
+											<span class="malla-dependencia-icon"></span>
+										</span>
+									</ui:fragment>
+								</div>
+							</ui:fragment>
+						</div>
+					</ui:repeat>
+				</div>
+				<div id="mallaListView" class="malla-list-view">
+					<ui:repeat value="#{mallaCurricularAlumnoBean.semestresTabla}" var="semestreTabla">
+						<div class="malla-list-semestre" data-semestre="#{semestreTabla.numero}">
+							<div class="malla-list-sem-header">
+								<span class="malla-list-sem-toggle"></span>
+								<span>Semestre #{semestreTabla.numero}</span>
+							</div>
+							<div class="malla-list-body">
+								<table class="malla-table">
+									<thead>
+										<tr>
+											<th>Bloque</th>
+											<th>Asignatura</th>
+											<th>Clave</th>
+											<th>Créditos</th>
+											<th>Estatus</th>
+											<th>Calificación</th>
+											<th>Indicadores</th>
+										</tr>
+									</thead>
+									<tbody>
+										<ui:repeat value="#{semestreTabla.filas}" var="fila">
+											<tr>
+												<td class="malla-bloque-cell">#{fila.bloque}</td>
+												<td class="malla-asig-cell" style="border-left-color: #{fila.tipoBorderColor};">#{fila.asignatura}</td>
+												<td>#{fila.clave}</td>
+												<td>#{fila.creditos}</td>
+												<td class="#{fila.estatusCss}">#{fila.estatus}</td>
+												<td>#{fila.calificacion}</td>
+												<td class="malla-indicadores-cell">
+													<span class="malla-table-icon #{fila.estatusCss}" style="background: #{fila.estatusColor};"
+														data-tooltip="#{empty fila.calificacion or fila.calificacion eq 'N/A' or fila.calificacion eq '--' ? fila.estatus : fila.estatus.concat(' - Calificación: ').concat(fila.calificacion)}">
+														<ui:fragment rendered="#{fila.estatusCss eq 'estatus-aprobada' or fila.estatusCss eq 'estatus-acreditada'}">
+															<span class="glyph">&#10003;</span>
+														</ui:fragment>
+														<ui:fragment rendered="#{fila.estatusCss eq 'estatus-no-acreditada'}">
+															<span class="glyph">&#10005;</span>
+														</ui:fragment>
+														<ui:fragment rendered="#{fila.estatusCss eq 'estatus-no-inscrita'}">
+															<span class="glyph">&#9888;</span>
+														</ui:fragment>
+														<ui:fragment rendered="#{fila.estatusCss ne 'estatus-aprobada' and fila.estatusCss ne 'estatus-acreditada' and fila.estatusCss ne 'estatus-no-acreditada' and fila.estatusCss ne 'estatus-no-inscrita'}">
+															<ui:fragment rendered="#{fila.estatusCss eq 'estatus-en-curso'}">
+																<span class="icon-en-curso"></span>
+															</ui:fragment>
+															<ui:fragment rendered="#{fila.estatusCss ne 'estatus-en-curso'}">
+																<i class="#{fila.estatusIconClass}"></i>
+															</ui:fragment>
+														</ui:fragment>
+													</span>
+													<ui:fragment rendered="#{fila.seriada}">
+														<span class="malla-table-icon seriada" data-tooltip="#{fila.dependenciaTooltip}">
+															<span class="malla-dependencia-icon"></span>
+														</span>
+													</ui:fragment>
+												</td>
+											</tr>
+										</ui:repeat>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</ui:repeat>
+				</div>
+			</p:panel>
+		</h:form>
+		<script type="text/javascript">
+			//<![CDATA[
+			(function() {
+				function initMallaToggles() {
+					var root = document.getElementById('mallaRoot');
+					if (!root) {
+						return;
+					}
+					var tooltip = document.getElementById('mallaCustomTooltip');
+					if (!tooltip) {
+						tooltip = document.createElement('div');
+						tooltip.id = 'mallaCustomTooltip';
+						tooltip.className = 'malla-tooltip-bubble';
+						document.body.appendChild(tooltip);
+					}
+					var semestreActual = root.getAttribute('data-semestre-actual');
+					var nodes = Array.prototype.slice.call(root.querySelectorAll('.malla-elemento[data-semestre]'));
+					var toggles = root.querySelectorAll('.malla-toggle');
+					var toggleVerticalSem = root.querySelectorAll('.malla-toggle-v[data-semestre]');
+					var toggleVerticalBlo = root.querySelectorAll('.malla-toggle-v[data-bloque]');
+					var semestres = {};
+					var bloques = {};
+					var expandedWidth = 260;
+					var collapsedWidth = 128;
+					var collapsedSemWidth = 120;
+					var collapsedBloWidth = 96;
+					var collapsedProgWidth = 64;
+					var startX = 24;
+					var gap = 16;
+					var programaGap = 8;
+					var bloqueGap = 18;
+
+					function getLeft(node) {
+						var value = node.getAttribute('data-left') || node.style.left || '0';
+						return parseInt(value.replace('px', ''), 10) || 0;
+					}
+
+					function getTop(node) {
+						var value = node.getAttribute('data-top') || node.style.top || '0';
+						return parseInt(value.replace('px', ''), 10) || 0;
+					}
+
+					function getHeight(node) {
+						var value = node.style.height || '0';
+						return parseInt(value.replace('px', ''), 10) || 0;
+					}
+
+					function setTooltipPosition(event) {
+						var padding = 16;
+						var tipW = tooltip.offsetWidth || 240;
+						var tipH = tooltip.offsetHeight || 80;
+						var x = event.clientX + 14;
+						var y = event.clientY - tipH - 12;
+						if (x + tipW > window.innerWidth - padding) {
+							x = window.innerWidth - tipW - padding;
+						}
+						if (y < padding) {
+							y = event.clientY + 14;
+						}
+						tooltip.style.left = x + 'px';
+						tooltip.style.top = y + 'px';
+					}
+
+					function bindCustomTooltips() {
+						var scope = root.closest('form') || document;
+						var nodesWithTooltip = scope.querySelectorAll('[data-tooltip]');
+						nodesWithTooltip.forEach(function(node) {
+							node.addEventListener('mouseenter', function(event) {
+								var text = node.getAttribute('data-tooltip');
+								if (!text) {
+									return;
+								}
+								if (node.classList.contains('malla-dependencia') || node.classList.contains('seriada')) {
+									var lines = text.split('\n');
+									var html = '<div class=\"malla-tooltip-seriada\">';
+									html += '<div class=\"malla-tooltip-seriada-title\">Asignatura seriada</div>';
+									lines.forEach(function(line) {
+										var cleanLine = line || '';
+										if (cleanLine.indexOf('Depende de:') === 0) {
+											html += '<span class=\"malla-tooltip-seriada-label\">Asignatura Antecedente:</span>';
+											html += '<span class=\"malla-tooltip-seriada-value\">' +
+												cleanLine.substring('Depende de:'.length).trim() + '</span>';
+										} else if (cleanLine.indexOf('Libera:') === 0) {
+											html += '<span class=\"malla-tooltip-seriada-label\">Asignatura Consecuente:</span>';
+											html += '<span class=\"malla-tooltip-seriada-value\">' +
+												cleanLine.substring('Libera:'.length).trim() + '</span>';
+										} else if (cleanLine.trim()) {
+											html += '<span class=\"malla-tooltip-seriada-value\">' + cleanLine + '</span>';
+										}
+									});
+									html += '</div>';
+									tooltip.innerHTML = html;
+								} else {
+									tooltip.innerHTML = text.replace(/\n/g, '<br/>');
+								}
+								tooltip.classList.add('visible');
+								setTooltipPosition(event);
+							});
+							node.addEventListener('mousemove', function(event) {
+								if (tooltip.classList.contains('visible')) {
+									setTooltipPosition(event);
+								}
+							});
+							node.addEventListener('mouseleave', function() {
+								tooltip.classList.remove('visible');
+							});
+						});
+					}
+
+					function bindViewSwitcher() {
+						var listView = document.getElementById('mallaListView');
+						var viewButtons = root.closest('form').querySelectorAll('.malla-tool-btn[data-view]');
+						var collapseIcon = root.closest('form').querySelector('.malla-tool-btn[data-action="collapse-all"] img');
+						var expandIcon = root.closest('form').querySelector('.malla-tool-btn[data-action="expand-all"] img');
+
+						function updateViewActionIcons(isList) {
+							if (collapseIcon) {
+								collapseIcon.src = isList
+									? collapseIcon.getAttribute('data-src-list')
+									: collapseIcon.getAttribute('data-src-column');
+							}
+							if (expandIcon) {
+								expandIcon.src = isList
+									? expandIcon.getAttribute('data-src-list')
+									: expandIcon.getAttribute('data-src-column');
+							}
+						}
+
+						viewButtons.forEach(function(btn) {
+							btn.addEventListener('click', function(event) {
+								event.preventDefault();
+								var target = btn.getAttribute('data-view');
+								var isList = target === 'lista';
+								root.style.display = isList ? 'none' : 'block';
+								if (listView) {
+									listView.style.display = isList ? 'block' : 'none';
+								}
+								viewButtons.forEach(function(b) {
+									b.classList.toggle('activo', b === btn);
+								});
+								updateViewActionIcons(isList);
+							});
+						});
+
+						updateViewActionIcons(false);
+
+						if (listView) {
+							var currentSem = parseInt(semestreActual || '0', 10);
+							var semCards = listView.querySelectorAll('.malla-list-semestre[data-semestre]');
+							semCards.forEach(function(card) {
+								var sem = parseInt(card.getAttribute('data-semestre') || '0', 10);
+								if (!currentSem || sem !== currentSem) {
+									card.classList.add('colapsado');
+								} else {
+									card.classList.remove('colapsado');
+								}
+							});
+
+							var semHeaders = listView.querySelectorAll('.malla-list-sem-header');
+							semHeaders.forEach(function(header) {
+								header.addEventListener('click', function() {
+									var card = header.closest('.malla-list-semestre');
+									if (card) {
+										card.classList.toggle('colapsado');
+									}
+								});
+							});
+						}
+					}
+
+					function setCollapsed(semestre, collapsed) {
+						if (semestres[semestre]) {
+							semestres[semestre].collapsed = collapsed;
+						}
+						var toggle = root.querySelector('.malla-toggle[data-semestre="' + semestre + '"]');
+						if (toggle) {
+							toggle.setAttribute('data-collapsed', collapsed ? 'true' : 'false');
+							toggle.classList.toggle('collapsed', collapsed);
+							toggle.classList.toggle('expanded', !collapsed);
+						}
+					}
+
+					function setVerticalCollapsed(semestre, collapsed) {
+						if (semestres[semestre]) {
+							semestres[semestre].verticalCollapsed = collapsed;
+						}
+						var toggle = root.querySelector('.malla-toggle-v[data-semestre="' + semestre + '"]');
+						if (toggle) {
+							toggle.setAttribute('data-collapsed', collapsed ? 'true' : 'false');
+							toggle.classList.toggle('collapsed', collapsed);
+							toggle.classList.toggle('expanded', !collapsed);
+						}
+						Object.keys(bloques).forEach(function(bloqueId) {
+							var bloque = bloques[bloqueId];
+							if (bloque && bloque.semestre === semestre) {
+								bloque.collapsed = collapsed;
+								var bloqueToggle = root.querySelector('.malla-toggle-v[data-bloque="' + bloqueId + '"]');
+								if (bloqueToggle) {
+									bloqueToggle.setAttribute('data-collapsed', collapsed ? 'true' : 'false');
+									bloqueToggle.classList.toggle('collapsed', collapsed);
+									bloqueToggle.classList.toggle('expanded', !collapsed);
+								}
+							}
+						});
+					}
+
+					function setBlockCollapsed(bloqueId, collapsed) {
+						if (bloques[bloqueId]) {
+							bloques[bloqueId].collapsed = collapsed;
+						}
+						var toggle = root.querySelector('.malla-toggle-v[data-bloque="' + bloqueId + '"]');
+						if (toggle) {
+							toggle.setAttribute('data-collapsed', collapsed ? 'true' : 'false');
+							toggle.classList.toggle('collapsed', collapsed);
+							toggle.classList.toggle('expanded', !collapsed);
+						}
+					}
+
+					nodes.forEach(function(node) {
+						var sem = node.getAttribute('data-semestre');
+						if (!sem) {
+							return;
+						}
+						if (!semestres[sem]) {
+							semestres[sem] = {
+								nodes: [],
+								baseLeft: null,
+								collapsed: false,
+								semestre: sem
+							};
+						}
+						semestres[sem].nodes.push(node);
+						if (node.classList.contains('semestre')) {
+							semestres[sem].baseLeft = getLeft(node);
+							semestres[sem].semestreNode = node;
+						}
+						var tipo = node.getAttribute('data-tipo');
+						var bloqueId = node.getAttribute('data-bloque');
+						if (tipo === 'BLOQUE' && bloqueId) {
+							bloques[bloqueId] = {
+								bloqueId: bloqueId,
+								semestre: sem,
+								blockNode: node,
+								programas: [],
+								baseTop: getTop(node),
+								collapsed: false
+							};
+						}
+						if (tipo === 'PROGRAMA' && bloqueId) {
+							if (!bloques[bloqueId]) {
+								bloques[bloqueId] = {
+									bloqueId: bloqueId,
+									semestre: sem,
+									blockNode: null,
+									programas: [],
+									baseTop: null,
+									collapsed: false
+								};
+							}
+							bloques[bloqueId].programas.push(node);
+						}
+					});
+
+					Object.keys(semestres).forEach(function(sem) {
+						if (semestres[sem].baseLeft == null && semestres[sem].nodes.length > 0) {
+							semestres[sem].baseLeft = getLeft(semestres[sem].nodes[0]);
+						}
+						if (semestres[sem].verticalCollapsed == null) {
+							semestres[sem].verticalCollapsed = false;
+						}
+					});
+
+					Object.keys(bloques).forEach(function(bloqueId) {
+						var bloque = bloques[bloqueId];
+						if (bloque.blockNode && bloque.baseTop == null) {
+							bloque.baseTop = getTop(bloque.blockNode);
+						}
+						setBlockCollapsed(bloqueId, false);
+					});
+
+					function aplicarLayoutVertical(sem) {
+						var semestreData = semestres[sem];
+						if (!semestreData) {
+							return;
+						}
+						var baseNode = semestreData.semestreNode;
+						if (!baseNode) {
+							return;
+						}
+						var currentY = getTop(baseNode) + getHeight(baseNode);
+						var blocks = Object.keys(bloques).map(function(id) { return bloques[id]; })
+							.filter(function(b) { return b.semestre === sem && b.blockNode; })
+							.sort(function(a, b) { return a.baseTop - b.baseTop; });
+						blocks.forEach(function(block) {
+							var blockNode = block.blockNode;
+							if (!blockNode) {
+								return;
+							}
+							blockNode.style.top = currentY + 'px';
+							currentY += getHeight(blockNode);
+							if (block.collapsed) {
+								block.programas.forEach(function(p) {
+									p.style.display = 'none';
+								});
+							} else {
+								block.programas.sort(function(a, b) {
+									return getTop(a) - getTop(b);
+								});
+								block.programas.forEach(function(p) {
+									p.style.display = '';
+									p.style.top = currentY + 'px';
+									currentY += getHeight(p) + programaGap;
+								});
+							}
+							currentY += bloqueGap;
+						});
+					}
+
+					function ordenarSemestres() {
+						return Object.keys(semestres).sort(function(a, b) {
+							return parseInt(a, 10) - parseInt(b, 10);
+						});
+					}
+
+					function aplicarLayout() {
+						var currentX = startX;
+						var lines = root.querySelectorAll('.malla-col-line');
+						lines.forEach(function(line) {
+							line.parentNode.removeChild(line);
+						});
+						ordenarSemestres().forEach(function(sem) {
+							var data = semestres[sem];
+							var width = data.collapsed ? collapsedWidth : expandedWidth;
+							var baseLeft = data.baseLeft || 0;
+							var line = document.createElement('div');
+							line.className = 'malla-col-line';
+							line.style.left = currentX + 'px';
+							root.appendChild(line);
+							data.nodes.forEach(function(node) {
+								var left = getLeft(node);
+								var offset = left - baseLeft;
+								if (data.collapsed) {
+									if (node.classList.contains('semestre')) {
+										node.style.left = (currentX + (collapsedWidth - collapsedSemWidth) / 2) + 'px';
+									} else if (node.classList.contains('bloque')) {
+										node.style.left = (currentX + (collapsedWidth - collapsedBloWidth) / 2) + 'px';
+									} else if (node.classList.contains('programa')) {
+										node.style.left = (currentX + (collapsedWidth - collapsedProgWidth) / 2) + 'px';
+									} else {
+										node.style.left = (currentX + offset) + 'px';
+									}
+								} else {
+									node.style.left = (currentX + offset) + 'px';
+								}
+								node.classList.toggle('colapsado', data.collapsed);
+							});
+							aplicarLayoutVertical(sem);
+							currentX += width + gap;
+						});
+						var endLine = document.createElement('div');
+						endLine.className = 'malla-col-line';
+						endLine.style.left = currentX + 'px';
+						root.appendChild(endLine);
+						root.style.width = (currentX + 40) + 'px';
+					}
+
+					ordenarSemestres().forEach(function(sem) {
+						if (semestreActual && sem === semestreActual) {
+							setCollapsed(sem, false);
+						} else {
+							setCollapsed(sem, true);
+						}
+						setVerticalCollapsed(sem, false);
+					});
+					aplicarLayout();
+
+					toggles.forEach(function(toggle) {
+						toggle.addEventListener('click', function(event) {
+							event.preventDefault();
+							event.stopPropagation();
+							var sem = toggle.getAttribute('data-semestre');
+							var collapsed = toggle.getAttribute('data-collapsed') === 'true';
+							setCollapsed(sem, !collapsed);
+							aplicarLayout();
+						});
+					});
+
+					toggleVerticalSem.forEach(function(toggle) {
+						toggle.addEventListener('click', function(event) {
+							event.preventDefault();
+							event.stopPropagation();
+							var sem = toggle.getAttribute('data-semestre');
+							var collapsed = toggle.getAttribute('data-collapsed') === 'true';
+							setVerticalCollapsed(sem, !collapsed);
+							aplicarLayout();
+						});
+					});
+
+					toggleVerticalBlo.forEach(function(toggle) {
+						toggle.addEventListener('click', function(event) {
+							event.preventDefault();
+							event.stopPropagation();
+							var bloqueId = toggle.getAttribute('data-bloque');
+							var collapsed = toggle.getAttribute('data-collapsed') === 'true';
+							setBlockCollapsed(bloqueId, !collapsed);
+							aplicarLayout();
+						});
+					});
+
+					var toolButtons = root.closest('form').querySelectorAll('.malla-tool-btn[data-action]');
+					toolButtons.forEach(function(btn) {
+						btn.addEventListener('click', function(event) {
+							event.preventDefault();
+							var action = btn.getAttribute('data-action');
+							if (action === 'print') {
+								window.print();
+								return;
+							}
+							var listView = document.getElementById('mallaListView');
+							var listCards = listView ? listView.querySelectorAll('.malla-list-semestre') : [];
+							if (action === 'collapse-all') {
+								ordenarSemestres().forEach(function(sem) { setCollapsed(sem, true); });
+								listCards.forEach(function(card) { card.classList.add('colapsado'); });
+								toolButtons.forEach(function(b) {
+									b.classList.toggle('activo', b.getAttribute('data-action') === 'collapse-all');
+								});
+								aplicarLayout();
+							}
+							if (action === 'expand-all') {
+								ordenarSemestres().forEach(function(sem) { setCollapsed(sem, false); });
+								listCards.forEach(function(card) { card.classList.remove('colapsado'); });
+								toolButtons.forEach(function(b) {
+									b.classList.toggle('activo', b.getAttribute('data-action') === 'expand-all');
+								});
+								aplicarLayout();
+							}
+						});
+					});
+
+					bindCustomTooltips();
+					bindViewSwitcher();
+				}
+
+				if (document.readyState === 'loading') {
+					document.addEventListener('DOMContentLoaded', initMallaToggles);
+				} else {
+					initMallaToggles();
+				}
+			})();
+			//]]>
+		</script>
+	</ui:define>
+</ui:composition>

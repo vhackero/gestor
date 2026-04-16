@@ -653,13 +653,33 @@
 							<ui:fragment
 								rendered="#{menuGestorBean.rolTienePermiso('CONST')}">
 								<sec:authorize access="hasPermission(null, 'CONST') ">
-									<li><h:commandLink
-											action="#{menuGestorBean.navegaConstancias}"
-											title="#{sistema.obtenerTexto('gw.sidebar.historialAcademico')}">
+									<li><a href="#"
+										title="#{sistema.obtenerTexto('gw.sidebar.historialAcademico')}">
 											<i class="fa fa-solid fa-book"></i>
 											<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.historialAcademico')}</span>
-
-										</h:commandLink></li>
+											<span class="fa arrow"></span>
+									</a>
+										<ul class="nav nav-second-level">
+											<li><h:commandLink
+													action="#{menuGestorBean.navegaConstancias}"
+													title="#{sistema.obtenerTexto('gw.sidebar.historialAcademico')}">
+													<i class="fa fa-solid fa-file-lines"></i>
+													<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.constancias')}</span>
+												</h:commandLink></li>
+											<li><h:commandLink
+													action="#{menuGestorBean.navegaMallaCurricularAlumno}"
+													title="#{sistema.obtenerTexto('gw.sidebar.mallaCurricularAlumno')}">
+													<i class="fa fa-sitemap"></i>
+													<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.mallaCurricularAlumno')}</span>
+												</h:commandLink></li>
+											<li><h:commandLink
+													action="#{menuGestorBean.navegaTablaCurricularAsistida}"
+													title="Tabla curricular asistida">
+													<i class="fa fa-table"></i>
+													<span class="m-label">Tabla curricular asistida</span>
+												</h:commandLink></li>
+										</ul>
+									</li>
 								</sec:authorize>
 							</ui:fragment>
 

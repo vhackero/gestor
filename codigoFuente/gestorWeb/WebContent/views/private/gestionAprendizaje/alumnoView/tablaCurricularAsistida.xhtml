@@ -1,0 +1,1075 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition template="/templates/layout.xhtml"
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="breadcrumb">
+        <li>Asistente de inscripción curricular</li>
+    </ui:define>
+
+    <ui:define name="content">
+        <style type="text/css">
+            .asistente-wrap {
+                background: #f4f6f7;
+                border-radius: 4px;
+                padding: 20px 18px 28px;
+            }
+            .asistente-title {
+                margin: 0 0 14px;
+                font-size: 23px;
+                font-weight: 400;
+                color: #3a3a3a;
+            }
+            .asistente-tabs.ui-tabs {
+                background: transparent;
+                border: 0;
+                padding: 0;
+            }
+            .asistente-tabs .ui-tabs-nav {
+                background: transparent;
+                border: 0;
+                padding: 0;
+                border-bottom: 0;
+            }
+            .asistente-tabs .ui-tabs-nav li {
+                margin: 0 0 0 0;
+                border: 0;
+                border-radius: 0;
+                background: #ffffff;
+                border-right: 1px solid #8eb7c4;
+                box-shadow: none;
+            }
+            .asistente-tabs .ui-tabs-nav li:last-child {
+                border-right: 0;
+            }
+            .asistente-tabs .ui-tabs-nav li a {
+                color: #2e2e2e;
+                font-size: 14px;
+                padding: 15px 20px;
+                font-weight: 400;
+            }
+            .asistente-tabs .ui-tabs-nav li.ui-state-active {
+                background: #5f97a8;
+            }
+            .asistente-tabs .ui-tabs-nav li.ui-state-active a {
+                color: #ffffff;
+            }
+            .asistente-tabs .ui-tabs-panels {
+                background: #f4f6f7;
+                border: 0;
+                padding: 22px 0 0;
+            }
+            .asistente-section {
+                background: #f4f6f7;
+            }
+            .resumen-caja {
+                background: #ffffff;
+                border: 2px solid #99c4d4;
+                border-radius: 4px;
+                padding: 24px 28px;
+                color: #363636;
+                font-size: 16px;
+                margin-bottom: 22px;
+                line-height: 1.5;
+            }
+            .resumen-caja .fa {
+                color: #b7c9d2;
+                font-size: 30px;
+                margin-right: 10px;
+                vertical-align: middle;
+            }
+            .resumen-caja .situacion-regular {
+                color: #6ab142;
+                font-weight: 700;
+            }
+            .resumen-caja .situacion-irregular {
+                color: #e18a22;
+                font-weight: 700;
+            }
+            .kpi-grid {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(150px, 1fr));
+                gap: 22px;
+                margin-bottom: 20px;
+            }
+            .kpi-card {
+                border-radius: 4px;
+                padding: 20px 16px;
+                min-height: 74px;
+                text-align: center;
+            }
+            .kpi-card-green {
+                background: #e7efdf;
+            }
+            .kpi-card-blue {
+                background: #cfe1f1;
+            }
+            .kpi-title {
+                font-size: 13px;
+                color: #3e3e3e;
+                font-weight: 600;
+                margin-bottom: 10px;
+            }
+            .kpi-value {
+                font-size: 30px;
+                line-height: 1;
+                color: #111111;
+                font-weight: 700;
+            }
+            .kpi-inline-note {
+                margin: 10px 0 28px 14px;
+                font-size: 16px;
+                color: #232323;
+            }
+            .kpi-inline-note .fa {
+                margin-left: 8px;
+            }
+            .section-subtitle {
+                text-align: center;
+                font-size: 29px;
+                font-weight: 700;
+                color: #333333;
+                margin: 12px 0 20px;
+            }
+            .riesgo-box {
+                background: #ffffff;
+                border-radius: 4px;
+                padding: 26px 36px;
+                width: 70%;
+                margin: 0 auto;
+            }
+            .riesgo-box-alto {
+                border: 2px solid #ea8f8b;
+            }
+            .riesgo-box-medio {
+                border: 2px solid #d8b55c;
+            }
+            .riesgo-box-bajo {
+                border: 2px solid #98cf83;
+            }
+            .riesgo-nivel {
+                font-size: 15px;
+                font-weight: 700;
+                margin-bottom: 12px;
+            }
+            .riesgo-box-alto .riesgo-nivel {
+                color: #dc3c33;
+            }
+            .riesgo-box-medio .riesgo-nivel {
+                color: #bb8d12;
+            }
+            .riesgo-box-bajo .riesgo-nivel {
+                color: #66a72f;
+            }
+            .riesgo-box h3 {
+                text-align: center;
+                margin: -2px 0 18px;
+                font-size: 17px;
+                font-weight: 700;
+                color: #222222;
+            }
+            .riesgo-box ul,
+            .expectativa-card ul,
+            .escenario-card ul,
+            .simulacion-list ul {
+                margin: 8px 0 0 18px;
+            }
+            .expectativa-alerta {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: #303030;
+                font-size: 16px;
+                margin: 8px 0 28px;
+            }
+            .expectativa-alerta .fa {
+                font-size: 28px;
+                color: #2f2f2f;
+            }
+            .expectativa-grid,
+            .escenarios-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(220px, 1fr));
+                gap: 26px;
+            }
+            .expectativa-card,
+            .escenario-card {
+                min-height: 100%;
+            }
+            .expectativa-head,
+            .escenario-head {
+                background: #bcd1db;
+                color: #202020;
+                border-radius: 3px;
+                text-align: center;
+                font-size: 18px;
+                font-weight: 700;
+                padding: 11px 10px;
+                margin-bottom: 16px;
+            }
+            .expectativa-desc,
+            .escenario-desc {
+                color: #2d2d2d;
+                font-size: 16px;
+                line-height: 1.35;
+                min-height: 82px;
+            }
+            .expectativa-kpis {
+                display: flex;
+                gap: 20px;
+                margin: 14px 0 10px;
+                justify-content: center;
+            }
+            .expectativa-kpi,
+            .escenario-kpi {
+                background: #e5eddc;
+                border-radius: 4px;
+                padding: 12px 16px;
+                min-width: 88px;
+                text-align: center;
+            }
+            .expectativa-kpi .label,
+            .escenario-kpi .label {
+                display: block;
+                font-size: 14px;
+                color: #333333;
+                font-weight: 600;
+                margin-bottom: 3px;
+            }
+            .expectativa-kpi .value,
+            .escenario-kpi .value {
+                font-size: 28px;
+                line-height: 1;
+                font-weight: 700;
+                color: #111111;
+            }
+            .oportunidad-box {
+                margin-top: 34px;
+                background: #ffffff;
+                border: 2px solid #90bdd0;
+                border-radius: 4px;
+                padding: 28px 36px;
+                display: grid;
+                grid-template-columns: 1fr 180px;
+                gap: 20px;
+                align-items: center;
+            }
+            .oportunidad-box h3 {
+                margin: 0 0 12px;
+                color: #5f9bb2;
+                font-size: 22px;
+                font-weight: 700;
+            }
+            .oportunidad-icon {
+                text-align: center;
+                color: #c4d4dc;
+                font-size: 100px;
+            }
+            .meta-strip {
+                display: flex;
+                justify-content: space-between;
+                gap: 18px;
+                align-items: center;
+                margin-bottom: 30px;
+                flex-wrap: wrap;
+            }
+            .meta-strip-left,
+            .meta-strip-right {
+                display: flex;
+                gap: 14px;
+                flex-wrap: wrap;
+            }
+            .meta-pill,
+            .meta-box {
+                background: #ffffff;
+                border-radius: 4px;
+                padding: 9px 18px;
+                color: #3b3b3b;
+                font-size: 15px;
+            }
+            .meta-pill {
+                border: 2px solid #7fb0c1;
+                min-width: 410px;
+            }
+            .meta-box {
+                background: #b7ccd6;
+                min-width: 150px;
+                text-align: center;
+                font-weight: 600;
+            }
+            .meta-box strong {
+                font-weight: 700;
+            }
+            .escenario-card-min .escenario-head {
+                background: #ffdf84;
+            }
+            .escenario-card-bal .escenario-head {
+                background: #b7cf95;
+            }
+            .escenario-card-max .escenario-head {
+                background: #9fc4eb;
+            }
+            .escenario-kpis {
+                display: flex;
+                gap: 26px;
+                margin: 22px 0 18px;
+                justify-content: center;
+            }
+            .escenario-card-min .escenario-kpi {
+                background: #ffdf84;
+            }
+            .escenario-card-bal .escenario-kpi {
+                background: #b7cf95;
+            }
+            .escenario-card-max .escenario-kpi {
+                background: #9fc4eb;
+            }
+            .escenario-mark {
+                margin-top: 24px;
+                font-size: 16px;
+                font-weight: 700;
+            }
+            .escenario-beneficio {
+                color: #2e9b53;
+            }
+            .escenario-riesgo {
+                color: #d53b32;
+            }
+            .escenario-mark .fa {
+                margin-right: 8px;
+            }
+            .simulador-title {
+                text-align: center;
+                font-size: 21px;
+                font-weight: 700;
+                color: #363636;
+                margin: 10px 0 24px;
+            }
+            .simulacion-actions {
+                margin-bottom: 16px;
+            }
+            .simulacion-panel {
+                margin-top: 12px;
+                background: #ffffff;
+                border-radius: 4px;
+                padding: 16px 20px;
+                border: 1px solid #d6e1e6;
+            }
+            .simulacion-base {
+                margin: 0 0 14px;
+                font-size: 13px;
+                color: #4a4a4a;
+            }
+            .sim-semestre {
+                margin-bottom: 16px;
+            }
+            .sim-semestre-title {
+                background: #5f97a8;
+                color: #ffffff;
+                border-radius: 4px 4px 0 0;
+                padding: 11px 18px;
+                font-size: 16px;
+                font-weight: 700;
+            }
+            .sim-table-wrap {
+                overflow-x: auto;
+                background: #ffffff;
+                border-radius: 0 0 4px 4px;
+            }
+            .sim-table {
+                width: 100%;
+                min-width: 1080px;
+                border-collapse: collapse;
+            }
+            .sim-table thead th {
+                background: #5f97a8;
+                color: #ffffff;
+                font-size: 14px;
+                font-weight: 700;
+                padding: 12px 8px;
+                text-align: center;
+                border-right: 1px solid rgba(255, 255, 255, 0.15);
+            }
+            .sim-table tbody td {
+                padding: 16px 10px;
+                border-bottom: 1px solid #dfe5e8;
+                color: #4a4a4a;
+                vertical-align: middle;
+            }
+            .sim-table tbody tr {
+                background: #ffffff;
+            }
+            .sim-check {
+                text-align: center;
+                width: 46px;
+            }
+            .sim-check .ui-chkbox {
+                margin: 0 auto;
+            }
+            .sim-toggle {
+                display: inline-block;
+                margin-top: 8px;
+                color: #303030;
+                text-decoration: none;
+            }
+            .sim-toggle:hover,
+            .sim-toggle:focus {
+                color: #1f6f86;
+                text-decoration: none;
+            }
+            .sim-detail-row td {
+                padding: 0;
+                background: #f8fbfd;
+                border-bottom: 1px solid #d7e2e8;
+            }
+            .sim-detail-box {
+                margin: 10px 8px 16px;
+                padding: 14px 16px 16px;
+                border: 1px solid #d2dee6;
+                border-radius: 8px;
+                background: #ffffff;
+            }
+            .sim-detail-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(280px, 1fr));
+                gap: 0 48px;
+                align-items: start;
+            }
+            .sim-detail-col {
+                display: flex;
+                flex-direction: column;
+            }
+            .sim-detail-item .detail-label,
+            .sim-detail-section .detail-label {
+                display: block;
+                font-size: 12px;
+                font-weight: 700;
+                color: #4b6b86;
+                text-transform: uppercase;
+                margin-bottom: 4px;
+                text-align: left;
+            }
+            .sim-detail-item {
+                margin-bottom: 10px;
+            }
+            .sim-detail-item .detail-value,
+            .sim-detail-section .detail-value {
+                display: block;
+                color: #2f3c4b;
+                font-size: 14px;
+                line-height: 1.45;
+                text-align: left;
+            }
+            .sim-detail-section {
+                margin-top: 12px;
+            }
+            .sim-detail-section ul {
+                margin: 0;
+                padding-left: 18px;
+            }
+            .sim-detail-section li {
+                margin-bottom: 6px;
+                color: #2f3c4b;
+            }
+            .motivo-tag {
+                display: inline-block;
+                margin-left: 8px;
+                padding: 2px 8px;
+                border-radius: 10px;
+                font-size: 11px;
+                font-weight: 700;
+                line-height: 1.4;
+                background: #e3eef5;
+                color: #4b6b86;
+            }
+            .motivo-tag-baja {
+                background: #e8f3fb;
+                color: #4b6b86;
+            }
+            .motivo-tag-media {
+                background: #fff4cf;
+                color: #8a6800;
+            }
+            .motivo-tag-alta {
+                background: #fde4e2;
+                color: #b03d35;
+            }
+            .estado-ok,
+            .estado-opcional,
+            .estado-alerta,
+            .estado-prioritaria,
+            .estado-bloqueada,
+            .estado-condicionada,
+            .estado-neutro {
+                font-weight: 700;
+            }
+            .estado-ok {
+                color: #22a35a;
+            }
+            .estado-opcional {
+                color: #b78a11;
+            }
+            .estado-alerta {
+                color: #d63d36;
+            }
+            .estado-prioritaria {
+                color: #d63d36;
+            }
+            .estado-bloqueada {
+                color: #7a7f86;
+            }
+            .estado-condicionada {
+                color: #d18a1a;
+            }
+            .estado-neutro {
+                color: #4f5f6d;
+            }
+            .sim-empty-box {
+                background: #ffffff;
+                border: 2px dashed #c6d8e0;
+                border-radius: 6px;
+                padding: 44px 26px;
+                text-align: center;
+                color: #6c7c84;
+                font-size: 18px;
+            }
+            .inscripcion-futura {
+                position: relative;
+                min-height: 220px;
+            }
+            .inscripcion-note {
+                position: absolute;
+                top: 0;
+                right: 26px;
+                background: #ffffff;
+                border: 2px solid #f25c5c;
+                border-radius: 10px;
+                color: #7a7a7a;
+                font-size: 13px;
+                text-align: center;
+                padding: 10px 14px;
+                width: 170px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            }
+            .inscripcion-note:after {
+                content: "";
+                position: absolute;
+                left: 50%;
+                bottom: -10px;
+                margin-left: -8px;
+                border-width: 10px 8px 0 8px;
+                border-style: solid;
+                border-color: #f25c5c transparent transparent transparent;
+            }
+            .inscripcion-note:before {
+                content: "";
+                position: absolute;
+                left: 50%;
+                bottom: -7px;
+                margin-left: -6px;
+                border-width: 8px 6px 0 6px;
+                border-style: solid;
+                border-color: #ffffff transparent transparent transparent;
+                z-index: 2;
+            }
+            .sim-empty-box .fa {
+                font-size: 36px;
+                display: block;
+                margin-bottom: 14px;
+                color: #9bb8c4;
+            }
+            .alert-box {
+                margin-bottom: 18px;
+                border-radius: 4px;
+                padding: 12px 16px;
+            }
+            .alert-box-warning {
+                background: #fff4d7;
+                border: 1px solid #e4ca73;
+                color: #4a4430;
+            }
+            .alert-box-info {
+                background: #eef5f8;
+                border: 1px solid #bed4dd;
+                color: #3d5863;
+            }
+            .simulacion-ok {
+                color: #2f9b54;
+                font-weight: 700;
+            }
+            .simulacion-error {
+                color: #dc3f36;
+                font-weight: 700;
+            }
+            .simulacion-list {
+                margin-top: 12px;
+            }
+            @media (max-width: 991px) {
+                .kpi-grid,
+                .expectativa-grid,
+                .escenarios-grid {
+                    grid-template-columns: repeat(2, minmax(220px, 1fr));
+                }
+                .riesgo-box {
+                    width: 100%;
+                }
+                .oportunidad-box {
+                    grid-template-columns: 1fr;
+                }
+                .inscripcion-note {
+                    position: static;
+                    margin: 0 0 18px auto;
+                }
+                .inscripcion-note:after,
+                .inscripcion-note:before {
+                    display: none;
+                }
+            }
+            @media (max-width: 640px) {
+                .kpi-grid,
+                .expectativa-grid,
+                .escenarios-grid {
+                    grid-template-columns: 1fr;
+                }
+                .meta-pill,
+                .meta-box {
+                    min-width: 100%;
+                }
+                .expectativa-kpis,
+                .escenario-kpis {
+                    gap: 12px;
+                }
+                .sim-detail-grid {
+                    grid-template-columns: 1fr;
+                    gap: 0;
+                }
+            }
+        </style>
+
+        <h:form id="mainForm">
+            <h1 class="asistente-title">Asistente de inscripción curricular</h1>
+
+            <p:outputPanel rendered="#{not empty tablaCurricularAsistidaBean.mensajeError}">
+                <div class="alert alert-danger">#{tablaCurricularAsistidaBean.mensajeError}</div>
+            </p:outputPanel>
+
+            <p:outputPanel rendered="#{empty tablaCurricularAsistidaBean.mensajeError and not empty tablaCurricularAsistidaBean.contexto}">
+                <div class="asistente-wrap">
+                    <p:tabView styleClass="asistente-tabs" widgetVar="asistenteTabsWidget">
+                        <p:tab title="Situación académica">
+                            <div class="asistente-section">
+                                <div class="resumen-caja">
+                                    <i class="fa fa-graduation-cap" />
+                                    <span class="#{tablaCurricularAsistidaBean.contexto.diagnosticoActual.regular ? 'situacion-regular' : 'situacion-irregular'}">
+                                        Estudiante #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.regular ? 'regular' : 'irregular'}
+                                    </span>
+                                    con #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasReprobadasActivas} UD reprobada(s),
+                                    #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasBloqueadasPorSeriacion} UD bloqueada(s) por seriación curricular
+                                    y #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasCriticas} UD crítica(s) para la trayectoria académica.
+                                </div>
+
+                                <div class="kpi-grid">
+                                    <div class="kpi-card kpi-card-green">
+                                        <div class="kpi-title">Seguimiento de Bloque/Semestre vigente</div>
+                                        <div class="kpi-value">
+                                            #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasEnCurso}
+                                            <i class="fa fa-eye" style="font-size:18px;" />
+                                        </div>
+                                    </div>
+                                    <div class="kpi-card kpi-card-green">
+                                        <div class="kpi-title">UD reprobadas activas</div>
+                                        <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasReprobadasActivas}</div>
+                                    </div>
+                                    <div class="kpi-card kpi-card-green">
+                                        <div class="kpi-title">UD críticas</div>
+                                        <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasCriticas}</div>
+                                    </div>
+                                    <div class="kpi-card kpi-card-green">
+                                        <div class="kpi-title">UD bloqueadas por seriación curricular</div>
+                                        <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasBloqueadasPorSeriacion}</div>
+                                    </div>
+                                </div>
+
+                                <div class="section-subtitle" style="font-size:28px;">Unidades didácticas pendientes en ciclos académicos restantes</div>
+
+                                <div class="kpi-grid">
+                                    <div class="kpi-card kpi-card-blue">
+                                        <div class="kpi-title">Unidades didácticas obligatorias</div>
+                                        <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.pendientesPlan.obligatoriasFaltantes}</div>
+                                    </div>
+                                    <div class="kpi-card kpi-card-blue">
+                                        <div class="kpi-title">Unidades didácticas optativas</div>
+                                        <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.pendientesPlan.optativasFaltantes}</div>
+                                    </div>
+                                    <div class="kpi-card kpi-card-blue">
+                                        <div class="kpi-title">Unidades didácticas electivas</div>
+                                        <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.pendientesPlan.electivasFaltantes}</div>
+                                    </div>
+                                    <div class="kpi-card kpi-card-blue">
+                                        <div class="kpi-title">Créditos faltantes</div>
+                                        <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.pendientesPlan.creditosFaltantes}</div>
+                                    </div>
+                                </div>
+
+                                <div class="kpi-inline-note">
+                                    <strong>UD optativas rezagadas:</strong> #{tablaCurricularAsistidaBean.contexto.pendientesPlan.optativasRezagadas}
+                                    <i class="fa fa-eye" />
+                                </div>
+
+                                <div class="riesgo-box #{tablaCurricularAsistidaBean.obtenerClaseRiesgo()}">
+                                    <div class="riesgo-nivel">
+                                        <i class="fa fa-warning" /> Nivel #{tablaCurricularAsistidaBean.contexto.riesgos.nivelRiesgo.toLowerCase()}
+                                    </div>
+                                    <h3>Riesgos</h3>
+                                    <div>
+                                        Nivel de riesgo #{tablaCurricularAsistidaBean.contexto.riesgos.nivelRiesgo}
+                                        con #{tablaCurricularAsistidaBean.contexto.riesgos.riesgosInmediatos.size()} riesgo(s) inmediato(s)
+                                        y #{tablaCurricularAsistidaBean.contexto.riesgos.riesgosMedianoPlazo.size()} riesgo(s) de mediano plazo.
+                                    </div>
+
+                                    <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.contexto.riesgos.riesgosInmediatos}">
+                                        <div style="margin-top:18px;"><strong>Riesgos inmediatos</strong></div>
+                                        <ul>
+                                            <ui:repeat value="#{tablaCurricularAsistidaBean.contexto.riesgos.riesgosInmediatos}" var="riesgo">
+                                                <li>#{riesgo}</li>
+                                            </ui:repeat>
+                                        </ul>
+                                    </ui:fragment>
+
+                                    <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.contexto.riesgos.riesgosMedianoPlazo}">
+                                        <div style="margin-top:18px;"><strong>Riesgos de mediano plazo</strong></div>
+                                        <ul>
+                                            <ui:repeat value="#{tablaCurricularAsistidaBean.contexto.riesgos.riesgosMedianoPlazo}" var="riesgo">
+                                                <li>#{riesgo}</li>
+                                            </ui:repeat>
+                                        </ul>
+                                    </ui:fragment>
+                                </div>
+                            </div>
+                        </p:tab>
+
+                        <p:tab title="Expectativa de logro">
+                            <div class="asistente-section">
+                                <div class="expectativa-alerta">
+                                    <i class="fa fa-warning" />
+                                    <span>#{tablaCurricularAsistidaBean.contexto.proyeccionSiguientePeriodo.resumen}</span>
+                                </div>
+
+                                <div class="expectativa-grid">
+                                    <ui:repeat value="#{tablaCurricularAsistidaBean.contexto.proyeccionSiguientePeriodo.escenarios}" var="escenarioProyeccion">
+                                        <div class="expectativa-card">
+                                            <div class="expectativa-head">#{escenarioProyeccion.nombre}</div>
+                                            <div class="expectativa-desc">#{escenarioProyeccion.descripcion}</div>
+                                            <div class="expectativa-kpis">
+                                                <div class="expectativa-kpi">
+                                                    <span class="label">UD habilitadas</span>
+                                                    <span class="value">#{escenarioProyeccion.materiasHabilitadas ne null ? escenarioProyeccion.materiasHabilitadas : 0}</span>
+                                                </div>
+                                                <div class="expectativa-kpi">
+                                                    <span class="label">UD bloqueadas</span>
+                                                    <span class="value">#{escenarioProyeccion.materiasBloqueadas ne null ? escenarioProyeccion.materiasBloqueadas : 0}</span>
+                                                </div>
+                                            </div>
+                                            <ui:fragment rendered="#{not empty escenarioProyeccion.recomendaciones}">
+                                                <ul>
+                                                    <ui:repeat value="#{escenarioProyeccion.recomendaciones}" var="recomendacion">
+                                                        <li>#{recomendacion}</li>
+                                                    </ui:repeat>
+                                                </ul>
+                                            </ui:fragment>
+                                        </div>
+                                    </ui:repeat>
+                                </div>
+
+                                <div class="oportunidad-box">
+                                    <div>
+                                        <h3>Oportunidades académicas</h3>
+                                        <div>#{tablaCurricularAsistidaBean.contexto.oportunidades.resumen}</div>
+                                        <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.contexto.oportunidades.oportunidades}">
+                                            <div style="margin-top:18px;"><strong>Recomendaciones de oportunidad</strong></div>
+                                            <ul>
+                                                <ui:repeat value="#{tablaCurricularAsistidaBean.contexto.oportunidades.oportunidades}" var="oportunidad">
+                                                    <li>#{oportunidad}</li>
+                                                </ui:repeat>
+                                            </ul>
+                                        </ui:fragment>
+                                    </div>
+                                    <div class="oportunidad-icon">
+                                        <i class="fa fa-bookmark-o" />
+                                    </div>
+                                </div>
+                            </div>
+                        </p:tab>
+
+                        <p:tab title="Proyección de carga académica">
+                            <div class="asistente-section">
+                                <div class="meta-strip">
+                                    <div class="meta-strip-left">
+                                        <div class="meta-pill">
+                                            <strong>Situación académica:</strong>
+                                            #{tablaCurricularAsistidaBean.contexto.situacionAcademicaPeriodo}-#{tablaCurricularAsistidaBean.contexto.subtipoSituacionAcademica.toLowerCase()}
+                                            <span style="margin-left:20px;"><strong>Periodo activo:</strong> #{tablaCurricularAsistidaBean.contexto.periodoActivo}</span>
+                                        </div>
+                                    </div>
+                                    <div class="meta-strip-right">
+                                        <div class="meta-box">Créditos del Programa Educativo: <strong>#{tablaCurricularAsistidaBean.contexto.creditosTotalesPlan}</strong></div>
+                                        <div class="meta-box">Créditos acumulados: <strong>#{tablaCurricularAsistidaBean.contexto.creditosAcumulados}</strong></div>
+                                        <div class="meta-box">% acumulado:
+                                            <strong>
+                                                <h:outputText value="#{tablaCurricularAsistidaBean.contexto.porcentajeCreditosCompletados / 100}">
+                                                    <f:convertNumber type="percent" minFractionDigits="1" maxFractionDigits="1" />
+                                                </h:outputText>
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="escenarios-grid">
+                                    <ui:repeat value="#{tablaCurricularAsistidaBean.contexto.escenarios}" var="escenario" varStatus="st">
+                                        <div class="escenario-card #{st.index eq 0 ? 'escenario-card-min' : (st.index eq 1 ? 'escenario-card-bal' : 'escenario-card-max')}">
+                                            <div class="escenario-head">#{escenario.nombre}</div>
+                                            <div class="escenario-desc">#{escenario.descripcion}</div>
+                                            <div class="escenario-kpis">
+                                                <div class="escenario-kpi">
+                                                    <span class="label">UD</span>
+                                                    <span class="value">#{escenario.totalMaterias}</span>
+                                                </div>
+                                                <div class="escenario-kpi">
+                                                    <span class="label">CRÉDITOS</span>
+                                                    <span class="value">#{escenario.totalCreditos}</span>
+                                                </div>
+                                            </div>
+                                            <ui:fragment rendered="#{not empty escenario.razones}">
+                                                <ul>
+                                                    <ui:repeat value="#{escenario.razones}" var="razon">
+                                                        <li>#{razon}</li>
+                                                    </ui:repeat>
+                                                </ul>
+                                            </ui:fragment>
+                                            <div class="escenario-mark escenario-beneficio">
+                                                <i class="fa fa-check-circle" /> Beneficio
+                                            </div>
+                                            <div style="margin-top:8px;">#{escenario.beneficioPrincipal}</div>
+                                            <div class="escenario-mark escenario-riesgo">
+                                                <i class="fa fa-warning" /> Riesgo
+                                            </div>
+                                            <div style="margin-top:8px;">#{escenario.riesgoGeneral}</div>
+                                        </div>
+                                    </ui:repeat>
+                                </div>
+                            </div>
+                        </p:tab>
+
+                        <p:tab title="Asistente de inscripción (Simulador)">
+                            <div class="asistente-section">
+                                <div class="meta-strip">
+                                    <div class="meta-strip-left">
+                                        <div class="meta-pill">
+                                            <strong>Situación académica:</strong>
+                                            #{tablaCurricularAsistidaBean.contexto.situacionAcademicaPeriodo}-#{tablaCurricularAsistidaBean.contexto.subtipoSituacionAcademica.toLowerCase()}
+                                            <span style="margin-left:20px;"><strong>Periodo activo:</strong> #{tablaCurricularAsistidaBean.contexto.periodoActivo}</span>
+                                        </div>
+                                    </div>
+                                    <div class="meta-strip-right">
+                                        <div class="meta-box">Créditos del Programa Educativo: <strong>#{tablaCurricularAsistidaBean.contexto.creditosTotalesPlan}</strong></div>
+                                        <div class="meta-box">Créditos acumulados: <strong>#{tablaCurricularAsistidaBean.contexto.creditosAcumulados}</strong></div>
+                                        <div class="meta-box">% acumulado:
+                                            <strong>
+                                                <h:outputText value="#{tablaCurricularAsistidaBean.contexto.porcentajeCreditosCompletados / 100}">
+                                                    <f:convertNumber type="percent" minFractionDigits="1" maxFractionDigits="1" />
+                                                </h:outputText>
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="simulador-title">Asistente de inscripción curricular</div>
+
+                                <div class="simulacion-base">
+                                    <strong>Base de simulación:</strong>
+                                    #{tablaCurricularAsistidaBean.contexto.inscripcionVigente ? 'Universo curricular hipotético con UD pendientes de ciclos académicos anteriores y UD del semestre siguiente' : 'Oferta académica vigente'}
+                                </div>
+
+                                <div class="simulacion-actions">
+                                    <p:commandButton value="Simular reinscripción"
+                                        action="#{tablaCurricularAsistidaBean.simularSeleccion}"
+                                        update="@form" styleClass="btn btn-primary" />
+                                    <p:commandButton value="Validar reinscripción final"
+                                        action="#{tablaCurricularAsistidaBean.validarSeleccionFinal}"
+                                        update="@form" styleClass="btn btn-default" style="margin-left:10px; min-width:220px;" />
+                                </div>
+
+                                <p:outputPanel rendered="#{not empty tablaCurricularAsistidaBean.resultadoSimulacion}">
+                                    <div class="simulacion-panel">
+                                        <div class="#{tablaCurricularAsistidaBean.resultadoSimulacion.valida ? 'simulacion-ok' : 'simulacion-error'}">
+                                            #{tablaCurricularAsistidaBean.resultadoSimulacion.mensajeGeneral}
+                                        </div>
+                                        <div style="margin-top:10px;">
+                                            <strong>UD seleccionadas:</strong> #{tablaCurricularAsistidaBean.resultadoSimulacion.totalMaterias}
+                                            <br />
+                                            <strong>Créditos seleccionados:</strong> #{tablaCurricularAsistidaBean.resultadoSimulacion.totalCreditos}
+                                            <br />
+                                            <strong>Impacto en el siguiente periodo académico:</strong> #{tablaCurricularAsistidaBean.resultadoSimulacion.impactoSiguientePeriodo}
+                                        </div>
+
+                                        <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.resultadoSimulacion.motivos}">
+                                            <div class="simulacion-list">
+                                                <strong>Restricciones detectadas</strong>
+                                                <ul>
+                                                    <ui:repeat value="#{tablaCurricularAsistidaBean.resultadoSimulacion.motivos}" var="motivo">
+                                                        <li>
+                                                            <strong>#{motivo.mensajeCorto}</strong>: #{motivo.mensajeDetallado}
+                                                        </li>
+                                                    </ui:repeat>
+                                                </ul>
+                                            </div>
+                                        </ui:fragment>
+
+                                        <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.resultadoSimulacion.advertencias}">
+                                            <div class="simulacion-list">
+                                                <strong>Advertencias</strong>
+                                                <ul>
+                                                    <ui:repeat value="#{tablaCurricularAsistidaBean.resultadoSimulacion.advertencias}" var="advertencia">
+                                                        <li>#{advertencia}</li>
+                                                    </ui:repeat>
+                                                </ul>
+                                            </div>
+                                        </ui:fragment>
+                                    </div>
+                                </p:outputPanel>
+
+                                <ui:repeat value="#{tablaCurricularAsistidaBean.semestres}" var="semestre">
+                                    <div class="sim-semestre">
+                                        <div class="sim-semestre-title">#{semestre.titulo}</div>
+                                        <div class="sim-table-wrap">
+                                            <table class="sim-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:48px;"></th>
+                                                        <th>Bloque</th>
+                                                        <th>Unidad didáctica</th>
+                                                        <th>Tipo de UD</th>
+                                                        <th>Clave</th>
+                                                        <th>Créditos</th>
+                                                        <th>Estatus histórico</th>
+                                                        <th>Estatus del periodo</th>
+                                                        <th>Prioridad</th>
+                                                        <th>Detalle normativo</th>
+                                                        <th>Acción sugerida</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <ui:repeat value="#{semestre.filas}" var="fila">
+                                                        <tr>
+                                                            <td class="sim-check">
+                                                                <p:selectBooleanCheckbox value="#{fila.seleccionada}" />
+                                                                <div>
+                                                                    <p:commandLink action="#{tablaCurricularAsistidaBean.toggleDetalle(fila)}"
+                                                                        process="@this" update="@form" styleClass="sim-toggle"
+                                                                        oncomplete="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(3); }"
+                                                                        title="#{fila.detalleVisible ? 'Ocultar detalle' : 'Mostrar detalle'}">
+                                                                        <i class="fa #{fila.detalleVisible ? 'fa-eye-slash' : 'fa-eye'}" style="font-size:16px;" />
+                                                                    </p:commandLink>
+                                                                </div>
+                                                            </td>
+                                                            <td style="text-align:center;">#{fila.bloque}</td>
+                                                            <td>#{fila.asignatura}</td>
+                                                            <td style="text-align:center;">#{fila.tipo}</td>
+                                                            <td style="text-align:center;">#{fila.clave}</td>
+                                                            <td style="text-align:center;">#{fila.creditos}</td>
+                                                            <td style="text-align:center;">
+                                                                <span class="#{tablaCurricularAsistidaBean.obtenerClaseEstado(fila.estatusHistorico)}">#{fila.estatusHistorico}</span>
+                                                            </td>
+                                                            <td style="text-align:center;">
+                                                                <span class="#{tablaCurricularAsistidaBean.obtenerClaseEstado(fila.estatusPeriodo)}">#{fila.estatusPeriodo}</span>
+                                                            </td>
+                                                            <td style="text-align:center;">#{fila.prioridad}</td>
+                                                            <td>#{fila.motivoPrincipal}</td>
+                                                            <td>#{fila.accionSugerida}</td>
+                                                        </tr>
+                                                        <ui:fragment rendered="#{fila.detalleVisible}">
+                                                            <tr class="sim-detail-row">
+                                                                <td colspan="11">
+                                                                    <div class="sim-detail-box">
+                                                                        <div class="sim-detail-grid">
+                                                                            <div class="sim-detail-col">
+                                                                                <div class="sim-detail-item">
+                                                                                    <span class="detail-label">Clave</span>
+                                                                                    <span class="detail-value">#{fila.clave}</span>
+                                                                                </div>
+                                                                                <div class="sim-detail-item">
+                                                                                    <span class="detail-label">Prioridad</span>
+                                                                                    <span class="detail-value">#{fila.prioridad}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="sim-detail-col">
+                                                                                <div class="sim-detail-item">
+                                                                                    <span class="detail-label">Créditos</span>
+                                                                                    <span class="detail-value">#{fila.creditos}</span>
+                                                                                </div>
+                                                                                <div class="sim-detail-item">
+                                                                                    <span class="detail-label">Estatus histórico</span>
+                                                                                    <span class="detail-value">
+                                                                                        <span class="#{tablaCurricularAsistidaBean.obtenerClaseEstado(fila.estatusHistorico)}">#{fila.estatusHistorico}</span>
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="sim-detail-section">
+                                                                            <span class="detail-label">Riesgo si no se inscribe</span>
+                                                                            <span class="detail-value">#{empty fila.riesgoSiNoSeInscribe ? 'Sin riesgo adicional identificado.' : fila.riesgoSiNoSeInscribe}</span>
+                                                                        </div>
+
+                                                                        <ui:fragment rendered="#{not empty fila.motivos}">
+                                                                            <div class="sim-detail-section">
+                                                                                <span class="detail-label">Motivos</span>
+                                                                                <ul>
+                                                                                    <ui:repeat value="#{fila.motivos}" var="motivo">
+                                                                                        <li>
+                                                                                            <strong>#{motivo.mensajeCorto}</strong>
+                                                                                            <span class="motivo-tag #{motivo.severidad eq 'ALTA' ? 'motivo-tag-alta' : (motivo.severidad eq 'MEDIA' ? 'motivo-tag-media' : 'motivo-tag-baja')}">
+                                                                                                #{empty motivo.severidad ? 'Informativo' : motivo.severidad}
+                                                                                            </span>
+                                                                                            <br />
+                                                                                            #{motivo.mensajeDetallado}
+                                                                                            <ui:fragment rendered="#{not empty motivo.accionSugerida}">
+                                                                                                <br />
+                                                                                                <strong>Acción:</strong> #{motivo.accionSugerida}
+                                                                                            </ui:fragment>
+                                                                                        </li>
+                                                                                    </ui:repeat>
+                                                                                </ul>
+                                                                            </div>
+                                                                        </ui:fragment>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </ui:fragment>
+                                                    </ui:repeat>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </ui:repeat>
+                            </div>
+                        </p:tab>
+
+                        <p:tab title="Inscripción">
+                            <div class="asistente-section inscripcion-futura">
+                                <div class="inscripcion-note">Únicamente se mostraría en periodo de inscripción</div>
+                                <div class="sim-empty-box">
+                                    <i class="fa fa-link" />
+                                    Esta sección quedará reservada para el vínculo futuro entre el simulador y la inscripción real.
+                                </div>
+                            </div>
+                        </p:tab>
+                    </p:tabView>
+                </div>
+            </p:outputPanel>
+        </h:form>
+    </ui:define>
+</ui:composition>

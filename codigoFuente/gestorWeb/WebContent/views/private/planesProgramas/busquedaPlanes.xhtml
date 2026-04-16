@@ -289,6 +289,14 @@
 						</p:commandButton>
 						<p:tooltip for="ver" position="top" value="#{sistema.obtenerTexto('gw.planesprogramas.tooltip.ver')}" />
 
+						<p:commandButton ajax="true" update="@form" id="malla"
+							action="#{planBean.navegaMallaPlanDiagrama}"
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-sitemap">
+							<f:setPropertyActionListener value="#{plan}"
+								target="#{planBean.planSelecBusq}" />
+						</p:commandButton>
+						<p:tooltip for="malla" position="top" value="Malla curricular" />
+
 						<p:commandButton ajax="true" update="@form" id="editar"
 							action="#{planBean.navegaEditarPlan}"
 							styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-pen-to-square">

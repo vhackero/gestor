@@ -71,11 +71,23 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	@Transactional(readOnly = true)
 	@Override
 	public InscripcionContextoDTO obtenerContextoInscripcion(Long idPersona) throws InscripcionException {
+		return construirContextoInscripcion(idPersona, true);
+	}
 
+	@Transactional(readOnly = true)
+	@Override
+	public InscripcionContextoDTO obtenerContextoInscripcionConsulta(Long idPersona) throws InscripcionException {
+		return construirContextoInscripcion(idPersona, false);
+	}
+
+	private InscripcionContextoDTO construirContextoInscripcion(Long idPersona, boolean validarInscripcionPrevia)
+			throws InscripcionException {
 		Date fechaActual = new Date();
 
 		InscripcionPersonaDTO persona = obtenerInscripcionPersona(idPersona);
-		validarInscripcionPrevia(fechaActual, persona);
+		if (validarInscripcionPrevia) {
+			validarInscripcionPrevia(fechaActual, persona);
+		}
 		TerminosCondicionesDTO terminosCondiciones = obtenerTerminosCondiciones();
 		CreditosTotalesPlanDTO creditosTotalesPlan = obtenerCreditosTotalesPorPlan(persona.getIdPlan());
 		LimitesCargaAcademicaDTO limitesCargaAcademica = obtenerLimitesCargaAcademicaPorPlan(persona.getIdPlan());
