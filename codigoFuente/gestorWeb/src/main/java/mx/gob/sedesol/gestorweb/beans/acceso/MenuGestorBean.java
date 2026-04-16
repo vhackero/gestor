@@ -495,6 +495,16 @@ public class MenuGestorBean extends BaseBean {
 		return ConstantesGestorWeb.NAVEGA_CONSTANCIAS;
 	}
 
+	public String navegaMallaCurricularAlumno() {
+		logger.info("Navegando a malla curricular del alumno");
+		return ConstantesGestorWeb.NAVEGA_MALLA_CURRICULAR_ALUMNO;
+	}
+
+	public String navegaTablaCurricularAsistida() {
+		logger.info("Navegando a tabla curricular asistida");
+		return ConstantesGestorWeb.NAVEGA_TABLA_CURRICULAR_ASISTIDA;
+	}
+
 	public String navegaExpedienteAlumoBuscar() {
 		logger.info("Navegando a Expedientes Academicos Busqueda o expediente alumno");
 		

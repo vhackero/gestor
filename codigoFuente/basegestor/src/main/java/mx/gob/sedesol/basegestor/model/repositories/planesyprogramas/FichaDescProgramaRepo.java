@@ -76,5 +76,13 @@ public interface FichaDescProgramaRepo extends JpaRepository<TblFichaDescriptiva
 	
 	@Query("SELECT COUNT(prg.idPrograma) FROM TblFichaDescriptivaPrograma prg WHERE prg.catTipoEventoEc.id = :idEvento")
 	public Integer totalTipoEventoById(@Param("idEvento")Integer idEvento);
+
+	@Query("SELECT prg FROM TblFichaDescriptivaPrograma prg WHERE prg.ejeCapacitacion = :idEjeCapacitacion AND prg.plan.idPlan = :idPlan")
+	public List<TblFichaDescriptivaPrograma> buscarProgramasPorEjeCapacitacionYPlan(
+			@Param("idEjeCapacitacion") Integer idEjeCapacitacion,
+			@Param("idPlan") Integer idPlan);
+
+	@Query("SELECT prg FROM TblFichaDescriptivaPrograma prg WHERE prg.plan.idPlan = :idPlan")
+	public List<TblFichaDescriptivaPrograma> buscarProgramasPorPlan(@Param("idPlan") Integer idPlan);
 	
 }

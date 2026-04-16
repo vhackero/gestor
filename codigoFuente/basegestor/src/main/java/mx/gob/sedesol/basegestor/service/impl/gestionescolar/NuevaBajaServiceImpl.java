@@ -461,7 +461,7 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         UsuarioWSClient usuarioWSClient = new UsuarioWSClient(plataforma);
         Usuario usuario = new Usuario();
         usuario.setId(datosMoodle.getIdPersonaMoodle());
-        usuario.setSuspended(0);
+        usuario.setSuspended(false);
         try {
             usuarioWSClient.actualizarUsuarioSuspender(usuario);
         } catch (ErrorWS e) {

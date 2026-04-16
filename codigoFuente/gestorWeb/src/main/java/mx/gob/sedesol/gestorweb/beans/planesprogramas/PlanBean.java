@@ -692,6 +692,13 @@ public class PlanBean extends BaseBean {
 		return ConstantesGestorWeb.NAVEGA_PLAN_PROGRAMA_MALLACURRICULAR;
 	}
 
+	public String navegaMallaPlanDiagrama() {
+		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "VER_PLA", String.valueOf(planSelecBusq.getIdPlan()),
+				requestActual(), TipoServicioEnum.LOCAL);
+		getSession().setAttribute(ConstantesGestorWeb.OBJ_PLAN_SELEC, planSelecBusq);
+		return ConstantesGestorWeb.NAVEGA_MALLA_PLAN_DIAGRAMA;
+	}
+
 	/**
 	 * Realiza la busqueda de planes de acuerdo al filtro
 	 */

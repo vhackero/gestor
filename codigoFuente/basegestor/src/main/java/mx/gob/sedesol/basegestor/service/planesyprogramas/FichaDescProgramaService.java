@@ -47,5 +47,9 @@ public interface FichaDescProgramaService extends CommonService<FichaDescProgram
 	public Integer totalTipoEventoById(Integer idEvento);
 	
 	public TblFichaDescriptivaPrograma consultaProgramasPorIdNombre(Integer idPrograma,String nombreTentativo);
+
+	public List<FichaDescProgramaDTO> buscarProgramasPorEjeCapacitacionYPlan(Integer idEjeCapacitacion, Integer idPlan);
+
+	public List<FichaDescProgramaDTO> buscarProgramasPorPlan(Integer idPlan);
 	
 }
