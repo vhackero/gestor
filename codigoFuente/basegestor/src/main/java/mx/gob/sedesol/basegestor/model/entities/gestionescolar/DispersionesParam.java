@@ -32,6 +32,8 @@ public class DispersionesParam implements Serializable {
 	
 	private Integer idProcesoInscripcionMatricular;
 
+	private String nombreProgramaCompartidoSeleccionado;
+
 	public Integer getIdPlan() {
 		return idPlan;
 	}
@@ -78,6 +80,14 @@ public class DispersionesParam implements Serializable {
 	
 	public void setIdProcesoInscripcionMatricular(Integer idProcesoInscripcionMatricular) {
 		this.idProcesoInscripcionMatricular = idProcesoInscripcionMatricular;
+	}
+
+	public String getNombreProgramaCompartidoSeleccionado() {
+		return nombreProgramaCompartidoSeleccionado;
+	}
+
+	public void setNombreProgramaCompartidoSeleccionado(String nombreProgramaCompartidoSeleccionado) {
+		this.nombreProgramaCompartidoSeleccionado = nombreProgramaCompartidoSeleccionado;
 	}
 
 	public Long getIdUsuarioAccion() {

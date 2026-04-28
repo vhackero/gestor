@@ -67,6 +67,11 @@ public interface IDispersionesRepository {
 		public List<ProcesosInscripcion> consultarProcesosConDispersion();
 		
 		public List<ProcesosInscripcion> consultarProcesosSinDispersion();
+
+		public List<String> consultarProgramasCompartidos(Integer idProcesoInscripcion);
+
+		public List<TblDispersionesBusqueda> consultarDispersionesGruposCompartidos(Integer idProcesoInscripcion,
+				String nombreProgramaSeleccionado);
 		
 		public List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculaExistenteDTO> consultarDispersionesExistentes(Integer idProcesoConDispersion, Integer idProcesoMatricular);
 		

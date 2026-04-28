@@ -802,6 +802,8 @@ public class DispersionesRepository implements IDispersionesRepository {
 	@SuppressWarnings("unchecked")
 	public List<ProcesosInscripcion> consultarProcesosConDispersion() {
 		String sql = "SELECT tpi.proceso_inscripcion_id AS idProcesoInscripcion, "
+				+ " tpi.convocatoria_id AS idConvocatoria, "
+				+ " tpi.id_tipo_proceso AS idTipoProceso, "
 				+ " CONCAT(tc.nombre,'>',tpi.nombre) AS nombre"
 				+ " FROM tbl_procesos_inscripcion tpi"
 				+ " JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpi.convocatoria_id"
@@ -816,7 +818,9 @@ public class DispersionesRepository implements IDispersionesRepository {
 		for (Object[] row : registros) {
 			ProcesosInscripcion proc = new ProcesosInscripcion();
 			proc.setIdProcesoInscripcion(row[0] != null ? ((Number) row[0]).intValue() : null);
-			proc.setNombre(row[1] != null ? row[1].toString() : null);
+			proc.setIdConvocatoria(row[1] != null ? ((Number) row[1]).intValue() : null);
+			proc.setIdTipoProceso(row[2] != null ? ((Number) row[2]).intValue() : null);
+			proc.setNombre(row[3] != null ? row[3].toString() : null);
 			lista.add(proc);
 		}
 		return lista;
@@ -826,6 +830,8 @@ public class DispersionesRepository implements IDispersionesRepository {
 	@SuppressWarnings("unchecked")
 	public List<ProcesosInscripcion> consultarProcesosSinDispersion() {
 		String sql = "SELECT tpi.proceso_inscripcion_id AS idProcesoInscripcion, "
+				+ " tpi.convocatoria_id AS idConvocatoria, "
+				+ " tpi.id_tipo_proceso AS idTipoProceso, "
 				+ " CONCAT(tc.nombre,'>',tpi.nombre) AS nombre"
 				+ " FROM tbl_procesos_inscripcion tpi"
 				+ " JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpi.convocatoria_id"
@@ -840,8 +846,117 @@ public class DispersionesRepository implements IDispersionesRepository {
 		for (Object[] row : registros) {
 			ProcesosInscripcion proc = new ProcesosInscripcion();
 			proc.setIdProcesoInscripcion(row[0] != null ? ((Number) row[0]).intValue() : null);
-			proc.setNombre(row[1] != null ? row[1].toString() : null);
+			proc.setIdConvocatoria(row[1] != null ? ((Number) row[1]).intValue() : null);
+			proc.setIdTipoProceso(row[2] != null ? ((Number) row[2]).intValue() : null);
+			proc.setNombre(row[3] != null ? row[3].toString() : null);
 			lista.add(proc);
+		}
+		return lista;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<String> consultarProgramasCompartidos(Integer idProcesoInscripcion) {
+		List<String> lista = new ArrayList<>();
+		if (idProcesoInscripcion == null) {
+			return lista;
+		}
+		String sql = "SELECT tfdp.nombre_tentativo value, tfdp.nombre_tentativo programa "
+				+ "FROM rel_proceso_inscipcion_planesyprogramas rpip "
+				+ "JOIN tbl_ficha_descriptiva_programa tfdp ON tfdp.id_programa = rpip.id_programa "
+				+ "WHERE EXISTS(SELECT 1 FROM tbl_ficha_descriptiva_programa tfdpp "
+				+ "              WHERE tfdpp.nombre_tentativo = tfdp.nombre_tentativo "
+				+ "                AND tfdpp.id_plan != rpip.id_plan) "
+				+ "AND rpip.id_proceso_inscripcion = :idProcesoInscripcion "
+				+ "GROUP BY tfdp.nombre_tentativo";
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("idProcesoInscripcion", idProcesoInscripcion);
+		List<Object[]> registros = query.getResultList();
+		for (Object[] row : registros) {
+			if (row != null && row.length > 0 && row[0] != null) {
+				lista.add(row[0].toString());
+			}
+		}
+		return lista;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<TblDispersionesBusqueda> consultarDispersionesGruposCompartidos(Integer idProcesoInscripcion,
+			String nombreProgramaSeleccionado) {
+		List<TblDispersionesBusqueda> lista = new ArrayList<>();
+		if (idProcesoInscripcion == null || nombreProgramaSeleccionado == null
+				|| nombreProgramaSeleccionado.trim().isEmpty()) {
+			return lista;
+		}
+		String sql = "SELECT * "
+				+ "FROM ( "
+				+ "    SELECT td.id_dispersion, tp.id_plan, tp.nombre AS plan, tfdp.id_programa, "
+				+ "           tfdp.nombre_tentativo AS programa, tfdp.cve_programa AS clavePrograma, "
+				+ "           COALESCE(tmc2.nombre, '-') AS semestre, tmc.nombre AS bloque, "
+				+ "           ( "
+				+ "               SELECT COUNT(tis.asignatura) "
+				+ "               FROM tbl_inscripciones tis "
+				+ "               JOIN tbl_procesos_inscripcion tpi "
+				+ "                 ON tis.fecha_registro >= tpi.fecha_inicio "
+				+ "                AND tis.fecha_registro <= tpi.fecha_fin "
+				+ "                AND tpi.proceso_inscripcion_id = :idProcesosInscripcion "
+				+ "               WHERE tis.asignatura LIKE CONCAT(tfdp.nombre_tentativo, '%') "
+				+ "                 AND tmc.nombre LIKE CONCAT('%', tis.bloque, '%') "
+				+ "                 AND NOT EXISTS ( "
+				+ "                     SELECT 1 "
+				+ "                     FROM rel_grupo_participante rgp "
+				+ "                     JOIN tbl_grupos tg ON rgp.id_grupo = tg.id "
+				+ "                     JOIN tbl_eventos te ON te.id_evento = tg.id_evento "
+				+ "                     JOIN tbl_ficha_descriptiva_programa tfpp ON tfpp.id_programa = te.id_programa "
+				+ "                     WHERE rgp.id_persona_participante = tis.Idpersona "
+				+ "                       AND tis.asignatura LIKE CONCAT(tfpp.nombre_tentativo, '%') "
+				+ "                 ) "
+				+ "           ) AS num_usuarios_inscripcion, "
+				+ "           td.no_grupos AS gruposgenerales, td.estudiantes_x_grupo AS cupogeneral, "
+				+ "           td.grupo_resto AS gruposresto, td.estudiantes_resto AS cuporesto, "
+				+ "           NULL AS tipo_matriculacion, "
+				+ "           COALESCE((SELECT COUNT(DISTINCT rdg.id_grupo) "
+				+ "                    FROM rel_dispersiones_grupo rdg "
+				+ "                    WHERE rdg.id_dispersion = td.id_dispersion), 0) AS grupos_creados, "
+				+ "           COALESCE((SELECT COUNT(*) "
+				+ "                    FROM rel_grupo_participante rgp "
+				+ "                    INNER JOIN rel_dispersiones_grupo rdg "
+				+ "                            ON rdg.id_grupo = rgp.id_grupo "
+				+ "                    WHERE rdg.id_dispersion = td.id_dispersion), 0) AS usuarios_matriculados "
+				+ "    FROM rel_proceso_inscipcion_planesyprogramas rpip "
+				+ "    JOIN tbl_ficha_descriptiva_programa tfdp ON tfdp.id_programa = rpip.id_programa "
+				+ "    JOIN tbl_planes tp ON tfdp.id_plan = tp.id_plan "
+				+ "    JOIN tbl_malla_curricular tmc ON tmc.id = tfdp.id_eje_capacitacion "
+				+ "    LEFT JOIN tbl_malla_curricular tmc2 ON tmc2.id = tmc.id_padre "
+				+ "    JOIN tbl_dispersiones td ON td.id_proceso_inscripcion = rpip.id_proceso_inscripcion "
+				+ "                             AND td.id_programa = tfdp.id_programa "
+				+ "    WHERE rpip.id_proceso_inscripcion = :idProcesosInscripcion "
+				+ "      AND tfdp.nombre_tentativo = TRIM(:nombreProgramaSelecionado) "
+				+ "      AND EXISTS ( "
+				+ "            SELECT 1 "
+				+ "            FROM tbl_inscripciones ti "
+				+ "            JOIN tbl_procesos_inscripcion tpi "
+				+ "              ON ti.fecha_registro >= tpi.fecha_inicio "
+				+ "             AND ti.fecha_registro <= tpi.fecha_fin "
+				+ "             AND tpi.proceso_inscripcion_id = :idProcesosInscripcion "
+				+ "            WHERE ti.asignatura = tfdp.nombre_tentativo "
+				+ "      ) "
+				+ "      AND EXISTS ( "
+				+ "            SELECT 1 "
+				+ "            FROM tbl_ficha_descriptiva_programa tfdp2 "
+				+ "            WHERE tfdp2.nombre_tentativo = tfdp.nombre_tentativo "
+				+ "              AND tfdp2.id_plan != tfdp.id_plan "
+				+ "      ) "
+				+ ") t "
+				+ "WHERE t.num_usuarios_inscripcion > 0 "
+				+ "ORDER BY t.plan, t.semestre, t.bloque";
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("idProcesosInscripcion", idProcesoInscripcion);
+		query.setParameter("nombreProgramaSelecionado", nombreProgramaSeleccionado);
+		List<Object[]> registros = query.getResultList();
+		for (Object[] row : registros) {
+			lista.add(mapeoDispercionBusqueda(row));
 		}
 		return lista;
 	}

@@ -223,6 +223,20 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 	public List<ProcesosInscripcion> consultarProcesosSinDispersion() {
 		return iDispersionesRepository.consultarProcesosSinDispersion();
 	}
+
+	@Override
+	public List<String> consultarProgramasCompartidos(Integer idProcesoInscripcion) {
+		List<String> lista = iDispersionesRepository.consultarProgramasCompartidos(idProcesoInscripcion);
+		return lista != null ? lista : new ArrayList<String>();
+	}
+
+	@Override
+	public List<TblDispersionesBusqueda> consultarDispersionesGruposCompartidos(Integer idProcesoInscripcion,
+			String nombreProgramaSeleccionado) {
+		List<TblDispersionesBusqueda> lista = iDispersionesRepository
+				.consultarDispersionesGruposCompartidos(idProcesoInscripcion, nombreProgramaSeleccionado);
+		return lista != null ? lista : new ArrayList<TblDispersionesBusqueda>();
+	}
 	
 	@Override
 	public List<DispersionMatriculaExistenteDTO> consultarDispersionesExistentes(Integer idProcesoConDispersion,

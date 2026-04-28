@@ -12,6 +12,8 @@ public class ProcesosInscripcion implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private Integer idProcesoInscripcion;
+	private Integer idConvocatoria;
+	private Integer idTipoProceso;
 	private String nombre;
 	
 	public Integer getIdProcesoInscripcion() {
@@ -19,6 +21,18 @@ public class ProcesosInscripcion implements Serializable {
 	}
 	public void setIdProcesoInscripcion(Integer idProcesoInscripcion) {
 		this.idProcesoInscripcion = idProcesoInscripcion;
+	}
+	public Integer getIdConvocatoria() {
+		return idConvocatoria;
+	}
+	public void setIdConvocatoria(Integer idConvocatoria) {
+		this.idConvocatoria = idConvocatoria;
+	}
+	public Integer getIdTipoProceso() {
+		return idTipoProceso;
+	}
+	public void setIdTipoProceso(Integer idTipoProceso) {
+		this.idTipoProceso = idTipoProceso;
 	}
 	public String getNombre() {
 		return nombre;
