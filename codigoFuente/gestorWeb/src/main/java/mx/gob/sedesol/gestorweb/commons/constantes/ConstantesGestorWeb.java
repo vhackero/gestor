@@ -116,6 +116,9 @@ public final class ConstantesGestorWeb {
 
 	public static final String NAVEGA_PLANES_PROGRAMAS_CATALOGOS = "ADMIN_CAT_PLAN_PROG";
 	public static final String NAVEGA_PLAN_PROGRAMA_MALLACURRICULAR = "MALLA_CURRICULAR";
+	public static final String NAVEGA_MALLA_PLAN_DIAGRAMA = "MALLA_PLAN_DIAGRAMA";
+	public static final String NAVEGA_MALLA_CURRICULAR_ALUMNO = "MALLA_CURRICULAR_ALUMNO";
+	public static final String NAVEGA_TABLA_CURRICULAR_ASISTIDA = "TABLA_CURRICULAR_ASISTIDA";
 	public static final String NAVEGA_ACTIVIDADES_RECURSOS_MOODLE = "RECURSOS_MOODLE";
 	public static final String NAVEGA_BUSQUEDA_PROGRAMAS_CAPACIT = "BUSQUEDA_PROGRAMA_CAP";
 	public static final String NAVEGA_NUEVO_PROGRAMA_CAPACITACION = "NUEVO_PROGRAMA_CAP";
@@ -411,6 +414,7 @@ public final class ConstantesGestorWeb {
 	public static final String NAVEGA_MIS_CONVOCATORIAS = "MIS_CONVOCATORIAS";
 	public static final String NAVEGA_MIS_INSCRIPCIONES = "MIS_INSCRIPCIONES";
 	public static final String NAVEGA_MIS_DISPERSIONES = "MIS_DISPERSIONES";
+	public static final String NAVEGA_MIS_MATRICULACIONES = "MIS_MATRICULACIONES";
 
 	public static final String NAVEGA_INSCRIPCION = "INSCRIPCION";
 	public static final String NAVEGA_REENVIO_CORREO = "REENVIO_CORREO";

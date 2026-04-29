@@ -276,6 +276,12 @@
 		</navigation-case>
 
 		<navigation-case>
+			<from-outcome>MALLA_PLAN_DIAGRAMA</from-outcome>
+			<to-view-id>/views/private/planesProgramas/mallaPlanDiagrama.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+
+		<navigation-case>
 			<from-outcome>BUSQUEDA_PROGRAMA_CAP</from-outcome>
 			<to-view-id>/views/private/planesProgramas/busquedaPrograma.jsf</to-view-id>
 			<redirect />
@@ -614,7 +620,12 @@
 			<to-view-id>/views/private/gestionAprendizaje/alumnoView/busquedaDispersiones</to-view-id>
 			<redirect />
 		</navigation-case>
-
+		
+		<navigation-case>
+			<from-outcome>MIS_MATRICULACIONES</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/matriculacionMasivaUsuarios</to-view-id>
+			<redirect />
+		</navigation-case>
 
 		<!-- ITTIVA 666 MIS INSCRIPCION -->
 		<navigation-case>
@@ -675,6 +686,19 @@
 		<navigation-case>
 			<from-outcome>CONSTANCIAS_GE</from-outcome>
 			<to-view-id>/views/private/gestionAprendizaje/alumnoView/constancias.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+
+		<!-- Malla curricular alumno -->
+		<navigation-case>
+			<from-outcome>MALLA_CURRICULAR_ALUMNO</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/mallaCurricularAlumno.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+
+		<navigation-case>
+			<from-outcome>TABLA_CURRICULAR_ASISTIDA</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/alumnoView/tablaCurricularAsistida.xhtml</to-view-id>
 			<redirect />
 		</navigation-case>
 

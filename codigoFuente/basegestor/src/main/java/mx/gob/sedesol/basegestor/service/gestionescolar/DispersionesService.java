@@ -47,6 +47,14 @@ public interface DispersionesService extends CommonService<Dispersiones, Integer
 	
 	public List<TipoMatriculacion> consultarTipoMatriculacion();
 	
+	public List<ProcesosInscripcion> consultarProcesosConDispersion();
+	
+	public List<ProcesosInscripcion> consultarProcesosSinDispersion();
+	
+	public List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculaExistenteDTO> consultarDispersionesExistentes(Integer idProcesoConDispersion, Integer idProcesoMatricular);
+	
+	public ResultadoDTO<DispersionMatriculacionResultadoDTO> matricularDispersionExistente(mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculaExistenteDTO dispersion, Long idUsuario);
+	
 	public DispersionPreEvento obtenerDatosPreviosEvento(Integer idPrograma);
 	
 	public ResultadoDTO<DispersionCreacionResultadoDTO> crearEventosDispersion(CrearEventoDispersionDTO solicitud);

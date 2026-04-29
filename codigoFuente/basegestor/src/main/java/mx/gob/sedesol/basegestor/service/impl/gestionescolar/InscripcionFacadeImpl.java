@@ -71,11 +71,23 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	@Transactional(readOnly = true)
 	@Override
 	public InscripcionContextoDTO obtenerContextoInscripcion(Long idPersona) throws InscripcionException {
+		return construirContextoInscripcion(idPersona, true);
+	}
 
+	@Transactional(readOnly = true)
+	@Override
+	public InscripcionContextoDTO obtenerContextoInscripcionConsulta(Long idPersona) throws InscripcionException {
+		return construirContextoInscripcion(idPersona, false);
+	}
+
+	private InscripcionContextoDTO construirContextoInscripcion(Long idPersona, boolean validarInscripcionPrevia)
+			throws InscripcionException {
 		Date fechaActual = new Date();
 
 		InscripcionPersonaDTO persona = obtenerInscripcionPersona(idPersona);
-		validarInscripcionPrevia(fechaActual, persona);
+		if (validarInscripcionPrevia) {
+			validarInscripcionPrevia(fechaActual, persona);
+		}
 		TerminosCondicionesDTO terminosCondiciones = obtenerTerminosCondiciones();
 		CreditosTotalesPlanDTO creditosTotalesPlan = obtenerCreditosTotalesPorPlan(persona.getIdPlan());
 		LimitesCargaAcademicaDTO limitesCargaAcademica = obtenerLimitesCargaAcademicaPorPlan(persona.getIdPlan());
@@ -1000,11 +1012,13 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 			long cantidadMateriasReprobadasObligatorias = obtenerCantidadMateriasReprobadasObligatorias(
 					materiasReprobadas);
+			long cantidadDeMateriasREprobadasTotales = materiasReprobadas.size();
 
 			// Regla para respetar el avance anual (Leer descripcion del metodo
 			// 'obtenerMateriasPorAvanceAnualIrregulares')
 			if (cantidadMateriasReprobadasObligatorias >= 1
-					&& cantidadMateriasReprobadasObligatorias <= ConstantesGestor.NUMERO_MAXIMO_MATERIAS_REPROBADAS) {
+					&& cantidadMateriasReprobadasObligatorias <= ConstantesGestor.NUMERO_MAXIMO_MATERIAS_REPROBADAS
+					&& cantidadDeMateriasREprobadasTotales <= 3) {
 				logger.info("Estudiantes irregulares de a 1 a 3 reprobadas");
 				return obtenerMateriasPorAvanceAnualIrregulares(materiasConReprobadasMarcadas, materiasReprobadas);
 			}
@@ -1248,6 +1262,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private Optional<String> buscarSemestreReprobadoMasAntiguo(
 			List<InscripcionMateriasReprobadasDTO> materiasCursadas) {
 		Optional<InscripcionMateriasReprobadasDTO> optionalMateria = materiasCursadas.stream()
+				.filter(dto -> ConstantesGestor.TEXTO_MATERIA_OBLIGATORIA
+	                    .equalsIgnoreCase(dto.getTipoPrograma()))
 				.sorted(Comparator.comparing(dto -> {
 					String estructura = dto.getEstructura();
 					if (estructura == null) {

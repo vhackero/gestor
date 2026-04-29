@@ -10,6 +10,7 @@ import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 
 public interface InscripcionFacade {
 	InscripcionContextoDTO obtenerContextoInscripcion(Long idPersona) throws InscripcionException;
+	InscripcionContextoDTO obtenerContextoInscripcionConsulta(Long idPersona) throws InscripcionException;
 	void validarSeleccionMateria(InscripcionMateriasDTO materiaSeleccionada, InscripcionContextoDTO contexto) throws InscripcionException;
 	void finalizarInscripcion(Boolean aceptaTerminos, InscripcionContextoDTO contexto) throws InscripcionException;
 	boolean intentarReenviarCorreoInscripcion(ReenvioCorreoInscripcionDTO inscripcion);

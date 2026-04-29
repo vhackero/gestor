@@ -442,6 +442,12 @@ public class MenuGestorBean extends BaseBean {
 			logger.info("Navegando a mis dispersiones");
 			return ConstantesGestorWeb.NAVEGA_MIS_DISPERSIONES;
 		}
+		
+	//ITTIVA 666
+		public String navegaMisMatriculaciones() {
+			logger.info("Navegando a mis matriculaciones");
+			return ConstantesGestorWeb.NAVEGA_MIS_MATRICULACIONES;
+		}
 	
 	//ITTIVA 666
 		public String navegaMisInscripciones() {
@@ -487,6 +493,16 @@ public class MenuGestorBean extends BaseBean {
 		logger.info("Navegando a constacias");
 		inicializaExpedienteAcademico();
 		return ConstantesGestorWeb.NAVEGA_CONSTANCIAS;
+	}
+
+	public String navegaMallaCurricularAlumno() {
+		logger.info("Navegando a malla curricular del alumno");
+		return ConstantesGestorWeb.NAVEGA_MALLA_CURRICULAR_ALUMNO;
+	}
+
+	public String navegaTablaCurricularAsistida() {
+		logger.info("Navegando a tabla curricular asistida");
+		return ConstantesGestorWeb.NAVEGA_TABLA_CURRICULAR_ASISTIDA;
 	}
 
 	public String navegaExpedienteAlumoBuscar() {

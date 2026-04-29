@@ -656,7 +656,9 @@ public class DispersionesRepository implements IDispersionesRepository {
 		}
 		String sql = "SELECT rdg.id_evento, rdg.id_grupo, te.id_curso_lms_borrador, te.id_plataforma_lms_borrador,\r\n"
 				+ "       te.modalidad, tg.num_max_alumnos, tg.id_moodle, tg.nombre,\r\n"
-				+ "       COALESCE((SELECT COUNT(*) FROM rel_grupo_participante rgp WHERE rgp.id_grupo = tg.id), 0) inscritos\r\n"
+				+ "       COALESCE((SELECT COUNT(*) FROM rel_grupo_participante rgp "
+				+ "		  JOIN tbl_persona_aspirante tpa ON tpa.id_persona = rgp.id_persona_participante"
+				+ " WHERE rgp.id_grupo = tg.id), 0) inscritos\r\n"
 				+ "  FROM rel_dispersiones_grupo rdg\r\n"
 				+ "       INNER JOIN tbl_eventos te ON te.id_evento = rdg.id_evento\r\n"
 				+ "       INNER JOIN tbl_grupos tg ON tg.id = rdg.id_grupo\r\n"
@@ -747,6 +749,163 @@ public class DispersionesRepository implements IDispersionesRepository {
 			}
 		}
 		return personas;
+	}
+	
+	@Override
+	public Integer crearDispersionBasica(Integer idProcesoInscripcion, Integer idPrograma, Integer totalEstudiantes,
+			Integer tipoMatriculacion, Long usuarioModifico) {
+		String sql = "INSERT INTO tbl_dispersiones (id_proceso_inscripcion, id_programa, no_total_estudiantes, no_grupos, estudiantes_x_grupo, grupo_resto, estudiantes_resto, tipo_matriculacion, usuario_modifico) "
+				+ " VALUES (:idProcesoInscripcion, :idPrograma, :totalEstudiantes, :noGrupos, :estudiantesGrupo, :grupoResto, :estudiantesResto, :tipoMatriculacion, :usuarioModifico)";
+		Query insert = entityManager.createNativeQuery(sql);
+		insert.setParameter("idProcesoInscripcion", idProcesoInscripcion);
+		insert.setParameter("idPrograma", idPrograma);
+		insert.setParameter("totalEstudiantes", totalEstudiantes != null ? totalEstudiantes : 0);
+		insert.setParameter("noGrupos", 0);
+		insert.setParameter("estudiantesGrupo", 0);
+		insert.setParameter("grupoResto", 0);
+		insert.setParameter("estudiantesResto", 0);
+		insert.setParameter("tipoMatriculacion", tipoMatriculacion != null ? tipoMatriculacion : 0);
+		insert.setParameter("usuarioModifico", usuarioModifico != null ? usuarioModifico : 0);
+		insert.executeUpdate();
+		Query lastId = entityManager.createNativeQuery("SELECT LAST_INSERT_ID()");
+		Object id = lastId.getSingleResult();
+		return id != null ? ((Number) id).intValue() : null;
+	}
+	
+	@Override
+	public List<Long> obtenerPersonasMatriculaExistente(Integer idProcesoInscripcionMatricular, Integer idPrograma) {
+		List<Long> personas = new ArrayList<>();
+		if (idProcesoInscripcionMatricular == null || idPrograma == null) {
+			return personas;
+		}
+		String sql = "SELECT DISTINCT ti.idpersona "
+				+ "FROM tbl_inscripciones ti "
+				+ "INNER JOIN rel_proceso_inscipcion_planesyprogramas rpi ON rpi.id_programa = ti.idprograma AND rpi.id_plan = ti.idplan "
+				+ "INNER JOIN tbl_procesos_inscripcion tpi ON tpi.proceso_inscripcion_id = rpi.id_proceso_inscripcion "
+				+ "WHERE ti.fecha_registro >= tpi.fecha_inicio AND ti.fecha_registro <= tpi.fecha_fin "
+				+ "AND tpi.proceso_inscripcion_id = :idProcesoInscripcionMatricular "
+				+ "AND ti.idprograma = :idPrograma "
+				+ "ORDER BY ti.idpersona";
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("idProcesoInscripcionMatricular", idProcesoInscripcionMatricular);
+		query.setParameter("idPrograma", idPrograma);
+		List<Number> registros = query.getResultList();
+		for (Number numero : registros) {
+			if (numero != null) {
+				personas.add(numero.longValue());
+			}
+		}
+		return personas;
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<ProcesosInscripcion> consultarProcesosConDispersion() {
+		String sql = "SELECT tpi.proceso_inscripcion_id AS idProcesoInscripcion, "
+				+ " CONCAT(tc.nombre,'>',tpi.nombre) AS nombre"
+				+ " FROM tbl_procesos_inscripcion tpi"
+				+ " JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpi.convocatoria_id"
+				+ " WHERE tpi.estatus = 1 AND tpi.id_categoria_proceso IN (1,2)"
+				+ " AND EXISTS(SELECT 1 FROM rel_proceso_inscipcion_planesyprogramas rpip where rpip.id_proceso_inscripcion = tpi.proceso_inscripcion_id)"
+				+ " AND EXISTS(SELECT 1 FROM tbl_dispersiones td"
+				+ "                 JOIN rel_dispersiones_grupo rdg ON rdg.id_dispersion = td.id_dispersion"
+				+ "                 WHERE td.id_proceso_inscripcion = tpi.proceso_inscripcion_id)";
+		Query query = entityManager.createNativeQuery(sql);
+		List<Object[]> registros = query.getResultList();
+		List<ProcesosInscripcion> lista = new ArrayList<>();
+		for (Object[] row : registros) {
+			ProcesosInscripcion proc = new ProcesosInscripcion();
+			proc.setIdProcesoInscripcion(row[0] != null ? ((Number) row[0]).intValue() : null);
+			proc.setNombre(row[1] != null ? row[1].toString() : null);
+			lista.add(proc);
+		}
+		return lista;
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<ProcesosInscripcion> consultarProcesosSinDispersion() {
+		String sql = "SELECT tpi.proceso_inscripcion_id AS idProcesoInscripcion, "
+				+ " CONCAT(tc.nombre,'>',tpi.nombre) AS nombre"
+				+ " FROM tbl_procesos_inscripcion tpi"
+				+ " JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpi.convocatoria_id"
+				+ " WHERE tpi.estatus = 1 AND tpi.id_categoria_proceso IN (1,2)"
+				+ " AND EXISTS(SELECT 1 FROM rel_proceso_inscipcion_planesyprogramas rpip where rpip.id_proceso_inscripcion = tpi.proceso_inscripcion_id)"
+				+ " AND NOT EXISTS(SELECT 1 FROM tbl_dispersiones td"
+				+ "                 JOIN rel_dispersiones_grupo rdg ON rdg.id_dispersion = td.id_dispersion"
+				+ "                 WHERE td.id_proceso_inscripcion = tpi.proceso_inscripcion_id)";
+		Query query = entityManager.createNativeQuery(sql);
+		List<Object[]> registros = query.getResultList();
+		List<ProcesosInscripcion> lista = new ArrayList<>();
+		for (Object[] row : registros) {
+			ProcesosInscripcion proc = new ProcesosInscripcion();
+			proc.setIdProcesoInscripcion(row[0] != null ? ((Number) row[0]).intValue() : null);
+			proc.setNombre(row[1] != null ? row[1].toString() : null);
+			lista.add(proc);
+		}
+		return lista;
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculaExistenteDTO> consultarDispersionesExistentes(
+			Integer idProcesoConDispersion, Integer idProcesoMatricular) {
+		List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculaExistenteDTO> resultado = new ArrayList<>();
+		if (idProcesoConDispersion == null || idProcesoMatricular == null) {
+			return resultado;
+		}
+		String sql = "SELECT td.id_dispersion, "
+				+ " tpi.proceso_inscripcion_id AS idProcesoInscripcionMatricular, "
+				+ " tp.nombre AS plan, "
+				+ " fd.id_programa, "
+				+ " fd.nombre_tentativo AS programa, "
+				+ " fd.id_plan, "
+				+ " fd.cve_programa AS clave, "
+				+ " tmc2.nombre AS semestre, "
+				+ " tmc.nombre AS bloque, "
+				+ " COUNT(ti.id) AS no_estudiantes_inscritos "
+				+ " FROM rel_proceso_inscipcion_planesyprogramas rpi "
+				+ " INNER JOIN tbl_procesos_inscripcion tpi ON tpi.proceso_inscripcion_id = rpi.id_proceso_inscripcion "
+				+ " INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_plan = rpi.id_plan AND fd.id_programa = rpi.id_programa "
+				+ " INNER JOIN tbl_planes tp ON tp.id_plan = fd.id_plan "
+				+ " INNER JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion "
+				+ " INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpi.convocatoria_id "
+				+ " JOIN tbl_inscripciones ti ON ti.idplan = rpi.id_plan AND ti.idprograma = rpi.id_programa "
+				+ "      AND ti.fecha_registro >= tpi.fecha_inicio AND ti.fecha_registro <= tpi.fecha_fin "
+				+ " LEFT JOIN tbl_malla_curricular tmc2  ON tmc2.id = tmc.id_padre "
+				+ " INNER JOIN rel_proceso_inscipcion_planesyprogramas rpip ON rpi.id_programa = rpip.id_programa AND rpip.id_programa = ti.idprograma AND rpip.id_proceso_inscripcion = :idProcesoInscripcionConDispersion "
+				+ " INNER JOIN tbl_dispersiones td ON td.id_proceso_inscripcion = rpip.id_proceso_inscripcion AND td.id_programa = rpip.id_programa "
+				+ " WHERE EXISTS(SELECT 1 FROM rel_dispersiones_grupo rdg WHERE rdg.id_dispersion = td.id_dispersion) "
+				+ " AND NOT EXISTS(SELECT 1 FROM tbl_dispersiones td2 WHERE td2.id_proceso_inscripcion = tpi.proceso_inscripcion_id AND td2.id_programa = rpi.id_programa) "
+				+ " AND tpi.proceso_inscripcion_id = :idProcesoInscripcionMatricular "
+				+ " GROUP BY td.id_dispersion, "
+				+ " tpi.proceso_inscripcion_id, "
+				+ " tp.nombre, "
+				+ " fd.id_programa, "
+				+ " fd.nombre_tentativo, "
+				+ " fd.id_plan, "
+				+ " fd.cve_programa, "
+				+ " tmc2.nombre, "
+				+ " tmc.nombre";
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("idProcesoInscripcionConDispersion", idProcesoConDispersion);
+		query.setParameter("idProcesoInscripcionMatricular", idProcesoMatricular);
+		List<Object[]> registros = query.getResultList();
+		for (Object[] row : registros) {
+			mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculaExistenteDTO dto = new mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculaExistenteDTO();
+			dto.setIdDispersion(row[0] != null ? ((Number) row[0]).intValue() : null);
+			dto.setIdProcesoInscripcionMatricular(row[1] != null ? ((Number) row[1]).intValue() : null);
+			dto.setPlan(row[2] != null ? row[2].toString() : null);
+			dto.setIdPrograma(row[3] != null ? ((Number) row[3]).intValue() : null);
+			dto.setPrograma(row[4] != null ? row[4].toString() : null);
+			dto.setIdPlan(row[5] != null ? ((Number) row[5]).intValue() : null);
+			dto.setClave(row[6] != null ? row[6].toString() : null);
+			dto.setSemestre(row[7] != null ? row[7].toString() : null);
+			dto.setBloque(row[8] != null ? row[8].toString() : null);
+			dto.setNoEstudiantesInscritos(row[9] != null ? ((Number) row[9]).intValue() : null);
+			resultado.add(dto);
+		}
+		return resultado;
 	}
 	
 	

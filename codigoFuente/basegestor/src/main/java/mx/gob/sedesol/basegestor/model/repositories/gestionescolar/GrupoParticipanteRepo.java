@@ -147,4 +147,16 @@ public interface GrupoParticipanteRepo extends JpaRepository<RelGrupoParticipant
 	@Query(value = " DELETE FROM rel_grupo_participante where id_grupo = :idGrupo" , nativeQuery = true)
 	public void borrarPorIdGrupo(@Param("idGrupo") Integer idGrupo);
 	
+	@Query("SELECT CASE WHEN COUNT(rgp) > 0 THEN true ELSE false END "
+			+ "FROM RelGrupoParticipante rgp "
+			+ "WHERE rgp.grupo.idGrupo = :idGrupo "
+			+ "AND rgp.persona.idPersona = :idPersona")
+	boolean existeParticipanteEnGrupo(@Param("idGrupo") Integer idGrupo, @Param("idPersona") Long idPersona);
+	
+	@Query("SELECT CASE WHEN COUNT(rgp) > 0 THEN true ELSE false END "
+			+ "FROM RelGrupoParticipante rgp "
+			+ "WHERE rgp.grupo.idGrupo = :idGrupo "
+			+ "AND rgp.persona.idPersona = :idPersona")
+	boolean existsByGrupoIdGrupoAndPersonaIdPersona(@Param("idGrupo") Integer idGrupo, @Param("idPersona") Long idPersona);
+	
 }

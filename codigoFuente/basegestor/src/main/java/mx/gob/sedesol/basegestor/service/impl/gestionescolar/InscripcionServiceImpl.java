@@ -21,6 +21,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasI
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademicaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaDTO;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IinscripcionRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
 
@@ -44,7 +45,7 @@ public class InscripcionServiceImpl implements InscripcionService {
 		List<InscripcionPersonaDTO> listaInformacionPersona = inscripcionesRepository
 				.obtenerInscripcionPorPersona(idPersona);
 
-		if (listaInformacionPersona == null) {
+		if (listaInformacionPersona == null || listaInformacionPersona.isEmpty()) {
 			return new InscripcionPersonaDTO();
 		}
 		InscripcionPersonaDTO regresaPersona = listaInformacionPersona.get(0);
@@ -104,6 +105,18 @@ public class InscripcionServiceImpl implements InscripcionService {
 			return listaInscripcionMateriasIns;
 		}
 		return listaInscripcionMateriasIns;
+	}
+
+	@Override
+	public List<MallaAlumnoProgramaDTO> obtenerProgramasMallaAlumno(Long idPersona, Long idPlan) {
+		List<MallaAlumnoProgramaDTO> lista = new ArrayList<>();
+
+		lista = inscripcionesRepository.obtenerProgramasMallaAlumno(idPersona, idPlan);
+
+		if (lista == null) {
+			return lista;
+		}
+		return lista;
 	}
 
 	@Override

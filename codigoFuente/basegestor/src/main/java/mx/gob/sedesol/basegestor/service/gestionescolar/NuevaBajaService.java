@@ -5,6 +5,7 @@ import java.util.List;
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaSolicitudDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
 
 public interface NuevaBajaService {
@@ -26,4 +27,8 @@ public interface NuevaBajaService {
     BajaMatriculaDetalleDTO obtenerDatosPorMatricula(String matricula);
 
     void aplicarBaja(BajaSolicitudDTO solicitud);
+
+    void actualizarBaja(Long idBaja, BajaSolicitudDTO solicitud, Long idMotivoBaja);
+
+    void eliminarBaja(ConsultaBajaDTO baja);
 }

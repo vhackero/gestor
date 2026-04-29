@@ -20,6 +20,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EstatusDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CrearEventoDispersionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionCreacionResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculacionResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculaExistenteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MatricularDispersionDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionPreEvento;
@@ -54,6 +55,7 @@ public class DispersionesBean extends BaseBean {
 	private static final int CLASIFICACION_AVA_NUEVO = 3;
 	private static final int LIMITE_ANIOS_PERIODO = 9;
 	private static final int MAX_VALOR_LISTAS = 500;
+	private static final String MENSAJE_SIN_PROCESOS_MATRICULACION = "No hay procesos de inscripción disponibles.";
 
 	@ManagedProperty("#{dispersionesService}")
 	private DispersionesService dispersionesService;
@@ -79,6 +81,10 @@ public class DispersionesBean extends BaseBean {
 	private List<InscripcionPlanesProgramas> planesProgramasBusquedaSeleccionados;
 	List<TipoProceso> listaTipoProceso;
 	List<ProcesosInscripcion> listaProcesosInscripcion;
+	private List<ProcesosInscripcion> listaProcesosConDispersion;
+	private List<ProcesosInscripcion> listaProcesosSinDispersion;
+	private String mensajeProcesosConDispersion;
+	private String mensajeProcesosSinDispersion;
 	List<TipoMatriculacion> listaTipoMatriculacion;
 	List<TblPlan> listaPlanes;
 	List<TblFichaDescriptivaPrograma> listaPrograma;
@@ -87,12 +93,15 @@ public class DispersionesBean extends BaseBean {
 
 
 	List<TblDispersionesBusqueda> listaDispercionBusqueda = new ArrayList<TblDispersionesBusqueda>();
+	private List<DispersionMatriculaExistenteDTO> listaDispersionesExistentes = new ArrayList<>();
+	private DispersionMatriculaExistenteDTO dispersionExistenteSeleccionada;
 
 	TblDispersionesBusqueda elminarDispersion = new TblDispersionesBusqueda();
 	
 	TblDispersionesBusqueda editarDispersion = new TblDispersionesBusqueda();
 	
 	private String mensajeGestion;
+	private String mensajeTablaDispersionExistente;
 
 	// REDIRECCION OPCIONES
 	private String paginaActual;
@@ -119,6 +128,8 @@ public class DispersionesBean extends BaseBean {
 	public void init() {
 		dispercionParametros = new DispersionesParam(); // Inicializar el objeto
 		listaProcesosInscripcion = new ArrayList<>();
+		listaProcesosConDispersion = new ArrayList<>();
+		listaProcesosSinDispersion = new ArrayList<>();
 		listaPlanes = new ArrayList<>();
 		listaPrograma = new ArrayList<>();
 		listaPlanProgramas = new ArrayList<>();
@@ -127,6 +138,7 @@ public class DispersionesBean extends BaseBean {
 		idProgramaPlanSeleccionado = null;
 		inicializarListasEdicion();
 		cargarCatalogosCrearGrupos();
+		mensajeTablaDispersionExistente = MENSAJE_SIN_PROCESOS_MATRICULACION;
 	}
 
 	public DispersionesBean() {
@@ -184,6 +196,16 @@ public class DispersionesBean extends BaseBean {
 		
 		return null;
 	}
+	
+	public String navegaMatriculaDispersionExistente() throws Exception {
+		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/matriculaConDispersionExistente.xhtml";
+		limpiarCampos();
+		consultarConvocatorias();
+		consultaTipoProceso();
+		consultarTipoMatriculacion();
+		cargarProcesosMatriculaExistente();
+		return null;
+	}
 
 	public void cancelar() throws Exception {
 		this.paginaActual = "";
@@ -198,16 +220,31 @@ public class DispersionesBean extends BaseBean {
 		this.mostrarNuevaDispersion = false;
 		limpiarCampos();
 	}
+	
+	private void cargarProcesosMatriculaExistente() {
+		listaProcesosConDispersion = dispersionesService.consultarProcesosConDispersion();
+		listaProcesosSinDispersion = dispersionesService.consultarProcesosSinDispersion();
+		mensajeProcesosConDispersion = (listaProcesosConDispersion == null || listaProcesosConDispersion.isEmpty())
+				? "No se encontraron procesos de dispersión creados" : null;
+		mensajeProcesosSinDispersion = (listaProcesosSinDispersion == null || listaProcesosSinDispersion.isEmpty())
+				? "No se encontraron procesos de inscripción sin dispersiones" : null;
+	}
 
 	public void limpiarCampos() {
 		dispercionParametros = new DispersionesParam();
 		listaProcesosInscripcion = new ArrayList<>();
+		listaProcesosConDispersion = new ArrayList<>();
+		listaProcesosSinDispersion = new ArrayList<>();
+		mensajeProcesosConDispersion = null;
+		mensajeProcesosSinDispersion = null;
+		mensajeTablaDispersionExistente = MENSAJE_SIN_PROCESOS_MATRICULACION;
 		listaPlanes = new ArrayList<>();
 		listaPrograma = new ArrayList<>();
 		listaPlanProgramas = new ArrayList<>();
 		planesProgramasSeleccionados = new ArrayList<>();
 		planesProgramasBusquedaSeleccionados = new ArrayList<>();
 		listaDispercionBusqueda = new ArrayList<>();
+		listaDispersionesExistentes = new ArrayList<>();
 		mostrarPlanYPrograma = false;
 		idProgramaPlanSeleccionado = null;
 		mostrarFormularioCrearGrupos = false;
@@ -219,6 +256,7 @@ public class DispersionesBean extends BaseBean {
 		editarDispersion = new TblDispersionesBusqueda();
 		dispersionNuevo = null;
 		ultimaConsultaExtraordinaria = false;
+		cargarProcesosMatriculaExistente();
 
 	}
 	
@@ -318,6 +356,28 @@ public class DispersionesBean extends BaseBean {
 			mostrarMensajeDispersion(false, "No se encontraron dispersiones");
 		}
 
+	}
+	
+	public void busquedaDispersionExistente() {
+		listaDispersionesExistentes = new ArrayList<>();
+		mensajeTablaDispersionExistente = MENSAJE_SIN_PROCESOS_MATRICULACION;
+		if (dispercionParametros.getIdProcesoInscripcionConDispersion() == null
+				|| dispercionParametros.getIdProcesoInscripcionMatricular() == null) {
+			mostrarMensajeDispersion(true, "Seleccione ambos procesos de inscripción para continuar.");
+			return;
+		}
+		listaDispersionesExistentes = dispersionesService
+				.consultarDispersionesExistentes(dispercionParametros.getIdProcesoInscripcionConDispersion(),
+						dispercionParametros.getIdProcesoInscripcionMatricular());
+		if (listaDispersionesExistentes == null) {
+			listaDispersionesExistentes = new ArrayList<>();
+		}
+		if (listaDispersionesExistentes.isEmpty()) {
+			return;
+		} else {
+			mensajeTablaDispersionExistente = MENSAJE_SIN_PROCESOS_MATRICULACION;
+			mostrarMensajeDispersion(false, null);
+		}
 	}
 	
 	public void crearGruposDispersion(TblDispersionesBusqueda dispersion) {
@@ -873,6 +933,38 @@ public class DispersionesBean extends BaseBean {
 	public void setListaProcesosInscripcion(List<ProcesosInscripcion> listaProcesosInscripcion) {
 		this.listaProcesosInscripcion = listaProcesosInscripcion;
 	}
+	
+	public List<ProcesosInscripcion> getListaProcesosConDispersion() {
+		return listaProcesosConDispersion;
+	}
+	
+	public void setListaProcesosConDispersion(List<ProcesosInscripcion> listaProcesosConDispersion) {
+		this.listaProcesosConDispersion = listaProcesosConDispersion;
+	}
+	
+	public List<ProcesosInscripcion> getListaProcesosSinDispersion() {
+		return listaProcesosSinDispersion;
+	}
+	
+	public void setListaProcesosSinDispersion(List<ProcesosInscripcion> listaProcesosSinDispersion) {
+		this.listaProcesosSinDispersion = listaProcesosSinDispersion;
+	}
+	
+	public String getMensajeProcesosConDispersion() {
+		return mensajeProcesosConDispersion;
+	}
+	
+	public void setMensajeProcesosConDispersion(String mensajeProcesosConDispersion) {
+		this.mensajeProcesosConDispersion = mensajeProcesosConDispersion;
+	}
+	
+	public String getMensajeProcesosSinDispersion() {
+		return mensajeProcesosSinDispersion;
+	}
+	
+	public void setMensajeProcesosSinDispersion(String mensajeProcesosSinDispersion) {
+		this.mensajeProcesosSinDispersion = mensajeProcesosSinDispersion;
+	}
 
 	public List<TipoMatriculacion> getListaTipoMatriculacion() {
 		return listaTipoMatriculacion;
@@ -916,6 +1008,14 @@ public class DispersionesBean extends BaseBean {
 	
 	public List<CatalogoComunDTO> getListaClasificacionesAva() {
 		return listaClasificacionesAva;
+	}
+	
+	public List<DispersionMatriculaExistenteDTO> getListaDispersionesExistentes() {
+		return listaDispersionesExistentes;
+	}
+	
+	public void setListaDispersionesExistentes(List<DispersionMatriculaExistenteDTO> listaDispersionesExistentes) {
+		this.listaDispersionesExistentes = listaDispersionesExistentes;
 	}
 
 	public DispersionesParam getDispercionParametros() {
@@ -1071,6 +1171,14 @@ public class DispersionesBean extends BaseBean {
 		this.mensajeGestion = mensajeGestion;
 	}
 	
+	public String getMensajeTablaDispersionExistente() {
+		return mensajeTablaDispersionExistente;
+	}
+	
+	public void setMensajeTablaDispersionExistente(String mensajeTablaDispersionExistente) {
+		this.mensajeTablaDispersionExistente = mensajeTablaDispersionExistente;
+	}
+	
 	public TblDispersionesBusqueda getDispersionSeleccionada() {
 		return dispersionSeleccionada;
 	}
@@ -1104,6 +1212,33 @@ public class DispersionesBean extends BaseBean {
 				return;
 			}
 		}
+	}
+	
+	public void matricularUsuariosDispersionExistente(DispersionMatriculaExistenteDTO dispersion) {
+		this.dispersionExistenteSeleccionada = dispersion;
+		RequestContext.getCurrentInstance().execute("PF('dlgConfirmMatriculaExistente').show()");
+	}
+	
+	public void confirmarMatriculaUsuariosDispersionExistente() {
+		if (dispersionExistenteSeleccionada == null) {
+			mostrarMensajeDispersion(true, "No se seleccionó una dispersión.");
+			return;
+		}
+		Long usuario = getUsuarioEnSession() != null ? getUsuarioEnSession().getIdPersona() : null;
+		if (usuario == null) {
+			mostrarMensajeDispersion(true, "No se pudo identificar al usuario en sesión.");
+			return;
+		}
+		ResultadoDTO<DispersionMatriculacionResultadoDTO> respuesta = dispersionesService
+				.matricularDispersionExistente(dispersionExistenteSeleccionada, usuario);
+		String mensaje = obtenerMensajeRespuesta(respuesta, "No fue posible completar la matriculación.");
+		if (respuesta != null && respuesta.esCorrecto()) {
+			mostrarMensajeDispersion(false, mensaje);
+			busquedaDispersionExistente();
+		} else {
+			mostrarMensajeDispersion(true, mensaje);
+		}
+		dispersionExistenteSeleccionada = null;
 	}
 	
 	
@@ -1285,6 +1420,10 @@ public class DispersionesBean extends BaseBean {
 	
 	private void mostrarMensajeDispersion(boolean error, String mensaje) {
 		mensajeGestion = mensaje;
+		if (mensaje == null || mensaje.isEmpty()) {
+			return;
+		}
+		RequestContext.getCurrentInstance().update(":formBusquedaDispersiones");
 		String dialogo = error ? "PF('dlgDispersionError').show()" : "PF('dlgDispersionInfo').show()";
 		RequestContext.getCurrentInstance().execute(dialogo);
 	}

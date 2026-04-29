@@ -28,6 +28,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasI
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademicaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 
 @Repository
@@ -312,6 +313,17 @@ public class InscripcionRepository implements IinscripcionRepository {
 		return Boolean.valueOf(value.toString());
 	}
 
+	private MallaAlumnoProgramaDTO mapProgramaMallaAlumno(Object[] obj) {
+		MallaAlumnoProgramaDTO dto = new MallaAlumnoProgramaDTO();
+		if (obj == null || obj.length < 3) {
+			return dto;
+		}
+		dto.setIdPrograma(getLongValue(obj[0]));
+		dto.setCalificacionFinal(getDoubleValue(obj[1]));
+		dto.setCalificacionMinAprobatoria(getDoubleValue(obj[2]));
+		return dto;
+	}
+
 	@Override
 	public List<InscripcionMateriasCursadasDTO> consultarMateriasCursadas(String id_persona) {
 
@@ -322,7 +334,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "    tmc.nombre subestructura,\r\n"
 				+ "    (SELECT tmc2.nombre FROM tbl_malla_curricular tmc2 WHERE tmc2.id = tmc.id_padre ) estructura,\r\n"
 				+ "    rgp.calificacion_final calificacion_final,\r\n"
-				+ "    if(rgp.calificacion_final >= 60, 1,0) estatus_aprobacion\r\n" + "FROM tbl_persona tp\r\n"
+				+ "    if(rgp.calificacion_final >= te.calificacion_min_aprobatoria , 1,0) estatus_aprobacion\r\n" + "FROM tbl_persona tp\r\n"
 				+ "         INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona AND calificacion_final IS NOT NULL\r\n"
 				+ "         INNER JOIN tbl_grupos tg ON tg.id = rgp.id_grupo\r\n"
 				+ "         INNER JOIN tbl_eventos te ON te.id_evento = tg.id_evento\r\n"
@@ -371,6 +383,40 @@ public class InscripcionRepository implements IinscripcionRepository {
 				InscripcionMateriasInsDTO convocatoria = mapeoInscripcionMateria(obj);
 				lista.add(convocatoria);
 
+			}
+		}
+
+		return lista;
+	}
+
+	@Override
+	public List<MallaAlumnoProgramaDTO> obtenerProgramasMallaAlumno(Long idPersona, Long idPlan) {
+		List<MallaAlumnoProgramaDTO> lista = new ArrayList<>();
+
+		String consulta = "SELECT\r\n"
+				+ "    fd.id_programa,\r\n"
+				+ "    califs.calificacion_final,\r\n"
+				+ "    fd.calificacion_min_aprobatoria\r\n"
+				+ "FROM tbl_ficha_descriptiva_programa fd\r\n"
+				+ "LEFT JOIN (\r\n"
+				+ "    SELECT e.id_programa, MAX(rgp.calificacion_final) AS calificacion_final\r\n"
+				+ "    FROM rel_grupo_participante rgp\r\n"
+				+ "    INNER JOIN tbl_grupos g ON g.id = rgp.id_grupo AND g.acta_cerrada = 1\r\n"
+				+ "    INNER JOIN tbl_eventos e ON e.id_evento = g.id_evento\r\n"
+				+ "    WHERE rgp.id_persona_participante = :idPersona\r\n"
+				+ "      AND rgp.calificacion_final IS NOT NULL\r\n"
+				+ "    GROUP BY e.id_programa\r\n"
+				+ ") califs ON califs.id_programa = fd.id_programa\r\n"
+				+ "WHERE fd.id_plan = :idPlan";
+
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("idPersona", idPersona);
+		query.setParameter("idPlan", idPlan);
+
+		List<Object[]> listaQuery = query.getResultList();
+		if (!listaQuery.isEmpty()) {
+			for (Object[] obj : listaQuery) {
+				lista.add(mapProgramaMallaAlumno(obj));
 			}
 		}
 
@@ -742,7 +788,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("    JOIN tbl_ficha_descriptiva_programa fd2 ON fd2.id_programa = te2.id_programa ");
 		sql.append("    WHERE rgp2.id_persona_participante = rgp.id_persona_participante ");
 		sql.append("    AND te2.id_programa = te.id_programa ");
-		sql.append("    AND rgp2.calificacion_final > fd2.calificacion_min_aprobatoria ");
+		sql.append("    AND rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
 		sql.append(")");
 
 		List<?> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("idPersona", idPersona)
@@ -892,6 +938,17 @@ public class InscripcionRepository implements IinscripcionRepository {
 		if (value instanceof Number) {
 			return ((Number) value).doubleValue();
 		}
+		if (value instanceof String) {
+			String text = ((String) value).trim();
+			if (text.isEmpty()) {
+				return null;
+			}
+			try {
+				return Double.valueOf(text);
+			} catch (NumberFormatException ex) {
+				return null;
+			}
+		}
 		return null;
 	}
 
@@ -935,7 +992,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("      INNER JOIN tbl_ficha_descriptiva_programa fd2 ON fd2.id_programa = te2.id_programa ");
 		sql.append("      WHERE fd2.cve_programa = fd.cve_programa ");
 		sql.append("        AND te2.id_programa = fd.id_programa ");
-		sql.append("        AND rgp2.calificacion_final > fd2.calificacion_min_aprobatoria ");
+		sql.append("        AND rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
 		sql.append("        AND rgp2.id_persona_participante = rgp.id_persona_participante ");
 		sql.append("  ) ");
 		sql.append("GROUP BY tpl.id_plan, fd.id_programa, fd.cve_programa");

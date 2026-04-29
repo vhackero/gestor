@@ -63,5 +63,15 @@ public interface IDispersionesRepository {
 		public List<Long> obtenerPersonasMatriculacion(Integer idDispersion, Integer idConvocatoria, Integer idTipoProceso, Integer idProcesoInscripcion);
 		
 		public void guardarRelacionDispersionGrupo(Integer idDispersion, Integer idEvento, Integer idGrupo, Long idPersona);
+		
+		public List<ProcesosInscripcion> consultarProcesosConDispersion();
+		
+		public List<ProcesosInscripcion> consultarProcesosSinDispersion();
+		
+		public List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculaExistenteDTO> consultarDispersionesExistentes(Integer idProcesoConDispersion, Integer idProcesoMatricular);
+		
+		public Integer crearDispersionBasica(Integer idProcesoInscripcion, Integer idPrograma, Integer totalEstudiantes, Integer tipoMatriculacion, Long usuarioModifico);
+		
+		public List<Long> obtenerPersonasMatriculaExistente(Integer idProcesoInscripcionMatricular, Integer idPrograma);
 
 	}

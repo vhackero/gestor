@@ -27,6 +27,10 @@ public class DispersionesParam implements Serializable {
 	private List<Integer> listaIdPlan;
 
 	private List<Integer> listaIdPrograma;
+	
+	private Integer idProcesoInscripcionConDispersion;
+	
+	private Integer idProcesoInscripcionMatricular;
 
 	public Integer getIdPlan() {
 		return idPlan;
@@ -58,6 +62,22 @@ public class DispersionesParam implements Serializable {
 
 	public void setListaIdPrograma(List<Integer> listaIdPrograma) {
 		this.listaIdPrograma = listaIdPrograma;
+	}
+	
+	public Integer getIdProcesoInscripcionConDispersion() {
+		return idProcesoInscripcionConDispersion;
+	}
+	
+	public void setIdProcesoInscripcionConDispersion(Integer idProcesoInscripcionConDispersion) {
+		this.idProcesoInscripcionConDispersion = idProcesoInscripcionConDispersion;
+	}
+	
+	public Integer getIdProcesoInscripcionMatricular() {
+		return idProcesoInscripcionMatricular;
+	}
+	
+	public void setIdProcesoInscripcionMatricular(Integer idProcesoInscripcionMatricular) {
+		this.idProcesoInscripcionMatricular = idProcesoInscripcionMatricular;
 	}
 
 	public Long getIdUsuarioAccion() {

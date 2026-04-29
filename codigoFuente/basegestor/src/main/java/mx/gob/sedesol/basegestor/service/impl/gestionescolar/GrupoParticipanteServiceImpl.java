@@ -266,7 +266,13 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 	private ResultadoDTO<RelGrupoParticipanteDTO> almacenarAlumnosNormales(List<PersonaDTO> listaPersonas,
 			GrupoDTO grupo) {
 		ResultadoDTO<RelGrupoParticipanteDTO> resultado = new ResultadoDTO<>();
+		int guardados = 0;
+		int duplicados = 0;
 		for (PersonaDTO persona : listaPersonas) {
+			if (esParticipanteDuplicado(persona, grupo)) {
+				duplicados++;
+				continue;
+			}
 			RelGrupoParticipante grupoParticipante = new RelGrupoParticipante();
 			grupoParticipante.setGrupo(modelMapper.map(grupo, TblGrupo.class));
 			grupoParticipante.setPersona(modelMapper.map(persona, TblPersona.class));
@@ -275,8 +281,12 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 			RelGrupoParticipanteDTO dto = modelMapper.map(grupoParticipante, RelGrupoParticipanteDTO.class);
 
 			grupoParticipanteRepo.save(grupoParticipante);
+			guardados++;
 		}
-		resultado.agregaMensaje(MensajesSistemaEnum.EC_MATRICULACION_GRUPAL_EXITO.getId() + listaPersonas.size());
+		if (guardados > 0) {
+			resultado.agregaMensaje(MensajesSistemaEnum.EC_MATRICULACION_GRUPAL_EXITO.getId() + guardados);
+		}
+		agregarMensajeDuplicados(duplicados, resultado, grupo.getIdGrupo());
 		return resultado;
 	}
 
@@ -287,7 +297,12 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 		List<Enrol> listaEnrol = new ArrayList<>();
 		List<AlumnoGrupo> listaAlumnosGrupo = new ArrayList<>();
 		List<RelGrupoParticipante> personasCorrectas = new ArrayList<>();
+		int duplicados = 0;
 		for (PersonaDTO persona : listaPersonas) {
+			if (esParticipanteDuplicado(persona, grupo)) {
+				duplicados++;
+				continue;
+			}
 			Integer idPersonaMoodle = relPersonaPlataformaMoodleService.obtenerIdMoodle(persona, parametroWSMoodleDTO,
 					grupo.getUsuarioModifico());
 			if (ObjectUtils.isNullOrCero(idPersonaMoodle)) {
@@ -307,7 +322,10 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 			}
 		}
 		if (personasCorrectas.isEmpty()) {
-			resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+			agregarMensajeDuplicados(duplicados, resultado, grupo.getIdGrupo());
+			if (duplicados != listaPersonas.size()) {
+				resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+			}
 		} else {
 			if (almacenarAlumnosMoodle(listaEnrol, listaAlumnosGrupo, parametroWSMoodleDTO)) {
 				for (RelGrupoParticipante grupoParticipante : personasCorrectas) {
@@ -318,6 +336,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 				grupoRepo.save(modelMapper.map(grupo, TblGrupo.class));
 				resultado.agregaMensaje(
 						MensajesSistemaEnum.EC_MATRICULACION_GRUPAL_EXITO.getId() + personasCorrectas.size());
+				agregarMensajeDuplicados(duplicados, resultado, grupo.getIdGrupo());
 			} else {
 				resultado.setMensajeError(MensajesSistemaEnum.EC_MATRICULACION_ERROR);
 			}
@@ -358,6 +377,28 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 		alumnoGrupo.setUserid(idPersonaMoodle);
 		listaAlumnosGrupo.add(alumnoGrupo);
 		return listaAlumnosGrupo;
+	}
+
+	private boolean esParticipanteDuplicado(PersonaDTO persona, GrupoDTO grupo) {
+		if (persona == null || persona.getIdPersona() == null || grupo == null || grupo.getIdGrupo() == null) {
+			return false;
+		}
+		boolean existe = grupoParticipanteRepo.existeParticipanteEnGrupo(grupo.getIdGrupo(),
+				persona.getIdPersona());
+		if (existe) {
+			logger.warn(String.format("Inscripción duplicada omitida: persona %d ya está en el grupo %d",
+					persona.getIdPersona(), grupo.getIdGrupo()));
+		}
+		return existe;
+	}
+	
+	private void agregarMensajeDuplicados(int duplicados, ResultadoDTO<RelGrupoParticipanteDTO> resultado, Integer idGrupo) {
+		if (duplicados <= 0 || resultado == null) {
+			return;
+		}
+		String mensaje = String.format("%d registro(s) ya existían en el grupo %s y no se duplicaron.",
+				duplicados, idGrupo != null ? idGrupo : "");
+		resultado.agregaMensaje(mensaje);
 	}
 
 	private List<Enrol> generarEnrol(EventoCapacitacionDTO evento, Integer idPersonaMoodle) {

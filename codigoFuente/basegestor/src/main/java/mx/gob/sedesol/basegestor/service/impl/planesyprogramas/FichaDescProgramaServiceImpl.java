@@ -118,6 +118,44 @@ public class FichaDescProgramaServiceImpl extends ComunValidacionService<FichaDe
         return lista;
     }
 
+    @Override
+    public List<FichaDescProgramaDTO> buscarProgramasPorEjeCapacitacionYPlan(Integer idEjeCapacitacion, Integer idPlan) {
+        List<TblFichaDescriptivaPrograma> programas = fichaDescProgramaRepo
+                .buscarProgramasPorEjeCapacitacionYPlan(idEjeCapacitacion, idPlan);
+        return mapProgramas(programas);
+    }
+
+    @Override
+    public List<FichaDescProgramaDTO> buscarProgramasPorPlan(Integer idPlan) {
+        List<TblFichaDescriptivaPrograma> programas = fichaDescProgramaRepo.buscarProgramasPorPlan(idPlan);
+        return mapProgramas(programas);
+    }
+
+    private List<FichaDescProgramaDTO> mapProgramas(List<TblFichaDescriptivaPrograma> programas) {
+        if (ObjectUtils.isNullOrEmpty(programas)) {
+            return new ArrayList<>();
+        }
+        List<FichaDescProgramaDTO> resultado = new ArrayList<>();
+        for (TblFichaDescriptivaPrograma programa : programas) {
+            FichaDescProgramaDTO dto = new FichaDescProgramaDTO();
+            dto.setIdPrograma(programa.getIdPrograma());
+            dto.setNombreTentativo(programa.getNombreTentativo());
+            dto.setIdentificadorFinal(programa.getIdentificadorFinal());
+            dto.setCvePrograma(programa.getCvePrograma());
+            dto.setTipo(programa.getTipo());
+            dto.setCreditos(programa.getCreditos());
+            dto.setEjeCapacitacion(programa.getEjeCapacitacion());
+            if (programa.getProgramaAntecedente() != null
+                    && programa.getProgramaAntecedente().getIdPrograma() != null) {
+                FichaDescProgramaDTO antecedente = new FichaDescProgramaDTO();
+                antecedente.setIdPrograma(programa.getProgramaAntecedente().getIdPrograma());
+                dto.setProgramaAntecedente(antecedente);
+            }
+            resultado.add(dto);
+        }
+        return resultado;
+    }
+
     /**
      *
      */

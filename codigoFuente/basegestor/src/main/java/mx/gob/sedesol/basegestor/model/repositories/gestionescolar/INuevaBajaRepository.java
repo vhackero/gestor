@@ -6,6 +6,7 @@ import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaAplicacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DatosMoodlePersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PlanBajaDTO;
 
@@ -48,4 +49,14 @@ public interface INuevaBajaRepository {
     void insertarBaja(BajaAplicacionDTO bajaAplicacionDTO);
 
     BajaMatriculaDetalleDTO consultarDatosPorMatricula(String matricula);
+
+    void actualizarBaja(Long idBaja, BajaAplicacionDTO bajaAplicacionDTO);
+
+    ConsultaBajaDTO consultarBajaPorId(Long idBaja);
+
+    void eliminarBaja(Long idBaja);
+
+    void actualizarMotivoBaja(Long idMotivoBaja, Long idTipoBaja, String descripcion);
+
+    void reactivarPersona(Long idPersona);
 }

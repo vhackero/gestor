@@ -6,7 +6,8 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:sec="http://www.springframework.org/security/tags">
-	<script src="https://kit.fontawesome.com/153b08498d.js" crossorigin="anonymous"></script>
+	<!-- <script src="https://kit.fontawesome.com/153b08498d.js" crossorigin="anonymous"></script> -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></link>
 
 	<!-- Navigation -->
 	<nav class="navbar navbar-default navbar-static-top" role="navigation"
@@ -26,48 +27,50 @@
 			</div>
 			<!-- /.navbar-header -->
 
-			<ul class="nav navbar-top-links item2">
-				<li class="boton-header" id="tareas"><p:commandButton
-						id="btnActividadesUsuario" ajax="true"
-						action="#{menuGestorBean.navegaActividadesUsuario()}"
-						styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-rectangle-list tareas icono-btn-header" />
-					<p:tooltip for="btnActividadesUsuario" position="bottom"
-						value="#{sistema.obtenerTexto('gw.header.tooltip.tareas')}"></p:tooltip></li>
-				<li class="boton-header"><p:commandButton
-						id="btnHeaderNotificaciones" ajax="true"
-						action="#{notificacionesBean.cargarNotificacionesSistema()}"
-						styleClass="btn-icon btn btn-default icono_sisi fa fa-bell tareas icono-btn-header" />
-					<p:tooltip for="btnHeaderNotificaciones" position="bottom"
-						value="#{sistema.obtenerTexto('gw.header.tooltip.notificaciones')}"></p:tooltip></li>
+			<h:form id="frmHeaderAcciones">
+				<ul class="nav navbar-top-links item2">
+					<li class="boton-header" id="tareas"><p:commandButton
+							id="btnActividadesUsuario" ajax="true"
+							action="#{menuGestorBean.navegaActividadesUsuario()}"
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-regular fa-rectangle-list tareas icono-btn-header" />
+						<p:tooltip for="btnActividadesUsuario" position="bottom"
+							value="#{sistema.obtenerTexto('gw.header.tooltip.tareas')}"></p:tooltip></li>
+					<li class="boton-header"><p:commandButton
+							id="btnHeaderNotificaciones" ajax="true"
+							action="#{notificacionesBean.cargarNotificacionesSistema()}"
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-bell tareas icono-btn-header" />
+						<p:tooltip for="btnHeaderNotificaciones" position="bottom"
+							value="#{sistema.obtenerTexto('gw.header.tooltip.notificaciones')}"></p:tooltip></li>
 
-				<li class="boton-header"><p:commandButton
-						id="btnHeaderMensajes" ajax="true"
-						actionListener="#{notificacionesBean.cargarNotificacionesSistema()}"
-						action="#{menuGestorBean.navegaNotificaciones()}"
-						styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-envelope tareas icono-btn-header">
-					</p:commandButton></li>
-				<p:tooltip for="btnHeaderMensajes" position="bottom"
-					value="#{sistema.obtenerTexto('gw.header.tooltip.mensajes')}"></p:tooltip>
-				<ui:fragment
-					rendered="#{menuGestorBean.rolTienePermiso('LOG_ACA_INF')}">
-					<sec:authorize access="hasPermission(null, 'LOG_ACA_INF')">
-						<li class="boton-header"><p:commandButton
-								id="btnHeaderReservaciones" ajax="true"
-								action="#{menuGestorBean.navegaReservacionAreas}"
-								styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-calendar-days tareas icono-btn-header">
-							</p:commandButton></li>
-						<p:tooltip for="btnHeaderReservaciones" position="bottom"
-							value="#{sistema.obtenerTexto('gw.header.tooltip.reservaciones')}"></p:tooltip>
-					</sec:authorize>
-				</ui:fragment>
+					<li class="boton-header"><p:commandButton
+							id="btnHeaderMensajes" ajax="true"
+							actionListener="#{notificacionesBean.cargarNotificacionesSistema()}"
+							action="#{menuGestorBean.navegaNotificaciones()}"
+							styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-envelope tareas icono-btn-header">
+						</p:commandButton></li>
+					<p:tooltip for="btnHeaderMensajes" position="bottom"
+						value="#{sistema.obtenerTexto('gw.header.tooltip.mensajes')}"></p:tooltip>
+					<ui:fragment
+						rendered="#{menuGestorBean.rolTienePermiso('LOG_ACA_INF')}">
+						<sec:authorize access="hasPermission(null, 'LOG_ACA_INF')">
+							<li class="boton-header"><p:commandButton
+									id="btnHeaderReservaciones" ajax="true"
+									action="#{menuGestorBean.navegaReservacionAreas}"
+									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-calendar-days tareas icono-btn-header">
+								</p:commandButton></li>
+							<p:tooltip for="btnHeaderReservaciones" position="bottom"
+								value="#{sistema.obtenerTexto('gw.header.tooltip.reservaciones')}"></p:tooltip>
+						</sec:authorize>
+					</ui:fragment>
 
-				<li class="dropdown visible-xs"><a class="dropdown-toggle"
-					data-toggle="dropdown" href="#"> <i class="fa fa-user fa-fw"></i>
-				</a>
-					<ul class="dropdown-menu dropdown-user">
-						<ui:include src="/templates/private/menu-user.xhtml"></ui:include>
-					</ul></li>
-			</ul>
+					<li class="dropdown visible-xs"><a class="dropdown-toggle"
+						data-toggle="dropdown" href="#"> <i class="fa fa-user fa-fw"></i>
+					</a>
+						<ul class="dropdown-menu dropdown-user">
+							<ui:include src="/templates/private/menu-user.xhtml"></ui:include>
+						</ul></li>
+				</ul>
+			</h:form>
 
 
 			<div class="hidden-xs visible-sm visible-md visible-lg perfil item3">
@@ -79,7 +82,7 @@
 								<strong>#{sistema.obtenerTexto('gw.header.bienvenida')}</strong>,
 								#{loginBean.usuarioEnSession.usuario}
 							</div>
-							<h:form>
+							<h:form id="frmSelectorRol">
 								<p:selectOneMenu id="somRol" value="#{menuGestorBean.idRol}"
 									effect="fade" class="col-xs-12"
 									onchange="correccionSelectores()">
