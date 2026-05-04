@@ -21,6 +21,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.inscripcion.InscripcionPreviaMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
@@ -111,6 +113,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private double sumaCalificaciones;
 	private int totalCalificaciones;
 	private Set<String> asignaturasEnCurso;
+	private Set<Integer> programasConBaja;
 	private Integer semestreEnCurso;
 	private Integer bloqueEnCurso;
 	private String estatusEstudiante;
@@ -127,6 +130,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		sumaCalificaciones = 0d;
 		totalCalificaciones = 0;
 		asignaturasEnCurso = new HashSet<>();
+		programasConBaja = new HashSet<>();
 		semestreEnCurso = null;
 		bloqueEnCurso = null;
 		estatusEstudiante = "Regular";
@@ -149,6 +153,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 
 		cargarInscripcionesEnCurso(idPersona);
+		ajustarSemestreReferenciaPorTrayectoria(idPersona);
 		construirModelo(raiz, idPersona);
 	}
 
@@ -168,14 +173,35 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			if (semestre > maxSemestre) {
 				maxSemestre = semestre;
 			}
-			int bloqueMateria = parseNumero(materia.getBloque(), 0);
-			if (bloqueEnCurso != null && bloqueEnCurso.intValue() == bloqueMateria
-					&& StringUtils.isNotBlank(materia.getAsignatura())) {
+			if (StringUtils.isNotBlank(materia.getAsignatura())) {
 				asignaturasEnCurso.add(normalizaTexto(limpiaAsignatura(materia.getAsignatura())));
 			}
 		}
 		if (maxSemestre > 0) {
 			semestreEnCurso = maxSemestre;
+		}
+	}
+
+	private void ajustarSemestreReferenciaPorTrayectoria(Long idPersona) {
+		List<InscripcionMateriasCursadasDTO> materiasCursadas = inscripcionService.obtenerMateriasCursadas(idPersona);
+		if (ObjectUtils.isNullOrEmpty(materiasCursadas)) {
+			return;
+		}
+		int maxSemestreHistorico = 0;
+		for (InscripcionMateriasCursadasDTO materia : materiasCursadas) {
+			if (materia == null) {
+				continue;
+			}
+			int semestreHistorico = parseNumero(materia.getEstructura(), 0);
+			if (semestreHistorico > maxSemestreHistorico) {
+				maxSemestreHistorico = semestreHistorico;
+			}
+		}
+		if (maxSemestreHistorico <= 0) {
+			return;
+		}
+		if (semestreEnCurso == null || maxSemestreHistorico > semestreEnCurso.intValue()) {
+			semestreEnCurso = maxSemestreHistorico;
 		}
 	}
 
@@ -204,6 +230,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 
 		List<MallaAlumnoProgramaDTO> estatusLista = inscripcionService.obtenerProgramasMallaAlumno(idPersona, planId);
+		cargarProgramasConBaja(idPersona);
 		if (!ObjectUtils.isNullOrEmpty(estatusLista)) {
 			for (MallaAlumnoProgramaDTO dto : estatusLista) {
 				if (dto.getIdPrograma() != null) {
@@ -282,7 +309,8 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 					aplicaTipoPrograma(programaNodo, programa.getTipo(), tiposMap);
 					Integer idPrograma = programa.getIdPrograma();
 					aplicaEstatusPrograma(programaNodo,
-							idPrograma != null ? estatusPorPrograma.get(idPrograma) : null);
+							idPrograma != null ? estatusPorPrograma.get(idPrograma) : null,
+							idPrograma);
 					programaNodo.setCreditos(programa.getCreditos());
 					programaNodo.setTextoCompacto(resolveTextoCompacto(programa, nombrePrograma));
 					if (StringUtils.isNotBlank(nombrePrograma)
@@ -429,6 +457,10 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		estatusEstudiante = "Regular";
 		for (MallaAlumnoProgramaDTO estatusDto : estatusLista) {
 			if (estatusDto == null || estatusDto.getCalificacionFinal() == null) {
+				continue;
+			}
+			if (estatusDto.getIdPrograma() != null
+					&& programasConBaja.contains(estatusDto.getIdPrograma().intValue())) {
 				continue;
 			}
 			if (!esProgramaAprobado(estatusDto)) {
@@ -595,7 +627,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_BLOQUEADA, "#111827", "#111827", "#111827", "fa fa-lock"));
 	}
 
-	private void aplicaEstatusPrograma(MallaDiagramaNodoDTO nodo, MallaAlumnoProgramaDTO estatusDto) {
+	private void aplicaEstatusPrograma(MallaDiagramaNodoDTO nodo, MallaAlumnoProgramaDTO estatusDto, Integer idPrograma) {
 		String estatus = ESTATUS_NO_INSCRITA;
 		Double calificacionFinal = null;
 		Double calificacionMin = null;
@@ -603,7 +635,9 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			calificacionFinal = estatusDto.getCalificacionFinal();
 			calificacionMin = estatusDto.getCalificacionMinAprobatoria();
 		}
-		if (calificacionFinal != null) {
+		if (idPrograma != null && programasConBaja.contains(idPrograma)) {
+			estatus = ESTATUS_BAJA;
+		} else if (calificacionFinal != null) {
 			if (Double.compare(calificacionFinal, CALIFICACION_NO_PRESENTADA) == 0) {
 				estatus = ESTATUS_NO_ACREDITADA;
 			} else {
@@ -625,6 +659,27 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 	}
 
+	private void cargarProgramasConBaja(Long idPersona) {
+		programasConBaja.clear();
+		List<InscripcionBajasDTO> bajas = inscripcionService.obtenerBajasDeMateriasSolicitadas(idPersona);
+		if (ObjectUtils.isNullOrEmpty(bajas)) {
+			return;
+		}
+		for (InscripcionBajasDTO baja : bajas) {
+			if (baja != null && baja.getIdPrograma() != null && esBajaTemporalOParcial(baja)) {
+				programasConBaja.add(baja.getIdPrograma().intValue());
+			}
+		}
+	}
+
+	private boolean esBajaTemporalOParcial(InscripcionBajasDTO baja) {
+		if (baja == null || StringUtils.isBlank(baja.getTipoBaja())) {
+			return false;
+		}
+		String tipo = baja.getTipoBaja().trim().toUpperCase();
+		return tipo.contains("TEMPORAL") || tipo.contains("PARCIAL");
+	}
+
 	private void aplicarEstatusEnCurso(Map<Integer, MallaDiagramaNodoDTO> programasPorId) {
 		for (MallaDiagramaNodoDTO nodo : programasPorId.values()) {
 			if (nodo.isEnCurso()) {
@@ -642,7 +697,10 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			Map<Integer, MallaAlumnoProgramaDTO> estatusPorPrograma) {
 		for (Map.Entry<Integer, MallaDiagramaNodoDTO> entry : programasPorId.entrySet()) {
 			MallaDiagramaNodoDTO nodo = entry.getValue();
-			if (nodo.isEnCurso() || ESTATUS_APROBADA.equals(nodo.getEstatus())) {
+			if (nodo.isEnCurso()
+					|| ESTATUS_APROBADA.equals(nodo.getEstatus())
+					|| ESTATUS_NO_ACREDITADA.equals(nodo.getEstatus())
+					|| ESTATUS_BAJA.equals(nodo.getEstatus())) {
 				continue;
 			}
 			boolean bloqueada = false;

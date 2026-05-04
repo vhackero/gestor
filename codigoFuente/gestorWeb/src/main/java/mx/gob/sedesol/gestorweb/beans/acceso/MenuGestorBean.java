@@ -496,12 +496,12 @@ public class MenuGestorBean extends BaseBean {
 	}
 
 	public String navegaMallaCurricularAlumno() {
-		logger.info("Navegando a malla curricular del alumno");
+		logger.info("Navegando a malla curricular del estudiante");
 		return ConstantesGestorWeb.NAVEGA_MALLA_CURRICULAR_ALUMNO;
 	}
 
 	public String navegaTablaCurricularAsistida() {
-		logger.info("Navegando a tabla curricular asistida");
+		logger.info("Navegando a asistente de inscripción curricular");
 		return ConstantesGestorWeb.NAVEGA_TABLA_CURRICULAR_ASISTIDA;
 	}
 
