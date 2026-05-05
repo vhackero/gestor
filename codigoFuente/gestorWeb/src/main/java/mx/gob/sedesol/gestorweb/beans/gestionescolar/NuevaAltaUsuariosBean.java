@@ -48,6 +48,9 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
             "nombre_sige", "apellidop_sige", "apellidom_sige", "programa_educativo_sige", "division_sige",
             "correo_institucional_sige", "fecha_nacimiento_sige", "curp_sige", "nivel_sige", "persona_id_sige",
             "perfil_id_sige");
+    private static final int MAX_PARAMETROS_BUSQUEDA = 2;
+    private static final String MENSAJE_IMPORTACION_IGNORADA =
+            "La matrícula/usuario ya existe en tbl_persona_sige. El registro se ignoró.";
 
     @ManagedProperty("#{personaServiceFacade}")
     private transient PersonaServiceFacade personaServiceFacade;
@@ -137,7 +140,8 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                 return;
             }
 
-            String consultaNormalizada = normalizarConsulta(fuente.getConsulta());
+            int totalParametros = obtenerTotalParametrosBusqueda(fuente.getConsulta());
+            String consultaNormalizada = normalizarConsulta(fuente.getConsulta(), totalParametros);
             if (consultaNormalizada == null) {
                 int numInterrogaciones = contarOcurrencias(fuente.getConsulta(), "?");
                 int numMatricula = contarOcurrenciasIgnoreCase(fuente.getConsulta(), ":matricula");
@@ -162,7 +166,8 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                         traceId, enmascararServidor(urlConexion), !esVacio(fuente.getUsuario()),
                         fuente.getContrasena() != null, fuente.getContrasena() != null ? fuente.getContrasena().length() : 0));
                 try (PreparedStatement ps = conexion.prepareStatement(consultaNormalizada)) {
-                    ps.setString(1, matriculaImportar.trim());
+                    String criterioBusqueda = matriculaImportar.trim();
+                    asignarParametrosBusqueda(ps, criterioBusqueda, totalParametros);
 
                     try (ResultSet rs = ps.executeQuery()) {
                         if (!rs.next()) {
@@ -206,14 +211,18 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
                                 personaSige.getMatricula(), personaSige.getNombre(),
                                 personaSige.getApellidoPaterno(), personaSige.getApellidoMaterno(),
                                 personaSige.getCorreoInstitucional()));
-                        guardarPersonaSige(personaSige, traceId);
-                        matriculaNuevaAlta = null;
-                        matriculaImportar = null;
-                        fuenteExternaSeleccionada = null;
+                        boolean insertada = guardarPersonaSigeSiNoExiste(personaSige, traceId);
+                        limpiarDatosImportacion();
+                        if (!insertada) {
+                            mostrarDialogoExito(MENSAJE_IMPORTACION_IGNORADA);
+                            LOGGER.info(String.format("[%s] Importación ignorada para matrícula %s por registro existente",
+                                    traceId, personaSige.getMatricula()));
+                            return;
+                        }
                         mostrarDialogoExito(obtenerTextoSistema(
                                 "gw.gestionescolar.altasbajas.nuevaAlta.modal.importacionCorrecta"));
                         LOGGER.info(String.format("[%s] Importación exitosa para matrícula %s", traceId,
-                                matriculaNuevaAlta));
+                                personaSige.getMatricula()));
                     }
                 }
             }
@@ -487,18 +496,31 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         return contarOcurrencias(cadena.toLowerCase(), subcadena.toLowerCase());
     }
 
-    private String normalizarConsulta(String consulta) {
+    private int obtenerTotalParametrosBusqueda(String consulta) {
         if (esVacio(consulta)) {
-            return null;
+            return 0;
         }
         int numInterrogaciones = contarOcurrencias(consulta, "?");
         int numMatricula = contarOcurrenciasIgnoreCase(consulta, ":matricula");
         int numUsuario = contarOcurrenciasIgnoreCase(consulta, ":usuario");
-        int totalParametros = numInterrogaciones + numMatricula + numUsuario;
-        if (totalParametros != 1) {
+        return numInterrogaciones + numMatricula + numUsuario;
+    }
+
+    private String normalizarConsulta(String consulta, int totalParametros) {
+        if (esVacio(consulta)) {
+            return null;
+        }
+        if (totalParametros < 1 || totalParametros > MAX_PARAMETROS_BUSQUEDA) {
             return null;
         }
         return consulta.replaceAll("(?i):matricula", "?").replaceAll("(?i):usuario", "?");
+    }
+
+    private void asignarParametrosBusqueda(PreparedStatement ps, String criterioBusqueda, int totalParametros)
+            throws SQLException {
+        for (int i = 1; i <= totalParametros; i++) {
+            ps.setString(i, criterioBusqueda);
+        }
     }
 
     private Connection crearConexion(FuenteExternaDTO fuente) throws SQLException {
@@ -691,18 +713,17 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         }
     }
 
-    private void guardarPersonaSige(PersonaSigeDTO personaSige, String traceId) {
+    private boolean guardarPersonaSigeSiNoExiste(PersonaSigeDTO personaSige, String traceId) {
         PersonaSigeDTO existente = personaSigeService.buscarPorMatricula(personaSige.getMatricula());
         if (ObjectUtils.isNotNull(existente)) {
-            personaSige.setIdPersonaSige(existente.getIdPersonaSige());
-            LOGGER.info(String.format("[%s] Actualizando persona SIGE existente para matrícula %s", traceId,
-                    personaSige.getMatricula()));
-            manejarResultadoPersistencia(personaSigeService.actualizar(personaSige));
-        } else {
-            LOGGER.info(String.format("[%s] Insertando nueva persona SIGE para matrícula %s", traceId,
-                    personaSige.getMatricula()));
-            manejarResultadoPersistencia(personaSigeService.guardar(personaSige));
+            LOGGER.info(String.format("[%s] Persona SIGE ya existente para matrícula %s. Se ignora la importación.",
+                    traceId, personaSige.getMatricula()));
+            return false;
         }
+        LOGGER.info(String.format("[%s] Insertando nueva persona SIGE para matrícula %s", traceId,
+                personaSige.getMatricula()));
+        manejarResultadoPersistencia(personaSigeService.guardar(personaSige));
+        return true;
     }
 
     private void manejarResultadoPersistencia(ResultadoDTO<PersonaSigeDTO> resultado) {
@@ -885,6 +906,12 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
     private void mostrarDialogoExito(String mensaje) {
         mensajeExitoDialogo = mensaje;
         mostrarDialogo("dlgNuevaAltaExito");
+    }
+
+    private void limpiarDatosImportacion() {
+        matriculaNuevaAlta = null;
+        matriculaImportar = null;
+        fuenteExternaSeleccionada = null;
     }
 
 }
