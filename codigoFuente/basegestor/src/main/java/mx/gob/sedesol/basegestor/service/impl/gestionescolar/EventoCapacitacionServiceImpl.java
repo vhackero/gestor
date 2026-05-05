@@ -30,6 +30,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CveEventoCapDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoActaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PersonaResponsabilidadesDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProgramaEventoEstatusDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TablaCalificacionesDTO;
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.PersonalizacionAreaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.RelAreaRecursoDTO;
@@ -230,6 +231,57 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 	}
 
 	@Override
+	public List<ProgramaEventoEstatusDTO> obtenerProgramasConEventosParaCambioEstatus() {
+		List<ProgramaEventoEstatusDTO> lista = new ArrayList<ProgramaEventoEstatusDTO>();
+		List<Object[]> resultados = eventoCapacitacionRepo.obtenerProgramasConEventosParaCambioEstatus();
+		if (resultados == null) {
+			return lista;
+		}
+		for (Object[] row : resultados) {
+			ProgramaEventoEstatusDTO dto = new ProgramaEventoEstatusDTO();
+			dto.setIdPlan(getLongValue(row, 0));
+			dto.setPlan(getStringValue(row, 1));
+			dto.setIdPrograma(getLongValue(row, 2));
+			dto.setSemestre(getStringValue(row, 3));
+			dto.setBloque(getStringValue(row, 4));
+			dto.setPrograma(getStringValue(row, 5));
+			lista.add(dto);
+		}
+		return lista;
+	}
+
+	@Override
+	public List<ProgramaEventoEstatusDTO> buscarEventosParaCambioEstatus(String anioPeriodo, String numeroElementos,
+			List<Integer> idsPrograma) {
+		List<ProgramaEventoEstatusDTO> lista = new ArrayList<ProgramaEventoEstatusDTO>();
+		if (ObjectUtils.isNullOrEmpty(idsPrograma) || ObjectUtils.isNull(anioPeriodo)
+				|| ObjectUtils.isNull(numeroElementos)) {
+			return lista;
+		}
+		List<Object[]> resultados = eventoCapacitacionRepo.buscarEventosParaCambioEstatus(anioPeriodo, numeroElementos,
+				idsPrograma);
+		if (resultados == null) {
+			return lista;
+		}
+		for (Object[] row : resultados) {
+			ProgramaEventoEstatusDTO dto = new ProgramaEventoEstatusDTO();
+			dto.setIdPlan(getLongValue(row, 0));
+			dto.setPlan(getStringValue(row, 1));
+			dto.setSemestre(getStringValue(row, 2));
+			dto.setBloque(getStringValue(row, 3));
+			dto.setIdPrograma(getLongValue(row, 4));
+			dto.setPrograma(getStringValue(row, 5));
+			dto.setIdEvento(getLongValue(row, 6));
+			dto.setEvento(getStringValue(row, 7));
+			dto.setIdEstatus(getIntegerValue(row, 8));
+			dto.setEstatus(getStringValue(row, 9));
+			dto.setSeleccionado(false);
+			lista.add(dto);
+		}
+		return lista;
+	}
+
+	@Override
 	public List<EventoCapacitacionDTO> consultaEventoPorEstatus(Integer idEstatus) {
 		List<TblEvento> res = eventoCapacitacionRepo.consultaEventoPorEstatus(idEstatus);
 		List<EventoCapacitacionDTO> resList = new ArrayList<>();
@@ -243,6 +295,33 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		}
 		
 		return resList;
+	}
+
+	private Long getLongValue(Object[] row, int index) {
+		if (row == null || row.length <= index || row[index] == null) {
+			return null;
+		}
+		if (row[index] instanceof Number) {
+			return ((Number) row[index]).longValue();
+		}
+		return Long.valueOf(row[index].toString());
+	}
+
+	private String getStringValue(Object[] row, int index) {
+		if (row == null || row.length <= index || row[index] == null) {
+			return null;
+		}
+		return row[index].toString();
+	}
+
+	private Integer getIntegerValue(Object[] row, int index) {
+		if (row == null || row.length <= index || row[index] == null) {
+			return null;
+		}
+		if (row[index] instanceof Number) {
+			return ((Number) row[index]).intValue();
+		}
+		return Integer.valueOf(row[index].toString());
 	}
 
 	@Override
@@ -337,6 +416,20 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public boolean modificarEstatusEventos(Integer idEstatus, List<Integer> idsEvento) {
+		try {
+			if (ObjectUtils.isNull(idEstatus) || ObjectUtils.isNullOrEmpty(idsEvento)) {
+				return false;
+			}
+			return eventoCapacitacionRepo.cambiarEstatusEventos(idEstatus, idsEvento) > 0;
+		} catch (Exception e) {
+			logger.info("Ocurrio un error al modificar el estatus de los eventos." + e);
+			return false;
+		}
 	}
 
 	@Override

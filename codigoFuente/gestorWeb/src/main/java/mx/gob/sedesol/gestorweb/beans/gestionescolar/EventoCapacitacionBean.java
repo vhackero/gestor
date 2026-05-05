@@ -1,6 +1,7 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import javax.faces.bean.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
+import javax.faces.model.SelectItem;
 
 import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
@@ -25,6 +27,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProgramaEventoEstatusDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.MallaCurricularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.RelProgDuracionDTO;
@@ -100,6 +103,17 @@ public class EventoCapacitacionBean extends BaseBean {
 	private List<CatalogoComunDTO> planes;
 	private Integer nivelMaximo = 1;
 	private Integer idCapacitacion;
+	private boolean mostrarVistaModificarEstatus;
+	private List<String> filtroModificarPlanPrograma;
+	private String filtroModificarAnioPeriodo;
+	private String filtroModificarNumeroElementos;
+	private List<SelectItem> opcionesModificarPlanPrograma;
+	private List<SelectItem> opcionesModificarAnioPeriodo;
+	private List<SelectItem> opcionesModificarNumeroElementos;
+	private List<SelectItem> opcionesModificarEstatus;
+	private List<ProgramaEventoEstatusDTO> resultadosModificarEstatus;
+	private Integer idEstatusModificarSeleccionado;
+	private boolean busquedaModificarEstatusEjecutada;
 
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
@@ -113,6 +127,12 @@ public class EventoCapacitacionBean extends BaseBean {
 		if (ObjectUtils.isNull(eventosCapacitacion)){
 
 		}
+		opcionesModificarPlanPrograma = new ArrayList<SelectItem>();
+		opcionesModificarAnioPeriodo = new ArrayList<SelectItem>();
+		opcionesModificarNumeroElementos = new ArrayList<SelectItem>();
+		opcionesModificarEstatus = new ArrayList<SelectItem>();
+		filtroModificarPlanPrograma = new ArrayList<String>();
+		resultadosModificarEstatus = new ArrayList<ProgramaEventoEstatusDTO>();
 
 	}
 
@@ -127,6 +147,190 @@ public class EventoCapacitacionBean extends BaseBean {
 
 		this.generaEstructuraCatTpoCompetenciaPlan();
 		this.generaCatEjesCapacitBusqueda();
+		inicializarVistaModificarEstatus();
+	}
+
+	private void inicializarVistaModificarEstatus() {
+		mostrarVistaModificarEstatus = false;
+		filtroModificarPlanPrograma = new ArrayList<String>();
+		filtroModificarAnioPeriodo = null;
+		filtroModificarNumeroElementos = null;
+		idEstatusModificarSeleccionado = null;
+		busquedaModificarEstatusEjecutada = false;
+		if (resultadosModificarEstatus == null) {
+			resultadosModificarEstatus = new ArrayList<ProgramaEventoEstatusDTO>();
+		} else {
+			resultadosModificarEstatus.clear();
+		}
+		if (opcionesModificarPlanPrograma == null) {
+			opcionesModificarPlanPrograma = new ArrayList<SelectItem>();
+		} else {
+			opcionesModificarPlanPrograma.clear();
+		}
+		if (opcionesModificarAnioPeriodo == null) {
+			opcionesModificarAnioPeriodo = new ArrayList<SelectItem>();
+		} else {
+			opcionesModificarAnioPeriodo.clear();
+		}
+		if (opcionesModificarNumeroElementos == null) {
+			opcionesModificarNumeroElementos = new ArrayList<SelectItem>();
+		} else {
+			opcionesModificarNumeroElementos.clear();
+		}
+		if (opcionesModificarEstatus == null) {
+			opcionesModificarEstatus = new ArrayList<SelectItem>();
+		} else {
+			opcionesModificarEstatus.clear();
+		}
+		cargarOpcionesModificarEstatus();
+	}
+
+	public void mostrarVistaModificarEstatus() {
+		mostrarVistaModificarEstatus = true;
+		limpiarCamposModificarEstatus();
+	}
+
+	public void prepararVistaEntrada() {
+		if (!FacesContext.getCurrentInstance().isPostback()) {
+			cancelarModificarEstatus();
+		}
+	}
+
+	public void ocultarVistaModificarEstatus() {
+		mostrarVistaModificarEstatus = false;
+	}
+
+	public void cancelarModificarEstatus() {
+		ocultarVistaModificarEstatus();
+		limpiarCamposModificarEstatus();
+	}
+
+	public void limpiarCamposModificarEstatus() {
+		filtroModificarPlanPrograma = new ArrayList<String>();
+		filtroModificarAnioPeriodo = null;
+		filtroModificarNumeroElementos = null;
+		idEstatusModificarSeleccionado = null;
+		busquedaModificarEstatusEjecutada = false;
+		if (resultadosModificarEstatus == null) {
+			resultadosModificarEstatus = new ArrayList<ProgramaEventoEstatusDTO>();
+		} else {
+			resultadosModificarEstatus.clear();
+		}
+	}
+
+	public void buscarModificarEstatus() {
+		busquedaModificarEstatusEjecutada = true;
+		idEstatusModificarSeleccionado = null;
+		resultadosModificarEstatus.clear();
+
+		if (ObjectUtils.isNullOrEmpty(filtroModificarPlanPrograma) || ObjectUtils.isNull(filtroModificarAnioPeriodo)
+				|| ObjectUtils.isNull(filtroModificarNumeroElementos)) {
+			agregarMsgError("Debes seleccionar Plan / Programa, Año Periodo y Número de elementos.", null);
+			return;
+		}
+
+		List<Integer> idsPrograma = new ArrayList<Integer>();
+		for (String idPrograma : filtroModificarPlanPrograma) {
+			if (ObjectUtils.isNull(idPrograma) || idPrograma.trim().isEmpty()) {
+				continue;
+			}
+			idsPrograma.add(Integer.valueOf(idPrograma));
+		}
+
+		resultadosModificarEstatus = eventoCapacitacionServiceFacade.buscarEventosParaCambioEstatus(
+				filtroModificarAnioPeriodo, filtroModificarNumeroElementos, idsPrograma);
+		if (resultadosModificarEstatus == null) {
+			resultadosModificarEstatus = new ArrayList<ProgramaEventoEstatusDTO>();
+		}
+	}
+
+	public void actualizarModificarEstatus() {
+		if (ObjectUtils.isNull(idEstatusModificarSeleccionado)) {
+			agregarMsgError("Debes seleccionar el estatus a cambiar.", null);
+			return;
+		}
+		List<Integer> idsEvento = new ArrayList<Integer>();
+		for (ProgramaEventoEstatusDTO registro : resultadosModificarEstatus) {
+			if (registro != null && registro.isSeleccionado() && registro.getIdEvento() != null) {
+				idsEvento.add(registro.getIdEvento().intValue());
+			}
+		}
+		if (ObjectUtils.isNullOrEmpty(idsEvento)) {
+			agregarMsgError("Debes seleccionar al menos un evento.", null);
+			return;
+		}
+
+		boolean actualizado = eventoCapacitacionServiceFacade.modificarEstatusEventos(idEstatusModificarSeleccionado,
+				idsEvento);
+		if (actualizado) {
+			agregarMsgInfo("Registros actualizados correctamente", null);
+			buscarModificarEstatus();
+			idEstatusModificarSeleccionado = null;
+			for (ProgramaEventoEstatusDTO registro : resultadosModificarEstatus) {
+				if (registro != null) {
+					registro.setSeleccionado(false);
+				}
+			}
+		} else {
+			agregarMsgError("Ocurrió un error al actualizar los registros.", null);
+		}
+	}
+
+	private void cargarOpcionesModificarEstatus() {
+		cargarOpcionesModificarPlanPrograma();
+		cargarOpcionesModificarAnioPeriodo();
+		cargarOpcionesModificarNumeroElementos();
+		cargarOpcionesCambioEstatus();
+	}
+
+	private void cargarOpcionesModificarPlanPrograma() {
+		opcionesModificarPlanPrograma.clear();
+		List<ProgramaEventoEstatusDTO> programas = eventoCapacitacionServiceFacade.obtenerProgramasConEventosParaCambioEstatus();
+		if (ObjectUtils.isNullOrEmpty(programas)) {
+			return;
+		}
+		for (ProgramaEventoEstatusDTO programa : programas) {
+			if (programa == null || programa.getIdPrograma() == null) {
+				continue;
+			}
+			StringBuilder etiqueta = new StringBuilder();
+			etiqueta.append(programa.getPlan() != null ? programa.getPlan() : "Sin plan");
+			etiqueta.append(" / ");
+			etiqueta.append(programa.getSemestre() != null ? programa.getSemestre() : "-");
+			etiqueta.append(" / ");
+			etiqueta.append(programa.getBloque() != null ? programa.getBloque() : "-");
+			etiqueta.append(" / ");
+			etiqueta.append(programa.getPrograma() != null ? programa.getPrograma() : "Sin programa");
+			opcionesModificarPlanPrograma.add(new SelectItem(String.valueOf(programa.getIdPrograma()), etiqueta.toString()));
+		}
+	}
+
+	private void cargarOpcionesModificarAnioPeriodo() {
+		opcionesModificarAnioPeriodo.clear();
+		int anioActual = Calendar.getInstance().get(Calendar.YEAR);
+		for (int anio = anioActual - 10; anio <= anioActual + 10; anio++) {
+			opcionesModificarAnioPeriodo.add(new SelectItem(String.valueOf(anio), String.valueOf(anio)));
+		}
+	}
+
+	private void cargarOpcionesModificarNumeroElementos() {
+		opcionesModificarNumeroElementos.clear();
+		for (int numero = 1; numero <= 12; numero++) {
+			opcionesModificarNumeroElementos.add(new SelectItem(String.valueOf(numero), String.valueOf(numero)));
+		}
+	}
+
+	private void cargarOpcionesCambioEstatus() {
+		opcionesModificarEstatus.clear();
+		if (ObjectUtils.isNullOrEmpty(listaEstatusEC)) {
+			return;
+		}
+		for (CatalogoComunDTO estatus : listaEstatusEC) {
+			if (estatus == null || estatus.getId() == null || !Integer.valueOf(1).equals(estatus.getActivo())) {
+				continue;
+			}
+			opcionesModificarEstatus.add(new SelectItem(estatus.getId(), estatus.getNombre()));
+		}
 	}
 
 	/**
@@ -737,6 +941,94 @@ public class EventoCapacitacionBean extends BaseBean {
 
 	public void setFiltros(EventoCapacitacionDTO filtros) {
 		this.filtros = filtros;
+	}
+
+	public boolean isMostrarVistaModificarEstatus() {
+		return mostrarVistaModificarEstatus;
+	}
+
+	public void setMostrarVistaModificarEstatus(boolean mostrarVistaModificarEstatus) {
+		this.mostrarVistaModificarEstatus = mostrarVistaModificarEstatus;
+	}
+
+	public List<String> getFiltroModificarPlanPrograma() {
+		return filtroModificarPlanPrograma;
+	}
+
+	public void setFiltroModificarPlanPrograma(List<String> filtroModificarPlanPrograma) {
+		this.filtroModificarPlanPrograma = filtroModificarPlanPrograma;
+	}
+
+	public String getFiltroModificarAnioPeriodo() {
+		return filtroModificarAnioPeriodo;
+	}
+
+	public void setFiltroModificarAnioPeriodo(String filtroModificarAnioPeriodo) {
+		this.filtroModificarAnioPeriodo = filtroModificarAnioPeriodo;
+	}
+
+	public String getFiltroModificarNumeroElementos() {
+		return filtroModificarNumeroElementos;
+	}
+
+	public void setFiltroModificarNumeroElementos(String filtroModificarNumeroElementos) {
+		this.filtroModificarNumeroElementos = filtroModificarNumeroElementos;
+	}
+
+	public List<SelectItem> getOpcionesModificarPlanPrograma() {
+		return opcionesModificarPlanPrograma;
+	}
+
+	public void setOpcionesModificarPlanPrograma(List<SelectItem> opcionesModificarPlanPrograma) {
+		this.opcionesModificarPlanPrograma = opcionesModificarPlanPrograma;
+	}
+
+	public List<SelectItem> getOpcionesModificarAnioPeriodo() {
+		return opcionesModificarAnioPeriodo;
+	}
+
+	public void setOpcionesModificarAnioPeriodo(List<SelectItem> opcionesModificarAnioPeriodo) {
+		this.opcionesModificarAnioPeriodo = opcionesModificarAnioPeriodo;
+	}
+
+	public List<SelectItem> getOpcionesModificarNumeroElementos() {
+		return opcionesModificarNumeroElementos;
+	}
+
+	public void setOpcionesModificarNumeroElementos(List<SelectItem> opcionesModificarNumeroElementos) {
+		this.opcionesModificarNumeroElementos = opcionesModificarNumeroElementos;
+	}
+
+	public List<SelectItem> getOpcionesModificarEstatus() {
+		return opcionesModificarEstatus;
+	}
+
+	public void setOpcionesModificarEstatus(List<SelectItem> opcionesModificarEstatus) {
+		this.opcionesModificarEstatus = opcionesModificarEstatus;
+	}
+
+	public List<ProgramaEventoEstatusDTO> getResultadosModificarEstatus() {
+		return resultadosModificarEstatus;
+	}
+
+	public void setResultadosModificarEstatus(List<ProgramaEventoEstatusDTO> resultadosModificarEstatus) {
+		this.resultadosModificarEstatus = resultadosModificarEstatus;
+	}
+
+	public Integer getIdEstatusModificarSeleccionado() {
+		return idEstatusModificarSeleccionado;
+	}
+
+	public void setIdEstatusModificarSeleccionado(Integer idEstatusModificarSeleccionado) {
+		this.idEstatusModificarSeleccionado = idEstatusModificarSeleccionado;
+	}
+
+	public boolean isBusquedaModificarEstatusEjecutada() {
+		return busquedaModificarEstatusEjecutada;
+	}
+
+	public void setBusquedaModificarEstatusEjecutada(boolean busquedaModificarEstatusEjecutada) {
+		this.busquedaModificarEstatusEjecutada = busquedaModificarEstatusEjecutada;
 	}
 
 	public boolean isVisibleAuditar() {
