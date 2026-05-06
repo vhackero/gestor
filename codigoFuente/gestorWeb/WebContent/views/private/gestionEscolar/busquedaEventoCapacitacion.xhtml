@@ -16,10 +16,177 @@
 	</ui:define>
 
 	<ui:define name="content">
+		<f:event type="preRenderView" listener="#{eventoCapacitacionBean.prepararVistaEntrada}" />
 
 		<h1>#{sistema.obtenerTexto('gw.gestionescolar.eventos.titulo')}</h1>
 		<hr />
 
+		<p:outputPanel id="pnlVistaConsultarActas"
+					   rendered="#{eventoCapacitacionBean.mostrarVistaConsultarActas}">
+			<h:form id="frmConsultarActas">
+				<p:ajaxStatus onstart="PF('dialogLayout').show()"
+							  onsuccess="PF('dialogLayout').hide()" />
+
+				<p:panel id="fldConsultarActas"
+						 header="Consultar actas"
+						 showCollapseLink="false" collapsible="false">
+					<f:validateBean disabled="true">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-4 col-xs-12">
+									<p:outputLabel styleClass="requerido" value="Plan / Programa:" />
+									<p:selectCheckboxMenu id="actasPlanPrograma"
+														 value="#{eventoCapacitacionBean.filtroConsultarActasPlanPrograma}"
+														 filter="true" filterMatchMode="contains"
+														 label="Seleccionar" styleClass="col-xs-12">
+										<f:selectItems value="#{eventoCapacitacionBean.opcionesConsultarActasPlanPrograma}" />
+									</p:selectCheckboxMenu>
+								</div>
+								<div class="col-md-4 col-xs-12">
+									<p:outputLabel styleClass="requerido" value="Año Periodo:" />
+									<p:selectOneMenu id="actasAnioPeriodo" styleClass="col-xs-12"
+													 value="#{eventoCapacitacionBean.filtroConsultarActasAnioPeriodo}">
+										<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+										<f:selectItems value="#{eventoCapacitacionBean.opcionesConsultarActasAnioPeriodo}" />
+									</p:selectOneMenu>
+								</div>
+								<div class="col-md-4 col-xs-12">
+									<p:outputLabel styleClass="requerido" value="Número de elementos:" />
+									<p:selectOneMenu id="actasNumeroElementos" styleClass="col-xs-12"
+													 value="#{eventoCapacitacionBean.filtroConsultarActasNumeroElementos}">
+										<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+										<f:selectItems value="#{eventoCapacitacionBean.opcionesConsultarActasNumeroElementos}" />
+									</p:selectOneMenu>
+								</div>
+							</div>
+						</div>
+
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-4 col-xs-12">
+									<p:outputLabel styleClass="requerido" value="Estatus:" />
+									<p:selectOneMenu id="actasEstatus" styleClass="col-xs-12"
+													 value="#{eventoCapacitacionBean.filtroConsultarActasEstatus}">
+										<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+										<f:selectItems value="#{eventoCapacitacionBean.opcionesConsultarActasEstatus}" />
+									</p:selectOneMenu>
+								</div>
+							</div>
+						</div>
+
+						<div class="row" style="margin-top: 25px;">
+							<div class="col-md-12">
+								<p:commandButton value="Buscar"
+												 styleClass="btn btn-primary pull-right"
+												 update="frmConsultarActas"
+												 actionListener="#{eventoCapacitacionBean.buscarConsultarActas}"
+												 process="@form" />
+								<p:commandButton value="Cancelar"
+												 styleClass="btn btn-default pull-right"
+												 style="margin-right: 10px;"
+												 update=":pnlVistaConsultarActas :pnlVistaInicial"
+												 actionListener="#{eventoCapacitacionBean.cancelarConsultarActas}"
+												 process="@this" />
+								<p:commandButton value="Limpiar campos"
+												 styleClass="btn btn-default pull-right"
+												 style="margin-right: 10px;"
+												 update="frmConsultarActas"
+												 actionListener="#{eventoCapacitacionBean.limpiarCamposConsultarActas}"
+												 process="@this" />
+							</div>
+						</div>
+
+						<p:outputPanel id="pnlResultadosConsultarActas"
+									   rendered="#{eventoCapacitacionBean.busquedaConsultarActasEjecutada}">
+							<div class="row" style="margin-top: 25px;">
+								<div class="col-md-12">
+									<p:panel header="Resultados">
+										<p:dataTable id="dtResultConsultarActas"
+													 value="#{eventoCapacitacionBean.resultadosConsultarActas}"
+													 var="resultado"
+													 paginator="true" rows="10"
+													 paginatorPosition="bottom"
+													 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+													 currentPageReportTemplate="({currentPage} de {totalPages})"
+													 rowsPerPageTemplate="5,10,15"
+													 tableStyleClass="table"
+													 emptyMessage="No hay datos que mostrar">
+											<p:column>
+												<f:facet name="header">
+													<h:outputText value="Plan" />
+												</f:facet>
+												<h:outputText value="#{resultado.plan}" />
+											</p:column>
+											<p:column>
+												<f:facet name="header">
+													<h:outputText value="Programa" />
+												</f:facet>
+												<h:outputText value="#{resultado.programa}" />
+											</p:column>
+											<p:column>
+												<f:facet name="header">
+													<h:outputText value="Semestre" />
+												</f:facet>
+												<h:outputText value="#{resultado.semestre}" />
+											</p:column>
+											<p:column>
+												<f:facet name="header">
+													<h:outputText value="Bloque" />
+												</f:facet>
+												<h:outputText value="#{resultado.bloque}" />
+											</p:column>
+											<p:column>
+												<f:facet name="header">
+													<h:outputText value="Evento" />
+												</f:facet>
+												<h:outputText value="#{resultado.evento}" />
+											</p:column>
+											<p:column>
+												<f:facet name="header">
+													<h:outputText value="Grupo" />
+												</f:facet>
+												<h:outputText value="#{resultado.grupo}" />
+											</p:column>
+											<p:column styleClass="text-center">
+												<f:facet name="header">
+													<h:outputText value="Acciones" />
+												</f:facet>
+												<p:commandButton id="btnEliminarActaConsulta"
+																 rendered="#{eventoCapacitacionBean.mostrarEliminarActaConsulta(resultado)}"
+																 styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar"
+																 actionListener="#{eventoCapacitacionBean.eliminarActaConsulta(resultado)}"
+																 process="@this" update="frmConsultarActas" />
+												<p:tooltip for="btnEliminarActaConsulta" rendered="#{eventoCapacitacionBean.mostrarEliminarActaConsulta(resultado)}"
+														   value="Eliminar acta" position="top" />
+
+												<p:commandButton id="btnVerActaConsulta"
+																 rendered="#{eventoCapacitacionBean.mostrarVerActaConsulta(resultado)}"
+																 styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye"
+																 actionListener="#{eventoCapacitacionBean.verActaConsulta(resultado)}"
+																 process="@this" update="frmConsultarActas" />
+												<p:tooltip for="btnVerActaConsulta" rendered="#{eventoCapacitacionBean.mostrarVerActaConsulta(resultado)}"
+														   value="Visualizar acta" position="top" />
+
+												<p:commandButton id="btnListarActaConsulta"
+																 rendered="#{eventoCapacitacionBean.mostrarListadoActasConsulta(resultado)}"
+																 styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-list"
+																 actionListener="#{eventoCapacitacionBean.listarActasConsulta(resultado)}"
+																 process="@this" update="frmConsultarActas" />
+												<p:tooltip for="btnListarActaConsulta" rendered="#{eventoCapacitacionBean.mostrarListadoActasConsulta(resultado)}"
+														   value="Ver listado de actas" position="top" />
+											</p:column>
+										</p:dataTable>
+									</p:panel>
+								</div>
+							</div>
+						</p:outputPanel>
+					</f:validateBean>
+				</p:panel>
+			</h:form>
+		</p:outputPanel>
+
+		<p:outputPanel id="pnlVistaInicial"
+					   rendered="#{not eventoCapacitacionBean.mostrarVistaConsultarActas}">
 		<h:form id="frmBusqueda">
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 						  onsuccess="PF('dialogLayout').hide()" />
@@ -60,6 +227,13 @@
 			<div class="row">
 				<div class="col-md-12">
 					<sec:authorize access="hasPermission(null, 'EC_AGR' ) ">
+						<p:commandButton
+							value="Consultar actas"
+							styleClass="btn btn-primary pull-right"
+							style="margin-left: 10px;"
+							update=":pnlVistaConsultarActas :pnlVistaInicial"
+							actionListener="#{eventoCapacitacionBean.mostrarVistaConsultarActas}"
+							process="@this" />
 						<p:commandButton
 							value="#{sistema.obtenerTexto('gw.ge.btn.crear')}"
 							styleClass="btn btn-primary pull-right"
@@ -632,5 +806,6 @@
 
 
 		</h:form>
+		</p:outputPanel>
 	</ui:define>
 </ui:composition>

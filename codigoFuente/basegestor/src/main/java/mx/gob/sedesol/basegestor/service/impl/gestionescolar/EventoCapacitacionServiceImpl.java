@@ -26,10 +26,12 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionRecordDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CapturaEventoCapacitacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaActaEventoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CveEventoCapDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoActaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PersonaResponsabilidadesDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProgramaEventoFiltroDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TablaCalificacionesDTO;
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.PersonalizacionAreaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.RelAreaRecursoDTO;
@@ -227,6 +229,89 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		// TODO Auto-generated method stub
 		List<TblEvento> listEntitiesEventos = eventoCapacitacionRepo.findAll();
 		return modelMapper.map(listEntitiesEventos, tipoListaEvento);
+	}
+
+	@Override
+	public List<ProgramaEventoFiltroDTO> obtenerProgramasConEventosParaFiltro() {
+		List<ProgramaEventoFiltroDTO> lista = new ArrayList<ProgramaEventoFiltroDTO>();
+		List<Object[]> resultados = eventoCapacitacionRepo.obtenerProgramasConEventosParaFiltro();
+		if (resultados == null) {
+			return lista;
+		}
+		for (Object[] row : resultados) {
+			ProgramaEventoFiltroDTO dto = new ProgramaEventoFiltroDTO();
+			dto.setIdPlan(getLongValue(row, 0));
+			dto.setPlan(getStringValue(row, 1));
+			dto.setIdPrograma(getLongValue(row, 2));
+			dto.setSemestre(getStringValue(row, 3));
+			dto.setBloque(getStringValue(row, 4));
+			dto.setPrograma(getStringValue(row, 5));
+			lista.add(dto);
+		}
+		return lista;
+	}
+
+	@Override
+	public List<ConsultaActaEventoDTO> consultarActasPorFiltros(String anioPeriodo, String numeroElementos,
+			List<Long> idprogramaSelecionado, Integer estatus) {
+		List<ConsultaActaEventoDTO> lista = new ArrayList<ConsultaActaEventoDTO>();
+		List<Object[]> resultados = eventoCapacitacionRepo.consultarActasPorFiltros(anioPeriodo, numeroElementos,
+				idprogramaSelecionado, estatus);
+		if (resultados == null) {
+			return lista;
+		}
+		for (Object[] row : resultados) {
+			ConsultaActaEventoDTO dto = new ConsultaActaEventoDTO();
+			dto.setIdPlan(getLongValue(row, 0));
+			dto.setPlan(getStringValue(row, 1));
+			dto.setSemestre(getStringValue(row, 2));
+			dto.setBloque(getStringValue(row, 3));
+			dto.setIdPrograma(getLongValue(row, 4));
+			dto.setPrograma(getStringValue(row, 5));
+			dto.setIdEvento(getLongValue(row, 6));
+			dto.setEvento(getStringValue(row, 7));
+			dto.setIdGrupo(getLongValue(row, 8));
+			dto.setGrupo(getStringValue(row, 9));
+			dto.setEstatus(estatus);
+			dto.setTextoEstatus(obtenerTextoEstatusActa(estatus));
+			lista.add(dto);
+		}
+		return lista;
+	}
+
+	private String obtenerTextoEstatusActa(Integer estatus) {
+		if (estatus == null) {
+			return null;
+		}
+		switch (estatus.intValue()) {
+		case 0:
+			return "Abierta";
+		case 1:
+			return "Cerrada";
+		case 2:
+			return "Cierre incompleto";
+		case 3:
+			return "Más de un documento cargado";
+		default:
+			return null;
+		}
+	}
+
+	private Long getLongValue(Object[] row, int index) {
+		if (row == null || row.length <= index || row[index] == null) {
+			return null;
+		}
+		if (row[index] instanceof Number) {
+			return ((Number) row[index]).longValue();
+		}
+		return Long.valueOf(row[index].toString());
+	}
+
+	private String getStringValue(Object[] row, int index) {
+		if (row == null || row.length <= index || row[index] == null) {
+			return null;
+		}
+		return row[index].toString();
 	}
 
 	@Override
