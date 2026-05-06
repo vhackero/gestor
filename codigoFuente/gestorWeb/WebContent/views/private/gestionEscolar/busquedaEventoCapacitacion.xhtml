@@ -16,10 +16,138 @@
 	</ui:define>
 
 	<ui:define name="content">
+		<f:event type="preRenderView" listener="#{eventoCapacitacionBean.prepararVistaEntrada}" />
 
 		<h1>#{sistema.obtenerTexto('gw.gestionescolar.eventos.titulo')}</h1>
 		<hr />
 
+		<p:outputPanel id="pnlVistaModificarEstatus">
+		<p:outputPanel rendered="#{eventoCapacitacionBean.mostrarVistaModificarEstatus}">
+		<h:form id="frmBusquedaModificar">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+						  onsuccess="PF('dialogLayout').hide()" />
+
+			<p:panel id="fldModificarEstatus"
+					 header="Modificar estatus de eventos académicos"
+					 showCollapseLink="false" collapsible="false">
+				<f:validateBean disabled="true">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-4 col-xs-12">
+								<p:outputLabel styleClass="requerido" value="Plan / Programa:" />
+								<p:selectCheckboxMenu id="modEstatusPlanPrograma"
+												 value="#{eventoCapacitacionBean.filtroModificarPlanPrograma}"
+												 filter="true" filterMatchMode="contains"
+												 label="Seleccionar" styleClass="col-xs-12">
+									<f:selectItems value="#{eventoCapacitacionBean.opcionesModificarPlanPrograma}" />
+								</p:selectCheckboxMenu>
+							</div>
+							<div class="col-md-4 col-xs-12">
+								<p:outputLabel styleClass="requerido" value="Año Periodo:" />
+								<p:selectOneMenu id="modEstatusAnioPeriodo" styleClass="col-xs-12"
+												 value="#{eventoCapacitacionBean.filtroModificarAnioPeriodo}">
+									<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+									<f:selectItems value="#{eventoCapacitacionBean.opcionesModificarAnioPeriodo}" />
+								</p:selectOneMenu>
+							</div>
+							<div class="col-md-4 col-xs-12">
+								<p:outputLabel styleClass="requerido" value="Número de elementos:" />
+								<p:selectOneMenu id="modEstatusNumeroElementos" styleClass="col-xs-12"
+												 value="#{eventoCapacitacionBean.filtroModificarNumeroElementos}">
+									<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+									<f:selectItems value="#{eventoCapacitacionBean.opcionesModificarNumeroElementos}" />
+								</p:selectOneMenu>
+							</div>
+						</div>
+					</div>
+
+					<div class="row" style="margin-top: 25px;">
+						<div class="col-md-12">
+							<p:commandButton value="Buscar"
+								styleClass="btn btn-primary pull-right"
+								update=":pnlVistaModificarEstatus :pnlVistaInicial"
+								actionListener="#{eventoCapacitacionBean.buscarModificarEstatus}"
+								process="@this modEstatusPlanPrograma modEstatusAnioPeriodo modEstatusNumeroElementos" />
+							<p:commandButton value="Cancelar"
+								styleClass="btn btn-default pull-right"
+								style="margin-right: 10px;"
+								update=":pnlVistaModificarEstatus :pnlVistaInicial"
+								actionListener="#{eventoCapacitacionBean.cancelarModificarEstatus}"
+								process="@this" />
+							<p:commandButton value="Limpiar campos"
+								styleClass="btn btn-default pull-right"
+								style="margin-right: 10px;"
+								update=":pnlVistaModificarEstatus"
+								actionListener="#{eventoCapacitacionBean.limpiarCamposModificarEstatus}"
+								process="@this" />
+						</div>
+					</div>
+
+					<p:outputPanel id="pnlResultadosModificarEstatus"
+								   rendered="#{eventoCapacitacionBean.busquedaModificarEstatusEjecutada}">
+						<div class="row" style="margin-top: 25px;">
+							<div class="col-md-12">
+								<p:dataTable id="tblModificarEstatus"
+											 value="#{eventoCapacitacionBean.resultadosModificarEstatus}"
+											 var="registro"
+											 emptyMessage="No se encontraron datos"
+											 tableStyleClass="table">
+									<p:column headerText="Plan">
+										<h:outputText value="#{registro.plan}" />
+									</p:column>
+									<p:column headerText="Programa">
+										<h:outputText value="#{registro.programa}" />
+									</p:column>
+									<p:column headerText="Semestre">
+										<h:outputText value="#{registro.semestre}" />
+									</p:column>
+									<p:column headerText="Bloque">
+										<h:outputText value="#{registro.bloque}" />
+									</p:column>
+									<p:column headerText="Evento">
+										<h:outputText value="#{registro.evento}" />
+									</p:column>
+									<p:column headerText="Estatus">
+										<h:outputText value="#{registro.estatus}" />
+									</p:column>
+									<p:column headerText="Seleccionar" style="text-align:center; width: 90px;">
+										<p:selectBooleanCheckbox value="#{registro.seleccionado}" />
+									</p:column>
+								</p:dataTable>
+							</div>
+						</div>
+
+						<p:outputPanel rendered="#{not empty eventoCapacitacionBean.resultadosModificarEstatus}">
+							<div class="row" style="margin-top: 20px;">
+								<div class="col-md-6 col-md-offset-6 col-xs-12">
+									<p:outputLabel styleClass="requerido" value="Estatus a cambiar:" />
+									<p:selectOneMenu id="modEstatusNuevo" styleClass="col-xs-12"
+													 value="#{eventoCapacitacionBean.idEstatusModificarSeleccionado}">
+										<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+										<f:selectItems value="#{eventoCapacitacionBean.opcionesModificarEstatus}" />
+									</p:selectOneMenu>
+								</div>
+							</div>
+
+							<div class="row" style="margin-top: 20px;">
+								<div class="col-md-12">
+									<p:commandButton value="Actualizar estatus"
+													 styleClass="btn btn-primary pull-right"
+													 update=":pnlVistaModificarEstatus :pnlVistaInicial"
+													 actionListener="#{eventoCapacitacionBean.actualizarModificarEstatus}"
+													 process="@form" />
+								</div>
+							</div>
+						</p:outputPanel>
+					</p:outputPanel>
+				</f:validateBean>
+			</p:panel>
+		</h:form>
+		</p:outputPanel>
+		</p:outputPanel>
+
+		<p:outputPanel id="pnlVistaInicial">
+		<p:outputPanel rendered="#{not eventoCapacitacionBean.mostrarVistaModificarEstatus}">
 		<h:form id="frmBusqueda">
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 						  onsuccess="PF('dialogLayout').hide()" />
@@ -61,8 +189,15 @@
 				<div class="col-md-12">
 					<sec:authorize access="hasPermission(null, 'EC_AGR' ) ">
 						<p:commandButton
+							value="Modificar estatus"
+							styleClass="btn btn-primary pull-right"
+							update=":pnlVistaModificarEstatus :pnlVistaInicial"
+							actionListener="#{eventoCapacitacionBean.mostrarVistaModificarEstatus}"
+							process="@this" />
+						<p:commandButton
 							value="#{sistema.obtenerTexto('gw.ge.btn.crear')}"
 							styleClass="btn btn-primary pull-right"
+							style="margin-left: 10px;"
 							update="frmBusquedaPrograma"
 							action="#{capturaEventoCapacitacion.nuevoEventoCapacitacion()}"
 							ajax="false" immediate="true" process="@this" />
@@ -71,7 +206,6 @@
 					</sec:authorize>
 				</div>
 			</div>
-
 			<p:panel id="fldBusqueda"
 					 header="#{sistema.obtenerTexto('gw.gestionescolar.eventos.busqueda.header')}"
 					 showCollapseLink="false" collapsible="false">
@@ -311,6 +445,7 @@
 			</p:panel>
 
 		</h:form>
+		<p:outputPanel id="pnlListadoEventosBase">
 		<h:form id="frmtabla">
 
 			<p:importEnum
@@ -632,5 +767,8 @@
 
 
 		</h:form>
+		</p:outputPanel>
+		</p:outputPanel>
+		</p:outputPanel>
 	</ui:define>
 </ui:composition>

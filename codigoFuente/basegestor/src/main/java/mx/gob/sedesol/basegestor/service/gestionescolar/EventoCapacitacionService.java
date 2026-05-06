@@ -7,6 +7,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionRecordDT
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CapturaEventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoActaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProgramaEventoEstatusDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TablaCalificacionesDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.util.ErrorWS;
@@ -26,7 +27,10 @@ public interface EventoCapacitacionService {
 	List<EventoCapacitacionDTO> obtenerEventosPorProgramaIdPlan(String idPrograma, Integer idPlan);
 	List<EventoCapacitacionDTO> obtenerEventosPorIdPlan( Integer idPlan);
 	List<EventoCapacitacionDTO> obtenerTodosLosEventos();
+	List<ProgramaEventoEstatusDTO> obtenerProgramasConEventosParaCambioEstatus();
+	List<ProgramaEventoEstatusDTO> buscarEventosParaCambioEstatus(String anioPeriodo, String numeroElementos, List<Integer> idsPrograma);
 	boolean modificarEstatusEvento(Integer idEstatus, Integer idEvento);
+	boolean modificarEstatusEventos(Integer idEstatus, List<Integer> idsEvento);
 	
 	
 	List<CalificacionRecordDTO> obtieneDetalleActa(Integer idEvento, Integer idCurso, List<TablaCalificacionesDTO> listaCalif);

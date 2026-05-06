@@ -104,4 +104,32 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 			+ "         INNER JOIN cat_nombres_planesyprogramas cpp ON cpp.programa_educativo = tp.nombre AND tfd.nombre_tentativo = cpp.asignatura AND cpp.bloque NOT LIKE 'NA'\n"
 			+ "WHERE te.id_evento = :idEvento AND tg.id = :idGrupo", nativeQuery = true)
 	public List<EncabezadoActaDTO> obtenerEncabezadoActa(@Param("idEvento")Integer idEvento, @Param("idGrupo")Integer idGrupo);
+
+	@Query(value = "SELECT tp.id_plan, tp.nombre AS plan, tfdp.id_programa, tmc2.nombre AS semestre, tmc.nombre AS bloque, tfdp.nombre_tentativo AS programa "
+			+ "FROM tbl_ficha_descriptiva_programa tfdp "
+			+ "JOIN tbl_planes tp ON tp.id_plan = tfdp.id_plan "
+			+ "JOIN tbl_malla_curricular tmc ON tmc.id = tfdp.id_eje_capacitacion "
+			+ "LEFT JOIN tbl_malla_curricular tmc2 ON tmc2.id = tmc.id_padre "
+			+ "WHERE EXISTS (SELECT 1 FROM tbl_eventos te WHERE te.id_programa = tfdp.id_programa) "
+			+ "ORDER BY tp.nombre, tmc2.nombre, tmc.nombre", nativeQuery = true)
+	public List<Object[]> obtenerProgramasConEventosParaCambioEstatus();
+
+	@Query(value = "SELECT tp.id_plan, tp.nombre AS plan, tmc2.nombre AS semestre, tmc.nombre AS bloque, "
+			+ "tfdp.id_programa, tfdp.nombre_tentativo AS programa, te.id_evento, te.nombre_ec AS evento, "
+			+ "ceec.id AS id_estatus, ceec.nombre AS estatus "
+			+ "FROM tbl_eventos te "
+			+ "JOIN tbl_ficha_descriptiva_programa tfdp ON tfdp.id_programa = te.id_programa "
+			+ "JOIN tbl_planes tp ON tp.id_plan = tfdp.id_plan "
+			+ "JOIN tbl_malla_curricular tmc ON tmc.id = tfdp.id_eje_capacitacion "
+			+ "LEFT JOIN tbl_malla_curricular tmc2 ON tmc2.id = tmc.id_padre "
+			+ "JOIN cat_estado_evento_capacitacion ceec ON ceec.id = te.id_estatus_ec "
+			+ "WHERE te.cve_evento_cap LIKE CONCAT('%', :anioPeriodo, '-', :numeroElementos, '%') "
+			+ "AND te.id_programa IN (:idsPrograma) "
+			+ "ORDER BY tp.nombre, tmc2.nombre, tmc.nombre, te.nombre_ec", nativeQuery = true)
+	public List<Object[]> buscarEventosParaCambioEstatus(@Param("anioPeriodo") String anioPeriodo,
+			@Param("numeroElementos") String numeroElementos, @Param("idsPrograma") List<Integer> idsPrograma);
+
+	@Modifying(clearAutomatically = true)
+	@Query("UPDATE TblEvento e SET e.catEstadoEventoCapacitacion.id = :idEstatus WHERE e.id IN (:idsEvento)")
+	public int cambiarEstatusEventos(@Param("idEstatus") Integer idEstatus, @Param("idsEvento") List<Integer> idsEvento);
 }
