@@ -21,13 +21,24 @@ import javax.faces.bean.ViewScoped;
 
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
+import mx.gob.sedesol.basegestor.commons.dto.admin.AsentamientoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.CapturaPersonaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.DomicilioPersonaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.EntidadFederativaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaCorreoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDatosAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.FuenteExternaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.RolDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.TipoCorreoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.UsuarioDatosLaboralesDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.MunicipioDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
@@ -49,8 +60,24 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
             "correo_institucional_sige", "fecha_nacimiento_sige", "curp_sige", "nivel_sige", "persona_id_sige",
             "perfil_id_sige");
     private static final int MAX_PARAMETROS_BUSQUEDA = 2;
+    private static final Integer ID_SEDE_DEFAULT = 11;
+    private static final String ID_PAIS_DEFAULT = ConstantesGestor.ID_PAIS_MEXICO;
+    private static final String ID_ASENTAMIENTO_DEFAULT = "100010407";
+    private static final String ID_ENTIDAD_FEDERATIVA_DEFAULT = "01";
+    private static final String ENTIDAD_FEDERATIVA_DEFAULT = "Mexico";
+    private static final String ID_MUNICIPIO_DEFAULT = "12";
+    private static final String MUNICIPIO_DEFAULT = "Patriotismo";
+    private static final String ID_DEPENDENCIA_DEFAULT = "2-00";
+    private static final String CLAVE_DEPENDENCIA_DEFAULT = "11";
+    private static final String DEPENDENCIA_DEFAULT = "Dependencia";
+    private static final String ID_UNIDAD_ADMINISTRATIVA_DEFAULT = "11";
+    private static final String CALLE_DEFAULT = "Reforma";
+    private static final String NUMERO_EXTERIOR_DEFAULT = "001";
+    private static final String INSTITUCION_DEFAULT = "UNADM";
     private static final String MENSAJE_IMPORTACION_IGNORADA =
             "La matrícula/usuario ya existe en tbl_persona_sige. El registro se ignoró.";
+    private static final String MENSAJE_ERROR_REGISTRO_AUTOMATICO =
+            "No se pudo registrar al usuario en el sistema.";
 
     @ManagedProperty("#{personaServiceFacade}")
     private transient PersonaServiceFacade personaServiceFacade;
@@ -65,6 +92,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
     private transient SistemaBean sistema;
 
     private static final Logger LOGGER = Logger.getLogger(NuevaAltaUsuariosBean.class);
+    private transient BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     private List<SelectImportarDTO> listaFuentesExternas;
     private List<SelectImportarDTO> listaPlanes;
@@ -314,21 +342,11 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         }
 
         LOGGER.info(String.format("Iniciando alta de usuario con matrícula %s", matriculaNuevaAlta));
-        Optional<Long> idPersona = personaServiceFacade.getPersonaService()
-                .obtenerIdPersonaPorMatricula(matriculaNuevaAlta.trim());
-
-        if (!idPersona.isPresent()) {
-            LOGGER.warn("No se encontró la matrícula ingresada");
-            mostrarDialogoError(obtenerTextoSistema("gw.gestionescolar.altasbajas.nuevaAlta.modal.matriculaIngresadaNoEncontrada"));
-            return;
-        }
-
-        PersonaDTO persona = personaServiceFacade.obtenerPersonaPorId(idPersona.get());
+        PersonaDTO persona = obtenerPersonaParaMatriculacion(matriculaNuevaAlta != null ? matriculaNuevaAlta.trim() : null);
         if (ObjectUtils.isNull(persona)) {
-            LOGGER.warn("No se encontró la información del usuario");
-            mostrarDialogoError(obtenerTextoSistema("gw.gestionescolar.altasbajas.nuevaAlta.modal.informacionNoEncontrada"));
             return;
         }
+        Long idPersona = persona.getIdPersona();
 
         Integer idEvento = parseEntero(eventoSeleccionado);
         Integer idGrupo = parseEntero(grupoSeleccionado);
@@ -348,7 +366,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
             return;
         }
 
-        if (yaEstaMatriculado(idEvento, idPersona.get())) {
+        if (yaEstaMatriculado(idEvento, idPersona)) {
             LOGGER.info("El usuario ya está matriculado en el evento seleccionado");
             mostrarDialogoError(obtenerTextoSistema("gw.gestionescolar.altasbajas.nuevaAlta.modal.usuarioYaMatriculadoEvento"));
             return;
@@ -364,7 +382,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
             return;
         }
 
-        LOGGER.info(String.format("Matriculando usuario %s en evento %s y grupo %s", idPersona.get(), idEvento,
+        LOGGER.info(String.format("Matriculando usuario %s en evento %s y grupo %s", idPersona, idEvento,
                 idGrupo));
         RelGrupoParticipanteDTO participante = eventoCapacitacionServiceFacade.almacenarParticipante(grupo, persona,
                 evento, parametroWSMoodleDTO);
@@ -378,6 +396,156 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
         LOGGER.info("Alta registrada correctamente");
         mostrarDialogoExito(obtenerTextoSistema("gw.gestionescolar.altasbajas.nuevaAlta.modal.altaAplicada"));
         limpiarFormulario();
+    }
+
+    private PersonaDTO obtenerPersonaParaMatriculacion(String matriculaOUsuario) {
+        Optional<Long> idPersona = personaServiceFacade.getPersonaService().obtenerIdPersonaPorMatricula(matriculaOUsuario);
+
+        if (idPersona.isPresent()) {
+            PersonaDTO personaExistente = personaServiceFacade.obtenerPersonaPorId(idPersona.get());
+            if (ObjectUtils.isNull(personaExistente)) {
+                LOGGER.warn("No se encontró la información del usuario existente en tbl_persona");
+                mostrarDialogoError(obtenerTextoSistema("gw.gestionescolar.altasbajas.nuevaAlta.modal.informacionNoEncontrada"));
+            }
+            return personaExistente;
+        }
+
+        PersonaSigeDTO personaSige = personaSigeService.buscarPorMatricula(matriculaOUsuario);
+        if (ObjectUtils.isNull(personaSige)) {
+            LOGGER.warn("No se encontró la matrícula/usuario en tbl_persona ni en tbl_persona_sige");
+            mostrarDialogoError(obtenerTextoSistema("gw.gestionescolar.altasbajas.nuevaAlta.modal.informacionNoEncontrada"));
+            return null;
+        }
+
+        return registrarPersonaDesdeSige(personaSige);
+    }
+
+    private PersonaDTO registrarPersonaDesdeSige(PersonaSigeDTO personaSige) {
+        try {
+            CapturaPersonaDTO datos = construirCapturaPersonaDesdeSige(personaSige);
+            ResultadoDTO<PersonaDTO> resultado = personaServiceFacade.guardarPersona(datos);
+
+            if (ObjectUtils.isNull(resultado) || !resultado.esCorrecto() || ObjectUtils.isNull(resultado.getDto())
+                    || ObjectUtils.isNull(resultado.getDto().getIdPersona())) {
+                LOGGER.error(String.format("No se pudo registrar automáticamente al usuario %s desde tbl_persona_sige",
+                        personaSige.getMatricula()));
+                mostrarDialogoError(obtenerMensajeErrorRegistro(resultado));
+                return null;
+            }
+
+            LOGGER.info(String.format("Usuario %s registrado automáticamente en tbl_persona", personaSige.getMatricula()));
+            return personaServiceFacade.obtenerPersonaPorId(resultado.getDto().getIdPersona());
+        } catch (Exception e) {
+            LOGGER.error("Error al registrar automáticamente al usuario desde tbl_persona_sige", e);
+            mostrarDialogoError(MENSAJE_ERROR_REGISTRO_AUTOMATICO);
+            return null;
+        }
+    }
+
+    private CapturaPersonaDTO construirCapturaPersonaDesdeSige(PersonaSigeDTO personaSige) {
+        Long usuarioModifico = getUsuarioEnSession().getIdPersona();
+        EntidadFederativaDTO sede = personaServiceFacade.getEntidadFederativaService().buscarPorId(ID_SEDE_DEFAULT);
+        List<MunicipioDTO> municipios = personaServiceFacade.getMunicipioService()
+                .buscarPorEntidadFederativa(ID_SEDE_DEFAULT);
+        AsentamientoDTO asentamiento = personaServiceFacade.getAsentamientoService().buscarPorId(ID_ASENTAMIENTO_DEFAULT);
+
+        CapturaPersonaDTO datos = new CapturaPersonaDTO();
+        PersonaDTO persona = crearPersonaDesdeSige(personaSige, usuarioModifico);
+        datos.setPersona(persona);
+        datos.setRoles(obtenerRolesPorDefectoAlumno());
+        datos.setDatosAcademicos(new PersonaDatosAcademicoDTO());
+        datos.setDomicilioPersona(crearDomicilioPorDefecto(asentamiento, usuarioModifico, datos));
+        datos.setDatosLaborales(crearDatosLaboralesPorDefecto(persona, sede, municipios));
+        datos.setPersonaCorreo(crearCorreoPersona(usuarioModifico, datos));
+        datos.getPersona().setContraseniaEncriptada(encoder.encode(datos.getPersona().getNuevaContrasenia()));
+        return datos;
+    }
+
+    private PersonaDTO crearPersonaDesdeSige(PersonaSigeDTO personaSige, Long usuarioModifico) {
+        PersonaDTO persona = new PersonaDTO(usuarioModifico, ID_PAIS_DEFAULT);
+        persona.setUsuario(personaSige.getMatricula().toUpperCase());
+        persona.setContrasenia(encoder.encode(personaSige.getPassword()));
+        persona.setNuevaContrasenia(encoder.encode(personaSige.getPassword()));
+        persona.setConfirmacionContrasenia(encoder.encode(personaSige.getPassword()));
+        persona.setContraseniaEncriptada(encoder.encode(personaSige.getPassword()));
+        persona.setCurp(personaSige.getCurp());
+        persona.setUnidadAdministrativa(personaSige.getPassword());
+        persona.setNombre(personaSige.getNombre());
+        persona.setApellidoPaterno(personaSige.getApellidoPaterno());
+        persona.setApellidoMaterno(personaSige.getApellidoMaterno());
+        persona.setFechaNacimiento(personaSige.getFechaNacimiento());
+        if (!esVacio(personaSige.getCurp()) && personaSige.getCurp().length() >= 9) {
+            persona.setRfc(personaSige.getCurp().substring(0, 9));
+        }
+        persona.setCorreoElectronico(personaSige.getCorreoInstitucional());
+        persona.setFuenteExterna(personaSige.getProgramaEducativo());
+        persona.setIdEntidadFederativa(ID_ENTIDAD_FEDERATIVA_DEFAULT);
+        persona.setEntidadFederativa(ENTIDAD_FEDERATIVA_DEFAULT);
+        persona.setIdMunicipio(ID_MUNICIPIO_DEFAULT);
+        persona.setMunicipio(MUNICIPIO_DEFAULT);
+        persona.setIdDependencia(ID_DEPENDENCIA_DEFAULT);
+        persona.setClaveDependencia(CLAVE_DEPENDENCIA_DEFAULT);
+        persona.setDependencia(DEPENDENCIA_DEFAULT);
+        persona.setIdUnidadAdministrativa(ID_UNIDAD_ADMINISTRATIVA_DEFAULT);
+        persona.setSso_status(String.valueOf(personaSige.getIdPersonaSige()));
+        return persona;
+    }
+
+    private UsuarioDatosLaboralesDTO crearDatosLaboralesPorDefecto(PersonaDTO persona, EntidadFederativaDTO sede,
+            List<MunicipioDTO> municipios) {
+        UsuarioDatosLaboralesDTO datosLaborales = new UsuarioDatosLaboralesDTO(persona);
+        datosLaborales.setInstitucion(INSTITUCION_DEFAULT);
+        datosLaborales.setSede(sede);
+        if (municipios != null && !municipios.isEmpty()) {
+            datosLaborales.setMunicipio(municipios.get(0));
+        }
+        datosLaborales.setFechaIngreso(persona.getFechaActualizacion());
+        return datosLaborales;
+    }
+
+    private PersonaCorreoDTO crearCorreoPersona(Long usuarioModifico, CapturaPersonaDTO datos) {
+        PersonaCorreoDTO correo = new PersonaCorreoDTO(usuarioModifico, ConstantesGestor.TIPO_CORREO_INSTITUCIONAL);
+        TipoCorreoDTO tipoCorreo = new TipoCorreoDTO();
+        tipoCorreo.setDescripcion("Correo");
+        tipoCorreo.setIdTipoCorreo(ConstantesGestor.TIPO_CORREO_INSTITUCIONAL);
+        tipoCorreo.setActivo(1);
+        correo.setCorreoElectronico(datos.getPersona().getCorreoElectronico());
+        correo.setPersona(datos.getPersona());
+        correo.setTipoCorreo(tipoCorreo);
+        return correo;
+    }
+
+    private DomicilioPersonaDTO crearDomicilioPorDefecto(AsentamientoDTO asentamiento, Long usuarioModifico,
+            CapturaPersonaDTO datos) {
+        DomicilioPersonaDTO domicilio = new DomicilioPersonaDTO(usuarioModifico, ID_PAIS_DEFAULT);
+        domicilio.setAsentamiento(asentamiento);
+        domicilio.setPersona(datos.getPersona());
+        domicilio.setIdMunicipio("11");
+        domicilio.setIdEntidadFederativa(11);
+        domicilio.setCalle(CALLE_DEFAULT);
+        domicilio.setNumeroExterior(NUMERO_EXTERIOR_DEFAULT);
+        return domicilio;
+    }
+
+    private List<RolDTO> obtenerRolesPorDefectoAlumno() {
+        List<RolDTO> roles = new ArrayList<>();
+        RolDTO rolAlumno = personaServiceFacade.obtenerRolAlumno();
+        if (ObjectUtils.isNotNull(rolAlumno)) {
+            roles.add(rolAlumno);
+        }
+        return roles;
+    }
+
+    private String obtenerMensajeErrorRegistro(ResultadoDTO<PersonaDTO> resultado) {
+        if (ObjectUtils.isNotNull(resultado)) {
+            if (!esVacio(resultado.getMensaje())) {
+                return resultado.getMensaje();
+            }
+            if (ObjectUtils.isNotNull(resultado.getMensajeError())) {
+                return obtenerTextoSistema(resultado.getMensajeError().getId());
+            }
+        }
+        return MENSAJE_ERROR_REGISTRO_AUTOMATICO;
     }
 
     private ParametroWSMoodleDTO obtenerParametrosMoodle(EventoCapacitacionDTO evento) {
