@@ -149,10 +149,11 @@ public class PlanBean extends BaseBean {
 
 			plan = (PlanDTO) getSession().getAttribute(ConstantesGestorWeb.OBJ_PLAN_SELEC);
 			this.llenaRelacionesPlanSel(plan);
-			if (ObjectUtils.isNotNull(plan)) {
-				getSession().removeAttribute(ConstantesGestorWeb.OBJ_PLAN_SELEC);
-				mallaPlan = mallaPlanService.findByIdPlan(plan.getIdPlan());
-			}
+				if (ObjectUtils.isNotNull(plan)) {
+					getSession().removeAttribute(ConstantesGestorWeb.OBJ_PLAN_SELEC);
+					mallaPlan = mallaPlanService.findByIdPlan(plan.getIdPlan());
+					plan.setCreditosTotales(planServiceFacade.obtenerCreditosTotalesPorPlan(plan.getIdPlan()));
+				}
 
 		} else {
 			// Flujo Nuevo Plan
@@ -187,8 +188,9 @@ public class PlanBean extends BaseBean {
 			plan.setCatModalidadPlanPrograma(new CatalogoComunDTO());
 			plan.setCatNivelEnsenanzaPrograma(new CatalogoComunDTO());
 			plan.setCatDivisionesPlan(new CatalogoComunDTO());
-			plan.setCatTipoCompetencia(this.getValorDeCatalogo(catTipoCompetencia, 1));
-			plan.setPonderacion(true);
+				plan.setCatTipoCompetencia(this.getValorDeCatalogo(catTipoCompetencia, 1));
+				plan.setPonderacion(true);
+				plan.setCreditosTotales(0L);
 
 			filtroPlan = new PlanDTO();
 			setEdicionPlan(Boolean.FALSE);

@@ -63,6 +63,10 @@ public interface IinscripcionRepository {
 
 	Optional<CreditosTotalesPlanDTO> obtenerCreditosTotalesPorPlan(Long idPlan);
 
+	void guardarCreditosTotalesPorPlan(Long idPlan, Long totalCreditos);
+
+	void actualizarCreditosTotalesPorPlan(Long idPlan, Long totalCreditos);
+
 	Optional<EstadoInscripcionEstudianteDTO> obtenerEstadoInscripcionEstudiante(Long idPersona,
 			Long idProcesoInscripcion);
 	

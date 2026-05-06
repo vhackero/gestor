@@ -3,6 +3,7 @@ package mx.gob.sedesol.basegestor.service.gestionescolar;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ActaDTO;
 import mx.gob.sedesol.basegestor.service.admin.CommonService;
+import java.util.List;
 
 /**
  *  ACTAS
@@ -16,5 +17,6 @@ public interface ActaService extends CommonService<ActaDTO, Integer>{
 	public ResultadoDTO<ActaDTO> eliminar(ActaDTO dto);
 	public ActaDTO getActaByGrupoUser(int idGrupo, long idUser);
 	public ActaDTO getActaByIdGrupo(int idGrupo) ;
+	public List<ActaDTO> getActasByIdGrupo(int idGrupo);
 
 }

@@ -50,7 +50,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             mensajeError = e.getMessage();
         } catch (Exception e) {
             logger.error("Error inesperado al cargar la tabla curricular asistida.", e);
-            mensajeError = "Ocurrió un error al cargar la tabla curricular asistida.";
+            mensajeError = "Ocurrió un error al cargar el asistente de inscripción curricular.";
         }
     }
 
@@ -59,7 +59,8 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             return;
         }
 
-        Map<Integer, List<UnidadDecisionInscripcionDTO>> porSemestre = contexto.getUnidades().stream()
+        List<UnidadDecisionInscripcionDTO> unidadesVisibles = filtrarUnidadesSimulador(contexto.getUnidades());
+        Map<Integer, List<UnidadDecisionInscripcionDTO>> porSemestre = unidadesVisibles.stream()
                 .sorted(Comparator
                         .comparing(UnidadDecisionInscripcionDTO::getSemestre, Comparator.nullsLast(Integer::compareTo))
                         .thenComparing(UnidadDecisionInscripcionDTO::getBloque, Comparator.nullsLast(Integer::compareTo))
@@ -78,6 +79,38 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                     .collect(Collectors.toList()));
             semestres.add(semestre);
         }
+    }
+
+    private List<UnidadDecisionInscripcionDTO> filtrarUnidadesSimulador(List<UnidadDecisionInscripcionDTO> unidades) {
+        if (unidades == null || unidades.isEmpty() || contexto == null || !Boolean.TRUE.equals(contexto.getInscripcionVigente())) {
+            return unidades != null ? unidades : new ArrayList<UnidadDecisionInscripcionDTO>();
+        }
+        Integer semestreReferencia = obtenerSemestreReferenciaSimulador(unidades);
+        if (semestreReferencia == null) {
+            return unidades;
+        }
+        final int paridadObjetivo = semestreReferencia.intValue() % 2;
+        List<UnidadDecisionInscripcionDTO> filtradas = unidades.stream()
+                .filter(unidad -> unidad != null && unidad.getSemestre() != null
+                        && unidad.getSemestre().intValue() % 2 == paridadObjetivo)
+                .collect(Collectors.toList());
+        return filtradas.isEmpty() ? unidades : filtradas;
+    }
+
+    private Integer obtenerSemestreReferenciaSimulador(List<UnidadDecisionInscripcionDTO> unidades) {
+        Integer maximo = null;
+        if (unidades == null) {
+            return null;
+        }
+        for (UnidadDecisionInscripcionDTO unidad : unidades) {
+            if (unidad == null || unidad.getSemestre() == null) {
+                continue;
+            }
+            if (maximo == null || unidad.getSemestre().intValue() > maximo.intValue()) {
+                maximo = unidad.getSemestre();
+            }
+        }
+        return maximo;
     }
 
     private FilaAsistidaDTO convertirAFila(UnidadDecisionInscripcionDTO unidad) {
@@ -186,6 +219,34 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         this.resultadoSimulacion = resultadoSimulacion;
     }
 
+    public boolean isEscenarioBajaTemporalOParcial() {
+        return contexto != null
+                && contexto.getDiagnosticoActual() != null
+                && valor(contexto.getDiagnosticoActual().getMateriasConBaja()) > 0
+                && valor(contexto.getDiagnosticoActual().getMateriasReprobadasActivas()) == 0;
+    }
+
+    public int getConteoIncidenciasSituacion() {
+        if (contexto == null || contexto.getDiagnosticoActual() == null) {
+            return 0;
+        }
+        return isEscenarioBajaTemporalOParcial()
+                ? valor(contexto.getDiagnosticoActual().getMateriasConBaja())
+                : valor(contexto.getDiagnosticoActual().getMateriasReprobadasActivas());
+    }
+
+    public String getEtiquetaIncidenciaSituacion() {
+        return isEscenarioBajaTemporalOParcial() ? "UD no presentada(s)" : "UD no acreditada(s)";
+    }
+
+    public String getTituloIndicadorIncidencias() {
+        return isEscenarioBajaTemporalOParcial() ? "UD no presentadas activas" : "UD no acreditadas activas";
+    }
+
+    private int valor(Integer numero) {
+        return numero != null ? numero.intValue() : 0;
+    }
+
     public AsistenteInscripcionService getAsistenteInscripcionService() {
         return asistenteInscripcionService;
     }
@@ -271,8 +332,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         if ("OPCIONAL".equalsIgnoreCase(estado) || "ALTERNATIVA".equalsIgnoreCase(estado)) {
             return "estado-opcional";
         }
-        if ("REPROBADA".equalsIgnoreCase(estado)) {
+        if ("REPROBADA".equalsIgnoreCase(estado) || "NO_ACREDITADA".equalsIgnoreCase(estado)) {
             return "estado-alerta";
+        }
+        if ("POR_CURSAR".equalsIgnoreCase(estado)) {
+            return "estado-neutro";
         }
         if ("PRIORITARIA".equalsIgnoreCase(estado)) {
             return "estado-prioritaria";

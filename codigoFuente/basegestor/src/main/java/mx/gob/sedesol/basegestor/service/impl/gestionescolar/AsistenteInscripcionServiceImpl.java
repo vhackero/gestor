@@ -123,12 +123,12 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         CreditosTotalesPlanDTO creditosPlan = contextoBase.getCreditosTotalesPlan();
 
         if (estado != null) {
-            dto.setSituacionAcademicaPeriodo(Boolean.TRUE.equals(estado.getEsRegular()) ? "Regular" : "Irregular");
+            dto.setSituacionAcademicaPeriodo(esSituacionRegular(estado) ? "Regular" : "Irregular");
             dto.setSubtipoSituacionAcademica(Boolean.TRUE.equals(estado.getEsNuevoIngreso()) ? "Nuevo ingreso" : "Reingreso");
             dto.setPorcentajeCreditosCompletados(estado.getPorcentajeCreditosCompletados());
-            dto.setTotalReprobadasAcumuladas(Integer.valueOf(calcularTotalReprobadasAcumuladas(estado)));
+            dto.setTotalReprobadasAcumuladas(Integer.valueOf(contarReprobadasReales(estado)));
             dto.setRestriccionCuatroOMasReprobadas(Boolean.valueOf(
-                    calcularTotalReprobadasAcumuladas(estado) >= TOTAL_REPROBADAS_RESTRICCION_SEVERA));
+                    contarReprobadasReales(estado) >= TOTAL_REPROBADAS_RESTRICCION_SEVERA));
             dto.setReglaCargaFijaNuevoIngreso(Boolean.valueOf(esReglaCargaFijaNuevoIngresoAplicable(contextoBase)));
         }
 
@@ -242,17 +242,17 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         DiagnosticoAcademicoDTO dto = new DiagnosticoAcademicoDTO();
         EstadoAcademicoDTO estado = contextoBase.getEstadoAcademico();
 
-        int reprobadas = estado != null && estado.getMateriasReprobadas() != null ? estado.getMateriasReprobadas().size() : 0;
-        int bajas = estado != null && estado.getMateriasBajas() != null ? estado.getMateriasBajas().size() : 0;
+        int reprobadas = contarReprobadasReales(estado);
+        int bajas = contarBajasTemporalesOParciales(estado);
         int enCurso = materiasEnCurso != null ? materiasEnCurso.size() : 0;
         int criticas = (int) contexto.getUnidades().stream()
                 .filter(u -> Boolean.TRUE.equals(u.getPrioritaria()) || !u.getDesbloquea().isEmpty())
                 .count();
         int bloqueadas = (int) contexto.getUnidades().stream()
-                .filter(u -> Boolean.TRUE.equals(u.getBloqueada()) || Boolean.TRUE.equals(u.getCondicionada()))
+                .filter(this::esUnidadConSeriacionCurricular)
                 .count();
 
-        dto.setRegular(estado != null ? estado.getEsRegular() : Boolean.TRUE);
+        dto.setRegular(Boolean.valueOf(esSituacionRegular(estado)));
         dto.setMateriasEnCurso(Integer.valueOf(enCurso));
         dto.setMateriasReprobadasActivas(reprobadas);
         dto.setMateriasConBaja(bajas);
@@ -277,7 +277,9 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             }
         }
 
-        if (reprobadas > 0) {
+        if (bajas > 0 && reprobadas == 0) {
+            dto.getAlertas().add("El Estudiante presenta " + bajas + " UD no presentada(s) activa(s).");
+        } else if (reprobadas > 0) {
             dto.getAlertas().add("El Estudiante presenta " + reprobadas + " UD reprobada(s) activa(s).");
         }
         if (enCurso > 0) {
@@ -293,7 +295,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             dto.getAlertas().add("Las UD reprobadas activas no están ofertadas; en este escenario la carga académica complementaria debe concentrarse en UD optativas.");
         }
         if (bloqueadas > 0) {
-            dto.getAlertas().add("Hay " + bloqueadas + " UD condicionada(s) o bloqueada(s) por seriación curricular.");
+            dto.getAlertas().add("Hay " + bloqueadas + " UD con seriación curricular pendiente.");
         }
 
         return dto;
@@ -327,6 +329,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         aplicarRestriccionesReprobadasNoOfertadas(ud, contextoBase);
         aplicarRestriccionesBajaParcial(ud, materia, contextoBase);
         aplicarRestriccionesElectivas(ud, materia, contextoBase);
+        normalizarUnidadReprobadaOfertada(ud, materia, contextoBase);
 
         ud.setMotivos(construirMotivos(materia, contextoBase));
         if (esMateriaSimulada(materia)) {
@@ -739,17 +742,26 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         if (contieneMateriaCursadaAprobada(estado, materia)) {
             return "ACREDITADA";
         }
-        if (contieneMateriaReprobada(estado, materia)) {
-            return "REPROBADA";
-        }
         if (contieneMateriaBaja(estado, materia)) {
             return "BAJA";
+        }
+        if (contieneMateriaReprobada(estado, materia)) {
+            return "NO_ACREDITADA";
         }
         return "NO_INSCRITA";
     }
 
     private String resolverEstatusPeriodo(InscripcionMateriasDTO materia, InscripcionContextoDTO contextoBase) {
         if (Boolean.TRUE.equals(materia.getDisabled())) {
+            if (contieneMateriaBaja(contextoBase.getEstadoAcademico(), materia)) {
+                return "BAJA";
+            }
+            if (contieneMateriaReprobada(contextoBase.getEstadoAcademico(), materia)) {
+                return "NO_ACREDITADA";
+            }
+            if (debeMostrarseComoPorCursar(materia, contextoBase)) {
+                return "POR_CURSAR";
+            }
             return "BLOQUEADA";
         }
         if (Boolean.TRUE.equals(esPrioritaria(materia, contextoBase))) {
@@ -769,22 +781,14 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         if (esMateriaConBajaParcial(materia, contextoBase)) {
             return Boolean.TRUE;
         }
-        if (estado == null || Boolean.TRUE.equals(estado.getEsNuevoIngreso()) || Boolean.TRUE.equals(estado.getEsRegular())
-                || Boolean.TRUE.equals(materia.getDisabled())) {
+        if (estado == null || Boolean.TRUE.equals(estado.getEsNuevoIngreso()) || Boolean.TRUE.equals(estado.getEsRegular())) {
             return Boolean.FALSE;
         }
 
-        if (estado.getMateriasReprobadas() == null) {
+        if (!esMateriaReprobada(materia, estado)) {
             return Boolean.FALSE;
         }
-
-        for (InscripcionMateriasReprobadasDTO reprobada : estado.getMateriasReprobadas()) {
-            if (esMismaMateria(materia.getIdPrograma(), reprobada.getIdPrograma(), materia.getClavePrograma(),
-                    reprobada.getClavePrograma())) {
-                return Boolean.TRUE;
-            }
-        }
-        return Boolean.FALSE;
+        return Boolean.TRUE;
     }
 
     private Boolean esRecomendada(InscripcionMateriasDTO materia, InscripcionContextoDTO contextoBase) {
@@ -817,6 +821,16 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     private List<MotivoDecisionDTO> construirMotivos(InscripcionMateriasDTO materia, InscripcionContextoDTO contextoBase) {
         List<MotivoDecisionDTO> motivos = new ArrayList<MotivoDecisionDTO>();
 
+        if (contieneMateriaBaja(contextoBase != null ? contextoBase.getEstadoAcademico() : null, materia)) {
+            motivos.add(new MotivoDecisionDTO(
+                    "UD_CON_BAJA",
+                    "ALTA",
+                    "UD con baja registrada",
+                    "La UD registra una baja temporal o parcial en tu trayectoria académica; para efectos de seguimiento académico se considera no presentada.",
+                    "Valida la reincorporación oportuna y el momento correcto para reinscribirla.",
+                    Boolean.FALSE));
+        }
+
         if (Boolean.TRUE.equals(esPrioritaria(materia, contextoBase))) {
             if (esMateriaConBajaParcial(materia, contextoBase)) {
                 motivos.add(new MotivoDecisionDTO(
@@ -830,8 +844,8 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             motivos.add(new MotivoDecisionDTO(
                     "REINSCRIPCION_REPROBADA",
                     "ALTA",
-                    "Debe atenderse primero",
-                    "La UD fue reprobada y está disponible en este periodo, por lo que tiene prioridad de reinscripción.",
+                    "No acreditada; debe atenderse primero",
+                    "La UD no fue acreditada y está disponible en este periodo, por lo que tiene prioridad de reinscripción.",
                     "Inclúyela dentro de tu carga mínima.",
                     Boolean.FALSE));
             }
@@ -851,8 +865,8 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             motivos.add(new MotivoDecisionDTO(
                     "SERIACION_NO_ACREDITADA",
                     "ALTA",
-                    "Tiene seriación",
-                    "La UD requiere acreditar previamente una UD antecedente o mantiene una relación activa de seriación.",
+                    "Tiene seriación curricular",
+                    "La UD requiere acreditar previamente una UD antecedente o mantiene una relación activa de seriación curricular.",
                     "Consulta la UD antecedente y su estatus académico.",
                     Boolean.TRUE));
         }
@@ -927,6 +941,20 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         return "";
     }
 
+    private boolean debeMostrarseComoPorCursar(InscripcionMateriasDTO materia, InscripcionContextoDTO contextoBase) {
+        EstadoAcademicoDTO estado = contextoBase != null ? contextoBase.getEstadoAcademico() : null;
+        return estado != null
+                && Boolean.TRUE.equals(estado.getEsRegular())
+                && !contieneMateriaReprobada(estado, materia)
+                && !contieneMateriaBaja(estado, materia)
+                && !Boolean.TRUE.equals(esPrioritaria(materia, contextoBase));
+    }
+
+    private boolean esUnidadConSeriacionCurricular(UnidadDecisionInscripcionDTO unidad) {
+        return unidad != null && unidad.getRequiere() != null && !unidad.getRequiere().isEmpty()
+                && (Boolean.TRUE.equals(unidad.getBloqueada()) || Boolean.TRUE.equals(unidad.getCondicionada()));
+    }
+
     private Integer obtenerCreditosMateria(InscripcionMateriasDTO materia, EstadoAcademicoDTO estado,
             Map<Long, Integer> creditosPorPrograma) {
         if (materia.getIdPrograma() != null && creditosPorPrograma.containsKey(materia.getIdPrograma())) {
@@ -970,10 +998,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     }
 
     private int calcularTotalReprobadasAcumuladas(EstadoAcademicoDTO estado) {
-        if (estado == null || estado.getMateriasReprobadas() == null) {
-            return 0;
-        }
-        return estado.getMateriasReprobadas().size();
+        return contarReprobadasReales(estado);
     }
 
     private Double calcularPromedioPronosticado(InscripcionContextoDTO contextoBase) {
@@ -1006,7 +1031,11 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     }
 
     private boolean contieneMateriaReprobada(EstadoAcademicoDTO estado, InscripcionMateriasDTO materia) {
-        if (estado == null || estado.getMateriasReprobadas() == null) {
+        return esMateriaReprobada(materia, estado);
+    }
+
+    private boolean esMateriaReprobada(InscripcionMateriasDTO materia, EstadoAcademicoDTO estado) {
+        if (materia == null || estado == null || estado.getMateriasReprobadas() == null) {
             return false;
         }
         for (InscripcionMateriasReprobadasDTO reprobada : estado.getMateriasReprobadas()) {
@@ -1078,6 +1107,9 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         if (unidad == null || unidad.getTipoUd() == null || !InscripcionUtils.esMateriaObligatoria(unidad.getTipoUd())) {
             return;
         }
+        if ("NO_ACREDITADA".equalsIgnoreCase(unidad.getEstatusHistorico())) {
+            return;
+        }
 
         boolean actualizada = false;
 
@@ -1134,6 +1166,9 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     private void aplicarRestriccionesReprobadasNoOfertadas(UnidadDecisionInscripcionDTO unidad,
             InscripcionContextoDTO contextoBase) {
         if (unidad == null || contextoBase == null || !aplicaEscenarioSoloOptativasPorReprobadasNoOfertadas(contextoBase)) {
+            return;
+        }
+        if ("NO_ACREDITADA".equalsIgnoreCase(unidad.getEstatusHistorico())) {
             return;
         }
 
@@ -1203,6 +1238,22 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
                     "Con una baja parcial optativa activa, la carga académica debe enfocarse en la UD optativa pendiente y en UD obligatorias u optativas del periodo.",
                     "Atiende primero la UD optativa dada de baja antes de desplazar carga académica hacia UD electivas.");
         }
+    }
+
+    private void normalizarUnidadReprobadaOfertada(UnidadDecisionInscripcionDTO unidad, InscripcionMateriasDTO materia,
+            InscripcionContextoDTO contextoBase) {
+        EstadoAcademicoDTO estado = contextoBase != null ? contextoBase.getEstadoAcademico() : null;
+        if (unidad == null || materia == null || estado == null || !esMateriaReprobada(materia, estado)) {
+            return;
+        }
+
+        unidad.setSeleccionable(Boolean.TRUE);
+        unidad.setBloqueada(Boolean.FALSE);
+        unidad.setCondicionada(Boolean.FALSE);
+        unidad.setRecomendada(Boolean.TRUE);
+        unidad.setPrioritaria(Boolean.TRUE);
+        unidad.setEstatusPeriodo("PRIORITARIA");
+        unidad.setPrioridad("ALTA");
     }
 
     private boolean perteneceElectivaAlMismoPlan(InscripcionMateriasDTO materia, InscripcionContextoDTO contextoBase) {
@@ -1591,14 +1642,60 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         if (diagnostico == null) {
             return "";
         }
+        boolean escenarioBaja = valor(diagnostico.getMateriasConBaja()) > 0
+                && valor(diagnostico.getMateriasReprobadasActivas()) == 0;
         return (Boolean.TRUE.equals(diagnostico.getRegular()) ? "Estudiante regular" : "Estudiante irregular")
                 + " con "
-                + valor(diagnostico.getMateriasReprobadasActivas())
-                + " UD reprobada(s), "
+                + (escenarioBaja ? valor(diagnostico.getMateriasConBaja()) : valor(diagnostico.getMateriasReprobadasActivas()))
+                + (escenarioBaja ? " UD no presentada(s), " : " UD reprobada(s), ")
                 + valor(diagnostico.getMateriasBloqueadasPorSeriacion())
                 + " UD bloqueada(s) por seriación curricular y "
                 + valor(diagnostico.getMateriasCriticas())
                 + " UD crítica(s) para la trayectoria académica.";
+    }
+
+    private boolean esSituacionRegular(EstadoAcademicoDTO estado) {
+        return contarReprobadasReales(estado) == 0;
+    }
+
+    private int contarReprobadasReales(EstadoAcademicoDTO estado) {
+        if (estado == null || estado.getMateriasReprobadas() == null) {
+            return 0;
+        }
+        int total = 0;
+        for (InscripcionMateriasReprobadasDTO reprobada : estado.getMateriasReprobadas()) {
+            if (reprobada == null || esMateriaConBaja(reprobada, estado)) {
+                continue;
+            }
+            total++;
+        }
+        return total;
+    }
+
+    private int contarBajasTemporalesOParciales(EstadoAcademicoDTO estado) {
+        if (estado == null || estado.getMateriasBajas() == null) {
+            return 0;
+        }
+        int total = 0;
+        for (InscripcionBajasDTO baja : estado.getMateriasBajas()) {
+            if (baja != null && (esBajaTemporal(baja) || esBajaParcial(baja))) {
+                total++;
+            }
+        }
+        return total;
+    }
+
+    private boolean esMateriaConBaja(InscripcionMateriasReprobadasDTO reprobada, EstadoAcademicoDTO estado) {
+        if (reprobada == null || estado == null || estado.getMateriasBajas() == null) {
+            return false;
+        }
+        for (InscripcionBajasDTO baja : estado.getMateriasBajas()) {
+            if (baja != null && esMismaMateria(reprobada.getIdPrograma(), baja.getIdPrograma(),
+                    reprobada.getClavePrograma(), baja.getClavePrograma())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String construirResumenRiesgos(RiesgoAcademicoDTO riesgos) {
@@ -2749,8 +2846,8 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
                 agregarMotivoSiNoExiste(unidad, new MotivoDecisionDTO(
                         "OPTATIVA_OPCIONAL",
                         "BAJA",
-                        "Optativa opcional",
-                        "La UD sigue disponible en el Programa Educativo, pero ya se cubrió el mínimo requerido de UD optativas, por lo que su cursamiento es opcional.",
+                        "No inscrita, su registro es opcional",
+                        "La UD sigue disponible en el Programa Educativo, pero ya se cubrió el mínimo requerido de UD optativas, por lo que su registro es opcional y no afecta tu trayectoria académica.",
                         "Puedes seleccionarla si deseas ampliar tu trayectoria académica, pero ya no es necesaria para cubrir el mínimo.",
                         Boolean.FALSE));
                 actualizada = true;
