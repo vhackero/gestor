@@ -20,6 +20,7 @@ import javax.faces.bean.ViewScoped;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
@@ -29,6 +30,7 @@ import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaD
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.MallaCurricularDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ObjetoCurricularEnum;
+import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
 import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasService;
 import mx.gob.sedesol.basegestor.service.impl.planesyprogramas.FECServiceFacade;
@@ -100,6 +102,9 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	@ManagedProperty(value = "#{inscripcionPreviaMateriasService}")
 	private InscripcionPreviaMateriasService inscripcionPreviaMateriasService;
 
+	@ManagedProperty(value = "#{grupoParticipanteService}")
+	private GrupoParticipanteService grupoParticipanteService;
+
 	private List<MallaDiagramaNodoDTO> nodos;
 	private int diagramWidth;
 	private int diagramHeight;
@@ -113,6 +118,8 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private double sumaCalificaciones;
 	private int totalCalificaciones;
 	private Set<String> asignaturasEnCurso;
+	private Map<String, Set<String>> ubicacionesOptativasHistoricas;
+	private Map<String, Set<String>> ubicacionesOptativasEnCurso;
 	private Set<Integer> programasConBaja;
 	private Integer semestreEnCurso;
 	private Integer bloqueEnCurso;
@@ -130,6 +137,8 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		sumaCalificaciones = 0d;
 		totalCalificaciones = 0;
 		asignaturasEnCurso = new HashSet<>();
+		ubicacionesOptativasHistoricas = new HashMap<>();
+		ubicacionesOptativasEnCurso = new HashMap<>();
 		programasConBaja = new HashSet<>();
 		semestreEnCurso = null;
 		bloqueEnCurso = null;
@@ -153,6 +162,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 
 		cargarInscripcionesEnCurso(idPersona);
+		cargarUbicacionesHistoricasOptativas(idPersona);
 		ajustarSemestreReferenciaPorTrayectoria(idPersona);
 		construirModelo(raiz, idPersona);
 	}
@@ -170,15 +180,38 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		int maxSemestre = 0;
 		for (InscripcionPreviaMateriasDTO materia : inscritas) {
 			int semestre = parseNumero(materia.getSemestre(), 0);
+			int bloque = parseNumero(materia.getBloque(), 0);
 			if (semestre > maxSemestre) {
 				maxSemestre = semestre;
 			}
 			if (StringUtils.isNotBlank(materia.getAsignatura())) {
-				asignaturasEnCurso.add(normalizaTexto(limpiaAsignatura(materia.getAsignatura())));
+				String nombreNormalizado = normalizaTexto(limpiaAsignatura(materia.getAsignatura()));
+				asignaturasEnCurso.add(nombreNormalizado);
+				if (esProgramaOpcional(materia.getTipoPrograma())) {
+					registrarUbicacionOptativa(ubicacionesOptativasEnCurso, nombreNormalizado, semestre, bloque);
+				}
 			}
 		}
 		if (maxSemestre > 0) {
 			semestreEnCurso = maxSemestre;
+		}
+	}
+
+	private void cargarUbicacionesHistoricasOptativas(Long idPersona) {
+		if (grupoParticipanteService == null) {
+			return;
+		}
+		List<EventoConstanciaDTO> historial = grupoParticipanteService.getParticipanteByActaCerradaYconstancia2(idPersona);
+		if (ObjectUtils.isNullOrEmpty(historial)) {
+			return;
+		}
+		for (EventoConstanciaDTO materia : historial) {
+			if (materia == null || StringUtils.isBlank(materia.getClave()) || StringUtils.isBlank(materia.getnActa())) {
+				continue;
+			}
+			int semestre = extraerSemestreDeActa(materia.getnActa());
+			int bloque = extraerBloqueDeActa(materia.getnActa());
+			registrarUbicacionOptativa(ubicacionesOptativasHistoricas, normalizaTexto(materia.getClave()), semestre, bloque);
 		}
 	}
 
@@ -299,6 +332,9 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 						}
 						idxMateriaMalla++;
 					}
+					if (!debeMostrarsePrograma(programa, nombrePrograma, numeroSemestre, numeroBloque)) {
+						continue;
+					}
 					int programaX = x + PROGRAMA_X_OFFSET + ((NODE_WIDTH - PROGRAMA_WIDTH) / 2);
 					int programaHeight = estimaAlto(nombrePrograma, PROGRAMA_BASE_HEIGHT);
 					String programaId = nextElementId(ID_PROGRAMA_PREFIX, programa.getIdPrograma(), secuenciaLocal++);
@@ -313,8 +349,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 							idPrograma);
 					programaNodo.setCreditos(programa.getCreditos());
 					programaNodo.setTextoCompacto(resolveTextoCompacto(programa, nombrePrograma));
-					if (StringUtils.isNotBlank(nombrePrograma)
-							&& asignaturasEnCurso.contains(normalizaTexto(nombrePrograma))) {
+					if (estaProgramaEnCurso(programa, nombrePrograma, numeroSemestre, numeroBloque)) {
 						programaNodo.setEnCurso(true);
 					}
 					acumularCreditos(programa.getTipo(), programa.getCreditos(),
@@ -566,6 +601,107 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		} catch (NumberFormatException ex) {
 			return fallback;
 		}
+	}
+
+	private int extraerSemestreDeActa(String textoActa) {
+		if (StringUtils.isBlank(textoActa)) {
+			return 0;
+		}
+		String compacta = textoActa.toUpperCase().replaceAll("\\s+", "");
+		java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("B(\\d+)S(\\d+)").matcher(compacta);
+		if (matcher.find()) {
+			return parseNumero(matcher.group(2), 0);
+		}
+		return 0;
+	}
+
+	private int extraerBloqueDeActa(String textoActa) {
+		if (StringUtils.isBlank(textoActa)) {
+			return 0;
+		}
+		String compacta = textoActa.toUpperCase().replaceAll("\\s+", "");
+		java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("B(\\d+)S(\\d+)").matcher(compacta);
+		if (matcher.find()) {
+			return parseNumero(matcher.group(1), 0);
+		}
+		return 0;
+	}
+
+	private boolean debeMostrarsePrograma(FichaDescProgramaDTO programa, String nombrePrograma,
+			int numeroSemestre, int numeroBloque) {
+		if (!esProgramaOpcional(programa != null ? programa.getTipo() : null)) {
+			return true;
+		}
+		String ubicacionActual = construirClaveUbicacion(numeroSemestre, numeroBloque);
+		Set<String> ubicacionesHistoricas = obtenerUbicacionesOptativas(ubicacionesOptativasHistoricas, programa, nombrePrograma);
+		if (!ubicacionesHistoricas.isEmpty()) {
+			return ubicacionesHistoricas.contains(ubicacionActual);
+		}
+		Set<String> ubicacionesEnCurso = obtenerUbicacionesOptativas(ubicacionesOptativasEnCurso, programa, nombrePrograma);
+		if (!ubicacionesEnCurso.isEmpty()) {
+			return ubicacionesEnCurso.contains(ubicacionActual);
+		}
+		return true;
+	}
+
+	private boolean estaProgramaEnCurso(FichaDescProgramaDTO programa, String nombrePrograma,
+			int numeroSemestre, int numeroBloque) {
+		String nombreNormalizado = normalizaTexto(nombrePrograma);
+		if (!esProgramaOpcional(programa != null ? programa.getTipo() : null)) {
+			return StringUtils.isNotBlank(nombrePrograma) && asignaturasEnCurso.contains(nombreNormalizado);
+		}
+		String ubicacionActual = construirClaveUbicacion(numeroSemestre, numeroBloque);
+		Set<String> ubicacionesEnCurso = obtenerUbicacionesOptativas(ubicacionesOptativasEnCurso, programa, nombrePrograma);
+		return ubicacionesEnCurso.contains(ubicacionActual);
+	}
+
+	private boolean esProgramaOpcional(String tipoPrograma) {
+		if (StringUtils.isBlank(tipoPrograma)) {
+			return false;
+		}
+		String tipo = normalizaTexto(tipoPrograma);
+		return tipo.contains("optativa") || tipo.contains("opcional");
+	}
+
+	private void registrarUbicacionOptativa(Map<String, Set<String>> ubicacionesPorClave, String clave,
+			int semestre, int bloque) {
+		if (ubicacionesPorClave == null || StringUtils.isBlank(clave) || semestre <= 0 || bloque <= 0) {
+			return;
+		}
+		ubicacionesPorClave.computeIfAbsent(clave, key -> new HashSet<>())
+				.add(construirClaveUbicacion(semestre, bloque));
+	}
+
+	private Set<String> obtenerUbicacionesOptativas(Map<String, Set<String>> ubicacionesPorClave,
+			FichaDescProgramaDTO programa, String nombrePrograma) {
+		Set<String> ubicaciones = new HashSet<>();
+		for (String clave : construirClavesPrograma(programa, nombrePrograma)) {
+			Set<String> registradas = ubicacionesPorClave.get(clave);
+			if (!ObjectUtils.isNullOrEmpty(registradas)) {
+				ubicaciones.addAll(registradas);
+			}
+		}
+		return ubicaciones;
+	}
+
+	private Set<String> construirClavesPrograma(FichaDescProgramaDTO programa, String nombrePrograma) {
+		Set<String> claves = new HashSet<>();
+		if (programa != null) {
+			if (StringUtils.isNotBlank(programa.getIdentificadorFinal())) {
+				claves.add(normalizaTexto(programa.getIdentificadorFinal()));
+			}
+			if (StringUtils.isNotBlank(programa.getCvePrograma())) {
+				claves.add(normalizaTexto(programa.getCvePrograma()));
+			}
+		}
+		if (StringUtils.isNotBlank(nombrePrograma)) {
+			claves.add(normalizaTexto(nombrePrograma));
+		}
+		return claves;
+	}
+
+	private String construirClaveUbicacion(int semestre, int bloque) {
+		return "S" + semestre + "B" + bloque;
 	}
 
 	private String normalizaTexto(String texto) {
@@ -922,6 +1058,14 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 
 	public void setInscripcionPreviaMateriasService(InscripcionPreviaMateriasService inscripcionPreviaMateriasService) {
 		this.inscripcionPreviaMateriasService = inscripcionPreviaMateriasService;
+	}
+
+	public GrupoParticipanteService getGrupoParticipanteService() {
+		return grupoParticipanteService;
+	}
+
+	public void setGrupoParticipanteService(GrupoParticipanteService grupoParticipanteService) {
+		this.grupoParticipanteService = grupoParticipanteService;
 	}
 
 	public static class SemestreTablaDTO {
