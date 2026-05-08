@@ -210,9 +210,10 @@ public class PlanServiceFacade {
 
 		resultado = planService.guardar(plan);
 
-			if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
-				PlanDTO nuevoPlan = resultado.getDto();
-				guardarCreditosTotalesPlan(nuevoPlan);
+				if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
+					PlanDTO nuevoPlan = resultado.getDto();
+					nuevoPlan.setCreditosTotales(plan.getCreditosTotales());
+					guardarCreditosTotalesPlan(nuevoPlan);
 
 				// Se generan las Relaciones de acuerdo a las listas de seleccion multiple
 			if (!ObjectUtils.isNullOrEmpty(habilidadesPlan)) {
