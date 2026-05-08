@@ -208,11 +208,12 @@ public class PlanServiceFacade {
 		plan.setFechaRegistro(new Date());
 		plan.setVersion(ConstantesGestor.VERSION_UNO);
 
-		resultado = planService.guardar(plan);
+			resultado = planService.guardar(plan);
 
-			if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
-				PlanDTO nuevoPlan = resultado.getDto();
-				guardarCreditosTotalesPlan(nuevoPlan);
+				if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
+					PlanDTO nuevoPlan = resultado.getDto();
+					nuevoPlan.setCreditosTotales(plan.getCreditosTotales());
+					guardarCreditosTotalesPlan(nuevoPlan);
 
 				// Se generan las Relaciones de acuerdo a las listas de seleccion multiple
 			if (!ObjectUtils.isNullOrEmpty(habilidadesPlan)) {
@@ -277,21 +278,21 @@ public class PlanServiceFacade {
 				resultadoMalla = mallaPlanService.guardar(relMallaPlan);
 
 				if (ObjectUtils.isNotNull(resultadoMalla) && resultadoMalla.getResultado().getValor()) {
-					if (resultado.getDto().getCatEstatusPlan().getNombre().equals("Ejecución")) {
-						resultado = guardarDatosMoodle(resultado.getDto(), relMallaPlan);
+						if (resultado.getDto().getCatEstatusPlan().getNombre().equals("Ejecución")) {
+							resultado = guardarDatosMoodle(resultado.getDto(), relMallaPlan);
 
-						if (ObjectUtils.isNull(resultado) && !resultado.getResultado().getValor()) {
-							throw new Exception("¡No se pudieron guardar lo datos en Moodle!");
+							if (ObjectUtils.isNull(resultado) || !resultado.getResultado().getValor()) {
+								throw new Exception("¡No se pudieron guardar lo datos en Moodle!");
+							}
 						}
+					} else {
+						throw new Exception("¡No se pudo guardar el detalle de las estructuras y subestructuras!");
 					}
-				} else {
-					throw new Exception("¡No se pudo guardar el detalle de las estructuras y subestructuras!");
-				}
 
-				logger.error("Datos guardados!");
-			} else {
-				throw new Exception("¡No se pudieron guardar los conocimientos, habilidades o competencias!");
-			}
+					logger.info("Datos guardados!");
+				} else {
+					throw new Exception("¡No se pudieron guardar los conocimientos, habilidades o competencias!");
+				}
 
 			logger.debug("finaliza persistencia de plan");
 			return resultado;
@@ -305,7 +306,7 @@ public class PlanServiceFacade {
 			List<CatalogoComunDTO> aptitudesPlan, List<CatalogoComunDTO> conocimientosPlan,
 			RelMallaPlanDTO relMallaPlan) throws Exception {
 
-		ResultadoDTO<PlanDTO> resultado = null;
+		ResultadoDTO<PlanDTO> resultado = new ResultadoDTO<>();
 		List<RelPlanHabilidadDTO> relHabilidades;
 		List<RelPlanConocimientoDTO> relConocimientos;
 		List<RelPlanAptitudDTO> relAptitudes;
@@ -327,15 +328,17 @@ public class PlanServiceFacade {
 			
 			// RN: Actualizacion de Nombre de malla curricular
 			MallaCurricularDTO mallaCurr = mallaCurricularService.obtenerMallaCurricularPorIdPlan(plan.getIdPlan());
-			mallaCurr.setNombre(plan.getNombre());
-			mallaCurr.setFechaActualizacion(fechaAct);
-			mallaCurr.setUsuarioModifico(plan.getUsuarioModifico());
-			// mallaCurr.getBitacoraDTO().setIdUsuario(plan.getBitacoraDTO().getIdUsuario());
-			// mallaCurr.getBitacoraDTO().setFechaBitacora(new Date());
-			// mallaCurr.getBitacoraDTO().setIp(plan.getBitacoraDTO().getIp());
-			// mallaCurr.getBitacoraDTO().setNavegador(plan.getBitacoraDTO().getNavegador());
-			// mallaCurr.getBitacoraDTO().setFuncion(ConstantesBitacora.MALLA_CUR_EDITAR);
-			mallaCurricularService.actualizar(mallaCurr);
+			if (ObjectUtils.isNotNull(mallaCurr)) {
+				mallaCurr.setNombre(plan.getNombre());
+				mallaCurr.setFechaActualizacion(fechaAct);
+				mallaCurr.setUsuarioModifico(plan.getUsuarioModifico());
+				// mallaCurr.getBitacoraDTO().setIdUsuario(plan.getBitacoraDTO().getIdUsuario());
+				// mallaCurr.getBitacoraDTO().setFechaBitacora(new Date());
+				// mallaCurr.getBitacoraDTO().setIp(plan.getBitacoraDTO().getIp());
+				// mallaCurr.getBitacoraDTO().setNavegador(plan.getBitacoraDTO().getNavegador());
+				// mallaCurr.getBitacoraDTO().setFuncion(ConstantesBitacora.MALLA_CUR_EDITAR);
+				mallaCurricularService.actualizar(mallaCurr);
+			}
 			
 
 			// Se generan las Relaciones de acuerdo a las listas de seleccion multiple

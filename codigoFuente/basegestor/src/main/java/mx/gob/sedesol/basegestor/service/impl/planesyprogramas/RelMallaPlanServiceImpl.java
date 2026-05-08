@@ -74,9 +74,11 @@ public class RelMallaPlanServiceImpl extends ComunValidacionService<RelMallaPlan
 	@Override
 	public RelMallaPlanDTO findByIdPlan(Integer idPlan) {
 		try {
-			RelMallaPlan mallaPlan = mallaPlanRepo.findByIdPlan(idPlan);
-
-            return mallaPlanMapper.map(mallaPlan, RelMallaPlanDTO.class);
+			List<RelMallaPlan> mallasPlan = mallaPlanRepo.findByIdPlan(idPlan);
+			if (ObjectUtils.isNullOrEmpty(mallasPlan)) {
+				return null;
+			}
+			return mallaPlanMapper.map(mallasPlan.get(0), RelMallaPlanDTO.class);
 		}catch(Exception e) {
 			logger.error(e);
 			return null;

@@ -102,6 +102,7 @@ public class PlanBean extends BaseBean {
 	private PlanDTO planSelecBusq;
 	private PlanDTO plan;
 	private boolean edicionPlan;
+	private boolean modoEdicionHabilitado;
 	private boolean creditos;
 	private boolean tipoPlan;
 
@@ -134,6 +135,7 @@ public class PlanBean extends BaseBean {
 	public PlanBean() {
 		initRecursos();
 		edicionPlan = Boolean.parseBoolean(getRequest().getParameter("edicion"));
+		modoEdicionHabilitado = false;
 
 		namesSubStruc.add("");
 		elementsSubStruc.add("1");
@@ -148,12 +150,16 @@ public class PlanBean extends BaseBean {
 		if (isEdicionPlan()) {
 
 			plan = (PlanDTO) getSession().getAttribute(ConstantesGestorWeb.OBJ_PLAN_SELEC);
-			this.llenaRelacionesPlanSel(plan);
-				if (ObjectUtils.isNotNull(plan)) {
-					getSession().removeAttribute(ConstantesGestorWeb.OBJ_PLAN_SELEC);
-					mallaPlan = mallaPlanService.findByIdPlan(plan.getIdPlan());
-					plan.setCreditosTotales(planServiceFacade.obtenerCreditosTotalesPorPlan(plan.getIdPlan()));
+			if (ObjectUtils.isNotNull(plan)) {
+				this.llenaRelacionesPlanSel(plan);
+				getSession().removeAttribute(ConstantesGestorWeb.OBJ_PLAN_SELEC);
+				mallaPlan = mallaPlanService.findByIdPlan(plan.getIdPlan());
+				if (ObjectUtils.isNull(mallaPlan)) {
+					mallaPlan = new RelMallaPlanDTO();
 				}
+				Long creditosTotales = planServiceFacade.obtenerCreditosTotalesPorPlan(plan.getIdPlan());
+				plan.setCreditosTotales(creditosTotales != null ? creditosTotales : 0L);
+			}
 
 		} else {
 			// Flujo Nuevo Plan
@@ -824,6 +830,10 @@ public class PlanBean extends BaseBean {
 		return this.regresaBusquedaPlanes();
 	}
 
+	public void habilitarEdicionPlan() {
+		modoEdicionHabilitado = true;
+	}
+
 	/**
 	 * Navega a la edición del plan
 	 */
@@ -1349,11 +1359,23 @@ public class PlanBean extends BaseBean {
 		return edicionPlan;
 	}
 
+	public boolean isVistaSoloLecturaPlan() {
+		return edicionPlan && !modoEdicionHabilitado;
+	}
+
 	/**
 	 * @param edicionPlan the edicionPlan to set
 	 */
 	public void setEdicionPlan(boolean edicionPlan) {
 		this.edicionPlan = edicionPlan;
+	}
+
+	public boolean isModoEdicionHabilitado() {
+		return modoEdicionHabilitado;
+	}
+
+	public void setModoEdicionHabilitado(boolean modoEdicionHabilitado) {
+		this.modoEdicionHabilitado = modoEdicionHabilitado;
 	}
 
 	/**
