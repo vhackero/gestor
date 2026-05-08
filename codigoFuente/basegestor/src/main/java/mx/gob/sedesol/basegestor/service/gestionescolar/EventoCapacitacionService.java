@@ -5,8 +5,10 @@ import java.util.List;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionRecordDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CapturaEventoCapacitacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaActaEventoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EncabezadoActaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProgramaEventoFiltroDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProgramaEventoEstatusDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TablaCalificacionesDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
@@ -27,6 +29,9 @@ public interface EventoCapacitacionService {
 	List<EventoCapacitacionDTO> obtenerEventosPorProgramaIdPlan(String idPrograma, Integer idPlan);
 	List<EventoCapacitacionDTO> obtenerEventosPorIdPlan( Integer idPlan);
 	List<EventoCapacitacionDTO> obtenerTodosLosEventos();
+	List<ProgramaEventoFiltroDTO> obtenerProgramasConEventosParaFiltro();
+	List<ConsultaActaEventoDTO> consultarActasPorFiltros(String anioPeriodo, String numeroElementos,
+			List<Long> idprogramaSelecionado, Integer estatus);
 	List<ProgramaEventoEstatusDTO> obtenerProgramasConEventosParaCambioEstatus();
 	List<ProgramaEventoEstatusDTO> buscarEventosParaCambioEstatus(String anioPeriodo, String numeroElementos, List<Integer> idsPrograma);
 	boolean modificarEstatusEvento(Integer idEstatus, Integer idEvento);

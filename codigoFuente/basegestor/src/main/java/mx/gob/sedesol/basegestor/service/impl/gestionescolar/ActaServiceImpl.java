@@ -1,9 +1,11 @@
 package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 
 import java.util.List;
+import java.lang.reflect.Type;
 
 import org.apache.log4j.Logger;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -109,6 +111,13 @@ public class ActaServiceImpl extends ComunValidacionService<ActaDTO> implements 
 	}
 
 	@Override
+	public List<ActaDTO> getActasByIdGrupo(int idGrupo) {
+		List<Acta> actas = iCargaActaRepository.getActaByIdGrupo(idGrupo);
+		Type listType = new TypeToken<List<ActaDTO>>() {}.getType();
+		return modelMapper.map(actas, listType);
+	}
+
+	@Override
 	public List<ActaDTO> findAll() {
 		// TODO Auto-generated method stub
 		return null;
@@ -116,8 +125,11 @@ public class ActaServiceImpl extends ComunValidacionService<ActaDTO> implements 
 
 	@Override
 	public ActaDTO buscarPorId(Integer id) {
-		// TODO Auto-generated method stub
-		return null;
+		Acta acta = iCargaActaRepository.findOne(id);
+		if (ObjectUtils.isNull(acta)) {
+			return null;
+		}
+		return modelMapper.map(acta, ActaDTO.class);
 	}
 
 	@Override

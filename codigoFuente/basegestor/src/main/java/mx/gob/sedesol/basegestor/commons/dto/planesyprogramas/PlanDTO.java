@@ -64,6 +64,8 @@ public class PlanDTO implements Serializable{
 	private CatalogoComunDTO catCreditosPlan;
 	private CatalogoComunDTO catDivisionesPlan;
 	private Integer horasCredito;
+	@NotNull(message=MensajesSistemaEnum.Constantes.GESTOR_WEB_GENERAL_DATO_REQUERIDO)
+	private Long creditosTotales;
 	private boolean tieneLogros;
 	
 	/**
@@ -178,6 +180,14 @@ public class PlanDTO implements Serializable{
 
 	public void setHorasCredito(Integer horasCredito) {
 		this.horasCredito = horasCredito;
+	}
+
+	public Long getCreditosTotales() {
+		return creditosTotales;
+	}
+
+	public void setCreditosTotales(Long creditosTotales) {
+		this.creditosTotales = creditosTotales;
 	}
 
 	/**

@@ -110,6 +110,15 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 			+ "JOIN tbl_planes tp ON tp.id_plan = tfdp.id_plan "
 			+ "JOIN tbl_malla_curricular tmc ON tmc.id = tfdp.id_eje_capacitacion "
 			+ "LEFT JOIN tbl_malla_curricular tmc2 ON tmc2.id = tmc.id_padre "
+			+ "WHERE EXISTS(SELECT 1 FROM tbl_eventos te WHERE te.id_programa = tfdp.id_programa) "
+			+ "ORDER BY tp.nombre, tmc2.nombre, tmc.nombre", nativeQuery = true)
+	public List<Object[]> obtenerProgramasConEventosParaFiltro();
+
+	@Query(value = "SELECT tp.id_plan, tp.nombre AS plan, tfdp.id_programa, tmc2.nombre AS semestre, tmc.nombre AS bloque, tfdp.nombre_tentativo AS programa "
+			+ "FROM tbl_ficha_descriptiva_programa tfdp "
+			+ "JOIN tbl_planes tp ON tp.id_plan = tfdp.id_plan "
+			+ "JOIN tbl_malla_curricular tmc ON tmc.id = tfdp.id_eje_capacitacion "
+			+ "LEFT JOIN tbl_malla_curricular tmc2 ON tmc2.id = tmc.id_padre "
 			+ "WHERE EXISTS (SELECT 1 FROM tbl_eventos te WHERE te.id_programa = tfdp.id_programa) "
 			+ "ORDER BY tp.nombre, tmc2.nombre, tmc.nombre", nativeQuery = true)
 	public List<Object[]> obtenerProgramasConEventosParaCambioEstatus();
@@ -132,4 +141,69 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 	@Modifying(clearAutomatically = true)
 	@Query("UPDATE TblEvento e SET e.catEstadoEventoCapacitacion.id = :idEstatus WHERE e.id IN (:idsEvento)")
 	public int cambiarEstatusEventos(@Param("idEstatus") Integer idEstatus, @Param("idsEvento") List<Integer> idsEvento);
+
+	@Query(value = "SELECT tp.id_plan, tp.nombre AS plan, tmc2.nombre AS semestre, "
+			+ "tmc.nombre AS bloque, tfdp.id_programa, tfdp.nombre_tentativo AS programa, "
+			+ "te.id_evento, te.nombre_ec AS evento, tg.id AS id_grupo, tg.nombre AS grupo "
+			+ "FROM tbl_eventos te "
+			+ "JOIN tbl_ficha_descriptiva_programa tfdp ON tfdp.id_programa = te.id_programa "
+			+ "JOIN tbl_planes tp ON tp.id_plan = tfdp.id_plan "
+			+ "JOIN tbl_malla_curricular tmc ON tmc.id = tfdp.id_eje_capacitacion "
+			+ "LEFT JOIN tbl_malla_curricular tmc2 ON tmc2.id = tmc.id_padre "
+			+ "JOIN cat_estado_evento_capacitacion ceec ON ceec.id = te.id_estatus_ec "
+			+ "JOIN tbl_grupos tg ON tg.id_evento = te.id_evento "
+			+ "WHERE te.cve_evento_cap LIKE CONCAT('%', :anioPeriodo, '-', :numeroElementos, '%') "
+			+ "AND te.id_programa IN (:idprogramaSelecionado) "
+			+ "AND ("
+			+ "    (:estatus = 0 "
+			+ "     AND NOT EXISTS(SELECT 1 FROM tbl_actas ta WHERE ta.id_grupo = tg.id) "
+			+ "     AND tg.acta_cerrada = 0)"
+			+ " OR (:estatus = 1 "
+			+ "     AND EXISTS(SELECT 1 FROM tbl_actas ta WHERE ta.id_grupo = tg.id) "
+			+ "     AND (SELECT COUNT(rgp.id) "
+			+ "          FROM rel_grupo_participante rgp "
+			+ "          WHERE (SELECT COUNT(rpr.id_persona_rol) "
+			+ "                 FROM rel_persona_roles rpr "
+			+ "                 WHERE rpr.id_rol = 2 AND rpr.id_persona = rgp.id_persona_participante) = 1 "
+			+ "            AND rgp.id_grupo = tg.id "
+			+ "            AND rgp.calificacion_final IS NOT NULL) = "
+			+ "         (SELECT COUNT(rgp2.id) "
+			+ "          FROM rel_grupo_participante rgp2 "
+			+ "          WHERE rgp2.id_grupo = tg.id "
+			+ "            AND EXISTS (SELECT 1 FROM rel_persona_roles rpr "
+			+ "                        WHERE rpr.id_persona = rgp2.id_persona_participante "
+			+ "                          AND rpr.id_rol = 2) "
+			+ "            AND NOT EXISTS (SELECT 1 FROM rel_persona_roles rpr "
+			+ "                            WHERE rpr.id_persona = rgp2.id_persona_participante "
+			+ "                              AND rpr.id_rol <> 2)) "
+			+ "     AND tg.acta_cerrada = 1)"
+			+ " OR (:estatus = 2 "
+			+ "     AND EXISTS(SELECT 1 FROM tbl_actas ta WHERE ta.id_grupo = tg.id) "
+			+ "     AND (SELECT COUNT(rgp.id) "
+			+ "          FROM rel_grupo_participante rgp "
+			+ "          WHERE (SELECT COUNT(rpr.id_persona_rol) "
+			+ "                 FROM rel_persona_roles rpr "
+			+ "                 WHERE rpr.id_rol = 2 AND rpr.id_persona = rgp.id_persona_participante) = 1 "
+			+ "            AND rgp.id_grupo = tg.id "
+			+ "            AND rgp.calificacion_final IS NOT NULL) < "
+			+ "         (SELECT COUNT(rgp2.id) "
+			+ "          FROM rel_grupo_participante rgp2 "
+			+ "          WHERE rgp2.id_grupo = tg.id "
+			+ "            AND EXISTS (SELECT 1 FROM rel_persona_roles rpr "
+			+ "                        WHERE rpr.id_persona = rgp2.id_persona_participante "
+			+ "                          AND rpr.id_rol = 2) "
+			+ "            AND NOT EXISTS (SELECT 1 FROM rel_persona_roles rpr "
+			+ "                            WHERE rpr.id_persona = rgp2.id_persona_participante "
+			+ "                              AND rpr.id_rol <> 2)) "
+			+ "     AND tg.acta_cerrada = 1)"
+			+ " OR (:estatus = 3 "
+			+ "     AND EXISTS(SELECT 1 FROM tbl_actas ta WHERE ta.id_grupo = tg.id) "
+			+ "     AND (SELECT COUNT(ta.id_acta) FROM tbl_actas ta WHERE ta.id_grupo = tg.id) > 1 "
+			+ "     AND tg.acta_cerrada = 1)"
+			+ ") "
+			+ "ORDER BY tp.nombre, tmc2.nombre, tmc.nombre, te.nombre_ec, tg.nombre", nativeQuery = true)
+	public List<Object[]> consultarActasPorFiltros(@Param("anioPeriodo") String anioPeriodo,
+			@Param("numeroElementos") String numeroElementos,
+			@Param("idprogramaSelecionado") List<Long> idprogramaSelecionado,
+			@Param("estatus") Integer estatus);
 }

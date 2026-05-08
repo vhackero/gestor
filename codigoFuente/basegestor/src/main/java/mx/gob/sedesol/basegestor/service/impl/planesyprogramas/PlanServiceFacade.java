@@ -18,6 +18,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.AsentamientoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.MallaCurricularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.PlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.RelPlanAptitudDTO;
@@ -27,6 +28,7 @@ import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ObjetoCurricularEnum;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatObjetoCurricular;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IinscripcionRepository;
 import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
 import mx.gob.sedesol.basegestor.service.admin.CatalogoComunService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService;
@@ -54,6 +56,9 @@ public class PlanServiceFacade {
 
 	@Autowired
 	private MallaPlanService mallaPlanService;
+
+	@Autowired
+	private IinscripcionRepository inscripcionRepository;
 
 	/**
 	 *
@@ -205,10 +210,11 @@ public class PlanServiceFacade {
 
 		resultado = planService.guardar(plan);
 
-		if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
-			PlanDTO nuevoPlan = resultado.getDto();
+			if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
+				PlanDTO nuevoPlan = resultado.getDto();
+				guardarCreditosTotalesPlan(nuevoPlan);
 
-			// Se generan las Relaciones de acuerdo a las listas de seleccion multiple
+				// Se generan las Relaciones de acuerdo a las listas de seleccion multiple
 			if (!ObjectUtils.isNullOrEmpty(habilidadesPlan)) {
 				relHabilidades = new ArrayList<>();
 				for (CatalogoComunDTO habilidad : habilidadesPlan) {
@@ -314,8 +320,9 @@ public class PlanServiceFacade {
 			planService.eliminAptitudesPorIdPlan(plan.getIdPlan());
 			planService.eliminaHabilidadesPorIdPlan(plan.getIdPlan());
 
-			logger.debug("Editando el nuevo plan");
-			plan.setFechaActualizacion(fechaAct);
+				logger.debug("Editando el nuevo plan");
+				plan.setFechaActualizacion(fechaAct);
+				guardarOActualizarCreditosTotalesPlan(plan);
 
 			
 			// RN: Actualizacion de Nombre de malla curricular
@@ -582,6 +589,33 @@ public class PlanServiceFacade {
 		
 	public List<PlanDTO> findAllPlanes() {
 		return planService.findAll();
+	}
+
+	public Long obtenerCreditosTotalesPorPlan(Integer idPlan) {
+		if (idPlan == null) {
+			return null;
+		}
+		return inscripcionRepository.obtenerCreditosTotalesPorPlan(idPlan.longValue())
+				.map(CreditosTotalesPlanDTO::getTotalCreditos).orElse(null);
+	}
+
+	private void guardarCreditosTotalesPlan(PlanDTO plan) {
+		if (plan == null || plan.getIdPlan() == null || plan.getCreditosTotales() == null) {
+			return;
+		}
+		inscripcionRepository.guardarCreditosTotalesPorPlan(plan.getIdPlan().longValue(), plan.getCreditosTotales());
+	}
+
+	private void guardarOActualizarCreditosTotalesPlan(PlanDTO plan) {
+		if (plan == null || plan.getIdPlan() == null || plan.getCreditosTotales() == null) {
+			return;
+		}
+		Long idPlan = plan.getIdPlan().longValue();
+		if (inscripcionRepository.obtenerCreditosTotalesPorPlan(idPlan).isPresent()) {
+			inscripcionRepository.actualizarCreditosTotalesPorPlan(idPlan, plan.getCreditosTotales());
+		} else {
+			inscripcionRepository.guardarCreditosTotalesPorPlan(idPlan, plan.getCreditosTotales());
+		}
 	}
 
 
