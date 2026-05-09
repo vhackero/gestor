@@ -437,7 +437,7 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
             return personaServiceFacade.obtenerPersonaPorId(resultado.getDto().getIdPersona());
         } catch (Exception e) {
             LOGGER.error("Error al registrar automáticamente al usuario desde tbl_persona_sige", e);
-            mostrarDialogoError(MENSAJE_ERROR_REGISTRO_AUTOMATICO);
+            mostrarDialogoError(obtenerMensajeErrorRegistro(e));
             return null;
         }
     }
@@ -463,11 +463,10 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
 
     private PersonaDTO crearPersonaDesdeSige(PersonaSigeDTO personaSige, Long usuarioModifico) {
         PersonaDTO persona = new PersonaDTO(usuarioModifico, ID_PAIS_DEFAULT);
+        String password = personaSige.getPassword();
         persona.setUsuario(personaSige.getMatricula().toUpperCase());
-        persona.setContrasenia(encoder.encode(personaSige.getPassword()));
-        persona.setNuevaContrasenia(encoder.encode(personaSige.getPassword()));
-        persona.setConfirmacionContrasenia(encoder.encode(personaSige.getPassword()));
-        persona.setContraseniaEncriptada(encoder.encode(personaSige.getPassword()));
+        persona.setNuevaContrasenia(password);
+        persona.setConfirmacionContrasenia(password);
         persona.setCurp(personaSige.getCurp());
         persona.setUnidadAdministrativa(personaSige.getPassword());
         persona.setNombre(personaSige.getNombre());
@@ -537,15 +536,46 @@ public class NuevaAltaUsuariosBean extends BaseBean implements Serializable {
     }
 
     private String obtenerMensajeErrorRegistro(ResultadoDTO<PersonaDTO> resultado) {
+        String detalle = obtenerDetalleErrorRegistro(resultado);
+        if (!esVacio(detalle)) {
+            return MENSAJE_ERROR_REGISTRO_AUTOMATICO + " Detalle: " + detalle;
+        }
+        return MENSAJE_ERROR_REGISTRO_AUTOMATICO;
+    }
+
+    private String obtenerDetalleErrorRegistro(ResultadoDTO<PersonaDTO> resultado) {
         if (ObjectUtils.isNotNull(resultado)) {
             if (!esVacio(resultado.getMensaje())) {
                 return resultado.getMensaje();
+            }
+            if (!ObjectUtils.isNullOrEmpty(resultado.getMensajes())) {
+                for (String mensaje : resultado.getMensajes()) {
+                    String detalle = obtenerTextoResultado(mensaje);
+                    if (!esVacio(detalle)) {
+                        return detalle;
+                    }
+                }
             }
             if (ObjectUtils.isNotNull(resultado.getMensajeError())) {
                 return obtenerTextoSistema(resultado.getMensajeError().getId());
             }
         }
+        return null;
+    }
+
+    private String obtenerMensajeErrorRegistro(Exception e) {
+        if (ObjectUtils.isNotNull(e) && !esVacio(e.getMessage())) {
+            return MENSAJE_ERROR_REGISTRO_AUTOMATICO + " Detalle: " + e.getMessage();
+        }
         return MENSAJE_ERROR_REGISTRO_AUTOMATICO;
+    }
+
+    private String obtenerTextoResultado(String mensaje) {
+        if (esVacio(mensaje)) {
+            return null;
+        }
+        String texto = obtenerTextoSistema(mensaje);
+        return esVacio(texto) ? mensaje : texto;
     }
 
     private ParametroWSMoodleDTO obtenerParametrosMoodle(EventoCapacitacionDTO evento) {
