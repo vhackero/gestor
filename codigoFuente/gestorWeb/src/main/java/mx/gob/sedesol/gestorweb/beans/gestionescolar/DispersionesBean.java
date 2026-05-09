@@ -801,6 +801,8 @@ public class DispersionesBean extends BaseBean {
 		solicitud.setIdPlan(dispersion.getIdPlan());
 		solicitud.setGruposGenerales(dispersion.getGruposGenerales());
 		solicitud.setGrupoResto(dispersion.getGrupoResto());
+		solicitud.setMatriculacionCompartidos(Boolean.TRUE);
+		solicitud.setNombreProgramaSeleccionado(dispersion.getPrograma());
 		solicitud.setIdUsuario(usuario);
 		return solicitud;
 	}

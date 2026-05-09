@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
@@ -62,6 +63,8 @@ import mx.gob.sedesol.basegestor.service.gestionescolar.DispersionesService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.EventoCapacitacionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Grupo;
+import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Curso;
+import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Cursos;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.model.entities.Seccion;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.CrearGrupo;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.CursoWS;
@@ -386,13 +389,23 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 		for (int eventoIndex = 1; eventoIndex <= eventosObjetivo; eventoIndex++) {
 			TblEvento evento = construirEvento(solicitud, eventoIndex, gruposPorEvento);
 			evento = iDispersionesRepository.guardarEventoDispersion(evento);
-			eventosCreados++;
 			
-			Integer idCursoLms = crearCursoEnMoodle(solicitud, evento, numeroUnidadesCurso);
+			Integer idCursoLms;
+			try {
+				idCursoLms = crearCursoEnMoodle(solicitud, evento, numeroUnidadesCurso);
+			} catch (Exception ex) {
+				logger.error("No fue posible crear o reutilizar el curso en Moodle para el evento "
+						+ evento.getIdEvento(), ex);
+				TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+				resultado.agregaMensaje(obtenerMensajeCreacionMoodle(ex,
+						"No fue posible crear el grupo porque ocurrió un error al crear el curso en Moodle."));
+				return resultado;
+			}
 			if (idCursoLms != null) {
 				evento.setIdCursoLmsBorrador(idCursoLms);
 				iDispersionesRepository.actualizarEvento(evento);
 			}
+			eventosCreados++;
 			
 			TblAmbienteVirtualAprendizaje ava = null;
 			if (Boolean.TRUE.equals(solicitud.getVincularAva()) && solicitud.getIdPlataformaLms() != null) {
@@ -407,13 +420,25 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 					capacidadGrupo = solicitud.getCupoGeneral() != null ? solicitud.getCupoGeneral() : 0;
 				}
 				String nombreGrupo = construirNombreGrupo(solicitud, evento, gruposCreados + 1);
-				TblGrupo grupoCreado = construirGrupo(evento, nombreGrupo, capacidadGrupo, solicitud.getIdUsuario());
-				grupoCreado = iDispersionesRepository.guardarGrupoDispersion(grupoCreado);
-				Integer idGrupoMoodle = crearGrupoEnMoodle(solicitud, evento, nombreGrupo);
-				if (idGrupoMoodle != null) {
-					grupoCreado.setIdMoodle(idGrupoMoodle);
-					iDispersionesRepository.actualizarGrupoDispersion(grupoCreado);
+				Integer idGrupoMoodle;
+				try {
+					idGrupoMoodle = crearGrupoEnMoodle(solicitud, evento, nombreGrupo);
+				} catch (Exception ex) {
+					logger.error("No fue posible crear el grupo en Moodle para el evento " + evento.getIdEvento(), ex);
+					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+					resultado.agregaMensaje(obtenerMensajeCreacionMoodle(ex,
+							"No fue posible crear el grupo porque ocurrió un error al registrar el grupo en Moodle."));
+					return resultado;
 				}
+				if (idGrupoMoodle == null) {
+					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+					resultado.agregaMensaje(
+							"No fue posible crear el grupo porque Moodle no devolvió un identificador válido.");
+					return resultado;
+				}
+				TblGrupo grupoCreado = construirGrupo(evento, nombreGrupo, capacidadGrupo, solicitud.getIdUsuario());
+				grupoCreado.setIdMoodle(idGrupoMoodle);
+				grupoCreado = iDispersionesRepository.guardarGrupoDispersion(grupoCreado);
 				iDispersionesRepository.guardarRelacionDispersionGrupo(solicitud.getIdDispersion(),
 						evento.getIdEvento(), grupoCreado.getIdGrupo(), solicitud.getIdUsuario());
 				gruposCreados++;
@@ -460,8 +485,17 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 			return resultado;
 		}
 		
-		List<Long> personas = iDispersionesRepository.obtenerPersonasMatriculacion(solicitud.getIdDispersion(),
-				solicitud.getIdConvocatoria(), solicitud.getIdTipoProceso(), solicitud.getIdProcesoInscripcion());
+		List<Long> personas;
+		if (Boolean.TRUE.equals(solicitud.getMatriculacionCompartidos())) {
+			personas = iDispersionesRepository.obtenerPersonasMatriculacionCompartidos(
+					solicitud.getIdDispersion(),
+					solicitud.getIdProcesoInscripcion(),
+					solicitud.getIdPrograma(),
+					solicitud.getNombreProgramaSeleccionado());
+		} else {
+			personas = iDispersionesRepository.obtenerPersonasMatriculacion(solicitud.getIdDispersion(),
+					solicitud.getIdConvocatoria(), solicitud.getIdTipoProceso(), solicitud.getIdProcesoInscripcion());
+		}
 		if (personas.isEmpty()) {
 			resultado.agregaMensaje("No se encontraron inscripciones para matricular en los grupos de la dispersión.");
 			resultado.setResultado(ResultadoTransaccionEnum.EXITOSO);
@@ -697,7 +731,8 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 		return sb.toString();
 	}
 	
-	private Integer crearCursoEnMoodle(CrearEventoDispersionDTO solicitud, TblEvento evento, int numeroUnidades) {
+	private Integer crearCursoEnMoodle(CrearEventoDispersionDTO solicitud, TblEvento evento, int numeroUnidades)
+			throws Exception {
 		if (eventoCapacitacionService == null || solicitud.getIdPlataformaLms() == null
 				|| solicitud.getIdClasificacionAva() == null) {
 			return null;
@@ -711,10 +746,19 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 			} catch (NumberFormatException ex) {
 				unidades = numeroUnidades;
 			}
+			Integer cursoExistente = buscarCursoExistenteMoodle(evento);
+			if (cursoExistente != null) {
+				return cursoExistente;
+			}
 			return eventoCapacitacionService.obtenerIdMoodle(evento, unidades);
 		} catch (Exception ex) {
-			logger.error("No fue posible crear el curso en Moodle para el evento " + evento.getIdEvento(), ex);
-			return null;
+			Integer cursoExistente = buscarCursoExistenteMoodle(evento);
+			if (cursoExistente != null) {
+				logger.warn("Se reutilizará el curso existente en Moodle para el evento " + evento.getIdEvento()
+						+ " tras detectar una colisión durante la creación.");
+				return cursoExistente;
+			}
+			throw ex;
 		}
 	}
 	
@@ -889,28 +933,65 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 		return grupo;
 	}
 	
-	private Integer crearGrupoEnMoodle(CrearEventoDispersionDTO solicitud, TblEvento evento, String nombreGrupo) {
+	private Integer crearGrupoEnMoodle(CrearEventoDispersionDTO solicitud, TblEvento evento, String nombreGrupo)
+			throws Exception {
 		if (evento == null || evento.getIdCursoLmsBorrador() == null || solicitud.getIdPlataformaLms() == null) {
 			return null;
 		}
+		ParametroWSMoodleDTO plataforma = parametroWSMoodleService.buscarPorId(solicitud.getIdPlataformaLms());
+		if (plataforma == null) {
+			return null;
+		}
+		CrearGrupo ws = new CrearGrupo(plataforma);
+		Grupo grupo = new Grupo();
+		grupo.setCourseid(evento.getIdCursoLmsBorrador());
+		grupo.setName(nombreGrupo);
+		List<Grupo> creados = ws.crearGrupos(Collections.singletonList(grupo));
+		if (creados != null && !creados.isEmpty()) {
+			int idMoodle = creados.get(0).getId();
+			return idMoodle > 0 ? idMoodle : null;
+		}
+		return null;
+	}
+
+	private Integer buscarCursoExistenteMoodle(TblEvento evento) {
+		if (evento == null || evento.getIdEvento() == null || evento.getIdPlataformaLmsBorrador() == null) {
+			return null;
+		}
 		try {
-			ParametroWSMoodleDTO plataforma = parametroWSMoodleService.buscarPorId(solicitud.getIdPlataformaLms());
+			ParametroWSMoodleDTO plataforma = parametroWSMoodleService.buscarPorId(evento.getIdPlataformaLmsBorrador());
 			if (plataforma == null) {
 				return null;
 			}
-			CrearGrupo ws = new CrearGrupo(plataforma);
-			Grupo grupo = new Grupo();
-			grupo.setCourseid(evento.getIdCursoLmsBorrador());
-			grupo.setName(nombreGrupo);
-				List<Grupo> creados = ws.crearGrupos(Collections.singletonList(grupo));
-				if (creados != null && !creados.isEmpty()) {
-					int idMoodle = creados.get(0).getId();
-					return idMoodle > 0 ? idMoodle : null;
+			CursoWS cursoWS = new CursoWS(plataforma);
+			String shortnameEsperado = "EC-" + evento.getIdEvento();
+			String idnumberEsperado = String.valueOf(evento.getIdEvento());
+			Cursos cursos = cursoWS.verificarExisteCurso("search", shortnameEsperado);
+			if (cursos == null || cursos.getCourses() == null) {
+				return null;
+			}
+			for (Curso curso : cursos.getCourses()) {
+				if (curso == null) {
+					continue;
 				}
+				boolean coincideShortname = shortnameEsperado.equals(curso.getShortname());
+				boolean coincideIdnumber = idnumberEsperado.equals(curso.getIdnumber());
+				if ((coincideShortname || coincideIdnumber) && curso.getId() > 0) {
+					return curso.getId();
+				}
+			}
 		} catch (Exception ex) {
-			logger.error("No fue posible crear el grupo en Moodle para el evento " + evento.getIdEvento(), ex);
+			logger.warn("No fue posible verificar si el curso ya existe en Moodle para el evento "
+					+ evento.getIdEvento(), ex);
 		}
 		return null;
+	}
+
+	private String obtenerMensajeCreacionMoodle(Exception ex, String mensajeDefault) {
+		if (ex != null && ex.getMessage() != null && !ex.getMessage().trim().isEmpty()) {
+			return ex.getMessage();
+		}
+		return mensajeDefault;
 	}
 	
 	private String construirNombreGrupo(CrearEventoDispersionDTO dto, TblEvento evento, int consecutivo) {

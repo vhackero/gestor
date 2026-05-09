@@ -61,6 +61,9 @@ public interface IDispersionesRepository {
 		public List<DispersionGrupoEventoDTO> obtenerGruposOrdinariosPorPrograma(Integer idPrograma, Integer idProcesoInscripcion);
 		
 		public List<Long> obtenerPersonasMatriculacion(Integer idDispersion, Integer idConvocatoria, Integer idTipoProceso, Integer idProcesoInscripcion);
+
+		public List<Long> obtenerPersonasMatriculacionCompartidos(Integer idDispersion, Integer idProcesoInscripcion,
+				Integer idPrograma, String nombreProgramaSeleccionado);
 		
 		public void guardarRelacionDispersionGrupo(Integer idDispersion, Integer idEvento, Integer idGrupo, Long idPersona);
 		

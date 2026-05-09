@@ -750,6 +750,59 @@ public class DispersionesRepository implements IDispersionesRepository {
 		}
 		return personas;
 	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Long> obtenerPersonasMatriculacionCompartidos(Integer idDispersion, Integer idProcesoInscripcion,
+			Integer idPrograma, String nombreProgramaSeleccionado) {
+		List<Long> personas = new ArrayList<>();
+		if (idDispersion == null || idProcesoInscripcion == null || idPrograma == null
+				|| nombreProgramaSeleccionado == null || nombreProgramaSeleccionado.trim().isEmpty()) {
+			return personas;
+		}
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT tis.Idpersona, tis.idplan, tis.idprograma, :idDispersion id_dispersion ")
+		   .append("FROM tbl_inscripciones tis ")
+		   .append("JOIN tbl_procesos_inscripcion tpi ")
+		   .append("  ON tis.fecha_registro >= tpi.fecha_inicio ")
+		   .append(" AND tis.fecha_registro <= tpi.fecha_fin ")
+		   .append(" AND tpi.proceso_inscripcion_id = :idProcesoInscripcion ")
+		   .append("JOIN tbl_dispersiones td ")
+		   .append("  ON td.id_proceso_inscripcion = tpi.proceso_inscripcion_id ")
+		   .append(" AND td.id_dispersion = :idDispersion ")
+		   .append("JOIN tbl_ficha_descriptiva_programa tfdp ")
+		   .append("  ON tfdp.id_programa = tis.idprograma ")
+		   .append("JOIN tbl_planes tp ")
+		   .append("  ON tfdp.id_plan = tp.id_plan ")
+		   .append("JOIN tbl_malla_curricular tmc ")
+		   .append("  ON tmc.id = tfdp.id_eje_capacitacion ")
+		   .append("WHERE tis.asignatura LIKE CONCAT(:nombreProgramaSeleccionado,'%') ")
+		   .append("  AND tmc.nombre LIKE CONCAT('%',tis.bloque,'%') ")
+		   .append("  AND NOT EXISTS( ")
+		   .append("      SELECT 1 ")
+		   .append("      FROM rel_grupo_participante rgp ")
+		   .append("      JOIN tbl_grupos tg ON rgp.id_grupo = tg.id ")
+		   .append("      JOIN tbl_eventos te ON te.id_evento = tg.id_evento ")
+		   .append("      JOIN tbl_ficha_descriptiva_programa tfpp ")
+		   .append("        ON tfpp.id_programa = te.id_programa ")
+		   .append("      WHERE rgp.id_persona_participante = tis.Idpersona ")
+		   .append("        AND tis.asignatura LIKE CONCAT(tfpp.nombre_tentativo,'%') ")
+		   .append("        AND rgp.fecha_registro >= tis.fecha_registro) ")
+		   .append("ORDER BY CASE WHEN tis.idprograma = :idPrograma THEN 0 ELSE 1 END, ")
+		   .append("         tis.idprograma");
+		Query query = entityManager.createNativeQuery(sql.toString());
+		query.setParameter("idDispersion", idDispersion);
+		query.setParameter("idProcesoInscripcion", idProcesoInscripcion);
+		query.setParameter("nombreProgramaSeleccionado", nombreProgramaSeleccionado);
+		query.setParameter("idPrograma", idPrograma);
+		List<Object[]> registros = query.getResultList();
+		for (Object[] row : registros) {
+			if (row != null && row.length > 0 && row[0] instanceof Number) {
+				personas.add(((Number) row[0]).longValue());
+			}
+		}
+		return personas;
+	}
 	
 	@Override
 	public Integer crearDispersionBasica(Integer idProcesoInscripcion, Integer idPrograma, Integer totalEstudiantes,
