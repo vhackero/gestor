@@ -19,6 +19,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.RolDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.TipoDiscapacidadDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.FuenteExternaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.SelectImportarDTO;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.AsentamientoService;
@@ -155,6 +156,38 @@ public class PersonaServiceFacade {
 	
 	public List<SelectImportarDTO> consultaFuenteExterna() {
 		return usuariosImportarService.consultaFuenteExterna();
+	}
+
+	public FuenteExternaDTO buscarFuenteExternaPorId(Integer idFuente) {
+		return usuariosImportarService.buscarFuenteExternaPorId(idFuente);
+	}
+
+	public List<SelectImportarDTO> consultaPlanesActivos() {
+		return usuariosImportarService.consultaPlanesActivos();
+	}
+
+	public List<SelectImportarDTO> consultaSemestresPorPlan(Integer idPlan) {
+		return usuariosImportarService.consultaSemestresPorPlan(idPlan);
+	}
+
+	public List<SelectImportarDTO> consultaBloquesPorSemestre(Integer idSemestre) {
+		return usuariosImportarService.consultaBloquesPorSemestre(idSemestre);
+	}
+
+	public List<SelectImportarDTO> consultaProgramasPorEje(Integer idEjeCapacitacion) {
+		return usuariosImportarService.consultaProgramasPorEje(idEjeCapacitacion);
+	}
+
+	public List<SelectImportarDTO> consultaPeriodosInscripcion() {
+		return usuariosImportarService.consultaPeriodosInscripcion();
+	}
+
+	public List<SelectImportarDTO> consultaEventosPorPeriodoYPrograma(String nombrePeriodo, Integer idPrograma) {
+		return usuariosImportarService.consultaEventosPorPeriodoYPrograma(nombrePeriodo, idPrograma);
+	}
+
+	public List<SelectImportarDTO> consultaGruposPorEvento(Integer idEvento) {
+		return usuariosImportarService.consultaGruposPorEvento(idEvento);
 	}
 	
 	public List<PersonaSigeDTO> consultaPersonasImportar(String fuenteExterna, String convocatoria) {
