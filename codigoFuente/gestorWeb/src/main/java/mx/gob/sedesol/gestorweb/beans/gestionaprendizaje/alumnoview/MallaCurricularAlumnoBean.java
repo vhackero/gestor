@@ -118,6 +118,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private double sumaCalificaciones;
 	private int totalCalificaciones;
 	private Set<String> asignaturasEnCurso;
+	private Map<String, Set<String>> ubicacionesProgramasEnCurso;
 	private Map<String, Set<String>> ubicacionesOptativasHistoricas;
 	private Map<String, Set<String>> ubicacionesOptativasEnCurso;
 	private Set<Integer> programasConBaja;
@@ -137,6 +138,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		sumaCalificaciones = 0d;
 		totalCalificaciones = 0;
 		asignaturasEnCurso = new HashSet<>();
+		ubicacionesProgramasEnCurso = new HashMap<>();
 		ubicacionesOptativasHistoricas = new HashMap<>();
 		ubicacionesOptativasEnCurso = new HashMap<>();
 		programasConBaja = new HashSet<>();
@@ -187,6 +189,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			if (StringUtils.isNotBlank(materia.getAsignatura())) {
 				String nombreNormalizado = normalizaTexto(limpiaAsignatura(materia.getAsignatura()));
 				asignaturasEnCurso.add(nombreNormalizado);
+				registrarUbicacionProgramaEnCurso(nombreNormalizado, semestre, bloque);
 				if (esProgramaOpcional(materia.getTipoPrograma())) {
 					registrarUbicacionOptativa(ubicacionesOptativasEnCurso, nombreNormalizado, semestre, bloque);
 				}
@@ -646,13 +649,23 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 
 	private boolean estaProgramaEnCurso(FichaDescProgramaDTO programa, String nombrePrograma,
 			int numeroSemestre, int numeroBloque) {
-		String nombreNormalizado = normalizaTexto(nombrePrograma);
-		if (!esProgramaOpcional(programa != null ? programa.getTipo() : null)) {
-			return StringUtils.isNotBlank(nombrePrograma) && asignaturasEnCurso.contains(nombreNormalizado);
-		}
 		String ubicacionActual = construirClaveUbicacion(numeroSemestre, numeroBloque);
+		if (!esProgramaOpcional(programa != null ? programa.getTipo() : null)) {
+			return estaProgramaEnCursoPorUbicacion(programa, nombrePrograma, ubicacionActual);
+		}
 		Set<String> ubicacionesEnCurso = obtenerUbicacionesOptativas(ubicacionesOptativasEnCurso, programa, nombrePrograma);
 		return ubicacionesEnCurso.contains(ubicacionActual);
+	}
+
+	private boolean estaProgramaEnCursoPorUbicacion(FichaDescProgramaDTO programa, String nombrePrograma,
+			String ubicacionActual) {
+		for (String clave : construirClavesPrograma(programa, nombrePrograma)) {
+			Set<String> ubicaciones = ubicacionesProgramasEnCurso.get(clave);
+			if (!ObjectUtils.isNullOrEmpty(ubicaciones) && ubicaciones.contains(ubicacionActual)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean esProgramaOpcional(String tipoPrograma) {
@@ -669,6 +682,14 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			return;
 		}
 		ubicacionesPorClave.computeIfAbsent(clave, key -> new HashSet<>())
+				.add(construirClaveUbicacion(semestre, bloque));
+	}
+
+	private void registrarUbicacionProgramaEnCurso(String clave, int semestre, int bloque) {
+		if (StringUtils.isBlank(clave) || semestre <= 0 || bloque <= 0) {
+			return;
+		}
+		ubicacionesProgramasEnCurso.computeIfAbsent(clave, key -> new HashSet<>())
 				.add(construirClaveUbicacion(semestre, bloque));
 	}
 
@@ -818,7 +839,10 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 
 	private void aplicarEstatusEnCurso(Map<Integer, MallaDiagramaNodoDTO> programasPorId) {
 		for (MallaDiagramaNodoDTO nodo : programasPorId.values()) {
-			if (nodo.isEnCurso()) {
+			if (nodo.isEnCurso()
+					&& !ESTATUS_APROBADA.equals(nodo.getEstatus())
+					&& !ESTATUS_NO_ACREDITADA.equals(nodo.getEstatus())
+					&& !ESTATUS_BAJA.equals(nodo.getEstatus())) {
 				String color = ESTATUS_COLORS.getOrDefault(ESTATUS_EN_CURSO, "#facc15");
 				nodo.setEstatus(ESTATUS_EN_CURSO);
 				nodo.setEstatusBackgroundColor(color);
