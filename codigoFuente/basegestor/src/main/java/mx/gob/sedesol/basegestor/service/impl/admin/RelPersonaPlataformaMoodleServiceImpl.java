@@ -58,7 +58,7 @@ public class RelPersonaPlataformaMoodleServiceImpl implements RelPersonaPlatafor
 						usuario.setUsername(persona.getUsuario());
 						usuario.setPassword(persona.getContrasenia());
 						usuario.setFirstname(persona.getNombre());
-						usuario.setLastname(persona.getApellidoPaterno());
+						usuario.setLastname(obtenerApellidos(persona));
 						usuario.setIdnumber(persona.getIdPersona().toString());
 						usuario.setEmail(correoElectronico);
 						idMoodle = wsClient.crearUsuario(usuario);
@@ -119,7 +119,7 @@ public class RelPersonaPlataformaMoodleServiceImpl implements RelPersonaPlatafor
 		            usuario.setUsername(persona.getUsuario());
 		            usuario.setPassword(persona.getContrasenia());
 		            usuario.setFirstname(persona.getNombre());
-		            usuario.setLastname(persona.getApellidoPaterno());
+		            usuario.setLastname(obtenerApellidos(persona));
 		            usuario.setIdnumber(persona.getIdPersona().toString());
 		            usuario.setEmail(correoElectronico);
 
@@ -162,6 +162,22 @@ public class RelPersonaPlataformaMoodleServiceImpl implements RelPersonaPlatafor
 
 		return idMoodle;
 
+	}
+
+	private String obtenerApellidos(PersonaDTO persona) {
+		StringBuilder apellidos = new StringBuilder();
+		agregarValor(apellidos, persona.getApellidoPaterno());
+		agregarValor(apellidos, persona.getApellidoMaterno());
+		return apellidos.toString();
+	}
+
+	private void agregarValor(StringBuilder builder, String valor) {
+		if (ObjectUtils.isNotNull(valor) && !valor.trim().isEmpty()) {
+			if (builder.length() > 0) {
+				builder.append(" ");
+			}
+			builder.append(valor.trim());
+		}
 	}
 	
 	/**
