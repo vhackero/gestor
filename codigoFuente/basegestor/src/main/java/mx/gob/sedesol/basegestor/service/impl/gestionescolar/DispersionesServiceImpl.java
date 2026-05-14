@@ -491,7 +491,8 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 					solicitud.getIdDispersion(),
 					solicitud.getIdProcesoInscripcion(),
 					solicitud.getIdPrograma(),
-					solicitud.getNombreProgramaSeleccionado());
+					solicitud.getNombreProgramaSeleccionado(),
+					solicitud.getBloquePrograma());
 		} else {
 			personas = iDispersionesRepository.obtenerPersonasMatriculacion(solicitud.getIdDispersion(),
 					solicitud.getIdConvocatoria(), solicitud.getIdTipoProceso(), solicitud.getIdProcesoInscripcion());

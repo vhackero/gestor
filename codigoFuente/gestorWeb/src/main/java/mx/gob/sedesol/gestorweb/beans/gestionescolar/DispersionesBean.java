@@ -803,6 +803,7 @@ public class DispersionesBean extends BaseBean {
 		solicitud.setGrupoResto(dispersion.getGrupoResto());
 		solicitud.setMatriculacionCompartidos(Boolean.TRUE);
 		solicitud.setNombreProgramaSeleccionado(dispersion.getPrograma());
+		solicitud.setBloquePrograma(dispersion.getBloque());
 		solicitud.setIdUsuario(usuario);
 		return solicitud;
 	}

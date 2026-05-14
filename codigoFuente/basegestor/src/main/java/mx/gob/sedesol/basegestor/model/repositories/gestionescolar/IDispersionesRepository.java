@@ -63,7 +63,7 @@ public interface IDispersionesRepository {
 		public List<Long> obtenerPersonasMatriculacion(Integer idDispersion, Integer idConvocatoria, Integer idTipoProceso, Integer idProcesoInscripcion);
 
 		public List<Long> obtenerPersonasMatriculacionCompartidos(Integer idDispersion, Integer idProcesoInscripcion,
-				Integer idPrograma, String nombreProgramaSeleccionado);
+				Integer idPrograma, String nombreProgramaSeleccionado, String bloque);
 		
 		public void guardarRelacionDispersionGrupo(Integer idDispersion, Integer idEvento, Integer idGrupo, Long idPersona);
 		

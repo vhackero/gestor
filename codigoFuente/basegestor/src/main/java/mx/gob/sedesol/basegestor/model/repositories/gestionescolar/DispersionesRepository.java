@@ -754,30 +754,25 @@ public class DispersionesRepository implements IDispersionesRepository {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Long> obtenerPersonasMatriculacionCompartidos(Integer idDispersion, Integer idProcesoInscripcion,
-			Integer idPrograma, String nombreProgramaSeleccionado) {
+			Integer idPrograma, String nombreProgramaSeleccionado, String bloque) {
 		List<Long> personas = new ArrayList<>();
 		if (idDispersion == null || idProcesoInscripcion == null || idPrograma == null
-				|| nombreProgramaSeleccionado == null || nombreProgramaSeleccionado.trim().isEmpty()) {
+				|| nombreProgramaSeleccionado == null || nombreProgramaSeleccionado.trim().isEmpty()
+				|| bloque == null || bloque.trim().isEmpty()) {
 			return personas;
 		}
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT tis.Idpersona, tis.idplan, tis.idprograma, :idDispersion id_dispersion ")
+		sql.append("SELECT tis.Idpersona, tis.idplan, td.id_programa AS idprograma, :idDispersion id_dispersion ")
 		   .append("FROM tbl_inscripciones tis ")
 		   .append("JOIN tbl_procesos_inscripcion tpi ")
 		   .append("  ON tis.fecha_registro >= tpi.fecha_inicio ")
 		   .append(" AND tis.fecha_registro <= tpi.fecha_fin ")
-		   .append(" AND tpi.proceso_inscripcion_id = :idProcesoInscripcion ")
+		   .append(" AND tpi.proceso_inscripcion_id = :idProcesosInscripcion ")
 		   .append("JOIN tbl_dispersiones td ")
 		   .append("  ON td.id_proceso_inscripcion = tpi.proceso_inscripcion_id ")
 		   .append(" AND td.id_dispersion = :idDispersion ")
-		   .append("JOIN tbl_ficha_descriptiva_programa tfdp ")
-		   .append("  ON tfdp.id_programa = tis.idprograma ")
-		   .append("JOIN tbl_planes tp ")
-		   .append("  ON tfdp.id_plan = tp.id_plan ")
-		   .append("JOIN tbl_malla_curricular tmc ")
-		   .append("  ON tmc.id = tfdp.id_eje_capacitacion ")
-		   .append("WHERE tis.asignatura LIKE CONCAT(:nombreProgramaSeleccionado,'%') ")
-		   .append("  AND tmc.nombre LIKE CONCAT('%',tis.bloque,'%') ")
+		   .append("WHERE tis.asignatura LIKE CONCAT('%', TRIM(:nombreProgramaSelecionado), '%') ")
+		   .append("  AND :bloque LIKE CONCAT('%', tis.bloque, '%') ")
 		   .append("  AND NOT EXISTS( ")
 		   .append("      SELECT 1 ")
 		   .append("      FROM rel_grupo_participante rgp ")
@@ -792,8 +787,9 @@ public class DispersionesRepository implements IDispersionesRepository {
 		   .append("         tis.idprograma");
 		Query query = entityManager.createNativeQuery(sql.toString());
 		query.setParameter("idDispersion", idDispersion);
-		query.setParameter("idProcesoInscripcion", idProcesoInscripcion);
-		query.setParameter("nombreProgramaSeleccionado", nombreProgramaSeleccionado);
+		query.setParameter("idProcesosInscripcion", idProcesoInscripcion);
+		query.setParameter("nombreProgramaSelecionado", nombreProgramaSeleccionado);
+		query.setParameter("bloque", bloque);
 		query.setParameter("idPrograma", idPrograma);
 		List<Object[]> registros = query.getResultList();
 		for (Object[] row : registros) {
@@ -964,11 +960,12 @@ public class DispersionesRepository implements IDispersionesRepository {
 				+ "                     JOIN tbl_ficha_descriptiva_programa tfpp ON tfpp.id_programa = te.id_programa "
 				+ "                     WHERE rgp.id_persona_participante = tis.Idpersona "
 				+ "                       AND tis.asignatura LIKE CONCAT(tfpp.nombre_tentativo, '%') "
+				+ "                       AND rgp.fecha_registro >= tis.fecha_registro "
 				+ "                 ) "
 				+ "           ) AS num_usuarios_inscripcion, "
 				+ "           td.no_grupos AS gruposgenerales, td.estudiantes_x_grupo AS cupogeneral, "
 				+ "           td.grupo_resto AS gruposresto, td.estudiantes_resto AS cuporesto, "
-				+ "           NULL AS tipo_matriculacion, "
+				+ "           td.tipo_matriculacion AS tipo_matriculacion, "
 				+ "           COALESCE((SELECT COUNT(DISTINCT rdg.id_grupo) "
 				+ "                    FROM rel_dispersiones_grupo rdg "
 				+ "                    WHERE rdg.id_dispersion = td.id_dispersion), 0) AS grupos_creados, "
@@ -976,7 +973,11 @@ public class DispersionesRepository implements IDispersionesRepository {
 				+ "                    FROM rel_grupo_participante rgp "
 				+ "                    INNER JOIN rel_dispersiones_grupo rdg "
 				+ "                            ON rdg.id_grupo = rgp.id_grupo "
-				+ "                    WHERE rdg.id_dispersion = td.id_dispersion), 0) AS usuarios_matriculados "
+				+ "                    WHERE rdg.id_dispersion = td.id_dispersion "
+				+ "                      AND rgp.fecha_registro >= (SELECT tpi1.fecha_inicio "
+				+ "                                                   FROM tbl_procesos_inscripcion tpi1 "
+				+ "                                                  WHERE tpi1.proceso_inscripcion_id = td.id_proceso_inscripcion)"
+				+ "                   ), 0) AS usuarios_matriculados "
 				+ "    FROM rel_proceso_inscipcion_planesyprogramas rpip "
 				+ "    JOIN tbl_ficha_descriptiva_programa tfdp ON tfdp.id_programa = rpip.id_programa "
 				+ "    JOIN tbl_planes tp ON tfdp.id_plan = tp.id_plan "
@@ -992,7 +993,6 @@ public class DispersionesRepository implements IDispersionesRepository {
 				+ "            JOIN tbl_procesos_inscripcion tpi "
 				+ "              ON ti.fecha_registro >= tpi.fecha_inicio "
 				+ "             AND ti.fecha_registro <= tpi.fecha_fin "
-				+ "             AND tpi.proceso_inscripcion_id = :idProcesosInscripcion "
 				+ "            WHERE ti.asignatura = tfdp.nombre_tentativo "
 				+ "      ) "
 				+ "      AND EXISTS ( "

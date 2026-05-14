@@ -17,6 +17,7 @@ public class MatricularDispersionDTO implements Serializable {
 	private Integer grupoResto;
 	private Boolean matriculacionCompartidos;
 	private String nombreProgramaSeleccionado;
+	private String bloquePrograma;
 
 	public Integer getIdDispersion() {
 		return idDispersion;
@@ -104,6 +105,14 @@ public class MatricularDispersionDTO implements Serializable {
 
 	public void setNombreProgramaSeleccionado(String nombreProgramaSeleccionado) {
 		this.nombreProgramaSeleccionado = nombreProgramaSeleccionado;
+	}
+
+	public String getBloquePrograma() {
+		return bloquePrograma;
+	}
+
+	public void setBloquePrograma(String bloquePrograma) {
+		this.bloquePrograma = bloquePrograma;
 	}
 
 }
