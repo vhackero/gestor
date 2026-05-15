@@ -86,9 +86,11 @@ public class RelPersonaPlataformaMoodleServiceImpl implements RelPersonaPlatafor
 				relPersonaPlataformaMoodleRepo.save(entidad);
 			}
 			return idMoodle;
-		} else {
-			return lista.get(ConstantesGestor.PRIMER_ELEMENTO).getIdPersonaMoodle();
-		}
+			
+		}else if (!lista.isEmpty()){ 
+				return lista.get(ConstantesGestor.PRIMER_ELEMENTO).getIdPersonaMoodle();
+			
+		} 
 		ParametroWSMoodleDTO parametroWSMoodleDTO = parametroWSMoodleService.buscarPorId(idPlataformaMoodle);
 		Integer idMoodle = resolverIdMoodle(persona, parametroWSMoodleDTO);
 		if (ObjectUtils.isNullOrCero(idMoodle)) {
@@ -119,14 +121,7 @@ public class RelPersonaPlataformaMoodleServiceImpl implements RelPersonaPlatafor
 
 		return idMoodle;
 
-		        if (ObjectUtils.isNullOrCero(idMoodle)) {
-		            Usuario usuario = new Usuario();
-		            usuario.setUsername(persona.getUsuario());
-		            usuario.setPassword(persona.getContrasenia());
-		            usuario.setFirstname(persona.getNombre());
-		            usuario.setLastname(obtenerApellidos(persona));
-		            usuario.setIdnumber(persona.getIdPersona().toString());
-		            usuario.setEmail(correoElectronico);
+	}
 
 	private Integer resolverIdMoodle(PersonaDTO persona, ParametroWSMoodleDTO parametroWSMoodleDTO) {
 		UsuarioWSClient wsClient = new UsuarioWSClient(parametroWSMoodleDTO);
@@ -143,7 +138,7 @@ public class RelPersonaPlataformaMoodleServiceImpl implements RelPersonaPlatafor
 				usuario.setUsername(persona.getUsuario());
 				usuario.setPassword(persona.getContrasenia());
 				usuario.setFirstname(persona.getNombre());
-				usuario.setLastname(persona.getApellidoPaterno());
+				usuario.setLastname(obtenerApellidos(persona));
 				usuario.setIdnumber(persona.getIdPersona().toString());
 				usuario.setEmail(correoElectronico);
 				try {
@@ -160,6 +155,22 @@ public class RelPersonaPlataformaMoodleServiceImpl implements RelPersonaPlatafor
 			logger.error(e.getMessage(), e);
 		}
 		return ObjectUtils.isNullOrCero(idMoodle) ? null : idMoodle;
+	}
+
+	private String obtenerApellidos(PersonaDTO persona) {
+		StringBuilder apellidos = new StringBuilder();
+		agregarValor(apellidos, persona.getApellidoPaterno());
+		agregarValor(apellidos, persona.getApellidoMaterno());
+		return apellidos.toString();
+	}
+
+	private void agregarValor(StringBuilder builder, String valor) {
+		if (ObjectUtils.isNotNull(valor) && !valor.trim().isEmpty()) {
+			if (builder.length() > 0) {
+				builder.append(" ");
+			}
+			builder.append(valor.trim());
+		}
 	}
 
 	private Integer recuperarIdMoodleExistente(UsuarioWSClient wsClient, String username, String correoElectronico) {
@@ -200,22 +211,6 @@ public class RelPersonaPlataformaMoodleServiceImpl implements RelPersonaPlatafor
 			entidad.setUsuarioModifico(usuarioModifico);
 			entidad.setFechaRegistro(new Date());
 			relPersonaPlataformaMoodleRepo.save(entidad);
-		}
-	}
-
-	private String obtenerApellidos(PersonaDTO persona) {
-		StringBuilder apellidos = new StringBuilder();
-		agregarValor(apellidos, persona.getApellidoPaterno());
-		agregarValor(apellidos, persona.getApellidoMaterno());
-		return apellidos.toString();
-	}
-
-	private void agregarValor(StringBuilder builder, String valor) {
-		if (ObjectUtils.isNotNull(valor) && !valor.trim().isEmpty()) {
-			if (builder.length() > 0) {
-				builder.append(" ");
-			}
-			builder.append(valor.trim());
 		}
 	}
 	
