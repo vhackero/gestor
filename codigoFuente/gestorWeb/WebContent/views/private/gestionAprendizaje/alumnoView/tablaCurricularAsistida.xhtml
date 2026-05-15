@@ -7,7 +7,8 @@
     xmlns:p="http://primefaces.org/ui">
 
     <ui:define name="breadcrumb">
-        <li>Asistente de inscripción curricular</li>
+        <li>#{sistema.obtenerTexto('gw.sidebar.historialAcademico')}</li>
+        <li class="active">Asistente de inscripción curricular</li>
     </ui:define>
 
     <ui:define name="content">
@@ -666,9 +667,9 @@
                                     <span class="#{tablaCurricularAsistidaBean.contexto.diagnosticoActual.regular ? 'situacion-regular' : 'situacion-irregular'}">
                                         Estudiante #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.regular ? 'regular' : 'irregular'}
                                     </span>
-                                    con #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasReprobadasActivas} UD reprobada(s),
-                                    #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasBloqueadasPorSeriacion} UD bloqueada(s) por seriación curricular
-                                    y #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasCriticas} UD crítica(s) para la trayectoria académica.
+                                    con #{tablaCurricularAsistidaBean.conteoIncidenciasSituacion} #{tablaCurricularAsistidaBean.etiquetaIncidenciaSituacion},
+                                    #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasBloqueadasPorSeriacion} UD con seriación curricular pendiente
+                                    y #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasCriticas} UD a registrar para la trayectoria académica.
                                 </div>
 
                                 <div class="kpi-grid">
@@ -680,11 +681,11 @@
                                         </div>
                                     </div>
                                     <div class="kpi-card kpi-card-green">
-                                        <div class="kpi-title">UD reprobadas activas</div>
-                                        <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasReprobadasActivas}</div>
+                                        <div class="kpi-title">#{tablaCurricularAsistidaBean.tituloIndicadorIncidencias}</div>
+                                        <div class="kpi-value">#{tablaCurricularAsistidaBean.conteoIncidenciasSituacion}</div>
                                     </div>
                                     <div class="kpi-card kpi-card-green">
-                                        <div class="kpi-title">UD críticas</div>
+                                        <div class="kpi-title">UD a registrar</div>
                                         <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasCriticas}</div>
                                     </div>
                                     <div class="kpi-card kpi-card-green">
@@ -890,7 +891,7 @@
 
                                 <div class="simulacion-base">
                                     <strong>Base de simulación:</strong>
-                                    #{tablaCurricularAsistidaBean.contexto.inscripcionVigente ? 'Universo curricular hipotético con UD pendientes de ciclos académicos anteriores y UD del semestre siguiente' : 'Oferta académica vigente'}
+                                    #{tablaCurricularAsistidaBean.contexto.inscripcionVigente ? 'Universo curricular hipotético con UD pendientes de ciclos académicos anteriores y UD del periodo de inscripción vigente' : 'Oferta académica vigente'}
                                 </div>
 
                                 <div class="simulacion-actions">

@@ -1106,6 +1106,25 @@ public class InscripcionRepository implements IinscripcionRepository {
 		return dto;
 	}
 
+	@Override
+	public void guardarCreditosTotalesPorPlan(Long idPlan, Long totalCreditos) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO rel_creditos_totales_por_plan (id_plan, total_creditos) ");
+		sql.append("VALUES (:id_plan, :total_creditos)");
+		entityManager.createNativeQuery(sql.toString()).setParameter("id_plan", idPlan)
+				.setParameter("total_creditos", totalCreditos).executeUpdate();
+	}
+
+	@Override
+	public void actualizarCreditosTotalesPorPlan(Long idPlan, Long totalCreditos) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE rel_creditos_totales_por_plan ");
+		sql.append("SET total_creditos = :total_creditos ");
+		sql.append("WHERE id_plan = :id_plan");
+		entityManager.createNativeQuery(sql.toString()).setParameter("id_plan", idPlan)
+				.setParameter("total_creditos", totalCreditos).executeUpdate();
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<InscripcionMateriasDTO> obtenerMateriasElectivasDeOtrosPlanes(Long idPlanPersona, Date fechaActual,

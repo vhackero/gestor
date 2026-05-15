@@ -1,6 +1,7 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import javax.faces.bean.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
+import javax.faces.model.SelectItem;
 
 import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
@@ -24,13 +26,20 @@ import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CatalogoComunDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ActaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaActaEventoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProgramaEventoFiltroDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProgramaEventoEstatusDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.MallaCurricularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.RelProgDuracionDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.ActaService;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.EventoCapacitacionServiceFacade;
 import mx.gob.sedesol.basegestor.service.impl.planesyprogramas.FECServiceFacade;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.LoginWS;
@@ -55,6 +64,9 @@ public class EventoCapacitacionBean extends BaseBean {
 
 	@ManagedProperty(value = "#{parametroSistemaService}")
 	private ParametroSistemaService parametrosSistemaService;
+
+	@ManagedProperty(value = "#{actaService}")
+	private ActaService actaService;
 
 	private EventoCapacitacionDTO filtros;
 	private EventoCapacitacionDTO eventoReporte;
@@ -90,6 +102,7 @@ public class EventoCapacitacionBean extends BaseBean {
 
 	private String tipoDatoFechas;
 	private StreamedContent reportePDF;
+	private StreamedContent actaConsultaPDF;
 	private Integer idPlan;
 
 	private List<CatalogoComunDTO> catEstructuras;
@@ -100,6 +113,32 @@ public class EventoCapacitacionBean extends BaseBean {
 	private List<CatalogoComunDTO> planes;
 	private Integer nivelMaximo = 1;
 	private Integer idCapacitacion;
+	private boolean mostrarVistaConsultarActas;
+	private List<String> filtroConsultarActasPlanPrograma;
+	private String filtroConsultarActasAnioPeriodo;
+	private String filtroConsultarActasNumeroElementos;
+	private Integer filtroConsultarActasEstatus;
+	private List<SelectItem> opcionesConsultarActasPlanPrograma;
+	private List<SelectItem> opcionesConsultarActasAnioPeriodo;
+	private List<SelectItem> opcionesConsultarActasNumeroElementos;
+	private List<SelectItem> opcionesConsultarActasEstatus;
+	private List<ConsultaActaEventoDTO> resultadosConsultarActas;
+	private boolean busquedaConsultarActasEjecutada;
+	private boolean mostrarListadoActasConsulta;
+	private ConsultaActaEventoDTO grupoListadoActasConsulta;
+	private List<ActaDTO> actasListadoConsulta;
+	private Map<Long, String> cacheUsuariosActas;
+	private boolean mostrarVistaModificarEstatus;
+	private List<String> filtroModificarPlanPrograma;
+	private String filtroModificarAnioPeriodo;
+	private String filtroModificarNumeroElementos;
+	private List<SelectItem> opcionesModificarPlanPrograma;
+	private List<SelectItem> opcionesModificarAnioPeriodo;
+	private List<SelectItem> opcionesModificarNumeroElementos;
+	private List<SelectItem> opcionesModificarEstatus;
+	private List<ProgramaEventoEstatusDTO> resultadosModificarEstatus;
+	private Integer idEstatusModificarSeleccionado;
+	private boolean busquedaModificarEstatusEjecutada;
 
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
@@ -113,6 +152,20 @@ public class EventoCapacitacionBean extends BaseBean {
 		if (ObjectUtils.isNull(eventosCapacitacion)){
 
 		}
+		filtroConsultarActasPlanPrograma = new ArrayList<String>();
+		opcionesConsultarActasPlanPrograma = new ArrayList<SelectItem>();
+		opcionesConsultarActasAnioPeriodo = new ArrayList<SelectItem>();
+		opcionesConsultarActasNumeroElementos = new ArrayList<SelectItem>();
+			opcionesConsultarActasEstatus = new ArrayList<SelectItem>();
+			resultadosConsultarActas = new ArrayList<ConsultaActaEventoDTO>();
+			actasListadoConsulta = new ArrayList<ActaDTO>();
+			cacheUsuariosActas = new HashMap<Long, String>();
+			opcionesModificarPlanPrograma = new ArrayList<SelectItem>();
+		opcionesModificarAnioPeriodo = new ArrayList<SelectItem>();
+		opcionesModificarNumeroElementos = new ArrayList<SelectItem>();
+		opcionesModificarEstatus = new ArrayList<SelectItem>();
+		filtroModificarPlanPrograma = new ArrayList<String>();
+		resultadosModificarEstatus = new ArrayList<ProgramaEventoEstatusDTO>();
 
 	}
 
@@ -127,6 +180,498 @@ public class EventoCapacitacionBean extends BaseBean {
 
 		this.generaEstructuraCatTpoCompetenciaPlan();
 		this.generaCatEjesCapacitBusqueda();
+		inicializarVistaConsultarActas();
+		inicializarVistaModificarEstatus();
+	}
+
+	private void inicializarVistaConsultarActas() {
+			mostrarVistaConsultarActas = false;
+			limpiarCamposConsultarActas();
+			cargarOpcionesConsultarActas();
+	}
+
+	private void inicializarVistaModificarEstatus() {
+		mostrarVistaModificarEstatus = false;
+		filtroModificarPlanPrograma = new ArrayList<String>();
+		filtroModificarAnioPeriodo = null;
+		filtroModificarNumeroElementos = null;
+		idEstatusModificarSeleccionado = null;
+		busquedaModificarEstatusEjecutada = false;
+		if (resultadosModificarEstatus == null) {
+			resultadosModificarEstatus = new ArrayList<ProgramaEventoEstatusDTO>();
+		} else {
+			resultadosModificarEstatus.clear();
+		}
+		if (opcionesModificarPlanPrograma == null) {
+			opcionesModificarPlanPrograma = new ArrayList<SelectItem>();
+		} else {
+			opcionesModificarPlanPrograma.clear();
+		}
+		if (opcionesModificarAnioPeriodo == null) {
+			opcionesModificarAnioPeriodo = new ArrayList<SelectItem>();
+		} else {
+			opcionesModificarAnioPeriodo.clear();
+		}
+		if (opcionesModificarNumeroElementos == null) {
+			opcionesModificarNumeroElementos = new ArrayList<SelectItem>();
+		} else {
+			opcionesModificarNumeroElementos.clear();
+		}
+		if (opcionesModificarEstatus == null) {
+			opcionesModificarEstatus = new ArrayList<SelectItem>();
+		} else {
+			opcionesModificarEstatus.clear();
+		}
+		cargarOpcionesModificarEstatus();
+	}
+
+	public void mostrarVistaConsultarActas() {
+		mostrarVistaConsultarActas = true;
+		mostrarVistaModificarEstatus = false;
+		limpiarCamposConsultarActas();
+	}
+
+	public void mostrarVistaModificarEstatus() {
+		mostrarVistaModificarEstatus = true;
+		mostrarVistaConsultarActas = false;
+		limpiarCamposModificarEstatus();
+	}
+
+	public void prepararVistaEntrada() {
+		if (!FacesContext.getCurrentInstance().isPostback()) {
+			cancelarConsultarActas();
+			cancelarModificarEstatus();
+		}
+	}
+
+	public void ocultarVistaModificarEstatus() {
+		mostrarVistaModificarEstatus = false;
+	}
+
+	public void cancelarModificarEstatus() {
+		ocultarVistaModificarEstatus();
+		limpiarCamposModificarEstatus();
+	}
+
+	public void limpiarCamposModificarEstatus() {
+		filtroModificarPlanPrograma = new ArrayList<String>();
+		filtroModificarAnioPeriodo = null;
+		filtroModificarNumeroElementos = null;
+		idEstatusModificarSeleccionado = null;
+		busquedaModificarEstatusEjecutada = false;
+		if (resultadosModificarEstatus == null) {
+			resultadosModificarEstatus = new ArrayList<ProgramaEventoEstatusDTO>();
+		} else {
+			resultadosModificarEstatus.clear();
+		}
+	}
+
+	public void buscarModificarEstatus() {
+		busquedaModificarEstatusEjecutada = true;
+		idEstatusModificarSeleccionado = null;
+		resultadosModificarEstatus.clear();
+
+		if (ObjectUtils.isNullOrEmpty(filtroModificarPlanPrograma) || ObjectUtils.isNull(filtroModificarAnioPeriodo)
+				|| ObjectUtils.isNull(filtroModificarNumeroElementos)) {
+			agregarMsgError("Debes seleccionar Plan / Programa, Año Periodo y Número de elementos.", null);
+			return;
+		}
+
+		List<Integer> idsPrograma = new ArrayList<Integer>();
+		for (String idPrograma : filtroModificarPlanPrograma) {
+			if (ObjectUtils.isNull(idPrograma) || idPrograma.trim().isEmpty()) {
+				continue;
+			}
+			idsPrograma.add(Integer.valueOf(idPrograma));
+		}
+
+		resultadosModificarEstatus = eventoCapacitacionServiceFacade.buscarEventosParaCambioEstatus(
+				filtroModificarAnioPeriodo, filtroModificarNumeroElementos, idsPrograma);
+		if (resultadosModificarEstatus == null) {
+			resultadosModificarEstatus = new ArrayList<ProgramaEventoEstatusDTO>();
+		}
+	}
+
+	public void actualizarModificarEstatus() {
+		if (ObjectUtils.isNull(idEstatusModificarSeleccionado)) {
+			agregarMsgError("Debes seleccionar el estatus a cambiar.", null);
+			return;
+		}
+		List<Integer> idsEvento = new ArrayList<Integer>();
+		for (ProgramaEventoEstatusDTO registro : resultadosModificarEstatus) {
+			if (registro != null && registro.isSeleccionado() && registro.getIdEvento() != null) {
+				idsEvento.add(registro.getIdEvento().intValue());
+			}
+		}
+		if (ObjectUtils.isNullOrEmpty(idsEvento)) {
+			agregarMsgError("Debes seleccionar al menos un evento.", null);
+			return;
+		}
+
+		boolean actualizado = eventoCapacitacionServiceFacade.modificarEstatusEventos(idEstatusModificarSeleccionado,
+				idsEvento);
+		if (actualizado) {
+			agregarMsgInfo("Registros actualizados correctamente", null);
+			buscarModificarEstatus();
+			idEstatusModificarSeleccionado = null;
+			for (ProgramaEventoEstatusDTO registro : resultadosModificarEstatus) {
+				if (registro != null) {
+					registro.setSeleccionado(false);
+				}
+			}
+		} else {
+			agregarMsgError("Ocurrió un error al actualizar los registros.", null);
+		}
+	}
+
+	private void cargarOpcionesModificarEstatus() {
+		cargarOpcionesModificarPlanPrograma();
+		cargarOpcionesModificarAnioPeriodo();
+		cargarOpcionesModificarNumeroElementos();
+		cargarOpcionesCambioEstatus();
+	}
+
+	private void cargarOpcionesModificarPlanPrograma() {
+		opcionesModificarPlanPrograma.clear();
+		List<ProgramaEventoEstatusDTO> programas = eventoCapacitacionServiceFacade.obtenerProgramasConEventosParaCambioEstatus();
+		if (ObjectUtils.isNullOrEmpty(programas)) {
+			return;
+		}
+		for (ProgramaEventoEstatusDTO programa : programas) {
+			if (programa == null || programa.getIdPrograma() == null) {
+				continue;
+			}
+			StringBuilder etiqueta = new StringBuilder();
+			etiqueta.append(programa.getPlan() != null ? programa.getPlan() : "Sin plan");
+			etiqueta.append(" / ");
+			etiqueta.append(programa.getSemestre() != null ? programa.getSemestre() : "-");
+			etiqueta.append(" / ");
+			etiqueta.append(programa.getBloque() != null ? programa.getBloque() : "-");
+			etiqueta.append(" / ");
+			etiqueta.append(programa.getPrograma() != null ? programa.getPrograma() : "Sin programa");
+			opcionesModificarPlanPrograma.add(new SelectItem(String.valueOf(programa.getIdPrograma()), etiqueta.toString()));
+		}
+	}
+
+	private void cargarOpcionesModificarAnioPeriodo() {
+		opcionesModificarAnioPeriodo.clear();
+		int anioActual = Calendar.getInstance().get(Calendar.YEAR);
+		for (int anio = anioActual - 10; anio <= anioActual + 10; anio++) {
+			opcionesModificarAnioPeriodo.add(new SelectItem(String.valueOf(anio), String.valueOf(anio)));
+		}
+	}
+
+	private void cargarOpcionesModificarNumeroElementos() {
+		opcionesModificarNumeroElementos.clear();
+		for (int numero = 1; numero <= 12; numero++) {
+			opcionesModificarNumeroElementos.add(new SelectItem(String.valueOf(numero), String.valueOf(numero)));
+		}
+	}
+
+	private void cargarOpcionesCambioEstatus() {
+		opcionesModificarEstatus.clear();
+		if (ObjectUtils.isNullOrEmpty(listaEstatusEC)) {
+			return;
+		}
+		for (CatalogoComunDTO estatus : listaEstatusEC) {
+			if (estatus == null || estatus.getId() == null || !Integer.valueOf(1).equals(estatus.getActivo())) {
+				continue;
+			}
+			opcionesModificarEstatus.add(new SelectItem(estatus.getId(), estatus.getNombre()));
+		}
+	}
+
+	public void cancelarConsultarActas() {
+		mostrarVistaConsultarActas = false;
+		limpiarCamposConsultarActas();
+	}
+
+	public void limpiarCamposConsultarActas() {
+		filtroConsultarActasPlanPrograma = new ArrayList<String>();
+		filtroConsultarActasAnioPeriodo = null;
+		filtroConsultarActasNumeroElementos = null;
+		filtroConsultarActasEstatus = null;
+		resultadosConsultarActas = new ArrayList<ConsultaActaEventoDTO>();
+		busquedaConsultarActasEjecutada = false;
+		mostrarListadoActasConsulta = false;
+		grupoListadoActasConsulta = null;
+		actasListadoConsulta = new ArrayList<ActaDTO>();
+		cacheUsuariosActas = new HashMap<Long, String>();
+	}
+
+	public void buscarConsultarActas() {
+		if (ObjectUtils.isNullOrEmpty(filtroConsultarActasPlanPrograma)
+				|| ObjectUtils.isNullOrEmpty(filtroConsultarActasAnioPeriodo)
+				|| ObjectUtils.isNullOrEmpty(filtroConsultarActasNumeroElementos)
+				|| ObjectUtils.isNull(filtroConsultarActasEstatus)) {
+			agregarMsgWarn("Debe seleccionar todos los filtros para consultar actas.", null);
+			resultadosConsultarActas = new ArrayList<ConsultaActaEventoDTO>();
+			busquedaConsultarActasEjecutada = true;
+			return;
+		}
+
+		List<Long> idsPrograma = new ArrayList<Long>();
+		for (String idPrograma : filtroConsultarActasPlanPrograma) {
+			if (!ObjectUtils.isNullOrEmpty(idPrograma)) {
+				idsPrograma.add(Long.valueOf(idPrograma));
+			}
+		}
+
+		resultadosConsultarActas = eventoCapacitacionServiceFacade.consultarActasPorFiltros(
+				filtroConsultarActasAnioPeriodo, filtroConsultarActasNumeroElementos, idsPrograma,
+				filtroConsultarActasEstatus);
+		if (resultadosConsultarActas == null) {
+			resultadosConsultarActas = new ArrayList<ConsultaActaEventoDTO>();
+		}
+		busquedaConsultarActasEjecutada = true;
+	}
+
+	public void eliminarActaConsulta(ConsultaActaEventoDTO consultaActa) {
+		if (consultaActa == null || consultaActa.getIdGrupo() == null) {
+			agregarMsgWarn("No fue posible identificar el grupo del acta a eliminar.", null);
+			return;
+		}
+		try {
+			GrupoDTO grupo = eventoCapacitacionServiceFacade.getGrupoService()
+					.buscarGrupoPorId(consultaActa.getIdGrupo().intValue());
+			if (ObjectUtils.isNull(grupo)) {
+				agregarMsgWarn("No fue posible cargar la información del grupo seleccionado.", null);
+				return;
+			}
+
+			ActaDTO acta = actaService.getActaByIdGrupo(grupo.getIdGrupo());
+			if (ObjectUtils.isNull(acta)) {
+				agregarMsgInfo("No existe una acta asociada al grupo.", null);
+				return;
+			}
+
+			eventoCapacitacionServiceFacade.actualizaCalificacionesAlEliminarActa(grupo);
+			ResultadoDTO<ActaDTO> resEli = actaService.eliminar(acta);
+			if (ObjectUtils.isNotNull(resEli) && resEli.esCorrecto()) {
+				ResultadoDTO<GrupoDTO> resTx = eventoCapacitacionServiceFacade.actualizarEstatusActa(grupo,
+						getUsuarioEnSession().getIdPersona(), false);
+				if (ObjectUtils.isNull(resTx) || !resTx.esCorrecto()) {
+					agregarMsgError("Ocurrió un error al actualizar el estatus del acta.", null);
+					return;
+				}
+				agregarMsgInfo("ELIMINAR ACTA: " + acta.getIdActa() + " - CORRECTA", null);
+				buscarConsultarActas();
+			} else {
+				agregarMsgError("Ocurrió un error al eliminar el acta.", null);
+			}
+		} catch (Exception e) {
+			logger.error("Ocurrió un error al eliminar el acta en consultar actas", e);
+			agregarMsgWarn("Ocurrió un error al eliminar el acta.", null);
+		}
+	}
+
+	public void verActaConsulta(ConsultaActaEventoDTO consultaActa) {
+		if (consultaActa == null || consultaActa.getIdGrupo() == null) {
+			agregarMsgWarn("No fue posible identificar el grupo del acta a visualizar.", null);
+			return;
+		}
+		ActaDTO acta = actaService.getActaByIdGrupo(consultaActa.getIdGrupo().intValue());
+		abrirVisorActa(acta);
+	}
+
+	public void verActaListadoConsulta(ActaDTO acta) {
+		abrirVisorActa(acta);
+	}
+
+	private void abrirVisorActa(ActaDTO acta) {
+		if (ObjectUtils.isNull(acta)) {
+			agregarMsgInfo("No existe una acta asociada al grupo.", null);
+			return;
+		}
+		if (ObjectUtils.isNull(acta.getBlob())) {
+			ActaDTO actaCompleta = acta.getIdActa() == null ? null : actaService.buscarPorId(acta.getIdActa());
+			acta = ObjectUtils.isNull(actaCompleta) ? acta : actaCompleta;
+		}
+		if (ObjectUtils.isNull(acta) || ObjectUtils.isNull(acta.getBlob())) {
+			agregarMsgInfo("No existe una acta asociada al grupo.", null);
+			return;
+		}
+		try {
+			actaConsultaPDF = ReporteUtil.getStreamedContentOfBytes(acta.getBlob(), "application/pdf", "Acta Firmada");
+			RequestContext.getCurrentInstance().execute("PF('visorActaConsulta').show()");
+			RequestContext.getCurrentInstance().update("frmConsultarActas:dlgVisorActaConsulta");
+			RequestContext.getCurrentInstance().scrollTo("frmConsultarActas:dlgVisorActaConsulta");
+		} catch (Exception e) {
+			logger.error("Ocurrió un error al visualizar el acta en consultar actas", e);
+			agregarMsgWarn("Ocurrió un error al visualizar el acta.", null);
+		}
+	}
+
+	public void listarActasConsulta(ConsultaActaEventoDTO consultaActa) {
+		if (consultaActa == null || consultaActa.getIdGrupo() == null) {
+			agregarMsgWarn("No fue posible identificar el grupo de las actas.", null);
+			return;
+		}
+		grupoListadoActasConsulta = consultaActa;
+		actasListadoConsulta = actaService.getActasByIdGrupo(consultaActa.getIdGrupo().intValue());
+		if (actasListadoConsulta == null) {
+			actasListadoConsulta = new ArrayList<ActaDTO>();
+		}
+		cacheUsuariosActas = new HashMap<Long, String>();
+		mostrarListadoActasConsulta = true;
+	}
+
+	public void regresarResultadosConsultarActas() {
+		mostrarListadoActasConsulta = false;
+		grupoListadoActasConsulta = null;
+		actasListadoConsulta = new ArrayList<ActaDTO>();
+	}
+
+	public void eliminarActaListadoConsulta(ActaDTO acta) {
+		if (acta == null || acta.getIdActa() == null || grupoListadoActasConsulta == null
+				|| grupoListadoActasConsulta.getIdGrupo() == null) {
+			agregarMsgWarn("No fue posible identificar el acta a eliminar.", null);
+			return;
+		}
+		try {
+			ResultadoDTO<ActaDTO> resEli = actaService.eliminar(acta);
+			if (ObjectUtils.isNull(resEli) || !resEli.esCorrecto()) {
+				agregarMsgError("Ocurrió un error al eliminar el acta.", null);
+				return;
+			}
+
+			actasListadoConsulta = actaService.getActasByIdGrupo(grupoListadoActasConsulta.getIdGrupo().intValue());
+			if (actasListadoConsulta == null) {
+				actasListadoConsulta = new ArrayList<ActaDTO>();
+			}
+
+			if (actasListadoConsulta.isEmpty()) {
+				GrupoDTO grupo = eventoCapacitacionServiceFacade.getGrupoService()
+						.buscarGrupoPorId(grupoListadoActasConsulta.getIdGrupo().intValue());
+				if (ObjectUtils.isNotNull(grupo)) {
+					eventoCapacitacionServiceFacade.actualizaCalificacionesAlEliminarActa(grupo);
+					ResultadoDTO<GrupoDTO> resTx = eventoCapacitacionServiceFacade.actualizarEstatusActa(grupo,
+							getUsuarioEnSession().getIdPersona(), false);
+					if (ObjectUtils.isNull(resTx) || !resTx.esCorrecto()) {
+						agregarMsgError("Ocurrió un error al actualizar el estatus del acta.", null);
+						return;
+					}
+				}
+				agregarMsgInfo("ELIMINAR ACTA: " + acta.getIdActa() + " - CORRECTA", null);
+				regresarResultadosConsultarActas();
+				buscarConsultarActas();
+				return;
+			}
+
+			agregarMsgInfo("ELIMINAR ACTA: " + acta.getIdActa() + " - CORRECTA", null);
+			buscarConsultarActas();
+			listarActasConsulta(grupoListadoActasConsulta);
+		} catch (Exception e) {
+			logger.error("Ocurrió un error al eliminar el acta del listado en consultar actas", e);
+			agregarMsgWarn("Ocurrió un error al eliminar el acta.", null);
+		}
+	}
+
+	public boolean mostrarEliminarActaConsulta(ConsultaActaEventoDTO consultaActa) {
+		return consultaActa != null && consultaActa.getEstatus() != null && consultaActa.getEstatus().intValue() != 0;
+	}
+
+	public boolean mostrarVerActaConsulta(ConsultaActaEventoDTO consultaActa) {
+		return consultaActa != null && consultaActa.getEstatus() != null && consultaActa.getEstatus().intValue() == 1;
+	}
+
+	public boolean mostrarListadoActasConsulta(ConsultaActaEventoDTO consultaActa) {
+		return consultaActa != null && consultaActa.getEstatus() != null && consultaActa.getEstatus().intValue() == 3;
+	}
+
+	public String obtenerNombreUsuarioActa(ActaDTO acta) {
+		if (acta == null || acta.getUsuarioModifico() == null) {
+			return "-";
+		}
+		Long idPersona = acta.getUsuarioModifico();
+		if (ObjectUtils.isNotNull(cacheUsuariosActas) && cacheUsuariosActas.containsKey(idPersona)) {
+			return cacheUsuariosActas.get(idPersona);
+		}
+		String nombreCompleto = String.valueOf(idPersona);
+		try {
+			PersonaDTO persona = eventoCapacitacionServiceFacade.getPersonaService().buscarPorId(idPersona);
+			if (ObjectUtils.isNotNull(persona)) {
+				StringBuilder nombre = new StringBuilder();
+				if (ObjectUtils.isNotNull(persona.getNombre())) {
+					nombre.append(persona.getNombre());
+				}
+				if (ObjectUtils.isNotNull(persona.getApellidoPaterno())) {
+					if (nombre.length() > 0) {
+						nombre.append(" ");
+					}
+					nombre.append(persona.getApellidoPaterno());
+				}
+				if (ObjectUtils.isNotNull(persona.getApellidoMaterno())) {
+					if (nombre.length() > 0) {
+						nombre.append(" ");
+					}
+					nombre.append(persona.getApellidoMaterno());
+				}
+				if (nombre.length() > 0) {
+					nombreCompleto = nombre.toString();
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Ocurrió un error al resolver el usuario del acta: " + idPersona, e);
+		}
+		if (ObjectUtils.isNull(cacheUsuariosActas)) {
+			cacheUsuariosActas = new HashMap<Long, String>();
+		}
+		cacheUsuariosActas.put(idPersona, nombreCompleto);
+		return nombreCompleto;
+	}
+
+	private void cargarOpcionesConsultarActas() {
+		cargarOpcionesConsultarActasPlanPrograma();
+		cargarOpcionesConsultarActasAnioPeriodo();
+		cargarOpcionesConsultarActasNumeroElementos();
+		cargarOpcionesConsultarActasEstatus();
+	}
+
+	private void cargarOpcionesConsultarActasPlanPrograma() {
+		opcionesConsultarActasPlanPrograma.clear();
+		List<ProgramaEventoFiltroDTO> programas = eventoCapacitacionServiceFacade.obtenerProgramasConEventosParaFiltro();
+		if (ObjectUtils.isNullOrEmpty(programas)) {
+			return;
+		}
+		for (ProgramaEventoFiltroDTO programa : programas) {
+			if (programa == null || programa.getIdPrograma() == null) {
+				continue;
+			}
+			StringBuilder etiqueta = new StringBuilder();
+			etiqueta.append(programa.getPlan() != null ? programa.getPlan() : "Sin plan");
+			etiqueta.append(" / ");
+			etiqueta.append(programa.getSemestre() != null ? programa.getSemestre() : "-");
+			etiqueta.append(" / ");
+			etiqueta.append(programa.getBloque() != null ? programa.getBloque() : "-");
+			etiqueta.append(" / ");
+			etiqueta.append(programa.getPrograma() != null ? programa.getPrograma() : "Sin programa");
+			opcionesConsultarActasPlanPrograma.add(new SelectItem(String.valueOf(programa.getIdPrograma()),
+					etiqueta.toString()));
+		}
+	}
+
+	private void cargarOpcionesConsultarActasAnioPeriodo() {
+		opcionesConsultarActasAnioPeriodo.clear();
+		int anioActual = Calendar.getInstance().get(Calendar.YEAR);
+		for (int anio = anioActual - 10; anio <= anioActual + 10; anio++) {
+			opcionesConsultarActasAnioPeriodo.add(new SelectItem(String.valueOf(anio), String.valueOf(anio)));
+		}
+	}
+
+	private void cargarOpcionesConsultarActasNumeroElementos() {
+		opcionesConsultarActasNumeroElementos.clear();
+		for (int numero = 1; numero <= 12; numero++) {
+			opcionesConsultarActasNumeroElementos.add(new SelectItem(String.valueOf(numero), String.valueOf(numero)));
+		}
+	}
+
+	private void cargarOpcionesConsultarActasEstatus() {
+		opcionesConsultarActasEstatus.clear();
+		opcionesConsultarActasEstatus.add(new SelectItem(0, "Abierta"));
+		opcionesConsultarActasEstatus.add(new SelectItem(1, "Cerrada"));
+		opcionesConsultarActasEstatus.add(new SelectItem(2, "Cierre incompleto"));
+		opcionesConsultarActasEstatus.add(new SelectItem(3, "Más de un documento cargado"));
 	}
 
 	/**
@@ -739,6 +1284,94 @@ public class EventoCapacitacionBean extends BaseBean {
 		this.filtros = filtros;
 	}
 
+	public boolean isMostrarVistaModificarEstatus() {
+		return mostrarVistaModificarEstatus;
+	}
+
+	public void setMostrarVistaModificarEstatus(boolean mostrarVistaModificarEstatus) {
+		this.mostrarVistaModificarEstatus = mostrarVistaModificarEstatus;
+	}
+
+	public List<String> getFiltroModificarPlanPrograma() {
+		return filtroModificarPlanPrograma;
+	}
+
+	public void setFiltroModificarPlanPrograma(List<String> filtroModificarPlanPrograma) {
+		this.filtroModificarPlanPrograma = filtroModificarPlanPrograma;
+	}
+
+	public String getFiltroModificarAnioPeriodo() {
+		return filtroModificarAnioPeriodo;
+	}
+
+	public void setFiltroModificarAnioPeriodo(String filtroModificarAnioPeriodo) {
+		this.filtroModificarAnioPeriodo = filtroModificarAnioPeriodo;
+	}
+
+	public String getFiltroModificarNumeroElementos() {
+		return filtroModificarNumeroElementos;
+	}
+
+	public void setFiltroModificarNumeroElementos(String filtroModificarNumeroElementos) {
+		this.filtroModificarNumeroElementos = filtroModificarNumeroElementos;
+	}
+
+	public List<SelectItem> getOpcionesModificarPlanPrograma() {
+		return opcionesModificarPlanPrograma;
+	}
+
+	public void setOpcionesModificarPlanPrograma(List<SelectItem> opcionesModificarPlanPrograma) {
+		this.opcionesModificarPlanPrograma = opcionesModificarPlanPrograma;
+	}
+
+	public List<SelectItem> getOpcionesModificarAnioPeriodo() {
+		return opcionesModificarAnioPeriodo;
+	}
+
+	public void setOpcionesModificarAnioPeriodo(List<SelectItem> opcionesModificarAnioPeriodo) {
+		this.opcionesModificarAnioPeriodo = opcionesModificarAnioPeriodo;
+	}
+
+	public List<SelectItem> getOpcionesModificarNumeroElementos() {
+		return opcionesModificarNumeroElementos;
+	}
+
+	public void setOpcionesModificarNumeroElementos(List<SelectItem> opcionesModificarNumeroElementos) {
+		this.opcionesModificarNumeroElementos = opcionesModificarNumeroElementos;
+	}
+
+	public List<SelectItem> getOpcionesModificarEstatus() {
+		return opcionesModificarEstatus;
+	}
+
+	public void setOpcionesModificarEstatus(List<SelectItem> opcionesModificarEstatus) {
+		this.opcionesModificarEstatus = opcionesModificarEstatus;
+	}
+
+	public List<ProgramaEventoEstatusDTO> getResultadosModificarEstatus() {
+		return resultadosModificarEstatus;
+	}
+
+	public void setResultadosModificarEstatus(List<ProgramaEventoEstatusDTO> resultadosModificarEstatus) {
+		this.resultadosModificarEstatus = resultadosModificarEstatus;
+	}
+
+	public Integer getIdEstatusModificarSeleccionado() {
+		return idEstatusModificarSeleccionado;
+	}
+
+	public void setIdEstatusModificarSeleccionado(Integer idEstatusModificarSeleccionado) {
+		this.idEstatusModificarSeleccionado = idEstatusModificarSeleccionado;
+	}
+
+	public boolean isBusquedaModificarEstatusEjecutada() {
+		return busquedaModificarEstatusEjecutada;
+	}
+
+	public void setBusquedaModificarEstatusEjecutada(boolean busquedaModificarEstatusEjecutada) {
+		this.busquedaModificarEstatusEjecutada = busquedaModificarEstatusEjecutada;
+	}
+
 	public boolean isVisibleAuditar() {
 		return visibleAuditar;
 	}
@@ -880,12 +1513,32 @@ public class EventoCapacitacionBean extends BaseBean {
 		this.reportePDF = reportePDF;
 	}
 
+	public StreamedContent getActaConsultaPDF() {
+		return actaConsultaPDF;
+	}
+
+	public void setActaConsultaPDF(StreamedContent actaConsultaPDF) {
+		this.actaConsultaPDF = actaConsultaPDF;
+	}
+
+	public String getIdFileActaConsulta() {
+		return java.util.UUID.randomUUID().toString();
+	}
+
 	public ParametroSistemaService getParametrosSistemaService() {
 		return parametrosSistemaService;
 	}
 
 	public void setParametrosSistemaService(ParametroSistemaService parametrosSistemaService) {
 		this.parametrosSistemaService = parametrosSistemaService;
+	}
+
+	public ActaService getActaService() {
+		return actaService;
+	}
+
+	public void setActaService(ActaService actaService) {
+		this.actaService = actaService;
 	}
 
 	public FECServiceFacade getFecServiceFacade() {
@@ -984,6 +1637,118 @@ public class EventoCapacitacionBean extends BaseBean {
 
 	public void setIdCapacitacion(Integer idCapacitacion) {
 		this.idCapacitacion = idCapacitacion;
+	}
+
+	public boolean isMostrarVistaConsultarActas() {
+		return mostrarVistaConsultarActas;
+	}
+
+	public void setMostrarVistaConsultarActas(boolean mostrarVistaConsultarActas) {
+		this.mostrarVistaConsultarActas = mostrarVistaConsultarActas;
+	}
+
+	public List<String> getFiltroConsultarActasPlanPrograma() {
+		return filtroConsultarActasPlanPrograma;
+	}
+
+	public void setFiltroConsultarActasPlanPrograma(List<String> filtroConsultarActasPlanPrograma) {
+		this.filtroConsultarActasPlanPrograma = filtroConsultarActasPlanPrograma;
+	}
+
+	public String getFiltroConsultarActasAnioPeriodo() {
+		return filtroConsultarActasAnioPeriodo;
+	}
+
+	public void setFiltroConsultarActasAnioPeriodo(String filtroConsultarActasAnioPeriodo) {
+		this.filtroConsultarActasAnioPeriodo = filtroConsultarActasAnioPeriodo;
+	}
+
+	public String getFiltroConsultarActasNumeroElementos() {
+		return filtroConsultarActasNumeroElementos;
+	}
+
+	public void setFiltroConsultarActasNumeroElementos(String filtroConsultarActasNumeroElementos) {
+		this.filtroConsultarActasNumeroElementos = filtroConsultarActasNumeroElementos;
+	}
+
+	public Integer getFiltroConsultarActasEstatus() {
+		return filtroConsultarActasEstatus;
+	}
+
+	public void setFiltroConsultarActasEstatus(Integer filtroConsultarActasEstatus) {
+		this.filtroConsultarActasEstatus = filtroConsultarActasEstatus;
+	}
+
+	public List<SelectItem> getOpcionesConsultarActasPlanPrograma() {
+		return opcionesConsultarActasPlanPrograma;
+	}
+
+	public void setOpcionesConsultarActasPlanPrograma(List<SelectItem> opcionesConsultarActasPlanPrograma) {
+		this.opcionesConsultarActasPlanPrograma = opcionesConsultarActasPlanPrograma;
+	}
+
+	public List<SelectItem> getOpcionesConsultarActasAnioPeriodo() {
+		return opcionesConsultarActasAnioPeriodo;
+	}
+
+	public void setOpcionesConsultarActasAnioPeriodo(List<SelectItem> opcionesConsultarActasAnioPeriodo) {
+		this.opcionesConsultarActasAnioPeriodo = opcionesConsultarActasAnioPeriodo;
+	}
+
+	public List<SelectItem> getOpcionesConsultarActasNumeroElementos() {
+		return opcionesConsultarActasNumeroElementos;
+	}
+
+	public void setOpcionesConsultarActasNumeroElementos(List<SelectItem> opcionesConsultarActasNumeroElementos) {
+		this.opcionesConsultarActasNumeroElementos = opcionesConsultarActasNumeroElementos;
+	}
+
+	public List<SelectItem> getOpcionesConsultarActasEstatus() {
+		return opcionesConsultarActasEstatus;
+	}
+
+	public void setOpcionesConsultarActasEstatus(List<SelectItem> opcionesConsultarActasEstatus) {
+		this.opcionesConsultarActasEstatus = opcionesConsultarActasEstatus;
+	}
+
+	public List<ConsultaActaEventoDTO> getResultadosConsultarActas() {
+		return resultadosConsultarActas;
+	}
+
+	public void setResultadosConsultarActas(List<ConsultaActaEventoDTO> resultadosConsultarActas) {
+		this.resultadosConsultarActas = resultadosConsultarActas;
+	}
+
+	public boolean isBusquedaConsultarActasEjecutada() {
+		return busquedaConsultarActasEjecutada;
+	}
+
+	public void setBusquedaConsultarActasEjecutada(boolean busquedaConsultarActasEjecutada) {
+		this.busquedaConsultarActasEjecutada = busquedaConsultarActasEjecutada;
+	}
+
+	public boolean isMostrarListadoActasConsulta() {
+		return mostrarListadoActasConsulta;
+	}
+
+	public void setMostrarListadoActasConsulta(boolean mostrarListadoActasConsulta) {
+		this.mostrarListadoActasConsulta = mostrarListadoActasConsulta;
+	}
+
+	public ConsultaActaEventoDTO getGrupoListadoActasConsulta() {
+		return grupoListadoActasConsulta;
+	}
+
+	public void setGrupoListadoActasConsulta(ConsultaActaEventoDTO grupoListadoActasConsulta) {
+		this.grupoListadoActasConsulta = grupoListadoActasConsulta;
+	}
+
+	public List<ActaDTO> getActasListadoConsulta() {
+		return actasListadoConsulta;
+	}
+
+	public void setActasListadoConsulta(List<ActaDTO> actasListadoConsulta) {
+		this.actasListadoConsulta = actasListadoConsulta;
 	}
 
 	public PlanService getPlanService() {

@@ -4,14 +4,20 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.log4j.Logger;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.modelmapper.TypeToken;
+import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
+import mx.gob.sedesol.basegestor.commons.utils.MensajesErrorEnum;
+import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
 import mx.gob.sedesol.basegestor.model.entities.admin.TblPersonaSige;
 import mx.gob.sedesol.basegestor.model.repositories.admin.PersonaSigeRepo;
 import mx.gob.sedesol.basegestor.service.admin.ComunValidacionService;
@@ -19,15 +25,38 @@ import mx.gob.sedesol.basegestor.service.admin.PersonaSigeService;
 
 @Service("personaSigeService")
 public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDTO> implements PersonaSigeService{
-	
-	private static final Logger logger = Logger.getLogger(PersonaServiceImpl.class);
-	
+
+	private static final Logger logger = Logger.getLogger(PersonaSigeServiceImpl.class);
+
 	@Autowired
 	private PersonaSigeRepo personaSigeRepo;
 	private ModelMapper mapper = new ModelMapper();
 	Type personaSigeDTO = new TypeToken<List<PersonaSigeDTO>>() {
 	}.getType();
-	
+
+	@PostConstruct
+	private void initMapper() {
+		mapper.getConfiguration().setAmbiguityIgnored(true);
+		TypeMap<PersonaSigeDTO, TblPersonaSige> dtoToEntity = mapper.createTypeMap(PersonaSigeDTO.class, TblPersonaSige.class);
+		dtoToEntity.addMappings(new PropertyMap<PersonaSigeDTO, TblPersonaSige>() {
+			@Override
+			protected void configure() {
+				map().setIdPersonaSige(source.getIdPersonaSige());
+				map().setPersonaIdSige(source.getPersonaIdSige());
+				map().setPerfilIdSige(source.getPerfilIdSige());
+			}
+		});
+		TypeMap<TblPersonaSige, PersonaSigeDTO> entityToDto = mapper.createTypeMap(TblPersonaSige.class, PersonaSigeDTO.class);
+		entityToDto.addMappings(new PropertyMap<TblPersonaSige, PersonaSigeDTO>() {
+			@Override
+			protected void configure() {
+				map().setIdPersonaSige(source.getIdPersonaSige());
+				map().setPersonaIdSige(source.getPersonaIdSige());
+				map().setPerfilIdSige(source.getPerfilIdSige());
+			}
+		});
+	}
+
 	@Override
 	public List<PersonaSigeDTO> findAll() {
 		List<PersonaSigeDTO> listaPersonas = new ArrayList<PersonaSigeDTO>();
@@ -50,43 +79,108 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 			personaObj.setPassword(persona.getPassword());
 			listaPersonas.add(personaObj);
 		}
-		
+
 		return listaPersonas;
 	}
 	@Override
 	public PersonaSigeDTO buscarPorId(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		TblPersonaSige entidad = personaSigeRepo.findOne(id);
+		return entidad != null ? mapper.map(entidad, PersonaSigeDTO.class) : null;
 	}
 	@Override
 	public ResultadoDTO<PersonaSigeDTO> guardar(PersonaSigeDTO dto) {
-		// TODO Auto-generated method stub
-		return null;
+		ResultadoDTO<PersonaSigeDTO> resultado = new ResultadoDTO<>();
+		try {
+			List<String> faltantes = validarCamposObligatorios(dto);
+			if (!faltantes.isEmpty()) {
+				resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+				resultado.setMensaje("No se guardó: faltan campos obligatorios: " + String.join(", ", faltantes));
+				return resultado;
+			}
+			TblPersonaSige entidad = new TblPersonaSige();
+			copiarCamposImportacion(dto, entidad, true);
+			boolean passwordPresente = dto.getPassword() != null && !dto.getPassword().isEmpty();
+			logger.info(String.format("Insertando persona SIGE matricula=%s passwordPresent=%s personaIdSige=%d perfilIdSige=%d",
+					entidad.getMatricula(), passwordPresente, entidad.getPersonaIdSige(), entidad.getPerfilIdSige()));
+			TblPersonaSige guardada = personaSigeRepo.save(entidad);
+			resultado.setDto(mapper.map(guardada, PersonaSigeDTO.class));
+		} catch (Exception e) {
+			logger.error("Error al guardar persona sige", e);
+			resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+			String mensajeAmigable = obtenerMensajeCampoNulo(e);
+			if (mensajeAmigable != null) {
+				resultado.setMensaje(mensajeAmigable);
+			} else {
+				resultado.setMensajeError(MensajesErrorEnum.ERROR_PERSISTENCIA_DATOS, e.getMessage());
+			}
+		}
+		return resultado;
 	}
 	@Override
 	public ResultadoDTO<PersonaSigeDTO> actualizar(PersonaSigeDTO dto) {
-		// TODO Auto-generated method stub
-		return null;
+		ResultadoDTO<PersonaSigeDTO> resultado = new ResultadoDTO<>();
+		try {
+			if (dto.getIdPersonaSige() == null) {
+				logger.info("DTO sin idPersonaSige, se realizará inserción en lugar de actualización.");
+				return guardar(dto);
+			}
+			List<String> faltantes = validarCamposObligatorios(dto);
+			if (!faltantes.isEmpty()) {
+				resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+				resultado.setMensaje("No se actualizó: faltan campos obligatorios: " + String.join(", ", faltantes));
+				return resultado;
+			}
+			TblPersonaSige existente = personaSigeRepo.findOne(dto.getIdPersonaSige());
+			if (existente == null) {
+				logger.info(String.format("No se encontró persona SIGE id=%s, se realizará inserción.", dto.getIdPersonaSige()));
+				return guardar(dto);
+			}
+			copiarCamposImportacion(dto, existente, false);
+			boolean passwordPresente = dto.getPassword() != null && !dto.getPassword().isEmpty();
+			logger.info(String.format("Actualizando persona SIGE id=%s matricula=%s passwordPresent=%s personaIdSige=%d perfilIdSige=%d",
+					existente.getIdPersonaSige(), existente.getMatricula(), passwordPresente, existente.getPersonaIdSige(),
+					existente.getPerfilIdSige()));
+			TblPersonaSige actualizada = personaSigeRepo.save(existente);
+			resultado.setDto(mapper.map(actualizada, PersonaSigeDTO.class));
+		} catch (Exception e) {
+			logger.error("Error al actualizar persona sige", e);
+			resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+			String mensajeAmigable = obtenerMensajeCampoNulo(e);
+			if (mensajeAmigable != null) {
+				resultado.setMensaje(mensajeAmigable);
+			} else {
+				resultado.setMensajeError(MensajesErrorEnum.ERROR_PERSISTENCIA_DATOS, e.getMessage());
+			}
+		}
+		return resultado;
 	}
 	@Override
 	public ResultadoDTO<PersonaSigeDTO> eliminar(PersonaSigeDTO dto) {
-		// TODO Auto-generated method stub
-		return null;
+		ResultadoDTO<PersonaSigeDTO> resultado = new ResultadoDTO<>();
+		try {
+			TblPersonaSige entidad = mapper.map(dto, TblPersonaSige.class);
+			personaSigeRepo.delete(entidad);
+		} catch (Exception e) {
+			logger.error("Error al eliminar persona sige", e);
+			resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+			resultado.setMensajeError(MensajesErrorEnum.ERROR_ELIMINAR_DATOS, e.getMessage());
+		}
+		return resultado;
 	}
 	@Override
 	public void validarPersistencia(PersonaSigeDTO dto, ResultadoDTO<PersonaSigeDTO> resultado) {
 		// TODO Auto-generated method stub
-		
+
 	}
 	@Override
 	public void validarActualizacion(PersonaSigeDTO dto, ResultadoDTO<PersonaSigeDTO> resultado) {
 		// TODO Auto-generated method stub
-		
+
 	}
 	@Override
 	public void validarEliminacion(PersonaSigeDTO dto, ResultadoDTO<PersonaSigeDTO> resultado) {
 		// TODO Auto-generated method stub
-		
+
 	}
 	public PersonaSigeRepo getPersonaSigeRepo() {
 		return personaSigeRepo;
@@ -116,11 +210,119 @@ public class PersonaSigeServiceImpl extends ComunValidacionService<PersonaSigeDT
 				personaObj.setPersonaIdSige(persona.getPersonaIdSige());
 				personaObj.setPerfilIdSige(persona.getPerfilIdSige());
 				personaObj.setPassword(persona.getPassword());
-				listaPersonas.add(personaObj);				
+				listaPersonas.add(personaObj);
 			}
 		}
-		
+
 		return listaPersonas;
 	}
-	
+
+	@Override
+	public PersonaSigeDTO buscarPorMatricula(String matricula) {
+		TblPersonaSige entidad = personaSigeRepo.findByMatricula(matricula);
+		return entidad != null ? mapper.map(entidad, PersonaSigeDTO.class) : null;
+	}
+
+	private void copiarCamposImportacion(PersonaSigeDTO dto, TblPersonaSige entidad, boolean actualizarIdsSiempre) {
+		entidad.setMatricula(dto.getMatricula());
+		entidad.setNombre(dto.getNombre());
+		entidad.setApellidoPaterno(dto.getApellidoPaterno());
+		entidad.setApellidoMaterno(dto.getApellidoMaterno());
+		entidad.setProgramaEducativo(dto.getProgramaEducativo());
+		entidad.setDivision(dto.getDivision());
+		entidad.setCorreoInstitucional(dto.getCorreoInstitucional());
+		entidad.setFechaNacimiento(dto.getFechaNacimiento());
+		entidad.setCurp(dto.getCurp());
+		entidad.setNivelSige(dto.getNivelSige());
+		entidad.setPassword(dto.getPassword());
+		if (actualizarIdsSiempre || dto.getPersonaIdSige() > 0) {
+			entidad.setPersonaIdSige(dto.getPersonaIdSige());
+		}
+		if (actualizarIdsSiempre || dto.getPerfilIdSige() > 0) {
+			entidad.setPerfilIdSige(dto.getPerfilIdSige());
+		}
+	}
+
+	private List<String> validarCamposObligatorios(PersonaSigeDTO dto) {
+		List<String> faltantes = new ArrayList<>();
+		if (dto == null) {
+			faltantes.add("matricula");
+			faltantes.add("password");
+			faltantes.add("nombre");
+			faltantes.add("apellidoPaterno");
+			faltantes.add("apellidoMaterno");
+			faltantes.add("programaEducativo");
+			faltantes.add("division");
+			faltantes.add("correoInstitucional");
+			faltantes.add("fechaNacimiento");
+			faltantes.add("curp");
+			faltantes.add("nivelSige");
+			faltantes.add("persona_id_sige");
+			faltantes.add("perfil_id_sige");
+			return faltantes;
+		}
+		if (esVacio(dto.getMatricula())) {
+			faltantes.add("matricula");
+		}
+		if (esVacio(dto.getPassword())) {
+			faltantes.add("password");
+		}
+		if (esVacio(dto.getNombre())) {
+			faltantes.add("nombre");
+		}
+		if (esVacio(dto.getApellidoPaterno())) {
+			faltantes.add("apellidoPaterno");
+		}
+		if (esVacio(dto.getApellidoMaterno())) {
+			faltantes.add("apellidoMaterno");
+		}
+		if (esVacio(dto.getProgramaEducativo())) {
+			faltantes.add("programaEducativo");
+		}
+		if (esVacio(dto.getDivision())) {
+			faltantes.add("division");
+		}
+		if (esVacio(dto.getCorreoInstitucional())) {
+			faltantes.add("correoInstitucional");
+		}
+		if (dto.getFechaNacimiento() == null) {
+			faltantes.add("fechaNacimiento");
+		}
+		if (esVacio(dto.getCurp())) {
+			faltantes.add("curp");
+		}
+		if (esVacio(dto.getNivelSige())) {
+			faltantes.add("nivelSige");
+		}
+		if (dto.getPersonaIdSige() <= 0) {
+			faltantes.add("persona_id_sige");
+		}
+		if (dto.getPerfilIdSige() <= 0) {
+			faltantes.add("perfil_id_sige");
+		}
+		return faltantes;
+	}
+
+	private boolean esVacio(String valor) {
+		return valor == null || valor.trim().isEmpty();
+	}
+
+	private String obtenerMensajeCampoNulo(Exception e) {
+		Throwable causa = e;
+		while (causa != null) {
+			String mensaje = causa.getMessage();
+			if (mensaje != null && mensaje.contains("Column '") && mensaje.contains("cannot be null")) {
+				int inicio = mensaje.indexOf("Column '") + "Column '".length();
+				int fin = mensaje.indexOf("'", inicio);
+				if (fin > inicio) {
+					String campo = mensaje.substring(inicio, fin);
+					return "No se guardó: el campo requerido '" + campo
+							+ "' viene vacío. Revise la consulta de la fuente externa.";
+				}
+			}
+			causa = causa.getCause();
+		}
+		return null;
+	}
+
 }

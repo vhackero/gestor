@@ -9,29 +9,297 @@
 
     <ui:fragment rendered="#{menuGestorBean.rolTienePermiso('ALT_BAJ_USR_ALT')}">
         <sec:authorize access="hasPermission(null, 'ALT_BAJ_USR_ALT') ">
-            <h:form id="frmNuevaAlta">
-                <p:messages id="msgsNuevaAlta"
-                             autoUpdate="true"
-                             closable="true"
-                             for="@form" />
+            <h:form id="frmImportar">
+                <p:messages id="msgsImportar"
+                            autoUpdate="true"
+                            closable="true"
+                            for="@form" />
 
-                <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaAlta')}"
+                <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiquetaPanel.importarDatosFuenteExt')}"
                          styleClass="panel-primary">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h:outputText value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.mensaje.pendiente')}" />
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <p:outputLabel for="txtMatriculaImportar"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.matriculaUsuario')}:"
+                                               styleClass="requerido bloque" />
+                                <p:inputText id="txtMatriculaImportar"
+                                             styleClass="form-control"
+                                             style="width: 100%;"
+                                             value="#{nuevaAltaUsuariosBean.matriculaImportar}" />
+                            </div>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <p:outputLabel for="somFuenteExterna"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.etiqueta.fuenteExterna')}:"
+                                               styleClass="requerido bloque" />
+                                <p:selectOneMenu id="somFuenteExterna"
+                                                 styleClass="col-xs-12"
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.fuenteExternaSeleccionada}">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaFuentesExternas}"
+                                                   var="fuente"
+                                                   itemLabel="#{fuente.nombre}"
+                                                   itemValue="#{fuente.id}" />
+                                </p:selectOneMenu>
+                            </div>
                         </div>
                     </div>
-                    <div class="row" style="margin-top: 15px;">
+                    <div class="row" style="margin-top: 20px;">
                         <div class="col-md-12 text-right">
-                            <p:commandButton value="#{sistema.obtenerTexto('gw.ge.texto.regresar')}"
-                                             action="#{altasBajasUsuariosBean.regresarAlModulo}"
-                                             styleClass="btn btn-default"
-                                             ajax="false" />
+                            <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.btn.importar')}"
+                                             action="#{nuevaAltaUsuariosBean.importarDesdeFuenteExterna}"
+                                             process="@form"
+                                             update="@form :frmAltasBajas:panelContenido :frmAltasBajas:msgsAltasBajas"
+                                             onstart="PF('dialogLayout').show();"
+                                             oncomplete="PF('dialogLayout').hide();"
+                                             onerror="PF('dialogLayout').hide();"
+                                             styleClass="btn btn-primary" />
                         </div>
                     </div>
                 </p:panel>
             </h:form>
+
+            <h:form id="frmNuevaAlta">
+                <p:messages id="msgsNuevaAlta"
+                            autoUpdate="true"
+                            closable="true"
+                            for="@form" />
+
+                <p:panel header="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.accion.nuevaAlta')}"
+                         styleClass="panel-primary"
+                         style="margin-top: 25px;">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4 col-sm-6 col-xs-12">
+                                <p:outputLabel for="txtMatriculaNuevaAlta"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.matriculaUsuario')}:"
+                                               styleClass="requerido bloque" />
+                                <p:inputText id="txtMatriculaNuevaAlta"
+                                             styleClass="form-control"
+                                             style="width: 100%;"
+                                             value="#{nuevaAltaUsuariosBean.matriculaNuevaAlta}" />
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 15px;">
+                            <div class="col-md-4 col-sm-6 col-xs-12">
+                                <p:outputLabel for="somPlanEstudios"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.planEstudios')}:"
+                                               styleClass="requerido bloque" />
+                                <p:selectOneMenu id="somPlanEstudios"
+                                                 styleClass="col-xs-12"
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.planSeleccionado}">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaPlanes}"
+                                                   var="plan"
+                                                   itemLabel="#{plan.nombre}"
+                                                   itemValue="#{plan.id}" />
+                                    <p:ajax listener="#{nuevaAltaUsuariosBean.onPlanChange}"
+                                            update="somSemestre somBloque somAsignaturaPrograma somPeriodo somEvento somGrupo" />
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12">
+                                <p:outputLabel for="somSemestre"
+                                               value="Semestre:"
+                                               styleClass="requerido bloque" />
+                                <p:selectOneMenu id="somSemestre"
+                                                 styleClass="col-xs-12"
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.semestreSeleccionado}">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaSemestres}"
+                                                   var="semestre"
+                                                   itemLabel="#{semestre.nombre}"
+                                                   itemValue="#{semestre.id}" />
+                                    <p:ajax listener="#{nuevaAltaUsuariosBean.onSemestreChange}"
+                                            update="somBloque somAsignaturaPrograma somPeriodo somEvento somGrupo" />
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12">
+                                <p:outputLabel for="somBloque"
+                                               value="Bloque:"
+                                               styleClass="requerido bloque" />
+                                <p:selectOneMenu id="somBloque"
+                                                 styleClass="col-xs-12"
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.bloqueSeleccionado}">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaBloques}"
+                                                   var="bloque"
+                                                   itemLabel="#{bloque.nombre}"
+                                                   itemValue="#{bloque.id}" />
+                                    <p:ajax listener="#{nuevaAltaUsuariosBean.onBloqueChange}"
+                                            update="somAsignaturaPrograma somPeriodo somEvento somGrupo" />
+                                </p:selectOneMenu>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 15px;">
+                            <div class="col-md-4 col-sm-6 col-xs-12">
+                                <p:outputLabel for="somAsignaturaPrograma"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.asignaturaPrograma')}:"
+                                               styleClass="requerido bloque" />
+                                <p:selectOneMenu id="somAsignaturaPrograma"
+                                                 styleClass="col-xs-12"
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.programaSeleccionado}">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaProgramas}"
+                                                   var="programa"
+                                                   itemLabel="#{programa.nombre}"
+                                                   itemValue="#{programa.id}" />
+                                    <p:ajax listener="#{nuevaAltaUsuariosBean.onProgramaChange}"
+                                            update="somEvento somGrupo" />
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12">
+                                <p:outputLabel for="somPeriodo"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.periodo')}:"
+                                               styleClass="requerido bloque" />
+                                <p:selectOneMenu id="somPeriodo"
+                                                 styleClass="col-xs-12"
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.periodoSeleccionado}">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaPeriodos}"
+                                                   var="periodo"
+                                                   itemLabel="#{periodo.nombre}"
+                                                   itemValue="#{periodo.id}" />
+                                    <p:ajax listener="#{nuevaAltaUsuariosBean.onPeriodoChange}"
+                                            update="somEvento somGrupo" />
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12">
+                                <p:outputLabel for="somEvento"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.nuevaBaja.etiqueta.evento')}:"
+                                               styleClass="requerido bloque" />
+                                <p:selectOneMenu id="somEvento"
+                                                 styleClass="col-xs-12"
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.eventoSeleccionado}">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaEventos}"
+                                                   var="evento"
+                                                   itemLabel="#{evento.nombre}"
+                                                   itemValue="#{evento.id}" />
+                                    <p:ajax listener="#{nuevaAltaUsuariosBean.onEventoChange}"
+                                            update="somGrupo" />
+                                </p:selectOneMenu>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 15px;">
+                            <div class="col-md-4 col-sm-6 col-xs-12">
+                                <p:outputLabel for="somGrupo"
+                                               value="#{sistema.obtenerTexto('gw.gestionescolar.altasbajas.etiqueta.grupo')}:"
+                                               styleClass="requerido bloque" />
+                                <p:selectOneMenu id="somGrupo"
+                                                 styleClass="col-xs-12"
+                                                 style="width: 100%;"
+                                                 value="#{nuevaAltaUsuariosBean.grupoSeleccionado}">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                                    <f:selectItems value="#{nuevaAltaUsuariosBean.listaGrupos}"
+                                                   var="grupo"
+                                                   itemLabel="#{grupo.nombre}"
+                                                   itemValue="#{grupo.id}" />
+                                </p:selectOneMenu>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <p:outputLabel value="#{sistema.obtenerTexto('gw.gestionescolar.label.camposRequeridos')}"
+                                           styleClass="requerido" />
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-xs-12 text-right">
+                            <p:commandButton value="#{sistema.obtenerTexto('gw.admin.plantillas.boton.cancelar')}"
+                                             process="@this"
+                                             update=":frmAltasBajas:panelBotones :frmAltasBajas:panelContenido"
+                                             action="#{altasBajasUsuariosBean.mostrarOpcionesAltas}"
+                                             ajax="true"
+                                             immediate="true"
+                                             onstart="PF('dialogLayout').show()"
+                                             oncomplete="PF('dialogLayout').hide()"
+                                             onerror="PF('dialogLayout').hide()"
+                                             styleClass="btn btn-default"
+                                             style="margin-right: 10px;" />
+                            <p:commandButton value="#{sistema.obtenerTexto('gw.matriculacion.btn.matricular')}"
+                                             styleClass="btn btn-primary"
+                                             action="#{nuevaAltaUsuariosBean.guardarAlta}"
+                                             process="@form"
+                                             update="@form"
+                                             onstart="PF('dialogLayout').show();"
+                                             oncomplete="PF('dialogLayout').hide();"
+                                             onerror="PF('dialogLayout').hide();" />
+                        </div>
+                    </div>
+                </p:panel>
+            </h:form>
+
+            <p:dialog appendTo="@(body)" draggable="false" position="center"
+                      resizable="false" closable="false" modal="true"
+                      widgetVar="dlgNuevaAltaValidacion" header="Informativo" dynamic="true"
+                      styleClass="medidaModal">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h:outputText styleClass="bloque"
+                                          value="#{nuevaAltaUsuariosBean.mensajeValidacionDialogo}" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.button.cerrar')}"
+                                         styleClass="btn btn-default"
+                                         onclick="PF('dlgNuevaAltaValidacion').hide()" />
+                    </div>
+                </div>
+            </p:dialog>
+
+            <p:dialog appendTo="@(body)" draggable="false" position="center"
+                      resizable="false" closable="false" modal="true"
+                      widgetVar="dlgNuevaAltaExito" header="Informativo" dynamic="true"
+                      styleClass="medidaModal">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h:outputText styleClass="bloque"
+                                          value="#{nuevaAltaUsuariosBean.mensajeExitoDialogo}" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.button.cerrar')}"
+                                         styleClass="btn btn-default"
+                                         onclick="PF('dlgNuevaAltaExito').hide()" />
+                    </div>
+                </div>
+            </p:dialog>
+
+            <p:dialog appendTo="@(body)" draggable="false" position="center"
+                      resizable="false" closable="false" modal="true"
+                      widgetVar="dlgNuevaAltaError" header="Informativo" dynamic="true"
+                      styleClass="medidaModal">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h:outputText styleClass="bloque"
+                                          value="#{nuevaAltaUsuariosBean.mensajeErrorDialogo}" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <p:commandButton value="#{sistema.obtenerTexto('gw.gestionescolar.button.cerrar')}"
+                                         styleClass="btn btn-default"
+                                         onclick="PF('dlgNuevaAltaError').hide()" />
+                    </div>
+                </div>
+            </p:dialog>
         </sec:authorize>
     </ui:fragment>
 </ui:composition>

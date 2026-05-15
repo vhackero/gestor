@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import mx.gob.sedesol.basegestor.commons.dto.admin.FuenteExternaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaSigeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.SelectImportarDTO;
 
@@ -67,6 +68,107 @@ public class UsuariosImportarRepo implements IUsuariosImportarRepo {
 			}
 		}
 		return regresa;
+	}
+
+	@Override
+	public FuenteExternaDTO buscarFuenteExternaPorId(Integer idFuente) {
+		String consulta = "SELECT id_fuente_externa, nombre, servidor, usuario, contrasena, alias, nombre_base_datos, consulta "
+				+ "FROM cat_fuentes_externas WHERE activo = 1 AND id_fuente_externa = :idFuente";
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("idFuente", idFuente);
+		List<Object[]> resultado = query.getResultList();
+		if (resultado.isEmpty()) {
+			return null;
+		}
+		Object[] fila = resultado.get(0);
+		FuenteExternaDTO dto = new FuenteExternaDTO();
+		dto.setId(fila[0] != null ? Integer.parseInt(fila[0].toString()) : null);
+		dto.setNombre(fila[1] != null ? fila[1].toString() : null);
+		dto.setServidor(fila[2] != null ? fila[2].toString() : null);
+		dto.setUsuario(fila[3] != null ? fila[3].toString() : null);
+		dto.setContrasena(fila[4] != null ? fila[4].toString() : null);
+		dto.setAlias(fila[5] != null ? fila[5].toString() : null);
+		dto.setNombreBaseDatos(fila[6] != null ? fila[6].toString() : null);
+		dto.setConsulta(fila[7] != null ? fila[7].toString() : null);
+		return dto;
+	}
+
+	@Override
+	public List<SelectImportarDTO> consultaPlanesActivos() {
+		String consulta = "SELECT tmc.id_plan, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.activo = 1 AND tmc.id_plan IS NOT NULL";
+		return obtenerSelectImportarDTO(consulta);
+	}
+
+	@Override
+	public List<SelectImportarDTO> consultaSemestresPorPlan(Integer idPlan) {
+		StringBuilder consulta = new StringBuilder();
+		consulta.append("SELECT hijo.id, hijo.nombre ");
+		consulta.append("FROM tbl_malla_curricular hijo ");
+		consulta.append("WHERE hijo.id_padre = (");
+		consulta.append("    SELECT plan.id FROM tbl_malla_curricular plan ");
+		consulta.append("    WHERE plan.id_plan = :idPlan AND plan.id_padre IS NULL LIMIT 1");
+		consulta.append(") AND hijo.activo = 1");
+		return obtenerSelectImportarDTO(consulta.toString(), "idPlan", idPlan);
+	}
+
+	@Override
+	public List<SelectImportarDTO> consultaBloquesPorSemestre(Integer idSemestre) {
+		String consulta = "SELECT tmc.id, tmc.nombre FROM tbl_malla_curricular tmc WHERE tmc.id_padre = :idSemestre AND tmc.activo = 1";
+		return obtenerSelectImportarDTO(consulta, "idSemestre", idSemestre);
+	}
+
+	@Override
+	public List<SelectImportarDTO> consultaProgramasPorEje(Integer idEjeCapacitacion) {
+		String consulta = "SELECT tfdp.id_programa, tfdp.nombre_tentativo FROM tbl_ficha_descriptiva_programa tfdp WHERE tfdp.id_eje_capacitacion = :idEjeCapacitacion";
+		return obtenerSelectImportarDTO(consulta, "idEjeCapacitacion", idEjeCapacitacion);
+	}
+
+	@Override
+	public List<SelectImportarDTO> consultaPeriodosInscripcion() {
+		String consulta = "SELECT tpi.nombre_periodo FROM tbl_periodos_inscripcion tpi";
+		return obtenerSelectImportarDTO(consulta);
+	}
+
+	@Override
+	public List<SelectImportarDTO> consultaEventosPorPeriodoYPrograma(String nombrePeriodo, Integer idPrograma) {
+		String consulta = "SELECT te.id_evento, te.nombre_ec FROM tbl_eventos te WHERE te.cve_evento_cap LIKE CONCAT('%',:nombrePeriodo,'%') AND te.id_programa = :idPrograma";
+		return obtenerSelectImportarDTO(consulta, "nombrePeriodo", nombrePeriodo, "idPrograma", idPrograma);
+	}
+
+	@Override
+	public List<SelectImportarDTO> consultaGruposPorEvento(Integer idEvento) {
+		String consulta = "SELECT tg.id, tg.nombre FROM tbl_grupos tg WHERE tg.id_evento = :idEvento";
+		return obtenerSelectImportarDTO(consulta, "idEvento", idEvento);
+	}
+
+	private List<SelectImportarDTO> obtenerSelectImportarDTO(String consulta, Object... parametros) {
+		List<SelectImportarDTO> resultado = new ArrayList<>();
+		Query query = entityManager.createNativeQuery(consulta);
+		if (parametros != null && parametros.length > 0) {
+			for (int i = 0; i < parametros.length; i += 2) {
+				String nombre = parametros[i].toString();
+				Object valor = parametros[i + 1];
+				query.setParameter(nombre, valor);
+			}
+		}
+
+		List<?> lista = query.getResultList();
+
+		if (!lista.isEmpty()) {
+			for (Object fila : lista) {
+				SelectImportarDTO dato = new SelectImportarDTO();
+				if (fila instanceof Object[]) {
+					Object[] obj = (Object[]) fila;
+					dato.setId(obj[0] != null ? obj[0].toString() : null);
+					dato.setNombre(obj.length > 1 && obj[1] != null ? obj[1].toString() : dato.getId());
+				} else {
+					dato.setId(fila != null ? fila.toString() : null);
+					dato.setNombre(dato.getId());
+				}
+				resultado.add(dato);
+			}
+		}
+		return resultado;
 	}
 
 	@Override

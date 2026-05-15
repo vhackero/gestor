@@ -18,9 +18,12 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionECDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CapturaEventoCapacitacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaActaEventoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.GrupoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PersonaResponsabilidadesDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProgramaEventoFiltroDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProgramaEventoEstatusDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProgramaSocialDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelEvaluacionCalificacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoEvaluacionDTO;
@@ -142,6 +145,29 @@ public class EventoCapacitacionServiceFacade {
 	
 	@Autowired
 	private GrupoParticipanteRepo grupoParticipanteRepo;
+
+	public List<ProgramaEventoFiltroDTO> obtenerProgramasConEventosParaFiltro() {
+		return eventoCapacitacionService.obtenerProgramasConEventosParaFiltro();
+	}
+
+	public List<ConsultaActaEventoDTO> consultarActasPorFiltros(String anioPeriodo, String numeroElementos,
+			List<Long> idprogramaSelecionado, Integer estatus) {
+		return eventoCapacitacionService.consultarActasPorFiltros(anioPeriodo, numeroElementos, idprogramaSelecionado,
+				estatus);
+	}
+
+	public List<ProgramaEventoEstatusDTO> obtenerProgramasConEventosParaCambioEstatus() {
+		return eventoCapacitacionService.obtenerProgramasConEventosParaCambioEstatus();
+	}
+
+	public List<ProgramaEventoEstatusDTO> buscarEventosParaCambioEstatus(String anioPeriodo, String numeroElementos,
+			List<Integer> idsPrograma) {
+		return eventoCapacitacionService.buscarEventosParaCambioEstatus(anioPeriodo, numeroElementos, idsPrograma);
+	}
+
+	public boolean modificarEstatusEventos(Integer idEstatus, List<Integer> idsEvento) {
+		return eventoCapacitacionService.modificarEstatusEventos(idEstatus, idsEvento);
+	}
 
 	/**
 	 * ñ
