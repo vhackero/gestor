@@ -7,110 +7,55 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core">
 
-	<ui:fragment rendered="#{not dispersionesBean.mostrarFormularioCrearGrupos}">
-	<p:panel header="Dispersión">
+	<ui:fragment rendered="#{not dispersionesBean.mostrarDefinicionGruposCompartidos and not dispersionesBean.mostrarFormularioCrearGrupos}">
+	<p:panel header="Dispersión en grupos compartidos">
 
-		<div class="row">
-			<div class="col-md-12 text-right">
-				<p:commandButton value="Matriculación en dispersiones existentes"
-					styleClass="btn btn-primary" style="width: 300px; margin-right: 10px;"
-					action="#{dispersionesBean.navegaMatriculaDispersionExistente}"
-					process="@this" update="@form" />
-				<p:commandButton value="Dispersión en grupos compartidos"
-					styleClass="btn btn-primary" style="width: 280px;"
-					action="#{dispersionesBean.navegaDispersionGruposCompartidos}"
-					process="@this" update="@form" />
-			</div>
-		</div>
-		<p:spacer height="10" />
 		<div class="form-group">
 			<div class="row">
 
 				<div class="col-md-4 col-xs-12">
-
-					<p:outputLabel styleClass="bloque requerido" value="Convocatoria:" />
-
-					<p:selectOneMenu id="convocatoriaDispersion" required="true"
-						styleClass="col-xs-12"
-						value="#{dispersionesBean.dispercionParametros.idConvocatoriaSeleccionada}">
-						<p:ajax event="change" process="@this" update="@form"
-							listener="#{dispersionesBean.onConvocatoriaChange}" />
-						<f:selectItem
-							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-							itemValue="#{null}" />
-						<f:selectItems value="#{dispersionesBean.listaConvocatoria}"
-							var="conv" itemLabel="#{conv.nombre}"
-							itemValue="#{conv.convocatoriaId}" />
-					</p:selectOneMenu>
-					<p:message for="convocatoriaDispersion" display="text" />
-
-				</div>
-
-				<div class="col-md-4 col-xs-12">
-
 					<p:outputLabel styleClass="bloque requerido"
-						value="Tipo de proceso de inscripción:" />
-					<p:selectOneMenu id="tipoProcesoDispersion" required="true"
+						value="Proceso de inscripción con dispersión:" />
+					<p:selectOneMenu id="procesoCompartidoConDispersion" required="true"
 						styleClass="col-xs-12"
-						value="#{dispersionesBean.dispercionParametros.idTipoProceso}">
+						value="#{dispersionesBean.dispercionParametros.idProcesoInscripcionConDispersion}">
 						<p:ajax event="change" process="@this" update="@form"
-							listener="#{dispersionesBean.consultarProcesoInscripcion}" />
-						<f:selectItem
-							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
-							itemValue="#{null}" />
-						<f:selectItems value="#{dispersionesBean.listaTipoProceso}"
-							var="tipo" itemLabel="#{tipo.nombre}"
-							itemValue="#{tipo.idProceso}" />
-					</p:selectOneMenu>
-					<p:message for="tipoProcesoDispersion" display="text" />
-
-				</div>
-
-				<div class="col-md-4 col-xs-12">
-
-					<p:outputLabel styleClass="bloque requerido"
-						value="Proceso de inscripción:" />
-					<p:selectOneMenu id="procesoInscripcionDispersion"
-						required="true" styleClass="col-xs-12"
-						value="#{dispersionesBean.dispercionParametros.idProcesoInscripcion}">
-						<p:ajax event="change" process="@this" update="@form"
-							listener="#{dispersionesBean.onProcesoInscripcionSeleccionado}" />
+							listener="#{dispersionesBean.onProcesoCompartidoSeleccionado}" />
 						<f:selectItem
 							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 							itemValue="#{null}" />
 						<f:selectItems
-							value="#{dispersionesBean.listaProcesosInscripcion}"
+							value="#{dispersionesBean.listaProcesosConDispersion}"
 							var="proc" itemLabel="#{proc.nombre}"
 							itemValue="#{proc.idProcesoInscripcion}" />
 					</p:selectOneMenu>
-					<p:message for="procesoInscripcionDispersion" display="text" />
+					<p:message for="procesoCompartidoConDispersion" display="text" />
+					<h:outputText styleClass="text-danger"
+						rendered="#{not empty dispersionesBean.mensajeProcesosConDispersion}"
+						value="#{dispersionesBean.mensajeProcesosConDispersion}" />
+				</div>
+
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel styleClass="bloque requerido"
+						value="Programas compartidos:" />
+					<p:selectOneMenu id="programaCompartido" required="true"
+						styleClass="col-xs-12"
+						value="#{dispersionesBean.dispercionParametros.nombreProgramaCompartidoSeleccionado}">
+						<f:selectItem
+							itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							itemValue="#{null}" />
+						<f:selectItems
+							value="#{dispersionesBean.listaProgramasCompartidos}"
+							var="programa" itemLabel="#{programa}" itemValue="#{programa}" />
+					</p:selectOneMenu>
+					<p:message for="programaCompartido" display="text" />
+					<h:outputText styleClass="text-danger"
+						rendered="#{not empty dispersionesBean.mensajeProgramasCompartidos}"
+						value="#{dispersionesBean.mensajeProgramasCompartidos}" />
 				</div>
 
 			</div>
 		</div>
-
-		<ui:fragment rendered="#{dispersionesBean.mostrarPlanYPrograma}">
-			<div class="form-group">
-				<div class="row">
-
-				<div class="col-md-4 col-xs-12">
-
-					<p:outputLabel styleClass="bloque" value="Plan / Programa:" />
-					<p:selectCheckboxMenu id="planProgramaDispersion"
-						value="#{dispersionesBean.planesProgramasBusquedaSeleccionados}"
-						styleClass="col-xs-12" converter="entityConverter"
-						label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}">
-						<f:selectItems value="#{dispersionesBean.listaPlanProgramas}"
-							var="planPrograma"
-							itemLabel="#{planPrograma.nombrePlan} &gt; #{planPrograma.nombrePrograma}"
-							itemValue="#{planPrograma}" />
-
-					</p:selectCheckboxMenu>
-				</div>
-
-				</div>
-			</div>
-		</ui:fragment>
 
 		<div class="form-group">
 			<div class="row">
@@ -118,16 +63,18 @@
 				<div class="col-md-12 text-right">
 
 					<p:commandButton value="Cancelar" process="@this" update="@form"
-						action="#{dispersionesBean.cancelar}" ajax="true"
-						styleClass="btn btn-default" />
-
-					<p:commandButton value="Limpiar campos" process="@this"
-						update="@form" action="#{dispersionesBean.limpiarCampos}"
+						action="#{dispersionesBean.cancelarDispersionGruposCompartidos}"
 						ajax="true" styleClass="btn btn-default" />
 
-					<p:commandButton id="btnBusquedaDispersion" process="@form"
+					<p:commandButton value="Limpiar campos" process="@this"
+						update="@form"
+						action="#{dispersionesBean.limpiarCamposDispersionGruposCompartidos}"
+						ajax="true" styleClass="btn btn-default" />
+
+					<p:commandButton id="btnBusquedaGruposCompartidos" process="@form"
 						ajax="true" update="@form" styleClass="btn btn-primary pull-right"
-						action="#{dispersionesBean.busquedaDispersion}" value="Aceptar" />
+						action="#{dispersionesBean.busquedaDispersionGruposCompartidos}"
+						value="Aceptar" />
 
 				</div>
 			</div>
@@ -135,13 +82,17 @@
 
 		<div class="row">
 			<div class="col-md-12">
-				<p:dataTable id="tablaDispersion" reflow="true"
-					emptyMessage="No se encontraron dispersiones"
+				<p:dataTable id="tablaGruposCompartidos" reflow="true"
+					emptyMessage="#{dispersionesBean.mensajeTablaDispersionGruposCompartidos}"
 					value="#{dispersionesBean.listaDispercionBusqueda}" var="dispercion"
 					paginator="true" rows="10" paginatorPosition="bottom"
 					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
 					currentPageReportTemplate="({currentPage} de {totalPages})"
 					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+
+					<p:column styleClass="text-center" style="display:none;">
+						<h:outputText value="#{dispercion.idDispersion}" />
+					</p:column>
 
 					<p:column styleClass="text-center" style="min-width:120px;">
 						<f:facet name="header">
@@ -212,34 +163,148 @@
 						</f:facet>
 						<h:outputText value="#{dispercion.cupoResto}" />
 					</p:column>
-					
-						<p:column styleClass="text-center" style="min-width:110px;">
-							<f:facet name="header">
-								<h:outputText value="Crear grupos" />
-							</f:facet>
-							<p:commandButton ajax="true" process="@this" update="@form"
-								action="#{dispersionesBean.crearGruposDispersion(dispercion)}"
-								icon="fa fa-users" title="Crear grupos"
-								styleClass="btn-icon btn btn-default"
-								disabled="#{not dispercion.crearGruposHabilitado}" />
-						</p:column>
-						
-						<p:column styleClass="text-center" style="min-width:130px;">
-							<f:facet name="header">
-								<h:outputText value="Matricular usuarios" />
-							</f:facet>
-							<p:commandButton ajax="true" process="@this" update="@form"
-								action="#{dispersionesBean.matricularUsuariosDispersion(dispercion)}"
-								icon="fa fa-graduation-cap" title="Matricular usuarios"
-								styleClass="btn-icon btn btn-default"
-								disabled="#{not dispercion.matricularHabilitado}" />
-						</p:column>
+
+					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Usuarios matriculados" />
+						</f:facet>
+						<h:outputText value="#{dispercion.usuariosMatriculados}" />
+					</p:column>
+
+					<p:column styleClass="text-center" style="min-width:110px;">
+						<f:facet name="header">
+							<h:outputText value="Define grupos" />
+						</f:facet>
+						<p:commandButton ajax="true" process="@this" update="@form"
+							action="#{dispersionesBean.definirGruposCompartidos(dispercion)}"
+							icon="fa fa-pencil" title="Define grupos"
+							styleClass="btn-icon btn btn-default"
+							disabled="#{not dispercion.definirGruposHabilitado}" />
+					</p:column>
+
+					<p:column styleClass="text-center" style="min-width:110px;">
+						<f:facet name="header">
+							<h:outputText value="Crear grupos" />
+						</f:facet>
+						<p:commandButton ajax="true" process="@this" update="@form"
+							action="#{dispersionesBean.crearGruposCompartidos(dispercion)}"
+							icon="fa fa-users" title="Crear grupos"
+							styleClass="btn-icon btn btn-default"
+							disabled="#{not dispercion.crearGruposHabilitado}" />
+					</p:column>
+
+					<p:column styleClass="text-center" style="min-width:130px;">
+						<f:facet name="header">
+							<h:outputText value="Matricular usuarios" />
+						</f:facet>
+						<p:commandButton ajax="true" process="@this" update="@form"
+							action="#{dispersionesBean.matricularUsuariosCompartidos(dispercion)}"
+							icon="fa fa-graduation-cap" title="Matricular usuarios"
+							styleClass="btn-icon btn btn-default"
+							disabled="#{not dispercion.matricularHabilitado}" />
+					</p:column>
 				</p:dataTable>
 			</div>
 		</div>
 
 	</p:panel>
 	</ui:fragment>
+
+	<p:panel header="Definición de grupos para dispersión compartida"
+		rendered="#{dispersionesBean.mostrarDefinicionGruposCompartidos}">
+
+		<div class="form-group">
+			<div class="row">
+
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel styleClass="bloque requerido" for="gruposGeneralesCompartidos"
+						value="Grupos generales:" />
+					<p:inputText id="gruposGeneralesCompartidos"
+						value="#{dispersionesBean.dispersionNuevo.noGrupos}" required="true"
+						requiredMessage="Los grupos generales son obligatorios."
+						styleClass="form-control" type="number" min="0">
+						<f:validateLongRange minimum="0" />
+					</p:inputText>
+					<p:message for="gruposGeneralesCompartidos" display="text" />
+				</div>
+
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel styleClass="bloque requerido" for="cupoGeneralCompartidos"
+						value="Cupo general:" />
+					<p:inputText id="cupoGeneralCompartidos"
+						value="#{dispersionesBean.dispersionNuevo.estudiantesGrupo}"
+						required="true" requiredMessage="El cupo general es obligatorio."
+						styleClass="form-control" type="number" min="0">
+						<f:validateLongRange minimum="0" />
+					</p:inputText>
+					<p:message for="cupoGeneralCompartidos" display="text" />
+				</div>
+
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel styleClass="bloque requerido" for="gruposRestoCompartidos"
+						value="Grupos resto:" />
+					<p:inputText id="gruposRestoCompartidos"
+						value="#{dispersionesBean.dispersionNuevo.grupoResto}" required="true"
+						requiredMessage="Los grupos resto son obligatorios."
+						styleClass="form-control" type="number" min="0">
+						<f:validateLongRange minimum="0" />
+					</p:inputText>
+					<p:message for="gruposRestoCompartidos" display="text" />
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel styleClass="bloque requerido" for="cupoRestoCompartidos"
+						value="Cupo resto:" />
+					<p:inputText id="cupoRestoCompartidos"
+						value="#{dispersionesBean.dispersionNuevo.cupoResto}" required="true"
+						requiredMessage="El cupo resto es obligatorio."
+						styleClass="form-control" type="number" min="0">
+						<f:validateLongRange minimum="0" />
+					</p:inputText>
+					<p:message for="cupoRestoCompartidos" display="text" />
+				</div>
+
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-4 col-xs-12">
+					<p:outputLabel styleClass="bloque"
+						value="Estudiantes inscritos: #{dispersionesBean.editarDispersion.noEstudiantes}" />
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+
+				<div class="col-md-12 text-right">
+
+					<p:commandButton value="Cancelar" process="@this" update="@form"
+						action="#{dispersionesBean.cancelarDefinicionGruposCompartidos}"
+						ajax="true" styleClass="btn btn-default" />
+
+					<p:commandButton value="Limpiar campos" process="@this"
+						update="@form" action="#{dispersionesBean.limpiarDefinicionGruposCompartidos}"
+						ajax="true" styleClass="btn btn-default" />
+
+					<p:commandButton id="btnGuardarDefinicionGruposCompartidos"
+						process="@form" ajax="true" update="@form"
+						styleClass="btn btn-primary pull-right"
+						action="#{dispersionesBean.guardarDefinicionGruposCompartidos}"
+						value="Aceptar" />
+
+				</div>
+			</div>
+		</div>
+
+	</p:panel>
 
 	<ui:fragment rendered="#{dispersionesBean.mostrarFormularioCrearGrupos}">
 		<p:panel header="Crear Eventos y grupos">
@@ -262,7 +327,7 @@
 				<div class="row">
 					<div class="col-md-4">
 						<p:outputLabel styleClass="bloque requerido" value="Estatus de evento(s):" />
-						<p:selectOneMenu id="estatusEventoCrear"
+						<p:selectOneMenu id="estatusEventoCrearCompartidos"
 							value="#{dispersionesBean.formularioCrearEvento.idEstatusEvento}"
 							styleClass="col-xs-12">
 							<f:selectItem
@@ -301,7 +366,7 @@
 					</div>
 					<div class="col-md-3">
 						<p:outputLabel styleClass="bloque requerido" value="Modalidad:" />
-						<p:selectOneMenu id="modalidadCrear"
+						<p:selectOneMenu id="modalidadCrearCompartidos"
 							value="#{dispersionesBean.formularioCrearEvento.idModalidad}"
 							styleClass="col-xs-12">
 							<f:selectItem
@@ -315,7 +380,7 @@
 						<p:outputLabel styleClass="bloque requerido" value="Vincular AVA" />
 						<p:commandButton value="Vincular" type="button"
 							styleClass="btn btn-default"
-							onclick="PF('modVincAvaDispersion').show(); return false;" />
+							onclick="PF('modVincAvaDispersionCompartidos').show(); return false;" />
 					</div>
 				</div>
 			</div>
@@ -371,12 +436,12 @@
 		</p:panel>
 	</ui:fragment>
 
-	<ui:fragment rendered="#{not empty dispersionesBean.formularioCrearEvento}">
-		<p:dialog id="dialogVincularAvaDispersion" widgetVar="modVincAvaDispersion"
+	<ui:fragment rendered="#{not empty dispersionesBean.formularioCrearEvento and dispersionesBean.mostrarFormularioCrearGrupos}">
+		<p:dialog id="dialogVincularAvaDispersionCompartidos" widgetVar="modVincAvaDispersionCompartidos"
 			header="Vincular Ambiente Virtual de Aprendizaje (AVA)" modal="true"
 			resizable="false" draggable="false" closable="false" position="center"
 			width="650">
-			<h:form id="frmVincularAvaDispersion">
+			<h:form id="frmVincularAvaDispersionCompartidos">
 				<div class="form-group">
 					<div class="row">
 						<div class="col-md-6">
@@ -384,7 +449,7 @@
 								value="Seleccionar la plataforma Moodle" />
 							<p:selectOneMenu styleClass="col-xs-12"
 								value="#{dispersionesBean.formularioCrearEvento.idPlataformaLms}">
-								<p:ajax update="seleccionarAvaDispersion autonomoDispersion" process="@this" />
+								<p:ajax update="seleccionarAvaDispersionCompartidos autonomoDispersionCompartidos" process="@this" />
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									itemValue="#{null}" />
@@ -401,7 +466,7 @@
 						<div class="col-md-6">
 							<p:outputLabel styleClass="requerido bloque"
 								value="Seleccionar AVA" />
-							<p:selectOneRadio id="seleccionarAvaDispersion"
+							<p:selectOneRadio id="seleccionarAvaDispersionCompartidos"
 								disabled="#{dispersionesBean.formularioCrearEvento.idPlataformaLms == null}"
 								value="#{dispersionesBean.formularioCrearEvento.idClasificacionAva}">
 								<f:selectItems value="#{dispersionesBean.listaClasificacionesAva}"
@@ -411,7 +476,7 @@
 						<div class="col-md-6">
 							<p:outputLabel styleClass="bloque"
 								value="¿Es un evento autónomo?" />
-							<p:inputSwitch id="autonomoDispersion"
+							<p:inputSwitch id="autonomoDispersionCompartidos"
 								value="#{dispersionesBean.formularioCrearEvento.eventoAutonomo}"
 								onLabel="Sí" offLabel="No"
 								disabled="#{dispersionesBean.formularioCrearEvento.idPlataformaLms == null}" />
@@ -433,7 +498,7 @@
 						<div class="col-md-12 text-right">
 							<p:commandButton value="Cerrar" type="button"
 								styleClass="btn btn-default"
-								onclick="PF('modVincAvaDispersion').hide();" />
+								onclick="PF('modVincAvaDispersionCompartidos').hide();" />
 						</div>
 					</div>
 				</div>
@@ -451,11 +516,11 @@
 						value="#{dispersionesBean.mensajeGestion}" />
 				</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-12 text-right">
-				<p:commandButton value="Cerrar" styleClass="btn btn-default"
-					onclick="PF('dlgDispersionInfo').hide()" />
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Aceptar" styleClass="btn btn-primary"
+						type="button" onclick="PF('dlgDispersionInfo').hide()" />
+				</div>
 			</div>
 		</div>
 	</p:dialog>
@@ -470,11 +535,112 @@
 						value="#{dispersionesBean.mensajeGestion}" />
 				</div>
 			</div>
+			<div class="row">
+				<div class="col-md-12 text-right">
+					<p:commandButton value="Aceptar" styleClass="btn btn-primary"
+						type="button" onclick="PF('dlgDispersionError').hide()" />
+				</div>
+			</div>
 		</div>
+	</p:dialog>
+
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccion8" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="El cálculo de número de Grupos generales, Cupo general, número de Grupos resto y Cupo resto deben sumar entre todos el número total de usuarios inscritos por proceso de inscripción." />
+				</div>
+			</div>
+		</div>
+
 		<div class="row">
 			<div class="col-md-12 text-right">
 				<p:commandButton value="Cerrar" styleClass="btn btn-default"
-					onclick="PF('dlgDispersionError').hide()" />
+					onclick="PF('dlgValidarSeleccion8').hide()" />
+			</div>
+		</div>
+	</p:dialog>
+
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccionSuma" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="La sumatoria de grupos y cupos debe ser igual al número de estudiantes inscritos." />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccionSuma').hide()" />
+			</div>
+		</div>
+	</p:dialog>
+
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccion6" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="Error al intentar actualizar la información." />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccion6').hide()" />
+			</div>
+		</div>
+	</p:dialog>
+
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccion7" header="Informativo" dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="Información actualizada correctamente." />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccion7').hide()" />
+			</div>
+		</div>
+	</p:dialog>
+
+	<p:dialog appendTo="@(body)" draggable="false" position="center"
+		resizable="false" closable="false" modal="true" width="600px"
+		widgetVar="dlgValidarSeleccionErrorUpdate" header="Informativo"
+		dynamic="true">
+		<div class="form-group">
+			<div class="row">
+				<div class="col-md-12">
+					<h:outputText styleClass="bloque"
+						value="No fue posible actualizar la dispersión. Inténtelo nuevamente más tarde." />
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<p:commandButton value="Cerrar" styleClass="btn btn-default"
+					onclick="PF('dlgValidarSeleccionErrorUpdate').hide()" />
 			</div>
 		</div>
 	</p:dialog>

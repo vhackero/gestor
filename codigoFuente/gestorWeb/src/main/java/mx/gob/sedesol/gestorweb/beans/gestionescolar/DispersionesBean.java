@@ -56,6 +56,7 @@ public class DispersionesBean extends BaseBean {
 	private static final int LIMITE_ANIOS_PERIODO = 9;
 	private static final int MAX_VALOR_LISTAS = 500;
 	private static final String MENSAJE_SIN_PROCESOS_MATRICULACION = "No hay procesos de inscripción disponibles.";
+	private static final String MENSAJE_SIN_DATOS = "No se encontraron datos";
 
 	@ManagedProperty("#{dispersionesService}")
 	private DispersionesService dispersionesService;
@@ -83,8 +84,10 @@ public class DispersionesBean extends BaseBean {
 	List<ProcesosInscripcion> listaProcesosInscripcion;
 	private List<ProcesosInscripcion> listaProcesosConDispersion;
 	private List<ProcesosInscripcion> listaProcesosSinDispersion;
+	private List<String> listaProgramasCompartidos;
 	private String mensajeProcesosConDispersion;
 	private String mensajeProcesosSinDispersion;
+	private String mensajeProgramasCompartidos;
 	List<TipoMatriculacion> listaTipoMatriculacion;
 	List<TblPlan> listaPlanes;
 	List<TblFichaDescriptivaPrograma> listaPrograma;
@@ -102,6 +105,7 @@ public class DispersionesBean extends BaseBean {
 	
 	private String mensajeGestion;
 	private String mensajeTablaDispersionExistente;
+	private String mensajeTablaDispersionGruposCompartidos;
 
 	// REDIRECCION OPCIONES
 	private String paginaActual;
@@ -111,9 +115,11 @@ public class DispersionesBean extends BaseBean {
 	
 	private boolean mostrarConsultaDispersion = true;
 	private boolean mostrarNuevaDispersion = false;
+	private boolean mostrarDefinicionGruposCompartidos = false;
 	private Integer idProgramaPlanSeleccionado;
 	
 	private boolean mostrarFormularioCrearGrupos = false;
+	private boolean crearGruposDesdeCompartidos = false;
 	private TblDispersionesBusqueda dispersionSeleccionada;
 	private DispersionPreEvento datosPreviosCrear;
 	private CrearEventoGrupoForm formularioCrearEvento;
@@ -130,6 +136,7 @@ public class DispersionesBean extends BaseBean {
 		listaProcesosInscripcion = new ArrayList<>();
 		listaProcesosConDispersion = new ArrayList<>();
 		listaProcesosSinDispersion = new ArrayList<>();
+		listaProgramasCompartidos = new ArrayList<>();
 		listaPlanes = new ArrayList<>();
 		listaPrograma = new ArrayList<>();
 		listaPlanProgramas = new ArrayList<>();
@@ -139,6 +146,7 @@ public class DispersionesBean extends BaseBean {
 		inicializarListasEdicion();
 		cargarCatalogosCrearGrupos();
 		mensajeTablaDispersionExistente = MENSAJE_SIN_PROCESOS_MATRICULACION;
+		mensajeTablaDispersionGruposCompartidos = MENSAJE_SIN_DATOS;
 	}
 
 	public DispersionesBean() {
@@ -207,6 +215,13 @@ public class DispersionesBean extends BaseBean {
 		return null;
 	}
 
+	public String navegaDispersionGruposCompartidos() throws Exception {
+		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/dispersionGruposCompartidos.xhtml";
+		limpiarCamposDispersionGruposCompartidos();
+		cargarProcesosCompartidosConDispersion();
+		return null;
+	}
+
 	public void cancelar() throws Exception {
 		this.paginaActual = "";
 
@@ -230,14 +245,23 @@ public class DispersionesBean extends BaseBean {
 				? "No se encontraron procesos de inscripción sin dispersiones" : null;
 	}
 
+	private void cargarProcesosCompartidosConDispersion() {
+		listaProcesosConDispersion = dispersionesService.consultarProcesosConDispersion();
+		mensajeProcesosConDispersion = (listaProcesosConDispersion == null || listaProcesosConDispersion.isEmpty())
+				? "No se encontraron procesos de dispersión creados" : null;
+	}
+
 	public void limpiarCampos() {
 		dispercionParametros = new DispersionesParam();
 		listaProcesosInscripcion = new ArrayList<>();
 		listaProcesosConDispersion = new ArrayList<>();
 		listaProcesosSinDispersion = new ArrayList<>();
+		listaProgramasCompartidos = new ArrayList<>();
 		mensajeProcesosConDispersion = null;
 		mensajeProcesosSinDispersion = null;
+		mensajeProgramasCompartidos = null;
 		mensajeTablaDispersionExistente = MENSAJE_SIN_PROCESOS_MATRICULACION;
+		mensajeTablaDispersionGruposCompartidos = MENSAJE_SIN_DATOS;
 		listaPlanes = new ArrayList<>();
 		listaPrograma = new ArrayList<>();
 		listaPlanProgramas = new ArrayList<>();
@@ -248,16 +272,29 @@ public class DispersionesBean extends BaseBean {
 		mostrarPlanYPrograma = false;
 		idProgramaPlanSeleccionado = null;
 		mostrarFormularioCrearGrupos = false;
+		crearGruposDesdeCompartidos = false;
 		dispersionSeleccionada = null;
 		formularioCrearEvento = null;
 		datosPreviosCrear = null;
 		mostrarConsultaDispersion = true;
 		mostrarNuevaDispersion = false;
+		mostrarDefinicionGruposCompartidos = false;
 		editarDispersion = new TblDispersionesBusqueda();
 		dispersionNuevo = null;
 		ultimaConsultaExtraordinaria = false;
 		cargarProcesosMatriculaExistente();
 
+	}
+
+	public void limpiarCamposDispersionGruposCompartidos() {
+		dispercionParametros = new DispersionesParam();
+		listaProgramasCompartidos = new ArrayList<>();
+		listaDispercionBusqueda = new ArrayList<>();
+		mensajeProgramasCompartidos = null;
+		mensajeTablaDispersionGruposCompartidos = MENSAJE_SIN_DATOS;
+		mostrarDefinicionGruposCompartidos = false;
+		editarDispersion = new TblDispersionesBusqueda();
+		dispersionNuevo = null;
 	}
 	
 	public void onConvocatoriaChange() {
@@ -379,6 +416,160 @@ public class DispersionesBean extends BaseBean {
 			mostrarMensajeDispersion(false, null);
 		}
 	}
+
+	public void onProcesoCompartidoSeleccionado() {
+		dispercionParametros.setNombreProgramaCompartidoSeleccionado(null);
+		listaProgramasCompartidos = new ArrayList<>();
+		listaDispercionBusqueda = new ArrayList<>();
+		mensajeTablaDispersionGruposCompartidos = MENSAJE_SIN_DATOS;
+		mensajeProgramasCompartidos = null;
+		if (dispercionParametros.getIdProcesoInscripcionConDispersion() == null) {
+			return;
+		}
+		listaProgramasCompartidos = dispersionesService
+				.consultarProgramasCompartidos(dispercionParametros.getIdProcesoInscripcionConDispersion());
+		mensajeProgramasCompartidos = (listaProgramasCompartidos == null || listaProgramasCompartidos.isEmpty())
+				? "No se encontraron programas compartidos"
+				: null;
+	}
+
+	public void busquedaDispersionGruposCompartidos() {
+		listaDispercionBusqueda = new ArrayList<>();
+		mensajeTablaDispersionGruposCompartidos = MENSAJE_SIN_DATOS;
+		mostrarDefinicionGruposCompartidos = false;
+		if (dispercionParametros.getIdProcesoInscripcionConDispersion() == null
+				|| dispercionParametros.getNombreProgramaCompartidoSeleccionado() == null
+				|| dispercionParametros.getNombreProgramaCompartidoSeleccionado().trim().isEmpty()) {
+			mostrarMensajeDispersion(true,
+					"Seleccione el proceso de inscripción con dispersión y el programa compartido para continuar.");
+			return;
+		}
+		listaDispercionBusqueda = dispersionesService.consultarDispersionesGruposCompartidos(
+				dispercionParametros.getIdProcesoInscripcionConDispersion(),
+				dispercionParametros.getNombreProgramaCompartidoSeleccionado());
+		actualizarAccionesGruposCompartidos();
+	}
+
+	public void definirGruposCompartidos(TblDispersionesBusqueda dispersion) {
+		if (dispersion == null || dispersion.getIdDispersion() == null) {
+			mostrarMensajeDispersion(true, "Seleccione un registro válido para definir los grupos.");
+			return;
+		}
+		editarDispersion = dispersion;
+		dispersionNuevo = new DispersionesParamNuevo();
+		dispersionNuevo.setIdDispersion(dispersion.getIdDispersion());
+		dispersionNuevo.setNoGrupos(dispersion.getGruposGenerales());
+		dispersionNuevo.setEstudiantesGrupo(dispersion.getCupoGeneral());
+		dispersionNuevo.setGrupoResto(dispersion.getGrupoResto());
+		dispersionNuevo.setCupoResto(dispersion.getCupoResto());
+		asegurarValorEnLista(listaGrupoGeneral, dispersionNuevo.getNoGrupos());
+		asegurarValorEnLista(listaCupoGeneral, dispersionNuevo.getEstudiantesGrupo());
+		asegurarValorEnLista(listaGrupoRestante, dispersionNuevo.getGrupoResto());
+		asegurarValorEnLista(listaCupoRestanre, dispersionNuevo.getCupoResto());
+		mostrarDefinicionGruposCompartidos = true;
+	}
+
+	public void guardarDefinicionGruposCompartidos() {
+		Integer sumTotal;
+		if (dispersionNuevo == null || dispersionNuevo.getCupoResto() == null
+				|| dispersionNuevo.getEstudiantesGrupo() == null || dispersionNuevo.getGrupoResto() == null
+				|| dispersionNuevo.getNoGrupos() == null) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion8').show()");
+			return;
+		}
+		List<TblDispersionesBusqueda> lista = dispersionesService.actualizarDispersion(dispersionNuevo);
+		if (lista.isEmpty()) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion6').show()");
+			return;
+		}
+		sumTotal = (dispersionNuevo.getNoGrupos() * dispersionNuevo.getEstudiantesGrupo())
+				+ (dispersionNuevo.getGrupoResto() * dispersionNuevo.getCupoResto());
+		Integer totalRegistrado = editarDispersion != null ? editarDispersion.getNoEstudiantes() : null;
+		if (totalRegistrado == null) {
+			totalRegistrado = lista.get(0).getNoEstudiantes();
+		}
+		if (sumTotal != null && totalRegistrado != null && sumTotal > 0 && sumTotal <= totalRegistrado) {
+			boolean actualizada = dispersionesService.actualizarDispersionExc(dispersionNuevo);
+			if (actualizada) {
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion7').show()");
+				mostrarDefinicionGruposCompartidos = false;
+				busquedaDispersionGruposCompartidos();
+			} else {
+				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccionErrorUpdate').show()");
+			}
+		} else {
+			mostrarMensajeDispersion(true,
+					"La capacidad definida debe ser mayor a cero y menor o igual al número de usuarios con inscripción.");
+		}
+	}
+
+	public void cancelarDefinicionGruposCompartidos() {
+		mostrarDefinicionGruposCompartidos = false;
+		dispersionNuevo = null;
+		editarDispersion = new TblDispersionesBusqueda();
+	}
+
+	public void limpiarDefinicionGruposCompartidos() {
+		if (editarDispersion != null && editarDispersion.getIdDispersion() != null) {
+			definirGruposCompartidos(editarDispersion);
+		}
+	}
+	
+	public void cancelarDispersionGruposCompartidos() throws Exception {
+		this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/dispersion.xhtml";
+		limpiarCampos();
+		consultarConvocatorias();
+		consultaTipoProceso();
+		consultarTipoMatriculacion();
+	}
+
+	public void crearGruposCompartidos(TblDispersionesBusqueda dispersion) {
+		if (dispersion == null) {
+			mostrarMensajeDispersion(true, "Seleccione un registro para continuar.");
+			return;
+		}
+		if (!dispersion.isCrearGruposHabilitado()) {
+			mostrarMensajeDispersion(true,
+					"No es posible crear grupos hasta completar la definición de grupos para la dispersión compartida.");
+			return;
+		}
+		crearGruposDesdeCompartidos = true;
+		prepararFormularioCrearGrupos(dispersion);
+	}
+
+	public void matricularUsuariosCompartidos(TblDispersionesBusqueda dispersion) {
+		if (dispersion == null) {
+			mostrarMensajeDispersion(true, "Seleccione un registro para continuar.");
+			return;
+		}
+		if (!dispersion.isMatricularHabilitado()) {
+			mostrarMensajeDispersion(true,
+					"No es posible matricular usuarios hasta completar la generación de grupos.");
+			return;
+		}
+		MatricularDispersionDTO solicitud = construirSolicitudMatriculacionCompartidos(dispersion);
+		if (solicitud == null) {
+			return;
+		}
+		try {
+			ResultadoDTO<DispersionMatriculacionResultadoDTO> respuesta = dispersionesService
+					.matricularUsuariosDispersion(solicitud);
+			if (respuesta != null && respuesta.esCorrecto()) {
+				dispersion.setMatricularHabilitado(false);
+				String mensaje = obtenerMensajeRespuesta(respuesta,
+						"Usuarios matriculados correctamente en los grupos de la dispersión compartida.");
+				busquedaDispersionGruposCompartidos();
+				mostrarMensajeDispersion(false, mensaje);
+			} else {
+				String mensaje = obtenerMensajeRespuesta(respuesta,
+						"No fue posible completar la matriculación de usuarios.");
+				mostrarMensajeDispersion(true, mensaje);
+			}
+		} catch (Exception ex) {
+			logger.error("Error al matricular usuarios de la dispersión compartida", ex);
+			mostrarMensajeDispersion(true, "Ocurrió un error al matricular los usuarios de la dispersión compartida.");
+		}
+	}
 	
 	public void crearGruposDispersion(TblDispersionesBusqueda dispersion) {
 		if (dispersion == null) {
@@ -390,6 +581,7 @@ public class DispersionesBean extends BaseBean {
 					"Los grupos ya fueron generados o no se requiere este paso para la dispersión seleccionada.");
 			return;
 		}
+		crearGruposDesdeCompartidos = false;
 		prepararFormularioCrearGrupos(dispersion);
 	}
 	
@@ -486,6 +678,7 @@ public class DispersionesBean extends BaseBean {
 	
 	public void cancelarFormularioCrearGrupos() {
 		mostrarFormularioCrearGrupos = false;
+		crearGruposDesdeCompartidos = false;
 		dispersionSeleccionada = null;
 		formularioCrearEvento = null;
 		datosPreviosCrear = null;
@@ -584,12 +777,57 @@ public class DispersionesBean extends BaseBean {
 		solicitud.setIdUsuario(usuario);
 		return solicitud;
 	}
+
+	private MatricularDispersionDTO construirSolicitudMatriculacionCompartidos(TblDispersionesBusqueda dispersion) {
+		ProcesosInscripcion procesoSeleccionado = obtenerProcesoConDispersionSeleccionado();
+		if (procesoSeleccionado == null || procesoSeleccionado.getIdConvocatoria() == null
+				|| procesoSeleccionado.getIdTipoProceso() == null
+				|| procesoSeleccionado.getIdProcesoInscripcion() == null) {
+			mostrarMensajeDispersion(true,
+					"Seleccione un proceso de inscripción con dispersión válido antes de matricular usuarios.");
+			return null;
+		}
+		Long usuario = getUsuarioEnSession() != null ? getUsuarioEnSession().getIdPersona() : null;
+		if (usuario == null) {
+			mostrarMensajeDispersion(true, "No se pudo identificar al usuario en sesión.");
+			return null;
+		}
+		MatricularDispersionDTO solicitud = new MatricularDispersionDTO();
+		solicitud.setIdDispersion(dispersion.getIdDispersion());
+		solicitud.setIdConvocatoria(procesoSeleccionado.getIdConvocatoria());
+		solicitud.setIdTipoProceso(procesoSeleccionado.getIdTipoProceso());
+		solicitud.setIdProcesoInscripcion(procesoSeleccionado.getIdProcesoInscripcion());
+		solicitud.setIdPrograma(dispersion.getIdPrograma());
+		solicitud.setIdPlan(dispersion.getIdPlan());
+		solicitud.setGruposGenerales(dispersion.getGruposGenerales());
+		solicitud.setGrupoResto(dispersion.getGrupoResto());
+		solicitud.setMatriculacionCompartidos(Boolean.TRUE);
+		solicitud.setNombreProgramaSeleccionado(dispersion.getPrograma());
+		solicitud.setBloquePrograma(dispersion.getBloque());
+		solicitud.setIdUsuario(usuario);
+		return solicitud;
+	}
+
+	private ProcesosInscripcion obtenerProcesoConDispersionSeleccionado() {
+		if (dispercionParametros == null || dispercionParametros.getIdProcesoInscripcionConDispersion() == null
+				|| listaProcesosConDispersion == null || listaProcesosConDispersion.isEmpty()) {
+			return null;
+		}
+		for (ProcesosInscripcion proceso : listaProcesosConDispersion) {
+			if (proceso != null && dispercionParametros.getIdProcesoInscripcionConDispersion()
+					.equals(proceso.getIdProcesoInscripcion())) {
+				return proceso;
+			}
+		}
+		return null;
+	}
 	
 	public void aceptarFormularioCrearGrupos() {
 		if (!formularioCrearGruposValido()) {
 			return;
 		}
 		try {
+			boolean contextoCompartidos = crearGruposDesdeCompartidos;
 			CrearEventoDispersionDTO solicitud = construirSolicitudCrearEventos();
 			ResultadoDTO<DispersionCreacionResultadoDTO> respuesta = dispersionesService
 					.crearEventosDispersion(solicitud);
@@ -597,7 +835,7 @@ public class DispersionesBean extends BaseBean {
 				String mensaje = !respuesta.getMensajes().isEmpty() ? respuesta.getMensajes().get(0)
 						: "Eventos y grupos generados correctamente.";
 				cancelarFormularioCrearGrupos();
-				busquedaDispersion();
+				refrescarBusquedaPosteriorCrearGrupos(contextoCompartidos);
 				mostrarMensajeDispersion(false, mensaje);
 			} else {
 				String mensaje = (respuesta != null && !respuesta.getMensajes().isEmpty())
@@ -966,6 +1204,22 @@ public class DispersionesBean extends BaseBean {
 		this.mensajeProcesosSinDispersion = mensajeProcesosSinDispersion;
 	}
 
+	public List<String> getListaProgramasCompartidos() {
+		return listaProgramasCompartidos;
+	}
+
+	public void setListaProgramasCompartidos(List<String> listaProgramasCompartidos) {
+		this.listaProgramasCompartidos = listaProgramasCompartidos;
+	}
+
+	public String getMensajeProgramasCompartidos() {
+		return mensajeProgramasCompartidos;
+	}
+
+	public void setMensajeProgramasCompartidos(String mensajeProgramasCompartidos) {
+		this.mensajeProgramasCompartidos = mensajeProgramasCompartidos;
+	}
+
 	public List<TipoMatriculacion> getListaTipoMatriculacion() {
 		return listaTipoMatriculacion;
 	}
@@ -1089,6 +1343,14 @@ public class DispersionesBean extends BaseBean {
 	public void setMostrarNuevaDispersion(boolean mostrarNuevaDispersion) {
 		this.mostrarNuevaDispersion = mostrarNuevaDispersion;
 	}
+
+	public boolean isMostrarDefinicionGruposCompartidos() {
+		return mostrarDefinicionGruposCompartidos;
+	}
+
+	public void setMostrarDefinicionGruposCompartidos(boolean mostrarDefinicionGruposCompartidos) {
+		this.mostrarDefinicionGruposCompartidos = mostrarDefinicionGruposCompartidos;
+	}
 	
 	public DispersionesParamNuevo getDispersionNuevo() {
 		return dispersionNuevo;
@@ -1177,6 +1439,14 @@ public class DispersionesBean extends BaseBean {
 	
 	public void setMensajeTablaDispersionExistente(String mensajeTablaDispersionExistente) {
 		this.mensajeTablaDispersionExistente = mensajeTablaDispersionExistente;
+	}
+
+	public String getMensajeTablaDispersionGruposCompartidos() {
+		return mensajeTablaDispersionGruposCompartidos;
+	}
+
+	public void setMensajeTablaDispersionGruposCompartidos(String mensajeTablaDispersionGruposCompartidos) {
+		this.mensajeTablaDispersionGruposCompartidos = mensajeTablaDispersionGruposCompartidos;
 	}
 	
 	public TblDispersionesBusqueda getDispersionSeleccionada() {
@@ -1417,6 +1687,36 @@ public class DispersionesBean extends BaseBean {
 			dispersion.setMatricularHabilitado(habilitarMatricular);
 		}
 	}
+
+	private void actualizarAccionesGruposCompartidos() {
+		if (listaDispercionBusqueda == null) {
+			return;
+		}
+		for (TblDispersionesBusqueda dispersion : listaDispercionBusqueda) {
+			if (dispersion == null) {
+				continue;
+			}
+			int gruposGenerales = dispersion.getGruposGenerales() != null ? dispersion.getGruposGenerales() : 0;
+			int gruposResto = dispersion.getGrupoResto() != null ? dispersion.getGrupoResto() : 0;
+			int totalConfigurado = Math.max(0, gruposGenerales) + Math.max(0, gruposResto);
+			boolean definicionCompleta = totalConfigurado > 0;
+			boolean existenGruposGenerados = dispersion.getGruposCreados() != null && dispersion.getGruposCreados() > 0;
+			int estudiantesInscritos = dispersion.getNoEstudiantes() != null ? dispersion.getNoEstudiantes() : 0;
+			boolean existeMatriculacionRegistrada = dispersion.getUsuariosMatriculados() != null
+					&& dispersion.getUsuariosMatriculados() > 0;
+			boolean matriculacionCompleta = dispersion.getUsuariosMatriculados() != null
+					&& dispersion.getUsuariosMatriculados() >= estudiantesInscritos && estudiantesInscritos > 0;
+			boolean habilitarDefinir = !existenGruposGenerados && !existeMatriculacionRegistrada
+					&& !matriculacionCompleta;
+			boolean habilitarCrear = definicionCompleta && !existenGruposGenerados && !existeMatriculacionRegistrada
+					&& !matriculacionCompleta;
+			boolean habilitarMatricular = existenGruposGenerados && !existeMatriculacionRegistrada
+					&& !matriculacionCompleta;
+			dispersion.setDefinirGruposHabilitado(habilitarDefinir);
+			dispersion.setCrearGruposHabilitado(habilitarCrear);
+			dispersion.setMatricularHabilitado(habilitarMatricular);
+		}
+	}
 	
 	private void mostrarMensajeDispersion(boolean error, String mensaje) {
 		mensajeGestion = mensaje;
@@ -1450,6 +1750,14 @@ public class DispersionesBean extends BaseBean {
 		boolean sinMatriculacionRegistrada = dispersion != null
 				&& (dispersion.getUsuariosMatriculados() == null || dispersion.getUsuariosMatriculados() == 0);
 		return dispersion != null && ultimaConsultaExtraordinaria && totalConfigurado == 0 && sinMatriculacionRegistrada;
+	}
+
+	private void refrescarBusquedaPosteriorCrearGrupos(boolean contextoCompartidos) {
+		if (contextoCompartidos) {
+			busquedaDispersionGruposCompartidos();
+		} else {
+			busquedaDispersion();
+		}
 	}
 	
 	private boolean esProcesoExtraordinarioSeleccionado() {

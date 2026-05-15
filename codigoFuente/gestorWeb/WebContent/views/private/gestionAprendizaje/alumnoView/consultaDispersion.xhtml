@@ -200,6 +200,9 @@
 					</p:column>		
 					
 					<p:column styleClass="text-center">
+						<f:facet name="header">
+							<h:outputText value="Acciones" />
+						</f:facet>
 						<p:commandButton ajax="true" update="@form"
 							action="#{dispersionesBean.eliminar}"
 							icon="fa fa-trash" styleClass="btn-icon btn btn-default">

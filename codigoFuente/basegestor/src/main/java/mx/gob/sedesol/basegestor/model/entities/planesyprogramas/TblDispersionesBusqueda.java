@@ -23,6 +23,7 @@ public class TblDispersionesBusqueda implements Serializable {
 	private Integer tipoMatriculacion;
 	private Integer gruposCreados;
 	private Integer usuariosMatriculados;
+	private boolean definirGruposHabilitado;
 	private boolean crearGruposHabilitado;
 	private boolean matricularHabilitado;
 
@@ -160,6 +161,14 @@ public class TblDispersionesBusqueda implements Serializable {
 	
 	public void setUsuariosMatriculados(Integer usuariosMatriculados) {
 		this.usuariosMatriculados = usuariosMatriculados;
+	}
+
+	public boolean isDefinirGruposHabilitado() {
+		return definirGruposHabilitado;
+	}
+
+	public void setDefinirGruposHabilitado(boolean definirGruposHabilitado) {
+		this.definirGruposHabilitado = definirGruposHabilitado;
 	}
 	
 	public boolean isCrearGruposHabilitado() {
