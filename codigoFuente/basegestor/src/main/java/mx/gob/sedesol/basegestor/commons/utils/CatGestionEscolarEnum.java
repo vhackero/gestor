@@ -10,6 +10,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDictamen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatEstadoEventoCapacitacion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoCalificacionEc;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoResponsabilidadEc;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.PeriodoInscripcion;
 
 /**
  * Created by jhcortes on 1/02/17.
@@ -25,7 +26,8 @@ public enum CatGestionEscolarEnum {
 	CAT_ALCANCE_AREA("ALCANCE \u00C1REA","catAlcanceArea",9,CatAlcanceArea.class,Boolean.FALSE),
 	CAT_TIPO_RESPONSABILIDAD_EC("TIPO RESPONSABILIDAD","catTipoResponsabilidadEc",10,CatTipoResponsabilidadEc.class,Boolean.FALSE),
 	CAT_DESTINATARIOS_EC("DESTINATARIOS EC", "catDestinatariosEc", 11, CatDestinatariosEc.class,Boolean.FALSE),
-	CAT_ASISTENCIA("CAT ASISTENCIA","cat_asistencia",12,CatAsistencia.class,Boolean.FALSE);
+	CAT_ASISTENCIA("CAT ASISTENCIA","cat_asistencia",12,CatAsistencia.class,Boolean.FALSE),
+	CAT_PERIODOS_INSCRIPCION("PERIODOS INSCRIPCI\u00D3N","tbl_periodos_inscripcion",13,PeriodoInscripcion.class,Boolean.TRUE);
 
 	private String nombre;
 	private String id;
