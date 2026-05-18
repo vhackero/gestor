@@ -117,6 +117,7 @@
         <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatClasificacionInformacion</class>
         <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatClasificacionAva</class>
         <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatAlcanceArea</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.PeriodoInscripcion</class>
         <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento</class>
         <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoResponsabilidadEc</class>
         <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelPersonaResponsabilidades</class>

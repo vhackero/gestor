@@ -252,6 +252,10 @@ public class CatGestionEscolarBean extends BaseBean {
         this.catalogoSeleccionado = catalogoSeleccionado;
     }
 
+    public boolean isCatalogoPeriodosInscripcion() {
+        return CatGestionEscolarEnum.CAT_PERIODOS_INSCRIPCION.equals(catalogoSeleccionado);
+    }
+
     public GestionEscolarServiceAdapter getGestionEscolarServiceAdapter() {
         if (ObjectUtils.isNull(gestionEscolarServiceAdapter)) {
             gestionEscolarServiceAdapter = new GestionEscolarServiceAdapter();

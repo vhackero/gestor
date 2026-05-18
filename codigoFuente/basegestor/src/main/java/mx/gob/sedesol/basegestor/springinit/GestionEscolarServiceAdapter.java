@@ -15,6 +15,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatDictamen;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatEstadoEventoCapacitacion;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoCalificacionEc;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatTipoResponsabilidadEc;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.PeriodoInscripcion;
 import mx.gob.sedesol.basegestor.service.admin.CatalogoComunService;
 
 /**
@@ -58,6 +59,9 @@ public class GestionEscolarServiceAdapter {
 	@Autowired
 	private CatalogoComunService<CatAsistencia, Integer> catAsistenciaService;
 
+	@Autowired
+	private CatalogoComunService<PeriodoInscripcion, Integer> periodoInscripcionService;
+
 	@SuppressWarnings("rawtypes")
 	public CatalogoComunService getCatalogoServiceByGestionEscolarEnum(CatGestionEscolarEnum catalogo) {
 		switch (catalogo) {
@@ -81,6 +85,8 @@ public class GestionEscolarServiceAdapter {
 			return catalogoDestinatariosEcService;
 		case CAT_ASISTENCIA:
 			return catAsistenciaService;
+		case CAT_PERIODOS_INSCRIPCION:
+			return periodoInscripcionService;
 		}
 		return null;
 	}
