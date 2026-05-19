@@ -42,6 +42,12 @@ public class ActaServiceImpl extends ComunValidacionService<ActaDTO> implements 
 		ResultadoDTO<ActaDTO> resultado = sonDatosRequeridosValidos(TipoAccion.PERSISTENCIA, dto);
 		if (ObjectUtils.isNotNull(resultado) && resultado.getResultado().getValor()) {
 			try {
+				if (ObjectUtils.isNull(dto.getIdActa()) && ObjectUtils.isNotNull(dto.getGrupo())
+						&& !ObjectUtils.isNullOrEmpty(iCargaActaRepository.getActaByIdGrupo(dto.getGrupo()))) {
+					resultado.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);
+					logger.warn("Ya existe un acta asociada al grupo " + dto.getGrupo());
+					return resultado;
+				}
 				logger.info("EJECUTANDO QUERY");
 				Acta entidad = new Acta();
 				modelMapper.map(dto, entidad);

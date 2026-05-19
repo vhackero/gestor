@@ -188,7 +188,7 @@ public class EventoCapacitacionServiceFacade {
 			List<RelGrupoParticipanteDTO> participantesByGrupo, List<TablaCalificacionesDTO> tablaAuxCalif)
 			throws Exception {
 
-		ResultadoDTO<RelGrupoEvaluacionDTO> res = null;
+		ResultadoDTO<RelGrupoEvaluacionDTO> res = new ResultadoDTO<>();
 		
 		int idGrupo = 0;
 
@@ -270,12 +270,13 @@ public class EventoCapacitacionServiceFacade {
 
 						califAux.stream().forEach(c -> c.setRelGrupoEvaluacion(eval));
 						eval.setRelEvaluacionCalificaciones(califAux);
-						res = relGpoEvaluacionService.guardar(eval);
+						ResultadoDTO<RelGrupoEvaluacionDTO> resGuardar = relGpoEvaluacionService.guardar(eval);
 						
-						if (ObjectUtils.isNotNull(res) && !res.getResultado().getValor()) {
+						if (!esResultadoCorrecto(resGuardar)) {
 							res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_FALLIDA);
 							throw new Exception("Error al guardar actualizacion del Grupo");
 						}
+						res = resGuardar;
 
 					}
 				}
@@ -292,9 +293,12 @@ public class EventoCapacitacionServiceFacade {
 				logger.info("grupo : "+idGrupo);
 				
 				for (RelGrupoParticipanteDTO rpg : participantesByGrupo) {
+					if (!tieneEvaluacionParticipante(rpg, tablaAuxCalif)) {
+						continue;
+					}
 					ResultadoDTO<RelGrupoParticipanteDTO> resx = grupoParticipanteService
 							.actualizaRelGrupoParticipante(rpg);
-					if (ObjectUtils.isNotNull(resx) && !resx.getResultado().getValor()) {
+					if (ObjectUtils.isNotNull(resx) && !esResultadoCorrecto(resx)) {
 						res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_FALLIDA);
 						throw new Exception("Error al Actualizar la relación grupo-participante");
 					}
@@ -303,13 +307,14 @@ public class EventoCapacitacionServiceFacade {
 				gpoSeleccionado.setActaCerrada(Boolean.TRUE);
 				logger.info("1 actualizarGrupo>>");
 				ResultadoDTO<GrupoDTO> resActGpo = actualizarEstatusActa(gpoSeleccionado, usuarioReg, true);
-				logger.info("12 actualizarGrupo>>" + resActGpo.getMensaje()+" - "+ resActGpo.getDto().toString());
+				logger.info("12 actualizarGrupo>>" + resActGpo.getMensaje());
 				
 			}
 
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);
+			throw e;
 		}
 
 		return res;
@@ -319,7 +324,7 @@ public class EventoCapacitacionServiceFacade {
 	public ResultadoDTO<GrupoDTO> actualizarEstatusActa(GrupoDTO gpoSeleccionado, Long usuarioReg, boolean cerrarActa)
 			throws Exception {
 		logger.info("actualizarEstatusActa>>");
-		ResultadoDTO<GrupoDTO> resActGpo = null;
+		ResultadoDTO<GrupoDTO> resActGpo = new ResultadoDTO<>();
 
 		try {
 			gpoSeleccionado.setActaCerrada(cerrarActa);
@@ -331,6 +336,7 @@ public class EventoCapacitacionServiceFacade {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			resActGpo.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_GUARDADO_FALLIDO);
+			throw e;
 		}
 
 		return resActGpo;
@@ -369,7 +375,7 @@ public class EventoCapacitacionServiceFacade {
 			List<RelGrupoParticipanteDTO> participantesByGrupo, List<TablaCalificacionesDTO> tablaAuxCalif,
 			Long usuarioModifico) throws Exception {
 
-		ResultadoDTO<RelGrupoEvaluacionDTO> res = null;
+		ResultadoDTO<RelGrupoEvaluacionDTO> res = new ResultadoDTO<>();
 
 		try {
 
@@ -407,7 +413,8 @@ public class EventoCapacitacionServiceFacade {
 					TablaCalificacionesDTO evaluacionPart = getEvaluacionByParticipante(
 							partce.getPersona().getIdPersona(), tablaAuxCalif);
 					// Por cada evaluacion genero Sus calificaciones
-					if (!ObjectUtils.isNullOrEmpty(evaluacionPart.getCalificacionEC())) {
+					if (ObjectUtils.isNotNull(evaluacionPart)
+							&& !ObjectUtils.isNullOrEmpty(evaluacionPart.getCalificacionEC())) {
 
 						partce.setCalifFinal(evaluacionPart.getCalifFinal());
 						partce.setCalifTotal(evaluacionPart.getCalifTotal());
@@ -454,11 +461,12 @@ public class EventoCapacitacionServiceFacade {
 						 * eval.getBitacoraDTO().setFuncion(ConstantesBitacora.
 						 * EC_MOD_CALIF_EDITAR);
 						 */
-						res = relGpoEvaluacionService.actualizar(eval);
-						if (ObjectUtils.isNotNull(res) && !res.getResultado().getValor()) {
+						ResultadoDTO<RelGrupoEvaluacionDTO> resActualizar = relGpoEvaluacionService.actualizar(eval);
+						if (!esResultadoCorrecto(resActualizar)) {
 							res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_FALLIDA);
 							throw new Exception("Error al Actualizar el Grupo");
 						}
+						res = resActualizar;
 					}
 				}
 
@@ -476,9 +484,12 @@ public class EventoCapacitacionServiceFacade {
 						 * rpg.getBitacoraDTO().setFuncion(ConstantesBitacora.
 						 * GRUPO_EC_EDITAR);
 						 */
+						if (!tieneEvaluacionParticipante(rpg, tablaAuxCalif)) {
+							continue;
+						}
 						ResultadoDTO<RelGrupoParticipanteDTO> resx = grupoParticipanteService
 								.actualizaRelGrupoParticipante(rpg);
-						if (ObjectUtils.isNotNull(resx) && !resx.getResultado().getValor()) {
+						if (ObjectUtils.isNotNull(resx) && !esResultadoCorrecto(resx)) {
 							res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_FALLIDA);
 							throw new Exception("Error al Actualizar la relación grupo-participante");
 						}
@@ -486,7 +497,7 @@ public class EventoCapacitacionServiceFacade {
 
 					gpoSeleccionado.setActaCerrada(Boolean.TRUE);
 					ResultadoDTO<GrupoDTO> resActGpo = grupoService.actualizarGrupo(gpoSeleccionado, usuarioModifico);
-					if (ObjectUtils.isNotNull(resActGpo) && !resActGpo.getResultado().getValor()) {
+					if (!esResultadoCorrecto(resActGpo)) {
 						res.setMensajeError(MensajesSistemaEnum.ADMIN_MSG_ACTUALIZACION_FALLIDA);
 						throw new Exception("Error al Actualizar el Grupo");
 					}
@@ -552,6 +563,23 @@ public class EventoCapacitacionServiceFacade {
 			}
 		}
 		return null;
+	}
+
+	private boolean esResultadoCorrecto(ResultadoDTO<?> resultado) {
+		return ObjectUtils.isNotNull(resultado) && ObjectUtils.isNotNull(resultado.getResultado())
+				&& resultado.getResultado().getValor();
+	}
+
+	private boolean tieneEvaluacionParticipante(RelGrupoParticipanteDTO participante,
+			List<TablaCalificacionesDTO> tablaAuxCalif) {
+		if (ObjectUtils.isNull(participante) || ObjectUtils.isNull(participante.getPersona())
+				|| ObjectUtils.isNullOrEmpty(tablaAuxCalif)) {
+			return false;
+		}
+		TablaCalificacionesDTO evaluacionPart = getEvaluacionByParticipante(
+				participante.getPersona().getIdPersona(), tablaAuxCalif);
+		return ObjectUtils.isNotNull(evaluacionPart)
+				&& !ObjectUtils.isNullOrEmpty(evaluacionPart.getCalificacionEC());
 	}
 
 	public MallaCurricularDTO obtenerMallaCurricular() {

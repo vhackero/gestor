@@ -101,7 +101,6 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 			+ "         INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_programa = te.id_programa\n"
 			+ "         INNER JOIN tbl_planes tp ON tp.id_plan = tfd.id_plan\n"
 			+ "         INNER JOIN tbl_grupos tg ON tg.id_evento = te.id_evento\n"
-			+ "         INNER JOIN cat_nombres_planesyprogramas cpp ON cpp.programa_educativo = tp.nombre AND tfd.nombre_tentativo = cpp.asignatura AND cpp.bloque NOT LIKE 'NA'\n"
 			+ "WHERE te.id_evento = :idEvento AND tg.id = :idGrupo", nativeQuery = true)
 	public List<EncabezadoActaDTO> obtenerEncabezadoActa(@Param("idEvento")Integer idEvento, @Param("idGrupo")Integer idGrupo);
 

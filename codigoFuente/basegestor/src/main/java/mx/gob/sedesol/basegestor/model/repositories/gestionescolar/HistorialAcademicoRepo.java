@@ -183,10 +183,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 		List<TiraMateriaDTO> regresa = new ArrayList<TiraMateriaDTO>();
 		List<Object[]> lista = new ArrayList<>();
 
-		String consulta = "SELECT gp.id id, fd.identificador_final as clave, (SELECT CONCAT(SUBSTRING(mc.nombre,1,1),cnp.bloque)\r\n"
-				+ "FROM tbl_ficha_descriptiva_programa fdp\r\n"
-				+ "INNER JOIN tbl_malla_curricular mc ON mc.id = fdp.id_eje_capacitacion\r\n"
-				+ "WHERE fdp.id_programa = e.id_programa) as bloquemodulo,\r\n"
+		String consulta = "SELECT gp.id id, fd.identificador_final as clave, tmc.nombre as bloquemodulo,\r\n"
 				+ "CONCAT(e.nombre_ec ,' - ',g.nombre) as grupo,\r\n"
 				+ "    (SELECT CONCAT(tp.sso_nombre,' ', tp.sso_apellidoPaterno,' ', tp.sso_apellidoMaterno)\r\n"
 				+ "        FROM tbl_persona tp\r\n"
@@ -202,8 +199,9 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				+ "                  INNER JOIN tbl_eventos e on e.id_evento = g.id_evento\r\n"
 				+ "                  INNER JOIN cat_estado_evento_capacitacion c on  c.id  = e.id_estatus_ec\r\n"
 				+ "                  INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa\r\n"
-				+ "                  INNER JOIN cat_nombres_planesyprogramas cnp ON cnp.clave_asig = fd.identificador_final AND e.cve_evento_cap LIKE CONCAT('%',cnp.clave_asig,'%') AND e.cve_evento_cap LIKe CONCAT('%',cnp.semestre,'%') AND e.cve_evento_cap LIKe CONCAT('%',cnp.bloque,'%')\r\n"
 				+ "                  INNER JOIN tbl_planes pl ON pl.id_plan = fd.id_plan\r\n"
+				+ "					 INNER JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion\r\n"
+				+ "					 LEFT JOIN tbl_malla_curricular tmc2 ON tmc2.id = tmc.id_padre\r\n"
 				+ "WHERE\r\n"
 				+ "  c.id = :idEstatusEc AND t.id_persona = :id_persona AND g.acta_cerrada = 0";
 
@@ -230,11 +228,11 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 		TiraMateriaDTO regresa = new TiraMateriaDTO();
 		
 		regresa.setId_grupo((Integer) (obj[0]));
-		regresa.setClave(obj[1].toString());
-		regresa.setBloque(obj[2].toString());
-		regresa.setGrupo(obj[3].toString());
-		regresa.setDocente(obj[4].toString());
-		regresa.setAsesor(obj[5].toString());
+		regresa.setClave(getStringValue(obj[1]));
+		regresa.setBloque(getStringValue(obj[2]));
+		regresa.setGrupo(getStringValue(obj[3]));
+		regresa.setDocente(getStringValue(obj[4]));
+		regresa.setAsesor(getStringValue(obj[5]));
 
 		return regresa;
 	}
@@ -246,7 +244,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 
 		List<Object[]> lista = new ArrayList<>();
 
-		String consulta = "SELECT gp.id as grupo_participante_id, " + "cnp.semestre as 'c/s',\r\n"
+		String consulta = "SELECT gp.id as grupo_participante_id, " + " COALESCE(SUBSTRING_INDEX(tmc2.nombre, ' ', -1), '') as 'c/s',\r\n"
 				+ "       fd.identificador_final as clavesep,\r\n" + "       fd.identificador_final as clave,\r\n"
 				+ "       fd.creditos as creditos,\r\n"
 				+ "        SUBSTRING_INDEX(e.cve_evento_cap, \"-\", -2) as periodo,\r\n"
@@ -258,7 +256,8 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				+ "                  INNER JOIN tbl_persona t on t.id_persona = gp.id_persona_participante\r\n"
 				+ "                  INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa\r\n"
 				+ "                  INNER JOIN tbl_planes pl ON pl.id_plan = fd.id_plan\r\n"
-				+ "                  INNER JOIN cat_nombres_planesyprogramas cnp ON cnp.clave_asig = fd.identificador_final AND e.cve_evento_cap LIKE CONCAT('%',cnp.clave_asig,'%') AND e.cve_evento_cap LIKe CONCAT('%',cnp.semestre,'%') AND e.cve_evento_cap LIKe CONCAT('%',cnp.bloque,'%')\r\n"
+				+ "                  INNER JOIN tbl_malla_curricular tmc  ON tmc.id = fd.id_eje_capacitacion\r\n"
+				+ "					 LEFT JOIN tbl_malla_curricular tmc2  ON tmc2.id = tmc.id_padre\r\n"		
 				+ "WHERE t.id_persona = :id_persona AND g.acta_cerrada = 1 AND e.constancia = 1;";
 
 		Query query = entityManager.createNativeQuery(consulta);
@@ -281,15 +280,19 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 
 		HistorialAcademicoListaDTO regresa = new HistorialAcademicoListaDTO();
 		regresa.setGrupo_participante_id((Integer) obj[0]);
-		regresa.setCs(obj[1].toString());
-		regresa.setClavesep(obj[2].toString());
-		regresa.setClave(obj[3].toString());
-		regresa.setCreditos(obj[4].toString());
-		regresa.setPeriodo(obj[5].toString());
-		regresa.setTipoEvaluacion(obj[6].toString());
-		regresa.setnActa(obj[7].toString());
+		regresa.setCs(getStringValue(obj[1]));
+		regresa.setClavesep(getStringValue(obj[2]));
+		regresa.setClave(getStringValue(obj[3]));
+		regresa.setCreditos(getStringValue(obj[4]));
+		regresa.setPeriodo(getStringValue(obj[5]));
+		regresa.setTipoEvaluacion(getStringValue(obj[6]));
+		regresa.setnActa(getStringValue(obj[7]));
 
 		return regresa;
+	}
+
+	private String getStringValue(Object valor) {
+		return valor != null ? valor.toString() : "";
 	}
 	
 	@Override
