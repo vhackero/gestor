@@ -739,5 +739,21 @@ INSERT INTO `tbl_carga_archivos_oa` (`id`,`id_unidad_oa`,`id_clasificacion`,`id_
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-03-10 13:29:52
+INSERT INTO `tbl_funcionalidades` (`id_funcionalidad`,`clave`,`id_funcionalidad_padre`,`descripcion`,`fecha_registro`,`fecha_actualizacion`,`activo`,`usuario_modifico`)
+VALUES (139,'ACT_CUR_MOODLE',71,'Actualizacion curso Moodle','2026-05-21 00:00:00',NULL,1,1);
 
+INSERT INTO `tbl_textos_sistema` (`clave`,`valor`,`id_funcionalidad`,`fecha_registro`,`fecha_actualizacion`,`usuario_modifico`)
+VALUES ('gw.sidebar.actualizacionCursoMoodle','Actualización curso Moodle',139,'2026-05-21 00:00:00',NULL,1);
+
+INSERT INTO `rel_rol_funcionalidad` (`id_rol`,`id_funcionalidad`,`usuario_modifico`,`fecha_registro`,`fecha_actualizacion`,`activo`)
+SELECT rrf.id_rol, 139, 1, '2026-05-21 00:00:00', NULL, 1
+FROM rel_rol_funcionalidad rrf
+WHERE rrf.id_funcionalidad = 71
+  AND NOT EXISTS (
+    SELECT 1
+    FROM rel_rol_funcionalidad existente
+    WHERE existente.id_rol = rrf.id_rol
+      AND existente.id_funcionalidad = 139
+  );
+
+-- Dump completed on 2017-03-10 13:29:52

@@ -7,6 +7,7 @@
 
     <http pattern="/resources/**" security="none" />
     <http pattern="/javax.faces.resource/**" security="none" />
+    <http pattern="/ws/public/**" security="none" />
 
     <authentication-manager erase-credentials="true" alias="customAuthenticationProvider">
         <authentication-provider user-service-ref="customUserDetailsService">
