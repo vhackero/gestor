@@ -627,6 +627,12 @@
 			<redirect />
 		</navigation-case>
 
+		<navigation-case>
+			<from-outcome>RECONOCIMIENTO_ASIGNATURAS</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/reconocimientoAsignaturas.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+
 		<!-- ITTIVA 666 MIS INSCRIPCION -->
 		<navigation-case>
 			<from-outcome>INSCRIPCION</from-outcome>

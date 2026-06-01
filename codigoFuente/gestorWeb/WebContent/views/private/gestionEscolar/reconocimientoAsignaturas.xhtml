@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+		<li class="active">#{sistema.obtenerTexto('gw.sidebar.reconocimientoAsignaturas')}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="frmReconocimientoAsignaturas">
+			<h1>#{sistema.obtenerTexto('gw.sidebar.reconocimientoAsignaturas')}</h1>
+			<hr />
+
+			<p:messages id="msgs" closable="true" showDetail="true" severity="info,warn,error,fatal" />
+
+			<p:panel header="Reconocimiento de asignaturas" styleClass="panel-default">
+				<div class="row">
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel for="matricula" styleClass="requerido" value="Matrícula" />
+						<p:inputText id="matricula" value="#{reconocimientoAsignaturasBean.matricula}"
+							placeholder="Matrícula" style="width:100%;" maxlength="100" />
+					</div>
+					<div class="col-md-2 col-xs-12">
+						<p:outputLabel for="anioPeriodo" value="Año periodo:" />
+						<p:selectOneMenu id="anioPeriodo" style="width:100%;"
+							value="#{reconocimientoAsignaturasBean.anioPeriodoSeleccionado}">
+							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+							<f:selectItems value="#{reconocimientoAsignaturasBean.aniosPeriodo}" />
+						</p:selectOneMenu>
+					</div>
+					<div class="col-md-3 col-xs-12">
+						<p:outputLabel for="numeroElementos" value="Número de elementos:" />
+						<p:selectOneMenu id="numeroElementos" style="width:100%;"
+							value="#{reconocimientoAsignaturasBean.numeroElementosSeleccionado}">
+							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+							<f:selectItems value="#{reconocimientoAsignaturasBean.numerosElementos}" />
+						</p:selectOneMenu>
+					</div>
+					<div class="col-md-3 col-xs-12 text-right" style="margin-top: 27px;">
+						<p:commandButton value="Limpiar campos" styleClass="btn btn-default"
+							actionListener="#{reconocimientoAsignaturasBean.limpiar}" update="@form" process="@this" />
+						<p:commandButton value="Buscar" styleClass="btn btn-primary" style="margin-left: 10px;"
+							actionListener="#{reconocimientoAsignaturasBean.buscar}" update="@form" process="@form" />
+					</div>
+				</div>
+
+				<p:spacer height="20" />
+				<h:panelGroup layout="block" style="margin-bottom: 10px;"
+					rendered="#{not empty reconocimientoAsignaturasBean.resultados}">
+					<h:outputText value="Registros encontrados: #{reconocimientoAsignaturasBean.resultados.size()}" />
+				</h:panelGroup>
+
+				<p:dataTable id="tablaResultados" widgetVar="tblReconocimientoAsignaturas" reflow="true"
+					value="#{reconocimientoAsignaturasBean.resultados}" var="resultado"
+					paginator="true" rows="10" paginatorPosition="bottom"
+					emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="({currentPage} de {totalPages})"
+					rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="Plan" />
+						</f:facet>
+						<h:outputText value="#{resultado.plan}" />
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="Programa" />
+						</f:facet>
+						<h:outputText value="#{resultado.programa}" />
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="Clave" />
+						</f:facet>
+						<h:outputText value="#{resultado.clavePrograma}" />
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="Semestre" />
+						</f:facet>
+						<h:outputText value="#{resultado.semestre}" />
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="Bloque" />
+						</f:facet>
+						<h:outputText value="#{resultado.bloque}" />
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="Periodo" />
+						</f:facet>
+						<h:outputText value="#{resultado.periodo}" />
+					</p:column>
+					<p:column style="width: 110px; text-align:center;">
+						<f:facet name="header">
+							<h:outputText value="Acciones" />
+						</f:facet>
+						<p:commandLink title="Eliminar" actionListener="#{reconocimientoAsignaturasBean.prepararEliminar}"
+							process="@this" update=":frmReconocimientoAsignaturas:msgs"
+							oncomplete="PF('dlgConfirmarEliminarReconocimiento').show()">
+							<f:setPropertyActionListener target="#{reconocimientoAsignaturasBean.filaSeleccionada}" value="#{resultado}" />
+							<i class="fa fa-trash"></i>
+						</p:commandLink>
+						<p:commandLink title="Actualizar" actionListener="#{reconocimientoAsignaturasBean.prepararActualizar}"
+							process="@this" update=":frmReconocimientoAsignaturas:msgs" style="margin-left: 12px;"
+							oncomplete="PF('dlgConfirmarActualizarReconocimiento').show()">
+							<f:setPropertyActionListener target="#{reconocimientoAsignaturasBean.filaSeleccionada}" value="#{resultado}" />
+							<i class="fa fa-pencil"></i>
+						</p:commandLink>
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+
+			<p:confirmDialog id="dlgEliminarReconocimiento"
+				widgetVar="dlgConfirmarEliminarReconocimiento" resizable="false"
+				responsive="true" modal="true" draggable="false" position="center"
+				closable="false" header="Confirmación">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText value="¿Estás seguro de eliminar el registro en moodle?" />
+					</div>
+				</div>
+				<div class="row" style="margin-top: 15px;">
+					<div class="col-md-12 text-right">
+						<p:commandButton type="button" value="No" styleClass="btn btn-default"
+							onclick="PF('dlgConfirmarEliminarReconocimiento').hide()" />
+						<p:commandButton value="Sí" styleClass="btn btn-primary" style="margin-left: 10px;"
+							actionListener="#{reconocimientoAsignaturasBean.eliminarRegistro}"
+							process="@this" update=":frmReconocimientoAsignaturas"
+							oncomplete="PF('dlgConfirmarEliminarReconocimiento').hide()" />
+					</div>
+				</div>
+			</p:confirmDialog>
+
+			<p:confirmDialog id="dlgActualizarReconocimiento"
+				widgetVar="dlgConfirmarActualizarReconocimiento" resizable="false"
+				responsive="true" modal="true" draggable="false" position="center"
+				closable="false" header="Confirmación">
+				<div class="row">
+					<div class="col-md-12">
+						<h:outputText value="¿Estas seguro que quieres actualizar el registro?" />
+					</div>
+				</div>
+				<div class="row" style="margin-top: 15px;">
+					<div class="col-md-12 text-right">
+						<p:commandButton type="button" value="No" styleClass="btn btn-default"
+							onclick="PF('dlgConfirmarActualizarReconocimiento').hide()" />
+						<p:commandButton value="Sí" styleClass="btn btn-primary" style="margin-left: 10px;"
+							actionListener="#{reconocimientoAsignaturasBean.actualizarRegistro}"
+							process="@this" update=":frmReconocimientoAsignaturas:msgs"
+							oncomplete="PF('dlgConfirmarActualizarReconocimiento').hide()" />
+					</div>
+				</div>
+			</p:confirmDialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

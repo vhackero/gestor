@@ -563,6 +563,19 @@
 														</h:commandLink></li>
 												</sec:authorize>
 											</ui:fragment>
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('REC_ASIGNATURAS')}">
+												<sec:authorize
+													access="hasPermission(null, 'REC_ASIGNATURAS') ">
+													<li><h:commandLink
+															action="#{menuGestorBean.navegaReconocimientoAsignaturas}"
+															title="#{sistema.obtenerTexto('gw.sidebar.reconocimientoAsignaturas')}">
+															<i class="fa fa-solid fa-id-card"></i>
+															<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.reconocimientoAsignaturas')}</span>
+
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
 
 
 

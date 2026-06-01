@@ -56,7 +56,10 @@ import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.GrupoParticip
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.GrupoRepo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IConvocatoriaRepository;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IHistorialAcademicoRepo;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.RelAsistenciaRepo;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.RelGpoEvaluacionRepo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.RelProgCompEspecificaRepo;
+import mx.gob.sedesol.basegestor.model.repositories.encuestas.RelEncuestaUsuarioRepo;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
 import mx.gob.sedesol.basegestor.service.admin.ComunValidacionService;
@@ -107,6 +110,15 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 	
 	@Autowired
 	private IHistorialAcademicoRepo iHistorialAcademicoRepo;
+
+	@Autowired
+	private RelEncuestaUsuarioRepo relEncuestaUsuarioRepo;
+
+	@Autowired
+	private RelGpoEvaluacionRepo relGpoEvaluacionRepo;
+
+	@Autowired
+	private RelAsistenciaRepo relAsistenciaRepo;
 	
 	
 
@@ -416,7 +428,11 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 			EventoCapacitacionDTO evento) {
 		ResultadoDTO<RelGrupoParticipanteDTO> resultado = new ResultadoDTO<>();
 		try {
+			relEncuestaUsuarioRepo.eliminarPorIdGrupoParticipante(participante.getId());
+			relGpoEvaluacionRepo.eliminaEvaluacionesByIdGrupoParticipante(participante.getId());
+			relAsistenciaRepo.eliminarPorIdGrupoParticipante(participante.getId());
 			grupoParticipanteRepo.delete(participante.getId());
+			grupoParticipanteRepo.flush();
 			resultado.agregaMensaje(MensajesSistemaEnum.ADMIN_MSG_ELIMINACION_EXITOSA.getId());
 
 			if (evento.getCatModalidadPlanPrograma().getId() == ConstantesGestor.MODALIDAD_LINEA
