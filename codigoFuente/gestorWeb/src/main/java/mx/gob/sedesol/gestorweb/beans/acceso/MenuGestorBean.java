@@ -454,6 +454,11 @@ public class MenuGestorBean extends BaseBean {
 			logger.info("Navegando a mis inscripciones");
 			return ConstantesGestorWeb.NAVEGA_MIS_INSCRIPCIONES;
 		}
+
+	public String navegaActualizacionCursoMoodle() {
+		logger.info("Navegando a actualizacion curso Moodle");
+		return ConstantesGestorWeb.NAVEGA_ACTUALIZACION_CURSO_MOODLE;
+	}
 		
 	//ITTIVA 666
 	public String navegaInscripcion() {
