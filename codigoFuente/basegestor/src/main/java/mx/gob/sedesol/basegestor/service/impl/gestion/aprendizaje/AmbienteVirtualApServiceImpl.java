@@ -51,6 +51,7 @@ import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.EventoCapacit
 import mx.gob.sedesol.basegestor.service.admin.CatalogoComunService;
 import mx.gob.sedesol.basegestor.service.admin.ComunValidacionService;
 import mx.gob.sedesol.basegestor.service.admin.PersonaService;
+import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.gestion.aprendizaje.AmbienteVirtualApService;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.CursoWS;
 import mx.gob.sedesol.basegestor.ws.moodle.clientes.service.client.LoginWS;
@@ -89,6 +90,9 @@ public class AmbienteVirtualApServiceImpl extends ComunValidacionService<Ambient
 	 */
 	@Autowired
 	private PersonaService personaService;
+
+	@Autowired
+	private ParametroSistemaService parametroSistemaService;
 
 	/**
 	 * Inyeccion de repo de evento de capacitacion
@@ -860,7 +864,9 @@ public class AmbienteVirtualApServiceImpl extends ComunValidacionService<Ambient
 
 		PersonaDTO personaDTO = personaService.buscarPorId(idPersona);
 
-		LoginWS loginWS = new LoginWS(parametroWSMoodleDTO);
+		String rutaPluginWSMoodle = parametroSistemaService
+				.obtenerParametro(ConstantesGestor.PARAMETRO_RUTA_PLUGIN_WSMOODLE);
+		LoginWS loginWS = new LoginWS(parametroWSMoodleDTO, rutaPluginWSMoodle);
 
 		try {
 			url = loginWS.generarAccesoMoodle(personaDTO.getUsuario(), personaDTO.getContrasenia(), idCurso);

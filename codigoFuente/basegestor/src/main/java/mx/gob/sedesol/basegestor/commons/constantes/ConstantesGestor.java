@@ -17,6 +17,7 @@ public final class ConstantesGestor {
 	public static final String PARAMETRO_RUTA_RECURSOS = "RUTA_RECURSOS";
 	public static final String PARAMETRO_RUTA_RECURSOS_PUBLICOS = "RUTA_RECURSOS_PUBLICOS";
 	public static final String PARAMETRO_URL_PUBLICA_RESPALDOS_MOODLE = "URL_PUBLICA_RESPALDOS_MOODLE";
+	public static final String PARAMETRO_RUTA_PLUGIN_WSMOODLE = "RUTA_PLUGIN_WSMOODLE";
 	public static final String PARAMETRO_RUTA_CARGA_MASIVA = "RUTA_CARGA_MASIVA";
 	
 	public static final String NOMBRE_DIRECTOR_GENERAL = "NOMBRE_DIRECTOR_GENERAL";
