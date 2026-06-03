@@ -1,0 +1,1 @@
+INSERT INTO `cat_parametros_sistema` VALUES ('RUTA_PLUGIN_WSMOODLE','/local/wsplataforma','2026-06-02 00:00:00',NOW(),1);

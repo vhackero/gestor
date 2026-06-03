@@ -527,13 +527,13 @@ INSERT INTO `cat_objeto_curricular` VALUES (2,'Plan','objeto curricular del tipo
 -- Dumping data for table `cat_parametros_sistema`
 --
 
-INSERT INTO `cat_parametros_sistema` VALUES ('NOMBRE_FOTO_COMUN','Usuario.png','2017-02-17 13:13:58','2017-02-17 13:14:19',39),('RUTA_ADJUNTOS','general/archivos_adjuntos','2014-12-24 11:13:28','2016-11-16 16:11:04',2),('RUTA_AREAS','areas/','2017-02-23 12:48:35',NULL,2),('RUTA_CARGA_MASIVA','general/cargar_masiva','2016-11-03 17:23:08','2016-11-16 16:11:12',2),('RUTA_FOTOS_USUARIOS','usuarios/','2017-02-17 13:13:23','2017-02-17 13:14:44',39),('RUTA_PRINCIPAL','/SISI/elearning/plataformaAprendizaje/','2016-11-03 13:41:41','2016-11-17 08:36:04',2),('RUTA_RECURSOS','mod_administracion/temas/recursos/','2016-11-03 17:03:40','2016-11-16 16:10:46',2),('RUTA_UNDERTOW','/recursos/','2017-02-17 13:30:14',NULL,39);
+INSERT INTO `cat_parametros_sistema` VALUES ('NOMBRE_FOTO_COMUN','Usuario.png','2017-02-17 13:13:58','2017-02-17 13:14:19',39),('RUTA_ADJUNTOS','general/archivos_adjuntos','2014-12-24 11:13:28','2016-11-16 16:11:04',2),('RUTA_AREAS','areas/','2017-02-23 12:48:35',NULL,2),('RUTA_CARGA_MASIVA','general/cargar_masiva','2016-11-03 17:23:08','2016-11-16 16:11:12',2),('RUTA_FOTOS_USUARIOS','usuarios/','2017-02-17 13:13:23','2017-02-17 13:14:44',39),('RUTA_PLUGIN_WSMOODLE','/local/wsplataforma','2026-06-02 00:00:00',NULL,1),('RUTA_PRINCIPAL','/SISI/elearning/plataformaAprendizaje/','2016-11-03 13:41:41','2016-11-17 08:36:04',2),('RUTA_RECURSOS','mod_administracion/temas/recursos/','2016-11-03 17:03:40','2016-11-16 16:10:46',2),('RUTA_RECURSOS_PUBLICOS','/opt/sigie/publico/','2026-05-27 00:00:00',NULL,1),('RUTA_UNDERTOW','/recursos/','2017-02-17 13:30:14',NULL,39),('URL_PUBLICA_RESPALDOS_MOODLE','http://localhost:8080/plataforma/ws/public/respaldos-moodle/','2026-05-27 00:00:00',NULL,1);
 
 --
 -- Dumping data for table `cat_parametros_wsmoodle`
 --
 
-INSERT INTO `cat_parametros_wsmoodle` (id_parametro_wsmoodle, host, path, service, username, password, outh, server, activo, fecha_registro, nombre) VALUES (1,'http://189.206.122.67/sedesol/plataformaElearning','/oauth/token','wstemplate','admin','elearning','/login/token.php','/webservice/rest/server.php', 1, CURDATE(), 'Moodle1');
+INSERT INTO `cat_parametros_wsmoodle` (id_parametro_wsmoodle, host, path, service, username, password, outh, server, activo, fecha_registro, nombre) VALUES (1,'http://189.206.122.67/sedesol/plataformaElearning','/oauth/token','wsplataforma','admin','elearning','/login/token.php','/webservice/rest/server.php', 1, CURDATE(), 'Moodle1');
 
 --
 -- Dumping data for table `cat_puestos_sedesol_ec`
@@ -783,4 +783,3 @@ INSERT INTO `cat_badges` (id_badge, id_clasificacion_badge, calificacion_maxima,
 INSERT INTO `cat_badges` (id_badge, id_clasificacion_badge, calificacion_maxima, calificacion_minima, nombre, descripcion, ruta_imagen, fecha_registro, id_estatus) VALUES (2, 1, 89, 80, 'Plata','Aqui la descripcion de los criterios', '/tmp/img/ejemplo', CURDATE(), 1);
 
 INSERT INTO `cat_badges` (id_badge, id_clasificacion_badge, calificacion_maxima, calificacion_minima, nombre, descripcion, ruta_imagen, fecha_registro, id_estatus) VALUES (3, 1, 79, 0, 'Sin badge','Aqui la descripcion de los criterios', '/tmp/img/ejemplo', CURDATE(), 1);
-

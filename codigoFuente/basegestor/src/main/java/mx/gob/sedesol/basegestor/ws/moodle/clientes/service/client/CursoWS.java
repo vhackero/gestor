@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -397,6 +398,27 @@ public class CursoWS {
                 logger.info(respuesta);
                 return respuesta;
         }
+
+	public String restauracionMasivaCurso(String mbzFilename, String mbzUrl, Integer userId, String mode,
+			List<Integer> courseIds) throws ErrorWS {
+		HashMap<String, Object> paramMap = new LinkedHashMap<>();
+		paramMap.put("mbzfilename", mbzFilename);
+		paramMap.put("userid", userId);
+		paramMap.put("mode", mode);
+		paramMap.put("mbzurl", mbzUrl);
+		paramMap.put("data[users]", 0);
+		paramMap.put("data[enrolments]", 0);
+		paramMap.put("data[activities]", 1);
+		paramMap.put("data[blocks]", 1);
+		for (int i = 0; i < courseIds.size(); i++) {
+			paramMap.put("courseids[" + i + "]", courseIds.get(i));
+		}
+		WSClientBase ws = new WSClientBase(parametroWSMoodleDTO);
+		String respuesta = ws.ejecutarServicioPOST("local_actions_mass_restore_courses", paramMap, null,
+				String.class);
+		logger.info(respuesta);
+		return respuesta;
+	}
     
     
     

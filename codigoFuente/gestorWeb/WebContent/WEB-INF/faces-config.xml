@@ -632,6 +632,12 @@
 			<to-view-id>/views/private/gestionEscolar/reconocimientoAsignaturas.xhtml</to-view-id>
 			<redirect />
 		</navigation-case>
+    
+    <navigation-case>
+      <from-outcome>ACTUALIZACION_CURSO_MOODLE</from-outcome>
+			<to-view-id>/views/private/gestionEscolar/actualizacionCursoMoodle.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
 
 		<!-- ITTIVA 666 MIS INSCRIPCION -->
 		<navigation-case>
