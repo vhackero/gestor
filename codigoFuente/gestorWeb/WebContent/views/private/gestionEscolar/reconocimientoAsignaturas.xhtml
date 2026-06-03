@@ -19,6 +19,22 @@
 
 			<p:messages id="msgs" closable="true" showDetail="true" severity="info,warn,error,fatal" />
 
+			<style type="text/css">
+				.confirmacion-reconocimiento .ui-dialog-content {
+					padding: 18px 22px;
+				}
+
+				.confirmacion-reconocimiento-mensaje {
+					display: block;
+					line-height: 1.45;
+					margin-bottom: 16px;
+				}
+
+				.fa-cancel:before {
+					content: "\f05e";
+				}
+			</style>
+
 			<p:panel header="Reconocimiento de asignaturas" styleClass="panel-default">
 				<div class="row">
 					<div class="col-md-4 col-xs-12">
@@ -42,7 +58,9 @@
 							<f:selectItems value="#{reconocimientoAsignaturasBean.numerosElementos}" />
 						</p:selectOneMenu>
 					</div>
-					<div class="col-md-3 col-xs-12 text-right" style="margin-top: 27px;">
+				</div>
+				<div class="row" style="margin-top: 18px;">
+					<div class="col-md-12 text-right">
 						<p:commandButton value="Limpiar campos" styleClass="btn btn-default"
 							actionListener="#{reconocimientoAsignaturasBean.limpiar}" update="@form" process="@this" />
 						<p:commandButton value="Buscar" styleClass="btn btn-primary" style="margin-left: 10px;"
@@ -113,7 +131,7 @@
 							process="@this" update=":frmReconocimientoAsignaturas:msgs" style="margin-left: 12px;"
 							oncomplete="PF('dlgConfirmarActualizarReconocimiento').show()">
 							<f:setPropertyActionListener target="#{reconocimientoAsignaturasBean.filaSeleccionada}" value="#{resultado}" />
-							<i class="fa fa-pencil"></i>
+							<i class="fa fa-cancel"></i>
 						</p:commandLink>
 					</p:column>
 				</p:dataTable>
@@ -122,7 +140,8 @@
 			<p:confirmDialog id="dlgEliminarReconocimiento"
 				widgetVar="dlgConfirmarEliminarReconocimiento" resizable="false"
 				responsive="true" modal="true" draggable="false" position="center"
-				closable="false" header="Confirmación">
+				closable="false" header="Confirmación"
+				styleClass="confirmacion-reconocimiento" width="420">
 				<div class="row">
 					<div class="col-md-12">
 						<h:outputText value="¿Estás seguro de eliminar el registro en moodle?" />
@@ -143,7 +162,8 @@
 			<p:confirmDialog id="dlgActualizarReconocimiento"
 				widgetVar="dlgConfirmarActualizarReconocimiento" resizable="false"
 				responsive="true" modal="true" draggable="false" position="center"
-				closable="false" header="Confirmación">
+				closable="false" header="Confirmación"
+				styleClass="confirmacion-reconocimiento" width="420">
 				<div class="row">
 					<div class="col-md-12">
 						<h:outputText value="¿Estas seguro que quieres actualizar el registro?" />
