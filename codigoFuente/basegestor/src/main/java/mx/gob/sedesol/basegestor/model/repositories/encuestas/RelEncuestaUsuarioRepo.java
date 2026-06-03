@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -128,4 +129,8 @@ public interface RelEncuestaUsuarioRepo extends JpaRepository<RelEncuestaUsuario
 		   " AND et.id =1"+
 		   " AND eve.idPrograma =:idPrograma")
 	List<RelEncuestaUsuario> obtenerParticipantesEncuestasPorPrograma(@Param("idPrograma") Integer idPrograma);
+
+	@Modifying(clearAutomatically = true)
+	@Query("DELETE FROM RelEncuestaUsuario eu WHERE eu.idGrupoParticipante = :idGrupoParticipante")
+	void eliminarPorIdGrupoParticipante(@Param("idGrupoParticipante") Integer idGrupoParticipante);
 }

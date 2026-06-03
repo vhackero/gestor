@@ -448,6 +448,11 @@ public class MenuGestorBean extends BaseBean {
 			logger.info("Navegando a mis matriculaciones");
 			return ConstantesGestorWeb.NAVEGA_MIS_MATRICULACIONES;
 		}
+
+		public String navegaReconocimientoAsignaturas() {
+			logger.info("Navegando a reconocimiento de asignaturas");
+			return ConstantesGestorWeb.NAVEGA_RECONOCIMIENTO_ASIGNATURAS;
+		}
 	
 	//ITTIVA 666
 		public String navegaMisInscripciones() {

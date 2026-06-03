@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -31,6 +32,10 @@ public interface RelAsistenciaRepo extends JpaRepository<RelAsistencia, Integer>
 			+ " GROUP BY evt.id")
 	public List<GroupByGestionEscolarDTO> obtenerAsistenciaAgrupadaPorEventoCapacitacion(@Param("idEventoCapacitacionList")List<Integer> 
 		idEventoCapacitacionList,@Param("idTipoAsistencia")Integer idTipoAsistencia);
+
+	@Modifying(clearAutomatically = true)
+	@Query("DELETE FROM RelAsistencia asis WHERE asis.idGrupoParticipante = :idGrupoParticipante")
+	void eliminarPorIdGrupoParticipante(@Param("idGrupoParticipante") Integer idGrupoParticipante);
 	
 	
 }
