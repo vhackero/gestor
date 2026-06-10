@@ -317,6 +317,10 @@ public class DispersionesBean extends BaseBean {
 		dispersionNuevo.setEstudiantesGrupo(editarDispersion.getCupoGeneral());
 		dispersionNuevo.setGrupoResto(editarDispersion.getGrupoResto());
 		dispersionNuevo.setCupoResto(editarDispersion.getCupoResto());
+		List<TblDispersionesBusqueda> dispersionActualizada = dispersionesService.actualizarDispersion(dispersionNuevo);
+		if (dispersionActualizada != null && !dispersionActualizada.isEmpty()) {
+			editarDispersion.setNoEstudiantes(dispersionActualizada.get(0).getNoEstudiantes());
+		}
 		
 			asegurarValorEnLista(listaGrupoGeneral, dispersionNuevo.getNoGrupos());
 			asegurarValorEnLista(listaCupoGeneral, dispersionNuevo.getEstudiantesGrupo());
@@ -484,10 +488,7 @@ public class DispersionesBean extends BaseBean {
 		}
 		sumTotal = (dispersionNuevo.getNoGrupos() * dispersionNuevo.getEstudiantesGrupo())
 				+ (dispersionNuevo.getGrupoResto() * dispersionNuevo.getCupoResto());
-		Integer totalRegistrado = editarDispersion != null ? editarDispersion.getNoEstudiantes() : null;
-		if (totalRegistrado == null) {
-			totalRegistrado = lista.get(0).getNoEstudiantes();
-		}
+		Integer totalRegistrado = lista.get(0).getNoEstudiantes();
 		if (sumTotal != null && totalRegistrado != null && sumTotal > 0 && sumTotal <= totalRegistrado) {
 			boolean actualizada = dispersionesService.actualizarDispersionExc(dispersionNuevo);
 			if (actualizada) {

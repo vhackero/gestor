@@ -178,7 +178,14 @@ public class DispersionesRepository implements IDispersionesRepository {
 				+ "    tbd.id_dispersion, rpi.id_plan, tp.nombre plan, fd.id_programa,\r\n"
 				+ "    fd.nombre_tentativo programa, fd.identificador_final clave,\r\n"
 				+ "    IF((SELECT tmc2.nombre FROM tbl_malla_curricular tmc2 WHERE tmc2.id = tmc.id_padre ) IS NOT NULL, (SELECT tmc2.nombre FROM tbl_malla_curricular tmc2 WHERE tmc2.id = tmc.id_padre ), '')semestre ,\r\n"
-				+ "    tmc.nombre bloque, tbd.no_total_estudiantes, tbd.no_grupos,\r\n"
+				+ "    tmc.nombre bloque,\r\n"
+				+ "    COALESCE((SELECT COUNT(ti.id)\r\n"
+				+ "                FROM tbl_inscripciones ti\r\n"
+				+ "               WHERE ti.idplan = rpi.id_plan\r\n"
+				+ "                 AND ti.idprograma = rpi.id_programa\r\n"
+				+ "                 AND ti.fecha_registro >= tpi.fecha_inicio\r\n"
+				+ "                 AND ti.fecha_registro <= tpi.fecha_fin), tbd.no_total_estudiantes) no_total_estudiantes,\r\n"
+				+ "    tbd.no_grupos,\r\n"
 				+ "    tbd.estudiantes_x_grupo, tbd.grupo_resto, tbd.estudiantes_resto,\r\n"
 				+ "    tbd.tipo_matriculacion,\r\n"
 				+ "    COALESCE((SELECT COUNT(DISTINCT rdg.id_grupo) FROM rel_dispersiones_grupo rdg WHERE rdg.id_dispersion = tbd.id_dispersion), 0) grupos_creados,\r\n"
@@ -296,8 +303,20 @@ public class DispersionesRepository implements IDispersionesRepository {
 		
 		List<TblDispersionesBusqueda> lista = new ArrayList<TblDispersionesBusqueda>();
 		
-		String consultarDispersionId = "SELECT dis.id_dispersion, dis.no_grupos, dis.estudiantes_x_grupo, dis.grupo_resto, dis.estudiantes_resto, dis.no_total_estudiantes FROM tbl_dispersiones dis " +
-				"	WHERE dis.id_dispersion = :idDispersion ";
+		String consultarDispersionId = "SELECT dis.id_dispersion, dis.no_grupos, dis.estudiantes_x_grupo, dis.grupo_resto, dis.estudiantes_resto, "
+				+ "COALESCE((SELECT COUNT(ti.id) "
+				+ "           FROM tbl_inscripciones ti "
+				+ "           JOIN rel_proceso_inscipcion_planesyprogramas rpi "
+				+ "             ON rpi.id_proceso_inscripcion = dis.id_proceso_inscripcion "
+				+ "            AND rpi.id_programa = dis.id_programa "
+				+ "            AND rpi.id_plan = ti.idplan "
+				+ "           JOIN tbl_procesos_inscripcion tpi "
+				+ "             ON tpi.proceso_inscripcion_id = dis.id_proceso_inscripcion "
+				+ "          WHERE ti.idprograma = dis.id_programa "
+				+ "            AND ti.fecha_registro >= tpi.fecha_inicio "
+				+ "            AND ti.fecha_registro <= tpi.fecha_fin), dis.no_total_estudiantes) no_total_estudiantes "
+				+ "FROM tbl_dispersiones dis "
+				+ "WHERE dis.id_dispersion = :idDispersion ";
 		
 		
 		
