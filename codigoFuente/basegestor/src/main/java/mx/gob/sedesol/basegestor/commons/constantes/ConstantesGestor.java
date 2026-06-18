@@ -219,6 +219,7 @@ public final class ConstantesGestor {
 	public static final Integer MATERIA_APROBADA = 1;
 	public static final int NUMERO_MAXIMO_MATERIAS_REPROBADAS = 4;
 	public static final String NUMERO_PRIMER_ESTRUCTURA = "1";
+	public static final String NUMERO_SEGUNDA_ESTRUCTURA = "2";
 	public static final String ESPACIO_EN_BLANCO = " ";
 	public static final Double PORCENTAJE_CREDITOS_REQUERIDOS_SEPTIMO_SEMESTRE = 50.00;
 	public static final int SEXTO_SEMESTRE = 6;
