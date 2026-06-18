@@ -1396,7 +1396,11 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			List<InscripcionMateriasDTO> materiasPorPeriodoInscripcion) {
 		List<InscripcionMateriasDTO> materiasPrimerPeriodo = obtenerMateriasDelPrimerPeriodo(
 				materiasPorPeriodoInscripcion);
-		return marcarMateriasObligatorias(materiasPrimerPeriodo);
+		if (!materiasPrimerPeriodo.isEmpty()) {
+			return marcarMateriasObligatorias(materiasPrimerPeriodo);
+		}
+
+		return marcarMateriasObligatorias(obtenerMateriasDelSegundoPeriodo(materiasPorPeriodoInscripcion));
 	}
 
 	private List<InscripcionMateriasDTO> marcarMateriasObligatorias(
@@ -1419,9 +1423,19 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	 */
 	private List<InscripcionMateriasDTO> obtenerMateriasDelPrimerPeriodo(
 			List<InscripcionMateriasDTO> materiasPorPeriodoInscripcion) {
+		return obtenerMateriasDelPeriodo(materiasPorPeriodoInscripcion, ConstantesGestor.NUMERO_PRIMER_ESTRUCTURA);
+	}
+
+	private List<InscripcionMateriasDTO> obtenerMateriasDelSegundoPeriodo(
+			List<InscripcionMateriasDTO> materiasPorPeriodoInscripcion) {
+		return obtenerMateriasDelPeriodo(materiasPorPeriodoInscripcion, ConstantesGestor.NUMERO_SEGUNDA_ESTRUCTURA);
+	}
+
+	private List<InscripcionMateriasDTO> obtenerMateriasDelPeriodo(
+			List<InscripcionMateriasDTO> materiasPorPeriodoInscripcion, String numeroPeriodo) {
 		return materiasPorPeriodoInscripcion.stream().filter(materia -> {
 			String numeroSemestre = obtenerNumeroSemestre(materia);
-			return numeroSemestre.equalsIgnoreCase(ConstantesGestor.NUMERO_PRIMER_ESTRUCTURA);
+			return numeroSemestre.equalsIgnoreCase(numeroPeriodo);
 		}).collect(Collectors.toList());
 	}
 
