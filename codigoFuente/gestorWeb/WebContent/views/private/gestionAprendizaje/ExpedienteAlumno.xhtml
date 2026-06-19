@@ -180,6 +180,14 @@
 			<div class="form-group">
 				<div class="row">
 					<div class="col-md-12 text-right">
+						<p:commandButton value="Malla curricular"
+							styleClass="btn btn-primary"
+							action="#{expedienteAlumnoBean.navegaMallaCurricularAlumno}"
+							ajax="false" style="margin-right:10px;" />
+						<p:commandButton value="Asistente curricular"
+							styleClass="btn btn-primary"
+							action="#{expedienteAlumnoBean.navegaAsistenteCurricular}"
+							ajax="false" style="margin-right:10px;" />
 						<p:commandButton value="Regresar"
 							styleClass="btn btn-default pull-right"
 							action="#{expedienteAlumnoBean.cancelar}" />

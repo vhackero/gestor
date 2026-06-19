@@ -30,6 +30,7 @@ import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.NotificacionesBean;
 import mx.gob.sedesol.gestorweb.beans.analisisdatos.ReporteGestionEscolarBean;
 import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.ExpedienteAlumnoBean;
+import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.TrayectoriaAcademicaContextoBean;
 import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview.ConstanciasBean;
 import mx.gob.sedesol.gestorweb.beans.gestionescolar.EventoCapacitacionBean;
 import mx.gob.sedesol.gestorweb.beans.logisticainfraestructura.AreasBean;
@@ -78,6 +79,9 @@ public class MenuGestorBean extends BaseBean {
 	
 	@ManagedProperty("#{expedienteAlumnoBean}")
 	private ExpedienteAlumnoBean expedienteAlumnoBean;
+
+	@ManagedProperty("#{trayectoriaAcademicaContextoBean}")
+	private TrayectoriaAcademicaContextoBean trayectoriaAcademicaContextoBean;
 	
 	private List<RolDTO> roles;
 	private Integer idRol;
@@ -501,44 +505,69 @@ public class MenuGestorBean extends BaseBean {
 
 	public String navegaConstancias() {
 		logger.info("Navegando a constacias");
+		if (!esRolEstudianteActivo()) {
+			prepararConsultaGestorPorMatricula();
+			return ConstantesGestorWeb.NAVEGA_BUSCAR_EXPEDIENTE_ALUMNO;
+		}
+		PersonaDTO persona = personaService.buscarPorId(getUsuarioEnSession().getIdPersona());
+		trayectoriaAcademicaContextoBean.configurarAlumnoSesion(persona, getUsuarioEnSession());
 		inicializaExpedienteAcademico();
 		return ConstantesGestorWeb.NAVEGA_CONSTANCIAS;
 	}
 
 	public String navegaMallaCurricularAlumno() {
 		logger.info("Navegando a malla curricular del estudiante");
+		if (!esRolEstudianteActivo()) {
+			prepararConsultaGestorPorMatricula();
+			return ConstantesGestorWeb.NAVEGA_BUSCAR_EXPEDIENTE_ALUMNO;
+		}
+		PersonaDTO persona = personaService.buscarPorId(getUsuarioEnSession().getIdPersona());
+		trayectoriaAcademicaContextoBean.configurarAlumnoSesion(persona, getUsuarioEnSession());
 		return ConstantesGestorWeb.NAVEGA_MALLA_CURRICULAR_ALUMNO;
 	}
 
 	public String navegaTablaCurricularAsistida() {
 		logger.info("Navegando a asistente de inscripción curricular");
+		if (!esRolEstudianteActivo()) {
+			prepararConsultaGestorPorMatricula();
+			return ConstantesGestorWeb.NAVEGA_BUSCAR_EXPEDIENTE_ALUMNO;
+		}
+		PersonaDTO persona = personaService.buscarPorId(getUsuarioEnSession().getIdPersona());
+		trayectoriaAcademicaContextoBean.configurarAlumnoSesion(persona, getUsuarioEnSession());
 		return ConstantesGestorWeb.NAVEGA_TABLA_CURRICULAR_ASISTIDA;
 	}
 
 	public String navegaExpedienteAlumoBuscar() {
 		logger.info("Navegando a Expedientes Academicos Busqueda o expediente alumno");
-		
-//		roles = new ArrayList<>();
-//		List<PersonaRolDTO> rolesPersona = personaRolesService
-//				.obtieneRelPersonaRolesPorUsuario(getUsuarioEnSession().getUsuario());
-//
-//		for (PersonaRolDTO personaRol : rolesPersona) {
-//			roles.add(personaRol.getRol());
-//		}
-//		
-//		
-//		if("Estudiante".equals(roles.get(0).getNombre())) {
-//			
-//			PersonaDTO persona = personaService.buscarPorId(getUsuarioEnSession().getIdPersona());
-//	
-//			return expedienteAlumnoBean.navegaExpedienteAlumno2(persona);			
-//			
-//		}else {
-			
-			return ConstantesGestorWeb.NAVEGA_BUSCAR_EXPEDIENTE_ALUMNO;
-			
-		//}
+		if (esRolEstudianteActivo()) {
+			PersonaDTO persona = personaService.buscarPorId(getUsuarioEnSession().getIdPersona());
+			trayectoriaAcademicaContextoBean.configurarAlumnoSesion(persona, getUsuarioEnSession());
+			return expedienteAlumnoBean.navegaExpedienteAlumno2(persona);
+		}
+		prepararConsultaGestorPorMatricula();
+		return ConstantesGestorWeb.NAVEGA_BUSCAR_EXPEDIENTE_ALUMNO;
 
+	}
+
+	private void prepararConsultaGestorPorMatricula() {
+		trayectoriaAcademicaContextoBean.limpiar();
+		if (expedienteAlumnoBean != null) {
+			expedienteAlumnoBean.setPersonaDTO(null);
+			expedienteAlumnoBean.setListaEventos(null);
+			expedienteAlumnoBean.setHistorial(null);
+		}
+	}
+
+	private boolean esRolEstudianteActivo() {
+		if (ObjectUtils.isNullOrEmpty(roles)) {
+			return false;
+		}
+		for (RolDTO rol : roles) {
+			if (rol != null && rol.getIdRol() != null && rol.getIdRol().equals(idRol)) {
+				return "Estudiante".equalsIgnoreCase(rol.getNombre());
+			}
+		}
+		return roles.get(0) != null && "Estudiante".equalsIgnoreCase(roles.get(0).getNombre());
 	}
 
 	public String navegaExpedienteGrupo() {
@@ -729,6 +758,14 @@ public class MenuGestorBean extends BaseBean {
 
 	public void setExpedienteAlumnoBean(ExpedienteAlumnoBean expedienteAlumnoBean) {
 		this.expedienteAlumnoBean = expedienteAlumnoBean;
+	}
+
+	public TrayectoriaAcademicaContextoBean getTrayectoriaAcademicaContextoBean() {
+		return trayectoriaAcademicaContextoBean;
+	}
+
+	public void setTrayectoriaAcademicaContextoBean(TrayectoriaAcademicaContextoBean trayectoriaAcademicaContextoBean) {
+		this.trayectoriaAcademicaContextoBean = trayectoriaAcademicaContextoBean;
 	}
 
 }

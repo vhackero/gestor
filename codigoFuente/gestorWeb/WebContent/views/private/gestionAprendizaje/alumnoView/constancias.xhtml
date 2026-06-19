@@ -12,7 +12,92 @@
 	<ui:define name="content">
 		<f:event type="preRenderView" listener="#{constanciasBean.init}" />
 		<h:form>
-			<h1>#{sistema.obtenerTexto('gw.alumno.constancias.historial')}</h1>
+			<style type="text/css">
+				.historial-context-strip {
+					display: flex;
+					flex-wrap: wrap;
+					gap: 10px;
+					margin: 0 0 18px;
+				}
+				.historial-page-title {
+					margin: 0 0 8px;
+					font-size: 30px;
+					font-weight: 700;
+					color: #3b3b3b;
+				}
+				.historial-context-chip {
+					background: #eef4f6;
+					border: 1px solid #cadbe2;
+					border-radius: 999px;
+					color: #425861;
+					font-size: 13px;
+					font-weight: 600;
+					padding: 8px 14px;
+				}
+				.historial-context-chip.main {
+					background: #5f97a8;
+					border-color: #5f97a8;
+					color: #ffffff;
+				}
+				.historial-context-chip.mode {
+					background: #ffffff;
+					border-color: #95b8c5;
+					color: #2f5563;
+				}
+				.historial-context-chip.state {
+					background: #fdf6de;
+					border-color: #ead48e;
+					color: #6e5620;
+				}
+				.historial-context-copy {
+					color: #6a6f75;
+					font-size: 15px;
+					line-height: 1.45;
+					margin-bottom: 18px;
+				}
+				.historial-actions {
+					margin-bottom: 18px;
+					text-align: right;
+				}
+				.historial-role-box {
+					background: #f7fafb;
+					border: 1px solid #d5e3e8;
+					border-left: 4px solid #5f97a8;
+					border-radius: 8px;
+					color: #425861;
+					margin: 0 0 18px;
+					padding: 14px 16px;
+				}
+				.historial-role-title {
+					display: block;
+					font-size: 13px;
+					font-weight: 700;
+					letter-spacing: .04em;
+					margin-bottom: 4px;
+					text-transform: uppercase;
+				}
+			</style>
+			<h1 class="historial-page-title">#{constanciasBean.tituloVistaHistorial}</h1>
+			<div class="historial-context-strip">
+				<span class="historial-context-chip main">#{constanciasBean.etiquetaPeriodoContextual}</span>
+				<span class="historial-context-chip mode">Modo: #{constanciasBean.etiquetaModoContextual}</span>
+				<span class="historial-context-chip state">Periodo: #{constanciasBean.etiquetaEstadoPeriodo}</span>
+				<span class="historial-context-chip">Estudiante: #{constanciasBean.nombrePersonaObjetivo}</span>
+				<span class="historial-context-chip">Matrícula: #{constanciasBean.matriculaPersonaObjetivo}</span>
+			</div>
+			<div class="historial-context-copy">#{constanciasBean.mensajeContextualHistorial}</div>
+			<div class="historial-role-box">
+				<span class="historial-role-title">#{constanciasBean.etiquetaRolHistorial}</span>
+				<div>#{constanciasBean.mensajeTransicionAsistente}</div>
+			</div>
+			<div class="historial-actions">
+				<p:commandButton value="Malla curricular"
+					action="#{constanciasBean.navegaMallaCurricularAlumno}"
+					ajax="false" styleClass="btn btn-primary" style="margin-right:10px;" />
+				<p:commandButton value="Asistente curricular"
+					action="#{constanciasBean.navegaAsistenteCurricular}"
+					ajax="false" styleClass="btn btn-primary" />
+			</div>
 			<hr />
 
 			<p:panel header="#{sistema.obtenerTexto('gw.alumno.constancias.historialEstudiante')}">

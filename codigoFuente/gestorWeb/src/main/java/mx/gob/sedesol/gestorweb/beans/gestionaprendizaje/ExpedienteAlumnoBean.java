@@ -56,6 +56,9 @@ public class ExpedienteAlumnoBean extends BaseBean {
 	
 	@ManagedProperty("#{constanciasBean}")
 	ConstanciasBean constanciasBean;
+
+	@ManagedProperty("#{trayectoriaAcademicaContextoBean}")
+	private TrayectoriaAcademicaContextoBean trayectoriaAcademicaContextoBean;
 	
 	public ConstanciasBean getConstanciasBean() {
 		return constanciasBean;
@@ -63,6 +66,14 @@ public class ExpedienteAlumnoBean extends BaseBean {
 
 	public void setConstanciasBean(ConstanciasBean constanciasBean) {
 		this.constanciasBean = constanciasBean;
+	}
+
+	public TrayectoriaAcademicaContextoBean getTrayectoriaAcademicaContextoBean() {
+		return trayectoriaAcademicaContextoBean;
+	}
+
+	public void setTrayectoriaAcademicaContextoBean(TrayectoriaAcademicaContextoBean trayectoriaAcademicaContextoBean) {
+		this.trayectoriaAcademicaContextoBean = trayectoriaAcademicaContextoBean;
 	}
 
 	private List<EventoConstanciaDTO> eventos;
@@ -139,8 +150,8 @@ public class ExpedienteAlumnoBean extends BaseBean {
 	}
 
 	public String navegaExpedienteAlumno() {
-	
 		Long id = personaDTO.getIdPersona();
+		prepararContextoConsultaGestor();
 		
 		log.info("id persona xxx : " + id);
 		
@@ -159,6 +170,38 @@ public class ExpedienteAlumnoBean extends BaseBean {
 
 		//return ConstantesGestorWeb.NAVEGA_EXPEDIENTE_ALUMNO;
 		
+	}
+
+	private void prepararContextoConsultaGestor() {
+		trayectoriaAcademicaContextoBean.configurarConsultaGestor(personaDTO);
+	}
+
+	public void prepararHubEstudianteGestor(PersonaDTO persona) {
+		if (persona == null || persona.getIdPersona() == null) {
+			return;
+		}
+		this.personaDTO = persona;
+		prepararContextoConsultaGestor();
+		Long id = persona.getIdPersona();
+		listaEventos = constanciasBean.getEventosAdmin(id);
+		historial = constanciasBean.getHistorialAdmin(id);
+	}
+
+	public String navegaHubTrayectoriaEstudiante() {
+		prepararHubEstudianteGestor(personaDTO);
+		return ConstantesGestorWeb.NAVEGA_HUB_TRAYECTORIA_ESTUDIANTE;
+	}
+
+	public String navegaMallaCurricularAlumno() {
+		trayectoriaAcademicaContextoBean.limpiarContextoAsistente();
+		prepararContextoConsultaGestor();
+		return ConstantesGestorWeb.NAVEGA_MALLA_CURRICULAR_ALUMNO;
+	}
+
+	public String navegaAsistenteCurricular() {
+		trayectoriaAcademicaContextoBean.configurarContextoAsistenteDesdeHistorial();
+		prepararContextoConsultaGestor();
+		return ConstantesGestorWeb.NAVEGA_TABLA_CURRICULAR_ASISTIDA;
 	}
 
 	public void generarReporte() {
@@ -239,6 +282,10 @@ public class ExpedienteAlumnoBean extends BaseBean {
 		return listaEventos;
 	}
 
+	public int getTotalEventosTrayectoria() {
+		return listaEventos != null ? listaEventos.size() : 0;
+	}
+
 	public void setListaEventos(List<EventoConstanciaDTO> listaEventos) {
 		this.listaEventos = listaEventos;
 	}
@@ -254,6 +301,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 	public String navegaExpedienteAlumno2(PersonaDTO persona) {
 		
 		personaDTO = persona;
+		trayectoriaAcademicaContextoBean.configurarConsultaGestor(personaDTO);
 		
 		eventos = grupoParticipanteService.getParticipanteByActaCerradaYconstancia(personaDTO.getIdPersona());
 		

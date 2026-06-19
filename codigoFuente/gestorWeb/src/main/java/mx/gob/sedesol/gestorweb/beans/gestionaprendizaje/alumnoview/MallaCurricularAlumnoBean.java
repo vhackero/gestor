@@ -20,21 +20,26 @@ import javax.faces.bean.ViewScoped;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.inscripcion.InscripcionPreviaMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.MallaCurricularDTO;
+import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ObjetoCurricularEnum;
+import mx.gob.sedesol.basegestor.service.gestionescolar.AsistenteInscripcionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
 import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasService;
 import mx.gob.sedesol.basegestor.service.impl.planesyprogramas.FECServiceFacade;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
+import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.TrayectoriaAcademicaContextoBean;
 import mx.gob.sedesol.gestorweb.commons.dto.MallaDiagramaNodoDTO;
 import mx.gob.sedesol.gestorweb.commons.dto.MallaDiagramaTipoDTO;
 
@@ -105,6 +110,12 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	@ManagedProperty(value = "#{grupoParticipanteService}")
 	private GrupoParticipanteService grupoParticipanteService;
 
+	@ManagedProperty(value = "#{asistenteInscripcionServiceImpl}")
+	private AsistenteInscripcionService asistenteInscripcionService;
+
+	@ManagedProperty(value = "#{trayectoriaAcademicaContextoBean}")
+	private TrayectoriaAcademicaContextoBean trayectoriaAcademicaContextoBean;
+
 	private List<MallaDiagramaNodoDTO> nodos;
 	private int diagramWidth;
 	private int diagramHeight;
@@ -126,6 +137,12 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private Integer bloqueEnCurso;
 	private String estatusEstudiante;
 	private List<SemestreTablaDTO> semestresTabla;
+	private Long idPersonaObjetivo;
+	private boolean vistaGestor;
+	private String nombrePersonaObjetivo;
+	private String matriculaPersonaObjetivo;
+	private AsistenteInscripcionContextoDTO contextoAsistente;
+	private Map<Long, UnidadDecisionInscripcionDTO> unidadesAsistentePorPrograma;
 
 	@PostConstruct
 	public void init() {
@@ -146,8 +163,14 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		bloqueEnCurso = null;
 		estatusEstudiante = "Regular";
 		semestresTabla = new ArrayList<>();
+		unidadesAsistentePorPrograma = new HashMap<>();
 
-		Long idPersona = idPersonaEnSesion();
+		Long idPersona = trayectoriaAcademicaContextoBean.resolverIdPersonaObjetivo(idPersonaEnSesion());
+		idPersonaObjetivo = idPersona;
+		vistaGestor = trayectoriaAcademicaContextoBean.isVistaGestor();
+		nombrePersonaObjetivo = trayectoriaAcademicaContextoBean.resolverNombreObjetivo(getUsuarioEnSession().getUsuario());
+		matriculaPersonaObjetivo = trayectoriaAcademicaContextoBean.resolverMatriculaObjetivo(getUsuarioEnSession().getUsuario());
+		cargarContextoAsistente(idPersona);
 		InscripcionPersonaDTO inscripcion = inscripcionService.obtenerInscripcionPorPersona(String.valueOf(idPersona));
 		if (inscripcion == null || inscripcion.getIdPlan() == null) {
 			logger.warn("No se encontro plan de estudios para el alumno en sesion.");
@@ -167,6 +190,27 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		cargarUbicacionesHistoricasOptativas(idPersona);
 		ajustarSemestreReferenciaPorTrayectoria(idPersona);
 		construirModelo(raiz, idPersona);
+	}
+
+	private void cargarContextoAsistente(Long idPersona) {
+		if (asistenteInscripcionService == null || idPersona == null) {
+			return;
+		}
+		try {
+			contextoAsistente = asistenteInscripcionService.obtenerContextoAsistido(idPersona);
+			if (contextoAsistente == null || ObjectUtils.isNullOrEmpty(contextoAsistente.getUnidades())) {
+				return;
+			}
+			for (UnidadDecisionInscripcionDTO unidad : contextoAsistente.getUnidades()) {
+				if (unidad != null && unidad.getUdId() != null) {
+					unidadesAsistentePorPrograma.put(unidad.getUdId(), unidad);
+				}
+			}
+		} catch (InscripcionException e) {
+			logger.warn("No fue posible cargar el contexto asistido para la malla curricular.", e);
+		} catch (Exception e) {
+			logger.warn("Error inesperado al cargar el contexto asistido para la malla curricular.", e);
+		}
 	}
 
 	private void cargarInscripcionesEnCurso(Long idPersona) {
@@ -352,9 +396,12 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 							idPrograma);
 					programaNodo.setCreditos(programa.getCreditos());
 					programaNodo.setTextoCompacto(resolveTextoCompacto(programa, nombrePrograma));
+					programaNodo.setProgramaId(idPrograma);
+					programaNodo.setClavePrograma(StringUtils.defaultIfBlank(programa.getCvePrograma(), "N/A"));
 					if (estaProgramaEnCurso(programa, nombrePrograma, numeroSemestre, numeroBloque)) {
 						programaNodo.setEnCurso(true);
 					}
+					enriquecerDetalleContextual(programaNodo, idPrograma, programa);
 					acumularCreditos(programa.getTipo(), programa.getCreditos(),
 							estatusPorPrograma.get(idPrograma));
 					nodos.add(programaNodo);
@@ -444,6 +491,74 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			return "En curso";
 		}
 		return StringUtils.defaultString(estatus, "N/A");
+	}
+
+	private void enriquecerDetalleContextual(MallaDiagramaNodoDTO programaNodo, Integer idPrograma,
+			FichaDescProgramaDTO programa) {
+		if (programaNodo == null) {
+			return;
+		}
+		programaNodo.setDetalleTipoUd(programa != null ? programa.getTipo() : null);
+		programaNodo.setDetalleEstatusHistorico(resolveEstatusTabla(programaNodo.getEstatus()));
+		programaNodo.setDetalleEstatusPeriodo(resolveEstatusPeriodoContextual(programaNodo));
+		programaNodo.setDetalleMotivoPrincipal("Consulta el asistente curricular para interpretar esta UD dentro del escenario activo.");
+		programaNodo.setDetalleAccionSugerida(Boolean.TRUE.equals(esPeriodoCursamiento())
+				? "Consultar orientación sobre seguimiento y proyección."
+				: "Revisar elegibilidad y validación de inscripción.");
+		programaNodo.setDetalleRiesgo("Sin riesgo adicional identificado.");
+		if (idPrograma == null) {
+			return;
+		}
+		UnidadDecisionInscripcionDTO unidad = unidadesAsistentePorPrograma.get(idPrograma.longValue());
+		if (unidad == null) {
+			return;
+		}
+		if (StringUtils.isNotBlank(unidad.getTipoUd())) {
+			programaNodo.setDetalleTipoUd(unidad.getTipoUd());
+		}
+		if (StringUtils.isNotBlank(unidad.getEstatusHistorico())) {
+			programaNodo.setDetalleEstatusHistorico(unidad.getEstatusHistorico());
+		}
+		if (StringUtils.isNotBlank(unidad.getEstatusPeriodo())) {
+			programaNodo.setDetalleEstatusPeriodo(unidad.getEstatusPeriodo());
+		}
+		if (StringUtils.isNotBlank(unidad.getAccionSugerida())) {
+			programaNodo.setDetalleAccionSugerida(unidad.getAccionSugerida());
+		}
+		if (StringUtils.isNotBlank(unidad.getRiesgoSiNoSeInscribe())) {
+			programaNodo.setDetalleRiesgo(unidad.getRiesgoSiNoSeInscribe());
+		}
+		String motivoPrincipal = unidad.getMensajeCorto();
+		if (unidad.getMotivos() != null && !unidad.getMotivos().isEmpty()
+				&& unidad.getMotivos().get(0) != null
+				&& StringUtils.isNotBlank(unidad.getMotivos().get(0).getMensajeCorto())) {
+			motivoPrincipal = unidad.getMotivos().get(0).getMensajeCorto();
+		}
+		if (StringUtils.isNotBlank(motivoPrincipal)) {
+			programaNodo.setDetalleMotivoPrincipal(motivoPrincipal);
+		}
+	}
+
+	private String resolveEstatusPeriodoContextual(MallaDiagramaNodoDTO programaNodo) {
+		if (programaNodo == null) {
+			return "Sin información";
+		}
+		if (programaNodo.isBloqueada()) {
+			return "Bloqueada";
+		}
+		if (programaNodo.isEnCurso()) {
+			return "En curso";
+		}
+		if (ESTATUS_BAJA.equals(programaNodo.getEstatus())) {
+			return "Baja";
+		}
+		if (ESTATUS_APROBADA.equals(programaNodo.getEstatus())) {
+			return "Acreditada";
+		}
+		if (ESTATUS_NO_ACREDITADA.equals(programaNodo.getEstatus())) {
+			return "No acreditada";
+		}
+		return esPeriodoCursamiento() ? "Seguimiento de trayectoria" : "Pendiente de validación";
 	}
 
 	private void acumularCreditos(String tipo, Integer creditos, MallaAlumnoProgramaDTO estatusDto) {
@@ -1035,6 +1150,120 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		return resolveColorByEstatusCss(estatusCss);
 	}
 
+	public boolean isVistaGestor() {
+		return vistaGestor;
+	}
+
+	public String getNombrePersonaObjetivo() {
+		return nombrePersonaObjetivo;
+	}
+
+	public String getMatriculaPersonaObjetivo() {
+		return matriculaPersonaObjetivo;
+	}
+
+	public boolean esPeriodoCursamiento() {
+		return contextoAsistente != null && Boolean.TRUE.equals(contextoAsistente.getInscripcionVigente());
+	}
+
+	public String getEtiquetaPeriodoContextual() {
+		return esPeriodoCursamiento() ? "Periodo de cursamiento activo" : "Periodo de inscripción/reinscripción";
+	}
+
+	public String getEtiquetaModoContextual() {
+		if (vistaGestor) {
+			return esPeriodoCursamiento() ? "Seguimiento" : "Gestión";
+		}
+		return esPeriodoCursamiento() ? "Consulta" : "Operativo";
+	}
+
+	public String getEtiquetaEstadoPeriodo() {
+		return esPeriodoCursamiento() ? "En curso" : "Activo";
+	}
+
+	public String getEtiquetaPeriodoBadge() {
+		return esPeriodoCursamiento() ? "Periodo: Cursamiento activo" : "Periodo: Inscripción activa";
+	}
+
+	public String getTituloVistaMalla() {
+		return vistaGestor ? "Malla curricular estudiante | Vista gestor" : "Malla curricular estudiante";
+	}
+
+	public String getSubtituloContextual() {
+		if (vistaGestor) {
+			return "Consulta académica contextual para " + StringUtils.defaultIfBlank(nombrePersonaObjetivo, matriculaPersonaObjetivo);
+		}
+		return "Visualización de trayectoria curricular y orientación contextual del escenario activo.";
+	}
+
+	public String getLlamadoAsistente() {
+		return esPeriodoCursamiento() ? "Consultar orientación" : "Abrir asistente curricular";
+	}
+
+	public String getMensajePanelContextual() {
+		return esPeriodoCursamiento()
+				? "La malla muestra la trayectoria actual. Usa el asistente para interpretar qué implica durante el cursamiento activo."
+				: "La malla muestra la trayectoria acumulada. Usa el asistente para validar qué puedes inscribir en el proceso activo.";
+	}
+
+	public String irAsistenteCurricular() {
+		if (trayectoriaAcademicaContextoBean != null) {
+			trayectoriaAcademicaContextoBean.configurarContextoAsistenteDesdeMalla(
+					StringUtils.trimToNull(asistenteClaveSeleccionada),
+					StringUtils.trimToNull(asistenteNombreSeleccionado),
+					StringUtils.trimToNull(asistenteEstadoSeleccionado),
+					StringUtils.trimToNull(asistenteTipoSeleccionado),
+					StringUtils.trimToNull(asistenteMotivoSeleccionado));
+		}
+		return "TABLA_CURRICULAR_ASISTIDA";
+	}
+
+	private String asistenteClaveSeleccionada;
+	private String asistenteNombreSeleccionado;
+	private String asistenteEstadoSeleccionado;
+	private String asistenteTipoSeleccionado;
+	private String asistenteMotivoSeleccionado;
+
+	public String getAsistenteClaveSeleccionada() {
+		return asistenteClaveSeleccionada;
+	}
+
+	public void setAsistenteClaveSeleccionada(String asistenteClaveSeleccionada) {
+		this.asistenteClaveSeleccionada = asistenteClaveSeleccionada;
+	}
+
+	public String getAsistenteNombreSeleccionado() {
+		return asistenteNombreSeleccionado;
+	}
+
+	public void setAsistenteNombreSeleccionado(String asistenteNombreSeleccionado) {
+		this.asistenteNombreSeleccionado = asistenteNombreSeleccionado;
+	}
+
+	public String getAsistenteEstadoSeleccionado() {
+		return asistenteEstadoSeleccionado;
+	}
+
+	public void setAsistenteEstadoSeleccionado(String asistenteEstadoSeleccionado) {
+		this.asistenteEstadoSeleccionado = asistenteEstadoSeleccionado;
+	}
+
+	public String getAsistenteTipoSeleccionado() {
+		return asistenteTipoSeleccionado;
+	}
+
+	public void setAsistenteTipoSeleccionado(String asistenteTipoSeleccionado) {
+		this.asistenteTipoSeleccionado = asistenteTipoSeleccionado;
+	}
+
+	public String getAsistenteMotivoSeleccionado() {
+		return asistenteMotivoSeleccionado;
+	}
+
+	public void setAsistenteMotivoSeleccionado(String asistenteMotivoSeleccionado) {
+		this.asistenteMotivoSeleccionado = asistenteMotivoSeleccionado;
+	}
+
 	private String resolveColorByEstatusCss(String estatusCss) {
 		if (StringUtils.isBlank(estatusCss)) {
 			return "#6b7280";
@@ -1090,6 +1319,22 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 
 	public void setGrupoParticipanteService(GrupoParticipanteService grupoParticipanteService) {
 		this.grupoParticipanteService = grupoParticipanteService;
+	}
+
+	public AsistenteInscripcionService getAsistenteInscripcionService() {
+		return asistenteInscripcionService;
+	}
+
+	public void setAsistenteInscripcionService(AsistenteInscripcionService asistenteInscripcionService) {
+		this.asistenteInscripcionService = asistenteInscripcionService;
+	}
+
+	public TrayectoriaAcademicaContextoBean getTrayectoriaAcademicaContextoBean() {
+		return trayectoriaAcademicaContextoBean;
+	}
+
+	public void setTrayectoriaAcademicaContextoBean(TrayectoriaAcademicaContextoBean trayectoriaAcademicaContextoBean) {
+		this.trayectoriaAcademicaContextoBean = trayectoriaAcademicaContextoBean;
 	}
 
 	public static class SemestreTablaDTO {
