@@ -42,6 +42,10 @@
 				transition: left 0.25s ease, width 0.25s ease;
 				z-index: 2;
 			}
+			.malla-elemento.context-selected {
+				box-shadow: 0 0 0 3px rgba(95, 151, 168, 0.25);
+				border-color: #5f97a8 !important;
+			}
 			.malla-texto {
 				display: block;
 				max-width: 180px;
@@ -681,6 +685,149 @@
 				margin-top: 1px;
 				line-height: 1.15;
 			}
+			.malla-page-title {
+				margin: 0 0 8px;
+				font-size: 30px;
+				font-weight: 700;
+				color: #3b3b3b;
+			}
+			.malla-context-copy {
+				color: #6a6f75;
+				font-size: 15px;
+				line-height: 1.45;
+				margin-bottom: 18px;
+			}
+			.malla-context-strip {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 12px;
+				margin-bottom: 18px;
+			}
+			.malla-context-chip,
+			.malla-context-chip-soft {
+				border-radius: 999px;
+				padding: 10px 16px;
+				font-size: 13px;
+				font-weight: 600;
+			}
+			.malla-context-chip {
+				background: #5c95a8;
+				color: #ffffff;
+			}
+			.malla-context-chip.mode {
+				background: #ffffff;
+				color: #2f5563;
+				border: 1px solid #95b8c5;
+			}
+			.malla-context-chip.state {
+				background: #fdf6de;
+				color: #6e5620;
+				border: 1px solid #ead48e;
+			}
+			.malla-context-chip-soft {
+				background: #eef4f6;
+				color: #3c5058;
+				border: 1px solid #c6d6dd;
+			}
+			.malla-context-grid {
+				display: flex;
+				gap: 22px;
+				align-items: flex-start;
+			}
+			.malla-main {
+				flex: 1 1 auto;
+				min-width: 0;
+			}
+			.malla-side {
+				width: 320px;
+				flex: 0 0 320px;
+			}
+			.malla-detail-panel {
+				background: #f7f9fa;
+				border: 1px solid #d7e3e8;
+				border-radius: 8px;
+				padding: 18px 18px 20px;
+				position: sticky;
+				top: 22px;
+			}
+			.malla-detail-title {
+				font-size: 20px;
+				font-weight: 700;
+				color: #30464f;
+				margin-bottom: 12px;
+			}
+			.malla-detail-badge {
+				display: inline-block;
+				background: #e7f0f4;
+				color: #54737d;
+				border-radius: 999px;
+				padding: 6px 12px;
+				font-size: 12px;
+				font-weight: 700;
+				margin-bottom: 12px;
+			}
+			.malla-detail-name {
+				font-size: 18px;
+				font-weight: 700;
+				color: #23343b;
+				margin-bottom: 4px;
+			}
+			.malla-detail-key {
+				font-size: 13px;
+				color: #6c7c82;
+				margin-bottom: 14px;
+			}
+			.malla-detail-section {
+				margin-bottom: 14px;
+			}
+			.malla-detail-label {
+				display: block;
+				font-size: 12px;
+				font-weight: 700;
+				letter-spacing: 0.04em;
+				text-transform: uppercase;
+				color: #6b7e86;
+				margin-bottom: 4px;
+			}
+			.malla-detail-value {
+				display: block;
+				font-size: 14px;
+				color: #2f3f46;
+				line-height: 1.4;
+			}
+			.malla-detail-note {
+				border-top: 1px solid #d7e3e8;
+				padding-top: 14px;
+				margin-top: 8px;
+				font-size: 13px;
+				color: #566970;
+				line-height: 1.5;
+			}
+			.malla-gestor-box {
+				margin-top: 14px;
+				background: #ffffff;
+				border: 1px dashed #bdd0d8;
+				border-radius: 6px;
+				padding: 12px 14px;
+				font-size: 13px;
+				color: #4c636d;
+			}
+			.malla-side-action {
+				margin-top: 16px;
+				width: 100%;
+			}
+			@media (max-width: 1200px) {
+				.malla-context-grid {
+					flex-direction: column;
+				}
+				.malla-side {
+					width: 100%;
+					flex: 1 1 auto;
+				}
+				.malla-detail-panel {
+					position: static;
+				}
+			}
 		</style>
 	</ui:define>
 
@@ -691,7 +838,23 @@
 
 	<ui:define name="content">
 		<h:form>
+			<h:inputHidden id="ctxClave" value="#{mallaCurricularAlumnoBean.asistenteClaveSeleccionada}" />
+			<h:inputHidden id="ctxNombre" value="#{mallaCurricularAlumnoBean.asistenteNombreSeleccionado}" />
+			<h:inputHidden id="ctxEstado" value="#{mallaCurricularAlumnoBean.asistenteEstadoSeleccionado}" />
+			<h:inputHidden id="ctxTipo" value="#{mallaCurricularAlumnoBean.asistenteTipoSeleccionado}" />
+			<h:inputHidden id="ctxMotivo" value="#{mallaCurricularAlumnoBean.asistenteMotivoSeleccionado}" />
+			<h1 class="malla-page-title">#{mallaCurricularAlumnoBean.tituloVistaMalla}</h1>
+			<div class="malla-context-copy">#{mallaCurricularAlumnoBean.subtituloContextual}</div>
+			<div class="malla-context-strip">
+				<span class="malla-context-chip">#{mallaCurricularAlumnoBean.etiquetaPeriodoContextual}</span>
+				<span class="malla-context-chip mode">Modo: #{mallaCurricularAlumnoBean.etiquetaModoContextual}</span>
+				<span class="malla-context-chip state">Periodo: #{mallaCurricularAlumnoBean.etiquetaEstadoPeriodo}</span>
+				<span class="malla-context-chip-soft">Estudiante: #{mallaCurricularAlumnoBean.nombrePersonaObjetivo}</span>
+				<span class="malla-context-chip-soft">Matrícula: #{mallaCurricularAlumnoBean.matriculaPersonaObjetivo}</span>
+			</div>
 			<p:panel header="Malla curricular: #{mallaCurricularAlumnoBean.planNombre}">
+				<div class="malla-context-grid">
+					<div class="malla-main">
 				<div class="malla-resumen">
 					<span class="malla-resumen-item">
 						<strong>Estatus del estudiante:</strong>
@@ -788,6 +951,15 @@
 							data-top="#{nodo.y}"
 							data-tipo="#{nodo.tipo}"
 							data-bloque="#{nodo.bloqueId}"
+							data-programa-id="#{nodo.programaId}"
+							data-clave="#{nodo.clavePrograma}"
+							data-detalle-tipo="#{nodo.detalleTipoUd}"
+							data-detalle-historico="#{nodo.detalleEstatusHistorico}"
+							data-detalle-periodo="#{nodo.detalleEstatusPeriodo}"
+							data-detalle-motivo="#{nodo.detalleMotivoPrincipal}"
+							data-detalle-accion="#{nodo.detalleAccionSugerida}"
+							data-detalle-riesgo="#{nodo.detalleRiesgo}"
+							data-detalle-estatus="#{nodo.estatus}"
 							style="left: #{nodo.x}px; top: #{nodo.y}px; height: #{nodo.height}px; width: #{nodo.width}px; #{nodo.tipoStyle}">
 							<ui:fragment rendered="#{nodo.tipo eq 'SEMESTRE'}">
 								<span class="malla-toggle" data-semestre="#{nodo.semestre}"></span>
@@ -889,6 +1061,45 @@
 						</div>
 					</ui:repeat>
 				</div>
+					</div>
+					<div class="malla-side">
+						<div class="malla-detail-panel">
+							<div class="malla-detail-title">Panel de detalle contextual</div>
+							<div class="malla-detail-badge">#{mallaCurricularAlumnoBean.etiquetaPeriodoBadge}</div>
+							<div id="mallaDetailName" class="malla-detail-name">Selecciona una unidad didáctica</div>
+							<div id="mallaDetailKey" class="malla-detail-key">Haz clic sobre una UD en la malla para ver detalle contextual.</div>
+							<div class="malla-detail-section">
+								<span class="malla-detail-label">Estado</span>
+								<span id="mallaDetailEstado" class="malla-detail-value">Sin selección</span>
+							</div>
+							<div class="malla-detail-section">
+								<span class="malla-detail-label">Tipo</span>
+								<span id="mallaDetailTipo" class="malla-detail-value">Sin selección</span>
+							</div>
+							<div class="malla-detail-section">
+								<span class="malla-detail-label">Motivo contextual</span>
+								<span id="mallaDetailMotivo" class="malla-detail-value">Selecciona una UD para consultar la explicación funcional del escenario activo.</span>
+							</div>
+							<div class="malla-detail-section">
+								<span class="malla-detail-label">Acción sugerida</span>
+								<span id="mallaDetailAccion" class="malla-detail-value">#{mallaCurricularAlumnoBean.llamadoAsistente}</span>
+							</div>
+							<div class="malla-detail-section">
+								<span class="malla-detail-label">Riesgo si no se atiende</span>
+								<span id="mallaDetailRiesgo" class="malla-detail-value">Sin selección</span>
+							</div>
+							<div class="malla-detail-note">#{mallaCurricularAlumnoBean.mensajePanelContextual}</div>
+							<ui:fragment rendered="#{mallaCurricularAlumnoBean.vistaGestor}">
+								<div class="malla-gestor-box">
+									<strong>Uso gestor:</strong> esta vista mantiene la trayectoria del estudiante y agrega contexto funcional para revisión, acompañamiento y trazabilidad.
+								</div>
+							</ui:fragment>
+							<p:commandButton value="#{mallaCurricularAlumnoBean.llamadoAsistente}"
+								action="#{mallaCurricularAlumnoBean.irAsistenteCurricular}"
+								ajax="false" styleClass="btn btn-primary malla-side-action" />
+						</div>
+					</div>
+				</div>
 			</p:panel>
 		</h:form>
 		<script type="text/javascript">
@@ -899,6 +1110,18 @@
 					if (!root) {
 						return;
 					}
+					var detailName = document.getElementById('mallaDetailName');
+					var detailKey = document.getElementById('mallaDetailKey');
+					var detailEstado = document.getElementById('mallaDetailEstado');
+					var detailTipo = document.getElementById('mallaDetailTipo');
+					var detailMotivo = document.getElementById('mallaDetailMotivo');
+					var detailAccion = document.getElementById('mallaDetailAccion');
+					var detailRiesgo = document.getElementById('mallaDetailRiesgo');
+					var ctxClave = document.getElementById('ctxClave');
+					var ctxNombre = document.getElementById('ctxNombre');
+					var ctxEstado = document.getElementById('ctxEstado');
+					var ctxTipo = document.getElementById('ctxTipo');
+					var ctxMotivo = document.getElementById('ctxMotivo');
 					var tooltip = document.getElementById('mallaCustomTooltip');
 					if (!tooltip) {
 						tooltip = document.createElement('div');
@@ -906,8 +1129,94 @@
 						tooltip.className = 'malla-tooltip-bubble';
 						document.body.appendChild(tooltip);
 					}
+
+					function asignaTexto(el, valor, fallback) {
+						if (el) {
+							el.textContent = valor && valor.trim() ? valor : fallback;
+						}
+					}
+
+					function actualizarContextoAsistente(payload) {
+						if (ctxClave) {
+							ctxClave.value = payload.clave || '';
+						}
+						if (ctxNombre) {
+							ctxNombre.value = payload.nombre || '';
+						}
+						if (ctxEstado) {
+							ctxEstado.value = payload.estado || '';
+						}
+						if (ctxTipo) {
+							ctxTipo.value = payload.tipo || '';
+						}
+						if (ctxMotivo) {
+							ctxMotivo.value = payload.motivo || '';
+						}
+					}
+
+					function seleccionarNodoPrograma(node) {
+						if (!node || node.getAttribute('data-tipo') !== 'PROGRAMA') {
+							return;
+						}
+						var selected = root.querySelectorAll('.malla-elemento.programa.context-selected');
+						selected.forEach(function(item) {
+							item.classList.remove('context-selected');
+						});
+						node.classList.add('context-selected');
+						asignaTexto(detailName, node.querySelector('.malla-texto.full') ? node.querySelector('.malla-texto.full').textContent : '', 'Unidad didáctica');
+						asignaTexto(detailKey, node.getAttribute('data-clave') ? 'Clave: ' + node.getAttribute('data-clave') : '', 'Sin clave');
+						asignaTexto(detailEstado, node.getAttribute('data-detalle-estatus'), 'Sin información');
+						asignaTexto(detailTipo, node.getAttribute('data-detalle-tipo'), 'Sin información');
+						asignaTexto(detailMotivo, node.getAttribute('data-detalle-motivo'), 'Sin explicación disponible.');
+						asignaTexto(detailAccion, node.getAttribute('data-detalle-accion'), 'Sin acción sugerida.');
+						asignaTexto(detailRiesgo, node.getAttribute('data-detalle-riesgo'), 'Sin riesgo adicional identificado.');
+						actualizarContextoAsistente({
+							clave: node.getAttribute('data-clave'),
+							nombre: node.querySelector('.malla-texto.full') ? node.querySelector('.malla-texto.full').textContent : '',
+							estado: node.getAttribute('data-detalle-estatus'),
+							tipo: node.getAttribute('data-detalle-tipo'),
+							motivo: node.getAttribute('data-detalle-motivo')
+						});
+					}
 					var semestreActual = root.getAttribute('data-semestre-actual');
 					var nodes = Array.prototype.slice.call(root.querySelectorAll('.malla-elemento[data-semestre]'));
+					nodes.forEach(function(node) {
+						if (node.getAttribute('data-tipo') === 'PROGRAMA') {
+							node.style.cursor = 'pointer';
+							node.addEventListener('click', function(event) {
+								event.preventDefault();
+								seleccionarNodoPrograma(node);
+							});
+						}
+					});
+					var primerPrograma = root.querySelector('.malla-elemento.programa');
+					if (primerPrograma) {
+						seleccionarNodoPrograma(primerPrograma);
+					}
+					var listRows = document.querySelectorAll('#mallaListView .malla-table tbody tr');
+					listRows.forEach(function(row) {
+						row.addEventListener('click', function() {
+							var cells = row.querySelectorAll('td');
+							if (!cells || cells.length < 5) {
+								return;
+							}
+							var nombre = cells[1].textContent.trim();
+							var clave = cells[2].textContent.trim();
+							var estado = cells[4].textContent.trim();
+							asignaTexto(detailName, nombre, 'Unidad didáctica');
+							asignaTexto(detailKey, clave ? 'Clave: ' + clave : '', 'Sin clave');
+							asignaTexto(detailEstado, estado, 'Sin información');
+							asignaTexto(detailTipo, 'Consulta desde vista en lista', 'Sin información');
+							asignaTexto(detailMotivo, 'La unidad fue seleccionada desde la tabla de trayectoria para revisar su impacto en el asistente.', 'Sin explicación disponible.');
+							actualizarContextoAsistente({
+								clave: clave,
+								nombre: nombre,
+								estado: estado,
+								tipo: 'Consulta desde vista en lista',
+								motivo: 'La unidad fue seleccionada desde la tabla de trayectoria para revisar su impacto en el asistente.'
+							});
+						});
+					});
 					var toggles = root.querySelectorAll('.malla-toggle');
 					var toggleVerticalSem = root.querySelectorAll('.malla-toggle-v[data-semestre]');
 					var toggleVerticalBlo = root.querySelectorAll('.malla-toggle-v[data-bloque]');
@@ -1038,15 +1347,9 @@
 						updateViewActionIcons(false);
 
 						if (listView) {
-							var currentSem = parseInt(semestreActual || '0', 10);
 							var semCards = listView.querySelectorAll('.malla-list-semestre[data-semestre]');
 							semCards.forEach(function(card) {
-								var sem = parseInt(card.getAttribute('data-semestre') || '0', 10);
-								if (!currentSem || sem !== currentSem) {
-									card.classList.add('colapsado');
-								} else {
-									card.classList.remove('colapsado');
-								}
+								card.classList.add('colapsado');
 							});
 
 							var semHeaders = listView.querySelectorAll('.malla-list-sem-header');
@@ -1258,11 +1561,7 @@
 					}
 
 					ordenarSemestres().forEach(function(sem) {
-						if (semestreActual && sem === semestreActual) {
-							setCollapsed(sem, false);
-						} else {
-							setCollapsed(sem, true);
-						}
+						setCollapsed(sem, true);
 						setVerticalCollapsed(sem, false);
 					});
 					aplicarLayout();

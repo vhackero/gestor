@@ -20,17 +20,21 @@ import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PlantillaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EstatusDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.DateUtils;
+import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoDocumentoEnum;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.PlantillaService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.AsistenteInscripcionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
+import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.TrayectoriaAcademicaContextoBean;
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.dto.ReporteConfig;
 import mx.gob.sedesol.gestorweb.commons.dto.UsuarioSessionDTO;
@@ -59,12 +63,22 @@ public class ConstanciasBean extends BaseBean {
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
 
+	@ManagedProperty("#{trayectoriaAcademicaContextoBean}")
+	private TrayectoriaAcademicaContextoBean trayectoriaAcademicaContextoBean;
+
+	@ManagedProperty(value = "#{asistenteInscripcionServiceImpl}")
+	private AsistenteInscripcionService asistenteInscripcionService;
+
 	private List<EventoConstanciaDTO> eventos;
 	private Long idPersona;
 	private StreamedContent reportePDF;
 	private StreamedContent constanciaPDF;
 	private EventoConstanciaDTO eventoSeleccionado;
 	private HistorialAcademicoDTO historialAcademico;
+	private AsistenteInscripcionContextoDTO contextoAsistente;
+	private boolean vistaGestor;
+	private String nombrePersonaObjetivo;
+	private String matriculaPersonaObjetivo;
 
 
 	
@@ -76,10 +90,28 @@ public class ConstanciasBean extends BaseBean {
 
 	@PostConstruct
 	public void init() {
-		idPersona = getUsuarioEnSession().getIdPersona();
+		idPersona = trayectoriaAcademicaContextoBean.resolverIdPersonaObjetivo(getUsuarioEnSession().getIdPersona());
+		vistaGestor = trayectoriaAcademicaContextoBean.isVistaGestor();
+		nombrePersonaObjetivo = trayectoriaAcademicaContextoBean.resolverNombreObjetivo(getUsuarioEnSession().getUsuario());
+		matriculaPersonaObjetivo = trayectoriaAcademicaContextoBean.resolverMatriculaObjetivo(getUsuarioEnSession().getUsuario());
 		eventos = grupoParticipanteService.getParticipanteByActaCerradaYconstancia2(idPersona);
 		historialAcademico = grupoParticipanteService.consultaDatosHistorialAcademico(idPersona.toString());
+		cargarContextoAsistente();
 
+	}
+
+	private void cargarContextoAsistente() {
+		contextoAsistente = null;
+		if (asistenteInscripcionService == null || idPersona == null) {
+			return;
+		}
+		try {
+			contextoAsistente = asistenteInscripcionService.obtenerContextoAsistido(idPersona);
+		} catch (InscripcionException e) {
+			log.warn("No fue posible obtener el contexto asistido para historial académico.", e);
+		} catch (Exception e) {
+			log.warn("Error inesperado al obtener el contexto asistido para historial académico.", e);
+		}
 	}
 
 	
@@ -242,6 +274,73 @@ public class ConstanciasBean extends BaseBean {
 		return historialAcademico;
 	}
 
+	public boolean isVistaGestor() {
+		return vistaGestor;
+	}
+
+	public String getNombrePersonaObjetivo() {
+		if (historialAcademico != null && ObjectUtils.isNotNull(historialAcademico.getNombre())) {
+			return historialAcademico.getNombre();
+		}
+		return nombrePersonaObjetivo;
+	}
+
+	public String getMatriculaPersonaObjetivo() {
+		if (historialAcademico != null && ObjectUtils.isNotNull(historialAcademico.getMatricula())) {
+			return historialAcademico.getMatricula();
+		}
+		return matriculaPersonaObjetivo;
+	}
+
+	public boolean esPeriodoCursamiento() {
+		return contextoAsistente != null && Boolean.TRUE.equals(contextoAsistente.getInscripcionVigente());
+	}
+
+	public String getEtiquetaPeriodoContextual() {
+		return esPeriodoCursamiento() ? "Periodo de cursamiento activo" : "Periodo de inscripción/reinscripción";
+	}
+
+	public String getEtiquetaModoContextual() {
+		if (vistaGestor) {
+			return esPeriodoCursamiento() ? "Seguimiento" : "Gestión";
+		}
+		return esPeriodoCursamiento() ? "Consulta" : "Operativo";
+	}
+
+	public String getEtiquetaEstadoPeriodo() {
+		return esPeriodoCursamiento() ? "En curso" : "Activo";
+	}
+
+	public String getTituloVistaHistorial() {
+		return vistaGestor ? "Historial académico estudiante | Vista gestor" : "Historial académico";
+	}
+
+	public String getMensajeContextualHistorial() {
+		return esPeriodoCursamiento()
+				? "Esta vista muestra la evidencia histórica del estudiante mientras cursa el periodo activo. La interpretación normativa vive en la malla y el asistente."
+				: "Esta vista muestra la trayectoria consolidada del estudiante. Usa la malla y el asistente para entender cómo ese historial impacta la inscripción activa.";
+	}
+
+	public String getEtiquetaRolHistorial() {
+		return "Vista de evidencia académica";
+	}
+
+	public String getMensajeTransicionAsistente() {
+		return esPeriodoCursamiento()
+				? "¿Quieres entender cómo este historial condiciona el seguimiento del periodo vigente? Consulta el Asistente de inscripción curricular."
+				: "¿Tienes dudas sobre cómo este historial afecta tu inscripción? Consulta el Asistente de inscripción curricular.";
+	}
+
+	public String navegaMallaCurricularAlumno() {
+		trayectoriaAcademicaContextoBean.limpiarContextoAsistente();
+		return ConstantesGestorWeb.NAVEGA_MALLA_CURRICULAR_ALUMNO;
+	}
+
+	public String navegaAsistenteCurricular() {
+		trayectoriaAcademicaContextoBean.configurarContextoAsistenteDesdeHistorial();
+		return ConstantesGestorWeb.NAVEGA_TABLA_CURRICULAR_ASISTIDA;
+	}
+
 
 	public void setHistorialAcademico(HistorialAcademicoDTO historialAcademico) {
 		this.historialAcademico = historialAcademico;
@@ -317,6 +416,22 @@ public class ConstanciasBean extends BaseBean {
 
 	public void setBitacoraBean(BitacoraBean bitacoraBean) {
 		this.bitacoraBean = bitacoraBean;
+	}
+
+	public TrayectoriaAcademicaContextoBean getTrayectoriaAcademicaContextoBean() {
+		return trayectoriaAcademicaContextoBean;
+	}
+
+	public void setTrayectoriaAcademicaContextoBean(TrayectoriaAcademicaContextoBean trayectoriaAcademicaContextoBean) {
+		this.trayectoriaAcademicaContextoBean = trayectoriaAcademicaContextoBean;
+	}
+
+	public AsistenteInscripcionService getAsistenteInscripcionService() {
+		return asistenteInscripcionService;
+	}
+
+	public void setAsistenteInscripcionService(AsistenteInscripcionService asistenteInscripcionService) {
+		this.asistenteInscripcionService = asistenteInscripcionService;
 	}
 
 

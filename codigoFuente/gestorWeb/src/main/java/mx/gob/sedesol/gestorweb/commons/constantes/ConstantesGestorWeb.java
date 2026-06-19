@@ -152,6 +152,7 @@ public final class ConstantesGestorWeb {
 
 	public static final String NAVEGA_EXPEDIENTE_ALUMNO = "EXPEDIENTE_ALUMNO";
 	public static final String NAVEGA_BUSCAR_EXPEDIENTE_ALUMNO = "BUSCAR_EXPEDIENTE_ALUMNO";
+	public static final String NAVEGA_HUB_TRAYECTORIA_ESTUDIANTE = "HUB_TRAYECTORIA_ESTUDIANTE";
 	public static final String NAVEGA_EXPEDIENTE_GRUPO = "EXPEDIENTE_GRUPO";
 
 	public static final String NAVEGA_ALTAS_BAJAS_USUARIOS = "ALTAS_BAJAS_USUARIOS";

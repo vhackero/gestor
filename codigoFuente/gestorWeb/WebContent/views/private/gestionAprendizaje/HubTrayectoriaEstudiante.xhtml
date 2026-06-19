@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.gestionescolar.label.gestionEscolar')}</li>
+		<li>#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}</li>
+		<li class="active">Situación del estudiante</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<style type="text/css">
+			.hub-title {
+				margin: 0 0 8px;
+				font-size: 30px;
+				font-weight: 700;
+				color: #3b3b3b;
+			}
+			.hub-copy {
+				color: #6a6f75;
+				font-size: 15px;
+				line-height: 1.45;
+				margin-bottom: 18px;
+			}
+			.hub-strip {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+				margin-bottom: 20px;
+			}
+			.hub-chip {
+				background: #eef4f6;
+				border: 1px solid #cadbe2;
+				border-radius: 999px;
+				color: #425861;
+				font-size: 13px;
+				font-weight: 600;
+				padding: 8px 14px;
+			}
+			.hub-chip.main {
+				background: #5f97a8;
+				border-color: #5f97a8;
+				color: #ffffff;
+			}
+			.hub-chip.mode {
+				background: #ffffff;
+				border-color: #95b8c5;
+				color: #2f5563;
+			}
+			.hub-grid {
+				display: grid;
+				grid-template-columns: minmax(280px, 1.1fr) repeat(3, minmax(220px, 1fr));
+				gap: 18px;
+				align-items: stretch;
+			}
+			.hub-card {
+				background: #ffffff;
+				border: 1px solid #d8e2e7;
+				border-radius: 8px;
+				padding: 20px 20px 18px;
+				box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+				min-height: 100%;
+			}
+			.hub-card h3 {
+				margin: 0 0 10px;
+				font-size: 19px;
+				font-weight: 700;
+				color: #315766;
+			}
+			.hub-card p {
+				color: #4d5b63;
+				line-height: 1.45;
+				margin-bottom: 14px;
+			}
+			.hub-kpi {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(120px, 1fr));
+				gap: 10px;
+				margin-top: 14px;
+			}
+			.hub-kpi-box {
+				background: #f4f8fa;
+				border-radius: 6px;
+				padding: 12px 14px;
+			}
+			.hub-kpi-label {
+				display: block;
+				font-size: 12px;
+				font-weight: 700;
+				color: #5a6c76;
+				text-transform: uppercase;
+				margin-bottom: 4px;
+			}
+			.hub-kpi-value {
+				display: block;
+				font-size: 18px;
+				font-weight: 700;
+				color: #27343b;
+			}
+			.hub-action {
+				margin-top: 18px;
+			}
+			.hub-back {
+				margin-top: 20px;
+				text-align: right;
+			}
+			@media (max-width: 1199px) {
+				.hub-grid {
+					grid-template-columns: 1fr 1fr;
+				}
+			}
+			@media (max-width: 767px) {
+				.hub-grid {
+					grid-template-columns: 1fr;
+				}
+			}
+		</style>
+
+		<h:form>
+			<h1 class="hub-title">Situación del estudiante</h1>
+			<div class="hub-copy">Consulta central para gestor académico. Desde aquí puedes revisar el estado del estudiante y entrar a expediente, malla curricular y asistente curricular usando el mismo contexto de matrícula.</div>
+
+			<div class="hub-strip">
+				<span class="hub-chip main">Vista gestor</span>
+				<span class="hub-chip mode">Matrícula: #{expedienteAlumnoBean.personaDTO.usuario}</span>
+				<span class="hub-chip">Estudiante: #{expedienteAlumnoBean.personaDTO.nombre} #{expedienteAlumnoBean.personaDTO.apellidoPaterno} #{expedienteAlumnoBean.personaDTO.apellidoMaterno}</span>
+				<span class="hub-chip">Tipo: #{expedienteAcademicoBean.obtenerTipoUsuario(expedienteAlumnoBean.personaDTO.tipoUsuario)}</span>
+			</div>
+
+			<div class="hub-grid">
+				<div class="hub-card">
+					<h3>Resumen académico</h3>
+					<p>Vista rápida del estado general del estudiante consultado para orientar la revisión académica antes de entrar al detalle.</p>
+					<div class="hub-kpi">
+						<div class="hub-kpi-box">
+							<span class="hub-kpi-label">Programa</span>
+							<span class="hub-kpi-value">#{empty expedienteAlumnoBean.historial.programaEducativo ? 'Sin dato' : expedienteAlumnoBean.historial.programaEducativo}</span>
+						</div>
+						<div class="hub-kpi-box">
+							<span class="hub-kpi-label">Estatus</span>
+							<span class="hub-kpi-value">#{empty expedienteAlumnoBean.historial.estatus ? 'Sin dato' : expedienteAlumnoBean.historial.estatus}</span>
+						</div>
+						<div class="hub-kpi-box">
+							<span class="hub-kpi-label">Promedio</span>
+							<span class="hub-kpi-value">
+								<h:outputText value="#{expedienteAlumnoBean.historial.promedio}">
+									<f:convertNumber maxFractionDigits="2" />
+								</h:outputText>
+							</span>
+						</div>
+						<div class="hub-kpi-box">
+							<span class="hub-kpi-label">Eventos</span>
+							<span class="hub-kpi-value">#{expedienteAlumnoBean.totalEventosTrayectoria}</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="hub-card">
+					<h3>Expediente académico</h3>
+					<p>Consulta el historial consolidado, constancias, promedio, créditos y evidencia histórica del estudiante.</p>
+					<div class="hub-action">
+						<p:commandButton value="Abrir expediente"
+							action="#{expedienteAlumnoBean.navegaExpedienteAlumno}"
+							ajax="false" styleClass="btn btn-primary btn-block" />
+					</div>
+				</div>
+
+				<div class="hub-card">
+					<h3>Malla curricular</h3>
+					<p>Revisa la trayectoria visual del plan, el avance acumulado y la situación curricular del estudiante en contexto gestor.</p>
+					<div class="hub-action">
+						<p:commandButton value="Abrir malla curricular"
+							action="#{expedienteAlumnoBean.navegaMallaCurricularAlumno}"
+							ajax="false" styleClass="btn btn-primary btn-block" />
+					</div>
+				</div>
+
+				<div class="hub-card">
+					<h3>Asistente curricular</h3>
+					<p>Interpreta riesgos, reglas y recomendaciones de inscripción o seguimiento según el periodo activo del estudiante.</p>
+					<div class="hub-action">
+						<p:commandButton value="Abrir asistente curricular"
+							action="#{expedienteAlumnoBean.navegaAsistenteCurricular}"
+							ajax="false" styleClass="btn btn-primary btn-block" />
+					</div>
+				</div>
+			</div>
+
+			<div class="hub-back">
+				<p:commandButton value="Cambiar estudiante"
+					action="#{expedienteAlumnoBean.cancelar}"
+					ajax="false" styleClass="btn btn-default" />
+			</div>
+		</h:form>
+	</ui:define>
+</ui:composition>

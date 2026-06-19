@@ -24,6 +24,14 @@ public class MallaDiagramaNodoDTO implements Serializable {
 	private String textoCompacto;
 	private boolean bloqueada;
 	private String bloqueId;
+	private Integer programaId;
+	private String clavePrograma;
+	private String detalleTipoUd;
+	private String detalleEstatusHistorico;
+	private String detalleEstatusPeriodo;
+	private String detalleMotivoPrincipal;
+	private String detalleAccionSugerida;
+	private String detalleRiesgo;
 	private boolean tieneDependencias;
 	private String dependenciaTooltip;
 	private String estatusIconClass;
@@ -175,6 +183,70 @@ public class MallaDiagramaNodoDTO implements Serializable {
 
 	public void setBloqueId(String bloqueId) {
 		this.bloqueId = bloqueId;
+	}
+
+	public Integer getProgramaId() {
+		return programaId;
+	}
+
+	public void setProgramaId(Integer programaId) {
+		this.programaId = programaId;
+	}
+
+	public String getClavePrograma() {
+		return clavePrograma;
+	}
+
+	public void setClavePrograma(String clavePrograma) {
+		this.clavePrograma = clavePrograma;
+	}
+
+	public String getDetalleTipoUd() {
+		return detalleTipoUd;
+	}
+
+	public void setDetalleTipoUd(String detalleTipoUd) {
+		this.detalleTipoUd = detalleTipoUd;
+	}
+
+	public String getDetalleEstatusHistorico() {
+		return detalleEstatusHistorico;
+	}
+
+	public void setDetalleEstatusHistorico(String detalleEstatusHistorico) {
+		this.detalleEstatusHistorico = detalleEstatusHistorico;
+	}
+
+	public String getDetalleEstatusPeriodo() {
+		return detalleEstatusPeriodo;
+	}
+
+	public void setDetalleEstatusPeriodo(String detalleEstatusPeriodo) {
+		this.detalleEstatusPeriodo = detalleEstatusPeriodo;
+	}
+
+	public String getDetalleMotivoPrincipal() {
+		return detalleMotivoPrincipal;
+	}
+
+	public void setDetalleMotivoPrincipal(String detalleMotivoPrincipal) {
+		this.detalleMotivoPrincipal = detalleMotivoPrincipal;
+	}
+
+	public String getDetalleAccionSugerida() {
+		return detalleAccionSugerida;
+	}
+
+	public void setDetalleAccionSugerida(String detalleAccionSugerida) {
+		this.detalleAccionSugerida = detalleAccionSugerida;
+	}
+
+	public String getDetalleRiesgo() {
+		return detalleRiesgo;
+	}
+
+	public void setDetalleRiesgo(String detalleRiesgo) {
+		this.detalleRiesgo = detalleRiesgo;
 	}
 
 	public boolean isTieneDependencias() {

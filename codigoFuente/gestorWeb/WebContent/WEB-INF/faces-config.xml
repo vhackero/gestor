@@ -732,6 +732,11 @@
 			<to-view-id>/views/private/gestionAprendizaje/ExpedienteAlumnoBuscar.xhtml</to-view-id>
 			<redirect />
 		</navigation-case>
+		<navigation-case>
+			<from-outcome>HUB_TRAYECTORIA_ESTUDIANTE</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/HubTrayectoriaEstudiante.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
 
 		<!-- CONVOCATORIAS -->
 		<navigation-case>

@@ -32,6 +32,9 @@ public class ExpedienteAcademicoBean extends BaseBean {
 	@ManagedProperty("#{bitacoraBean}")
 	private BitacoraBean bitacoraBean;
 
+	@ManagedProperty("#{expedienteAlumnoBean}")
+	private ExpedienteAlumnoBean expedienteAlumnoBean;
+
 	private List<PersonaDTO> personas;
 
 	private PersonaDTO personaFiltros;
@@ -53,6 +56,40 @@ public class ExpedienteAcademicoBean extends BaseBean {
 					TipoServicioEnum.LOCAL);
 		}
 
+	}
+
+	public String buscarMatriculaYAbrirHub() {
+		String matricula = personaFiltros != null ? personaFiltros.getUsuario() : null;
+		if (ObjectUtils.isNullOrEmpty(matricula)) {
+			agregarMsgInfo("Captura la matrícula del estudiante.", null);
+			return null;
+		}
+		personas = personaServiceFacade.buscarPersonaPorCriterios(personaFiltros);
+		List<PersonaDTO> coincidenciasExactas = new ArrayList<PersonaDTO>();
+		for (PersonaDTO persona : personas) {
+			if (persona != null && !ObjectUtils.isNullOrEmpty(persona.getUsuario())
+					&& matricula.trim().equalsIgnoreCase(persona.getUsuario().trim())) {
+				coincidenciasExactas.add(persona);
+			}
+		}
+		if (coincidenciasExactas.isEmpty()) {
+			agregarMsgInfo("No se encontró un estudiante con la matrícula capturada.", null);
+			return null;
+		}
+		if (coincidenciasExactas.size() > 1) {
+			agregarMsgInfo("La matrícula devolvió más de un resultado. Selecciona al estudiante en la tabla.", null);
+			return null;
+		}
+		if (!personas.isEmpty()) {
+			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "CON_EXP_ALM", "", requestActual(), TipoServicioEnum.LOCAL);
+		}
+		expedienteAlumnoBean.prepararHubEstudianteGestor(coincidenciasExactas.get(0));
+		return expedienteAlumnoBean.navegaHubTrayectoriaEstudiante();
+	}
+
+	public String abrirHubEstudiante(PersonaDTO persona) {
+		expedienteAlumnoBean.prepararHubEstudianteGestor(persona);
+		return expedienteAlumnoBean.navegaHubTrayectoriaEstudiante();
 	}
 
 	public String obtenerTipoUsuario(int tipo) {
@@ -98,6 +135,14 @@ public class ExpedienteAcademicoBean extends BaseBean {
 
 	public void setBitacoraBean(BitacoraBean bitacoraBean) {
 		this.bitacoraBean = bitacoraBean;
+	}
+
+	public ExpedienteAlumnoBean getExpedienteAlumnoBean() {
+		return expedienteAlumnoBean;
+	}
+
+	public void setExpedienteAlumnoBean(ExpedienteAlumnoBean expedienteAlumnoBean) {
+		this.expedienteAlumnoBean = expedienteAlumnoBean;
 	}
 
 }

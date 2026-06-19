@@ -16,7 +16,16 @@
 	</ui:define>
 
 	<ui:define name="content">
+		<style type="text/css">
+			.expediente-gestor-copy {
+				color: #6a6f75;
+				font-size: 15px;
+				line-height: 1.45;
+				margin: 0 0 18px;
+			}
+		</style>
 		<h1>#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}</h1>
+		<div class="expediente-gestor-copy">Busca por matrícula y abre la situación del estudiante en expediente, malla curricular y asistente curricular desde el mismo resultado.</div>
 		<hr />
 		<p:ajaxStatus onstart="PF('dialogLayout').show()"
 			onsuccess="PF('dialogLayout').hide()" />
@@ -54,9 +63,9 @@
 									</div>
 									<div class="col-md-4 col-xs-12">
 										<p:outputLabel for="txtUsuario"
-											value="Estudiante:" />
+											value="Matrícula:" />
 										<p:inputText id="txtUsuario"
-											placeholder="Estudiante"
+											placeholder="Matrícula"
 											value="#{expedienteAcademicoBean.personaFiltros.usuario}"
 											styleClass="form-control" />
 									</div>
@@ -96,6 +105,12 @@
 							<div class="row">
 								<div class="col-md-12 text-right">
 									<p:commandButton
+										action="#{expedienteAcademicoBean.buscarMatriculaYAbrirHub()}"
+										ajax="false"
+										value="Ver situación del estudiante"
+										styleClass="btn btn-primary"
+										style="margin-right:10px; min-width:230px;" />
+									<p:commandButton
 										action="#{expedienteAcademicoBean.buscarPersonaPorCriterios()}"
 										ajax="true" update="@form"
 										value="#{sistema.obtenerTexto('gw.gestionaprendizaje.boton.buscar')}"
@@ -131,7 +146,7 @@
 							</f:facet>
 							
 							<p:column
-								headerText="Estudiante"
+								headerText="Matrícula"
 								sortBy="#{persona.usuario}" filterMatchMode="contains"
 								filterBy="#{persona.usuario}" filterStyle="display:none">
 								<h:outputText
@@ -164,15 +179,43 @@
 
 							<p:column styleClass="text-center"
 								headerText="#{sistema.obtenerTexto('gw.adminPersona.etiqueta.accion')}">
+								<p:commandButton id="btnAbrirHub" ajax="false"
+									action="#{expedienteAcademicoBean.abrirHubEstudiante(persona)}"
+									styleClass="btn btn-default btn-icon icono_sisi fa fa-dashboard"
+									process="@this">
+								</p:commandButton>
+								<p:tooltip for="btnAbrirHub"
+									value="Ver situación del estudiante"
+									position="top" />
 								<p:commandButton id="btnAbrirExpediente" ajax="true"
 									action="#{expedienteAlumnoBean.navegaExpedienteAlumno}"
 									styleClass="btn btn-default btn-icon icono_sisi fa fa-solid fa-book"
-									process="@this">
+									process="@this" style="margin-left:6px;">
 									<f:setPropertyActionListener value="#{persona}"
 										target="#{expedienteAlumnoBean.personaDTO}" />
 								</p:commandButton>
 								<p:tooltip for="btnAbrirExpediente"
 									value="#{sistema.obtenerTexto('gw.gestionaprendizaje.boton.expediente')}"
+									position="top" />
+								<p:commandButton id="btnAbrirMalla" ajax="false"
+									action="#{expedienteAlumnoBean.navegaMallaCurricularAlumno}"
+									styleClass="btn btn-default btn-icon icono_sisi fa fa-th"
+									process="@this" style="margin-left:6px;">
+									<f:setPropertyActionListener value="#{persona}"
+										target="#{expedienteAlumnoBean.personaDTO}" />
+								</p:commandButton>
+								<p:tooltip for="btnAbrirMalla"
+									value="Malla curricular"
+									position="top" />
+								<p:commandButton id="btnAbrirAsistente" ajax="false"
+									action="#{expedienteAlumnoBean.navegaAsistenteCurricular}"
+									styleClass="btn btn-default btn-icon icono_sisi fa fa-compass"
+									process="@this" style="margin-left:6px;">
+									<f:setPropertyActionListener value="#{persona}"
+										target="#{expedienteAlumnoBean.personaDTO}" />
+								</p:commandButton>
+								<p:tooltip for="btnAbrirAsistente"
+									value="Asistente curricular"
 									position="top" />
 							</p:column>
 						</p:dataTable>
