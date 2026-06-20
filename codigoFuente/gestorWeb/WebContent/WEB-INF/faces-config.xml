@@ -529,6 +529,12 @@
 			<redirect />
 		</navigation-case>
 
+		<navigation-case>
+			<from-outcome>CAMBIO_MASIVO_ESTATUS_AVA</from-outcome>
+			<to-view-id>/views/private/gestionAprendizaje/cambioMasivoEstatusAva.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+
 
 		<navigation-case>
 			<from-outcome>CAT_GESTION_APRENDIZAJE</from-outcome>

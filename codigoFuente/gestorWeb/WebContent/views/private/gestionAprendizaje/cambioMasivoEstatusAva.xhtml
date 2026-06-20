@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="breadcrumb">
+		<li>#{sistema.obtenerTexto('gw.titulo.gestionaprendizaje.texto')}</li>
+		<li>#{sistema.obtenerTexto('gw.titulo.ambientes.texto.ava.parentesis')}</li>
+		<li class="active">Cambio masivo de estatus</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h1>Cambio masivo de estatus AVA</h1>
+		<hr />
+
+		<h:form id="frmCambioMasivoAva">
+			<p:ajaxStatus onstart="PF('dialogLayout').show()"
+				onsuccess="PF('dialogLayout').hide()" />
+
+			<p:panel id="pnlFiltrosCambioMasivo"
+				header="Modificar estatus de AVAs" showCollapseLink="false"
+				collapsible="false">
+				<f:validateBean disabled="true">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-4 col-xs-12">
+								<p:outputLabel styleClass="requerido" value="Plan / Programa:" />
+								<p:selectCheckboxMenu id="masivoPlanPrograma"
+									value="#{ambientesVirtualesAvaBean.filtroMasivoPlanPrograma}"
+									filter="true" filterMatchMode="contains"
+									label="Seleccionar" styleClass="col-xs-12">
+									<f:selectItems
+										value="#{ambientesVirtualesAvaBean.opcionesMasivoPlanPrograma}" />
+								</p:selectCheckboxMenu>
+							</div>
+							<div class="col-md-4 col-xs-12">
+								<p:outputLabel styleClass="requerido" value="Año del periodo:" />
+								<p:selectOneMenu id="masivoAnioPeriodo" styleClass="col-xs-12"
+									value="#{ambientesVirtualesAvaBean.filtroMasivoAnioPeriodo}">
+									<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+									<f:selectItems
+										value="#{ambientesVirtualesAvaBean.opcionesMasivoAnioPeriodo}" />
+								</p:selectOneMenu>
+							</div>
+							<div class="col-md-4 col-xs-12">
+								<p:outputLabel styleClass="requerido" value="Número de elementos:" />
+								<p:selectOneMenu id="masivoNumeroElementos"
+									styleClass="col-xs-12"
+									value="#{ambientesVirtualesAvaBean.filtroMasivoNumeroElementos}">
+									<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+									<f:selectItems
+										value="#{ambientesVirtualesAvaBean.opcionesMasivoNumeroElementos}" />
+								</p:selectOneMenu>
+							</div>
+						</div>
+					</div>
+
+					<div class="row" style="margin-top: 25px;">
+						<div class="col-md-12">
+							<p:commandButton value="Buscar"
+								styleClass="btn btn-primary pull-right"
+								update="@form"
+								actionListener="#{ambientesVirtualesAvaBean.buscarCambioMasivoEstatusAva}"
+								process="@form" />
+							<p:commandButton value="Regresar"
+								styleClass="btn btn-default pull-right"
+								style="margin-right: 10px;" ajax="false" immediate="true"
+								action="#{ambientesVirtualesAvaBean.regresarBusquedaAmbientesVirtuales}"
+								process="@this" />
+							<p:commandButton value="Limpiar campos"
+								styleClass="btn btn-default pull-right"
+								style="margin-right: 10px;" update="@form"
+								actionListener="#{ambientesVirtualesAvaBean.limpiarCamposCambioMasivoEstatusAva}"
+								process="@this" />
+						</div>
+					</div>
+
+					<p:outputPanel id="pnlResultadosCambioMasivo"
+						rendered="#{ambientesVirtualesAvaBean.busquedaMasivaEjecutada}">
+						<div class="row" style="margin-top: 25px;">
+							<div class="col-md-12">
+								<p:dataTable id="tblCambioMasivoAva"
+									value="#{ambientesVirtualesAvaBean.resultadosMasivoEstatusAva}"
+									var="ava" emptyMessage="No se encontraron datos"
+									paginator="true" rows="10" paginatorPosition="bottom"
+									paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+									currentPageReportTemplate="({currentPage} de {totalPages})"
+									rowsPerPageTemplate="5,10,15" tableStyleClass="table">
+									<p:column headerText="Plan">
+										<h:outputText
+											value="#{ambientesVirtualesAvaBean.obtenerPlanCambioMasivo(ava)}" />
+									</p:column>
+									<p:column headerText="Programa">
+										<h:outputText
+											value="#{ambientesVirtualesAvaBean.obtenerProgramaCambioMasivo(ava)}" />
+									</p:column>
+									<p:column headerText="Semestre">
+										<h:outputText
+											value="#{ambientesVirtualesAvaBean.obtenerSemestreCambioMasivo(ava)}" />
+									</p:column>
+									<p:column headerText="Bloque">
+										<h:outputText
+											value="#{ambientesVirtualesAvaBean.obtenerBloqueCambioMasivo(ava)}" />
+									</p:column>
+									<p:column headerText="Evento">
+										<h:outputText value="#{ava.eventoCapacitacion.nombreEc}" />
+									</p:column>
+									<p:column headerText="Estatus AVA">
+										<h:outputText value="#{ava.catEstadoAva.nombre}" />
+									</p:column>
+									<p:column headerText="Seleccionar"
+										style="text-align:center; width: 90px;">
+										<p:selectBooleanCheckbox value="#{ava.seleccionado}" />
+									</p:column>
+								</p:dataTable>
+							</div>
+						</div>
+
+						<p:outputPanel
+							rendered="#{not empty ambientesVirtualesAvaBean.resultadosMasivoEstatusAva}">
+							<div class="row" style="margin-top: 20px;">
+								<div class="col-md-6 col-md-offset-6 col-xs-12">
+									<p:outputLabel styleClass="requerido"
+										value="Estatus AVA a cambiar:" />
+									<p:selectOneMenu id="masivoEstatusNuevo"
+										styleClass="col-xs-12"
+										value="#{ambientesVirtualesAvaBean.idEstatusMasivoSeleccionado}">
+										<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+										<f:selectItems
+											value="#{ambientesVirtualesAvaBean.opcionesMasivoEstatusAva}" />
+									</p:selectOneMenu>
+								</div>
+							</div>
+
+							<div class="row" style="margin-top: 20px;">
+								<div class="col-md-12">
+									<p:commandButton value="Actualizar estatus"
+										styleClass="btn btn-primary pull-right"
+										update="@form"
+										actionListener="#{ambientesVirtualesAvaBean.actualizarCambioMasivoEstatusAva}"
+										process="@form">
+										<p:confirm header="Confirmación"
+											message="¿Desea actualizar el estatus de los AVAs seleccionados?" />
+									</p:commandButton>
+								</div>
+							</div>
+						</p:outputPanel>
+					</p:outputPanel>
+				</f:validateBean>
+			</p:panel>
+
+			<p:confirmDialog global="true" styleClass="medidaModal"
+				closable="false">
+				<div class="row">
+					<div class="col-md-12">
+						<p:commandButton value="Aceptar" type="button"
+							styleClass="btn btn-primary pull-right ui-confirmdialog-yes" />
+						<p:commandButton value="Cancelar" type="button"
+							styleClass="btn btn-default pull-right ui-confirmdialog-no" />
+					</div>
+				</div>
+			</p:confirmDialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

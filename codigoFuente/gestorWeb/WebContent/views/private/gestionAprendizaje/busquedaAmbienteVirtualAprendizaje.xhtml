@@ -18,6 +18,17 @@
 			<h1>#{sistema.obtenerTexto('gw.titulo.ambientes.texto.ava.parentesis')}</h1>
 			<hr />
 
+			<div class="row" style="margin-bottom: 15px;">
+				<div class="col-md-12">
+					<p:commandButton id="btnCambioMasivoEstatusAva" process="@this"
+						ajax="false" immediate="true"
+						styleClass="btn btn-default pull-right"
+						style="width: auto; min-width: 210px; white-space: normal; line-height: 18px;"
+						action="#{ambientesVirtualesAvaBean.navegarCambioMasivoEstatusAva}"
+						value="Cambio masivo de estatus" />
+				</div>
+			</div>
+
 			<!-- Panel búsqueda de ambientes virtuales -->
 			<p:panel id="fldBusqueda"
 				header="#{sistema.obtenerTexto('gw.ga.panel.ava')}"
