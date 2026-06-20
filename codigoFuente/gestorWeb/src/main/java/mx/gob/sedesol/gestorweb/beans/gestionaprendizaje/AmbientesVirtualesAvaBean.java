@@ -1,9 +1,11 @@
 package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.ValueChangeEvent;
+import javax.faces.model.SelectItem;
 
 import org.apache.log4j.Logger;
 import org.primefaces.model.DefaultTreeNode;
@@ -23,6 +26,8 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.AmbienteVirtualAprendizajeDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.UnidadOaAvaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PersonaResponsabilidadesDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProgramaEventoEstatusDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReponsableProduccionEcDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.MallaCurricularDTO;
 import mx.gob.sedesol.basegestor.commons.utils.CatGestionAprendizajeEnum;
@@ -202,6 +207,18 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 		
 	private List<CatalogoComunDTO> catEstadoEventoCapacitacion;
 
+	private List<String> filtroMasivoPlanPrograma;
+	private String filtroMasivoAnioPeriodo;
+	private String filtroMasivoNumeroElementos;
+	private Integer idEstatusMasivoSeleccionado;
+	private List<SelectItem> opcionesMasivoPlanPrograma;
+	private List<SelectItem> opcionesMasivoAnioPeriodo;
+	private List<SelectItem> opcionesMasivoNumeroElementos;
+	private List<SelectItem> opcionesMasivoEstatusAva;
+	private List<AmbienteVirtualAprendizajeDTO> resultadosMasivoEstatusAva;
+	private Map<Integer, ProgramaEventoEstatusDTO> infoMasivoPorEvento;
+	private boolean busquedaMasivaEjecutada;
+
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public void init() {
@@ -248,6 +265,292 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 		this.generaCatEjesCapacitBusqueda();
 		
 		this.generaEstructuraCatPlanes();
+		this.inicializarCambioMasivoEstatusAva();
+	}
+
+	private void inicializarCambioMasivoEstatusAva() {
+		filtroMasivoPlanPrograma = new ArrayList<String>();
+		filtroMasivoAnioPeriodo = null;
+		filtroMasivoNumeroElementos = null;
+		idEstatusMasivoSeleccionado = null;
+		resultadosMasivoEstatusAva = new ArrayList<AmbienteVirtualAprendizajeDTO>();
+		infoMasivoPorEvento = new HashMap<Integer, ProgramaEventoEstatusDTO>();
+		busquedaMasivaEjecutada = false;
+		cargarOpcionesCambioMasivoEstatusAva();
+	}
+
+	public String navegarCambioMasivoEstatusAva() {
+		return ConstantesGestorWeb.NAVEGA_CAMBIO_MASIVO_ESTATUS_AVA;
+	}
+
+	public String regresarBusquedaAmbientesVirtuales() {
+		return ConstantesGestorWeb.NAVEGA_AMBIENTES_VIRTUALES_APRENDIZAJE;
+	}
+
+	public void limpiarCamposCambioMasivoEstatusAva() {
+		filtroMasivoPlanPrograma = new ArrayList<String>();
+		filtroMasivoAnioPeriodo = null;
+		filtroMasivoNumeroElementos = null;
+		idEstatusMasivoSeleccionado = null;
+		resultadosMasivoEstatusAva = new ArrayList<AmbienteVirtualAprendizajeDTO>();
+		infoMasivoPorEvento = new HashMap<Integer, ProgramaEventoEstatusDTO>();
+		busquedaMasivaEjecutada = false;
+	}
+
+	public void buscarCambioMasivoEstatusAva() {
+		busquedaMasivaEjecutada = true;
+		idEstatusMasivoSeleccionado = null;
+		resultadosMasivoEstatusAva = new ArrayList<AmbienteVirtualAprendizajeDTO>();
+		infoMasivoPorEvento = new HashMap<Integer, ProgramaEventoEstatusDTO>();
+
+		if (ObjectUtils.isNullOrEmpty(filtroMasivoPlanPrograma) || ObjectUtils.isNull(filtroMasivoAnioPeriodo)
+				|| ObjectUtils.isNull(filtroMasivoNumeroElementos)) {
+			agregarMsgError("Debes seleccionar Plan / Programa, Año del periodo y Número de elementos.", null);
+			return;
+		}
+
+		List<Integer> idsPrograma = new ArrayList<Integer>();
+		for (String idPrograma : filtroMasivoPlanPrograma) {
+			if (!ObjectUtils.isNullOrEmpty(idPrograma)) {
+				idsPrograma.add(Integer.valueOf(idPrograma));
+			}
+		}
+
+		List<ProgramaEventoEstatusDTO> eventos = eventoCapacitacionServiceFacade.buscarEventosParaCambioEstatus(
+				filtroMasivoAnioPeriodo, filtroMasivoNumeroElementos, idsPrograma);
+		if (ObjectUtils.isNullOrEmpty(eventos)) {
+			return;
+		}
+
+		List<Integer> idsEvento = new ArrayList<Integer>();
+		for (ProgramaEventoEstatusDTO evento : eventos) {
+			if (evento != null && evento.getIdEvento() != null) {
+				Integer idEvento = evento.getIdEvento().intValue();
+				idsEvento.add(idEvento);
+				infoMasivoPorEvento.put(idEvento, evento);
+			}
+		}
+
+		if (!ObjectUtils.isNullOrEmpty(idsEvento)) {
+			resultadosMasivoEstatusAva = ambienteVirtualApService.obtenerAvasPorIdEventos(idsEvento);
+		}
+	}
+
+	public void actualizarCambioMasivoEstatusAva() {
+		if (ObjectUtils.isNull(idEstatusMasivoSeleccionado)) {
+			agregarMsgError("Debes seleccionar el estatus a cambiar.", null);
+			return;
+		}
+		List<AmbienteVirtualAprendizajeDTO> seleccionados = obtenerAvasSeleccionadosCambioMasivo();
+		if (ObjectUtils.isNullOrEmpty(seleccionados)) {
+			agregarMsgError("Debes seleccionar al menos un AVA.", null);
+			return;
+		}
+
+		int actualizados = 0;
+		int omitidos = 0;
+		for (AmbienteVirtualAprendizajeDTO ava : seleccionados) {
+			if (procesarCambioMasivoEstatusAva(ava)) {
+				actualizados++;
+			} else {
+				omitidos++;
+			}
+		}
+
+		agregarMsgInfo("AVAs actualizados: " + actualizados + ". AVAs omitidos: " + omitidos + ".", null);
+		buscarCambioMasivoEstatusAva();
+	}
+
+	private List<AmbienteVirtualAprendizajeDTO> obtenerAvasSeleccionadosCambioMasivo() {
+		List<AmbienteVirtualAprendizajeDTO> seleccionados = new ArrayList<AmbienteVirtualAprendizajeDTO>();
+		if (ObjectUtils.isNullOrEmpty(resultadosMasivoEstatusAva)) {
+			return seleccionados;
+		}
+		for (AmbienteVirtualAprendizajeDTO ava : resultadosMasivoEstatusAva) {
+			if (ava != null && ava.isSeleccionado()) {
+				seleccionados.add(ava);
+			}
+		}
+		return seleccionados;
+	}
+
+	private boolean procesarCambioMasivoEstatusAva(AmbienteVirtualAprendizajeDTO ava) {
+		try {
+			AmbienteVirtualAprendizajeDTO avaCompleto = ambienteVirtualApService.findAvaById(ava.getId());
+			if (avaCompleto == null) {
+				agregarMsgError("No se encontró el AVA seleccionado.", null);
+				return false;
+			}
+			if (EstatusAmbienteVirtualAprendizajeEnum.ACTIVO.getId().equals(idEstatusMasivoSeleccionado)) {
+				if (!validaAutonomo(avaCompleto)) {
+					agregarMsgError("Solo se pueden activar AVAs en construcción o inactivos y autónomos.", null);
+					return false;
+				}
+				return activarAva(avaCompleto) != null;
+			}
+			if (EstatusAmbienteVirtualAprendizajeEnum.INACTIVO.getId().equals(idEstatusMasivoSeleccionado)) {
+				if (avaCompleto.getEventoCapacitacion() == null
+						|| validaActasCerradas(avaCompleto.getEventoCapacitacion().getIdEvento())) {
+					agregarMsgError("No se puede inactivar el AVA porque no tiene evento o sus actas ya están cerradas.",
+							null);
+					return false;
+				}
+				desactivarAVA(avaCompleto);
+				return true;
+			}
+			if (EstatusAmbienteVirtualAprendizajeEnum.EN_CONSTRUCCION.getId().equals(idEstatusMasivoSeleccionado)) {
+				asignarUsuarioSesionComoResponsableProduccion(avaCompleto);
+				if (!validaSiAvaTieneRespProduccion(avaCompleto)) {
+					agregarMsgError("No se pudo asignar responsable de producción al AVA.", null);
+					return false;
+				}
+				porcesarAvaCambioEstatusConstruccion(avaCompleto);
+				return true;
+			}
+
+			return actualizarEstatusAvaSinAccionMoodle(avaCompleto, idEstatusMasivoSeleccionado);
+		} catch (Exception e) {
+			logger.error("Ocurrio un error al cambiar el estatus masivo del AVA " + ava.getId(), e);
+			return false;
+		}
+	}
+
+	private boolean actualizarEstatusAvaSinAccionMoodle(AmbienteVirtualAprendizajeDTO ava, Integer idEstatusAva) {
+		ava.setCatEstadoAva(obtenerEstatusAva(idEstatusAva, estadoAvaList));
+		ava.setUsuarioModifico(usuarioSessionDTO.getIdPersona());
+		ava.setFechaActualizacion(new Date());
+		ResultadoDTO<AmbienteVirtualAprendizajeDTO> resultado = ambienteVirtualApService.actualizar(ava);
+		return resultado != null && resultado.esCorrecto();
+	}
+
+	private void asignarUsuarioSesionComoResponsableProduccion(AmbienteVirtualAprendizajeDTO ava) {
+		if (validaSiAvaTieneRespProduccion(ava)) {
+			return;
+		}
+		if (ava == null || ava.getEventoCapacitacion() == null || ava.getEventoCapacitacion().getIdEvento() == null) {
+			return;
+		}
+		List<ReponsableProduccionEcDTO> responsablesEvento = relReponsableProduccionEcService.getResponsableDelEvento(
+				ava.getEventoCapacitacion().getIdEvento(), TipoResponsabilidadEnum.RESPONSABLE_DE_PRODUCCION.getId());
+		if (!ObjectUtils.isNullOrEmpty(responsablesEvento)) {
+			ava.getEventoCapacitacion().setResponsableProduccion(responsablesEvento.get(0));
+			return;
+		}
+		PersonaResponsabilidadesDTO responsable = obtenerResponsabilidadProduccionUsuarioSesion();
+		if (responsable == null || ava.getEventoCapacitacion() == null) {
+			return;
+		}
+		ReponsableProduccionEcDTO responsableEvento = new ReponsableProduccionEcDTO();
+		responsableEvento.setEventoCapacitacion(ava.getEventoCapacitacion());
+		responsableEvento.setPersonaResponsabilidad(responsable);
+		responsableEvento.setEsResponsablePrincipal(Boolean.TRUE);
+		responsableEvento.setFechaRegistro(new Date());
+		responsableEvento.setFechaActualizacion(new Date());
+		responsableEvento.setUsuarioModifico(BigInteger.valueOf(usuarioSessionDTO.getIdPersona()));
+		ResultadoDTO<ReponsableProduccionEcDTO> resultado = relReponsableProduccionEcService.guardar(responsableEvento);
+		if (resultado != null && resultado.esCorrecto()) {
+			ava.getEventoCapacitacion().setResponsableProduccion(responsableEvento);
+		}
+	}
+
+	private PersonaResponsabilidadesDTO obtenerResponsabilidadProduccionUsuarioSesion() {
+		List<PersonaResponsabilidadesDTO> responsables = eventoCapacitacionServiceFacade
+				.obtienePersonasPorResponsabilidad(TipoResponsabilidadEnum.RESPONSABLE_DE_PRODUCCION.getId());
+		if (ObjectUtils.isNullOrEmpty(responsables)) {
+			return null;
+		}
+		for (PersonaResponsabilidadesDTO responsable : responsables) {
+			if (responsable != null && responsable.getTblPersona() != null
+					&& usuarioSessionDTO.getIdPersona().equals(responsable.getTblPersona().getIdPersona())) {
+				return responsable;
+			}
+		}
+		return null;
+	}
+
+	private void cargarOpcionesCambioMasivoEstatusAva() {
+		cargarOpcionesMasivoPlanPrograma();
+		cargarOpcionesMasivoAnioPeriodo();
+		cargarOpcionesMasivoNumeroElementos();
+		cargarOpcionesMasivoEstatusAva();
+	}
+
+	private void cargarOpcionesMasivoPlanPrograma() {
+		opcionesMasivoPlanPrograma = new ArrayList<SelectItem>();
+		List<ProgramaEventoEstatusDTO> programas = eventoCapacitacionServiceFacade.obtenerProgramasConEventosParaCambioEstatus();
+		if (ObjectUtils.isNullOrEmpty(programas)) {
+			return;
+		}
+		for (ProgramaEventoEstatusDTO programa : programas) {
+			if (programa == null || programa.getIdPrograma() == null) {
+				continue;
+			}
+			StringBuilder etiqueta = new StringBuilder();
+			etiqueta.append(programa.getPlan() != null ? programa.getPlan() : "Sin plan");
+			etiqueta.append(" / ");
+			etiqueta.append(programa.getSemestre() != null ? programa.getSemestre() : "-");
+			etiqueta.append(" / ");
+			etiqueta.append(programa.getBloque() != null ? programa.getBloque() : "-");
+			etiqueta.append(" / ");
+			etiqueta.append(programa.getPrograma() != null ? programa.getPrograma() : "Sin programa");
+			opcionesMasivoPlanPrograma.add(new SelectItem(String.valueOf(programa.getIdPrograma()), etiqueta.toString()));
+		}
+	}
+
+	private void cargarOpcionesMasivoAnioPeriodo() {
+		opcionesMasivoAnioPeriodo = new ArrayList<SelectItem>();
+		int anioActual = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
+		for (int anio = anioActual - 10; anio <= anioActual + 10; anio++) {
+			opcionesMasivoAnioPeriodo.add(new SelectItem(String.valueOf(anio), String.valueOf(anio)));
+		}
+	}
+
+	private void cargarOpcionesMasivoNumeroElementos() {
+		opcionesMasivoNumeroElementos = new ArrayList<SelectItem>();
+		for (int numero = 1; numero <= 12; numero++) {
+			opcionesMasivoNumeroElementos.add(new SelectItem(String.valueOf(numero), String.valueOf(numero)));
+		}
+	}
+
+	private void cargarOpcionesMasivoEstatusAva() {
+		opcionesMasivoEstatusAva = new ArrayList<SelectItem>();
+		if (ObjectUtils.isNullOrEmpty(estadoAvaList)) {
+			return;
+		}
+		for (CatalogoComunDTO estatus : estadoAvaList) {
+			if (estatus == null || estatus.getId() == null) {
+				continue;
+			}
+			opcionesMasivoEstatusAva.add(new SelectItem(estatus.getId(), estatus.getNombre()));
+		}
+	}
+
+	public String obtenerPlanCambioMasivo(AmbienteVirtualAprendizajeDTO ava) {
+		ProgramaEventoEstatusDTO info = obtenerInfoCambioMasivo(ava);
+		return info != null ? info.getPlan() : "";
+	}
+
+	public String obtenerProgramaCambioMasivo(AmbienteVirtualAprendizajeDTO ava) {
+		ProgramaEventoEstatusDTO info = obtenerInfoCambioMasivo(ava);
+		return info != null ? info.getPrograma() : "";
+	}
+
+	public String obtenerSemestreCambioMasivo(AmbienteVirtualAprendizajeDTO ava) {
+		ProgramaEventoEstatusDTO info = obtenerInfoCambioMasivo(ava);
+		return info != null ? info.getSemestre() : "";
+	}
+
+	public String obtenerBloqueCambioMasivo(AmbienteVirtualAprendizajeDTO ava) {
+		ProgramaEventoEstatusDTO info = obtenerInfoCambioMasivo(ava);
+		return info != null ? info.getBloque() : "";
+	}
+
+	private ProgramaEventoEstatusDTO obtenerInfoCambioMasivo(AmbienteVirtualAprendizajeDTO ava) {
+		if (ava == null || ava.getEventoCapacitacion() == null || ava.getEventoCapacitacion().getIdEvento() == null
+				|| infoMasivoPorEvento == null) {
+			return null;
+		}
+		return infoMasivoPorEvento.get(ava.getEventoCapacitacion().getIdEvento());
 	}
 
 	private List<AmbienteVirtualAprendizajeDTO> obtenerAmbientesvirtualAprendizaje(Integer idEstatusAva,
@@ -377,7 +680,7 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 		
 		if (resultado.esCorrecto() || resultado.getResultado().equals(ResultadoTransaccionEnum.EXITOSO)) {
 			try {
-				mostrarCursoLms(ambienteVirtualAprendizajeDTO);
+				mostrarCursoLms(obtenerAvaConDatosMoodle(resultado.getDto(), ambienteVirtualAprendizajeDTO));
 				bitacoraBean.guardarBitacora(idPersonaEnSesion(), "ACT_AVA", String.valueOf(resultado.getDto().getId()),
 						requestActual(), TipoServicioEnum.LOCAL);
 				
@@ -395,8 +698,21 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 	}
 	
 	public void mostrarCursoLms(AmbienteVirtualAprendizajeDTO ambienteVirtualAprendizajeDTO) throws ErrorWS {
+		if (ambienteVirtualAprendizajeDTO == null || ambienteVirtualAprendizajeDTO.getPlataformaMoodle() == null
+				|| ambienteVirtualAprendizajeDTO.getIdCursoLms() == null) {
+			throw new ErrorWS("No se encontraron los datos de Moodle del AVA.");
+		}
 		CursoWS cursoWS = new CursoWS(ambienteVirtualAprendizajeDTO.getPlataformaMoodle());
 		cursoWS.mostrarCurso(ambienteVirtualAprendizajeDTO.getIdCursoLms());
+	}
+
+	private AmbienteVirtualAprendizajeDTO obtenerAvaConDatosMoodle(AmbienteVirtualAprendizajeDTO avaActualizado,
+			AmbienteVirtualAprendizajeDTO avaOriginal) {
+		if (avaActualizado != null && avaActualizado.getPlataformaMoodle() != null
+				&& avaActualizado.getIdCursoLms() != null) {
+			return avaActualizado;
+		}
+		return avaOriginal;
 	}
 	
 	private CatalogoComunDTO obtenerEdoEventoCapacitacionPorEnum(EstadoEventoCapEnum estadoEventoCapEnum) {
@@ -443,7 +759,9 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 	private Boolean validaSiAvaTieneRespProduccion(AmbienteVirtualAprendizajeDTO ambienteVirtualAprendizajeDTO) {
 		Boolean avaTieneRespConstruccion = Boolean.FALSE;
 
-		if (ObjectUtils.isNotNull(ambienteVirtualAprendizajeDTO.getEventoCapacitacion().getResponsableProduccion())) {
+		if (ObjectUtils.isNotNull(ambienteVirtualAprendizajeDTO)
+				&& ObjectUtils.isNotNull(ambienteVirtualAprendizajeDTO.getEventoCapacitacion())
+				&& ObjectUtils.isNotNull(ambienteVirtualAprendizajeDTO.getEventoCapacitacion().getResponsableProduccion())) {
 			avaTieneRespConstruccion = Boolean.TRUE;
 		}
 
@@ -975,9 +1293,12 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 	
 	public Boolean validaAutonomo(AmbienteVirtualAprendizajeDTO ambienteVirtualAprendizajeDTO) {
 		Boolean esVisible = Boolean.FALSE;
-		if (ObjectUtils.isNotNull(ambienteVirtualAprendizajeDTO)) {
-			if(ambienteVirtualAprendizajeDTO.getCatEstadoAva().getNombre().equals("En construcción") 
-					&& ambienteVirtualAprendizajeDTO.getAutonomo()==1){
+		if (ObjectUtils.isNotNull(ambienteVirtualAprendizajeDTO)
+				&& ObjectUtils.isNotNull(ambienteVirtualAprendizajeDTO.getCatEstadoAva())) {
+			Integer idEstadoAva = ambienteVirtualAprendizajeDTO.getCatEstadoAva().getId();
+			if ((EstatusAmbienteVirtualAprendizajeEnum.EN_CONSTRUCCION.getId().equals(idEstadoAva)
+					|| EstatusAmbienteVirtualAprendizajeEnum.INACTIVO.getId().equals(idEstadoAva))
+					&& Integer.valueOf(1).equals(ambienteVirtualAprendizajeDTO.getAutonomo())) {
 				esVisible = Boolean.TRUE;
 			}
 		}
@@ -1011,7 +1332,6 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 		}
 		this.validaMensajeResultadoTransaccion(resultado.getMensajes(), resultado.getResultado());
 		logger.info("El resultado de la actualizacion del AVA fue " + resultado.getResultado());
-
 	}
 
 	/**
@@ -1573,6 +1893,86 @@ public class AmbientesVirtualesAvaBean extends BaseBean {
 
 	public void setEsEstatusAvaVisible(Boolean esEstatusAvaVisible) {
 		this.esEstatusAvaVisible = esEstatusAvaVisible;
+	}
+
+	public List<String> getFiltroMasivoPlanPrograma() {
+		return filtroMasivoPlanPrograma;
+	}
+
+	public void setFiltroMasivoPlanPrograma(List<String> filtroMasivoPlanPrograma) {
+		this.filtroMasivoPlanPrograma = filtroMasivoPlanPrograma;
+	}
+
+	public String getFiltroMasivoAnioPeriodo() {
+		return filtroMasivoAnioPeriodo;
+	}
+
+	public void setFiltroMasivoAnioPeriodo(String filtroMasivoAnioPeriodo) {
+		this.filtroMasivoAnioPeriodo = filtroMasivoAnioPeriodo;
+	}
+
+	public String getFiltroMasivoNumeroElementos() {
+		return filtroMasivoNumeroElementos;
+	}
+
+	public void setFiltroMasivoNumeroElementos(String filtroMasivoNumeroElementos) {
+		this.filtroMasivoNumeroElementos = filtroMasivoNumeroElementos;
+	}
+
+	public Integer getIdEstatusMasivoSeleccionado() {
+		return idEstatusMasivoSeleccionado;
+	}
+
+	public void setIdEstatusMasivoSeleccionado(Integer idEstatusMasivoSeleccionado) {
+		this.idEstatusMasivoSeleccionado = idEstatusMasivoSeleccionado;
+	}
+
+	public List<SelectItem> getOpcionesMasivoPlanPrograma() {
+		return opcionesMasivoPlanPrograma;
+	}
+
+	public void setOpcionesMasivoPlanPrograma(List<SelectItem> opcionesMasivoPlanPrograma) {
+		this.opcionesMasivoPlanPrograma = opcionesMasivoPlanPrograma;
+	}
+
+	public List<SelectItem> getOpcionesMasivoAnioPeriodo() {
+		return opcionesMasivoAnioPeriodo;
+	}
+
+	public void setOpcionesMasivoAnioPeriodo(List<SelectItem> opcionesMasivoAnioPeriodo) {
+		this.opcionesMasivoAnioPeriodo = opcionesMasivoAnioPeriodo;
+	}
+
+	public List<SelectItem> getOpcionesMasivoNumeroElementos() {
+		return opcionesMasivoNumeroElementos;
+	}
+
+	public void setOpcionesMasivoNumeroElementos(List<SelectItem> opcionesMasivoNumeroElementos) {
+		this.opcionesMasivoNumeroElementos = opcionesMasivoNumeroElementos;
+	}
+
+	public List<SelectItem> getOpcionesMasivoEstatusAva() {
+		return opcionesMasivoEstatusAva;
+	}
+
+	public void setOpcionesMasivoEstatusAva(List<SelectItem> opcionesMasivoEstatusAva) {
+		this.opcionesMasivoEstatusAva = opcionesMasivoEstatusAva;
+	}
+
+	public List<AmbienteVirtualAprendizajeDTO> getResultadosMasivoEstatusAva() {
+		return resultadosMasivoEstatusAva;
+	}
+
+	public void setResultadosMasivoEstatusAva(List<AmbienteVirtualAprendizajeDTO> resultadosMasivoEstatusAva) {
+		this.resultadosMasivoEstatusAva = resultadosMasivoEstatusAva;
+	}
+
+	public boolean isBusquedaMasivaEjecutada() {
+		return busquedaMasivaEjecutada;
+	}
+
+	public void setBusquedaMasivaEjecutada(boolean busquedaMasivaEjecutada) {
+		this.busquedaMasivaEjecutada = busquedaMasivaEjecutada;
 	}
 
 	public BitacoraBean getBitacoraBean() {
