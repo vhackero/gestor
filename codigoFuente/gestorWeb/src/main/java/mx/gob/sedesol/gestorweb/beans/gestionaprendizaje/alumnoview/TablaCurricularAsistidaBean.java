@@ -13,8 +13,10 @@ import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import javax.faces.component.UIComponent;
 
 import org.apache.log4j.Logger;
+import org.primefaces.event.TabChangeEvent;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ResultadoSimulacionDTO;
@@ -46,6 +48,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private boolean vistaGestor;
     private String nombrePersonaObjetivo;
     private String matriculaPersonaObjetivo;
+    private String accionPanelSeleccionada;
+    private String respuestaAccionPanel;
+    private String preguntaOrientacionSeleccionada;
+    private String respuestaPreguntaOrientacion;
+    private int indiceTabActiva;
 
     @PostConstruct
     public void init() {
@@ -58,6 +65,8 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             matriculaPersonaObjetivo = trayectoriaAcademicaContextoBean.resolverMatriculaObjetivo(getUsuarioEnSession().getUsuario());
             contexto = asistenteInscripcionService.obtenerContextoAsistido(idPersona);
             construirSemestres();
+            inicializarRespuestasContextuales();
+            indiceTabActiva = 0;
         } catch (InscripcionException e) {
             logger.error("Error al obtener contexto asistido de inscripción.", e);
             mensajeError = e.getMessage();
@@ -93,6 +102,24 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             semestres.add(semestre);
         }
         inicializarSeleccionSugerida();
+    }
+
+    private void inicializarRespuestasContextuales() {
+        List<String> acciones = getAccionesPanelContextual();
+        if (!acciones.isEmpty()) {
+            seleccionarAccionPanel(acciones.get(0));
+        } else {
+            accionPanelSeleccionada = "Resumen contextual";
+            respuestaAccionPanel = construirRespuestaAccionPanel(accionPanelSeleccionada);
+        }
+
+        List<String> preguntas = getPreguntasRapidasOrientacion();
+        if (!preguntas.isEmpty()) {
+            seleccionarPreguntaOrientacion(preguntas.get(0));
+        } else {
+            preguntaOrientacionSeleccionada = getPreguntaPrincipalOrientacion();
+            respuestaPreguntaOrientacion = construirRespuestaOrientacion(preguntaOrientacionSeleccionada);
+        }
     }
 
     private List<UnidadDecisionInscripcionDTO> filtrarUnidadesSimulador(List<UnidadDecisionInscripcionDTO> unidades) {
@@ -481,6 +508,28 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                 : "Usa el simulador para validar la combinación elegida antes de pasar a inscripción.";
     }
 
+    public int getIndiceTabActiva() {
+        return indiceTabActiva;
+    }
+
+    public void setIndiceTabActiva(int indiceTabActiva) {
+        this.indiceTabActiva = indiceTabActiva;
+    }
+
+    public void onTabChange(TabChangeEvent event) {
+        if (event == null || event.getTab() == null || event.getTab().getParent() == null) {
+            return;
+        }
+        UIComponent parent = event.getTab().getParent();
+        List<UIComponent> children = parent.getChildren();
+        for (int i = 0; i < children.size(); i++) {
+            if (children.get(i) == event.getTab()) {
+                indiceTabActiva = i;
+                return;
+            }
+        }
+    }
+
     public boolean isPermiteValidacionFinal() {
         return !esPeriodoCursamiento();
     }
@@ -717,6 +766,19 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                 : "Tu reinscripción prioriza regularizar las UD pendientes ofertadas.";
     }
 
+    public void seleccionarAccionPanel(String accion) {
+        accionPanelSeleccionada = accion;
+        respuestaAccionPanel = construirRespuestaAccionPanel(accion);
+    }
+
+    public String getAccionPanelSeleccionada() {
+        return accionPanelSeleccionada;
+    }
+
+    public String getRespuestaAccionPanel() {
+        return respuestaAccionPanel;
+    }
+
     public List<String> getPreguntasRapidasOrientacion() {
         List<String> preguntas = new ArrayList<String>();
         if (vistaGestor) {
@@ -741,6 +803,19 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return preguntas;
     }
 
+    public void seleccionarPreguntaOrientacion(String pregunta) {
+        preguntaOrientacionSeleccionada = pregunta;
+        respuestaPreguntaOrientacion = construirRespuestaOrientacion(pregunta);
+    }
+
+    public String getPreguntaOrientacionSeleccionada() {
+        return preguntaOrientacionSeleccionada;
+    }
+
+    public String getRespuestaPreguntaOrientacion() {
+        return respuestaPreguntaOrientacion;
+    }
+
     public String getPreguntaPrincipalOrientacion() {
         if (vistaGestor) {
             return esPeriodoCursamiento()
@@ -753,31 +828,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getRespuestaPrincipalOrientacion() {
-        if (vistaGestor) {
-            return esPeriodoCursamiento()
-                    ? "Respuesta sugerida para el estudiante:\n"
-                    + "Tu situación académica requiere seguimiento porque tienes " + getConteoUdPendientesPanel() + " UD pendientes.\n"
-                    + "Durante este periodo no puedes modificar tu carga final, pero sí dar seguimiento a las UD en curso y preparar el siguiente proceso de inscripción.\n"
-                    + "Siguiente acción: mantener evidencia del avance, registrar incidencias y revisar las UD prioritarias que condicionarán tu reinscripción."
-                    : "Respuesta sugerida para el estudiante:\n"
-                    + "Tu situación académica es irregular porque tienes " + getConteoUdPendientesPanel() + " UD no acreditadas.\n"
-                    + "Causa: no aprobación en ciclos anteriores.\n"
-                    + "Regla aplicada: para reinscripción solo puedes seleccionar UD prioritarias y la carga máxima permitida es de " + getCargaMaximaPanel() + " UD.\n"
-                    + "Siguiente acción: selecciona tus UD prioritarias para regularizarte. Si requieres apoyo, agenda una asesoría académica.";
-        }
-        if (esPeriodoCursamiento()) {
-            return "Durante cursamiento activo puedes revisar tu avance y preparar la siguiente inscripción. "
-                    + "La selección final se habilitará solo con proceso activo.";
-        }
-        return "Estás irregular porque tienes " + getConteoUdPendientesPanel()
-                + " UD pendientes que no han sido acreditadas.\n"
-                + "1. Registra primero las " + getConteoUdPendientesPanel()
-                + " UD pendientes obligatorias para cumplir con los requisitos de tu plan de estudios.\n"
-                + "2. Si tu carga lo permite, puedes elegir hasta "
-                + Math.max(0, getCargaMaximaPanel() - getTotalObligatoriasSeleccionadas())
-                + " UD adicionales disponibles y compatibles con tu trayectoria.\n"
-                + "3. Verifica que no existan choques de horario y que cumplas con las seriaciones requeridas.\n\n"
-                + "Al completar estos pasos podrás avanzar en tu trayectoria y mantener la continuidad académica.";
+        return construirRespuestaOrientacion(getPreguntaPrincipalOrientacion());
     }
 
     public String getMensajeEscalamientoAcademico() {
@@ -793,6 +844,227 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public String getTextoBotonEscalamiento() {
         return vistaGestor ? (esPeriodoCursamiento() ? "Registrar seguimiento" : "Registrar seguimiento") : "Ver detalle";
+    }
+
+    private String construirRespuestaAccionPanel(String accion) {
+        if (accion == null || accion.trim().isEmpty()) {
+            return construirResumenContextual();
+        }
+        if ("Resumen técnico".equalsIgnoreCase(accion) || "Consultar detalle".equalsIgnoreCase(accion)) {
+            return construirResumenContextual();
+        }
+        if ("Regla aplicada".equalsIgnoreCase(accion) || "Validar seriación".equalsIgnoreCase(accion)) {
+            return construirRespuestaReglaAplicada();
+        }
+        if ("Paquete de evidencia".equalsIgnoreCase(accion)) {
+            return construirRespuestaPaqueteEvidencia();
+        }
+        if ("Mensaje sugerido".equalsIgnoreCase(accion)) {
+            return construirRespuestaMensajeSugerido();
+        }
+        if ("¿Cómo voy?".equalsIgnoreCase(accion) || "¿Qué debo elegir?".equalsIgnoreCase(accion)) {
+            return construirRespuestaProgresoEstudiante();
+        }
+        if ("¿Qué debo cuidar?".equalsIgnoreCase(accion)) {
+            return construirRespuestaCuidadosEstudiante();
+        }
+        if ("Preparar próximo periodo".equalsIgnoreCase(accion) || "Simular carga".equalsIgnoreCase(accion)) {
+            return construirRespuestaPreparacionPeriodo();
+        }
+        if ("Confirmar selección".equalsIgnoreCase(accion)) {
+            return construirRespuestaConfirmacionSeleccion();
+        }
+        return construirResumenContextual();
+    }
+
+    private String construirRespuestaOrientacion(String pregunta) {
+        if (pregunta == null || pregunta.trim().isEmpty()) {
+            return construirRespuestaPrincipalBase();
+        }
+        if ("Resumen técnico".equalsIgnoreCase(pregunta)) {
+            return construirResumenContextual();
+        }
+        if ("Regla aplicada".equalsIgnoreCase(pregunta)) {
+            return construirRespuestaReglaAplicada();
+        }
+        if ("Paquete de evidencia".equalsIgnoreCase(pregunta)) {
+            return construirRespuestaPaqueteEvidencia();
+        }
+        if ("Mensaje sugerido".equalsIgnoreCase(pregunta)) {
+            return construirRespuestaMensajeSugerido();
+        }
+        if ("¿Por qué soy irregular?".equalsIgnoreCase(pregunta)) {
+            return construirRespuestaIrregularidad();
+        }
+        if ("¿Qué UD debo registrar primero?".equalsIgnoreCase(pregunta) || "¿Qué UD debo registrar?".equalsIgnoreCase(pregunta)) {
+            return construirRespuestaUdPrimero();
+        }
+        if ("¿Puedo tomar más UD?".equalsIgnoreCase(pregunta) || "¿Puedo agregar otra UD?".equalsIgnoreCase(pregunta)) {
+            return construirRespuestaCargaAdicional();
+        }
+        if ("¿Qué pasa si acredito todo?".equalsIgnoreCase(pregunta)) {
+            return construirRespuestaAcreditaTodo();
+        }
+        if ("Necesito revisión académica".equalsIgnoreCase(pregunta) || "Ver detalle".equalsIgnoreCase(pregunta)) {
+            return construirRespuestaRevisionDetalle();
+        }
+        return construirRespuestaPrincipalBase();
+    }
+
+    private String construirRespuestaPrincipalBase() {
+        if (vistaGestor) {
+            return construirRespuestaMensajeSugerido();
+        }
+        if (esPeriodoCursamiento()) {
+            return construirRespuestaPreparacionPeriodo();
+        }
+        return construirRespuestaIrregularidad();
+    }
+
+    private String construirResumenContextual() {
+        StringBuilder texto = new StringBuilder();
+        texto.append("Situación actual: ").append(valorTexto(contexto != null ? contexto.getSituacionAcademicaPeriodo() : null, "Sin clasificar")).append(". ");
+        texto.append("Periodo: ").append(getEtiquetaPeriodoContextual()).append(". ");
+        texto.append("Riesgo estimado: ").append(obtenerNivelRiesgo()).append(". ");
+        texto.append("UD pendientes: ").append(getConteoUdPendientesPanel()).append(". ");
+        if (getConteoSeriacionPanel() > 0) {
+            texto.append("Hay ").append(getConteoSeriacionPanel()).append(" UD con restricción por seriación. ");
+        } else {
+            texto.append("No se detectan bloqueos activos por seriación. ");
+        }
+        if (!getFilasUdPrioritarias().isEmpty()) {
+            FilaAsistidaDTO fila = getFilasUdPrioritarias().get(0);
+            texto.append("Primera UD de atención: ").append(valorTexto(fila.getAsignatura(), "Sin referencia"))
+                    .append(" con acción sugerida ").append(valorTexto(fila.getAccionSugerida(), "por definir")).append(".");
+        }
+        return texto.toString().trim();
+    }
+
+    private String construirRespuestaReglaAplicada() {
+        StringBuilder texto = new StringBuilder();
+        texto.append("Regla principal: ").append(getResumenReglaAplicada()).append(". ");
+        if (esPeriodoCursamiento()) {
+            texto.append("En cursamiento la regla se usa para seguimiento y preparación; no para confirmar inscripción. ");
+        } else {
+            texto.append("En inscripción la regla se usa para validar prioridad, seriación y carga máxima de ").append(getCargaMaximaPanel()).append(" UD. ");
+        }
+        if (getConteoSeriacionPanel() > 0) {
+            texto.append("La trayectoria presenta ").append(getConteoSeriacionPanel()).append(" caso(s) que requieren revisar seriación antes de cerrar decisión.");
+        } else {
+            texto.append("No hay bloqueos de seriación detectados en la recomendación actual.");
+        }
+        return texto.toString().trim();
+    }
+
+    private String construirRespuestaPaqueteEvidencia() {
+        StringBuilder texto = new StringBuilder();
+        texto.append("Para documentar el caso conviene integrar: estudiante ").append(valorTexto(matriculaPersonaObjetivo, "-"))
+                .append(", periodo ").append(valorTexto(contexto != null ? contexto.getPeriodoActivo() : null, "-"))
+                .append(", situación ").append(valorTexto(contexto != null ? contexto.getSituacionAcademicaPeriodo() : null, "-"))
+                .append(", riesgo ").append(obtenerNivelRiesgo()).append(", ");
+        texto.append("UD prioritarias ").append(getConteoUdPendientesPanel()).append(" y regla aplicada ").append(obtenerCodigoReglaAplicada()).append(". ");
+        if (!getFilasUdPrioritarias().isEmpty()) {
+            texto.append("Adjunta al menos la relación de UD causantes y la acción sugerida del motor académico.");
+        } else {
+            texto.append("No se identificaron UD prioritarias visibles; revisar consistencia de datos del contexto.");
+        }
+        return texto.toString().trim();
+    }
+
+    private String construirRespuestaMensajeSugerido() {
+        if (vistaGestor) {
+            if (esPeriodoCursamiento()) {
+                return "Mensaje sugerido para el estudiante: actualmente estás en periodo de cursamiento y tu seguimiento muestra "
+                        + getConteoUdPendientesPanel() + " UD pendientes. En este momento no se modifica la carga final; la recomendación es concluir las UD activas, registrar incidencias si aparecen y preparar tu siguiente inscripción con base en las UD prioritarias.";
+            }
+            return "Mensaje sugerido para el estudiante: tu reinscripción requiere atender primero "
+                    + getConteoUdPendientesPanel() + " UD prioritarias. La selección debe respetar la regla "
+                    + obtenerCodigoReglaAplicada() + " y la carga máxima de " + getCargaMaximaPanel()
+                    + " UD. Registra primero las obligatorias y después valida si hay margen para adicionales.";
+        }
+        return construirRespuestaIrregularidad();
+    }
+
+    private String construirRespuestaProgresoEstudiante() {
+        return "Vas en una situación " + valorTexto(contexto != null ? contexto.getSituacionAcademicaPeriodo() : null, "sin clasificar")
+                + " con " + getConteoUdPendientesPanel() + " UD pendientes y riesgo " + obtenerNivelRiesgo()
+                + ". Tu foco inmediato es mantener en control las UD activas y seguir la prioridad sugerida para no incrementar rezago.";
+    }
+
+    private String construirRespuestaCuidadosEstudiante() {
+        StringBuilder texto = new StringBuilder();
+        texto.append("Debes cuidar tres puntos: ");
+        texto.append("1) seriación");
+        if (getConteoSeriacionPanel() > 0) {
+            texto.append(" porque hay ").append(getConteoSeriacionPanel()).append(" restricción(es) activa(s)");
+        }
+        texto.append(", 2) carga máxima de ").append(getCargaMaximaPanel()).append(" UD, ");
+        texto.append("y 3) prioridad de las UD no acreditadas u obligatorias antes de agregar opciones adicionales.");
+        return texto.toString();
+    }
+
+    private String construirRespuestaPreparacionPeriodo() {
+        if (esPeriodoCursamiento()) {
+            return "Para preparar tu próximo periodo revisa desde ahora las UD prioritarias ofertadas, confirma si existe seriación pendiente y estima una carga de hasta "
+                    + getCargaMaximaPanel() + " UD. Si mantienes control de las UD en curso llegarás con una mejor combinación a la siguiente inscripción.";
+        }
+        return "El siguiente paso es depurar la selección: confirma obligatorias, revisa bloqueos por seriación y usa el simulador para validar que la carga propuesta sea consistente con tu trayectoria.";
+    }
+
+    private String construirRespuestaConfirmacionSeleccion() {
+        return "Antes de confirmar la selección valida que las UD obligatorias sigan marcadas, que la carga no exceda "
+                + getCargaMaximaPanel() + " UD y que no haya inconsistencias de seriación u oferta. La confirmación final debe hacerse sólo cuando la validación quede consistente.";
+    }
+
+    private String construirRespuestaIrregularidad() {
+        return "Tu situación aparece como " + valorTexto(contexto != null ? contexto.getSituacionAcademicaPeriodo() : null, "sin clasificar")
+                + " porque el contexto registra " + getConteoUdPendientesPanel() + " UD pendientes y un riesgo "
+                + obtenerNivelRiesgo() + ". La recomendación es regularizar primero las UD prioritarias para disminuir el impacto sobre tu siguiente periodo.";
+    }
+
+    private String construirRespuestaUdPrimero() {
+        List<FilaAsistidaDTO> filas = getFilasUdPrioritarias();
+        if (filas.isEmpty()) {
+            return "No hay UD prioritarias visibles en el contexto actual. Conviene revisar si la trayectoria ya quedó regularizada o si falta sincronizar información del motor académico.";
+        }
+        FilaAsistidaDTO primera = filas.get(0);
+        StringBuilder texto = new StringBuilder();
+        texto.append("Debes atender primero ").append(valorTexto(primera.getAsignatura(), "la UD prioritaria principal"));
+        if (primera.getClave() != null) {
+            texto.append(" (").append(primera.getClave()).append(")");
+        }
+        texto.append(" porque su prioridad está marcada como ").append(valorTexto(primera.getPrioridad(), "relevante"))
+                .append(" y la acción sugerida es ").append(valorTexto(primera.getAccionSugerida(), "dar seguimiento")).append(".");
+        return texto.toString();
+    }
+
+    private String construirRespuestaCargaAdicional() {
+        int margen = Math.max(0, getCargaMaximaPanel() - getTotalObligatoriasSeleccionadas());
+        if (esPeriodoCursamiento()) {
+            return "En cursamiento no agregas carga final desde esta vista. Lo útil ahora es estimar si, al cerrar el periodo, quedarás con margen para hasta "
+                    + Math.max(0, getCargaMaximaPanel()) + " UD en el siguiente proceso.";
+        }
+        return "Sí puedes agregar UD adicionales sólo si después de cubrir las obligatorias todavía queda margen dentro de la carga máxima. En la situación actual el margen estimado es de "
+                + margen + " UD, sujeto a oferta y seriación.";
+    }
+
+    private String construirRespuestaAcreditaTodo() {
+        return "Si acreditas todas las UD activas, tu siguiente periodo tendrá menos restricciones, bajará el riesgo académico y podrías liberar más opciones de carga. Eso también reduce la presión sobre las UD prioritarias que hoy condicionan tu trayectoria.";
+    }
+
+    private String construirRespuestaRevisionDetalle() {
+        if (vistaGestor) {
+            return construirRespuestaPaqueteEvidencia();
+        }
+        return "Si detectas una inconsistencia, reúne tu periodo activo, las UD involucradas, la prioridad mostrada y cualquier evidencia de oferta o seriación. Con eso se puede registrar una revisión académica con mejor trazabilidad.";
+    }
+
+    private String obtenerNivelRiesgo() {
+        return valorTexto(contexto != null && contexto.getRiesgos() != null ? contexto.getRiesgos().getNivelRiesgo() : null, "Sin clasificar");
+    }
+
+    private String valorTexto(String valor, String fallback) {
+        return valor != null && !valor.trim().isEmpty() ? valor : fallback;
     }
 
     public boolean isValidacionNoDisponible() {

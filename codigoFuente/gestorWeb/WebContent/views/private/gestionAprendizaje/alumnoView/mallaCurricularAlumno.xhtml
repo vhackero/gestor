@@ -730,12 +730,20 @@
 				border: 1px solid #c6d6dd;
 			}
 			.malla-context-grid {
-				display: flex;
+				display: inline-flex;
 				gap: 22px;
 				align-items: flex-start;
+				min-width: 100%;
+				width: max-content;
+			}
+			.malla-context-scroll {
+				overflow-x: auto;
+				overflow-y: visible;
+				padding-bottom: 8px;
 			}
 			.malla-main {
-				flex: 1 1 auto;
+				flex: 0 0 auto;
+				width: max-content;
 				min-width: 0;
 			}
 			.malla-side {
@@ -818,11 +826,19 @@
 			}
 			@media (max-width: 1200px) {
 				.malla-context-grid {
+					display: flex;
 					flex-direction: column;
+					width: 100%;
+				}
+				.malla-context-scroll {
+					overflow-x: visible;
 				}
 				.malla-side {
 					width: 100%;
 					flex: 1 1 auto;
+				}
+				.malla-main {
+					width: 100%;
 				}
 				.malla-detail-panel {
 					position: static;
@@ -853,6 +869,7 @@
 				<span class="malla-context-chip-soft">Matrícula: #{mallaCurricularAlumnoBean.matriculaPersonaObjetivo}</span>
 			</div>
 			<p:panel header="Malla curricular: #{mallaCurricularAlumnoBean.planNombre}">
+				<div class="malla-context-scroll">
 				<div class="malla-context-grid">
 					<div class="malla-main">
 				<div class="malla-resumen">
@@ -1099,6 +1116,7 @@
 								ajax="false" styleClass="btn btn-primary malla-side-action" />
 						</div>
 					</div>
+				</div>
 				</div>
 			</p:panel>
 		</h:form>
