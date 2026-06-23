@@ -272,9 +272,6 @@ public class ConvocatoriasBean extends BaseBean {
 
 	
 	public void editarConvocatoria() {
-	    if (esFechaActual(editarConv.getFecha_Apertura().toString())) {
-	        RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion7').show()");
-	    } else {
 	        logger.info(" INICIA EDITAR ");
 
 	        // Validar parámetros
@@ -328,13 +325,13 @@ public class ConvocatoriasBean extends BaseBean {
 	        convocatoriaParamNueva.setListaPlanProgramaNivel(seleccionados);
 	        
 	        convocatoriaParamNueva.setListaPlanProgramaMarcados(seleccionados);
+	        convocatoriaParamNueva.setListaPlanProgramaEliminar(new ArrayList<ConvocatoriaNivelEducativoCompl>());
 
 	        // Cambiar visibilidad de componentes
 	        this.mostrarNuevaConvocatoria = true;
 	        this.mostrarConsultaConvocatoria = false;
 
 	        logger.info(" TERMINA EDITAR ");
-	    }
 	}
 
 	
@@ -373,12 +370,13 @@ public class ConvocatoriasBean extends BaseBean {
 					convocatoriaParamNueva.setAltaCupoLimite("0");
 				}
 				
-				listaConvocatoria2 = convocatoriaService.consultarConvocatoriasFiltros(convocatoriaParamConsulta);
+				Integer convocatoriaId = editarConv != null ? editarConv.getConvocatoriaId() : listaConvocatoria2.get(0).getConvocatoriaId();
 				
-				convocatoriaService.actualizarConvocatorias(convocatoriaParamNueva, listaConvocatoria2.get(0).getConvocatoriaId());
+				convocatoriaService.actualizarConvocatorias(convocatoriaParamNueva, convocatoriaId);
 				
-				if (!convocatoriaParamNueva.getListaPlanProgramaEliminar().isEmpty()) {
-					convocatoriaService.eliminarPlanesProgramas(convocatoriaParamNueva, listaConvocatoria2.get(0).getConvocatoriaId());
+				if (convocatoriaParamNueva.getListaPlanProgramaEliminar() != null
+						&& !convocatoriaParamNueva.getListaPlanProgramaEliminar().isEmpty()) {
+					convocatoriaService.eliminarPlanesProgramas(convocatoriaParamNueva, convocatoriaId);
 				}
 				
 				//RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion9').show()");	

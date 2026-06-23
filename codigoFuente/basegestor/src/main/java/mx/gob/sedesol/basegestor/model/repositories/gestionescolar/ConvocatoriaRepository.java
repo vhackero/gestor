@@ -233,6 +233,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		String queryFiltro = obtieneFiltro(convocatoriaParamConsulta);
 
 		Query query = entityManager.createNativeQuery(consulta.concat(queryFiltro));
+		asignarParametrosFiltros(query, convocatoriaParamConsulta);
 
 		List<Object[]> listaQuery = query.getResultList();
 
@@ -254,30 +255,28 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 		StringBuilder filtro = new StringBuilder("");
 		boolean isPrimerFiltro = false;
 
-		if (!("").equals(convocatoriaParamConsulta.getConsulNombreConvocatoria())) {
-			filtro.append(validaOperador(isPrimerFiltro) + "tb.nombre = '")
-					.append(convocatoriaParamConsulta.getConsulNombreConvocatoria()).append("'").append(" ");
+		if (tieneTexto(convocatoriaParamConsulta.getConsulNombreConvocatoria())) {
+			filtro.append(validaOperador(isPrimerFiltro)
+					+ "UPPER(tb.nombre) LIKE CONCAT('%', UPPER(:nombreConvocatoria), '%') ");
 			isPrimerFiltro = true;
 		}
 
-		if (!("").equals(convocatoriaParamConsulta.getConsulNombreCorto())) {
-			filtro.append(validaOperador(isPrimerFiltro) + "tb.nombre_corto = '")
-					.append(convocatoriaParamConsulta.getConsulNombreCorto()).append("'").append(" ");
+		if (tieneTexto(convocatoriaParamConsulta.getConsulNombreCorto())) {
+			filtro.append(validaOperador(isPrimerFiltro)
+					+ "UPPER(tb.nombre_corto) LIKE CONCAT('%', UPPER(:nombreCorto), '%') ");
 			isPrimerFiltro = true;
 		}
 
-		if (!("").equals(convocatoriaParamConsulta.getValueConvocatoriaEstatus())) {
-			filtro.append(validaOperador(isPrimerFiltro) + "tb.activo = ")
-					.append(convocatoriaParamConsulta.getValueConvocatoriaEstatus()).append(" ");
+		if (tieneTexto(convocatoriaParamConsulta.getValueConvocatoriaEstatus())) {
+			filtro.append(validaOperador(isPrimerFiltro) + "tb.activo = :estatus ");
 			isPrimerFiltro = true;
 		} else {
 			filtro.append(validaOperador(isPrimerFiltro) + "tb.activo = ").append("1").append(" ");
 			isPrimerFiltro = true;
 		}
 
-		if (!("0").equals(convocatoriaParamConsulta.getConsulNivelEducativo())) {
-			filtro.append(validaOperador(isPrimerFiltro) + "rcpp.id_nivel_ensenanza = ")
-					.append(convocatoriaParamConsulta.getConsulNivelEducativo()).append(" ");
+		if (esNivelSeleccionado(convocatoriaParamConsulta.getConsulNivelEducativo())) {
+			filtro.append(validaOperador(isPrimerFiltro) + "rcpp.id_nivel_ensenanza = :nivelEducativo ");
 			isPrimerFiltro = true;
 		}
 
@@ -291,36 +290,59 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 			boolean isPrimerFiltro) {
 
 		if (filter.getConsulFechaApertura() != null && filter.getConsulFechaCierre() != null) {
-
-			DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy",
-					Locale.ENGLISH);
-			ZonedDateTime zonedDateTime = ZonedDateTime.parse(filter.getConsulFechaApertura().toString(),
-					inputFormatter);
-			DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-			String formattedDate = zonedDateTime.format(outputFormatter);
-
-			filtro.append(validaOperador(isPrimerFiltro) + "tb.fecha_apertura >= '").append(formattedDate).append("' ");
-
-//			filtro.append(validaOperador(isPrimerFiltro)+"tb.fecha_apertura BETWEEN '")
-//			.append(formattedDate).append("' AND '").append(formattedDate).append("'");
-		}
-
-		if (filter.getConsulFechaApertura() != null && filter.getConsulFechaCierre() != null) {
-
-			DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy",
-					Locale.ENGLISH);
-			ZonedDateTime zonedDateTime = ZonedDateTime.parse(filter.getConsulFechaCierre().toString(), inputFormatter);
-			DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-			String formattedDate = zonedDateTime.format(outputFormatter);
-
-			filtro.append(validaOperador(isPrimerFiltro) + "tb.fecha_cierre >= '").append(formattedDate).append("' ");
-
-//			filtro.append(validaOperador(isPrimerFiltro)+"tb.fecha_cierre BETWEEN '")
-//			.append(formattedDate).append("' AND '").append(formattedDate).append("'");
+			filtro.append(validaOperador(isPrimerFiltro)
+					+ "tb.fecha_apertura <= :fechaFin AND tb.fecha_cierre >= :fechaInicio ");
 		}
 
 		return filtro;
 
+	}
+
+	private void asignarParametrosFiltros(Query query, ConvocatoriaParamConsulta filtro) {
+		if (tieneTexto(filtro.getConsulNombreConvocatoria())) {
+			query.setParameter("nombreConvocatoria", filtro.getConsulNombreConvocatoria().trim());
+		}
+		if (tieneTexto(filtro.getConsulNombreCorto())) {
+			query.setParameter("nombreCorto", filtro.getConsulNombreCorto().trim());
+		}
+		if (tieneTexto(filtro.getValueConvocatoriaEstatus())) {
+			query.setParameter("estatus", filtro.getValueConvocatoriaEstatus());
+		}
+		if (esNivelSeleccionado(filtro.getConsulNivelEducativo())) {
+			query.setParameter("nivelEducativo", filtro.getConsulNivelEducativo());
+		}
+		if (filtro.getConsulFechaApertura() != null && filtro.getConsulFechaCierre() != null) {
+			query.setParameter("fechaInicio", inicioDia(filtro.getConsulFechaApertura()));
+			query.setParameter("fechaFin", finDia(filtro.getConsulFechaCierre()));
+		}
+	}
+
+	private boolean tieneTexto(String valor) {
+		return valor != null && !valor.trim().isEmpty();
+	}
+
+	private boolean esNivelSeleccionado(String nivelEducativo) {
+		return tieneTexto(nivelEducativo) && !"0".equals(nivelEducativo);
+	}
+
+	private java.util.Date inicioDia(java.util.Date fecha) {
+		java.util.Calendar calendario = java.util.Calendar.getInstance();
+		calendario.setTime(fecha);
+		calendario.set(java.util.Calendar.HOUR_OF_DAY, 0);
+		calendario.set(java.util.Calendar.MINUTE, 0);
+		calendario.set(java.util.Calendar.SECOND, 0);
+		calendario.set(java.util.Calendar.MILLISECOND, 0);
+		return calendario.getTime();
+	}
+
+	private java.util.Date finDia(java.util.Date fecha) {
+		java.util.Calendar calendario = java.util.Calendar.getInstance();
+		calendario.setTime(fecha);
+		calendario.set(java.util.Calendar.HOUR_OF_DAY, 23);
+		calendario.set(java.util.Calendar.MINUTE, 59);
+		calendario.set(java.util.Calendar.SECOND, 59);
+		calendario.set(java.util.Calendar.MILLISECOND, 999);
+		return calendario.getTime();
 	}
 
 	public static String validaOperador(boolean filtro) {

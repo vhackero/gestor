@@ -55,7 +55,8 @@ public interface IinscripcionesRepository {
 	Object getProcesoInscripcionById(Long procesoInscripcionId);
 
 	void updateProcesoInscripcion(Long procesoInscripcionId, String nombre, LocalDateTime fechaInicio,
-			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId);
+			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId, String claveProceso,
+			String semestre, String perfil);
 
 	void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId, String tipoProceso);
 
