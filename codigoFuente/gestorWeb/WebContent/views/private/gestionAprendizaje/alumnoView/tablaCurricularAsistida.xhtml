@@ -871,6 +871,20 @@
                 width: 100%;
                 text-align: left;
             }
+            .assistant-right-rail .rail-response {
+                margin-top: 12px;
+                background: #f6fafc;
+                border: 1px solid #d3e1e7;
+                padding: 12px;
+                color: #3f4b52;
+                line-height: 1.5;
+                white-space: pre-line;
+            }
+            .assistant-right-rail .rail-response strong {
+                display: block;
+                margin-bottom: 6px;
+                color: #2f3539;
+            }
             .assistant-right-rail .rail-next {
                 margin: 14px 12px 12px;
                 background: #edf4de;
@@ -1158,7 +1172,8 @@
 
             <p:outputPanel rendered="#{empty tablaCurricularAsistidaBean.mensajeError and not empty tablaCurricularAsistidaBean.contexto}">
                 <div class="asistente-wrap">
-                    <p:tabView styleClass="asistente-tabs" widgetVar="asistenteTabsWidget">
+                    <p:tabView styleClass="asistente-tabs" widgetVar="asistenteTabsWidget" activeIndex="#{tablaCurricularAsistidaBean.indiceTabActiva}">
+                        <p:ajax event="tabChange" listener="#{tablaCurricularAsistidaBean.onTabChange}" process="@this" />
                         <p:tab title="Situación académica">
                             <div class="asistente-section">
                                 <div class="situacion-layout">
@@ -1349,8 +1364,12 @@
                                                 <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
                                                 <div class="rail-actions">
                                                     <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualPrioridad">
-                                                        <p:commandButton type="button" value="#{accionContextualPrioridad}" styleClass="btn btn-default" />
+                                                        <p:commandButton value="#{accionContextualPrioridad}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualPrioridad)}" process="@this" update="@form" styleClass="btn btn-default" />
                                                     </ui:repeat>
+                                                </div>
+                                                <div class="rail-response">
+                                                    <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
+                                                    <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
                                                 </div>
                                             </div>
                                             <div class="rail-next">
@@ -1712,8 +1731,12 @@
                                                     <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
                                                     <div class="rail-actions">
                                                         <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualValidacion">
-                                                            <p:commandButton type="button" value="#{accionContextualValidacion}" styleClass="btn btn-default" />
+                                                            <p:commandButton value="#{accionContextualValidacion}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualValidacion)}" process="@this" update="@form" styleClass="btn btn-default" />
                                                         </ui:repeat>
+                                                    </div>
+                                                    <div class="rail-response">
+                                                        <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
+                                                        <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
                                                     </div>
                                                 </div>
                                                 <div class="rail-next">
@@ -1782,8 +1805,12 @@
                                                     <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
                                                     <div class="rail-actions">
                                                         <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualValidacionGestor">
-                                                            <p:commandButton type="button" value="#{accionContextualValidacionGestor}" styleClass="btn btn-default" />
+                                                            <p:commandButton value="#{accionContextualValidacionGestor}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualValidacionGestor)}" process="@this" update="@form" styleClass="btn btn-default" />
                                                         </ui:repeat>
+                                                    </div>
+                                                    <div class="rail-response">
+                                                        <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
+                                                        <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
                                                     </div>
                                                 </div>
                                                 <div class="rail-next">
@@ -1901,8 +1928,8 @@
                                             <div class="orientation-panel">
                                                 <div class="panel-head">Orientación contextual</div>
                                                 <div class="panel-body">
-                                                    <p:commandButton type="button" value="#{tablaCurricularAsistidaBean.preguntaPrincipalOrientacion}" styleClass="btn btn-default question-item" />
-                                                    <div class="orientation-answer-box">#{tablaCurricularAsistidaBean.respuestaPrincipalOrientacion}</div>
+                                                    <p:commandButton value="#{tablaCurricularAsistidaBean.preguntaOrientacionSeleccionada}" action="#{tablaCurricularAsistidaBean.seleccionarPreguntaOrientacion(tablaCurricularAsistidaBean.preguntaOrientacionSeleccionada)}" process="@this" update="@form" styleClass="btn btn-default question-item" />
+                                                    <div class="orientation-answer-box">#{tablaCurricularAsistidaBean.respuestaPreguntaOrientacion}</div>
                                                     <div class="soft-panel" style="margin-top:18px;">
                                                         <h3>Escalamiento académico</h3>
                                                         <p>#{tablaCurricularAsistidaBean.mensajeEscalamientoAcademico}</p>
@@ -1926,7 +1953,7 @@
                                                     <div class="panel-body">
                                                         <div class="questions-list">
                                                             <ui:repeat value="#{tablaCurricularAsistidaBean.preguntasRapidasOrientacion}" var="preguntaRapida">
-                                                                <p:commandButton type="button" value="#{preguntaRapida}" styleClass="btn btn-default question-item" />
+                                                                <p:commandButton value="#{preguntaRapida}" action="#{tablaCurricularAsistidaBean.seleccionarPreguntaOrientacion(preguntaRapida)}" process="@this" update="@form" styleClass="btn btn-default question-item" />
                                                             </ui:repeat>
                                                         </div>
                                                     </div>
@@ -1934,8 +1961,8 @@
                                                 <div class="orientation-panel">
                                                     <div class="panel-head">Orientación contextual</div>
                                                     <div class="panel-body">
-                                                        <p:commandButton type="button" value="#{tablaCurricularAsistidaBean.preguntaPrincipalOrientacion}" styleClass="btn btn-default question-item" />
-                                                        <div class="orientation-answer-box">#{tablaCurricularAsistidaBean.respuestaPrincipalOrientacion}</div>
+                                                        <p:commandButton value="#{tablaCurricularAsistidaBean.preguntaOrientacionSeleccionada}" action="#{tablaCurricularAsistidaBean.seleccionarPreguntaOrientacion(tablaCurricularAsistidaBean.preguntaOrientacionSeleccionada)}" process="@this" update="@form" styleClass="btn btn-default question-item" />
+                                                        <div class="orientation-answer-box">#{tablaCurricularAsistidaBean.respuestaPreguntaOrientacion}</div>
                                                         <div class="soft-panel" style="margin-top:18px;">
                                                             <h3>Escalamiento académico</h3>
                                                             <p>#{tablaCurricularAsistidaBean.mensajeEscalamientoAcademico}</p>
@@ -1951,8 +1978,12 @@
                                                 <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
                                                 <div class="rail-actions">
                                                     <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualOrientacion">
-                                                        <p:commandButton type="button" value="#{accionContextualOrientacion}" styleClass="btn btn-default" />
+                                                        <p:commandButton value="#{accionContextualOrientacion}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualOrientacion)}" process="@this" update="@form" styleClass="btn btn-default" />
                                                     </ui:repeat>
+                                                </div>
+                                                <div class="rail-response">
+                                                    <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
+                                                    <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
                                                 </div>
                                             </div>
                                             <div class="rail-next">
