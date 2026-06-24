@@ -68,6 +68,38 @@
 							styleClass="form-control" />
 					</div>
 
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="claveProcesoEdit"
+							value="Clave de proceso:" />
+						<p:inputText id="claveProcesoEdit"
+							value="#{inscripocionesBean.registroSeleccionado.claveProceso}"
+							styleClass="form-control" />
+					</div>
+
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="semestreEdit"
+							value="Numeral de periodo:" />
+						<p:selectOneMenu id="semestreEdit"
+							value="#{inscripocionesBean.registroSeleccionado.semestre}"
+							styleClass="col-xs-12">
+							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+							<f:selectItems value="#{inscripocionesBean.listaSemestres}"
+								var="semestre" itemLabel="#{semestre}"
+								itemValue="#{semestre}" />
+						</p:selectOneMenu>
+					</div>
+
+				</div>
+				<div class="row">
+
+					<div class="col-md-4 col-xs-12">
+						<p:outputLabel styleClass="bloque" for="perfilEdit"
+							value="Perfil:" />
+						<p:inputText id="perfilEdit"
+							value="#{inscripocionesBean.registroSeleccionado.perfil}"
+							styleClass="form-control" maxlength="10" />
+					</div>
+
 
 					<!-- Fecha de Inicio -->
 					<div class="col-md-4 col-xs-12">

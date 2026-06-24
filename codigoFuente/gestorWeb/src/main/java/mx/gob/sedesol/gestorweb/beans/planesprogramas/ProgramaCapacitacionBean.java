@@ -196,7 +196,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 	private RelProgDuracionDTO relProgDuracionPractica;
 	private RelProgDuracionDTO relProgDuracionEvaluacion;
 	private List<CatalogoComunDTO> catTipoCargaHoraria;
-	private List<FichaDescProgramaDTO> programasList;
+	private List<FichaDescProgramaDTO> programasList = new ArrayList<>();
 	private Integer calificacionMinimaAprobatoria = 60;
 	private String nombreTipoCompetencia;
 	private String nombreEjeCapacitacion;
@@ -1005,6 +1005,9 @@ public class ProgramaCapacitacionBean extends BaseBean {
 			programa.setAreaResponsable(planPadre.getTblOrganismoGubernamental());
 			programa.setPerfilEgreso(planPadre.getPerfilEgreso());
 			programa.setPerfilIngreso(planPadre.getPerfilIngreso());
+			if (isSeriado()) {
+				cargarProgramasSeriadosPorPlan();
+			}
 			
 			nivelMaximo = 0;
 		}
@@ -1740,20 +1743,64 @@ public class ProgramaCapacitacionBean extends BaseBean {
 		}
 	}
 	public void onChangeProgramasSeriados(ValueChangeEvent e) {
-		if (ObjectUtils.isNotNull(e.getNewValue())) {
-			idProgramaSeriado = (String) e.getNewValue();
+		if (ObjectUtils.isNotNull(e.getNewValue()) && !"0".equals(e.getNewValue().toString())) {
+			idProgramaSeriado = e.getNewValue().toString();
 			for (FichaDescProgramaDTO fichaDescProgramaDTO : programasList) {
-				if (fichaDescProgramaDTO.getIdPrograma().equals(new Integer(idProgramaSeriado))) {
+				if (fichaDescProgramaDTO.getIdPrograma().equals(Integer.valueOf(idProgramaSeriado))) {
 					programa.setProgramaAntecedente(fichaDescProgramaDTO);
 					break;
 				}
 			}
+		} else {
+			idProgramaSeriado = null;
+			programa.setProgramaAntecedente(null);
 		}
 	}
 
-	public void onChangeGetProgramaSeriado() {
-		programasList = fecServiceFacade.getFichaDescProgramaService().consultarProgramasPorTCompYEjeCap(
-				programa.getTipoCompetencia(), programa.getEjeCapacitacion(), getIdEstatusPrograma());
+	public void onChangeGetProgramaSeriado(ValueChangeEvent e) {
+		if (ObjectUtils.isNotNull(e.getNewValue()) && Boolean.TRUE.equals(e.getNewValue())) {
+			cargarProgramasSeriadosPorPlan();
+		} else {
+			idProgramaSeriado = null;
+			programa.setProgramaAntecedente(null);
+			programasList = new ArrayList<>();
+		}
+	}
+
+	private void cargarProgramasSeriadosPorPlan() {
+		programasList = new ArrayList<>();
+		Integer idPlanPrograma = obtenerIdPlanPrograma();
+		if (ObjectUtils.isNull(idPlanPrograma)) {
+			return;
+		}
+
+		List<FichaDescProgramaDTO> programasPlan = fecServiceFacade.getFichaDescProgramaService()
+				.buscarProgramasPorPlan(idPlanPrograma);
+		if (ObjectUtils.isNullOrEmpty(programasPlan)) {
+			return;
+		}
+
+		for (FichaDescProgramaDTO programaPlan : programasPlan) {
+			if (ObjectUtils.isNull(programaPlan.getIdPrograma())) {
+				continue;
+			}
+			if (ObjectUtils.isNotNull(programa.getIdPrograma())
+					&& programaPlan.getIdPrograma().equals(programa.getIdPrograma())) {
+				continue;
+			}
+			programasList.add(programaPlan);
+		}
+	}
+
+	private Integer obtenerIdPlanPrograma() {
+		if (ObjectUtils.isNotNull(programa) && ObjectUtils.isNotNull(programa.getPlan())
+				&& ObjectUtils.isNotNull(programa.getPlan().getIdPlan())) {
+			return programa.getPlan().getIdPlan();
+		}
+		if (ObjectUtils.isNotNull(planPadre) && ObjectUtils.isNotNull(planPadre.getIdPlan())) {
+			return planPadre.getIdPlan();
+		}
+		return null;
 	}
 
 	private Integer getIdEstatusPrograma() {
@@ -2841,8 +2888,7 @@ public class ProgramaCapacitacionBean extends BaseBean {
 
 		if (ObjectUtils.isNotNull(programa.getProgramaAntecedente())) {
 
-			programasList = fecServiceFacade.getFichaDescProgramaService().consultarProgramasPorTCompYEjeCap(
-					programa.getTipoCompetencia(), programa.getEjeCapacitacion(), getIdEstatusPrograma());
+			cargarProgramasSeriadosPorPlan();
 
 			idProgramaSeriado = programa.getProgramaAntecedente().getIdPrograma().toString();
 			setSeriado(Boolean.TRUE);

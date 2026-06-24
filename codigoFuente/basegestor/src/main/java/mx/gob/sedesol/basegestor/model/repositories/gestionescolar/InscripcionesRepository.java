@@ -349,7 +349,8 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		StringBuilder consulta = new StringBuilder("SELECT tp.proceso_inscripcion_id, \n" + "tp.convocatoria_id, \n"
 				+ "tc.nombre convocatoria, \n" + "tp.nombre nombre, \n" + "tp.fecha_inicio, \n" + "tp.fecha_fin, \n"
 				+ "cp.nombre tipo_proceso, \n" + "IF(tp.estatus = 0, 'Inactivo', 'Activo') estatus,\n"
-				+ "tp.id_tipo_proceso\n" + "FROM tbl_procesos_inscripcion tp\n"
+				+ "tp.id_tipo_proceso, \n" + "tp.clave_proceso, \n" + "tp.semestre, \n" + "tp.perfil\n"
+				+ "FROM tbl_procesos_inscripcion tp\n"
 				+ "INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tp.convocatoria_id\n"
 				+ "INNER JOIN cat_procesos_inscripcion cp ON cp.id_proceso = tp.id_tipo_proceso\n"
 				+ "WHERE tp.id_categoria_proceso = 1\n" + "AND tp.convocatoria_id = :id_convocatoria_selecionada ");
@@ -417,6 +418,9 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		regresa.setTipoProceso(obj[6].toString());
 		regresa.setEstatus(obj[7].toString());
 		regresa.setIdTipoProceso(obj[8].toString());
+		regresa.setClaveProceso(obj[9] != null ? obj[9].toString() : null);
+		regresa.setSemestre(obj[10] != null ? obj[10].toString() : null);
+		regresa.setPerfil(obj[11] != null ? obj[11].toString() : null);
 
 		return regresa;
 	}
@@ -472,15 +476,32 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 	@Transactional
 	@Override
 	public void updateProcesoInscripcion(Long procesoInscripcionId, String nombre, LocalDateTime fechaInicio,
-			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId) {
+			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId, String claveProceso,
+			String semestre, String perfil) {
 
 		String query = "UPDATE tbl_procesos_inscripcion " + "SET nombre = ?, " + "fecha_inicio = ?, "
-				+ "fecha_fin = ?, " + "estatus = ?, " + "id_tipo_proceso = ?, " + "convocatoria_id = ? "
+				+ "fecha_fin = ?, " + "estatus = ?, " + "id_tipo_proceso = ?, " + "convocatoria_id = ?, "
+				+ "clave_proceso = ?, " + "semestre = ?, " + "perfil = ? "
 				+ "WHERE proceso_inscripcion_id = ?";
 
 		entityManager.createNativeQuery(query).setParameter(1, nombre).setParameter(2, fechaInicio)
 				.setParameter(3, fechaFin).setParameter(4, estatus).setParameter(5, idTipoProceso)
-				.setParameter(6, convocatoriaId).setParameter(7, procesoInscripcionId).executeUpdate();
+				.setParameter(6, convocatoriaId).setParameter(7, normalizarTexto(claveProceso))
+				.setParameter(8, normalizarEntero(semestre))
+				.setParameter(9, prepararPerfil(perfil)).setParameter(10, procesoInscripcionId).executeUpdate();
+	}
+
+	private String normalizarTexto(String valor) {
+		if (valor == null) {
+			return null;
+		}
+		String limpio = valor.trim();
+		return limpio.isEmpty() ? null : limpio;
+	}
+
+	private Integer normalizarEntero(String valor) {
+		String limpio = normalizarTexto(valor);
+		return limpio != null ? Integer.valueOf(limpio) : null;
 	}
 
 	private InscripcionPlanesProgramas mapeoNivelComp(Object[] obj) {

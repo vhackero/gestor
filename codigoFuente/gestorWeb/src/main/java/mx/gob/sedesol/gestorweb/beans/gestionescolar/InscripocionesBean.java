@@ -577,23 +577,6 @@ public class InscripocionesBean extends BaseBean {
 	        // Manejo de error en caso de no poder parsear
 	    }
 
-	    // 2) Validamos si se puede o no editar
-	    //    - No se puede editar si la fecha de inicio es hoy
-	    //    - O si ya finalizó el periodo activo (la fecha actual es posterior a fechaFinEdit)
-	    Date hoy = new Date();
-
-	    // Para comparar únicamente la parte de fecha (día, mes y año), sin considerar horas/minutos
-	    SimpleDateFormat formatoDia = new SimpleDateFormat("yyyyMMdd");
-	    boolean fechaInicioEsHoy = formatoDia.format(fechaInicioEdit).equals(formatoDia.format(hoy));
-	    boolean periodoActivoTerminado = hoy.after(fechaFinEdit);
-
-	    if (fechaInicioEsHoy || periodoActivoTerminado) {
-	        // 3) Si NO se puede editar, mostramos el diálogo y salimos del método
-	        RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccionEditarBorrar').show()");
-	        return;
-	    }
-
-	    // 4) Si sí se puede editar, continuamos con la ejecución normal
 	    this.paginaActual = "/views/private/gestionAprendizaje/alumnoView/actualizaInscripciones.xhtml";
 	    consultarConvocatorias();
 	    consultaTipoProceso();
@@ -619,8 +602,12 @@ public class InscripocionesBean extends BaseBean {
 	        int estatus = registroSeleccionado.getEstatus().equalsIgnoreCase("Activo") ? 1 : 0;
 	        Long idTipoProceso = Long.parseLong(registroSeleccionado.getIdTipoProceso());
 	        Long convocatoriaId = Long.parseLong(registroSeleccionado.getIdConvocatoria());
+	        String claveProceso = registroSeleccionado.getClaveProceso();
+	        String semestre = registroSeleccionado.getSemestre();
+	        String perfil = registroSeleccionado.getPerfil();
 
-	        inscripcionesService.updateProcesoInscripcion(procesoInscripcionId, nombre, fechaInicio, fechaFin, estatus, idTipoProceso, convocatoriaId);
+	        inscripcionesService.updateProcesoInscripcion(procesoInscripcionId, nombre, fechaInicio, fechaFin, estatus,
+	        		idTipoProceso, convocatoriaId, claveProceso, semestre, perfil);
 	        
 	        if (esTipoProcesoExtraordinario(String.valueOf(idTipoProceso))) {
 	        	inscripcionesService.actualizarPlanesProgramasProceso(procesoInscripcionId, planesProgramasEdicionSeleccionados);

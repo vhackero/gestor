@@ -16,6 +16,9 @@ public class InscripcionesConsultaResumen implements Serializable {
 	private String tipoProceso;
 	private String estatus;
 	private String idTipoProceso;
+	private String claveProceso;
+	private String semestre;
+	private String perfil;
 	
 	public String getProcesoInscripcionId() {
 		return procesoInscripcionId;
@@ -73,6 +76,24 @@ public class InscripcionesConsultaResumen implements Serializable {
 	}
 	public void setIdTipoProceso(String idTipoProceso) {
 		this.idTipoProceso = idTipoProceso;
+	}
+	public String getClaveProceso() {
+		return claveProceso;
+	}
+	public void setClaveProceso(String claveProceso) {
+		this.claveProceso = claveProceso;
+	}
+	public String getSemestre() {
+		return semestre;
+	}
+	public void setSemestre(String semestre) {
+		this.semestre = semestre;
+	}
+	public String getPerfil() {
+		return perfil;
+	}
+	public void setPerfil(String perfil) {
+		this.perfil = perfil;
 	}
 	 
 	

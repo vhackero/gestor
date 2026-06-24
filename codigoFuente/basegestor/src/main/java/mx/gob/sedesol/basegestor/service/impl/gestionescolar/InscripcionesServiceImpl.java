@@ -124,11 +124,12 @@ public class InscripcionesServiceImpl implements InscripcionesService {
 
 	@Override
 	public boolean updateProcesoInscripcion(Long procesoInscripcionId, String nombre, LocalDateTime fechaInicio,
-			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId) {
+			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId, String claveProceso,
+			String semestre, String perfil) {
 
 		// Actualizar el registro
 		inscripcionesRepository.updateProcesoInscripcion(procesoInscripcionId, nombre, fechaInicio, fechaFin, estatus,
-				idTipoProceso, convocatoriaId);
+				idTipoProceso, convocatoriaId, claveProceso, semestre, perfil);
 
 		return true;
 	}

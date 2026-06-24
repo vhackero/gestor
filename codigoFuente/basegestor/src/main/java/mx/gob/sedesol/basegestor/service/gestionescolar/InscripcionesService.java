@@ -53,7 +53,8 @@ public interface InscripcionesService extends CommonService<Convocatoria, Intege
 	List<TipoProceso> consultarNombre(ConvocatoriaParamConsulta tableroParamConsulta);
 
 	boolean updateProcesoInscripcion(Long procesoInscripcionId, String nombre, LocalDateTime fechaInicio,
-			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId);
+			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId, String claveProceso,
+			String semestre, String perfil);
 
 	void deleteProcesoInscripcion(Long procesoInscripcionId, Long convocatoriaId, String tipoProceso);
 
