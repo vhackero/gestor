@@ -5,8 +5,7 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+	xmlns:f="http://java.sun.com/jsf/core">
 
 	<p:panel header="Nuevo Proceso de Inscripción" rendered="#{inscripocionesBean.mostrarConsultaConvocatoria}">
 
@@ -352,7 +351,7 @@
 
 							<!-- Opciones del Select -->
 							<f:selectItems value="#{inscripocionesBean.listaPlanProgramas}"
-								var="tblPlan" itemLabel="#{tblPlan.nombrePlan} > #{fn:replace(tblPlan.nombreSemestre, 'Semestre', 'Numeral de periodo')} > #{tblPlan.nombreBloque} > #{tblPlan.nombrePrograma} "
+								var="tblPlan" itemLabel="#{tblPlan.nombrePlan} > #{tblPlan.nombreSemestre} > #{tblPlan.nombreBloque} > #{tblPlan.nombrePrograma} "
 								itemValue="#{tblPlan}" />
 						</p:selectCheckboxMenu>
 						 <p:message id="plan2Msg" for="plan2" display="text" />
