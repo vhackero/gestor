@@ -1,6 +1,7 @@
 package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.text.Normalizer;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Locale;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -88,6 +90,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private static final Map<String, String> ESTATUS_COLORS = new LinkedHashMap<>();
 	private static final double CALIFICACION_NO_PRESENTADA = 666.0;
 	private static final DecimalFormat CALIF_FORMAT = new DecimalFormat("0.##");
+	private static final DecimalFormat PROMEDIO_FORMAT = new DecimalFormat("0.00", DecimalFormatSymbols.getInstance(Locale.US));
 
 	static {
 		ESTATUS_COLORS.put(ESTATUS_APROBADA, "#15A449");
@@ -124,6 +127,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private List<MallaDiagramaTipoDTO> tiposPrograma;
 	private List<MallaDiagramaTipoDTO> estatusPrograma;
 	private Map<String, Integer> creditosAprobadosPorTipo;
+	private Map<String, Integer> creditosPlanPorTipo;
 	private int creditosAprobadosTotal;
 	private int creditosPlanTotal;
 	private double sumaCalificaciones;
@@ -150,6 +154,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		tiposPrograma = new ArrayList<>();
 		estatusPrograma = new ArrayList<>();
 		creditosAprobadosPorTipo = new LinkedHashMap<>();
+		creditosPlanPorTipo = new LinkedHashMap<>();
 		creditosAprobadosTotal = 0;
 		creditosPlanTotal = 0;
 		sumaCalificaciones = 0d;
@@ -566,12 +571,14 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			return;
 		}
 		creditosPlanTotal += creditos;
+		String tipoNormalizado = StringUtils.isBlank(tipo) ? "Sin tipo" : tipo.trim();
+		Integer totalActual = creditosPlanPorTipo.get(tipoNormalizado);
+		creditosPlanPorTipo.put(tipoNormalizado, totalActual == null ? creditos : totalActual + creditos);
 
 		acumularPromedio(estatusDto);
 		if (!esProgramaAprobado(estatusDto)) {
 			return;
 		}
-		String tipoNormalizado = StringUtils.isBlank(tipo) ? "Sin tipo" : tipo.trim();
 		Integer actual = creditosAprobadosPorTipo.get(tipoNormalizado);
 		if (actual == null) {
 			creditosAprobadosPorTipo.put(tipoNormalizado, creditos);
@@ -1119,6 +1126,24 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		return new ArrayList<>(creditosAprobadosPorTipo.entrySet());
 	}
 
+	public List<CreditoTipoResumenDTO> getResumenCreditosPorTipo() {
+		List<CreditoTipoResumenDTO> resumen = new ArrayList<>();
+		if (creditosPlanPorTipo == null || creditosPlanPorTipo.isEmpty()) {
+			return resumen;
+		}
+		for (Map.Entry<String, Integer> entry : creditosPlanPorTipo.entrySet()) {
+			String tipo = entry.getKey();
+			int total = entry.getValue() != null ? entry.getValue().intValue() : 0;
+			int aprobados = 0;
+			if (creditosAprobadosPorTipo != null && creditosAprobadosPorTipo.containsKey(tipo)
+					&& creditosAprobadosPorTipo.get(tipo) != null) {
+				aprobados = creditosAprobadosPorTipo.get(tipo).intValue();
+			}
+			resumen.add(new CreditoTipoResumenDTO(formatearEtiquetaTipoPlural(tipo), aprobados, total));
+		}
+		return resumen;
+	}
+
 	public int getCreditosAprobadosTotal() {
 		return creditosAprobadosTotal;
 	}
@@ -1132,6 +1157,10 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			return 0d;
 		}
 		return sumaCalificaciones / totalCalificaciones;
+	}
+
+	public String getPromedioActualFormateado() {
+		return PROMEDIO_FORMAT.format(getPromedioActual());
 	}
 
 	public Integer getSemestreEnCurso() {
@@ -1194,6 +1223,24 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			return "Consulta académica contextual para " + StringUtils.defaultIfBlank(nombrePersonaObjetivo, matriculaPersonaObjetivo);
 		}
 		return "Visualización de trayectoria curricular y orientación contextual del escenario activo.";
+	}
+
+	private String formatearEtiquetaTipoPlural(String tipo) {
+		String normalizado = StringUtils.defaultString(tipo).trim();
+		if (StringUtils.isBlank(normalizado)) {
+			return "Sin tipo";
+		}
+		String clave = normalizaTexto(normalizado);
+		if (clave.contains("obligat")) {
+			return "Obligatorias";
+		}
+		if (clave.contains("optativ") || clave.contains("opcional")) {
+			return "Optativas";
+		}
+		if (clave.contains("electiv")) {
+			return "Electivas";
+		}
+		return normalizado;
 	}
 
 	public String getLlamadoAsistente() {
@@ -1262,6 +1309,31 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 
 	public void setAsistenteMotivoSeleccionado(String asistenteMotivoSeleccionado) {
 		this.asistenteMotivoSeleccionado = asistenteMotivoSeleccionado;
+	}
+
+	public static class CreditoTipoResumenDTO implements java.io.Serializable {
+		private static final long serialVersionUID = 1L;
+		private String etiqueta;
+		private int aprobados;
+		private int total;
+
+		public CreditoTipoResumenDTO(String etiqueta, int aprobados, int total) {
+			this.etiqueta = etiqueta;
+			this.aprobados = aprobados;
+			this.total = total;
+		}
+
+		public String getEtiqueta() {
+			return etiqueta;
+		}
+
+		public int getAprobados() {
+			return aprobados;
+		}
+
+		public int getTotal() {
+			return total;
+		}
 	}
 
 	private String resolveColorByEstatusCss(String estatusCss) {
