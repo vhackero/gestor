@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>Análisis de datos</li>
+		<li class="active">Reporteador</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<sec:authorize access="hasPermission(null, 'ANA_DAT_REPORTEADOR')">
+			<h1>Reporteador</h1>
+			<hr class="red" />
+			<h:form id="frmReporteador">
+				<p:messages id="mensajes" showDetail="false" closable="true" />
+
+				<p:panel header="Configuración del reporte">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6 col-xs-12">
+								<p:outputLabel styleClass="bloque requerido" value="Reporte:" />
+								<p:selectOneMenu id="reporte"
+									value="#{reporteadorBean.idReporteSeleccionado}"
+									styleClass="col-xs-12" required="true"
+									requiredMessage="Debe seleccionar un reporte.">
+									<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+									<f:selectItems value="#{reporteadorBean.reportes}" var="reporte"
+										itemValue="#{reporte.idReporte}" itemLabel="#{reporte.nombre}" />
+									<p:ajax listener="#{reporteadorBean.seleccionarReporte}"
+										update="parametros resultado acciones mensajes" />
+								</p:selectOneMenu>
+							</div>
+						</div>
+					</div>
+
+					<p:outputPanel id="parametros">
+						<ui:fragment rendered="#{reporteadorBean.reporteSeleccionadoConParametros}">
+							<div class="form-group">
+								<div class="row">
+									<ui:repeat value="#{reporteadorBean.reporteSeleccionado.parametros}"
+										var="parametro">
+										<div class="col-md-4 col-xs-12">
+											<p:outputLabel styleClass="bloque requerido"
+												value="#{parametro.etiqueta}" />
+											<p:selectOneMenu
+												value="#{reporteadorBean.valoresParametros[parametro.claveSinPrefijo]}"
+												styleClass="col-xs-12" required="true"
+												requiredMessage="Falta capturar el parámetro #{parametro.clave} para poder ser utilizado">
+												<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
+												<f:selectItems value="#{parametro.opciones}" var="opcion"
+													itemValue="#{opcion.valor}" itemLabel="#{opcion.nombre}" />
+											</p:selectOneMenu>
+										</div>
+									</ui:repeat>
+								</div>
+							</div>
+						</ui:fragment>
+					</p:outputPanel>
+
+					<p:outputPanel id="acciones">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-md-12 text-right">
+									<p:commandButton value="Vista previa"
+										actionListener="#{reporteadorBean.generarVistaPrevia}"
+										update="resultado mensajes" styleClass="btn btn-default" />
+									<p:commandButton value="Limpiar"
+										actionListener="#{reporteadorBean.limpiarPantalla}"
+										process="@this" update="@form" resetValues="true"
+										styleClass="btn btn-default" />
+									<p:commandButton value="Generar Excel"
+										actionListener="#{reporteadorBean.generarExcel}" ajax="false"
+										styleClass="btn btn-primary">
+										<p:fileDownload value="#{reporteadorBean.archivoReporte}" />
+									</p:commandButton>
+								</div>
+							</div>
+						</div>
+					</p:outputPanel>
+				</p:panel>
+
+				<p:outputPanel id="resultado">
+					<p:panel header="Vista previa" rendered="#{reporteadorBean.conResultado}">
+						<p:outputLabel value="No existe información para generar el reporte"
+							rendered="#{empty reporteadorBean.resultado.filas}" />
+
+						<p:dataTable value="#{reporteadorBean.resultado.filas}" var="fila"
+							rendered="#{not empty reporteadorBean.resultado.filas}"
+							paginator="true" paginatorPosition="bottom" rows="10">
+							<p:columns value="#{reporteadorBean.resultado.columnas}" var="columna"
+								columnIndexVar="indice">
+								<f:facet name="header">
+									<h:outputText value="#{columna}" />
+								</f:facet>
+								<h:outputText value="#{fila[indice]}" />
+							</p:columns>
+						</p:dataTable>
+					</p:panel>
+				</p:outputPanel>
+			</h:form>
+		</sec:authorize>
+	</ui:define>
+</ui:composition>

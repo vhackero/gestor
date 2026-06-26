@@ -606,6 +606,12 @@
 			<redirect />
 		</navigation-case>
 
+		<navigation-case>
+			<from-outcome>ANALISIS_REPORTEADOR</from-outcome>
+			<to-view-id>/views/private/analisisDatos/reporteador.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+
 		<!-- ITTIVA 666 MIS CONVOCATORIAS -->
 		<navigation-case>
 			<from-outcome>MIS_CONVOCATORIAS</from-outcome>

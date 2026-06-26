@@ -849,6 +849,19 @@
 												</sec:authorize>
 											</ui:fragment>
 
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT_REPORTEADOR')}">
+												<sec:authorize
+													access="hasPermission(null, 'ANA_DAT_REPORTEADOR')">
+													<li><h:commandLink rendered="true"
+															action="#{menuGestorBean.navegaAnalisisReporteador}"
+															title="Reporteador">
+															<i class="fa fa-solid fa-file-excel"></i>
+															<span class="m-label">Reporteador</span>
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+
 
 
 											<ui:fragment
