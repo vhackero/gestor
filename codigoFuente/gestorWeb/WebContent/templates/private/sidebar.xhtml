@@ -279,6 +279,19 @@
 															</ui:fragment>
 
 															<ui:fragment
+																rendered="#{menuGestorBean.rolTienePermiso('ADM_REPORTEADOR')}">
+																<sec:authorize
+																	access="hasPermission(null,'ADM_REPORTEADOR')">
+																	<li><h:commandLink
+																			action="#{menuGestorBean.navegaAdminReporteador}"
+																			title="Reporteador">
+																			<i class="fa fa-solid fa-file-excel"></i>
+																			<span class="m-label">Reporteador</span>
+																		</h:commandLink></li>
+																</sec:authorize>
+															</ui:fragment>
+
+															<ui:fragment
 																rendered="#{menuGestorBean.rolTienePermiso('LOG_ACA_INF')}">
 																<sec:authorize access="hasPermission(null,'CONF_SEDES')">
 																	<li><h:commandLink
@@ -845,6 +858,19 @@
 															<i class="fa fa-solid fa-book"></i>
 															<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.reporteEventosCapacitacion')}</span>
 
+														</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+
+											<ui:fragment
+												rendered="#{menuGestorBean.rolTienePermiso('ANA_DAT_REPORTEADOR')}">
+												<sec:authorize
+													access="hasPermission(null, 'ANA_DAT_REPORTEADOR')">
+													<li><h:commandLink rendered="true"
+															action="#{menuGestorBean.navegaAnalisisReporteador}"
+															title="Reporteador">
+															<i class="fa fa-solid fa-file-excel"></i>
+															<span class="m-label">Reporteador</span>
 														</h:commandLink></li>
 												</sec:authorize>
 											</ui:fragment>
