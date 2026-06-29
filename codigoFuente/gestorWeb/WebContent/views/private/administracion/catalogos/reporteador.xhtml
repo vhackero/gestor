@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="breadcrumb">
+		<li>Administracion</li>
+		<li>Catalogos</li>
+		<li class="active">Reporteador</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<sec:authorize access="hasPermission(null, 'ADM_REPORTEADOR')">
+			<h1>Reporteador</h1>
+			<hr class="red" />
+			<h:form id="frmAdminReporteador">
+				<p:messages id="mensajes" showDetail="false" closable="true" />
+
+				<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+					<p:commandButton value="Si" type="button"
+						styleClass="ui-confirmdialog-yes btn btn-primary" icon="ui-icon-check" />
+					<p:commandButton value="No" type="button"
+						styleClass="ui-confirmdialog-no btn btn-default" icon="ui-icon-close" />
+				</p:confirmDialog>
+
+				<div class="row">
+					<div class="col-md-5 col-xs-12">
+						<p:panel header="Reportes configurados">
+							<p:commandButton value="Nuevo reporte"
+								actionListener="#{adminReporteadorBean.nuevoReporte}"
+								process="@this"
+								update=":frmAdminReporteador:reporteForm :frmAdminReporteador:parametrosPanel :frmAdminReporteador:parametroFormPanel :frmAdminReporteador:mensajes"
+								styleClass="btn btn-default" />
+							<br />
+							<br />
+							<p:dataTable id="tablaReportes"
+								value="#{adminReporteadorBean.reportes}" var="reporte"
+								paginator="true" paginatorPosition="bottom" rows="10"
+								emptyMessage="No existen reportes configurados.">
+								<p:column headerText="Nombre">
+									<h:outputText value="#{reporte.nombre}" />
+								</p:column>
+								<p:column headerText="Clave">
+									<h:outputText value="#{reporte.clave}" />
+								</p:column>
+								<p:column headerText="Estatus">
+									<h:outputText value="#{reporte.activo ? 'Activo' : 'Oculto'}" />
+								</p:column>
+								<p:column headerText="Acciones" styleClass="text-center">
+									<p:commandButton value="Editar" title="Editar" icon="ui-icon-pencil"
+										actionListener="#{adminReporteadorBean.seleccionarReporte(reporte)}"
+										process="@this"
+										update=":frmAdminReporteador:reporteForm :frmAdminReporteador:parametrosPanel :frmAdminReporteador:parametroFormPanel :frmAdminReporteador:mensajes"
+										styleClass="btn btn-default" />
+									<p:commandButton value="#{reporte.activo ? 'Ocultar' : 'Mostrar'}"
+										title="#{reporte.activo ? 'Ocultar' : 'Mostrar'}"
+										icon="#{reporte.activo ? 'fa fa-eye-slash' : 'fa fa-eye'}"
+										actionListener="#{adminReporteadorBean.cambiarEstatusReporte(reporte)}"
+										process="@this" update="@form" styleClass="btn btn-default" />
+									<p:commandButton value="Eliminar" title="Eliminar"
+										icon="ui-icon-trash"
+										actionListener="#{adminReporteadorBean.eliminarReporte(reporte)}"
+										process="@this" update="@form" styleClass="btn btn-default">
+										<p:confirm header="Confirmar"
+											message="El reporte y sus parametros seran eliminados. Desea continuar?"
+											icon="ui-icon-alert" />
+									</p:commandButton>
+								</p:column>
+							</p:dataTable>
+						</p:panel>
+					</div>
+
+					<div class="col-md-7 col-xs-12">
+						<p:panel id="reporteForm" header="Detalle del reporte">
+							<div class="form-group">
+								<p:outputLabel styleClass="bloque requerido" value="Clave:" />
+								<p:inputText value="#{adminReporteadorBean.reporteEdicion.clave}"
+									styleClass="form-control" required="true"
+									requiredMessage="Debe capturar la clave del reporte." />
+							</div>
+							<div class="form-group">
+								<p:outputLabel styleClass="bloque requerido" value="Nombre:" />
+								<p:inputText value="#{adminReporteadorBean.reporteEdicion.nombre}"
+									styleClass="form-control" required="true"
+									requiredMessage="Debe capturar el nombre del reporte." />
+							</div>
+							<div class="form-group">
+								<p:outputLabel styleClass="bloque requerido" value="Consulta SQL:" />
+								<p:inputTextarea
+									value="#{adminReporteadorBean.reporteEdicion.consultaSql}"
+									rows="8" autoResize="false" styleClass="form-control"
+									required="true"
+									requiredMessage="Debe capturar la consulta SQL del reporte." />
+							</div>
+							<div class="form-group">
+								<p:selectBooleanCheckbox
+									value="#{adminReporteadorBean.reporteEdicion.activo}"
+									itemLabel="Activo" />
+							</div>
+							<div class="text-right">
+								<p:commandButton value="Guardar reporte"
+									actionListener="#{adminReporteadorBean.guardarReporte}"
+									process=":frmAdminReporteador:reporteForm" update="@form"
+									styleClass="btn btn-primary" />
+							</div>
+						</p:panel>
+					</div>
+				</div>
+
+				<br />
+
+				<p:outputPanel id="parametrosPanel">
+					<p:panel header="Parametros"
+						rendered="#{not adminReporteadorBean.reporteGuardado}">
+						<h:outputText
+							value="Seleccione o guarde un reporte para administrar sus parametros." />
+					</p:panel>
+					<p:panel header="Parametros"
+						rendered="#{adminReporteadorBean.reporteGuardado}">
+						<p:dataTable id="tablaParametros"
+							value="#{adminReporteadorBean.parametros}" var="parametro"
+							paginator="true" paginatorPosition="bottom" rows="10"
+							emptyMessage="No existen parametros configurados para el reporte.">
+							<p:column headerText="Orden">
+								<h:outputText value="#{parametro.orden}" />
+							</p:column>
+							<p:column headerText="Etiqueta">
+								<h:outputText value="#{parametro.etiqueta}" />
+							</p:column>
+							<p:column headerText="Clave">
+								<h:outputText value="#{parametro.clave}" />
+							</p:column>
+							<p:column headerText="Estatus">
+								<h:outputText value="#{parametro.activo ? 'Activo' : 'Oculto'}" />
+							</p:column>
+							<p:column headerText="Acciones" styleClass="text-center">
+								<p:commandButton value="Editar" title="Editar" icon="ui-icon-pencil"
+									actionListener="#{adminReporteadorBean.editarParametro(parametro)}"
+									process="@this"
+									update=":frmAdminReporteador:parametroFormPanel :frmAdminReporteador:mensajes"
+									styleClass="btn btn-default" />
+								<p:commandButton value="#{parametro.activo ? 'Ocultar' : 'Mostrar'}"
+									title="#{parametro.activo ? 'Ocultar' : 'Mostrar'}"
+									icon="#{parametro.activo ? 'fa fa-eye-slash' : 'fa fa-eye'}"
+									actionListener="#{adminReporteadorBean.cambiarEstatusParametro(parametro)}"
+									process="@this"
+									update=":frmAdminReporteador:parametrosPanel :frmAdminReporteador:parametroFormPanel :frmAdminReporteador:mensajes"
+									styleClass="btn btn-default" />
+								<p:commandButton value="Eliminar" title="Eliminar"
+									icon="ui-icon-trash"
+									actionListener="#{adminReporteadorBean.eliminarParametro(parametro)}"
+									process="@this"
+									update=":frmAdminReporteador:parametrosPanel :frmAdminReporteador:parametroFormPanel :frmAdminReporteador:mensajes"
+									styleClass="btn btn-default">
+									<p:confirm header="Confirmar"
+										message="El parametro sera eliminado. Desea continuar?"
+										icon="ui-icon-alert" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+					</p:panel>
+				</p:outputPanel>
+
+				<br />
+
+				<p:outputPanel id="parametroFormPanel">
+					<p:panel id="parametroForm" header="Detalle del parametro"
+						rendered="#{adminReporteadorBean.reporteGuardado}">
+						<div class="row">
+							<div class="col-md-4 col-xs-12">
+								<div class="form-group">
+									<p:outputLabel styleClass="bloque requerido" value="Clave:" />
+									<p:inputText
+										value="#{adminReporteadorBean.parametroEdicion.clave}"
+										styleClass="form-control" required="true"
+										requiredMessage="Debe capturar la clave del parametro." />
+								</div>
+							</div>
+							<div class="col-md-6 col-xs-12">
+								<div class="form-group">
+									<p:outputLabel styleClass="bloque requerido" value="Etiqueta:" />
+									<p:inputText
+										value="#{adminReporteadorBean.parametroEdicion.etiqueta}"
+										styleClass="form-control" required="true"
+										requiredMessage="Debe capturar la etiqueta del parametro." />
+								</div>
+							</div>
+							<div class="col-md-2 col-xs-12">
+								<div class="form-group">
+									<p:outputLabel styleClass="bloque requerido" value="Orden:" />
+									<p:inputText
+										value="#{adminReporteadorBean.parametroEdicion.orden}"
+										styleClass="form-control" required="true"
+										requiredMessage="Debe capturar el orden del parametro." />
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<p:outputLabel styleClass="bloque requerido"
+								value="Consulta SQL de opciones:" />
+							<p:inputTextarea
+								value="#{adminReporteadorBean.parametroEdicion.consultaSql}"
+								rows="6" autoResize="false" styleClass="form-control"
+								required="true"
+								requiredMessage="Debe capturar la consulta SQL de opciones." />
+						</div>
+						<div class="form-group">
+							<p:selectBooleanCheckbox
+								value="#{adminReporteadorBean.parametroEdicion.activo}"
+								itemLabel="Activo" />
+						</div>
+						<div class="text-right">
+							<p:commandButton value="Nuevo parametro"
+								actionListener="#{adminReporteadorBean.nuevoParametro}"
+								process="@this"
+								update=":frmAdminReporteador:parametroFormPanel :frmAdminReporteador:mensajes"
+								styleClass="btn btn-default" />
+							<p:commandButton value="Guardar parametro"
+								actionListener="#{adminReporteadorBean.guardarParametro}"
+								process=":frmAdminReporteador:parametroForm"
+								update=":frmAdminReporteador:parametrosPanel :frmAdminReporteador:parametroFormPanel :frmAdminReporteador:mensajes"
+								styleClass="btn btn-primary" />
+						</div>
+					</p:panel>
+				</p:outputPanel>
+			</h:form>
+		</sec:authorize>
+	</ui:define>
+</ui:composition>

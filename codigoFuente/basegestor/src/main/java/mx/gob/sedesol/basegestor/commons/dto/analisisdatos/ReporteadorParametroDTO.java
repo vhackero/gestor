@@ -14,6 +14,7 @@ public class ReporteadorParametroDTO implements Serializable {
 	private String etiqueta;
 	private String consultaSql;
 	private Integer orden;
+	private Boolean activo = Boolean.TRUE;
 	private List<ReporteadorOpcionDTO> opciones = new ArrayList<>();
 
 	public Long getIdParametro() {
@@ -70,6 +71,14 @@ public class ReporteadorParametroDTO implements Serializable {
 
 	public void setOrden(Integer orden) {
 		this.orden = orden;
+	}
+
+	public Boolean getActivo() {
+		return activo;
+	}
+
+	public void setActivo(Boolean activo) {
+		this.activo = activo;
 	}
 
 	public List<ReporteadorOpcionDTO> getOpciones() {

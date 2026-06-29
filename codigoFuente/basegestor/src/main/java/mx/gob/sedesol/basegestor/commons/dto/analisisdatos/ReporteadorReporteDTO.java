@@ -12,6 +12,7 @@ public class ReporteadorReporteDTO implements Serializable {
 	private String clave;
 	private String nombre;
 	private String consultaSql;
+	private Boolean activo = Boolean.TRUE;
 	private List<ReporteadorParametroDTO> parametros = new ArrayList<>();
 
 	public Long getIdReporte() {
@@ -44,6 +45,14 @@ public class ReporteadorReporteDTO implements Serializable {
 
 	public void setConsultaSql(String consultaSql) {
 		this.consultaSql = consultaSql;
+	}
+
+	public Boolean getActivo() {
+		return activo;
+	}
+
+	public void setActivo(Boolean activo) {
+		this.activo = activo;
 	}
 
 	public List<ReporteadorParametroDTO> getParametros() {

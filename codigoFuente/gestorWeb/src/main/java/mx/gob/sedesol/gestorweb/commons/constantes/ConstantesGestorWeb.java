@@ -146,6 +146,7 @@ public final class ConstantesGestorWeb {
 	public static final String NAVEGA_ANALISIS_GESTION_ESC = "ANALISIS_GESTION_ESCOLAR";
 	public static final String NAVEGA_ANALISIS_EVENTOS = "ANALISIS_EVENTOS";
 	public static final String NAVEGA_ANALISIS_REPORTEADOR = "ANALISIS_REPORTEADOR";
+	public static final String NAVEGA_ADMIN_REPORTEADOR = "ADMIN_REPORTEADOR";
 
 	public static final String NAVEGA_IMAGENES_DOCS = "IMAGENES_DOCS";
 	public static final String NAVEGA_PLANTILLAS_DOCS = "PLANTILLAS_DOCS";

@@ -37,6 +37,32 @@ WHERE padre.clave = 'ANA_DAT'
     SELECT 1 FROM tbl_funcionalidades f WHERE f.clave = 'ANA_DAT_REPORTEADOR'
   );
 
+INSERT INTO tbl_funcionalidades
+  (clave, descripcion, usuario_modifico, fecha_registro, fecha_actualizacion, activo, id_funcionalidad_padre)
+SELECT 'ADM_REPORTEADOR', 'Administrar reporteador', 1, NOW(), NULL, 1, padre.id_funcionalidad
+FROM tbl_funcionalidades padre
+WHERE padre.clave = 'CATALOGOS'
+  AND NOT EXISTS (
+    SELECT 1 FROM tbl_funcionalidades f WHERE f.clave = 'ADM_REPORTEADOR'
+  );
+
+INSERT INTO rel_rol_funcionalidad
+  (id_rol, id_funcionalidad, activo, fecha_registro, fecha_actualizacion, usuario_modifico)
+SELECT rol_catalogos.id_rol, funcionalidad.id_funcionalidad, 1, NOW(), NOW(), 1
+FROM rel_rol_funcionalidad rol_catalogos
+JOIN tbl_funcionalidades catalogos
+  ON catalogos.id_funcionalidad = rol_catalogos.id_funcionalidad
+JOIN tbl_funcionalidades funcionalidad
+  ON funcionalidad.clave = 'ADM_REPORTEADOR'
+WHERE catalogos.clave = 'CATALOGOS'
+  AND rol_catalogos.activo = 1
+  AND NOT EXISTS (
+    SELECT 1
+    FROM rel_rol_funcionalidad existente
+    WHERE existente.id_rol = rol_catalogos.id_rol
+      AND existente.id_funcionalidad = funcionalidad.id_funcionalidad
+  );
+
 INSERT INTO tbl_reporteador_reportes
   (clave, nombre, consulta_sql, activo, usuario_modifico, fecha_registro)
 VALUES

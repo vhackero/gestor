@@ -227,6 +227,12 @@
 		</navigation-case>
 
 		<navigation-case>
+			<from-outcome>ADMIN_REPORTEADOR</from-outcome>
+			<to-view-id>/views/private/administracion/catalogos/reporteador.jsf</to-view-id>
+			<redirect />
+		</navigation-case>
+
+		<navigation-case>
 			<from-outcome>CAT_GESTION_ESCOLAR</from-outcome>
 			<to-view-id>/views/private/gestionEscolar/catalogos/catalogosGestionEscolar.xhtml</to-view-id>
 			<redirect />

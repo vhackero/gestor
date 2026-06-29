@@ -193,6 +193,11 @@ public class MenuGestorBean extends BaseBean {
 		return ConstantesGestorWeb.NAVEGA_ANALISIS_REPORTEADOR;
 	}
 
+	public String navegaAdminReporteador() {
+		logger.info("Navegando a pantalla de administracion de reporteador");
+		return ConstantesGestorWeb.NAVEGA_ADMIN_REPORTEADOR;
+	}
+
 	public String navegaEventosPublico() {
 		logger.info("Navegando a pantalla de eventos en portal publico");
 		return ConstantesGestorWeb.NAVEGA_EVENTOS_PUBLICOS;
