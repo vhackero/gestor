@@ -37,6 +37,8 @@ public interface DispersionesService extends CommonService<Dispersiones, Integer
 	
 	public boolean actualizarDispersionExc(DispersionesParamNuevo dispercionParametros);
 	
+	public boolean existeCambioNoEstudiantes(Integer idDispersion);
+	
 	public void borrarDispercsion(TblDispersionesBusqueda tblBusqueda);
 
 	public boolean existeRelDispersionGrupo(Integer idDispersion);

@@ -149,6 +149,11 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 		 return iDispersionesRepository.actualizarDispersionExc(dispercionParametros);
 
 	}
+	
+	@Override
+	public boolean existeCambioNoEstudiantes(Integer idDispersion) {
+		return iDispersionesRepository.existeCambioNoEstudiantes(idDispersion);
+	}
 
 	@Override
 	public boolean validarDispercionExistente(DispersionesParam dispercionParametros) {

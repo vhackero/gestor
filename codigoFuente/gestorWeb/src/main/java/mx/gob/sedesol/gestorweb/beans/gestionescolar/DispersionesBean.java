@@ -348,6 +348,7 @@ public class DispersionesBean extends BaseBean {
 				sumTotal = (dispersionNuevo.getNoGrupos() * dispersionNuevo.getEstudiantesGrupo())
 						+ (dispersionNuevo.getGrupoResto() * dispersionNuevo.getCupoResto());
 				Integer totalRegistrado = lista.get(0).getNoEstudiantes();
+				dispersionNuevo.setNoEstudiantes(totalRegistrado);
 				
 				logger.info(String.format(
 						"Validando dispersión (id=%d) con noGrupos=%d, cupoGeneral=%d, gruposResto=%d, cupoResto=%d, sumaCalculada=%d, estudiantesRegistrados=%d",
@@ -594,6 +595,11 @@ public class DispersionesBean extends BaseBean {
 		if (!dispersion.isMatricularHabilitado()) {
 			mostrarMensajeDispersion(true,
 					"No es posible matricular usuarios hasta completar la generación de grupos.");
+			return;
+		}
+		if (dispersionesService.existeCambioNoEstudiantes(dispersion.getIdDispersion())) {
+			mostrarMensajeDispersion(true,
+					"El numero de estudiantes con inscripcion cambio, revisa en el apartado de consulta dispersion.");
 			return;
 		}
 		MatricularDispersionDTO solicitud = construirSolicitudMatriculacion(dispersion);

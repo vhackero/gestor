@@ -268,7 +268,8 @@ public class DispersionesRepository implements IDispersionesRepository {
 	            "SET c.no_grupos = :noGrupos, " +
 	            "    c.estudiantes_x_grupo = :estudiantesGrupo, " +
 	            "    c.grupo_resto = :grupoResto, " +
-	            "    c.estudiantes_resto = :estudianteResto " +
+	            "    c.estudiantes_resto = :estudianteResto, " +
+	            "    c.no_total_estudiantes = COALESCE(:noTotalEstudiantes, c.no_total_estudiantes) " +
 	            "WHERE c.id_dispersion = :id";
 		
 		Query queryCtualizar = entityManager.createNativeQuery(actualizarDispersion);
@@ -276,6 +277,7 @@ public class DispersionesRepository implements IDispersionesRepository {
 		queryCtualizar.setParameter("estudiantesGrupo", dispercionParametros.getEstudiantesGrupo());
 		queryCtualizar.setParameter("grupoResto", dispercionParametros.getGrupoResto());
 		queryCtualizar.setParameter("estudianteResto", dispercionParametros.getCupoResto());
+		queryCtualizar.setParameter("noTotalEstudiantes", dispercionParametros.getNoEstudiantes());
 		queryCtualizar.setParameter("id", idDispersion);
 		
 		logger.info(String.format("Actualizando dispersión %d (no_grupos=%d, estudiantes_x_grupo=%d, grupo_resto=%d, estudiantes_resto=%d)",
@@ -295,6 +297,34 @@ public class DispersionesRepository implements IDispersionesRepository {
 		}
 		
 		return exito;
+	}
+	
+	@Override
+	public boolean existeCambioNoEstudiantes(Integer idDispersion) {
+		if (idDispersion == null) {
+			return false;
+		}
+		String consulta = "SELECT CASE WHEN COALESCE(dis.no_total_estudiantes, 0) <> COALESCE(("
+				+ "SELECT COUNT(ti.id) "
+				+ "  FROM tbl_inscripciones ti "
+				+ "  JOIN rel_proceso_inscipcion_planesyprogramas rpi "
+				+ "    ON rpi.id_proceso_inscripcion = dis.id_proceso_inscripcion "
+				+ "   AND rpi.id_programa = dis.id_programa "
+				+ "   AND rpi.id_plan = ti.idplan "
+				+ "  JOIN tbl_procesos_inscripcion tpi "
+				+ "    ON tpi.proceso_inscripcion_id = dis.id_proceso_inscripcion "
+				+ " WHERE ti.idprograma = dis.id_programa "
+				+ "   AND ti.fecha_registro >= tpi.fecha_inicio "
+				+ "   AND ti.fecha_registro <= tpi.fecha_fin), 0) THEN 1 ELSE 0 END "
+				+ "FROM tbl_dispersiones dis "
+				+ "WHERE dis.id_dispersion = :idDispersion";
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("idDispersion", idDispersion);
+		List<?> resultado = query.getResultList();
+		if (resultado.isEmpty() || resultado.get(0) == null) {
+			return false;
+		}
+		return ((Number) resultado.get(0)).intValue() == 1;
 	}
 	
 	@Transactional
