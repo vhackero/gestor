@@ -18,6 +18,8 @@ public class DispersionesParamNuevo implements Serializable {
 	Integer grupoResto;
 	
 	Integer cupoResto;
+	
+	Integer noEstudiantes;
 
 	public Integer getIdDispersion() {
 		return idDispersion;
@@ -57,6 +59,14 @@ public class DispersionesParamNuevo implements Serializable {
 
 	public void setCupoResto(Integer cupoResto) {
 		this.cupoResto = cupoResto;
+	}
+	
+	public Integer getNoEstudiantes() {
+		return noEstudiantes;
+	}
+	
+	public void setNoEstudiantes(Integer noEstudiantes) {
+		this.noEstudiantes = noEstudiantes;
 	}
 
 }

@@ -34,6 +34,8 @@ public interface IDispersionesRepository {
 	
 	public boolean actualizarDispersionExc(DispersionesParamNuevo dispercionParametros);
 	
+	public boolean existeCambioNoEstudiantes(Integer idDispersion);
+	
 	public boolean validarDispercionExistenteOrdinario(DispersionesParam dispercionParametros);
 	
 	public List<TblDispersionesBusqueda> consultaDisperciones(DispersionesParam dispercionParametros);
