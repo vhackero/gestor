@@ -151,15 +151,12 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 
 		HistorialAcademicoDTO regresa = new HistorialAcademicoDTO();
 
-		String consulta = "SELECT DISTINCT (p.sso_idUsuario) matricula, CONCAT(cne.nombre,' en ', pl.nombre) carrera\r\n"
-				+ "FROM tbl_persona p\r\n"
-				+ "         INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = p.id_persona AND rgp.calificacion_final is null\r\n"
-				+ "         INNER JOIN tbl_grupos g ON g.id = rgp.id_grupo AND g.acta_cerrada = 0\r\n"
-				+ "         INNER JOIN tbl_eventos e ON e.id_evento = g.id_evento\r\n"
-				+ "         INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa\r\n"
-				+ "         INNER JOIN tbl_planes pl ON pl.id_plan = fd.id_plan\r\n"
-				+ "         INNER JOIN cat_nivel_ensenanza_programa cne ON cne.id = pl.id_nivel_ensenanza\r\n"
-				+ "WHERE p.id_persona = :id_persona";
+		String consulta = "SELECT DISTINCT (tp.sso_idUsuario) matricula, CONCAT(cne.nombre,' en ', tpl.nombre) carrera\r\n"
+				+ "FROM tbl_persona tp\r\n"
+				+ "         INNER JOIN tbl_persona_aspirante tpa ON tp.id_persona = tpa.id_persona\r\n"
+				+ "         INNER JOIN tbl_planes tpl ON tpa.id_plan = tpl.id_plan\r\n"
+				+ "         INNER JOIN cat_nivel_ensenanza_programa cne ON cne.id = tpl.id_nivel_ensenanza\r\n"
+				+ "WHERE tp.id_persona = :id_persona";
 
 		Query query = entityManager.createNativeQuery(consulta);
 		query.setParameter("id_persona", id_persona);
