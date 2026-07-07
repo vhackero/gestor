@@ -422,7 +422,9 @@ public class MatriculacionEventoBean extends BaseBean {
 			}
 		}
 		participantes.removeAll(listaEliminar);
-		if (algunaSeleccion) {
+		if (!algunaSeleccion) {
+			agregarMsgError("No existe seleccion.", null, sistema);
+		} else if (!listaEliminar.isEmpty()) {
 			bitacoraBean.guardarBitacora(idPersonaEnSesion(), "DES_MTR_PAR", "", requestActual(),
 					TipoServicioEnum.LOCAL);
 			agregarMsgInfo("Baja exitosa.", null, sistema);
@@ -432,7 +434,7 @@ public class MatriculacionEventoBean extends BaseBean {
 			eventoCapacitacionServiceFacade.getGrupoService().actualizarGrupo(grupo,
 					getUsuarioEnSession().getIdPersona());
 		} else {
-			agregarMsgError("No existe selección.", null, sistema);
+			agregarMsgError("No fue posible realizar la baja.", null, sistema);
 		}
 	}
 
