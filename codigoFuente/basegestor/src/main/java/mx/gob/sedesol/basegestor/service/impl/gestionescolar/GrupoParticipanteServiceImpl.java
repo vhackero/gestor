@@ -424,6 +424,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 	}
 
 	@Override
+	@Transactional
 	public ResultadoDTO<RelGrupoParticipanteDTO> eliminarParticipante(RelGrupoParticipanteDTO participante,
 			EventoCapacitacionDTO evento) {
 		ResultadoDTO<RelGrupoParticipanteDTO> resultado = new ResultadoDTO<>();
