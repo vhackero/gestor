@@ -498,6 +498,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			throws InscripcionException {
 		List<InscripcionMateriasDTO> materiasDisponibles = obtenerMateriasDisponibles(contexto);
 		ResumenSeleccionMateriasDTO resumen = construirResumenSeleccion(materiasDisponibles);
+		validarSeleccionElectivas(materiasDisponibles, obtenerCantidadMaximaMateriasElectivas(contexto));
 
 		if (esNuevoIngreso(contexto) && esRegular(contexto)) {
 			validarCargaPrimerSemestre(resumen, contexto);
@@ -684,7 +685,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		validarSeleccionMateriasOctavoSemestre(materiaSeleccionada, materiasReprobadas);
 		validarSeleccionOptativas(materiaSeleccionada, materiasDisponibles);
 		if (InscripcionUtils.esMateriaElectiva(materiaSeleccionada.getTipoPrograma())) {
-			validarSeleccionElectivas(materiaSeleccionada, materiasDisponibles, cantidadMaximaMateriasElectivas);
+			validarSeleccionElectivas(materiasDisponibles, cantidadMaximaMateriasElectivas);
 		}
 
 	}
@@ -1651,8 +1652,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		return contexto.getEstadoAcademico().getPorcentajeCreditosCompletados();
 	}
 
-	private void validarSeleccionElectivas(InscripcionMateriasDTO materiaSeleccionada,
-			List<InscripcionMateriasDTO> materiasDisponibles, Long cantidadMaximaMateriasElectivas)
+	private void validarSeleccionElectivas(List<InscripcionMateriasDTO> materiasDisponibles,
+			Long cantidadMaximaMateriasElectivas)
 			throws InscripcionException {
 
 		Long cantidadElectivasSeleccionadas = materiasDisponibles.stream().filter(
