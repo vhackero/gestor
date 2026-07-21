@@ -699,6 +699,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("    cdp.nombre AS division, ");
 		sql.append("    tfd.tipo AS tipo_programa, ");
 		sql.append("    tfd.id_programa_antecedente AS seriada, ");
+		sql.append("    (SELECT antecedente.nombre_tentativo FROM tbl_ficha_descriptiva_programa antecedente ");
+		sql.append("     WHERE antecedente.id_programa = tfd.id_programa_antecedente) AS nombre_antecedente, ");
 		sql.append("    tpi.semestre AS periodo, ");
 		sql.append("    tpi.perfil AS perfil, ");
 		sql.append("    tpi.proceso_inscripcion_id AS proceso_inscripcion_id ");
@@ -748,10 +750,11 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setDivision((String) row[9]); // cdp.nombre
 		dto.setTipoPrograma((String) row[10]); // tfd.tipo
 		dto.setIdProgramaAntecedente(getLongValue(row[11])); // tfd.id_programa_antecedente
+		dto.setNombreProgramaAntecedente((String) row[12]); // antecedente.nombre_tentativo
 		dto.setCheck(false); // Valor por defecto
-		dto.setPeriodo(getIntegerValue(row[12])); // tpi.semestre
-		dto.setPerfil((String) row[13]); // tpi.perfil
-		dto.setIdProcesoInscripcion(getLongValue(row[14])); // tpi.proceso_inscripcion_id
+		dto.setPeriodo(getIntegerValue(row[13])); // tpi.semestre
+		dto.setPerfil((String) row[14]); // tpi.perfil
+		dto.setIdProcesoInscripcion(getLongValue(row[15])); // tpi.proceso_inscripcion_id
 
 		return dto;
 	}
@@ -787,7 +790,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("    JOIN tbl_eventos te2 ON te2.id_evento = tg2.id_evento ");
 		sql.append("    JOIN tbl_ficha_descriptiva_programa fd2 ON fd2.id_programa = te2.id_programa ");
 		sql.append("    WHERE rgp2.id_persona_participante = rgp.id_persona_participante ");
-		sql.append("    AND te2.id_programa = te.id_programa ");
+		sql.append("    AND LOWER(TRIM(fd2.nombre_tentativo)) = LOWER(TRIM(fd.nombre_tentativo)) ");
 		sql.append("    AND rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
 		sql.append(")");
 
@@ -990,8 +993,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("      INNER JOIN tbl_grupos tg2 ON tg2.id = rgp2.id_grupo ");
 		sql.append("      INNER JOIN tbl_eventos te2 ON te2.id_evento = tg2.id_evento ");
 		sql.append("      INNER JOIN tbl_ficha_descriptiva_programa fd2 ON fd2.id_programa = te2.id_programa ");
-		sql.append("      WHERE fd2.cve_programa = fd.cve_programa ");
-		sql.append("        AND te2.id_programa = fd.id_programa ");
+		sql.append("      WHERE LOWER(TRIM(fd2.nombre_tentativo)) = LOWER(TRIM(fd.nombre_tentativo)) ");
 		sql.append("        AND rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
 		sql.append("        AND rgp2.id_persona_participante = rgp.id_persona_participante ");
 		sql.append("  ) ");
