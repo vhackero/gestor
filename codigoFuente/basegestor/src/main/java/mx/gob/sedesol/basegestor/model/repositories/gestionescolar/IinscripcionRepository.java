@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignaturasPorSemestreDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
@@ -73,5 +74,13 @@ public interface IinscripcionRepository {
 	List<AprobacionAsignaturasPorSemestreDTO> obtenerAprobacionAsignaturasPorSemestre(Long idPlan, Long idPersona);
 
 	List<MallaAlumnoProgramaDTO> obtenerProgramasMallaAlumno(Long idPersona, Long idPlan);
+
+	List<ConfiguracionElectivaDTO> obtenerProcesosActivosConfiguracionElectivas();
+
+	List<ConfiguracionElectivaDTO> obtenerAsignaturasConfiguracionElectivas(Long idProcesoInscripcion);
+
+	void guardarConfiguracionElectiva(ConfiguracionElectivaDTO configuracion);
+
+	boolean tieneCupoElectiva(Long idProcesoInscripcion, Long idPrograma);
 
 }

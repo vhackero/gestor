@@ -499,6 +499,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		List<InscripcionMateriasDTO> materiasDisponibles = obtenerMateriasDisponibles(contexto);
 		ResumenSeleccionMateriasDTO resumen = construirResumenSeleccion(materiasDisponibles);
 		validarSeleccionElectivas(materiasDisponibles, obtenerCantidadMaximaMateriasElectivas(contexto));
+		validarCuposElectivas(materiasDisponibles);
 
 		if (esNuevoIngreso(contexto) && esRegular(contexto)) {
 			validarCargaPrimerSemestre(resumen, contexto);
@@ -1666,6 +1667,18 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 							cantidadMaximaMateriasElectivas));
 		}
 
+	}
+
+	private void validarCuposElectivas(List<InscripcionMateriasDTO> materiasDisponibles) throws InscripcionException {
+		for (InscripcionMateriasDTO materia : materiasDisponibles) {
+			if (estaSeleccionada(materia) && InscripcionUtils.esMateriaElectiva(materia.getTipoPrograma())
+					&& (materia.getIdProcesoInscripcion() == null || !inscripcionService.tieneCupoElectiva(
+							materia.getIdProcesoInscripcion(), materia.getIdPrograma()))) {
+				throw new InscripcionException("La unidad didáctica electiva "
+						+ materia.getNombreTentativoPrograma()
+						+ " ya no cuenta con lugares disponibles. Actualiza tu selección.");
+			}
+		}
 	}
 
 	private boolean estaSeleccionada(InscripcionMateriasDTO m) {

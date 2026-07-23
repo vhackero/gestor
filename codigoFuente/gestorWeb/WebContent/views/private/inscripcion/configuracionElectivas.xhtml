@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition template="/templates/layout.xhtml"
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="breadcrumb">
+        <li>Inscripción</li>
+        <li class="active">Configuración de electivas</li>
+    </ui:define>
+
+    <ui:define name="content">
+        <h:form id="formElectivas">
+            <p:messages id="mensajes" showDetail="true" closable="true" />
+            <h1><h:outputText value="Configuración de asignaturas electivas" /></h1>
+
+            <p:panel header="Proceso de inscripción" styleClass="fondoPrimario">
+                <div class="row">
+                    <div class="col-md-8 form-group">
+                        <h:outputLabel for="proceso" value="Proceso activo / convocatoria" styleClass="requerido" />
+                        <p:selectOneMenu id="proceso" value="#{configuracionElectivasBean.idProcesoInscripcion}"
+                            styleClass="form-control">
+                            <f:selectItem itemLabel="Selecciona un proceso" itemValue="#{null}" />
+                            <f:selectItems value="#{configuracionElectivasBean.procesos}" var="proceso"
+                                itemValue="#{proceso.idProcesoInscripcion}"
+                                itemLabel="#{proceso.nombreConvocatoria} - #{proceso.nombreProceso}" />
+                            <p:ajax listener="#{configuracionElectivasBean.consultarAsignaturas}"
+                                process="@this" update="@form" />
+                        </p:selectOneMenu>
+                    </div>
+                </div>
+            </p:panel>
+
+            <p:dataTable id="tabla" value="#{configuracionElectivasBean.asignaturas}" var="asignatura"
+                paginator="true" rows="20" emptyMessage="Selecciona un proceso o no existen asignaturas de quinto y sexto semestre.">
+                <p:column headerText="Plan"><h:outputText value="#{asignatura.nombrePlan}" /></p:column>
+                <p:column headerText="Semestre"><h:outputText value="#{asignatura.semestre}" /></p:column>
+                <p:column headerText="Clave"><h:outputText value="#{asignatura.clavePrograma}" /></p:column>
+                <p:column headerText="Asignatura"><h:outputText value="#{asignatura.nombrePrograma}" /></p:column>
+                <p:column headerText="Habilitada" style="text-align:center">
+                    <p:selectBooleanCheckbox id="activa" value="#{asignatura.activa}" />
+                </p:column>
+                <p:column headerText="Sin límite" style="text-align:center">
+                    <p:selectBooleanCheckbox id="sinLimite" value="#{asignatura.sinLimite}">
+                        <p:ajax process="@this" update="@form" />
+                    </p:selectBooleanCheckbox>
+                </p:column>
+                <p:column headerText="Cupo máximo">
+                    <p:inputText id="cupo" value="#{asignatura.cupoMaximo}"
+                        disabled="#{asignatura.sinLimite}" styleClass="form-control">
+                        <f:convertNumber integerOnly="true" />
+                    </p:inputText>
+                </p:column>
+                <p:column headerText="Ocupados"><h:outputText value="#{asignatura.cupoOcupado}" /></p:column>
+                <p:column headerText="Acciones" style="text-align:center">
+                    <p:commandButton value="Guardar" icon="fa fa-save"
+                        action="#{configuracionElectivasBean.guardar(asignatura)}"
+                        ajax="false" />
+                </p:column>
+            </p:dataTable>
+        </h:form>
+    </ui:define>
+</ui:composition>

@@ -8,9 +8,11 @@ import java.util.Optional;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignaturasPorSemestreDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
@@ -38,6 +40,27 @@ public class InscripcionServiceImpl implements InscripcionService {
 
 	@Autowired
 	private IinscripcionRepository inscripcionesRepository;
+
+	@Override
+	public List<ConfiguracionElectivaDTO> obtenerProcesosActivosConfiguracionElectivas() {
+		return inscripcionesRepository.obtenerProcesosActivosConfiguracionElectivas();
+	}
+
+	@Override
+	public List<ConfiguracionElectivaDTO> obtenerAsignaturasConfiguracionElectivas(Long idProcesoInscripcion) {
+		return inscripcionesRepository.obtenerAsignaturasConfiguracionElectivas(idProcesoInscripcion);
+	}
+
+	@Override
+	@Transactional
+	public void guardarConfiguracionElectiva(ConfiguracionElectivaDTO configuracion) {
+		inscripcionesRepository.guardarConfiguracionElectiva(configuracion);
+	}
+
+	@Override
+	public boolean tieneCupoElectiva(Long idProcesoInscripcion, Long idPrograma) {
+		return inscripcionesRepository.tieneCupoElectiva(idProcesoInscripcion, idPrograma);
+	}
 
 	@Override
 	public InscripcionPersonaDTO obtenerInscripcionPorPersona(String idPersona) {
