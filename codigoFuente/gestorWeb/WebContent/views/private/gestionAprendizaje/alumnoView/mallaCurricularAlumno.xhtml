@@ -821,6 +821,16 @@
 				color: #566970;
 				line-height: 1.5;
 			}
+			.malla-student-v2-box {
+				margin-top: 14px;
+				background: #edf4de;
+				border: 1px solid #d7e2bb;
+				border-radius: 6px;
+				padding: 12px 14px;
+				font-size: 13px;
+				color: #4c636d;
+				line-height: 1.5;
+			}
 			.malla-gestor-box {
 				margin-top: 14px;
 				background: #ffffff;
@@ -1114,6 +1124,13 @@
 								<span id="mallaDetailRiesgo" class="malla-detail-value">Sin selección</span>
 							</div>
 							<div class="malla-detail-note">#{mallaCurricularAlumnoBean.mensajePanelContextual}</div>
+							<ui:fragment rendered="#{mallaCurricularAlumnoBean.mostrarPrevencionEstudianteV2}">
+								<div class="malla-student-v2-box">
+									<strong>Prevención y siguientes pasos:</strong> #{mallaCurricularAlumnoBean.resumenPrevencionEstudianteV2}
+									<br />
+									#{mallaCurricularAlumnoBean.prevencionTicketEstudianteV2}
+								</div>
+							</ui:fragment>
 							<ui:fragment rendered="#{mallaCurricularAlumnoBean.vistaGestor}">
 								<div class="malla-gestor-box">
 									<strong>Uso gestor:</strong> esta vista mantiene la trayectoria del estudiante y agrega contexto funcional para revisión, acompañamiento y trazabilidad.

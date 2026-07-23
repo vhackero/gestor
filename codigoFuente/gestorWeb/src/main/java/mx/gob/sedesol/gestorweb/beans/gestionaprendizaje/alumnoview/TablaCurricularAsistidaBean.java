@@ -19,11 +19,15 @@ import org.apache.log4j.Logger;
 import org.primefaces.event.TabChangeEvent;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ResultadoSimulacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MotivoDecisionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.service.gestionescolar.AsistenteInscripcionService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.AsistenteCurricularV2Facade;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.TrayectoriaAcademicaContextoBean;
 
@@ -40,7 +44,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     @ManagedProperty(value = "#{trayectoriaAcademicaContextoBean}")
     private TrayectoriaAcademicaContextoBean trayectoriaAcademicaContextoBean;
 
+    @ManagedProperty(value = "#{asistenteCurricularV2Facade}")
+    private AsistenteCurricularV2Facade asistenteCurricularV2Facade;
+
     private AsistenteInscripcionContextoDTO contexto;
+    private FichaIntegralCasoDTO fichaIntegralV2;
     private List<SemestreAsistidoDTO> semestres;
     private String mensajeError;
     private ResultadoSimulacionDTO resultadoSimulacion;
@@ -65,6 +73,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             matriculaPersonaObjetivo = trayectoriaAcademicaContextoBean.resolverMatriculaObjetivo(getUsuarioEnSession().getUsuario());
             contexto = asistenteInscripcionService.obtenerContextoAsistido(idPersona);
             construirSemestres();
+            cargarFichaIntegralV2();
             inicializarRespuestasContextuales();
             indiceTabActiva = 0;
         } catch (InscripcionException e) {
@@ -365,6 +374,22 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         this.trayectoriaAcademicaContextoBean = trayectoriaAcademicaContextoBean;
     }
 
+    public AsistenteCurricularV2Facade getAsistenteCurricularV2Facade() {
+        return asistenteCurricularV2Facade;
+    }
+
+    public void setAsistenteCurricularV2Facade(AsistenteCurricularV2Facade asistenteCurricularV2Facade) {
+        this.asistenteCurricularV2Facade = asistenteCurricularV2Facade;
+    }
+
+    public FichaIntegralCasoDTO getFichaIntegralV2() {
+        return fichaIntegralV2;
+    }
+
+    public boolean isTieneFichaIntegralV2() {
+        return fichaIntegralV2 != null;
+    }
+
     public boolean isVistaGestor() {
         return vistaGestor;
     }
@@ -404,7 +429,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                     : "Modo gestión: revisa la selección propuesta, valida la regla aplicada y documenta la decisión académica del periodo.";
         }
         return esPeriodoCursamiento()
-                ? "Modo consulta: el periodo de inscripción no está activo. Esta vista sirve para dar seguimiento, anticipar riesgos y preparar el siguiente periodo."
+                ? "Modo consulta: el periodo de inscripción no está activo. Esta vista sirve para dar seguimiento, anticipar riesgos y preparar el siguiente período."
                 : "Modo operativo: usa esta vista para revisar la recomendación, simular alternativas y validar la selección final del periodo.";
     }
 
@@ -469,6 +494,50 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return "Asistente virtual";
     }
 
+    private void cargarFichaIntegralV2() {
+        fichaIntegralV2 = null;
+        if (asistenteCurricularV2Facade == null || idPersonaObjetivo == null) {
+            return;
+        }
+        try {
+            fichaIntegralV2 = asistenteCurricularV2Facade.obtenerFichaIntegral(construirContextoV2());
+        } catch (InscripcionException e) {
+            logger.warn("No fue posible cargar la ficha integral V2 para el asistente curricular.", e);
+        } catch (Exception e) {
+            logger.warn("Error inesperado al cargar la ficha integral V2 para el asistente curricular.", e);
+        }
+    }
+
+    private void asegurarFichaIntegralV2() {
+        if (fichaIntegralV2 != null) {
+            return;
+        }
+        cargarFichaIntegralV2();
+    }
+
+    private ContextoAsistenteCurricularV2DTO construirContextoV2() {
+        ContextoAsistenteCurricularV2DTO contextoV2 = new ContextoAsistenteCurricularV2DTO();
+        contextoV2.setIdPersonaObjetivo(idPersonaObjetivo);
+        contextoV2.setIdPersonaConsulta(idPersonaEnSesion());
+        contextoV2.setPerfilConsulta(vistaGestor ? "GESTOR" : "ESTUDIANTE");
+        contextoV2.setVistaGestor(Boolean.valueOf(vistaGestor));
+        contextoV2.setPeriodoOperativo(esPeriodoCursamiento() ? "CURSAMIENTO" : "INSCRIPCION");
+        contextoV2.setOrigenConsulta("ASISTENTE");
+        contextoV2.setIdPlan(resolverIdPlanV2());
+        return contextoV2;
+    }
+
+    private Long resolverIdPlanV2() {
+        if (contexto == null) {
+            return null;
+        }
+        InscripcionContextoDTO contextoBase = contexto.getContextoBase();
+        if (contextoBase == null || contextoBase.getInscripcionPersona() == null) {
+            return null;
+        }
+        return contextoBase.getInscripcionPersona().getIdPlan();
+    }
+
     public List<String> getAccionesPanelContextual() {
         List<String> acciones = new ArrayList<String>();
         if (vistaGestor) {
@@ -481,7 +550,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         if (esPeriodoCursamiento()) {
             acciones.add("¿Cómo voy?");
             acciones.add("¿Qué debo cuidar?");
-            acciones.add("Preparar próximo periodo");
+            acciones.add("Preparar próximo período");
             acciones.add("Consultar detalle");
             return acciones;
         }
@@ -552,7 +621,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             return mensajes;
         }
         mensajes.add(esPeriodoCursamiento()
-                ? "Consulta la trayectoria vigente y toma nota de las UD que condicionarán el próximo periodo."
+                ? "Consulta la trayectoria vigente y toma nota de las UD que condicionarán el próximo período."
                 : "Revisa primero las UD prioritarias y luego valida la selección completa.");
         mensajes.add("Situación académica actual: " + contexto.getSituacionAcademicaPeriodo() + ".");
         mensajes.add("Riesgo general estimado: " + (contexto.getRiesgos() != null ? contexto.getRiesgos().getNivelRiesgo() : "Sin clasificar") + ".");
@@ -677,6 +746,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                             || Boolean.TRUE.equals(fila.getBloqueada())))
                 .sorted(Comparator
                         .comparing(this::ordenPrioridadFila)
+                        .thenComparing(this::pesoPrioridadTexto)
                         .thenComparing(FilaAsistidaDTO::getSemestre, Comparator.nullsLast(Integer::compareTo))
                         .thenComparing(FilaAsistidaDTO::getBloque, Comparator.nullsLast(Integer::compareTo))
                         .thenComparing(FilaAsistidaDTO::getClave, Comparator.nullsLast(String::compareTo)))
@@ -693,7 +763,13 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         if (fila == null) {
             return Integer.valueOf(9);
         }
+        if (Boolean.TRUE.equals(fila.getPrioritaria())) {
+            return Integer.valueOf(0);
+        }
         if (fila.getPrioridad() != null && fila.getPrioridad().toUpperCase().contains("PRIOR")) {
+            return Integer.valueOf(0);
+        }
+        if (pesoPrioridadTexto(fila).intValue() <= 1) {
             return Integer.valueOf(0);
         }
         if (Boolean.TRUE.equals(fila.getBloqueada())) {
@@ -705,11 +781,35 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return Integer.valueOf(2);
     }
 
+    private Integer pesoPrioridadTexto(FilaAsistidaDTO fila) {
+        if (fila == null || fila.getPrioridad() == null) {
+            return Integer.valueOf(5);
+        }
+        String prioridad = fila.getPrioridad().trim().toUpperCase();
+        if (prioridad.contains("CRIT") || prioridad.contains("MUY ALTA") || prioridad.contains("ALTA")) {
+            return Integer.valueOf(0);
+        }
+        if (prioridad.contains("MEDIA")) {
+            return Integer.valueOf(1);
+        }
+        if (prioridad.contains("BAJA")) {
+            return Integer.valueOf(2);
+        }
+        if (prioridad.contains("OPC")) {
+            return Integer.valueOf(4);
+        }
+        return Integer.valueOf(3);
+    }
+
     public int getConteoUdPendientesPanel() {
         if (contexto == null || contexto.getDiagnosticoActual() == null) {
-            return getFilasUdPrioritarias().size();
+            return obtenerConteoPendientesDerivado();
         }
-        return valor(contexto.getDiagnosticoActual().getMateriasCriticas());
+        int materiasCriticas = valor(contexto.getDiagnosticoActual().getMateriasCriticas());
+        if (materiasCriticas > 0) {
+            return materiasCriticas;
+        }
+        return obtenerConteoPendientesDerivado();
     }
 
     public int getConteoSeriacionPanel() {
@@ -740,7 +840,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             return "Vista de trazabilidad de UD causantes, prioridad calculada y acción sugerida por el motor académico.";
         }
         return esPeriodoCursamiento()
-                ? "Consulta de UD pendientes para seguimiento y preparación del siguiente periodo."
+                ? "Consulta de UD pendientes para seguimiento y preparación del siguiente período."
                 : "Estas UD deben atenderse primero para regularizar la trayectoria.";
     }
 
@@ -760,6 +860,12 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     public String getMensajePanelLateral() {
         if (vistaGestor) {
             return "Apoyo para interpretar el caso y documentar la atención.";
+        }
+        if (isMostrarSeguimientoCasoEstudianteV2()) {
+            return "Esta orientación resume tu estado actual, el mensaje principal y el siguiente paso recomendado según tu situación académica.";
+        }
+        if (isMostrarPanelPrevencionEstudianteV2()) {
+            return getTextoPrevencionTicketsV2();
         }
         return esPeriodoCursamiento()
                 ? "En cursamiento activo puedes consultar tu situación; no hay selección final."
@@ -788,19 +894,50 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             preguntas.add("Mensaje sugerido");
             return preguntas;
         }
+
+        if (isEstudianteRegularContexto()) {
+            preguntas.add("¿Cómo mantengo mi avance?");
+            preguntas.add("¿Qué debo cuidar este periodo?");
+            preguntas.add(esPeriodoCursamiento() ? "¿Cómo preparo el siguiente período?" : "¿Puedo adelantar carga?");
+            preguntas.add("¿Qué pasa si acredito todo?");
+            if (getConteoSeriacionPanel() > 0) {
+                preguntas.add("¿Qué significa la seriación?");
+            }
+            asegurarPreguntaOrientacionSeleccionada(preguntas);
+            return preguntas;
+        }
+
         if (esPeriodoCursamiento()) {
             preguntas.add("¿Por qué soy irregular?");
             preguntas.add("¿Qué UD debo registrar primero?");
-            preguntas.add("¿Puedo tomar más UD?");
-            preguntas.add("¿Qué pasa si acredito todo?");
-            preguntas.add("Necesito revisión académica");
+            preguntas.add(getConteoUdNoAcreditadasPanel() > 0 ? "¿Qué debo regularizar primero?" : "¿Puedo tomar más UD?");
+            preguntas.add("¿Cómo preparo el siguiente período?");
+            if (isRequiereRevisionAcademicaV2()) {
+                preguntas.add("¿Cuándo debo pedir apoyo académico?");
+            }
+            asegurarPreguntaOrientacionSeleccionada(preguntas);
             return preguntas;
         }
-        preguntas.add("¿Por qué soy irregular?");
-        preguntas.add("¿Qué UD debo registrar?");
+
+        preguntas.add(getConteoUdNoAcreditadasPanel() > 0 ? "¿Qué debo regularizar primero?" : "¿Qué UD debo registrar?");
         preguntas.add("¿Puedo agregar otra UD?");
-        preguntas.add("Ver detalle");
+        preguntas.add(getConteoSeriacionPanel() > 0 ? "¿Qué significa la seriación?" : "¿Qué debo preparar ahora?");
+        preguntas.add("¿Qué pasa si acredito todo?");
+        if (isRequiereRevisionAcademicaV2()) {
+            preguntas.add("¿Cuándo debo pedir apoyo académico?");
+        }
+        asegurarPreguntaOrientacionSeleccionada(preguntas);
         return preguntas;
+    }
+
+    private void asegurarPreguntaOrientacionSeleccionada(List<String> preguntas) {
+        if (preguntas == null || preguntas.isEmpty()) {
+            return;
+        }
+        if (preguntaOrientacionSeleccionada == null || !preguntas.contains(preguntaOrientacionSeleccionada)) {
+            preguntaOrientacionSeleccionada = preguntas.get(0);
+            respuestaPreguntaOrientacion = construirRespuestaOrientacion(preguntaOrientacionSeleccionada);
+        }
     }
 
     public void seleccionarPreguntaOrientacion(String pregunta) {
@@ -822,13 +959,14 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                     ? "Generar mensaje de seguimiento para estudiante"
                     : "Generar respuesta sugerida para estudiante";
         }
-        return esPeriodoCursamiento()
-                ? "¿Qué debo hacer para regularizarme?"
-                : "¿Qué debo hacer para regularizarme?";
+        if (isEstudianteRegularContexto()) {
+            return esPeriodoCursamiento() ? "¿Cómo mantengo mi avance?" : "¿Cómo preparo mi siguiente período?";
+        }
+        return "¿Qué debo hacer para regularizarme?";
     }
 
     public String getRespuestaPrincipalOrientacion() {
-        return construirRespuestaOrientacion(getPreguntaPrincipalOrientacion());
+        return valorTexto(obtenerMensajeEstudianteV2(), construirRespuestaOrientacion(getPreguntaPrincipalOrientacion()));
     }
 
     public String getMensajeEscalamientoAcademico() {
@@ -837,13 +975,19 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                     ? "Paquete mínimo requerido para escalamiento: estudiante, periodo, resultado actual, regla aplicada y evidencia del seguimiento."
                     : "Paquete mínimo requerido para escalamiento: estudiante, programa, periodo, UD involucradas, regla aplicada, resultado y mensaje mostrado.";
         }
+        if (!isRequiereRevisionAcademicaV2()) {
+            return getTextoPrevencionTicketsV2();
+        }
         return esPeriodoCursamiento()
                 ? "Si el estudiante reporta inconsistencia, integrar evidencia y folio de revisión."
                 : "No requiere escalamiento: variables consistentes.";
     }
 
     public String getTextoBotonEscalamiento() {
-        return vistaGestor ? (esPeriodoCursamiento() ? "Registrar seguimiento" : "Registrar seguimiento") : "Ver detalle";
+        if (vistaGestor) {
+            return "Registrar seguimiento";
+        }
+        return isRequiereRevisionAcademicaV2() ? "Solicitar apoyo académico" : "Seguir orientación";
     }
 
     private String construirRespuestaAccionPanel(String accion) {
@@ -868,7 +1012,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         if ("¿Qué debo cuidar?".equalsIgnoreCase(accion)) {
             return construirRespuestaCuidadosEstudiante();
         }
-        if ("Preparar próximo periodo".equalsIgnoreCase(accion) || "Simular carga".equalsIgnoreCase(accion)) {
+        if ("Preparar próximo período".equalsIgnoreCase(accion) || "Simular carga".equalsIgnoreCase(accion)) {
             return construirRespuestaPreparacionPeriodo();
         }
         if ("Confirmar selección".equalsIgnoreCase(accion)) {
@@ -896,16 +1040,33 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         if ("¿Por qué soy irregular?".equalsIgnoreCase(pregunta)) {
             return construirRespuestaIrregularidad();
         }
+        if ("¿Cómo mantengo mi avance?".equalsIgnoreCase(pregunta)) {
+            return construirRespuestaMantenerAvance();
+        }
+        if ("¿Qué debo cuidar este periodo?".equalsIgnoreCase(pregunta)) {
+            return construirRespuestaCuidadosEstudiante();
+        }
+        if ("¿Cómo preparo el siguiente período?".equalsIgnoreCase(pregunta)
+                || "¿Puedo adelantar carga?".equalsIgnoreCase(pregunta)) {
+            return construirRespuestaPreparacionPeriodo();
+        }
         if ("¿Qué UD debo registrar primero?".equalsIgnoreCase(pregunta) || "¿Qué UD debo registrar?".equalsIgnoreCase(pregunta)) {
             return construirRespuestaUdPrimero();
+        }
+        if ("¿Qué debo regularizar primero?".equalsIgnoreCase(pregunta)) {
+            return construirRespuestaRegularizacionPrioritaria();
         }
         if ("¿Puedo tomar más UD?".equalsIgnoreCase(pregunta) || "¿Puedo agregar otra UD?".equalsIgnoreCase(pregunta)) {
             return construirRespuestaCargaAdicional();
         }
+        if ("¿Qué significa la seriación?".equalsIgnoreCase(pregunta)) {
+            return construirRespuestaSeriacion();
+        }
         if ("¿Qué pasa si acredito todo?".equalsIgnoreCase(pregunta)) {
             return construirRespuestaAcreditaTodo();
         }
-        if ("Necesito revisión académica".equalsIgnoreCase(pregunta) || "Ver detalle".equalsIgnoreCase(pregunta)) {
+        if ("¿Cuándo debo pedir apoyo académico?".equalsIgnoreCase(pregunta)
+                || "¿Qué debo preparar ahora?".equalsIgnoreCase(pregunta)) {
             return construirRespuestaRevisionDetalle();
         }
         return construirRespuestaPrincipalBase();
@@ -915,6 +1076,9 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         if (vistaGestor) {
             return construirRespuestaMensajeSugerido();
         }
+        if (obtenerMensajeEstudianteV2() != null) {
+            return obtenerMensajeEstudianteV2();
+        }
         if (esPeriodoCursamiento()) {
             return construirRespuestaPreparacionPeriodo();
         }
@@ -922,11 +1086,33 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     private String construirResumenContextual() {
+        if (!vistaGestor && obtenerMensajeEstudianteV2() != null) {
+            StringBuilder textoV2 = new StringBuilder();
+            textoV2.append(obtenerMensajeEstudianteV2());
+            if (fichaIntegralV2 != null && fichaIntegralV2.getCasoAcademico() != null
+                    && fichaIntegralV2.getCasoAcademico().getDiagnostico() != null
+                    && fichaIntegralV2.getCasoAcademico().getDiagnostico().getRestriccionDominante() != null) {
+                textoV2.append(" Restricción dominante: ")
+                        .append(fichaIntegralV2.getCasoAcademico().getDiagnostico().getRestriccionDominante()).append(".");
+            }
+            if (fichaIntegralV2 != null && fichaIntegralV2.getAccionSugerida() != null) {
+                textoV2.append(" Acción sugerida: ").append(fichaIntegralV2.getAccionSugerida()).append(".");
+            }
+            return textoV2.toString().trim();
+        }
         StringBuilder texto = new StringBuilder();
+        int noAcreditadas = getConteoUdNoAcreditadasPanel();
+        int omisiones = getConteoUdOmisionesPanel();
         texto.append("Situación actual: ").append(valorTexto(contexto != null ? contexto.getSituacionAcademicaPeriodo() : null, "Sin clasificar")).append(". ");
         texto.append("Periodo: ").append(getEtiquetaPeriodoContextual()).append(". ");
         texto.append("Riesgo estimado: ").append(obtenerNivelRiesgo()).append(". ");
         texto.append("UD pendientes: ").append(getConteoUdPendientesPanel()).append(". ");
+        if (noAcreditadas > 0) {
+            texto.append("UD no acreditadas detectadas: ").append(noAcreditadas).append(". ");
+        }
+        if (omisiones > 0) {
+            texto.append("UD no inscritas u omitidas: ").append(omisiones).append(". ");
+        }
         if (getConteoSeriacionPanel() > 0) {
             texto.append("Hay ").append(getConteoSeriacionPanel()).append(" UD con restricción por seriación. ");
         } else {
@@ -982,16 +1168,44 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                     + obtenerCodigoReglaAplicada() + " y la carga máxima de " + getCargaMaximaPanel()
                     + " UD. Registra primero las obligatorias y después valida si hay margen para adicionales.";
         }
+        if (obtenerMensajeEstudianteV2() != null) {
+            return obtenerMensajeEstudianteV2();
+        }
         return construirRespuestaIrregularidad();
     }
 
     private String construirRespuestaProgresoEstudiante() {
+        if (obtenerMensajeEstudianteV2() != null) {
+            return obtenerMensajeEstudianteV2() + " " + getResumenEstadoPreventivoEstudiante();
+        }
         return "Vas en una situación " + valorTexto(contexto != null ? contexto.getSituacionAcademicaPeriodo() : null, "sin clasificar")
                 + " con " + getConteoUdPendientesPanel() + " UD pendientes y riesgo " + obtenerNivelRiesgo()
                 + ". Tu foco inmediato es mantener en control las UD activas y seguir la prioridad sugerida para no incrementar rezago.";
     }
 
+    private String construirRespuestaMantenerAvance() {
+        StringBuilder texto = new StringBuilder();
+        texto.append("Tu trayectoria se mantiene ");
+        texto.append(valorTexto(contexto != null ? contexto.getSituacionAcademicaPeriodo() : null, "estable").toLowerCase());
+        texto.append(". Para conservar ese avance, cuida la carga actual, atiende cualquier seriación activa y prepara el siguiente período sin romper la secuencia sugerida por el motor.");
+        if (obtenerAccionSugeridaV2() != null) {
+            texto.append(" Siguiente paso recomendado: ").append(obtenerAccionSugeridaV2()).append(".");
+        }
+        return texto.toString();
+    }
+
     private String construirRespuestaCuidadosEstudiante() {
+        if (!getMensajesPreventivosEstudianteV2().isEmpty()) {
+            return "Debes cuidar lo siguiente: " + String.join(" ", getMensajesPreventivosEstudianteV2());
+        }
+        if (isEstudianteRegularContexto()) {
+            StringBuilder texto = new StringBuilder();
+            texto.append("Mantén la continuidad que ya tienes: acredita todas tus UD activas, prioriza las obligatorias del trayecto inmediato y complementa con optativas solo si siguen siendo compatibles con tu carga y seriación.");
+            if (getCargaMaximaPanel() > 0) {
+                texto.append(" Conserva una carga equilibrada dentro del máximo de ").append(getCargaMaximaPanel()).append(" UD.");
+            }
+            return texto.toString();
+        }
         StringBuilder texto = new StringBuilder();
         texto.append("Debes cuidar tres puntos: ");
         texto.append("1) seriación");
@@ -1004,11 +1218,34 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     private String construirRespuestaPreparacionPeriodo() {
+        if (!vistaGestor && fichaIntegralV2 != null && fichaIntegralV2.getAccionSugerida() != null) {
+            return "Preparar tu siguiente período implica " + fichaIntegralV2.getAccionSugerida().toLowerCase()
+                    + ". " + getResumenEstadoPreventivoEstudiante();
+        }
         if (esPeriodoCursamiento()) {
-            return "Para preparar tu próximo periodo revisa desde ahora las UD prioritarias ofertadas, confirma si existe seriación pendiente y estima una carga de hasta "
+            return "Para preparar tu próximo período revisa desde ahora las UD prioritarias ofertadas, confirma si existe seriación pendiente y estima una carga de hasta "
                     + getCargaMaximaPanel() + " UD. Si mantienes control de las UD en curso llegarás con una mejor combinación a la siguiente inscripción.";
         }
         return "El siguiente paso es depurar la selección: confirma obligatorias, revisa bloqueos por seriación y usa el simulador para validar que la carga propuesta sea consistente con tu trayectoria.";
+    }
+
+    private String construirRespuestaRegularizacionPrioritaria() {
+        if (getConteoUdNoAcreditadasPanel() <= 0) {
+            return construirRespuestaUdPrimero();
+        }
+        StringBuilder texto = new StringBuilder();
+        texto.append("Tu prioridad es regularizar primero las ").append(getConteoUdNoAcreditadasPanel())
+                .append(" UD no acreditadas que hoy están afectando más tu continuidad académica. ");
+        texto.append(construirRespuestaUdPrimero());
+        return texto.toString().trim();
+    }
+
+    private String construirRespuestaSeriacion() {
+        if (getConteoSeriacionPanel() <= 0) {
+            return "En este momento no se detectan bloqueos activos por seriación en tu trayectoria.";
+        }
+        return "La seriación significa que hay " + getConteoSeriacionPanel()
+                + " UD que dependen de acreditar antes una unidad antecedente. Mientras esa antecedente no se cierre, el sistema mantendrá la restricción sobre las siguientes opciones.";
     }
 
     private String construirRespuestaConfirmacionSeleccion() {
@@ -1017,9 +1254,20 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     private String construirRespuestaIrregularidad() {
-        return "Tu situación aparece como " + valorTexto(contexto != null ? contexto.getSituacionAcademicaPeriodo() : null, "sin clasificar")
-                + " porque el contexto registra " + getConteoUdPendientesPanel() + " UD pendientes y un riesgo "
-                + obtenerNivelRiesgo() + ". La recomendación es regularizar primero las UD prioritarias para disminuir el impacto sobre tu siguiente periodo.";
+        if (obtenerMensajeEstudianteV2() != null) {
+            return obtenerMensajeEstudianteV2();
+        }
+        StringBuilder texto = new StringBuilder();
+        texto.append("Tu situación aparece como ")
+                .append(valorTexto(contexto != null ? contexto.getSituacionAcademicaPeriodo() : null, "sin clasificar"))
+                .append(" porque el contexto registra ").append(getConteoUdPendientesPanel())
+                .append(" UD pendientes y un riesgo ").append(obtenerNivelRiesgo()).append(". ");
+        if (getConteoUdNoAcreditadasPanel() > 0) {
+            texto.append("Actualmente tienes ").append(getConteoUdNoAcreditadasPanel())
+                    .append(" UD no acreditadas que deben regularizarse antes de priorizar combinaciones adicionales. ");
+        }
+        texto.append("La recomendación es regularizar primero las UD prioritarias para disminuir el impacto sobre tu siguiente período.");
+        return texto.toString().trim();
     }
 
     private String construirRespuestaUdPrimero() {
@@ -1044,19 +1292,305 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             return "En cursamiento no agregas carga final desde esta vista. Lo útil ahora es estimar si, al cerrar el periodo, quedarás con margen para hasta "
                     + Math.max(0, getCargaMaximaPanel()) + " UD en el siguiente proceso.";
         }
+        if (isEstudianteRegularContexto() && getConteoUdNoAcreditadasPanel() == 0 && getConteoSeriacionPanel() == 0) {
+            return "Si tu situación se mantiene regular, puedes explorar carga adicional siempre que respetes la oferta, la seriación y la carga máxima. El margen estimado actual es de "
+                    + margen + " UD.";
+        }
         return "Sí puedes agregar UD adicionales sólo si después de cubrir las obligatorias todavía queda margen dentro de la carga máxima. En la situación actual el margen estimado es de "
                 + margen + " UD, sujeto a oferta y seriación.";
     }
 
     private String construirRespuestaAcreditaTodo() {
-        return "Si acreditas todas las UD activas, tu siguiente periodo tendrá menos restricciones, bajará el riesgo académico y podrías liberar más opciones de carga. Eso también reduce la presión sobre las UD prioritarias que hoy condicionan tu trayectoria.";
+        return "Si acreditas todas las UD activas, tu siguiente período tendrá menos restricciones, bajará el riesgo académico y podrías liberar más opciones de carga. Eso también reduce la presión sobre las UD prioritarias que hoy condicionan tu trayectoria.";
     }
 
     private String construirRespuestaRevisionDetalle() {
         if (vistaGestor) {
             return construirRespuestaPaqueteEvidencia();
         }
-        return "Si detectas una inconsistencia, reúne tu periodo activo, las UD involucradas, la prioridad mostrada y cualquier evidencia de oferta o seriación. Con eso se puede registrar una revisión académica con mejor trazabilidad.";
+        if (!isRequiereRevisionAcademicaV2()) {
+            return getTextoPrevencionTicketsV2();
+        }
+        return "Si detectas una inconsistencia real, reúne tu periodo activo, las UD involucradas, la prioridad mostrada y cualquier evidencia de oferta o seriación. Con eso podrás pedir apoyo académico con mejor contexto.";
+    }
+
+    public boolean isMostrarPanelPrevencionEstudianteV2() {
+        asegurarFichaIntegralV2();
+        return !vistaGestor && fichaIntegralV2 != null;
+    }
+
+    public boolean isMostrarSeguimientoCasoEstudianteV2() {
+        asegurarFichaIntegralV2();
+        return !vistaGestor && fichaIntegralV2 != null;
+    }
+
+    public String getEstatusCasoEstudianteV2() {
+        asegurarFichaIntegralV2();
+        if (fichaIntegralV2 == null || fichaIntegralV2.getCasoAcademico() == null
+                || fichaIntegralV2.getCasoAcademico().getEstatusCaso() == null
+                || fichaIntegralV2.getCasoAcademico().getEstatusCaso().trim().isEmpty()) {
+            return "Orientación general";
+        }
+        return fichaIntegralV2.getCasoAcademico().getEstatusCaso().trim();
+    }
+
+    public String getMensajeCasoEstudianteV2() {
+        asegurarFichaIntegralV2();
+        if (fichaIntegralV2 == null || fichaIntegralV2.getMensajeEstudiante() == null
+                || fichaIntegralV2.getMensajeEstudiante().trim().isEmpty()) {
+            return isEstudianteRegularContexto()
+                    ? "Tu trayectoria se mantiene estable. Conserva el ritmo actual, acredita tus UD activas y prepara el siguiente período priorizando obligatorias y opciones compatibles."
+                    : "Tu trayectoria no muestra un riesgo académico inmediato en este momento.";
+        }
+        String mensaje = limpiarMensajeEstudiante(fichaIntegralV2.getMensajeEstudiante());
+        if (isEstudianteRegularContexto() && mensajePareceDeRezagoSevero(mensaje)) {
+            return "Tu trayectoria se mantiene regular. Continúa acreditando tus UD activas, prioriza las obligatorias del siguiente tramo y agrega optativas sólo cuando sigan siendo compatibles con tu carga y seriación.";
+        }
+        return mensaje;
+    }
+
+    public String getMensajeCasoEstudianteV2Html() {
+        String mensaje = getMensajeCasoEstudianteV2();
+        if (mensaje == null || mensaje.trim().isEmpty()) {
+            return "";
+        }
+        String[] partes = mensaje.trim().split("(?<=\\.)\\s+");
+        StringBuilder html = new StringBuilder();
+        for (String parte : partes) {
+            String limpia = parte != null ? parte.trim() : null;
+            if (limpia == null || limpia.isEmpty()) {
+                continue;
+            }
+            if (html.length() > 0) {
+                html.append("<br/><br/>");
+            }
+            html.append(escapeHtml(limpia));
+        }
+        return html.toString();
+    }
+
+    public String getResolucionCasoEstudianteV2() {
+        asegurarFichaIntegralV2();
+        if (fichaIntegralV2 == null || fichaIntegralV2.getAccionSugerida() == null
+                || fichaIntegralV2.getAccionSugerida().trim().isEmpty()) {
+            return "Sigue la orientación actual y vuelve a revisar tu escenario cuando cambie el periodo.";
+        }
+        return fichaIntegralV2.getAccionSugerida().trim();
+    }
+
+    public boolean isRequiereRevisionAcademicaV2() {
+        asegurarFichaIntegralV2();
+        return fichaIntegralV2 != null && Boolean.TRUE.equals(fichaIntegralV2.getRequiereSeguimiento());
+    }
+
+    public List<String> getMensajesPreventivosEstudianteV2() {
+        asegurarFichaIntegralV2();
+        if (vistaGestor || fichaIntegralV2 == null) {
+            return Collections.emptyList();
+        }
+        if (isEstudianteRegularContexto()) {
+            List<String> mensajes = new ArrayList<String>();
+            agregarMensajeUnico(mensajes, "Mantén el desempeño actual acreditando todas tus UD activas.");
+            agregarMensajeUnico(mensajes, "Prioriza las UD obligatorias del tramo siguiente antes de ampliar combinaciones.");
+            if (getConteoSeriacionPanel() > 0) {
+                agregarMensajeUnico(mensajes, "Revisa la seriación activa antes de mover tu siguiente selección.");
+            } else {
+                agregarMensajeUnico(mensajes, "Si conservas este ritmo, podrás sostener una trayectoria estable en el siguiente período.");
+            }
+            return mensajes;
+        }
+        List<String> mensajes = new ArrayList<String>();
+        if (getConteoUdNoAcreditadasPanel() > 0) {
+            agregarMensajeUnico(mensajes, "Tu caso muestra " + getConteoUdNoAcreditadasPanel()
+                    + " UD no acreditadas; regularízalas primero antes de intentar combinar carga adicional.");
+        }
+        if (getConteoSeriacionPanel() > 0) {
+            agregarMensajeUnico(mensajes, "Hay " + getConteoSeriacionPanel()
+                    + " restricción(es) por seriación; una UD bloqueada sólo se libera acreditando el antecedente.");
+        }
+        if (getConteoUdPendientesPanel() > 0) {
+            agregarMensajeUnico(mensajes, "La prioridad actual es ordenar tus " + getConteoUdPendientesPanel()
+                    + " UD pendientes según oferta, seriación y regla de carga máxima.");
+        }
+        if (fichaIntegralV2.getAlertas() != null) {
+            for (String alerta : fichaIntegralV2.getAlertas()) {
+                if (!esAlertaConfusaParaEstudiante(alerta)) {
+                    agregarMensajeUnico(mensajes, limpiarMensajeEstudiante(alerta));
+                }
+            }
+        }
+        if (fichaIntegralV2.getMensajesContextuales() != null) {
+            for (mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.MensajeInstitucionalContextualDTO mensaje : fichaIntegralV2.getMensajesContextuales()) {
+                if (mensaje != null && !mensajePareceDeRezagoSevero(mensaje.getMensaje())) {
+                    agregarMensajeUnico(mensajes, limpiarMensajeEstudiante(mensaje.getMensaje()));
+                }
+            }
+        }
+        if (mensajes.isEmpty() && fichaIntegralV2.getPatronesConocimiento() != null) {
+            for (mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PatronConocimientoDTO patron : fichaIntegralV2.getPatronesConocimiento()) {
+                if (patron != null) {
+                    agregarMensajeUnico(mensajes, patron.getDescripcion());
+                }
+            }
+        }
+        if (mensajes.isEmpty()) {
+            agregarMensajeUnico(mensajes, "Revisa primero las UD prioritarias y la carga máxima sugerida antes de pedir apoyo adicional.");
+        }
+        return mensajes.stream().limit(3).collect(Collectors.toList());
+    }
+
+    public String getTextoPrevencionTicketsV2() {
+        if (vistaGestor) {
+            return "Usa la ficha integral y la bitácora del caso antes de escalar para evitar duplicidad operativa.";
+        }
+        if (isRequiereRevisionAcademicaV2()) {
+            return "Si después de revisar la orientación persiste una inconsistencia real de oferta, seriación o dictamen, entonces sí conviene solicitar apoyo académico.";
+        }
+        return "En este escenario primero conviene seguir la prioridad académica, validar la regla aplicada y preparar tu siguiente movimiento con el asistente.";
+    }
+
+    public String getResumenPrevencionEstudianteV2() {
+        if (!isMostrarPanelPrevencionEstudianteV2()) {
+            return getTextoPrevencionTicketsV2();
+        }
+        StringBuilder texto = new StringBuilder();
+        texto.append(getResumenEstadoPreventivoEstudiante());
+        if (obtenerAccionSugeridaV2() != null && !obtenerAccionSugeridaV2().trim().isEmpty()) {
+            texto.append(" Acción sugerida: ").append(obtenerAccionSugeridaV2()).append(".");
+        }
+        return texto.toString().trim();
+    }
+
+    private String getResumenEstadoPreventivoEstudiante() {
+        StringBuilder texto = new StringBuilder();
+        if (getConteoUdNoAcreditadasPanel() > 0) {
+            texto.append("Tienes ").append(getConteoUdNoAcreditadasPanel()).append(" UD no acreditadas que hoy pesan más que cualquier ajuste menor de trayectoria.");
+        } else if (getConteoUdPendientesPanel() > 0) {
+            texto.append("Tu trayectoria mantiene ").append(getConteoUdPendientesPanel()).append(" UD pendientes que debes atender por prioridad.");
+        } else if (isEstudianteRegularContexto()) {
+            texto.append("Tu trayectoria se mantiene regular y el foco está en conservar el avance sin introducir riesgos innecesarios.");
+        } else {
+            texto.append("Tu trayectoria no muestra un bloqueo crítico inmediato.");
+        }
+        if (getConteoSeriacionPanel() > 0) {
+            texto.append(" Además, hay ").append(getConteoSeriacionPanel()).append(" restricción(es) de seriación activas.");
+        }
+        return texto.toString();
+    }
+
+    public boolean isEstudianteRegularContexto() {
+        return contexto != null
+                && contexto.getSituacionAcademicaPeriodo() != null
+                && contexto.getSituacionAcademicaPeriodo().trim().equalsIgnoreCase("REGULAR")
+                && getConteoUdNoAcreditadasPanel() == 0
+                && getConteoNoAcreditadasDiagnostico() == 0;
+    }
+
+    private int getConteoUdOmisionesPanel() {
+        int total = 0;
+        for (FilaAsistidaDTO fila : getFilasUdPrioritarias()) {
+            if (fila != null && fila.getEstatusHistorico() != null) {
+                String estatus = fila.getEstatusHistorico().toUpperCase();
+                if (estatus.contains("NO INSCRITA") || estatus.contains("NO CURSADA")) {
+                    total++;
+                }
+            }
+        }
+        return total;
+    }
+
+    private int getConteoUdNoAcreditadasPanel() {
+        int total = 0;
+        for (FilaAsistidaDTO fila : getFilasUdPrioritarias()) {
+            if (fila != null && fila.getEstatusHistorico() != null
+                    && fila.getEstatusHistorico().toUpperCase().contains("NO ACREDIT")) {
+                total++;
+            }
+        }
+        return Math.max(total, getConteoNoAcreditadasDiagnostico());
+    }
+
+    private int getConteoNoAcreditadasDiagnostico() {
+        if (contexto == null || contexto.getDiagnosticoActual() == null) {
+            return 0;
+        }
+        return valor(contexto.getDiagnosticoActual().getMateriasReprobadasActivas());
+    }
+
+    private int obtenerConteoPendientesDerivado() {
+        int noAcreditadas = getConteoUdNoAcreditadasPanel();
+        int omisiones = getConteoUdOmisionesPanel();
+        int derivado = noAcreditadas + omisiones;
+        if (derivado > 0) {
+            return derivado;
+        }
+        return getFilasUdPrioritarias().size();
+    }
+
+    private void agregarMensajeUnico(List<String> mensajes, String mensaje) {
+        if (mensaje == null || mensaje.trim().isEmpty()) {
+            return;
+        }
+        String normalizado = mensaje.trim();
+        if (!mensajes.contains(normalizado)) {
+            mensajes.add(normalizado);
+        }
+    }
+
+    private String obtenerMensajeEstudianteV2() {
+        return fichaIntegralV2 != null && fichaIntegralV2.getMensajeEstudiante() != null
+                && !fichaIntegralV2.getMensajeEstudiante().trim().isEmpty()
+                        ? fichaIntegralV2.getMensajeEstudiante().trim()
+                        : null;
+    }
+
+    private boolean esAlertaConfusaParaEstudiante(String alerta) {
+        if (alerta == null) {
+            return false;
+        }
+        String texto = alerta.trim().toUpperCase();
+        return texto.contains("EXPEDIENTE MINIMO")
+                || texto.contains("NO EXISTE DICTAMEN PERSISTIDO")
+                || texto.contains("NO EXISTE RESUMEN DE DIAGNOSTICO PERSISTIDO")
+                || texto.contains("NO EXISTEN PATRONES DE CONOCIMIENTO");
+    }
+
+    private boolean mensajePareceDeRezagoSevero(String mensaje) {
+        if (mensaje == null) {
+            return false;
+        }
+        String texto = mensaje.trim().toUpperCase();
+        return texto.contains("REZAGO SEVERO")
+                || texto.contains("REGULARIZACIÓN INTENSIVA")
+                || texto.contains("RIESGO ALTO")
+                || texto.contains("ACUMULACIÓN SEVERA")
+                || texto.contains("NO CONVIENE PLANEAR AVANCE ADICIONAL");
+    }
+
+    private String limpiarMensajeEstudiante(String mensaje) {
+        if (mensaje == null) {
+            return null;
+        }
+        String limpio = mensaje.trim();
+        limpio = limpio.replace("El expediente minimo del caso esta incompleto.", "").trim();
+        limpio = limpio.replace("El expediente mínimo del caso está incompleto.", "").trim();
+        limpio = limpio.replace("Aun no hay elementos suficientes para resolver tu caso.", "").trim();
+        limpio = limpio.replace("Aún no hay elementos suficientes para resolver tu caso.", "").trim();
+        limpio = limpio.replaceAll("\\s{2,}", " ").trim();
+        return limpio;
+    }
+
+    private String escapeHtml(String texto) {
+        return texto.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
+    }
+
+    private String obtenerAccionSugeridaV2() {
+        return fichaIntegralV2 != null && fichaIntegralV2.getAccionSugerida() != null
+                && !fichaIntegralV2.getAccionSugerida().trim().isEmpty()
+                        ? fichaIntegralV2.getAccionSugerida().trim()
+                        : null;
     }
 
     private String obtenerNivelRiesgo() {
@@ -1188,6 +1722,10 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return fila != null && !Boolean.TRUE.equals(fila.getSeleccionBloqueada()) && !esPeriodoCursamiento();
     }
 
+    public boolean seleccionEditable(FilaAsistidaDTO fila) {
+        return isSeleccionEditable(fila);
+    }
+
     public String getObservacionValidacion(FilaAsistidaDTO fila) {
         if (fila == null) {
             return null;
@@ -1202,6 +1740,10 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             return "Obligatoria por plan de estudios.";
         }
         return "Optativa del área de formación.";
+    }
+
+    public String observacionValidacion(FilaAsistidaDTO fila) {
+        return getObservacionValidacion(fila);
     }
 
     public static class SemestreAsistidoDTO implements Serializable {

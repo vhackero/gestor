@@ -23,6 +23,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
@@ -38,6 +40,7 @@ import mx.gob.sedesol.basegestor.commons.utils.ObjetoCurricularEnum;
 import mx.gob.sedesol.basegestor.service.gestionescolar.AsistenteInscripcionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.MallaCurricularV2Facade;
 import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasService;
 import mx.gob.sedesol.basegestor.service.impl.planesyprogramas.FECServiceFacade;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
@@ -119,6 +122,9 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	@ManagedProperty(value = "#{trayectoriaAcademicaContextoBean}")
 	private TrayectoriaAcademicaContextoBean trayectoriaAcademicaContextoBean;
 
+	@ManagedProperty(value = "#{mallaCurricularV2Facade}")
+	private MallaCurricularV2Facade mallaCurricularV2Facade;
+
 	private List<MallaDiagramaNodoDTO> nodos;
 	private int diagramWidth;
 	private int diagramHeight;
@@ -146,6 +152,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private String nombrePersonaObjetivo;
 	private String matriculaPersonaObjetivo;
 	private AsistenteInscripcionContextoDTO contextoAsistente;
+	private FichaIntegralCasoDTO fichaIntegralV2;
 	private Map<Long, UnidadDecisionInscripcionDTO> unidadesAsistentePorPrograma;
 
 	@PostConstruct
@@ -183,6 +190,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 		planId = inscripcion.getIdPlan();
 		planNombre = inscripcion.getPlan();
+		cargarFichaIntegralV2();
 
 		MallaCurricularDTO raiz = fecServiceFacade.getMallaCurricularService()
 				.obtenerMallaCurricularPorIdPlan(planId.intValue());
@@ -216,6 +224,39 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		} catch (Exception e) {
 			logger.warn("Error inesperado al cargar el contexto asistido para la malla curricular.", e);
 		}
+	}
+
+	private void cargarFichaIntegralV2() {
+		fichaIntegralV2 = null;
+		if (mallaCurricularV2Facade == null || idPersonaObjetivo == null) {
+			return;
+		}
+		try {
+			fichaIntegralV2 = mallaCurricularV2Facade.obtenerContextoMalla(construirContextoV2());
+		} catch (InscripcionException e) {
+			logger.warn("No fue posible cargar la ficha integral V2 para malla curricular.", e);
+		} catch (Exception e) {
+			logger.warn("Error inesperado al cargar la ficha integral V2 para malla curricular.", e);
+		}
+	}
+
+	private void asegurarFichaIntegralV2() {
+		if (fichaIntegralV2 != null) {
+			return;
+		}
+		cargarFichaIntegralV2();
+	}
+
+	private ContextoAsistenteCurricularV2DTO construirContextoV2() {
+		ContextoAsistenteCurricularV2DTO contextoV2 = new ContextoAsistenteCurricularV2DTO();
+		contextoV2.setIdPersonaObjetivo(idPersonaObjetivo);
+		contextoV2.setIdPersonaConsulta(idPersonaEnSesion());
+		contextoV2.setPerfilConsulta(vistaGestor ? "GESTOR" : "ESTUDIANTE");
+		contextoV2.setVistaGestor(Boolean.valueOf(vistaGestor));
+		contextoV2.setPeriodoOperativo(esPeriodoCursamiento() ? "CURSAMIENTO" : "INSCRIPCION");
+		contextoV2.setOrigenConsulta("MALLA");
+		contextoV2.setIdPlan(planId);
+		return contextoV2;
 	}
 
 	private void cargarInscripcionesEnCurso(Long idPersona) {
@@ -1225,6 +1266,86 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		return "Visualización de trayectoria curricular y orientación contextual del escenario activo.";
 	}
 
+	public FichaIntegralCasoDTO getFichaIntegralV2() {
+		asegurarFichaIntegralV2();
+		return fichaIntegralV2;
+	}
+
+	public boolean isTieneFichaIntegralV2() {
+		asegurarFichaIntegralV2();
+		return fichaIntegralV2 != null;
+	}
+
+	public boolean isMostrarPrevencionEstudianteV2() {
+		asegurarFichaIntegralV2();
+		return !vistaGestor && fichaIntegralV2 != null;
+	}
+
+	public boolean isMostrarSeguimientoCasoEstudianteV2() {
+		asegurarFichaIntegralV2();
+		return !vistaGestor && fichaIntegralV2 != null;
+	}
+
+	public String getEstatusCasoEstudianteV2() {
+		asegurarFichaIntegralV2();
+		if (fichaIntegralV2 == null || fichaIntegralV2.getCasoAcademico() == null
+				|| StringUtils.isBlank(fichaIntegralV2.getCasoAcademico().getEstatusCaso())) {
+			return "Orientación general";
+		}
+		return fichaIntegralV2.getCasoAcademico().getEstatusCaso().trim();
+	}
+
+	public String getMensajeCasoEstudianteV2() {
+		asegurarFichaIntegralV2();
+		if (fichaIntegralV2 == null || StringUtils.isBlank(fichaIntegralV2.getMensajeEstudiante())) {
+			return "Tu trayectoria no muestra un riesgo académico inmediato en este momento.";
+		}
+		return fichaIntegralV2.getMensajeEstudiante().trim();
+	}
+
+	public String getResolucionCasoEstudianteV2() {
+		asegurarFichaIntegralV2();
+		if (fichaIntegralV2 == null || StringUtils.isBlank(fichaIntegralV2.getAccionSugerida())) {
+			return "Mantén tu avance actual y revisa el siguiente periodo conforme a tu trayectoria.";
+		}
+		return fichaIntegralV2.getAccionSugerida().trim();
+	}
+
+	public String getResumenPrevencionEstudianteV2() {
+		asegurarFichaIntegralV2();
+		if (fichaIntegralV2 == null) {
+			return getMensajePanelContextual();
+		}
+		StringBuilder texto = new StringBuilder();
+		if (StringUtils.isNotBlank(fichaIntegralV2.getMensajeEstudiante())) {
+			texto.append(fichaIntegralV2.getMensajeEstudiante().trim());
+		}
+		if (StringUtils.isNotBlank(fichaIntegralV2.getAccionSugerida())) {
+			if (texto.length() > 0) {
+				texto.append(" ");
+			}
+			texto.append("Siguiente paso: ").append(fichaIntegralV2.getAccionSugerida()).append(".");
+		}
+		if (texto.length() == 0) {
+			return getMensajePanelContextual();
+		}
+		return texto.toString().trim();
+	}
+
+	public String getPrevencionTicketEstudianteV2() {
+		asegurarFichaIntegralV2();
+		if (vistaGestor) {
+			return null;
+		}
+		StringBuilder texto = new StringBuilder();
+		texto.append("Antes de pedir apoyo adicional revisa el detalle contextual de la UD, confirma la regla aplicada");
+		if (fichaIntegralV2 != null && StringUtils.isNotBlank(fichaIntegralV2.getReglaAplicada())) {
+			texto.append(" (").append(fichaIntegralV2.getReglaAplicada()).append(")");
+		}
+		texto.append(" y usa el asistente curricular para validar tu siguiente paso.");
+		return texto.toString();
+	}
+
 	private String formatearEtiquetaTipoPlural(String tipo) {
 		String normalizado = StringUtils.defaultString(tipo).trim();
 		if (StringUtils.isBlank(normalizado)) {
@@ -1407,6 +1528,14 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 
 	public void setTrayectoriaAcademicaContextoBean(TrayectoriaAcademicaContextoBean trayectoriaAcademicaContextoBean) {
 		this.trayectoriaAcademicaContextoBean = trayectoriaAcademicaContextoBean;
+	}
+
+	public MallaCurricularV2Facade getMallaCurricularV2Facade() {
+		return mallaCurricularV2Facade;
+	}
+
+	public void setMallaCurricularV2Facade(MallaCurricularV2Facade mallaCurricularV2Facade) {
+		this.mallaCurricularV2Facade = mallaCurricularV2Facade;
 	}
 
 	public static class SemestreTablaDTO {
