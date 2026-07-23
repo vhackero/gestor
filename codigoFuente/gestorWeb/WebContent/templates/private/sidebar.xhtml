@@ -460,8 +460,8 @@
 													</h:commandLink></li>
 												</sec:authorize>
 											</ui:fragment>
-											<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('MOD_INS')}">
-												<sec:authorize access="hasPermission(null, 'MOD_INS') ">
+											<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('CONF_ELECTIVAS')}">
+												<sec:authorize access="hasPermission(null, 'CONF_ELECTIVAS') ">
 													<li><h:commandLink action="#{menuGestorBean.navegaConfiguracionElectivas}"
 															title="Configurar asignaturas electivas">
 														<i class="fa fa-sliders"></i>
