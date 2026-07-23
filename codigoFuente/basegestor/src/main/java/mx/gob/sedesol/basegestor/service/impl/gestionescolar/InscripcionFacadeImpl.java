@@ -2,6 +2,7 @@ package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -396,17 +397,17 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		List<InscripcionBajasDTO> materiasBajas = contexto.getEstadoAcademico().getMateriasBajas();
 		List<InscripcionMateriasReprobadasDTO> materiasReprobadas = contexto.getEstadoAcademico()
 				.getMateriasReprobadas();
-		return verificarRecursamiento(materiasBajas, materiasReprobadas, materia.getClavePrograma());
+		return verificarRecursamiento(materiasBajas, materiasReprobadas, materia);
 	}
 
 	private int verificarRecursamiento(List<InscripcionBajasDTO> materiasBajas,
-			List<InscripcionMateriasReprobadasDTO> materiasReprobadas, String clavePrograma) {
+			List<InscripcionMateriasReprobadasDTO> materiasReprobadas, InscripcionMateriasDTO materia) {
 
-		if (esMateriaDadaDeBaja(materiasBajas, clavePrograma)) {
+		if (esMateriaDadaDeBaja(materiasBajas, materia.getClavePrograma())) {
 			return ConstantesGestor.CURSANDO_MATERIA_POR_PRIMERA_VEZ;
 		}
 
-		if (esMateriaReprobada(materiasReprobadas, clavePrograma)) {
+		if (esMateriaReprobadaPorNombre(materiasReprobadas, materia.getNombreTentativoPrograma())) {
 			return ConstantesGestor.RECURSANDO_MATERIA;
 		}
 
@@ -497,6 +498,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			throws InscripcionException {
 		List<InscripcionMateriasDTO> materiasDisponibles = obtenerMateriasDisponibles(contexto);
 		ResumenSeleccionMateriasDTO resumen = construirResumenSeleccion(materiasDisponibles);
+		validarSeleccionElectivas(materiasDisponibles, obtenerCantidadMaximaMateriasElectivas(contexto));
+		validarCuposElectivas(materiasDisponibles);
 
 		if (esNuevoIngreso(contexto) && esRegular(contexto)) {
 			validarCargaPrimerSemestre(resumen, contexto);
@@ -683,7 +686,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		validarSeleccionMateriasOctavoSemestre(materiaSeleccionada, materiasReprobadas);
 		validarSeleccionOptativas(materiaSeleccionada, materiasDisponibles);
 		if (InscripcionUtils.esMateriaElectiva(materiaSeleccionada.getTipoPrograma())) {
-			validarSeleccionElectivas(materiaSeleccionada, materiasDisponibles, cantidadMaximaMateriasElectivas);
+			validarSeleccionElectivas(materiasDisponibles, cantidadMaximaMateriasElectivas);
 		}
 
 	}
@@ -876,21 +879,24 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private List<InscripcionMateriasDTO> excluirMateriasReprobadasConLimiteAlcanzado(
 			List<InscripcionMateriasDTO> materiasOfertadasSinAprobadas,
 			List<InscripcionMateriasReprobadasDTO> materiasReprobadas) {
-		Set<String> clavesMateriasReprobadasConLimiteAlcanzado = obtenerClavesMateriasReprobadasConLimiteAlcanzado(
+		Set<String> nombresMateriasReprobadasConLimiteAlcanzado = obtenerNombresMateriasReprobadasConLimiteAlcanzado(
 				materiasReprobadas);
 
 		return materiasOfertadasSinAprobadas.stream()
-				.filter(materia -> !clavesMateriasReprobadasConLimiteAlcanzado.contains(materia.getClavePrograma()))
+				.filter(materia -> !nombresMateriasReprobadasConLimiteAlcanzado
+						.contains(normalizarNombreMateria(materia.getNombreTentativoPrograma())))
 				.collect(Collectors.toList());
 
 	}
 
-	private Set<String> obtenerClavesMateriasReprobadasConLimiteAlcanzado(
+	private Set<String> obtenerNombresMateriasReprobadasConLimiteAlcanzado(
 			List<InscripcionMateriasReprobadasDTO> materiasReprobadas) {
 
 		return materiasReprobadas.stream().filter(
 				materia -> materia.getIntentosReprobados().equals(ConstantesGestor.LIMITE_REPROBACIONES_POR_MATERIA))
-				.map(InscripcionMateriasReprobadasDTO::getClavePrograma).collect(Collectors.toSet());
+				.map(InscripcionMateriasReprobadasDTO::getNombrePrograma).map(this::normalizarNombreMateria)
+				.filter(nombre -> !nombre.isEmpty())
+				.collect(Collectors.toSet());
 	}
 
 	private List<InscripcionMateriasDTO> aplicarValidacionDeSeriacion(List<InscripcionMateriasDTO> materiasDisponibles,
@@ -899,6 +905,11 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 		Set<Long> idsMateriasReprobadas = obtenerIdsMateriasReprobadas(materiasReprobadas);
 		Set<Long> idsMateriasCursadas = obtenerIdsMateriasCursadas(materiasCursadas);
+		Set<String> nombresMateriasReprobadas = materiasReprobadas.stream()
+				.map(InscripcionMateriasReprobadasDTO::getNombrePrograma).map(this::normalizarNombreMateria)
+				.filter(nombre -> !nombre.isEmpty())
+				.collect(Collectors.toSet());
+		Set<String> nombresMateriasAprobadas = generarNombresMateriasAprobadas(materiasCursadas);
 
 		Map<Long, InscripcionMateriasDTO> materiasMap = materiasDisponibles.stream()
 				.collect(Collectors.toMap(InscripcionMateriasDTO::getIdPrograma, materia -> materia, (a, b) -> b));
@@ -917,27 +928,56 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		}
 
 		return materiasDisponibles.stream()
-				.filter(m -> m.getCheck() || !esMateriaSeriadaReprobada(idsMateriasReprobadas, m)
-						|| !esMateriaSeriadaYNoCursada(idsMateriasCursadas, m))
+				.filter(m -> m.getCheck()
+						|| !esMateriaSeriadaReprobada(idsMateriasReprobadas, nombresMateriasReprobadas, materiasMap, m)
+						|| !esMateriaSeriadaYNoCursada(idsMateriasCursadas, nombresMateriasAprobadas, materiasMap, m))
 				.collect(Collectors.toList());
 	}
 
-	private boolean esMateriaSeriadaYNoCursada(Set<Long> idsMateriasCursadas, InscripcionMateriasDTO m) {
-		return esMateriaSeriada(m) && !esMateriaCursada(idsMateriasCursadas, m);
+	private boolean esMateriaSeriadaYNoCursada(Set<Long> idsMateriasCursadas,
+			Set<String> nombresMateriasAprobadas, Map<Long, InscripcionMateriasDTO> materiasMap,
+			InscripcionMateriasDTO materia) {
+		return esMateriaSeriada(materia)
+				&& !esMateriaCursada(idsMateriasCursadas, nombresMateriasAprobadas, materiasMap, materia);
 	}
 
-	private boolean esMateriaCursada(Set<Long> idsMateriasCursadas, InscripcionMateriasDTO m) {
-		return idsMateriasCursadas.contains(m.getIdProgramaAntecedente());
+	private boolean esMateriaCursada(Set<Long> idsMateriasCursadas, Set<String> nombresMateriasAprobadas,
+			Map<Long, InscripcionMateriasDTO> materiasMap, InscripcionMateriasDTO materia) {
+		if (idsMateriasCursadas.contains(materia.getIdProgramaAntecedente())) {
+			return true;
+		}
+		String nombreAntecedente = obtenerNombreAntecedente(materiasMap, materia);
+		return !nombreAntecedente.isEmpty() && nombresMateriasAprobadas.contains(nombreAntecedente);
 	}
 
-	private boolean esMateriaSeriadaReprobada(Set<Long> idsMateriasReprobadas, InscripcionMateriasDTO m) {
-		return esMateriaSeriada(m) && esMateriaReprobada(idsMateriasReprobadas, m);
+	private boolean esMateriaSeriadaReprobada(Set<Long> idsMateriasReprobadas,
+			Set<String> nombresMateriasReprobadas, Map<Long, InscripcionMateriasDTO> materiasMap,
+			InscripcionMateriasDTO materia) {
+		if (!esMateriaSeriada(materia)) {
+			return false;
+		}
+		if (esMateriaReprobada(idsMateriasReprobadas, materia)) {
+			return true;
+		}
+		String nombreAntecedente = obtenerNombreAntecedente(materiasMap, materia);
+		return !nombreAntecedente.isEmpty() && nombresMateriasReprobadas.contains(nombreAntecedente);
 	}
 
-	private boolean esMateriaReprobada(List<InscripcionMateriasReprobadasDTO> materiasReprobadas,
-			String clavePrograma) {
-		return materiasReprobadas.stream()
-				.anyMatch(materia -> materia.getClavePrograma().equalsIgnoreCase(clavePrograma));
+	private String obtenerNombreAntecedente(Map<Long, InscripcionMateriasDTO> materiasMap,
+			InscripcionMateriasDTO materia) {
+		String nombreAntecedente = normalizarNombreMateria(materia.getNombreProgramaAntecedente());
+		if (!nombreAntecedente.isEmpty()) {
+			return nombreAntecedente;
+		}
+		InscripcionMateriasDTO antecedente = materiasMap.get(materia.getIdProgramaAntecedente());
+		return antecedente == null ? "" : normalizarNombreMateria(antecedente.getNombreTentativoPrograma());
+	}
+
+	private boolean esMateriaReprobadaPorNombre(List<InscripcionMateriasReprobadasDTO> materiasReprobadas,
+			String nombrePrograma) {
+		String nombreNormalizado = normalizarNombreMateria(nombrePrograma);
+		return !nombreNormalizado.isEmpty() && materiasReprobadas.stream()
+				.anyMatch(materia -> normalizarNombreMateria(materia.getNombrePrograma()).equals(nombreNormalizado));
 	}
 
 	private boolean esMateriaReprobada(Set<Long> idsMateriasReprobadas, InscripcionMateriasDTO m) {
@@ -1212,6 +1252,10 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private List<InscripcionMateriasDTO> obtenerMateriasPorAvanceAnualSinTomarEnCuentaObligatorias(
 			List<InscripcionMateriasDTO> materiasOfertadas, InscripcionPersonaDTO persona) {
 
+		if (materiasOfertadas == null || materiasOfertadas.isEmpty()) {
+			return Collections.emptyList();
+		}
+
 		String semestreDondeFaltanObligatorias = obtenerSemestre(persona.getIdPersona(), persona.getIdPlan(),
 				materiasOfertadas.get(0).getEstructura());
 
@@ -1288,17 +1332,17 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 		int maxReprobadasPermitidasIrregulares = Integer.valueOf(limitesCargaAcademica.getMaxProgramasIrregulares());
 
-		/*
-		 * Las claves en las materias optativas se pueden repetir, por eso se le
-		 * concatena el idprograma para crear un id unico
-		 */
-		Set<String> clavesMateriasReprobadas = materiasReprobadas.stream()
-				.map(InscripcionUtils::obtenerClaveUnicaPrograma).collect(Collectors.toSet());
+		// El nombre es la equivalencia académica entre asignaturas de distintos planes.
+		Set<String> nombresMateriasReprobadas = materiasReprobadas.stream()
+				.map(InscripcionMateriasReprobadasDTO::getNombrePrograma).map(this::normalizarNombreMateria)
+				.filter(nombre -> !nombre.isEmpty())
+				.collect(Collectors.toSet());
 
 		int cantidadMateriasMarcadas = 0;
 
 		for (InscripcionMateriasDTO materia : materiasOfertadas) {
-			boolean estaReprobada = clavesMateriasReprobadas.contains(InscripcionUtils.claveUnicaPrograma(materia));
+			boolean estaReprobada = nombresMateriasReprobadas
+					.contains(normalizarNombreMateria(materia.getNombreTentativoPrograma()));
 			if (estaReprobada && !InscripcionUtils.esMateriaElectiva(materia.getTipoPrograma())
 					&& cantidadMateriasMarcadas < maxReprobadasPermitidasIrregulares) {
 				materia.setCheck(Boolean.TRUE);
@@ -1447,21 +1491,29 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 	private List<InscripcionMateriasDTO> excluirMateriasAprobadas(List<InscripcionMateriasDTO> materiasOfertadas,
 			List<InscripcionMateriasCursadasDTO> materiasCursadas) {
-		Set<String> clavesMateriasAprobadas = generarClavesMateriasAprobadas(materiasCursadas);
+		Set<String> nombresMateriasAprobadas = generarNombresMateriasAprobadas(materiasCursadas);
 
-		return excluirMateriasAprobadasPorClave(materiasOfertadas, clavesMateriasAprobadas);
-	}
-
-	private List<InscripcionMateriasDTO> excluirMateriasAprobadasPorClave(
-			List<InscripcionMateriasDTO> materiasOfertadas, Set<String> clavesMateriasAprobadas) {
-		return materiasOfertadas.stream().filter(mpi -> !clavesMateriasAprobadas.contains(mpi.getClavePrograma()))
+		return materiasOfertadas.stream()
+				.filter(materia -> !nombresMateriasAprobadas
+						.contains(normalizarNombreMateria(materia.getNombreTentativoPrograma())))
 				.collect(Collectors.toList());
 	}
 
-	private Set<String> generarClavesMateriasAprobadas(List<InscripcionMateriasCursadasDTO> materiasCursadas) {
+	private Set<String> generarNombresMateriasAprobadas(List<InscripcionMateriasCursadasDTO> materiasCursadas) {
 		return materiasCursadas.stream()
 				.filter(mc -> mc.getEstatusAprobacion().equals(ConstantesGestor.MATERIA_APROBADA))
-				.map(InscripcionMateriasCursadasDTO::getClavePrograma).collect(Collectors.toSet());
+				.map(InscripcionMateriasCursadasDTO::getPrograma).map(this::normalizarNombreMateria)
+				.filter(nombre -> !nombre.isEmpty())
+				.collect(Collectors.toSet());
+	}
+
+	private String normalizarNombreMateria(String nombre) {
+		if (nombre == null) {
+			return "";
+		}
+		String sinAcentos = Normalizer.normalize(nombre, Normalizer.Form.NFD)
+				.replaceAll("\\p{M}", "");
+		return sinAcentos.trim().replaceAll("\\s+", " ").toUpperCase();
 	}
 
 	private Double obtenerPorcentajeCreditosCompletados(List<InscripcionMateriasCursadasDTO> materiasCursadas,
@@ -1605,8 +1657,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		return contexto.getEstadoAcademico().getPorcentajeCreditosCompletados();
 	}
 
-	private void validarSeleccionElectivas(InscripcionMateriasDTO materiaSeleccionada,
-			List<InscripcionMateriasDTO> materiasDisponibles, Long cantidadMaximaMateriasElectivas)
+	private void validarSeleccionElectivas(List<InscripcionMateriasDTO> materiasDisponibles,
+			Long cantidadMaximaMateriasElectivas)
 			throws InscripcionException {
 
 		Long cantidadElectivasSeleccionadas = materiasDisponibles.stream().filter(
@@ -1619,6 +1671,18 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 							cantidadMaximaMateriasElectivas));
 		}
 
+	}
+
+	private void validarCuposElectivas(List<InscripcionMateriasDTO> materiasDisponibles) throws InscripcionException {
+		for (InscripcionMateriasDTO materia : materiasDisponibles) {
+			if (estaSeleccionada(materia) && InscripcionUtils.esMateriaElectiva(materia.getTipoPrograma())
+					&& (materia.getIdProcesoInscripcion() == null || !inscripcionService.tieneCupoElectiva(
+							materia.getIdProcesoInscripcion(), materia.getIdPrograma()))) {
+				throw new InscripcionException("La unidad didáctica electiva "
+						+ materia.getNombreTentativoPrograma()
+						+ " ya no cuenta con lugares disponibles. Actualiza tu selección.");
+			}
+		}
 	}
 
 	private boolean estaSeleccionada(InscripcionMateriasDTO m) {

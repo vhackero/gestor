@@ -116,7 +116,8 @@
 						<p:outputLabel styleClass="bloque requerido" for="fechaInicio"
 							value="Fecha inicio:" />
 						<p:calendar id="fechaInicio" value="#{inscripocionesBean.inscripcionParamNueva.fechaInicio}"
-							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
+							pattern="dd/MM/yyyy HH:mm" hourFormat="24"
+							locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
 							placeholder="Seleccionar" required="true"
                 				 requiredMessage="El campo fecha inicio es requerido"/>
@@ -128,7 +129,8 @@
 						<p:outputLabel styleClass="bloque requerido" for="fechaFin"
 							value="Fecha fin:" />
 						<p:calendar id="fechaFin" value="#{inscripocionesBean.inscripcionParamNueva.fechaFin}"
-							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
+							pattern="dd/MM/yyyy HH:mm" hourFormat="24"
+							locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
 							placeholder="Seleccionar" required="true"
                 				 requiredMessage="El campo fecha fin es requerido"/>
@@ -295,7 +297,8 @@
 						<p:outputLabel styleClass="bloque requerido" for="fechaInicio2"
 							value="Fecha inicio:" />
 						<p:calendar id="fechaInicio2" value="#{inscripocionesBean.inscripcionParamNueva.fechaInicio}"
-							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
+							pattern="dd/MM/yyyy HH:mm" hourFormat="24"
+							locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
 							placeholder="Seleccionar" required="true"
                 				 requiredMessage="El campo fecha inicio es requerido"/>
@@ -307,7 +310,8 @@
 						<p:outputLabel styleClass="bloque requerido" for="fechaFin2"
 							value="Fecha fin:" />
 						<p:calendar id="fechaFin2" value="#{inscripocionesBean.inscripcionParamNueva.fechaFin}"
-							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
+							pattern="dd/MM/yyyy HH:mm" hourFormat="24"
+							locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
 							placeholder="Seleccionar" required="true"
                 				 requiredMessage="El campo fecha fin es requerido"/>

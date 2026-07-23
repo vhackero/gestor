@@ -212,8 +212,8 @@ public final class ConstantesGestor {
 	public static final String TEXTO_MATERIA_OPTATIVA = "Optativa";
 	public static final String TEXTO_MATERIA_ELECTIVA = "Electiva";
 	public static final int SEMESTRE_MINIMO_PARA_ELECTIVAS = 1;
-	public static final String NUMERO_SEMESTRE_CINCO = "1";
-	public static final String NUMERO_SEMESTRE_SEIS = "2";
+	public static final String NUMERO_SEMESTRE_CINCO = "5";
+	public static final String NUMERO_SEMESTRE_SEIS = "6";
 	public static final Long LIMITE_REPROBACIONES_POR_MATERIA = 3l;
 	public static final Integer MATERIA_REPROBADA = 0;
 	public static final Integer MATERIA_APROBADA = 1;

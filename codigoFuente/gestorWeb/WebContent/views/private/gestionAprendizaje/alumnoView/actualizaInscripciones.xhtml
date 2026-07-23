@@ -107,7 +107,8 @@
 							value="Fecha de inicio:" />
 						<p:calendar id="fecIniEdit"
 							value="#{inscripocionesBean.fechaInicioEdit}"
-							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
+							pattern="dd/MM/yyyy HH:mm" hourFormat="24"
+							locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
 							placeholder="Seleccionar" />
 					</div>
@@ -118,7 +119,8 @@
 							value="Fecha de Fin:" />
 						<p:calendar id="fecFinEdit"
 							value="#{inscripocionesBean.fechaFinEdit}"
-							pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
+							pattern="dd/MM/yyyy HH:mm" hourFormat="24"
+							locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
 							placeholder="Seleccionar" />
 					</div>

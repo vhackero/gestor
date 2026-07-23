@@ -426,6 +426,7 @@ public final class ConstantesGestorWeb {
 	public static final String NAVEGA_REENVIO_CORREO = "REENVIO_CORREO";
 	public static final String NAVEGA_INSCRIPCION_MANUAL = "INSCRIPCION_MANUAL";
 	public static final String NAVEGA_MODIFICACION_INSCRIPCION = "NAVEGA_MODIFICACION_INSCRIPCION";
+	public static final String NAVEGA_CONFIGURACION_ELECTIVAS = "NAVEGA_CONFIGURACION_ELECTIVAS";
 	public static final String NAVEGA_NUEVA_CONVOCATORIAS = "NAVEGA_NUEVA_CONVOCATORIAS";
 	public static final String NAVEGA_CONSULTA_CONVOCATORIAS = "NAVEGA_CONSULTA_CONVOCATORIAS";
 	public static final String NAVEGA_CONSULTA_TABLERO_CONVOCATORIAS = "NAVEGA_CONSULTA_TABLERO_CONVOCATORIAS";
@@ -460,8 +461,8 @@ public final class ConstantesGestorWeb {
 	public static final int OCTAVO_SEMESTRE = 8;
 	public static final int TERCER_SEMESTRE = 3;
 	public static final int SEMESTRE_MINIMO_PARA_ELECTIVAS = 1;
-	public static final String NUMERO_SEMESTRE_CINCO = "1";
-	public static final String NUMERO_SEMESTRE_SEIS = "2";
+	public static final String NUMERO_SEMESTRE_CINCO = "5";
+	public static final String NUMERO_SEMESTRE_SEIS = "6";
 	public static final String TIPO_AVISO_INFO = "info";
 	public static final String TIPO_AVISO_SUCCESS = "success";
 

@@ -358,7 +358,6 @@
 														</ul></li>
 												</sec:authorize>
 											</ui:fragment>
-
 										</ul></li>
 								</sec:authorize>
 							</ui:fragment>
@@ -457,8 +456,17 @@
 															action="#{menuGestorBean.navegaModificacionInscripcion}"
 															title="#{sistema.obtenerTexto('gw.sidebar.gestionInscripcion.modificarInscripcion')}">
 															<i class="fa fa-book"></i>
-															<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.gestionInscripcion.modificarInscripcion')}</span>
-														</h:commandLink></li>
+														<span class="m-label">#{sistema.obtenerTexto('gw.sidebar.gestionInscripcion.modificarInscripcion')}</span>
+													</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
+											<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('MOD_INS')}">
+												<sec:authorize access="hasPermission(null, 'MOD_INS') ">
+													<li><h:commandLink action="#{menuGestorBean.navegaConfiguracionElectivas}"
+															title="Configurar asignaturas electivas">
+														<i class="fa fa-sliders"></i>
+														<span class="m-label">Configurar electivas</span>
+													</h:commandLink></li>
 												</sec:authorize>
 											</ui:fragment>
 

@@ -8,6 +8,7 @@ public class InscripcionMateriasDTO {
     private String nombrePlan;
     private Long idPrograma;
     private String nombreTentativoPrograma;
+    private String nombreProgramaAntecedente;
     private String subestructura;
     private String estructura;
     private String nivelEnsenanza;
@@ -64,6 +65,14 @@ public class InscripcionMateriasDTO {
 	}
 	public void setNombreTentativoPrograma(String nombreTentativoPrograma) {
 		this.nombreTentativoPrograma = nombreTentativoPrograma;
+	}
+
+	public String getNombreProgramaAntecedente() {
+		return nombreProgramaAntecedente;
+	}
+
+	public void setNombreProgramaAntecedente(String nombreProgramaAntecedente) {
+		this.nombreProgramaAntecedente = nombreProgramaAntecedente;
 	}
 	public String getSubestructura() {
 		return subestructura;

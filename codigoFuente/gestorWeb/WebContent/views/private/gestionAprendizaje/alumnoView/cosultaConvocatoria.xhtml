@@ -63,7 +63,8 @@
 								<p:outputLabel styleClass="bloque"
 											   value="Fecha de apertura:" />
 								<p:calendar id="fc_fechaInicial" styleClass="requerido"
-											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')} HH:mm"
+											hourFormat="24"
 											yearRange="c-100:c+100" locale="es"
 											
 											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -84,7 +85,8 @@
 								<p:calendar id="fc_fechaFinal" styleClass="requerido"
 											mindate="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura}"
 											disabled="#{empty convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura}"
-											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')} HH:mm"
+											hourFormat="24"
 											yearRange="c-100:c+100" locale="es"
 											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 											readonlyInput="true" navigator="true"
@@ -289,7 +291,8 @@
 								<p:outputLabel styleClass="bloque requerido"
 											   value="Fecha de apertura:" />
 								<p:calendar id="fc_fechaInicialAlta" 
-											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}"
+											hourFormat="24"
 											yearRange="c-100:c+100" locale="es"
 											
 											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -297,7 +300,7 @@
 											value="#{convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
 											showOn="button" required="true"
                 							requiredMessage="La fecha de apertura es obligatoria.">
-									<p:ajax event="dateSelect" process="@this"
+									<p:ajax event="change" process="@this"
 											update="fc_fechaFinalAlta"
 											listener="#{convocatoriasBean.validarFechasAlta2()}" />
 								</p:calendar>
@@ -311,14 +314,15 @@
 								<p:calendar id="fc_fechaFinalAlta" 
 											mindate="#{convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
 											disabled="#{empty convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
-											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}"
+											hourFormat="24"
 											yearRange="c-100:c+100" locale="es"
 											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 											readonlyInput="true" navigator="true"
 											value="#{convocatoriasBean.convocatoriaParamNueva.altaFechaCierre}"
 											showOn="button"   required="true"
                 							requiredMessage="La fecha de cierre es obligatoria.">
-									<p:ajax event="dateSelect" process="@this" />
+									<p:ajax event="change" process="@this" />
 								</p:calendar>
 								 <p:message for="fc_fechaFinalAlta" display="text" />
 							</div>

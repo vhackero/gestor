@@ -15,10 +15,13 @@ import javax.persistence.Tuple;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignaturasPorSemestreDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
@@ -699,6 +702,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("    cdp.nombre AS division, ");
 		sql.append("    tfd.tipo AS tipo_programa, ");
 		sql.append("    tfd.id_programa_antecedente AS seriada, ");
+		sql.append("    (SELECT antecedente.nombre_tentativo FROM tbl_ficha_descriptiva_programa antecedente ");
+		sql.append("     WHERE antecedente.id_programa = tfd.id_programa_antecedente) AS nombre_antecedente, ");
 		sql.append("    tpi.semestre AS periodo, ");
 		sql.append("    tpi.perfil AS perfil, ");
 		sql.append("    tpi.proceso_inscripcion_id AS proceso_inscripcion_id ");
@@ -748,10 +753,11 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setDivision((String) row[9]); // cdp.nombre
 		dto.setTipoPrograma((String) row[10]); // tfd.tipo
 		dto.setIdProgramaAntecedente(getLongValue(row[11])); // tfd.id_programa_antecedente
+		dto.setNombreProgramaAntecedente((String) row[12]); // antecedente.nombre_tentativo
 		dto.setCheck(false); // Valor por defecto
-		dto.setPeriodo(getIntegerValue(row[12])); // tpi.semestre
-		dto.setPerfil((String) row[13]); // tpi.perfil
-		dto.setIdProcesoInscripcion(getLongValue(row[14])); // tpi.proceso_inscripcion_id
+		dto.setPeriodo(getIntegerValue(row[13])); // tpi.semestre
+		dto.setPerfil((String) row[14]); // tpi.perfil
+		dto.setIdProcesoInscripcion(getLongValue(row[15])); // tpi.proceso_inscripcion_id
 
 		return dto;
 	}
@@ -787,7 +793,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("    JOIN tbl_eventos te2 ON te2.id_evento = tg2.id_evento ");
 		sql.append("    JOIN tbl_ficha_descriptiva_programa fd2 ON fd2.id_programa = te2.id_programa ");
 		sql.append("    WHERE rgp2.id_persona_participante = rgp.id_persona_participante ");
-		sql.append("    AND te2.id_programa = te.id_programa ");
+		sql.append("    AND LOWER(TRIM(fd2.nombre_tentativo)) = LOWER(TRIM(fd.nombre_tentativo)) ");
 		sql.append("    AND rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
 		sql.append(")");
 
@@ -990,8 +996,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("      INNER JOIN tbl_grupos tg2 ON tg2.id = rgp2.id_grupo ");
 		sql.append("      INNER JOIN tbl_eventos te2 ON te2.id_evento = tg2.id_evento ");
 		sql.append("      INNER JOIN tbl_ficha_descriptiva_programa fd2 ON fd2.id_programa = te2.id_programa ");
-		sql.append("      WHERE fd2.cve_programa = fd.cve_programa ");
-		sql.append("        AND te2.id_programa = fd.id_programa ");
+		sql.append("      WHERE LOWER(TRIM(fd2.nombre_tentativo)) = LOWER(TRIM(fd.nombre_tentativo)) ");
 		sql.append("        AND rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
 		sql.append("        AND rgp2.id_persona_participante = rgp.id_persona_participante ");
 		sql.append("  ) ");
@@ -1143,7 +1148,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("    cne.nombre AS nivel_ensenanza, ");
 		sql.append("    cdp.nombre AS division, ");
 		sql.append("    'Electiva' AS tipo_programa, ");
-		sql.append("    tfd.id_programa_antecedente AS seriada ");
+		sql.append("    tfd.id_programa_antecedente AS seriada, ");
+		sql.append("    tpi.proceso_inscripcion_id AS proceso_inscripcion_id ");
 		sql.append("FROM tbl_procesos_inscripcion tpi ");
 		sql.append(
 				"INNER JOIN rel_proceso_inscipcion_planesyprogramas rpip ON tpi.proceso_inscripcion_id = rpip.id_proceso_inscripcion ");
@@ -1152,15 +1158,22 @@ public class InscripcionRepository implements IinscripcionRepository {
 				"INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_plan = tp.id_plan AND rpip.id_programa = tfd.id_programa ");
 		sql.append("INNER JOIN tbl_malla_curricular tmc ON tmc.id = tfd.id_eje_capacitacion ");
 		sql.append("INNER JOIN tbl_malla_curricular tmc2 ON tmc2.id = tmc.id_padre ");
-		sql.append(
-				"    AND (tmc2.nombre LIKE CONCAT('%', :semestre_cinco, '%') OR tmc2.nombre LIKE CONCAT('%', :semestre_seis, '%')) ");
+		sql.append("    AND SUBSTRING_INDEX(TRIM(tmc2.nombre), ' ', -1) IN (:semestre_cinco, :semestre_seis) ");
 		sql.append("INNER JOIN cat_nivel_ensenanza_programa cne ON cne.id = tp.id_nivel_ensenanza ");
 		sql.append("INNER JOIN cat_divisiones_plan cdp ON cdp.id = tp.id_divisiones_plan ");
+		sql.append("INNER JOIN rel_configuracion_electivas rce ON rce.id_proceso_inscripcion = tpi.proceso_inscripcion_id ");
+		sql.append("    AND rce.id_programa = tfd.id_programa AND rce.activo = 1 ");
 		sql.append("WHERE tfd.tipo = 'Obligatoria' ");
 		sql.append("  AND rpip.id_plan NOT IN (:id_plan_persona) ");
 		sql.append("  AND :fecha_actual >= tpi.fecha_inicio ");
 		sql.append("  AND :fecha_actual <= tpi.fecha_fin ");
-		sql.append("  AND tpi.convocatoria_id = :id_convocatoria");
+		sql.append("  AND tpi.convocatoria_id = :id_convocatoria ");
+		sql.append("  AND (rce.sin_limite = 1 OR (SELECT COUNT(ti.id) FROM tbl_inscripciones ti ");
+		sql.append("       WHERE ti.idprograma = tfd.id_programa ");
+		sql.append("         AND ti.fecha_registro BETWEEN tpi.fecha_inicio AND tpi.fecha_fin ");
+		sql.append("         AND EXISTS (SELECT 1 FROM tbl_persona_aspirante tpa ");
+		sql.append("             WHERE tpa.id_persona = ti.Idpersona AND tpa.id_convocatoria = tpi.convocatoria_id ");
+		sql.append("               AND tpa.id_plan <> tfd.id_plan)) < rce.cupo_maximo) ");
 
 		List<Object[]> resultados = entityManager.createNativeQuery(sql.toString())
 				.setParameter("id_plan_persona", idPlanPersona).setParameter("semestre_cinco", semestreCinco)
@@ -1190,11 +1203,123 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setDivision((String) row[9]);
 		dto.setTipoPrograma((String) row[10]);
 		dto.setIdProgramaAntecedente(getLongValue(row[11]));
+		dto.setIdProcesoInscripcion(getLongValue(row[12]));
 
 		dto.setCheck(false);
 		dto.setDisabled(false);
 
 		return dto;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<ConfiguracionElectivaDTO> obtenerProcesosActivosConfiguracionElectivas() {
+		String sql = "SELECT tpi.proceso_inscripcion_id AS id_proceso_inscripcion, "
+				+ "tpi.nombre AS nombre_proceso, tc.nombre AS nombre_convocatoria "
+				+ "FROM tbl_procesos_inscripcion tpi "
+				+ "INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpi.convocatoria_id "
+				+ "WHERE tpi.estatus = 1 AND CURRENT_DATE BETWEEN tpi.fecha_inicio AND tpi.fecha_fin "
+				+ "ORDER BY tc.nombre, tpi.nombre";
+		List<Object[]> rows = entityManager.createNativeQuery(sql).getResultList();
+		List<ConfiguracionElectivaDTO> resultado = new ArrayList<>();
+		for (Object[] row : rows) {
+			ConfiguracionElectivaDTO dto = new ConfiguracionElectivaDTO();
+			dto.setIdProcesoInscripcion(getLongValue(row[0]));
+			dto.setNombreProceso((String) row[1]);
+			dto.setNombreConvocatoria((String) row[2]);
+			resultado.add(dto);
+		}
+		return resultado;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<ConfiguracionElectivaDTO> obtenerAsignaturasConfiguracionElectivas(Long idProcesoInscripcion) {
+		String sql = "SELECT tpi.proceso_inscripcion_id AS id_proceso_inscripcion, "
+				+ "tp.id_plan AS id_plan, tp.nombre AS nombre_plan, "
+				+ "tfd.id_programa AS id_programa, tfd.nombre_tentativo AS nombre_programa, "
+				+ "tfd.identificador_final AS clave_programa, tmc2.nombre AS semestre, "
+				+ "COALESCE(rce.activo, 0) AS electiva_activa, "
+				+ "COALESCE(rce.sin_limite, 1) AS electiva_sin_limite, "
+				+ "rce.cupo_maximo AS cupo_maximo, "
+				+ "(SELECT COUNT(ti.id) FROM tbl_inscripciones ti "
+				+ " WHERE ti.idprograma = tfd.id_programa "
+				+ " AND ti.fecha_registro BETWEEN tpi.fecha_inicio AND tpi.fecha_fin "
+				+ " AND EXISTS (SELECT 1 FROM tbl_persona_aspirante tpa "
+				+ "  WHERE tpa.id_persona = ti.Idpersona AND tpa.id_convocatoria = tpi.convocatoria_id "
+				+ "  AND tpa.id_plan <> tfd.id_plan)) AS ocupados "
+				+ "FROM tbl_procesos_inscripcion tpi "
+				+ "INNER JOIN rel_proceso_inscipcion_planesyprogramas rpip "
+				+ " ON rpip.id_proceso_inscripcion = tpi.proceso_inscripcion_id "
+				+ "INNER JOIN tbl_planes tp ON tp.id_plan = rpip.id_plan "
+				+ "INNER JOIN tbl_ficha_descriptiva_programa tfd "
+				+ " ON tfd.id_plan = rpip.id_plan AND tfd.id_programa = rpip.id_programa "
+				+ "INNER JOIN tbl_malla_curricular tmc ON tmc.id = tfd.id_eje_capacitacion "
+				+ "INNER JOIN tbl_malla_curricular tmc2 ON tmc2.id = tmc.id_padre "
+				+ "LEFT JOIN rel_configuracion_electivas rce "
+				+ " ON rce.id_proceso_inscripcion = tpi.proceso_inscripcion_id AND rce.id_programa = tfd.id_programa "
+				+ "WHERE tpi.proceso_inscripcion_id = :idProceso AND tfd.tipo = 'Obligatoria' "
+				+ "AND SUBSTRING_INDEX(TRIM(tmc2.nombre), ' ', -1) IN (:semestreCinco, :semestreSeis) "
+				+ "ORDER BY tp.nombre, tmc2.nombre, tfd.nombre_tentativo";
+		List<Object[]> rows = entityManager.createNativeQuery(sql).setParameter("idProceso", idProcesoInscripcion)
+				.setParameter("semestreCinco", ConstantesGestor.NUMERO_SEMESTRE_CINCO)
+				.setParameter("semestreSeis", ConstantesGestor.NUMERO_SEMESTRE_SEIS)
+				.getResultList();
+		List<ConfiguracionElectivaDTO> resultado = new ArrayList<>();
+		for (Object[] row : rows) {
+			ConfiguracionElectivaDTO dto = new ConfiguracionElectivaDTO();
+			dto.setIdProcesoInscripcion(getLongValue(row[0]));
+			dto.setIdPlan(getLongValue(row[1]));
+			dto.setNombrePlan((String) row[2]);
+			dto.setIdPrograma(getLongValue(row[3]));
+			dto.setNombrePrograma((String) row[4]);
+			dto.setClavePrograma((String) row[5]);
+			dto.setSemestre((String) row[6]);
+			dto.setActiva(Integer.valueOf(1).equals(getIntegerValue(row[7])));
+			dto.setSinLimite(Integer.valueOf(1).equals(getIntegerValue(row[8])));
+			dto.setCupoMaximo(getIntegerValue(row[9]));
+			dto.setCupoOcupado(getLongValue(row[10]));
+			resultado.add(dto);
+		}
+		return resultado;
+	}
+
+	@Override
+	public void guardarConfiguracionElectiva(ConfiguracionElectivaDTO dto) {
+		String sql = "INSERT INTO rel_configuracion_electivas "
+				+ "(id_proceso_inscripcion, id_programa, activo, sin_limite, cupo_maximo) "
+				+ "VALUES (:proceso, :programa, :activo, :sinLimite, :cupo) "
+				+ "ON DUPLICATE KEY UPDATE activo = VALUES(activo), sin_limite = VALUES(sin_limite), "
+				+ "cupo_maximo = VALUES(cupo_maximo), fecha_modificacion = CURRENT_TIMESTAMP";
+		entityManager.createNativeQuery(sql).setParameter("proceso", dto.getIdProcesoInscripcion())
+				.setParameter("programa", dto.getIdPrograma()).setParameter("activo", Boolean.TRUE.equals(dto.getActiva()) ? 1 : 0)
+				.setParameter("sinLimite", Boolean.TRUE.equals(dto.getSinLimite()) ? 1 : 0)
+				.setParameter("cupo", Boolean.TRUE.equals(dto.getSinLimite()) ? null : dto.getCupoMaximo()).executeUpdate();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public boolean tieneCupoElectiva(Long idProcesoInscripcion, Long idPrograma) {
+		String configSql = "SELECT sin_limite, cupo_maximo FROM rel_configuracion_electivas "
+				+ "WHERE id_proceso_inscripcion = :proceso AND id_programa = :programa AND activo = 1 FOR UPDATE";
+		List<Object[]> config = entityManager.createNativeQuery(configSql).setParameter("proceso", idProcesoInscripcion)
+				.setParameter("programa", idPrograma).getResultList();
+		if (config.isEmpty()) {
+			return false;
+		}
+		if (Integer.valueOf(1).equals(getIntegerValue(config.get(0)[0]))) {
+			return true;
+		}
+		Integer limite = getIntegerValue(config.get(0)[1]);
+		String countSql = "SELECT COUNT(ti.id) FROM tbl_inscripciones ti "
+				+ "INNER JOIN tbl_procesos_inscripcion tpi ON tpi.proceso_inscripcion_id = :proceso "
+				+ "INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_programa = :programa "
+				+ "WHERE ti.idprograma = :programa AND ti.fecha_registro BETWEEN tpi.fecha_inicio AND tpi.fecha_fin "
+				+ "AND EXISTS (SELECT 1 FROM tbl_persona_aspirante tpa WHERE tpa.id_persona = ti.Idpersona "
+				+ "AND tpa.id_convocatoria = tpi.convocatoria_id AND tpa.id_plan <> tfd.id_plan)";
+		Object count = entityManager.createNativeQuery(countSql).setParameter("proceso", idProcesoInscripcion)
+				.setParameter("programa", idPrograma).getSingleResult();
+		return limite != null && getLongValue(count) < limite.longValue();
 	}
 
 	@SuppressWarnings("unchecked")

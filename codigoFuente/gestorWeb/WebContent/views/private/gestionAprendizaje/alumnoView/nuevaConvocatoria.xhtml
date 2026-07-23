@@ -67,7 +67,8 @@
 								<p:outputLabel styleClass="bloque requerido"
 											   value="Fecha de apertura:" />
 								<p:calendar id="fc_fechaInicialAlta" 
-											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')} HH:mm"
+											hourFormat="24"
 											yearRange="c-100:c+100" locale="es"
 											
 											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
@@ -89,7 +90,8 @@
 								<p:calendar id="fc_fechaFinalAlta" 
 											mindate="#{convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
 											disabled="#{empty convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
-											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
+											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')} HH:mm"
+											hourFormat="24"
 											yearRange="c-100:c+100" locale="es"
 											placeholder="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 											readonlyInput="true" navigator="true"
