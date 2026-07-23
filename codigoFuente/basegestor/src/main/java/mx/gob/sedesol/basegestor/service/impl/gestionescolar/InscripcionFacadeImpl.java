@@ -1252,6 +1252,10 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private List<InscripcionMateriasDTO> obtenerMateriasPorAvanceAnualSinTomarEnCuentaObligatorias(
 			List<InscripcionMateriasDTO> materiasOfertadas, InscripcionPersonaDTO persona) {
 
+		if (materiasOfertadas == null || materiasOfertadas.isEmpty()) {
+			return Collections.emptyList();
+		}
+
 		String semestreDondeFaltanObligatorias = obtenerSemestre(persona.getIdPersona(), persona.getIdPlan(),
 				materiasOfertadas.get(0).getEstructura());
 
