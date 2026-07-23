@@ -66,7 +66,8 @@
 					<p:outputLabel styleClass="bloque" for="fechaInicio"
 						value="Fecha inicio:" />
 					<p:calendar id="fechaInicio"
-						value="#{inscripocionesBean.fechaInicio}" pattern="dd/MM/yyyy"
+					value="#{inscripocionesBean.fechaInicio}" pattern="dd/MM/yyyy HH:mm"
+					hourFormat="24"
 						locale="es" showOn="button" navigator="true" readonlyInput="true"
 						yearRange="c-100:c+100" placeholder="Seleccionar" />
 				</div>
@@ -76,7 +77,8 @@
 					<p:outputLabel styleClass="bloque" for="fechaFin"
 						value="Fecha fin:" />
 					<p:calendar id="fechaFin" value="#{inscripocionesBean.fechaFin}"
-						pattern="dd/MM/yyyy" locale="es" showOn="button" navigator="true"
+						pattern="dd/MM/yyyy HH:mm" hourFormat="24"
+						locale="es" showOn="button" navigator="true"
 						readonlyInput="true" yearRange="c-100:c+100"
 						placeholder="Seleccionar" />
 				</div>
