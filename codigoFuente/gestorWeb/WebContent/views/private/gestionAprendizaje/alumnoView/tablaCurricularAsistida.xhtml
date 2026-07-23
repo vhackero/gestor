@@ -36,6 +36,43 @@
                 line-height: 1.45;
                 margin-bottom: 18px;
             }
+            .asistente-case-followup {
+                background: #f8fbfd;
+                border: 1px solid #d6e1e6;
+                border-left: 4px solid #5f97a8;
+                border-radius: 8px;
+                padding: 16px 18px;
+                margin: 0 0 18px;
+            }
+            .asistente-case-followup-title {
+                display: block;
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: .04em;
+                color: #315766;
+                text-transform: uppercase;
+                margin-bottom: 10px;
+            }
+            .asistente-case-followup-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(180px, 1fr));
+                gap: 12px;
+            }
+            .asistente-case-followup-card {
+                background: #ffffff;
+                border: 1px solid #d6e1e6;
+                border-radius: 6px;
+                padding: 12px 14px;
+            }
+            .asistente-case-followup-card strong {
+                display: block;
+                margin-bottom: 6px;
+                color: #315766;
+            }
+            .asistente-case-followup-card span {
+                color: #41535c;
+                line-height: 1.45;
+            }
             .asistente-context-chip {
                 background: #eef4f6;
                 border: 1px solid #cadbe2;
@@ -847,6 +884,15 @@
                 color: #3f4b52;
                 line-height: 1.45;
             }
+            .preventive-list {
+                margin: 12px 0 0;
+                padding-left: 18px;
+                color: #3f4b52;
+            }
+            .preventive-list li {
+                margin-bottom: 8px;
+                line-height: 1.5;
+            }
             .assistant-right-rail {
                 background: #ffffff;
                 border: 1px solid #cdd9df;
@@ -864,12 +910,41 @@
             .assistant-right-rail .rail-actions {
                 display: flex;
                 flex-direction: column;
-                gap: 8px;
+                gap: 0;
                 margin-top: 14px;
             }
             .assistant-right-rail .rail-actions .ui-button {
                 width: 100%;
                 text-align: left;
+            }
+            .assistant-right-rail .rail-actions.tabs .ui-button.rail-tab {
+                display: block;
+                width: 100%;
+                margin: 0;
+                border-radius: 10px 10px 0 0;
+                border: 1px solid #c8d5db;
+                border-bottom: 0;
+                background: #ffffff;
+                color: #3f4b52;
+                box-shadow: 0 2px 0 rgba(0,0,0,0.12);
+                text-align: left;
+                padding: 11px 14px;
+                font-weight: 600;
+            }
+            .assistant-right-rail .rail-actions.tabs .ui-button.rail-tab:last-child {
+                border-bottom: 1px solid #c8d5db;
+                border-radius: 10px;
+            }
+            .assistant-right-rail .rail-actions.tabs .ui-button.rail-tab.active {
+                background: #5f97a8;
+                border-color: #5f97a8;
+                color: #ffffff;
+                box-shadow: 0 3px 0 rgba(41, 74, 84, 0.25);
+                position: relative;
+                z-index: 2;
+            }
+            .assistant-right-rail .rail-actions.tabs .ui-button.rail-tab + .ui-button.rail-tab {
+                margin-top: -1px;
             }
             .assistant-right-rail .rail-response {
                 margin-top: 12px;
@@ -1041,11 +1116,11 @@
             .revision-status-card .status-value.revisar {
                 color: #d27f10;
             }
-            .assistant-right-rail.gestor .rail-actions .ui-button {
+            .assistant-right-rail.gestor .rail-actions.tabs .ui-button.rail-tab {
                 position: relative;
                 padding-right: 34px;
             }
-            .assistant-right-rail.gestor .rail-actions .ui-button:after {
+            .assistant-right-rail.gestor .rail-actions.tabs .ui-button.rail-tab:after {
                 content: "\f105";
                 font-family: FontAwesome;
                 position: absolute;
@@ -1270,20 +1345,26 @@
                                         </div>
                                     </div>
 
-                                    <div class="asistente-side-card">
-                                        <h3 class="asistente-side-title">#{tablaCurricularAsistidaBean.tituloPanelContextual}</h3>
-                                        <p>#{tablaCurricularAsistidaBean.mensajeModoContextual}</p>
-                                        <ul class="context-message-list">
-                                            <ui:repeat value="#{tablaCurricularAsistidaBean.mensajesClaveContextuales}" var="mensajeClave">
-                                                <li>#{mensajeClave}</li>
-                                            </ui:repeat>
-                                        </ul>
-                                        <ul class="asistente-side-list">
-                                            <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextual">
-                                                <li>#{accionContextual}</li>
-                                            </ui:repeat>
-                                        </ul>
-                                        <div class="asistente-next-step">
+                                    <div class="assistant-right-rail #{tablaCurricularAsistidaBean.vistaGestor ? 'gestor' : ''}">
+                                        <div class="rail-head">#{tablaCurricularAsistidaBean.tituloPanelContextual}</div>
+                                        <div class="rail-body">
+                                            <p>#{tablaCurricularAsistidaBean.mensajeModoContextual}</p>
+                                            <ul class="context-message-list">
+                                                <ui:repeat value="#{tablaCurricularAsistidaBean.mensajesClaveContextuales}" var="mensajeClave">
+                                                    <li>#{mensajeClave}</li>
+                                                </ui:repeat>
+                                            </ul>
+                                            <div class="rail-actions tabs" style="margin-top:14px;">
+                                                <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextual">
+                                                    <p:commandButton value="#{accionContextual}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextual)}" process="@this" update="@form" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextual ? 'active' : ''}" />
+                                                </ui:repeat>
+                                            </div>
+                                            <div class="rail-response">
+                                                <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
+                                                <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
+                                            </div>
+                                        </div>
+                                        <div class="rail-next">
                                             <h3>#{tablaCurricularAsistidaBean.tituloSiguientePaso}</h3>
                                             <p>#{tablaCurricularAsistidaBean.descripcionSiguientePaso}</p>
                                         </div>
@@ -1305,7 +1386,7 @@
                                     </div>
                                     <div class="prioritarias-layout">
                                         <div>
-                                            <h2 class="section-heading-large">2. UD prioritarias / Regularización</h2>
+                                            <h2 class="section-heading-large">UD prioritarias / Regularización</h2>
                                             <div class="section-intro-box">#{tablaCurricularAsistidaBean.mensajeUdPrioritarias}</div>
                                             <div class="tag-filter-strip">
                                                 <span class="tag-filter warning">Prioritarias</span>
@@ -1361,16 +1442,39 @@
                                         <div class="assistant-right-rail #{tablaCurricularAsistidaBean.vistaGestor ? 'gestor' : ''}">
                                             <div class="rail-head">#{tablaCurricularAsistidaBean.tituloPanelContextual}</div>
                                             <div class="rail-body">
-                                                <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
-                                                <div class="rail-actions">
-                                                    <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualPrioridad">
-                                                        <p:commandButton value="#{accionContextualPrioridad}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualPrioridad)}" process="@this" update="@form" styleClass="btn btn-default" />
-                                                    </ui:repeat>
-                                                </div>
-                                                <div class="rail-response">
-                                                    <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
-                                                    <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
-                                                </div>
+                                                <ui:fragment rendered="#{tablaCurricularAsistidaBean.vistaGestor}">
+                                                    <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
+                                                    <div class="rail-actions tabs">
+                                                        <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualPrioridad">
+                                                            <p:commandButton value="#{accionContextualPrioridad}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualPrioridad)}" process="@this" update="@form" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextualPrioridad ? 'active' : ''}" />
+                                                        </ui:repeat>
+                                                    </div>
+                                                    <div class="rail-response">
+                                                        <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
+                                                        <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
+                                                    </div>
+                                                </ui:fragment>
+                                                <ui:fragment rendered="#{not tablaCurricularAsistidaBean.vistaGestor}">
+                                                    <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
+                                                    <div class="rail-response">
+                                                        <strong>Mensaje principal</strong>
+                                                        <h:outputText value="#{tablaCurricularAsistidaBean.mensajeCasoEstudianteV2Html}" escape="false" />
+                                                    </div>
+                                                    <div class="rail-response">
+                                                        <strong>Siguiente paso recomendado</strong>
+                                                        <span>#{tablaCurricularAsistidaBean.resolucionCasoEstudianteV2}</span>
+                                                    </div>
+                                                    <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarPanelPrevencionEstudianteV2}">
+                                                        <div class="rail-response">
+                                                            <strong>Señales preventivas</strong>
+                                                            <span>
+                                                                <ui:repeat value="#{tablaCurricularAsistidaBean.mensajesPreventivosEstudianteV2}" var="mensajePreventivoPrioridad">
+                                                                    <div>#{mensajePreventivoPrioridad}</div>
+                                                                </ui:repeat>
+                                                            </span>
+                                                        </div>
+                                                    </ui:fragment>
+                                                </ui:fragment>
                                             </div>
                                             <div class="rail-next">
                                                 <h3>#{tablaCurricularAsistidaBean.tituloSiguientePaso}</h3>
@@ -1729,9 +1833,9 @@
                                                 <div class="rail-head">#{tablaCurricularAsistidaBean.tituloPanelContextual}</div>
                                                 <div class="rail-body">
                                                     <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
-                                                    <div class="rail-actions">
+                                                    <div class="rail-actions tabs">
                                                         <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualValidacion">
-                                                            <p:commandButton value="#{accionContextualValidacion}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualValidacion)}" process="@this" update="@form" styleClass="btn btn-default" />
+                                                            <p:commandButton value="#{accionContextualValidacion}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualValidacion)}" process="@this" update="@form" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextualValidacion ? 'active' : ''}" />
                                                         </ui:repeat>
                                                     </div>
                                                     <div class="rail-response">
@@ -1803,9 +1907,9 @@
                                                 <div class="rail-head">#{tablaCurricularAsistidaBean.tituloPanelContextual}</div>
                                                 <div class="rail-body">
                                                     <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
-                                                    <div class="rail-actions">
+                                                    <div class="rail-actions tabs">
                                                         <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualValidacionGestor">
-                                                            <p:commandButton value="#{accionContextualValidacionGestor}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualValidacionGestor)}" process="@this" update="@form" styleClass="btn btn-default" />
+                                                            <p:commandButton value="#{accionContextualValidacionGestor}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualValidacionGestor)}" process="@this" update="@form" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextualValidacionGestor ? 'active' : ''}" />
                                                         </ui:repeat>
                                                     </div>
                                                     <div class="rail-response">
@@ -1922,7 +2026,7 @@
                                         <span class="context-top-chip soft-yellow">Periodo: #{tablaCurricularAsistidaBean.etiquetaEstadoPeriodo}</span>
                                         <span class="context-top-chip soft-blue">Modo: #{tablaCurricularAsistidaBean.etiquetaModoContextual}</span>
                                     </div>
-                                    <h2 class="section-heading-large">7. Orientación conversacional</h2>
+                                    <h2 class="section-heading-large">Orientación conversacional</h2>
                                     <div class="orientacion-layout">
                                         <ui:fragment rendered="#{tablaCurricularAsistidaBean.vistaGestor}">
                                             <div class="orientation-panel">
@@ -1964,9 +2068,15 @@
                                                         <p:commandButton value="#{tablaCurricularAsistidaBean.preguntaOrientacionSeleccionada}" action="#{tablaCurricularAsistidaBean.seleccionarPreguntaOrientacion(tablaCurricularAsistidaBean.preguntaOrientacionSeleccionada)}" process="@this" update="@form" styleClass="btn btn-default question-item" />
                                                         <div class="orientation-answer-box">#{tablaCurricularAsistidaBean.respuestaPreguntaOrientacion}</div>
                                                         <div class="soft-panel" style="margin-top:18px;">
-                                                            <h3>Escalamiento académico</h3>
+                                                            <h3>Prevención y siguientes pasos</h3>
                                                             <p>#{tablaCurricularAsistidaBean.mensajeEscalamientoAcademico}</p>
-                                                            <p:commandButton type="button" value="#{tablaCurricularAsistidaBean.textoBotonEscalamiento}" styleClass="btn btn-primary" style="margin-top:16px; min-width:180px;" />
+                                                            <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarPanelPrevencionEstudianteV2}">
+                                                                <ul class="preventive-list">
+                                                                    <ui:repeat value="#{tablaCurricularAsistidaBean.mensajesPreventivosEstudianteV2}" var="mensajePreventivo">
+                                                                        <li>#{mensajePreventivo}</li>
+                                                                    </ui:repeat>
+                                                                </ul>
+                                                            </ui:fragment>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1975,16 +2085,39 @@
                                         <div class="assistant-right-rail #{tablaCurricularAsistidaBean.vistaGestor ? 'gestor' : ''}">
                                             <div class="rail-head">#{tablaCurricularAsistidaBean.tituloPanelContextual}</div>
                                             <div class="rail-body">
-                                                <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
-                                                <div class="rail-actions">
-                                                    <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualOrientacion">
-                                                        <p:commandButton value="#{accionContextualOrientacion}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualOrientacion)}" process="@this" update="@form" styleClass="btn btn-default" />
-                                                    </ui:repeat>
-                                                </div>
-                                                <div class="rail-response">
-                                                    <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
-                                                    <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
-                                                </div>
+                                                <ui:fragment rendered="#{tablaCurricularAsistidaBean.vistaGestor}">
+                                                    <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
+                                                    <div class="rail-actions tabs">
+                                                        <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualOrientacion">
+                                                            <p:commandButton value="#{accionContextualOrientacion}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualOrientacion)}" process="@this" update="@form" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextualOrientacion ? 'active' : ''}" />
+                                                        </ui:repeat>
+                                                    </div>
+                                                    <div class="rail-response">
+                                                        <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
+                                                        <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
+                                                    </div>
+                                                </ui:fragment>
+                                                <ui:fragment rendered="#{not tablaCurricularAsistidaBean.vistaGestor}">
+                                                    <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
+                                                    <div class="rail-response">
+                                                        <strong>Mensaje principal</strong>
+                                                        <h:outputText value="#{tablaCurricularAsistidaBean.mensajeCasoEstudianteV2Html}" escape="false" />
+                                                    </div>
+                                                    <div class="rail-response">
+                                                        <strong>Siguiente paso recomendado</strong>
+                                                        <span>#{tablaCurricularAsistidaBean.resolucionCasoEstudianteV2}</span>
+                                                    </div>
+                                                    <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarPanelPrevencionEstudianteV2}">
+                                                        <div class="rail-response">
+                                                            <strong>Señales preventivas</strong>
+                                                            <span>
+                                                                <ui:repeat value="#{tablaCurricularAsistidaBean.mensajesPreventivosEstudianteV2}" var="mensajePreventivoRail">
+                                                                    <div>#{mensajePreventivoRail}</div>
+                                                                </ui:repeat>
+                                                            </span>
+                                                        </div>
+                                                    </ui:fragment>
+                                                </ui:fragment>
                                             </div>
                                             <div class="rail-next">
                                                 <h3>#{tablaCurricularAsistidaBean.tituloSiguientePaso}</h3>

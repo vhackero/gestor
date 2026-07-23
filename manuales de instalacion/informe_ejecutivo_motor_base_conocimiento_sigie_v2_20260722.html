@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Informe Ejecutivo y Técnico - Motor y Base de Conocimiento SIGIE V2</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #20323a; margin: 28px; line-height: 1.45; }
+    h1, h2, h3 { color: #124050; }
+    h1 { font-size: 24pt; margin-bottom: 4px; }
+    h2 { font-size: 16pt; margin-top: 26px; border-bottom: 2px solid #d7e8ee; padding-bottom: 6px; }
+    h3 { font-size: 12.5pt; margin-top: 18px; }
+    p, li { font-size: 10.5pt; }
+    .meta { color: #48606a; font-size: 10pt; margin-bottom: 18px; }
+    .box { border: 1px solid #bfd7df; background: #f8fbfc; padding: 12px 14px; margin: 14px 0; }
+    .warn { border-left: 4px solid #cc8b2c; background: #fff8ee; padding: 10px 14px; margin: 14px 0; }
+    table { border-collapse: collapse; width: 100%; margin: 14px 0; }
+    th, td { border: 1px solid #c9dbe2; padding: 8px 9px; vertical-align: top; font-size: 9.7pt; }
+    th { background: #2d7f94; color: white; text-align: left; }
+    .subth { background: #eaf4f7; color: #1d3d48; font-weight: bold; }
+    .small { font-size: 9pt; color: #51656d; }
+    ul { margin-top: 6px; }
+    .center { text-align: center; }
+    img { max-width: 100%; height: auto; border: 1px solid #d7e8ee; }
+  </style>
+</head>
+<body>
+  <h1>Informe Ejecutivo y Técnico</h1>
+  <div class="meta">
+    Motor de diagnóstico académico-operativo y base de conocimiento SIGIE V2<br>
+    Fecha: 22 de julio de 2026<br>
+    Base de referencia: <b>propuesta_tecnica_asistente_curricular_v2_20260716.md</b>
+  </div>
+
+  <h2>1. Resumen ejecutivo</h2>
+  <p>
+    SIGIE V2 introduce una capacidad nueva en la plataforma: un motor que interpreta la situación académica,
+    clasifica casos, genera diagnóstico, recomienda acciones y deja trazabilidad institucional. Este cambio no es
+    solamente visual. Cambia el modo en que Historial, Malla Curricular y Asistente Curricular consumen y exponen
+    información para estudiante y gestor.
+  </p>
+  <div class="box">
+    <b>Resultado institucional:</b>
+    <ul>
+      <li>estandariza el criterio de atención académica;</li>
+      <li>reduce respuestas manuales no homogéneas;</li>
+      <li>permite diferenciar orientación al estudiante y soporte operativo al gestor;</li>
+      <li>deja evidencia y bitácora del caso;</li>
+      <li>sienta la base para un sistema formal de seguimiento y resolución.</li>
+    </ul>
+  </div>
+
+  <h2>2. Qué representa este cambio</h2>
+  <p>Antes de V2, la lógica vivía principalmente en las vistas y en reglas distribuidas. Con V2 se introduce un núcleo nuevo:</p>
+  <ul>
+    <li><b>Caso académico-operativo:</b> expediente estructurado del problema que se está atendiendo.</li>
+    <li><b>Diagnóstico académico-operativo:</b> interpretación de causa dominante, riesgo, bloqueo y viabilidad.</li>
+    <li><b>Base de conocimiento:</b> patrones, criterios, mensajes y acciones reutilizables.</li>
+    <li><b>Bitácora y evidencia:</b> trazabilidad institucional de seguimiento, soporte y resolución.</li>
+  </ul>
+  <p>
+    En términos ejecutivos, el sistema evoluciona de una capa descriptiva a una capa resolutiva.
+  </p>
+
+  <h2>3. Cómo funciona el motor</h2>
+  <ol>
+    <li>Recibe contexto: perfil, periodo, persona objetivo y origen de consulta.</li>
+    <li>Obtiene información de trayectoria: reprobadas, omisiones, seriación, carga, avance y oferta.</li>
+    <li>Clasifica el caso.</li>
+    <li>Valida expediente mínimo.</li>
+    <li>Construye diagnóstico enriquecido.</li>
+    <li>Consulta la base de conocimiento para identificar el patrón más relevante.</li>
+    <li>Produce dictamen, mensaje y acción sugerida.</li>
+    <li>Si el caso ya existía, recalcula y actualiza la persistencia cuando cambió el contexto.</li>
+  </ol>
+
+  <h2>4. Cobertura actual de la base de conocimiento</h2>
+  <p>
+    Se analizó el archivo <b>casos_avance_anual_2026_2 (2).xlsx</b>. La fuente reporta <b>184 casos operativos</b>.
+    El análisis revela una realidad importante: el histórico tiene valor, pero viene con calidad de captura irregular.
+  </p>
+  <table>
+    <tr>
+      <th>Métrica observada en el Excel</th>
+      <th>Valor</th>
+      <th>Impacto</th>
+    </tr>
+    <tr>
+      <td>Total de casos reportados</td>
+      <td>184</td>
+      <td>Base real para medir cobertura</td>
+    </tr>
+    <tr>
+      <td>Casos sin “Tipo de caso”</td>
+      <td>89</td>
+      <td>Reduce capacidad de carga directa</td>
+    </tr>
+    <tr>
+      <td>Casos sin “Viabilidad técnica”</td>
+      <td>60</td>
+      <td>Obliga a inferir o a curar antes de sembrar</td>
+    </tr>
+    <tr>
+      <td>Filas donde el tipo es texto libre o resolución</td>
+      <td>Alto</td>
+      <td>Contamina la taxonomía y baja precisión</td>
+    </tr>
+  </table>
+
+  <h3>4.1 Cobertura por familias formales</h3>
+  <p>De las 7 familias formales observables en la hoja de catálogos del Excel:</p>
+  <ul>
+    <li>cubiertas explícitamente: <b>5</b></li>
+    <li>cubiertas parcialmente o genéricas: <b>1</b></li>
+    <li>no cubiertas explícitamente: <b>1</b></li>
+  </ul>
+  <p><b>Cobertura formal explícita actual:</b> <b>71.4%</b>.</p>
+
+  <h3>4.2 Cobertura efectiva sobre tickets reales</h3>
+  <p>
+    La cobertura real no se debe reportar sólo con familias nominales. Debe medirse contra los 184 tickets reales.
+    Con esa lógica, la cobertura actual se estima así:
+  </p>
+  <table>
+    <tr>
+      <th>Tipo de cobertura</th>
+      <th>Estimación actual</th>
+      <th>Lectura</th>
+    </tr>
+    <tr>
+      <td>Cobertura precisa</td>
+      <td>35% a 45%</td>
+      <td>Casos en los que la respuesta ya es fina y contextualmente correcta</td>
+    </tr>
+    <tr>
+      <td>Cobertura operativa aceptable</td>
+      <td>55% a 60%</td>
+      <td>Casos que ya reciben una orientación o dictamen útil, aunque todavía genérico</td>
+    </tr>
+  </table>
+
+  <div class="warn">
+    <b>Conclusión ejecutiva:</b> el motor ya es funcional, pero la base de conocimiento aún está en fase intermedia de madurez.
+    No debe presentarse como cobertura completa del universo de casos.
+  </div>
+
+  <h2>5. Cómo se alimentará la base para hacerla más fina y precisa</h2>
+  <h3>5.1 Recomendación</h3>
+  <p>La estrategia correcta es mixta:</p>
+  <ul>
+    <li><b>Carga inicial adicional curada:</b> sí se necesitan más lotes iniciales desde el histórico.</li>
+    <li><b>Retroalimentación operativa estructurada:</b> cada caso atendido debe dejar datos útiles para el conocimiento.</li>
+    <li><b>Gobernanza funcional:</b> no cualquier usuario debe editar patrones y mensajes libremente.</li>
+  </ul>
+
+  <h3>5.2 Por qué no basta con aprender “sobre la marcha”</h3>
+  <p>
+    Si la base se alimenta sólo conforme se atienden casos, el crecimiento será lento, inconsistente y sesgado
+    por los casos recientes. Para llegar a una cobertura útil de corto plazo, se necesita una segunda y tercera carga
+    curada del histórico.
+  </p>
+
+  <h3>5.3 Cómo debe quedar el modelo de alimentación</h3>
+  <table>
+    <tr>
+      <th>Fase</th>
+      <th>Qué se hace</th>
+      <th>Resultado esperado</th>
+    </tr>
+    <tr>
+      <td>1. Curación inicial</td>
+      <td>Normalizar el Excel histórico y sembrar nuevos patrones, mensajes, criterios y acciones</td>
+      <td>Subir cobertura precisa a 60%-70%</td>
+    </tr>
+    <tr>
+      <td>2. Captura estructurada al cerrar casos</td>
+      <td>Registrar tipo confirmado, motivo, viabilidad, resolución y excepción</td>
+      <td>Aprendizaje institucional acumulativo</td>
+    </tr>
+    <tr>
+      <td>3. Gobernanza</td>
+      <td>Validar y aprobar cambios de conocimiento con un comité funcional</td>
+      <td>Consistencia y control de calidad</td>
+    </tr>
+  </table>
+
+  <h2>6. ¿Se necesita una interfaz de carga?</h2>
+  <p><b>Sí, pero no como primer paso absoluto.</b></p>
+  <p>La secuencia correcta es:</p>
+  <ol>
+    <li>hacer más cargas curadas por lote;</li>
+    <li>estabilizar taxonomía, mensajes y criterios;</li>
+    <li>después construir una interfaz administrativa ligera.</li>
+  </ol>
+  <p>La interfaz deberá permitir:</p>
+  <ul>
+    <li>alta/edición de patrones;</li>
+    <li>alta/edición de mensajes;</li>
+    <li>importación de lotes normalizados;</li>
+    <li>aprobación/versionado de cambios.</li>
+  </ul>
+
+  <h2>7. Diagrama de tablas nuevas y relación con el modelo existente</h2>
+  <p class="small">
+    El diagrama muestra tanto las tablas nuevas de V2 como su anclaje lógico con el modelo existente de SIGIE por persona, plan y periodo.
+  </p>
+  <p class="center">
+    <img src="diagrama_tablas_motor_base_conocimiento_sigie_v2_20260722.svg" alt="Diagrama de tablas del motor y base de conocimiento SIGIE V2">
+  </p>
+
+  <h2>8. Diccionario de tablas nuevas</h2>
+  <table>
+    <tr>
+      <th>Tabla</th>
+      <th>Tipo</th>
+      <th>Propósito</th>
+      <th>Relaciones</th>
+    </tr>
+    <tr>
+      <td>cat_tipo_caso_academico</td>
+      <td>Catálogo</td>
+      <td>Define la taxonomía principal del caso.</td>
+      <td>La usa <b>rel_patron_caso_academico</b> y <b>tbl_caso_academico_operativo</b>.</td>
+    </tr>
+    <tr>
+      <td>cat_motivo_restriccion</td>
+      <td>Catálogo</td>
+      <td>Define la causa dominante del problema.</td>
+      <td>La usa <b>tbl_caso_academico_operativo</b>.</td>
+    </tr>
+    <tr>
+      <td>cat_criterio_operativo</td>
+      <td>Catálogo</td>
+      <td>Formaliza las reglas institucionales que sustentan un dictamen.</td>
+      <td>La usa <b>rel_patron_criterio_operativo</b>.</td>
+    </tr>
+    <tr>
+      <td>cat_accion_operativa</td>
+      <td>Catálogo</td>
+      <td>Lista las acciones sugeridas por el motor.</td>
+      <td>La usan <b>rel_patron_accion_operativa</b> y <b>tbl_caso_dictamen</b>.</td>
+    </tr>
+    <tr>
+      <td>cat_viabilidad_tecnica</td>
+      <td>Catálogo</td>
+      <td>Normaliza el resultado de viabilidad del caso.</td>
+      <td>La usan <b>tbl_caso_academico_operativo</b> y <b>tbl_caso_dictamen</b>.</td>
+    </tr>
+    <tr>
+      <td>cat_mensaje_institucional_contextual</td>
+      <td>Catálogo</td>
+      <td>Define mensajes por perfil y periodo operativo.</td>
+      <td>La usa <b>rel_patron_mensaje_contextual</b>.</td>
+    </tr>
+    <tr>
+      <td>rel_patron_caso_academico</td>
+      <td>Conocimiento</td>
+      <td>Representa patrones reutilizables derivados del histórico.</td>
+      <td>Se relaciona con tipo de caso, criterios, acciones y mensajes.</td>
+    </tr>
+    <tr>
+      <td>rel_patron_criterio_operativo</td>
+      <td>Conocimiento</td>
+      <td>Asocia un patrón a uno o varios criterios.</td>
+      <td>Une <b>rel_patron_caso_academico</b> con <b>cat_criterio_operativo</b>.</td>
+    </tr>
+    <tr>
+      <td>rel_patron_accion_operativa</td>
+      <td>Conocimiento</td>
+      <td>Asocia un patrón a una o varias acciones sugeridas.</td>
+      <td>Une <b>rel_patron_caso_academico</b> con <b>cat_accion_operativa</b>.</td>
+    </tr>
+    <tr>
+      <td>rel_patron_mensaje_contextual</td>
+      <td>Conocimiento</td>
+      <td>Asocia un patrón con mensajes específicos por perfil.</td>
+      <td>Une <b>rel_patron_caso_academico</b> con <b>cat_mensaje_institucional_contextual</b>.</td>
+    </tr>
+    <tr>
+      <td>tbl_caso_academico_operativo</td>
+      <td>Operación</td>
+      <td>Es la entidad central del motor. Contiene folio, persona, plan, periodo, tipo, motivo, viabilidad y estatus.</td>
+      <td>Se ancla lógicamente a <b>tbl_persona</b>, <b>tbl_planes</b> y <b>cat_periodos</b>. De ella cuelgan diagnóstico, dictamen, bitácora, evidencia, UD relacionadas y similares.</td>
+    </tr>
+    <tr>
+      <td>tbl_caso_ud_relacionada</td>
+      <td>Operación</td>
+      <td>Guarda el detalle por UD involucrada en el caso.</td>
+      <td>Depende de <b>tbl_caso_academico_operativo</b>.</td>
+    </tr>
+    <tr>
+      <td>tbl_caso_diagnostico</td>
+      <td>Operación</td>
+      <td>Guarda la lectura del motor: riesgo, seriación, carga, oferta y resumen.</td>
+      <td>Relación 1:1 con <b>tbl_caso_academico_operativo</b>.</td>
+    </tr>
+    <tr>
+      <td>tbl_caso_dictamen</td>
+      <td>Operación</td>
+      <td>Guarda la salida resolutiva: acción, viabilidad, mensaje a estudiante y mensaje a gestor.</td>
+      <td>Depende de <b>tbl_caso_academico_operativo</b> y referencia acción y viabilidad.</td>
+    </tr>
+    <tr>
+      <td>tbl_caso_bitacora</td>
+      <td>Operación</td>
+      <td>Registra seguimiento y eventos del ciclo de vida del caso.</td>
+      <td>Depende de <b>tbl_caso_academico_operativo</b>.</td>
+    </tr>
+    <tr>
+      <td>tbl_caso_evidencia</td>
+      <td>Operación</td>
+      <td>Guarda la referencia documental que soporta la atención del caso.</td>
+      <td>Depende de <b>tbl_caso_academico_operativo</b>.</td>
+    </tr>
+    <tr>
+      <td>tbl_caso_similar</td>
+      <td>Operación / conocimiento vivo</td>
+      <td>Relaciona casos parecidos para reutilizar criterio y resolución.</td>
+      <td>Autorelación sobre <b>tbl_caso_academico_operativo</b>.</td>
+    </tr>
+  </table>
+
+  <h2>9. Relación con el modelo SIGIE existente</h2>
+  <p>La integración con el modelo actual no reemplaza entidades troncales. Se ancla a ellas:</p>
+  <table>
+    <tr>
+      <th>Entidad existente</th>
+      <th>Rol en V2</th>
+      <th>Observación</th>
+    </tr>
+    <tr>
+      <td>tbl_persona</td>
+      <td>Identifica al estudiante o persona objetivo del caso</td>
+      <td>Se usa mediante <b>id_persona</b> en <b>tbl_caso_academico_operativo</b>.</td>
+    </tr>
+    <tr>
+      <td>tbl_planes</td>
+      <td>Identifica el plan de estudios del estudiante</td>
+      <td>Se usa mediante <b>id_plan</b>.</td>
+    </tr>
+    <tr>
+      <td>cat_periodos</td>
+      <td>Contexto temporal y de operación</td>
+      <td>Se usa mediante <b>id_periodo</b> y además mediante el concepto funcional de “cursamiento” o “inscripción”.</td>
+    </tr>
+    <tr>
+      <td>Servicios de trayectoria / asistente</td>
+      <td>Fuente de reglas y diagnóstico</td>
+      <td>El motor V2 no duplica toda la lógica; consume información de trayectoria ya existente y la estructura como caso.</td>
+    </tr>
+  </table>
+
+  <h2>10. Qué sigue recomendado</h2>
+  <ul>
+    <li>hacer una nueva normalización del histórico de 184 casos;</li>
+    <li>preparar una tercera carga curada con foco en rezago múltiple, continuidad del mismo año, cierre de trayectoria y omisión vs no acreditación;</li>
+    <li>después construir una interfaz administrativa ligera para alimentar y gobernar la base de conocimiento;</li>
+    <li>cerrar el ciclo con una vista formal de seguimiento para el estudiante.</li>
+  </ul>
+
+  <h2>11. Cierre ejecutivo</h2>
+  <p>
+    Este cambio representa una nueva capacidad estratégica para SIGIE: pasar de vistas informativas a un sistema con
+    criterio operativo reusable, trazabilidad y soporte a resolución. El motor ya existe y ya opera. La oportunidad
+    inmediata ya no está en más pantallas, sino en elevar la madurez de la base de conocimiento con nuevas cargas y
+    una gobernanza funcional controlada.
+  </p>
+</body>
+</html>

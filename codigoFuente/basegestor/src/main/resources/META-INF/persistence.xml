@@ -237,6 +237,23 @@
         <class>mx.gob.sedesol.basegestor.model.entities.admin.TblDatosSociodemograficosPersona</class>
         <!-- Fin optimizacion de entidades -->
 
+        <!-- V2 asistente curricular -->
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.CatTipoCasoAcademicoV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.CatMotivoRestriccionV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.CatCriterioOperativoV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.CatAccionOperativaV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.CatMensajeInstitucionalContextualV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.CatViabilidadTecnicaV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.RelPatronCasoAcademicoV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.RelPatronCriterioOperativoV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.RelPatronAccionOperativaV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.RelPatronMensajeContextualV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblCasoAcademicoOperativoV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblCasoDiagnosticoV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblCasoDictamenV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblCasoBitacoraV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblCasoEvidenciaV2</class>
+
         <!-- Fin de seccion de entidades optimizadas -->
         <properties>
             <property name="hibernate.show_sql" value="false" />

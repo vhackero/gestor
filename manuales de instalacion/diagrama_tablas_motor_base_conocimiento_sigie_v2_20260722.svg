@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1350" viewBox="0 0 1800 1350">
+  <style>
+    .title { font: 700 24px Arial, sans-serif; fill: #163a4a; }
+    .subtitle { font: 600 16px Arial, sans-serif; fill: #28576c; }
+    .box { fill: #f8fbfc; stroke: #2d7f94; stroke-width: 2; rx: 8; ry: 8; }
+    .extbox { fill: #fff8eb; stroke: #c08a2b; stroke-width: 2; rx: 8; ry: 8; }
+    .header { fill: #2d7f94; }
+    .headerText { font: 700 14px Arial, sans-serif; fill: white; }
+    .bodyText { font: 12px Arial, sans-serif; fill: #1f2f36; }
+    .line { stroke: #63757d; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    .dash { stroke-dasharray: 8 6; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L9,3 L0,6 Z" fill="#63757d"/>
+    </marker>
+  </defs>
+
+  <text x="40" y="40" class="title">SIGIE V2 - Motor de diagnóstico académico-operativo y base de conocimiento</text>
+  <text x="40" y="70" class="subtitle">Diagrama lógico de tablas nuevas y relación con el modelo existente</text>
+
+  <rect x="40" y="110" width="260" height="95" class="extbox"/>
+  <text x="55" y="135" class="headerText" fill="#7b5200">Modelo SIGIE existente</text>
+  <text x="55" y="160" class="bodyText">tbl_persona</text>
+  <text x="55" y="178" class="bodyText">tbl_planes</text>
+  <text x="55" y="196" class="bodyText">cat_periodos / periodo operativo</text>
+
+  <rect x="360" y="110" width="250" height="90" class="box"/>
+  <rect x="360" y="110" width="250" height="26" class="header"/>
+  <text x="375" y="128" class="headerText">cat_tipo_caso_academico</text>
+  <text x="375" y="152" class="bodyText">Tipos de caso: rezago, aclaración,</text>
+  <text x="375" y="170" class="bodyText">reinscripción, omisión, continuidad</text>
+
+  <rect x="650" y="110" width="250" height="90" class="box"/>
+  <rect x="650" y="110" width="250" height="26" class="header"/>
+  <text x="665" y="128" class="headerText">cat_motivo_restriccion</text>
+  <text x="665" y="152" class="bodyText">Causa dominante: seriación, rezago,</text>
+  <text x="665" y="170" class="bodyText">avance anual, carga, omisión</text>
+
+  <rect x="940" y="110" width="250" height="90" class="box"/>
+  <rect x="940" y="110" width="250" height="26" class="header"/>
+  <text x="955" y="128" class="headerText">cat_criterio_operativo</text>
+  <text x="955" y="152" class="bodyText">Reglas institucionales que sustentan</text>
+  <text x="955" y="170" class="bodyText">el dictamen del caso</text>
+
+  <rect x="1230" y="110" width="250" height="90" class="box"/>
+  <rect x="1230" y="110" width="250" height="26" class="header"/>
+  <text x="1245" y="128" class="headerText">cat_accion_operativa</text>
+  <text x="1245" y="152" class="bodyText">Acción sugerida: validar, escalar,</text>
+  <text x="1245" y="170" class="bodyText">mantener restricción, ajustar</text>
+
+  <rect x="1520" y="110" width="240" height="90" class="box"/>
+  <rect x="1520" y="110" width="240" height="26" class="header"/>
+  <text x="1535" y="128" class="headerText">cat_viabilidad_tecnica</text>
+  <text x="1535" y="152" class="bodyText">Viable, viable con ajuste,</text>
+  <text x="1535" y="170" class="bodyText">no viable, pendiente de info</text>
+
+  <rect x="650" y="250" width="340" height="105" class="box"/>
+  <rect x="650" y="250" width="340" height="26" class="header"/>
+  <text x="665" y="268" class="headerText">rel_patron_caso_academico</text>
+  <text x="665" y="292" class="bodyText">Patrones de conocimiento derivados del histórico</text>
+  <text x="665" y="310" class="bodyText">Ej.: rezago con no acreditadas, continuidad</text>
+  <text x="665" y="328" class="bodyText">del mismo año, omisión documentada</text>
+
+  <rect x="420" y="405" width="250" height="90" class="box"/>
+  <rect x="420" y="405" width="250" height="26" class="header"/>
+  <text x="435" y="423" class="headerText">rel_patron_criterio_operativo</text>
+  <text x="435" y="447" class="bodyText">Vincula patrón con reglas</text>
+  <text x="435" y="465" class="bodyText">institucionales aplicables</text>
+
+  <rect x="775" y="405" width="250" height="90" class="box"/>
+  <rect x="775" y="405" width="250" height="26" class="header"/>
+  <text x="790" y="423" class="headerText">rel_patron_accion_operativa</text>
+  <text x="790" y="447" class="bodyText">Vincula patrón con acción</text>
+  <text x="790" y="465" class="bodyText">operativa sugerida</text>
+
+  <rect x="1130" y="405" width="310" height="90" class="box"/>
+  <rect x="1130" y="405" width="310" height="26" class="header"/>
+  <text x="1145" y="423" class="headerText">cat_mensaje_institucional_contextual</text>
+  <text x="1145" y="447" class="bodyText">Mensajes por perfil y periodo</text>
+  <text x="1145" y="465" class="bodyText">para estudiante y gestor</text>
+
+  <rect x="1490" y="405" width="270" height="90" class="box"/>
+  <rect x="1490" y="405" width="270" height="26" class="header"/>
+  <text x="1505" y="423" class="headerText">rel_patron_mensaje_contextual</text>
+  <text x="1505" y="447" class="bodyText">Asocia patrón con mensaje</text>
+  <text x="1505" y="465" class="bodyText">según perfil de consumo</text>
+
+  <rect x="620" y="565" width="420" height="145" class="box"/>
+  <rect x="620" y="565" width="420" height="28" class="header"/>
+  <text x="635" y="584" class="headerText">tbl_caso_academico_operativo</text>
+  <text x="635" y="610" class="bodyText">Entidad central del motor.</text>
+  <text x="635" y="628" class="bodyText">Guarda folio, persona, plan, periodo, tipo de caso,</text>
+  <text x="635" y="646" class="bodyText">motivo, viabilidad, estatus, confianza de clasificación</text>
+  <text x="635" y="664" class="bodyText">y bandera de intervención humana.</text>
+  <text x="635" y="688" class="bodyText">Relación lógica con modelo existente:</text>
+  <text x="635" y="706" class="bodyText">id_persona -> tbl_persona | id_plan -> tbl_planes | id_periodo -> cat_periodos</text>
+
+  <rect x="80" y="770" width="300" height="105" class="box"/>
+  <rect x="80" y="770" width="300" height="26" class="header"/>
+  <text x="95" y="788" class="headerText">tbl_caso_ud_relacionada</text>
+  <text x="95" y="812" class="bodyText">Detalle por UD involucrada:</text>
+  <text x="95" y="830" class="bodyText">clave, nombre, bloque, semestre,</text>
+  <text x="95" y="848" class="bodyText">estatus detectado y si es crítica</text>
+
+  <rect x="430" y="770" width="300" height="105" class="box"/>
+  <rect x="430" y="770" width="300" height="26" class="header"/>
+  <text x="445" y="788" class="headerText">tbl_caso_diagnostico</text>
+  <text x="445" y="812" class="bodyText">Situación académica, riesgo, cierre anual,</text>
+  <text x="445" y="830" class="bodyText">carga viable, seriación, oferta y</text>
+  <text x="445" y="848" class="bodyText">resumen del motor</text>
+
+  <rect x="780" y="770" width="300" height="105" class="box"/>
+  <rect x="780" y="770" width="300" height="26" class="header"/>
+  <text x="795" y="788" class="headerText">tbl_caso_dictamen</text>
+  <text x="795" y="812" class="bodyText">Dictamen final o preliminar, acción,</text>
+  <text x="795" y="830" class="bodyText">viabilidad, mensaje al estudiante</text>
+  <text x="795" y="848" class="bodyText">y mensaje al gestor</text>
+
+  <rect x="1130" y="770" width="300" height="105" class="box"/>
+  <rect x="1130" y="770" width="300" height="26" class="header"/>
+  <text x="1145" y="788" class="headerText">tbl_caso_bitacora</text>
+  <text x="1145" y="812" class="bodyText">Trazabilidad de eventos:</text>
+  <text x="1145" y="830" class="bodyText">creación, recálculo, seguimiento,</text>
+  <text x="1145" y="848" class="bodyText">edición y cierre</text>
+
+  <rect x="1480" y="770" width="280" height="105" class="box"/>
+  <rect x="1480" y="770" width="280" height="26" class="header"/>
+  <text x="1495" y="788" class="headerText">tbl_caso_evidencia</text>
+  <text x="1495" y="812" class="bodyText">Archivos o referencias documentales</text>
+  <text x="1495" y="830" class="bodyText">que soportan la atención del caso</text>
+  <text x="1495" y="848" class="bodyText">por el gestor</text>
+
+  <rect x="760" y="930" width="360" height="100" class="box"/>
+  <rect x="760" y="930" width="360" height="26" class="header"/>
+  <text x="775" y="948" class="headerText">tbl_caso_similar</text>
+  <text x="775" y="972" class="bodyText">Relación de similitud entre casos atendidos</text>
+  <text x="775" y="990" class="bodyText">para reutilizar criterio y resolución histórica</text>
+
+  <path d="M300 160 L360 160" class="line dash"/>
+  <path d="M300 160 L620 637" class="line dash"/>
+  <path d="M300 160 L620 690" class="line dash"/>
+
+  <path d="M485 200 L760 250" class="line"/>
+  <path d="M775 200 L820 250" class="line"/>
+  <path d="M1065 200 L930 405" class="line"/>
+  <path d="M1355 200 L900 405" class="line"/>
+  <path d="M1640 200 L930 637" class="line"/>
+
+  <path d="M820 355 L545 405" class="line"/>
+  <path d="M820 355 L900 405" class="line"/>
+  <path d="M990 305 L1130 450" class="line"/>
+  <path d="M1285 495 L1490 450" class="line"/>
+
+  <path d="M830 495 L830 565" class="line"/>
+  <path d="M830 710 L230 770" class="line"/>
+  <path d="M830 710 L580 770" class="line"/>
+  <path d="M830 710 L930 770" class="line"/>
+  <path d="M830 710 L1280 770" class="line"/>
+  <path d="M830 710 L1620 770" class="line"/>
+  <path d="M830 710 L940 930" class="line"/>
+
+  <text x="40" y="1110" class="subtitle">Lectura del diagrama</text>
+  <text x="40" y="1140" class="bodyText">1. Los catálogos definen el vocabulario institucional del motor.</text>
+  <text x="40" y="1162" class="bodyText">2. Los patrones transforman ese vocabulario en conocimiento reutilizable.</text>
+  <text x="40" y="1184" class="bodyText">3. El caso académico-operativo es la pieza central y conecta diagnóstico, dictamen, trazabilidad y evidencia.</text>
+  <text x="40" y="1206" class="bodyText">4. El modelo V2 se ancla al modelo histórico de SIGIE por persona, plan y periodo.</text>
+</svg>

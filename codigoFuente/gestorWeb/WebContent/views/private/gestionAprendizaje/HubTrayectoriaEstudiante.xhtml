@@ -109,9 +109,116 @@
 				margin-top: 20px;
 				text-align: right;
 			}
+			.hub-section {
+				margin-top: 26px;
+				background: #ffffff;
+				border: 1px solid #d8e2e7;
+				border-radius: 8px;
+				padding: 20px;
+				box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+			}
+			.hub-section h2 {
+				margin: 0 0 12px;
+				font-size: 23px;
+				font-weight: 700;
+				color: #315766;
+			}
+			.hub-section-copy {
+				color: #60717a;
+				font-size: 14px;
+				line-height: 1.45;
+				margin-bottom: 16px;
+			}
+			.hub-case-grid {
+				display: grid;
+				grid-template-columns: 1fr;
+				gap: 18px;
+				align-items: start;
+			}
+			.hub-subcard {
+				background: #f8fbfc;
+				border: 1px solid #d6e1e6;
+				border-radius: 8px;
+				padding: 16px;
+			}
+			.hub-subcard h3 {
+				margin: 0 0 10px;
+				font-size: 18px;
+				font-weight: 700;
+				color: #2f5563;
+			}
+			.hub-microcopy {
+				font-size: 13px;
+				color: #687881;
+				line-height: 1.45;
+				margin-bottom: 12px;
+			}
+			.hub-kpi-strip {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(180px, 1fr));
+				gap: 10px;
+				margin-top: 12px;
+			}
+			.hub-kpi-note {
+				background: #eef5f7;
+				border-radius: 6px;
+				padding: 12px 14px;
+			}
+			.hub-kpi-note strong {
+				display: block;
+				margin-bottom: 4px;
+				color: #2a4450;
+			}
+			.hub-badge {
+				display: inline-block;
+				padding: 5px 10px;
+				border-radius: 999px;
+				background: #eef4f6;
+				border: 1px solid #cadbe2;
+				color: #3f5a65;
+				font-size: 12px;
+				font-weight: 700;
+				margin: 0 6px 6px 0;
+			}
+			.hub-state-ok {
+				color: #1f8f50;
+				font-weight: 700;
+			}
+			.hub-state-risk {
+				color: #ad7b1b;
+				font-weight: 700;
+			}
+			.hub-state-block {
+				color: #b53a3a;
+				font-weight: 700;
+			}
+			.hub-form-row {
+				margin-bottom: 12px;
+			}
+			.hub-form-row label {
+				display: block;
+				font-weight: 700;
+				color: #40545d;
+				margin-bottom: 4px;
+			}
+			.hub-empty {
+				color: #6c7d86;
+				font-size: 14px;
+				padding: 8px 0;
+			}
+			.hub-dual-grid {
+				display: grid;
+				grid-template-columns: 1fr;
+				gap: 14px;
+				margin-top: 16px;
+			}
 			@media (max-width: 1199px) {
 				.hub-grid {
 					grid-template-columns: 1fr 1fr;
+				}
+				.hub-case-grid,
+				.hub-dual-grid {
+					grid-template-columns: 1fr;
 				}
 			}
 			@media (max-width: 767px) {
@@ -121,9 +228,10 @@
 			}
 		</style>
 
-		<h:form>
+		<h:form enctype="multipart/form-data">
+			<p:messages id="mensajesHub" showDetail="true" autoUpdate="false" closable="true" />
 			<h1 class="hub-title">Situación del estudiante</h1>
-			<div class="hub-copy">Consulta central para gestor académico. Desde aquí puedes revisar el estado del estudiante y entrar a expediente, malla curricular y asistente curricular usando el mismo contexto de matrícula.</div>
+			<div class="hub-copy">Consulta central para gestor académico. Desde aquí puedes revisar el estado del estudiante y entrar a expediente, malla curricular y asistente curricular usando el mismo contexto de matrícula y la misma orientación académica.</div>
 
 			<div class="hub-strip">
 				<span class="hub-chip main">Vista gestor</span>
@@ -135,7 +243,7 @@
 			<div class="hub-grid">
 				<div class="hub-card">
 					<h3>Resumen académico</h3>
-					<p>Vista rápida del estado general del estudiante consultado para orientar la revisión académica antes de entrar al detalle.</p>
+					<p>Vista rápida del estado general del estudiante consultado para orientar el acompañamiento académico antes de entrar al detalle.</p>
 					<div class="hub-kpi">
 						<div class="hub-kpi-box">
 							<span class="hub-kpi-label">Programa</span>
@@ -182,7 +290,7 @@
 
 				<div class="hub-card">
 					<h3>Asistente curricular</h3>
-					<p>Interpreta riesgos, reglas y recomendaciones de inscripción o seguimiento según el periodo activo del estudiante.</p>
+					<p>Interpreta riesgos, reglas y recomendaciones de inscripción o acompañamiento según el periodo activo del estudiante.</p>
 					<div class="hub-action">
 						<p:commandButton value="Abrir asistente curricular"
 							action="#{expedienteAlumnoBean.navegaAsistenteCurricular}"
@@ -195,6 +303,251 @@
 				<p:commandButton value="Cambiar estudiante"
 					action="#{expedienteAlumnoBean.cancelar}"
 					ajax="false" styleClass="btn btn-default" />
+			</div>
+
+			<div class="hub-section">
+				<h2>Bandeja de orientación V2</h2>
+				<div class="hub-section-copy">Acompañamiento académico del estudiante consultado. Aquí se concentra la orientación curricular, el dictamen sugerido y la trazabilidad del acompañamiento del gestor.</div>
+
+				<div class="hub-case-grid">
+					<div class="hub-subcard">
+						<h3>Orientaciones del estudiante</h3>
+						<p class="hub-microcopy">La bandeja muestra las orientaciones V2 asociadas a la matrícula consultada. Selecciona una para revisar su ficha integral, bitácora y evidencias de apoyo.</p>
+						<p:dataTable id="tablaCasosV2"
+							value="#{expedienteAlumnoBean.bandejaCasosV2}"
+							var="casoV2"
+							paginator="true" rows="5"
+							emptyMessage="No hay orientaciones V2 registradas para este estudiante.">
+							<p:column headerText="Folio">
+								<h:outputText value="#{casoV2.folioExterno}" />
+							</p:column>
+							<p:column headerText="Estatus">
+								<h:outputText value="#{casoV2.estatusCaso}" />
+							</p:column>
+							<p:column headerText="Tipo">
+								<h:outputText value="#{empty casoV2.tipoCaso ? 'Sin clasificar' : casoV2.tipoCaso.nombre}" />
+							</p:column>
+							<p:column headerText="Acción">
+								<p:commandButton value="Ver orientación"
+									actionListener="#{expedienteAlumnoBean.seleccionarCasoV2(casoV2)}"
+									update="@form" process="@this"
+									styleClass="btn btn-primary btn-xs" />
+							</p:column>
+						</p:dataTable>
+					</div>
+
+					<div class="hub-subcard">
+						<h3>Ficha integral de orientación</h3>
+						<h:panelGroup rendered="#{not empty expedienteAlumnoBean.fichaIntegralCasoV2}">
+							<div class="hub-microcopy">
+								Referencia: <strong>#{expedienteAlumnoBean.casoSeleccionadoV2.folioExterno}</strong>
+								| Estado actual: <strong>#{expedienteAlumnoBean.casoSeleccionadoV2.estatusCaso}</strong>
+							</div>
+							<div class="hub-kpi-strip">
+								<div class="hub-kpi-note">
+									<strong>Regla aplicada</strong>
+									#{expedienteAlumnoBean.fichaIntegralCasoV2.reglaAplicada}
+								</div>
+								<div class="hub-kpi-note">
+									<strong>Siguiente paso recomendado</strong>
+									#{expedienteAlumnoBean.fichaIntegralCasoV2.accionSugerida}
+								</div>
+								<div class="hub-kpi-note">
+									<strong>Mensaje para gestor</strong>
+									#{expedienteAlumnoBean.fichaIntegralCasoV2.mensajeGestor}
+								</div>
+								<div class="hub-kpi-note">
+									<strong>Mensaje para estudiante</strong>
+									#{expedienteAlumnoBean.fichaIntegralCasoV2.mensajeEstudiante}
+								</div>
+							</div>
+
+							<div style="margin-top:16px;">
+								<strong>Patrones de conocimiento</strong><br />
+								<ui:repeat value="#{expedienteAlumnoBean.fichaIntegralCasoV2.patronesConocimiento}" var="patronV2">
+									<span class="hub-badge">#{patronV2.nombrePatron}</span>
+								</ui:repeat>
+								<h:panelGroup rendered="#{empty expedienteAlumnoBean.fichaIntegralCasoV2.patronesConocimiento}">
+									<div class="hub-empty">No hay patrones asociados a la orientación seleccionada.</div>
+								</h:panelGroup>
+							</div>
+
+							<div style="margin-top:16px;">
+								<strong>Mensajes contextuales</strong><br />
+								<ui:repeat value="#{expedienteAlumnoBean.fichaIntegralCasoV2.mensajesContextuales}" var="mensajeV2">
+									<span class="hub-badge">#{mensajeV2.titulo}</span>
+								</ui:repeat>
+								<h:panelGroup rendered="#{empty expedienteAlumnoBean.fichaIntegralCasoV2.mensajesContextuales}">
+									<div class="hub-empty">No hay mensajes contextuales configurados para este perfil y periodo.</div>
+								</h:panelGroup>
+							</div>
+
+							<div style="margin-top:16px;">
+								<strong>Orientaciones similares</strong>
+								<p:dataTable value="#{expedienteAlumnoBean.fichaIntegralCasoV2.casosSimilares}" var="casoSimilar"
+									emptyMessage="No se encontraron orientaciones similares."
+									paginator="false">
+									<p:column headerText="Folio relacionado">
+										<h:outputText value="#{casoSimilar.folioCasoRelacion}" />
+									</p:column>
+									<p:column headerText="Similitud">
+										<h:outputText value="#{casoSimilar.puntajeSimilitud}" />
+									</p:column>
+									<p:column headerText="Motivo">
+										<h:outputText value="#{casoSimilar.motivoRelacion}" />
+									</p:column>
+								</p:dataTable>
+							</div>
+
+							<div style="margin-top:16px;">
+								<strong>Alertas</strong><br />
+								<ui:repeat value="#{expedienteAlumnoBean.fichaIntegralCasoV2.alertas}" var="alertaCasoV2">
+									<span class="hub-badge hub-state-risk">#{alertaCasoV2}</span>
+								</ui:repeat>
+								<h:panelGroup rendered="#{empty expedienteAlumnoBean.fichaIntegralCasoV2.alertas}">
+									<div class="hub-empty">Sin alertas activas.</div>
+								</h:panelGroup>
+							</div>
+						</h:panelGroup>
+						<h:panelGroup rendered="#{empty expedienteAlumnoBean.fichaIntegralCasoV2}">
+							<div class="hub-empty">Selecciona una orientación para consultar la ficha integral V2.</div>
+						</h:panelGroup>
+					</div>
+				</div>
+
+				<div class="hub-dual-grid">
+					<div class="hub-subcard">
+						<h3>Bitácora de acompañamiento</h3>
+						<p class="hub-microcopy">Registra el acompañamiento académico y conserva trazabilidad de la orientación brindada.</p>
+						<div class="hub-form-row">
+							<label for="seguimientoCasoV2">Comentario de acompañamiento</label>
+							<p:inputTextarea id="seguimientoCasoV2"
+								value="#{expedienteAlumnoBean.comentarioSeguimientoV2}"
+								rows="4" autoResize="false" style="width:100%;" />
+						</div>
+						<p:commandButton value="#{expedienteAlumnoBean.etiquetaAccionSeguimientoV2}"
+							actionListener="#{expedienteAlumnoBean.registrarSeguimientoCasoV2}"
+							update="@form" process="@form"
+							styleClass="btn btn-primary" />
+						<p:commandButton value="Cancelar edición"
+							actionListener="#{expedienteAlumnoBean.cancelarEdicionBitacoraV2}"
+							update="@form" process="@this"
+							rendered="#{expedienteAlumnoBean.editandoBitacoraV2}"
+							styleClass="btn btn-default" style="margin-left:8px;" />
+						<div style="margin-top:14px;">
+							<p:dataTable value="#{expedienteAlumnoBean.bitacoraCasoV2}" var="eventoBitacora"
+								emptyMessage="No hay eventos registrados en la bitácora."
+								paginator="true" rows="5">
+								<p:column headerText="Fecha">
+									<h:outputText value="#{eventoBitacora.fecha}">
+										<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Evento">
+									<h:outputText value="#{eventoBitacora.evento}" />
+								</p:column>
+								<p:column headerText="Detalle">
+									<h:outputText value="#{eventoBitacora.detalle}" />
+								</p:column>
+								<p:column headerText="Usuario">
+									<h:outputText value="#{eventoBitacora.usuario}" />
+								</p:column>
+								<p:column headerText="Acciones" style="width:140px;">
+									<p:commandButton value="Editar"
+										actionListener="#{expedienteAlumnoBean.prepararEdicionBitacoraV2(eventoBitacora)}"
+										update="@form" process="@this"
+										rendered="#{expedienteAlumnoBean.bitacoraEditable(eventoBitacora)}"
+										styleClass="btn btn-default btn-xs" />
+									<p:commandButton value="Eliminar"
+										actionListener="#{expedienteAlumnoBean.eliminarBitacoraCasoV2(eventoBitacora)}"
+										update="@form" process="@this"
+										rendered="#{expedienteAlumnoBean.bitacoraEditable(eventoBitacora)}"
+										onclick="return confirm('¿Eliminar este registro manual de acompañamiento?');"
+										styleClass="btn btn-danger btn-xs" style="margin-left:6px;" />
+								</p:column>
+							</p:dataTable>
+						</div>
+					</div>
+
+					<div class="hub-subcard">
+						<h3>Evidencias de orientación</h3>
+						<p class="hub-microcopy">Captura evidencia de apoyo a la orientación. El archivo queda visible en la tabla una vez que se registra.</p>
+						<div class="hub-form-row">
+							<label for="tipoEvidenciaV2">Tipo de evidencia</label>
+							<p:inputText id="tipoEvidenciaV2" value="#{expedienteAlumnoBean.tipoEvidenciaV2}" style="width:100%;" />
+						</div>
+						<div class="hub-form-row">
+							<label for="descripcionEvidenciaV2">Descripción</label>
+							<p:inputTextarea id="descripcionEvidenciaV2"
+								value="#{expedienteAlumnoBean.descripcionEvidenciaV2}"
+								rows="3" autoResize="false" style="width:100%;" />
+						</div>
+						<div class="hub-form-row">
+							<label>Archivo de soporte</label>
+							<p:fileUpload value="#{expedienteAlumnoBean.archivoEvidenciaV2}"
+								mode="simple"
+								allowTypes="/(\\.|\\/)(pdf|png|jpg|jpeg|doc|docx|xls|xlsx|zip)$/i" />
+							<div class="hub-microcopy" style="margin-top:6px;">
+								El archivo se guarda al presionar <strong>#{expedienteAlumnoBean.etiquetaAccionEvidenciaV2}</strong>.
+							</div>
+						</div>
+						<h:panelGroup rendered="#{expedienteAlumnoBean.editandoEvidenciaV2}">
+							<div class="hub-form-row">
+								<label>Archivo actual</label>
+								<div class="hub-microcopy">
+									#{expedienteAlumnoBean.nombreArchivoEvidenciaV2}
+								</div>
+							</div>
+						</h:panelGroup>
+						<p:commandButton value="#{expedienteAlumnoBean.etiquetaAccionEvidenciaV2}"
+							actionListener="#{expedienteAlumnoBean.registrarEvidenciaCasoV2}"
+							ajax="false"
+							process="@form"
+							styleClass="btn btn-primary" />
+						<p:commandButton value="Cancelar edición"
+							actionListener="#{expedienteAlumnoBean.cancelarEdicionEvidenciaV2}"
+							update="@form" process="@this"
+							rendered="#{expedienteAlumnoBean.editandoEvidenciaV2}"
+							styleClass="btn btn-default" style="margin-left:8px;" />
+						<div style="margin-top:14px;">
+							<p:dataTable value="#{expedienteAlumnoBean.evidenciasCasoV2}" var="evidenciaV2"
+								emptyMessage="No hay evidencias registradas."
+								paginator="true" rows="5">
+								<p:column headerText="Fecha">
+									<h:outputText value="#{evidenciaV2.fecha}">
+										<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+									</h:outputText>
+								</p:column>
+								<p:column headerText="Tipo">
+									<h:outputText value="#{evidenciaV2.tipoEvidencia}" />
+								</p:column>
+								<p:column headerText="Descripción">
+									<h:outputText value="#{evidenciaV2.descripcion}" />
+								</p:column>
+								<p:column headerText="Archivo">
+									<h:outputText value="#{expedienteAlumnoBean.obtenerNombreArchivoDesdeRuta(evidenciaV2.ruta)}" />
+								</p:column>
+								<p:column headerText="Ruta">
+									<h:outputText value="#{evidenciaV2.ruta}" />
+								</p:column>
+								<p:column headerText="Usuario">
+									<h:outputText value="#{evidenciaV2.usuario}" />
+								</p:column>
+								<p:column headerText="Acciones" style="width:140px;">
+									<p:commandButton value="Editar"
+										actionListener="#{expedienteAlumnoBean.prepararEdicionEvidenciaV2(evidenciaV2)}"
+										update="@form" process="@this"
+										styleClass="btn btn-default btn-xs" />
+									<p:commandButton value="Eliminar"
+										actionListener="#{expedienteAlumnoBean.eliminarEvidenciaCasoV2(evidenciaV2)}"
+										update="@form" process="@this"
+										onclick="return confirm('¿Eliminar esta evidencia de orientación?');"
+										styleClass="btn btn-danger btn-xs" style="margin-left:6px;" />
+								</p:column>
+							</p:dataTable>
+						</div>
+					</div>
+				</div>
 			</div>
 		</h:form>
 	</ui:define>
