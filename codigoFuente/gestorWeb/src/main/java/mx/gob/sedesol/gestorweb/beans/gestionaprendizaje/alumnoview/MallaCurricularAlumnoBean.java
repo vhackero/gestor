@@ -447,9 +447,11 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 					if (estaProgramaEnCurso(programa, nombrePrograma, numeroSemestre, numeroBloque)) {
 						programaNodo.setEnCurso(true);
 					}
+					UnidadDecisionInscripcionDTO unidadContextual = idPrograma != null
+							? unidadesAsistentePorPrograma.get(idPrograma.longValue()) : null;
 					enriquecerDetalleContextual(programaNodo, idPrograma, programa);
 					acumularCreditos(programa.getTipo(), programa.getCreditos(),
-							estatusPorPrograma.get(idPrograma));
+							estatusPorPrograma.get(idPrograma), unidadContextual);
 					nodos.add(programaNodo);
 
 					if (programa.getIdPrograma() != null) {
@@ -544,14 +546,12 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		if (programaNodo == null) {
 			return;
 		}
-		programaNodo.setDetalleTipoUd(programa != null ? programa.getTipo() : null);
-		programaNodo.setDetalleEstatusHistorico(resolveEstatusTabla(programaNodo.getEstatus()));
+		programaNodo.setDetalleTipoUd(formatearTipoDetalle(programaNodo, programa, null));
+		programaNodo.setDetalleEstatusHistorico(resolveEstatusDetalle(programaNodo, null));
 		programaNodo.setDetalleEstatusPeriodo(resolveEstatusPeriodoContextual(programaNodo));
-		programaNodo.setDetalleMotivoPrincipal("Consulta el asistente curricular para interpretar esta UD dentro del escenario activo.");
-		programaNodo.setDetalleAccionSugerida(Boolean.TRUE.equals(esPeriodoCursamiento())
-				? "Consultar orientación sobre seguimiento y proyección."
-				: "Revisar elegibilidad y validación de inscripción.");
-		programaNodo.setDetalleRiesgo("Sin riesgo adicional identificado.");
+		programaNodo.setDetalleMotivoPrincipal("Selecciona una unidad didáctica para consultar su situación académica.");
+		programaNodo.setDetalleAccionSugerida("Revisa el asistente de inscripción curricular para interpretar su elegibilidad y oferta.");
+		programaNodo.setDetalleRiesgo("Su resultado académico incide en la continuidad de tu trayectoria.");
 		if (idPrograma == null) {
 			return;
 		}
@@ -559,30 +559,148 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		if (unidad == null) {
 			return;
 		}
-		if (StringUtils.isNotBlank(unidad.getTipoUd())) {
-			programaNodo.setDetalleTipoUd(unidad.getTipoUd());
-		}
-		if (StringUtils.isNotBlank(unidad.getEstatusHistorico())) {
-			programaNodo.setDetalleEstatusHistorico(unidad.getEstatusHistorico());
-		}
+		programaNodo.setDetalleTipoUd(formatearTipoDetalle(programaNodo, programa, unidad));
+		programaNodo.setDetalleEstatusHistorico(resolveEstatusDetalle(programaNodo, unidad));
 		if (StringUtils.isNotBlank(unidad.getEstatusPeriodo())) {
 			programaNodo.setDetalleEstatusPeriodo(unidad.getEstatusPeriodo());
 		}
-		if (StringUtils.isNotBlank(unidad.getAccionSugerida())) {
-			programaNodo.setDetalleAccionSugerida(unidad.getAccionSugerida());
+		programaNodo.setDetalleMotivoPrincipal(construirSituacionDetalle(programaNodo, programa, unidad));
+		programaNodo.setDetalleAccionSugerida(construirRecomendacionDetalle(programaNodo, programa, unidad));
+		programaNodo.setDetalleRiesgo(construirImpactoDetalle(programaNodo, programa, unidad));
+	}
+
+	private String formatearTipoDetalle(MallaDiagramaNodoDTO programaNodo, FichaDescProgramaDTO programa,
+			UnidadDecisionInscripcionDTO unidad) {
+		String tipo = unidad != null && StringUtils.isNotBlank(unidad.getTipoUd())
+				? unidad.getTipoUd() : (programa != null ? programa.getTipo() : null);
+		String normalizado = normalizaTexto(tipo);
+		if (esUnidadOpcionalLibre(unidad) || normalizado.contains("optativa opcional")) {
+			return "Optativa opcional";
 		}
-		if (StringUtils.isNotBlank(unidad.getRiesgoSiNoSeInscribe())) {
-			programaNodo.setDetalleRiesgo(unidad.getRiesgoSiNoSeInscribe());
+		if (normalizado.contains("electiv")) {
+			return "Electiva";
 		}
-		String motivoPrincipal = unidad.getMensajeCorto();
-		if (unidad.getMotivos() != null && !unidad.getMotivos().isEmpty()
-				&& unidad.getMotivos().get(0) != null
-				&& StringUtils.isNotBlank(unidad.getMotivos().get(0).getMensajeCorto())) {
-			motivoPrincipal = unidad.getMotivos().get(0).getMensajeCorto();
+		if (normalizado.contains("optativ")) {
+			return "Optativa";
 		}
-		if (StringUtils.isNotBlank(motivoPrincipal)) {
-			programaNodo.setDetalleMotivoPrincipal(motivoPrincipal);
+		if (normalizado.contains("oblig")) {
+			return programaNodo != null && (programaNodo.isBloqueada() || programaNodo.isTieneDependencias())
+					? "Obligatoria seriada" : "Obligatoria";
 		}
+		return StringUtils.defaultIfBlank(tipo, "Sin información");
+	}
+
+	private String resolveEstatusDetalle(MallaDiagramaNodoDTO programaNodo, UnidadDecisionInscripcionDTO unidad) {
+		if (esUnidadOpcionalLibre(unidad)) {
+			return "Opcional";
+		}
+		if (programaNodo != null && ESTATUS_APROBADA.equals(programaNodo.getEstatus())) {
+			return "Acreditada";
+		}
+		if (programaNodo != null && ESTATUS_NO_ACREDITADA.equals(programaNodo.getEstatus())) {
+			return "Pendiente de acreditar";
+		}
+		if (programaNodo != null && programaNodo.isBloqueada()) {
+			return "Pendiente de cursar";
+		}
+		if (programaNodo != null && ESTATUS_BAJA.equals(programaNodo.getEstatus())) {
+			return "Pendiente por " + resolverTipoBaja(unidad);
+		}
+		return "Por cursar";
+	}
+
+	private String construirSituacionDetalle(MallaDiagramaNodoDTO programaNodo, FichaDescProgramaDTO programa,
+			UnidadDecisionInscripcionDTO unidad) {
+		if (esUnidadOpcionalLibre(unidad)) {
+			return "Corresponde a la unidad didáctica optativa adicional del bloque. Dado que ya cubriste las 2 unidades optativas opcionales requeridas en tu Programa educativo, esta unidad didáctica queda como una opción libre a elegir, si deseas aumentar tus créditos, puedes integrarla en cuanto se oferte.";
+		}
+		if (programaNodo != null && ESTATUS_APROBADA.equals(programaNodo.getEstatus())) {
+			return "Unidad didáctica concluida y acreditada en tu historial académico.";
+		}
+		if (programaNodo != null && ESTATUS_BAJA.equals(programaNodo.getEstatus())) {
+			String tipoBaja = resolverTipoBaja(unidad);
+			return "Registras una " + tipoBaja + " previa en esta unidad didáctica, debes cursarla en cuanto se oferte para continuar con tu trayectoria académica.";
+		}
+		if (programaNodo != null && programaNodo.isBloqueada()) {
+			return "Esta unidad didáctica no está disponible para selección porque requiere haber acreditado previamente " + resolverNombreAntecedente(programa, programaNodo) + ".";
+		}
+		if (programaNodo != null && ESTATUS_NO_ACREDITADA.equals(programaNodo.getEstatus())) {
+			if ("Obligatoria seriada".equalsIgnoreCase(formatearTipoDetalle(programaNodo, programa, unidad))) {
+				return "Esta unidad didáctica seriada no está acreditada y debes inscribirla y cursarla en cuanto se oferte para continuar con tu trayectoria académica regular y poder registrar la siguiente unidad didáctica.";
+			}
+			return "Esta unidad didáctica no está acreditada y debe inscribirse y cursarse en cuanto se oferte para continuar con tu trayectoria académica regular.";
+		}
+		return "Unidad didáctica por cursar y acreditar en próximos periodos.";
+	}
+
+	private String construirRecomendacionDetalle(MallaDiagramaNodoDTO programaNodo, FichaDescProgramaDTO programa,
+			UnidadDecisionInscripcionDTO unidad) {
+		if (esUnidadOpcionalLibre(unidad)) {
+			return "No es obligatorio registrarla. Inscríbela únicamente si deseas reforzar tu formación y cuentas con espacio en tu carga máxima permitida o si es especialmente útil si alguna unidad didáctica obligatoria no llega a ofertarse.";
+		}
+		if (programaNodo != null && ESTATUS_APROBADA.equals(programaNodo.getEstatus())) {
+			return "Tus créditos ya forman parte de tu avance. Puedes consultar tu calificación registrada en el Historial Académico.";
+		}
+		if (programaNodo != null && ESTATUS_BAJA.equals(programaNodo.getEstatus())) {
+			return "Inscribe y cursa la unidad didáctica. Revisa elegibilidad, oferta y validación de registro de la UD en el asistente de inscripción.";
+		}
+		if (programaNodo != null && programaNodo.isBloqueada()) {
+			String antecedente = resolverNombreAntecedente(programa, programaNodo);
+			return "Acredita la unidad didáctica pendiente " + antecedente + " para poder registrar esta unidad didáctica. Revisa elegibilidad, oferta y validación de registro de la UD en el asistente de inscripción.";
+		}
+		if (programaNodo != null && ESTATUS_NO_ACREDITADA.equals(programaNodo.getEstatus())) {
+			return "Revisa elegibilidad, oferta y validación de registro de la UD en el asistente de inscripción.";
+		}
+		return "Continúa revisando a detalle cada unidad didáctica para que tengas conocimiento del impacto que tiene en tu trayectoria académica.";
+	}
+
+	private String construirImpactoDetalle(MallaDiagramaNodoDTO programaNodo, FichaDescProgramaDTO programa,
+			UnidadDecisionInscripcionDTO unidad) {
+		if (esUnidadOpcionalLibre(unidad)) {
+			return "Aporta créditos adicionales a tu historial académico. Cursarla o no cursarla no afecta tu situación académica.";
+		}
+		if (programaNodo != null && ESTATUS_APROBADA.equals(programaNodo.getEstatus())) {
+			return "El cumplimiento de acreditación con esta unidad didáctica en tu Programa educativo permite avanzar a los siguientes semestres.";
+		}
+		if (programaNodo != null && ESTATUS_BAJA.equals(programaNodo.getEstatus())) {
+			return "Mantener unidades didácticas obligatorias pendientes puede limitar la selección de unidades didácticas en semestres posteriores.";
+		}
+		if (programaNodo != null && (programaNodo.isBloqueada() || ESTATUS_NO_ACREDITADA.equals(programaNodo.getEstatus()))) {
+			return "Mantener unidades didácticas pendientes puede limitar la selección de unidades didácticas en semestres posteriores.";
+		}
+		return "Acreditar esta unidad didáctica en su momento te permitirá continuar avanzando en la secuencia prevista para tu programa educativo.";
+	}
+
+	private String resolverNombreAntecedente(FichaDescProgramaDTO programa, MallaDiagramaNodoDTO programaNodo) {
+		if (programa != null && programa.getProgramaAntecedente() != null) {
+			String nombre = resolveNombrePrograma(programa.getProgramaAntecedente());
+			if (StringUtils.isNotBlank(nombre) && !"Programa sin nombre".equalsIgnoreCase(nombre)) {
+				return nombre;
+			}
+		}
+		if (programaNodo != null && StringUtils.isNotBlank(programaNodo.getDependenciaTooltip())) {
+			String tooltip = programaNodo.getDependenciaTooltip().trim();
+			int idx = tooltip.lastIndexOf(":");
+			if (idx >= 0 && idx + 1 < tooltip.length()) {
+				return tooltip.substring(idx + 1).trim();
+			}
+			return tooltip;
+		}
+		return "la unidad didáctica antecedente";
+	}
+
+	private String resolverTipoBaja(UnidadDecisionInscripcionDTO unidad) {
+		if (unidad == null || StringUtils.isBlank(unidad.getEstatusHistorico())) {
+			return "baja previa";
+		}
+		String estatus = unidad.getEstatusHistorico().trim();
+		if (estatus.toUpperCase().contains("TEMP")) {
+			return "baja temporal";
+		}
+		if (estatus.toUpperCase().contains("PARC")) {
+			return "baja parcial";
+		}
+		return estatus.toLowerCase(Locale.ROOT);
 	}
 
 	private String resolveEstatusPeriodoContextual(MallaDiagramaNodoDTO programaNodo) {
@@ -607,8 +725,10 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		return esPeriodoCursamiento() ? "Seguimiento de trayectoria" : "Pendiente de validación";
 	}
 
-	private void acumularCreditos(String tipo, Integer creditos, MallaAlumnoProgramaDTO estatusDto) {
-		if (creditos == null) {
+	private void acumularCreditos(String tipo, Integer creditos, MallaAlumnoProgramaDTO estatusDto,
+			UnidadDecisionInscripcionDTO unidadContextual) {
+		acumularPromedio(estatusDto);
+		if (creditos == null || esUnidadOpcionalLibre(tipo, unidadContextual)) {
 			return;
 		}
 		creditosPlanTotal += creditos;
@@ -616,7 +736,6 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		Integer totalActual = creditosPlanPorTipo.get(tipoNormalizado);
 		creditosPlanPorTipo.put(tipoNormalizado, totalActual == null ? creditos : totalActual + creditos);
 
-		acumularPromedio(estatusDto);
 		if (!esProgramaAprobado(estatusDto)) {
 			return;
 		}
@@ -658,6 +777,10 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		estatusEstudiante = "Regular";
 		for (MallaAlumnoProgramaDTO estatusDto : estatusLista) {
 			if (estatusDto == null || estatusDto.getCalificacionFinal() == null) {
+				continue;
+			}
+			if (estatusDto.getIdPrograma() != null
+					&& esUnidadOpcionalLibre(unidadesAsistentePorPrograma.get(estatusDto.getIdPrograma().longValue()))) {
 				continue;
 			}
 			if (estatusDto.getIdPrograma() != null
@@ -837,6 +960,26 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 		String tipo = normalizaTexto(tipoPrograma);
 		return tipo.contains("optativa") || tipo.contains("opcional");
+	}
+
+	private boolean esUnidadOpcionalLibre(UnidadDecisionInscripcionDTO unidadContextual) {
+		if (unidadContextual == null) {
+			return false;
+		}
+		if ("OPCIONAL".equalsIgnoreCase(StringUtils.trimToEmpty(unidadContextual.getEstatusPeriodo()))
+				|| "ALTERNATIVA".equalsIgnoreCase(StringUtils.trimToEmpty(unidadContextual.getEstatusPeriodo()))) {
+			return true;
+		}
+		String tipoUd = normalizaTexto(unidadContextual.getTipoUd());
+		return tipoUd.contains("optativa") && tipoUd.contains("opcional");
+	}
+
+	private boolean esUnidadOpcionalLibre(String tipoPrograma, UnidadDecisionInscripcionDTO unidadContextual) {
+		if (esUnidadOpcionalLibre(unidadContextual)) {
+			return true;
+		}
+		String tipoNormalizado = normalizaTexto(tipoPrograma);
+		return tipoNormalizado.contains("optativa opcional");
 	}
 
 	private void registrarUbicacionOptativa(Map<String, Set<String>> ubicacionesPorClave, String clave,
@@ -1212,6 +1355,12 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		return estatusEstudiante;
 	}
 
+	public String getDescripcionSituacionAcademica() {
+		return "Irregular".equalsIgnoreCase(StringUtils.trimToEmpty(estatusEstudiante))
+				? "Situación académica con irregularidad (existencia de UD no acreditadas)"
+				: "Situación académica con regularidad";
+	}
+
 	public List<SemestreTablaDTO> getSemestresTabla() {
 		return semestresTabla;
 	}
@@ -1252,7 +1401,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	}
 
 	public String getEtiquetaPeriodoBadge() {
-		return esPeriodoCursamiento() ? "Periodo: Cursamiento activo" : "Periodo: Inscripción activa";
+		return esPeriodoCursamiento() ? "Cursamiento activo" : "Inscripción activa";
 	}
 
 	public String getTituloVistaMalla() {
@@ -1263,7 +1412,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		if (vistaGestor) {
 			return "Consulta académica contextual para " + StringUtils.defaultIfBlank(nombrePersonaObjetivo, matriculaPersonaObjetivo);
 		}
-		return "Visualización de trayectoria curricular y orientación contextual del escenario activo.";
+		return "Consulta tu trayectoria curricular y revisa cómo cada unidad didáctica influye en tu avance académico.";
 	}
 
 	public FichaIntegralCasoDTO getFichaIntegralV2() {
@@ -1369,9 +1518,11 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	}
 
 	public String getMensajePanelContextual() {
-		return esPeriodoCursamiento()
-				? "La malla muestra la trayectoria actual. Usa el asistente para interpretar qué implica durante el cursamiento activo."
-				: "La malla muestra la trayectoria acumulada. Usa el asistente para validar qué puedes inscribir en el proceso activo.";
+		return "Consulta el detalle contextual de cada unidad didáctica para identificar su situación académica, la recomendación asociada y su impacto en tu trayectoria.";
+	}
+
+	public String getEtiquetaCreditosResumen() {
+		return "Créditos requeridos del programa";
 	}
 
 	public String irAsistenteCurricular() {

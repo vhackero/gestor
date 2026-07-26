@@ -1224,9 +1224,11 @@
         <h:form id="mainForm">
             <h1 class="asistente-title">#{tablaCurricularAsistidaBean.vistaGestor ? 'Asistente de inscripción curricular | Vista gestor' : 'Asistente de inscripción curricular'}</h1>
             <div class="asistente-context-strip">
-                <span class="asistente-context-chip main">#{tablaCurricularAsistidaBean.etiquetaPeriodoContextual}</span>
-                <span class="asistente-context-chip mode">Modo: #{tablaCurricularAsistidaBean.etiquetaModoContextual}</span>
-                <span class="asistente-context-chip state">Periodo: #{tablaCurricularAsistidaBean.etiquetaEstadoPeriodo}</span>
+                <ui:fragment rendered="#{tablaCurricularAsistidaBean.vistaGestor}">
+                    <span class="asistente-context-chip main">#{tablaCurricularAsistidaBean.etiquetaPeriodoContextual}</span>
+                    <span class="asistente-context-chip mode">Modo: #{tablaCurricularAsistidaBean.etiquetaModoContextual}</span>
+                    <span class="asistente-context-chip state">Periodo: #{tablaCurricularAsistidaBean.etiquetaEstadoPeriodo}</span>
+                </ui:fragment>
                 <span class="asistente-context-chip">Estudiante: #{tablaCurricularAsistidaBean.nombrePersonaObjetivo}</span>
                 <span class="asistente-context-chip">Matrícula: #{tablaCurricularAsistidaBean.matriculaPersonaObjetivo}</span>
             </div>
@@ -1247,8 +1249,7 @@
 
             <p:outputPanel rendered="#{empty tablaCurricularAsistidaBean.mensajeError and not empty tablaCurricularAsistidaBean.contexto}">
                 <div class="asistente-wrap">
-                    <p:tabView styleClass="asistente-tabs" widgetVar="asistenteTabsWidget" activeIndex="#{tablaCurricularAsistidaBean.indiceTabActiva}">
-                        <p:ajax event="tabChange" listener="#{tablaCurricularAsistidaBean.onTabChange}" process="@this" />
+                    <p:tabView styleClass="asistente-tabs" widgetVar="asistenteTabsWidget">
                         <p:tab title="Situación académica">
                             <div class="asistente-section">
                                 <div class="situacion-layout">
@@ -1259,16 +1260,14 @@
                                         <div class="resumen-caja">
                                             <i class="fa fa-graduation-cap" />
                                             <span class="#{tablaCurricularAsistidaBean.contexto.diagnosticoActual.regular ? 'situacion-regular' : 'situacion-irregular'}">
-                                                Estudiante #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.regular ? 'regular' : 'irregular'}
+                                                #{tablaCurricularAsistidaBean.descripcionSituacionAcademica}
                                             </span>
-                                            con #{tablaCurricularAsistidaBean.conteoIncidenciasSituacion} #{tablaCurricularAsistidaBean.etiquetaIncidenciaSituacion},
-                                            #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasBloqueadasPorSeriacion} UD con seriación curricular pendiente
-                                            y #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasCriticas} UD a registrar para la trayectoria académica.
+                                            #{tablaCurricularAsistidaBean.resumenDiagnosticoSituacion}
                                         </div>
 
                                         <div class="kpi-grid">
                                             <div class="kpi-card kpi-card-green">
-                                                <div class="kpi-title">Seguimiento de Bloque/Semestre vigente</div>
+                                                <div class="kpi-title">Unidades didácticas del bloque/semestre actual</div>
                                                 <div class="kpi-value">
                                                     #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasEnCurso}
                                                     <i class="fa fa-eye" style="font-size:18px;" />
@@ -1279,7 +1278,7 @@
                                                 <div class="kpi-value">#{tablaCurricularAsistidaBean.conteoIncidenciasSituacion}</div>
                                             </div>
                                             <div class="kpi-card kpi-card-green">
-                                                <div class="kpi-title">UD a registrar</div>
+                                                <div class="kpi-title">Unidades didácticas disponibles para registrar</div>
                                                 <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasCriticas}</div>
                                             </div>
                                             <div class="kpi-card kpi-card-green">
@@ -1288,7 +1287,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="section-subtitle" style="font-size:28px;">Unidades didácticas pendientes en ciclos académicos restantes</div>
+                                        <div class="section-subtitle" style="font-size:28px;">Resumen de créditos y unidades didácticas por cursar</div>
 
                                         <div class="kpi-grid">
                                             <div class="kpi-card kpi-card-blue">
@@ -1310,7 +1309,7 @@
                                         </div>
 
                                         <div class="kpi-inline-note">
-                                            <strong>UD optativas rezagadas:</strong> #{tablaCurricularAsistidaBean.contexto.pendientesPlan.optativasRezagadas}
+                                            <strong>Unidades didácticas optativas de periodos anteriores pendientes:</strong> #{tablaCurricularAsistidaBean.contexto.pendientesPlan.optativasRezagadas}
                                             <i class="fa fa-eye" />
                                         </div>
 
@@ -1377,12 +1376,14 @@
                             <div class="asistente-section">
                                 <div class="panel-shell">
                                     <div class="context-top-strip">
-                                        <span class="context-top-chip">Situación académica: #{tablaCurricularAsistidaBean.contexto.situacionAcademicaPeriodo}</span>
+                                        <span class="context-top-chip">#{tablaCurricularAsistidaBean.descripcionSituacionAcademica}</span>
                                         <span class="context-top-chip soft-blue">UD pendientes: #{tablaCurricularAsistidaBean.conteoUdPendientesPanel}</span>
                                         <span class="context-top-chip soft-blue">Carga máxima: #{tablaCurricularAsistidaBean.cargaMaximaPanel} UD</span>
                                         <span class="context-top-chip">Seriación: #{tablaCurricularAsistidaBean.conteoSeriacionPanel}</span>
-                                        <span class="context-top-chip soft-yellow">Periodo: #{tablaCurricularAsistidaBean.etiquetaEstadoPeriodo}</span>
-                                        <span class="context-top-chip soft-blue">Modo: #{tablaCurricularAsistidaBean.etiquetaModoContextual}</span>
+                                        <ui:fragment rendered="#{tablaCurricularAsistidaBean.vistaGestor}">
+                                            <span class="context-top-chip soft-yellow">Periodo: #{tablaCurricularAsistidaBean.etiquetaEstadoPeriodo}</span>
+                                            <span class="context-top-chip soft-blue">Modo: #{tablaCurricularAsistidaBean.etiquetaModoContextual}</span>
+                                        </ui:fragment>
                                     </div>
                                     <div class="prioritarias-layout">
                                         <div>
@@ -1541,12 +1542,18 @@
 
                         <p:tab title="Proyección de carga">
                             <div class="asistente-section">
+                                <ui:fragment rendered="#{not tablaCurricularAsistidaBean.mostrarProyeccionConDatos}">
+                                    <div class="soft-panel">
+                                        <h3>Proyección de carga no disponible</h3>
+                                        <p>Aún no se cuenta con información suficiente para mostrar la proyección de carga de este estudiante.</p>
+                                    </div>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarProyeccionConDatos}">
                                 <div class="meta-strip">
                                     <div class="meta-strip-left">
                                         <div class="meta-pill">
-                                            <strong>Situación académica:</strong>
-                                            #{tablaCurricularAsistidaBean.contexto.situacionAcademicaPeriodo}-#{tablaCurricularAsistidaBean.contexto.subtipoSituacionAcademica.toLowerCase()}
-                                            <span style="margin-left:20px;"><strong>Periodo activo:</strong> #{tablaCurricularAsistidaBean.contexto.periodoActivo}</span>
+                                            <strong>#{tablaCurricularAsistidaBean.descripcionSituacionAcademica}</strong>
+                                            <span style="margin-left:20px;"><strong>#{tablaCurricularAsistidaBean.etiquetaPeriodoInscripcion}:</strong> #{tablaCurricularAsistidaBean.contexto.periodoActivo}</span>
                                         </div>
                                     </div>
                                     <div class="meta-strip-right">
@@ -1595,17 +1602,17 @@
                                         </div>
                                     </ui:repeat>
                                 </div>
+                                </ui:fragment>
                             </div>
                         </p:tab>
 
-                        <p:tab title="Simulador">
+                        <p:tab title="Simulador" rendered="#{tablaCurricularAsistidaBean.mostrarSimuladorParaEstudiante}">
                             <div class="asistente-section">
                                 <div class="meta-strip">
                                     <div class="meta-strip-left">
                                         <div class="meta-pill">
-                                            <strong>Situación académica:</strong>
-                                            #{tablaCurricularAsistidaBean.contexto.situacionAcademicaPeriodo}-#{tablaCurricularAsistidaBean.contexto.subtipoSituacionAcademica.toLowerCase()}
-                                            <span style="margin-left:20px;"><strong>Periodo activo:</strong> #{tablaCurricularAsistidaBean.contexto.periodoActivo}</span>
+                                            <strong>#{tablaCurricularAsistidaBean.descripcionSituacionAcademica}</strong>
+                                            <span style="margin-left:20px;"><strong>#{tablaCurricularAsistidaBean.etiquetaPeriodoInscripcion}:</strong> #{tablaCurricularAsistidaBean.contexto.periodoActivo}</span>
                                         </div>
                                     </div>
                                     <div class="meta-strip-right">
@@ -1631,16 +1638,23 @@
                                 <div class="simulacion-actions">
                                     <p:commandButton value="Simular reinscripción"
                                         action="#{tablaCurricularAsistidaBean.simularSeleccion}"
-                                        update="@form" styleClass="btn btn-primary" />
+                                        update="@form" styleClass="btn btn-primary"
+                                        disabled="#{tablaCurricularAsistidaBean.simuladorSoloConsulta}" />
                                     <p:commandButton value="Validar reinscripción final"
                                         action="#{tablaCurricularAsistidaBean.validarSeleccionFinal}"
                                         update="@form" styleClass="btn btn-default" style="margin-left:10px; min-width:220px;"
                                         disabled="#{not tablaCurricularAsistidaBean.permiteValidacionFinal}" />
                                 </div>
 
+                                <p:outputPanel rendered="#{tablaCurricularAsistidaBean.simuladorSoloConsulta}">
+                                    <div class="alert-box alert-box-info">
+                                        Modo de consulta: puedes revisar la oferta y el detalle de las unidades didácticas disponibles, pero el simulador no está habilitado mientras no exista un periodo activo de inscripción/reinscripción.
+                                    </div>
+                                </p:outputPanel>
+
                                 <p:outputPanel rendered="#{not tablaCurricularAsistidaBean.permiteValidacionFinal}">
                                     <div class="alert-box alert-box-warning">
-                                        La validación final de selección sólo se habilita en periodo de inscripción/reinscripción.
+                                        #{tablaCurricularAsistidaBean.mensajePeriodoValidacion}
                                     </div>
                                 </p:outputPanel>
 
@@ -1707,7 +1721,8 @@
                                                     <ui:repeat value="#{semestre.filas}" var="fila">
                                                         <tr>
                                                             <td class="sim-check">
-                                                                <p:selectBooleanCheckbox value="#{fila.seleccionada}" />
+                                                                <p:selectBooleanCheckbox value="#{fila.seleccionada}"
+                                                                    disabled="#{tablaCurricularAsistidaBean.simuladorSoloConsulta}" />
                                                                 <div>
                                                                     <p:commandLink action="#{tablaCurricularAsistidaBean.toggleDetalle(fila)}"
                                                                         process="@this" update="@form" styleClass="sim-toggle"
@@ -1804,12 +1819,14 @@
                             <div class="asistente-section">
                                 <div class="panel-shell">
                                     <div class="context-top-strip">
-                                        <span class="context-top-chip">Situación académica: #{tablaCurricularAsistidaBean.contexto.situacionAcademicaPeriodo}</span>
+                                        <span class="context-top-chip">#{tablaCurricularAsistidaBean.descripcionSituacionAcademica}</span>
                                         <span class="context-top-chip soft-blue">UD pendientes: #{tablaCurricularAsistidaBean.conteoUdPendientesPanel}</span>
                                         <span class="context-top-chip soft-blue">Carga máxima: #{tablaCurricularAsistidaBean.cargaMaximaPanel} UD</span>
                                         <span class="context-top-chip">Seriación: #{tablaCurricularAsistidaBean.conteoSeriacionPanel}</span>
-                                        <span class="context-top-chip soft-yellow">Periodo: #{tablaCurricularAsistidaBean.etiquetaEstadoPeriodo}</span>
-                                        <span class="context-top-chip soft-blue">Modo: #{tablaCurricularAsistidaBean.etiquetaModoContextual}</span>
+                                        <ui:fragment rendered="#{tablaCurricularAsistidaBean.vistaGestor}">
+                                            <span class="context-top-chip soft-yellow">Periodo: #{tablaCurricularAsistidaBean.etiquetaEstadoPeriodo}</span>
+                                            <span class="context-top-chip soft-blue">Modo: #{tablaCurricularAsistidaBean.etiquetaModoContextual}</span>
+                                        </ui:fragment>
                                     </div>
 
                                     <ui:fragment rendered="#{tablaCurricularAsistidaBean.validacionNoDisponible}">
@@ -1818,14 +1835,14 @@
                                                 <h2 class="section-heading-large">6. Validación de inscripción</h2>
                                                 <div class="soft-panel" style="min-height:144px;">
                                                     <h3><i class="fa fa-warning" style="margin-right:8px; color:#8d95a0;" /> Validación de inscripción no disponible</h3>
-                                                    <p>La validación solo debe mostrarse como acción activa durante un periodo de inscripción o reinscripción. Durante cursamiento activo no se permite confirmar, modificar ni validar carga final.</p>
+                                                    <p>#{tablaCurricularAsistidaBean.mensajePeriodoValidacion}</p>
                                                 </div>
                                                 <div class="soft-panel" style="margin-top:18px;">
                                                     <h3>Comportamiento requerido</h3>
                                                     <ul style="padding-left:18px;">
-                                                        <li>Ocultar la pestaña en navegación principal del estudiante o marcarla como inactiva.</li>
-                                                        <li>Mostrar solo histórico de validaciones anteriores si el gestor necesita auditoría.</li>
-                                                        <li>Redirigir a Orientación conversacional para dudas o seguimiento.</li>
+                                                        <li>La validación final sólo se habilita durante un periodo activo de inscripción o reinscripción.</li>
+                                                        <li>Durante cursamiento activo esta vista se conserva como consulta informativa.</li>
+                                                        <li>Usa la orientación conversacional para preparar el siguiente periodo.</li>
                                                     </ul>
                                                 </div>
                                             </div>
@@ -1927,7 +1944,7 @@
 
                                     <ui:fragment rendered="#{not tablaCurricularAsistidaBean.vistaGestor and not tablaCurricularAsistidaBean.validacionNoDisponible}">
                                         <div class="validation-shell">
-                                            <div class="panel-head">8. Validación de selección</div>
+                                            <div class="panel-head">Validación de selección</div>
                                             <div class="panel-body">
                                                 <div class="validation-info-box">
                                                     <div class="validation-callout">
@@ -2019,12 +2036,14 @@
                             <div class="asistente-section">
                                 <div class="panel-shell">
                                     <div class="context-top-strip">
-                                        <span class="context-top-chip">Situación académica: #{tablaCurricularAsistidaBean.contexto.situacionAcademicaPeriodo}</span>
+                                        <span class="context-top-chip">#{tablaCurricularAsistidaBean.descripcionSituacionAcademica}</span>
                                         <span class="context-top-chip soft-blue">UD pendientes: #{tablaCurricularAsistidaBean.conteoUdPendientesPanel}</span>
                                         <span class="context-top-chip soft-blue">Carga máxima: #{tablaCurricularAsistidaBean.cargaMaximaPanel} UD</span>
                                         <span class="context-top-chip">Seriación: #{tablaCurricularAsistidaBean.conteoSeriacionPanel}</span>
-                                        <span class="context-top-chip soft-yellow">Periodo: #{tablaCurricularAsistidaBean.etiquetaEstadoPeriodo}</span>
-                                        <span class="context-top-chip soft-blue">Modo: #{tablaCurricularAsistidaBean.etiquetaModoContextual}</span>
+                                        <ui:fragment rendered="#{tablaCurricularAsistidaBean.vistaGestor}">
+                                            <span class="context-top-chip soft-yellow">Periodo: #{tablaCurricularAsistidaBean.etiquetaEstadoPeriodo}</span>
+                                            <span class="context-top-chip soft-blue">Modo: #{tablaCurricularAsistidaBean.etiquetaModoContextual}</span>
+                                        </ui:fragment>
                                     </div>
                                     <h2 class="section-heading-large">Orientación conversacional</h2>
                                     <div class="orientacion-layout">
@@ -2032,7 +2051,6 @@
                                             <div class="orientation-panel">
                                                 <div class="panel-head">Orientación contextual</div>
                                                 <div class="panel-body">
-                                                    <p:commandButton value="#{tablaCurricularAsistidaBean.preguntaOrientacionSeleccionada}" action="#{tablaCurricularAsistidaBean.seleccionarPreguntaOrientacion(tablaCurricularAsistidaBean.preguntaOrientacionSeleccionada)}" process="@this" update="@form" styleClass="btn btn-default question-item" />
                                                     <div class="orientation-answer-box">#{tablaCurricularAsistidaBean.respuestaPreguntaOrientacion}</div>
                                                     <div class="soft-panel" style="margin-top:18px;">
                                                         <h3>Escalamiento académico</h3>
@@ -2057,73 +2075,76 @@
                                                     <div class="panel-body">
                                                         <div class="questions-list">
                                                             <ui:repeat value="#{tablaCurricularAsistidaBean.preguntasRapidasOrientacion}" var="preguntaRapida">
-                                                                <p:commandButton value="#{preguntaRapida}" action="#{tablaCurricularAsistidaBean.seleccionarPreguntaOrientacion(preguntaRapida)}" process="@this" update="@form" styleClass="btn btn-default question-item" />
+                                                                <p:commandButton value="#{preguntaRapida}" action="#{tablaCurricularAsistidaBean.seleccionarPreguntaOrientacion(preguntaRapida)}" process="@this" update="@form" oncomplete="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(6); }" styleClass="btn btn-default question-item" />
                                                             </ui:repeat>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="orientation-panel">
-                                                    <div class="panel-head">Orientación contextual</div>
-                                                    <div class="panel-body">
-                                                        <p:commandButton value="#{tablaCurricularAsistidaBean.preguntaOrientacionSeleccionada}" action="#{tablaCurricularAsistidaBean.seleccionarPreguntaOrientacion(tablaCurricularAsistidaBean.preguntaOrientacionSeleccionada)}" process="@this" update="@form" styleClass="btn btn-default question-item" />
-                                                        <div class="orientation-answer-box">#{tablaCurricularAsistidaBean.respuestaPreguntaOrientacion}</div>
-                                                        <div class="soft-panel" style="margin-top:18px;">
-                                                            <h3>Prevención y siguientes pasos</h3>
-                                                            <p>#{tablaCurricularAsistidaBean.mensajeEscalamientoAcademico}</p>
-                                                            <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarPanelPrevencionEstudianteV2}">
-                                                                <ul class="preventive-list">
-                                                                    <ui:repeat value="#{tablaCurricularAsistidaBean.mensajesPreventivosEstudianteV2}" var="mensajePreventivo">
-                                                                        <li>#{mensajePreventivo}</li>
-                                                                    </ui:repeat>
-                                                                </ul>
-                                                            </ui:fragment>
+                                                <p:outputPanel id="orientacionMainPanel">
+                                                    <div class="orientation-panel">
+                                                        <div class="panel-head">Orientación contextual</div>
+                                                        <div class="panel-body">
+                                                            <div class="orientation-answer-box">#{tablaCurricularAsistidaBean.respuestaPreguntaOrientacion}</div>
+                                                            <div class="soft-panel" style="margin-top:18px;">
+                                                                <h3>Prevención y siguientes pasos</h3>
+                                                                <p>#{tablaCurricularAsistidaBean.mensajeEscalamientoAcademico}</p>
+                                                                <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarPanelPrevencionEstudianteV2}">
+                                                                    <ul class="preventive-list">
+                                                                        <ui:repeat value="#{tablaCurricularAsistidaBean.mensajesPreventivosEstudianteV2}" var="mensajePreventivo">
+                                                                            <li>#{mensajePreventivo}</li>
+                                                                        </ui:repeat>
+                                                                    </ul>
+                                                                </ui:fragment>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </p:outputPanel>
                                             </div>
                                         </ui:fragment>
-                                        <div class="assistant-right-rail #{tablaCurricularAsistidaBean.vistaGestor ? 'gestor' : ''}">
-                                            <div class="rail-head">#{tablaCurricularAsistidaBean.tituloPanelContextual}</div>
-                                            <div class="rail-body">
-                                                <ui:fragment rendered="#{tablaCurricularAsistidaBean.vistaGestor}">
-                                                    <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
-                                                    <div class="rail-actions tabs">
-                                                        <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualOrientacion">
-                                                            <p:commandButton value="#{accionContextualOrientacion}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualOrientacion)}" process="@this" update="@form" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextualOrientacion ? 'active' : ''}" />
-                                                        </ui:repeat>
-                                                    </div>
-                                                    <div class="rail-response">
-                                                        <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
-                                                        <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
-                                                    </div>
-                                                </ui:fragment>
-                                                <ui:fragment rendered="#{not tablaCurricularAsistidaBean.vistaGestor}">
-                                                    <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
-                                                    <div class="rail-response">
-                                                        <strong>Mensaje principal</strong>
-                                                        <h:outputText value="#{tablaCurricularAsistidaBean.mensajeCasoEstudianteV2Html}" escape="false" />
-                                                    </div>
-                                                    <div class="rail-response">
-                                                        <strong>Siguiente paso recomendado</strong>
-                                                        <span>#{tablaCurricularAsistidaBean.resolucionCasoEstudianteV2}</span>
-                                                    </div>
-                                                    <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarPanelPrevencionEstudianteV2}">
+                                        <p:outputPanel id="orientacionRailPanel">
+                                            <div class="assistant-right-rail #{tablaCurricularAsistidaBean.vistaGestor ? 'gestor' : ''}">
+                                                <div class="rail-head">#{tablaCurricularAsistidaBean.tituloPanelContextual}</div>
+                                                <div class="rail-body">
+                                                    <ui:fragment rendered="#{tablaCurricularAsistidaBean.vistaGestor}">
+                                                        <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
+                                                        <div class="rail-actions tabs">
+                                                            <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualOrientacion">
+                                                                <p:commandButton value="#{accionContextualOrientacion}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualOrientacion)}" process="@this" update="@form" oncomplete="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(6); }" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextualOrientacion ? 'active' : ''}" />
+                                                            </ui:repeat>
+                                                        </div>
                                                         <div class="rail-response">
-                                                            <strong>Señales preventivas</strong>
-                                                            <span>
-                                                                <ui:repeat value="#{tablaCurricularAsistidaBean.mensajesPreventivosEstudianteV2}" var="mensajePreventivoRail">
-                                                                    <div>#{mensajePreventivoRail}</div>
-                                                                </ui:repeat>
-                                                            </span>
+                                                            <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
+                                                            <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
                                                         </div>
                                                     </ui:fragment>
-                                                </ui:fragment>
+                                                    <ui:fragment rendered="#{not tablaCurricularAsistidaBean.vistaGestor}">
+                                                        <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
+                                                        <div class="rail-response">
+                                                            <strong>Mensaje principal</strong>
+                                                            <h:outputText value="#{tablaCurricularAsistidaBean.mensajeCasoEstudianteV2Html}" escape="false" />
+                                                        </div>
+                                                        <div class="rail-response">
+                                                            <strong>Siguiente paso recomendado</strong>
+                                                            <span>#{tablaCurricularAsistidaBean.resolucionCasoEstudianteV2}</span>
+                                                        </div>
+                                                        <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarPanelPrevencionEstudianteV2}">
+                                                            <div class="rail-response">
+                                                                <strong>Señales preventivas</strong>
+                                                                <span>
+                                                                    <ui:repeat value="#{tablaCurricularAsistidaBean.mensajesPreventivosEstudianteV2}" var="mensajePreventivoRail">
+                                                                        <div>#{mensajePreventivoRail}</div>
+                                                                    </ui:repeat>
+                                                                </span>
+                                                            </div>
+                                                        </ui:fragment>
+                                                    </ui:fragment>
+                                                </div>
+                                                <div class="rail-next">
+                                                    <h3>#{tablaCurricularAsistidaBean.tituloSiguientePaso}</h3>
+                                                    <p>#{tablaCurricularAsistidaBean.descripcionSiguientePaso}</p>
+                                                </div>
                                             </div>
-                                            <div class="rail-next">
-                                                <h3>#{tablaCurricularAsistidaBean.tituloSiguientePaso}</h3>
-                                                <p>#{tablaCurricularAsistidaBean.descripcionSiguientePaso}</p>
-                                            </div>
-                                        </div>
+                                        </p:outputPanel>
                                     </div>
                                 </div>
                             </div>

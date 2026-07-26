@@ -1,22 +1,23 @@
 package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview;
 
 import java.io.Serializable;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
-import javax.faces.component.UIComponent;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.primefaces.event.TabChangeEvent;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
@@ -60,7 +61,6 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private String respuestaAccionPanel;
     private String preguntaOrientacionSeleccionada;
     private String respuestaPreguntaOrientacion;
-    private int indiceTabActiva;
 
     @PostConstruct
     public void init() {
@@ -75,7 +75,6 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             construirSemestres();
             cargarFichaIntegralV2();
             inicializarRespuestasContextuales();
-            indiceTabActiva = 0;
         } catch (InscripcionException e) {
             logger.error("Error al obtener contexto asistido de inscripción.", e);
             mensajeError = e.getMessage();
@@ -351,7 +350,9 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getTituloIndicadorIncidencias() {
-        return isEscenarioBajaTemporalOParcial() ? "UD no presentadas activas" : "UD no acreditadas activas";
+        return isEscenarioBajaTemporalOParcial()
+                ? "Unidades didácticas pendientes por reincorporar"
+                : "Unidades didácticas pendientes por regularizar";
     }
 
     private int valor(Integer numero) {
@@ -429,8 +430,36 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                     : "Modo gestión: revisa la selección propuesta, valida la regla aplicada y documenta la decisión académica del periodo.";
         }
         return esPeriodoCursamiento()
-                ? "Modo consulta: el periodo de inscripción no está activo. Esta vista sirve para dar seguimiento, anticipar riesgos y preparar el siguiente período."
-                : "Modo operativo: usa esta vista para revisar la recomendación, simular alternativas y validar la selección final del periodo.";
+                ? "Revisa tu diagnóstico académico y prepara tu siguiente periodo de reinscripción con base en tu trayectoria actual."
+                : "Revisa tu diagnóstico académico y simula la carga para tu próximo periodo de reinscripción. Durante el periodo activo, podrás validar y confirmar tu selección final.";
+    }
+
+    public String getDescripcionSituacionAcademica() {
+        if (isEstudianteRegularContexto()) {
+            return "Situación académica con regularidad";
+        }
+        return "Situación académica con irregularidad (existencia de UD no acreditadas)";
+    }
+
+    public String getResumenDiagnosticoSituacion() {
+        if (isEstudianteRegularContexto()) {
+            return "Situación académica con regularidad. No presentas unidades didácticas pendientes de acreditar. Continúa así para no afectar tu trayectoria académica.";
+        }
+        if (isEscenarioBajaTemporalOParcial()) {
+            return "Diagnóstico de reincorporación a la trayectoria académica. Presentas "
+                    + getConteoIncidenciasSituacion()
+                    + " unidad(es) didáctica(s) con baja previa que debes retomar en cuanto se oferten para recuperar continuidad.";
+        }
+        if (getConteoSeriacionPanel() > 0) {
+            return "Situación académica con irregularidad. Presentas "
+                    + getConteoUdNoAcreditadasPanel()
+                    + " unidad(es) didáctica(s) antecedente(s) pendiente(s) que bloquean "
+                    + getConteoSeriacionPanel()
+                    + " unidad(es) didáctica(s) posterior(es).";
+        }
+        return "Situación académica con irregularidad. Presentas "
+                + getConteoUdNoAcreditadasPanel()
+                + " unidad(es) didáctica(s) pendiente(s) de acreditar. Para continuar con tu trayectoria, es necesario priorizar su registro en cuanto se oferten.";
     }
 
     public boolean isMostrarContextoOrigen() {
@@ -574,37 +603,45 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         }
         return esPeriodoCursamiento()
                 ? "Monitorea la trayectoria activa y usa la proyección para preparar la siguiente inscripción."
-                : "Usa el simulador para validar la combinación elegida antes de pasar a inscripción.";
+                : "Utiliza el simulador para validar la combinación de unidades didácticas elegidas antes de pasar a inscripción.";
     }
 
-    public int getIndiceTabActiva() {
-        return indiceTabActiva;
-    }
-
-    public void setIndiceTabActiva(int indiceTabActiva) {
-        this.indiceTabActiva = indiceTabActiva;
-    }
-
-    public void onTabChange(TabChangeEvent event) {
-        if (event == null || event.getTab() == null || event.getTab().getParent() == null) {
-            return;
-        }
-        UIComponent parent = event.getTab().getParent();
-        List<UIComponent> children = parent.getChildren();
-        for (int i = 0; i < children.size(); i++) {
-            if (children.get(i) == event.getTab()) {
-                indiceTabActiva = i;
-                return;
-            }
-        }
+    public boolean isPeriodoActivoInscripcion() {
+        return !esPeriodoCursamiento();
     }
 
     public boolean isPermiteValidacionFinal() {
-        return !esPeriodoCursamiento();
+        return isPeriodoActivoInscripcion();
     }
 
     public boolean isMostrarTabInscripcion() {
-        return !esPeriodoCursamiento();
+        return isPeriodoActivoInscripcion();
+    }
+
+    public boolean isMostrarSimuladorParaEstudiante() {
+        return true;
+    }
+
+    public boolean isSimuladorSoloConsulta() {
+        return !vistaGestor && !isPeriodoActivoInscripcion();
+    }
+
+    public boolean isMostrarProyeccionConDatos() {
+        return contexto != null
+                && contexto.getEscenarios() != null
+                && !contexto.getEscenarios().isEmpty();
+    }
+
+    public String getEtiquetaPeriodoInscripcion() {
+        return isPeriodoActivoInscripcion()
+                ? "Periodo activo de inscripción/reinscripción"
+                : "Periodo activo de inscripción/reinscripción no disponible";
+    }
+
+    public String getMensajePeriodoValidacion() {
+        return isPeriodoActivoInscripcion()
+                ? "Periodo activo de inscripción/reinscripción habilitado para validar y confirmar tu selección."
+                : "Periodo activo de inscripción/reinscripción no disponible.";
     }
 
     public List<String> getMensajesClaveContextuales() {
@@ -740,6 +777,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     public List<FilaAsistidaDTO> getFilasUdPrioritarias() {
         return obtenerFilasPlanas().stream()
                 .filter(fila -> fila != null
+                        && !esUnidadOpcionalLibre(fila)
                         && (fila.getPrioridad() != null
                             || fila.getEstatusHistorico() != null
                             || Boolean.TRUE.equals(fila.getOfertada())
@@ -751,6 +789,27 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                         .thenComparing(FilaAsistidaDTO::getBloque, Comparator.nullsLast(Integer::compareTo))
                         .thenComparing(FilaAsistidaDTO::getClave, Comparator.nullsLast(String::compareTo)))
                 .collect(Collectors.toList());
+    }
+
+    private boolean esUnidadOpcionalLibre(FilaAsistidaDTO fila) {
+        if (fila == null) {
+            return false;
+        }
+        String estatusPeriodo = StringUtils.trimToEmpty(fila.getEstatusPeriodo());
+        if ("OPCIONAL".equalsIgnoreCase(estatusPeriodo) || "ALTERNATIVA".equalsIgnoreCase(estatusPeriodo)) {
+            return true;
+        }
+        String tipo = normalizaTexto(fila.getTipo());
+        return tipo.contains("optativa opcional");
+    }
+
+    private String normalizaTexto(String texto) {
+        if (StringUtils.isBlank(texto)) {
+            return "";
+        }
+        String normalizado = Normalizer.normalize(texto, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
+        return normalizado.toLowerCase(Locale.ROOT).trim();
     }
 
     public List<FilaAsistidaDTO> getFilasValidacion() {
@@ -840,8 +899,8 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             return "Vista de trazabilidad de UD causantes, prioridad calculada y acción sugerida por el motor académico.";
         }
         return esPeriodoCursamiento()
-                ? "Consulta de UD pendientes para seguimiento y preparación del siguiente período."
-                : "Estas UD deben atenderse primero para regularizar la trayectoria.";
+                ? "Consulta las unidades didácticas que debes atender primero para preparar tu siguiente reinscripción."
+                : "Estas unidades didácticas deben atenderse primero para regularizar tu trayectoria.";
     }
 
     public String getResumenReglaAplicada() {
@@ -853,8 +912,8 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public String getResumenEstadoPeriodo() {
         return esPeriodoCursamiento()
-                ? "Acciones de registro habilitadas solo con proceso activo."
-                : "Puede avanzar a simulación de inscripción.";
+                ? "En cursamiento activo puedes revisar tu trayectoria y preparar tu siguiente reinscripción."
+                : "En periodo activo puedes simular, validar y confirmar tu selección final.";
     }
 
     public String getMensajePanelLateral() {
@@ -862,7 +921,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             return "Apoyo para interpretar el caso y documentar la atención.";
         }
         if (isMostrarSeguimientoCasoEstudianteV2()) {
-            return "Esta orientación resume tu estado actual, el mensaje principal y el siguiente paso recomendado según tu situación académica.";
+            return "Aquí se concentra la orientación principal para que interpretes tu situación académica y sepas qué sigue.";
         }
         if (isMostrarPanelPrevencionEstudianteV2()) {
             return getTextoPrevencionTicketsV2();
@@ -946,11 +1005,32 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getPreguntaOrientacionSeleccionada() {
+        asegurarRespuestaPreguntaOrientacion();
         return preguntaOrientacionSeleccionada;
     }
 
     public String getRespuestaPreguntaOrientacion() {
+        asegurarRespuestaPreguntaOrientacion();
         return respuestaPreguntaOrientacion;
+    }
+
+    private void asegurarRespuestaPreguntaOrientacion() {
+        if (!StringUtils.isBlank(respuestaPreguntaOrientacion)) {
+            return;
+        }
+        List<String> preguntas = getPreguntasRapidasOrientacion();
+        if (preguntas == null || preguntas.isEmpty()) {
+            if (StringUtils.isBlank(preguntaOrientacionSeleccionada)) {
+                preguntaOrientacionSeleccionada = getPreguntaPrincipalOrientacion();
+            }
+            respuestaPreguntaOrientacion = construirRespuestaOrientacion(preguntaOrientacionSeleccionada);
+            return;
+        }
+        if (StringUtils.isBlank(preguntaOrientacionSeleccionada)
+                || !preguntas.contains(preguntaOrientacionSeleccionada)) {
+            preguntaOrientacionSeleccionada = preguntas.get(0);
+        }
+        respuestaPreguntaOrientacion = construirRespuestaOrientacion(preguntaOrientacionSeleccionada);
     }
 
     public String getPreguntaPrincipalOrientacion() {
@@ -1175,23 +1255,22 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     private String construirRespuestaProgresoEstudiante() {
+        if (isEstudianteRegularContexto()) {
+            return "Presentas una situación académica regular sin unidades didácticas pendientes. Tu atención prioritaria es acreditar la totalidad de las unidades didácticas de tu semestre vigente para seleccionar la totalidad de tus unidades didácticas del próximo semestre.";
+        }
         if (obtenerMensajeEstudianteV2() != null) {
             return obtenerMensajeEstudianteV2() + " " + getResumenEstadoPreventivoEstudiante();
         }
-        return "Vas en una situación " + valorTexto(contexto != null ? contexto.getSituacionAcademicaPeriodo() : null, "sin clasificar")
-                + " con " + getConteoUdPendientesPanel() + " UD pendientes y riesgo " + obtenerNivelRiesgo()
-                + ". Tu foco inmediato es mantener en control las UD activas y seguir la prioridad sugerida para no incrementar rezago.";
+        if (getConteoSeriacionPanel() > 0) {
+            return "Presentas una situación irregular con seriación pendiente. Tu atención inmediata es dar prioridad de registro a las unidades didácticas antecedentes en cuanto se oferten.";
+        }
+        return "Presentas una situación académica con irregularidad con "
+                + getConteoUdNoAcreditadasPanel()
+                + " unidad(es) didáctica(s) pendiente(s). Tu atención inmediata es dar prioridad de registro en cuanto se oferten.";
     }
 
     private String construirRespuestaMantenerAvance() {
-        StringBuilder texto = new StringBuilder();
-        texto.append("Tu trayectoria se mantiene ");
-        texto.append(valorTexto(contexto != null ? contexto.getSituacionAcademicaPeriodo() : null, "estable").toLowerCase());
-        texto.append(". Para conservar ese avance, cuida la carga actual, atiende cualquier seriación activa y prepara el siguiente período sin romper la secuencia sugerida por el motor.");
-        if (obtenerAccionSugeridaV2() != null) {
-            texto.append(" Siguiente paso recomendado: ").append(obtenerAccionSugeridaV2()).append(".");
-        }
-        return texto.toString();
+        return "Mantienes una situación académica regular. Para conservar ese avance, acredita la totalidad de tus unidades didácticas activas, prioriza las obligatorias del siguiente bloque o semestre y agrega optativas sólo cuando sigan siendo compatibles con tu carga y seriación.";
     }
 
     private String construirRespuestaCuidadosEstudiante() {
@@ -1218,6 +1297,9 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     private String construirRespuestaPreparacionPeriodo() {
+        if (!vistaGestor && isEstudianteRegularContexto()) {
+            return "Utiliza esta orientación para preparar tu próximo periodo de reinscripción. Si mantienes acreditadas tus unidades didácticas activas, podrás seleccionar la totalidad de las unidades didácticas ofertadas correspondientes a tu siguiente bloque o semestre.";
+        }
         if (!vistaGestor && fichaIntegralV2 != null && fichaIntegralV2.getAccionSugerida() != null) {
             return "Preparar tu siguiente período implica " + fichaIntegralV2.getAccionSugerida().toLowerCase()
                     + ". " + getResumenEstadoPreventivoEstudiante();
@@ -1242,32 +1324,30 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     private String construirRespuestaSeriacion() {
         if (getConteoSeriacionPanel() <= 0) {
-            return "En este momento no se detectan bloqueos activos por seriación en tu trayectoria.";
+            return "No se identifican bloqueos por seriación en tu trayectoria actual. Puedes seleccionar la totalidad de las unidades didácticas ofertadas correspondientes a tu semestre activo.";
         }
-        return "La seriación significa que hay " + getConteoSeriacionPanel()
-                + " UD que dependen de acreditar antes una unidad antecedente. Mientras esa antecedente no se cierre, el sistema mantendrá la restricción sobre las siguientes opciones.";
+        return "Acreditar la unidad didáctica antecedente es requisito obligatorio para desbloquear las unidades didácticas subsecuentes. Hoy tienes "
+                + getConteoSeriacionPanel()
+                + " restricción(es) de este tipo en tu trayectoria.";
     }
 
     private String construirRespuestaConfirmacionSeleccion() {
-        return "Antes de confirmar la selección valida que las UD obligatorias sigan marcadas, que la carga no exceda "
-                + getCargaMaximaPanel() + " UD y que no haya inconsistencias de seriación u oferta. La confirmación final debe hacerse sólo cuando la validación quede consistente.";
+        if (isEstudianteRegularContexto()) {
+            return "Verifica que la carga proyectada cumpla con los créditos del periodo activo. Al estar al corriente, tu selección asegura el cumplimiento en tiempo y forma de tu programa educativo.";
+        }
+        return "Confirma que tu selección priorice las unidades didácticas pendientes por regularizar y que respete la oferta, la seriación y la carga máxima del periodo.";
     }
 
     private String construirRespuestaIrregularidad() {
         if (obtenerMensajeEstudianteV2() != null) {
             return obtenerMensajeEstudianteV2();
         }
-        StringBuilder texto = new StringBuilder();
-        texto.append("Tu situación aparece como ")
-                .append(valorTexto(contexto != null ? contexto.getSituacionAcademicaPeriodo() : null, "sin clasificar"))
-                .append(" porque el contexto registra ").append(getConteoUdPendientesPanel())
-                .append(" UD pendientes y un riesgo ").append(obtenerNivelRiesgo()).append(". ");
-        if (getConteoUdNoAcreditadasPanel() > 0) {
-            texto.append("Actualmente tienes ").append(getConteoUdNoAcreditadasPanel())
-                    .append(" UD no acreditadas que deben regularizarse antes de priorizar combinaciones adicionales. ");
+        if (getConteoSeriacionPanel() > 0) {
+            return "Presentas una situación académica con irregularidad y seriación pendiente. Tu atención inmediata es dar prioridad de registro a las unidades didácticas antecedentes en cuanto se oferten.";
         }
-        texto.append("La recomendación es regularizar primero las UD prioritarias para disminuir el impacto sobre tu siguiente período.");
-        return texto.toString().trim();
+        return "Presentas una situación académica con irregularidad con "
+                + getConteoUdNoAcreditadasPanel()
+                + " unidad(es) didáctica(s) pendiente(s). Tu atención inmediata es dar prioridad de registro a estas unidades didácticas en cuanto se oferten.";
     }
 
     private String construirRespuestaUdPrimero() {
@@ -1602,7 +1682,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public boolean isValidacionNoDisponible() {
-        return esPeriodoCursamiento();
+        return !isPeriodoActivoInscripcion();
     }
 
     public int getTotalSeleccionadas() {
@@ -1707,9 +1787,9 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     private String obtenerCodigoReglaAplicada() {
         if (contexto != null && contexto.getReglasActivas() != null && !contexto.getReglasActivas().isEmpty()) {
-            return "REI-07 (" + contexto.getReglasActivas().get(0) + ")";
+            return contexto.getReglasActivas().get(0);
         }
-        return "REI-07 (Cupo y carga máxima)";
+        return "Cupo y carga máxima";
     }
 
     private String obtenerResumenMensajeGestor() {

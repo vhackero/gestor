@@ -371,8 +371,8 @@ public class ConstanciasBean extends BaseBean {
 
 	public String getMensajeContextualHistorial() {
 		return esPeriodoCursamiento()
-				? "Esta vista muestra la evidencia histórica del estudiante mientras cursa el periodo activo. La interpretación normativa vive en la malla y el asistente."
-				: "Esta vista muestra la trayectoria consolidada del estudiante. Usa la malla y el asistente para entender cómo ese historial impacta la inscripción activa.";
+				? "Aquí puedes consultar el registro histórico de tus unidades didácticas cursadas, calificaciones y créditos. Para saber cómo influyen en tu proceso de inscripción actual, ingresa al Asistente de inscripción curricular."
+				: "Aquí puedes consultar el registro histórico de tus unidades didácticas cursadas, calificaciones y créditos. Para saber cómo influyen en tu próximo proceso de inscripción, ingresa al Asistente de inscripción curricular.";
 	}
 
 	public String getEtiquetaRolHistorial() {
@@ -381,8 +381,8 @@ public class ConstanciasBean extends BaseBean {
 
 	public String getMensajeTransicionAsistente() {
 		return esPeriodoCursamiento()
-				? "¿Quieres entender cómo este historial condiciona el seguimiento del periodo vigente? Consulta el Asistente de inscripción curricular."
-				: "¿Tienes dudas sobre cómo este historial afecta tu inscripción? Consulta el Asistente de inscripción curricular.";
+				? "Si necesitas interpretar cómo este historial impacta tu proceso de inscripción actual, consulta el Asistente de inscripción curricular."
+				: "Si necesitas interpretar cómo este historial puede impactar tu próximo proceso de inscripción, consulta el Asistente de inscripción curricular.";
 	}
 
 	public String navegaMallaCurricularAlumno() {
