@@ -645,7 +645,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 		reportePDF = null;
 
 		ReporteConfig reporteConfig = new ReporteConfig();
-		reporteConfig.setDatos(listaEventos);
+		reporteConfig.setDatos(null);
 		reporteConfig.setNombreReporte("Plantilla_SISI");
 		reporteConfig.setPathJasper("/resources/jasperReport/gestionAprendizaje/expediente_academico.jasper");
 

@@ -778,8 +778,8 @@
             }
             .orientacion-main-grid {
                 display: grid;
-                grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
-                gap: 14px;
+                grid-template-columns: minmax(0, 1fr);
+                gap: 12px;
             }
             .panel-shell {
                 background: #ffffff;
@@ -998,6 +998,37 @@
                 flex-direction: column;
                 gap: 10px;
             }
+            .orientation-collapse {
+                background: #ffffff;
+                border: 1px solid #8eb7c4;
+            }
+            .orientation-collapse > summary {
+                list-style: none;
+                cursor: pointer;
+                background: #5f97a8;
+                color: #ffffff;
+                padding: 10px 12px;
+                font-size: 15px;
+                font-weight: 700;
+                position: relative;
+            }
+            .orientation-collapse > summary::-webkit-details-marker {
+                display: none;
+            }
+            .orientation-collapse > summary:after {
+                content: "\f107";
+                font-family: FontAwesome;
+                position: absolute;
+                right: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            .orientation-collapse[open] > summary:after {
+                content: "\f106";
+            }
+            .orientation-collapse-body {
+                padding: 14px;
+            }
             .question-item {
                 width: 100%;
                 text-align: left;
@@ -1010,6 +1041,13 @@
                 color: #3e484d;
                 line-height: 1.5;
                 white-space: pre-line;
+            }
+            .orientation-answer-question {
+                display: block;
+                margin-bottom: 10px;
+                color: #2f3539;
+                font-size: 15px;
+                font-weight: 700;
             }
             .validation-info-box {
                 display: grid;
@@ -2070,21 +2108,19 @@
                                         </ui:fragment>
                                         <ui:fragment rendered="#{not tablaCurricularAsistidaBean.vistaGestor}">
                                             <div class="orientacion-main-grid">
-                                                <div class="questions-panel">
-                                                    <div class="panel-head">Preguntas rápidas</div>
-                                                    <div class="panel-body">
+                                                <details class="orientation-collapse" open="open">
+                                                    <summary>Preguntas rápidas</summary>
+                                                    <div class="orientation-collapse-body">
                                                         <div class="questions-list">
                                                             <ui:repeat value="#{tablaCurricularAsistidaBean.preguntasRapidasOrientacion}" var="preguntaRapida">
                                                                 <p:commandButton value="#{preguntaRapida}" action="#{tablaCurricularAsistidaBean.seleccionarPreguntaOrientacion(preguntaRapida)}" process="@this" update="@form" oncomplete="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(6); }" styleClass="btn btn-default question-item" />
                                                             </ui:repeat>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                                <p:outputPanel id="orientacionMainPanel">
-                                                    <div class="orientation-panel">
-                                                        <div class="panel-head">Orientación contextual</div>
-                                                        <div class="panel-body">
-                                                            <div class="orientation-answer-box">#{tablaCurricularAsistidaBean.respuestaPreguntaOrientacion}</div>
+                                                        <p:outputPanel id="orientacionMainPanel">
+                                                            <div class="orientation-answer-box">
+                                                                <strong class="orientation-answer-question">#{tablaCurricularAsistidaBean.preguntaOrientacionSeleccionada}</strong>
+                                                                #{tablaCurricularAsistidaBean.respuestaPreguntaOrientacion}
+                                                            </div>
                                                             <div class="soft-panel" style="margin-top:18px;">
                                                                 <h3>Prevención y siguientes pasos</h3>
                                                                 <p>#{tablaCurricularAsistidaBean.mensajeEscalamientoAcademico}</p>
@@ -2096,9 +2132,9 @@
                                                                     </ul>
                                                                 </ui:fragment>
                                                             </div>
-                                                        </div>
+                                                        </p:outputPanel>
                                                     </div>
-                                                </p:outputPanel>
+                                                </details>
                                             </div>
                                         </ui:fragment>
                                         <p:outputPanel id="orientacionRailPanel">

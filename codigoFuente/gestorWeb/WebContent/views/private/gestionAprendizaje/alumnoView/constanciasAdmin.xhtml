@@ -77,6 +77,31 @@
 					text-transform: uppercase;
 				}
 			</style>
+			<script type="text/javascript">
+				function mostrarReporteHistorial(widgetVar) {
+					var dialogo = PF(widgetVar);
+					if (!dialogo) {
+						return;
+					}
+					dialogo.show();
+					setTimeout(function() {
+						if (dialogo.initPosition) {
+							dialogo.initPosition();
+						}
+						if (dialogo.jq &amp;&amp; dialogo.jq.length) {
+							dialogo.jq.attr('tabindex', '-1');
+							dialogo.jq.focus();
+							if (dialogo.jq[0] &amp;&amp; dialogo.jq[0].scrollIntoView) {
+								dialogo.jq[0].scrollIntoView({
+									behavior: 'smooth',
+									block: 'center'
+								});
+							}
+						}
+						window.focus();
+					}, 150);
+				}
+			</script>
 			<h1 class="historial-page-title">Historial académico estudiante | Vista gestor</h1>
 			<div class="historial-context-strip">
 				<span class="historial-context-chip main">#{constanciasBean.etiquetaPeriodoContextual}</span>
@@ -88,7 +113,13 @@
 			<div class="historial-context-copy">#{constanciasBean.mensajeContextualHistorial}</div>
 			<div class="historial-role-box">
 				<span class="historial-role-title">#{constanciasBean.etiquetaRolHistorial}</span>
-				<div>#{constanciasBean.mensajeTransicionAsistente}</div>
+				<div>
+					<h:outputText value="#{constanciasBean.mensajeTransicionAsistentePrevio}" />
+					<p:commandLink value="Asistente de inscripción curricular"
+						action="#{expedienteAlumnoBean.navegaAsistenteCurricular}"
+						ajax="false" />
+					<h:outputText value="." />
+				</div>
 			</div>
 			<div class="historial-actions">
 				<p:commandButton value="Malla curricular"
@@ -348,7 +379,7 @@
 									disabled="#{empty expedienteAlumnoBean.listaEventos}"
 									styleClass="btn btn-primary" style="width:170px"
 									action="#{expedienteAlumnoBean.generarReporte}"
-									oncomplete="PF('modalReporte').show()" />
+									oncomplete="mostrarReporteHistorial('modalReporte')" />
 						</div>
 					</div>
 
