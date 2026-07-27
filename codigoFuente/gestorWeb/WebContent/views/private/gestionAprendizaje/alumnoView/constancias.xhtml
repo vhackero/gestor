@@ -79,9 +79,11 @@
 			</style>
 			<h1 class="historial-page-title">#{constanciasBean.tituloVistaHistorial}</h1>
 			<div class="historial-context-strip">
-				<span class="historial-context-chip main">#{constanciasBean.etiquetaPeriodoContextual}</span>
-				<span class="historial-context-chip mode">Modo: #{constanciasBean.etiquetaModoContextual}</span>
-				<span class="historial-context-chip state">Periodo: #{constanciasBean.etiquetaEstadoPeriodo}</span>
+				<ui:fragment rendered="#{constanciasBean.vistaGestor}">
+					<span class="historial-context-chip main">#{constanciasBean.etiquetaPeriodoContextual}</span>
+					<span class="historial-context-chip mode">Modo: #{constanciasBean.etiquetaModoContextual}</span>
+					<span class="historial-context-chip state">Periodo: #{constanciasBean.etiquetaEstadoPeriodo}</span>
+				</ui:fragment>
 				<span class="historial-context-chip">Estudiante: #{constanciasBean.nombrePersonaObjetivo}</span>
 				<span class="historial-context-chip">Matrícula: #{constanciasBean.matriculaPersonaObjetivo}</span>
 			</div>

@@ -306,18 +306,18 @@
 			</div>
 
 			<div class="hub-section">
-				<h2>Bandeja de orientación V2</h2>
+				<h2>Bandeja de orientación</h2>
 				<div class="hub-section-copy">Acompañamiento académico del estudiante consultado. Aquí se concentra la orientación curricular, el dictamen sugerido y la trazabilidad del acompañamiento del gestor.</div>
 
 				<div class="hub-case-grid">
 					<div class="hub-subcard">
 						<h3>Orientaciones del estudiante</h3>
-						<p class="hub-microcopy">La bandeja muestra las orientaciones V2 asociadas a la matrícula consultada. Selecciona una para revisar su ficha integral, bitácora y evidencias de apoyo.</p>
+						<p class="hub-microcopy">La bandeja muestra las orientaciones asociadas a la matrícula consultada. Selecciona una para revisar su ficha integral, bitácora y evidencias de apoyo.</p>
 						<p:dataTable id="tablaCasosV2"
 							value="#{expedienteAlumnoBean.bandejaCasosV2}"
 							var="casoV2"
 							paginator="true" rows="5"
-							emptyMessage="No hay orientaciones V2 registradas para este estudiante.">
+							emptyMessage="No hay orientaciones registradas para este estudiante.">
 							<p:column headerText="Folio">
 								<h:outputText value="#{casoV2.folioExterno}" />
 							</p:column>
@@ -410,7 +410,7 @@
 							</div>
 						</h:panelGroup>
 						<h:panelGroup rendered="#{empty expedienteAlumnoBean.fichaIntegralCasoV2}">
-							<div class="hub-empty">Selecciona una orientación para consultar la ficha integral V2.</div>
+							<div class="hub-empty">Selecciona una orientación para consultar la ficha integral.</div>
 						</h:panelGroup>
 					</div>
 				</div>

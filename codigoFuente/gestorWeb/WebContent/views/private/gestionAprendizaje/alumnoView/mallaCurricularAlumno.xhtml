@@ -882,9 +882,11 @@
 			<h1 class="malla-page-title">#{mallaCurricularAlumnoBean.tituloVistaMalla}</h1>
 			<div class="malla-context-copy">#{mallaCurricularAlumnoBean.subtituloContextual}</div>
 			<div class="malla-context-strip">
-				<span class="malla-context-chip">#{mallaCurricularAlumnoBean.etiquetaPeriodoContextual}</span>
-				<span class="malla-context-chip mode">Modo: #{mallaCurricularAlumnoBean.etiquetaModoContextual}</span>
-				<span class="malla-context-chip state">Periodo: #{mallaCurricularAlumnoBean.etiquetaEstadoPeriodo}</span>
+				<ui:fragment rendered="#{mallaCurricularAlumnoBean.vistaGestor}">
+					<span class="malla-context-chip">#{mallaCurricularAlumnoBean.etiquetaPeriodoContextual}</span>
+					<span class="malla-context-chip mode">Modo: #{mallaCurricularAlumnoBean.etiquetaModoContextual}</span>
+					<span class="malla-context-chip state">Periodo: #{mallaCurricularAlumnoBean.etiquetaEstadoPeriodo}</span>
+				</ui:fragment>
 				<span class="malla-context-chip-soft">Estudiante: #{mallaCurricularAlumnoBean.nombrePersonaObjetivo}</span>
 				<span class="malla-context-chip-soft">Matrícula: #{mallaCurricularAlumnoBean.matriculaPersonaObjetivo}</span>
 			</div>
@@ -894,15 +896,14 @@
 					<div class="malla-main">
 				<div class="malla-resumen">
 					<span class="malla-resumen-item">
-						<strong>Estatus del estudiante:</strong>
-						#{mallaCurricularAlumnoBean.estatusEstudiante}
+						<strong>#{mallaCurricularAlumnoBean.descripcionSituacionAcademica}</strong>
 					</span>
 					<span class="malla-resumen-item promedio-right">
 						<strong>Promedio:</strong>
 						<h:outputText value="#{mallaCurricularAlumnoBean.promedioActualFormateado}" />
 					</span>
 					<span class="malla-resumen-item total-right">
-						<strong>Total de créditos:</strong>
+						<strong>#{mallaCurricularAlumnoBean.etiquetaCreditosResumen}:</strong>
 						#{mallaCurricularAlumnoBean.creditosAprobadosTotal} /
 						#{mallaCurricularAlumnoBean.creditosPlanTotal}
 					</span>
@@ -1100,7 +1101,6 @@
 					<div class="malla-side">
 						<div id="mallaDetailPanel" class="malla-detail-panel" tabindex="-1">
 							<div class="malla-detail-title">Panel de detalle contextual</div>
-							<div class="malla-detail-badge">#{mallaCurricularAlumnoBean.etiquetaPeriodoBadge}</div>
 							<div id="mallaDetailName" class="malla-detail-name">Selecciona una unidad didáctica</div>
 							<div id="mallaDetailKey" class="malla-detail-key">Haz clic sobre una UD en la malla para ver detalle contextual.</div>
 							<div class="malla-detail-section">
@@ -1108,19 +1108,19 @@
 								<span id="mallaDetailEstado" class="malla-detail-value">Sin selección</span>
 							</div>
 							<div class="malla-detail-section">
-								<span class="malla-detail-label">Tipo</span>
+								<span class="malla-detail-label">Tipo de Unidad didáctica</span>
 								<span id="mallaDetailTipo" class="malla-detail-value">Sin selección</span>
 							</div>
 							<div class="malla-detail-section">
-								<span class="malla-detail-label">Motivo contextual</span>
-								<span id="mallaDetailMotivo" class="malla-detail-value">Selecciona una UD para consultar la explicación funcional del escenario activo.</span>
+								<span class="malla-detail-label">Situación académica de la Unidad didáctica</span>
+								<span id="mallaDetailMotivo" class="malla-detail-value">Selecciona una UD para consultar su situación académica.</span>
 							</div>
 							<div class="malla-detail-section">
-								<span class="malla-detail-label">Acción sugerida</span>
+								<span class="malla-detail-label">Recomendación</span>
 								<span id="mallaDetailAccion" class="malla-detail-value">#{mallaCurricularAlumnoBean.llamadoAsistente}</span>
 							</div>
 							<div class="malla-detail-section">
-								<span class="malla-detail-label">Riesgo si no se atiende</span>
+								<span class="malla-detail-label">Impacto en tu avance</span>
 								<span id="mallaDetailRiesgo" class="malla-detail-value">Sin selección</span>
 							</div>
 							<div class="malla-detail-note">#{mallaCurricularAlumnoBean.mensajePanelContextual}</div>
