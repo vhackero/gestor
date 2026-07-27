@@ -39,6 +39,7 @@
 		</box>
 	</style>
 	<subDataset name="dsHistorial" uuid="3724fb89-7896-4d11-9433-73f225762191">
+		<parameter name="NOMBRE_ESTRUCTURA" class="java.lang.String"/>
 		<queryString>
 			<![CDATA[]]>
 		</queryString>
@@ -71,6 +72,9 @@
 		<parameterDescription><![CDATA[]]></parameterDescription>
 	</parameter>
 	<parameter name="NIVEL" class="java.lang.String">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+	</parameter>
+	<parameter name="NOMBRE_ESTRUCTURA" class="java.lang.String">
 		<parameterDescription><![CDATA[]]></parameterDescription>
 	</parameter>
 	<parameter name="APROBADAS" class="java.lang.Integer">
@@ -501,19 +505,22 @@
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
 					<datasetRun subDataset="dsHistorial" uuid="7d26f519-86bf-4d56-b92d-fc0933cb72a9">
+						<datasetParameter name="NOMBRE_ESTRUCTURA">
+							<datasetParameterExpression><![CDATA[$P{NOMBRE_ESTRUCTURA}]]></datasetParameterExpression>
+						</datasetParameter>
 						<dataSourceExpression><![CDATA[$P{dsHistorial}]]></dataSourceExpression>
 					</datasetRun>
 					<jr:column width="25" uuid="976a4ce9-282a-480b-91a4-6d3c079f3ce2">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
 						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<staticText>
+							<textField>
 								<reportElement x="0" y="0" width="25" height="30" uuid="cbc04aad-af72-4f2a-8b4c-53e76e9c123d"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="9" isBold="true"/>
 								</textElement>
-								<text><![CDATA[C/S]]></text>
-							</staticText>
+								<textFieldExpression><![CDATA[$P{NOMBRE_ESTRUCTURA}]]></textFieldExpression>
+							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField>

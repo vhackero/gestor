@@ -693,6 +693,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 		params.put("NO_PRESENTADAS", historial.getNopresentadas().intValue());
 		params.put("TOTAL", historial.getTotal().intValue());
 		params.put("FECHA_CONSULTA", historial.getFechaConsulta());
+		params.put("NOMBRE_ESTRUCTURA", historial.getNombreEstructura());
 		
 		
 		//Parametros de datos

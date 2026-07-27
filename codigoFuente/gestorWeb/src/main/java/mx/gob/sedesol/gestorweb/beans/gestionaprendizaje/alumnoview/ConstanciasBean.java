@@ -245,6 +245,7 @@ public class ConstanciasBean extends BaseBean {
 		params.put("NO_PRESENTADAS", historialAcademico.getNopresentadas().intValue());
 		params.put("TOTAL", historialAcademico.getTotal().intValue());
 		params.put("FECHA_CONSULTA", historialAcademico.getFechaConsulta());
+		params.put("NOMBRE_ESTRUCTURA", historialAcademico.getNombreEstructura());
 		
 		
 		//Parametros de datos

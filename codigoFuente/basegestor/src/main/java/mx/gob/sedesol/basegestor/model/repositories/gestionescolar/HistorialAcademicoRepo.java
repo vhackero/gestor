@@ -88,7 +88,13 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				"                DATE_FORMAT(NOW(),'%d/%m/%Y') fecha_consulta,\n" +
 				"                CONCAT(p.sso_nombre,' ',p.sso_apellidoPaterno,' ',p.sso_apellidoMaterno) as nombre,\n" +
 				"                og.descripcion claveinstitucion,\n" +
-				"                mc.descripcion clave\n" +
+				"                mc.descripcion clave,\n" +
+				"                COALESCE((SELECT rmp.nombre_estructuras\n" +
+				"                          FROM tbl_persona_aspirante tpa\n" +
+				"                                   INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpa.id_convocatoria AND tc.activo = 1\n" +
+				"                                   INNER JOIN rel_malla_plan rmp ON rmp.id_plan = tpa.id_plan AND rmp.activo = 1\n" +
+				"                          WHERE tpa.id_persona = p.id_persona\n" +
+				"                          ORDER BY tpa.id_persona_aspirante DESC, rmp.id DESC LIMIT 1), '') nombreEstructura\n" +
 				"FROM tbl_persona p\n" +
 				"         INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = p.id_persona AND rgp.calificacion_final is not  null\n" +
 				"         INNER JOIN rel_persona_roles pr ON pr.id_persona = p.id_persona AND pr.id_rol = 2\n" +
@@ -138,6 +144,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				regresa.setNombre(obj[11].toString());
 				regresa.setClaveInst(obj[12] != null ? obj[12].toString() : null );
 				regresa.setClave(obj[13] != null ? obj[13].toString() : null );
+				regresa.setNombreEstructura(obj[14] != null ? obj[14].toString() : "");
 				BigInteger total = ((BigInteger) obj[5]).add((BigInteger) obj[6]).add((BigInteger) obj[7]);
 				regresa.setTotal(total);
 			}
