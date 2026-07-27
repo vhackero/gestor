@@ -75,7 +75,7 @@
 				<box>
 					<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
 				</box>
-				<text><![CDATA[Asignatura]]></text>
+				<text><![CDATA[Unidad didáctica]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement stretchType="RelativeToTallestObject" x="3" y="147" width="549" height="20" isPrintWhenDetailOverflows="true" uuid="687c4ec0-37ee-4fd9-a057-55097a8ccd2d"/>

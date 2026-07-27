@@ -87,14 +87,14 @@
 				<box>
 					<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
 				</box>
-				<text><![CDATA[Periodo]]></text>
+				<text><![CDATA[Período]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="1" y="112" width="278" height="20" backcolor="#7BA8DD" uuid="5a361ea6-3cf4-4c19-aad8-45a94a617de8"/>
 				<box>
 					<pen lineWidth="1.0" lineStyle="Solid" lineColor="#B8D0E3"/>
 				</box>
-				<text><![CDATA[Asignatura]]></text>
+				<text><![CDATA[Unidad didáctica]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="280" y="112" width="268" height="20" backcolor="#7BA8DD" uuid="62fe8e1e-a9e5-421a-877a-b78210b6408b"/>

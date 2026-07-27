@@ -39,6 +39,7 @@
 		</box>
 	</style>
 	<subDataset name="dsHistorial" uuid="3724fb89-7896-4d11-9433-73f225762191">
+		<parameter name="NOMBRE_ESTRUCTURA" class="java.lang.String"/>
 		<queryString>
 			<![CDATA[]]>
 		</queryString>
@@ -71,6 +72,9 @@
 		<parameterDescription><![CDATA[]]></parameterDescription>
 	</parameter>
 	<parameter name="NIVEL" class="java.lang.String">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+	</parameter>
+	<parameter name="NOMBRE_ESTRUCTURA" class="java.lang.String">
 		<parameterDescription><![CDATA[]]></parameterDescription>
 	</parameter>
 	<parameter name="APROBADAS" class="java.lang.Integer">
@@ -137,7 +141,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="13" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Historial Academico]]></text>
+				<text><![CDATA[Historial Académico]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="430" y="80" width="125" height="15" backcolor="#7BA8DD" uuid="11bebc2b-5925-48a6-8cfc-6b238e98871e"/>
@@ -150,7 +154,7 @@
 				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font size="9" isBold="true"/>
 				</textElement>
-				<text><![CDATA[ Clave Institucion]]></text>
+				<text><![CDATA[ Clave Institución]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="280" y="80" width="150" height="15" backcolor="#7BA8DD" uuid="05c572fb-3607-4921-ba45-2b6bb3eae85f"/>
@@ -164,7 +168,7 @@
 				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[ Matricula]]></text>
+				<text><![CDATA[ Matrícula]]></text>
 			</staticText>
 			<staticText>
 				<reportElement key="" mode="Opaque" x="0" y="110" width="250" height="15" backcolor="#7BA8DD" uuid="302eceec-cbc5-4b61-8934-a9e706f8efd4">
@@ -221,7 +225,7 @@
 					<font size="9" isBold="false"/>
 				</textElement>
 				<text><![CDATA[ Promedio:
- Creditos:]]></text>
+ Créditos:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement key="" mode="Opaque" x="170" y="140" width="90" height="44" backcolor="#7BA8DD" uuid="f0bbc8bd-3da5-4806-91f0-26f1c3a67971">
@@ -501,19 +505,22 @@
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
 					<datasetRun subDataset="dsHistorial" uuid="7d26f519-86bf-4d56-b92d-fc0933cb72a9">
+						<datasetParameter name="NOMBRE_ESTRUCTURA">
+							<datasetParameterExpression><![CDATA[$P{NOMBRE_ESTRUCTURA}]]></datasetParameterExpression>
+						</datasetParameter>
 						<dataSourceExpression><![CDATA[$P{dsHistorial}]]></dataSourceExpression>
 					</datasetRun>
 					<jr:column width="25" uuid="976a4ce9-282a-480b-91a4-6d3c079f3ce2">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
 						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<staticText>
+							<textField>
 								<reportElement x="0" y="0" width="25" height="30" uuid="cbc04aad-af72-4f2a-8b4c-53e76e9c123d"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="9" isBold="true"/>
 								</textElement>
-								<text><![CDATA[C/S]]></text>
-							</staticText>
+								<textFieldExpression><![CDATA[$P{NOMBRE_ESTRUCTURA}]]></textFieldExpression>
+							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField>
@@ -551,7 +558,7 @@ SEP]]></text>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="9" isBold="true"/>
 								</textElement>
-								<text><![CDATA[Periodo]]></text>
+								<text><![CDATA[Período]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
@@ -570,7 +577,7 @@ SEP]]></text>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="9" isBold="true"/>
 								</textElement>
-								<text><![CDATA[Credi-
+								<text><![CDATA[Crédi-
 tos]]></text>
 							</staticText>
 						</jr:columnHeader>
@@ -609,7 +616,7 @@ tos]]></text>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="9" isBold="true"/>
 								</textElement>
-								<text><![CDATA[Asignatura]]></text>
+								<text><![CDATA[Unidad didáctica]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">

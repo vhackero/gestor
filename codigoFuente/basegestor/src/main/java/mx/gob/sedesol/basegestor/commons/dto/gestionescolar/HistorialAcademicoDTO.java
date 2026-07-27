@@ -22,6 +22,7 @@ public class HistorialAcademicoDTO {
     private BigInteger total;
     private String fechaConsulta;
     private String estatus;
+    private String nombreEstructura;
 
 
     public String getNombre() {
@@ -142,5 +143,13 @@ public class HistorialAcademicoDTO {
 
     public void setEstatus(String estatus) {
         this.estatus = estatus;
+    }
+
+    public String getNombreEstructura() {
+        return nombreEstructura;
+    }
+
+    public void setNombreEstructura(String nombreEstructura) {
+        this.nombreEstructura = nombreEstructura;
     }
 }
