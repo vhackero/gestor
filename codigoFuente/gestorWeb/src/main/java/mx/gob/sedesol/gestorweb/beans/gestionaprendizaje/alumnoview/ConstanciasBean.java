@@ -197,7 +197,7 @@ public class ConstanciasBean extends BaseBean {
 		reportePDF = null;
 
 		ReporteConfig reporteConfig = new ReporteConfig();
-		reporteConfig.setDatos(eventos);
+		reporteConfig.setDatos(null);
 		reporteConfig.setNombreReporte("Plantilla_SISI");
 		reporteConfig.setPathJasper("/resources/jasperReport/gestionAprendizaje/expediente_academico.jasper");
 
@@ -384,6 +384,12 @@ public class ConstanciasBean extends BaseBean {
 		return esPeriodoCursamiento()
 				? "Si necesitas interpretar cómo este historial impacta tu proceso de inscripción actual, consulta el Asistente de inscripción curricular."
 				: "Si necesitas interpretar cómo este historial puede impactar tu próximo proceso de inscripción, consulta el Asistente de inscripción curricular.";
+	}
+
+	public String getMensajeTransicionAsistentePrevio() {
+		return esPeriodoCursamiento()
+				? "Si necesitas interpretar cómo este historial impacta tu proceso de inscripción actual, consulta el "
+				: "Si necesitas interpretar cómo este historial puede impactar tu próximo proceso de inscripción, consulta el ";
 	}
 
 	public String navegaMallaCurricularAlumno() {
