@@ -686,7 +686,8 @@ public class ExpedienteAlumnoBean extends BaseBean {
 		params.put("NIVEL", historial.getNivel());
 		params.put("PROMEDIO", historial.getPromedio().intValue());
 		params.put("CREDITOS", historial.getCreditos().intValue());
-		params.put("TOTAL_CREDITOS",historial.getTotalCreditos().intValue());
+		params.put("TOTAL_CREDITOS", historial.getTotalCreditos() != null
+				? historial.getTotalCreditos().toString() : "-");
 		params.put("APROBADAS", historial.getAprobadas().intValue());
 		params.put("REPROBADAS", historial.getReprobadas().intValue());
 		params.put("NO_PRESENTADAS", historial.getNopresentadas().intValue());

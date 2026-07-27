@@ -52,7 +52,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				"                                                                                                                                     FROM rel_persona_bajas t2\n" +
 				"                                                                                                                                              INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\n" +
 				"                                                                                                                         WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) creditos,\n" +
-				"                CONCAT(350)  as totalCreditos,\n" +
+				"                rctp.total_creditos as totalCreditos,\n" +
 				"                (SELECT COUNT(rgp.calificacion_final)\n" +
 				"                 FROM tbl_persona tp\n" +
 				"                          INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\n" +
@@ -97,6 +97,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				"         INNER JOIN tbl_eventos e ON e.id_evento = g.id_evento\n" +
 				"         INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa\n" +
 				"         INNER JOIN tbl_planes pl ON pl.id_plan = fd.id_plan\n" +
+				"         LEFT JOIN rel_creditos_totales_por_plan rctp ON rctp.id_plan = pl.id_plan\n" +
 				"         INNER JOIN tbl_malla_curricular mc ON mc.id_plan = pl.id_plan\n" +
 				"         INNER JOIN tbl_organismos_gubernamentales og ON og.id = pl.id_org_gub\n" +
 				"         INNER JOIN cat_nivel_ensenanza_programa cne ON cne.id = pl.id_nivel_ensenanza\n" +
@@ -127,7 +128,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 					regresa.setCreditos(new BigDecimal(obj[3].toString()));
 				}
 				
-				regresa.setTotalCreditos(new BigInteger(obj[4].toString()));
+				regresa.setTotalCreditos(obj[4] != null ? new BigInteger(obj[4].toString()) : null);
 				regresa.setAprobadas(new BigInteger(obj[5].toString()));
 				regresa.setReprobadas(new BigInteger(obj[6].toString()));
 				regresa.setNopresentadas(new BigInteger(obj[7].toString()));

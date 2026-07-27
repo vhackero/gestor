@@ -238,7 +238,8 @@ public class ConstanciasBean extends BaseBean {
 		params.put("NIVEL", historialAcademico.getNivel());
 		params.put("PROMEDIO", historialAcademico.getPromedio().intValue());
 		params.put("CREDITOS", historialAcademico.getCreditos().intValue());
-		params.put("TOTAL_CREDITOS",historialAcademico.getTotalCreditos().intValue());
+		params.put("TOTAL_CREDITOS", historialAcademico.getTotalCreditos() != null
+				? historialAcademico.getTotalCreditos().toString() : "-");
 		params.put("APROBADAS", historialAcademico.getAprobadas().intValue());
 		params.put("REPROBADAS", historialAcademico.getReprobadas().intValue());
 		params.put("NO_PRESENTADAS", historialAcademico.getNopresentadas().intValue());
