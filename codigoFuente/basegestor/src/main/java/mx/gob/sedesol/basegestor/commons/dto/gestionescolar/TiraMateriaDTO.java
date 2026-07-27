@@ -4,6 +4,7 @@ public class TiraMateriaDTO {
 	
 	
 	private int id_grupo;
+	private String semestre;
 	private String bloque;
 	private String grupo;
 	private String docente;
@@ -11,6 +12,12 @@ public class TiraMateriaDTO {
 	private String clave;
 
 	
+	public String getSemestre() {
+		return semestre;
+	}
+	public void setSemestre(String semestre) {
+		this.semestre = semestre;
+	}
 
 	public String getBloque() {
 		return bloque;

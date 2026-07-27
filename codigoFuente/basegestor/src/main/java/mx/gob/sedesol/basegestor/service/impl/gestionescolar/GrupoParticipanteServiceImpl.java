@@ -50,6 +50,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.RelGrupoParticipante;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblEvento;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.TblGrupo;
+import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.CatModalidadPlanPrograma;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCargaHoraria;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCompEspecifica;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.GrupoParticipanteRepo;
@@ -689,6 +690,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 			for (TiraMateriaDTO tiraMateriaDTO2 : listaGrupoParticipante2) {
 				if(tiraMateriaDTO2.getId_grupo() == relGrupoParticipanteDTO.getId()) {
 					relGrupoParticipanteDTO.setClave(tiraMateriaDTO2.getClave());
+					relGrupoParticipanteDTO.setSemestre(tiraMateriaDTO2.getSemestre());
 					relGrupoParticipanteDTO.setBloque(tiraMateriaDTO2.getBloque());
 					relGrupoParticipanteDTO.setNombre(tiraMateriaDTO2.getGrupo());
 					relGrupoParticipanteDTO.setDocente(tiraMateriaDTO2.getDocente());
@@ -736,6 +738,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 					eventoDTO.setFechaFinal(evento.getFechaFinal());
 					eventoDTO.setCveEventoCap(evento.getCveEventoCap());
 					eventoDTO.setCatEstadoEventoCapacitacion(convertirCatalogo(evento.getCatEstadoEventoCapacitacion()));
+					eventoDTO.setCatModalidadPlanPrograma(convertirCatalogo(evento.getCatModalidadPlanPrograma()));
 					grupoDTO.setEvento(eventoDTO);
 				}
 
@@ -748,6 +751,17 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 	}
 
 	private CatalogoComunDTO convertirCatalogo(CatEstadoEventoCapacitacion cat) {
+		if (ObjectUtils.isNull(cat)) {
+			return null;
+		}
+		CatalogoComunDTO dto = new CatalogoComunDTO();
+		dto.setId(cat.getId());
+		dto.setNombre(cat.getNombre());
+		dto.setDescripcion(cat.getDescripcion());
+		return dto;
+	}
+
+	private CatalogoComunDTO convertirCatalogo(CatModalidadPlanPrograma cat) {
 		if (ObjectUtils.isNull(cat)) {
 			return null;
 		}

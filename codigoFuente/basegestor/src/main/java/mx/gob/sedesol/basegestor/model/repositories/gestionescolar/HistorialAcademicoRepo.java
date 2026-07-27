@@ -180,7 +180,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 		List<TiraMateriaDTO> regresa = new ArrayList<TiraMateriaDTO>();
 		List<Object[]> lista = new ArrayList<>();
 
-		String consulta = "SELECT gp.id id, fd.identificador_final as clave, tmc.nombre as bloquemodulo,\r\n"
+		String consulta = "SELECT gp.id id, fd.identificador_final as clave, tmc2.nombre as semestre, tmc.nombre as bloquemodulo,\r\n"
 				+ "CONCAT(e.nombre_ec ,' - ',g.nombre) as grupo,\r\n"
 				+ "    (SELECT CONCAT(tp.sso_nombre,' ', tp.sso_apellidoPaterno,' ', tp.sso_apellidoMaterno)\r\n"
 				+ "        FROM tbl_persona tp\r\n"
@@ -226,10 +226,11 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 		
 		regresa.setId_grupo((Integer) (obj[0]));
 		regresa.setClave(getStringValue(obj[1]));
-		regresa.setBloque(getStringValue(obj[2]));
-		regresa.setGrupo(getStringValue(obj[3]));
-		regresa.setDocente(getStringValue(obj[4]));
-		regresa.setAsesor(getStringValue(obj[5]));
+		regresa.setSemestre(getStringValue(obj[2]));
+		regresa.setBloque(getStringValue(obj[3]));
+		regresa.setGrupo(getStringValue(obj[4]));
+		regresa.setDocente(getStringValue(obj[5]));
+		regresa.setAsesor(getStringValue(obj[6]));
 
 		return regresa;
 	}
