@@ -52,7 +52,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				"                                                                                                                                     FROM rel_persona_bajas t2\n" +
 				"                                                                                                                                              INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\n" +
 				"                                                                                                                         WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) creditos,\n" +
-				"                CONCAT(350)  as totalCreditos,\n" +
+				"                rctp.total_creditos as totalCreditos,\n" +
 				"                (SELECT COUNT(rgp.calificacion_final)\n" +
 				"                 FROM tbl_persona tp\n" +
 				"                          INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\n" +
@@ -97,6 +97,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				"         INNER JOIN tbl_eventos e ON e.id_evento = g.id_evento\n" +
 				"         INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa\n" +
 				"         INNER JOIN tbl_planes pl ON pl.id_plan = fd.id_plan\n" +
+				"         LEFT JOIN rel_creditos_totales_por_plan rctp ON rctp.id_plan = pl.id_plan\n" +
 				"         INNER JOIN tbl_malla_curricular mc ON mc.id_plan = pl.id_plan\n" +
 				"         INNER JOIN tbl_organismos_gubernamentales og ON og.id = pl.id_org_gub\n" +
 				"         INNER JOIN cat_nivel_ensenanza_programa cne ON cne.id = pl.id_nivel_ensenanza\n" +
@@ -127,7 +128,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 					regresa.setCreditos(new BigDecimal(obj[3].toString()));
 				}
 				
-				regresa.setTotalCreditos(new BigInteger(obj[4].toString()));
+				regresa.setTotalCreditos(obj[4] != null ? new BigInteger(obj[4].toString()) : null);
 				regresa.setAprobadas(new BigInteger(obj[5].toString()));
 				regresa.setReprobadas(new BigInteger(obj[6].toString()));
 				regresa.setNopresentadas(new BigInteger(obj[7].toString()));
@@ -180,7 +181,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 		List<TiraMateriaDTO> regresa = new ArrayList<TiraMateriaDTO>();
 		List<Object[]> lista = new ArrayList<>();
 
-		String consulta = "SELECT gp.id id, fd.identificador_final as clave, tmc.nombre as bloquemodulo,\r\n"
+		String consulta = "SELECT gp.id id, fd.identificador_final as clave, tmc2.nombre as semestre, tmc.nombre as bloquemodulo,\r\n"
 				+ "CONCAT(e.nombre_ec ,' - ',g.nombre) as grupo,\r\n"
 				+ "    (SELECT CONCAT(tp.sso_nombre,' ', tp.sso_apellidoPaterno,' ', tp.sso_apellidoMaterno)\r\n"
 				+ "        FROM tbl_persona tp\r\n"
@@ -226,10 +227,11 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 		
 		regresa.setId_grupo((Integer) (obj[0]));
 		regresa.setClave(getStringValue(obj[1]));
-		regresa.setBloque(getStringValue(obj[2]));
-		regresa.setGrupo(getStringValue(obj[3]));
-		regresa.setDocente(getStringValue(obj[4]));
-		regresa.setAsesor(getStringValue(obj[5]));
+		regresa.setSemestre(getStringValue(obj[2]));
+		regresa.setBloque(getStringValue(obj[3]));
+		regresa.setGrupo(getStringValue(obj[4]));
+		regresa.setDocente(getStringValue(obj[5]));
+		regresa.setAsesor(getStringValue(obj[6]));
 
 		return regresa;
 	}
@@ -245,7 +247,17 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				+ "       fd.identificador_final as clavesep,\r\n" + "       fd.identificador_final as clave,\r\n"
 				+ "       fd.creditos as creditos,\r\n"
 				+ "        SUBSTRING_INDEX(e.cve_evento_cap, \"-\", -2) as periodo,\r\n"
-				+ "       CONCAT('ORD') as tipodeevaluacion,\r\n"
+				+ "       CASE WHEN (\r\n"
+				+ "           SELECT COUNT(DISTINCT gp2.id)\r\n"
+				+ "           FROM rel_grupo_participante gp2\r\n"
+				+ "           INNER JOIN tbl_grupos g2 ON g2.id = gp2.id_grupo\r\n"
+				+ "           INNER JOIN tbl_eventos e2 ON e2.id_evento = g2.id_evento\r\n"
+				+ "           INNER JOIN tbl_ficha_descriptiva_programa fd2 ON fd2.id_programa = e2.id_programa\r\n"
+				+ "           WHERE gp2.id_persona_participante = gp.id_persona_participante\r\n"
+				+ "             AND LOWER(TRIM(fd2.nombre_tentativo)) = LOWER(TRIM(fd.nombre_tentativo))\r\n"
+				+ "             AND (COALESCE(gp2.fecha_registro, '1000-01-01') < COALESCE(gp.fecha_registro, '1000-01-01')\r\n"
+				+ "                  OR (COALESCE(gp2.fecha_registro, '1000-01-01') = COALESCE(gp.fecha_registro, '1000-01-01') AND gp2.id <= gp.id))\r\n"
+				+ "       ) = 1 THEN 'ORD' ELSE 'REC' END as tipodeevaluacion,\r\n"
 				+ "       CONCAT(pl.identificador,'-',SUBSTRING_INDEX(e.cve_evento_cap, \"-\", 1),'-',g.nombre) as noacta\r\n"
 				+ "       FROM rel_grupo_participante gp\r\n"
 				+ "                  INNER JOIN tbl_grupos g on g.id = gp.id_grupo\r\n"

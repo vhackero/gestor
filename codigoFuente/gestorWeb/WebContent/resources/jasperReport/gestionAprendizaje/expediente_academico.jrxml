@@ -79,7 +79,7 @@
 	<parameter name="CREDITOS" class="java.lang.Integer">
 		<parameterDescription><![CDATA[]]></parameterDescription>
 	</parameter>
-	<parameter name="TOTAL_CREDITOS" class="java.lang.Integer">
+	<parameter name="TOTAL_CREDITOS" class="java.lang.String">
 		<parameterDescription><![CDATA[]]></parameterDescription>
 	</parameter>
 	<parameter name="FECHA_CONSULTA" class="java.lang.String">

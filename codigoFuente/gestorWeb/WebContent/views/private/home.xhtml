@@ -47,7 +47,7 @@
 							<p:dataTable id="dtResultadoBusquedaMisCursos"
 								emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
 								reflow="true"
-								value="#{misCursosBean.participanteEventosCapacitacionEnEjecucion}"
+								value="#{misCursosBean.participanteEventosCapacitacionEnEjecucion2}"
 								var="participante" paginator="true" rows="10"
 								paginatorPosition="bottom"
 								paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
@@ -77,6 +77,22 @@
 	
 									<h:outputText
 										value="#{participante.grupo.evento.catModalidadPlanPrograma.nombre}" />
+								</p:column>
+
+								<p:column styleClass="text-center"
+									sortBy="#{participante.semestre}">
+									<f:facet name="header">
+										<h:outputText value="#{sistema.obtenerTexto('gw.home.col.semestre')}" />
+									</f:facet>
+									<h:outputText value="#{participante.semestre}" />
+								</p:column>
+
+								<p:column styleClass="text-center"
+									sortBy="#{participante.bloque}">
+									<f:facet name="header">
+										<h:outputText value="#{sistema.obtenerTexto('gw.home.col.bloque')}" />
+									</f:facet>
+									<h:outputText value="#{participante.bloque}" />
 								</p:column>
 								<!-- Porcentaje de avance -->
 								<p:column styleClass="text-center">

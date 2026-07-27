@@ -36,6 +36,7 @@ public class RelGrupoParticipanteDTO implements Serializable {
 	private Double califFinal;
 
 
+	private String semestre;
 	private String bloque;
 	private String nombre;
 	private String docente;
@@ -237,6 +238,16 @@ public class RelGrupoParticipanteDTO implements Serializable {
 
 	public String getBloque() {
 		return bloque;
+	}
+
+
+	public String getSemestre() {
+		return semestre;
+	}
+
+
+	public void setSemestre(String semestre) {
+		this.semestre = semestre;
 	}
 
 

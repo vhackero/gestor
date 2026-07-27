@@ -134,7 +134,7 @@
 								<div class="col-md-3 col-xs-12">
 									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.creditos')}" styleClass="bloque" />
 									<h:outputText
-										value="#{constanciasBean.historialAcademico.creditos} de #{constanciasBean.historialAcademico.totalCreditos}">
+									value="#{constanciasBean.historialAcademico.creditos} de #{empty constanciasBean.historialAcademico.totalCreditos ? '-' : constanciasBean.historialAcademico.totalCreditos}">
 
 									</h:outputText>
 								</div>
