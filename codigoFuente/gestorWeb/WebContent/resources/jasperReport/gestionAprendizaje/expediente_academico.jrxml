@@ -654,7 +654,7 @@ tos]]></text>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="9" isBold="true"/>
 								</textElement>
-								<text><![CDATA[Tipo de evaluacion]]></text>
+								<text><![CDATA[Tipo de evaluación]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
@@ -673,8 +673,8 @@ tos]]></text>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="9" isBold="true"/>
 								</textElement>
-								<text><![CDATA[Numero 
-de Acta]]></text>
+								<text><![CDATA[Número
+de acta]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
