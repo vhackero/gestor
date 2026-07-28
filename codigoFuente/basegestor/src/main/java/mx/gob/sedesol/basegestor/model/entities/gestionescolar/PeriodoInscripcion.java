@@ -9,6 +9,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import java.util.Date;
 
 @Entity
 @Table(name = "tbl_periodos_inscripcion")
@@ -25,6 +29,14 @@ public class PeriodoInscripcion implements Serializable {
 	@Column(name = "nombre_periodo")
 	private String nombre;
 
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "fecha_inicio")
+	private Date fechaInicio;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "fecha_finalizacion")
+	private Date fechaFinalizacion;
+
 	public Integer getId() {
 		return id;
 	}
@@ -39,5 +51,21 @@ public class PeriodoInscripcion implements Serializable {
 
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
+	}
+
+	public Date getFechaInicio() {
+		return fechaInicio;
+	}
+
+	public void setFechaInicio(Date fechaInicio) {
+		this.fechaInicio = fechaInicio;
+	}
+
+	public Date getFechaFinalizacion() {
+		return fechaFinalizacion;
+	}
+
+	public void setFechaFinalizacion(Date fechaFinalizacion) {
+		this.fechaFinalizacion = fechaFinalizacion;
 	}
 }
