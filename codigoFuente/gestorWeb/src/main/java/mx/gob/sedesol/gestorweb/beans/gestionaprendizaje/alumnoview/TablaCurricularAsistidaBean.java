@@ -50,6 +50,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     private AsistenteInscripcionContextoDTO contexto;
     private FichaIntegralCasoDTO fichaIntegralV2;
+    private boolean intentoCargaFichaIntegralV2;
     private List<SemestreAsistidoDTO> semestres;
     private String mensajeError;
     private ResultadoSimulacionDTO resultadoSimulacion;
@@ -524,6 +525,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     private void cargarFichaIntegralV2() {
+        intentoCargaFichaIntegralV2 = true;
         fichaIntegralV2 = null;
         if (asistenteCurricularV2Facade == null || idPersonaObjetivo == null) {
             return;
@@ -538,7 +540,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     private void asegurarFichaIntegralV2() {
-        if (fichaIntegralV2 != null) {
+        if (fichaIntegralV2 != null || intentoCargaFichaIntegralV2) {
             return;
         }
         cargarFichaIntegralV2();

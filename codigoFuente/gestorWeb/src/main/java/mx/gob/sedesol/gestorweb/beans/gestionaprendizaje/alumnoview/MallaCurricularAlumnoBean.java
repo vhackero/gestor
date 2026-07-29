@@ -153,6 +153,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private String matriculaPersonaObjetivo;
 	private AsistenteInscripcionContextoDTO contextoAsistente;
 	private FichaIntegralCasoDTO fichaIntegralV2;
+	private boolean intentoCargaFichaIntegralV2;
 	private Map<Long, UnidadDecisionInscripcionDTO> unidadesAsistentePorPrograma;
 
 	@PostConstruct
@@ -227,6 +228,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	}
 
 	private void cargarFichaIntegralV2() {
+		intentoCargaFichaIntegralV2 = true;
 		fichaIntegralV2 = null;
 		if (mallaCurricularV2Facade == null || idPersonaObjetivo == null) {
 			return;
@@ -241,7 +243,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	}
 
 	private void asegurarFichaIntegralV2() {
-		if (fichaIntegralV2 != null) {
+		if (fichaIntegralV2 != null || intentoCargaFichaIntegralV2) {
 			return;
 		}
 		cargarFichaIntegralV2();
