@@ -66,7 +66,7 @@
 						<div class="col-md-4">
 								<p:outputLabel styleClass="bloque requerido"
 											   value="Fecha de apertura:" />
-								<p:calendar id="fc_fechaInicialAlta" 
+								<p:calendar id="fc_fechaInicialAlta" timeZone="#{convocatoriasBean.zonaHoraria}"
 											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')} HH:mm"
 											hourFormat="24"
 											yearRange="c-100:c+100" locale="es"
@@ -87,7 +87,7 @@
 							<div class="col-md-4">
 								<p:outputLabel styleClass="bloque requerido"
 											   value="Fecha de cierre:" />
-								<p:calendar id="fc_fechaFinalAlta" 
+								<p:calendar id="fc_fechaFinalAlta" timeZone="#{convocatoriasBean.zonaHoraria}"
 											mindate="#{convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
 											disabled="#{empty convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
 											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')} HH:mm"
@@ -171,7 +171,7 @@
 						<!-- Fecha Inicial  -->
 						<div class="col-md-4">
 							<p:outputLabel styleClass="bloque requerido" value="Fecha Alta:" />
-							<p:calendar id="fc_fechaFinal2" 
+							<p:calendar id="fc_fechaFinal2" timeZone="#{convocatoriasBean.zonaHoraria}"
 											disabled="true"
 											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}"
 											yearRange="c-100:c+100" locale="es"

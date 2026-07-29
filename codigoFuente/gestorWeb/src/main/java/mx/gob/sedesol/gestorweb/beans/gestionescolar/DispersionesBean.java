@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -43,6 +44,10 @@ import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 @ManagedBean
 @ViewScoped
 public class DispersionesBean extends BaseBean {
+
+	public TimeZone getZonaHoraria() {
+		return TimeZone.getDefault();
+	}
 
 	/**
 	 * Serialization

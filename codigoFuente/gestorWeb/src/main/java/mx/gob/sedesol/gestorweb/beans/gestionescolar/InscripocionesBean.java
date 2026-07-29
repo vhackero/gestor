@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -38,6 +39,10 @@ import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 @ManagedBean
 @ViewScoped
 public class InscripocionesBean extends BaseBean {
+
+	public TimeZone getZonaHoraria() {
+		return TimeZone.getDefault();
+	}
 	
 	private InscripcionesConsultaResumen registroParaEliminar;
 

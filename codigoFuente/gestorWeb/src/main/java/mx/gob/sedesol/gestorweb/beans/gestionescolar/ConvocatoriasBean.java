@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +39,10 @@ import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 @ManagedBean
 @ViewScoped
 public class ConvocatoriasBean extends BaseBean {
+
+	public TimeZone getZonaHoraria() {
+		return TimeZone.getDefault();
+	}
 
 	/**
 	 * Serialization

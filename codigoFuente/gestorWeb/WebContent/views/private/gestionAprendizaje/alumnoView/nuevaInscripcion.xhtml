@@ -115,7 +115,7 @@
 					<div class="col-md-4 col-xs-12">
 						<p:outputLabel styleClass="bloque requerido" for="fechaInicio"
 							value="Fecha inicio:" />
-						<p:calendar id="fechaInicio" value="#{inscripocionesBean.inscripcionParamNueva.fechaInicio}"
+						<p:calendar id="fechaInicio" value="#{inscripocionesBean.inscripcionParamNueva.fechaInicio}" timeZone="#{inscripocionesBean.zonaHoraria}"
 							pattern="dd/MM/yyyy HH:mm" hourFormat="24"
 							locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
@@ -128,7 +128,7 @@
 					<div class="col-md-4 col-xs-12">
 						<p:outputLabel styleClass="bloque requerido" for="fechaFin"
 							value="Fecha fin:" />
-						<p:calendar id="fechaFin" value="#{inscripocionesBean.inscripcionParamNueva.fechaFin}"
+						<p:calendar id="fechaFin" value="#{inscripocionesBean.inscripcionParamNueva.fechaFin}" timeZone="#{inscripocionesBean.zonaHoraria}"
 							pattern="dd/MM/yyyy HH:mm" hourFormat="24"
 							locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
@@ -296,7 +296,7 @@
 					<div class="col-md-4 col-xs-12">
 						<p:outputLabel styleClass="bloque requerido" for="fechaInicio2"
 							value="Fecha inicio:" />
-						<p:calendar id="fechaInicio2" value="#{inscripocionesBean.inscripcionParamNueva.fechaInicio}"
+						<p:calendar id="fechaInicio2" value="#{inscripocionesBean.inscripcionParamNueva.fechaInicio}" timeZone="#{inscripocionesBean.zonaHoraria}"
 							pattern="dd/MM/yyyy HH:mm" hourFormat="24"
 							locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
@@ -309,7 +309,7 @@
 					<div class="col-md-4 col-xs-12">
 						<p:outputLabel styleClass="bloque requerido" for="fechaFin2"
 							value="Fecha fin:" />
-						<p:calendar id="fechaFin2" value="#{inscripocionesBean.inscripcionParamNueva.fechaFin}"
+						<p:calendar id="fechaFin2" value="#{inscripocionesBean.inscripcionParamNueva.fechaFin}" timeZone="#{inscripocionesBean.zonaHoraria}"
 							pattern="dd/MM/yyyy HH:mm" hourFormat="24"
 							locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
