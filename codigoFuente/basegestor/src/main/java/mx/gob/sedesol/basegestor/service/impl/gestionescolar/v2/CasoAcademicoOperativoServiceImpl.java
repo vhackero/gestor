@@ -169,9 +169,17 @@ public class CasoAcademicoOperativoServiceImpl implements CasoAcademicoOperativo
 
     private CasoAcademicoOperativoDTO construirCaso(TblCasoAcademicoOperativoV2 entity) {
         CasoAcademicoOperativoDTO dto = AsistenteCurricularV2Mapper.toCasoDto(entity);
-        dto.setTipoCaso(AsistenteCurricularV2Mapper.toTipoCasoDto(tipoCasoRepo.findOne(entity.getIdTipoCaso())));
-        dto.setViabilidadTecnica(AsistenteCurricularV2Mapper.toViabilidadDto(viabilidadRepo.findOne(entity.getIdViabilidadTecnica())));
-        dto.setMotivoRestriccion(AsistenteCurricularV2Mapper.toMotivoDto(motivoRepo.findOne(entity.getIdMotivoRestriccion())));
+        if (entity.getIdTipoCaso() != null) {
+            dto.setTipoCaso(AsistenteCurricularV2Mapper.toTipoCasoDto(tipoCasoRepo.findOne(entity.getIdTipoCaso())));
+        }
+        if (entity.getIdViabilidadTecnica() != null) {
+            dto.setViabilidadTecnica(
+                    AsistenteCurricularV2Mapper.toViabilidadDto(viabilidadRepo.findOne(entity.getIdViabilidadTecnica())));
+        }
+        if (entity.getIdMotivoRestriccion() != null) {
+            dto.setMotivoRestriccion(
+                    AsistenteCurricularV2Mapper.toMotivoDto(motivoRepo.findOne(entity.getIdMotivoRestriccion())));
+        }
         dto.setDiagnostico(AsistenteCurricularV2Mapper.toDiagnosticoDto(diagnosticoRepo.findByIdCaso(entity.getId())));
         dto.setDictamen(AsistenteCurricularV2Mapper.toDictamenDto(dictamenRepo.findByIdCaso(entity.getId())));
 
