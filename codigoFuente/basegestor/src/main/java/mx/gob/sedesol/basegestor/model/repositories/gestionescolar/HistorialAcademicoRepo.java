@@ -241,7 +241,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				+ "       AND ti.fecha_registro <= periodo.fecha_finalizacion "
 				+ "LEFT JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = ti.idprograma "
 				+ "LEFT JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion "
-				+ "WHERE ti.IdpersonaSIGIE = :idPersona "
+				+ "WHERE ti.Idpersona = :idPersona "
 				+ "ORDER BY ti.id";
 
 		Query query = entityManager.createNativeQuery(consulta);
