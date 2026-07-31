@@ -18,6 +18,8 @@ public interface IHistorialAcademicoRepo {
 
 	List<TiraMateriaDTO> consultaTiraMaterias2(Long id_persona, Integer idEstatusEc);
 
+	List<TiraMateriaDTO> consultaInscripcionesPeriodoMasReciente(Long idPersona);
+
 	List<HistorialAcademicoListaDTO> getParticipanteByActaCerradaYconstancia2(String id_persona);
 	
 	List<TiraMateriaBajaDTO> consultaTiraMateriasBaja(Long id_persona);

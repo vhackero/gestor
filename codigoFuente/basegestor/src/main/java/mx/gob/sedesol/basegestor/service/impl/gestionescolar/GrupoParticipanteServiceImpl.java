@@ -1,12 +1,14 @@
 package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 
 import java.lang.reflect.Type;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -701,6 +703,77 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 		}
 
 		return listaGrupoParticipante1;
+	}
+
+	@Override
+	public List<RelGrupoParticipanteDTO> obtenerTiraMateriasConsolidada(Long idParticipante,
+			List<RelGrupoParticipanteDTO> materiasMatriculadas) {
+		List<RelGrupoParticipanteDTO> resultado = new ArrayList<RelGrupoParticipanteDTO>(
+				materiasMatriculadas != null ? materiasMatriculadas : Collections.<RelGrupoParticipanteDTO>emptyList());
+		List<TiraMateriaDTO> inscripciones = iHistorialAcademicoRepo
+				.consultaInscripcionesPeriodoMasReciente(idParticipante);
+		Set<String> clavesMatriculadas = new HashSet<String>();
+		Set<String> nombresMatriculados = new HashSet<String>();
+
+		for (RelGrupoParticipanteDTO matriculada : resultado) {
+			agregarNormalizado(clavesMatriculadas, matriculada.getClave());
+			if (matriculada.getGrupo() != null && matriculada.getGrupo().getEvento() != null) {
+				agregarNormalizado(nombresMatriculados, matriculada.getGrupo().getEvento().getNombreEc());
+			}
+		}
+
+		int identificadorTemporal = -1;
+		for (TiraMateriaDTO inscrita : inscripciones) {
+			String clave = normalizar(inscrita.getClave());
+			String nombre = normalizar(inscrita.getGrupo());
+			if ((!clave.isEmpty() && clavesMatriculadas.contains(clave))
+					|| (!nombre.isEmpty() && nombresMatriculados.contains(nombre))) {
+				continue;
+			}
+
+			RelGrupoParticipanteDTO pendiente = new RelGrupoParticipanteDTO();
+			pendiente.setId(identificadorTemporal--);
+			pendiente.setClave(valorOGuion(inscrita.getClave()));
+			pendiente.setSemestre(valorOGuion(inscrita.getSemestre()));
+			pendiente.setBloque(valorOGuion(inscrita.getBloque()));
+			pendiente.setDocente("-");
+			pendiente.setAsesor("-");
+
+			EventoCapacitacionDTO evento = new EventoCapacitacionDTO();
+			evento.setNombreEc(valorOGuion(inscrita.getGrupo()));
+			CatalogoComunDTO modalidad = new CatalogoComunDTO();
+			modalidad.setNombre("-");
+			evento.setCatModalidadPlanPrograma(modalidad);
+
+			GrupoDTO grupo = new GrupoDTO();
+			grupo.setNombre("-");
+			grupo.setEvento(evento);
+			pendiente.setGrupo(grupo);
+			resultado.add(pendiente);
+			agregarNormalizado(clavesMatriculadas, inscrita.getClave());
+			agregarNormalizado(nombresMatriculados, inscrita.getGrupo());
+		}
+		return resultado;
+	}
+
+	private void agregarNormalizado(Set<String> valores, String valor) {
+		String normalizado = normalizar(valor);
+		if (!normalizado.isEmpty()) {
+			valores.add(normalizado);
+		}
+	}
+
+	private String normalizar(String valor) {
+		if (valor == null) {
+			return "";
+		}
+		String sinAcentos = Normalizer.normalize(valor, Normalizer.Form.NFD)
+				.replaceAll("\\p{M}+", "");
+		return sinAcentos.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
+	}
+
+	private String valorOGuion(String valor) {
+		return valor == null || valor.trim().isEmpty() ? "-" : valor;
 	}
 
 	private List<RelGrupoParticipanteDTO> mapearLigero(List<RelGrupoParticipante> entidades) {

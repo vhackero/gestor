@@ -72,6 +72,7 @@ public final class MisCursosSnapshotContext {
 		private final List<CatalogoComunDTO> catEstadoEventoCapacitacionList;
 		private final List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion;
 		private final List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion2;
+		private final List<RelGrupoParticipanteDTO> tiraMateriasConsolidada;
 		private final List<EventoCapacitacionDTO> eventoCapacitacionList;
 		private final CatalogoComunDTO estatusEcSeleccionado;
 		private final List<RelEncuestaUsuarioDTO> relEncuestaUsuarioEvtConcList;
@@ -88,6 +89,7 @@ public final class MisCursosSnapshotContext {
 		public MisCursosSnapshot(Long idPersona, List<CatalogoComunDTO> catEstadoEventoCapacitacionList,
 				List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion,
 				List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion2,
+				List<RelGrupoParticipanteDTO> tiraMateriasConsolidada,
 				List<EventoCapacitacionDTO> eventoCapacitacionList, CatalogoComunDTO estatusEcSeleccionado,
 				List<RelEncuestaUsuarioDTO> relEncuestaUsuarioEvtConcList,
 				List<RelEncuestaUsuarioDTO> relEncuestaUsuarioEvtEnEjecList,
@@ -99,6 +101,7 @@ public final class MisCursosSnapshotContext {
 			this.catEstadoEventoCapacitacionList = catEstadoEventoCapacitacionList;
 			this.participanteEventosCapacitacionEnEjecucion = participanteEventosCapacitacionEnEjecucion;
 			this.participanteEventosCapacitacionEnEjecucion2 = participanteEventosCapacitacionEnEjecucion2;
+			this.tiraMateriasConsolidada = tiraMateriasConsolidada;
 			this.eventoCapacitacionList = eventoCapacitacionList;
 			this.estatusEcSeleccionado = estatusEcSeleccionado;
 			this.relEncuestaUsuarioEvtConcList = relEncuestaUsuarioEvtConcList;
@@ -128,6 +131,10 @@ public final class MisCursosSnapshotContext {
 
 		public List<RelGrupoParticipanteDTO> getParticipanteEventosCapacitacionEnEjecucion2() {
 			return participanteEventosCapacitacionEnEjecucion2;
+		}
+
+		public List<RelGrupoParticipanteDTO> getTiraMateriasConsolidada() {
+			return tiraMateriasConsolidada;
 		}
 
 		public List<EventoCapacitacionDTO> getEventoCapacitacionList() {
