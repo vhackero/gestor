@@ -3,6 +3,7 @@ package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -58,6 +59,9 @@ public class CatGestionEscolarBean extends BaseBean {
 
     @SuppressWarnings("unchecked")
     public void guardarRegCatalogo() {
+		if (isCatalogoPeriodosInscripcion() && !sonFechasPeriodoValidas()) {
+			return;
+		}
         if (ObjectUtils.isNotNull(catalogoSeleccionado)
                 && ObjectUtils.isNotNull(catComunDTOGenerico) && !ObjectUtils.isNullOrEmpty(catComunDTOGenerico.getNombre())) {
             try {
@@ -95,6 +99,20 @@ public class CatGestionEscolarBean extends BaseBean {
 
         }
     }
+
+	private boolean sonFechasPeriodoValidas() {
+		if (ObjectUtils.isNull(catComunDTOGenerico)
+				|| ObjectUtils.isNull(catComunDTOGenerico.getFechaInicio())
+				|| ObjectUtils.isNull(catComunDTOGenerico.getFechaFinalizacion())) {
+			agregarMsgError("Las fechas de inicio y finalización son requeridas.", null);
+			return false;
+		}
+		if (catComunDTOGenerico.getFechaInicio().after(catComunDTOGenerico.getFechaFinalizacion())) {
+			agregarMsgError("La fecha de inicio no puede ser posterior a la fecha de finalización.", null);
+			return false;
+		}
+		return true;
+	}
 
     /**
      *
@@ -255,6 +273,10 @@ public class CatGestionEscolarBean extends BaseBean {
     public boolean isCatalogoPeriodosInscripcion() {
         return CatGestionEscolarEnum.CAT_PERIODOS_INSCRIPCION.equals(catalogoSeleccionado);
     }
+
+	public TimeZone getZonaHoraria() {
+		return TimeZone.getDefault();
+	}
 
     public GestionEscolarServiceAdapter getGestionEscolarServiceAdapter() {
         if (ObjectUtils.isNull(gestionEscolarServiceAdapter)) {

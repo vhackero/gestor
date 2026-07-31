@@ -228,6 +228,37 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 
 	}
 
+	@Override
+	public List<TiraMateriaDTO> consultaInscripcionesPeriodoMasReciente(Long idPersona) {
+		List<TiraMateriaDTO> resultado = new ArrayList<TiraMateriaDTO>();
+		String consulta = "SELECT ti.id, ti.clave_asig, CAST(ti.semestre AS CHAR), "
+				+ "COALESCE(tmc.nombre, ti.bloque), ti.asignatura "
+				+ "FROM tbl_inscripciones ti "
+				+ "INNER JOIN (SELECT fecha_inicio, fecha_finalizacion "
+				+ "            FROM tbl_periodos_inscripcion "
+				+ "            ORDER BY fecha_inicio DESC, id_periodo DESC LIMIT 1) periodo "
+				+ "        ON ti.fecha_registro >= periodo.fecha_inicio "
+				+ "       AND ti.fecha_registro <= periodo.fecha_finalizacion "
+				+ "LEFT JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = ti.idprograma "
+				+ "LEFT JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion "
+				+ "WHERE ti.IdpersonaSIGIE = :idPersona "
+				+ "ORDER BY ti.id";
+
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("idPersona", idPersona);
+		List<Object[]> registros = query.getResultList();
+		for (Object[] registro : registros) {
+			TiraMateriaDTO materia = new TiraMateriaDTO();
+			materia.setId_grupo((Integer) registro[0]);
+			materia.setClave(getStringValue(registro[1]));
+			materia.setSemestre(getStringValue(registro[2]));
+			materia.setBloque(getStringValue(registro[3]));
+			materia.setGrupo(getStringValue(registro[4]));
+			resultado.add(materia);
+		}
+		return resultado;
+	}
+
 	private TiraMateriaDTO creaDtoconsultaTiraMaterias(Object[] obj) {
 
 		TiraMateriaDTO regresa = new TiraMateriaDTO();

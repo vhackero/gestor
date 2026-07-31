@@ -116,6 +116,7 @@ public class MisCursosBean extends BaseBean {
 	private UsuarioSessionDTO usuarioEnSesion;
 	private List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion;
 	private List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion2;
+	private List<RelGrupoParticipanteDTO> tiraMateriasConsolidada;
 
 	private List<EventoCapacitacionDTO> eventoCapacitacionList;
 	private CatalogoComunDTO estatusEcSeleccionado;
@@ -214,6 +215,9 @@ public class MisCursosBean extends BaseBean {
 		logger.info("[MisCursosBean] participanteEventosCapacitacionEnEjecucion2 en "
 				+ (System.currentTimeMillis() - tEventosEnEjec2Ini) + " ms, registros: "
 				+ (participanteEventosCapacitacionEnEjecucion2 != null ? participanteEventosCapacitacionEnEjecucion2.size() : 0));
+
+		tiraMateriasConsolidada = grupoParticipanteService.obtenerTiraMateriasConsolidada(
+				usuarioEnSesion.getIdPersona(), participanteEventosCapacitacionEnEjecucion2);
 		
 		long tTiraBajaIni = System.currentTimeMillis();
 		tiraMateriasBaja = grupoParticipanteService.consultaTiraMateriasBaja(usuarioEnSesion.getIdPersona());
@@ -299,6 +303,7 @@ public class MisCursosBean extends BaseBean {
 			MisCursosSnapshotContext.guardarSnapshot(getSession(),
 					new MisCursosSnapshot(usuarioEnSesion.getIdPersona(), catEstadoEventoCapacitacionList,
 							participanteEventosCapacitacionEnEjecucion, participanteEventosCapacitacionEnEjecucion2,
+							tiraMateriasConsolidada,
 							eventoCapacitacionList, estatusEcSeleccionado, relEncuestaUsuarioEvtConcList,
 							relEncuestaUsuarioEvtEnEjecList, encuestaTipoList, tipoEncuestaSeleccionado, idEstatusSeleccionado,
 							esColumnaCompetenciasVisible, avaList, tiraMaterias, tiraMateriasBaja,
@@ -379,6 +384,7 @@ public class MisCursosBean extends BaseBean {
 		this.catEstadoEventoCapacitacionList = snapshot.getCatEstadoEventoCapacitacionList();
 		this.participanteEventosCapacitacionEnEjecucion = snapshot.getParticipanteEventosCapacitacionEnEjecucion();
 		this.participanteEventosCapacitacionEnEjecucion2 = snapshot.getParticipanteEventosCapacitacionEnEjecucion2();
+		this.tiraMateriasConsolidada = snapshot.getTiraMateriasConsolidada();
 		this.eventoCapacitacionList = snapshot.getEventoCapacitacionList();
 		this.estatusEcSeleccionado = snapshot.getEstatusEcSeleccionado();
 		this.relEncuestaUsuarioEvtConcList = snapshot.getRelEncuestaUsuarioEvtConcList();
@@ -847,6 +853,14 @@ public class MisCursosBean extends BaseBean {
 	public void setParticipanteEventosCapacitacionEnEjecucion2(
 			List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion2) {
 		this.participanteEventosCapacitacionEnEjecucion2 = participanteEventosCapacitacionEnEjecucion2;
+	}
+
+	public List<RelGrupoParticipanteDTO> getTiraMateriasConsolidada() {
+		return tiraMateriasConsolidada;
+	}
+
+	public void setTiraMateriasConsolidada(List<RelGrupoParticipanteDTO> tiraMateriasConsolidada) {
+		this.tiraMateriasConsolidada = tiraMateriasConsolidada;
 	}
 
 	public Boolean getEsColumnaCompetenciasVisible() {

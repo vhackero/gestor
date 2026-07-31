@@ -356,13 +356,13 @@
 				<div class="row">
 					<div class="col-md-3">
 						<p:outputLabel styleClass="bloque requerido" value="Fecha inicial:" />
-						<p:calendar pattern="dd-MMM-yyyy HH:mm" hourFormat="24"
+						<p:calendar pattern="dd-MMM-yyyy HH:mm" hourFormat="24" timeZone="#{dispersionesBean.zonaHoraria}"
 							navigator="true" showIcon="true"
 							value="#{dispersionesBean.formularioCrearEvento.fechaInicial}" />
 					</div>
 					<div class="col-md-3">
 						<p:outputLabel styleClass="bloque requerido" value="Fecha final:" />
-						<p:calendar pattern="dd-MMM-yyyy HH:mm" hourFormat="24"
+						<p:calendar pattern="dd-MMM-yyyy HH:mm" hourFormat="24" timeZone="#{dispersionesBean.zonaHoraria}"
 							navigator="true" showIcon="true"
 							value="#{dispersionesBean.formularioCrearEvento.fechaFinal}" />
 					</div>

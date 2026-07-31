@@ -22,6 +22,8 @@ public class CatalogoComunDTO implements Serializable {
 	private Integer activo;
 	private String descripcion;
 	private Date fechaActualizacion;
+	private Date fechaInicio;
+	private Date fechaFinalizacion;
 	private Date fechaRegistro;
 	private String nombre;
 	private Integer orden;
@@ -90,6 +92,18 @@ public class CatalogoComunDTO implements Serializable {
 	 */
 	public void setFechaActualizacion(Date fechaActualizacion) {
 		this.fechaActualizacion = fechaActualizacion;
+	}
+	public Date getFechaInicio() {
+		return fechaInicio;
+	}
+	public void setFechaInicio(Date fechaInicio) {
+		this.fechaInicio = fechaInicio;
+	}
+	public Date getFechaFinalizacion() {
+		return fechaFinalizacion;
+	}
+	public void setFechaFinalizacion(Date fechaFinalizacion) {
+		this.fechaFinalizacion = fechaFinalizacion;
 	}
 	/**
 	 * @return the fechaRegistro

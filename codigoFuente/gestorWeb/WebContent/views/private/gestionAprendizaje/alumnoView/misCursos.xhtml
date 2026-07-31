@@ -49,7 +49,7 @@
 						<p:dataTable id="dtResultadoBusquedaMisCursos"
 							emptyMessage="#{sistema.obtenerTexto('gw.textos.tablas.sinRegistros')}"
 							reflow="true"
-							value="#{misCursosBean.participanteEventosCapacitacionEnEjecucion2}"
+							value="#{misCursosBean.tiraMateriasConsolidada}"
 							var="participante" paginator="true" rows="10"
 							paginatorPosition="bottom"
 							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
@@ -62,10 +62,10 @@
 									<h:outputText value="#{sistema.obtenerTexto('gw.alumno.misCursos.columna.asignatura')}" />
 								</f:facet>
 								<h:outputText
-									rendered="#{participante.grupo.evento.catModalidadPlanPrograma.id eq 2}"
+									rendered="#{empty participante.grupo.evento.idEvento or participante.grupo.evento.catModalidadPlanPrograma.id eq 2}"
 									value="#{participante.grupo.evento.nombreEc}" />
 								<p:commandLink value="#{participante.grupo.evento.nombreEc}"
-									rendered="#{not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}"
+									rendered="#{not empty participante.grupo.evento.idEvento and not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}"
 									target="_blank" ajax="false" styleClass="subrayar-con-azul"
 									action="#{misCursosBean.navegaUrlCursoLms(participante.grupo.evento.idEvento)}" />
 							</p:column>
@@ -77,14 +77,14 @@
 										value="#{sistema.obtenerTexto('gw.ga.label.modalidad')}" />
 								</f:facet>
 								<h:outputText
-									value="#{participante.grupo.evento.catModalidadPlanPrograma.nombre}" />
+									value="#{empty participante.grupo.evento.catModalidadPlanPrograma.nombre ? '-' : participante.grupo.evento.catModalidadPlanPrograma.nombre}" />
 							</p:column>
 							<!-- Clave -->
 							<p:column styleClass="text-center" sortBy="#{participante.clave}">
 								<f:facet name="header">
 									<h:outputText value="#{sistema.obtenerTexto('gw.alumno.misCursos.columna.clave')}" />
 								</f:facet>
-								<h:outputText value="#{participante.clave}" />
+								<h:outputText value="#{empty participante.clave ? '-' : participante.clave}" />
 							</p:column>
 							<!-- Bloque / Modulo -->
 							<p:column styleClass="text-center"
@@ -92,7 +92,7 @@
 								<f:facet name="header">
 									<h:outputText value="#{sistema.obtenerTexto('gw.alumno.misCursos.columna.bloque')}" />
 								</f:facet>
-								<h:outputText value="#{participante.bloque}" />
+								<h:outputText value="#{empty participante.bloque ? '-' : participante.bloque}" />
 							</p:column>
 							<!-- Grupo -->
 							<p:column styleClass="text-center"
@@ -100,7 +100,7 @@
 								<f:facet name="header">
 									<h:outputText value="#{sistema.obtenerTexto('gw.alumno.misCursos.columna.grupo')}" />
 								</f:facet>
-								<h:outputText value="#{participante.grupo.nombre}" />
+								<h:outputText value="#{empty participante.grupo.nombre ? '-' : participante.grupo.nombre}" />
 							</p:column>
 							<!-- Docente -->
 							<p:column styleClass="text-center"
@@ -108,7 +108,7 @@
 								<f:facet name="header">
 									<h:outputText value="#{sistema.obtenerTexto('gw.alumno.misCursos.columna.docente')}" />
 								</f:facet>
-								<h:outputText value="#{participante.docente}" />
+								<h:outputText value="#{empty participante.docente ? '-' : participante.docente}" />
 							</p:column>
 							<!-- Docente -->
 							<p:column styleClass="text-center"
@@ -116,7 +116,7 @@
 								<f:facet name="header">
 									<h:outputText value="#{sistema.obtenerTexto('gw.alumno.misCursos.columna.asesor')}" />
 								</f:facet>
-								<h:outputText value="#{participante.asesor}" />
+								<h:outputText value="#{empty participante.asesor ? '-' : participante.asesor}" />
 							</p:column>
 							<!-- Porcentaje de avance -->
 							<p:column styleClass="text-center">
@@ -124,9 +124,11 @@
 									<h:outputText
 										value="#{sistema.obtenerTexto('gw.ga.label.porcentajeavance')}" />
 								</f:facet>
+								<h:outputText value="-"
+									rendered="#{empty participante.grupo.evento.idEvento or participante.grupo.evento.catModalidadPlanPrograma.id eq 2}" />
 								<p:outputPanel id="avancePanel"
 									layout="block"
-									rendered="#{not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}">
+									rendered="#{not empty participante.grupo.evento.idEvento and not (participante.grupo.evento.catModalidadPlanPrograma.id eq 2)}">
 									<p:progressBar id="progressBarAvanceEvento" ajax="true"
 										labelTemplate="{value}%"
 										rendered="#{misCursosBean.esAvanceDisponible(participante.grupo.evento.idEvento)}"
@@ -158,7 +160,9 @@
 									<h:outputText
 										value="#{sistema.obtenerTexto('gw.ga.label.encuestafinal')}" />
 								</f:facet>
+								<h:outputText value="-" rendered="#{empty participante.grupo.evento.idEvento}" />
 								<p:commandLink process="@this" style="opacity:1;"
+									rendered="#{not empty participante.grupo.evento.idEvento}"
 									styleClass="#{misCursosBean.obtenerEstatusEncuestaEvtEnEjec(participante.grupo.evento) eq 'Contestar' ? 'subrayar-con-azul' : ''}"
 									action="#{consultarEncuestaUsuarioBean.navegaConsultarEncuestaUsuario}"
 									disabled="#{misCursosBean.esEncuestaVisibleEvtEnEje(participante.grupo.evento.idEvento)}"
@@ -178,7 +182,9 @@
 									<h:outputText
 										value="#{sistema.obtenerTexto('gw.ga.label.finaliza')}" />
 								</f:facet>
-								<h:outputText value="#{participante.grupo.evento.fechaFinal}">
+								<h:outputText value="-" rendered="#{empty participante.grupo.evento.fechaFinal}" />
+								<h:outputText value="#{participante.grupo.evento.fechaFinal}"
+									rendered="#{not empty participante.grupo.evento.fechaFinal}">
 									<f:convertDateTime type="date"
 										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
 								</h:outputText>

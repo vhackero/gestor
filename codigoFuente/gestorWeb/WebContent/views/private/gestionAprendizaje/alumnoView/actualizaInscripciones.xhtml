@@ -105,7 +105,7 @@
 					<div class="col-md-4 col-xs-12">
 						<p:outputLabel styleClass="bloque" for="fecIniEdit"
 							value="Fecha de inicio:" />
-						<p:calendar id="fecIniEdit"
+						<p:calendar id="fecIniEdit" timeZone="#{inscripocionesBean.zonaHoraria}"
 							value="#{inscripocionesBean.fechaInicioEdit}"
 							pattern="dd/MM/yyyy HH:mm" hourFormat="24"
 							locale="es" showOn="button" navigator="true"
@@ -117,7 +117,7 @@
 					<div class="col-md-4 col-xs-12">
 						<p:outputLabel styleClass="bloque" for="fecFinEdit"
 							value="Fecha de Fin:" />
-						<p:calendar id="fecFinEdit"
+						<p:calendar id="fecFinEdit" timeZone="#{inscripocionesBean.zonaHoraria}"
 							value="#{inscripocionesBean.fechaFinEdit}"
 							pattern="dd/MM/yyyy HH:mm" hourFormat="24"
 							locale="es" showOn="button" navigator="true"

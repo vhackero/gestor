@@ -58,10 +58,38 @@
                         </div>
                         <div class="form-group">
                             <div class="row">
+                                <div class="col-md-6 col-xs-12">
+                                    <p:outputLabel for="fechaInicioPeriodo" styleClass="requerido bloque"
+                                                   value="Fecha de inicio" />
+                                    <p:calendar id="fechaInicioPeriodo" required="true"
+                                                requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+                                                value="#{catGestionEscolarBean.catComunDTOGenerico.fechaInicio}"
+                                                pattern="dd/MM/yyyy HH:mm" hourFormat="24" locale="es"
+                                                timeZone="#{catGestionEscolarBean.zonaHoraria}"
+                                                showOn="button" navigator="true" readonlyInput="true"
+                                                yearRange="c-100:c+100" placeholder="Seleccionar" />
+                                    <p:message for="fechaInicioPeriodo" />
+                                </div>
+                                <div class="col-md-6 col-xs-12">
+                                    <p:outputLabel for="fechaFinalizacionPeriodo" styleClass="requerido bloque"
+                                                   value="Fecha de finalización" />
+                                    <p:calendar id="fechaFinalizacionPeriodo" required="true"
+                                                requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
+                                                value="#{catGestionEscolarBean.catComunDTOGenerico.fechaFinalizacion}"
+                                                pattern="dd/MM/yyyy HH:mm" hourFormat="24" locale="es"
+                                                timeZone="#{catGestionEscolarBean.zonaHoraria}"
+                                                showOn="button" navigator="true" readonlyInput="true"
+                                                yearRange="c-100:c+100" placeholder="Seleccionar" />
+                                    <p:message for="fechaFinalizacionPeriodo" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
                                 <div class="col-md-12 text-right">
                                     <p:commandButton value="#{sistema.obtenerTexto('gw.catComunes.etiqueta.guardar')}"
                                                      action="#{catGestionEscolarBean.guardarRegCatalogo}"
-                                                     process="@this nombrePeriodoInscripcion" ajax="true" update="formf"
+                                                     process="@this nombrePeriodoInscripcion fechaInicioPeriodo fechaFinalizacionPeriodo" ajax="true" update="formf"
                                                      styleClass="btn btn-primary"
                                                      onstart="PF('statusDialog').hide()" />
                                 </div>
@@ -95,6 +123,18 @@
                             <p:column headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.nombre')}"
                                       sortBy="#{elemCat.nombre}">
                                 <h:outputText value="#{elemCat.nombre}" />
+                            </p:column>
+                            <p:column headerText="Fecha de inicio" sortBy="#{elemCat.fechaInicio}">
+                                <h:outputText value="#{elemCat.fechaInicio}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"
+                                                       timeZone="#{catGestionEscolarBean.zonaHoraria}" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Fecha de finalización" sortBy="#{elemCat.fechaFinalizacion}">
+                                <h:outputText value="#{elemCat.fechaFinalizacion}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"
+                                                       timeZone="#{catGestionEscolarBean.zonaHoraria}" />
+                                </h:outputText>
                             </p:column>
                             <p:column headerText="#{sistema.obtenerTexto('gw.admin.vercat.texto.acciones')}"
                                       styleClass="text-center">

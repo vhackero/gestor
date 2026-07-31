@@ -41,6 +41,9 @@ public interface GrupoParticipanteService {
     List<RelGrupoParticipanteDTO> obtenerEventosCapacitacionPorIdParticipante(Long idParticipante,Integer idEstatusEc);
     
     List<RelGrupoParticipanteDTO> obtenerEventosCapacitacionPorIdParticipante2(Long idParticipante,Integer idEstatusEc);
+
+    List<RelGrupoParticipanteDTO> obtenerTiraMateriasConsolidada(Long idParticipante,
+            List<RelGrupoParticipanteDTO> materiasMatriculadas);
     
     List<RelGrupoParticipanteDTO> obtenEvtsEnLineayMixtosPorIdParticipante(Long idParticipante,Integer idEstatusEc);
     

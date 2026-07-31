@@ -65,7 +65,7 @@
 				<div class="col-md-4 col-xs-12">
 					<p:outputLabel styleClass="bloque" for="fechaInicio"
 						value="Fecha inicio:" />
-					<p:calendar id="fechaInicio"
+					<p:calendar id="fechaInicio" timeZone="#{inscripocionesBean.zonaHoraria}"
 					value="#{inscripocionesBean.fechaInicio}" pattern="dd/MM/yyyy HH:mm"
 					hourFormat="24"
 						locale="es" showOn="button" navigator="true" readonlyInput="true"
@@ -76,7 +76,7 @@
 				<div class="col-md-4 col-xs-12">
 					<p:outputLabel styleClass="bloque" for="fechaFin"
 						value="Fecha fin:" />
-					<p:calendar id="fechaFin" value="#{inscripocionesBean.fechaFin}"
+					<p:calendar id="fechaFin" value="#{inscripocionesBean.fechaFin}" timeZone="#{inscripocionesBean.zonaHoraria}"
 						pattern="dd/MM/yyyy HH:mm" hourFormat="24"
 						locale="es" showOn="button" navigator="true"
 						readonlyInput="true" yearRange="c-100:c+100"
