@@ -105,6 +105,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	public void finalizarInscripcion(Boolean aceptaTerminos, InscripcionContextoDTO contexto)
 			throws InscripcionException {
 		validarAceptaTerminos(aceptaTerminos);
+		validarLimiteReprobacionesParaFinalizar(contexto);
 		validarSeleccionMateriasSegunEstatusAcademico(contexto);
 		guardarInscripcion(contexto);
 		gestionarEnvioCorreoInscripcion(contexto);
@@ -700,8 +701,10 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		contexto.setCreditosTotalesPlan(creditosTotalesPlan);
 		contexto.setLimitesCargaAcademica(limitesCargaAcademica);
 		contexto.setEstadoAcademico(estadoAcademico);
+		contexto.setPermiteInscripcionLimiteReprobadas(permiteInscripcionTrasLimiteReprobadas());
 		contexto.setMensajeSeriacion(obtenerMensajeSeriacion(estadoAcademico));
-		contexto.setMensajeLimiteReprobacionesAlcanzado(obtenerMensajeLimiteReprobacionesAlcanzado(estadoAcademico));
+		contexto.setMensajeLimiteReprobacionesAlcanzado(obtenerMensajeLimiteReprobacionesAlcanzado(estadoAcademico,
+				contexto.getPermiteInscripcionLimiteReprobadas()));
 		return contexto;
 	}
 
@@ -879,6 +882,9 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private List<InscripcionMateriasDTO> excluirMateriasReprobadasConLimiteAlcanzado(
 			List<InscripcionMateriasDTO> materiasOfertadasSinAprobadas,
 			List<InscripcionMateriasReprobadasDTO> materiasReprobadas) {
+		if (permiteInscripcionTrasLimiteReprobadas()) {
+			return materiasOfertadasSinAprobadas;
+		}
 		Set<String> nombresMateriasReprobadasConLimiteAlcanzado = obtenerNombresMateriasReprobadasConLimiteAlcanzado(
 				materiasReprobadas);
 
@@ -892,8 +898,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private Set<String> obtenerNombresMateriasReprobadasConLimiteAlcanzado(
 			List<InscripcionMateriasReprobadasDTO> materiasReprobadas) {
 
-		return materiasReprobadas.stream().filter(
-				materia -> materia.getIntentosReprobados().equals(ConstantesGestor.LIMITE_REPROBACIONES_POR_MATERIA))
+		return materiasReprobadas.stream().filter(this::alcanzoLimiteReprobaciones)
 				.map(InscripcionMateriasReprobadasDTO::getNombrePrograma).map(this::normalizarNombreMateria)
 				.filter(nombre -> !nombre.isEmpty())
 				.collect(Collectors.toSet());
@@ -1530,47 +1535,61 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		return (totalHastaElMomento * 100.0) / totalCreditos;
 	}
 
-	private String obtenerMensajeLimiteReprobacionesAlcanzado(EstadoAcademicoDTO estadoAcademico) {
+	private String obtenerMensajeLimiteReprobacionesAlcanzado(EstadoAcademicoDTO estadoAcademico,
+			Boolean permiteInscripcion) {
 
 		List<InscripcionMateriasReprobadasDTO> materiasReprobadasConIntentos = estadoAcademico.getMateriasReprobadas();
-		Boolean esEstudianteNuevoIngreso = estadoAcademico.getEsNuevoIngreso();
-		Boolean esEstudianteRegular = estadoAcademico.getEsRegular();
-
-		if (esEstudianteNuevoIngreso || esEstudianteRegular) {
-			return "";
-		}
-
-		// Solo aplica para estudiantes que NO sean de nuevo ingreso y que sean
-		// IRREGULARES
-
 		List<String> materiasConLimiteDeReprobacionesAlcanzados = obtenerNombresMateriasQueAlcanzaronLimiteReprobaciones(
 				materiasReprobadasConIntentos);
 		if (!materiasConLimiteDeReprobacionesAlcanzados.isEmpty()) {
-			return crearMensajeLimiteReprobacionesAlcanzado(materiasConLimiteDeReprobacionesAlcanzados);
+			return crearMensajeLimiteReprobacionesAlcanzado(materiasConLimiteDeReprobacionesAlcanzados,
+					Boolean.TRUE.equals(permiteInscripcion));
 		}
 		return "";
 
 	}
 
-	private String crearMensajeLimiteReprobacionesAlcanzado(List<String> nombresMaterias) {
+	private String crearMensajeLimiteReprobacionesAlcanzado(List<String> nombresMaterias,
+			boolean permiteInscripcion) {
 
 		String materiasFormateadas = String.join(", ", nombresMaterias);
 
 		String prefijoMateria = nombresMaterias.size() > 1 ? "las materias: " : "la materia: ";
 
+		String resultado = permiteInscripcion
+				? "Cuenta con autorización para realizar una nueva inscripción."
+				: "No le es permitido realizar una nueva inscripción. Contacte a la mesa de ayuda para revisar su caso.";
+
 		String mensaje = String.format(
-				"Estimad(a/o) estudiante, dada su situación académica en la que ha reprobado %s%s más de %d veces, no le es permitido realizar una nueva inscripción. "
-						+ "Contacte a la mesa de ayuda para revisar su caso.",
-				prefijoMateria, materiasFormateadas, ConstantesGestor.LIMITE_REPROBACIONES_POR_MATERIA);
+				"Estimad(a/o) estudiante, ha alcanzado el límite de %d reprobaciones en %s%s. %s",
+				ConstantesGestor.LIMITE_REPROBACIONES_POR_MATERIA, prefijoMateria, materiasFormateadas, resultado);
 
 		return mensaje;
 	}
 
 	private List<String> obtenerNombresMateriasQueAlcanzaronLimiteReprobaciones(
 			List<InscripcionMateriasReprobadasDTO> materias) {
-		return materias.stream().filter(
-				materia -> materia.getIntentosReprobados().equals(ConstantesGestor.LIMITE_REPROBACIONES_POR_MATERIA))
+		return materias.stream().filter(this::alcanzoLimiteReprobaciones)
 				.map(InscripcionMateriasReprobadasDTO::getNombrePrograma).collect(Collectors.toList());
+	}
+
+	private boolean alcanzoLimiteReprobaciones(InscripcionMateriasReprobadasDTO materia) {
+		return materia != null && materia.getIntentosReprobados() != null
+				&& materia.getIntentosReprobados() >= ConstantesGestor.LIMITE_REPROBACIONES_POR_MATERIA;
+	}
+
+	private boolean permiteInscripcionTrasLimiteReprobadas() {
+		return inscripcionService.reglaInscripcionActiva(
+				ConstantesGestor.REGLA_PERMITE_INSCRIPCION_LIMITE_REPROBADAS);
+	}
+
+	private void validarLimiteReprobacionesParaFinalizar(InscripcionContextoDTO contexto)
+			throws InscripcionException {
+		List<String> materias = obtenerNombresMateriasQueAlcanzaronLimiteReprobaciones(
+				contexto.getEstadoAcademico().getMateriasReprobadas());
+		if (!materias.isEmpty() && !permiteInscripcionTrasLimiteReprobadas()) {
+			throw new InscripcionException(crearMensajeLimiteReprobacionesAlcanzado(materias, false));
+		}
 	}
 
 	private ResultadoElectivasDTO procesarMateriasElectivas(List<InscripcionMateriasDTO> materiasOfertadas,

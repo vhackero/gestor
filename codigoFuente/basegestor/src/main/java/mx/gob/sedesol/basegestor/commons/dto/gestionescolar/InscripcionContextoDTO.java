@@ -12,6 +12,7 @@ public class InscripcionContextoDTO {
 	private TerminosCondicionesDTO terminosCondiciones;
 	private String mensajeSeriacion;
 	private String mensajeLimiteReprobacionesAlcanzado;
+	private Boolean permiteInscripcionLimiteReprobadas;
 
 	public InscripcionPersonaDTO getInscripcionPersona() {
 		return inscripcionPersona;
@@ -67,6 +68,14 @@ public class InscripcionContextoDTO {
 
 	public void setMensajeLimiteReprobacionesAlcanzado(String mensajeLimiteReprobacionesAlcanzado) {
 		this.mensajeLimiteReprobacionesAlcanzado = mensajeLimiteReprobacionesAlcanzado;
+	}
+
+	public Boolean getPermiteInscripcionLimiteReprobadas() {
+		return permiteInscripcionLimiteReprobadas;
+	}
+
+	public void setPermiteInscripcionLimiteReprobadas(Boolean permiteInscripcionLimiteReprobadas) {
+		this.permiteInscripcionLimiteReprobadas = permiteInscripcionLimiteReprobadas;
 	}
 
 	public Long obtenerIdPersona() {

@@ -469,6 +469,15 @@
 													</h:commandLink></li>
 												</sec:authorize>
 											</ui:fragment>
+											<ui:fragment rendered="#{menuGestorBean.rolTienePermiso('CONF_RESTR_INS')}">
+												<sec:authorize access="hasPermission(null, 'CONF_RESTR_INS') ">
+													<li><h:commandLink action="#{menuGestorBean.navegaConfiguracionRestriccionesInscripcion}"
+															title="Configurar restricciones de inscripción">
+														<i class="fa fa-lock"></i>
+														<span class="m-label">Configurar restricciones</span>
+													</h:commandLink></li>
+												</sec:authorize>
+											</ui:fragment>
 
 										</ul></li>
 								</sec:authorize>

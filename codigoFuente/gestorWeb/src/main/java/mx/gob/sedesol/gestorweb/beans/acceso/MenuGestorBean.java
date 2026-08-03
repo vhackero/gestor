@@ -412,6 +412,11 @@ public class MenuGestorBean extends BaseBean {
 		return ConstantesGestorWeb.NAVEGA_CONFIGURACION_ELECTIVAS;
 	}
 
+	public String navegaConfiguracionRestriccionesInscripcion() {
+		logger.info("Navegando a pantalla de configuracion de restricciones de inscripcion");
+		return ConstantesGestorWeb.NAVEGA_CONFIGURACION_RESTRICCIONES_INSCRIPCION;
+	}
+
 	public String navegaAmbientesVirtualesAprendizaje() {
 		logger.info("Navegando a pantalla de ambientes virtuales de aprendizaje");
 		return ConstantesGestorWeb.NAVEGA_AMBIENTES_VIRTUALES_APRENDIZAJE;

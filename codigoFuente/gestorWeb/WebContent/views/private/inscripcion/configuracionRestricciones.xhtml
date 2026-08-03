@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sec="http://www.springframework.org/security/tags">
+
+	<ui:define name="head">
+		<style type="text/css">
+			.reglas-check .ui-chkbox-box {
+				width: 20px;
+				height: 20px;
+				border: 1px solid #777 !important;
+				background: #fff !important;
+				position: relative;
+			}
+			.reglas-check .ui-chkbox-box.ui-state-active {
+				background: #337ab7 !important;
+				border-color: #2e6da4 !important;
+			}
+			.reglas-check .ui-chkbox-box.ui-state-active:after {
+				content: "✓";
+				color: #fff;
+				font-size: 15px;
+				font-weight: bold;
+				position: absolute;
+				left: 3px;
+				top: -1px;
+			}
+			.reglas-check .ui-chkbox-icon {
+				display: none !important;
+			}
+		</style>
+	</ui:define>
+
+	<ui:define name="breadcrumb">
+		<li>Gestión de inscripción</li>
+		<li class="active">Configuración de restricciones</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<sec:authorize access="hasPermission(null, 'CONF_RESTR_INS')">
+			<h:form id="formRestricciones">
+				<p:messages id="mensajes" showDetail="true" closable="true" />
+				<h1>Configuración de restricciones de inscripción</h1>
+				<p:panel header="Reglas de inscripción" styleClass="fondoPrimario mt-2">
+					<p:dataTable id="tablaReglas" value="#{configuracionRestriccionesInscripcionBean.reglas}"
+						var="regla" emptyMessage="No existen reglas de inscripción configuradas.">
+						<p:column headerText="Clave">
+							<h:outputText value="#{regla.clave}" />
+						</p:column>
+						<p:column headerText="Descripción">
+							<h:outputText value="#{regla.descripcion}" />
+						</p:column>
+						<p:column headerText="Estado" style="text-align:center; width:160px;">
+							<p:selectBooleanCheckbox id="activa" value="#{regla.activa}" styleClass="reglas-check">
+								<p:ajax process="@this" update="estadoRegla" />
+							</p:selectBooleanCheckbox>
+							<h:panelGroup id="estadoRegla" layout="block" style="margin-top:5px;">
+								<span class="label #{regla.activa ? 'label-success' : 'label-default'}">
+									#{regla.activa ? 'Activa' : 'Inactiva'}
+								</span>
+							</h:panelGroup>
+						</p:column>
+						<p:column headerText="Acciones" style="text-align:center; width:150px;">
+							<p:commandButton value="Guardar" icon="fa fa-save"
+								action="#{configuracionRestriccionesInscripcionBean.guardar(regla)}"
+								ajax="false" />
+						</p:column>
+					</p:dataTable>
+					<p class="help-block mt-2">
+						Una regla activa permite el comportamiento descrito; una regla inactiva aplica la restricción correspondiente.
+					</p>
+				</p:panel>
+			</h:form>
+		</sec:authorize>
+	</ui:define>
+</ui:composition>

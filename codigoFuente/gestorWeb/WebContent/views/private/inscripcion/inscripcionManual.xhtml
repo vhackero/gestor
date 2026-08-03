@@ -74,7 +74,7 @@
 
 				<p:outputPanel styleClass="mt-2"
 					rendered="#{not empty inscripcionManualBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}">
-					<div class="alert alert-info mb-0" role="alert">#{inscripcionManualBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}</div>
+					<div class="alert alert-#{inscripcionManualBean.contextoInscripcion.permiteInscripcionLimiteReprobadas ? 'warning' : 'danger'} mb-0" role="alert">#{inscripcionManualBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}</div>
 				</p:outputPanel>
 
 				<div class="form-group mt-1">
@@ -146,7 +146,7 @@
 
 				<p:outputPanel id="panelFinalizar" styleClass="text-center mt-2">
 					<p:commandButton id="finalizarBtn"
-						disabled="#{inscripcionManualBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionManualBean.aceptaTerminos}"
+						disabled="#{(inscripcionManualBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionManualBean.aceptaTerminos) or (not empty inscripcionManualBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado and not inscripcionManualBean.contextoInscripcion.permiteInscripcionLimiteReprobadas)}"
 						value="#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.boton.finalizarInscripcion')}" update="@form :pnlMensaje"
 						action="#{inscripcionManualBean.finalizarInscripcion}"
 						styleClass="btn btn-primary" />
