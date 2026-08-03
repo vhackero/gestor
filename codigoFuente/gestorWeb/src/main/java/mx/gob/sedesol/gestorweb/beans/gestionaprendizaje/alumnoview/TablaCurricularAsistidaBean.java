@@ -912,6 +912,21 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         }
     }
 
+    public String getTituloPrincipalRiesgo() {
+        switch (resolverEscenarioRiesgoPanel()) {
+        case "SERIACION":
+            return "Factores de atención por seriación curricular";
+        case "BAJA":
+            return "Factores de reincorporación y oferta";
+        default:
+            return "Factores de atención";
+        }
+    }
+
+    public boolean isMostrarTituloFactoresAtencionRiesgo() {
+        return !StringUtils.equals(getTituloPrincipalRiesgo(), getTituloFactoresAtencionRiesgo());
+    }
+
     public List<String> getFactoresAtencionRiesgo() {
         List<String> factores = new ArrayList<String>();
         String periodo = getPeriodoReinscripcionObjetivo();

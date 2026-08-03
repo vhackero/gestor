@@ -1336,11 +1336,13 @@
                                             <div class="riesgo-nivel">
                                                 <i class="fa fa-warning" /> #{tablaCurricularAsistidaBean.etiquetaNivelRiesgoPanel}
                                             </div>
-                                            <h3>Riesgos</h3>
+                                            <h3>#{tablaCurricularAsistidaBean.tituloPrincipalRiesgo}</h3>
                                             <div>#{tablaCurricularAsistidaBean.resumenRiesgoPanel}</div>
 
                                             <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.factoresAtencionRiesgo}">
-                                                <div style="margin-top:18px;"><strong>#{tablaCurricularAsistidaBean.tituloFactoresAtencionRiesgo}</strong></div>
+                                                <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarTituloFactoresAtencionRiesgo}">
+                                                    <div style="margin-top:18px;"><strong>#{tablaCurricularAsistidaBean.tituloFactoresAtencionRiesgo}</strong></div>
+                                                </ui:fragment>
                                                 <ul>
                                                     <ui:repeat value="#{tablaCurricularAsistidaBean.factoresAtencionRiesgo}" var="factorAtencion">
                                                         <li>#{factorAtencion}</li>
