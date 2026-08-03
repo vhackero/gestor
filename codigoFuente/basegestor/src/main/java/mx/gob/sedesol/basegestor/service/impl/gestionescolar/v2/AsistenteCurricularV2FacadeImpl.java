@@ -15,7 +15,9 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DictamenCasoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ExpedienteMinimoCasoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ClasificacionCasoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AsistenteVirtualAccionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.MensajeInstitucionalContextualDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PanelAsistenteVirtualDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PatronConocimientoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ViabilidadTecnicaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
@@ -99,6 +101,7 @@ public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Fac
         ficha.setReglaAplicada(obtenerReglaAplicada(caso, ficha.getPatronesConocimiento()));
         ficha.setRequiereSeguimiento(Boolean.TRUE.equals(caso.getRequiereIntervencionHumana())
                 || Boolean.TRUE.equals(dictamen.getRequiereEscalamiento()));
+        ficha.setPanelAsistenteVirtual(construirPanelAsistenteVirtual(contexto, caso, ficha));
 
         if (!Boolean.TRUE.equals(expediente.getCompleto())) {
             ficha.getAlertas().add("El expediente minimo del caso esta incompleto.");
@@ -116,6 +119,331 @@ public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Fac
             ficha.getAlertas().addAll(diagnostico.getAlertasDiagnostico());
         }
         return ficha;
+    }
+
+    private PanelAsistenteVirtualDTO construirPanelAsistenteVirtual(ContextoAsistenteCurricularV2DTO contexto,
+            CasoAcademicoOperativoDTO caso, FichaIntegralCasoDTO ficha) {
+        PanelAsistenteVirtualDTO panel = new PanelAsistenteVirtualDTO();
+        String perfil = contexto != null && contexto.getPerfilConsulta() != null ? contexto.getPerfilConsulta() : "ESTUDIANTE";
+        panel.setPerfil(perfil);
+        panel.setEscenario(resolverEscenarioPanel(contexto, caso));
+        if ("GESTOR".equalsIgnoreCase(perfil)) {
+            construirPanelGestor(panel, contexto, caso, ficha);
+        } else {
+            construirPanelEstudiante(panel, contexto, caso, ficha);
+        }
+        aplicarSobrescriturasPanel(panel, ficha != null ? ficha.getMensajesContextuales() : null);
+        return panel;
+    }
+
+    private void construirPanelEstudiante(PanelAsistenteVirtualDTO panel, ContextoAsistenteCurricularV2DTO contexto,
+            CasoAcademicoOperativoDTO caso, FichaIntegralCasoDTO ficha) {
+        String escenario = panel.getEscenario();
+        String periodoObjetivo = valorTexto(contexto != null ? contexto.getPeriodoLectivoObjetivo() : null,
+                "próximo periodo de reinscripción");
+        int noAcreditadas = totalNoAcreditadas(contexto, caso);
+        int bloqueadas = totalBloqueadas(contexto, caso);
+        int antecedentes = totalAntecedentes(contexto, caso);
+        int pendientesBaja = totalPendientesBaja(contexto, caso);
+
+        panel.setMensajeOperativo(resolverMensajePanelEstudiante(ficha,
+                "Revisa tu diagnóstico académico y simula la carga para tu próximo periodo de reinscripción. Durante el periodo activo, podrás validar y confirmar tu selección final."));
+        panel.setEtiquetaResumen("Resumen diagnóstico");
+
+        if ("REGULAR".equals(escenario)) {
+            panel.setResumenTitulo("Situación académica regular");
+            panel.setResumenContenido("Conservas una situación académica regular sin unidades didácticas pendientes. Tu objetivo es seleccionar la carga del bloque/semestre correspondiente para mantener la continuidad de tu trayectoria académica.");
+            panel.getAcciones().add(crearAccion("QUE_DEBO_ELEGIR", "¿Qué debo elegir?",
+                    "Presentas una situación académica regular sin unidades didácticas pendientes. Tu atención prioritaria es acreditar la totalidad de unidades didácticas de tu semestre vigente para seleccionar la totalidad de tus unidades didácticas del próximo semestre.",
+                    1));
+            panel.getAcciones().add(crearAccion("VALIDAR_SERIACION", "Validar seriación",
+                    "No se identifican bloqueos por seriación en tu trayectoria actual. Puedes seleccionar la totalidad de las unidades didácticas ofertadas correspondientes a tu semestre activo.",
+                    2));
+            panel.getAcciones().add(crearAccion("SIMULAR_CARGA", "Simular carga",
+                    "Tu trayectoria se mantiene regular. Utiliza el simulador para proyectar tus unidades didácticas del próximo periodo "
+                            + periodoObjetivo
+                            + ", asegurando una distribución equilibrada de tu carga académica.",
+                    3));
+            panel.getAcciones().add(crearAccion("CONFIRMAR_SELECCION", "Confirmar selección",
+                    "Verifica que la carga proyectada cumpla con los créditos del periodo activo. Al estar al corriente, tu selección asegura el cumplimiento en tiempo y forma de tu Programa Educativo.",
+                    4));
+            return;
+        }
+
+        if ("SERIACION".equals(escenario)) {
+            panel.setResumenTitulo("Situación académica con irregularidad");
+            panel.setResumenContenido("Presentas " + antecedentes
+                    + " unidad(es) didáctica(s) antecedente(s) pendiente(s) que bloquean el registro de "
+                    + bloqueadas + " unidad(es) didáctica(s) posterior(es).");
+            panel.getAcciones().add(crearAccion("QUE_DEBO_ELEGIR", "¿Qué debo elegir?",
+                    "Presentas una situación irregular con seriación pendiente. Tu atención inmediata es dar prioridad de registro en cuanto se oferten.",
+                    1));
+            panel.getAcciones().add(crearAccion("VALIDAR_SERIACION", "Validar seriación",
+                    "Acreditar la unidad didáctica antecedente es requisito obligatorio para desbloquear las unidades didácticas subsecuentes.",
+                    2));
+            panel.getAcciones().add(crearAccion("SIMULAR_CARGA", "Simular carga",
+                    "El simulador reflejará únicamente las unidades didácticas disponibles que no requieran la seriación pendiente. Si la unidad didáctica antecedente no se oferta, puedes simular la carga con unidades didácticas optativas disponibles.",
+                    3));
+            panel.getAcciones().add(crearAccion("CONFIRMAR_SELECCION", "Confirmar selección",
+                    "Valida que hayas incluido la unidad didáctica seriada pendiente. Acreditar esta unidad didáctica te permitirá avanzar en tu trayectoria.",
+                    4));
+            return;
+        }
+
+        if ("BAJA".equals(escenario)) {
+            panel.setResumenTitulo("Situación académica actual: Reincorporación");
+            panel.setResumenContenido("Registras " + pendientesBaja
+                    + " unidad(es) didáctica(s) pendientes por reincorporación. Revisa la oferta educativa vigente para reactivar tu avance académico.");
+            panel.getAcciones().add(crearAccion("QUE_DEBO_ELEGIR", "¿Qué debo elegir?",
+                    "Te encuentras en reincorporación. Tu atención inmediata es seleccionar las unidades didácticas ofertadas en este periodo para reactivar tu trayectoria académica.",
+                    1));
+            panel.getAcciones().add(crearAccion("VALIDAR_SERIACION", "Validar seriación",
+                    "Verifica la disponibilidad de las unidades didácticas pendientes tras tu periodo de inactividad. Si una unidad didáctica obligatoria no se oferta, selecciona optativas para mantenerte como estudiante activo.",
+                    2));
+            panel.getAcciones().add(crearAccion("SIMULAR_CARGA", "Simular carga",
+                    "Proyecta una carga académica de acuerdo con tu disponibilidad para asegurar una reincorporación continua.",
+                    3));
+            panel.getAcciones().add(crearAccion("CONFIRMAR_SELECCION", "Confirmar selección",
+                    "Valida que hayas incluido las unidades didácticas pendientes por reincorporación. Acreditarlas te permitirá avanzar en tu trayectoria.",
+                    4));
+            return;
+        }
+
+        panel.setResumenTitulo("Situación académica con irregularidad");
+        panel.setResumenContenido("Presentas " + noAcreditadas
+                + " unidad(es) didáctica(s) pendiente(s) por regularizar. Tu prioridad es registrar estas unidades didácticas en cuanto se oferten.");
+        panel.getAcciones().add(crearAccion("QUE_DEBO_ELEGIR", "¿Qué debo elegir?",
+                "Presentas una situación académica con irregularidad con " + noAcreditadas
+                        + " unidad(es) didáctica(s) pendiente(s). Tu atención inmediata es dar prioridad de registro en cuanto se oferten.",
+                1));
+        panel.getAcciones().add(crearAccion("VALIDAR_SERIACION", "Validar seriación",
+                "Es necesario priorizar las unidades didácticas pendientes. Si tus unidades didácticas pendientes no se ofertan en este periodo, puedes seleccionar unidades optativas disponibles para mantener tu estatus activo.",
+                2));
+        panel.getAcciones().add(crearAccion("SIMULAR_CARGA", "Simular carga",
+                "Utiliza el simulador para integrar primero tus unidades didácticas no acreditadas, si no se ofertan, puedes registrar optativas. Considera que acumular unidades didácticas pendientes puede limitar la selección de unidades didácticas en periodos posteriores.",
+                3));
+        panel.getAcciones().add(crearAccion("CONFIRMAR_SELECCION", "Confirmar selección",
+                "Confirma que tu selección priorice las unidades didácticas pendientes por regularizar.",
+                4));
+    }
+
+    private void construirPanelGestor(PanelAsistenteVirtualDTO panel, ContextoAsistenteCurricularV2DTO contexto,
+            CasoAcademicoOperativoDTO caso, FichaIntegralCasoDTO ficha) {
+        panel.setMensajeOperativo("Apoyo para interpretar el caso y documentar la atención.");
+        panel.setEtiquetaResumen("Resumen técnico");
+        panel.setResumenTitulo(valorTexto(caso != null && caso.getDiagnostico() != null
+                ? caso.getDiagnostico().getSituacionAcademica() : null, "Caso académico operativo"));
+        panel.setResumenContenido(construirResumenTecnicoGestor(contexto, caso, ficha));
+        panel.getAcciones().add(crearAccion("RESUMEN_TECNICO", "Resumen técnico",
+                construirResumenTecnicoGestor(contexto, caso, ficha), 1));
+        panel.getAcciones().add(crearAccion("REGLA_APLICADA", "Regla aplicada",
+                construirReglaAplicadaGestor(caso, ficha), 2));
+        panel.getAcciones().add(crearAccion("PAQUETE_EVIDENCIA", "Paquete de evidencia",
+                construirPaqueteEvidenciaGestor(caso, ficha), 3));
+        panel.getAcciones().add(crearAccion("MENSAJE_SUGERIDO", "Mensaje sugerido",
+                valorTexto(ficha != null ? ficha.getMensajeGestor() : null,
+                        "Revisar la causa principal, validar evidencia y documentar la atención brindada."),
+                4));
+    }
+
+    private String resolverEscenarioPanel(ContextoAsistenteCurricularV2DTO contexto, CasoAcademicoOperativoDTO caso) {
+        if (esEscenarioBaja(caso)) {
+            return "BAJA";
+        }
+        if (totalBloqueadas(contexto, caso) > 0
+                || (caso != null && caso.getDiagnostico() != null
+                        && Boolean.TRUE.equals(caso.getDiagnostico().getSeriacionActiva()))) {
+            return "SERIACION";
+        }
+        if (totalNoAcreditadas(contexto, caso) <= 0
+                && valor(caso != null && caso.getDiagnostico() != null ? caso.getDiagnostico().getTotalOmisiones() : null) <= 0
+                && totalBloqueadas(contexto, caso) <= 0) {
+            return "REGULAR";
+        }
+        return "IRREGULAR";
+    }
+
+    private boolean esEscenarioBaja(CasoAcademicoOperativoDTO caso) {
+        String tipo = caso != null && caso.getTipoCaso() != null ? caso.getTipoCaso().getClave() : null;
+        String motivo = caso != null && caso.getMotivoRestriccion() != null ? caso.getMotivoRestriccion().getClave() : null;
+        String situacion = caso != null && caso.getDiagnostico() != null ? caso.getDiagnostico().getSituacionAcademica() : null;
+        return contiene(tipo, "BAJA") || contiene(tipo, "REINCORPOR") || contiene(motivo, "BAJA")
+                || contiene(motivo, "REINCORPOR") || contiene(situacion, "BAJA")
+                || contiene(situacion, "REINCORPOR");
+    }
+
+    private int totalNoAcreditadas(ContextoAsistenteCurricularV2DTO contexto, CasoAcademicoOperativoDTO caso) {
+        if (contexto != null && contexto.getTotalNoAcreditadasVisibles() != null) {
+            return valor(contexto.getTotalNoAcreditadasVisibles());
+        }
+        return valor(caso != null && caso.getDiagnostico() != null ? caso.getDiagnostico().getTotalNoAcreditadas() : null);
+    }
+
+    private int totalBloqueadas(ContextoAsistenteCurricularV2DTO contexto, CasoAcademicoOperativoDTO caso) {
+        if (contexto != null && contexto.getTotalBloqueadasVisibles() != null) {
+            return valor(contexto.getTotalBloqueadasVisibles());
+        }
+        return valor(caso != null && caso.getDiagnostico() != null ? caso.getDiagnostico().getTotalBloqueadas() : null);
+    }
+
+    private int totalAntecedentes(ContextoAsistenteCurricularV2DTO contexto, CasoAcademicoOperativoDTO caso) {
+        if (contexto != null && contexto.getTotalAntecedentesPendientes() != null) {
+            return valor(contexto.getTotalAntecedentesPendientes());
+        }
+        Integer pendientesCriticas = caso != null && caso.getDiagnostico() != null
+                ? caso.getDiagnostico().getTotalPendientesCriticas() : null;
+        if (pendientesCriticas != null && pendientesCriticas.intValue() > 0) {
+            return pendientesCriticas.intValue();
+        }
+        return totalBloqueadas(contexto, caso) > 0 ? 1 : 0;
+    }
+
+    private int totalPendientesBaja(ContextoAsistenteCurricularV2DTO contexto, CasoAcademicoOperativoDTO caso) {
+        if (contexto != null && contexto.getTotalPendientesBaja() != null) {
+            return valor(contexto.getTotalPendientesBaja());
+        }
+        return valor(caso != null && caso.getDiagnostico() != null ? caso.getDiagnostico().getTotalPendientesCriticas() : null);
+    }
+
+    private AsistenteVirtualAccionDTO crearAccion(String clave, String titulo, String respuesta, int orden) {
+        AsistenteVirtualAccionDTO accion = new AsistenteVirtualAccionDTO();
+        accion.setClave(clave);
+        accion.setTitulo(titulo);
+        accion.setRespuesta(respuesta);
+        accion.setOrden(Integer.valueOf(orden));
+        return accion;
+    }
+
+    private String construirResumenTecnicoGestor(ContextoAsistenteCurricularV2DTO contexto, CasoAcademicoOperativoDTO caso,
+            FichaIntegralCasoDTO ficha) {
+        StringBuilder texto = new StringBuilder();
+        texto.append("Situación académica: ")
+                .append(valorTexto(caso != null && caso.getDiagnostico() != null
+                        ? caso.getDiagnostico().getSituacionAcademica() : null, "Sin clasificar"))
+                .append(". ");
+        texto.append("Riesgo actual: ")
+                .append(valorTexto(caso != null && caso.getDiagnostico() != null
+                        ? caso.getDiagnostico().getRiesgoActual() : null, "Sin clasificar"))
+                .append(". ");
+        texto.append("Restricción dominante: ")
+                .append(valorTexto(caso != null && caso.getDiagnostico() != null
+                        ? caso.getDiagnostico().getRestriccionDominante() : null, "Sin restricción dominante"))
+                .append(". ");
+        texto.append("Periodo operativo: ")
+                .append(valorTexto(contexto != null ? contexto.getPeriodoOperativo() : null, "Sin periodo"))
+                .append(". ");
+        texto.append("Acción sugerida: ")
+                .append(valorTexto(ficha != null ? ficha.getAccionSugerida() : null, "Sin acción sugerida"))
+                .append(".");
+        return texto.toString().trim();
+    }
+
+    private String construirReglaAplicadaGestor(CasoAcademicoOperativoDTO caso, FichaIntegralCasoDTO ficha) {
+        StringBuilder texto = new StringBuilder();
+        texto.append("Regla aplicada: ")
+                .append(valorTexto(ficha != null ? ficha.getReglaAplicada() : null, "Sin regla aplicada"))
+                .append(". ");
+        if (caso != null && caso.getDiagnostico() != null && caso.getDiagnostico().getReglasAplicadas() != null
+                && !caso.getDiagnostico().getReglasAplicadas().isEmpty()) {
+            texto.append("Reglas del diagnóstico: ")
+                    .append(String.join("; ", caso.getDiagnostico().getReglasAplicadas()))
+                    .append(".");
+        } else {
+            texto.append("No se identificaron reglas adicionales del diagnóstico.");
+        }
+        return texto.toString().trim();
+    }
+
+    private String construirPaqueteEvidenciaGestor(CasoAcademicoOperativoDTO caso, FichaIntegralCasoDTO ficha) {
+        StringBuilder texto = new StringBuilder();
+        texto.append("Integrar expediente mínimo, tipo de caso, motivo de restricción, dictamen y evidencia de UD relacionadas.");
+        if (caso != null && caso.getDiagnostico() != null) {
+            texto.append(" No acreditadas: ").append(valor(caso.getDiagnostico().getTotalNoAcreditadas())).append(".");
+            texto.append(" Bloqueadas: ").append(valor(caso.getDiagnostico().getTotalBloqueadas())).append(".");
+        }
+        if (ficha != null && Boolean.TRUE.equals(ficha.getRequiereSeguimiento())) {
+            texto.append(" El caso requiere seguimiento académico.");
+        }
+        return texto.toString().trim();
+    }
+
+    private String resolverMensajePanelEstudiante(FichaIntegralCasoDTO ficha, String valorDefecto) {
+        if (ficha != null && ficha.getMensajesContextuales() != null) {
+            for (MensajeInstitucionalContextualDTO mensaje : ficha.getMensajesContextuales()) {
+                if (mensaje != null && esTipoPanel(mensaje.getTipo(), "PANEL_OP", "PANEL_MENSAJE_OPERATIVO")
+                        && mensaje.getMensaje() != null && !mensaje.getMensaje().trim().isEmpty()) {
+                    return mensaje.getMensaje().trim();
+                }
+            }
+        }
+        return valorDefecto;
+    }
+
+    private void aplicarSobrescriturasPanel(PanelAsistenteVirtualDTO panel,
+            List<MensajeInstitucionalContextualDTO> mensajesContextuales) {
+        if (panel == null || mensajesContextuales == null || mensajesContextuales.isEmpty()) {
+            return;
+        }
+        aplicarResumenPanel(panel, mensajesContextuales);
+        if ("GESTOR".equalsIgnoreCase(panel.getPerfil())) {
+            aplicarAccionPanel(panel, mensajesContextuales, "RESUMEN_TECNICO", "PANEL_RTEC", "PANEL_ACCION_RESUMEN_TECNICO");
+            aplicarAccionPanel(panel, mensajesContextuales, "REGLA_APLICADA", "PANEL_REGLA", "PANEL_ACCION_REGLA_APLICADA");
+            aplicarAccionPanel(panel, mensajesContextuales, "PAQUETE_EVIDENCIA", "PANEL_EVID", "PANEL_ACCION_PAQUETE_EVIDENCIA");
+            aplicarAccionPanel(panel, mensajesContextuales, "MENSAJE_SUGERIDO", "PANEL_MSG", "PANEL_ACCION_MENSAJE_SUGERIDO");
+            return;
+        }
+        aplicarAccionPanel(panel, mensajesContextuales, "QUE_DEBO_ELEGIR", "PANEL_QDE", "PANEL_ACCION_QUE_DEBO_ELEGIR");
+        aplicarAccionPanel(panel, mensajesContextuales, "VALIDAR_SERIACION", "PANEL_SER", "PANEL_ACCION_VALIDAR_SERIACION");
+        aplicarAccionPanel(panel, mensajesContextuales, "SIMULAR_CARGA", "PANEL_SIM", "PANEL_ACCION_SIMULAR_CARGA");
+        aplicarAccionPanel(panel, mensajesContextuales, "CONFIRMAR_SELECCION", "PANEL_CON", "PANEL_ACCION_CONFIRMAR_SELECCION");
+    }
+
+    private void aplicarResumenPanel(PanelAsistenteVirtualDTO panel,
+            List<MensajeInstitucionalContextualDTO> mensajesContextuales) {
+        for (MensajeInstitucionalContextualDTO mensaje : mensajesContextuales) {
+            if (mensaje == null || !esTipoPanel(mensaje.getTipo(), "PANEL_RES", "PANEL_RESUMEN")) {
+                continue;
+            }
+            if (mensaje.getTitulo() != null && !mensaje.getTitulo().trim().isEmpty()) {
+                panel.setResumenTitulo(mensaje.getTitulo().trim());
+            }
+            if (mensaje.getMensaje() != null && !mensaje.getMensaje().trim().isEmpty()) {
+                panel.setResumenContenido(mensaje.getMensaje().trim());
+            }
+            break;
+        }
+    }
+
+    private void aplicarAccionPanel(PanelAsistenteVirtualDTO panel,
+            List<MensajeInstitucionalContextualDTO> mensajesContextuales, String claveAccion, String... tiposMensaje) {
+        if (panel == null || panel.getAcciones() == null) {
+            return;
+        }
+        for (AsistenteVirtualAccionDTO accion : panel.getAcciones()) {
+            if (accion == null || !claveAccion.equalsIgnoreCase(accion.getClave())) {
+                continue;
+            }
+            for (MensajeInstitucionalContextualDTO mensaje : mensajesContextuales) {
+                if (mensaje != null && esTipoPanel(mensaje.getTipo(), tiposMensaje)
+                        && mensaje.getMensaje() != null && !mensaje.getMensaje().trim().isEmpty()) {
+                    accion.setRespuesta(mensaje.getMensaje().trim());
+                    return;
+                }
+            }
+        }
+    }
+
+    private boolean esTipoPanel(String tipo, String... tiposCompatibles) {
+        if (tipo == null || tipo.trim().isEmpty() || tiposCompatibles == null) {
+            return false;
+        }
+        for (String tipoCompatible : tiposCompatibles) {
+            if (tipoCompatible != null && !tipoCompatible.trim().isEmpty()
+                    && tipoCompatible.equalsIgnoreCase(tipo.trim())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private CasoAcademicoOperativoDTO resolverCaso(ContextoAsistenteCurricularV2DTO contexto) throws InscripcionException {
@@ -619,6 +947,10 @@ public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Fac
             return "";
         }
         return texto.toUpperCase().replaceAll("[^A-Z0-9 ]", " ").replaceAll("\\s+", " ").trim();
+    }
+
+    private String valorTexto(String valor, String valorDefecto) {
+        return valor != null && !valor.trim().isEmpty() ? valor.trim() : valorDefecto;
     }
 
     private int valor(Integer numero) {
