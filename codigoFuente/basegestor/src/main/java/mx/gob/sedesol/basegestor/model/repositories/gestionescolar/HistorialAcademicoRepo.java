@@ -197,7 +197,9 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				+ "        INNER JOIN tbl_grupos gpro ON gpro.id = rgp.id_grupo\r\n"
 				+ "        INNER JOIN tbl_eventos te ON te.id_evento = gpro.id_evento\r\n"
 				+ "        WHERE gpro.id =  g.id AND  rpr.id_rol = 3 AND (tp.sso_idUsuario NOT LIKE '%.%' AND tp.sso_idUsuario NOT LIKE 'ES%' AND (tp.sso_idUsuario LIKE 'DL%' OR tp.sso_idUsuario LIKE 'FA%'))) docente,\r\n"
-				+ "        CONCAT('SIN ASESOR ASIGNADO') asesor\r\n"
+				+ "        CONCAT('SIN ASESOR ASIGNADO') asesor, rmp.niveles AS niveles_estructura, "
+				+ "tmc.nombre AS estructura_0, tmc2.nombre AS estructura_1, "
+				+ "tmc3.nombre AS estructura_2, tmc4.nombre AS estructura_3\r\n"
 				+ "                  FROM rel_grupo_participante gp\r\n"
 				+ "                  INNER JOIN tbl_grupos g on g.id = gp.id_grupo\r\n"
 				+ "                  INNER JOIN tbl_persona t on t.id_persona = gp.id_persona_participante\r\n"
@@ -207,6 +209,10 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				+ "                  INNER JOIN tbl_planes pl ON pl.id_plan = fd.id_plan\r\n"
 				+ "					 INNER JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion\r\n"
 				+ "					 LEFT JOIN tbl_malla_curricular tmc2 ON tmc2.id = tmc.id_padre\r\n"
+				+ "                     LEFT JOIN tbl_malla_curricular tmc3 ON tmc3.id = tmc2.id_padre\r\n"
+				+ "                     LEFT JOIN tbl_malla_curricular tmc4 ON tmc4.id = tmc3.id_padre\r\n"
+				+ "                  LEFT JOIN rel_malla_plan rmp ON rmp.id_plan = pl.id_plan AND rmp.activo = 1 "
+				+ "AND rmp.id = (SELECT MAX(rmp2.id) FROM rel_malla_plan rmp2 WHERE rmp2.id_plan = pl.id_plan AND rmp2.activo = 1)\r\n"
 				+ "WHERE\r\n"
 				+ "  c.id = :idEstatusEc AND t.id_persona = :id_persona AND g.acta_cerrada = 0";
 
@@ -232,7 +238,10 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 	public List<TiraMateriaDTO> consultaInscripcionesPeriodoMasReciente(Long idPersona) {
 		List<TiraMateriaDTO> resultado = new ArrayList<TiraMateriaDTO>();
 		String consulta = "SELECT ti.id, ti.clave_asig, CAST(ti.semestre AS CHAR), "
-				+ "COALESCE(tmc.nombre, ti.bloque), ti.asignatura "
+				+ "COALESCE(tmc.nombre, ti.bloque) AS bloque_inscripcion, ti.asignatura, "
+				+ "rmp.niveles AS niveles_estructura, tmc.nombre AS estructura_0, "
+				+ "tmc2.nombre AS estructura_1, tmc3.nombre AS estructura_2, "
+				+ "tmc4.nombre AS estructura_3 "
 				+ "FROM tbl_inscripciones ti "
 				+ "INNER JOIN (SELECT fecha_inicio, fecha_finalizacion "
 				+ "            FROM tbl_periodos_inscripcion "
@@ -241,6 +250,11 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				+ "       AND ti.fecha_registro <= periodo.fecha_finalizacion "
 				+ "LEFT JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = ti.idprograma "
 				+ "LEFT JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion "
+				+ "LEFT JOIN tbl_malla_curricular tmc2 ON tmc2.id = tmc.id_padre "
+				+ "LEFT JOIN tbl_malla_curricular tmc3 ON tmc3.id = tmc2.id_padre "
+				+ "LEFT JOIN tbl_malla_curricular tmc4 ON tmc4.id = tmc3.id_padre "
+				+ "LEFT JOIN rel_malla_plan rmp ON rmp.id_plan = ti.idplan AND rmp.activo = 1 "
+				+ "AND rmp.id = (SELECT MAX(rmp2.id) FROM rel_malla_plan rmp2 WHERE rmp2.id_plan = ti.idplan AND rmp2.activo = 1) "
 				+ "WHERE ti.Idpersona = :idPersona "
 				+ "ORDER BY ti.id";
 
@@ -254,9 +268,33 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 			materia.setSemestre(getStringValue(registro[2]));
 			materia.setBloque(getStringValue(registro[3]));
 			materia.setGrupo(getStringValue(registro[4]));
+			materia.setEstructurasCurriculares(construirEstructurasCurriculares(registro, 5));
 			resultado.add(materia);
 		}
 		return resultado;
+	}
+
+	@Override
+	public List<String> consultaNombresEstructurasCurriculares(Long idPersona) {
+		List<String> nombres = new ArrayList<String>();
+		String consulta = "SELECT rmp.nombre_estructuras, rmp.nombre_subestructuras_1, "
+				+ "rmp.nombre_subestructuras_2, rmp.nombre_subestructuras_3, rmp.niveles "
+				+ "FROM tbl_persona_aspirante tpa "
+				+ "INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpa.id_convocatoria AND tc.activo = 1 "
+				+ "INNER JOIN rel_malla_plan rmp ON rmp.id_plan = tpa.id_plan AND rmp.activo = 1 "
+				+ "WHERE tpa.id_persona = :idPersona "
+				+ "ORDER BY tpa.id_persona_aspirante DESC, rmp.id DESC LIMIT 1";
+		Query query = entityManager.createNativeQuery(consulta);
+		query.setParameter("idPersona", idPersona);
+		List<Object[]> registros = query.getResultList();
+		if (registros.isEmpty()) return nombres;
+		Object[] registro = registros.get(0);
+		int niveles = obtenerEntero(registro[4]);
+		agregarNombreEstructura(nombres, registro[0]);
+		if (niveles >= 1) agregarNombreEstructura(nombres, registro[1]);
+		if (niveles >= 2) agregarNombreEstructura(nombres, registro[2]);
+		if (niveles >= 3) agregarNombreEstructura(nombres, registro[3]);
+		return nombres;
 	}
 
 	private TiraMateriaDTO creaDtoconsultaTiraMaterias(Object[] obj) {
@@ -270,8 +308,33 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 		regresa.setGrupo(getStringValue(obj[4]));
 		regresa.setDocente(getStringValue(obj[5]));
 		regresa.setAsesor(getStringValue(obj[6]));
+		regresa.setEstructurasCurriculares(construirEstructurasCurriculares(obj, 7));
 
 		return regresa;
+	}
+
+	private List<String> construirEstructurasCurriculares(Object[] registro, int indiceNiveles) {
+		List<String> estructuras = new ArrayList<String>();
+		int niveles = obtenerEntero(registro[indiceNiveles]);
+		for (int nivel = niveles; nivel >= 0; nivel--) {
+			int indiceValor = indiceNiveles + 1 + nivel;
+			estructuras.add(indiceValor < registro.length ? valorEstructura(registro[indiceValor]) : "-");
+		}
+		return estructuras;
+	}
+
+	private int obtenerEntero(Object valor) {
+		return valor instanceof Number ? ((Number) valor).intValue() : 0;
+	}
+
+	private String valorEstructura(Object valor) {
+		String texto = getStringValue(valor);
+		return texto == null || texto.trim().isEmpty() ? "-" : texto;
+	}
+
+	private void agregarNombreEstructura(List<String> nombres, Object valor) {
+		String nombre = getStringValue(valor);
+		if (nombre != null && !nombre.trim().isEmpty()) nombres.add(nombre);
 	}
 
 	@Override

@@ -79,21 +79,14 @@
 										value="#{participante.grupo.evento.catModalidadPlanPrograma.nombre}" />
 								</p:column>
 
-								<p:column styleClass="text-center"
-									sortBy="#{participante.semestre}">
+								<p:columns value="#{misCursosBean.nombresEstructurasCurriculares}"
+									var="nombreEstructura" columnIndexVar="indiceEstructura"
+									styleClass="text-center">
 									<f:facet name="header">
-										<h:outputText value="#{sistema.obtenerTexto('gw.home.col.semestre')}" />
+										<h:outputText value="#{nombreEstructura}" />
 									</f:facet>
-									<h:outputText value="#{participante.semestre}" />
-								</p:column>
-
-								<p:column styleClass="text-center"
-									sortBy="#{participante.bloque}">
-									<f:facet name="header">
-										<h:outputText value="#{sistema.obtenerTexto('gw.home.col.bloque')}" />
-									</f:facet>
-									<h:outputText value="#{participante.bloque}" />
-								</p:column>
+									<h:outputText value="#{misCursosBean.obtenerValorEstructura(participante, indiceEstructura)}" />
+								</p:columns>
 								<!-- Porcentaje de avance -->
 								<p:column styleClass="text-center">
 									<f:facet name="header">

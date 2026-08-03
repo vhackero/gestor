@@ -79,20 +79,20 @@
 								<h:outputText
 									value="#{empty participante.grupo.evento.catModalidadPlanPrograma.nombre ? '-' : participante.grupo.evento.catModalidadPlanPrograma.nombre}" />
 							</p:column>
+							<p:columns value="#{misCursosBean.nombresEstructurasCurriculares}"
+								var="nombreEstructura" columnIndexVar="indiceEstructura"
+								styleClass="text-center">
+								<f:facet name="header">
+									<h:outputText value="#{nombreEstructura}" />
+								</f:facet>
+								<h:outputText value="#{misCursosBean.obtenerValorEstructura(participante, indiceEstructura)}" />
+							</p:columns>
 							<!-- Clave -->
 							<p:column styleClass="text-center" sortBy="#{participante.clave}">
 								<f:facet name="header">
 									<h:outputText value="#{sistema.obtenerTexto('gw.alumno.misCursos.columna.clave')}" />
 								</f:facet>
 								<h:outputText value="#{empty participante.clave ? '-' : participante.clave}" />
-							</p:column>
-							<!-- Bloque / Modulo -->
-							<p:column styleClass="text-center"
-								sortBy="#{participante.bloque}">
-								<f:facet name="header">
-									<h:outputText value="#{sistema.obtenerTexto('gw.alumno.misCursos.columna.bloque')}" />
-								</f:facet>
-								<h:outputText value="#{empty participante.bloque ? '-' : participante.bloque}" />
 							</p:column>
 							<!-- Grupo -->
 							<p:column styleClass="text-center"

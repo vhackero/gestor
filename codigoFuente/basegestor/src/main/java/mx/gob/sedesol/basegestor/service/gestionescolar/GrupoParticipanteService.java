@@ -44,6 +44,8 @@ public interface GrupoParticipanteService {
 
     List<RelGrupoParticipanteDTO> obtenerTiraMateriasConsolidada(Long idParticipante,
             List<RelGrupoParticipanteDTO> materiasMatriculadas);
+
+	List<String> obtenerNombresEstructurasCurriculares(Long idParticipante);
     
     List<RelGrupoParticipanteDTO> obtenEvtsEnLineayMixtosPorIdParticipante(Long idParticipante,Integer idEstatusEc);
     

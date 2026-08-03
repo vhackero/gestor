@@ -117,6 +117,7 @@ public class MisCursosBean extends BaseBean {
 	private List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion;
 	private List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion2;
 	private List<RelGrupoParticipanteDTO> tiraMateriasConsolidada;
+	private List<String> nombresEstructurasCurriculares;
 
 	private List<EventoCapacitacionDTO> eventoCapacitacionList;
 	private CatalogoComunDTO estatusEcSeleccionado;
@@ -218,6 +219,8 @@ public class MisCursosBean extends BaseBean {
 
 		tiraMateriasConsolidada = grupoParticipanteService.obtenerTiraMateriasConsolidada(
 				usuarioEnSesion.getIdPersona(), participanteEventosCapacitacionEnEjecucion2);
+		nombresEstructurasCurriculares = grupoParticipanteService
+				.obtenerNombresEstructurasCurriculares(usuarioEnSesion.getIdPersona());
 		
 		long tTiraBajaIni = System.currentTimeMillis();
 		tiraMateriasBaja = grupoParticipanteService.consultaTiraMateriasBaja(usuarioEnSesion.getIdPersona());
@@ -303,7 +306,7 @@ public class MisCursosBean extends BaseBean {
 			MisCursosSnapshotContext.guardarSnapshot(getSession(),
 					new MisCursosSnapshot(usuarioEnSesion.getIdPersona(), catEstadoEventoCapacitacionList,
 							participanteEventosCapacitacionEnEjecucion, participanteEventosCapacitacionEnEjecucion2,
-							tiraMateriasConsolidada,
+							tiraMateriasConsolidada, nombresEstructurasCurriculares,
 							eventoCapacitacionList, estatusEcSeleccionado, relEncuestaUsuarioEvtConcList,
 							relEncuestaUsuarioEvtEnEjecList, encuestaTipoList, tipoEncuestaSeleccionado, idEstatusSeleccionado,
 							esColumnaCompetenciasVisible, avaList, tiraMaterias, tiraMateriasBaja,
@@ -385,6 +388,7 @@ public class MisCursosBean extends BaseBean {
 		this.participanteEventosCapacitacionEnEjecucion = snapshot.getParticipanteEventosCapacitacionEnEjecucion();
 		this.participanteEventosCapacitacionEnEjecucion2 = snapshot.getParticipanteEventosCapacitacionEnEjecucion2();
 		this.tiraMateriasConsolidada = snapshot.getTiraMateriasConsolidada();
+		this.nombresEstructurasCurriculares = snapshot.getNombresEstructurasCurriculares();
 		this.eventoCapacitacionList = snapshot.getEventoCapacitacionList();
 		this.estatusEcSeleccionado = snapshot.getEstatusEcSeleccionado();
 		this.relEncuestaUsuarioEvtConcList = snapshot.getRelEncuestaUsuarioEvtConcList();
@@ -861,6 +865,19 @@ public class MisCursosBean extends BaseBean {
 
 	public void setTiraMateriasConsolidada(List<RelGrupoParticipanteDTO> tiraMateriasConsolidada) {
 		this.tiraMateriasConsolidada = tiraMateriasConsolidada;
+	}
+
+	public List<String> getNombresEstructurasCurriculares() {
+		return nombresEstructurasCurriculares;
+	}
+
+	public String obtenerValorEstructura(RelGrupoParticipanteDTO participante, int indice) {
+		if (participante == null || participante.getEstructurasCurriculares() == null
+				|| indice < 0 || indice >= participante.getEstructurasCurriculares().size()) {
+			return "-";
+		}
+		String valor = participante.getEstructurasCurriculares().get(indice);
+		return valor == null || valor.trim().isEmpty() ? "-" : valor;
 	}
 
 	public Boolean getEsColumnaCompetenciasVisible() {

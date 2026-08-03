@@ -73,6 +73,7 @@ public final class MisCursosSnapshotContext {
 		private final List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion;
 		private final List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion2;
 		private final List<RelGrupoParticipanteDTO> tiraMateriasConsolidada;
+		private final List<String> nombresEstructurasCurriculares;
 		private final List<EventoCapacitacionDTO> eventoCapacitacionList;
 		private final CatalogoComunDTO estatusEcSeleccionado;
 		private final List<RelEncuestaUsuarioDTO> relEncuestaUsuarioEvtConcList;
@@ -90,6 +91,7 @@ public final class MisCursosSnapshotContext {
 				List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion,
 				List<RelGrupoParticipanteDTO> participanteEventosCapacitacionEnEjecucion2,
 				List<RelGrupoParticipanteDTO> tiraMateriasConsolidada,
+				List<String> nombresEstructurasCurriculares,
 				List<EventoCapacitacionDTO> eventoCapacitacionList, CatalogoComunDTO estatusEcSeleccionado,
 				List<RelEncuestaUsuarioDTO> relEncuestaUsuarioEvtConcList,
 				List<RelEncuestaUsuarioDTO> relEncuestaUsuarioEvtEnEjecList,
@@ -102,6 +104,7 @@ public final class MisCursosSnapshotContext {
 			this.participanteEventosCapacitacionEnEjecucion = participanteEventosCapacitacionEnEjecucion;
 			this.participanteEventosCapacitacionEnEjecucion2 = participanteEventosCapacitacionEnEjecucion2;
 			this.tiraMateriasConsolidada = tiraMateriasConsolidada;
+			this.nombresEstructurasCurriculares = nombresEstructurasCurriculares;
 			this.eventoCapacitacionList = eventoCapacitacionList;
 			this.estatusEcSeleccionado = estatusEcSeleccionado;
 			this.relEncuestaUsuarioEvtConcList = relEncuestaUsuarioEvtConcList;
@@ -135,6 +138,10 @@ public final class MisCursosSnapshotContext {
 
 		public List<RelGrupoParticipanteDTO> getTiraMateriasConsolidada() {
 			return tiraMateriasConsolidada;
+		}
+
+		public List<String> getNombresEstructurasCurriculares() {
+			return nombresEstructurasCurriculares;
 		}
 
 		public List<EventoCapacitacionDTO> getEventoCapacitacionList() {

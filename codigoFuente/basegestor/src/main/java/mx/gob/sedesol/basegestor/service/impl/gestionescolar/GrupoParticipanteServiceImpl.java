@@ -45,6 +45,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
+import mx.gob.sedesol.basegestor.commons.utils.ParametrosSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
 import mx.gob.sedesol.basegestor.model.entities.admin.TblPersona;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.CatEstadoEventoCapacitacion;
@@ -236,7 +237,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 				List<AlumnoGrupo> listaAlumnosGrupo = generarAlumnosGrupo(grupo.getIdMoodle(), idPersonaLms);
 
 				try {
-					rolesWS.enrolarEstudiantes(listaEnrol);
+					rolesWS.enrolarEstudiantes(listaEnrol, obtenerRolEstudianteMoodle());
 					usuariosGrupoWS.agregarUsuariosGrupo(listaAlumnosGrupo);
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
@@ -376,13 +377,27 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 			RolesWS rolesWS = new RolesWS(parametroWSMoodleDTO);
 			UsuariosGrupoWS usuariosGrupoWS = new UsuariosGrupoWS(parametroWSMoodleDTO);
 
-			rolesWS.enrolarEstudiantes(listaEnrol);
+			rolesWS.enrolarEstudiantes(listaEnrol, obtenerRolEstudianteMoodle());
 			usuariosGrupoWS.agregarUsuariosGrupo(listaAlumnosGrupo);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			correcto = false;
 		}
 		return correcto;
+	}
+
+	private int obtenerRolEstudianteMoodle() {
+		String valor = parametroSistemaService
+				.obtenerParametro(ParametrosSistemaEnum.PS_ROL_MATRICULACION_USUARIO_MOODLE.getClave());
+		try {
+			int idRol = Integer.parseInt(valor != null ? valor.trim() : "");
+			if (idRol > 0) {
+				return idRol;
+			}
+		} catch (NumberFormatException e) {
+		}
+		logger.warn("El parametro ROL_MATRICULACION_USUARIO_MOODLE no contiene un entero positivo valido; se utilizara el rol 5");
+		return 5;
 	}
 
 	private List<AlumnoGrupo> generarAlumnosGrupo(Integer idGrupoMoodle, Integer idPersonaMoodle) {
@@ -697,12 +712,18 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 					relGrupoParticipanteDTO.setNombre(tiraMateriaDTO2.getGrupo());
 					relGrupoParticipanteDTO.setDocente(tiraMateriaDTO2.getDocente());
 					relGrupoParticipanteDTO.setAsesor(tiraMateriaDTO2.getAsesor());
+					relGrupoParticipanteDTO.setEstructurasCurriculares(tiraMateriaDTO2.getEstructurasCurriculares());
 				}
 			}
 
 		}
 
 		return listaGrupoParticipante1;
+	}
+
+	@Override
+	public List<String> obtenerNombresEstructurasCurriculares(Long idParticipante) {
+		return iHistorialAcademicoRepo.consultaNombresEstructurasCurriculares(idParticipante);
 	}
 
 	@Override
@@ -736,6 +757,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 			pendiente.setClave(valorOGuion(inscrita.getClave()));
 			pendiente.setSemestre(valorOGuion(inscrita.getSemestre()));
 			pendiente.setBloque(valorOGuion(inscrita.getBloque()));
+			pendiente.setEstructurasCurriculares(inscrita.getEstructurasCurriculares());
 			pendiente.setDocente("-");
 			pendiente.setAsesor("-");
 

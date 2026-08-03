@@ -41,6 +41,7 @@ public class RelGrupoParticipanteDTO implements Serializable {
 	private String nombre;
 	private String docente;
 	private String asesor;
+	private List<String> estructurasCurriculares = new ArrayList<String>();
 	
 	
 	
@@ -283,6 +284,14 @@ public class RelGrupoParticipanteDTO implements Serializable {
 
 	public void setAsesor(String asesor) {
 		this.asesor = asesor;
+	}
+
+	public List<String> getEstructurasCurriculares() {
+		return estructurasCurriculares;
+	}
+
+	public void setEstructurasCurriculares(List<String> estructurasCurriculares) {
+		this.estructurasCurriculares = estructurasCurriculares;
 	}
 
 }
