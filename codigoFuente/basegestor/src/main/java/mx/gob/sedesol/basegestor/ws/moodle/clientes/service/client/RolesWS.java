@@ -25,13 +25,17 @@ public class RolesWS {
 	/**
 	 * Servicio para enrolar una lista de usuarios como estudiantes en un curso
 	 * @param enrols
+	 * @param idRolMoodle identificador del rol configurado en Moodle
 	 * @throws ErrorWS 
 	 */
-	public boolean enrolarEstudiantes(List<Enrol> enrols) throws ErrorWS{
+	public boolean enrolarEstudiantes(List<Enrol> enrols, int idRolMoodle) throws ErrorWS {
+		if (idRolMoodle <= 0) {
+			throw new IllegalArgumentException("El identificador del rol de Moodle debe ser mayor que cero");
+		}
             HashMap<String, Object> paramMap = new HashMap<>();
             int x = 0;
             for (Enrol enrol : enrols) {
-                paramMap.put("enrolments[" + x + "][roleid]", 5);
+                paramMap.put("enrolments[" + x + "][roleid]", idRolMoodle);
                 paramMap.put("enrolments[" + x + "][userid]", enrol.getUserId());
                 paramMap.put("enrolments[" + x + "][courseid]", enrol.getCourseId());
                 //paramMap.put("enrolments[" + x + "][timestart]", enrol.getTimestart());
