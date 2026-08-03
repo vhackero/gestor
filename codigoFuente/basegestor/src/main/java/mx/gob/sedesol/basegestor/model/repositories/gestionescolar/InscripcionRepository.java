@@ -33,6 +33,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasC
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademicaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO;
 
 @Repository
 public class InscripcionRepository implements IinscripcionRepository {
@@ -816,6 +817,9 @@ public class InscripcionRepository implements IinscripcionRepository {
 		if (value == null) {
 			return null;
 		}
+		if (value instanceof Boolean) {
+			return Boolean.TRUE.equals(value) ? 1 : 0;
+		}
 		if (value instanceof Number) {
 			return ((Number) value).intValue();
 		}
@@ -1320,6 +1324,37 @@ public class InscripcionRepository implements IinscripcionRepository {
 		Object count = entityManager.createNativeQuery(countSql).setParameter("proceso", idProcesoInscripcion)
 				.setParameter("programa", idPrograma).getSingleResult();
 		return limite != null && getLongValue(count) < limite.longValue();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<ReglaInscripcionDTO> obtenerReglasInscripcion() {
+		String sql = "SELECT clave, descripcion, activo FROM cat_reglas_inscripcion ORDER BY descripcion";
+		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
+		List<ReglaInscripcionDTO> reglas = new ArrayList<>();
+		for (Object[] row : resultados) {
+			ReglaInscripcionDTO regla = new ReglaInscripcionDTO();
+			regla.setClave((String) row[0]);
+			regla.setDescripcion((String) row[1]);
+			regla.setActiva(Integer.valueOf(1).equals(getIntegerValue(row[2])));
+			reglas.add(regla);
+		}
+		return reglas;
+	}
+
+	@Override
+	public boolean reglaInscripcionActiva(String clave) {
+		String sql = "SELECT COUNT(*) FROM cat_reglas_inscripcion WHERE clave = :clave AND activo = 1";
+		Object resultado = entityManager.createNativeQuery(sql).setParameter("clave", clave).getSingleResult();
+		return getLongValue(resultado) > 0L;
+	}
+
+	@Override
+	public void guardarReglaInscripcion(ReglaInscripcionDTO regla, Long idUsuario) {
+		String sql = "UPDATE cat_reglas_inscripcion SET activo = :activo, usuario_modifico = :usuario, "
+				+ "fecha_actualizacion = CURRENT_TIMESTAMP WHERE clave = :clave";
+		entityManager.createNativeQuery(sql).setParameter("activo", Boolean.TRUE.equals(regla.getActiva()) ? 1 : 0)
+				.setParameter("usuario", idUsuario).setParameter("clave", regla.getClave()).executeUpdate();
 	}
 
 	@SuppressWarnings("unchecked")

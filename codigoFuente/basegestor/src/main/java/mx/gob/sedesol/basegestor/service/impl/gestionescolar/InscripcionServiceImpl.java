@@ -24,6 +24,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasR
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademicaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IinscripcionRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
 
@@ -60,6 +61,22 @@ public class InscripcionServiceImpl implements InscripcionService {
 	@Override
 	public boolean tieneCupoElectiva(Long idProcesoInscripcion, Long idPrograma) {
 		return inscripcionesRepository.tieneCupoElectiva(idProcesoInscripcion, idPrograma);
+	}
+
+	@Override
+	public List<ReglaInscripcionDTO> obtenerReglasInscripcion() {
+		return inscripcionesRepository.obtenerReglasInscripcion();
+	}
+
+	@Override
+	public boolean reglaInscripcionActiva(String clave) {
+		return inscripcionesRepository.reglaInscripcionActiva(clave);
+	}
+
+	@Override
+	@Transactional
+	public void guardarReglaInscripcion(ReglaInscripcionDTO regla, Long idUsuario) {
+		inscripcionesRepository.guardarReglaInscripcion(regla, idUsuario);
 	}
 
 	@Override

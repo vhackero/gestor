@@ -101,7 +101,7 @@
 
 				<p:outputPanel styleClass="mt-2"
 					rendered="#{not empty inscripcionBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}">
-					<div class="alert alert-info mb-0" role="alert">#{inscripcionBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}</div>
+					<div class="alert alert-#{inscripcionBean.contextoInscripcion.permiteInscripcionLimiteReprobadas ? 'warning' : 'danger'} mb-0" role="alert">#{inscripcionBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}</div>
 				</p:outputPanel>
 
 				<div class="form-group mt-1">
@@ -173,7 +173,7 @@
 
 				<p:outputPanel id="panelFinalizar" styleClass="text-center mt-2" rendered="#{not empty inscripcionBean.contextoInscripcion.estadoAcademico.materiasDisponibles}">
 					<p:commandButton id="finalizarBtn"
-						disabled="#{inscripcionBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionBean.aceptaTerminos}"
+						disabled="#{(inscripcionBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionBean.aceptaTerminos) or (not empty inscripcionBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado and not inscripcionBean.contextoInscripcion.permiteInscripcionLimiteReprobadas)}"
 						value="#{sistema.obtenerTexto('gw.alumno.inscripcion.finalizar')}" update="@form :pnlMensaje"
 						action="#{inscripcionBean.finalizarInscripcion}"
 						styleClass="btn btn-primary" />
