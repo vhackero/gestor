@@ -154,7 +154,7 @@
 								<div class="col-md-3 col-xs-12">
 									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.promedio')}" styleClass="bloque" />
 									<h:outputText
-										value="#{expedienteAlumnoBean.historial.promedio}">
+										value="#{expedienteAlumnoBean.promedioHistorialEscalaDiez}">
 										<f:convertNumber pattern="#0.00" />
 									</h:outputText>
 								</div>
@@ -209,7 +209,7 @@
 								<div class="col-md-3 col-xs-12">
 									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.estatus')}" styleClass="bloque" />
 									<h:outputText
-										value="#{expedienteAlumnoBean.historial.estatus} ">
+										value="#{expedienteAlumnoBean.estatusHistorialFormateado} ">
 
 									</h:outputText>
 								</div>

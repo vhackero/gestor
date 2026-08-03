@@ -3,6 +3,8 @@ package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -716,6 +718,38 @@ public class ExpedienteAlumnoBean extends BaseBean {
 	}
 
 	public int getTotalEventosTrayectoria() {
+		return listaEventos != null ? listaEventos.size() : 0;
+	}
+
+	public BigDecimal getPromedioHistorialEscalaDiez() {
+		if (historial == null || historial.getPromedio() == null) {
+			return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+		}
+		BigDecimal promedio = historial.getPromedio();
+		if (promedio.compareTo(BigDecimal.TEN) > 0) {
+			promedio = promedio.divide(BigDecimal.TEN, 2, RoundingMode.HALF_UP);
+		} else {
+			promedio = promedio.setScale(2, RoundingMode.HALF_UP);
+		}
+		return promedio;
+	}
+
+	public String getEstatusHistorialFormateado() {
+		if (historial == null || ObjectUtils.isNullOrEmpty(historial.getEstatus())) {
+			return "Sin dato";
+		}
+		String estatus = historial.getEstatus().trim();
+		if (estatus.startsWith("Estudiante ")) {
+			String resto = estatus.substring("Estudiante ".length()).trim().toLowerCase();
+			return "Estudiante de " + resto;
+		}
+		return estatus;
+	}
+
+	public int getTotalUnidadesDidacticasTrayectoria() {
+		if (historial != null && historial.getTotal() != null) {
+			return historial.getTotal().intValue();
+		}
 		return listaEventos != null ? listaEventos.size() : 0;
 	}
 

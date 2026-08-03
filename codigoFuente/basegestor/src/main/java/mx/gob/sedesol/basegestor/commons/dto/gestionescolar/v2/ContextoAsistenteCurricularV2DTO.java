@@ -14,6 +14,11 @@ public class ContextoAsistenteCurricularV2DTO implements Serializable {
     private Long idPlan;
     private Long idPeriodo;
     private Boolean vistaGestor;
+    private String periodoLectivoObjetivo;
+    private Integer totalNoAcreditadasVisibles;
+    private Integer totalBloqueadasVisibles;
+    private Integer totalAntecedentesPendientes;
+    private Integer totalPendientesBaja;
     private CasoAcademicoOperativoDTO casoActual;
 
     public Long getIdPersonaObjetivo() {
@@ -78,6 +83,46 @@ public class ContextoAsistenteCurricularV2DTO implements Serializable {
 
     public void setVistaGestor(Boolean vistaGestor) {
         this.vistaGestor = vistaGestor;
+    }
+
+    public String getPeriodoLectivoObjetivo() {
+        return periodoLectivoObjetivo;
+    }
+
+    public void setPeriodoLectivoObjetivo(String periodoLectivoObjetivo) {
+        this.periodoLectivoObjetivo = periodoLectivoObjetivo;
+    }
+
+    public Integer getTotalNoAcreditadasVisibles() {
+        return totalNoAcreditadasVisibles;
+    }
+
+    public void setTotalNoAcreditadasVisibles(Integer totalNoAcreditadasVisibles) {
+        this.totalNoAcreditadasVisibles = totalNoAcreditadasVisibles;
+    }
+
+    public Integer getTotalBloqueadasVisibles() {
+        return totalBloqueadasVisibles;
+    }
+
+    public void setTotalBloqueadasVisibles(Integer totalBloqueadasVisibles) {
+        this.totalBloqueadasVisibles = totalBloqueadasVisibles;
+    }
+
+    public Integer getTotalAntecedentesPendientes() {
+        return totalAntecedentesPendientes;
+    }
+
+    public void setTotalAntecedentesPendientes(Integer totalAntecedentesPendientes) {
+        this.totalAntecedentesPendientes = totalAntecedentesPendientes;
+    }
+
+    public Integer getTotalPendientesBaja() {
+        return totalPendientesBaja;
+    }
+
+    public void setTotalPendientesBaja(Integer totalPendientesBaja) {
+        this.totalPendientesBaja = totalPendientesBaja;
     }
 
     public CasoAcademicoOperativoDTO getCasoActual() {

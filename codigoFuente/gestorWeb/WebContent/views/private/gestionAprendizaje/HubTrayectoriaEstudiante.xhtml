@@ -231,13 +231,10 @@
 		<h:form enctype="multipart/form-data">
 			<p:messages id="mensajesHub" showDetail="true" autoUpdate="false" closable="true" />
 			<h1 class="hub-title">Situación del estudiante</h1>
-			<div class="hub-copy">Consulta central para gestor académico. Desde aquí puedes revisar el estado del estudiante y entrar a expediente, malla curricular y asistente curricular usando el mismo contexto de matrícula y la misma orientación académica.</div>
-
 			<div class="hub-strip">
 				<span class="hub-chip main">Vista gestor</span>
 				<span class="hub-chip mode">Matrícula: #{expedienteAlumnoBean.personaDTO.usuario}</span>
 				<span class="hub-chip">Estudiante: #{expedienteAlumnoBean.personaDTO.nombre} #{expedienteAlumnoBean.personaDTO.apellidoPaterno} #{expedienteAlumnoBean.personaDTO.apellidoMaterno}</span>
-				<span class="hub-chip">Tipo: #{expedienteAcademicoBean.obtenerTipoUsuario(expedienteAlumnoBean.personaDTO.tipoUsuario)}</span>
 			</div>
 
 			<div class="hub-grid">
@@ -251,28 +248,28 @@
 						</div>
 						<div class="hub-kpi-box">
 							<span class="hub-kpi-label">Estatus</span>
-							<span class="hub-kpi-value">#{empty expedienteAlumnoBean.historial.estatus ? 'Sin dato' : expedienteAlumnoBean.historial.estatus}</span>
+							<span class="hub-kpi-value">#{expedienteAlumnoBean.estatusHistorialFormateado}</span>
 						</div>
 						<div class="hub-kpi-box">
 							<span class="hub-kpi-label">Promedio</span>
 							<span class="hub-kpi-value">
-								<h:outputText value="#{expedienteAlumnoBean.historial.promedio}">
+								<h:outputText value="#{expedienteAlumnoBean.promedioHistorialEscalaDiez}">
 									<f:convertNumber maxFractionDigits="2" />
 								</h:outputText>
 							</span>
 						</div>
 						<div class="hub-kpi-box">
-							<span class="hub-kpi-label">Eventos</span>
-							<span class="hub-kpi-value">#{expedienteAlumnoBean.totalEventosTrayectoria}</span>
+							<span class="hub-kpi-label">Unidades didácticas</span>
+							<span class="hub-kpi-value">#{expedienteAlumnoBean.totalUnidadesDidacticasTrayectoria}</span>
 						</div>
 					</div>
 				</div>
 
 				<div class="hub-card">
-					<h3>Expediente académico</h3>
-					<p>Consulta el historial consolidado, constancias, promedio, créditos y evidencia histórica del estudiante.</p>
+					<h3>Historial académico</h3>
+					<p>Consulta el historial académico del estudiante.</p>
 					<div class="hub-action">
-						<p:commandButton value="Abrir expediente"
+						<p:commandButton value="Abrir historial académico"
 							action="#{expedienteAlumnoBean.navegaExpedienteAlumno}"
 							ajax="false" styleClass="btn btn-primary btn-block" />
 					</div>
@@ -280,7 +277,7 @@
 
 				<div class="hub-card">
 					<h3>Malla curricular</h3>
-					<p>Revisa la trayectoria visual del plan, el avance acumulado y la situación curricular del estudiante en contexto gestor.</p>
+					<p>Revisa la situación curricular del estudiante y la trayectoria del Programa educativo.</p>
 					<div class="hub-action">
 						<p:commandButton value="Abrir malla curricular"
 							action="#{expedienteAlumnoBean.navegaMallaCurricularAlumno}"
@@ -289,10 +286,10 @@
 				</div>
 
 				<div class="hub-card">
-					<h3>Asistente curricular</h3>
-					<p>Interpreta riesgos, reglas y recomendaciones de inscripción o acompañamiento según el periodo activo del estudiante.</p>
+					<h3>Asistente de inscripción</h3>
+					<p>Identifica riesgos, reglas de operación aplicadas y recomendaciones para sugerir al estudiante en su próximo periodo de inscripción.</p>
 					<div class="hub-action">
-						<p:commandButton value="Abrir asistente curricular"
+						<p:commandButton value="Abrir asistente de inscripción"
 							action="#{expedienteAlumnoBean.navegaAsistenteCurricular}"
 							ajax="false" styleClass="btn btn-primary btn-block" />
 					</div>

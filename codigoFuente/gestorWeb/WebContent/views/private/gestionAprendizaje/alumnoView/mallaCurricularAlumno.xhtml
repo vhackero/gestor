@@ -393,8 +393,8 @@
 			.malla-leyenda-row {
 				display: flex;
 				gap: 24px;
-				flex-wrap: wrap;
-				align-items: center;
+				flex-wrap: nowrap;
+				align-items: flex-start;
 				width: 100%;
 			}
 			.malla-resumen {
@@ -412,14 +412,19 @@
 				border-radius: 6px;
 				padding: 6px 10px;
 				display: inline-flex;
-				gap: 12px;
+				gap: 8px;
 				align-items: center;
+				flex-wrap: nowrap;
 				font-weight: bold;
+				margin-left: auto;
+				white-space: nowrap;
 			}
 			.malla-creditos-pill span {
 				display: inline-flex;
 				align-items: center;
 				gap: 4px;
+				line-height: 1.2;
+				white-space: nowrap;
 			}
 			.malla-resumen strong {
 				font-weight: bold;
@@ -907,11 +912,6 @@
 						#{mallaCurricularAlumnoBean.creditosAprobadosTotal} /
 						#{mallaCurricularAlumnoBean.creditosPlanTotal}
 					</span>
-					<span class="malla-creditos-pill">
-						<ui:repeat value="#{mallaCurricularAlumnoBean.resumenCreditosPorTipo}" var="resumenTipo">
-							<span><strong>#{resumenTipo.etiqueta}:</strong> #{resumenTipo.aprobados} de #{resumenTipo.total}</span>
-						</ui:repeat>
-					</span>
 				</div>
 				<div class="malla-leyenda">
 					<div class="malla-leyenda-row">
@@ -924,6 +924,13 @@
 								</span>
 							</ui:repeat>
 						</div>
+						<span class="malla-creditos-pill">
+							<ui:repeat value="#{mallaCurricularAlumnoBean.resumenCreditosPorTipo}" var="resumenTipo">
+								<span>
+									<strong>#{resumenTipo.etiqueta}:</strong> #{resumenTipo.aprobados} de #{resumenTipo.total}
+								</span>
+							</ui:repeat>
+						</span>
 					</div>
 					<div class="malla-leyenda-row">
 						<div class="malla-leyenda-group indicadores">
@@ -1124,18 +1131,6 @@
 								<span id="mallaDetailRiesgo" class="malla-detail-value">Sin selección</span>
 							</div>
 							<div class="malla-detail-note">#{mallaCurricularAlumnoBean.mensajePanelContextual}</div>
-							<ui:fragment rendered="#{mallaCurricularAlumnoBean.mostrarPrevencionEstudianteV2}">
-								<div class="malla-student-v2-box">
-									<strong>Prevención y siguientes pasos:</strong> #{mallaCurricularAlumnoBean.resumenPrevencionEstudianteV2}
-									<br />
-									#{mallaCurricularAlumnoBean.prevencionTicketEstudianteV2}
-								</div>
-							</ui:fragment>
-							<ui:fragment rendered="#{mallaCurricularAlumnoBean.vistaGestor}">
-								<div class="malla-gestor-box">
-									<strong>Uso gestor:</strong> esta vista mantiene la trayectoria del estudiante y agrega contexto funcional para revisión, acompañamiento y trazabilidad.
-								</div>
-							</ui:fragment>
 							<p:commandButton value="#{mallaCurricularAlumnoBean.llamadoAsistente}"
 								action="#{mallaCurricularAlumnoBean.irAsistenteCurricular}"
 								ajax="false" styleClass="btn btn-primary malla-side-action" />

@@ -2,9 +2,11 @@ package mx.gob.sedesol.gestorweb.beans.planesprogramas;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -73,6 +75,7 @@ public class MallaPlanDiagramaBean extends BaseBean {
 	private List<MallaDiagramaTipoDTO> tiposPrograma;
 	private Map<String, Integer> creditosPorTipo;
 	private int creditosPlanTotal;
+	private Set<String> clavesProgramasContabilizados;
 
 	@PostConstruct
 	public void init() {
@@ -80,6 +83,7 @@ public class MallaPlanDiagramaBean extends BaseBean {
 		tiposPrograma = new ArrayList<>();
 		creditosPorTipo = new LinkedHashMap<>();
 		creditosPlanTotal = 0;
+		clavesProgramasContabilizados = new HashSet<>();
 
 		planSelec = (PlanDTO) getSession().getAttribute(ConstantesGestorWeb.OBJ_PLAN_SELEC);
 		if (ObjectUtils.isNull(planSelec)) {
@@ -247,10 +251,34 @@ public class MallaPlanDiagramaBean extends BaseBean {
 		if (programa == null || programa.getCreditos() == null) {
 			return;
 		}
+		String claveContable = resolverClaveContablePrograma(programa);
+		if (clavesProgramasContabilizados.contains(claveContable)) {
+			return;
+		}
+		clavesProgramasContabilizados.add(claveContable);
 		creditosPlanTotal += programa.getCreditos();
 		String tipo = StringUtils.isBlank(programa.getTipo()) ? "Sin tipo" : programa.getTipo().trim();
 		Integer acumulado = creditosPorTipo.get(tipo);
 		creditosPorTipo.put(tipo, (acumulado == null ? 0 : acumulado) + programa.getCreditos());
+	}
+
+	private String resolverClaveContablePrograma(FichaDescProgramaDTO programa) {
+		if (programa == null) {
+			return "SIN_PROGRAMA";
+		}
+		if (StringUtils.isNotBlank(programa.getCvePrograma())) {
+			return "CLAVE:" + programa.getCvePrograma().trim().toUpperCase();
+		}
+		if (StringUtils.isNotBlank(programa.getIdentificadorFinal())) {
+			return "IDENT:" + programa.getIdentificadorFinal().trim().toUpperCase();
+		}
+		if (StringUtils.isNotBlank(programa.getNombreTentativo())) {
+			return "NOMBRE:" + programa.getNombreTentativo().trim().toUpperCase();
+		}
+		if (programa.getIdPrograma() != null) {
+			return "ID:" + programa.getIdPrograma();
+		}
+		return "SIN_PROGRAMA";
 	}
 
 	private boolean esMismaColumna(MallaDiagramaNodoDTO a, MallaDiagramaNodoDTO b) {

@@ -14,6 +14,7 @@ public class FichaIntegralCasoDTO implements Serializable {
     private String accionSugerida;
     private String reglaAplicada;
     private Boolean requiereSeguimiento;
+    private PanelAsistenteVirtualDTO panelAsistenteVirtual;
     private List<PatronConocimientoDTO> patronesConocimiento;
     private List<MensajeInstitucionalContextualDTO> mensajesContextuales;
     private List<CasoSimilarDTO> casosSimilares;
@@ -72,6 +73,14 @@ public class FichaIntegralCasoDTO implements Serializable {
 
     public void setRequiereSeguimiento(Boolean requiereSeguimiento) {
         this.requiereSeguimiento = requiereSeguimiento;
+    }
+
+    public PanelAsistenteVirtualDTO getPanelAsistenteVirtual() {
+        return panelAsistenteVirtual;
+    }
+
+    public void setPanelAsistenteVirtual(PanelAsistenteVirtualDTO panelAsistenteVirtual) {
+        this.panelAsistenteVirtual = panelAsistenteVirtual;
     }
 
     public List<PatronConocimientoDTO> getPatronesConocimiento() {
