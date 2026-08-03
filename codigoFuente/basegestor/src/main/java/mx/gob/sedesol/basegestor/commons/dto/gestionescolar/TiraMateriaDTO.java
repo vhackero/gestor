@@ -1,5 +1,8 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TiraMateriaDTO {
 	
 	
@@ -10,6 +13,7 @@ public class TiraMateriaDTO {
 	private String docente;
 	private String asesor;
 	private String clave;
+	private List<String> estructurasCurriculares = new ArrayList<String>();
 
 	
 	public String getSemestre() {
@@ -54,6 +58,12 @@ public class TiraMateriaDTO {
 	}
 	public void setClave(String clave) {
 		this.clave = clave;
+	}
+	public List<String> getEstructurasCurriculares() {
+		return estructurasCurriculares;
+	}
+	public void setEstructurasCurriculares(List<String> estructurasCurriculares) {
+		this.estructurasCurriculares = estructurasCurriculares;
 	}
 
 }

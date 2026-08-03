@@ -697,12 +697,18 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 					relGrupoParticipanteDTO.setNombre(tiraMateriaDTO2.getGrupo());
 					relGrupoParticipanteDTO.setDocente(tiraMateriaDTO2.getDocente());
 					relGrupoParticipanteDTO.setAsesor(tiraMateriaDTO2.getAsesor());
+					relGrupoParticipanteDTO.setEstructurasCurriculares(tiraMateriaDTO2.getEstructurasCurriculares());
 				}
 			}
 
 		}
 
 		return listaGrupoParticipante1;
+	}
+
+	@Override
+	public List<String> obtenerNombresEstructurasCurriculares(Long idParticipante) {
+		return iHistorialAcademicoRepo.consultaNombresEstructurasCurriculares(idParticipante);
 	}
 
 	@Override
@@ -736,6 +742,7 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 			pendiente.setClave(valorOGuion(inscrita.getClave()));
 			pendiente.setSemestre(valorOGuion(inscrita.getSemestre()));
 			pendiente.setBloque(valorOGuion(inscrita.getBloque()));
+			pendiente.setEstructurasCurriculares(inscrita.getEstructurasCurriculares());
 			pendiente.setDocente("-");
 			pendiente.setAsesor("-");
 
