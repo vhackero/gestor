@@ -53,6 +53,7 @@ public class MatriculacionMasivaUsuariosBean extends BaseBean implements Seriali
 
 	private List<PeriodoInscripcionDTO> periodos;
 	private Integer periodoSeleccionado;
+	private String claveEvento;
 	private StreamedContent reporteEventos;
 	private transient UploadedFile archivoMatriculacion;
 	private StreamedContent resultadoMatriculacion;
@@ -89,9 +90,11 @@ public class MatriculacionMasivaUsuariosBean extends BaseBean implements Seriali
 		}
 
 		try {
-			List<EventoPeriodoDTO> eventos = matriculacionMasivaService.obtenerEventosPorPeriodo(nombrePeriodo);
+			String filtroClaveEvento = claveEvento != null && !claveEvento.trim().isEmpty() ? claveEvento.trim() : null;
+			List<EventoPeriodoDTO> eventos = matriculacionMasivaService.obtenerEventosPorPeriodo(nombrePeriodo,
+					filtroClaveEvento);
 			if (eventos == null || eventos.isEmpty()) {
-				agregarMsgInfo("No se encontraron eventos para el periodo seleccionado", null, sistema);
+				agregarMsgInfo("No se encontraron eventos para los filtros seleccionados", null, sistema);
 				return;
 			}
 
@@ -113,6 +116,10 @@ public class MatriculacionMasivaUsuariosBean extends BaseBean implements Seriali
 			return null;
 		}
 		return new DefaultStreamedContent(stream, CONTENT_TYPE_XLSX, "ejemplo_archivo_registro_masivo.xlsx");
+	}
+
+	public void limpiarReporteEventos() {
+		reporteEventos = null;
 	}
 
 	public StreamedContent getRolesDisponibles() {
@@ -347,6 +354,14 @@ public class MatriculacionMasivaUsuariosBean extends BaseBean implements Seriali
 
 	public void setPeriodoSeleccionado(Integer periodoSeleccionado) {
 		this.periodoSeleccionado = periodoSeleccionado;
+	}
+
+	public String getClaveEvento() {
+		return claveEvento;
+	}
+
+	public void setClaveEvento(String claveEvento) {
+		this.claveEvento = claveEvento;
 	}
 
 	public StreamedContent getReporteEventos() {

@@ -67,9 +67,9 @@ public class MatriculacionMasivaServiceImpl implements MatriculacionMasivaServic
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<EventoPeriodoDTO> obtenerEventosPorPeriodo(String nombrePeriodo) {
+	public List<EventoPeriodoDTO> obtenerEventosPorPeriodo(String nombrePeriodo, String claveEvento) {
 		try {
-			return matriculacionMasivaRepository.obtenerEventosPorPeriodo(nombrePeriodo);
+			return matriculacionMasivaRepository.obtenerEventosPorPeriodo(nombrePeriodo, claveEvento);
 		} catch (Exception ex) {
 			logger.error("Error al consultar eventos por periodo", ex);
 			throw ex;

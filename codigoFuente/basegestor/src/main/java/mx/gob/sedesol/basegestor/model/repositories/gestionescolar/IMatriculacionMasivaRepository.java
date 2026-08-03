@@ -9,7 +9,7 @@ public interface IMatriculacionMasivaRepository {
 
 	List<PeriodoInscripcionDTO> obtenerPeriodosInscripcion();
 
-	List<EventoPeriodoDTO> obtenerEventosPorPeriodo(String nombrePeriodo);
+	List<EventoPeriodoDTO> obtenerEventosPorPeriodo(String nombrePeriodo, String claveEvento);
 	
 	boolean existeRol(Integer idRol);
 }

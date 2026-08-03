@@ -10,7 +10,7 @@ public interface MatriculacionMasivaService {
 
 	List<PeriodoInscripcionDTO> obtenerPeriodosInscripcion();
 
-	List<EventoPeriodoDTO> obtenerEventosPorPeriodo(String nombrePeriodo);
+	List<EventoPeriodoDTO> obtenerEventosPorPeriodo(String nombrePeriodo, String claveEvento);
 
 	List<MatriculacionMasivaRegistroDTO> procesarMatriculacionMasiva(List<MatriculacionMasivaRegistroDTO> registros,
 			Long idUsuario);
