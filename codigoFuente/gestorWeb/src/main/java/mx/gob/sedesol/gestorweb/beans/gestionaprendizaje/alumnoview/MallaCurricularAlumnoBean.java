@@ -542,7 +542,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 
 	private String resolveEstatusTabla(String estatus) {
 		if (ESTATUS_APROBADA.equals(estatus)) {
-			return "Acreditada";
+			return "Aprobada";
 		}
 		if (ESTATUS_NO_ACREDITADA.equals(estatus)) {
 			return "No acreditada";
@@ -572,11 +572,11 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			unidad = unidadesAsistentePorPrograma.get(idPrograma.longValue());
 		}
 		programaNodo.setDetalleTipoUd(formatearTipoDetalle(programaNodo, programa, unidad));
-		programaNodo.setDetalleEstatusHistorico(resolveEstatusDetalle(programaNodo, unidad));
+		programaNodo.setDetalleEstatusHistorico(normalizarEstadoDetalleContextual(resolveEstatusDetalle(programaNodo, unidad), programaNodo));
 		if (unidad != null && StringUtils.isNotBlank(unidad.getEstatusPeriodo())) {
-			programaNodo.setDetalleEstatusPeriodo(unidad.getEstatusPeriodo());
+			programaNodo.setDetalleEstatusPeriodo(normalizarEstadoDetalleContextual(unidad.getEstatusPeriodo(), programaNodo));
 		} else {
-			programaNodo.setDetalleEstatusPeriodo(resolveEstatusPeriodoContextual(programaNodo));
+			programaNodo.setDetalleEstatusPeriodo(normalizarEstadoDetalleContextual(resolveEstatusPeriodoContextual(programaNodo), programaNodo));
 		}
 		programaNodo.setDetalleMotivoPrincipal(construirSituacionDetalle(programaNodo, programa, unidad));
 		programaNodo.setDetalleAccionSugerida(construirRecomendacionDetalle(programaNodo, programa, unidad));
@@ -606,22 +606,22 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 
 	private String resolveEstatusDetalle(MallaDiagramaNodoDTO programaNodo, UnidadDecisionInscripcionDTO unidad) {
 		if (esUnidadOptativaOpcionalDetalle(programaNodo, null, unidad)) {
-			return "Opcional";
+			return "Por cursar";
 		}
 		if (programaNodo != null && ESTATUS_EN_CURSO.equals(programaNodo.getEstatus())) {
 			return "En curso";
 		}
 		if (programaNodo != null && ESTATUS_APROBADA.equals(programaNodo.getEstatus())) {
-			return "Acreditada";
+			return "Aprobada";
 		}
 		if (programaNodo != null && ESTATUS_NO_ACREDITADA.equals(programaNodo.getEstatus())) {
-			return "Pendiente de acreditar";
+			return "No acreditada";
 		}
 		if (programaNodo != null && programaNodo.isBloqueada()) {
-			return "Pendiente de cursar";
+			return "Por cursar";
 		}
 		if (programaNodo != null && ESTATUS_BAJA.equals(programaNodo.getEstatus())) {
-			return "Pendiente por " + resolverTipoBaja(unidad);
+			return "Baja";
 		}
 		return "Por cursar";
 	}
@@ -731,7 +731,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 
 	private String resolveEstatusPeriodoContextual(MallaDiagramaNodoDTO programaNodo) {
 		if (programaNodo == null) {
-			return "Sin información";
+			return "No inscrita";
 		}
 		if (programaNodo.isBloqueada()) {
 			return "Por cursar";
@@ -743,12 +743,56 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			return "Baja";
 		}
 		if (ESTATUS_APROBADA.equals(programaNodo.getEstatus())) {
-			return "Acreditada";
+			return "Aprobada";
 		}
 		if (ESTATUS_NO_ACREDITADA.equals(programaNodo.getEstatus())) {
 			return "No acreditada";
 		}
-		return esPeriodoCursamiento() ? "Seguimiento de trayectoria" : "Pendiente de validación";
+		return ESTATUS_NO_INSCRITA.equals(programaNodo.getEstatus()) ? "No inscrita" : "Por cursar";
+	}
+
+	private String normalizarEstadoDetalleContextual(String estado, MallaDiagramaNodoDTO programaNodo) {
+		String valor = StringUtils.trimToEmpty(estado);
+		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_APROBADA) || StringUtils.equalsIgnoreCase(valor, "Acreditada")) {
+			return "Aprobada";
+		}
+		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_NO_ACREDITADA)
+				|| StringUtils.equalsIgnoreCase(valor, "Pendiente de acreditar")) {
+			return "No acreditada";
+		}
+		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_NO_INSCRITA)) {
+			return "No inscrita";
+		}
+		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_BAJA) || valor.toLowerCase(Locale.ROOT).contains("baja")) {
+			return "Baja";
+		}
+		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_EN_CURSO)) {
+			return "En curso";
+		}
+		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_BLOQUEADA)
+				|| StringUtils.equalsIgnoreCase(valor, "RECOMENDADA")
+				|| StringUtils.equalsIgnoreCase(valor, "Opcional")
+				|| StringUtils.equalsIgnoreCase(valor, "Pendiente de cursar")
+				|| StringUtils.equalsIgnoreCase(valor, "Pendiente de validación")
+				|| StringUtils.equalsIgnoreCase(valor, "Seguimiento de trayectoria")) {
+			return "Por cursar";
+		}
+		if (programaNodo != null && programaNodo.isBloqueada()) {
+			return "Por cursar";
+		}
+		if (programaNodo != null && ESTATUS_EN_CURSO.equals(programaNodo.getEstatus())) {
+			return "En curso";
+		}
+		if (programaNodo != null && ESTATUS_APROBADA.equals(programaNodo.getEstatus())) {
+			return "Aprobada";
+		}
+		if (programaNodo != null && ESTATUS_NO_ACREDITADA.equals(programaNodo.getEstatus())) {
+			return "No acreditada";
+		}
+		if (programaNodo != null && ESTATUS_BAJA.equals(programaNodo.getEstatus())) {
+			return "Baja";
+		}
+		return "Por cursar";
 	}
 
 	private void acumularCreditos(String tipo, Integer creditos, MallaAlumnoProgramaDTO estatusDto,
@@ -1174,7 +1218,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_NO_INSCRITA, "#506172", "#506172", "#506172", "fa fa-exclamation-triangle"));
 		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_BAJA, "#fb923c", "#fb923c", "#fb923c", "fa fa-arrow-down"));
 		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_EN_CURSO, "#facc15", "#facc15", "#facc15", "fa fa-flag"));
-		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_BLOQUEADA, "#111827", "#111827", "#111827", "fa fa-lock"));
+		estatusPrograma.add(new MallaDiagramaTipoDTO("Por cursar", "#111827", "#111827", "#111827", "fa fa-lock"));
 	}
 
 	private void aplicaEstatusPrograma(MallaDiagramaNodoDTO nodo, MallaAlumnoProgramaDTO estatusDto, Integer idPrograma) {
