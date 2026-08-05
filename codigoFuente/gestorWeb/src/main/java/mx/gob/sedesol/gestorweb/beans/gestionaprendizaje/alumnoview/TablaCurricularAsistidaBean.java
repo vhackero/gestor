@@ -625,7 +625,24 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     private PanelAsistenteVirtualDTO getPanelAsistenteVirtualV2() {
         asegurarFichaIntegralV2();
-        return fichaIntegralV2 != null ? fichaIntegralV2.getPanelAsistenteVirtual() : null;
+        PanelAsistenteVirtualDTO panel = fichaIntegralV2 != null ? fichaIntegralV2.getPanelAsistenteVirtual() : null;
+        if (panel == null) {
+            return null;
+        }
+        if (vistaGestor || isPanelAsistenteVirtualCompatible(panel)) {
+            return panel;
+        }
+        logger.warn("Se descartó panelAsistenteVirtual V2 por inconsistencia de escenario. Escenario panel="
+                + panel.getEscenario() + ", escenario local=" + resolverEscenarioRiesgoPanel()
+                + ", matrícula=" + matriculaPersonaObjetivo);
+        return null;
+    }
+
+    private boolean isPanelAsistenteVirtualCompatible(PanelAsistenteVirtualDTO panel) {
+        if (panel == null || StringUtils.isBlank(panel.getEscenario())) {
+            return false;
+        }
+        return StringUtils.equalsIgnoreCase(panel.getEscenario(), resolverEscenarioRiesgoPanel());
     }
 
     private AsistenteVirtualAccionDTO getAccionPanelAsistenteVirtual(String titulo) {
@@ -861,7 +878,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getEtiquetaNivelRiesgoPanel() {
-        return "Nivel " + obtenerNivelRiesgo().toLowerCase(Locale.ROOT) + " por " + getDiagnosticoRiesgoPanel() + ".";
+        return getDiagnosticoRiesgoPanel();
     }
 
     public String getDiagnosticoRiesgoPanel() {
