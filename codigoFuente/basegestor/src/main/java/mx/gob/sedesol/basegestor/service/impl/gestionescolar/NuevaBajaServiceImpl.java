@@ -179,6 +179,10 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         boolean esTemporalOParcial = contieneTexto(solicitud.getNombreTipoBaja(), "temporal")
                 || contieneTexto(solicitud.getNombreTipoBaja(), "parcial");
 
+        BajaAplicacionDTO inscripcionBaja = esTemporalOParcial
+                ? nuevaBajaRepository.consultarInscripcionParaBaja(idPersona, idPlan, idPrograma, solicitud.getIdPeriodo())
+                : null;
+
         if (bajaActual != null) {
             idPlan = conservarValor(bajaActual.getIdPlan(), idPlan);
             idPrograma = conservarValor(bajaActual.getIdPrograma(), idPrograma);
@@ -194,7 +198,8 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
                 throw new IllegalArgumentException("Debe seleccionar un plan y programa válidos para aplicar la baja parcial/temporal");
             }
 
-            if (!nuevaBajaRepository.validarPlanProgramaPorPersona(idPersona, idPlan, idPrograma)) {
+            if (inscripcionBaja == null
+                    && !nuevaBajaRepository.validarPlanProgramaPorPersona(idPersona, idPlan, idPrograma)) {
                 throw new IllegalArgumentException("El usuario no pertenece al plan y programa seleccionados");
             }
         }
@@ -238,7 +243,7 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
         }
 
         int contabilizar;
-        if (esDefinitiva ||  esSinAsignaturas || idEvento != 0) {
+        if (esDefinitiva || esSinAsignaturas || idEvento != 0 || inscripcionBaja != null) {
             contabilizar = 1;
         }
         else if (idBaja != null) {
@@ -268,6 +273,11 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
                 solicitud.getQuienAplica(),
                 contabilizar,
                 solicitud.getNumeroSolicitud());
+        if (inscripcionBaja != null) {
+            bajaAplicacionDTO.setIdInscripcion(inscripcionBaja.getIdInscripcion());
+            bajaAplicacionDTO.setIdProcesoInscripcion(inscripcionBaja.getIdProcesoInscripcion());
+            bajaAplicacionDTO.setIdPeriodo(inscripcionBaja.getIdPeriodo());
+        }
 
         if (idBaja == null) {
             nuevaBajaRepository.insertarBaja(bajaAplicacionDTO);

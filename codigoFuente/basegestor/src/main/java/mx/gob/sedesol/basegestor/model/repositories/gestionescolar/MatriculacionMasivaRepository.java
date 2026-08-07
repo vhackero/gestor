@@ -34,7 +34,7 @@ public class MatriculacionMasivaRepository implements IMatriculacionMasivaReposi
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<EventoPeriodoDTO> obtenerEventosPorPeriodo(String nombrePeriodo) {
+	public List<EventoPeriodoDTO> obtenerEventosPorPeriodo(String nombrePeriodo, String claveEvento) {
 		String sql = "SELECT tpl.nombre plan, tfdp.nombre_tentativo programa, te.nombre_ec evento,te.cve_evento_cap, te.id_evento, tg.nombre grupo, tg.id id_grupo "
 				+ "FROM tbl_eventos te "
 				+ "JOIN tbl_ficha_descriptiva_programa tfdp ON tfdp.id_programa = te.id_programa "
@@ -42,10 +42,13 @@ public class MatriculacionMasivaRepository implements IMatriculacionMasivaReposi
 				+ "JOIN tbl_grupos tg ON tg.id_evento = te.id_evento "
 				+ "JOIN tbl_malla_curricular tmc ON tpl.id_plan = tmc.id_plan AND tmc.activo = 1 "
 				+ "WHERE te.cve_evento_cap LIKE CONCAT('%',:nombrePeriodo,'%') "
+				+ "AND (:claveEvento IS NULL OR TRIM(:claveEvento) = '' "
+				+ "     OR te.cve_evento_cap LIKE CONCAT('%', TRIM(:claveEvento), '%')) "
 				+ "ORDER BY tpl.nombre, tfdp.nombre_tentativo";
 
 		Query query = entityManager.createNativeQuery(sql);
 		query.setParameter("nombrePeriodo", nombrePeriodo);
+		query.setParameter("claveEvento", claveEvento);
 		List<Object[]> resultados = query.getResultList();
 
 		List<EventoPeriodoDTO> eventos = new ArrayList<>();

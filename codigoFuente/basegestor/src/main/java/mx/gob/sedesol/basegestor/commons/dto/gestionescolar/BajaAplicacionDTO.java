@@ -17,6 +17,9 @@ public class BajaAplicacionDTO implements Serializable {
     private String quienAplicaBaja;
     private Integer contabilizar;
     private String numeroSolicitud;
+    private Long idInscripcion;
+    private Long idProcesoInscripcion;
+    private Long idPeriodo;
 
     public BajaAplicacionDTO() {
     }
@@ -124,4 +127,11 @@ public class BajaAplicacionDTO implements Serializable {
     public void setNumeroSolicitud(String numeroSolicitud) {
         this.numeroSolicitud = numeroSolicitud;
     }
+
+    public Long getIdInscripcion() { return idInscripcion; }
+    public void setIdInscripcion(Long idInscripcion) { this.idInscripcion = idInscripcion; }
+    public Long getIdProcesoInscripcion() { return idProcesoInscripcion; }
+    public void setIdProcesoInscripcion(Long idProcesoInscripcion) { this.idProcesoInscripcion = idProcesoInscripcion; }
+    public Long getIdPeriodo() { return idPeriodo; }
+    public void setIdPeriodo(Long idPeriodo) { this.idPeriodo = idPeriodo; }
 }

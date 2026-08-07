@@ -47,6 +47,10 @@
 					<p:commandButton value="Plantilla" ajax="false" process="@this" update="msgs" styleClass="btn btn-primary">
 						<p:fileDownload value="#{matriculacionMasivaUsuariosBean.plantilla}" />
 					</p:commandButton>
+					<p:commandButton value="Roles disponibles" ajax="false" process="@this"
+						update="msgs" styleClass="btn btn-primary">
+						<p:fileDownload value="#{matriculacionMasivaUsuariosBean.rolesDisponibles}" />
+					</p:commandButton>
 				</div>
 			</div>
 
@@ -56,16 +60,23 @@
 						<h:outputLabel for="periodos" styleClass="requerido">Periodos:</h:outputLabel>
 						<p:selectOneMenu id="periodos" style="width:100%;"
 							value="#{matriculacionMasivaUsuariosBean.periodoSeleccionado}">
-							<p:ajax event="change" listener="#{matriculacionMasivaUsuariosBean.generarEventosPorPeriodo}"
-								process="@this" update="msgs" />
+							<p:ajax event="change" listener="#{matriculacionMasivaUsuariosBean.limpiarReporteEventos}"
+								process="@this" />
 							<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" noSelectionOption="true" />
 							<f:selectItems value="#{matriculacionMasivaUsuariosBean.periodos}" var="periodo"
 								itemValue="#{periodo.idPeriodo}" itemLabel="#{periodo.nombrePeriodo}" />
 						</p:selectOneMenu>
 					</div>
+					<div class="col-md-3">
+						<h:outputLabel for="claveEvento">Clave evento:</h:outputLabel>
+						<p:inputText id="claveEvento" style="width:100%;" maxlength="100"
+							value="#{matriculacionMasivaUsuariosBean.claveEvento}"
+							placeholder="ej. B1, S2" />
+					</div>
 					<div class="col-md-3" style="margin-top: 24px;">
 						<p:commandButton value="Descargar" ajax="false" styleClass="btn btn-primary"
-							process="@form" update="msgs">
+							process="@form" update="msgs"
+							actionListener="#{matriculacionMasivaUsuariosBean.generarEventosPorPeriodo}">
 							<p:fileDownload value="#{matriculacionMasivaUsuariosBean.reporteEventos}" />
 						</p:commandButton>
 					</div>

@@ -25,9 +25,11 @@ import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 import org.primefaces.model.UploadedFile;
 
+import mx.gob.sedesol.basegestor.commons.dto.admin.RolDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoPeriodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MatriculacionMasivaRegistroDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PeriodoInscripcionDTO;
+import mx.gob.sedesol.basegestor.service.admin.RoleService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.MatriculacionMasivaService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.sistema.SistemaBean;
@@ -42,12 +44,16 @@ public class MatriculacionMasivaUsuariosBean extends BaseBean implements Seriali
 
 	@ManagedProperty("#{matriculacionMasivaService}")
 	private MatriculacionMasivaService matriculacionMasivaService;
+
+	@ManagedProperty("#{roleService}")
+	private RoleService roleService;
 	
 	@ManagedProperty("#{sistema}")
 	private SistemaBean sistema;
 
 	private List<PeriodoInscripcionDTO> periodos;
 	private Integer periodoSeleccionado;
+	private String claveEvento;
 	private StreamedContent reporteEventos;
 	private transient UploadedFile archivoMatriculacion;
 	private StreamedContent resultadoMatriculacion;
@@ -84,9 +90,11 @@ public class MatriculacionMasivaUsuariosBean extends BaseBean implements Seriali
 		}
 
 		try {
-			List<EventoPeriodoDTO> eventos = matriculacionMasivaService.obtenerEventosPorPeriodo(nombrePeriodo);
+			String filtroClaveEvento = claveEvento != null && !claveEvento.trim().isEmpty() ? claveEvento.trim() : null;
+			List<EventoPeriodoDTO> eventos = matriculacionMasivaService.obtenerEventosPorPeriodo(nombrePeriodo,
+					filtroClaveEvento);
 			if (eventos == null || eventos.isEmpty()) {
-				agregarMsgInfo("No se encontraron eventos para el periodo seleccionado", null, sistema);
+				agregarMsgInfo("No se encontraron eventos para los filtros seleccionados", null, sistema);
 				return;
 			}
 
@@ -108,6 +116,60 @@ public class MatriculacionMasivaUsuariosBean extends BaseBean implements Seriali
 			return null;
 		}
 		return new DefaultStreamedContent(stream, CONTENT_TYPE_XLSX, "ejemplo_archivo_registro_masivo.xlsx");
+	}
+
+	public void limpiarReporteEventos() {
+		reporteEventos = null;
+	}
+
+	public StreamedContent getRolesDisponibles() {
+		try {
+			List<RolDTO> rolesConsultados = roleService.findAll();
+			List<RolDTO> roles = rolesConsultados != null ? new ArrayList<>(rolesConsultados) : new ArrayList<>();
+			roles.sort((rol1, rol2) -> {
+				Integer id1 = rol1 != null ? rol1.getIdRol() : null;
+				Integer id2 = rol2 != null ? rol2.getIdRol() : null;
+				if (id1 == null) {
+					return id2 == null ? 0 : 1;
+				}
+				return id2 == null ? -1 : id1.compareTo(id2);
+			});
+			return construirExcelRoles(roles);
+		} catch (Exception ex) {
+			logger.error("Error al generar el archivo de roles disponibles", ex);
+			agregarMsgError("Ocurrió un error al generar el archivo de roles disponibles", null, sistema);
+			return null;
+		}
+	}
+
+	private StreamedContent construirExcelRoles(List<RolDTO> roles) throws IOException {
+		try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+			Sheet sheet = workbook.createSheet("Roles disponibles");
+			Row header = sheet.createRow(0);
+			String[] columnas = new String[] { "id_rol", "nombre", "clave" };
+			for (int i = 0; i < columnas.length; i++) {
+				header.createCell(i).setCellValue(columnas[i]);
+			}
+
+			int fila = 1;
+			for (RolDTO rol : roles) {
+				if (rol == null) {
+					continue;
+				}
+				Row row = sheet.createRow(fila++);
+				row.createCell(0).setCellValue(rol.getIdRol() != null ? rol.getIdRol() : 0);
+				row.createCell(1).setCellValue(valorSeguro(rol.getNombre()));
+				row.createCell(2).setCellValue(valorSeguro(rol.getClave()));
+			}
+
+			for (int i = 0; i < columnas.length; i++) {
+				sheet.autoSizeColumn(i);
+			}
+
+			workbook.write(out);
+			return new DefaultStreamedContent(new ByteArrayInputStream(out.toByteArray()), CONTENT_TYPE_XLSX,
+					"roles_disponibles.xlsx");
+		}
 	}
 	
 	public void procesarMatriculacionMasiva() {
@@ -294,6 +356,14 @@ public class MatriculacionMasivaUsuariosBean extends BaseBean implements Seriali
 		this.periodoSeleccionado = periodoSeleccionado;
 	}
 
+	public String getClaveEvento() {
+		return claveEvento;
+	}
+
+	public void setClaveEvento(String claveEvento) {
+		this.claveEvento = claveEvento;
+	}
+
 	public StreamedContent getReporteEventos() {
 		return reporteEventos;
 	}
@@ -331,6 +401,14 @@ public class MatriculacionMasivaUsuariosBean extends BaseBean implements Seriali
 
 	public void setMatriculacionMasivaService(MatriculacionMasivaService matriculacionMasivaService) {
 		this.matriculacionMasivaService = matriculacionMasivaService;
+	}
+
+	public RoleService getRoleService() {
+		return roleService;
+	}
+
+	public void setRoleService(RoleService roleService) {
+		this.roleService = roleService;
 	}
 
 	public SistemaBean getSistema() {
