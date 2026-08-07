@@ -72,9 +72,7 @@
 											value="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura}"
 											showOn="button"  required="true"
                 							requiredMessage="La fecha de apertura es obligatoria.">
-									<p:ajax event="dateSelect" process="@this"
-											update="fc_fechaFinal"
-											listener="#{convocatoriasBean.validarFechas()}" />
+									<p:ajax event="dateSelect" process="@this"/>
 								</p:calendar>
  								<p:message for="fc_fechaInicial" display="text" />
 							</div>
@@ -84,7 +82,6 @@
 											   value="Fecha de cierre:" />
 								<p:calendar id="fc_fechaFinal" styleClass="requerido" timeZone="#{convocatoriasBean.zonaHoraria}"
 											mindate="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura}"
-											disabled="#{empty convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura}"
 											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')} HH:mm"
 											hourFormat="24"
 											yearRange="c-100:c+100" locale="es"
