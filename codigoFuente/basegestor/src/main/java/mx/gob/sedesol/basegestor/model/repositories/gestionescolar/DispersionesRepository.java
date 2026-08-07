@@ -51,6 +51,7 @@ public class DispersionesRepository implements IDispersionesRepository {
 				+ "         INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpi.convocatoria_id\r\n"
 				+ "         LEFT JOIN tbl_inscripciones ti ON ti.idplan = rpi.id_plan AND ti.idprograma = rpi.id_programa\r\n"
 				+ "                AND ti.fecha_registro >= tpi.fecha_inicio AND ti.fecha_registro <= tpi.fecha_fin\r\n"
+				+ "                AND NOT EXISTS (SELECT 1 FROM rel_persona_bajas rpb WHERE rpb.id_persona = ti.idpersona AND rpb.id_inscripcion = ti.id AND rpb.id_proceso_inscripcion = tpi.proceso_inscripcion_id AND rpb.contabilizar = 1)\r\n"
 				+ "WHERE tpi.convocatoria_id = :idConvocatoria AND tpi.id_tipo_proceso = :idTipoProceso\r\n"
 				+ "  AND tpi.proceso_inscripcion_id = :idProcesoInscripcion AND tpi.id_categoria_proceso = 1");
 
@@ -184,7 +185,8 @@ public class DispersionesRepository implements IDispersionesRepository {
 				+ "               WHERE ti.idplan = rpi.id_plan\r\n"
 				+ "                 AND ti.idprograma = rpi.id_programa\r\n"
 				+ "                 AND ti.fecha_registro >= tpi.fecha_inicio\r\n"
-				+ "                 AND ti.fecha_registro <= tpi.fecha_fin), tbd.no_total_estudiantes) no_total_estudiantes,\r\n"
+				+ "                 AND ti.fecha_registro <= tpi.fecha_fin\r\n"
+				+ "                 AND NOT EXISTS (SELECT 1 FROM rel_persona_bajas rpb WHERE rpb.id_persona = ti.idpersona AND rpb.id_inscripcion = ti.id AND rpb.id_proceso_inscripcion = tpi.proceso_inscripcion_id AND rpb.contabilizar = 1)), tbd.no_total_estudiantes) no_total_estudiantes,\r\n"
 				+ "    tbd.no_grupos,\r\n"
 				+ "    tbd.estudiantes_x_grupo, tbd.grupo_resto, tbd.estudiantes_resto,\r\n"
 				+ "    tbd.tipo_matriculacion,\r\n"
@@ -785,6 +787,11 @@ public class DispersionesRepository implements IDispersionesRepository {
 		   .append("                   INNER JOIN rel_dispersiones_grupo rdg2 ON rdg2.id_grupo = rgp.id_grupo ")
 		   .append("                   WHERE rdg2.id_dispersion = :idDispersion ")
 		   .append("                     AND rgp.id_persona_participante = ti.idpersona) ")
+		   .append("  AND NOT EXISTS (SELECT 1 FROM rel_persona_bajas rpb ")
+		   .append("                   WHERE rpb.id_persona = ti.idpersona ")
+		   .append("                     AND rpb.id_inscripcion = ti.id ")
+		   .append("                     AND rpb.id_proceso_inscripcion = tpi.proceso_inscripcion_id ")
+		   .append("                     AND rpb.contabilizar = 1) ")
 		   .append("ORDER BY ti.idpersona");
 		Query query = entityManager.createNativeQuery(sql.toString());
 		query.setParameter("idConvocatoria", idConvocatoria);
@@ -832,6 +839,11 @@ public class DispersionesRepository implements IDispersionesRepository {
 		   .append("      WHERE rgp.id_persona_participante = tis.Idpersona ")
 		   .append("        AND tis.asignatura LIKE CONCAT(tfpp.nombre_tentativo,'%') ")
 		   .append("        AND rgp.fecha_registro >= tis.fecha_registro) ")
+		   .append("  AND NOT EXISTS (SELECT 1 FROM rel_persona_bajas rpb ")
+		   .append("                  WHERE rpb.id_persona = tis.Idpersona ")
+		   .append("                    AND rpb.id_inscripcion = tis.id ")
+		   .append("                    AND rpb.id_proceso_inscripcion = tpi.proceso_inscripcion_id ")
+		   .append("                    AND rpb.contabilizar = 1) ")
 		   .append("ORDER BY CASE WHEN tis.idprograma = :idPrograma THEN 0 ELSE 1 END, ")
 		   .append("         tis.idprograma");
 		Query query = entityManager.createNativeQuery(sql.toString());
@@ -890,6 +902,11 @@ public class DispersionesRepository implements IDispersionesRepository {
 				+ "    WHERE rgp.id_persona_participante = ti.Idpersona "
 				+ "      AND ti.asignatura LIKE CONCAT(tfpp.nombre_tentativo, '%') "
 				+ "      AND rgp.fecha_registro >= ti.fecha_registro) "
+				+ "AND NOT EXISTS (SELECT 1 FROM rel_persona_bajas rpb "
+				+ "    WHERE rpb.id_persona = ti.idpersona "
+				+ "      AND rpb.id_inscripcion = ti.id "
+				+ "      AND rpb.id_proceso_inscripcion = tpi.proceso_inscripcion_id "
+				+ "      AND rpb.contabilizar = 1) "
 				+ "ORDER BY ti.idpersona";
 		Query query = entityManager.createNativeQuery(sql);
 		query.setParameter("idProcesoInscripcionMatricular", idProcesoInscripcionMatricular);
@@ -1018,6 +1035,9 @@ public class DispersionesRepository implements IDispersionesRepository {
 				+ "                       AND tis.asignatura LIKE CONCAT(tfpp.nombre_tentativo, '%') "
 				+ "                       AND rgp.fecha_registro >= tis.fecha_registro "
 				+ "                 ) "
+				+ "                 AND NOT EXISTS (SELECT 1 FROM rel_persona_bajas rpb "
+				+ "                     WHERE rpb.id_persona = tis.Idpersona AND rpb.id_inscripcion = tis.id "
+				+ "                       AND rpb.id_proceso_inscripcion = tpi.proceso_inscripcion_id AND rpb.contabilizar = 1) "
 				+ "           ) AS num_usuarios_inscripcion, "
 				+ "           td.no_grupos AS gruposgenerales, td.estudiantes_x_grupo AS cupogeneral, "
 				+ "           td.grupo_resto AS gruposresto, td.estudiantes_resto AS cuporesto, "
@@ -1103,6 +1123,9 @@ public class DispersionesRepository implements IDispersionesRepository {
 				+ "          WHERE rgp.id_persona_participante = ti.Idpersona "
 				+ "            AND ti.asignatura LIKE CONCAT(tfpp.nombre_tentativo, '%') "
 				+ "            AND rgp.fecha_registro >= ti.fecha_registro) "
+				+ "      AND NOT EXISTS (SELECT 1 FROM rel_persona_bajas rpb "
+				+ "          WHERE rpb.id_persona = ti.Idpersona AND rpb.id_inscripcion = ti.id "
+				+ "            AND rpb.id_proceso_inscripcion = tpi.proceso_inscripcion_id AND rpb.contabilizar = 1) "
 				+ " LEFT JOIN tbl_malla_curricular tmc2  ON tmc2.id = tmc.id_padre "
 				+ " INNER JOIN rel_proceso_inscipcion_planesyprogramas rpip ON rpi.id_programa = rpip.id_programa AND rpip.id_programa = ti.idprograma AND rpip.id_proceso_inscripcion = :idProcesoInscripcionConDispersion "
 				+ " INNER JOIN tbl_dispersiones td ON td.id_proceso_inscripcion = rpip.id_proceso_inscripcion AND td.id_programa = rpip.id_programa "

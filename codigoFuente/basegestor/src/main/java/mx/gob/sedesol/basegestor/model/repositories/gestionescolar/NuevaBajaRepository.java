@@ -323,8 +323,8 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
     @Override
     @Transactional
     public void insertarBaja(BajaAplicacionDTO bajaAplicacionDTO) {
-        String consulta = "INSERT INTO rel_persona_bajas (id_persona, motivo_baja_id, proceso_id, id_plan, id_programa, id_evento, id_grupo, id_user_enrolments_lms, usuario_modifico, contabilizar, solicitud)"
-                + " VALUES (:idPersona, :motivoBajaId, :procesoId, :idPlan, :idPrograma, :idEvento, :idGrupo, :idUserEnrolmentsLms, :usuarioModifico, :contabilizar, :numeroSolicitud)";
+        String consulta = "INSERT INTO rel_persona_bajas (id_persona, motivo_baja_id, proceso_id, id_plan, id_programa, id_evento, id_grupo, id_user_enrolments_lms, usuario_modifico, contabilizar, solicitud, id_inscripcion, id_proceso_inscripcion, id_periodo)"
+                + " VALUES (:idPersona, :motivoBajaId, :procesoId, :idPlan, :idPrograma, :idEvento, :idGrupo, :idUserEnrolmentsLms, :usuarioModifico, :contabilizar, :numeroSolicitud, :idInscripcion, :idProcesoInscripcion, :idPeriodo)";
 
         entityManager.createNativeQuery(consulta)
                 .setParameter("idPersona", bajaAplicacionDTO.getIdPersona())
@@ -338,7 +338,33 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
                 .setParameter("usuarioModifico", bajaAplicacionDTO.getQuienAplicaBaja() != null ? bajaAplicacionDTO.getQuienAplicaBaja() : "-")
                 .setParameter("contabilizar", bajaAplicacionDTO.getContabilizar())
                 .setParameter("numeroSolicitud", bajaAplicacionDTO.getNumeroSolicitud())
+                .setParameter("idInscripcion", bajaAplicacionDTO.getIdInscripcion())
+                .setParameter("idProcesoInscripcion", bajaAplicacionDTO.getIdProcesoInscripcion())
+                .setParameter("idPeriodo", bajaAplicacionDTO.getIdPeriodo())
                 .executeUpdate();
+    }
+
+    @Override
+    public BajaAplicacionDTO consultarInscripcionParaBaja(Long idPersona, Long idPlan, Long idPrograma, String nombrePeriodo) {
+        String sql = "SELECT ti.id, tpi.proceso_inscripcion_id, per.id_periodo "
+                + "FROM tbl_inscripciones ti "
+                + "JOIN tbl_periodos_inscripcion per ON ti.fecha_registro BETWEEN per.fecha_inicio AND per.fecha_finalizacion "
+                + "JOIN rel_proceso_inscipcion_planesyprogramas rpip ON rpip.id_plan = ti.idplan AND rpip.id_programa = ti.idprograma "
+                + "JOIN tbl_procesos_inscripcion tpi ON tpi.proceso_inscripcion_id = rpip.id_proceso_inscripcion "
+                + " AND ti.fecha_registro BETWEEN tpi.fecha_inicio AND tpi.fecha_fin "
+                + "WHERE ti.idpersona = :idPersona AND ti.idplan = :idPlan AND ti.idprograma = :idPrograma "
+                + "AND per.nombre_periodo = :nombrePeriodo ORDER BY ti.id DESC LIMIT 1";
+        List<Object[]> rows = entityManager.createNativeQuery(sql)
+                .setParameter("idPersona", idPersona).setParameter("idPlan", idPlan)
+                .setParameter("idPrograma", idPrograma).setParameter("nombrePeriodo", nombrePeriodo)
+                .getResultList();
+        if (rows.isEmpty()) { return null; }
+        Object[] row = rows.get(0);
+        BajaAplicacionDTO dto = new BajaAplicacionDTO();
+        dto.setIdInscripcion(obtenerLong(row[0]));
+        dto.setIdProcesoInscripcion(obtenerLong(row[1]));
+        dto.setIdPeriodo(obtenerLong(row[2]));
+        return dto;
     }
 
     @Override
@@ -403,6 +429,9 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
         String consulta = "UPDATE rel_persona_bajas "
                 + "SET motivo_baja_id = :motivoBajaId, proceso_id = :procesoId, "
                 + "id_plan = :idPlan, id_programa = :idPrograma, id_evento = :idEvento, id_grupo = :idGrupo, "
+                + "id_inscripcion = COALESCE(:idInscripcion, id_inscripcion), "
+                + "id_proceso_inscripcion = COALESCE(:idProcesoInscripcion, id_proceso_inscripcion), "
+                + "id_periodo = COALESCE(:idPeriodo, id_periodo), "
                 + "id_user_enrolments_lms = :idUserEnrolmentsLms, usuario_modifico = :usuarioModifico, "
                 + "contabilizar = :contabilizar, solicitud = :numeroSolicitud "
                 + "WHERE id_baja = :idBaja";
@@ -414,6 +443,9 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
                 .setParameter("idPrograma", bajaAplicacionDTO.getIdPrograma())
                 .setParameter("idEvento", bajaAplicacionDTO.getIdEvento())
                 .setParameter("idGrupo", bajaAplicacionDTO.getIdGrupo())
+                .setParameter("idInscripcion", bajaAplicacionDTO.getIdInscripcion())
+                .setParameter("idProcesoInscripcion", bajaAplicacionDTO.getIdProcesoInscripcion())
+                .setParameter("idPeriodo", bajaAplicacionDTO.getIdPeriodo())
                 .setParameter("idUserEnrolmentsLms", bajaAplicacionDTO.getIdUserEnrolmentsLms())
                 .setParameter("usuarioModifico", bajaAplicacionDTO.getQuienAplicaBaja() != null ? bajaAplicacionDTO.getQuienAplicaBaja() : "-")
                 .setParameter("contabilizar", bajaAplicacionDTO.getContabilizar())

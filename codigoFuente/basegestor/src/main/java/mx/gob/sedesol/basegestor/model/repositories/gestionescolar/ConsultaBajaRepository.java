@@ -30,7 +30,7 @@ public class ConsultaBajaRepository implements IConsultaBajaRepository {
                 + " COALESCE(te.nombre_ec,'-') AS evento, "
                 + " ctb.nombre AS tipo_baja, "
                 + " COALESCE(CONCAT((SELECT tmc2.nombre FROM tbl_malla_curricular tmc2 WHERE tmc2.id = tmc.id_padre),' ', tmc.nombre),'-') AS estructura, "
-                + " COALESCE(tpi.nombre_periodo,'-') AS periodo, "
+                + " COALESCE(tpiBaja.nombre_periodo, tpiEvento.nombre_periodo, '-') AS periodo, "
                 + " rpb.contabilizar AS estatus, "
                 + " rpb.id_plan AS id_plan, "
                 + " rpb.id_programa AS id_programa, "
@@ -54,10 +54,11 @@ public class ConsultaBajaRepository implements IConsultaBajaRepository {
                 + " JOIN cat_tipo_bajas ctb ON ctb.id_tipo_baja = rmb.tipo_baja_id "
                 + " LEFT JOIN tbl_malla_curricular tmc ON tmc.id = tfdp.id_eje_capacitacion "
                 + " LEFT JOIN tbl_eventos te ON te.id_evento = rpb.id_evento "
-                + " LEFT JOIN tbl_periodos_inscripcion tpi ON te.cve_evento_cap LIKE CONCAT('%', tpi.nombre_periodo, '%') "
+                + " LEFT JOIN tbl_periodos_inscripcion tpiBaja ON tpiBaja.id_periodo = rpb.id_periodo "
+                + " LEFT JOIN tbl_periodos_inscripcion tpiEvento ON te.cve_evento_cap LIKE CONCAT('%', tpiEvento.nombre_periodo, '%') "
                 + "WHERE rpb.contabilizar = :estatusSeleccionado "
                 + " AND tp.sso_idUsuario = :matriculaSeleccionada "
-                + " AND (te.id_evento IS NULL OR tpi.nombre_periodo = :periodoSeleccionado)";
+                + " AND COALESCE(tpiBaja.nombre_periodo, tpiEvento.nombre_periodo) = :periodoSeleccionado";
 
         Query query = entityManager.createNativeQuery(consulta);
         query.setParameter("matriculaSeleccionada", matricula);

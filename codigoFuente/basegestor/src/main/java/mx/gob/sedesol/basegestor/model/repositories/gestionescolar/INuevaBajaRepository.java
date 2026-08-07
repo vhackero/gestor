@@ -59,4 +59,6 @@ public interface INuevaBajaRepository {
     void actualizarMotivoBaja(Long idMotivoBaja, Long idTipoBaja, String descripcion);
 
     void reactivarPersona(Long idPersona);
+
+    BajaAplicacionDTO consultarInscripcionParaBaja(Long idPersona, Long idPlan, Long idPrograma, String nombrePeriodo);
 }
