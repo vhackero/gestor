@@ -87,7 +87,8 @@
 						<p:selectCheckboxMenu id="planProgramaConsulta"
 							value="#{dispersionesBean.planesProgramasBusquedaSeleccionados}"
 							styleClass="col-xs-12" converter="entityConverter"
-							label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}">
+							label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+							filter="true" filterMatchMode="contains">
 							<f:selectItems value="#{dispersionesBean.listaPlanProgramas}"
 								var="planPrograma"
 								itemLabel="#{planPrograma.nombrePlan} &gt; #{planPrograma.nombrePrograma}"

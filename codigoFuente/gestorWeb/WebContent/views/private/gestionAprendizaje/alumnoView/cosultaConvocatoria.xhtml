@@ -8,6 +8,7 @@
 	xmlns:f="http://java.sun.com/jsf/core">
 
 
+	<h:panelGroup id="contenidoConvocatoria" layout="block">
 	<p:panel header="Consulta Convocatoria" rendered="#{convocatoriasBean.mostrarConsultaConvocatoria}">
 
 
@@ -72,7 +73,8 @@
 											value="#{convocatoriasBean.convocatoriaParamConsulta.consulFechaApertura}"
 											showOn="button"  required="true"
                 							requiredMessage="La fecha de apertura es obligatoria.">
-									<p:ajax event="dateSelect" process="@this"/>
+									<p:ajax event="dateSelect" process="@this"
+											listener="#{convocatoriasBean.validarFechas()}" />
 								</p:calendar>
  								<p:message for="fc_fechaInicial" display="text" />
 							</div>
@@ -123,19 +125,21 @@
 
 				<div class="col-md-12 text-right">
 				
-					<p:commandButton value="Cancelar" process="@this"
-										 update="@form"
-										 action="#{convocatoriasBean.cancelar}" ajax="true"
+					<p:commandButton value="Cancelar" process="@this" update="@form"
+										 action="#{convocatoriasBean.cancelar}" ajax="true" global="false"
 										 styleClass="btn btn-default" />
 						
-						<p:commandButton value="Limpiar campos" process="@this"
-										 update="@form"
-										 action="#{convocatoriasBean.limpiarCampos}" ajax="true"
+						<p:commandButton value="Limpiar campos" process="@this" update="@form"
+										 action="#{convocatoriasBean.limpiarFiltros}" ajax="true" global="false"
 										 styleClass="btn btn-default" />
 
 					
-						<p:commandButton id="btnBusquedaAvas" process="@form" ajax="true"
-							update="@form" styleClass="btn btn-primary pull-right"
+						<p:commandButton id="btnBusquedaAvas" process="@form" ajax="true" global="false"
+							update=":convocatoriasForm:resultadosConvocatoria :convocatoriasForm:mensajesConvocatoria"
+							onstart="PF('dialogLayout').show();"
+							oncomplete="PF('dialogLayout').hide();"
+							onerror="PF('dialogLayout').hide();"
+							styleClass="btn btn-primary pull-right"
 							action="#{convocatoriasBean.consultarFiltros}"
 							value="#{sistema.obtenerTexto('gw.ga.btn.buscar')}" />
 					
@@ -146,6 +150,7 @@
 		</div>
 		
 		
+		<h:panelGroup id="resultadosConvocatoria" layout="block">
 		<div class="row" >
 			<div class="col-md-12">
 				<p:dataTable id="id"
@@ -204,14 +209,22 @@
 					
 					
 					<p:column styleClass="text-center">
-						<p:commandButton ajax="true" update="@form"
+						<p:commandButton ajax="true" global="false" process="@this"
+							update=":convocatoriasForm:resultadosConvocatoria :convocatoriasForm:mensajesConvocatoria"
+							onstart="PF('dialogLayout').show();"
+							oncomplete="PF('dialogLayout').hide();"
+							onerror="PF('dialogLayout').hide();"
 							action="#{convocatoriasBean.eliminar}"
 							icon="fa fa-trash" styleClass="btn-icon btn btn-default">
 							<f:setPropertyActionListener value="#{convo}"
 								target="#{convocatoriasBean.elminarConvo}" />
 						</p:commandButton>
 						
-						<p:commandButton ajax="true" update="@form"
+						<p:commandButton ajax="true" global="false" process="@this"
+							update=":convocatoriasForm:contenidoConvocatoria :convocatoriasForm:mensajesConvocatoria"
+							onstart="PF('dialogLayout').show();"
+							oncomplete="PF('dialogLayout').hide();"
+							onerror="PF('dialogLayout').hide();"
 							action="#{convocatoriasBean.editarConvocatoria}"
 							icon="fa fa-pencil" styleClass="btn-icon btn btn-default">
 							<f:setPropertyActionListener value="#{convo}"
@@ -221,6 +234,7 @@
 				</p:dataTable>
 			</div>
 		</div>
+		</h:panelGroup>
 
 		
 
@@ -297,9 +311,6 @@
 											value="#{convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
 											showOn="button" required="true"
                 							requiredMessage="La fecha de apertura es obligatoria.">
-									<p:ajax event="change" process="@this"
-											update="fc_fechaFinalAlta"
-											listener="#{convocatoriasBean.validarFechasAlta2()}" />
 								</p:calendar>
 								<p:message for="fc_fechaInicialAlta" display="text" />
 
@@ -309,8 +320,6 @@
 								<p:outputLabel styleClass="bloque requerido"
 											   value="Fecha de cierre:" />
 								<p:calendar id="fc_fechaFinalAlta" timeZone="#{convocatoriasBean.zonaHoraria}"
-											mindate="#{convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
-											disabled="#{empty convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
 											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFechaHora')}"
 											hourFormat="24"
 											yearRange="c-100:c+100" locale="es"
@@ -319,7 +328,6 @@
 											value="#{convocatoriasBean.convocatoriaParamNueva.altaFechaCierre}"
 											showOn="button"   required="true"
                 							requiredMessage="La fecha de cierre es obligatoria.">
-									<p:ajax event="change" process="@this" />
 								</p:calendar>
 								 <p:message for="fc_fechaFinalAlta" display="text" />
 							</div>
@@ -334,8 +342,6 @@
 						value="#{convocatoriasBean.convocatoriaParamNueva.listaPlanProgramaNivel}"
 						id="altaNivelEducativo" styleClass="col-xs-12" required="false"
 						requiredMessage="El nivel educativo es obligatorio." label="Seleccionar">
-
-						<p:ajax event="change" process="@this" listener="#{convocatoriasBean.onChange}" />
 
 						<f:selectItems
 							value="#{convocatoriasBean.convocatoriaParamNueva.listaPlanPrograma}"
@@ -371,7 +377,6 @@
 							<p:selectOneMenu id="altaEstatus"  value="#{convocatoriasBean.convocatoriaParamNueva.altaEstatus}"
 								styleClass="col-xs-12"  required="true" 
                      requiredMessage="El estatus es obligatorio.">
-								<p:ajax event="change" process="@this" />
 								<f:selectItem
 									itemLabel="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
 									itemValue="#{null}" />
@@ -402,9 +407,6 @@
 											readonlyInput="true" navigator="true"
 											value="#{convocatoriasBean.convocatoriaParamNueva.altaFechaAlta}"
 											showOn="button"  >
-									<p:ajax event="dateSelect" process="@this" />
-									
-							
 							</p:calendar>
 						
 						</div>
@@ -430,18 +432,19 @@
 				<div class="col-md-12 text-right">
 				
 					<p:commandButton value="Cancelar" process="@this"
-										 update="@form"
-										 action="#{convocatoriasBean.cancelar2}" ajax="true"
+										 update=":convocatoriasForm:contenidoConvocatoria"
+										 action="#{convocatoriasBean.cancelar2}" ajax="true" global="false"
 										 styleClass="btn btn-default" />
 						
 						<p:commandButton value="Limpiar campos" process="@this"
-										 update="@form"
-										 action="#{convocatoriasBean.limpiarCampos}" ajax="true"
+										 update=":convocatoriasForm:contenidoConvocatoria"
+										 action="#{convocatoriasBean.limpiarEdicion}" ajax="true" global="false"
 										 styleClass="btn btn-default" />
 
 					
-						<p:commandButton id="btnBusquedaAvas2" process="@form" ajax="true"
-							update="@form" styleClass="btn btn-primary pull-right"
+						<p:commandButton id="btnBusquedaAvas2" ajax="false"
+							onclick="PF('dialogLayout').show();"
+							styleClass="btn btn-primary pull-right"
 							action="#{convocatoriasBean.editarConvocatoriaBD}"
 							value="Guardar" />
 					
@@ -453,6 +456,7 @@
 
 		
 	</p:panel>
+	</h:panelGroup>
 
 	<p:dialog appendTo="@(body)" draggable="false" position="center"
 			resizable="false" closable="false" modal="true" width="600px"
