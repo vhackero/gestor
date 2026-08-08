@@ -346,7 +346,8 @@
 					<div class="col-md-4 col-xs-12" >
 						<p:outputLabel styleClass="bloque requerido" for="plan2" value="Plan / Programa:" />
 			<p:selectCheckboxMenu id="plan2" value="#{inscripocionesBean.inscripcionParamNueva.planesProgramas}" required="true"
-                				 requiredMessage="El campo es requerido">
+							 requiredMessage="El campo es requerido"
+							 filter="true" filterMatchMode="contains">
 
 							<!-- Llamar al método cuando cambia la selección -->
 							<p:ajax event="change"

@@ -105,7 +105,8 @@
 						value="#{dispersionesBean.planesProgramasSeleccionados}"
 						styleClass="col-xs-12" converter="entityConverter"
 						required="#{dispersionesBean.mostrarPlanYPrograma}"
-                    	requiredMessage="El plan / programa es obligatorio.">
+						requiredMessage="El plan / programa es obligatorio."
+						filter="true" filterMatchMode="contains">
 						<p:ajax event="change" process="@this" update="@form" />
 						<f:selectItems value="#{dispersionesBean.listaPlanProgramas}"
 							var="planPrograma"

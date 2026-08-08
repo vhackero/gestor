@@ -110,7 +110,8 @@
 							
 							<p:selectOneMenu  value="#{convocatoriasBean.convocatoriaParamNueva.altaNivelEducativo}" id="altaNivelEducativo" 
 								styleClass="col-xs-12" required="true" 
-                    			 requiredMessage="El nivel educativo es obligatorio.">
+								 requiredMessage="El nivel educativo es obligatorio."
+								 filter="true" filterMatchMode="contains">
                     			 
 								<p:ajax event="change" process="@this" />
 								

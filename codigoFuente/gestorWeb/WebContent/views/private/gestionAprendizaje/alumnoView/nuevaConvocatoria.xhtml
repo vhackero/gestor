@@ -89,7 +89,6 @@
 											   value="Fecha de cierre:" />
 								<p:calendar id="fc_fechaFinalAlta" timeZone="#{convocatoriasBean.zonaHoraria}"
 											mindate="#{convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
-											disabled="#{empty convocatoriasBean.convocatoriaParamNueva.altaFechaApertura}"
 											pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')} HH:mm"
 											hourFormat="24"
 											yearRange="c-100:c+100" locale="es"
@@ -111,7 +110,8 @@
 					<p:selectCheckboxMenu
 						value="#{convocatoriasBean.convocatoriaParamNueva.listaNivelEducativoCompl}"
 						id="altaNivelEducativo" styleClass="col-xs-12" required="true"
-						requiredMessage="El nivel educativo es obligatorio." label="Seleccionar">
+						requiredMessage="El nivel educativo es obligatorio." label="Seleccionar"
+						filter="true" filterMatchMode="contains">
 
 						<p:ajax event="change" process="@this" />
 				        
@@ -206,7 +206,7 @@
 				<div class="col-md-12 text-right">
 					<p:commandButton value="Cancelar" process="@this"
 										 update="@form"
-										 action="#{convocatoriasBean.cancelar}" ajax="true"
+										 action="#{convocatoriasBean.cancelarNuevaConvocatoria}" ajax="true"
 										 styleClass="btn btn-default" />
 						<p:commandButton value="Limpiar campos" process="@this"
 										 update="@form"

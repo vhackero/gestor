@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.model.entities.gestionescolar;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class ConvocatoriaNivelEducativoCompl implements Serializable {
 
@@ -35,6 +36,25 @@ public class ConvocatoriaNivelEducativoCompl implements Serializable {
                         + ", nombreBloque=" + nombreBloque
                         + ", nombreSemestre=" + nombreSemestre + "]";
 	    }
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(idNivelEnsenanza, idPlan, idPrograma);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof ConvocatoriaNivelEducativoCompl)) {
+			return false;
+		}
+		ConvocatoriaNivelEducativoCompl other = (ConvocatoriaNivelEducativoCompl) obj;
+		return Objects.equals(idNivelEnsenanza, other.idNivelEnsenanza)
+				&& Objects.equals(idPlan, other.idPlan)
+				&& Objects.equals(idPrograma, other.idPrograma);
+	}
 	 
 	public Integer getIdNivelEnsenanza() {
 		return idNivelEnsenanza;

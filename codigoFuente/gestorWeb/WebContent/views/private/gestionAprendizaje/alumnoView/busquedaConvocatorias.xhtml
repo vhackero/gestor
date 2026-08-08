@@ -14,14 +14,13 @@
 	</ui:define>
 
 	<ui:define name="content">
-		<h:form>
+		<h:form id="convocatoriasForm">
+			<p:growl id="mensajesConvocatoria" globalOnly="true"
+				showDetail="true" life="6000" />
 			<h1>
 				<p:outputLabel styleClass="h1" value="#{sistema.obtenerTexto('gw.alumno.convocatorias.titulo')}" />
 			</h1>
 
-
-			<p:ajaxStatus onstart="PF('dialogLayout').show()"
-				onsuccess="PF('dialogLayout').hide()" />
 
 			<br />
 

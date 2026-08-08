@@ -133,7 +133,8 @@
 							<p:selectCheckboxMenu id="planProgramaEditar"
 								value="#{inscripocionesBean.planesProgramasEdicionSeleccionados}"
 								styleClass="col-xs-12"
-								label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}">
+								label="#{sistema.obtenerTexto('gw.textos.menu.seleccionar')}"
+								filter="true" filterMatchMode="contains">
 								<f:selectItems
 									value="#{inscripocionesBean.listaPlanProgramasEdicion}"
 									var="planPrograma"
