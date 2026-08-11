@@ -110,7 +110,7 @@
 						<p:ajax event="change" process="@this" update="@form" />
 						<f:selectItems value="#{dispersionesBean.listaPlanProgramas}"
 							var="planPrograma"
-							itemLabel="#{planPrograma.nombrePlan} &gt; #{planPrograma.nombrePrograma}"
+							itemLabel="#{planPrograma.nombrePlan} &gt; #{planPrograma.nombreSemestre} &gt; #{planPrograma.nombreBloque} &gt; #{planPrograma.nombrePrograma}"
 							itemValue="#{planPrograma}" />
 
 					</p:selectCheckboxMenu>
