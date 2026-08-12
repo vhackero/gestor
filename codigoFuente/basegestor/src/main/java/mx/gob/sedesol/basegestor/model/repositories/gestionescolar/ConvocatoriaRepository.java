@@ -57,7 +57,9 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 //			"  AND pr.id_programa = :idPrograma ";
 
 	String query6 = "SELECT c.id, c.id_plan, c.id_programa, c.fecha_modificacion FROM rel_convocatoria_planesyprogramas c "
-			+ "	 WHERE c.id_convocatoria = :idConvocatoria " + "	 AND c.id_plan = :idPlanP "
+			+ "	 WHERE c.id_convocatoria = :idConvocatoria "
+			+ "	 AND c.id_nivel_ensenanza = :idNivelEnsenanzaP "
+			+ "	 AND c.id_plan = :idPlanP "
 			+ "	 AND c.id_programa = :idProgramaP";
 
 	String query7 = "UPDATE rel_convocatoria_planesyprogramas c " + "SET c.id_plan = :idPlan, "
@@ -582,6 +584,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 						Query query06 = entityManager.createNativeQuery(query6);
 						// Buscar
 						query06.setParameter("idConvocatoria", valorConv);
+						query06.setParameter("idNivelEnsenanzaP", idNivelEnsenanza);
 						query06.setParameter("idPlanP", idPlan);
 						query06.setParameter("idProgramaP", idPrograma);
 
@@ -726,12 +729,13 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 	public void eliminarPlanesProgramas(ConvocatoriaParamNueva convocatoriaParamNueva, int idConvocatoria) {
 
 		String consulta2 = " DELETE FROM rel_convocatoria_planesyprogramas WHERE id_convocatoria = :idConvocatoria "
-				+ "AND id_plan = :idPlan AND id_programa = :idPrograma";
+				+ "AND id_nivel_ensenanza = :idNivelEnsenanza AND id_plan = :idPlan AND id_programa = :idPrograma";
 
 		for (ConvocatoriaNivelEducativoCompl planProgramas : convocatoriaParamNueva.getListaPlanProgramaEliminar()) {
 
 			Query query2 = entityManager.createNativeQuery(consulta2);
 			query2.setParameter("idConvocatoria", idConvocatoria);
+			query2.setParameter("idNivelEnsenanza", planProgramas.getIdNivelEnsenanza());
 			query2.setParameter("idPlan", planProgramas.getIdPlan());
 			query2.setParameter("idPrograma", planProgramas.getIdPrograma());
 			query2.executeUpdate();
