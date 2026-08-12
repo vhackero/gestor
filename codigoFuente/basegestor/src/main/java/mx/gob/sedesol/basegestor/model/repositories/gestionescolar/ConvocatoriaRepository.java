@@ -148,7 +148,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 	public List<ConvocatoriaNivelEducativoCompl> consultarPlanesProgramasId(Convocatoria convocatoriaParamConsulta) {
 
 		List<ConvocatoriaNivelEducativoCompl> lista = new ArrayList<ConvocatoriaNivelEducativoCompl>();
-		String consulta = "select id_plan, id_programa from des_sisi_gestor.rel_convocatoria_planesyprogramas\r\n"
+		String consulta = "select id_nivel_ensenanza, id_plan, id_programa from des_sisi_gestor.rel_convocatoria_planesyprogramas\r\n"
 				+ "WHERE id_convocatoria = :idConvocatoria";
 
 		String consulta2 = " SELECT cnp.id id_nivel_ensenanza, cnp.nombre nivel_ensenaza, tp.id_plan id_plan, tp.nombre plan, fdp.id_programa id_programa, fdp.nombre_tentativo programa,\r\n"
@@ -159,7 +159,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 				+ "         INNER JOIN cat_nivel_ensenanza_programa cnp ON fdp.id_nivel_programa = cnp.id\r\n"
 				+ "         INNER JOIN tbl_malla_curricular mc ON mc.id_plan = tp.id_plan AND mc.activo =1 \r\n"
 				+ "			INNER JOIN tbl_malla_curricular mcr ON mcr.id = fdp.id_eje_capacitacion \r\n"
-				+ "			WHERE tp.id_plan = :idPlan AND fdp.id_programa = :idPrograma \r\n"
+				+ "			WHERE cnp.id = :idNivelEnsenanza AND tp.id_plan = :idPlan AND fdp.id_programa = :idPrograma \r\n"
 				+ " order by tp.id_plan, (SELECT mcrs.nombre FROM tbl_malla_curricular mcrs WHERE mcrs.id = mcr.id_padre), mcr.nombre";
 
 		Query query = entityManager.createNativeQuery(consulta);
@@ -174,8 +174,9 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 
 				Query query2 = entityManager.createNativeQuery(consulta2);
 
-				query2.setParameter("idPlan", planPrograma[0]);
-				query2.setParameter("idPrograma", planPrograma[1]);
+				query2.setParameter("idNivelEnsenanza", planPrograma[0]);
+				query2.setParameter("idPlan", planPrograma[1]);
+				query2.setParameter("idPrograma", planPrograma[2]);
 
 				List<Object[]> listaPlanProgramaCompl = query2.getResultList();
 
