@@ -529,21 +529,21 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		String consulta = "SELECT DISTINCT tc.convocatoria_id, tp.id_plan pll, tp.nombre plan, tfd.id_programa, tfd.nombre_tentativo programa, (rcpp.id_plan), tp.nombre,"
 				+ "mcr.nombre bloque,"
 				+ "(SELECT mcrs.nombre FROM tbl_malla_curricular mcrs WHERE mcrs.id = mcr.id_padre) semestre"
-				+ " FROM des_sisi_gestor.tbl_convocatoria tc\r\n"
-				+ "INNER JOIN des_sisi_gestor.rel_convocatoria_planesyprogramas rcpp ON rcpp.id_convocatoria = tc.convocatoria_id\r\n"
-				+ "INNER JOIN des_sisi_gestor.tbl_ficha_descriptiva_programa tfd ON tfd.id_plan = rcpp.id_plan ANd tfd.id_programa = rcpp.id_programa\r\n"
-				+ "INNER JOIN des_sisi_gestor.tbl_planes tp ON tp.id_plan = tfd.id_plan\r\n"
-				+ "INNER JOIN des_sisi_gestor.tbl_malla_curricular tmc ON tmc.id_plan = tp.id_plan AND tmc.activo = 1\r\n"
+				+ " FROM tbl_convocatoria tc\r\n"
+				+ "INNER JOIN rel_convocatoria_planesyprogramas rcpp ON rcpp.id_convocatoria = tc.convocatoria_id\r\n"
+				+ "INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_plan = rcpp.id_plan ANd tfd.id_programa = rcpp.id_programa\r\n"
+				+ "INNER JOIN tbl_planes tp ON tp.id_plan = tfd.id_plan\r\n"
+				+ "INNER JOIN tbl_malla_curricular tmc ON tmc.id_plan = tp.id_plan AND tmc.activo = 1\r\n"
 				+ "INNER JOIN tbl_malla_curricular mcr ON mcr.id = tfd.id_eje_capacitacion \r\n"
 				+ "WHERE tc.convocatoria_id = :idConvocatoria AND tp.id_plan = :idPlan \r\n"
 				+ "order by tp.id_plan, semestre, mcr.nombre";
 
 		String consulta2 = "SELECT DISTINCT (rcpp.id_plan), tp.nombre plan\r\n"
-				+ "FROM des_sisi_gestor.tbl_convocatoria tc\r\n"
-				+ "         INNER JOIN des_sisi_gestor.rel_convocatoria_planesyprogramas rcpp ON rcpp.id_convocatoria = tc.convocatoria_id\r\n"
-				+ "         INNER JOIN des_sisi_gestor.tbl_planes tp ON tp.id_plan = rcpp.id_plan\r\n"
-				+ "         INNER JOIN des_sisi_gestor.tbl_malla_curricular tmc ON tmc.id_plan = tp.id_plan AND tmc.activo = 1\r\n"
-				+ "WHERE des_sisi_gestor.tc.convocatoria_id = :convocatoriaId";
+				+ "FROM tbl_convocatoria tc\r\n"
+				+ "         INNER JOIN rel_convocatoria_planesyprogramas rcpp ON rcpp.id_convocatoria = tc.convocatoria_id\r\n"
+				+ "         INNER JOIN tbl_planes tp ON tp.id_plan = rcpp.id_plan\r\n"
+				+ "         INNER JOIN tbl_malla_curricular tmc ON tmc.id_plan = tp.id_plan AND tmc.activo = 1\r\n"
+				+ "WHERE tc.convocatoria_id = :convocatoriaId";
 
 		if (inscripcionParamNueva.getConvocatoriaSeleccionada() != null) {
 			Query query2 = entityManager.createNativeQuery(consulta2);

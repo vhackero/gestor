@@ -43,7 +43,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 			+ "nombre,nombre_corto,descripcion,fecha_apertura,fecha_cierre,semestre,tipo,url_convocatoria,activo,fecha_alta,fecha_modificacion,cupo_limite)\r\n"
 			+ "VALUES\r\n";
 
-	String query2 = "SELECT MAX(convocatoria_id) FROM des_sisi_gestor.tbl_convocatoria";
+	String query2 = "SELECT MAX(convocatoria_id) FROM tbl_convocatoria";
 
 	String query3 = "INSERT INTO rel_convocatoria_planesyprogramas\r\n"
 			+ "(id_convocatoria,id_nivel_ensenanza,id_plan,id_programa,fecha_modificacion)\r\n" + "VALUES ";
@@ -148,7 +148,7 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 	public List<ConvocatoriaNivelEducativoCompl> consultarPlanesProgramasId(Convocatoria convocatoriaParamConsulta) {
 
 		List<ConvocatoriaNivelEducativoCompl> lista = new ArrayList<ConvocatoriaNivelEducativoCompl>();
-		String consulta = "select id_nivel_ensenanza, id_plan, id_programa from des_sisi_gestor.rel_convocatoria_planesyprogramas\r\n"
+		String consulta = "select id_nivel_ensenanza, id_plan, id_programa from rel_convocatoria_planesyprogramas\r\n"
 				+ "WHERE id_convocatoria = :idConvocatoria";
 
 		String consulta2 = " SELECT cnp.id id_nivel_ensenanza, cnp.nombre nivel_ensenaza, tp.id_plan id_plan, tp.nombre plan, fdp.id_programa id_programa, fdp.nombre_tentativo programa,\r\n"
