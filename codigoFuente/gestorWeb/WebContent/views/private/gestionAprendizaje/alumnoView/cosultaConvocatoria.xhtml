@@ -341,7 +341,8 @@
 					<p:selectCheckboxMenu
 						value="#{convocatoriasBean.convocatoriaParamNueva.listaPlanProgramaNivel}"
 						id="altaNivelEducativo" styleClass="col-xs-12" required="false"
-						requiredMessage="El nivel educativo es obligatorio." label="Seleccionar">
+						requiredMessage="El nivel educativo es obligatorio." label="Seleccionar"
+						converter="entityConverter">
 
 						<f:selectItems
 							value="#{convocatoriasBean.convocatoriaParamNueva.listaPlanPrograma}"
