@@ -445,11 +445,14 @@ public class DispersionesRepository implements IDispersionesRepository {
 		}
 		
 		boolean filtrarPorProceso = dispercionParametros.getIdProcesoInscripcion() != null;
-		StringBuilder consulta = new StringBuilder("SELECT tp.id_plan, tp.nombre plan, tfd.id_programa, tfd.nombre_tentativo programa\r\n");
+		StringBuilder consulta = new StringBuilder("SELECT DISTINCT tp.id_plan, tp.nombre plan, tfd.id_programa, "
+				+ "tfd.nombre_tentativo programa, mcr.nombre bloque, "
+				+ "(SELECT mcrs.nombre FROM tbl_malla_curricular mcrs WHERE mcrs.id = mcr.id_padre) semestre\r\n");
 		if (filtrarPorProceso) {
 			consulta.append("FROM rel_proceso_inscipcion_planesyprogramas rpip\r\n")
-				.append("         JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_programa = rpip.id_programa\r\n")
+				.append("         JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_programa = rpip.id_programa AND tfd.id_plan = rpip.id_plan\r\n")
 				.append("         JOIN tbl_planes tp ON tp.id_plan = tfd.id_plan\r\n")
+				.append("         JOIN tbl_malla_curricular mcr ON mcr.id = tfd.id_eje_capacitacion\r\n")
 				.append("         JOIN tbl_procesos_inscripcion tpi ON tpi.proceso_inscripcion_id = rpip.id_proceso_inscripcion\r\n")
 				.append("WHERE rpip.id_proceso_inscripcion = :idProcesoInscripcion\r\n")
 				.append("  AND tpi.convocatoria_id = :idConvocatoria");
@@ -459,8 +462,10 @@ public class DispersionesRepository implements IDispersionesRepository {
 				.append("         INNER JOIN tbl_ficha_descriptiva_programa tfd ON tfd.id_plan = rcpp.id_plan AND tfd.id_programa = rcpp.id_programa\r\n")
 				.append("         INNER JOIN tbl_planes tp ON tp.id_plan = tfd.id_plan\r\n")
 				.append("         INNER JOIN tbl_malla_curricular tmc ON tmc.id_plan = tp.id_plan AND tmc.activo = 1\r\n")
+				.append("         INNER JOIN tbl_malla_curricular mcr ON mcr.id = tfd.id_eje_capacitacion\r\n")
 				.append("WHERE tc.convocatoria_id = :idConvocatoria");
 		}
+		consulta.append("\r\nORDER BY tp.id_plan, semestre, mcr.nombre");
 		
 		Query query = entityManager.createNativeQuery(consulta.toString());
 		query.setParameter("idConvocatoria", dispercionParametros.getIdConvocatoriaSeleccionada());
@@ -477,6 +482,8 @@ public class DispersionesRepository implements IDispersionesRepository {
 				planPrograma.setNombrePlan(obj[1].toString());
 				planPrograma.setIdPrograma(((Number) obj[2]).intValue());
 				planPrograma.setNombrePrograma(obj[3].toString());
+				planPrograma.setNombreBloque(obj[4] != null ? obj[4].toString() : null);
+				planPrograma.setNombreSemestre(obj[5] != null ? obj[5].toString() : null);
 				lista.add(planPrograma);
 			}
 		}
