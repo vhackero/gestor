@@ -450,12 +450,7 @@ public class ConvocatoriasBean extends BaseBean {
 				Integer convocatoriaId = editarConv.getConvocatoriaId();
 
 				try {
-					onChange();
 					convocatoriaService.actualizarConvocatorias(convocatoriaParamNueva, convocatoriaId);
-					if (convocatoriaParamNueva.getListaPlanProgramaEliminar() != null
-							&& !convocatoriaParamNueva.getListaPlanProgramaEliminar().isEmpty()) {
-						convocatoriaService.eliminarPlanesProgramas(convocatoriaParamNueva, convocatoriaId);
-					}
 				} catch (Exception e) {
 					logger.error("Error al actualizar la convocatoria", e);
 					agregarMsgError("Error", "Ocurrio un problema al actualizar la convocatoria.");

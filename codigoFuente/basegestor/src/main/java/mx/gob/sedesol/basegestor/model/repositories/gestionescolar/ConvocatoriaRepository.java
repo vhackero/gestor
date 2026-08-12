@@ -5,8 +5,12 @@ import java.sql.Date;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -532,7 +536,12 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 
 		int filasAfectadas = query.executeUpdate();// duda
 
-		if (filasAfectadas >= 0) {
+		if (filasAfectadas < 0) {
+			throw new IllegalStateException("No fue posible actualizar la convocatoria " + idConvocatoria);
+		}
+		actualizarPlanesProgramasSeleccionados(convocatoriaParamNueva.getListaPlanProgramaNivel(), idConvocatoria, fecha2);
+
+		if (false) {
 
 			Query query02 = entityManager.createNativeQuery(query2);
 
@@ -626,6 +635,78 @@ public class ConvocatoriaRepository implements IConvocatoriaRepository {
 
 		}
 
+	}
+
+	private void actualizarPlanesProgramasSeleccionados(List<?> seleccionados, int idConvocatoria,
+			String fechaModificacion) {
+		Query consultarRelaciones = entityManager.createNativeQuery(
+				"SELECT id, id_nivel_ensenanza, id_plan, id_programa "
+						+ "FROM rel_convocatoria_planesyprogramas WHERE id_convocatoria = :idConvocatoria");
+		consultarRelaciones.setParameter("idConvocatoria", idConvocatoria);
+		List<Object[]> relacionesActuales = consultarRelaciones.getResultList();
+		Map<String, Object> idsRelacionesActuales = new HashMap<String, Object>();
+		for (Object[] relacionActual : relacionesActuales) {
+			String clave = relacionActual[1] + "-" + relacionActual[2] + "-" + relacionActual[3];
+			idsRelacionesActuales.put(clave, relacionActual[0]);
+		}
+
+		if (seleccionados == null) {
+			seleccionados = new ArrayList<Object>();
+		}
+
+		Pattern pattern = Pattern.compile("id\\w+=(\\d+)");
+		Set<String> relacionesInsertadas = new HashSet<String>();
+		for (Object seleccionado : seleccionados) {
+			Integer idNivelEnsenanza = null;
+			Integer idPlan = null;
+			Integer idPrograma = null;
+
+			if (seleccionado instanceof ConvocatoriaNivelEducativoCompl) {
+				ConvocatoriaNivelEducativoCompl relacion = (ConvocatoriaNivelEducativoCompl) seleccionado;
+				idNivelEnsenanza = relacion.getIdNivelEnsenanza();
+				idPlan = relacion.getIdPlan();
+				idPrograma = relacion.getIdPrograma();
+			} else if (seleccionado != null) {
+				Matcher matcher = pattern.matcher(seleccionado.toString());
+				Integer[] ids = new Integer[3];
+				int index = 0;
+				while (matcher.find() && index < ids.length) {
+					ids[index++] = Integer.valueOf(matcher.group(1));
+				}
+				if (index == ids.length) {
+					idNivelEnsenanza = ids[0];
+					idPlan = ids[1];
+					idPrograma = ids[2];
+				}
+			}
+
+			if (idNivelEnsenanza == null || idPlan == null || idPrograma == null) {
+				throw new IllegalArgumentException("La seleccion de nivel educativo, plan y programa es invalida");
+			}
+
+			String claveRelacion = idNivelEnsenanza + "-" + idPlan + "-" + idPrograma;
+			if (relacionesInsertadas.add(claveRelacion) && !idsRelacionesActuales.containsKey(claveRelacion)) {
+				Query insertarRelacion = entityManager.createNativeQuery(
+						"INSERT INTO rel_convocatoria_planesyprogramas "
+								+ "(id_convocatoria, id_nivel_ensenanza, id_plan, id_programa, fecha_modificacion) "
+								+ "VALUES (:idConvocatoria, :idNivelEnsenanza, :idPlan, :idPrograma, :fechaModificacion)");
+				insertarRelacion.setParameter("idConvocatoria", idConvocatoria);
+				insertarRelacion.setParameter("idNivelEnsenanza", idNivelEnsenanza);
+				insertarRelacion.setParameter("idPlan", idPlan);
+				insertarRelacion.setParameter("idPrograma", idPrograma);
+				insertarRelacion.setParameter("fechaModificacion", fechaModificacion);
+				insertarRelacion.executeUpdate();
+			}
+		}
+
+		for (Map.Entry<String, Object> relacionActual : idsRelacionesActuales.entrySet()) {
+			if (!relacionesInsertadas.contains(relacionActual.getKey())) {
+				Query eliminarRelacion = entityManager.createNativeQuery(
+						"DELETE FROM rel_convocatoria_planesyprogramas WHERE id = :idRelacion");
+				eliminarRelacion.setParameter("idRelacion", relacionActual.getValue());
+				eliminarRelacion.executeUpdate();
+			}
+		}
 	}
 
 	@Transactional
