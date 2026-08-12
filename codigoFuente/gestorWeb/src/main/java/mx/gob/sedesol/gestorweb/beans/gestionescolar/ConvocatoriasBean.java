@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -269,8 +270,9 @@ public class ConvocatoriasBean extends BaseBean {
 	            }
 
 	            // Compara los elementos por ID (puedes ajustar si hay más atributos relevantes)
-	            if (elementoSeleccionado.getIdPlan().equals(original.getIdPlan()) &&
-	                elementoSeleccionado.getIdPrograma().equals(original.getIdPrograma())) {
+	            if (Objects.equals(elementoSeleccionado.getIdNivelEnsenanza(), original.getIdNivelEnsenanza()) &&
+	                Objects.equals(elementoSeleccionado.getIdPlan(), original.getIdPlan()) &&
+	                Objects.equals(elementoSeleccionado.getIdPrograma(), original.getIdPrograma())) {
 	                encontrado = true;
 	                break;
 	            }
@@ -374,7 +376,9 @@ public class ConvocatoriasBean extends BaseBean {
 	        }
 	        for (ConvocatoriaNivelEducativoCompl plan : listaNivelEducativoCompl) {
 	            for (ConvocatoriaNivelEducativoCompl seleccionado : listaPlanesProgramas) {
-	                if (plan.getIdPlan().equals(seleccionado.getIdPlan()) && plan.getIdPrograma().equals(seleccionado.getIdPrograma())) {
+	                if (Objects.equals(plan.getIdNivelEnsenanza(), seleccionado.getIdNivelEnsenanza())
+	                        && Objects.equals(plan.getIdPlan(), seleccionado.getIdPlan())
+	                        && Objects.equals(plan.getIdPrograma(), seleccionado.getIdPrograma())) {
 	                    seleccionados.add(plan);
 	                }
 	            }
