@@ -229,6 +229,7 @@
 							icon="fa fa-pencil" styleClass="btn-icon btn btn-default">
 							<f:setPropertyActionListener value="#{convo}"
 								target="#{convocatoriasBean.editarConv}" />
+							<p:resetInput target=":convocatoriasForm:contenidoConvocatoria" />
 						</p:commandButton>
 					</p:column>
 				</p:dataTable>
@@ -342,7 +343,7 @@
 						value="#{convocatoriasBean.convocatoriaParamNueva.listaPlanProgramaNivel}"
 						id="altaNivelEducativo" styleClass="col-xs-12" required="false"
 						requiredMessage="El nivel educativo es obligatorio." label="Seleccionar"
-						converter="entityConverter">
+						converter="entityConverter" filter="true" filterMatchMode="contains">
 
 						<f:selectItems
 							value="#{convocatoriasBean.convocatoriaParamNueva.listaPlanPrograma}"

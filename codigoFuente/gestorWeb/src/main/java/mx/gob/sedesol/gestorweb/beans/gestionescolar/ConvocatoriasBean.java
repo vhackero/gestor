@@ -15,9 +15,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
-import javax.faces.component.UIComponent;
-import javax.faces.component.UIInput;
-import javax.faces.context.FacesContext;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
@@ -395,30 +392,8 @@ public class ConvocatoriasBean extends BaseBean {
 	        // Cambiar visibilidad de componentes
 	        this.mostrarNuevaConvocatoria = true;
 	        this.mostrarConsultaConvocatoria = false;
-	        resetearValoresLocalesEdicion();
 
 	        logger.info(" TERMINA EDITAR ");
-	}
-
-	private void resetearValoresLocalesEdicion() {
-		UIComponent contenidoConvocatoria = FacesContext.getCurrentInstance().getViewRoot()
-				.findComponent("convocatoriasForm:contenidoConvocatoria");
-		resetearValoresLocales(contenidoConvocatoria);
-	}
-
-	private void resetearValoresLocales(UIComponent componente) {
-		if (componente == null) {
-			return;
-		}
-		if (componente instanceof UIInput) {
-			((UIInput) componente).resetValue();
-		}
-		for (UIComponent hijo : componente.getChildren()) {
-			resetearValoresLocales(hijo);
-		}
-		for (UIComponent faceta : componente.getFacets().values()) {
-			resetearValoresLocales(faceta);
-		}
 	}
 
 	public void cancelarNuevaConvocatoria() {
