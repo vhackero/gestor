@@ -61,4 +61,6 @@ public interface INuevaBajaRepository {
     void reactivarPersona(Long idPersona);
 
     BajaAplicacionDTO consultarInscripcionParaBaja(Long idPersona, Long idPlan, Long idPrograma, String nombrePeriodo);
+
+    List<BajaAplicacionDTO> consultarInscripcionesParaBaja(Long idPersona, String nombrePeriodo);
 }
