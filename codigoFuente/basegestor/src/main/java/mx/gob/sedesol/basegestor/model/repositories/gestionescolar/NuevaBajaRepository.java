@@ -369,6 +369,59 @@ public class NuevaBajaRepository implements INuevaBajaRepository {
 
     @Override
     @SuppressWarnings("unchecked")
+    public List<BajaAplicacionDTO> consultarInscripcionesParaBaja(Long idPersona, String nombrePeriodo) {
+        String sql = "SELECT DISTINCT ti.id, tpi.proceso_inscripcion_id, per.id_periodo, "
+                + "ti.idplan, ti.idprograma, "
+                + "(SELECT te.id_evento FROM tbl_eventos te "
+                + " JOIN tbl_grupos tg ON tg.id_evento = te.id_evento "
+                + " JOIN rel_grupo_participante rgp ON rgp.id_grupo = tg.id "
+                + " JOIN tbl_ficha_descriptiva_programa fdp "
+                + "  ON fdp.id_programa = te.id_programa AND fdp.id_plan = ti.idplan "
+                + " WHERE rgp.id_persona_participante = ti.idpersona "
+                + "  AND fdp.id_programa = ti.idprograma "
+                + "  AND te.cve_evento_cap LIKE CONCAT('%', per.nombre_periodo, '%') "
+                + " ORDER BY tg.id DESC LIMIT 1) AS id_evento, "
+                + "(SELECT tg.id FROM tbl_eventos te "
+                + " JOIN tbl_grupos tg ON tg.id_evento = te.id_evento "
+                + " JOIN rel_grupo_participante rgp ON rgp.id_grupo = tg.id "
+                + " JOIN tbl_ficha_descriptiva_programa fdp "
+                + "  ON fdp.id_programa = te.id_programa AND fdp.id_plan = ti.idplan "
+                + " WHERE rgp.id_persona_participante = ti.idpersona "
+                + "  AND fdp.id_programa = ti.idprograma "
+                + "  AND te.cve_evento_cap LIKE CONCAT('%', per.nombre_periodo, '%') "
+                + " ORDER BY tg.id DESC LIMIT 1) AS id_grupo "
+                + "FROM tbl_inscripciones ti "
+                + "JOIN tbl_periodos_inscripcion per "
+                + " ON ti.fecha_registro BETWEEN per.fecha_inicio AND per.fecha_finalizacion "
+                + "JOIN rel_proceso_inscipcion_planesyprogramas rpip "
+                + " ON rpip.id_plan = ti.idplan AND rpip.id_programa = ti.idprograma "
+                + "JOIN tbl_procesos_inscripcion tpi "
+                + " ON tpi.proceso_inscripcion_id = rpip.id_proceso_inscripcion "
+                + " AND ti.fecha_registro BETWEEN tpi.fecha_inicio AND tpi.fecha_fin "
+                + "WHERE ti.idpersona = :idPersona AND per.nombre_periodo = :nombrePeriodo "
+                + "ORDER BY ti.id";
+
+        List<Object[]> rows = entityManager.createNativeQuery(sql)
+                .setParameter("idPersona", idPersona)
+                .setParameter("nombrePeriodo", nombrePeriodo)
+                .getResultList();
+        List<BajaAplicacionDTO> resultado = new java.util.ArrayList<BajaAplicacionDTO>();
+        for (Object[] row : rows) {
+            BajaAplicacionDTO dto = new BajaAplicacionDTO();
+            dto.setIdInscripcion(obtenerLong(row[0]));
+            dto.setIdProcesoInscripcion(obtenerLong(row[1]));
+            dto.setIdPeriodo(obtenerLong(row[2]));
+            dto.setIdPlan(obtenerLong(row[3]));
+            dto.setIdPrograma(obtenerLong(row[4]));
+            dto.setIdEvento(obtenerLong(row[5]));
+            dto.setIdGrupo(obtenerLong(row[6]));
+            resultado.add(dto);
+        }
+        return resultado;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public BajaMatriculaDetalleDTO consultarDatosPorMatricula(String matricula) {
         String consulta = "SELECT DISTINCT "
                 + " CONCAT(tp.sso_nombre, ' ', tp.sso_apellidoPaterno, IF(tp.sso_apellidoMaterno != '', CONCAT(' ', tp.sso_apellidoMaterno),'')) AS nombre_completo, "

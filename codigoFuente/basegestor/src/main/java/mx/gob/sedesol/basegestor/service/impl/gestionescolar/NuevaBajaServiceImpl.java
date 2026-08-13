@@ -1,6 +1,8 @@
 package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import mx.gob.sedesol.basegestor.commons.dto.NodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.BajaMatriculaDetalleDTO;
@@ -77,7 +79,80 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
     @Override
     @Transactional
     public void aplicarBaja(BajaSolicitudDTO solicitud) {
+        boolean esSinAsignaturas = contieneTexto(solicitud.getNombreTipoBaja(), "sin asignaturas");
+        if (esBajaTemporal(solicitud.getNombreTipoBaja())) {
+            Long idPersona = nuevaBajaRepository.obtenerIdPersonaPorMatricula(solicitud.getMatriculaUsuario());
+            if (idPersona == null) {
+                throw new IllegalArgumentException("No se encontró la matrícula proporcionada");
+            }
+            List<BajaAplicacionDTO> inscripciones = nuevaBajaRepository
+                    .consultarInscripcionesParaBaja(idPersona, solicitud.getIdPeriodo());
+            if (inscripciones != null && !inscripciones.isEmpty()) {
+                aplicarBajaTemporalAInscripciones(solicitud, idPersona, inscripciones);
+                return;
+            }
+            if (!esSinAsignaturas) {
+                throw new IllegalArgumentException(
+                        "No se encontraron asignaturas inscritas para el periodo seleccionado");
+            }
+        }
         procesarBaja(solicitud, null, null);
+    }
+
+    private void aplicarBajaTemporalAInscripciones(BajaSolicitudDTO solicitud, Long idPersona,
+            List<BajaAplicacionDTO> inscripciones) {
+        Long motivoId = nuevaBajaRepository.insertarMotivoBaja(solicitud.getIdTipoBaja(), solicitud.getMotivo());
+        Long procesoId = nuevaBajaRepository.obtenerIdProcesoBaja();
+        Set<Long> inscripcionesProcesadas = new HashSet<Long>();
+
+        for (BajaAplicacionDTO inscripcion : inscripciones) {
+            if (inscripcion.getIdInscripcion() != null
+                    && !inscripcionesProcesadas.add(inscripcion.getIdInscripcion())) {
+                continue;
+            }
+            Long idEvento = inscripcion.getIdEvento() != null ? inscripcion.getIdEvento() : 0L;
+            Long idGrupo = inscripcion.getIdGrupo() != null ? inscripcion.getIdGrupo() : 0L;
+            Integer idUserEnrolmentsLms = 0;
+
+            if (idEvento.longValue() != 0L) {
+                BajaMatriculacionDTO matriculacion = nuevaBajaRepository
+                        .consultarMatriculacionPorEvento(solicitud.getMatriculaUsuario(), idEvento);
+                validarEventoParaBajaParcial(matriculacion, idEvento);
+                Integer idUsuarioMoodle = nuevaBajaRepository.obtenerIdUsuarioMoodle(idPersona, idEvento);
+                if (idUsuarioMoodle == null) {
+                    throw new IllegalArgumentException(
+                            "No se encontró el usuario en Moodle para una de las asignaturas inscritas");
+                }
+                idUserEnrolmentsLms = suspenderUsuarioEnCurso(idEvento, idUsuarioMoodle);
+                if (matriculacion != null && matriculacion.getIdGrupo() != null) {
+                    idGrupo = matriculacion.getIdGrupo();
+                }
+            }
+
+            BajaAplicacionDTO baja = new BajaAplicacionDTO(
+                    idPersona,
+                    motivoId,
+                    procesoId,
+                    inscripcion.getIdPlan() != null ? inscripcion.getIdPlan() : 0L,
+                    inscripcion.getIdPrograma() != null ? inscripcion.getIdPrograma() : 0L,
+                    idEvento,
+                    idGrupo,
+                    idUserEnrolmentsLms,
+                    solicitud.getQuienAplica(),
+                    1,
+                    solicitud.getNumeroSolicitud());
+            baja.setIdInscripcion(inscripcion.getIdInscripcion());
+            baja.setIdProcesoInscripcion(inscripcion.getIdProcesoInscripcion());
+            baja.setIdPeriodo(inscripcion.getIdPeriodo());
+            nuevaBajaRepository.insertarBaja(baja);
+        }
+    }
+
+    private boolean esBajaTemporal(String nombreTipoBaja) {
+        if (contieneTexto(nombreTipoBaja, "sin asignaturas")) {
+            return true;
+        }
+        return contieneTexto(nombreTipoBaja, "temporal");
     }
 
     @Override
@@ -176,8 +251,9 @@ public class NuevaBajaServiceImpl implements NuevaBajaService {
 
         boolean esDefinitiva = contieneTexto(solicitud.getNombreTipoBaja(), "definitiva");
         boolean esSinAsignaturas = contieneTexto(solicitud.getNombreTipoBaja(), "sin asignaturas");
-        boolean esTemporalOParcial = contieneTexto(solicitud.getNombreTipoBaja(), "temporal")
-                || contieneTexto(solicitud.getNombreTipoBaja(), "parcial");
+        boolean esTemporalOParcial = !esSinAsignaturas
+                && (contieneTexto(solicitud.getNombreTipoBaja(), "temporal")
+                || contieneTexto(solicitud.getNombreTipoBaja(), "parcial"));
 
         BajaAplicacionDTO inscripcionBaja = esTemporalOParcial
                 ? nuevaBajaRepository.consultarInscripcionParaBaja(idPersona, idPlan, idPrograma, solicitud.getIdPeriodo())
