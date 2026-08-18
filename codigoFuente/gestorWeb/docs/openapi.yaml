@@ -1,0 +1,150 @@
+openapi: 3.1.0
+info:
+  title: SIGIE - Consulta de estudiante por matricula
+  version: 1.0.0
+  description: API de solo lectura para que SISS consulte identidad y avance academico oficial. No determina elegibilidad para servicio social.
+servers:
+  - url: https://<HOST_DESARROLLO>
+    description: Desarrollo - PENDIENTE DE CONFIGURACION
+  - url: https://<HOST_QA>
+    description: QA - PENDIENTE DE CONFIGURACION
+  - url: https://<HOST_PRODUCCION>
+    description: Produccion - PENDIENTE DE CONFIGURACION
+paths:
+  /SIGIE/v1/estudiantes/{matricula}:
+    get:
+      operationId: consultarEstudiantePorMatricula
+      summary: Consulta un estudiante exclusivamente por matricula
+      description: Requiere HTTPS TLS 1.2 o superior, credencial de cliente y scope sigie:estudiantes:read. Sujeto a rate limiting configurable.
+      security:
+        - basicAuth: []
+      parameters:
+        - name: matricula
+          in: path
+          required: true
+          description: Matricula institucional. No se normaliza.
+          schema: { type: string, pattern: '^ES[0-9]{9}$', minLength: 11, maxLength: 11 }
+          example: ES241100064
+        - name: X-Request-ID
+          in: header
+          required: false
+          schema: { type: string, minLength: 1, maxLength: 64, pattern: '^[A-Za-z0-9._-]+$' }
+      responses:
+        '200':
+          description: Matricula encontrada
+          headers:
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Estudiante' }
+              example:
+                matricula: ES241100064
+                nombre: Maria Fernanda
+                primer_apellido: Lopez
+                segundo_apellido: Hernandez
+                curp: LOHM950101MDFPRR03
+                programa: { clave: LIC-INF, nombre: Licenciatura en Informatica, nivel: Licenciatura, plan_estudios: '2024' }
+                avance: { creditos_totales: 320, creditos_cubiertos: 245, porcentaje_cubierto: 76.56 }
+                situacion_escolar: { clave: REG, descripcion: Regular }
+                estatus: { clave: ACT, descripcion: Activo }
+                correo_institucional: maria.lopez@nube.unadmexico.mx
+                fecha_hora_consulta: '2026-08-17T10:15:30-06:00'
+                folio_consulta: SIGIE-20260817-550e8400-e29b-41d4-a716-446655440000
+        '400': { $ref: '#/components/responses/MatriculaInvalida' }
+        '401': { $ref: '#/components/responses/NoAutorizado401' }
+        '403': { $ref: '#/components/responses/NoAutorizado403' }
+        '404': { $ref: '#/components/responses/NoEncontrada' }
+        '409': { $ref: '#/components/responses/DatosIncompletos' }
+        '429':
+          description: Limite excedido
+          headers:
+            Retry-After: { schema: { type: integer }, description: Segundos antes de reintentar. }
+            X-Request-ID: { $ref: '#/components/headers/RequestId' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example: { codigo: LIMITE_EXCEDIDO, mensaje: Se ha excedido temporalmente el limite de solicitudes., folio_consulta: SIGIE-20260817-<UUID> }
+        '500': { $ref: '#/components/responses/ErrorInterno' }
+        '503': { $ref: '#/components/responses/NoDisponible' }
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Client ID y Client Secret de SISS. El secreto se transmite solo mediante HTTPS y se almacena como hash BCrypt en SIGIE.
+  headers:
+    RequestId:
+      schema: { type: string }
+      description: Identificador tecnico de la solicitud, recibido o generado por SIGIE.
+  schemas:
+    Catalogo:
+      type: object
+      additionalProperties: false
+      required: [clave, descripcion]
+      properties:
+        clave: { type: string }
+        descripcion: { type: string }
+    Programa:
+      type: object
+      additionalProperties: false
+      required: [clave, nombre, nivel, plan_estudios]
+      properties:
+        clave: { type: string }
+        nombre: { type: [string, 'null'] }
+        nivel: { type: [string, 'null'] }
+        plan_estudios: { type: [string, 'null'], pattern: '^[0-9]{4}$' }
+    Avance:
+      type: object
+      additionalProperties: false
+      required: [creditos_totales, creditos_cubiertos, porcentaje_cubierto]
+      properties:
+        creditos_totales: { type: number, minimum: 0 }
+        creditos_cubiertos: { type: number, minimum: 0 }
+        porcentaje_cubierto: { type: [number, 'null'], minimum: 0 }
+    Estudiante:
+      type: object
+      additionalProperties: false
+      required: [matricula, nombre, primer_apellido, segundo_apellido, curp, programa, avance, situacion_escolar, estatus, correo_institucional, fecha_hora_consulta, folio_consulta]
+      properties:
+        matricula: { type: string, pattern: '^ES[0-9]{9}$' }
+        nombre: { type: string }
+        primer_apellido: { type: string }
+        segundo_apellido: { type: [string, 'null'] }
+        curp: { type: string }
+        programa: { $ref: '#/components/schemas/Programa' }
+        avance: { $ref: '#/components/schemas/Avance' }
+        situacion_escolar: { $ref: '#/components/schemas/Catalogo' }
+        estatus: { $ref: '#/components/schemas/Catalogo' }
+        correo_institucional: { type: [string, 'null'], format: email }
+        fecha_hora_consulta: { type: string, format: date-time }
+        folio_consulta: { type: string }
+    Error:
+      type: object
+      additionalProperties: false
+      required: [codigo, mensaje, folio_consulta]
+      properties:
+        codigo: { type: string, enum: [MATRICULA_INVALIDA, MATRICULA_NO_ENCONTRADA, NO_AUTORIZADO, DATOS_INCOMPLETOS, LIMITE_EXCEDIDO, ERROR_INTERNO, SERVICIO_NO_DISPONIBLE] }
+        mensaje: { type: string }
+        folio_consulta: { type: string }
+  responses:
+    MatriculaInvalida:
+      description: Matricula invalida
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' }, example: { codigo: MATRICULA_INVALIDA, mensaje: La matricula proporcionada no tiene un formato valido., folio_consulta: SIGIE-20260817-<UUID> } } }
+    NoAutorizado401:
+      description: Credencial ausente o invalida
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' }, example: { codigo: NO_AUTORIZADO, mensaje: La credencial de acceso esta ausente o no es valida., folio_consulta: SIGIE-20260817-<UUID> } } }
+    NoAutorizado403:
+      description: Scope o IP no autorizados
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' }, example: { codigo: NO_AUTORIZADO, mensaje: El consumidor no tiene autorizacion para consultar estudiantes., folio_consulta: SIGIE-20260817-<UUID> } } }
+    NoEncontrada:
+      description: Matricula no encontrada
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' }, example: { codigo: MATRICULA_NO_ENCONTRADA, mensaje: No existe registro para la matricula proporcionada., folio_consulta: SIGIE-20260817-<UUID> } } }
+    DatosIncompletos:
+      description: Faltan datos obligatorios
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' }, example: { codigo: DATOS_INCOMPLETOS, mensaje: La informacion academica requerida del estudiante esta incompleta., folio_consulta: SIGIE-20260817-<UUID> } } }
+    ErrorInterno:
+      description: Error inesperado controlado
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' }, example: { codigo: ERROR_INTERNO, mensaje: Ocurrio un error interno al procesar la solicitud., folio_consulta: SIGIE-20260817-<UUID> } } }
+    NoDisponible:
+      description: Base de datos o dependencia temporalmente no disponible
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' }, example: { codigo: SERVICIO_NO_DISPONIBLE, mensaje: El servicio no esta disponible temporalmente., folio_consulta: SIGIE-20260817-<UUID> } } }

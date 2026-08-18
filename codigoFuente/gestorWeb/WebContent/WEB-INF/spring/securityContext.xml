@@ -8,6 +8,8 @@
     <http pattern="/resources/**" security="none" />
     <http pattern="/javax.faces.resource/**" security="none" />
     <http pattern="/ws/public/**" security="none" />
+    <!-- La API SIGIE aplica autenticacion maquina-a-maquina en SigieSecurityFilter. -->
+    <http pattern="/SIGIE/**" security="none" />
 
     <authentication-manager erase-credentials="true" alias="customAuthenticationProvider">
         <authentication-provider user-service-ref="customUserDetailsService">
@@ -73,6 +75,9 @@
 
     <beans:bean id="requestContextFilter"
         class="org.springframework.web.filter.RequestContextFilter" />
+
+    <beans:bean id="sigieSecurityFilter"
+        class="mx.gob.sedesol.gestorweb.ws.sigie.SigieSecurityFilter" />
 
     <!-- Habilita anotaciones -->
     <global-method-security pre-post-annotations="enabled">
