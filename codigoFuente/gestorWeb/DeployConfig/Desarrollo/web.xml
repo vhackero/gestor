@@ -47,6 +47,10 @@
         <url-pattern>/ws/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+        <servlet-name>wsServlet</servlet-name>
+        <url-pattern>/SIGIE/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>Faces Servlet</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
@@ -78,6 +82,15 @@
         <load-on-startup>0</load-on-startup>
         <async-supported>true</async-supported>
     </servlet>
+
+    <filter>
+        <filter-name>sigieSecurityFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>sigieSecurityFilter</filter-name>
+        <url-pattern>/SIGIE/*</url-pattern>
+    </filter-mapping>
 
     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
