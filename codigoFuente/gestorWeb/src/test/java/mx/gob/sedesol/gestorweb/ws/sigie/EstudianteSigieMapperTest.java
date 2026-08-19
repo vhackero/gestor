@@ -28,6 +28,19 @@ public class EstudianteSigieMapperTest {
         assertEquals("BAJ_DEF", mapper.mapear(source, "folio", "fecha").getSituacionEscolar().getClave());
     }
 
+    @Test public void clasificaIrregularCuandoConservaAsignaturaReprobada() {
+        EstudianteSigieConsultaDTO source = completo();
+        source.setIrregular(Boolean.TRUE);
+        assertEquals("IRR", mapper.mapear(source, "folio", "fecha").getSituacionEscolar().getClave());
+    }
+
+    @Test public void priorizaBajaTemporalSobreIrregularidad() {
+        EstudianteSigieConsultaDTO source = completo();
+        source.setIrregular(Boolean.TRUE);
+        source.setPrioridadBaja(1);
+        assertEquals("BAJ_TMP", mapper.mapear(source, "folio", "fecha").getSituacionEscolar().getClave());
+    }
+
     @Test(expected = SigieApiException.class)
     public void rechazaDatosObligatoriosIncompletos() {
         EstudianteSigieConsultaDTO source = completo();
@@ -42,6 +55,7 @@ public class EstudianteSigieMapperTest {
         dto.setClavePrograma("PLAN-2024"); dto.setNombrePrograma("Informatica"); dto.setNivel("Licenciatura");
         dto.setIdentificadorPlan("PLAN-2024"); dto.setCreditosTotales(new BigDecimal("320"));
         dto.setCreditosCubiertos(new BigDecimal("245")); dto.setActivo(Boolean.TRUE); dto.setPrioridadBaja(0);
+        dto.setIrregular(Boolean.FALSE);
         return dto;
     }
 }

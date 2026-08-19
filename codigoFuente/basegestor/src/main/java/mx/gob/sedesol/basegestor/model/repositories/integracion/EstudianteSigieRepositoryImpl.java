@@ -32,7 +32,8 @@ public class EstudianteSigieRepositoryImpl implements EstudianteSigieRepository 
                 + " WHERE rpc.id_persona = p.id_persona AND rpc.activo = 1 "
                 + " ORDER BY COALESCE(rpc.nivel_prioridad, 999), rpc.id_persona_correo LIMIT 1) "
                 + "AS correo_institucional, p.activo AS activo, "
-                + "COALESCE(bajas.prioridad_baja, 0) AS prioridad_baja "
+                + "COALESCE(bajas.prioridad_baja, 0) AS prioridad_baja, "
+                + "COALESCE(irregulares.tiene_reprobada, 0) AS tiene_reprobada "
                 + "FROM tbl_persona p "
                 + "INNER JOIN tbl_persona_sige ps ON ps.matricula_sige = p.sso_idUsuario "
                 + "INNER JOIN tbl_persona_aspirante aspirante ON aspirante.id_persona = p.id_persona "
@@ -61,13 +62,31 @@ public class EstudianteSigieRepositoryImpl implements EstudianteSigieRepository 
                 + " FROM rel_persona_bajas rpb "
                 + " INNER JOIN rel_motivo_baja rmb ON rmb.id_motivo_baja = rpb.motivo_baja_id "
                 + " WHERE rpb.contabilizar = 1 "
+                + " AND (rmb.tipo_baja_id IN (3,6) OR (rmb.tipo_baja_id IN (2,7,8) "
                 + " AND rpb.id_periodo = (SELECT per.id_periodo FROM tbl_inscripciones ti "
                 + " INNER JOIN tbl_periodos_inscripcion per "
                 + " ON ti.fecha_registro BETWEEN per.fecha_inicio AND per.fecha_finalizacion "
                 + " WHERE ti.idpersona = rpb.id_persona AND ti.idplan = rpb.id_plan "
-                + " ORDER BY per.fecha_inicio DESC, per.id_periodo DESC LIMIT 1) "
+                + " ORDER BY per.fecha_inicio DESC, per.id_periodo DESC LIMIT 1))) "
                 + " GROUP BY rpb.id_persona, rpb.id_plan) bajas "
                 + " ON bajas.id_persona = p.id_persona AND bajas.id_plan = plan.id_plan "
+                + "LEFT JOIN (SELECT reprobadas.id_persona, reprobadas.id_plan, 1 tiene_reprobada "
+                + " FROM (SELECT rgp.id_persona_participante id_persona, fd.id_plan, fd.id_programa "
+                + " FROM rel_grupo_participante rgp "
+                + " INNER JOIN tbl_grupos g ON g.id = rgp.id_grupo "
+                + " INNER JOIN tbl_eventos e ON e.id_evento = g.id_evento "
+                + " INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa "
+                + " WHERE rgp.calificacion_final IS NOT NULL "
+                + " AND NOT EXISTS (SELECT 1 FROM rel_persona_bajas rpb "
+                + " WHERE rpb.id_persona = rgp.id_persona_participante "
+                + " AND rpb.id_plan = fd.id_plan AND rpb.id_evento = e.id_evento "
+                + " AND rpb.contabilizar = 1) "
+                + " GROUP BY rgp.id_persona_participante, fd.id_plan, fd.id_programa, "
+                + " fd.calificacion_min_aprobatoria "
+                + " HAVING MAX(rgp.calificacion_final) "
+                + " < CAST(fd.calificacion_min_aprobatoria AS DECIMAL(10,2))) reprobadas "
+                + " GROUP BY reprobadas.id_persona, reprobadas.id_plan) irregulares "
+                + " ON irregulares.id_persona = p.id_persona AND irregulares.id_plan = plan.id_plan "
                 + "WHERE p.sso_idUsuario = :matricula ORDER BY prog.id_programa DESC LIMIT 1";
 
         Query query = entityManager.createNativeQuery(sql);
@@ -93,6 +112,8 @@ public class EstudianteSigieRepositoryImpl implements EstudianteSigieRepository 
         dto.setCorreoInstitucional(texto(row[11]));
         dto.setActivo(row[12] == null ? null : Boolean.valueOf("1".equals(row[12].toString()) || Boolean.TRUE.equals(row[12])));
         dto.setPrioridadBaja(row[13] == null ? Integer.valueOf(0) : Integer.valueOf(row[13].toString()));
+        dto.setIrregular(Boolean.valueOf(row[14] != null
+                && ("1".equals(row[14].toString()) || Boolean.TRUE.equals(row[14]))));
         return Optional.of(dto);
     }
 

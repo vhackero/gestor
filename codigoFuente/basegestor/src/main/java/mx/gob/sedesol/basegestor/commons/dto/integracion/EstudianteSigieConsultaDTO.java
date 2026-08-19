@@ -20,6 +20,7 @@ public class EstudianteSigieConsultaDTO implements Serializable {
     private String correoInstitucional;
     private Boolean activo;
     private Integer prioridadBaja;
+    private Boolean irregular;
 
     public String getMatricula() { return matricula; }
     public void setMatricula(String matricula) { this.matricula = matricula; }
@@ -49,4 +50,6 @@ public class EstudianteSigieConsultaDTO implements Serializable {
     public void setActivo(Boolean activo) { this.activo = activo; }
     public Integer getPrioridadBaja() { return prioridadBaja; }
     public void setPrioridadBaja(Integer prioridadBaja) { this.prioridadBaja = prioridadBaja; }
+    public Boolean getIrregular() { return irregular; }
+    public void setIrregular(Boolean irregular) { this.irregular = irregular; }
 }

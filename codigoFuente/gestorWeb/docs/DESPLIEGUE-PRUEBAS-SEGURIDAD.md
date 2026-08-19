@@ -17,7 +17,7 @@ La configuracion productiva de TLS, certificados, proxy, secretos, hosts y despl
 
 ## Pruebas
 
-Ejecutar `mvn test` primero en `basegestor` y despues en `gestorWeb`. Las pruebas incluidas cubren formato, opcionales nulos, porcentaje, precedencia de bajas, datos incompletos y estabilidad basica del OpenAPI. En QA deben añadirse pruebas con base controlada para encontrado, inexistente, reintentos aprobados, minima aprobatoria distinta, bajas vigentes, error DB, 401, 403 y 429.
+Ejecutar `mvn test` primero en `basegestor` y despues en `gestorWeb`. Las pruebas incluidas cubren formato, opcionales nulos, porcentaje, irregularidad, precedencia de bajas, datos incompletos y estabilidad basica del OpenAPI. En QA deben añadirse pruebas con base controlada para encontrado, inexistente, reintentos aprobados, minima aprobatoria distinta, asignatura reprobada posteriormente aprobada, baja de asignatura en el mismo evento, baja definitiva historica, baja temporal del ultimo periodo, error DB, 401, 403 y 429.
 
 La validacion final exige comparar API, base y logs mediante el mismo folio, sin buscar por CURP/nombre. No usar datos personales reales en fixtures.
 
