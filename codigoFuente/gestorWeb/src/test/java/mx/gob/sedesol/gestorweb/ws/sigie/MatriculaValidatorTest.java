@@ -1,5 +1,6 @@
 package mx.gob.sedesol.gestorweb.ws.sigie;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -12,5 +13,9 @@ public class MatriculaValidatorTest {
     @Test public void rechazaNula() { assertFalse(validator.esValida(null)); }
     @Test public void rechazaDemasiadoLarga() { assertFalse(validator.esValida("ES2411000640")); }
     @Test public void rechazaCaracteresInvalidos() { assertFalse(validator.esValida("ES24110A064")); }
-    @Test public void noNormalizaMinusculas() { assertFalse(validator.esValida("es241100064")); }
+    @Test public void aceptaPrefijoEnMinusculas() { assertTrue(validator.esValida("es241100064")); }
+    @Test public void aceptaPrefijoConMayusculasMixtas() { assertTrue(validator.esValida("eS241100064")); }
+    @Test public void normalizaMayusculasAntesDeConsultar() {
+        assertEquals("ES241100064", validator.normalizar("es241100064"));
+    }
 }
