@@ -30,7 +30,8 @@ public class EstudianteSigieController {
             throw new SigieApiException(HttpStatus.BAD_REQUEST, "MATRICULA_INVALIDA",
                     "La matrícula proporcionada no tiene un formato válido.");
         }
-        Optional<EstudianteSigieConsultaDTO> estudiante = service.consultarPorMatricula(matricula);
+        String matriculaNormalizada = validator.normalizar(matricula);
+        Optional<EstudianteSigieConsultaDTO> estudiante = service.consultarPorMatricula(matriculaNormalizada);
         if (!estudiante.isPresent()) {
             throw new SigieApiException(HttpStatus.NOT_FOUND, "MATRICULA_NO_ENCONTRADA",
                     "No existe registro para la matrícula proporcionada.");
