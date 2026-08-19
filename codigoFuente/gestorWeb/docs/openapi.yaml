@@ -22,8 +22,8 @@ paths:
         - name: matricula
           in: path
           required: true
-          description: Matricula institucional. No se normaliza.
-          schema: { type: string, pattern: '^ES[0-9]{9}$', minLength: 11, maxLength: 11 }
+          description: Matricula institucional. El prefijo acepta mayusculas o minusculas y SIGIE lo normaliza a mayusculas.
+          schema: { type: string, pattern: '^[Ee][Ss][0-9]{9}$', minLength: 11, maxLength: 11 }
           example: ES241100064
         - name: X-Request-ID
           in: header
@@ -43,7 +43,7 @@ paths:
                 primer_apellido: Lopez
                 segundo_apellido: Hernandez
                 curp: LOHM950101MDFPRR03
-                programa: { clave: LIC-INF, nombre: Licenciatura en Informatica, nivel: Licenciatura, plan_estudios: '2024' }
+                programa: { clave: PLAN-2024, nombre: Licenciatura en Informatica, nivel: Licenciatura, plan_estudios: '2024' }
                 avance: { creditos_totales: 320, creditos_cubiertos: 245, porcentaje_cubierto: 76.56 }
                 situacion_escolar: { clave: REG, descripcion: Regular }
                 estatus: { clave: ACT, descripcion: Activo }
@@ -113,7 +113,10 @@ components:
         curp: { type: string }
         programa: { $ref: '#/components/schemas/Programa' }
         avance: { $ref: '#/components/schemas/Avance' }
-        situacion_escolar: { $ref: '#/components/schemas/Catalogo' }
+        situacion_escolar:
+          allOf:
+            - { $ref: '#/components/schemas/Catalogo' }
+          description: Baja definitiva de cualquier periodo, baja temporal vigente del ultimo periodo, egresado, irregular por asignatura reprobada pendiente de aprobar, o regular.
         estatus: { $ref: '#/components/schemas/Catalogo' }
         correo_institucional: { type: [string, 'null'], format: email }
         fecha_hora_consulta: { type: string, format: date-time }

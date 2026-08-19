@@ -14,7 +14,9 @@
 
 `GET /SIGIE/v1/estudiantes/{matricula}` mediante HTTPS, TLS 1.2 o superior y JSON.
 
-La matricula es obligatoria, sensible a mayusculas, tiene 11 caracteres y cumple `^ES[0-9]{9}$`. Valido: `ES241100064`. Invalidos: `es241100064`, `ES24110A064`, `ES2411000640`.
+La matricula es obligatoria, tiene 11 caracteres y cumple `^[Ee][Ss][0-9]{9}$`. El prefijo acepta
+mayusculas o minusculas y se normaliza a mayusculas antes de consultar. Validos: `ES241100064` y
+`es241100064`. Invalidos: `EX241100064`, `ES24110A064`, `ES2411000640`.
 
 ## Autenticacion y autorizacion
 
@@ -30,7 +32,11 @@ Enviar `Authorization: Basic <BASE64_CLIENT_ID_CLIENT_SECRET>`. El cliente debe 
 - `programa.plan_estudios`: primer año de cuatro digitos en `tbl_planes.identificador`; puede ser `null`.
 - `avance.creditos_totales` y `creditos_cubiertos`: obligatorios.
 - `avance.porcentaje_cubierto`: puede ser `null` cuando los creditos totales sean cero.
-- `situacion_escolar`: baja definitiva, baja temporal, egresado o regular.
+- `situacion_escolar`: baja definitiva, baja temporal, egresado, irregular o regular. Una baja definitiva
+  contabilizable conserva vigencia sin importar el periodo en que se aplico; una baja temporal solo determina
+  la situacion cuando corresponde al ultimo periodo de inscripcion. Es irregular cuando conserva al menos una
+  asignatura reprobada sin aprobacion posterior. Las asignaturas sin calificacion y los intentos con baja
+  contabilizable asociada al mismo evento academico no generan irregularidad.
 - `estatus`: activo o inactivo desde `tbl_persona.activo`.
 - `correo_institucional`: puede ser `null`.
 - `fecha_hora_consulta`: fecha real ISO 8601 con zona del servidor.

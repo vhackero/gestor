@@ -56,6 +56,9 @@ public class EstudianteSigieMapper {
         if (source.getCreditosCubiertos().compareTo(source.getCreditosTotales()) >= 0) {
             return new EstudianteSigieResponse.Catalogo("EGR", "Egresado");
         }
+        if (Boolean.TRUE.equals(source.getIrregular())) {
+            return new EstudianteSigieResponse.Catalogo("IRR", "Irregular");
+        }
         return new EstudianteSigieResponse.Catalogo("REG", "Regular");
     }
 
