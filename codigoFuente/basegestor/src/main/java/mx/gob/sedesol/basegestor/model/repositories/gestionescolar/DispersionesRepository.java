@@ -799,6 +799,7 @@ public class DispersionesRepository implements IDispersionesRepository {
 		   .append("                     AND rpb.id_inscripcion = ti.id ")
 		   .append("                     AND rpb.id_proceso_inscripcion = tpi.proceso_inscripcion_id ")
 		   .append("                     AND rpb.contabilizar = 1) ")
+		   .append(condicionSeriacionCumplida("ti.idpersona", "fd"))
 		   .append("ORDER BY ti.idpersona");
 		Query query = entityManager.createNativeQuery(sql.toString());
 		query.setParameter("idConvocatoria", idConvocatoria);
@@ -827,6 +828,9 @@ public class DispersionesRepository implements IDispersionesRepository {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT tis.Idpersona, tis.idplan, td.id_programa AS idprograma, :idDispersion id_dispersion ")
 		   .append("FROM tbl_inscripciones tis ")
+		   .append("JOIN tbl_ficha_descriptiva_programa fdDestino ")
+		   .append("  ON fdDestino.id_programa = tis.idprograma ")
+		   .append(" AND fdDestino.id_plan = tis.idplan ")
 		   .append("JOIN tbl_procesos_inscripcion tpi ")
 		   .append("  ON tis.fecha_registro >= tpi.fecha_inicio ")
 		   .append(" AND tis.fecha_registro <= tpi.fecha_fin ")
@@ -851,6 +855,7 @@ public class DispersionesRepository implements IDispersionesRepository {
 		   .append("                    AND rpb.id_inscripcion = tis.id ")
 		   .append("                    AND rpb.id_proceso_inscripcion = tpi.proceso_inscripcion_id ")
 		   .append("                    AND rpb.contabilizar = 1) ")
+		   .append(condicionSeriacionCumplida("tis.Idpersona", "fdDestino"))
 		   .append("ORDER BY CASE WHEN tis.idprograma = :idPrograma THEN 0 ELSE 1 END, ")
 		   .append("         tis.idprograma");
 		Query query = entityManager.createNativeQuery(sql.toString());
@@ -899,6 +904,7 @@ public class DispersionesRepository implements IDispersionesRepository {
 				+ "FROM tbl_inscripciones ti "
 				+ "INNER JOIN rel_proceso_inscipcion_planesyprogramas rpi ON rpi.id_programa = ti.idprograma AND rpi.id_plan = ti.idplan "
 				+ "INNER JOIN tbl_procesos_inscripcion tpi ON tpi.proceso_inscripcion_id = rpi.id_proceso_inscripcion "
+				+ "INNER JOIN tbl_ficha_descriptiva_programa fdDestino ON fdDestino.id_programa = ti.idprograma AND fdDestino.id_plan = ti.idplan "
 				+ "WHERE ti.fecha_registro >= tpi.fecha_inicio AND ti.fecha_registro <= tpi.fecha_fin "
 				+ "AND tpi.proceso_inscripcion_id = :idProcesoInscripcionMatricular "
 				+ "AND ti.idprograma = :idPrograma "
@@ -914,6 +920,7 @@ public class DispersionesRepository implements IDispersionesRepository {
 				+ "      AND rpb.id_inscripcion = ti.id "
 				+ "      AND rpb.id_proceso_inscripcion = tpi.proceso_inscripcion_id "
 				+ "      AND rpb.contabilizar = 1) "
+				+ condicionSeriacionCumplida("ti.idpersona", "fdDestino")
 				+ "ORDER BY ti.idpersona";
 		Query query = entityManager.createNativeQuery(sql);
 		query.setParameter("idProcesoInscripcionMatricular", idProcesoInscripcionMatricular);
@@ -925,6 +932,28 @@ public class DispersionesRepository implements IDispersionesRepository {
 			}
 		}
 		return personas;
+	}
+
+	/**
+	 * Restringe la seleccion final de participantes a quienes hayan aprobado la
+	 * asignatura antecedente. La equivalencia entre planes se resuelve por el
+	 * nombre normalizado de la asignatura, igual que en el flujo de inscripcion.
+	 */
+	private String condicionSeriacionCumplida(String expresionPersona, String aliasFichaDestino) {
+		return " AND (" + aliasFichaDestino + ".id_programa_antecedente IS NULL "
+				+ "OR EXISTS (SELECT 1 "
+				+ "    FROM tbl_ficha_descriptiva_programa fdAntecedente "
+				+ "    INNER JOIN tbl_ficha_descriptiva_programa fdHistorial "
+				+ "      ON LOWER(TRIM(fdHistorial.nombre_tentativo)) = LOWER(TRIM(fdAntecedente.nombre_tentativo)) "
+				+ "    INNER JOIN tbl_eventos eventoHistorial ON eventoHistorial.id_programa = fdHistorial.id_programa "
+				+ "    INNER JOIN tbl_grupos grupoHistorial ON grupoHistorial.id_evento = eventoHistorial.id_evento "
+				+ "    INNER JOIN rel_grupo_participante participanteHistorial ON participanteHistorial.id_grupo = grupoHistorial.id "
+				+ "    WHERE fdAntecedente.id_programa = " + aliasFichaDestino + ".id_programa_antecedente "
+				+ "      AND participanteHistorial.id_persona_participante = " + expresionPersona
+				+ "      AND participanteHistorial.calificacion_final IS NOT NULL "
+				+ "      AND CAST(participanteHistorial.calificacion_final AS DECIMAL(10,2)) "
+				+ "          >= CAST(COALESCE(NULLIF(eventoHistorial.calificacion_min_aprobatoria, ''), "
+				+ "                           fdHistorial.calificacion_min_aprobatoria) AS DECIMAL(10,2)))) ";
 	}
 	
 	@Override
