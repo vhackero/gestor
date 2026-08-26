@@ -465,7 +465,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 	public Boolean consultarNuevoIngreso(String id_persona) {
 
 		String consulta = "SELECT * from tbl_persona tp\r\n"
-				+ "WHERE NOT EXISTS(SELECT * FROM tbl_inscripciones ti WHERE ti.semestre=1 AND ti.Idpersona=tp.id_persona) AND id_persona=:id_persona\r\n"
+				+ "WHERE NOT EXISTS(SELECT * FROM tbl_inscripciones ti WHERE ti.Idpersona=tp.id_persona) AND id_persona=:id_persona\r\n"
 				+ "  AND NOT EXISTS(SELECT * from rel_persona_bajas rpb WHERE rpb.id_persona = tp.id_persona)";
 
 		Query query = entityManager.createNativeQuery(consulta);
@@ -828,7 +828,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 	}
 
 	@Override
-	public Boolean esEstudianteNuevoIngreso(Long idPersona) {
+	public Boolean esEstudianteNuevoIngreso(Long idPersona, Long idPlan) {
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT COUNT(tp.id_persona) ");
@@ -836,18 +836,19 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("WHERE NOT EXISTS( ");
 		sql.append("    SELECT 1 ");
 		sql.append("    FROM tbl_inscripciones ti ");
-		sql.append("    WHERE ti.semestre = 1 ");
-		sql.append("    AND ti.Idpersona = tp.id_persona ");
+		sql.append("    WHERE ti.Idpersona = tp.id_persona ");
+		sql.append("    AND ti.idplan = :idPlan ");
 		sql.append(") ");
 		sql.append("AND tp.id_persona = :idPersona ");
 		sql.append("AND NOT EXISTS( ");
 		sql.append("    SELECT 1 ");
 		sql.append("    FROM rel_persona_bajas rpb ");
 		sql.append("    WHERE rpb.id_persona = tp.id_persona ");
+		sql.append("    AND rpb.id_plan = :idPlan ");
 		sql.append(")");
 
 		List<?> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("idPersona", idPersona)
-				.getResultList();
+				.setParameter("idPlan", idPlan).getResultList();
 
 		// Si no hay resultados, retorna false (no es nuevo ingreso)
 		if (resultados.isEmpty()) {
@@ -860,6 +861,18 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 		// Retorna true si count > 0 (es nuevo ingreso), false si count = 0
 		return count != null && count > 0;
+	}
+
+	@Override
+	public Boolean tienePrimerSemestrePendiente(Long idPersona, Long idPlan) {
+		String sql = "SELECT CASE WHEN EXISTS (SELECT 1 FROM tbl_inscripciones ti "
+				+ "WHERE ti.Idpersona=:idPersona AND ti.idplan=:idPlan) "
+				+ "AND NOT EXISTS (SELECT 1 FROM tbl_inscripciones ti "
+				+ "WHERE ti.Idpersona=:idPersona AND ti.idplan=:idPlan AND ti.semestre=1) "
+				+ "THEN 1 ELSE 0 END";
+		Object resultado = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona)
+				.setParameter("idPlan", idPlan).getSingleResult();
+		return Integer.valueOf(1).equals(getIntegerValue(resultado));
 	}
 
 	@Override
@@ -1389,12 +1402,14 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "MAX(CASE WHEN cpri.clave_parametro='MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO' THEN cpri.valor_default END) AS mostrar_segundo_sin_primero_general, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='AUTOSELECCIONAR_OBLIGATORIAS' THEN cpri.valor_default END) AS autoseleccionar_general, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='BLOQUEAR_OBLIGATORIAS' THEN cpri.valor_default END) AS bloquear_general, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='FORZAR_PRIMER_SEMESTRE_PENDIENTE' THEN cpri.valor_default END) AS forzar_primer_semestre_pendiente_general, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='OBLIGATORIAS_REQUERIDAS' THEN cpri.descripcion END) AS ayuda_obligatorias_general, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='OPTATIVAS_REQUERIDAS' THEN cpri.descripcion END) AS ayuda_optativas_general, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='RESTRINGIR_PRIMER_SEMESTRE' THEN cpri.descripcion END) AS ayuda_restringir_primer_semestre_general, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO' THEN cpri.descripcion END) AS ayuda_mostrar_segundo_sin_primero_general, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='AUTOSELECCIONAR_OBLIGATORIAS' THEN cpri.descripcion END) AS ayuda_autoseleccionar_general, "
-				+ "MAX(CASE WHEN cpri.clave_parametro='BLOQUEAR_OBLIGATORIAS' THEN cpri.descripcion END) AS ayuda_bloquear_general "
+				+ "MAX(CASE WHEN cpri.clave_parametro='BLOQUEAR_OBLIGATORIAS' THEN cpri.descripcion END) AS ayuda_bloquear_general, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='FORZAR_PRIMER_SEMESTRE_PENDIENTE' THEN cpri.descripcion END) AS ayuda_forzar_primer_semestre_pendiente_general "
 				+ "FROM cat_reglas_inscripcion cri JOIN cat_parametros_regla_inscripcion cpri "
 				+ "ON cpri.clave_regla=cri.clave WHERE cri.clave='CARGA_NUEVO_INGRESO' "
 				+ "GROUP BY cri.nombre,cri.descripcion,cri.activo";
@@ -1413,12 +1428,14 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setMostrarSegundoSemestreSinOfertaPrimero(obtenerBooleanoConfiguracion(row[6], "MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO", "general"));
 		dto.setAutoseleccionarObligatorias(obtenerBooleanoConfiguracion(row[7], "AUTOSELECCIONAR_OBLIGATORIAS", "general"));
 		dto.setBloquearObligatorias(obtenerBooleanoConfiguracion(row[8], "BLOQUEAR_OBLIGATORIAS", "general"));
-		dto.setAyudaObligatorias((String) row[9]);
-		dto.setAyudaOptativas((String) row[10]);
-		dto.setAyudaRestringirPrimerSemestre((String) row[11]);
-		dto.setAyudaMostrarSegundoSemestreSinOfertaPrimero((String) row[12]);
-		dto.setAyudaAutoseleccionarObligatorias((String) row[13]);
-		dto.setAyudaBloquearObligatorias((String) row[14]);
+		dto.setForzarPrimerSemestrePendiente(obtenerBooleanoConfiguracion(row[9], "FORZAR_PRIMER_SEMESTRE_PENDIENTE", "general"));
+		dto.setAyudaObligatorias((String) row[10]);
+		dto.setAyudaOptativas((String) row[11]);
+		dto.setAyudaRestringirPrimerSemestre((String) row[12]);
+		dto.setAyudaMostrarSegundoSemestreSinOfertaPrimero((String) row[13]);
+		dto.setAyudaAutoseleccionarObligatorias((String) row[14]);
+		dto.setAyudaBloquearObligatorias((String) row[15]);
+		dto.setAyudaForzarPrimerSemestrePendiente((String) row[16]);
 		return dto;
 	}
 
@@ -1473,12 +1490,14 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "MAX(CASE WHEN cpri.clave_parametro='MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO' THEN COALESCE(rvPersona.valor,rvPlan.valor,cpri.valor_default) END) AS mostrar_segundo_sin_primero, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='AUTOSELECCIONAR_OBLIGATORIAS' THEN COALESCE(rvPersona.valor,rvPlan.valor,cpri.valor_default) END) AS autoseleccionar_obligatorias, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='BLOQUEAR_OBLIGATORIAS' THEN COALESCE(rvPersona.valor,rvPlan.valor,cpri.valor_default) END) AS bloquear_obligatorias, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='FORZAR_PRIMER_SEMESTRE_PENDIENTE' THEN COALESCE(rvPersona.valor,rvPlan.valor,cpri.valor_default) END) AS forzar_primer_semestre_pendiente, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='OBLIGATORIAS_REQUERIDAS' THEN cpri.descripcion END) AS ayuda_obligatorias, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='OPTATIVAS_REQUERIDAS' THEN cpri.descripcion END) AS ayuda_optativas, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='RESTRINGIR_PRIMER_SEMESTRE' THEN cpri.descripcion END) AS ayuda_restringir_primer_semestre, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO' THEN cpri.descripcion END) AS ayuda_mostrar_segundo_sin_primero, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='AUTOSELECCIONAR_OBLIGATORIAS' THEN cpri.descripcion END) AS ayuda_autoseleccionar_obligatorias, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='BLOQUEAR_OBLIGATORIAS' THEN cpri.descripcion END) AS ayuda_bloquear_obligatorias, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='FORZAR_PRIMER_SEMESTRE_PENDIENTE' THEN cpri.descripcion END) AS ayuda_forzar_primer_semestre_pendiente, "
 				+ "persona.id_persona AS id_persona_configuracion, persona.sso_idUsuario AS username_configuracion "
 				+ "FROM rel_regla_inscripcion_plan_persona rripp "
 				+ "JOIN tbl_planes tp ON tp.id_plan=rripp.id_plan "
@@ -1508,12 +1527,14 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "MAX(CASE WHEN cpri.clave_parametro='MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO' THEN COALESCE(rv.valor,cpri.valor_default) END) AS mostrar_segundo_sin_primero, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='AUTOSELECCIONAR_OBLIGATORIAS' THEN COALESCE(rv.valor,cpri.valor_default) END) AS autoseleccionar_obligatorias, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='BLOQUEAR_OBLIGATORIAS' THEN COALESCE(rv.valor,cpri.valor_default) END) AS bloquear_obligatorias, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='FORZAR_PRIMER_SEMESTRE_PENDIENTE' THEN COALESCE(rv.valor,cpri.valor_default) END) AS forzar_primer_semestre_pendiente, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='OBLIGATORIAS_REQUERIDAS' THEN cpri.descripcion END) AS ayuda_obligatorias, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='OPTATIVAS_REQUERIDAS' THEN cpri.descripcion END) AS ayuda_optativas, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='RESTRINGIR_PRIMER_SEMESTRE' THEN cpri.descripcion END) AS ayuda_restringir_primer_semestre, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO' THEN cpri.descripcion END) AS ayuda_mostrar_segundo_sin_primero, "
 				+ "MAX(CASE WHEN cpri.clave_parametro='AUTOSELECCIONAR_OBLIGATORIAS' THEN cpri.descripcion END) AS ayuda_autoseleccionar_obligatorias, "
-				+ "MAX(CASE WHEN cpri.clave_parametro='BLOQUEAR_OBLIGATORIAS' THEN cpri.descripcion END) AS ayuda_bloquear_obligatorias "
+				+ "MAX(CASE WHEN cpri.clave_parametro='BLOQUEAR_OBLIGATORIAS' THEN cpri.descripcion END) AS ayuda_bloquear_obligatorias, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='FORZAR_PRIMER_SEMESTRE_PENDIENTE' THEN cpri.descripcion END) AS ayuda_forzar_primer_semestre_pendiente "
 				+ "FROM tbl_planes tp JOIN cat_reglas_inscripcion cri ON cri.clave='CARGA_NUEVO_INGRESO' "
 				+ "JOIN cat_parametros_regla_inscripcion cpri ON cpri.clave_regla=cri.clave "
 				+ unionReglaPlan
@@ -1536,15 +1557,17 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setMostrarSegundoSemestreSinOfertaPrimero(obtenerBooleanoConfiguracion(row[8], "MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO", alcance));
 		dto.setAutoseleccionarObligatorias(obtenerBooleanoConfiguracion(row[9], "AUTOSELECCIONAR_OBLIGATORIAS", alcance));
 		dto.setBloquearObligatorias(obtenerBooleanoConfiguracion(row[10], "BLOQUEAR_OBLIGATORIAS", alcance));
-		dto.setAyudaObligatorias((String) row[11]);
-		dto.setAyudaOptativas((String) row[12]);
-		dto.setAyudaRestringirPrimerSemestre((String) row[13]);
-		dto.setAyudaMostrarSegundoSemestreSinOfertaPrimero((String) row[14]);
-		dto.setAyudaAutoseleccionarObligatorias((String) row[15]);
-		dto.setAyudaBloquearObligatorias((String) row[16]);
-		if (row.length > 18) {
-			dto.setIdPersona(getLongValue(row[17]));
-			dto.setUsername((String) row[18]);
+		dto.setForzarPrimerSemestrePendiente(obtenerBooleanoConfiguracion(row[11], "FORZAR_PRIMER_SEMESTRE_PENDIENTE", alcance));
+		dto.setAyudaObligatorias((String) row[12]);
+		dto.setAyudaOptativas((String) row[13]);
+		dto.setAyudaRestringirPrimerSemestre((String) row[14]);
+		dto.setAyudaMostrarSegundoSemestreSinOfertaPrimero((String) row[15]);
+		dto.setAyudaAutoseleccionarObligatorias((String) row[16]);
+		dto.setAyudaBloquearObligatorias((String) row[17]);
+		dto.setAyudaForzarPrimerSemestrePendiente((String) row[18]);
+		if (row.length > 20) {
+			dto.setIdPersona(getLongValue(row[19]));
+			dto.setUsername((String) row[20]);
 		}
 		return dto;
 	}
@@ -1597,6 +1620,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		guardarValorParametroCarga(configuracion.getIdPlan(), "MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO", Boolean.TRUE.equals(configuracion.getMostrarSegundoSemestreSinOfertaPrimero()) ? "1" : "0", idUsuario);
 		guardarValorParametroCarga(configuracion.getIdPlan(), "AUTOSELECCIONAR_OBLIGATORIAS", Boolean.TRUE.equals(configuracion.getAutoseleccionarObligatorias()) ? "1" : "0", idUsuario);
 		guardarValorParametroCarga(configuracion.getIdPlan(), "BLOQUEAR_OBLIGATORIAS", Boolean.TRUE.equals(configuracion.getBloquearObligatorias()) ? "1" : "0", idUsuario);
+		guardarValorParametroCarga(configuracion.getIdPlan(), "FORZAR_PRIMER_SEMESTRE_PENDIENTE", Boolean.TRUE.equals(configuracion.getForzarPrimerSemestrePendiente()) ? "1" : "0", idUsuario);
 	}
 
 	private Long obtenerIdPersonaConfiguracion(ConfiguracionCargaNuevoIngresoDTO configuracion) {
@@ -1652,6 +1676,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		guardarValorParametroCargaPersona(configuracion.getIdPlan(), idPersona, "MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO", Boolean.TRUE.equals(configuracion.getMostrarSegundoSemestreSinOfertaPrimero()) ? "1" : "0", idUsuario);
 		guardarValorParametroCargaPersona(configuracion.getIdPlan(), idPersona, "AUTOSELECCIONAR_OBLIGATORIAS", Boolean.TRUE.equals(configuracion.getAutoseleccionarObligatorias()) ? "1" : "0", idUsuario);
 		guardarValorParametroCargaPersona(configuracion.getIdPlan(), idPersona, "BLOQUEAR_OBLIGATORIAS", Boolean.TRUE.equals(configuracion.getBloquearObligatorias()) ? "1" : "0", idUsuario);
+		guardarValorParametroCargaPersona(configuracion.getIdPlan(), idPersona, "FORZAR_PRIMER_SEMESTRE_PENDIENTE", Boolean.TRUE.equals(configuracion.getForzarPrimerSemestrePendiente()) ? "1" : "0", idUsuario);
 	}
 
 	private void validarConfiguracionCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion) {
@@ -1684,6 +1709,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		guardarValorDefaultCarga("MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO", Boolean.TRUE.equals(configuracion.getMostrarSegundoSemestreSinOfertaPrimero()) ? "1" : "0");
 		guardarValorDefaultCarga("AUTOSELECCIONAR_OBLIGATORIAS", Boolean.TRUE.equals(configuracion.getAutoseleccionarObligatorias()) ? "1" : "0");
 		guardarValorDefaultCarga("BLOQUEAR_OBLIGATORIAS", Boolean.TRUE.equals(configuracion.getBloquearObligatorias()) ? "1" : "0");
+		guardarValorDefaultCarga("FORZAR_PRIMER_SEMESTRE_PENDIENTE", Boolean.TRUE.equals(configuracion.getForzarPrimerSemestrePendiente()) ? "1" : "0");
 	}
 
 	@Override

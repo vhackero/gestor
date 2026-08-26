@@ -54,7 +54,9 @@ public interface IinscripcionRepository {
 
 	Boolean esEstudianteRegular(Long idPersona);
 
-	Boolean esEstudianteNuevoIngreso(Long idPersona);
+	Boolean esEstudianteNuevoIngreso(Long idPersona, Long idPlan);
+
+	Boolean tienePrimerSemestrePendiente(Long idPersona, Long idPlan);
 
 	Boolean existeInscripcionPrevia(Long idPersona, Long idPlan, Long idConvocatoria, Date fechaActual);
 

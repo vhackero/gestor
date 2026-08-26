@@ -5,6 +5,7 @@ import java.util.List;
 public class EstadoAcademicoDTO {
 	private Boolean esRegular;
 	private Boolean esNuevoIngreso;
+	private Boolean primerSemestrePendiente;
 
 	private List<InscripcionMateriasCursadasDTO> materiasCursadas;
 	private List<InscripcionMateriasReprobadasDTO> materiasReprobadas;
@@ -77,6 +78,14 @@ public class EstadoAcademicoDTO {
 
 	public void setEsNuevoIngreso(Boolean esNuevoIngreso) {
 		this.esNuevoIngreso = esNuevoIngreso;
+	}
+
+	public Boolean getPrimerSemestrePendiente() {
+		return primerSemestrePendiente;
+	}
+
+	public void setPrimerSemestrePendiente(Boolean primerSemestrePendiente) {
+		this.primerSemestrePendiente = primerSemestrePendiente;
 	}
 
 }

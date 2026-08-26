@@ -503,19 +503,26 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		validarSeleccionElectivas(materiasDisponibles, obtenerCantidadMaximaMateriasElectivas(contexto));
 		validarCuposElectivas(materiasDisponibles);
 
-		if (esNuevoIngreso(contexto) && esRegular(contexto)) {
+		boolean aplicarCargaNuevoIngreso = esNuevoIngreso(contexto);
+		if (esNuevoIngreso(contexto) || tienePrimerSemestrePendiente(contexto)) {
 			ConfiguracionCargaNuevoIngresoDTO configuracion = inscripcionService
 					.obtenerConfiguracionCargaNuevoIngreso(contexto.getInscripcionPersona().getIdPlan(),
 							contexto.getInscripcionPersona().getIdPersona());
-			if (Boolean.TRUE.equals(configuracion.getActiva())) {
+			if (tienePrimerSemestrePendiente(contexto)) {
+				aplicarCargaNuevoIngreso = Boolean.TRUE.equals(configuracion.getForzarPrimerSemestrePendiente());
+			}
+			if (aplicarCargaNuevoIngreso && Boolean.TRUE.equals(configuracion.getActiva())) {
 				validarCargaPrimerSemestre(resumen, contexto, configuracion);
 			} else {
 				validarMinimoMateriasPorPeriodo(resumen, contexto);
 				validarMaximoMateriasSegunEstatus(resumen, contexto);
+				if (tienePrimerSemestrePendiente(contexto)) {
+					validarMinimoObligatoriasEnSemestresPosteriores(resumen);
+				}
 			}
 		}
 
-		if (!esNuevoIngreso(contexto)) {
+		if (!esNuevoIngreso(contexto) && !tienePrimerSemestrePendiente(contexto)) {
 			validarMinimoMateriasPorPeriodo(resumen, contexto);
 			validarMaximoMateriasSegunEstatus(resumen, contexto);
 			validarMinimoObligatoriasEnSemestresPosteriores(resumen);
@@ -593,8 +600,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	}
 
 	/**
-	 * Los estudiantes regulares de nuevo ingreso deben seleccionar sus materias
-	 * obligatorias y optativas requeridas.
+	 * Los estudiantes de nuevo ingreso y quienes tienen pendiente cursar el primer
+	 * semestre deben seleccionar las materias obligatorias y optativas requeridas.
 	 */
 	private void validarCargaPrimerSemestre(ResumenSeleccionMateriasDTO resumen, InscripcionContextoDTO contexto,
 			ConfiguracionCargaNuevoIngresoDTO configuracion) throws InscripcionException {
@@ -647,6 +654,10 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 	private Boolean esNuevoIngreso(InscripcionContextoDTO contexto) {
 		return contexto.getEstadoAcademico().getEsNuevoIngreso();
+	}
+
+	private Boolean tienePrimerSemestrePendiente(InscripcionContextoDTO contexto) {
+		return Boolean.TRUE.equals(contexto.getEstadoAcademico().getPrimerSemestrePendiente());
 	}
 
 	private boolean esCargaAcademicaInvalidaPrimerSemestre(Long cantidadMateriasObligatorias,
@@ -720,6 +731,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			CreditosTotalesPlanDTO creditosTotalesPlan, LimitesCargaAcademicaDTO limitesCargaAcademica)
 			throws InscripcionException {
 		Boolean esNuevoIngreso = esNuevoIngreso(persona);
+		Boolean primerSemestrePendiente = tienePrimerSemestrePendiente(persona);
 
 		Boolean esRegular = esRegular(persona);
 
@@ -745,12 +757,12 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 				esRegular);
 
 		List<InscripcionMateriasDTO> materiasDisponibles = obtenerMateriasDisponiblesParaInscripcion(materiasOfertadas,
-				materiasCursadas, materiasReprobadas, esNuevoIngreso, esRegular, limitesCargaAcademica,
+				materiasCursadas, materiasReprobadas, esNuevoIngreso, primerSemestrePendiente, esRegular, limitesCargaAcademica,
 				estadoInscripcion, persona);
 
 		List<InscripcionBajasDTO> materiasBajas = obtenerBajasDeMateriasSolicitadas(persona);
 
-		EstadoAcademicoDTO estadoAcademico = crearEstadoAcademico(esNuevoIngreso, esRegular,
+		EstadoAcademicoDTO estadoAcademico = crearEstadoAcademico(esNuevoIngreso, primerSemestrePendiente, esRegular,
 				cantidadMaximaMateriasElectivas, materiasCursadas, porcentajeCreditosCompletados, materiasReprobadas,
 				materiasDisponibles, materiasBajas);
 
@@ -779,12 +791,14 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		return "";
 	}
 
-	private EstadoAcademicoDTO crearEstadoAcademico(Boolean esNuevoIngreso, Boolean esRegular,
+	private EstadoAcademicoDTO crearEstadoAcademico(Boolean esNuevoIngreso, Boolean primerSemestrePendiente,
+			Boolean esRegular,
 			Long cantidadMaximaMateriasElectivas, List<InscripcionMateriasCursadasDTO> materiasCursadas,
 			Double porcentajeCreditosCompletados, List<InscripcionMateriasReprobadasDTO> materiasReprobadas,
 			List<InscripcionMateriasDTO> materiasDisponibles, List<InscripcionBajasDTO> materiasBajas) {
 		EstadoAcademicoDTO estadoAcademico = new EstadoAcademicoDTO();
 		estadoAcademico.setEsNuevoIngreso(esNuevoIngreso);
+		estadoAcademico.setPrimerSemestrePendiente(primerSemestrePendiente);
 		estadoAcademico.setEsRegular(esRegular);
 		estadoAcademico.setMateriasCursadas(materiasCursadas);
 		estadoAcademico.setMateriasReprobadas(materiasReprobadas);
@@ -809,7 +823,11 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	}
 
 	private Boolean esNuevoIngreso(InscripcionPersonaDTO persona) {
-		return inscripcionService.esEstudianteNuevoIngreso(persona.getIdPersona());
+		return inscripcionService.esEstudianteNuevoIngreso(persona.getIdPersona(), persona.getIdPlan());
+	}
+
+	private Boolean tienePrimerSemestrePendiente(InscripcionPersonaDTO persona) {
+		return inscripcionService.tienePrimerSemestrePendiente(persona.getIdPersona(), persona.getIdPlan());
 	}
 
 	private List<InscripcionBajasDTO> obtenerBajasDeMateriasSolicitadas(InscripcionPersonaDTO persona) {
@@ -867,7 +885,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private List<InscripcionMateriasDTO> obtenerMateriasDisponiblesParaInscripcion(
 			List<InscripcionMateriasDTO> materiasOfertadas, List<InscripcionMateriasCursadasDTO> materiasCursadas,
 			List<InscripcionMateriasReprobadasDTO> materiasReprobadas, Boolean esEstudianteNuevoIngreso,
-			Boolean esEstudianteRegular, LimitesCargaAcademicaDTO limitesCargaAcademica,
+			Boolean primerSemestrePendiente, Boolean esEstudianteRegular,
+			LimitesCargaAcademicaDTO limitesCargaAcademica,
 			EstadoInscripcionEstudianteDTO estadoInscripcion, InscripcionPersonaDTO persona)
 			throws InscripcionException {
 
@@ -878,7 +897,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 				materiasOfertadasSinAprobadas, materiasReprobadas);
 
 		List<InscripcionMateriasDTO> materiasDeAcuerdoASituacionAcademica = obtenerMateriasDeAcuerdoASituacionAcademica(
-				materiasReprobadas, esEstudianteNuevoIngreso, esEstudianteRegular,
+				materiasReprobadas, esEstudianteNuevoIngreso, primerSemestrePendiente, esEstudianteRegular,
 				materiasOfertadasSinReprobadasConLimiteAlcanzado, limitesCargaAcademica, estadoInscripcion, persona,
 				materiasCursadas);
 
@@ -1022,7 +1041,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 	private List<InscripcionMateriasDTO> obtenerMateriasDeAcuerdoASituacionAcademica(
 			List<InscripcionMateriasReprobadasDTO> materiasReprobadas, Boolean esEstudianteNuevoIngreso,
-			Boolean esEstudianteRegular, List<InscripcionMateriasDTO> materiasOfertadas,
+			Boolean primerSemestrePendiente, Boolean esEstudianteRegular,
+			List<InscripcionMateriasDTO> materiasOfertadas,
 			LimitesCargaAcademicaDTO limitesCargaAcademica, EstadoInscripcionEstudianteDTO estadoInscripcion,
 			InscripcionPersonaDTO persona, List<InscripcionMateriasCursadasDTO> materiasCursadas)
 			throws InscripcionException {
@@ -1033,6 +1053,15 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			// y todas las optativas ofertadas (de todos los semestres y bloques).
 			materiasOfertadas = obtenerMateriasSemestreInscripcionOrdinariaConOptativas(materiasOfertadas,
 					estadoInscripcion);
+		}
+
+		if (Boolean.TRUE.equals(primerSemestrePendiente)) {
+			ConfiguracionCargaNuevoIngresoDTO configuracion = obtenerConfiguracionCargaNuevoIngresoControlada(
+					persona.getIdPlan(), persona.getIdPersona());
+			if (Boolean.TRUE.equals(configuracion.getActiva())
+					&& Boolean.TRUE.equals(configuracion.getForzarPrimerSemestrePendiente())) {
+				return obtenerMateriasConConfiguracionNuevoIngreso(materiasOfertadas, configuracion, true);
+			}
 		}
 
 		// Estudiantes regulares de nuevo ingreso
@@ -1454,16 +1483,29 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private List<InscripcionMateriasDTO> obtenerMateriasEstudianteNuevoIngreso(
 			List<InscripcionMateriasDTO> materiasPorPeriodoInscripcion, Long idPlan, Long idPersona)
 			throws InscripcionException {
-		ConfiguracionCargaNuevoIngresoDTO configuracion;
+		ConfiguracionCargaNuevoIngresoDTO configuracion = obtenerConfiguracionCargaNuevoIngresoControlada(idPlan,
+				idPersona);
+		return obtenerMateriasConConfiguracionNuevoIngreso(materiasPorPeriodoInscripcion, configuracion, false);
+	}
+
+	private ConfiguracionCargaNuevoIngresoDTO obtenerConfiguracionCargaNuevoIngresoControlada(Long idPlan,
+			Long idPersona) throws InscripcionException {
 		try {
-			configuracion = inscripcionService.obtenerConfiguracionCargaNuevoIngreso(idPlan, idPersona);
+			return inscripcionService.obtenerConfiguracionCargaNuevoIngreso(idPlan, idPersona);
 		} catch (RuntimeException e) {
 			logger.error("No fue posible aplicar la configuración de nuevo ingreso para el plan " + idPlan, e);
 			throw new InscripcionException("No fue posible aplicar la configuración de nuevo ingreso para el plan "
 					+ idPlan + ": " + obtenerCausaErrorConfiguracion(e));
 		}
+	}
+
+	private List<InscripcionMateriasDTO> obtenerMateriasConConfiguracionNuevoIngreso(
+			List<InscripcionMateriasDTO> materiasPorPeriodoInscripcion,
+			ConfiguracionCargaNuevoIngresoDTO configuracion, boolean forzarPrimerSemestre) {
 		List<InscripcionMateriasDTO> materiasPermitidas = materiasPorPeriodoInscripcion;
-		if (Boolean.TRUE.equals(configuracion.getRestringirPrimerSemestre())) {
+		if (forzarPrimerSemestre) {
+			materiasPermitidas = obtenerMateriasDelPrimerPeriodo(materiasPorPeriodoInscripcion);
+		} else if (Boolean.TRUE.equals(configuracion.getRestringirPrimerSemestre())) {
 			List<InscripcionMateriasDTO> materiasPrimerPeriodo = obtenerMateriasDelPrimerPeriodo(
 					materiasPorPeriodoInscripcion);
 			materiasPermitidas = materiasPrimerPeriodo;

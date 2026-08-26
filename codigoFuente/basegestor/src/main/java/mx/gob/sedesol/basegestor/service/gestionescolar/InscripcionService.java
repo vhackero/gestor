@@ -57,7 +57,9 @@ public interface InscripcionService {
 
 	Boolean esEstudianteRegular(Long idPersona);
 
-	Boolean esEstudianteNuevoIngreso(Long idPersona);
+	Boolean esEstudianteNuevoIngreso(Long idPersona, Long idPlan);
+
+	Boolean tienePrimerSemestrePendiente(Long idPersona, Long idPlan);
 
 	Boolean existeInscripcionPrevia(InscripcionPersonaDTO infoPersona, Date fechaActual);
 

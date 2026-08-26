@@ -17,12 +17,14 @@ public class ConfiguracionCargaNuevoIngresoDTO implements Serializable {
 	private Integer optativasRequeridas;
 	private Boolean restringirPrimerSemestre;
 	private Boolean mostrarSegundoSemestreSinOfertaPrimero;
+	private Boolean forzarPrimerSemestrePendiente;
 	private Boolean autoseleccionarObligatorias;
 	private Boolean bloquearObligatorias;
 	private String ayudaObligatorias;
 	private String ayudaOptativas;
 	private String ayudaRestringirPrimerSemestre;
 	private String ayudaMostrarSegundoSemestreSinOfertaPrimero;
+	private String ayudaForzarPrimerSemestrePendiente;
 	private String ayudaAutoseleccionarObligatorias;
 	private String ayudaBloquearObligatorias;
 
@@ -48,6 +50,8 @@ public class ConfiguracionCargaNuevoIngresoDTO implements Serializable {
 	public void setRestringirPrimerSemestre(Boolean valor) { this.restringirPrimerSemestre = valor; }
 	public Boolean getMostrarSegundoSemestreSinOfertaPrimero() { return mostrarSegundoSemestreSinOfertaPrimero; }
 	public void setMostrarSegundoSemestreSinOfertaPrimero(Boolean valor) { this.mostrarSegundoSemestreSinOfertaPrimero = valor; }
+	public Boolean getForzarPrimerSemestrePendiente() { return forzarPrimerSemestrePendiente; }
+	public void setForzarPrimerSemestrePendiente(Boolean valor) { this.forzarPrimerSemestrePendiente = valor; }
 	public Boolean getAutoseleccionarObligatorias() { return autoseleccionarObligatorias; }
 	public void setAutoseleccionarObligatorias(Boolean autoseleccionarObligatorias) { this.autoseleccionarObligatorias = autoseleccionarObligatorias; }
 	public Boolean getBloquearObligatorias() { return bloquearObligatorias; }
@@ -60,6 +64,8 @@ public class ConfiguracionCargaNuevoIngresoDTO implements Serializable {
 	public void setAyudaRestringirPrimerSemestre(String valor) { this.ayudaRestringirPrimerSemestre = valor; }
 	public String getAyudaMostrarSegundoSemestreSinOfertaPrimero() { return ayudaMostrarSegundoSemestreSinOfertaPrimero; }
 	public void setAyudaMostrarSegundoSemestreSinOfertaPrimero(String valor) { this.ayudaMostrarSegundoSemestreSinOfertaPrimero = valor; }
+	public String getAyudaForzarPrimerSemestrePendiente() { return ayudaForzarPrimerSemestrePendiente; }
+	public void setAyudaForzarPrimerSemestrePendiente(String valor) { this.ayudaForzarPrimerSemestrePendiente = valor; }
 	public String getAyudaAutoseleccionarObligatorias() { return ayudaAutoseleccionarObligatorias; }
 	public void setAyudaAutoseleccionarObligatorias(String valor) { this.ayudaAutoseleccionarObligatorias = valor; }
 	public String getAyudaBloquearObligatorias() { return ayudaBloquearObligatorias; }

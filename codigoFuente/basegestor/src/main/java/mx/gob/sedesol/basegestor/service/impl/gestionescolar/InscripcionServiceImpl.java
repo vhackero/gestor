@@ -252,8 +252,13 @@ public class InscripcionServiceImpl implements InscripcionService {
 	}
 
 	@Override
-	public Boolean esEstudianteNuevoIngreso(Long idPersona) {
-		return inscripcionesRepository.esEstudianteNuevoIngreso(idPersona);
+	public Boolean esEstudianteNuevoIngreso(Long idPersona, Long idPlan) {
+		return inscripcionesRepository.esEstudianteNuevoIngreso(idPersona, idPlan);
+	}
+
+	@Override
+	public Boolean tienePrimerSemestrePendiente(Long idPersona, Long idPlan) {
+		return inscripcionesRepository.tienePrimerSemestrePendiente(idPersona, idPlan);
 	}
 
 	@Override

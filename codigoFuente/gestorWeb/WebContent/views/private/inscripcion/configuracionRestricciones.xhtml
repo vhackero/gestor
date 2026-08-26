@@ -105,6 +105,11 @@
 							<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.autoseleccionarObligatorias}" />
 							<h:outputLabel value="Impedir desmarcar obligatorias:" />
 							<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.bloquearObligatorias}" />
+							<h:outputLabel value="Forzar primer semestre pendiente:" />
+							<h:panelGroup>
+								<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.forzarPrimerSemestrePendiente}" />
+								<small class="help-block">#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.ayudaForzarPrimerSemestrePendiente}</small>
+							</h:panelGroup>
 						</h:panelGrid>
 						<p:commandButton value="Guardar regla general" icon="fa fa-save"
 							action="#{configuracionRestriccionesInscripcionBean.guardarCargaNuevoIngresoGeneral}"
@@ -167,6 +172,9 @@
 							<p:selectBooleanCheckbox value="#{configuracion.bloquearObligatorias}" />
 							<h:outputText value=" Impedir desmarcar obligatorias" />
 							<small class="help-block">#{configuracion.ayudaBloquearObligatorias}</small>
+							<p:selectBooleanCheckbox value="#{configuracion.forzarPrimerSemestrePendiente}" />
+							<h:outputText value=" Forzar primer semestre pendiente" />
+							<small class="help-block">#{configuracion.ayudaForzarPrimerSemestrePendiente}</small>
 						</p:column>
 						<p:column headerText="Acciones" style="text-align:center; width:120px;">
 							<p:commandButton value="Guardar" icon="fa fa-save"
