@@ -13,6 +13,7 @@ import javax.faces.context.FacesContext;
 import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 
@@ -27,6 +28,11 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 	private InscripcionService inscripcionService;
 
 	private List<ReglaInscripcionDTO> reglas;
+	private ConfiguracionCargaNuevoIngresoDTO configuracionGeneralCargaNuevoIngreso;
+	private List<ConfiguracionCargaNuevoIngresoDTO> configuracionesCargaNuevoIngreso;
+	private List<ConfiguracionCargaNuevoIngresoDTO> planesDisponiblesCargaNuevoIngreso;
+	private Long idPlanNuevaConfiguracion;
+	private String usernameNuevaConfiguracion;
 
 	@PostConstruct
 	public void init() {
@@ -34,12 +40,116 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 	}
 
 	private void consultarReglas() {
+		reglas = new ArrayList<>();
+		configuracionGeneralCargaNuevoIngreso = new ConfiguracionCargaNuevoIngresoDTO();
+		configuracionesCargaNuevoIngreso = new ArrayList<>();
+		planesDisponiblesCargaNuevoIngreso = new ArrayList<>();
 		try {
 			reglas = inscripcionService.obtenerReglasInscripcion();
+			configuracionGeneralCargaNuevoIngreso = inscripcionService.obtenerConfiguracionGeneralCargaNuevoIngreso();
+			configuracionesCargaNuevoIngreso = inscripcionService.obtenerConfiguracionesCargaNuevoIngreso();
+			planesDisponiblesCargaNuevoIngreso = inscripcionService.obtenerPlanesDisponiblesCargaNuevoIngreso();
 		} catch (Exception e) {
 			logger.error("No fue posible consultar las reglas de inscripción", e);
-			reglas = new ArrayList<>();
-			mensaje(FacesMessage.SEVERITY_ERROR, "Error", "No fue posible consultar las reglas de inscripción.");
+			mensajeError("No fue posible consultar las reglas de inscripción", e);
+		}
+	}
+
+	public void guardarCargaNuevoIngresoGeneral() {
+		try {
+			inscripcionService.guardarConfiguracionGeneralCargaNuevoIngreso(configuracionGeneralCargaNuevoIngreso,
+					getUsuarioEnSession().getIdPersona());
+			consultarReglas();
+			mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada",
+					"La regla general de nuevo ingreso fue actualizada correctamente.");
+		} catch (Exception e) {
+			logger.error("No fue posible guardar la regla general de nuevo ingreso", e);
+			mensajeError("No fue posible guardar la regla general de nuevo ingreso", e);
+		}
+	}
+
+	public void agregarCargaNuevoIngreso() {
+		if (idPlanNuevaConfiguracion == null) {
+			mensaje(FacesMessage.SEVERITY_WARN, "Plan requerido",
+					"Selecciona el plan al que se aplicará la regla.");
+			return;
+		}
+		String username = usernameNuevaConfiguracion == null ? null : usernameNuevaConfiguracion.trim();
+		if (username != null && username.isEmpty()) {
+			username = null;
+		}
+		if (existeConfiguracionEspecifica(idPlanNuevaConfiguracion, username)) {
+			mensaje(FacesMessage.SEVERITY_WARN, "Regla existente",
+					username == null
+							? "El plan seleccionado ya tiene una regla específica para todos sus usuarios. Puedes modificarla en la tabla."
+							: "El username indicado ya tiene una regla específica para el plan seleccionado. Puedes modificarla en la tabla.");
+			return;
+		}
+		try {
+			ConfiguracionCargaNuevoIngresoDTO configuracion = inscripcionService
+					.obtenerConfiguracionCargaNuevoIngreso(idPlanNuevaConfiguracion, null);
+			configuracion.setActiva(Boolean.TRUE);
+			configuracion.setUsername(username);
+			inscripcionService.guardarConfiguracionCargaNuevoIngreso(configuracion,
+					getUsuarioEnSession().getIdPersona());
+			idPlanNuevaConfiguracion = null;
+			usernameNuevaConfiguracion = null;
+			consultarReglas();
+			mensaje(FacesMessage.SEVERITY_INFO, "Regla agregada",
+					configuracion.getUsername() == null || configuracion.getUsername().isEmpty()
+							? "La configuración fue creada para todos los usuarios del plan seleccionado."
+							: "La configuración fue creada para el username indicado dentro del plan.");
+		} catch (Exception e) {
+			logger.error("No fue posible agregar la regla de nuevo ingreso para el plan " + idPlanNuevaConfiguracion, e);
+			mensajeError("No fue posible agregar la regla para el plan", e);
+		}
+	}
+
+	private boolean existeConfiguracionEspecifica(Long idPlan, String username) {
+		if (configuracionesCargaNuevoIngreso == null) {
+			return false;
+		}
+		for (ConfiguracionCargaNuevoIngresoDTO configuracion : configuracionesCargaNuevoIngreso) {
+			if (!idPlan.equals(configuracion.getIdPlan())) {
+				continue;
+			}
+			String usernameConfigurado = configuracion.getUsername() == null
+					? null : configuracion.getUsername().trim();
+			if (username == null) {
+				if (usernameConfigurado == null || usernameConfigurado.isEmpty()) {
+					return true;
+				}
+			} else if (usernameConfigurado != null && username.equalsIgnoreCase(usernameConfigurado)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void guardarCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion) {
+		try {
+			inscripcionService.guardarConfiguracionCargaNuevoIngreso(configuracion,
+					getUsuarioEnSession().getIdPersona());
+			consultarReglas();
+			mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada",
+					"La carga de nuevo ingreso fue actualizada para el plan seleccionado.");
+		} catch (Exception e) {
+			logger.error("No fue posible guardar la carga de nuevo ingreso del plan " + configuracion.getIdPlan(), e);
+			mensajeError("No fue posible guardar la configuración de nuevo ingreso", e);
+		}
+	}
+
+	public void eliminarCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion) {
+		try {
+			inscripcionService.eliminarConfiguracionCargaNuevoIngreso(configuracion);
+			consultarReglas();
+			mensaje(FacesMessage.SEVERITY_INFO, "Configuración eliminada",
+					configuracion.getIdPersona() == null
+							? "El plan vuelve a utilizar la regla general de nuevo ingreso."
+							: "El usuario vuelve a utilizar la configuración del plan o, si no existe, la regla general.");
+		} catch (Exception e) {
+			logger.error("No fue posible eliminar la carga de nuevo ingreso del plan " + configuracion.getIdPlan(), e);
+			mensajeError("No fue posible eliminar la configuración específica del plan", e);
 		}
 	}
 
@@ -51,7 +161,7 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 					"La regla de inscripción fue actualizada correctamente.");
 		} catch (Exception e) {
 			logger.error("No fue posible guardar la regla de inscripción " + regla.getClave(), e);
-			mensaje(FacesMessage.SEVERITY_ERROR, "Error", "No fue posible guardar la regla de inscripción.");
+			mensajeError("No fue posible guardar la regla de inscripción", e);
 		}
 	}
 
@@ -59,8 +169,54 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 		FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severity, titulo, detalle));
 	}
 
+	private void mensajeError(String contexto, Throwable error) {
+		mensaje(FacesMessage.SEVERITY_ERROR, "Error", contexto + ": " + obtenerCausaError(error));
+	}
+
+	private String obtenerCausaError(Throwable error) {
+		Throwable causa = error;
+		while (causa.getCause() != null && causa.getCause() != causa) {
+			causa = causa.getCause();
+		}
+		String detalle = error.getMessage();
+		String causaRaiz = causa.getMessage();
+		if (detalle == null || detalle.trim().isEmpty()) {
+			detalle = error.getClass().getSimpleName();
+		}
+		return causa != error && causaRaiz != null && !causaRaiz.trim().isEmpty()
+				&& !causaRaiz.equals(detalle) ? detalle + " (causa: " + causaRaiz + ")" : detalle;
+	}
+
 	public InscripcionService getInscripcionService() { return inscripcionService; }
 	public void setInscripcionService(InscripcionService inscripcionService) { this.inscripcionService = inscripcionService; }
 	public List<ReglaInscripcionDTO> getReglas() { return reglas; }
 	public void setReglas(List<ReglaInscripcionDTO> reglas) { this.reglas = reglas; }
+	public List<ConfiguracionCargaNuevoIngresoDTO> getConfiguracionesCargaNuevoIngreso() { return configuracionesCargaNuevoIngreso; }
+	public void setConfiguracionesCargaNuevoIngreso(List<ConfiguracionCargaNuevoIngresoDTO> configuraciones) { this.configuracionesCargaNuevoIngreso = configuraciones; }
+	public String getNombreReglaCargaNuevoIngreso() {
+		ConfiguracionCargaNuevoIngresoDTO referencia = obtenerReferenciaCargaNuevoIngreso();
+		return referencia == null ? "Nuevo ingreso" : referencia.getNombreRegla();
+	}
+	public String getDescripcionReglaCargaNuevoIngreso() {
+		ConfiguracionCargaNuevoIngresoDTO referencia = obtenerReferenciaCargaNuevoIngreso();
+		return referencia == null ? "" : referencia.getDescripcionRegla();
+	}
+	private ConfiguracionCargaNuevoIngresoDTO obtenerReferenciaCargaNuevoIngreso() {
+		if (configuracionGeneralCargaNuevoIngreso != null) {
+			return configuracionGeneralCargaNuevoIngreso;
+		}
+		if (configuracionesCargaNuevoIngreso != null && !configuracionesCargaNuevoIngreso.isEmpty()) {
+			return configuracionesCargaNuevoIngreso.get(0);
+		}
+		return planesDisponiblesCargaNuevoIngreso == null || planesDisponiblesCargaNuevoIngreso.isEmpty()
+				? null : planesDisponiblesCargaNuevoIngreso.get(0);
+	}
+	public List<ConfiguracionCargaNuevoIngresoDTO> getPlanesDisponiblesCargaNuevoIngreso() { return planesDisponiblesCargaNuevoIngreso; }
+	public void setPlanesDisponiblesCargaNuevoIngreso(List<ConfiguracionCargaNuevoIngresoDTO> planes) { this.planesDisponiblesCargaNuevoIngreso = planes; }
+	public Long getIdPlanNuevaConfiguracion() { return idPlanNuevaConfiguracion; }
+	public void setIdPlanNuevaConfiguracion(Long idPlanNuevaConfiguracion) { this.idPlanNuevaConfiguracion = idPlanNuevaConfiguracion; }
+	public String getUsernameNuevaConfiguracion() { return usernameNuevaConfiguracion; }
+	public void setUsernameNuevaConfiguracion(String username) { this.usernameNuevaConfiguracion = username; }
+	public ConfiguracionCargaNuevoIngresoDTO getConfiguracionGeneralCargaNuevoIngreso() { return configuracionGeneralCargaNuevoIngreso; }
+	public void setConfiguracionGeneralCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion) { this.configuracionGeneralCargaNuevoIngreso = configuracion; }
 }

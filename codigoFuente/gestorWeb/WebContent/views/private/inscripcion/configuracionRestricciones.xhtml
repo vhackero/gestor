@@ -45,11 +45,12 @@
 			<h:form id="formRestricciones">
 				<p:messages id="mensajes" showDetail="true" closable="true" />
 				<h1>Configuración de restricciones de inscripción</h1>
-				<p:panel header="Reglas de inscripción" styleClass="fondoPrimario mt-2">
+				<p:panel header="Reglas generales" styleClass="fondoPrimario mt-2">
 					<p:dataTable id="tablaReglas" value="#{configuracionRestriccionesInscripcionBean.reglas}"
 						var="regla" emptyMessage="No existen reglas de inscripción configuradas.">
-						<p:column headerText="Clave">
-							<h:outputText value="#{regla.clave}" />
+						<p:column headerText="Regla">
+							<h:outputText value="#{regla.nombre}" />
+							<small class="help-block">#{regla.clave}</small>
 						</p:column>
 						<p:column headerText="Descripción">
 							<h:outputText value="#{regla.descripcion}" />
@@ -70,9 +71,113 @@
 								ajax="false" />
 						</p:column>
 					</p:dataTable>
-					<p class="help-block mt-2">
-						Una regla activa permite el comportamiento descrito; una regla inactiva aplica la restricción correspondiente.
-					</p>
+					<p class="help-block mt-2">Estas reglas tienen alcance general para todos los escenarios de inscripción. El texto de cada regla indica si representa una restricción o una autorización.</p>
+				</p:panel>
+
+				<p:panel header="Nuevo ingreso - #{configuracionRestriccionesInscripcionBean.nombreReglaCargaNuevoIngreso}" styleClass="fondoPrimario mt-2">
+					<p class="help-block">#{configuracionRestriccionesInscripcionBean.descripcionReglaCargaNuevoIngreso}</p>
+					<p:panel header="Regla general para todos los planes" styleClass="mb-2">
+						<p class="help-block">Esta configuración se aplica cuando el plan no tiene una regla específica. Una regla agregada para un plan sustituye estos valores.</p>
+						<h:panelGrid columns="2" cellpadding="5">
+							<h:outputLabel value="Aplicar regla general:" />
+							<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.activa}" styleClass="reglas-check" />
+							<h:outputLabel value="Obligatorias requeridas:" />
+							<h:panelGroup>
+								<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.obligatoriasRequeridas}" size="4" />
+								<small class="help-block">#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.ayudaObligatorias}</small>
+							</h:panelGroup>
+							<h:outputLabel value="Optativas requeridas:" />
+							<h:panelGroup>
+								<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.optativasRequeridas}" size="4" />
+								<small class="help-block">#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.ayudaOptativas}</small>
+							</h:panelGroup>
+							<h:outputLabel value="Mostrar sólo primer semestre:" />
+							<h:panelGroup>
+								<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.restringirPrimerSemestre}" />
+								<small class="help-block">#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.ayudaRestringirPrimerSemestre}</small>
+							</h:panelGroup>
+							<h:outputLabel value="Mostrar semestre 2 si no hay oferta del semestre 1:" />
+							<h:panelGroup>
+								<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.mostrarSegundoSemestreSinOfertaPrimero}" />
+								<small class="help-block">#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.ayudaMostrarSegundoSemestreSinOfertaPrimero}</small>
+							</h:panelGroup>
+							<h:outputLabel value="Autoseleccionar obligatorias:" />
+							<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.autoseleccionarObligatorias}" />
+							<h:outputLabel value="Impedir desmarcar obligatorias:" />
+							<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaNuevoIngreso.bloquearObligatorias}" />
+						</h:panelGrid>
+						<p:commandButton value="Guardar regla general" icon="fa fa-save"
+							action="#{configuracionRestriccionesInscripcionBean.guardarCargaNuevoIngresoGeneral}"
+							ajax="false" styleClass="mt-1" />
+					</p:panel>
+
+					<h3>Reglas específicas por plan</h3>
+					<h:panelGrid columns="5" cellpadding="5" styleClass="mb-2">
+						<h:outputLabel for="planNuevaRegla" value="Agregar regla para el plan:" />
+						<p:selectOneMenu id="planNuevaRegla"
+							value="#{configuracionRestriccionesInscripcionBean.idPlanNuevaConfiguracion}"
+							style="min-width:320px;">
+							<f:selectItem itemLabel="Selecciona un plan" itemValue="#{null}" noSelectionOption="true" />
+							<f:selectItems value="#{configuracionRestriccionesInscripcionBean.planesDisponiblesCargaNuevoIngreso}"
+								var="plan" itemLabel="#{plan.nombrePlan}" itemValue="#{plan.idPlan}" />
+						</p:selectOneMenu>
+						<h:outputLabel for="usernameNuevaRegla" value="Username (opcional):" />
+						<p:inputText id="usernameNuevaRegla"
+							value="#{configuracionRestriccionesInscripcionBean.usernameNuevaConfiguracion}"
+							placeholder="Aplica sólo a este usuario" maxlength="100" />
+						<p:commandButton value="Agregar" icon="fa fa-plus"
+							action="#{configuracionRestriccionesInscripcionBean.agregarCargaNuevoIngreso}"
+							ajax="false" />
+					</h:panelGrid>
+					<p:dataTable id="tablaCargaNuevoIngreso"
+						value="#{configuracionRestriccionesInscripcionBean.configuracionesCargaNuevoIngreso}"
+						var="configuracion" paginator="true" rows="10"
+						emptyMessage="No existen reglas de carga de nuevo ingreso configuradas por plan.">
+						<p:column headerText="Plan" style="min-width:220px;">
+							<h:outputText value="#{configuracion.nombrePlan}" />
+							<small class="help-block">ID del plan: #{configuracion.idPlan}</small>
+						</p:column>
+						<p:column headerText="Username" style="min-width:160px;">
+							<h:outputText value="#{empty configuracion.username ? 'Todos los usuarios del plan' : configuracion.username}" />
+							<h:panelGroup rendered="#{not empty configuracion.username}">
+								<small class="help-block">ID de persona: #{configuracion.idPersona}</small>
+							</h:panelGroup>
+						</p:column>
+						<p:column headerText="Aplicar restricción" style="text-align:center; width:120px;">
+							<p:selectBooleanCheckbox value="#{configuracion.activa}" styleClass="reglas-check" />
+						</p:column>
+						<p:column headerText="Obligatorias" style="width:135px;">
+							<p:inputText value="#{configuracion.obligatoriasRequeridas}" size="4" />
+							<small class="help-block">#{configuracion.ayudaObligatorias}</small>
+						</p:column>
+						<p:column headerText="Optativas" style="width:135px;">
+							<p:inputText value="#{configuracion.optativasRequeridas}" size="4" />
+							<small class="help-block">#{configuracion.ayudaOptativas}</small>
+						</p:column>
+						<p:column headerText="Comportamiento" style="min-width:280px;">
+							<p:selectBooleanCheckbox value="#{configuracion.restringirPrimerSemestre}" />
+							<h:outputText value=" Mostrar sólo primer semestre" />
+							<small class="help-block">#{configuracion.ayudaRestringirPrimerSemestre}</small>
+							<p:selectBooleanCheckbox value="#{configuracion.mostrarSegundoSemestreSinOfertaPrimero}" />
+							<h:outputText value=" Mostrar semestre 2 si no hay oferta del semestre 1" />
+							<small class="help-block">#{configuracion.ayudaMostrarSegundoSemestreSinOfertaPrimero}</small>
+							<p:selectBooleanCheckbox value="#{configuracion.autoseleccionarObligatorias}" />
+							<h:outputText value=" Autoseleccionar obligatorias" />
+							<small class="help-block">#{configuracion.ayudaAutoseleccionarObligatorias}</small>
+							<p:selectBooleanCheckbox value="#{configuracion.bloquearObligatorias}" />
+							<h:outputText value=" Impedir desmarcar obligatorias" />
+							<small class="help-block">#{configuracion.ayudaBloquearObligatorias}</small>
+						</p:column>
+						<p:column headerText="Acciones" style="text-align:center; width:120px;">
+							<p:commandButton value="Guardar" icon="fa fa-save"
+								action="#{configuracionRestriccionesInscripcionBean.guardarCargaNuevoIngreso(configuracion)}"
+								ajax="false" />
+							<p:commandButton value="Eliminar" icon="fa fa-trash"
+								action="#{configuracionRestriccionesInscripcionBean.eliminarCargaNuevoIngreso(configuracion)}"
+								onclick="return confirm('¿Deseas eliminar esta regla específica? Se volverá a aplicar el siguiente nivel de configuración disponible.');"
+								immediate="true" ajax="false" styleClass="btn-danger ml-1" />
+						</p:column>
+					</p:dataTable>
 				</p:panel>
 			</h:form>
 		</sec:authorize>

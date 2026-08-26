@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignaturasPorSemestreDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
@@ -77,6 +78,46 @@ public class InscripcionServiceImpl implements InscripcionService {
 	@Transactional
 	public void guardarReglaInscripcion(ReglaInscripcionDTO regla, Long idUsuario) {
 		inscripcionesRepository.guardarReglaInscripcion(regla, idUsuario);
+	}
+
+	@Override
+	public List<ConfiguracionCargaNuevoIngresoDTO> obtenerConfiguracionesCargaNuevoIngreso() {
+		return inscripcionesRepository.obtenerConfiguracionesCargaNuevoIngreso();
+	}
+
+	@Override
+	public ConfiguracionCargaNuevoIngresoDTO obtenerConfiguracionGeneralCargaNuevoIngreso() {
+		return inscripcionesRepository.obtenerConfiguracionGeneralCargaNuevoIngreso();
+	}
+
+	@Override
+	public List<ConfiguracionCargaNuevoIngresoDTO> obtenerPlanesDisponiblesCargaNuevoIngreso() {
+		return inscripcionesRepository.obtenerPlanesDisponiblesCargaNuevoIngreso();
+	}
+
+	@Override
+	public ConfiguracionCargaNuevoIngresoDTO obtenerConfiguracionCargaNuevoIngreso(Long idPlan, Long idPersona) {
+		return inscripcionesRepository.obtenerConfiguracionCargaNuevoIngreso(idPlan, idPersona);
+	}
+
+	@Override
+	@Transactional
+	public void guardarConfiguracionCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion,
+			Long idUsuario) {
+		inscripcionesRepository.guardarConfiguracionCargaNuevoIngreso(configuracion, idUsuario);
+	}
+
+	@Override
+	@Transactional
+	public void guardarConfiguracionGeneralCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion,
+			Long idUsuario) {
+		inscripcionesRepository.guardarConfiguracionGeneralCargaNuevoIngreso(configuracion, idUsuario);
+	}
+
+	@Override
+	@Transactional
+	public void eliminarConfiguracionCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion) {
+		inscripcionesRepository.eliminarConfiguracionCargaNuevoIngreso(configuracion);
 	}
 
 	@Override

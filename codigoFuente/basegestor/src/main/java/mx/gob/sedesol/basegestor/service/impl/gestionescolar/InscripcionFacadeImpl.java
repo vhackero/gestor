@@ -27,6 +27,7 @@ import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.admin.CorreoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignaturasPorSemestreDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
@@ -503,7 +504,15 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		validarCuposElectivas(materiasDisponibles);
 
 		if (esNuevoIngreso(contexto) && esRegular(contexto)) {
-			validarCargaPrimerSemestre(resumen, contexto);
+			ConfiguracionCargaNuevoIngresoDTO configuracion = inscripcionService
+					.obtenerConfiguracionCargaNuevoIngreso(contexto.getInscripcionPersona().getIdPlan(),
+							contexto.getInscripcionPersona().getIdPersona());
+			if (Boolean.TRUE.equals(configuracion.getActiva())) {
+				validarCargaPrimerSemestre(resumen, contexto, configuracion);
+			} else {
+				validarMinimoMateriasPorPeriodo(resumen, contexto);
+				validarMaximoMateriasSegunEstatus(resumen, contexto);
+			}
 		}
 
 		if (!esNuevoIngreso(contexto)) {
@@ -587,24 +596,25 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	 * Los estudiantes regulares de nuevo ingreso deben seleccionar sus materias
 	 * obligatorias y optativas requeridas.
 	 */
-	private void validarCargaPrimerSemestre(ResumenSeleccionMateriasDTO resumen, InscripcionContextoDTO contexto)
-			throws InscripcionException {
+	private void validarCargaPrimerSemestre(ResumenSeleccionMateriasDTO resumen, InscripcionContextoDTO contexto,
+			ConfiguracionCargaNuevoIngresoDTO configuracion) throws InscripcionException {
 		List<InscripcionMateriasDTO> materiasDisponibles = contexto.getEstadoAcademico().getMateriasDisponibles();
 		int cantidadMateriasOfertadas = materiasDisponibles.size();
-		Long cantidadMaxMaterias = ConstantesGestor.CANT_MATERIAS_OBLIGATORIAS_EST_REGULAR_PRIMER_SEMESTRE
-				+ ConstantesGestor.CANT_MATERIAS_OPTATIVAS_EST_REGULAR_PRIMER_SEMESTRE;
+		long cantidadMaxMaterias = configuracion.getObligatoriasRequeridas()
+				+ configuracion.getOptativasRequeridas();
 
 		if (cantidadMateriasOfertadas < cantidadMaxMaterias) {
-			return;
+			throw new InscripcionException("La oferta disponible no permite cumplir la carga configurada para nuevo ingreso. "
+					+ "Contacta al administrador para revisar la configuración del plan.");
 		}
 
 		if (esCargaAcademicaInvalidaPrimerSemestre(resumen.getObligatoriasSeleccionadas(),
-				resumen.getOptativasSeleccionadas())) {
+				resumen.getOptativasSeleccionadas(), configuracion)) {
 
 			throw new InscripcionException("Para finalizar la inscripción, debe seleccionar "
-					+ ConstantesGestor.CANT_MATERIAS_OBLIGATORIAS_EST_REGULAR_PRIMER_SEMESTRE
+					+ configuracion.getObligatoriasRequeridas()
 					+ " unidades didácticas obligatorias y "
-					+ ConstantesGestor.CANT_MATERIAS_OPTATIVAS_EST_REGULAR_PRIMER_SEMESTRE
+					+ configuracion.getOptativasRequeridas()
 					+ " unidades didácticas optativas.");
 		}
 	}
@@ -640,11 +650,9 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	}
 
 	private boolean esCargaAcademicaInvalidaPrimerSemestre(Long cantidadMateriasObligatorias,
-			Long cantidadMateriasOptativas) {
-		return !cantidadMateriasObligatorias
-				.equals(ConstantesGestor.CANT_MATERIAS_OBLIGATORIAS_EST_REGULAR_PRIMER_SEMESTRE)
-				|| !cantidadMateriasOptativas
-						.equals(ConstantesGestor.CANT_MATERIAS_OPTATIVAS_EST_REGULAR_PRIMER_SEMESTRE);
+			Long cantidadMateriasOptativas, ConfiguracionCargaNuevoIngresoDTO configuracion) {
+		return cantidadMateriasObligatorias.longValue() != configuracion.getObligatoriasRequeridas().longValue()
+				|| cantidadMateriasOptativas.longValue() != configuracion.getOptativasRequeridas().longValue();
 	}
 
 	private long contarMateriasDisponiblesObligatorias(List<InscripcionMateriasDTO> materiasDisponibles) {
@@ -860,7 +868,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			List<InscripcionMateriasDTO> materiasOfertadas, List<InscripcionMateriasCursadasDTO> materiasCursadas,
 			List<InscripcionMateriasReprobadasDTO> materiasReprobadas, Boolean esEstudianteNuevoIngreso,
 			Boolean esEstudianteRegular, LimitesCargaAcademicaDTO limitesCargaAcademica,
-			EstadoInscripcionEstudianteDTO estadoInscripcion, InscripcionPersonaDTO persona) {
+			EstadoInscripcionEstudianteDTO estadoInscripcion, InscripcionPersonaDTO persona)
+			throws InscripcionException {
 
 		List<InscripcionMateriasDTO> materiasOfertadasSinAprobadas = excluirMateriasAprobadas(materiasOfertadas,
 				materiasCursadas);
@@ -1015,7 +1024,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			List<InscripcionMateriasReprobadasDTO> materiasReprobadas, Boolean esEstudianteNuevoIngreso,
 			Boolean esEstudianteRegular, List<InscripcionMateriasDTO> materiasOfertadas,
 			LimitesCargaAcademicaDTO limitesCargaAcademica, EstadoInscripcionEstudianteDTO estadoInscripcion,
-			InscripcionPersonaDTO persona, List<InscripcionMateriasCursadasDTO> materiasCursadas) {
+			InscripcionPersonaDTO persona, List<InscripcionMateriasCursadasDTO> materiasCursadas)
+			throws InscripcionException {
 
 		if (esInscripcionExtraordinariaInicial(estadoInscripcion)) {
 			// logger.info("esInscripcionExtraordinariaInicial");
@@ -1028,7 +1038,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		// Estudiantes regulares de nuevo ingreso
 		if (esEstudianteNuevoIngreso && esEstudianteRegular) {
 			// logger.info("Estudiantes regulares de nuevo ingreso");
-			return obtenerMateriasEstudianteNuevoIngreso(materiasOfertadas);
+			return obtenerMateriasEstudianteNuevoIngreso(materiasOfertadas, persona.getIdPlan(), persona.getIdPersona());
 		}
 
 		// Verifica si las materias a msotrar de tipo optativas son opcionales tomar
@@ -1043,7 +1053,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		// Estudiantes irregulares de nuevo ingreso
 		if (esEstudianteNuevoIngreso && !esEstudianteRegular) {
 			// logger.info("Estudiantes irregulares de nuevo ingreso");
-			return obtenerMateriasEstudianteNuevoIngreso(materiasOfertadas);
+			return obtenerMateriasEstudianteNuevoIngreso(materiasOfertadas, persona.getIdPlan(), persona.getIdPersona());
 		}
 
 		// Estudiantes irregulares que no son de nuevo ingreso
@@ -1442,25 +1452,61 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	}
 
 	private List<InscripcionMateriasDTO> obtenerMateriasEstudianteNuevoIngreso(
-			List<InscripcionMateriasDTO> materiasPorPeriodoInscripcion) {
-		List<InscripcionMateriasDTO> materiasPrimerPeriodo = obtenerMateriasDelPrimerPeriodo(
-				materiasPorPeriodoInscripcion);
-		if (!materiasPrimerPeriodo.isEmpty()) {
-			return marcarMateriasObligatorias(materiasPrimerPeriodo);
+			List<InscripcionMateriasDTO> materiasPorPeriodoInscripcion, Long idPlan, Long idPersona)
+			throws InscripcionException {
+		ConfiguracionCargaNuevoIngresoDTO configuracion;
+		try {
+			configuracion = inscripcionService.obtenerConfiguracionCargaNuevoIngreso(idPlan, idPersona);
+		} catch (RuntimeException e) {
+			logger.error("No fue posible aplicar la configuración de nuevo ingreso para el plan " + idPlan, e);
+			throw new InscripcionException("No fue posible aplicar la configuración de nuevo ingreso para el plan "
+					+ idPlan + ": " + obtenerCausaErrorConfiguracion(e));
 		}
-
-		return marcarMateriasObligatorias(obtenerMateriasDelSegundoPeriodo(materiasPorPeriodoInscripcion));
+		List<InscripcionMateriasDTO> materiasPermitidas = materiasPorPeriodoInscripcion;
+		if (Boolean.TRUE.equals(configuracion.getRestringirPrimerSemestre())) {
+			List<InscripcionMateriasDTO> materiasPrimerPeriodo = obtenerMateriasDelPrimerPeriodo(
+					materiasPorPeriodoInscripcion);
+			materiasPermitidas = materiasPrimerPeriodo;
+			if (materiasPrimerPeriodo.isEmpty()
+					&& Boolean.TRUE.equals(configuracion.getMostrarSegundoSemestreSinOfertaPrimero())) {
+				materiasPermitidas = obtenerMateriasDelSegundoPeriodo(materiasPorPeriodoInscripcion);
+			}
+		}
+		return Boolean.TRUE.equals(configuracion.getActiva())
+				? configurarMateriasObligatorias(materiasPermitidas, configuracion) : materiasPermitidas;
 	}
 
-	private List<InscripcionMateriasDTO> marcarMateriasObligatorias(
-			List<InscripcionMateriasDTO> materiasPorPeriodoInscripcion) {
-		return materiasPorPeriodoInscripcion.stream().map(materia -> {
+	private String obtenerCausaErrorConfiguracion(Throwable error) {
+		Throwable causa = error;
+		while (causa.getCause() != null && causa.getCause() != causa) {
+			causa = causa.getCause();
+		}
+		String detalle = error.getMessage();
+		String causaRaiz = causa.getMessage();
+		if (detalle == null || detalle.trim().isEmpty()) {
+			detalle = error.getClass().getSimpleName();
+		}
+		return causa != error && causaRaiz != null && !causaRaiz.trim().isEmpty()
+				&& !causaRaiz.equals(detalle) ? detalle + " (causa: " + causaRaiz + ")" : detalle;
+	}
+
+	private List<InscripcionMateriasDTO> configurarMateriasObligatorias(
+			List<InscripcionMateriasDTO> materiasPorPeriodoInscripcion,
+			ConfiguracionCargaNuevoIngresoDTO configuracion) {
+		int obligatoriasSeleccionadas = 0;
+		for (InscripcionMateriasDTO materia : materiasPorPeriodoInscripcion) {
 			if (InscripcionUtils.esMateriaObligatoria(materia.getTipoPrograma())) {
-				materia.setCheck(Boolean.TRUE);
-				materia.setDisabled(Boolean.TRUE);
+				boolean debeSeleccionarse = Boolean.TRUE.equals(configuracion.getAutoseleccionarObligatorias())
+						&& obligatoriasSeleccionadas < configuracion.getObligatoriasRequeridas();
+				if (debeSeleccionarse) {
+					materia.setCheck(Boolean.TRUE);
+					obligatoriasSeleccionadas++;
+				}
+				materia.setDisabled(debeSeleccionarse
+						&& Boolean.TRUE.equals(configuracion.getBloquearObligatorias()));
 			}
-			return materia;
-		}).collect(Collectors.toList());
+		}
+		return materiasPorPeriodoInscripcion;
 	}
 
 	/**
