@@ -55,7 +55,7 @@ public interface InscripcionService {
 	List<InscripcionMateriasDTO> obtenerMateriasPorPeriodoInscripcion(Long idPlan, Date fechaActual,
 			Long idConvocatoria);
 
-	Boolean esEstudianteRegular(Long idPersona);
+	Boolean esEstudianteRegular(Long idPersona, Long idPlan);
 
 	Boolean esEstudianteNuevoIngreso(Long idPersona, Long idPlan);
 
@@ -65,7 +65,7 @@ public interface InscripcionService {
 
 	List<InscripcionMateriasCursadasDTO> obtenerMateriasCursadas(Long idPersona);
 
-	List<InscripcionMateriasReprobadasDTO> obtenerMateriasCursadasReprobadas(Long idPersona);
+	List<InscripcionMateriasReprobadasDTO> obtenerMateriasCursadasReprobadas(Long idPersona, Long idPlan);
 
 	List<InscripcionMateriasDTO> obtenerMateriasElectivasDeOtrosPlanes(Long idPlanPersona, Date fechaActual,
 			Long idConvocatoria, String semestreCinco, String semestreSeis);

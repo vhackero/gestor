@@ -502,6 +502,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		ResumenSeleccionMateriasDTO resumen = construirResumenSeleccion(materiasDisponibles);
 		validarSeleccionElectivas(materiasDisponibles, obtenerCantidadMaximaMateriasElectivas(contexto));
 		validarCuposElectivas(materiasDisponibles);
+		validarReglasCriticasAlFinalizar(contexto, materiasDisponibles);
 
 		boolean aplicarCargaNuevoIngreso = esNuevoIngreso(contexto);
 		if (esNuevoIngreso(contexto) || tienePrimerSemestrePendiente(contexto)) {
@@ -654,6 +655,65 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 	private Boolean esNuevoIngreso(InscripcionContextoDTO contexto) {
 		return contexto.getEstadoAcademico().getEsNuevoIngreso();
+	}
+
+	private void validarReglasCriticasAlFinalizar(InscripcionContextoDTO contexto,
+			List<InscripcionMateriasDTO> materiasDisponibles) throws InscripcionException {
+		Long idPersona = contexto.getInscripcionPersona().getIdPersona();
+		Long idPlan = contexto.getInscripcionPersona().getIdPlan();
+		List<InscripcionMateriasCursadasDTO> materiasCursadasActuales = inscripcionService
+				.obtenerMateriasCursadas(idPersona);
+		List<InscripcionMateriasReprobadasDTO> materiasReprobadasActuales = inscripcionService
+				.obtenerMateriasCursadasReprobadas(idPersona, idPlan);
+		Double porcentajeCreditosActual = obtenerPorcentajeCreditosCompletados(materiasCursadasActuales,
+				contexto.getCreditosTotalesPlan());
+		List<InscripcionMateriasDTO> materiasSeleccionadas = materiasDisponibles.stream()
+				.filter(materia -> Boolean.TRUE.equals(materia.getCheck())).collect(Collectors.toList());
+
+		for (InscripcionMateriasDTO materia : materiasSeleccionadas) {
+			validarPorcentajeAvanceCreditos(porcentajeCreditosActual, materia);
+			validarSeleccionMateriasOctavoSemestre(materia, materiasReprobadasActuales);
+			validarSeleccionOptativas(materia, materiasDisponibles);
+			validarSeriacionAlFinalizar(materia, materiasSeleccionadas, materiasCursadasActuales);
+		}
+	}
+
+	private void validarSeriacionAlFinalizar(InscripcionMateriasDTO materia,
+			List<InscripcionMateriasDTO> materiasSeleccionadas,
+			List<InscripcionMateriasCursadasDTO> materiasCursadas) throws InscripcionException {
+		if (!esMateriaSeriada(materia)) {
+			return;
+		}
+		boolean antecedenteAprobado = materiasCursadas.stream()
+				.filter(cursada -> ConstantesGestor.MATERIA_APROBADA.equals(cursada.getEstatusAprobacion()))
+				.anyMatch(cursada -> esAntecedenteEquivalente(materia, cursada));
+		boolean antecedenteSeleccionadoMismoSemestre = materiasSeleccionadas.stream()
+				.anyMatch(antecedente -> esAntecedenteSeleccionadoMismoSemestre(materia, antecedente));
+		if (!antecedenteAprobado && !antecedenteSeleccionadoMismoSemestre) {
+			throw new InscripcionException("No es posible seleccionar la unidad didáctica "
+					+ materia.getNombreTentativoPrograma()
+					+ " porque no se ha acreditado ni seleccionado su antecedente conforme a la seriación del plan.");
+		}
+	}
+
+	private boolean esAntecedenteEquivalente(InscripcionMateriasDTO materia,
+			InscripcionMateriasCursadasDTO cursada) {
+		if (materia.getIdProgramaAntecedente().equals(cursada.getIdPrograma())) {
+			return true;
+		}
+		String nombreAntecedente = normalizarNombreMateria(materia.getNombreProgramaAntecedente());
+		return !nombreAntecedente.isEmpty()
+				&& nombreAntecedente.equals(normalizarNombreMateria(cursada.getPrograma()));
+	}
+
+	private boolean esAntecedenteSeleccionadoMismoSemestre(InscripcionMateriasDTO materia,
+			InscripcionMateriasDTO antecedente) {
+		boolean correspondeAntecedente = materia.getIdProgramaAntecedente().equals(antecedente.getIdPrograma())
+				|| (!normalizarNombreMateria(materia.getNombreProgramaAntecedente()).isEmpty()
+						&& normalizarNombreMateria(materia.getNombreProgramaAntecedente())
+								.equals(normalizarNombreMateria(antecedente.getNombreTentativoPrograma())));
+		return correspondeAntecedente && InscripcionUtils.sonMateriasDelMismoSemestre(materia, antecedente)
+				&& !InscripcionUtils.esMateriaElectiva(materia.getTipoPrograma());
 	}
 
 	private Boolean tienePrimerSemestrePendiente(InscripcionContextoDTO contexto) {
@@ -819,7 +879,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	}
 
 	private Boolean esRegular(InscripcionPersonaDTO persona) {
-		return inscripcionService.esEstudianteRegular(persona.getIdPersona());
+		return inscripcionService.esEstudianteRegular(persona.getIdPersona(), persona.getIdPlan());
 	}
 
 	private Boolean esNuevoIngreso(InscripcionPersonaDTO persona) {
@@ -837,7 +897,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private List<InscripcionMateriasReprobadasDTO> obtenerMateriasReprobadas(InscripcionPersonaDTO persona,
 			Boolean esNuevoIngreso, Boolean esRegular) {
 		List<InscripcionMateriasReprobadasDTO> materiasReprobadas = inscripcionService
-				.obtenerMateriasCursadasReprobadas(persona.getIdPersona());
+				.obtenerMateriasCursadasReprobadas(persona.getIdPersona(), persona.getIdPlan());
 		return materiasReprobadas;
 	}
 
@@ -962,8 +1022,9 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 		return materiasDisponibles.stream()
 				.filter(m -> m.getCheck()
-						|| !esMateriaSeriadaReprobada(idsMateriasReprobadas, nombresMateriasReprobadas, materiasMap, m)
-						|| !esMateriaSeriadaYNoCursada(idsMateriasCursadas, nombresMateriasAprobadas, materiasMap, m))
+						|| (!esMateriaSeriadaReprobada(idsMateriasReprobadas, nombresMateriasReprobadas, materiasMap, m)
+								&& !esMateriaSeriadaYNoCursada(idsMateriasCursadas, nombresMateriasAprobadas,
+										materiasMap, m)))
 				.collect(Collectors.toList());
 	}
 
@@ -1036,7 +1097,9 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	}
 
 	private Set<Long> obtenerIdsMateriasCursadas(List<InscripcionMateriasCursadasDTO> materiasCursadas) {
-		return materiasCursadas.stream().map(InscripcionMateriasCursadasDTO::getIdPrograma).collect(Collectors.toSet());
+		return materiasCursadas.stream()
+				.filter(materia -> ConstantesGestor.MATERIA_APROBADA.equals(materia.getEstatusAprobacion()))
+				.map(InscripcionMateriasCursadasDTO::getIdPrograma).collect(Collectors.toSet());
 	}
 
 	private List<InscripcionMateriasDTO> obtenerMateriasDeAcuerdoASituacionAcademica(

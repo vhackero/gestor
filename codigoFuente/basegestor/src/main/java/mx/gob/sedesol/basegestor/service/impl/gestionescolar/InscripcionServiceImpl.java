@@ -247,8 +247,8 @@ public class InscripcionServiceImpl implements InscripcionService {
 	}
 
 	@Override
-	public Boolean esEstudianteRegular(Long idPersona) {
-		return inscripcionesRepository.esEstudianteRegular(idPersona);
+	public Boolean esEstudianteRegular(Long idPersona, Long idPlan) {
+		return inscripcionesRepository.esEstudianteRegular(idPersona, idPlan);
 	}
 
 	@Override
@@ -273,8 +273,8 @@ public class InscripcionServiceImpl implements InscripcionService {
 	}
 
 	@Override
-	public List<InscripcionMateriasReprobadasDTO> obtenerMateriasCursadasReprobadas(Long idPersona) {
-		return inscripcionesRepository.obtenerMateriasCursadasReprobadas(idPersona);
+	public List<InscripcionMateriasReprobadasDTO> obtenerMateriasCursadasReprobadas(Long idPersona, Long idPlan) {
+		return inscripcionesRepository.obtenerMateriasCursadasReprobadas(idPersona, idPlan);
 	}
 
 	@Override

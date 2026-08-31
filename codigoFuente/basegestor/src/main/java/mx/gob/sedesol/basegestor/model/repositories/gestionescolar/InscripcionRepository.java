@@ -778,9 +778,9 @@ public class InscripcionRepository implements IinscripcionRepository {
 	}
 
 	@Override
-	public Boolean esEstudianteRegular(Long idPersona) {
+	public Boolean esEstudianteRegular(Long idPersona, Long idPlan) {
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT IF(COUNT(IF(rgp.calificacion_final < fd.calificacion_min_aprobatoria, 1, 0)) > 0, 0, 1) ");
+		sql.append("SELECT CASE WHEN EXISTS(SELECT 1 ");
 		sql.append("FROM rel_grupo_participante rgp ");
 		sql.append("JOIN tbl_grupos tg ON tg.id = rgp.id_grupo ");
 		sql.append("JOIN tbl_eventos te ON te.id_evento = tg.id_evento ");
@@ -788,6 +788,19 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("WHERE rgp.id_persona_participante = :idPersona ");
 		sql.append("AND rgp.calificacion_final IS NOT NULL ");
 		sql.append("AND rgp.calificacion_final < fd.calificacion_min_aprobatoria ");
+		sql.append("AND (fd.id_plan = :idPlan OR EXISTS( ");
+		sql.append("    SELECT 1 FROM tbl_ficha_descriptiva_programa fdPlan ");
+		sql.append("    WHERE fdPlan.id_plan = :idPlan ");
+		sql.append("    AND LOWER(TRIM(fdPlan.nombre_tentativo)) = LOWER(TRIM(fd.nombre_tentativo)) ");
+		sql.append(")) ");
+		sql.append("AND NOT EXISTS( ");
+		sql.append("    SELECT 1 FROM rel_persona_bajas rpb ");
+		sql.append("    JOIN rel_motivo_baja rmb ON rmb.id_motivo_baja = rpb.motivo_baja_id ");
+		sql.append("    WHERE rpb.id_persona = rgp.id_persona_participante ");
+		sql.append("    AND rpb.contabilizar = 1 AND rmb.tipo_baja_id IN (1,2,7) ");
+		sql.append("    AND rpb.id_plan = fd.id_plan AND rpb.id_programa = fd.id_programa ");
+		sql.append("    AND rpb.id_evento = te.id_evento AND rpb.id_grupo = tg.id ");
+		sql.append(") ");
 		sql.append("AND NOT EXISTS( ");
 		sql.append("    SELECT 1 ");
 		sql.append("    FROM rel_grupo_participante rgp2 ");
@@ -797,10 +810,11 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("    WHERE rgp2.id_persona_participante = rgp.id_persona_participante ");
 		sql.append("    AND LOWER(TRIM(fd2.nombre_tentativo)) = LOWER(TRIM(fd.nombre_tentativo)) ");
 		sql.append("    AND rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
-		sql.append(")");
+		sql.append(") ");
+		sql.append(") THEN 0 ELSE 1 END");
 
 		List<?> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("idPersona", idPersona)
-				.getResultList();
+				.setParameter("idPlan", idPlan).getResultList();
 
 		if (resultados.isEmpty()) {
 			return true;
@@ -978,7 +992,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<InscripcionMateriasReprobadasDTO> obtenerMateriasCursadasReprobadas(Long idPersona) {
+	public List<InscripcionMateriasReprobadasDTO> obtenerMateriasCursadasReprobadas(Long idPersona, Long idPlan) {
 
 		StringBuilder sql = new StringBuilder();
 		sql.append(
@@ -1008,6 +1022,19 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("INNER JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion ");
 		sql.append("WHERE tp.id_persona = :id_persona ");
 		sql.append("  AND rgp.calificacion_final < fd.calificacion_min_aprobatoria ");
+		sql.append("  AND (fd.id_plan = :idPlan OR EXISTS( ");
+		sql.append("      SELECT 1 FROM tbl_ficha_descriptiva_programa fdPlan ");
+		sql.append("      WHERE fdPlan.id_plan = :idPlan ");
+		sql.append("        AND LOWER(TRIM(fdPlan.nombre_tentativo)) = LOWER(TRIM(fd.nombre_tentativo)) ");
+		sql.append("  )) ");
+		sql.append("  AND NOT EXISTS( ");
+		sql.append("      SELECT 1 FROM rel_persona_bajas rpb ");
+		sql.append("      INNER JOIN rel_motivo_baja rmb ON rmb.id_motivo_baja = rpb.motivo_baja_id ");
+		sql.append("      WHERE rpb.id_persona = rgp.id_persona_participante ");
+		sql.append("        AND rpb.contabilizar = 1 AND rmb.tipo_baja_id IN (1,2,7) ");
+		sql.append("        AND rpb.id_plan = fd.id_plan AND rpb.id_programa = fd.id_programa ");
+		sql.append("        AND rpb.id_evento = te.id_evento AND rpb.id_grupo = tg.id ");
+		sql.append("  ) ");
 		sql.append("  AND NOT EXISTS( ");
 		sql.append("      SELECT 1 ");
 		sql.append("      FROM rel_grupo_participante rgp2 ");
@@ -1021,7 +1048,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("GROUP BY tpl.id_plan, fd.id_programa, fd.cve_programa");
 
 		List<Object[]> resultados = entityManager.createNativeQuery(sql.toString())
-				.setParameter("id_persona", idPersona).getResultList();
+				.setParameter("id_persona", idPersona).setParameter("idPlan", idPlan).getResultList();
 
 		List<InscripcionMateriasReprobadasDTO> listaDTO = new ArrayList<>();
 
@@ -1786,7 +1813,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("SELECT ");
 		sql.append("       tmcu2.id, ");
 		sql.append("       tmcu2.nombre, ");
-		sql.append("       (SELECT COUNT(tmll2.nombre) ");
+		sql.append("       (SELECT COUNT(DISTINCT tlfdp.id_programa) ");
 		sql.append("        FROM tbl_malla_curricular tmll ");
 		sql.append("        JOIN tbl_malla_curricular tmll2 ");
 		sql.append("          ON tmll2.id_padre = tmll.id ");
@@ -1796,28 +1823,27 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("         AND tlfdp.tipo = 'Obligatoria' ");
 		sql.append("        WHERE tmll.id_padre = tmcu2.id ");
 		sql.append("       ) AS asignaturasObligatoriasPorPrograma, ");
-		sql.append("       (SELECT COUNT(rgp2.id_persona_participante) ");
-		sql.append("        FROM rel_grupo_participante rgp2 ");
-		sql.append("        INNER JOIN tbl_grupos tg2 ");
-		sql.append("          ON tg2.id = rgp2.id_grupo ");
-		sql.append("        INNER JOIN tbl_eventos te2 ");
-		sql.append("          ON te2.id_evento = tg2.id_evento ");
-		sql.append("        INNER JOIN tbl_ficha_descriptiva_programa fd2 ");
-		sql.append("          ON fd2.id_plan = :idPlan ");
-		sql.append("         AND fd2.id_programa = te2.id_programa ");
-		sql.append("         AND fd2.tipo = 'Obligatoria' ");
-		sql.append("        INNER JOIN tbl_malla_curricular tmcc ");
-		sql.append("          ON tmcc.id = fd2.id_eje_capacitacion ");
-		sql.append("        INNER JOIN tbl_malla_curricular tmcc2 ");
-		sql.append("          ON tmcc2.id = tmcc.id_padre ");
-		sql.append("        WHERE rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
+		sql.append("       (SELECT COUNT(DISTINCT fdPlan.id_programa) ");
+		sql.append("        FROM tbl_ficha_descriptiva_programa fdPlan ");
+		sql.append("        INNER JOIN tbl_malla_curricular tmcc ON tmcc.id = fdPlan.id_eje_capacitacion ");
+		sql.append("        INNER JOIN tbl_malla_curricular tmcc2 ON tmcc2.id = tmcc.id_padre ");
+		sql.append("        WHERE fdPlan.id_plan = :idPlan AND fdPlan.tipo = 'Obligatoria' ");
 		sql.append("          AND tmcc2.nombre = tmcu2.nombre ");
-		sql.append("          AND rgp2.id_persona_participante = :idPersona ");
+		sql.append("          AND EXISTS( ");
+		sql.append("              SELECT 1 FROM rel_grupo_participante rgp2 ");
+		sql.append("              INNER JOIN tbl_grupos tg2 ON tg2.id = rgp2.id_grupo ");
+		sql.append("              INNER JOIN tbl_eventos te2 ON te2.id_evento = tg2.id_evento ");
+		sql.append("              INNER JOIN tbl_ficha_descriptiva_programa fd2 ON fd2.id_programa = te2.id_programa ");
+		sql.append("              WHERE rgp2.id_persona_participante = :idPersona ");
+		sql.append("                AND rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
+		sql.append("                AND LOWER(TRIM(fd2.nombre_tentativo)) = LOWER(TRIM(fdPlan.nombre_tentativo)) ");
+		sql.append("          ) ");
 		sql.append("       ) AS asignaturasAprobadas ");
 		sql.append("FROM tbl_malla_curricular tmcu ");
 		sql.append("INNER JOIN tbl_malla_curricular tmcu2 ");
 		sql.append("        ON tmcu2.id_padre = tmcu.id ");
-		sql.append("WHERE tmcu.id_plan = :idPlan");
+		sql.append("WHERE tmcu.id_plan = :idPlan ");
+		sql.append("ORDER BY CAST(SUBSTRING_INDEX(tmcu2.nombre, ' ', -1) AS UNSIGNED), tmcu2.id");
 
 		List<Object[]> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("idPlan", idPlan)
 				.setParameter("idPersona", idPersona).getResultList();

@@ -52,7 +52,7 @@ public interface IinscripcionRepository {
 	List<InscripcionMateriasDTO> obtenerMateriasElectivasDeOtrosPlanes(Long idPlanActual, Date fechaActual,
 			Long idConvocatoria, String semestreCinco, String semestreSeis);
 
-	Boolean esEstudianteRegular(Long idPersona);
+	Boolean esEstudianteRegular(Long idPersona, Long idPlan);
 
 	Boolean esEstudianteNuevoIngreso(Long idPersona, Long idPlan);
 
@@ -62,7 +62,7 @@ public interface IinscripcionRepository {
 
 	List<InscripcionMateriasCursadasDTO> obtenerMateriasCursadas(Long idPersona);
 
-	List<InscripcionMateriasReprobadasDTO> obtenerMateriasCursadasReprobadas(Long idPersona);
+	List<InscripcionMateriasReprobadasDTO> obtenerMateriasCursadasReprobadas(Long idPersona, Long idPlan);
 
 	List<InscripcionBajasDTO> obtenerBajasDeMateriasSolicitadas(Long idPersona);
 
