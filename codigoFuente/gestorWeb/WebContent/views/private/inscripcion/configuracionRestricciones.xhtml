@@ -187,6 +187,82 @@
 						</p:column>
 					</p:dataTable>
 				</p:panel>
+
+				<p:panel header="Estudiantes regulares - Carga académica y avance" styleClass="fondoPrimario mt-2">
+					<p class="help-block">Configura el avance anual y la carga mínima de estudiantes regulares. Los valores específicos por plan sustituyen la regla general.</p>
+					<p:panel header="Regla general para todos los planes" styleClass="mb-2">
+						<h:panelGrid columns="2" cellpadding="5">
+							<h:outputLabel value="Aplicar regla:" />
+							<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaRegular.activa}" styleClass="reglas-check" />
+							<h:outputLabel value="Restringir por avance anual:" />
+							<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaRegular.restringirAvanceAnual}" />
+							<h:outputLabel value="Permitir semestre adyacente:" />
+							<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaRegular.permitirSemestreAdyacente}" />
+							<h:outputLabel value="Mínimo de obligatorias:" />
+							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaRegular.minimoObligatorias}" size="4" />
+							<h:outputLabel value="Máximo de electivas por periodo (0 = espacios del plan):" />
+							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaRegular.maximoElectivasPorPeriodo}" size="4" />
+						</h:panelGrid>
+						<p:commandButton value="Guardar regla general de regulares" icon="fa fa-save"
+							action="#{configuracionRestriccionesInscripcionBean.guardarCargaRegularGeneral}" ajax="false" />
+					</p:panel>
+
+					<h:panelGrid columns="3" cellpadding="5" styleClass="mb-2">
+						<h:outputLabel for="planNuevaReglaRegular" value="Agregar regla para el plan:" />
+						<p:selectOneMenu id="planNuevaReglaRegular"
+							value="#{configuracionRestriccionesInscripcionBean.idPlanNuevaConfiguracionRegular}" style="min-width:320px;">
+							<f:selectItem itemLabel="Selecciona un plan" itemValue="#{null}" noSelectionOption="true" />
+							<f:selectItems value="#{configuracionRestriccionesInscripcionBean.planesDisponiblesCargaRegular}"
+								var="plan" itemLabel="#{plan.nombrePlan}" itemValue="#{plan.idPlan}" />
+						</p:selectOneMenu>
+						<p:commandButton value="Agregar" icon="fa fa-plus"
+							action="#{configuracionRestriccionesInscripcionBean.agregarCargaRegular}" ajax="false" />
+					</h:panelGrid>
+					<p:dataTable value="#{configuracionRestriccionesInscripcionBean.configuracionesCargaRegular}"
+						var="regular" paginator="true" rows="10" emptyMessage="No existen reglas regulares específicas por plan.">
+						<p:column headerText="Plan"><h:outputText value="#{regular.nombrePlan}" /></p:column>
+						<p:column headerText="Aplicar"><p:selectBooleanCheckbox value="#{regular.activa}" styleClass="reglas-check" /></p:column>
+						<p:column headerText="Avance anual"><p:selectBooleanCheckbox value="#{regular.restringirAvanceAnual}" /></p:column>
+						<p:column headerText="Semestre adyacente"><p:selectBooleanCheckbox value="#{regular.permitirSemestreAdyacente}" /></p:column>
+						<p:column headerText="Mínimo obligatorias"><p:inputText value="#{regular.minimoObligatorias}" size="4" /></p:column>
+						<p:column headerText="Máximo electivas"><p:inputText value="#{regular.maximoElectivasPorPeriodo}" size="4" /></p:column>
+						<p:column headerText="Acciones">
+							<p:commandButton value="Guardar" icon="fa fa-save" action="#{configuracionRestriccionesInscripcionBean.guardarCargaRegular(regular)}" ajax="false" />
+							<p:commandButton value="Eliminar" icon="fa fa-trash" action="#{configuracionRestriccionesInscripcionBean.eliminarCargaRegular(regular)}"
+								onclick="return confirm('¿Deseas eliminar esta regla específica?');" immediate="true" ajax="false" styleClass="btn-danger ml-1" />
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+
+				<p:panel header="Restricciones académicas generales" styleClass="fondoPrimario mt-2">
+					<p class="help-block">Parámetros transversales aplicables durante la selección y nuevamente al finalizar la inscripción.</p>
+					<h:panelGrid columns="2" cellpadding="5">
+						<h:outputLabel value="Aplicar restricciones:" />
+						<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.activa}" styleClass="reglas-check" />
+						<h:outputLabel value="Porcentaje mínimo para tramo final:" />
+						<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.porcentajeMinimoTramoFinal}" size="4" />
+						<h:outputLabel value="Semestre de inicio del tramo final:" />
+						<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.semestreInicioTramoFinal}" size="4" />
+						<h:outputLabel value="Validar rezagos seriados:" />
+						<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.validarRezagosSeriados}" />
+						<h:outputLabel value="Semestre destino de la validación:" />
+						<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.semestreDestinoRezagos}" size="4" />
+						<h:outputLabel value="Rango de antecedentes seriados:" />
+						<h:panelGroup>
+							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.semestreInicialAntecedentes}" size="4" />
+							<h:outputText value=" a " />
+							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.semestreFinalAntecedentes}" size="4" />
+						</h:panelGroup>
+						<h:outputLabel value="Máximo de optativas por bloque:" />
+						<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.maximoOptativasPorBloque}" size="4" />
+						<h:outputLabel value="Optativas aprobadas para volverlas opcionales:" />
+						<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.optativasAprobadasParaOpcionales}" size="4" />
+						<h:outputLabel value="Impedir clave optativa repetida:" />
+						<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.impedirClaveOptativaRepetida}" />
+					</h:panelGrid>
+					<p:commandButton value="Guardar restricciones académicas" icon="fa fa-save"
+						action="#{configuracionRestriccionesInscripcionBean.guardarRestriccionesAcademicasGenerales}" ajax="false" />
+				</p:panel>
 			</h:form>
 		</sec:authorize>
 	</ui:define>

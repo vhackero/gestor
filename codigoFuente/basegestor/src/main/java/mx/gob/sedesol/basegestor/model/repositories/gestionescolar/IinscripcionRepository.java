@@ -8,6 +8,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignatura
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaRegularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
@@ -54,11 +55,21 @@ public interface IinscripcionRepository {
 
 	Boolean esEstudianteRegular(Long idPersona, Long idPlan);
 
+	/** Semestre pendiente de reincorporación por baja temporal contabilizable, o null. */
+	Integer obtenerSemestreBajaTemporalPendiente(Long idPersona, Long idPlan);
+
 	Boolean esEstudianteNuevoIngreso(Long idPersona, Long idPlan);
 
 	Boolean tienePrimerSemestrePendiente(Long idPersona, Long idPlan);
 
 	Boolean existeInscripcionPrevia(Long idPersona, Long idPlan, Long idConvocatoria, Date fechaActual);
+
+	/** Serializa la finalización de inscripciones de una persona dentro de la transacción. */
+	void bloquearPersonaParaInscripcion(Long idPersona);
+
+	/** Incluye cualquier materia del proceso, incluso electivas de otro plan. */
+	Boolean existeInscripcionEnProceso(Long idPersona, Long idProcesoInscripcion);
+
 
 	List<InscripcionMateriasCursadasDTO> obtenerMateriasCursadas(Long idPersona);
 
@@ -106,5 +117,24 @@ public interface IinscripcionRepository {
 	void guardarConfiguracionGeneralCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion, Long idUsuario);
 
 	void eliminarConfiguracionCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion);
+
+	ConfiguracionCargaRegularDTO obtenerConfiguracionGeneralCargaRegular();
+
+	List<ConfiguracionCargaRegularDTO> obtenerConfiguracionesCargaRegular();
+
+	List<ConfiguracionCargaRegularDTO> obtenerPlanesDisponiblesCargaRegular();
+
+	ConfiguracionCargaRegularDTO obtenerConfiguracionCargaRegular(Long idPlan);
+
+	void guardarConfiguracionGeneralCargaRegular(ConfiguracionCargaRegularDTO configuracion, Long idUsuario);
+
+	void guardarConfiguracionCargaRegular(ConfiguracionCargaRegularDTO configuracion, Long idUsuario);
+
+	void eliminarConfiguracionCargaRegular(ConfiguracionCargaRegularDTO configuracion);
+
+	ConfiguracionCargaRegularDTO obtenerConfiguracionRestriccionesAcademicasGenerales();
+
+	void guardarConfiguracionRestriccionesAcademicasGenerales(ConfiguracionCargaRegularDTO configuracion,
+			Long idUsuario);
 
 }

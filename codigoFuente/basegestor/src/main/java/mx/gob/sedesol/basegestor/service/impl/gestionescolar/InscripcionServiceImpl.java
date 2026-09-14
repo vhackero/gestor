@@ -14,6 +14,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignatura
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaRegularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
@@ -118,6 +119,56 @@ public class InscripcionServiceImpl implements InscripcionService {
 	@Transactional
 	public void eliminarConfiguracionCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion) {
 		inscripcionesRepository.eliminarConfiguracionCargaNuevoIngreso(configuracion);
+	}
+
+	@Override
+	public ConfiguracionCargaRegularDTO obtenerConfiguracionGeneralCargaRegular() {
+		return inscripcionesRepository.obtenerConfiguracionGeneralCargaRegular();
+	}
+
+	@Override
+	public List<ConfiguracionCargaRegularDTO> obtenerConfiguracionesCargaRegular() {
+		return inscripcionesRepository.obtenerConfiguracionesCargaRegular();
+	}
+
+	@Override
+	public List<ConfiguracionCargaRegularDTO> obtenerPlanesDisponiblesCargaRegular() {
+		return inscripcionesRepository.obtenerPlanesDisponiblesCargaRegular();
+	}
+
+	@Override
+	public ConfiguracionCargaRegularDTO obtenerConfiguracionCargaRegular(Long idPlan) {
+		return inscripcionesRepository.obtenerConfiguracionCargaRegular(idPlan);
+	}
+
+	@Override
+	@Transactional
+	public void guardarConfiguracionGeneralCargaRegular(ConfiguracionCargaRegularDTO configuracion, Long idUsuario) {
+		inscripcionesRepository.guardarConfiguracionGeneralCargaRegular(configuracion, idUsuario);
+	}
+
+	@Override
+	@Transactional
+	public void guardarConfiguracionCargaRegular(ConfiguracionCargaRegularDTO configuracion, Long idUsuario) {
+		inscripcionesRepository.guardarConfiguracionCargaRegular(configuracion, idUsuario);
+	}
+
+	@Override
+	@Transactional
+	public void eliminarConfiguracionCargaRegular(ConfiguracionCargaRegularDTO configuracion) {
+		inscripcionesRepository.eliminarConfiguracionCargaRegular(configuracion);
+	}
+
+	@Override
+	public ConfiguracionCargaRegularDTO obtenerConfiguracionRestriccionesAcademicasGenerales() {
+		return inscripcionesRepository.obtenerConfiguracionRestriccionesAcademicasGenerales();
+	}
+
+	@Override
+	@Transactional
+	public void guardarConfiguracionRestriccionesAcademicasGenerales(ConfiguracionCargaRegularDTO configuracion,
+			Long idUsuario) {
+		inscripcionesRepository.guardarConfiguracionRestriccionesAcademicasGenerales(configuracion, idUsuario);
 	}
 
 	@Override
@@ -257,8 +308,23 @@ public class InscripcionServiceImpl implements InscripcionService {
 	}
 
 	@Override
+	public Integer obtenerSemestreBajaTemporalPendiente(Long idPersona, Long idPlan) {
+		return inscripcionesRepository.obtenerSemestreBajaTemporalPendiente(idPersona, idPlan);
+	}
+
+	@Override
 	public Boolean tienePrimerSemestrePendiente(Long idPersona, Long idPlan) {
 		return inscripcionesRepository.tienePrimerSemestrePendiente(idPersona, idPlan);
+	}
+
+	@Override
+	public void bloquearPersonaParaInscripcion(Long idPersona) {
+		inscripcionesRepository.bloquearPersonaParaInscripcion(idPersona);
+	}
+
+	@Override
+	public Boolean existeInscripcionEnProceso(Long idPersona, Long idProcesoInscripcion) {
+		return inscripcionesRepository.existeInscripcionEnProceso(idPersona, idProcesoInscripcion);
 	}
 
 	@Override

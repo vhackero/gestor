@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaRegularDTO;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 
@@ -33,6 +34,11 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 	private List<ConfiguracionCargaNuevoIngresoDTO> planesDisponiblesCargaNuevoIngreso;
 	private Long idPlanNuevaConfiguracion;
 	private String usernameNuevaConfiguracion;
+	private ConfiguracionCargaRegularDTO configuracionGeneralCargaRegular;
+	private List<ConfiguracionCargaRegularDTO> configuracionesCargaRegular;
+	private List<ConfiguracionCargaRegularDTO> planesDisponiblesCargaRegular;
+	private Long idPlanNuevaConfiguracionRegular;
+	private ConfiguracionCargaRegularDTO configuracionRestriccionesAcademicasGenerales;
 
 	@PostConstruct
 	public void init() {
@@ -44,14 +50,91 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 		configuracionGeneralCargaNuevoIngreso = new ConfiguracionCargaNuevoIngresoDTO();
 		configuracionesCargaNuevoIngreso = new ArrayList<>();
 		planesDisponiblesCargaNuevoIngreso = new ArrayList<>();
+		configuracionGeneralCargaRegular = new ConfiguracionCargaRegularDTO();
+		configuracionesCargaRegular = new ArrayList<>();
+		planesDisponiblesCargaRegular = new ArrayList<>();
+		configuracionRestriccionesAcademicasGenerales = new ConfiguracionCargaRegularDTO();
 		try {
 			reglas = inscripcionService.obtenerReglasInscripcion();
 			configuracionGeneralCargaNuevoIngreso = inscripcionService.obtenerConfiguracionGeneralCargaNuevoIngreso();
 			configuracionesCargaNuevoIngreso = inscripcionService.obtenerConfiguracionesCargaNuevoIngreso();
 			planesDisponiblesCargaNuevoIngreso = inscripcionService.obtenerPlanesDisponiblesCargaNuevoIngreso();
+			configuracionGeneralCargaRegular = inscripcionService.obtenerConfiguracionGeneralCargaRegular();
+			configuracionesCargaRegular = inscripcionService.obtenerConfiguracionesCargaRegular();
+			planesDisponiblesCargaRegular = inscripcionService.obtenerPlanesDisponiblesCargaRegular();
+			configuracionRestriccionesAcademicasGenerales = inscripcionService
+					.obtenerConfiguracionRestriccionesAcademicasGenerales();
 		} catch (Exception e) {
 			logger.error("No fue posible consultar las reglas de inscripción", e);
 			mensajeError("No fue posible consultar las reglas de inscripción", e);
+		}
+	}
+
+	public void guardarCargaRegularGeneral() {
+		try {
+			inscripcionService.guardarConfiguracionGeneralCargaRegular(configuracionGeneralCargaRegular,
+					getUsuarioEnSession().getIdPersona());
+			consultarReglas();
+			mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada",
+					"La carga académica general para estudiantes regulares fue actualizada.");
+		} catch (Exception e) {
+			logger.error("No fue posible guardar la carga regular general", e);
+			mensajeError("No fue posible guardar la carga regular general", e);
+		}
+	}
+
+	public void agregarCargaRegular() {
+		if (idPlanNuevaConfiguracionRegular == null) {
+			mensaje(FacesMessage.SEVERITY_WARN, "Plan requerido", "Selecciona el plan al que se aplicará la regla.");
+			return;
+		}
+		try {
+			ConfiguracionCargaRegularDTO configuracion = inscripcionService
+					.obtenerConfiguracionCargaRegular(idPlanNuevaConfiguracionRegular);
+			configuracion.setActiva(Boolean.TRUE);
+			inscripcionService.guardarConfiguracionCargaRegular(configuracion, getUsuarioEnSession().getIdPersona());
+			idPlanNuevaConfiguracionRegular = null;
+			consultarReglas();
+			mensaje(FacesMessage.SEVERITY_INFO, "Regla agregada", "La configuración regular fue creada para el plan.");
+		} catch (Exception e) {
+			logger.error("No fue posible agregar la carga regular", e);
+			mensajeError("No fue posible agregar la carga regular", e);
+		}
+	}
+
+	public void guardarCargaRegular(ConfiguracionCargaRegularDTO configuracion) {
+		try {
+			inscripcionService.guardarConfiguracionCargaRegular(configuracion, getUsuarioEnSession().getIdPersona());
+			consultarReglas();
+			mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada", "La carga regular del plan fue actualizada.");
+		} catch (Exception e) {
+			logger.error("No fue posible guardar la carga regular", e);
+			mensajeError("No fue posible guardar la carga regular", e);
+		}
+	}
+
+	public void eliminarCargaRegular(ConfiguracionCargaRegularDTO configuracion) {
+		try {
+			inscripcionService.eliminarConfiguracionCargaRegular(configuracion);
+			consultarReglas();
+			mensaje(FacesMessage.SEVERITY_INFO, "Configuración eliminada",
+					"El plan vuelve a utilizar la regla general para estudiantes regulares.");
+		} catch (Exception e) {
+			logger.error("No fue posible eliminar la carga regular", e);
+			mensajeError("No fue posible eliminar la carga regular", e);
+		}
+	}
+
+	public void guardarRestriccionesAcademicasGenerales() {
+		try {
+			inscripcionService.guardarConfiguracionRestriccionesAcademicasGenerales(
+					configuracionRestriccionesAcademicasGenerales, getUsuarioEnSession().getIdPersona());
+			consultarReglas();
+			mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada",
+					"Las restricciones académicas generales fueron actualizadas.");
+		} catch (Exception e) {
+			logger.error("No fue posible guardar las restricciones académicas generales", e);
+			mensajeError("No fue posible guardar las restricciones académicas generales", e);
 		}
 	}
 
@@ -219,4 +302,14 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 	public void setUsernameNuevaConfiguracion(String username) { this.usernameNuevaConfiguracion = username; }
 	public ConfiguracionCargaNuevoIngresoDTO getConfiguracionGeneralCargaNuevoIngreso() { return configuracionGeneralCargaNuevoIngreso; }
 	public void setConfiguracionGeneralCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion) { this.configuracionGeneralCargaNuevoIngreso = configuracion; }
+	public ConfiguracionCargaRegularDTO getConfiguracionGeneralCargaRegular() { return configuracionGeneralCargaRegular; }
+	public void setConfiguracionGeneralCargaRegular(ConfiguracionCargaRegularDTO valor) { this.configuracionGeneralCargaRegular = valor; }
+	public List<ConfiguracionCargaRegularDTO> getConfiguracionesCargaRegular() { return configuracionesCargaRegular; }
+	public void setConfiguracionesCargaRegular(List<ConfiguracionCargaRegularDTO> valor) { this.configuracionesCargaRegular = valor; }
+	public List<ConfiguracionCargaRegularDTO> getPlanesDisponiblesCargaRegular() { return planesDisponiblesCargaRegular; }
+	public void setPlanesDisponiblesCargaRegular(List<ConfiguracionCargaRegularDTO> valor) { this.planesDisponiblesCargaRegular = valor; }
+	public Long getIdPlanNuevaConfiguracionRegular() { return idPlanNuevaConfiguracionRegular; }
+	public void setIdPlanNuevaConfiguracionRegular(Long valor) { this.idPlanNuevaConfiguracionRegular = valor; }
+	public ConfiguracionCargaRegularDTO getConfiguracionRestriccionesAcademicasGenerales() { return configuracionRestriccionesAcademicasGenerales; }
+	public void setConfiguracionRestriccionesAcademicasGenerales(ConfiguracionCargaRegularDTO valor) { this.configuracionRestriccionesAcademicasGenerales = valor; }
 }
