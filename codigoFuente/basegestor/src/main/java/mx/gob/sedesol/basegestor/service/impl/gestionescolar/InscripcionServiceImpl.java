@@ -14,6 +14,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignatura
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaIrregularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaRegularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
@@ -157,6 +158,44 @@ public class InscripcionServiceImpl implements InscripcionService {
 	@Transactional
 	public void eliminarConfiguracionCargaRegular(ConfiguracionCargaRegularDTO configuracion) {
 		inscripcionesRepository.eliminarConfiguracionCargaRegular(configuracion);
+	}
+
+	@Override
+	public ConfiguracionCargaIrregularDTO obtenerConfiguracionGeneralCargaIrregular() {
+		return inscripcionesRepository.obtenerConfiguracionGeneralCargaIrregular();
+	}
+
+	@Override
+	public List<ConfiguracionCargaIrregularDTO> obtenerConfiguracionesCargaIrregular() {
+		return inscripcionesRepository.obtenerConfiguracionesCargaIrregular();
+	}
+
+	@Override
+	public List<ConfiguracionCargaIrregularDTO> obtenerPlanesDisponiblesCargaIrregular() {
+		return inscripcionesRepository.obtenerPlanesDisponiblesCargaIrregular();
+	}
+
+	@Override
+	public ConfiguracionCargaIrregularDTO obtenerConfiguracionCargaIrregular(Long idPlan) {
+		return inscripcionesRepository.obtenerConfiguracionCargaIrregular(idPlan);
+	}
+
+	@Override
+	@Transactional
+	public void guardarConfiguracionGeneralCargaIrregular(ConfiguracionCargaIrregularDTO configuracion, Long idUsuario) {
+		inscripcionesRepository.guardarConfiguracionGeneralCargaIrregular(configuracion, idUsuario);
+	}
+
+	@Override
+	@Transactional
+	public void guardarConfiguracionCargaIrregular(ConfiguracionCargaIrregularDTO configuracion, Long idUsuario) {
+		inscripcionesRepository.guardarConfiguracionCargaIrregular(configuracion, idUsuario);
+	}
+
+	@Override
+	@Transactional
+	public void eliminarConfiguracionCargaIrregular(ConfiguracionCargaIrregularDTO configuracion) {
+		inscripcionesRepository.eliminarConfiguracionCargaIrregular(configuracion);
 	}
 
 	@Override

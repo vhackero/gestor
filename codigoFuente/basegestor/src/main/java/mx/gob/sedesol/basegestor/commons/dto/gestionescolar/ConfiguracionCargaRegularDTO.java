@@ -61,4 +61,24 @@ public class ConfiguracionCargaRegularDTO implements Serializable {
 	public void setSemestreInicialAntecedentes(Integer valor) { this.semestreInicialAntecedentes = valor; }
 	public Integer getSemestreFinalAntecedentes() { return semestreFinalAntecedentes; }
 	public void setSemestreFinalAntecedentes(Integer valor) { this.semestreFinalAntecedentes = valor; }
+
+	private Integer limiteReprobacionesPorMateria;
+	public Integer getLimiteReprobacionesPorMateria() { return limiteReprobacionesPorMateria; }
+	public void setLimiteReprobacionesPorMateria(Integer valor) { this.limiteReprobacionesPorMateria = valor; }
+
+	private Integer semestreMinimoElectivas;
+	public Integer getSemestreMinimoElectivas() { return semestreMinimoElectivas; }
+	public void setSemestreMinimoElectivas(Integer valor) { this.semestreMinimoElectivas = valor; }
+
+	private Integer primerSemestreOrigenElectivas;
+	public Integer getPrimerSemestreOrigenElectivas() { return primerSemestreOrigenElectivas; }
+	public void setPrimerSemestreOrigenElectivas(Integer valor) { this.primerSemestreOrigenElectivas = valor; }
+
+	private Integer segundoSemestreOrigenElectivas;
+	public Integer getSegundoSemestreOrigenElectivas() { return segundoSemestreOrigenElectivas; }
+	public void setSegundoSemestreOrigenElectivas(Integer valor) { this.segundoSemestreOrigenElectivas = valor; }
+
+	private Integer minimoOptativasPlanAsistente;
+	public Integer getMinimoOptativasPlanAsistente() { return minimoOptativasPlanAsistente; }
+	public void setMinimoOptativasPlanAsistente(Integer valor) { this.minimoOptativasPlanAsistente = valor; }
 }

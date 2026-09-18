@@ -200,8 +200,6 @@
 							<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaRegular.permitirSemestreAdyacente}" />
 							<h:outputLabel value="Mínimo de obligatorias:" />
 							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaRegular.minimoObligatorias}" size="4" />
-							<h:outputLabel value="Máximo de electivas por periodo (0 = espacios del plan):" />
-							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaRegular.maximoElectivasPorPeriodo}" size="4" />
 						</h:panelGrid>
 						<p:commandButton value="Guardar regla general de regulares" icon="fa fa-save"
 							action="#{configuracionRestriccionesInscripcionBean.guardarCargaRegularGeneral}" ajax="false" />
@@ -225,11 +223,50 @@
 						<p:column headerText="Avance anual"><p:selectBooleanCheckbox value="#{regular.restringirAvanceAnual}" /></p:column>
 						<p:column headerText="Semestre adyacente"><p:selectBooleanCheckbox value="#{regular.permitirSemestreAdyacente}" /></p:column>
 						<p:column headerText="Mínimo obligatorias"><p:inputText value="#{regular.minimoObligatorias}" size="4" /></p:column>
-						<p:column headerText="Máximo electivas"><p:inputText value="#{regular.maximoElectivasPorPeriodo}" size="4" /></p:column>
 						<p:column headerText="Acciones">
 							<p:commandButton value="Guardar" icon="fa fa-save" action="#{configuracionRestriccionesInscripcionBean.guardarCargaRegular(regular)}" ajax="false" />
 							<p:commandButton value="Eliminar" icon="fa fa-trash" action="#{configuracionRestriccionesInscripcionBean.eliminarCargaRegular(regular)}"
 								onclick="return confirm('¿Deseas eliminar esta regla específica?');" immediate="true" ajax="false" styleClass="btn-danger ml-1" />
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+
+				<p:panel header="Estudiantes irregulares - Carga académica y recuperación" styleClass="fondoPrimario mt-2">
+					<p class="help-block">Se evalúa la primera ruta aplicable: avance anual con alguna obligatoria reprobada; solo optativas reprobadas; concentración en un semestre ofertado; recuperación restante. Los umbrales de las rutas posteriores no se acumulan.</p>
+					<p class="help-block">Solo optativas reprobadas conserva su ruta independiente sin límite de cantidad. Las excepciones de nuevo ingreso y primer semestre pendiente se evalúan antes. El mínimo por periodo y el máximo de carga irregular conservan los límites existentes del plan.</p>
+					<p class="help-block">Cada regla por plan sustituye los valores generales. Desactivar esta regla omite sus filtros, marcado y mínimo de obligatorias; siguen aplicándose oferta, acreditaciones, intentos, seriación, límites de carga y restricciones generales.</p>
+					<p:panel header="Regla general para todos los planes" styleClass="mb-2">
+						<h:outputLabel value="Aplicar regla general:" />
+						<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaIrregular.activa}" styleClass="reglas-check" />
+						<f:subview id="irregularGeneral">
+							<ui:include src="camposCargaIrregular.xhtml">
+								<ui:param name="configuracionIrregular" value="#{configuracionRestriccionesInscripcionBean.configuracionGeneralCargaIrregular}" />
+							</ui:include>
+						</f:subview>
+						<p:commandButton value="Guardar regla general de irregulares" icon="fa fa-save"
+							action="#{configuracionRestriccionesInscripcionBean.guardarCargaIrregularGeneral}" ajax="false" />
+					</p:panel>
+					<h:panelGrid columns="3" cellpadding="5" styleClass="mb-2">
+						<h:outputLabel for="planNuevaReglaIrregular" value="Agregar regla para el plan:" />
+						<p:selectOneMenu id="planNuevaReglaIrregular" value="#{configuracionRestriccionesInscripcionBean.idPlanNuevaConfiguracionIrregular}">
+							<f:selectItem itemLabel="Selecciona un plan" itemValue="#{null}" noSelectionOption="true" />
+							<f:selectItems value="#{configuracionRestriccionesInscripcionBean.planesDisponiblesCargaIrregular}" var="plan" itemLabel="#{plan.nombrePlan}" itemValue="#{plan.idPlan}" />
+						</p:selectOneMenu>
+						<p:commandButton value="Agregar" icon="fa fa-plus" action="#{configuracionRestriccionesInscripcionBean.agregarCargaIrregular}" ajax="false" />
+					</h:panelGrid>
+					<p:dataTable value="#{configuracionRestriccionesInscripcionBean.configuracionesCargaIrregular}" var="irregular"
+						paginator="true" rows="5" emptyMessage="No existen reglas irregulares específicas por plan.">
+						<p:column headerText="Plan"><h:outputText value="#{irregular.nombrePlan}" /></p:column>
+						<p:column headerText="Aplicar"><p:selectBooleanCheckbox value="#{irregular.activa}" styleClass="reglas-check" /></p:column>
+						<p:column headerText="Parámetros de recuperación">
+							<f:subview id="irregularPlan">
+								<ui:include src="camposCargaIrregular.xhtml"><ui:param name="configuracionIrregular" value="#{irregular}" /></ui:include>
+							</f:subview>
+						</p:column>
+						<p:column headerText="Acciones">
+							<p:commandButton value="Guardar" icon="fa fa-save" action="#{configuracionRestriccionesInscripcionBean.guardarCargaIrregular(irregular)}" ajax="false" />
+							<p:commandButton value="Eliminar" icon="fa fa-trash" action="#{configuracionRestriccionesInscripcionBean.eliminarCargaIrregular(irregular)}"
+								immediate="true" ajax="false" styleClass="btn-danger ml-1" onclick="return confirm('¿Deseas eliminar esta regla específica? El plan volverá a la regla general.');" />
 						</p:column>
 					</p:dataTable>
 				</p:panel>
@@ -239,6 +276,31 @@
 					<h:panelGrid columns="2" cellpadding="5">
 						<h:outputLabel value="Aplicar restricciones:" />
 						<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.activa}" styleClass="reglas-check" />
+						<h:outputLabel value="Límite de reprobaciones por asignatura:" />
+						<h:panelGroup>
+							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.limiteReprobacionesPorMateria}" size="4" required="true" label="Límite de reprobaciones por asignatura"><f:validateLongRange minimum="1" /></p:inputText>
+							<small class="help-block">Se mantiene la autorización general para inscribir después de alcanzar este límite.</small>
+						</h:panelGroup>
+						<h:outputLabel value="Semestre mínimo de los espacios electivos:" />
+						<h:panelGroup>
+							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.semestreMinimoElectivas}" size="4" required="true" label="Semestre mínimo de los espacios electivos"><f:validateLongRange minimum="1" /></p:inputText>
+							<small class="help-block">Se aplica al conteo de espacios electivos del plan del estudiante.</small>
+						</h:panelGroup>
+						<h:outputLabel value="Primer semestre de origen para electivas:" />
+						<h:panelGroup>
+							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.primerSemestreOrigenElectivas}" size="4" required="true" label="Primer semestre de origen para electivas"><f:validateLongRange minimum="1" /></p:inputText>
+							<small class="help-block">Semestre de las obligatorias de otros planes que pueden configurarse como electivas.</small>
+						</h:panelGroup>
+						<h:outputLabel value="Segundo semestre de origen para electivas:" />
+						<h:panelGroup>
+							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.segundoSemestreOrigenElectivas}" size="4" required="true" label="Segundo semestre de origen para electivas"><f:validateLongRange minimum="1" /></p:inputText>
+							<small class="help-block">Segundo semestre elegible de otros planes; no representa un rango.</small>
+						</h:panelGroup>
+						<h:outputLabel value="Optativas requeridas para el diagnóstico del asistente:" />
+						<h:panelGroup>
+							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.minimoOptativasPlanAsistente}" size="4" required="true" label="Optativas requeridas para el diagnóstico del asistente"><f:validateLongRange minimum="0" /></p:inputText>
+							<small class="help-block">Determina las optativas pendientes del plan en el asistente; no impone una carga por periodo.</small>
+						</h:panelGroup>
 						<h:outputLabel value="Porcentaje mínimo para tramo final:" />
 						<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.porcentajeMinimoTramoFinal}" size="4" />
 						<h:outputLabel value="Semestre de inicio del tramo final:" />
@@ -252,6 +314,11 @@
 							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.semestreInicialAntecedentes}" size="4" />
 							<h:outputText value=" a " />
 							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.semestreFinalAntecedentes}" size="4" />
+						</h:panelGroup>
+						<h:outputLabel value="Máximo de electivas por periodo (todos los estudiantes):" />
+						<h:panelGroup>
+							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.maximoElectivasPorPeriodo}" size="4" />
+							<h:outputText value=" 0 conserva los espacios electivos disponibles del plan." />
 						</h:panelGroup>
 						<h:outputLabel value="Máximo de optativas por bloque:" />
 						<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.maximoOptativasPorBloque}" size="4" />

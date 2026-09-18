@@ -42,6 +42,8 @@ import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ObjetoCurricularEnum;
 import mx.gob.sedesol.basegestor.service.gestionescolar.AsistenteInscripcionService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionFacade;
 import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.FichaDescProgramaService;
@@ -51,14 +53,15 @@ import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService
 @Transactional(readOnly = true)
 public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionService {
 
-    private static final int MINIMO_OPTATIVAS_REQUERIDAS = 8;
-    private static final int TOTAL_REPROBADAS_RESTRICCION_SEVERA = 4;
     private static final double PROMEDIO_MINIMO_MAESTRIA = 8.0D;
     private static final double PROMEDIO_MINIMO_BECA = 8.5D;
     private static final double CALIFICACION_NO_PRESENTADA = 666.0D;
 
     @Autowired
     private InscripcionFacade inscripcionFacade;
+
+    @Autowired
+    private InscripcionService inscripcionService;
 
     @Autowired
     private FichaDescProgramaService fichaDescProgramaService;
@@ -128,7 +131,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             dto.setPorcentajeCreditosCompletados(estado.getPorcentajeCreditosCompletados());
             dto.setTotalReprobadasAcumuladas(Integer.valueOf(contarReprobadasReales(estado)));
             dto.setRestriccionCuatroOMasReprobadas(Boolean.valueOf(
-                    contarReprobadasReales(estado) >= TOTAL_REPROBADAS_RESTRICCION_SEVERA));
+                    contarReprobadasReales(estado) >= obtenerUmbralRecuperacionAsistente(contextoBase)));
             dto.setReglaCargaFijaNuevoIngreso(Boolean.valueOf(esReglaCargaFijaNuevoIngresoAplicable(contextoBase)));
         }
 
@@ -170,7 +173,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         }
 
         if (Boolean.TRUE.equals(dto.getRestriccionCuatroOMasReprobadas())) {
-            dto.getReglasActivas().add("Restricción por 4 o más UD reprobadas");
+            dto.getReglasActivas().add("Restricción por " + obtenerUmbralRecuperacionAsistente(contextoBase) + " o más UD reprobadas");
             dto.getPendientesCriticos().add("Acumulas " + valor(dto.getTotalReprobadasAcumuladas())
                     + " UD reprobadas; no deben habilitarse UD obligatorias nuevas mientras persista esa condición.");
         }
@@ -184,7 +187,9 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
         if (Boolean.TRUE.equals(dto.getReglaCargaFijaNuevoIngreso())) {
             dto.getReglasActivas().add("Carga fija de nuevo ingreso");
-            dto.getPendientesCriticos().add("Por tratarse de nuevo ingreso regular, la selección debe cerrarse con 4 obligatorias y 2 optativas.");
+            ConfiguracionCargaNuevoIngresoDTO configuracion = obtenerCargaNuevoIngreso(contextoBase);
+            dto.getPendientesCriticos().add("La carga configurada exige " + configuracion.getObligatoriasRequeridas()
+                    + " obligatorias y " + configuracion.getOptativasRequeridas() + " optativas.");
         }
 
         if (existeBajaParcialObligatoria(contextoBase)) {
@@ -531,7 +536,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         }
         if (cobertura.getOptativasObligatoriasPendientes() > 0) {
             dto.getPendientesRelevantes().add("Faltan " + cobertura.getOptativasObligatoriasPendientes()
-                    + " unidades didácticas optativas para cubrir el mínimo requerido de " + MINIMO_OPTATIVAS_REQUERIDAS + ".");
+                    + " unidades didácticas optativas para cubrir el mínimo requerido de " + inscripcionService.obtenerConfiguracionRestriccionesAcademicasGenerales().getMinimoOptativasPlanAsistente() + ".");
         }
         if (electivas > 0) {
             dto.getPendientesRelevantes().add("Quedan " + electivas + " unidades didácticas electivas pendientes y forman parte obligatoria del cierre del Programa Educativo.");
@@ -1116,8 +1121,8 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         if (debeBloquearPorCuatroOMasReprobadas(unidad, contextoBase)) {
             bloquearUnidadPorNormativa(unidad,
                     "RESTRICCION_4_O_MAS_REPROBADAS",
-                    "Bloqueada por 4 o más reprobadas",
-                    "Acumulas cuatro o más UD reprobadas; mientras persista esa condición no deben habilitarse UD obligatorias nuevas.",
+                    "Bloqueada por el umbral configurado de reprobadas",
+                    "Alcanzaste el umbral de recuperación del asistente; mientras persista esa condición no deben habilitarse UD obligatorias nuevas.",
                     "Regulariza primero las UD reprobadas ofertadas y completa tu carga académica con UD optativas cuando corresponda.");
             actualizada = true;
         }
@@ -1410,7 +1415,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
     private boolean debeBloquearPorCuatroOMasReprobadas(UnidadDecisionInscripcionDTO unidad, InscripcionContextoDTO contextoBase) {
         EstadoAcademicoDTO estado = contextoBase != null ? contextoBase.getEstadoAcademico() : null;
-        return calcularTotalReprobadasAcumuladas(estado) >= TOTAL_REPROBADAS_RESTRICCION_SEVERA
+        return calcularTotalReprobadasAcumuladas(estado) >= obtenerUmbralRecuperacionAsistente(contextoBase)
                 && !Boolean.TRUE.equals(unidad.getPrioritaria());
     }
 
@@ -1963,7 +1968,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         }
         if (unidad.getTipoUd() != null && InscripcionUtils.esMateriaObligatoria(unidad.getTipoUd())) {
             if (calcularTotalReprobadasProyectadas(contextoBase, enCursoPorId, asumirAcreditaEnCurso)
-                    >= TOTAL_REPROBADAS_RESTRICCION_SEVERA) {
+                    >= obtenerUmbralRecuperacionAsistente(contextoBase)) {
                 return false;
             }
             Integer anioPendiente = obtenerAnioObligatorioPendienteMasAntiguoProyectado(contextoBase, enCursoPorId,
@@ -2144,6 +2149,9 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
     private void validarRangosCarga(AsistenteInscripcionContextoDTO contexto, List<UnidadDecisionInscripcionDTO> seleccion,
             ResultadoSimulacionDTO resultado) {
+        if (esReglaCargaFijaNuevoIngresoAplicable(contexto.getContextoBase())) {
+            return;
+        }
         int total = seleccion.size();
 
         if (contexto.getCargaMinima() != null && total < contexto.getCargaMinima().intValue()) {
@@ -2171,23 +2179,24 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
     private void validarCargaFijaNuevoIngreso(AsistenteInscripcionContextoDTO contexto,
             List<UnidadDecisionInscripcionDTO> seleccion, ResultadoSimulacionDTO resultado) {
-        if (!Boolean.TRUE.equals(contexto.getReglaCargaFijaNuevoIngreso())) {
+        if (!esReglaCargaFijaNuevoIngresoAplicable(contexto.getContextoBase())) {
             return;
         }
 
+        ConfiguracionCargaNuevoIngresoDTO configuracion = obtenerCargaNuevoIngreso(contexto.getContextoBase());
         long obligatoriasSeleccionadas = contarSeleccionPorTipo(seleccion, ConstantesGestor.TEXTO_MATERIA_OBLIGATORIA);
         long optativasSeleccionadas = contarSeleccionPorTipo(seleccion, ConstantesGestor.TEXTO_MATERIA_OPTATIVA);
 
-        if (obligatoriasSeleccionadas != ConstantesGestor.CANT_MATERIAS_OBLIGATORIAS_EST_REGULAR_PRIMER_SEMESTRE
-                || optativasSeleccionadas != ConstantesGestor.CANT_MATERIAS_OPTATIVAS_EST_REGULAR_PRIMER_SEMESTRE) {
+        if (obligatoriasSeleccionadas != configuracion.getObligatoriasRequeridas()
+                || optativasSeleccionadas != configuracion.getOptativasRequeridas()) {
             resultado.getMotivos().add(new MotivoDecisionDTO(
                     "CARGA_FIJA_NUEVO_INGRESO_INVALIDA",
                     "ALTA",
                     "Carga fija de nuevo ingreso incumplida",
-                    "Para nuevo ingreso regular debes seleccionar "
-                            + ConstantesGestor.CANT_MATERIAS_OBLIGATORIAS_EST_REGULAR_PRIMER_SEMESTRE
+                    "Según la configuración de nuevo ingreso debes seleccionar "
+                            + configuracion.getObligatoriasRequeridas()
                             + " unidades didácticas obligatorias y "
-                            + ConstantesGestor.CANT_MATERIAS_OPTATIVAS_EST_REGULAR_PRIMER_SEMESTRE
+                            + configuracion.getOptativasRequeridas()
                             + " unidades didácticas optativas. La selección actual contiene "
                             + obligatoriasSeleccionadas + " obligatoria(s) y " + optativasSeleccionadas
                             + " optativa(s).",
@@ -2395,25 +2404,28 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         }
     }
 
+    private ConfiguracionCargaNuevoIngresoDTO obtenerCargaNuevoIngreso(InscripcionContextoDTO contextoBase) {
+        return inscripcionService.obtenerConfiguracionCargaNuevoIngreso(
+                contextoBase.getInscripcionPersona().getIdPlan(), contextoBase.getInscripcionPersona().getIdPersona());
+    }
+
+    private int obtenerUmbralRecuperacionAsistente(InscripcionContextoDTO contextoBase) {
+        return inscripcionService.obtenerConfiguracionCargaIrregular(
+                contextoBase.getInscripcionPersona().getIdPlan()).getMinReprobadasPriorizarAsistente();
+    }
+
     private boolean esReglaCargaFijaNuevoIngresoAplicable(InscripcionContextoDTO contextoBase) {
         if (contextoBase == null || contextoBase.getEstadoAcademico() == null) {
             return false;
         }
-
         EstadoAcademicoDTO estado = contextoBase.getEstadoAcademico();
-        if (!Boolean.TRUE.equals(estado.getEsNuevoIngreso()) || !Boolean.TRUE.equals(estado.getEsRegular())
-                || estado.getMateriasDisponibles() == null) {
+        boolean primerSemestrePendiente = Boolean.TRUE.equals(estado.getPrimerSemestrePendiente());
+        if (!Boolean.TRUE.equals(estado.getEsNuevoIngreso()) && !primerSemestrePendiente) {
             return false;
         }
-
-        long obligatoriasDisponibles = contarDisponiblesPorTipo(estado.getMateriasDisponibles(),
-                ConstantesGestor.TEXTO_MATERIA_OBLIGATORIA);
-        long totalDisponibles = estado.getMateriasDisponibles().size();
-        long cargaFijaRequerida = ConstantesGestor.CANT_MATERIAS_OBLIGATORIAS_EST_REGULAR_PRIMER_SEMESTRE
-                + ConstantesGestor.CANT_MATERIAS_OPTATIVAS_EST_REGULAR_PRIMER_SEMESTRE;
-
-        return obligatoriasDisponibles >= ConstantesGestor.CANT_MATERIAS_OBLIGATORIAS_EST_REGULAR_PRIMER_SEMESTRE
-                && totalDisponibles >= cargaFijaRequerida;
+        ConfiguracionCargaNuevoIngresoDTO configuracion = obtenerCargaNuevoIngreso(contextoBase);
+        return Boolean.TRUE.equals(configuracion.getActiva())
+                && (!primerSemestrePendiente || Boolean.TRUE.equals(configuracion.getForzarPrimerSemestrePendiente()));
     }
 
     private long contarDisponiblesPorTipo(List<InscripcionMateriasDTO> materiasDisponibles, String tipoPrograma) {
@@ -2755,7 +2767,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         }
 
         int optativasCubiertasCantidad = optativasCubiertas.size();
-        int optativasObligatoriasPendientes = Math.max(0, MINIMO_OPTATIVAS_REQUERIDAS - optativasCubiertasCantidad);
+        int optativasObligatoriasPendientes = Math.max(0, inscripcionService.obtenerConfiguracionRestriccionesAcademicasGenerales().getMinimoOptativasPlanAsistente() - optativasCubiertasCantidad);
         int optativasOpcionalesDisponibles = Math.max(0, totalOptativasPendientes - optativasObligatoriasPendientes);
 
         info.setOptativasCubiertas(optativasCubiertasCantidad);

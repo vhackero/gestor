@@ -1,0 +1,76 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core" xmlns:p="http://primefaces.org/ui">
+    <h:panelGrid columns="2" cellpadding="5">
+        <h:outputLabel for="maxReprobadasAvanceAnual" value="Máximo de reprobadas totales para avance anual:" />
+        <h:panelGroup>
+            <p:inputText id="maxReprobadasAvanceAnual" value="#{configuracionIrregular.maxReprobadasAvanceAnual}" size="4" required="true" label="Máximo de reprobadas totales para avance anual">
+                <f:validateLongRange minimum="1" />
+            </p:inputText>
+            <small class="help-block">Aplica cuando existe al menos una obligatoria reprobada.</small>
+        </h:panelGroup>
+        <h:outputLabel for="minReprobadasMismoSemestre" value="Restringir a un semestre a partir de reprobadas:" />
+        <h:panelGroup>
+            <p:inputText id="minReprobadasMismoSemestre" value="#{configuracionIrregular.minReprobadasMismoSemestre}" size="4" required="true" label="Restringir a un semestre a partir de reprobadas">
+                <f:validateLongRange minimum="1" />
+            </p:inputText>
+            <small class="help-block">Cuenta reprobadas de cualquier tipo concentradas en un mismo semestre ofertado.</small>
+        </h:panelGroup>
+        <h:outputLabel for="minReprobadasRestringirOptativas" value="Restringir optativas a partir de reprobadas totales:" />
+        <h:panelGroup>
+            <p:inputText id="minReprobadasRestringirOptativas" value="#{configuracionIrregular.minReprobadasRestringirOptativas}" size="4" required="true" label="Restringir optativas a partir de reprobadas totales">
+                <f:validateLongRange minimum="1" />
+            </p:inputText>
+            <small class="help-block">Solo se evalúa en la ruta restante de recuperación.</small>
+        </h:panelGroup>
+        <h:outputLabel for="minOptativasReprobadasRestringir" value="Restringir optativas a partir de optativas reprobadas:" />
+        <h:panelGroup>
+            <p:inputText id="minOptativasReprobadasRestringir" value="#{configuracionIrregular.minOptativasReprobadasRestringir}" size="4" required="true" label="Restringir optativas a partir de optativas reprobadas">
+                <f:validateLongRange minimum="1" />
+            </p:inputText>
+            <small class="help-block">Es una condición alternativa al total de reprobadas; solo en la ruta restante.</small>
+        </h:panelGroup>
+        <h:outputLabel for="minimoObligatorias" value="Mínimo de obligatorias seleccionadas:" />
+        <h:panelGroup>
+            <p:inputText id="minimoObligatorias" value="#{configuracionIrregular.minimoObligatorias}" size="4" required="true" label="Mínimo de obligatorias seleccionadas">
+                <f:validateLongRange minimum="0" />
+            </p:inputText>
+            <small class="help-block">Se exige cuando existen suficientes obligatorias disponibles. 0 desactiva este mínimo.</small>
+        </h:panelGroup>
+        <h:outputLabel for="permitirSemestreAdyacente" value="Permitir semestre complementario del mismo año:" />
+        <h:panelGroup>
+            <p:selectBooleanCheckbox id="permitirSemestreAdyacente" value="#{configuracionIrregular.permitirSemestreAdyacente}" />
+            <small class="help-block">Aplica al avance anual y al rango de optativas restringidas.</small>
+        </h:panelGroup>
+        <h:outputLabel for="permitirOptativasOtrosSemestresAvance" value="Permitir optativas de otros semestres durante el avance anual:" />
+        <h:panelGroup>
+            <p:selectBooleanCheckbox id="permitirOptativasOtrosSemestresAvance" value="#{configuracionIrregular.permitirOptativasOtrosSemestresAvance}" />
+            <small class="help-block">Solo aplica a la primera ruta, con pocas reprobadas y al menos una obligatoria.</small>
+        </h:panelGroup>
+        <h:outputLabel for="restringirOptativasPorRezago" value="Aplicar restricción de optativas en la ruta restante:" />
+        <h:panelGroup>
+            <p:selectBooleanCheckbox id="restringirOptativasPorRezago" value="#{configuracionIrregular.restringirOptativasPorRezago}" />
+            <small class="help-block">Al alcanzar cualquiera de sus umbrales, limita incluso optativas reprobadas al semestre de referencia y su complementario permitido.</small>
+        </h:panelGroup>
+        <h:outputLabel for="marcarReprobadasObligatorias" value="Exigir selección de obligatorias reprobadas:" />
+        <h:panelGroup>
+            <p:selectBooleanCheckbox id="marcarReprobadasObligatorias" value="#{configuracionIrregular.marcarReprobadasObligatorias}" />
+            <small class="help-block">Marca y bloquea su desmarcado, hasta el máximo de carga irregular existente.</small>
+        </h:panelGroup>
+        <h:outputLabel for="marcarReprobadasOptativas" value="Exigir selección de optativas reprobadas:" />
+        <h:panelGroup>
+            <p:selectBooleanCheckbox id="marcarReprobadasOptativas" value="#{configuracionIrregular.marcarReprobadasOptativas}" />
+            <small class="help-block">Marca y bloquea su desmarcado, compartiendo el máximo de carga irregular.</small>
+        </h:panelGroup>
+        <h:outputLabel for="marcarObligatoriasSemestreRestringido" value="Exigir todas las obligatorias del semestre restringido:" />
+        <h:panelGroup>
+            <p:selectBooleanCheckbox id="marcarObligatoriasSemestreRestringido" value="#{configuracionIrregular.marcarObligatoriasSemestreRestringido}" />
+            <small class="help-block">En la ruta de reprobadas concentradas, incluye también obligatorias pendientes que no están reprobadas.</small>
+        </h:panelGroup>
+        <h:outputLabel value="Reprobadas para priorizar recuperación en el asistente:" />
+        <h:panelGroup>
+            <p:inputText value="#{configuracionIrregular.minReprobadasPriorizarAsistente}" size="4" required="true" label="Umbral de reprobadas del asistente"><f:validateLongRange minimum="1" /></p:inputText>
+            <small class="help-block">Umbral del diagnóstico y proyección del asistente. No sustituye las rutas escalonadas de la oferta de inscripción.</small>
+        </h:panelGroup>
+    </h:panelGrid>
+</ui:composition>

@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
@@ -29,6 +30,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.CorreoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignaturasPorSemestreDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaIrregularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaRegularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
@@ -109,10 +111,62 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			throws InscripcionException {
 		validarAceptaTerminos(aceptaTerminos);
 		validarInscripcionPreviaAlFinalizar(contexto);
+		contexto = reconstruirSeleccionAlFinalizar(contexto);
 		validarLimiteReprobacionesParaFinalizar(contexto);
 		validarSeleccionMateriasSegunEstatusAcademico(contexto);
 		guardarInscripcion(contexto);
 		gestionarEnvioCorreoInscripcion(contexto);
+	}
+
+	/** Reevalúa la oferta y las reglas actuales antes de persistir la selección de la sesión. */
+	private InscripcionContextoDTO reconstruirSeleccionAlFinalizar(InscripcionContextoDTO anterior)
+			throws InscripcionException {
+		InscripcionContextoDTO actual = construirContextoInscripcion(anterior.obtenerIdPersona(), false);
+		validarYRestaurarSeleccionActual(anterior, actual);
+		return actual;
+	}
+
+	private void validarYRestaurarSeleccionActual(InscripcionContextoDTO anterior, InscripcionContextoDTO actual)
+			throws InscripcionException {
+		if (!Objects.equals(anterior.getInscripcionPersona().getIdPlan(), actual.getInscripcionPersona().getIdPlan())) {
+			throw new InscripcionException("Tu plan de estudios cambió. Actualiza la página para revisar tu inscripción.");
+		}
+		List<InscripcionMateriasDTO> disponibles = actual.getEstadoAcademico().getMateriasDisponibles();
+		Long procesoAnterior = anterior.obtenerIdProcesoInscripcionDesdeMateriasDisponibles();
+		if (disponibles.isEmpty() || disponibles.stream()
+				.anyMatch(materia -> !Objects.equals(procesoAnterior, materia.getIdProcesoInscripcion()))) {
+			throw new InscripcionException("La oferta o el proceso de inscripción cambió. Actualiza la página.");
+		}
+		List<InscripcionMateriasDTO> seleccionadas = anterior.obtenerMateriasSeleccionadas();
+		for (InscripcionMateriasDTO seleccionada : seleccionadas) {
+			if (disponibles.stream().noneMatch(materia -> mismaMateriaOfertada(materia, seleccionada))) {
+				throw new InscripcionException("La unidad didáctica " + seleccionada.getNombreTentativoPrograma()
+						+ " ya no está permitida para tu situación académica. Actualiza la página.");
+			}
+		}
+		for (InscripcionMateriasDTO materia : disponibles) {
+			boolean seleccionada = seleccionadas.stream().anyMatch(previa -> mismaMateriaOfertada(materia, previa));
+			if (Boolean.TRUE.equals(materia.getCheck()) && Boolean.TRUE.equals(materia.getDisabled())
+					&& !seleccionada) {
+				throw new InscripcionException("Debes incluir la unidad didáctica " + materia.getNombreTentativoPrograma()
+						+ " según tu situación académica actual. Actualiza la página.");
+			}
+			if (seleccionada && Boolean.TRUE.equals(materia.getDisabled()) && !Boolean.TRUE.equals(materia.getCheck())) {
+				throw new InscripcionException("La unidad didáctica " + materia.getNombreTentativoPrograma()
+						+ " no está habilitada para inscripción. Actualiza la página.");
+			}
+			materia.setCheck(seleccionada);
+		}
+	}
+
+	private boolean mismaMateriaOfertada(InscripcionMateriasDTO primera, InscripcionMateriasDTO segunda) {
+		// La equivalencia académica no autoriza sustituir la oferta elegida por otro programa o bloque.
+		return primera.getIdPrograma() != null && Objects.equals(primera.getIdPrograma(), segunda.getIdPrograma())
+				&& Objects.equals(primera.getIdPlan(), segunda.getIdPlan())
+				&& Objects.equals(primera.getIdProcesoInscripcion(), segunda.getIdProcesoInscripcion())
+				&& Objects.equals(primera.getPeriodo(), segunda.getPeriodo())
+				&& Objects.equals(primera.getEstructura(), segunda.getEstructura())
+				&& Objects.equals(primera.getSubestructura(), segunda.getSubestructura());
 	}
 
 	private void validarInscripcionPreviaAlFinalizar(InscripcionContextoDTO contexto)
@@ -563,9 +617,16 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			InscripcionContextoDTO contexto)
 			throws InscripcionException {
 
-		int minimoObligatorias = 2;
+		int minimoObligatorias;
 		if (esRegular(contexto)) {
 			ConfiguracionCargaRegularDTO configuracion = obtenerConfiguracionCargaRegular(
+					contexto.getInscripcionPersona().getIdPlan());
+			if (!Boolean.TRUE.equals(configuracion.getActiva())) {
+				return;
+			}
+			minimoObligatorias = configuracion.getMinimoObligatorias();
+		} else {
+			ConfiguracionCargaIrregularDTO configuracion = inscripcionService.obtenerConfiguracionCargaIrregular(
 					contexto.getInscripcionPersona().getIdPlan());
 			if (!Boolean.TRUE.equals(configuracion.getActiva())) {
 				return;
@@ -872,11 +933,11 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 				.orElseThrow(() -> new InscripcionException("No existe el proceso de inscripción"));
 	}
 
-	private Long obtenerIdProcesoInscripcion(List<InscripcionMateriasDTO> materiasOfertadas) {
-		if (!materiasOfertadas.isEmpty()) {
-			materiasOfertadas.get(0).getIdProcesoInscripcion();
+	private Long obtenerIdProcesoInscripcion(List<InscripcionMateriasDTO> materiasOfertadas) throws InscripcionException {
+		if (materiasOfertadas.isEmpty() || materiasOfertadas.get(0).getIdProcesoInscripcion() == null) {
+			throw new InscripcionException("No hay oferta disponible para identificar el proceso de inscripción.");
 		}
-		return 0l;
+		return materiasOfertadas.get(0).getIdProcesoInscripcion();
 	}
 
 	private String obtenerMensajeSeriacion(EstadoAcademicoDTO estadoAcademico) {
@@ -1061,7 +1122,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private Set<String> obtenerNombresMateriasReprobadasConLimiteAlcanzado(
 			List<InscripcionMateriasReprobadasDTO> materiasReprobadas) {
 
-		return materiasReprobadas.stream().filter(this::alcanzoLimiteReprobaciones)
+		int limite = obtenerLimiteReprobacionesPorMateria();
+		return materiasReprobadas.stream().filter(materia -> alcanzoLimiteReprobaciones(materia, limite))
 				.map(InscripcionMateriasReprobadasDTO::getNombrePrograma).map(this::normalizarNombreMateria)
 				.filter(nombre -> !nombre.isEmpty())
 				.collect(Collectors.toSet());
@@ -1225,12 +1287,16 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 		// Estudiantes irregulares que no son de nuevo ingreso
 		if (!esEstudianteNuevoIngreso && !esEstudianteRegular) {
-			// logger.info("Estudiantes irregulares que no son de nuevo ingreso");
+			ConfiguracionCargaIrregularDTO configuracion = inscripcionService.obtenerConfiguracionCargaIrregular(persona.getIdPlan());
+			if (!Boolean.TRUE.equals(configuracion.getActiva())) {
+				return materiasOfertadas;
+			}
+			// La primera condición aplicable determina la ruta; no acumular las posteriores.
 
 			// Las materias reprobadas se vuelven obligatorias en la lista de materias
 			// ofertadas
 			List<InscripcionMateriasDTO> materiasConReprobadasMarcadas = marcarMateriasOfertadasReprobadas(
-					materiasOfertadas, materiasReprobadas, limitesCargaAcademica);
+					materiasOfertadas, materiasReprobadas, limitesCargaAcademica, configuracion);
 
 			long cantidadMateriasReprobadasObligatorias = obtenerCantidadMateriasReprobadasObligatorias(
 					materiasReprobadas);
@@ -1239,10 +1305,9 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			// Regla para respetar el avance anual (Leer descripcion del metodo
 			// 'obtenerMateriasPorAvanceAnualIrregulares')
 			if (cantidadMateriasReprobadasObligatorias >= 1
-					&& cantidadMateriasReprobadasObligatorias <= ConstantesGestor.NUMERO_MAXIMO_MATERIAS_REPROBADAS
-					&& cantidadDeMateriasREprobadasTotales <= 3) {
-				logger.info("Estudiantes irregulares de a 1 a 3 reprobadas");
-				return obtenerMateriasPorAvanceAnualIrregulares(materiasConReprobadasMarcadas, materiasReprobadas);
+					&& cantidadDeMateriasREprobadasTotales <= configuracion.getMaxReprobadasAvanceAnual()) {
+				logger.info("Estudiante irregular: avance anual dentro del máximo configurado");
+				return obtenerMateriasPorAvanceAnualIrregulares(materiasConReprobadasMarcadas, materiasReprobadas, configuracion);
 			}
 
 			if (cantidadMateriasReprobadasObligatorias == 0) {
@@ -1251,17 +1316,17 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 						persona);
 			}
 
-			// Regla cuando el estudiante reprueba mas de 4 materias del mismo semestre
+			// Concentración de reprobadas en un semestre ofertado (umbral inclusivo).
 			Map.Entry<String, Integer> semestreConMasReprobadas = buscarSemestreConMasReprobadas(materiasReprobadas);
 			if (estaSemestreDentroDeMateriasOfertadas(semestreConMasReprobadas, materiasConReprobadasMarcadas)
-					&& semestreConMasReprobadas.getValue() > ConstantesGestor.NUMERO_MAXIMO_MATERIAS_REPROBADAS) {
-				logger.info("Estudiantes irregulares con más de 4 asignaturas reprobas en un semestre");
-				return filtrarPorSemestreUOptativas(materiasConReprobadasMarcadas, semestreConMasReprobadas.getKey());
+					&& semestreConMasReprobadas.getValue() >= configuracion.getMinReprobadasMismoSemestre()) {
+				logger.info("Estudiante irregular: reprobadas concentradas en un semestre ofertado");
+				return filtrarPorSemestreUOptativas(materiasConReprobadasMarcadas, semestreConMasReprobadas.getKey(), configuracion);
 			}
 
-			logger.info("Estudiantes irregulare con 4 o más reprobadas");
-			// Regla cuando el estudiante reprueba 4 o mas materias de diferentes semestres
-			return obtenerMateriasReprobadasUOptativas(materiasConReprobadasMarcadas, materiasReprobadas);
+			logger.info("Estudiante irregular: ruta restante de recuperación");
+			// Recuperación restante: reprobadas y optativas, con sus propios umbrales.
+			return obtenerMateriasReprobadasUOptativas(materiasConReprobadasMarcadas, materiasReprobadas, configuracion);
 		}
 		return Collections.emptyList();
 	}
@@ -1352,27 +1417,29 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	}
 
 	private List<InscripcionMateriasDTO> obtenerMateriasReprobadasUOptativas(
-			List<InscripcionMateriasDTO> materiasOfertadas, List<InscripcionMateriasReprobadasDTO> materiasReprobadas) {
+			List<InscripcionMateriasDTO> materiasOfertadas, List<InscripcionMateriasReprobadasDTO> materiasReprobadas,
+			ConfiguracionCargaIrregularDTO configuracion) {
 
-		Set<String> clavesMateriasReprobadas = materiasReprobadas.stream()
-				.map(InscripcionMateriasReprobadasDTO::getClavePrograma).collect(Collectors.toSet());
+		Predicate<InscripcionMateriasDTO> esReprobada = crearComparacionMateriasReprobadas(materiasReprobadas);
 
 		List<InscripcionMateriasDTO> materias = materiasOfertadas.stream()
-				.filter(esMateriaReprobadaUOptativa(clavesMateriasReprobadas)).collect(Collectors.toList());
+				.filter(esReprobada.or(materia -> InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma()))).collect(Collectors.toList());
 
 		long cantidadMateriasReprobadasOptativas = materiasReprobadas.stream()
 				.filter(m -> InscripcionUtils.esMateriaOptativa(m.getTipoPrograma())).count();
 
-		if (materiasReprobadas.size() > ConstantesGestor.CANTIDAD_MAXIMA_MATERIAS_REPROBADAS
-				|| cantidadMateriasReprobadasOptativas >= ConstantesGestor.CANTIDAD_MAXIMA_MATERIAS_REPROBADAS_OPTATIVAS) {
-			return limitarMateriasOptativas(materias, materiasReprobadas);
+		if (Boolean.TRUE.equals(configuracion.getRestringirOptativasPorRezago())
+				&& (materiasReprobadas.size() >= configuracion.getMinReprobadasRestringirOptativas()
+				|| cantidadMateriasReprobadasOptativas >= configuracion.getMinOptativasReprobadasRestringir())) {
+			return limitarMateriasOptativas(materias, materiasReprobadas, configuracion);
 		}
 
 		return materias;
 	}
 
 	private List<InscripcionMateriasDTO> limitarMateriasOptativas(List<InscripcionMateriasDTO> materias,
-			List<InscripcionMateriasReprobadasDTO> materiasReprobadas) {
+			List<InscripcionMateriasReprobadasDTO> materiasReprobadas,
+			ConfiguracionCargaIrregularDTO configuracion) {
 
 		Optional<String> optSemestreReprobado = buscarSemestreReprobadoMasAntiguo(materiasReprobadas);
 		if (!optSemestreReprobado.isPresent()) {
@@ -1385,7 +1452,9 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		return materias.stream().filter(materia -> {
 			if (InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma())) {
 				int semestreMateria = InscripcionUtils.obtenerNumeroSemestre(materia.getEstructura());
-				if (semestreMateria != numeroSemestreReprobado && semestreMateria != numeroSemestreAdyacente) {
+				if (semestreMateria != numeroSemestreReprobado
+						&& (!Boolean.TRUE.equals(configuracion.getPermitirSemestreAdyacente())
+								|| semestreMateria != numeroSemestreAdyacente)) {
 					return false;
 				}
 			}
@@ -1393,17 +1462,23 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		}).collect(Collectors.toList());
 	}
 
-	private Predicate<? super InscripcionMateriasDTO> esMateriaReprobadaUOptativa(
-			Set<String> clavesMateriasReprobadas) {
-		return materia -> clavesMateriasReprobadas.contains(materia.getClavePrograma())
-				|| InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma());
+	private Predicate<InscripcionMateriasDTO> crearComparacionMateriasReprobadas(
+			List<InscripcionMateriasReprobadasDTO> materiasReprobadas) {
+		Set<String> claves = materiasReprobadas.stream().map(InscripcionMateriasReprobadasDTO::getClavePrograma)
+				.filter(clave -> clave != null && !clave.trim().isEmpty()).collect(Collectors.toSet());
+		Set<String> nombres = materiasReprobadas.stream().map(InscripcionMateriasReprobadasDTO::getNombrePrograma)
+				.map(this::normalizarNombreMateria).filter(nombre -> !nombre.isEmpty()).collect(Collectors.toSet());
+		return materia -> claves.contains(materia.getClavePrograma())
+				|| nombres.contains(normalizarNombreMateria(materia.getNombreTentativoPrograma()));
 	}
 
 	private List<InscripcionMateriasDTO> filtrarPorSemestreUOptativas(
-			List<InscripcionMateriasDTO> materiasConReprobadasMarcadas, String semestreConMasReprobadas) {
+			List<InscripcionMateriasDTO> materiasConReprobadasMarcadas, String semestreConMasReprobadas,
+			ConfiguracionCargaIrregularDTO configuracion) {
 		return materiasConReprobadasMarcadas.stream()
 				.filter(materia -> materia.getEstructura().equalsIgnoreCase(semestreConMasReprobadas)).map(materia -> {
-					if (materia.getEstructura().equalsIgnoreCase(semestreConMasReprobadas)
+					if (Boolean.TRUE.equals(configuracion.getMarcarObligatoriasSemestreRestringido())
+							&& materia.getEstructura().equalsIgnoreCase(semestreConMasReprobadas)
 							&& materia.getTipoPrograma().equalsIgnoreCase(ConstantesGestor.TEXTO_MATERIA_OBLIGATORIA)) {
 						materia.setCheck(Boolean.TRUE);
 						materia.setDisabled(Boolean.TRUE);
@@ -1467,7 +1542,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	 * Si el alumno reprobó en un semestre X, SOLO puede inscribir:
 	 *  - materias del mismo semestre X
 	 *  - materias del semestre complementario del mismo año (X par ⇒ X-1, X non ⇒ X+1)
-	 *  - además SIEMPRE se permiten las optativas.
+	 *  - las optativas de otros semestres y el complementario dependen de la configuración.
 	 *
 	 * Si no existe semestre reprobado, no se aplica filtro.
 	 * </pre>
@@ -1477,7 +1552,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	 * @return
 	 */
 	private List<InscripcionMateriasDTO> obtenerMateriasPorAvanceAnualIrregulares(
-			List<InscripcionMateriasDTO> materiasOfertadas, List<InscripcionMateriasReprobadasDTO> materiasReprobadas) {
+			List<InscripcionMateriasDTO> materiasOfertadas, List<InscripcionMateriasReprobadasDTO> materiasReprobadas,
+			ConfiguracionCargaIrregularDTO configuracion) {
 
 		Optional<String> optSemestreReprobado = buscarSemestreReprobadoMasAntiguo(materiasReprobadas);
 		if (!optSemestreReprobado.isPresent()) {
@@ -1487,7 +1563,14 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		int numeroSemestreReprobado = InscripcionUtils.obtenerNumeroSemestre(optSemestreReprobado.get());
 		int numeroSemestreAdyacente = obtenerNumeroSemestreAdyacente(numeroSemestreReprobado);
 
-		return obtenerMateriasPermitidas(materiasOfertadas, numeroSemestreReprobado, numeroSemestreAdyacente);
+		return materiasOfertadas.stream().filter(materia -> {
+			int semestre = InscripcionUtils.obtenerNumeroSemestre(materia.getEstructura());
+			return semestre == numeroSemestreReprobado
+					|| (Boolean.TRUE.equals(configuracion.getPermitirSemestreAdyacente()) && semestre == numeroSemestreAdyacente)
+					|| (Boolean.TRUE.equals(configuracion.getPermitirOptativasOtrosSemestresAvance())
+							&& InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma()))
+					|| InscripcionUtils.esMateriaElectiva(materia.getTipoPrograma());
+		}).collect(Collectors.toList());
 	}
 
 	private Optional<String> buscarSemestreReprobadoMasAntiguo(
@@ -1515,27 +1598,24 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 	private List<InscripcionMateriasDTO> marcarMateriasOfertadasReprobadas(
 			List<InscripcionMateriasDTO> materiasOfertadas, List<InscripcionMateriasReprobadasDTO> materiasReprobadas,
-			LimitesCargaAcademicaDTO limitesCargaAcademica) {
+			LimitesCargaAcademicaDTO limitesCargaAcademica, ConfiguracionCargaIrregularDTO configuracion) {
 
 		int maxReprobadasPermitidasIrregulares = Integer.valueOf(limitesCargaAcademica.getMaxProgramasIrregulares());
 
-		// El nombre es la equivalencia académica entre asignaturas de distintos planes.
-		Set<String> nombresMateriasReprobadas = materiasReprobadas.stream()
-				.map(InscripcionMateriasReprobadasDTO::getNombrePrograma).map(this::normalizarNombreMateria)
-				.filter(nombre -> !nombre.isEmpty())
-				.collect(Collectors.toSet());
+		Predicate<InscripcionMateriasDTO> esReprobada = crearComparacionMateriasReprobadas(materiasReprobadas);
 
 		int cantidadMateriasMarcadas = 0;
 
 		for (InscripcionMateriasDTO materia : materiasOfertadas) {
-			boolean estaReprobada = nombresMateriasReprobadas
-					.contains(normalizarNombreMateria(materia.getNombreTentativoPrograma()));
-			if (estaReprobada && !InscripcionUtils.esMateriaElectiva(materia.getTipoPrograma())
+			boolean estaReprobada = esReprobada.test(materia);
+			boolean exigirSeleccion = (InscripcionUtils.esMateriaObligatoria(materia.getTipoPrograma())
+					&& Boolean.TRUE.equals(configuracion.getMarcarReprobadasObligatorias()))
+					|| (InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma())
+					&& Boolean.TRUE.equals(configuracion.getMarcarReprobadasOptativas()));
+			if (estaReprobada && exigirSeleccion
 					&& cantidadMateriasMarcadas < maxReprobadasPermitidasIrregulares) {
 				materia.setCheck(Boolean.TRUE);
-				// if (InscripcionUtils.esMateriaObligatoria(materia.getTipoPrograma())) {
 				materia.setDisabled(Boolean.TRUE);
-				// }
 				cantidadMateriasMarcadas++;
 			}
 		}
@@ -1810,20 +1890,25 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 		String mensaje = String.format(
 				"Estimad(a/o) estudiante, ha alcanzado el límite de %d reprobaciones en %s%s. %s",
-				ConstantesGestor.LIMITE_REPROBACIONES_POR_MATERIA, prefijoMateria, materiasFormateadas, resultado);
+				obtenerLimiteReprobacionesPorMateria(), prefijoMateria, materiasFormateadas, resultado);
 
 		return mensaje;
 	}
 
 	private List<String> obtenerNombresMateriasQueAlcanzaronLimiteReprobaciones(
 			List<InscripcionMateriasReprobadasDTO> materias) {
-		return materias.stream().filter(this::alcanzoLimiteReprobaciones)
+		int limite = obtenerLimiteReprobacionesPorMateria();
+		return materias.stream().filter(materia -> alcanzoLimiteReprobaciones(materia, limite))
 				.map(InscripcionMateriasReprobadasDTO::getNombrePrograma).collect(Collectors.toList());
 	}
 
-	private boolean alcanzoLimiteReprobaciones(InscripcionMateriasReprobadasDTO materia) {
+	private int obtenerLimiteReprobacionesPorMateria() {
+		return obtenerConfiguracionRestriccionesAcademicasGenerales().getLimiteReprobacionesPorMateria();
+	}
+
+	private boolean alcanzoLimiteReprobaciones(InscripcionMateriasReprobadasDTO materia, int limite) {
 		return materia != null && materia.getIntentosReprobados() != null
-				&& materia.getIntentosReprobados() >= ConstantesGestor.LIMITE_REPROBACIONES_POR_MATERIA;
+				&& materia.getIntentosReprobados() >= limite;
 	}
 
 	private boolean permiteInscripcionTrasLimiteReprobadas() {
@@ -1843,14 +1928,14 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private ResultadoElectivasDTO procesarMateriasElectivas(List<InscripcionMateriasDTO> materiasOfertadas,
 			InscripcionPersonaDTO persona, Date fechaActual) {
 		if (!puedeCursarMateriasElectivas(materiasOfertadas)) {
-			return new ResultadoElectivasDTO(materiasOfertadas, 0L);
+			return new ResultadoElectivasDTO(excluirMateriasElectivas(materiasOfertadas), 0L);
 		}
 		Long cantidadMaximaMateriasElectivas = contarMateriasElectivasConSemestreValido(materiasOfertadas);
-		ConfiguracionCargaRegularDTO configuracionRegular = obtenerConfiguracionCargaRegular(persona.getIdPlan());
-		if (Boolean.TRUE.equals(configuracionRegular.getActiva())
-				&& configuracionRegular.getMaximoElectivasPorPeriodo() > 0) {
+		ConfiguracionCargaRegularDTO configuracionGeneral = obtenerConfiguracionRestriccionesAcademicasGenerales();
+		if (Boolean.TRUE.equals(configuracionGeneral.getActiva())
+				&& configuracionGeneral.getMaximoElectivasPorPeriodo() > 0) {
 			cantidadMaximaMateriasElectivas = Math.min(cantidadMaximaMateriasElectivas,
-					configuracionRegular.getMaximoElectivasPorPeriodo().longValue());
+					configuracionGeneral.getMaximoElectivasPorPeriodo().longValue());
 		}
 		List<InscripcionMateriasDTO> materiasOfertadasSinElectivas = excluirMateriasElectivas(materiasOfertadas);
 		List<InscripcionMateriasDTO> materiasElectivasOtrosPlanes = obtenerMateriasElectivasDeOtrosPlanes(persona,
@@ -1875,8 +1960,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private List<InscripcionMateriasDTO> obtenerMateriasElectivasDeOtrosPlanes(InscripcionPersonaDTO infoPersona,
 			Date fechaActual) {
 		return inscripcionService.obtenerMateriasElectivasDeOtrosPlanes(infoPersona.getIdPlan(), fechaActual,
-				infoPersona.getIdConvocatoria(), ConstantesGestor.NUMERO_SEMESTRE_CINCO,
-				ConstantesGestor.NUMERO_SEMESTRE_SEIS);
+				infoPersona.getIdConvocatoria(), obtenerConfiguracionRestriccionesAcademicasGenerales().getPrimerSemestreOrigenElectivas().toString(),
+				obtenerConfiguracionRestriccionesAcademicasGenerales().getSegundoSemestreOrigenElectivas().toString());
 	}
 
 	private List<InscripcionMateriasDTO> excluirMateriasElectivas(List<InscripcionMateriasDTO> materiasOfertadas) {
@@ -1886,15 +1971,17 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	}
 
 	private boolean puedeCursarMateriasElectivas(List<InscripcionMateriasDTO> materiasOfertadas) {
+		int semestreMinimo = obtenerConfiguracionRestriccionesAcademicasGenerales().getSemestreMinimoElectivas();
 		return materiasOfertadas.stream()
 				.anyMatch(materia -> InscripcionUtils.esMateriaElectiva(materia.getTipoPrograma())
-						&& InscripcionUtils.esSemestreValidoMateriaElectiva(materia.getEstructura()));
+						&& InscripcionUtils.esSemestreValidoMateriaElectiva(materia.getEstructura(), semestreMinimo));
 	}
 
 	private long contarMateriasElectivasConSemestreValido(List<InscripcionMateriasDTO> materiasOfertadas) {
+		int semestreMinimo = obtenerConfiguracionRestriccionesAcademicasGenerales().getSemestreMinimoElectivas();
 		return materiasOfertadas.stream()
 				.filter(materia -> InscripcionUtils.esMateriaElectiva(materia.getTipoPrograma())
-						&& InscripcionUtils.esSemestreValidoMateriaElectiva(materia.getEstructura()))
+						&& InscripcionUtils.esSemestreValidoMateriaElectiva(materia.getEstructura(), semestreMinimo))
 				.count();
 	}
 

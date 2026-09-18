@@ -8,6 +8,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignatura
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaIrregularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaRegularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
@@ -133,6 +134,20 @@ public interface InscripcionService {
 	void guardarConfiguracionCargaRegular(ConfiguracionCargaRegularDTO configuracion, Long idUsuario);
 
 	void eliminarConfiguracionCargaRegular(ConfiguracionCargaRegularDTO configuracion);
+
+	ConfiguracionCargaIrregularDTO obtenerConfiguracionGeneralCargaIrregular();
+
+	List<ConfiguracionCargaIrregularDTO> obtenerConfiguracionesCargaIrregular();
+
+	List<ConfiguracionCargaIrregularDTO> obtenerPlanesDisponiblesCargaIrregular();
+
+	ConfiguracionCargaIrregularDTO obtenerConfiguracionCargaIrregular(Long idPlan);
+
+	void guardarConfiguracionGeneralCargaIrregular(ConfiguracionCargaIrregularDTO configuracion, Long idUsuario);
+
+	void guardarConfiguracionCargaIrregular(ConfiguracionCargaIrregularDTO configuracion, Long idUsuario);
+
+	void eliminarConfiguracionCargaIrregular(ConfiguracionCargaIrregularDTO configuracion);
 
 	ConfiguracionCargaRegularDTO obtenerConfiguracionRestriccionesAcademicasGenerales();
 

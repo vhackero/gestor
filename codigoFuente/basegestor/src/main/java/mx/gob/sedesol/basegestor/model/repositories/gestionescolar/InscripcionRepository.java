@@ -23,6 +23,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignatura
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaIrregularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaRegularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
@@ -1353,8 +1354,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "AND SUBSTRING_INDEX(TRIM(tmc2.nombre), ' ', -1) IN (:semestreCinco, :semestreSeis) "
 				+ "ORDER BY tp.nombre, tmc2.nombre, tfd.nombre_tentativo";
 		List<Object[]> rows = entityManager.createNativeQuery(sql).setParameter("idProceso", idProcesoInscripcion)
-				.setParameter("semestreCinco", ConstantesGestor.NUMERO_SEMESTRE_CINCO)
-				.setParameter("semestreSeis", ConstantesGestor.NUMERO_SEMESTRE_SEIS)
+				.setParameter("semestreCinco", obtenerConfiguracionRestriccionesAcademicasGenerales().getPrimerSemestreOrigenElectivas().toString())
+				.setParameter("semestreSeis", obtenerConfiguracionRestriccionesAcademicasGenerales().getSegundoSemestreOrigenElectivas().toString())
 				.getResultList();
 		List<ConfiguracionElectivaDTO> resultado = new ArrayList<>();
 		for (Object[] row : rows) {
@@ -1922,8 +1923,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ activo + " AS activo_regla,"
 				+ "MAX(CASE WHEN p.clave_parametro='RESTRINGIR_AVANCE_ANUAL' THEN " + valor + " END) AS restringir_avance_anual,"
 				+ "MAX(CASE WHEN p.clave_parametro='PERMITIR_SEMESTRE_ADYACENTE' THEN " + valor + " END) AS permitir_semestre_adyacente,"
-				+ "MAX(CASE WHEN p.clave_parametro='MINIMO_OBLIGATORIAS' THEN " + valor + " END) AS minimo_obligatorias,"
-				+ "MAX(CASE WHEN p.clave_parametro='MAXIMO_ELECTIVAS_POR_PERIODO' THEN " + valor + " END) AS maximo_electivas_periodo "
+				+ "MAX(CASE WHEN p.clave_parametro='MINIMO_OBLIGATORIAS' THEN " + valor + " END) AS minimo_obligatorias "
 				+ origen + "JOIN cat_parametros_regla_inscripcion p ON p.clave_regla=cri.clave "
 				+ unionRegla + unionValores + where + group + (soloConfiguradas ? "ORDER BY tp.nombre" : "");
 	}
@@ -1938,7 +1938,6 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setRestringirAvanceAnual(obtenerBooleanoConfiguracion(row[5], "RESTRINGIR_AVANCE_ANUAL", "carga regular"));
 		dto.setPermitirSemestreAdyacente(obtenerBooleanoConfiguracion(row[6], "PERMITIR_SEMESTRE_ADYACENTE", "carga regular"));
 		dto.setMinimoObligatorias(obtenerEnteroConfiguracion(row[7], "MINIMO_OBLIGATORIAS", "carga regular"));
-		dto.setMaximoElectivasPorPeriodo(obtenerEnteroConfiguracion(row[8], "MAXIMO_ELECTIVAS_POR_PERIODO", "carga regular"));
 		return dto;
 	}
 
@@ -1949,7 +1948,6 @@ public class InscripcionRepository implements IinscripcionRepository {
 		guardarValorDefaultRegla("CARGA_ESTUDIANTE_REGULAR", "RESTRINGIR_AVANCE_ANUAL", booleano(configuracion.getRestringirAvanceAnual()));
 		guardarValorDefaultRegla("CARGA_ESTUDIANTE_REGULAR", "PERMITIR_SEMESTRE_ADYACENTE", booleano(configuracion.getPermitirSemestreAdyacente()));
 		guardarValorDefaultRegla("CARGA_ESTUDIANTE_REGULAR", "MINIMO_OBLIGATORIAS", configuracion.getMinimoObligatorias().toString());
-		guardarValorDefaultRegla("CARGA_ESTUDIANTE_REGULAR", "MAXIMO_ELECTIVAS_POR_PERIODO", configuracion.getMaximoElectivasPorPeriodo().toString());
 	}
 
 	@Override
@@ -1962,7 +1960,6 @@ public class InscripcionRepository implements IinscripcionRepository {
 		guardarValorReglaPlan("CARGA_ESTUDIANTE_REGULAR", configuracion.getIdPlan(), "RESTRINGIR_AVANCE_ANUAL", booleano(configuracion.getRestringirAvanceAnual()), idUsuario);
 		guardarValorReglaPlan("CARGA_ESTUDIANTE_REGULAR", configuracion.getIdPlan(), "PERMITIR_SEMESTRE_ADYACENTE", booleano(configuracion.getPermitirSemestreAdyacente()), idUsuario);
 		guardarValorReglaPlan("CARGA_ESTUDIANTE_REGULAR", configuracion.getIdPlan(), "MINIMO_OBLIGATORIAS", configuracion.getMinimoObligatorias().toString(), idUsuario);
-		guardarValorReglaPlan("CARGA_ESTUDIANTE_REGULAR", configuracion.getIdPlan(), "MAXIMO_ELECTIVAS_POR_PERIODO", configuracion.getMaximoElectivasPorPeriodo().toString(), idUsuario);
 	}
 
 	@Override
@@ -1977,9 +1974,208 @@ public class InscripcionRepository implements IinscripcionRepository {
 	}
 
 	private void validarConfiguracionRegular(ConfiguracionCargaRegularDTO configuracion) {
-		if (configuracion.getMinimoObligatorias() == null || configuracion.getMinimoObligatorias() < 0
-				|| configuracion.getMaximoElectivasPorPeriodo() == null || configuracion.getMaximoElectivasPorPeriodo() < 0) {
+		if (configuracion.getMinimoObligatorias() == null || configuracion.getMinimoObligatorias() < 0) {
 			throw new IllegalArgumentException("Los límites de carga regular no pueden ser negativos");
+		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public ConfiguracionCargaIrregularDTO obtenerConfiguracionGeneralCargaIrregular() {
+		String sql = construirConsultaConfiguracionIrregular(false, false);
+		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
+		if (resultados.isEmpty()) {
+			throw new IllegalArgumentException("No existe la regla general CARGA_ESTUDIANTE_IRREGULAR");
+		}
+		return mapearConfiguracionIrregular(resultados.get(0));
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<ConfiguracionCargaIrregularDTO> obtenerConfiguracionesCargaIrregular() {
+		return ((List<Object[]>) entityManager.createNativeQuery(construirConsultaConfiguracionIrregular(true, true))
+				.getResultList()).stream().map(this::mapearConfiguracionIrregular).collect(Collectors.toList());
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<ConfiguracionCargaIrregularDTO> obtenerPlanesDisponiblesCargaIrregular() {
+		String sql = "SELECT tp.id_plan AS id_plan,tp.nombre AS nombre_plan,"
+				+ "cri.nombre AS nombre_regla,cri.descripcion AS descripcion_regla FROM tbl_planes tp "
+				+ "JOIN cat_reglas_inscripcion cri ON cri.clave='CARGA_ESTUDIANTE_IRREGULAR' ORDER BY tp.nombre";
+		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
+		return resultados.stream().map(row -> {
+			ConfiguracionCargaIrregularDTO dto = new ConfiguracionCargaIrregularDTO();
+			dto.setIdPlan(getLongValue(row[0]));
+			dto.setNombrePlan((String) row[1]);
+			dto.setNombreRegla((String) row[2]);
+			dto.setDescripcionRegla((String) row[3]);
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public ConfiguracionCargaIrregularDTO obtenerConfiguracionCargaIrregular(Long idPlan) {
+		List<Object[]> resultados = entityManager.createNativeQuery(construirConsultaConfiguracionIrregular(true, false))
+				.setParameter("idPlan", idPlan).getResultList();
+		if (resultados.isEmpty()) {
+			throw new IllegalArgumentException("No existe configuración de carga irregular para el plan " + idPlan);
+		}
+		return mapearConfiguracionIrregular(resultados.get(0));
+	}
+
+	private String construirConsultaConfiguracionIrregular(boolean incluirPlan, boolean soloConfiguradas) {
+		String camposPlan = incluirPlan ? "tp.id_plan AS id_plan,tp.nombre AS nombre_plan,"
+				: "CAST(NULL AS SIGNED) AS id_plan,CAST(NULL AS CHAR) AS nombre_plan,";
+		String origen = incluirPlan
+				? "FROM tbl_planes tp JOIN cat_reglas_inscripcion cri ON cri.clave='CARGA_ESTUDIANTE_IRREGULAR' "
+				: "FROM cat_reglas_inscripcion cri ";
+		String unionRegla = incluirPlan
+				? (soloConfiguradas
+						? "JOIN rel_regla_inscripcion_plan rrip ON rrip.clave_regla=cri.clave AND rrip.id_plan=tp.id_plan "
+						: "LEFT JOIN rel_regla_inscripcion_plan rrip ON rrip.clave_regla=cri.clave AND rrip.id_plan=tp.id_plan ")
+				: "";
+		String unionValores = incluirPlan
+				? "LEFT JOIN rel_valor_parametro_regla_plan rv ON rv.clave_regla=cri.clave AND rv.id_plan=tp.id_plan AND rv.clave_parametro=p.clave_parametro "
+				: "";
+		String valor = incluirPlan ? "COALESCE(rv.valor,p.valor_default)" : "p.valor_default";
+		String activo = incluirPlan ? "COALESCE(rrip.activo,cri.activo)" : "cri.activo";
+		String where = incluirPlan
+				? (!soloConfiguradas ? "WHERE tp.id_plan=:idPlan " : "")
+				: "WHERE cri.clave='CARGA_ESTUDIANTE_IRREGULAR' ";
+		String group = incluirPlan ? "GROUP BY tp.id_plan,tp.nombre,cri.nombre,cri.descripcion,rrip.activo,cri.activo "
+				: "GROUP BY cri.nombre,cri.descripcion,cri.activo ";
+		return "SELECT " + camposPlan + "cri.nombre AS nombre_regla,cri.descripcion AS descripcion_regla,"
+				+ activo + " AS activo_regla,"
+				+ "MAX(CASE WHEN p.clave_parametro='MAX_REPROBADAS_AVANCE_ANUAL' THEN " + valor + " END) AS max_reprobadas_avance_anual,"
+				+ "MAX(CASE WHEN p.clave_parametro='MIN_REPROBADAS_MISMO_SEMESTRE' THEN " + valor + " END) AS min_reprobadas_mismo_semestre,"
+				+ "MAX(CASE WHEN p.clave_parametro='MIN_REPROBADAS_RESTRINGIR_OPTATIVAS' THEN " + valor + " END) AS min_reprobadas_restringir_optativas,"
+				+ "MAX(CASE WHEN p.clave_parametro='MIN_OPTATIVAS_REPROBADAS_RESTRINGIR' THEN " + valor + " END) AS min_optativas_reprobadas_restringir,"
+				+ "MAX(CASE WHEN p.clave_parametro='MINIMO_OBLIGATORIAS' THEN " + valor + " END) AS minimo_obligatorias,"
+				+ "MAX(CASE WHEN p.clave_parametro='PERMITIR_SEMESTRE_ADYACENTE' THEN " + valor + " END) AS permitir_semestre_adyacente,"
+				+ "MAX(CASE WHEN p.clave_parametro='PERMITIR_OPTATIVAS_OTROS_SEMESTRES_AVANCE' THEN " + valor + " END) AS permitir_optativas_otros_semestres_avance,"
+				+ "MAX(CASE WHEN p.clave_parametro='RESTRINGIR_OPTATIVAS_POR_REZAGO' THEN " + valor + " END) AS restringir_optativas_por_rezago,"
+				+ "MAX(CASE WHEN p.clave_parametro='MARCAR_REPROBADAS_OBLIGATORIAS' THEN " + valor + " END) AS marcar_reprobadas_obligatorias,"
+				+ "MAX(CASE WHEN p.clave_parametro='MARCAR_REPROBADAS_OPTATIVAS' THEN " + valor + " END) AS marcar_reprobadas_optativas,"
+				+ "MAX(CASE WHEN p.clave_parametro='MARCAR_OBLIGATORIAS_SEMESTRE_RESTRINGIDO' THEN " + valor + " END) AS marcar_obligatorias_semestre_restringido,"
+				+ "MAX(CASE WHEN p.clave_parametro='MIN_REPROBADAS_PRIORIZAR_ASISTENTE' THEN " + valor + " END) AS min_reprobadas_priorizar_asistente "
+				+ origen + "JOIN cat_parametros_regla_inscripcion p ON p.clave_regla=cri.clave "
+				+ unionRegla + unionValores + where + group + (soloConfiguradas ? "ORDER BY tp.nombre" : "");
+	}
+
+	private ConfiguracionCargaIrregularDTO mapearConfiguracionIrregular(Object[] row) {
+		ConfiguracionCargaIrregularDTO dto = new ConfiguracionCargaIrregularDTO();
+		dto.setIdPlan(getLongValue(row[0]));
+		dto.setNombrePlan((String) row[1]);
+		dto.setNombreRegla((String) row[2]);
+		dto.setDescripcionRegla((String) row[3]);
+		dto.setActiva(Integer.valueOf(1).equals(getIntegerValue(row[4])));
+		dto.setMaxReprobadasAvanceAnual(obtenerEnteroConfiguracion(row[5], "MAX_REPROBADAS_AVANCE_ANUAL", "carga irregular"));
+		dto.setMinReprobadasMismoSemestre(obtenerEnteroConfiguracion(row[6], "MIN_REPROBADAS_MISMO_SEMESTRE", "carga irregular"));
+		dto.setMinReprobadasRestringirOptativas(obtenerEnteroConfiguracion(row[7], "MIN_REPROBADAS_RESTRINGIR_OPTATIVAS", "carga irregular"));
+		dto.setMinOptativasReprobadasRestringir(obtenerEnteroConfiguracion(row[8], "MIN_OPTATIVAS_REPROBADAS_RESTRINGIR", "carga irregular"));
+		dto.setMinimoObligatorias(obtenerEnteroConfiguracion(row[9], "MINIMO_OBLIGATORIAS", "carga irregular"));
+		dto.setPermitirSemestreAdyacente(obtenerBooleanoConfiguracion(row[10], "PERMITIR_SEMESTRE_ADYACENTE", "carga irregular"));
+		dto.setPermitirOptativasOtrosSemestresAvance(obtenerBooleanoConfiguracion(row[11], "PERMITIR_OPTATIVAS_OTROS_SEMESTRES_AVANCE", "carga irregular"));
+		dto.setRestringirOptativasPorRezago(obtenerBooleanoConfiguracion(row[12], "RESTRINGIR_OPTATIVAS_POR_REZAGO", "carga irregular"));
+		dto.setMarcarReprobadasObligatorias(obtenerBooleanoConfiguracion(row[13], "MARCAR_REPROBADAS_OBLIGATORIAS", "carga irregular"));
+		dto.setMarcarReprobadasOptativas(obtenerBooleanoConfiguracion(row[14], "MARCAR_REPROBADAS_OPTATIVAS", "carga irregular"));
+		dto.setMarcarObligatoriasSemestreRestringido(obtenerBooleanoConfiguracion(row[15], "MARCAR_OBLIGATORIAS_SEMESTRE_RESTRINGIDO", "carga irregular"));
+		dto.setMinReprobadasPriorizarAsistente(obtenerEnteroConfiguracion(row[16], "MIN_REPROBADAS_PRIORIZAR_ASISTENTE", "carga irregular"));
+		validarConfiguracionIrregular(dto);
+		return dto;
+	}
+
+	@Override
+	public void guardarConfiguracionGeneralCargaIrregular(ConfiguracionCargaIrregularDTO configuracion, Long idUsuario) {
+		validarConfiguracionIrregular(configuracion);
+		actualizarEstadoRegla("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getActiva(), idUsuario);
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MAX_REPROBADAS_AVANCE_ANUAL", configuracion.getMaxReprobadasAvanceAnual().toString());
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MIN_REPROBADAS_MISMO_SEMESTRE", configuracion.getMinReprobadasMismoSemestre().toString());
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MIN_REPROBADAS_RESTRINGIR_OPTATIVAS", configuracion.getMinReprobadasRestringirOptativas().toString());
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MIN_OPTATIVAS_REPROBADAS_RESTRINGIR", configuracion.getMinOptativasReprobadasRestringir().toString());
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MINIMO_OBLIGATORIAS", configuracion.getMinimoObligatorias().toString());
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "PERMITIR_SEMESTRE_ADYACENTE", booleano(configuracion.getPermitirSemestreAdyacente()));
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "PERMITIR_OPTATIVAS_OTROS_SEMESTRES_AVANCE", booleano(configuracion.getPermitirOptativasOtrosSemestresAvance()));
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "RESTRINGIR_OPTATIVAS_POR_REZAGO", booleano(configuracion.getRestringirOptativasPorRezago()));
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MARCAR_REPROBADAS_OBLIGATORIAS", booleano(configuracion.getMarcarReprobadasObligatorias()));
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MARCAR_REPROBADAS_OPTATIVAS", booleano(configuracion.getMarcarReprobadasOptativas()));
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MARCAR_OBLIGATORIAS_SEMESTRE_RESTRINGIDO", booleano(configuracion.getMarcarObligatoriasSemestreRestringido()));
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MIN_REPROBADAS_PRIORIZAR_ASISTENTE", configuracion.getMinReprobadasPriorizarAsistente().toString());
+	}
+
+	@Override
+	public void guardarConfiguracionCargaIrregular(ConfiguracionCargaIrregularDTO configuracion, Long idUsuario) {
+		validarConfiguracionIrregular(configuracion);
+		if (configuracion.getIdPlan() == null) {
+			throw new IllegalArgumentException("El plan es obligatorio para la carga irregular");
+		}
+		guardarEstadoReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), configuracion.getActiva(), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MAX_REPROBADAS_AVANCE_ANUAL", configuracion.getMaxReprobadasAvanceAnual().toString(), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MIN_REPROBADAS_MISMO_SEMESTRE", configuracion.getMinReprobadasMismoSemestre().toString(), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MIN_REPROBADAS_RESTRINGIR_OPTATIVAS", configuracion.getMinReprobadasRestringirOptativas().toString(), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MIN_OPTATIVAS_REPROBADAS_RESTRINGIR", configuracion.getMinOptativasReprobadasRestringir().toString(), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MINIMO_OBLIGATORIAS", configuracion.getMinimoObligatorias().toString(), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "PERMITIR_SEMESTRE_ADYACENTE", booleano(configuracion.getPermitirSemestreAdyacente()), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "PERMITIR_OPTATIVAS_OTROS_SEMESTRES_AVANCE", booleano(configuracion.getPermitirOptativasOtrosSemestresAvance()), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "RESTRINGIR_OPTATIVAS_POR_REZAGO", booleano(configuracion.getRestringirOptativasPorRezago()), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MARCAR_REPROBADAS_OBLIGATORIAS", booleano(configuracion.getMarcarReprobadasObligatorias()), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MARCAR_REPROBADAS_OPTATIVAS", booleano(configuracion.getMarcarReprobadasOptativas()), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MARCAR_OBLIGATORIAS_SEMESTRE_RESTRINGIDO", booleano(configuracion.getMarcarObligatoriasSemestreRestringido()), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MIN_REPROBADAS_PRIORIZAR_ASISTENTE", configuracion.getMinReprobadasPriorizarAsistente().toString(), idUsuario);
+	}
+
+	@Override
+	public void eliminarConfiguracionCargaIrregular(ConfiguracionCargaIrregularDTO configuracion) {
+		if (configuracion == null || configuracion.getIdPlan() == null) {
+			throw new IllegalArgumentException("El plan es obligatorio para eliminar la carga irregular");
+		}
+		entityManager.createNativeQuery("DELETE FROM rel_valor_parametro_regla_plan WHERE clave_regla='CARGA_ESTUDIANTE_IRREGULAR' AND id_plan=:idPlan")
+				.setParameter("idPlan", configuracion.getIdPlan()).executeUpdate();
+		entityManager.createNativeQuery("DELETE FROM rel_regla_inscripcion_plan WHERE clave_regla='CARGA_ESTUDIANTE_IRREGULAR' AND id_plan=:idPlan")
+				.setParameter("idPlan", configuracion.getIdPlan()).executeUpdate();
+	}
+
+	private void validarConfiguracionIrregular(ConfiguracionCargaIrregularDTO configuracion) {
+		if (configuracion == null || configuracion.getMinReprobadasPriorizarAsistente() == null || configuracion.getMinReprobadasPriorizarAsistente() < 1) {
+			throw new IllegalArgumentException("El umbral de reprobadas para el asistente debe ser positivo");
+		}
+		if (configuracion == null || configuracion.getActiva() == null) {
+			throw new IllegalArgumentException("La configuración irregular y su estado son obligatorios");
+		}
+		if (configuracion.getMaxReprobadasAvanceAnual() == null || configuracion.getMaxReprobadasAvanceAnual() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Máximo de reprobadas totales para avance anual");
+		}
+		if (configuracion.getMinReprobadasMismoSemestre() == null || configuracion.getMinReprobadasMismoSemestre() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Restringir a un semestre a partir de reprobadas");
+		}
+		if (configuracion.getMinReprobadasRestringirOptativas() == null || configuracion.getMinReprobadasRestringirOptativas() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Restringir optativas a partir de reprobadas totales");
+		}
+		if (configuracion.getMinOptativasReprobadasRestringir() == null || configuracion.getMinOptativasReprobadasRestringir() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Restringir optativas a partir de optativas reprobadas");
+		}
+		if (configuracion.getMinimoObligatorias() == null || configuracion.getMinimoObligatorias() < 0) {
+			throw new IllegalArgumentException("Valor no válido: Mínimo de obligatorias seleccionadas");
+		}
+		if (configuracion.getPermitirSemestreAdyacente() == null) {
+			throw new IllegalArgumentException("Valor no válido: Permitir semestre complementario del mismo año");
+		}
+		if (configuracion.getPermitirOptativasOtrosSemestresAvance() == null) {
+			throw new IllegalArgumentException("Valor no válido: Permitir optativas de otros semestres durante el avance anual");
+		}
+		if (configuracion.getRestringirOptativasPorRezago() == null) {
+			throw new IllegalArgumentException("Valor no válido: Aplicar restricción de optativas en la ruta restante");
+		}
+		if (configuracion.getMarcarReprobadasObligatorias() == null) {
+			throw new IllegalArgumentException("Valor no válido: Exigir selección de obligatorias reprobadas");
+		}
+		if (configuracion.getMarcarReprobadasOptativas() == null) {
+			throw new IllegalArgumentException("Valor no válido: Exigir selección de optativas reprobadas");
+		}
+		if (configuracion.getMarcarObligatoriasSemestreRestringido() == null) {
+			throw new IllegalArgumentException("Valor no válido: Exigir todas las obligatorias del semestre restringido");
 		}
 	}
 
@@ -1995,7 +2191,13 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "MAX(CASE WHEN p.clave_parametro='SEMESTRE_FINAL_ANTECEDENTES' THEN p.valor_default END) AS semestre_final_antecedentes,"
 				+ "MAX(CASE WHEN p.clave_parametro='MAXIMO_OPTATIVAS_POR_BLOQUE' THEN p.valor_default END) AS maximo_optativas_bloque,"
 				+ "MAX(CASE WHEN p.clave_parametro='OPTATIVAS_APROBADAS_PARA_OPCIONALES' THEN p.valor_default END) AS optativas_aprobadas_opcionales,"
-				+ "MAX(CASE WHEN p.clave_parametro='IMPEDIR_CLAVE_OPTATIVA_REPETIDA' THEN p.valor_default END) AS impedir_clave_optativa_repetida "
+				+ "MAX(CASE WHEN p.clave_parametro='IMPEDIR_CLAVE_OPTATIVA_REPETIDA' THEN p.valor_default END) AS impedir_clave_optativa_repetida,"
+				+ "MAX(CASE WHEN p.clave_parametro='MAXIMO_ELECTIVAS_POR_PERIODO' THEN p.valor_default END) AS maximo_electivas_periodo,"
+				+ "MAX(CASE WHEN p.clave_parametro='LIMITE_REPROBACIONES_POR_MATERIA' THEN p.valor_default END) AS limite_reprobaciones_por_materia,"
+				+ "MAX(CASE WHEN p.clave_parametro='SEMESTRE_MINIMO_ELECTIVAS' THEN p.valor_default END) AS semestre_minimo_electivas,"
+				+ "MAX(CASE WHEN p.clave_parametro='PRIMER_SEMESTRE_ORIGEN_ELECTIVAS' THEN p.valor_default END) AS primer_semestre_origen_electivas,"
+				+ "MAX(CASE WHEN p.clave_parametro='SEGUNDO_SEMESTRE_ORIGEN_ELECTIVAS' THEN p.valor_default END) AS segundo_semestre_origen_electivas,"
+				+ "MAX(CASE WHEN p.clave_parametro='MINIMO_OPTATIVAS_PLAN_ASISTENTE' THEN p.valor_default END) AS minimo_optativas_plan_asistente "
 				+ "FROM cat_reglas_inscripcion cri JOIN cat_parametros_regla_inscripcion p ON p.clave_regla=cri.clave "
 				+ "WHERE cri.clave='RESTRICCIONES_ACADEMICAS_GENERALES' GROUP BY cri.nombre,cri.descripcion,cri.activo";
 		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
@@ -2016,6 +2218,13 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setMaximoOptativasPorBloque(obtenerEnteroConfiguracion(row[9], "MAXIMO_OPTATIVAS_POR_BLOQUE", "general"));
 		dto.setOptativasAprobadasParaOpcionales(obtenerEnteroConfiguracion(row[10], "OPTATIVAS_APROBADAS_PARA_OPCIONALES", "general"));
 		dto.setImpedirClaveOptativaRepetida(obtenerBooleanoConfiguracion(row[11], "IMPEDIR_CLAVE_OPTATIVA_REPETIDA", "general"));
+		dto.setMaximoElectivasPorPeriodo(obtenerEnteroConfiguracion(row[12], "MAXIMO_ELECTIVAS_POR_PERIODO", "general"));
+		dto.setLimiteReprobacionesPorMateria(obtenerEnteroConfiguracion(row[13], "LIMITE_REPROBACIONES_POR_MATERIA", "general"));
+		dto.setSemestreMinimoElectivas(obtenerEnteroConfiguracion(row[14], "SEMESTRE_MINIMO_ELECTIVAS", "general"));
+		dto.setPrimerSemestreOrigenElectivas(obtenerEnteroConfiguracion(row[15], "PRIMER_SEMESTRE_ORIGEN_ELECTIVAS", "general"));
+		dto.setSegundoSemestreOrigenElectivas(obtenerEnteroConfiguracion(row[16], "SEGUNDO_SEMESTRE_ORIGEN_ELECTIVAS", "general"));
+		dto.setMinimoOptativasPlanAsistente(obtenerEnteroConfiguracion(row[17], "MINIMO_OPTATIVAS_PLAN_ASISTENTE", "general"));
+		validarRestriccionesAcademicas(dto);
 		return dto;
 	}
 
@@ -2033,9 +2242,30 @@ public class InscripcionRepository implements IinscripcionRepository {
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "MAXIMO_OPTATIVAS_POR_BLOQUE", configuracion.getMaximoOptativasPorBloque().toString());
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "OPTATIVAS_APROBADAS_PARA_OPCIONALES", configuracion.getOptativasAprobadasParaOpcionales().toString());
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "IMPEDIR_CLAVE_OPTATIVA_REPETIDA", booleano(configuracion.getImpedirClaveOptativaRepetida()));
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "MAXIMO_ELECTIVAS_POR_PERIODO", configuracion.getMaximoElectivasPorPeriodo().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "LIMITE_REPROBACIONES_POR_MATERIA", configuracion.getLimiteReprobacionesPorMateria().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "SEMESTRE_MINIMO_ELECTIVAS", configuracion.getSemestreMinimoElectivas().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "PRIMER_SEMESTRE_ORIGEN_ELECTIVAS", configuracion.getPrimerSemestreOrigenElectivas().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "SEGUNDO_SEMESTRE_ORIGEN_ELECTIVAS", configuracion.getSegundoSemestreOrigenElectivas().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "MINIMO_OPTATIVAS_PLAN_ASISTENTE", configuracion.getMinimoOptativasPlanAsistente().toString());
 	}
 
 	private void validarRestriccionesAcademicas(ConfiguracionCargaRegularDTO configuracion) {
+		if (configuracion.getLimiteReprobacionesPorMateria() == null || configuracion.getLimiteReprobacionesPorMateria() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Límite de reprobaciones por asignatura");
+		}
+		if (configuracion.getSemestreMinimoElectivas() == null || configuracion.getSemestreMinimoElectivas() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Semestre mínimo de los espacios electivos");
+		}
+		if (configuracion.getPrimerSemestreOrigenElectivas() == null || configuracion.getPrimerSemestreOrigenElectivas() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Primer semestre de origen para electivas");
+		}
+		if (configuracion.getSegundoSemestreOrigenElectivas() == null || configuracion.getSegundoSemestreOrigenElectivas() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Segundo semestre de origen para electivas");
+		}
+		if (configuracion.getMinimoOptativasPlanAsistente() == null || configuracion.getMinimoOptativasPlanAsistente() < 0) {
+			throw new IllegalArgumentException("Valor no válido: Optativas requeridas para el diagnóstico del asistente");
+		}
 		if (configuracion.getPorcentajeMinimoTramoFinal() == null || configuracion.getPorcentajeMinimoTramoFinal() < 0
 				|| configuracion.getPorcentajeMinimoTramoFinal() > 100) {
 			throw new IllegalArgumentException("El porcentaje del tramo final debe estar entre 0 y 100");
@@ -2047,7 +2277,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 				|| configuracion.getSemestreFinalAntecedentes() < configuracion.getSemestreInicialAntecedentes()
 				|| configuracion.getMaximoOptativasPorBloque() == null || configuracion.getMaximoOptativasPorBloque() < 0
 				|| configuracion.getOptativasAprobadasParaOpcionales() == null
-				|| configuracion.getOptativasAprobadasParaOpcionales() < 0) {
+				|| configuracion.getOptativasAprobadasParaOpcionales() < 0
+				|| configuracion.getMaximoElectivasPorPeriodo() == null || configuracion.getMaximoElectivasPorPeriodo() < 0) {
 			throw new IllegalArgumentException("Los parámetros académicos generales no son válidos");
 		}
 	}

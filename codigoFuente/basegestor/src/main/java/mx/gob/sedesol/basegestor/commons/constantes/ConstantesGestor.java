@@ -211,24 +211,17 @@ public final class ConstantesGestor {
 	public static final String TEXTO_MATERIA_OBLIGATORIA = "Obligatoria";
 	public static final String TEXTO_MATERIA_OPTATIVA = "Optativa";
 	public static final String TEXTO_MATERIA_ELECTIVA = "Electiva";
-	public static final int SEMESTRE_MINIMO_PARA_ELECTIVAS = 1;
-	public static final String NUMERO_SEMESTRE_CINCO = "5";
-	public static final String NUMERO_SEMESTRE_SEIS = "6";
-	public static final Long LIMITE_REPROBACIONES_POR_MATERIA = 3l;
+
+
 	public static final String REGLA_PERMITE_INSCRIPCION_LIMITE_REPROBADAS = "PERMITE_INSCRIPCION_LIMITE_REPROBADAS";
 	public static final String REGLA_CARGA_NUEVO_INGRESO = "CARGA_NUEVO_INGRESO";
 	public static final Integer MATERIA_REPROBADA = 0;
 	public static final Integer MATERIA_APROBADA = 1;
-	public static final int NUMERO_MAXIMO_MATERIAS_REPROBADAS = 4;
+
 	public static final String NUMERO_PRIMER_ESTRUCTURA = "1";
 	public static final String NUMERO_SEGUNDA_ESTRUCTURA = "2";
 	public static final String ESPACIO_EN_BLANCO = " ";
-	public static final Double PORCENTAJE_CREDITOS_REQUERIDOS_SEPTIMO_SEMESTRE = 50.00;
-	public static final int SEXTO_SEMESTRE = 6;
-	public static final int OCTAVO_SEMESTRE = 8;
-	public static final int TERCER_SEMESTRE = 3;
-	public static final Long CANT_MATERIAS_OBLIGATORIAS_EST_REGULAR_PRIMER_SEMESTRE = 4l;
-	public static final Long CANT_MATERIAS_OPTATIVAS_EST_REGULAR_PRIMER_SEMESTRE = 2l;
+
 	public static final Long SIN_EVENTO = 0l;
 	public static final Integer NO_ES_ESTUDIANTE_NUEVO_INGRESO = 0;
 	public static final Integer ES_ESTUDIANTE_NUEVO_INGRESO = 1;
@@ -251,8 +244,7 @@ public final class ConstantesGestor {
 	public static final String TEXTO_CORREO_NO_ENVIADO_INSCRIPCION = "No enviado";
 	public static final Integer PANEL_BUSQUEDA_INSCRIPCION_REENVIO_CORREO = 1;
 	public static final Integer PANEL_MATERIAS_REENVIO_CORREO = 2;
-	public static final int CANTIDAD_MAXIMA_MATERIAS_REPROBADAS = 5;
-	public static final long CANTIDAD_MAXIMA_MATERIAS_REPROBADAS_OPTATIVAS = 3;
+
 	public static final String ANIO_INSCRIPCION = "ANIO_INSCRIPCION";
-	public static final long MATERIAS_OPTATIVAS_APROBADAS_POR_SEMESTRE = 2;
+
 }
