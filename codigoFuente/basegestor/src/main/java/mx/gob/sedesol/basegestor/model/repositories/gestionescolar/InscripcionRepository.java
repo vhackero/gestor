@@ -22,6 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignaturasPorSemestreDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaIrregularDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaRegularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEstudianteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
@@ -464,7 +467,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 	public Boolean consultarNuevoIngreso(String id_persona) {
 
 		String consulta = "SELECT * from tbl_persona tp\r\n"
-				+ "WHERE NOT EXISTS(SELECT * FROM tbl_inscripciones ti WHERE ti.semestre=1 AND ti.Idpersona=tp.id_persona) AND id_persona=:id_persona\r\n"
+				+ "WHERE NOT EXISTS(SELECT * FROM tbl_inscripciones ti WHERE ti.Idpersona=tp.id_persona) AND id_persona=:id_persona\r\n"
 				+ "  AND NOT EXISTS(SELECT * from rel_persona_bajas rpb WHERE rpb.id_persona = tp.id_persona)";
 
 		Query query = entityManager.createNativeQuery(consulta);
@@ -777,9 +780,36 @@ public class InscripcionRepository implements IinscripcionRepository {
 	}
 
 	@Override
-	public Boolean esEstudianteRegular(Long idPersona) {
+	public Integer obtenerSemestreBajaTemporalPendiente(Long idPersona, Long idPlan) {
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT IF(COUNT(IF(rgp.calificacion_final < fd.calificacion_min_aprobatoria, 1, 0)) > 0, 0, 1) ");
+		sql.append("SELECT CAST(SUBSTRING_INDEX(TRIM(semestre.nombre), ' ', -1) AS UNSIGNED) ");
+		sql.append("FROM rel_persona_bajas baja ");
+		sql.append("JOIN rel_motivo_baja motivo ON motivo.id_motivo_baja = baja.motivo_baja_id ");
+		sql.append("JOIN tbl_ficha_descriptiva_programa materia ON materia.id_programa = baja.id_programa AND materia.id_plan = baja.id_plan ");
+		sql.append("JOIN tbl_malla_curricular bloque ON bloque.id = materia.id_eje_capacitacion ");
+		sql.append("JOIN tbl_malla_curricular semestre ON semestre.id = bloque.id_padre ");
+		sql.append("WHERE baja.id_persona = :idPersona AND baja.id_plan = :idPlan ");
+		sql.append("AND baja.contabilizar = 1 AND motivo.tipo_baja_id IN (2,7) ");
+		sql.append("AND NOT EXISTS ( ");
+		sql.append(" SELECT 1 FROM rel_grupo_participante participacion ");
+		sql.append(" JOIN tbl_grupos grupo ON grupo.id = participacion.id_grupo ");
+		sql.append(" JOIN tbl_eventos evento ON evento.id_evento = grupo.id_evento ");
+		sql.append(" JOIN tbl_ficha_descriptiva_programa aprobada ON aprobada.id_programa = evento.id_programa ");
+		sql.append(" WHERE participacion.id_persona_participante = baja.id_persona ");
+		sql.append(" AND participacion.calificacion_final >= aprobada.calificacion_min_aprobatoria ");
+		sql.append(" AND LOWER(TRIM(aprobada.nombre_tentativo)) = LOWER(TRIM(materia.nombre_tentativo)) ");
+		sql.append(") ORDER BY baja.fecha_modificacion DESC, baja.id_baja DESC ");
+		sql.append("LIMIT 1 ");
+
+		List<?> resultados = entityManager.createNativeQuery(sql.toString())
+				.setParameter("idPersona", idPersona).setParameter("idPlan", idPlan).getResultList();
+		return resultados.isEmpty() ? null : getIntegerValue(resultados.get(0));
+	}
+
+	@Override
+	public Boolean esEstudianteRegular(Long idPersona, Long idPlan) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT CASE WHEN EXISTS(SELECT 1 ");
 		sql.append("FROM rel_grupo_participante rgp ");
 		sql.append("JOIN tbl_grupos tg ON tg.id = rgp.id_grupo ");
 		sql.append("JOIN tbl_eventos te ON te.id_evento = tg.id_evento ");
@@ -787,6 +817,19 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("WHERE rgp.id_persona_participante = :idPersona ");
 		sql.append("AND rgp.calificacion_final IS NOT NULL ");
 		sql.append("AND rgp.calificacion_final < fd.calificacion_min_aprobatoria ");
+		sql.append("AND (fd.id_plan = :idPlan OR EXISTS( ");
+		sql.append("    SELECT 1 FROM tbl_ficha_descriptiva_programa fdPlan ");
+		sql.append("    WHERE fdPlan.id_plan = :idPlan ");
+		sql.append("    AND LOWER(TRIM(fdPlan.nombre_tentativo)) = LOWER(TRIM(fd.nombre_tentativo)) ");
+		sql.append(")) ");
+		sql.append("AND NOT EXISTS( ");
+		sql.append("    SELECT 1 FROM rel_persona_bajas rpb ");
+		sql.append("    JOIN rel_motivo_baja rmb ON rmb.id_motivo_baja = rpb.motivo_baja_id ");
+		sql.append("    WHERE rpb.id_persona = rgp.id_persona_participante ");
+		sql.append("    AND rpb.contabilizar = 1 AND rmb.tipo_baja_id IN (1,2,7) ");
+		sql.append("    AND rpb.id_plan = fd.id_plan AND rpb.id_programa = fd.id_programa ");
+		sql.append("    AND rpb.id_evento = te.id_evento AND rpb.id_grupo = tg.id ");
+		sql.append(") ");
 		sql.append("AND NOT EXISTS( ");
 		sql.append("    SELECT 1 ");
 		sql.append("    FROM rel_grupo_participante rgp2 ");
@@ -796,10 +839,11 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("    WHERE rgp2.id_persona_participante = rgp.id_persona_participante ");
 		sql.append("    AND LOWER(TRIM(fd2.nombre_tentativo)) = LOWER(TRIM(fd.nombre_tentativo)) ");
 		sql.append("    AND rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
-		sql.append(")");
+		sql.append(") ");
+		sql.append(") THEN 0 ELSE 1 END");
 
 		List<?> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("idPersona", idPersona)
-				.getResultList();
+				.setParameter("idPlan", idPlan).getResultList();
 
 		if (resultados.isEmpty()) {
 			return true;
@@ -827,7 +871,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 	}
 
 	@Override
-	public Boolean esEstudianteNuevoIngreso(Long idPersona) {
+	public Boolean esEstudianteNuevoIngreso(Long idPersona, Long idPlan) {
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT COUNT(tp.id_persona) ");
@@ -835,18 +879,19 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("WHERE NOT EXISTS( ");
 		sql.append("    SELECT 1 ");
 		sql.append("    FROM tbl_inscripciones ti ");
-		sql.append("    WHERE ti.semestre = 1 ");
-		sql.append("    AND ti.Idpersona = tp.id_persona ");
+		sql.append("    WHERE ti.Idpersona = tp.id_persona ");
+		sql.append("    AND ti.idplan = :idPlan ");
 		sql.append(") ");
 		sql.append("AND tp.id_persona = :idPersona ");
 		sql.append("AND NOT EXISTS( ");
 		sql.append("    SELECT 1 ");
 		sql.append("    FROM rel_persona_bajas rpb ");
 		sql.append("    WHERE rpb.id_persona = tp.id_persona ");
+		sql.append("    AND rpb.id_plan = :idPlan ");
 		sql.append(")");
 
 		List<?> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("idPersona", idPersona)
-				.getResultList();
+				.setParameter("idPlan", idPlan).getResultList();
 
 		// Si no hay resultados, retorna false (no es nuevo ingreso)
 		if (resultados.isEmpty()) {
@@ -859,6 +904,36 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 		// Retorna true si count > 0 (es nuevo ingreso), false si count = 0
 		return count != null && count > 0;
+	}
+
+	@Override
+	public Boolean tienePrimerSemestrePendiente(Long idPersona, Long idPlan) {
+		String sql = "SELECT CASE WHEN EXISTS (SELECT 1 FROM tbl_inscripciones ti "
+				+ "WHERE ti.Idpersona=:idPersona AND ti.idplan=:idPlan) "
+				+ "AND NOT EXISTS (SELECT 1 FROM tbl_inscripciones ti "
+				+ "WHERE ti.Idpersona=:idPersona AND ti.idplan=:idPlan AND ti.semestre=1) "
+				+ "THEN 1 ELSE 0 END";
+		Object resultado = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona)
+				.setParameter("idPlan", idPlan).getSingleResult();
+		return Integer.valueOf(1).equals(getIntegerValue(resultado));
+	}
+
+	@Override
+	public void bloquearPersonaParaInscripcion(Long idPersona) {
+		// Existe aun cuando el estudiante no tiene ninguna inscripción; permite
+		// bloquear también dos intentos concurrentes de primera inscripción.
+		entityManager.createNativeQuery("SELECT id_persona FROM tbl_persona WHERE id_persona = :idPersona FOR UPDATE")
+				.setParameter("idPersona", idPersona).getSingleResult();
+	}
+
+	@Override
+	public Boolean existeInscripcionEnProceso(Long idPersona, Long idProcesoInscripcion) {
+		String sql = "SELECT ti.id FROM tbl_inscripciones ti "
+				+ "JOIN tbl_procesos_inscripcion proceso ON proceso.proceso_inscripcion_id = :idProceso "
+				+ "AND ti.fecha_registro >= proceso.fecha_inicio AND ti.fecha_registro <= proceso.fecha_fin "
+				+ "WHERE ti.Idpersona = :idPersona";
+		return !entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona)
+				.setParameter("idProceso", idProcesoInscripcion).setMaxResults(1).getResultList().isEmpty();
 	}
 
 	@Override
@@ -964,7 +1039,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<InscripcionMateriasReprobadasDTO> obtenerMateriasCursadasReprobadas(Long idPersona) {
+	public List<InscripcionMateriasReprobadasDTO> obtenerMateriasCursadasReprobadas(Long idPersona, Long idPlan) {
 
 		StringBuilder sql = new StringBuilder();
 		sql.append(
@@ -994,6 +1069,19 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("INNER JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion ");
 		sql.append("WHERE tp.id_persona = :id_persona ");
 		sql.append("  AND rgp.calificacion_final < fd.calificacion_min_aprobatoria ");
+		sql.append("  AND (fd.id_plan = :idPlan OR EXISTS( ");
+		sql.append("      SELECT 1 FROM tbl_ficha_descriptiva_programa fdPlan ");
+		sql.append("      WHERE fdPlan.id_plan = :idPlan ");
+		sql.append("        AND LOWER(TRIM(fdPlan.nombre_tentativo)) = LOWER(TRIM(fd.nombre_tentativo)) ");
+		sql.append("  )) ");
+		sql.append("  AND NOT EXISTS( ");
+		sql.append("      SELECT 1 FROM rel_persona_bajas rpb ");
+		sql.append("      INNER JOIN rel_motivo_baja rmb ON rmb.id_motivo_baja = rpb.motivo_baja_id ");
+		sql.append("      WHERE rpb.id_persona = rgp.id_persona_participante ");
+		sql.append("        AND rpb.contabilizar = 1 AND rmb.tipo_baja_id IN (1,2,7) ");
+		sql.append("        AND rpb.id_plan = fd.id_plan AND rpb.id_programa = fd.id_programa ");
+		sql.append("        AND rpb.id_evento = te.id_evento AND rpb.id_grupo = tg.id ");
+		sql.append("  ) ");
 		sql.append("  AND NOT EXISTS( ");
 		sql.append("      SELECT 1 ");
 		sql.append("      FROM rel_grupo_participante rgp2 ");
@@ -1007,7 +1095,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("GROUP BY tpl.id_plan, fd.id_programa, fd.cve_programa");
 
 		List<Object[]> resultados = entityManager.createNativeQuery(sql.toString())
-				.setParameter("id_persona", idPersona).getResultList();
+				.setParameter("id_persona", idPersona).setParameter("idPlan", idPlan).getResultList();
 
 		List<InscripcionMateriasReprobadasDTO> listaDTO = new ArrayList<>();
 
@@ -1266,8 +1354,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "AND SUBSTRING_INDEX(TRIM(tmc2.nombre), ' ', -1) IN (:semestreCinco, :semestreSeis) "
 				+ "ORDER BY tp.nombre, tmc2.nombre, tfd.nombre_tentativo";
 		List<Object[]> rows = entityManager.createNativeQuery(sql).setParameter("idProceso", idProcesoInscripcion)
-				.setParameter("semestreCinco", ConstantesGestor.NUMERO_SEMESTRE_CINCO)
-				.setParameter("semestreSeis", ConstantesGestor.NUMERO_SEMESTRE_SEIS)
+				.setParameter("semestreCinco", obtenerConfiguracionRestriccionesAcademicasGenerales().getPrimerSemestreOrigenElectivas().toString())
+				.setParameter("semestreSeis", obtenerConfiguracionRestriccionesAcademicasGenerales().getSegundoSemestreOrigenElectivas().toString())
 				.getResultList();
 		List<ConfiguracionElectivaDTO> resultado = new ArrayList<>();
 		for (Object[] row : rows) {
@@ -1329,14 +1417,18 @@ public class InscripcionRepository implements IinscripcionRepository {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<ReglaInscripcionDTO> obtenerReglasInscripcion() {
-		String sql = "SELECT clave, descripcion, activo FROM cat_reglas_inscripcion ORDER BY descripcion";
+		String sql = "SELECT clave, nombre, descripcion, categoria, tipo_regla, activo "
+				+ "FROM cat_reglas_inscripcion WHERE categoria = 'GENERAL' ORDER BY nombre";
 		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
 		List<ReglaInscripcionDTO> reglas = new ArrayList<>();
 		for (Object[] row : resultados) {
 			ReglaInscripcionDTO regla = new ReglaInscripcionDTO();
 			regla.setClave((String) row[0]);
-			regla.setDescripcion((String) row[1]);
-			regla.setActiva(Integer.valueOf(1).equals(getIntegerValue(row[2])));
+			regla.setNombre((String) row[1]);
+			regla.setDescripcion((String) row[2]);
+			regla.setCategoria((String) row[3]);
+			regla.setTipoRegla((String) row[4]);
+			regla.setActiva(Integer.valueOf(1).equals(getIntegerValue(row[5])));
 			reglas.add(regla);
 		}
 		return reglas;
@@ -1357,6 +1449,871 @@ public class InscripcionRepository implements IinscripcionRepository {
 				.setParameter("usuario", idUsuario).setParameter("clave", regla.getClave()).executeUpdate();
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<ConfiguracionCargaNuevoIngresoDTO> obtenerConfiguracionesCargaNuevoIngreso() {
+		List<Object[]> resultadosPlan = entityManager.createNativeQuery(
+				construirConsultaCargaNuevoIngreso(true) + " ORDER BY tp.nombre")
+				.getResultList();
+		List<Object[]> resultadosPersona = entityManager.createNativeQuery(
+				construirConsultaCargaNuevoIngresoPersona() + " ORDER BY tp.nombre, persona.sso_idUsuario")
+				.getResultList();
+		List<ConfiguracionCargaNuevoIngresoDTO> configuraciones = resultadosPlan.stream()
+				.map(this::mapearConfiguracionCargaNuevoIngreso).collect(Collectors.toList());
+		configuraciones.addAll(resultadosPersona.stream().map(this::mapearConfiguracionCargaNuevoIngreso)
+				.collect(Collectors.toList()));
+		return configuraciones;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public ConfiguracionCargaNuevoIngresoDTO obtenerConfiguracionGeneralCargaNuevoIngreso() {
+		String sql = "SELECT cri.nombre AS nombre_regla_general, cri.descripcion AS descripcion_regla_general, "
+				+ "cri.activo AS activo_regla_general, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='OBLIGATORIAS_REQUERIDAS' THEN cpri.valor_default END) AS obligatorias_generales, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='OPTATIVAS_REQUERIDAS' THEN cpri.valor_default END) AS optativas_generales, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='RESTRINGIR_PRIMER_SEMESTRE' THEN cpri.valor_default END) AS restringir_primer_semestre_general, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO' THEN cpri.valor_default END) AS mostrar_segundo_sin_primero_general, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='AUTOSELECCIONAR_OBLIGATORIAS' THEN cpri.valor_default END) AS autoseleccionar_general, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='BLOQUEAR_OBLIGATORIAS' THEN cpri.valor_default END) AS bloquear_general, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='FORZAR_PRIMER_SEMESTRE_PENDIENTE' THEN cpri.valor_default END) AS forzar_primer_semestre_pendiente_general, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='OBLIGATORIAS_REQUERIDAS' THEN cpri.descripcion END) AS ayuda_obligatorias_general, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='OPTATIVAS_REQUERIDAS' THEN cpri.descripcion END) AS ayuda_optativas_general, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='RESTRINGIR_PRIMER_SEMESTRE' THEN cpri.descripcion END) AS ayuda_restringir_primer_semestre_general, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO' THEN cpri.descripcion END) AS ayuda_mostrar_segundo_sin_primero_general, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='AUTOSELECCIONAR_OBLIGATORIAS' THEN cpri.descripcion END) AS ayuda_autoseleccionar_general, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='BLOQUEAR_OBLIGATORIAS' THEN cpri.descripcion END) AS ayuda_bloquear_general, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='FORZAR_PRIMER_SEMESTRE_PENDIENTE' THEN cpri.descripcion END) AS ayuda_forzar_primer_semestre_pendiente_general "
+				+ "FROM cat_reglas_inscripcion cri JOIN cat_parametros_regla_inscripcion cpri "
+				+ "ON cpri.clave_regla=cri.clave WHERE cri.clave='CARGA_NUEVO_INGRESO' "
+				+ "GROUP BY cri.nombre,cri.descripcion,cri.activo";
+		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
+		if (resultados.isEmpty()) {
+			throw new IllegalArgumentException("No existe la regla general CARGA_NUEVO_INGRESO");
+		}
+		Object[] row = resultados.get(0);
+		ConfiguracionCargaNuevoIngresoDTO dto = new ConfiguracionCargaNuevoIngresoDTO();
+		dto.setNombreRegla((String) row[0]);
+		dto.setDescripcionRegla((String) row[1]);
+		dto.setActiva(Integer.valueOf(1).equals(getIntegerValue(row[2])));
+		dto.setObligatoriasRequeridas(obtenerEnteroConfiguracion(row[3], "OBLIGATORIAS_REQUERIDAS", "general"));
+		dto.setOptativasRequeridas(obtenerEnteroConfiguracion(row[4], "OPTATIVAS_REQUERIDAS", "general"));
+		dto.setRestringirPrimerSemestre(obtenerBooleanoConfiguracion(row[5], "RESTRINGIR_PRIMER_SEMESTRE", "general"));
+		dto.setMostrarSegundoSemestreSinOfertaPrimero(obtenerBooleanoConfiguracion(row[6], "MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO", "general"));
+		dto.setAutoseleccionarObligatorias(obtenerBooleanoConfiguracion(row[7], "AUTOSELECCIONAR_OBLIGATORIAS", "general"));
+		dto.setBloquearObligatorias(obtenerBooleanoConfiguracion(row[8], "BLOQUEAR_OBLIGATORIAS", "general"));
+		dto.setForzarPrimerSemestrePendiente(obtenerBooleanoConfiguracion(row[9], "FORZAR_PRIMER_SEMESTRE_PENDIENTE", "general"));
+		dto.setAyudaObligatorias((String) row[10]);
+		dto.setAyudaOptativas((String) row[11]);
+		dto.setAyudaRestringirPrimerSemestre((String) row[12]);
+		dto.setAyudaMostrarSegundoSemestreSinOfertaPrimero((String) row[13]);
+		dto.setAyudaAutoseleccionarObligatorias((String) row[14]);
+		dto.setAyudaBloquearObligatorias((String) row[15]);
+		dto.setAyudaForzarPrimerSemestrePendiente((String) row[16]);
+		return dto;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<ConfiguracionCargaNuevoIngresoDTO> obtenerPlanesDisponiblesCargaNuevoIngreso() {
+		String sql = "SELECT tp.id_plan AS id_plan_disponible, tp.nombre AS nombre_plan_disponible, "
+				+ "cri.nombre AS nombre_regla_disponible, cri.descripcion AS descripcion_regla_disponible "
+				+ "FROM tbl_planes tp JOIN cat_reglas_inscripcion cri ON cri.clave='CARGA_NUEVO_INGRESO' "
+				+ "ORDER BY tp.nombre";
+		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
+		return resultados.stream().map(row -> {
+			ConfiguracionCargaNuevoIngresoDTO dto = new ConfiguracionCargaNuevoIngresoDTO();
+			dto.setIdPlan(getLongValue(row[0]));
+			dto.setNombrePlan((String) row[1]);
+			dto.setNombreRegla((String) row[2]);
+			dto.setDescripcionRegla((String) row[3]);
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public ConfiguracionCargaNuevoIngresoDTO obtenerConfiguracionCargaNuevoIngreso(Long idPlan, Long idPersona) {
+		if (idPersona != null) {
+			List<Object[]> configuracionPersona = entityManager.createNativeQuery(
+					"SELECT * FROM (" + construirConsultaCargaNuevoIngresoPersona()
+							+ ") configuracion_persona WHERE configuracion_persona.id_plan_configuracion=:idPlan "
+							+ "AND configuracion_persona.id_persona_configuracion=:idPersona")
+					.setParameter("idPlan", idPlan).setParameter("idPersona", idPersona).getResultList();
+			if (!configuracionPersona.isEmpty()) {
+				return mapearConfiguracionCargaNuevoIngreso(configuracionPersona.get(0));
+			}
+		}
+		List<Object[]> resultados = entityManager.createNativeQuery(
+				"SELECT * FROM (" + construirConsultaCargaNuevoIngreso(false)
+						+ ") configuracion_carga WHERE configuracion_carga.id_plan_configuracion = :idPlan")
+				.setParameter("idPlan", idPlan).getResultList();
+		if (resultados.isEmpty()) {
+			throw new IllegalArgumentException("No existe configuración de carga de nuevo ingreso para el plan " + idPlan);
+		}
+		return mapearConfiguracionCargaNuevoIngreso(resultados.get(0));
+	}
+
+	private String construirConsultaCargaNuevoIngresoPersona() {
+		return "SELECT tp.id_plan AS id_plan_configuracion, tp.nombre AS nombre_plan_configuracion, "
+				+ "cri.nombre AS nombre_regla_configuracion, cri.descripcion AS descripcion_regla_configuracion, "
+				+ "rripp.activo AS activo_regla_plan, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='OBLIGATORIAS_REQUERIDAS' THEN COALESCE(rvPersona.valor,rvPlan.valor,cpri.valor_default) END) AS obligatorias_requeridas, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='OPTATIVAS_REQUERIDAS' THEN COALESCE(rvPersona.valor,rvPlan.valor,cpri.valor_default) END) AS optativas_requeridas, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='RESTRINGIR_PRIMER_SEMESTRE' THEN COALESCE(rvPersona.valor,rvPlan.valor,cpri.valor_default) END) AS restringir_primer_semestre, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO' THEN COALESCE(rvPersona.valor,rvPlan.valor,cpri.valor_default) END) AS mostrar_segundo_sin_primero, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='AUTOSELECCIONAR_OBLIGATORIAS' THEN COALESCE(rvPersona.valor,rvPlan.valor,cpri.valor_default) END) AS autoseleccionar_obligatorias, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='BLOQUEAR_OBLIGATORIAS' THEN COALESCE(rvPersona.valor,rvPlan.valor,cpri.valor_default) END) AS bloquear_obligatorias, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='FORZAR_PRIMER_SEMESTRE_PENDIENTE' THEN COALESCE(rvPersona.valor,rvPlan.valor,cpri.valor_default) END) AS forzar_primer_semestre_pendiente, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='OBLIGATORIAS_REQUERIDAS' THEN cpri.descripcion END) AS ayuda_obligatorias, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='OPTATIVAS_REQUERIDAS' THEN cpri.descripcion END) AS ayuda_optativas, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='RESTRINGIR_PRIMER_SEMESTRE' THEN cpri.descripcion END) AS ayuda_restringir_primer_semestre, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO' THEN cpri.descripcion END) AS ayuda_mostrar_segundo_sin_primero, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='AUTOSELECCIONAR_OBLIGATORIAS' THEN cpri.descripcion END) AS ayuda_autoseleccionar_obligatorias, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='BLOQUEAR_OBLIGATORIAS' THEN cpri.descripcion END) AS ayuda_bloquear_obligatorias, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='FORZAR_PRIMER_SEMESTRE_PENDIENTE' THEN cpri.descripcion END) AS ayuda_forzar_primer_semestre_pendiente, "
+				+ "persona.id_persona AS id_persona_configuracion, persona.sso_idUsuario AS username_configuracion "
+				+ "FROM rel_regla_inscripcion_plan_persona rripp "
+				+ "JOIN tbl_planes tp ON tp.id_plan=rripp.id_plan "
+				+ "JOIN tbl_persona persona ON persona.id_persona=rripp.id_persona "
+				+ "JOIN cat_reglas_inscripcion cri ON cri.clave=rripp.clave_regla "
+				+ "JOIN cat_parametros_regla_inscripcion cpri ON cpri.clave_regla=cri.clave "
+				+ "LEFT JOIN rel_regla_inscripcion_plan rrip ON rrip.clave_regla=cri.clave AND rrip.id_plan=tp.id_plan "
+				+ "LEFT JOIN rel_valor_parametro_regla_plan rvPlan ON rvPlan.clave_regla=cri.clave "
+				+ "AND rvPlan.id_plan=tp.id_plan AND rvPlan.clave_parametro=cpri.clave_parametro "
+				+ "LEFT JOIN rel_valor_parametro_regla_plan_persona rvPersona ON rvPersona.clave_regla=cri.clave "
+				+ "AND rvPersona.id_plan=tp.id_plan AND rvPersona.id_persona=persona.id_persona "
+				+ "AND rvPersona.clave_parametro=cpri.clave_parametro "
+				+ "WHERE cri.clave='CARGA_NUEVO_INGRESO' "
+				+ "GROUP BY tp.id_plan,tp.nombre,cri.nombre,cri.descripcion,rripp.activo,persona.id_persona,persona.sso_idUsuario";
+	}
+
+	private String construirConsultaCargaNuevoIngreso(boolean soloConfiguradas) {
+		String unionReglaPlan = soloConfiguradas
+				? "JOIN rel_regla_inscripcion_plan rrip ON rrip.clave_regla=cri.clave AND rrip.id_plan=tp.id_plan "
+				: "LEFT JOIN rel_regla_inscripcion_plan rrip ON rrip.clave_regla=cri.clave AND rrip.id_plan=tp.id_plan ";
+		return "SELECT tp.id_plan AS id_plan_configuracion, tp.nombre AS nombre_plan_configuracion, "
+				+ "cri.nombre AS nombre_regla_configuracion, cri.descripcion AS descripcion_regla_configuracion, "
+				+ "COALESCE(rrip.activo, cri.activo) AS activo_regla_plan, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='OBLIGATORIAS_REQUERIDAS' THEN COALESCE(rv.valor,cpri.valor_default) END) AS obligatorias_requeridas, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='OPTATIVAS_REQUERIDAS' THEN COALESCE(rv.valor,cpri.valor_default) END) AS optativas_requeridas, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='RESTRINGIR_PRIMER_SEMESTRE' THEN COALESCE(rv.valor,cpri.valor_default) END) AS restringir_primer_semestre, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO' THEN COALESCE(rv.valor,cpri.valor_default) END) AS mostrar_segundo_sin_primero, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='AUTOSELECCIONAR_OBLIGATORIAS' THEN COALESCE(rv.valor,cpri.valor_default) END) AS autoseleccionar_obligatorias, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='BLOQUEAR_OBLIGATORIAS' THEN COALESCE(rv.valor,cpri.valor_default) END) AS bloquear_obligatorias, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='FORZAR_PRIMER_SEMESTRE_PENDIENTE' THEN COALESCE(rv.valor,cpri.valor_default) END) AS forzar_primer_semestre_pendiente, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='OBLIGATORIAS_REQUERIDAS' THEN cpri.descripcion END) AS ayuda_obligatorias, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='OPTATIVAS_REQUERIDAS' THEN cpri.descripcion END) AS ayuda_optativas, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='RESTRINGIR_PRIMER_SEMESTRE' THEN cpri.descripcion END) AS ayuda_restringir_primer_semestre, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO' THEN cpri.descripcion END) AS ayuda_mostrar_segundo_sin_primero, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='AUTOSELECCIONAR_OBLIGATORIAS' THEN cpri.descripcion END) AS ayuda_autoseleccionar_obligatorias, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='BLOQUEAR_OBLIGATORIAS' THEN cpri.descripcion END) AS ayuda_bloquear_obligatorias, "
+				+ "MAX(CASE WHEN cpri.clave_parametro='FORZAR_PRIMER_SEMESTRE_PENDIENTE' THEN cpri.descripcion END) AS ayuda_forzar_primer_semestre_pendiente "
+				+ "FROM tbl_planes tp JOIN cat_reglas_inscripcion cri ON cri.clave='CARGA_NUEVO_INGRESO' "
+				+ "JOIN cat_parametros_regla_inscripcion cpri ON cpri.clave_regla=cri.clave "
+				+ unionReglaPlan
+				+ "LEFT JOIN rel_valor_parametro_regla_plan rv ON rv.clave_regla=cri.clave AND rv.id_plan=tp.id_plan "
+				+ "AND rv.clave_parametro=cpri.clave_parametro "
+				+ "GROUP BY tp.id_plan,tp.nombre,cri.nombre,cri.descripcion,rrip.id_plan,rrip.activo,cri.activo";
+	}
+
+	private ConfiguracionCargaNuevoIngresoDTO mapearConfiguracionCargaNuevoIngreso(Object[] row) {
+		ConfiguracionCargaNuevoIngresoDTO dto = new ConfiguracionCargaNuevoIngresoDTO();
+		dto.setIdPlan(getLongValue(row[0]));
+		dto.setNombrePlan((String) row[1]);
+		dto.setNombreRegla((String) row[2]);
+		dto.setDescripcionRegla((String) row[3]);
+		dto.setActiva(Integer.valueOf(1).equals(getIntegerValue(row[4])));
+		String alcance = "plan " + dto.getIdPlan();
+		dto.setObligatoriasRequeridas(obtenerEnteroConfiguracion(row[5], "OBLIGATORIAS_REQUERIDAS", alcance));
+		dto.setOptativasRequeridas(obtenerEnteroConfiguracion(row[6], "OPTATIVAS_REQUERIDAS", alcance));
+		dto.setRestringirPrimerSemestre(obtenerBooleanoConfiguracion(row[7], "RESTRINGIR_PRIMER_SEMESTRE", alcance));
+		dto.setMostrarSegundoSemestreSinOfertaPrimero(obtenerBooleanoConfiguracion(row[8], "MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO", alcance));
+		dto.setAutoseleccionarObligatorias(obtenerBooleanoConfiguracion(row[9], "AUTOSELECCIONAR_OBLIGATORIAS", alcance));
+		dto.setBloquearObligatorias(obtenerBooleanoConfiguracion(row[10], "BLOQUEAR_OBLIGATORIAS", alcance));
+		dto.setForzarPrimerSemestrePendiente(obtenerBooleanoConfiguracion(row[11], "FORZAR_PRIMER_SEMESTRE_PENDIENTE", alcance));
+		dto.setAyudaObligatorias((String) row[12]);
+		dto.setAyudaOptativas((String) row[13]);
+		dto.setAyudaRestringirPrimerSemestre((String) row[14]);
+		dto.setAyudaMostrarSegundoSemestreSinOfertaPrimero((String) row[15]);
+		dto.setAyudaAutoseleccionarObligatorias((String) row[16]);
+		dto.setAyudaBloquearObligatorias((String) row[17]);
+		dto.setAyudaForzarPrimerSemestrePendiente((String) row[18]);
+		if (row.length > 20) {
+			dto.setIdPersona(getLongValue(row[19]));
+			dto.setUsername((String) row[20]);
+		}
+		return dto;
+	}
+
+	private Integer obtenerEnteroConfiguracion(Object valor, String parametro, String alcance) {
+		if (valor == null) {
+			throw new IllegalStateException("Falta configurar el parámetro " + parametro + " para la regla " + alcance);
+		}
+		try {
+			return Integer.valueOf(valor.toString());
+		} catch (NumberFormatException e) {
+			throw new IllegalStateException("El parámetro " + parametro + " de la regla " + alcance
+					+ " debe contener un número entero y tiene el valor '" + valor + "'", e);
+		}
+	}
+
+	private Boolean obtenerBooleanoConfiguracion(Object valor, String parametro, String alcance) {
+		if (valor == null) {
+			throw new IllegalStateException("Falta configurar el parámetro " + parametro + " para la regla " + alcance);
+		}
+		String texto = valor.toString();
+		if (!"0".equals(texto) && !"1".equals(texto)) {
+			throw new IllegalStateException("El parámetro " + parametro + " de la regla " + alcance
+					+ " debe contener 0 o 1 y tiene el valor '" + texto + "'");
+		}
+		return "1".equals(texto);
+	}
+
+	@Override
+	public void guardarConfiguracionCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion,
+			Long idUsuario) {
+		validarConfiguracionCargaNuevoIngreso(configuracion);
+		if (configuracion.getIdPlan() == null) {
+			throw new IllegalArgumentException("El plan es obligatorio para una regla específica");
+		}
+		Long idPersona = obtenerIdPersonaConfiguracion(configuracion);
+		if (idPersona != null) {
+			guardarConfiguracionCargaNuevoIngresoPersona(configuracion, idPersona, idUsuario);
+			return;
+		}
+		String regla = "INSERT INTO rel_regla_inscripcion_plan (clave_regla,id_plan,activo,usuario_modifico) "
+				+ "VALUES ('CARGA_NUEVO_INGRESO',:idPlan,:activo,:usuario) ON DUPLICATE KEY UPDATE "
+				+ "activo=VALUES(activo),usuario_modifico=VALUES(usuario_modifico),fecha_actualizacion=CURRENT_TIMESTAMP";
+		entityManager.createNativeQuery(regla).setParameter("idPlan", configuracion.getIdPlan())
+				.setParameter("activo", Boolean.TRUE.equals(configuracion.getActiva()) ? 1 : 0)
+				.setParameter("usuario", idUsuario).executeUpdate();
+		guardarValorParametroCarga(configuracion.getIdPlan(), "OBLIGATORIAS_REQUERIDAS", configuracion.getObligatoriasRequeridas().toString(), idUsuario);
+		guardarValorParametroCarga(configuracion.getIdPlan(), "OPTATIVAS_REQUERIDAS", configuracion.getOptativasRequeridas().toString(), idUsuario);
+		guardarValorParametroCarga(configuracion.getIdPlan(), "RESTRINGIR_PRIMER_SEMESTRE", Boolean.TRUE.equals(configuracion.getRestringirPrimerSemestre()) ? "1" : "0", idUsuario);
+		guardarValorParametroCarga(configuracion.getIdPlan(), "MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO", Boolean.TRUE.equals(configuracion.getMostrarSegundoSemestreSinOfertaPrimero()) ? "1" : "0", idUsuario);
+		guardarValorParametroCarga(configuracion.getIdPlan(), "AUTOSELECCIONAR_OBLIGATORIAS", Boolean.TRUE.equals(configuracion.getAutoseleccionarObligatorias()) ? "1" : "0", idUsuario);
+		guardarValorParametroCarga(configuracion.getIdPlan(), "BLOQUEAR_OBLIGATORIAS", Boolean.TRUE.equals(configuracion.getBloquearObligatorias()) ? "1" : "0", idUsuario);
+		guardarValorParametroCarga(configuracion.getIdPlan(), "FORZAR_PRIMER_SEMESTRE_PENDIENTE", Boolean.TRUE.equals(configuracion.getForzarPrimerSemestrePendiente()) ? "1" : "0", idUsuario);
+	}
+
+	private Long obtenerIdPersonaConfiguracion(ConfiguracionCargaNuevoIngresoDTO configuracion) {
+		if (configuracion.getIdPersona() != null) {
+			validarPersonaConfiguracion(configuracion.getIdPersona(), configuracion.getIdPlan());
+			return configuracion.getIdPersona();
+		}
+		if (configuracion.getUsername() == null || configuracion.getUsername().trim().isEmpty()) {
+			return null;
+		}
+		String sql = "SELECT DISTINCT persona.id_persona FROM tbl_persona persona "
+				+ "JOIN tbl_persona_aspirante aspirante ON aspirante.id_persona=persona.id_persona "
+				+ "WHERE LOWER(TRIM(persona.sso_idUsuario))=LOWER(TRIM(:username)) "
+				+ "AND aspirante.id_plan=:idPlan";
+		List<?> personas = entityManager.createNativeQuery(sql)
+				.setParameter("username", configuracion.getUsername())
+				.setParameter("idPlan", configuracion.getIdPlan()).getResultList();
+		if (personas.isEmpty()) {
+			throw new IllegalArgumentException("El username '" + configuracion.getUsername()
+					+ "' no existe o no corresponde al plan " + configuracion.getIdPlan());
+		}
+		if (personas.size() > 1) {
+			throw new IllegalArgumentException("El username '" + configuracion.getUsername()
+					+ "' está asociado más de una vez al plan " + configuracion.getIdPlan());
+		}
+		return getLongValue(personas.get(0));
+	}
+
+	private void validarPersonaConfiguracion(Long idPersona, Long idPlan) {
+		String sql = "SELECT COUNT(*) FROM tbl_persona_aspirante aspirante "
+				+ "WHERE aspirante.id_persona=:idPersona AND aspirante.id_plan=:idPlan";
+		Object resultado = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona)
+				.setParameter("idPlan", idPlan).getSingleResult();
+		if (getLongValue(resultado) == 0L) {
+			throw new IllegalArgumentException("El usuario no corresponde al plan " + idPlan);
+		}
+	}
+
+	private void guardarConfiguracionCargaNuevoIngresoPersona(ConfiguracionCargaNuevoIngresoDTO configuracion,
+			Long idPersona, Long idUsuario) {
+		String regla = "INSERT INTO rel_regla_inscripcion_plan_persona "
+				+ "(clave_regla,id_plan,id_persona,activo,usuario_modifico) "
+				+ "VALUES ('CARGA_NUEVO_INGRESO',:idPlan,:idPersona,:activo,:usuario) "
+				+ "ON DUPLICATE KEY UPDATE activo=VALUES(activo),usuario_modifico=VALUES(usuario_modifico),"
+				+ "fecha_actualizacion=CURRENT_TIMESTAMP";
+		entityManager.createNativeQuery(regla).setParameter("idPlan", configuracion.getIdPlan())
+				.setParameter("idPersona", idPersona)
+				.setParameter("activo", Boolean.TRUE.equals(configuracion.getActiva()) ? 1 : 0)
+				.setParameter("usuario", idUsuario).executeUpdate();
+		guardarValorParametroCargaPersona(configuracion.getIdPlan(), idPersona, "OBLIGATORIAS_REQUERIDAS", configuracion.getObligatoriasRequeridas().toString(), idUsuario);
+		guardarValorParametroCargaPersona(configuracion.getIdPlan(), idPersona, "OPTATIVAS_REQUERIDAS", configuracion.getOptativasRequeridas().toString(), idUsuario);
+		guardarValorParametroCargaPersona(configuracion.getIdPlan(), idPersona, "RESTRINGIR_PRIMER_SEMESTRE", Boolean.TRUE.equals(configuracion.getRestringirPrimerSemestre()) ? "1" : "0", idUsuario);
+		guardarValorParametroCargaPersona(configuracion.getIdPlan(), idPersona, "MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO", Boolean.TRUE.equals(configuracion.getMostrarSegundoSemestreSinOfertaPrimero()) ? "1" : "0", idUsuario);
+		guardarValorParametroCargaPersona(configuracion.getIdPlan(), idPersona, "AUTOSELECCIONAR_OBLIGATORIAS", Boolean.TRUE.equals(configuracion.getAutoseleccionarObligatorias()) ? "1" : "0", idUsuario);
+		guardarValorParametroCargaPersona(configuracion.getIdPlan(), idPersona, "BLOQUEAR_OBLIGATORIAS", Boolean.TRUE.equals(configuracion.getBloquearObligatorias()) ? "1" : "0", idUsuario);
+		guardarValorParametroCargaPersona(configuracion.getIdPlan(), idPersona, "FORZAR_PRIMER_SEMESTRE_PENDIENTE", Boolean.TRUE.equals(configuracion.getForzarPrimerSemestrePendiente()) ? "1" : "0", idUsuario);
+	}
+
+	private void validarConfiguracionCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion) {
+		if (configuracion.getObligatoriasRequeridas() == null || configuracion.getObligatoriasRequeridas() < 0
+				|| configuracion.getOptativasRequeridas() == null || configuracion.getOptativasRequeridas() < 0) {
+			throw new IllegalArgumentException("Las cantidades de unidades didácticas no pueden ser negativas");
+		}
+		if (configuracion.getObligatoriasRequeridas() + configuracion.getOptativasRequeridas() == 0) {
+			throw new IllegalArgumentException("La carga configurada debe requerir al menos una unidad didáctica");
+		}
+		if (Boolean.TRUE.equals(configuracion.getBloquearObligatorias())
+				&& !Boolean.TRUE.equals(configuracion.getAutoseleccionarObligatorias())) {
+			throw new IllegalArgumentException(
+					"No se pueden bloquear las obligatorias si no se seleccionan automáticamente");
+		}
+	}
+
+	@Override
+	public void guardarConfiguracionGeneralCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion,
+			Long idUsuario) {
+		validarConfiguracionCargaNuevoIngreso(configuracion);
+		String regla = "UPDATE cat_reglas_inscripcion SET activo=:activo,usuario_modifico=:usuario,"
+				+ "fecha_actualizacion=CURRENT_TIMESTAMP WHERE clave='CARGA_NUEVO_INGRESO'";
+		entityManager.createNativeQuery(regla)
+				.setParameter("activo", Boolean.TRUE.equals(configuracion.getActiva()) ? 1 : 0)
+				.setParameter("usuario", idUsuario).executeUpdate();
+		guardarValorDefaultCarga("OBLIGATORIAS_REQUERIDAS", configuracion.getObligatoriasRequeridas().toString());
+		guardarValorDefaultCarga("OPTATIVAS_REQUERIDAS", configuracion.getOptativasRequeridas().toString());
+		guardarValorDefaultCarga("RESTRINGIR_PRIMER_SEMESTRE", Boolean.TRUE.equals(configuracion.getRestringirPrimerSemestre()) ? "1" : "0");
+		guardarValorDefaultCarga("MOSTRAR_SEGUNDO_SIN_OFERTA_PRIMERO", Boolean.TRUE.equals(configuracion.getMostrarSegundoSemestreSinOfertaPrimero()) ? "1" : "0");
+		guardarValorDefaultCarga("AUTOSELECCIONAR_OBLIGATORIAS", Boolean.TRUE.equals(configuracion.getAutoseleccionarObligatorias()) ? "1" : "0");
+		guardarValorDefaultCarga("BLOQUEAR_OBLIGATORIAS", Boolean.TRUE.equals(configuracion.getBloquearObligatorias()) ? "1" : "0");
+		guardarValorDefaultCarga("FORZAR_PRIMER_SEMESTRE_PENDIENTE", Boolean.TRUE.equals(configuracion.getForzarPrimerSemestrePendiente()) ? "1" : "0");
+	}
+
+	@Override
+	public void eliminarConfiguracionCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion) {
+		if (configuracion == null || configuracion.getIdPlan() == null) {
+			throw new IllegalArgumentException("El plan es obligatorio para eliminar la regla específica");
+		}
+		if (configuracion.getIdPersona() != null) {
+			eliminarConfiguracionCargaNuevoIngresoPersona(configuracion);
+			return;
+		}
+		String eliminarValores = "DELETE FROM rel_valor_parametro_regla_plan "
+				+ "WHERE clave_regla='CARGA_NUEVO_INGRESO' AND id_plan=:idPlan";
+		entityManager.createNativeQuery(eliminarValores).setParameter("idPlan", configuracion.getIdPlan()).executeUpdate();
+
+		String eliminarRegla = "DELETE FROM rel_regla_inscripcion_plan "
+				+ "WHERE clave_regla='CARGA_NUEVO_INGRESO' AND id_plan=:idPlan";
+		int eliminadas = entityManager.createNativeQuery(eliminarRegla).setParameter("idPlan", configuracion.getIdPlan()).executeUpdate();
+		if (eliminadas == 0) {
+			throw new IllegalArgumentException("No existe una regla específica de nuevo ingreso para el plan "
+					+ configuracion.getIdPlan());
+		}
+	}
+
+	private void eliminarConfiguracionCargaNuevoIngresoPersona(ConfiguracionCargaNuevoIngresoDTO configuracion) {
+		String eliminarValores = "DELETE FROM rel_valor_parametro_regla_plan_persona "
+				+ "WHERE clave_regla='CARGA_NUEVO_INGRESO' AND id_plan=:idPlan AND id_persona=:idPersona";
+		entityManager.createNativeQuery(eliminarValores).setParameter("idPlan", configuracion.getIdPlan())
+				.setParameter("idPersona", configuracion.getIdPersona()).executeUpdate();
+		String eliminarRegla = "DELETE FROM rel_regla_inscripcion_plan_persona "
+				+ "WHERE clave_regla='CARGA_NUEVO_INGRESO' AND id_plan=:idPlan AND id_persona=:idPersona";
+		int eliminadas = entityManager.createNativeQuery(eliminarRegla)
+				.setParameter("idPlan", configuracion.getIdPlan())
+				.setParameter("idPersona", configuracion.getIdPersona()).executeUpdate();
+		if (eliminadas == 0) {
+			throw new IllegalArgumentException("No existe una regla específica de nuevo ingreso para el username '"
+					+ configuracion.getUsername() + "' en el plan " + configuracion.getIdPlan());
+		}
+	}
+
+	private void guardarValorDefaultCarga(String claveParametro, String valor) {
+		String sql = "UPDATE cat_parametros_regla_inscripcion SET valor_default=:valor "
+				+ "WHERE clave_regla='CARGA_NUEVO_INGRESO' AND clave_parametro=:parametro";
+		entityManager.createNativeQuery(sql).setParameter("valor", valor)
+				.setParameter("parametro", claveParametro).executeUpdate();
+	}
+
+	private void guardarValorParametroCarga(Long idPlan, String claveParametro, String valor, Long idUsuario) {
+		String sql = "INSERT INTO rel_valor_parametro_regla_plan "
+				+ "(clave_regla,id_plan,clave_parametro,valor,usuario_modifico) "
+				+ "VALUES ('CARGA_NUEVO_INGRESO',:idPlan,:parametro,:valor,:usuario) ON DUPLICATE KEY UPDATE "
+				+ "valor=VALUES(valor),usuario_modifico=VALUES(usuario_modifico),fecha_actualizacion=CURRENT_TIMESTAMP";
+		entityManager.createNativeQuery(sql).setParameter("idPlan", idPlan).setParameter("parametro", claveParametro)
+				.setParameter("valor", valor).setParameter("usuario", idUsuario).executeUpdate();
+	}
+
+	private void guardarValorParametroCargaPersona(Long idPlan, Long idPersona, String claveParametro,
+			String valor, Long idUsuario) {
+		String sql = "INSERT INTO rel_valor_parametro_regla_plan_persona "
+				+ "(clave_regla,id_plan,id_persona,clave_parametro,valor,usuario_modifico) "
+				+ "VALUES ('CARGA_NUEVO_INGRESO',:idPlan,:idPersona,:parametro,:valor,:usuario) "
+				+ "ON DUPLICATE KEY UPDATE valor=VALUES(valor),usuario_modifico=VALUES(usuario_modifico),"
+				+ "fecha_actualizacion=CURRENT_TIMESTAMP";
+		entityManager.createNativeQuery(sql).setParameter("idPlan", idPlan).setParameter("idPersona", idPersona)
+				.setParameter("parametro", claveParametro).setParameter("valor", valor)
+				.setParameter("usuario", idUsuario).executeUpdate();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public ConfiguracionCargaRegularDTO obtenerConfiguracionGeneralCargaRegular() {
+		String sql = construirConsultaConfiguracionRegular(false, false);
+		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
+		if (resultados.isEmpty()) {
+			throw new IllegalArgumentException("No existe la regla general CARGA_ESTUDIANTE_REGULAR");
+		}
+		return mapearConfiguracionRegular(resultados.get(0));
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<ConfiguracionCargaRegularDTO> obtenerConfiguracionesCargaRegular() {
+		return ((List<Object[]>) entityManager.createNativeQuery(construirConsultaConfiguracionRegular(true, true))
+				.getResultList()).stream().map(this::mapearConfiguracionRegular).collect(Collectors.toList());
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<ConfiguracionCargaRegularDTO> obtenerPlanesDisponiblesCargaRegular() {
+		String sql = "SELECT tp.id_plan AS id_plan,tp.nombre AS nombre_plan,"
+				+ "cri.nombre AS nombre_regla,cri.descripcion AS descripcion_regla FROM tbl_planes tp "
+				+ "JOIN cat_reglas_inscripcion cri ON cri.clave='CARGA_ESTUDIANTE_REGULAR' ORDER BY tp.nombre";
+		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
+		return resultados.stream().map(row -> {
+			ConfiguracionCargaRegularDTO dto = new ConfiguracionCargaRegularDTO();
+			dto.setIdPlan(getLongValue(row[0]));
+			dto.setNombrePlan((String) row[1]);
+			dto.setNombreRegla((String) row[2]);
+			dto.setDescripcionRegla((String) row[3]);
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public ConfiguracionCargaRegularDTO obtenerConfiguracionCargaRegular(Long idPlan) {
+		List<Object[]> resultados = entityManager.createNativeQuery(construirConsultaConfiguracionRegular(true, false))
+				.setParameter("idPlan", idPlan).getResultList();
+		if (resultados.isEmpty()) {
+			throw new IllegalArgumentException("No existe configuración de carga regular para el plan " + idPlan);
+		}
+		return mapearConfiguracionRegular(resultados.get(0));
+	}
+
+	private String construirConsultaConfiguracionRegular(boolean incluirPlan, boolean soloConfiguradas) {
+		String camposPlan = incluirPlan ? "tp.id_plan AS id_plan,tp.nombre AS nombre_plan,"
+				: "CAST(NULL AS SIGNED) AS id_plan,CAST(NULL AS CHAR) AS nombre_plan,";
+		String origen = incluirPlan
+				? "FROM tbl_planes tp JOIN cat_reglas_inscripcion cri ON cri.clave='CARGA_ESTUDIANTE_REGULAR' "
+				: "FROM cat_reglas_inscripcion cri ";
+		String unionRegla = incluirPlan
+				? (soloConfiguradas
+						? "JOIN rel_regla_inscripcion_plan rrip ON rrip.clave_regla=cri.clave AND rrip.id_plan=tp.id_plan "
+						: "LEFT JOIN rel_regla_inscripcion_plan rrip ON rrip.clave_regla=cri.clave AND rrip.id_plan=tp.id_plan ")
+				: "";
+		String unionValores = incluirPlan
+				? "LEFT JOIN rel_valor_parametro_regla_plan rv ON rv.clave_regla=cri.clave AND rv.id_plan=tp.id_plan AND rv.clave_parametro=p.clave_parametro "
+				: "";
+		String valor = incluirPlan ? "COALESCE(rv.valor,p.valor_default)" : "p.valor_default";
+		String activo = incluirPlan ? "COALESCE(rrip.activo,cri.activo)" : "cri.activo";
+		String where = incluirPlan
+				? (!soloConfiguradas ? "WHERE tp.id_plan=:idPlan " : "")
+				: "WHERE cri.clave='CARGA_ESTUDIANTE_REGULAR' ";
+		String group = incluirPlan ? "GROUP BY tp.id_plan,tp.nombre,cri.nombre,cri.descripcion,rrip.activo,cri.activo "
+				: "GROUP BY cri.nombre,cri.descripcion,cri.activo ";
+		return "SELECT " + camposPlan + "cri.nombre AS nombre_regla,cri.descripcion AS descripcion_regla,"
+				+ activo + " AS activo_regla,"
+				+ "MAX(CASE WHEN p.clave_parametro='RESTRINGIR_AVANCE_ANUAL' THEN " + valor + " END) AS restringir_avance_anual,"
+				+ "MAX(CASE WHEN p.clave_parametro='PERMITIR_SEMESTRE_ADYACENTE' THEN " + valor + " END) AS permitir_semestre_adyacente,"
+				+ "MAX(CASE WHEN p.clave_parametro='MINIMO_OBLIGATORIAS' THEN " + valor + " END) AS minimo_obligatorias "
+				+ origen + "JOIN cat_parametros_regla_inscripcion p ON p.clave_regla=cri.clave "
+				+ unionRegla + unionValores + where + group + (soloConfiguradas ? "ORDER BY tp.nombre" : "");
+	}
+
+	private ConfiguracionCargaRegularDTO mapearConfiguracionRegular(Object[] row) {
+		ConfiguracionCargaRegularDTO dto = new ConfiguracionCargaRegularDTO();
+		dto.setIdPlan(getLongValue(row[0]));
+		dto.setNombrePlan((String) row[1]);
+		dto.setNombreRegla((String) row[2]);
+		dto.setDescripcionRegla((String) row[3]);
+		dto.setActiva(Integer.valueOf(1).equals(getIntegerValue(row[4])));
+		dto.setRestringirAvanceAnual(obtenerBooleanoConfiguracion(row[5], "RESTRINGIR_AVANCE_ANUAL", "carga regular"));
+		dto.setPermitirSemestreAdyacente(obtenerBooleanoConfiguracion(row[6], "PERMITIR_SEMESTRE_ADYACENTE", "carga regular"));
+		dto.setMinimoObligatorias(obtenerEnteroConfiguracion(row[7], "MINIMO_OBLIGATORIAS", "carga regular"));
+		return dto;
+	}
+
+	@Override
+	public void guardarConfiguracionGeneralCargaRegular(ConfiguracionCargaRegularDTO configuracion, Long idUsuario) {
+		validarConfiguracionRegular(configuracion);
+		actualizarEstadoRegla("CARGA_ESTUDIANTE_REGULAR", configuracion.getActiva(), idUsuario);
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_REGULAR", "RESTRINGIR_AVANCE_ANUAL", booleano(configuracion.getRestringirAvanceAnual()));
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_REGULAR", "PERMITIR_SEMESTRE_ADYACENTE", booleano(configuracion.getPermitirSemestreAdyacente()));
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_REGULAR", "MINIMO_OBLIGATORIAS", configuracion.getMinimoObligatorias().toString());
+	}
+
+	@Override
+	public void guardarConfiguracionCargaRegular(ConfiguracionCargaRegularDTO configuracion, Long idUsuario) {
+		validarConfiguracionRegular(configuracion);
+		if (configuracion.getIdPlan() == null) {
+			throw new IllegalArgumentException("El plan es obligatorio para la carga regular");
+		}
+		guardarEstadoReglaPlan("CARGA_ESTUDIANTE_REGULAR", configuracion.getIdPlan(), configuracion.getActiva(), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_REGULAR", configuracion.getIdPlan(), "RESTRINGIR_AVANCE_ANUAL", booleano(configuracion.getRestringirAvanceAnual()), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_REGULAR", configuracion.getIdPlan(), "PERMITIR_SEMESTRE_ADYACENTE", booleano(configuracion.getPermitirSemestreAdyacente()), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_REGULAR", configuracion.getIdPlan(), "MINIMO_OBLIGATORIAS", configuracion.getMinimoObligatorias().toString(), idUsuario);
+	}
+
+	@Override
+	public void eliminarConfiguracionCargaRegular(ConfiguracionCargaRegularDTO configuracion) {
+		if (configuracion == null || configuracion.getIdPlan() == null) {
+			throw new IllegalArgumentException("El plan es obligatorio para eliminar la carga regular");
+		}
+		entityManager.createNativeQuery("DELETE FROM rel_valor_parametro_regla_plan WHERE clave_regla='CARGA_ESTUDIANTE_REGULAR' AND id_plan=:idPlan")
+				.setParameter("idPlan", configuracion.getIdPlan()).executeUpdate();
+		entityManager.createNativeQuery("DELETE FROM rel_regla_inscripcion_plan WHERE clave_regla='CARGA_ESTUDIANTE_REGULAR' AND id_plan=:idPlan")
+				.setParameter("idPlan", configuracion.getIdPlan()).executeUpdate();
+	}
+
+	private void validarConfiguracionRegular(ConfiguracionCargaRegularDTO configuracion) {
+		if (configuracion.getMinimoObligatorias() == null || configuracion.getMinimoObligatorias() < 0) {
+			throw new IllegalArgumentException("Los límites de carga regular no pueden ser negativos");
+		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public ConfiguracionCargaIrregularDTO obtenerConfiguracionGeneralCargaIrregular() {
+		String sql = construirConsultaConfiguracionIrregular(false, false);
+		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
+		if (resultados.isEmpty()) {
+			throw new IllegalArgumentException("No existe la regla general CARGA_ESTUDIANTE_IRREGULAR");
+		}
+		return mapearConfiguracionIrregular(resultados.get(0));
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<ConfiguracionCargaIrregularDTO> obtenerConfiguracionesCargaIrregular() {
+		return ((List<Object[]>) entityManager.createNativeQuery(construirConsultaConfiguracionIrregular(true, true))
+				.getResultList()).stream().map(this::mapearConfiguracionIrregular).collect(Collectors.toList());
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<ConfiguracionCargaIrregularDTO> obtenerPlanesDisponiblesCargaIrregular() {
+		String sql = "SELECT tp.id_plan AS id_plan,tp.nombre AS nombre_plan,"
+				+ "cri.nombre AS nombre_regla,cri.descripcion AS descripcion_regla FROM tbl_planes tp "
+				+ "JOIN cat_reglas_inscripcion cri ON cri.clave='CARGA_ESTUDIANTE_IRREGULAR' ORDER BY tp.nombre";
+		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
+		return resultados.stream().map(row -> {
+			ConfiguracionCargaIrregularDTO dto = new ConfiguracionCargaIrregularDTO();
+			dto.setIdPlan(getLongValue(row[0]));
+			dto.setNombrePlan((String) row[1]);
+			dto.setNombreRegla((String) row[2]);
+			dto.setDescripcionRegla((String) row[3]);
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public ConfiguracionCargaIrregularDTO obtenerConfiguracionCargaIrregular(Long idPlan) {
+		List<Object[]> resultados = entityManager.createNativeQuery(construirConsultaConfiguracionIrregular(true, false))
+				.setParameter("idPlan", idPlan).getResultList();
+		if (resultados.isEmpty()) {
+			throw new IllegalArgumentException("No existe configuración de carga irregular para el plan " + idPlan);
+		}
+		return mapearConfiguracionIrregular(resultados.get(0));
+	}
+
+	private String construirConsultaConfiguracionIrregular(boolean incluirPlan, boolean soloConfiguradas) {
+		String camposPlan = incluirPlan ? "tp.id_plan AS id_plan,tp.nombre AS nombre_plan,"
+				: "CAST(NULL AS SIGNED) AS id_plan,CAST(NULL AS CHAR) AS nombre_plan,";
+		String origen = incluirPlan
+				? "FROM tbl_planes tp JOIN cat_reglas_inscripcion cri ON cri.clave='CARGA_ESTUDIANTE_IRREGULAR' "
+				: "FROM cat_reglas_inscripcion cri ";
+		String unionRegla = incluirPlan
+				? (soloConfiguradas
+						? "JOIN rel_regla_inscripcion_plan rrip ON rrip.clave_regla=cri.clave AND rrip.id_plan=tp.id_plan "
+						: "LEFT JOIN rel_regla_inscripcion_plan rrip ON rrip.clave_regla=cri.clave AND rrip.id_plan=tp.id_plan ")
+				: "";
+		String unionValores = incluirPlan
+				? "LEFT JOIN rel_valor_parametro_regla_plan rv ON rv.clave_regla=cri.clave AND rv.id_plan=tp.id_plan AND rv.clave_parametro=p.clave_parametro "
+				: "";
+		String valor = incluirPlan ? "COALESCE(rv.valor,p.valor_default)" : "p.valor_default";
+		String activo = incluirPlan ? "COALESCE(rrip.activo,cri.activo)" : "cri.activo";
+		String where = incluirPlan
+				? (!soloConfiguradas ? "WHERE tp.id_plan=:idPlan " : "")
+				: "WHERE cri.clave='CARGA_ESTUDIANTE_IRREGULAR' ";
+		String group = incluirPlan ? "GROUP BY tp.id_plan,tp.nombre,cri.nombre,cri.descripcion,rrip.activo,cri.activo "
+				: "GROUP BY cri.nombre,cri.descripcion,cri.activo ";
+		return "SELECT " + camposPlan + "cri.nombre AS nombre_regla,cri.descripcion AS descripcion_regla,"
+				+ activo + " AS activo_regla,"
+				+ "MAX(CASE WHEN p.clave_parametro='MAX_REPROBADAS_AVANCE_ANUAL' THEN " + valor + " END) AS max_reprobadas_avance_anual,"
+				+ "MAX(CASE WHEN p.clave_parametro='MIN_REPROBADAS_MISMO_SEMESTRE' THEN " + valor + " END) AS min_reprobadas_mismo_semestre,"
+				+ "MAX(CASE WHEN p.clave_parametro='MIN_REPROBADAS_RESTRINGIR_OPTATIVAS' THEN " + valor + " END) AS min_reprobadas_restringir_optativas,"
+				+ "MAX(CASE WHEN p.clave_parametro='MIN_OPTATIVAS_REPROBADAS_RESTRINGIR' THEN " + valor + " END) AS min_optativas_reprobadas_restringir,"
+				+ "MAX(CASE WHEN p.clave_parametro='MINIMO_OBLIGATORIAS' THEN " + valor + " END) AS minimo_obligatorias,"
+				+ "MAX(CASE WHEN p.clave_parametro='PERMITIR_SEMESTRE_ADYACENTE' THEN " + valor + " END) AS permitir_semestre_adyacente,"
+				+ "MAX(CASE WHEN p.clave_parametro='PERMITIR_OPTATIVAS_OTROS_SEMESTRES_AVANCE' THEN " + valor + " END) AS permitir_optativas_otros_semestres_avance,"
+				+ "MAX(CASE WHEN p.clave_parametro='RESTRINGIR_OPTATIVAS_POR_REZAGO' THEN " + valor + " END) AS restringir_optativas_por_rezago,"
+				+ "MAX(CASE WHEN p.clave_parametro='MARCAR_REPROBADAS_OBLIGATORIAS' THEN " + valor + " END) AS marcar_reprobadas_obligatorias,"
+				+ "MAX(CASE WHEN p.clave_parametro='MARCAR_REPROBADAS_OPTATIVAS' THEN " + valor + " END) AS marcar_reprobadas_optativas,"
+				+ "MAX(CASE WHEN p.clave_parametro='MARCAR_OBLIGATORIAS_SEMESTRE_RESTRINGIDO' THEN " + valor + " END) AS marcar_obligatorias_semestre_restringido,"
+				+ "MAX(CASE WHEN p.clave_parametro='MIN_REPROBADAS_PRIORIZAR_ASISTENTE' THEN " + valor + " END) AS min_reprobadas_priorizar_asistente "
+				+ origen + "JOIN cat_parametros_regla_inscripcion p ON p.clave_regla=cri.clave "
+				+ unionRegla + unionValores + where + group + (soloConfiguradas ? "ORDER BY tp.nombre" : "");
+	}
+
+	private ConfiguracionCargaIrregularDTO mapearConfiguracionIrregular(Object[] row) {
+		ConfiguracionCargaIrregularDTO dto = new ConfiguracionCargaIrregularDTO();
+		dto.setIdPlan(getLongValue(row[0]));
+		dto.setNombrePlan((String) row[1]);
+		dto.setNombreRegla((String) row[2]);
+		dto.setDescripcionRegla((String) row[3]);
+		dto.setActiva(Integer.valueOf(1).equals(getIntegerValue(row[4])));
+		dto.setMaxReprobadasAvanceAnual(obtenerEnteroConfiguracion(row[5], "MAX_REPROBADAS_AVANCE_ANUAL", "carga irregular"));
+		dto.setMinReprobadasMismoSemestre(obtenerEnteroConfiguracion(row[6], "MIN_REPROBADAS_MISMO_SEMESTRE", "carga irregular"));
+		dto.setMinReprobadasRestringirOptativas(obtenerEnteroConfiguracion(row[7], "MIN_REPROBADAS_RESTRINGIR_OPTATIVAS", "carga irregular"));
+		dto.setMinOptativasReprobadasRestringir(obtenerEnteroConfiguracion(row[8], "MIN_OPTATIVAS_REPROBADAS_RESTRINGIR", "carga irregular"));
+		dto.setMinimoObligatorias(obtenerEnteroConfiguracion(row[9], "MINIMO_OBLIGATORIAS", "carga irregular"));
+		dto.setPermitirSemestreAdyacente(obtenerBooleanoConfiguracion(row[10], "PERMITIR_SEMESTRE_ADYACENTE", "carga irregular"));
+		dto.setPermitirOptativasOtrosSemestresAvance(obtenerBooleanoConfiguracion(row[11], "PERMITIR_OPTATIVAS_OTROS_SEMESTRES_AVANCE", "carga irregular"));
+		dto.setRestringirOptativasPorRezago(obtenerBooleanoConfiguracion(row[12], "RESTRINGIR_OPTATIVAS_POR_REZAGO", "carga irregular"));
+		dto.setMarcarReprobadasObligatorias(obtenerBooleanoConfiguracion(row[13], "MARCAR_REPROBADAS_OBLIGATORIAS", "carga irregular"));
+		dto.setMarcarReprobadasOptativas(obtenerBooleanoConfiguracion(row[14], "MARCAR_REPROBADAS_OPTATIVAS", "carga irregular"));
+		dto.setMarcarObligatoriasSemestreRestringido(obtenerBooleanoConfiguracion(row[15], "MARCAR_OBLIGATORIAS_SEMESTRE_RESTRINGIDO", "carga irregular"));
+		dto.setMinReprobadasPriorizarAsistente(obtenerEnteroConfiguracion(row[16], "MIN_REPROBADAS_PRIORIZAR_ASISTENTE", "carga irregular"));
+		validarConfiguracionIrregular(dto);
+		return dto;
+	}
+
+	@Override
+	public void guardarConfiguracionGeneralCargaIrregular(ConfiguracionCargaIrregularDTO configuracion, Long idUsuario) {
+		validarConfiguracionIrregular(configuracion);
+		actualizarEstadoRegla("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getActiva(), idUsuario);
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MAX_REPROBADAS_AVANCE_ANUAL", configuracion.getMaxReprobadasAvanceAnual().toString());
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MIN_REPROBADAS_MISMO_SEMESTRE", configuracion.getMinReprobadasMismoSemestre().toString());
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MIN_REPROBADAS_RESTRINGIR_OPTATIVAS", configuracion.getMinReprobadasRestringirOptativas().toString());
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MIN_OPTATIVAS_REPROBADAS_RESTRINGIR", configuracion.getMinOptativasReprobadasRestringir().toString());
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MINIMO_OBLIGATORIAS", configuracion.getMinimoObligatorias().toString());
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "PERMITIR_SEMESTRE_ADYACENTE", booleano(configuracion.getPermitirSemestreAdyacente()));
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "PERMITIR_OPTATIVAS_OTROS_SEMESTRES_AVANCE", booleano(configuracion.getPermitirOptativasOtrosSemestresAvance()));
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "RESTRINGIR_OPTATIVAS_POR_REZAGO", booleano(configuracion.getRestringirOptativasPorRezago()));
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MARCAR_REPROBADAS_OBLIGATORIAS", booleano(configuracion.getMarcarReprobadasObligatorias()));
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MARCAR_REPROBADAS_OPTATIVAS", booleano(configuracion.getMarcarReprobadasOptativas()));
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MARCAR_OBLIGATORIAS_SEMESTRE_RESTRINGIDO", booleano(configuracion.getMarcarObligatoriasSemestreRestringido()));
+		guardarValorDefaultRegla("CARGA_ESTUDIANTE_IRREGULAR", "MIN_REPROBADAS_PRIORIZAR_ASISTENTE", configuracion.getMinReprobadasPriorizarAsistente().toString());
+	}
+
+	@Override
+	public void guardarConfiguracionCargaIrregular(ConfiguracionCargaIrregularDTO configuracion, Long idUsuario) {
+		validarConfiguracionIrregular(configuracion);
+		if (configuracion.getIdPlan() == null) {
+			throw new IllegalArgumentException("El plan es obligatorio para la carga irregular");
+		}
+		guardarEstadoReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), configuracion.getActiva(), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MAX_REPROBADAS_AVANCE_ANUAL", configuracion.getMaxReprobadasAvanceAnual().toString(), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MIN_REPROBADAS_MISMO_SEMESTRE", configuracion.getMinReprobadasMismoSemestre().toString(), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MIN_REPROBADAS_RESTRINGIR_OPTATIVAS", configuracion.getMinReprobadasRestringirOptativas().toString(), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MIN_OPTATIVAS_REPROBADAS_RESTRINGIR", configuracion.getMinOptativasReprobadasRestringir().toString(), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MINIMO_OBLIGATORIAS", configuracion.getMinimoObligatorias().toString(), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "PERMITIR_SEMESTRE_ADYACENTE", booleano(configuracion.getPermitirSemestreAdyacente()), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "PERMITIR_OPTATIVAS_OTROS_SEMESTRES_AVANCE", booleano(configuracion.getPermitirOptativasOtrosSemestresAvance()), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "RESTRINGIR_OPTATIVAS_POR_REZAGO", booleano(configuracion.getRestringirOptativasPorRezago()), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MARCAR_REPROBADAS_OBLIGATORIAS", booleano(configuracion.getMarcarReprobadasObligatorias()), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MARCAR_REPROBADAS_OPTATIVAS", booleano(configuracion.getMarcarReprobadasOptativas()), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MARCAR_OBLIGATORIAS_SEMESTRE_RESTRINGIDO", booleano(configuracion.getMarcarObligatoriasSemestreRestringido()), idUsuario);
+		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MIN_REPROBADAS_PRIORIZAR_ASISTENTE", configuracion.getMinReprobadasPriorizarAsistente().toString(), idUsuario);
+	}
+
+	@Override
+	public void eliminarConfiguracionCargaIrregular(ConfiguracionCargaIrregularDTO configuracion) {
+		if (configuracion == null || configuracion.getIdPlan() == null) {
+			throw new IllegalArgumentException("El plan es obligatorio para eliminar la carga irregular");
+		}
+		entityManager.createNativeQuery("DELETE FROM rel_valor_parametro_regla_plan WHERE clave_regla='CARGA_ESTUDIANTE_IRREGULAR' AND id_plan=:idPlan")
+				.setParameter("idPlan", configuracion.getIdPlan()).executeUpdate();
+		entityManager.createNativeQuery("DELETE FROM rel_regla_inscripcion_plan WHERE clave_regla='CARGA_ESTUDIANTE_IRREGULAR' AND id_plan=:idPlan")
+				.setParameter("idPlan", configuracion.getIdPlan()).executeUpdate();
+	}
+
+	private void validarConfiguracionIrregular(ConfiguracionCargaIrregularDTO configuracion) {
+		if (configuracion == null || configuracion.getMinReprobadasPriorizarAsistente() == null || configuracion.getMinReprobadasPriorizarAsistente() < 1) {
+			throw new IllegalArgumentException("El umbral de reprobadas para el asistente debe ser positivo");
+		}
+		if (configuracion == null || configuracion.getActiva() == null) {
+			throw new IllegalArgumentException("La configuración irregular y su estado son obligatorios");
+		}
+		if (configuracion.getMaxReprobadasAvanceAnual() == null || configuracion.getMaxReprobadasAvanceAnual() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Máximo de reprobadas totales para avance anual");
+		}
+		if (configuracion.getMinReprobadasMismoSemestre() == null || configuracion.getMinReprobadasMismoSemestre() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Restringir a un semestre a partir de reprobadas");
+		}
+		if (configuracion.getMinReprobadasRestringirOptativas() == null || configuracion.getMinReprobadasRestringirOptativas() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Restringir optativas a partir de reprobadas totales");
+		}
+		if (configuracion.getMinOptativasReprobadasRestringir() == null || configuracion.getMinOptativasReprobadasRestringir() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Restringir optativas a partir de optativas reprobadas");
+		}
+		if (configuracion.getMinimoObligatorias() == null || configuracion.getMinimoObligatorias() < 0) {
+			throw new IllegalArgumentException("Valor no válido: Mínimo de obligatorias seleccionadas");
+		}
+		if (configuracion.getPermitirSemestreAdyacente() == null) {
+			throw new IllegalArgumentException("Valor no válido: Permitir semestre complementario del mismo año");
+		}
+		if (configuracion.getPermitirOptativasOtrosSemestresAvance() == null) {
+			throw new IllegalArgumentException("Valor no válido: Permitir optativas de otros semestres durante el avance anual");
+		}
+		if (configuracion.getRestringirOptativasPorRezago() == null) {
+			throw new IllegalArgumentException("Valor no válido: Aplicar restricción de optativas en la ruta restante");
+		}
+		if (configuracion.getMarcarReprobadasObligatorias() == null) {
+			throw new IllegalArgumentException("Valor no válido: Exigir selección de obligatorias reprobadas");
+		}
+		if (configuracion.getMarcarReprobadasOptativas() == null) {
+			throw new IllegalArgumentException("Valor no válido: Exigir selección de optativas reprobadas");
+		}
+		if (configuracion.getMarcarObligatoriasSemestreRestringido() == null) {
+			throw new IllegalArgumentException("Valor no válido: Exigir todas las obligatorias del semestre restringido");
+		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public ConfiguracionCargaRegularDTO obtenerConfiguracionRestriccionesAcademicasGenerales() {
+		String sql = "SELECT cri.nombre AS nombre_regla,cri.descripcion AS descripcion_regla,cri.activo AS activo_regla,"
+				+ "MAX(CASE WHEN p.clave_parametro='PORCENTAJE_MINIMO_TRAMO_FINAL' THEN p.valor_default END) AS porcentaje_minimo_tramo_final,"
+				+ "MAX(CASE WHEN p.clave_parametro='SEMESTRE_INICIO_TRAMO_FINAL' THEN p.valor_default END) AS semestre_inicio_tramo_final,"
+				+ "MAX(CASE WHEN p.clave_parametro='VALIDAR_REZAGOS_SERIADOS' THEN p.valor_default END) AS validar_rezagos_seriados,"
+				+ "MAX(CASE WHEN p.clave_parametro='SEMESTRE_DESTINO_REZAGOS' THEN p.valor_default END) AS semestre_destino_rezagos,"
+				+ "MAX(CASE WHEN p.clave_parametro='SEMESTRE_INICIAL_ANTECEDENTES' THEN p.valor_default END) AS semestre_inicial_antecedentes,"
+				+ "MAX(CASE WHEN p.clave_parametro='SEMESTRE_FINAL_ANTECEDENTES' THEN p.valor_default END) AS semestre_final_antecedentes,"
+				+ "MAX(CASE WHEN p.clave_parametro='MAXIMO_OPTATIVAS_POR_BLOQUE' THEN p.valor_default END) AS maximo_optativas_bloque,"
+				+ "MAX(CASE WHEN p.clave_parametro='OPTATIVAS_APROBADAS_PARA_OPCIONALES' THEN p.valor_default END) AS optativas_aprobadas_opcionales,"
+				+ "MAX(CASE WHEN p.clave_parametro='IMPEDIR_CLAVE_OPTATIVA_REPETIDA' THEN p.valor_default END) AS impedir_clave_optativa_repetida,"
+				+ "MAX(CASE WHEN p.clave_parametro='MAXIMO_ELECTIVAS_POR_PERIODO' THEN p.valor_default END) AS maximo_electivas_periodo,"
+				+ "MAX(CASE WHEN p.clave_parametro='LIMITE_REPROBACIONES_POR_MATERIA' THEN p.valor_default END) AS limite_reprobaciones_por_materia,"
+				+ "MAX(CASE WHEN p.clave_parametro='SEMESTRE_MINIMO_ELECTIVAS' THEN p.valor_default END) AS semestre_minimo_electivas,"
+				+ "MAX(CASE WHEN p.clave_parametro='PRIMER_SEMESTRE_ORIGEN_ELECTIVAS' THEN p.valor_default END) AS primer_semestre_origen_electivas,"
+				+ "MAX(CASE WHEN p.clave_parametro='SEGUNDO_SEMESTRE_ORIGEN_ELECTIVAS' THEN p.valor_default END) AS segundo_semestre_origen_electivas,"
+				+ "MAX(CASE WHEN p.clave_parametro='MINIMO_OPTATIVAS_PLAN_ASISTENTE' THEN p.valor_default END) AS minimo_optativas_plan_asistente "
+				+ "FROM cat_reglas_inscripcion cri JOIN cat_parametros_regla_inscripcion p ON p.clave_regla=cri.clave "
+				+ "WHERE cri.clave='RESTRICCIONES_ACADEMICAS_GENERALES' GROUP BY cri.nombre,cri.descripcion,cri.activo";
+		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
+		if (resultados.isEmpty()) {
+			throw new IllegalArgumentException("No existe la regla RESTRICCIONES_ACADEMICAS_GENERALES");
+		}
+		Object[] row = resultados.get(0);
+		ConfiguracionCargaRegularDTO dto = new ConfiguracionCargaRegularDTO();
+		dto.setNombreRegla((String) row[0]);
+		dto.setDescripcionRegla((String) row[1]);
+		dto.setActiva(Integer.valueOf(1).equals(getIntegerValue(row[2])));
+		dto.setPorcentajeMinimoTramoFinal(obtenerEnteroConfiguracion(row[3], "PORCENTAJE_MINIMO_TRAMO_FINAL", "general"));
+		dto.setSemestreInicioTramoFinal(obtenerEnteroConfiguracion(row[4], "SEMESTRE_INICIO_TRAMO_FINAL", "general"));
+		dto.setValidarRezagosSeriados(obtenerBooleanoConfiguracion(row[5], "VALIDAR_REZAGOS_SERIADOS", "general"));
+		dto.setSemestreDestinoRezagos(obtenerEnteroConfiguracion(row[6], "SEMESTRE_DESTINO_REZAGOS", "general"));
+		dto.setSemestreInicialAntecedentes(obtenerEnteroConfiguracion(row[7], "SEMESTRE_INICIAL_ANTECEDENTES", "general"));
+		dto.setSemestreFinalAntecedentes(obtenerEnteroConfiguracion(row[8], "SEMESTRE_FINAL_ANTECEDENTES", "general"));
+		dto.setMaximoOptativasPorBloque(obtenerEnteroConfiguracion(row[9], "MAXIMO_OPTATIVAS_POR_BLOQUE", "general"));
+		dto.setOptativasAprobadasParaOpcionales(obtenerEnteroConfiguracion(row[10], "OPTATIVAS_APROBADAS_PARA_OPCIONALES", "general"));
+		dto.setImpedirClaveOptativaRepetida(obtenerBooleanoConfiguracion(row[11], "IMPEDIR_CLAVE_OPTATIVA_REPETIDA", "general"));
+		dto.setMaximoElectivasPorPeriodo(obtenerEnteroConfiguracion(row[12], "MAXIMO_ELECTIVAS_POR_PERIODO", "general"));
+		dto.setLimiteReprobacionesPorMateria(obtenerEnteroConfiguracion(row[13], "LIMITE_REPROBACIONES_POR_MATERIA", "general"));
+		dto.setSemestreMinimoElectivas(obtenerEnteroConfiguracion(row[14], "SEMESTRE_MINIMO_ELECTIVAS", "general"));
+		dto.setPrimerSemestreOrigenElectivas(obtenerEnteroConfiguracion(row[15], "PRIMER_SEMESTRE_ORIGEN_ELECTIVAS", "general"));
+		dto.setSegundoSemestreOrigenElectivas(obtenerEnteroConfiguracion(row[16], "SEGUNDO_SEMESTRE_ORIGEN_ELECTIVAS", "general"));
+		dto.setMinimoOptativasPlanAsistente(obtenerEnteroConfiguracion(row[17], "MINIMO_OPTATIVAS_PLAN_ASISTENTE", "general"));
+		validarRestriccionesAcademicas(dto);
+		return dto;
+	}
+
+	@Override
+	public void guardarConfiguracionRestriccionesAcademicasGenerales(ConfiguracionCargaRegularDTO configuracion,
+			Long idUsuario) {
+		validarRestriccionesAcademicas(configuracion);
+		actualizarEstadoRegla("RESTRICCIONES_ACADEMICAS_GENERALES", configuracion.getActiva(), idUsuario);
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "PORCENTAJE_MINIMO_TRAMO_FINAL", configuracion.getPorcentajeMinimoTramoFinal().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "SEMESTRE_INICIO_TRAMO_FINAL", configuracion.getSemestreInicioTramoFinal().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "VALIDAR_REZAGOS_SERIADOS", booleano(configuracion.getValidarRezagosSeriados()));
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "SEMESTRE_DESTINO_REZAGOS", configuracion.getSemestreDestinoRezagos().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "SEMESTRE_INICIAL_ANTECEDENTES", configuracion.getSemestreInicialAntecedentes().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "SEMESTRE_FINAL_ANTECEDENTES", configuracion.getSemestreFinalAntecedentes().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "MAXIMO_OPTATIVAS_POR_BLOQUE", configuracion.getMaximoOptativasPorBloque().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "OPTATIVAS_APROBADAS_PARA_OPCIONALES", configuracion.getOptativasAprobadasParaOpcionales().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "IMPEDIR_CLAVE_OPTATIVA_REPETIDA", booleano(configuracion.getImpedirClaveOptativaRepetida()));
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "MAXIMO_ELECTIVAS_POR_PERIODO", configuracion.getMaximoElectivasPorPeriodo().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "LIMITE_REPROBACIONES_POR_MATERIA", configuracion.getLimiteReprobacionesPorMateria().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "SEMESTRE_MINIMO_ELECTIVAS", configuracion.getSemestreMinimoElectivas().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "PRIMER_SEMESTRE_ORIGEN_ELECTIVAS", configuracion.getPrimerSemestreOrigenElectivas().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "SEGUNDO_SEMESTRE_ORIGEN_ELECTIVAS", configuracion.getSegundoSemestreOrigenElectivas().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "MINIMO_OPTATIVAS_PLAN_ASISTENTE", configuracion.getMinimoOptativasPlanAsistente().toString());
+	}
+
+	private void validarRestriccionesAcademicas(ConfiguracionCargaRegularDTO configuracion) {
+		if (configuracion.getLimiteReprobacionesPorMateria() == null || configuracion.getLimiteReprobacionesPorMateria() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Límite de reprobaciones por asignatura");
+		}
+		if (configuracion.getSemestreMinimoElectivas() == null || configuracion.getSemestreMinimoElectivas() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Semestre mínimo de los espacios electivos");
+		}
+		if (configuracion.getPrimerSemestreOrigenElectivas() == null || configuracion.getPrimerSemestreOrigenElectivas() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Primer semestre de origen para electivas");
+		}
+		if (configuracion.getSegundoSemestreOrigenElectivas() == null || configuracion.getSegundoSemestreOrigenElectivas() < 1) {
+			throw new IllegalArgumentException("Valor no válido: Segundo semestre de origen para electivas");
+		}
+		if (configuracion.getMinimoOptativasPlanAsistente() == null || configuracion.getMinimoOptativasPlanAsistente() < 0) {
+			throw new IllegalArgumentException("Valor no válido: Optativas requeridas para el diagnóstico del asistente");
+		}
+		if (configuracion.getPorcentajeMinimoTramoFinal() == null || configuracion.getPorcentajeMinimoTramoFinal() < 0
+				|| configuracion.getPorcentajeMinimoTramoFinal() > 100) {
+			throw new IllegalArgumentException("El porcentaje del tramo final debe estar entre 0 y 100");
+		}
+		if (configuracion.getSemestreInicioTramoFinal() == null || configuracion.getSemestreInicioTramoFinal() < 1
+				|| configuracion.getSemestreDestinoRezagos() == null || configuracion.getSemestreDestinoRezagos() < 1
+				|| configuracion.getSemestreInicialAntecedentes() == null || configuracion.getSemestreInicialAntecedentes() < 1
+				|| configuracion.getSemestreFinalAntecedentes() == null
+				|| configuracion.getSemestreFinalAntecedentes() < configuracion.getSemestreInicialAntecedentes()
+				|| configuracion.getMaximoOptativasPorBloque() == null || configuracion.getMaximoOptativasPorBloque() < 0
+				|| configuracion.getOptativasAprobadasParaOpcionales() == null
+				|| configuracion.getOptativasAprobadasParaOpcionales() < 0
+				|| configuracion.getMaximoElectivasPorPeriodo() == null || configuracion.getMaximoElectivasPorPeriodo() < 0) {
+			throw new IllegalArgumentException("Los parámetros académicos generales no son válidos");
+		}
+	}
+
+	private void actualizarEstadoRegla(String claveRegla, Boolean activa, Long idUsuario) {
+		entityManager.createNativeQuery("UPDATE cat_reglas_inscripcion SET activo=:activo,usuario_modifico=:usuario,fecha_actualizacion=CURRENT_TIMESTAMP WHERE clave=:regla")
+				.setParameter("activo", Boolean.TRUE.equals(activa) ? 1 : 0).setParameter("usuario", idUsuario)
+				.setParameter("regla", claveRegla).executeUpdate();
+	}
+
+	private void guardarEstadoReglaPlan(String claveRegla, Long idPlan, Boolean activa, Long idUsuario) {
+		String sql = "INSERT INTO rel_regla_inscripcion_plan (clave_regla,id_plan,activo,usuario_modifico) "
+				+ "VALUES (:regla,:idPlan,:activo,:usuario) ON DUPLICATE KEY UPDATE activo=VALUES(activo),"
+				+ "usuario_modifico=VALUES(usuario_modifico),fecha_actualizacion=CURRENT_TIMESTAMP";
+		entityManager.createNativeQuery(sql).setParameter("regla", claveRegla).setParameter("idPlan", idPlan)
+				.setParameter("activo", Boolean.TRUE.equals(activa) ? 1 : 0).setParameter("usuario", idUsuario).executeUpdate();
+	}
+
+	private void guardarValorDefaultRegla(String claveRegla, String parametro, String valor) {
+		entityManager.createNativeQuery("UPDATE cat_parametros_regla_inscripcion SET valor_default=:valor WHERE clave_regla=:regla AND clave_parametro=:parametro")
+				.setParameter("valor", valor).setParameter("regla", claveRegla).setParameter("parametro", parametro).executeUpdate();
+	}
+
+	private void guardarValorReglaPlan(String claveRegla, Long idPlan, String parametro, String valor, Long idUsuario) {
+		String sql = "INSERT INTO rel_valor_parametro_regla_plan (clave_regla,id_plan,clave_parametro,valor,usuario_modifico) "
+				+ "VALUES (:regla,:idPlan,:parametro,:valor,:usuario) ON DUPLICATE KEY UPDATE valor=VALUES(valor),"
+				+ "usuario_modifico=VALUES(usuario_modifico),fecha_actualizacion=CURRENT_TIMESTAMP";
+		entityManager.createNativeQuery(sql).setParameter("regla", claveRegla).setParameter("idPlan", idPlan)
+				.setParameter("parametro", parametro).setParameter("valor", valor).setParameter("usuario", idUsuario).executeUpdate();
+	}
+
+	private String booleano(Boolean valor) {
+		return Boolean.TRUE.equals(valor) ? "1" : "0";
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<AprobacionAsignaturasPorSemestreDTO> obtenerAprobacionAsignaturasPorSemestre(Long idPlan,
@@ -1365,7 +2322,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("SELECT ");
 		sql.append("       tmcu2.id, ");
 		sql.append("       tmcu2.nombre, ");
-		sql.append("       (SELECT COUNT(tmll2.nombre) ");
+		sql.append("       (SELECT COUNT(DISTINCT tlfdp.id_programa) ");
 		sql.append("        FROM tbl_malla_curricular tmll ");
 		sql.append("        JOIN tbl_malla_curricular tmll2 ");
 		sql.append("          ON tmll2.id_padre = tmll.id ");
@@ -1375,28 +2332,27 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("         AND tlfdp.tipo = 'Obligatoria' ");
 		sql.append("        WHERE tmll.id_padre = tmcu2.id ");
 		sql.append("       ) AS asignaturasObligatoriasPorPrograma, ");
-		sql.append("       (SELECT COUNT(rgp2.id_persona_participante) ");
-		sql.append("        FROM rel_grupo_participante rgp2 ");
-		sql.append("        INNER JOIN tbl_grupos tg2 ");
-		sql.append("          ON tg2.id = rgp2.id_grupo ");
-		sql.append("        INNER JOIN tbl_eventos te2 ");
-		sql.append("          ON te2.id_evento = tg2.id_evento ");
-		sql.append("        INNER JOIN tbl_ficha_descriptiva_programa fd2 ");
-		sql.append("          ON fd2.id_plan = :idPlan ");
-		sql.append("         AND fd2.id_programa = te2.id_programa ");
-		sql.append("         AND fd2.tipo = 'Obligatoria' ");
-		sql.append("        INNER JOIN tbl_malla_curricular tmcc ");
-		sql.append("          ON tmcc.id = fd2.id_eje_capacitacion ");
-		sql.append("        INNER JOIN tbl_malla_curricular tmcc2 ");
-		sql.append("          ON tmcc2.id = tmcc.id_padre ");
-		sql.append("        WHERE rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
+		sql.append("       (SELECT COUNT(DISTINCT fdPlan.id_programa) ");
+		sql.append("        FROM tbl_ficha_descriptiva_programa fdPlan ");
+		sql.append("        INNER JOIN tbl_malla_curricular tmcc ON tmcc.id = fdPlan.id_eje_capacitacion ");
+		sql.append("        INNER JOIN tbl_malla_curricular tmcc2 ON tmcc2.id = tmcc.id_padre ");
+		sql.append("        WHERE fdPlan.id_plan = :idPlan AND fdPlan.tipo = 'Obligatoria' ");
 		sql.append("          AND tmcc2.nombre = tmcu2.nombre ");
-		sql.append("          AND rgp2.id_persona_participante = :idPersona ");
+		sql.append("          AND EXISTS( ");
+		sql.append("              SELECT 1 FROM rel_grupo_participante rgp2 ");
+		sql.append("              INNER JOIN tbl_grupos tg2 ON tg2.id = rgp2.id_grupo ");
+		sql.append("              INNER JOIN tbl_eventos te2 ON te2.id_evento = tg2.id_evento ");
+		sql.append("              INNER JOIN tbl_ficha_descriptiva_programa fd2 ON fd2.id_programa = te2.id_programa ");
+		sql.append("              WHERE rgp2.id_persona_participante = :idPersona ");
+		sql.append("                AND rgp2.calificacion_final >= fd2.calificacion_min_aprobatoria ");
+		sql.append("                AND LOWER(TRIM(fd2.nombre_tentativo)) = LOWER(TRIM(fdPlan.nombre_tentativo)) ");
+		sql.append("          ) ");
 		sql.append("       ) AS asignaturasAprobadas ");
 		sql.append("FROM tbl_malla_curricular tmcu ");
 		sql.append("INNER JOIN tbl_malla_curricular tmcu2 ");
 		sql.append("        ON tmcu2.id_padre = tmcu.id ");
-		sql.append("WHERE tmcu.id_plan = :idPlan");
+		sql.append("WHERE tmcu.id_plan = :idPlan ");
+		sql.append("ORDER BY CAST(SUBSTRING_INDEX(tmcu2.nombre, ' ', -1) AS UNSIGNED), tmcu2.id");
 
 		List<Object[]> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("idPlan", idPlan)
 				.setParameter("idPersona", idPersona).getResultList();

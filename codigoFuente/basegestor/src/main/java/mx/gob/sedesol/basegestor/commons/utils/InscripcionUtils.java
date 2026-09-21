@@ -18,9 +18,9 @@ public class InscripcionUtils {
 		return tipo.equalsIgnoreCase(ConstantesGestor.TEXTO_MATERIA_OPTATIVA);
 	}
 	
-	public static boolean esSemestreValidoMateriaElectiva(String semestre) {
+	public static boolean esSemestreValidoMateriaElectiva(String semestre, int semestreMinimo) {
 		int numeroSemestre = obtenerNumeroSemestre(semestre);
-		return numeroSemestre >= ConstantesGestor.SEMESTRE_MINIMO_PARA_ELECTIVAS;
+		return numeroSemestre >= semestreMinimo;
 	}
 	
 	public static int obtenerNumeroSemestre(String semestre) {
