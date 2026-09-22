@@ -958,13 +958,12 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	}
 
 	private EstadoInscripcionEstudianteDTO obtenerEstadoInscripcion(InscripcionPersonaDTO persona,
-			Long idProcesoInscripcion) throws InscripcionException {
+			Long idProcesoInscripcion) {
 		return inscripcionService.obtenerEstadoInscripcionEstudiante(persona.getIdPersona(), idProcesoInscripcion)
-				.orElseThrow(() -> new InscripcionException("No existe el proceso de inscripción"));
+				.orElse(new EstadoInscripcionEstudianteDTO());
 	}
 
-	private Long obtenerIdProcesoInscripcion(List<InscripcionMateriasDTO> materiasOfertadas)
-			throws InscripcionException {
+	private Long obtenerIdProcesoInscripcion(List<InscripcionMateriasDTO> materiasOfertadas) {
 		if (materiasOfertadas != null) {
 			for (InscripcionMateriasDTO materia : materiasOfertadas) {
 				if (materia != null && materia.getIdProcesoInscripcion() != null) {
@@ -972,7 +971,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 				}
 			}
 		}
-		throw new InscripcionException("No hay oferta disponible para identificar el proceso de inscripción.");
+		return null;
 	}
 
 	private String obtenerMensajeSeriacion(EstadoAcademicoDTO estadoAcademico) {
