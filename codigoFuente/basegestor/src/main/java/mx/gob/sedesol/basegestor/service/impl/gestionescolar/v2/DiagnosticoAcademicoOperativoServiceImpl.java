@@ -8,6 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DiagnosticoAcademicoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoAcademicoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MotivoDecisionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.PendientesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RiesgoAcademicoDTO;
@@ -16,6 +19,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CasoUdRelacionada
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DiagnosticoAcademicoOperativoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
+import mx.gob.sedesol.basegestor.commons.utils.InscripcionUtils;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.v2.TblCasoDiagnosticoV2Repo;
 import mx.gob.sedesol.basegestor.service.gestionescolar.AsistenteInscripcionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.DiagnosticoAcademicoOperativoService;
@@ -68,10 +72,11 @@ public class DiagnosticoAcademicoOperativoServiceImpl implements DiagnosticoAcad
         PendientesPlanDTO pendientes = contextoAsistido.getPendientesPlan();
         RiesgoAcademicoDTO riesgo = contextoAsistido.getRiesgos();
 
-        int totalNoAcreditadas = 0;
+        int totalNoAcreditadasDetectadas = 0;
         int totalOmisiones = 0;
         int totalBloqueadas = 0;
         int totalPendientesCriticas = 0;
+        java.util.Set<Long> noAcreditadasPorId = new java.util.HashSet<Long>();
 
         diagnostico.getDetallePorUd().clear();
         diagnostico.getReglasAplicadas().clear();
@@ -82,15 +87,28 @@ public class DiagnosticoAcademicoOperativoServiceImpl implements DiagnosticoAcad
                 if (unidad == null) {
                     continue;
                 }
-                boolean noAcreditada = contiene(unidad.getEstatusHistorico(), "NO ACREDIT");
-                boolean omision = contiene(unidad.getEstatusHistorico(), "NO INSCRITA")
-                        || contiene(unidad.getEstatusHistorico(), "NO CURSADA");
+                boolean noAcreditada = esNoAcreditada(unidad.getEstatusHistorico());
+                boolean omision = esOmissionRegistroContabilizable(unidad);
                 boolean bloqueada = Boolean.TRUE.equals(unidad.getBloqueada());
                 boolean critica = Boolean.TRUE.equals(unidad.getPrioritaria()) || esMotivoBloqueante(unidad);
 
                 if (noAcreditada) {
-                    totalNoAcreditadas++;
+                    totalNoAcreditadasDetectadas++;
+                    if (unidad.getUdId() != null) {
+                        noAcreditadasPorId.add(unidad.getUdId());
+                    }
                 }
+            }
+
+            for (UnidadDecisionInscripcionDTO unidad : contextoAsistido.getUnidades()) {
+                if (unidad == null) {
+                    continue;
+                }
+                boolean noAcreditada = esNoAcreditada(unidad.getEstatusHistorico());
+                boolean omision = esOmissionRegistroContabilizable(unidad);
+                boolean bloqueada = esBloqueadaPorSeriacion(unidad, noAcreditadasPorId);
+                boolean critica = Boolean.TRUE.equals(unidad.getPrioritaria()) || esMotivoBloqueante(unidad);
+
                 if (omision) {
                     totalOmisiones++;
                 }
@@ -105,6 +123,18 @@ public class DiagnosticoAcademicoOperativoServiceImpl implements DiagnosticoAcad
             }
         }
 
+        // Una reprobada puede no formar parte de la oferta o de las unidades
+        // visibles del periodo. En ese caso el total histórico sí la cuenta,
+        // pero antes no había una UD asociada para explicarla en el diagnóstico.
+        // Se incorporan las reprobadas activas faltantes para que el contador y
+        // su detalle siempre se correspondan.
+        agregarDetallesReprobadasHistoricas(diagnostico, contextoAsistido);
+
+        // El diagnóstico base es la fuente canónica del historial; las unidades sólo lo complementan.
+        int totalNoAcreditadas = Math.max(totalNoAcreditadasDetectadas,
+                Math.max(valor(diagnosticoBase != null ? diagnosticoBase.getMateriasReprobadasActivas() : null),
+                        valor(contextoAsistido.getTotalReprobadasAcumuladas())));
+
         diagnostico.setSituacionAcademica(resolverSituacionAcademica(contextoAsistido, diagnosticoBase));
         diagnostico.setRiesgoActual(riesgo != null && tieneTexto(riesgo.getNivelRiesgo()) ? riesgo.getNivelRiesgo()
                 : (contextoAsistido.getRestriccionCuatroOMasReprobadas() != null
@@ -113,7 +143,9 @@ public class DiagnosticoAcademicoOperativoServiceImpl implements DiagnosticoAcad
                 ? resumirRiesgoSiguientePeriodo(riesgo) : diagnostico.getRiesgoActual());
         diagnostico.setCierreAnual(Boolean.TRUE.equals(contextoAsistido.getCierreAnualCumplido()) ? "CUMPLIDO" : "PENDIENTE");
         diagnostico.setCargaViable(contextoAsistido.getCargaMaxima());
-        diagnostico.setSeriacionActiva(Boolean.valueOf(totalBloqueadas > 0 || existeMensajeSeriacion(contextoAsistido)));
+        // Una leyenda de la interfaz no constituye evidencia de seriación. Sólo cuenta
+        // una UD subsecuente con antecedente curricular pendiente y bloqueo activo.
+        diagnostico.setSeriacionActiva(Boolean.valueOf(totalBloqueadas > 0));
         diagnostico.setOfertaVigente(contextoAsistido.getInscripcionVigente());
         diagnostico.setDictamenPreliminar(resolverDictamenPreliminar(contexto, contextoAsistido, totalBloqueadas));
 
@@ -132,6 +164,67 @@ public class DiagnosticoAcademicoOperativoServiceImpl implements DiagnosticoAcad
         cargarAlertasDiagnostico(diagnostico, contextoAsistido, riesgo, totalBloqueadas);
     }
 
+    private void agregarDetallesReprobadasHistoricas(DiagnosticoAcademicoOperativoDTO diagnostico,
+            AsistenteInscripcionContextoDTO contextoAsistido) {
+        if (diagnostico == null || contextoAsistido == null || contextoAsistido.getContextoBase() == null
+                || contextoAsistido.getContextoBase().getEstadoAcademico() == null) {
+            return;
+        }
+        EstadoAcademicoDTO estado = contextoAsistido.getContextoBase().getEstadoAcademico();
+        if (estado.getMateriasReprobadas() == null) {
+            return;
+        }
+
+        java.util.Set<String> unidadesYaDetalladas = new java.util.HashSet<String>();
+        for (CasoUdRelacionadaDTO detalle : diagnostico.getDetallePorUd()) {
+            if (detalle != null && "NO_ACREDITADA".equalsIgnoreCase(detalle.getEstatusDetectado())) {
+                unidadesYaDetalladas.add(llaveUd(detalle.getIdPrograma(), detalle.getClaveUd()));
+            }
+        }
+
+        for (InscripcionMateriasReprobadasDTO reprobada : estado.getMateriasReprobadas()) {
+            if (reprobada == null || tieneBajaActiva(reprobada, estado)) {
+                continue;
+            }
+            String llave = llaveUd(reprobada.getIdPrograma(), reprobada.getClavePrograma());
+            if (!unidadesYaDetalladas.add(llave)) {
+                continue;
+            }
+            CasoUdRelacionadaDTO detalle = new CasoUdRelacionadaDTO();
+            detalle.setIdPrograma(reprobada.getIdPrograma());
+            detalle.setClaveUd(reprobada.getClavePrograma());
+            detalle.setNombreUd(reprobada.getNombrePrograma());
+            detalle.setTipoUd(reprobada.getTipoPrograma());
+            detalle.setSemestre(reprobada.getEstructura());
+            detalle.setBloque(reprobada.getSubestructura());
+            detalle.setEstatusDetectado("NO_ACREDITADA");
+            detalle.setCritica(Boolean.TRUE);
+            diagnostico.getDetallePorUd().add(detalle);
+        }
+    }
+
+    private boolean tieneBajaActiva(InscripcionMateriasReprobadasDTO reprobada, EstadoAcademicoDTO estado) {
+        if (estado.getMateriasBajas() == null) {
+            return false;
+        }
+        for (InscripcionBajasDTO baja : estado.getMateriasBajas()) {
+            if (baja != null && esMismaUd(reprobada.getIdPrograma(), baja.getIdPrograma(),
+                    reprobada.getClavePrograma(), baja.getClavePrograma())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean esMismaUd(Long idProgramaUno, Long idProgramaDos, String claveUno, String claveDos) {
+        return idProgramaUno != null && idProgramaDos != null ? idProgramaUno.equals(idProgramaDos)
+                : claveUno != null && claveDos != null && claveUno.trim().equalsIgnoreCase(claveDos.trim());
+    }
+
+    private String llaveUd(Long idPrograma, String clave) {
+        return idPrograma != null ? "ID:" + idPrograma : "CLAVE:" + (clave != null ? clave.trim().toUpperCase() : "");
+    }
+
     private CasoUdRelacionadaDTO construirDetalleUd(UnidadDecisionInscripcionDTO unidad, boolean noAcreditada,
             boolean omision, boolean bloqueada, boolean critica) {
         CasoUdRelacionadaDTO detalle = new CasoUdRelacionadaDTO();
@@ -144,6 +237,29 @@ public class DiagnosticoAcademicoOperativoServiceImpl implements DiagnosticoAcad
         detalle.setEstatusDetectado(resolverEstatusDiagnosticoUd(noAcreditada, omision, bloqueada, unidad));
         detalle.setCritica(Boolean.valueOf(critica));
         return detalle;
+    }
+
+    private boolean esNoAcreditada(String estatusHistorico) {
+        return contiene(estatusHistorico, "NO ACREDIT") || contiene(estatusHistorico, "NO_ACREDIT")
+                || contiene(estatusHistorico, "REPROB");
+    }
+
+    private boolean esBloqueadaPorSeriacion(UnidadDecisionInscripcionDTO unidad,
+            java.util.Set<Long> noAcreditadasPorId) {
+        if (unidad == null || unidad.getRequiere() == null || unidad.getRequiere().isEmpty()) {
+            return false;
+        }
+        for (mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelacionSeriacionDTO antecedente : unidad.getRequiere()) {
+            if (antecedente != null && antecedente.getUdId() != null
+                    && noAcreditadasPorId.contains(antecedente.getUdId())) {
+                return Boolean.TRUE.equals(unidad.getBloqueada()) || !Boolean.TRUE.equals(unidad.getSeleccionable());
+            }
+        }
+        return false;
+    }
+
+    private int valor(Integer numero) {
+        return numero != null ? numero.intValue() : 0;
     }
 
     private String resolverEstatusDiagnosticoUd(boolean noAcreditada, boolean omision, boolean bloqueada,
@@ -165,6 +281,9 @@ public class DiagnosticoAcademicoOperativoServiceImpl implements DiagnosticoAcad
 
     private String resolverSituacionAcademica(AsistenteInscripcionContextoDTO contextoAsistido,
             DiagnosticoAcademicoDTO diagnosticoBase) {
+        if (diagnosticoBase != null && valor(diagnosticoBase.getMateriasReprobadasActivas()) > 0) {
+            return "IRREGULAR";
+        }
         if (tieneTexto(contextoAsistido.getSituacionAcademicaPeriodo())) {
             return contextoAsistido.getSituacionAcademicaPeriodo();
         }
@@ -275,18 +394,133 @@ public class DiagnosticoAcademicoOperativoServiceImpl implements DiagnosticoAcad
     private String construirResumenMotorEnriquecido(AsistenteInscripcionContextoDTO contextoAsistido,
             DiagnosticoAcademicoOperativoDTO diagnostico, PendientesPlanDTO pendientes) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Situación ").append(diagnostico.getSituacionAcademica());
-        sb.append(", restricción dominante ").append(diagnostico.getRestriccionDominante());
-        sb.append(", ").append(diagnostico.getTotalNoAcreditadas()).append(" UD no acreditadas");
-        sb.append(", ").append(diagnostico.getTotalOmisiones()).append(" omisiones");
-        sb.append(", ").append(diagnostico.getTotalBloqueadas()).append(" bloqueadas por seriación");
+        sb.append(describirSituacionParaEstudiante(diagnostico.getSituacionAcademica())).append(". ");
+        sb.append(describirRestriccionParaEstudiante(diagnostico.getRestriccionDominante())).append(". ");
+        sb.append("Tienes ").append(valor(diagnostico.getTotalNoAcreditadas()))
+                .append(" UD pendientes de acreditar y ").append(valor(diagnostico.getTotalBloqueadas()))
+                .append(" UD bloqueadas por seriación. ");
+        sb.append(construirResumenOmisionesPorTipo(contextoAsistido, pendientes));
         if (pendientes != null && pendientes.getCreditosFaltantes() != null) {
-            sb.append(", créditos faltantes ").append(pendientes.getCreditosFaltantes());
+            sb.append(" Te faltan ").append(pendientes.getCreditosFaltantes())
+                    .append(" créditos requeridos para concluir tu programa educativo. Esta cifra corresponde a las UD del plan que aún no están acreditadas; las optativas opcionales no generan una obligación de registro.");
         }
         if (tieneTexto(contextoAsistido.getMensajeResumenPeriodo())) {
-            sb.append(". ").append(contextoAsistido.getMensajeResumenPeriodo());
+            sb.append(" ").append(contextoAsistido.getMensajeResumenPeriodo());
         }
         return sb.toString();
+    }
+
+    private String construirResumenOmisionesPorTipo(AsistenteInscripcionContextoDTO contextoAsistido,
+            PendientesPlanDTO pendientes) {
+        int ofertadasPeriodoActual = 0;
+        int semestresPrevios = 0;
+        int obligatorias = 0;
+        int optativas = 0;
+        int electivas = 0;
+
+        if (contextoAsistido != null && contextoAsistido.getUnidades() != null) {
+            for (UnidadDecisionInscripcionDTO unidad : contextoAsistido.getUnidades()) {
+                if (!esOmissionRegistroContabilizable(unidad)) {
+                    continue;
+                }
+                if (Boolean.TRUE.equals(unidad.getOfertada())) {
+                    ofertadasPeriodoActual++;
+                } else {
+                    semestresPrevios++;
+                }
+                if (InscripcionUtils.esMateriaObligatoria(unidad.getTipoUd())) {
+                    obligatorias++;
+                } else if (InscripcionUtils.esMateriaOptativa(unidad.getTipoUd())) {
+                    optativas++;
+                } else if (InscripcionUtils.esMateriaElectiva(unidad.getTipoUd())) {
+                    electivas++;
+                }
+            }
+        }
+
+        semestresPrevios = Math.max(semestresPrevios,
+                valor(pendientes != null ? pendientes.getPendientesRegistroSemestresPrevios() : null));
+        int total = ofertadasPeriodoActual + semestresPrevios;
+        if (total == 0) {
+            return "No tienes UD pendientes de registro: 0 ofertadas en este periodo y 0 de semestres previos.";
+        }
+
+        java.util.List<String> detalle = new java.util.ArrayList<String>();
+        agregarConteoOmisiones(detalle, obligatorias, "obligatoria");
+        agregarConteoOmisiones(detalle, optativas, "optativa requerida");
+        agregarConteoOmisiones(detalle, electivas, "electiva");
+        return "Tienes " + total + " UD pendientes de registro: " + ofertadasPeriodoActual
+                + " ofertada" + (ofertadasPeriodoActual == 1 ? "" : "s") + " en este periodo y "
+                + semestresPrevios + " de semestres previos"
+                + (detalle.isEmpty() ? "." : " (" + String.join(", ", detalle) + ").");
+    }
+
+    private boolean esOmissionRegistroContabilizable(UnidadDecisionInscripcionDTO unidad) {
+        if (unidad == null || !(contiene(unidad.getEstatusHistorico(), "NO INSCRITA")
+                || contiene(unidad.getEstatusHistorico(), "NO CURSADA"))) {
+            return false;
+        }
+        if ("OPCIONAL".equalsIgnoreCase(unidad.getEstatusPeriodo())
+                || "ALTERNATIVA".equalsIgnoreCase(unidad.getEstatusPeriodo())) {
+            return false;
+        }
+        // Una UD de la oferta vigente todavía no es una omisión: no tener
+        // inscripción previa es el estado normal antes de que la persona la
+        // seleccione. Sólo se contabilizan UD de semestres anteriores que el
+        // simulador incorporó expresamente como pendientes históricos.
+        return tieneMotivo(unidad, "SIMULACION_PENDIENTE_PREVIO");
+    }
+
+    private boolean tieneMotivo(UnidadDecisionInscripcionDTO unidad, String codigo) {
+        if (unidad == null || unidad.getMotivos() == null || codigo == null) {
+            return false;
+        }
+        for (MotivoDecisionDTO motivo : unidad.getMotivos()) {
+            if (motivo != null && codigo.equalsIgnoreCase(motivo.getCodigo())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void agregarConteoOmisiones(java.util.List<String> detalle, int cantidad, String tipo) {
+        if (cantidad > 0) {
+            detalle.add(cantidad + " " + tipo + (cantidad == 1 ? "" : "s"));
+        }
+    }
+
+    private String describirSituacionParaEstudiante(String situacion) {
+        if ("REGULAR".equalsIgnoreCase(normalizarClave(situacion))) {
+            return "Tu situación académica es regular";
+        }
+        if ("IRREGULAR".equalsIgnoreCase(normalizarClave(situacion))) {
+            return "Tu situación académica requiere atención";
+        }
+        return "Se actualizó tu situación académica";
+    }
+
+    private String describirRestriccionParaEstudiante(String restriccion) {
+        String clave = normalizarClave(restriccion);
+        if ("SIN_RESTRICCION_DOMINANTE".equalsIgnoreCase(clave)) {
+            return "No se identifican restricciones académicas que limiten tu avance";
+        }
+        if ("AVANCE_ANUAL".equalsIgnoreCase(clave)) {
+            return "Tu avance está sujeto a regularizar primero las unidades didácticas pendientes";
+        }
+        if ("SERIACION".equalsIgnoreCase(clave)) {
+            return "Algunas unidades didácticas requieren acreditar primero sus antecedentes";
+        }
+        if ("NO_ACREDITACION".equalsIgnoreCase(clave)) {
+            return "La prioridad es acreditar las unidades didácticas que aún tienes pendientes";
+        }
+        if ("OMISION".equalsIgnoreCase(clave)) {
+            return "Es necesario revisar las unidades didácticas que no quedaron registradas";
+        }
+        return "Tu trayectoria está siendo revisada para identificar la mejor ruta de avance";
+    }
+
+    private String normalizarClave(String valor) {
+        return valor != null ? valor.trim() : "";
     }
 
     private void cargarReglasAplicadas(DiagnosticoAcademicoOperativoDTO diagnostico,
@@ -346,11 +580,6 @@ public class DiagnosticoAcademicoOperativoServiceImpl implements DiagnosticoAcad
             }
         }
         return false;
-    }
-
-    private boolean existeMensajeSeriacion(AsistenteInscripcionContextoDTO contextoAsistido) {
-        return contextoAsistido != null && contextoAsistido.getContextoBase() != null
-                && tieneTexto(contextoAsistido.getContextoBase().getMensajeSeriacion());
     }
 
     private boolean contiene(String valor, String patron) {

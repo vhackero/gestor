@@ -109,6 +109,14 @@ public class MallaDiagramaNodoDTO implements Serializable {
 		return estatus;
 	}
 
+	/**
+	 * Conserva el estatus interno para la lógica de la malla, pero evita mostrar
+	 * al estudiante el término técnico asociado al candado.
+	 */
+	public String getEstatusTooltip() {
+		return "Bloqueada".equalsIgnoreCase(estatus) ? "Por cursar" : estatus;
+	}
+
 	public void setEstatus(String estatus) {
 		this.estatus = estatus;
 	}

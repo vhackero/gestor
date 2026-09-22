@@ -10,6 +10,7 @@ public class EscenarioProyeccionDTO implements Serializable {
 
     private String nombre;
     private String descripcion;
+    private Integer materiasOfertadas;
     private Integer materiasHabilitadas;
     private Integer materiasBloqueadas;
     private List<String> recomendaciones;
@@ -40,6 +41,14 @@ public class EscenarioProyeccionDTO implements Serializable {
 
     public void setMateriasHabilitadas(Integer materiasHabilitadas) {
         this.materiasHabilitadas = materiasHabilitadas;
+    }
+
+    public Integer getMateriasOfertadas() {
+        return materiasOfertadas;
+    }
+
+    public void setMateriasOfertadas(Integer materiasOfertadas) {
+        this.materiasOfertadas = materiasOfertadas;
     }
 
     public Integer getMateriasBloqueadas() {

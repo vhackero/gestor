@@ -94,10 +94,10 @@ public class BaseConocimientoAcademicoServiceImpl implements BaseConocimientoAca
         if (caso != null && caso.getTipoCaso() != null) {
             candidatos.addAll(obtenerPatronesPorTipoCaso(caso.getTipoCaso()));
         }
-        for (PatronConocimientoDTO patron : obtenerPatronesActivos()) {
-            if (!contienePatron(candidatos, patron)) {
-                candidatos.add(patron);
-            }
+        // Un patrón de otro tipo nunca debe competir sólo por tener confianza base positiva.
+        // Si el catálogo no configura patrón para el tipo, el caso queda sin mensaje institucional hasta corregirlo.
+        if (candidatos.isEmpty()) {
+            return candidatos;
         }
         List<PatronPuntaje> ponderados = new ArrayList<PatronPuntaje>();
         for (PatronConocimientoDTO patron : candidatos) {
@@ -108,7 +108,10 @@ public class BaseConocimientoAcademicoServiceImpl implements BaseConocimientoAca
         }
         Collections.sort(ponderados, Comparator.comparingDouble(PatronPuntaje::getPuntaje).reversed());
         List<PatronConocimientoDTO> resultado = new ArrayList<PatronConocimientoDTO>();
+        int orden = 1;
         for (PatronPuntaje item : ponderados) {
+            item.getPatron().setPuntajeRelevancia(Double.valueOf(item.getPuntaje()));
+            item.getPatron().setOrdenAplicacion(Integer.valueOf(orden++));
             resultado.add(item.getPatron());
             if (resultado.size() >= 4) {
                 break;
@@ -122,10 +125,6 @@ public class BaseConocimientoAcademicoServiceImpl implements BaseConocimientoAca
     public List<MensajeInstitucionalContextualDTO> obtenerMensajesContextuales(CasoAcademicoOperativoDTO caso,
             String perfil, String periodoOperativo) throws InscripcionException {
         Map<String, MensajePuntaje> mensajes = new LinkedHashMap<String, MensajePuntaje>();
-        for (MensajeInstitucionalContextualDTO mensaje : obtenerMensajesPorPerfilYPeriodo(perfil, periodoOperativo)) {
-            double puntaje = puntuarMensaje(caso, mensaje, false);
-            registrarMensaje(mensajes, mensaje, puntaje);
-        }
         for (PatronConocimientoDTO patron : obtenerPatronesRelevantes(caso, perfil, periodoOperativo)) {
             if (patron.getMensajes() == null) {
                 continue;
@@ -138,6 +137,13 @@ public class BaseConocimientoAcademicoServiceImpl implements BaseConocimientoAca
                     continue;
                 }
                 double puntaje = puntuarMensaje(caso, mensaje, true);
+                registrarMensaje(mensajes, mensaje, puntaje);
+            }
+        }
+        // Los mensajes globales son sólo un respaldo cuando el patrón aplicable no tiene texto para el contexto.
+        if (mensajes.isEmpty()) {
+            for (MensajeInstitucionalContextualDTO mensaje : obtenerMensajesPorPerfilYPeriodo(perfil, periodoOperativo)) {
+                double puntaje = puntuarMensaje(caso, mensaje, false);
                 registrarMensaje(mensajes, mensaje, puntaje);
             }
         }

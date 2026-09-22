@@ -8,7 +8,50 @@
 
     <ui:define name="breadcrumb">
         <li>#{sistema.obtenerTexto('gw.sidebar.historialAcademico')}</li>
-        <li class="active">Asistente de inscripción curricular</li>
+		<li class="active">Asistente de inscripción y orientación educativa</li>
+        <script type="text/javascript">
+            //<![CDATA[
+            (function() {
+                window.instalarControlesAsistente = function() {
+                    var encabezados = document.querySelectorAll('.assistant-right-rail .rail-head:not([data-colapsable])');
+                    for (var i = 0; i < encabezados.length; i++) {
+                        var encabezado = encabezados[i];
+                        encabezado.setAttribute('data-colapsable', 'true');
+                        var boton = document.createElement('button');
+                        boton.type = 'button';
+                        boton.className = 'rail-collapse-button';
+                        boton.setAttribute('aria-label', 'Contraer asistente virtual');
+                        boton.setAttribute('title', 'Contraer asistente virtual');
+                        boton.innerHTML = '&#9664;';
+                        boton.onclick = function() {
+                            var rail = this.parentNode.parentNode;
+                            var contraido = !rail.classList.contains('is-collapsed');
+                            rail.classList.toggle('is-collapsed', contraido);
+                            if (rail.parentNode) {
+                                rail.parentNode.classList.toggle('rail-collapsed', contraido);
+                            }
+                            this.innerHTML = contraido ? '&#9654;' : '&#9664;';
+                            this.setAttribute('aria-label', contraido ? 'Expandir asistente virtual' : 'Contraer asistente virtual');
+                            this.setAttribute('title', contraido ? 'Expandir asistente virtual' : 'Contraer asistente virtual');
+                        };
+                        encabezado.appendChild(boton);
+                    }
+                };
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', window.instalarControlesAsistente);
+                } else {
+                    window.instalarControlesAsistente();
+                }
+                if (window.jsf && window.jsf.ajax) {
+                    window.jsf.ajax.addOnEvent(function(data) {
+                        if (data.status === 'success') {
+                            window.instalarControlesAsistente();
+                        }
+                    });
+                }
+            }());
+            //]]>
+        </script>
     </ui:define>
 
     <ui:define name="content">
@@ -721,6 +764,75 @@
                 color: #42535d;
                 line-height: 1.45;
             }
+            .motor-result {
+                border-left: 4px solid #3e95aa;
+                background: #f2f8fa;
+            }
+            .motor-label {
+                margin-top: 12px;
+                font-weight: 700;
+                color: #315766;
+            }
+            .motor-meta {
+                margin-top: 8px;
+                font-size: 12px;
+                font-weight: 700;
+                color: #4a6875;
+            }
+            .diagnostico-mensaje {
+                display: block;
+                margin: 0;
+                line-height: 1.4;
+            }
+            .diagnostico-contadores {
+                margin: 0;
+                padding-left: 17px;
+                list-style: disc;
+            }
+            .diagnostico-contadores li {
+                margin: 0;
+                padding: 0;
+                line-height: 1.35;
+            }
+            .diagnostico-numero {
+                display: inline !important;
+                margin: 0 !important;
+                color: #315766;
+                cursor: help;
+                text-decoration: underline dotted;
+                position: relative;
+            }
+            .diagnostico-numero[data-ayuda]:hover::after {
+                content: attr(data-ayuda);
+                position: absolute;
+                z-index: 1100;
+                top: calc(100% + 6px);
+                left: 0;
+                min-width: 180px;
+                max-width: 360px;
+                padding: 7px 9px;
+                border: 1px solid #9fb8c2;
+                border-radius: 4px;
+                background: #fff;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+                color: #31424a;
+                font-size: 11px;
+                font-weight: 400;
+                line-height: 1.35;
+                text-align: left;
+                white-space: pre-line;
+                pointer-events: none;
+            }
+            .diagnostico-nota {
+                display: block;
+                margin: 0;
+                line-height: 1.4;
+            }
+            .motor-refresh {
+                width: 100%;
+                margin-top: 10px;
+                text-align: center;
+            }
             .context-message-list {
                 margin: 12px 0 0 18px;
                 color: #3f505a;
@@ -769,10 +881,15 @@
                 border-color: #e7cf7a;
                 color: #6b581e;
             }
-            .prioritarias-layout,
-            .orientacion-layout {
+            .prioritarias-layout {
                 display: grid;
                 grid-template-columns: minmax(0, 1fr) 262px;
+                gap: 18px;
+                align-items: start;
+            }
+            .orientacion-layout {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr);
                 gap: 18px;
                 align-items: start;
             }
@@ -898,11 +1015,54 @@
                 border: 1px solid #cdd9df;
             }
             .assistant-right-rail .rail-head {
+                position: relative;
                 background: #5f97a8;
                 color: #ffffff;
-                padding: 12px 12px;
+                padding: 12px 12px 12px 40px;
                 font-size: 15px;
                 font-weight: 700;
+            }
+            .rail-collapse-button {
+                position: absolute;
+                top: 9px;
+                left: 9px;
+                width: 22px;
+                height: 22px;
+                padding: 0;
+                border: 0;
+                border-radius: 50%;
+                background: transparent;
+                color: #ffffff;
+                cursor: pointer;
+                font-size: 14px;
+                line-height: 22px;
+                text-align: center;
+            }
+            .rail-collapse-button:hover,
+            .rail-collapse-button:focus {
+                background: rgba(255,255,255,.22);
+                outline: none;
+            }
+            .assistant-right-rail.is-collapsed {
+                min-width: 34px;
+            }
+            .assistant-right-rail.is-collapsed .rail-body,
+            .assistant-right-rail.is-collapsed .rail-next {
+                display: none;
+            }
+            .assistant-right-rail.is-collapsed .rail-head {
+                min-height: 42px;
+                padding: 8px 4px;
+                font-size: 0;
+            }
+            .assistant-right-rail.is-collapsed .rail-collapse-button {
+                top: 9px;
+                left: 6px;
+                font-size: 14px;
+            }
+            .prioritarias-layout.rail-collapsed,
+            .situacion-layout.rail-collapsed {
+                grid-template-columns: minmax(0, 1fr) 34px;
             }
             .assistant-right-rail .rail-body {
                 padding: 14px 12px;
@@ -1260,7 +1420,7 @@
         </style>
 
         <h:form id="mainForm">
-            <h1 class="asistente-title">#{tablaCurricularAsistidaBean.vistaGestor ? 'Asistente de inscripción curricular | Vista gestor' : 'Asistente de inscripción curricular'}</h1>
+			<h1 class="asistente-title">#{tablaCurricularAsistidaBean.vistaGestor ? 'Asistente de inscripción y orientación educativa | Vista gestor' : 'Asistente de inscripción y orientación educativa'}</h1>
             <div class="asistente-context-strip">
                 <span class="asistente-context-chip">Estudiante: #{tablaCurricularAsistidaBean.nombrePersonaObjetivo}</span>
                 <span class="asistente-context-chip">Matrícula: #{tablaCurricularAsistidaBean.matriculaPersonaObjetivo}</span>
@@ -1298,7 +1458,7 @@
                                             </div>
                                             <div class="kpi-card kpi-card-green">
                                                 <div class="kpi-title">Unidades didácticas disponibles para registrar</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasCriticas}</div>
+                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesDisponiblesParaRegistrarSituacion}</div>
                                             </div>
                                             <div class="kpi-card kpi-card-green">
                                                 <div class="kpi-title">UD bloqueadas por seriación curricular</div>
@@ -1311,15 +1471,19 @@
                                         <div class="kpi-grid">
                                             <div class="kpi-card kpi-card-blue">
                                                 <div class="kpi-title">Unidades didácticas obligatorias</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.pendientesPlan.obligatoriasFaltantes}</div>
+                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesObligatoriasFaltantesResumen}</div>
                                             </div>
                                             <div class="kpi-card kpi-card-blue">
-                                                <div class="kpi-title">Unidades didácticas optativas</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.pendientesPlan.optativasFaltantes}</div>
+                                                <div class="kpi-title">Unidades didácticas optativas requeridas</div>
+                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasFaltantesResumen}</div>
+                                            </div>
+                                            <div class="kpi-card kpi-card-blue">
+                                                <div class="kpi-title">Unidades didácticas optativas opcionales</div>
+                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasOpcionalesResumen}</div>
                                             </div>
                                             <div class="kpi-card kpi-card-blue">
                                                 <div class="kpi-title">Unidades didácticas electivas</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.pendientesPlan.electivasFaltantes}</div>
+                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesElectivasFaltantesResumen}</div>
                                             </div>
                                             <div class="kpi-card kpi-card-blue">
                                                 <div class="kpi-title">Créditos faltantes</div>
@@ -1368,16 +1532,18 @@
                                             <div class="rail-response">
                                                 <strong>#{tablaCurricularAsistidaBean.etiquetaResumenPanelAsistenteVirtual}</strong>
                                                 <div style="font-weight:700; margin-top:6px;">#{tablaCurricularAsistidaBean.tituloResumenDiagnosticoAsistenteVirtual}</div>
-                                                <span>#{tablaCurricularAsistidaBean.contenidoResumenDiagnosticoAsistenteVirtual}</span>
-                                            </div>
-                                            <div class="rail-actions tabs" style="margin-top:14px;">
-                                                <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextual">
-                                                    <p:commandButton value="#{accionContextual}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextual)}" process="@this" update="@form" oncomplete="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(0); }" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextual ? 'active' : ''}" />
-                                                </ui:repeat>
-                                            </div>
-                                            <div class="rail-response">
-                                                <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
-                                                <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
+                                                <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarResultadoMotorV2}">
+                                                    <span class="diagnostico-mensaje">#{tablaCurricularAsistidaBean.mensajeRestriccionDiagnosticoV2}.</span>
+                                                    <ul class="diagnostico-contadores">
+                                                        <li><strong class="diagnostico-numero" data-ayuda="#{tablaCurricularAsistidaBean.detalleUdPendientesAcreditarDiagnosticoV2}">#{tablaCurricularAsistidaBean.udPendientesAcreditarDiagnosticoV2}</strong>-UD pendientes de acreditar.</li>
+                                                        <li><strong class="diagnostico-numero" data-ayuda="#{tablaCurricularAsistidaBean.detalleUdBloqueadasSeriacionDiagnosticoV2}">#{tablaCurricularAsistidaBean.udBloqueadasSeriacionDiagnosticoV2}</strong>-UD bloqueadas por seriación.</li>
+                                                        <li><strong class="diagnostico-numero" data-ayuda="#{tablaCurricularAsistidaBean.detalleUdPendientesRegistroDiagnosticoV2}">#{tablaCurricularAsistidaBean.udPendientesRegistroOfertadasDiagnosticoV2 + tablaCurricularAsistidaBean.udPendientesRegistroPreviasDiagnosticoV2}</strong>-UD pendientes de registro: #{tablaCurricularAsistidaBean.udPendientesRegistroOfertadasDiagnosticoV2} ofertadas en este periodo y #{tablaCurricularAsistidaBean.udPendientesRegistroPreviasDiagnosticoV2} de semestres previos.</li>
+                                                    </ul>
+                                                    <span class="diagnostico-nota">Te faltan #{tablaCurricularAsistidaBean.creditosPendientesDiagnosticoV2} créditos requeridos para concluir tu programa educativo.</span>
+                                                </ui:fragment>
+                                                <ui:fragment rendered="#{not tablaCurricularAsistidaBean.mostrarResultadoMotorV2}">
+                                                    <span>#{tablaCurricularAsistidaBean.contenidoResumenDiagnosticoAsistenteVirtual}</span>
+                                                </ui:fragment>
                                             </div>
                                         </div>
                                     </div>
@@ -1408,7 +1574,6 @@
                                                 <table class="prioridad-table">
                                                     <thead>
                                                         <tr>
-                                                            <th>Bloque</th>
                                                             <th>Unidad didáctica</th>
                                                             <th>Tipo</th>
                                                             <th>Clave</th>
@@ -1421,7 +1586,6 @@
                                                     <tbody>
                                                         <ui:repeat value="#{tablaCurricularAsistidaBean.filasUdPrioritarias}" var="filaPrioritaria">
                                                             <tr>
-                                                                <td style="text-align:center;">#{filaPrioritaria.etiquetaBloque}</td>
                                                                 <td>#{filaPrioritaria.asignatura}</td>
                                                                 <td style="text-align:center;">#{filaPrioritaria.tipo}</td>
                                                                 <td style="text-align:center;">#{filaPrioritaria.clave}</td>
@@ -1456,25 +1620,27 @@
                                                 <div class="rail-response">
                                                     <strong>#{tablaCurricularAsistidaBean.etiquetaResumenPanelAsistenteVirtual}</strong>
                                                     <div style="font-weight:700; margin-top:6px;">#{tablaCurricularAsistidaBean.tituloResumenDiagnosticoAsistenteVirtual}</div>
-                                                    <span>#{tablaCurricularAsistidaBean.contenidoResumenDiagnosticoAsistenteVirtual}</span>
+                                                    <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarResultadoMotorV2}">
+                                                        <span class="diagnostico-mensaje">#{tablaCurricularAsistidaBean.mensajeRestriccionDiagnosticoV2}.</span>
+                                                        <ul class="diagnostico-contadores">
+                                                            <li><strong class="diagnostico-numero" data-ayuda="#{tablaCurricularAsistidaBean.detalleUdPendientesAcreditarDiagnosticoV2}">#{tablaCurricularAsistidaBean.udPendientesAcreditarDiagnosticoV2}</strong>-UD pendientes de acreditar.</li>
+                                                            <li><strong class="diagnostico-numero" data-ayuda="#{tablaCurricularAsistidaBean.detalleUdBloqueadasSeriacionDiagnosticoV2}">#{tablaCurricularAsistidaBean.udBloqueadasSeriacionDiagnosticoV2}</strong>-UD bloqueadas por seriación.</li>
+                                                            <li><strong class="diagnostico-numero" data-ayuda="#{tablaCurricularAsistidaBean.detalleUdPendientesRegistroDiagnosticoV2}">#{tablaCurricularAsistidaBean.udPendientesRegistroOfertadasDiagnosticoV2 + tablaCurricularAsistidaBean.udPendientesRegistroPreviasDiagnosticoV2}</strong>-UD pendientes de registro: #{tablaCurricularAsistidaBean.udPendientesRegistroOfertadasDiagnosticoV2} ofertadas en este periodo y #{tablaCurricularAsistidaBean.udPendientesRegistroPreviasDiagnosticoV2} de semestres previos.</li>
+                                                        </ul>
+                                                        <span class="diagnostico-nota">Te faltan #{tablaCurricularAsistidaBean.creditosPendientesDiagnosticoV2} créditos requeridos para concluir tu programa educativo.</span>
+                                                    </ui:fragment>
+                                                    <ui:fragment rendered="#{not tablaCurricularAsistidaBean.mostrarResultadoMotorV2}">
+                                                        <span>#{tablaCurricularAsistidaBean.contenidoResumenDiagnosticoAsistenteVirtual}</span>
+                                                    </ui:fragment>
                                                 </div>
-                                                <div class="rail-actions tabs">
-                                                    <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualPrioridad">
-                                                        <p:commandButton value="#{accionContextualPrioridad}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualPrioridad)}" process="@this" update="@form" oncomplete="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(1); }" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextualPrioridad ? 'active' : ''}" />
-                                                    </ui:repeat>
-                                                </div>
-                                                <div class="rail-response">
-                                                    <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
-                                                    <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
-                                                </div>
-                                            </div>
                                         </div>
+                                    </div>
                                     </div>
                                 </div>
                             </div>
                         </p:tab>
 
-                        <p:tab title="Expectativa de logro">
+                        <p:tab title="Expectativa de logro" rendered="#{tablaCurricularAsistidaBean.periodoCursamiento}">
                             <div class="asistente-section">
                                 <div class="expectativa-alerta">
                                     <i class="fa fa-warning" />
@@ -1488,7 +1654,11 @@
                                             <div class="expectativa-desc">#{escenarioProyeccion.descripcion}</div>
                                             <div class="expectativa-kpis">
                                                 <div class="expectativa-kpi">
-                                                    <span class="label">UD habilitadas</span>
+                                                    <span class="label">UD ofertadas</span>
+                                                    <span class="value">#{escenarioProyeccion.materiasOfertadas ne null ? escenarioProyeccion.materiasOfertadas : 0}</span>
+                                                </div>
+                                                <div class="expectativa-kpi">
+                                                    <span class="label">UD posibles a registrar</span>
                                                     <span class="value">#{escenarioProyeccion.materiasHabilitadas ne null ? escenarioProyeccion.materiasHabilitadas : 0}</span>
                                                 </div>
                                                 <div class="expectativa-kpi">
@@ -1527,7 +1697,7 @@
                             </div>
                         </p:tab>
 
-                        <p:tab title="Proyección de carga">
+                        <p:tab title="Proyección de carga" rendered="#{not tablaCurricularAsistidaBean.periodoCursamiento}">
                             <div class="asistente-section">
                                 <ui:fragment rendered="#{not tablaCurricularAsistidaBean.mostrarProyeccionConDatos}">
                                     <div class="soft-panel">
@@ -1595,6 +1765,14 @@
 
                         <p:tab title="Simulador" rendered="#{tablaCurricularAsistidaBean.mostrarSimuladorParaEstudiante}">
                             <div class="asistente-section">
+                                <ui:fragment rendered="#{tablaCurricularAsistidaBean.estadoOperativoBajaTemporal}">
+                                    <div class="soft-panel">
+                                        <h3>Simulador no disponible</h3>
+                                        <p>#{tablaCurricularAsistidaBean.mensajePeriodoValidacion}</p>
+                                    </div>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{not tablaCurricularAsistidaBean.estadoOperativoBajaTemporal}">
+                                <ui:fragment rendered="#{not tablaCurricularAsistidaBean.mostrarRevisionSeleccion}">
                                 <div class="meta-strip">
                                     <div class="meta-strip-left">
                                         <div class="meta-pill">
@@ -1615,27 +1793,29 @@
                                     </div>
                                 </div>
 
-                                <div class="simulador-title">Asistente de inscripción curricular</div>
-
+                                <div class="prioritarias-layout">
+                                <div>
+								<div class="simulador-title">Asistente de inscripción y orientación educativa</div>
                                 <div class="simulacion-base">
                                     <strong>Base de simulación:</strong>
-                                    #{tablaCurricularAsistidaBean.contexto.inscripcionVigente ? 'Universo curricular hipotético con UD pendientes de ciclos académicos anteriores y UD del periodo de inscripción vigente' : 'Oferta académica vigente'}
+                                    #{tablaCurricularAsistidaBean.baseSimulacion}
                                 </div>
 
                                 <div class="simulacion-actions">
-                                    <p:commandButton value="Simular reinscripción"
-                                        action="#{tablaCurricularAsistidaBean.simularSeleccion}"
+                                    <p:commandButton value="Validar selección"
+                                        action="#{tablaCurricularAsistidaBean.simularSeleccion}" process="@form"
                                         update="@form" styleClass="btn btn-primary"
                                         disabled="#{tablaCurricularAsistidaBean.simuladorSoloConsulta}" />
-                                    <p:commandButton value="Validar reinscripción final"
-                                        action="#{tablaCurricularAsistidaBean.validarSeleccionFinal}"
-                                        update="@form" styleClass="btn btn-default" style="margin-left:10px; min-width:220px;"
+                                    <p:commandButton value="Simular reinscripción"
+                                        action="#{tablaCurricularAsistidaBean.validarSeleccionFinal}" process="@form"
+                                        update="@form"
+                                        styleClass="btn btn-default" style="margin-left:10px; min-width:220px;"
                                         disabled="#{not tablaCurricularAsistidaBean.permiteValidacionFinal}" />
                                 </div>
 
-                                <p:outputPanel rendered="#{tablaCurricularAsistidaBean.simuladorSoloConsulta}">
+                                <p:outputPanel rendered="#{tablaCurricularAsistidaBean.mostrarAvisoProyeccionSimulador}">
                                     <div class="alert-box alert-box-info">
-                                        Modo de consulta: puedes revisar la oferta y el detalle de las unidades didácticas disponibles, pero el simulador no está habilitado mientras no exista un periodo activo de inscripción/reinscripción.
+                                        #{tablaCurricularAsistidaBean.mensajeSimulacionHipotetica}
                                     </div>
                                 </p:outputPanel>
 
@@ -1713,7 +1893,7 @@
                                                                 <div>
                                                                     <p:commandLink action="#{tablaCurricularAsistidaBean.toggleDetalle(fila)}"
                                                                         process="@this" update="@form" styleClass="sim-toggle"
-                                                                        oncomplete="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(4); }"
+                                                                        oncomplete="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(3); }"
                                                                         title="#{fila.detalleVisible ? 'Ocultar detalle' : 'Mostrar detalle'}">
                                                                         <i class="fa #{fila.detalleVisible ? 'fa-eye-slash' : 'fa-eye'}" style="font-size:16px;" />
                                                                     </p:commandLink>
@@ -1799,10 +1979,35 @@
                                         </div>
                                     </div>
                                 </ui:repeat>
+                                </div>
+                                <div class="assistant-right-rail #{tablaCurricularAsistidaBean.vistaGestor ? 'gestor' : ''}">
+                                    <div class="rail-head">#{tablaCurricularAsistidaBean.tituloPanelContextual}</div>
+                                    <div class="rail-body">
+                                        <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
+                                        <div class="rail-actions tabs">
+                                            <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualSimulador">
+                                                <p:commandButton value="#{accionContextualSimulador}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualSimulador)}" process="@this" update="@form" oncomplete="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(3); } if (window.instalarControlesAsistente) { window.instalarControlesAsistente(); }" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextualSimulador ? 'active' : ''}" />
+                                            </ui:repeat>
+                                        </div>
+                                        <div class="rail-response">
+                                            <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
+                                            <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
+                                        </div>
+                                        <div class="rail-response motor-result">
+                                            <strong>Dictamen</strong>
+                                            <div class="motor-label">#{tablaCurricularAsistidaBean.tituloDictamenMotorV2}</div>
+                                            <span>#{tablaCurricularAsistidaBean.mensajeDictamenMotorV2}</span>
+                                            <div class="motor-meta">Acción: #{tablaCurricularAsistidaBean.accionDictamenMotorV2}</div>
+                                            <div class="motor-meta">Viabilidad: #{tablaCurricularAsistidaBean.viabilidadDictamenMotorV2}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>
+                                </ui:fragment>
+                                </ui:fragment>
                             </div>
-                        </p:tab>
 
-                        <p:tab title="Validación">
+                        <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarRevisionSeleccion}">
                             <div class="asistente-section">
                                 <div class="panel-shell">
                                     <div class="context-top-strip">
@@ -1834,12 +2039,19 @@
                                                     <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
                                                     <div class="rail-actions tabs">
                                                         <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualValidacion">
-                                                            <p:commandButton value="#{accionContextualValidacion}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualValidacion)}" process="@this" update="@form" oncomplete="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(5); }" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextualValidacion ? 'active' : ''}" />
+                                                            <p:commandButton value="#{accionContextualValidacion}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualValidacion)}" process="@this" update="@form" oncomplete="if (window.instalarControlesAsistente) { window.instalarControlesAsistente(); }" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextualValidacion ? 'active' : ''}" />
                                                         </ui:repeat>
                                                     </div>
                                                     <div class="rail-response">
                                                         <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
                                                         <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
+                                                    </div>
+                                                    <div class="rail-response motor-result">
+                                                        <strong>Dictamen</strong>
+                                                        <div class="motor-label">#{tablaCurricularAsistidaBean.tituloDictamenMotorV2}</div>
+                                                        <span>#{tablaCurricularAsistidaBean.mensajeDictamenMotorV2}</span>
+                                                        <div class="motor-meta">Acción: #{tablaCurricularAsistidaBean.accionDictamenMotorV2}</div>
+                                                        <div class="motor-meta">Viabilidad: #{tablaCurricularAsistidaBean.viabilidadDictamenMotorV2}</div>
                                                     </div>
                                                 </div>
                                                 <div class="rail-next">
@@ -1898,6 +2110,7 @@
                                                 </div>
 
                                                 <div class="validation-actions" style="justify-content:flex-start;">
+                                                    <p:commandButton value="Regresar" action="#{tablaCurricularAsistidaBean.regresarASimulador}" process="@this" update="@form" styleClass="btn btn-default" />
                                                     <p:commandButton type="button" value="Registrar revisión" styleClass="btn btn-primary" />
                                                     <p:commandButton type="button" value="Escalar con evidencia" styleClass="btn btn-default" />
                                                 </div>
@@ -1908,12 +2121,19 @@
                                                     <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
                                                     <div class="rail-actions tabs">
                                                         <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualValidacionGestor">
-                                                            <p:commandButton value="#{accionContextualValidacionGestor}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualValidacionGestor)}" process="@this" update="@form" oncomplete="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(5); }" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextualValidacionGestor ? 'active' : ''}" />
+                                                            <p:commandButton value="#{accionContextualValidacionGestor}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualValidacionGestor)}" process="@this" update="@form" oncomplete="if (window.instalarControlesAsistente) { window.instalarControlesAsistente(); }" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextualValidacionGestor ? 'active' : ''}" />
                                                         </ui:repeat>
                                                     </div>
                                                     <div class="rail-response">
                                                         <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
                                                         <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
+                                                    </div>
+                                                    <div class="rail-response motor-result">
+                                                        <strong>Dictamen</strong>
+                                                        <div class="motor-label">#{tablaCurricularAsistidaBean.tituloDictamenMotorV2}</div>
+                                                        <span>#{tablaCurricularAsistidaBean.mensajeDictamenMotorV2}</span>
+                                                        <div class="motor-meta">Acción: #{tablaCurricularAsistidaBean.accionDictamenMotorV2}</div>
+                                                        <div class="motor-meta">Viabilidad: #{tablaCurricularAsistidaBean.viabilidadDictamenMotorV2}</div>
                                                     </div>
                                                 </div>
                                                 <div class="rail-next">
@@ -1925,25 +2145,48 @@
                                     </ui:fragment>
 
                                     <ui:fragment rendered="#{not tablaCurricularAsistidaBean.vistaGestor and not tablaCurricularAsistidaBean.validacionNoDisponible}">
+                                        <div class="prioritarias-layout">
                                         <div class="validation-shell">
                                             <div class="panel-head">Validación de selección</div>
                                             <div class="panel-body">
                                                 <div class="validation-info-box">
                                                     <div class="validation-callout">
                                                         <i class="fa fa-info-circle" style="margin-right:8px; font-size:18px; color:#3a89c5;" />
-                                                        Las UD obligatorias están preseleccionadas conforme a las reglas académicas. No puedes desmarcarlas si son requeridas.
-                                                    </div>
-                                                    <div class="validation-legend">
-                                                        <div style="margin-bottom:8px;"><i class="fa fa-check-square-o" style="margin-right:6px;" /> Obligatoria (no puede desmarcarse)</div>
-                                                        <div><i class="fa fa-square-o" style="margin-right:6px;" /> Opcional (puede desmarcarse)</div>
+                                                        La selección se define únicamente en el simulador. Esta vista la conserva y valida sin modificarla.
                                                     </div>
                                                 </div>
+                                                <p:outputPanel rendered="#{not empty tablaCurricularAsistidaBean.resultadoSimulacion}">
+                                                    <div class="simulacion-panel">
+                                                        <div class="#{tablaCurricularAsistidaBean.resultadoSimulacion.valida ? 'simulacion-ok' : 'simulacion-error'}">
+                                                            #{tablaCurricularAsistidaBean.resultadoSimulacion.mensajeGeneral}
+                                                        </div>
+                                                        <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.resultadoSimulacion.motivos}">
+                                                            <div class="simulacion-list">
+                                                                <strong>Aspectos por revisar</strong>
+                                                                <ul>
+                                                                    <ui:repeat value="#{tablaCurricularAsistidaBean.resultadoSimulacion.motivos}" var="motivo">
+                                                                        <li><strong>#{motivo.mensajeCorto}</strong>: #{motivo.mensajeDetallado}</li>
+                                                                    </ui:repeat>
+                                                                </ul>
+                                                            </div>
+                                                        </ui:fragment>
+                                                        <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.resultadoSimulacion.advertencias}">
+                                                            <div class="simulacion-list">
+                                                                <strong>Recomendaciones</strong>
+                                                                <ul>
+                                                                    <ui:repeat value="#{tablaCurricularAsistidaBean.resultadoSimulacion.advertencias}" var="advertencia">
+                                                                        <li>#{advertencia}</li>
+                                                                    </ui:repeat>
+                                                                </ul>
+                                                            </div>
+                                                        </ui:fragment>
+                                                    </div>
+                                                </p:outputPanel>
 
                                                 <div class="validacion-table-wrap">
                                                     <table class="validacion-table">
                                                         <thead>
                                                             <tr>
-                                                                <th style="width:44px;"></th>
                                                                 <th>UD</th>
                                                                 <th>Tipo</th>
                                                                 <th>Seriación</th>
@@ -1955,9 +2198,6 @@
                                                         <tbody>
                                                             <ui:repeat value="#{tablaCurricularAsistidaBean.filasValidacion}" var="filaValidacion">
                                                                 <tr>
-                                                                    <td style="text-align:center;">
-                                                                        <p:selectBooleanCheckbox value="#{filaValidacion.seleccionada}" disabled="#{not tablaCurricularAsistidaBean.seleccionEditable(filaValidacion)}" />
-                                                                    </td>
                                                                     <td>#{filaValidacion.asignatura}</td>
                                                                     <td style="text-align:center;">#{filaValidacion.tipo}</td>
                                                                     <td style="text-align:center;">#{filaValidacion.bloqueada ? 'Con bloqueo' : 'Ninguna'}</td>
@@ -2004,105 +2244,44 @@
                                                 </div>
 
                                                 <div class="validation-actions">
-                                                    <p:commandButton type="button" value="Regresar al simulador" styleClass="btn btn-default" onclick="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(4); } return false;" />
-                                                    <p:commandButton value="Confirmar inscripción" action="#{tablaCurricularAsistidaBean.validarSeleccionFinal}" update="@form" styleClass="btn btn-primary" />
+                                                    <p:commandButton value="Regresar" action="#{tablaCurricularAsistidaBean.regresarASimulador}" process="@this" update="@form" styleClass="btn btn-default" />
+                            <p:commandButton value="Continuar inscripción" action="#{tablaCurricularAsistidaBean.continuarInscripcion}" process="@form" ajax="false" styleClass="btn btn-primary" style="min-width: 220px; white-space: nowrap;" />
                                                 </div>
                                             </div>
+                                        </div>
+                                        <div class="assistant-right-rail #{tablaCurricularAsistidaBean.vistaGestor ? 'gestor' : ''}">
+                                            <div class="rail-head">#{tablaCurricularAsistidaBean.tituloPanelContextual}</div>
+                                            <div class="rail-body">
+                                                <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
+                                                <div class="rail-actions tabs">
+                                                    <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualValidacionAlumno">
+                                                        <p:commandButton value="#{accionContextualValidacionAlumno}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualValidacionAlumno)}" process="@this" update="@form" oncomplete="if (window.instalarControlesAsistente) { window.instalarControlesAsistente(); }" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextualValidacionAlumno ? 'active' : ''}" />
+                                                    </ui:repeat>
+                                                </div>
+                                                <div class="rail-response">
+                                                    <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
+                                                    <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
+                                                </div>
+                                                <div class="rail-response motor-result">
+                                                    <strong>Dictamen</strong>
+                                                    <div class="motor-label">#{tablaCurricularAsistidaBean.tituloDictamenMotorV2}</div>
+                                                    <span>#{tablaCurricularAsistidaBean.mensajeDictamenMotorV2}</span>
+                                                    <div class="motor-meta">Acción: #{tablaCurricularAsistidaBean.accionDictamenMotorV2}</div>
+                                                    <div class="motor-meta">Viabilidad: #{tablaCurricularAsistidaBean.viabilidadDictamenMotorV2}</div>
+                                                </div>
+                                            </div>
+                                            <div class="rail-next">
+                                                <h3>#{tablaCurricularAsistidaBean.tituloSiguientePaso}</h3>
+                                                <p>#{tablaCurricularAsistidaBean.descripcionSiguientePaso}</p>
+                                            </div>
+                                        </div>
                                         </div>
                                     </ui:fragment>
                                 </div>
                             </div>
+                        </ui:fragment>
                         </p:tab>
 
-                        <p:tab title="Orientación">
-                            <div class="asistente-section">
-                                <div class="panel-shell">
-                                    <div class="context-top-strip">
-                                        <span class="context-top-chip">#{tablaCurricularAsistidaBean.descripcionSituacionAcademica}</span>
-                                        <span class="context-top-chip soft-blue">UD pendientes: #{tablaCurricularAsistidaBean.conteoUdPendientesPanel}</span>
-                                        <span class="context-top-chip soft-blue">Carga máxima: #{tablaCurricularAsistidaBean.cargaMaximaPanel} UD</span>
-                                        <span class="context-top-chip">Seriación: #{tablaCurricularAsistidaBean.conteoSeriacionPanel}</span>
-                                    </div>
-                                    <h2 class="section-heading-large">Orientación conversacional</h2>
-                                    <div class="orientacion-layout">
-                                        <ui:fragment rendered="#{tablaCurricularAsistidaBean.vistaGestor}">
-                                            <div class="orientation-panel">
-                                                <div class="panel-head">Orientación contextual</div>
-                                                <div class="panel-body">
-                                                    <div class="orientation-answer-box">#{tablaCurricularAsistidaBean.respuestaPreguntaOrientacion}</div>
-                                                    <div class="soft-panel" style="margin-top:18px;">
-                                                        <h3>Escalamiento académico</h3>
-                                                        <p>#{tablaCurricularAsistidaBean.mensajeEscalamientoAcademico}</p>
-                                                        <div class="escalamiento-grid">
-                                                            <ui:repeat value="#{tablaCurricularAsistidaBean.datosEscalamientoGestor}" var="datoEscalamiento">
-                                                                <div class="escalamiento-item">
-                                                                    <i class="fa #{datoEscalamiento.icono}" />
-                                                                    <div><strong>#{datoEscalamiento.etiqueta}:</strong> #{datoEscalamiento.valor}</div>
-                                                                </div>
-                                                            </ui:repeat>
-                                                        </div>
-                                                        <p:commandButton type="button" value="#{tablaCurricularAsistidaBean.textoBotonEscalamiento}" styleClass="btn btn-primary" style="margin-top:16px; min-width:180px;" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </ui:fragment>
-                                        <ui:fragment rendered="#{not tablaCurricularAsistidaBean.vistaGestor}">
-                                            <div class="orientacion-main-grid">
-                                                <details class="orientation-collapse" open="open">
-                                                    <summary>Preguntas rápidas</summary>
-                                                    <div class="orientation-collapse-body">
-                                                        <div class="questions-list">
-                                                            <ui:repeat value="#{tablaCurricularAsistidaBean.preguntasRapidasOrientacion}" var="preguntaRapida">
-                                                                <p:commandButton value="#{preguntaRapida}" action="#{tablaCurricularAsistidaBean.seleccionarPreguntaOrientacion(preguntaRapida)}" process="@this" update="@form" oncomplete="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(6); }" styleClass="btn btn-default question-item" />
-                                                            </ui:repeat>
-                                                        </div>
-                                                        <p:outputPanel id="orientacionMainPanel">
-                                                            <div class="orientation-answer-box">
-                                                                <strong class="orientation-answer-question">#{tablaCurricularAsistidaBean.preguntaOrientacionSeleccionada}</strong>
-                                                                #{tablaCurricularAsistidaBean.respuestaPreguntaOrientacion}
-                                                            </div>
-                                                            <div class="soft-panel" style="margin-top:18px;">
-                                                                <h3>Prevención y siguientes pasos</h3>
-                                                                <p>#{tablaCurricularAsistidaBean.mensajeEscalamientoAcademico}</p>
-                                                                <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarPanelPrevencionEstudianteV2}">
-                                                                    <ul class="preventive-list">
-                                                                        <ui:repeat value="#{tablaCurricularAsistidaBean.mensajesPreventivosEstudianteV2}" var="mensajePreventivo">
-                                                                            <li>#{mensajePreventivo}</li>
-                                                                        </ui:repeat>
-                                                                    </ul>
-                                                                </ui:fragment>
-                                                            </div>
-                                                        </p:outputPanel>
-                                                    </div>
-                                                </details>
-                                            </div>
-                                        </ui:fragment>
-                                        <p:outputPanel id="orientacionRailPanel">
-                                            <div class="assistant-right-rail #{tablaCurricularAsistidaBean.vistaGestor ? 'gestor' : ''}">
-                                                <div class="rail-head">#{tablaCurricularAsistidaBean.tituloPanelContextual}</div>
-                                                <div class="rail-body">
-                                                    <p>#{tablaCurricularAsistidaBean.mensajePanelLateral}</p>
-                                                    <div class="rail-response">
-                                                        <strong>#{tablaCurricularAsistidaBean.etiquetaResumenPanelAsistenteVirtual}</strong>
-                                                        <div style="font-weight:700; margin-top:6px;">#{tablaCurricularAsistidaBean.tituloResumenDiagnosticoAsistenteVirtual}</div>
-                                                        <span>#{tablaCurricularAsistidaBean.contenidoResumenDiagnosticoAsistenteVirtual}</span>
-                                                    </div>
-                                                    <div class="rail-actions tabs">
-                                                        <ui:repeat value="#{tablaCurricularAsistidaBean.accionesPanelContextual}" var="accionContextualOrientacion">
-                                                            <p:commandButton value="#{accionContextualOrientacion}" action="#{tablaCurricularAsistidaBean.seleccionarAccionPanel(accionContextualOrientacion)}" process="@this" update="@form" oncomplete="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(6); }" styleClass="rail-tab #{tablaCurricularAsistidaBean.accionPanelSeleccionada eq accionContextualOrientacion ? 'active' : ''}" />
-                                                        </ui:repeat>
-                                                    </div>
-                                                    <div class="rail-response">
-                                                        <strong>#{tablaCurricularAsistidaBean.accionPanelSeleccionada}</strong>
-                                                        <span>#{tablaCurricularAsistidaBean.respuestaAccionPanel}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </p:outputPanel>
-                                    </div>
-                                </div>
-                            </div>
-                        </p:tab>
                     </p:tabView>
                 </div>
             </p:outputPanel>

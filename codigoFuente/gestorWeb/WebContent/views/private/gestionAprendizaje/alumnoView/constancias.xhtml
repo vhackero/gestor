@@ -118,17 +118,17 @@
 				<span class="historial-role-title">#{constanciasBean.etiquetaRolHistorial}</span>
 				<div>
 					<h:outputText value="#{constanciasBean.mensajeTransicionAsistentePrevio}" />
-					<p:commandLink value="Asistente de inscripción curricular"
+					<p:commandLink value="Asistente de inscripción y orientación educativa"
 						action="#{constanciasBean.navegaAsistenteCurricular}"
 						ajax="false" />
 					<h:outputText value="." />
 				</div>
 			</div>
 			<div class="historial-actions">
-				<p:commandButton value="Malla curricular"
+				<p:commandButton value="Mapa curricular dinámico"
 					action="#{constanciasBean.navegaMallaCurricularAlumno}"
 					ajax="false" styleClass="btn btn-primary" style="margin-right:10px;" />
-				<p:commandButton value="Asistente curricular"
+				<p:commandButton value="Asistente de inscripción y orientación educativa"
 					action="#{constanciasBean.navegaAsistenteCurricular}"
 					ajax="false" styleClass="btn btn-primary" />
 			</div>

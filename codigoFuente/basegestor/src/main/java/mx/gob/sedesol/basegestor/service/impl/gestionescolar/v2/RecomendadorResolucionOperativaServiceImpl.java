@@ -1,15 +1,26 @@
 package mx.gob.sedesol.basegestor.service.impl.gestionescolar.v2;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AccionOperativaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CasoAcademicoOperativoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DictamenCasoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.CatAccionOperativaV2;
+import mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.CatViabilidadTecnicaV2;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.v2.CatAccionOperativaV2Repo;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.v2.CatViabilidadTecnicaV2Repo;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.RecomendadorResolucionOperativaService;
 
 @Service("recomendadorResolucionOperativaService")
 public class RecomendadorResolucionOperativaServiceImpl implements RecomendadorResolucionOperativaService {
+
+    @Autowired
+    private CatAccionOperativaV2Repo accionRepo;
+
+    @Autowired
+    private CatViabilidadTecnicaV2Repo viabilidadRepo;
 
     @Override
     public DictamenCasoDTO generarDictamen(CasoAcademicoOperativoDTO casoAcademico) throws InscripcionException {
@@ -22,79 +33,24 @@ public class RecomendadorResolucionOperativaServiceImpl implements RecomendadorR
         Integer totalNoAcreditadas = casoAcademico.getDiagnostico() != null ? casoAcademico.getDiagnostico().getTotalNoAcreditadas() : null;
         Integer totalBloqueadas = casoAcademico.getDiagnostico() != null ? casoAcademico.getDiagnostico().getTotalBloqueadas() : null;
 
-        if (valor(totalNoAcreditadas) >= 5 || (valor(totalNoAcreditadas) >= 3 && contiene(riesgoActual, "ALTO"))) {
-            accion.setClave("PRIORIZAR_REGULARIZACION");
-            accion.setNombre("Priorizar regularización");
-            dictamen.setDictamen("Alto riesgo por acumulación de no acreditadas");
-            dictamen.setMensajeEstudiante("Tu trayectoria presenta un riesgo alto por acumulación de UD no acreditadas. En este momento la prioridad no es avanzar con más carga, sino regularizar las unidades que están afectando tu continuidad académica.");
-            dictamen.setMensajeGestor("Enfatizar regularización intensiva, priorizar no acreditadas críticas y evitar prometer aperturas que contradigan la restricción académica activa.");
-            dictamen.setRequiereEscalamiento(Boolean.FALSE);
-        } else if (!Boolean.TRUE.equals(casoAcademico.getExpedienteCompleto())) {
-            accion.setClave("SOLICITAR_INFORMACION");
-            accion.setNombre("Solicitar información");
-            dictamen.setDictamen("Pendiente de información");
-            dictamen.setMensajeEstudiante("Tu caso requiere información adicional antes de emitir un dictamen definitivo.");
-            dictamen.setMensajeGestor("Solicita evidencia mínima del expediente antes de continuar con la resolución.");
-            dictamen.setRequiereEscalamiento(Boolean.FALSE);
-        } else if (contiene(tipoCaso, "OMISION_DOCUMENTADA") || contiene(motivo, "OMISION_DOCUMENTADA")) {
-            accion.setClave("APLICAR_AJUSTE_POR_OMISION");
-            accion.setNombre("Aplicar ajuste por omisión");
-            dictamen.setDictamen("Ajuste por omisión documentada");
-            dictamen.setMensajeEstudiante("Tu caso puede atenderse como una omisión documentada, no como una no acreditación, siempre que la evidencia institucional ya esté validada.");
-            dictamen.setMensajeGestor("Validar soporte documental y ejecutar el ajuste sin reclasificar el caso como no acreditación.");
-            dictamen.setRequiereEscalamiento(Boolean.FALSE);
-        } else if (contiene(tipoCaso, "REINSCRIPCION_NO_APROBADA")
-                || contiene(motivo, "PRIMER_ANIO_INCOMPLETO")) {
-            accion.setClave("MANTENER_RESTRICCION");
-            accion.setNombre("Mantener restricción");
-            dictamen.setDictamen("Primer año incompleto");
-            dictamen.setMensajeEstudiante("Mientras el primer año permanezca incompleto por una UD no aprobada, no procede habilitar obligatorias de un año superior.");
-            dictamen.setMensajeGestor("No habilitar manualmente obligatorias de un año superior; priorizar la UD pendiente y solo permitir selección compatible.");
-            dictamen.setRequiereEscalamiento(Boolean.FALSE);
-        } else if (contiene(motivo, "SOLO_OPTATIVAS") || (valor(totalNoAcreditadas) > 0 && "AVANCE_ANUAL".equalsIgnoreCase(restriccion))) {
-            accion.setClave("REGISTRAR_SOLO_OPTATIVAS_HABILITADAS");
-            accion.setNombre("Registrar solo optativas habilitadas");
-            dictamen.setDictamen("Selección limitada por rezago");
-            dictamen.setMensajeEstudiante("Tu trayectoria tiene rezago activo; en este período debes tomar solo las UD que el sistema habilite de forma compatible, aunque eso limite la selección a optativas o pendientes.");
-            dictamen.setMensajeGestor("Mantener la restricción del sistema y no forzar desbloqueos manuales; documentar que la selección queda limitada por rezago, carga y pendientes.");
-            dictamen.setRequiereEscalamiento(Boolean.FALSE);
-        } else if (contiene(motivo, "MISMO_ANIO") || (contiene(restriccion, "AVANCE_ANUAL") && valor(totalNoAcreditadas) == 0)) {
-            accion.setClave("PERMITIR_CONTINUIDAD_MISMO_ANIO");
-            accion.setNombre("Permitir continuidad del mismo año");
-            dictamen.setDictamen("Continuidad del mismo año académico");
-            dictamen.setMensajeEstudiante("Tu caso puede analizarse como continuidad dentro del mismo año académico, pero sigue sujeto a carga, oferta y reglas de selección.");
-            dictamen.setMensajeGestor("Distinguir continuidad del mismo año contra avance improcedente; permitir solo la selección que sea compatible con carga, oferta y trayectoria.");
-            dictamen.setRequiereEscalamiento(Boolean.FALSE);
-        } else if (valor(totalBloqueadas) > 0 && !Boolean.TRUE.equals(casoAcademico.getRequiereIntervencionHumana())) {
-            accion.setClave("DAR_SEGUIMIENTO");
-            accion.setNombre("Dar seguimiento");
-            dictamen.setDictamen("Seguimiento con seriación activa");
-            dictamen.setMensajeEstudiante("Hay UD bloqueadas por seriación; antes de pensar en otras opciones debes atender la unidad antecedente o la carga ya habilitada.");
-            dictamen.setMensajeGestor("Explicar la seriación activa y documentar la UD antecedente que mantiene el bloqueo.");
-            dictamen.setRequiereEscalamiento(Boolean.FALSE);
-        } else if (Boolean.TRUE.equals(casoAcademico.getRequiereIntervencionHumana())) {
-            accion.setClave("ESCALAR_REVISION");
-            accion.setNombre("Escalar revisión");
-            dictamen.setDictamen("Requiere revisión de segundo nivel");
-            dictamen.setMensajeEstudiante("Tu caso será revisado por una instancia académica para confirmar la mejor ruta de atención.");
-            dictamen.setMensajeGestor("Escalar el caso con evidencia y regla aplicada.");
-            dictamen.setRequiereEscalamiento(Boolean.TRUE);
-        } else if ("INSCRIPCION".equalsIgnoreCase(casoAcademico.getOrigenCaso())) {
-            accion.setClave("VALIDAR_SELECCION");
-            accion.setNombre("Validar selección");
-            dictamen.setDictamen("Validación operativa inicial");
-            dictamen.setMensajeEstudiante("Se generó una validación inicial para tu selección académica.");
-            dictamen.setMensajeGestor("Revisar la selección, corroborar regla aplicada y documentar el resultado.");
-            dictamen.setRequiereEscalamiento(Boolean.FALSE);
-        } else {
-            accion.setClave("DAR_SEGUIMIENTO");
-            accion.setNombre("Dar seguimiento");
-            dictamen.setDictamen("Seguimiento de primer nivel");
-            dictamen.setMensajeEstudiante("Se generó una orientación inicial con base en tu contexto académico actual.");
-            dictamen.setMensajeGestor("Revisar la causa principal, validar evidencia y documentar la atención brindada.");
-            dictamen.setRequiereEscalamiento(Boolean.FALSE);
+        resolverPorTipo(dictamen, accion, tipoCaso, motivo, restriccion, totalNoAcreditadas, totalBloqueadas,
+                casoAcademico.getExpedienteCompleto(), casoAcademico.getRequiereIntervencionHumana());
+        CatAccionOperativaV2 accionCatalogo = accionRepo.findByClave(accion.getClave());
+        if (accionCatalogo == null) {
+            throw new InscripcionException("No existe la acción operativa configurada: " + accion.getClave());
         }
-        dictamen.setAccionOperativa(accion);
+        dictamen.setAccionOperativa(AsistenteCurricularV2Mapper.toAccionDto(accionCatalogo));
+
+        if (casoAcademico.getViabilidadTecnica() != null
+                && casoAcademico.getViabilidadTecnica().getId() != null) {
+            dictamen.setViabilidadTecnica(casoAcademico.getViabilidadTecnica());
+        } else {
+            CatViabilidadTecnicaV2 viabilidad = viabilidadRepo.findByClave("VIABLE");
+            if (viabilidad == null) {
+                throw new InscripcionException("No existe la viabilidad técnica configurada: VIABLE");
+            }
+            dictamen.setViabilidadTecnica(AsistenteCurricularV2Mapper.toViabilidadDto(viabilidad));
+        }
         return dictamen;
     }
 
@@ -104,5 +60,85 @@ public class RecomendadorResolucionOperativaServiceImpl implements RecomendadorR
 
     private int valor(Integer numero) {
         return numero != null ? numero.intValue() : 0;
+    }
+
+    /** El tipo clasificado es la decisión principal; los contadores sólo la contextualizan. */
+    private void resolverPorTipo(DictamenCasoDTO dictamen, AccionOperativaDTO accion, String tipo, String motivo,
+            String restriccion, Integer noAcreditadas, Integer bloqueadas, Boolean expedienteCompleto,
+            Boolean requiereIntervencion) {
+        if (!Boolean.TRUE.equals(expedienteCompleto) || "PENDIENTE_INFORMACION".equals(tipo)) {
+            configurar(dictamen, accion, "SOLICITAR_INFORMACION", "Pendiente de información",
+                    "Tu caso requiere información adicional antes de emitir un dictamen definitivo.",
+                    "Solicita evidencia mínima del expediente antes de continuar con la resolución.", false);
+        } else if (valor(bloqueadas) > 0) {
+            configurar(dictamen, accion, "MANTENER_RESTRICCION", "Seguimiento con seriación activa",
+                    "Hay unidades didácticas bloqueadas por seriación; debes acreditar primero la unidad antecedente para habilitar las subsecuentes.",
+                    "Documentar la unidad antecedente pendiente y mantener la restricción curricular.", false);
+        } else if ("SERIACION".equals(tipo) && valor(noAcreditadas) == 0) {
+            // La clasificación almacenada puede provenir de una consulta anterior. La
+            // restricción sólo se conserva si la evaluación actual todavía reporta UD
+            // bloqueadas; una acreditación posterior del antecedente debe liberar el
+            // avance sin exigir una intervención manual.
+            configurar(dictamen, accion, "DAR_SEGUIMIENTO", "Seriación sin bloqueo activo",
+                    "El antecedente de seriación ya está acreditado o no genera bloqueos vigentes. Puedes continuar con las unidades habilitadas.",
+                    "Conservar la trazabilidad del caso y confirmar que la oferta actual no contiene bloqueos activos.", false);
+        } else if ("UNIDADES_NO_ACREDITADAS".equals(tipo) || "REZAGO".equals(tipo)) {
+            configurar(dictamen, accion, "PRIORIZAR_REGULARIZACION", "Regularización de unidades pendientes",
+                    "Presentas " + valor(noAcreditadas) + " unidad(es) no acreditada(s). Debes priorizar su regularización cuando exista oferta.",
+                    "Priorizar las unidades no acreditadas y no habilitar una carga que contradiga la restricción vigente.", false);
+        } else if ("OMISION_DOCUMENTADA".equals(tipo)) {
+            configurar(dictamen, accion, "APLICAR_AJUSTE_POR_OMISION", "Ajuste por omisión documentada",
+                    "Tu caso puede atenderse como una omisión documentada, una vez validada la evidencia institucional.",
+                    "Validar la evidencia y aplicar el ajuste sin clasificarlo como no acreditación.", false);
+        } else if ("OMISION_REGISTRO".equals(tipo)) {
+            configurar(dictamen, accion, "VALIDAR_SELECCION", "Regularización de omisión de registro",
+                    "Tienes unidades didácticas no cursadas que requieren revisión de oferta y selección para regularizar tu trayectoria.",
+                    "Verificar oferta, motivo de omisión y selección compatible antes de confirmar el movimiento.", false);
+        } else if ("OFERTA_NO_DISPONIBLE".equals(tipo)) {
+            configurar(dictamen, accion, "DAR_SEGUIMIENTO", "Oferta académica no disponible",
+                    "No existe oferta vigente suficiente para resolver tu selección en este periodo; consulta las alternativas disponibles.",
+                    "Registrar la incidencia de oferta y acompañar al estudiante con una alternativa compatible.", false);
+        } else if ("CARGA_LIMITADA".equals(tipo)) {
+            configurar(dictamen, accion, "VALIDAR_SELECCION", "Carga académica limitada",
+                    "Tu selección debe ajustarse a la carga máxima permitida y a las unidades prioritarias de tu trayectoria.",
+                    "Validar créditos, unidades prioritarias y límites de carga antes de confirmar.", false);
+        } else if ("AVANCE_ANUAL".equals(tipo) || "REINSCRIPCION_NO_APROBADA".equals(tipo)) {
+            configurar(dictamen, accion, "MANTENER_RESTRICCION", "Restricción de avance académico",
+                    "Tu avance está condicionado por unidades obligatorias pendientes; primero debes atender la carga compatible habilitada.",
+                    "Mantener la restricción de avance y evitar desbloqueos manuales incompatibles.", false);
+        } else if ("CONTINUIDAD_MISMO_ANIO".equals(tipo)) {
+            configurar(dictamen, accion, "PERMITIR_CONTINUIDAD_MISMO_ANIO", "Continuidad del mismo año académico",
+                    "Puedes continuar dentro del mismo año académico, sujeto a la oferta y a las reglas de carga aplicables.",
+                    "Distinguir continuidad de avance improcedente y validar la selección compatible.", false);
+        } else if ("EQUIVALENCIA_PE".equals(tipo)) {
+            configurar(dictamen, accion, "RECONOCER_EQUIVALENCIA_PE", "Equivalencia académica acreditada",
+                    "Las unidades didácticas ya acreditadas por equivalencia no deben volver a formar parte de tu oferta.",
+                    "Validar la equivalencia por nombre normalizado y conservar fuera de la oferta las UD ya acreditadas.", false);
+        } else if ("CONFIGURACION_PLAN".equals(tipo)) {
+            configurar(dictamen, accion, "REVISAR_CONFIGURACION_PLAN", "Revisión de configuración del plan",
+                    "La situación requiere revisar la configuración académica aplicable antes de continuar.",
+                    "Verificar umbrales, marcado, excepciones y vigencia de las reglas del plan sin alterar el historial del estudiante.", true);
+        } else if ("ESTADO_INSCRIPCION".equals(tipo)) {
+            configurar(dictamen, accion, "VERIFICAR_INSCRIPCION_PREVIA", "Validación del estado de inscripción",
+                    "Antes de continuar, el sistema debe confirmar que no exista una inscripción previa vigente.",
+                    "Revalidar la oferta y proteger la operación contra registros duplicados o concurrentes.", false);
+        } else if ("ACLARACION_AVANCE".equals(tipo) || Boolean.TRUE.equals(requiereIntervencion)) {
+            configurar(dictamen, accion, "ESCALAR_REVISION", "Revisión de avance académico",
+                    "Tu trayectoria requiere una revisión académica para confirmar la ruta de atención aplicable.",
+                    "Escalar el caso con la evidencia y la regla que originó la revisión.", true);
+        } else {
+            configurar(dictamen, accion, "DAR_SEGUIMIENTO", "Trayectoria académica regular",
+                    "Tu trayectoria no presenta pendientes que limiten el avance actual. Mantén la acreditación de tu carga vigente.",
+                    "Dar seguimiento a la trayectoria y orientar sobre la siguiente carga académica.", false);
+        }
+    }
+
+    private void configurar(DictamenCasoDTO dictamen, AccionOperativaDTO accion, String clave, String titulo,
+            String estudiante, String gestor, boolean escalar) {
+        accion.setClave(clave);
+        dictamen.setDictamen(titulo);
+        dictamen.setMensajeEstudiante(estudiante);
+        dictamen.setMensajeGestor(gestor);
+        dictamen.setRequiereEscalamiento(Boolean.valueOf(escalar));
     }
 }

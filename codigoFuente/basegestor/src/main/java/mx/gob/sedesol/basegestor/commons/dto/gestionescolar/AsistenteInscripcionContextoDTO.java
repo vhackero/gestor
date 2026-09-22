@@ -9,6 +9,7 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private InscripcionContextoDTO contextoBase;
+    private Long idProcesoInscripcion;
 
     private String periodoActivo;
     private String situacionAcademicaPeriodo;
@@ -27,6 +28,8 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
     private Integer anioObligatorioPendiente;
     private Boolean reglaCargaFijaNuevoIngreso;
     private Boolean inscripcionVigente;
+    private Boolean ofertaVigenteReal;
+    private String estadoOperativoSimulador;
     private String modoProyeccion;
 
     private String mensajeResumenPeriodo;
@@ -57,6 +60,14 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
 
     public void setContextoBase(InscripcionContextoDTO contextoBase) {
         this.contextoBase = contextoBase;
+    }
+
+    public Long getIdProcesoInscripcion() {
+        return idProcesoInscripcion;
+    }
+
+    public void setIdProcesoInscripcion(Long idProcesoInscripcion) {
+        this.idProcesoInscripcion = idProcesoInscripcion;
     }
 
     public String getPeriodoActivo() {
@@ -177,6 +188,22 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
 
     public void setInscripcionVigente(Boolean inscripcionVigente) {
         this.inscripcionVigente = inscripcionVigente;
+    }
+
+    public Boolean getOfertaVigenteReal() {
+        return ofertaVigenteReal;
+    }
+
+    public void setOfertaVigenteReal(Boolean ofertaVigenteReal) {
+        this.ofertaVigenteReal = ofertaVigenteReal;
+    }
+
+    public String getEstadoOperativoSimulador() {
+        return estadoOperativoSimulador;
+    }
+
+    public void setEstadoOperativoSimulador(String estadoOperativoSimulador) {
+        this.estadoOperativoSimulador = estadoOperativoSimulador;
     }
 
     public String getModoProyeccion() {

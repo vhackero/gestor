@@ -12,12 +12,15 @@ public class PendientesPlanDTO implements Serializable {
     private Integer optativasFaltantes;
     private Integer electivasFaltantes;
     private Integer optativasRezagadas;
+    private Integer pendientesRegistroSemestresPrevios;
+    private List<String> pendientesRegistroSemestresPreviosDetalle;
     private Integer creditosFaltantes;
     private List<String> optativasRezagadasDetalle;
     private List<String> pendientesRelevantes;
 
     public PendientesPlanDTO() {
         this.optativasRezagadasDetalle = new ArrayList<String>();
+        this.pendientesRegistroSemestresPreviosDetalle = new ArrayList<String>();
         this.pendientesRelevantes = new ArrayList<String>();
     }
 
@@ -51,6 +54,22 @@ public class PendientesPlanDTO implements Serializable {
 
     public void setOptativasRezagadas(Integer optativasRezagadas) {
         this.optativasRezagadas = optativasRezagadas;
+    }
+
+    public Integer getPendientesRegistroSemestresPrevios() {
+        return pendientesRegistroSemestresPrevios;
+    }
+
+    public void setPendientesRegistroSemestresPrevios(Integer pendientesRegistroSemestresPrevios) {
+        this.pendientesRegistroSemestresPrevios = pendientesRegistroSemestresPrevios;
+    }
+
+    public List<String> getPendientesRegistroSemestresPreviosDetalle() {
+        return pendientesRegistroSemestresPreviosDetalle;
+    }
+
+    public void setPendientesRegistroSemestresPreviosDetalle(List<String> detalle) {
+        this.pendientesRegistroSemestresPreviosDetalle = detalle;
     }
 
     public Integer getCreditosFaltantes() {

@@ -25,7 +25,7 @@
 			}
 		</style>
 		<h1>#{sistema.obtenerTexto('gw.gestionaprendizaje.expediente.titulo')}</h1>
-		<div class="expediente-gestor-copy">Busca por matrícula y abre la situación del estudiante en expediente, malla curricular y asistente curricular desde el mismo resultado.</div>
+		<div class="expediente-gestor-copy">Busca por matrícula y abre la situación del estudiante en expediente, mapa curricular dinámico y asistente de inscripción y orientación educativa desde el mismo resultado.</div>
 		<hr />
 		<p:ajaxStatus onstart="PF('dialogLayout').show()"
 			onsuccess="PF('dialogLayout').hide()" />
@@ -205,7 +205,7 @@
 										target="#{expedienteAlumnoBean.personaDTO}" />
 								</p:commandButton>
 								<p:tooltip for="btnAbrirMalla"
-									value="Malla curricular"
+									value="Mapa curricular dinámico"
 									position="top" />
 								<p:commandButton id="btnAbrirAsistente" ajax="false"
 									action="#{expedienteAlumnoBean.navegaAsistenteCurricular}"
@@ -215,7 +215,7 @@
 										target="#{expedienteAlumnoBean.personaDTO}" />
 								</p:commandButton>
 								<p:tooltip for="btnAbrirAsistente"
-									value="Asistente curricular"
+									value="Asistente de inscripción y orientación educativa"
 									position="top" />
 							</p:column>
 						</p:dataTable>

@@ -11,6 +11,11 @@ import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 public interface InscripcionFacade {
 	InscripcionContextoDTO obtenerContextoInscripcion(Long idPersona) throws InscripcionException;
 	InscripcionContextoDTO obtenerContextoInscripcionConsulta(Long idPersona) throws InscripcionException;
+	/**
+	 * Valida una propuesta contra las mismas reglas del módulo de inscripción,
+	 * sin registrar ni modificar la inscripción del estudiante.
+	 */
+	void validarPropuestaInscripcion(Long idPersona, List<Long> idsProgramas) throws InscripcionException;
 	void validarSeleccionMateria(InscripcionMateriasDTO materiaSeleccionada, InscripcionContextoDTO contexto) throws InscripcionException;
 	void finalizarInscripcion(Boolean aceptaTerminos, InscripcionContextoDTO contexto) throws InscripcionException;
 	boolean intentarReenviarCorreoInscripcion(ReenvioCorreoInscripcionDTO inscripcion);

@@ -14,6 +14,8 @@ public class PatronConocimientoDTO implements Serializable {
     private String descripcion;
     private Double confianzaBase;
     private Boolean activo;
+    private Double puntajeRelevancia;
+    private Integer ordenAplicacion;
     private List<CriterioOperativoDTO> criterios;
     private List<AccionOperativaDTO> acciones;
     private List<MensajeInstitucionalContextualDTO> mensajes;
@@ -70,6 +72,22 @@ public class PatronConocimientoDTO implements Serializable {
 
     public void setActivo(Boolean activo) {
         this.activo = activo;
+    }
+
+    public Double getPuntajeRelevancia() {
+        return puntajeRelevancia;
+    }
+
+    public void setPuntajeRelevancia(Double puntajeRelevancia) {
+        this.puntajeRelevancia = puntajeRelevancia;
+    }
+
+    public Integer getOrdenAplicacion() {
+        return ordenAplicacion;
+    }
+
+    public void setOrdenAplicacion(Integer ordenAplicacion) {
+        this.ordenAplicacion = ordenAplicacion;
     }
 
     public List<CriterioOperativoDTO> getCriterios() {
