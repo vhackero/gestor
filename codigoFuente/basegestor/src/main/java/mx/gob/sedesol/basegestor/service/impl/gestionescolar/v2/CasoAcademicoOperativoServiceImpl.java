@@ -13,6 +13,7 @@ import mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblCasoAcademi
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblCasoDiagnosticoV2;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblCasoDictamenV2;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.v2.CatMotivoRestriccionV2Repo;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.v2.CatAccionOperativaV2Repo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.v2.CatTipoCasoAcademicoV2Repo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.v2.CatViabilidadTecnicaV2Repo;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.v2.TblCasoAcademicoOperativoV2Repo;
@@ -45,6 +46,9 @@ public class CasoAcademicoOperativoServiceImpl implements CasoAcademicoOperativo
     @Autowired
     private CatMotivoRestriccionV2Repo motivoRepo;
 
+    @Autowired
+    private CatAccionOperativaV2Repo accionRepo;
+
     @Override
     @Transactional
     public CasoAcademicoOperativoDTO crearCaso(CasoAcademicoOperativoDTO caso) throws InscripcionException {
@@ -56,20 +60,20 @@ public class CasoAcademicoOperativoServiceImpl implements CasoAcademicoOperativo
 
         if (caso.getDiagnostico() != null) {
             TblCasoDiagnosticoV2 diagnostico = diagnosticoRepo.findByIdCaso(entity.getId());
-            if (diagnostico != null) {
-                diagnosticoRepo.delete(diagnostico);
-            }
-            diagnosticoRepo.save(AsistenteCurricularV2Mapper.toDiagnosticoEntity(entity.getId(), caso.getDiagnostico()));
+            TblCasoDiagnosticoV2 actualizado = AsistenteCurricularV2Mapper.toDiagnosticoEntity(entity.getId(),
+                    caso.getDiagnostico());
+            // id_caso es único: al recalcular se actualiza el mismo registro, no se inserta otro.
+            actualizado.setId(diagnostico != null ? diagnostico.getId() : null);
+            diagnosticoRepo.save(actualizado);
         }
 
         if (caso.getDictamen() != null) {
             TblCasoDictamenV2 dictamen = dictamenRepo.findByIdCaso(entity.getId());
-            if (dictamen != null) {
-                dictamenRepo.delete(dictamen);
-            }
-            dictamenRepo.save(AsistenteCurricularV2Mapper.toDictamenEntity(entity.getId(), caso.getDictamen()));
+            TblCasoDictamenV2 actualizado = AsistenteCurricularV2Mapper.toDictamenEntity(entity.getId(),
+                    caso.getDictamen());
+            actualizado.setId(dictamen != null ? dictamen.getId() : null);
+            dictamenRepo.save(actualizado);
         }
-
         return obtenerCasoPorId(entity.getId());
     }
 
@@ -150,20 +154,19 @@ public class CasoAcademicoOperativoServiceImpl implements CasoAcademicoOperativo
 
         if (caso.getDiagnostico() != null) {
             TblCasoDiagnosticoV2 diagnostico = diagnosticoRepo.findByIdCaso(actual.getId());
-            if (diagnostico != null) {
-                diagnosticoRepo.delete(diagnostico);
-            }
-            diagnosticoRepo.save(AsistenteCurricularV2Mapper.toDiagnosticoEntity(actual.getId(), caso.getDiagnostico()));
+            TblCasoDiagnosticoV2 actualizadoDiagnostico = AsistenteCurricularV2Mapper.toDiagnosticoEntity(actual.getId(),
+                    caso.getDiagnostico());
+            actualizadoDiagnostico.setId(diagnostico != null ? diagnostico.getId() : null);
+            diagnosticoRepo.save(actualizadoDiagnostico);
         }
 
         if (caso.getDictamen() != null) {
             TblCasoDictamenV2 dictamen = dictamenRepo.findByIdCaso(actual.getId());
-            if (dictamen != null) {
-                dictamenRepo.delete(dictamen);
-            }
-            dictamenRepo.save(AsistenteCurricularV2Mapper.toDictamenEntity(actual.getId(), caso.getDictamen()));
+            TblCasoDictamenV2 actualizadoDictamen = AsistenteCurricularV2Mapper.toDictamenEntity(actual.getId(),
+                    caso.getDictamen());
+            actualizadoDictamen.setId(dictamen != null ? dictamen.getId() : null);
+            dictamenRepo.save(actualizadoDictamen);
         }
-
         return obtenerCasoPorId(actual.getId());
     }
 
@@ -181,7 +184,18 @@ public class CasoAcademicoOperativoServiceImpl implements CasoAcademicoOperativo
                     AsistenteCurricularV2Mapper.toMotivoDto(motivoRepo.findOne(entity.getIdMotivoRestriccion())));
         }
         dto.setDiagnostico(AsistenteCurricularV2Mapper.toDiagnosticoDto(diagnosticoRepo.findByIdCaso(entity.getId())));
-        dto.setDictamen(AsistenteCurricularV2Mapper.toDictamenDto(dictamenRepo.findByIdCaso(entity.getId())));
+        TblCasoDictamenV2 dictamenEntity = dictamenRepo.findByIdCaso(entity.getId());
+        dto.setDictamen(AsistenteCurricularV2Mapper.toDictamenDto(dictamenEntity));
+        if (dto.getDictamen() != null && dictamenEntity != null) {
+            if (dictamenEntity.getIdAccionOperativa() != null) {
+                dto.getDictamen().setAccionOperativa(AsistenteCurricularV2Mapper
+                        .toAccionDto(accionRepo.findOne(dictamenEntity.getIdAccionOperativa())));
+            }
+            if (dictamenEntity.getIdViabilidadTecnica() != null) {
+                dto.getDictamen().setViabilidadTecnica(AsistenteCurricularV2Mapper
+                        .toViabilidadDto(viabilidadRepo.findOne(dictamenEntity.getIdViabilidadTecnica())));
+            }
+        }
 
         bitacoraRepo.findByIdCasoOrderByFechaAsc(entity.getId()).forEach(item -> dto.getBitacora()
                 .add(AsistenteCurricularV2Mapper.toBitacoraDto(item)));

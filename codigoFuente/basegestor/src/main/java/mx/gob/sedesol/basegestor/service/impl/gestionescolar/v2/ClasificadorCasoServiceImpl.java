@@ -1,10 +1,14 @@
 package mx.gob.sedesol.basegestor.service.impl.gestionescolar.v2;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DiagnosticoAcademicoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MotivoDecisionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ClasificacionCasoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
@@ -29,10 +33,9 @@ public class ClasificadorCasoServiceImpl implements ClasificadorCasoService {
     private AsistenteInscripcionService asistenteInscripcionService;
 
     @Override
-    public ClasificacionCasoDTO clasificarCaso(ContextoAsistenteCurricularV2DTO contexto) {
-        if (contexto != null && contexto.getCasoActual() != null && contexto.getCasoActual().getClasificacion() != null) {
-            return contexto.getCasoActual().getClasificacion();
-        }
+    public ClasificacionCasoDTO clasificarCaso(ContextoAsistenteCurricularV2DTO contexto) throws InscripcionException {
+        // La clasificación no se reutiliza desde el caso persistido: el historial, la
+        // oferta y las dependencias curriculares pueden cambiar entre consultas.
         ClasificacionCasoDTO clasificacion = AsistenteCurricularV2Mapper.crearClasificacionVacia(contexto);
 
         boolean tienePersona = contexto != null && contexto.getIdPersonaObjetivo() != null;
@@ -47,7 +50,10 @@ public class ClasificadorCasoServiceImpl implements ClasificadorCasoService {
         AsistenteInscripcionContextoDTO contextoAsistido = obtenerContextoAsistidoSeguro(contexto);
         DiagnosticoAcademicoDTO diagnostico = contextoAsistido != null ? contextoAsistido.getDiagnosticoActual() : null;
         int noAcreditadas = valor(diagnostico != null ? diagnostico.getMateriasReprobadasActivas() : null);
-        int omisiones = valor(diagnostico != null ? diagnostico.getMateriasPendientesNoInscritas() : null);
+        // La clasificación V2 debe usar la misma regla del diagnóstico visible:
+        // una UD ofertada por primera vez no es una omisión y las optativas
+        // opcionales no constituyen una obligación de registro.
+        int omisiones = contarOmisionesRegistro(contextoAsistido);
         int bloqueadas = valor(diagnostico != null ? diagnostico.getMateriasBloqueadasPorSeriacion() : null);
         boolean contextoAcademicoSuficiente = contextoAsistido != null
                 && (noAcreditadas > 0 || omisiones > 0 || bloqueadas > 0
@@ -57,9 +63,9 @@ public class ClasificadorCasoServiceImpl implements ClasificadorCasoService {
                 || (!tienePlan && !contextoAcademicoSuficiente)
                 || (requiereGestor && !tienePersonaConsulta)) {
             clasificacion.setTipoCaso(AsistenteCurricularV2Mapper
-                    .toTipoCasoDto(tipoCasoRepo.findByClave("PENDIENTE_INFORMACION")));
+                    .toTipoCasoDto(obtenerTipoCaso("PENDIENTE_INFORMACION")));
             clasificacion.setMotivoPrincipal(AsistenteCurricularV2Mapper
-                    .toMotivoDto(motivoRepo.findByClave("INFORMACION_INSUFICIENTE")));
+                    .toMotivoDto(obtenerMotivo("INFORMACION_INSUFICIENTE")));
             clasificacion.setConfianza(0.55D);
             clasificacion.setOperable(Boolean.FALSE);
             clasificacion.setRequiereIntervencionHumana(Boolean.TRUE);
@@ -87,7 +93,15 @@ public class ClasificadorCasoServiceImpl implements ClasificadorCasoService {
         boolean omisionDocumentada = detectarOmisionDocumentada(contextoAsistido);
         boolean mismoAnio = detectarContinuidadMismoAnio(contexto, contextoAsistido);
 
-        if (noAcreditadas >= 5) {
+        // La seriación se determina por la dependencia curricular activa de la malla,
+        // por lo que tiene prioridad frente a una omisión genérica de registro.
+        if (bloqueadas > 0) {
+            tipoCaso = tipoCasoRepo.findByClave("SERIACION");
+            motivo = motivoRepo.findByClave("BLOQUEO_SERIACION");
+            clasificacion.setConfianza(0.94D);
+            clasificacion.setEstatusSugerido("EN_ANALISIS");
+            clasificacion.getObservaciones().add("Existen bloqueos por seriación que condicionan la selección.");
+        } else if (noAcreditadas >= 5) {
             tipoCaso = tipoCasoRepo.findByClave("UNIDADES_NO_ACREDITADAS");
             motivo = motivoRepo.findByClave("ACUMULACION_NO_ACREDITADAS");
             clasificacion.setConfianza(0.98D);
@@ -124,18 +138,24 @@ public class ClasificadorCasoServiceImpl implements ClasificadorCasoService {
             clasificacion.setConfianza(restriccionAvance ? 0.93D : 0.88D);
             clasificacion.setEstatusSugerido("EN_ANALISIS");
             clasificacion.getObservaciones().add("La clasificación se apoya en acumulación de no acreditadas y restricción de avance.");
-        } else if (bloqueadas > 0) {
-            tipoCaso = tipoCasoRepo.findByClave("SERIACION");
-            motivo = motivoRepo.findByClave("BLOQUEO_SERIACION");
-            clasificacion.setConfianza(0.89D);
+        } else if (noAcreditadas > 0) {
+            tipoCaso = tipoCasoRepo.findByClave("UNIDADES_NO_ACREDITADAS");
+            motivo = motivoRepo.findByClave("UD_NO_ACREDITADA");
+            clasificacion.setConfianza(0.90D);
             clasificacion.setEstatusSugerido("EN_ANALISIS");
-            clasificacion.getObservaciones().add("Existen bloqueos por seriación que explican la limitación de selección.");
+            clasificacion.getObservaciones().add("Existen unidades no acreditadas que deben regularizarse.");
         } else if (omisiones > 0) {
             tipoCaso = tipoCasoRepo.findByClave("OMISION_REGISTRO");
             motivo = motivoRepo.findByClave("UD_NO_CURSADA");
             clasificacion.setConfianza(0.82D);
             clasificacion.setEstatusSugerido("EN_ANALISIS");
             clasificacion.getObservaciones().add("Predominan omisiones o unidades no inscritas sobre reprobación activa.");
+        } else if (noAcreditadas == 0 && omisiones == 0 && bloqueadas == 0) {
+            tipoCaso = tipoCasoRepo.findByClave("TRAYECTORIA_REGULAR");
+            motivo = motivoRepo.findByClave("SIN_RESTRICCION");
+            clasificacion.setConfianza(0.95D);
+            clasificacion.setEstatusSugerido("EN_ANALISIS");
+            clasificacion.getObservaciones().add("La trayectoria no presenta pendientes académicos activos.");
         } else if ("MALLA".equalsIgnoreCase(origen) || "EXPEDIENTE".equalsIgnoreCase(origen)) {
             tipoCaso = tipoCasoRepo.findByClave("ACLARACION_AVANCE");
             motivo = motivoRepo.findByClave("INFORMACION_INSUFICIENTE");
@@ -156,6 +176,11 @@ public class ClasificadorCasoServiceImpl implements ClasificadorCasoService {
             clasificacion.setEstatusSugerido("EN_ANALISIS");
         }
 
+        if (tipoCaso == null || motivo == null) {
+            throw new InscripcionException("La clasificación V2 no tiene catálogo completo. Tipo="
+                    + (tipoCaso != null ? tipoCaso.getClave() : "NO_RESUELTO") + ", motivo="
+                    + (motivo != null ? motivo.getClave() : "NO_RESUELTO") + ". Ejecute la conciliación de catálogos V2.");
+        }
         clasificacion.setTipoCaso(AsistenteCurricularV2Mapper.toTipoCasoDto(tipoCaso));
         clasificacion.setMotivoPrincipal(AsistenteCurricularV2Mapper.toMotivoDto(motivo));
         clasificacion.setOperable(Boolean.TRUE);
@@ -192,6 +217,22 @@ public class ClasificadorCasoServiceImpl implements ClasificadorCasoService {
         return clasificacion;
     }
 
+    private CatTipoCasoAcademicoV2 obtenerTipoCaso(String clave) throws InscripcionException {
+        CatTipoCasoAcademicoV2 tipoCaso = tipoCasoRepo.findByClave(clave);
+        if (tipoCaso == null) {
+            throw new InscripcionException("No existe el tipo de caso V2 configurado: " + clave);
+        }
+        return tipoCaso;
+    }
+
+    private CatMotivoRestriccionV2 obtenerMotivo(String clave) throws InscripcionException {
+        CatMotivoRestriccionV2 motivo = motivoRepo.findByClave(clave);
+        if (motivo == null) {
+            throw new InscripcionException("No existe el motivo de restricción V2 configurado: " + clave);
+        }
+        return motivo;
+    }
+
     private AsistenteInscripcionContextoDTO obtenerContextoAsistidoSeguro(ContextoAsistenteCurricularV2DTO contexto) {
         if (contexto == null || contexto.getIdPersonaObjetivo() == null) {
             return null;
@@ -225,6 +266,43 @@ public class ClasificadorCasoServiceImpl implements ClasificadorCasoService {
         return habilitadas > 0 && optativas == habilitadas;
     }
 
+    private int contarOmisionesRegistro(AsistenteInscripcionContextoDTO contextoAsistido) {
+        if (contextoAsistido == null || contextoAsistido.getUnidades() == null) {
+            return 0;
+        }
+        Set<String> udsPendientes = new HashSet<String>();
+        for (UnidadDecisionInscripcionDTO unidad : contextoAsistido.getUnidades()) {
+            if (!esOmisionRegistroContabilizable(unidad)) {
+                continue;
+            }
+            String clave = unidad.getClave() != null ? unidad.getClave().trim().toUpperCase() : "";
+            String identificador = !clave.isEmpty() ? "CLAVE:" + clave
+                    : "UD:" + String.valueOf(unidad.getUdId());
+            udsPendientes.add(identificador);
+        }
+        return udsPendientes.size();
+    }
+
+    private boolean esOmisionRegistroContabilizable(UnidadDecisionInscripcionDTO unidad) {
+        if (unidad == null || !(contiene(unidad.getEstatusHistorico(), "NO INSCRITA")
+                || contiene(unidad.getEstatusHistorico(), "NO CURSADA"))) {
+            return false;
+        }
+        if ("OPCIONAL".equalsIgnoreCase(unidad.getEstatusPeriodo())
+                || "ALTERNATIVA".equalsIgnoreCase(unidad.getEstatusPeriodo())) {
+            return false;
+        }
+        if (unidad.getMotivos() == null) {
+            return false;
+        }
+        for (MotivoDecisionDTO motivo : unidad.getMotivos()) {
+            if (motivo != null && "SIMULACION_PENDIENTE_PREVIO".equalsIgnoreCase(motivo.getCodigo())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean detectarOmisionDocumentada(AsistenteInscripcionContextoDTO contextoAsistido) {
         if (contextoAsistido == null) {
             return false;
@@ -247,9 +325,6 @@ public class ClasificadorCasoServiceImpl implements ClasificadorCasoService {
             AsistenteInscripcionContextoDTO contextoAsistido) {
         if (contexto == null || contextoAsistido == null || !"INSCRIPCION".equalsIgnoreCase(contexto.getPeriodoOperativo())) {
             return false;
-        }
-        if (Boolean.TRUE.equals(contextoAsistido.getRestriccionCuatroOMasReprobadas())) {
-            return true;
         }
         String resumen = contextoAsistido.getMensajeResumenPeriodo();
         if (contiene(resumen, "mismo primer año académico") || contiene(resumen, "mismo primer anio academico")

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Motor V2 del Asistente de Inscripción Curricular</title>
+<style>
+  @page { size: A4; margin: 1.8cm; }
+  body { color: #1f2d3d; font-family: Calibri, Arial, sans-serif; font-size: 10.5pt; line-height: 1.35; }
+  h1 { color: #17677b; font-size: 24pt; margin: 0 0 4px; }
+  h2 { color: #17677b; border-bottom: 2px solid #53a0b0; font-size: 16pt; margin-top: 28px; padding-bottom: 3px; }
+  h3 { color: #27596b; font-size: 12.5pt; margin-top: 18px; }
+  h4 { color: #27596b; font-size: 11pt; margin: 14px 0 5px; }
+  p { margin: 6px 0; }
+  ul, ol { margin: 5px 0 8px 22px; }
+  li { margin: 3px 0; }
+  .subtitle { color: #5a6b78; font-size: 12pt; margin: 0 0 20px; }
+  .meta { background: #edf6f8; border-left: 5px solid #3b95a8; padding: 10px 12px; margin: 14px 0; }
+  .note { background: #fff7df; border: 1px solid #e3bd58; padding: 9px 11px; margin: 12px 0; }
+  .risk { background: #fff0ef; border: 1px solid #d86d68; padding: 9px 11px; margin: 12px 0; }
+  .good { background: #eef8ee; border: 1px solid #79ae78; padding: 9px 11px; margin: 12px 0; }
+  table { border-collapse: collapse; margin: 9px 0 15px; width: 100%; }
+  th { background: #3e92a5; color: white; text-align: left; font-weight: bold; }
+  th, td { border: 1px solid #c6d6dc; padding: 6px 7px; vertical-align: top; }
+  tr:nth-child(even) td { background: #f6fafb; }
+  code { color: #164d60; font-family: Consolas, monospace; font-size: 9pt; }
+  pre { background: #f4f7f8; border: 1px solid #b9ccd2; color: #203946; font-family: Consolas, monospace; font-size: 8pt; line-height: 1.22; overflow: hidden; padding: 10px; white-space: pre-wrap; }
+  .page-break { page-break-before: always; }
+  .small { color: #55636c; font-size: 9pt; }
+  .toc td { border: 0; padding: 3px 0; }
+  .toc a { color: #17677b; text-decoration: none; }
+</style>
+</head>
+<body>
+<h1>Motor V2 del Asistente de Inscripción Curricular</h1>
+<p class="subtitle">Documento técnico-funcional, modelo ER, fuentes de datos y mecanismo de decisión</p>
+
+<div class="meta">
+  <strong>Alcance:</strong> implementación actual en el repositorio. Incluye V2, sus dependencias del servicio de inscripción y los puntos de coexistencia con los beans de presentación.<br>
+  <strong>Corte de revisión:</strong> 29 de agosto de 2026.<br>
+  <strong>Audiencia:</strong> experto académico, responsables funcionales, desarrollo y soporte.
+</div>
+
+<h2>Resumen ejecutivo</h2>
+<p>El Motor V2 no reemplaza por completo el cálculo académico histórico. Consume el contexto generado por <code>AsistenteInscripcionService</code>, clasifica y persiste un caso académico, construye un diagnóstico, genera un dictamen y selecciona patrones, acciones y mensajes para los perfiles de estudiante y gestor.</p>
+<p>Actualmente existen tres conceptos distintos que pueden mostrarse como si fueran la misma “situación”:</p>
+<table>
+  <tr><th>Concepto</th><th>Propósito</th><th>Fuente principal</th><th>Ejemplo</th></tr>
+  <tr><td>Situación académica</td><td>Describe si la trayectoria está regular o irregular.</td><td>Contexto de inscripción y diagnóstico V2.</td><td><code>Regular</code>, <code>Irregular</code></td></tr>
+  <tr><td>Tipo de caso</td><td>Clasifica el expediente operativo para tratamiento y trazabilidad.</td><td><code>ClasificadorCasoServiceImpl</code>.</td><td><code>UNIDADES_NO_ACREDITADAS</code>, <code>SERIACION</code></td></tr>
+  <tr><td>Escenario del panel</td><td>Decide el contenido conversacional que verá el usuario.</td><td><code>AsistenteCurricularV2FacadeImpl</code>.</td><td><code>REGULAR</code>, <code>IRREGULAR</code>, <code>SERIACION</code>, <code>BAJA</code></td></tr>
+</table>
+<div class="risk"><strong>Conclusión clave:</strong> la base de conocimiento V2 hoy enriquece patrones, acciones y mensajes. La decisión académica primaria continúa codificada en Java y se alimenta del servicio de inscripción. Por tanto, modificar textos o patrones en BD no cambia por sí solo la clasificación académica.</div>
+
+<h2>1. Objetivo funcional</h2>
+<p>El asistente debe explicar la situación de la trayectoria, indicar restricciones y priorizar decisiones de reinscripción o seguimiento. El perfil del usuario determina el nivel de detalle:</p>
+<table>
+  <tr><th>Perfil</th><th>Resultado esperado</th><th>Contenido V2</th></tr>
+  <tr><td>Estudiante</td><td>Orientación clara para priorizar UD, comprender restricciones y simular la carga.</td><td>Mensaje operativo, resumen diagnóstico y cuatro acciones: qué elegir, seriación, simulación y confirmación.</td></tr>
+  <tr><td>Gestor académico</td><td>Interpretar el caso y documentar la atención institucional.</td><td>Resumen técnico, regla aplicada, paquete de evidencia y mensaje sugerido.</td></tr>
+</table>
+
+<h2>2. Arquitectura y flujo técnico</h2>
+<pre>
+Pantallas web: Asistente / Malla / Expediente / Hub gestor
+                  |
+                  v
+TablaCurricularAsistidaBean
+  - arma ContextoAsistenteCurricularV2DTO
+  - consume FichaIntegralCasoDTO.panelAsistenteVirtual
+                  |
+                  v
+AsistenteCurricularV2FacadeImpl
+  1. resuelve o crea el caso operativo
+  2. valida expediente mínimo
+  3. clasifica el caso
+  4. construye diagnóstico
+  5. genera dictamen
+  6. recupera patrones, mensajes y casos similares
+  7. construye el panel por perfil y escenario
+                  |
+                  +-----------------------+
+                  |                       |
+                  v                       v
+AsistenteInscripcionService          Tablas V2 de caso y conocimiento
+  - contexto académico real            - persistencia, patrones, mensajes
+  - oferta, inscripción, reglas        - auditoría y dictamen
+  - unidades, seriación, créditos
+</pre>
+
+<h3>2.1 Servicios V2 principales</h3>
+<table>
+  <tr><th>Servicio</th><th>Responsabilidad</th><th>Dependencias relevantes</th></tr>
+  <tr><td><code>AsistenteCurricularV2FacadeImpl</code></td><td>Orquesta la ficha integral y el panel virtual.</td><td>Caso, diagnóstico, clasificador, recomendador, expediente, conocimiento, bitácora.</td></tr>
+  <tr><td><code>ClasificadorCasoServiceImpl</code></td><td>Asigna tipo de caso, motivo, confianza, operabilidad y necesidad de intervención humana.</td><td><code>AsistenteInscripcionService.obtenerContextoAsistido</code>, catálogos V2.</td></tr>
+  <tr><td><code>DiagnosticoAcademicoOperativoServiceImpl</code></td><td>Cuenta no acreditadas, omisiones, bloqueadas, riesgo, seriación y restricción dominante.</td><td>Contexto asistido y repositorio de diagnóstico.</td></tr>
+  <tr><td><code>RecomendadorResolucionOperativaServiceImpl</code></td><td>Produce dictamen y acción operativa.</td><td>Tipo de caso, motivo, diagnóstico, expediente.</td></tr>
+  <tr><td><code>BaseConocimientoAcademicoServiceImpl</code></td><td>Selecciona patrones y mensajes contextuales activos.</td><td>Relaciones patrón-caso, patrón-criterio, patrón-acción y patrón-mensaje.</td></tr>
+  <tr><td><code>ValidadorExpedienteCasoServiceImpl</code></td><td>Comprueba que exista información mínima para orientar.</td><td>Contexto V2 y contexto asistido.</td></tr>
+  <tr><td><code>CasoAcademicoOperativoServiceImpl</code></td><td>Persiste, recupera y actualiza el caso, diagnóstico y dictamen.</td><td>Tablas <code>tbl_caso_*</code>.</td></tr>
+</table>
+
+<h3>2.2 Ciclo de vida del caso</h3>
+<ol>
+  <li>La pantalla crea <code>ContextoAsistenteCurricularV2DTO</code> con persona, plan, periodo, perfil, origen y contadores visibles.</li>
+  <li>Si existe un caso previo para la persona, V2 lo recalcula; de otro modo, genera un caso inicial.</li>
+  <li>Se valida el expediente mínimo y se consulta el contexto académico existente.</li>
+  <li>Se clasifican tipo de caso y motivo de restricción.</li>
+  <li>Se construye el diagnóstico y el dictamen.</li>
+  <li>Se persisten los datos del caso y se registra bitácora de creación, recálculo o consumo.</li>
+  <li>Se resuelve el panel virtual usando plantilla Java y sobrescrituras de conocimiento si son compatibles.</li>
+</ol>
+
+<h2>3. Fuente de hechos académicos y estado operativo</h2>
+<p>La fuente factual del motor es <code>AsistenteInscripcionService.obtenerContextoAsistido(idPersona)</code>. Este servicio construye el contexto desde el módulo de inscripción, historial, malla y oferta; V2 no calcula los hechos directamente desde las tablas de conocimiento.</p>
+<table>
+  <tr><th>Dato que consume V2</th><th>Origen inmediato</th><th>Uso en V2</th></tr>
+  <tr><td>Situación regular/irregular</td><td><code>EstadoAcademicoDTO</code> del contexto de inscripción.</td><td>Diagnóstico, panel y mensajes.</td></tr>
+  <tr><td>UD no acreditadas, no inscritas y bloqueadas</td><td><code>DiagnosticoAcademicoDTO</code> y lista de <code>UnidadDecisionInscripcionDTO</code>.</td><td>Clasificación, restricciones, panel, dictamen.</td></tr>
+  <tr><td>Seriación</td><td>Unidades bloqueadas y mensajes de seriación.</td><td>Restricción dominante y escenario <code>SERIACION</code>.</td></tr>
+  <tr><td>Oferta vigente real</td><td>Proceso, plan, convocatoria y materias ofertadas en la fecha actual.</td><td>Estado operativo del simulador y explicación.</td></tr>
+  <tr><td>Inscripción vigente / UD en curso</td><td>Inscripción previa de la persona.</td><td>Proyección contra inscripción operativa.</td></tr>
+  <tr><td>Carga máxima, créditos y cierre anual</td><td>Límites y estado académico del contexto.</td><td>Diagnóstico, riesgos y recomendaciones.</td></tr>
+</table>
+
+<h3>3.1 Estados operativos que determina el servicio de inscripción</h3>
+<table>
+  <tr><th>Condición</th><th>Estado resultante</th><th>Intención funcional</th></tr>
+  <tr><td>Sin inscripción vigente, sin oferta vigente y con baja temporal</td><td><code>BAJA_TEMPORAL</code></td><td>No abrir flujo real de simulación/confirmación.</td></tr>
+  <tr><td>Con inscripción vigente, sin oferta vigente y con baja parcial</td><td><code>CURSAMIENTO_PARCIAL</code></td><td>Proyección considerando las UD dadas de baja.</td></tr>
+  <tr><td>Sin inscripción vigente y con oferta vigente real</td><td><code>INSCRIPCION_REINSCRIPCION_OPERATIVA</code></td><td>Simulación real y validación/confirmación habilitables.</td></tr>
+  <tr><td>Cualquier otro caso</td><td><code>CURSAMIENTO_PROYECCION</code></td><td>Escenario hipotético sin confirmación de inscripción.</td></tr>
+</table>
+<div class="note"><strong>Nota:</strong> esta decisión operativa pertenece al servicio de inscripción y no al clasificador V2. Debe ser la única fuente de habilitación de Simulador, Validación y envío al módulo de inscripción.</div>
+
+<div class="page-break"></div>
+<h2>4. Mecanismo de decisión V2</h2>
+
+<h3>4.1 Validación de expediente mínimo</h3>
+<p>Antes de clasificar, V2 verifica: persona objetivo, plan o contexto académico suficiente, perfil, periodo operativo, origen de consulta y, en modo gestor, persona que consulta. Si faltan datos esenciales, el caso se marca como <code>PENDIENTE_INFORMACION</code>, no operable y con intervención humana.</p>
+
+<h3>4.2 Precedencia del clasificador de caso</h3>
+<p>Las reglas se aplican en el orden siguiente. La primera condición verdadera domina la clasificación.</p>
+<table>
+  <tr><th>Orden</th><th>Condición</th><th>Tipo de caso / motivo</th><th>Confianza</th></tr>
+  <tr><td>0</td><td>Contexto mínimo incompleto.</td><td><code>PENDIENTE_INFORMACION</code> / <code>INFORMACION_INSUFICIENTE</code></td><td>0.55</td></tr>
+  <tr><td>1</td><td>5 o más UD no acreditadas.</td><td><code>UNIDADES_NO_ACREDITADAS</code> / <code>ACUMULACION_NO_ACREDITADAS</code></td><td>0.98</td></tr>
+  <tr><td>2</td><td>Omisión documentada detectada en mensajes o pendientes críticos.</td><td><code>OMISION_DOCUMENTADA</code> / <code>OMISION_DOCUMENTADA_MOTIVO</code></td><td>0.92</td></tr>
+  <tr><td>3</td><td>Primer año incompleto y periodo operativo de inscripción.</td><td><code>REINSCRIPCION_NO_APROBADA</code> / <code>PRIMER_ANIO_INCOMPLETO</code></td><td>0.95</td></tr>
+  <tr><td>4</td><td>Solo hay optativas habilitadas y es inscripción.</td><td><code>UNIDADES_NO_ACREDITADAS</code> o <code>REZAGO</code> / <code>SOLO_OPTATIVAS_HABILITADAS</code></td><td>0.90</td></tr>
+  <tr><td>5</td><td>Continuidad dentro del mismo año y es inscripción.</td><td><code>CONTINUIDAD_MISMO_ANIO</code> / <code>MISMO_ANIO_ACADEMICO</code></td><td>0.86</td></tr>
+  <tr><td>6</td><td>Restricción de avance o 3 o más no acreditadas.</td><td><code>UNIDADES_NO_ACREDITADAS</code> o <code>REZAGO</code> / <code>ACUMULACION_NO_ACREDITADAS</code></td><td>0.93 o 0.88</td></tr>
+  <tr><td>7</td><td>Una o más UD bloqueadas.</td><td><code>SERIACION</code> / <code>BLOQUEO_SERIACION</code></td><td>0.89</td></tr>
+  <tr><td>8</td><td>Una o más omisiones o UD no inscritas.</td><td><code>OMISION_REGISTRO</code> / <code>UD_NO_CURSADA</code></td><td>0.82</td></tr>
+  <tr><td>9</td><td>Origen Malla o Expediente sin condición previa dominante.</td><td><code>ACLARACION_AVANCE</code> / <code>INFORMACION_INSUFICIENTE</code></td><td>0.70</td></tr>
+  <tr><td>10</td><td>Periodo operativo de inscripción sin condición previa.</td><td><code>REINSCRIPCION_NO_APROBADA</code> / <code>UD_NO_CURSADA</code></td><td>0.80</td></tr>
+  <tr><td>11</td><td>Fallback.</td><td><code>REZAGO</code> / <code>UD_NO_ACREDITADA</code></td><td>0.78</td></tr>
+</table>
+<div class="risk"><strong>Riesgo técnico identificado:</strong> dos detecciones dependen de buscar frases dentro de textos: omisión documentada y continuidad del mismo año. Esto es frágil frente a cambios de redacción; debe evolucionar a indicadores explícitos en el contexto.</div>
+
+<h3>4.3 Diagnóstico académico y restricción dominante</h3>
+<table>
+  <tr><th>Campo/resultado</th><th>Regla actual</th></tr>
+  <tr><td><code>situacion_academica</code></td><td>Se toma de <code>situacionAcademicaPeriodo</code>; si no existe, usa la bandera regular/irregular del diagnóstico base; como último recurso queda <code>EN_ANALISIS</code>.</td></tr>
+  <tr><td>Riesgo actual</td><td>Se toma del riesgo generado por el servicio; en ausencia, es <code>ALTO</code> si hay restricción por cuatro o más reprobadas y <code>MEDIO</code> en otro caso.</td></tr>
+  <tr><td>Seriación activa</td><td>Hay UD bloqueadas o mensaje de seriación.</td></tr>
+  <tr><td>Restricción dominante</td><td>Precedencia: avance anual por 4+ reprobadas, seriación, no acreditación predominante, omisión, sin restricción.</td></tr>
+  <tr><td>Dictamen preliminar</td><td>Avance anual, seriación, revisión operativa de gestor, validación académica o seguimiento de cursamiento.</td></tr>
+</table>
+
+<h3>4.4 Escenario del panel virtual</h3>
+<p>El escenario que alimenta el panel no usa exactamente la misma precedencia que el tipo de caso:</p>
+<table>
+  <tr><th>Prioridad</th><th>Condición</th><th>Escenario visual</th></tr>
+  <tr><td>1</td><td>Tipo, motivo o situación contienen baja/reincorporación.</td><td><code>BAJA</code></td></tr>
+  <tr><td>2</td><td>Hay UD bloqueadas o seriación activa.</td><td><code>SERIACION</code></td></tr>
+  <tr><td>3</td><td>No hay no acreditadas, omisiones ni bloqueadas.</td><td><code>REGULAR</code></td></tr>
+  <tr><td>4</td><td>Cualquier otro caso.</td><td><code>IRREGULAR</code></td></tr>
+</table>
+<div class="note"><strong>Implicación:</strong> un mismo alumno puede tener tipo de caso <code>UNIDADES_NO_ACREDITADAS</code> y panel <code>SERIACION</code> si además tiene bloqueos. Es una prioridad de comunicación, no un cambio de hechos. Para evitar confusión se recomienda publicar ambos atributos con etiquetas diferentes, no llamarlos indistintamente “situación académica”.</div>
+
+<h3>4.5 Recomendador de resolución</h3>
+<p>Después del diagnóstico, el recomendador elige la acción final con esta prioridad: alto riesgo por acumulación, expediente incompleto, omisión documentada, primer año incompleto, solo optativas/restricción de avance, continuidad del mismo año, seriación, escalamiento humano, validación de inscripción y seguimiento general.</p>
+<table>
+  <tr><th>Condición dominante</th><th>Acción resultante</th><th>Propósito</th></tr>
+  <tr><td>5+ no acreditadas, o 3+ y riesgo alto</td><td><code>PRIORIZAR_REGULARIZACION</code></td><td>Evitar avanzar con carga incompatible.</td></tr>
+  <tr><td>Expediente incompleto</td><td><code>SOLICITAR_INFORMACION</code></td><td>Detener dictamen definitivo.</td></tr>
+  <tr><td>Omisión documentada</td><td><code>APLICAR_AJUSTE_POR_OMISION</code></td><td>Atender con evidencia, no como reprobación.</td></tr>
+  <tr><td>Primer año incompleto</td><td><code>MANTENER_RESTRICCION</code></td><td>No abrir obligatorias de año superior.</td></tr>
+  <tr><td>Solo optativas / avance anual con pendientes</td><td><code>REGISTRAR_SOLO_OPTATIVAS_HABILITADAS</code></td><td>Respetar la selección compatible.</td></tr>
+  <tr><td>Continuidad del mismo año</td><td><code>PERMITIR_CONTINUIDAD_MISMO_ANIO</code></td><td>Aplicar carga, oferta y pendientes sin tratarlo como salto anual.</td></tr>
+  <tr><td>Seriación</td><td><code>DAR_SEGUIMIENTO</code></td><td>Atender antecedente y documentar bloqueo.</td></tr>
+  <tr><td>Revisión humana</td><td><code>ESCALAR_REVISION</code></td><td>Enviar a segundo nivel.</td></tr>
+</table>
+
+<div class="page-break"></div>
+<h2>5. Modelo de datos V2</h2>
+<h3>5.1 Diagrama entidad-relación</h3>
+<pre>
+                         cat_tipo_caso_academico
+                                   | 1
+                                   |---- N rel_patron_caso_academico ---- N rel_patron_criterio_operativo ---- 1 cat_criterio_operativo
+                                   |                  |
+                                   |                  |---- N rel_patron_accion_operativa ---- 1 cat_accion_operativa
+                                   |                  |
+                                   |                  |---- N rel_patron_mensaje_contextual ---- 1 cat_mensaje_institucional_contextual
+                                   |
+                                   | 1
+             cat_motivo_restriccion |                         cat_viabilidad_tecnica
+                       | 1           |                                 | 1
+                       +-------------+---- N tbl_caso_academico_operativo +
+                                                    | 1
+              +----------------+--------------------+---------------------+--------------------+-------------------+
+              |                |                    |                     |                    |                   |
+              N                1                    N                     N                    N                   N
+ tbl_caso_ud_relacionada  tbl_caso_diagnostico  tbl_caso_dictamen  tbl_caso_bitacora  tbl_caso_evidencia  tbl_caso_similar
+                                                   | N                                             (origen y relacionado
+                                                   |                                                apuntan al mismo caso)
+                                                   +---- 1 cat_accion_operativa
+                                                   +---- 1 cat_viabilidad_tecnica
+
+Referencias externas sin FK en el modelo V2: id_persona, id_plan, id_periodo.
+</pre>
+
+<h3>5.2 Catálogos y base de conocimiento</h3>
+<table>
+  <tr><th>Tabla</th><th>Rol</th><th>Relaciones</th></tr>
+  <tr><td><code>cat_tipo_caso_academico</code></td><td>Tipos operativos de caso.</td><td>Uno a muchos con patrones y casos.</td></tr>
+  <tr><td><code>cat_motivo_restriccion</code></td><td>Motivo principal de restricción.</td><td>Uno a muchos con casos.</td></tr>
+  <tr><td><code>cat_criterio_operativo</code></td><td>Reglas/criterios documentales asociados a patrones.</td><td>Muchos a muchos vía <code>rel_patron_criterio_operativo</code>.</td></tr>
+  <tr><td><code>cat_accion_operativa</code></td><td>Acciones para resolver o dar seguimiento.</td><td>Muchos a muchos con patrones; uno a muchos con dictámenes.</td></tr>
+  <tr><td><code>cat_viabilidad_tecnica</code></td><td>Viabilidad del caso o dictamen.</td><td>Uno a muchos con casos y dictámenes.</td></tr>
+  <tr><td><code>cat_mensaje_institucional_contextual</code></td><td>Textos por perfil, periodo y tipo.</td><td>Muchos a muchos con patrones.</td></tr>
+  <tr><td><code>rel_patron_caso_academico</code></td><td>Patrón activo con confianza base para un tipo de caso.</td><td>Padre de relaciones a criterios, acciones y mensajes.</td></tr>
+</table>
+
+<h3>5.3 Persistencia operativa del caso</h3>
+<table>
+  <tr><th>Tabla</th><th>Cardinalidad respecto al caso</th><th>Contenido relevante</th></tr>
+  <tr><td><code>tbl_caso_academico_operativo</code></td><td>Entidad raíz.</td><td>Persona, plan, periodo, perfil, origen, tipo, motivo, viabilidad, confianza, estatus.</td></tr>
+  <tr><td><code>tbl_caso_diagnostico</code></td><td>Uno a uno.</td><td>Situación, riesgo, carga viable, seriación, oferta, dictamen preliminar y resumen del motor.</td></tr>
+  <tr><td><code>tbl_caso_dictamen</code></td><td>Uno a uno operativo.</td><td>Acción, viabilidad, dictamen, mensajes por perfil y escalamiento.</td></tr>
+  <tr><td><code>tbl_caso_ud_relacionada</code></td><td>Uno a muchos.</td><td>UD involucradas, estatus detectado, criticidad, bloque y semestre.</td></tr>
+  <tr><td><code>tbl_caso_bitacora</code></td><td>Uno a muchos.</td><td>Creación, recálculo y consumo automático.</td></tr>
+  <tr><td><code>tbl_caso_evidencia</code></td><td>Uno a muchos.</td><td>Rutas y descripción de evidencia.</td></tr>
+  <tr><td><code>tbl_caso_similar</code></td><td>Muchos a muchos autorreferenciada.</td><td>Casos relacionados por puntaje y motivo.</td></tr>
+</table>
+<div class="note"><strong>Persistencia real:</strong> <code>tbl_caso_diagnostico</code> persiste el resumen y los campos centrales. Los conteos enriquecidos usados en DTO, tales como total de no acreditadas, omisiones, bloqueadas, pendientes críticas, reglas y alertas, se recalculan desde el contexto asistido y no existen como columnas en el script base del modelo.</div>
+
+<h3>5.4 Scripts de datos asociados</h3>
+<table>
+  <tr><th>Script</th><th>Propósito</th></tr>
+  <tr><td><code>24_asistente_curricular_v2_sprint1_20260716.sql</code></td><td>Esquema base: catálogos, patrones, casos, diagnóstico, dictamen, bitácora y evidencia.</td></tr>
+  <tr><td><code>25_asistente_curricular_v2_catalogos_semilla_20260717.sql</code></td><td>Catálogos y relaciones mínimas.</td></tr>
+  <tr><td><code>26_asistente_curricular_v2_base_conocimiento_excel_20260718.sql</code></td><td>Conocimiento inicial derivado de casos fuente.</td></tr>
+  <tr><td><code>27_asistente_curricular_v2_base_conocimiento_ampliada_20260720.sql</code></td><td>Patrones ampliados: rezago, omisión, continuidad, primer año, optativas y cierre anual.</td></tr>
+  <tr><td><code>28_asistente_curricular_v2_alto_riesgo_no_acreditadas_20260722.sql</code></td><td>Casos de alto riesgo por no acreditadas.</td></tr>
+  <tr><td><code>29/30/31/32/33</code></td><td>Semillas, auditoría y plantillas del panel virtual para inscripción y cursamiento.</td></tr>
+</table>
+
+<div class="page-break"></div>
+<h2>6. Base de conocimiento y textos</h2>
+<p>La base de conocimiento selecciona patrones activos por tipo de caso y los puntúa con señales del diagnóstico. Los mensajes asociados a un patrón se filtran por perfil y periodo operativo. Para el panel virtual se manejan tipos como <code>PANEL_OP</code>, <code>PANEL_RES</code>, <code>PANEL_QDE</code>, <code>PANEL_SER</code>, <code>PANEL_SIM</code> y <code>PANEL_CON</code>.</p>
+<table>
+  <tr><th>Prioridad de contenido del panel</th><th>Comportamiento</th></tr>
+  <tr><td>1. Mensaje contextual compatible</td><td>Sobrescribe la plantilla del panel cuando coincide el tipo de mensaje y el escenario.</td></tr>
+  <tr><td>2. Plantilla Java por perfil/escenario</td><td>Se usa si no hay mensaje aplicable en BD.</td></tr>
+  <tr><td>3. Fallback local del bean</td><td>Solo debe operar si V2 no puede entregar una ficha.</td></tr>
+</table>
+<div class="risk"><strong>Limitación:</strong> la compatibilidad del mensaje con el escenario se infiere buscando palabras en clave, título y texto como “seriación”, “baja”, “reincorporación”, “irregular” o “regular”. Conviene modelar explícitamente el escenario en la tabla de mensajes para eliminar esta dependencia semántica.</div>
+
+<h2>7. Relación con beans y riesgo de duplicidad</h2>
+<p>El bean <code>TablaCurricularAsistidaBean</code> consume la ficha V2 para el panel y, tras los ajustes recientes, prioriza el escenario V2 para situaciones, riesgos y preguntas rápidas. Conserva lógica local de fallback para no dejar la vista sin contenido ante un error de V2.</p>
+<table>
+  <tr><th>Capa</th><th>Debe ser responsable de</th><th>No debe decidir de forma independiente</th></tr>
+  <tr><td>Servicio de inscripción</td><td>Hechos de trayectoria, oferta, inscripción vigente, reglas de selección, habilitación de flujo.</td><td>Textos y explicación institucional.</td></tr>
+  <tr><td>Motor V2</td><td>Clasificación, diagnóstico, dictamen, trazabilidad y contrato único de panel.</td><td>Replicar cálculos de oferta o alterar el flujo de inscripción.</td></tr>
+  <tr><td>Bean / XHTML</td><td>Renderizar el contrato V2 y controlar navegación.</td><td>Reclasificar al alumno o producir mensajes académicos alternos.</td></tr>
+  <tr><td>Base de conocimiento</td><td>Patrones, criterios, acciones y redacción institucional.</td><td>Reemplazar cálculos dinámicos sin variables o motor de reglas formal.</td></tr>
+</table>
+
+<h2>8. Recomendación de unificación posterior</h2>
+<ol>
+  <li><strong>Definir un contrato canónico:</strong> un DTO único debe publicar <code>estadoOperativo</code>, <code>situacionAcademica</code>, <code>tipoCaso</code>, <code>restriccionDominante</code>, <code>escenarioPanel</code>, acciones permitidas y evidencia.</li>
+  <li><strong>Centralizar los hechos:</strong> el servicio de inscripción debe ser dueño de oferta, selección posible y flujo real; V2 debe consumir esas decisiones sin reinterpretarlas.</li>
+  <li><strong>Centralizar la clasificación:</strong> V2 debe ser la única capa que determine tipo de caso, escenario comunicacional y dictamen.</li>
+  <li><strong>Reducir el bean a presentación:</strong> retirar progresivamente los if/else académicos del bean después de una matriz de pruebas por escenario.</li>
+  <li><strong>Formalizar indicadores:</strong> sustituir detección por texto para omisión documentada, mismo año, baja y oferta con booleanos o códigos procedentes del servicio fuente.</li>
+  <li><strong>Parametrizar mensajes:</strong> incorporar tokens como <code>${periodo_objetivo}</code>, <code>${ud_no_acreditadas}</code> y <code>${ud_bloqueadas}</code> antes de mover a BD textos con valores dinámicos.</li>
+</ol>
+
+<h2>9. Matriz mínima de pruebas para estabilización</h2>
+<table>
+  <tr><th>Escenario</th><th>Hecho de entrada</th><th>Resultado esperado</th></tr>
+  <tr><td>Regular en cursamiento</td><td>UD en curso, sin pendientes, sin oferta real.</td><td>Proyección hipotética; sin validar ni confirmar.</td></tr>
+  <tr><td>Regular en inscripción</td><td>Sin inscripción vigente y con oferta real.</td><td>Propuesta real; validar y confirmar habilitables.</td></tr>
+  <tr><td>Irregular con reprobadas</td><td>Una o más no acreditadas ofertadas.</td><td>Panel irregular y prioridad de regularización; las reprobadas obligatorias permitidas no deben marcarse como bloqueo genérico.</td></tr>
+  <tr><td>Seriación</td><td>UD antecedente pendiente y UD subsecuente bloqueada.</td><td>Panel de seriación; antecedente priorizado; subsecuente no seleccionable.</td></tr>
+  <tr><td>Baja parcial</td><td>Inscripción vigente, baja de algunas UD y sin oferta real.</td><td>Cursamiento parcial; proyección sin confirmación.</td></tr>
+  <tr><td>Baja temporal</td><td>Baja de todas las UD, sin inscripción y sin oferta.</td><td>Sin flujo de simulación/validación; mensaje de baja al gestor.</td></tr>
+  <tr><td>Omisión documentada</td><td>Indicador explícito y evidencia institucional.</td><td>Caso de omisión; acción de ajuste con trazabilidad.</td></tr>
+</table>
+
+<h2>10. Referencias de implementación</h2>
+<ul>
+  <li><code>codigoFuente/basegestor/.../v2/AsistenteCurricularV2FacadeImpl.java</code></li>
+  <li><code>codigoFuente/basegestor/.../v2/ClasificadorCasoServiceImpl.java</code></li>
+  <li><code>codigoFuente/basegestor/.../v2/DiagnosticoAcademicoOperativoServiceImpl.java</code></li>
+  <li><code>codigoFuente/basegestor/.../v2/RecomendadorResolucionOperativaServiceImpl.java</code></li>
+  <li><code>codigoFuente/basegestor/.../v2/BaseConocimientoAcademicoServiceImpl.java</code></li>
+  <li><code>codigoFuente/basegestor/.../AsistenteInscripcionServiceImpl.java</code></li>
+  <li><code>codigoFuente/gestorWeb/.../TablaCurricularAsistidaBean.java</code></li>
+  <li><code>codigoFuente/bd/24_asistente_curricular_v2_sprint1_20260716.sql</code></li>
+  <li><code>codigoFuente/bd/README_asistente_curricular_v2_panel_virtual.md</code></li>
+</ul>
+
+<p class="small">Este documento describe el comportamiento del código revisado. Las decisiones normativas futuras deben validarse con el experto académico antes de migrar reglas o modificar los catálogos de conocimiento.</p>
+</body>
+</html>

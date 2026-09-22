@@ -778,6 +778,49 @@
 				font-weight: 700;
 				color: #30464f;
 				margin-bottom: 12px;
+				padding-left: 26px;
+			}
+			.malla-detail-collapse {
+				position: absolute;
+				top: 8px;
+				left: 8px;
+				width: 22px;
+				height: 22px;
+				padding: 0;
+				border: 0;
+				border-radius: 50%;
+				background: transparent;
+				color: #406070;
+				font-size: 14px;
+				line-height: 22px;
+				cursor: pointer;
+			}
+			.malla-detail-collapse:hover,
+			.malla-detail-collapse:focus {
+				background: #e2edf1;
+				outline: none;
+			}
+			.malla-context-grid.detail-collapsed .malla-side {
+				width: 44px;
+				min-width: 44px;
+				max-width: 44px;
+				flex: 0 0 44px;
+			}
+			.malla-context-grid.detail-collapsed {
+				gap: 8px;
+				min-width: 0;
+				width: max-content;
+			}
+			.malla-context-grid.detail-collapsed .malla-detail-panel {
+				padding: 8px;
+			}
+			.malla-context-grid.detail-collapsed .malla-detail-panel > :not(.malla-detail-title) {
+				display: none;
+			}
+			.malla-context-grid.detail-collapsed .malla-detail-title {
+				font-size: 0;
+				margin: 0;
+				padding-left: 0;
 			}
 			.malla-detail-badge {
 				display: inline-block;
@@ -874,7 +917,7 @@
 
 	<ui:define name="breadcrumb">
 		<li>#{sistema.obtenerTexto('gw.sidebar.historialAcademico')}</li>
-		<li class="active">Malla curricular</li>
+		<li class="active">Mapa curricular dinámico</li>
 	</ui:define>
 
 	<ui:define name="content">
@@ -895,7 +938,7 @@
 				<span class="malla-context-chip-soft">Estudiante: #{mallaCurricularAlumnoBean.nombrePersonaObjetivo}</span>
 				<span class="malla-context-chip-soft">Matrícula: #{mallaCurricularAlumnoBean.matriculaPersonaObjetivo}</span>
 			</div>
-			<p:panel header="Malla curricular: #{mallaCurricularAlumnoBean.planNombre}">
+			<p:panel header="Mapa curricular dinámico: #{mallaCurricularAlumnoBean.planNombre}">
 				<div class="malla-context-scroll">
 				<div class="malla-context-grid">
 					<div class="malla-main">
@@ -1011,8 +1054,10 @@
 							<ui:fragment rendered="#{nodo.tipo eq 'BLOQUE'}">
 								<span class="malla-toggle-v" data-bloque="#{nodo.bloqueId}"></span>
 							</ui:fragment>
-							<span class="malla-texto full">#{nodo.texto}</span>
-							<span class="malla-texto compacto">#{nodo.textoCompacto}</span>
+							<span class="malla-texto full"
+								data-tooltip="#{nodo.tipo eq 'PROGRAMA' ? nodo.clavePrograma : ''}">#{nodo.texto}</span>
+							<span class="malla-texto compacto"
+								data-tooltip="#{nodo.tipo eq 'PROGRAMA' ? nodo.texto : ''}">#{nodo.textoCompacto}</span>
 							<ui:fragment rendered="#{nodo.tipo eq 'PROGRAMA'}">
 								<span class="malla-ver-mas" title="Ver panel de detalle contextual" aria-label="Ver panel de detalle contextual"></span>
 								<div class="malla-programa-row">
@@ -1022,7 +1067,7 @@
 										</span>
 									</ui:fragment>
 									<span class="malla-estado #{nodo.estatusCss}" style="#{nodo.estatusStyle}"
-										data-tooltip="#{empty nodo.calificacion ? nodo.estatus : nodo.estatus.concat(' - Calificación: ').concat(nodo.calificacion)}">
+										data-tooltip="#{empty nodo.calificacion ? nodo.estatusTooltip : nodo.estatusTooltip.concat(' - Calificación: ').concat(nodo.calificacion)}">
 										<ui:fragment rendered="#{nodo.estatusCss eq 'estatus-en-curso'}">
 											<span class="icon-en-curso"></span>
 										</ui:fragment>
@@ -1107,7 +1152,7 @@
 					</div>
 					<div class="malla-side">
 						<div id="mallaDetailPanel" class="malla-detail-panel" tabindex="-1">
-							<div class="malla-detail-title">Panel de detalle contextual</div>
+							<div class="malla-detail-title">Panel de detalle contextual<button type="button" id="mallaDetailCollapse" class="malla-detail-collapse" title="Contraer panel de detalle" aria-label="Contraer panel de detalle" onclick="toggleMallaDetailPanel();">&#9664;</button></div>
 							<div id="mallaDetailName" class="malla-detail-name">Selecciona una unidad didáctica</div>
 							<div id="mallaDetailKey" class="malla-detail-key">Haz clic sobre una UD en la malla para ver detalle contextual.</div>
 							<div class="malla-detail-section">
@@ -1140,6 +1185,21 @@
 				</div>
 			</p:panel>
 		</h:form>
+		<script type="text/javascript">
+			function toggleMallaDetailPanel() {
+				var panel = document.getElementById('mallaDetailPanel');
+				var boton = document.getElementById('mallaDetailCollapse');
+				if (!panel || !boton || !panel.parentNode) {
+					return;
+				}
+				var contenedor = panel.parentNode.parentNode;
+				var contraido = !contenedor.classList.contains('detail-collapsed');
+				contenedor.classList.toggle('detail-collapsed', contraido);
+				boton.innerHTML = contraido ? '&#9654;' : '&#9664;';
+				boton.title = contraido ? 'Expandir panel de detalle' : 'Contraer panel de detalle';
+				boton.setAttribute('aria-label', boton.title);
+			}
+		</script>
 		<script type="text/javascript">
 			//<![CDATA[
 			(function() {
@@ -1289,7 +1349,7 @@
 					var semestres = {};
 					var bloques = {};
 					var expandedWidth = 260;
-					var collapsedWidth = 128;
+					var collapsedWidth = 120;
 					var collapsedSemWidth = 120;
 					var collapsedBloWidth = 96;
 					var collapsedProgWidth = 64;
@@ -1590,7 +1650,8 @@
 						lines.forEach(function(line) {
 							line.parentNode.removeChild(line);
 						});
-						ordenarSemestres().forEach(function(sem) {
+						var semestresOrdenados = ordenarSemestres();
+						semestresOrdenados.forEach(function(sem, index) {
 							var data = semestres[sem];
 							var width = data.collapsed ? collapsedWidth : expandedWidth;
 							var baseLeft = data.baseLeft || 0;
@@ -1617,13 +1678,15 @@
 								node.classList.toggle('colapsado', data.collapsed);
 							});
 							aplicarLayoutVertical(sem);
-							currentX += width + gap;
+							var siguiente = semestres[semestresOrdenados[index + 1]];
+							var separacion = siguiente && (!data.collapsed || !siguiente.collapsed) ? gap : 0;
+							currentX += width + separacion;
 						});
 						var endLine = document.createElement('div');
 						endLine.className = 'malla-col-line';
 						endLine.style.left = currentX + 'px';
 						root.appendChild(endLine);
-						root.style.width = (currentX + 40) + 'px';
+						root.style.width = currentX + 'px';
 					}
 
 					ordenarSemestres().forEach(function(sem) {

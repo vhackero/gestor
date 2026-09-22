@@ -375,8 +375,8 @@ public class ConstanciasBean extends BaseBean {
 
 	public String getMensajeContextualHistorial() {
 		return esPeriodoCursamiento()
-				? "Aquí puedes consultar el registro histórico de tus unidades didácticas cursadas, calificaciones y créditos. Para saber cómo influyen en tu proceso de inscripción actual, ingresa al Asistente de inscripción curricular."
-				: "Aquí puedes consultar el registro histórico de tus unidades didácticas cursadas, calificaciones y créditos. Para saber cómo influyen en tu próximo proceso de inscripción, ingresa al Asistente de inscripción curricular.";
+				? "Aquí puedes consultar el registro histórico de tus unidades didácticas cursadas, calificaciones y créditos. Para saber cómo influyen en tu proceso de inscripción actual, ingresa al Asistente de inscripción y orientación educativa."
+				: "Aquí puedes consultar el registro histórico de tus unidades didácticas cursadas, calificaciones y créditos. Para saber cómo influyen en tu próximo proceso de inscripción, ingresa al Asistente de inscripción y orientación educativa.";
 	}
 
 	public String getEtiquetaRolHistorial() {
@@ -385,8 +385,8 @@ public class ConstanciasBean extends BaseBean {
 
 	public String getMensajeTransicionAsistente() {
 		return esPeriodoCursamiento()
-				? "Si necesitas interpretar cómo este historial impacta tu proceso de inscripción actual, consulta el Asistente de inscripción curricular."
-				: "Si necesitas interpretar cómo este historial puede impactar tu próximo proceso de inscripción, consulta el Asistente de inscripción curricular.";
+				? "Si necesitas interpretar cómo este historial impacta tu proceso de inscripción actual, consulta el Asistente de inscripción y orientación educativa."
+				: "Si necesitas interpretar cómo este historial puede impactar tu próximo proceso de inscripción, consulta el Asistente de inscripción y orientación educativa.";
 	}
 
 	public String getMensajeTransicionAsistentePrevio() {

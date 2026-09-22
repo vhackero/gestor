@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -84,6 +85,35 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	@Override
 	public InscripcionContextoDTO obtenerContextoInscripcionConsulta(Long idPersona) throws InscripcionException {
 		return construirContextoInscripcion(idPersona, false);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public void validarPropuestaInscripcion(Long idPersona, List<Long> idsProgramas) throws InscripcionException {
+		InscripcionContextoDTO contexto = construirContextoInscripcion(idPersona, false);
+		List<InscripcionMateriasDTO> materiasDisponibles = obtenerMateriasDisponibles(contexto);
+		Set<Long> idsSeleccionados = idsProgramas != null ? new HashSet<Long>(idsProgramas) : Collections.<Long>emptySet();
+		Set<Long> idsOfertados = materiasDisponibles.stream()
+				.filter(materia -> materia != null && materia.getIdPrograma() != null)
+				.map(InscripcionMateriasDTO::getIdPrograma).collect(Collectors.toSet());
+
+		for (Long idPrograma : idsSeleccionados) {
+			if (idPrograma != null && !idsOfertados.contains(idPrograma)) {
+				throw new InscripcionException("La unidad didáctica seleccionada no forma parte de la oferta vigente.");
+			}
+		}
+		for (InscripcionMateriasDTO materia : materiasDisponibles) {
+			if (materia != null) {
+				materia.setCheck(Boolean.valueOf(materia.getIdPrograma() != null
+						&& idsSeleccionados.contains(materia.getIdPrograma())));
+			}
+		}
+		for (InscripcionMateriasDTO materia : materiasDisponibles) {
+			if (materia != null && Boolean.TRUE.equals(materia.getCheck())) {
+				validarSeleccionMateria(materia, contexto);
+			}
+		}
+		validarSeleccionMateriasSegunEstatusAcademico(contexto);
 	}
 
 	private InscripcionContextoDTO construirContextoInscripcion(Long idPersona, boolean validarInscripcionPrevia)
@@ -933,11 +963,16 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 				.orElseThrow(() -> new InscripcionException("No existe el proceso de inscripción"));
 	}
 
-	private Long obtenerIdProcesoInscripcion(List<InscripcionMateriasDTO> materiasOfertadas) throws InscripcionException {
-		if (materiasOfertadas.isEmpty() || materiasOfertadas.get(0).getIdProcesoInscripcion() == null) {
-			throw new InscripcionException("No hay oferta disponible para identificar el proceso de inscripción.");
+	private Long obtenerIdProcesoInscripcion(List<InscripcionMateriasDTO> materiasOfertadas)
+			throws InscripcionException {
+		if (materiasOfertadas != null) {
+			for (InscripcionMateriasDTO materia : materiasOfertadas) {
+				if (materia != null && materia.getIdProcesoInscripcion() != null) {
+					return materia.getIdProcesoInscripcion();
+				}
+			}
 		}
-		return materiasOfertadas.get(0).getIdProcesoInscripcion();
+		throw new InscripcionException("No hay oferta disponible para identificar el proceso de inscripción.");
 	}
 
 	private String obtenerMensajeSeriacion(EstadoAcademicoDTO estadoAcademico) {

@@ -1135,7 +1135,25 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("INNER JOIN rel_motivo_baja rmb ON rmb.id_motivo_baja = rpb.motivo_baja_id ");
 		sql.append("INNER JOIN cat_tipo_bajas ctb ON ctb.id_tipo_baja = rmb.tipo_baja_id ");
 		sql.append("INNER JOIN tbl_ficha_descriptiva_programa tfdp ON tfdp.id_programa = rpb.id_programa ");
-		sql.append("WHERE rpb.id_persona = :id_persona");
+		// Una baja con contabilizar = 0 se conserva como antecedente auditado,
+		// pero ya no debe prevalecer sobre una reinscripción acreditada.
+		// Del mismo modo, una baja contabilizable deja de ser una restricción activa
+		// cuando el estudiante ya acreditó posteriormente la misma UD. La baja se
+		// conserva en rel_persona_bajas para fines administrativos, pero no se
+		// entrega a los motores de inscripción, simulación o mapa curricular.
+		sql.append("WHERE rpb.id_persona = :id_persona ");
+		sql.append("  AND COALESCE(rpb.contabilizar, 1) = 1 ");
+		sql.append("  AND NOT EXISTS ( ");
+		sql.append("      SELECT 1 ");
+		sql.append("      FROM rel_grupo_participante rgp_acreditada ");
+		sql.append("      INNER JOIN tbl_grupos tg_acreditada ON tg_acreditada.id = rgp_acreditada.id_grupo ");
+		sql.append("      INNER JOIN tbl_eventos te_acreditada ON te_acreditada.id_evento = tg_acreditada.id_evento ");
+		sql.append("      INNER JOIN tbl_ficha_descriptiva_programa fd_acreditada ");
+		sql.append("          ON fd_acreditada.id_programa = te_acreditada.id_programa ");
+		sql.append("      WHERE rgp_acreditada.id_persona_participante = rpb.id_persona ");
+		sql.append("        AND te_acreditada.id_programa = rpb.id_programa ");
+		sql.append("        AND rgp_acreditada.calificacion_final >= fd_acreditada.calificacion_min_aprobatoria ");
+		sql.append("  )");
 
 		List<Object[]> resultados = entityManager.createNativeQuery(sql.toString())
 				.setParameter("id_persona", idPersona).getResultList();

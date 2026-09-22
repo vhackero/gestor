@@ -191,6 +191,14 @@ final class AsistenteCurricularV2Mapper {
         entity.setOfertaVigente(dto.getOfertaVigente());
         entity.setDictamenPreliminar(truncar(dto.getDictamenPreliminar(), 100));
         entity.setResumenMotor(dto.getResumenMotor());
+        entity.setRestriccionDominante(truncar(dto.getRestriccionDominante(), 50));
+        entity.setMotivoBloqueoPrincipal(dto.getMotivoBloqueoPrincipal());
+        entity.setComparativoAvanceRestricciones(dto.getComparativoAvanceRestricciones());
+        entity.setInterpretacionOmisiones(dto.getInterpretacionOmisiones());
+        entity.setTotalNoAcreditadas(dto.getTotalNoAcreditadas());
+        entity.setTotalOmisiones(dto.getTotalOmisiones());
+        entity.setTotalBloqueadas(dto.getTotalBloqueadas());
+        entity.setTotalPendientesCriticas(dto.getTotalPendientesCriticas());
         return entity;
     }
 
@@ -209,6 +217,14 @@ final class AsistenteCurricularV2Mapper {
         dto.setOfertaVigente(entity.getOfertaVigente());
         dto.setDictamenPreliminar(entity.getDictamenPreliminar());
         dto.setResumenMotor(entity.getResumenMotor());
+        dto.setRestriccionDominante(entity.getRestriccionDominante());
+        dto.setMotivoBloqueoPrincipal(entity.getMotivoBloqueoPrincipal());
+        dto.setComparativoAvanceRestricciones(entity.getComparativoAvanceRestricciones());
+        dto.setInterpretacionOmisiones(entity.getInterpretacionOmisiones());
+        dto.setTotalNoAcreditadas(entity.getTotalNoAcreditadas());
+        dto.setTotalOmisiones(entity.getTotalOmisiones());
+        dto.setTotalBloqueadas(entity.getTotalBloqueadas());
+        dto.setTotalPendientesCriticas(entity.getTotalPendientesCriticas());
         return dto;
     }
 
@@ -362,12 +378,16 @@ final class AsistenteCurricularV2Mapper {
         plan.setObservacion(plan.getPresente() ? "Plan disponible." : "Falta plan academico.");
         dto.getCampos().add(plan);
 
+        boolean requiereProcesoOperativo = contexto == null
+                || !"CURSAMIENTO".equalsIgnoreCase(contexto.getPeriodoOperativo());
         CampoExpedienteCasoDTO periodo = new CampoExpedienteCasoDTO();
         periodo.setClaveCampo("ID_PERIODO");
-        periodo.setNombreCampo("Periodo operativo");
-        periodo.setObligatorio(Boolean.TRUE);
-        periodo.setPresente(contexto != null && contexto.getIdPeriodo() != null);
-        periodo.setObservacion(periodo.getPresente() ? "Periodo disponible." : "Falta periodo operativo.");
+        periodo.setNombreCampo("Proceso operativo");
+        periodo.setObligatorio(Boolean.valueOf(requiereProcesoOperativo));
+        periodo.setPresente(Boolean.valueOf(!requiereProcesoOperativo
+                || (contexto != null && contexto.getIdPeriodo() != null)));
+        periodo.setObservacion(periodo.getPresente() ? "Proceso disponible o no requerido durante cursamiento."
+                : "Falta proceso operativo de inscripción.");
         dto.getCampos().add(periodo);
 
         if (!persona.getPresente()) {
@@ -376,8 +396,8 @@ final class AsistenteCurricularV2Mapper {
         if (!plan.getPresente()) {
             dto.getFaltantes().add("Plan academico");
         }
-        if (!periodo.getPresente()) {
-            dto.getFaltantes().add("Periodo operativo");
+        if (Boolean.TRUE.equals(periodo.getObligatorio()) && !periodo.getPresente()) {
+            dto.getFaltantes().add("Proceso operativo de inscripción");
         }
         dto.setCompleto(dto.getFaltantes().isEmpty());
         return dto;

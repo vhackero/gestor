@@ -1,6 +1,10 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -26,6 +30,7 @@ public class InscripcionBean extends BaseBean {
 	private static final long serialVersionUID = -4348522429538060563L;
 
 	private static final Logger logger = Logger.getLogger(InscripcionBean.class);
+	private static final String SESION_PRESELECCION_INSCRIPCION = "preseleccionInscripcionAsistente";
 
 	@ManagedProperty(value = "#{inscripcionFacade}")
 	private InscripcionFacade inscripcionFacade;
@@ -117,7 +122,44 @@ public class InscripcionBean extends BaseBean {
 
 	private void inicializarInscripcion() throws InscripcionException {
 		contextoInscripcion = obtenerContextoInscripcion();
+		aplicarPreseleccionDelAsistente();
 		aceptaTerminos = obtenerValorPorDefecto();
+	}
+
+	/**
+	 * Recupera la propuesta que el asistente validó en la misma sesión y la
+	 * contrasta de nuevo contra la oferta recién consultada por inscripción.
+	 * Así se preserva la selección sin permitir que una URL o una sesión
+	 * desactualizada evada las reglas propias del módulo de inscripción.
+	 */
+	@SuppressWarnings("unchecked")
+	private void aplicarPreseleccionDelAsistente() throws InscripcionException {
+		Object propuestaSesion = getSessionMap().remove(SESION_PRESELECCION_INSCRIPCION);
+		if (!(propuestaSesion instanceof List<?>)) {
+			return;
+		}
+
+		Set<Long> idsSeleccionados = new HashSet<Long>();
+		for (Object valor : (List<?>) propuestaSesion) {
+			if (valor instanceof Long) {
+				idsSeleccionados.add((Long) valor);
+			}
+		}
+		if (idsSeleccionados.isEmpty()) {
+			return;
+		}
+
+		List<Long> propuesta = new ArrayList<Long>(idsSeleccionados);
+		inscripcionFacade.validarPropuestaInscripcion(getUsuarioEnSession().getIdPersona(), propuesta);
+		List<InscripcionMateriasDTO> disponibles = contextoInscripcion != null
+				&& contextoInscripcion.getEstadoAcademico() != null
+				? contextoInscripcion.getEstadoAcademico().getMateriasDisponibles()
+				: Collections.<InscripcionMateriasDTO>emptyList();
+		for (InscripcionMateriasDTO materia : disponibles) {
+			if (materia != null && materia.getIdPrograma() != null) {
+				materia.setCheck(Boolean.valueOf(idsSeleccionados.contains(materia.getIdPrograma())));
+			}
+		}
 	}
 
 	private boolean obtenerValorPorDefecto() {

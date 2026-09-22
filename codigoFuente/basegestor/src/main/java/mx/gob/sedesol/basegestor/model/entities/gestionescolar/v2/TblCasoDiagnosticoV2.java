@@ -54,6 +54,30 @@ public class TblCasoDiagnosticoV2 implements Serializable {
     @Column(name = "resumen_motor")
     private String resumenMotor;
 
+    @Column(name = "restriccion_dominante")
+    private String restriccionDominante;
+
+    @Column(name = "motivo_bloqueo_principal")
+    private String motivoBloqueoPrincipal;
+
+    @Column(name = "comparativo_avance_restricciones")
+    private String comparativoAvanceRestricciones;
+
+    @Column(name = "interpretacion_omisiones")
+    private String interpretacionOmisiones;
+
+    @Column(name = "total_no_acreditadas")
+    private Integer totalNoAcreditadas;
+
+    @Column(name = "total_omisiones")
+    private Integer totalOmisiones;
+
+    @Column(name = "total_bloqueadas")
+    private Integer totalBloqueadas;
+
+    @Column(name = "total_pendientes_criticas")
+    private Integer totalPendientesCriticas;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "fecha_registro", insertable = false, updatable = false)
     private Date fechaRegistro;
@@ -149,6 +173,23 @@ public class TblCasoDiagnosticoV2 implements Serializable {
     public void setResumenMotor(String resumenMotor) {
         this.resumenMotor = resumenMotor;
     }
+
+    public String getRestriccionDominante() { return restriccionDominante; }
+    public void setRestriccionDominante(String valor) { this.restriccionDominante = valor; }
+    public String getMotivoBloqueoPrincipal() { return motivoBloqueoPrincipal; }
+    public void setMotivoBloqueoPrincipal(String valor) { this.motivoBloqueoPrincipal = valor; }
+    public String getComparativoAvanceRestricciones() { return comparativoAvanceRestricciones; }
+    public void setComparativoAvanceRestricciones(String valor) { this.comparativoAvanceRestricciones = valor; }
+    public String getInterpretacionOmisiones() { return interpretacionOmisiones; }
+    public void setInterpretacionOmisiones(String valor) { this.interpretacionOmisiones = valor; }
+    public Integer getTotalNoAcreditadas() { return totalNoAcreditadas; }
+    public void setTotalNoAcreditadas(Integer valor) { this.totalNoAcreditadas = valor; }
+    public Integer getTotalOmisiones() { return totalOmisiones; }
+    public void setTotalOmisiones(Integer valor) { this.totalOmisiones = valor; }
+    public Integer getTotalBloqueadas() { return totalBloqueadas; }
+    public void setTotalBloqueadas(Integer valor) { this.totalBloqueadas = valor; }
+    public Integer getTotalPendientesCriticas() { return totalPendientesCriticas; }
+    public void setTotalPendientesCriticas(Integer valor) { this.totalPendientesCriticas = valor; }
 
     public Date getFechaRegistro() {
         return fechaRegistro;

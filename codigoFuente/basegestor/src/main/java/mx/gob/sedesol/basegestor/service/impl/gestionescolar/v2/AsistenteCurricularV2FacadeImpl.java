@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CasoAcademicoOperativoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CasoSimilarDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DiagnosticoAcademicoOperativoDTO;
@@ -26,11 +27,13 @@ import mx.gob.sedesol.basegestor.service.gestionescolar.v2.AsistenteCurricularV2
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.BaseConocimientoAcademicoService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.BitacoraCasoService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.CasoAcademicoOperativoService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.CasoPatronAplicadoService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.CasosSimilaresService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ClasificadorCasoService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.DiagnosticoAcademicoOperativoService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.RecomendadorResolucionOperativaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ValidadorExpedienteCasoService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.AsistenteInscripcionService;
 
 @Service("asistenteCurricularV2Facade")
 public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Facade {
@@ -60,11 +63,18 @@ public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Fac
     private CasosSimilaresService casosSimilaresService;
 
     @Autowired
+    private CasoPatronAplicadoService casoPatronAplicadoService;
+
+    @Autowired
     private CatViabilidadTecnicaV2Repo viabilidadRepo;
+
+    @Autowired
+    private AsistenteInscripcionService asistenteInscripcionService;
 
     @Override
     @Transactional
     public FichaIntegralCasoDTO obtenerFichaIntegral(ContextoAsistenteCurricularV2DTO contexto) throws InscripcionException {
+        normalizarContextoOperativo(contexto);
         FichaIntegralCasoDTO ficha = new FichaIntegralCasoDTO();
         CasoAcademicoOperativoDTO caso = resolverCaso(contexto);
         ficha.setCasoAcademico(caso);
@@ -91,6 +101,7 @@ public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Fac
                 : recomendadorService.generarDictamen(caso);
         caso.setDictamen(dictamen);
         ficha.setPatronesConocimiento(obtenerPatrones(caso, contexto));
+        casoPatronAplicadoService.registrarPatronesAplicados(caso, contexto, ficha.getPatronesConocimiento());
         ficha.setMensajesContextuales(obtenerMensajes(contexto, caso));
         ficha.setCasosSimilares(obtenerCasosSimilares(contexto, caso));
         caso.setCasosSimilares(ficha.getCasosSimilares());
@@ -119,6 +130,23 @@ public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Fac
             ficha.getAlertas().addAll(diagnostico.getAlertasDiagnostico());
         }
         return ficha;
+    }
+
+    private void normalizarContextoOperativo(ContextoAsistenteCurricularV2DTO contexto) throws InscripcionException {
+        if (contexto == null || contexto.getIdPersonaObjetivo() == null
+                || (contexto.getIdPlan() != null && contexto.getIdPeriodo() != null)) {
+            return;
+        }
+        AsistenteInscripcionContextoDTO contextoAsistido = asistenteInscripcionService
+                .obtenerContextoAsistido(contexto.getIdPersonaObjetivo());
+        if (contexto.getIdPlan() == null && contextoAsistido != null && contextoAsistido.getContextoBase() != null
+                && contextoAsistido.getContextoBase().getInscripcionPersona() != null) {
+            contexto.setIdPlan(contextoAsistido.getContextoBase().getInscripcionPersona().getIdPlan());
+        }
+        if (contexto.getIdPeriodo() == null && contextoAsistido != null) {
+            // El modelo V2 aún denomina id_periodo al identificador del proceso operativo.
+            contexto.setIdPeriodo(contextoAsistido.getIdProcesoInscripcion());
+        }
     }
 
     private PanelAsistenteVirtualDTO construirPanelAsistenteVirtual(ContextoAsistenteCurricularV2DTO contexto,
@@ -404,6 +432,9 @@ public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Fac
             if (mensaje == null || !esTipoPanel(mensaje.getTipo(), "PANEL_RES", "PANEL_RESUMEN")) {
                 continue;
             }
+            if (!esMensajeCompatibleConEscenario(panel, mensaje)) {
+                continue;
+            }
             if (mensaje.getTitulo() != null && !mensaje.getTitulo().trim().isEmpty()) {
                 panel.setResumenTitulo(mensaje.getTitulo().trim());
             }
@@ -425,12 +456,72 @@ public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Fac
             }
             for (MensajeInstitucionalContextualDTO mensaje : mensajesContextuales) {
                 if (mensaje != null && esTipoPanel(mensaje.getTipo(), tiposMensaje)
+                        && esMensajeCompatibleConEscenario(panel, mensaje)
                         && mensaje.getMensaje() != null && !mensaje.getMensaje().trim().isEmpty()) {
                     accion.setRespuesta(mensaje.getMensaje().trim());
                     return;
                 }
             }
         }
+    }
+
+    private boolean esMensajeCompatibleConEscenario(PanelAsistenteVirtualDTO panel,
+            MensajeInstitucionalContextualDTO mensaje) {
+        if (panel == null || mensaje == null) {
+            return false;
+        }
+        String escenario = limpio(panel.getEscenario());
+        if (escenario == null) {
+            return false;
+        }
+        String huella = construirHuellaMensaje(mensaje);
+        if (huella == null) {
+            return true;
+        }
+        String escenarioMensaje = resolverEscenarioMensaje(huella);
+        if (escenarioMensaje == null) {
+            return true;
+        }
+        return escenario.equalsIgnoreCase(escenarioMensaje);
+    }
+
+    private String construirHuellaMensaje(MensajeInstitucionalContextualDTO mensaje) {
+        StringBuilder huella = new StringBuilder();
+        agregarHuella(huella, mensaje.getClave());
+        agregarHuella(huella, mensaje.getTitulo());
+        agregarHuella(huella, mensaje.getMensaje());
+        String resultado = limpio(huella.toString());
+        return resultado != null ? resultado.toUpperCase() : null;
+    }
+
+    private void agregarHuella(StringBuilder huella, String valor) {
+        String limpio = limpio(valor);
+        if (huella == null || limpio == null) {
+            return;
+        }
+        if (huella.length() > 0) {
+            huella.append(' ');
+        }
+        huella.append(limpio);
+    }
+
+    private String resolverEscenarioMensaje(String huella) {
+        if (huella == null) {
+            return null;
+        }
+        if (huella.contains("SERIACION") || huella.contains("SERIADA")) {
+            return "SERIACION";
+        }
+        if (huella.contains("REINC") || huella.contains("BAJA")) {
+            return "BAJA";
+        }
+        if (huella.contains("IRREGULAR")) {
+            return "IRREGULAR";
+        }
+        if (huella.contains("REGULAR")) {
+            return "REGULAR";
+        }
+        return null;
     }
 
     private boolean esTipoPanel(String tipo, String... tiposCompatibles) {
@@ -450,8 +541,7 @@ public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Fac
         if (contexto != null && contexto.getCasoActual() != null) {
             if (contexto.getCasoActual().getId() != null) {
                 CasoAcademicoOperativoDTO caso = casoService.obtenerCasoPorId(contexto.getCasoActual().getId());
-                registrarConsumoAutomatico(caso, contexto);
-                return caso;
+                return refrescarCasoExistente(contexto, caso);
             }
             return contexto.getCasoActual();
         }
@@ -522,17 +612,9 @@ public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Fac
         DictamenCasoDTO dictamenActualizado = recomendadorService.generarDictamen(casoActual);
         casoActual.setDictamen(dictamenActualizado);
 
-        if (!huboCambioRelevante(casoActual, clasificacionActualizada, diagnosticoActualizado, dictamenActualizado,
-                expedienteActualizado)) {
-            registrarConsumoAutomatico(casoActual, contexto);
-            return casoActual;
-        }
-
+        // Persistir siempre el corte actual. El historial, oferta y seriación cambian con
+        // el tiempo; la auditoría de patrones deduplica por huella de evaluación.
         CasoAcademicoOperativoDTO persistido = casoService.actualizarCaso(casoActual);
-        bitacoraCasoService.registrarEvento(persistido.getId(), "RECALCULO_AUTOMATICO",
-                construirDetalleRecalculo(clasificacionActualizada, diagnosticoActualizado, dictamenActualizado,
-                        expedienteActualizado),
-                contexto.getPerfilConsulta());
         registrarConsumoAutomatico(persistido, contexto);
         return casoService.obtenerCasoPorId(persistido.getId());
     }

@@ -69,6 +69,8 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private static final int MAX_CHARS_PER_LINE = 18;
 	private static final int LINE_HEIGHT = 16;
 	private static final int EXTRA_TEXT_HEIGHT = 6;
+	private static final int CARGA_MINIMA_APROBADA_POR_SEMESTRE = 6;
+	private static final int MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA = 8;
 	private static final String ID_SEMESTRE_PREFIX = "sem-";
 	private static final String ID_BLOQUE_PREFIX = "blo-";
 	private static final String ID_PROGRAMA_PREFIX = "pro-";
@@ -628,8 +630,8 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 
 	private String construirSituacionDetalle(MallaDiagramaNodoDTO programaNodo, FichaDescProgramaDTO programa,
 			UnidadDecisionInscripcionDTO unidad) {
-		if (esUnidadOptativaOpcionalDetalle(programaNodo, programa, unidad)) {
-			return "Corresponde a la unidad didáctica optativa adicional del bloque. Dado que ya cubriste las 2 unidades optativas opcionales requeridas en tu Programa educativo, esta unidad didáctica queda como una opción libre a elegir, si deseas aumentar tus créditos, puedes integrarla en cuanto se oferte.";
+        if (esUnidadOptativaOpcionalDetalle(programaNodo, programa, unidad)) {
+			return "Corresponde a una unidad didáctica optativa adicional del semestre. Ya cubriste la carga mínima de 6 unidades didácticas acreditadas, por lo que esta unidad queda como una opción libre para ampliar tus créditos.";
 		}
 		if (programaNodo != null && ESTATUS_EN_CURSO.equals(programaNodo.getEstatus())) {
 			return "Unidad didáctica en curso.";
@@ -1072,14 +1074,16 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 
 	private boolean esUnidadOptativaOpcionalDetalle(MallaDiagramaNodoDTO programaNodo, FichaDescProgramaDTO programa,
 			UnidadDecisionInscripcionDTO unidadContextual) {
-		if (esUnidadOpcionalLibre(unidadContextual)) {
-			return true;
-		}
 		if (programaNodo == null || !esProgramaOpcional(programaNodo.getTipoPrograma())) {
 			return false;
 		}
 		if (ESTATUS_APROBADA.equals(programaNodo.getEstatus())) {
 			return false;
+		}
+		// Al cubrir el mínimo global de optativas del programa educativo, las
+		// optativas restantes dejan de ser requisito y se muestran como opcionales.
+		if (contarOptativasAprobadasPrograma() >= MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA) {
+			return true;
 		}
 		if (StringUtils.isBlank(programaNodo.getBloqueId()) || programaNodo.getSemestre() <= 0) {
 			return false;
@@ -1087,22 +1091,34 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		if (semestreEnCurso == null || programaNodo.getSemestre() > semestreEnCurso.intValue()) {
 			return false;
 		}
-		int optativasAcreditadas = 0;
+		int unidadesAcreditadasSemestre = 0;
 		for (MallaDiagramaNodoDTO nodo : nodos) {
 			if (nodo == null || !"PROGRAMA".equalsIgnoreCase(nodo.getTipo())) {
 				continue;
 			}
-			if (!programaNodo.getBloqueId().equals(nodo.getBloqueId()) || programaNodo.getSemestre() != nodo.getSemestre()) {
-				continue;
-			}
-			if (!esProgramaOpcional(nodo.getTipoPrograma())) {
-				continue;
-			}
+			// Una optativa sólo es adicional cuando ya se completó la carga
+			// mínima del semestre: 4 obligatorias y 2 optativas acreditadas.
+			// Por ello se cuentan todas las UDs aprobadas, sin separarlas por
+			// bloque ni limitar el conteo a las optativas.
+            if (programaNodo.getSemestre() != nodo.getSemestre()) {
+                continue;
+            }
 			if (ESTATUS_APROBADA.equals(nodo.getEstatus())) {
-				optativasAcreditadas++;
+				unidadesAcreditadasSemestre++;
 			}
 		}
-		return optativasAcreditadas >= 2;
+		return unidadesAcreditadasSemestre >= CARGA_MINIMA_APROBADA_POR_SEMESTRE;
+	}
+
+	private int contarOptativasAprobadasPrograma() {
+		int total = 0;
+		for (MallaDiagramaNodoDTO nodo : nodos) {
+			if (nodo != null && "PROGRAMA".equalsIgnoreCase(nodo.getTipo())
+					&& esProgramaOpcional(nodo.getTipoPrograma()) && ESTATUS_APROBADA.equals(nodo.getEstatus())) {
+				total++;
+			}
+		}
+		return total;
 	}
 
 	private boolean esUnidadOpcionalLibre(String tipoPrograma, UnidadDecisionInscripcionDTO unidadContextual) {
@@ -1229,15 +1245,17 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			calificacionFinal = estatusDto.getCalificacionFinal();
 			calificacionMin = estatusDto.getCalificacionMinAprobatoria();
 		}
-		if (idPrograma != null && programasConBaja.contains(idPrograma)) {
-			estatus = ESTATUS_BAJA;
-		} else if (calificacionFinal != null) {
+		// Una baja temporal/parcial se conserva como antecedente administrativo,
+		// pero nunca debe ocultar una acreditación posterior cerrada.
+		if (calificacionFinal != null) {
 			if (Double.compare(calificacionFinal, CALIFICACION_NO_PRESENTADA) == 0) {
 				estatus = ESTATUS_NO_ACREDITADA;
 			} else {
 				double min = calificacionMin != null ? calificacionMin : 0d;
 				estatus = calificacionFinal >= min ? ESTATUS_APROBADA : ESTATUS_NO_ACREDITADA;
 			}
+		} else if (idPrograma != null && programasConBaja.contains(idPrograma)) {
+			estatus = ESTATUS_BAJA;
 		}
 		String color = ESTATUS_COLORS.getOrDefault(estatus, "#6b7280");
 		nodo.setEstatus(estatus);
@@ -1536,7 +1554,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	}
 
 	public String getTituloVistaMalla() {
-		return vistaGestor ? "Malla curricular estudiante | Vista gestor" : "Malla curricular estudiante";
+		return vistaGestor ? "Mapa curricular dinámico | Vista gestor" : "Mapa curricular dinámico";
 	}
 
 	public String getSubtituloContextual() {
@@ -1622,7 +1640,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		if (fichaIntegralV2 != null && StringUtils.isNotBlank(fichaIntegralV2.getReglaAplicada())) {
 			texto.append(" (").append(fichaIntegralV2.getReglaAplicada()).append(")");
 		}
-		texto.append(" y usa el asistente curricular para validar tu siguiente paso.");
+		texto.append(" y usa el Asistente de inscripción y orientación educativa para validar tu siguiente paso.");
 		return texto.toString();
 	}
 
@@ -1645,7 +1663,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	}
 
 	public String getLlamadoAsistente() {
-		return esPeriodoCursamiento() ? "Consultar orientación" : "Abrir asistente curricular";
+		return esPeriodoCursamiento() ? "Consultar orientación" : "Abrir Asistente de inscripción y orientación educativa";
 	}
 
 	public String getMensajePanelContextual() {
