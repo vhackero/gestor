@@ -73,6 +73,7 @@ import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.EventoCapacit
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.RelProgCompEspecificaRepo;
 import mx.gob.sedesol.basegestor.model.repositories.planesyprogramas.RelEstructuraUDidacticaRepo;
 import mx.gob.sedesol.basegestor.service.ParametroWSMoodleService;
+import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.CatalogoComunService;
 import mx.gob.sedesol.basegestor.service.admin.ComunValidacionService;
 import mx.gob.sedesol.basegestor.service.admin.RelPersonaPlataformaMoodleService;
@@ -100,6 +101,9 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 
 	@Autowired
 	private EventoCapacitacionRepo eventoCapacitacionRepo;
+
+	@Autowired
+	private ParametroSistemaService parametroSistemaService;
 
 	@Autowired
 	private RelReponsableProduccionEcRepo relReponsableProduccionEcRepo;
@@ -184,7 +188,9 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 		}
 		
 		
-		List<BajasDTO> bajas = eventoCapacitacionRepo.obtenerBajas(idEvento, idCurso, idsMoodle);
+		List<BajasDTO> bajas = idsMoodle.isEmpty() ? new ArrayList<BajasDTO>()
+				: eventoCapacitacionRepo.obtenerBajas(idEvento, idCurso, idsMoodle,
+						parametroSistemaService.obtenerTiposBajaNp());
 		HashMap<Integer, BajasDTO> mapaBajas = new HashMap<Integer, BajasDTO>();
 		if(bajas == null) {
 			bajas = new ArrayList<BajasDTO>();

@@ -642,7 +642,7 @@ tos]]></text>
 							<textField>
 								<reportElement x="0" y="0" width="40" height="30" uuid="25a2dbb2-4916-4f47-8a73-8eb57672338f"/>
 								<textElement textAlignment="Center"/>
-								<textFieldExpression><![CDATA[$F{calificacionFinal}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{calificacionFinal} == null ? "" : (Double.compare($F{calificacionFinal}, 666.0D) == 0 ? "NP" : $F{calificacionFinal}.toString())]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

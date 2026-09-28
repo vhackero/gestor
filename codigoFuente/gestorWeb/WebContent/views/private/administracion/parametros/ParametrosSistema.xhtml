@@ -118,6 +118,9 @@
 								placeholder="#{sistema.obtenerTexto('gw.parametros.sistema.modal.etiqueta.valor')}"
 								value="#{parametroSistemaBean.parametro.valor}" />
 							<p:message for="valor" />
+							<h:outputText rendered="#{parametroSistemaBean.parametro.clave eq 'TIPOS_BAJA_NP_ACTA'}"
+								value="IDs de tipos de baja separados por comas (ejemplo: 1,2,7,8). Aplica a NP en actas, historial, constancias y malla curricular."
+								styleClass="help-block" />
 						</div>
 					</div>
 				</div>

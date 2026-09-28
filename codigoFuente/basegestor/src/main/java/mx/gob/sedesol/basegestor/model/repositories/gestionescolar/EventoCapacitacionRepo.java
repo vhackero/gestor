@@ -71,16 +71,17 @@ public interface EventoCapacitacionRepo  extends JpaRepository<TblEvento, Intege
 	public List<TblEvento> obtenerEventosPorIdProgramaIdPlan( @Param("idPlan") Integer idPlan);
 	
 	
-	@Query(value = "select	rpm.id_persona as idpersona, rpm.id_persona_moodle as personamoodle "
+	@Query(value = "select	rpm.id_persona as idpersona, rpm.id_persona_moodle as idpersonamoodle "
 			+ " from rel_personas_plataformas_moodle rpm "
 			+ " inner join tbl_persona p on p.id_persona = rpm.id_persona "
 			+ " inner join rel_persona_bajas rpb on rpb.id_persona = p.id_persona "
 			+ " inner join tbl_eventos e on	e.id_evento = rpb.id_evento "
 			+ " inner join rel_motivo_baja rb on rb.id_motivo_baja = rpb.motivo_baja_id "
 			+ " where (e.id_evento = :idEvento  or e.id_curso_lms_borrador = :idCurso )"
-			+ " and rpb.contabilizar = 1  and (rb.tipo_baja_id = 2 OR rb.tipo_baja_id = 1)"
+			+ " and rpb.contabilizar = 1  and rb.tipo_baja_id in (:tiposBajaNp)"
 			+ " and rpm.id_persona_moodle in :idsMoodle", nativeQuery = true)
-	public List<BajasDTO> obtenerBajas(@Param("idEvento")Integer idEvento, @Param("idCurso")Integer idCurso, @Param("idsMoodle")List<Integer> idsMoodle);
+	public List<BajasDTO> obtenerBajas(@Param("idEvento")Integer idEvento, @Param("idCurso")Integer idCurso, @Param("idsMoodle")List<Integer> idsMoodle,
+			@Param("tiposBajaNp") List<Integer> tiposBajaNp);
 	
 	@Query(value = "SELECT\n"
 			+ "    (SELECT p.sso_idUsuario FROM rel_grupo_participante rgp\n"
