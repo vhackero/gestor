@@ -694,8 +694,10 @@ public class AdminPersonaBean extends BaseBean {
 					.obtenerCorreoInstitucional(datos.getPersona().getIdPersona());
 			datos.setCorreoDePersonaEnBD(correoOriginal);
 		}
-		//datos.getPersona().setUnidadAdministrativa(datos.getPersona().getNuevaContrasenia());
 		if (!ObjectUtils.isNullOrEmpty(datos.getPersona().getNuevaContrasenia())) {
+			if (nuevaPersona) {
+				datos.getPersona().setUnidadAdministrativa(datos.getPersona().getNuevaContrasenia());
+			}
 			datos.getPersona().setContraseniaEncriptada(encoder.encode(datos.getPersona().getNuevaContrasenia()));
 		}
 
