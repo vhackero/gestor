@@ -31,6 +31,12 @@ public class SigieSecurityFilter extends OncePerRequestFilter {
         String folio = SigieRequestContext.preparar(request);
         response.setHeader("X-Request-ID", request.getAttribute(SigieRequestContext.REQUEST_ID).toString());
         try {
+            if (!SigieHostValidator.esSolicitudPorIp(request)) {
+                response.setHeader("Cache-Control", "no-store");
+                error(response, 403, "ACCESO_SOLO_POR_IP",
+                        "El servicio SIGIE requiere la IP del servidor en la URL.", folio);
+                return;
+            }
             Credencial credencial = leerCredencial(request.getHeader("Authorization"));
             if (credencial == null) {
                 error(response, 401, "NO_AUTORIZADO", "La credencial de acceso está ausente o no es válida.", folio);
@@ -61,6 +67,11 @@ public class SigieSecurityFilter extends OncePerRequestFilter {
                     + " resultado=" + (response.getStatus() < 400 ? "OK" : "ERROR")
                     + " duracion_ms=" + (System.currentTimeMillis() - inicio));
         }
+    }
+
+    @Override
+    protected boolean shouldNotFilterAsyncDispatch() {
+        return false;
     }
 
     private Credencial leerCredencial(String authorization) {

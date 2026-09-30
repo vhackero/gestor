@@ -14,6 +14,23 @@
 
 `GET /SIGIE/v1/estudiantes/{matricula}` mediante HTTPS, TLS 1.2 o superior y JSON.
 
+El host de la URL debe ser una IP literal del servidor, no un dominio ni `localhost`.
+La regla es obligatoria en codigo: no se registra una IP fija ni un parametro del sistema.
+Admite IPv4, IPv6 entre corchetes y puerto opcional. Se comprueban el encabezado `Host` y
+el nombre de servidor interpretado por el contenedor, sin resolver nombres por DNS.
+Los dominios, hosts ausentes, duplicados o malformados reciben HTTP 403 con
+`codigo=ACCESO_SOLO_POR_IP`, antes de autenticar o consultar estudiantes.
+
+La restriccion cubre `/SIGIE/*` y el alias del mismo controlador
+`/ws/v1/estudiantes` y `/ws/v1/estudiantes/*`. Los demas servicios de `/ws/*` y
+el portal web conservan sus controles. Una IP valida sigue requiriendo las credenciales,
+scope, IP de origen (si esta configurada) y limites de solicitudes existentes.
+
+Si hay proxy, debe preservar el Host original y no sustituir un dominio por la IP interna.
+El filtro no confia en `Forwarded` ni `X-Forwarded-Host` enviados por el cliente.
+El certificado HTTPS debe ser valido para la IP utilizada. La configuracion de proxy,
+certificado y despliegue del ambiente permanece PENDIENTE DE CONFIGURACION.
+
 La matricula es obligatoria, tiene 11 caracteres y cumple `^[Ee][Ss][0-9]{9}$`. El prefijo acepta
 mayusculas o minusculas y se normaliza a mayusculas antes de consultar. Validos: `ES241100064` y
 `es241100064`. Invalidos: `EX241100064`, `ES24110A064`, `ES2411000640`.
@@ -48,7 +65,7 @@ Precedencia provisional de situacion: baja definitiva vigente; baja temporal vig
 
 ```bash
 curl --request GET \
-  --url 'https://<HOST>/SIGIE/v1/estudiantes/ES241100064' \
+  --url 'https://<IP_SERVIDOR>/SIGIE/v1/estudiantes/ES241100064' \
   --user '<CLIENT_ID>:<CLIENT_SECRET>' \
   --header 'Accept: application/json' \
   --header 'X-Request-ID: <REQUEST_ID>'
@@ -63,7 +80,9 @@ Todas las respuestas de error contienen `codigo`, `mensaje` y `folio_consulta`.
 {"codigo":"MATRICULA_INVALIDA","mensaje":"La matricula proporcionada no tiene un formato valido.","folio_consulta":"SIGIE-20260817-<UUID>"}
 // 401
 {"codigo":"NO_AUTORIZADO","mensaje":"La credencial de acceso esta ausente o no es valida.","folio_consulta":"SIGIE-20260817-<UUID>"}
-// 403
+// 403: host solicitado mediante dominio o autoridad invalida
+{"codigo":"ACCESO_SOLO_POR_IP","mensaje":"El servicio SIGIE requiere la IP del servidor en la URL.","folio_consulta":"SIGIE-20260929-<UUID>"}
+// 403: scope o IP de origen no autorizados
 {"codigo":"NO_AUTORIZADO","mensaje":"El consumidor no tiene autorizacion para consultar estudiantes.","folio_consulta":"SIGIE-20260817-<UUID>"}
 // 404
 {"codigo":"MATRICULA_NO_ENCONTRADA","mensaje":"No existe registro para la matricula proporcionada.","folio_consulta":"SIGIE-20260817-<UUID>"}
