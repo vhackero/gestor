@@ -1,5 +1,13 @@
 # Changelog SIGIE API
 
+## Optimizacion de consulta por estudiante - 2026-09-30
+
+- Los agregados de creditos, bajas e irregularidad se filtran por la matricula solicitada antes de agrupar.
+- Se conserva una sola consulta SQL, con parametros enlazados y las mismas reglas academicas.
+- Se mantiene el timeout predeterminado de 5000 ms y su variable SIGIE_API_QUERY_TIMEOUT_MS.
+- Se agrega una prueba de integracion optativa que compara las 15 columnas con la consulta anterior
+  en una base local, sin modificar datos ni indices.
+
 ## Restriccion de acceso por IP - 2026-09-29
 
 - Por solicitud expresa, SIGIE exige una IP literal en el host de la URL, sin lista de destinos ni parametro.
