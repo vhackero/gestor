@@ -109,15 +109,28 @@
 							<p:message for="clave" />
 						</div>
 						<div class="col-md-6">
-							<p:outputLabel for="valor"
+							<p:outputLabel rendered="#{not parametroSistemaBean.parametroColumnasHistorial}" for="valor"
 								value="#{sistema.obtenerTexto('gw.parametros.sistema.modal.etiqueta.valor')}:" />
 							<!-- Longitud de campo -->
-							<p:inputText id="valor" styleClass="form-control" required="true"
+							<p:inputText rendered="#{not parametroSistemaBean.parametroColumnasHistorial}" id="valor" styleClass="form-control" required="true"
 								maxlength="255"
 								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 								placeholder="#{sistema.obtenerTexto('gw.parametros.sistema.modal.etiqueta.valor')}"
 								value="#{parametroSistemaBean.parametro.valor}" />
 							<p:message for="valor" />
+                            <h:panelGroup layout="block" rendered="#{parametroSistemaBean.parametroColumnasHistorial}">
+                                <p:outputLabel for="columnasHistorial" value="Columnas visibles del historial académico" />
+                                <p:selectManyCheckbox id="columnasHistorial"
+                                    value="#{parametroSistemaBean.columnasHistorialSeleccionadas}"
+                                    layout="grid" columns="1" required="true"
+                                    requiredMessage="Seleccione al menos una columna.">
+                                    <f:selectItems value="#{parametroSistemaBean.columnasHistorialDisponibles}"
+                                        var="columna" itemValue="#{columna.clave}" itemLabel="#{columna.etiqueta}" />
+                                </p:selectManyCheckbox>
+                                <p:message for="columnasHistorial" />
+                                <h:outputText value="Aplica al estudiante, al gestor y al PDF. Los cambios se reflejan al volver a consultar el historial."
+                                    styleClass="help-block" />
+                            </h:panelGroup>
 							<h:outputText rendered="#{parametroSistemaBean.parametro.clave eq 'TIPOS_BAJA_NP_ACTA'}"
 								value="IDs de tipos de baja separados por comas (ejemplo: 1,2,7,8). Aplica a NP en actas, historial, constancias y malla curricular."
 								styleClass="help-block" />

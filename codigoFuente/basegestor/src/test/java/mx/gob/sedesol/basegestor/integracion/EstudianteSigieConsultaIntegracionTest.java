@@ -17,7 +17,8 @@ import org.mockito.ArgumentCaptor;
 import mx.gob.sedesol.basegestor.model.repositories.integracion.EstudianteSigieRepositoryImpl;
 
 /**
- * Regresion optativa contra una copia local de datos: solo SELECT.
+ * Regresion optativa contra una copia local de datos. Solo SELECT sobre tablas persistentes;
+ * la prueba de respaldo crea una tabla temporal de SIGE exclusiva de su conexion.
  * Propiedades: sigie.test.jdbc.url, sigie.test.jdbc.user, sigie.test.jdbc.password
  * y, opcionalmente, sigie.test.matricula para reproducir un caso reportado.
  */
@@ -74,6 +75,60 @@ public class EstudianteSigieConsultaIntegracionTest {
                         caso.getKey(), obtenido.size(), msAnterior, msOptimizada);
             }
             conexion.rollback();
+        }
+    }
+
+    @Test
+    public void usaUsuarioYPlanCuandoNoExisteRegistroSige() throws Exception {
+        String url = System.getProperty("sigie.test.jdbc.url");
+        assumeTrue("Requiere base local de pruebas", url != null && !url.isEmpty());
+        Class.forName("com.mysql.jdbc.Driver");
+        try (Connection cn = DriverManager.getConnection(url,
+                System.getProperty("sigie.test.jdbc.user", ""),
+                System.getProperty("sigie.test.jdbc.password", ""))) {
+            String usuario;
+            String nombrePlan;
+            try (Statement st = cn.createStatement();
+                    ResultSet rs = st.executeQuery("SELECT p.sso_idUsuario, pl.nombre FROM tbl_persona p "
+                    + "JOIN tbl_persona_aspirante a ON a.id_persona=p.id_persona "
+                    + "AND a.id_persona_aspirante=(SELECT MAX(a2.id_persona_aspirante) "
+                    + "FROM tbl_persona_aspirante a2 WHERE a2.id_persona=p.id_persona) "
+                    + "JOIN tbl_planes pl ON pl.id_plan=a.id_plan "
+                    + "WHERE p.sso_idUsuario IS NOT NULL AND pl.nombre IS NOT NULL LIMIT 1")) {
+                assertTrue("Falta estudiante con plan para la prueba", rs.next());
+                usuario = rs.getString(1);
+                nombrePlan = rs.getString(2);
+            }
+            String sql = obtenerConsultaActual();
+            List<List<String>> original = ejecutar(cn, sql, usuario, 5);
+            assertEquals(1, original.size());
+            // Sombrea SIGE solo en esta conexion; no modifica la tabla persistente.
+            try (Statement st = cn.createStatement()) {
+                st.execute("CREATE TEMPORARY TABLE tbl_persona_sige ("
+                        + "matricula_sige VARCHAR(255), programa_educativo_sige VARCHAR(255))");
+            }
+            List<List<String>> sinSige = ejecutar(cn, sql, usuario, 5);
+            assertEquals(1, sinSige.size());
+            assertEquals(usuario, sinSige.get(0).get(0));
+            assertEquals(nombrePlan, sinSige.get(0).get(6));
+            for (int i = 0; i < 15; i++) {
+                if (i != 0 && i != 6) {
+                    assertEquals("Cambio inesperado en columna " + i,
+                            original.get(0).get(i), sinSige.get(0).get(i));
+                }
+            }
+            try (PreparedStatement st = cn.prepareStatement(
+                    "INSERT INTO tbl_persona_sige VALUES (?, ?)")) {
+                st.setString(1, usuario);
+                st.setString(2, "PROGRAMA DE PRUEBA SIGE");
+                st.executeUpdate();
+            }
+            List<List<String>> conSige = ejecutar(cn, sql, usuario, 5);
+            assertEquals(1, conSige.size());
+            assertEquals(usuario, conSige.get(0).get(0));
+            assertEquals("PROGRAMA DE PRUEBA SIGE", conSige.get(0).get(6));
+            assertTrue(ejecutar(cn, sql, "__SIGIE_NO_EXISTE__", 5).isEmpty());
+            // La tabla temporal desaparece al cerrar la conexion.
         }
     }
 

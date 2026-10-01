@@ -148,7 +148,8 @@ public class BajasNpConfigurablesTest {
         inyectar(servicio, "parametroSistemaService", mock(ParametroSistemaService.class));
         RelGrupoParticipante primero = participante(10, 60.0);
         RelGrupoParticipante segundo = participante(20, 90.0);
-        when(repo.getParticipanteByActaCerradaYconstancia(100L)).thenReturn(Arrays.asList(primero, segundo));
+        RelGrupoParticipante tercero = participante(30, null);
+        when(repo.getParticipanteByActaCerradaYconstancia(100L)).thenReturn(Arrays.asList(primero, segundo, tercero));
         when(historial.getParticipanteByActaCerradaYconstancia2("100")).thenReturn(Collections.<HistorialAcademicoListaDTO>emptyList());
         TiraMateriaBaja2DTO baja = new TiraMateriaBaja2DTO();
         baja.setIdGrupo(10);
@@ -157,6 +158,8 @@ public class BajasNpConfigurablesTest {
         assertEquals(Double.valueOf(666), eventos.get(0).getCalificacionFinal());
         assertEquals("NP", eventos.get(0).getCalificacion());
         assertEquals(Double.valueOf(90), eventos.get(1).getCalificacionFinal());
+        assertNull(eventos.get(2).getCalificacionFinal());
+        assertEquals("", eventos.get(2).getCalificacionFinalTexto());
         verify(primero, never()).setCalifFinal(anyDouble());
         verify(segundo, never()).setCalifFinal(anyDouble());
     }
@@ -174,7 +177,7 @@ public class BajasNpConfigurablesTest {
         return dto;
     }
 
-    private RelGrupoParticipante participante(int idGrupo, double nota) {
+    private RelGrupoParticipante participante(int idGrupo, Double nota) {
         RelGrupoParticipante gp = mock(RelGrupoParticipante.class, RETURNS_DEEP_STUBS);
         when(gp.getGrupo().getIdGrupo()).thenReturn(idGrupo);
         when(gp.getCalifFinal()).thenReturn(nota);

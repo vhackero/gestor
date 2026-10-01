@@ -21,11 +21,11 @@ public class EstudianteSigieRepositoryImpl implements EstudianteSigieRepository 
     @SuppressWarnings("unchecked")
     public Optional<EstudianteSigieConsultaDTO> consultarPorMatricula(String matricula) {
         // Acotar cada agregado por matricula antes de agrupar evita recorrer otros estudiantes.
-        String sql = "SELECT ps.matricula_sige AS matricula, p.sso_nombre AS nombre, "
+        String sql = "SELECT COALESCE(ps.matricula_sige, p.sso_idUsuario) AS matricula, p.sso_nombre AS nombre, "
                 + "p.sso_apellidoPaterno AS primer_apellido, "
                 + "p.sso_apellidoMaterno AS segundo_apellido, p.sso_curp AS curp, "
                 + "plan.identificador AS clave_programa, "
-                + "ps.programa_educativo_sige AS nombre_programa, nivel.nombre AS nivel, "
+                + "COALESCE(ps.programa_educativo_sige, plan.nombre) AS nombre_programa, nivel.nombre AS nivel, "
                 + "plan.identificador AS identificador_plan, "
                 + "creditos.total_creditos AS creditos_totales, "
                 + "COALESCE(aprobados.creditos_cubiertos, 0) AS creditos_cubiertos, "
@@ -36,7 +36,7 @@ public class EstudianteSigieRepositoryImpl implements EstudianteSigieRepository 
                 + "COALESCE(bajas.prioridad_baja, 0) AS prioridad_baja, "
                 + "COALESCE(irregulares.tiene_reprobada, 0) AS tiene_reprobada "
                 + "FROM tbl_persona p "
-                + "INNER JOIN tbl_persona_sige ps ON ps.matricula_sige = p.sso_idUsuario "
+                + "LEFT JOIN tbl_persona_sige ps ON ps.matricula_sige = p.sso_idUsuario "
                 + "INNER JOIN tbl_persona_aspirante aspirante ON aspirante.id_persona = p.id_persona "
                 + " AND aspirante.id_persona_aspirante = (SELECT MAX(a2.id_persona_aspirante) "
                 + " FROM tbl_persona_aspirante a2 WHERE a2.id_persona = p.id_persona) "

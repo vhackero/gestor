@@ -1,6 +1,8 @@
 package mx.gob.sedesol.gestorweb.beans.administracion;
 
 import java.util.Date;
+import java.util.ArrayList;
+import mx.gob.sedesol.basegestor.commons.utils.ColumnasHistorial;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -41,6 +43,7 @@ public class ParametroSistemaBean extends BaseBean {
 	private ParametroSistemaDTO parametroModificar;
 
 	private boolean nuevo;
+	private List<String> columnasHistorialSeleccionadas = new ArrayList<>();
 
 	private transient ModelMapper modelMapper = new ModelMapper();
 
@@ -60,6 +63,12 @@ public class ParametroSistemaBean extends BaseBean {
 		parametro.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
 		parametro.setFechaActualizacion(new Date());
 
+		if (isParametroColumnasHistorial()) {
+			columnasHistorialSeleccionadas = new ArrayList<>();
+			for (ColumnasHistorial columna : ColumnasHistorial.leer(parametro.getValor())) {
+				columnasHistorialSeleccionadas.add(columna.getClave());
+			}
+		}
 		setNuevo(false);
 	}
 
@@ -72,7 +81,18 @@ public class ParametroSistemaBean extends BaseBean {
 		return true;
 	}
 
+	public boolean isParametroColumnasHistorial() {
+		return parametro != null && ColumnasHistorial.PARAMETRO.equals(parametro.getClave());
+	}
+
+	public ColumnasHistorial[] getColumnasHistorialDisponibles() { return ColumnasHistorial.values(); }
+	public List<String> getColumnasHistorialSeleccionadas() { return columnasHistorialSeleccionadas; }
+	public void setColumnasHistorialSeleccionadas(List<String> columnas) { columnasHistorialSeleccionadas = columnas; }
+
 	public void guardarParametro() {
+		if (isParametroColumnasHistorial()) {
+			parametro.setValor(ColumnasHistorial.serializar(columnasHistorialSeleccionadas));
+		}
 		ResultadoDTO<ParametroSistemaDTO> resultado;
 		if (isNuevo()) {
 			if (buscarClave(parametro, parametros)) {

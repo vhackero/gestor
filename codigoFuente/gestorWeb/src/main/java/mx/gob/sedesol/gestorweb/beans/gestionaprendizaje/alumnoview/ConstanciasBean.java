@@ -27,6 +27,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoD
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
+import mx.gob.sedesol.basegestor.commons.utils.ColumnasHistorial;
 import mx.gob.sedesol.basegestor.commons.utils.DateUtils;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
@@ -43,6 +44,7 @@ import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.TrayectoriaAcademicaCon
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.dto.ReporteConfig;
 import mx.gob.sedesol.gestorweb.commons.dto.UsuarioSessionDTO;
+import mx.gob.sedesol.gestorweb.commons.utils.HistorialAcademicoReporte;
 import mx.gob.sedesol.gestorweb.commons.utils.ReporteUtil;
 import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
 
@@ -87,6 +89,7 @@ public class ConstanciasBean extends BaseBean {
 	private FichaIntegralCasoDTO fichaIntegralV2;
 	private boolean intentoCargaFichaIntegralV2;
 	private boolean vistaGestor;
+	private List<ColumnasHistorial> columnasHistorial = ColumnasHistorial.leer(null);
 	private String nombrePersonaObjetivo;
 	private String matriculaPersonaObjetivo;
 
@@ -100,6 +103,7 @@ public class ConstanciasBean extends BaseBean {
 
 	@PostConstruct
 	public void init() {
+		cargarColumnasHistorial();
 		idPersona = trayectoriaAcademicaContextoBean.resolverIdPersonaObjetivo(getUsuarioEnSession().getIdPersona());
 		vistaGestor = trayectoriaAcademicaContextoBean.isVistaGestor();
 		nombrePersonaObjetivo = trayectoriaAcademicaContextoBean.resolverNombreObjetivo(getUsuarioEnSession().getUsuario());
@@ -189,21 +193,18 @@ public class ConstanciasBean extends BaseBean {
 	}
 	
 
-	public void generarReporte() {
+	private void cargarColumnasHistorial() {
+		columnasHistorial = ColumnasHistorial.leer(parametrosSistemaService.obtenerParametro(ColumnasHistorial.PARAMETRO));
+	}
 
-		String rutaFondoConstancia = FacesContext.getCurrentInstance().getExternalContext().getRequestScheme() + "://"
-				+ FacesContext.getCurrentInstance().getExternalContext().getRequestServerName() + ":"
-				+ FacesContext.getCurrentInstance().getExternalContext().getRequestServerPort()
-				+ "/recursos/documentos/fondoConstancia.png";
+	public boolean columnaVisible(String clave) {
+		return columnasHistorial.contains(ColumnasHistorial.valueOf(clave));
+	}
+
+	public void generarReporte() {
+		cargarColumnasHistorial();
 
 		reportePDF = null;
-
-		ReporteConfig reporteConfig = new ReporteConfig();
-		reporteConfig.setDatos(null);
-		reporteConfig.setNombreReporte("Plantilla_SISI");
-		reporteConfig.setPathJasper("/resources/jasperReport/gestionAprendizaje/expediente_academico.jasper");
-
-		reporteConfig.setTipoReporte(ReporteUtil.REPORTE_PDF);
 
 		HashMap<String, Object> params = new HashMap<>();
 		
@@ -254,10 +255,17 @@ public class ConstanciasBean extends BaseBean {
 		JRBeanArrayDataSource dsHistorial = new JRBeanArrayDataSource(eventos.toArray());
 		params.put("dsHistorial", dsHistorial);
 		
-		reporteConfig.setParametros(params);
 
-		setReportePDF(ReporteUtil.getStreamedContentOfBytes(ReporteUtil.generar(reporteConfig), "application/pdf",
-				historialAcademico.getMatricula()+"_Historial_academico"));
+		try (InputStream plantilla = FacesContext.getCurrentInstance().getExternalContext()
+				.getResourceAsStream("/resources/jasperReport/gestionAprendizaje/expediente_academico.jrxml")) {
+			setReportePDF(ReporteUtil.getStreamedContentOfBytes(
+					HistorialAcademicoReporte.generar(plantilla, params, columnasHistorial), "application/pdf",
+					historialAcademico.getMatricula() + "_Historial_academico"));
+		} catch (Exception e) {
+			log.error("No fue posible generar el historial académico.", e);
+			agregarMsgError("No fue posible generar el historial académico.", null);
+			return;
+		}
 		RequestContext.getCurrentInstance().update("reporte");
 
 		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "GEN_EXP_ACA_PDF", "", requestActual(),

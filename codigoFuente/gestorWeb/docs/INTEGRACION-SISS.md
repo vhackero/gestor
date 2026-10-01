@@ -44,7 +44,8 @@ Enviar `Authorization: Basic <BASE64_CLIENT_ID_CLIENT_SECRET>`. El cliente debe 
 - `matricula`, `nombre`, `primer_apellido`, `curp`: obligatorios.
 - `segundo_apellido`: puede ser `null`.
 - `programa.clave`: `tbl_ficha_descriptiva_programa.cve_programa`, obligatorio.
-- `programa.nombre`: programa importado de SIGE; puede ser `null`.
+- `programa.nombre`: programa importado de SIGE; si no existe registro SIGE, se toma `tbl_planes.nombre` del plan asociado al ultimo registro de aspirante del usuario. Puede ser `null` si la fuente no tiene nombre.
+- El registro en `tbl_persona_sige` es opcional: sin el, `matricula` se obtiene de `tbl_persona.sso_idUsuario`. Se requiere que el usuario tenga un plan asociado.
 - `programa.nivel`: nivel del plan; puede ser `null`.
 - `programa.plan_estudios`: primer año de cuatro digitos en `tbl_planes.identificador`; puede ser `null`.
 - `avance.creditos_totales` y `creditos_cubiertos`: obligatorios.
