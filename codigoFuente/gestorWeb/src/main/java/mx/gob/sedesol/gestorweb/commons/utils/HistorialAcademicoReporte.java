@@ -26,13 +26,18 @@ public final class HistorialAcademicoReporte {
     private HistorialAcademicoReporte() { }
 
     public static byte[] generar(InputStream plantilla, Map<String, Object> parametros,
-            List<ColumnasHistorial> columnas) throws Exception {
-        JasperReport reporte = compilar(plantilla, columnas);
+            List<ColumnasHistorial> columnas, Map<String, String> cabeceras) throws Exception {
+        JasperReport reporte = compilar(plantilla, columnas, cabeceras);
         JasperPrint impresion = JasperFillManager.fillReport(reporte, parametros, new JREmptyDataSource(1));
         return JasperExportManager.exportReportToPdf(impresion);
     }
 
     public static JasperReport compilar(InputStream plantilla, List<ColumnasHistorial> columnas) throws Exception {
+        return compilar(plantilla, columnas, java.util.Collections.<String, String>emptyMap());
+    }
+
+    public static JasperReport compilar(InputStream plantilla, List<ColumnasHistorial> columnas,
+            Map<String, String> cabeceras) throws Exception {
         if (plantilla == null) throw new IllegalArgumentException("No se encontro la plantilla del historial.");
         if (columnas == null || columnas.isEmpty()) throw new IllegalArgumentException(ColumnasHistorial.ERROR);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -96,9 +101,16 @@ public final class HistorialAcademicoReporte {
             Element fuente = doc.createElementNS(JR, "font");
             fuente.setAttribute("size", "8");
             texto.appendChild(fuente);
-            String titulo = columna == ColumnasHistorial.ESTRUCTURA ? "$P{NOMBRE_ESTRUCTURA}"
-                    : "\"" + columna.getEtiqueta() + "\"";
-            cabecera.getElementsByTagNameNS(JR, "textFieldExpression").item(0).setTextContent(titulo);
+            // El texto editable es contenido XML, nunca una expresion Java.
+            Element anterior = (Element) cabecera.getElementsByTagNameNS(JR, "textField").item(0);
+            Element estatico = doc.createElementNS(JR, "staticText");
+            estatico.appendChild(anterior.getElementsByTagNameNS(JR, "reportElement").item(0).cloneNode(true));
+            estatico.appendChild(anterior.getElementsByTagNameNS(JR, "textElement").item(0).cloneNode(true));
+            Element etiqueta = doc.createElementNS(JR, "text");
+            etiqueta.setTextContent(cabeceras.containsKey(columna.getClave())
+                    ? cabeceras.get(columna.getClave()) : columna.getEtiqueta());
+            estatico.appendChild(etiqueta);
+            cabecera.replaceChild(estatico, anterior);
             String expresion = "$F{" + campo + "}";
             if (columna == ColumnasHistorial.FECHA) {
                 expresion = "$F{fecha} == null ? \"\" : new java.text.SimpleDateFormat(\"dd/MM/yyyy\").format($F{fecha})";

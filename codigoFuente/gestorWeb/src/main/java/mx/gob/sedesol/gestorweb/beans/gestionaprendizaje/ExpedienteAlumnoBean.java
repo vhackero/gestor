@@ -17,6 +17,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
+import mx.gob.sedesol.gestorweb.sistema.SistemaBean;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -37,6 +38,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistente
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvidenciaCasoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.DateUtils;
+import mx.gob.sedesol.basegestor.commons.utils.ColumnasHistorial;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoDocumentoEnum;
@@ -55,6 +57,7 @@ import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview.ConstanciasB
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.dto.ReporteConfig;
 import mx.gob.sedesol.gestorweb.commons.utils.ReporteUtil;
+import mx.gob.sedesol.gestorweb.commons.utils.HistorialAcademicoReporte;
 import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
 
 @SessionScoped
@@ -67,6 +70,12 @@ public class ExpedienteAlumnoBean extends BaseBean {
 
 	@ManagedProperty(value = "#{grupoParticipanteService}")
 	private GrupoParticipanteService grupoParticipanteService;
+
+	@ManagedProperty(value = "#{sistema}")
+	private SistemaBean sistema;
+
+	public SistemaBean getSistema() { return sistema; }
+	public void setSistema(SistemaBean sistema) { this.sistema = sistema; }
 
 	@ManagedProperty(value = "#{parametroSistemaService}")
 	private ParametroSistemaService parametrosSistemaService;
@@ -638,20 +647,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 	}
 
 	public void generarReporte() {
-
-		String rutaFondoConstancia = FacesContext.getCurrentInstance().getExternalContext().getRequestScheme() + "://"
-				+ FacesContext.getCurrentInstance().getExternalContext().getRequestServerName() + ":"
-				+ FacesContext.getCurrentInstance().getExternalContext().getRequestServerPort()
-				+ "/recursos/documentos/fondoConstancia.png";
-
 		reportePDF = null;
-
-		ReporteConfig reporteConfig = new ReporteConfig();
-		reporteConfig.setDatos(null);
-		reporteConfig.setNombreReporte("Plantilla_SISI");
-		reporteConfig.setPathJasper("/resources/jasperReport/gestionAprendizaje/expediente_academico.jasper");
-
-		reporteConfig.setTipoReporte(ReporteUtil.REPORTE_PDF);
 
 		HashMap<String, Object> params = new HashMap<>();
 		
@@ -702,10 +698,18 @@ public class ExpedienteAlumnoBean extends BaseBean {
 		JRBeanArrayDataSource dsHistorial = new JRBeanArrayDataSource(listaEventos.toArray());
 		params.put("dsHistorial", dsHistorial);
 		
-		reporteConfig.setParametros(params);
-
-		setReportePDF(ReporteUtil.getStreamedContentOfBytes(ReporteUtil.generar(reporteConfig), "application/pdf",
-				historial.getMatricula()+"_Historial_academico"));
+		try (InputStream plantilla = FacesContext.getCurrentInstance().getExternalContext()
+				.getResourceAsStream("/resources/jasperReport/gestionAprendizaje/expediente_academico.jrxml")) {
+			List<ColumnasHistorial> columnas = ColumnasHistorial.leer(
+					parametrosSistemaService.obtenerParametro(ColumnasHistorial.PARAMETRO));
+			setReportePDF(ReporteUtil.getStreamedContentOfBytes(
+					HistorialAcademicoReporte.generar(plantilla, params, columnas, sistema.getCabecerasHistorial()), "application/pdf",
+					historial.getMatricula() + "_Historial_academico"));
+		} catch (Exception e) {
+			log.error("No fue posible generar el historial académico del estudiante consultado.", e);
+			agregarMsgError("No fue posible generar el historial académico.", null);
+			return;
+		}
 		RequestContext.getCurrentInstance().update("reporte");
 
 		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "GEN_EXP_ACA_PDF", "", requestActual(),

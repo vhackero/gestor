@@ -11,6 +11,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
+import mx.gob.sedesol.gestorweb.sistema.SistemaBean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -63,6 +64,12 @@ public class ConstanciasBean extends BaseBean {
 
 	@ManagedProperty(value = "#{plantillaService}")
 	private PlantillaService plantillaService;
+
+	@ManagedProperty(value = "#{sistema}")
+	private SistemaBean sistema;
+
+	public SistemaBean getSistema() { return sistema; }
+	public void setSistema(SistemaBean sistema) { this.sistema = sistema; }
 
 	@ManagedProperty(value = "#{parametroSistemaService}")
 	private ParametroSistemaService parametrosSistemaService;
@@ -259,7 +266,7 @@ public class ConstanciasBean extends BaseBean {
 		try (InputStream plantilla = FacesContext.getCurrentInstance().getExternalContext()
 				.getResourceAsStream("/resources/jasperReport/gestionAprendizaje/expediente_academico.jrxml")) {
 			setReportePDF(ReporteUtil.getStreamedContentOfBytes(
-					HistorialAcademicoReporte.generar(plantilla, params, columnasHistorial), "application/pdf",
+					HistorialAcademicoReporte.generar(plantilla, params, columnasHistorial, sistema.getCabecerasHistorial()), "application/pdf",
 					historialAcademico.getMatricula() + "_Historial_academico"));
 		} catch (Exception e) {
 			log.error("No fue posible generar el historial académico.", e);

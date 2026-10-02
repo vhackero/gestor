@@ -256,57 +256,57 @@
 										placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
 								</p:outputPanel>
 							</f:facet>
-							<p:column rendered="#{constanciasBean.columnaVisible('ASIGNATURA')}" headerText="Nombre de la asignatura"
+							<p:column rendered="#{constanciasBean.columnaVisible('ASIGNATURA')}" headerText="#{sistema.obtenerCabeceraHistorial('ASIGNATURA')}"
 								sortBy="#{evento.nombreEc}" filterMatchMode="contains"
 								filterBy="#{evento.nombreEc}" filterStyle="display:none">
 								<h:outputText value="#{evento.nombreEc}" />
 							</p:column>
-							<p:column rendered="#{constanciasBean.columnaVisible('GRUPO')}" headerText="Nombre del Grupo"
+							<p:column rendered="#{constanciasBean.columnaVisible('GRUPO')}" headerText="#{sistema.obtenerCabeceraHistorial('GRUPO')}"
 								sortBy="#{evento.nombreGrupo}" filterMatchMode="contains"
 								filterBy="#{evento.nombreGrupo}" filterStyle="display:none">
 								<h:outputText value="#{evento.nombreGrupo}" />
 							</p:column>
-							<p:column rendered="#{constanciasBean.columnaVisible('ESTRUCTURA')}" headerText="#{constanciasBean.historialAcademico.nombreEstructura}" sortBy="#{evento.cs}"
+							<p:column rendered="#{constanciasBean.columnaVisible('ESTRUCTURA')}" headerText="#{sistema.obtenerCabeceraHistorial('ESTRUCTURA')}" sortBy="#{evento.cs}"
 								filterMatchMode="contains" filterBy="#{evento.cs}"
 								filterStyle="display:none">
 								<h:outputText value="#{evento.cs}" />
 							</p:column>
-							<p:column rendered="#{constanciasBean.columnaVisible('CLAVE')}" headerText="clave" sortBy="#{evento.clave}"
+							<p:column rendered="#{constanciasBean.columnaVisible('CLAVE')}" headerText="#{sistema.obtenerCabeceraHistorial('CLAVE')}" sortBy="#{evento.clave}"
 								filterMatchMode="contains" filterBy="#{evento.clave}"
 								filterStyle="display:none">
 								<h:outputText value="#{evento.clave}" />
 							</p:column>
-							<p:column rendered="#{constanciasBean.columnaVisible('CLAVE_SEP')}" headerText="Clave SEP" sortBy="#{evento.clavesep}"
+							<p:column rendered="#{constanciasBean.columnaVisible('CLAVE_SEP')}" headerText="#{sistema.obtenerCabeceraHistorial('CLAVE_SEP')}" sortBy="#{evento.clavesep}"
 								filterMatchMode="contains" filterBy="#{evento.clavesep}"
 								filterStyle="display:none">
 								<h:outputText value="#{evento.clavesep}" />
 							</p:column>
-							<p:column rendered="#{constanciasBean.columnaVisible('CREDITOS')}" headerText="Créditos" sortBy="#{evento.creditos}"
+							<p:column rendered="#{constanciasBean.columnaVisible('CREDITOS')}" headerText="#{sistema.obtenerCabeceraHistorial('CREDITOS')}" sortBy="#{evento.creditos}"
 								filterMatchMode="contains" filterBy="#{evento.creditos}"
 								filterStyle="display:none">
 								<h:outputText value="#{evento.creditos}" />
 							</p:column>
-							<p:column rendered="#{constanciasBean.columnaVisible('PERIODO')}" headerText="Periodo" sortBy="#{evento.periodo}"
+							<p:column rendered="#{constanciasBean.columnaVisible('PERIODO')}" headerText="#{sistema.obtenerCabeceraHistorial('PERIODO')}" sortBy="#{evento.periodo}"
 								filterMatchMode="contains" filterBy="#{evento.periodo}"
 								filterStyle="display:none">
 								<h:outputText value="#{evento.periodo}" />
 							</p:column>
-							<p:column rendered="#{constanciasBean.columnaVisible('TIPO_EVALUACION')}" headerText="Tipo de evaluacion"
+							<p:column rendered="#{constanciasBean.columnaVisible('TIPO_EVALUACION')}" headerText="#{sistema.obtenerCabeceraHistorial('TIPO_EVALUACION')}"
 								sortBy="#{evento.tipoEvaluacion}" filterMatchMode="contains"
 								filterBy="#{evento.tipoEvaluacion}" filterStyle="display:none">
 								<h:outputText value="#{evento.tipoEvaluacion}" />
 							</p:column>
-								<p:column rendered="#{constanciasBean.columnaVisible('ACTA')}" headerText="#{sistema.obtenerTexto('gw.alumno.constancias.noActa')}" sortBy="#{evento.nActa}"
+								<p:column rendered="#{constanciasBean.columnaVisible('ACTA')}" headerText="#{sistema.obtenerCabeceraHistorial('ACTA')}" sortBy="#{evento.nActa}"
 									filterMatchMode="contains" filterBy="#{evento.nActa}"
 									filterStyle="display:none">
 									<h:outputText value="#{evento.nActa}" />
 								</p:column>
-								<p:column rendered="#{constanciasBean.columnaVisible('MODALIDAD')}" headerText="#{sistema.obtenerTexto('gw.alumno.constancias.modalidad')}" sortBy="#{evento.modalidad}"
+								<p:column rendered="#{constanciasBean.columnaVisible('MODALIDAD')}" headerText="#{sistema.obtenerCabeceraHistorial('MODALIDAD')}" sortBy="#{evento.modalidad}"
 									filterMatchMode="contains" filterBy="#{evento.modalidad}"
 									filterStyle="display:none">
 									<h:outputText value="#{evento.modalidad}" />
 								</p:column>
-								<p:column rendered="#{constanciasBean.columnaVisible('FECHA')}" headerText="#{sistema.obtenerTexto('gw.alumno.constancias.fechaFinalizacion')}"
+								<p:column rendered="#{constanciasBean.columnaVisible('FECHA')}" headerText="#{sistema.obtenerCabeceraHistorial('FECHA')}"
 									sortBy="#{evento.fecha}" filterMatchMode="contains"
 									filterBy="#{evento.fecha}" filterStyle="display:none">
 								<h:outputText value="#{evento.fecha}">
@@ -314,7 +314,7 @@
 										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
 								</h:outputText>
 							</p:column>
-								<p:column rendered="#{constanciasBean.columnaVisible('ENCUESTA')}" headerText="#{sistema.obtenerTexto('gw.alumno.constancias.encuestaFinal')}"
+								<p:column rendered="#{constanciasBean.columnaVisible('ENCUESTA')}" headerText="#{sistema.obtenerCabeceraHistorial('ENCUESTA')}"
 									sortBy="#{evento.nombreEstatusEncuesta}"
 									filterMatchMode="contains"
 									filterBy="#{evento.nombreEstatusEncuesta}"
@@ -325,7 +325,7 @@
 									rendered="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
 										value="#{sistema.obtenerTexto('gw.alumno.constancias.encuestaPendiente')}" />
 							</p:column>
-								<p:column rendered="#{constanciasBean.columnaVisible('PROMEDIO')}" headerText="#{sistema.obtenerTexto('gw.alumno.constancias.promedioEvaluaciones')}"
+								<p:column rendered="#{constanciasBean.columnaVisible('PROMEDIO')}" headerText="#{sistema.obtenerCabeceraHistorial('PROMEDIO')}"
 									sortBy="#{evento.nombreEstatusEncuesta}"
 									filterMatchMode="contains"
 									filterBy="#{evento.calificacionTotal}"
@@ -333,7 +333,7 @@
 									<h:outputText
 										value="#{evento.modalidad eq 'En línea' ? sistema.obtenerTexto('gw.alumno.constancias.noAplica') : evento.calificacionTotal}" />
 								</p:column>
-								<p:column rendered="#{constanciasBean.columnaVisible('ASISTENCIA')}" headerText="#{sistema.obtenerTexto('gw.alumno.constancias.porcentajeAsistencias')}"
+								<p:column rendered="#{constanciasBean.columnaVisible('ASISTENCIA')}" headerText="#{sistema.obtenerCabeceraHistorial('ASISTENCIA')}"
 									sortBy="#{evento.porcentajeAsistencia}"
 									filterMatchMode="contains"
 									filterBy="#{evento.porcentajeAsistencia}"
@@ -341,7 +341,7 @@
 									<h:outputText
 										value="#{evento.modalidad eq 'En línea' ? sistema.obtenerTexto('gw.alumno.constancias.noAplica') : evento.porcentajeAsistencia}" />
 								</p:column>
-								<p:column rendered="#{constanciasBean.columnaVisible('CALIFICACION')}" headerText="#{sistema.obtenerTexto('gw.alumno.constancias.calificacionFinal')}"
+								<p:column rendered="#{constanciasBean.columnaVisible('CALIFICACION')}" headerText="#{sistema.obtenerCabeceraHistorial('CALIFICACION')}"
 									sortBy="#{evento.calificacionFinal}" filterMatchMode="contains"
 									filterBy="#{evento.calificacionFinal}"
 									filterStyle="display:none">
@@ -349,7 +349,7 @@
 								<h:outputText
 									value="#{evento.calificacionFinalTexto}" />
 							</p:column>
-							<p:column headerText="Constancias" styleClass="text-center">
+							<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.col.constancias')}" styleClass="text-center">
 								<p:commandButton action="#{constanciasBean.generarConstancia}"
 									ajax="true" id="btn1"
 									disabled="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"

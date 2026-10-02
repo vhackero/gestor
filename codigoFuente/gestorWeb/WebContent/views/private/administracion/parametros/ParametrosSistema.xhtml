@@ -125,7 +125,7 @@
                                     layout="grid" columns="1" required="true"
                                     requiredMessage="Seleccione al menos una columna.">
                                     <f:selectItems value="#{parametroSistemaBean.columnasHistorialDisponibles}"
-                                        var="columna" itemValue="#{columna.clave}" itemLabel="#{columna.etiqueta}" />
+                                        var="columna" itemValue="#{columna.clave}" itemLabel="#{sistema.obtenerCabeceraHistorial(columna.clave)}" />
                                 </p:selectManyCheckbox>
                                 <p:message for="columnasHistorial" />
                                 <h:outputText value="Aplica al estudiante, al gestor y al PDF. Los cambios se reflejan al volver a consultar el historial."
