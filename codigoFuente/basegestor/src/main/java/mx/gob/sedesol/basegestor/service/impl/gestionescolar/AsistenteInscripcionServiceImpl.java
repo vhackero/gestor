@@ -36,6 +36,9 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelacionSeriacionDTO
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ResultadoSimulacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RiesgoAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ConfiguracionEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.inscripcion.InscripcionPreviaMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.MallaCurricularDTO;
@@ -46,6 +49,9 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNu
 import mx.gob.sedesol.basegestor.service.gestionescolar.AsistenteInscripcionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionFacade;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ConfiguracionEvaluacionCurricularV2Service;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ContextoEvaluacionCurricularV2Adapter;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.EvaluacionCurricularV2Service;
 import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.FichaDescProgramaService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService;
@@ -72,6 +78,15 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
     @Autowired
     private MallaCurricularService mallaCurricularService;
+
+    @Autowired
+    private ConfiguracionEvaluacionCurricularV2Service configuracionEvaluacionCurricularV2Service;
+
+    @Autowired
+    private ContextoEvaluacionCurricularV2Adapter contextoEvaluacionCurricularV2Adapter;
+
+    @Autowired
+    private EvaluacionCurricularV2Service evaluacionCurricularV2Service;
 
     @Override
     public AsistenteInscripcionContextoDTO obtenerContextoAsistido(Long idPersona) throws InscripcionException {
@@ -138,6 +153,31 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             throws InscripcionException {
         AsistenteInscripcionContextoDTO contexto = obtenerContextoAsistido(idPersona);
         return evaluarSeleccion(contexto, unidadesIds, true);
+    }
+
+    /**
+     * Punto de integración de FASE 0C. Se mantiene fuera de los flujos de UI y
+     * de inscripción: únicamente materializa una comparación de lectura.
+     */
+    @Override
+    public ResultadoEvaluacionCurricularV2DTO obtenerEvaluacionCurricularSombra(Long idPersona)
+            throws InscripcionException {
+        ConfiguracionEvaluacionCurricularV2DTO configuracion = configuracionEvaluacionCurricularV2Service
+                .obtenerConfiguracion();
+        ResultadoEvaluacionCurricularV2DTO resultado = new ResultadoEvaluacionCurricularV2DTO();
+        if (!Boolean.TRUE.equals(configuracion.getEvaluacionV2Habilitada())) {
+            resultado.getMensajes().add("La evaluación curricular V2 se encuentra deshabilitada por configuración.");
+            return resultado;
+        }
+        if (!Boolean.TRUE.equals(configuracion.getModoSombra())) {
+            resultado.getMensajes().add("La evaluación curricular V2 requiere modo sombra en FASE 0.");
+            return resultado;
+        }
+        AsistenteInscripcionContextoDTO contextoVigente = obtenerContextoAsistido(idPersona);
+        ContextoEvaluacionCurricularV2DTO contextoSombra = contextoEvaluacionCurricularV2Adapter
+                .construirDesdeAsistente(contextoVigente);
+        contextoSombra.setVersionReglas(configuracion.getVersionReglas());
+        return evaluacionCurricularV2Service.evaluarSombra(contextoSombra);
     }
 
     private void mapearResumenPeriodo(AsistenteInscripcionContextoDTO dto, InscripcionContextoDTO contextoBase) {
