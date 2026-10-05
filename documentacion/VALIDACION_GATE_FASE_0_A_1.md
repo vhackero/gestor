@@ -3,7 +3,7 @@
 **Fecha:** 2026-10-05
 **Rama:** `feature/reglas-negocio-pe2027`
 **Versión de reglas:** `PE2027-V1`
-**Resultado del gate:** **CONDICIONAL — no autoriza iniciar FASE 1 automáticamente.**
+**Resultado del gate:** **NO_APROBADO — no autoriza iniciar FASE 1.**
 
 ## 1. Control de versión
 
@@ -53,6 +53,26 @@ Los estados que FASE 0 puede normalizar sin aplicar reglas nuevas son: `ACREDITA
 
 ## 4. Comparación vigente contra sombra
 
+### Mecanismo E2E y resultado de ejecución
+
+La ruta real existe exclusivamente como método de servicio:
+`AsistenteInscripcionService.obtenerEvaluacionCurricularSombra(Long idPersona)`. La búsqueda en el repositorio no localizó una invocación desde vista, bean web, controlador o endpoint. El contexto de pruebas Maven disponible levanta una fuente H2 y no una fuente DEV/QA; utilizarlo habría sustituido el contexto principal por una infraestructura diferente y no cumpliría este gate.
+
+No se fabricaron datos ni se usaron mocks para sustituir el contexto real. Tampoco se invocó una reinscripción o validación productiva para intentar llegar indirectamente al servicio. Por esa razón, la cantidad de UD comparadas mediante el flujo completo solicitado es **0** y las diferencias E2E por categoría permanecen sin datos.
+
+| Categoría de diferencia | Cantidad E2E |
+|---|---:|
+| NORMALIZACION_ESPERADA | 0 |
+| DATOS_INSUFICIENTES | 0 |
+| DUPLICIDAD | 0 |
+| ESTADO | 0 |
+| CAUSA | 0 |
+| OFERTA | 0 |
+| SERIACION | 0 |
+| ERROR | 1 |
+
+**ERROR-01:** no existe un ejecutor de integración DEV/QA que obtenga un `AsistenteInscripcionContextoDTO` desde el contenedor SIGIE real y entregue el resultado sombra para inspección, sin conectar el resultado al flujo productivo.
+
 | Elemento requerido | Resultado | Observación verificable |
 |---|---|---|
 | Estado por UD | Parcial | F0-I-01 y F0-I-06 prueban la conversión en memoria. Aún no existe un ejecutor de gate que tome automáticamente estos expedientes del contexto de aplicación y persista/imprima el detalle por UD. |
@@ -69,6 +89,8 @@ La evidencia disponible confirma que FASE 0 no conecta el resultado V2 a las vis
 
 No se ejecutó una reinscripción real ni se modificó una selección de estudiante durante este gate. Por ello, la no afectación en UI y en operación real queda **parcialmente validada**: está respaldada por la ausencia de integración productiva y por pruebas aisladas, pero no por una sesión completa de aplicación con los cinco expedientes.
 
+Después de aplicar la migración DEV, las tres tablas de evaluación V2 permanecen en cero registros. La revisión de referencias de código localizó el método sombra sólo en su interfaz e implementación, sin consumidor web. Estos dos controles confirman que durante el gate no se derivó escritura V2 ni modificación de oferta, selección, carga, bloqueos o inscripción.
+
 ## 6. Conclusión y condición para abrir FASE 1
 
 La infraestructura FASE 0, la migración DEV y la suite de 14 pruebas están correctas. Sin embargo, el requisito de comparación real por expediente aún no puede declararse cumplido porque el motor sombra no tiene en FASE 0 un ejecutor de integración que:
@@ -78,4 +100,6 @@ La infraestructura FASE 0, la migración DEV y la suite de 14 pruebas están cor
 3. guarde o exponga el resultado por UD sin afectar flujos productivos;
 4. compare oferta, estado vigente y resultado sombra por cada caso.
 
-**Decisión del gate:** detenerse para revisión. No se inicia FASE 1 hasta autorizar un mecanismo de ejecución/consulta sombra de sólo lectura para esos cinco casos, o hasta aceptar formalmente que la validación de datos reales se ejecute en una fase posterior.
+**GATE_FASE_0_A_1 = NO_APROBADO**
+
+No se inicia FASE 1 hasta autorizar un mecanismo de ejecución/consulta sombra de sólo lectura para esos cinco casos, o hasta aceptar formalmente que la validación de datos reales se ejecute en una fase posterior.
