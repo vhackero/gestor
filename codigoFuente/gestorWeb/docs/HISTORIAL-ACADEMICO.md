@@ -14,11 +14,14 @@
 
 Ejecutar `codigoFuente/bd/R051_01102026_columnas_historial_academico.sql` en cada ambiente. El script no sobrescribe una selección existente; instalado en la base local `des_sisi_gestor` el 01/10/2026.
 
-En **Administración → Configuración → Parámetros del sistema**, editar **COLUMNAS_HISTORIAL_ACADEMICO**. Las casillas permiten mostrar u ocultar las 15 columnas de datos para estudiante, gestor y PDF. Se conserva el permiso existente de edición de parámetros.
+En **Administración → Configuración → Parámetros del sistema**, editar **COLUMNAS_HISTORIAL_ACADEMICO**. El selector permite mover las 15 columnas entre **Ocultas** y **Visibles (en este orden)**. La lista de visibles se ordena arrastrando o con los botones Subir, Bajar, Mover al principio y Mover al final. Guardar aplica la selección y el orden al estudiante, al gestor y al PDF. Se conserva el permiso existente de edición de parámetros.
 
 - Configuración global; se consulta al abrir/renderizar el historial y al imprimir.
 - Todas las columnas se muestran por defecto; se requiere al menos una.
-- El orden es el del catálogo compartido `ColumnasHistorial`; no se configura el orden.
+- El orden se guarda en el mismo parámetro `COLUMNAS_HISTORIAL_ACADEMICO`, como claves separadas por comas. Por ejemplo, `CALIFICACION,ASIGNATURA,GRUPO` presenta primero la calificación, después la asignatura y luego el grupo. No se requiere una migración adicional para ordenar.
+- Ambas vistas incluyen `columnasHistorial.xhtml`, que recorre la lista configurada. La impresión recorre esa misma lista en el mismo orden.
+- Los valores existentes se conservan y ahora se respeta el orden escrito en ellos. Las claves repetidas conservan su primera posición.
+- Al agregar una columna a Visibles se puede ubicar en la posición deseada antes de guardar; los botones de constancias siguen al final de la vista del estudiante.
 - Sin el parámetro se conservan todas las columnas. Valores vacíos o claves desconocidas se rechazan al guardar.
 - Los botones de constancias del estudiante son acciones, no columnas de datos del PDF; permanecen como antes.
 - El encabezado de datos generales no depende de la selección de columnas.
@@ -68,3 +71,5 @@ Las 15 cabeceras se resuelven desde **Administración → Personalización → E
 - Aplicar `codigoFuente/bd/R052_01102026_textos_cabeceras_historial.sql` en cada ambiente. Usa la entrada existente `gw.alumno.constancias.historial` como referencia de funcionalidad y usuario, y no sobrescribe claves existentes. Instalado en la base local.
 - Reconstruir basegestor y gestorWeb y desplegar el WAR. La ausencia de una clave usa la etiqueta predeterminada, para evitar mostrar identificadores internos.
 - Validación: compilación JDK 8 y 5 pruebas de generación real de PDF. Ambas acciones de impresión consultan un catálogo simulado con ediciones sucesivas, comillas, acentos y símbolos; se verifica el texto del PDF. Sin validación de navegador ni despliegue.
+
+- Verificación del orden (02/10/2026): compilación JDK 8 y 9 pruebas exitosas de lectura, guardado y generación de PDF. Se comprobaron órdenes invertidos en ambas rutas de impresión. Cuatro XHTML validados estructuralmente; arrastre pendiente de prueba en navegador tras desplegar.

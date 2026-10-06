@@ -108,7 +108,7 @@
 							</p:inputText>
 							<p:message for="clave" />
 						</div>
-						<div class="col-md-6">
+						<div class="#{parametroSistemaBean.parametroColumnasHistorial ? 'col-md-12' : 'col-md-6'}">
 							<p:outputLabel rendered="#{not parametroSistemaBean.parametroColumnasHistorial}" for="valor"
 								value="#{sistema.obtenerTexto('gw.parametros.sistema.modal.etiqueta.valor')}:" />
 							<!-- Longitud de campo -->
@@ -119,16 +119,21 @@
 								value="#{parametroSistemaBean.parametro.valor}" />
 							<p:message for="valor" />
                             <h:panelGroup layout="block" rendered="#{parametroSistemaBean.parametroColumnasHistorial}">
-                                <p:outputLabel for="columnasHistorial" value="Columnas visibles del historial académico" />
-                                <p:selectManyCheckbox id="columnasHistorial"
-                                    value="#{parametroSistemaBean.columnasHistorialSeleccionadas}"
-                                    layout="grid" columns="1" required="true"
-                                    requiredMessage="Seleccione al menos una columna.">
-                                    <f:selectItems value="#{parametroSistemaBean.columnasHistorialDisponibles}"
-                                        var="columna" itemValue="#{columna.clave}" itemLabel="#{sistema.obtenerCabeceraHistorial(columna.clave)}" />
-                                </p:selectManyCheckbox>
+                                <p:outputLabel for="columnasHistorial" value="Visibilidad y orden de columnas" />
+                                <p:pickList id="columnasHistorial"
+                                    value="#{parametroSistemaBean.columnasHistorialModelo}" var="columna"
+                                    itemValue="#{columna}" itemLabel="#{sistema.obtenerCabeceraHistorial(columna)}"
+                                    showTargetControls="true" responsive="true" required="true"
+                                    requiredMessage="Seleccione al menos una columna visible."
+                                    addLabel="Mostrar" addAllLabel="Mostrar todas"
+                                    removeLabel="Ocultar" removeAllLabel="Ocultar todas"
+                                    moveUpLabel="Subir" moveTopLabel="Mover al principio"
+                                    moveDownLabel="Bajar" moveBottomLabel="Mover al final">
+                                    <f:facet name="sourceCaption">Ocultas</f:facet>
+                                    <f:facet name="targetCaption">Visibles (en este orden)</f:facet>
+                                </p:pickList>
                                 <p:message for="columnasHistorial" />
-                                <h:outputText value="Aplica al estudiante, al gestor y al PDF. Los cambios se reflejan al volver a consultar el historial."
+                                <h:outputText value="Mueve las columnas entre Ocultas y Visibles. Arrastra las visibles o utiliza los botones para ordenarlas. Guarda para aplicar el mismo orden al estudiante, al gestor y al PDF."
                                     styleClass="help-block" />
                             </h:panelGroup>
 							<h:outputText rendered="#{parametroSistemaBean.parametro.clave eq 'TIPOS_BAJA_NP_ACTA'}"

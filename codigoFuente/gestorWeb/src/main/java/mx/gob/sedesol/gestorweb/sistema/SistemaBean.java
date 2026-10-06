@@ -62,9 +62,25 @@ public class SistemaBean implements Serializable {
 	}
 	
 	public String obtenerCabeceraHistorial(String claveColumna) {
-		ColumnasHistorial columna = ColumnasHistorial.valueOf(claveColumna);
+		if (claveColumna == null || claveColumna.trim().isEmpty()) return "";
+		ColumnasHistorial columna;
+		try {
+			columna = ColumnasHistorial.valueOf(claveColumna.trim());
+		} catch (IllegalArgumentException ex) {
+			return claveColumna;
+		}
 		String texto = textos.get(columna.getClaveTexto());
 		return texto != null ? texto : columna.getEtiqueta();
+	}
+
+	/** Resuelve la cabecera cuando p:columns entrega el enum completo. */
+	public String obtenerCabeceraHistorial(Object columna) {
+		if (columna instanceof ColumnasHistorial) {
+			ColumnasHistorial valor = (ColumnasHistorial) columna;
+			String texto = textos.get(valor.getClaveTexto());
+			return texto != null ? texto : valor.getEtiqueta();
+		}
+		return obtenerCabeceraHistorial(columna == null ? null : columna.toString());
 	}
 
 	public Map<String, String> getCabecerasHistorial() {

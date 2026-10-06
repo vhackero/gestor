@@ -70,7 +70,7 @@ public class ExpedienteAlumnoHistorialPdfTest {
             if (gestor) ((ExpedienteAlumnoBean) bean).setListaEventos(Arrays.asList(fila));
             else inyectar(bean, "eventos", Arrays.asList(fila));
 
-            when(parametros.obtenerParametro(ColumnasHistorial.PARAMETRO)).thenReturn("ASIGNATURA,GRUPO");
+            when(parametros.obtenerParametro(ColumnasHistorial.PARAMETRO)).thenReturn("GRUPO,ASIGNATURA");
             generar(bean);
             assertNotNull("Debe generar el PDF", contenido(bean));
             String primero = leerPdf(bean, "gestor-sin-calificacion.pdf");
@@ -79,12 +79,16 @@ public class ExpedienteAlumnoHistorialPdfTest {
             assertTrue(primero.contains("ASIGNATURA_CONSULTADA"));
             assertTrue("Falta la columna seleccionada de grupo", primero.contains("GRUPO_CONSULTADO"));
             assertFalse("Se imprimio una calificacion oculta", primero.contains("92.5"));
+            assertTrue("El PDF debe conservar Grupo antes de Asignatura",
+                    primero.indexOf("GRUPO_CONSULTADO") < primero.indexOf("ASIGNATURA_CONSULTADA"));
 
             sistema.establecerTexto(ColumnasHistorial.ASIGNATURA.getClaveTexto(), "Materia ACTUALIZADA");
-            when(parametros.obtenerParametro(ColumnasHistorial.PARAMETRO)).thenReturn("ASIGNATURA,CALIFICACION");
+            when(parametros.obtenerParametro(ColumnasHistorial.PARAMETRO)).thenReturn("CALIFICACION,ASIGNATURA");
             generar(bean);
             String segundo = leerPdf(bean, "gestor-con-calificacion.pdf");
             assertTrue(segundo.contains("92.5"));
+            assertTrue("El PDF debe conservar Calificacion antes de Asignatura",
+                    segundo.indexOf("92.5") < segundo.indexOf("ASIGNATURA_CONSULTADA"));
             assertTrue(segundo.contains(sistema.obtenerCabeceraHistorial("ASIGNATURA")));
             assertFalse(segundo.contains("Unidad"));
             assertFalse(segundo.contains("GRUPO_CONSULTADO"));

@@ -2,6 +2,7 @@ package mx.gob.sedesol.gestorweb.beans.administracion;
 
 import java.util.Date;
 import java.util.ArrayList;
+import org.primefaces.model.DualListModel;
 import mx.gob.sedesol.basegestor.commons.utils.ColumnasHistorial;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class ParametroSistemaBean extends BaseBean {
 	private ParametroSistemaDTO parametroModificar;
 
 	private boolean nuevo;
-	private List<String> columnasHistorialSeleccionadas = new ArrayList<>();
+	private DualListModel<String> columnasHistorialModelo = new DualListModel<>(new ArrayList<String>(), new ArrayList<String>());
 
 	private transient ModelMapper modelMapper = new ModelMapper();
 
@@ -64,10 +65,15 @@ public class ParametroSistemaBean extends BaseBean {
 		parametro.setFechaActualizacion(new Date());
 
 		if (isParametroColumnasHistorial()) {
-			columnasHistorialSeleccionadas = new ArrayList<>();
+			List<String> visibles = new ArrayList<>();
 			for (ColumnasHistorial columna : ColumnasHistorial.leer(parametro.getValor())) {
-				columnasHistorialSeleccionadas.add(columna.getClave());
+				visibles.add(columna.getClave());
 			}
+			List<String> ocultas = new ArrayList<>();
+			for (ColumnasHistorial columna : ColumnasHistorial.values()) {
+				if (!visibles.contains(columna.getClave())) ocultas.add(columna.getClave());
+			}
+			columnasHistorialModelo = new DualListModel<>(ocultas, visibles);
 		}
 		setNuevo(false);
 	}
@@ -85,13 +91,12 @@ public class ParametroSistemaBean extends BaseBean {
 		return parametro != null && ColumnasHistorial.PARAMETRO.equals(parametro.getClave());
 	}
 
-	public ColumnasHistorial[] getColumnasHistorialDisponibles() { return ColumnasHistorial.values(); }
-	public List<String> getColumnasHistorialSeleccionadas() { return columnasHistorialSeleccionadas; }
-	public void setColumnasHistorialSeleccionadas(List<String> columnas) { columnasHistorialSeleccionadas = columnas; }
+	public DualListModel<String> getColumnasHistorialModelo() { return columnasHistorialModelo; }
+	public void setColumnasHistorialModelo(DualListModel<String> columnas) { columnasHistorialModelo = columnas; }
 
 	public void guardarParametro() {
 		if (isParametroColumnasHistorial()) {
-			parametro.setValor(ColumnasHistorial.serializar(columnasHistorialSeleccionadas));
+			parametro.setValor(ColumnasHistorial.serializar(columnasHistorialModelo.getTarget()));
 		}
 		ResultadoDTO<ParametroSistemaDTO> resultado;
 		if (isNuevo()) {

@@ -2,7 +2,8 @@ package mx.gob.sedesol.basegestor.commons.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.List;
 
 /** Catalogo unico de columnas del historial para las vistas y la impresion. */
@@ -41,14 +42,19 @@ public enum ColumnasHistorial {
     public String getClaveTexto() { return claveTexto; }
     public String getEtiqueta() { return etiqueta; }
     public String getPropiedad() { return propiedad; }
+    public String getPropiedadOrden() { return this == CALIFICACION ? "calificacionFinal" : propiedad; }
     public int getAncho() { return ancho; }
 
     /** Ausencia del parametro conserva todas las columnas; un valor invalido se rechaza. */
     public static List<ColumnasHistorial> leer(String valor) {
         if (valor == null) return Arrays.asList(values());
-        EnumSet<ColumnasHistorial> seleccion = EnumSet.noneOf(ColumnasHistorial.class);
+        // Conserva el orden elegido y elimina duplicados sin mover la primera aparicion.
+        Set<ColumnasHistorial> seleccion = new LinkedHashSet<>();
         try {
-            for (String clave : valor.split(",", -1)) seleccion.add(valueOf(clave.trim()));
+            for (String clave : valor.split(",", -1)) {
+                String normalizada = clave.trim();
+                if (!normalizada.isEmpty()) seleccion.add(valueOf(normalizada));
+            }
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException(ERROR, ex);
         }
