@@ -74,7 +74,7 @@ public final class HistorialAcademicoReporte {
             if (columna != ColumnasHistorial.MODALIDAD) {
                 String tipo = columna == ColumnasHistorial.FECHA ? "java.util.Date"
                         : columna == ColumnasHistorial.PROMEDIO ? "java.lang.Double"
-                        : columna == ColumnasHistorial.ASISTENCIA ? "java.lang.Integer" : "java.lang.String";
+                        : columna == ColumnasHistorial.ASISTENCIA ? "java.lang.Integer" : columna == ColumnasHistorial.CONSTANCIAS ? "java.lang.Integer" : "java.lang.String";
                 agregarCampo(doc, dataset, campo, tipo);
             }
             int medida = i == columnas.size() - 1 ? ancho - ocupado : ancho * columna.getAncho() / peso;
@@ -117,6 +117,8 @@ public final class HistorialAcademicoReporte {
             } else if (columna == ColumnasHistorial.PROMEDIO || columna == ColumnasHistorial.ASISTENCIA) {
                 expresion = "\"En línea\".equals($F{modalidad}) ? \"No aplica\" : (" + expresion
                         + " == null ? \"\" : " + expresion + ".toString())";
+            } else if (columna == ColumnasHistorial.CONSTANCIAS) {
+                expresion = "$F{tipoConstancia} == null ? \"\" : \"Disponible\"";
             }
             detalle.getElementsByTagNameNS(JR, "textFieldExpression").item(0).setTextContent(expresion);
             tabla.appendChild(copia);

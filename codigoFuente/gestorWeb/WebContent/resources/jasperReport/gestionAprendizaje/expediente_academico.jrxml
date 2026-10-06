@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.21.2.final using JasperReports Library version 6.21.2-8434a0bd7c3bbc37cbf916f2968d35e4b165821a  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="expediente_academico" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="57e12be7-7b6a-4bf4-837b-e78f13925336">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record" />
@@ -142,7 +142,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="13" isBold="true" />
 				</textElement>
-				<text><![CDATA[Historial AcadÃ©mico]]></text>
+				<text><![CDATA[Historial Académico]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="430" y="80" width="125" height="15" backcolor="#7BA8DD" uuid="11bebc2b-5925-48a6-8cfc-6b238e98871e" />
@@ -155,7 +155,7 @@
 				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font size="9" isBold="true" />
 				</textElement>
-				<text><![CDATA[ Clave InstituciÃ³n]]></text>
+				<text><![CDATA[ Clave Institución]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="280" y="80" width="150" height="15" backcolor="#7BA8DD" uuid="05c572fb-3607-4921-ba45-2b6bb3eae85f" />
@@ -169,7 +169,7 @@
 				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font isBold="true" />
 				</textElement>
-				<text><![CDATA[ MatrÃ­cula]]></text>
+				<text><![CDATA[ Matrícula]]></text>
 			</staticText>
 			<staticText>
 				<reportElement key="" mode="Opaque" x="0" y="110" width="250" height="15" backcolor="#7BA8DD" uuid="302eceec-cbc5-4b61-8934-a9e706f8efd4">
@@ -226,10 +226,10 @@
 					<font size="9" isBold="false" />
 				</textElement>
 				<text><![CDATA[ Promedio:
- CrÃ©ditos:]]></text>
+ Créditos:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement key="" mode="Opaque" x="170" y="140" width="90" height="33" backcolor="#7BA8DD" uuid="f0bbc8bd-3da5-4806-91f0-26f1c3a67971">
+				<reportElement key="" mode="Opaque" x="170" y="140" width="90" height="36" backcolor="#7BA8DD" uuid="f0bbc8bd-3da5-4806-91f0-26f1c3a67971">
 					<property name="com.jaspersoft.studio.unit.height" value="px" />
 				</reportElement>
 				<box>
@@ -542,7 +542,7 @@ SEP]]></text>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="9" isBold="true" />
 								</textElement>
-								<text><![CDATA[PerÃ­odo]]></text>
+								<text><![CDATA[Período]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
@@ -561,7 +561,7 @@ SEP]]></text>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="9" isBold="true" />
 								</textElement>
-								<text><![CDATA[CrÃ©di-
+								<text><![CDATA[Crédi-
 tos]]></text>
 							</staticText>
 						</jr:columnHeader>
@@ -600,7 +600,7 @@ tos]]></text>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="9" isBold="true" />
 								</textElement>
-								<text><![CDATA[Unidad didÃ¡ctica]]></text>
+								<text><![CDATA[Unidad didáctica]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
@@ -638,7 +638,7 @@ tos]]></text>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="9" isBold="true" />
 								</textElement>
-								<text><![CDATA[Tipo de evaluaciÃ³n]]></text>
+								<text><![CDATA[Tipo de evaluación]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
@@ -657,7 +657,7 @@ tos]]></text>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="9" isBold="true" />
 								</textElement>
-								<text><![CDATA[NÃºmero
+								<text><![CDATA[Número
 de acta]]></text>
 							</staticText>
 						</jr:columnHeader>

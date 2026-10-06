@@ -1,4 +1,4 @@
-﻿package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje;
+package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje;
 
 import java.io.File;
 import java.io.IOException;
@@ -281,9 +281,9 @@ public class ExpedienteAlumnoBean extends BaseBean {
 			}
 			expedienteCurricularV2Facade.obtenerContextoExpediente(contextoV2);
 		} catch (InscripcionException e) {
-			log.warn("No fue posible abrir la orientaciÃƒÂ³n V2 bÃƒÂ¡sica para la matrÃƒÂ­cula consultada.", e);
+			log.warn("No fue posible abrir la orientación V2 básica para la matrícula consultada.", e);
 		} catch (Exception e) {
-			log.warn("Error inesperado al abrir la orientaciÃƒÂ³n V2 bÃƒÂ¡sica para la matrÃƒÂ­cula consultada.", e);
+			log.warn("Error inesperado al abrir la orientación V2 básica para la matrícula consultada.", e);
 		}
 	}
 
@@ -316,7 +316,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 				seleccionarCasoV2(bandejaCasosV2.get(0));
 			}
 		} catch (InscripcionException e) {
-			log.warn("No fue posible cargar la bandeja V2 de orientaciÃƒÂ³n del estudiante consultado.", e);
+			log.warn("No fue posible cargar la bandeja V2 de orientación del estudiante consultado.", e);
 		}
 	}
 
@@ -338,17 +338,17 @@ public class ExpedienteAlumnoBean extends BaseBean {
 			cancelarEdicionBitacoraV2();
 			cancelarEdicionEvidenciaV2();
 		} catch (InscripcionException e) {
-			log.warn("No fue posible cargar la ficha integral V2 de la orientaciÃƒÂ³n seleccionada.", e);
+			log.warn("No fue posible cargar la ficha integral V2 de la orientación seleccionada.", e);
 		}
 	}
 
 	public void registrarSeguimientoCasoV2() {
 		if (casoSeleccionadoV2 == null || casoSeleccionadoV2.getId() == null) {
-			agregarMsgInfo("No hay orientaciÃƒÂ³n V2 seleccionada.", null);
+			agregarMsgInfo("No hay orientación V2 seleccionada.", null);
 			return;
 		}
 		if (ObjectUtils.isNullOrEmpty(comentarioSeguimientoV2)) {
-			agregarMsgInfo("Captura el comentario de acompaÃƒÂ±amiento.", null);
+			agregarMsgInfo("Captura el comentario de acompañamiento.", null);
 			return;
 		}
 		try {
@@ -359,24 +359,24 @@ public class ExpedienteAlumnoBean extends BaseBean {
 				bitacora.setUsuario(getUsuarioEnSession().getUsuario());
 				bitacoraCasoServiceV2.actualizarBitacora(casoSeleccionadoV2.getId(), bitacora);
 				bitacoraCasoServiceV2.registrarEvento(casoSeleccionadoV2.getId(), "BITACORA_EDITADA",
-						"Se actualizÃƒÂ³ un registro manual de acompaÃƒÂ±amiento.", getUsuarioEnSession().getUsuario());
-				agregarMsgInfo("AcompaÃƒÂ±amiento actualizado.", null);
+						"Se actualizó un registro manual de acompañamiento.", getUsuarioEnSession().getUsuario());
+				agregarMsgInfo("Acompañamiento actualizado.", null);
 			} else {
 				bitacoraCasoServiceV2.registrarEvento(casoSeleccionadoV2.getId(), "SEGUIMIENTO_GESTOR",
 						comentarioSeguimientoV2.trim(), getUsuarioEnSession().getUsuario());
-				agregarMsgInfo("AcompaÃƒÂ±amiento registrado.", null);
+				agregarMsgInfo("Acompañamiento registrado.", null);
 			}
 			cancelarEdicionBitacoraV2();
 			seleccionarCasoV2(casoSeleccionadoV2);
 		} catch (InscripcionException e) {
-			log.error("No fue posible registrar el acompaÃƒÂ±amiento de la orientaciÃƒÂ³n V2.", e);
-			agregarMsgInfo("OcurriÃƒÂ³ un problema al registrar el acompaÃƒÂ±amiento.", null);
+			log.error("No fue posible registrar el acompañamiento de la orientación V2.", e);
+			agregarMsgInfo("Ocurrió un problema al registrar el acompañamiento.", null);
 		}
 	}
 
 	public void prepararEdicionBitacoraV2(BitacoraCasoDTO bitacora) {
 		if (!isBitacoraEditable(bitacora)) {
-			agregarMsgInfo("SÃƒÂ³lo se pueden corregir registros manuales de acompaÃƒÂ±amiento.", null);
+			agregarMsgInfo("Sólo se pueden corregir registros manuales de acompañamiento.", null);
 			return;
 		}
 		idBitacoraEdicionV2 = bitacora.getId();
@@ -390,31 +390,31 @@ public class ExpedienteAlumnoBean extends BaseBean {
 
 	public void eliminarBitacoraCasoV2(BitacoraCasoDTO bitacora) {
 		if (casoSeleccionadoV2 == null || casoSeleccionadoV2.getId() == null || !isBitacoraEditable(bitacora)) {
-			agregarMsgInfo("La bitÃƒÂ¡cora seleccionada no puede eliminarse.", null);
+			agregarMsgInfo("La bitácora seleccionada no puede eliminarse.", null);
 			return;
 		}
 		try {
 			bitacoraCasoServiceV2.eliminarBitacora(casoSeleccionadoV2.getId(), bitacora.getId());
 			bitacoraCasoServiceV2.registrarEvento(casoSeleccionadoV2.getId(), "BITACORA_ELIMINADA",
-					"Se eliminÃƒÂ³ un registro manual de acompaÃƒÂ±amiento.", getUsuarioEnSession().getUsuario());
+					"Se eliminó un registro manual de acompañamiento.", getUsuarioEnSession().getUsuario());
 			if (idBitacoraEdicionV2 != null && idBitacoraEdicionV2.equals(bitacora.getId())) {
 				cancelarEdicionBitacoraV2();
 			}
 			seleccionarCasoV2(casoSeleccionadoV2);
-			agregarMsgInfo("Registro de acompaÃƒÂ±amiento eliminado.", null);
+			agregarMsgInfo("Registro de acompañamiento eliminado.", null);
 		} catch (InscripcionException e) {
-			log.error("No fue posible eliminar el acompaÃƒÂ±amiento de la orientaciÃƒÂ³n V2.", e);
-			agregarMsgInfo("OcurriÃƒÂ³ un problema al eliminar el acompaÃƒÂ±amiento.", null);
+			log.error("No fue posible eliminar el acompañamiento de la orientación V2.", e);
+			agregarMsgInfo("Ocurrió un problema al eliminar el acompañamiento.", null);
 		}
 	}
 
 	public void registrarEvidenciaCasoV2() {
 		if (casoSeleccionadoV2 == null || casoSeleccionadoV2.getId() == null) {
-			agregarMsgInfo("No hay orientaciÃƒÂ³n V2 seleccionada.", null);
+			agregarMsgInfo("No hay orientación V2 seleccionada.", null);
 			return;
 		}
 		if (ObjectUtils.isNullOrEmpty(tipoEvidenciaV2) || ObjectUtils.isNullOrEmpty(descripcionEvidenciaV2)) {
-			agregarMsgInfo("Captura tipo y descripciÃƒÂ³n de la evidencia.", null);
+			agregarMsgInfo("Captura tipo y descripción de la evidencia.", null);
 			return;
 		}
 		try {
@@ -436,7 +436,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 				evidenciaCasoService.actualizarEvidencia(casoSeleccionadoV2.getId(), evidencia);
 				if (bitacoraCasoServiceV2 != null) {
 					bitacoraCasoServiceV2.registrarEvento(casoSeleccionadoV2.getId(), "EVIDENCIA_EDITADA",
-							"Se actualizÃƒÂ³ evidencia: " + evidencia.getTipoEvidencia(), getUsuarioEnSession().getUsuario());
+							"Se actualizó evidencia: " + evidencia.getTipoEvidencia(), getUsuarioEnSession().getUsuario());
 				}
 				if (hayArchivoSeleccionadoEvidenciaV2() && !ObjectUtils.isNullOrEmpty(rutaAnterior)
 						&& !rutaAnterior.equals(rutaEvidenciaV2)) {
@@ -447,24 +447,24 @@ public class ExpedienteAlumnoBean extends BaseBean {
 				evidenciaCasoService.registrarEvidencia(casoSeleccionadoV2.getId(), evidencia);
 				if (bitacoraCasoServiceV2 != null) {
 					bitacoraCasoServiceV2.registrarEvento(casoSeleccionadoV2.getId(), "EVIDENCIA_GESTOR",
-							"Se registrÃƒÂ³ evidencia: " + evidencia.getTipoEvidencia(), getUsuarioEnSession().getUsuario());
+							"Se registró evidencia: " + evidencia.getTipoEvidencia(), getUsuarioEnSession().getUsuario());
 				}
 				agregarMsgInfo("Evidencia registrada.", null);
 			}
 			cancelarEdicionEvidenciaV2();
 			seleccionarCasoV2(casoSeleccionadoV2);
 		} catch (IOException e) {
-			log.error("No fue posible guardar el archivo de evidencia de la orientaciÃƒÂ³n V2.", e);
-			agregarMsgInfo("OcurriÃƒÂ³ un problema al guardar el archivo de evidencia.", null);
+			log.error("No fue posible guardar el archivo de evidencia de la orientación V2.", e);
+			agregarMsgInfo("Ocurrió un problema al guardar el archivo de evidencia.", null);
 		} catch (InscripcionException e) {
-			log.error("No fue posible registrar la evidencia de la orientaciÃƒÂ³n V2.", e);
-			agregarMsgInfo("OcurriÃƒÂ³ un problema al registrar la evidencia.", null);
+			log.error("No fue posible registrar la evidencia de la orientación V2.", e);
+			agregarMsgInfo("Ocurrió un problema al registrar la evidencia.", null);
 		}
 	}
 
 	public void prepararEdicionEvidenciaV2(EvidenciaCasoDTO evidencia) {
 		if (evidencia == null || evidencia.getId() == null) {
-			agregarMsgInfo("No hay evidencia vÃƒÂ¡lida para editar.", null);
+			agregarMsgInfo("No hay evidencia válida para editar.", null);
 			return;
 		}
 		idEvidenciaEdicionV2 = evidencia.getId();
@@ -479,7 +479,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 		String rutaBase = parametrosSistemaService
 				.obtenerParametro(ConstantesGestor.PARAMETRO_RUTA_RECURSOS_PUBLICOS);
 		if (ObjectUtils.isNullOrEmpty(rutaBase)) {
-			throw new IOException("No existe configuraciÃƒÂ³n de ruta pÃƒÂºblica para guardar evidencias.");
+			throw new IOException("No existe configuración de ruta pública para guardar evidencias.");
 		}
 		String nombreSeguro = construirNombreArchivoEvidencia(archivoEvidenciaV2.getFileName());
 		File directorio = construirDirectorioEvidencias(rutaBase);
@@ -504,7 +504,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 	public void eliminarEvidenciaCasoV2(EvidenciaCasoDTO evidencia) {
 		if (casoSeleccionadoV2 == null || casoSeleccionadoV2.getId() == null || evidencia == null
 				|| evidencia.getId() == null) {
-			agregarMsgInfo("No hay evidencia vÃƒÂ¡lida para eliminar.", null);
+			agregarMsgInfo("No hay evidencia válida para eliminar.", null);
 			return;
 		}
 		try {
@@ -512,7 +512,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 			eliminarArchivoEvidenciaSilencioso(evidencia.getRuta());
 			if (bitacoraCasoServiceV2 != null) {
 				bitacoraCasoServiceV2.registrarEvento(casoSeleccionadoV2.getId(), "EVIDENCIA_ELIMINADA",
-						"Se eliminÃƒÂ³ evidencia: " + evidencia.getTipoEvidencia(), getUsuarioEnSession().getUsuario());
+						"Se eliminó evidencia: " + evidencia.getTipoEvidencia(), getUsuarioEnSession().getUsuario());
 			}
 			if (idEvidenciaEdicionV2 != null && idEvidenciaEdicionV2.equals(evidencia.getId())) {
 				cancelarEdicionEvidenciaV2();
@@ -521,7 +521,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 			agregarMsgInfo("Evidencia eliminada.", null);
 		} catch (InscripcionException e) {
 			log.error("No fue posible eliminar la evidencia del caso V2.", e);
-			agregarMsgInfo("OcurriÃƒÂ³ un problema al eliminar la evidencia.", null);
+			agregarMsgInfo("Ocurrió un problema al eliminar la evidencia.", null);
 		}
 	}
 
@@ -547,7 +547,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 				FileUtils.forceDelete(archivo);
 			}
 		} catch (IOException e) {
-			log.warn("No fue posible eliminar fÃƒÂ­sicamente el archivo de evidencia: " + rutaArchivo, e);
+			log.warn("No fue posible eliminar físicamente el archivo de evidencia: " + rutaArchivo, e);
 		}
 	}
 
@@ -581,7 +581,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 	}
 
 	public String getEtiquetaAccionSeguimientoV2() {
-		return isEditandoBitacoraV2() ? "Guardar cambios" : "Registrar acompaÃƒÂ±amiento";
+		return isEditandoBitacoraV2() ? "Guardar cambios" : "Registrar acompañamiento";
 	}
 
 	public String getEtiquetaAccionEvidenciaV2() {
@@ -646,7 +646,11 @@ public class ExpedienteAlumnoBean extends BaseBean {
 		return ConstantesGestorWeb.NAVEGA_TABLA_CURRICULAR_ASISTIDA;
 	}
 	private String valorNumerico(Number valor) {
-		return valor == null ? "0" : valor.toString();
+		if (valor == null) return "0.00";
+		if (valor instanceof BigDecimal) {
+			return ((BigDecimal) valor).setScale(2, RoundingMode.HALF_UP).toPlainString();
+		}
+		return valor.toString();
 	}
 
 	public void generarReporte() {
@@ -708,8 +712,8 @@ public class ExpedienteAlumnoBean extends BaseBean {
 					HistorialAcademicoReporte.generar(plantilla, params, columnas, sistema.getCabecerasHistorial()), "application/pdf",
 					historial.getMatricula() + "_Historial_academico_" + System.currentTimeMillis()));
 		} catch (Exception e) {
-			log.error("No fue posible generar el historial acadÃƒÂ©mico del estudiante consultado.", e);
-			agregarMsgError("No fue posible generar el historial acadÃƒÂ©mico.", null);
+			log.error("No fue posible generar el historial académico del estudiante consultado.", e);
+			agregarMsgError("No fue posible generar el historial académico.", null);
 			return;
 		}
 		RequestContext.getCurrentInstance().update("reporte");
@@ -731,13 +735,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 		if (historial == null || historial.getPromedio() == null) {
 			return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
 		}
-		BigDecimal promedio = historial.getPromedio();
-		if (promedio.compareTo(BigDecimal.TEN) > 0) {
-			promedio = promedio.divide(BigDecimal.TEN, 2, RoundingMode.HALF_UP);
-		} else {
-			promedio = promedio.setScale(2, RoundingMode.HALF_UP);
-		}
-		return promedio;
+		return historial.getPromedio().setScale(2, RoundingMode.HALF_UP);
 	}
 
 	public String getEstatusHistorialFormateado() {

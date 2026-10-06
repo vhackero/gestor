@@ -158,7 +158,7 @@
 								<div class="col-md-3 col-xs-12">
 									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.promedio')}" styleClass="bloque" />
 									<h:outputText
-										value="#{constanciasBean.historialAcademico.promedio}">
+										value="#{constanciasBean.promedioHistorial}">
 										<f:convertNumber pattern="#0.00" />
 									</h:outputText>
 								</div>
@@ -258,26 +258,7 @@
 								</p:outputPanel>
 							</f:facet>
 							<ui:include src="columnasHistorial.xhtml" />
-							<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.col.constancias')}" styleClass="text-center">
-								<p:commandButton action="#{constanciasBean.generarConstancia}"
-									ajax="true" id="btn1"
-									disabled="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
-									rendered="#{evento.tipoConstancia eq 1}"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye">
-									<f:setPropertyActionListener value="#{evento}"
-										target="#{constanciasBean.eventoSeleccionado}" />
-								</p:commandButton>
-									<p:tooltip for="btn1" position="top" value="#{sistema.obtenerTexto('gw.alumno.constancias.ver')}" />
-								<p:commandButton id="btn2"
-									action="#{constanciasBean.generarConstancia}" ajax="true"
-									disabled="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
-									rendered="#{evento.tipoConstancia eq 2}"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye">
-									<f:setPropertyActionListener value="#{evento}"
-										target="#{constanciasBean.eventoSeleccionado}" />
-								</p:commandButton>
-									<p:tooltip for="btn2" value="#{sistema.obtenerTexto('gw.alumno.constancias.ver')}" position="top" />
-							</p:column>
+
 						</p:dataTable>
 					</div>
 				</div>

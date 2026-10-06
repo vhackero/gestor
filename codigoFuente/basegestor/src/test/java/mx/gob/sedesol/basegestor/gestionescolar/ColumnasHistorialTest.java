@@ -13,7 +13,7 @@ import mx.gob.sedesol.basegestor.service.impl.admin.ParametroSistemaServiceImpl;
 
 public class ColumnasHistorialTest {
     @Test public void seleccionComunOrdenadaSinDuplicados() {
-        assertEquals(15, ColumnasHistorial.leer(null).size());
+        assertEquals(16, ColumnasHistorial.leer(null).size());
         assertEquals(Arrays.asList(ColumnasHistorial.CALIFICACION, ColumnasHistorial.ASIGNATURA),
                 ColumnasHistorial.leer("CALIFICACION, ASIGNATURA,ASIGNATURA"));
     }

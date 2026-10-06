@@ -22,6 +22,7 @@ public enum ColumnasHistorial {
     ENCUESTA("Encuesta final", "nombreEstatusEncuesta", 60, "encuestaFinal"),
     PROMEDIO("Promedio de evaluaciones", "calificacionTotal", 60, "promedioEvaluaciones"),
     ASISTENCIA("Porcentaje de asistencias", "porcentajeAsistencia", 60, "porcentajeAsistencias"),
+    CONSTANCIAS("Constancias", "tipoConstancia", 60, "col.constancias"),
     CALIFICACION("Calificación final", "calificacionFinalTexto", 55, "calificacionFinal");
 
     public static final String PARAMETRO = "COLUMNAS_HISTORIAL_ACADEMICO";

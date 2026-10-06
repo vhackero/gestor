@@ -1,6 +1,8 @@
-﻿package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview;
+package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -100,14 +102,6 @@ public class ConstanciasBean extends BaseBean {
 	private String nombrePersonaObjetivo;
 	private String matriculaPersonaObjetivo;
 
-
-	
-	
-
-
-
-	
-
 	@PostConstruct
 	public void init() {
 		cargarColumnasHistorial();
@@ -130,9 +124,9 @@ public class ConstanciasBean extends BaseBean {
 		try {
 			contextoAsistente = asistenteInscripcionService.obtenerContextoAsistido(idPersona);
 		} catch (InscripcionException e) {
-			log.warn("No fue posible obtener el contexto asistido para historial acadÃƒÂ©mico.", e);
+			log.warn("No fue posible obtener el contexto asistido para historial académico.", e);
 		} catch (Exception e) {
-			log.warn("Error inesperado al obtener el contexto asistido para historial acadÃƒÂ©mico.", e);
+			log.warn("Error inesperado al obtener el contexto asistido para historial académico.", e);
 		}
 	}
 
@@ -145,9 +139,9 @@ public class ConstanciasBean extends BaseBean {
 		try {
 			fichaIntegralV2 = expedienteCurricularV2Facade.obtenerContextoExpediente(construirContextoV2());
 		} catch (InscripcionException e) {
-			log.warn("No fue posible cargar la ficha integral V2 para historial acadÃƒÂ©mico.", e);
+			log.warn("No fue posible cargar la ficha integral V2 para historial académico.", e);
 		} catch (Exception e) {
-			log.warn("Error inesperado al cargar la ficha integral V2 para historial acadÃƒÂ©mico.", e);
+			log.warn("Error inesperado al cargar la ficha integral V2 para historial académico.", e);
 		}
 	}
 
@@ -181,8 +175,6 @@ public class ConstanciasBean extends BaseBean {
 		return contextoBase.getInscripcionPersona().getIdPlan();
 	}
 
-	
-
 	public List<EventoConstanciaDTO> getEventosAdmin( Long id){
 
 		eventos = grupoParticipanteService.getParticipanteByActaCerradaYconstancia2(id);
@@ -198,7 +190,6 @@ public class ConstanciasBean extends BaseBean {
 		return historialAcademico;
 
 	}
-	
 
 	private void cargarColumnasHistorial() {
 		try {
@@ -219,7 +210,12 @@ public class ConstanciasBean extends BaseBean {
 		}
 	}
 	private String valorNumerico(Number valor) {
-		return valor == null ? "0" : valor.toString();
+		if (valor == null) return "0.00";
+
+		if (valor instanceof BigDecimal) {
+			return ((BigDecimal) valor).setScale(2, RoundingMode.HALF_UP).toPlainString();
+		}
+		return valor.toString();
 	}
 
 	public void generarReporte() {
@@ -228,10 +224,9 @@ public class ConstanciasBean extends BaseBean {
 		reportePDF = null;
 
 		HashMap<String, Object> params = new HashMap<>();
-		
-		
+
 		//Parametros de Encabezado
-		
+
 		String LOGO_UNADM = "/resources/jasperReport/LOGO_EDU_UNADM.png";
 		InputStream strmLOGO_UNADM = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(LOGO_UNADM);
 		String LOGO_SEP = "/resources/jasperReport/LOGO_SEP.png";
@@ -269,12 +264,10 @@ public class ConstanciasBean extends BaseBean {
 		params.put("HISTORIAL_NO_PRESENTADAS", valorNumerico(historialAcademico.getNopresentadas()));
 		params.put("FECHA_CONSULTA", historialAcademico.getFechaConsulta());
 		params.put("NOMBRE_ESTRUCTURA", historialAcademico.getNombreEstructura());
-		
-		
+
 		//Parametros de datos
 		JRBeanArrayDataSource dsHistorial = new JRBeanArrayDataSource(eventos.toArray());
 		params.put("dsHistorial", dsHistorial);
-		
 
 		try (InputStream plantilla = FacesContext.getCurrentInstance().getExternalContext()
 				.getResourceAsStream("/resources/jasperReport/gestionAprendizaje/expediente_academico.jrxml")) {
@@ -282,8 +275,8 @@ public class ConstanciasBean extends BaseBean {
 					HistorialAcademicoReporte.generar(plantilla, params, columnasHistorial, sistema.getCabecerasHistorial()), "application/pdf",
 					historialAcademico.getMatricula() + "_Historial_academico_" + System.currentTimeMillis()));
 		} catch (Exception e) {
-			log.error("No fue posible generar el historial acadÃƒÂ©mico.", e);
-			agregarMsgError("No fue posible generar el historial acadÃƒÂ©mico.", null);
+			log.error("No fue posible generar el historial académico.", e);
+			agregarMsgError("No fue posible generar el historial académico.", null);
 			return;
 		}
 		RequestContext.getCurrentInstance().update("reporte");
@@ -355,7 +348,12 @@ public class ConstanciasBean extends BaseBean {
 		parrafoSalida = parrafoSalida.replace("$_num_horas_", eventoSeleccionado.getDuracionHrs());
 		return parrafoSalida;
 	}
-	
+
+	public String getPromedioHistorial() {
+		if (historialAcademico == null || historialAcademico.getPromedio() == null) return "0.00";
+		return historialAcademico.getPromedio().setScale(2, RoundingMode.HALF_UP).toPlainString();
+	}
+
 	public HistorialAcademicoDTO getHistorialAcademico() {
 		return historialAcademico;
 	}
@@ -383,12 +381,12 @@ public class ConstanciasBean extends BaseBean {
 	}
 
 	public String getEtiquetaPeriodoContextual() {
-		return esPeriodoCursamiento() ? "Periodo de cursamiento activo" : "Periodo de inscripciÃƒÂ³n/reinscripciÃƒÂ³n";
+		return esPeriodoCursamiento() ? "Periodo de cursamiento activo" : "Periodo de inscripción/reinscripción";
 	}
 
 	public String getEtiquetaModoContextual() {
 		if (vistaGestor) {
-			return esPeriodoCursamiento() ? "Seguimiento" : "GestiÃƒÂ³n";
+			return esPeriodoCursamiento() ? "Seguimiento" : "Gestión";
 		}
 		return esPeriodoCursamiento() ? "Consulta" : "Operativo";
 	}
@@ -398,29 +396,29 @@ public class ConstanciasBean extends BaseBean {
 	}
 
 	public String getTituloVistaHistorial() {
-		return vistaGestor ? "Historial acadÃƒÂ©mico estudiante | Vista gestor" : "Historial acadÃƒÂ©mico";
+		return vistaGestor ? "Historial académico estudiante | Vista gestor" : "Historial académico";
 	}
 
 	public String getMensajeContextualHistorial() {
 		return esPeriodoCursamiento()
-				? "AquÃƒÂ­ puedes consultar el registro histÃƒÂ³rico de tus unidades didÃƒÂ¡cticas cursadas, calificaciones y crÃƒÂ©ditos. Para saber cÃƒÂ³mo influyen en tu proceso de inscripciÃƒÂ³n actual, ingresa al Asistente de inscripciÃƒÂ³n y orientaciÃƒÂ³n educativa."
-				: "AquÃƒÂ­ puedes consultar el registro histÃƒÂ³rico de tus unidades didÃƒÂ¡cticas cursadas, calificaciones y crÃƒÂ©ditos. Para saber cÃƒÂ³mo influyen en tu prÃƒÂ³ximo proceso de inscripciÃƒÂ³n, ingresa al Asistente de inscripciÃƒÂ³n y orientaciÃƒÂ³n educativa.";
+				? "Aquí puedes consultar el registro histórico de tus unidades didácticas cursadas, calificaciones y créditos. Para saber cómo influyen en tu proceso de inscripción actual, ingresa al Asistente de inscripción y orientación educativa."
+				: "Aquí puedes consultar el registro histórico de tus unidades didácticas cursadas, calificaciones y créditos. Para saber cómo influyen en tu próximo proceso de inscripción, ingresa al Asistente de inscripción y orientación educativa.";
 	}
 
 	public String getEtiquetaRolHistorial() {
-		return "Vista de evidencia acadÃƒÂ©mica";
+		return "Vista de evidencia académica";
 	}
 
 	public String getMensajeTransicionAsistente() {
 		return esPeriodoCursamiento()
-				? "Si necesitas interpretar cÃƒÂ³mo este historial impacta tu proceso de inscripciÃƒÂ³n actual, consulta el Asistente de inscripciÃƒÂ³n y orientaciÃƒÂ³n educativa."
-				: "Si necesitas interpretar cÃƒÂ³mo este historial puede impactar tu prÃƒÂ³ximo proceso de inscripciÃƒÂ³n, consulta el Asistente de inscripciÃƒÂ³n y orientaciÃƒÂ³n educativa.";
+				? "Si necesitas interpretar cómo este historial impacta tu proceso de inscripción actual, consulta el Asistente de inscripción y orientación educativa."
+				: "Si necesitas interpretar cómo este historial puede impactar tu próximo proceso de inscripción, consulta el Asistente de inscripción y orientación educativa.";
 	}
 
 	public String getMensajeTransicionAsistentePrevio() {
 		return esPeriodoCursamiento()
-				? "Si necesitas interpretar cÃƒÂ³mo este historial impacta tu proceso de inscripciÃƒÂ³n actual, consulta el "
-				: "Si necesitas interpretar cÃƒÂ³mo este historial puede impactar tu prÃƒÂ³ximo proceso de inscripciÃƒÂ³n, consulta el ";
+				? "Si necesitas interpretar cómo este historial impacta tu proceso de inscripción actual, consulta el "
+				: "Si necesitas interpretar cómo este historial puede impactar tu próximo proceso de inscripción, consulta el ";
 	}
 
 	public String navegaMallaCurricularAlumno() {
@@ -452,7 +450,7 @@ public class ConstanciasBean extends BaseBean {
 		asegurarFichaIntegralV2();
 		if (fichaIntegralV2 == null || fichaIntegralV2.getCasoAcademico() == null
 				|| StringUtils.isBlank(fichaIntegralV2.getCasoAcademico().getEstatusCaso())) {
-			return "OrientaciÃƒÂ³n general";
+			return "Orientación general";
 		}
 		return fichaIntegralV2.getCasoAcademico().getEstatusCaso().trim();
 	}
@@ -460,7 +458,7 @@ public class ConstanciasBean extends BaseBean {
 	public String getMensajeCasoEstudianteV2() {
 		asegurarFichaIntegralV2();
 		if (fichaIntegralV2 == null || StringUtils.isBlank(fichaIntegralV2.getMensajeEstudiante())) {
-			return "Tu trayectoria no muestra un riesgo acadÃƒÂ©mico inmediato en este momento.";
+			return "Tu trayectoria no muestra un riesgo académico inmediato en este momento.";
 		}
 		return fichaIntegralV2.getMensajeEstudiante().trim();
 	}
@@ -468,11 +466,10 @@ public class ConstanciasBean extends BaseBean {
 	public String getResolucionCasoEstudianteV2() {
 		asegurarFichaIntegralV2();
 		if (fichaIntegralV2 == null || StringUtils.isBlank(fichaIntegralV2.getAccionSugerida())) {
-			return "MantÃƒÂ©n tu avance actual y vuelve a revisar tu orientaciÃƒÂ³n cuando cambie el periodo.";
+			return "Mantén tu avance actual y vuelve a revisar tu orientación cuando cambie el periodo.";
 		}
 		return fichaIntegralV2.getAccionSugerida().trim();
 	}
-
 
 	public void setHistorialAcademico(HistorialAcademicoDTO historialAcademico) {
 		this.historialAcademico = historialAcademico;
@@ -574,10 +571,4 @@ public class ConstanciasBean extends BaseBean {
 		this.expedienteCurricularV2Facade = expedienteCurricularV2Facade;
 	}
 
-
-
-	
-
 }
-
-
