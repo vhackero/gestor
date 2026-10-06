@@ -23,6 +23,7 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private String origenConsulta;
     private String versionReglas;
     private String huellaOferta;
+    private Boolean avanceCondicionado;
     private Date fechaEvaluacion;
     private List<UnidadEvaluacionCurricularV2DTO> unidades = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
 
@@ -46,6 +47,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setVersionReglas(String versionReglas) { this.versionReglas = versionReglas; }
     public String getHuellaOferta() { return huellaOferta; }
     public void setHuellaOferta(String huellaOferta) { this.huellaOferta = huellaOferta; }
+    public Boolean getAvanceCondicionado() { return avanceCondicionado; }
+    public void setAvanceCondicionado(Boolean avanceCondicionado) { this.avanceCondicionado = avanceCondicionado; }
     public Date getFechaEvaluacion() { return fechaEvaluacion; }
     public void setFechaEvaluacion(Date fechaEvaluacion) { this.fechaEvaluacion = fechaEvaluacion; }
     public List<UnidadEvaluacionCurricularV2DTO> getUnidades() { return unidades; }

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaPendienteUnidadV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoReglaCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CondicionCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
@@ -61,24 +62,118 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
     @Transactional(readOnly = true)
     public ResultadoEvaluacionCurricularV2DTO evaluarSombra(ContextoEvaluacionCurricularV2DTO contexto) {
         ResultadoEvaluacionCurricularV2DTO resultado = new ResultadoEvaluacionCurricularV2DTO();
-        if (contexto == null) { resultado.getMensajes().add("No fue posible construir el contexto de evaluación sombra."); return resultado; }
+        resultado.setEfectosProductivosAplicados(Boolean.FALSE);
+        if (contexto == null) {
+            resultado.getMensajes().add("No fue posible construir el contexto de evaluación sombra.");
+            return resultado;
+        }
+
+        int reprobadas = 0;
         for (UnidadEvaluacionCurricularV2DTO unidad : normalizarUnidades(contexto.getUnidades())) {
             DecisionUnidadCurricularV2DTO decision = new DecisionUnidadCurricularV2DTO();
             decision.setIdPrograma(unidad.getIdPrograma());
+            // Fase 1A conserva literalmente la oferta leída del contexto. No decide elegibilidad.
             decision.setHabilitada(Boolean.valueOf(Boolean.TRUE.equals(unidad.getOfertada())));
             decision.setPrioritaria(Boolean.valueOf(unidad.getEstado() == EstadoUnidadCurricularV2.REPROBADA));
-            if (unidad.getCausa() == CausaPendienteUnidadV2.REPROBACION) decision.getMotivos().add(CodigoMotivoCurricularV2.REPROBACION_ACUMULADA);
-            if (unidad.getCausa() == CausaPendienteUnidadV2.NO_CURSAMIENTO) decision.getMotivos().add(CodigoMotivoCurricularV2.PENDIENTE_NO_CURSADA);
-            if (unidad.getCausa() == CausaPendienteUnidadV2.BAJA_PARCIAL) decision.getMotivos().add(CodigoMotivoCurricularV2.BAJA_PARCIAL);
-            if (Boolean.TRUE.equals(unidad.getSeriacionConocida())) decision.getMotivos().add(CodigoMotivoCurricularV2.SERIACION_DIRECTA);
+
+            if (unidad.getEstado() == EstadoUnidadCurricularV2.REPROBADA) {
+                reprobadas++;
+                registrarCondicion(resultado, decision, contexto, CondicionCurricularV2.REPROBACION,
+                        CodigoReglaCurricularV2.RN_1_2, CodigoMotivoCurricularV2.REPROBACION_ACUMULADA,
+                        80, "REPROBACION_NORMALIZADA", "La UD conserva una condición de reprobación en modo sombra.");
+            }
+            if (unidad.getCausa() == CausaPendienteUnidadV2.NO_CURSAMIENTO) {
+                registrarCondicion(resultado, decision, contexto, CondicionCurricularV2.PENDIENTE_NO_CURSADA,
+                        CodigoReglaCurricularV2.RN_1_3, CodigoMotivoCurricularV2.PENDIENTE_NO_CURSADA,
+                        50, "NO_CURSAMIENTO_NORMALIZADO", "La UD conserva una pendiente de no cursamiento en modo sombra.");
+            }
+            if (unidad.getCausa() == CausaPendienteUnidadV2.BAJA_PARCIAL) {
+                registrarCondicion(resultado, decision, contexto, CondicionCurricularV2.BAJA_PARCIAL,
+                        CodigoReglaCurricularV2.RN_1_3, CodigoMotivoCurricularV2.BAJA_PARCIAL,
+                        60, "BAJA_PARCIAL_NORMALIZADA", "La UD conserva una baja parcial en modo sombra.");
+            }
+            if (unidad.getCausa() == CausaPendienteUnidadV2.NO_DETERMINADA) {
+                registrarCondicion(resultado, decision, contexto, CondicionCurricularV2.DATOS_INSUFICIENTES,
+                        CodigoReglaCurricularV2.CTR_04, CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,
+                        10, "DATOS_INSUFICIENTES", "No existe causa suficiente para clasificar la UD.");
+            }
+            if (Boolean.TRUE.equals(unidad.getSeriacionConocida())) {
+                registrarCondicion(resultado, decision, contexto, CondicionCurricularV2.SERIACION,
+                        CodigoReglaCurricularV2.RN_8, CodigoMotivoCurricularV2.SERIACION_DIRECTA,
+                        90, "SERIACION_CONOCIDA", "La seriación se registra sin modificar bloqueos vigentes.");
+            }
             resultado.getDecisiones().add(decision);
         }
-        TrazaReglaAplicadaV2DTO traza = new TrazaReglaAplicadaV2DTO();
-        traza.setCodigoRegla(CodigoReglaCurricularV2.CTR_04); traza.setVersionReglas(contexto.getVersionReglas());
-        traza.setAplicada(Boolean.FALSE); traza.setResultado("MODO_SOMBRA_SIN_ELEGIBILIDAD"); traza.setFechaEvaluacion(new Date());
-        resultado.getTrazas().add(traza); resultado.getReglasEvaluadas().add(CodigoReglaCurricularV2.CTR_04);
+
+        resultado.setSituacionAcademica(reprobadas > 0 ? "IRREGULAR" : "REGULAR");
+        resultado.setAvanceCondicionado(Boolean.valueOf(Boolean.TRUE.equals(contexto.getAvanceCondicionado())));
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_03, null, 20,
+                "SITUACION_SEPARADA_DE_AVANCE",
+                "La situación académica se determina de forma independiente a la autorización de avance.");
+        if (Boolean.TRUE.equals(contexto.getAvanceCondicionado())) {
+            agregarUnico(resultado.getCondicionesDetectadas(), CondicionCurricularV2.AVANCE_CONDICIONADO);
+            agregarUnico(resultado.getExcepciones(), "AVANCE_CONDICIONADO_SIN_EFECTO_PRODUCTIVO");
+        }
+        if (reprobadas >= 4) {
+            agregarUnico(resultado.getCondicionesDetectadas(), CondicionCurricularV2.CUATRO_O_MAS_REPROBADAS);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_4,
+                    CodigoMotivoCurricularV2.REPROBACION_ACUMULADA, 100,
+                    "CONDICION_REGISTRADA_SIN_EFECTO_PRODUCTIVO",
+                    "Cuatro o más reprobadas se registran como condición concurrente; la RN-6.4 no se activa en Fase 1A.");
+        }
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
+                "EVALUACION_CONCURRENTE",
+                "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
         resultado.getMensajes().add("Resultado generado en modo sombra; no modifica la elegibilidad vigente.");
         return resultado;
+    }
+
+    private void registrarCondicion(ResultadoEvaluacionCurricularV2DTO resultado,
+            DecisionUnidadCurricularV2DTO decision, ContextoEvaluacionCurricularV2DTO contexto,
+            CondicionCurricularV2 condicion, CodigoReglaCurricularV2 regla,
+            CodigoMotivoCurricularV2 motivo, int prioridad, String resultadoTraza, String detalle) {
+        agregarUnico(resultado.getCondicionesDetectadas(), condicion);
+        agregarUnico(resultado.getRestricciones(), motivo);
+        agregarUnico(decision.getMotivos(), motivo);
+        TrazaReglaAplicadaV2DTO traza = crearTraza(contexto, regla, motivo, prioridad, resultadoTraza, detalle);
+        decision.getTrazas().add(traza);
+        resultado.getTrazas().add(traza);
+        agregarUnico(resultado.getReglasEvaluadas(), regla);
+        actualizarPrioridad(resultado, prioridad);
+    }
+
+    private void registrarTraza(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, CodigoReglaCurricularV2 regla,
+            CodigoMotivoCurricularV2 motivo, int prioridad, String resultadoTraza, String detalle) {
+        resultado.getTrazas().add(crearTraza(contexto, regla, motivo, prioridad, resultadoTraza, detalle));
+        agregarUnico(resultado.getReglasEvaluadas(), regla);
+        actualizarPrioridad(resultado, prioridad);
+    }
+
+    private TrazaReglaAplicadaV2DTO crearTraza(ContextoEvaluacionCurricularV2DTO contexto,
+            CodigoReglaCurricularV2 regla, CodigoMotivoCurricularV2 motivo, int prioridad,
+            String resultadoTraza, String detalle) {
+        TrazaReglaAplicadaV2DTO traza = new TrazaReglaAplicadaV2DTO();
+        traza.setCodigoRegla(regla);
+        traza.setCodigoMotivo(motivo);
+        traza.setVersionReglas(contexto.getVersionReglas());
+        traza.setPrioridad(Integer.valueOf(prioridad));
+        traza.setAplicada(Boolean.FALSE);
+        traza.setResultado(resultadoTraza);
+        traza.setDetalle(detalle);
+        traza.setFechaEvaluacion(contexto.getFechaEvaluacion() == null ? new Date() : contexto.getFechaEvaluacion());
+        return traza;
+    }
+
+    private void actualizarPrioridad(ResultadoEvaluacionCurricularV2DTO resultado, int prioridad) {
+        if (resultado.getPrioridadTecnicaDominante() == null
+                || prioridad > resultado.getPrioridadTecnicaDominante().intValue()) {
+            resultado.setPrioridadTecnicaDominante(Integer.valueOf(prioridad));
+        }
+    }
+
+    private <T> void agregarUnico(List<T> destino, T valor) {
+        if (valor != null && !destino.contains(valor)) destino.add(valor);
     }
 
     private String obtenerLlaveUnidad(UnidadEvaluacionCurricularV2DTO unidad) {
