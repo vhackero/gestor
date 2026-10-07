@@ -170,6 +170,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarCargaMaxima(resultado, contexto, unidadesNormalizadas);
         evaluarExcepcionesTipificadas(resultado, contexto, unidadesNormalizadas);
         evaluarCargaAcademicaIntegrada(resultado, contexto);
+        evaluarPrioridadRegularizacion(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -901,6 +902,166 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         for (CodigoMotivoCurricularV2 motivo : maxima.getMotivos()) agregarUnico(integrada.getCausasExclusion(), motivo);
         if (maxima.getEstado() == EstadoCargaMaximaCurricularV2.REQUIERE_REVISION
                 || Boolean.TRUE.equals(maxima.getRequiereRevisionPorEmpate())) integrada.setRequiereRevision(Boolean.TRUE);
+    }
+
+    /**
+     * RN-6.3 en el alcance V2: describe la prioridad académica de regularización.
+     * No realiza reinscripción, no reserva cupo y no altera selección, oferta ni carga origen.
+     */
+    private void evaluarPrioridadRegularizacion(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO ruta = resultado.getEvaluacionCargaAcademica();
+        if (ruta == null) return;
+        agregarUnico(ruta.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_3);
+        String situacion = resultado.getSituacionAcademicaCalculada();
+        if (!"IRREGULAR".equals(situacion)) {
+            ruta.setAplicaRn63(Boolean.FALSE);
+            if ("NO_DETERMINADA".equals(situacion)) {
+                ruta.setRequiereRevisionRegularizacion(Boolean.TRUE);
+                ruta.setRequiereRevision(Boolean.TRUE);
+                agregarUnico(ruta.getCausasExclusion(), CodigoMotivoCurricularV2.DATOS_INSUFICIENTES);
+                registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_3,
+                        CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, 75,
+                        "REGULARIZACION_REQUIERE_REVISION",
+                        "RN-6.3 no infiere ruta sin situación académica determinada por RN-1.2.");
+            } else {
+                registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_3, null, 75,
+                        "REGULARIZACION_NO_APLICA",
+                        "RN-6.3 no construye ruta de regularización para situación académica REGULAR.");
+            }
+            return;
+        }
+
+        ruta.setAplicaRn63(Boolean.TRUE);
+        List<UnidadEvaluacionCurricularV2DTO> prioritariasOfertadas = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
+        List<UnidadEvaluacionCurricularV2DTO> obligatoriasCompatibles = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
+        List<UnidadEvaluacionCurricularV2DTO> optativasCompatibles = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            DecisionUnidadCurricularV2DTO decision = buscarDecision(resultado, unidad.getIdPrograma());
+            String indisponibilidad = motivoDescarteCargaMinima(unidad, decision);
+            if (esReprobacionVigentePrevia(unidad)) {
+                agregarIdUnico(ruta.getUdsReprobadasPrioritarias(), unidad.getIdPrograma());
+                marcarPrioridadRegularizacion(resultado, contexto, decision, unidad);
+                if (indisponibilidad == null) {
+                    prioritariasOfertadas.add(unidad);
+                    agregarIdUnico(ruta.getUdsReprobadasOfertadas(), unidad.getIdPrograma());
+                } else {
+                    agregarIdUnico(ruta.getUdsReprobadasNoDisponibles(), unidad.getIdPrograma());
+                    ruta.getCausasIndisponibilidadRegularizacion().add(obtenerLlaveUnidad(unidad) + ":" + indisponibilidad);
+                    ruta.getUdsExcluidas().add(obtenerLlaveUnidad(unidad) + ":" + indisponibilidad);
+                    marcarNoDisponibleRegularizacion(resultado, contexto, decision, unidad, indisponibilidad);
+                }
+            } else if (indisponibilidad == null && esObligatoria(unidad)) {
+                obligatoriasCompatibles.add(unidad);
+                agregarIdUnico(ruta.getUdsObligatoriasCompatibles(), unidad.getIdPrograma());
+                registrarCompatibilidadRegularizacion(resultado, contexto, decision, unidad, "OBLIGATORIA_COMPATIBLE");
+            } else if (indisponibilidad == null) {
+                optativasCompatibles.add(unidad);
+                agregarIdUnico(ruta.getUdsOptativasCompatibles(), unidad.getIdPrograma());
+                registrarCompatibilidadRegularizacion(resultado, contexto, decision, unidad, "OPTATIVA_COMPLEMENTARIA");
+            }
+        }
+
+        Integer maximo = ruta.getCargaMaximaNormativa();
+        if (maximo == null) {
+            ruta.setRequiereRevisionRegularizacion(Boolean.TRUE);
+            ruta.setRequiereRevision(Boolean.TRUE);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_3,
+                    CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, 75,
+                    "REGULARIZACION_SIN_MAXIMO_DETERMINABLE",
+                    "RN-4.2 no determinó carga máxima; no se propone orden de inclusión para RN-6.3.");
+            return;
+        }
+        int espacios = maximo.intValue();
+        espacios = evaluarNivelRegularizacion(ruta, prioritariasOfertadas, espacios, "REPROBADA_PRIORITARIA");
+        if (espacios >= 0) espacios = evaluarNivelRegularizacion(ruta, obligatoriasCompatibles, espacios, "OBLIGATORIA_COMPATIBLE");
+        if (espacios >= 0) espacios = evaluarNivelRegularizacion(ruta, optativasCompatibles, espacios, "OPTATIVA_COMPLEMENTARIA");
+        ruta.setCargaDisponibleRegularizacion(Integer.valueOf(Math.max(0, espacios)));
+        if (espacios < 0) {
+            ruta.setRequiereRevisionRegularizacion(Boolean.TRUE);
+            ruta.setRequiereRevision(Boolean.TRUE);
+        }
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_3,
+                ruta.getRequiereRevisionRegularizacion() ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null,
+                75, ruta.getRequiereRevisionRegularizacion()
+                        ? "REGULARIZACION_REQUIERE_REVISION" : "REGULARIZACION_PRIORIZADA_SOMBRA",
+                "situacion=" + situacion + "; reprobadasPrioritarias=" + ruta.getUdsReprobadasPrioritarias()
+                        + "; ofertadas=" + ruta.getUdsReprobadasOfertadas()
+                        + "; noDisponibles=" + ruta.getCausasIndisponibilidadRegularizacion()
+                        + "; obligatoriasCompatibles=" + ruta.getUdsObligatoriasCompatibles()
+                        + "; optativasCompatibles=" + ruta.getUdsOptativasCompatibles()
+                        + "; cargaDisponible=" + ruta.getCargaDisponibleRegularizacion());
+    }
+
+    /** Devuelve -1 sólo cuando el límite corta un conjunto empatado sin criterio normativo adicional. */
+    private int evaluarNivelRegularizacion(EvaluacionCargaAcademicaV2DTO ruta,
+            List<UnidadEvaluacionCurricularV2DTO> candidatas, int espacios, String nivel) {
+        if (candidatas.isEmpty()) return espacios;
+        if (candidatas.size() > espacios) {
+            ruta.setRequiereRevisionRegularizacion(Boolean.TRUE);
+            for (UnidadEvaluacionCurricularV2DTO unidad : candidatas) {
+                agregarIdUnico(ruta.getUdsEmpatadasRegularizacion(), unidad.getIdPrograma());
+                ruta.getUdsExcluidas().add(obtenerLlaveUnidad(unidad) + ":" + nivel + "_EMPATE_SIN_CRITERIO_APROBADO");
+            }
+            return -1;
+        }
+        return espacios - candidatas.size();
+    }
+
+    private void marcarPrioridadRegularizacion(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, DecisionUnidadCurricularV2DTO decision,
+            UnidadEvaluacionCurricularV2DTO unidad) {
+        if (decision == null) return;
+        decision.setPrioritaria(Boolean.TRUE);
+        agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.PRIORITARIA);
+        agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.REPROBACION_ACUMULADA);
+        decision.getReferenciasFuente().addAll(unidad.getReferenciasHistoricas());
+        agregarExplicacion(decision, "RN-6.3 registra prioridad académica de regularización en modo sombra.");
+        registrarTrazaDecisionRegularizacion(resultado, contexto, decision, CodigoMotivoCurricularV2.REPROBACION_ACUMULADA,
+                "UD_REPROBADA_PRIORITARIA", "La UD reprobada vigente se ubica en nivel 1 de regularización.");
+    }
+
+    private void marcarNoDisponibleRegularizacion(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, DecisionUnidadCurricularV2DTO decision,
+            UnidadEvaluacionCurricularV2DTO unidad, String causa) {
+        if (decision == null) return;
+        agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.REQUIERE_REVISION);
+        if ("SIN_CUPO".equals(causa)) agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.SIN_CUPO);
+        else if ("SERIACION".equals(causa)) agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.SERIACION_DIRECTA);
+        else if ("DATOS_INSUFICIENTES".equals(causa)) agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.DATOS_INSUFICIENTES);
+        else agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.SIN_OFERTA);
+        agregarExplicacion(decision, "RN-6.3 conserva prioridad, pero registra indisponibilidad: " + causa + ".");
+        CodigoMotivoCurricularV2 motivo = "SIN_CUPO".equals(causa) ? CodigoMotivoCurricularV2.SIN_CUPO
+                : ("SERIACION".equals(causa) ? CodigoMotivoCurricularV2.SERIACION_DIRECTA
+                : ("DATOS_INSUFICIENTES".equals(causa) ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES
+                : CodigoMotivoCurricularV2.SIN_OFERTA));
+        registrarTrazaDecisionRegularizacion(resultado, contexto, decision, motivo,
+                "UD_REPROBADA_NO_DISPONIBLE_" + causa,
+                "La UD " + obtenerLlaveUnidad(unidad) + " sigue prioritaria, pero no está disponible: " + causa + ".");
+    }
+
+    private void registrarCompatibilidadRegularizacion(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, DecisionUnidadCurricularV2DTO decision,
+            UnidadEvaluacionCurricularV2DTO unidad, String clasificacion) {
+        if (decision == null) return;
+        agregarExplicacion(decision, "RN-6.3 clasifica la UD como " + clasificacion + " en modo sombra.");
+        registrarTrazaDecisionRegularizacion(resultado, contexto, decision, null,
+                "UD_" + clasificacion, "La UD " + obtenerLlaveUnidad(unidad) + " es compatible después de regularización.");
+    }
+
+    private void registrarTrazaDecisionRegularizacion(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, DecisionUnidadCurricularV2DTO decision,
+            CodigoMotivoCurricularV2 motivo, String resultadoTraza, String detalle) {
+        TrazaReglaAplicadaV2DTO traza = crearTraza(contexto, CodigoReglaCurricularV2.RN_6_3, motivo, 75,
+                resultadoTraza, detalle);
+        decision.getTrazas().add(traza);
+        resultado.getTrazas().add(traza);
+        agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_6_3);
+        actualizarPrioridad(resultado, 75);
+    }
+
+    private void agregarIdUnico(List<Long> destino, Long id) {
+        if (id != null && !destino.contains(id)) destino.add(id);
     }
 
     private Boolean procedenciaCtr01(ContextoEvaluacionCurricularV2DTO contexto) {
