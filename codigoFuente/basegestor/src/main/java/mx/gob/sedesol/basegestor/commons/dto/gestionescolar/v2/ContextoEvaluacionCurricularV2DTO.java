@@ -37,6 +37,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Boolean actividadAcademicaComprobada = Boolean.FALSE;
     private Boolean limiteInactividadAlcanzado = Boolean.FALSE;
     private Boolean datosActividadContradictorios = Boolean.FALSE;
+    private Boolean permanenciaDentroLimiteComprobada = Boolean.FALSE;
+    private Boolean limitePermanenciaExcedido = Boolean.FALSE;
     private Integer periodosBajaTemporalAutorizados;
     private Integer periodosBajaTemporalTranscurridos;
     private List<String> periodosActividadConsiderados = new ArrayList<String>();
@@ -91,6 +93,10 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setLimiteInactividadAlcanzado(Boolean valor) { limiteInactividadAlcanzado = valor; }
     public Boolean getDatosActividadContradictorios() { return datosActividadContradictorios; }
     public void setDatosActividadContradictorios(Boolean valor) { datosActividadContradictorios = valor; }
+    public Boolean getPermanenciaDentroLimiteComprobada() { return permanenciaDentroLimiteComprobada; }
+    public void setPermanenciaDentroLimiteComprobada(Boolean valor) { permanenciaDentroLimiteComprobada = valor; }
+    public Boolean getLimitePermanenciaExcedido() { return limitePermanenciaExcedido; }
+    public void setLimitePermanenciaExcedido(Boolean valor) { limitePermanenciaExcedido = valor; }
     public Integer getPeriodosBajaTemporalAutorizados() { return periodosBajaTemporalAutorizados; }
     public void setPeriodosBajaTemporalAutorizados(Integer valor) { periodosBajaTemporalAutorizados = valor; }
     public Integer getPeriodosBajaTemporalTranscurridos() { return periodosBajaTemporalTranscurridos; }

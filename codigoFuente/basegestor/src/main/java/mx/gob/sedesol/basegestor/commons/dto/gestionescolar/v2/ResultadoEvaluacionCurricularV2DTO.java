@@ -16,6 +16,14 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     private List<Long> unidadesOrigenIrregularidad = new ArrayList<Long>();
     private List<String> evidenciasSituacionAcademica = new ArrayList<String>();
     private List<String> datosDescartadosSituacionAcademica = new ArrayList<String>();
+    private String situacionAcademicaActualCalculada;
+    private Boolean recuperacionRegularidadEvaluada = Boolean.FALSE;
+    private Boolean recuperacionRegularidadProcede;
+    private String resultadoRecuperacionRegularidad;
+    private List<String> condicionesRecuperacionCumplidas = new ArrayList<String>();
+    private List<String> condicionesRecuperacionNoCumplidas = new ArrayList<String>();
+    private List<Long> udsReprobadasImpedimentoRecuperacion = new ArrayList<Long>();
+    private List<Long> pendientesNoReprobatoriosRecuperacion = new ArrayList<Long>();
     private EstadoActividadAcademicaV2 estadoActividadAcademica = EstadoActividadAcademicaV2.NO_DETERMINADO;
     private Integer totalReprobadas;
     private Boolean avanceCondicionado = Boolean.FALSE;
@@ -41,6 +49,18 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     public List<Long> getUnidadesOrigenIrregularidad() { return unidadesOrigenIrregularidad; }
     public List<String> getEvidenciasSituacionAcademica() { return evidenciasSituacionAcademica; }
     public List<String> getDatosDescartadosSituacionAcademica() { return datosDescartadosSituacionAcademica; }
+    public String getSituacionAcademicaActualCalculada() { return situacionAcademicaActualCalculada; }
+    public void setSituacionAcademicaActualCalculada(String valor) { situacionAcademicaActualCalculada = valor; }
+    public Boolean getRecuperacionRegularidadEvaluada() { return recuperacionRegularidadEvaluada; }
+    public void setRecuperacionRegularidadEvaluada(Boolean valor) { recuperacionRegularidadEvaluada = valor; }
+    public Boolean getRecuperacionRegularidadProcede() { return recuperacionRegularidadProcede; }
+    public void setRecuperacionRegularidadProcede(Boolean valor) { recuperacionRegularidadProcede = valor; }
+    public String getResultadoRecuperacionRegularidad() { return resultadoRecuperacionRegularidad; }
+    public void setResultadoRecuperacionRegularidad(String valor) { resultadoRecuperacionRegularidad = valor; }
+    public List<String> getCondicionesRecuperacionCumplidas() { return condicionesRecuperacionCumplidas; }
+    public List<String> getCondicionesRecuperacionNoCumplidas() { return condicionesRecuperacionNoCumplidas; }
+    public List<Long> getUdsReprobadasImpedimentoRecuperacion() { return udsReprobadasImpedimentoRecuperacion; }
+    public List<Long> getPendientesNoReprobatoriosRecuperacion() { return pendientesNoReprobatoriosRecuperacion; }
     public EstadoActividadAcademicaV2 getEstadoActividadAcademica() { return estadoActividadAcademica; }
     public void setEstadoActividadAcademica(EstadoActividadAcademicaV2 valor) { estadoActividadAcademica = valor; }
     public Integer getTotalReprobadas() { return totalReprobadas; }

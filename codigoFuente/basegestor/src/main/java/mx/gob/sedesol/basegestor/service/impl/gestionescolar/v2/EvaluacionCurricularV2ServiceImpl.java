@@ -134,6 +134,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         determinarSituacionAcademica(resultado, contexto, reprobadas, datosInsuficientesSituacion);
         resultado.setTotalReprobadas(Integer.valueOf(reprobadas));
         evaluarActividadAcademica(resultado, contexto);
+        evaluarRecuperacionRegularidad(resultado, contexto, unidadesNormalizadas);
         resultado.setAvanceCondicionado(Boolean.valueOf(Boolean.TRUE.equals(contexto.getAvanceCondicionado())));
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_03, null, 20,
                 "SITUACION_SEPARADA_DE_AVANCE",
@@ -165,6 +166,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         String situacion = reprobadas > 0 ? "IRREGULAR" : (datosInsuficientes ? "NO_DETERMINADA" : "REGULAR");
         resultado.setSituacionAcademica(situacion);
         resultado.setSituacionAcademicaCalculada(situacion);
+        resultado.setSituacionAcademicaActualCalculada(situacion);
         resultado.setCantidadReprobadasVigentes(Integer.valueOf(reprobadas));
         resultado.setCargaMaximaFuturaSombra(Integer.valueOf(reprobadas > 0 ? 6 : 8));
         String detalle = "Situación=" + situacion + "; reprobadasVigentes=" + reprobadas
@@ -176,6 +178,69 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 reprobadas > 0 ? CodigoMotivoCurricularV2.REPROBACION_ACUMULADA
                         : (datosInsuficientes ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null),
                 80, "SITUACION_ACADEMICA_" + situacion, detalle);
+    }
+
+    /** RN-1.3 reutiliza RN-1.2; no recalcula ni modifica la situación productiva. */
+    private void evaluarRecuperacionRegularidad(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        resultado.setRecuperacionRegularidadEvaluada(Boolean.TRUE);
+        resultado.getUdsReprobadasImpedimentoRecuperacion().addAll(resultado.getUnidadesOrigenIrregularidad());
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if ((unidad.getEstado() == EstadoUnidadCurricularV2.BAJA_PARCIAL
+                    || unidad.getEstado() == EstadoUnidadCurricularV2.NO_CURSADA)
+                    && unidad.getIdPrograma() != null)
+                resultado.getPendientesNoReprobatoriosRecuperacion().add(unidad.getIdPrograma());
+        }
+
+        boolean hayReprobadas = resultado.getCantidadReprobadasVigentes() != null
+                && resultado.getCantidadReprobadasVigentes().intValue() > 0;
+        boolean seriacionPendiente = existeSeriacionPendiente(unidades);
+        boolean severa = resultado.getCantidadReprobadasVigentes() != null
+                && resultado.getCantidadReprobadasVigentes().intValue() >= 4;
+        boolean actividadIndeterminada = resultado.getEstadoActividadAcademica() == EstadoActividadAcademicaV2.NO_DETERMINADO;
+        boolean actividadImpide = resultado.getEstadoActividadAcademica() == EstadoActividadAcademicaV2.INACTIVO
+                || resultado.getEstadoActividadAcademica() == EstadoActividadAcademicaV2.LIMITE_INACTIVIDAD_ALCANZADO
+                || resultado.getEstadoActividadAcademica() == EstadoActividadAcademicaV2.REINCORPORACION_PENDIENTE;
+        boolean permanenciaIndeterminada = !Boolean.TRUE.equals(contexto.getPermanenciaDentroLimiteComprobada())
+                && !Boolean.TRUE.equals(contexto.getLimitePermanenciaExcedido());
+
+        if (!hayReprobadas) resultado.getCondicionesRecuperacionCumplidas().add("SIN_REPROBACIONES_VIGENTES");
+        else resultado.getCondicionesRecuperacionNoCumplidas().add("REPROBACIONES_VIGENTES:" + resultado.getUnidadesOrigenIrregularidad());
+        if (!seriacionPendiente) resultado.getCondicionesRecuperacionCumplidas().add("SERIACION_SIN_PENDIENTES_CONOCIDAS");
+        else resultado.getCondicionesRecuperacionNoCumplidas().add("SERIACION_PENDIENTE");
+        if (!severa) resultado.getCondicionesRecuperacionCumplidas().add("SIN_RESTRICCION_SEVERA_6_4_OBSERVADA");
+        else resultado.getCondicionesRecuperacionNoCumplidas().add("RESTRICCION_SEVERA_6_4_OBSERVADA");
+        if (Boolean.TRUE.equals(contexto.getPermanenciaDentroLimiteComprobada()))
+            resultado.getCondicionesRecuperacionCumplidas().add("PERMANENCIA_DENTRO_LIMITE_COMPROBADA");
+        else if (Boolean.TRUE.equals(contexto.getLimitePermanenciaExcedido()))
+            resultado.getCondicionesRecuperacionNoCumplidas().add("LIMITE_PERMANENCIA_EXCEDIDO");
+        else resultado.getCondicionesRecuperacionNoCumplidas().add("PERMANENCIA_NO_DETERMINADA");
+        if (!actividadIndeterminada && !actividadImpide) resultado.getCondicionesRecuperacionCumplidas().add("ACTIVIDAD_COMPATIBLE");
+        else if (actividadIndeterminada) resultado.getCondicionesRecuperacionNoCumplidas().add("ACTIVIDAD_NO_DETERMINADA");
+        else resultado.getCondicionesRecuperacionNoCumplidas().add("ACTIVIDAD_IMPIDE_CONTINUIDAD:" + resultado.getEstadoActividadAcademica());
+
+        if (hayReprobadas || seriacionPendiente || severa || actividadImpide
+                || Boolean.TRUE.equals(contexto.getLimitePermanenciaExcedido())) {
+            resultado.setRecuperacionRegularidadProcede(Boolean.FALSE);
+            resultado.setResultadoRecuperacionRegularidad("NO_PROCEDE");
+        } else if ("NO_DETERMINADA".equals(resultado.getSituacionAcademicaCalculada())
+                || actividadIndeterminada || permanenciaIndeterminada) {
+            resultado.setRecuperacionRegularidadProcede(null);
+            resultado.setResultadoRecuperacionRegularidad("REQUIERE_REVISION");
+        } else {
+            resultado.setRecuperacionRegularidadProcede(Boolean.TRUE);
+            resultado.setResultadoRecuperacionRegularidad("PROCEDE_EN_SOMBRA");
+        }
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_1_3,
+                Boolean.TRUE.equals(resultado.getRecuperacionRegularidadProcede()) ? null
+                        : (hayReprobadas ? CodigoMotivoCurricularV2.REPROBACION_ACUMULADA
+                                : CodigoMotivoCurricularV2.DATOS_INSUFICIENTES),
+                75, "RECUPERACION_REGULARIDAD_" + resultado.getResultadoRecuperacionRegularidad(),
+                "SituacionRN12=" + resultado.getSituacionAcademicaActualCalculada()
+                        + "; cumplidas=" + resultado.getCondicionesRecuperacionCumplidas()
+                        + "; noCumplidas=" + resultado.getCondicionesRecuperacionNoCumplidas()
+                        + "; reprobadas=" + resultado.getUdsReprobadasImpedimentoRecuperacion()
+                        + "; pendientesNoReprobatorios=" + resultado.getPendientesNoReprobatoriosRecuperacion());
     }
 
     private boolean esReprobacionVigentePrevia(UnidadEvaluacionCurricularV2DTO unidad) {
@@ -457,6 +522,16 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
 
     private boolean existeSeriacionConocida(List<UnidadEvaluacionCurricularV2DTO> unidades) {
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (Boolean.TRUE.equals(unidad.getSeriacionDirectaConocida())
+                    || Boolean.TRUE.equals(unidad.getSeriacionIndirectaConocida())
+                    || Boolean.TRUE.equals(unidad.getSeriacionConocida())) return true;
+        }
+        return false;
+    }
+
+    private boolean existeSeriacionPendiente(List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (!esPendiente(unidad)) continue;
             if (Boolean.TRUE.equals(unidad.getSeriacionDirectaConocida())
                     || Boolean.TRUE.equals(unidad.getSeriacionIndirectaConocida())
                     || Boolean.TRUE.equals(unidad.getSeriacionConocida())) return true;
