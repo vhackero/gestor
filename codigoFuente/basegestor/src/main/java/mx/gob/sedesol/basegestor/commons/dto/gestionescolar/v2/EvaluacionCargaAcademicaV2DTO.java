@@ -21,6 +21,9 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private Boolean ctr01Rn61Procedente;
     /** RN-6.3: ruta descriptiva de regularización; nunca ejecuta reinscripción. */
     private Boolean aplicaRn63;
+    /** RN-5.1: clasificación concurrente; no sustituye situación académica. */
+    private Boolean aplicaRn51;
+    private String condicionRegularizacion;
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -60,6 +63,10 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public void setCtr01Rn61Procedente(Boolean valor) { ctr01Rn61Procedente = valor; }
     public Boolean getAplicaRn63() { return aplicaRn63; }
     public void setAplicaRn63(Boolean valor) { aplicaRn63 = valor; }
+    public Boolean getAplicaRn51() { return aplicaRn51; }
+    public void setAplicaRn51(Boolean valor) { aplicaRn51 = valor; }
+    public String getCondicionRegularizacion() { return condicionRegularizacion; }
+    public void setCondicionRegularizacion(String valor) { condicionRegularizacion = valor; }
     public Boolean getRequiereRevisionRegularizacion() { return requiereRevisionRegularizacion; }
     public void setRequiereRevisionRegularizacion(Boolean valor) { requiereRevisionRegularizacion = valor; }
     public Integer getCargaDisponibleRegularizacion() { return cargaDisponibleRegularizacion; }
