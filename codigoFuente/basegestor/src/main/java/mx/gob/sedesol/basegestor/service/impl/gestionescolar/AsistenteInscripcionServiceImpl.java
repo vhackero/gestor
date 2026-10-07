@@ -52,6 +52,7 @@ import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ConfiguracionEvaluacionCurricularV2Service;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ContextoEvaluacionCurricularV2Adapter;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.EvaluacionCurricularV2Service;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.TrazabilidadEvaluacionCurricularV2Service;
 import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.FichaDescProgramaService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService;
@@ -87,6 +88,9 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
     @Autowired
     private EvaluacionCurricularV2Service evaluacionCurricularV2Service;
+
+    @Autowired
+    private TrazabilidadEvaluacionCurricularV2Service trazabilidadEvaluacionCurricularV2Service;
 
     @Override
     public AsistenteInscripcionContextoDTO obtenerContextoAsistido(Long idPersona) throws InscripcionException {
@@ -177,7 +181,14 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         ContextoEvaluacionCurricularV2DTO contextoSombra = contextoEvaluacionCurricularV2Adapter
                 .construirDesdeAsistente(contextoVigente);
         contextoSombra.setVersionReglas(configuracion.getVersionReglas());
-        return evaluacionCurricularV2Service.evaluarSombra(contextoSombra);
+        resultado = evaluacionCurricularV2Service.evaluarSombra(contextoSombra);
+        try {
+            trazabilidadEvaluacionCurricularV2Service.registrarSombra(contextoSombra, resultado);
+        } catch (RuntimeException ex) {
+            // RN-9.5 en modo sombra jamás interrumpe el flujo vigente de inscripción/asistente.
+            resultado.getMensajes().add("La trazabilidad V2 no pudo registrarse; la evaluación vigente permanece sin cambios.");
+        }
+        return resultado;
     }
 
     private void mapearResumenPeriodo(AsistenteInscripcionContextoDTO dto, InscripcionContextoDTO contextoBase) {
