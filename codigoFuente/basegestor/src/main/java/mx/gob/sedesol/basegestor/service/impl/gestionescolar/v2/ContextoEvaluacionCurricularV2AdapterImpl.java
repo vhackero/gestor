@@ -11,9 +11,11 @@ import org.springframework.stereotype.Service;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaPendienteUnidadV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaIndisponibilidadOfertaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.UnidadEvaluacionCurricularV2DTO;
@@ -61,6 +63,7 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         resultado.setTotalReprobadasOrigen(contextoAsistente.getTotalReprobadasAcumuladas());
         resultado.setCargaMinimaOrigen(contextoAsistente.getCargaMinima());
         resultado.setCargaMaximaOrigen(contextoAsistente.getCargaMaxima());
+        resultado.setBajaTemporalRegistrada(Boolean.valueOf(existeBajaTemporal(contextoAsistente.getContextoBase())));
         return resultado;
     }
 
@@ -77,6 +80,9 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
             unidad.setSemestre(unidadOrigen.getSemestre());
             unidad.setBloque(unidadOrigen.getBloque() == null ? null : unidadOrigen.getBloque().toString());
             unidad.setOfertada(unidadOrigen.getOfertada());
+            if (!Boolean.TRUE.equals(unidadOrigen.getOfertada())) {
+                unidad.setCausaIndisponibilidadOferta(CausaIndisponibilidadOfertaV2.UD_NO_OFERTADA_PERIODO);
+            }
             unidad.setSeleccionableOrigen(unidadOrigen.getSeleccionable());
             unidad.setBloqueadaOrigen(unidadOrigen.getBloqueada());
             unidad.setSeriacionDirectaConocida(unidadOrigen.getBloqueada());
@@ -150,5 +156,16 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
 
     private boolean contiene(String valor, String esperado) {
         return valor.contains(esperado);
+    }
+
+    private boolean existeBajaTemporal(InscripcionContextoDTO contexto) {
+        if (contexto == null || contexto.getEstadoAcademico() == null
+                || contexto.getEstadoAcademico().getMateriasBajas() == null) return false;
+        for (InscripcionBajasDTO baja : contexto.getEstadoAcademico().getMateriasBajas()) {
+            if (baja != null && baja.getTipoBaja() != null && normalizar(baja.getTipoBaja()).contains("TEMPORAL")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

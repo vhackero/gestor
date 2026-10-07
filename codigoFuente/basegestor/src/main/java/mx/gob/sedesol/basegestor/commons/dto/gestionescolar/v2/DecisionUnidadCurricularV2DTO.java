@@ -19,6 +19,7 @@ public class DecisionUnidadCurricularV2DTO implements Serializable {
     private String explicacionTecnica;
     private List<EstadoDecisionUnidadCurricularV2> estadosSombra = new ArrayList<EstadoDecisionUnidadCurricularV2>();
     private List<CodigoMotivoCurricularV2> motivos = new ArrayList<CodigoMotivoCurricularV2>();
+    private List<CodigoExcepcionCurricularV2> excepcionesRelacionadas = new ArrayList<CodigoExcepcionCurricularV2>();
     private List<String> referenciasFuente = new ArrayList<String>();
     private List<TrazaReglaAplicadaV2DTO> trazas = new ArrayList<TrazaReglaAplicadaV2DTO>();
 
@@ -40,6 +41,7 @@ public class DecisionUnidadCurricularV2DTO implements Serializable {
     public void setExplicacionTecnica(String explicacionTecnica) { this.explicacionTecnica = explicacionTecnica; }
     public List<EstadoDecisionUnidadCurricularV2> getEstadosSombra() { return estadosSombra; }
     public List<CodigoMotivoCurricularV2> getMotivos() { return motivos; }
+    public List<CodigoExcepcionCurricularV2> getExcepcionesRelacionadas() { return excepcionesRelacionadas; }
     public List<String> getReferenciasFuente() { return referenciasFuente; }
     public List<TrazaReglaAplicadaV2DTO> getTrazas() { return trazas; }
 }

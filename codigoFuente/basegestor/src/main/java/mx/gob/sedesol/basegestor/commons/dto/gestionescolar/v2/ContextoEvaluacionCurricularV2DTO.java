@@ -28,6 +28,7 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Integer cargaMinimaOrigen;
     private Integer cargaMaximaOrigen;
     private Boolean ctr01ProcedenciaFutura = Boolean.FALSE;
+    private Boolean bajaTemporalRegistrada = Boolean.FALSE;
     private Boolean avanceCondicionado;
     private Date fechaEvaluacion;
     private List<UnidadEvaluacionCurricularV2DTO> unidades = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
@@ -62,6 +63,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setCargaMaximaOrigen(Integer cargaMaximaOrigen) { this.cargaMaximaOrigen = cargaMaximaOrigen; }
     public Boolean getCtr01ProcedenciaFutura() { return ctr01ProcedenciaFutura; }
     public void setCtr01ProcedenciaFutura(Boolean ctr01ProcedenciaFutura) { this.ctr01ProcedenciaFutura = ctr01ProcedenciaFutura; }
+    public Boolean getBajaTemporalRegistrada() { return bajaTemporalRegistrada; }
+    public void setBajaTemporalRegistrada(Boolean bajaTemporalRegistrada) { this.bajaTemporalRegistrada = bajaTemporalRegistrada; }
     public Boolean getAvanceCondicionado() { return avanceCondicionado; }
     public void setAvanceCondicionado(Boolean avanceCondicionado) { this.avanceCondicionado = avanceCondicionado; }
     public Date getFechaEvaluacion() { return fechaEvaluacion; }

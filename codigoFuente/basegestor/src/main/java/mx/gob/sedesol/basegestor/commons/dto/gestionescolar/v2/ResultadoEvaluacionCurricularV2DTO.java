@@ -19,6 +19,7 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     private List<DecisionUnidadCurricularV2DTO> decisiones = new ArrayList<DecisionUnidadCurricularV2DTO>();
     private List<CodigoMotivoCurricularV2> restricciones = new ArrayList<CodigoMotivoCurricularV2>();
     private List<String> excepciones = new ArrayList<String>();
+    private List<ExcepcionCurricularV2DTO> excepcionesEvaluadas = new ArrayList<ExcepcionCurricularV2DTO>();
     private List<String> mensajes = new ArrayList<String>();
     private List<TrazaReglaAplicadaV2DTO> trazas = new ArrayList<TrazaReglaAplicadaV2DTO>();
 
@@ -37,6 +38,7 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     public List<DecisionUnidadCurricularV2DTO> getDecisiones() { return decisiones; }
     public List<CodigoMotivoCurricularV2> getRestricciones() { return restricciones; }
     public List<String> getExcepciones() { return excepciones; }
+    public List<ExcepcionCurricularV2DTO> getExcepcionesEvaluadas() { return excepcionesEvaluadas; }
     public List<String> getMensajes() { return mensajes; }
     public List<TrazaReglaAplicadaV2DTO> getTrazas() { return trazas; }
 }
