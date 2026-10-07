@@ -192,6 +192,8 @@ public class EvaluacionCurricularV2Fase1CTest {
         unidad.setOfertada(Boolean.valueOf(ofertada));
         unidad.setSeleccionableOrigen(Boolean.valueOf(ofertada));
         unidad.setBloqueadaOrigen(Boolean.FALSE);
+        unidad.setGrupoActivoConocido(Boolean.valueOf(ofertada));
+        unidad.setCupoDisponibleConocido(Boolean.valueOf(ofertada));
         return unidad;
     }
 }

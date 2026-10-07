@@ -23,6 +23,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurri
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcreditacionV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoLimiteIntentosV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionIntentosUnidadV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaMinimaCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaMinimaCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoMejoraPromedioV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionMejoraPromedioUnidadV2DTO;
@@ -160,6 +162,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                     "CONDICION_REGISTRADA_SIN_EFECTO_PRODUCTIVO",
                     "Cuatro o más reprobadas se registran como condición concurrente; la RN-6.4 no se activa en Fase 1A.");
         }
+        evaluarCargaMinima(resultado, contexto, unidadesNormalizadas);
         evaluarExcepcionesTipificadas(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
@@ -529,40 +532,154 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         return "La baja temporal total carece de duración autorizada o transcurrida verificable.";
     }
 
+    /**
+     * RN-4.1: cálculo semestral y descriptivo de carga mínima. La oferta origen
+     * y las decisiones productivas nunca se sustituyen; se reutilizan las
+     * decisiones sombra ya construidas por RN-2.2 y seriación.
+     */
+    private void evaluarCargaMinima(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaMinimaCurricularV2DTO evaluacion = new EvaluacionCargaMinimaCurricularV2DTO();
+        evaluacion.setCargaMinimaNormativa(Integer.valueOf(3));
+        agregarUnico(evaluacion.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_4_1);
+        agregarUnico(evaluacion.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_2_2);
+        agregarUnico(evaluacion.getReglasRelacionadas(), CodigoReglaCurricularV2.CTR_02);
+        resultado.setEvaluacionCargaMinima(evaluacion);
+
+        if (contexto.getSemestreObjetivo() == null) {
+            evaluacion.setAplicaCargaMinimaNormativa(null);
+            evaluacion.setEstado(EstadoCargaMinimaCurricularV2.NO_DETERMINADO);
+            agregarUnico(evaluacion.getMotivos(), CodigoMotivoCurricularV2.DATOS_INSUFICIENTES);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_4_1,
+                    CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, 55,
+                    "CARGA_MINIMA_SEMESTRE_OBJETIVO_NO_DETERMINADO",
+                    "No se evalúa la carga mínima sin semestre objetivo verificable.");
+            return;
+        }
+        if (contexto.getSemestreObjetivo().intValue() <= 1) {
+            evaluacion.setAplicaCargaMinimaNormativa(Boolean.FALSE);
+            evaluacion.setEstado(EstadoCargaMinimaCurricularV2.NO_DETERMINADO);
+            evaluacion.getEvidencias().add("PRIMER_SEMESTRE_REQUIERE_REGLA_ESPECIFICA_NUEVO_INGRESO");
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_4_1, null, 55,
+                    "CARGA_MINIMA_NUEVO_INGRESO_SEPARADA",
+                    "RN-4.1 no aplica automáticamente el mínimo general al primer semestre; se conserva la regla específica de nuevo ingreso.");
+            return;
+        }
+
+        evaluacion.setAplicaCargaMinimaNormativa(Boolean.TRUE);
+        List<UnidadEvaluacionCurricularV2DTO> obligatorias = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
+        List<UnidadEvaluacionCurricularV2DTO> optativas = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
+        boolean datosInsuficientes = false;
+        boolean hayPendientes = false;
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (esPendiente(unidad)) hayPendientes = true;
+            String descarte = motivoDescarteCargaMinima(unidad, buscarDecision(resultado, unidad.getIdPrograma()));
+            if (descarte != null) {
+                evaluacion.getUdsDescartadas().add(obtenerLlaveUnidad(unidad) + ":" + descarte);
+                if ("DATOS_INSUFICIENTES".equals(descarte)) datosInsuficientes = true;
+                if ("SERIACION".equals(descarte)) agregarUnico(evaluacion.getMotivos(), CodigoMotivoCurricularV2.SERIACION_DIRECTA);
+                if ("SIN_OFERTA".equals(descarte)) agregarUnico(evaluacion.getMotivos(), CodigoMotivoCurricularV2.SIN_OFERTA);
+                if ("SIN_CUPO".equals(descarte)) agregarUnico(evaluacion.getMotivos(), CodigoMotivoCurricularV2.SIN_CUPO);
+                continue;
+            }
+            if (esObligatoria(unidad)) obligatorias.add(unidad); else optativas.add(unidad);
+        }
+        registrarUnidadesCarga(evaluacion, obligatorias, true);
+        registrarUnidadesCarga(evaluacion, optativas, false);
+        int total = obligatorias.size() + optativas.size();
+        evaluacion.setCantidadObligatoriasElegibles(Integer.valueOf(obligatorias.size()));
+        evaluacion.setCantidadOptativasElegibles(Integer.valueOf(optativas.size()));
+        evaluacion.setCantidadTotalElegible(Integer.valueOf(total));
+        evaluacion.setCargaMinimaEvaluada(Integer.valueOf(Math.min(3, total)));
+        evaluacion.getEvidencias().add("EVALUACION_SEMESTRAL;OBLIGATORIAS=" + obligatorias.size()
+                + ";OPTATIVAS=" + optativas.size() + ";TOTAL=" + total);
+
+        if (!hayPendientes) {
+            evaluacion.setCargaMinimaAlcanzable(null);
+            evaluacion.setEstado(EstadoCargaMinimaCurricularV2.NO_DETERMINADO);
+            evaluacion.getEvidencias().add("SIN_UD_PENDIENTES_PARA_CONSTRUIR_CARGA_SOMBRA");
+        } else if (datosInsuficientes && total < 3) {
+            evaluacion.setCargaMinimaAlcanzable(null);
+            evaluacion.setEstado(EstadoCargaMinimaCurricularV2.REQUIERE_REVISION);
+            agregarUnico(evaluacion.getMotivos(), CodigoMotivoCurricularV2.DATOS_INSUFICIENTES);
+        } else if (total >= 3) {
+            evaluacion.setCargaMinimaAlcanzable(Boolean.TRUE);
+            evaluacion.setEstado(optativas.isEmpty() ? EstadoCargaMinimaCurricularV2.CUMPLE_MINIMO
+                    : EstadoCargaMinimaCurricularV2.CUMPLE_MEDIANTE_OPTATIVAS);
+        } else {
+            evaluacion.setCargaMinimaAlcanzable(Boolean.FALSE);
+            evaluacion.setExcepcionCargaMinimaAplicable(Boolean.TRUE);
+            evaluacion.setEstado(EstadoCargaMinimaCurricularV2.EXCEPCION_MINIMO_APLICABLE);
+            registrarExcepcionCargaMinima(resultado, contexto, obligatorias, optativas, evaluacion);
+        }
+        CodigoMotivoCurricularV2 motivo = evaluacion.getExcepcionCargaMinimaAplicable()
+                ? CodigoMotivoCurricularV2.CARGA_MINIMA_EXCEPCION
+                : (datosInsuficientes ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null);
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_4_1, motivo, 55,
+                "CARGA_MINIMA_" + evaluacion.getEstado(),
+                "minimo=3; obligatorias=" + obligatorias.size() + "; optativas=" + optativas.size()
+                        + "; total=" + total + "; descartadas=" + evaluacion.getUdsDescartadas()
+                        + "; excepcion=" + evaluacion.getExcepcionCargaMinimaAplicable());
+    }
+
+    private String motivoDescarteCargaMinima(UnidadEvaluacionCurricularV2DTO unidad,
+            DecisionUnidadCurricularV2DTO decision) {
+        if (unidad.getEstado() == EstadoUnidadCurricularV2.NO_DETERMINADO) return "DATOS_INSUFICIENTES";
+        if (!esPendiente(unidad)) return "NO_PENDIENTE";
+        if (unidad.getOfertada() == null || unidad.getGrupoActivoConocido() == null
+                || unidad.getCupoDisponibleConocido() == null) return "DATOS_INSUFICIENTES";
+        if (!Boolean.TRUE.equals(unidad.getOfertada()) || !Boolean.TRUE.equals(unidad.getGrupoActivoConocido())) return "SIN_OFERTA";
+        if (unidad.getCausaIndisponibilidadOferta() == CausaIndisponibilidadOfertaV2.SIN_CUPO
+                || !Boolean.TRUE.equals(unidad.getCupoDisponibleConocido())) return "SIN_CUPO";
+        if (Boolean.FALSE.equals(unidad.getSeleccionableOrigen())) return "RESTRICCION_ORIGEN";
+        if (Boolean.TRUE.equals(unidad.getSeriacionDirectaConocida())
+                || Boolean.TRUE.equals(unidad.getSeriacionIndirectaConocida())
+                || Boolean.TRUE.equals(unidad.getSeriacionConocida())
+                || (decision != null && (decision.getEstadosSombra().contains(EstadoDecisionUnidadCurricularV2.BLOQUEADA)
+                        || decision.getEstadosSombra().contains(EstadoDecisionUnidadCurricularV2.REQUIERE_REVISION)))) return "SERIACION";
+        if (decision == null || !Boolean.TRUE.equals(decision.getOfertaEvaluadaV2())) return "RESTRICCION_V2";
+        return null;
+    }
+
+    private void registrarUnidadesCarga(EvaluacionCargaMinimaCurricularV2DTO evaluacion,
+            List<UnidadEvaluacionCurricularV2DTO> unidades, boolean obligatorias) {
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (unidad.getIdPrograma() != null) {
+                if (obligatorias) evaluacion.getUdsObligatoriasConsideradas().add(unidad.getIdPrograma());
+                else evaluacion.getUdsOptativasConsideradas().add(unidad.getIdPrograma());
+            }
+            evaluacion.getEvidencias().addAll(unidad.getReferenciasHistoricas());
+        }
+    }
+
+    private void registrarExcepcionCargaMinima(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> obligatorias,
+            List<UnidadEvaluacionCurricularV2DTO> optativas, EvaluacionCargaMinimaCurricularV2DTO evaluacion) {
+        registrarExcepcion(resultado, contexto, CodigoExcepcionCurricularV2.CARGA_MINIMA_OBLIGATORIAS_INSUFICIENTES,
+                TipoExcepcionCurricularV2.TIPIFICADA, CodigoReglaCurricularV2.RN_4_1,
+                EstadoExcepcionCurricularV2.APLICABLE, obligatorias,
+                "OBLIGATORIAS_ELEGIBLES_OFERTADAS<3",
+                "Las obligatorias elegibles no alcanzan la carga mínima; se consideran optativas compatibles en modo sombra.");
+        List<UnidadEvaluacionCurricularV2DTO> relacionadas = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
+        relacionadas.addAll(obligatorias); relacionadas.addAll(optativas);
+        registrarExcepcion(resultado, contexto, CodigoExcepcionCurricularV2.CARGA_MINIMA_OPTATIVAS_INSUFICIENTES,
+                TipoExcepcionCurricularV2.TIPIFICADA, CodigoReglaCurricularV2.RN_4_1,
+                EstadoExcepcionCurricularV2.APLICABLE, relacionadas,
+                "OBLIGATORIAS_Y_OPTATIVAS_ELEGIBLES_OFERTADAS<3",
+                "Incluso considerando optativas elegibles no se alcanza el mínimo; se permite una carga evaluada inferior sólo en sombra.");
+        if (obligatorias.size() == 1 && relacionadas.size() == 1) {
+            registrarExcepcion(resultado, contexto, CodigoExcepcionCurricularV2.CARGA_MINIMA_UNICA_OBLIGATORIA_PENDIENTE,
+                    TipoExcepcionCurricularV2.TIPIFICADA, CodigoReglaCurricularV2.RN_4_1,
+                    EstadoExcepcionCurricularV2.APLICABLE, obligatorias,
+                    "UNICA_OBLIGATORIA_PENDIENTE_DISPONIBLE",
+                    "Existe una única UD obligatoria pendiente disponible; RN-4.1 admite carga evaluada de una UD sólo en sombra.");
+        }
+        agregarUnico(evaluacion.getMotivos(), CodigoMotivoCurricularV2.CARGA_MINIMA_EXCEPCION);
+    }
+
     private void evaluarExcepcionesTipificadas(ResultadoEvaluacionCurricularV2DTO resultado,
             ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
         List<UnidadEvaluacionCurricularV2DTO> obligatoriasPendientes = filtrarPendientes(unidades, true);
-        List<UnidadEvaluacionCurricularV2DTO> optativasPendientes = filtrarPendientes(unidades, false);
-        List<UnidadEvaluacionCurricularV2DTO> obligatoriasOfertadas = filtrarOfertadas(obligatoriasPendientes);
-        List<UnidadEvaluacionCurricularV2DTO> optativasOfertadas = filtrarOfertadas(optativasPendientes);
-        Integer cargaMinima = contexto.getCargaMinimaOrigen();
-
-        if (cargaMinima != null && cargaMinima.intValue() > 0
-                && obligatoriasOfertadas.size() < cargaMinima.intValue()) {
-            registrarExcepcion(resultado, contexto, CodigoExcepcionCurricularV2.CARGA_MINIMA_OBLIGATORIAS_INSUFICIENTES,
-                    TipoExcepcionCurricularV2.TIPIFICADA, CodigoReglaCurricularV2.RN_4_1,
-                    EstadoExcepcionCurricularV2.APLICABLE, obligatoriasOfertadas,
-                    "OBLIGATORIAS_ELEGIBLES_OFERTADAS<" + cargaMinima,
-                    "Las UD obligatorias elegibles/ofertadas no alcanzan la carga mínima; sólo se registra la excepción en sombra.");
-        }
-        if (cargaMinima != null && cargaMinima.intValue() > 0
-                && obligatoriasOfertadas.size() + optativasOfertadas.size() < cargaMinima.intValue()) {
-            List<UnidadEvaluacionCurricularV2DTO> relacionadas = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
-            relacionadas.addAll(obligatoriasOfertadas);
-            relacionadas.addAll(optativasOfertadas);
-            registrarExcepcion(resultado, contexto, CodigoExcepcionCurricularV2.CARGA_MINIMA_OPTATIVAS_INSUFICIENTES,
-                    TipoExcepcionCurricularV2.TIPIFICADA, CodigoReglaCurricularV2.RN_4_1,
-                    EstadoExcepcionCurricularV2.APLICABLE, relacionadas,
-                    "OBLIGATORIAS_Y_OPTATIVAS_ELEGIBLES_OFERTADAS<" + cargaMinima,
-                    "Incluso al considerar optativas elegibles no se alcanza la carga mínima; no se altera carga productiva.");
-        }
-        if (obligatoriasPendientes.size() == 1 && obligatoriasOfertadas.size() == 1) {
-            registrarExcepcion(resultado, contexto, CodigoExcepcionCurricularV2.CARGA_MINIMA_UNICA_OBLIGATORIA_PENDIENTE,
-                    TipoExcepcionCurricularV2.TIPIFICADA, CodigoReglaCurricularV2.RN_4_1,
-                    EstadoExcepcionCurricularV2.APLICABLE, obligatoriasOfertadas,
-                    "UNICA_OBLIGATORIA_PENDIENTE_DISPONIBLE",
-                    "Existe una única obligatoria pendiente disponible; la excepción de carga mínima sólo queda trazada.");
-        }
 
         if (Integer.valueOf(5).equals(contexto.getSemestreObjetivo())) {
             if (obligatoriasPendientes.size() == 1) {

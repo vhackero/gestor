@@ -25,6 +25,7 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     private List<Long> udsReprobadasImpedimentoRecuperacion = new ArrayList<Long>();
     private List<Long> pendientesNoReprobatoriosRecuperacion = new ArrayList<Long>();
     private List<EvaluacionIntentosUnidadV2DTO> evaluacionesIntentos = new ArrayList<EvaluacionIntentosUnidadV2DTO>();
+    private EvaluacionCargaMinimaCurricularV2DTO evaluacionCargaMinima;
     private Integer oportunidadesMejoraUtilizadas;
     private Integer oportunidadesMejoraDisponibles;
     private List<EvaluacionMejoraPromedioUnidadV2DTO> evaluacionesMejoraPromedio = new ArrayList<EvaluacionMejoraPromedioUnidadV2DTO>();
@@ -66,6 +67,8 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     public List<Long> getUdsReprobadasImpedimentoRecuperacion() { return udsReprobadasImpedimentoRecuperacion; }
     public List<Long> getPendientesNoReprobatoriosRecuperacion() { return pendientesNoReprobatoriosRecuperacion; }
     public List<EvaluacionIntentosUnidadV2DTO> getEvaluacionesIntentos() { return evaluacionesIntentos; }
+    public EvaluacionCargaMinimaCurricularV2DTO getEvaluacionCargaMinima() { return evaluacionCargaMinima; }
+    public void setEvaluacionCargaMinima(EvaluacionCargaMinimaCurricularV2DTO valor) { evaluacionCargaMinima = valor; }
     public Integer getOportunidadesMejoraUtilizadas() { return oportunidadesMejoraUtilizadas; }
     public void setOportunidadesMejoraUtilizadas(Integer valor) { oportunidadesMejoraUtilizadas = valor; }
     public Integer getOportunidadesMejoraDisponibles() { return oportunidadesMejoraDisponibles; }
