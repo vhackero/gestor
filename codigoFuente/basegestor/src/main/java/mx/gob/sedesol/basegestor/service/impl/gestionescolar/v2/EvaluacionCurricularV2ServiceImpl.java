@@ -25,6 +25,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoLimiteInten
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionIntentosUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaMinimaCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaMinimaCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaMaximaCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaMaximaCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoMejoraPromedioV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionMejoraPromedioUnidadV2DTO;
@@ -163,6 +165,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                     "Cuatro o más reprobadas se registran como condición concurrente; la RN-6.4 no se activa en Fase 1A.");
         }
         evaluarCargaMinima(resultado, contexto, unidadesNormalizadas);
+        evaluarCargaMaxima(resultado, contexto, unidadesNormalizadas);
         evaluarExcepcionesTipificadas(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
@@ -181,7 +184,8 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         resultado.setSituacionAcademicaCalculada(situacion);
         resultado.setSituacionAcademicaActualCalculada(situacion);
         resultado.setCantidadReprobadasVigentes(Integer.valueOf(reprobadas));
-        resultado.setCargaMaximaFuturaSombra(Integer.valueOf(reprobadas > 0 ? 6 : 8));
+        resultado.setCargaMaximaFuturaSombra("NO_DETERMINADA".equals(situacion)
+                ? null : Integer.valueOf(reprobadas > 0 ? 6 : 8));
         String detalle = "Situación=" + situacion + "; reprobadasVigentes=" + reprobadas
                 + "; UD=" + resultado.getUnidadesOrigenIrregularidad()
                 + "; descartadas=" + resultado.getDatosDescartadosSituacionAcademica()
@@ -675,6 +679,118 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                     "Existe una única UD obligatoria pendiente disponible; RN-4.1 admite carga evaluada de una UD sólo en sombra.");
         }
         agregarUnico(evaluacion.getMotivos(), CodigoMotivoCurricularV2.CARGA_MINIMA_EXCEPCION);
+    }
+
+    /** RN-4.2 reutiliza RN-1.2, RN-2.2 y RN-4.1; la propuesta no altera selección ni carga. */
+    private void evaluarCargaMaxima(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaMaximaCurricularV2DTO evaluacion = new EvaluacionCargaMaximaCurricularV2DTO();
+        evaluacion.setSituacionAcademicaUtilizada(resultado.getSituacionAcademicaCalculada());
+        agregarUnico(evaluacion.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_1_2);
+        agregarUnico(evaluacion.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_2_2);
+        agregarUnico(evaluacion.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_4_1);
+        agregarUnico(evaluacion.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_4_2);
+        resultado.setEvaluacionCargaMaxima(evaluacion);
+
+        String situacion = resultado.getSituacionAcademicaCalculada();
+        if (!"REGULAR".equals(situacion) && !"IRREGULAR".equals(situacion)) {
+            evaluacion.setEstado("NO_DETERMINADA".equals(situacion)
+                    ? EstadoCargaMaximaCurricularV2.REQUIERE_REVISION : EstadoCargaMaximaCurricularV2.NO_DETERMINADO);
+            agregarUnico(evaluacion.getMotivos(), CodigoMotivoCurricularV2.DATOS_INSUFICIENTES);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_4_2,
+                    CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, 55,
+                    "CARGA_MAXIMA_SITUACION_NO_DETERMINADA",
+                    "RN-4.2 reutiliza RN-1.2 y no infiere máximo de 8 o 6 sin situación académica determinada.");
+            return;
+        }
+
+        int maximo = "REGULAR".equals(situacion) ? 8 : 6;
+        evaluacion.setCargaMaximaNormativa(Integer.valueOf(maximo));
+        List<UnidadEvaluacionCurricularV2DTO> prioritarias = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
+        List<UnidadEvaluacionCurricularV2DTO> compatibles = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
+        List<UnidadEvaluacionCurricularV2DTO> optativas = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            String descarte = motivoDescarteCargaMinima(unidad, buscarDecision(resultado, unidad.getIdPrograma()));
+            if (descarte != null) {
+                evaluacion.getUdsDescartadas().add(obtenerLlaveUnidad(unidad) + ":" + descarte);
+                continue;
+            }
+            if (esObligatoria(unidad) && unidad.getEstado() == EstadoUnidadCurricularV2.REPROBADA) prioritarias.add(unidad);
+            else if (esObligatoria(unidad)) compatibles.add(unidad);
+            else optativas.add(unidad);
+        }
+        registrarUnidadesMaximas(evaluacion, prioritarias, "PRIORITARIA");
+        evaluacion.setCantidadPrioritarias(Integer.valueOf(prioritarias.size()));
+        evaluacion.setCantidadCompatibles(Integer.valueOf(compatibles.size()));
+        evaluacion.setCantidadOptativas(Integer.valueOf(optativas.size()));
+        int total = prioritarias.size() + compatibles.size() + optativas.size();
+        evaluacion.setCargaActualEvaluada(Integer.valueOf(total));
+        evaluacion.setExcedeMaximo(Boolean.valueOf(total > maximo));
+        evaluacion.setCargaDisponible(Integer.valueOf(Math.max(0, maximo - total)));
+        evaluacion.getEvidencias().add("SITUACION_RN_1_2=" + situacion + ";MAXIMO=" + maximo
+                + ";PRIORITARIAS=" + prioritarias.size() + ";COMPATIBLES=" + compatibles.size()
+                + ";OPTATIVAS=" + optativas.size());
+        if (resultado.getEvaluacionCargaMinima() != null)
+            evaluacion.getEvidencias().add("RN_4_1=" + resultado.getEvaluacionCargaMinima().getEstado());
+        if (resultado.getCondicionesDetectadas().contains(CondicionCurricularV2.CUATRO_O_MAS_REPROBADAS)) {
+            agregarUnico(evaluacion.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_4);
+            evaluacion.getEvidencias().add("RN_6_4_OBSERVACIONAL_SIN_EFECTO_PRODUCTIVO");
+        }
+        if (Integer.valueOf(5).equals(contexto.getSemestreObjetivo())) {
+            agregarUnico(evaluacion.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_1);
+            evaluacion.getEvidencias().add("CTR_01_RN_6_1_PROCEDENCIA_FUTURA_SIN_ACTIVAR");
+        }
+
+        int espacios = maximo;
+        espacios = incluirGrupoCargaMaxima(evaluacion, prioritarias, espacios, "PRIORITARIA");
+        if (espacios >= 0) espacios = incluirGrupoCargaMaxima(evaluacion, compatibles, espacios, "COMPATIBLE");
+        if (espacios >= 0) espacios = incluirGrupoCargaMaxima(evaluacion, optativas, espacios, "OPTATIVA");
+        if (total < maximo) evaluacion.setEstado(EstadoCargaMaximaCurricularV2.DENTRO_DE_MAXIMO);
+        else if (total == maximo) evaluacion.setEstado(EstadoCargaMaximaCurricularV2.MAXIMO_ALCANZADO);
+        else if (espacios < 0) {
+            evaluacion.setEstado(EstadoCargaMaximaCurricularV2.REQUIERE_REVISION);
+            evaluacion.setRequiereRevisionPorEmpate(Boolean.TRUE);
+            agregarUnico(evaluacion.getMotivos(), CodigoMotivoCurricularV2.DATOS_INSUFICIENTES);
+        } else evaluacion.setEstado(EstadoCargaMaximaCurricularV2.EXCEDE_MAXIMO);
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_4_2,
+                evaluacion.getEstado() == EstadoCargaMaximaCurricularV2.REQUIERE_REVISION
+                        ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null,
+                55, "CARGA_MAXIMA_" + evaluacion.getEstado(),
+                "situacion=" + situacion + "; maximo=" + maximo + "; evaluada=" + total
+                        + "; incluidas=" + evaluacion.getUdsIncluidasSombra()
+                        + "; fuera=" + evaluacion.getUdsFueraPorMaximo()
+                        + "; descartadas=" + evaluacion.getUdsDescartadas());
+    }
+
+    private void registrarUnidadesMaximas(EvaluacionCargaMaximaCurricularV2DTO evaluacion,
+            List<UnidadEvaluacionCurricularV2DTO> unidades, String categoria) {
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (unidad.getIdPrograma() != null) evaluacion.getUdsPrioritarias().add(unidad.getIdPrograma());
+            evaluacion.getEvidencias().add(categoria + ":" + obtenerLlaveUnidad(unidad));
+        }
+    }
+
+    /** Devuelve -1 si una frontera contiene UD de igual prioridad sin desempate aprobado. */
+    private int incluirGrupoCargaMaxima(EvaluacionCargaMaximaCurricularV2DTO evaluacion,
+            List<UnidadEvaluacionCurricularV2DTO> grupo, int espacios, String categoria) {
+        if (grupo.isEmpty()) return espacios;
+        if (espacios == 0) {
+            registrarFueraPorMaximo(evaluacion, grupo, categoria + "_FUERA_POR_MAXIMO");
+            return 0;
+        }
+        if (grupo.size() <= espacios) {
+            for (UnidadEvaluacionCurricularV2DTO unidad : grupo)
+                if (unidad.getIdPrograma() != null) evaluacion.getUdsIncluidasSombra().add(unidad.getIdPrograma());
+            return espacios - grupo.size();
+        }
+        registrarFueraPorMaximo(evaluacion, grupo, categoria + "_EMPATE_SIN_CRITERIO_APROBADO");
+        return -1;
+    }
+
+    private void registrarFueraPorMaximo(EvaluacionCargaMaximaCurricularV2DTO evaluacion,
+            List<UnidadEvaluacionCurricularV2DTO> unidades, String motivo) {
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades)
+            evaluacion.getUdsFueraPorMaximo().add(obtenerLlaveUnidad(unidad) + ":" + motivo);
     }
 
     private void evaluarExcepcionesTipificadas(ResultadoEvaluacionCurricularV2DTO resultado,
