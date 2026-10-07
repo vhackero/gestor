@@ -73,6 +73,13 @@ public class TrazabilidadEvaluacionCurricularV2ServiceImpl implements Trazabilid
         return encabezado.getId();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public String obtenerHashContexto(Long idEvaluacion) {
+        TblEvaluacionCurricularV2 entidad = idEvaluacion == null ? null : evaluacionRepo.findOne(idEvaluacion);
+        return entidad == null ? null : entidad.getHashContexto();
+    }
+
     private TblEvaluacionCurricularUdV2 mapearUnidad(Long idEvaluacion, UnidadEvaluacionCurricularV2DTO unidad,
             DecisionUnidadCurricularV2DTO decision) {
         TblEvaluacionCurricularUdV2 entidad = new TblEvaluacionCurricularUdV2();

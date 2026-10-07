@@ -103,3 +103,25 @@ La infraestructura FASE 0, la migración DEV y la suite de 14 pruebas están cor
 **GATE_FASE_0_A_1 = NO_APROBADO**
 
 No se inicia FASE 1 hasta autorizar un mecanismo de ejecución/consulta sombra de sólo lectura para esos cinco casos, o hasta aceptar formalmente que la validación de datos reales se ejecute en una fase posterior.
+
+## 7. Actualización FASE 1E — 2026-10-06
+
+FASE 1 incorporó el mecanismo interno `DiagnosticoE2EEvaluacionCurricularV2Service`. No es un endpoint HTTP, vista JSF ni controlador público. La operación requiere simultáneamente las propiedades JVM `sigie.v2.diagnostico.e2e.habilitado=true` y `sigie.v2.diagnostico.e2e.ambiente=DEV` o `QA`; en cualquier otro valor, incluido `PROD`, rechaza la ejecución antes de consultar el contexto. También exige que V2 esté habilitada y en modo sombra.
+
+El mecanismo obtiene el contexto por `AsistenteInscripcionService.obtenerContextoAsistido`, lo adapta y evalúa con V2, registra la auditoría RN-9.5 y recupera la huella persistida. Antes y después calcula una huella técnica de oferta, seleccionabilidad y bloqueo de las UD fuente. La salida contiene sólo identificadores técnicos, conteos, hash y banderas de auditoría/inmutabilidad; no incorpora nombre, correo ni matrícula.
+
+La implementación y la prueba de protección por defecto se compilaron localmente. No se desplegó ni invocó esta versión desde un contenedor SIGIE DEV/QA durante esta ejecución. Aunque se detectó un listener local, no se obtuvo evidencia de que ejecutara el artefacto del commit actual ni se expuso un invocador interno administrado. Por seguridad no se forzó una llamada contra un ambiente no identificado.
+
+| Caso | Ejecución E2E F1E | Motivo |
+|---|---|---|
+| A. Regular | CASO_NO_DISPONIBLE | El diagnóstico no fue desplegado/invocado en contenedor DEV/QA actual. |
+| B. 1–3 reprobadas | CASO_NO_DISPONIBLE | Mismo motivo. |
+| C. 4 o más reprobadas | CASO_NO_DISPONIBLE | Mismo motivo. |
+| D. Baja parcial | CASO_NO_DISPONIBLE | Mismo motivo. |
+| E. UD no cursada | CASO_NO_DISPONIBLE | Mismo motivo. |
+| F. Seriación | CASO_NO_DISPONIBLE | Mismo motivo. |
+| G. Múltiples intentos | CASO_NO_DISPONIBLE | Mismo motivo. |
+| H. Falta de oferta/cupo | CASO_NO_DISPONIBLE | Mismo motivo. |
+| I. Excepción extraordinaria | CASO_NO_DISPONIBLE | Mismo motivo. |
+
+**GATE_E2E_V2 = NO_APROBADO.** La causa es exclusivamente la falta de una ejecución real y controlada del diagnóstico en DEV/QA con el artefacto actual. No hay evidencia de modificación de oferta, selección, carga, bloqueos, inscripción o mapa por V2. Para resolver el gate se requiere desplegar la rama en DEV/QA, habilitar temporalmente las dos propiedades de diagnóstico sólo en dicho ambiente, invocar el servicio desde una herramienta administrada con un identificador técnico autorizado y contrastar las filas de auditoría contra el contexto fuente antes/después.
