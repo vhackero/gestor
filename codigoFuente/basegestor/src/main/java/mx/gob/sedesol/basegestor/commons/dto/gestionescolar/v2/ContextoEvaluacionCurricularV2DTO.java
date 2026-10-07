@@ -39,6 +39,9 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Boolean datosActividadContradictorios = Boolean.FALSE;
     private Boolean permanenciaDentroLimiteComprobada = Boolean.FALSE;
     private Boolean limitePermanenciaExcedido = Boolean.FALSE;
+    private Boolean dictaminacionEgresoConocida = Boolean.FALSE;
+    private Boolean dictaminacionEgresoIniciada = Boolean.FALSE;
+    private Integer oportunidadesMejoraUtilizadas;
     private Integer periodosBajaTemporalAutorizados;
     private Integer periodosBajaTemporalTranscurridos;
     private List<String> periodosActividadConsiderados = new ArrayList<String>();
@@ -97,6 +100,12 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setPermanenciaDentroLimiteComprobada(Boolean valor) { permanenciaDentroLimiteComprobada = valor; }
     public Boolean getLimitePermanenciaExcedido() { return limitePermanenciaExcedido; }
     public void setLimitePermanenciaExcedido(Boolean valor) { limitePermanenciaExcedido = valor; }
+    public Boolean getDictaminacionEgresoConocida() { return dictaminacionEgresoConocida; }
+    public void setDictaminacionEgresoConocida(Boolean valor) { dictaminacionEgresoConocida = valor; }
+    public Boolean getDictaminacionEgresoIniciada() { return dictaminacionEgresoIniciada; }
+    public void setDictaminacionEgresoIniciada(Boolean valor) { dictaminacionEgresoIniciada = valor; }
+    public Integer getOportunidadesMejoraUtilizadas() { return oportunidadesMejoraUtilizadas; }
+    public void setOportunidadesMejoraUtilizadas(Integer valor) { oportunidadesMejoraUtilizadas = valor; }
     public Integer getPeriodosBajaTemporalAutorizados() { return periodosBajaTemporalAutorizados; }
     public void setPeriodosBajaTemporalAutorizados(Integer valor) { periodosBajaTemporalAutorizados = valor; }
     public Integer getPeriodosBajaTemporalTranscurridos() { return periodosBajaTemporalTranscurridos; }

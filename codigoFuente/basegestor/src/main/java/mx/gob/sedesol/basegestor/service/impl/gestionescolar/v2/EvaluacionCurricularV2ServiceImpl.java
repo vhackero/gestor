@@ -24,6 +24,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcre
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoLimiteIntentosV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionIntentosUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoMejoraPromedioV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionMejoraPromedioUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoDecisionUnidadCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoActividadAcademicaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoExcepcionCurricularV2;
@@ -142,6 +144,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarActividadAcademica(resultado, contexto);
         evaluarRecuperacionRegularidad(resultado, contexto, unidadesNormalizadas);
         evaluarLimiteIntentos(resultado, contexto, unidadesNormalizadas);
+        evaluarMejoraPromedio(resultado, contexto, unidadesNormalizadas);
         resultado.setAvanceCondicionado(Boolean.valueOf(Boolean.TRUE.equals(contexto.getAvanceCondicionado())));
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_03, null, 20,
                 "SITUACION_SEPARADA_DE_AVANCE",
@@ -359,6 +362,94 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         if (intento.getIdEjecucionTecnico() != null && !intento.getIdEjecucionTecnico().trim().isEmpty()) return intento.getIdEjecucionTecnico();
         if (intento.getIdParticipacion() != null) return "PARTICIPACION:" + intento.getIdParticipacion();
         return null;
+    }
+
+    /** RN-1.5 usa un límite global de mejoras, independiente de RN-1.4. */
+    private void evaluarMejoraPromedio(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        Integer utilizadas = obtenerOportunidadesMejora(contexto, unidades);
+        resultado.setOportunidadesMejoraUtilizadas(utilizadas);
+        resultado.setOportunidadesMejoraDisponibles(utilizadas == null ? null : Integer.valueOf(Math.max(0, 3 - utilizadas.intValue())));
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            EvaluacionMejoraPromedioUnidadV2DTO evaluacion = evaluarMejoraUnidad(unidad, contexto, resultado);
+            resultado.getEvaluacionesMejoraPromedio().add(evaluacion);
+            CodigoMotivoCurricularV2 motivo = motivoMejora(evaluacion.getEstado());
+            TrazaReglaAplicadaV2DTO traza = crearTraza(contexto, CodigoReglaCurricularV2.RN_1_5, motivo, 40,
+                    "MEJORA_PROMEDIO_" + evaluacion.getEstado(),
+                    "UD=" + evaluacion.getIdPrograma() + "; oportunidadesUsadas=" + utilizadas
+                            + "; disponibles=" + resultado.getOportunidadesMejoraDisponibles()
+                            + "; calificacionFavorable=" + evaluacion.getCalificacionFavorable()
+                            + "; prioridad=" + evaluacion.getPrioridad() + "; motivos=" + evaluacion.getMotivos()
+                            + "; evidencia=" + evaluacion.getEvidencias());
+            resultado.getTrazas().add(traza);
+            agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_1_5);
+            DecisionUnidadCurricularV2DTO decision = buscarDecision(resultado, unidad.getIdPrograma());
+            if (decision != null) decision.getTrazas().add(traza);
+        }
+    }
+
+    private Integer obtenerOportunidadesMejora(ContextoEvaluacionCurricularV2DTO contexto,
+            List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        if (contexto.getOportunidadesMejoraUtilizadas() != null) return contexto.getOportunidadesMejoraUtilizadas();
+        Set<String> mejoras = new HashSet<String>();
+        boolean identidadIncompleta = false;
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) for (IntentoAcreditacionUnidadV2DTO intento : unidad.getIntentosAcreditacion()) {
+            if (!Boolean.TRUE.equals(intento.getRecursamientoMejora())) continue;
+            String llave = llaveIntento(intento);
+            if (llave == null) identidadIncompleta = true; else mejoras.add(llave);
+        }
+        return identidadIncompleta ? null : Integer.valueOf(mejoras.size());
+    }
+
+    private EvaluacionMejoraPromedioUnidadV2DTO evaluarMejoraUnidad(UnidadEvaluacionCurricularV2DTO unidad,
+            ContextoEvaluacionCurricularV2DTO contexto, ResultadoEvaluacionCurricularV2DTO resultado) {
+        EvaluacionMejoraPromedioUnidadV2DTO evaluacion = new EvaluacionMejoraPromedioUnidadV2DTO();
+        evaluacion.setIdPrograma(unidad.getIdPrograma()); evaluacion.setClave(unidad.getClave());
+        evaluacion.setOportunidadesMejoraUtilizadas(resultado.getOportunidadesMejoraUtilizadas());
+        evaluacion.setOportunidadesMejoraDisponibles(resultado.getOportunidadesMejoraDisponibles());
+        evaluacion.setOfertada(unidad.getOfertada()); evaluacion.setCupoDisponible(unidad.getCupoDisponibleConocido());
+        for (IntentoAcreditacionUnidadV2DTO intento : unidad.getIntentosAcreditacion()) {
+            if (intento.getCalificacionFinal() == null) continue;
+            if (evaluacion.getCalificacionFavorable() == null || intento.getCalificacionFinal().doubleValue() > evaluacion.getCalificacionFavorable().doubleValue())
+                evaluacion.setCalificacionFavorable(intento.getCalificacionFinal());
+            evaluacion.getEvidencias().add("CALIFICACION_HISTORICA:" + intento.getCalificacionFinal());
+        }
+        if (unidad.getEstado() != EstadoUnidadCurricularV2.ACREDITADA) {
+            evaluacion.setEstado(EstadoMejoraPromedioV2.NO_ELEGIBLE); evaluacion.getMotivos().add("UD_NO_ACREDITADA");
+        } else if (resultado.getEstadoActividadAcademica() != EstadoActividadAcademicaV2.ACTIVO) {
+            evaluacion.setEstado(resultado.getEstadoActividadAcademica() == EstadoActividadAcademicaV2.NO_DETERMINADO
+                    ? EstadoMejoraPromedioV2.REQUIERE_REVISION : EstadoMejoraPromedioV2.ESTUDIANTE_NO_ACTIVO);
+            evaluacion.getMotivos().add("ESTADO_ACTIVIDAD:" + resultado.getEstadoActividadAcademica());
+        } else if (!Boolean.TRUE.equals(contexto.getDictaminacionEgresoConocida())) {
+            evaluacion.setEstado(EstadoMejoraPromedioV2.REQUIERE_REVISION); evaluacion.getMotivos().add("EGRESO_NO_DETERMINADO");
+        } else if (Boolean.TRUE.equals(contexto.getDictaminacionEgresoIniciada())) {
+            evaluacion.setEstado(EstadoMejoraPromedioV2.EGRESO_INICIADO); evaluacion.getMotivos().add("DICTAMINACION_EGRESO_INICIADA");
+        } else if (resultado.getOportunidadesMejoraUtilizadas() == null) {
+            evaluacion.setEstado(EstadoMejoraPromedioV2.REQUIERE_REVISION); evaluacion.getMotivos().add("OPORTUNIDADES_MEJORA_NO_DETERMINADAS");
+        } else if (resultado.getOportunidadesMejoraUtilizadas().intValue() >= 3) {
+            evaluacion.setEstado(EstadoMejoraPromedioV2.LIMITE_MEJORA_AGOTADO); evaluacion.getMotivos().add("LIMITE_GLOBAL_MEJORA_AGOTADO");
+        } else if (!Boolean.TRUE.equals(unidad.getOfertada())) {
+            evaluacion.setEstado(EstadoMejoraPromedioV2.NO_ELEGIBLE); evaluacion.getMotivos().add("UD_NO_OFERTADA");
+        } else if (unidad.getGrupoActivoConocido() == null || unidad.getCupoDisponibleConocido() == null) {
+            evaluacion.setEstado(EstadoMejoraPromedioV2.REQUIERE_REVISION); evaluacion.getMotivos().add("GRUPO_O_CUPO_NO_DETERMINADO");
+        } else if (!Boolean.TRUE.equals(unidad.getGrupoActivoConocido())) {
+            evaluacion.setEstado(EstadoMejoraPromedioV2.NO_ELEGIBLE); evaluacion.getMotivos().add("SIN_GRUPO_ACTIVO");
+        } else if (!Boolean.TRUE.equals(unidad.getCupoDisponibleConocido())) {
+            evaluacion.setEstado(EstadoMejoraPromedioV2.SIN_CUPO); evaluacion.getMotivos().add("SIN_CUPO");
+        } else {
+            evaluacion.setEstado(EstadoMejoraPromedioV2.ELEGIBLE_EN_SOMBRA);
+            evaluacion.getMotivos().add("PRIORIDAD_INFERIOR_A_PRIMERA_INSCRIPCION_Y_REPROBACION");
+            evaluacion.getMotivos().add("OBJETIVO_REFERENCIA_PROMEDIO_8_5");
+        }
+        return evaluacion;
+    }
+
+    private CodigoMotivoCurricularV2 motivoMejora(EstadoMejoraPromedioV2 estado) {
+        if (estado == EstadoMejoraPromedioV2.SIN_CUPO) return CodigoMotivoCurricularV2.SIN_CUPO;
+        if (estado == EstadoMejoraPromedioV2.EGRESO_INICIADO) return CodigoMotivoCurricularV2.EGRESO_INICIADO;
+        if (estado == EstadoMejoraPromedioV2.ESTUDIANTE_NO_ACTIVO) return CodigoMotivoCurricularV2.ESTUDIANTE_NO_ACTIVO;
+        if (estado == EstadoMejoraPromedioV2.LIMITE_MEJORA_AGOTADO) return CodigoMotivoCurricularV2.LIMITE_MEJORA_PROMEDIO;
+        return estado == EstadoMejoraPromedioV2.REQUIERE_REVISION ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null;
     }
 
     /**

@@ -25,6 +25,9 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     private List<Long> udsReprobadasImpedimentoRecuperacion = new ArrayList<Long>();
     private List<Long> pendientesNoReprobatoriosRecuperacion = new ArrayList<Long>();
     private List<EvaluacionIntentosUnidadV2DTO> evaluacionesIntentos = new ArrayList<EvaluacionIntentosUnidadV2DTO>();
+    private Integer oportunidadesMejoraUtilizadas;
+    private Integer oportunidadesMejoraDisponibles;
+    private List<EvaluacionMejoraPromedioUnidadV2DTO> evaluacionesMejoraPromedio = new ArrayList<EvaluacionMejoraPromedioUnidadV2DTO>();
     private EstadoActividadAcademicaV2 estadoActividadAcademica = EstadoActividadAcademicaV2.NO_DETERMINADO;
     private Integer totalReprobadas;
     private Boolean avanceCondicionado = Boolean.FALSE;
@@ -63,6 +66,11 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     public List<Long> getUdsReprobadasImpedimentoRecuperacion() { return udsReprobadasImpedimentoRecuperacion; }
     public List<Long> getPendientesNoReprobatoriosRecuperacion() { return pendientesNoReprobatoriosRecuperacion; }
     public List<EvaluacionIntentosUnidadV2DTO> getEvaluacionesIntentos() { return evaluacionesIntentos; }
+    public Integer getOportunidadesMejoraUtilizadas() { return oportunidadesMejoraUtilizadas; }
+    public void setOportunidadesMejoraUtilizadas(Integer valor) { oportunidadesMejoraUtilizadas = valor; }
+    public Integer getOportunidadesMejoraDisponibles() { return oportunidadesMejoraDisponibles; }
+    public void setOportunidadesMejoraDisponibles(Integer valor) { oportunidadesMejoraDisponibles = valor; }
+    public List<EvaluacionMejoraPromedioUnidadV2DTO> getEvaluacionesMejoraPromedio() { return evaluacionesMejoraPromedio; }
     public EstadoActividadAcademicaV2 getEstadoActividadAcademica() { return estadoActividadAcademica; }
     public void setEstadoActividadAcademica(EstadoActividadAcademicaV2 valor) { estadoActividadAcademica = valor; }
     public Integer getTotalReprobadas() { return totalReprobadas; }
