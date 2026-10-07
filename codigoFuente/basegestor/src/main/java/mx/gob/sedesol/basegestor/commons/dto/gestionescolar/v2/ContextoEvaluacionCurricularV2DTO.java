@@ -16,6 +16,7 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Long idPersona;
     private Long idPlan;
     private Long idPeriodo;
+    private String periodoNormativo;
     private Long idProcesoInscripcion;
     private Integer semestreObjetivo;
     private String bloqueObjetivo;
@@ -35,6 +36,7 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Boolean reincorporacionRegistrada = Boolean.FALSE;
     private Boolean bajaDefinitivaRegistrada = Boolean.FALSE;
     private Boolean actividadAcademicaComprobada = Boolean.FALSE;
+    private Boolean seriacionComprobada = Boolean.TRUE;
     private Boolean limiteInactividadAlcanzado = Boolean.FALSE;
     private Boolean datosActividadContradictorios = Boolean.FALSE;
     private Boolean permanenciaDentroLimiteComprobada = Boolean.FALSE;
@@ -56,6 +58,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setIdPlan(Long idPlan) { this.idPlan = idPlan; }
     public Long getIdPeriodo() { return idPeriodo; }
     public void setIdPeriodo(Long idPeriodo) { this.idPeriodo = idPeriodo; }
+    public String getPeriodoNormativo() { return periodoNormativo; }
+    public void setPeriodoNormativo(String valor) { periodoNormativo = valor; }
     public Long getIdProcesoInscripcion() { return idProcesoInscripcion; }
     public void setIdProcesoInscripcion(Long idProcesoInscripcion) { this.idProcesoInscripcion = idProcesoInscripcion; }
     public Integer getSemestreObjetivo() { return semestreObjetivo; }
@@ -92,6 +96,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setBajaDefinitivaRegistrada(Boolean valor) { bajaDefinitivaRegistrada = valor; }
     public Boolean getActividadAcademicaComprobada() { return actividadAcademicaComprobada; }
     public void setActividadAcademicaComprobada(Boolean valor) { actividadAcademicaComprobada = valor; }
+    public Boolean getSeriacionComprobada() { return seriacionComprobada; }
+    public void setSeriacionComprobada(Boolean valor) { seriacionComprobada = valor; }
     public Boolean getLimiteInactividadAlcanzado() { return limiteInactividadAlcanzado; }
     public void setLimiteInactividadAlcanzado(Boolean valor) { limiteInactividadAlcanzado = valor; }
     public Boolean getDatosActividadContradictorios() { return datosActividadContradictorios; }

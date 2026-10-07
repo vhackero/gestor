@@ -27,6 +27,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaMi
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaMinimaCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaMaximaCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaMaximaCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaAcademicaV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaAcademicaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoMejoraPromedioV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionMejoraPromedioUnidadV2DTO;
@@ -167,6 +169,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarCargaMinima(resultado, contexto, unidadesNormalizadas);
         evaluarCargaMaxima(resultado, contexto, unidadesNormalizadas);
         evaluarExcepcionesTipificadas(resultado, contexto, unidadesNormalizadas);
+        evaluarCargaAcademicaIntegrada(resultado, contexto);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -791,6 +794,125 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             List<UnidadEvaluacionCurricularV2DTO> unidades, String motivo) {
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades)
             evaluacion.getUdsFueraPorMaximo().add(obtenerLlaveUnidad(unidad) + ":" + motivo);
+    }
+
+    /** RN-4.3 orquesta resultados ya calculados; no repite cálculos de mínimo, máximo o situación. */
+    private void evaluarCargaAcademicaIntegrada(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto) {
+        EvaluacionCargaAcademicaV2DTO integrada = new EvaluacionCargaAcademicaV2DTO();
+        copiarResultadoCargaMinima(integrada, resultado.getEvaluacionCargaMinima());
+        copiarResultadoCargaMaxima(integrada, resultado.getEvaluacionCargaMaxima());
+        integrada.setSituacionAcademica(resultado.getSituacionAcademicaCalculada());
+        agregarUnico(integrada.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_1_2);
+        agregarUnico(integrada.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_2_2);
+        agregarUnico(integrada.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_4_1);
+        agregarUnico(integrada.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_4_2);
+        agregarUnico(integrada.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_4_3);
+        resultado.setEvaluacionCargaAcademica(integrada);
+
+        boolean seriacionIndeterminada = !Boolean.TRUE.equals(contexto.getSeriacionComprobada());
+        if (seriacionIndeterminada) {
+            integrada.setRequiereRevision(Boolean.TRUE);
+            agregarUnico(integrada.getCausasExclusion(), CodigoMotivoCurricularV2.DATOS_INSUFICIENTES);
+            integrada.getEvidencias().add("SERIACION_NO_COMPROBADA");
+        }
+        Boolean ctr01 = procedenciaCtr01(contexto);
+        integrada.setCtr01Rn61Procedente(ctr01);
+        if (Boolean.TRUE.equals(ctr01)) {
+            agregarUnico(integrada.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_1);
+            integrada.getEvidencias().add("CTR_01_RN_6_1_PROCEDENTE_SIN_ACTIVAR");
+        } else if (Integer.valueOf(5).equals(contexto.getSemestreObjetivo()) && ctr01 == null) {
+            integrada.getEvidencias().add("CTR_01_NO_DETERMINADO_POR_PERIODO_NORMATIVO");
+        }
+        boolean rn64 = resultado.getCondicionesDetectadas().contains(CondicionCurricularV2.CUATRO_O_MAS_REPROBADAS);
+        integrada.setRn64AplicableEnFuturaFase(Boolean.valueOf(rn64));
+        if (rn64) {
+            agregarUnico(integrada.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_4);
+            integrada.getEvidencias().add("RN_6_4_APLICABLE_EN_FUTURA_FASE_SIN_EFECTO_ACTUAL");
+        }
+        for (ExcepcionCurricularV2DTO excepcion : resultado.getExcepcionesEvaluadas()) {
+            integrada.getEvidencias().add("EXCEPCION:" + excepcion.getCodigo() + ":" + excepcion.getEstado());
+            if (excepcion.getTipo() == TipoExcepcionCurricularV2.EXTRAORDINARIA
+                    || excepcion.getEstado() == EstadoExcepcionCurricularV2.REQUIERE_REVISION) {
+                integrada.setRequiereRevision(Boolean.TRUE);
+            }
+        }
+
+        if (integrada.getCargaMinimaNormativa() != null && integrada.getCargaMaximaNormativa() != null
+                && integrada.getCargaMinimaNormativa().intValue() > integrada.getCargaMaximaNormativa().intValue()) {
+            integrada.setRequiereRevision(Boolean.TRUE);
+            integrada.getEvidencias().add("INVARIANTE_MINIMO_MAYOR_QUE_MAXIMO");
+        }
+        if (integrada.getCargaMinimaNormativa() == null || integrada.getCargaMaximaNormativa() == null) {
+            integrada.setEstado("NO_DETERMINADA".equals(integrada.getSituacionAcademica())
+                    ? EstadoCargaAcademicaV2.REQUIERE_REVISION : EstadoCargaAcademicaV2.NO_DETERMINADA);
+            integrada.setRequiereRevision(Boolean.TRUE);
+        } else if (Boolean.TRUE.equals(integrada.getRequiereRevision())) {
+            integrada.setEstado(EstadoCargaAcademicaV2.REQUIERE_REVISION);
+        } else if (Boolean.FALSE.equals(integrada.getMaximoCumplido())) {
+            integrada.setEstado(EstadoCargaAcademicaV2.RESTRINGIDA);
+        } else if (Boolean.TRUE.equals(integrada.getExcepcionMinimoAplicable())) {
+            integrada.setEstado(EstadoCargaAcademicaV2.VALIDA_CON_EXCEPCION_MINIMO);
+        } else if (Boolean.TRUE.equals(integrada.getMinimoCumplido())) {
+            integrada.setEstado(EstadoCargaAcademicaV2.VALIDA);
+        } else if (contieneCausa(integrada.getUdsExcluidas(), "SIN_CUPO")) {
+            integrada.setEstado(EstadoCargaAcademicaV2.INCOMPLETA_POR_CUPO);
+        } else if (contieneCausa(integrada.getUdsExcluidas(), "SIN_OFERTA")) {
+            integrada.setEstado(EstadoCargaAcademicaV2.INCOMPLETA_POR_OFERTA);
+        } else {
+            integrada.setEstado(EstadoCargaAcademicaV2.RESTRINGIDA);
+        }
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_4_3,
+                integrada.getEstado() == EstadoCargaAcademicaV2.REQUIERE_REVISION
+                        ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null,
+                55, "CARGA_ACADEMICA_" + integrada.getEstado(),
+                "situacion=" + integrada.getSituacionAcademica() + "; minimo=" + integrada.getCargaMinimaNormativa()
+                        + "; maximo=" + integrada.getCargaMaximaNormativa() + "; carga=" + integrada.getCargaEvaluada()
+                        + "; excepcionMinimo=" + integrada.getExcepcionMinimoAplicable()
+                        + "; rn64=" + rn64 + "; ctr01=" + ctr01
+                        + "; excluidas=" + integrada.getUdsExcluidas());
+    }
+
+    private void copiarResultadoCargaMinima(EvaluacionCargaAcademicaV2DTO integrada,
+            EvaluacionCargaMinimaCurricularV2DTO minima) {
+        if (minima == null) return;
+        integrada.setCargaMinimaNormativa(minima.getCargaMinimaNormativa());
+        integrada.setMinimoCumplido(Boolean.valueOf(minima.getEstado() == EstadoCargaMinimaCurricularV2.CUMPLE_MINIMO
+                || minima.getEstado() == EstadoCargaMinimaCurricularV2.CUMPLE_MEDIANTE_OPTATIVAS));
+        integrada.setExcepcionMinimoAplicable(minima.getExcepcionCargaMinimaAplicable());
+        integrada.getUdsExcluidas().addAll(minima.getUdsDescartadas());
+        integrada.getEvidencias().addAll(minima.getEvidencias());
+        integrada.getReglasRelacionadas().addAll(minima.getReglasRelacionadas());
+        for (CodigoMotivoCurricularV2 motivo : minima.getMotivos()) agregarUnico(integrada.getCausasExclusion(), motivo);
+    }
+
+    private void copiarResultadoCargaMaxima(EvaluacionCargaAcademicaV2DTO integrada,
+            EvaluacionCargaMaximaCurricularV2DTO maxima) {
+        if (maxima == null) return;
+        integrada.setCargaMaximaNormativa(maxima.getCargaMaximaNormativa());
+        integrada.setCargaEvaluada(maxima.getCargaActualEvaluada());
+        integrada.setMaximoCumplido(maxima.getExcedeMaximo() == null ? null : Boolean.valueOf(!maxima.getExcedeMaximo().booleanValue()));
+        integrada.getUdsPrioritarias().addAll(maxima.getUdsPrioritarias());
+        integrada.getUdsIncluidasSombra().addAll(maxima.getUdsIncluidasSombra());
+        integrada.getUdsExcluidas().addAll(maxima.getUdsFueraPorMaximo());
+        integrada.getUdsExcluidas().addAll(maxima.getUdsDescartadas());
+        integrada.getEvidencias().addAll(maxima.getEvidencias());
+        integrada.getReglasRelacionadas().addAll(maxima.getReglasRelacionadas());
+        for (CodigoMotivoCurricularV2 motivo : maxima.getMotivos()) agregarUnico(integrada.getCausasExclusion(), motivo);
+        if (maxima.getEstado() == EstadoCargaMaximaCurricularV2.REQUIERE_REVISION
+                || Boolean.TRUE.equals(maxima.getRequiereRevisionPorEmpate())) integrada.setRequiereRevision(Boolean.TRUE);
+    }
+
+    private Boolean procedenciaCtr01(ContextoEvaluacionCurricularV2DTO contexto) {
+        if (!Integer.valueOf(5).equals(contexto.getSemestreObjetivo())) return Boolean.FALSE;
+        String periodo = contexto.getPeriodoNormativo();
+        if (periodo == null || !periodo.matches("\\d{4}-[12]")) return null;
+        return Boolean.valueOf(periodo.compareTo("2027-1") >= 0);
+    }
+
+    private boolean contieneCausa(List<String> valores, String causa) {
+        for (String valor : valores) if (valor != null && valor.contains(causa)) return true;
+        return false;
     }
 
     private void evaluarExcepcionesTipificadas(ResultadoEvaluacionCurricularV2DTO resultado,
