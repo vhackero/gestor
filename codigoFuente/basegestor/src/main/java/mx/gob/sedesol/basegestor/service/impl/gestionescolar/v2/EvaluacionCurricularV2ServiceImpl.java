@@ -3,8 +3,10 @@ package mx.gob.sedesol.basegestor.service.impl.gestionescolar.v2;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,10 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CondicionCurricul
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcreditacionV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoLimiteIntentosV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionIntentosUnidadV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoDecisionUnidadCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoActividadAcademicaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoExcepcionCurricularV2;
@@ -135,6 +141,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         resultado.setTotalReprobadas(Integer.valueOf(reprobadas));
         evaluarActividadAcademica(resultado, contexto);
         evaluarRecuperacionRegularidad(resultado, contexto, unidadesNormalizadas);
+        evaluarLimiteIntentos(resultado, contexto, unidadesNormalizadas);
         resultado.setAvanceCondicionado(Boolean.valueOf(Boolean.TRUE.equals(contexto.getAvanceCondicionado())));
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_03, null, 20,
                 "SITUACION_SEPARADA_DE_AVANCE",
@@ -265,6 +272,93 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             existente.setIntentos(candidata.getIntentos());
         if (Boolean.FALSE.equals(candidata.getReprobacionPeriodoPrevioConocida()))
             existente.setReprobacionPeriodoPrevioConocida(Boolean.FALSE);
+        if (candidata.getIntentosFallidosHistoricosConfiables() != null && (existente.getIntentosFallidosHistoricosConfiables() == null
+                || candidata.getIntentosFallidosHistoricosConfiables().intValue() > existente.getIntentosFallidosHistoricosConfiables().intValue()))
+            existente.setIntentosFallidosHistoricosConfiables(candidata.getIntentosFallidosHistoricosConfiables());
+        existente.getIntentosAcreditacion().addAll(candidata.getIntentosAcreditacion());
+    }
+
+    /** RN-1.4 cuenta intentos por UD; nunca los usa como conteo de reprobadas. */
+    private void evaluarLimiteIntentos(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            EvaluacionIntentosUnidadV2DTO evaluacion = evaluarIntentosUnidad(unidad);
+            resultado.getEvaluacionesIntentos().add(evaluacion);
+            CodigoMotivoCurricularV2 motivo = evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.LIMITE_AGOTADO
+                    ? CodigoMotivoCurricularV2.LIMITE_INTENTOS
+                    : (evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.REQUIERE_REVISION
+                            || evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.NO_DETERMINADO
+                            ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null);
+            String detalle = "UD=" + evaluacion.getIdPrograma() + "; fallidos=" + evaluacion.getIntentosFallidos()
+                    + "; acreditados=" + evaluacion.getIntentosAcreditados() + "; estado=" + evaluacion.getEstadoLimite()
+                    + "; evidencia=" + evaluacion.getEvidencias() + "; duplicados=" + evaluacion.getDuplicadosDescartados();
+            TrazaReglaAplicadaV2DTO traza = crearTraza(contexto, CodigoReglaCurricularV2.RN_1_4, motivo, 85,
+                    "LIMITE_INTENTOS_" + evaluacion.getEstadoLimite(), detalle);
+            resultado.getTrazas().add(traza);
+            agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_1_4);
+            actualizarPrioridad(resultado, 85);
+            DecisionUnidadCurricularV2DTO decision = buscarDecision(resultado, unidad.getIdPrograma());
+            if (decision != null) {
+                decision.getTrazas().add(traza);
+                if (motivo != null) agregarUnico(decision.getMotivos(), motivo);
+                if (evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.LIMITE_AGOTADO
+                        || evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.REQUIERE_REVISION)
+                    agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.REQUIERE_REVISION);
+            }
+        }
+    }
+
+    private EvaluacionIntentosUnidadV2DTO evaluarIntentosUnidad(UnidadEvaluacionCurricularV2DTO unidad) {
+        EvaluacionIntentosUnidadV2DTO evaluacion = new EvaluacionIntentosUnidadV2DTO();
+        evaluacion.setIdPrograma(unidad.getIdPrograma()); evaluacion.setClave(unidad.getClave());
+        if (unidad.getEstado() == EstadoUnidadCurricularV2.ACREDITADA) {
+            evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.ACREDITADA_SIN_OPORTUNIDAD_REQUERIDA);
+        }
+        Set<String> ejecuciones = new HashSet<String>();
+        boolean identidadInsuficiente = false;
+        for (IntentoAcreditacionUnidadV2DTO intento : unidad.getIntentosAcreditacion()) {
+            if (intento == null) { identidadInsuficiente = true; continue; }
+            String llave = llaveIntento(intento);
+            if (llave == null) { identidadInsuficiente = true; continue; }
+            if (!ejecuciones.add(llave)) { evaluacion.getDuplicadosDescartados().add("DUPLICADO_INTENTO:" + llave); continue; }
+            evaluacion.setIntentosIdentificados(Integer.valueOf(evaluacion.getIntentosIdentificados().intValue() + 1));
+            evaluacion.getEvidencias().add(intento.getEvidenciaFuente() == null ? "INTENTO:" + llave : intento.getEvidenciaFuente());
+            if (intento.getEstado() == EstadoIntentoAcreditacionV2.REPROBADO)
+                evaluacion.setIntentosFallidos(Integer.valueOf(evaluacion.getIntentosFallidos().intValue() + 1));
+            if (intento.getEstado() == EstadoIntentoAcreditacionV2.ACREDITADO)
+                evaluacion.setIntentosAcreditados(Integer.valueOf(evaluacion.getIntentosAcreditados().intValue() + 1));
+        }
+        if (unidad.getIntentosAcreditacion().isEmpty() && unidad.getIntentosFallidosHistoricosConfiables() != null) {
+            evaluacion.setIntentosIdentificados(unidad.getIntentosFallidosHistoricosConfiables());
+            evaluacion.setIntentosFallidos(unidad.getIntentosFallidosHistoricosConfiables());
+            evaluacion.getEvidencias().add("RESUMEN_CANONICO_INTENTOS_FALLIDOS:" + unidad.getIntentosFallidosHistoricosConfiables());
+        } else if (unidad.getIntentosAcreditacion().isEmpty() && unidad.getIntentos() != null) {
+            identidadInsuficiente = true;
+            evaluacion.getEvidencias().add("CONTEO_LEGADO_SIN_CALIDAD_DE_INTENTO:" + unidad.getIntentos());
+        }
+        if (evaluacion.getIntentosAcreditados().intValue() > 0 || unidad.getEstado() == EstadoUnidadCurricularV2.ACREDITADA) {
+            evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.ACREDITADA_SIN_OPORTUNIDAD_REQUERIDA);
+        } else if (identidadInsuficiente) {
+            evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.REQUIERE_REVISION);
+        } else if (evaluacion.getIntentosFallidos().intValue() > 3 || evaluacion.getIntentosIdentificados().intValue() > 3) {
+            evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.REQUIERE_REVISION);
+            evaluacion.setRequiereEscalamiento(Boolean.TRUE);
+        } else if (evaluacion.getIntentosFallidos().intValue() == 3) {
+            evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.LIMITE_AGOTADO);
+            evaluacion.setLimiteAgotado(Boolean.TRUE); evaluacion.setRequiereEscalamiento(Boolean.TRUE);
+        } else if (evaluacion.getIntentosFallidos().intValue() == 2) {
+            evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.ULTIMA_OPORTUNIDAD);
+            evaluacion.setUltimaOportunidad(Boolean.TRUE);
+        } else {
+            evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.DISPONIBLE);
+        }
+        return evaluacion;
+    }
+
+    private String llaveIntento(IntentoAcreditacionUnidadV2DTO intento) {
+        if (intento.getIdEjecucionTecnico() != null && !intento.getIdEjecucionTecnico().trim().isEmpty()) return intento.getIdEjecucionTecnico();
+        if (intento.getIdParticipacion() != null) return "PARTICIPACION:" + intento.getIdParticipacion();
+        return null;
     }
 
     /**
@@ -545,6 +639,15 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         for (DecisionUnidadCurricularV2DTO decision : resultado.getDecisiones()) {
             if (idPrograma.equals(decision.getIdPrograma())) agregarUnico(decision.getExcepcionesRelacionadas(), codigo);
         }
+    }
+
+    private DecisionUnidadCurricularV2DTO buscarDecision(ResultadoEvaluacionCurricularV2DTO resultado,
+            Long idPrograma) {
+        if (idPrograma == null) return null;
+        for (DecisionUnidadCurricularV2DTO decision : resultado.getDecisiones()) {
+            if (idPrograma.equals(decision.getIdPrograma())) return decision;
+        }
+        return null;
     }
 
     private DecisionUnidadCurricularV2DTO crearDecisionSombra(UnidadEvaluacionCurricularV2DTO unidad) {

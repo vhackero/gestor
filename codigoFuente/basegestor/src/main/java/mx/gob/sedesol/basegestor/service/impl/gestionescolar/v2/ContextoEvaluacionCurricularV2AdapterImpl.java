@@ -207,6 +207,8 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
                     unidad.setReprobacionPeriodoPrevioConocida(Boolean.TRUE);
                     unidad.setIntentos(reprobada.getIntentosReprobados() == null ? null
                             : Integer.valueOf(reprobada.getIntentosReprobados().intValue()));
+                    unidad.setIntentosFallidosHistoricosConfiables(reprobada.getIntentosReprobados() == null ? null
+                            : Integer.valueOf(reprobada.getIntentosReprobados().intValue()));
                     unidad.getReferenciasHistoricas().add("REPROBACION_VIGENTE_ORIGEN:" + reprobada.getIdPrograma());
                     break;
                 }
