@@ -60,6 +60,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             } else {
                 existente.getReferenciasHistoricas().addAll(normalizada.getReferenciasHistoricas());
                 existente.getReferenciasHistoricas().add("DUPLICADO_CURRICULAR:" + llave);
+                consolidarEstadoVigente(existente, normalizada);
             }
         }
         return new ArrayList<UnidadEvaluacionCurricularV2DTO>(porUnidad.values());
@@ -76,16 +77,21 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         }
 
         int reprobadas = 0;
+        boolean datosInsuficientesSituacion = false;
         List<UnidadEvaluacionCurricularV2DTO> unidadesNormalizadas = normalizarUnidades(contexto.getUnidades());
         for (UnidadEvaluacionCurricularV2DTO unidad : unidadesNormalizadas) {
             DecisionUnidadCurricularV2DTO decision = crearDecisionSombra(unidad);
             decision.setPrioritaria(Boolean.valueOf(unidad.getEstado() == EstadoUnidadCurricularV2.REPROBADA));
 
-            if (unidad.getEstado() == EstadoUnidadCurricularV2.REPROBADA) {
+            if (esReprobacionVigentePrevia(unidad)) {
                 reprobadas++;
+                if (unidad.getIdPrograma() != null) resultado.getUnidadesOrigenIrregularidad().add(unidad.getIdPrograma());
+                resultado.getEvidenciasSituacionAcademica().add("REPROBACION_VIGENTE_PREVIA:" + obtenerLlaveUnidad(unidad));
                 registrarCondicion(resultado, decision, contexto, CondicionCurricularV2.REPROBACION,
                         CodigoReglaCurricularV2.RN_1_2, CodigoMotivoCurricularV2.REPROBACION_ACUMULADA,
                         80, "REPROBACION_NORMALIZADA", "La UD conserva una condición de reprobación en modo sombra.");
+            } else if (unidad.getEstado() == EstadoUnidadCurricularV2.REPROBADA) {
+                resultado.getDatosDescartadosSituacionAcademica().add("REPROBACION_NO_PREVIA_O_NO_VIGENTE:" + obtenerLlaveUnidad(unidad));
             }
             if (unidad.getCausa() == CausaPendienteUnidadV2.NO_CURSAMIENTO) {
                 registrarCondicion(resultado, decision, contexto, CondicionCurricularV2.PENDIENTE_NO_CURSADA,
@@ -98,6 +104,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                         60, "BAJA_PARCIAL_NORMALIZADA", "La UD conserva una baja parcial en modo sombra.");
             }
             if (unidad.getCausa() == CausaPendienteUnidadV2.NO_DETERMINADA) {
+                datosInsuficientesSituacion = true;
                 registrarCondicion(resultado, decision, contexto, CondicionCurricularV2.DATOS_INSUFICIENTES,
                         CodigoReglaCurricularV2.CTR_04, CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,
                         10, "DATOS_INSUFICIENTES", "No existe causa suficiente para clasificar la UD.");
@@ -124,7 +131,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             resultado.getDecisiones().add(decision);
         }
 
-        resultado.setSituacionAcademica(reprobadas > 0 ? "IRREGULAR" : "REGULAR");
+        determinarSituacionAcademica(resultado, contexto, reprobadas, datosInsuficientesSituacion);
         resultado.setTotalReprobadas(Integer.valueOf(reprobadas));
         evaluarActividadAcademica(resultado, contexto);
         resultado.setAvanceCondicionado(Boolean.valueOf(Boolean.TRUE.equals(contexto.getAvanceCondicionado())));
@@ -151,6 +158,48 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 "Se construyó una oferta individual V2 separada de la oferta y seleccionabilidad origen.");
         resultado.getMensajes().add("Resultado generado en modo sombra; no modifica la elegibilidad vigente.");
         return resultado;
+    }
+
+    private void determinarSituacionAcademica(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, int reprobadas, boolean datosInsuficientes) {
+        String situacion = reprobadas > 0 ? "IRREGULAR" : (datosInsuficientes ? "NO_DETERMINADA" : "REGULAR");
+        resultado.setSituacionAcademica(situacion);
+        resultado.setSituacionAcademicaCalculada(situacion);
+        resultado.setCantidadReprobadasVigentes(Integer.valueOf(reprobadas));
+        resultado.setCargaMaximaFuturaSombra(Integer.valueOf(reprobadas > 0 ? 6 : 8));
+        String detalle = "Situación=" + situacion + "; reprobadasVigentes=" + reprobadas
+                + "; UD=" + resultado.getUnidadesOrigenIrregularidad()
+                + "; descartadas=" + resultado.getDatosDescartadosSituacionAcademica()
+                + "; evidencia=" + resultado.getEvidenciasSituacionAcademica()
+                + "; cargaFuturaSombra=" + resultado.getCargaMaximaFuturaSombra();
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_1_2,
+                reprobadas > 0 ? CodigoMotivoCurricularV2.REPROBACION_ACUMULADA
+                        : (datosInsuficientes ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null),
+                80, "SITUACION_ACADEMICA_" + situacion, detalle);
+    }
+
+    private boolean esReprobacionVigentePrevia(UnidadEvaluacionCurricularV2DTO unidad) {
+        if (unidad.getEstado() != EstadoUnidadCurricularV2.REPROBADA
+                || unidad.getCausa() != CausaPendienteUnidadV2.REPROBACION) return false;
+        if (Boolean.FALSE.equals(unidad.getReprobacionVigenteConocida())
+                || Boolean.FALSE.equals(unidad.getReprobacionPeriodoPrevioConocida())) return false;
+        return true;
+    }
+
+    /** Acreditada prevalece sobre una representación histórica duplicada reprobada. */
+    private void consolidarEstadoVigente(UnidadEvaluacionCurricularV2DTO existente,
+            UnidadEvaluacionCurricularV2DTO candidata) {
+        if (candidata.getEstado() == EstadoUnidadCurricularV2.ACREDITADA
+                && existente.getEstado() != EstadoUnidadCurricularV2.ACREDITADA) {
+            existente.setEstado(EstadoUnidadCurricularV2.ACREDITADA);
+            existente.setCausa(null);
+            existente.setReprobacionVigenteConocida(Boolean.FALSE);
+        }
+        if (candidata.getIntentos() != null && (existente.getIntentos() == null
+                || candidata.getIntentos().intValue() > existente.getIntentos().intValue()))
+            existente.setIntentos(candidata.getIntentos());
+        if (Boolean.FALSE.equals(candidata.getReprobacionPeriodoPrevioConocida()))
+            existente.setReprobacionPeriodoPrevioConocida(Boolean.FALSE);
     }
 
     /**

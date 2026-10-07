@@ -13,6 +13,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcion
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaPendienteUnidadV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaIndisponibilidadOfertaV2;
@@ -44,6 +45,7 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
             }
         }
         resultado.setUnidades(mapearUnidades(unidades));
+        marcarReprobacionesVigentes(resultado, contextoInscripcion);
         resultado.setSemestreObjetivo(obtenerSemestreObjetivo(resultado.getUnidades()));
         resultado.setHuellaOferta(construirHuella(periodoActivo, resultado.getUnidades()));
         return resultado;
@@ -186,6 +188,33 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
             if (!normalizar(baja.getTipoBaja()).contains("TEMPORAL")) resultado.setBajaParcialRegistrada(Boolean.TRUE);
             resultado.getEvidenciasActividad().add("BAJA_UD:" + baja.getIdPrograma() + ":"
                     + normalizar(baja.getTipoBaja()));
+        }
+    }
+
+    /** La lista vigente de reprobadas distingue evidencia actual de un estatus histórico aislado. */
+    private void marcarReprobacionesVigentes(ContextoEvaluacionCurricularV2DTO resultado,
+            InscripcionContextoDTO contexto) {
+        if (contexto == null || contexto.getEstadoAcademico() == null
+                || contexto.getEstadoAcademico().getMateriasReprobadas() == null) return;
+        for (UnidadEvaluacionCurricularV2DTO unidad : resultado.getUnidades()) {
+            if (unidad.getEstado() != EstadoUnidadCurricularV2.REPROBADA) continue;
+            boolean encontrada = false;
+            for (InscripcionMateriasReprobadasDTO reprobada : contexto.getEstadoAcademico().getMateriasReprobadas()) {
+                if (reprobada != null && unidad.getIdPrograma() != null
+                        && unidad.getIdPrograma().equals(reprobada.getIdPrograma())) {
+                    encontrada = true;
+                    unidad.setReprobacionVigenteConocida(Boolean.TRUE);
+                    unidad.setReprobacionPeriodoPrevioConocida(Boolean.TRUE);
+                    unidad.setIntentos(reprobada.getIntentosReprobados() == null ? null
+                            : Integer.valueOf(reprobada.getIntentosReprobados().intValue()));
+                    unidad.getReferenciasHistoricas().add("REPROBACION_VIGENTE_ORIGEN:" + reprobada.getIdPrograma());
+                    break;
+                }
+            }
+            if (!encontrada) {
+                unidad.setReprobacionVigenteConocida(Boolean.FALSE);
+                unidad.getReferenciasHistoricas().add("REPROBACION_HISTORICA_DESCARTADA_SIN_EVIDENCIA_VIGENTE");
+            }
         }
     }
 }
