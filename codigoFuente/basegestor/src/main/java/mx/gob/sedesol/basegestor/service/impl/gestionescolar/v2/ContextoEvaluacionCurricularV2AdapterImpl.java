@@ -64,6 +64,7 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         resultado.setCargaMinimaOrigen(contextoAsistente.getCargaMinima());
         resultado.setCargaMaximaOrigen(contextoAsistente.getCargaMaxima());
         resultado.setBajaTemporalRegistrada(Boolean.valueOf(existeBajaTemporal(contextoAsistente.getContextoBase())));
+        registrarEvidenciaActividad(resultado, contextoAsistente.getContextoBase());
         return resultado;
     }
 
@@ -167,5 +168,24 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
             }
         }
         return false;
+    }
+
+    /** El contexto vigente sólo aporta bajas por UD; no las eleva a baja total. */
+    private void registrarEvidenciaActividad(ContextoEvaluacionCurricularV2DTO resultado,
+            InscripcionContextoDTO contexto) {
+        if (contexto == null || contexto.getEstadoAcademico() == null) return;
+        if (contexto.getEstadoAcademico().getMateriasCursadas() != null
+                && !contexto.getEstadoAcademico().getMateriasCursadas().isEmpty()) {
+            resultado.setActividadAcademicaComprobada(Boolean.TRUE);
+            resultado.getEvidenciasActividad().add("MATERIAS_CURSADAS:"
+                    + contexto.getEstadoAcademico().getMateriasCursadas().size());
+        }
+        if (contexto.getEstadoAcademico().getMateriasBajas() == null) return;
+        for (InscripcionBajasDTO baja : contexto.getEstadoAcademico().getMateriasBajas()) {
+            if (baja == null || baja.getTipoBaja() == null) continue;
+            if (!normalizar(baja.getTipoBaja()).contains("TEMPORAL")) resultado.setBajaParcialRegistrada(Boolean.TRUE);
+            resultado.getEvidenciasActividad().add("BAJA_UD:" + baja.getIdPrograma() + ":"
+                    + normalizar(baja.getTipoBaja()));
+        }
     }
 }

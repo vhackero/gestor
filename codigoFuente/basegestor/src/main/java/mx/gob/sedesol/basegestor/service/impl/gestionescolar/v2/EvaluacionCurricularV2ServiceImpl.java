@@ -19,6 +19,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacio
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoDecisionUnidadCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoActividadAcademicaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoExcepcionCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ExcepcionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
@@ -125,6 +126,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
 
         resultado.setSituacionAcademica(reprobadas > 0 ? "IRREGULAR" : "REGULAR");
         resultado.setTotalReprobadas(Integer.valueOf(reprobadas));
+        evaluarActividadAcademica(resultado, contexto);
         resultado.setAvanceCondicionado(Boolean.valueOf(Boolean.TRUE.equals(contexto.getAvanceCondicionado())));
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_03, null, 20,
                 "SITUACION_SEPARADA_DE_AVANCE",
@@ -149,6 +151,83 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 "Se construyó una oferta individual V2 separada de la oferta y seleccionabilidad origen.");
         resultado.getMensajes().add("Resultado generado en modo sombra; no modifica la elegibilidad vigente.");
         return resultado;
+    }
+
+    /**
+     * RN-1.1: esta clasificación es independiente de la situación académica.
+     * Sólo utiliza evidencia explícita del contexto; una ausencia de inscripción
+     * o una baja parcial no se convierten en inactividad por inferencia.
+     */
+    private void evaluarActividadAcademica(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto) {
+        EstadoActividadAcademicaV2 estado;
+        String codigoResultado;
+        String detalle;
+        CodigoMotivoCurricularV2 motivo = null;
+
+        if (Boolean.TRUE.equals(contexto.getDatosActividadContradictorios())) {
+            estado = EstadoActividadAcademicaV2.NO_DETERMINADO;
+            codigoResultado = "DATOS_ACTIVIDAD_CONTRADICTORIOS";
+            detalle = "Las evidencias de actividad son contradictorias; V2 no infiere una baja, reincorporación ni inactividad.";
+            motivo = CodigoMotivoCurricularV2.DATOS_INSUFICIENTES;
+        } else if (Boolean.TRUE.equals(contexto.getBajaDefinitivaRegistrada())) {
+            estado = EstadoActividadAcademicaV2.INACTIVO;
+            codigoResultado = "BAJA_DEFINITIVA_REGISTRADA";
+            detalle = "Existe evidencia explícita de baja definitiva; la evaluación sólo la registra sin modificar estado productivo.";
+            motivo = CodigoMotivoCurricularV2.INACTIVIDAD;
+        } else if (Boolean.TRUE.equals(contexto.getBajaTemporalTotalRegistrada())) {
+            estado = resolverBajaTemporal(contexto);
+            codigoResultado = "BAJA_TEMPORAL_" + estado.name();
+            detalle = detalleActividad(contexto, estado);
+            motivo = estado == EstadoActividadAcademicaV2.NO_DETERMINADO
+                    ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : CodigoMotivoCurricularV2.INACTIVIDAD;
+        } else if (Boolean.TRUE.equals(contexto.getReincorporacionRegistrada())
+                || Boolean.TRUE.equals(contexto.getActividadAcademicaComprobada())) {
+            estado = EstadoActividadAcademicaV2.ACTIVO;
+            codigoResultado = Boolean.TRUE.equals(contexto.getReincorporacionRegistrada())
+                    ? "REINCORPORACION_REGISTRADA" : "ACTIVIDAD_ACADEMICA_COMPROBADA";
+            detalle = "La actividad académica se respalda con evidencia explícita del contexto.";
+        } else {
+            estado = EstadoActividadAcademicaV2.NO_DETERMINADO;
+            codigoResultado = Boolean.TRUE.equals(contexto.getBajaParcialRegistrada())
+                    ? "BAJA_PARCIAL_NO_EQUIVALE_A_INACTIVIDAD" : "EVIDENCIA_ACTIVIDAD_INSUFICIENTE";
+            detalle = Boolean.TRUE.equals(contexto.getBajaParcialRegistrada())
+                    ? "Una baja parcial afecta UD específicas y no acredita inactividad total."
+                    : "No existe evidencia suficiente para clasificar actividad, baja temporal total o reincorporación.";
+            motivo = CodigoMotivoCurricularV2.DATOS_INSUFICIENTES;
+        }
+
+        resultado.setEstadoActividadAcademica(estado);
+        if (estado != EstadoActividadAcademicaV2.ACTIVO && estado != EstadoActividadAcademicaV2.NO_DETERMINADO) {
+            agregarUnico(resultado.getCondicionesDetectadas(), CondicionCurricularV2.INACTIVIDAD_ACADEMICA);
+            agregarUnico(resultado.getRestricciones(), CodigoMotivoCurricularV2.INACTIVIDAD);
+        }
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_1_1, motivo, 65,
+                codigoResultado, detalle + " Evidencia=" + contexto.getEvidenciasActividad()
+                        + "; periodos=" + contexto.getPeriodosActividadConsiderados());
+    }
+
+    private EstadoActividadAcademicaV2 resolverBajaTemporal(ContextoEvaluacionCurricularV2DTO contexto) {
+        if (Boolean.TRUE.equals(contexto.getLimiteInactividadAlcanzado()))
+            return EstadoActividadAcademicaV2.LIMITE_INACTIVIDAD_ALCANZADO;
+        if (Boolean.TRUE.equals(contexto.getReincorporacionRegistrada())) return EstadoActividadAcademicaV2.ACTIVO;
+        Integer autorizados = contexto.getPeriodosBajaTemporalAutorizados();
+        Integer transcurridos = contexto.getPeriodosBajaTemporalTranscurridos();
+        if (autorizados == null || transcurridos == null || autorizados.intValue() < 0 || transcurridos.intValue() < 0)
+            return EstadoActividadAcademicaV2.NO_DETERMINADO;
+        return transcurridos.intValue() < autorizados.intValue()
+                ? EstadoActividadAcademicaV2.BAJA_TEMPORAL_VIGENTE
+                : EstadoActividadAcademicaV2.REINCORPORACION_PENDIENTE;
+    }
+
+    private String detalleActividad(ContextoEvaluacionCurricularV2DTO contexto, EstadoActividadAcademicaV2 estado) {
+        if (estado == EstadoActividadAcademicaV2.BAJA_TEMPORAL_VIGENTE)
+            return "La baja temporal total está dentro de los periodos autorizados.";
+        if (estado == EstadoActividadAcademicaV2.REINCORPORACION_PENDIENTE)
+            return "La duración autorizada de baja temporal concluyó y no existe reincorporación registrada.";
+        if (estado == EstadoActividadAcademicaV2.LIMITE_INACTIVIDAD_ALCANZADO)
+            return "La fuente canónica reporta que se alcanzó el límite institucional de inactividad.";
+        return "La baja temporal total carece de duración autorizada o transcurrida verificable.";
     }
 
     private void evaluarExcepcionesTipificadas(ResultadoEvaluacionCurricularV2DTO resultado,

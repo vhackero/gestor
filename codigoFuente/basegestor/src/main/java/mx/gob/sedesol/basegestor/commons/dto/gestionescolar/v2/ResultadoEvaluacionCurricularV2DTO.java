@@ -10,6 +10,7 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String situacionAcademica;
+    private EstadoActividadAcademicaV2 estadoActividadAcademica = EstadoActividadAcademicaV2.NO_DETERMINADO;
     private Integer totalReprobadas;
     private Boolean avanceCondicionado = Boolean.FALSE;
     private Integer prioridadTecnicaDominante;
@@ -25,6 +26,8 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String situacionAcademica) { this.situacionAcademica = situacionAcademica; }
+    public EstadoActividadAcademicaV2 getEstadoActividadAcademica() { return estadoActividadAcademica; }
+    public void setEstadoActividadAcademica(EstadoActividadAcademicaV2 valor) { estadoActividadAcademica = valor; }
     public Integer getTotalReprobadas() { return totalReprobadas; }
     public void setTotalReprobadas(Integer totalReprobadas) { this.totalReprobadas = totalReprobadas; }
     public Boolean getAvanceCondicionado() { return avanceCondicionado; }

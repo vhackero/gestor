@@ -29,6 +29,18 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Integer cargaMaximaOrigen;
     private Boolean ctr01ProcedenciaFutura = Boolean.FALSE;
     private Boolean bajaTemporalRegistrada = Boolean.FALSE;
+    /* Datos de actividad sólo se llenan cuando la fuente canónica los acredita. */
+    private Boolean bajaTemporalTotalRegistrada = Boolean.FALSE;
+    private Boolean bajaParcialRegistrada = Boolean.FALSE;
+    private Boolean reincorporacionRegistrada = Boolean.FALSE;
+    private Boolean bajaDefinitivaRegistrada = Boolean.FALSE;
+    private Boolean actividadAcademicaComprobada = Boolean.FALSE;
+    private Boolean limiteInactividadAlcanzado = Boolean.FALSE;
+    private Boolean datosActividadContradictorios = Boolean.FALSE;
+    private Integer periodosBajaTemporalAutorizados;
+    private Integer periodosBajaTemporalTranscurridos;
+    private List<String> periodosActividadConsiderados = new ArrayList<String>();
+    private List<String> evidenciasActividad = new ArrayList<String>();
     private Boolean avanceCondicionado;
     private Date fechaEvaluacion;
     private List<UnidadEvaluacionCurricularV2DTO> unidades = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
@@ -65,6 +77,28 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setCtr01ProcedenciaFutura(Boolean ctr01ProcedenciaFutura) { this.ctr01ProcedenciaFutura = ctr01ProcedenciaFutura; }
     public Boolean getBajaTemporalRegistrada() { return bajaTemporalRegistrada; }
     public void setBajaTemporalRegistrada(Boolean bajaTemporalRegistrada) { this.bajaTemporalRegistrada = bajaTemporalRegistrada; }
+    public Boolean getBajaTemporalTotalRegistrada() { return bajaTemporalTotalRegistrada; }
+    public void setBajaTemporalTotalRegistrada(Boolean valor) { bajaTemporalTotalRegistrada = valor; }
+    public Boolean getBajaParcialRegistrada() { return bajaParcialRegistrada; }
+    public void setBajaParcialRegistrada(Boolean valor) { bajaParcialRegistrada = valor; }
+    public Boolean getReincorporacionRegistrada() { return reincorporacionRegistrada; }
+    public void setReincorporacionRegistrada(Boolean valor) { reincorporacionRegistrada = valor; }
+    public Boolean getBajaDefinitivaRegistrada() { return bajaDefinitivaRegistrada; }
+    public void setBajaDefinitivaRegistrada(Boolean valor) { bajaDefinitivaRegistrada = valor; }
+    public Boolean getActividadAcademicaComprobada() { return actividadAcademicaComprobada; }
+    public void setActividadAcademicaComprobada(Boolean valor) { actividadAcademicaComprobada = valor; }
+    public Boolean getLimiteInactividadAlcanzado() { return limiteInactividadAlcanzado; }
+    public void setLimiteInactividadAlcanzado(Boolean valor) { limiteInactividadAlcanzado = valor; }
+    public Boolean getDatosActividadContradictorios() { return datosActividadContradictorios; }
+    public void setDatosActividadContradictorios(Boolean valor) { datosActividadContradictorios = valor; }
+    public Integer getPeriodosBajaTemporalAutorizados() { return periodosBajaTemporalAutorizados; }
+    public void setPeriodosBajaTemporalAutorizados(Integer valor) { periodosBajaTemporalAutorizados = valor; }
+    public Integer getPeriodosBajaTemporalTranscurridos() { return periodosBajaTemporalTranscurridos; }
+    public void setPeriodosBajaTemporalTranscurridos(Integer valor) { periodosBajaTemporalTranscurridos = valor; }
+    public List<String> getPeriodosActividadConsiderados() { return periodosActividadConsiderados; }
+    public void setPeriodosActividadConsiderados(List<String> valores) { periodosActividadConsiderados = valores == null ? new ArrayList<String>() : valores; }
+    public List<String> getEvidenciasActividad() { return evidenciasActividad; }
+    public void setEvidenciasActividad(List<String> valores) { evidenciasActividad = valores == null ? new ArrayList<String>() : valores; }
     public Boolean getAvanceCondicionado() { return avanceCondicionado; }
     public void setAvanceCondicionado(Boolean avanceCondicionado) { this.avanceCondicionado = avanceCondicionado; }
     public Date getFechaEvaluacion() { return fechaEvaluacion; }
