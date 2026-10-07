@@ -57,6 +57,10 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
                 contextoAsistente.getIdProcesoInscripcion());
         resultado.setOrigenConsulta("ASISTENTE_INSCRIPCION_SOLO_LECTURA");
         resultado.setPerfilConsulta("ESTUDIANTE_O_GESTOR_NO_DETERMINADO");
+        resultado.setSituacionAcademicaOrigen(contextoAsistente.getSituacionAcademicaPeriodo());
+        resultado.setTotalReprobadasOrigen(contextoAsistente.getTotalReprobadasAcumuladas());
+        resultado.setCargaMinimaOrigen(contextoAsistente.getCargaMinima());
+        resultado.setCargaMaximaOrigen(contextoAsistente.getCargaMaxima());
         return resultado;
     }
 
@@ -73,6 +77,11 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
             unidad.setSemestre(unidadOrigen.getSemestre());
             unidad.setBloque(unidadOrigen.getBloque() == null ? null : unidadOrigen.getBloque().toString());
             unidad.setOfertada(unidadOrigen.getOfertada());
+            unidad.setSeleccionableOrigen(unidadOrigen.getSeleccionable());
+            unidad.setBloqueadaOrigen(unidadOrigen.getBloqueada());
+            unidad.setSeriacionDirectaConocida(unidadOrigen.getBloqueada());
+            unidad.setSeriacionIndirectaConocida(Boolean.valueOf(!unidadOrigen.getRequiere().isEmpty()
+                    || !unidadOrigen.getDesbloquea().isEmpty()));
             unidad.setSeriacionConocida(Boolean.valueOf(Boolean.TRUE.equals(unidadOrigen.getBloqueada())
                     || !unidadOrigen.getRequiere().isEmpty() || !unidadOrigen.getDesbloquea().isEmpty()));
             unidad.setEstado(obtenerEstado(unidadOrigen.getEstatusHistorico(), unidadOrigen.getEstatusPeriodo()));
@@ -80,6 +89,9 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
             conservarEvidencia(unidad, "ESTATUS_HISTORICO", unidadOrigen.getEstatusHistorico());
             conservarEvidencia(unidad, "ESTATUS_PERIODO", unidadOrigen.getEstatusPeriodo());
             conservarEvidencia(unidad, "PRIORIDAD_VIGENTE", unidadOrigen.getPrioridad());
+            conservarEvidencia(unidad, "OFERTA_ORIGEN", String.valueOf(unidadOrigen.getOfertada()));
+            conservarEvidencia(unidad, "SELECCIONABLE_ORIGEN", String.valueOf(unidadOrigen.getSeleccionable()));
+            conservarEvidencia(unidad, "BLOQUEADA_ORIGEN", String.valueOf(unidadOrigen.getBloqueada()));
             resultado.add(unidad);
         }
         return resultado;

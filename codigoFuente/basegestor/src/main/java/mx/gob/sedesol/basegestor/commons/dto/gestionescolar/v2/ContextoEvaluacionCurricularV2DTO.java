@@ -23,6 +23,11 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private String origenConsulta;
     private String versionReglas;
     private String huellaOferta;
+    private String situacionAcademicaOrigen;
+    private Integer totalReprobadasOrigen;
+    private Integer cargaMinimaOrigen;
+    private Integer cargaMaximaOrigen;
+    private Boolean ctr01ProcedenciaFutura = Boolean.FALSE;
     private Boolean avanceCondicionado;
     private Date fechaEvaluacion;
     private List<UnidadEvaluacionCurricularV2DTO> unidades = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
@@ -47,6 +52,16 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setVersionReglas(String versionReglas) { this.versionReglas = versionReglas; }
     public String getHuellaOferta() { return huellaOferta; }
     public void setHuellaOferta(String huellaOferta) { this.huellaOferta = huellaOferta; }
+    public String getSituacionAcademicaOrigen() { return situacionAcademicaOrigen; }
+    public void setSituacionAcademicaOrigen(String situacionAcademicaOrigen) { this.situacionAcademicaOrigen = situacionAcademicaOrigen; }
+    public Integer getTotalReprobadasOrigen() { return totalReprobadasOrigen; }
+    public void setTotalReprobadasOrigen(Integer totalReprobadasOrigen) { this.totalReprobadasOrigen = totalReprobadasOrigen; }
+    public Integer getCargaMinimaOrigen() { return cargaMinimaOrigen; }
+    public void setCargaMinimaOrigen(Integer cargaMinimaOrigen) { this.cargaMinimaOrigen = cargaMinimaOrigen; }
+    public Integer getCargaMaximaOrigen() { return cargaMaximaOrigen; }
+    public void setCargaMaximaOrigen(Integer cargaMaximaOrigen) { this.cargaMaximaOrigen = cargaMaximaOrigen; }
+    public Boolean getCtr01ProcedenciaFutura() { return ctr01ProcedenciaFutura; }
+    public void setCtr01ProcedenciaFutura(Boolean ctr01ProcedenciaFutura) { this.ctr01ProcedenciaFutura = ctr01ProcedenciaFutura; }
     public Boolean getAvanceCondicionado() { return avanceCondicionado; }
     public void setAvanceCondicionado(Boolean avanceCondicionado) { this.avanceCondicionado = avanceCondicionado; }
     public Date getFechaEvaluacion() { return fechaEvaluacion; }

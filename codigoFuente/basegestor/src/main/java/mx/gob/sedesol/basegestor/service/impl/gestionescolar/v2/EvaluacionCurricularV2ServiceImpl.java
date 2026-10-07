@@ -16,6 +16,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CondicionCurricul
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoDecisionUnidadCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TrazaReglaAplicadaV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.UnidadEvaluacionCurricularV2DTO;
@@ -70,10 +71,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
 
         int reprobadas = 0;
         for (UnidadEvaluacionCurricularV2DTO unidad : normalizarUnidades(contexto.getUnidades())) {
-            DecisionUnidadCurricularV2DTO decision = new DecisionUnidadCurricularV2DTO();
-            decision.setIdPrograma(unidad.getIdPrograma());
-            // Fase 1A conserva literalmente la oferta leída del contexto. No decide elegibilidad.
-            decision.setHabilitada(Boolean.valueOf(Boolean.TRUE.equals(unidad.getOfertada())));
+            DecisionUnidadCurricularV2DTO decision = crearDecisionSombra(unidad);
             decision.setPrioritaria(Boolean.valueOf(unidad.getEstado() == EstadoUnidadCurricularV2.REPROBADA));
 
             if (unidad.getEstado() == EstadoUnidadCurricularV2.REPROBADA) {
@@ -97,15 +95,30 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                         CodigoReglaCurricularV2.CTR_04, CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,
                         10, "DATOS_INSUFICIENTES", "No existe causa suficiente para clasificar la UD.");
             }
-            if (Boolean.TRUE.equals(unidad.getSeriacionConocida())) {
+            if (Boolean.TRUE.equals(unidad.getSeriacionDirectaConocida())
+                    || (Boolean.TRUE.equals(unidad.getSeriacionConocida())
+                            && !Boolean.TRUE.equals(unidad.getSeriacionIndirectaConocida()))) {
                 registrarCondicion(resultado, decision, contexto, CondicionCurricularV2.SERIACION,
                         CodigoReglaCurricularV2.RN_8, CodigoMotivoCurricularV2.SERIACION_DIRECTA,
                         90, "SERIACION_CONOCIDA", "La seriación se registra sin modificar bloqueos vigentes.");
+                agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.BLOQUEADA);
+                // Es una proyección V2, no una modificación a la oferta origen ni al bloqueo productivo.
+                decision.setOfertaEvaluadaV2(Boolean.FALSE);
+                agregarExplicacion(decision, "Seriación directa detectada en la representación sombra.");
+            } else if (Boolean.TRUE.equals(unidad.getSeriacionIndirectaConocida())
+                    || Boolean.TRUE.equals(unidad.getSeriacionConocida())) {
+                registrarCondicion(resultado, decision, contexto, CondicionCurricularV2.SERIACION,
+                        CodigoReglaCurricularV2.RN_8, CodigoMotivoCurricularV2.SERIACION_INDIRECTA,
+                        70, "SERIACION_INDIRECTA_CONOCIDA",
+                        "Existe relación de seriación que requiere revisión, sin alterar el motor vigente.");
+                agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.REQUIERE_REVISION);
+                agregarExplicacion(decision, "Seriación indirecta conocida; requiere revisión académica.");
             }
             resultado.getDecisiones().add(decision);
         }
 
         resultado.setSituacionAcademica(reprobadas > 0 ? "IRREGULAR" : "REGULAR");
+        resultado.setTotalReprobadas(Integer.valueOf(reprobadas));
         resultado.setAvanceCondicionado(Boolean.valueOf(Boolean.TRUE.equals(contexto.getAvanceCondicionado())));
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_03, null, 20,
                 "SITUACION_SEPARADA_DE_AVANCE",
@@ -124,8 +137,32 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_2_2, null, 25,
+                "EVALUACION_PREVIA_REINSCRIPCION_SOMBRA",
+                "Se construyó una oferta individual V2 separada de la oferta y seleccionabilidad origen.");
         resultado.getMensajes().add("Resultado generado en modo sombra; no modifica la elegibilidad vigente.");
         return resultado;
+    }
+
+    private DecisionUnidadCurricularV2DTO crearDecisionSombra(UnidadEvaluacionCurricularV2DTO unidad) {
+        DecisionUnidadCurricularV2DTO decision = new DecisionUnidadCurricularV2DTO();
+        decision.setIdPrograma(unidad.getIdPrograma());
+        decision.setOfertaOrigen(unidad.getOfertada());
+        decision.setOfertaEvaluadaV2(unidad.getOfertada());
+        decision.setSeleccionableOrigen(unidad.getSeleccionableOrigen());
+        decision.setBloqueadaOrigen(unidad.getBloqueadaOrigen());
+        // Compatibilidad con Fase 0/1A: habilitada conserva la fotografía de la oferta origen.
+        decision.setHabilitada(Boolean.valueOf(Boolean.TRUE.equals(unidad.getOfertada())));
+        decision.getReferenciasFuente().addAll(unidad.getReferenciasHistoricas());
+        if (Boolean.TRUE.equals(unidad.getOfertada())) {
+            agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.HABILITADA);
+            decision.setExplicacionTecnica("Oferta origen disponible; la evaluación V2 la replica para comparación.");
+        } else {
+            agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.REQUIERE_REVISION);
+            agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.SIN_OFERTA);
+            decision.setExplicacionTecnica("La UD no forma parte de la oferta origen y requiere revisión en V2.");
+        }
+        return decision;
     }
 
     private void registrarCondicion(ResultadoEvaluacionCurricularV2DTO resultado,
@@ -135,6 +172,9 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         agregarUnico(resultado.getCondicionesDetectadas(), condicion);
         agregarUnico(resultado.getRestricciones(), motivo);
         agregarUnico(decision.getMotivos(), motivo);
+        if (motivo == CodigoMotivoCurricularV2.REPROBACION_ACUMULADA) {
+            agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.PRIORITARIA);
+        }
         TrazaReglaAplicadaV2DTO traza = crearTraza(contexto, regla, motivo, prioridad, resultadoTraza, detalle);
         decision.getTrazas().add(traza);
         resultado.getTrazas().add(traza);
@@ -174,6 +214,14 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
 
     private <T> void agregarUnico(List<T> destino, T valor) {
         if (valor != null && !destino.contains(valor)) destino.add(valor);
+    }
+
+    private void agregarExplicacion(DecisionUnidadCurricularV2DTO decision, String texto) {
+        if (decision.getExplicacionTecnica() == null || decision.getExplicacionTecnica().isEmpty()) {
+            decision.setExplicacionTecnica(texto);
+        } else {
+            decision.setExplicacionTecnica(decision.getExplicacionTecnica() + " " + texto);
+        }
     }
 
     private String obtenerLlaveUnidad(UnidadEvaluacionCurricularV2DTO unidad) {
