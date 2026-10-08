@@ -50,6 +50,7 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private EstadoSupuestosAvanceV2 estadoSupuestosAvance = EstadoSupuestosAvanceV2.NO_APLICA;
     private List<SupuestoAvanceCondicionadoV2DTO> supuestosAvanceTipificados = new ArrayList<SupuestoAvanceCondicionadoV2DTO>();
     private List<Long> udsQuintoSinDependenciaSeriacionRn613 = new ArrayList<Long>();
+    private List<EvaluacionOfertaPendienteRn614V2DTO> ofertasPendientesRn614 = new ArrayList<EvaluacionOfertaPendienteRn614V2DTO>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -148,6 +149,7 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public void setEstadoSupuestosAvance(EstadoSupuestosAvanceV2 valor) { estadoSupuestosAvance = valor; }
     public List<SupuestoAvanceCondicionadoV2DTO> getSupuestosAvanceTipificados() { return supuestosAvanceTipificados; }
     public List<Long> getUdsQuintoSinDependenciaSeriacionRn613() { return udsQuintoSinDependenciaSeriacionRn613; }
+    public List<EvaluacionOfertaPendienteRn614V2DTO> getOfertasPendientesRn614() { return ofertasPendientesRn614; }
     public List<CodigoMotivoCurricularV2> getCausasExclusion() { return causasExclusion; }
     public List<CodigoReglaCurricularV2> getReglasRelacionadas() { return reglasRelacionadas; }
     public List<String> getEvidencias() { return evidencias; }

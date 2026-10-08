@@ -36,6 +36,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CondicionComunAva
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoSupuestoAvanceCondicionadoV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoSupuestosAvanceV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.SupuestoAvanceCondicionadoV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionOfertaPendienteRn614V2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoOfertaPendienteRn614V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoMejoraPromedioV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionMejoraPromedioUnidadV2DTO;
@@ -183,6 +185,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarCargaRezagoSevero(resultado, contexto);
         evaluarControlAvanceAnualBase(resultado, contexto, unidadesNormalizadas);
         evaluarCondicionesComunesAvance(resultado, contexto, unidadesNormalizadas);
+        evaluarFaltaOfertaControlAvance(resultado, contexto, unidadesNormalizadas);
         evaluarSupuestosTipificadosAvance(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
@@ -1543,16 +1546,12 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         List<Long> bajas = idsPendientesPorCausa(unidades, CausaPendienteUnidadV2.BAJA_PARCIAL);
         if (!bajas.isEmpty()) agregarSupuesto(control, CodigoSupuestoAvanceCondicionadoV2.BAJA_PARCIAL, bajas,
                 "BAJA_PARCIAL", "La baja parcial se conserva como causa, no como reprobación.");
-        boolean ofertaAmbigua = false;
-        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
-            if (!control.getObligatoriasPendientesRn611().contains(unidad.getIdPrograma())) continue;
-            if (unidad.getCausaIndisponibilidadOferta() == CausaIndisponibilidadOfertaV2.UD_NO_OFERTADA_PERIODO
-                    || Boolean.FALSE.equals(unidad.getOfertada())) agregarSupuesto(control,
-                    CodigoSupuestoAvanceCondicionadoV2.FALTA_OFERTA_SUFICIENTE, listaId(unidad.getIdPrograma()),
-                    "SIN_OFERTA", "Oferta individual V2 indica UD pendiente no ofertada.");
-            else if (unidad.getCausaIndisponibilidadOferta() == CausaIndisponibilidadOfertaV2.SIN_CUPO) ofertaAmbigua = true;
+        for (EvaluacionOfertaPendienteRn614V2DTO oferta : control.getOfertasPendientesRn614()) {
+            if (Boolean.TRUE.equals(oferta.getFaltaOferta())) agregarSupuesto(control,
+                    CodigoSupuestoAvanceCondicionadoV2.FALTA_OFERTA_SUFICIENTE, listaId(oferta.getIdUnidad()),
+                    oferta.getEstado().name(), oferta.getEvidencia());
+            else if (oferta.getEstado() == EstadoOfertaPendienteRn614V2.REQUIERE_REVISION) control.setRequiereRevision(Boolean.TRUE);
         }
-        if (ofertaAmbigua) control.setRequiereRevision(Boolean.TRUE);
         for (Long id : control.getUdsQuintoCompatiblesRn612()) {
             agregarIdUnico(control.getUdsQuintoSinDependenciaSeriacionRn613(), id);
             agregarSupuesto(control, CodigoSupuestoAvanceCondicionadoV2.SIN_DEPENDENCIA_SERIACION, listaId(id),
@@ -1587,6 +1586,37 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
     }
 
     private List<Long> listaId(Long id) { List<Long> ids = new ArrayList<Long>(); agregarIdUnico(ids, id); return ids; }
+
+    /** Fase 5D: fuente única de clasificación oferta/cupo para pendientes CTR-01. */
+    private void evaluarFaltaOfertaControlAvance(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO control = resultado.getEvaluacionCargaAcademica();
+        if (control == null) return;
+        agregarUnico(control.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_1_4);
+        agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_6_1_4);
+        if (!Boolean.TRUE.equals(control.getAplicaCtr01()) || control.getObligatoriasPendientesRn611().isEmpty()) {
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_4, null, 100, "RN614_NO_APLICA", "CTR-01 no aplica o no hay pendientes base."); return;
+        }
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (!control.getObligatoriasPendientesRn611().contains(unidad.getIdPrograma())) continue;
+            EvaluacionOfertaPendienteRn614V2DTO oferta = new EvaluacionOfertaPendienteRn614V2DTO();
+            oferta.setIdUnidad(unidad.getIdPrograma()); oferta.setEstadoCurricular(unidad.getEstado()); oferta.setCausaPendiente(unidad.getCausa()); oferta.setCausaOferta(unidad.getCausaIndisponibilidadOferta());
+            CausaIndisponibilidadOfertaV2 causa = unidad.getCausaIndisponibilidadOferta();
+            if (causa == CausaIndisponibilidadOfertaV2.UD_NO_OFERTADA_PERIODO) clasificarOferta(oferta, EstadoOfertaPendienteRn614V2.NO_OFERTADA_EN_PERIODO, true, false, "OFERTA:UD_NO_OFERTADA_PERIODO");
+            else if (causa == CausaIndisponibilidadOfertaV2.FUERA_BLOQUE_VIGENTE) clasificarOferta(oferta, EstadoOfertaPendienteRn614V2.FUERA_DE_BLOQUE_VIGENTE, true, false, "OFERTA:FUERA_BLOQUE_VIGENTE");
+            else if (causa == CausaIndisponibilidadOfertaV2.SIN_GRUPO_ACTIVO_INSTITUCIONAL) clasificarOferta(oferta, EstadoOfertaPendienteRn614V2.SIN_GRUPO_ACTIVO_DECISION_INSTITUCIONAL, true, false, "OFERTA:SIN_GRUPO_ACTIVO_INSTITUCIONAL");
+            else if (causa == CausaIndisponibilidadOfertaV2.OTRA_INDISPONIBILIDAD_INSTITUCIONAL) clasificarOferta(oferta, EstadoOfertaPendienteRn614V2.OTRA_CONDICION_INSTITUCIONAL_OBJETIVA, true, false, "OFERTA:OTRA_INSTITUCIONAL");
+            else if (causa == CausaIndisponibilidadOfertaV2.SIN_CUPO || Boolean.FALSE.equals(unidad.getCupoDisponibleConocido())) clasificarOferta(oferta, EstadoOfertaPendienteRn614V2.SIN_CUPO_CAPACIDAD, false, true, "OFERTA:SIN_CUPO_CAPACIDAD");
+            else if (Boolean.TRUE.equals(unidad.getOfertada()) && Boolean.TRUE.equals(unidad.getGrupoActivoConocido()) && Boolean.TRUE.equals(unidad.getCupoDisponibleConocido())) clasificarOferta(oferta, EstadoOfertaPendienteRn614V2.DISPONIBLE, false, false, "OFERTA:DISPONIBLE");
+            else clasificarOferta(oferta, EstadoOfertaPendienteRn614V2.REQUIERE_REVISION, false, false, "OFERTA:EVIDENCIA_INSUFICIENTE");
+            control.getOfertasPendientesRn614().add(oferta);
+        }
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_4, null, 100, "RN614_EVALUADA", "UD pendientes clasificadas=" + control.getOfertasPendientesRn614().size() + "; RN-6.1.3 consume esta fuente única.");
+    }
+
+    private void clasificarOferta(EvaluacionOfertaPendienteRn614V2DTO oferta, EstadoOfertaPendienteRn614V2 estado, boolean falta, boolean cupo, String evidencia) {
+        oferta.setEstado(estado); oferta.setFaltaOferta(Boolean.valueOf(falta)); oferta.setSinCupo(Boolean.valueOf(cupo)); oferta.setEvidencia(evidencia);
+    }
 
     private void agregarIdUnico(List<Long> destino, Long id) {
         if (id != null && !destino.contains(id)) destino.add(id);
