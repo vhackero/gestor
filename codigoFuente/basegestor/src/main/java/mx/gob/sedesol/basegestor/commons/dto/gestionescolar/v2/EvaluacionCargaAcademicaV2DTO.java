@@ -47,6 +47,9 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<Long> udsQuintoBloqueadasSeriacionDirectaRn612 = new ArrayList<Long>();
     private List<Long> udsQuintoBloqueadasSeriacionIndirectaRn612 = new ArrayList<Long>();
     private List<Long> udsQuintoRevisionSeriacionRn612 = new ArrayList<Long>();
+    private EstadoSupuestosAvanceV2 estadoSupuestosAvance = EstadoSupuestosAvanceV2.NO_APLICA;
+    private List<SupuestoAvanceCondicionadoV2DTO> supuestosAvanceTipificados = new ArrayList<SupuestoAvanceCondicionadoV2DTO>();
+    private List<Long> udsQuintoSinDependenciaSeriacionRn613 = new ArrayList<Long>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -141,6 +144,10 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<Long> getUdsQuintoBloqueadasSeriacionDirectaRn612() { return udsQuintoBloqueadasSeriacionDirectaRn612; }
     public List<Long> getUdsQuintoBloqueadasSeriacionIndirectaRn612() { return udsQuintoBloqueadasSeriacionIndirectaRn612; }
     public List<Long> getUdsQuintoRevisionSeriacionRn612() { return udsQuintoRevisionSeriacionRn612; }
+    public EstadoSupuestosAvanceV2 getEstadoSupuestosAvance() { return estadoSupuestosAvance; }
+    public void setEstadoSupuestosAvance(EstadoSupuestosAvanceV2 valor) { estadoSupuestosAvance = valor; }
+    public List<SupuestoAvanceCondicionadoV2DTO> getSupuestosAvanceTipificados() { return supuestosAvanceTipificados; }
+    public List<Long> getUdsQuintoSinDependenciaSeriacionRn613() { return udsQuintoSinDependenciaSeriacionRn613; }
     public List<CodigoMotivoCurricularV2> getCausasExclusion() { return causasExclusion; }
     public List<CodigoReglaCurricularV2> getReglasRelacionadas() { return reglasRelacionadas; }
     public List<String> getEvidencias() { return evidencias; }

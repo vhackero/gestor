@@ -33,6 +33,9 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoControlAvan
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCondicionAvanceV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCondicionesComunesAvanceV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CondicionComunAvanceV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoSupuestoAvanceCondicionadoV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoSupuestosAvanceV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.SupuestoAvanceCondicionadoV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoMejoraPromedioV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionMejoraPromedioUnidadV2DTO;
@@ -180,6 +183,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarCargaRezagoSevero(resultado, contexto);
         evaluarControlAvanceAnualBase(resultado, contexto, unidadesNormalizadas);
         evaluarCondicionesComunesAvance(resultado, contexto, unidadesNormalizadas);
+        evaluarSupuestosTipificadosAvance(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -1508,6 +1512,81 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         if (unidades != null) condicion.getUnidadesRelacionadas().addAll(unidades);
         control.getCondicionesComunesAvance().add(condicion);
     }
+
+    /** Fase 5C: identifica supuestos concurrentes; no autoriza avance ni implementa RN-6.1.4+. */
+    private void evaluarSupuestosTipificadosAvance(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO control = resultado.getEvaluacionCargaAcademica();
+        if (control == null) return;
+        agregarUnico(control.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_1_3);
+        agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_6_1_3);
+        if (!Boolean.TRUE.equals(control.getAplicaCtr01()) || !Boolean.TRUE.equals(control.getRequiereEvaluacionAvanceCondicionado())) {
+            control.setEstadoSupuestosAvance(EstadoSupuestosAvanceV2.NO_APLICA);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_3, null, 100,
+                    "RN613_NO_APLICA", "RN-6.1.3 requiere CTR-01 y una base pendiente delegada por RN-6.1.1.");
+            return;
+        }
+        if (control.getEstadoCondicionesComunesAvance() == EstadoCondicionesComunesAvanceV2.NO_APLICA) {
+            control.setEstadoSupuestosAvance(EstadoSupuestosAvanceV2.NO_APLICA); return;
+        }
+        if (control.getObligatoriasPendientesRn611().size() == 1) agregarSupuesto(control,
+                CodigoSupuestoAvanceCondicionadoV2.UNA_OBLIGATORIA_PENDIENTE,
+                control.getObligatoriasPendientesRn611(), "PENDIENTE_BASE_RN611", "Causa preservada: " + control.getDetallePendientesRn611());
+        if (Boolean.TRUE.equals(control.getAplicaRn51()) && "REZAGO_LEVE".equals(control.getCondicionRegularizacion())) agregarSupuesto(control,
+                CodigoSupuestoAvanceCondicionadoV2.REZAGO_LEVE, control.getUdsReprobadasPrioritarias(),
+                "RN_5_1_REUTILIZADO", "Reprobadas vigentes=" + resultado.getCantidadReprobadasVigentes());
+        if (Boolean.TRUE.equals(contexto.getBajaTemporalRegistrada()) && Boolean.TRUE.equals(contexto.getReincorporacionRegistrada())) agregarSupuesto(control,
+                CodigoSupuestoAvanceCondicionadoV2.BAJA_TEMPORAL, control.getObligatoriasPendientesRn611(),
+                "BAJA_TEMPORAL_Y_REINCORPORACION", "RN-1.1/contexto acredita ambos antecedentes.");
+        else if (Boolean.TRUE.equals(contexto.getBajaTemporalRegistrada()) && !Boolean.TRUE.equals(contexto.getReincorporacionRegistrada()))
+            control.setRequiereRevision(Boolean.TRUE);
+        List<Long> bajas = idsPendientesPorCausa(unidades, CausaPendienteUnidadV2.BAJA_PARCIAL);
+        if (!bajas.isEmpty()) agregarSupuesto(control, CodigoSupuestoAvanceCondicionadoV2.BAJA_PARCIAL, bajas,
+                "BAJA_PARCIAL", "La baja parcial se conserva como causa, no como reprobación.");
+        boolean ofertaAmbigua = false;
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (!control.getObligatoriasPendientesRn611().contains(unidad.getIdPrograma())) continue;
+            if (unidad.getCausaIndisponibilidadOferta() == CausaIndisponibilidadOfertaV2.UD_NO_OFERTADA_PERIODO
+                    || Boolean.FALSE.equals(unidad.getOfertada())) agregarSupuesto(control,
+                    CodigoSupuestoAvanceCondicionadoV2.FALTA_OFERTA_SUFICIENTE, listaId(unidad.getIdPrograma()),
+                    "SIN_OFERTA", "Oferta individual V2 indica UD pendiente no ofertada.");
+            else if (unidad.getCausaIndisponibilidadOferta() == CausaIndisponibilidadOfertaV2.SIN_CUPO) ofertaAmbigua = true;
+        }
+        if (ofertaAmbigua) control.setRequiereRevision(Boolean.TRUE);
+        for (Long id : control.getUdsQuintoCompatiblesRn612()) {
+            agregarIdUnico(control.getUdsQuintoSinDependenciaSeriacionRn613(), id);
+            agregarSupuesto(control, CodigoSupuestoAvanceCondicionadoV2.SIN_DEPENDENCIA_SERIACION, listaId(id),
+                    "SIN_DEPENDENCIA_DIRECTA_O_INDIRECTA_CONOCIDA", "RN-6.1.2 clasificó la UD de quinto como compatible.");
+        }
+        if (control.getSupuestosAvanceTipificados().isEmpty()) control.setEstadoSupuestosAvance(
+                Boolean.TRUE.equals(control.getRequiereRevision()) ? EstadoSupuestosAvanceV2.REQUIERE_REVISION : EstadoSupuestosAvanceV2.SIN_SUPUESTO_TIPIFICADO);
+        else control.setEstadoSupuestosAvance(control.getSupuestosAvanceTipificados().size() == 1
+                ? EstadoSupuestosAvanceV2.SUPUESTO_TIPIFICADO_IDENTIFICADO : EstadoSupuestosAvanceV2.MULTIPLES_SUPUESTOS_TIPIFICADOS);
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_3,
+                Boolean.TRUE.equals(control.getAplicaRn64()) ? CodigoMotivoCurricularV2.REZAGO_SEVERO : null, 100,
+                "RN613_" + control.getEstadoSupuestosAvance(), "Supuestos=" + control.getSupuestosAvanceTipificados().size()
+                        + "; condicionesRN612=" + control.getEstadoCondicionesComunesAvance()
+                        + "; RN64=" + control.getAplicaRn64() + "; no autoriza avance condicionado.");
+    }
+
+    private void agregarSupuesto(EvaluacionCargaAcademicaV2DTO control, CodigoSupuestoAvanceCondicionadoV2 codigo,
+            List<Long> unidades, String causa, String evidencia) {
+        for (SupuestoAvanceCondicionadoV2DTO existente : control.getSupuestosAvanceTipificados())
+            if (existente.getCodigo() == codigo && existente.getUnidadesRelacionadas().equals(unidades)) return;
+        SupuestoAvanceCondicionadoV2DTO supuesto = new SupuestoAvanceCondicionadoV2DTO();
+        supuesto.setCodigo(codigo); supuesto.setCausa(causa); supuesto.setEvidencia(evidencia);
+        if (unidades != null) supuesto.getUnidadesRelacionadas().addAll(unidades);
+        control.getSupuestosAvanceTipificados().add(supuesto);
+    }
+
+    private List<Long> idsPendientesPorCausa(List<UnidadEvaluacionCurricularV2DTO> unidades, CausaPendienteUnidadV2 causa) {
+        List<Long> ids = new ArrayList<Long>();
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades)
+            if (unidad.getCausa() == causa) agregarIdUnico(ids, unidad.getIdPrograma());
+        return ids;
+    }
+
+    private List<Long> listaId(Long id) { List<Long> ids = new ArrayList<Long>(); agregarIdUnico(ids, id); return ids; }
 
     private void agregarIdUnico(List<Long> destino, Long id) {
         if (id != null && !destino.contains(id)) destino.add(id);
