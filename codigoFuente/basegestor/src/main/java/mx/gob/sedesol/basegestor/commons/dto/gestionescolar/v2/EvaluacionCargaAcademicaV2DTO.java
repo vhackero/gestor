@@ -51,6 +51,10 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<SupuestoAvanceCondicionadoV2DTO> supuestosAvanceTipificados = new ArrayList<SupuestoAvanceCondicionadoV2DTO>();
     private List<Long> udsQuintoSinDependenciaSeriacionRn613 = new ArrayList<Long>();
     private List<EvaluacionOfertaPendienteRn614V2DTO> ofertasPendientesRn614 = new ArrayList<EvaluacionOfertaPendienteRn614V2DTO>();
+    private EstadoResolucionAvanceV2 estadoResolucionAvance = EstadoResolucionAvanceV2.NO_APLICA;
+    private List<String> impedimentosAvanceRn615 = new ArrayList<String>();
+    private List<Long> udsQuintoNoSusceptiblesRn615 = new ArrayList<Long>();
+    private List<String> rutaInstitucionalExtraordinariaRn616 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -150,6 +154,11 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<SupuestoAvanceCondicionadoV2DTO> getSupuestosAvanceTipificados() { return supuestosAvanceTipificados; }
     public List<Long> getUdsQuintoSinDependenciaSeriacionRn613() { return udsQuintoSinDependenciaSeriacionRn613; }
     public List<EvaluacionOfertaPendienteRn614V2DTO> getOfertasPendientesRn614() { return ofertasPendientesRn614; }
+    public EstadoResolucionAvanceV2 getEstadoResolucionAvance() { return estadoResolucionAvance; }
+    public void setEstadoResolucionAvance(EstadoResolucionAvanceV2 valor) { estadoResolucionAvance = valor; }
+    public List<String> getImpedimentosAvanceRn615() { return impedimentosAvanceRn615; }
+    public List<Long> getUdsQuintoNoSusceptiblesRn615() { return udsQuintoNoSusceptiblesRn615; }
+    public List<String> getRutaInstitucionalExtraordinariaRn616() { return rutaInstitucionalExtraordinariaRn616; }
     public List<CodigoMotivoCurricularV2> getCausasExclusion() { return causasExclusion; }
     public List<CodigoReglaCurricularV2> getReglasRelacionadas() { return reglasRelacionadas; }
     public List<String> getEvidencias() { return evidencias; }

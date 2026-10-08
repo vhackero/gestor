@@ -38,6 +38,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoSupuestosAv
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.SupuestoAvanceCondicionadoV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionOfertaPendienteRn614V2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoOfertaPendienteRn614V2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoResolucionAvanceV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoMejoraPromedioV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionMejoraPromedioUnidadV2DTO;
@@ -187,6 +188,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarCondicionesComunesAvance(resultado, contexto, unidadesNormalizadas);
         evaluarFaltaOfertaControlAvance(resultado, contexto, unidadesNormalizadas);
         evaluarSupuestosTipificadosAvance(resultado, contexto, unidadesNormalizadas);
+        evaluarImpedimentosYExtraordinario(resultado, contexto);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -1616,6 +1618,22 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
 
     private void clasificarOferta(EvaluacionOfertaPendienteRn614V2DTO oferta, EstadoOfertaPendienteRn614V2 estado, boolean falta, boolean cupo, String evidencia) {
         oferta.setEstado(estado); oferta.setFaltaOferta(Boolean.valueOf(falta)); oferta.setSinCupo(Boolean.valueOf(cupo)); oferta.setEvidencia(evidencia);
+    }
+
+    /** Fase 5E: impedimentos prevalentes y ruta extraordinaria sólo descriptiva. */
+    private void evaluarImpedimentosYExtraordinario(ResultadoEvaluacionCurricularV2DTO resultado, ContextoEvaluacionCurricularV2DTO contexto) {
+        EvaluacionCargaAcademicaV2DTO c=resultado.getEvaluacionCargaAcademica(); if(c==null)return;
+        agregarUnico(c.getReglasRelacionadas(),CodigoReglaCurricularV2.RN_6_1_5);agregarUnico(c.getReglasRelacionadas(),CodigoReglaCurricularV2.RN_6_1_6);
+        if(!Boolean.TRUE.equals(c.getAplicaCtr01())||!Boolean.TRUE.equals(c.getRequiereEvaluacionAvanceCondicionado())){c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.NO_APLICA);return;}
+        if(Boolean.TRUE.equals(c.getAplicaRn64()))c.getImpedimentosAvanceRn615().add("RN_6_4_REZAGO_SEVERO");
+        c.getUdsQuintoNoSusceptiblesRn615().addAll(c.getUdsQuintoBloqueadasSeriacionDirectaRn612());c.getUdsQuintoNoSusceptiblesRn615().addAll(c.getUdsQuintoBloqueadasSeriacionIndirectaRn612());
+        if(!c.getUdsQuintoNoSusceptiblesRn615().isEmpty())c.getImpedimentosAvanceRn615().add("SERIACION_DIRECTA_O_INDIRECTA");
+        if(Boolean.TRUE.equals(contexto.getSancionImpedimentoConocida())&&Boolean.TRUE.equals(contexto.getSancionImpedimentoRegistrada()))c.getImpedimentosAvanceRn615().add("SANCION_IMPEDITIVA");
+        if(!Boolean.TRUE.equals(contexto.getSancionImpedimentoConocida())||Boolean.TRUE.equals(c.getRequiereRevision())){c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.REQUIERE_REVISION);}
+        else if(!c.getImpedimentosAvanceRn615().isEmpty())c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.NO_PROCEDE_AVANCE_CONDICIONADO);
+        else if(c.getEstadoSupuestosAvance()==EstadoSupuestosAvanceV2.SIN_SUPUESTO_TIPIFICADO){c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.REQUIERE_RESOLUCION_EXTRAORDINARIA);c.getRutaInstitucionalExtraordinariaRn616().add("DIRECCION_DIVISION:PENDIENTE_FUNDAMENTACION_ACADEMICA");c.getRutaInstitucionalExtraordinariaRn616().add("CAI:PENDIENTE_DEFINICION_ACADEMICA");c.getRutaInstitucionalExtraordinariaRn616().add("DAEAE:PENDIENTE_DETERMINACION_ESCOLAR_NORMATIVA");c.getRutaInstitucionalExtraordinariaRn616().add("CTIE:RESOLUCION_DOCUMENTADA_PENDIENTE_EJECUCION");}
+        else c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.CONTINUA_EVALUACION_ORDINARIA_RN61);
+        registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_1_5,null,100,"RN615_"+c.getEstadoResolucionAvance(),"Impedimentos="+c.getImpedimentosAvanceRn615());registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_1_6,null,100,"RN616_"+c.getEstadoResolucionAvance(),"Ruta="+c.getRutaInstitucionalExtraordinariaRn616());
     }
 
     private void agregarIdUnico(List<Long> destino, Long id) {
