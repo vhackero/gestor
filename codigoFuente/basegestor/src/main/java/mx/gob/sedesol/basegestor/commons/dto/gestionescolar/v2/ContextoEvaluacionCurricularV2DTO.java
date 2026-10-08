@@ -54,6 +54,10 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Boolean sancionImpedimentoRegistrada;
     /** Compatibilidad curricular del plan acreditada por fuente canónica; null preserva incertidumbre. */
     private Boolean estructuraProgramaEducativoComprobada;
+    private Boolean restriccionPeNormativaConocida;
+    private Boolean restriccionPeNormativaImpeditiva;
+    private String codigoRestriccionPeNormativa;
+    private String fuenteRestriccionPeNormativa;
     private Date fechaEvaluacion;
     private List<UnidadEvaluacionCurricularV2DTO> unidades = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
 
@@ -133,6 +137,14 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setSancionImpedimentoRegistrada(Boolean valor) { sancionImpedimentoRegistrada = valor; }
     public Boolean getEstructuraProgramaEducativoComprobada() { return estructuraProgramaEducativoComprobada; }
     public void setEstructuraProgramaEducativoComprobada(Boolean valor) { estructuraProgramaEducativoComprobada = valor; }
+    public Boolean getRestriccionPeNormativaConocida() { return restriccionPeNormativaConocida; }
+    public void setRestriccionPeNormativaConocida(Boolean valor) { restriccionPeNormativaConocida = valor; }
+    public Boolean getRestriccionPeNormativaImpeditiva() { return restriccionPeNormativaImpeditiva; }
+    public void setRestriccionPeNormativaImpeditiva(Boolean valor) { restriccionPeNormativaImpeditiva = valor; }
+    public String getCodigoRestriccionPeNormativa() { return codigoRestriccionPeNormativa; }
+    public void setCodigoRestriccionPeNormativa(String valor) { codigoRestriccionPeNormativa = valor; }
+    public String getFuenteRestriccionPeNormativa() { return fuenteRestriccionPeNormativa; }
+    public void setFuenteRestriccionPeNormativa(String valor) { fuenteRestriccionPeNormativa = valor; }
     public Date getFechaEvaluacion() { return fechaEvaluacion; }
     public void setFechaEvaluacion(Date fechaEvaluacion) { this.fechaEvaluacion = fechaEvaluacion; }
     public List<UnidadEvaluacionCurricularV2DTO> getUnidades() { return unidades; }
