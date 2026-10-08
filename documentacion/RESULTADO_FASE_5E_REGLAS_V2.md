@@ -10,4 +10,10 @@ IMPEDIMENTOS_RN_6_1_5: `RN_6_4`, `SERIACION_DIRECTA_INDIRECTA`, `SANCION_IMPEDIT
 
 Validación de cierre: regresión F0–F5E, 445 pruebas, 0 fallas y 0 errores. Compilación `basegestor`: exitosa. Compilación `gestorWeb`: exitosa.
 
+PRUEBAS_F5E_DESCUBIERTAS = true.
+
+CANTIDAD_PRUEBAS_F5E = 12.
+
+REGRESION_TOTAL = 457. FALLAS = 0. ERRORES = 0. SKIPPED = 0.
+
 CAMBIO_PRODUCTIVO = NINGUNO.
