@@ -41,6 +41,12 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<Long> obligatoriasAcreditadasRn611 = new ArrayList<Long>();
     private List<Long> obligatoriasPendientesRn611 = new ArrayList<Long>();
     private List<String> detallePendientesRn611 = new ArrayList<String>();
+    private EstadoCondicionesComunesAvanceV2 estadoCondicionesComunesAvance = EstadoCondicionesComunesAvanceV2.NO_APLICA;
+    private List<CondicionComunAvanceV2DTO> condicionesComunesAvance = new ArrayList<CondicionComunAvanceV2DTO>();
+    private List<Long> udsQuintoCompatiblesRn612 = new ArrayList<Long>();
+    private List<Long> udsQuintoBloqueadasSeriacionDirectaRn612 = new ArrayList<Long>();
+    private List<Long> udsQuintoBloqueadasSeriacionIndirectaRn612 = new ArrayList<Long>();
+    private List<Long> udsQuintoRevisionSeriacionRn612 = new ArrayList<Long>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -128,6 +134,13 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<Long> getObligatoriasAcreditadasRn611() { return obligatoriasAcreditadasRn611; }
     public List<Long> getObligatoriasPendientesRn611() { return obligatoriasPendientesRn611; }
     public List<String> getDetallePendientesRn611() { return detallePendientesRn611; }
+    public EstadoCondicionesComunesAvanceV2 getEstadoCondicionesComunesAvance() { return estadoCondicionesComunesAvance; }
+    public void setEstadoCondicionesComunesAvance(EstadoCondicionesComunesAvanceV2 valor) { estadoCondicionesComunesAvance = valor; }
+    public List<CondicionComunAvanceV2DTO> getCondicionesComunesAvance() { return condicionesComunesAvance; }
+    public List<Long> getUdsQuintoCompatiblesRn612() { return udsQuintoCompatiblesRn612; }
+    public List<Long> getUdsQuintoBloqueadasSeriacionDirectaRn612() { return udsQuintoBloqueadasSeriacionDirectaRn612; }
+    public List<Long> getUdsQuintoBloqueadasSeriacionIndirectaRn612() { return udsQuintoBloqueadasSeriacionIndirectaRn612; }
+    public List<Long> getUdsQuintoRevisionSeriacionRn612() { return udsQuintoRevisionSeriacionRn612; }
     public List<CodigoMotivoCurricularV2> getCausasExclusion() { return causasExclusion; }
     public List<CodigoReglaCurricularV2> getReglasRelacionadas() { return reglasRelacionadas; }
     public List<String> getEvidencias() { return evidencias; }

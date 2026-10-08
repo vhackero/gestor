@@ -49,6 +49,11 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private List<String> periodosActividadConsiderados = new ArrayList<String>();
     private List<String> evidenciasActividad = new ArrayList<String>();
     private Boolean avanceCondicionado;
+    /** Sólo se llena cuando una fuente canónica acredita el dato disciplinario. */
+    private Boolean sancionImpedimentoConocida;
+    private Boolean sancionImpedimentoRegistrada;
+    /** Compatibilidad curricular del plan acreditada por fuente canónica; null preserva incertidumbre. */
+    private Boolean estructuraProgramaEducativoComprobada;
     private Date fechaEvaluacion;
     private List<UnidadEvaluacionCurricularV2DTO> unidades = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
 
@@ -122,6 +127,12 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setEvidenciasActividad(List<String> valores) { evidenciasActividad = valores == null ? new ArrayList<String>() : valores; }
     public Boolean getAvanceCondicionado() { return avanceCondicionado; }
     public void setAvanceCondicionado(Boolean avanceCondicionado) { this.avanceCondicionado = avanceCondicionado; }
+    public Boolean getSancionImpedimentoConocida() { return sancionImpedimentoConocida; }
+    public void setSancionImpedimentoConocida(Boolean valor) { sancionImpedimentoConocida = valor; }
+    public Boolean getSancionImpedimentoRegistrada() { return sancionImpedimentoRegistrada; }
+    public void setSancionImpedimentoRegistrada(Boolean valor) { sancionImpedimentoRegistrada = valor; }
+    public Boolean getEstructuraProgramaEducativoComprobada() { return estructuraProgramaEducativoComprobada; }
+    public void setEstructuraProgramaEducativoComprobada(Boolean valor) { estructuraProgramaEducativoComprobada = valor; }
     public Date getFechaEvaluacion() { return fechaEvaluacion; }
     public void setFechaEvaluacion(Date fechaEvaluacion) { this.fechaEvaluacion = fechaEvaluacion; }
     public List<UnidadEvaluacionCurricularV2DTO> getUnidades() { return unidades; }

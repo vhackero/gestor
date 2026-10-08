@@ -30,6 +30,9 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaMaxima
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaAcademicaV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaAcademicaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoControlAvanceAnualV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCondicionAvanceV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCondicionesComunesAvanceV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CondicionComunAvanceV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoMejoraPromedioV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionMejoraPromedioUnidadV2DTO;
@@ -176,6 +179,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarRezagoSevero(resultado, contexto, unidadesNormalizadas);
         evaluarCargaRezagoSevero(resultado, contexto);
         evaluarControlAvanceAnualBase(resultado, contexto, unidadesNormalizadas);
+        evaluarCondicionesComunesAvance(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -1358,7 +1362,9 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 || resultado.getCondicionesDetectadas().contains(CondicionCurricularV2.SERIACION);
         if (rn64Activa || restriccionConcurrente) {
             control.setAccesoOrdinarioQuinto(Boolean.FALSE);
-            control.setRequiereEvaluacionAvanceCondicionado(Boolean.FALSE);
+            // La restricción impide conceder avance, pero conserva la delegación para
+            // que RN-6.1.2 pueda trazar concurrentemente por qué no cumple.
+            control.setRequiereEvaluacionAvanceCondicionado(Boolean.valueOf(!control.getObligatoriasPendientesRn611().isEmpty()));
             control.setEstadoControlAvanceAnual(EstadoControlAvanceAnualV2.BLOQUEADO_POR_RESTRICCION_CONCURRENTE);
             if (rn64Activa) control.setAvanceCondicionadoBloqueadoPorRn64(Boolean.TRUE);
             registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_1,
@@ -1390,6 +1396,117 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         return "UD=" + obtenerLlaveUnidad(unidad) + ";semestre=" + unidad.getSemestre()
                 + ";estado=" + unidad.getEstado() + ";causa=" + unidad.getCausa()
                 + ";evidencia=" + unidad.getReferenciasHistoricas();
+    }
+
+    /** Fase 5B: precondiciones comunes; no tipifica ni concede avance condicionado. */
+    private void evaluarCondicionesComunesAvance(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO control = resultado.getEvaluacionCargaAcademica();
+        if (control == null) return;
+        agregarUnico(control.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_1_2);
+        agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_6_1_2);
+        if (!Boolean.TRUE.equals(control.getAplicaCtr01())
+                || !Boolean.TRUE.equals(control.getRequiereEvaluacionAvanceCondicionado())) {
+            control.setEstadoCondicionesComunesAvance(EstadoCondicionesComunesAvanceV2.NO_APLICA);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_2, null, 100,
+                    "RN612_NO_APLICA", "RN-6.1.2 requiere CTR-01 aplicable y pendientes delegadas por RN-6.1.1.");
+            return;
+        }
+        List<EstadoCondicionAvanceV2> estados = new ArrayList<EstadoCondicionAvanceV2>();
+        boolean rn64 = Boolean.TRUE.equals(control.getAplicaRn64());
+        agregarCondicionAvance(control, "A_RN64", rn64 ? EstadoCondicionAvanceV2.NO_CUMPLE : EstadoCondicionAvanceV2.CUMPLE,
+                "RN-6.4=" + rn64 + "; reprobadas=" + resultado.getCantidadReprobadasVigentes(),
+                control.getObligatoriasPendientesRn611());
+        estados.add(rn64 ? EstadoCondicionAvanceV2.NO_CUMPLE : EstadoCondicionAvanceV2.CUMPLE);
+
+        EstadoCondicionAvanceV2 estadoSeriacion = evaluarSeriacionQuinto(control, unidades);
+        estados.add(estadoSeriacion);
+
+        EstadoCondicionAvanceV2 estadoCarga;
+        if (control.getCargaMaximaNormativa() == null || control.getCargaEvaluada() == null) estadoCarga = EstadoCondicionAvanceV2.REQUIERE_REVISION;
+        else estadoCarga = control.getCargaEvaluada().intValue() <= control.getCargaMaximaNormativa().intValue()
+                ? EstadoCondicionAvanceV2.CUMPLE : EstadoCondicionAvanceV2.NO_CUMPLE;
+        agregarCondicionAvance(control, "C_CARGA", estadoCarga,
+                "carga=" + control.getCargaEvaluada() + ";maximoRN42=" + control.getCargaMaximaNormativa(), null);
+        estados.add(estadoCarga);
+
+        EstadoCondicionAvanceV2 estadoPrioridad;
+        if (Boolean.TRUE.equals(control.getAplicaRn63())) estadoPrioridad = EstadoCondicionAvanceV2.CUMPLE;
+        else if ("NO_DETERMINADA".equals(resultado.getSituacionAcademicaCalculada())) estadoPrioridad = EstadoCondicionAvanceV2.REQUIERE_REVISION;
+        else estadoPrioridad = EstadoCondicionAvanceV2.REQUIERE_REVISION;
+        agregarCondicionAvance(control, "D_PRIORIDAD_PENDIENTES", estadoPrioridad,
+                "rutaRN63=" + control.getAplicaRn63() + ";pendientes=" + control.getObligatoriasPendientesRn611()
+                        + ";indisponibilidades=" + control.getCausasIndisponibilidadRegularizacion(),
+                control.getObligatoriasPendientesRn611());
+        estados.add(estadoPrioridad);
+
+        EstadoCondicionAvanceV2 estadoEstructura = Boolean.TRUE.equals(contexto.getEstructuraProgramaEducativoComprobada())
+                ? EstadoCondicionAvanceV2.CUMPLE : EstadoCondicionAvanceV2.REQUIERE_REVISION;
+        agregarCondicionAvance(control, "E_ESTRUCTURA_PE", estadoEstructura,
+                "estructuraProgramaEducativoComprobada=" + contexto.getEstructuraProgramaEducativoComprobada(), null);
+        estados.add(estadoEstructura);
+
+        boolean causaIdentificada = !control.getDetallePendientesRn611().isEmpty();
+        EstadoCondicionAvanceV2 estadoExcepcion = causaIdentificada
+                ? EstadoCondicionAvanceV2.PENDIENTE_TIPIFICACION : EstadoCondicionAvanceV2.REQUIERE_REVISION;
+        agregarCondicionAvance(control, "F_CAUSA_Y_EXCEPCION", estadoExcepcion,
+                causaIdentificada ? "CAUSA_REGISTRADA=true;EXCEPCION_APLICADA=PENDIENTE_TIPIFICACION_RN_6_1_3"
+                        : "No existe causa verificable para la pendiente.", control.getObligatoriasPendientesRn611());
+        estados.add(estadoExcepcion);
+
+        EstadoCondicionAvanceV2 estadoSancion;
+        if (!Boolean.TRUE.equals(contexto.getSancionImpedimentoConocida())) estadoSancion = EstadoCondicionAvanceV2.REQUIERE_REVISION;
+        else estadoSancion = Boolean.TRUE.equals(contexto.getSancionImpedimentoRegistrada())
+                ? EstadoCondicionAvanceV2.NO_CUMPLE : EstadoCondicionAvanceV2.CUMPLE;
+        agregarCondicionAvance(control, "G_SANCION", estadoSancion,
+                "sancionImpedimentoConocida=" + contexto.getSancionImpedimentoConocida()
+                        + ";sancionImpedimentoRegistrada=" + contexto.getSancionImpedimentoRegistrada(), null);
+        estados.add(estadoSancion);
+
+        EstadoCondicionesComunesAvanceV2 global;
+        if (estados.contains(EstadoCondicionAvanceV2.NO_CUMPLE)) global = EstadoCondicionesComunesAvanceV2.NO_CUMPLE_CONDICIONES_COMUNES;
+        else if (estados.contains(EstadoCondicionAvanceV2.REQUIERE_REVISION)) global = EstadoCondicionesComunesAvanceV2.REQUIERE_REVISION;
+        else if (estados.contains(EstadoCondicionAvanceV2.PENDIENTE_TIPIFICACION)) global = EstadoCondicionesComunesAvanceV2.PENDIENTE_TIPIFICACION;
+        else global = EstadoCondicionesComunesAvanceV2.CUMPLE_CONDICIONES_COMUNES;
+        control.setEstadoCondicionesComunesAvance(global);
+        if (global == EstadoCondicionesComunesAvanceV2.REQUIERE_REVISION) control.setRequiereRevision(Boolean.TRUE);
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_2,
+                global == EstadoCondicionesComunesAvanceV2.NO_CUMPLE_CONDICIONES_COMUNES ? CodigoMotivoCurricularV2.REZAGO_SEVERO
+                        : (global == EstadoCondicionesComunesAvanceV2.REQUIERE_REVISION ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null),
+                100, "RN612_" + global,
+                "Condiciones A-G concurrentes=" + estados + "; no concede avance condicionado ni tipifica RN-6.1.3.");
+    }
+
+    private EstadoCondicionAvanceV2 evaluarSeriacionQuinto(EvaluacionCargaAcademicaV2DTO control,
+            List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        boolean revision = false;
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (unidad == null || !Integer.valueOf(5).equals(unidad.getSemestre())) continue;
+            if (unidad.getIdPrograma() == null) { revision = true; continue; }
+            if (Boolean.TRUE.equals(unidad.getSeriacionDirectaConocida())) {
+                agregarIdUnico(control.getUdsQuintoBloqueadasSeriacionDirectaRn612(), unidad.getIdPrograma());
+            } else if (Boolean.TRUE.equals(unidad.getSeriacionIndirectaConocida())) {
+                agregarIdUnico(control.getUdsQuintoBloqueadasSeriacionIndirectaRn612(), unidad.getIdPrograma());
+            } else if (Boolean.TRUE.equals(unidad.getSeriacionConocida())) {
+                agregarIdUnico(control.getUdsQuintoRevisionSeriacionRn612(), unidad.getIdPrograma()); revision = true;
+            } else agregarIdUnico(control.getUdsQuintoCompatiblesRn612(), unidad.getIdPrograma());
+        }
+        EstadoCondicionAvanceV2 estado = !control.getUdsQuintoBloqueadasSeriacionDirectaRn612().isEmpty()
+                || !control.getUdsQuintoBloqueadasSeriacionIndirectaRn612().isEmpty() ? EstadoCondicionAvanceV2.NO_CUMPLE
+                : (revision || control.getUdsQuintoCompatiblesRn612().isEmpty() ? EstadoCondicionAvanceV2.REQUIERE_REVISION : EstadoCondicionAvanceV2.CUMPLE);
+        agregarCondicionAvance(control, "B_SERIACION_QUINTO", estado,
+                "compatibles=" + control.getUdsQuintoCompatiblesRn612() + ";directa=" + control.getUdsQuintoBloqueadasSeriacionDirectaRn612()
+                        + ";indirecta=" + control.getUdsQuintoBloqueadasSeriacionIndirectaRn612() + ";revision=" + control.getUdsQuintoRevisionSeriacionRn612(),
+                control.getObligatoriasPendientesRn611());
+        return estado;
+    }
+
+    private void agregarCondicionAvance(EvaluacionCargaAcademicaV2DTO control, String codigo,
+            EstadoCondicionAvanceV2 estado, String detalle, List<Long> unidades) {
+        CondicionComunAvanceV2DTO condicion = new CondicionComunAvanceV2DTO();
+        condicion.setCodigo(codigo); condicion.setEstado(estado); condicion.setDetalle(detalle);
+        if (unidades != null) condicion.getUnidadesRelacionadas().addAll(unidades);
+        control.getCondicionesComunesAvance().add(condicion);
     }
 
     private void agregarIdUnico(List<Long> destino, Long id) {
