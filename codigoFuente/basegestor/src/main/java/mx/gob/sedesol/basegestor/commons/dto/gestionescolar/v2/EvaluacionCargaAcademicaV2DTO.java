@@ -55,6 +55,8 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<String> impedimentosAvanceRn615 = new ArrayList<String>();
     private List<Long> udsQuintoNoSusceptiblesRn615 = new ArrayList<Long>();
     private List<String> rutaInstitucionalExtraordinariaRn616 = new ArrayList<String>();
+    private EstadoDecisionControlAvanceRn61V2 decisionGlobalRn61 = EstadoDecisionControlAvanceRn61V2.NO_APLICA;
+    private List<String> decisionesPorUdQuintoRn61 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -159,6 +161,9 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<String> getImpedimentosAvanceRn615() { return impedimentosAvanceRn615; }
     public List<Long> getUdsQuintoNoSusceptiblesRn615() { return udsQuintoNoSusceptiblesRn615; }
     public List<String> getRutaInstitucionalExtraordinariaRn616() { return rutaInstitucionalExtraordinariaRn616; }
+    public EstadoDecisionControlAvanceRn61V2 getDecisionGlobalRn61() { return decisionGlobalRn61; }
+    public void setDecisionGlobalRn61(EstadoDecisionControlAvanceRn61V2 valor) { decisionGlobalRn61 = valor; }
+    public List<String> getDecisionesPorUdQuintoRn61() { return decisionesPorUdQuintoRn61; }
     public List<CodigoMotivoCurricularV2> getCausasExclusion() { return causasExclusion; }
     public List<CodigoReglaCurricularV2> getReglasRelacionadas() { return reglasRelacionadas; }
     public List<String> getEvidencias() { return evidencias; }

@@ -39,6 +39,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.SupuestoAvanceCon
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionOfertaPendienteRn614V2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoOfertaPendienteRn614V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoResolucionAvanceV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoDecisionControlAvanceRn61V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoMejoraPromedioV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionMejoraPromedioUnidadV2DTO;
@@ -189,6 +190,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarFaltaOfertaControlAvance(resultado, contexto, unidadesNormalizadas);
         evaluarSupuestosTipificadosAvance(resultado, contexto, unidadesNormalizadas);
         evaluarImpedimentosYExtraordinario(resultado, contexto);
+        consolidarDecisionControlAvance(resultado, contexto);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -1631,10 +1633,29 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         if(Boolean.TRUE.equals(contexto.getSancionImpedimentoConocida())&&Boolean.TRUE.equals(contexto.getSancionImpedimentoRegistrada()))c.getImpedimentosAvanceRn615().add("SANCION_IMPEDITIVA");
         if(Boolean.TRUE.equals(contexto.getRestriccionPeNormativaConocida())&&Boolean.TRUE.equals(contexto.getRestriccionPeNormativaImpeditiva()))c.getImpedimentosAvanceRn615().add("RESTRICCION_PE_NORMATIVA:"+contexto.getCodigoRestriccionPeNormativa()+":"+contexto.getFuenteRestriccionPeNormativa());
         if(!Boolean.TRUE.equals(contexto.getSancionImpedimentoConocida())||!Boolean.TRUE.equals(contexto.getRestriccionPeNormativaConocida())||Boolean.TRUE.equals(c.getRequiereRevision())){c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.REQUIERE_REVISION);}
-        else if(!c.getImpedimentosAvanceRn615().isEmpty())c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.NO_PROCEDE_AVANCE_CONDICIONADO);
+        else if(Boolean.TRUE.equals(c.getAplicaRn64()) || Boolean.TRUE.equals(contexto.getSancionImpedimentoRegistrada()) || Boolean.TRUE.equals(contexto.getRestriccionPeNormativaImpeditiva()))c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.NO_PROCEDE_AVANCE_CONDICIONADO);
         else if(c.getEstadoSupuestosAvance()==EstadoSupuestosAvanceV2.SIN_SUPUESTO_TIPIFICADO){c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.REQUIERE_RESOLUCION_EXTRAORDINARIA);c.getRutaInstitucionalExtraordinariaRn616().add("DIRECCION_DIVISION:PENDIENTE_FUNDAMENTACION_ACADEMICA");c.getRutaInstitucionalExtraordinariaRn616().add("CAI:PENDIENTE_DEFINICION_ACADEMICA");c.getRutaInstitucionalExtraordinariaRn616().add("DAEAE:PENDIENTE_DETERMINACION_ESCOLAR_NORMATIVA");c.getRutaInstitucionalExtraordinariaRn616().add("CTIE:RESOLUCION_DOCUMENTADA_PENDIENTE_EJECUCION");}
         else c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.CONTINUA_EVALUACION_ORDINARIA_RN61);
         registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_1_5,null,100,"RN615_"+c.getEstadoResolucionAvance(),"Impedimentos="+c.getImpedimentosAvanceRn615());registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_1_6,null,100,"RN616_"+c.getEstadoResolucionAvance(),"Ruta="+c.getRutaInstitucionalExtraordinariaRn616());
+    }
+
+    /** Fase 5F: compone resultados RN-6.1.1..6 sin recalcularlos ni activar efectos. */
+    private void consolidarDecisionControlAvance(ResultadoEvaluacionCurricularV2DTO resultado, ContextoEvaluacionCurricularV2DTO contexto) {
+        EvaluacionCargaAcademicaV2DTO c=resultado.getEvaluacionCargaAcademica(); if(c==null)return;
+        EstadoDecisionControlAvanceRn61V2 d;
+        if(!Boolean.TRUE.equals(c.getAplicaCtr01())) d=EstadoDecisionControlAvanceRn61V2.NO_APLICA;
+        else if(c.getEstadoControlAvanceAnual()==EstadoControlAvanceAnualV2.ACCESO_ORDINARIO_PROCEDE_EN_SOMBRA) d=EstadoDecisionControlAvanceRn61V2.ACCESO_ORDINARIO_PROCEDE_EN_SOMBRA;
+        else if(c.getEstadoResolucionAvance()==EstadoResolucionAvanceV2.NO_PROCEDE_AVANCE_CONDICIONADO) d=EstadoDecisionControlAvanceRn61V2.AVANCE_CONDICIONADO_NO_PROCEDE;
+        else if(c.getEstadoResolucionAvance()==EstadoResolucionAvanceV2.REQUIERE_RESOLUCION_EXTRAORDINARIA) d=EstadoDecisionControlAvanceRn61V2.REQUIERE_RESOLUCION_EXTRAORDINARIA;
+        else if(c.getEstadoResolucionAvance()==EstadoResolucionAvanceV2.REQUIERE_REVISION || Boolean.TRUE.equals(c.getRequiereRevision())) d=EstadoDecisionControlAvanceRn61V2.REQUIERE_REVISION;
+        else if(!c.getSupuestosAvanceTipificados().isEmpty()) d=EstadoDecisionControlAvanceRn61V2.AVANCE_CONDICIONADO_PROCEDE_PARA_UD_COMPATIBLES;
+        else d=EstadoDecisionControlAvanceRn61V2.NO_DETERMINADO;
+        c.setDecisionGlobalRn61(d);
+        for(Long id:c.getUdsQuintoBloqueadasSeriacionDirectaRn612())c.getDecisionesPorUdQuintoRn61().add(id+":NO_PROCEDE_POR_SERIACION_DIRECTA");
+        for(Long id:c.getUdsQuintoBloqueadasSeriacionIndirectaRn612())c.getDecisionesPorUdQuintoRn61().add(id+":NO_PROCEDE_POR_SERIACION_INDIRECTA");
+        for(Long id:c.getUdsQuintoRevisionSeriacionRn612())c.getDecisionesPorUdQuintoRn61().add(id+":REQUIERE_REVISION_SERIACION");
+        for(Long id:c.getUdsQuintoCompatiblesRn612())c.getDecisionesPorUdQuintoRn61().add(id+":"+(d==EstadoDecisionControlAvanceRn61V2.AVANCE_CONDICIONADO_PROCEDE_PARA_UD_COMPATIBLES?"AVANCE_CONDICIONADO_PROCEDE_EN_SOMBRA":d.name()));
+        registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_1,null,100,"DECISION_RN61_"+d,"DecisionesUD5="+c.getDecisionesPorUdQuintoRn61()+"; sin efecto productivo.");
     }
 
     private void agregarIdUnico(List<Long> destino, Long id) {
