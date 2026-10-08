@@ -23,6 +23,8 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private Boolean aplicaRn63;
     /** RN-5.1: clasificación concurrente; no sustituye situación académica. */
     private Boolean aplicaRn51;
+    /** RN-5.2 compone el resultado severo existente, sin duplicar RN-6.4. */
+    private Boolean aplicaRn52;
     private String condicionRegularizacion;
     /** RN-6.4: restricción efectiva sólo dentro del resultado sombra V2. */
     private Boolean aplicaRn64;
@@ -70,6 +72,8 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public void setAplicaRn63(Boolean valor) { aplicaRn63 = valor; }
     public Boolean getAplicaRn51() { return aplicaRn51; }
     public void setAplicaRn51(Boolean valor) { aplicaRn51 = valor; }
+    public Boolean getAplicaRn52() { return aplicaRn52; }
+    public void setAplicaRn52(Boolean valor) { aplicaRn52 = valor; }
     public String getCondicionRegularizacion() { return condicionRegularizacion; }
     public void setCondicionRegularizacion(String valor) { condicionRegularizacion = valor; }
     public Boolean getAplicaRn64() { return aplicaRn64; }

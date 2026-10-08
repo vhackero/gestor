@@ -173,6 +173,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarPrioridadRegularizacion(resultado, contexto, unidadesNormalizadas);
         evaluarRezagoLeve(resultado, contexto);
         evaluarRezagoSevero(resultado, contexto, unidadesNormalizadas);
+        evaluarCargaRezagoSevero(resultado, contexto);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -1140,6 +1141,59 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         resultado.getTrazas().add(traza);
         agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_6_4);
         actualizarPrioridad(resultado, 100);
+    }
+
+    /**
+     * RN-5.2 clasifica y valida la composición severa ya resultante de RN-6.4,
+     * RN-6.3 y RN-4.3. No recalcula bloqueo, prioridad, carga ni umbral.
+     */
+    private void evaluarCargaRezagoSevero(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto) {
+        EvaluacionCargaAcademicaV2DTO evaluacion = resultado.getEvaluacionCargaAcademica();
+        if (evaluacion == null) return;
+        agregarUnico(evaluacion.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_5_2);
+        Integer reprobadas = resultado.getCantidadReprobadasVigentes();
+        String situacion = resultado.getSituacionAcademicaCalculada();
+        if (reprobadas == null || "NO_DETERMINADA".equals(situacion)) {
+            evaluacion.setAplicaRn52(Boolean.FALSE);
+            evaluacion.setRequiereRevision(Boolean.TRUE);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_5_2,
+                    CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, 95,
+                    "CARGA_REZAGO_SEVERO_REQUIERE_REVISION",
+                    "RN-5.2 no infiere rezago severo sin situación y total de reprobadas confiables.");
+            return;
+        }
+        boolean aplica = "IRREGULAR".equals(situacion) && reprobadas.intValue() >= 4;
+        evaluacion.setAplicaRn52(Boolean.valueOf(aplica));
+        if (!aplica) {
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_5_2, null, 95,
+                    "CARGA_REZAGO_SEVERO_NO_APLICA",
+                    "RN-5.2 requiere situación IRREGULAR y cuatro o más reprobadas; situación="
+                            + situacion + "; reprobadas=" + reprobadas + ".");
+            return;
+        }
+
+        boolean rn64Activo = Boolean.TRUE.equals(evaluacion.getAplicaRn64());
+        boolean rutaConsistente = Boolean.TRUE.equals(evaluacion.getAplicaRn63());
+        boolean maximoConsistente = Integer.valueOf(6).equals(evaluacion.getCargaMaximaNormativa());
+        boolean condicionConsistente = "REZAGO_SEVERO".equals(evaluacion.getCondicionRegularizacion());
+        boolean consistente = rn64Activo && rutaConsistente && maximoConsistente && condicionConsistente;
+        if (!consistente) evaluacion.setRequiereRevision(Boolean.TRUE);
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_5_2,
+                consistente ? null : CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, 95,
+                consistente ? "CARGA_REZAGO_SEVERO_APLICA_SOMBRA" : "CARGA_REZAGO_SEVERO_INCONSISTENTE",
+                "situacionRN12=" + situacion + "; reprobadas=" + reprobadas
+                        + "; rn64=" + evaluacion.getAplicaRn64()
+                        + "; rutaRN63=" + evaluacion.getAplicaRn63()
+                        + "; maximoRN42=" + evaluacion.getCargaMaximaNormativa()
+                        + "; cargaRN43=" + evaluacion.getCargaEvaluada()
+                        + "; prioritarias=" + evaluacion.getUdsReprobadasPrioritarias()
+                        + "; noDisponibles=" + evaluacion.getCausasIndisponibilidadRegularizacion()
+                        + "; bloqueadas=" + evaluacion.getUdsObligatoriasNuevasBloqueadasRn64()
+                        + "; optativas=" + evaluacion.getUdsOptativasAdicionalesElegiblesRn64()
+                        + "; excepcionMinimo=" + evaluacion.getExcepcionMinimoAplicable()
+                        + "; ctr01=" + evaluacion.getCtr01Rn61Procedente()
+                        + "; prevalenciaRn64=" + evaluacion.getAvanceCondicionadoBloqueadoPorRn64());
     }
 
     /** Devuelve -1 sólo cuando el límite corta un conjunto empatado sin criterio normativo adicional. */
