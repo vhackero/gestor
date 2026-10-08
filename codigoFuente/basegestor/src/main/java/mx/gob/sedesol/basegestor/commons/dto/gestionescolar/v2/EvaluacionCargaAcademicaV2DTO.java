@@ -29,6 +29,18 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     /** RN-6.4: restricción efectiva sólo dentro del resultado sombra V2. */
     private Boolean aplicaRn64;
     private Boolean avanceCondicionadoBloqueadoPorRn64 = Boolean.FALSE;
+    /** Fase 5A: aplicabilidad formal de CTR-01/RN-6.1 para acceso a quinto. */
+    private Boolean aplicaCtr01;
+    private Boolean aplicaRn61;
+    private Integer totalObligatoriasSemestres1A4;
+    private Boolean todasObligatoriasPreviasAcreditadas;
+    private Boolean accesoOrdinarioQuinto;
+    private Boolean requiereEvaluacionAvanceCondicionado;
+    private EstadoControlAvanceAnualV2 estadoControlAvanceAnual = EstadoControlAvanceAnualV2.NO_APLICA;
+    private List<Long> baseRn611 = new ArrayList<Long>();
+    private List<Long> obligatoriasAcreditadasRn611 = new ArrayList<Long>();
+    private List<Long> obligatoriasPendientesRn611 = new ArrayList<Long>();
+    private List<String> detallePendientesRn611 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -80,6 +92,20 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public void setAplicaRn64(Boolean valor) { aplicaRn64 = valor; }
     public Boolean getAvanceCondicionadoBloqueadoPorRn64() { return avanceCondicionadoBloqueadoPorRn64; }
     public void setAvanceCondicionadoBloqueadoPorRn64(Boolean valor) { avanceCondicionadoBloqueadoPorRn64 = valor; }
+    public Boolean getAplicaCtr01() { return aplicaCtr01; }
+    public void setAplicaCtr01(Boolean valor) { aplicaCtr01 = valor; }
+    public Boolean getAplicaRn61() { return aplicaRn61; }
+    public void setAplicaRn61(Boolean valor) { aplicaRn61 = valor; }
+    public Integer getTotalObligatoriasSemestres1A4() { return totalObligatoriasSemestres1A4; }
+    public void setTotalObligatoriasSemestres1A4(Integer valor) { totalObligatoriasSemestres1A4 = valor; }
+    public Boolean getTodasObligatoriasPreviasAcreditadas() { return todasObligatoriasPreviasAcreditadas; }
+    public void setTodasObligatoriasPreviasAcreditadas(Boolean valor) { todasObligatoriasPreviasAcreditadas = valor; }
+    public Boolean getAccesoOrdinarioQuinto() { return accesoOrdinarioQuinto; }
+    public void setAccesoOrdinarioQuinto(Boolean valor) { accesoOrdinarioQuinto = valor; }
+    public Boolean getRequiereEvaluacionAvanceCondicionado() { return requiereEvaluacionAvanceCondicionado; }
+    public void setRequiereEvaluacionAvanceCondicionado(Boolean valor) { requiereEvaluacionAvanceCondicionado = valor; }
+    public EstadoControlAvanceAnualV2 getEstadoControlAvanceAnual() { return estadoControlAvanceAnual; }
+    public void setEstadoControlAvanceAnual(EstadoControlAvanceAnualV2 valor) { estadoControlAvanceAnual = valor; }
     public Boolean getRequiereRevisionRegularizacion() { return requiereRevisionRegularizacion; }
     public void setRequiereRevisionRegularizacion(Boolean valor) { requiereRevisionRegularizacion = valor; }
     public Integer getCargaDisponibleRegularizacion() { return cargaDisponibleRegularizacion; }
@@ -98,6 +124,10 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<String> getCausasIndisponibilidadRegularizacion() { return causasIndisponibilidadRegularizacion; }
     public List<Long> getUdsObligatoriasNuevasBloqueadasRn64() { return udsObligatoriasNuevasBloqueadasRn64; }
     public List<Long> getUdsOptativasAdicionalesElegiblesRn64() { return udsOptativasAdicionalesElegiblesRn64; }
+    public List<Long> getBaseRn611() { return baseRn611; }
+    public List<Long> getObligatoriasAcreditadasRn611() { return obligatoriasAcreditadasRn611; }
+    public List<Long> getObligatoriasPendientesRn611() { return obligatoriasPendientesRn611; }
+    public List<String> getDetallePendientesRn611() { return detallePendientesRn611; }
     public List<CodigoMotivoCurricularV2> getCausasExclusion() { return causasExclusion; }
     public List<CodigoReglaCurricularV2> getReglasRelacionadas() { return reglasRelacionadas; }
     public List<String> getEvidencias() { return evidencias; }

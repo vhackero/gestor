@@ -29,6 +29,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaMa
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaMaximaCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaAcademicaV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaAcademicaV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoControlAvanceAnualV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoMejoraPromedioV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionMejoraPromedioUnidadV2DTO;
@@ -174,6 +175,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarRezagoLeve(resultado, contexto);
         evaluarRezagoSevero(resultado, contexto, unidadesNormalizadas);
         evaluarCargaRezagoSevero(resultado, contexto);
+        evaluarControlAvanceAnualBase(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -1263,11 +1265,139 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         actualizarPrioridad(resultado, 75);
     }
 
+    /**
+     * Fase 5A. Formaliza la procedencia del Control de Avance Anual y su
+     * base RN-6.1.1; no evalúa ni concede avance condicionado.
+     */
+    private void evaluarControlAvanceAnualBase(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO control = resultado.getEvaluacionCargaAcademica();
+        if (control == null) return;
+        agregarUnico(control.getReglasRelacionadas(), CodigoReglaCurricularV2.CTR_01);
+        agregarUnico(control.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_1);
+        agregarUnico(control.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_1_1);
+        agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.CTR_01);
+        agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_6_1);
+        agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_6_1_1);
+
+        Boolean aplica = procedenciaCtr01(contexto);
+        control.setAplicaCtr01(aplica);
+        control.setAplicaRn61(aplica);
+        if (aplica == null) {
+            control.setEstadoControlAvanceAnual(EstadoControlAvanceAnualV2.REQUIERE_REVISION);
+            control.setRequiereRevision(Boolean.TRUE);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_01,
+                    CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, 100,
+                    "CTR01_REQUIERE_REVISION",
+                    "No es posible determinar semestre objetivo o periodo normativo para CTR-01.");
+            return;
+        }
+        if (!aplica.booleanValue()) {
+            control.setEstadoControlAvanceAnual(EstadoControlAvanceAnualV2.NO_APLICA);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_01, null, 100,
+                    "CTR01_NO_APLICA",
+                    "CTR-01 sólo aplica desde 2027-1 cuando el semestre objetivo curricular es quinto.");
+            return;
+        }
+        if (contexto.getIdPlan() == null) {
+            control.setEstadoControlAvanceAnual(EstadoControlAvanceAnualV2.REQUIERE_REVISION);
+            control.setRequiereRevision(Boolean.TRUE);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_1,
+                    CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, 100,
+                    "BASE_RN611_PLAN_NO_DETERMINADO",
+                    "No se construye la base obligatoria 1-4 sin Programa Educativo/plan técnico.");
+            return;
+        }
+
+        boolean datosInsuficientes = false;
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (unidad == null) continue;
+            Integer semestre = unidad.getSemestre();
+            if (semestre == null) {
+                if (unidad.getTipoUd() == null || esObligatoria(unidad)) datosInsuficientes = true;
+                continue;
+            }
+            if (semestre.intValue() < 1 || semestre.intValue() > 4) continue;
+            if (unidad.getTipoUd() == null) {
+                datosInsuficientes = true;
+                continue;
+            }
+            if (!esObligatoria(unidad)) continue;
+            if (unidad.getIdPrograma() == null) {
+                datosInsuficientes = true;
+                continue;
+            }
+            agregarIdUnico(control.getBaseRn611(), unidad.getIdPrograma());
+            if (unidad.getEstado() == EstadoUnidadCurricularV2.ACREDITADA) {
+                agregarIdUnico(control.getObligatoriasAcreditadasRn611(), unidad.getIdPrograma());
+            } else {
+                agregarIdUnico(control.getObligatoriasPendientesRn611(), unidad.getIdPrograma());
+                control.getDetallePendientesRn611().add(detallePendienteControlAvance(unidad));
+                if (unidad.getEstado() == EstadoUnidadCurricularV2.NO_DETERMINADO
+                        || unidad.getCausa() == CausaPendienteUnidadV2.NO_DETERMINADA) datosInsuficientes = true;
+            }
+        }
+        control.setTotalObligatoriasSemestres1A4(Integer.valueOf(control.getBaseRn611().size()));
+        control.setTodasObligatoriasPreviasAcreditadas(Boolean.valueOf(!control.getBaseRn611().isEmpty()
+                && control.getObligatoriasPendientesRn611().isEmpty() && !datosInsuficientes));
+        if (control.getBaseRn611().isEmpty() || datosInsuficientes) {
+            control.setEstadoControlAvanceAnual(EstadoControlAvanceAnualV2.REQUIERE_REVISION);
+            control.setRequiereRevision(Boolean.TRUE);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_1,
+                    CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, 100,
+                    "BASE_RN611_REQUIERE_REVISION",
+                    "Base obligatoria 1-4 incompleta o indeterminada; base=" + control.getBaseRn611()
+                            + "; pendientes=" + control.getDetallePendientesRn611());
+            return;
+        }
+
+        boolean rn64Activa = Boolean.TRUE.equals(control.getAplicaRn64());
+        boolean restriccionConcurrente = rn64Activa || Boolean.TRUE.equals(contexto.getLimitePermanenciaExcedido())
+                || Boolean.TRUE.equals(contexto.getLimiteInactividadAlcanzado())
+                || Boolean.TRUE.equals(contexto.getBajaDefinitivaRegistrada())
+                || resultado.getCondicionesDetectadas().contains(CondicionCurricularV2.SERIACION);
+        if (rn64Activa || restriccionConcurrente) {
+            control.setAccesoOrdinarioQuinto(Boolean.FALSE);
+            control.setRequiereEvaluacionAvanceCondicionado(Boolean.FALSE);
+            control.setEstadoControlAvanceAnual(EstadoControlAvanceAnualV2.BLOQUEADO_POR_RESTRICCION_CONCURRENTE);
+            if (rn64Activa) control.setAvanceCondicionadoBloqueadoPorRn64(Boolean.TRUE);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_1,
+                    rn64Activa ? CodigoMotivoCurricularV2.REZAGO_SEVERO : CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,
+                    100, "CTR01_BLOQUEADO_RESTRICCION_CONCURRENTE",
+                    "CTR-01 aplica, pero una restricción concurrente impide declarar acceso ordinario o avance condicionado."
+                            + " RN64=" + rn64Activa + "; pendientes=" + control.getDetallePendientesRn611());
+            return;
+        }
+        if (Boolean.TRUE.equals(control.getTodasObligatoriasPreviasAcreditadas())) {
+            control.setAccesoOrdinarioQuinto(Boolean.TRUE);
+            control.setRequiereEvaluacionAvanceCondicionado(Boolean.FALSE);
+            control.setEstadoControlAvanceAnual(EstadoControlAvanceAnualV2.ACCESO_ORDINARIO_PROCEDE_EN_SOMBRA);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_1, null, 100,
+                    "ACCESO_ORDINARIO_QUINTO_PROCEDE_EN_SOMBRA",
+                    "Todas las UD obligatorias de semestres 1-4 están acreditadas en la base RN-6.1.1.");
+        } else {
+            control.setAccesoOrdinarioQuinto(Boolean.FALSE);
+            control.setRequiereEvaluacionAvanceCondicionado(Boolean.TRUE);
+            control.setEstadoControlAvanceAnual(EstadoControlAvanceAnualV2.REQUIERE_EVALUACION_AVANCE_CONDICIONADO);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_1, null, 100,
+                    "REQUIERE_EVALUACION_AVANCE_CONDICIONADO",
+                    "Existen obligatorias 1-4 pendientes; Fase 5A no decide la procedencia del avance condicionado."
+                            + " pendientes=" + control.getDetallePendientesRn611());
+        }
+    }
+
+    private String detallePendienteControlAvance(UnidadEvaluacionCurricularV2DTO unidad) {
+        return "UD=" + obtenerLlaveUnidad(unidad) + ";semestre=" + unidad.getSemestre()
+                + ";estado=" + unidad.getEstado() + ";causa=" + unidad.getCausa()
+                + ";evidencia=" + unidad.getReferenciasHistoricas();
+    }
+
     private void agregarIdUnico(List<Long> destino, Long id) {
         if (id != null && !destino.contains(id)) destino.add(id);
     }
 
     private Boolean procedenciaCtr01(ContextoEvaluacionCurricularV2DTO contexto) {
+        if (contexto.getSemestreObjetivo() == null) return null;
         if (!Integer.valueOf(5).equals(contexto.getSemestreObjetivo())) return Boolean.FALSE;
         String periodo = contexto.getPeriodoNormativo();
         if (periodo == null || !periodo.matches("\\d{4}-[12]")) return null;
