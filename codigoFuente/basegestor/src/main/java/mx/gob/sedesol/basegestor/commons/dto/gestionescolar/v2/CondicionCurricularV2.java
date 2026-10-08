@@ -4,6 +4,7 @@ package mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2;
 public enum CondicionCurricularV2 {
     REPROBACION,
     REZAGO_LEVE,
+    REZAGO_SEVERO,
     BAJA_PARCIAL,
     PENDIENTE_NO_CURSADA,
     SERIACION,

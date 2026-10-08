@@ -24,6 +24,9 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     /** RN-5.1: clasificación concurrente; no sustituye situación académica. */
     private Boolean aplicaRn51;
     private String condicionRegularizacion;
+    /** RN-6.4: restricción efectiva sólo dentro del resultado sombra V2. */
+    private Boolean aplicaRn64;
+    private Boolean avanceCondicionadoBloqueadoPorRn64 = Boolean.FALSE;
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -37,6 +40,8 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<Long> udsOptativasCompatibles = new ArrayList<Long>();
     private List<Long> udsEmpatadasRegularizacion = new ArrayList<Long>();
     private List<String> causasIndisponibilidadRegularizacion = new ArrayList<String>();
+    private List<Long> udsObligatoriasNuevasBloqueadasRn64 = new ArrayList<Long>();
+    private List<Long> udsOptativasAdicionalesElegiblesRn64 = new ArrayList<Long>();
     private List<CodigoMotivoCurricularV2> causasExclusion = new ArrayList<CodigoMotivoCurricularV2>();
     private List<CodigoReglaCurricularV2> reglasRelacionadas = new ArrayList<CodigoReglaCurricularV2>();
     private List<String> evidencias = new ArrayList<String>();
@@ -67,6 +72,10 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public void setAplicaRn51(Boolean valor) { aplicaRn51 = valor; }
     public String getCondicionRegularizacion() { return condicionRegularizacion; }
     public void setCondicionRegularizacion(String valor) { condicionRegularizacion = valor; }
+    public Boolean getAplicaRn64() { return aplicaRn64; }
+    public void setAplicaRn64(Boolean valor) { aplicaRn64 = valor; }
+    public Boolean getAvanceCondicionadoBloqueadoPorRn64() { return avanceCondicionadoBloqueadoPorRn64; }
+    public void setAvanceCondicionadoBloqueadoPorRn64(Boolean valor) { avanceCondicionadoBloqueadoPorRn64 = valor; }
     public Boolean getRequiereRevisionRegularizacion() { return requiereRevisionRegularizacion; }
     public void setRequiereRevisionRegularizacion(Boolean valor) { requiereRevisionRegularizacion = valor; }
     public Integer getCargaDisponibleRegularizacion() { return cargaDisponibleRegularizacion; }
@@ -83,6 +92,8 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<Long> getUdsOptativasCompatibles() { return udsOptativasCompatibles; }
     public List<Long> getUdsEmpatadasRegularizacion() { return udsEmpatadasRegularizacion; }
     public List<String> getCausasIndisponibilidadRegularizacion() { return causasIndisponibilidadRegularizacion; }
+    public List<Long> getUdsObligatoriasNuevasBloqueadasRn64() { return udsObligatoriasNuevasBloqueadasRn64; }
+    public List<Long> getUdsOptativasAdicionalesElegiblesRn64() { return udsOptativasAdicionalesElegiblesRn64; }
     public List<CodigoMotivoCurricularV2> getCausasExclusion() { return causasExclusion; }
     public List<CodigoReglaCurricularV2> getReglasRelacionadas() { return reglasRelacionadas; }
     public List<String> getEvidencias() { return evidencias; }

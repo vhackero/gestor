@@ -172,6 +172,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarCargaAcademicaIntegrada(resultado, contexto);
         evaluarPrioridadRegularizacion(resultado, contexto, unidadesNormalizadas);
         evaluarRezagoLeve(resultado, contexto);
+        evaluarRezagoSevero(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -1039,6 +1040,106 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                         + "; noDisponibles=" + evaluacion.getCausasIndisponibilidadRegularizacion()
                         + "; rn64Observacional=" + evaluacion.getRn64AplicableEnFuturaFase()
                         + "; ctr01Observacional=" + evaluacion.getCtr01Rn61Procedente());
+    }
+
+    /**
+     * RN-6.4 aplica una restricción sólo sobre la propuesta V2: no modifica
+     * oferta, selección, carga o avance del proceso productivo vigente.
+     */
+    private void evaluarRezagoSevero(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO evaluacion = resultado.getEvaluacionCargaAcademica();
+        if (evaluacion == null) return;
+        agregarUnico(evaluacion.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_4);
+        Integer reprobadas = resultado.getCantidadReprobadasVigentes();
+        String situacion = resultado.getSituacionAcademicaCalculada();
+        if (reprobadas == null || "NO_DETERMINADA".equals(situacion)) {
+            evaluacion.setAplicaRn64(Boolean.FALSE);
+            evaluacion.setRequiereRevision(Boolean.TRUE);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_4,
+                    CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, 100,
+                    "REZAGO_SEVERO_REQUIERE_REVISION",
+                    "RN-6.4 no se activa ni descarta sin total confiable de reprobadas vigentes.");
+            return;
+        }
+        if (reprobadas.intValue() < 4) {
+            evaluacion.setAplicaRn64(Boolean.FALSE);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_4, null, 100,
+                    "REZAGO_SEVERO_NO_APLICA",
+                    "RN-6.4 requiere cuatro o más reprobadas vigentes; total=" + reprobadas + ".");
+            return;
+        }
+
+        evaluacion.setAplicaRn64(Boolean.TRUE);
+        evaluacion.setRn64AplicableEnFuturaFase(Boolean.TRUE);
+        evaluacion.setCondicionRegularizacion("REZAGO_SEVERO");
+        evaluacion.setAplicaRn51(Boolean.FALSE);
+        agregarUnico(resultado.getCondicionesDetectadas(), CondicionCurricularV2.REZAGO_SEVERO);
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (esReprobacionVigentePrevia(unidad) || !esObligatoria(unidad) || !esPendiente(unidad)) continue;
+            agregarIdUnico(evaluacion.getUdsObligatoriasNuevasBloqueadasRn64(), unidad.getIdPrograma());
+            evaluacion.getUdsObligatoriasCompatibles().remove(unidad.getIdPrograma());
+            evaluacion.getUdsIncluidasSombra().remove(unidad.getIdPrograma());
+            evaluacion.getUdsExcluidas().add(obtenerLlaveUnidad(unidad) + ":RN_6_4_REZAGO_SEVERO");
+            bloquearObligatoriaNuevaRn64(resultado, contexto, buscarDecision(resultado, unidad.getIdPrograma()), unidad);
+        }
+
+        registrarOptativasAdicionalesRn64(resultado, evaluacion, unidades);
+        if (Boolean.TRUE.equals(evaluacion.getCtr01Rn61Procedente()) && Boolean.TRUE.equals(contexto.getAvanceCondicionado())) {
+            resultado.setAvanceCondicionado(Boolean.FALSE);
+            evaluacion.setAvanceCondicionadoBloqueadoPorRn64(Boolean.TRUE);
+        }
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_4,
+                CodigoMotivoCurricularV2.REZAGO_SEVERO, 100,
+                "REZAGO_SEVERO_APLICA_SOMBRA",
+                "reprobadas=" + reprobadas + "; prioritarias=" + evaluacion.getUdsReprobadasPrioritarias()
+                        + "; noDisponibles=" + evaluacion.getCausasIndisponibilidadRegularizacion()
+                        + "; obligatoriasBloqueadas=" + evaluacion.getUdsObligatoriasNuevasBloqueadasRn64()
+                        + "; optativasAdicionales=" + evaluacion.getUdsOptativasAdicionalesElegiblesRn64()
+                        + "; maximoRN42=" + evaluacion.getCargaMaximaNormativa()
+                        + "; excepcionMinimo=" + evaluacion.getExcepcionMinimoAplicable()
+                        + "; ctr01=" + evaluacion.getCtr01Rn61Procedente()
+                        + "; avanceBloqueado=" + evaluacion.getAvanceCondicionadoBloqueadoPorRn64());
+    }
+
+    private void registrarOptativasAdicionalesRn64(ResultadoEvaluacionCurricularV2DTO resultado,
+            EvaluacionCargaAcademicaV2DTO evaluacion, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        Integer maximo = evaluacion.getCargaMaximaNormativa();
+        if (maximo == null) {
+            evaluacion.setRequiereRevision(Boolean.TRUE);
+            return;
+        }
+        int espacios = maximo.intValue() - evaluacion.getUdsReprobadasOfertadas().size();
+        List<UnidadEvaluacionCurricularV2DTO> optativas = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (esObligatoria(unidad) || esReprobacionVigentePrevia(unidad)) continue;
+            if (motivoDescarteCargaMinima(unidad, buscarDecision(resultado, unidad.getIdPrograma())) == null) optativas.add(unidad);
+        }
+        if (optativas.size() > espacios) {
+            evaluacion.setRequiereRevision(Boolean.TRUE);
+            for (UnidadEvaluacionCurricularV2DTO unidad : optativas)
+                agregarIdUnico(evaluacion.getUdsEmpatadasRegularizacion(), unidad.getIdPrograma());
+            return;
+        }
+        for (UnidadEvaluacionCurricularV2DTO unidad : optativas)
+            agregarIdUnico(evaluacion.getUdsOptativasAdicionalesElegiblesRn64(), unidad.getIdPrograma());
+    }
+
+    private void bloquearObligatoriaNuevaRn64(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, DecisionUnidadCurricularV2DTO decision,
+            UnidadEvaluacionCurricularV2DTO unidad) {
+        if (decision == null) return;
+        agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.BLOQUEADA);
+        agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.REZAGO_SEVERO);
+        decision.setOfertaEvaluadaV2(Boolean.FALSE);
+        agregarExplicacion(decision, "RN-6.4 bloquea la obligatoria nueva sólo dentro de la propuesta sombra.");
+        TrazaReglaAplicadaV2DTO traza = crearTraza(contexto, CodigoReglaCurricularV2.RN_6_4,
+                CodigoMotivoCurricularV2.REZAGO_SEVERO, 100, "OBLIGATORIA_NUEVA_BLOQUEADA_RN64",
+                "La UD " + obtenerLlaveUnidad(unidad) + " no es reprobada vigente y queda fuera de la propuesta RN-6.4.");
+        decision.getTrazas().add(traza);
+        resultado.getTrazas().add(traza);
+        agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_6_4);
+        actualizarPrioridad(resultado, 100);
     }
 
     /** Devuelve -1 sólo cuando el límite corta un conjunto empatado sin criterio normativo adicional. */
