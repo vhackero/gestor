@@ -59,6 +59,11 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<String> decisionesPorUdQuintoRn61 = new ArrayList<String>();
     private Boolean aplicaRn62;
     private EstadoIncorporacionDiferidaV2 estadoIncorporacionDiferida = EstadoIncorporacionDiferidaV2.NO_APLICA;
+    /** Trayectoria descriptiva RN-6.2; no representa una inscripción productiva. */
+    private String condicionTrayectoriaRn62;
+    private String periodoAdmisionRn62;
+    private String periodoIncorporacionRn62;
+    private Integer semestreObjetivoRn62;
     private List<Long> udsSemestre2CompatiblesRn62 = new ArrayList<Long>();
     private List<Long> udsSemestre2BloqueadasRn62 = new ArrayList<Long>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
@@ -170,6 +175,10 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<String> getDecisionesPorUdQuintoRn61() { return decisionesPorUdQuintoRn61; }
     public Boolean getAplicaRn62() { return aplicaRn62; } public void setAplicaRn62(Boolean valor) { aplicaRn62 = valor; }
     public EstadoIncorporacionDiferidaV2 getEstadoIncorporacionDiferida() { return estadoIncorporacionDiferida; } public void setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2 valor) { estadoIncorporacionDiferida = valor; }
+    public String getCondicionTrayectoriaRn62() { return condicionTrayectoriaRn62; } public void setCondicionTrayectoriaRn62(String valor) { condicionTrayectoriaRn62 = valor; }
+    public String getPeriodoAdmisionRn62() { return periodoAdmisionRn62; } public void setPeriodoAdmisionRn62(String valor) { periodoAdmisionRn62 = valor; }
+    public String getPeriodoIncorporacionRn62() { return periodoIncorporacionRn62; } public void setPeriodoIncorporacionRn62(String valor) { periodoIncorporacionRn62 = valor; }
+    public Integer getSemestreObjetivoRn62() { return semestreObjetivoRn62; } public void setSemestreObjetivoRn62(Integer valor) { semestreObjetivoRn62 = valor; }
     public List<Long> getUdsSemestre2CompatiblesRn62() { return udsSemestre2CompatiblesRn62; } public List<Long> getUdsSemestre2BloqueadasRn62() { return udsSemestre2BloqueadasRn62; }
     public List<CodigoMotivoCurricularV2> getCausasExclusion() { return causasExclusion; }
     public List<CodigoReglaCurricularV2> getReglasRelacionadas() { return reglasRelacionadas; }
