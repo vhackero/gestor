@@ -57,6 +57,10 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<String> rutaInstitucionalExtraordinariaRn616 = new ArrayList<String>();
     private EstadoDecisionControlAvanceRn61V2 decisionGlobalRn61 = EstadoDecisionControlAvanceRn61V2.NO_APLICA;
     private List<String> decisionesPorUdQuintoRn61 = new ArrayList<String>();
+    private Boolean aplicaRn62;
+    private EstadoIncorporacionDiferidaV2 estadoIncorporacionDiferida = EstadoIncorporacionDiferidaV2.NO_APLICA;
+    private List<Long> udsSemestre2CompatiblesRn62 = new ArrayList<Long>();
+    private List<Long> udsSemestre2BloqueadasRn62 = new ArrayList<Long>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -164,6 +168,9 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public EstadoDecisionControlAvanceRn61V2 getDecisionGlobalRn61() { return decisionGlobalRn61; }
     public void setDecisionGlobalRn61(EstadoDecisionControlAvanceRn61V2 valor) { decisionGlobalRn61 = valor; }
     public List<String> getDecisionesPorUdQuintoRn61() { return decisionesPorUdQuintoRn61; }
+    public Boolean getAplicaRn62() { return aplicaRn62; } public void setAplicaRn62(Boolean valor) { aplicaRn62 = valor; }
+    public EstadoIncorporacionDiferidaV2 getEstadoIncorporacionDiferida() { return estadoIncorporacionDiferida; } public void setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2 valor) { estadoIncorporacionDiferida = valor; }
+    public List<Long> getUdsSemestre2CompatiblesRn62() { return udsSemestre2CompatiblesRn62; } public List<Long> getUdsSemestre2BloqueadasRn62() { return udsSemestre2BloqueadasRn62; }
     public List<CodigoMotivoCurricularV2> getCausasExclusion() { return causasExclusion; }
     public List<CodigoReglaCurricularV2> getReglasRelacionadas() { return reglasRelacionadas; }
     public List<String> getEvidencias() { return evidencias; }

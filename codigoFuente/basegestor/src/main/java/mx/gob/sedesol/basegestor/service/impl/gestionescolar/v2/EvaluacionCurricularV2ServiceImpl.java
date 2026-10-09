@@ -40,6 +40,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionOfertaP
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoOfertaPendienteRn614V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoResolucionAvanceV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoDecisionControlAvanceRn61V2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIncorporacionDiferidaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoMejoraPromedioV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionMejoraPromedioUnidadV2DTO;
@@ -191,6 +192,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarSupuestosTipificadosAvance(resultado, contexto, unidadesNormalizadas);
         evaluarImpedimentosYExtraordinario(resultado, contexto);
         consolidarDecisionControlAvance(resultado, contexto);
+        evaluarInscripcionInicialDiferida(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -1656,6 +1658,19 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         for(Long id:c.getUdsQuintoRevisionSeriacionRn612())c.getDecisionesPorUdQuintoRn61().add(id+":REQUIERE_REVISION_SERIACION");
         for(Long id:c.getUdsQuintoCompatiblesRn612())c.getDecisionesPorUdQuintoRn61().add(id+":"+(d==EstadoDecisionControlAvanceRn61V2.AVANCE_CONDICIONADO_PROCEDE_PARA_UD_COMPATIBLES?"AVANCE_CONDICIONADO_PROCEDE_EN_SOMBRA":d.name()));
         registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_1,null,100,"DECISION_RN61_"+d,"DecisionesUD5="+c.getDecisionesPorUdQuintoRn61()+"; sin efecto productivo.");
+    }
+
+    /** Fase 6A: trayectoria admitida sin inscripción inicial; evaluación descriptiva, no inscripción. */
+    private void evaluarInscripcionInicialDiferida(ResultadoEvaluacionCurricularV2DTO resultado, ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO c=resultado.getEvaluacionCargaAcademica(); if(c==null)return;
+        agregarUnico(c.getReglasRelacionadas(),CodigoReglaCurricularV2.RN_6_2);agregarUnico(resultado.getReglasEvaluadas(),CodigoReglaCurricularV2.RN_6_2);
+        if(contexto.getAdmitido()==null||contexto.getInscripcionInicialRealizada()==null){c.setAplicaRn62(null);c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.REQUIERE_REVISION);registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_2,CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,70,"RN62_REQUIERE_REVISION","Admisión o inscripción inicial no determinable.");return;}
+        boolean aplica=Boolean.TRUE.equals(contexto.getAdmitido())&&!Boolean.TRUE.equals(contexto.getInscripcionInicialRealizada());c.setAplicaRn62(aplica?Boolean.TRUE:Boolean.FALSE);if(!aplica){c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.NO_APLICA);return;}
+        if(Boolean.TRUE.equals(contexto.getLimiteInactividadAlcanzado())){c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.NO_PROCEDE_POR_INACTIVIDAD);return;}
+        if(!Boolean.TRUE.equals(contexto.getActividadAcademicaComprobada())){c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.REQUIERE_REVISION);return;}
+        boolean bloqueo=false,revision=false; for(UnidadEvaluacionCurricularV2DTO u:unidades)if(Integer.valueOf(2).equals(u.getSemestre())){if(Boolean.TRUE.equals(u.getSeriacionDirectaConocida())||Boolean.TRUE.equals(u.getSeriacionIndirectaConocida())){agregarIdUnico(c.getUdsSemestre2BloqueadasRn62(),u.getIdPrograma());bloqueo=true;}else if(Boolean.TRUE.equals(u.getSeriacionConocida())){revision=true;}else agregarIdUnico(c.getUdsSemestre2CompatiblesRn62(),u.getIdPrograma());}
+        if(revision)c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.REQUIERE_REVISION);else if(bloqueo)c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.INCORPORACION_SEMESTRE_2_NO_PROCEDE_POR_SERIACION);else if(!c.getUdsSemestre2CompatiblesRn62().isEmpty())c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.INCORPORACION_SEMESTRE_2_PROCEDE_EN_SOMBRA);else c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.INCORPORACION_DIFERIDA_SEMESTRE_1_PROCEDE_EN_SOMBRA);
+        registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_2,null,70,"RN62_"+c.getEstadoIncorporacionDiferida(),"Trayectoria=INSCRIPCION_INICIAL_DIFERIDA; S2 compatibles="+c.getUdsSemestre2CompatiblesRn62()+"; bloqueadas="+c.getUdsSemestre2BloqueadasRn62()+"; CTR01="+c.getAplicaCtr01());
     }
 
     private void agregarIdUnico(List<Long> destino, Long id) {

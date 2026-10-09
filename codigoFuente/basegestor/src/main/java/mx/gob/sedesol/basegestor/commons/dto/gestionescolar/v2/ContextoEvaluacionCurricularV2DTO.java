@@ -58,6 +58,10 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Boolean restriccionPeNormativaImpeditiva;
     private String codigoRestriccionPeNormativa;
     private String fuenteRestriccionPeNormativa;
+    private Boolean admitido;
+    private Boolean inscripcionInicialRealizada;
+    private String periodoAdmision;
+    private String periodoIncorporacion;
     private Date fechaEvaluacion;
     private List<UnidadEvaluacionCurricularV2DTO> unidades = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
 
@@ -145,6 +149,10 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setCodigoRestriccionPeNormativa(String valor) { codigoRestriccionPeNormativa = valor; }
     public String getFuenteRestriccionPeNormativa() { return fuenteRestriccionPeNormativa; }
     public void setFuenteRestriccionPeNormativa(String valor) { fuenteRestriccionPeNormativa = valor; }
+    public Boolean getAdmitido() { return admitido; } public void setAdmitido(Boolean valor) { admitido = valor; }
+    public Boolean getInscripcionInicialRealizada() { return inscripcionInicialRealizada; } public void setInscripcionInicialRealizada(Boolean valor) { inscripcionInicialRealizada = valor; }
+    public String getPeriodoAdmision() { return periodoAdmision; } public void setPeriodoAdmision(String valor) { periodoAdmision = valor; }
+    public String getPeriodoIncorporacion() { return periodoIncorporacion; } public void setPeriodoIncorporacion(String valor) { periodoIncorporacion = valor; }
     public Date getFechaEvaluacion() { return fechaEvaluacion; }
     public void setFechaEvaluacion(Date fechaEvaluacion) { this.fechaEvaluacion = fechaEvaluacion; }
     public List<UnidadEvaluacionCurricularV2DTO> getUnidades() { return unidades; }
