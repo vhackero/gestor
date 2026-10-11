@@ -86,6 +86,25 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<Long> udsRutaReincorporacionRn65 = new ArrayList<Long>();
     private List<String> decisionesPorUdRn65 = new ArrayList<String>();
     private Boolean rn61ConsumidaRn65 = Boolean.FALSE;
+    /** RN-6.6 mantiene una ruta sombra separada de RN-6.5. */
+    private Boolean aplicaRn66;
+    private EstadoReincorporacionBajaTemporalV2 estadoReincorporacionRn66 = EstadoReincorporacionBajaTemporalV2.NO_APLICA;
+    private String condicionTrayectoriaRn66;
+    private String periodoInicioBajaTemporalRn66;
+    private String periodoFinBajaTemporalRn66;
+    private String ultimoPeriodoEfectivamenteCursadoRn66;
+    private Integer semestreEfectivoPrevioBajaRn66;
+    private Integer semestreObjetivoRn66;
+    private Boolean dentroCalendarioReincorporacionRn66;
+    private List<Long> udsPendientesPrioritariasRn66 = new ArrayList<Long>();
+    private List<Long> udsPendientesSinOfertaRn66 = new ArrayList<Long>();
+    private List<Long> udsPendientesSinCupoRn66 = new ArrayList<Long>();
+    private List<Long> udsPosterioresCompatiblesRn66 = new ArrayList<Long>();
+    private List<Long> udsPosterioresBloqueadasSeriacionRn66 = new ArrayList<Long>();
+    private List<Long> udsPosterioresRevisionSeriacionRn66 = new ArrayList<Long>();
+    private List<Long> udsRutaReincorporacionRn66 = new ArrayList<Long>();
+    private List<String> decisionesPorUdRn66 = new ArrayList<String>();
+    private Boolean rn61ConsumidaRn66 = Boolean.FALSE;
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -135,6 +154,34 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<String> getDecisionesPorUdRn65() { return decisionesPorUdRn65; }
     public Boolean getRn61ConsumidaRn65() { return rn61ConsumidaRn65; }
     public void setRn61ConsumidaRn65(Boolean valor) { rn61ConsumidaRn65 = valor; }
+    public Boolean getAplicaRn66() { return aplicaRn66; }
+    public void setAplicaRn66(Boolean valor) { aplicaRn66 = valor; }
+    public EstadoReincorporacionBajaTemporalV2 getEstadoReincorporacionRn66() { return estadoReincorporacionRn66; }
+    public void setEstadoReincorporacionRn66(EstadoReincorporacionBajaTemporalV2 valor) { estadoReincorporacionRn66 = valor; }
+    public String getCondicionTrayectoriaRn66() { return condicionTrayectoriaRn66; }
+    public void setCondicionTrayectoriaRn66(String valor) { condicionTrayectoriaRn66 = valor; }
+    public String getPeriodoInicioBajaTemporalRn66() { return periodoInicioBajaTemporalRn66; }
+    public void setPeriodoInicioBajaTemporalRn66(String valor) { periodoInicioBajaTemporalRn66 = valor; }
+    public String getPeriodoFinBajaTemporalRn66() { return periodoFinBajaTemporalRn66; }
+    public void setPeriodoFinBajaTemporalRn66(String valor) { periodoFinBajaTemporalRn66 = valor; }
+    public String getUltimoPeriodoEfectivamenteCursadoRn66() { return ultimoPeriodoEfectivamenteCursadoRn66; }
+    public void setUltimoPeriodoEfectivamenteCursadoRn66(String valor) { ultimoPeriodoEfectivamenteCursadoRn66 = valor; }
+    public Integer getSemestreEfectivoPrevioBajaRn66() { return semestreEfectivoPrevioBajaRn66; }
+    public void setSemestreEfectivoPrevioBajaRn66(Integer valor) { semestreEfectivoPrevioBajaRn66 = valor; }
+    public Integer getSemestreObjetivoRn66() { return semestreObjetivoRn66; }
+    public void setSemestreObjetivoRn66(Integer valor) { semestreObjetivoRn66 = valor; }
+    public Boolean getDentroCalendarioReincorporacionRn66() { return dentroCalendarioReincorporacionRn66; }
+    public void setDentroCalendarioReincorporacionRn66(Boolean valor) { dentroCalendarioReincorporacionRn66 = valor; }
+    public List<Long> getUdsPendientesPrioritariasRn66() { return udsPendientesPrioritariasRn66; }
+    public List<Long> getUdsPendientesSinOfertaRn66() { return udsPendientesSinOfertaRn66; }
+    public List<Long> getUdsPendientesSinCupoRn66() { return udsPendientesSinCupoRn66; }
+    public List<Long> getUdsPosterioresCompatiblesRn66() { return udsPosterioresCompatiblesRn66; }
+    public List<Long> getUdsPosterioresBloqueadasSeriacionRn66() { return udsPosterioresBloqueadasSeriacionRn66; }
+    public List<Long> getUdsPosterioresRevisionSeriacionRn66() { return udsPosterioresRevisionSeriacionRn66; }
+    public List<Long> getUdsRutaReincorporacionRn66() { return udsRutaReincorporacionRn66; }
+    public List<String> getDecisionesPorUdRn66() { return decisionesPorUdRn66; }
+    public Boolean getRn61ConsumidaRn66() { return rn61ConsumidaRn66; }
+    public void setRn61ConsumidaRn66(Boolean valor) { rn61ConsumidaRn66 = valor; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }

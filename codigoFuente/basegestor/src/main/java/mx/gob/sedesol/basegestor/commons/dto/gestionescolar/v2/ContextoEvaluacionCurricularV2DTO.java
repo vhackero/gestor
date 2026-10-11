@@ -73,6 +73,15 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private List<String> periodosOmitidos = new ArrayList<String>();
     private String periodoReincorporacion;
     private TipoProcesoReincorporacionV2 tipoProcesoReincorporacion = TipoProcesoReincorporacionV2.NO_DETERMINADO;
+    /** Evidencia de RN-6.6; null preserva incertidumbre y evita inferir una baja formal. */
+    private Boolean bajaTemporalFormalComprobada;
+    private Boolean bajaTemporalConcluida;
+    private String periodoInicioBajaTemporal;
+    private String periodoFinBajaTemporal;
+    private Integer semestreEfectivoPrevioBaja;
+    private Boolean calendarioReincorporacionComprobado;
+    private Boolean dentroCalendarioReincorporacion;
+    private Boolean limitePermanenciaComprobado;
     private Date fechaEvaluacion;
     private List<UnidadEvaluacionCurricularV2DTO> unidades = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
 
@@ -184,6 +193,22 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setPeriodoReincorporacion(String valor) { periodoReincorporacion = valor; }
     public TipoProcesoReincorporacionV2 getTipoProcesoReincorporacion() { return tipoProcesoReincorporacion; }
     public void setTipoProcesoReincorporacion(TipoProcesoReincorporacionV2 valor) { tipoProcesoReincorporacion = valor == null ? TipoProcesoReincorporacionV2.NO_DETERMINADO : valor; }
+    public Boolean getBajaTemporalFormalComprobada() { return bajaTemporalFormalComprobada; }
+    public void setBajaTemporalFormalComprobada(Boolean valor) { bajaTemporalFormalComprobada = valor; }
+    public Boolean getBajaTemporalConcluida() { return bajaTemporalConcluida; }
+    public void setBajaTemporalConcluida(Boolean valor) { bajaTemporalConcluida = valor; }
+    public String getPeriodoInicioBajaTemporal() { return periodoInicioBajaTemporal; }
+    public void setPeriodoInicioBajaTemporal(String valor) { periodoInicioBajaTemporal = valor; }
+    public String getPeriodoFinBajaTemporal() { return periodoFinBajaTemporal; }
+    public void setPeriodoFinBajaTemporal(String valor) { periodoFinBajaTemporal = valor; }
+    public Integer getSemestreEfectivoPrevioBaja() { return semestreEfectivoPrevioBaja; }
+    public void setSemestreEfectivoPrevioBaja(Integer valor) { semestreEfectivoPrevioBaja = valor; }
+    public Boolean getCalendarioReincorporacionComprobado() { return calendarioReincorporacionComprobado; }
+    public void setCalendarioReincorporacionComprobado(Boolean valor) { calendarioReincorporacionComprobado = valor; }
+    public Boolean getDentroCalendarioReincorporacion() { return dentroCalendarioReincorporacion; }
+    public void setDentroCalendarioReincorporacion(Boolean valor) { dentroCalendarioReincorporacion = valor; }
+    public Boolean getLimitePermanenciaComprobado() { return limitePermanenciaComprobado; }
+    public void setLimitePermanenciaComprobado(Boolean valor) { limitePermanenciaComprobado = valor; }
     public Date getFechaEvaluacion() { return fechaEvaluacion; }
     public void setFechaEvaluacion(Date fechaEvaluacion) { this.fechaEvaluacion = fechaEvaluacion; }
     public List<UnidadEvaluacionCurricularV2DTO> getUnidades() { return unidades; }
