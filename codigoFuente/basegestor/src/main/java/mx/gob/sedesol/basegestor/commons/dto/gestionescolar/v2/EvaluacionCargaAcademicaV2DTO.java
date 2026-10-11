@@ -152,6 +152,24 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<String> decisionesConsolidacionFase6 = new ArrayList<String>();
     private String trayectoriaAntesFase6;
     private String trayectoriaDespuesFase6;
+    /** RN-7.1 y RN-7.1.1 consumen estados comunes sin crear otra ruta académica. */
+    private Boolean aplicaRn71;
+    private Boolean aplicaRn711;
+    private EstadoRequerimientoOptativoV2 estadoRequerimientoOptativo = EstadoRequerimientoOptativoV2.NO_DETERMINADO;
+    private Integer cantidadOptativasRequeridasRn711 = Integer.valueOf(8);
+    private Integer cantidadOptativasAcreditadasRn711 = Integer.valueOf(0);
+    private Integer cantidadOptativasFaltantesRn711 = Integer.valueOf(8);
+    private Integer cantidadOptativasAdicionalesRn711 = Integer.valueOf(0);
+    private Boolean requiereRevisionRn71 = Boolean.FALSE;
+    private List<Long> udsOptativasIdentificadasRn71 = new ArrayList<Long>();
+    private List<Long> udsOptativasAcreditadasRn711 = new ArrayList<Long>();
+    private List<Long> udsOptativasAdicionalesRn711 = new ArrayList<Long>();
+    private List<Long> udsOptativasReprobadasRn71 = new ArrayList<Long>();
+    private List<Long> udsOptativasReprobadasPrioritariasRn71 = new ArrayList<Long>();
+    private List<Long> udsOptativasReprobadasSinOfertaRn71 = new ArrayList<Long>();
+    private List<Long> udsOptativasReprobadasSinCupoRn71 = new ArrayList<Long>();
+    private List<Long> udsOptativasNuevasRn71 = new ArrayList<Long>();
+    private List<String> decisionesPorUdOptativaRn71 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -294,6 +312,24 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public void setTrayectoriaAntesFase6(String valor) { trayectoriaAntesFase6 = valor; }
     public String getTrayectoriaDespuesFase6() { return trayectoriaDespuesFase6; }
     public void setTrayectoriaDespuesFase6(String valor) { trayectoriaDespuesFase6 = valor; }
+    public Boolean getAplicaRn71() { return aplicaRn71; } public void setAplicaRn71(Boolean valor) { aplicaRn71 = valor; }
+    public Boolean getAplicaRn711() { return aplicaRn711; } public void setAplicaRn711(Boolean valor) { aplicaRn711 = valor; }
+    public EstadoRequerimientoOptativoV2 getEstadoRequerimientoOptativo() { return estadoRequerimientoOptativo; }
+    public void setEstadoRequerimientoOptativo(EstadoRequerimientoOptativoV2 valor) { estadoRequerimientoOptativo = valor; }
+    public Integer getCantidadOptativasRequeridasRn711() { return cantidadOptativasRequeridasRn711; } public void setCantidadOptativasRequeridasRn711(Integer valor) { cantidadOptativasRequeridasRn711 = valor; }
+    public Integer getCantidadOptativasAcreditadasRn711() { return cantidadOptativasAcreditadasRn711; } public void setCantidadOptativasAcreditadasRn711(Integer valor) { cantidadOptativasAcreditadasRn711 = valor; }
+    public Integer getCantidadOptativasFaltantesRn711() { return cantidadOptativasFaltantesRn711; } public void setCantidadOptativasFaltantesRn711(Integer valor) { cantidadOptativasFaltantesRn711 = valor; }
+    public Integer getCantidadOptativasAdicionalesRn711() { return cantidadOptativasAdicionalesRn711; } public void setCantidadOptativasAdicionalesRn711(Integer valor) { cantidadOptativasAdicionalesRn711 = valor; }
+    public Boolean getRequiereRevisionRn71() { return requiereRevisionRn71; } public void setRequiereRevisionRn71(Boolean valor) { requiereRevisionRn71 = valor; }
+    public List<Long> getUdsOptativasIdentificadasRn71() { return udsOptativasIdentificadasRn71; }
+    public List<Long> getUdsOptativasAcreditadasRn711() { return udsOptativasAcreditadasRn711; }
+    public List<Long> getUdsOptativasAdicionalesRn711() { return udsOptativasAdicionalesRn711; }
+    public List<Long> getUdsOptativasReprobadasRn71() { return udsOptativasReprobadasRn71; }
+    public List<Long> getUdsOptativasReprobadasPrioritariasRn71() { return udsOptativasReprobadasPrioritariasRn71; }
+    public List<Long> getUdsOptativasReprobadasSinOfertaRn71() { return udsOptativasReprobadasSinOfertaRn71; }
+    public List<Long> getUdsOptativasReprobadasSinCupoRn71() { return udsOptativasReprobadasSinCupoRn71; }
+    public List<Long> getUdsOptativasNuevasRn71() { return udsOptativasNuevasRn71; }
+    public List<String> getDecisionesPorUdOptativaRn71() { return decisionesPorUdOptativaRn71; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }

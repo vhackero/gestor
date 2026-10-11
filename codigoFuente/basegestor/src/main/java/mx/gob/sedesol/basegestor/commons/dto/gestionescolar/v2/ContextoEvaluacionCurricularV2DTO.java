@@ -89,6 +89,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private String situacionAcademicaAntesCierre;
     private Integer totalReprobadasAntesCierre;
     private Boolean rn64AntesCierre;
+    /** Configuracion de PE opcional para detectar discrepancia frente al umbral normativo de ocho. */
+    private Integer optativasRequeridasPrograma;
     private Date fechaEvaluacion;
     private List<UnidadEvaluacionCurricularV2DTO> unidades = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
 
@@ -228,6 +230,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setTotalReprobadasAntesCierre(Integer valor) { totalReprobadasAntesCierre = valor; }
     public Boolean getRn64AntesCierre() { return rn64AntesCierre; }
     public void setRn64AntesCierre(Boolean valor) { rn64AntesCierre = valor; }
+    public Integer getOptativasRequeridasPrograma() { return optativasRequeridasPrograma; }
+    public void setOptativasRequeridasPrograma(Integer valor) { optativasRequeridasPrograma = valor; }
     public Date getFechaEvaluacion() { return fechaEvaluacion; }
     public void setFechaEvaluacion(Date fechaEvaluacion) { this.fechaEvaluacion = fechaEvaluacion; }
     public List<UnidadEvaluacionCurricularV2DTO> getUnidades() { return unidades; }
