@@ -44,6 +44,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIncorporaci
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoReincorporacionPeriodoNoCursadoV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoReincorporacionBajaTemporalV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoReincorporacionBajaParcialV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoActualizacionTrayectoriaRn68V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoProcesoReincorporacionV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoMejoraPromedioV2;
@@ -200,6 +201,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarReincorporacionTrasPeriodoNoCursado(resultado, contexto, unidadesNormalizadas);
         evaluarReincorporacionTrasBajaTemporal(resultado, contexto, unidadesNormalizadas);
         evaluarReincorporacionTrasBajaParcial(resultado, contexto, unidadesNormalizadas);
+        evaluarActualizacionTrayectoriaTrasRegularizacion(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -2493,6 +2495,253 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
 
     private void agregarIdUnico(List<Long> destino, Long id) {
         if (id != null && !destino.contains(id)) destino.add(id);
+    }
+
+    /**
+     * RN-6.8 observa el cierre en sombra. La situacion vigente ya fue calculada
+     * por RN-1.2; aqui solo se conserva el delta y se compone la continuidad non-par.
+     */
+    private void evaluarActualizacionTrayectoriaTrasRegularizacion(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
+        if (carga == null) return;
+        agregarUnico(carga.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_8);
+        agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_6_8);
+
+        if (contexto.getCierrePeriodoAcademicoComprobado() == null) {
+            carga.setAplicaRn68(null);
+            carga.setEstadoActualizacionTrayectoriaRn68(EstadoActualizacionTrayectoriaRn68V2.REQUIERE_REVISION);
+            carga.setRequiereRevision(Boolean.TRUE);
+            registrarTrazaRn68(resultado, contexto, carga, CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,
+                    "RN68_REQUIERE_REVISION_CIERRE", "No existe evidencia verificable del cierre del periodo academico.");
+            return;
+        }
+        if (!Boolean.TRUE.equals(contexto.getCierrePeriodoAcademicoComprobado())) {
+            carga.setAplicaRn68(Boolean.FALSE);
+            carga.setEstadoActualizacionTrayectoriaRn68(EstadoActualizacionTrayectoriaRn68V2.NO_APLICA_ESPECIFICO_NON_PAR);
+            registrarTrazaRn68(resultado, contexto, carga, null, "RN68_NO_APLICA_SIN_CIERRE",
+                    "RN-6.8 no genera una actualizacion de cierre sin evidencia de cierre academico.");
+            return;
+        }
+
+        carga.setAplicaRn68(Boolean.TRUE);
+        carga.setSemestreCurricularCierreRn68(contexto.getSemestreCurricularCierre());
+        carga.setSituacionAcademicaAntesCierreRn68(contexto.getSituacionAcademicaAntesCierre());
+        carga.setSituacionAcademicaVigenteRn68(resultado.getSituacionAcademicaCalculada());
+        carga.setTotalReprobadasAntesCierreRn68(contexto.getTotalReprobadasAntesCierre());
+        carga.setTotalReprobadasVigentesRn68(resultado.getCantidadReprobadasVigentes());
+        carga.setRn64AntesCierreRn68(contexto.getRn64AntesCierre());
+        carga.setRn64VigenteRn68(carga.getAplicaRn64());
+
+        Integer semestreCierre = contexto.getSemestreCurricularCierre();
+        if (semestreCierre == null) {
+            marcarRevisionRn68(resultado, contexto, carga, null, "SEMESTRE_CURRICULAR_CIERRE_NO_DETERMINADO");
+            finalizarRn68(resultado, contexto, carga, EstadoActualizacionTrayectoriaRn68V2.REQUIERE_REVISION);
+            return;
+        }
+        if (semestreCierre.intValue() % 2 == 0) {
+            finalizarRn68(resultado, contexto, carga, EstadoActualizacionTrayectoriaRn68V2.NO_APLICA_ESPECIFICO_NON_PAR);
+            return;
+        }
+        if (contexto.getSemestreObjetivo() == null
+                || contexto.getSemestreObjetivo().intValue() != semestreCierre.intValue() + 1
+                || contexto.getSemestreObjetivo().intValue() % 2 != 0) {
+            marcarRevisionRn68(resultado, contexto, carga, null, "SEMESTRE_PAR_SIGUIENTE_NO_DETERMINABLE_POR_TRAYECTORIA");
+            finalizarRn68(resultado, contexto, carga, EstadoActualizacionTrayectoriaRn68V2.REQUIERE_REVISION);
+            return;
+        }
+        carga.setSemestreObjetivoParRn68(contexto.getSemestreObjetivo());
+        if (!Boolean.TRUE.equals(contexto.getBloqueosContinuidadAntesComprobados())) {
+            marcarRevisionRn68(resultado, contexto, carga, null, "BLOQUEOS_PREVIOS_NO_COMPROBADOS");
+            finalizarRn68(resultado, contexto, carga, EstadoActualizacionTrayectoriaRn68V2.REQUIERE_REVISION);
+            return;
+        }
+
+        boolean existenBloqueosPrevios = false;
+        boolean bloqueosPendientes = false;
+        int reprobadasParAnterior = 0;
+        int espacios = carga.getCargaMaximaNormativa() == null ? 0 : carga.getCargaMaximaNormativa().intValue();
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (Boolean.TRUE.equals(unidad.getAcreditadaDurantePeriodo())) {
+                if (unidad.getEstado() == EstadoUnidadCurricularV2.ACREDITADA) {
+                    agregarIdUnico(carga.getUdsAcreditadasDuranteCierreRn68(), unidad.getIdPrograma());
+                } else {
+                    marcarRevisionRn68(resultado, contexto, carga, unidad, "ACREDITACION_CIERRE_NO_COINCIDE_CON_ESTADO_VIGENTE");
+                }
+            }
+            if (Boolean.TRUE.equals(unidad.getImpediaContinuidadAntesCierre())) {
+                existenBloqueosPrevios = true;
+                if (unidad.getEstadoAnteriorCierre() == null || !textoPresente(unidad.getEvidenciaContinuidadAntesCierre())) {
+                    bloqueosPendientes = true;
+                    marcarRevisionRn68(resultado, contexto, carga, unidad, "EVIDENCIA_BLOQUEO_PREVIO_INSUFICIENTE");
+                } else if (unidad.getEstado() == EstadoUnidadCurricularV2.ACREDITADA) {
+                    agregarIdUnico(carga.getUdsBloqueosResueltosRn68(), unidad.getIdPrograma());
+                    registrarDecisionRn68(resultado, contexto, unidad, null, "BLOQUEO_CONTINUIDAD_RESUELTO", "ACREDITADA_AL_CIERRE");
+                } else {
+                    bloqueosPendientes = true;
+                    agregarIdUnico(carga.getUdsBloqueosPendientesRn68(), unidad.getIdPrograma());
+                    registrarDecisionRn68(resultado, contexto, unidad,
+                            unidad.getEstado() == EstadoUnidadCurricularV2.NO_DETERMINADO
+                                    ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null,
+                            "BLOQUEO_CONTINUIDAD_PERSISTE", String.valueOf(unidad.getEstado()));
+                }
+            }
+            if (esReprobacionVigentePrevia(unidad)) {
+                if (unidad.getCorrespondeSemestreParInmediatoAnterior() == null) {
+                    marcarRevisionRn68(resultado, contexto, carga, unidad, "SEMESTRE_PAR_INMEDIATO_ANTERIOR_NO_DETERMINABLE");
+                } else if (Boolean.TRUE.equals(unidad.getCorrespondeSemestreParInmediatoAnterior())) {
+                    reprobadasParAnterior++;
+                    String disponibilidad = disponibilidadRn65(unidad);
+                    if ("DISPONIBLE".equals(disponibilidad)
+                            && carga.getUdsReprobadasOfertadas().contains(unidad.getIdPrograma())) {
+                        // RN-6.8 delimita el subconjunto non-par; RN-6.3 conserva la prioridad.
+                        agregarIdUnico(carga.getUdsReprobadasParAnteriorPrioritariasRn68(), unidad.getIdPrograma());
+                    } else if ("DISPONIBLE".equals(disponibilidad)) {
+                        marcarRevisionRn68(resultado, contexto, carga, unidad, "PRIORIDAD_RN63_NO_DETERMINABLE");
+                    } else if ("SIN_OFERTA".equals(disponibilidad)) {
+                        agregarIdUnico(carga.getUdsReprobadasParAnteriorSinOfertaRn68(), unidad.getIdPrograma());
+                    } else if ("SIN_CUPO".equals(disponibilidad)) {
+                        agregarIdUnico(carga.getUdsReprobadasParAnteriorSinCupoRn68(), unidad.getIdPrograma());
+                    } else {
+                        marcarRevisionRn68(resultado, contexto, carga, unidad, "OFERTA_O_CUPO_REPROBADA_NO_DETERMINADO");
+                    }
+                }
+            }
+        }
+
+        carga.setRegularizacionAlcanzadaRn68(Boolean.valueOf(existenBloqueosPrevios && !bloqueosPendientes));
+        if (Boolean.TRUE.equals(carga.getAplicaRn64()) || reprobadasParAnterior >= 4) {
+            finalizarRn68(resultado, contexto, carga, EstadoActualizacionTrayectoriaRn68V2.RESTRINGIDA_POR_RN64);
+            return;
+        }
+        if (reprobadasParAnterior > 3) {
+            marcarRevisionRn68(resultado, contexto, carga, null, "CONTEO_REPROBADAS_PAR_ANTERIOR_INCONSISTENTE_CON_RN64");
+            finalizarRn68(resultado, contexto, carga, EstadoActualizacionTrayectoriaRn68V2.REQUIERE_REVISION);
+            return;
+        }
+        if (reprobadasParAnterior > 0) {
+            for (Long id : carga.getUdsReprobadasParAnteriorPrioritariasRn68()) {
+                if (espacios <= 0) break;
+                agregarIdUnico(carga.getUdsRutaCierreRn68(), id);
+                espacios--;
+            }
+        }
+
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (unidad.getEstado() != EstadoUnidadCurricularV2.NO_INSCRITA
+                    || unidad.getSemestre() == null
+                    || unidad.getSemestre().intValue() != contexto.getSemestreObjetivo().intValue()) continue;
+            if (esOptativa(unidad) || esElectiva(unidad)) {
+                marcarRevisionRn68(resultado, contexto, carga, unidad, "TIPO_UD_REQUIERE_REGLA_RN7");
+                continue;
+            }
+            if (!esObligatoria(unidad)) {
+                marcarRevisionRn68(resultado, contexto, carga, unidad, "TIPO_UD_NO_DETERMINADO");
+                continue;
+            }
+            if (Boolean.TRUE.equals(unidad.getSeriacionDirectaConocida())
+                    || Boolean.TRUE.equals(unidad.getSeriacionIndirectaConocida())) {
+                agregarIdUnico(carga.getUdsParBloqueadasSeriacionRn68(), unidad.getIdPrograma());
+                registrarDecisionRn68(resultado, contexto, unidad, CodigoMotivoCurricularV2.SERIACION_DIRECTA,
+                        "UD_PAR_NO_COMPATIBLE_SERIACION", "SERIACION");
+                continue;
+            }
+            if (Boolean.TRUE.equals(unidad.getSeriacionConocida())
+                    || !Boolean.TRUE.equals(contexto.getSeriacionComprobada())) {
+                marcarRevisionRn68(resultado, contexto, carga, unidad, "SERIACION_NO_DETERMINABLE");
+                continue;
+            }
+            String disponibilidad = disponibilidadRn65(unidad);
+            if (!"DISPONIBLE".equals(disponibilidad)) {
+                registrarDecisionRn68(resultado, contexto, unidad,
+                        "SIN_OFERTA".equals(disponibilidad) ? CodigoMotivoCurricularV2.SIN_OFERTA
+                                : ("SIN_CUPO".equals(disponibilidad) ? CodigoMotivoCurricularV2.SIN_CUPO
+                                : CodigoMotivoCurricularV2.DATOS_INSUFICIENTES),
+                        "UD_PAR_NO_DISPONIBLE", disponibilidad);
+                if ("REQUIERE_REVISION".equals(disponibilidad)) marcarRevisionRn68(resultado, contexto, carga, unidad, disponibilidad);
+                continue;
+            }
+            if (espacios <= 0) {
+                registrarDecisionRn68(resultado, contexto, unidad, null, "UD_PAR_FUERA_POR_CARGA", "CARGA_MAXIMA");
+                continue;
+            }
+            agregarIdUnico(carga.getUdsParCompatiblesRn68(), unidad.getIdPrograma());
+            agregarIdUnico(carga.getUdsRutaCierreRn68(), unidad.getIdPrograma());
+            espacios--;
+            registrarDecisionRn68(resultado, contexto, unidad, null, "UD_PAR_COMPATIBLE", "DISPONIBLE");
+        }
+
+        if (Boolean.TRUE.equals(carga.getRequiereRevisionRn68())) {
+            finalizarRn68(resultado, contexto, carga, EstadoActualizacionTrayectoriaRn68V2.REQUIERE_REVISION);
+        } else if (!carga.getUdsReprobadasParAnteriorPrioritariasRn68().isEmpty()) {
+            finalizarRn68(resultado, contexto, carga, EstadoActualizacionTrayectoriaRn68V2.CONTINUIDAD_CON_PRIORIDAD_REGULARIZACION);
+        } else if (!carga.getUdsParCompatiblesRn68().isEmpty()) {
+            finalizarRn68(resultado, contexto, carga, EstadoActualizacionTrayectoriaRn68V2.CONTINUIDAD_A_SEMESTRE_PAR_PROCEDE_EN_SOMBRA);
+        } else if (Boolean.TRUE.equals(carga.getRegularizacionAlcanzadaRn68())) {
+            finalizarRn68(resultado, contexto, carga, EstadoActualizacionTrayectoriaRn68V2.REGULARIZACION_RECONOCIDA_EN_SOMBRA);
+        } else {
+            finalizarRn68(resultado, contexto, carga, EstadoActualizacionTrayectoriaRn68V2.RECALCULO_REALIZADO_EN_SOMBRA);
+        }
+    }
+
+    private void marcarRevisionRn68(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga,
+            UnidadEvaluacionCurricularV2DTO unidad, String causa) {
+        carga.setRequiereRevisionRn68(Boolean.TRUE);
+        if (unidad != null) registrarDecisionRn68(resultado, contexto, unidad,
+                CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, "REQUIERE_REVISION", causa);
+    }
+
+    private void registrarDecisionRn68(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, UnidadEvaluacionCurricularV2DTO unidad,
+            CodigoMotivoCurricularV2 motivo, String decision, String detalle) {
+        if (unidad == null) return;
+        EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
+        if (carga != null) carga.getDecisionesPorUdRn68().add(obtenerLlaveUnidad(unidad) + ":" + decision + ":" + detalle);
+        DecisionUnidadCurricularV2DTO unidadDecision = buscarDecision(resultado, unidad.getIdPrograma());
+        if (unidadDecision != null) {
+            if ("BLOQUEO_CONTINUIDAD_RESUELTO".equals(decision) || "UD_PAR_COMPATIBLE".equals(decision)) {
+                agregarUnico(unidadDecision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.HABILITADA);
+            }
+            if (motivo != null) agregarUnico(unidadDecision.getMotivos(), motivo);
+            agregarExplicacion(unidadDecision, "RN-6.8: " + decision + " (" + detalle + ").");
+            TrazaReglaAplicadaV2DTO traza = crearTraza(contexto, CodigoReglaCurricularV2.RN_6_8, motivo, 85,
+                    "RN68_" + decision, obtenerLlaveUnidad(unidad) + "; " + detalle);
+            unidadDecision.getTrazas().add(traza);
+            resultado.getTrazas().add(traza);
+        }
+    }
+
+    private void finalizarRn68(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga,
+            EstadoActualizacionTrayectoriaRn68V2 estado) {
+        carga.setEstadoActualizacionTrayectoriaRn68(estado);
+        String evidencia = "cierre=" + contexto.getCierrePeriodoAcademicoComprobado()
+                + "; semestreCierre=" + carga.getSemestreCurricularCierreRn68()
+                + "; semestrePar=" + carga.getSemestreObjetivoParRn68()
+                + "; situacionAntes=" + carga.getSituacionAcademicaAntesCierreRn68()
+                + "; situacionVigente=" + carga.getSituacionAcademicaVigenteRn68()
+                + "; reprobadasAntes=" + carga.getTotalReprobadasAntesCierreRn68()
+                + "; reprobadasVigentes=" + carga.getTotalReprobadasVigentesRn68()
+                + "; rn64Antes=" + carga.getRn64AntesCierreRn68()
+                + "; rn64Vigente=" + carga.getRn64VigenteRn68()
+                + "; acreditadas=" + carga.getUdsAcreditadasDuranteCierreRn68()
+                + "; bloqueosResueltos=" + carga.getUdsBloqueosResueltosRn68()
+                + "; bloqueosPendientes=" + carga.getUdsBloqueosPendientesRn68()
+                + "; prioritarias=" + carga.getUdsReprobadasParAnteriorPrioritariasRn68()
+                + "; ruta=" + carga.getUdsRutaCierreRn68()
+                + "; rn61=NO_REACTIVADA_NON_PAR";
+        registrarTrazaRn68(resultado, contexto, carga,
+                estado == EstadoActualizacionTrayectoriaRn68V2.REQUIERE_REVISION
+                        ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null,
+                "RN68_" + estado, evidencia);
+    }
+
+    private void registrarTrazaRn68(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga,
+            CodigoMotivoCurricularV2 motivo, String estado, String detalle) {
+        agregarUnico(carga.getEvidencias(), detalle);
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_8, motivo, 85, estado, detalle);
     }
 
     private Boolean procedenciaCtr01(ContextoEvaluacionCurricularV2DTO contexto) {

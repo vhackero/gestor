@@ -120,6 +120,29 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<Long> udsRutaReincorporacionRn67 = new ArrayList<Long>();
     private List<String> decisionesPorUdRn67 = new ArrayList<String>();
     private Boolean rn61ConsumidaRn67 = Boolean.FALSE;
+    /** RN-6.8 conserva el delta de cierre y una ruta non->par sólo en sombra. */
+    private Boolean aplicaRn68;
+    private EstadoActualizacionTrayectoriaRn68V2 estadoActualizacionTrayectoriaRn68 = EstadoActualizacionTrayectoriaRn68V2.NO_DETERMINADO;
+    private Integer semestreCurricularCierreRn68;
+    private Integer semestreObjetivoParRn68;
+    private String situacionAcademicaAntesCierreRn68;
+    private String situacionAcademicaVigenteRn68;
+    private Integer totalReprobadasAntesCierreRn68;
+    private Integer totalReprobadasVigentesRn68;
+    private Boolean rn64AntesCierreRn68;
+    private Boolean rn64VigenteRn68;
+    private Boolean regularizacionAlcanzadaRn68;
+    private Boolean requiereRevisionRn68 = Boolean.FALSE;
+    private List<Long> udsAcreditadasDuranteCierreRn68 = new ArrayList<Long>();
+    private List<Long> udsBloqueosResueltosRn68 = new ArrayList<Long>();
+    private List<Long> udsBloqueosPendientesRn68 = new ArrayList<Long>();
+    private List<Long> udsReprobadasParAnteriorPrioritariasRn68 = new ArrayList<Long>();
+    private List<Long> udsReprobadasParAnteriorSinOfertaRn68 = new ArrayList<Long>();
+    private List<Long> udsReprobadasParAnteriorSinCupoRn68 = new ArrayList<Long>();
+    private List<Long> udsParCompatiblesRn68 = new ArrayList<Long>();
+    private List<Long> udsParBloqueadasSeriacionRn68 = new ArrayList<Long>();
+    private List<Long> udsRutaCierreRn68 = new ArrayList<Long>();
+    private List<String> decisionesPorUdRn68 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -215,6 +238,40 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<String> getDecisionesPorUdRn67() { return decisionesPorUdRn67; }
     public Boolean getRn61ConsumidaRn67() { return rn61ConsumidaRn67; }
     public void setRn61ConsumidaRn67(Boolean valor) { rn61ConsumidaRn67 = valor; }
+    public Boolean getAplicaRn68() { return aplicaRn68; }
+    public void setAplicaRn68(Boolean valor) { aplicaRn68 = valor; }
+    public EstadoActualizacionTrayectoriaRn68V2 getEstadoActualizacionTrayectoriaRn68() { return estadoActualizacionTrayectoriaRn68; }
+    public void setEstadoActualizacionTrayectoriaRn68(EstadoActualizacionTrayectoriaRn68V2 valor) { estadoActualizacionTrayectoriaRn68 = valor; }
+    public Integer getSemestreCurricularCierreRn68() { return semestreCurricularCierreRn68; }
+    public void setSemestreCurricularCierreRn68(Integer valor) { semestreCurricularCierreRn68 = valor; }
+    public Integer getSemestreObjetivoParRn68() { return semestreObjetivoParRn68; }
+    public void setSemestreObjetivoParRn68(Integer valor) { semestreObjetivoParRn68 = valor; }
+    public String getSituacionAcademicaAntesCierreRn68() { return situacionAcademicaAntesCierreRn68; }
+    public void setSituacionAcademicaAntesCierreRn68(String valor) { situacionAcademicaAntesCierreRn68 = valor; }
+    public String getSituacionAcademicaVigenteRn68() { return situacionAcademicaVigenteRn68; }
+    public void setSituacionAcademicaVigenteRn68(String valor) { situacionAcademicaVigenteRn68 = valor; }
+    public Integer getTotalReprobadasAntesCierreRn68() { return totalReprobadasAntesCierreRn68; }
+    public void setTotalReprobadasAntesCierreRn68(Integer valor) { totalReprobadasAntesCierreRn68 = valor; }
+    public Integer getTotalReprobadasVigentesRn68() { return totalReprobadasVigentesRn68; }
+    public void setTotalReprobadasVigentesRn68(Integer valor) { totalReprobadasVigentesRn68 = valor; }
+    public Boolean getRn64AntesCierreRn68() { return rn64AntesCierreRn68; }
+    public void setRn64AntesCierreRn68(Boolean valor) { rn64AntesCierreRn68 = valor; }
+    public Boolean getRn64VigenteRn68() { return rn64VigenteRn68; }
+    public void setRn64VigenteRn68(Boolean valor) { rn64VigenteRn68 = valor; }
+    public Boolean getRegularizacionAlcanzadaRn68() { return regularizacionAlcanzadaRn68; }
+    public void setRegularizacionAlcanzadaRn68(Boolean valor) { regularizacionAlcanzadaRn68 = valor; }
+    public Boolean getRequiereRevisionRn68() { return requiereRevisionRn68; }
+    public void setRequiereRevisionRn68(Boolean valor) { requiereRevisionRn68 = valor; }
+    public List<Long> getUdsAcreditadasDuranteCierreRn68() { return udsAcreditadasDuranteCierreRn68; }
+    public List<Long> getUdsBloqueosResueltosRn68() { return udsBloqueosResueltosRn68; }
+    public List<Long> getUdsBloqueosPendientesRn68() { return udsBloqueosPendientesRn68; }
+    public List<Long> getUdsReprobadasParAnteriorPrioritariasRn68() { return udsReprobadasParAnteriorPrioritariasRn68; }
+    public List<Long> getUdsReprobadasParAnteriorSinOfertaRn68() { return udsReprobadasParAnteriorSinOfertaRn68; }
+    public List<Long> getUdsReprobadasParAnteriorSinCupoRn68() { return udsReprobadasParAnteriorSinCupoRn68; }
+    public List<Long> getUdsParCompatiblesRn68() { return udsParCompatiblesRn68; }
+    public List<Long> getUdsParBloqueadasSeriacionRn68() { return udsParBloqueadasSeriacionRn68; }
+    public List<Long> getUdsRutaCierreRn68() { return udsRutaCierreRn68; }
+    public List<String> getDecisionesPorUdRn68() { return decisionesPorUdRn68; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }

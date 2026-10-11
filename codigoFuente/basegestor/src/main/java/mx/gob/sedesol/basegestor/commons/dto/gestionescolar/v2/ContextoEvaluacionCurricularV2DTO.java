@@ -82,6 +82,13 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Boolean calendarioReincorporacionComprobado;
     private Boolean dentroCalendarioReincorporacion;
     private Boolean limitePermanenciaComprobado;
+    /** Evidencia de corte para RN-6.8; null evita inferir un cierre académico. */
+    private Boolean cierrePeriodoAcademicoComprobado;
+    private Integer semestreCurricularCierre;
+    private Boolean bloqueosContinuidadAntesComprobados;
+    private String situacionAcademicaAntesCierre;
+    private Integer totalReprobadasAntesCierre;
+    private Boolean rn64AntesCierre;
     private Date fechaEvaluacion;
     private List<UnidadEvaluacionCurricularV2DTO> unidades = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
 
@@ -209,6 +216,18 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setDentroCalendarioReincorporacion(Boolean valor) { dentroCalendarioReincorporacion = valor; }
     public Boolean getLimitePermanenciaComprobado() { return limitePermanenciaComprobado; }
     public void setLimitePermanenciaComprobado(Boolean valor) { limitePermanenciaComprobado = valor; }
+    public Boolean getCierrePeriodoAcademicoComprobado() { return cierrePeriodoAcademicoComprobado; }
+    public void setCierrePeriodoAcademicoComprobado(Boolean valor) { cierrePeriodoAcademicoComprobado = valor; }
+    public Integer getSemestreCurricularCierre() { return semestreCurricularCierre; }
+    public void setSemestreCurricularCierre(Integer valor) { semestreCurricularCierre = valor; }
+    public Boolean getBloqueosContinuidadAntesComprobados() { return bloqueosContinuidadAntesComprobados; }
+    public void setBloqueosContinuidadAntesComprobados(Boolean valor) { bloqueosContinuidadAntesComprobados = valor; }
+    public String getSituacionAcademicaAntesCierre() { return situacionAcademicaAntesCierre; }
+    public void setSituacionAcademicaAntesCierre(String valor) { situacionAcademicaAntesCierre = valor; }
+    public Integer getTotalReprobadasAntesCierre() { return totalReprobadasAntesCierre; }
+    public void setTotalReprobadasAntesCierre(Integer valor) { totalReprobadasAntesCierre = valor; }
+    public Boolean getRn64AntesCierre() { return rn64AntesCierre; }
+    public void setRn64AntesCierre(Boolean valor) { rn64AntesCierre = valor; }
     public Date getFechaEvaluacion() { return fechaEvaluacion; }
     public void setFechaEvaluacion(Date fechaEvaluacion) { this.fechaEvaluacion = fechaEvaluacion; }
     public List<UnidadEvaluacionCurricularV2DTO> getUnidades() { return unidades; }
