@@ -170,6 +170,19 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<Long> udsOptativasReprobadasSinCupoRn71 = new ArrayList<Long>();
     private List<Long> udsOptativasNuevasRn71 = new ArrayList<Long>();
     private List<String> decisionesPorUdOptativaRn71 = new ArrayList<String>();
+    /** RN-7.2 conserva elegibilidad electiva sin seleccionar ni inscribir UD. */
+    private Boolean aplicaRn72;
+    private EstadoElegibilidadElectivaV2 estadoElegibilidadElectiva = EstadoElegibilidadElectivaV2.NO_DETERMINADO;
+    private Boolean requiereRevisionRn72 = Boolean.FALSE;
+    private List<Long> udsElectivasIdentificadasRn72 = new ArrayList<Long>();
+    private List<Long> udsElectivasElegiblesRn72 = new ArrayList<Long>();
+    private List<Long> udsElectivasMismoPeRn72 = new ArrayList<Long>();
+    private List<Long> udsElectivasSinOfertaRn72 = new ArrayList<Long>();
+    private List<Long> udsElectivasSinCupoRn72 = new ArrayList<Long>();
+    private List<Long> udsElectivasBloqueadasSeriacionRn72 = new ArrayList<Long>();
+    private List<Long> udsElectivasReprobadasRn72 = new ArrayList<Long>();
+    private List<Long> udsElectivasConRestriccionPrioridadRn72 = new ArrayList<Long>();
+    private List<String> decisionesPorUdElectivaRn72 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -330,6 +343,19 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<Long> getUdsOptativasReprobadasSinCupoRn71() { return udsOptativasReprobadasSinCupoRn71; }
     public List<Long> getUdsOptativasNuevasRn71() { return udsOptativasNuevasRn71; }
     public List<String> getDecisionesPorUdOptativaRn71() { return decisionesPorUdOptativaRn71; }
+    public Boolean getAplicaRn72() { return aplicaRn72; } public void setAplicaRn72(Boolean valor) { aplicaRn72 = valor; }
+    public EstadoElegibilidadElectivaV2 getEstadoElegibilidadElectiva() { return estadoElegibilidadElectiva; }
+    public void setEstadoElegibilidadElectiva(EstadoElegibilidadElectivaV2 valor) { estadoElegibilidadElectiva = valor; }
+    public Boolean getRequiereRevisionRn72() { return requiereRevisionRn72; } public void setRequiereRevisionRn72(Boolean valor) { requiereRevisionRn72 = valor; }
+    public List<Long> getUdsElectivasIdentificadasRn72() { return udsElectivasIdentificadasRn72; }
+    public List<Long> getUdsElectivasElegiblesRn72() { return udsElectivasElegiblesRn72; }
+    public List<Long> getUdsElectivasMismoPeRn72() { return udsElectivasMismoPeRn72; }
+    public List<Long> getUdsElectivasSinOfertaRn72() { return udsElectivasSinOfertaRn72; }
+    public List<Long> getUdsElectivasSinCupoRn72() { return udsElectivasSinCupoRn72; }
+    public List<Long> getUdsElectivasBloqueadasSeriacionRn72() { return udsElectivasBloqueadasSeriacionRn72; }
+    public List<Long> getUdsElectivasReprobadasRn72() { return udsElectivasReprobadasRn72; }
+    public List<Long> getUdsElectivasConRestriccionPrioridadRn72() { return udsElectivasConRestriccionPrioridadRn72; }
+    public List<String> getDecisionesPorUdElectivaRn72() { return decisionesPorUdElectivaRn72; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }
