@@ -32,6 +32,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaAc
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaAcademicaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoConsolidacionFase6V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoElegibilidadElectivaV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoPrincipioOptativaElectivaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoRequerimientoOptativoV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoControlAvanceAnualV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCondicionAvanceV2;
@@ -209,6 +210,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         consolidarFase6ReincorporacionYTrayectoria(resultado, contexto);
         evaluarOptativasRn71(resultado, contexto, unidadesNormalizadas);
         evaluarElectivasRn72(resultado, contexto, unidadesNormalizadas);
+        consolidarPrincipioOptativasElectivasRn73(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -3250,6 +3252,117 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             CodigoMotivoCurricularV2 motivo, String estado, String detalle) {
         agregarUnico(carga.getEvidencias(), detalle);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_7_2, motivo, 70, estado, detalle);
+    }
+
+    /** RN-7.3 consolida tipos y resultados existentes; no recalcula RN-1.2, RN-6.3 ni RN-6.4. */
+    private void consolidarPrincipioOptativasElectivasRn73(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
+        if (carga == null) return;
+        agregarUnico(carga.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_7_3);
+        agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_7_3);
+
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (!esReprobacionVigentePrevia(unidad)) continue;
+            if (esOptativa(unidad)) {
+                agregarIdUnico(carga.getUdsOptativasReprobadasRn73(), unidad.getIdPrograma());
+                registrarDecisionRn73(resultado, contexto, unidad, "REPROBADA_OPTATIVA_VIGENTE", "NO_BLOQUEO_AUTONOMO_POR_TIPO");
+            } else if (esElectiva(unidad)) {
+                agregarIdUnico(carga.getUdsElectivasReprobadasRn73(), unidad.getIdPrograma());
+                registrarDecisionRn73(resultado, contexto, unidad, "REPROBADA_ELECTIVA_VIGENTE", "NO_BLOQUEO_AUTONOMO_POR_TIPO");
+            } else if (esObligatoria(unidad)) {
+                agregarIdUnico(carga.getUdsObligatoriasReprobadasRn73(), unidad.getIdPrograma());
+            } else if (unidad.getTipoUd() == null || unidad.getTipoUd().trim().isEmpty()) {
+                carga.setRequiereRevisionRn73(Boolean.TRUE);
+            }
+        }
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (esObligatoria(unidad) && esObligatoriaPendientePrioritariaRn73(carga, unidad.getIdPrograma()))
+                agregarIdUnico(carga.getUdsObligatoriasPrioritariasRn73(), unidad.getIdPrograma());
+        }
+
+        carga.setCantidadOptativasReprobadasRn73(Integer.valueOf(carga.getUdsOptativasReprobadasRn73().size()));
+        carga.setCantidadElectivasReprobadasRn73(Integer.valueOf(carga.getUdsElectivasReprobadasRn73().size()));
+        carga.setCantidadObligatoriasReprobadasRn73(Integer.valueOf(carga.getUdsObligatoriasReprobadasRn73().size()));
+        carga.setTotalReprobadasComunRn73(resultado.getCantidadReprobadasVigentes());
+        boolean hayTiposRn73 = !carga.getUdsOptativasReprobadasRn73().isEmpty()
+                || !carga.getUdsElectivasReprobadasRn73().isEmpty();
+        carga.setAplicaRn73(Boolean.valueOf(hayTiposRn73));
+
+        if (!hayTiposRn73) {
+            carga.setEstadoPrincipioOptativaElectiva(EstadoPrincipioOptativaElectivaV2.NO_APLICA);
+        } else if (Boolean.TRUE.equals(carga.getRequiereRevisionRn73())) {
+            carga.setEstadoPrincipioOptativaElectiva(EstadoPrincipioOptativaElectivaV2.REQUIERE_REVISION);
+        } else if (Boolean.TRUE.equals(carga.getAplicaRn64())) {
+            carga.setEstadoPrincipioOptativaElectiva(EstadoPrincipioOptativaElectivaV2.SUJETO_RN64);
+        } else if (!"IRREGULAR".equals(resultado.getSituacionAcademicaCalculada())) {
+            carga.setRequiereRevisionRn73(Boolean.TRUE);
+            carga.setEstadoPrincipioOptativaElectiva(EstadoPrincipioOptativaElectivaV2.REQUIERE_REVISION);
+        } else if (conflictoMaterialPrioridadRn73(carga)) {
+            carga.setRequiereRevisionRn73(Boolean.TRUE);
+            carga.setEstadoPrincipioOptativaElectiva(EstadoPrincipioOptativaElectivaV2.REQUIERE_REVISION);
+        } else if (!carga.getUdsObligatoriasPrioritariasRn73().isEmpty()) {
+            carga.setEstadoPrincipioOptativaElectiva(EstadoPrincipioOptativaElectivaV2.PRIORIDAD_OBLIGATORIA_PREVALECE);
+        } else {
+            carga.setContinuidadPotencialSujetaReglasRn73(Boolean.TRUE);
+            carga.setEstadoPrincipioOptativaElectiva(EstadoPrincipioOptativaElectivaV2.IRREGULAR_SIN_BLOQUEO_AUTONOMO);
+        }
+        registrarTrazaRn73(resultado, contexto, carga,
+                carga.getEstadoPrincipioOptativaElectiva() == EstadoPrincipioOptativaElectivaV2.REQUIERE_REVISION
+                        ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null,
+                "RN73_" + carga.getEstadoPrincipioOptativaElectiva(), construirEvidenciaRn73(carga));
+    }
+
+    private boolean conflictoMaterialPrioridadRn73(EvaluacionCargaAcademicaV2DTO carga) {
+        if (carga.getUdsOptativasReprobadasRn73().isEmpty() || carga.getUdsElectivasReprobadasRn73().isEmpty()) return false;
+        Integer espacios = carga.getCargaDisponibleRegularizacion();
+        if (espacios == null) return false;
+        int candidatasOfertadas = 0;
+        for (Long id : carga.getUdsOptativasReprobadasRn73()) if (carga.getUdsReprobadasOfertadas().contains(id)) candidatasOfertadas++;
+        for (Long id : carga.getUdsElectivasReprobadasRn73()) if (carga.getUdsReprobadasOfertadas().contains(id)) candidatasOfertadas++;
+        return candidatasOfertadas > espacios.intValue();
+    }
+
+    /** Consume prioridades ya construidas por RN-6.3 y las reincorporaciones de Fase 6. */
+    private boolean esObligatoriaPendientePrioritariaRn73(EvaluacionCargaAcademicaV2DTO carga, Long idPrograma) {
+        if (idPrograma == null) return false;
+        return carga.getUdsReprobadasPrioritarias().contains(idPrograma)
+                || carga.getUdsPrioritarias().contains(idPrograma)
+                || carga.getUdsPendientesPrioritariasRn65().contains(idPrograma)
+                || carga.getUdsPendientesPrioritariasRn66().contains(idPrograma)
+                || carga.getUdsBajaParcialPrioritariasRn67().contains(idPrograma);
+    }
+
+    private void registrarDecisionRn73(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, UnidadEvaluacionCurricularV2DTO unidad,
+            String decision, String detalle) {
+        EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
+        if (carga != null) carga.getDecisionesPorUdRn73().add(obtenerLlaveUnidad(unidad) + ":" + decision + ":" + detalle);
+        DecisionUnidadCurricularV2DTO unidadDecision = buscarDecision(resultado, unidad.getIdPrograma());
+        if (unidadDecision == null) return;
+        agregarExplicacion(unidadDecision, "RN-7.3: " + decision + " (" + detalle + ").");
+        TrazaReglaAplicadaV2DTO traza = crearTraza(contexto, CodigoReglaCurricularV2.RN_7_3, null, 70,
+                "RN73_" + decision, obtenerLlaveUnidad(unidad) + "; " + detalle);
+        unidadDecision.getTrazas().add(traza);
+        resultado.getTrazas().add(traza);
+    }
+
+    private String construirEvidenciaRn73(EvaluacionCargaAcademicaV2DTO carga) {
+        return "optativas=" + carga.getUdsOptativasReprobadasRn73()
+                + "; electivas=" + carga.getUdsElectivasReprobadasRn73()
+                + "; obligatorias=" + carga.getUdsObligatoriasReprobadasRn73()
+                + "; totalComun=" + carga.getTotalReprobadasComunRn73()
+                + "; rn64=" + carga.getAplicaRn64()
+                + "; obligatoriasPrioritarias=" + carga.getUdsObligatoriasPrioritariasRn73()
+                + "; noBloqueoAutonomo={continuidad=" + carga.getBloqueoAutonomoContinuidadPorTipoRn73()
+                + ",quinto=" + carga.getBloqueoAutonomoQuintoPorTipoRn73() + "}";
+    }
+
+    private void registrarTrazaRn73(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga,
+            CodigoMotivoCurricularV2 motivo, String estado, String detalle) {
+        agregarUnico(carga.getEvidencias(), detalle);
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_7_3, motivo, 70, estado, detalle);
     }
 
     private Boolean procedenciaCtr01(ContextoEvaluacionCurricularV2DTO contexto) {

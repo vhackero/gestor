@@ -183,6 +183,22 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<Long> udsElectivasReprobadasRn72 = new ArrayList<Long>();
     private List<Long> udsElectivasConRestriccionPrioridadRn72 = new ArrayList<Long>();
     private List<String> decisionesPorUdElectivaRn72 = new ArrayList<String>();
+    /** RN-7.3 consolida optativas/electivas sin reemplazar motores comunes. */
+    private Boolean aplicaRn73;
+    private EstadoPrincipioOptativaElectivaV2 estadoPrincipioOptativaElectiva = EstadoPrincipioOptativaElectivaV2.NO_DETERMINADO;
+    private Boolean requiereRevisionRn73 = Boolean.FALSE;
+    private Integer cantidadOptativasReprobadasRn73 = Integer.valueOf(0);
+    private Integer cantidadElectivasReprobadasRn73 = Integer.valueOf(0);
+    private Integer cantidadObligatoriasReprobadasRn73 = Integer.valueOf(0);
+    private Integer totalReprobadasComunRn73 = Integer.valueOf(0);
+    private Boolean bloqueoAutonomoContinuidadPorTipoRn73 = Boolean.FALSE;
+    private Boolean bloqueoAutonomoQuintoPorTipoRn73 = Boolean.FALSE;
+    private Boolean continuidadPotencialSujetaReglasRn73 = Boolean.FALSE;
+    private List<Long> udsOptativasReprobadasRn73 = new ArrayList<Long>();
+    private List<Long> udsElectivasReprobadasRn73 = new ArrayList<Long>();
+    private List<Long> udsObligatoriasReprobadasRn73 = new ArrayList<Long>();
+    private List<Long> udsObligatoriasPrioritariasRn73 = new ArrayList<Long>();
+    private List<String> decisionesPorUdRn73 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -356,6 +372,22 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<Long> getUdsElectivasReprobadasRn72() { return udsElectivasReprobadasRn72; }
     public List<Long> getUdsElectivasConRestriccionPrioridadRn72() { return udsElectivasConRestriccionPrioridadRn72; }
     public List<String> getDecisionesPorUdElectivaRn72() { return decisionesPorUdElectivaRn72; }
+    public Boolean getAplicaRn73() { return aplicaRn73; } public void setAplicaRn73(Boolean valor) { aplicaRn73 = valor; }
+    public EstadoPrincipioOptativaElectivaV2 getEstadoPrincipioOptativaElectiva() { return estadoPrincipioOptativaElectiva; }
+    public void setEstadoPrincipioOptativaElectiva(EstadoPrincipioOptativaElectivaV2 valor) { estadoPrincipioOptativaElectiva = valor; }
+    public Boolean getRequiereRevisionRn73() { return requiereRevisionRn73; } public void setRequiereRevisionRn73(Boolean valor) { requiereRevisionRn73 = valor; }
+    public Integer getCantidadOptativasReprobadasRn73() { return cantidadOptativasReprobadasRn73; } public void setCantidadOptativasReprobadasRn73(Integer valor) { cantidadOptativasReprobadasRn73 = valor; }
+    public Integer getCantidadElectivasReprobadasRn73() { return cantidadElectivasReprobadasRn73; } public void setCantidadElectivasReprobadasRn73(Integer valor) { cantidadElectivasReprobadasRn73 = valor; }
+    public Integer getCantidadObligatoriasReprobadasRn73() { return cantidadObligatoriasReprobadasRn73; } public void setCantidadObligatoriasReprobadasRn73(Integer valor) { cantidadObligatoriasReprobadasRn73 = valor; }
+    public Integer getTotalReprobadasComunRn73() { return totalReprobadasComunRn73; } public void setTotalReprobadasComunRn73(Integer valor) { totalReprobadasComunRn73 = valor; }
+    public Boolean getBloqueoAutonomoContinuidadPorTipoRn73() { return bloqueoAutonomoContinuidadPorTipoRn73; } public void setBloqueoAutonomoContinuidadPorTipoRn73(Boolean valor) { bloqueoAutonomoContinuidadPorTipoRn73 = valor; }
+    public Boolean getBloqueoAutonomoQuintoPorTipoRn73() { return bloqueoAutonomoQuintoPorTipoRn73; } public void setBloqueoAutonomoQuintoPorTipoRn73(Boolean valor) { bloqueoAutonomoQuintoPorTipoRn73 = valor; }
+    public Boolean getContinuidadPotencialSujetaReglasRn73() { return continuidadPotencialSujetaReglasRn73; } public void setContinuidadPotencialSujetaReglasRn73(Boolean valor) { continuidadPotencialSujetaReglasRn73 = valor; }
+    public List<Long> getUdsOptativasReprobadasRn73() { return udsOptativasReprobadasRn73; }
+    public List<Long> getUdsElectivasReprobadasRn73() { return udsElectivasReprobadasRn73; }
+    public List<Long> getUdsObligatoriasReprobadasRn73() { return udsObligatoriasReprobadasRn73; }
+    public List<Long> getUdsObligatoriasPrioritariasRn73() { return udsObligatoriasPrioritariasRn73; }
+    public List<String> getDecisionesPorUdRn73() { return decisionesPorUdRn73; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }
