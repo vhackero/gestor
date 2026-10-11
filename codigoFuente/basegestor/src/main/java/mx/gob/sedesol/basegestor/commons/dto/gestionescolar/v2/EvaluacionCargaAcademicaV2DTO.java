@@ -105,6 +105,21 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<Long> udsRutaReincorporacionRn66 = new ArrayList<Long>();
     private List<String> decisionesPorUdRn66 = new ArrayList<String>();
     private Boolean rn61ConsumidaRn66 = Boolean.FALSE;
+    /** RN-6.7 opera sobre bajas parciales por UD, sin equipararlas a reprobacion. */
+    private Boolean aplicaRn67;
+    private EstadoReincorporacionBajaParcialV2 estadoReincorporacionRn67 = EstadoReincorporacionBajaParcialV2.NO_APLICA;
+    private String condicionTrayectoriaRn67;
+    private List<Long> udsBajaParcialRn67 = new ArrayList<Long>();
+    private List<Long> udsBajaParcialPrioritariasRn67 = new ArrayList<Long>();
+    private List<Long> udsBajaParcialSinOfertaRn67 = new ArrayList<Long>();
+    private List<Long> udsBajaParcialSinCupoRn67 = new ArrayList<Long>();
+    private List<Long> udsBajaParcialRevisionRn67 = new ArrayList<Long>();
+    private List<Long> udsBajaParcialSancionRn67 = new ArrayList<Long>();
+    private List<Long> udsPosterioresCompatiblesRn67 = new ArrayList<Long>();
+    private List<Long> udsPosterioresBloqueadasSeriacionRn67 = new ArrayList<Long>();
+    private List<Long> udsRutaReincorporacionRn67 = new ArrayList<Long>();
+    private List<String> decisionesPorUdRn67 = new ArrayList<String>();
+    private Boolean rn61ConsumidaRn67 = Boolean.FALSE;
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -182,6 +197,24 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<String> getDecisionesPorUdRn66() { return decisionesPorUdRn66; }
     public Boolean getRn61ConsumidaRn66() { return rn61ConsumidaRn66; }
     public void setRn61ConsumidaRn66(Boolean valor) { rn61ConsumidaRn66 = valor; }
+    public Boolean getAplicaRn67() { return aplicaRn67; }
+    public void setAplicaRn67(Boolean valor) { aplicaRn67 = valor; }
+    public EstadoReincorporacionBajaParcialV2 getEstadoReincorporacionRn67() { return estadoReincorporacionRn67; }
+    public void setEstadoReincorporacionRn67(EstadoReincorporacionBajaParcialV2 valor) { estadoReincorporacionRn67 = valor; }
+    public String getCondicionTrayectoriaRn67() { return condicionTrayectoriaRn67; }
+    public void setCondicionTrayectoriaRn67(String valor) { condicionTrayectoriaRn67 = valor; }
+    public List<Long> getUdsBajaParcialRn67() { return udsBajaParcialRn67; }
+    public List<Long> getUdsBajaParcialPrioritariasRn67() { return udsBajaParcialPrioritariasRn67; }
+    public List<Long> getUdsBajaParcialSinOfertaRn67() { return udsBajaParcialSinOfertaRn67; }
+    public List<Long> getUdsBajaParcialSinCupoRn67() { return udsBajaParcialSinCupoRn67; }
+    public List<Long> getUdsBajaParcialRevisionRn67() { return udsBajaParcialRevisionRn67; }
+    public List<Long> getUdsBajaParcialSancionRn67() { return udsBajaParcialSancionRn67; }
+    public List<Long> getUdsPosterioresCompatiblesRn67() { return udsPosterioresCompatiblesRn67; }
+    public List<Long> getUdsPosterioresBloqueadasSeriacionRn67() { return udsPosterioresBloqueadasSeriacionRn67; }
+    public List<Long> getUdsRutaReincorporacionRn67() { return udsRutaReincorporacionRn67; }
+    public List<String> getDecisionesPorUdRn67() { return decisionesPorUdRn67; }
+    public Boolean getRn61ConsumidaRn67() { return rn61ConsumidaRn67; }
+    public void setRn61ConsumidaRn67(Boolean valor) { rn61ConsumidaRn67 = valor; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }
