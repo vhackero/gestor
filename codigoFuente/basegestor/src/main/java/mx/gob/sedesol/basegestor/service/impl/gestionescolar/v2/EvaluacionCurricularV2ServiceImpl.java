@@ -41,6 +41,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoOfertaPendi
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoResolucionAvanceV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoDecisionControlAvanceRn61V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIncorporacionDiferidaV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoReincorporacionPeriodoNoCursadoV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoProcesoReincorporacionV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoMejoraPromedioV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionMejoraPromedioUnidadV2DTO;
@@ -193,6 +195,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarImpedimentosYExtraordinario(resultado, contexto);
         consolidarDecisionControlAvance(resultado, contexto);
         evaluarInscripcionInicialDiferida(resultado, contexto, unidadesNormalizadas);
+        evaluarReincorporacionTrasPeriodoNoCursado(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -1675,6 +1678,277 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
 
     private void registrarTrazaInscripcionInicialDiferida(ResultadoEvaluacionCurricularV2DTO resultado, ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga) {
         String evidencia="Trayectoria="+carga.getCondicionTrayectoriaRn62()+"; periodoAdmision="+contexto.getPeriodoAdmision()+"; periodoIncorporacion="+contexto.getPeriodoIncorporacion()+"; semestreObjetivo="+contexto.getSemestreObjetivo()+"; S2 compatibles="+carga.getUdsSemestre2CompatiblesRn62()+"; bloqueadas="+carga.getUdsSemestre2BloqueadasRn62()+"; CTR01="+carga.getAplicaCtr01();agregarUnico(carga.getEvidencias(),evidencia);registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_2,null,70,"RN62_"+carga.getEstadoIncorporacionDiferida(),evidencia);
+    }
+
+    /**
+     * Fase 6B: RN-6.5 describe la reincorporacion posterior a un periodo no
+     * cursado. Reutiliza resultados ya calculados de carga, seriacion, RN-6.4
+     * y RN-6.1; no altera oferta, cupo, seleccion ni reinscripcion real.
+     */
+    private void evaluarReincorporacionTrasPeriodoNoCursado(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
+        if (carga == null) return;
+
+        agregarUnico(carga.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_5);
+        agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_6_5);
+
+        if (contexto.getHaCursadoUnoOMasPeriodos() == null
+                || contexto.getNoCursoPeriodoInmediatoSiguiente() == null) {
+            carga.setAplicaRn65(null);
+            carga.setEstadoReincorporacionRn65(EstadoReincorporacionPeriodoNoCursadoV2.REQUIERE_REVISION);
+            carga.setRequiereRevision(Boolean.TRUE);
+            registrarTrazaReincorporacionRn65(resultado, contexto, carga,
+                    CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, "RN65_REQUIERE_REVISION_APLICABILIDAD",
+                    "No es posible acreditar si la persona curso previamente o si omitio el periodo inmediato siguiente.");
+            return;
+        }
+
+        boolean aplica = Boolean.TRUE.equals(contexto.getHaCursadoUnoOMasPeriodos())
+                && Boolean.TRUE.equals(contexto.getNoCursoPeriodoInmediatoSiguiente());
+        carga.setAplicaRn65(Boolean.valueOf(aplica));
+        if (!aplica) {
+            carga.setEstadoReincorporacionRn65(EstadoReincorporacionPeriodoNoCursadoV2.NO_APLICA);
+            registrarTrazaReincorporacionRn65(resultado, contexto, carga, null, "RN65_NO_APLICA",
+                    "RN-6.5 requiere trayectoria cursada y omision comprobada del periodo inmediato siguiente.");
+            return;
+        }
+
+        // Las bajas formales se conservan para RN-6.6/RN-6.7, no se reinterpretan aqui.
+        if (Boolean.TRUE.equals(contexto.getBajaTemporalRegistrada())
+                || Boolean.TRUE.equals(contexto.getBajaTemporalTotalRegistrada())
+                || Boolean.TRUE.equals(contexto.getBajaParcialRegistrada())) {
+            carga.setAplicaRn65(Boolean.FALSE);
+            carga.setEstadoReincorporacionRn65(EstadoReincorporacionPeriodoNoCursadoV2.NO_APLICA);
+            registrarTrazaReincorporacionRn65(resultado, contexto, carga, null, "RN65_NO_APLICA_BAJA_FORMAL",
+                    "La interrupcion tiene una baja formal y queda fuera de RN-6.5 para futuras RN-6.6 o RN-6.7.");
+            return;
+        }
+
+        copiarTrayectoriaReincorporacionRn65(carga, contexto);
+        agregarUnico(resultado.getCondicionesDetectadas(), CondicionCurricularV2.REINCORPORACION_TRAS_PERIODO_NO_CURSADO);
+        if (!Boolean.TRUE.equals(contexto.getCausaInterrupcionConocida())
+                || !textoPresente(contexto.getCausaInterrupcion())
+                || !trayectoriaReincorporacionCompleta(contexto)
+                || contexto.getSemestreObjetivo() == null) {
+            carga.setEstadoReincorporacionRn65(EstadoReincorporacionPeriodoNoCursadoV2.REQUIERE_REVISION);
+            carga.setRequiereRevision(Boolean.TRUE);
+            registrarTrazaReincorporacionRn65(resultado, contexto, carga,
+                    CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, "RN65_REQUIERE_REVISION_TRAYECTORIA",
+                    "La causa, los periodos omitidos, la reincorporacion o el semestre objetivo no son determinables.");
+            return;
+        }
+
+        if (!Boolean.TRUE.equals(contexto.getLimiteInactividadComprobado())) {
+            carga.setEstadoReincorporacionRn65(EstadoReincorporacionPeriodoNoCursadoV2.REQUIERE_REVISION);
+            carga.setRequiereRevision(Boolean.TRUE);
+            registrarTrazaReincorporacionRn65(resultado, contexto, carga,
+                    CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, "RN65_REQUIERE_REVISION_INACTIVIDAD",
+                    "No existe evidencia suficiente para determinar el limite de inactividad aplicable.");
+            return;
+        }
+        if (Boolean.TRUE.equals(contexto.getLimiteInactividadAlcanzado())) {
+            carga.setEstadoReincorporacionRn65(EstadoReincorporacionPeriodoNoCursadoV2.NO_PROCEDE_POR_INACTIVIDAD);
+            registrarTrazaReincorporacionRn65(resultado, contexto, carga,
+                    CodigoMotivoCurricularV2.INACTIVIDAD, "RN65_NO_PROCEDE_INACTIVIDAD",
+                    "La reincorporacion no procede en sombra porque el limite de inactividad fue excedido.");
+            return;
+        }
+
+        if (carga.getCargaMaximaNormativa() == null) {
+            carga.setEstadoReincorporacionRn65(EstadoReincorporacionPeriodoNoCursadoV2.REQUIERE_REVISION);
+            carga.setRequiereRevision(Boolean.TRUE);
+            registrarTrazaReincorporacionRn65(resultado, contexto, carga,
+                    CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, "RN65_REQUIERE_REVISION_CARGA",
+                    "RN-4.2 no determino carga maxima; RN-6.5 no infiere una ruta de reincorporacion.");
+            return;
+        }
+
+        int espacios = carga.getCargaMaximaNormativa().intValue();
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (!esPendienteObligatoriaRn65(unidad, contexto.getSemestreObjetivo())) continue;
+            if (unidad.getEstado() == EstadoUnidadCurricularV2.NO_DETERMINADO
+                    || unidad.getCausa() == CausaPendienteUnidadV2.NO_DETERMINADA) {
+                marcarRevisionRn65(resultado, contexto, carga, unidad, "PENDIENTE_NO_DETERMINADA");
+                continue;
+            }
+            String disponibilidad = disponibilidadRn65(unidad);
+            if ("SIN_OFERTA".equals(disponibilidad)) {
+                agregarIdUnico(carga.getUdsPendientesSinOfertaRn65(), unidad.getIdPrograma());
+                registrarDecisionRn65(resultado, contexto, unidad, CodigoMotivoCurricularV2.SIN_OFERTA,
+                        "PENDIENTE_OBLIGATORIA_SIN_OFERTA", disponibilidad);
+                continue;
+            }
+            if ("SIN_CUPO".equals(disponibilidad)) {
+                agregarIdUnico(carga.getUdsPendientesSinCupoRn65(), unidad.getIdPrograma());
+                registrarDecisionRn65(resultado, contexto, unidad, CodigoMotivoCurricularV2.SIN_CUPO,
+                        "PENDIENTE_OBLIGATORIA_SIN_CUPO", disponibilidad);
+                continue;
+            }
+            if ("REQUIERE_REVISION".equals(disponibilidad)) {
+                marcarRevisionRn65(resultado, contexto, carga, unidad, "OFERTA_O_CAPACIDAD_NO_DETERMINADA");
+                continue;
+            }
+            agregarIdUnico(carga.getUdsPendientesPrioritariasRn65(), unidad.getIdPrograma());
+            if (espacios > 0) {
+                agregarIdUnico(carga.getUdsRutaReincorporacionRn65(), unidad.getIdPrograma());
+                espacios--;
+            } else {
+                marcarRevisionRn65(resultado, contexto, carga, unidad, "CARGA_MAXIMA_SIN_DESEMPATE_APROBADO");
+            }
+            registrarDecisionRn65(resultado, contexto, unidad, motivoPendienteRn65(unidad),
+                    "PENDIENTE_OBLIGATORIA_PRIORITARIA", disponibilidad);
+        }
+
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (!esPosteriorCandidataRn65(unidad, contexto.getSemestreObjetivo())) continue;
+            if (Boolean.TRUE.equals(carga.getAplicaRn64()) && esObligatoria(unidad)) {
+                agregarUnico(carga.getUdsExcluidas(), obtenerLlaveUnidad(unidad) + ":RN_6_4");
+                registrarDecisionRn65(resultado, contexto, unidad, CodigoMotivoCurricularV2.REZAGO_SEVERO,
+                        "POSTERIOR_EXCLUIDA_RN64", "RN_6_4");
+                continue;
+            }
+            if (Boolean.TRUE.equals(unidad.getSeriacionDirectaConocida())
+                    || Boolean.TRUE.equals(unidad.getSeriacionIndirectaConocida())) {
+                agregarIdUnico(carga.getUdsPosterioresBloqueadasSeriacionRn65(), unidad.getIdPrograma());
+                registrarDecisionRn65(resultado, contexto, unidad, CodigoMotivoCurricularV2.SERIACION_DIRECTA,
+                        "POSTERIOR_NO_COMPATIBLE_SERIACION", "SERIACION");
+                continue;
+            }
+            if (Boolean.TRUE.equals(unidad.getSeriacionConocida())
+                    || !Boolean.TRUE.equals(contexto.getSeriacionComprobada())) {
+                agregarIdUnico(carga.getUdsPosterioresRevisionSeriacionRn65(), unidad.getIdPrograma());
+                marcarRevisionRn65(resultado, contexto, carga, unidad, "SERIACION_NO_DETERMINABLE");
+                continue;
+            }
+            String disponibilidad = disponibilidadRn65(unidad);
+            if (!"DISPONIBLE".equals(disponibilidad)) {
+                registrarDecisionRn65(resultado, contexto, unidad,
+                        "SIN_CUPO".equals(disponibilidad) ? CodigoMotivoCurricularV2.SIN_CUPO
+                                : ("SIN_OFERTA".equals(disponibilidad) ? CodigoMotivoCurricularV2.SIN_OFERTA
+                                : CodigoMotivoCurricularV2.DATOS_INSUFICIENTES),
+                        "POSTERIOR_NO_DISPONIBLE", disponibilidad);
+                if ("REQUIERE_REVISION".equals(disponibilidad)) marcarRevisionRn65(resultado, contexto, carga, unidad, disponibilidad);
+                continue;
+            }
+            if (espacios <= 0) {
+                registrarDecisionRn65(resultado, contexto, unidad, null, "POSTERIOR_FUERA_POR_CARGA", "CARGA_MAXIMA");
+                continue;
+            }
+            agregarIdUnico(carga.getUdsPosterioresCompatiblesRn65(), unidad.getIdPrograma());
+            agregarIdUnico(carga.getUdsRutaReincorporacionRn65(), unidad.getIdPrograma());
+            espacios--;
+            registrarDecisionRn65(resultado, contexto, unidad, null, "POSTERIOR_COMPATIBLE", "DISPONIBLE");
+        }
+
+        carga.setCargaDisponibleRegularizacion(Integer.valueOf(Math.max(0, espacios)));
+        if (Boolean.TRUE.equals(carga.getAplicaCtr01())) carga.setRn61ConsumidaRn65(Boolean.TRUE);
+        if (Boolean.TRUE.equals(carga.getAplicaRn64())) {
+            carga.setEstadoReincorporacionRn65(EstadoReincorporacionPeriodoNoCursadoV2.REINCORPORACION_RESTRINGIDA_POR_RN64);
+        } else if (Boolean.TRUE.equals(carga.getAplicaCtr01())) {
+            carga.setEstadoReincorporacionRn65(EstadoReincorporacionPeriodoNoCursadoV2.REINCORPORACION_SUJETA_RN61);
+        } else if (!carga.getUdsRutaReincorporacionRn65().isEmpty()) {
+            carga.setEstadoReincorporacionRn65(EstadoReincorporacionPeriodoNoCursadoV2.REINCORPORACION_PROCEDE_CON_RUTA_REGULARIZACION);
+        } else {
+            carga.setEstadoReincorporacionRn65(EstadoReincorporacionPeriodoNoCursadoV2.REINCORPORACION_PROCEDE_EN_SOMBRA);
+        }
+        registrarTrazaReincorporacionRn65(resultado, contexto, carga,
+                Boolean.TRUE.equals(carga.getRequiereRevision()) ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null,
+                "RN65_" + carga.getEstadoReincorporacionRn65(), construirEvidenciaRn65(carga));
+    }
+
+    private void copiarTrayectoriaReincorporacionRn65(EvaluacionCargaAcademicaV2DTO carga,
+            ContextoEvaluacionCurricularV2DTO contexto) {
+        carga.setCondicionTrayectoriaRn65("REINCORPORACION_TRAS_PERIODO_NO_CURSADO");
+        carga.setUltimoPeriodoCursadoRn65(contexto.getUltimoPeriodoCursado());
+        carga.setPrimerPeriodoOmitidoRn65(contexto.getPrimerPeriodoOmitido());
+        carga.setPeriodosOmitidosRn65(contexto.getPeriodosOmitidos());
+        carga.setPeriodoReincorporacionRn65(contexto.getPeriodoReincorporacion());
+        carga.setCantidadPeriodosInterrupcionRn65(Integer.valueOf(contexto.getPeriodosOmitidos().size()));
+        carga.setCausaInterrupcionRn65(contexto.getCausaInterrupcion());
+        carga.setTipoProcesoReincorporacionRn65(contexto.getTipoProcesoReincorporacion());
+    }
+
+    private boolean trayectoriaReincorporacionCompleta(ContextoEvaluacionCurricularV2DTO contexto) {
+        return textoPresente(contexto.getUltimoPeriodoCursado())
+                && textoPresente(contexto.getPrimerPeriodoOmitido())
+                && contexto.getPeriodosOmitidos() != null && !contexto.getPeriodosOmitidos().isEmpty()
+                && textoPresente(contexto.getPeriodoReincorporacion());
+    }
+
+    private boolean textoPresente(String valor) { return valor != null && !valor.trim().isEmpty(); }
+
+    private boolean esPendienteObligatoriaRn65(UnidadEvaluacionCurricularV2DTO unidad, Integer semestreObjetivo) {
+        return esObligatoria(unidad) && esPendiente(unidad)
+                && unidad.getEstado() != EstadoUnidadCurricularV2.BAJA_PARCIAL
+                && unidad.getSemestre() != null && unidad.getSemestre().intValue() <= semestreObjetivo.intValue();
+    }
+
+    private boolean esPosteriorCandidataRn65(UnidadEvaluacionCurricularV2DTO unidad, Integer semestreObjetivo) {
+        return unidad.getEstado() == EstadoUnidadCurricularV2.NO_INSCRITA
+                && unidad.getSemestre() != null && unidad.getSemestre().intValue() > semestreObjetivo.intValue();
+    }
+
+    private String disponibilidadRn65(UnidadEvaluacionCurricularV2DTO unidad) {
+        if (!Boolean.TRUE.equals(unidad.getOfertada())) return "SIN_OFERTA";
+        if (Boolean.FALSE.equals(unidad.getCupoDisponibleConocido())
+                || unidad.getCausaIndisponibilidadOferta() == CausaIndisponibilidadOfertaV2.SIN_CUPO) return "SIN_CUPO";
+        if (!Boolean.TRUE.equals(unidad.getCupoDisponibleConocido())) return "REQUIERE_REVISION";
+        return "DISPONIBLE";
+    }
+
+    private CodigoMotivoCurricularV2 motivoPendienteRn65(UnidadEvaluacionCurricularV2DTO unidad) {
+        return unidad.getCausa() == CausaPendienteUnidadV2.REPROBACION
+                ? CodigoMotivoCurricularV2.REPROBACION_ACUMULADA : CodigoMotivoCurricularV2.PENDIENTE_NO_CURSADA;
+    }
+
+    private void marcarRevisionRn65(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga,
+            UnidadEvaluacionCurricularV2DTO unidad, String causa) {
+        carga.setRequiereRevision(Boolean.TRUE);
+        if (unidad != null) registrarDecisionRn65(resultado, contexto, unidad,
+                CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, "REQUIERE_REVISION", causa);
+    }
+
+    private void registrarDecisionRn65(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, UnidadEvaluacionCurricularV2DTO unidad,
+            CodigoMotivoCurricularV2 motivo, String decision, String detalle) {
+        if (unidad == null) return;
+        EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
+        if (carga != null) carga.getDecisionesPorUdRn65().add(obtenerLlaveUnidad(unidad) + ":" + decision + ":" + detalle);
+        DecisionUnidadCurricularV2DTO unidadDecision = buscarDecision(resultado, unidad.getIdPrograma());
+        if (unidadDecision != null) {
+            if ("PENDIENTE_OBLIGATORIA_PRIORITARIA".equals(decision)) {
+                unidadDecision.setPrioritaria(Boolean.TRUE);
+                agregarUnico(unidadDecision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.PRIORITARIA);
+            }
+            if (motivo != null) agregarUnico(unidadDecision.getMotivos(), motivo);
+            agregarExplicacion(unidadDecision, "RN-6.5: " + decision + " (" + detalle + ").");
+            TrazaReglaAplicadaV2DTO traza = crearTraza(contexto, CodigoReglaCurricularV2.RN_6_5, motivo, 85,
+                    "RN65_" + decision, obtenerLlaveUnidad(unidad) + "; " + detalle);
+            unidadDecision.getTrazas().add(traza);
+            resultado.getTrazas().add(traza);
+        }
+    }
+
+    private String construirEvidenciaRn65(EvaluacionCargaAcademicaV2DTO carga) {
+        return "Trayectoria=" + carga.getCondicionTrayectoriaRn65()
+                + "; ultimo=" + carga.getUltimoPeriodoCursadoRn65()
+                + "; omitidos=" + carga.getPeriodosOmitidosRn65()
+                + "; reincorporacion=" + carga.getPeriodoReincorporacionRn65()
+                + "; pendientes=" + carga.getUdsPendientesPrioritariasRn65()
+                + "; sinOferta=" + carga.getUdsPendientesSinOfertaRn65()
+                + "; sinCupo=" + carga.getUdsPendientesSinCupoRn65()
+                + "; compatibles=" + carga.getUdsPosterioresCompatiblesRn65()
+                + "; rn64=" + carga.getAplicaRn64()
+                + "; rn61=" + carga.getRn61ConsumidaRn65();
+    }
+
+    private void registrarTrazaReincorporacionRn65(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga,
+            CodigoMotivoCurricularV2 motivo, String estado, String detalle) {
+        agregarUnico(carga.getEvidencias(), detalle);
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_5, motivo, 85, estado, detalle);
     }
 
     private void agregarIdUnico(List<Long> destino, Long id) {

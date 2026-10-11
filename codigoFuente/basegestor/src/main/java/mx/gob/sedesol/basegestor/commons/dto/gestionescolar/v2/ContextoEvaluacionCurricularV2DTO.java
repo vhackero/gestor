@@ -62,6 +62,17 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Boolean inscripcionInicialRealizada;
     private String periodoAdmision;
     private String periodoIncorporacion;
+    /** Evidencia de trayectoria requerida por RN-6.5; null conserva incertidumbre. */
+    private Boolean haCursadoUnoOMasPeriodos;
+    private Boolean noCursoPeriodoInmediatoSiguiente;
+    private Boolean causaInterrupcionConocida;
+    private Boolean limiteInactividadComprobado;
+    private String causaInterrupcion;
+    private String ultimoPeriodoCursado;
+    private String primerPeriodoOmitido;
+    private List<String> periodosOmitidos = new ArrayList<String>();
+    private String periodoReincorporacion;
+    private TipoProcesoReincorporacionV2 tipoProcesoReincorporacion = TipoProcesoReincorporacionV2.NO_DETERMINADO;
     private Date fechaEvaluacion;
     private List<UnidadEvaluacionCurricularV2DTO> unidades = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
 
@@ -153,6 +164,26 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public Boolean getInscripcionInicialRealizada() { return inscripcionInicialRealizada; } public void setInscripcionInicialRealizada(Boolean valor) { inscripcionInicialRealizada = valor; }
     public String getPeriodoAdmision() { return periodoAdmision; } public void setPeriodoAdmision(String valor) { periodoAdmision = valor; }
     public String getPeriodoIncorporacion() { return periodoIncorporacion; } public void setPeriodoIncorporacion(String valor) { periodoIncorporacion = valor; }
+    public Boolean getHaCursadoUnoOMasPeriodos() { return haCursadoUnoOMasPeriodos; }
+    public void setHaCursadoUnoOMasPeriodos(Boolean valor) { haCursadoUnoOMasPeriodos = valor; }
+    public Boolean getNoCursoPeriodoInmediatoSiguiente() { return noCursoPeriodoInmediatoSiguiente; }
+    public void setNoCursoPeriodoInmediatoSiguiente(Boolean valor) { noCursoPeriodoInmediatoSiguiente = valor; }
+    public Boolean getCausaInterrupcionConocida() { return causaInterrupcionConocida; }
+    public void setCausaInterrupcionConocida(Boolean valor) { causaInterrupcionConocida = valor; }
+    public Boolean getLimiteInactividadComprobado() { return limiteInactividadComprobado; }
+    public void setLimiteInactividadComprobado(Boolean valor) { limiteInactividadComprobado = valor; }
+    public String getCausaInterrupcion() { return causaInterrupcion; }
+    public void setCausaInterrupcion(String valor) { causaInterrupcion = valor; }
+    public String getUltimoPeriodoCursado() { return ultimoPeriodoCursado; }
+    public void setUltimoPeriodoCursado(String valor) { ultimoPeriodoCursado = valor; }
+    public String getPrimerPeriodoOmitido() { return primerPeriodoOmitido; }
+    public void setPrimerPeriodoOmitido(String valor) { primerPeriodoOmitido = valor; }
+    public List<String> getPeriodosOmitidos() { return periodosOmitidos; }
+    public void setPeriodosOmitidos(List<String> valores) { periodosOmitidos = valores == null ? new ArrayList<String>() : valores; }
+    public String getPeriodoReincorporacion() { return periodoReincorporacion; }
+    public void setPeriodoReincorporacion(String valor) { periodoReincorporacion = valor; }
+    public TipoProcesoReincorporacionV2 getTipoProcesoReincorporacion() { return tipoProcesoReincorporacion; }
+    public void setTipoProcesoReincorporacion(TipoProcesoReincorporacionV2 valor) { tipoProcesoReincorporacion = valor == null ? TipoProcesoReincorporacionV2.NO_DETERMINADO : valor; }
     public Date getFechaEvaluacion() { return fechaEvaluacion; }
     public void setFechaEvaluacion(Date fechaEvaluacion) { this.fechaEvaluacion = fechaEvaluacion; }
     public List<UnidadEvaluacionCurricularV2DTO> getUnidades() { return unidades; }

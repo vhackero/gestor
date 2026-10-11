@@ -66,6 +66,26 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private Integer semestreObjetivoRn62;
     private List<Long> udsSemestre2CompatiblesRn62 = new ArrayList<Long>();
     private List<Long> udsSemestre2BloqueadasRn62 = new ArrayList<Long>();
+    /** RN-6.5 reutiliza carga, seriacion, RN-6.4 y RN-6.1 sin efectos productivos. */
+    private Boolean aplicaRn65;
+    private EstadoReincorporacionPeriodoNoCursadoV2 estadoReincorporacionRn65 = EstadoReincorporacionPeriodoNoCursadoV2.NO_APLICA;
+    private String condicionTrayectoriaRn65;
+    private String ultimoPeriodoCursadoRn65;
+    private String primerPeriodoOmitidoRn65;
+    private List<String> periodosOmitidosRn65 = new ArrayList<String>();
+    private String periodoReincorporacionRn65;
+    private Integer cantidadPeriodosInterrupcionRn65;
+    private String causaInterrupcionRn65;
+    private TipoProcesoReincorporacionV2 tipoProcesoReincorporacionRn65 = TipoProcesoReincorporacionV2.NO_DETERMINADO;
+    private List<Long> udsPendientesPrioritariasRn65 = new ArrayList<Long>();
+    private List<Long> udsPendientesSinOfertaRn65 = new ArrayList<Long>();
+    private List<Long> udsPendientesSinCupoRn65 = new ArrayList<Long>();
+    private List<Long> udsPosterioresCompatiblesRn65 = new ArrayList<Long>();
+    private List<Long> udsPosterioresBloqueadasSeriacionRn65 = new ArrayList<Long>();
+    private List<Long> udsPosterioresRevisionSeriacionRn65 = new ArrayList<Long>();
+    private List<Long> udsRutaReincorporacionRn65 = new ArrayList<Long>();
+    private List<String> decisionesPorUdRn65 = new ArrayList<String>();
+    private Boolean rn61ConsumidaRn65 = Boolean.FALSE;
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -84,6 +104,37 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<CodigoMotivoCurricularV2> causasExclusion = new ArrayList<CodigoMotivoCurricularV2>();
     private List<CodigoReglaCurricularV2> reglasRelacionadas = new ArrayList<CodigoReglaCurricularV2>();
     private List<String> evidencias = new ArrayList<String>();
+
+    public Boolean getAplicaRn65() { return aplicaRn65; }
+    public void setAplicaRn65(Boolean valor) { aplicaRn65 = valor; }
+    public EstadoReincorporacionPeriodoNoCursadoV2 getEstadoReincorporacionRn65() { return estadoReincorporacionRn65; }
+    public void setEstadoReincorporacionRn65(EstadoReincorporacionPeriodoNoCursadoV2 valor) { estadoReincorporacionRn65 = valor; }
+    public String getCondicionTrayectoriaRn65() { return condicionTrayectoriaRn65; }
+    public void setCondicionTrayectoriaRn65(String valor) { condicionTrayectoriaRn65 = valor; }
+    public String getUltimoPeriodoCursadoRn65() { return ultimoPeriodoCursadoRn65; }
+    public void setUltimoPeriodoCursadoRn65(String valor) { ultimoPeriodoCursadoRn65 = valor; }
+    public String getPrimerPeriodoOmitidoRn65() { return primerPeriodoOmitidoRn65; }
+    public void setPrimerPeriodoOmitidoRn65(String valor) { primerPeriodoOmitidoRn65 = valor; }
+    public List<String> getPeriodosOmitidosRn65() { return periodosOmitidosRn65; }
+    public void setPeriodosOmitidosRn65(List<String> valores) { periodosOmitidosRn65 = valores == null ? new ArrayList<String>() : valores; }
+    public String getPeriodoReincorporacionRn65() { return periodoReincorporacionRn65; }
+    public void setPeriodoReincorporacionRn65(String valor) { periodoReincorporacionRn65 = valor; }
+    public Integer getCantidadPeriodosInterrupcionRn65() { return cantidadPeriodosInterrupcionRn65; }
+    public void setCantidadPeriodosInterrupcionRn65(Integer valor) { cantidadPeriodosInterrupcionRn65 = valor; }
+    public String getCausaInterrupcionRn65() { return causaInterrupcionRn65; }
+    public void setCausaInterrupcionRn65(String valor) { causaInterrupcionRn65 = valor; }
+    public TipoProcesoReincorporacionV2 getTipoProcesoReincorporacionRn65() { return tipoProcesoReincorporacionRn65; }
+    public void setTipoProcesoReincorporacionRn65(TipoProcesoReincorporacionV2 valor) { tipoProcesoReincorporacionRn65 = valor == null ? TipoProcesoReincorporacionV2.NO_DETERMINADO : valor; }
+    public List<Long> getUdsPendientesPrioritariasRn65() { return udsPendientesPrioritariasRn65; }
+    public List<Long> getUdsPendientesSinOfertaRn65() { return udsPendientesSinOfertaRn65; }
+    public List<Long> getUdsPendientesSinCupoRn65() { return udsPendientesSinCupoRn65; }
+    public List<Long> getUdsPosterioresCompatiblesRn65() { return udsPosterioresCompatiblesRn65; }
+    public List<Long> getUdsPosterioresBloqueadasSeriacionRn65() { return udsPosterioresBloqueadasSeriacionRn65; }
+    public List<Long> getUdsPosterioresRevisionSeriacionRn65() { return udsPosterioresRevisionSeriacionRn65; }
+    public List<Long> getUdsRutaReincorporacionRn65() { return udsRutaReincorporacionRn65; }
+    public List<String> getDecisionesPorUdRn65() { return decisionesPorUdRn65; }
+    public Boolean getRn61ConsumidaRn65() { return rn61ConsumidaRn65; }
+    public void setRn61ConsumidaRn65(Boolean valor) { rn61ConsumidaRn65 = valor; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }
