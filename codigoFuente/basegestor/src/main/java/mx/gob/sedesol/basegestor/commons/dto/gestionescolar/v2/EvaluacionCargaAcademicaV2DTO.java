@@ -199,6 +199,11 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<Long> udsObligatoriasReprobadasRn73 = new ArrayList<Long>();
     private List<Long> udsObligatoriasPrioritariasRn73 = new ArrayList<Long>();
     private List<String> decisionesPorUdRn73 = new ArrayList<String>();
+    /** F7D audita consistencia entre tipos sin introducir reglas académicas nuevas. */
+    private EstadoCierreFase7V2 estadoCierreFase7 = EstadoCierreFase7V2.NO_DETERMINADO;
+    private Boolean requiereRevisionFase7 = Boolean.FALSE;
+    private List<Long> udsTipoAmbiguoFase7 = new ArrayList<Long>();
+    private List<String> decisionesCierreFase7 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -388,6 +393,10 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<Long> getUdsObligatoriasReprobadasRn73() { return udsObligatoriasReprobadasRn73; }
     public List<Long> getUdsObligatoriasPrioritariasRn73() { return udsObligatoriasPrioritariasRn73; }
     public List<String> getDecisionesPorUdRn73() { return decisionesPorUdRn73; }
+    public EstadoCierreFase7V2 getEstadoCierreFase7() { return estadoCierreFase7; } public void setEstadoCierreFase7(EstadoCierreFase7V2 valor) { estadoCierreFase7 = valor; }
+    public Boolean getRequiereRevisionFase7() { return requiereRevisionFase7; } public void setRequiereRevisionFase7(Boolean valor) { requiereRevisionFase7 = valor; }
+    public List<Long> getUdsTipoAmbiguoFase7() { return udsTipoAmbiguoFase7; }
+    public List<String> getDecisionesCierreFase7() { return decisionesCierreFase7; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }

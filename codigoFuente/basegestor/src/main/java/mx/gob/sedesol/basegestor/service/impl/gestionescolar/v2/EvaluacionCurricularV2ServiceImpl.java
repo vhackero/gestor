@@ -30,6 +30,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaMa
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaMaximaCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaAcademicaV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaAcademicaV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCierreFase7V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoConsolidacionFase6V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoElegibilidadElectivaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoPrincipioOptativaElectivaV2;
@@ -211,6 +212,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarOptativasRn71(resultado, contexto, unidadesNormalizadas);
         evaluarElectivasRn72(resultado, contexto, unidadesNormalizadas);
         consolidarPrincipioOptativasElectivasRn73(resultado, contexto, unidadesNormalizadas);
+        consolidarCierreTiposUdFase7(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -2445,11 +2447,19 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
     }
 
     private boolean esOptativa(UnidadEvaluacionCurricularV2DTO unidad) {
-        return unidad.getTipoUd() != null && unidad.getTipoUd().toUpperCase().contains("OPTATIVA");
+        return unidad.getTipoUd() != null && unidad.getTipoUd().toUpperCase().contains("OPTATIVA")
+                && !esTipoAmbiguoFase7(unidad);
     }
 
     private boolean esElectiva(UnidadEvaluacionCurricularV2DTO unidad) {
-        return unidad.getTipoUd() != null && unidad.getTipoUd().toUpperCase().contains("ELECTIVA");
+        return unidad.getTipoUd() != null && unidad.getTipoUd().toUpperCase().contains("ELECTIVA")
+                && !esTipoAmbiguoFase7(unidad);
+    }
+
+    private boolean esTipoAmbiguoFase7(UnidadEvaluacionCurricularV2DTO unidad) {
+        if (unidad == null || unidad.getTipoUd() == null) return false;
+        String tipo = unidad.getTipoUd().toUpperCase();
+        return tipo.contains("OPTATIVA") && tipo.contains("ELECTIVA");
     }
 
     private void marcarRevisionRn67(ResultadoEvaluacionCurricularV2DTO resultado,
@@ -2935,6 +2945,10 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 marcarRevisionOptativasRn71(resultado, contexto, carga, unidad, "TIPO_UD_NO_DETERMINADO");
                 continue;
             }
+            if (esTipoAmbiguoFase7(unidad)) {
+                marcarRevisionOptativasRn71(resultado, contexto, carga, unidad, "TIPO_UD_AMBIGUO_OPTATIVA_ELECTIVA");
+                continue;
+            }
             if (!esOptativa(unidad)) continue;
             hayOptativas = true;
             agregarIdUnico(carga.getUdsOptativasIdentificadasRn71(), unidad.getIdPrograma());
@@ -3096,6 +3110,10 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
             if (unidad.getTipoUd() == null || unidad.getTipoUd().trim().isEmpty()) {
                 marcarRevisionElectivaRn72(resultado, contexto, carga, unidad, "TIPO_UD_NO_DETERMINADO");
+                continue;
+            }
+            if (esTipoAmbiguoFase7(unidad)) {
+                marcarRevisionElectivaRn72(resultado, contexto, carga, unidad, "TIPO_UD_AMBIGUO_OPTATIVA_ELECTIVA");
                 continue;
             }
             if (!esElectiva(unidad)) continue;
@@ -3264,7 +3282,9 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
 
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
             if (!esReprobacionVigentePrevia(unidad)) continue;
-            if (esOptativa(unidad)) {
+            if (esTipoAmbiguoFase7(unidad)) {
+                carga.setRequiereRevisionRn73(Boolean.TRUE);
+            } else if (esOptativa(unidad)) {
                 agregarIdUnico(carga.getUdsOptativasReprobadasRn73(), unidad.getIdPrograma());
                 registrarDecisionRn73(resultado, contexto, unidad, "REPROBADA_OPTATIVA_VIGENTE", "NO_BLOQUEO_AUTONOMO_POR_TIPO");
             } else if (esElectiva(unidad)) {
@@ -3363,6 +3383,52 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             CodigoMotivoCurricularV2 motivo, String estado, String detalle) {
         agregarUnico(carga.getEvidencias(), detalle);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_7_3, motivo, 70, estado, detalle);
+    }
+
+    /** F7D audita que RN-7.1, RN-7.2 y RN-7.3 compartan un contrato y tipos no ambiguos. */
+    private void consolidarCierreTiposUdFase7(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
+        if (carga == null) return;
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (esTipoAmbiguoFase7(unidad)) {
+                agregarIdUnico(carga.getUdsTipoAmbiguoFase7(), unidad.getIdPrograma());
+                registrarDecisionCierreFase7(carga, "TIPO_UD_AMBIGUO:" + obtenerLlaveUnidad(unidad));
+            }
+        }
+        if (!carga.getUdsTipoAmbiguoFase7().isEmpty()) carga.setRequiereRevisionFase7(Boolean.TRUE);
+        if (intersectan(carga.getUdsOptativasReprobadasRn73(), carga.getUdsElectivasReprobadasRn73())) {
+            carga.setRequiereRevisionFase7(Boolean.TRUE);
+            registrarDecisionCierreFase7(carga, "TIPO_UD_DUPLICADO_ENTRE_OPTATIVA_Y_ELECTIVA");
+        }
+        if (Boolean.TRUE.equals(carga.getRequiereRevisionRn71()) || Boolean.TRUE.equals(carga.getRequiereRevisionRn72())
+                || Boolean.TRUE.equals(carga.getRequiereRevisionRn73())) carga.setRequiereRevisionFase7(Boolean.TRUE);
+        if (Boolean.TRUE.equals(carga.getRequiereRevisionFase7())) {
+            carga.setEstadoCierreFase7(EstadoCierreFase7V2.REQUIERE_REVISION);
+        } else if (Boolean.TRUE.equals(carga.getAplicaRn64())) {
+            carga.setEstadoCierreFase7(EstadoCierreFase7V2.RESTRINGIDA_POR_RN64);
+        } else {
+            carga.setEstadoCierreFase7(EstadoCierreFase7V2.CONSOLIDADA_EN_SOMBRA);
+        }
+        String evidencia = "tipos={optativas=" + carga.getUdsOptativasReprobadasRn73()
+                + ",electivas=" + carga.getUdsElectivasReprobadasRn73()
+                + ",obligatorias=" + carga.getUdsObligatoriasReprobadasRn73()
+                + "}; totalComun=" + carga.getTotalReprobadasComunRn73()
+                + "; estadoCierre=" + carga.getEstadoCierreFase7()
+                + "; decisiones=" + carga.getDecisionesCierreFase7();
+        agregarUnico(carga.getEvidencias(), evidencia);
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_7_3,
+                Boolean.TRUE.equals(carga.getRequiereRevisionFase7()) ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null,
+                72, "F7D_" + carga.getEstadoCierreFase7(), evidencia);
+    }
+
+    private boolean intersectan(List<Long> izquierda, List<Long> derecha) {
+        for (Long id : izquierda) if (derecha.contains(id)) return true;
+        return false;
+    }
+
+    private void registrarDecisionCierreFase7(EvaluacionCargaAcademicaV2DTO carga, String decision) {
+        agregarUnico(carga.getDecisionesCierreFase7(), decision);
     }
 
     private Boolean procedenciaCtr01(ContextoEvaluacionCurricularV2DTO contexto) {
