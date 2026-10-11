@@ -143,6 +143,15 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<Long> udsParBloqueadasSeriacionRn68 = new ArrayList<Long>();
     private List<Long> udsRutaCierreRn68 = new ArrayList<Long>();
     private List<String> decisionesPorUdRn68 = new ArrayList<String>();
+    /** F6 consolida causas mutuamente excluyentes y condiciones concurrentes. */
+    private CausaPrincipalTrayectoriaV2 causaPrincipalTrayectoriaFase6 = CausaPrincipalTrayectoriaV2.NO_DETERMINADO;
+    private EstadoConsolidacionFase6V2 estadoConsolidacionFase6 = EstadoConsolidacionFase6V2.NO_DETERMINADO;
+    private Boolean requiereRevisionFase6 = Boolean.FALSE;
+    private List<String> condicionesConcurrentesFase6 = new ArrayList<String>();
+    private List<Long> udsRutaAcademicaConsolidadaFase6 = new ArrayList<Long>();
+    private List<String> decisionesConsolidacionFase6 = new ArrayList<String>();
+    private String trayectoriaAntesFase6;
+    private String trayectoriaDespuesFase6;
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -272,6 +281,19 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<Long> getUdsParBloqueadasSeriacionRn68() { return udsParBloqueadasSeriacionRn68; }
     public List<Long> getUdsRutaCierreRn68() { return udsRutaCierreRn68; }
     public List<String> getDecisionesPorUdRn68() { return decisionesPorUdRn68; }
+    public CausaPrincipalTrayectoriaV2 getCausaPrincipalTrayectoriaFase6() { return causaPrincipalTrayectoriaFase6; }
+    public void setCausaPrincipalTrayectoriaFase6(CausaPrincipalTrayectoriaV2 valor) { causaPrincipalTrayectoriaFase6 = valor; }
+    public EstadoConsolidacionFase6V2 getEstadoConsolidacionFase6() { return estadoConsolidacionFase6; }
+    public void setEstadoConsolidacionFase6(EstadoConsolidacionFase6V2 valor) { estadoConsolidacionFase6 = valor; }
+    public Boolean getRequiereRevisionFase6() { return requiereRevisionFase6; }
+    public void setRequiereRevisionFase6(Boolean valor) { requiereRevisionFase6 = valor; }
+    public List<String> getCondicionesConcurrentesFase6() { return condicionesConcurrentesFase6; }
+    public List<Long> getUdsRutaAcademicaConsolidadaFase6() { return udsRutaAcademicaConsolidadaFase6; }
+    public List<String> getDecisionesConsolidacionFase6() { return decisionesConsolidacionFase6; }
+    public String getTrayectoriaAntesFase6() { return trayectoriaAntesFase6; }
+    public void setTrayectoriaAntesFase6(String valor) { trayectoriaAntesFase6 = valor; }
+    public String getTrayectoriaDespuesFase6() { return trayectoriaDespuesFase6; }
+    public void setTrayectoriaDespuesFase6(String valor) { trayectoriaDespuesFase6 = valor; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }
