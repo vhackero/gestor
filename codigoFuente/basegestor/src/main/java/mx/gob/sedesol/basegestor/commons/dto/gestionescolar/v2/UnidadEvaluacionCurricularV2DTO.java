@@ -16,6 +16,7 @@ public class UnidadEvaluacionCurricularV2DTO implements Serializable {
  private Boolean correspondeSemestreParInmediatoAnterior;
  private Integer ordenAcreditacionOptativa;
  private Long idPlanOrigenElectiva;
+ private List<RelacionSeriacionCurricularV2DTO> relacionesSeriacion = new ArrayList<RelacionSeriacionCurricularV2DTO>();
  private Integer intentos; private Integer intentosFallidosHistoricosConfiables; private Boolean reprobacionVigenteConocida; private Boolean reprobacionPeriodoPrevioConocida;
  private List<IntentoAcreditacionUnidadV2DTO> intentosAcreditacion=new ArrayList<IntentoAcreditacionUnidadV2DTO>();
  private List<String> referenciasHistoricas=new ArrayList<String>();
@@ -28,4 +29,5 @@ public class UnidadEvaluacionCurricularV2DTO implements Serializable {
  public EstadoUnidadCurricularV2 getEstadoAnteriorCierre(){return estadoAnteriorCierre;} public void setEstadoAnteriorCierre(EstadoUnidadCurricularV2 v){estadoAnteriorCierre=v;} public Boolean getAcreditadaDurantePeriodo(){return acreditadaDurantePeriodo;} public void setAcreditadaDurantePeriodo(Boolean v){acreditadaDurantePeriodo=v;} public Boolean getImpediaContinuidadAntesCierre(){return impediaContinuidadAntesCierre;} public void setImpediaContinuidadAntesCierre(Boolean v){impediaContinuidadAntesCierre=v;} public String getEvidenciaContinuidadAntesCierre(){return evidenciaContinuidadAntesCierre;} public void setEvidenciaContinuidadAntesCierre(String v){evidenciaContinuidadAntesCierre=v;} public Boolean getCorrespondeSemestreParInmediatoAnterior(){return correspondeSemestreParInmediatoAnterior;} public void setCorrespondeSemestreParInmediatoAnterior(Boolean v){correspondeSemestreParInmediatoAnterior=v;}
  public Integer getOrdenAcreditacionOptativa(){return ordenAcreditacionOptativa;} public void setOrdenAcreditacionOptativa(Integer v){ordenAcreditacionOptativa=v;}
  public Long getIdPlanOrigenElectiva(){return idPlanOrigenElectiva;} public void setIdPlanOrigenElectiva(Long v){idPlanOrigenElectiva=v;}
+ public List<RelacionSeriacionCurricularV2DTO> getRelacionesSeriacion(){return relacionesSeriacion;} public void setRelacionesSeriacion(List<RelacionSeriacionCurricularV2DTO> v){relacionesSeriacion=v==null?new ArrayList<RelacionSeriacionCurricularV2DTO>():v;}
 }

@@ -204,6 +204,15 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private Boolean requiereRevisionFase7 = Boolean.FALSE;
     private List<Long> udsTipoAmbiguoFase7 = new ArrayList<Long>();
     private List<String> decisionesCierreFase7 = new ArrayList<String>();
+    /** RN-8/RN-8.1: relaciones curriculares en sombra; no modifica seleccionabilidad origen. */
+    private Boolean aplicaRn81 = Boolean.FALSE;
+    private Boolean requiereRevisionRn81 = Boolean.FALSE;
+    private List<RelacionSeriacionCurricularV2DTO> relacionesSeriacionV2 = new ArrayList<RelacionSeriacionCurricularV2DTO>();
+    private List<Long> udsInterbloqueCumplidasRn81 = new ArrayList<Long>();
+    private List<Long> udsInterbloqueCondicionadasRn81 = new ArrayList<Long>();
+    private List<Long> udsInterbloqueNoCumplidasRn81 = new ArrayList<Long>();
+    private List<Long> udsInterbloqueRevisionRn81 = new ArrayList<Long>();
+    private List<String> decisionesPorUdSeriacionRn81 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -397,6 +406,14 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public Boolean getRequiereRevisionFase7() { return requiereRevisionFase7; } public void setRequiereRevisionFase7(Boolean valor) { requiereRevisionFase7 = valor; }
     public List<Long> getUdsTipoAmbiguoFase7() { return udsTipoAmbiguoFase7; }
     public List<String> getDecisionesCierreFase7() { return decisionesCierreFase7; }
+    public Boolean getAplicaRn81() { return aplicaRn81; } public void setAplicaRn81(Boolean valor) { aplicaRn81 = valor; }
+    public Boolean getRequiereRevisionRn81() { return requiereRevisionRn81; } public void setRequiereRevisionRn81(Boolean valor) { requiereRevisionRn81 = valor; }
+    public List<RelacionSeriacionCurricularV2DTO> getRelacionesSeriacionV2() { return relacionesSeriacionV2; }
+    public List<Long> getUdsInterbloqueCumplidasRn81() { return udsInterbloqueCumplidasRn81; }
+    public List<Long> getUdsInterbloqueCondicionadasRn81() { return udsInterbloqueCondicionadasRn81; }
+    public List<Long> getUdsInterbloqueNoCumplidasRn81() { return udsInterbloqueNoCumplidasRn81; }
+    public List<Long> getUdsInterbloqueRevisionRn81() { return udsInterbloqueRevisionRn81; }
+    public List<String> getDecisionesPorUdSeriacionRn81() { return decisionesPorUdSeriacionRn81; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }

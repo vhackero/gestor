@@ -15,11 +15,15 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelacionSeriacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaPendienteUnidadV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaIndisponibilidadOfertaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.UnidadEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.RelacionSeriacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoRelacionSeriacionV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoSeriacionV2;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ContextoEvaluacionCurricularV2Adapter;
 
 /**
@@ -93,6 +97,7 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
                     || !unidadOrigen.getDesbloquea().isEmpty()));
             unidad.setSeriacionConocida(Boolean.valueOf(Boolean.TRUE.equals(unidadOrigen.getBloqueada())
                     || !unidadOrigen.getRequiere().isEmpty() || !unidadOrigen.getDesbloquea().isEmpty()));
+            mapearRelacionesSeriacion(unidad, unidadOrigen.getRequiere());
             unidad.setEstado(obtenerEstado(unidadOrigen.getEstatusHistorico(), unidadOrigen.getEstatusPeriodo()));
             unidad.setCausa(obtenerCausa(unidad.getEstado()));
             conservarEvidencia(unidad, "ESTATUS_HISTORICO", unidadOrigen.getEstatusHistorico());
@@ -104,6 +109,31 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
             resultado.add(unidad);
         }
         return resultado;
+    }
+
+    private void mapearRelacionesSeriacion(UnidadEvaluacionCurricularV2DTO consecuente,
+            List<RelacionSeriacionDTO> antecedentes) {
+        if (antecedentes == null) return;
+        for (RelacionSeriacionDTO antecedente : antecedentes) {
+            if (antecedente == null) continue;
+            RelacionSeriacionCurricularV2DTO relacion = new RelacionSeriacionCurricularV2DTO();
+            relacion.setIdAntecedente(antecedente.getUdId());
+            relacion.setIdConsecuente(consecuente.getIdPrograma());
+            relacion.setSemestreAntecedente(antecedente.getSemestre());
+            relacion.setSemestreConsecuente(consecuente.getSemestre());
+            relacion.setBloqueAntecedente(antecedente.getBloque() == null ? null : antecedente.getBloque().toString());
+            relacion.setBloqueConsecuente(consecuente.getBloque());
+            relacion.setTipoRelacion(TipoRelacionSeriacionV2.DIRECTA);
+            relacion.setTipoSeriacion(esInterbloque(antecedente, consecuente)
+                    ? TipoSeriacionV2.INTERBLOQUE : TipoSeriacionV2.NO_DETERMINADA);
+            relacion.setEvidencia("PE_REQUIERE:" + antecedente.getUdId() + "->" + consecuente.getIdPrograma());
+            consecuente.getRelacionesSeriacion().add(relacion);
+        }
+    }
+
+    private boolean esInterbloque(RelacionSeriacionDTO antecedente, UnidadEvaluacionCurricularV2DTO consecuente) {
+        return antecedente.getSemestre() != null && antecedente.getSemestre().equals(consecuente.getSemestre())
+                && Integer.valueOf(1).equals(antecedente.getBloque()) && "2".equals(consecuente.getBloque());
     }
 
     private EstadoUnidadCurricularV2 obtenerEstado(String estatusHistorico, String estatusPeriodo) {
