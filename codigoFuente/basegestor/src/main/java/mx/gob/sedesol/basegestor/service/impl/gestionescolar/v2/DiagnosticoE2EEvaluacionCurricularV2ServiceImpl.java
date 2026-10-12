@@ -40,6 +40,9 @@ public class DiagnosticoE2EEvaluacionCurricularV2ServiceImpl implements Diagnost
             throw new InscripcionException("El diagnóstico requiere V2 habilitada exclusivamente en modo sombra.");
         }
         AsistenteInscripcionContextoDTO origen = asistenteInscripcionService.obtenerContextoAsistido(idPersona);
+        if (origen == null) {
+            throw new InscripcionException("No existe contexto SIGIE para el expediente técnico solicitado.");
+        }
         String antes = huellaOrigen(origen);
         ContextoEvaluacionCurricularV2DTO contexto = adaptador.construirDesdeAsistente(origen);
         contexto.setVersionReglas(cfg.getVersionReglas());
@@ -51,7 +54,8 @@ public class DiagnosticoE2EEvaluacionCurricularV2ServiceImpl implements Diagnost
         dto.setHashContexto(trazabilidad.obtenerHashContexto(idEvaluacion)); dto.setUnidadesEvaluadas(Integer.valueOf(resultado.getDecisiones().size()));
         dto.setReglasEvaluadas(Integer.valueOf(resultado.getReglasEvaluadas().size())); dto.setExcepcionesEvaluadas(Integer.valueOf(resultado.getExcepcionesEvaluadas().size()));
         dto.setAuditoriaReconstruida(Boolean.valueOf(idEvaluacion != null && dto.getHashContexto() != null));
-        dto.setInmutabilidadVerificada(Boolean.valueOf(antes.equals(despues))); dto.setResultado("SOMBRA_SIN_EFECTOS_PRODUCTIVOS");
+        dto.setInmutabilidadVerificada(Boolean.valueOf(antes.equals(despues))); dto.setEvaluacionSombra(resultado);
+        dto.setResultado("SOMBRA_SIN_EFECTOS_PRODUCTIVOS");
         return dto;
     }
 

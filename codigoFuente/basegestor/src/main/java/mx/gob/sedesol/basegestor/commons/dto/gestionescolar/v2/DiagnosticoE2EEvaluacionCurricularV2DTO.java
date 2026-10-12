@@ -13,6 +13,8 @@ public class DiagnosticoE2EEvaluacionCurricularV2DTO implements Serializable {
     private Integer excepcionesEvaluadas;
     private Boolean auditoriaReconstruida;
     private Boolean inmutabilidadVerificada;
+    /** Resultado completo del motor, expuesto sólo por el diagnóstico interno DEV/QA. */
+    private ResultadoEvaluacionCurricularV2DTO evaluacionSombra;
     private String resultado;
     public Long getIdPersonaTecnico(){return idPersonaTecnico;} public void setIdPersonaTecnico(Long v){idPersonaTecnico=v;}
     public Long getIdEvaluacion(){return idEvaluacion;} public void setIdEvaluacion(Long v){idEvaluacion=v;}
@@ -22,5 +24,6 @@ public class DiagnosticoE2EEvaluacionCurricularV2DTO implements Serializable {
     public Integer getExcepcionesEvaluadas(){return excepcionesEvaluadas;} public void setExcepcionesEvaluadas(Integer v){excepcionesEvaluadas=v;}
     public Boolean getAuditoriaReconstruida(){return auditoriaReconstruida;} public void setAuditoriaReconstruida(Boolean v){auditoriaReconstruida=v;}
     public Boolean getInmutabilidadVerificada(){return inmutabilidadVerificada;} public void setInmutabilidadVerificada(Boolean v){inmutabilidadVerificada=v;}
+    public ResultadoEvaluacionCurricularV2DTO getEvaluacionSombra(){return evaluacionSombra;} public void setEvaluacionSombra(ResultadoEvaluacionCurricularV2DTO v){evaluacionSombra=v;}
     public String getResultado(){return resultado;} public void setResultado(String v){resultado=v;}
 }
