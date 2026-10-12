@@ -1,6 +1,8 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Relación curricular de sólo lectura, transportada desde la estructura del PE. */
 public class RelacionSeriacionCurricularV2DTO implements Serializable {
@@ -18,6 +20,10 @@ public class RelacionSeriacionCurricularV2DTO implements Serializable {
     private EstadoCumplimientoSeriacionV2 decision = EstadoCumplimientoSeriacionV2.NO_APLICA;
     private String motivo;
     private String evidencia;
+    private Integer profundidadCadena;
+    private List<Long> caminoCurricular = new ArrayList<Long>();
+    private Boolean antecedenteObligatorio = Boolean.TRUE;
+    private Boolean cicloDetectado = Boolean.FALSE;
 
     public Long getIdAntecedente() { return idAntecedente; }
     public void setIdAntecedente(Long valor) { idAntecedente = valor; }
@@ -43,4 +49,12 @@ public class RelacionSeriacionCurricularV2DTO implements Serializable {
     public void setMotivo(String valor) { motivo = valor; }
     public String getEvidencia() { return evidencia; }
     public void setEvidencia(String valor) { evidencia = valor; }
+    public Integer getProfundidadCadena() { return profundidadCadena; }
+    public void setProfundidadCadena(Integer valor) { profundidadCadena = valor; }
+    public List<Long> getCaminoCurricular() { return caminoCurricular; }
+    public void setCaminoCurricular(List<Long> valor) { caminoCurricular = valor == null ? new ArrayList<Long>() : valor; }
+    public Boolean getAntecedenteObligatorio() { return antecedenteObligatorio; }
+    public void setAntecedenteObligatorio(Boolean valor) { antecedenteObligatorio = valor; }
+    public Boolean getCicloDetectado() { return cicloDetectado; }
+    public void setCicloDetectado(Boolean valor) { cicloDetectado = valor; }
 }

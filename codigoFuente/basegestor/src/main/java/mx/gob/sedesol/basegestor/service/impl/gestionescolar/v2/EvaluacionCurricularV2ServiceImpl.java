@@ -219,6 +219,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         consolidarCierreTiposUdFase7(resultado, contexto, unidadesNormalizadas);
         evaluarSeriacionInterbloqueRn81(resultado, contexto, unidadesNormalizadas);
         evaluarSeriacionIntersemestralRn82(resultado, contexto, unidadesNormalizadas);
+        evaluarSeriacionInteranualRn83(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -492,6 +493,190 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             if (llaveRelacionSeriacion(existente).equals(llaveRelacionSeriacion(relacion))) return;
         }
         carga.getRelacionesSeriacionV2().add(relacion);
+    }
+
+    /**
+     * RN-8.3 PE2027 recorre únicamente prerrequisitos formales del PE. No usa
+     * cierre anual ni el resultado RN-6.1 para decidir la seriación.
+     */
+    private void evaluarSeriacionInteranualRn83(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
+        if (carga == null) return;
+        agregarUnico(carga.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_8_3);
+        Map<Long, UnidadEvaluacionCurricularV2DTO> unidadesPorId = new LinkedHashMap<Long, UnidadEvaluacionCurricularV2DTO>();
+        Map<Long, List<RelacionSeriacionCurricularV2DTO>> relacionesPorConsecuente = new LinkedHashMap<Long, List<RelacionSeriacionCurricularV2DTO>>();
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (unidad == null || unidad.getIdPrograma() == null) continue;
+            unidadesPorId.put(unidad.getIdPrograma(), unidad);
+            if (unidad.getRelacionesSeriacion() == null) continue;
+            for (RelacionSeriacionCurricularV2DTO relacion : unidad.getRelacionesSeriacion()) {
+                if (relacion == null) continue;
+                if (relacion.getIdConsecuente() == null) relacion.setIdConsecuente(unidad.getIdPrograma());
+                List<RelacionSeriacionCurricularV2DTO> relaciones = relacionesPorConsecuente.get(relacion.getIdConsecuente());
+                if (relaciones == null) { relaciones = new ArrayList<RelacionSeriacionCurricularV2DTO>(); relacionesPorConsecuente.put(relacion.getIdConsecuente(), relaciones); }
+                relaciones.add(relacion);
+            }
+        }
+
+        boolean aplica = false;
+        for (UnidadEvaluacionCurricularV2DTO consecuente : unidades) {
+            if (consecuente == null || consecuente.getIdPrograma() == null) continue;
+            List<RelacionSeriacionCurricularV2DTO> directas = relacionesPorConsecuente.get(consecuente.getIdPrograma());
+            if (!tieneRelacionInteranual(directas)) continue;
+            aplica = true;
+            ResultadoCadenaInteranual resultadoCadena = new ResultadoCadenaInteranual();
+            List<Long> camino = new ArrayList<Long>(); camino.add(consecuente.getIdPrograma());
+            recorrerAntecedentesInteranuales(resultado, contexto, carga, consecuente, consecuente.getIdPrograma(),
+                    relacionesPorConsecuente, unidadesPorId, camino, new HashSet<Long>(), resultadoCadena, 0);
+            registrarResultadoInteranualPorUd(resultado, contexto, carga, consecuente, resultadoCadena);
+        }
+        carga.setAplicaRn83(Boolean.valueOf(aplica));
+        if (!aplica) {
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_8_3, null, 65,
+                    "RN83_NO_APLICA", "No existe relación INTERANUAL formal clasificada por el PE.");
+            return;
+        }
+        String evidencia = "cumplidas=" + carga.getUdsInteranualesCumplidasRn83()
+                + "; noCumplidas=" + carga.getUdsInteranualesNoCumplidasRn83()
+                + "; revision=" + carga.getUdsInteranualesRevisionRn83()
+                + "; antecedentesNoAcreditados=" + carga.getAntecedentesNoAcreditadosRn83()
+                + "; ciclos=" + carga.getCiclosSeriacionRn83()
+                + "; rn61Concurrente=" + Boolean.TRUE.equals(carga.getAplicaRn61());
+        agregarUnico(carga.getEvidencias(), "RN83:" + evidencia);
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_8_3,
+                Boolean.TRUE.equals(carga.getRequiereRevisionRn83()) ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null,
+                65, "RN83_EVALUADA_EN_SOMBRA", evidencia);
+    }
+
+    private boolean tieneRelacionInteranual(List<RelacionSeriacionCurricularV2DTO> relaciones) {
+        if (relaciones == null) return false;
+        for (RelacionSeriacionCurricularV2DTO relacion : relaciones)
+            if (relacion != null && relacion.getTipoSeriacion() == TipoSeriacionV2.INTERANUAL) return true;
+        return false;
+    }
+
+    private void recorrerAntecedentesInteranuales(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga,
+            UnidadEvaluacionCurricularV2DTO consecuenteRaiz, Long actual,
+            Map<Long, List<RelacionSeriacionCurricularV2DTO>> relacionesPorConsecuente,
+            Map<Long, UnidadEvaluacionCurricularV2DTO> unidadesPorId, List<Long> camino,
+            Set<Long> visitadosEnCamino, ResultadoCadenaInteranual acumulado, int profundidad) {
+        if (actual == null) { acumulado.requiereRevision = true; return; }
+        Set<Long> rutaActual = new HashSet<Long>(visitadosEnCamino); rutaActual.add(actual);
+        List<RelacionSeriacionCurricularV2DTO> relaciones = relacionesPorConsecuente.get(actual);
+        if (relaciones == null) return;
+        Set<String> relacionesLocales = new HashSet<String>();
+        for (RelacionSeriacionCurricularV2DTO origen : relaciones) {
+            if (origen == null || !relacionesLocales.add(llaveRelacionSeriacion(origen))) continue;
+            RelacionSeriacionCurricularV2DTO evaluada = copiarRelacionSeriacion(origen);
+            evaluada.setTipoRelacion(profundidad == 0 ? TipoRelacionSeriacionV2.DIRECTA : TipoRelacionSeriacionV2.INDIRECTA);
+            evaluada.setProfundidadCadena(Integer.valueOf(profundidad + 1));
+            evaluada.setCaminoCurricular(construirCaminoAntecedente(origen.getIdAntecedente(), camino));
+            if (origen.getTipoSeriacion() == null || origen.getTipoSeriacion() == TipoSeriacionV2.NO_DETERMINADA
+                    || origen.getIdAntecedente() == null || !Boolean.TRUE.equals(origen.getAntecedenteObligatorio())) {
+                registrarRelacionInteranual(resultado, contexto, carga, consecuenteRaiz, evaluada,
+                        EstadoCumplimientoSeriacionV2.REQUIERE_REVISION, CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,
+                        "RELACION_O_OBLIGATORIEDAD_NO_DETERMINADA", acumulado);
+                continue;
+            }
+            if (rutaActual.contains(origen.getIdAntecedente())) {
+                evaluada.setCicloDetectado(Boolean.TRUE);
+                registrarRelacionInteranual(resultado, contexto, carga, consecuenteRaiz, evaluada,
+                        EstadoCumplimientoSeriacionV2.REQUIERE_REVISION, CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,
+                        "CICLO_DETECTADO_EN_GRAFO_SERIACION", acumulado);
+                acumulado.cicloDetectado = true;
+                agregarIdUnico(carga.getCiclosSeriacionRn83(), origen.getIdAntecedente());
+                continue;
+            }
+            UnidadEvaluacionCurricularV2DTO antecedente = unidadesPorId.get(origen.getIdAntecedente());
+            if (antecedente == null || antecedente.getEstado() == null || antecedente.getEstado() == EstadoUnidadCurricularV2.NO_DETERMINADO) {
+                registrarRelacionInteranual(resultado, contexto, carga, consecuenteRaiz, evaluada,
+                        EstadoCumplimientoSeriacionV2.REQUIERE_REVISION, CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,
+                        antecedente == null ? "ANTECEDENTE_NO_LOCALIZADO_EN_CONTEXTO_V2" : "ESTADO_ANTECEDENTE_NO_DETERMINADO", acumulado);
+                continue;
+            }
+            evaluada.setEstadoAntecedente(antecedente.getEstado());
+            if (antecedente.getEstado() == EstadoUnidadCurricularV2.ACREDITADA) {
+                registrarRelacionInteranual(resultado, contexto, carga, consecuenteRaiz, evaluada,
+                        EstadoCumplimientoSeriacionV2.CUMPLIDA, null, "ANTECEDENTE_ACREDITADO", acumulado);
+            } else {
+                registrarRelacionInteranual(resultado, contexto, carga, consecuenteRaiz, evaluada,
+                        EstadoCumplimientoSeriacionV2.NO_CUMPLIDA, CodigoMotivoCurricularV2.SERIACION_DIRECTA,
+                        "ANTECEDENTE_NO_ACREDITADO:" + antecedente.getEstado(), acumulado);
+                agregarIdUnico(carga.getAntecedentesNoAcreditadosRn83(), antecedente.getIdPrograma());
+            }
+            List<Long> siguienteCamino = new ArrayList<Long>(camino); siguienteCamino.add(origen.getIdAntecedente());
+            recorrerAntecedentesInteranuales(resultado, contexto, carga, consecuenteRaiz, origen.getIdAntecedente(),
+                    relacionesPorConsecuente, unidadesPorId, siguienteCamino, rutaActual, acumulado, profundidad + 1);
+        }
+    }
+
+    private void registrarRelacionInteranual(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga,
+            UnidadEvaluacionCurricularV2DTO consecuente, RelacionSeriacionCurricularV2DTO relacion,
+            EstadoCumplimientoSeriacionV2 estado, CodigoMotivoCurricularV2 motivo, String detalle,
+            ResultadoCadenaInteranual acumulado) {
+        relacion.setDecision(estado); relacion.setMotivo(detalle);
+        if (relacion.getEvidencia() == null) relacion.setEvidencia("PE_RELACION:" + llaveRelacionSeriacion(relacion));
+        agregarRelacionInteranualUnica(carga, relacion);
+        if (estado == EstadoCumplimientoSeriacionV2.NO_CUMPLIDA) acumulado.noCumplida = true;
+        if (estado == EstadoCumplimientoSeriacionV2.REQUIERE_REVISION) acumulado.requiereRevision = true;
+        DecisionUnidadCurricularV2DTO decision = buscarDecision(resultado, consecuente.getIdPrograma());
+        if (decision != null) {
+            if (motivo != null) agregarUnico(decision.getMotivos(), motivo);
+            if (estado == EstadoCumplimientoSeriacionV2.NO_CUMPLIDA) agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.BLOQUEADA);
+            if (estado == EstadoCumplimientoSeriacionV2.REQUIERE_REVISION) agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.REQUIERE_REVISION);
+            agregarExplicacion(decision, "RN-8.3: " + detalle + "; camino=" + relacion.getCaminoCurricular() + ".");
+            TrazaReglaAplicadaV2DTO traza = crearTraza(contexto, CodigoReglaCurricularV2.RN_8_3, motivo, 65,
+                    "RN83_" + estado, relacion.getEvidencia() + "; camino=" + relacion.getCaminoCurricular() + "; " + detalle);
+            decision.getTrazas().add(traza); resultado.getTrazas().add(traza);
+        }
+    }
+
+    private void registrarResultadoInteranualPorUd(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga,
+            UnidadEvaluacionCurricularV2DTO consecuente, ResultadoCadenaInteranual cadena) {
+        EstadoCumplimientoSeriacionV2 estado = cadena.requiereRevision ? EstadoCumplimientoSeriacionV2.REQUIERE_REVISION
+                : cadena.noCumplida ? EstadoCumplimientoSeriacionV2.NO_CUMPLIDA : EstadoCumplimientoSeriacionV2.CUMPLIDA;
+        agregarIdUnico(estado == EstadoCumplimientoSeriacionV2.CUMPLIDA ? carga.getUdsInteranualesCumplidasRn83()
+                : estado == EstadoCumplimientoSeriacionV2.NO_CUMPLIDA ? carga.getUdsInteranualesNoCumplidasRn83()
+                : carga.getUdsInteranualesRevisionRn83(), consecuente.getIdPrograma());
+        if (estado == EstadoCumplimientoSeriacionV2.REQUIERE_REVISION) { carga.setRequiereRevisionRn83(Boolean.TRUE); carga.setRequiereRevision(Boolean.TRUE); }
+        carga.getDecisionesPorUdSeriacionRn83().add(obtenerLlaveUnidad(consecuente) + ":" + estado
+                + ":directosEIndirectosEvaluados; ciclo=" + cadena.cicloDetectado);
+    }
+
+    private RelacionSeriacionCurricularV2DTO copiarRelacionSeriacion(RelacionSeriacionCurricularV2DTO origen) {
+        RelacionSeriacionCurricularV2DTO copia = new RelacionSeriacionCurricularV2DTO();
+        copia.setIdAntecedente(origen.getIdAntecedente()); copia.setIdConsecuente(origen.getIdConsecuente());
+        copia.setSemestreAntecedente(origen.getSemestreAntecedente()); copia.setSemestreConsecuente(origen.getSemestreConsecuente());
+        copia.setBloqueAntecedente(origen.getBloqueAntecedente()); copia.setBloqueConsecuente(origen.getBloqueConsecuente());
+        copia.setTipoSeriacion(origen.getTipoSeriacion()); copia.setTipoRelacion(origen.getTipoRelacion());
+        copia.setAntecedenteObligatorio(origen.getAntecedenteObligatorio()); copia.setEvidencia(origen.getEvidencia());
+        return copia;
+    }
+
+    private List<Long> construirCaminoAntecedente(Long antecedente, List<Long> caminoRaiz) {
+        List<Long> resultado = new ArrayList<Long>(); resultado.add(antecedente);
+        for (int indice = caminoRaiz.size() - 1; indice >= 0; indice--) resultado.add(caminoRaiz.get(indice));
+        return resultado;
+    }
+
+    private void agregarRelacionInteranualUnica(EvaluacionCargaAcademicaV2DTO carga,
+            RelacionSeriacionCurricularV2DTO relacion) {
+        String llave = llaveRelacionSeriacion(relacion) + ":" + relacion.getTipoRelacion() + ":" + relacion.getCaminoCurricular();
+        for (RelacionSeriacionCurricularV2DTO existente : carga.getRelacionesSeriacionV2()) {
+            String llaveExistente = llaveRelacionSeriacion(existente) + ":" + existente.getTipoRelacion() + ":" + existente.getCaminoCurricular();
+            if (llave.equals(llaveExistente)) return;
+        }
+        carga.getRelacionesSeriacionV2().add(relacion);
+    }
+
+    private static class ResultadoCadenaInteranual {
+        private boolean noCumplida;
+        private boolean requiereRevision;
+        private boolean cicloDetectado;
     }
 
     private void determinarSituacionAcademica(ResultadoEvaluacionCurricularV2DTO resultado,

@@ -220,6 +220,15 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<Long> udsIntersemestralesNoCumplidasRn82 = new ArrayList<Long>();
     private List<Long> udsIntersemestralesRevisionRn82 = new ArrayList<Long>();
     private List<String> decisionesPorUdSeriacionRn82 = new ArrayList<String>();
+    /** RN-8.3 PE2027: recorrido de prerrequisitos sin usar cierre anual global. */
+    private Boolean aplicaRn83 = Boolean.FALSE;
+    private Boolean requiereRevisionRn83 = Boolean.FALSE;
+    private List<Long> udsInteranualesCumplidasRn83 = new ArrayList<Long>();
+    private List<Long> udsInteranualesNoCumplidasRn83 = new ArrayList<Long>();
+    private List<Long> udsInteranualesRevisionRn83 = new ArrayList<Long>();
+    private List<Long> antecedentesNoAcreditadosRn83 = new ArrayList<Long>();
+    private List<Long> ciclosSeriacionRn83 = new ArrayList<Long>();
+    private List<String> decisionesPorUdSeriacionRn83 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -427,6 +436,14 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<Long> getUdsIntersemestralesNoCumplidasRn82() { return udsIntersemestralesNoCumplidasRn82; }
     public List<Long> getUdsIntersemestralesRevisionRn82() { return udsIntersemestralesRevisionRn82; }
     public List<String> getDecisionesPorUdSeriacionRn82() { return decisionesPorUdSeriacionRn82; }
+    public Boolean getAplicaRn83() { return aplicaRn83; } public void setAplicaRn83(Boolean valor) { aplicaRn83 = valor; }
+    public Boolean getRequiereRevisionRn83() { return requiereRevisionRn83; } public void setRequiereRevisionRn83(Boolean valor) { requiereRevisionRn83 = valor; }
+    public List<Long> getUdsInteranualesCumplidasRn83() { return udsInteranualesCumplidasRn83; }
+    public List<Long> getUdsInteranualesNoCumplidasRn83() { return udsInteranualesNoCumplidasRn83; }
+    public List<Long> getUdsInteranualesRevisionRn83() { return udsInteranualesRevisionRn83; }
+    public List<Long> getAntecedentesNoAcreditadosRn83() { return antecedentesNoAcreditadosRn83; }
+    public List<Long> getCiclosSeriacionRn83() { return ciclosSeriacionRn83; }
+    public List<String> getDecisionesPorUdSeriacionRn83() { return decisionesPorUdSeriacionRn83; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }
