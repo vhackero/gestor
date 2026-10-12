@@ -39,7 +39,7 @@ La búsqueda incluye programas sin plan/bloque asociado y compara exactamente lo
 
 En duplicados se impide la eliminación con limpieza académica hasta depurar el listado. Retirar incluso el último documento conserva las calificaciones y el estado del grupo; la reapertura es otra acción explícita.
 
-Las operaciones de documento y cierre bloquean la fila del grupo durante su transacción. La eliminación con reapertura se ejecuta en una sola transacción con reversión ante errores. Se revisan pertenencia del documento y estado actual para rechazar selecciones desactualizadas. Las acciones de consulta mantienen el permiso existente `EC_AGR`, comprobado también en el bean.
+Las operaciones de documento y cierre bloquean la fila del grupo durante su transacción. La eliminación con reapertura se ejecuta en una sola transacción con reversión ante errores. Se revisan pertenencia del documento y estado actual para rechazar selecciones desactualizadas. Las acciones de consulta requieren el permiso independiente `EC_CON_ACTAS`, comprobado también en el bean.
 
 La carga acepta PDF de hasta 10 MB, con páginas y sin contraseña. La validación completa, al cargar, visualizar o completar el cierre, comprueba que el PDF se pueda leer; no verifica firmas digitales, correspondencia de calificaciones ni contenido académico del documento.
 
@@ -66,3 +66,13 @@ Verificación: componentes compilados con Java 8; 21 pruebas con `-Xmx64m`, incl
 ## Filtro opcional por texto del evento
 
 El campo «Clave o nombre del evento (opcional)» busca el texto contenido en `cve_evento_cap` o `nombre_ec`, combinado con plan/programa, periodo y estatus. Por ejemplo, `S1` o `B1`. No distingue mayúsculas/minúsculas y elimina espacios al principio y al final. Vacío o con sólo espacios no restringe resultados. La comparación trata `%` y `_` como texto literal. «Limpiar campos» también borra este filtro. La condición se aplica en la base de datos, sin cargar documentos.
+
+## Permisos administrables desde Roles
+
+| Botón | Permiso |
+|---|---|
+| Crear | `EC_AGR` (existente: Crear evento de capacitación) |
+| Modificar estatus | `EC_MOD_ESTATUS` |
+| Consultar actas | `EC_CON_ACTAS` (incluye las acciones de gestión de actas) |
+
+Cada botón tiene su autorización independiente. Las entradas de Crear, Modificar estatus y Consultar actas comprueban también el permiso en el bean. El script `documentacion/sql/20261012_permisos_eventos_academicos.sql` registra los nuevos permisos bajo el mismo padre que `EC_AGR`, sin identificadores fijos ni asignaciones automáticas a roles. Es idempotente y debe ejecutarse en las demás bases al desplegar. Asignar los nuevos permisos desde Administración → Roles; cerrar sesión y volver a entrar para renovar los permisos cargados durante la autenticación.

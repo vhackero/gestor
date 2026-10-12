@@ -244,6 +244,7 @@ public class EventoCapacitacionBean extends BaseBean {
 	}
 
 	public void mostrarVistaModificarEstatus() {
+		validarPermisoModificarEstatus();
 		mostrarVistaModificarEstatus = true;
 		mostrarVistaConsultarActas = false;
 		limpiarCamposModificarEstatus();
@@ -279,6 +280,7 @@ public class EventoCapacitacionBean extends BaseBean {
 	}
 
 	public void buscarModificarEstatus() {
+		validarPermisoModificarEstatus();
 		busquedaModificarEstatusEjecutada = true;
 		idEstatusModificarSeleccionado = null;
 		resultadosModificarEstatus.clear();
@@ -305,6 +307,7 @@ public class EventoCapacitacionBean extends BaseBean {
 	}
 
 	public void actualizarModificarEstatus() {
+		validarPermisoModificarEstatus();
 		if (ObjectUtils.isNull(idEstatusModificarSeleccionado)) {
 			agregarMsgError("Debes seleccionar el estatus a cambiar.", null);
 			return;
@@ -662,7 +665,13 @@ public class EventoCapacitacionBean extends BaseBean {
 		return acta != null && acta.isEstructuraPdfValida();
 	}
 	public boolean isPuedeGestionarActas() {
-		return new CustomPermissionEvaluator().hasPermission(SecurityContextHolder.getContext().getAuthentication(), null, "EC_AGR");
+		return new CustomPermissionEvaluator().hasPermission(SecurityContextHolder.getContext().getAuthentication(), null, "EC_CON_ACTAS");
+	}
+	public boolean isPuedeModificarEstatus() {
+		return new CustomPermissionEvaluator().hasPermission(SecurityContextHolder.getContext().getAuthentication(), null, "EC_MOD_ESTATUS");
+	}
+	private void validarPermisoModificarEstatus() {
+		if (!isPuedeModificarEstatus()) { throw new SecurityException("No cuenta con permiso para modificar estatus de eventos."); }
 	}
 	private void validarPermisoActas() {
 		if (!isPuedeGestionarActas()) { throw new SecurityException("No cuenta con permiso para gestionar actas."); }

@@ -972,6 +972,11 @@ public class CapturaEventoCapacitacion extends BaseBean {
 	}
 
 	public String nuevoEventoCapacitacion() {
+		if (!new mx.gob.sedesol.gestorweb.config.security.CustomPermissionEvaluator().hasPermission(
+				org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication(), null, "EC_AGR")) {
+			agregarMsgError("No cuenta con permiso para crear eventos académicos.", null);
+			return null;
+		}
 		/* Limpiando el filtro de seleccion de programas */
 		filtrosPrograma = new FichaDescProgramaDTO();
 		filtrosPrograma.setCatStatusPrograma(new CatalogoComunDTO());
