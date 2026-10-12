@@ -16,6 +16,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoD
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaMaximaCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.v2.ContextoEvaluacionCurricularV2AdapterImpl;
@@ -106,6 +107,23 @@ public class ContextoEvaluacionCurricularV2AdapterTest {
         assertEquals(EstadoUnidadCurricularV2.REPROBADA, contexto.getUnidades().get(0).getEstado());
         assertEquals(EstadoUnidadCurricularV2.BAJA_PARCIAL, contexto.getUnidades().get(1).getEstado());
         assertEquals(EstadoUnidadCurricularV2.NO_CURSADA, contexto.getUnidades().get(2).getEstado());
+    }
+
+    @Test
+    public void f12A1B07ReconoceEstadosLegacyConGuionBajoSinDegradarlos() {
+        List<UnidadDecisionInscripcionDTO> unidades = new ArrayList<UnidadDecisionInscripcionDTO>();
+        unidades.add(unidad("REP", "NO_ACREDITADA", null));
+        unidades.add(unidad("NIN", "NO_INSCRITA", null));
+        AsistenteInscripcionContextoDTO asistente = asistente(unidades);
+
+        ContextoEvaluacionCurricularV2DTO contexto = adapter.construirDesdeAsistente(asistente);
+        ResultadoEvaluacionCurricularV2DTO resultado = evaluator.evaluarSombra(contexto);
+
+        assertEquals(EstadoUnidadCurricularV2.REPROBADA, contexto.getUnidades().get(0).getEstado());
+        assertEquals(EstadoUnidadCurricularV2.NO_INSCRITA, contexto.getUnidades().get(1).getEstado());
+        assertEquals("IRREGULAR", resultado.getSituacionAcademicaCalculada());
+        EvaluacionCargaMaximaCurricularV2DTO carga = resultado.getEvaluacionCargaMaxima();
+        assertEquals(Integer.valueOf(6), carga.getCargaMaximaNormativa());
     }
 
     private AsistenteInscripcionContextoDTO asistente(UnidadDecisionInscripcionDTO unidad) {

@@ -145,8 +145,8 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
     private EstadoUnidadCurricularV2 obtenerEstado(String estatusHistorico, String estatusPeriodo) {
         String historico = normalizar(estatusHistorico);
         String periodo = normalizar(estatusPeriodo);
-        if (contiene(historico, "APROBADA") || contiene(historico, "ACREDITADA")) return EstadoUnidadCurricularV2.ACREDITADA;
         if (contiene(historico, "REPROBADA") || contiene(historico, "NO ACREDITADA")) return EstadoUnidadCurricularV2.REPROBADA;
+        if (contiene(historico, "APROBADA") || contiene(historico, "ACREDITADA")) return EstadoUnidadCurricularV2.ACREDITADA;
         if (contiene(historico, "BAJA")) return EstadoUnidadCurricularV2.BAJA_PARCIAL;
         if (contiene(historico, "EN CURSO") || contiene(historico, "CURSANDO")
                 || contiene(periodo, "EN CURSO") || contiene(periodo, "CURSANDO")) return EstadoUnidadCurricularV2.EN_CURSO;
@@ -190,7 +190,8 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
 
     private String normalizar(String valor) {
         if (valor == null) return "";
-        return Normalizer.normalize(valor, Normalizer.Form.NFD).replaceAll("\\p{M}", "").toUpperCase();
+        return Normalizer.normalize(valor, Normalizer.Form.NFD).replaceAll("\\p{M}", "")
+                .replace('_', ' ').toUpperCase();
     }
 
     private boolean contiene(String valor, String esperado) {
