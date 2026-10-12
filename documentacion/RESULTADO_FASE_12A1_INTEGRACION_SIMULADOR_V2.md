@@ -69,13 +69,16 @@ No se alteró V2 para igualar legacy.
 
 ## PRUEBAS
 
-La integración compila contra el motor común. Pendiente agregar cobertura
-específica del consumidor y validación manual UI en la siguiente revisión
-autorizada.
+PRUEBAS_ESPECIFICAS_CONSUMIDOR: 3 pruebas, 0 fallas, 0 errores, 0 omitidas.
+Cubren consumo del resultado V2, restricción por UD, no mutación de la fuente
+y determinismo. La validación manual UI permanece pendiente.
 
 ## REGRESION
 
-F0-F12A.1: 746 pruebas, 0 fallas, 0 errores, 0 omitidas.
+La regresión completa fue iniciada tras agregar las pruebas, pero el entorno no
+entregó su resumen final antes del cierre operativo. La última regresión
+confirmada previa fue 746 pruebas verdes; debe repetirse y capturarse el total
+final antes de una aprobación formal de fase.
 
 ## COMPILACION
 
