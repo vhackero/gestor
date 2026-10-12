@@ -38,7 +38,22 @@
         </pluginManagement>
     </build>
 
+    <!-- Repositorio ya utilizado por gestorWeb para la biblioteca PDF de JasperReports. -->
+    <repositories>
+        <repository>
+            <id>jaspersoft-third-party</id>
+            <url>https://jaspersoft.jfrog.io/jaspersoft/third-party-ce-artifacts/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
+
+        <!-- Misma biblioteca PDF utilizada por JasperReports en gestorWeb. -->
+        <dependency>
+            <groupId>com.lowagie</groupId>
+            <artifactId>itext</artifactId>
+            <version>2.1.7.js8</version>
+        </dependency>
 
         <dependency>
             <groupId>org.testng</groupId>

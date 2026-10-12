@@ -17,6 +17,7 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.ParametroWSMoodleDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.PersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.admin.ResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CalificacionECDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ActaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CapturaEventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConsultaActaEventoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EventoCapacitacionDTO;
@@ -31,6 +32,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipante
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TablaCalificacionesDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.MallaCurricularDTO;
+import mx.gob.sedesol.basegestor.commons.utils.ActaDocumentoUtils;
 import mx.gob.sedesol.basegestor.commons.utils.CatGestionEscolarEnum;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
@@ -53,6 +55,7 @@ import mx.gob.sedesol.basegestor.service.admin.PersonaService;
 import mx.gob.sedesol.basegestor.service.admin.RelPersonaPlataformaMoodleService;
 import mx.gob.sedesol.basegestor.service.gestion.aprendizaje.AmbienteVirtualApService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.EventoCapacitacionService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.ActaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.PersonaResponsabilidadesService;
@@ -107,6 +110,9 @@ public class EventoCapacitacionServiceFacade {
 	private GrupoService grupoService;
 
 	@Autowired
+	private ActaService actaService;
+
+	@Autowired
 	private GrupoParticipanteService grupoParticipanteService;
 
 	@Autowired
@@ -154,6 +160,12 @@ public class EventoCapacitacionServiceFacade {
 			List<Long> idprogramaSelecionado, Integer estatus) {
 		return eventoCapacitacionService.consultarActasPorFiltros(anioPeriodo, numeroElementos, idprogramaSelecionado,
 				estatus);
+	}
+
+	public List<ConsultaActaEventoDTO> consultarActasPorFiltros(String anioPeriodo, String numeroElementos,
+			List<Long> idprogramaSelecionado, Integer estatus, String textoEvento) {
+		return eventoCapacitacionService.consultarActasPorFiltros(anioPeriodo, numeroElementos,
+				idprogramaSelecionado, estatus, textoEvento);
 	}
 
 	public List<ProgramaEventoEstatusDTO> obtenerProgramasConEventosParaCambioEstatus() {
@@ -514,6 +526,58 @@ public class EventoCapacitacionServiceFacade {
 		return res;
 	}
 
+	/** El documento, las evaluaciones y el cierre se corrigen en una sola transacción. */
+	@Transactional(rollbackFor = Exception.class)
+	public void eliminarActaYReabrir(Integer idGrupo, Integer idActa, Long usuario) throws Exception {
+		actaService.bloquearGrupo(idGrupo);
+		ConsultaActaEventoDTO estado = actaService.consultarEstadoGrupo(idGrupo);
+		if (idActa == null && Boolean.FALSE.equals(estado.getActaCerrada())) {
+			throw new IllegalArgumentException("El grupo ya está abierto. Actualice la consulta.");
+		}
+		if (estado.getNumeroActas() > 1) {
+			throw new IllegalArgumentException("Existen varios documentos. Depúrelos desde el listado antes de reabrir.");
+		}
+		List<ActaDTO> documentos = actaService.getActasByIdGrupo(idGrupo);
+		if ((idActa == null && !documentos.isEmpty()) || (idActa != null
+				&& (documentos.isEmpty() || !idActa.equals(documentos.get(0).getIdActa())))) {
+			throw new IllegalArgumentException("Los documentos del grupo cambiaron. Actualice la consulta.");
+		}
+		GrupoDTO grupo = grupoService.buscarGrupoPorId(idGrupo);
+		if (grupo == null) { throw new IllegalArgumentException("El grupo ya no existe."); }
+		grupo.setUsuarioModifico(usuario);
+		grupo.setFachaActualizacion(new Date());
+		if (idActa != null) { actaService.retirarDocumento(idActa, idGrupo); }
+		actualizaCalificacionesAlEliminarActa(grupo);
+		ResultadoDTO<GrupoDTO> resultado = actualizarEstatusActa(grupo, usuario, false);
+		if (!esResultadoCorrecto(resultado)) { throw new Exception("No fue posible reabrir el grupo."); }
+	}
+
+	@Transactional(rollbackFor = Exception.class)
+	public void completarCierreActa(Integer idGrupo, Long usuario) throws Exception {
+		actaService.bloquearGrupo(idGrupo);
+		ConsultaActaEventoDTO estado = actaService.consultarEstadoGrupo(idGrupo);
+		if (Boolean.TRUE.equals(estado.getActaCerrada())) {
+			throw new IllegalArgumentException("El grupo ya está cerrado. Actualice la consulta.");
+		}
+		if (estado.getNumeroActas() != 1 || estado.getDocumentosInvalidos() != 0
+				|| estado.getNumeroAlumnos() == 0 || estado.getCalificacionesPendientes() != 0) {
+			throw new IllegalArgumentException("El cierre requiere un PDF válido y calificaciones para todos los alumnos.");
+		}
+		List<ActaDTO> documentos = actaService.getActasByIdGrupo(idGrupo);
+		ActaDTO documento = documentos.size() == 1 ? actaService.buscarPorId(documentos.get(0).getIdActa()) : null;
+		if (documento == null || !ActaDocumentoUtils.esPdfValido(documento.getBlob())) {
+			throw new IllegalArgumentException("El cierre requiere un PDF legible y sin contraseña. Reemplace el documento.");
+		}
+		GrupoDTO grupo = grupoService.buscarGrupoPorId(idGrupo);
+		if (grupo == null) { throw new IllegalArgumentException("El grupo ya no existe."); }
+		grupo.setUsuarioModifico(usuario);
+		grupo.setFachaActualizacion(new Date());
+		if (!esResultadoCorrecto(actualizarEstatusActa(grupo, usuario, true))) {
+			throw new Exception("No fue posible completar el cierre del grupo.");
+		}
+	}
+
+	@Transactional(rollbackFor = Exception.class)
 	public void actualizaCalificacionesAlEliminarActa(GrupoDTO gpoSeleccionado) throws Exception {
 		try {
 

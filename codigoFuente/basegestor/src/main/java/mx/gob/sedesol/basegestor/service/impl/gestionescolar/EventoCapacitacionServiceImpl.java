@@ -41,6 +41,8 @@ import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.RelSolicit
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.ReservacionEventoCapacitacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.logisticainfraestructura.SolicitudReservacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
+import mx.gob.sedesol.basegestor.commons.utils.EstatusConsultaActaEnum;
+import mx.gob.sedesol.basegestor.commons.utils.ConsultaActaUtils;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesErrorEnum;
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
@@ -101,6 +103,7 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 
 	@Autowired
 	private EventoCapacitacionRepo eventoCapacitacionRepo;
+
 
 	@Autowired
 	private ParametroSistemaService parametroSistemaService;
@@ -312,14 +315,22 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 	@Override
 	public List<ConsultaActaEventoDTO> consultarActasPorFiltros(String anioPeriodo, String numeroElementos,
 			List<Long> idprogramaSelecionado, Integer estatus) {
+		return consultarActasPorFiltros(anioPeriodo, numeroElementos, idprogramaSelecionado, estatus, null);
+	}
+
+	@Override
+	public List<ConsultaActaEventoDTO> consultarActasPorFiltros(String anioPeriodo, String numeroElementos,
+			List<Long> idprogramaSelecionado, Integer estatus, String textoEvento) {
+		String texto = textoEvento == null ? "" : textoEvento.trim();
+		EstatusConsultaActaEnum filtro = EstatusConsultaActaEnum.porId(estatus);
 		List<ConsultaActaEventoDTO> lista = new ArrayList<ConsultaActaEventoDTO>();
+		if (idprogramaSelecionado == null || idprogramaSelecionado.isEmpty()) { return lista; }
 		List<Object[]> resultados = eventoCapacitacionRepo.consultarActasPorFiltros(anioPeriodo, numeroElementos,
-				idprogramaSelecionado, estatus);
-		if (resultados == null) {
-			return lista;
-		}
+				idprogramaSelecionado, texto);
+		if (resultados == null) { return lista; }
 		for (Object[] row : resultados) {
-			ConsultaActaEventoDTO dto = new ConsultaActaEventoDTO();
+			ConsultaActaEventoDTO dto = ConsultaActaUtils.desdeRegistro(row, 10);
+			if (!filtro.incluye(dto)) { continue; }
 			dto.setIdPlan(getLongValue(row, 0));
 			dto.setPlan(getStringValue(row, 1));
 			dto.setSemestre(getStringValue(row, 2));
@@ -328,32 +339,13 @@ public class EventoCapacitacionServiceImpl extends ComunValidacionService<Evento
 			dto.setPrograma(getStringValue(row, 5));
 			dto.setIdEvento(getLongValue(row, 6));
 			dto.setEvento(getStringValue(row, 7));
-			dto.setIdGrupo(getLongValue(row, 8));
 			dto.setGrupo(getStringValue(row, 9));
 			dto.setEstatus(estatus);
-			dto.setTextoEstatus(obtenerTextoEstatusActa(estatus));
 			lista.add(dto);
 		}
 		return lista;
 	}
 
-	private String obtenerTextoEstatusActa(Integer estatus) {
-		if (estatus == null) {
-			return null;
-		}
-		switch (estatus.intValue()) {
-		case 0:
-			return "Abierta";
-		case 1:
-			return "Cerrada";
-		case 2:
-			return "Cierre incompleto";
-		case 3:
-			return "Más de un documento cargado";
-		default:
-			return null;
-		}
-	}
 	@Override
 	public List<EventoCapacitacionDTO> consultaEventoPorEstatus(Integer idEstatus) {
 		List<TblEvento> res = eventoCapacitacionRepo.consultaEventoPorEstatus(idEstatus);
