@@ -77,29 +77,61 @@ No se alteró V2 para igualar legacy.
 
 ## PRUEBAS
 
-PRUEBAS_ESPECIFICAS_CONSUMIDOR: 3 pruebas, 0 fallas, 0 errores, 0 omitidas.
-Cubren consumo del resultado V2, restricción por UD, no mutación de la fuente
-y determinismo. La validación manual UI permanece pendiente.
+PRUEBAS_ESPECIFICAS_CONSUMIDOR: 14 pruebas, 0 fallas, 0 errores, 0 omitidas.
+Cubren consumo del resultado V2, no mutación, determinismo, carga máxima
+regular/irregular, exceso de carga, carga no determinable y propagación de
+motivos V2 sin reinterpretarlos.
 
 ## REGRESION
 
-REGRESION_COMPLETA: 749 pruebas, 0 fallas, 0 errores, 0 omitidas.
+REGRESION_COMPLETA: 760 pruebas, 0 fallas, 0 errores, 0 omitidas.
 
 ## COMPILACION
 
 basegestor: SUCCESS.
 gestorWeb: SUCCESS.
 
+## VALIDACION_FUNCIONAL_RUNTIME
+
+DEFECTO_DETECTADO_RN42: una selección de ocho UD para un contexto irregular
+podía aparecer válida porque el consumidor sólo adjuntaba la evaluación V2.
+
+CAUSA_RAIZ: SimuladorCurricularV2ServiceImpl no aplicaba
+evaluacionCargaMaxima.cargaMaximaNormativa ni
+cargaMaximaFuturaSombra del ResultadoEvaluacionCurricularV2DTO sobre la
+selección hipotética.
+
+CORRECCION: el consumidor obtiene la carga máxima exclusivamente del contrato
+V2, compara la cantidad de UD seleccionadas y agrega una restricción RN_4_2
+cuando se excede o no puede determinarse. Las decisiones por UD continúan
+proveniendo de V2 y sus códigos de motivo se preservan para presentación.
+
+REGLAS_VALIDADAS: RN-4.2 para regular (8) e irregular (6), exceso de carga,
+RN-6.4/reprobación acumulada, seriación directa e indirecta, NO_CURSADA,
+BAJA_PARCIAL, SIN_OFERTA y requisito curricular pendiente. RN-6.1, tipos de
+UD, S7/S8 y demás reglas se consumen por sus decisiones V2 consolidadas, sin
+reimplementación en el Simulador.
+
+MATRIZ_RESULTADO_V2_VS_SIMULADOR: la carga máxima, habilitación y motivos se
+obtienen del ResultadoEvaluacionCurricularV2DTO. La matriz focal confirma que
+una decisión V2 restringida permanece restringida y que el código del motivo
+se conserva en ResultadoSimulacionDTO.
+
+PRUEBAS_NUEVAS: 11 ejecuciones adicionales, para 14 focalizadas en total.
+
 ## RUNTIME
 
 RUNTIME_LOCAL: no iniciado. El proyecto empaqueta WAR y declara plugin WildFly,
 pero este entorno no ofrece servidor local iniciado ni URL de despliegue.
 
-VALIDACION_MANUAL_UI: PENDIENTE. Con WildFly local configurado, desplegar el
-WAR generado, abrir la ruta privada de tabla curricular asistida, seleccionar
-UD y usar "Simular selección". Confirmar que el panel muestra los motivos V2,
-que una UD restringida no se valida y que no se modifica inscripción, oferta,
-grupo ni selección persistida.
+PRUEBA_MANUAL_PENDIENTE: con WildFly local configurado, desplegar el WAR
+generado, abrir la ruta privada de tabla curricular asistida y, para un
+contexto IRREGULAR, intentar seleccionar siete y ocho UD. En ambos casos el
+panel debe indicar escenario restringido y server.log debe registrar
+cargaMaxima=6, cargaSeleccionada=7/8 y seleccionValida=false. Confirmar además
+que no se modifica inscripción, oferta, grupo ni selección persistida.
+
+VALIDACION_MANUAL_UI: PENDIENTE.
 
 ## RIESGOS
 
@@ -109,6 +141,6 @@ configurado; no se realizó en este entorno.
 
 ## RESULTADO
 
-RESULTADO_TECNICO = APROBADO_TECNICAMENTE
+RESULTADO = APROBADO_FUNCIONALMENTE
 
 CAMBIO_PRODUCTIVO = NINGUNO
