@@ -36,6 +36,9 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCierreFase7
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCierreFase8V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoReinscripcionExtemporaneaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoAvanceUltimosSemestresV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoRequisitosEgresoAcademicoV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoRequisitoComponenteFinalV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoComponenteCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCumplimientoSeriacionV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoConsolidacionFase6V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoElegibilidadElectivaV2;
@@ -228,6 +231,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarSeriacionInteranualRn83(resultado, contexto, unidadesNormalizadas);
         consolidarCierreSeriacionFase8(resultado, contexto, unidadesNormalizadas);
         evaluarAvanceUltimosSemestresRn93(resultado, contexto, unidadesNormalizadas);
+        evaluarRequisitosAcreditacionEgresoRn94(resultado, contexto, unidadesNormalizadas);
         evaluarReinscripcionExtemporaneaRn91(resultado, contexto);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
@@ -929,6 +933,103 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
     }
 
     private void registrarDecisionRn93(EvaluacionCargaAcademicaV2DTO carga, String decision) { agregarUnico(carga.getDecisionesRn93(), decision); }
+
+    /** RN-9.4 compone catálogos verificados y motores previos; no autoriza egreso ni inscripción. */
+    private void evaluarRequisitosAcreditacionEgresoRn94(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
+        if (carga == null) return;
+        carga.setAplicaRn94(Boolean.TRUE);
+        agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_9_4);
+        agregarUnico(carga.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_9_4);
+        Map<Long, UnidadEvaluacionCurricularV2DTO> porId = new LinkedHashMap<Long, UnidadEvaluacionCurricularV2DTO>();
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades)
+            if (unidad != null && unidad.getIdPrograma() != null && !porId.containsKey(unidad.getIdPrograma())) porId.put(unidad.getIdPrograma(), unidad);
+
+        boolean revision = !Boolean.TRUE.equals(contexto.getEstructuraProgramaEducativoComprobada());
+        Set<Long> obligatorias = new HashSet<Long>(contexto.getIdsObligatoriasRequeridasEgreso());
+        carga.setObligatoriasRequeridasRn94(Integer.valueOf(obligatorias.size()));
+        int obligatoriasAcreditadas = 0;
+        for (Long id : obligatorias) {
+            UnidadEvaluacionCurricularV2DTO unidad = porId.get(id);
+            if (unidad == null || !esObligatoria(unidad) || unidad.getEstado() == null) { revision = true; registrarDecisionRn94(carga, "OBLIGATORIA_PE_NO_VERIFICABLE:" + id); continue; }
+            if (unidad.getEstado() == EstadoUnidadCurricularV2.ACREDITADA) obligatoriasAcreditadas++;
+            else agregarIdUnico(carga.getObligatoriasPendientesRn94(), id);
+        }
+        carga.setObligatoriasAcreditadasRn94(Integer.valueOf(obligatoriasAcreditadas));
+
+        Set<Long> electivas = new HashSet<Long>();
+        for (UnidadEvaluacionCurricularV2DTO unidad : porId.values()) {
+            if (esTipoAmbiguoFase7(unidad)) { revision = true; continue; }
+            if (esElectiva(unidad) && unidad.getEstado() == EstadoUnidadCurricularV2.ACREDITADA) {
+                electivas.add(unidad.getIdPrograma()); agregarIdUnico(carga.getIdsElectivasAcreditadasRn94(), unidad.getIdPrograma());
+            }
+        }
+        carga.setElectivasAcreditadasRn94(Integer.valueOf(electivas.size()));
+        boolean optativasCumplidas = carga.getEstadoRequerimientoOptativo() == EstadoRequerimientoOptativoV2.REQUERIMIENTO_OPTATIVO_CUMPLIDO
+                || carga.getCantidadOptativasAcreditadasRn711().intValue() >= 8;
+        if (carga.getEstadoRequerimientoOptativo() == EstadoRequerimientoOptativoV2.REQUIERE_REVISION) revision = true;
+
+        evaluarComponentesFinalesRn94(resultado, contexto, carga, porId);
+        if (revision) carga.setEstadoRequisitosEgresoAcademicoRn94(EstadoRequisitosEgresoAcademicoV2.REQUIERE_REVISION);
+        else if (obligatoriasAcreditadas == obligatorias.size() && optativasCumplidas && !electivas.isEmpty())
+            carga.setEstadoRequisitosEgresoAcademicoRn94(EstadoRequisitosEgresoAcademicoV2.REQUISITOS_ACADEMICOS_EGRESO_CUMPLIDOS);
+        else carga.setEstadoRequisitosEgresoAcademicoRn94(EstadoRequisitosEgresoAcademicoV2.REQUISITOS_ACADEMICOS_EGRESO_PENDIENTES);
+        carga.setRequiereRevisionRn94(Boolean.valueOf(revision));
+        String evidencia = "obligatorias={requeridas=" + obligatorias.size() + ",acreditadas=" + obligatoriasAcreditadas
+                + ",pendientes=" + carga.getObligatoriasPendientesRn94() + "}; optativas=" + carga.getCantidadOptativasAcreditadasRn711()
+                + "/8; electivas=" + electivas.size() + "/1; componentes=" + carga.getEstadoComponentesFinalesRn94()
+                + "; referenciaRN15=REUTILIZADA_SIN_REQUISITO_GENERAL_85; estado=" + carga.getEstadoRequisitosEgresoAcademicoRn94();
+        agregarUnico(carga.getEvidencias(), "RN94:" + evidencia);
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_9_4,
+                revision ? CodigoMotivoCurricularV2.ESTRUCTURA_PE_NO_DETERMINADA : null, 80,
+                "RN94_" + carga.getEstadoRequisitosEgresoAcademicoRn94(), evidencia);
+    }
+
+    private void evaluarComponentesFinalesRn94(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga,
+            Map<Long, UnidadEvaluacionCurricularV2DTO> porId) {
+        Set<Long> seriadas = new HashSet<Long>(contexto.getIdsSeriadasPrimerosSeisSemestres());
+        boolean revision = false;
+        for (Long id : seriadas) {
+            UnidadEvaluacionCurricularV2DTO unidad = porId.get(id);
+            if (unidad == null || unidad.getSemestre() == null || unidad.getSemestre().intValue() < 1 || unidad.getSemestre().intValue() > 6
+                    || unidad.getEstado() == null || !esSeriadaFase8(unidad)) { revision = true; continue; }
+            agregarIdUnico(carga.getSeriadasS1S6RequeridasRn94(), id);
+            if (unidad.getEstado() != EstadoUnidadCurricularV2.ACREDITADA) agregarIdUnico(carga.getSeriadasS1S6PendientesRn94(), id);
+        }
+        Set<Long> componentes = new HashSet<Long>(contexto.getComponentesFinalesSolicitados());
+        for (UnidadEvaluacionCurricularV2DTO unidad : porId.values()) if (esComponenteFinalRn94(unidad)) componentes.add(unidad.getIdPrograma());
+        if (componentes.isEmpty()) { carga.setEstadoComponentesFinalesRn94(EstadoRequisitoComponenteFinalV2.NO_APLICA); return; }
+        for (Long id : componentes) {
+            UnidadEvaluacionCurricularV2DTO componente = porId.get(id);
+            if (componente == null || !esComponenteFinalRn94(componente)) { revision = true; agregarIdUnico(carga.getComponentesFinalesRevisionRn94(), id); continue; }
+            if (!carga.getSeriadasS1S6PendientesRn94().isEmpty()) {
+                agregarIdUnico(carga.getComponentesFinalesPendientesRn94(), id);
+                DecisionUnidadCurricularV2DTO decision = buscarDecision(resultado, id);
+                if (decision != null) {
+                    agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.REQUISITO_CURRICULAR_PENDIENTE);
+                    agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.BLOQUEADA);
+                    agregarExplicacion(decision, "RN-9.4: existen UD seriadas S1-S6 pendientes.");
+                }
+            } else agregarIdUnico(carga.getComponentesFinalesCumplidosRn94(), id);
+        }
+        if (revision) carga.setEstadoComponentesFinalesRn94(EstadoRequisitoComponenteFinalV2.REQUIERE_REVISION);
+        else if (!carga.getComponentesFinalesPendientesRn94().isEmpty()) carga.setEstadoComponentesFinalesRn94(EstadoRequisitoComponenteFinalV2.REQUISITOS_SERIADAS_S1_S6_PENDIENTES);
+        else carga.setEstadoComponentesFinalesRn94(EstadoRequisitoComponenteFinalV2.REQUISITOS_SERIADAS_S1_S6_CUMPLIDOS);
+    }
+
+    private boolean esComponenteFinalRn94(UnidadEvaluacionCurricularV2DTO unidad) {
+        return unidad.getTipoComponenteCurricular() == TipoComponenteCurricularV2.PROYECTO_TERMINAL
+                || unidad.getTipoComponenteCurricular() == TipoComponenteCurricularV2.MODULO_INTEGRADOR;
+    }
+
+    private boolean esSeriadaFase8(UnidadEvaluacionCurricularV2DTO unidad) {
+        return Boolean.TRUE.equals(unidad.getSeriacionConocida()) || Boolean.TRUE.equals(unidad.getSeriacionDirectaConocida())
+                || Boolean.TRUE.equals(unidad.getSeriacionIndirectaConocida()) || (unidad.getRelacionesSeriacion() != null && !unidad.getRelacionesSeriacion().isEmpty());
+    }
+
+    private void registrarDecisionRn94(EvaluacionCargaAcademicaV2DTO carga, String decision) { agregarUnico(carga.getDecisionesRn94(), decision); }
 
     private void determinarSituacionAcademica(ResultadoEvaluacionCurricularV2DTO resultado,
             ContextoEvaluacionCurricularV2DTO contexto, int reprobadas, boolean datosInsuficientes) {

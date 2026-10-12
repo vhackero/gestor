@@ -97,6 +97,10 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Boolean rn64AntesCierre;
     /** Configuracion de PE opcional para detectar discrepancia frente al umbral normativo de ocho. */
     private Integer optativasRequeridasPrograma;
+    /** Universos explícitos del PE para RN-9.4; nunca se infieren de la trayectoria. */
+    private List<Long> idsObligatoriasRequeridasEgreso = new ArrayList<Long>();
+    private List<Long> idsSeriadasPrimerosSeisSemestres = new ArrayList<Long>();
+    private List<Long> componentesFinalesSolicitados = new ArrayList<Long>();
     private Date fechaEvaluacion;
     private List<UnidadEvaluacionCurricularV2DTO> unidades = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
 
@@ -244,6 +248,12 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setRn64AntesCierre(Boolean valor) { rn64AntesCierre = valor; }
     public Integer getOptativasRequeridasPrograma() { return optativasRequeridasPrograma; }
     public void setOptativasRequeridasPrograma(Integer valor) { optativasRequeridasPrograma = valor; }
+    public List<Long> getIdsObligatoriasRequeridasEgreso() { return idsObligatoriasRequeridasEgreso; }
+    public void setIdsObligatoriasRequeridasEgreso(List<Long> valores) { idsObligatoriasRequeridasEgreso = valores == null ? new ArrayList<Long>() : valores; }
+    public List<Long> getIdsSeriadasPrimerosSeisSemestres() { return idsSeriadasPrimerosSeisSemestres; }
+    public void setIdsSeriadasPrimerosSeisSemestres(List<Long> valores) { idsSeriadasPrimerosSeisSemestres = valores == null ? new ArrayList<Long>() : valores; }
+    public List<Long> getComponentesFinalesSolicitados() { return componentesFinalesSolicitados; }
+    public void setComponentesFinalesSolicitados(List<Long> valores) { componentesFinalesSolicitados = valores == null ? new ArrayList<Long>() : valores; }
     public Date getFechaEvaluacion() { return fechaEvaluacion; }
     public void setFechaEvaluacion(Date fechaEvaluacion) { this.fechaEvaluacion = fechaEvaluacion; }
     public List<UnidadEvaluacionCurricularV2DTO> getUnidades() { return unidades; }

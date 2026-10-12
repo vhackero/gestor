@@ -256,6 +256,23 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<Long> componentesRestringidosRequisitoPeRn93 = new ArrayList<Long>();
     private List<Long> componentesRevisionRequisitoPeRn93 = new ArrayList<Long>();
     private List<String> decisionesRn93 = new ArrayList<String>();
+    /** RN-9.4 consolida requisitos académicos de egreso sin ejecutar egreso ni inscripción. */
+    private Boolean aplicaRn94 = Boolean.FALSE;
+    private Boolean requiereRevisionRn94 = Boolean.FALSE;
+    private EstadoRequisitosEgresoAcademicoV2 estadoRequisitosEgresoAcademicoRn94 = EstadoRequisitosEgresoAcademicoV2.NO_DETERMINADO;
+    private Integer obligatoriasRequeridasRn94 = Integer.valueOf(0);
+    private Integer obligatoriasAcreditadasRn94 = Integer.valueOf(0);
+    private Integer electivasMinimasRn94 = Integer.valueOf(1);
+    private Integer electivasAcreditadasRn94 = Integer.valueOf(0);
+    private EstadoRequisitoComponenteFinalV2 estadoComponentesFinalesRn94 = EstadoRequisitoComponenteFinalV2.NO_APLICA;
+    private List<Long> obligatoriasPendientesRn94 = new ArrayList<Long>();
+    private List<Long> idsElectivasAcreditadasRn94 = new ArrayList<Long>();
+    private List<Long> seriadasS1S6RequeridasRn94 = new ArrayList<Long>();
+    private List<Long> seriadasS1S6PendientesRn94 = new ArrayList<Long>();
+    private List<Long> componentesFinalesCumplidosRn94 = new ArrayList<Long>();
+    private List<Long> componentesFinalesPendientesRn94 = new ArrayList<Long>();
+    private List<Long> componentesFinalesRevisionRn94 = new ArrayList<Long>();
+    private List<String> decisionesRn94 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -499,6 +516,24 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<Long> getComponentesRestringidosRequisitoPeRn93() { return componentesRestringidosRequisitoPeRn93; }
     public List<Long> getComponentesRevisionRequisitoPeRn93() { return componentesRevisionRequisitoPeRn93; }
     public List<String> getDecisionesRn93() { return decisionesRn93; }
+    public Boolean getAplicaRn94() { return aplicaRn94; } public void setAplicaRn94(Boolean valor) { aplicaRn94 = valor; }
+    public Boolean getRequiereRevisionRn94() { return requiereRevisionRn94; } public void setRequiereRevisionRn94(Boolean valor) { requiereRevisionRn94 = valor; }
+    public EstadoRequisitosEgresoAcademicoV2 getEstadoRequisitosEgresoAcademicoRn94() { return estadoRequisitosEgresoAcademicoRn94; }
+    public void setEstadoRequisitosEgresoAcademicoRn94(EstadoRequisitosEgresoAcademicoV2 valor) { estadoRequisitosEgresoAcademicoRn94 = valor == null ? EstadoRequisitosEgresoAcademicoV2.NO_DETERMINADO : valor; }
+    public Integer getObligatoriasRequeridasRn94() { return obligatoriasRequeridasRn94; } public void setObligatoriasRequeridasRn94(Integer valor) { obligatoriasRequeridasRn94 = valor; }
+    public Integer getObligatoriasAcreditadasRn94() { return obligatoriasAcreditadasRn94; } public void setObligatoriasAcreditadasRn94(Integer valor) { obligatoriasAcreditadasRn94 = valor; }
+    public Integer getElectivasMinimasRn94() { return electivasMinimasRn94; }
+    public Integer getElectivasAcreditadasRn94() { return electivasAcreditadasRn94; } public void setElectivasAcreditadasRn94(Integer valor) { electivasAcreditadasRn94 = valor; }
+    public EstadoRequisitoComponenteFinalV2 getEstadoComponentesFinalesRn94() { return estadoComponentesFinalesRn94; }
+    public void setEstadoComponentesFinalesRn94(EstadoRequisitoComponenteFinalV2 valor) { estadoComponentesFinalesRn94 = valor == null ? EstadoRequisitoComponenteFinalV2.NO_APLICA : valor; }
+    public List<Long> getObligatoriasPendientesRn94() { return obligatoriasPendientesRn94; }
+    public List<Long> getIdsElectivasAcreditadasRn94() { return idsElectivasAcreditadasRn94; }
+    public List<Long> getSeriadasS1S6RequeridasRn94() { return seriadasS1S6RequeridasRn94; }
+    public List<Long> getSeriadasS1S6PendientesRn94() { return seriadasS1S6PendientesRn94; }
+    public List<Long> getComponentesFinalesCumplidosRn94() { return componentesFinalesCumplidosRn94; }
+    public List<Long> getComponentesFinalesPendientesRn94() { return componentesFinalesPendientesRn94; }
+    public List<Long> getComponentesFinalesRevisionRn94() { return componentesFinalesRevisionRn94; }
+    public List<String> getDecisionesRn94() { return decisionesRn94; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }
