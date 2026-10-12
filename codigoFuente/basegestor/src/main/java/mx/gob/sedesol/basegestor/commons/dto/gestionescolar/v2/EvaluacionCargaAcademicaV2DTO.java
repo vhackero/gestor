@@ -229,6 +229,11 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<Long> antecedentesNoAcreditadosRn83 = new ArrayList<Long>();
     private List<Long> ciclosSeriacionRn83 = new ArrayList<Long>();
     private List<String> decisionesPorUdSeriacionRn83 = new ArrayList<String>();
+    /** F8D consolida el contrato comun sin reemplazar las decisiones RN-8.x. */
+    private EstadoCierreFase8V2 estadoCierreFase8 = EstadoCierreFase8V2.NO_DETERMINADO;
+    private Boolean requiereRevisionFase8 = Boolean.FALSE;
+    private List<String> relacionesTipoInconsistenteFase8 = new ArrayList<String>();
+    private List<String> decisionesCierreFase8 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -444,6 +449,12 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<Long> getAntecedentesNoAcreditadosRn83() { return antecedentesNoAcreditadosRn83; }
     public List<Long> getCiclosSeriacionRn83() { return ciclosSeriacionRn83; }
     public List<String> getDecisionesPorUdSeriacionRn83() { return decisionesPorUdSeriacionRn83; }
+    public EstadoCierreFase8V2 getEstadoCierreFase8() { return estadoCierreFase8; }
+    public void setEstadoCierreFase8(EstadoCierreFase8V2 valor) { estadoCierreFase8 = valor; }
+    public Boolean getRequiereRevisionFase8() { return requiereRevisionFase8; }
+    public void setRequiereRevisionFase8(Boolean valor) { requiereRevisionFase8 = valor; }
+    public List<String> getRelacionesTipoInconsistenteFase8() { return relacionesTipoInconsistenteFase8; }
+    public List<String> getDecisionesCierreFase8() { return decisionesCierreFase8; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }

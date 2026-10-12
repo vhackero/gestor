@@ -31,6 +31,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaMaxima
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaAcademicaV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaAcademicaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCierreFase7V2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCierreFase8V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCumplimientoSeriacionV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoConsolidacionFase6V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoElegibilidadElectivaV2;
@@ -220,6 +221,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarSeriacionInterbloqueRn81(resultado, contexto, unidadesNormalizadas);
         evaluarSeriacionIntersemestralRn82(resultado, contexto, unidadesNormalizadas);
         evaluarSeriacionInteranualRn83(resultado, contexto, unidadesNormalizadas);
+        consolidarCierreSeriacionFase8(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -677,6 +679,64 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         private boolean noCumplida;
         private boolean requiereRevision;
         private boolean cicloDetectado;
+    }
+
+    /**
+     * F8D verifica que una dependencia formal del PE tenga una sola
+     * clasificacion de seriacion. No recalcula RN-8.1, RN-8.2 ni RN-8.3.
+     */
+    private void consolidarCierreSeriacionFase8(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
+        if (carga == null) return;
+        agregarUnico(carga.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_8);
+        Map<String, TipoSeriacionV2> tiposPorRelacion = new LinkedHashMap<String, TipoSeriacionV2>();
+        for (UnidadEvaluacionCurricularV2DTO consecuente : unidades) {
+            if (consecuente == null || consecuente.getRelacionesSeriacion() == null) continue;
+            for (RelacionSeriacionCurricularV2DTO relacion : consecuente.getRelacionesSeriacion()) {
+                if (relacion == null) continue;
+                Long idConsecuente = relacion.getIdConsecuente() == null ? consecuente.getIdPrograma() : relacion.getIdConsecuente();
+                String llave = String.valueOf(relacion.getIdAntecedente()) + "->" + String.valueOf(idConsecuente);
+                TipoSeriacionV2 tipo = relacion.getTipoSeriacion();
+                if (tipo == null || tipo == TipoSeriacionV2.NO_DETERMINADA) {
+                    registrarDecisionCierreFase8(carga, "TIPO_SERIACION_NO_DETERMINADO:" + llave);
+                    carga.setRequiereRevisionFase8(Boolean.TRUE);
+                    continue;
+                }
+                TipoSeriacionV2 existente = tiposPorRelacion.get(llave);
+                if (existente == null) {
+                    tiposPorRelacion.put(llave, tipo);
+                } else if (existente != tipo) {
+                    String inconsistencia = "TIPO_SERIACION_INCONSISTENTE:" + llave + ":" + existente + ":" + tipo;
+                    agregarUnico(carga.getRelacionesTipoInconsistenteFase8(), inconsistencia);
+                    registrarDecisionCierreFase8(carga, inconsistencia);
+                    carga.setRequiereRevisionFase8(Boolean.TRUE);
+                }
+            }
+        }
+        if (Boolean.TRUE.equals(carga.getRequiereRevisionRn81())
+                || Boolean.TRUE.equals(carga.getRequiereRevisionRn82())
+                || Boolean.TRUE.equals(carga.getRequiereRevisionRn83())) {
+            carga.setRequiereRevisionFase8(Boolean.TRUE);
+        }
+        if (Boolean.TRUE.equals(carga.getRequiereRevisionFase8())) {
+            carga.setEstadoCierreFase8(EstadoCierreFase8V2.REQUIERE_REVISION);
+        } else {
+            carga.setEstadoCierreFase8(EstadoCierreFase8V2.CONSOLIDADA_EN_SOMBRA);
+        }
+        String evidencia = "modeloComun={relaciones=" + carga.getRelacionesSeriacionV2().size()
+                + ",rn81=" + carga.getAplicaRn81() + ",rn82=" + carga.getAplicaRn82()
+                + ",rn83=" + carga.getAplicaRn83() + "}; inconsistencias="
+                + carga.getRelacionesTipoInconsistenteFase8() + "; estadoCierre="
+                + carga.getEstadoCierreFase8() + "; rn61Concurrente=" + carga.getAplicaRn61();
+        agregarUnico(carga.getEvidencias(), "F8D:" + evidencia);
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_8,
+                Boolean.TRUE.equals(carga.getRequiereRevisionFase8()) ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null,
+                80, "F8D_" + carga.getEstadoCierreFase8(), evidencia);
+    }
+
+    private void registrarDecisionCierreFase8(EvaluacionCargaAcademicaV2DTO carga, String decision) {
+        agregarUnico(carga.getDecisionesCierreFase8(), decision);
     }
 
     private void determinarSituacionAcademica(ResultadoEvaluacionCurricularV2DTO resultado,
