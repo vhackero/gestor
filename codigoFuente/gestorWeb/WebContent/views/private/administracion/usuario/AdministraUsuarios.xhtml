@@ -56,11 +56,20 @@
 										<p:commandButton id="btnRegistro" rendered="true"
 											action="#{adminPersonaBean.obtenerUsuarios()}"
 											value="Importar datos"
+											process="filtroImportarUsuarios" update="filtroImportarUsuarios"
 											styleClass="pull-right btn btn-primary"
-											disabled="#{adminPersonaBean.importarButtonDisabled}" />
+											disabled="#{adminPersonaBean.importarButtonDisabled or adminPersonaBean.importacionFuenteEnCurso}" />
 									</sec:authorize>
 								</div>
 							</div>
+							<h:panelGroup id="progresoFuenteExterna" layout="block">
+								<h:panelGroup rendered="#{not empty adminPersonaBean.estadoImportacionFuente}" layout="block">
+									<p:progressBar value="#{adminPersonaBean.estadoImportacionFuente.porcentaje}" labelTemplate="{value}%" />
+									<h:outputText value="#{adminPersonaBean.estadoImportacionFuente.mensaje}" />
+									<p:poll interval="3" global="false" process="@this" update="filtroImportarUsuarios"
+										stop="#{adminPersonaBean.estadoImportacionFuente.terminado}" />
+								</h:panelGroup>
+							</h:panelGroup>
 						</p:panel>
 					</sec:authorize>
 				</div>
