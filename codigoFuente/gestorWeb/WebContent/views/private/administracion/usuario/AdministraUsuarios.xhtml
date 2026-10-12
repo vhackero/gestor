@@ -12,9 +12,12 @@
 		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.administrarUsuarios')}</li>
 	</ui:define>
 	<ui:define name="content">
-		<h:form id="frmPersonas">
+		<h:form id="frmPersonas" enctype="multipart/form-data">
 			<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.administrarUsuarios')}</h1>
 			<hr />
+			<sec:authorize access="hasPermission(null,'IMP_FUEN_EXT')">
+				<ui:include src="../componentes/cargaPersonaExterna.xhtml" />
+			</sec:authorize>
 
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
