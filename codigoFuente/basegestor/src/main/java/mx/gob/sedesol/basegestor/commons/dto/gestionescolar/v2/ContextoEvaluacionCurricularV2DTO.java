@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,6 +19,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Long idPeriodo;
     private String periodoNormativo;
     private Long idProcesoInscripcion;
+    /** Total crediticio del PE aportado por estructura curricular verificable. */
+    private BigDecimal creditosTotalesPrograma;
     /** Momento administrativo informado por fuente canónica, independiente de la trayectoria. */
     private TipoProcesoAdministrativoV2 tipoProcesoAdministrativo = TipoProcesoAdministrativoV2.NO_DETERMINADO;
     private String evidenciaProcesoAdministrativo;
@@ -107,6 +110,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setPeriodoNormativo(String valor) { periodoNormativo = valor; }
     public Long getIdProcesoInscripcion() { return idProcesoInscripcion; }
     public void setIdProcesoInscripcion(Long idProcesoInscripcion) { this.idProcesoInscripcion = idProcesoInscripcion; }
+    public BigDecimal getCreditosTotalesPrograma() { return creditosTotalesPrograma; }
+    public void setCreditosTotalesPrograma(BigDecimal valor) { creditosTotalesPrograma = valor; }
     public TipoProcesoAdministrativoV2 getTipoProcesoAdministrativo() { return tipoProcesoAdministrativo; }
     public void setTipoProcesoAdministrativo(TipoProcesoAdministrativoV2 valor) { tipoProcesoAdministrativo = valor == null ? TipoProcesoAdministrativoV2.NO_DETERMINADO : valor; }
     public String getEvidenciaProcesoAdministrativo() { return evidenciaProcesoAdministrativo; }

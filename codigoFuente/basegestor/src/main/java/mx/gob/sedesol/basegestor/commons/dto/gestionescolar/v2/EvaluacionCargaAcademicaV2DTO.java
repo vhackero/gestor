@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -242,6 +243,19 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private Boolean requiereValoracionIndividualRn91 = Boolean.FALSE;
     private Boolean requiereResolucionDocumentadaRn91 = Boolean.FALSE;
     private List<String> decisionesRn91 = new ArrayList<String>();
+    /** RN-9.3 reutiliza los motores previos para la evaluación S7/S8. */
+    private Boolean aplicaRn93 = Boolean.FALSE;
+    private Boolean requiereRevisionRn93 = Boolean.FALSE;
+    private BigDecimal creditosTotalesPeRn93;
+    private BigDecimal creditosAcreditadosValidosRn93;
+    private BigDecimal porcentajeCreditosAcreditadosRn93;
+    private BigDecimal umbralCreditosRn93 = new BigDecimal("50");
+    private Boolean umbralCreditosCumplidoRn93;
+    private EstadoAvanceUltimosSemestresV2 estadoAvanceUltimosSemestresRn93 = EstadoAvanceUltimosSemestresV2.NO_APLICA;
+    private List<Long> udsRestringidasCreditosRn93 = new ArrayList<Long>();
+    private List<Long> componentesRestringidosRequisitoPeRn93 = new ArrayList<Long>();
+    private List<Long> componentesRevisionRequisitoPeRn93 = new ArrayList<Long>();
+    private List<String> decisionesRn93 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -472,6 +486,19 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public Boolean getRequiereValoracionIndividualRn91() { return requiereValoracionIndividualRn91; } public void setRequiereValoracionIndividualRn91(Boolean valor) { requiereValoracionIndividualRn91 = valor; }
     public Boolean getRequiereResolucionDocumentadaRn91() { return requiereResolucionDocumentadaRn91; } public void setRequiereResolucionDocumentadaRn91(Boolean valor) { requiereResolucionDocumentadaRn91 = valor; }
     public List<String> getDecisionesRn91() { return decisionesRn91; }
+    public Boolean getAplicaRn93() { return aplicaRn93; } public void setAplicaRn93(Boolean valor) { aplicaRn93 = valor; }
+    public Boolean getRequiereRevisionRn93() { return requiereRevisionRn93; } public void setRequiereRevisionRn93(Boolean valor) { requiereRevisionRn93 = valor; }
+    public BigDecimal getCreditosTotalesPeRn93() { return creditosTotalesPeRn93; } public void setCreditosTotalesPeRn93(BigDecimal valor) { creditosTotalesPeRn93 = valor; }
+    public BigDecimal getCreditosAcreditadosValidosRn93() { return creditosAcreditadosValidosRn93; } public void setCreditosAcreditadosValidosRn93(BigDecimal valor) { creditosAcreditadosValidosRn93 = valor; }
+    public BigDecimal getPorcentajeCreditosAcreditadosRn93() { return porcentajeCreditosAcreditadosRn93; } public void setPorcentajeCreditosAcreditadosRn93(BigDecimal valor) { porcentajeCreditosAcreditadosRn93 = valor; }
+    public BigDecimal getUmbralCreditosRn93() { return umbralCreditosRn93; }
+    public Boolean getUmbralCreditosCumplidoRn93() { return umbralCreditosCumplidoRn93; } public void setUmbralCreditosCumplidoRn93(Boolean valor) { umbralCreditosCumplidoRn93 = valor; }
+    public EstadoAvanceUltimosSemestresV2 getEstadoAvanceUltimosSemestresRn93() { return estadoAvanceUltimosSemestresRn93; }
+    public void setEstadoAvanceUltimosSemestresRn93(EstadoAvanceUltimosSemestresV2 valor) { estadoAvanceUltimosSemestresRn93 = valor == null ? EstadoAvanceUltimosSemestresV2.NO_DETERMINADO : valor; }
+    public List<Long> getUdsRestringidasCreditosRn93() { return udsRestringidasCreditosRn93; }
+    public List<Long> getComponentesRestringidosRequisitoPeRn93() { return componentesRestringidosRequisitoPeRn93; }
+    public List<Long> getComponentesRevisionRequisitoPeRn93() { return componentesRevisionRequisitoPeRn93; }
+    public List<String> getDecisionesRn93() { return decisionesRn93; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }
