@@ -48,6 +48,7 @@ import mx.gob.sedesol.basegestor.service.gestionescolar.AsistenteInscripcionServ
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.AsistenteCurricularV2Facade;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.SimuladorCurricularV2Service;
 import mx.gob.sedesol.basegestor.service.impl.planesyprogramas.FECServiceFacade;
 import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
@@ -82,6 +83,9 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     @ManagedProperty(value = "#{asistenteCurricularV2Facade}")
     private AsistenteCurricularV2Facade asistenteCurricularV2Facade;
+
+    @ManagedProperty(value = "#{simuladorCurricularV2Service}")
+    private SimuladorCurricularV2Service simuladorCurricularV2Service;
 
     private AsistenteInscripcionContextoDTO contexto;
     private FichaIntegralCasoDTO fichaIntegralV2;
@@ -383,6 +387,10 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public void setAsistenteInscripcionService(AsistenteInscripcionService asistenteInscripcionService) {
         this.asistenteInscripcionService = asistenteInscripcionService;
+    }
+
+    public void setSimuladorCurricularV2Service(SimuladorCurricularV2Service simuladorCurricularV2Service) {
+        this.simuladorCurricularV2Service = simuladorCurricularV2Service;
     }
 
     public void setFecServiceFacade(FECServiceFacade fecServiceFacade) {
@@ -834,7 +842,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     public void simularSeleccion() {
         try {
             Long idPersona = idPersonaObjetivo != null ? idPersonaObjetivo : idPersonaEnSesion();
-            resultadoSimulacion = asistenteInscripcionService.simularInscripcion(idPersona, obtenerUnidadesSeleccionadas());
+            resultadoSimulacion = simuladorCurricularV2Service.simularSombra(idPersona, obtenerUnidadesSeleccionadas());
         } catch (InscripcionException e) {
             logger.error("Error al simular selección asistida.", e);
             mensajeError = e.getMessage();
