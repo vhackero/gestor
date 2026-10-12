@@ -1,0 +1,24 @@
+# Checklist Gate E2E V2
+
+- [ ] Ambiente DEV, QA o local con datos reales anonimizados disponible.
+- [ ] Datasource real configurado y conectividad read-only confirmada.
+- [ ] Credenciales o secret externos disponibles fuera del repositorio.
+- [ ] Permisos mínimos confirmados.
+- [ ] Escritura limitada a auditoría V2, si RN-9.5 se habilita.
+- [ ] sigie.v2.diagnostico.e2e.habilitado=true.
+- [ ] sigie.v2.diagnostico.e2e.ambiente=DEV o QA.
+- [ ] EVALUACION_V2_HABILITADA=true.
+- [ ] REGLAS_V2_MODO_SOMBRA=true.
+- [ ] REGLAS_V2_VERSION=PE2027-V1.
+- [ ] Aplicación y contexto Spring iniciados.
+- [ ] Fuente SIGIE accesible mediante AsistenteInscripcionService.
+- [ ] Perfil técnico real localizado.
+- [ ] Contexto real generado.
+- [ ] Adapter V2 ejecutado.
+- [ ] Motor V2 ejecutado.
+- [ ] Resultado V2 obtenido.
+- [ ] RN-9.5 obtenida.
+- [ ] No mutación comprobada.
+- [ ] PII anonimizada.
+- [ ] Diferencias clasificadas.
+- [ ] Gate decidido: APROBADO, NO_APROBADO o BLOQUEADO_POR_AMBIENTE.
