@@ -45,17 +45,29 @@ navegación permanecen en el consumidor. No son reglas académicas.
 
 ## LOGICA_PARALELA_AUDITADA
 
-TablaCurricularAsistidaBean.simularSeleccion delega una sola evaluación
-académica final a SimuladorCurricularV2Service. No recalcula RN-6.1, RN-6.4,
-seriación, situación, carga, optativas ni electivas. La validación final de
-inscripción legacy permanece en una ruta productiva separada y no participa en
-la decisión de simulación; se conserva fuera de alcance.
+TablaCurricularAsistidaBean.simularSeleccion delega la evaluación académica
+final a SimuladorCurricularV2Service. RN-6.1, RN-6.4, seriación, situación y
+carga proceden del resultado V2. La validación final de inscripción legacy
+permanece en una ruta productiva separada y no participa en la simulación.
 
 ## CONTRATO_V2
 
 Se reutilizan ContextoEvaluacionCurricularV2DTO y
 ResultadoEvaluacionCurricularV2DTO. No existe motor académico paralelo ni DTO
 académico alterno.
+
+## VALIDACIONES_COMPLEMENTARIAS_DE_ESCENARIO
+
+El contrato V2 no representa todavía restricciones de composición de selección
+heredadas. El Simulador las conserva explícitamente como complementarias, sin
+sustituir decisiones V2 ni mutar datos: una optativa por bloque/semestre,
+prohibición de repetir la misma clave optativa, máximo configurado de
+electivas y advertencia por UD prioritaria ofertada omitida.
+
+La carga mínima y máxima se aplican desde el resultado V2: RN-4.1 impide una
+selección inferior al mínimo y RN-4.2 impide exceder el máximo. Los mensajes
+identifican el código de regla aplicable; no atribuyen genéricamente una
+restricción al Motor V2.
 
 ## MAPEO_RESULTADO
 
@@ -77,14 +89,15 @@ No se alteró V2 para igualar legacy.
 
 ## PRUEBAS
 
-PRUEBAS_ESPECIFICAS_CONSUMIDOR: 14 pruebas, 0 fallas, 0 errores, 0 omitidas.
+PRUEBAS_ESPECIFICAS_CONSUMIDOR: 17 pruebas, 0 fallas, 0 errores, 0 omitidas.
 Cubren consumo del resultado V2, no mutación, determinismo, carga máxima
-regular/irregular, exceso de carga, carga no determinable y propagación de
-motivos V2 sin reinterpretarlos.
+regular/irregular, carga mínima, exceso de carga, carga no determinable,
+propagación de motivos V2, optativas repetidas por clave/bloque, máximo de
+electivas y prioridad omitida.
 
 ## REGRESION
 
-REGRESION_COMPLETA: 760 pruebas, 0 fallas, 0 errores, 0 omitidas.
+REGRESION_COMPLETA: 764 pruebas, 0 fallas, 0 errores, 0 omitidas.
 
 ## COMPILACION
 
@@ -106,7 +119,7 @@ V2, compara la cantidad de UD seleccionadas y agrega una restricción RN_4_2
 cuando se excede o no puede determinarse. Las decisiones por UD continúan
 proveniendo de V2 y sus códigos de motivo se preservan para presentación.
 
-REGLAS_VALIDADAS: RN-4.2 para regular (8) e irregular (6), exceso de carga,
+REGLAS_VALIDADAS: RN-4.1 para carga mínima, RN-4.2 para regular (8) e irregular (6), exceso de carga,
 RN-6.4/reprobación acumulada, seriación directa e indirecta, NO_CURSADA,
 BAJA_PARCIAL, SIN_OFERTA y requisito curricular pendiente. RN-6.1, tipos de
 UD, S7/S8 y demás reglas se consumen por sus decisiones V2 consolidadas, sin
@@ -117,7 +130,7 @@ obtienen del ResultadoEvaluacionCurricularV2DTO. La matriz focal confirma que
 una decisión V2 restringida permanece restringida y que el código del motivo
 se conserva en ResultadoSimulacionDTO.
 
-PRUEBAS_NUEVAS: 11 ejecuciones adicionales, para 14 focalizadas en total.
+PRUEBAS_NUEVAS: 14 ejecuciones adicionales, para 17 focalizadas en total.
 
 ## RUNTIME
 
@@ -130,6 +143,11 @@ contexto IRREGULAR, intentar seleccionar siete y ocho UD. En ambos casos el
 panel debe indicar escenario restringido y server.log debe registrar
 cargaMaxima=6, cargaSeleccionada=7/8 y seleccionValida=false. Confirmar además
 que no se modifica inscripción, oferta, grupo ni selección persistida.
+
+También verificar una selección vacía cuando RN-4.1 exige mínimo, dos
+optativas del mismo bloque y la misma optativa en bloques distintos. Deben
+mostrarse respectivamente RN_4_1, OPTATIVA_DUPLICADA_EN_BLOQUE y
+OPTATIVA_MISMA_CLAVE.
 
 VALIDACION_MANUAL_UI: PENDIENTE.
 
