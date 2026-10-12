@@ -124,8 +124,9 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
             relacion.setBloqueAntecedente(antecedente.getBloque() == null ? null : antecedente.getBloque().toString());
             relacion.setBloqueConsecuente(consecuente.getBloque());
             relacion.setTipoRelacion(TipoRelacionSeriacionV2.DIRECTA);
-            relacion.setTipoSeriacion(esInterbloque(antecedente, consecuente)
-                    ? TipoSeriacionV2.INTERBLOQUE : TipoSeriacionV2.NO_DETERMINADA);
+            relacion.setTipoSeriacion(esInterbloque(antecedente, consecuente) ? TipoSeriacionV2.INTERBLOQUE
+                    : esIntersemestral(antecedente, consecuente) ? TipoSeriacionV2.INTERSEMESTRAL
+                    : TipoSeriacionV2.NO_DETERMINADA);
             relacion.setEvidencia("PE_REQUIERE:" + antecedente.getUdId() + "->" + consecuente.getIdPrograma());
             consecuente.getRelacionesSeriacion().add(relacion);
         }
@@ -134,6 +135,11 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
     private boolean esInterbloque(RelacionSeriacionDTO antecedente, UnidadEvaluacionCurricularV2DTO consecuente) {
         return antecedente.getSemestre() != null && antecedente.getSemestre().equals(consecuente.getSemestre())
                 && Integer.valueOf(1).equals(antecedente.getBloque()) && "2".equals(consecuente.getBloque());
+    }
+
+    private boolean esIntersemestral(RelacionSeriacionDTO antecedente, UnidadEvaluacionCurricularV2DTO consecuente) {
+        return antecedente.getSemestre() != null && consecuente.getSemestre() != null
+                && consecuente.getSemestre().intValue() == antecedente.getSemestre().intValue() + 1;
     }
 
     private EstadoUnidadCurricularV2 obtenerEstado(String estatusHistorico, String estatusPeriodo) {

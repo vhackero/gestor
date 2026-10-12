@@ -213,6 +213,13 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private List<Long> udsInterbloqueNoCumplidasRn81 = new ArrayList<Long>();
     private List<Long> udsInterbloqueRevisionRn81 = new ArrayList<Long>();
     private List<String> decisionesPorUdSeriacionRn81 = new ArrayList<String>();
+    /** RN-8.2 consume el mismo modelo de relación y no modifica oferta o selección. */
+    private Boolean aplicaRn82 = Boolean.FALSE;
+    private Boolean requiereRevisionRn82 = Boolean.FALSE;
+    private List<Long> udsIntersemestralesCumplidasRn82 = new ArrayList<Long>();
+    private List<Long> udsIntersemestralesNoCumplidasRn82 = new ArrayList<Long>();
+    private List<Long> udsIntersemestralesRevisionRn82 = new ArrayList<Long>();
+    private List<String> decisionesPorUdSeriacionRn82 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -414,6 +421,12 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public List<Long> getUdsInterbloqueNoCumplidasRn81() { return udsInterbloqueNoCumplidasRn81; }
     public List<Long> getUdsInterbloqueRevisionRn81() { return udsInterbloqueRevisionRn81; }
     public List<String> getDecisionesPorUdSeriacionRn81() { return decisionesPorUdSeriacionRn81; }
+    public Boolean getAplicaRn82() { return aplicaRn82; } public void setAplicaRn82(Boolean valor) { aplicaRn82 = valor; }
+    public Boolean getRequiereRevisionRn82() { return requiereRevisionRn82; } public void setRequiereRevisionRn82(Boolean valor) { requiereRevisionRn82 = valor; }
+    public List<Long> getUdsIntersemestralesCumplidasRn82() { return udsIntersemestralesCumplidasRn82; }
+    public List<Long> getUdsIntersemestralesNoCumplidasRn82() { return udsIntersemestralesNoCumplidasRn82; }
+    public List<Long> getUdsIntersemestralesRevisionRn82() { return udsIntersemestralesRevisionRn82; }
+    public List<String> getDecisionesPorUdSeriacionRn82() { return decisionesPorUdSeriacionRn82; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }
