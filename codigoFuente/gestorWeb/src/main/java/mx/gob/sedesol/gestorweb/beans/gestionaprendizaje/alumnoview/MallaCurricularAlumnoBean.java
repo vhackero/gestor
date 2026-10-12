@@ -24,7 +24,9 @@ import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
@@ -54,6 +56,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(MallaCurricularAlumnoBean.class);
+	private static final MallaCurricularV2ResultadoAdapter ADAPTADOR_RESULTADO_V2 = new MallaCurricularV2ResultadoAdapter();
 
 	private static final int COL_WIDTH = 260;
 	private static final int SEMESTRE_Y = 20;
@@ -157,8 +160,10 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private String matriculaPersonaObjetivo;
 	private AsistenteInscripcionContextoDTO contextoAsistente;
 	private FichaIntegralCasoDTO fichaIntegralV2;
+	private ResultadoEvaluacionCurricularV2DTO resultadoEvaluacionV2;
 	private boolean intentoCargaFichaIntegralV2;
 	private Map<Long, UnidadDecisionInscripcionDTO> unidadesAsistentePorPrograma;
+	private Map<Long, DecisionUnidadCurricularV2DTO> decisionesV2PorPrograma;
 
 	@PostConstruct
 	public void init() {
@@ -183,6 +188,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		estatusEstudiante = "Regular";
 		semestresTabla = new ArrayList<>();
 		unidadesAsistentePorPrograma = new HashMap<>();
+		decisionesV2PorPrograma = new HashMap<>();
 
 		Long idPersona = trayectoriaAcademicaContextoBean.resolverIdPersonaObjetivo(idPersonaEnSesion());
 		idPersonaObjetivo = idPersona;
@@ -226,10 +232,36 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 					unidadesAsistentePorPrograma.put(unidad.getUdId(), unidad);
 				}
 			}
+			cargarResultadoEvaluacionV2();
 		} catch (InscripcionException e) {
 			logger.warn("No fue posible cargar el contexto asistido para la malla curricular.", e);
 		} catch (Exception e) {
 			logger.warn("Error inesperado al cargar el contexto asistido para la malla curricular.", e);
+		}
+	}
+
+	private void cargarResultadoEvaluacionV2() {
+		resultadoEvaluacionV2 = null;
+		decisionesV2PorPrograma.clear();
+		if (mallaCurricularV2Facade == null || contextoAsistente == null) {
+			return;
+		}
+		try {
+			logger.info("[MALLA_V2] Inicio evaluacion curricular con Motor V2");
+			logger.info("[MALLA_V2] Invocando Motor Curricular V2 - version=PE2027-V1 - modo=SOMBRA");
+			resultadoEvaluacionV2 = mallaCurricularV2Facade.evaluarSombra(contextoAsistente);
+			if (resultadoEvaluacionV2 == null) {
+				logger.warn("[MALLA_V2] No fue posible obtener ResultadoEvaluacionCurricularV2DTO");
+				return;
+			}
+			for (DecisionUnidadCurricularV2DTO decision : resultadoEvaluacionV2.getDecisiones()) {
+				if (decision != null && decision.getIdPrograma() != null) {
+					decisionesV2PorPrograma.put(decision.getIdPrograma(), decision);
+				}
+			}
+			logger.info("[MALLA_V2] ResultadoEvaluacionCurricularV2DTO obtenido correctamente");
+		} catch (Exception e) {
+			logger.warn("[MALLA_V2] Error al evaluar la Malla con Motor V2", e);
 		}
 	}
 
@@ -501,10 +533,33 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		aplicarEstatusEnCurso(programasPorId);
 		aplicarBloqueos(programasPorId, programaAntecedentePorId, estatusPorPrograma);
 		reconstruirDetallesContextuales(programasPorId, fichasProgramaPorId);
+		aplicarResultadoV2(programasPorId);
 		actualizarFilasTabla(filasTablaPorPrograma, programasPorId);
 		tiposPrograma = new ArrayList<>(tiposMap.values());
 		diagramWidth = maxX + DIAGRAMA_PADDING;
 		diagramHeight = maxY + DIAGRAMA_PADDING;
+	}
+
+	private void aplicarResultadoV2(Map<Integer, MallaDiagramaNodoDTO> programasPorId) {
+		if (resultadoEvaluacionV2 == null || decisionesV2PorPrograma.isEmpty()) {
+			return;
+		}
+		MallaCurricularV2ResultadoAdapter.AplicacionResultadoMallaV2 aplicacion = ADAPTADOR_RESULTADO_V2
+				.aplicar(programasPorId, decisionesV2PorPrograma, resultadoEvaluacionV2.getSituacionAcademicaCalculada());
+		aplicarSituacionAcademicaV2(aplicacion.getSituacionAcademica());
+		logger.info("[MALLA_V2] Resultado V2 aplicado a Malla Curricular");
+		logger.info("[MALLA_V2] Resumen aplicado - acreditadas=" + aplicacion.getAcreditadas() + " - reprobadas="
+				+ aplicacion.getReprobadas() + " - restringidas=" + aplicacion.getRestringidas() + " - habilitadas="
+				+ aplicacion.getHabilitadas() + " - requiereRevision=" + aplicacion.getRequiereRevision());
+	}
+
+	private void aplicarSituacionAcademicaV2(String situacionAcademicaV2) {
+		String situacionV2 = StringUtils.upperCase(StringUtils.trimToEmpty(situacionAcademicaV2));
+		if ("REGULAR".equals(situacionV2)) {
+			estatusEstudiante = "Regular";
+		} else if ("IRREGULAR".equals(situacionV2)) {
+			estatusEstudiante = "Irregular";
+		}
 	}
 
 	private void actualizarFilasTabla(Map<Integer, ProgramaTablaDTO> filasTablaPorPrograma,
