@@ -43,6 +43,14 @@ presentación y se conserva ResultadoEvaluacionCurricularV2DTO completo.
 Conteo visual de UD/créditos seleccionados, mensajes de presentación y
 navegación permanecen en el consumidor. No son reglas académicas.
 
+## LOGICA_PARALELA_AUDITADA
+
+TablaCurricularAsistidaBean.simularSeleccion delega una sola evaluación
+académica final a SimuladorCurricularV2Service. No recalcula RN-6.1, RN-6.4,
+seriación, situación, carga, optativas ni electivas. La validación final de
+inscripción legacy permanece en una ruta productiva separada y no participa en
+la decisión de simulación; se conserva fuera de alcance.
+
 ## CONTRATO_V2
 
 Se reutilizan ContextoEvaluacionCurricularV2DTO y
@@ -75,28 +83,32 @@ y determinismo. La validación manual UI permanece pendiente.
 
 ## REGRESION
 
-La regresión completa fue iniciada tras agregar las pruebas, pero el entorno no
-entregó su resumen final antes del cierre operativo. La última regresión
-confirmada previa fue 746 pruebas verdes; debe repetirse y capturarse el total
-final antes de una aprobación formal de fase.
+REGRESION_COMPLETA: 749 pruebas, 0 fallas, 0 errores, 0 omitidas.
 
 ## COMPILACION
 
 basegestor: SUCCESS.
-gestorWeb: SUCCESS, después de instalar localmente el artefacto actualizado de
-basegestor.
+gestorWeb: SUCCESS.
 
 ## RUNTIME
 
-PENDIENTE_VALIDACION_MANUAL_UI. No se levantó interfaz local.
+RUNTIME_LOCAL: no iniciado. El proyecto empaqueta WAR y declara plugin WildFly,
+pero este entorno no ofrece servidor local iniciado ni URL de despliegue.
+
+VALIDACION_MANUAL_UI: PENDIENTE. Con WildFly local configurado, desplegar el
+WAR generado, abrir la ruta privada de tabla curricular asistida, seleccionar
+UD y usar "Simular selección". Confirmar que el panel muestra los motivos V2,
+que una UD restringida no se valida y que no se modifica inscripción, oferta,
+grupo ni selección persistida.
 
 ## RIESGOS
 
 La validación final productiva continúa legacy y está fuera de esta subfase.
-Se requiere regresión y pruebas específicas antes de declarar aprobación.
+La interacción visual requiere evidencia manual sobre un WildFly local
+configurado; no se realizó en este entorno.
 
 ## RESULTADO
 
-APROBADO_CON_OBSERVACIONES
+RESULTADO_TECNICO = APROBADO_TECNICAMENTE
 
 CAMBIO_PRODUCTIVO = NINGUNO
