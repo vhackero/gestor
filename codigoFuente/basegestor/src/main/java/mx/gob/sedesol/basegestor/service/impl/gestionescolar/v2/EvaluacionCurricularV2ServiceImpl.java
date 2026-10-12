@@ -233,6 +233,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarAvanceUltimosSemestresRn93(resultado, contexto, unidadesNormalizadas);
         evaluarRequisitosAcreditacionEgresoRn94(resultado, contexto, unidadesNormalizadas);
         evaluarReinscripcionExtemporaneaRn91(resultado, contexto);
+        auditarCoberturaTrazabilidadRn95(resultado, contexto, unidadesNormalizadas);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -806,7 +807,8 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 + "; situacion=" + resultado.getSituacionAcademicaCalculada() + "; cargaMaxima=" + carga.getCargaMaximaNormativa()
                 + "; rn64=" + carga.getAplicaRn64() + "; rn61=" + carga.getAplicaRn61()
                 + "; seriacion={rn81=" + carga.getAplicaRn81() + ",rn82=" + carga.getAplicaRn82() + ",rn83=" + carga.getAplicaRn83()
-                + "}; estado=" + carga.getEstadoReinscripcionExtemporaneaRn91();
+                + "}; resolucionExtraordinaria=" + evidenciaResolucionExtraordinariaRn95(contexto, extraordinaria)
+                + "; estado=" + carga.getEstadoReinscripcionExtemporaneaRn91();
         agregarUnico(carga.getEvidencias(), "RN91:" + evidencia);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_9_1,
                 extraordinaria ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null, 80,
@@ -824,6 +826,45 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
 
     private void registrarDecisionRn91(EvaluacionCargaAcademicaV2DTO carga, String decision) {
         agregarUnico(carga.getDecisionesRn91(), decision);
+    }
+
+    private String evidenciaResolucionExtraordinariaRn95(ContextoEvaluacionCurricularV2DTO contexto, boolean extraordinaria) {
+        if (!extraordinaria) return "NO_APLICA";
+        if (esTexto(contexto.getInstanciaResolutoraExtraordinaria()) && esTexto(contexto.getFundamentacionExtraordinaria())
+                && esTexto(contexto.getFolioInstitucionalExtraordinario()))
+            return "DOCUMENTADA{instancia=" + contexto.getInstanciaResolutoraExtraordinaria()
+                    + ",fundamentacion=" + contexto.getFundamentacionExtraordinaria()
+                    + ",folio=" + contexto.getFolioInstitucionalExtraordinario() + "}";
+        return "PENDIENTE_DE_RESOLUCION";
+    }
+
+    private boolean esTexto(String valor) { return valor != null && !valor.trim().isEmpty(); }
+
+    /** RN-9.5 consolida evidencia ya calculada; no reevalúa reglas ni altera decisiones. */
+    private void auditarCoberturaTrazabilidadRn95(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
+        if (carga == null) return;
+        agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_9_5);
+        agregarUnico(carga.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_9_5);
+        String resumen = "situacion=" + resultado.getSituacionAcademicaCalculada() + "; semestreObjetivo=" + contexto.getSemestreObjetivo()
+                + "; totalReprobadas=" + resultado.getTotalReprobadas() + "; rn61="
+                + (Boolean.TRUE.equals(carga.getAplicaRn61()) ? "APLICA:" + carga.getDecisionGlobalRn61() : "NO_APLICA")
+                + "; rn64=" + carga.getAplicaRn64() + "; excepciones=" + resultado.getExcepcionesEvaluadas().size()
+                + "; fecha=" + contexto.getFechaEvaluacion() + "; version=" + contexto.getVersionReglas();
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_9_5, null, 90, "RN95_COBERTURA_CONTEXTO", resumen);
+        Set<Long> auditadas = new HashSet<Long>();
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            if (unidad == null || unidad.getIdPrograma() == null || !auditadas.add(unidad.getIdPrograma())) continue;
+            DecisionUnidadCurricularV2DTO decision = buscarDecision(resultado, unidad.getIdPrograma());
+            String oferta = Boolean.TRUE.equals(unidad.getOfertada()) ? "OFERTADA"
+                    : (unidad.getCausaIndisponibilidadOferta() == CausaIndisponibilidadOfertaV2.SIN_CUPO ? "SIN_CUPO" : "SIN_OFERTA");
+            String detalle = "ud=" + unidad.getIdPrograma() + "; estado=" + unidad.getEstado() + "; causa=" + unidad.getCausa()
+                    + "; disponibilidad=" + oferta + "; cupoConocido=" + unidad.getCupoDisponibleConocido()
+                    + "; decision=" + (decision == null ? "NO_DETERMINADA" : decision.getEstadosSombra())
+                    + "; motivos=" + (decision == null ? "[]" : decision.getMotivos());
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_9_5, null, 90, "RN95_COBERTURA_UD", detalle);
+        }
     }
 
     /** RN-9.3 reutiliza crédito curricular, F7 y F8 sin sustituir sus decisiones. */

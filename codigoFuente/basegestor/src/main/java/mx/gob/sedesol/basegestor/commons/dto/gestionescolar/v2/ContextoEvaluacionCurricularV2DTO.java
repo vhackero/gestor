@@ -24,6 +24,10 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     /** Momento administrativo informado por fuente canónica, independiente de la trayectoria. */
     private TipoProcesoAdministrativoV2 tipoProcesoAdministrativo = TipoProcesoAdministrativoV2.NO_DETERMINADO;
     private String evidenciaProcesoAdministrativo;
+    /** Metadatos no PII de una resolución extraordinaria ya emitida, si existe. */
+    private String instanciaResolutoraExtraordinaria;
+    private String fundamentacionExtraordinaria;
+    private String folioInstitucionalExtraordinario;
     private Integer semestreObjetivo;
     private String bloqueObjetivo;
     private String perfilConsulta;
@@ -120,6 +124,12 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setTipoProcesoAdministrativo(TipoProcesoAdministrativoV2 valor) { tipoProcesoAdministrativo = valor == null ? TipoProcesoAdministrativoV2.NO_DETERMINADO : valor; }
     public String getEvidenciaProcesoAdministrativo() { return evidenciaProcesoAdministrativo; }
     public void setEvidenciaProcesoAdministrativo(String valor) { evidenciaProcesoAdministrativo = valor; }
+    public String getInstanciaResolutoraExtraordinaria() { return instanciaResolutoraExtraordinaria; }
+    public void setInstanciaResolutoraExtraordinaria(String valor) { instanciaResolutoraExtraordinaria = valor; }
+    public String getFundamentacionExtraordinaria() { return fundamentacionExtraordinaria; }
+    public void setFundamentacionExtraordinaria(String valor) { fundamentacionExtraordinaria = valor; }
+    public String getFolioInstitucionalExtraordinario() { return folioInstitucionalExtraordinario; }
+    public void setFolioInstitucionalExtraordinario(String valor) { folioInstitucionalExtraordinario = valor; }
     public Integer getSemestreObjetivo() { return semestreObjetivo; }
     public void setSemestreObjetivo(Integer semestreObjetivo) { this.semestreObjetivo = semestreObjetivo; }
     public String getBloqueObjetivo() { return bloqueObjetivo; }
