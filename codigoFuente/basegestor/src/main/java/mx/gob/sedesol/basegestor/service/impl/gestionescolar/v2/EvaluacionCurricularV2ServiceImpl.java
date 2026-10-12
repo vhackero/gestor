@@ -32,6 +32,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaAc
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCargaAcademicaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCierreFase7V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCierreFase8V2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoReinscripcionExtemporaneaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCumplimientoSeriacionV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoConsolidacionFase6V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoElegibilidadElectivaV2;
@@ -54,6 +55,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoReincorpora
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoReincorporacionBajaParcialV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoActualizacionTrayectoriaRn68V2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoProcesoReincorporacionV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoProcesoAdministrativoV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoMejoraPromedioV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionMejoraPromedioUnidadV2DTO;
@@ -222,6 +224,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarSeriacionIntersemestralRn82(resultado, contexto, unidadesNormalizadas);
         evaluarSeriacionInteranualRn83(resultado, contexto, unidadesNormalizadas);
         consolidarCierreSeriacionFase8(resultado, contexto, unidadesNormalizadas);
+        evaluarReinscripcionExtemporaneaRn91(resultado, contexto);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_04, null, 15,
                 "EVALUACION_CONCURRENTE",
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
@@ -737,6 +740,82 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
 
     private void registrarDecisionCierreFase8(EvaluacionCargaAcademicaV2DTO carga, String decision) {
         agregarUnico(carga.getDecisionesCierreFase8(), decision);
+    }
+
+    /**
+     * RN-9.1 sólo incorpora el momento administrativo. Consume las decisiones
+     * ya calculadas y no altera situación, carga, seriación ni excepciones.
+     */
+    private void evaluarReinscripcionExtemporaneaRn91(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto) {
+        EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
+        if (carga == null) return;
+        agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_9_1);
+        agregarUnico(carga.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_9_1);
+        TipoProcesoAdministrativoV2 proceso = contexto.getTipoProcesoAdministrativo();
+        carga.setTipoProcesoAdministrativoRn91(proceso);
+        if (proceso == null || proceso == TipoProcesoAdministrativoV2.NO_DETERMINADO) {
+            carga.setEstadoReinscripcionExtemporaneaRn91(EstadoReinscripcionExtemporaneaV2.REQUIERE_REVISION);
+            registrarDecisionRn91(carga, "TIPO_PROCESO_ADMINISTRATIVO_NO_DETERMINADO");
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_9_1,
+                    CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, 80, "RN91_REQUIERE_REVISION",
+                    "No se determina si el proceso es ordinario o extemporáneo; no se infiere una excepción.");
+            return;
+        }
+        if (proceso == TipoProcesoAdministrativoV2.ORDINARIO) {
+            carga.setEstadoReinscripcionExtemporaneaRn91(EstadoReinscripcionExtemporaneaV2.NO_APLICA);
+            registrarDecisionRn91(carga, "PROCESO_ORDINARIO_RN91_NO_APLICA");
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_9_1, null, 80, "RN91_NO_APLICA",
+                    "Proceso ordinario: RN-9.1 no añade una condición administrativa.");
+            return;
+        }
+        carga.setAplicaRn91(Boolean.TRUE);
+        boolean tipificada = false;
+        boolean extraordinaria = false;
+        for (ExcepcionCurricularV2DTO excepcion : resultado.getExcepcionesEvaluadas()) {
+            if (excepcion == null) continue;
+            if (excepcion.getTipo() == TipoExcepcionCurricularV2.TIPIFICADA) tipificada = true;
+            if (excepcion.getTipo() == TipoExcepcionCurricularV2.EXTRAORDINARIA
+                    || excepcion.getEstado() == EstadoExcepcionCurricularV2.REQUIERE_REVISION) extraordinaria = true;
+        }
+        carga.setExcepcionTipificadaRn91(Boolean.valueOf(tipificada));
+        if (extraordinaria) {
+            carga.setRequiereValoracionIndividualRn91(Boolean.TRUE);
+            carga.setRequiereResolucionDocumentadaRn91(Boolean.TRUE);
+            carga.setEstadoReinscripcionExtemporaneaRn91(EstadoReinscripcionExtemporaneaV2.REQUIERE_VALORACION_INDIVIDUAL);
+            registrarDecisionRn91(carga, "EXCEPCION_EXTRAORDINARIA_NO_TIPIFICADA_REQUIERE_RESOLUCION_DOCUMENTADA");
+        } else if (tipificada) {
+            carga.setEstadoReinscripcionExtemporaneaRn91(EstadoReinscripcionExtemporaneaV2.EXTEMPORANEO_CON_EXCEPCION_TIPIFICADA);
+            registrarDecisionRn91(carga, "EXCEPCION_TIPIFICADA_CTR02_REUTILIZADA");
+        } else if (tieneRestriccionAcademicaRn91(resultado, carga)) {
+            carga.setEstadoReinscripcionExtemporaneaRn91(EstadoReinscripcionExtemporaneaV2.EXTEMPORANEO_RESTRINGIDO_POR_REGLAS);
+            registrarDecisionRn91(carga, "RESTRICCIONES_ACADEMICAS_EXISTENTES_SE_CONSERVAN");
+        } else {
+            carga.setEstadoReinscripcionExtemporaneaRn91(EstadoReinscripcionExtemporaneaV2.EXTEMPORANEO_PROCEDE_SEGUN_REGLAS);
+            registrarDecisionRn91(carga, "MISMAS_REGLAS_ACADEMICAS_QUE_PROCESO_ORDINARIO");
+        }
+        String evidencia = "proceso=EXTEMPORANEO; evidenciaProceso=" + contexto.getEvidenciaProcesoAdministrativo()
+                + "; situacion=" + resultado.getSituacionAcademicaCalculada() + "; cargaMaxima=" + carga.getCargaMaximaNormativa()
+                + "; rn64=" + carga.getAplicaRn64() + "; rn61=" + carga.getAplicaRn61()
+                + "; seriacion={rn81=" + carga.getAplicaRn81() + ",rn82=" + carga.getAplicaRn82() + ",rn83=" + carga.getAplicaRn83()
+                + "}; estado=" + carga.getEstadoReinscripcionExtemporaneaRn91();
+        agregarUnico(carga.getEvidencias(), "RN91:" + evidencia);
+        registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_9_1,
+                extraordinaria ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null, 80,
+                "RN91_" + carga.getEstadoReinscripcionExtemporaneaRn91(), evidencia);
+    }
+
+    private boolean tieneRestriccionAcademicaRn91(ResultadoEvaluacionCurricularV2DTO resultado,
+            EvaluacionCargaAcademicaV2DTO carga) {
+        if (Boolean.TRUE.equals(carga.getAplicaRn64()) || Boolean.FALSE.equals(carga.getMaximoCumplido())) return true;
+        for (DecisionUnidadCurricularV2DTO decision : resultado.getDecisiones()) {
+            if (decision != null && decision.getEstadosSombra().contains(EstadoDecisionUnidadCurricularV2.BLOQUEADA)) return true;
+        }
+        return false;
+    }
+
+    private void registrarDecisionRn91(EvaluacionCargaAcademicaV2DTO carga, String decision) {
+        agregarUnico(carga.getDecisionesRn91(), decision);
     }
 
     private void determinarSituacionAcademica(ResultadoEvaluacionCurricularV2DTO resultado,

@@ -18,6 +18,9 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Long idPeriodo;
     private String periodoNormativo;
     private Long idProcesoInscripcion;
+    /** Momento administrativo informado por fuente canónica, independiente de la trayectoria. */
+    private TipoProcesoAdministrativoV2 tipoProcesoAdministrativo = TipoProcesoAdministrativoV2.NO_DETERMINADO;
+    private String evidenciaProcesoAdministrativo;
     private Integer semestreObjetivo;
     private String bloqueObjetivo;
     private String perfilConsulta;
@@ -104,6 +107,10 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setPeriodoNormativo(String valor) { periodoNormativo = valor; }
     public Long getIdProcesoInscripcion() { return idProcesoInscripcion; }
     public void setIdProcesoInscripcion(Long idProcesoInscripcion) { this.idProcesoInscripcion = idProcesoInscripcion; }
+    public TipoProcesoAdministrativoV2 getTipoProcesoAdministrativo() { return tipoProcesoAdministrativo; }
+    public void setTipoProcesoAdministrativo(TipoProcesoAdministrativoV2 valor) { tipoProcesoAdministrativo = valor == null ? TipoProcesoAdministrativoV2.NO_DETERMINADO : valor; }
+    public String getEvidenciaProcesoAdministrativo() { return evidenciaProcesoAdministrativo; }
+    public void setEvidenciaProcesoAdministrativo(String valor) { evidenciaProcesoAdministrativo = valor; }
     public Integer getSemestreObjetivo() { return semestreObjetivo; }
     public void setSemestreObjetivo(Integer semestreObjetivo) { this.semestreObjetivo = semestreObjetivo; }
     public String getBloqueObjetivo() { return bloqueObjetivo; }

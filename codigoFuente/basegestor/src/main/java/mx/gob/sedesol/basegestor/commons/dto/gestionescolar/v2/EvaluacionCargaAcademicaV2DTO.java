@@ -234,6 +234,14 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     private Boolean requiereRevisionFase8 = Boolean.FALSE;
     private List<String> relacionesTipoInconsistenteFase8 = new ArrayList<String>();
     private List<String> decisionesCierreFase8 = new ArrayList<String>();
+    /** RN-9.1 orquesta resultados existentes para el momento administrativo extemporáneo. */
+    private Boolean aplicaRn91 = Boolean.FALSE;
+    private TipoProcesoAdministrativoV2 tipoProcesoAdministrativoRn91 = TipoProcesoAdministrativoV2.NO_DETERMINADO;
+    private EstadoReinscripcionExtemporaneaV2 estadoReinscripcionExtemporaneaRn91 = EstadoReinscripcionExtemporaneaV2.NO_APLICA;
+    private Boolean excepcionTipificadaRn91 = Boolean.FALSE;
+    private Boolean requiereValoracionIndividualRn91 = Boolean.FALSE;
+    private Boolean requiereResolucionDocumentadaRn91 = Boolean.FALSE;
+    private List<String> decisionesRn91 = new ArrayList<String>();
     private Boolean requiereRevisionRegularizacion = Boolean.FALSE;
     private Integer cargaDisponibleRegularizacion;
     private EstadoCargaAcademicaV2 estado = EstadoCargaAcademicaV2.NO_DETERMINADA;
@@ -455,6 +463,15 @@ public class EvaluacionCargaAcademicaV2DTO implements Serializable {
     public void setRequiereRevisionFase8(Boolean valor) { requiereRevisionFase8 = valor; }
     public List<String> getRelacionesTipoInconsistenteFase8() { return relacionesTipoInconsistenteFase8; }
     public List<String> getDecisionesCierreFase8() { return decisionesCierreFase8; }
+    public Boolean getAplicaRn91() { return aplicaRn91; } public void setAplicaRn91(Boolean valor) { aplicaRn91 = valor; }
+    public TipoProcesoAdministrativoV2 getTipoProcesoAdministrativoRn91() { return tipoProcesoAdministrativoRn91; }
+    public void setTipoProcesoAdministrativoRn91(TipoProcesoAdministrativoV2 valor) { tipoProcesoAdministrativoRn91 = valor == null ? TipoProcesoAdministrativoV2.NO_DETERMINADO : valor; }
+    public EstadoReinscripcionExtemporaneaV2 getEstadoReinscripcionExtemporaneaRn91() { return estadoReinscripcionExtemporaneaRn91; }
+    public void setEstadoReinscripcionExtemporaneaRn91(EstadoReinscripcionExtemporaneaV2 valor) { estadoReinscripcionExtemporaneaRn91 = valor == null ? EstadoReinscripcionExtemporaneaV2.NO_DETERMINADO : valor; }
+    public Boolean getExcepcionTipificadaRn91() { return excepcionTipificadaRn91; } public void setExcepcionTipificadaRn91(Boolean valor) { excepcionTipificadaRn91 = valor; }
+    public Boolean getRequiereValoracionIndividualRn91() { return requiereValoracionIndividualRn91; } public void setRequiereValoracionIndividualRn91(Boolean valor) { requiereValoracionIndividualRn91 = valor; }
+    public Boolean getRequiereResolucionDocumentadaRn91() { return requiereResolucionDocumentadaRn91; } public void setRequiereResolucionDocumentadaRn91(Boolean valor) { requiereResolucionDocumentadaRn91 = valor; }
+    public List<String> getDecisionesRn91() { return decisionesRn91; }
 
     public String getSituacionAcademica() { return situacionAcademica; }
     public void setSituacionAcademica(String valor) { situacionAcademica = valor; }
