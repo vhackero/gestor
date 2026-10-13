@@ -34,8 +34,20 @@ Aplicar `codigoFuente/bd/R063_13102026_asignacion_plan_usuarios.sql`, ya aplicad
 - `USU_PLAN_ASIGNAR`: asignación; requiere también el permiso de consulta.
 - `USU_PLAN_MODIFICAR`: mostrar el destino y guardar modificaciones; requiere también el permiso de consulta.
 - `USU_PLAN_ELIMINAR`: eliminar asignaciones, incluida la única relación; requiere también consulta.
+- `USU_PLAN_MASIVO`: visualizar el panel masivo y descargar el Excel. Para cargar y asignar desde Excel también requiere `USU_PLAN_ASIGNAR`, además de consulta.
 
-Ejecutar únicamente `codigoFuente/bd/R063_13102026_asignacion_plan_usuarios.sql`. Integra los cambios de los antiguos R063, R064 y R065: cuatro permisos, textos finales y actualización de los textos predeterminados anteriores. Los dos archivos adicionales se retiraron para evitar ejecutar versiones redundantes. Puede aplicarse aunque los tres scripts originales ya se hayan ejecutado: conserva los permisos concedidos a los roles y los textos personalizados. No crea tablas ni elimina asignaciones.
+Ejecutar únicamente `codigoFuente/bd/R063_13102026_asignacion_plan_usuarios.sql`. Integra los cambios de los antiguos R063, R064 y R065, además del panel masivo: cinco permisos, textos finales y actualización de los textos predeterminados anteriores. Los dos archivos adicionales se retiraron para evitar ejecutar versiones redundantes. Puede aplicarse aunque los tres scripts originales ya se hayan ejecutado: conserva los permisos concedidos a los roles y los textos personalizados. No crea tablas ni elimina asignaciones.
+
+## Descarga y asignación masiva
+
+1. Pulse **Revisar y descargar estudiantes sin plan**. Se consulta la base de datos y se incluyen exclusivamente usuarios con rol Estudiante (2) sin ninguna relación en `tbl_persona_aspirante`. No exige que ese sea su único rol, ni filtra por estado activo. El listado usa un corte por identificador y páginas de 500.
+2. En `estudiantes_sin_plan.xlsx`, complete `id_plan` e `id_convocatoria` en la hoja `Asignaciones`, usando las combinaciones vigentes de `Catalogos`. `usuario` determina a quién se asignará; `nombre` e `id_persona` sólo son informativos. No se requieren contraseñas. Puede quitar las filas que no desee importar.
+3. Conserve los encabezados `usuario`, `nombre`, `id_persona`, `id_plan`, `id_convocatoria`, en ese orden. Se admite XLSX de hasta 5 MB y 15 000 registros. Se rechazan fórmulas, errores de celda, usuarios repetidos y archivos vacíos.
+4. Seleccione el archivo y pulse **Asignar desde Excel**. La lectura del archivo valida la estructura antes de iniciar el trabajo. El guardado se ejecuta en segundo plano, con un trabajador y dos trabajos en cola por instancia de aplicación. Se impide iniciar otra carga del mismo operador mientras una esté pendiente.
+5. El servidor procesa bloques de 250 en transacciones independientes y usa una inserción múltiple por bloque. Antes de validar el destino, omite a quien ya tenga cualquier asignación, aunque se haya asignado después de descargar el archivo. Tampoco altera el plan de los usuarios omitidos. Para quienes no tienen plan se exige usuario existente con rol Estudiante, plan disponible y convocatoria activa vinculada.
+6. La pantalla muestra asignados, omitidos y procesados. Si falla un bloque, se revierte ese bloque y se conserva lo ya confirmado. El mensaje muestra el motivo; puede corregir y volver a cargar el archivo completo, pues quienes ya tienen plan serán omitidos.
+
+El avance se mantiene en memoria y sólo puede consultarlo el operador que inició el trabajo. Un reinicio pierde ese avance, pero conserva los bloques confirmados. No se crean tablas para la carga ni se modifican los otros módulos de importación. La generación XLSX usa filas temporales de POI y elimina los archivos temporales al finalizar.
 
 No se conceden automáticamente a ningún rol. Se administran desde Roles y permisos. Los textos `gw.planUsuario.*` se administran mediante los textos del sistema. Se preservan los valores existentes al volver a aplicar la migración.
 
@@ -43,4 +55,4 @@ No se crean tablas ni se agregan columnas o índices a las tablas académicas ac
 
 ## Validación
 
-Compilación directa con Java 8. Once pruebas comprobaron normalización, asignación única, usuarios sin rol Estudiante, destino incompatible, permisos declarados, transacciones declaradas y SQL sobre tablas temporales de MariaDB. La prueba SQL verificó inserción, consulta, modificación del mismo identificador, rechazo de datos desactualizados, rechazo de un segundo plan, eliminación de duplicados, eliminación del último registro, conservación de otros estudiantes, nueva asignación posterior y reversión. No se asignaron, cambiaron ni eliminaron planes de estudiantes reales. Se validó la estructura XML de las vistas; queda validar visualmente en pantalla después del despliegue.
+Compilación directa con Java 8. Diecisiete pruebas comprobaron el flujo individual y masivo: normalización, asignación única, usuarios sin rol Estudiante, destino incompatible, permisos y transacciones declarados; SQL sobre tablas temporales de MariaDB; exportación XLSX, lectura de 15 000 registros con heap de 128 MB, rechazo de fórmulas y usuarios repetidos; trabajos asíncronos y conservación del avance confirmado tras un fallo. La prueba SQL también verificó omitir a un usuario que ya tiene plan sin cambiar su asignación. No se asignaron, cambiaron ni eliminaron planes de estudiantes reales. Se validó la estructura XML de las vistas; queda validar visualmente en pantalla después del despliegue.

@@ -1,6 +1,7 @@
 package mx.gob.sedesol.gestorweb.beans.administracion;
 
 import java.io.Serializable;
+import java.io.ByteArrayInputStream;
 import java.text.MessageFormat;
 import java.util.*;
 import javax.annotation.PostConstruct;
@@ -20,6 +21,9 @@ public class AsignacionPlanUsuarioBean implements Serializable {
     private static final Logger LOG=Logger.getLogger(AsignacionPlanUsuarioBean.class);
     @ManagedProperty("#{asignacionPlanUsuarioService}") private transient AsignacionPlanUsuarioService servicio;
     @ManagedProperty("#{sistema}") private SistemaBean sistema;
+    @ManagedProperty("#{asignacionPlanMasivaService}") private transient mx.gob.sedesol.basegestor.service.impl.admin.AsignacionPlanMasivaService servicioMasivo;
+    private transient byte[] contenidoMasivo;
+    private String archivoMasivo,idCargaMasiva;
     private String usuariosAsignar,usuariosBuscar;
     private Integer planAsignar,convocatoriaAsignar,planModificar,convocatoriaModificar;
     private List<Object[]> planes=new ArrayList<>(),convocatoriasAsignar=new ArrayList<>(),convocatoriasModificar=new ArrayList<>();
@@ -56,6 +60,30 @@ public class AsignacionPlanUsuarioBean implements Serializable {
             mensaje(FacesMessage.SEVERITY_INFO,"eliminado");}
         catch(Exception e){error(e);}
     }
+    public org.primefaces.model.StreamedContent getSinPlanExcel(){
+        try{byte[] archivo=servicioMasivo.descargar();return new org.primefaces.model.DefaultStreamedContent(new ByteArrayInputStream(archivo),"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","estudiantes_sin_plan.xlsx");}
+        catch(Exception e){error(e);return null;}
+    }
+    public void cargarMasivo(org.primefaces.event.FileUploadEvent evento){
+        contenidoMasivo=null;archivoMasivo=null;
+        if(evento.getFile().getSize()==0 || evento.getFile().getSize()>mx.gob.sedesol.basegestor.commons.utils.ArchivoAsignacionPlan.MAX_BYTES
+            || !evento.getFile().getFileName().toLowerCase(Locale.ROOT).endsWith(".xlsx")){
+            error(new ErrorAsignacionPlan("gw.planUsuario.masivo.archivo"));return;}
+        contenidoMasivo=evento.getFile().getContents();archivoMasivo=evento.getFile().getFileName();
+    }
+    public void importarMasivo(){
+        try{idCargaMasiva=servicioMasivo.iniciar(archivoMasivo,contenidoMasivo,actor());}
+        catch(Exception e){error(e);}finally{contenidoMasivo=null;archivoMasivo=null;}
+    }
+    public EstadoCargaPlanDTO getEstadoMasivo(){return servicioMasivo.consultar(idCargaMasiva,actor());}
+    public boolean isCargaMasivaEnCurso(){EstadoCargaPlanDTO e=getEstadoMasivo();return e!=null && !e.isTerminado();}
+    public boolean isArchivoMasivoSeleccionado(){return contenidoMasivo!=null;}
+    public String getArchivoMasivo(){return archivoMasivo;}
+    public String getResumenMasivo(){EstadoCargaPlanDTO e=getEstadoMasivo();if(e==null)return "";
+        String clave=e.isTerminado()?(e.getError()==null?"gw.planUsuario.masivo.finalizado":"gw.planUsuario.masivo.detenido"):"gw.planUsuario.masivo.progreso";
+        return MessageFormat.format(sistema.obtenerTexto(clave),e.getAsignados(),e.getOmitidos(),e.getProcesados(),e.getTotal());}
+    public String getErrorMasivo(){EstadoCargaPlanDTO e=getEstadoMasivo();return e==null || e.getError()==null?"":MessageFormat.format(sistema.obtenerTexto(e.getError()),e.getArgumentos());}
+    public void setServicioMasivo(mx.gob.sedesol.basegestor.service.impl.admin.AsignacionPlanMasivaService v){servicioMasivo=v;}
     private Long actor(){Object usuario=FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get(ConstantesGestorWeb.PARAM_USUARIO_SESSION);return usuario instanceof UsuarioSessionDTO?((UsuarioSessionDTO)usuario).getIdPersona():null;}
     private void mensaje(FacesMessage.Severity severity,String clave,Object... argumentos){FacesContext.getCurrentInstance().addMessage(null,new FacesMessage(severity,MessageFormat.format(sistema.obtenerTexto("gw.planUsuario.mensaje."+clave),argumentos),null));}
     private void error(Exception e){

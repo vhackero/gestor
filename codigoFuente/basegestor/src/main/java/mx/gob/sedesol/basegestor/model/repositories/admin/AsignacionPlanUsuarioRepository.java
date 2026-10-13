@@ -8,6 +8,20 @@ import mx.gob.sedesol.basegestor.commons.dto.admin.AsignacionPlanUsuarioDTO;
 @Repository
 public class AsignacionPlanUsuarioRepository {
     @PersistenceContext private EntityManager entityManager;
+    private static final String SIN_PLAN=" FROM tbl_persona p WHERE EXISTS(SELECT 1 FROM rel_persona_roles r WHERE r.id_persona=p.id_persona AND r.id_rol=2) AND NOT EXISTS(SELECT 1 FROM tbl_persona_aspirante a WHERE a.id_persona=p.id_persona) ";
+    public long[] resumenSinPlan(){Object[] fila=(Object[])entityManager.createNativeQuery("SELECT COALESCE(MAX(p.id_persona),0) AS corte,COUNT(*) AS total"+SIN_PLAN).getSingleResult();return new long[]{((Number)fila[0]).longValue(),((Number)fila[1]).longValue()};}
+    @SuppressWarnings("unchecked")
+    public List<Object[]> sinPlan(long ultimo,long corte,int limite){return entityManager.createNativeQuery("SELECT p.sso_idUsuario,CONCAT_WS(' ',p.sso_nombre,p.sso_apellidoPaterno,p.sso_apellidoMaterno) AS nombre_completo,p.id_persona"+SIN_PLAN+" AND p.id_persona>:ultimo AND p.id_persona<=:corte ORDER BY p.id_persona")
+        .setParameter("ultimo",ultimo).setParameter("corte",corte).setMaxResults(limite).getResultList();}
+    @SuppressWarnings("unchecked")
+    public List<Object[]> catalogosMasivos(){return entityManager.createNativeQuery("SELECT DISTINCT p.id_plan,p.nombre AS nombre_plan,c.convocatoria_id,c.nombre AS nombre_convocatoria FROM tbl_planes p JOIN rel_convocatoria_planesyprogramas r ON r.id_plan=p.id_plan JOIN tbl_convocatoria c ON c.convocatoria_id=r.id_convocatoria WHERE p.id_estatus_plan=3 AND c.activo=1 ORDER BY p.nombre,c.convocatoria_id").getResultList();}
+    public void insertarLote(List<AsignacionPlanUsuarioDTO> datos){
+        if(datos.isEmpty())return;List<String> valores=new ArrayList<>();
+        for(int n=0;n<datos.size();n++)valores.add("(:persona"+n+",:plan"+n+",:convocatoria"+n+")");
+        Query query=entityManager.createNativeQuery("INSERT INTO tbl_persona_aspirante(id_persona,id_plan,id_convocatoria) VALUES"+String.join(",",valores));
+        for(int n=0;n<datos.size();n++)query.setParameter("persona"+n,datos.get(n).getIdPersona()).setParameter("plan"+n,datos.get(n).getIdPlan()).setParameter("convocatoria"+n,datos.get(n).getIdConvocatoria());
+        query.executeUpdate();
+    }
     @SuppressWarnings("unchecked")
     public List<Object[]> planes(){
         return entityManager.createNativeQuery("SELECT p.id_plan,p.nombre FROM tbl_planes p WHERE p.id_estatus_plan=3 AND EXISTS(SELECT 1 FROM rel_convocatoria_planesyprogramas r WHERE r.id_plan=p.id_plan) ORDER BY p.nombre,p.id_plan").getResultList();

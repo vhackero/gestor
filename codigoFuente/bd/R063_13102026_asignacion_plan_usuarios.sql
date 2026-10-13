@@ -20,6 +20,10 @@ SELECT 'USU_PLAN_ELIMINAR',p.id_funcionalidad,'Eliminar asignaciones de plan de 
 FROM tbl_funcionalidades p WHERE p.clave='USU_PLAN_VER'
 AND NOT EXISTS(SELECT 1 FROM tbl_funcionalidades x WHERE x.clave='USU_PLAN_ELIMINAR');
 
+INSERT INTO tbl_funcionalidades(clave,id_funcionalidad_padre,descripcion,activo,usuario_modifico)
+SELECT 'USU_PLAN_MASIVO',p.id_funcionalidad,'Descargar estudiantes sin plan y cargar asignaciones masivas',1,1
+FROM tbl_funcionalidades p WHERE p.clave='USU_PLAN_VER'
+AND NOT EXISTS(SELECT 1 FROM tbl_funcionalidades x WHERE x.clave='USU_PLAN_MASIVO');
 SET @funcionalidad_plan=(SELECT id_funcionalidad FROM tbl_funcionalidades WHERE clave='USU_PLAN_VER');
 INSERT INTO tbl_textos_sistema(clave,valor,id_funcionalidad,usuario_modifico)
 VALUES
@@ -89,5 +93,26 @@ WHERE clave='gw.planUsuario.mensaje.eliminado' AND valor='Se eliminó la asignac
 UPDATE tbl_textos_sistema SET valor='Se eliminará la asignación de {0} al plan {1}, convocatoria {2}. ¿Desea continuar?'
 WHERE clave='gw.planUsuario.confirmar.eliminar'
 AND valor='Se eliminará la asignación de {0} al plan {1}, convocatoria {2}. Se conservará al menos otra asignación del estudiante. ¿Desea continuar?';
+
+INSERT INTO tbl_textos_sistema(clave,valor,id_funcionalidad,usuario_modifico) VALUES
+('gw.planUsuario.masivo.titulo','Asignación masiva de plan',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.ayuda','Descargue los estudiantes con rol Estudiante que no tienen asignación. Complete id_plan e id_convocatoria usando la hoja Catalogos y cargue el mismo archivo XLSX. nombre e id_persona son informativos. Se omiten quienes ya tienen plan. Máximo 15000 registros y 5 MB. El proceso guarda bloques de 250; ante un error conserva los bloques anteriores.',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.descargar','Revisar y descargar estudiantes sin plan',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.seleccionar','Seleccionar Excel',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.importar','Asignar desde Excel',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.archivo','Seleccione un archivo XLSX válido de hasta 5 MB.',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.encabezados','Conserve los cinco encabezados y su orden: usuario, nombre, id_persona, id_plan, id_convocatoria.',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.limite','Se admiten hasta 15000 registros por archivo.',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.formula','Fila {0}: no se admiten fórmulas ni celdas con errores.',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.usuario','Fila {0}: capture un nombre de usuario válido.',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.repetido','Fila {0}: el usuario {1} se repite en el archivo.',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.vacio','El archivo no contiene estudiantes para procesar.',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.destinoFila','Fila {0}, usuario {1}: capture un plan disponible y una convocatoria activa vinculada a ese plan.',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.enCurso','Ya tiene una asignación masiva en curso. Espere a que termine.',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.ocupado','Hay otras cargas en curso. Intente nuevamente más tarde.',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.progreso','Asignados: {0}. Omitidos por tener plan: {1}. Procesados: {2} de {3}.',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.finalizado','Carga finalizada. Asignados: {0}. Omitidos por tener plan: {1}. Procesados: {2} de {3}.',@funcionalidad_plan,1),
+('gw.planUsuario.masivo.detenido','Carga detenida. Se conservaron {0} asignaciones. Omitidos: {1}. Procesados: {2} de {3}. Corrija el error indicado y vuelva a cargar el archivo; quienes ya tienen plan serán omitidos.',@funcionalidad_plan,1)
+ON DUPLICATE KEY UPDATE clave=VALUES(clave);
 
 -- No otorga accesos automáticamente: seleccionar permisos desde Roles y permisos.

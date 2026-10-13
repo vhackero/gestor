@@ -32,12 +32,14 @@ public class AsignacionPlanUsuarioSqlTest {
             connection.setAutoCommit(false);
             AsignacionPlanUsuarioRepository repo=new AsignacionPlanUsuarioRepository();
             EntityManager em=(EntityManager)Proxy.newProxyInstance(getClass().getClassLoader(),new Class[]{EntityManager.class},(p,m,a)->{
-                String sql=(String)a[0];Map<String,Object> params=new HashMap<>();
+                String sql=(String)a[0];Map<String,Object> params=new HashMap<>();int[] limite={0};
                 return Proxy.newProxyInstance(getClass().getClassLoader(),new Class[]{Query.class},(q,method,args)->{
                     if(method.getName().equals("setParameter")){params.put((String)args[0],args[1]);return q;}
-                    Matcher matcher=Pattern.compile(":([A-Za-z]+)").matcher(sql);StringBuffer expanded=new StringBuffer();List<Object> values=new ArrayList<>();
+                    if(method.getName().equals("setMaxResults")){limite[0]=(Integer)args[0];return q;}
+                    Matcher matcher=Pattern.compile(":([A-Za-z][A-Za-z0-9_]*)").matcher(sql);StringBuffer expanded=new StringBuffer();List<Object> values=new ArrayList<>();
                     while(matcher.find()){Object value=params.get(matcher.group(1));if(value instanceof Collection){Collection<?> group=(Collection<?>)value;matcher.appendReplacement(expanded,String.join(",",Collections.nCopies(group.size(),"?")));values.addAll(group);}else{matcher.appendReplacement(expanded,"?");values.add(value);}}
                     matcher.appendTail(expanded);
+                    if(limite[0]>0)expanded.append(" LIMIT ").append(limite[0]);
                     try(PreparedStatement statement=connection.prepareStatement(expanded.toString())){
                         for(int n=0;n<values.size();n++)statement.setObject(n+1,values.get(n));
                         if(method.getName().equals("executeUpdate"))return statement.executeUpdate();
@@ -53,6 +55,15 @@ public class AsignacionPlanUsuarioSqlTest {
             Field field=repo.getClass().getDeclaredField("entityManager");field.setAccessible(true);field.set(repo,em);
             AsignacionPlanUsuarioServiceImpl service=new AsignacionPlanUsuarioServiceImpl();field=service.getClass().getDeclaredField("repository");field.setAccessible(true);field.set(service,repo);
             assertEquals(2,repo.planes().size());assertEquals(1,repo.convocatorias(3).size());
+            assertArrayEquals(new long[]{20,2},repo.resumenSinPlan());assertEquals(2,repo.sinPlan(0,20,500).size());assertEquals(2,repo.catalogosMasivos().size());
+            mx.gob.sedesol.basegestor.service.impl.admin.AsignacionPlanMasivaService masivo=new mx.gob.sedesol.basegestor.service.impl.admin.AsignacionPlanMasivaService();
+            try{field=masivo.getClass().getDeclaredField("repository");field.setAccessible(true);field.set(masivo,repo);
+                try(org.apache.poi.ss.usermodel.Workbook excel=org.apache.poi.ss.usermodel.WorkbookFactory.create(new java.io.ByteArrayInputStream(masivo.descargar()))){
+                    assertEquals(3,excel.getNumberOfSheets());assertEquals(2,excel.getSheetAt(0).getLastRowNum());
+                    assertEquals("es1",excel.getSheetAt(0).getRow(1).getCell(0).getStringCellValue());
+                    assertEquals("",excel.getSheetAt(0).getRow(1).getCell(3).getStringCellValue());
+                }
+            }finally{masivo.cerrar();}
             assertFalse(repo.destinoValido(3,18));assertFalse(repo.destinoValido(3,19));
             assertEquals(2,service.asignar("ES1;es2",3,17,1L));
             assertEquals(2,service.buscar("es1 es2").size());
@@ -76,7 +87,9 @@ public class AsignacionPlanUsuarioSqlTest {
             service.eliminarAsignacion(restante.get(0),1L);
             assertTrue(repo.asignaciones(Collections.singletonList(10L)).isEmpty());
             assertEquals(1,service.buscar("es2").size());
-            assertEquals(1,service.asignar("es1",3,17,1L));
+            assertArrayEquals(new int[]{1,1},service.asignarBloque(Arrays.asList(new FilaAsignacionPlanDTO(2,"es1","3","17"),new FilaAsignacionPlanDTO(3,"es2","","")),1L));
+            assertEquals(Integer.valueOf(4),service.buscar("es2").get(0).getIdPlan());
+            assertEquals(0,repo.resumenSinPlan()[1]);
             connection.rollback();
             try(ResultSet rs=s.executeQuery("SELECT COUNT(*) FROM tbl_persona_aspirante")){assertTrue(rs.next());assertEquals(0,rs.getInt(1));}
         }

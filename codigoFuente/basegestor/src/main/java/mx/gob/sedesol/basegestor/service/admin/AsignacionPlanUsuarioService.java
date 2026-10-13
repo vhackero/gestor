@@ -8,4 +8,5 @@ public interface AsignacionPlanUsuarioService {
     int asignar(String usuarios,Integer plan,Integer convocatoria,Long actor);
     int modificar(List<AsignacionPlanUsuarioDTO> seleccion,Integer plan,Integer convocatoria,Long actor);
     void eliminarAsignacion(AsignacionPlanUsuarioDTO asignacion,Long actor);
+    int[] asignarBloque(List<mx.gob.sedesol.basegestor.commons.dto.admin.FilaAsignacionPlanDTO> filas,Long actor);
 }

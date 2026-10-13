@@ -90,6 +90,28 @@ public class AsignacionPlanUsuarioServiceImpl implements AsignacionPlanUsuarioSe
         if(actor==null)throw new ErrorAsignacionPlan(PREFIJO+"sesion");
         if(plan==null || convocatoria==null || !repository.destinoValido(plan,convocatoria))throw new ErrorAsignacionPlan(PREFIJO+"destino");
     }
+    @Override @PreAuthorize("hasPermission(null,'USU_PLAN_VER') and hasPermission(null,'USU_PLAN_MASIVO') and hasPermission(null,'USU_PLAN_ASIGNAR')")
+    @Transactional(propagation=org.springframework.transaction.annotation.Propagation.REQUIRES_NEW,rollbackFor=Exception.class)
+    public int[] asignarBloque(List<FilaAsignacionPlanDTO> filas,Long actor){
+        if(actor==null)throw new ErrorAsignacionPlan(PREFIJO+"sesion");
+        if(filas==null || filas.isEmpty() || filas.size()>250)throw new ErrorAsignacionPlan("gw.planUsuario.masivo.limite");
+        String lista=filas.stream().map(FilaAsignacionPlanDTO::getUsuario).collect(Collectors.joining(","));
+        List<AsignacionPlanUsuarioDTO> personas=validarPersonas(lista);
+        List<Long> ids=ids(personas);repository.bloquearPersonas(ids);
+        Set<Long> asignados=repository.asignacionesBloqueadas(ids).stream().map(AsignacionPlanUsuarioDTO::getIdPersona).collect(Collectors.toSet());
+        Map<String,AsignacionPlanUsuarioDTO> porUsuario=personas.stream().collect(Collectors.toMap(p->p.getUsuario().toLowerCase(Locale.ROOT),p->p));
+        List<AsignacionPlanUsuarioDTO> nuevos=new ArrayList<>();Set<String> destinos=new HashSet<>();int omitidos=0;
+        for(FilaAsignacionPlanDTO fila:filas){
+            AsignacionPlanUsuarioDTO persona=porUsuario.get(fila.getUsuario().toLowerCase(Locale.ROOT));
+            if(asignados.contains(persona.getIdPersona())){omitidos++;continue;}
+            Integer plan,convocatoria;
+            try{if(!fila.getPlan().matches("[0-9]+") || !fila.getConvocatoria().matches("[0-9]+"))throw new NumberFormatException();plan=Integer.valueOf(fila.getPlan());convocatoria=Integer.valueOf(fila.getConvocatoria());}
+            catch(RuntimeException e){throw new ErrorAsignacionPlan("gw.planUsuario.masivo.destinoFila",fila.getFila(),fila.getUsuario());}
+            if(destinos.add(plan+":"+convocatoria) && !repository.destinoValido(plan,convocatoria))throw new ErrorAsignacionPlan("gw.planUsuario.masivo.destinoFila",fila.getFila(),fila.getUsuario());
+            persona.setIdPlan(plan);persona.setIdConvocatoria(convocatoria);nuevos.add(persona);
+        }
+        repository.insertarLote(nuevos);return new int[]{nuevos.size(),omitidos};
+    }
     private List<AsignacionPlanUsuarioDTO> validarPersonas(String texto){
         Set<String> usuarios=normalizarUsuarios(texto);
         List<AsignacionPlanUsuarioDTO> personas=repository.personas(usuarios);
