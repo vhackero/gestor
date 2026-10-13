@@ -10,6 +10,8 @@ import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.FacesContext;
+import javax.faces.context.ExternalContext;
 
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
@@ -22,6 +24,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CrearEventoDispersio
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionCreacionResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculacionResultadoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionMatriculaExistenteDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionPendienteDTO;
+import mx.gob.sedesol.gestorweb.commons.utils.DispersionPendientesExcel;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MatricularDispersionDTO;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.Convocatoria;
 import mx.gob.sedesol.basegestor.model.entities.gestionescolar.DispersionPreEvento;
@@ -487,14 +491,29 @@ public class DispersionesBean extends BaseBean {
 			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion8').show()");
 			return;
 		}
-		List<TblDispersionesBusqueda> lista = dispersionesService.actualizarDispersion(dispersionNuevo);
-		if (lista.isEmpty()) {
+		if (dispercionParametros == null
+				|| dispercionParametros.getIdProcesoInscripcionConDispersion() == null
+				|| editarDispersion == null || editarDispersion.getPrograma() == null) {
+			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion6').show()");
+			return;
+		}
+		List<TblDispersionesBusqueda> lista = dispersionesService.consultarDispersionesGruposCompartidos(
+				dispercionParametros.getIdProcesoInscripcionConDispersion(), editarDispersion.getPrograma());
+		TblDispersionesBusqueda dispersionActual = null;
+		for (TblDispersionesBusqueda dispersion : lista) {
+			if (dispersionNuevo.getIdDispersion() != null
+					&& dispersionNuevo.getIdDispersion().equals(dispersion.getIdDispersion())) {
+				dispersionActual = dispersion;
+				break;
+			}
+		}
+		if (dispersionActual == null) {
 			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion6').show()");
 			return;
 		}
 		sumTotal = (dispersionNuevo.getNoGrupos() * dispersionNuevo.getEstudiantesGrupo())
 				+ (dispersionNuevo.getGrupoResto() * dispersionNuevo.getCupoResto());
-		Integer totalRegistrado = lista.get(0).getNoEstudiantes();
+		Integer totalRegistrado = dispersionActual.getNoEstudiantes();
 		if (sumTotal != null && totalRegistrado != null && sumTotal > 0 && sumTotal <= totalRegistrado) {
 			boolean actualizada = dispersionesService.actualizarDispersionExc(dispersionNuevo);
 			if (actualizada) {
@@ -1500,6 +1519,39 @@ public class DispersionesBean extends BaseBean {
 		this.dispersionExistenteSeleccionada = dispersion;
 		RequestContext.getCurrentInstance().execute("PF('dlgConfirmMatriculaExistente').show()");
 	}
+
+	public void descargarPendientesDispersionExistente(DispersionMatriculaExistenteDTO dispersion) {
+		if (dispersion == null) {
+			return;
+		}
+		try {
+			List<DispersionPendienteDTO> pendientes = dispersionesService.consultarPendientesDispersionExistente(
+					dispersion.getIdDispersion(), dispersion.getIdProcesoInscripcionMatricular(), dispersion.getIdPrograma());
+			if (pendientes.isEmpty()) {
+				mostrarMensajeDispersion(false, "No hay alumnos elegibles pendientes de matricular.");
+				busquedaDispersionExistente();
+				return;
+			}
+			String origen = "";
+			for (ProcesosInscripcion proceso : listaProcesosConDispersion) {
+				if (proceso.getIdProcesoInscripcion().equals(dispercionParametros.getIdProcesoInscripcionConDispersion())) {
+					origen = proceso.getNombre();
+					break;
+				}
+			}
+			FacesContext faces = FacesContext.getCurrentInstance();
+			ExternalContext respuesta = faces.getExternalContext();
+			respuesta.responseReset();
+			respuesta.setResponseContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+			respuesta.setResponseHeader("Content-Disposition", "attachment; filename=pendientes_matricula_proceso_"
+					+ dispersion.getIdProcesoInscripcionMatricular() + "_programa_" + dispersion.getIdPrograma() + ".xlsx");
+			DispersionPendientesExcel.escribir(respuesta.getResponseOutputStream(), pendientes, origen);
+			faces.responseComplete();
+		} catch (Exception e) {
+			logger.error("No fue posible descargar los alumnos pendientes de matricular", e);
+			mostrarMensajeDispersion(true, "No fue posible generar el Excel de alumnos pendientes.");
+		}
+	}
 	
 	public void confirmarMatriculaUsuariosDispersionExistente() {
 		if (dispersionExistenteSeleccionada == null) {
@@ -1516,10 +1568,10 @@ public class DispersionesBean extends BaseBean {
 		String mensaje = obtenerMensajeRespuesta(respuesta, "No fue posible completar la matriculación.");
 		if (respuesta != null && respuesta.esCorrecto()) {
 			mostrarMensajeDispersion(false, mensaje);
-			busquedaDispersionExistente();
 		} else {
 			mostrarMensajeDispersion(true, mensaje);
 		}
+		busquedaDispersionExistente();
 		dispersionExistenteSeleccionada = null;
 	}
 	

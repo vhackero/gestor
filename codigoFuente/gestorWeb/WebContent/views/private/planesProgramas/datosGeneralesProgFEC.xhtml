@@ -80,6 +80,20 @@
 		</div>
 	</div>
 </div>
+
+<div class="form-group agregaMargenTop">
+	<div class="row">
+		<div class="col-md-4">
+			<p:outputLabel for="claveMovilidadPrograma" value="Clave de movilidad (opcional)" />
+			<p:inputText id="claveMovilidadPrograma" styleClass="col-xs-12" maxlength="100"
+				value="#{programaCapacitacionBean.programa.claveMovilidad}">
+				<p:ajax process="@this" update="mensajeClaveMovilidad"
+					listener="#{programaCapacitacionBean.validarClaveMovilidadPrograma}" />
+			</p:inputText>
+			<p:message id="mensajeClaveMovilidad" for="claveMovilidadPrograma" />
+		</div>
+	</div>
+</div>
 <div class="form-group agregaMargenTopX">
 	<div class="row">
 	

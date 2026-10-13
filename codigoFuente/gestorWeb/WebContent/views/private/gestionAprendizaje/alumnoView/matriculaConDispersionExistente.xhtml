@@ -122,7 +122,7 @@
 
 					<p:column styleClass="text-center">
 						<f:facet name="header">
-							<h:outputText value="No. de usuarios con inscripción" />
+							<h:outputText value="Alumnos pendientes de matricular" />
 						</f:facet>
 						<h:outputText value="#{dispercion.noEstudiantesInscritos}" />
 					</p:column>
@@ -134,6 +134,10 @@
 						<p:commandButton ajax="true" process="@this" update="@form"
 							action="#{dispersionesBean.matricularUsuariosDispersionExistente(dispercion)}"
 							icon="fa fa-graduation-cap" title="Matricular usuarios"
+							styleClass="btn-icon btn btn-default" />
+						<p:commandButton ajax="false" process="@this"
+							action="#{dispersionesBean.descargarPendientesDispersionExistente(dispercion)}"
+							icon="fa fa-file-excel-o" title="Descargar Excel de alumnos pendientes"
 							styleClass="btn-icon btn btn-default" />
 					</p:column>
 				</p:dataTable>

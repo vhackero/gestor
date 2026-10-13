@@ -1,6 +1,8 @@
 package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,6 +13,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
+import mx.gob.sedesol.gestorweb.sistema.SistemaBean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -27,6 +30,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoD
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
+import mx.gob.sedesol.basegestor.commons.utils.ColumnasHistorial;
 import mx.gob.sedesol.basegestor.commons.utils.DateUtils;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
@@ -43,6 +47,7 @@ import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.TrayectoriaAcademicaCon
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.dto.ReporteConfig;
 import mx.gob.sedesol.gestorweb.commons.dto.UsuarioSessionDTO;
+import mx.gob.sedesol.gestorweb.commons.utils.HistorialAcademicoReporte;
 import mx.gob.sedesol.gestorweb.commons.utils.ReporteUtil;
 import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
 
@@ -61,6 +66,12 @@ public class ConstanciasBean extends BaseBean {
 
 	@ManagedProperty(value = "#{plantillaService}")
 	private PlantillaService plantillaService;
+
+	@ManagedProperty(value = "#{sistema}")
+	private SistemaBean sistema;
+
+	public SistemaBean getSistema() { return sistema; }
+	public void setSistema(SistemaBean sistema) { this.sistema = sistema; }
 
 	@ManagedProperty(value = "#{parametroSistemaService}")
 	private ParametroSistemaService parametrosSistemaService;
@@ -87,19 +98,13 @@ public class ConstanciasBean extends BaseBean {
 	private FichaIntegralCasoDTO fichaIntegralV2;
 	private boolean intentoCargaFichaIntegralV2;
 	private boolean vistaGestor;
+	private List<ColumnasHistorial> columnasHistorial = ColumnasHistorial.leer(null);
 	private String nombrePersonaObjetivo;
 	private String matriculaPersonaObjetivo;
 
-
-	
-	
-
-
-
-	
-
 	@PostConstruct
 	public void init() {
+		cargarColumnasHistorial();
 		idPersona = trayectoriaAcademicaContextoBean.resolverIdPersonaObjetivo(getUsuarioEnSession().getIdPersona());
 		vistaGestor = trayectoriaAcademicaContextoBean.isVistaGestor();
 		nombrePersonaObjetivo = trayectoriaAcademicaContextoBean.resolverNombreObjetivo(getUsuarioEnSession().getUsuario());
@@ -170,8 +175,6 @@ public class ConstanciasBean extends BaseBean {
 		return contextoBase.getInscripcionPersona().getIdPlan();
 	}
 
-	
-
 	public List<EventoConstanciaDTO> getEventosAdmin( Long id){
 
 		eventos = grupoParticipanteService.getParticipanteByActaCerradaYconstancia2(id);
@@ -187,29 +190,43 @@ public class ConstanciasBean extends BaseBean {
 		return historialAcademico;
 
 	}
-	
+
+	private void cargarColumnasHistorial() {
+		try {
+			columnasHistorial = ColumnasHistorial.leer(parametrosSistemaService.obtenerParametro(ColumnasHistorial.PARAMETRO));
+		} catch (IllegalArgumentException ex) {
+			log.warn("Parametro de columnas de historial invalido; se muestran todas las columnas.", ex);
+			columnasHistorial = ColumnasHistorial.leer(null);
+		}
+	}
+
+	public List<ColumnasHistorial> getColumnasHistorial() { return columnasHistorial; }
+
+	public boolean columnaVisible(String clave) {
+		try {
+			return columnasHistorial.contains(ColumnasHistorial.valueOf(clave));
+		} catch (IllegalArgumentException ex) {
+			return false;
+		}
+	}
+	private String valorNumerico(Number valor) {
+		if (valor == null) return "0.00";
+
+		if (valor instanceof BigDecimal) {
+			return ((BigDecimal) valor).setScale(2, RoundingMode.HALF_UP).toPlainString();
+		}
+		return valor.toString();
+	}
 
 	public void generarReporte() {
-
-		String rutaFondoConstancia = FacesContext.getCurrentInstance().getExternalContext().getRequestScheme() + "://"
-				+ FacesContext.getCurrentInstance().getExternalContext().getRequestServerName() + ":"
-				+ FacesContext.getCurrentInstance().getExternalContext().getRequestServerPort()
-				+ "/recursos/documentos/fondoConstancia.png";
+		cargarColumnasHistorial();
 
 		reportePDF = null;
 
-		ReporteConfig reporteConfig = new ReporteConfig();
-		reporteConfig.setDatos(null);
-		reporteConfig.setNombreReporte("Plantilla_SISI");
-		reporteConfig.setPathJasper("/resources/jasperReport/gestionAprendizaje/expediente_academico.jasper");
-
-		reporteConfig.setTipoReporte(ReporteUtil.REPORTE_PDF);
-
 		HashMap<String, Object> params = new HashMap<>();
-		
-		
+
 		//Parametros de Encabezado
-		
+
 		String LOGO_UNADM = "/resources/jasperReport/LOGO_EDU_UNADM.png";
 		InputStream strmLOGO_UNADM = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(LOGO_UNADM);
 		String LOGO_SEP = "/resources/jasperReport/LOGO_SEP.png";
@@ -238,26 +255,30 @@ public class ConstanciasBean extends BaseBean {
 		params.put("PROG_EDUCATIVO",historialAcademico.getProgramaEducativo());
 		params.put("CLAVE", historialAcademico.getClave());
 		params.put("NIVEL", historialAcademico.getNivel());
-		params.put("PROMEDIO", historialAcademico.getPromedio().intValue());
+		params.put("HISTORIAL_PROMEDIO", valorNumerico(historialAcademico.getPromedio()));
 		params.put("CREDITOS", historialAcademico.getCreditos().intValue());
 		params.put("TOTAL_CREDITOS", historialAcademico.getTotalCreditos() != null
 				? historialAcademico.getTotalCreditos().toString() : "-");
-		params.put("APROBADAS", historialAcademico.getAprobadas().intValue());
-		params.put("REPROBADAS", historialAcademico.getReprobadas().intValue());
-		params.put("NO_PRESENTADAS", historialAcademico.getNopresentadas().intValue());
-		params.put("TOTAL", historialAcademico.getTotal().intValue());
+		params.put("HISTORIAL_APROBADAS", valorNumerico(historialAcademico.getAprobadas()));
+		params.put("HISTORIAL_REPROBADAS", valorNumerico(historialAcademico.getReprobadas()));
+		params.put("HISTORIAL_NO_PRESENTADAS", valorNumerico(historialAcademico.getNopresentadas()));
 		params.put("FECHA_CONSULTA", historialAcademico.getFechaConsulta());
 		params.put("NOMBRE_ESTRUCTURA", historialAcademico.getNombreEstructura());
-		
-		
+
 		//Parametros de datos
 		JRBeanArrayDataSource dsHistorial = new JRBeanArrayDataSource(eventos.toArray());
 		params.put("dsHistorial", dsHistorial);
-		
-		reporteConfig.setParametros(params);
 
-		setReportePDF(ReporteUtil.getStreamedContentOfBytes(ReporteUtil.generar(reporteConfig), "application/pdf",
-				historialAcademico.getMatricula()+"_Historial_academico"));
+		try (InputStream plantilla = FacesContext.getCurrentInstance().getExternalContext()
+				.getResourceAsStream("/resources/jasperReport/gestionAprendizaje/expediente_academico.jrxml")) {
+			setReportePDF(ReporteUtil.getStreamedContentOfBytes(
+					HistorialAcademicoReporte.generar(plantilla, params, columnasHistorial, sistema.getCabecerasHistorial()), "application/pdf",
+					historialAcademico.getMatricula() + "_Historial_academico_" + System.currentTimeMillis()));
+		} catch (Exception e) {
+			log.error("No fue posible generar el historial académico.", e);
+			agregarMsgError("No fue posible generar el historial académico.", null);
+			return;
+		}
 		RequestContext.getCurrentInstance().update("reporte");
 
 		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "GEN_EXP_ACA_PDF", "", requestActual(),
@@ -327,7 +348,12 @@ public class ConstanciasBean extends BaseBean {
 		parrafoSalida = parrafoSalida.replace("$_num_horas_", eventoSeleccionado.getDuracionHrs());
 		return parrafoSalida;
 	}
-	
+
+	public String getPromedioHistorial() {
+		if (historialAcademico == null || historialAcademico.getPromedio() == null) return "0.00";
+		return historialAcademico.getPromedio().setScale(2, RoundingMode.HALF_UP).toPlainString();
+	}
+
 	public HistorialAcademicoDTO getHistorialAcademico() {
 		return historialAcademico;
 	}
@@ -445,7 +471,6 @@ public class ConstanciasBean extends BaseBean {
 		return fichaIntegralV2.getAccionSugerida().trim();
 	}
 
-
 	public void setHistorialAcademico(HistorialAcademicoDTO historialAcademico) {
 		this.historialAcademico = historialAcademico;
 	}
@@ -545,9 +570,5 @@ public class ConstanciasBean extends BaseBean {
 	public void setExpedienteCurricularV2Facade(ExpedienteCurricularV2Facade expedienteCurricularV2Facade) {
 		this.expedienteCurricularV2Facade = expedienteCurricularV2Facade;
 	}
-
-
-
-	
 
 }

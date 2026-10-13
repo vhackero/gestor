@@ -13,6 +13,7 @@
 	<ui:define name="content">
 		<f:event type="preRenderView" listener="#{constanciasBean.init}" />
 		<h:form>
+            <p:ajaxStatus onstart="PF('dialogLayout').show()" onsuccess="PF('dialogLayout').hide()" onerror="PF('dialogLayout').hide()" />
 			<style type="text/css">
 				.historial-context-strip {
 					display: flex;
@@ -157,7 +158,7 @@
 								<div class="col-md-3 col-xs-12">
 									<h:outputLabel value="#{sistema.obtenerTexto('gw.alumno.constancias.promedio')}" styleClass="bloque" />
 									<h:outputText
-										value="#{constanciasBean.historialAcademico.promedio}">
+										value="#{constanciasBean.promedioHistorial}">
 										<f:convertNumber pattern="#0.00" />
 									</h:outputText>
 								</div>
@@ -256,119 +257,8 @@
 										placeholder="#{sistema.obtenerTexto('gw.global.tablas.etiqueta.ayuda')}" />
 								</p:outputPanel>
 							</f:facet>
-							<p:column headerText="Nombre de la asignatura"
-								sortBy="#{evento.nombreEc}" filterMatchMode="contains"
-								filterBy="#{evento.nombreEc}" filterStyle="display:none">
-								<h:outputText value="#{evento.nombreEc}" />
-							</p:column>
-							<p:column headerText="Nombre del Grupo"
-								sortBy="#{evento.nombreGrupo}" filterMatchMode="contains"
-								filterBy="#{evento.nombreGrupo}" filterStyle="display:none">
-								<h:outputText value="#{evento.nombreGrupo}" />
-							</p:column>
-							<p:column headerText="#{constanciasBean.historialAcademico.nombreEstructura}" sortBy="#{evento.cs}"
-								filterMatchMode="contains" filterBy="#{evento.cs}"
-								filterStyle="display:none">
-								<h:outputText value="#{evento.cs}" />
-							</p:column>
-							<p:column headerText="clave" sortBy="#{evento.clave}"
-								filterMatchMode="contains" filterBy="#{evento.clave}"
-								filterStyle="display:none">
-								<h:outputText value="#{evento.clave}" />
-							</p:column>
-							<p:column headerText="Clave SEP" sortBy="#{evento.clavesep}"
-								filterMatchMode="contains" filterBy="#{evento.clavesep}"
-								filterStyle="display:none">
-								<h:outputText value="#{evento.clavesep}" />
-							</p:column>
-							<p:column headerText="Créditos" sortBy="#{evento.creditos}"
-								filterMatchMode="contains" filterBy="#{evento.creditos}"
-								filterStyle="display:none">
-								<h:outputText value="#{evento.creditos}" />
-							</p:column>
-							<p:column headerText="Periodo" sortBy="#{evento.periodo}"
-								filterMatchMode="contains" filterBy="#{evento.periodo}"
-								filterStyle="display:none">
-								<h:outputText value="#{evento.periodo}" />
-							</p:column>
-							<p:column headerText="Tipo de evaluacion"
-								sortBy="#{evento.tipoEvaluacion}" filterMatchMode="contains"
-								filterBy="#{evento.tipoEvaluacion}" filterStyle="display:none">
-								<h:outputText value="#{evento.tipoEvaluacion}" />
-							</p:column>
-								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.noActa')}" sortBy="#{evento.nActa}"
-									filterMatchMode="contains" filterBy="#{evento.nActa}"
-									filterStyle="display:none">
-									<h:outputText value="#{evento.nActa}" />
-								</p:column>
-								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.modalidad')}" sortBy="#{evento.modalidad}"
-									filterMatchMode="contains" filterBy="#{evento.modalidad}"
-									filterStyle="display:none">
-									<h:outputText value="#{evento.modalidad}" />
-								</p:column>
-								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.fechaFinalizacion')}"
-									sortBy="#{evento.fecha}" filterMatchMode="contains"
-									filterBy="#{evento.fecha}" filterStyle="display:none">
-								<h:outputText value="#{evento.fecha}">
-									<f:convertDateTime type="date"
-										pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
-								</h:outputText>
-							</p:column>
-								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.encuestaFinal')}"
-									sortBy="#{evento.nombreEstatusEncuesta}"
-									filterMatchMode="contains"
-									filterBy="#{evento.nombreEstatusEncuesta}"
-									filterStyle="display:none">
-								<h:outputText id="enc" value="#{evento.nombreEstatusEncuesta}"
-									styleClass="#{evento.nombreEstatusEncuesta eq 'Pendiente' ? 'colorRojo' : ''}" />
-								<p:tooltip for="enc"
-									rendered="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
-										value="#{sistema.obtenerTexto('gw.alumno.constancias.encuestaPendiente')}" />
-							</p:column>
-								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.promedioEvaluaciones')}"
-									sortBy="#{evento.nombreEstatusEncuesta}"
-									filterMatchMode="contains"
-									filterBy="#{evento.calificacionTotal}"
-									filterStyle="display:none">
-									<h:outputText
-										value="#{evento.modalidad eq 'En línea' ? sistema.obtenerTexto('gw.alumno.constancias.noAplica') : evento.calificacionTotal}" />
-								</p:column>
-								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.porcentajeAsistencias')}"
-									sortBy="#{evento.porcentajeAsistencia}"
-									filterMatchMode="contains"
-									filterBy="#{evento.porcentajeAsistencia}"
-									filterStyle="display:none">
-									<h:outputText
-										value="#{evento.modalidad eq 'En línea' ? sistema.obtenerTexto('gw.alumno.constancias.noAplica') : evento.porcentajeAsistencia}" />
-								</p:column>
-								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.constancias.calificacionFinal')}"
-									sortBy="#{evento.calificacionFinal}" filterMatchMode="contains"
-									filterBy="#{evento.calificacionFinal}"
-									filterStyle="display:none">
-								<!--<h:outputText value="#{evento.calificacionFinal}" /-->
-								<h:outputText
-									value="#{evento.calificacionFinal eq '666.0' ? 'NP' : evento.calificacionFinal}" />
-							</p:column>
-							<p:column headerText="Constancias" styleClass="text-center">
-								<p:commandButton action="#{constanciasBean.generarConstancia}"
-									ajax="true" id="btn1"
-									disabled="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
-									rendered="#{evento.tipoConstancia eq 1}"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye">
-									<f:setPropertyActionListener value="#{evento}"
-										target="#{constanciasBean.eventoSeleccionado}" />
-								</p:commandButton>
-									<p:tooltip for="btn1" position="top" value="#{sistema.obtenerTexto('gw.alumno.constancias.ver')}" />
-								<p:commandButton id="btn2"
-									action="#{constanciasBean.generarConstancia}" ajax="true"
-									disabled="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
-									rendered="#{evento.tipoConstancia eq 2}"
-									styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye">
-									<f:setPropertyActionListener value="#{evento}"
-										target="#{constanciasBean.eventoSeleccionado}" />
-								</p:commandButton>
-									<p:tooltip for="btn2" value="#{sistema.obtenerTexto('gw.alumno.constancias.ver')}" position="top" />
-							</p:column>
+							<ui:include src="columnasHistorial.xhtml" />
+
 						</p:dataTable>
 					</div>
 				</div>

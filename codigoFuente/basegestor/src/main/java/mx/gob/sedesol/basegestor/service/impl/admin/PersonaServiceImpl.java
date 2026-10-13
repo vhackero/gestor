@@ -105,6 +105,8 @@ import mx.gob.sedesol.basegestor.service.admin.RoleService;
 
 @Service("personaService")
 public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> implements PersonaService {
+	@javax.persistence.PersistenceContext
+	private javax.persistence.EntityManager entityManagerFuente;
 
 	private static final Logger logger = Logger.getLogger(PersonaServiceImpl.class);
 
@@ -1540,6 +1542,50 @@ public class PersonaServiceImpl extends ComunValidacionService<PersonaDTO> imple
 	    }
 		exito = true;
 		return exito;
+	}
+
+	@Override
+	@Transactional(propagation=org.springframework.transaction.annotation.Propagation.REQUIRES_NEW,rollbackFor=Exception.class)
+	public int guardarPersonasFuenteExterna(List<CapturaPersonaDTO> datos,Integer convocatoria,boolean vincularUsuario) {
+		if(datos==null || datos.isEmpty()) return 0;
+		if(datos.size()>250) throw new IllegalArgumentException("El bloque de importacion supera 250 usuarios.");
+		List<RelUsuarioDatosLaborales> laborales=new ArrayList<>();
+		List<RelPersonaCorreo> correos=new ArrayList<>();
+		List<TblDomiciliosPersona> domicilios=new ArrayList<>();
+		List<RelPersonaRol> roles=new ArrayList<>();
+		List<SsoElemento> elementos=new ArrayList<>();
+		java.util.Map<Integer,CatRol> cacheRoles=new java.util.HashMap<>();
+		RolDTO rolAlumnoPorDefecto=null;
+		for(CapturaPersonaDTO captura:datos) {
+			TblPersona persona=personaRepo.save(mapper.map(captura.getPersona(),TblPersona.class));
+			captura.getPersona().setIdPersona(persona.getIdPersona());
+			RelUsuarioDatosLaborales laboral=mapper.map(captura.getDatosLaborales(),RelUsuarioDatosLaborales.class);
+			laboral.setPersona(persona);laborales.add(laboral);
+			RelPersonaCorreo correo=mapper.map(captura.getPersonaCorreo(),RelPersonaCorreo.class);
+			correo.setPersona(persona);correos.add(correo);
+			TblDomiciliosPersona domicilio=mapper.map(captura.getDomicilioPersona(),TblDomiciliosPersona.class);
+			domicilio.setPersona(persona);domicilios.add(domicilio);
+			java.util.Map<Integer,RolDTO> rolesPersona=new java.util.LinkedHashMap<>();
+			if(captura.getRoles()!=null) for(RolDTO rol:captura.getRoles()) rolesPersona.put(rol.getIdRol(),rol);
+			if(!rolesPersona.containsKey(2)) {
+				if(rolAlumnoPorDefecto==null) rolAlumnoPorDefecto=rolService.buscarPorId(2);
+				rolesPersona.put(2,rolAlumnoPorDefecto);
+			}
+			for(RolDTO rol:rolesPersona.values()) {
+				CatRol entidadRol=cacheRoles.get(rol.getIdRol());
+				if(entidadRol==null) {entidadRol=mapper.map(rol,CatRol.class);cacheRoles.put(rol.getIdRol(),entidadRol);}
+				roles.add(new RelPersonaRol(entidadRol,persona,persona.getUsuarioModifico()));
+			}
+			if(captura.getElementos()!=null) for(SsoElementoDTO dto:captura.getElementos()) {
+				SsoElemento elemento=mapper.map(dto,SsoElemento.class);elemento.setPersona(persona);elementos.add(elemento);
+			}
+		}
+		usuarioDatosLaboralesRepo.save(laborales);personaCorreoRepo.save(correos);
+		domicilioPersonaRepo.save(domicilios);personaRolesRepo.save(roles);
+		if(!elementos.isEmpty()) ssoElementoRepo.save(elementos);
+		if(vincularUsuario) usuariosImportarRepo.insertarAspirantesFuenteLote(datos,convocatoria);
+		entityManagerFuente.flush();entityManagerFuente.clear();
+		return datos.size();
 	}
 
 	@Override

@@ -12,6 +12,12 @@ public class ActaDTO implements Serializable {
 	private byte[] blob;
 	private Date fechaCierre;
 	private Long usuarioModifico;
+	private boolean estructuraPdfValida;
+	private long tamanioArchivo;
+	public boolean isEstructuraPdfValida() { return estructuraPdfValida; }
+	public void setEstructuraPdfValida(boolean valor) { estructuraPdfValida = valor; }
+	public long getTamanioArchivo() { return tamanioArchivo; }
+	public void setTamanioArchivo(long valor) { tamanioArchivo = valor; }
 	
 	public Integer getIdActa() {
 		return idActa;

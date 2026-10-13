@@ -10,6 +10,9 @@
     <http pattern="/ws/public/**" security="none" />
     <!-- La API SIGIE aplica autenticacion maquina-a-maquina en SigieSecurityFilter. -->
     <http pattern="/SIGIE/**" security="none" />
+    <!-- Alias del mismo controlador: protegido tambien por SigieSecurityFilter. -->
+    <http pattern="/ws/v1/estudiantes" security="none" />
+    <http pattern="/ws/v1/estudiantes/**" security="none" />
 
     <authentication-manager erase-credentials="true" alias="customAuthenticationProvider">
         <authentication-provider user-service-ref="customUserDetailsService">

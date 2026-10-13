@@ -17,6 +17,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
+import mx.gob.sedesol.gestorweb.sistema.SistemaBean;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -37,6 +38,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistente
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvidenciaCasoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.DateUtils;
+import mx.gob.sedesol.basegestor.commons.utils.ColumnasHistorial;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoDocumentoEnum;
@@ -55,6 +57,7 @@ import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview.ConstanciasB
 import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 import mx.gob.sedesol.gestorweb.commons.dto.ReporteConfig;
 import mx.gob.sedesol.gestorweb.commons.utils.ReporteUtil;
+import mx.gob.sedesol.gestorweb.commons.utils.HistorialAcademicoReporte;
 import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
 
 @SessionScoped
@@ -67,6 +70,12 @@ public class ExpedienteAlumnoBean extends BaseBean {
 
 	@ManagedProperty(value = "#{grupoParticipanteService}")
 	private GrupoParticipanteService grupoParticipanteService;
+
+	@ManagedProperty(value = "#{sistema}")
+	private SistemaBean sistema;
+
+	public SistemaBean getSistema() { return sistema; }
+	public void setSistema(SistemaBean sistema) { this.sistema = sistema; }
 
 	@ManagedProperty(value = "#{parametroSistemaService}")
 	private ParametroSistemaService parametrosSistemaService;
@@ -636,22 +645,16 @@ public class ExpedienteAlumnoBean extends BaseBean {
 		prepararContextoConsultaGestor();
 		return ConstantesGestorWeb.NAVEGA_TABLA_CURRICULAR_ASISTIDA;
 	}
+	private String valorNumerico(Number valor) {
+		if (valor == null) return "0.00";
+		if (valor instanceof BigDecimal) {
+			return ((BigDecimal) valor).setScale(2, RoundingMode.HALF_UP).toPlainString();
+		}
+		return valor.toString();
+	}
 
 	public void generarReporte() {
-
-		String rutaFondoConstancia = FacesContext.getCurrentInstance().getExternalContext().getRequestScheme() + "://"
-				+ FacesContext.getCurrentInstance().getExternalContext().getRequestServerName() + ":"
-				+ FacesContext.getCurrentInstance().getExternalContext().getRequestServerPort()
-				+ "/recursos/documentos/fondoConstancia.png";
-
 		reportePDF = null;
-
-		ReporteConfig reporteConfig = new ReporteConfig();
-		reporteConfig.setDatos(null);
-		reporteConfig.setNombreReporte("Plantilla_SISI");
-		reporteConfig.setPathJasper("/resources/jasperReport/gestionAprendizaje/expediente_academico.jasper");
-
-		reporteConfig.setTipoReporte(ReporteUtil.REPORTE_PDF);
 
 		HashMap<String, Object> params = new HashMap<>();
 		
@@ -686,14 +689,13 @@ public class ExpedienteAlumnoBean extends BaseBean {
 		params.put("PROG_EDUCATIVO",historial.getProgramaEducativo());
 		params.put("CLAVE", historial.getClave());
 		params.put("NIVEL", historial.getNivel());
-		params.put("PROMEDIO", historial.getPromedio().intValue());
+		params.put("HISTORIAL_PROMEDIO", valorNumerico(historial.getPromedio()));
 		params.put("CREDITOS", historial.getCreditos().intValue());
 		params.put("TOTAL_CREDITOS", historial.getTotalCreditos() != null
 				? historial.getTotalCreditos().toString() : "-");
-		params.put("APROBADAS", historial.getAprobadas().intValue());
-		params.put("REPROBADAS", historial.getReprobadas().intValue());
-		params.put("NO_PRESENTADAS", historial.getNopresentadas().intValue());
-		params.put("TOTAL", historial.getTotal().intValue());
+		params.put("HISTORIAL_APROBADAS", valorNumerico(historial.getAprobadas()));
+		params.put("HISTORIAL_REPROBADAS", valorNumerico(historial.getReprobadas()));
+		params.put("HISTORIAL_NO_PRESENTADAS", valorNumerico(historial.getNopresentadas()));
 		params.put("FECHA_CONSULTA", historial.getFechaConsulta());
 		params.put("NOMBRE_ESTRUCTURA", historial.getNombreEstructura());
 		
@@ -702,10 +704,18 @@ public class ExpedienteAlumnoBean extends BaseBean {
 		JRBeanArrayDataSource dsHistorial = new JRBeanArrayDataSource(listaEventos.toArray());
 		params.put("dsHistorial", dsHistorial);
 		
-		reporteConfig.setParametros(params);
-
-		setReportePDF(ReporteUtil.getStreamedContentOfBytes(ReporteUtil.generar(reporteConfig), "application/pdf",
-				historial.getMatricula()+"_Historial_academico"));
+		try (InputStream plantilla = FacesContext.getCurrentInstance().getExternalContext()
+				.getResourceAsStream("/resources/jasperReport/gestionAprendizaje/expediente_academico.jrxml")) {
+			List<ColumnasHistorial> columnas = ColumnasHistorial.leer(
+					parametrosSistemaService.obtenerParametro(ColumnasHistorial.PARAMETRO));
+			setReportePDF(ReporteUtil.getStreamedContentOfBytes(
+					HistorialAcademicoReporte.generar(plantilla, params, columnas, sistema.getCabecerasHistorial()), "application/pdf",
+					historial.getMatricula() + "_Historial_academico_" + System.currentTimeMillis()));
+		} catch (Exception e) {
+			log.error("No fue posible generar el historial académico del estudiante consultado.", e);
+			agregarMsgError("No fue posible generar el historial académico.", null);
+			return;
+		}
 		RequestContext.getCurrentInstance().update("reporte");
 
 		bitacoraBean.guardarBitacora(idPersonaEnSesion(), "GEN_EXP_ACA_PDF", "", requestActual(),
@@ -725,13 +735,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 		if (historial == null || historial.getPromedio() == null) {
 			return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
 		}
-		BigDecimal promedio = historial.getPromedio();
-		if (promedio.compareTo(BigDecimal.TEN) > 0) {
-			promedio = promedio.divide(BigDecimal.TEN, 2, RoundingMode.HALF_UP);
-		} else {
-			promedio = promedio.setScale(2, RoundingMode.HALF_UP);
-		}
-		return promedio;
+		return historial.getPromedio().setScale(2, RoundingMode.HALF_UP);
 	}
 
 	public String getEstatusHistorialFormateado() {
@@ -1015,3 +1019,5 @@ public class ExpedienteAlumnoBean extends BaseBean {
 		this.nombreArchivoEvidenciaV2 = nombreArchivoEvidenciaV2;
 	}
 }
+
+

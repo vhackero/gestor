@@ -73,6 +73,19 @@ import mx.gob.sedesol.gestorweb.ws.ServiciosExternos;
 @ManagedBean
 @SessionScoped
 public class AdminPersonaBean extends BaseBean {
+	@ManagedProperty("#{importacionUsuariosExternosService}")
+	private transient mx.gob.sedesol.basegestor.service.impl.admin.ImportacionUsuariosExternosService importacionUsuariosExternosService;
+	private String idImportacionFuente;
+	public void setImportacionUsuariosExternosService(mx.gob.sedesol.basegestor.service.impl.admin.ImportacionUsuariosExternosService servicio) {
+		this.importacionUsuariosExternosService=servicio;
+	}
+	public mx.gob.sedesol.basegestor.commons.dto.admin.ImportacionFuenteEstadoDTO getEstadoImportacionFuente() {
+		return importacionUsuariosExternosService.consultar(idImportacionFuente,getUsuarioEnSession()==null?null:getUsuarioEnSession().getIdPersona());
+	}
+	public boolean isImportacionFuenteEnCurso() {
+		mx.gob.sedesol.basegestor.commons.dto.admin.ImportacionFuenteEstadoDTO estado=getEstadoImportacionFuente();
+		return estado!=null && !estado.isTerminado();
+	}
 
 	private static final long serialVersionUID = 1L;
 
@@ -166,73 +179,24 @@ public class AdminPersonaBean extends BaseBean {
 	}
 
 	public void obtenerUsuarios() {
-
-		boolean exito = false;
-
-		listaRoles = new DualListModel<>(personaServiceFacade.obtenerTodosRoles(), new ArrayList<>());
-		Long usuarioModifico = 2L;
-		String idPais = "MX";
-		EntidadFederativaDTO sede = entidadFederativaService.buscarPorId(11);
-		List<MunicipioDTO> municipio = municipioService.buscarPorEntidadFederativa(11);
-		AsentamientoDTO asentamiento = asentamientoService.buscarPorId("100010407");
-		nuevaPersona = true;
-		mostrarContrasenia = true;
-
-		listaDatos = new ArrayList<CapturaPersonaDTO>();
-
-		listaMunicipiosLaboral = new ArrayList<>();
-		listaEntidades = personaServiceFacade.obtenerEntidadesPorPais(ConstantesGestor.ID_PAIS_MEXICO);
-		listaMunicipiosDomicilio = new ArrayList<>();
-
-		String convocatoria = personaFiltros.getConvocatoria();
-		String fuenteExterna = personaFiltros.getFuenteExterna();
-
-		boolean vincularUsuario = personaFiltros.getVincularUsuario();
-
-		if (convocatoria == null || fuenteExterna == null) {
+		if (isImportacionFuenteEnCurso()) {
+			agregarMsgInfo("La importación sigue en curso; consulte el avance.", "Importación");
 			return;
 		}
-
-		List<PersonaSigeDTO> personasSige = personaServiceFacade.consultaPersonasImportar(fuenteExterna, convocatoria);
-
-		if (personasSige == null || personasSige.isEmpty()) {
-			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccion').show()");
-			return;
-		}
-
-		StringBuilder rutaCompletaFoto = new StringBuilder(rutaUndertow);
-		rutaCompletaFoto.append(nombreFotoComun);
-		listaDatos = personasSige.parallelStream().map(personaSige -> {
-			CapturaPersonaDTO datos = new CapturaPersonaDTO();
-			datos.getPersona().setRutaCompletaFoto(rutaCompletaFoto.toString());
-			datos.setRoles(listaRoles.getTarget());
-			datos.setDatosAcademicos(personaDatosAcademicos());
-
-			PersonaDTO personaInsertar = crearPersona(personaSige, usuarioModifico);
-			datos.setPersona(personaInsertar);
-			datos.setDomicilioPersona(personaDomicilio(asentamiento, usuarioModifico, idPais, datos));
-			datos.setDatosLaborales(datoslaborales(personaInsertar, sede, municipio));
-			datos.setPersonaCorreo(personaCorreo(usuarioModifico, datos));
-			datos.getPersona().setContraseniaEncriptada(encoder.encode(datos.getPersona().getNuevaContrasenia()));
-			return datos;
-		}).collect(Collectors.toList());
-
-		logger.info("Hola");
 		try {
-			exito = personaServiceFacade.getPersonaService().guardarPersonas(listaDatos, convocatoria,
-					vincularUsuario);
+			if (getUsuarioEnSession()==null) throw new IllegalArgumentException("No se pudo identificar al usuario en sesión.");
+			Integer fuente=Integer.valueOf(personaFiltros.getFuenteExterna());
+			Integer convocatoria=Integer.valueOf(personaFiltros.getConvocatoria());
+			idImportacionFuente=importacionUsuariosExternosService.iniciar(fuente,convocatoria,
+					personaFiltros.getVincularUsuario(),getUsuarioEnSession().getIdPersona(),rutaUndertow+nombreFotoComun);
+			agregarMsgInfo("Consulte el resultado y avance en el panel de importación.", "Importación");
+		} catch (IllegalArgumentException e) {
+			agregarMsgError("No fue posible iniciar la importación. Verifique la selección o si ya hay una importación en curso.", "Importación");
 		} catch (Exception e) {
-			exito = false;
+			logger.error("No fue posible iniciar la importacion externa: "+e.getClass().getSimpleName());
+			agregarMsgError("No fue posible iniciar la importación.", "Importación");
 		}
-		logger.info(exito);
-		if (exito) {
-			agregarMsgInfo("Registros insertados", "Exito");
-		} else {
-			agregarMsgError("Registros no insertados", "Ocurrio un error");
-		}
-
 	}
-
 	private PersonaDTO crearPersona(PersonaSigeDTO persona, Long usuarioModifico) {
 		PersonaDTO personaInsertar = new PersonaDTO(usuarioModifico, "MX");
 		personaInsertar.setUsuario(persona.getMatricula().toUpperCase());
@@ -694,8 +658,10 @@ public class AdminPersonaBean extends BaseBean {
 					.obtenerCorreoInstitucional(datos.getPersona().getIdPersona());
 			datos.setCorreoDePersonaEnBD(correoOriginal);
 		}
-		//datos.getPersona().setUnidadAdministrativa(datos.getPersona().getNuevaContrasenia());
 		if (!ObjectUtils.isNullOrEmpty(datos.getPersona().getNuevaContrasenia())) {
+			if (nuevaPersona) {
+				datos.getPersona().setUnidadAdministrativa(datos.getPersona().getNuevaContrasenia());
+			}
 			datos.getPersona().setContraseniaEncriptada(encoder.encode(datos.getPersona().getNuevaContrasenia()));
 		}
 

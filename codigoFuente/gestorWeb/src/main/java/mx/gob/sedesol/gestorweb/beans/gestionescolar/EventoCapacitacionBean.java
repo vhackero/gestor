@@ -20,6 +20,9 @@ import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService
 import mx.gob.sedesol.basegestor.service.planesyprogramas.PlanService;
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
+import org.primefaces.event.FileUploadEvent;
+import org.springframework.security.core.context.SecurityContextHolder;
+import mx.gob.sedesol.gestorweb.config.security.CustomPermissionEvaluator;
 import org.primefaces.model.StreamedContent;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
@@ -37,6 +40,9 @@ import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaD
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.MallaCurricularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.RelProgDuracionDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
+import mx.gob.sedesol.basegestor.commons.utils.ActaDocumentoUtils;
+import mx.gob.sedesol.basegestor.commons.utils.EstatusConsultaActaEnum;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelGrupoParticipanteDTO;
 import mx.gob.sedesol.basegestor.commons.utils.TipoServicioEnum;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ActaService;
@@ -118,6 +124,7 @@ public class EventoCapacitacionBean extends BaseBean {
 	private String filtroConsultarActasAnioPeriodo;
 	private String filtroConsultarActasNumeroElementos;
 	private Integer filtroConsultarActasEstatus;
+	private String filtroConsultarActasTextoEvento;
 	private List<SelectItem> opcionesConsultarActasPlanPrograma;
 	private List<SelectItem> opcionesConsultarActasAnioPeriodo;
 	private List<SelectItem> opcionesConsultarActasNumeroElementos;
@@ -128,6 +135,10 @@ public class EventoCapacitacionBean extends BaseBean {
 	private ConsultaActaEventoDTO grupoListadoActasConsulta;
 	private List<ActaDTO> actasListadoConsulta;
 	private Map<Long, String> cacheUsuariosActas;
+	private Integer grupoCargaActaConsulta;
+	private Integer documentoCargaActaConsulta;
+	private ConsultaActaEventoDTO detalleActaConsulta;
+	private List<RelGrupoParticipanteDTO> alumnosActaConsulta = new ArrayList<RelGrupoParticipanteDTO>();
 	private boolean mostrarVistaModificarEstatus;
 	private List<String> filtroModificarPlanPrograma;
 	private String filtroModificarAnioPeriodo;
@@ -226,12 +237,14 @@ public class EventoCapacitacionBean extends BaseBean {
 	}
 
 	public void mostrarVistaConsultarActas() {
+		validarPermisoActas();
 		mostrarVistaConsultarActas = true;
 		mostrarVistaModificarEstatus = false;
 		limpiarCamposConsultarActas();
 	}
 
 	public void mostrarVistaModificarEstatus() {
+		validarPermisoModificarEstatus();
 		mostrarVistaModificarEstatus = true;
 		mostrarVistaConsultarActas = false;
 		limpiarCamposModificarEstatus();
@@ -267,6 +280,7 @@ public class EventoCapacitacionBean extends BaseBean {
 	}
 
 	public void buscarModificarEstatus() {
+		validarPermisoModificarEstatus();
 		busquedaModificarEstatusEjecutada = true;
 		idEstatusModificarSeleccionado = null;
 		resultadosModificarEstatus.clear();
@@ -293,6 +307,7 @@ public class EventoCapacitacionBean extends BaseBean {
 	}
 
 	public void actualizarModificarEstatus() {
+		validarPermisoModificarEstatus();
 		if (ObjectUtils.isNull(idEstatusModificarSeleccionado)) {
 			agregarMsgError("Debes seleccionar el estatus a cambiar.", null);
 			return;
@@ -387,19 +402,29 @@ public class EventoCapacitacionBean extends BaseBean {
 	}
 
 	public void limpiarCamposConsultarActas() {
+		actaConsultaPDF = null;
 		filtroConsultarActasPlanPrograma = new ArrayList<String>();
 		filtroConsultarActasAnioPeriodo = null;
 		filtroConsultarActasNumeroElementos = null;
 		filtroConsultarActasEstatus = null;
+		filtroConsultarActasTextoEvento = null;
 		resultadosConsultarActas = new ArrayList<ConsultaActaEventoDTO>();
 		busquedaConsultarActasEjecutada = false;
 		mostrarListadoActasConsulta = false;
 		grupoListadoActasConsulta = null;
 		actasListadoConsulta = new ArrayList<ActaDTO>();
 		cacheUsuariosActas = new HashMap<Long, String>();
+		grupoCargaActaConsulta = null;
+		documentoCargaActaConsulta = null;
+		detalleActaConsulta = null;
+		alumnosActaConsulta = new ArrayList<RelGrupoParticipanteDTO>();
 	}
 
 	public void buscarConsultarActas() {
+		validarPermisoActas();
+		actaConsultaPDF = null;
+		resultadosConsultarActas = new ArrayList<ConsultaActaEventoDTO>();
+		regresarResultadosConsultarActas();
 		if (ObjectUtils.isNullOrEmpty(filtroConsultarActasPlanPrograma)
 				|| ObjectUtils.isNullOrEmpty(filtroConsultarActasAnioPeriodo)
 				|| ObjectUtils.isNullOrEmpty(filtroConsultarActasNumeroElementos)
@@ -419,7 +444,7 @@ public class EventoCapacitacionBean extends BaseBean {
 
 		resultadosConsultarActas = eventoCapacitacionServiceFacade.consultarActasPorFiltros(
 				filtroConsultarActasAnioPeriodo, filtroConsultarActasNumeroElementos, idsPrograma,
-				filtroConsultarActasEstatus);
+				filtroConsultarActasEstatus, filtroConsultarActasTextoEvento);
 		if (resultadosConsultarActas == null) {
 			resultadosConsultarActas = new ArrayList<ConsultaActaEventoDTO>();
 		}
@@ -427,55 +452,43 @@ public class EventoCapacitacionBean extends BaseBean {
 	}
 
 	public void eliminarActaConsulta(ConsultaActaEventoDTO consultaActa) {
-		if (consultaActa == null || consultaActa.getIdGrupo() == null) {
-			agregarMsgWarn("No fue posible identificar el grupo del acta a eliminar.", null);
-			return;
-		}
 		try {
-			GrupoDTO grupo = eventoCapacitacionServiceFacade.getGrupoService()
-					.buscarGrupoPorId(consultaActa.getIdGrupo().intValue());
-			if (ObjectUtils.isNull(grupo)) {
-				agregarMsgWarn("No fue posible cargar la información del grupo seleccionado.", null);
+			validarPermisoActas();
+			Integer grupo = idGrupoConsulta(consultaActa);
+			List<ActaDTO> documentos = actaService.getActasByIdGrupo(grupo);
+			if (documentos.size() > 1) {
+				listarActasConsulta(consultaActa);
+				agregarMsgWarn("Existen varios documentos. Seleccione cuál retirar desde el listado.", null);
 				return;
 			}
-
-			ActaDTO acta = actaService.getActaByIdGrupo(grupo.getIdGrupo());
-			if (ObjectUtils.isNull(acta)) {
-				agregarMsgInfo("No existe una acta asociada al grupo.", null);
-				return;
-			}
-
-			eventoCapacitacionServiceFacade.actualizaCalificacionesAlEliminarActa(grupo);
-			ResultadoDTO<ActaDTO> resEli = actaService.eliminar(acta);
-			if (ObjectUtils.isNotNull(resEli) && resEli.esCorrecto()) {
-				ResultadoDTO<GrupoDTO> resTx = eventoCapacitacionServiceFacade.actualizarEstatusActa(grupo,
-						getUsuarioEnSession().getIdPersona(), false);
-				if (ObjectUtils.isNull(resTx) || !resTx.esCorrecto()) {
-					agregarMsgError("Ocurrió un error al actualizar el estatus del acta.", null);
-					return;
-				}
-				agregarMsgInfo("ELIMINAR ACTA: " + acta.getIdActa() + " - CORRECTA", null);
-				buscarConsultarActas();
-			} else {
-				agregarMsgError("Ocurrió un error al eliminar el acta.", null);
-			}
-		} catch (Exception e) {
-			logger.error("Ocurrió un error al eliminar el acta en consultar actas", e);
-			agregarMsgWarn("Ocurrió un error al eliminar el acta.", null);
-		}
+			if (documentos.isEmpty()) { throw new IllegalArgumentException("El documento ya no existe. Actualice la consulta."); }
+			eventoCapacitacionServiceFacade.eliminarActaYReabrir(grupo, documentos.get(0).getIdActa(),
+					getUsuarioEnSession().getIdPersona());
+			agregarMsgInfo("Acta eliminada y grupo reabierto. Se limpiaron las calificaciones y evaluaciones.", null);
+			refrescarConsultaActas();
+		} catch (Exception e) { errorAccionActa(e); }
 	}
 
 	public void verActaConsulta(ConsultaActaEventoDTO consultaActa) {
-		if (consultaActa == null || consultaActa.getIdGrupo() == null) {
-			agregarMsgWarn("No fue posible identificar el grupo del acta a visualizar.", null);
-			return;
-		}
-		ActaDTO acta = actaService.getActaByIdGrupo(consultaActa.getIdGrupo().intValue());
-		abrirVisorActa(acta);
+		try {
+			validarPermisoActas();
+			List<ActaDTO> documentos = actaService.getActasByIdGrupo(idGrupoConsulta(consultaActa));
+			if (documentos.size() > 1) { listarActasConsulta(consultaActa); return; }
+			abrirVisorActa(documentos.isEmpty() ? null : documentos.get(0));
+		} catch (Exception e) { errorAccionActa(e); }
 	}
 
 	public void verActaListadoConsulta(ActaDTO acta) {
-		abrirVisorActa(acta);
+		try {
+			validarPermisoActas();
+			ActaDTO actual = acta == null ? null : actaService.buscarPorId(acta.getIdActa());
+			if (actual == null || grupoListadoActasConsulta == null
+					|| !grupoListadoActasConsulta.getIdGrupo().equals(Long.valueOf(actual.getGrupo()))) {
+				agregarMsgWarn("El documento ya no existe o no pertenece al grupo seleccionado.", null);
+				return;
+			}
+			abrirVisorActa(actual);
+		} catch (Exception e) { errorAccionActa(e); }
 	}
 
 	private void abrirVisorActa(ActaDTO acta) {
@@ -487,8 +500,8 @@ public class EventoCapacitacionBean extends BaseBean {
 			ActaDTO actaCompleta = acta.getIdActa() == null ? null : actaService.buscarPorId(acta.getIdActa());
 			acta = ObjectUtils.isNull(actaCompleta) ? acta : actaCompleta;
 		}
-		if (ObjectUtils.isNull(acta) || ObjectUtils.isNull(acta.getBlob())) {
-			agregarMsgInfo("No existe una acta asociada al grupo.", null);
+		if (!ActaDocumentoUtils.esPdfValido(acta.getBlob())) {
+			agregarMsgWarn("El documento está vacío o no es un PDF válido. Puede reemplazarlo o retirarlo.", null);
 			return;
 		}
 		try {
@@ -503,6 +516,7 @@ public class EventoCapacitacionBean extends BaseBean {
 	}
 
 	public void listarActasConsulta(ConsultaActaEventoDTO consultaActa) {
+		validarPermisoActas();
 		if (consultaActa == null || consultaActa.getIdGrupo() == null) {
 			agregarMsgWarn("No fue posible identificar el grupo de las actas.", null);
 			return;
@@ -522,62 +536,163 @@ public class EventoCapacitacionBean extends BaseBean {
 		actasListadoConsulta = new ArrayList<ActaDTO>();
 	}
 
+	/** Retira sólo el documento elegido; conserva el cierre y la evaluación del grupo. */
 	public void eliminarActaListadoConsulta(ActaDTO acta) {
-		if (acta == null || acta.getIdActa() == null || grupoListadoActasConsulta == null
-				|| grupoListadoActasConsulta.getIdGrupo() == null) {
-			agregarMsgWarn("No fue posible identificar el acta a eliminar.", null);
-			return;
-		}
 		try {
-			ResultadoDTO<ActaDTO> resEli = actaService.eliminar(acta);
-			if (ObjectUtils.isNull(resEli) || !resEli.esCorrecto()) {
-				agregarMsgError("Ocurrió un error al eliminar el acta.", null);
-				return;
-			}
+			validarPermisoActas();
+			if (acta == null) { throw new IllegalArgumentException("Seleccione el documento."); }
+			actaService.retirarDocumento(acta.getIdActa(), idGrupoConsulta(grupoListadoActasConsulta));
+			agregarMsgInfo("Documento retirado. Se conservaron las calificaciones y el estado del grupo.", null);
+			refrescarConsultaActas();
+		} catch (Exception e) { errorAccionActa(e); }
+	}
 
-			actasListadoConsulta = actaService.getActasByIdGrupo(grupoListadoActasConsulta.getIdGrupo().intValue());
-			if (actasListadoConsulta == null) {
-				actasListadoConsulta = new ArrayList<ActaDTO>();
-			}
+	public void retirarActaConsulta(ConsultaActaEventoDTO consulta) {
+		try {
+			validarPermisoActas();
+			Integer grupo = idGrupoConsulta(consulta);
+			List<ActaDTO> documentos = actaService.getActasByIdGrupo(grupo);
+			if (documentos.size() > 1) { listarActasConsulta(consulta); return; }
+			if (documentos.isEmpty()) { throw new IllegalArgumentException("El documento ya no existe."); }
+			actaService.retirarDocumento(documentos.get(0).getIdActa(), grupo);
+			agregarMsgInfo("Documento retirado. Se conservaron las calificaciones y el estado del grupo.", null);
+			refrescarConsultaActas();
+		} catch (Exception e) { errorAccionActa(e); }
+	}
 
-			if (actasListadoConsulta.isEmpty()) {
-				GrupoDTO grupo = eventoCapacitacionServiceFacade.getGrupoService()
-						.buscarGrupoPorId(grupoListadoActasConsulta.getIdGrupo().intValue());
-				if (ObjectUtils.isNotNull(grupo)) {
-					eventoCapacitacionServiceFacade.actualizaCalificacionesAlEliminarActa(grupo);
-					ResultadoDTO<GrupoDTO> resTx = eventoCapacitacionServiceFacade.actualizarEstatusActa(grupo,
-							getUsuarioEnSession().getIdPersona(), false);
-					if (ObjectUtils.isNull(resTx) || !resTx.esCorrecto()) {
-						agregarMsgError("Ocurrió un error al actualizar el estatus del acta.", null);
-						return;
-					}
+	public void reabrirActaConsulta(ConsultaActaEventoDTO consulta) {
+		try {
+			validarPermisoActas();
+			eventoCapacitacionServiceFacade.eliminarActaYReabrir(idGrupoConsulta(consulta), null,
+					getUsuarioEnSession().getIdPersona());
+			agregarMsgInfo("Grupo reabierto. Se limpiaron las calificaciones y evaluaciones.", null);
+			refrescarConsultaActas();
+		} catch (Exception e) { errorAccionActa(e); }
+	}
+
+	public void completarCierreActaConsulta(ConsultaActaEventoDTO consulta) {
+		try {
+			validarPermisoActas();
+			eventoCapacitacionServiceFacade.completarCierreActa(idGrupoConsulta(consulta),
+					getUsuarioEnSession().getIdPersona());
+			agregarMsgInfo("Cierre del grupo completado correctamente.", null);
+			refrescarConsultaActas();
+		} catch (Exception e) { errorAccionActa(e); }
+	}
+
+	public void prepararDocumentoActaConsulta(ConsultaActaEventoDTO consulta) {
+		try {
+			validarPermisoActas();
+			Integer grupo = idGrupoConsulta(consulta);
+			List<ActaDTO> documentos = actaService.getActasByIdGrupo(grupo);
+			if (documentos.size() > 1) { listarActasConsulta(consulta); return; }
+			grupoCargaActaConsulta = grupo;
+			documentoCargaActaConsulta = documentos.isEmpty() ? null : documentos.get(0).getIdActa();
+			RequestContext.getCurrentInstance().execute("PF('cargaActaConsulta').show()");
+		} catch (Exception e) { errorAccionActa(e); }
+	}
+
+	public void prepararReemplazoActaListado(ActaDTO acta) {
+		try {
+			validarPermisoActas();
+			Integer grupo = idGrupoConsulta(grupoListadoActasConsulta);
+			ActaDTO actual = null;
+			for (ActaDTO documento : actaService.getActasByIdGrupo(grupo)) {
+				if (acta != null && documento.getIdActa().equals(acta.getIdActa())) { actual = documento; break; }
+			}
+			if (actual == null || !grupo.equals(actual.getGrupo())) {
+				throw new IllegalArgumentException("El documento ya no existe o pertenece a otro grupo.");
+			}
+			grupoCargaActaConsulta = grupo;
+			documentoCargaActaConsulta = actual.getIdActa();
+			RequestContext.getCurrentInstance().execute("PF('cargaActaConsulta').show()");
+		} catch (Exception e) { errorAccionActa(e); }
+	}
+
+	public void cargarDocumentoActaConsulta(FileUploadEvent evento) {
+		try {
+			validarPermisoActas();
+			if (grupoCargaActaConsulta == null || evento == null || evento.getFile() == null
+					|| evento.getFile().getSize() > 10485760L) {
+				throw new IllegalArgumentException("Seleccione un PDF de hasta 10 MB para el grupo elegido.");
+			}
+			actaService.guardarDocumento(documentoCargaActaConsulta, grupoCargaActaConsulta,
+					evento.getFile().getContents(), getUsuarioEnSession().getIdPersona());
+			grupoCargaActaConsulta = null;
+			documentoCargaActaConsulta = null;
+			RequestContext.getCurrentInstance().execute("PF('cargaActaConsulta').hide()");
+			agregarMsgInfo("Documento guardado. Se conservaron las calificaciones y el estado del grupo.", null);
+			refrescarConsultaActas();
+		} catch (Exception e) { errorAccionActa(e); }
+	}
+
+	public void verDetalleActaConsulta(ConsultaActaEventoDTO consulta) {
+		try {
+			validarPermisoActas();
+			Integer grupo = idGrupoConsulta(consulta);
+			detalleActaConsulta = actaService.consultarEstadoGrupo(grupo);
+			detalleActaConsulta.setGrupo(consulta.getGrupo());
+			List<Long> ids = actaService.consultarIdsAlumnos(grupo);
+			alumnosActaConsulta = new ArrayList<RelGrupoParticipanteDTO>();
+			for (RelGrupoParticipanteDTO alumno : eventoCapacitacionServiceFacade.getGrupoParticipanteService()
+					.getParticipantesByGrupo(grupo)) {
+				if (alumno.getPersona() != null && ids.contains(alumno.getPersona().getIdPersona())) {
+					alumnosActaConsulta.add(alumno);
 				}
-				agregarMsgInfo("ELIMINAR ACTA: " + acta.getIdActa() + " - CORRECTA", null);
-				regresarResultadosConsultarActas();
-				buscarConsultarActas();
-				return;
 			}
+			RequestContext.getCurrentInstance().execute("PF('detalleActaConsulta').show()");
+		} catch (Exception e) { errorAccionActa(e); }
+	}
 
-			agregarMsgInfo("ELIMINAR ACTA: " + acta.getIdActa() + " - CORRECTA", null);
-			buscarConsultarActas();
-			listarActasConsulta(grupoListadoActasConsulta);
-		} catch (Exception e) {
-			logger.error("Ocurrió un error al eliminar el acta del listado en consultar actas", e);
-			agregarMsgWarn("Ocurrió un error al eliminar el acta.", null);
+	public boolean mostrarEliminarActaConsulta(ConsultaActaEventoDTO consulta) {
+		return consulta != null && consulta.getNumeroActas() == 1;
+	}
+	public boolean mostrarVerActaConsulta(ConsultaActaEventoDTO consulta) {
+		return consulta != null && consulta.getNumeroActas() == 1 && consulta.getDocumentosInvalidos() == 0;
+	}
+	public boolean mostrarListadoActasConsulta(ConsultaActaEventoDTO consulta) {
+		return consulta != null && consulta.getNumeroActas() > 1;
+	}
+	public boolean mostrarReabrirActaConsulta(ConsultaActaEventoDTO consulta) {
+		return consulta != null && consulta.getNumeroActas() == 0 && !Boolean.FALSE.equals(consulta.getActaCerrada());
+	}
+	public boolean mostrarCompletarCierreActaConsulta(ConsultaActaEventoDTO consulta) {
+		return consulta != null && !Boolean.TRUE.equals(consulta.getActaCerrada()) && consulta.getNumeroActas() == 1
+				&& consulta.getDocumentosInvalidos() == 0 && consulta.getNumeroAlumnos() > 0
+				&& consulta.getCalificacionesPendientes() == 0;
+	}
+	public boolean esDocumentoActaValido(ActaDTO acta) {
+		return acta != null && acta.isEstructuraPdfValida();
+	}
+	public boolean isPuedeGestionarActas() {
+		return new CustomPermissionEvaluator().hasPermission(SecurityContextHolder.getContext().getAuthentication(), null, "EC_CON_ACTAS");
+	}
+	public boolean isPuedeModificarEstatus() {
+		return new CustomPermissionEvaluator().hasPermission(SecurityContextHolder.getContext().getAuthentication(), null, "EC_MOD_ESTATUS");
+	}
+	private void validarPermisoModificarEstatus() {
+		if (!isPuedeModificarEstatus()) { throw new SecurityException("No cuenta con permiso para modificar estatus de eventos."); }
+	}
+	private void validarPermisoActas() {
+		if (!isPuedeGestionarActas()) { throw new SecurityException("No cuenta con permiso para gestionar actas."); }
+	}
+	private Integer idGrupoConsulta(ConsultaActaEventoDTO consulta) {
+		if (consulta == null || consulta.getIdGrupo() == null) {
+			throw new IllegalArgumentException("Seleccione un grupo de la consulta de actas.");
 		}
+		return consulta.getIdGrupo().intValue();
 	}
-
-	public boolean mostrarEliminarActaConsulta(ConsultaActaEventoDTO consultaActa) {
-		return consultaActa != null && consultaActa.getEstatus() != null && consultaActa.getEstatus().intValue() != 0;
+	private void refrescarConsultaActas() {
+		regresarResultadosConsultarActas();
+		buscarConsultarActas();
 	}
-
-	public boolean mostrarVerActaConsulta(ConsultaActaEventoDTO consultaActa) {
-		return consultaActa != null && consultaActa.getEstatus() != null && consultaActa.getEstatus().intValue() == 1;
+	private void errorAccionActa(Exception e) {
+		logger.error("Error en la gestión de actas", e);
+		agregarMsgError(e instanceof IllegalArgumentException || e instanceof SecurityException
+				? e.getMessage() : "No fue posible completar la operación del acta.", null);
 	}
-
-	public boolean mostrarListadoActasConsulta(ConsultaActaEventoDTO consultaActa) {
-		return consultaActa != null && consultaActa.getEstatus() != null && consultaActa.getEstatus().intValue() == 3;
-	}
+	public ConsultaActaEventoDTO getDetalleActaConsulta() { return detalleActaConsulta; }
+	public List<RelGrupoParticipanteDTO> getAlumnosActaConsulta() { return alumnosActaConsulta; }
 
 	public String obtenerNombreUsuarioActa(ActaDTO acta) {
 		if (acta == null || acta.getUsuarioModifico() == null) {
@@ -668,10 +783,9 @@ public class EventoCapacitacionBean extends BaseBean {
 
 	private void cargarOpcionesConsultarActasEstatus() {
 		opcionesConsultarActasEstatus.clear();
-		opcionesConsultarActasEstatus.add(new SelectItem(0, "Abierta"));
-		opcionesConsultarActasEstatus.add(new SelectItem(1, "Cerrada"));
-		opcionesConsultarActasEstatus.add(new SelectItem(2, "Cierre incompleto"));
-		opcionesConsultarActasEstatus.add(new SelectItem(3, "Más de un documento cargado"));
+		for (EstatusConsultaActaEnum estatus : EstatusConsultaActaEnum.values()) {
+			opcionesConsultarActasEstatus.add(new SelectItem(estatus.getId(), estatus.getNombre()));
+		}
 	}
 
 	/**
@@ -1646,6 +1760,9 @@ public class EventoCapacitacionBean extends BaseBean {
 	public void setMostrarVistaConsultarActas(boolean mostrarVistaConsultarActas) {
 		this.mostrarVistaConsultarActas = mostrarVistaConsultarActas;
 	}
+
+	public String getFiltroConsultarActasTextoEvento() { return filtroConsultarActasTextoEvento; }
+	public void setFiltroConsultarActasTextoEvento(String texto) { filtroConsultarActasTextoEvento = texto; }
 
 	public List<String> getFiltroConsultarActasPlanPrograma() {
 		return filtroConsultarActasPlanPrograma;

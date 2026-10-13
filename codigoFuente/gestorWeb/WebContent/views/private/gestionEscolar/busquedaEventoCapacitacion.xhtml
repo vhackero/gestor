@@ -22,7 +22,7 @@
 		<hr />
 
 		<p:outputPanel id="pnlVistaConsultarActas">
-			<p:outputPanel rendered="#{eventoCapacitacionBean.mostrarVistaConsultarActas}">
+			<p:outputPanel rendered="#{eventoCapacitacionBean.mostrarVistaConsultarActas and eventoCapacitacionBean.puedeGestionarActas}">
 			<h:form id="frmConsultarActas">
 				<p:ajaxStatus onstart="PF('dialogLayout').show()"
 							  onsuccess="PF('dialogLayout').hide()" />
@@ -70,6 +70,12 @@
 										<f:selectItem itemLabel="Seleccionar" itemValue="#{null}" />
 										<f:selectItems value="#{eventoCapacitacionBean.opcionesConsultarActasEstatus}" />
 									</p:selectOneMenu>
+								</div>
+								<div class="col-md-8 col-xs-12">
+									<p:outputLabel for="actasTextoEvento" value="Clave o nombre del evento (opcional):" />
+									<p:inputText id="actasTextoEvento" styleClass="col-xs-12"
+										value="#{eventoCapacitacionBean.filtroConsultarActasTextoEvento}"
+										placeholder="Parte de la clave o nombre, por ejemplo: S1, B1" />
 								</div>
 							</div>
 						</div>
@@ -157,33 +163,85 @@
 														</f:facet>
 														<h:outputText value="#{resultado.grupo}" />
 													</p:column>
+													<p:column headerText="Estado del grupo">
+														<h:outputText value="#{resultado.estadoGrupo}" />
+													</p:column>
+													<p:column headerText="Documentos">
+														<h:outputText value="#{resultado.numeroActas}" />
+													</p:column>
+													<p:column headerText="Alumnos / Calificados / Pendientes">
+														<h:outputText value="#{resultado.numeroAlumnos} / #{resultado.alumnosCalificados} / #{resultado.calificacionesPendientes}" />
+													</p:column>
+													<p:column headerText="Estatus e incidencias">
+														<h:outputText value="#{resultado.textoEstatus}" />
+													</p:column>
 													<p:column styleClass="text-center">
 														<f:facet name="header">
 															<h:outputText value="Acciones" />
 														</f:facet>
 														<p:commandButton id="btnEliminarActaConsulta"
 																		 rendered="#{eventoCapacitacionBean.mostrarEliminarActaConsulta(resultado)}"
-																		 styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar"
+																		 styleClass="btn-icon btn btn-default" icon="fa fa-trash"
 																		 actionListener="#{eventoCapacitacionBean.eliminarActaConsulta(resultado)}"
-																		 process="@this" update="frmConsultarActas" />
-														<p:tooltip for="btnEliminarActaConsulta" rendered="#{eventoCapacitacionBean.mostrarEliminarActaConsulta(resultado)}"
-																   value="Eliminar acta" position="top" />
+																		 process="@this" update="frmConsultarActas">
+															<p:confirm header="Eliminar acta y reabrir" message="Se eliminará el documento y se limpiarán las calificaciones y evaluaciones del grupo. ¿Desea continuar?" icon="ui-icon-alert" />
+														</p:commandButton>
+														<p:tooltip for="btnEliminarActaConsulta" value="Eliminar acta y reabrir (limpia calificaciones)" position="top" rendered="#{eventoCapacitacionBean.mostrarEliminarActaConsulta(resultado)}" />
+
 
 														<p:commandButton id="btnVerActaConsulta"
 																		 rendered="#{eventoCapacitacionBean.mostrarVerActaConsulta(resultado)}"
-																		 styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye"
+																		 styleClass="btn-icon btn btn-default" icon="fa fa-eye"
 																		 actionListener="#{eventoCapacitacionBean.verActaConsulta(resultado)}"
 																		 process="@this" update="frmConsultarActas" />
-														<p:tooltip for="btnVerActaConsulta" rendered="#{eventoCapacitacionBean.mostrarVerActaConsulta(resultado)}"
-																   value="Visualizar acta" position="top" />
+
 
 														<p:commandButton id="btnListarActaConsulta"
 																		 rendered="#{eventoCapacitacionBean.mostrarListadoActasConsulta(resultado)}"
-																		 styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-list"
+																		 styleClass="btn-icon btn btn-default" icon="fa fa-list"
 																		 actionListener="#{eventoCapacitacionBean.listarActasConsulta(resultado)}"
 																		 process="@this" update="frmConsultarActas" />
-														<p:tooltip for="btnListarActaConsulta" rendered="#{eventoCapacitacionBean.mostrarListadoActasConsulta(resultado)}"
-																   value="Ver listado de actas" position="top" />
+
+
+														<p:commandButton id="btnDetalleActaConsulta"
+															styleClass="btn-icon btn btn-default" icon="fa fa-info-circle"
+															actionListener="#{eventoCapacitacionBean.verDetalleActaConsulta(resultado)}"
+															process="@this" update=":frmConsultarActas:dlgDetalleActaConsulta" />
+														<p:commandButton id="btnDocumentoActaConsulta"
+															rendered="#{resultado.numeroActas le 1}"
+															styleClass="btn-icon btn btn-default" icon="fa fa-upload"
+															actionListener="#{eventoCapacitacionBean.prepararDocumentoActaConsulta(resultado)}"
+															process="@this" update="frmConsultarActas">
+															<p:confirm header="Cargar o reemplazar documento" message="Se guardará el PDF para este grupo. Si ya existe un documento, será reemplazado. Se conservarán las calificaciones y el estado del grupo. ¿Desea continuar?" icon="ui-icon-alert" />
+														</p:commandButton>
+														<p:tooltip for="btnDocumentoActaConsulta" value="#{resultado.numeroActas eq 0 ? 'Cargar PDF' : 'Reemplazar PDF (conserva calificaciones)'}" position="top" rendered="#{resultado.numeroActas le 1}" />
+														<p:tooltip for="btnDetalleActaConsulta" value="Ver alumnos y calificaciones pendientes" position="top" />
+														<p:tooltip for="btnListarActaConsulta" value="Ver listado de actas" position="top" rendered="#{eventoCapacitacionBean.mostrarListadoActasConsulta(resultado)}" />
+														<p:tooltip for="btnVerActaConsulta" value="Visualizar acta" position="top" rendered="#{eventoCapacitacionBean.mostrarVerActaConsulta(resultado)}" />
+														<p:commandButton id="btnRetirarDocumentoActaConsulta"
+															rendered="#{resultado.numeroActas eq 1}"
+															styleClass="btn-icon btn btn-default" icon="fa fa-minus-circle"
+															actionListener="#{eventoCapacitacionBean.retirarActaConsulta(resultado)}"
+															process="@this" update="frmConsultarActas">
+															<p:confirm header="Retirar documento" message="Se retirará sólo el documento. Se conservarán las calificaciones y el estado del grupo. ¿Desea continuar?" icon="ui-icon-alert" />
+														</p:commandButton>
+														<p:tooltip for="btnRetirarDocumentoActaConsulta" value="Retirar documento (conserva calificaciones)" position="top" rendered="#{resultado.numeroActas eq 1}" />
+														<p:commandButton id="btnReabrirActaConsulta"
+															rendered="#{eventoCapacitacionBean.mostrarReabrirActaConsulta(resultado)}"
+															styleClass="btn-icon btn btn-default" icon="fa fa-unlock"
+															actionListener="#{eventoCapacitacionBean.reabrirActaConsulta(resultado)}"
+															process="@this" update="frmConsultarActas">
+															<p:confirm header="Reabrir grupo" message="Se reabrirá el grupo y se limpiarán sus calificaciones y evaluaciones. ¿Desea continuar?" icon="ui-icon-alert" />
+														</p:commandButton>
+														<p:tooltip for="btnReabrirActaConsulta" value="Reabrir grupo (limpia calificaciones)" position="top" rendered="#{eventoCapacitacionBean.mostrarReabrirActaConsulta(resultado)}" />
+														<p:commandButton id="btnCompletarCierreActaConsulta"
+															rendered="#{eventoCapacitacionBean.mostrarCompletarCierreActaConsulta(resultado)}"
+															styleClass="btn-icon btn btn-default" icon="fa fa-lock"
+															actionListener="#{eventoCapacitacionBean.completarCierreActaConsulta(resultado)}"
+															process="@this" update="frmConsultarActas">
+															<p:confirm header="Completar cierre" message="Se cerrará el grupo con el documento y las calificaciones actuales. ¿Desea continuar?" icon="ui-icon-alert" />
+														</p:commandButton>
+														<p:tooltip for="btnCompletarCierreActaConsulta" value="Completar cierre" position="top" rendered="#{eventoCapacitacionBean.mostrarCompletarCierreActaConsulta(resultado)}" />
 													</p:column>
 												</p:dataTable>
 												</p:panel>
@@ -240,22 +298,35 @@
 														</f:facet>
 														<h:outputText value="#{eventoCapacitacionBean.obtenerNombreUsuarioActa(acta)}" />
 													</p:column>
+													<p:column headerText="Estado del documento">
+														<h:outputText value="#{eventoCapacitacionBean.esDocumentoActaValido(acta) ? 'Estructura PDF reconocible' : 'Vacío, inválido o supera 10 MB'}" />
+													</p:column>
 													<p:column styleClass="text-center">
 														<f:facet name="header">
 															<h:outputText value="Acciones" />
 														</f:facet>
 														<p:commandButton id="btnVerActaListadoConsulta"
-																		 styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye"
+																		 styleClass="btn-icon btn btn-default" icon="fa fa-eye"
 																		 actionListener="#{eventoCapacitacionBean.verActaListadoConsulta(acta)}"
 																		 process="@this" update="frmConsultarActas" />
-														<p:tooltip for="btnVerActaListadoConsulta"
-																   value="Visualizar acta" position="top" />
+
 														<p:commandButton id="btnEliminarActaListadoConsulta"
-																		 styleClass="btn-icon btn btn-default icono_sisi ss_gn_eliminar"
+																		 styleClass="btn-icon btn btn-default" icon="fa fa-minus-circle"
 																		 actionListener="#{eventoCapacitacionBean.eliminarActaListadoConsulta(acta)}"
-																		 process="@this" update="frmConsultarActas" />
-														<p:tooltip for="btnEliminarActaListadoConsulta"
-																   value="Eliminar acta" position="top" />
+																		 process="@this" update="frmConsultarActas">
+															<p:confirm header="Retirar documento" message="Se retirará sólo este documento. Se conservarán las calificaciones, los demás documentos y el estado del grupo. ¿Desea continuar?" icon="ui-icon-alert" />
+														</p:commandButton>
+														<p:tooltip for="btnEliminarActaListadoConsulta" value="Retirar documento (conserva calificaciones)" position="top" />
+														<p:tooltip for="btnVerActaListadoConsulta" value="Visualizar acta" position="top" />
+
+
+														<p:commandButton id="btnReemplazarActaListado"
+															styleClass="btn-icon btn btn-default" icon="fa fa-upload"
+															actionListener="#{eventoCapacitacionBean.prepararReemplazoActaListado(acta)}"
+															process="@this" update="frmConsultarActas">
+															<p:confirm header="Reemplazar documento" message="Se reemplazará sólo el PDF seleccionado. Se conservarán las calificaciones y el estado del grupo. ¿Desea continuar?" icon="ui-icon-alert" />
+														</p:commandButton>
+														<p:tooltip for="btnReemplazarActaListado" value="Reemplazar este PDF (conserva calificaciones)" position="top" />
 													</p:column>
 												</p:dataTable>
 											</p:panel>
@@ -264,6 +335,43 @@
 								</p:outputPanel>
 							</p:outputPanel>
 
+								<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+									<p:commandButton value="Sí, continuar" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+									<p:commandButton value="Cancelar" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+								</p:confirmDialog>
+								<p:dialog id="dlgCargaActaConsulta" widgetVar="cargaActaConsulta" header="Cargar o reemplazar PDF"
+									modal="true" responsive="true" resizable="false" width="650">
+									<p>Seleccione el acta en PDF (hasta 10 MB, con páginas y sin contraseña). La carga conserva las calificaciones y el estado del grupo.</p>
+									<p:fileUpload id="archivoActaConsulta" mode="advanced" auto="true" multiple="false"
+										label="Seleccionar PDF" allowTypes="/(\.|\/)(pdf)$/" sizeLimit="10485760"
+										invalidFileMessage="Seleccione un archivo PDF." invalidSizeMessage="El PDF debe pesar hasta 10 MB."
+										fileUploadListener="#{eventoCapacitacionBean.cargarDocumentoActaConsulta}" update="frmConsultarActas" />
+								</p:dialog>
+								<p:dialog id="dlgDetalleActaConsulta" widgetVar="detalleActaConsulta" header="Alumnos y estado del acta"
+									modal="true" responsive="true" resizable="false" width="850">
+									<h:panelGroup rendered="#{not empty eventoCapacitacionBean.detalleActaConsulta}">
+										<p><h:outputText value="Grupo: #{eventoCapacitacionBean.detalleActaConsulta.grupo}. Estado: #{eventoCapacitacionBean.detalleActaConsulta.estadoGrupo}. Documentos: #{eventoCapacitacionBean.detalleActaConsulta.numeroActas}. Documentos inválidos: #{eventoCapacitacionBean.detalleActaConsulta.documentosInvalidos}." /></p>
+										<p><h:outputText value="#{eventoCapacitacionBean.detalleActaConsulta.textoEstatus}" /></p>
+									</h:panelGroup>
+									<p>Se incluyen únicamente participantes con una sola asignación de rol y que sea estudiante. Quienes tengan otras asignaciones de rol quedan excluidos. Las calificaciones pendientes se corrigen desde la captura de calificaciones del evento; el grupo debe estar abierto.</p>
+									<p>Puede filtrar por estado usando el selector «Todos», «Calificado» o «Pendiente» en la columna Estado.</p>
+									<p:dataTable id="dtAlumnosActaConsulta" widgetVar="dtAlumnosActaConsultaWidget" value="#{eventoCapacitacionBean.alumnosActaConsulta}" var="alumno"
+										paginator="true" rows="10" paginatorPosition="bottom" emptyMessage="No hay alumnos evaluables. Revise los participantes y sus roles en el grupo.">
+										<p:column headerText="Matrícula (usuario)"><h:outputText value="#{alumno.persona.usuario}" /></p:column>
+										<p:column headerText="Alumno"><h:outputText value="#{alumno.persona.nombre} #{alumno.persona.apellidoPaterno} #{alumno.persona.apellidoMaterno}" /></p:column>
+										<p:column headerText="Calificación final"><h:outputText value="#{alumno.califFinal}" /></p:column>
+										<p:column headerText="Estado" filterBy="#{alumno.califFinal eq null ? 'Pendiente' : 'Calificado'}" filterMatchMode="exact">
+											<f:facet name="filter">
+												<p:selectOneMenu id="filtroEstadoAlumnoActa" onchange="PF('dtAlumnosActaConsultaWidget').filter()" styleClass="custom-filter" style="width: 100%;">
+													<f:selectItem itemLabel="Todos" itemValue="" noSelectionOption="true" />
+													<f:selectItem itemLabel="Calificado" itemValue="Calificado" />
+													<f:selectItem itemLabel="Pendiente" itemValue="Pendiente" />
+												</p:selectOneMenu>
+											</f:facet>
+											<h:outputText value="#{alumno.califFinal eq null ? 'Pendiente' : 'Calificado'}" />
+										</p:column>
+									</p:dataTable>
+								</p:dialog>
 								<p:dialog id="dlgVisorActaConsulta" dynamic="true" responsive="true" modal="true"
 										  closable="false" resizable="false" position="center"
 									  header="Acta firmada" width="900" widgetVar="visorActaConsulta">
@@ -293,7 +401,7 @@
 		</p:outputPanel>
 
 			<p:outputPanel id="pnlVistaModificarEstatus">
-			<p:outputPanel rendered="#{eventoCapacitacionBean.mostrarVistaModificarEstatus}">
+			<p:outputPanel rendered="#{eventoCapacitacionBean.mostrarVistaModificarEstatus and eventoCapacitacionBean.puedeModificarEstatus}">
 		<h:form id="frmBusquedaModificar">
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 						  onsuccess="PF('dialogLayout').hide()" />
@@ -463,7 +571,7 @@
 
 			<div class="row">
 				<div class="col-md-12">
-					<sec:authorize access="hasPermission(null, 'EC_AGR' ) ">
+					<sec:authorize access="hasPermission(null, 'EC_CON_ACTAS') ">
 							<p:commandButton
 								value="Consultar actas"
 								styleClass="btn btn-primary pull-right"
@@ -471,6 +579,8 @@
 								update=":pnlVistaConsultarActas :pnlVistaModificarEstatus :pnlVistaInicial"
 								actionListener="#{eventoCapacitacionBean.mostrarVistaConsultarActas}"
 								process="@this" />
+					</sec:authorize>
+					<sec:authorize access="hasPermission(null, 'EC_MOD_ESTATUS')">
 							<p:commandButton
 								value="Modificar estatus"
 								styleClass="btn btn-primary pull-right"
@@ -478,6 +588,8 @@
 								update=":pnlVistaConsultarActas :pnlVistaModificarEstatus :pnlVistaInicial"
 								actionListener="#{eventoCapacitacionBean.mostrarVistaModificarEstatus}"
 								process="@this" />
+					</sec:authorize>
+					<sec:authorize access="hasPermission(null, 'EC_AGR')">
 						<p:commandButton
 							value="#{sistema.obtenerTexto('gw.ge.btn.crear')}"
 							styleClass="btn btn-primary pull-right"
@@ -796,7 +908,7 @@
 								</f:facet>
 								<h:outputText value="#{eventoCapacitacionBean.obtenerRuta(evento)}" />
 							</p:column>
-							
+
 							<!-- Modalidad -->
 							<p:column>
 								<f:facet name="header">
@@ -829,7 +941,7 @@
 								</h:outputText>
 							</p:column>
 
-							<!-- Auditar 
+							<!-- Auditar
 
 							<p:column
 									headerText="#{sistema.obtenerTexto('gw.gestionescolar.label.auditarEventoCa')}"
@@ -843,7 +955,7 @@
 										   position="top" />
 							</p:column>
 							-->
-							
+
 							<!-- Accesos -->
 							<p:column
 									headerText="#{sistema.obtenerTexto('gw.gestionescolar.label.accesosEventoCap')}"
@@ -1042,9 +1154,9 @@
 					<div class="col-md-12 text-right">
 						<p:commandButton value="Cancelar" styleClass="btn btn-default"
 										 onclick="PF('wConcluirEvento').hide();" />
-						<p:commandButton value="Aceptar" styleClass="btn btn-primary" process="@this" ajax="true" 
+						<p:commandButton value="Aceptar" styleClass="btn btn-primary" process="@this" ajax="true"
 										 action="#{calificacionGpoEventoCapBean.concluirEvento}" />
-						
+
 					</div>
 				</div>
 			</p:dialog>

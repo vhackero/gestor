@@ -12,9 +12,12 @@
 		<li class="active">#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.administrarUsuarios')}</li>
 	</ui:define>
 	<ui:define name="content">
-		<h:form id="frmPersonas">
+		<h:form id="frmPersonas" enctype="multipart/form-data">
 			<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.administrarUsuarios')}</h1>
 			<hr />
+			<sec:authorize access="hasPermission(null,'IMP_FUEN_EXT')">
+				<ui:include src="../componentes/cargaPersonaExterna.xhtml" />
+			</sec:authorize>
 
 			<p:ajaxStatus onstart="PF('dialogLayout').show()"
 				onsuccess="PF('dialogLayout').hide()" />
@@ -53,11 +56,20 @@
 										<p:commandButton id="btnRegistro" rendered="true"
 											action="#{adminPersonaBean.obtenerUsuarios()}"
 											value="Importar datos"
+											process="filtroImportarUsuarios" update="filtroImportarUsuarios"
 											styleClass="pull-right btn btn-primary"
-											disabled="#{adminPersonaBean.importarButtonDisabled}" />
+											disabled="#{adminPersonaBean.importarButtonDisabled or adminPersonaBean.importacionFuenteEnCurso}" />
 									</sec:authorize>
 								</div>
 							</div>
+							<h:panelGroup id="progresoFuenteExterna" layout="block">
+								<h:panelGroup rendered="#{not empty adminPersonaBean.estadoImportacionFuente}" layout="block">
+									<p:progressBar value="#{adminPersonaBean.estadoImportacionFuente.porcentaje}" labelTemplate="{value}%" />
+									<h:outputText value="#{adminPersonaBean.estadoImportacionFuente.mensaje}" />
+									<p:poll interval="3" global="false" process="@this" update="filtroImportarUsuarios"
+										stop="#{adminPersonaBean.estadoImportacionFuente.terminado}" />
+								</h:panelGroup>
+							</h:panelGroup>
 						</p:panel>
 					</sec:authorize>
 				</div>

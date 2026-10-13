@@ -27,6 +27,7 @@ public class TblFichaDescriptivaPrograma_ {
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, Integer> idNivelDominioPrograma;
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, TblFichaDescriptivaPrograma> idProgramaAntecedente;
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, String> identificadorFinal;
+    public static volatile SingularAttribute<TblFichaDescriptivaPrograma, String> claveMovilidad;
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, String> instrumentoAprendizaje;
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, String> justificacionAcademica;
 	public static volatile SingularAttribute<TblFichaDescriptivaPrograma, String> metodologia;
