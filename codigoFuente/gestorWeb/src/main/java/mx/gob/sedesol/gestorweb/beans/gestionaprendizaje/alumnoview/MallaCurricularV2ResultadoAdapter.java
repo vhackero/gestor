@@ -1,11 +1,15 @@
 package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoDecisionUnidadCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TrazaReglaAplicadaV2DTO;
 import mx.gob.sedesol.gestorweb.commons.dto.MallaDiagramaNodoDTO;
 
 /** Adaptador sin estado entre decisiones V2 y la representación visual existente de la Malla. */
@@ -42,7 +46,7 @@ public class MallaCurricularV2ResultadoAdapter {
 				aplicacion.requiereRevision++;
 			}
 			if (!decision.getMotivos().isEmpty()) {
-				nodo.setDetalleMotivoPrincipal("Restricción curricular V2: " + decision.getMotivos());
+				nodo.setDetalleMotivoPrincipal(construirMotivoVisible(decision, nodo));
 			}
 			if (Boolean.TRUE.equals(decision.getPrioritaria())) {
 				String recomendacion = StringUtils.defaultString(nodo.getDetalleAccionSugerida());
@@ -50,6 +54,74 @@ public class MallaCurricularV2ResultadoAdapter {
 			}
 		}
 		return aplicacion;
+	}
+
+	private String construirMotivoVisible(DecisionUnidadCurricularV2DTO decision, MallaDiagramaNodoDTO nodo) {
+		List<String> mensajes = new ArrayList<String>();
+		for (CodigoMotivoCurricularV2 motivo : decision.getMotivos()) {
+			String mensaje = describirMotivo(motivo, nodo);
+			if (StringUtils.isNotBlank(mensaje) && !mensajes.contains(mensaje)) {
+				mensajes.add(mensaje);
+			}
+		}
+		String reglas = obtenerReglasAplicadas(decision);
+		String detalle = StringUtils.join(mensajes, " ");
+		if (StringUtils.isBlank(detalle)) {
+			detalle = "La unidad didáctica tiene una restricción curricular que debe revisarse antes de seleccionarla.";
+		}
+		return StringUtils.isBlank(reglas) ? detalle : detalle + " Regla aplicable: " + reglas + ".";
+	}
+
+	private String describirMotivo(CodigoMotivoCurricularV2 motivo, MallaDiagramaNodoDTO nodo) {
+		if (motivo == null) {
+			return null;
+		}
+		switch (motivo) {
+		case REPROBACION_ACUMULADA:
+			return ESTATUS_NO_ACREDITADA.equals(nodo.getEstatus())
+					? "Esta unidad didáctica está reprobada y debe priorizarse su regularización."
+					: "Existen unidades didácticas reprobadas pendientes de regularización.";
+		case DATOS_INSUFICIENTES:
+		case NO_DETERMINADO:
+		case ESTRUCTURA_PE_NO_DETERMINADA:
+			return "La información curricular disponible requiere revisión para completar esta evaluación.";
+		case SERIACION_DIRECTA:
+			return "Requiere acreditar previamente una unidad didáctica antecedente.";
+		case SERIACION_INDIRECTA:
+			return "Requiere acreditar los antecedentes curriculares de su cadena de seriación.";
+		case SIN_OFERTA:
+			return "La unidad didáctica no tiene oferta disponible en el periodo consultado.";
+		case SIN_CUPO:
+			return "La unidad didáctica no tiene cupo disponible en el periodo consultado.";
+		default:
+			return "Esta unidad didáctica tiene una condición curricular que debe revisarse antes de seleccionarla.";
+		}
+	}
+
+	private String obtenerReglasAplicadas(DecisionUnidadCurricularV2DTO decision) {
+		List<String> reglas = new ArrayList<String>();
+		for (TrazaReglaAplicadaV2DTO traza : decision.getTrazas()) {
+			if (traza == null || traza.getCodigoRegla() == null) {
+				continue;
+			}
+			String regla = formatearCodigoRegla(traza.getCodigoRegla().name());
+			if (!reglas.contains(regla)) {
+				reglas.add(regla);
+			}
+		}
+		return StringUtils.join(reglas, ", ");
+	}
+
+	private String formatearCodigoRegla(String codigo) {
+		String[] partes = StringUtils.split(codigo, '_');
+		if (partes == null || partes.length < 2) {
+			return codigo;
+		}
+		StringBuilder regla = new StringBuilder(partes[0]).append('-').append(partes[1]);
+		for (int indice = 2; indice < partes.length; indice++) {
+			regla.append('.').append(partes[indice]);
+		}
+		return regla.toString();
 	}
 
 	private void contarEstatus(AplicacionResultadoMallaV2 aplicacion, MallaDiagramaNodoDTO nodo) {

@@ -1132,7 +1132,10 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		if (programaNodo == null || !esProgramaOpcional(programaNodo.getTipoPrograma())) {
 			return false;
 		}
-		if (ESTATUS_APROBADA.equals(programaNodo.getEstatus())) {
+		if (ESTATUS_APROBADA.equals(programaNodo.getEstatus())
+				|| ESTATUS_NO_ACREDITADA.equals(programaNodo.getEstatus())
+				|| ESTATUS_BAJA.equals(programaNodo.getEstatus())
+				|| ESTATUS_EN_CURSO.equals(programaNodo.getEstatus())) {
 			return false;
 		}
 		// Al cubrir el mínimo global de optativas del programa educativo, las

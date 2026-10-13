@@ -81,7 +81,9 @@ Se reutiliza la convencion visual existente. La restriccion V2 se expresa por el
 
 ## MOTIVOS
 
-Los codigos V2 se conservan en `detalleMotivoPrincipal`, por ejemplo motivos de seriacion, RN-6.4, RN-6.1, oferta o datos insuficientes. No se reemplazan por el texto generico "bloqueado por Motor V2".
+Los codigos V2 se conservan para trazabilidad interna, pero el panel muestra explicaciones legibles y las reglas aplicadas cuando existen trazas. No se exponen listas como `REPROBACION_ACUMULADA` o `DATOS_INSUFICIENTES` al estudiante.
+
+Una UD reprobada conserva el estado visual `No acreditada`, incluso si es optativa y ya se cubrio el minimo de optativas. La condicion de optativa opcional solo se aplica a UD sin un estado historico pendiente.
 
 ## TRAZABILIDAD_RUNTIME
 
@@ -108,7 +110,7 @@ La Malla registra, sin PII:
 
 `basegestor`: Tests run: 765, Failures: 0, Errors: 0, Skipped: 0.
 
-`gestorWeb`: Tests run: 2, Failures: 0, Errors: 0, Skipped: 0.
+`gestorWeb`: Tests run: 3, Failures: 0, Errors: 0, Skipped: 0.
 
 ## COMPILACION
 

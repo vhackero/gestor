@@ -10,8 +10,10 @@ import java.util.Map;
 import org.testng.annotations.Test;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoReglaCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoDecisionUnidadCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TrazaReglaAplicadaV2DTO;
 import mx.gob.sedesol.gestorweb.commons.dto.MallaDiagramaNodoDTO;
 
 /** Verifica que la Malla sólo traduce las decisiones normativas recibidas de V2. */
@@ -34,7 +36,8 @@ public class MallaCurricularAlumnoBeanV2Test {
 
 		assertTrue(nodo.isBloqueada());
 		assertEquals("No acreditada", nodo.getEstatus());
-		assertTrue(nodo.getDetalleMotivoPrincipal().contains("SERIACION_DIRECTA"));
+		assertTrue(nodo.getDetalleMotivoPrincipal().contains("Requiere acreditar previamente"));
+		assertFalse(nodo.getDetalleMotivoPrincipal().contains("SERIACION_DIRECTA"));
 		assertTrue(nodo.getDetalleAccionSugerida().contains("prioritaria"));
 		assertEquals("IRREGULAR", aplicacion.getSituacionAcademica());
 	}
@@ -62,6 +65,30 @@ public class MallaCurricularAlumnoBeanV2Test {
 		assertTrue(nodoRevision.isBloqueada());
 		assertEquals("No inscrita", nodoRevision.getEstatus());
 		assertEquals(1, aplicacion.getRequiereRevision());
+	}
+
+	@Test
+	public void explicaMotivosConTextoUsuarioYReglaSinExponerCodigosInternos() {
+		DecisionUnidadCurricularV2DTO decision = decision(301L, false);
+		decision.getMotivos().add(CodigoMotivoCurricularV2.REPROBACION_ACUMULADA);
+		decision.getMotivos().add(CodigoMotivoCurricularV2.DATOS_INSUFICIENTES);
+		TrazaReglaAplicadaV2DTO traza = new TrazaReglaAplicadaV2DTO();
+		traza.setCodigoRegla(CodigoReglaCurricularV2.RN_1_2);
+		decision.getTrazas().add(traza);
+		Map<Long, DecisionUnidadCurricularV2DTO> decisiones = new LinkedHashMap<Long, DecisionUnidadCurricularV2DTO>();
+		decisiones.put(301L, decision);
+		MallaDiagramaNodoDTO nodo = new MallaDiagramaNodoDTO();
+		nodo.setEstatus("No acreditada");
+		Map<Integer, MallaDiagramaNodoDTO> nodos = new LinkedHashMap<Integer, MallaDiagramaNodoDTO>();
+		nodos.put(301, nodo);
+
+		new MallaCurricularV2ResultadoAdapter().aplicar(nodos, decisiones, "IRREGULAR");
+
+		assertEquals("No acreditada", nodo.getEstatus());
+		assertTrue(nodo.getDetalleMotivoPrincipal().contains("está reprobada"));
+		assertTrue(nodo.getDetalleMotivoPrincipal().contains("RN-1.2"));
+		assertFalse(nodo.getDetalleMotivoPrincipal().contains("REPROBACION_ACUMULADA"));
+		assertFalse(nodo.getDetalleMotivoPrincipal().contains("DATOS_INSUFICIENTES"));
 	}
 
 	private DecisionUnidadCurricularV2DTO decision(Long idPrograma, boolean habilitada) {
