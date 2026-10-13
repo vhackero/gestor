@@ -15,6 +15,13 @@
 		<h:form id="frmPersonas" enctype="multipart/form-data">
 			<h1>#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.administrarUsuarios')}</h1>
 			<hr />
+			<sec:authorize access="hasPermission(null,'USU_PLAN_VER')">
+				<div class="row" style="margin-bottom:15px"><div class="col-md-12" style="display:flex;justify-content:flex-end">
+					<p:button outcome="/views/private/administracion/usuario/AsignacionPlanUsuario.xhtml"
+						value="#{sistema.obtenerTexto('gw.planUsuario.titulo')}" styleClass="btn btn-primary"
+						style="width:auto;min-width:280px;max-width:100%;white-space:normal;height:auto" />
+				</div></div>
+			</sec:authorize>
 			<sec:authorize access="hasPermission(null,'IMP_FUEN_EXT')">
 				<ui:include src="../componentes/cargaPersonaExterna.xhtml" />
 			</sec:authorize>

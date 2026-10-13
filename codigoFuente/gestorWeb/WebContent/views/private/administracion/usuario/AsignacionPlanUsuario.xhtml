@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<ui:composition template="/templates/layout.xhtml" xmlns="http://www.w3.org/1999/xhtml"
+ xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html"
+ xmlns:f="http://java.sun.com/jsf/core" xmlns:p="http://primefaces.org/ui" xmlns:sec="http://www.springframework.org/security/tags">
+ <ui:define name="breadcrumb">
+  <li>#{sistema.obtenerTexto('gw.textos.menu.administracion')}</li>
+  <li><h:link outcome="/views/private/administracion/usuario/AdministraUsuarios.xhtml" value="#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.administrarUsuarios')}"/></li>
+  <li class="active">#{sistema.obtenerTexto('gw.planUsuario.titulo')}</li>
+ </ui:define>
+ <ui:define name="content">
+  <h1>#{sistema.obtenerTexto('gw.planUsuario.titulo')}</h1><hr/>
+  <sec:authorize access="hasPermission(null,'USU_PLAN_VER')">
+   <p:messages id="mensajesPlan" showDetail="false" closable="true"/>
+   <h:outputText value="#{sistema.obtenerTexto('gw.planUsuario.ayuda')}"/>
+   <sec:authorize access="hasPermission(null,'USU_PLAN_ASIGNAR')">
+    <h:form id="formAsignar">
+     <p:panel header="#{sistema.obtenerTexto('gw.planUsuario.panel.asignar')}">
+      <div class="row">
+       <div class="col-md-4"><p:outputLabel for="usuarios" value="#{sistema.obtenerTexto('gw.planUsuario.usuario')}"/>
+        <p:inputText id="usuarios" value="#{asignacionPlanUsuarioBean.usuariosAsignar}" maxlength="51000" style="width:100%" required="true" requiredMessage="#{sistema.obtenerTexto('gw.planUsuario.mensaje.usuarios')}"/>
+       </div>
+       <div class="col-md-4"><p:outputLabel for="plan" value="#{sistema.obtenerTexto('gw.planUsuario.plan')}"/>
+        <p:selectOneMenu id="plan" value="#{asignacionPlanUsuarioBean.planAsignar}" style="width:100%" required="true" requiredMessage="#{sistema.obtenerTexto('gw.planUsuario.mensaje.destino')}">
+         <f:selectItem itemLabel="#{sistema.obtenerTexto('gw.planUsuario.seleccionar')}" itemValue="#{null}" noSelectionOption="true"/>
+         <f:selectItems value="#{asignacionPlanUsuarioBean.planes}" var="opcion" itemValue="#{opcion[0]}" itemLabel="#{opcion[1]}"/>
+         <p:ajax listener="#{asignacionPlanUsuarioBean.cambiarPlanAsignar}" process="@this" update="convocatoria :mensajesPlan"/>
+        </p:selectOneMenu>
+       </div>
+       <div class="col-md-4"><p:outputLabel for="convocatoria" value="#{sistema.obtenerTexto('gw.planUsuario.convocatoria')}"/>
+        <p:selectOneMenu id="convocatoria" value="#{asignacionPlanUsuarioBean.convocatoriaAsignar}" style="width:100%" required="true" requiredMessage="#{sistema.obtenerTexto('gw.planUsuario.mensaje.destino')}">
+         <f:selectItem itemLabel="#{sistema.obtenerTexto('gw.planUsuario.seleccionar')}" itemValue="#{null}" noSelectionOption="true"/>
+         <f:selectItems value="#{asignacionPlanUsuarioBean.convocatoriasAsignar}" var="opcion" itemValue="#{opcion[0]}" itemLabel="#{opcion[1]}"/>
+        </p:selectOneMenu>
+       </div>
+      </div>
+      <p:commandButton value="#{sistema.obtenerTexto('gw.planUsuario.boton.asignar')}" action="#{asignacionPlanUsuarioBean.asignar}" process="@form" update="@form :mensajesPlan" styleClass="btn btn-primary"/>
+     </p:panel>
+    </h:form>
+   </sec:authorize>
+   <h:form id="formModificar">
+    <p:panel header="#{sistema.obtenerTexto('gw.planUsuario.panel.modificar')}">
+     <div class="row" style="margin-bottom:15px">
+      <div class="col-md-8"><p:outputLabel for="usuariosBuscar" value="#{sistema.obtenerTexto('gw.planUsuario.usuario')}"/>
+       <div style="display:flex;align-items:center;gap:10px">
+        <p:inputText id="usuariosBuscar" value="#{asignacionPlanUsuarioBean.usuariosBuscar}" maxlength="51000" style="flex:1;min-width:0"/>
+        <p:commandButton value="#{sistema.obtenerTexto('gw.planUsuario.boton.buscar')}" action="#{asignacionPlanUsuarioBean.buscar}" process="@this usuariosBuscar" update="@form :mensajesPlan" resetValues="true" styleClass="btn btn-primary"/>
+       </div>
+      </div>
+     </div>
+     <p:dataTable id="asignaciones" value="#{asignacionPlanUsuarioBean.asignaciones}" var="asignacion" rowKey="#{asignacion.idAsignacion}" selection="#{asignacionPlanUsuarioBean.seleccion}" paginator="true" rows="15" emptyMessage="#{sistema.obtenerTexto('gw.planUsuario.sinResultados')}">
+      <p:column selectionMode="multiple" style="width:35px"/>
+      <p:column headerText="#{sistema.obtenerTexto('gw.planUsuario.usuario')}"><h:outputText value="#{asignacion.usuario}"/></p:column>
+      <p:column headerText="#{sistema.obtenerTexto('gw.planUsuario.nombre')}"><h:outputText value="#{asignacion.nombre}"/></p:column>
+      <p:column headerText="#{sistema.obtenerTexto('gw.planUsuario.planActual')}"><h:outputText value="#{asignacion.plan}"/></p:column>
+      <p:column headerText="#{sistema.obtenerTexto('gw.planUsuario.convocatoria')}"><h:outputText value="#{asignacion.convocatoria}"/></p:column>
+      <p:column headerText="#{sistema.obtenerTexto('gw.planUsuario.acciones')}">
+       <sec:authorize access="hasPermission(null,'USU_PLAN_ELIMINAR')">
+        <p:commandButton icon="ui-icon-trash" title="#{sistema.obtenerTexto('gw.planUsuario.boton.eliminar')}" rendered="#{asignacionPlanUsuarioBean.puedeEliminar(asignacion)}"
+         action="#{asignacionPlanUsuarioBean.eliminar(asignacion)}" process="@this" update="@form :mensajesPlan">
+         <p:confirm header="#{sistema.obtenerTexto('gw.planUsuario.confirmar')}" message="#{asignacionPlanUsuarioBean.confirmacionEliminar(asignacion)}" icon="ui-icon-alert"/>
+        </p:commandButton>
+       </sec:authorize>
+      </p:column>
+     </p:dataTable>
+     <sec:authorize access="hasPermission(null,'USU_PLAN_MODIFICAR')">
+      <h:panelGroup id="destino" layout="block" rendered="#{not empty asignacionPlanUsuarioBean.asignaciones}" style="margin-top:15px">
+       <div class="row">
+        <div class="col-md-4"><p:outputLabel for="planDestino" value="#{sistema.obtenerTexto('gw.planUsuario.planNuevo')}"/>
+         <p:selectOneMenu id="planDestino" value="#{asignacionPlanUsuarioBean.planModificar}" style="width:100%" required="true" requiredMessage="#{sistema.obtenerTexto('gw.planUsuario.mensaje.destino')}">
+          <f:selectItem itemLabel="#{sistema.obtenerTexto('gw.planUsuario.seleccionar')}" itemValue="#{null}" noSelectionOption="true"/>
+          <f:selectItems value="#{asignacionPlanUsuarioBean.planes}" var="opcion" itemValue="#{opcion[0]}" itemLabel="#{opcion[1]}"/>
+          <p:ajax listener="#{asignacionPlanUsuarioBean.cambiarPlanModificar}" process="@this" update="convocatoriaDestino :mensajesPlan"/>
+         </p:selectOneMenu>
+        </div>
+        <div class="col-md-4"><p:outputLabel for="convocatoriaDestino" value="#{sistema.obtenerTexto('gw.planUsuario.convocatoriaNueva')}"/>
+         <p:selectOneMenu id="convocatoriaDestino" value="#{asignacionPlanUsuarioBean.convocatoriaModificar}" style="width:100%" required="true" requiredMessage="#{sistema.obtenerTexto('gw.planUsuario.mensaje.destino')}">
+          <f:selectItem itemLabel="#{sistema.obtenerTexto('gw.planUsuario.seleccionar')}" itemValue="#{null}" noSelectionOption="true"/>
+          <f:selectItems value="#{asignacionPlanUsuarioBean.convocatoriasModificar}" var="opcion" itemValue="#{opcion[0]}" itemLabel="#{opcion[1]}"/>
+         </p:selectOneMenu>
+        </div>
+        <div class="col-md-4" style="padding-top:25px"><p:commandButton value="#{sistema.obtenerTexto('gw.planUsuario.boton.modificar')}" action="#{asignacionPlanUsuarioBean.modificar}" process="@form" update="@form :mensajesPlan" styleClass="btn btn-primary"/></div>
+       </div>
+      </h:panelGroup>
+     </sec:authorize>
+    </p:panel>
+   </h:form>
+   <h:form id="formConfirmacionPlan">
+   <p:confirmDialog global="true">
+    <p:commandButton value="#{sistema.obtenerTexto('gw.planUsuario.si')}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"/>
+    <p:commandButton value="#{sistema.obtenerTexto('gw.planUsuario.no')}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close"/>
+   </p:confirmDialog>
+   </h:form>
+  </sec:authorize>
+  <sec:authorize access="!hasPermission(null,'USU_PLAN_VER')"><h:outputText value="#{sistema.obtenerTexto('gw.planUsuario.mensaje.permiso')}"/></sec:authorize>
+ </ui:define>
+</ui:composition>
