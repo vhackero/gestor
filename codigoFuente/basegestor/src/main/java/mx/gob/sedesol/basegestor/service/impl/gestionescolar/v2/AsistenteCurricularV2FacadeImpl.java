@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CasoAcademicoOperativoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CasoSimilarDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DiagnosticoAcademicoOperativoDTO;
@@ -20,10 +21,12 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AsistenteVirtualA
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.MensajeInstitucionalContextualDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PanelAsistenteVirtualDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PatronConocimientoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ViabilidadTecnicaDTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.v2.CatViabilidadTecnicaV2Repo;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.AsistenteCurricularV2Facade;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ContextoEvaluacionCurricularV2Adapter;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.BaseConocimientoAcademicoService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.BitacoraCasoService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.CasoAcademicoOperativoService;
@@ -34,6 +37,7 @@ import mx.gob.sedesol.basegestor.service.gestionescolar.v2.DiagnosticoAcademicoO
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.RecomendadorResolucionOperativaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ValidadorExpedienteCasoService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.AsistenteInscripcionService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.EvaluacionCurricularV2Service;
 
 @Service("asistenteCurricularV2Facade")
 public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Facade {
@@ -70,6 +74,18 @@ public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Fac
 
     @Autowired
     private AsistenteInscripcionService asistenteInscripcionService;
+
+    @Autowired
+    private ContextoEvaluacionCurricularV2Adapter adaptadorEvaluacion;
+
+    @Autowired
+    private EvaluacionCurricularV2Service evaluadorCurricular;
+
+    @Override
+    public ResultadoEvaluacionCurricularV2DTO evaluarSombra(AsistenteInscripcionContextoDTO contexto) {
+        ContextoEvaluacionCurricularV2DTO contextoV2 = adaptadorEvaluacion.construirDesdeAsistente(contexto);
+        return evaluadorCurricular.evaluarSombra(contextoV2);
+    }
 
     @Override
     @Transactional

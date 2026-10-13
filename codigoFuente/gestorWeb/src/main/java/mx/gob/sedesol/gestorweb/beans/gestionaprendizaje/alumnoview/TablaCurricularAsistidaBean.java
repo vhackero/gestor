@@ -41,6 +41,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AsistenteVirtualA
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PanelAsistenteVirtualDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ObjetoCurricularEnum;
@@ -61,6 +63,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private static final long serialVersionUID = 1L;
     private static final int MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA = 8;
     private static final Logger logger = Logger.getLogger(TablaCurricularAsistidaBean.class);
+    private static final AsistenteCurricularV2ResultadoAdapter ADAPTADOR_RESULTADO_V2 = new AsistenteCurricularV2ResultadoAdapter();
     private static final String SESION_PRESELECCION_INSCRIPCION = "preseleccionInscripcionAsistente";
 
     @ManagedProperty(value = "#{asistenteInscripcionServiceImpl}")
@@ -89,6 +92,8 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     private AsistenteInscripcionContextoDTO contexto;
     private FichaIntegralCasoDTO fichaIntegralV2;
+    private ResultadoEvaluacionCurricularV2DTO resultadoEvaluacionV2;
+    private Map<Long, DecisionUnidadCurricularV2DTO> decisionesV2PorPrograma = new HashMap<Long, DecisionUnidadCurricularV2DTO>();
     private boolean intentoCargaFichaIntegralV2;
     private List<SemestreAsistidoDTO> semestres;
     private String mensajeError;
@@ -115,7 +120,9 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             nombrePersonaObjetivo = trayectoriaAcademicaContextoBean.resolverNombreObjetivo(getUsuarioEnSession().getUsuario());
             matriculaPersonaObjetivo = trayectoriaAcademicaContextoBean.resolverMatriculaObjetivo(getUsuarioEnSession().getUsuario());
             contexto = asistenteInscripcionService.obtenerContextoAsistido(idPersona);
+            cargarResultadoEvaluacionV2();
             construirSemestres();
+			registrarResumenAplicacionV2();
             cargarFichaIntegralV2();
             inicializarRespuestasContextuales();
         } catch (InscripcionException e) {
@@ -206,8 +213,55 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         fila.setRecomendada(Boolean.TRUE.equals(unidad.getRecomendada()));
         fila.setMotivoPrincipal(obtenerMotivoPrincipal(unidad));
         fila.setMotivos(obtenerMotivos(unidad));
+        aplicarDecisionV2(fila);
         return fila;
     }
+
+	private void cargarResultadoEvaluacionV2() {
+		resultadoEvaluacionV2 = null;
+		decisionesV2PorPrograma.clear();
+		if (asistenteCurricularV2Facade == null || contexto == null) return;
+		try {
+			logger.info("[ASISTENTE_V2] Inicio evaluacion curricular con Motor V2");
+			logger.info("[ASISTENTE_V2] Invocando Motor Curricular V2 - version=PE2027-V1 - modo=SOMBRA");
+			resultadoEvaluacionV2 = asistenteCurricularV2Facade.evaluarSombra(contexto);
+			if (resultadoEvaluacionV2 == null) {
+				logger.warn("[ASISTENTE_V2] No fue posible obtener ResultadoEvaluacionCurricularV2DTO");
+				return;
+			}
+			for (DecisionUnidadCurricularV2DTO decision : resultadoEvaluacionV2.getDecisiones()) {
+				if (decision != null && decision.getIdPrograma() != null) decisionesV2PorPrograma.put(decision.getIdPrograma(), decision);
+			}
+			logger.info("[ASISTENTE_V2] ResultadoEvaluacionCurricularV2DTO obtenido correctamente");
+		} catch (Exception e) {
+			logger.warn("[ASISTENTE_V2] Error al evaluar el Asistente con Motor V2", e);
+		}
+	}
+
+	private void aplicarDecisionV2(FilaAsistidaDTO fila) {
+		if (fila == null || fila.getUdId() == null) return;
+		DecisionUnidadCurricularV2DTO decision = decisionesV2PorPrograma.get(fila.getUdId());
+		if (decision == null) return;
+		ADAPTADOR_RESULTADO_V2.aplicar(fila, decision);
+	}
+
+	private void registrarResumenAplicacionV2() {
+		if (resultadoEvaluacionV2 == null) return;
+		int habilitadas = 0;
+		int restringidas = 0;
+		int prioritarias = 0;
+		int recomendadas = 0;
+		for (FilaAsistidaDTO fila : obtenerFilasPlanas()) {
+			if (Boolean.TRUE.equals(fila.getBloqueada())) restringidas++;
+			else if (Boolean.TRUE.equals(fila.getSeleccionable())) habilitadas++;
+			if (Boolean.TRUE.equals(fila.getPrioritaria())) prioritarias++;
+			if (Boolean.TRUE.equals(fila.getRecomendada())) recomendadas++;
+		}
+		logger.info("[ASISTENTE_V2] Recomendaciones construidas utilizando resultado V2");
+		logger.info("[ASISTENTE_V2] Resumen - situacion=" + resultadoEvaluacionV2.getSituacionAcademicaCalculada()
+				+ " - habilitadas=" + habilitadas + " - restringidas=" + restringidas
+				+ " - prioritarias=" + prioritarias + " - recomendadas=" + recomendadas);
+	}
 
     private String construirEtiquetaBloque(UnidadDecisionInscripcionDTO unidad) {
         if (unidad == null) {
@@ -604,8 +658,12 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             // La situación cambia con el historial; se reconstruye el contexto antes de recalcular V2.
             contexto = asistenteInscripcionService.obtenerContextoAsistido(idPersonaObjetivo);
             intentoCargaFichaIntegralV2 = false;
+			cargarResultadoEvaluacionV2();
+			semestres.clear();
+			construirSemestres();
             cargarFichaIntegralV2();
             inicializarRespuestasContextuales();
+			registrarResumenAplicacionV2();
         } catch (InscripcionException e) {
             logger.warn("No fue posible actualizar el diagnóstico V2 del asistente curricular.", e);
             mensajeError = "No fue posible actualizar el diagnóstico académico.";
