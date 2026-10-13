@@ -110,7 +110,7 @@ La Malla registra, sin PII:
 
 `basegestor`: Tests run: 765, Failures: 0, Errors: 0, Skipped: 0.
 
-`gestorWeb`: Tests run: 3, Failures: 0, Errors: 0, Skipped: 0.
+`gestorWeb`: Tests run: 4, Failures: 0, Errors: 0, Skipped: 0.
 
 ## COMPILACION
 

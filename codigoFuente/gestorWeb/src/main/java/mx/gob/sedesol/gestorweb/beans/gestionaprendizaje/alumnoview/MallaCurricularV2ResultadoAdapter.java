@@ -23,6 +23,29 @@ public class MallaCurricularV2ResultadoAdapter {
 	private static final String ESTATUS_BLOQUEADA = "Bloqueada";
 	private static final String COLOR_BLOQUEADA = "#000000";
 
+	public String normalizarEstatusDetalle(String estado, MallaDiagramaNodoDTO programaNodo) {
+		String valor = StringUtils.trimToEmpty(estado);
+		// El estado histórico prevalece sobre etiquetas operativas de la Malla.
+		if (programaNodo != null && ESTATUS_NO_ACREDITADA.equals(programaNodo.getEstatus())) return ESTATUS_NO_ACREDITADA;
+		if (programaNodo != null && ESTATUS_APROBADA.equals(programaNodo.getEstatus())) return ESTATUS_APROBADA;
+		if (programaNodo != null && ESTATUS_BAJA.equals(programaNodo.getEstatus())) return ESTATUS_BAJA;
+		if (programaNodo != null && ESTATUS_EN_CURSO.equals(programaNodo.getEstatus())) return ESTATUS_EN_CURSO;
+		if (programaNodo != null && ESTATUS_NO_INSCRITA.equals(programaNodo.getEstatus())) return ESTATUS_NO_INSCRITA;
+		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_APROBADA) || StringUtils.equalsIgnoreCase(valor, "Acreditada")) return ESTATUS_APROBADA;
+		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_NO_ACREDITADA) || StringUtils.equalsIgnoreCase(valor, "Pendiente de acreditar")) return ESTATUS_NO_ACREDITADA;
+		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_NO_INSCRITA)) return ESTATUS_NO_INSCRITA;
+		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_BAJA) || StringUtils.containsIgnoreCase(valor, "baja")) return ESTATUS_BAJA;
+		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_EN_CURSO)) return ESTATUS_EN_CURSO;
+		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_BLOQUEADA)
+				|| StringUtils.equalsIgnoreCase(valor, "RECOMENDADA")
+				|| StringUtils.equalsIgnoreCase(valor, "Opcional")
+				|| StringUtils.equalsIgnoreCase(valor, "Pendiente de cursar")
+				|| StringUtils.equalsIgnoreCase(valor, "Pendiente de validación")
+				|| StringUtils.equalsIgnoreCase(valor, "Seguimiento de trayectoria")) return "Por cursar";
+		if (programaNodo != null && programaNodo.isBloqueada()) return "Por cursar";
+		return "Por cursar";
+	}
+
 	public AplicacionResultadoMallaV2 aplicar(Map<Integer, MallaDiagramaNodoDTO> programasPorId,
 			Map<Long, DecisionUnidadCurricularV2DTO> decisionesPorPrograma, String situacionAcademica) {
 		AplicacionResultadoMallaV2 aplicacion = new AplicacionResultadoMallaV2(situacionAcademica);

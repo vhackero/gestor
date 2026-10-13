@@ -809,47 +809,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	}
 
 	private String normalizarEstadoDetalleContextual(String estado, MallaDiagramaNodoDTO programaNodo) {
-		String valor = StringUtils.trimToEmpty(estado);
-		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_APROBADA) || StringUtils.equalsIgnoreCase(valor, "Acreditada")) {
-			return "Aprobada";
-		}
-		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_NO_ACREDITADA)
-				|| StringUtils.equalsIgnoreCase(valor, "Pendiente de acreditar")) {
-			return "No acreditada";
-		}
-		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_NO_INSCRITA)) {
-			return "No inscrita";
-		}
-		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_BAJA) || valor.toLowerCase(Locale.ROOT).contains("baja")) {
-			return "Baja";
-		}
-		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_EN_CURSO)) {
-			return "En curso";
-		}
-		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_BLOQUEADA)
-				|| StringUtils.equalsIgnoreCase(valor, "RECOMENDADA")
-				|| StringUtils.equalsIgnoreCase(valor, "Opcional")
-				|| StringUtils.equalsIgnoreCase(valor, "Pendiente de cursar")
-				|| StringUtils.equalsIgnoreCase(valor, "Pendiente de validación")
-				|| StringUtils.equalsIgnoreCase(valor, "Seguimiento de trayectoria")) {
-			return "Por cursar";
-		}
-		if (programaNodo != null && programaNodo.isBloqueada()) {
-			return "Por cursar";
-		}
-		if (programaNodo != null && ESTATUS_EN_CURSO.equals(programaNodo.getEstatus())) {
-			return "En curso";
-		}
-		if (programaNodo != null && ESTATUS_APROBADA.equals(programaNodo.getEstatus())) {
-			return "Aprobada";
-		}
-		if (programaNodo != null && ESTATUS_NO_ACREDITADA.equals(programaNodo.getEstatus())) {
-			return "No acreditada";
-		}
-		if (programaNodo != null && ESTATUS_BAJA.equals(programaNodo.getEstatus())) {
-			return "Baja";
-		}
-		return "Por cursar";
+		return ADAPTADOR_RESULTADO_V2.normalizarEstatusDetalle(estado, programaNodo);
 	}
 
 	private void acumularCreditos(String tipo, Integer creditos, MallaAlumnoProgramaDTO estatusDto,

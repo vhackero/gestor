@@ -91,6 +91,16 @@ public class MallaCurricularAlumnoBeanV2Test {
 		assertFalse(nodo.getDetalleMotivoPrincipal().contains("DATOS_INSUFICIENTES"));
 	}
 
+	@Test
+	public void estadoReprobadoPrevaleceSobreEtiquetaOptativaOpcional() {
+		MallaDiagramaNodoDTO nodo = new MallaDiagramaNodoDTO();
+		nodo.setEstatus("No acreditada");
+
+		String estado = new MallaCurricularV2ResultadoAdapter().normalizarEstatusDetalle("OPCIONAL", nodo);
+
+		assertEquals("No acreditada", estado);
+	}
+
 	private DecisionUnidadCurricularV2DTO decision(Long idPrograma, boolean habilitada) {
 		DecisionUnidadCurricularV2DTO decision = new DecisionUnidadCurricularV2DTO();
 		decision.setIdPrograma(idPrograma);
