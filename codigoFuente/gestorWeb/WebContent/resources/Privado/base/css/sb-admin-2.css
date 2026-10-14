@@ -5625,3 +5625,17 @@ a.terminos-condiciones{
     .asignacion-plan .plan-busqueda .ui-inputfield { flex-basis: 100% !important; }
     .asignacion-plan .plan-progreso { padding: 14px; }
 }
+
+/* Administración / Usuarios: R031 Registrar usuarios en Moodle. */
+.registro-usuarios-moodle .ui-panel { margin: 20px 0 26px; }
+.registro-usuarios-moodle .ui-panel-content { padding: 20px !important; }
+.registro-usuarios-moodle .ui-outputlabel { display: block; margin-bottom: 8px; }
+.registro-usuarios-moodle .row > div { margin-bottom: 14px; }
+.registro-usuarios-moodle p { line-height: 1.6; margin-bottom: 16px; }
+.registro-usuarios-moodle .registro-moodle-acciones { display: flex; justify-content: flex-end; margin-top: 18px; }
+.registro-usuarios-moodle .btn { width: auto; height: auto; padding: 8px 18px; white-space: normal; }
+.registro-usuarios-moodle .registro-moodle-progreso { margin-top: 20px; padding: 18px; border: 1px solid #d5e3e7; border-radius: 6px; background: #f5f9fa; }
+.registro-usuarios-moodle .ui-progressbar { height: 28px; border-radius: 5px; background: #e1ecef; }
+.registro-usuarios-moodle .ui-progressbar-value { background: #5093a6; }
+.registro-usuarios-moodle .ui-progressbar-label { line-height: 28px; font-weight: 600; color: #163840; }
+.registro-usuarios-moodle .registro-moodle-progreso p { margin-top: 12px; }

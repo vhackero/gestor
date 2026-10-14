@@ -84,6 +84,9 @@
 
 			<div class="row">
 				<div class="col-md-12">
+					<sec:authorize access="hasPermission(null,'USU_MOODLE_REG')">
+						<ui:include src="../componentes/registroUsuariosMoodle.xhtml" />
+					</sec:authorize>
 					<p:panel id="panelBuscarCriterios"
 						header="#{sistema.obtenerTexto('gw.adminPersona.titulo.busquedaAvanzada')}">
 
