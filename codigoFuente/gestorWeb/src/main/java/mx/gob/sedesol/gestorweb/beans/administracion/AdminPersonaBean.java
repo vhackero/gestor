@@ -763,9 +763,13 @@ public class AdminPersonaBean extends BaseBean {
 	}
 
 	public void guardarRolesUsuario() {
+		if (listaRoles == null || listaRoles.getTarget() == null || listaRoles.getTarget().isEmpty()) {
+			agregarMsgError(textosSistema.obtenerTexto("gw.adminPersona.roles.minimo"), null);
+			return;
+		}
 
 		ResultadoDTO<PersonaRolDTO> resultado = personaServiceFacade.almacenarRolesUsuario(personaSeleccionada,
-				personaServiceFacade.getPersonaService().estableceRolAlumnoPorDefecto(listaRoles.getTarget()),
+				new ArrayList<>(listaRoles.getTarget()),
 				getUsuarioEnSession().getIdPersona());
 
 		if (resultado.getResultado() == ResultadoTransaccionEnum.EXITOSO) {
@@ -775,6 +779,7 @@ public class AdminPersonaBean extends BaseBean {
 					TipoServicioEnum.LOCAL);
 
 			agregarMsgInfo("Actualización exitosa.", null);
+			cargarRolesUsuario();
 		} else {
 			agregarMsgInfo("Ocurrió un error al actualizar.", null);
 		}
