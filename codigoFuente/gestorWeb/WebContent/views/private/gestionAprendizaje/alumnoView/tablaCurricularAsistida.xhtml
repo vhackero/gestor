@@ -828,6 +828,16 @@
                 margin: 0;
                 line-height: 1.4;
             }
+            .asistente-v2-trace {
+                margin: 12px 18px 4px;
+                color: #7a848d;
+                font-size: 10px;
+                line-height: 1.35;
+                text-align: right;
+            }
+            .asistente-v2-trace i {
+                margin-right: 4px;
+            }
             .motor-refresh {
                 width: 100%;
                 margin-top: 10px;
@@ -2283,6 +2293,11 @@
                         </p:tab>
 
                     </p:tabView>
+                    <h:panelGroup rendered="#{not empty tablaCurricularAsistidaBean.resumenReglasAplicadasV2}" layout="block" styleClass="asistente-v2-trace">
+                        <i class="fa fa-info-circle" aria-hidden="true" />
+                        <h:outputText id="reglasAplicadasV2" value="Evaluación curricular V2: #{tablaCurricularAsistidaBean.cantidadReglasAplicadasV2} reglas aplicadas" title="#{tablaCurricularAsistidaBean.detalleReglasAplicadasV2}" />
+                        <p:tooltip for="reglasAplicadasV2" value="#{tablaCurricularAsistidaBean.detalleReglasAplicadasV2}" position="top" />
+                    </h:panelGroup>
                 </div>
             </p:outputPanel>
         </h:form>

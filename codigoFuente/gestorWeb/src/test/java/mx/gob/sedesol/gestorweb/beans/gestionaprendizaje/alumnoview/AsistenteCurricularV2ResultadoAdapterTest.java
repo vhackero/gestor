@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 import org.testng.annotations.Test;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoReglaCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 
 public class AsistenteCurricularV2ResultadoAdapterTest {
@@ -55,5 +56,11 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertFalse(fila.getSeleccionable());
 		assertFalse(fila.getRecomendada());
 		assertTrue(fila.getMotivoPrincipal().contains("oferta disponible"));
+	}
+
+	@Test
+	public void f12A3U05FormateaCodigoDeReglaParaLaTrazaDiscreta() {
+		assertTrue(TablaCurricularAsistidaBean.formatearCodigoReglaV2(CodigoReglaCurricularV2.RN_6_4).equals("RN-6.4"));
+		assertTrue(TablaCurricularAsistidaBean.formatearCodigoReglaV2(CodigoReglaCurricularV2.CTR_01).equals("CTR-01"));
 	}
 }

@@ -38,6 +38,7 @@ import mx.gob.sedesol.basegestor.commons.dto.inscripcion.InscripcionPreviaMateri
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.MallaCurricularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AsistenteVirtualAccionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoReglaCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PanelAsistenteVirtualDTO;
@@ -261,6 +262,34 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 		logger.info("[ASISTENTE_V2] Resumen - situacion=" + resultadoEvaluacionV2.getSituacionAcademicaCalculada()
 				+ " - habilitadas=" + habilitadas + " - restringidas=" + restringidas
 				+ " - prioritarias=" + prioritarias + " - recomendadas=" + recomendadas);
+	}
+
+	/** Etiqueta compacta para la evidencia normativa mostrada al pie del Asistente. */
+	public String getResumenReglasAplicadasV2() {
+		if (resultadoEvaluacionV2 == null || resultadoEvaluacionV2.getReglasEvaluadas().isEmpty()) return null;
+		return resultadoEvaluacionV2.getReglasEvaluadas().stream()
+				.filter(regla -> regla != null)
+				.map(TablaCurricularAsistidaBean::formatearCodigoReglaV2)
+				.distinct()
+				.sorted()
+				.collect(Collectors.joining(", "));
+	}
+
+	public String getDetalleReglasAplicadasV2() {
+		String reglas = getResumenReglasAplicadasV2();
+		return reglas == null ? null : "Motor Curricular V2 PE2027-V1 en modo sombra. Reglas evaluadas en este contexto: " + reglas + ".";
+	}
+
+	public int getCantidadReglasAplicadasV2() {
+		String reglas = getResumenReglasAplicadasV2();
+		return reglas == null ? 0 : reglas.split(", ").length;
+	}
+
+	static String formatearCodigoReglaV2(CodigoReglaCurricularV2 regla) {
+		String codigo = regla.name();
+		int separador = codigo.indexOf('_');
+		if (separador < 0) return codigo;
+		return codigo.substring(0, separador) + "-" + codigo.substring(separador + 1).replace('_', '.');
 	}
 
     private String construirEtiquetaBloque(UnidadDecisionInscripcionDTO unidad) {
