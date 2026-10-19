@@ -9,6 +9,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurri
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoReglaCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TrazaReglaAplicadaV2DTO;
 
 public class AsistenteCurricularV2ResultadoAdapterTest {
 	@Test
@@ -64,11 +65,13 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		ResultadoEvaluacionCurricularV2DTO resultado = new ResultadoEvaluacionCurricularV2DTO();
 		resultado.setSituacionAcademicaCalculada("IRREGULAR");
 		resultado.setCantidadReprobadasVigentes(Integer.valueOf(4));
-		resultado.getReglasEvaluadas().add(CodigoReglaCurricularV2.RN_1_2);
+		resultado.getTrazas().add(trazaCausal(CodigoReglaCurricularV2.RN_1_2));
+		resultado.getTrazas().add(trazaCausal(CodigoReglaCurricularV2.RN_6_6));
 		resultado.getReglasEvaluadas().add(CodigoReglaCurricularV2.RN_6_4);
 
 		assertTrue(TablaCurricularAsistidaBean.construirResumenClasificacionNoRegularV2(resultado).contains("4 unidades didácticas reprobadas"));
-		assertTrue(TablaCurricularAsistidaBean.construirDetalleClasificacionNoRegularV2(resultado).contains("RN-1.2, RN-6.4"));
+		assertTrue(TablaCurricularAsistidaBean.construirDetalleClasificacionNoRegularV2(resultado).contains("RN-1.2, RN-6.6"));
+		assertFalse(TablaCurricularAsistidaBean.construirDetalleClasificacionNoRegularV2(resultado).contains("RN-6.4"));
 
 		resultado.setSituacionAcademicaCalculada("REGULAR");
 		assertTrue(TablaCurricularAsistidaBean.construirResumenClasificacionNoRegularV2(resultado) == null);
@@ -78,5 +81,12 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 	public void f12A3U06FormateaCodigoDeReglaParaLaTrazaDiscreta() {
 		assertTrue(TablaCurricularAsistidaBean.formatearCodigoReglaV2(CodigoReglaCurricularV2.RN_6_4).equals("RN-6.4"));
 		assertTrue(TablaCurricularAsistidaBean.formatearCodigoReglaV2(CodigoReglaCurricularV2.CTR_01).equals("CTR-01"));
+	}
+
+	private TrazaReglaAplicadaV2DTO trazaCausal(CodigoReglaCurricularV2 regla) {
+		TrazaReglaAplicadaV2DTO traza = new TrazaReglaAplicadaV2DTO();
+		traza.setCodigoRegla(regla);
+		traza.setResultado("SITUACION_ACADEMICA_IRREGULAR");
+		return traza;
 	}
 }

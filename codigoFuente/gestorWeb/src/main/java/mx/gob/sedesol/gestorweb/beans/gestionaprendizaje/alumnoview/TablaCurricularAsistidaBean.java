@@ -44,6 +44,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCaso
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PanelAsistenteVirtualDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TrazaReglaAplicadaV2DTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ObjetoCurricularEnum;
@@ -285,12 +286,20 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 	static String construirDetalleClasificacionNoRegularV2(ResultadoEvaluacionCurricularV2DTO resultado) {
 		String resumen = construirResumenClasificacionNoRegularV2(resultado);
 		if (resumen == null) return null;
-		List<String> reglas = new ArrayList<String>();
-		if (resultado.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_1_2)) reglas.add(formatearCodigoReglaV2(CodigoReglaCurricularV2.RN_1_2));
-		if (resultado.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_6_3)) reglas.add(formatearCodigoReglaV2(CodigoReglaCurricularV2.RN_6_3));
-		if (resultado.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_6_4)) reglas.add(formatearCodigoReglaV2(CodigoReglaCurricularV2.RN_6_4));
-		if (resultado.getReglasEvaluadas().contains(CodigoReglaCurricularV2.CTR_04)) reglas.add(formatearCodigoReglaV2(CodigoReglaCurricularV2.CTR_04));
+		List<String> reglas = obtenerReglasCausalesClasificacion(resultado);
 		return resumen + " Fundamento V2: " + (reglas.isEmpty() ? "requiere revisión de evidencia curricular" : StringUtils.join(reglas, ", ")) + ".";
+	}
+
+	private static List<String> obtenerReglasCausalesClasificacion(ResultadoEvaluacionCurricularV2DTO resultado) {
+		String resultadoEsperado = "SITUACION_ACADEMICA_" + resultado.getSituacionAcademicaCalculada();
+		return resultado.getTrazas().stream()
+				.filter(traza -> traza != null && traza.getCodigoRegla() != null)
+				.filter(traza -> resultadoEsperado.equals(traza.getResultado()))
+				.map(TrazaReglaAplicadaV2DTO::getCodigoRegla)
+				.map(TablaCurricularAsistidaBean::formatearCodigoReglaV2)
+				.distinct()
+				.sorted()
+				.collect(Collectors.toList());
 	}
 
 	static String formatearCodigoReglaV2(CodigoReglaCurricularV2 regla) {
