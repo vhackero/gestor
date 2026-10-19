@@ -264,25 +264,33 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 				+ " - prioritarias=" + prioritarias + " - recomendadas=" + recomendadas);
 	}
 
-	/** Etiqueta compacta para la evidencia normativa mostrada al pie del Asistente. */
-	public String getResumenReglasAplicadasV2() {
-		if (resultadoEvaluacionV2 == null || resultadoEvaluacionV2.getReglasEvaluadas().isEmpty()) return null;
-		return resultadoEvaluacionV2.getReglasEvaluadas().stream()
-				.filter(regla -> regla != null)
-				.map(TablaCurricularAsistidaBean::formatearCodigoReglaV2)
-				.distinct()
-				.sorted()
-				.collect(Collectors.joining(", "));
+	/** Evidencia compacta exclusiva para clasificaciones no regulares. */
+	public String getResumenClasificacionNoRegularV2() {
+		return construirResumenClasificacionNoRegularV2(resultadoEvaluacionV2);
 	}
 
-	public String getDetalleReglasAplicadasV2() {
-		String reglas = getResumenReglasAplicadasV2();
-		return reglas == null ? null : "Motor Curricular V2 PE2027-V1 en modo sombra. Reglas evaluadas en este contexto: " + reglas + ".";
+	public String getDetalleClasificacionNoRegularV2() {
+		return construirDetalleClasificacionNoRegularV2(resultadoEvaluacionV2);
 	}
 
-	public int getCantidadReglasAplicadasV2() {
-		String reglas = getResumenReglasAplicadasV2();
-		return reglas == null ? 0 : reglas.split(", ").length;
+	static String construirResumenClasificacionNoRegularV2(ResultadoEvaluacionCurricularV2DTO resultado) {
+		if (resultado == null || "REGULAR".equals(resultado.getSituacionAcademicaCalculada())) return null;
+		if ("IRREGULAR".equals(resultado.getSituacionAcademicaCalculada())) {
+			int reprobadas = resultado.getCantidadReprobadasVigentes() == null ? 0 : resultado.getCantidadReprobadasVigentes().intValue();
+			return "Situación irregular: " + reprobadas + " unidad" + (reprobadas == 1 ? " didáctica reprobada vigente" : "es didácticas reprobadas vigentes") + ".";
+		}
+		return "Situación académica pendiente de revisión.";
+	}
+
+	static String construirDetalleClasificacionNoRegularV2(ResultadoEvaluacionCurricularV2DTO resultado) {
+		String resumen = construirResumenClasificacionNoRegularV2(resultado);
+		if (resumen == null) return null;
+		List<String> reglas = new ArrayList<String>();
+		if (resultado.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_1_2)) reglas.add(formatearCodigoReglaV2(CodigoReglaCurricularV2.RN_1_2));
+		if (resultado.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_6_3)) reglas.add(formatearCodigoReglaV2(CodigoReglaCurricularV2.RN_6_3));
+		if (resultado.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_6_4)) reglas.add(formatearCodigoReglaV2(CodigoReglaCurricularV2.RN_6_4));
+		if (resultado.getReglasEvaluadas().contains(CodigoReglaCurricularV2.CTR_04)) reglas.add(formatearCodigoReglaV2(CodigoReglaCurricularV2.CTR_04));
+		return resumen + " Fundamento V2: " + (reglas.isEmpty() ? "requiere revisión de evidencia curricular" : StringUtils.join(reglas, ", ")) + ".";
 	}
 
 	static String formatearCodigoReglaV2(CodigoReglaCurricularV2 regla) {

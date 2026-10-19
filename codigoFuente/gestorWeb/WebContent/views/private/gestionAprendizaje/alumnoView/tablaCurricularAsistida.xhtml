@@ -2293,10 +2293,10 @@
                         </p:tab>
 
                     </p:tabView>
-                    <h:panelGroup rendered="#{not empty tablaCurricularAsistidaBean.resumenReglasAplicadasV2}" layout="block" styleClass="asistente-v2-trace">
+                    <h:panelGroup rendered="#{not empty tablaCurricularAsistidaBean.resumenClasificacionNoRegularV2}" layout="block" styleClass="asistente-v2-trace">
                         <i class="fa fa-info-circle" aria-hidden="true" />
-                        <h:outputText id="reglasAplicadasV2" value="Evaluación curricular V2: #{tablaCurricularAsistidaBean.cantidadReglasAplicadasV2} reglas aplicadas" title="#{tablaCurricularAsistidaBean.detalleReglasAplicadasV2}" />
-                        <p:tooltip for="reglasAplicadasV2" value="#{tablaCurricularAsistidaBean.detalleReglasAplicadasV2}" position="top" />
+                        <h:outputText id="clasificacionNoRegularV2" value="#{tablaCurricularAsistidaBean.resumenClasificacionNoRegularV2} Ver fundamento." title="#{tablaCurricularAsistidaBean.detalleClasificacionNoRegularV2}" />
+                        <p:tooltip for="clasificacionNoRegularV2" value="#{tablaCurricularAsistidaBean.detalleClasificacionNoRegularV2}" position="top" />
                     </h:panelGroup>
                 </div>
             </p:outputPanel>

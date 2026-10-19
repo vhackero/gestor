@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoReglaCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 
 public class AsistenteCurricularV2ResultadoAdapterTest {
 	@Test
@@ -59,7 +60,22 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 	}
 
 	@Test
-	public void f12A3U05FormateaCodigoDeReglaParaLaTrazaDiscreta() {
+	public void f12A3U05MuestraFundamentoSoloParaClasificacionIrregular() {
+		ResultadoEvaluacionCurricularV2DTO resultado = new ResultadoEvaluacionCurricularV2DTO();
+		resultado.setSituacionAcademicaCalculada("IRREGULAR");
+		resultado.setCantidadReprobadasVigentes(Integer.valueOf(4));
+		resultado.getReglasEvaluadas().add(CodigoReglaCurricularV2.RN_1_2);
+		resultado.getReglasEvaluadas().add(CodigoReglaCurricularV2.RN_6_4);
+
+		assertTrue(TablaCurricularAsistidaBean.construirResumenClasificacionNoRegularV2(resultado).contains("4 unidades didácticas reprobadas"));
+		assertTrue(TablaCurricularAsistidaBean.construirDetalleClasificacionNoRegularV2(resultado).contains("RN-1.2, RN-6.4"));
+
+		resultado.setSituacionAcademicaCalculada("REGULAR");
+		assertTrue(TablaCurricularAsistidaBean.construirResumenClasificacionNoRegularV2(resultado) == null);
+	}
+
+	@Test
+	public void f12A3U06FormateaCodigoDeReglaParaLaTrazaDiscreta() {
 		assertTrue(TablaCurricularAsistidaBean.formatearCodigoReglaV2(CodigoReglaCurricularV2.RN_6_4).equals("RN-6.4"));
 		assertTrue(TablaCurricularAsistidaBean.formatearCodigoReglaV2(CodigoReglaCurricularV2.CTR_01).equals("CTR-01"));
 	}
