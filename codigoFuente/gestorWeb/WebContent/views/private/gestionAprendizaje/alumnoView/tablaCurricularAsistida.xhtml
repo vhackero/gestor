@@ -1686,24 +1686,6 @@
                                         </div>
                                     </ui:repeat>
                                 </div>
-
-                                <div class="oportunidad-box">
-                                    <div>
-                                        <h3>Oportunidades académicas</h3>
-                                        <div>#{tablaCurricularAsistidaBean.contexto.oportunidades.resumen}</div>
-                                        <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.contexto.oportunidades.oportunidades}">
-                                            <div style="margin-top:18px;"><strong>Recomendaciones de oportunidad</strong></div>
-                                            <ul>
-                                                <ui:repeat value="#{tablaCurricularAsistidaBean.contexto.oportunidades.oportunidades}" var="oportunidad">
-                                                    <li>#{oportunidad}</li>
-                                                </ui:repeat>
-                                            </ul>
-                                        </ui:fragment>
-                                    </div>
-                                    <div class="oportunidad-icon">
-                                        <i class="fa fa-bookmark-o" />
-                                    </div>
-                                </div>
                             </div>
                         </p:tab>
 
