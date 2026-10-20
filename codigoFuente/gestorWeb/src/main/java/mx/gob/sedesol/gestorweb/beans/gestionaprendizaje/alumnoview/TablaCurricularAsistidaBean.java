@@ -225,20 +225,20 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 		decisionesV2PorPrograma.clear();
 		if (asistenteCurricularV2Facade == null || contexto == null) return;
 		try {
-			logger.info("[ASISTENTE_V2] Inicio evaluacion curricular con Motor V2");
-			logger.info("[ASISTENTE_V2] Invocando Motor Curricular V2 - version=PE2027-V1 - modo=SOMBRA");
+			logger.info("[ASISTENTE_V2] Inicio de evaluacion curricular");
+			logger.info("[ASISTENTE_V2] Evaluando reglas curriculares");
 			resultadoEvaluacionV2 = asistenteCurricularV2Facade.evaluarSombra(contexto);
 			if (resultadoEvaluacionV2 == null) {
-				logger.warn("[ASISTENTE_V2] No fue posible obtener ResultadoEvaluacionCurricularV2DTO");
+				logger.warn("[ASISTENTE_V2] No fue posible obtener el resultado de la evaluacion curricular");
 				return;
 			}
 			for (DecisionUnidadCurricularV2DTO decision : resultadoEvaluacionV2.getDecisiones()) {
 				if (decision != null && decision.getIdPrograma() != null) decisionesV2PorPrograma.put(decision.getIdPrograma(), decision);
 			}
 			aplicarLimiteCargaV2AProyeccion();
-			logger.info("[ASISTENTE_V2] ResultadoEvaluacionCurricularV2DTO obtenido correctamente");
+			logger.info("[ASISTENTE_V2] Resultado de evaluacion curricular obtenido correctamente");
 		} catch (Exception e) {
-			logger.warn("[ASISTENTE_V2] Error al evaluar el Asistente con Motor V2", e);
+			logger.warn("[ASISTENTE_V2] Error al evaluar las reglas curriculares", e);
 		}
 	}
 
@@ -1237,7 +1237,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     /**
-     * El motor V2 clasifica el caso y construye el panel para ambos perfiles.
+     * La evaluacion curricular clasifica el caso y construye el panel para ambos perfiles.
      * El bean conserva la regla local solo como degradación controlada si V2 no responde.
      */
     private String resolverEscenarioAsistente() {

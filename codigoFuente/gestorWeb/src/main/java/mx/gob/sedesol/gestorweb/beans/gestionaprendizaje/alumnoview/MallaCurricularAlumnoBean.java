@@ -247,11 +247,11 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			return;
 		}
 		try {
-			logger.info("[MALLA_V2] Inicio evaluacion curricular con Motor V2");
-			logger.info("[MALLA_V2] Invocando Motor Curricular V2 - version=PE2027-V1 - modo=SOMBRA");
+			logger.info("[MALLA_V2] Inicio de evaluacion curricular");
+			logger.info("[MALLA_V2] Evaluando reglas curriculares");
 			resultadoEvaluacionV2 = mallaCurricularV2Facade.evaluarSombra(contextoAsistente);
 			if (resultadoEvaluacionV2 == null) {
-				logger.warn("[MALLA_V2] No fue posible obtener ResultadoEvaluacionCurricularV2DTO");
+				logger.warn("[MALLA_V2] No fue posible obtener el resultado de la evaluacion curricular");
 				return;
 			}
 			for (DecisionUnidadCurricularV2DTO decision : resultadoEvaluacionV2.getDecisiones()) {
@@ -259,9 +259,9 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 					decisionesV2PorPrograma.put(decision.getIdPrograma(), decision);
 				}
 			}
-			logger.info("[MALLA_V2] ResultadoEvaluacionCurricularV2DTO obtenido correctamente");
+			logger.info("[MALLA_V2] Resultado de evaluacion curricular obtenido correctamente");
 		} catch (Exception e) {
-			logger.warn("[MALLA_V2] Error al evaluar la Malla con Motor V2", e);
+			logger.warn("[MALLA_V2] Error al evaluar las reglas curriculares", e);
 		}
 	}
 

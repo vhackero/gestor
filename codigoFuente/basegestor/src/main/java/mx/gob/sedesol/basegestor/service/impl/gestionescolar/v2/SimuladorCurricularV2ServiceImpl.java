@@ -36,16 +36,16 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
 
     @Override @Transactional(readOnly = true)
     public ResultadoSimulacionDTO simularSombra(Long idPersona, List<Long> idsSeleccionados) throws InscripcionException {
-        LOGGER.info("[SIMULADOR_V2] Inicio simulacion utilizando Motor Curricular V2");
+        LOGGER.info("[SIMULADOR_V2] Inicio de simulacion curricular");
         AsistenteInscripcionContextoDTO fuente = asistenteInscripcionService.obtenerContextoAsistido(idPersona);
         if (fuente == null) throw new InscripcionException("No existe contexto SIGIE para simular.");
         ContextoEvaluacionCurricularV2DTO contexto = adaptador.construirDesdeAsistente(fuente);
-        LOGGER.info("[SIMULADOR_V2] Invocando Motor Curricular V2 - version=PE2027-V1 - modo=SOMBRA");
+        LOGGER.info("[SIMULADOR_V2] Evaluando reglas curriculares");
         ResultadoEvaluacionCurricularV2DTO evaluacion = evaluador.evaluarSombra(contexto);
         if (evaluacion == null) {
-            LOGGER.warn("[SIMULADOR_V2] No fue posible obtener ResultadoEvaluacionCurricularV2DTO");
+            LOGGER.warn("[SIMULADOR_V2] No fue posible obtener el resultado de la evaluacion curricular");
         } else {
-            LOGGER.info("[SIMULADOR_V2] ResultadoEvaluacionCurricularV2DTO obtenido correctamente");
+            LOGGER.info("[SIMULADOR_V2] Resultado de evaluacion curricular obtenido correctamente");
         }
         ResultadoSimulacionDTO resultado = new ResultadoSimulacionDTO();
         List<Long> seleccionados = idsSeleccionados == null ? Collections.<Long>emptyList()
@@ -61,11 +61,11 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
         aplicarValidacionesComplementarias(fuente, seleccion, seleccionados, resultado);
         resultado.setValida(Boolean.valueOf(resultado.getMotivos().isEmpty()));
         resultado.setMensajeGeneral(Boolean.TRUE.equals(resultado.getValida())
-                ? "Escenario evaluado por Motor Curricular V2 en modo sombra."
-                : "Escenario restringido por reglas V2 y validaciones complementarias del simulador.");
+                ? "Escenario academico valido."
+                : "Escenario restringido por reglas academicas y validaciones complementarias del simulador.");
         resultado.setImpactoSiguientePeriodo("Resultado académico hipotético; no modifica inscripción, oferta ni selección.");
         registrarResumenAplicacion(evaluacion, seleccionados.size(), resultado);
-        LOGGER.info("[SIMULADOR_V2] Simulacion finalizada utilizando resultado del Motor Curricular V2");
+        LOGGER.info("[SIMULADOR_V2] Simulacion finalizada");
         return resultado;
     }
 
