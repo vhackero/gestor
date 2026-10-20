@@ -203,7 +203,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 		planId = inscripcion.getIdPlan();
 		planNombre = inscripcion.getPlan();
-		cargarFichaIntegralV2();
+		// D1: la malla no consume ficha histórica para orientación académica.
 
 		MallaCurricularDTO raiz = fecServiceFacade.getMallaCurricularService()
 				.obtenerMallaCurricularPorIdPlan(planId.intValue());
@@ -268,16 +268,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private void cargarFichaIntegralV2() {
 		intentoCargaFichaIntegralV2 = true;
 		fichaIntegralV2 = null;
-		if (mallaCurricularV2Facade == null || idPersonaObjetivo == null) {
-			return;
-		}
-		try {
-			fichaIntegralV2 = mallaCurricularV2Facade.obtenerContextoMalla(construirContextoV2());
-		} catch (InscripcionException e) {
-			logger.warn("No fue posible cargar la ficha integral V2 para malla curricular.", e);
-		} catch (Exception e) {
-			logger.warn("Error inesperado al cargar la ficha integral V2 para malla curricular.", e);
-		}
+		logger.debug("[D1_PE2027] Ficha histórica omitida; la malla usa resultado PE2027.");
 	}
 
 	private void asegurarFichaIntegralV2() {

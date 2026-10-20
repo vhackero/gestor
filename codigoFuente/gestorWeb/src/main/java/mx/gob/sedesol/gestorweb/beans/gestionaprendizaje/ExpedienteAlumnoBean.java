@@ -237,7 +237,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 		}
 		this.personaDTO = persona;
 		prepararContextoConsultaGestor();
-		asegurarCasoV2ConsultaGestor(persona);
+		// D1: abrir el expediente no genera ni lee una ficha académica histórica.
 		Long id = persona.getIdPersona();
 		listaEventos = constanciasBean.getEventosAdmin(id);
 		historial = constanciasBean.getHistorialAdmin(id);
@@ -319,7 +319,8 @@ public class ExpedienteAlumnoBean extends BaseBean {
 			casoSeleccionadoV2 = casoAcademicoOperativoService.obtenerCasoPorId(caso.getId());
 			ContextoAsistenteCurricularV2DTO contexto = construirContextoV2("EXPEDIENTE");
 			contexto.setCasoActual(casoSeleccionadoV2);
-			fichaIntegralCasoV2 = expedienteCurricularV2Facade.obtenerContextoExpediente(contexto);
+			// El caso sólo conserva bitácora/evidencia; su dictamen no decide PE2027.
+			fichaIntegralCasoV2 = null;
 			bitacoraCasoV2 = bitacoraCasoServiceV2 != null
 					? bitacoraCasoServiceV2.obtenerBitacora(casoSeleccionadoV2.getId())
 					: new ArrayList<BitacoraCasoDTO>();

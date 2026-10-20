@@ -96,6 +96,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private AsistenteInscripcionContextoDTO contexto;
     private FichaIntegralCasoDTO fichaIntegralV2;
     private ResultadoEvaluacionCurricularV2DTO resultadoEvaluacionV2;
+    private AsistenteCurricularViewModelDTO orientacionPE2027;
     private Map<Long, DecisionUnidadCurricularV2DTO> decisionesV2PorPrograma = new HashMap<Long, DecisionUnidadCurricularV2DTO>();
     private boolean intentoCargaFichaIntegralV2;
     private List<SemestreAsistidoDTO> semestres;
@@ -126,7 +127,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             cargarResultadoEvaluacionV2();
             construirSemestres();
 			registrarResumenAplicacionV2();
-            cargarFichaIntegralV2();
+            // D1: la orientación se deriva exclusivamente de resultadoEvaluacionV2.
             inicializarRespuestasContextuales();
         } catch (InscripcionException e) {
             logger.error("Error al obtener contexto asistido de inscripción.", e);
@@ -235,6 +236,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 			for (DecisionUnidadCurricularV2DTO decision : resultadoEvaluacionV2.getDecisiones()) {
 				if (decision != null && decision.getIdPrograma() != null) decisionesV2PorPrograma.put(decision.getIdPrograma(), decision);
 			}
+			orientacionPE2027 = new AsistenteCurricularResultadoAdapter().adaptar(resultadoEvaluacionV2);
 			aplicarLimiteCargaV2AProyeccion();
 			logger.info("[ASISTENTE_V2] Resultado de evaluacion curricular obtenido correctamente");
 		} catch (Exception e) {
@@ -466,6 +468,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public ResultadoSimulacionDTO getResultadoSimulacion() {
         return resultadoSimulacion;
+    }
+
+    /** Presentación PE2027; no expone ficha, caso ni dictamen histórico. */
+    public AsistenteCurricularViewModelDTO getOrientacionPE2027() {
+        return orientacionPE2027;
     }
 
     public void setResultadoSimulacion(ResultadoSimulacionDTO resultadoSimulacion) {
@@ -705,16 +712,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private void cargarFichaIntegralV2() {
         intentoCargaFichaIntegralV2 = true;
         fichaIntegralV2 = null;
-        if (asistenteCurricularV2Facade == null || idPersonaObjetivo == null) {
-            return;
-        }
-        try {
-            fichaIntegralV2 = asistenteCurricularV2Facade.obtenerFichaIntegral(construirContextoV2());
-        } catch (InscripcionException e) {
-            logger.warn("No fue posible cargar la ficha integral V2 para el asistente curricular.", e);
-        } catch (Exception e) {
-            logger.warn("Error inesperado al cargar la ficha integral V2 para el asistente curricular.", e);
-        }
+        logger.debug("[D1_PE2027] Ficha histórica omitida; el asistente no la usa para orientación.");
     }
 
     public void actualizarDiagnosticoMotor() {
