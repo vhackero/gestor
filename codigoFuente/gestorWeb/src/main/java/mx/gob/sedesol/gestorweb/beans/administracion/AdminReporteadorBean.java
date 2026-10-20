@@ -188,6 +188,7 @@ public class AdminReporteadorBean extends BaseBean {
 			copia.setClave(parametro.getClave());
 			copia.setEtiqueta(parametro.getEtiqueta());
 			copia.setConsultaSql(parametro.getConsultaSql());
+            copia.setTipoEntrada(parametro.getTipoEntrada());
 			copia.setOrden(parametro.getOrden());
 			copia.setActivo(parametro.getActivo());
 		}
