@@ -4,6 +4,8 @@ En Administración de Reporteador, el detalle del parámetro permite elegir **Li
 
 Por ejemplo, configure la clave `:periodociclo`, etiqueta `Periodo o ciclo` y tipo Texto. En el Reporteador podrá capturar `2024-1` o `2024`; el SQL recibe el valor mediante un parámetro JDBC, sin concatenarlo. Los parámetros siguen siendo obligatorios.
 
+Para Texto puede configurar **Texto de ejemplo (placeholder)**, opcional y de hasta 250 caracteres. Se muestra dentro del campo vacío; no sustituye la etiqueta ni asigna un valor al parámetro. Por ejemplo: `2024-1 o 2024`. Requiere aplicar `codigoFuente/bd/R069_20102026_reporteador_placeholder.sql` después de R068 y antes del despliegue. Los parámetros existentes conservan NULL y no muestran ejemplo hasta configurarlo.
+
 La validación admite una sola consulta `SELECT` o `WITH ... SELECT`, incluidos comentarios ordinarios y un punto y coma final. Rechaza instrucciones de modificación o administración, consultas múltiples, escritura/lectura de archivos, asignación a variables, bloqueos y comentarios ejecutables. Las cadenas de texto y comentarios no se interpretan como instrucciones ni como parámetros. La ejecución de reportes y opciones utiliza una conexión marcada de sólo lectura.
 
 Aplicar `codigoFuente/bd/R068_20102026_reporteador_parametros_texto.sql` antes de desplegar los cambios en basegestor y gestorWeb. Agrega `tipo_entrada` a la tabla existente; las configuraciones previas quedan como SELECT (Lista). Los parámetros INPUT (Texto) guardan la consulta de opciones vacía. No cambia permisos ni otros módulos.

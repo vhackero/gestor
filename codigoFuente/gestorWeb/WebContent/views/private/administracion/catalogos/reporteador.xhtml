@@ -209,6 +209,10 @@
                             </p:selectOneMenu>
                         </div>
                         <p:outputPanel id="opcionesParametro">
+                            <h:panelGroup layout="block" styleClass="form-group" rendered="#{adminReporteadorBean.parametroEdicion.entradaTexto}">
+                                <p:outputLabel for="placeholderParametro" value="Texto de ejemplo (placeholder):" />
+                                <p:inputText id="placeholderParametro" value="#{adminReporteadorBean.parametroEdicion.placeholder}" maxlength="250" styleClass="form-control" placeholder="Ejemplo: 2024-1 o 2024" />
+                            </h:panelGroup>
                         <h:panelGroup layout="block" rendered="#{not adminReporteadorBean.parametroEdicion.entradaTexto}">
                             <p:outputLabel value="Consulta SQL de opciones:" />
 							<p:inputTextarea
