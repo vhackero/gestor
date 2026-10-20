@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoAcademicoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EscenarioProyeccionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
@@ -234,10 +235,30 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 			for (DecisionUnidadCurricularV2DTO decision : resultadoEvaluacionV2.getDecisiones()) {
 				if (decision != null && decision.getIdPrograma() != null) decisionesV2PorPrograma.put(decision.getIdPrograma(), decision);
 			}
+			aplicarLimiteCargaV2AProyeccion();
 			logger.info("[ASISTENTE_V2] ResultadoEvaluacionCurricularV2DTO obtenido correctamente");
 		} catch (Exception e) {
 			logger.warn("[ASISTENTE_V2] Error al evaluar el Asistente con Motor V2", e);
 		}
+	}
+
+	private void aplicarLimiteCargaV2AProyeccion() {
+		if (contexto == null || contexto.getProyeccionSiguientePeriodo() == null) return;
+		Integer cargaMaxima = resultadoEvaluacionV2.getEvaluacionCargaAcademica() != null
+				? resultadoEvaluacionV2.getEvaluacionCargaAcademica().getCargaMaximaNormativa()
+				: null;
+		if (cargaMaxima == null) cargaMaxima = resultadoEvaluacionV2.getCargaMaximaFuturaSombra();
+		if (cargaMaxima == null || cargaMaxima.intValue() < 0) return;
+		for (EscenarioProyeccionDTO escenario : contexto.getProyeccionSiguientePeriodo().getEscenarios()) {
+			if (escenario == null) continue;
+			escenario.setMateriasOfertadas(limitarPorCargaV2(escenario.getMateriasOfertadas(), cargaMaxima));
+			escenario.setMateriasHabilitadas(limitarPorCargaV2(escenario.getMateriasHabilitadas(), cargaMaxima));
+		}
+	}
+
+	static Integer limitarPorCargaV2(Integer cantidad, Integer cargaMaxima) {
+		if (cantidad == null || cargaMaxima == null) return cantidad;
+		return Integer.valueOf(Math.min(cantidad.intValue(), cargaMaxima.intValue()));
 	}
 
 	private void aplicarDecisionV2(FilaAsistidaDTO fila) {

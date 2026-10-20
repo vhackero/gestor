@@ -89,6 +89,12 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertTrue(TablaCurricularAsistidaBean.formatearEstadoEnOracion("REGULAR").equals("Regular"));
 	}
 
+	@Test
+	public void f12A3U08LimitaExpectativaAlMaximoDeCargaV2() {
+		assertTrue(TablaCurricularAsistidaBean.limitarPorCargaV2(Integer.valueOf(10), Integer.valueOf(6)).equals(Integer.valueOf(6)));
+		assertTrue(TablaCurricularAsistidaBean.limitarPorCargaV2(Integer.valueOf(3), Integer.valueOf(6)).equals(Integer.valueOf(3)));
+	}
+
 	private TrazaReglaAplicadaV2DTO trazaCausal(CodigoReglaCurricularV2 regla) {
 		TrazaReglaAplicadaV2DTO traza = new TrazaReglaAplicadaV2DTO();
 		traza.setCodigoRegla(regla);
