@@ -5561,3 +5561,81 @@ a.terminos-condiciones{
 	display:flex;
 	align-items: flex-end;
 }
+
+/* Administración / Usuarios: cambio o asignación de plan. */
+.asignacion-plan .ui-panel { margin: 18px 0 24px; }
+.asignacion-plan .ui-panel-content { padding: 20px !important; }
+.asignacion-plan .ui-panel-content > p { margin-bottom: 18px; line-height: 1.6; }
+.asignacion-plan .row > div { margin-bottom: 14px; }
+.asignacion-plan .ui-outputlabel { display: block; margin-bottom: 8px; }
+.asignacion-plan .btn,
+.asignacion-plan .ui-fileupload-buttonbar .ui-button {
+    width: auto;
+    height: auto;
+    min-height: 38px;
+    margin: 0;
+    padding: 8px 16px;
+    white-space: normal;
+}
+.asignacion-plan .btn .ui-button-text { white-space: normal; }
+.asignacion-plan .plan-acciones {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 18px 0;
+}
+.asignacion-plan .plan-archivo { margin: 20px 0; }
+.asignacion-plan .plan-carga-fila { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 14px; }
+.asignacion-plan .plan-carga-fila .ui-fileupload-buttonbar { padding: 0; border: 0; background: transparent; }
+.asignacion-plan .plan-carga-fila .ui-fileupload-content:empty { display: none; }
+.asignacion-plan .plan-nombre-archivo { display: block; margin-top: 10px; }
+.asignacion-plan .ui-fileupload-buttonbar { padding: 12px; display: flex; flex-wrap: wrap; gap: 12px; }
+.asignacion-plan .ui-fileupload-content { padding: 12px; }
+.asignacion-plan .plan-busqueda { display: flex; align-items: center; gap: 16px; }
+.asignacion-plan .plan-progreso {
+    margin-top: 24px;
+    padding: 20px;
+    border: 1px solid #d5e3e7;
+    border-radius: 6px;
+    background: #f5f9fa;
+}
+.asignacion-plan .plan-progreso .ui-progressbar {
+    position: relative;
+    height: 28px;
+    border: 1px solid #c5d8de;
+    border-radius: 5px;
+    background: #e1ecef;
+    overflow: hidden;
+}
+.asignacion-plan .plan-progreso .ui-progressbar-value { background: #5093a6; border: 0; height: 100%; }
+.asignacion-plan .plan-progreso .ui-progressbar-label {
+    position: absolute;
+    inset: 0;
+    line-height: 28px;
+    font-weight: 600;
+    color: #163840;
+    text-shadow: 0 1px 1px #fff;
+}
+.asignacion-plan .plan-progreso p { margin: 14px 0 0; line-height: 1.6; }
+.asignacion-plan .plan-error { margin-top: 12px; color: #a12622; line-height: 1.6; }
+@media (max-width: 767px) {
+    .asignacion-plan .ui-panel-content { padding: 14px !important; }
+    .asignacion-plan .plan-busqueda { flex-wrap: wrap; }
+    .asignacion-plan .plan-busqueda .ui-inputfield { flex-basis: 100% !important; }
+    .asignacion-plan .plan-progreso { padding: 14px; }
+}
+
+/* Administración / Usuarios: R031 Registrar usuarios en Moodle. */
+.registro-usuarios-moodle .ui-panel { margin: 20px 0 26px; }
+.registro-usuarios-moodle .ui-panel-content { padding: 20px !important; }
+.registro-usuarios-moodle .ui-outputlabel { display: block; margin-bottom: 8px; }
+.registro-usuarios-moodle .row > div { margin-bottom: 14px; }
+.registro-usuarios-moodle p { line-height: 1.6; margin-bottom: 16px; }
+.registro-usuarios-moodle .registro-moodle-acciones { display: flex; justify-content: flex-end; margin-top: 18px; }
+.registro-usuarios-moodle .btn { width: auto; height: auto; padding: 8px 18px; white-space: normal; }
+.registro-usuarios-moodle .registro-moodle-progreso { margin-top: 20px; padding: 18px; border: 1px solid #d5e3e7; border-radius: 6px; background: #f5f9fa; }
+.registro-usuarios-moodle .ui-progressbar { height: 28px; border-radius: 5px; background: #e1ecef; }
+.registro-usuarios-moodle .ui-progressbar-value { background: #5093a6; }
+.registro-usuarios-moodle .ui-progressbar-label { line-height: 28px; font-weight: 600; color: #163840; }
+.registro-usuarios-moodle .registro-moodle-progreso p { margin-top: 12px; }

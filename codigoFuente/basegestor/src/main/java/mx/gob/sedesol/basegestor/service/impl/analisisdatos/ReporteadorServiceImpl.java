@@ -32,11 +32,6 @@ import mx.gob.sedesol.basegestor.service.analisisdatos.ReporteadorService;
 public class ReporteadorServiceImpl implements ReporteadorService {
 
 	private static final Pattern PARAMETRO = Pattern.compile(":([A-Za-z][A-Za-z0-9_]*)");
-	private static final Pattern COMENTARIO_BLOQUE = Pattern.compile("(?s)/\\*.*?\\*/");
-	private static final Pattern COMENTARIO_LINEA = Pattern.compile("(?m)--.*?$");
-	private static final Pattern SENTENCIAS_NO_PERMITIDAS = Pattern.compile(
-			"(?i)\\b(insert|update|delete|drop|alter|truncate|create|replace|merge|call|grant|revoke|commit|rollback)\\b");
-
 	@Autowired
 	@Qualifier("elearnigDS")
 	private DataSource dataSource;
@@ -77,14 +72,14 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 
 	@Override
 	public List<ReporteadorParametroDTO> obtenerParametrosPorReporte(Long idReporte) {
-		String sql = "SELECT id_parametro, id_reporte, clave, etiqueta, consulta_sql, orden, activo "
+		String sql = "SELECT id_parametro, id_reporte, clave, etiqueta, consulta_sql, tipo_entrada, orden, activo "
 				+ "FROM tbl_reporteador_parametros WHERE id_reporte = ? AND activo = 1 ORDER BY orden, etiqueta";
 		return obtenerParametrosPorReporte(idReporte, sql);
 	}
 
 	@Override
 	public List<ReporteadorParametroDTO> obtenerParametrosPorReporteAdmin(Long idReporte) {
-		String sql = "SELECT id_parametro, id_reporte, clave, etiqueta, consulta_sql, orden, activo "
+		String sql = "SELECT id_parametro, id_reporte, clave, etiqueta, consulta_sql, tipo_entrada, orden, activo "
 				+ "FROM tbl_reporteador_parametros WHERE id_reporte = ? ORDER BY orden, etiqueta";
 		return obtenerParametrosPorReporte(idReporte, sql);
 	}
@@ -107,9 +102,10 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 
 	@Override
 	public List<ReporteadorOpcionDTO> obtenerOpcionesParametro(ReporteadorParametroDTO parametro) {
+        if (parametro.isEntradaTexto()) return new ArrayList<>();
 		validarConsultaSelect(parametro.getConsultaSql());
 		List<ReporteadorOpcionDTO> opciones = new ArrayList<>();
-		try (Connection connection = dataSource.getConnection();
+		try (Connection connection = conexionLectura();
 				PreparedStatement statement = connection.prepareStatement(normalizarSql(parametro.getConsultaSql()));
 				ResultSet rs = statement.executeQuery()) {
 			while (rs.next()) {
@@ -130,7 +126,7 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 		validarValoresParametros(sqlPreparado, valoresParametros);
 
 		ReporteadorResultadoDTO resultado = new ReporteadorResultadoDTO();
-		try (Connection connection = dataSource.getConnection();
+		try (Connection connection = conexionLectura();
 				PreparedStatement statement = connection.prepareStatement(sqlPreparado.getSql())) {
 			for (int i = 0; i < sqlPreparado.getParametros().size(); i++) {
 				statement.setString(i + 1, valoresParametros.get(sqlPreparado.getParametros().get(i)));
@@ -248,8 +244,8 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 
 	private void insertarParametro(ReporteadorParametroDTO parametro, Long usuarioModifico) {
 		String sql = "INSERT INTO tbl_reporteador_parametros "
-				+ "(id_reporte, clave, etiqueta, consulta_sql, orden, activo, usuario_modifico, fecha_registro) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
+				+ "(id_reporte, clave, etiqueta, consulta_sql, tipo_entrada, orden, activo, usuario_modifico, fecha_registro) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 			setParametroStatement(statement, parametro, usuarioModifico);
@@ -265,12 +261,12 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 	}
 
 	private void actualizarParametro(ReporteadorParametroDTO parametro, Long usuarioModifico) {
-		String sql = "UPDATE tbl_reporteador_parametros SET id_reporte = ?, clave = ?, etiqueta = ?, consulta_sql = ?, "
+		String sql = "UPDATE tbl_reporteador_parametros SET id_reporte = ?, clave = ?, etiqueta = ?, consulta_sql = ?, tipo_entrada = ?, "
 				+ "orden = ?, activo = ?, usuario_modifico = ?, fecha_actualizacion = NOW() WHERE id_parametro = ?";
 		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 			setParametroStatement(statement, parametro, usuarioModifico);
-			statement.setLong(8, parametro.getIdParametro());
+			statement.setLong(9, parametro.getIdParametro());
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			throw new IllegalStateException("No fue posible actualizar el parametro. Verifique que la clave no exista.", e);
@@ -282,13 +278,14 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 		statement.setLong(1, parametro.getIdReporte());
 		statement.setString(2, formatearClaveParametro(parametro.getClave()));
 		statement.setString(3, parametro.getEtiqueta().trim());
-		statement.setString(4, normalizarSql(parametro.getConsultaSql()));
-		statement.setInt(5, parametro.getOrden() != null ? parametro.getOrden() : 1);
-		statement.setInt(6, Boolean.FALSE.equals(parametro.getActivo()) ? 0 : 1);
+		statement.setString(4, parametro.isEntradaTexto() ? "" : normalizarSql(parametro.getConsultaSql()));
+        statement.setString(5, parametro.getTipoEntrada());
+		statement.setInt(6, parametro.getOrden() != null ? parametro.getOrden() : 1);
+		statement.setInt(7, Boolean.FALSE.equals(parametro.getActivo()) ? 0 : 1);
 		if (usuarioModifico == null) {
-			statement.setNull(7, java.sql.Types.BIGINT);
+			statement.setNull(8, java.sql.Types.BIGINT);
 		} else {
-			statement.setLong(7, usuarioModifico);
+			statement.setLong(8, usuarioModifico);
 		}
 	}
 
@@ -324,6 +321,7 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 		parametro.setClave(rs.getString("clave"));
 		parametro.setEtiqueta(rs.getString("etiqueta"));
 		parametro.setConsultaSql(rs.getString("consulta_sql"));
+        parametro.setTipoEntrada(rs.getString("tipo_entrada"));
 		parametro.setOrden(rs.getInt("orden"));
 		parametro.setActivo(rs.getInt("activo") == 1);
 		return parametro;
@@ -339,10 +337,12 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 
 	private void validarParametro(ReporteadorParametroDTO parametro) {
 		if (parametro == null || ObjectUtils.isNull(parametro.getIdReporte()) || esCadenaVacia(parametro.getClave())
-				|| esCadenaVacia(parametro.getEtiqueta()) || esCadenaVacia(parametro.getConsultaSql())) {
-			throw new IllegalArgumentException("Reporte, clave, etiqueta y consulta SQL son obligatorios.");
+				|| esCadenaVacia(parametro.getEtiqueta())) {
+			throw new IllegalArgumentException("Reporte, clave y etiqueta son obligatorios; las listas requieren consulta SQL.");
 		}
-		validarConsultaSelect(parametro.getConsultaSql());
+		if (!"SELECT".equals(parametro.getTipoEntrada()) && !parametro.isEntradaTexto())
+            throw new IllegalArgumentException("Tipo de entrada inválido.");
+        if (!parametro.isEntradaTexto()) validarConsultaSelect(parametro.getConsultaSql());
 	}
 
 	private void validarParametrosRegistrados(ReporteadorReporteDTO reporte) {
@@ -371,20 +371,23 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 
 	private ReporteadorSqlPreparadoDTO prepararSql(String sql) {
 		ReporteadorSqlPreparadoDTO preparado = new ReporteadorSqlPreparadoDTO();
-		Matcher matcher = PARAMETRO.matcher(normalizarSql(sql));
-		StringBuffer buffer = new StringBuffer();
+		String original = normalizarSql(sql);
+        Matcher matcher = PARAMETRO.matcher(ReporteadorSqlLectura.codigo(original));
+		StringBuilder buffer = new StringBuilder();
+        int ultimo = 0;
 		while (matcher.find()) {
 			preparado.getParametros().add(matcher.group(1));
-			matcher.appendReplacement(buffer, "?");
+			buffer.append(original, ultimo, matcher.start()).append("?");
+            ultimo = matcher.end();
 		}
-		matcher.appendTail(buffer);
+		buffer.append(original.substring(ultimo));
 		preparado.setSql(buffer.toString());
 		return preparado;
 	}
 
 	private Set<String> obtenerParametrosSql(String sql) {
 		Set<String> parametros = new HashSet<>();
-		Matcher matcher = PARAMETRO.matcher(sql);
+		Matcher matcher = PARAMETRO.matcher(ReporteadorSqlLectura.codigo(sql));
 		while (matcher.find()) {
 			parametros.add(matcher.group(1));
 		}
@@ -413,16 +416,16 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 	}
 
 	private void validarConsultaSelect(String sql) {
-		String sqlNormalizado = normalizarSql(sql);
-		String sqlSinComentarios = COMENTARIO_LINEA.matcher(COMENTARIO_BLOQUE.matcher(sqlNormalizado).replaceAll(" "))
-				.replaceAll(" ").trim();
-		if (!sqlSinComentarios.toLowerCase().startsWith("select")) {
-			throw new IllegalArgumentException("El reporteador solo permite consultas SELECT.");
-		}
-		if (sqlSinComentarios.contains(";") || SENTENCIAS_NO_PERMITIDAS.matcher(sqlSinComentarios).find()) {
-			throw new IllegalArgumentException("El reporteador solo permite consultas SELECT.");
-		}
-	}
+        ReporteadorSqlLectura.validar(sql);
+    }
+
+	private Connection conexionLectura() throws SQLException {
+        Connection connection = dataSource.getConnection();
+        try {
+            connection.setReadOnly(true);
+            return connection;
+        } catch (SQLException e) { connection.close(); throw e; }
+    }
 
 	private boolean esCadenaVacia(String valor) {
 		return valor == null || valor.trim().isEmpty();
