@@ -13,7 +13,10 @@ public class ReporteadorParametroDTO implements Serializable {
 	private String clave;
 	private String etiqueta;
 	private String consultaSql;
-	private String tipoEntrada = "SELECT";
+	private String placeholder;
+    public String getPlaceholder() { return placeholder; }
+    public void setPlaceholder(String placeholder) { this.placeholder = placeholder; }
+    private String tipoEntrada = "SELECT";
 	public String getTipoEntrada() { return tipoEntrada; }
 	public void setTipoEntrada(String tipoEntrada) { this.tipoEntrada = tipoEntrada; }
 	public boolean isEntradaTexto() { return "INPUT".equals(tipoEntrada); }

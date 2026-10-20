@@ -72,14 +72,14 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 
 	@Override
 	public List<ReporteadorParametroDTO> obtenerParametrosPorReporte(Long idReporte) {
-		String sql = "SELECT id_parametro, id_reporte, clave, etiqueta, consulta_sql, tipo_entrada, orden, activo "
+		String sql = "SELECT id_parametro, id_reporte, clave, etiqueta, consulta_sql, tipo_entrada, placeholder, orden, activo "
 				+ "FROM tbl_reporteador_parametros WHERE id_reporte = ? AND activo = 1 ORDER BY orden, etiqueta";
 		return obtenerParametrosPorReporte(idReporte, sql);
 	}
 
 	@Override
 	public List<ReporteadorParametroDTO> obtenerParametrosPorReporteAdmin(Long idReporte) {
-		String sql = "SELECT id_parametro, id_reporte, clave, etiqueta, consulta_sql, tipo_entrada, orden, activo "
+		String sql = "SELECT id_parametro, id_reporte, clave, etiqueta, consulta_sql, tipo_entrada, placeholder, orden, activo "
 				+ "FROM tbl_reporteador_parametros WHERE id_reporte = ? ORDER BY orden, etiqueta";
 		return obtenerParametrosPorReporte(idReporte, sql);
 	}
@@ -244,8 +244,8 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 
 	private void insertarParametro(ReporteadorParametroDTO parametro, Long usuarioModifico) {
 		String sql = "INSERT INTO tbl_reporteador_parametros "
-				+ "(id_reporte, clave, etiqueta, consulta_sql, tipo_entrada, orden, activo, usuario_modifico, fecha_registro) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+				+ "(id_reporte, clave, etiqueta, consulta_sql, tipo_entrada, placeholder, orden, activo, usuario_modifico, fecha_registro) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 			setParametroStatement(statement, parametro, usuarioModifico);
@@ -261,12 +261,12 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 	}
 
 	private void actualizarParametro(ReporteadorParametroDTO parametro, Long usuarioModifico) {
-		String sql = "UPDATE tbl_reporteador_parametros SET id_reporte = ?, clave = ?, etiqueta = ?, consulta_sql = ?, tipo_entrada = ?, "
+		String sql = "UPDATE tbl_reporteador_parametros SET id_reporte = ?, clave = ?, etiqueta = ?, consulta_sql = ?, tipo_entrada = ?, placeholder = ?, "
 				+ "orden = ?, activo = ?, usuario_modifico = ?, fecha_actualizacion = NOW() WHERE id_parametro = ?";
 		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 			setParametroStatement(statement, parametro, usuarioModifico);
-			statement.setLong(9, parametro.getIdParametro());
+			statement.setLong(10, parametro.getIdParametro());
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			throw new IllegalStateException("No fue posible actualizar el parametro. Verifique que la clave no exista.", e);
@@ -280,12 +280,13 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 		statement.setString(3, parametro.getEtiqueta().trim());
 		statement.setString(4, parametro.isEntradaTexto() ? "" : normalizarSql(parametro.getConsultaSql()));
         statement.setString(5, parametro.getTipoEntrada());
-		statement.setInt(6, parametro.getOrden() != null ? parametro.getOrden() : 1);
-		statement.setInt(7, Boolean.FALSE.equals(parametro.getActivo()) ? 0 : 1);
+        statement.setString(6, parametro.getPlaceholder());
+		statement.setInt(7, parametro.getOrden() != null ? parametro.getOrden() : 1);
+		statement.setInt(8, Boolean.FALSE.equals(parametro.getActivo()) ? 0 : 1);
 		if (usuarioModifico == null) {
-			statement.setNull(8, java.sql.Types.BIGINT);
+			statement.setNull(9, java.sql.Types.BIGINT);
 		} else {
-			statement.setLong(8, usuarioModifico);
+			statement.setLong(9, usuarioModifico);
 		}
 	}
 
@@ -322,6 +323,7 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 		parametro.setEtiqueta(rs.getString("etiqueta"));
 		parametro.setConsultaSql(rs.getString("consulta_sql"));
         parametro.setTipoEntrada(rs.getString("tipo_entrada"));
+        parametro.setPlaceholder(rs.getString("placeholder"));
 		parametro.setOrden(rs.getInt("orden"));
 		parametro.setActivo(rs.getInt("activo") == 1);
 		return parametro;
@@ -342,6 +344,8 @@ public class ReporteadorServiceImpl implements ReporteadorService {
 		}
 		if (!"SELECT".equals(parametro.getTipoEntrada()) && !parametro.isEntradaTexto())
             throw new IllegalArgumentException("Tipo de entrada inválido.");
+        if (parametro.getPlaceholder() != null && parametro.getPlaceholder().length() > 250)
+            throw new IllegalArgumentException("El placeholder admite hasta 250 caracteres.");
         if (!parametro.isEntradaTexto()) validarConsultaSelect(parametro.getConsultaSql());
 	}
 

@@ -38,10 +38,10 @@ public class ReporteadorLecturaTest {
         ReporteadorServiceImpl servicio=new ReporteadorServiceImpl();
         DataSource ds=mock(DataSource.class);Connection c=mock(Connection.class);PreparedStatement st=mock(PreparedStatement.class);
         when(ds.getConnection()).thenReturn(c);when(c.prepareStatement(anyString())).thenReturn(st);servicio.setDataSource(ds);
-        ReporteadorParametroDTO p=new ReporteadorParametroDTO();p.setIdParametro(2L);p.setIdReporte(1L);p.setClave(":periodociclo");p.setEtiqueta("Periodo");p.setTipoEntrada("INPUT");
+        ReporteadorParametroDTO p=new ReporteadorParametroDTO();p.setIdParametro(2L);p.setIdReporte(1L);p.setClave(":periodociclo");p.setEtiqueta("Periodo");p.setTipoEntrada("INPUT");p.setPlaceholder("2024-1 o 2024");
         assertTrue(servicio.obtenerOpcionesParametro(p).isEmpty());verifyZeroInteractions(ds);
         servicio.guardarParametro(p,7L);
-        verify(st).setString(4,"");verify(st).setString(5,"INPUT");verify(st).setLong(8,7L);verify(st).setLong(9,2L);
+        verify(st).setString(4,"");verify(st).setString(5,"INPUT");verify(st).setString(6,"2024-1 o 2024");verify(st).setLong(9,7L);verify(st).setLong(10,2L);
         assertFalse(new ReporteadorParametroDTO().isEntradaTexto());
     }
     @Test public void ejecutaCteConInputEnMariaDbSinInterpolarValor() throws Exception {
