@@ -67,3 +67,9 @@ Se cubren consistencia de situación/carga, seriación, RN-6.1/RN-6.4, estados n
 ## RIESGOS Y RESULTADO
 
 Riesgo principal: vistas JSF aún enlazadas a getters históricos. Se mitiga dejando DTOs y gestión operativa disponibles, pero sin lectura para decisión académica. No hay retiro físico autorizado.
+
+## PREPARACION_RETIRO_LOGICO_R4_R7
+
+Las fachadas `obtenerFichaIntegral`, `obtenerContextoMalla` y `obtenerContextoExpediente` están marcadas `@Deprecated`. La operación automática del motor histórico queda deshabilitada por defecto mediante `sigie.motor.historico.operativo.habilitado=false`: no debe crear ni actualizar `tbl_caso_*` al abrir una vista académica. Cualquier activación temporal exige autorización operativa explícita y no cambia la fuente normativa PE2027.
+
+Antes de cualquier retirada física se debe ejecutar el respaldo no destructivo y la validación de relaciones descritos en `codigoFuente/bd/90_respaldo_y_validacion_retiro_motor_historico.sql`, archivar el resultado y confirmar cero invocaciones de las fachadas deprecadas. El retiro físico sigue bloqueado sin autorización explícita.

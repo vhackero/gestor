@@ -25,7 +25,6 @@ import org.apache.log4j.Logger;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
@@ -159,7 +158,6 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private String nombrePersonaObjetivo;
 	private String matriculaPersonaObjetivo;
 	private AsistenteInscripcionContextoDTO contextoAsistente;
-	private FichaIntegralCasoDTO fichaIntegralV2;
 	private ResultadoEvaluacionCurricularV2DTO resultadoEvaluacionV2;
 	private boolean intentoCargaFichaIntegralV2;
 	private Map<Long, UnidadDecisionInscripcionDTO> unidadesAsistentePorPrograma;
@@ -263,19 +261,6 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		} catch (Exception e) {
 			logger.warn("[MALLA_V2] Error al evaluar las reglas curriculares", e);
 		}
-	}
-
-	private void cargarFichaIntegralV2() {
-		intentoCargaFichaIntegralV2 = true;
-		fichaIntegralV2 = null;
-		logger.debug("[D1_PE2027] Ficha histórica omitida; la malla usa resultado PE2027.");
-	}
-
-	private void asegurarFichaIntegralV2() {
-		if (fichaIntegralV2 != null || intentoCargaFichaIntegralV2) {
-			return;
-		}
-		cargarFichaIntegralV2();
 	}
 
 	private ContextoAsistenteCurricularV2DTO construirContextoV2() {
@@ -1571,86 +1556,6 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			return "Consulta académica contextual para " + StringUtils.defaultIfBlank(nombrePersonaObjetivo, matriculaPersonaObjetivo);
 		}
 		return "Consulta tu trayectoria curricular y revisa cómo cada unidad didáctica influye en tu avance académico.";
-	}
-
-	public FichaIntegralCasoDTO getFichaIntegralV2() {
-		asegurarFichaIntegralV2();
-		return fichaIntegralV2;
-	}
-
-	public boolean isTieneFichaIntegralV2() {
-		asegurarFichaIntegralV2();
-		return fichaIntegralV2 != null;
-	}
-
-	public boolean isMostrarPrevencionEstudianteV2() {
-		asegurarFichaIntegralV2();
-		return !vistaGestor && fichaIntegralV2 != null;
-	}
-
-	public boolean isMostrarSeguimientoCasoEstudianteV2() {
-		asegurarFichaIntegralV2();
-		return !vistaGestor && fichaIntegralV2 != null;
-	}
-
-	public String getEstatusCasoEstudianteV2() {
-		asegurarFichaIntegralV2();
-		if (fichaIntegralV2 == null || fichaIntegralV2.getCasoAcademico() == null
-				|| StringUtils.isBlank(fichaIntegralV2.getCasoAcademico().getEstatusCaso())) {
-			return "Orientación general";
-		}
-		return fichaIntegralV2.getCasoAcademico().getEstatusCaso().trim();
-	}
-
-	public String getMensajeCasoEstudianteV2() {
-		asegurarFichaIntegralV2();
-		if (fichaIntegralV2 == null || StringUtils.isBlank(fichaIntegralV2.getMensajeEstudiante())) {
-			return "Tu trayectoria no muestra un riesgo académico inmediato en este momento.";
-		}
-		return fichaIntegralV2.getMensajeEstudiante().trim();
-	}
-
-	public String getResolucionCasoEstudianteV2() {
-		asegurarFichaIntegralV2();
-		if (fichaIntegralV2 == null || StringUtils.isBlank(fichaIntegralV2.getAccionSugerida())) {
-			return "Mantén tu avance actual y revisa el siguiente periodo conforme a tu trayectoria.";
-		}
-		return fichaIntegralV2.getAccionSugerida().trim();
-	}
-
-	public String getResumenPrevencionEstudianteV2() {
-		asegurarFichaIntegralV2();
-		if (fichaIntegralV2 == null) {
-			return getMensajePanelContextual();
-		}
-		StringBuilder texto = new StringBuilder();
-		if (StringUtils.isNotBlank(fichaIntegralV2.getMensajeEstudiante())) {
-			texto.append(fichaIntegralV2.getMensajeEstudiante().trim());
-		}
-		if (StringUtils.isNotBlank(fichaIntegralV2.getAccionSugerida())) {
-			if (texto.length() > 0) {
-				texto.append(" ");
-			}
-			texto.append("Siguiente paso: ").append(fichaIntegralV2.getAccionSugerida()).append(".");
-		}
-		if (texto.length() == 0) {
-			return getMensajePanelContextual();
-		}
-		return texto.toString().trim();
-	}
-
-	public String getPrevencionTicketEstudianteV2() {
-		asegurarFichaIntegralV2();
-		if (vistaGestor) {
-			return null;
-		}
-		StringBuilder texto = new StringBuilder();
-		texto.append("Antes de pedir apoyo adicional revisa el detalle contextual de la UD, confirma la regla aplicada");
-		if (fichaIntegralV2 != null && StringUtils.isNotBlank(fichaIntegralV2.getReglaAplicada())) {
-			texto.append(" (").append(fichaIntegralV2.getReglaAplicada()).append(")");
-		}
-		texto.append(" y usa el Asistente de inscripción y orientación educativa para validar tu siguiente paso.");
-		return texto.toString();
 	}
 
 	private String formatearEtiquetaTipoPlural(String tipo) {

@@ -8,6 +8,11 @@ import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 
 public interface AsistenteCurricularV2Facade {
 
+    /**
+     * @deprecated El dictamen/caso histórico no es fuente académica PE2027.
+     *             Usar {@link #evaluarSombra(AsistenteInscripcionContextoDTO)}.
+     */
+    @Deprecated
     FichaIntegralCasoDTO obtenerFichaIntegral(ContextoAsistenteCurricularV2DTO contexto) throws InscripcionException;
 
     ResultadoEvaluacionCurricularV2DTO evaluarSombra(AsistenteInscripcionContextoDTO contexto);

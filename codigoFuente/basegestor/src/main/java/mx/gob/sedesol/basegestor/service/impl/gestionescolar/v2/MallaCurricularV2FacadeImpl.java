@@ -27,6 +27,7 @@ public class MallaCurricularV2FacadeImpl implements MallaCurricularV2Facade {
     private EvaluacionCurricularV2Service evaluador;
 
     @Override
+    @Deprecated
     public FichaIntegralCasoDTO obtenerContextoMalla(ContextoAsistenteCurricularV2DTO contexto) throws InscripcionException {
         return asistenteFacade.obtenerFichaIntegral(contexto);
     }

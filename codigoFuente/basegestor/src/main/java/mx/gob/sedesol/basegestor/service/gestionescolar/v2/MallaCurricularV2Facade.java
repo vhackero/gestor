@@ -8,6 +8,8 @@ import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 
 public interface MallaCurricularV2Facade {
 
+    /** @deprecated La orientación de malla se deriva de ResultadoEvaluacionCurricularV2DTO. */
+    @Deprecated
     FichaIntegralCasoDTO obtenerContextoMalla(ContextoAsistenteCurricularV2DTO contexto) throws InscripcionException;
 
     ResultadoEvaluacionCurricularV2DTO evaluarSombra(AsistenteInscripcionContextoDTO contexto);

@@ -35,7 +35,6 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.BitacoraCasoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CasoAcademicoOperativoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvidenciaCasoDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.DateUtils;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
@@ -128,7 +127,6 @@ public class ExpedienteAlumnoBean extends BaseBean {
 
 	private List<CasoAcademicoOperativoDTO> bandejaCasosV2;
 	private CasoAcademicoOperativoDTO casoSeleccionadoV2;
-	private FichaIntegralCasoDTO fichaIntegralCasoV2;
 	private List<BitacoraCasoDTO> bitacoraCasoV2;
 	private List<EvidenciaCasoDTO> evidenciasCasoV2;
 	private String comentarioSeguimientoV2;
@@ -280,7 +278,6 @@ public class ExpedienteAlumnoBean extends BaseBean {
 
 	public void cargarBandejaCasosV2() {
 		bandejaCasosV2 = new ArrayList<CasoAcademicoOperativoDTO>();
-		fichaIntegralCasoV2 = null;
 		casoSeleccionadoV2 = null;
 		bitacoraCasoV2 = new ArrayList<BitacoraCasoDTO>();
 		evidenciasCasoV2 = new ArrayList<EvidenciaCasoDTO>();
@@ -319,8 +316,6 @@ public class ExpedienteAlumnoBean extends BaseBean {
 			casoSeleccionadoV2 = casoAcademicoOperativoService.obtenerCasoPorId(caso.getId());
 			ContextoAsistenteCurricularV2DTO contexto = construirContextoV2("EXPEDIENTE");
 			contexto.setCasoActual(casoSeleccionadoV2);
-			// El caso sólo conserva bitácora/evidencia; su dictamen no decide PE2027.
-			fichaIntegralCasoV2 = null;
 			bitacoraCasoV2 = bitacoraCasoServiceV2 != null
 					? bitacoraCasoServiceV2.obtenerBitacora(casoSeleccionadoV2.getId())
 					: new ArrayList<BitacoraCasoDTO>();
@@ -942,14 +937,6 @@ public class ExpedienteAlumnoBean extends BaseBean {
 
 	public void setCasoSeleccionadoV2(CasoAcademicoOperativoDTO casoSeleccionadoV2) {
 		this.casoSeleccionadoV2 = casoSeleccionadoV2;
-	}
-
-	public FichaIntegralCasoDTO getFichaIntegralCasoV2() {
-		return fichaIntegralCasoV2;
-	}
-
-	public void setFichaIntegralCasoV2(FichaIntegralCasoDTO fichaIntegralCasoV2) {
-		this.fichaIntegralCasoV2 = fichaIntegralCasoV2;
 	}
 
 	public List<BitacoraCasoDTO> getBitacoraCasoV2() {

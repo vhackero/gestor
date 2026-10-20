@@ -88,8 +88,18 @@ public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Fac
     }
 
     @Override
+    @Deprecated
     @Transactional
     public FichaIntegralCasoDTO obtenerFichaIntegral(ContextoAsistenteCurricularV2DTO contexto) throws InscripcionException {
+        // R4: por defecto ninguna apertura académica crea/actualiza tbl_caso_*.
+        // La activación requiere decisión operativa explícita de plataforma.
+        if (!Boolean.getBoolean("sigie.motor.historico.operativo.habilitado")) {
+            FichaIntegralCasoDTO deshabilitada = new FichaIntegralCasoDTO();
+            deshabilitada.setMensajeGestor("El motor histórico está deshabilitado para decisiones académicas.");
+            deshabilitada.setMensajeEstudiante("La orientación académica se consulta exclusivamente desde PE2027.");
+            deshabilitada.getAlertas().add("OPERACION_HISTORICA_DESHABILITADA");
+            return deshabilitada;
+        }
         normalizarContextoOperativo(contexto);
         FichaIntegralCasoDTO ficha = new FichaIntegralCasoDTO();
         CasoAcademicoOperativoDTO caso = resolverCaso(contexto);
