@@ -270,7 +270,7 @@ public class ExpedienteAlumnoBean extends BaseBean {
 			if (ObjectUtils.isNullOrEmpty(contextoV2.getPeriodoOperativo())) {
 				contextoV2.setPeriodoOperativo("CURSAMIENTO");
 			}
-			expedienteCurricularV2Facade.obtenerContextoExpediente(contextoV2);
+			// D1: la operación de expediente no consume dictamen histórico.
 		} catch (InscripcionException e) {
 			log.warn("No fue posible abrir la orientación V2 básica para la matrícula consultada.", e);
 		} catch (Exception e) {

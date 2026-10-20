@@ -131,13 +131,7 @@ public class ConstanciasBean extends BaseBean {
 		if (expedienteCurricularV2Facade == null || idPersona == null) {
 			return;
 		}
-		try {
-			fichaIntegralV2 = expedienteCurricularV2Facade.obtenerContextoExpediente(construirContextoV2());
-		} catch (InscripcionException e) {
-			log.warn("No fue posible cargar la ficha integral V2 para historial académico.", e);
-		} catch (Exception e) {
-			log.warn("Error inesperado al cargar la ficha integral V2 para historial académico.", e);
-		}
+		// D1: el historial no obtiene orientación ni dictamen desde casos históricos.
 	}
 
 	private void asegurarFichaIntegralV2() {
