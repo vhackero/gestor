@@ -2021,7 +2021,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     public String getTituloResumenDiagnosticoAsistenteVirtual() {
         if (isMostrarResultadoMotorV2() && fichaIntegralV2.getCasoAcademico().getDiagnostico() != null
                 && !StringUtils.isBlank(fichaIntegralV2.getCasoAcademico().getDiagnostico().getSituacionAcademica())) {
-            return fichaIntegralV2.getCasoAcademico().getDiagnostico().getSituacionAcademica().trim();
+            return formatearEstadoEnOracion(fichaIntegralV2.getCasoAcademico().getDiagnostico().getSituacionAcademica());
         }
         PanelAsistenteVirtualDTO panel = getPanelAsistenteVirtualV2();
         if (panel != null && !StringUtils.isBlank(panel.getResumenTitulo())) {
@@ -2036,6 +2036,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             return "Situación académica con irregularidad";
         }
     }
+
+	static String formatearEstadoEnOracion(String estado) {
+		if (StringUtils.isBlank(estado)) return estado;
+		return StringUtils.capitalize(estado.trim().toLowerCase(Locale.ROOT).replace('_', ' '));
+	}
 
     public String getContenidoResumenDiagnosticoAsistenteVirtual() {
         if (isMostrarResultadoMotorV2()) {

@@ -83,6 +83,12 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertTrue(TablaCurricularAsistidaBean.formatearCodigoReglaV2(CodigoReglaCurricularV2.CTR_01).equals("CTR-01"));
 	}
 
+	@Test
+	public void f12A3U07MuestraSituacionDelResumenEnFormatoOracion() {
+		assertTrue(TablaCurricularAsistidaBean.formatearEstadoEnOracion("IRREGULAR").equals("Irregular"));
+		assertTrue(TablaCurricularAsistidaBean.formatearEstadoEnOracion("REGULAR").equals("Regular"));
+	}
+
 	private TrazaReglaAplicadaV2DTO trazaCausal(CodigoReglaCurricularV2 regla) {
 		TrazaReglaAplicadaV2DTO traza = new TrazaReglaAplicadaV2DTO();
 		traza.setCodigoRegla(regla);
