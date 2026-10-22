@@ -1511,36 +1511,51 @@
                                             <div class="kpi-card kpi-card-blue">
                                                 <div class="kpi-title">Duración nominal del programa</div>
                                                 <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres} semestres</div>
+                                                <div class="kpi-detail">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalAnios} años</div>
                                             </div>
                                             <div class="kpi-card kpi-card-blue">
                                                 <div class="kpi-title">Plazo máximo ordinario</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoMaximoSemestres} semestres</div>
+                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoMaximoAnios} años</div>
+                                                <div class="kpi-detail">Equivalencia organizativa: #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoMaximoSemestres} semestres</div>
                                             </div>
                                             <ui:fragment rendered="#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.determinable}">
                                                 <div class="kpi-card kpi-card-blue">
-                                                    <div class="kpi-title">Periodos académicos transcurridos</div>
-                                                    <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodosAcademicosTranscurridos}</div>
-                                                    <div class="kpi-detail">Desde #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodoPrimeraInscripcion} hasta #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodoCorte}</div>
-                                                </div>
-                                                <div class="kpi-card kpi-card-blue">
-                                                    <div class="kpi-title">Periodos con inscripción comprobada</div>
-                                                    <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodosConInscripcion}</div>
-                                                </div>
-                                                <div class="kpi-card kpi-card-blue">
                                                     <div class="kpi-title">Tiempo calendario transcurrido</div>
                                                     <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.tiempoCalendarioTranscurrido}</div>
+                                                    <div class="kpi-detail">Inicio: primera inscripción válida <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodoPrimeraInscripcion}">(#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodoPrimeraInscripcion})</ui:fragment></div>
                                                 </div>
                                                 <div class="kpi-card kpi-card-blue">
                                                     <div class="kpi-title">Plazo restante para concluir</div>
-                                                    <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoRestanteSemestres} semestres</div>
+                                                    <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoRestanteCalendario}</div>
+                                                    <div class="kpi-detail">Fecha de corte: <h:outputText value="#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.fechaCorte}"><f:convertDateTime pattern="dd/MM/yyyy" /></h:outputText></div>
                                                 </div>
+                                                <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodosAcademicosTranscurridos}">
+                                                    <div class="kpi-card kpi-card-blue">
+                                                        <div class="kpi-title">Semestres académicos transcurridos</div>
+                                                        <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodosAcademicosTranscurridos}</div>
+                                                        <div class="kpi-detail">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.semestresConcluidos} concluidos y #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.semestreEnCurso ? 'uno en curso' : 'ninguno en curso'}</div>
+                                                    </div>
+                                                    <div class="kpi-card kpi-card-blue">
+                                                        <div class="kpi-title">Semestres con inscripción válida</div>
+                                                        <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodosConInscripcion}</div>
+                                                        <div class="kpi-detail">Desde #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodoPrimeraInscripcion} hasta #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodoCorte}</div>
+                                                    </div>
+                                                </ui:fragment>
                                             </ui:fragment>
                                         </div>
-                                        <ui:fragment rendered="#{not tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.determinable}">
+                                        <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.mensajeRevision}">
                                             <div class="kpi-inline-note">
                                                 <strong>Plazo de estudios:</strong> #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.mensajeRevision}
                                             </div>
                                         </ui:fragment>
+                                        <ui:fragment rendered="#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoAgotado}">
+                                            <div class="kpi-inline-note">
+                                                <strong>Plazo máximo:</strong> se requiere validación del procedimiento institucional; una solicitud no representa una prórroga automática.
+                                            </div>
+                                        </ui:fragment>
+                                        <div class="kpi-inline-note">
+                                            <strong>Cómo se calcula:</strong> el plazo considera el tiempo calendario desde la primera inscripción válida; B1 y B2 corresponden al mismo semestre. La inscripción, el cursamiento y la acreditación se muestran como datos distintos.
+                                        </div>
 
                                         <div class="riesgo-box #{tablaCurricularAsistidaBean.obtenerClaseRiesgo()}">
                                             <div class="riesgo-nivel">

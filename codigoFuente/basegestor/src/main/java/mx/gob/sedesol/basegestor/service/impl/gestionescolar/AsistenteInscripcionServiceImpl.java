@@ -67,7 +67,9 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     private static final double PROMEDIO_MINIMO_BECA = 8.5D;
     private static final double CALIFICACION_NO_PRESENTADA = 666.0D;
     private static final int DURACION_NOMINAL_LICENCIATURA_SEMESTRES = 8;
+    private static final int DURACION_NOMINAL_LICENCIATURA_ANIOS = 4;
     private static final int PLAZO_MAXIMO_LICENCIATURA_SEMESTRES = 16;
+    private static final int PLAZO_MAXIMO_LICENCIATURA_ANIOS = 8;
 
     @Autowired
     private InscripcionFacade inscripcionFacade;
@@ -138,29 +140,48 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     }
 
     /**
-     * Art. 35 y 48: duración nominal de ocho y plazo ordinario máximo de
-     * dieciséis semestres. La ausencia de una fuente verificable no produce
-     * una fecha de vencimiento ni efecto escolar.
+     * Art. 35 y 48: duración nominal de ocho semestres y plazo ordinario de
+     * ocho años. Los semestres son indicadores organizativos; el plazo se
+     * calcula con tiempo calendario desde la inscripción efectiva validada.
      */
     static TrayectoriaPermanenciaDTO completarIndicadoresTrayectoria(TrayectoriaPermanenciaDTO trayectoria) {
         TrayectoriaPermanenciaDTO resultado = trayectoria == null ? new TrayectoriaPermanenciaDTO() : trayectoria;
         resultado.setDuracionNominalSemestres(Integer.valueOf(DURACION_NOMINAL_LICENCIATURA_SEMESTRES));
+        resultado.setDuracionNominalAnios(Integer.valueOf(DURACION_NOMINAL_LICENCIATURA_ANIOS));
         resultado.setPlazoMaximoSemestres(Integer.valueOf(PLAZO_MAXIMO_LICENCIATURA_SEMESTRES));
-        if (resultado.getFechaPrimeraInscripcion() == null || resultado.getFechaCorte() == null
-                || resultado.getPeriodoPrimeraInscripcion() == null || resultado.getPeriodoCorte() == null
-                || resultado.getPeriodosAcademicosTranscurridos() == null) {
+        resultado.setPlazoMaximoAnios(Integer.valueOf(PLAZO_MAXIMO_LICENCIATURA_ANIOS));
+        if (resultado.getFechaPrimeraInscripcion() == null || resultado.getFechaCorte() == null) {
             resultado.setDeterminable(Boolean.FALSE);
-            resultado.setMensajeRevision("Apreciable estudiante, por favor, solicita la revisión de tu expediente mediante Mesa de Servicio.");
+            resultado.setMensajeRevision("Plazo de estudios pendiente de validación. No contamos con la información completa para calcularlo. Solicita la revisión de tu expediente mediante la Mesa de Servicio.");
             return resultado;
         }
 
-        int transcurridos = Math.max(0, resultado.getPeriodosAcademicosTranscurridos().intValue());
-        resultado.setPeriodosAcademicosTranscurridos(Integer.valueOf(transcurridos));
-        resultado.setPlazoRestanteSemestres(Integer.valueOf(Math.max(0, PLAZO_MAXIMO_LICENCIATURA_SEMESTRES - transcurridos)));
         resultado.setTiempoCalendarioTranscurrido(describirTiempoCalendario(resultado.getFechaPrimeraInscripcion(), resultado.getFechaCorte()));
+        Date fechaLimite = sumarAnios(resultado.getFechaPrimeraInscripcion(), PLAZO_MAXIMO_LICENCIATURA_ANIOS);
+        resultado.setFechaLimiteEstudios(fechaLimite);
+        boolean agotado = !resultado.getFechaCorte().before(fechaLimite);
+        resultado.setPlazoAgotado(Boolean.valueOf(agotado));
+        resultado.setPlazoRestanteCalendario(agotado ? "Plazo máximo agotado"
+                : describirTiempoCalendario(resultado.getFechaCorte(), fechaLimite));
+        if (resultado.getPeriodosAcademicosTranscurridos() != null
+                && resultado.getPeriodoPrimeraInscripcion() != null && resultado.getPeriodoCorte() != null) {
+            int transcurridos = Math.max(0, resultado.getPeriodosAcademicosTranscurridos().intValue());
+            resultado.setPeriodosAcademicosTranscurridos(Integer.valueOf(transcurridos));
+            resultado.setSemestresConcluidos(Integer.valueOf(Math.max(0, transcurridos - 1)));
+            resultado.setSemestreEnCurso(Boolean.valueOf(transcurridos > 0));
+            resultado.setMensajeRevision(null);
+        } else {
+            resultado.setMensajeRevision("Se calculó el plazo calendario, pero falta el calendario académico aplicable para completar los indicadores semestrales.");
+        }
         resultado.setDeterminable(Boolean.TRUE);
-        resultado.setMensajeRevision(null);
         return resultado;
+    }
+
+    private static Date sumarAnios(Date fecha, int anios) {
+        Calendar calendario = Calendar.getInstance();
+        calendario.setTime(fecha);
+        calendario.add(Calendar.YEAR, anios);
+        return calendario.getTime();
     }
 
     private static String describirTiempoCalendario(Date inicio, Date corte) {
