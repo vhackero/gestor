@@ -37,12 +37,74 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademic
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
 
 @Repository
 public class InscripcionRepository implements IinscripcionRepository {
 
 	@Autowired
 	public EntityManager entityManager;
+
+	/**
+	 * Recupera únicamente hechos históricos verificables. Las fechas sin un
+	 * periodo académico oficial no se usan para calcular permanencia.
+	 */
+	@Override
+	public TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Date fechaCorte) {
+		TrayectoriaPermanenciaDTO resultado = new TrayectoriaPermanenciaDTO();
+		resultado.setFechaCorte(fechaCorte);
+		if (idPersona == null || fechaCorte == null) return resultado;
+
+		Date primeraInscripcion = obtenerPrimeraInscripcionValida(idPersona);
+		resultado.setFechaPrimeraInscripcion(primeraInscripcion);
+		if (primeraInscripcion == null) return resultado;
+
+		Object[] periodoInicial = obtenerPeriodoPorFecha(primeraInscripcion);
+		Object[] periodoCorte = obtenerPeriodoPorFecha(fechaCorte);
+		if (periodoInicial == null || periodoCorte == null) return resultado;
+
+		resultado.setPeriodoPrimeraInscripcion((String) periodoInicial[0]);
+		resultado.setPeriodoCorte((String) periodoCorte[0]);
+		Date inicioPrimerPeriodo = (Date) periodoInicial[1];
+		Date inicioPeriodoCorte = (Date) periodoCorte[1];
+		resultado.setPeriodosAcademicosTranscurridos(contarPeriodos(inicioPrimerPeriodo, inicioPeriodoCorte));
+		resultado.setPeriodosConInscripcion(contarPeriodosConInscripcion(idPersona, fechaCorte));
+		return resultado;
+	}
+
+	private Date obtenerPrimeraInscripcionValida(Long idPersona) {
+		String sql = "SELECT MIN(ti.fecha_registro) FROM tbl_inscripciones ti "
+				+ "WHERE ti.Idpersona = :idPersona AND ti.fecha_registro >= '2000-01-01 00:00:00'";
+		Object valor = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona).getSingleResult();
+		return valor instanceof Date ? (Date) valor : null;
+	}
+
+	private Object[] obtenerPeriodoPorFecha(Date fecha) {
+		String sql = "SELECT p.nombre_periodo, p.fecha_inicio FROM tbl_periodos_inscripcion p "
+				+ "WHERE :fecha BETWEEN p.fecha_inicio AND p.fecha_finalizacion "
+				+ "ORDER BY p.fecha_inicio DESC, p.id_periodo DESC LIMIT 1";
+		@SuppressWarnings("unchecked")
+		List<Object[]> periodos = entityManager.createNativeQuery(sql).setParameter("fecha", fecha).getResultList();
+		return periodos.isEmpty() ? null : periodos.get(0);
+	}
+
+	private Integer contarPeriodos(Date inicio, Date corte) {
+		String sql = "SELECT COUNT(*) FROM tbl_periodos_inscripcion p "
+				+ "WHERE p.fecha_inicio >= :inicio AND p.fecha_inicio <= :corte";
+		Object valor = entityManager.createNativeQuery(sql).setParameter("inicio", inicio).setParameter("corte", corte)
+				.getSingleResult();
+		return valor instanceof Number ? Integer.valueOf(((Number) valor).intValue()) : null;
+	}
+
+	private Integer contarPeriodosConInscripcion(Long idPersona, Date fechaCorte) {
+		String sql = "SELECT COUNT(DISTINCT p.id_periodo) FROM tbl_inscripciones ti "
+				+ "JOIN tbl_periodos_inscripcion p ON ti.fecha_registro BETWEEN p.fecha_inicio AND p.fecha_finalizacion "
+				+ "WHERE ti.Idpersona = :idPersona AND ti.fecha_registro >= '2000-01-01 00:00:00' "
+				+ "AND ti.fecha_registro <= :fechaCorte";
+		Object valor = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona)
+				.setParameter("fechaCorte", fechaCorte).getSingleResult();
+		return valor instanceof Number ? Integer.valueOf(((Number) valor).intValue()) : null;
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override

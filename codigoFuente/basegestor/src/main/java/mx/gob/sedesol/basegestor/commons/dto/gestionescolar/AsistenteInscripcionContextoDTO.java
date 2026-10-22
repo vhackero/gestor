@@ -39,6 +39,7 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
     private RiesgoAcademicoDTO riesgos;
     private ProyeccionSiguientePeriodoDTO proyeccionSiguientePeriodo;
     private OportunidadAcademicaDTO oportunidades;
+    private TrayectoriaPermanenciaDTO trayectoriaPermanencia;
 
     private List<String> reglasActivas;
     private List<String> pendientesCriticos;
@@ -268,6 +269,14 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
 
     public void setOportunidades(OportunidadAcademicaDTO oportunidades) {
         this.oportunidades = oportunidades;
+    }
+
+    public TrayectoriaPermanenciaDTO getTrayectoriaPermanencia() {
+        return trayectoriaPermanencia;
+    }
+
+    public void setTrayectoriaPermanencia(TrayectoriaPermanenciaDTO trayectoriaPermanencia) {
+        this.trayectoriaPermanencia = trayectoriaPermanencia;
     }
 
     public List<String> getReglasActivas() {

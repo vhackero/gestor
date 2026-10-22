@@ -1506,6 +1506,42 @@
                                             <i class="fa fa-eye" />
                                         </div>
 
+                                        <div class="section-subtitle" style="font-size:28px;">Trayectoria y permanencia</div>
+                                        <div class="kpi-grid">
+                                            <div class="kpi-card kpi-card-blue">
+                                                <div class="kpi-title">Duración nominal del programa</div>
+                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres} semestres</div>
+                                            </div>
+                                            <div class="kpi-card kpi-card-blue">
+                                                <div class="kpi-title">Plazo máximo ordinario</div>
+                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoMaximoSemestres} semestres</div>
+                                            </div>
+                                            <ui:fragment rendered="#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.determinable}">
+                                                <div class="kpi-card kpi-card-blue">
+                                                    <div class="kpi-title">Periodos académicos transcurridos</div>
+                                                    <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodosAcademicosTranscurridos}</div>
+                                                    <div class="kpi-detail">Desde #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodoPrimeraInscripcion} hasta #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodoCorte}</div>
+                                                </div>
+                                                <div class="kpi-card kpi-card-blue">
+                                                    <div class="kpi-title">Periodos con inscripción comprobada</div>
+                                                    <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodosConInscripcion}</div>
+                                                </div>
+                                                <div class="kpi-card kpi-card-blue">
+                                                    <div class="kpi-title">Tiempo calendario transcurrido</div>
+                                                    <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.tiempoCalendarioTranscurrido}</div>
+                                                </div>
+                                                <div class="kpi-card kpi-card-blue">
+                                                    <div class="kpi-title">Plazo restante para concluir</div>
+                                                    <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoRestanteSemestres} semestres</div>
+                                                </div>
+                                            </ui:fragment>
+                                        </div>
+                                        <ui:fragment rendered="#{not tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.determinable}">
+                                            <div class="kpi-inline-note">
+                                                <strong>Plazo de estudios:</strong> #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.mensajeRevision}
+                                            </div>
+                                        </ui:fragment>
+
                                         <div class="riesgo-box #{tablaCurricularAsistidaBean.obtenerClaseRiesgo()}">
                                             <div class="riesgo-nivel">
                                                 <i class="fa fa-warning" /> #{tablaCurricularAsistidaBean.etiquetaNivelRiesgoPanel}

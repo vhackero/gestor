@@ -28,6 +28,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademic
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IinscripcionRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
 
@@ -233,6 +234,11 @@ public class InscripcionServiceImpl implements InscripcionService {
 			return listaMaterias;
 		}
 		return listaMaterias;
+	}
+
+	@Override
+	public TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Date fechaCorte) {
+		return inscripcionesRepository.obtenerTrayectoriaPermanencia(idPersona, fechaCorte);
 	}
 
 	@Override

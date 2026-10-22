@@ -22,12 +22,16 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasC
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademicaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
 
 public interface IinscripcionRepository {
 
 	List<InscripcionPersonaDTO> obtenerInscripcionPorPersona(String idPersona);
 
 	List<InscripcionMateriasDTO> consultarMaterias(String id_plan);
+
+	/** Consulta informativa de primera inscripción y calendario, sin mutación. */
+	TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Date fechaCorte);
 
 	Optional<LimitesCargaAcademicaDTO> obtenerLimitesCargaAcademicaPorPlan(Long idPlan);
 

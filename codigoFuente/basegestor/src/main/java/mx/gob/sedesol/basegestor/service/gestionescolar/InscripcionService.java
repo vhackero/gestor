@@ -23,6 +23,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademic
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ReenvioCorreoInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
 
 /**
  * 
@@ -34,6 +35,8 @@ public interface InscripcionService {
 	InscripcionPersonaDTO obtenerInscripcionPorPersona(String idPersona);
 
 	List<InscripcionMateriasDTO> consultarMaterias(String id_plan);
+
+	TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Date fechaCorte);
 
 	Optional<LimitesCargaAcademicaDTO> obtenerLimitesCargaAcademicaPorPlan(Long idPlan);
 

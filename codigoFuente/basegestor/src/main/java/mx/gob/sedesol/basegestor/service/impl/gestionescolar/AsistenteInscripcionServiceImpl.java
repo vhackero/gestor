@@ -3,6 +3,7 @@ package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelacionSeriacionDTO
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ResultadoSimulacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RiesgoAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ConfiguracionEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
@@ -64,6 +66,8 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     private static final double PROMEDIO_MINIMO_MAESTRIA = 8.0D;
     private static final double PROMEDIO_MINIMO_BECA = 8.5D;
     private static final double CALIFICACION_NO_PRESENTADA = 666.0D;
+    private static final int DURACION_NOMINAL_LICENCIATURA_SEMESTRES = 8;
+    private static final int PLAZO_MAXIMO_LICENCIATURA_SEMESTRES = 16;
 
     @Autowired
     private InscripcionFacade inscripcionFacade;
@@ -111,6 +115,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         dto.setModoProyeccion(Boolean.TRUE.equals(dto.getInscripcionVigente()) ? "UNIVERSO_CURRICULAR" : "OFERTA_VIGENTE");
 
         mapearResumenPeriodo(dto, contextoBase);
+        dto.setTrayectoriaPermanencia(construirTrayectoriaPermanencia(idPersona));
         dto.setPromedioPronosticado(calcularPromedioPronosticado(contextoBase));
         mapearPendientesYReglas(dto, contextoBase);
         mapearUnidades(dto, contextoBase, programasPlan, cobertura, materiasEnCurso, ubicacionesPlan);
@@ -125,6 +130,54 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         dto.setAuditoriaDecisionId(null);
 
         return dto;
+    }
+
+    private TrayectoriaPermanenciaDTO construirTrayectoriaPermanencia(Long idPersona) {
+        TrayectoriaPermanenciaDTO trayectoria = inscripcionService.obtenerTrayectoriaPermanencia(idPersona, new Date());
+        return completarIndicadoresTrayectoria(trayectoria);
+    }
+
+    /**
+     * Art. 35 y 48: duración nominal de ocho y plazo ordinario máximo de
+     * dieciséis semestres. La ausencia de una fuente verificable no produce
+     * una fecha de vencimiento ni efecto escolar.
+     */
+    static TrayectoriaPermanenciaDTO completarIndicadoresTrayectoria(TrayectoriaPermanenciaDTO trayectoria) {
+        TrayectoriaPermanenciaDTO resultado = trayectoria == null ? new TrayectoriaPermanenciaDTO() : trayectoria;
+        resultado.setDuracionNominalSemestres(Integer.valueOf(DURACION_NOMINAL_LICENCIATURA_SEMESTRES));
+        resultado.setPlazoMaximoSemestres(Integer.valueOf(PLAZO_MAXIMO_LICENCIATURA_SEMESTRES));
+        if (resultado.getFechaPrimeraInscripcion() == null || resultado.getFechaCorte() == null
+                || resultado.getPeriodoPrimeraInscripcion() == null || resultado.getPeriodoCorte() == null
+                || resultado.getPeriodosAcademicosTranscurridos() == null) {
+            resultado.setDeterminable(Boolean.FALSE);
+            resultado.setMensajeRevision("Apreciable estudiante, por favor, solicita la revisión de tu expediente mediante Mesa de Servicio.");
+            return resultado;
+        }
+
+        int transcurridos = Math.max(0, resultado.getPeriodosAcademicosTranscurridos().intValue());
+        resultado.setPeriodosAcademicosTranscurridos(Integer.valueOf(transcurridos));
+        resultado.setPlazoRestanteSemestres(Integer.valueOf(Math.max(0, PLAZO_MAXIMO_LICENCIATURA_SEMESTRES - transcurridos)));
+        resultado.setTiempoCalendarioTranscurrido(describirTiempoCalendario(resultado.getFechaPrimeraInscripcion(), resultado.getFechaCorte()));
+        resultado.setDeterminable(Boolean.TRUE);
+        resultado.setMensajeRevision(null);
+        return resultado;
+    }
+
+    private static String describirTiempoCalendario(Date inicio, Date corte) {
+        Calendar inicioCalendario = Calendar.getInstance();
+        inicioCalendario.setTime(inicio);
+        Calendar corteCalendario = Calendar.getInstance();
+        corteCalendario.setTime(corte);
+        int meses = (corteCalendario.get(Calendar.YEAR) - inicioCalendario.get(Calendar.YEAR)) * 12
+                + corteCalendario.get(Calendar.MONTH) - inicioCalendario.get(Calendar.MONTH);
+        if (corteCalendario.get(Calendar.DAY_OF_MONTH) < inicioCalendario.get(Calendar.DAY_OF_MONTH)) meses--;
+        meses = Math.max(0, meses);
+        int anios = meses / 12;
+        int mesesRestantes = meses % 12;
+        if (anios == 0) return mesesRestantes + (mesesRestantes == 1 ? " mes" : " meses");
+        if (mesesRestantes == 0) return anios + (anios == 1 ? " año" : " años");
+        return anios + (anios == 1 ? " año" : " años") + " y " + mesesRestantes
+                + (mesesRestantes == 1 ? " mes" : " meses");
     }
 
     private Long resolverIdProcesoInscripcion(InscripcionContextoDTO contextoBase) {
