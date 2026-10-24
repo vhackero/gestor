@@ -31,7 +31,7 @@ public interface IinscripcionRepository {
 	List<InscripcionMateriasDTO> consultarMaterias(String id_plan);
 
 	/** Consulta informativa de primera inscripción y calendario, sin mutación. */
-	TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Date fechaCorte);
+	TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Long idPlan, Date fechaCorte);
 
 	Optional<LimitesCargaAcademicaDTO> obtenerLimitesCargaAcademicaPorPlan(Long idPlan);
 

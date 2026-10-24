@@ -47,28 +47,29 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 	/**
 	 * Recupera únicamente hechos históricos verificables. Las fechas sin un
-	 * periodo académico oficial no se usan para calcular permanencia.
+	 * calendario académico se obtiene de los eventos del plan. Las ventanas de
+	 * inscripción sólo validan la clave del periodo; no aportan sus fechas.
 	 */
 	@Override
-	public TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Date fechaCorte) {
+	public TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Long idPlan, Date fechaCorte) {
 		TrayectoriaPermanenciaDTO resultado = new TrayectoriaPermanenciaDTO();
 		resultado.setFechaCorte(fechaCorte);
-		if (idPersona == null || fechaCorte == null) return resultado;
+		if (idPersona == null || idPlan == null || fechaCorte == null) return resultado;
 
 		Date primeraInscripcion = obtenerPrimeraInscripcionValida(idPersona);
 		resultado.setFechaPrimeraInscripcion(primeraInscripcion);
 		if (primeraInscripcion == null) return resultado;
 
-		Object[] periodoInicial = obtenerPeriodoPorFecha(primeraInscripcion);
-		Object[] periodoCorte = obtenerPeriodoPorFecha(fechaCorte);
+		Object[] periodoInicial = obtenerPeriodoAcademicoPorInscripcion(idPlan, primeraInscripcion);
+		Object[] periodoCorte = obtenerPeriodoAcademicoPorFecha(idPlan, fechaCorte);
 		if (periodoInicial == null || periodoCorte == null) return resultado;
 
 		resultado.setPeriodoPrimeraInscripcion((String) periodoInicial[0]);
 		resultado.setPeriodoCorte((String) periodoCorte[0]);
 		Date inicioPrimerPeriodo = (Date) periodoInicial[1];
 		Date inicioPeriodoCorte = (Date) periodoCorte[1];
-		resultado.setPeriodosAcademicosTranscurridos(contarPeriodos(inicioPrimerPeriodo, inicioPeriodoCorte));
-		resultado.setPeriodosConInscripcion(contarPeriodosConInscripcion(idPersona, fechaCorte));
+		resultado.setPeriodosAcademicosTranscurridos(contarPeriodosAcademicos(idPlan, inicioPrimerPeriodo, inicioPeriodoCorte));
+		resultado.setPeriodosConInscripcion(contarPeriodosAcademicosConInscripcion(idPersona, idPlan, fechaCorte));
 		return resultado;
 	}
 
@@ -79,31 +80,68 @@ public class InscripcionRepository implements IinscripcionRepository {
 		return valor instanceof Date ? (Date) valor : null;
 	}
 
-	private Object[] obtenerPeriodoPorFecha(Date fecha) {
-		String sql = "SELECT p.nombre_periodo, p.fecha_inicio FROM tbl_periodos_inscripcion p "
-				+ "WHERE :fecha BETWEEN p.fecha_inicio AND p.fecha_finalizacion "
-				+ "ORDER BY p.fecha_inicio DESC, p.id_periodo DESC LIMIT 1";
+	private Object[] obtenerPeriodoAcademicoPorFecha(Long idPlan, Date fecha) {
+		String sql = "SELECT calendario.periodo, calendario.fecha_inicio FROM (" + consultaCalendarioAcademico()
+				+ ") calendario WHERE :fecha BETWEEN calendario.fecha_inicio AND calendario.fecha_final "
+				+ "ORDER BY calendario.fecha_inicio DESC LIMIT 1";
 		@SuppressWarnings("unchecked")
-		List<Object[]> periodos = entityManager.createNativeQuery(sql).setParameter("fecha", fecha).getResultList();
+		List<Object[]> periodos = entityManager.createNativeQuery(sql).setParameter("idPlan", idPlan)
+				.setParameter("fecha", fecha).getResultList();
 		return periodos.isEmpty() ? null : periodos.get(0);
 	}
 
-	private Integer contarPeriodos(Date inicio, Date corte) {
-		String sql = "SELECT COUNT(*) FROM tbl_periodos_inscripcion p "
-				+ "WHERE p.fecha_inicio >= :inicio AND p.fecha_inicio <= :corte";
-		Object valor = entityManager.createNativeQuery(sql).setParameter("inicio", inicio).setParameter("corte", corte)
+	/**
+	 * La inscripción se ubica primero en su ventana administrativa y se usa su
+	 * nombre como llave del periodo en las claves de evento del plan.
+	 */
+	private Object[] obtenerPeriodoAcademicoPorInscripcion(Long idPlan, Date fechaInscripcion) {
+		String sql = "SELECT calendario.periodo, calendario.fecha_inicio FROM (" + consultaCalendarioAcademico()
+				+ ") calendario JOIN tbl_periodos_inscripcion periodoInscripcion "
+				+ "ON periodoInscripcion.nombre_periodo = calendario.periodo "
+				+ "WHERE :fechaInscripcion BETWEEN periodoInscripcion.fecha_inicio AND periodoInscripcion.fecha_finalizacion "
+				+ "ORDER BY calendario.fecha_inicio DESC LIMIT 1";
+		@SuppressWarnings("unchecked")
+		List<Object[]> periodos = entityManager.createNativeQuery(sql).setParameter("idPlan", idPlan)
+				.setParameter("fechaInscripcion", fechaInscripcion).getResultList();
+		return periodos.isEmpty() ? null : periodos.get(0);
+	}
+
+	private Integer contarPeriodosAcademicos(Long idPlan, Date inicio, Date corte) {
+		String sql = "SELECT COUNT(*) FROM (" + consultaCalendarioAcademico()
+				+ ") calendario WHERE calendario.fecha_inicio >= :inicio AND calendario.fecha_inicio <= :corte";
+		Object valor = entityManager.createNativeQuery(sql).setParameter("idPlan", idPlan)
+				.setParameter("inicio", inicio).setParameter("corte", corte)
 				.getSingleResult();
 		return valor instanceof Number ? Integer.valueOf(((Number) valor).intValue()) : null;
 	}
 
-	private Integer contarPeriodosConInscripcion(Long idPersona, Date fechaCorte) {
-		String sql = "SELECT COUNT(DISTINCT p.id_periodo) FROM tbl_inscripciones ti "
-				+ "JOIN tbl_periodos_inscripcion p ON ti.fecha_registro BETWEEN p.fecha_inicio AND p.fecha_finalizacion "
+	private Integer contarPeriodosAcademicosConInscripcion(Long idPersona, Long idPlan, Date fechaCorte) {
+		String sql = "SELECT COUNT(*) FROM (" + consultaCalendarioAcademico()
+				+ ") calendario WHERE EXISTS (SELECT 1 FROM tbl_inscripciones ti "
+				+ "JOIN tbl_periodos_inscripcion periodoInscripcion "
+				+ "ON ti.fecha_registro BETWEEN periodoInscripcion.fecha_inicio AND periodoInscripcion.fecha_finalizacion "
 				+ "WHERE ti.Idpersona = :idPersona AND ti.fecha_registro >= '2000-01-01 00:00:00' "
-				+ "AND ti.fecha_registro <= :fechaCorte";
-		Object valor = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona)
+				+ "AND ti.fecha_registro <= :fechaCorte "
+				+ "AND periodoInscripcion.nombre_periodo = calendario.periodo)";
+		Object valor = entityManager.createNativeQuery(sql).setParameter("idPlan", idPlan).setParameter("idPersona", idPersona)
 				.setParameter("fechaCorte", fechaCorte).getSingleResult();
 		return valor instanceof Number ? Integer.valueOf(((Number) valor).intValue()) : null;
+	}
+
+	/**
+	 * Los eventos son la fuente de fechas académicas. La clave contiene el
+	 * periodo y se contrasta con el catálogo administrativo cuando éste existe,
+	 * sin usar su ventana administrativa como duración del semestre.
+	 */
+	private String consultaCalendarioAcademico() {
+		return "SELECT COALESCE(pi.nombre_periodo, SUBSTRING_INDEX(te.cve_evento_cap, '-', -2)) AS periodo, "
+				+ "MIN(te.fecha_inicial) AS fecha_inicio, MAX(te.fecha_final) AS fecha_final "
+				+ "FROM tbl_eventos te "
+				+ "JOIN tbl_ficha_descriptiva_programa fdp ON fdp.id_programa = te.id_programa "
+				+ "LEFT JOIN tbl_periodos_inscripcion pi ON te.cve_evento_cap LIKE CONCAT('%', pi.nombre_periodo, '%') "
+				+ "WHERE fdp.id_plan = :idPlan AND te.fecha_inicial IS NOT NULL AND te.fecha_final IS NOT NULL "
+				+ "AND te.cve_evento_cap REGEXP '[0-9]{4}-[0-9]$' "
+				+ "GROUP BY COALESCE(pi.nombre_periodo, SUBSTRING_INDEX(te.cve_evento_cap, '-', -2))";
 	}
 
 	@SuppressWarnings("unchecked")

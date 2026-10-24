@@ -117,7 +117,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         dto.setModoProyeccion(Boolean.TRUE.equals(dto.getInscripcionVigente()) ? "UNIVERSO_CURRICULAR" : "OFERTA_VIGENTE");
 
         mapearResumenPeriodo(dto, contextoBase);
-        dto.setTrayectoriaPermanencia(construirTrayectoriaPermanencia(idPersona));
+		dto.setTrayectoriaPermanencia(construirTrayectoriaPermanencia(idPersona, contextoBase));
         dto.setPromedioPronosticado(calcularPromedioPronosticado(contextoBase));
         mapearPendientesYReglas(dto, contextoBase);
         mapearUnidades(dto, contextoBase, programasPlan, cobertura, materiasEnCurso, ubicacionesPlan);
@@ -134,8 +134,10 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         return dto;
     }
 
-    private TrayectoriaPermanenciaDTO construirTrayectoriaPermanencia(Long idPersona) {
-        TrayectoriaPermanenciaDTO trayectoria = inscripcionService.obtenerTrayectoriaPermanencia(idPersona, new Date());
+    private TrayectoriaPermanenciaDTO construirTrayectoriaPermanencia(Long idPersona, InscripcionContextoDTO contextoBase) {
+        Long idPlan = contextoBase != null && contextoBase.getInscripcionPersona() != null
+                ? contextoBase.getInscripcionPersona().getIdPlan() : null;
+        TrayectoriaPermanenciaDTO trayectoria = inscripcionService.obtenerTrayectoriaPermanencia(idPersona, idPlan, new Date());
         return completarIndicadoresTrayectoria(trayectoria);
     }
 

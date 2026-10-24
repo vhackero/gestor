@@ -36,7 +36,7 @@ public interface InscripcionService {
 
 	List<InscripcionMateriasDTO> consultarMaterias(String id_plan);
 
-	TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Date fechaCorte);
+	TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Long idPlan, Date fechaCorte);
 
 	Optional<LimitesCargaAcademicaDTO> obtenerLimitesCargaAcademicaPorPlan(Long idPlan);
 

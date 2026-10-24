@@ -237,8 +237,8 @@ public class InscripcionServiceImpl implements InscripcionService {
 	}
 
 	@Override
-	public TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Date fechaCorte) {
-		return inscripcionesRepository.obtenerTrayectoriaPermanencia(idPersona, fechaCorte);
+	public TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Long idPlan, Date fechaCorte) {
+		return inscripcionesRepository.obtenerTrayectoriaPermanencia(idPersona, idPlan, fechaCorte);
 	}
 
 	@Override
