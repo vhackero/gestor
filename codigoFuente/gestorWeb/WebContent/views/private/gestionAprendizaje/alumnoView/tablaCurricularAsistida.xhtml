@@ -1700,12 +1700,12 @@
                                         <div class="section-subtitle" style="font-size:25px;">Trayectoria y permanencia</div>
                                         <div class="trayectoria-linea">
                                             <ui:repeat value="#{tablaCurricularAsistidaBean.hitosTrayectoria}" var="semestreTrayectoria">
-                                                <div class="trayectoria-hito #{tablaCurricularAsistidaBean.estadoHitoTrayectoria(semestreTrayectoria)}">#{semestreTrayectoria}</div>
+                                                <div class="trayectoria-hito #{tablaCurricularAsistidaBean.getEstadoHitoTrayectoria(semestreTrayectoria)}">#{semestreTrayectoria}</div>
                                             </ui:repeat>
                                             <ui:fragment rendered="#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo gt 0}"><div class="trayectoria-hito adicional">#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo} semestres más</div></ui:fragment>
                                         </div>
                                         <div class="trayectoria-periodos">
-                                            <ui:repeat value="#{tablaCurricularAsistidaBean.hitosTrayectoria}" var="semestreTrayectoria"><div class="trayectoria-periodo">#{tablaCurricularAsistidaBean.etiquetaPeriodoTrayectoria(semestreTrayectoria)}</div></ui:repeat>
+                                            <ui:repeat value="#{tablaCurricularAsistidaBean.hitosTrayectoria}" var="semestreTrayectoria"><div class="trayectoria-periodo">#{tablaCurricularAsistidaBean.getEtiquetaPeriodoTrayectoria(semestreTrayectoria)}</div></ui:repeat>
                                             <ui:fragment rendered="#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo gt 0}"><div class="trayectoria-periodo adicional">Plazo adicional máximo</div></ui:fragment>
                                         </div>
                                         <div class="kpi-inline-note"><strong>Plazo máximo total para concluir:</strong> #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoMaximoAnios} años, incluidos los #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalAnios} años de duración nominal del plan.</div>
