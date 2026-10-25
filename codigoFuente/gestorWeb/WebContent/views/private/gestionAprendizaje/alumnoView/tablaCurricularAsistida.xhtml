@@ -231,64 +231,165 @@
             .avance-grid {
                 display: grid;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 18px;
+                gap: 14px;
                 margin: 0 0 22px;
             }
             .avance-panel {
                 background: #ffffff;
-                border: 1px solid #b8d1db;
-                padding: 20px;
+                border: 1px solid #c8d4dc;
+                border-radius: 5px;
+                min-height: 184px;
+                padding: 18px 22px;
                 display: flex;
                 align-items: center;
-                gap: 20px;
+                gap: 22px;
             }
             .avance-anillo {
-                flex: 0 0 94px;
-                width: 94px;
-                height: 94px;
-                border: 9px solid #6a9baa;
+                --progreso: 0;
+                flex: 0 0 142px;
+                width: 142px;
+                height: 142px;
+                background: conic-gradient(#0c416d calc(var(--progreso) * 1%), #d8d8d8 0);
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: #244c5c;
-                font-size: 21px;
+                position: relative;
+            }
+            .avance-anillo:before {
+                content: '';
+                background: #ffffff;
+                border-radius: 50%;
+                height: 104px;
+                width: 104px;
+                position: absolute;
+            }
+            .avance-anillo-contenido {
+                color: #071733;
+                font-size: 37px;
                 font-weight: 700;
+                line-height: 1;
+                position: relative;
+                text-align: center;
+                z-index: 1;
+            }
+            .avance-anillo-contenido small {
+                display: block;
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 1.05;
+                margin-top: 5px;
+            }
+            .avance-panel-creditos .avance-datos {
+                flex: 1;
+            }
+            .avance-panel-creditos .avance-dato-principal {
+                border-bottom: 1px solid #b7c3cd;
+                color: #102445;
+                font-size: 24px;
+                font-weight: 700;
+                line-height: 1.15;
+                margin-bottom: 14px;
+                padding-bottom: 14px;
+            }
+            .avance-panel-creditos .avance-dato-principal:last-child {
+                border-bottom: 0;
+                margin-bottom: 0;
+                padding-bottom: 0;
             }
             .avance-panel h3 {
                 margin: 0 0 8px;
-                font-size: 17px;
-                color: #2e4854;
+                font-size: 22px;
+                color: #071733;
             }
             .avance-panel p {
                 margin: 0;
-                color: #46545a;
+                color: #13213d;
+                font-size: 17px;
                 line-height: 1.45;
+            }
+            .avance-panel-tiempo {
+                justify-content: space-between;
+                gap: 14px;
+            }
+            .avance-panel-tiempo .avance-anillo {
+                flex-basis: 126px;
+                height: 126px;
+                width: 126px;
+            }
+            .avance-panel-tiempo .avance-anillo:before {
+                height: 92px;
+                width: 92px;
+            }
+            .avance-panel-tiempo .avance-anillo-contenido {
+                font-size: 31px;
+            }
+            .avance-panel-tiempo .avance-anillo-contenido small {
+                font-size: 14px;
+            }
+            .avance-tiempo-texto {
+                flex: 1;
+                color: #071733;
+                font-size: 21px;
+                font-weight: 700;
+                line-height: 1.12;
+                text-align: center;
+            }
+            .avance-tiempo-texto span {
+                display: block;
+                font-size: 16px;
+                font-weight: 400;
+                margin-bottom: 12px;
             }
             .trayectoria-linea {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 7px;
-                margin: 0 0 20px;
+                gap: 2px;
+                margin: 0 0 7px;
             }
             .trayectoria-hito {
-                min-width: 68px;
-                flex: 1 1 68px;
-                padding: 10px 8px;
+                --color-hito: #d9d9d9;
+                background: var(--color-hito);
+                clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+                color: #3f3f3f;
+                flex: 1 1 74px;
+                min-width: 74px;
+                padding: 8px 13px 8px 17px;
                 text-align: center;
-                border: 1px solid #b8d1db;
-                background: #eaf4e3;
-                color: #375745;
-                font-size: 12px;
+                font-size: 20px;
                 font-weight: 700;
+                line-height: 1.1;
+                position: relative;
             }
+            .trayectoria-hito.concluido { --color-hito: #42a94d; color: #ffffff; }
             .trayectoria-hito.actual {
-                background: #dcecf6;
-                color: #315a6b;
+                --color-hito: #1671ad;
+                color: #ffffff;
             }
             .trayectoria-hito.pendiente {
-                background: #f7f8f8;
-                color: #6d767b;
+                --color-hito: #c8c8c8;
+            }
+            .trayectoria-hito.adicional {
+                --color-hito: #f5b544;
+                color: #111111;
+                flex: 1.7 1 165px;
+            }
+            .trayectoria-periodos {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 2px;
+                margin-bottom: 18px;
+            }
+            .trayectoria-periodo {
+                color: #071733;
+                flex: 1 1 74px;
+                font-size: 13px;
+                font-weight: 600;
+                min-width: 74px;
+                text-align: center;
+            }
+            .trayectoria-periodo.adicional {
+                flex: 1.7 1 165px;
             }
             .kpi-title {
                 font-size: 13px;
@@ -1571,64 +1672,43 @@
                                         </ui:fragment>
 
                                         <div class="avance-grid">
-                                            <div class="avance-panel">
-                                                <div class="avance-anillo"><h:outputText value="#{tablaCurricularAsistidaBean.contexto.porcentajeCreditosCompletados / 100}"><f:convertNumber type="percent" maxFractionDigits="0" /></h:outputText></div>
-                                                <div>
+                                            <div class="avance-panel avance-panel-creditos">
+                                                <div class="avance-anillo" style="--progreso: #{tablaCurricularAsistidaBean.contexto.porcentajeCreditosCompletados};">
+                                                    <div class="avance-anillo-contenido"><h:outputText value="#{tablaCurricularAsistidaBean.contexto.porcentajeCreditosCompletados / 100}"><f:convertNumber type="percent" maxFractionDigits="0" /></h:outputText><small>de créditos</small></div>
+                                                </div>
+                                                <div class="avance-datos">
                                                     <h3>Avance curricular acreditado</h3>
-                                                    <p>#{tablaCurricularAsistidaBean.contexto.creditosAcumulados} de #{tablaCurricularAsistidaBean.contexto.creditosTotalesPlan} créditos acreditados. El porcentaje corresponde a créditos, no al tiempo transcurrido.</p>
+                                                    <div class="avance-dato-principal">#{tablaCurricularAsistidaBean.unidadesAcreditadasResumen} UD acreditadas<br /><span style="font-size:17px; font-weight:400;">de un total de #{tablaCurricularAsistidaBean.unidadesAcreditadasResumen + tablaCurricularAsistidaBean.conteoUdPendientesPanel} UD</span></div>
+                                                    <div class="avance-dato-principal">#{tablaCurricularAsistidaBean.contexto.creditosAcumulados} créditos obtenidos<br /><span style="font-size:17px; font-weight:400;">de un total de #{tablaCurricularAsistidaBean.contexto.creditosTotalesPlan}</span></div>
                                                 </div>
                                             </div>
-                                            <div class="avance-panel">
-                                                <div class="avance-anillo">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres}</div>
-                                                <div>
+                                            <div class="avance-panel avance-panel-tiempo">
+                                                <div class="avance-anillo" style="--progreso: #{tablaCurricularAsistidaBean.porcentajeTiempoNominalTranscurrido};">
+                                                    <div class="avance-anillo-contenido">#{tablaCurricularAsistidaBean.porcentajeTiempoNominalTranscurrido}%<small>transcurrido<br />del Plan de estudios</small></div>
+                                                </div>
+                                                <div class="avance-tiempo-texto">
                                                     <h3>Tiempo transcurrido y plazo para concluir</h3>
-                                                    <p>Duración nominal: #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres} semestres. Plazo máximo: #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoMaximoAnios} años.</p>
+                                                    <span>#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.tiempoCalendarioTranscurrido} del plazo establecido de #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres} semestres para el Plan de estudios</span>
+                                                    Faltan #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoRestanteCalendario}
+                                                </div>
+                                                <div class="avance-anillo" style="--progreso: #{tablaCurricularAsistidaBean.porcentajePlazoMaximoTranscurrido};">
+                                                    <div class="avance-anillo-contenido">#{tablaCurricularAsistidaBean.porcentajePlazoMaximoTranscurrido}%<small>transcurrido<br />del plazo máximo</small></div>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div class="section-subtitle" style="font-size:25px;">Trayectoria y permanencia</div>
                                         <div class="trayectoria-linea">
-                                            <ui:repeat value="#{tablaCurricularAsistidaBean.semestres}" var="semestreTrayectoria">
-                                                <div class="trayectoria-hito #{semestreTrayectoria.numero le tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.semestresConcluidos ? '' : (semestreTrayectoria.numero eq tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodosAcademicosTranscurridos ? 'actual' : 'pendiente')}">S#{semestreTrayectoria.numero}</div>
+                                            <ui:repeat value="#{tablaCurricularAsistidaBean.hitosTrayectoria}" var="semestreTrayectoria">
+                                                <div class="trayectoria-hito #{tablaCurricularAsistidaBean.estadoHitoTrayectoria(semestreTrayectoria)}">#{semestreTrayectoria}</div>
                                             </ui:repeat>
+                                            <ui:fragment rendered="#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo gt 0}"><div class="trayectoria-hito adicional">#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo} semestres más</div></ui:fragment>
                                         </div>
-                                        <div class="kpi-grid">
-                                            <div class="kpi-card kpi-card-blue">
-                                                <div class="kpi-title">Duración nominal del programa</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres} semestres</div>
-                                                <div class="kpi-detail">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalAnios} años</div>
-                                            </div>
-                                            <div class="kpi-card kpi-card-blue">
-                                                <div class="kpi-title">Plazo máximo ordinario</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoMaximoAnios} años</div>
-                                                <div class="kpi-detail">Equivalencia organizativa: #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoMaximoSemestres} semestres</div>
-                                            </div>
-                                            <ui:fragment rendered="#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.determinable}">
-                                                <div class="kpi-card kpi-card-blue">
-                                                    <div class="kpi-title">Tiempo calendario transcurrido</div>
-                                                    <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.tiempoCalendarioTranscurrido}</div>
-                                                    <div class="kpi-detail">Inicio: primera inscripción válida <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodoPrimeraInscripcion}">(#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodoPrimeraInscripcion})</ui:fragment></div>
-                                                </div>
-                                                <div class="kpi-card kpi-card-blue">
-                                                    <div class="kpi-title">Plazo restante para concluir</div>
-                                                    <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoRestanteCalendario}</div>
-                                                    <div class="kpi-detail">Fecha de corte: <h:outputText value="#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.fechaCorte}"><f:convertDateTime pattern="dd/MM/yyyy" /></h:outputText></div>
-                                                </div>
-                                                <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodosAcademicosTranscurridos}">
-                                                    <div class="kpi-card kpi-card-blue">
-                                                        <div class="kpi-title">Semestres académicos transcurridos</div>
-                                                        <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodosAcademicosTranscurridos}</div>
-                                                        <div class="kpi-detail">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.semestresConcluidos} concluidos y #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.semestreEnCurso ? 'uno en curso' : 'ninguno en curso'}</div>
-                                                    </div>
-                                                    <div class="kpi-card kpi-card-blue">
-                                                        <div class="kpi-title">Semestres con inscripción válida</div>
-                                                        <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodosConInscripcion}</div>
-                                                        <div class="kpi-detail">Desde #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodoPrimeraInscripcion} hasta #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodoCorte}</div>
-                                                    </div>
-                                                </ui:fragment>
-                                            </ui:fragment>
+                                        <div class="trayectoria-periodos">
+                                            <ui:repeat value="#{tablaCurricularAsistidaBean.hitosTrayectoria}" var="semestreTrayectoria"><div class="trayectoria-periodo">#{tablaCurricularAsistidaBean.etiquetaPeriodoTrayectoria(semestreTrayectoria)}</div></ui:repeat>
+                                            <ui:fragment rendered="#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo gt 0}"><div class="trayectoria-periodo adicional">Plazo adicional máximo</div></ui:fragment>
                                         </div>
+                                        <div class="kpi-inline-note"><strong>Plazo máximo total para concluir:</strong> #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoMaximoAnios} años, incluidos los #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalAnios} años de duración nominal del plan.</div>
                                         <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.mensajeRevision}">
                                             <div class="kpi-inline-note">
                                                 <strong>Plazo de estudios:</strong> #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.mensajeRevision}

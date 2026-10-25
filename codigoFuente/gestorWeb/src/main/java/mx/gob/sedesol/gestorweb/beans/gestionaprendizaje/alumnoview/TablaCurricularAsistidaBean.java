@@ -2918,6 +2918,101 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                 .count();
     }
 
+    public int getPorcentajeTiempoNominalTranscurrido() {
+        return calcularPorcentajeTiempoTranscurrido(contexto != null ? contexto.getTrayectoriaPermanencia() : null,
+                true);
+    }
+
+    public int getPorcentajePlazoMaximoTranscurrido() {
+        return calcularPorcentajeTiempoTranscurrido(contexto != null ? contexto.getTrayectoriaPermanencia() : null,
+                false);
+    }
+
+    private int calcularPorcentajeTiempoTranscurrido(
+            mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO trayectoria,
+            boolean duracionNominal) {
+        if (trayectoria == null || trayectoria.getFechaPrimeraInscripcion() == null
+                || trayectoria.getFechaCorte() == null) {
+            return 0;
+        }
+        Integer anios = duracionNominal ? trayectoria.getDuracionNominalAnios() : trayectoria.getPlazoMaximoAnios();
+        if (anios == null || anios.intValue() <= 0) {
+            return 0;
+        }
+        Calendar limite = Calendar.getInstance();
+        limite.setTime(trayectoria.getFechaPrimeraInscripcion());
+        limite.add(Calendar.YEAR, anios.intValue());
+        long total = limite.getTimeInMillis() - trayectoria.getFechaPrimeraInscripcion().getTime();
+        long transcurrido = trayectoria.getFechaCorte().getTime() - trayectoria.getFechaPrimeraInscripcion().getTime();
+        if (total <= 0 || transcurrido <= 0) {
+            return 0;
+        }
+        return Math.min(100, Math.max(0, (int) Math.round((transcurrido * 100.0d) / total)));
+    }
+
+    public int getSemestresAdicionalesMaximo() {
+        if (contexto == null || contexto.getTrayectoriaPermanencia() == null) {
+            return 0;
+        }
+        Integer maximo = contexto.getTrayectoriaPermanencia().getPlazoMaximoSemestres();
+        Integer nominal = contexto.getTrayectoriaPermanencia().getDuracionNominalSemestres();
+        if (maximo == null || nominal == null) {
+            return 0;
+        }
+        return Math.max(0, maximo.intValue() - nominal.intValue());
+    }
+
+    public List<Integer> getHitosTrayectoria() {
+        List<Integer> hitos = new ArrayList<Integer>();
+        if (contexto == null || contexto.getTrayectoriaPermanencia() == null
+                || contexto.getTrayectoriaPermanencia().getDuracionNominalSemestres() == null) {
+            return hitos;
+        }
+        for (int semestre = 1; semestre <= contexto.getTrayectoriaPermanencia().getDuracionNominalSemestres(); semestre++) {
+            hitos.add(Integer.valueOf(semestre));
+        }
+        return hitos;
+    }
+
+    public String getEstadoHitoTrayectoria(Integer semestre) {
+        if (semestre == null || contexto == null || contexto.getTrayectoriaPermanencia() == null) {
+            return "pendiente";
+        }
+        Integer concluidos = contexto.getTrayectoriaPermanencia().getSemestresConcluidos();
+        if (concluidos != null && semestre.intValue() <= concluidos.intValue()) {
+            return "concluido";
+        }
+        Integer transcurridos = contexto.getTrayectoriaPermanencia().getPeriodosAcademicosTranscurridos();
+        if (Boolean.TRUE.equals(contexto.getTrayectoriaPermanencia().getSemestreEnCurso())
+                && transcurridos != null && semestre.intValue() == transcurridos.intValue()) {
+            return "actual";
+        }
+        return "pendiente";
+    }
+
+    public String getEtiquetaPeriodoTrayectoria(Integer semestre) {
+        if (semestre == null || contexto == null || contexto.getTrayectoriaPermanencia() == null) {
+            return "";
+        }
+        String primerPeriodo = contexto.getTrayectoriaPermanencia().getPeriodoPrimeraInscripcion();
+        if (StringUtils.isBlank(primerPeriodo) || !primerPeriodo.matches("\\d{4}-[12]")) {
+            return "";
+        }
+        String[] partes = primerPeriodo.split("-");
+        int anio = Integer.parseInt(partes[0]);
+        int termino = Integer.parseInt(partes[1]);
+        int desplazamiento = semestre.intValue() - 1;
+        while (desplazamiento-- > 0) {
+            if (termino == 1) {
+                termino = 2;
+            } else {
+                termino = 1;
+                anio++;
+            }
+        }
+        return anio + "-" + termino;
+    }
+
     private int contarUnidadesActualesPorTipo(String tipo) {
         return (int) obtenerFilasPlanas().stream()
                 .filter(this::esFilaActual)
