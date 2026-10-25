@@ -299,8 +299,9 @@
             }
             .avance-panel h3 {
                 margin: 0 0 8px;
-                font-size: 22px;
+                font-size: 19px;
                 color: #071733;
+                white-space: nowrap;
             }
             .avance-panel p {
                 margin: 0;
@@ -309,8 +310,15 @@
                 line-height: 1.45;
             }
             .avance-panel-tiempo {
+                flex-wrap: wrap;
                 justify-content: space-between;
                 gap: 14px;
+            }
+            .avance-panel-tiempo > h3 {
+                flex: 0 0 100%;
+                font-size: 17px;
+                margin: 0;
+                text-align: center;
             }
             .avance-panel-tiempo .avance-anillo {
                 flex-basis: 126px;
@@ -1633,6 +1641,9 @@
                 .prioridades-grid {
                     grid-template-columns: 1fr;
                 }
+                .avance-panel h3 {
+                    white-space: normal;
+                }
                 .revision-status-grid,
                 .escalamiento-grid {
                     grid-template-columns: 1fr;
@@ -1683,12 +1694,12 @@
                                                 </div>
                                             </div>
                                             <div class="avance-panel avance-panel-tiempo">
+                                                <h3>Tiempo transcurrido y plazo para concluir</h3>
                                                 <div class="avance-anillo" style="--progreso: #{tablaCurricularAsistidaBean.porcentajeTiempoNominalTranscurrido};">
                                                     <div class="avance-anillo-contenido">#{tablaCurricularAsistidaBean.porcentajeTiempoNominalTranscurrido}%<small>transcurrido<br />del Plan de estudios</small></div>
                                                 </div>
                                                 <div class="avance-tiempo-texto">
-                                                    <h3>Tiempo transcurrido y plazo para concluir</h3>
-                                                    <span>#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.tiempoCalendarioTranscurrido} del plazo establecido de #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres} semestres para el Plan de estudios</span>
+                                                    <span><strong>#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.tiempoCalendarioTranscurrido}</strong> del plazo establecido de #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres} semestres para el Plan de estudios</span>
                                                     Faltan #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoRestanteCalendario}
                                                 </div>
                                                 <div class="avance-anillo" style="--progreso: #{tablaCurricularAsistidaBean.porcentajePlazoMaximoTranscurrido};">
