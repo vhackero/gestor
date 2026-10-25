@@ -224,6 +224,72 @@
             .kpi-card-blue {
                 background: #cfe1f1;
             }
+            .kpi-card-orange {
+                background: #fff0d9;
+                border: 1px solid #e8bd79;
+            }
+            .avance-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 18px;
+                margin: 0 0 22px;
+            }
+            .avance-panel {
+                background: #ffffff;
+                border: 1px solid #b8d1db;
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+            .avance-anillo {
+                flex: 0 0 94px;
+                width: 94px;
+                height: 94px;
+                border: 9px solid #6a9baa;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #244c5c;
+                font-size: 21px;
+                font-weight: 700;
+            }
+            .avance-panel h3 {
+                margin: 0 0 8px;
+                font-size: 17px;
+                color: #2e4854;
+            }
+            .avance-panel p {
+                margin: 0;
+                color: #46545a;
+                line-height: 1.45;
+            }
+            .trayectoria-linea {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 7px;
+                margin: 0 0 20px;
+            }
+            .trayectoria-hito {
+                min-width: 68px;
+                flex: 1 1 68px;
+                padding: 10px 8px;
+                text-align: center;
+                border: 1px solid #b8d1db;
+                background: #eaf4e3;
+                color: #375745;
+                font-size: 12px;
+                font-weight: 700;
+            }
+            .trayectoria-hito.actual {
+                background: #dcecf6;
+                color: #315a6b;
+            }
+            .trayectoria-hito.pendiente {
+                background: #f7f8f8;
+                color: #6d767b;
+            }
             .kpi-title {
                 font-size: 13px;
                 color: #3e3e3e;
@@ -984,6 +1050,46 @@
                 color: #3e4448;
                 vertical-align: middle;
             }
+            .prioridades-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 16px;
+            }
+            .prioridad-card {
+                background: #ffffff;
+                border: 1px solid #9abecd;
+                padding: 16px;
+                min-height: 180px;
+            }
+            .prioridad-card h3 {
+                margin: 0 0 8px;
+                color: #2f5969;
+                font-size: 16px;
+            }
+            .prioridad-card .contador {
+                color: #234856;
+                font-size: 29px;
+                font-weight: 700;
+                margin-bottom: 8px;
+            }
+            .prioridad-card p {
+                color: #4a555a;
+                line-height: 1.42;
+                margin: 0 0 10px;
+            }
+            .prioridad-detalle {
+                background: #edf6fa;
+                border-left: 3px solid #78aebe;
+                color: #3c5058;
+                font-size: 12px;
+                line-height: 1.42;
+                margin-top: 8px;
+                padding: 9px 10px;
+            }
+            .prioridad-detalle ul {
+                margin: 0;
+                padding-left: 16px;
+            }
             .dual-soft-panels {
                 display: grid;
                 grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -1422,6 +1528,10 @@
                 .validation-summary-grid {
                     grid-template-columns: 1fr;
                 }
+                .avance-grid,
+                .prioridades-grid {
+                    grid-template-columns: 1fr;
+                }
                 .revision-status-grid,
                 .escalamiento-grid {
                     grid-template-columns: 1fr;
@@ -1454,59 +1564,35 @@
                                             #{tablaCurricularAsistidaBean.resumenDiagnosticoSituacion}
                                         </div>
 
-                                        <div class="kpi-grid">
-                                            <div class="kpi-card kpi-card-green">
-                                                <div class="kpi-title">Unidades didácticas del bloque/semestre actual</div>
-                                                <div class="kpi-value">
-                                                    #{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasEnCurso}
-                                                    <i class="fa fa-eye" style="font-size:18px;" />
+                                        <ui:fragment rendered="#{not tablaCurricularAsistidaBean.contexto.diagnosticoActual.regular}">
+                                            <div class="alert-box alert-box-warning">
+                                                <strong>Atención a tu situación académica.</strong> Revisa las UD pendientes y prioritarias para conocer las acciones disponibles en tu siguiente periodo.
+                                            </div>
+                                        </ui:fragment>
+
+                                        <div class="avance-grid">
+                                            <div class="avance-panel">
+                                                <div class="avance-anillo"><h:outputText value="#{tablaCurricularAsistidaBean.contexto.porcentajeCreditosCompletados / 100}"><f:convertNumber type="percent" maxFractionDigits="0" /></h:outputText></div>
+                                                <div>
+                                                    <h3>Avance curricular acreditado</h3>
+                                                    <p>#{tablaCurricularAsistidaBean.contexto.creditosAcumulados} de #{tablaCurricularAsistidaBean.contexto.creditosTotalesPlan} créditos acreditados. El porcentaje corresponde a créditos, no al tiempo transcurrido.</p>
                                                 </div>
                                             </div>
-                                            <div class="kpi-card kpi-card-green">
-                                                <div class="kpi-title">#{tablaCurricularAsistidaBean.tituloIndicadorIncidencias}</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.conteoIncidenciasSituacion}</div>
-                                            </div>
-                                            <div class="kpi-card kpi-card-green">
-                                                <div class="kpi-title">Unidades didácticas disponibles para registrar</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesDisponiblesParaRegistrarSituacion}</div>
-                                            </div>
-                                            <div class="kpi-card kpi-card-green">
-                                                <div class="kpi-title">UD bloqueadas por seriación curricular</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.contexto.diagnosticoActual.materiasBloqueadasPorSeriacion}</div>
+                                            <div class="avance-panel">
+                                                <div class="avance-anillo">#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres}</div>
+                                                <div>
+                                                    <h3>Tiempo transcurrido y plazo para concluir</h3>
+                                                    <p>Duración nominal: #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres} semestres. Plazo máximo: #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoMaximoAnios} años.</p>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <div class="section-subtitle" style="font-size:28px;">Resumen de créditos y unidades didácticas por cursar</div>
-
-                                        <div class="kpi-grid">
-                                            <div class="kpi-card kpi-card-blue">
-                                                <div class="kpi-title">Unidades didácticas obligatorias</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesObligatoriasFaltantesResumen}</div>
-                                            </div>
-                                            <div class="kpi-card kpi-card-blue">
-                                                <div class="kpi-title">Unidades didácticas optativas requeridas</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasFaltantesResumen}</div>
-                                            </div>
-                                            <div class="kpi-card kpi-card-blue">
-                                                <div class="kpi-title">Unidades didácticas optativas adicionales</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasOpcionalesResumen}</div>
-                                            </div>
-                                            <div class="kpi-card kpi-card-blue">
-                                                <div class="kpi-title">Unidades didácticas electivas</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesElectivasFaltantesResumen}</div>
-                                            </div>
-                                            <div class="kpi-card kpi-card-blue">
-                                                <div class="kpi-title">Créditos faltantes</div>
-                                                <div class="kpi-value">#{tablaCurricularAsistidaBean.creditosFaltantesResumen}</div>
-                                            </div>
+                                        <div class="section-subtitle" style="font-size:25px;">Trayectoria y permanencia</div>
+                                        <div class="trayectoria-linea">
+                                            <ui:repeat value="#{tablaCurricularAsistidaBean.semestres}" var="semestreTrayectoria">
+                                                <div class="trayectoria-hito #{semestreTrayectoria.numero le tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.semestresConcluidos ? '' : (semestreTrayectoria.numero eq tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodosAcademicosTranscurridos ? 'actual' : 'pendiente')}">S#{semestreTrayectoria.numero}</div>
+                                            </ui:repeat>
                                         </div>
-
-                                        <div class="kpi-inline-note">
-                                            <strong>Unidades didácticas optativas de periodos anteriores pendientes:</strong> #{tablaCurricularAsistidaBean.contexto.pendientesPlan.optativasRezagadas}
-                                            <i class="fa fa-eye" />
-                                        </div>
-
-                                        <div class="section-subtitle" style="font-size:28px;">Trayectoria y permanencia</div>
                                         <div class="kpi-grid">
                                             <div class="kpi-card kpi-card-blue">
                                                 <div class="kpi-title">Duración nominal del programa</div>
@@ -1555,6 +1641,24 @@
                                         </ui:fragment>
                                         <div class="kpi-inline-note">
                                             <strong>Cómo se calcula:</strong> el plazo considera el tiempo calendario desde la primera inscripción válida; B1 y B2 corresponden al mismo semestre. La inscripción, el cursamiento y la acreditación se muestran como datos distintos.
+                                        </div>
+
+                                        <div class="section-subtitle" style="font-size:25px;">Resumen actual</div>
+                                        <div class="kpi-grid">
+                                            <div class="kpi-card kpi-card-green"><div class="kpi-title">UD actualmente registradas o en curso</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesActualesRegistradasResumen}</div></div>
+                                            <div class="kpi-card kpi-card-green"><div class="kpi-title">UD obligatorias actuales</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesObligatoriasActualesResumen}</div></div>
+                                            <div class="kpi-card kpi-card-green"><div class="kpi-title">UD optativas requeridas actuales</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasRequeridasActualesResumen}</div></div>
+                                            <div class="kpi-card kpi-card-green"><div class="kpi-title">UD optativas adicionales actuales</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasAdicionalesActualesResumen}</div></div>
+                                            <div class="kpi-card kpi-card-orange"><div class="kpi-title">Bajas parciales aplicadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesConBajaParcialResumen}</div></div>
+                                        </div>
+
+                                        <div class="section-subtitle" style="font-size:25px;">Resumen global</div>
+                                        <div class="kpi-grid">
+                                            <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD acreditadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesAcreditadasResumen}</div></div>
+                                            <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD obligatorias acreditadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesObligatoriasAcreditadasResumen}</div></div>
+                                            <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD optativas requeridas acreditadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasRequeridasAcreditadasResumen}</div></div>
+                                            <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD optativas adicionales acreditadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasAdicionalesAcreditadasResumen}</div></div>
+                                            <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD pendientes de regularizar</div><div class="kpi-value">#{tablaCurricularAsistidaBean.conteoUdPendientesPanel}</div></div>
                                         </div>
 
                                         <div class="riesgo-box #{tablaCurricularAsistidaBean.obtenerClaseRiesgo()}">
@@ -1631,37 +1735,46 @@
                                                 <span class="tag-filter">No ofertadas: #{tablaCurricularAsistidaBean.conteoFilasNoOfertadas}</span>
                                                 <span class="tag-filter danger">Con bloqueo: #{tablaCurricularAsistidaBean.conteoFilasConBloqueo}</span>
                                             </div>
-                                            <div class="prioridad-table-wrap">
-                                                <table class="prioridad-table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Unidad didáctica</th>
-                                                            <th>Tipo</th>
-                                                            <th>Clave</th>
-                                                            <th>Créd.</th>
-                                                            <th>Estatus histórico</th>
-                                                            <th>Prioridad</th>
-                                                            <th>Acción sugerida</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <ui:repeat value="#{tablaCurricularAsistidaBean.filasUdPrioritarias}" var="filaPrioritaria">
-                                                            <tr>
-                                                                <td>#{filaPrioritaria.asignatura}</td>
-                                                                <td style="text-align:center;">#{filaPrioritaria.tipo}</td>
-                                                                <td style="text-align:center;">#{filaPrioritaria.clave}</td>
-                                                                <td style="text-align:center;">#{filaPrioritaria.creditos}</td>
-                                                                <td style="text-align:center;">
-                                                                    <span class="#{tablaCurricularAsistidaBean.obtenerClaseEstado(filaPrioritaria.estatusHistorico)}">#{filaPrioritaria.estatusHistorico}</span>
-                                                                </td>
-                                                                <td style="text-align:center;">
-                                                                    <span class="#{tablaCurricularAsistidaBean.obtenerClaseEstado(filaPrioritaria.prioridad)}">#{filaPrioritaria.prioridad}</span>
-                                                                </td>
-                                                                <td style="text-align:center;">#{filaPrioritaria.accionSugerida}</td>
-                                                            </tr>
-                                                        </ui:repeat>
-                                                    </tbody>
-                                                </table>
+                                            <div class="prioridades-grid">
+                                                <div class="prioridad-card">
+                                                    <h3>UD reprobadas pendientes</h3>
+                                                    <div class="contador">#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias.size()}</div>
+                                                    <p>Unidades no acreditadas que requieren atención de regularización según su estado vigente y prioridad.</p>
+                                                    <div class="prioridad-detalle">
+                                                        <ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasReprobadasPrioritarias}">No se identifican UD reprobadas pendientes en el contexto disponible.</ui:fragment>
+                                                        <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasReprobadasPrioritarias}"><ul><ui:repeat value="#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias}" var="filaPrioritaria"><li>#{tablaCurricularAsistidaBean.detalleFilaPrioritaria(filaPrioritaria)}</li></ui:repeat></ul></ui:fragment>
+                                                    </div>
+                                                </div>
+                                                <div class="prioridad-card">
+                                                    <h3>UD con antecedentes de recursamiento</h3>
+                                                    <div class="contador">#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias.size()}</div>
+                                                    <p>Las UD no acreditadas se muestran para su seguimiento. Los intentos exactos se validan individualmente con el historial académico.</p>
+                                                    <div class="prioridad-detalle"><ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasReprobadasPrioritarias}"><ul><ui:repeat value="#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias}" var="filaRecursamiento"><li>#{tablaCurricularAsistidaBean.detalleFilaPrioritaria(filaRecursamiento)}</li></ui:repeat></ul></ui:fragment><ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasReprobadasPrioritarias}">Sin antecedentes visibles de recursamiento.</ui:fragment></div>
+                                                </div>
+                                                <div class="prioridad-card">
+                                                    <h3>Bajas parciales aplicadas</h3>
+                                                    <div class="contador">#{tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias.size()}</div>
+                                                    <p>Las bajas parciales se conservan separadas de una reprobación y no cambian artificialmente el estado académico.</p>
+                                                    <div class="prioridad-detalle"><ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}"><ul><ui:repeat value="#{tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}" var="filaBaja"><li>#{tablaCurricularAsistidaBean.detalleFilaPrioritaria(filaBaja)}</li></ui:repeat></ul></ui:fragment><ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}">No se identifican bajas parciales en las UD visibles.</ui:fragment></div>
+                                                </div>
+                                                <div class="prioridad-card">
+                                                    <h3>Bajas temporales autorizadas</h3>
+                                                    <div class="contador">#{tablaCurricularAsistidaBean.estadoOperativoBajaTemporal ? 'Activa' : '0'}</div>
+                                                    <p>El seguimiento de una baja temporal corresponde al expediente institucional.</p>
+                                                    <div class="prioridad-detalle">#{tablaCurricularAsistidaBean.resumenBajasTemporalesPrioritarias}</div>
+                                                </div>
+                                                <div class="prioridad-card">
+                                                    <h3>Sustituciones de optativas adicionales</h3>
+                                                    <div class="contador">-</div>
+                                                    <p>Este componente no infiere sustituciones ni crea equivalencias entre optativas.</p>
+                                                    <div class="prioridad-detalle">#{tablaCurricularAsistidaBean.resumenSustitucionesOptativasPrioritarias}</div>
+                                                </div>
+                                                <div class="prioridad-card">
+                                                    <h3>Oportunidades de acreditación</h3>
+                                                    <div class="contador">#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias.size()}</div>
+                                                    <p>Consulta las UD que requieren seguimiento de oportunidades conforme a la regla institucional aplicable.</p>
+                                                    <div class="prioridad-detalle">#{tablaCurricularAsistidaBean.resumenOportunidadesAcreditacionPrioritarias}</div>
+                                                </div>
                                             </div>
                                             <div class="dual-soft-panels">
                                                 <div class="soft-panel highlight">

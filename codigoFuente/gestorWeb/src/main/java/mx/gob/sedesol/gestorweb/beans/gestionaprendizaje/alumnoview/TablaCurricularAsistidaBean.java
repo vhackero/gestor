@@ -1352,7 +1352,8 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private boolean esFilaNoAcreditada(FilaAsistidaDTO fila) {
         return fila != null
                 && fila.getEstatusHistorico() != null
-                && fila.getEstatusHistorico().toUpperCase(Locale.ROOT).contains("NO ACREDIT");
+                && (fila.getEstatusHistorico().toUpperCase(Locale.ROOT).contains("NO ACREDIT")
+                        || fila.getEstatusHistorico().toUpperCase(Locale.ROOT).contains("REPROB"));
     }
 
     private boolean esFilaPendienteRiesgo(FilaAsistidaDTO fila) {
@@ -2865,6 +2866,124 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return obtenerCreditosResumenMalla().getElectivasPendientes();
     }
 
+    /**
+     * Estos indicadores son de presentacion: conservan el universo curricular
+     * de la malla y no sustituyen decisiones del resultado V2.
+     */
+    public int getUnidadesAcreditadasResumen() {
+        return obtenerCreditosResumenMalla().getAcreditadas();
+    }
+
+    public int getUnidadesObligatoriasAcreditadasResumen() {
+        return obtenerCreditosResumenMalla().getObligatoriasAcreditadas();
+    }
+
+    public int getUnidadesOptativasRequeridasAcreditadasResumen() {
+        return Math.min(MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA,
+                obtenerCreditosResumenMalla().getOptativasAcreditadas());
+    }
+
+    public int getUnidadesOptativasAdicionalesAcreditadasResumen() {
+        return Math.max(0, obtenerCreditosResumenMalla().getOptativasAcreditadas()
+                - MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA);
+    }
+
+    public int getUnidadesActualesRegistradasResumen() {
+        return contexto != null && contexto.getDiagnosticoActual() != null
+                ? valor(contexto.getDiagnosticoActual().getMateriasEnCurso()) : 0;
+    }
+
+    public int getUnidadesObligatoriasActualesResumen() {
+        return contarUnidadesActualesPorTipo("oblig");
+    }
+
+    public int getUnidadesOptativasRequeridasActualesResumen() {
+        return Math.max(0, contarUnidadesActualesPorTipo("optativa")
+                - getUnidadesOptativasAdicionalesActualesResumen());
+    }
+
+    public int getUnidadesOptativasAdicionalesActualesResumen() {
+        return (int) obtenerFilasPlanas().stream()
+                .filter(this::esFilaActual)
+                .filter(this::esUnidadOpcionalLibre)
+                .map(this::claveUnicaFila)
+                .distinct()
+                .count();
+    }
+
+    public int getUnidadesConBajaParcialResumen() {
+        return (int) getFilasConBajaParcialPrioritarias().stream()
+                .map(this::claveUnicaFila)
+                .distinct()
+                .count();
+    }
+
+    private int contarUnidadesActualesPorTipo(String tipo) {
+        return (int) obtenerFilasPlanas().stream()
+                .filter(this::esFilaActual)
+                .filter(fila -> normalizaTexto(fila.getTipo()).contains(tipo))
+                .filter(fila -> !esUnidadOpcionalLibre(fila))
+                .map(this::claveUnicaFila)
+                .distinct()
+                .count();
+    }
+
+    private boolean esFilaActual(FilaAsistidaDTO fila) {
+        if (fila == null || StringUtils.isBlank(fila.getEstatusPeriodo())) {
+            return false;
+        }
+        String estatus = normalizaTexto(fila.getEstatusPeriodo());
+        return estatus.contains("en curso") || estatus.contains("cursando")
+                || estatus.contains("inscrita") || estatus.contains("registrada");
+    }
+
+    public List<FilaAsistidaDTO> getFilasReprobadasPrioritarias() {
+        return getFilasUdPrioritarias().stream()
+                .filter(this::esFilaNoAcreditada)
+                .collect(Collectors.toList());
+    }
+
+    public List<FilaAsistidaDTO> getFilasConBajaParcialPrioritarias() {
+        return obtenerFilasPlanas().stream()
+                .filter(fila -> fila != null && normalizaTexto(fila.getEstatusHistorico()).contains("baja parcial"))
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(this::claveUnicaFila, fila -> fila,
+                                (primera, repetida) -> primera, LinkedHashMap::new),
+                        filasPorClave -> new ArrayList<FilaAsistidaDTO>(filasPorClave.values())));
+    }
+
+    public String getDetalleFilaPrioritaria(FilaAsistidaDTO fila) {
+        if (fila == null) {
+            return "Sin información verificable de la unidad didáctica.";
+        }
+        StringBuilder detalle = new StringBuilder();
+        detalle.append(valorTexto(fila.getClave(), "Sin clave"));
+        if (!StringUtils.isBlank(fila.getAsignatura())) {
+            detalle.append(" - ").append(fila.getAsignatura());
+        }
+        detalle.append(". Estado: ").append(valorTexto(fila.getEstatusHistorico(), "No determinado"));
+        detalle.append(". Oferta: ").append(Boolean.TRUE.equals(fila.getOfertada()) ? "disponible" : "no disponible");
+        if (!StringUtils.isBlank(fila.getPrioridad())) {
+            detalle.append(". Prioridad: ").append(fila.getPrioridad());
+        }
+        return detalle.toString();
+    }
+
+    public String getResumenBajasTemporalesPrioritarias() {
+        if (!isEstadoOperativoBajaTemporal()) {
+            return "No se identifica una baja temporal activa en el contexto académico actual.";
+        }
+        return "Existe una baja temporal activa. La fecha de autorización y los periodos consumidos deben consultarse en el expediente institucional.";
+    }
+
+    public String getResumenSustitucionesOptativasPrioritarias() {
+        return "La sustitución de optativas adicionales no cuenta con una fuente verificable en este contexto; requiere consulta institucional.";
+    }
+
+    public String getResumenOportunidadesAcreditacionPrioritarias() {
+        return "Las oportunidades por UD se rigen por RN-1.4. La vista actual no recibe el historial de intentos verificable por unidad para distinguir oportunidad final, en curso o agotada.";
+    }
+
     public int getUnidadesDisponiblesParaRegistrarSituacion() {
         if (contexto == null || contexto.getUnidades() == null) {
             return 0;
@@ -2992,6 +3111,9 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                     String claveContable = claveUnicaUd(programa);
                     boolean acreditada = esProgramaAprobadoResumen(estatus)
                             || clavesAcreditadasPrograma.contains(claveContable);
+                    if (acreditada) {
+                        resumen.registrarAcreditada(claveContable);
+                    }
                     if (acreditada && esProgramaOpcional(programa.getTipo())) {
                         resumen.registrarOptativaAcreditada(claveContable);
                     }
@@ -3014,6 +3136,8 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                         } else if (tipo.contains("electiva")) {
                             resumen.registrarElectivaPendiente(claveContable);
                         }
+                    } else if (normalizaTexto(programa.getTipo()).contains("oblig")) {
+                        resumen.registrarObligatoriaAcreditada(claveContable);
                     }
                 }
             }
@@ -3822,6 +3946,8 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         private int optativasOpcionalesPendientes;
         private int electivasPendientes;
         private final Set<String> clavesObligatoriasPendientes = new HashSet<String>();
+        private final Set<String> clavesAcreditadas = new HashSet<String>();
+        private final Set<String> clavesObligatoriasAcreditadas = new HashSet<String>();
         private final Set<String> clavesOptativasPendientes = new HashSet<String>();
         private final Set<String> clavesOptativasAcreditadas = new HashSet<String>();
         private final Set<String> clavesOptativasOpcionalesPendientes = new HashSet<String>();
@@ -3847,6 +3973,10 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
         public int getObligatoriasPendientes() { return clavesObligatoriasPendientes.size(); }
         public void registrarObligatoriaPendiente(String clave) { clavesObligatoriasPendientes.add(clave); }
+        public int getAcreditadas() { return clavesAcreditadas.size(); }
+        public void registrarAcreditada(String clave) { clavesAcreditadas.add(clave); }
+        public int getObligatoriasAcreditadas() { return clavesObligatoriasAcreditadas.size(); }
+        public void registrarObligatoriaAcreditada(String clave) { clavesObligatoriasAcreditadas.add(clave); }
         public int getOptativasPendientes() { return clavesOptativasPendientes.size(); }
         public void registrarOptativaPendiente(String clave) { clavesOptativasPendientes.add(clave); }
         public int getOptativasAcreditadas() { return clavesOptativasAcreditadas.size(); }
