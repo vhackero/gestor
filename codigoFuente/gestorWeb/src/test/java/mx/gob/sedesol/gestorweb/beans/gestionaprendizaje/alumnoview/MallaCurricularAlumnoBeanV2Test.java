@@ -101,6 +101,19 @@ public class MallaCurricularAlumnoBeanV2Test {
 		assertEquals("No acreditada", estado);
 	}
 
+	@Test
+	public void muestraReprobadaEnCursoSinAlterarSuEstadoAcademico() {
+		MallaDiagramaNodoDTO nodo = new MallaDiagramaNodoDTO();
+		nodo.setEstatus("No acreditada");
+		nodo.setEnCurso(true);
+
+		String estado = new MallaCurricularV2ResultadoAdapter().construirEstatusContextual(
+				"No acreditada", "En curso", nodo);
+
+		assertEquals(estado, "No acreditada (en curso)");
+		assertEquals(nodo.getEstatus(), "No acreditada");
+	}
+
 	private DecisionUnidadCurricularV2DTO decision(Long idPrograma, boolean habilitada) {
 		DecisionUnidadCurricularV2DTO decision = new DecisionUnidadCurricularV2DTO();
 		decision.setIdPrograma(idPrograma);

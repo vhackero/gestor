@@ -46,6 +46,21 @@ public class MallaCurricularV2ResultadoAdapter {
 		return "Por cursar";
 	}
 
+	/**
+	 * Conserva el resultado académico vigente y agrega la condición operativa
+	 * cuando la UD reprobada se encuentra recursándose en el periodo actual.
+	 */
+	public String construirEstatusContextual(String estatusHistorico, String estatusPeriodo,
+			MallaDiagramaNodoDTO programaNodo) {
+		String historico = normalizarEstatusDetalle(estatusHistorico, programaNodo);
+		boolean enCurso = StringUtils.equalsIgnoreCase(StringUtils.trimToEmpty(estatusPeriodo), ESTATUS_EN_CURSO)
+				|| (programaNodo != null && programaNodo.isEnCurso());
+		if (ESTATUS_NO_ACREDITADA.equals(historico) && enCurso) {
+			return ESTATUS_NO_ACREDITADA + " (en curso)";
+		}
+		return normalizarEstatusDetalle(estatusPeriodo, programaNodo);
+	}
+
 	public AplicacionResultadoMallaV2 aplicar(Map<Integer, MallaDiagramaNodoDTO> programasPorId,
 			Map<Long, DecisionUnidadCurricularV2DTO> decisionesPorPrograma, String situacionAcademica) {
 		AplicacionResultadoMallaV2 aplicacion = new AplicacionResultadoMallaV2(situacionAcademica);

@@ -605,12 +605,16 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			unidad = unidadesAsistentePorPrograma.get(idPrograma.longValue());
 		}
 		programaNodo.setDetalleTipoUd(formatearTipoDetalle(programaNodo, programa, unidad));
-		programaNodo.setDetalleEstatusHistorico(normalizarEstadoDetalleContextual(resolveEstatusDetalle(programaNodo, unidad), programaNodo));
+		String estatusHistorico = normalizarEstadoDetalleContextual(resolveEstatusDetalle(programaNodo, unidad), programaNodo);
+		programaNodo.setDetalleEstatusHistorico(estatusHistorico);
+		String estatusPeriodo;
 		if (unidad != null && StringUtils.isNotBlank(unidad.getEstatusPeriodo())) {
-			programaNodo.setDetalleEstatusPeriodo(normalizarEstadoDetalleContextual(unidad.getEstatusPeriodo(), programaNodo));
+			estatusPeriodo = unidad.getEstatusPeriodo();
 		} else {
-			programaNodo.setDetalleEstatusPeriodo(normalizarEstadoDetalleContextual(resolveEstatusPeriodoContextual(programaNodo), programaNodo));
+			estatusPeriodo = resolveEstatusPeriodoContextual(programaNodo);
 		}
+		programaNodo.setDetalleEstatusPeriodo(ADAPTADOR_RESULTADO_V2.construirEstatusContextual(
+				estatusHistorico, estatusPeriodo, programaNodo));
 		programaNodo.setDetalleMotivoPrincipal(construirSituacionDetalle(programaNodo, programa, unidad));
 		programaNodo.setDetalleAccionSugerida(construirRecomendacionDetalle(programaNodo, programa, unidad));
 		programaNodo.setDetalleRiesgo(construirImpactoDetalle(programaNodo, programa, unidad));
