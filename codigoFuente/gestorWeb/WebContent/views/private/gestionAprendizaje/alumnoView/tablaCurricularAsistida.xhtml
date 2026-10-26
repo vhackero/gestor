@@ -368,6 +368,23 @@
                 gap: 2px;
                 margin: 0 0 7px;
             }
+            .trayectoria-encabezado {
+                align-items: baseline;
+                display: flex;
+                gap: 18px;
+                margin: 0 0 10px;
+            }
+            .trayectoria-encabezado h3 {
+                color: #071733;
+                font-size: 25px;
+                font-weight: 700;
+                margin: 0;
+            }
+            .trayectoria-encabezado span {
+                color: #4b5967;
+                font-size: 14px;
+                font-style: italic;
+            }
             .trayectoria-hito {
                 --color-hito: #d9d9d9;
                 background: var(--color-hito);
@@ -408,6 +425,12 @@
                 font-weight: 600;
                 min-width: 74px;
                 text-align: center;
+            }
+            .trayectoria-periodo .en-curso {
+                display: block;
+                font-size: 12px;
+                font-weight: 700;
+                margin-top: 3px;
             }
             .trayectoria-periodo.adicional {
                 flex: 1.7 1 165px;
@@ -1696,6 +1719,11 @@
                 .prioridades-grid {
                     grid-template-columns: 1fr;
                 }
+                .trayectoria-encabezado {
+                    align-items: flex-start;
+                    flex-direction: column;
+                    gap: 4px;
+                }
                 .avance-panel h3 {
                     white-space: normal;
                 }
@@ -1763,7 +1791,10 @@
                                             </div>
                                         </div>
 
-                                        <div class="section-subtitle" style="font-size:25px;">Trayectoria y permanencia</div>
+                                        <div class="trayectoria-encabezado">
+                                            <h3>Trayectoria y permanencia</h3>
+                                            <span>Semestres transcurridos: #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.periodosAcademicosTranscurridos} (#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.semestresConcluidos} concluidos y #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.semestreEnCurso ? 'uno en curso' : 'ninguno en curso'})</span>
+                                        </div>
                                         <div class="trayectoria-linea">
                                             <ui:repeat value="#{tablaCurricularAsistidaBean.hitosTrayectoria}" var="semestreTrayectoria">
                                                 <div class="trayectoria-hito #{tablaCurricularAsistidaBean.getEstadoHitoTrayectoria(semestreTrayectoria)}">#{semestreTrayectoria}</div>
@@ -1771,7 +1802,7 @@
                                             <ui:fragment rendered="#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo gt 0}"><div class="trayectoria-hito adicional">#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo} semestres más</div></ui:fragment>
                                         </div>
                                         <div class="trayectoria-periodos">
-                                            <ui:repeat value="#{tablaCurricularAsistidaBean.hitosTrayectoria}" var="semestreTrayectoria"><div class="trayectoria-periodo">#{tablaCurricularAsistidaBean.getEtiquetaPeriodoTrayectoria(semestreTrayectoria)}</div></ui:repeat>
+                                            <ui:repeat value="#{tablaCurricularAsistidaBean.hitosTrayectoria}" var="semestreTrayectoria"><div class="trayectoria-periodo">#{tablaCurricularAsistidaBean.getEtiquetaPeriodoTrayectoria(semestreTrayectoria)}<ui:fragment rendered="#{tablaCurricularAsistidaBean.getEstadoHitoTrayectoria(semestreTrayectoria) eq 'actual'}"><span class="en-curso">En curso</span></ui:fragment></div></ui:repeat>
                                             <ui:fragment rendered="#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo gt 0}"><div class="trayectoria-periodo adicional">Plazo adicional máximo</div></ui:fragment>
                                         </div>
                                         <div class="kpi-inline-note"><strong>Plazo máximo total para concluir:</strong> #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoMaximoAnios} años, incluidos los #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalAnios} años de duración nominal del plan.</div>
