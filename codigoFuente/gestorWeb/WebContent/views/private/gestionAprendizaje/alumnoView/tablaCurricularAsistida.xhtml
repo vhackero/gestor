@@ -883,6 +883,48 @@
                 border: 1px solid #e4ca73;
                 color: #4a4430;
             }
+            .situacion-alerta {
+                align-items: center;
+                display: flex;
+                gap: 16px;
+                margin-bottom: 18px;
+                padding: 15px 18px;
+            }
+            .situacion-alerta .fa {
+                font-size: 34px;
+            }
+            .situacion-alerta.warning .fa { color: #db9a11; }
+            .situacion-alerta.regular {
+                background: #eaf5e5;
+                border: 1px solid #9cca92;
+                color: #2f5d32;
+            }
+            .situacion-alerta.regular .fa { color: #3b9c45; }
+            .situacion-alerta-texto {
+                flex: 1;
+                font-size: 16px;
+                line-height: 1.35;
+            }
+            .situacion-alerta-texto strong { font-weight: 700; }
+            .situacion-alerta .ui-button {
+                background: #0e4b7c;
+                border-color: #0e4b7c;
+                white-space: nowrap;
+            }
+            .ud-irregulares-modal .ui-dialog-titlebar {
+                background: #3d8597;
+                color: #ffffff;
+            }
+            .ud-irregulares-modal .ui-dialog-content { padding: 18px; }
+            .ud-irregulares-lista { list-style: none; margin: 0; padding: 0; }
+            .ud-irregulares-lista li {
+                border-bottom: 1px solid #d6e2e7;
+                color: #33454c;
+                line-height: 1.4;
+                padding: 10px 0;
+            }
+            .ud-irregulares-lista li:last-child { border-bottom: 0; }
+            .ud-irregulares-ubicacion { color: #426f80; font-size: 12px; font-weight: 700; }
             .alert-box-info {
                 background: #eef5f8;
                 border: 1px solid #bed4dd;
@@ -1668,17 +1710,17 @@
                             <div class="asistente-section">
                                 <div class="situacion-layout">
                                     <div>
-                                        <div class="resumen-caja">
-                                            <i class="fa fa-graduation-cap" />
-                                            <span class="#{tablaCurricularAsistidaBean.contexto.diagnosticoActual.regular ? 'situacion-regular' : 'situacion-irregular'}">
-                                                #{tablaCurricularAsistidaBean.descripcionSituacionAcademica}
-                                            </span>
-                                            #{tablaCurricularAsistidaBean.resumenDiagnosticoSituacion}
-                                        </div>
-
-                                        <ui:fragment rendered="#{not tablaCurricularAsistidaBean.contexto.diagnosticoActual.regular}">
-                                            <div class="alert-box alert-box-warning">
-                                                <strong>Atención a tu situación académica.</strong> Revisa las UD pendientes y prioritarias para conocer las acciones disponibles en tu siguiente periodo.
+                                        <ui:fragment rendered="#{tablaCurricularAsistidaBean.estudianteRegularContexto}">
+                                            <div class="alert-box situacion-alerta regular">
+                                                <i class="fa fa-check-circle" />
+                                                <div class="situacion-alerta-texto"><strong>Estudiante regular.</strong> #{tablaCurricularAsistidaBean.textoAlertaSituacionAcademica}</div>
+                                            </div>
+                                        </ui:fragment>
+                                        <ui:fragment rendered="#{not tablaCurricularAsistidaBean.estudianteRegularContexto}">
+                                            <div class="alert-box alert-box-warning situacion-alerta warning">
+                                                <i class="fa fa-exclamation-triangle" />
+                                                <div class="situacion-alerta-texto"><strong>ATENCIÓN -</strong> #{tablaCurricularAsistidaBean.textoAlertaSituacionAcademica}</div>
+                                                <p:commandButton value="Consultar UD pendientes" type="button" onclick="PF('udIrregularesDialog').show(); return false;" />
                                             </div>
                                         </ui:fragment>
 
@@ -2509,6 +2551,24 @@
                     </h:panelGroup>
                 </div>
             </p:outputPanel>
+            <p:dialog widgetVar="udIrregularesDialog" header="UD pendientes de regularizar" modal="true" closable="false" resizable="false" width="560" styleClass="ud-irregulares-modal">
+                <p>Estas unidades didácticas requieren atención conforme a su estado académico actual.</p>
+                <ul class="ud-irregulares-lista">
+                    <ui:repeat value="#{tablaCurricularAsistidaBean.filasIrregularesDetalle}" var="filaIrregular">
+                        <li>
+                            <strong>#{filaIrregular.clave} - #{filaIrregular.asignatura}</strong><br />
+                            <span class="ud-irregulares-ubicacion">#{tablaCurricularAsistidaBean.getUbicacionFilaIrregular(filaIrregular)}</span>
+                            <span> | #{filaIrregular.estatusHistorico}</span>
+                        </li>
+                    </ui:repeat>
+                </ul>
+                <ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasIrregularesDetalle}">
+                    <p>No se identifican UD pendientes con la información disponible.</p>
+                </ui:fragment>
+                <div style="margin-top:18px; text-align:right;">
+                    <p:commandButton value="OK" type="button" onclick="PF('udIrregularesDialog').hide(); return false;" />
+                </div>
+            </p:dialog>
         </h:form>
     </ui:define>
 </ui:composition>

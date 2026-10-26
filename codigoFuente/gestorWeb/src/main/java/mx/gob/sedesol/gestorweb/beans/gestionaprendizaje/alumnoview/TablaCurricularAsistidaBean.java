@@ -3038,6 +3038,37 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                 .collect(Collectors.toList());
     }
 
+    public List<FilaAsistidaDTO> getFilasIrregularesDetalle() {
+        return obtenerFilasPlanas().stream()
+                .filter(fila -> fila != null && !esUnidadOpcionalLibre(fila) && esFilaPendienteRiesgo(fila))
+                .sorted(Comparator
+                        .comparing(FilaAsistidaDTO::getSemestre, Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(FilaAsistidaDTO::getBloque, Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(FilaAsistidaDTO::getClave, Comparator.nullsLast(String::compareTo)))
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(this::claveUnicaFila, fila -> fila,
+                                (primera, repetida) -> primera, LinkedHashMap::new),
+                        filasPorClave -> new ArrayList<FilaAsistidaDTO>(filasPorClave.values())));
+    }
+
+    public String getTextoAlertaSituacionAcademica() {
+        if (isEstudianteRegularContexto()) {
+            return "Tu situación académica es regular. Continúa con tu trayectoria conforme a las UD disponibles.";
+        }
+        int pendientes = getConteoUdPendientesPanel();
+        return "Tienes " + pendientes + " " + (pendientes == 1 ? "unidad didáctica pendiente" : "unidades didácticas pendientes")
+                + " de regularizar. Revisa las UD prioritarias para conocer las acciones disponibles en tu siguiente periodo.";
+    }
+
+    public String getUbicacionFilaIrregular(FilaAsistidaDTO fila) {
+        if (fila == null) {
+            return "Ubicación no determinada";
+        }
+        String semestre = fila.getSemestre() != null ? "S" + fila.getSemestre() : "Semestre no determinado";
+        String bloque = fila.getBloque() != null ? "B" + fila.getBloque() : "Bloque no determinado";
+        return semestre + " / " + bloque;
+    }
+
     public List<FilaAsistidaDTO> getFilasConBajaParcialPrioritarias() {
         return obtenerFilasPlanas().stream()
                 .filter(fila -> fila != null && normalizaTexto(fila.getEstatusHistorico()).contains("baja parcial"))
