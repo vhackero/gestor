@@ -44,6 +44,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistente
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PanelAsistenteVirtualDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TrazaReglaAplicadaV2DTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
@@ -3040,7 +3041,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public List<FilaAsistidaDTO> getFilasIrregularesDetalle() {
         return obtenerFilasPlanas().stream()
-                .filter(fila -> fila != null && !esUnidadOpcionalLibre(fila) && esFilaPendienteRiesgo(fila))
+                .filter(this::esFilaIrregularParaDetalle)
                 .sorted(Comparator
                         .comparing(FilaAsistidaDTO::getSemestre, Comparator.nullsLast(Integer::compareTo))
                         .thenComparing(FilaAsistidaDTO::getBloque, Comparator.nullsLast(Integer::compareTo))
@@ -3049,6 +3050,27 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                         Collectors.toMap(this::claveUnicaFila, fila -> fila,
                                 (primera, repetida) -> primera, LinkedHashMap::new),
                         filasPorClave -> new ArrayList<FilaAsistidaDTO>(filasPorClave.values())));
+    }
+
+    private boolean esFilaIrregularParaDetalle(FilaAsistidaDTO fila) {
+        if (fila == null) {
+            return false;
+        }
+        // El detalle debe explicar exactamente las UD pendientes, incluso si
+        // son optativas alternativas. El filtro operativo de riesgo excluye
+        // esas opciones para selección, pero no debe ocultarlas aquí.
+        if (esFilaNoAcreditada(fila) || esFilaBaja(fila)) {
+            return true;
+        }
+        String estatus = normalizaTexto(fila.getEstatusHistorico());
+        if (estatus.contains("no inscrita") || estatus.contains("no cursada")) {
+            return true;
+        }
+        DecisionUnidadCurricularV2DTO decision = fila.getUdId() != null
+                ? decisionesV2PorPrograma.get(fila.getUdId()) : null;
+        return decision != null && (decision.getMotivos().contains(CodigoMotivoCurricularV2.REPROBACION_ACUMULADA)
+                || decision.getMotivos().contains(CodigoMotivoCurricularV2.PENDIENTE_NO_CURSADA)
+                || decision.getMotivos().contains(CodigoMotivoCurricularV2.BAJA_PARCIAL));
     }
 
     public String getTextoAlertaSituacionAcademica() {
