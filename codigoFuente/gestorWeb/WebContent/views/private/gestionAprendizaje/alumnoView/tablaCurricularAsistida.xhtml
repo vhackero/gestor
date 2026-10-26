@@ -362,6 +362,10 @@
                 margin-bottom: 9px;
             }
             .avance-tiempo-texto span strong { font-size: 18px; }
+            .avance-tiempo-texto .texto-secundario {
+                font-size: 14px;
+                font-weight: 400;
+            }
             .trayectoria-linea {
                 display: flex;
                 flex-wrap: wrap;
@@ -1789,7 +1793,7 @@
                                                 </div>
                                                 <div class="avance-tiempo-texto">
                                                     <span><strong>#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.tiempoCalendarioTranscurrido}</strong> del plazo establecido de #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres} semestres para el Plan de estudios</span>
-                                                    Faltan #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoRestanteCalendario} para el plazo máximo
+                                                    Faltan #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoRestanteCalendario}<small class="texto-secundario"> para el plazo máximo</small>
                                                 </div>
                                                 <div class="avance-anillo" style="--progreso: #{tablaCurricularAsistidaBean.porcentajePlazoMaximoTranscurrido};">
                                                     <div class="avance-anillo-contenido">#{tablaCurricularAsistidaBean.porcentajePlazoMaximoTranscurrido}%<small>transcurrido<br />del plazo máximo</small></div>
