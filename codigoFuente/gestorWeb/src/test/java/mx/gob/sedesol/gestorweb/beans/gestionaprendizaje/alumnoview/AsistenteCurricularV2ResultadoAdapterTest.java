@@ -1,5 +1,6 @@
 package mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.alumnoview;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -93,6 +94,14 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 	public void f12A3U08LimitaExpectativaAlMaximoDeCargaV2() {
 		assertTrue(TablaCurricularAsistidaBean.limitarPorCargaV2(Integer.valueOf(10), Integer.valueOf(6)).equals(Integer.valueOf(6)));
 		assertTrue(TablaCurricularAsistidaBean.limitarPorCargaV2(Integer.valueOf(3), Integer.valueOf(6)).equals(Integer.valueOf(3)));
+	}
+
+	@Test
+	public void clasificaOptativaEnCursoComoRequeridaMientrasFalteMinimoGlobal() {
+		assertEquals(TablaCurricularAsistidaBean.calcularOptativasRequeridasActuales(1, 0), 1);
+		assertEquals(TablaCurricularAsistidaBean.calcularOptativasAdicionalesActuales(1, 0), 0);
+		assertEquals(TablaCurricularAsistidaBean.calcularOptativasRequeridasActuales(1, 8), 0);
+		assertEquals(TablaCurricularAsistidaBean.calcularOptativasAdicionalesActuales(1, 8), 1);
 	}
 
 	private TrazaReglaAplicadaV2DTO trazaCausal(CodigoReglaCurricularV2 regla) {

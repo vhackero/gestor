@@ -2899,14 +2899,32 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public int getUnidadesOptativasRequeridasActualesResumen() {
-        return Math.max(0, contarUnidadesActualesPorTipo("optativa")
-                - getUnidadesOptativasAdicionalesActualesResumen());
+        // La clasificación opcional por bloque no convierte una optativa en
+        // adicional mientras siga cubriendo el mínimo global del programa.
+        return calcularOptativasRequeridasActuales(contarOptativasActuales(),
+                obtenerCreditosResumenMalla().getOptativasAcreditadas());
     }
 
     public int getUnidadesOptativasAdicionalesActualesResumen() {
+        int optativasActuales = contarOptativasActuales();
+        return calcularOptativasAdicionalesActuales(optativasActuales,
+                obtenerCreditosResumenMalla().getOptativasAcreditadas());
+    }
+
+    static int calcularOptativasRequeridasActuales(int optativasActuales, int optativasAcreditadas) {
+        return Math.min(Math.max(0, optativasActuales),
+                Math.max(0, MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA - optativasAcreditadas));
+    }
+
+    static int calcularOptativasAdicionalesActuales(int optativasActuales, int optativasAcreditadas) {
+        return Math.max(0, optativasActuales
+                - calcularOptativasRequeridasActuales(optativasActuales, optativasAcreditadas));
+    }
+
+    private int contarOptativasActuales() {
         return (int) obtenerFilasPlanas().stream()
                 .filter(this::esFilaActual)
-                .filter(this::esUnidadOpcionalLibre)
+                .filter(fila -> normalizaTexto(fila.getTipo()).contains("optativa"))
                 .map(this::claveUnicaFila)
                 .distinct()
                 .count();
