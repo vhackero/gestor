@@ -114,6 +114,17 @@ public class MallaCurricularAlumnoBeanV2Test {
 		assertEquals(nodo.getEstatus(), "No acreditada");
 	}
 
+	@Test
+	public void bloqueoCurricularNoConvierteObligatoriaEnSeriada() {
+		MallaDiagramaNodoDTO nodo = new MallaDiagramaNodoDTO();
+		nodo.setBloqueada(true);
+
+		assertFalse(MallaCurricularAlumnoBean.esObligatoriaSeriada(nodo));
+
+		nodo.setTieneDependencias(true);
+		assertTrue(MallaCurricularAlumnoBean.esObligatoriaSeriada(nodo));
+	}
+
 	private DecisionUnidadCurricularV2DTO decision(Long idPrograma, boolean habilitada) {
 		DecisionUnidadCurricularV2DTO decision = new DecisionUnidadCurricularV2DTO();
 		decision.setIdPrograma(idPrograma);

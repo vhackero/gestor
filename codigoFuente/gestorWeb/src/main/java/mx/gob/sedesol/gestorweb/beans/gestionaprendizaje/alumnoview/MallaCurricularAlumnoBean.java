@@ -635,10 +635,14 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			return "Optativa";
 		}
 		if (normalizado.contains("oblig")) {
-			return programaNodo != null && (programaNodo.isBloqueada() || programaNodo.isTieneDependencias())
+			return esObligatoriaSeriada(programaNodo)
 					? "Obligatoria seriada" : "Obligatoria";
 		}
 		return StringUtils.defaultIfBlank(tipo, "Sin información");
+	}
+
+	static boolean esObligatoriaSeriada(MallaDiagramaNodoDTO programaNodo) {
+		return programaNodo != null && programaNodo.isTieneDependencias();
 	}
 
 	private String resolveEstatusDetalle(MallaDiagramaNodoDTO programaNodo, UnidadDecisionInscripcionDTO unidad) {
