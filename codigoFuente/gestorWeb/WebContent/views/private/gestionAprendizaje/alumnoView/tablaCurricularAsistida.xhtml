@@ -283,6 +283,15 @@
             .avance-panel-creditos .avance-datos {
                 flex: 1;
             }
+            .avance-panel-creditos {
+                flex-wrap: wrap;
+            }
+            .avance-panel-creditos > h3 {
+                flex: 0 0 100%;
+                font-size: 18px;
+                margin: 0;
+                text-align: left;
+            }
             .avance-panel-creditos .avance-dato-principal {
                 border-bottom: 1px solid #b7c3cd;
                 color: #102445;
@@ -1729,11 +1738,11 @@
 
                                         <div class="avance-grid">
                                             <div class="avance-panel avance-panel-creditos">
+                                                <h3>Avance curricular acreditado</h3>
                                                 <div class="avance-anillo" style="--progreso: #{tablaCurricularAsistidaBean.contexto.porcentajeCreditosCompletados};">
                                                     <div class="avance-anillo-contenido"><h:outputText value="#{tablaCurricularAsistidaBean.contexto.porcentajeCreditosCompletados / 100}"><f:convertNumber type="percent" maxFractionDigits="0" /></h:outputText><small>de créditos</small></div>
                                                 </div>
                                                 <div class="avance-datos">
-                                                    <h3>Avance curricular acreditado</h3>
                                                     <div class="avance-dato-principal">#{tablaCurricularAsistidaBean.unidadesAcreditadasResumen} UD acreditadas<br /><span style="font-size:17px; font-weight:400;">de un total de #{tablaCurricularAsistidaBean.unidadesAcreditadasResumen + tablaCurricularAsistidaBean.conteoUdPendientesPanel} UD</span></div>
                                                     <div class="avance-dato-principal">#{tablaCurricularAsistidaBean.contexto.creditosAcumulados} créditos obtenidos<br /><span style="font-size:17px; font-weight:400;">de un total de #{tablaCurricularAsistidaBean.contexto.creditosTotalesPlan}</span></div>
                                                 </div>
