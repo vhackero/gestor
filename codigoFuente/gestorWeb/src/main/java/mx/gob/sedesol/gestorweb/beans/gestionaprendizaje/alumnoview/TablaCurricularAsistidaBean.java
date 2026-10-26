@@ -1415,6 +1415,14 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return tipo.contains("optativa opcional");
     }
 
+    private boolean esOptativaAdicionalActual(FilaAsistidaDTO fila) {
+        if (fila == null || fila.getMotivos() == null) {
+            return false;
+        }
+        return fila.getMotivos().stream()
+                .anyMatch(motivo -> motivo != null && "OPTATIVA_OPCIONAL".equalsIgnoreCase(motivo.getCodigo()));
+    }
+
     private String normalizaTexto(String texto) {
         if (StringUtils.isBlank(texto)) {
             return "";
@@ -2899,32 +2907,33 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public int getUnidadesOptativasRequeridasActualesResumen() {
-        // La clasificación opcional por bloque no convierte una optativa en
-        // adicional mientras siga cubriendo el mínimo global del programa.
         return calcularOptativasRequeridasActuales(contarOptativasActuales(),
-                obtenerCreditosResumenMalla().getOptativasAcreditadas());
+                contarOptativasAdicionalesActuales());
     }
 
     public int getUnidadesOptativasAdicionalesActualesResumen() {
-        int optativasActuales = contarOptativasActuales();
-        return calcularOptativasAdicionalesActuales(optativasActuales,
-                obtenerCreditosResumenMalla().getOptativasAcreditadas());
+        return contarOptativasAdicionalesActuales();
     }
 
-    static int calcularOptativasRequeridasActuales(int optativasActuales, int optativasAcreditadas) {
+    static int calcularOptativasRequeridasActuales(int optativasActuales, int optativasAdicionales) {
         return Math.min(Math.max(0, optativasActuales),
-                Math.max(0, MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA - optativasAcreditadas));
-    }
-
-    static int calcularOptativasAdicionalesActuales(int optativasActuales, int optativasAcreditadas) {
-        return Math.max(0, optativasActuales
-                - calcularOptativasRequeridasActuales(optativasActuales, optativasAcreditadas));
+                Math.max(0, optativasActuales - optativasAdicionales));
     }
 
     private int contarOptativasActuales() {
         return (int) obtenerFilasPlanas().stream()
                 .filter(this::esFilaActual)
                 .filter(fila -> normalizaTexto(fila.getTipo()).contains("optativa"))
+                .map(this::claveUnicaFila)
+                .distinct()
+                .count();
+    }
+
+    private int contarOptativasAdicionalesActuales() {
+        return (int) obtenerFilasPlanas().stream()
+                .filter(this::esFilaActual)
+                .filter(fila -> normalizaTexto(fila.getTipo()).contains("optativa"))
+                .filter(this::esOptativaAdicionalActual)
                 .map(this::claveUnicaFila)
                 .distinct()
                 .count();

@@ -396,7 +396,40 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
         completarRelacionesDesbloqueo(unidades);
         aplicarReglasOptativasElectivas(unidades, cobertura, contextoBase);
+        marcarUnidadesReinscritasComoEnCurso(unidades, materiasEnCurso);
         dto.setUnidades(unidades);
+    }
+
+    /**
+     * La oferta clasifica opciones para seleccionar; la reinscripción previa
+     * identifica las UD que ya forman parte de la carga vigente. Esta última
+     * condición debe prevalecer en la vista sin borrar sus motivos curriculares.
+     */
+    private void marcarUnidadesReinscritasComoEnCurso(List<UnidadDecisionInscripcionDTO> unidades,
+            List<InscripcionPreviaMateriasDTO> materiasEnCurso) {
+        if (unidades == null || unidades.isEmpty() || materiasEnCurso == null || materiasEnCurso.isEmpty()) {
+            return;
+        }
+        Set<String> nombresEnCurso = new HashSet<String>();
+        Set<String> clavesEnCurso = new HashSet<String>();
+        for (InscripcionPreviaMateriasDTO materia : materiasEnCurso) {
+            if (materia != null) {
+                String nombre = normalizarTexto(materia.getAsignatura());
+                if (!nombre.isEmpty()) {
+                    nombresEnCurso.add(nombre);
+                }
+                String clave = normalizarTexto(materia.getPrograma());
+                if (!clave.isEmpty()) {
+                    clavesEnCurso.add(clave);
+                }
+            }
+        }
+        for (UnidadDecisionInscripcionDTO unidad : unidades) {
+            if (unidad != null && (nombresEnCurso.contains(normalizarTexto(unidad.getNombre()))
+                    || clavesEnCurso.contains(normalizarTexto(unidad.getClave())))) {
+                unidad.setEstatusPeriodo("EN_CURSO");
+            }
+        }
     }
 
     private DiagnosticoAcademicoDTO construirDiagnosticoActual(AsistenteInscripcionContextoDTO contexto,

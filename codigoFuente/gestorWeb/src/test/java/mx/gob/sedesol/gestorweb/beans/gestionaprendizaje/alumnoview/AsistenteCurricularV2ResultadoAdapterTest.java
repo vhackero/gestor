@@ -97,11 +97,9 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 	}
 
 	@Test
-	public void clasificaOptativaEnCursoComoRequeridaMientrasFalteMinimoGlobal() {
+	public void clasificaOptativaActualComoAdicionalSoloConMarcaCurricularExplicita() {
 		assertEquals(TablaCurricularAsistidaBean.calcularOptativasRequeridasActuales(1, 0), 1);
-		assertEquals(TablaCurricularAsistidaBean.calcularOptativasAdicionalesActuales(1, 0), 0);
-		assertEquals(TablaCurricularAsistidaBean.calcularOptativasRequeridasActuales(1, 8), 0);
-		assertEquals(TablaCurricularAsistidaBean.calcularOptativasAdicionalesActuales(1, 8), 1);
+		assertEquals(TablaCurricularAsistidaBean.calcularOptativasRequeridasActuales(2, 2), 0);
 	}
 
 	private TrazaReglaAplicadaV2DTO trazaCausal(CodigoReglaCurricularV2 regla) {
