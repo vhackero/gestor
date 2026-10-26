@@ -21,6 +21,8 @@ public class InscripcionPreviaMateriasRepository implements IInscripcionPreviaMa
 	public List<InscripcionPreviaMateriasDTO> obtenerInscripcionPrevia(Long idPersona) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT ");
+		sql.append("  ti.idprograma,");
+		sql.append("  ti.clave_asig,");
 		sql.append("  ti.programa,");
 		sql.append("  ti.asignatura,");
 		sql.append("  tf.tipo,");
@@ -53,11 +55,13 @@ public class InscripcionPreviaMateriasRepository implements IInscripcionPreviaMa
 
 	private InscripcionPreviaMateriasDTO mapearInscripcionPreviaMaterias(Object[] row) {
 		InscripcionPreviaMateriasDTO dto = new InscripcionPreviaMateriasDTO();
-		dto.setPrograma((String) row[0]);
-		dto.setAsignatura((String) row[1]);
-		dto.setTipoPrograma(row[2] != null ? String.valueOf(row[2]) : null);
-		dto.setSemestre(row[3] != null ? String.valueOf(row[3]) : null);
-	    dto.setBloque(row[4] != null ? String.valueOf(row[4]) : null);
+		dto.setIdPrograma(row[0] != null ? ((Number) row[0]).longValue() : null);
+		dto.setClavePrograma(row[1] != null ? String.valueOf(row[1]) : null);
+		dto.setPrograma((String) row[2]);
+		dto.setAsignatura((String) row[3]);
+		dto.setTipoPrograma(row[4] != null ? String.valueOf(row[4]) : null);
+		dto.setSemestre(row[5] != null ? String.valueOf(row[5]) : null);
+	    dto.setBloque(row[6] != null ? String.valueOf(row[6]) : null);
 	    
 		return dto;
 	}

@@ -380,7 +380,9 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
          * inferencia curricular se conserva sólo como respaldo cuando aún no
          * hay oferta dinámica publicada.
          */
-        List<InscripcionMateriasDTO> materiasFuente = estado.getMateriasDisponibles();
+        List<InscripcionMateriasDTO> materiasFuente = estado.getMateriasDisponibles() != null
+                ? new ArrayList<InscripcionMateriasDTO>(estado.getMateriasDisponibles())
+                : null;
         if (Boolean.TRUE.equals(dto.getInscripcionVigente())
                 && (materiasFuente == null || materiasFuente.isEmpty())) {
             materiasFuente = construirMateriasSimuladas(contextoBase, programasPlan, materiasEnCurso, ubicacionesPlan);
@@ -390,6 +392,9 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             return;
         }
 
+        incorporarMateriasEnCursoNoPresentes(materiasFuente, materiasEnCurso, programasPlan, contextoBase,
+                ubicacionesPlan);
+
         for (InscripcionMateriasDTO materia : materiasFuente) {
             unidades.add(construirUnidadDecision(materia, contextoBase, programasPlan, creditosPorPrograma));
         }
@@ -398,6 +403,40 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         aplicarReglasOptativasElectivas(unidades, cobertura, contextoBase);
         marcarUnidadesReinscritasComoEnCurso(unidades, materiasEnCurso);
         dto.setUnidades(unidades);
+    }
+
+    /**
+     * La oferta y la carga ya registrada no siempre se publican en la misma
+     * consulta. Se agregan sólo las UDs vigentes ausentes para describir la
+     * carga actual, sin convertirlas en una nueva opción de inscripción.
+     */
+    private void incorporarMateriasEnCursoNoPresentes(List<InscripcionMateriasDTO> materiasFuente,
+            List<InscripcionPreviaMateriasDTO> materiasEnCurso, Map<Long, FichaDescProgramaDTO> programasPlan,
+            InscripcionContextoDTO contextoBase, Map<Long, UbicacionCurricular> ubicacionesPlan) {
+        if (materiasFuente == null || materiasEnCurso == null || programasPlan == null || ubicacionesPlan == null) {
+            return;
+        }
+        Set<Long> idsPresentes = new HashSet<Long>();
+        for (InscripcionMateriasDTO materia : materiasFuente) {
+            if (materia != null && materia.getIdPrograma() != null) {
+                idsPresentes.add(materia.getIdPrograma());
+            }
+        }
+        for (InscripcionPreviaMateriasDTO materiaEnCurso : materiasEnCurso) {
+            if (materiaEnCurso == null || materiaEnCurso.getIdPrograma() == null
+                    || idsPresentes.contains(materiaEnCurso.getIdPrograma())) {
+                continue;
+            }
+            FichaDescProgramaDTO programa = programasPlan.get(materiaEnCurso.getIdPrograma());
+            UbicacionCurricular ubicacion = ubicacionesPlan.get(materiaEnCurso.getIdPrograma());
+            if (programa == null || ubicacion == null || ubicacion.getSemestre() == null) {
+                continue;
+            }
+            InscripcionMateriasDTO materia = construirMateriaSimulada(programa, contextoBase, ubicacion, false);
+            materia.setPerfil(null);
+            materiasFuente.add(materia);
+            idsPresentes.add(materiaEnCurso.getIdPrograma());
+        }
     }
 
     /**
@@ -412,21 +451,27 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         }
         Set<String> nombresEnCurso = new HashSet<String>();
         Set<String> clavesEnCurso = new HashSet<String>();
+		Set<Long> idsEnCurso = new HashSet<Long>();
         for (InscripcionPreviaMateriasDTO materia : materiasEnCurso) {
             if (materia != null) {
+				if (materia.getIdPrograma() != null) {
+					idsEnCurso.add(materia.getIdPrograma());
+				}
                 String nombre = normalizarTexto(materia.getAsignatura());
                 if (!nombre.isEmpty()) {
                     nombresEnCurso.add(nombre);
                 }
-                String clave = normalizarTexto(materia.getPrograma());
+				String clave = normalizarTexto(materia.getClavePrograma());
                 if (!clave.isEmpty()) {
                     clavesEnCurso.add(clave);
                 }
             }
         }
         for (UnidadDecisionInscripcionDTO unidad : unidades) {
-            if (unidad != null && (nombresEnCurso.contains(normalizarTexto(unidad.getNombre()))
-                    || clavesEnCurso.contains(normalizarTexto(unidad.getClave())))) {
+            if (unidad != null && (idsEnCurso.contains(unidad.getUdId())
+					|| clavesEnCurso.contains(normalizarTexto(unidad.getClave()))
+					|| nombresEnCurso.contains(normalizarTexto(unidad.getNombre()))
+					)) {
                 unidad.setEstatusPeriodo("EN_CURSO");
             }
         }
@@ -568,9 +613,14 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     }
 
     private String llaveMateriaEnCurso(InscripcionPreviaMateriasDTO materia) {
-        // `programa` identifica el Programa Educativo (por ejemplo, Derecho),
-        // por lo que no distingue las UDs de una misma persona. La asignatura
-        // es la identidad disponible de la UD en esta consulta.
+        if (materia.getIdPrograma() != null) {
+            return "ID:" + materia.getIdPrograma();
+        }
+        String clave = normalizarTexto(materia.getClavePrograma());
+        if (!clave.isEmpty()) {
+            return "CLAVE:" + clave;
+        }
+        // Respaldo para registros históricos sin identificador curricular.
         String asignatura = normalizarTexto(materia.getAsignatura());
         return !asignatura.isEmpty() ? "UD:" + asignatura : "PROGRAMA:" + normalizarTexto(materia.getPrograma());
     }
@@ -803,8 +853,8 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             return claves;
         }
         for (InscripcionPreviaMateriasDTO materia : materiasEnCurso) {
-            if (materia != null && materia.getPrograma() != null) {
-                claves.add(materia.getPrograma().toUpperCase());
+            if (materia != null && materia.getClavePrograma() != null) {
+                claves.add(materia.getClavePrograma().toUpperCase());
             }
         }
         return claves;
@@ -3461,8 +3511,14 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
     private FichaDescProgramaDTO resolverProgramaPlanPorMateriaEnCurso(Map<Long, FichaDescProgramaDTO> programasPlan,
             InscripcionPreviaMateriasDTO materiaEnCurso) {
+        if (materiaEnCurso.getIdPrograma() != null) {
+            FichaDescProgramaDTO programa = programasPlan.get(materiaEnCurso.getIdPrograma());
+            if (programa != null) {
+                return programa;
+            }
+        }
         String nombre = normalizarTexto(materiaEnCurso.getAsignatura());
-        String clave = normalizarTexto(materiaEnCurso.getPrograma());
+        String clave = normalizarTexto(materiaEnCurso.getClavePrograma());
         for (FichaDescProgramaDTO programa : programasPlan.values()) {
             if (programa == null) {
                 continue;
