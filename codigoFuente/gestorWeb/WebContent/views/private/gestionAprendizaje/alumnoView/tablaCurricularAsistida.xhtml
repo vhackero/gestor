@@ -906,11 +906,7 @@
                 line-height: 1.35;
             }
             .situacion-alerta-texto strong { font-weight: 700; }
-            .situacion-alerta .ui-button {
-                background: #0e4b7c;
-                border-color: #0e4b7c;
-                white-space: nowrap;
-            }
+            .situacion-alerta .btn { white-space: nowrap; }
             .ud-irregulares-modal .ui-dialog-titlebar {
                 background: #3d8597;
                 color: #ffffff;
@@ -1720,7 +1716,7 @@
                                             <div class="alert-box alert-box-warning situacion-alerta warning">
                                                 <i class="fa fa-exclamation-triangle" />
                                                 <div class="situacion-alerta-texto"><strong>ATENCIÓN -</strong> #{tablaCurricularAsistidaBean.textoAlertaSituacionAcademica}</div>
-                                                <p:commandButton value="#{tablaCurricularAsistidaBean.conteoUdPendientesPanel eq 1 ? 'Consultar UD pendiente' : 'Consultar UDs pendientes'}" type="button" onclick="PF('udIrregularesDialog').show(); return false;" />
+                                                <p:commandButton value="#{tablaCurricularAsistidaBean.conteoUdPendientesPanel eq 1 ? 'Consultar UD pendiente' : 'Consultar UDs pendientes'}" type="button" styleClass="btn btn-primary" onclick="PF('udIrregularesDialog').show(); return false;" />
                                             </div>
                                         </ui:fragment>
 
@@ -2566,7 +2562,7 @@
                     <p>No se identifican UD pendientes con la información disponible.</p>
                 </ui:fragment>
                 <div style="margin-top:18px; text-align:right;">
-                    <p:commandButton value="OK" type="button" onclick="PF('udIrregularesDialog').hide(); return false;" />
+                    <p:commandButton value="OK" type="button" styleClass="btn btn-default" onclick="PF('udIrregularesDialog').hide(); return false;" />
                 </div>
             </p:dialog>
         </h:form>
