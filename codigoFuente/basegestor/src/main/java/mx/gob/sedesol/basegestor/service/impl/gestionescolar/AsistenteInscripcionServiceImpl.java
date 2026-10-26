@@ -123,7 +123,8 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         mapearUnidades(dto, contextoBase, programasPlan, cobertura, materiasEnCurso, ubicacionesPlan);
         dto.setPendientesPlan(construirPendientesPlan(dto, contextoBase, programasPlan, cobertura,
                 ubicacionesPlan, materiasEnCurso));
-        dto.setDiagnosticoActual(construirDiagnosticoActual(dto, contextoBase, materiasEnCurso, programasPlan));
+        dto.setDiagnosticoActual(construirDiagnosticoActual(dto, contextoBase, materiasEnCurso, programasPlan,
+                cobertura));
         dto.setRiesgos(construirRiesgos(dto, contextoBase));
         dto.setProyeccionSiguientePeriodo(
                 construirProyeccionSiguientePeriodo(dto, materiasEnCurso, contextoBase, programasPlan, ubicacionesPlan));
@@ -479,13 +480,19 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
     private DiagnosticoAcademicoDTO construirDiagnosticoActual(AsistenteInscripcionContextoDTO contexto,
             InscripcionContextoDTO contextoBase, List<InscripcionPreviaMateriasDTO> materiasEnCurso,
-            Map<Long, FichaDescProgramaDTO> programasPlan) {
+            Map<Long, FichaDescProgramaDTO> programasPlan, CoberturaCurricularInfo cobertura) {
         DiagnosticoAcademicoDTO dto = new DiagnosticoAcademicoDTO();
         EstadoAcademicoDTO estado = contextoBase.getEstadoAcademico();
 
         int reprobadas = contarReprobadasReales(estado);
         int bajas = contarBajasTemporalesOParciales(estado);
         int enCurso = contarMateriasEnCursoUnicas(materiasEnCurso);
+		int obligatoriasEnCurso = contarMateriasEnCursoPorTipo(materiasEnCurso, true);
+		int optativasEnCurso = contarMateriasEnCursoPorTipo(materiasEnCurso, false);
+		int optativasCubiertasPrevias = cobertura != null
+				? Math.max(0, cobertura.getOptativasCubiertas() - optativasEnCurso) : 0;
+		int optativasRequeridasEnCurso = Math.min(optativasEnCurso,
+				Math.max(0, obtenerMinimoOptativasPlanAsistente() - optativasCubiertasPrevias));
         int criticas = contarUnidadesUnicas(contexto.getUnidades(), new CriterioUnidad() {
             @Override
             public boolean cumple(UnidadDecisionInscripcionDTO unidad) {
@@ -500,6 +507,9 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
         dto.setRegular(Boolean.valueOf(esSituacionRegular(estado)));
         dto.setMateriasEnCurso(Integer.valueOf(enCurso));
+		dto.setMateriasEnCursoObligatorias(Integer.valueOf(obligatoriasEnCurso));
+		dto.setMateriasEnCursoOptativasRequeridas(Integer.valueOf(optativasRequeridasEnCurso));
+		dto.setMateriasEnCursoOptativasAdicionales(Integer.valueOf(optativasEnCurso - optativasRequeridasEnCurso));
         dto.setMateriasReprobadasActivas(reprobadas);
         dto.setMateriasConBaja(bajas);
         dto.setMateriasPendientesNoInscritas(contexto.getPendientesPlan() != null
@@ -550,6 +560,31 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
         return dto;
     }
+
+	private int contarMateriasEnCursoPorTipo(List<InscripcionPreviaMateriasDTO> materiasEnCurso,
+			boolean obligatorias) {
+		Set<String> materias = new HashSet<String>();
+		if (materiasEnCurso == null) {
+			return 0;
+		}
+		for (InscripcionPreviaMateriasDTO materia : materiasEnCurso) {
+			if (materia == null) {
+				continue;
+			}
+			boolean coincideTipo = obligatorias
+					? InscripcionUtils.esMateriaObligatoria(materia.getTipoPrograma())
+					: InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma());
+			if (coincideTipo) {
+				materias.add(llaveMateriaEnCurso(materia));
+			}
+		}
+		return materias.size();
+	}
+
+	private int obtenerMinimoOptativasPlanAsistente() {
+		return inscripcionService.obtenerConfiguracionRestriccionesAcademicasGenerales()
+				.getMinimoOptativasPlanAsistente();
+	}
 
     private int contarBloqueadasSeriacionPlan(Map<Long, FichaDescProgramaDTO> programasPlan,
             InscripcionContextoDTO contextoBase) {

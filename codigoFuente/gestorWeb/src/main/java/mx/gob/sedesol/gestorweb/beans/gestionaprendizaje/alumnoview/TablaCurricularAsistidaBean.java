@@ -2903,15 +2903,27 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public int getUnidadesObligatoriasActualesResumen() {
+        if (contexto != null && contexto.getDiagnosticoActual() != null
+                && contexto.getDiagnosticoActual().getMateriasEnCursoObligatorias() != null) {
+            return valor(contexto.getDiagnosticoActual().getMateriasEnCursoObligatorias());
+        }
         return contarUnidadesActualesPorTipo("oblig");
     }
 
     public int getUnidadesOptativasRequeridasActualesResumen() {
+        if (contexto != null && contexto.getDiagnosticoActual() != null
+                && contexto.getDiagnosticoActual().getMateriasEnCursoOptativasRequeridas() != null) {
+            return valor(contexto.getDiagnosticoActual().getMateriasEnCursoOptativasRequeridas());
+        }
         return calcularOptativasRequeridasActuales(contarOptativasActuales(),
                 contarOptativasAdicionalesActuales());
     }
 
     public int getUnidadesOptativasAdicionalesActualesResumen() {
+        if (contexto != null && contexto.getDiagnosticoActual() != null
+                && contexto.getDiagnosticoActual().getMateriasEnCursoOptativasAdicionales() != null) {
+            return valor(contexto.getDiagnosticoActual().getMateriasEnCursoOptativasAdicionales());
+        }
         return contarOptativasAdicionalesActuales();
     }
 
