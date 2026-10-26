@@ -432,6 +432,12 @@
                 font-weight: 700;
                 margin-top: 3px;
             }
+            .trayectoria-periodo .duracion-plan {
+                display: block;
+                font-size: 12px;
+                font-weight: 400;
+                margin-top: 3px;
+            }
             .trayectoria-periodo.adicional {
                 flex: 1.7 1 165px;
             }
@@ -1783,7 +1789,7 @@
                                                 </div>
                                                 <div class="avance-tiempo-texto">
                                                     <span><strong>#{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.tiempoCalendarioTranscurrido}</strong> del plazo establecido de #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres} semestres para el Plan de estudios</span>
-                                                    Faltan #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoRestanteCalendario}
+                                                    Faltan #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoRestanteCalendario} para el plazo máximo
                                                 </div>
                                                 <div class="avance-anillo" style="--progreso: #{tablaCurricularAsistidaBean.porcentajePlazoMaximoTranscurrido};">
                                                     <div class="avance-anillo-contenido">#{tablaCurricularAsistidaBean.porcentajePlazoMaximoTranscurrido}%<small>transcurrido<br />del plazo máximo</small></div>
@@ -1802,7 +1808,7 @@
                                             <ui:fragment rendered="#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo gt 0}"><div class="trayectoria-hito adicional">#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo} semestres más</div></ui:fragment>
                                         </div>
                                         <div class="trayectoria-periodos">
-                                            <ui:repeat value="#{tablaCurricularAsistidaBean.hitosTrayectoria}" var="semestreTrayectoria"><div class="trayectoria-periodo">#{tablaCurricularAsistidaBean.getEtiquetaPeriodoTrayectoria(semestreTrayectoria)}<ui:fragment rendered="#{tablaCurricularAsistidaBean.getEstadoHitoTrayectoria(semestreTrayectoria) eq 'actual'}"><span class="en-curso">En curso</span></ui:fragment></div></ui:repeat>
+                                            <ui:repeat value="#{tablaCurricularAsistidaBean.hitosTrayectoria}" var="semestreTrayectoria"><div class="trayectoria-periodo">#{tablaCurricularAsistidaBean.getEtiquetaPeriodoTrayectoria(semestreTrayectoria)}<ui:fragment rendered="#{tablaCurricularAsistidaBean.getEstadoHitoTrayectoria(semestreTrayectoria) eq 'actual'}"><span class="en-curso">En curso</span></ui:fragment><ui:fragment rendered="#{semestreTrayectoria eq tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres}"><span class="duracion-plan">Duración del plan</span></ui:fragment></div></ui:repeat>
                                             <ui:fragment rendered="#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo gt 0}"><div class="trayectoria-periodo adicional">Plazo adicional máximo</div></ui:fragment>
                                         </div>
                                         <div class="kpi-inline-note"><strong>Plazo máximo total para concluir:</strong> #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoMaximoAnios} años, incluidos los #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalAnios} años de duración nominal del plan.</div>
