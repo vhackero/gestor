@@ -2902,6 +2902,99 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                 ? valor(contexto.getDiagnosticoActual().getMateriasEnCurso()) : 0;
     }
 
+    public String getDetalleUnidadesActualesResumen() {
+        return detalleFilasResumen(filtrarFilasActualesResumen());
+    }
+
+    public String getDetalleUnidadesObligatoriasActualesResumen() {
+        return detalleFilasResumen(filtrarFilasActualesPorTipo("oblig", false));
+    }
+
+    public String getDetalleUnidadesOptativasRequeridasActualesResumen() {
+        List<FilaAsistidaDTO> filas = new ArrayList<FilaAsistidaDTO>();
+        for (FilaAsistidaDTO fila : filtrarFilasActualesPorTipo("optativa", true)) {
+            if (!esOptativaAdicionalActual(fila)) {
+                filas.add(fila);
+            }
+        }
+        return detalleFilasResumen(filas);
+    }
+
+    public String getDetalleUnidadesOptativasAdicionalesActualesResumen() {
+        List<FilaAsistidaDTO> filas = new ArrayList<FilaAsistidaDTO>();
+        for (FilaAsistidaDTO fila : filtrarFilasActualesPorTipo("optativa", true)) {
+            if (esOptativaAdicionalActual(fila)) {
+                filas.add(fila);
+            }
+        }
+        return detalleFilasResumen(filas);
+    }
+
+    public String getDetalleUnidadesConBajaParcialResumen() {
+        return detalleFilasResumen(getFilasConBajaParcialPrioritarias());
+    }
+
+    public String getDetalleUnidadesAcreditadasResumen() {
+        return obtenerCreditosResumenMalla().getDetalleAcreditadas();
+    }
+
+    public String getDetalleUnidadesObligatoriasAcreditadasResumen() {
+        return obtenerCreditosResumenMalla().getDetalleObligatoriasAcreditadas();
+    }
+
+    public String getDetalleUnidadesOptativasRequeridasAcreditadasResumen() {
+        return obtenerCreditosResumenMalla().getDetalleOptativasAcreditadas(0,
+                MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA);
+    }
+
+    public String getDetalleUnidadesOptativasAdicionalesAcreditadasResumen() {
+        return obtenerCreditosResumenMalla().getDetalleOptativasAcreditadas(
+                MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA, Integer.MAX_VALUE);
+    }
+
+    public String getDetalleUnidadesPendientesRegularizarResumen() {
+        return detalleFilasResumen(getFilasIrregularesDetalle());
+    }
+
+    private List<FilaAsistidaDTO> filtrarFilasActualesResumen() {
+        return obtenerFilasPlanas().stream()
+                .filter(this::esFilaActual)
+                .collect(Collectors.toList());
+    }
+
+    private List<FilaAsistidaDTO> filtrarFilasActualesPorTipo(String tipo, boolean incluirOpcionales) {
+        return obtenerFilasPlanas().stream()
+                .filter(this::esFilaActual)
+                .filter(fila -> normalizaTexto(fila.getTipo()).contains(tipo))
+                .filter(fila -> incluirOpcionales || !esUnidadOpcionalLibre(fila))
+                .collect(Collectors.toList());
+    }
+
+    private String detalleFilasResumen(List<FilaAsistidaDTO> filas) {
+        if (filas == null || filas.isEmpty()) {
+            return "Sin UD relacionadas.";
+        }
+        Map<String, FilaAsistidaDTO> unicas = new LinkedHashMap<String, FilaAsistidaDTO>();
+        for (FilaAsistidaDTO fila : filas) {
+            if (fila != null && !unicas.containsKey(claveUnicaFila(fila))) {
+                unicas.put(claveUnicaFila(fila), fila);
+            }
+        }
+        List<FilaAsistidaDTO> ordenadas = new ArrayList<FilaAsistidaDTO>(unicas.values());
+        Collections.sort(ordenadas, Comparator.comparing(FilaAsistidaDTO::getClave,
+                Comparator.nullsLast(String::compareTo)));
+        StringBuilder detalle = new StringBuilder();
+        for (FilaAsistidaDTO fila : ordenadas) {
+            if (detalle.length() > 0) {
+                detalle.append('\n');
+            }
+            detalle.append(valorTexto(fila.getClave(), "Sin clave"))
+                    .append(" - ")
+                    .append(valorTexto(fila.getAsignatura(), "Sin nombre"));
+        }
+        return detalle.toString();
+    }
+
     /**
      * Etiqueta visual del resumen vigente. El bloque se obtiene de las UD que
      * están registradas o en curso, por lo que no depende de una fecha fija.
@@ -3353,6 +3446,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                     Integer idPrograma = programa.getIdPrograma();
                     MallaAlumnoProgramaDTO estatus = idPrograma != null ? estatusPorPrograma.get(idPrograma) : null;
                     String claveContable = claveUnicaUd(programa);
+                    resumen.registrarEtiqueta(claveContable, nombrePrograma);
                     boolean acreditada = esProgramaAprobadoResumen(estatus)
                             || clavesAcreditadasPrograma.contains(claveContable);
                     if (acreditada) {
@@ -4197,6 +4291,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         private final Set<String> clavesOptativasOpcionalesPendientes = new HashSet<String>();
         private final Set<String> clavesElectivasPendientes = new HashSet<String>();
         private final Set<String> clavesConCreditosContabilizados = new HashSet<String>();
+        private final Map<String, String> etiquetasPorClave = new HashMap<String, String>();
 
         public int getRequeridos() {
             return requeridos;
@@ -4216,6 +4311,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         }
 
         public int getObligatoriasPendientes() { return clavesObligatoriasPendientes.size(); }
+        public void registrarEtiqueta(String clave, String nombre) {
+            if (clave != null && !etiquetasPorClave.containsKey(clave)) {
+                etiquetasPorClave.put(clave, StringUtils.defaultIfBlank(nombre, "Sin nombre"));
+            }
+        }
         public void registrarObligatoriaPendiente(String clave) { clavesObligatoriasPendientes.add(clave); }
         public int getAcreditadas() { return clavesAcreditadas.size(); }
         public void registrarAcreditada(String clave) { clavesAcreditadas.add(clave); }
@@ -4229,5 +4329,39 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         public void registrarOptativaOpcionalPendiente(String clave) { clavesOptativasOpcionalesPendientes.add(clave); }
         public int getElectivasPendientes() { return clavesElectivasPendientes.size(); }
         public void registrarElectivaPendiente(String clave) { clavesElectivasPendientes.add(clave); }
+
+        public String getDetalleAcreditadas() { return detalleClaves(clavesAcreditadas); }
+        public String getDetalleObligatoriasAcreditadas() { return detalleClaves(clavesObligatoriasAcreditadas); }
+
+        public String getDetalleOptativasAcreditadas(int inicio, int limite) {
+            List<String> claves = new ArrayList<String>(clavesOptativasAcreditadas);
+            Collections.sort(claves);
+            int desde = Math.min(Math.max(0, inicio), claves.size());
+            int hasta = limite == Integer.MAX_VALUE ? claves.size()
+                    : Math.min(claves.size(), desde + Math.max(0, limite));
+            return detalleClaves(claves.subList(desde, hasta));
+        }
+
+        private String detalleClaves(Iterable<String> claves) {
+            List<String> ordenadas = new ArrayList<String>();
+            for (String clave : claves) {
+                if (clave != null) {
+                    ordenadas.add(clave);
+                }
+            }
+            Collections.sort(ordenadas);
+            if (ordenadas.isEmpty()) {
+                return "Sin UD relacionadas.";
+            }
+            StringBuilder detalle = new StringBuilder();
+            for (String clave : ordenadas) {
+                if (detalle.length() > 0) {
+                    detalle.append('\n');
+                }
+                detalle.append(clave).append(" - ")
+                        .append(StringUtils.defaultIfBlank(etiquetasPorClave.get(clave), "Sin nombre"));
+            }
+            return detalle.toString();
+        }
     }
 }
