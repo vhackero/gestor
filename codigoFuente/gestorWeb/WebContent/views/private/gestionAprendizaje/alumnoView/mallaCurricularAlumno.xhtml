@@ -484,6 +484,20 @@
 			}
 			.malla-leyenda-group.indicadores {
 				flex: 1 1 auto;
+				align-items: flex-start;
+				min-width: 0;
+			}
+			.malla-indicadores-contenido {
+				display: flex;
+				flex-direction: column;
+				gap: 7px;
+				min-width: 0;
+			}
+			.malla-indicadores-linea {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				flex-wrap: wrap;
 			}
 			.malla-leyenda-title {
 				font-weight: bold;
@@ -1027,31 +1041,35 @@
 					<div class="malla-leyenda-row">
 						<div class="malla-leyenda-group indicadores">
 							<span class="malla-leyenda-title">Indicadores</span>
-							<ui:repeat value="#{mallaCurricularAlumnoBean.estatusPrograma}" var="estatus">
-								<span class="malla-leyenda-item">
-								<span class="malla-leyenda-box estatus #{estatus.nombre eq 'Recursando' ? 'estatus-recursando' : ''} #{estatus.nombre eq 'Regularizada' ? 'estatus-regularizada' : ''}" style="#{estatus.nombre eq 'En curso' ? 'background:#ffffff;border:1px solid #C19E00;' : 'background:'.concat(estatus.backgroundColor).concat(';border-color:').concat(estatus.borderColor).concat(';')}">
-									<ui:fragment rendered="#{estatus.nombre eq 'En curso'}">
-										<span class="icon-en-curso"></span>
-									</ui:fragment>
-									<ui:fragment rendered="#{estatus.nombre eq 'Recursando'}"><span class="icon-recursando"></span></ui:fragment>
-									<ui:fragment rendered="#{estatus.nombre eq 'Regularizada'}"><span class="icon-regularizada"></span></ui:fragment>
-									<ui:fragment rendered="#{estatus.nombre ne 'En curso' and estatus.nombre ne 'Recursando' and estatus.nombre ne 'Regularizada'}">
-										<i class="#{estatus.iconClass}"></i>
-									</ui:fragment>
-								</span>
-									#{estatus.nombre}
-								</span>
-							</ui:repeat>
-							<span class="malla-leyenda-item">
-								<span class="malla-creditos-demo" title="Créditos por materia">8</span>
-								Número de créditos
-							</span>
-							<span class="malla-leyenda-item">
-								<span class="malla-leyenda-box serializada" title="Materia con dependencia">
-									<span class="malla-dependencia-icon"></span>
-								</span>
-								Serializada
-							</span>
+							<div class="malla-indicadores-contenido">
+								<div class="malla-indicadores-linea">
+									<ui:repeat value="#{mallaCurricularAlumnoBean.estatusPrograma}" var="estatus">
+										<ui:fragment rendered="#{estatus.nombre ne 'Por cursar'}">
+											<span class="malla-leyenda-item">
+												<span class="malla-leyenda-box estatus #{estatus.nombre eq 'Recursando' ? 'estatus-recursando' : ''} #{estatus.nombre eq 'Regularizada' ? 'estatus-regularizada' : ''}" style="#{estatus.nombre eq 'En curso' ? 'background:#ffffff;border:1px solid #C19E00;' : 'background:'.concat(estatus.backgroundColor).concat(';border-color:').concat(estatus.borderColor).concat(';')}">
+													<ui:fragment rendered="#{estatus.nombre eq 'En curso'}"><span class="icon-en-curso"></span></ui:fragment>
+													<ui:fragment rendered="#{estatus.nombre eq 'Recursando'}"><span class="icon-recursando"></span></ui:fragment>
+													<ui:fragment rendered="#{estatus.nombre eq 'Regularizada'}"><span class="icon-regularizada"></span></ui:fragment>
+													<ui:fragment rendered="#{estatus.nombre ne 'En curso' and estatus.nombre ne 'Recursando' and estatus.nombre ne 'Regularizada'}"><i class="#{estatus.iconClass}"></i></ui:fragment>
+												</span>
+												#{estatus.nombre}
+											</span>
+										</ui:fragment>
+									</ui:repeat>
+								</div>
+								<div class="malla-indicadores-linea">
+									<ui:repeat value="#{mallaCurricularAlumnoBean.estatusPrograma}" var="estatus">
+										<ui:fragment rendered="#{estatus.nombre eq 'Por cursar'}">
+											<span class="malla-leyenda-item">
+												<span class="malla-leyenda-box estatus" style="background:#{estatus.backgroundColor};border-color:#{estatus.borderColor};"><i class="#{estatus.iconClass}"></i></span>
+												#{estatus.nombre}
+											</span>
+										</ui:fragment>
+									</ui:repeat>
+									<span class="malla-leyenda-item"><span class="malla-creditos-demo" title="Créditos por materia">8</span>Número de créditos</span>
+									<span class="malla-leyenda-item"><span class="malla-leyenda-box serializada" title="Materia con dependencia"><span class="malla-dependencia-icon"></span></span>Serializada</span>
+								</div>
+							</div>
 						</div>
 						<div class="malla-tools">
 							<button type="button" class="malla-tool-btn" data-action="print" title="Imprimir">
