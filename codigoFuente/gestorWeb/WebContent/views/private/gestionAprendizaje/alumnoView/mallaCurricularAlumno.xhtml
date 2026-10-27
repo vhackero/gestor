@@ -231,12 +231,12 @@
 			}
 			.icon-recursando,
 			.icon-regularizada {
-				width: 11px;
-				height: 11px;
+				width: 16px;
+				height: 16px;
 				display: inline-block;
 				background-repeat: no-repeat;
 				background-position: center;
-				background-size: 11px 11px;
+				background-size: 16px 16px;
 			}
 			.icon-recursando { background-image: url("#{resource['images/recursando.png']}"); }
 			.icon-regularizada { background-image: url("#{resource['images/regularizada.png']}"); }
@@ -245,6 +245,18 @@
 			.malla-table-icon.estatus-en-curso {
 				background: #ffffff !important;
 				border: 1px solid #C19E00 !important;
+			}
+			.malla-estado.estatus-recursando,
+			.malla-table-icon.estatus-recursando,
+			.malla-leyenda-box.estatus.estatus-recursando {
+				background: #ffffff !important;
+				border: 1px solid #C81E2A !important;
+			}
+			.malla-estado.estatus-regularizada,
+			.malla-table-icon.estatus-regularizada,
+			.malla-leyenda-box.estatus.estatus-regularizada {
+				background: #ffffff !important;
+				border: 1px solid #229447 !important;
 			}
 			.malla-creditos {
 				position: static;
@@ -497,6 +509,12 @@
 				height: 9px;
 				background-size: 9px 9px;
 			}
+			.malla-leyenda-box.estatus .icon-recursando,
+			.malla-leyenda-box.estatus .icon-regularizada {
+				width: 14px;
+				height: 14px;
+				background-size: 14px 14px;
+			}
 			.malla-leyenda-box.serializada {
 				width: 18px;
 				height: 18px;
@@ -632,9 +650,9 @@
 			}
 			.malla-table-icon .icon-recursando,
 			.malla-table-icon .icon-regularizada {
-				width: 12px;
-				height: 12px;
-				background-size: 12px 12px;
+				width: 18px;
+				height: 18px;
+				background-size: 18px 18px;
 			}
 			.malla-table-icon.seriada {
 				background: #3376e5;
@@ -999,7 +1017,7 @@
 							<span class="malla-leyenda-title">Indicadores</span>
 							<ui:repeat value="#{mallaCurricularAlumnoBean.estatusPrograma}" var="estatus">
 								<span class="malla-leyenda-item">
-								<span class="malla-leyenda-box estatus" style="#{estatus.nombre eq 'En curso' ? 'background:#ffffff;border:1px solid #C19E00;' : 'background:'.concat(estatus.backgroundColor).concat(';border-color:').concat(estatus.borderColor).concat(';')}">
+								<span class="malla-leyenda-box estatus #{estatus.nombre eq 'Recursando' ? 'estatus-recursando' : ''} #{estatus.nombre eq 'Regularizada' ? 'estatus-regularizada' : ''}" style="#{estatus.nombre eq 'En curso' ? 'background:#ffffff;border:1px solid #C19E00;' : 'background:'.concat(estatus.backgroundColor).concat(';border-color:').concat(estatus.borderColor).concat(';')}">
 									<ui:fragment rendered="#{estatus.nombre eq 'En curso'}">
 										<span class="icon-en-curso"></span>
 									</ui:fragment>
