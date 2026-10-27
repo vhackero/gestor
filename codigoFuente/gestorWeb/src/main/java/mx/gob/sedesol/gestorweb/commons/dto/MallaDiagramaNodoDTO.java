@@ -15,6 +15,7 @@ public class MallaDiagramaNodoDTO implements Serializable {
 	private String tipoBackgroundColor;
 	private String tipoBorderColor;
 	private String estatus;
+	private String estatusVisual;
 	private String estatusBackgroundColor;
 	private String estatusBorderColor;
 	private String calificacion;
@@ -114,11 +115,20 @@ public class MallaDiagramaNodoDTO implements Serializable {
 	 * al estudiante el término técnico asociado al candado.
 	 */
 	public String getEstatusTooltip() {
-		return "Bloqueada".equalsIgnoreCase(estatus) ? "Por cursar" : estatus;
+		String estatusMostrado = getEstatusVisual();
+		return "Bloqueada".equalsIgnoreCase(estatusMostrado) ? "Por cursar" : estatusMostrado;
 	}
 
 	public void setEstatus(String estatus) {
 		this.estatus = estatus;
+	}
+
+	public String getEstatusVisual() {
+		return estatusVisual != null ? estatusVisual : estatus;
+	}
+
+	public void setEstatusVisual(String estatusVisual) {
+		this.estatusVisual = estatusVisual;
 	}
 
 	public String getEstatusBackgroundColor() {
@@ -357,10 +367,10 @@ public class MallaDiagramaNodoDTO implements Serializable {
 	}
 
 	public String getEstatusCss() {
-		if (estatus == null) {
+		if (getEstatusVisual() == null) {
 			return "";
 		}
-		String normalizado = estatus.trim().toLowerCase().replaceAll("[^a-z0-9]+", "-");
+		String normalizado = getEstatusVisual().trim().toLowerCase().replaceAll("[^a-z0-9]+", "-");
 		return "estatus-" + normalizado;
 	}
 

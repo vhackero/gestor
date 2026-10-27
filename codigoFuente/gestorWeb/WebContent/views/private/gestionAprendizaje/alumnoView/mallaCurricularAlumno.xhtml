@@ -229,6 +229,17 @@
 				background-position: center;
 				background-size: 11px 11px;
 			}
+			.icon-recursando,
+			.icon-regularizada {
+				width: 11px;
+				height: 11px;
+				display: inline-block;
+				background-repeat: no-repeat;
+				background-position: center;
+				background-size: 11px 11px;
+			}
+			.icon-recursando { background-image: url("#{resource['images/recursando.png']}"); }
+			.icon-regularizada { background-image: url("#{resource['images/regularizada.png']}"); }
 			.malla-estado.estatus-en-curso,
 			.malla-leyenda-box.estatus[style*='C19E00'],
 			.malla-table-icon.estatus-en-curso {
@@ -619,6 +630,12 @@
 				height: 12px;
 				background-size: 12px 12px;
 			}
+			.malla-table-icon .icon-recursando,
+			.malla-table-icon .icon-regularizada {
+				width: 12px;
+				height: 12px;
+				background-size: 12px 12px;
+			}
 			.malla-table-icon.seriada {
 				background: #3376e5;
 			}
@@ -640,6 +657,8 @@
 				color: #C19E00;
 				font-weight: 700;
 			}
+			.malla-table .estatus-recursando { color: #C81E2A; font-weight: 700; }
+			.malla-table .estatus-regularizada { color: #229447; font-weight: 700; }
 			/* When SVG is embedded inline, force white fill/stroke. */
 			.malla-tool-btn svg,
 			.malla-toggle svg,
@@ -984,7 +1003,9 @@
 									<ui:fragment rendered="#{estatus.nombre eq 'En curso'}">
 										<span class="icon-en-curso"></span>
 									</ui:fragment>
-									<ui:fragment rendered="#{estatus.nombre ne 'En curso'}">
+									<ui:fragment rendered="#{estatus.nombre eq 'Recursando'}"><span class="icon-recursando"></span></ui:fragment>
+									<ui:fragment rendered="#{estatus.nombre eq 'Regularizada'}"><span class="icon-regularizada"></span></ui:fragment>
+									<ui:fragment rendered="#{estatus.nombre ne 'En curso' and estatus.nombre ne 'Recursando' and estatus.nombre ne 'Regularizada'}">
 										<i class="#{estatus.iconClass}"></i>
 									</ui:fragment>
 								</span>
@@ -1071,7 +1092,9 @@
 										<ui:fragment rendered="#{nodo.estatusCss eq 'estatus-en-curso'}">
 											<span class="icon-en-curso"></span>
 										</ui:fragment>
-										<ui:fragment rendered="#{nodo.estatusCss ne 'estatus-en-curso'}">
+										<ui:fragment rendered="#{nodo.estatusCss eq 'estatus-recursando'}"><span class="icon-recursando"></span></ui:fragment>
+										<ui:fragment rendered="#{nodo.estatusCss eq 'estatus-regularizada'}"><span class="icon-regularizada"></span></ui:fragment>
+										<ui:fragment rendered="#{nodo.estatusCss ne 'estatus-en-curso' and nodo.estatusCss ne 'estatus-recursando' and nodo.estatusCss ne 'estatus-regularizada'}">
 											<i class="#{nodo.estatusIconClass}"></i>
 										</ui:fragment>
 									</span>
@@ -1130,7 +1153,9 @@
 															<ui:fragment rendered="#{fila.estatusCss eq 'estatus-en-curso'}">
 																<span class="icon-en-curso"></span>
 															</ui:fragment>
-															<ui:fragment rendered="#{fila.estatusCss ne 'estatus-en-curso'}">
+															<ui:fragment rendered="#{fila.estatusCss eq 'estatus-recursando'}"><span class="icon-recursando"></span></ui:fragment>
+															<ui:fragment rendered="#{fila.estatusCss eq 'estatus-regularizada'}"><span class="icon-regularizada"></span></ui:fragment>
+															<ui:fragment rendered="#{fila.estatusCss ne 'estatus-en-curso' and fila.estatusCss ne 'estatus-recursando' and fila.estatusCss ne 'estatus-regularizada'}">
 																<i class="#{fila.estatusIconClass}"></i>
 															</ui:fragment>
 														</ui:fragment>

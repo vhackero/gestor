@@ -428,6 +428,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setIdPrograma(getLongValue(obj[0]));
 		dto.setCalificacionFinal(getDoubleValue(obj[1]));
 		dto.setCalificacionMinAprobatoria(getDoubleValue(obj[2]));
+		dto.setRegularizada(obj.length > 3 ? getBooleanValue(obj[3]) : Boolean.FALSE);
 		return dto;
 	}
 
@@ -503,7 +504,16 @@ public class InscripcionRepository implements IinscripcionRepository {
 		String consulta = "SELECT\r\n"
 				+ "    fd.id_programa,\r\n"
 				+ "    califs.calificacion_final,\r\n"
-				+ "    fd.calificacion_min_aprobatoria\r\n"
+				+ "    fd.calificacion_min_aprobatoria,\r\n"
+				+ "    CASE WHEN califs.calificacion_final >= fd.calificacion_min_aprobatoria AND EXISTS (\r\n"
+				+ "        SELECT 1 FROM rel_grupo_participante rgp_hist\r\n"
+				+ "        INNER JOIN tbl_grupos g_hist ON g_hist.id = rgp_hist.id_grupo AND g_hist.acta_cerrada = 1\r\n"
+				+ "        INNER JOIN tbl_eventos e_hist ON e_hist.id_evento = g_hist.id_evento\r\n"
+				+ "        WHERE rgp_hist.id_persona_participante = :idPersona\r\n"
+				+ "          AND e_hist.id_programa = fd.id_programa\r\n"
+				+ "          AND rgp_hist.calificacion_final IS NOT NULL\r\n"
+				+ "          AND rgp_hist.calificacion_final < fd.calificacion_min_aprobatoria\r\n"
+				+ "    ) THEN 1 ELSE 0 END AS regularizada\r\n"
 				+ "FROM tbl_ficha_descriptiva_programa fd\r\n"
 				+ "LEFT JOIN (\r\n"
 				+ "    SELECT e.id_programa, MAX(rgp.calificacion_final) AS calificacion_final\r\n"

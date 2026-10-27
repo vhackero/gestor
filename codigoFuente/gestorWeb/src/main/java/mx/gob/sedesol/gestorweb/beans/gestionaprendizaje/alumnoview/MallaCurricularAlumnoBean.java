@@ -92,6 +92,8 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private static final String ESTATUS_NO_ACREDITADA = "No acreditada";
 	private static final String ESTATUS_NO_INSCRITA = "No inscrita";
 	private static final String ESTATUS_EN_CURSO = "En curso";
+	private static final String ESTATUS_RECURSANDO = "Recursando";
+	private static final String ESTATUS_REGULARIZADA = "Regularizada";
 	private static final String ESTATUS_BAJA = "Baja";
 	private static final String ESTATUS_BLOQUEADA = "Bloqueada";
 	private static final Map<String, String> ESTATUS_COLORS = new LinkedHashMap<>();
@@ -105,6 +107,8 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		ESTATUS_COLORS.put(ESTATUS_NO_INSCRITA, "#506172");
 		ESTATUS_COLORS.put(ESTATUS_BAJA, "#ED9A55");
 		ESTATUS_COLORS.put(ESTATUS_EN_CURSO, "#C19E00");
+		ESTATUS_COLORS.put(ESTATUS_RECURSANDO, "#C81E2A");
+		ESTATUS_COLORS.put(ESTATUS_REGULARIZADA, "#229447");
 		ESTATUS_COLORS.put(ESTATUS_BLOQUEADA, "#000000");
 	}
 
@@ -508,6 +512,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		aplicarTooltipsDependencias(programasPorId, dependenciasEntrantes, dependenciasSalientes);
 		aplicarEstatusEnCurso(programasPorId);
 		aplicarBloqueos(programasPorId, programaAntecedentePorId, estatusPorPrograma);
+		aplicarIndicadoresVisuales(programasPorId, estatusPorPrograma);
 		reconstruirDetallesContextuales(programasPorId, fichasProgramaPorId);
 		aplicarResultadoV2(programasPorId);
 		actualizarFilasTabla(filasTablaPorPrograma, programasPorId);
@@ -546,7 +551,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 				continue;
 			}
 			ProgramaTablaDTO fila = entry.getValue();
-			fila.setEstatus(resolveEstatusTabla(nodo.getEstatus()));
+			fila.setEstatus(resolveEstatusTabla(nodo.getEstatusVisual()));
 			fila.setEstatusCss(nodo.getEstatusCss());
 			fila.setEstatusIconClass(nodo.getEstatusIconClass());
 			fila.setEstatusColor(resolveColorByEstatusCss(nodo.getEstatusCss()));
@@ -574,6 +579,9 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	}
 
 	private String resolveEstatusTabla(String estatus) {
+		if (ESTATUS_RECURSANDO.equals(estatus) || ESTATUS_REGULARIZADA.equals(estatus)) {
+			return estatus;
+		}
 		if (ESTATUS_APROBADA.equals(estatus)) {
 			return "Aprobada";
 		}
@@ -613,8 +621,10 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		} else {
 			estatusPeriodo = resolveEstatusPeriodoContextual(programaNodo);
 		}
-		programaNodo.setDetalleEstatusPeriodo(ADAPTADOR_RESULTADO_V2.construirEstatusContextual(
-				estatusHistorico, estatusPeriodo, programaNodo));
+		String estatusVisual = programaNodo.getEstatusVisual();
+		programaNodo.setDetalleEstatusPeriodo(ESTATUS_RECURSANDO.equals(estatusVisual)
+				|| ESTATUS_REGULARIZADA.equals(estatusVisual) ? estatusVisual
+				: ADAPTADOR_RESULTADO_V2.construirEstatusContextual(estatusHistorico, estatusPeriodo, programaNodo));
 		programaNodo.setDetalleMotivoPrincipal(construirSituacionDetalle(programaNodo, programa, unidad));
 		programaNodo.setDetalleAccionSugerida(construirRecomendacionDetalle(programaNodo, programa, unidad));
 		programaNodo.setDetalleRiesgo(construirImpactoDetalle(programaNodo, programa, unidad));
@@ -1236,6 +1246,8 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_NO_INSCRITA, "#506172", "#506172", "#506172", "fa fa-exclamation-triangle"));
 		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_BAJA, "#fb923c", "#fb923c", "#fb923c", "fa fa-arrow-down"));
 		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_EN_CURSO, "#facc15", "#facc15", "#facc15", "fa fa-flag"));
+		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_RECURSANDO, "#c81e2a", "#c81e2a", "#c81e2a", ""));
+		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_REGULARIZADA, "#229447", "#229447", "#229447", ""));
 		estatusPrograma.add(new MallaDiagramaTipoDTO("Por cursar", "#111827", "#111827", "#111827", "fa fa-lock"));
 	}
 
@@ -1307,6 +1319,31 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 				nodo.setEstatusIconClass("fa fa-flag");
 			}
 		}
+	}
+
+	/** Indicadores visuales: no alteran el estado académico usado por la malla. */
+	private void aplicarIndicadoresVisuales(Map<Integer, MallaDiagramaNodoDTO> programasPorId,
+			Map<Integer, MallaAlumnoProgramaDTO> estatusPorPrograma) {
+		for (Map.Entry<Integer, MallaDiagramaNodoDTO> entry : programasPorId.entrySet()) {
+			MallaDiagramaNodoDTO nodo = entry.getValue();
+			MallaAlumnoProgramaDTO estatus = estatusPorPrograma.get(entry.getKey());
+			String indicador = resolverIndicadorVisual(nodo.getEstatus(), nodo.isEnCurso(),
+					estatus != null && Boolean.TRUE.equals(estatus.getRegularizada()));
+			nodo.setEstatusVisual(indicador);
+			if (ESTATUS_RECURSANDO.equals(indicador) || ESTATUS_REGULARIZADA.equals(indicador)) {
+				nodo.setEstatusIconClass("");
+			}
+		}
+	}
+
+	static String resolverIndicadorVisual(String estatus, boolean enCurso, boolean regularizada) {
+		if (enCurso && ESTATUS_NO_ACREDITADA.equals(estatus)) {
+			return ESTATUS_RECURSANDO;
+		}
+		if (ESTATUS_APROBADA.equals(estatus) && regularizada) {
+			return ESTATUS_REGULARIZADA;
+		}
+		return estatus;
 	}
 
 	private void aplicarBloqueos(Map<Integer, MallaDiagramaNodoDTO> programasPorId,
@@ -1711,6 +1748,12 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 		if ("estatus-en-curso".equals(estatusCss)) {
 			return "#C19E00";
+		}
+		if ("estatus-recursando".equals(estatusCss)) {
+			return "#C81E2A";
+		}
+		if ("estatus-regularizada".equals(estatusCss)) {
+			return "#229447";
 		}
 		if ("estatus-bloqueada".equals(estatusCss)) {
 			return "#000000";

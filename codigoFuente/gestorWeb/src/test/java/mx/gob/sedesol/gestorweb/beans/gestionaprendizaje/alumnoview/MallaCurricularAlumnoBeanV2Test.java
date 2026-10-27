@@ -115,6 +115,24 @@ public class MallaCurricularAlumnoBeanV2Test {
 	}
 
 	@Test
+	public void identificaRecursamientoYRegularizacionSinCambiarElEstadoAcademico() {
+		MallaDiagramaNodoDTO recursando = new MallaDiagramaNodoDTO();
+		recursando.setEstatus("No acreditada");
+		recursando.setEstatusVisual(MallaCurricularAlumnoBean.resolverIndicadorVisual(
+				recursando.getEstatus(), true, false));
+
+		MallaDiagramaNodoDTO regularizada = new MallaDiagramaNodoDTO();
+		regularizada.setEstatus("Aprobada");
+		regularizada.setEstatusVisual(MallaCurricularAlumnoBean.resolverIndicadorVisual(
+				regularizada.getEstatus(), false, true));
+
+		assertEquals(recursando.getEstatus(), "No acreditada");
+		assertEquals(recursando.getEstatusVisual(), "Recursando");
+		assertEquals(regularizada.getEstatus(), "Aprobada");
+		assertEquals(regularizada.getEstatusVisual(), "Regularizada");
+	}
+
+	@Test
 	public void bloqueoCurricularNoConvierteObligatoriaEnSeriada() {
 		MallaDiagramaNodoDTO nodo = new MallaDiagramaNodoDTO();
 		nodo.setBloqueada(true);
