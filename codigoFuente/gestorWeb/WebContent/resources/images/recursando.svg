@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Recursando">
+  <g fill="none" stroke="#c81e2a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M13 29A20 20 0 0 1 46 17" stroke-width="6"/>
+    <path d="M45 9v10H35" stroke-width="6"/>
+    <path d="M51 35A20 20 0 0 1 18 47" stroke-width="6"/>
+    <path d="M19 55V45h10" stroke-width="6"/>
+    <path d="m25 25 14 14M39 25 25 39" stroke-width="7"/>
+  </g>
+</svg>
