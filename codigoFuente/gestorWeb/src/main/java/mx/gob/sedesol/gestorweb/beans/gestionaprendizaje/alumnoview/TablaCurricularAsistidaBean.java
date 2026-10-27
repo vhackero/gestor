@@ -2907,12 +2907,31 @@ public class TablaCurricularAsistidaBean extends BaseBean {
      * están registradas o en curso, por lo que no depende de una fecha fija.
      */
     public String getEtiquetaResumenActual() {
-        String periodoRaw = contexto != null ? contexto.getPeriodoActivo() : null;
+        String periodoRaw = resolverPeriodoResumenActual();
         String periodo = StringUtils.isBlank(periodoRaw)
                 ? "No determinado" : formatearPeriodoAcademico(periodoRaw, 0);
         Integer bloque = resolverBloqueResumenActual();
         return bloque != null ? "Periodo " + periodo + " · Bloque B" + bloque
                 : "Periodo " + periodo;
+    }
+
+    private String resolverPeriodoResumenActual() {
+        String periodoActivo = contexto != null ? contexto.getPeriodoActivo() : null;
+        if (!StringUtils.isBlank(periodoActivo)) {
+            return periodoActivo;
+        }
+        if (contexto != null && contexto.getTrayectoriaPermanencia() != null) {
+            String periodoCorte = contexto.getTrayectoriaPermanencia().getPeriodoCorte();
+            if (!StringUtils.isBlank(periodoCorte)) {
+                return periodoCorte;
+            }
+            Integer transcurridos = contexto.getTrayectoriaPermanencia().getPeriodosAcademicosTranscurridos();
+            if (Boolean.TRUE.equals(contexto.getTrayectoriaPermanencia().getSemestreEnCurso())
+                    && transcurridos != null && transcurridos.intValue() > 0) {
+                return getEtiquetaPeriodoTrayectoria(transcurridos);
+            }
+        }
+        return null;
     }
 
     private Integer resolverBloqueResumenActual() {
@@ -2923,6 +2942,18 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             }
             if (bloqueActual == null || fila.getBloque().intValue() > bloqueActual.intValue()) {
                 bloqueActual = fila.getBloque();
+            }
+        }
+        if (bloqueActual == null && inscripcionPreviaMateriasService != null && idPersonaObjetivo != null) {
+            List<InscripcionPreviaMateriasDTO> inscritas = inscripcionPreviaMateriasService
+                    .obtenerInscripcionPrevia(idPersonaObjetivo);
+            if (!ObjectUtils.isNullOrEmpty(inscritas)) {
+                for (InscripcionPreviaMateriasDTO materia : inscritas) {
+                    int bloque = parseNumero(materia.getBloque(), 0);
+                    if (bloque > 0 && (bloqueActual == null || bloque > bloqueActual.intValue())) {
+                        bloqueActual = Integer.valueOf(bloque);
+                    }
+                }
             }
         }
         return bloqueActual;
