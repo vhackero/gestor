@@ -240,6 +240,11 @@
 			}
 			.icon-recursando { background-image: url("#{resource['images/recursando.svg']}"); }
 			.icon-regularizada { background-image: url("#{resource['images/regularizada.svg']}"); }
+			.icon-recursando,
+			.icon-regularizada {
+				/* The SVG glyphs use currentColor; as background images, render them white. */
+				filter: brightness(0) invert(1);
+			}
 			.malla-estado.estatus-en-curso,
 			.malla-leyenda-box.estatus[style*='C19E00'],
 			.malla-table-icon.estatus-en-curso {
@@ -249,13 +254,13 @@
 			.malla-estado.estatus-recursando,
 			.malla-table-icon.estatus-recursando,
 			.malla-leyenda-box.estatus.estatus-recursando {
-				background: #ffffff !important;
+				background: #C81E2A !important;
 				border: 1px solid #C81E2A !important;
 			}
 			.malla-estado.estatus-regularizada,
 			.malla-table-icon.estatus-regularizada,
 			.malla-leyenda-box.estatus.estatus-regularizada {
-				background: #ffffff !important;
+				background: #229447 !important;
 				border: 1px solid #229447 !important;
 			}
 			.malla-creditos {
