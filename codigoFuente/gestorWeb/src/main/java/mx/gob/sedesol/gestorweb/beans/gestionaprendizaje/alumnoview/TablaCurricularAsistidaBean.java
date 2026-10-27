@@ -112,12 +112,14 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private String preguntaOrientacionSeleccionada;
     private String respuestaPreguntaOrientacion;
     private CreditosResumenMallaDTO creditosResumenMalla;
+    private List<InscripcionPreviaMateriasDTO> inscripcionesActualesResumen;
     /** Vista interna de la pestaña Simulador: selección o revisión final. */
     private boolean mostrarRevisionSeleccion;
 
     @PostConstruct
     public void init() {
         semestres = new ArrayList<SemestreAsistidoDTO>();
+        inscripcionesActualesResumen = null;
         try {
             Long idPersona = trayectoriaAcademicaContextoBean.resolverIdPersonaObjetivo(idPersonaEnSesion());
             idPersonaObjetivo = idPersona;
@@ -2903,11 +2905,13 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getDetalleUnidadesActualesResumen() {
-        return detalleFilasResumen(filtrarFilasActualesResumen());
+        return detalleActualConRespaldo(filtrarFilasActualesResumen(), null, 0,
+                getUnidadesActualesRegistradasResumen());
     }
 
     public String getDetalleUnidadesObligatoriasActualesResumen() {
-        return detalleFilasResumen(filtrarFilasActualesPorTipo("oblig", false));
+        return detalleActualConRespaldo(filtrarFilasActualesPorTipo("oblig", false), "oblig", 0,
+                getUnidadesObligatoriasActualesResumen());
     }
 
     public String getDetalleUnidadesOptativasRequeridasActualesResumen() {
@@ -2917,7 +2921,8 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                 filas.add(fila);
             }
         }
-        return detalleFilasResumen(filas);
+        return detalleActualConRespaldo(filas, "optativa", 0,
+                getUnidadesOptativasRequeridasActualesResumen());
     }
 
     public String getDetalleUnidadesOptativasAdicionalesActualesResumen() {
@@ -2927,7 +2932,9 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                 filas.add(fila);
             }
         }
-        return detalleFilasResumen(filas);
+        return detalleActualConRespaldo(filas, "optativa",
+                getUnidadesOptativasRequeridasActualesResumen(),
+                getUnidadesOptativasAdicionalesActualesResumen());
     }
 
     public String getDetalleUnidadesConBajaParcialResumen() {
@@ -2953,7 +2960,61 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getDetalleUnidadesPendientesRegularizarResumen() {
-        return detalleFilasResumen(getFilasIrregularesDetalle());
+        String detalle = detalleFilasResumen(getFilasIrregularesDetalle());
+        return getConteoUdPendientesPanel() > 0 && "Sin UD relacionadas.".equals(detalle)
+                ? obtenerDetalleReprobadasActivasContexto() : detalle;
+    }
+
+    private String detalleActualConRespaldo(List<FilaAsistidaDTO> filas, String tipo,
+            int inicio, int cantidadEsperada) {
+        String detalle = detalleFilasResumen(filas);
+        if (cantidadEsperada <= 0 || !"Sin UD relacionadas.".equals(detalle)) {
+            return detalle;
+        }
+        return detalleInscripcionesActuales(tipo, inicio, cantidadEsperada);
+    }
+
+    private String detalleInscripcionesActuales(String tipo, int inicio, int cantidadEsperada) {
+        List<InscripcionPreviaMateriasDTO> candidatas = new ArrayList<InscripcionPreviaMateriasDTO>();
+        for (InscripcionPreviaMateriasDTO materia : obtenerInscripcionesActualesResumen()) {
+            if (materia == null || (tipo != null
+                    && !normalizaTexto(materia.getTipoPrograma()).contains(tipo))) {
+                continue;
+            }
+            candidatas.add(materia);
+        }
+        Collections.sort(candidatas, Comparator.comparing(InscripcionPreviaMateriasDTO::getClavePrograma,
+                Comparator.nullsLast(String::compareTo)));
+        int desde = Math.min(Math.max(0, inicio), candidatas.size());
+        int hasta = Math.min(candidatas.size(), desde + Math.max(0, cantidadEsperada));
+        if (desde >= hasta) {
+            return "UD relacionadas no disponibles en la fuente de inscripción.";
+        }
+        StringBuilder detalle = new StringBuilder();
+        for (InscripcionPreviaMateriasDTO materia : candidatas.subList(desde, hasta)) {
+            if (detalle.length() > 0) {
+                detalle.append('\n');
+            }
+            detalle.append(StringUtils.defaultIfBlank(materia.getClavePrograma(), "Sin clave"))
+                    .append(" - ")
+                    .append(StringUtils.defaultIfBlank(materia.getAsignatura(),
+                            StringUtils.defaultIfBlank(materia.getPrograma(), "Sin nombre")));
+        }
+        return detalle.toString();
+    }
+
+    private List<InscripcionPreviaMateriasDTO> obtenerInscripcionesActualesResumen() {
+        if (inscripcionesActualesResumen == null) {
+            if (inscripcionPreviaMateriasService != null && idPersonaObjetivo != null) {
+                List<InscripcionPreviaMateriasDTO> inscritas = inscripcionPreviaMateriasService
+                        .obtenerInscripcionPrevia(idPersonaObjetivo);
+                inscripcionesActualesResumen = inscritas != null ? inscritas
+                        : Collections.<InscripcionPreviaMateriasDTO>emptyList();
+            } else {
+                inscripcionesActualesResumen = Collections.emptyList();
+            }
+        }
+        return inscripcionesActualesResumen;
     }
 
     private List<FilaAsistidaDTO> filtrarFilasActualesResumen() {

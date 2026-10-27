@@ -12,6 +12,59 @@
         <script type="text/javascript">
             //<![CDATA[
             (function() {
+                function instalarTooltipsResumenAsistente() {
+                    var tarjetas = document.querySelectorAll('.kpi-card[data-asistente-tooltip]');
+                    if (!tarjetas.length) {
+                        return;
+                    }
+                    var tooltip = document.getElementById('asistenteResumenTooltip');
+                    if (!tooltip) {
+                        tooltip = document.createElement('div');
+                        tooltip.id = 'asistenteResumenTooltip';
+                        tooltip.className = 'asistente-tooltip-bubble';
+                        tooltip.setAttribute('role', 'tooltip');
+                        document.body.appendChild(tooltip);
+                    }
+
+                    function posicionarTooltip(evento) {
+                        var margen = 16;
+                        var ancho = tooltip.offsetWidth || 280;
+                        var alto = tooltip.offsetHeight || 80;
+                        var izquierda = evento.clientX + 14;
+                        var arriba = evento.clientY - alto - 12;
+                        if (izquierda + ancho > window.innerWidth - margen) {
+                            izquierda = window.innerWidth - ancho - margen;
+                        }
+                        if (arriba < margen) {
+                            arriba = evento.clientY + 14;
+                        }
+                        tooltip.style.left = izquierda + 'px';
+                        tooltip.style.top = arriba + 'px';
+                    }
+
+                    for (var i = 0; i < tarjetas.length; i++) {
+                        var tarjeta = tarjetas[i];
+                        if (tarjeta.getAttribute('data-asistente-tooltip-instalado') === 'true') {
+                            continue;
+                        }
+                        tarjeta.setAttribute('data-asistente-tooltip-instalado', 'true');
+                        tarjeta.addEventListener('mouseenter', function(evento) {
+                            var texto = this.getAttribute('data-asistente-tooltip');
+                            if (!texto) {
+                                return;
+                            }
+                            // El contenido procede del servidor; textContent evita interpretar datos de UD como HTML.
+                            tooltip.textContent = texto;
+                            tooltip.classList.add('visible');
+                            posicionarTooltip(evento);
+                        });
+                        tarjeta.addEventListener('mousemove', posicionarTooltip);
+                        tarjeta.addEventListener('mouseleave', function() {
+                            tooltip.classList.remove('visible');
+                        });
+                    }
+                }
+
                 window.instalarControlesAsistente = function() {
                     var encabezados = document.querySelectorAll('.assistant-right-rail .rail-head:not([data-colapsable])');
                     for (var i = 0; i < encabezados.length; i++) {
@@ -36,6 +89,7 @@
                         };
                         encabezado.appendChild(boton);
                     }
+                    instalarTooltipsResumenAsistente();
                 };
                 if (document.readyState === 'loading') {
                     document.addEventListener('DOMContentLoaded', window.instalarControlesAsistente);
@@ -218,6 +272,28 @@
                 min-height: 58px;
                 text-align: left;
                 cursor: help;
+            }
+            .asistente-tooltip-bubble {
+                position: fixed;
+                z-index: 99999;
+                max-width: 320px;
+                background: #f7f7f8;
+                color: #2f3135;
+                border: 1px solid #d7d9de;
+                border-radius: 8px;
+                padding: 10px 12px;
+                font-size: 10px;
+                line-height: 1.25;
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(4px);
+                transition: opacity 0.15s ease, transform 0.15s ease;
+                white-space: pre-line;
+            }
+            .asistente-tooltip-bubble.visible {
+                opacity: 1;
+                transform: translateY(0);
             }
             .kpi-card-green {
                 background: #e7efdf;
@@ -1856,11 +1932,11 @@
                                             <span class="resumen-heading-context">#{tablaCurricularAsistidaBean.etiquetaResumenActual}</span>
                                         </div>
                                         <div class="kpi-grid">
-                                            <div class="kpi-card kpi-card-green" title="#{tablaCurricularAsistidaBean.detalleUnidadesActualesResumen}"><div class="kpi-title">UD actualmente registradas o en curso</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesActualesRegistradasResumen}</div></div>
-                                            <div class="kpi-card kpi-card-green" title="#{tablaCurricularAsistidaBean.detalleUnidadesObligatoriasActualesResumen}"><div class="kpi-title">UD obligatorias actuales</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesObligatoriasActualesResumen}</div></div>
-                                            <div class="kpi-card kpi-card-green" title="#{tablaCurricularAsistidaBean.detalleUnidadesOptativasRequeridasActualesResumen}"><div class="kpi-title">UD optativas requeridas actuales</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasRequeridasActualesResumen}</div></div>
-                                            <div class="kpi-card kpi-card-green" title="#{tablaCurricularAsistidaBean.detalleUnidadesOptativasAdicionalesActualesResumen}"><div class="kpi-title">UD optativas adicionales actuales</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasAdicionalesActualesResumen}</div></div>
-                                            <div class="kpi-card kpi-card-orange" title="#{tablaCurricularAsistidaBean.detalleUnidadesConBajaParcialResumen}"><div class="kpi-title">Bajas parciales aplicadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesConBajaParcialResumen}</div></div>
+                                            <div class="kpi-card kpi-card-green" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesActualesResumen}"><div class="kpi-title">UD actualmente registradas o en curso</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesActualesRegistradasResumen}</div></div>
+                                            <div class="kpi-card kpi-card-green" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesObligatoriasActualesResumen}"><div class="kpi-title">UD obligatorias actuales</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesObligatoriasActualesResumen}</div></div>
+                                            <div class="kpi-card kpi-card-green" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesOptativasRequeridasActualesResumen}"><div class="kpi-title">UD optativas requeridas actuales</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasRequeridasActualesResumen}</div></div>
+                                            <div class="kpi-card kpi-card-green" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesOptativasAdicionalesActualesResumen}"><div class="kpi-title">UD optativas adicionales actuales</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasAdicionalesActualesResumen}</div></div>
+                                            <div class="kpi-card kpi-card-orange" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesConBajaParcialResumen}"><div class="kpi-title">Bajas parciales aplicadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesConBajaParcialResumen}</div></div>
                                         </div>
                                         <ui:fragment rendered="#{tablaCurricularAsistidaBean.unidadesConBajaParcialResumen gt 0}">
                                             <div class="kpi-resumen-note">La baja parcial no forma parte de las #{tablaCurricularAsistidaBean.unidadesActualesRegistradasResumen} UD vigentes.</div>
@@ -1871,11 +1947,11 @@
                                             <span class="resumen-heading-context">Acumulado de la trayectoria académica</span>
                                         </div>
                                         <div class="kpi-grid">
-                                            <div class="kpi-card kpi-card-blue" title="#{tablaCurricularAsistidaBean.detalleUnidadesAcreditadasResumen}"><div class="kpi-title">UD acreditadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesAcreditadasResumen}</div></div>
-                                            <div class="kpi-card kpi-card-blue" title="#{tablaCurricularAsistidaBean.detalleUnidadesObligatoriasAcreditadasResumen}"><div class="kpi-title">UD obligatorias acreditadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesObligatoriasAcreditadasResumen}</div></div>
-                                            <div class="kpi-card kpi-card-blue" title="#{tablaCurricularAsistidaBean.detalleUnidadesOptativasRequeridasAcreditadasResumen}"><div class="kpi-title">UD optativas requeridas acreditadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasRequeridasAcreditadasResumen}</div></div>
-                                            <div class="kpi-card kpi-card-blue" title="#{tablaCurricularAsistidaBean.detalleUnidadesOptativasAdicionalesAcreditadasResumen}"><div class="kpi-title">UD optativas adicionales acreditadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasAdicionalesAcreditadasResumen}</div></div>
-                                            <div class="kpi-card kpi-card-blue" title="#{tablaCurricularAsistidaBean.detalleUnidadesPendientesRegularizarResumen}"><div class="kpi-title">UD pendientes de regularizar</div><div class="kpi-value">#{tablaCurricularAsistidaBean.conteoUdPendientesPanel}</div></div>
+                                            <div class="kpi-card kpi-card-blue" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesAcreditadasResumen}"><div class="kpi-title">UD acreditadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesAcreditadasResumen}</div></div>
+                                            <div class="kpi-card kpi-card-blue" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesObligatoriasAcreditadasResumen}"><div class="kpi-title">UD obligatorias acreditadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesObligatoriasAcreditadasResumen}</div></div>
+                                            <div class="kpi-card kpi-card-blue" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesOptativasRequeridasAcreditadasResumen}"><div class="kpi-title">UD optativas requeridas acreditadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasRequeridasAcreditadasResumen}</div></div>
+                                            <div class="kpi-card kpi-card-blue" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesOptativasAdicionalesAcreditadasResumen}"><div class="kpi-title">UD optativas adicionales acreditadas</div><div class="kpi-value">#{tablaCurricularAsistidaBean.unidadesOptativasAdicionalesAcreditadasResumen}</div></div>
+                                            <div class="kpi-card kpi-card-blue" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesPendientesRegularizarResumen}"><div class="kpi-title">UD pendientes de regularizar</div><div class="kpi-value">#{tablaCurricularAsistidaBean.conteoUdPendientesPanel}</div></div>
                                         </div>
                                         <div class="kpi-resumen-note">Las claves muestran el nombre completo al pasar el cursor o seleccionarlas.</div>
 
