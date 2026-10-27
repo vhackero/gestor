@@ -2902,6 +2902,32 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                 ? valor(contexto.getDiagnosticoActual().getMateriasEnCurso()) : 0;
     }
 
+    /**
+     * Etiqueta visual del resumen vigente. El bloque se obtiene de las UD que
+     * están registradas o en curso, por lo que no depende de una fecha fija.
+     */
+    public String getEtiquetaResumenActual() {
+        String periodoRaw = contexto != null ? contexto.getPeriodoActivo() : null;
+        String periodo = StringUtils.isBlank(periodoRaw)
+                ? "No determinado" : formatearPeriodoAcademico(periodoRaw, 0);
+        Integer bloque = resolverBloqueResumenActual();
+        return bloque != null ? "Periodo " + periodo + " · Bloque B" + bloque
+                : "Periodo " + periodo;
+    }
+
+    private Integer resolverBloqueResumenActual() {
+        Integer bloqueActual = null;
+        for (FilaAsistidaDTO fila : obtenerFilasPlanas()) {
+            if (!esFilaActual(fila) || fila.getBloque() == null) {
+                continue;
+            }
+            if (bloqueActual == null || fila.getBloque().intValue() > bloqueActual.intValue()) {
+                bloqueActual = fila.getBloque();
+            }
+        }
+        return bloqueActual;
+    }
+
     public int getUnidadesObligatoriasActualesResumen() {
         if (contexto != null && contexto.getDiagnosticoActual() != null
                 && contexto.getDiagnosticoActual().getMateriasEnCursoObligatorias() != null) {
