@@ -2041,9 +2041,9 @@
                                                 </div>
                                                 <div class="prioridad-card">
                                                     <h3>UD con antecedentes de recursamiento</h3>
-                                                    <div class="contador">#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias.size()}</div>
-                                                    <p>Las UD no acreditadas se muestran para su seguimiento. Los intentos exactos se validan individualmente con el historial académico.</p>
-                                                    <div class="prioridad-detalle"><ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasReprobadasPrioritarias}"><ul><ui:repeat value="#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias}" var="filaRecursamiento"><li>#{tablaCurricularAsistidaBean.detalleFilaPrioritaria(filaRecursamiento)}</li></ui:repeat></ul></ui:fragment><ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasReprobadasPrioritarias}">Sin antecedentes visibles de recursamiento.</ui:fragment></div>
+                                                    <div class="contador">#{tablaCurricularAsistidaBean.filasReprobadasRecursandoPrioritarias.size()}</div>
+                                                    <p>UD reprobadas que se encuentran actualmente en curso de recursamiento; conservarán ese antecedente hasta acreditar.</p>
+                                                    <div class="prioridad-detalle"><ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasReprobadasRecursandoPrioritarias}"><ul><ui:repeat value="#{tablaCurricularAsistidaBean.filasReprobadasRecursandoPrioritarias}" var="filaRecursamiento"><li>#{tablaCurricularAsistidaBean.detalleFilaPrioritaria(filaRecursamiento)}</li></ui:repeat></ul></ui:fragment><ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasReprobadasRecursandoPrioritarias}">No hay UD reprobadas actualmente en curso de recursamiento.</ui:fragment></div>
                                                 </div>
                                                 <div class="prioridad-card">
                                                     <h3>Bajas parciales aplicadas</h3>

@@ -3284,8 +3284,24 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public List<FilaAsistidaDTO> getFilasReprobadasPrioritarias() {
-        return getFilasUdPrioritarias().stream()
+        // La regularización incluye cualquier UD con reprobación vigente,
+        // incluso si es optativa o no recibió una marca operativa de prioridad.
+        return obtenerFilasPlanas().stream()
                 .filter(this::esFilaNoAcreditada)
+                .sorted(Comparator
+                        .comparing(FilaAsistidaDTO::getSemestre, Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(FilaAsistidaDTO::getBloque, Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(FilaAsistidaDTO::getClave, Comparator.nullsLast(String::compareTo)))
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(this::claveUnicaFila, fila -> fila,
+                                (primera, repetida) -> primera, LinkedHashMap::new),
+                        filasPorClave -> new ArrayList<FilaAsistidaDTO>(filasPorClave.values())));
+    }
+
+    /** Reprobadas que continúan en curso: se regularizan al acreditar, no al reinscribirse. */
+    public List<FilaAsistidaDTO> getFilasReprobadasRecursandoPrioritarias() {
+        return getFilasReprobadasPrioritarias().stream()
+                .filter(this::esFilaActual)
                 .collect(Collectors.toList());
     }
 
