@@ -1491,14 +1491,18 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public int getConteoUdPendientesPanel() {
-        if (contexto == null || contexto.getDiagnosticoActual() == null) {
-            return obtenerConteoPendientesDerivado();
-        }
-        int materiasCriticas = valor(contexto.getDiagnosticoActual().getMateriasCriticas());
-        if (materiasCriticas > 0) {
-            return materiasCriticas;
+        // materiasCriticas incluye UD estratégicas o que desbloquean otras;
+        // no representa una deuda de regularización.
+        if (esResultadoV2RegularSinPendientes()) {
+            return 0;
         }
         return obtenerConteoPendientesDerivado();
+    }
+
+    private boolean esResultadoV2RegularSinPendientes() {
+        return resultadoEvaluacionV2 != null
+                && "REGULAR".equalsIgnoreCase(resultadoEvaluacionV2.getSituacionAcademicaCalculada())
+                && valor(resultadoEvaluacionV2.getCantidadReprobadasVigentes()) == 0;
     }
 
     public int getConteoSeriacionPanel() {
@@ -2722,11 +2726,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private int obtenerConteoPendientesDerivado() {
         int noAcreditadas = getConteoUdNoAcreditadasPanel();
         int omisiones = getConteoUdOmisionesPanel();
-        int derivado = noAcreditadas + omisiones;
-        if (derivado > 0) {
-            return derivado;
-        }
-        return getFilasUdPrioritarias().size();
+        return noAcreditadas + omisiones;
     }
 
     private void agregarMensajeUnico(List<String> mensajes, String mensaje) {
