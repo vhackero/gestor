@@ -2885,8 +2885,16 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return obtenerCreditosResumenMalla().getAcreditadas();
     }
 
+    public int getTotalUnidadesPlanResumen() {
+        return obtenerCreditosResumenMalla().getTotalUnidadesPlan();
+    }
+
     public int getUnidadesObligatoriasAcreditadasResumen() {
         return obtenerCreditosResumenMalla().getObligatoriasAcreditadas();
+    }
+
+    public int getTotalUnidadesObligatoriasPlanResumen() {
+        return obtenerCreditosResumenMalla().getTotalObligatoriasPlan();
     }
 
     public int getUnidadesOptativasRequeridasAcreditadasResumen() {
@@ -2894,9 +2902,19 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                 obtenerCreditosResumenMalla().getOptativasAcreditadas());
     }
 
+    public int getTotalUnidadesOptativasRequeridasPlanResumen() {
+        return Math.min(MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA,
+                obtenerCreditosResumenMalla().getTotalOptativasPlan());
+    }
+
     public int getUnidadesOptativasAdicionalesAcreditadasResumen() {
         return Math.max(0, obtenerCreditosResumenMalla().getOptativasAcreditadas()
                 - MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA);
+    }
+
+    public int getTotalUnidadesOptativasAdicionalesPlanResumen() {
+        return Math.max(0, obtenerCreditosResumenMalla().getTotalOptativasPlan()
+                - getTotalUnidadesOptativasRequeridasPlanResumen());
     }
 
     public int getUnidadesActualesRegistradasResumen() {
@@ -3444,6 +3462,12 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             programasPorEje = programasPlanCompleto.stream()
                     .filter(programa -> programa.getEjeCapacitacion() != null)
                     .collect(Collectors.groupingBy(FichaDescProgramaDTO::getEjeCapacitacion));
+            for (FichaDescProgramaDTO programa : programasPlanCompleto) {
+                if (programa != null) {
+                    resumen.registrarUnidadPlan(claveUnicaUd(programa), programa.getTipo(),
+                            resolveNombrePrograma(programa));
+                }
+            }
         }
 
         Map<Integer, MallaAlumnoProgramaDTO> estatusPorPrograma = new HashMap<Integer, MallaAlumnoProgramaDTO>();
@@ -4368,6 +4392,9 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         private final Set<String> clavesOptativasOpcionalesPendientes = new HashSet<String>();
         private final Set<String> clavesElectivasPendientes = new HashSet<String>();
         private final Set<String> clavesConCreditosContabilizados = new HashSet<String>();
+        private final Set<String> clavesUnidadesPlan = new HashSet<String>();
+        private final Set<String> clavesObligatoriasPlan = new HashSet<String>();
+        private final Set<String> clavesOptativasPlan = new HashSet<String>();
         private final Map<String, String> etiquetasPorClave = new HashMap<String, String>();
 
         public int getRequeridos() {
@@ -4377,6 +4404,24 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         public int getAprobados() {
             return aprobados;
         }
+
+        public void registrarUnidadPlan(String clave, String tipo, String nombre) {
+            if (clave == null || !clavesUnidadesPlan.add(clave)) {
+                return;
+            }
+            registrarEtiqueta(clave, nombre);
+            String tipoNormalizado = Normalizer.normalize(StringUtils.defaultString(tipo), Normalizer.Form.NFD)
+                    .replaceAll("\\p{M}", "").toLowerCase(Locale.ROOT);
+            if (tipoNormalizado.contains("oblig")) {
+                clavesObligatoriasPlan.add(clave);
+            } else if (tipoNormalizado.contains("optativa")) {
+                clavesOptativasPlan.add(clave);
+            }
+        }
+
+        public int getTotalUnidadesPlan() { return clavesUnidadesPlan.size(); }
+        public int getTotalObligatoriasPlan() { return clavesObligatoriasPlan.size(); }
+        public int getTotalOptativasPlan() { return clavesOptativasPlan.size(); }
 
         public void registrarCreditos(String clave, int creditos, boolean acreditada) {
             if (clavesConCreditosContabilizados.add(clave)) {

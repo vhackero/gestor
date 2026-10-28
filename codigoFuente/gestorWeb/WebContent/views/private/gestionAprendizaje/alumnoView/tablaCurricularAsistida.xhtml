@@ -275,6 +275,11 @@
             .kpi-value[data-asistente-tooltip] {
                 cursor: help;
             }
+            .kpi-total {
+                font-size: 15px;
+                font-weight: 400;
+                white-space: nowrap;
+            }
             .asistente-tooltip-bubble {
                 position: fixed;
                 z-index: 99999;
@@ -1885,7 +1890,7 @@
                                                     <div class="avance-anillo-contenido"><h:outputText value="#{tablaCurricularAsistidaBean.contexto.porcentajeCreditosCompletados / 100}"><f:convertNumber type="percent" maxFractionDigits="0" /></h:outputText><small>de créditos</small></div>
                                                 </div>
                                                 <div class="avance-datos">
-                                                    <div class="avance-dato-principal">#{tablaCurricularAsistidaBean.unidadesAcreditadasResumen} UD acreditadas<br /><span style="font-size:17px; font-weight:400;">de un total de #{tablaCurricularAsistidaBean.unidadesAcreditadasResumen + tablaCurricularAsistidaBean.conteoUdPendientesPanel} UD</span></div>
+                                                    <div class="avance-dato-principal">#{tablaCurricularAsistidaBean.unidadesAcreditadasResumen} UD acreditadas<br /><span style="font-size:17px; font-weight:400;">de un total de #{tablaCurricularAsistidaBean.totalUnidadesPlanResumen} UD</span></div>
                                                     <div class="avance-dato-principal">#{tablaCurricularAsistidaBean.contexto.creditosAcumulados} créditos obtenidos<br /><span style="font-size:17px; font-weight:400;">de un total de #{tablaCurricularAsistidaBean.contexto.creditosTotalesPlan}</span></div>
                                                 </div>
                                             </div>
@@ -1949,10 +1954,10 @@
                                             <span class="resumen-heading-context">Acumulado de la trayectoria académica</span>
                                         </div>
                                         <div class="kpi-grid">
-                                            <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD acreditadas</div><div class="kpi-value" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesAcreditadasResumen}">#{tablaCurricularAsistidaBean.unidadesAcreditadasResumen}</div></div>
-                                            <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD obligatorias acreditadas</div><div class="kpi-value" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesObligatoriasAcreditadasResumen}">#{tablaCurricularAsistidaBean.unidadesObligatoriasAcreditadasResumen}</div></div>
-                                            <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD optativas requeridas acreditadas</div><div class="kpi-value" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesOptativasRequeridasAcreditadasResumen}">#{tablaCurricularAsistidaBean.unidadesOptativasRequeridasAcreditadasResumen}</div></div>
-                                            <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD optativas adicionales acreditadas</div><div class="kpi-value" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesOptativasAdicionalesAcreditadasResumen}">#{tablaCurricularAsistidaBean.unidadesOptativasAdicionalesAcreditadasResumen}</div></div>
+                                            <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD acreditadas</div><div class="kpi-value" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesAcreditadasResumen}">#{tablaCurricularAsistidaBean.unidadesAcreditadasResumen} <span class="kpi-total">de #{tablaCurricularAsistidaBean.totalUnidadesPlanResumen}</span></div></div>
+                                            <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD obligatorias acreditadas</div><div class="kpi-value" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesObligatoriasAcreditadasResumen}">#{tablaCurricularAsistidaBean.unidadesObligatoriasAcreditadasResumen} <span class="kpi-total">de #{tablaCurricularAsistidaBean.totalUnidadesObligatoriasPlanResumen}</span></div></div>
+                                            <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD optativas requeridas acreditadas</div><div class="kpi-value" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesOptativasRequeridasAcreditadasResumen}">#{tablaCurricularAsistidaBean.unidadesOptativasRequeridasAcreditadasResumen} <span class="kpi-total">de #{tablaCurricularAsistidaBean.totalUnidadesOptativasRequeridasPlanResumen}</span></div></div>
+                                            <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD optativas adicionales acreditadas</div><div class="kpi-value" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesOptativasAdicionalesAcreditadasResumen}">#{tablaCurricularAsistidaBean.unidadesOptativasAdicionalesAcreditadasResumen} <span class="kpi-total">de #{tablaCurricularAsistidaBean.totalUnidadesOptativasAdicionalesPlanResumen}</span></div></div>
                                             <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD pendientes de regularizar</div><div class="kpi-value" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesPendientesRegularizarResumen}">#{tablaCurricularAsistidaBean.conteoUdPendientesPanel}</div></div>
                                         </div>
                                         <div class="kpi-resumen-note">Las claves muestran el nombre completo al pasar el cursor o seleccionarlas.</div>
