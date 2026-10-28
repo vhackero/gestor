@@ -1889,7 +1889,7 @@
                                             <div class="alert-box alert-box-warning situacion-alerta warning">
                                                 <i class="fa fa-exclamation-triangle" />
                                                 <div class="situacion-alerta-texto"><strong>ATENCIÓN -</strong> #{tablaCurricularAsistidaBean.textoAlertaSituacionAcademica}</div>
-                                                <p:commandButton value="#{tablaCurricularAsistidaBean.conteoUdPendientesPanel eq 1 ? 'Consultar UD pendiente' : 'Consultar UDs pendientes'}" type="button" styleClass="btn btn-primary" onclick="PF('udIrregularesDialog').show(); return false;" />
+                                                <p:commandButton value="#{tablaCurricularAsistidaBean.conteoUdPendientesAlerta eq 1 ? 'Consultar UD pendiente' : 'Consultar UDs pendientes'}" type="button" styleClass="btn btn-primary" onclick="PF('udIrregularesDialog').show(); return false;" />
                                             </div>
                                         </ui:fragment>
 
@@ -2732,15 +2732,16 @@
             <p:dialog widgetVar="udIrregularesDialog" header="UD pendientes de regularizar" modal="true" closable="false" resizable="false" width="560" styleClass="ud-irregulares-modal">
                 <p>Estas unidades didácticas requieren atención conforme a su estado académico actual.</p>
                 <ul class="ud-irregulares-lista">
-                    <ui:repeat value="#{tablaCurricularAsistidaBean.filasIrregularesDetalle}" var="filaIrregular">
+                    <ui:repeat value="#{tablaCurricularAsistidaBean.filasPendientesAlerta}" var="filaIrregular">
                         <li>
                             <strong>#{filaIrregular.clave} - #{filaIrregular.asignatura}</strong><br />
                             <span class="ud-irregulares-ubicacion">#{tablaCurricularAsistidaBean.getUbicacionFilaIrregular(filaIrregular)}</span>
+                            <span> | #{tablaCurricularAsistidaBean.getTipoCurricularFilaIrregular(filaIrregular)}</span>
                             <span> | #{filaIrregular.estatusHistorico}</span>
                         </li>
                     </ui:repeat>
                 </ul>
-                <ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasIrregularesDetalle}">
+                <ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasPendientesAlerta}">
                     <p>No se identifican UD pendientes con la información disponible.</p>
                 </ui:fragment>
                 <div style="margin-top:18px; text-align:right;">

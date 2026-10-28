@@ -3361,9 +3361,35 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         if (isEstudianteRegularContexto()) {
             return "Tu situación académica es regular. Continúa con tu trayectoria conforme a las UD disponibles.";
         }
-        int pendientes = getConteoUdPendientesPanel();
+        int pendientes = getConteoUdPendientesAlerta();
         return "Tienes " + pendientes + " " + (pendientes == 1 ? "unidad didáctica pendiente" : "unidades didácticas pendientes")
                 + " de regularizar. Revisa las UD prioritarias para conocer las acciones disponibles en tu siguiente periodo.";
+    }
+
+    /** Si hay reprobadas vigentes, son el primer agrupamiento mostrado al estudiante. */
+    public int getConteoUdPendientesAlerta() {
+        List<FilaAsistidaDTO> reprobadas = getFilasReprobadasPrioritarias();
+        return !reprobadas.isEmpty() ? reprobadas.size() : getConteoUdPendientesPanel();
+    }
+
+    public List<FilaAsistidaDTO> getFilasPendientesAlerta() {
+        List<FilaAsistidaDTO> reprobadas = getFilasReprobadasPrioritarias();
+        return !reprobadas.isEmpty() ? reprobadas : getFilasIrregularesDetalle();
+    }
+
+    public String getTipoCurricularFilaIrregular(FilaAsistidaDTO fila) {
+        if (fila == null) {
+            return "Tipo no determinado";
+        }
+        String tipo = normalizaTexto(fila.getTipo());
+        if (tipo.contains("oblig")) {
+            return "Obligatoria";
+        }
+        if (tipo.contains("optativa")) {
+            return tipo.contains("adicional") || esUnidadOpcionalLibre(fila)
+                    || esOptativaAdicionalActual(fila) ? "Optativa adicional" : "Optativa";
+        }
+        return StringUtils.defaultIfBlank(fila.getTipo(), "Tipo no determinado");
     }
 
     public String getUbicacionFilaIrregular(FilaAsistidaDTO fila) {
