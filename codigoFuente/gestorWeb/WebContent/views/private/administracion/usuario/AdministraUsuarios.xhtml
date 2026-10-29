@@ -34,11 +34,13 @@
 					<sec:authorize access="hasPermission(null,'PER_AGR')">
 						<sec:authorize access="hasPermission(null,'CARG_MASI')">
 							<p:commandButton id="btnCargaMasiva" rendered="true"
+								process="@this"
 								action="#{cargaMasivaUsuariosBean.inicioCargaUsuarios()}"
 								value="#{sistema.obtenerTexto('gw.textos.menu.administracion.usuarios.cargaMasiva')}"
 								styleClass="pull-right btn btn-primary" />
 						</sec:authorize>
 						<p:commandButton id="btnIndividual"
+							process="@this"
 							action="#{adminPersonaBean.agregarPersona()}" rendered="true"
 							value="#{sistema.obtenerTexto('gw.adminPersona.boton.agregar')}"
 							ajax="true" styleClass="pull-right btn btn-primary" />
@@ -96,11 +98,13 @@
 							<div class="col-md-12">
 								<p:commandButton ajax="true" update="@form"
 									id="btnBuscarPorCriterios"
+									process="@this panelBuscarCriterios"
 									styleClass="btn btn-primary pull-right"
 									action="#{adminPersonaBean.buscarPersonaPorCriterios}"
 									value="#{sistema.obtenerTexto('gw.adminPersona.boton.buscar')}" />
 								<p:commandButton ajax="true" update="@form"
 									action="#{adminPersonaBean.limpiarDatos()}"
+									process="@this" resetValues="true"
 									styleClass="btn btn-default pull-right" value="Limpiar campos" />
 							</div>
 						</div>

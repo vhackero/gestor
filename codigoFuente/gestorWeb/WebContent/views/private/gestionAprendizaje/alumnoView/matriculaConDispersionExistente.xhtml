@@ -64,7 +64,7 @@
 						styleClass="btn btn-default" />
 
 					<p:commandButton value="Limpiar campos" process="@this"
-						update="@form" action="#{dispersionesBean.limpiarCampos}"
+						update="@form" action="#{dispersionesBean.limpiarCamposMatriculaExistente}"
 						ajax="true" styleClass="btn btn-default" />
 
 					<p:commandButton id="btnBusquedaDispersionExistente" process="@form"
@@ -135,10 +135,11 @@
 							action="#{dispersionesBean.matricularUsuariosDispersionExistente(dispercion)}"
 							icon="fa fa-graduation-cap" title="Matricular usuarios"
 							styleClass="btn-icon btn btn-default" />
-						<p:commandButton ajax="false" process="@this"
+						<p:commandButton ajax="true" global="false" process="@this"
 							action="#{dispersionesBean.descargarPendientesDispersionExistente(dispercion)}"
 							icon="fa fa-file-excel-o" title="Descargar Excel de alumnos pendientes"
-							styleClass="btn-icon btn btn-default" />
+							styleClass="btn-icon btn btn-default" onstart="PF('dialogLayout').show()" onerror="PF('dialogLayout').hide()"
+                                oncomplete="PF('dialogLayout').hide(); if (args &amp;&amp; args.excelPendientesListo) { document.getElementById('formBusquedaDispersiones:descargarExcelPendientes').click(); }" />
 					</p:column>
 				</p:dataTable>
 			</div>

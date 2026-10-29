@@ -79,6 +79,7 @@ public class DispersionPendientesSqlTest {
                     String sentencia = sql;
                     for (Map.Entry<String,Object> p : parametros.entrySet()) {
                         String valor = p.getValue() instanceof Collection ? p.getValue().toString().replace("[", "").replace("]", "") : p.getValue().toString();
+                        if (p.getValue() instanceof String) valor = "'" + valor.replace("'", "''") + "'";
                         sentencia = sentencia.replace(":"+p.getKey(), valor);
                     }
                     try (Statement s = c.createStatement()) {
@@ -104,6 +105,36 @@ public class DispersionPendientesSqlTest {
         return repo;
     }
 
+    @Test public void exportaLosMismosCandidatosNormalesYCompartidosSinDuplicar() throws Exception {
+        try (Connection c = conexion()) {
+            preparar(c);
+            try(Statement s=c.createStatement()) {
+                s.execute("ALTER TABLE tbl_inscripciones ADD bloque VARCHAR(10) DEFAULT '2'");
+                s.execute("INSERT INTO tbl_planes VALUES (4,'Plan B')");
+                s.execute("INSERT INTO tbl_persona VALUES (20,'0020','Alumno','Compartido',NULL)");
+                s.execute("INSERT INTO tbl_inscripciones(id,Idpersona,idprograma,idplan,asignatura,fecha_registro,bloque) VALUES (120,20,119,4,'Interaprendizaje','2026-10-12 12:00:00','2'),(121,20,119,4,'Interaprendizaje','2026-10-12 13:00:00','2')");
+            }
+            DispersionesRepository repo=repositorio(c);
+            mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MatricularDispersionDTO solicitud=new mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MatricularDispersionDTO();
+            solicitud.setIdDispersion(324);solicitud.setIdProcesoInscripcion(17);solicitud.setIdPrograma(114);
+            solicitud.setIdConvocatoria(3);solicitud.setIdTipoProceso(2);
+            List<Long> normales=repo.obtenerPersonasMatriculacion(324,3,2,17);
+            assertFalse(normales.contains(2L));assertFalse(normales.contains(4L));assertFalse(normales.contains(8L));assertFalse(normales.contains(11L));
+            verificarExportados(normales,repo.consultarDetallesPendientesDispersion(normales,solicitud));
+            solicitud.setMatriculacionCompartidos(true);solicitud.setNombreProgramaSeleccionado("Interaprendizaje");solicitud.setBloquePrograma("Bloque 2");
+            List<Long> compartidos=repo.obtenerPersonasMatriculacionCompartidos(324,17,114,"Interaprendizaje","Bloque 2");
+            assertTrue(compartidos.contains(20L));assertFalse(compartidos.contains(2L));assertFalse(compartidos.contains(4L));
+            List<DispersionPendienteDTO> exportados=repo.consultarDetallesPendientesDispersion(compartidos,solicitud);
+            verificarExportados(compartidos,exportados);
+            DispersionPendienteDTO otroPlan=exportados.stream().filter(p->p.getIdPersona().equals(20L)).findFirst().get();
+            assertEquals("Plan B",otroPlan.getPlan());assertEquals("AIAV",otroPlan.getClave());assertEquals("Bloque 2",otroPlan.getBloque());
+            assertTrue(repo.consultarDetallesPendientesDispersion(Collections.emptyList(),solicitud).isEmpty());
+        }
+    }
+    private void verificarExportados(List<Long> esperados,List<DispersionPendienteDTO> filas) {
+        Set<Long> ids=new HashSet<>();for(DispersionPendienteDTO dto:filas) assertTrue(ids.add(dto.getIdPersona()));
+        assertEquals(new HashSet<>(esperados),ids);
+    }
     @Test public void conteoExportacionYSeleccionCoincidenConBajasSeriacionYMatriculas() throws Exception {
         try (Connection c = conexion()) {
             preparar(c);

@@ -73,6 +73,19 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelEstructuraUn
 
 @Service("dispersionesService")
 public class DispersionesServiceImpl implements DispersionesService {
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionPendienteDTO> consultarPendientesDispersion(MatricularDispersionDTO solicitud) {
+        if (solicitud == null || solicitud.getIdDispersion() == null || solicitud.getIdProcesoInscripcion() == null)
+            return java.util.Collections.emptyList();
+        List<Long> personas = Boolean.TRUE.equals(solicitud.getMatriculacionCompartidos())
+            ? iDispersionesRepository.obtenerPersonasMatriculacionCompartidos(solicitud.getIdDispersion(),
+                solicitud.getIdProcesoInscripcion(), solicitud.getIdPrograma(), solicitud.getNombreProgramaSeleccionado(), solicitud.getBloquePrograma())
+            : iDispersionesRepository.obtenerPersonasMatriculacion(solicitud.getIdDispersion(),
+                solicitud.getIdConvocatoria(), solicitud.getIdTipoProceso(), solicitud.getIdProcesoInscripcion());
+        if (personas.isEmpty()) return java.util.Collections.emptyList();
+        return iDispersionesRepository.consultarDetallesPendientesDispersion(personas, solicitud);
+    }
 
 private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.class);
 	private static final int TIPO_MATRICULACION_EVENTO_POR_GRUPO = 1;
