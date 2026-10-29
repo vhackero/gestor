@@ -55,9 +55,11 @@ RN-9.3, salvo que exista un instrumento institucional adicional identificado y v
 ### 3. RN-9.4 fue sustituida materialmente
 
 La implementacion actual exige todas las obligatorias, ocho optativas y una electiva; tambien
-restringe Proyecto Terminal/Modulo Integrador por todas las seriadas S1-S6. El documento final
-requiere todas las obligatorias y ocho optativas requeridas, mas creditos y requisitos del plan
-aplicable. No exige una electiva minima.
+restringe Proyecto Terminal/Modulo Integrador por todas las seriadas S1-S6. La precision
+academica recibida confirma que las UD electivas dejan de existir. El documento final requiere
+todas las obligatorias y ocho optativas requeridas, mas creditos y requisitos del plan aplicable.
+No existe requisito de una electiva minima ni debe mantenerse ELECTIVA como tipo curricular
+vigente para PE2024-PE2027.
 
 Para seminarios, modulos u otros componentes exige requisitos expresos del plan; para UD de
 Proyecto Terminal identificadas por plan/instrumento exige todas las UD previas del mapa. No puede
@@ -140,7 +142,7 @@ inventarla.
 | RN-9.1 Extemporanea | CONFORME_CON_AJUSTE_DE_DATOS | Trata el momento administrativo sin flexibilizar reglas. | Las autorizaciones, fecha efectiva y cierre ordinario se obtienen del proceso productivo. |
 | RN-9.2 Dispersion | FRONTERA_OPERATIVA | Clasificada fuera de Motor V2. | Requiere matriculacion, grupos activos, capacidad y GLPi; no integrar en consumidores curriculares. |
 | RN-9.3 S7/S8 | CAMBIO_NORMATIVO_OBLIGATORIO | V2 exige 50% de creditos y aplica restricciones adicionales heredadas. | Retirar el umbral como condicion RN-9.3; evaluar plan/version, carga, oferta, prerrequisitos, prioridad y RN-6.4. |
-| RN-9.4 Egreso/componentes | CAMBIO_NORMATIVO_OBLIGATORIO | V2 exige electiva y seriadas S1-S6 para componentes. | Sustituir por obligatorias + 8 optativas requeridas + creditos/requisitos del plan; modelar requisitos especificos por componente sin inferir nombres. |
+| RN-9.4 Egreso/componentes | CAMBIO_NORMATIVO_OBLIGATORIO | V2 exige una electiva y seriadas S1-S6 para componentes. | Retirar requisito/tipo vigente ELECTIVA; sustituir por obligatorias + 8 optativas requeridas + creditos/requisitos del plan; modelar requisitos especificos por componente sin inferir nombres. |
 | RN-9.5 Trazabilidad | NUEVO_O_AMPLIADO | Registra contexto, UD, motivos, reglas y resultado. | Extender con fuente/instrumento, version, poblacion, vigencia, criterio institucional por NP y ticket GLPi. |
 | RN-10 Titulacion | FRONTERA_OPERATIVA | Auditoria previa determino responsabilidad compartida y no localizo modulo especializado. | No implementar en Motor V2; requiere catalogo por plan, seleccion, expediente y validacion institucional. |
 | RN-10.1 Servicio social | FRONTERA_OPERATIVA | No existe fuente verificable de cumplimiento ni modulo responsable. | El documento fija 60 anos, trabajador de Federacion/CDMX y enfermedad grave como supuestos de solicitud, no liberacion automatica. Requiere dato, evidencia y resolucion institucional. |
@@ -149,9 +151,9 @@ inventarla.
 
 | Consumidor | Ajustes obligatorios despues de actualizar el motor | Logica complementaria que debe conservarse |
 | --- | --- | --- |
-| Malla Curricular | Estados, motivos, RN-6.1 por UD S5 pretendida, RN-9.3 y RN-9.4 actualizados. | Bloques, creditos informativos, iconografia, tooltips y clasificacion visual de optativas. |
-| Asistente de Inscripcion y Orientacion | Recomendaciones, prioridades y explicaciones deben consumir el nuevo resultado; no recomendar S7/S8 por un umbral inexistente. | Narrativa, agrupacion, informacion de oferta y orientacion no normativa. |
-| Simulador | Validar seleccion contra carga, prioridad, seriacion y el nuevo disparador RN-6.1; no declarar invalida S7/S8 por 50%. | Una optativa por bloque, no duplicacion y otras validaciones de escenario no cubiertas por V2. |
+| Malla Curricular | Estados, motivos, RN-6.1 por UD S5 pretendida, RN-9.3 y RN-9.4 actualizados; retirar nomenclatura/elegibilidad ELECTIVA vigente. | Bloques, creditos informativos, iconografia, tooltips y clasificacion visual de optativas. |
+| Asistente de Inscripcion y Orientacion | Recomendaciones, prioridades y explicaciones deben consumir el nuevo resultado; no recomendar S7/S8 por un umbral inexistente ni usar ELECTIVA como requisito. | Narrativa, agrupacion, informacion de oferta y orientacion no normativa. |
+| Simulador | Validar seleccion contra carga, prioridad, seriacion y el nuevo disparador RN-6.1; no declarar invalida S7/S8 por 50% ni modelar seleccion ELECTIVA vigente. | Una optativa por bloque, no duplicacion y otras validaciones de escenario no cubiertas por V2. |
 | Asistente Virtual | Debe recibir solo hechos y motivos de la nueva version normativa; no reintroducir reglas historicas. | Presentacion, textos institucionales y acciones operativas no academicas. |
 
 ## Contratos que deben extenderse antes de cambios funcionales
@@ -164,13 +166,38 @@ inventarla.
 
 ## Datos que deben confirmar las areas academicas
 
-1. Identificador tecnico oficial y fecha de vigencia de la version final para sustituir `PE2027-V1` en configuracion y trazas.
-2. Matriz de aplicabilidad por plan, version y cohorte para los PE2024 y PE2027, incluidos los catalogos de UD, credtos y relaciones de seriacion.
-3. Catalogo vigente de las trece optativas, su distribucion por bloque y las cohortes/planes para los que alguna UD de IA es obligatoria.
-4. Identificacion formal, por plan/version/cohorte, de Seminarios, Modulos Integradores, Proyecto Terminal I/II y sus requisitos; conjunto de UD previas que exige cada Proyecto Terminal.
-5. Fuente institucional de convocatoria/resolucion para incorporacion diferida, medida administrativa, baja y reincorporacion.
-6. Criterio institucional para fuentes de trazabilidad RN-9.5: instrumento, poblacion, vigencia, fecha de corte y ticket GLPi.
-7. Ownership y fuente verificable de titulación/servicio social. La edad de 60, condicion laboral o solicitud no habilitan una liberacion sin resolucion institucional.
+La siguiente solicitud separa lo que debe definir la autoridad academica de lo que debe localizar
+Tecnologia en SIGIE. La respuesta debe identificar el documento o catalogo que sustenta cada dato,
+la persona/area responsable y su fecha de vigencia; una respuesta narrativa sin esa evidencia no
+permite automatizar una regla de forma segura.
+
+| # | Pregunta concreta para CAI/DAEAE/RPE | Evidencia minima que debe entregarse | Uso tecnico esperado |
+| --- | --- | --- | --- |
+| 1 | Cual es el identificador oficial de la version final, su fecha de publicacion y la fecha desde la que sustituye a `PE2027-V1`? Aplica retroactivamente a evaluaciones ya emitidas o solo a periodos/procesos posteriores? | Oficio, acuerdo o portada versionada que indique nombre/clave de version, fecha de aprobacion, vigencia inicial y regla de transicion. | Configuracion `REGLAS_V2_VERSION`, trazas RN-9.5 y reproduccion determinista de evaluaciones historicas. |
+| 2 | Que planes, versiones y cohortes estan comprendidos? Para cada PE2024 y PE2027, cual es la clave SIGIE de plan, periodo de ingreso inicial/final de cohorte y vigencia curricular? | Matriz `PE - idPlan SIGIE - version plan - cohorte - inicio - fin - vigencia`. | Evitar aplicar reglas de un plan o cohorte a otro. |
+| 3 | Cual es el catalogo curricular completo de cada fila de la matriz anterior? Que UD son obligatorias u optativas, en que semestre/bloque estan, cuantos creditos tienen y que relaciones de seriacion formal poseen? | Extracto aprobado de malla por plan/version/cohorte con clave, nombre, id SIGIE, tipo, semestre, bloque, creditos y prerrequisitos. | Contexto V2, RN-6.1, RN-8, RN-9.3, RN-9.4 y conteos/indicadores de Malla. |
+| 4 | La eliminacion de UD electivas aplica a todos los PE2024/PE2027 y todas las cohortes? Desde que periodo? Como deben tratarse los registros historicos ya clasificados como ELECTIVA: conservar solo historial, reclasificar a optativa o excluirlos de requisitos? | Acuerdo de eliminacion y tabla de equivalencias para registros historicos, si existe. | Retirar `ELECTIVA` de oferta, UI, recomendaciones y RN-9.4 sin corromper el historial academico. |
+| 5 | Cuales son exactamente las trece optativas vigentes por plan/cohorte? Cual puede seleccionarse en B1 y cual en B2? Una misma optativa puede aparecer en ambos bloques? Que regla opera cuando no existe cupo u oferta? | Catalogo de 13 optativas con id SIGIE, clave, creditos, bloque permitido, PE/cohorte y vigencia. | RN-3.2/3.3, RN-7.1, validaciones complementarias de Simulador y explicaciones de Asistente. |
+| 6 | Que poblacion debe acreditar alguna UD vinculada a Inteligencia Artificial y cual UD concreta satisface el requisito? Es obligatoria por PE, plan, cohorte o acuerdo especifico? | Acuerdo/matriz de aplicabilidad con PE, version, cohorte, UD, creditos y fecha de vigencia. | No convertir la mera presencia de una UD de IA en requisito universal. |
+| 7 | Que componentes finales existen formalmente en cada plan: Seminario(s), Modulo Integrador y Proyecto Terminal I/II? Son UD curriculares, modalidad de titulacion o ambas cosas? | Matriz por plan/version/cohorte con id SIGIE, tipo de componente, prerrequisitos, creditos y fundamento. | Sustituir la inferencia por nombre y aplicar RN-9.4 solo al componente correcto. |
+| 8 | Para cada Proyecto Terminal identificado, cuales son literalmente las UD previas del mapa cuya acreditacion exige? Los Seminarios o Modulos comparten algun requisito o tienen una lista distinta? | Lista explicitamente aprobada de ids de UD requeridas por componente, con fundamento y vigencia. | Evaluar RN-9.4 por componente sin bloquear genericamente por todas las seriadas S1-S6. |
+| 9 | Cual es la fuente institucional que acredita incorporacion diferida, baja temporal, baja parcial, baja definitiva, falta de reinscripcion y reincorporacion? Que campos expresan causa, periodo, fecha, vigencia y resolucion? | Diccionario de datos SIGIE o especificacion de servicio: tabla/campo, significado, valores validos, responsable de actualizacion y evidencia asociada. | RN-1.1, RN-1.3, RN-6.2 y RN-6.5 a RN-6.8; nunca inferir una baja formal. |
+| 10 | Cual es el criterio institucional de fecha de corte de la evaluacion previa y como se identifica el caracter preliminar de calificaciones, actas y oferta? | Calendario/procedimiento que especifique fecha de corte por periodo y evento que la actualiza. | RN-2.2 y mensajes de Malla/Asistente sin presentar datos preliminares como definitivos. |
+| 11 | Que fuente regula y evidencia cada parametro de RN-9.5: instrumento, version, poblacion, vigencia, causa NP y criterio que define sus efectos? Que formato de ticket GLPi se conserva para un caso extraordinario? | Plantilla de trazabilidad con campos obligatorios y ejemplo anonimizado de ticket/resolucion. | Extender traza sin PII y enlazar la evidencia externa de RN-6.1.6. |
+| 12 | Que modulo y fuente verificable son responsables de titulacion y servicio social? Que datos prueban cumplimiento, solicitud y resolucion para trabajador de Federacion/CDMX, persona de 60 anos o mas y enfermedad grave? | Documento de ownership, catalogo/tabla/API responsable y campos de evidencia/resolucion. | Mantener RN-10/RN-10.1 fuera del Motor V2 hasta que exista fuente y procedimiento; no liberar automaticamente por edad, empleo o solicitud. |
+
+### Informacion que debe localizar Tecnologia en SIGIE
+
+1. La relacion fisica entre los identificadores de plan, programa, unidad didactica, semestre,
+   bloque, creditos y relaciones de seriacion indicados por las areas academicas.
+2. La fuente real de oferta: periodo, bloque, grupo activo, cupo, cancelacion/no apertura y su
+   diferencia frente a `SIN_OFERTA`.
+3. La fuente real de historial: resultado, NP, causa de NP, intentos, rectificacion y relacion
+   entre una optativa adicional y sus sustitutas.
+4. La fuente de seleccion hipotetica del Simulador para remitir las UD pretendidas a V2 sin
+   persistirlas.
+5. La fuente de trayectoria efectiva que determine el semestre objetivo; no se aceptara el
+   semestre maximo ofertado como reemplazo.
 
 ## Estrategia de Ajuste
 
