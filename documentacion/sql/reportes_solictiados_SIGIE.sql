@@ -61,10 +61,13 @@ ORDER BY reporte.orden_total, reporte.`Plan`, reporte.periodo;
 -- Reporte de estudiantes regulares, irregulares e irregulares severos por periodo.
 -- MariaDB 10.2+ / MySQL 8+. Sólo lectura.
 -- Parámetro de texto :periodociclo: '2024-1' o '2024'. Sin variables SET.
--- Universo: personas de tbl_persona_aspirante con participación en un evento
--- del periodo consultado, del plan asignado o de una asignatura equivalente
--- por LOWER(TRIM(nombre_tentativo)), igual que la regularidad de inscripción.
--- Periodo: los dos últimos segmentos de cve_evento_cap (AAAA-N).
+-- Universo idéntico al reporte 6: personas de tbl_persona_aspirante con
+-- inscripción en el mismo plan, dentro del intervalo del catálogo de periodos.
+-- Periodo del universo: tbl_periodos_inscripcion.nombre_periodo.
+-- Periodo del historial: sufijo AAAA-N de cve_evento_cap; las equivalencias
+-- entre planes se resuelven por LOWER(TRIM(nombre_tentativo)).
+-- Sin historial evaluable se clasifica como regular (cero reprobadas conocidas).
+-- Regulares + irregulares + severos = inscritos del reporte 6 por plan/periodo.
 -- Situación acumulada HASTA el periodo de cada fila, sin aprobaciones futuras.
 -- Una aprobación de la misma asignatura cancela sus reprobaciones anteriores.
 -- Cada asignatura se cuenta una sola vez por nombre normalizado, no por intento.
@@ -92,17 +95,15 @@ WITH participaciones AS (
     JOIN tbl_ficha_descriptiva_programa f ON f.id_programa = e.id_programa
     WHERE SUBSTRING_INDEX(e.cve_evento_cap, '-', -2) REGEXP '^[0-9]{4}-[0-9]+$'
 ), universo AS (
-    SELECT DISTINCT a.id_persona, a.id_plan, p.periodo
+    SELECT DISTINCT a.id_persona, a.id_plan, pi.nombre_periodo AS periodo
     FROM tbl_persona_aspirante a
     JOIN tbl_persona tp ON tp.id_persona = a.id_persona
-    JOIN participaciones p ON p.persona = a.id_persona
-    WHERE (p.periodo = :periodociclo
-        OR p.periodo LIKE CONCAT(:periodociclo, '-%'))
-      AND (p.id_plan = a.id_plan OR EXISTS (
-          SELECT 1 FROM tbl_ficha_descriptiva_programa equivalente
-          WHERE equivalente.id_plan = a.id_plan
-            AND LOWER(TRIM(equivalente.nombre_tentativo)) = p.asignatura
-      ))
+    JOIN tbl_planes pl ON pl.id_plan = a.id_plan
+    JOIN tbl_inscripciones i ON i.Idpersona = a.id_persona AND i.idplan = a.id_plan
+    JOIN tbl_periodos_inscripcion pi
+      ON i.fecha_registro BETWEEN pi.fecha_inicio AND pi.fecha_finalizacion
+    WHERE pi.nombre_periodo = :periodociclo
+       OR pi.nombre_periodo LIKE CONCAT(:periodociclo, '-%')
 ), historial_asignatura AS (
     SELECT u.id_persona, u.id_plan, u.periodo, h.asignatura,
            MAX(CASE WHEN h.calificacion_final >= h.minimo THEN 1 ELSE 0 END) AS aprobada,
@@ -426,20 +427,16 @@ ORDER BY pl.nombre, pl.id_plan, s.nombre, b.nombre, ev.periodo,
          ev.nombre_tentativo, ev.id_programa;
 
 -- Reporte de aprobación de estudiantes por semestre, bloque y periodo.
+-- Desglose por unidad didáctica y tipo de asignatura antes del periodo.
 -- Parámetro de texto :periodociclo: '2024-1' o '2024'. Sólo lectura.
 -- Conserva universo, equivalencias, última participación por unidad/periodo y
 -- bajas contabilizables del reporte de promedios anterior.
--- Inscritos: personas únicas por plan/semestre/bloque/periodo, no inscripciones
--- por asignatura. Una persona puede aparecer en distintos bloques o periodos.
--- Categorías exclusivas, en este orden:
--- Reprobados: al menos una unidad cursada en el bloque tiene nota inferior al mínimo.
--- Bajas: ninguna unidad reprobada y al menos una baja en sus participaciones.
--- Aprobados: todas sus unidades cursadas en el bloque tienen nota aprobatoria.
--- Aprobar todas las cursadas no acredita necesariamente todo el bloque curricular.
--- Notas pendientes o mínimo sin configurar impiden clasificar como aprobado;
--- si no hay reprobación ni baja quedan sólo en inscritos.
--- Inscritos >= Aprobados + Reprobados + Bajas; la diferencia son pendientes.
--- No se suman personas entre bloques ni se atribuye un promedio como aprobación.
+-- Inscritos: personas únicas por plan/semestre/bloque/unidad/periodo.
+-- Aprobados/Reprobados: nota de esa unidad respecto a su mínimo aprobatorio.
+-- Bajas: baja contabilizable en la participación seleccionada de esa unidad.
+-- Las bajas se excluyen de aprobados y reprobados; las categorías no se duplican.
+-- Las notas pendientes o sin mínimo válido quedan sólo en inscritos.
+-- Una persona puede contarse en distintas unidades; no sumar como personas únicas.
 WITH notas_base AS (
     SELECT a.id_persona, a.id_plan,
            LOWER(TRIM(origen.nombre_tentativo)) AS asignatura,
@@ -494,6 +491,7 @@ WITH notas_base AS (
 ), estado_estudiante AS (
     SELECT ev.id_persona, ev.id_plan, ev.periodo, b.id AS id_bloque,
            b.nombre AS bloque, s.id AS id_semestre, s.nombre AS semestre,
+           ev.id_programa, ev.nombre_tentativo, ev.tipo,
            COUNT(*) AS unidades_cursadas,
            SUM(CASE WHEN ev.nota >= ev.minimo THEN 1 ELSE 0 END) AS unidades_aprobadas,
            MAX(CASE WHEN ev.nota < ev.minimo THEN 1 ELSE 0 END) AS tiene_reprobacion,
@@ -501,9 +499,11 @@ WITH notas_base AS (
     FROM evaluaciones ev
     LEFT JOIN tbl_malla_curricular b ON b.id = ev.id_eje_capacitacion
     LEFT JOIN tbl_malla_curricular s ON s.id = b.id_padre
-    GROUP BY ev.id_persona, ev.id_plan, ev.periodo, b.id, b.nombre, s.id, s.nombre
+    GROUP BY ev.id_persona, ev.id_plan, ev.periodo, b.id, b.nombre, s.id, s.nombre,
+             ev.id_programa, ev.nombre_tentativo, ev.tipo
 )
 SELECT pl.nombre AS `Plan`, e.semestre AS `semestre`, e.bloque AS `bloque`,
+       e.nombre_tentativo AS `unidad didáctica`, e.tipo AS `tipo de asignatura`,
        e.periodo AS `periodo`, COUNT(*) AS `No. de inscritos`,
        SUM(CASE WHEN e.unidades_aprobadas = e.unidades_cursadas
                 THEN 1 ELSE 0 END) AS `Aprobados`,
@@ -512,5 +512,5 @@ SELECT pl.nombre AS `Plan`, e.semestre AS `semestre`, e.bloque AS `bloque`,
                 THEN 1 ELSE 0 END) AS `Bajas`
 FROM estado_estudiante e
 JOIN tbl_planes pl ON pl.id_plan = e.id_plan
-GROUP BY pl.id_plan, pl.nombre, e.id_semestre, e.semestre, e.id_bloque, e.bloque, e.periodo
-ORDER BY pl.nombre, pl.id_plan, e.semestre, e.bloque, e.periodo;
+GROUP BY pl.id_plan, pl.nombre, e.id_semestre, e.semestre, e.id_bloque, e.bloque, e.id_programa, e.nombre_tentativo, e.tipo, e.periodo
+ORDER BY pl.nombre, pl.id_plan, e.semestre, e.bloque, e.nombre_tentativo, e.id_programa, e.periodo;

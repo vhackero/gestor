@@ -27,6 +27,52 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 
 @Repository
 public class DispersionesRepository implements IDispersionesRepository {
+    @Override
+    @SuppressWarnings("unchecked")
+    public java.util.List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionPendienteDTO> consultarDetallesPendientesDispersion(
+            java.util.List<Long> personas, mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MatricularDispersionDTO solicitud) {
+        java.util.Map<Long, mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionPendienteDTO> alumnos = new java.util.LinkedHashMap<>();
+        if (personas == null || personas.isEmpty() || solicitud == null) return new java.util.ArrayList<>();
+        java.util.List<Long> unicos = new java.util.ArrayList<>(new java.util.LinkedHashSet<>(personas));
+        boolean compartidos = Boolean.TRUE.equals(solicitud.getMatriculacionCompartidos());
+        String sql = "SELECT p.id_persona AS id_persona, p.sso_idUsuario AS matricula, "
+            + "CONCAT_WS(' ',p.sso_nombre,p.sso_apellidoPaterno,p.sso_apellidoMaterno) AS nombre_alumno, "
+            + "(SELECT MIN(c.sso_correoElectronico) FROM rel_persona_correo c WHERE c.id_persona=p.id_persona AND c.id_tipo_correo=1 AND c.activo=1) AS correo_institucional, "
+            + "pl.nombre AS nombre_plan, fd.nombre_tentativo AS nombre_programa, fd.cve_programa AS clave_programa, "
+            + "sem.nombre AS nombre_semestre, b.nombre AS nombre_bloque, CONCAT(tc.nombre,' > ',tpi.nombre) AS nombre_proceso, ti.fecha_registro AS fecha_inscripcion "
+            + "FROM tbl_inscripciones ti JOIN tbl_persona p ON p.id_persona=ti.Idpersona "
+            + "JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa=ti.idprograma AND fd.id_plan=ti.idplan "
+            + "JOIN tbl_planes pl ON pl.id_plan=ti.idplan "
+            + "LEFT JOIN tbl_malla_curricular b ON b.id=fd.id_eje_capacitacion "
+            + "LEFT JOIN tbl_malla_curricular sem ON sem.id=b.id_padre "
+            + "JOIN tbl_procesos_inscripcion tpi ON tpi.proceso_inscripcion_id=:proceso "
+            + "JOIN tbl_convocatoria tc ON tc.convocatoria_id=tpi.convocatoria_id "
+            + "WHERE ti.Idpersona IN (:personas) AND ti.fecha_registro BETWEEN tpi.fecha_inicio AND tpi.fecha_fin "
+            + (compartidos ? " AND ti.asignatura LIKE CONCAT('%',TRIM(:nombre),'%') AND :bloque LIKE CONCAT('%',ti.bloque,'%') "
+                : " AND ti.idprograma=:programa ")
+            + " AND NOT EXISTS (SELECT 1 FROM rel_persona_bajas baja WHERE baja.id_persona=ti.Idpersona "
+            + "AND baja.id_inscripcion=ti.id AND baja.id_proceso_inscripcion=tpi.proceso_inscripcion_id AND baja.contabilizar=1) "
+            + condicionSeriacionCumplida("ti.Idpersona", "fd")
+            + "ORDER BY p.sso_idUsuario, CASE WHEN ti.idprograma=:programa THEN 0 ELSE 1 END, ti.idprograma, ti.fecha_registro DESC, ti.id DESC";
+        for (int desde=0; desde<unicos.size(); desde+=500) {
+            Query consulta = entityManager.createNativeQuery(sql).setParameter("proceso",solicitud.getIdProcesoInscripcion())
+                .setParameter("programa",solicitud.getIdPrograma()).setParameter("personas",unicos.subList(desde,Math.min(desde+500,unicos.size())));
+            if (compartidos) consulta.setParameter("nombre",solicitud.getNombreProgramaSeleccionado()).setParameter("bloque",solicitud.getBloquePrograma());
+            List<Object[]> filas=consulta.getResultList();
+            for (Object[] f:filas) {
+                Long persona=((Number)f[0]).longValue();
+                if (alumnos.containsKey(persona)) continue;
+                mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionPendienteDTO dto=new mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionPendienteDTO();
+                dto.setIdPersona(persona);dto.setMatricula(textoPendiente(f[1]));dto.setNombre(textoPendiente(f[2]));dto.setCorreo(textoPendiente(f[3]));
+                dto.setPlan(textoPendiente(f[4]));dto.setPrograma(textoPendiente(f[5]));dto.setClave(textoPendiente(f[6]));dto.setSemestre(textoPendiente(f[7]));
+                dto.setBloque(textoPendiente(f[8]));dto.setProceso(textoPendiente(f[9]));dto.setFechaInscripcion((java.util.Date)f[10]);alumnos.put(persona,dto);
+            }
+        }
+        java.util.List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionPendienteDTO> resultado=new java.util.ArrayList<>(alumnos.values());
+        resultado.sort(java.util.Comparator.comparing(mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionPendienteDTO::getMatricula));
+        return resultado;
+    }
+    private static String textoPendiente(Object valor) { return valor == null ? "" : valor.toString(); }
 
 	@Autowired
 	public EntityManager entityManager;

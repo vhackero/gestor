@@ -1,5 +1,25 @@
 # Pendientes de matrícula en dispersiones existentes
 
+## Descarga en dispersión general y grupos compartidos
+
+### Carga inicial y cargador de descarga
+
+La limpieza general de campos ya no consulta los procesos de matrícula existente. Esa consulta ejecuta comprobaciones de inscripciones, bajas y seriación que no se necesitan para mostrar el formulario general. Sólo se carga al entrar en matrícula existente o al usar su botón específico de limpiar; se elimina también la carga duplicada al entrar en esa modalidad.
+
+Las tres descargas de pendientes se generan por AJAX con el diálogo Cargando visible. Sólo cuando el XLSX está preparado se inicia una segunda petición de descarga, sin repetir la consulta ni la generación. El cargador se cierra al completar la generación, sin pendientes, ante un error de servidor controlado o un error AJAX. La descarga final evita validar filtros ajenos a la acción. El XLSX generado se conserva en memoria en la vista hasta sustituirlo o cerrar la vista; la escritura de filas sigue utilizando SXSSF.
+
+Validación de este ajuste: compilación Java 8, XML de las cuatro vistas y cuatro pruebas satisfactorias, incluida la limpieza general sin consultas de otros módulos, la limpieza de matrícula existente con sus catálogos, preparación/lectura del archivo y prevención de descarga de un archivo anterior cuando no hay pendientes. La mejora de tiempo y el comportamiento visual deben comprobarse tras desplegar; no se midió el tiempo de la pantalla en WildFly.
+
+Las tablas de **Dispersión** y **Dispersión en grupos compartidos** también incluyen el icono **Descargar Excel de alumnos pendientes**, junto a Matricular usuarios. Se permite consultar pendientes antes de terminar de generar los grupos; la descarga no crea grupos ni matrícula y no modifica datos.
+
+La exportación consulta nuevamente los candidatos mediante los mismos selectores que emplea la matrícula de cada modalidad (`obtenerPersonasMatriculacion` y `obtenerPersonasMatriculacionCompartidos`). Conserva sus reglas vigentes de inscripción, proceso, bajas, seriación y participación previa. No sustituye esas reglas por las del módulo de dispersión existente.
+
+Los datos complementarios se consultan por lotes de hasta 500 alumnos, con una sola fila por persona. En compartidos se conserva el plan y la asignatura de inscripción del alumno, aunque el grupo se origine en otro plan. Si una persona tiene varias inscripciones coincidentes, se prioriza el programa de la dispersión y luego el identificador de programa, tomando la inscripción más reciente dentro de éste. Se reutiliza el formato y el generador XLSX existente. En estas modalidades el proceso origen y destino del archivo son el mismo proceso seleccionado.
+
+No hay migración de BD ni permisos nuevos: el acceso conserva el del módulo correspondiente. Si no hay candidatos se informa que no existen alumnos elegibles pendientes y no se genera un archivo vacío.
+
+Validación de la ampliación: compilación directa Java 8, validación XML de ambas vistas y tres pruebas satisfactorias (consultas anteriores, descarga general/compartida con dos planes y duplicados, y escritura/lectura de XLSX). Las consultas se ejecutaron en MariaDB con tablas temporales; no se matricularon usuarios ni se alteraron registros académicos persistentes. Falta desplegar y verificar la descarga desde el navegador.
+
 ## Comportamiento
 
 La columna **Alumnos pendientes de matricular**, la selección final de matrícula y el Excel aplican el mismo criterio en `DispersionPendientesSql`:

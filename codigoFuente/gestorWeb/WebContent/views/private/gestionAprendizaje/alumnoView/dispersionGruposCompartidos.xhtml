@@ -202,6 +202,11 @@
 							icon="fa fa-graduation-cap" title="Matricular usuarios"
 							styleClass="btn-icon btn btn-default"
 							disabled="#{not dispercion.matricularHabilitado}" />
+                            <p:commandButton ajax="true" global="false" process="@this"
+                                action="#{dispersionesBean.descargarPendientesDispersion(dispercion, true)}"
+                                icon="fa fa-file-excel-o" title="Descargar Excel de alumnos pendientes"
+                                styleClass="btn-icon btn btn-default" disabled="#{dispercion.idDispersion == null}" onstart="PF('dialogLayout').show()" onerror="PF('dialogLayout').hide()"
+                                oncomplete="PF('dialogLayout').hide(); if (args &amp;&amp; args.excelPendientesListo) { document.getElementById('formBusquedaDispersiones:descargarExcelPendientes').click(); }" />
 					</p:column>
 				</p:dataTable>
 			</div>

@@ -17,6 +17,8 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescrip
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 
 public interface IDispersionesRepository {
+    java.util.List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionPendienteDTO> consultarDetallesPendientesDispersion(java.util.List<Long> personas, mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MatricularDispersionDTO solicitud);
+
 	
 	public List<ProcesosInscripcion> consultarProcesoInscripcion(DispersionesParam dispercionParametros);
 	
