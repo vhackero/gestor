@@ -458,17 +458,15 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
          */
         List<InscripcionMateriasDTO> materiasFuente = estado.getMateriasDisponibles() != null
                 ? new ArrayList<InscripcionMateriasDTO>(estado.getMateriasDisponibles())
-                : null;
+                : new ArrayList<InscripcionMateriasDTO>();
         if (Boolean.TRUE.equals(dto.getInscripcionVigente())
-                && (materiasFuente == null || materiasFuente.isEmpty())) {
+                && materiasFuente.isEmpty()) {
             materiasFuente = construirMateriasSimuladas(contextoBase, programasPlan, materiasEnCurso, ubicacionesPlan);
-        }
-        if (materiasFuente == null) {
-            dto.setUnidades(unidades);
-            return;
         }
 
         incorporarMateriasEnCursoNoPresentes(materiasFuente, materiasEnCurso, programasPlan, contextoBase,
+                ubicacionesPlan);
+        incorporarMateriasReprobadasNoPresentes(materiasFuente, estado, programasPlan, contextoBase,
                 ubicacionesPlan);
 
         for (InscripcionMateriasDTO materia : materiasFuente) {
@@ -512,6 +510,48 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             materia.setPerfil(null);
             materiasFuente.add(materia);
             idsPresentes.add(materiaEnCurso.getIdPrograma());
+        }
+    }
+
+    /** La oferta no es el universo de regularización: conserva reprobadas no ofertadas como consulta. */
+    private void incorporarMateriasReprobadasNoPresentes(List<InscripcionMateriasDTO> materiasFuente,
+            EstadoAcademicoDTO estado, Map<Long, FichaDescProgramaDTO> programasPlan,
+            InscripcionContextoDTO contextoBase, Map<Long, UbicacionCurricular> ubicacionesPlan) {
+        if (materiasFuente == null || estado == null || estado.getMateriasReprobadas() == null) return;
+        Set<Long> idsPresentes = new HashSet<Long>();
+        Set<String> clavesPresentes = new HashSet<String>();
+        for (InscripcionMateriasDTO materia : materiasFuente) {
+            if (materia == null) continue;
+            if (materia.getIdPrograma() != null) idsPresentes.add(materia.getIdPrograma());
+            String clave = normalizarTexto(materia.getClavePrograma());
+            if (!clave.isEmpty()) clavesPresentes.add(clave);
+        }
+        for (InscripcionMateriasReprobadasDTO reprobada : estado.getMateriasReprobadas()) {
+            if (reprobada == null) continue;
+            String clave = normalizarTexto(reprobada.getClavePrograma());
+            if ((reprobada.getIdPrograma() != null && idsPresentes.contains(reprobada.getIdPrograma()))
+                    || (!clave.isEmpty() && clavesPresentes.contains(clave))) continue;
+            FichaDescProgramaDTO programa = reprobada.getIdPrograma() != null && programasPlan != null
+                    ? programasPlan.get(reprobada.getIdPrograma()) : null;
+            UbicacionCurricular ubicacion = reprobada.getIdPrograma() != null && ubicacionesPlan != null
+                    ? ubicacionesPlan.get(reprobada.getIdPrograma()) : null;
+            InscripcionMateriasDTO materia;
+            if (programa != null && ubicacion != null) {
+                materia = construirMateriaSimulada(programa, contextoBase, ubicacion, true);
+            } else {
+                materia = new InscripcionMateriasDTO();
+                materia.setIdPrograma(reprobada.getIdPrograma());
+                materia.setClavePrograma(reprobada.getClavePrograma());
+                materia.setNombreTentativoPrograma(reprobada.getNombrePrograma());
+                materia.setTipoPrograma(reprobada.getTipoPrograma());
+                materia.setEstructura(reprobada.getEstructura());
+                materia.setSubestructura(reprobada.getSubestructura());
+                materia.setIdProgramaAntecedente(reprobada.getIdProgramaAntecedente());
+                materia.setPerfil("HISTORIAL_REPROBADA_SIN_MALLA");
+            }
+            materiasFuente.add(materia);
+            if (materia.getIdPrograma() != null) idsPresentes.add(materia.getIdPrograma());
+            if (!clave.isEmpty()) clavesPresentes.add(clave);
         }
     }
 
