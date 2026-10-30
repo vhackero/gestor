@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MetadatosConsultaAsistenteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DiagnosticoAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EscenarioCargaDTO;
@@ -130,9 +132,43 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
                 construirProyeccionSiguientePeriodo(dto, materiasEnCurso, contextoBase, programasPlan, ubicacionesPlan));
         dto.setOportunidades(construirOportunidades(dto));
         dto.setEscenarios(construirEscenarios(dto));
+        dto.setMetadatosConsulta(construirMetadatosConsulta(dto, contextoBase));
         dto.setAuditoriaDecisionId(null);
 
         return dto;
+    }
+
+    /** Construye el corte y la disponibilidad sin convertir ausencia de datos en un resultado académico. */
+    private MetadatosConsultaAsistenteDTO construirMetadatosConsulta(AsistenteInscripcionContextoDTO contexto,
+            InscripcionContextoDTO contextoBase) {
+        MetadatosConsultaAsistenteDTO metadatos = new MetadatosConsultaAsistenteDTO();
+        metadatos.setPeriodoActual(contexto.getPeriodoActivo());
+        if (contexto.getTrayectoriaPermanencia() != null) {
+            metadatos.setFechaCorte(contexto.getTrayectoriaPermanencia().getFechaCorte());
+            metadatos.setEstadoTrayectoria(Boolean.TRUE.equals(contexto.getTrayectoriaPermanencia().getDeterminable())
+                    && contexto.getTrayectoriaPermanencia().getMensajeRevision() == null
+                            ? EstadoFuenteConsultaAsistente.DISPONIBLE
+                            : EstadoFuenteConsultaAsistente.PARCIAL);
+        }
+        boolean expedienteDisponible = contextoBase != null && contextoBase.getEstadoAcademico() != null;
+        metadatos.setEstadoExpediente(expedienteDisponible ? EstadoFuenteConsultaAsistente.DISPONIBLE
+                : EstadoFuenteConsultaAsistente.PARCIAL);
+        if (!expedienteDisponible) metadatos.getCamposPendientes().add("Expediente académico");
+        // Una oferta inexistente es un dato válido; sólo el valor ausente deja la fuente incompleta.
+        if (contexto.getOfertaVigenteReal() == null) {
+            metadatos.setEstadoOferta(EstadoFuenteConsultaAsistente.PARCIAL);
+            metadatos.getCamposPendientes().add("Oferta vigente");
+        } else {
+            metadatos.setEstadoOferta(EstadoFuenteConsultaAsistente.DISPONIBLE);
+        }
+        try {
+            ConfiguracionEvaluacionCurricularV2DTO configuracion = configuracionEvaluacionCurricularV2Service
+                    .obtenerConfiguracion();
+            if (configuracion != null) metadatos.setVersionReglas(configuracion.getVersionReglas());
+        } catch (RuntimeException ex) {
+            metadatos.getCamposPendientes().add("Configuración normativa V2");
+        }
+        return metadatos;
     }
 
     private TrayectoriaPermanenciaDTO construirTrayectoriaPermanencia(Long idPersona, InscripcionContextoDTO contextoBase) {

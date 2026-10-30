@@ -4,9 +4,13 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Calendar;
+
 import org.testng.annotations.Test;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MetadatosConsultaAsistenteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoReglaCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
@@ -100,6 +104,26 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 	public void clasificaOptativaActualComoAdicionalSoloConMarcaCurricularExplicita() {
 		assertEquals(TablaCurricularAsistidaBean.calcularOptativasRequeridasActuales(1, 0), 1);
 		assertEquals(TablaCurricularAsistidaBean.calcularOptativasRequeridasActuales(2, 2), 0);
+	}
+
+	@Test
+	public void muestraCorteYEstadosDeFuenteSinConvertirParcialEnCero() {
+		MetadatosConsultaAsistenteDTO metadatos = new MetadatosConsultaAsistenteDTO();
+		Calendar fechaCorte = Calendar.getInstance();
+		fechaCorte.clear();
+		fechaCorte.set(2026, Calendar.OCTOBER, 30);
+		metadatos.setFechaCorte(fechaCorte.getTime());
+		metadatos.setVersionReglas("PE2027-V1");
+		metadatos.setEstadoExpediente(EstadoFuenteConsultaAsistente.DISPONIBLE);
+		metadatos.setEstadoTrayectoria(EstadoFuenteConsultaAsistente.PARCIAL);
+		metadatos.setEstadoOferta(EstadoFuenteConsultaAsistente.VACIO);
+		metadatos.setEstadoEvaluacionV2(EstadoFuenteConsultaAsistente.DISPONIBLE);
+
+		String resumen = TablaCurricularAsistidaBean.resumirFuentesConsulta(metadatos);
+		assertTrue(resumen.contains("30/10/2026"));
+		assertTrue(resumen.contains("Expediente: disponible"));
+		assertTrue(resumen.contains("Trayectoria: parcial"));
+		assertTrue(resumen.contains("Oferta: sin registros"));
 	}
 
 	private TrazaReglaAplicadaV2DTO trazaCausal(CodigoReglaCurricularV2 regla) {

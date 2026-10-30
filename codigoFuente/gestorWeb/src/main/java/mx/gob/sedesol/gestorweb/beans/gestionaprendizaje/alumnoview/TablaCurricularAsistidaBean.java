@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Calendar;
+import java.text.SimpleDateFormat;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,6 +26,8 @@ import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoAcademicoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MetadatosConsultaAsistenteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EscenarioProyeccionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
@@ -233,9 +236,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 			logger.info("[ASISTENTE_V2] Evaluando reglas curriculares");
 			resultadoEvaluacionV2 = asistenteCurricularV2Facade.evaluarSombra(contexto);
 			if (resultadoEvaluacionV2 == null) {
+				actualizarEstadoEvaluacionV2(EstadoFuenteConsultaAsistente.ERROR);
 				logger.warn("[ASISTENTE_V2] No fue posible obtener el resultado de la evaluacion curricular");
 				return;
 			}
+			actualizarEstadoEvaluacionV2(EstadoFuenteConsultaAsistente.DISPONIBLE);
 			for (DecisionUnidadCurricularV2DTO decision : resultadoEvaluacionV2.getDecisiones()) {
 				if (decision != null && decision.getIdPrograma() != null) decisionesV2PorPrograma.put(decision.getIdPrograma(), decision);
 			}
@@ -243,7 +248,42 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 			aplicarLimiteCargaV2AProyeccion();
 			logger.info("[ASISTENTE_V2] Resultado de evaluacion curricular obtenido correctamente");
 		} catch (Exception e) {
+			actualizarEstadoEvaluacionV2(EstadoFuenteConsultaAsistente.ERROR);
 			logger.warn("[ASISTENTE_V2] Error al evaluar las reglas curriculares", e);
+		}
+	}
+
+	private void actualizarEstadoEvaluacionV2(EstadoFuenteConsultaAsistente estado) {
+		if (contexto == null || contexto.getMetadatosConsulta() == null) return;
+		contexto.getMetadatosConsulta().setEstadoEvaluacionV2(estado);
+	}
+
+	/** Resumen de origen para evitar presentar un corte parcial como información completa. */
+	public String getResumenFuentesSituacion() {
+		return resumirFuentesConsulta(contexto != null ? contexto.getMetadatosConsulta() : null);
+	}
+
+	static String resumirFuentesConsulta(MetadatosConsultaAsistenteDTO metadatos) {
+		if (metadatos == null) return "Información de consulta parcial: no se identificó el corte de datos.";
+		String corte = metadatos.getFechaCorte() == null ? "corte no disponible"
+				: "corte " + new SimpleDateFormat("dd/MM/yyyy").format(metadatos.getFechaCorte());
+		String version = StringUtils.isBlank(metadatos.getVersionReglas()) ? "versión normativa no disponible"
+				: "versión " + metadatos.getVersionReglas();
+		return "Consulta con " + corte + " · " + version + " · Expediente: "
+				+ etiquetaEstadoFuente(metadatos.getEstadoExpediente()) + " · Trayectoria: "
+				+ etiquetaEstadoFuente(metadatos.getEstadoTrayectoria()) + " · Oferta: "
+				+ etiquetaEstadoFuente(metadatos.getEstadoOferta()) + " · Evaluación curricular: "
+				+ etiquetaEstadoFuente(metadatos.getEstadoEvaluacionV2()) + ".";
+	}
+
+	private static String etiquetaEstadoFuente(EstadoFuenteConsultaAsistente estado) {
+		if (estado == null) return "no disponible";
+		switch (estado) {
+		case DISPONIBLE: return "disponible";
+		case VACIO: return "sin registros";
+		case DESACTUALIZADO: return "desactualizada";
+		case ERROR: return "con error";
+		default: return "parcial";
 		}
 	}
 

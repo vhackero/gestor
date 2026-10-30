@@ -322,6 +322,12 @@
                 background: #fff0d9;
                 border: 1px solid #e8bd79;
             }
+            .consulta-fuentes {
+                color: #6a7780;
+                font-size: 11px;
+                line-height: 1.35;
+                margin: 0 0 12px;
+            }
             .avance-grid {
                 display: grid;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1892,6 +1898,7 @@
                                                 <p:commandButton value="#{tablaCurricularAsistidaBean.conteoUdPendientesAlerta eq 1 ? 'Consultar UD pendiente' : 'Consultar UDs pendientes'}" type="button" styleClass="btn btn-primary" onclick="PF('udIrregularesDialog').show(); return false;" />
                                             </div>
                                         </ui:fragment>
+                                        <div class="consulta-fuentes">#{tablaCurricularAsistidaBean.resumenFuentesSituacion}</div>
 
                                         <div class="avance-grid">
                                             <div class="avance-panel avance-panel-creditos">

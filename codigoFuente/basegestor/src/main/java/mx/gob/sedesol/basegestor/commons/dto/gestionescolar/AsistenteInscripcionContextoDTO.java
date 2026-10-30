@@ -40,6 +40,7 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
     private ProyeccionSiguientePeriodoDTO proyeccionSiguientePeriodo;
     private OportunidadAcademicaDTO oportunidades;
     private TrayectoriaPermanenciaDTO trayectoriaPermanencia;
+    private MetadatosConsultaAsistenteDTO metadatosConsulta;
 
     private List<String> reglasActivas;
     private List<String> pendientesCriticos;
@@ -277,6 +278,14 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
 
     public void setTrayectoriaPermanencia(TrayectoriaPermanenciaDTO trayectoriaPermanencia) {
         this.trayectoriaPermanencia = trayectoriaPermanencia;
+    }
+
+    public MetadatosConsultaAsistenteDTO getMetadatosConsulta() {
+        return metadatosConsulta;
+    }
+
+    public void setMetadatosConsulta(MetadatosConsultaAsistenteDTO metadatosConsulta) {
+        this.metadatosConsulta = metadatosConsulta;
     }
 
     public List<String> getReglasActivas() {
