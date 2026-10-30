@@ -8,7 +8,8 @@ import java.util.List;
 
 /**
  * Contexto de sólo lectura para comparar el motor vigente con la evaluación V2.
- * No representa una solicitud de inscripción ni conserva una selección del usuario.
+ * No representa una solicitud de inscripción. Puede transportar UD candidatas
+ * exclusivamente para evaluar una propuesta en sombra.
  */
 public class ContextoEvaluacionCurricularV2DTO implements Serializable {
 
@@ -105,6 +106,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private List<Long> idsObligatoriasRequeridasEgreso = new ArrayList<Long>();
     private List<Long> idsSeriadasPrimerosSeisSemestres = new ArrayList<Long>();
     private List<Long> componentesFinalesSolicitados = new ArrayList<Long>();
+    /** UD que se pretenden habilitar o evaluar; no genera una inscripción. */
+    private List<Long> idsUnidadesPretendidas = new ArrayList<Long>();
     private Date fechaEvaluacion;
     private List<UnidadEvaluacionCurricularV2DTO> unidades = new ArrayList<UnidadEvaluacionCurricularV2DTO>();
 
@@ -264,6 +267,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setIdsSeriadasPrimerosSeisSemestres(List<Long> valores) { idsSeriadasPrimerosSeisSemestres = valores == null ? new ArrayList<Long>() : valores; }
     public List<Long> getComponentesFinalesSolicitados() { return componentesFinalesSolicitados; }
     public void setComponentesFinalesSolicitados(List<Long> valores) { componentesFinalesSolicitados = valores == null ? new ArrayList<Long>() : valores; }
+    public List<Long> getIdsUnidadesPretendidas() { return idsUnidadesPretendidas; }
+    public void setIdsUnidadesPretendidas(List<Long> valores) { idsUnidadesPretendidas = valores == null ? new ArrayList<Long>() : valores; }
     public Date getFechaEvaluacion() { return fechaEvaluacion; }
     public void setFechaEvaluacion(Date fechaEvaluacion) { this.fechaEvaluacion = fechaEvaluacion; }
     public List<UnidadEvaluacionCurricularV2DTO> getUnidades() { return unidades; }

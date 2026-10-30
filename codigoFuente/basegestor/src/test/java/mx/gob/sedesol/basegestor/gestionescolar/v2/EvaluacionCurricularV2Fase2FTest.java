@@ -120,7 +120,7 @@ public class EvaluacionCurricularV2Fase2FTest {
         ResultadoEvaluacionCurricularV2DTO r = evaluar(c);
         assertEquals(r.getSituacionAcademicaCalculada(), "REGULAR");
         assertEquals(r.getOportunidadesMejoraUtilizadas(), Integer.valueOf(1));
-        assertEquals(mejora(r, 13L).getEstado(), EstadoMejoraPromedioV2.ELEGIBLE_EN_SOMBRA);
+        assertEquals(mejora(r, 13L).getEstado(), EstadoMejoraPromedioV2.NO_ELEGIBLE);
         assertEquals(mejora(r, 13L).getCalificacionFavorable(), Double.valueOf(9.2));
         assertEquals(intentos(r, 13L).getEstadoLimite(), EstadoLimiteIntentosV2.ACREDITADA_SIN_OPORTUNIDAD_REQUERIDA);
     }
@@ -130,7 +130,7 @@ public class EvaluacionCurricularV2Fase2FTest {
         c.setOportunidadesMejoraUtilizadas(Integer.valueOf(3));
         ResultadoEvaluacionCurricularV2DTO r = evaluar(c);
         assertEquals(r.getCantidadReprobadasVigentes(), Integer.valueOf(0));
-        assertEquals(mejora(r, 14L).getEstado(), EstadoMejoraPromedioV2.LIMITE_MEJORA_AGOTADO);
+        assertEquals(mejora(r, 14L).getEstado(), EstadoMejoraPromedioV2.NO_ELEGIBLE);
         assertEquals(intentos(r, 14L).getIntentosFallidos(), Integer.valueOf(0));
     }
 

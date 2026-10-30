@@ -37,11 +37,11 @@ public class EvaluacionCurricularV2Fase9CTest {
         assertEquals(carga(contextoConOptativas(9)).getEstadoRequisitosEgresoAcademicoRn94(), EstadoRequisitosEgresoAcademicoV2.REQUISITOS_ACADEMICOS_EGRESO_CUMPLIDOS);
     }
 
-    @Test public void f9CU04ElectivaNoSeConfundeConOptativaYUnaBasta() {
+    @Test public void f9CU04NoExisteElectivaMinimaParaEgreso() {
         ContextoEvaluacionCurricularV2DTO c = contextoCompleto(); c.getUnidades().remove(c.getUnidades().size() - 1);
-        assertEquals(carga(c).getEstadoRequisitosEgresoAcademicoRn94(), EstadoRequisitosEgresoAcademicoV2.REQUISITOS_ACADEMICOS_EGRESO_PENDIENTES);
+        assertEquals(carga(c).getEstadoRequisitosEgresoAcademicoRn94(), EstadoRequisitosEgresoAcademicoV2.REQUISITOS_ACADEMICOS_EGRESO_CUMPLIDOS);
         c.getUnidades().add(unidad(99L, "Electiva", 5, EstadoUnidadCurricularV2.ACREDITADA));
-        assertEquals(carga(c).getElectivasAcreditadasRn94(), Integer.valueOf(1));
+        assertEquals(carga(c).getElectivasAcreditadasRn94(), Integer.valueOf(0));
     }
 
     @Test public void f9CU05AcreditadaDuplicadaCuentaUnaVezYEstadoVigentePrevalece() {

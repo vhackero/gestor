@@ -78,12 +78,12 @@ public class SimuladorCurricularV2ServiceTest {
   mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ResultadoSimulacionDTO r=servicio(f,resultadoConCarga(true,8,"REGULAR")).simularSombra(9L,seleccion(3));
   assertFalse(r.getValida());assertTrue(contieneMotivo(r,"OPTATIVA_MISMA_CLAVE"));assertTrue(contieneMotivo(r,"OPTATIVA_DUPLICADA_EN_BLOQUE"));
  }
- @Test public void f12A1B09ComplementosConservanMaximoElectivasYPrioridad() throws Exception {
+ @Test public void f12A1B09RetiroElectivasConservaAdvertenciaPrioritaria() throws Exception {
   AsistenteInscripcionContextoDTO f=fuenteConUnidades(2);f.getUnidades().get(0).setTipoUd("ELECTIVA");f.getUnidades().get(1).setTipoUd("ELECTIVA");f.getUnidades().get(1).setPrioritaria(Boolean.TRUE);
   EstadoAcademicoDTO estado=new EstadoAcademicoDTO();estado.setCantidadMaximaMateriasElectivas(Long.valueOf(1));f.getContextoBase().setEstadoAcademico(estado);
   mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ResultadoSimulacionDTO r=servicio(f,resultadoConCarga(true,8,"REGULAR")).simularSombra(9L,Arrays.asList(1L));
   assertTrue(r.getValida());assertEquals(r.getAdvertencias().size(),1);r=servicio(f,resultadoConCarga(true,8,"REGULAR")).simularSombra(9L,seleccion(2));
-  assertFalse(r.getValida());assertTrue(contieneMotivo(r,"ELECTIVA_MAXIMA_EXCEDIDA"));
+  assertTrue(r.getValida());assertFalse(contieneMotivo(r,"ELECTIVA_MAXIMA_EXCEDIDA"));
  }
  @DataProvider(name="motivosV2") public Object[][] motivosV2(){return new Object[][]{{CodigoMotivoCurricularV2.REPROBACION_ACUMULADA},{CodigoMotivoCurricularV2.SERIACION_INDIRECTA},{CodigoMotivoCurricularV2.PENDIENTE_NO_CURSADA},{CodigoMotivoCurricularV2.BAJA_PARCIAL},{CodigoMotivoCurricularV2.SIN_OFERTA},{CodigoMotivoCurricularV2.REQUISITO_CURRICULAR_PENDIENTE}};}
  @Test(dataProvider="motivosV2") public void f12A1B06PropagaRestriccionesDelMotorSinReinterpretarlas(CodigoMotivoCurricularV2 motivo) throws Exception {

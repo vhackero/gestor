@@ -92,9 +92,9 @@ public class EvaluacionCurricularV2Fase8BTest {
         EvaluacionCargaAcademicaV2DTO carga = carga(contexto); assertEquals(relacion(carga).getDecision(), EstadoCumplimientoSeriacionV2.CUMPLIDA); assertTrue(carga.getReglasRelacionadas().contains(mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoReglaCurricularV2.RN_6_1));
     }
 
-    @Test public void f8BU17S5AS6NoReactivaRn61YPermiteRn82() {
+    @Test public void f8BU17CandidataS5ActivaRn61AunqueObjetivoSeaS6() {
         ContextoEvaluacionCurricularV2DTO contexto = contexto(5, EstadoUnidadCurricularV2.ACREDITADA); contexto.setSemestreObjetivo(Integer.valueOf(6));
-        EvaluacionCargaAcademicaV2DTO carga = carga(contexto); assertTrue(Boolean.TRUE.equals(carga.getAplicaRn82())); assertFalse(Boolean.TRUE.equals(carga.getAplicaCtr01()));
+        EvaluacionCargaAcademicaV2DTO carga = carga(contexto); assertTrue(Boolean.TRUE.equals(carga.getAplicaRn82())); assertTrue(Boolean.TRUE.equals(carga.getAplicaCtr01()));
     }
 
     @Test public void f8BU18RelacionIndirectaSeConservaParaFasePosteriorSinInventarCadena() {

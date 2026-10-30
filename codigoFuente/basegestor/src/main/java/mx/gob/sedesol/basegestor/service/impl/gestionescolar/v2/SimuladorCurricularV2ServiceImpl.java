@@ -40,6 +40,10 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
         AsistenteInscripcionContextoDTO fuente = asistenteInscripcionService.obtenerContextoAsistido(idPersona);
         if (fuente == null) throw new InscripcionException("No existe contexto SIGIE para simular.");
         ContextoEvaluacionCurricularV2DTO contexto = adaptador.construirDesdeAsistente(fuente);
+        List<Long> seleccionados = idsSeleccionados == null ? Collections.<Long>emptyList()
+                : new ArrayList<Long>(new LinkedHashSet<Long>(idsSeleccionados));
+        // La selección sólo viaja como candidata para la evaluación sombra.
+        contexto.setIdsUnidadesPretendidas(seleccionados);
         LOGGER.info("[SIMULADOR_V2] Evaluando reglas curriculares");
         ResultadoEvaluacionCurricularV2DTO evaluacion = evaluador.evaluarSombra(contexto);
         if (evaluacion == null) {
@@ -48,8 +52,6 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
             LOGGER.info("[SIMULADOR_V2] Resultado de evaluacion curricular obtenido correctamente");
         }
         ResultadoSimulacionDTO resultado = new ResultadoSimulacionDTO();
-        List<Long> seleccionados = idsSeleccionados == null ? Collections.<Long>emptyList()
-                : new ArrayList<Long>(new LinkedHashSet<Long>(idsSeleccionados));
         resultado.setUnidadesSeleccionadas(seleccionados); resultado.setEvaluacionCurricularV2(evaluacion);
         List<UnidadDecisionInscripcionDTO> seleccion = obtenerSeleccion(fuente, seleccionados);
         for (UnidadDecisionInscripcionDTO unidad : seleccion) {
@@ -114,7 +116,6 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
             List<UnidadDecisionInscripcionDTO> seleccion, List<Long> seleccionados,
             ResultadoSimulacionDTO resultado) {
         validarOptativasComplementarias(seleccion, resultado);
-        validarMaximoElectivasComplementario(fuente, seleccion, resultado);
         advertirPrioritariasOmitidas(fuente, seleccionados, resultado);
     }
 
@@ -144,20 +145,6 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
                     + " fue seleccionada " + entrada.getValue() + " veces.",
                     "Sustituye las repeticiones por otra UD válida.", Boolean.TRUE));
         }
-    }
-
-    private void validarMaximoElectivasComplementario(AsistenteInscripcionContextoDTO fuente,
-            List<UnidadDecisionInscripcionDTO> seleccion, ResultadoSimulacionDTO resultado) {
-        if (fuente == null || fuente.getContextoBase() == null || fuente.getContextoBase().getEstadoAcademico() == null) return;
-        Long maximo = fuente.getContextoBase().getEstadoAcademico().getCantidadMaximaMateriasElectivas();
-        if (maximo == null) return;
-        int electivas = 0;
-        for (UnidadDecisionInscripcionDTO unidad : seleccion) if (unidad != null && unidad.getTipoUd() != null
-                && InscripcionUtils.esMateriaElectiva(unidad.getTipoUd())) electivas++;
-        if (electivas > maximo.longValue()) resultado.getMotivos().add(new MotivoDecisionDTO(
-                "ELECTIVA_MAXIMA_EXCEDIDA", "ALTA", "Máximo de UD electivas excedido",
-                "Validación complementaria: seleccionaste " + electivas + " electivas y el máximo configurado es " + maximo + ".",
-                "Reduce las electivas seleccionadas.", Boolean.TRUE));
     }
 
     private void advertirPrioritariasOmitidas(AsistenteInscripcionContextoDTO fuente,

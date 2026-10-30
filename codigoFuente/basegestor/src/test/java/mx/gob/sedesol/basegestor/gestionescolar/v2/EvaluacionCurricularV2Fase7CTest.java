@@ -21,13 +21,13 @@ public class EvaluacionCurricularV2Fase7CTest {
         assertEquals(carga(base(4)).getEstadoPrincipioOptativaElectiva(), EstadoPrincipioOptativaElectivaV2.NO_APLICA);
     }
 
-    @Test public void f7CU02OptativaYElectivaReprobadasAlimentanIrregularidadComun() {
+    @Test public void f7CU02HistoricoElectivaNoCreaCategoriaVigente() {
         ContextoEvaluacionCurricularV2DTO contexto = base(4); contexto.getUnidades().add(reprobada(1L, "Optativa")); contexto.getUnidades().add(reprobada(2L, "Electiva"));
         ResultadoEvaluacionCurricularV2DTO resultado = servicio.evaluarSombra(contexto);
         assertEquals(resultado.getSituacionAcademica(), "IRREGULAR");
         assertEquals(resultado.getCantidadReprobadasVigentes(), Integer.valueOf(2));
         assertEquals(resultado.getEvaluacionCargaAcademica().getCantidadOptativasReprobadasRn73(), Integer.valueOf(1));
-        assertEquals(resultado.getEvaluacionCargaAcademica().getCantidadElectivasReprobadasRn73(), Integer.valueOf(1));
+        assertEquals(resultado.getEvaluacionCargaAcademica().getCantidadElectivasReprobadasRn73(), Integer.valueOf(0));
     }
 
     @Test public void f7CU03TresCombinadasNoActivanRn64NiBloqueoAutonomo() {
@@ -84,12 +84,12 @@ public class EvaluacionCurricularV2Fase7CTest {
         assertEquals(carga.getEstadoPrincipioOptativaElectiva(), EstadoPrincipioOptativaElectivaV2.PRIORIDAD_OBLIGATORIA_PREVALECE);
     }
 
-    @Test public void f7CU10ConservaPrioridadRn71YNoTransformaElectivaEnRepeticionObligatoria() {
+    @Test public void f7CU10ConservaPrioridadRn71YSincronizaRetiroDeElectivas() {
         ContextoEvaluacionCurricularV2DTO contexto = base(7); contexto.getUnidades().add(reprobada(1L, "Optativa")); contexto.getUnidades().add(reprobada(2L, "Electiva"));
         EvaluacionCargaAcademicaV2DTO carga = carga(contexto);
         assertTrue(carga.getUdsOptativasReprobadasRn71().contains(1L));
-        assertTrue(carga.getUdsElectivasReprobadasRn72().contains(2L));
-        assertTrue(carga.getDecisionesPorUdRn73().toString().contains("REPROBADA_ELECTIVA_VIGENTE"));
+        assertTrue(carga.getUdsElectivasReprobadasRn72().isEmpty());
+        assertFalse(carga.getDecisionesPorUdRn73().toString().contains("REPROBADA_ELECTIVA_VIGENTE"));
     }
 
     @Test public void f7CU11S7NoReactivaRn61YSinOfertaNoEsSinCupo() {
@@ -113,10 +113,10 @@ public class EvaluacionCurricularV2Fase7CTest {
         assertFalse(Boolean.TRUE.equals(servicio.evaluarSombra(contexto).getEfectosProductivosAplicados()));
     }
 
-    @Test public void f7CU14ConflictoMaterialOptativaElectivaConservaRevisionSinJerarquiaInventada() {
+    @Test public void f7CU14EtiquetaElectivaNoCreaConflictoVigente() {
         ContextoEvaluacionCurricularV2DTO contexto = base(4); contexto.getUnidades().add(reprobada(1L, "Optativa")); contexto.getUnidades().add(reprobada(2L, "Electiva"));
         for (long id = 10; id < 15; id++) contexto.getUnidades().add(unidad(id, "Obligatoria", EstadoUnidadCurricularV2.NO_INSCRITA));
-        assertEquals(carga(contexto).getEstadoPrincipioOptativaElectiva(), EstadoPrincipioOptativaElectivaV2.REQUIERE_REVISION);
+        assertEquals(carga(contexto).getEstadoPrincipioOptativaElectiva(), EstadoPrincipioOptativaElectivaV2.IRREGULAR_SIN_BLOQUEO_AUTONOMO);
     }
 
     private EvaluacionCargaAcademicaV2DTO carga(ContextoEvaluacionCurricularV2DTO contexto) { return servicio.evaluarSombra(contexto).getEvaluacionCargaAcademica(); }

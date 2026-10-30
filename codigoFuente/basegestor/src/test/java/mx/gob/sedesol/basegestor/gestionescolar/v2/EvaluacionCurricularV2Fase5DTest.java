@@ -2,7 +2,7 @@ package mx.gob.sedesol.basegestor.gestionescolar.v2;
 import static org.testng.Assert.*; import java.util.Date; import org.testng.annotations.Test; import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.*; import mx.gob.sedesol.basegestor.service.impl.gestionescolar.v2.EvaluacionCurricularV2ServiceImpl;
 /** F5D-U: clasificación central oferta/cupo RN-6.1.4. */
 public class EvaluacionCurricularV2Fase5DTest { private final EvaluacionCurricularV2ServiceImpl s=new EvaluacionCurricularV2ServiceImpl();
- @Test public void noAplicaFueraCtr(){ContextoEvaluacionCurricularV2DTO z=c(null);z.setSemestreObjetivo(3);assertTrue(x(z).getOfertasPendientesRn614().isEmpty());}
+ @Test public void candidataQuintoSeEvaluaAunqueObjetivoSeaOtro(){ContextoEvaluacionCurricularV2DTO z=c(null);z.setSemestreObjetivo(3);assertFalse(x(z).getOfertasPendientesRn614().isEmpty());}
  @Test public void disponible(){assertE(null,EstadoOfertaPendienteRn614V2.DISPONIBLE,false,false);}
  @Test public void noOfertada(){assertE(CausaIndisponibilidadOfertaV2.UD_NO_OFERTADA_PERIODO,EstadoOfertaPendienteRn614V2.NO_OFERTADA_EN_PERIODO,true,false);}
  @Test public void fueraBloque(){assertE(CausaIndisponibilidadOfertaV2.FUERA_BLOQUE_VIGENTE,EstadoOfertaPendienteRn614V2.FUERA_DE_BLOQUE_VIGENTE,true,false);}

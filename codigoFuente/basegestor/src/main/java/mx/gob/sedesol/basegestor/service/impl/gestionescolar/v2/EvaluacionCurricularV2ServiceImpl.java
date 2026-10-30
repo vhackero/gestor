@@ -2,7 +2,6 @@ package mx.gob.sedesol.basegestor.service.impl.gestionescolar.v2;
 
 import java.util.ArrayList;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.HashSet;
@@ -867,7 +866,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         }
     }
 
-    /** RN-9.3 reutiliza crédito curricular, F7 y F8 sin sustituir sus decisiones. */
+    /** RN-9.3 para S7/S8 reutiliza F6-F8; no establece un umbral porcentual de créditos. */
     private void evaluarAvanceUltimosSemestresRn93(ResultadoEvaluacionCurricularV2DTO resultado,
             ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
         EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
@@ -884,32 +883,14 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             return;
         }
         carga.setAplicaRn93(Boolean.TRUE);
-        BigDecimal total = contexto.getCreditosTotalesPrograma();
-        carga.setCreditosTotalesPeRn93(total);
-        if (total == null || total.compareTo(BigDecimal.ZERO) <= 0) { finalizarRevisionCreditosRn93(resultado, contexto, carga, "CREDITOS_TOTALES_PE_NO_DETERMINADOS"); return; }
         Map<Long, UnidadEvaluacionCurricularV2DTO> unidadesPorId = new LinkedHashMap<Long, UnidadEvaluacionCurricularV2DTO>();
-        BigDecimal acreditados = BigDecimal.ZERO; boolean creditosInsuficientes = false;
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
             if (unidad == null || unidad.getIdPrograma() == null || unidadesPorId.containsKey(unidad.getIdPrograma())) continue;
             unidadesPorId.put(unidad.getIdPrograma(), unidad);
-            if (unidad.getEstado() != EstadoUnidadCurricularV2.ACREDITADA) continue;
-            if (!Boolean.TRUE.equals(unidad.getCreditoCurricularValido()) || unidad.getCreditosCurriculares() == null
-                    || unidad.getCreditosCurriculares().compareTo(BigDecimal.ZERO) < 0) { creditosInsuficientes = true; continue; }
-            acreditados = acreditados.add(unidad.getCreditosCurriculares());
         }
-        carga.setCreditosAcreditadosValidosRn93(acreditados);
-        if (creditosInsuficientes) { finalizarRevisionCreditosRn93(resultado, contexto, carga, "CREDITO_ACREDITADO_SIN_EVIDENCIA_CURRICULAR_VALIDA"); return; }
-        BigDecimal porcentaje = acreditados.multiply(new BigDecimal("100")).divide(total, 8, RoundingMode.HALF_UP);
-        carga.setPorcentajeCreditosAcreditadosRn93(porcentaje);
-        boolean umbralCumplido = porcentaje.compareTo(carga.getUmbralCreditosRn93()) >= 0;
-        carga.setUmbralCreditosCumplidoRn93(Boolean.valueOf(umbralCumplido));
         boolean seriacionNoCumplida = false, requisitoPendiente = false, requisitoRevision = false;
         for (UnidadEvaluacionCurricularV2DTO componente : unidades) {
             if (componente == null || componente.getIdPrograma() == null) continue;
-            if (esCandidataFinalRn93(componente, semestre) && !umbralCumplido) {
-                agregarIdUnico(carga.getUdsRestringidasCreditosRn93(), componente.getIdPrograma());
-                registrarRestriccionRn93(resultado, contexto, componente, CodigoMotivoCurricularV2.AVANCE_CREDITOS_INSUFICIENTE, "RESTRINGIDA_POR_AVANCE_CREDITOS");
-            }
             if (esCandidataFinalRn93(componente, semestre) && estaRestringidaSeriacionRn93(carga, componente.getIdPrograma())) {
                 seriacionNoCumplida = true;
                 registrarRestriccionRn93(resultado, contexto, componente, CodigoMotivoCurricularV2.SERIACION_INDIRECTA, "RESTRINGIDA_POR_SERIACION_RN8");
@@ -932,13 +913,11 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             }
         }
         if (requisitoRevision) { carga.setRequiereRevisionRn93(Boolean.TRUE); carga.setEstadoAvanceUltimosSemestresRn93(EstadoAvanceUltimosSemestresV2.REQUIERE_REVISION); }
-        else if (!umbralCumplido) carga.setEstadoAvanceUltimosSemestresRn93(EstadoAvanceUltimosSemestresV2.RESTRINGIDO_POR_CREDITOS);
         else if (Boolean.TRUE.equals(carga.getAplicaRn64())) carga.setEstadoAvanceUltimosSemestresRn93(EstadoAvanceUltimosSemestresV2.RESTRINGIDO_POR_RN64);
         else if (seriacionNoCumplida) carga.setEstadoAvanceUltimosSemestresRn93(EstadoAvanceUltimosSemestresV2.RESTRINGIDO_POR_SERIACION);
         else if (requisitoPendiente) carga.setEstadoAvanceUltimosSemestresRn93(EstadoAvanceUltimosSemestresV2.RESTRINGIDO_POR_REQUISITO_PE);
         else carga.setEstadoAvanceUltimosSemestresRn93(EstadoAvanceUltimosSemestresV2.AVANCE_ULTIMOS_SEMESTRES_CUMPLE);
-        String evidencia = "creditosTotal=" + total + "; acreditados=" + acreditados + "; porcentaje=" + porcentaje
-                + "; umbral=" + carga.getUmbralCreditosRn93() + "; cumple=" + umbralCumplido + "; rn64=" + carga.getAplicaRn64()
+        String evidencia = "sinUmbralPorcentualCreditos=true; rn64=" + carga.getAplicaRn64()
                 + "; rn61NoAplicaS7S8=" + !Boolean.TRUE.equals(carga.getAplicaRn61()) + "; estado=" + carga.getEstadoAvanceUltimosSemestresRn93();
         agregarUnico(carga.getEvidencias(), "RN93:" + evidencia);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_9_3,
@@ -954,7 +933,9 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
     }
 
     private boolean esCandidataFinalRn93(UnidadEvaluacionCurricularV2DTO unidad, Integer semestreObjetivo) { return semestreObjetivo.equals(unidad.getSemestre()) || esComponenteConRequisitoPeRn93(unidad); }
-    private boolean esComponenteConRequisitoPeRn93(UnidadEvaluacionCurricularV2DTO unidad) { return esElectiva(unidad) || Boolean.TRUE.equals(unidad.getComponenteSeminarioTitulacion()); }
+    private boolean esComponenteConRequisitoPeRn93(UnidadEvaluacionCurricularV2DTO unidad) {
+        return Boolean.TRUE.equals(unidad.getComponenteSeminarioTitulacion());
+    }
     private boolean estaRestringidaSeriacionRn93(EvaluacionCargaAcademicaV2DTO carga, Long id) { return carga.getUdsInterbloqueNoCumplidasRn81().contains(id) || carga.getUdsIntersemestralesNoCumplidasRn82().contains(id) || carga.getUdsInteranualesNoCumplidasRn83().contains(id); }
 
     private void registrarRestriccionRn93(ResultadoEvaluacionCurricularV2DTO resultado, ContextoEvaluacionCurricularV2DTO contexto,
@@ -999,27 +980,21 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         }
         carga.setObligatoriasAcreditadasRn94(Integer.valueOf(obligatoriasAcreditadas));
 
-        Set<Long> electivas = new HashSet<Long>();
-        for (UnidadEvaluacionCurricularV2DTO unidad : porId.values()) {
-            if (esTipoAmbiguoFase7(unidad)) { revision = true; continue; }
-            if (esElectiva(unidad) && unidad.getEstado() == EstadoUnidadCurricularV2.ACREDITADA) {
-                electivas.add(unidad.getIdPrograma()); agregarIdUnico(carga.getIdsElectivasAcreditadasRn94(), unidad.getIdPrograma());
-            }
-        }
-        carga.setElectivasAcreditadasRn94(Integer.valueOf(electivas.size()));
+        // El reglamento definitivo no exige una electiva mínima para RN-9.4.
+        carga.setElectivasAcreditadasRn94(Integer.valueOf(0));
         boolean optativasCumplidas = carga.getEstadoRequerimientoOptativo() == EstadoRequerimientoOptativoV2.REQUERIMIENTO_OPTATIVO_CUMPLIDO
                 || carga.getCantidadOptativasAcreditadasRn711().intValue() >= 8;
         if (carga.getEstadoRequerimientoOptativo() == EstadoRequerimientoOptativoV2.REQUIERE_REVISION) revision = true;
 
         evaluarComponentesFinalesRn94(resultado, contexto, carga, porId);
         if (revision) carga.setEstadoRequisitosEgresoAcademicoRn94(EstadoRequisitosEgresoAcademicoV2.REQUIERE_REVISION);
-        else if (obligatoriasAcreditadas == obligatorias.size() && optativasCumplidas && !electivas.isEmpty())
+        else if (obligatoriasAcreditadas == obligatorias.size() && optativasCumplidas)
             carga.setEstadoRequisitosEgresoAcademicoRn94(EstadoRequisitosEgresoAcademicoV2.REQUISITOS_ACADEMICOS_EGRESO_CUMPLIDOS);
         else carga.setEstadoRequisitosEgresoAcademicoRn94(EstadoRequisitosEgresoAcademicoV2.REQUISITOS_ACADEMICOS_EGRESO_PENDIENTES);
         carga.setRequiereRevisionRn94(Boolean.valueOf(revision));
         String evidencia = "obligatorias={requeridas=" + obligatorias.size() + ",acreditadas=" + obligatoriasAcreditadas
                 + ",pendientes=" + carga.getObligatoriasPendientesRn94() + "}; optativas=" + carga.getCantidadOptativasAcreditadasRn711()
-                + "/8; electivas=" + electivas.size() + "/1; componentes=" + carga.getEstadoComponentesFinalesRn94()
+                + "/8; electivas=NO_REQUERIDAS_POR_RN94; componentes=" + carga.getEstadoComponentesFinalesRn94()
                 + "; referenciaRN15=REUTILIZADA_SIN_REQUISITO_GENERAL_85; estado=" + carga.getEstadoRequisitosEgresoAcademicoRn94();
         agregarUnico(carga.getEvidencias(), "RN94:" + evidencia);
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_9_4,
@@ -1318,30 +1293,10 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         }
         if (unidad.getEstado() != EstadoUnidadCurricularV2.ACREDITADA) {
             evaluacion.setEstado(EstadoMejoraPromedioV2.NO_ELEGIBLE); evaluacion.getMotivos().add("UD_NO_ACREDITADA");
-        } else if (resultado.getEstadoActividadAcademica() != EstadoActividadAcademicaV2.ACTIVO) {
-            evaluacion.setEstado(resultado.getEstadoActividadAcademica() == EstadoActividadAcademicaV2.NO_DETERMINADO
-                    ? EstadoMejoraPromedioV2.REQUIERE_REVISION : EstadoMejoraPromedioV2.ESTUDIANTE_NO_ACTIVO);
-            evaluacion.getMotivos().add("ESTADO_ACTIVIDAD:" + resultado.getEstadoActividadAcademica());
-        } else if (!Boolean.TRUE.equals(contexto.getDictaminacionEgresoConocida())) {
-            evaluacion.setEstado(EstadoMejoraPromedioV2.REQUIERE_REVISION); evaluacion.getMotivos().add("EGRESO_NO_DETERMINADO");
-        } else if (Boolean.TRUE.equals(contexto.getDictaminacionEgresoIniciada())) {
-            evaluacion.setEstado(EstadoMejoraPromedioV2.EGRESO_INICIADO); evaluacion.getMotivos().add("DICTAMINACION_EGRESO_INICIADA");
-        } else if (resultado.getOportunidadesMejoraUtilizadas() == null) {
-            evaluacion.setEstado(EstadoMejoraPromedioV2.REQUIERE_REVISION); evaluacion.getMotivos().add("OPORTUNIDADES_MEJORA_NO_DETERMINADAS");
-        } else if (resultado.getOportunidadesMejoraUtilizadas().intValue() >= 3) {
-            evaluacion.setEstado(EstadoMejoraPromedioV2.LIMITE_MEJORA_AGOTADO); evaluacion.getMotivos().add("LIMITE_GLOBAL_MEJORA_AGOTADO");
-        } else if (!Boolean.TRUE.equals(unidad.getOfertada())) {
-            evaluacion.setEstado(EstadoMejoraPromedioV2.NO_ELEGIBLE); evaluacion.getMotivos().add("UD_NO_OFERTADA");
-        } else if (unidad.getGrupoActivoConocido() == null || unidad.getCupoDisponibleConocido() == null) {
-            evaluacion.setEstado(EstadoMejoraPromedioV2.REQUIERE_REVISION); evaluacion.getMotivos().add("GRUPO_O_CUPO_NO_DETERMINADO");
-        } else if (!Boolean.TRUE.equals(unidad.getGrupoActivoConocido())) {
-            evaluacion.setEstado(EstadoMejoraPromedioV2.NO_ELEGIBLE); evaluacion.getMotivos().add("SIN_GRUPO_ACTIVO");
-        } else if (!Boolean.TRUE.equals(unidad.getCupoDisponibleConocido())) {
-            evaluacion.setEstado(EstadoMejoraPromedioV2.SIN_CUPO); evaluacion.getMotivos().add("SIN_CUPO");
         } else {
-            evaluacion.setEstado(EstadoMejoraPromedioV2.ELEGIBLE_EN_SOMBRA);
-            evaluacion.getMotivos().add("PRIORIDAD_INFERIOR_A_PRIMERA_INSCRIPCION_Y_REPROBACION");
-            evaluacion.getMotivos().add("OBJETIVO_REFERENCIA_PROMEDIO_8_5");
+            // RN-1.5 definitivo: una UD acreditada no se reinscribe sólo para mejorar promedio.
+            evaluacion.setEstado(EstadoMejoraPromedioV2.NO_ELEGIBLE);
+            evaluacion.getMotivos().add("RN15_UD_ACREDITADA_NO_REINSCRIBIBLE_POR_MEJORA_PROMEDIO");
         }
         return evaluacion;
     }
@@ -1708,12 +1663,12 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             agregarUnico(integrada.getCausasExclusion(), CodigoMotivoCurricularV2.DATOS_INSUFICIENTES);
             integrada.getEvidencias().add("SERIACION_NO_COMPROBADA");
         }
-        Boolean ctr01 = procedenciaCtr01(contexto);
+        Boolean ctr01 = procedenciaCtr01(contexto, normalizarUnidades(contexto.getUnidades()));
         integrada.setCtr01Rn61Procedente(ctr01);
         if (Boolean.TRUE.equals(ctr01)) {
             agregarUnico(integrada.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_1);
             integrada.getEvidencias().add("CTR_01_RN_6_1_PROCEDENTE_SIN_ACTIVAR");
-        } else if (Integer.valueOf(5).equals(contexto.getSemestreObjetivo()) && ctr01 == null) {
+        } else if (tieneCandidataQuinto(contexto, normalizarUnidades(contexto.getUnidades())) && ctr01 == null) {
             integrada.getEvidencias().add("CTR_01_NO_DETERMINADO_POR_PERIODO_NORMATIVO");
         }
         boolean rn64 = resultado.getCondicionesDetectadas().contains(CondicionCurricularV2.CUATRO_O_MAS_REPROBADAS);
@@ -2166,7 +2121,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_6_1);
         agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_6_1_1);
 
-        Boolean aplica = procedenciaCtr01(contexto);
+        Boolean aplica = procedenciaCtr01(contexto, unidades);
         control.setAplicaCtr01(aplica);
         control.setAplicaRn61(aplica);
         if (aplica == null) {
@@ -2175,14 +2130,14 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_01,
                     CodigoMotivoCurricularV2.DATOS_INSUFICIENTES, 100,
                     "CTR01_REQUIERE_REVISION",
-                    "No es posible determinar semestre objetivo o periodo normativo para CTR-01.");
+                    "No es posible determinar la candidata de quinto o el periodo normativo para CTR-01.");
             return;
         }
         if (!aplica.booleanValue()) {
             control.setEstadoControlAvanceAnual(EstadoControlAvanceAnualV2.NO_APLICA);
             registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_01, null, 100,
                     "CTR01_NO_APLICA",
-                    "CTR-01 sólo aplica desde 2027-1 cuando el semestre objetivo curricular es quinto.");
+                    "CTR-01 sólo aplica desde 2027-1 cuando se pretende habilitar una UD de quinto semestre.");
             return;
         }
         if (contexto.getIdPlan() == null) {
@@ -2301,7 +2256,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 control.getObligatoriasPendientesRn611());
         estados.add(rn64 ? EstadoCondicionAvanceV2.NO_CUMPLE : EstadoCondicionAvanceV2.CUMPLE);
 
-        EstadoCondicionAvanceV2 estadoSeriacion = evaluarSeriacionQuinto(control, unidades);
+        EstadoCondicionAvanceV2 estadoSeriacion = evaluarSeriacionQuinto(control, contexto, unidades);
         estados.add(estadoSeriacion);
 
         EstadoCondicionAvanceV2 estadoCarga;
@@ -2360,10 +2315,10 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
     }
 
     private EstadoCondicionAvanceV2 evaluarSeriacionQuinto(EvaluacionCargaAcademicaV2DTO control,
-            List<UnidadEvaluacionCurricularV2DTO> unidades) {
+            ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
         boolean revision = false;
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
-            if (unidad == null || !Integer.valueOf(5).equals(unidad.getSemestre())) continue;
+            if (unidad == null || !esCandidataQuinto(contexto, unidad)) continue;
             if (unidad.getIdPrograma() == null) { revision = true; continue; }
             if (Boolean.TRUE.equals(unidad.getSeriacionDirectaConocida())) {
                 agregarIdUnico(control.getUdsQuintoBloqueadasSeriacionDirectaRn612(), unidad.getIdPrograma());
@@ -2427,11 +2382,6 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                     oferta.getEstado().name(), oferta.getEvidencia());
             else if (oferta.getEstado() == EstadoOfertaPendienteRn614V2.REQUIERE_REVISION) control.setRequiereRevision(Boolean.TRUE);
         }
-        for (Long id : control.getUdsQuintoCompatiblesRn612()) {
-            agregarIdUnico(control.getUdsQuintoSinDependenciaSeriacionRn613(), id);
-            agregarSupuesto(control, CodigoSupuestoAvanceCondicionadoV2.SIN_DEPENDENCIA_SERIACION, listaId(id),
-                    "SIN_DEPENDENCIA_DIRECTA_O_INDIRECTA_CONOCIDA", "RN-6.1.2 clasificó la UD de quinto como compatible.");
-        }
         if (control.getSupuestosAvanceTipificados().isEmpty()) control.setEstadoSupuestosAvance(
                 Boolean.TRUE.equals(control.getRequiereRevision()) ? EstadoSupuestosAvanceV2.REQUIERE_REVISION : EstadoSupuestosAvanceV2.SIN_SUPUESTO_TIPIFICADO);
         else control.setEstadoSupuestosAvance(control.getSupuestosAvanceTipificados().size() == 1
@@ -2440,7 +2390,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 Boolean.TRUE.equals(control.getAplicaRn64()) ? CodigoMotivoCurricularV2.REZAGO_SEVERO : null, 100,
                 "RN613_" + control.getEstadoSupuestosAvance(), "Supuestos=" + control.getSupuestosAvanceTipificados().size()
                         + "; condicionesRN612=" + control.getEstadoCondicionesComunesAvance()
-                        + "; RN64=" + control.getAplicaRn64() + "; no autoriza avance condicionado.");
+                        + "; RN64=" + control.getAplicaRn64() + "; supuestos tipificados se resuelven en sombra cuando cumplen condiciones.");
     }
 
     private void agregarSupuesto(EvaluacionCargaAcademicaV2DTO control, CodigoSupuestoAvanceCondicionadoV2 codigo,
@@ -3944,65 +3894,29 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_7_1_1, motivo, 70, estado, detalle);
     }
 
-    /** RN-7.2 evalúa elegibilidad de electivas sin generar selección, equivalencia ni inscripción. */
+    /** RN-7.2 definitivo trata optativas reprobadas; no crea una categoría ELECTIVA. */
     private void evaluarElectivasRn72(ResultadoEvaluacionCurricularV2DTO resultado,
             ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
         EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
         if (carga == null) return;
         agregarUnico(carga.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_7_2);
         agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_7_2);
-        agregarUnico(carga.getEvidencias(), "DEPENDENCIA_FUTURA_RN_9_3_NO_EVALUADA_EN_FASE_7B");
-
-        boolean hayElectivas = false;
-        boolean hayCandidataElegible = false;
-        boolean hayRestriccion = false;
+        boolean hayOptativasReprobadas = false;
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
-            if (unidad.getTipoUd() == null || unidad.getTipoUd().trim().isEmpty()) {
-                marcarRevisionElectivaRn72(resultado, contexto, carga, unidad, "TIPO_UD_NO_DETERMINADO");
-                continue;
-            }
-            if (esTipoAmbiguoFase7(unidad)) {
-                marcarRevisionElectivaRn72(resultado, contexto, carga, unidad, "TIPO_UD_AMBIGUO_OPTATIVA_ELECTIVA");
-                continue;
-            }
-            if (!esElectiva(unidad)) continue;
-            hayElectivas = true;
-            agregarIdUnico(carga.getUdsElectivasIdentificadasRn72(), unidad.getIdPrograma());
-            if (esReprobacionVigentePrevia(unidad)) {
-                agregarIdUnico(carga.getUdsElectivasReprobadasRn72(), unidad.getIdPrograma());
-                registrarDecisionElectivaRn72(resultado, contexto, unidad, CodigoMotivoCurricularV2.REPROBACION_ACUMULADA,
-                        "ELECTIVA_REPROBADA_CONSERVADA", "NO_EXIGE_REPETIR_LA_MISMA_ELECTIVA");
-            }
-            if (unidad.getEstado() != EstadoUnidadCurricularV2.NO_INSCRITA) continue;
-            String decision = evaluarElectivaNuevaRn72(resultado, contexto, carga, unidad);
-            if ("ELEGIBLE".equals(decision)) hayCandidataElegible = true;
-            if ("RESTRINGIDA".equals(decision)) hayRestriccion = true;
+            if (!esOptativa(unidad) || !esReprobacionVigentePrevia(unidad)) continue;
+            hayOptativasReprobadas = true;
+            String tratamiento = carga.getCantidadOptativasAcreditadasRn711() != null
+                    && carga.getCantidadOptativasAcreditadasRn711().intValue() >= 8
+                    ? "OPTATIVA_REPROBADA_POSIBLE_ADEUDO_ADICIONAL_SUJETO_A_CATALOGO_Y_RN711"
+                    : "OPTATIVA_REPROBADA_REQUERIDA_RECURSAMIENTO_MISMA_UD";
+            registrarDecisionElectivaRn72(resultado, contexto, unidad, CodigoMotivoCurricularV2.REPROBACION_ACUMULADA,
+                    tratamiento, "RN72_REUTILIZA_RN71_RN711_SIN_ELECTIVAS");
         }
-
-        carga.setAplicaRn72(Boolean.valueOf(hayElectivas));
-        if (Boolean.TRUE.equals(carga.getRequiereRevisionRn72())) {
-            carga.setEstadoElegibilidadElectiva(EstadoElegibilidadElectivaV2.REQUIERE_REVISION);
-        } else if (!hayElectivas) {
-            carga.setEstadoElegibilidadElectiva(EstadoElegibilidadElectivaV2.NO_APLICA);
-        } else if (contexto.getSemestreObjetivo() == null) {
-            carga.setEstadoElegibilidadElectiva(EstadoElegibilidadElectivaV2.REQUIERE_REVISION);
-        } else if (!esSemestreElectivas(contexto.getSemestreObjetivo())) {
-            carga.setEstadoElegibilidadElectiva(EstadoElegibilidadElectivaV2.NO_ELEGIBLE_POR_SEMESTRE);
-        } else if (Boolean.TRUE.equals(carga.getAplicaRn64())) {
-            carga.setEstadoElegibilidadElectiva(EstadoElegibilidadElectivaV2.RESTRINGIDA_POR_RN64);
-        } else if (!hayCandidataElegible && !carga.getUdsElectivasMismoPeRn72().isEmpty()) {
-            carga.setEstadoElegibilidadElectiva(EstadoElegibilidadElectivaV2.NO_ELEGIBLE_POR_MISMO_PE);
-        } else if (hayRestriccion || !carga.getUdsElectivasConRestriccionPrioridadRn72().isEmpty()) {
-            carga.setEstadoElegibilidadElectiva(EstadoElegibilidadElectivaV2.ELEGIBLE_CON_RESTRICCIONES);
-        } else if (hayCandidataElegible) {
-            carga.setEstadoElegibilidadElectiva(EstadoElegibilidadElectivaV2.ELEGIBLE_PARA_ELECTIVAS_EN_SOMBRA);
-        } else {
-            carga.setEstadoElegibilidadElectiva(EstadoElegibilidadElectivaV2.NO_DETERMINADO);
-        }
-        registrarTrazaElectivasRn72(resultado, contexto, carga,
-                carga.getEstadoElegibilidadElectiva() == EstadoElegibilidadElectivaV2.REQUIERE_REVISION
-                        ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null,
-                "RN72_" + carga.getEstadoElegibilidadElectiva(), construirEvidenciaElectivasRn72(carga));
+        carga.setAplicaRn72(Boolean.valueOf(hayOptativasReprobadas));
+        carga.setEstadoElegibilidadElectiva(EstadoElegibilidadElectivaV2.NO_APLICA);
+        registrarTrazaElectivasRn72(resultado, contexto, carga, null,
+                "RN72_OPTATIVAS_REPROBADAS", "sinElectivas=true; optativasReprobadas=" + hayOptativasReprobadas
+                        + "; tratamiento=RN71_RN711");
     }
 
     private String evaluarElectivaNuevaRn72(ResultadoEvaluacionCurricularV2DTO resultado,
@@ -4136,9 +4050,6 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             } else if (esOptativa(unidad)) {
                 agregarIdUnico(carga.getUdsOptativasReprobadasRn73(), unidad.getIdPrograma());
                 registrarDecisionRn73(resultado, contexto, unidad, "REPROBADA_OPTATIVA_VIGENTE", "NO_BLOQUEO_AUTONOMO_POR_TIPO");
-            } else if (esElectiva(unidad)) {
-                agregarIdUnico(carga.getUdsElectivasReprobadasRn73(), unidad.getIdPrograma());
-                registrarDecisionRn73(resultado, contexto, unidad, "REPROBADA_ELECTIVA_VIGENTE", "NO_BLOQUEO_AUTONOMO_POR_TIPO");
             } else if (esObligatoria(unidad)) {
                 agregarIdUnico(carga.getUdsObligatoriasReprobadasRn73(), unidad.getIdPrograma());
             } else if (unidad.getTipoUd() == null || unidad.getTipoUd().trim().isEmpty()) {
@@ -4280,12 +4191,29 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         agregarUnico(carga.getDecisionesCierreFase7(), decision);
     }
 
-    private Boolean procedenciaCtr01(ContextoEvaluacionCurricularV2DTO contexto) {
-        if (contexto.getSemestreObjetivo() == null) return null;
-        if (!Integer.valueOf(5).equals(contexto.getSemestreObjetivo())) return Boolean.FALSE;
+    private Boolean procedenciaCtr01(ContextoEvaluacionCurricularV2DTO contexto,
+            List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        if (!tieneCandidataQuinto(contexto, unidades)) return Boolean.FALSE;
         String periodo = contexto.getPeriodoNormativo();
         if (periodo == null || !periodo.matches("\\d{4}-[12]")) return null;
         return Boolean.valueOf(periodo.compareTo("2027-1") >= 0);
+    }
+
+    private boolean tieneCandidataQuinto(ContextoEvaluacionCurricularV2DTO contexto,
+            List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        if (contexto.getIdsUnidadesPretendidas().isEmpty()
+                && Integer.valueOf(5).equals(contexto.getSemestreObjetivo())) return true;
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades)
+            if (esCandidataQuinto(contexto, unidad)) return true;
+        return false;
+    }
+
+    private boolean esCandidataQuinto(ContextoEvaluacionCurricularV2DTO contexto,
+            UnidadEvaluacionCurricularV2DTO unidad) {
+        if (unidad == null || !Integer.valueOf(5).equals(unidad.getSemestre())) return false;
+        List<Long> pretendidas = contexto.getIdsUnidadesPretendidas();
+        return pretendidas == null || pretendidas.isEmpty()
+                || (unidad.getIdPrograma() != null && pretendidas.contains(unidad.getIdPrograma()));
     }
 
     private boolean contieneCausa(List<String> valores, String causa) {
@@ -4297,7 +4225,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
         List<UnidadEvaluacionCurricularV2DTO> obligatoriasPendientes = filtrarPendientes(unidades, true);
 
-        if (Integer.valueOf(5).equals(contexto.getSemestreObjetivo())) {
+        if (tieneCandidataQuinto(contexto, unidades)) {
             if (obligatoriasPendientes.size() == 1) {
                 registrarExcepcion(resultado, contexto, CodigoExcepcionCurricularV2.AVANCE_UNA_OBLIGATORIA_PENDIENTE,
                         TipoExcepcionCurricularV2.TIPIFICADA, CodigoReglaCurricularV2.RN_6_1,
@@ -4330,13 +4258,6 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                         TipoExcepcionCurricularV2.TIPIFICADA, CodigoReglaCurricularV2.RN_6_1,
                         EstadoExcepcionCurricularV2.CANDIDATA, sinOferta,
                         "FALTA_OFERTA_O_INDISPONIBILIDAD_INSTITUCIONAL", "La falta de oferta se registra separada de la falta de cupo.");
-            }
-            if (!obligatoriasPendientes.isEmpty() && !existeSeriacionConocida(unidades)) {
-                registrarExcepcion(resultado, contexto, CodigoExcepcionCurricularV2.AVANCE_AUSENCIA_SERIACION,
-                        TipoExcepcionCurricularV2.TIPIFICADA, CodigoReglaCurricularV2.RN_6_1,
-                        EstadoExcepcionCurricularV2.CANDIDATA, obligatoriasPendientes,
-                        "AUSENCIA_SERIACION_DIRECTA_E_INDIRECTA_CONOCIDA",
-                        "La ausencia de seriación se documenta, pero no autoriza por sí sola una UD.");
             }
         }
 

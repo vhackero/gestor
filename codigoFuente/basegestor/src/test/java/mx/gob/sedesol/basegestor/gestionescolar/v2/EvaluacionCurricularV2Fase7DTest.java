@@ -23,12 +23,12 @@ public class EvaluacionCurricularV2Fase7DTest {
         assertEquals(carga(base(4)).getEstadoCierreFase7(), EstadoCierreFase7V2.CONSOLIDADA_EN_SOMBRA);
     }
 
-    @Test public void f7DU02OptativaYElectivaConservanTipoYContribuyenAIrregular() {
+    @Test public void f7DU02HistoricoElectivaNoProduceTipoVigente() {
         ContextoEvaluacionCurricularV2DTO contexto = base(4); contexto.getUnidades().add(reprobada(1L, "Optativa")); contexto.getUnidades().add(reprobada(2L, "Electiva"));
         ResultadoEvaluacionCurricularV2DTO resultado = servicio.evaluarSombra(contexto);
         assertEquals(resultado.getSituacionAcademica(), "IRREGULAR");
         assertTrue(resultado.getEvaluacionCargaAcademica().getUdsOptativasReprobadasRn73().contains(1L));
-        assertTrue(resultado.getEvaluacionCargaAcademica().getUdsElectivasReprobadasRn73().contains(2L));
+        assertTrue(resultado.getEvaluacionCargaAcademica().getUdsElectivasReprobadasRn73().isEmpty());
     }
 
     @Test public void f7DU03TotalTresNoActivaRn64YCuatroSi() {
@@ -65,10 +65,9 @@ public class EvaluacionCurricularV2Fase7DTest {
         assertEquals(servicio.evaluarSombra(adicional).getCantidadReprobadasVigentes(), Integer.valueOf(1));
     }
 
-    @Test public void f7DU08ElectivaExigeS7OS8YPeDistinto() {
-        ContextoEvaluacionCurricularV2DTO s6 = base(6); s6.setIdPlan(1L); s6.getUnidades().add(electivaNueva(1L, 2L)); assertFalse(carga(s6).getUdsElectivasElegiblesRn72().contains(1L));
-        ContextoEvaluacionCurricularV2DTO s7 = base(7); s7.setIdPlan(1L); s7.getUnidades().add(electivaNueva(1L, 2L)); assertTrue(carga(s7).getUdsElectivasElegiblesRn72().contains(1L));
-        ContextoEvaluacionCurricularV2DTO mismo = base(8); mismo.setIdPlan(1L); mismo.getUnidades().add(electivaNueva(1L, 1L)); assertTrue(carga(mismo).getUdsElectivasMismoPeRn72().contains(1L));
+    @Test public void f7DU08EtiquetaElectivaNoCreaElegibilidadAutonoma() {
+        ContextoEvaluacionCurricularV2DTO s7 = base(7); s7.setIdPlan(1L); s7.getUnidades().add(electivaNueva(1L, 2L));
+        assertTrue(carga(s7).getUdsElectivasElegiblesRn72().isEmpty());
     }
 
     @Test public void f7DU09OtroPeNoConvierteUnaUdNoElectiva() {
@@ -76,11 +75,11 @@ public class EvaluacionCurricularV2Fase7DTest {
         assertFalse(Boolean.TRUE.equals(carga(contexto).getAplicaRn72()));
     }
 
-    @Test public void f7DU10ReprobadaElectivaNoCreaRepeticionFicticiaNiBorraEstado() {
+    @Test public void f7DU10EtiquetaElectivaHistoricaNoCreaTratamientoVigente() {
         ContextoEvaluacionCurricularV2DTO contexto = base(7); contexto.setIdPlan(1L); contexto.getUnidades().add(reprobada(1L, "Electiva")); contexto.getUnidades().add(electivaNueva(2L, 2L));
         EvaluacionCargaAcademicaV2DTO carga = carga(contexto);
-        assertTrue(carga.getUdsElectivasReprobadasRn72().contains(1L));
-        assertFalse(carga.getUdsElectivasMismoPeRn72().contains(2L));
+        assertTrue(carga.getUdsElectivasReprobadasRn72().isEmpty());
+        assertTrue(carga.getUdsElectivasMismoPeRn72().isEmpty());
     }
 
     @Test public void f7DU11ObligatoriaPrioritariaNoEsDesplazada() {
@@ -88,10 +87,10 @@ public class EvaluacionCurricularV2Fase7DTest {
         assertTrue(carga(contexto).getUdsObligatoriasPrioritariasRn73().contains(1L));
     }
 
-    @Test public void f7DU12OfertaCupoYSeriacionSeConservanPorUd() {
+    @Test public void f7DU12OfertaCupoYSeriacionNoCreanCategoriaElectiva() {
         ContextoEvaluacionCurricularV2DTO contexto = base(7); contexto.setIdPlan(1L); UnidadEvaluacionCurricularV2DTO sinCupo = electivaNueva(1L, 2L); sinCupo.setCupoDisponibleConocido(Boolean.FALSE); sinCupo.setCausaIndisponibilidadOferta(CausaIndisponibilidadOfertaV2.SIN_CUPO);
         UnidadEvaluacionCurricularV2DTO seriada = electivaNueva(2L, 3L); seriada.setSeriacionDirectaConocida(Boolean.TRUE); contexto.getUnidades().add(sinCupo); contexto.getUnidades().add(seriada);
-        EvaluacionCargaAcademicaV2DTO carga = carga(contexto); assertTrue(carga.getUdsElectivasSinCupoRn72().contains(1L)); assertTrue(carga.getUdsElectivasBloqueadasSeriacionRn72().contains(2L));
+        EvaluacionCargaAcademicaV2DTO carga = carga(contexto); assertTrue(carga.getUdsElectivasSinCupoRn72().isEmpty()); assertTrue(carga.getUdsElectivasBloqueadasSeriacionRn72().isEmpty());
     }
 
     @Test public void f7DU13ObjetivoS5NoIncluyeTiposEnBaseRn61YS7NoLaReactiva() {

@@ -107,9 +107,7 @@ public class EvaluacionCurricularV2Fase1CTest {
     public void f1CU09AusenciaSeriacionNoAutorizaPorSiSola() {
         ResultadoEvaluacionCurricularV2DTO resultado = service.evaluarSombra(contexto(5,
                 unidad(12L, "Obligatoria", EstadoUnidadCurricularV2.NO_CURSADA, true)));
-        ExcepcionCurricularV2DTO excepcion = excepcion(resultado, CodigoExcepcionCurricularV2.AVANCE_AUSENCIA_SERIACION);
-        assertNotNull(excepcion);
-        assertEquals(excepcion.getEstado(), EstadoExcepcionCurricularV2.CANDIDATA);
+        assertNull(excepcion(resultado, CodigoExcepcionCurricularV2.AVANCE_AUSENCIA_SERIACION));
     }
 
     @Test

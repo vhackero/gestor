@@ -4,7 +4,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.*; import mx.gob.
 /** F5C-U-01 a F5C-U-18: supuestos concurrentes RN-6.1.3, sin autorización. */
 public class EvaluacionCurricularV2Fase5CTest {
  private final EvaluacionCurricularV2ServiceImpl s=new EvaluacionCurricularV2ServiceImpl();
- @Test public void f5CU01NoAplicaFueraCtr(){ContextoEvaluacionCurricularV2DTO z=b();z.setSemestreObjetivo(3);assertEquals(x(z).getEstadoSupuestosAvance(),EstadoSupuestosAvanceV2.NO_APLICA);}
+ @Test public void f5CU01CandidataQuintoAplicaAunqueObjetivoSeaOtro(){ContextoEvaluacionCurricularV2DTO z=b();z.setSemestreObjetivo(3);assertTrue(Boolean.TRUE.equals(x(z).getAplicaCtr01()));}
  @Test public void f5CU02UnaPendiente(){assertTrue(t(x(b()),CodigoSupuestoAvanceCondicionadoV2.UNA_OBLIGATORIA_PENDIENTE));}
  @Test public void f5CU03DosPendientesNoEsSupuestoA(){ContextoEvaluacionCurricularV2DTO z=b();z.getUnidades().add(r(2,2));assertFalse(t(x(z),CodigoSupuestoAvanceCondicionadoV2.UNA_OBLIGATORIA_PENDIENTE));}
  @Test public void f5CU04RezagoLeve(){assertTrue(t(x(b()),CodigoSupuestoAvanceCondicionadoV2.REZAGO_LEVE));}
@@ -14,8 +14,8 @@ public class EvaluacionCurricularV2Fase5CTest {
  @Test public void f5CU08BajaParcialSinReprobacion(){ContextoEvaluacionCurricularV2DTO z=baja();ResultadoEvaluacionCurricularV2DTO r=s.evaluarSombra(z);assertTrue(t(r.getEvaluacionCargaAcademica(),CodigoSupuestoAvanceCondicionadoV2.BAJA_PARCIAL));assertEquals(r.getCantidadReprobadasVigentes(),Integer.valueOf(0));}
  @Test public void f5CU09SinOfertaTipifica(){ContextoEvaluacionCurricularV2DTO z=b();z.getUnidades().get(0).setOfertada(Boolean.FALSE);z.getUnidades().get(0).setCausaIndisponibilidadOferta(CausaIndisponibilidadOfertaV2.UD_NO_OFERTADA_PERIODO);assertTrue(t(x(z),CodigoSupuestoAvanceCondicionadoV2.FALTA_OFERTA_SUFICIENTE));}
  @Test public void f5CU10SinCupoNoEsOferta(){ContextoEvaluacionCurricularV2DTO z=b();z.getUnidades().get(0).setCausaIndisponibilidadOferta(CausaIndisponibilidadOfertaV2.SIN_CUPO);assertFalse(t(x(z),CodigoSupuestoAvanceCondicionadoV2.FALTA_OFERTA_SUFICIENTE));}
- @Test public void f5CU11SinDependenciaPorQuintoCompatible(){assertTrue(t(x(b()),CodigoSupuestoAvanceCondicionadoV2.SIN_DEPENDENCIA_SERIACION));}
- @Test public void f5CU12DependenciaDirectaNoSupuestoF(){ContextoEvaluacionCurricularV2DTO z=b();z.getUnidades().get(1).setSeriacionDirectaConocida(Boolean.TRUE);assertFalse(t(x(z),CodigoSupuestoAvanceCondicionadoV2.SIN_DEPENDENCIA_SERIACION));}
+ @Test public void f5CU11AusenciaSeriacionNoEsExcepcionAutonoma(){assertFalse(x(b()).getSupuestosAvanceTipificados().toString().contains("SERIACION"));}
+ @Test public void f5CU12SeriacionSeEvaluaComoCompatibilidad(){ContextoEvaluacionCurricularV2DTO z=b();z.getUnidades().get(1).setSeriacionDirectaConocida(Boolean.TRUE);assertTrue(x(z).getUdsQuintoBloqueadasSeriacionDirectaRn612().contains(50L));}
  @Test public void f5CU13Concurrencia(){ContextoEvaluacionCurricularV2DTO z=baja();z.getUnidades().get(0).setOfertada(Boolean.FALSE);z.getUnidades().get(0).setCausaIndisponibilidadOferta(CausaIndisponibilidadOfertaV2.UD_NO_OFERTADA_PERIODO);EvaluacionCargaAcademicaV2DTO q=x(z);assertTrue(t(q,CodigoSupuestoAvanceCondicionadoV2.UNA_OBLIGATORIA_PENDIENTE));assertTrue(t(q,CodigoSupuestoAvanceCondicionadoV2.BAJA_PARCIAL));assertTrue(t(q,CodigoSupuestoAvanceCondicionadoV2.FALTA_OFERTA_SUFICIENTE));}
  @Test public void f5CU14Rn64NoAutoriza(){ContextoEvaluacionCurricularV2DTO z=b();z.getUnidades().add(r(2,2));z.getUnidades().add(r(3,3));z.getUnidades().add(r(4,4));ResultadoEvaluacionCurricularV2DTO r=s.evaluarSombra(z);assertTrue(r.getEvaluacionCargaAcademica().getAplicaRn64());assertFalse(r.getAvanceCondicionado());}
  @Test public void f5CU15DuplicadoNoDuplicaSupuesto(){ContextoEvaluacionCurricularV2DTO z=b();UnidadEvaluacionCurricularV2DTO d=r(1,1);d.setBloque("B2");z.getUnidades().add(d);assertEquals(n(x(z),CodigoSupuestoAvanceCondicionadoV2.REZAGO_LEVE),1);}
