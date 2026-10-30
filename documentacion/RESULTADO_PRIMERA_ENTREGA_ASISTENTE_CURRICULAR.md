@@ -5,7 +5,7 @@
 - Rama: `feature/desacople_motor_historico`.
 - Base de la primera entrega: `f8adc866 feat: agrega contrato de lectura asistente curricular`.
 - Correcciones normativas preexistentes, fuera de la primera entrega: `732dfcd6 fix: actualiza reglas motor curricular v2 octubre 2026`.
-- Esta ampliacion incorpora pruebas de identidad, deduplicacion de creditos y suficiencia de fuentes; el commit de cierre se registrara al terminar las validaciones pendientes.
+- Ampliacion de evidencia de esta entrega: `f3525f76 test: valida contadores y fuentes asistente curricular`.
 
 Archivos de implementacion de esta entrega:
 
