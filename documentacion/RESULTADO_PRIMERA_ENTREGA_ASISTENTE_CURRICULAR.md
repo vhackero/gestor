@@ -5,7 +5,7 @@
 - Rama: `feature/desacople_motor_historico`.
 - Base de la primera entrega: `f8adc866 feat: agrega contrato de lectura asistente curricular`.
 - Correcciones normativas preexistentes, fuera de la primera entrega: `732dfcd6 fix: actualiza reglas motor curricular v2 octubre 2026`.
-- Esta ampliacion de evidencia incorpora pruebas y la correccion de composicion RN-9.4 para el adeudo adicional; debe confirmarse en el commit de cierre posterior.
+- Esta ampliacion incorpora pruebas de identidad, deduplicacion de creditos y suficiencia de fuentes; el commit de cierre se registrara al terminar las validaciones pendientes.
 
 Archivos de implementacion de esta entrega:
 
@@ -13,13 +13,13 @@ Archivos de implementacion de esta entrega:
 - `AsistenteInscripcionServiceImpl`.
 - `TablaCurricularAsistidaBean` y `tablaCurricularAsistida.xhtml`.
 - `EvaluacionCurricularV2ServiceImpl` para la composicion RN-9.4.
-- Pruebas `EvaluacionCurricularV2Fase5CTest`, `EvaluacionCurricularV2Fase9CTest`, `TrayectoriaPermanenciaAsistenteTest` y `AsistenteCurricularV2ResultadoAdapterTest`.
+- Pruebas `ContextoEvaluacionCurricularV2AdapterTest`, `EvaluacionCurricularV2Fase5CTest`, `EvaluacionCurricularV2Fase9CTest`, `TrayectoriaPermanenciaAsistenteTest` y `AsistenteCurricularV2ResultadoAdapterTest`.
 
 Comandos ejecutados durante la entrega:
 
 ```bash
-(cd codigoFuente/basegestor && mvn -q -Dtest=EvaluacionCurricularV2Fase5CTest,EvaluacionCurricularV2Fase9CTest test)
-(cd codigoFuente/gestorWeb && mvn -q -Dtest=AsistenteCurricularV2ResultadoAdapterTest test)
+(cd codigoFuente/basegestor && mvn -q -Dtest=ContextoEvaluacionCurricularV2AdapterTest,EvaluacionCurricularV2Fase5CTest,EvaluacionCurricularV2Fase9CTest test)
+(cd codigoFuente/gestorWeb && mvn -q -Dtest=AsistenteCurricularV2ResultadoAdapterTest,TrayectoriaPermanenciaAsistenteTest test)
 (cd codigoFuente/basegestor && mvn -q test)
 (cd codigoFuente/gestorWeb && mvn -q test)
 ```
@@ -52,7 +52,7 @@ La suite focalizada ejecutada para las correcciones normativas reporto: **82 pru
 | Campo | Fuente y significado | Estado de fuente |
 | --- | --- | --- |
 | `periodoActual` | Contexto de inscripcion activo | No convierte un periodo ausente en un periodo supuesto |
-| `fechaCorte` | `TrayectoriaPermanenciaDTO.fechaCorte` | Fecha desde la que se interpreta la trayectoria |
+| `fechaCorte` | `TrayectoriaPermanenciaDTO.fechaCorte` | Corte de los registros de trayectoria utilizados; no representa un corte comun ficticio |
 | `versionReglas` | Configuracion V2 (`ConfiguracionEvaluacionCurricularV2DTO`) | Es etiqueta tecnica; no sustituye vigencia ni poblacion institucional |
 | `estadoExpediente` | Estado academico disponible en `InscripcionContextoDTO` | `DISPONIBLE` o `PARCIAL` |
 | `estadoTrayectoria` | Determinabilidad y mensaje de revision de trayectoria | `DISPONIBLE` o `PARCIAL` |
@@ -90,17 +90,21 @@ El resultado V2 sigue siendo la fuente de decisiones normativas. El contrato de 
 
 | Indicador | Numerador | Denominador | Llave de deduplicacion | Exclusiones | Fuente | Cobertura |
 | --- | --- | --- | --- | --- | --- | --- |
-| Avance curricular | Creditos de UD acreditadas vigentes | Creditos totales del plan | `idPrograma` / clave curricular, no oferta | Reprobada, no cursada, baja parcial, no inscrita y en curso | Estructura curricular y estado vigente | El motor valida creditos del PE; falta una prueba de integracion del indicador visual contra una oferta parcial |
-| UD actuales | UD inscritas o en curso distintas | No aplica | Clave/`udId` | Baja parcial aplicada no es vigente | Inscripcion actual y materias en curso | El contrato no recalcula el indicador |
-| Reprobadas vigentes | UD distintas con reprobacion vigente | No aplica | `idPrograma` | NP por baja autorizada, baja parcial, no cursada y no inscrita | Historial normalizado por V2 | Cubierto por F4/F5/F7; la baja no se convierte en reprobacion |
-| Optativas requeridas | Optativas acreditadas hasta ocho | 8 segun RN-7.1.1 | `idPrograma` | Duplicados tecnicos | Estructura e historial | Cubierto por F7D y F9C |
-| Adeudo de optativa adicional | UD distinta posterior al requisito de ocho | No aplica | Requiere ruta de sustitucion verificable; no se infiere por representaciones repetidas | No duplica adeudos por la cadena | Historial; catalogo de sustituciones pendiente | RN-9.4 ya no lo usa para bloquear cumplimiento; falta fuente de sustituciones |
+| Avance curricular | Creditos de UD acreditadas vigentes | Creditos totales del plan | Clave curricular (`cvePrograma`); si falta, `udId` | Reprobada, no cursada, baja parcial, no inscrita y en curso | Estructura curricular completa y estado vigente | El plan completo se carga con `buscarProgramasPorPlan`; la oferta no determina el denominador. La prueba unitaria verifica dos UD del plan y un intento repetido sin duplicar creditos |
+| UD actuales | UD inscritas o en curso distintas | No aplica | Clave curricular; si falta, `udId` | Baja parcial aplicada no es vigente | Inscripcion actual y materias en curso | El DTO de baja disponible representa una baja aplicada; no existe fuente de solicitudes pendientes en este contrato |
+| Reprobadas vigentes | UD distintas con reprobacion vigente | No aplica | Identidad de UD mapeada: `UnidadDecisionInscripcionDTO.udId` | NP por baja autorizada, baja parcial, no cursada y no inscrita | Historial normalizado por V2 | `UnidadEvaluacionCurricularV2DTO.idPrograma` es un nombre heredado: el adaptador le asigna `udId`; no es el identificador del Programa Educativo |
+| Optativas requeridas | Optativas acreditadas hasta ocho | 8 segun RN-7.1.1 | Identidad de UD, no nombre | Duplicados tecnicos | Estructura e historial | Cubierto por F7D y F9C |
+| Adeudo de optativa adicional | UD distinta posterior al requisito de ocho | No aplica | Relacion curricular de sustitucion verificable | No se infiere por nombre ni por representaciones repetidas | Historial; catalogo de sustituciones pendiente | RN-9.4 ya no lo usa para bloquear cumplimiento; falta fuente de sustituciones |
 
-No hay fuente integrada de rutas de sustitucion. Por ello no se declara probada una cadena real ni se muestra un total definitivo de sustituciones; es una limitacion explicita, no un cero.
+`idPrograma` en los DTO V2 no identifica al Programa Educativo ni al plan: su nombre es heredado y, en `ContextoEvaluacionCurricularV2AdapterImpl.mapearUnidades`, recibe `UnidadDecisionInscripcionDTO.udId`. El plan se transporta separadamente en `ContextoEvaluacionCurricularV2DTO.idPlan`. La prueba `f0I08ConservaIdentidadDeUdSinDeduplicarPorNombreNiPlan` acredita que dos UD con el mismo nombre y el mismo plan mantienen dos identificadores distintos. No existe una correspondencia entre planes implementada por nombre: cualquier migracion o sustitucion entre planes requiere una relacion curricular verificable.
+
+No hay fuente integrada de rutas de sustitucion. Por ello no se declara probada una cadena real ni se muestra un total definitivo de sustituciones; es una limitacion explicita, no un cero. La prueba de una cadena trasladada queda pendiente hasta contar con la relacion institucional de UD origen, sustituta y adeudo.
 
 ## Correspondencia V2 y presentacion
 
-`TablaCurricularAsistidaBean.cargarResultadoEvaluacionV2` actualiza el estado de evaluacion del contexto y sigue adaptando `ResultadoEvaluacionCurricularV2DTO` para la vista. `getResumenFuentesSituacion` presenta una leyenda discreta sin datos personales: corte, version tecnica y estado de Expediente, Trayectoria, Oferta y Evaluacion curricular.
+`TablaCurricularAsistidaBean.cargarResultadoEvaluacionV2` actualiza el estado de evaluacion del contexto y sigue adaptando `ResultadoEvaluacionCurricularV2DTO` para la vista. `getResumenFuentesSituacion` presenta una leyenda discreta sin datos personales: corte, version tecnica y estado de Expediente, Trayectoria, Oferta y Evaluacion curricular. Los dos grupos de indicadores muestran adicionalmente una nota local cuando Expediente, Trayectoria, Oferta o V2 estan en `PARCIAL`, `DESACTUALIZADO` o `ERROR`.
+
+Por tanto, `estadoEvaluacionV2=DISPONIBLE` significa exclusivamente que el motor devolvio un resultado. No afirma que las fuentes sean completas: una ejecucion exitosa con Trayectoria `PARCIAL`, por ejemplo, conserva las decisiones resolubles y marca los indicadores como parciales. `VACIO` de oferta representa una consulta correcta sin UD vigentes y no vuelve parcial el resultado por si solo.
 
 No se genera una seleccion, escenario hipotetico ni traslado al Simulador en esta entrega.
 
@@ -115,13 +119,17 @@ Pruebas adicionales:
 - `TrayectoriaPermanenciaAsistenteTest.distingueConsultaDeOfertaVaciaDeFuenteParcial` diferencia una consulta exitosa sin oferta de una fuente incompleta.
 - `EvaluacionCurricularV2Fase5CTest.f5CU19SupuestoTipificadoProcedeSinResolucionIndividualYConCausasConcurrentes` cubre baja parcial y falta de oferta concurrentes sin instancia ni folio extraordinario y sin imponer un maximo de pendientes.
 - `EvaluacionCurricularV2Fase9CTest.f9CU13AdeudoOptativaAdicionalNoBloqueaCumplimientoCurricularPeroConservaRegularizacion` prueba ocho optativas requeridas y obligatorias acreditadas mas una optativa adicional reprobada: RN-9.4 queda cumplida, la reprobada conserva irregularidad y no se ejecuta ningun efecto productivo.
+- `ContextoEvaluacionCurricularV2AdapterTest.f0I08ConservaIdentidadDeUdSinDeduplicarPorNombreNiPlan` prueba que la identidad V2 procede de `udId` y que dos UD distintas del mismo plan no se colapsan por nombre.
+- `AsistenteCurricularV2ResultadoAdapterTest.conservaDenominadorDelPlanYNoDuplicaCreditosPorIntentos` prueba que el total procede de las UD del plan y que dos intentos de una misma UD no duplican sus creditos acreditados.
+- `AsistenteCurricularV2ResultadoAdapterTest.diferenciaEjecucionV2CorrectaDeFuentesParcialesEnIndicadores` prueba que una evaluacion V2 correcta no oculta la parcialidad de Trayectoria y produce una nota local en los indicadores.
+- `AsistenteCurricularV2ResultadoAdapterTest.bajaAplicadaNoCuentaComoVigenteYUnaSolicitudPendienteNoProduceEseEfecto` prueba que una baja parcial aplicada no cuenta como UD vigente. Una solicitud pendiente conserva el estado de inscripcion hasta que la fuente institucional la marque como baja aplicada; esa fuente de solicitudes aun no forma parte del contrato.
 
-Pruebas focalizadas del adaptador: **11 pruebas, 0 fallas, 0 errores, 0 omitidas**.
+Pruebas focalizadas de esta ampliacion: **40 pruebas en basegestor y 14 pruebas en gestorWeb, 0 fallas, 0 errores, 0 omitidas**.
 
 Regresion ejecutada para esta ampliacion:
 
-- `basegestor`: **765 pruebas, 0 fallas, 0 errores, 0 omitidas**.
-- `gestorWeb`: **20 pruebas, 0 fallas, 0 errores, 0 omitidas**.
+- `basegestor`: **766 pruebas, 0 fallas, 0 errores, 0 omitidas**.
+- `gestorWeb`: **23 pruebas, 0 fallas, 0 errores, 0 omitidas**.
 
 Compilacion verificada:
 
@@ -132,12 +140,12 @@ Pendiente concreto antes de aprobar visualmente esta entrega:
 
 1. Repetir regresion completa despues de integrar las restantes pantallas.
 2. Validar en WildFly la leyenda en escritorio y movil, incluyendo expediente con fuente parcial, oferta disponible sin unidades ofertadas y error controlado del evaluador V2.
-3. Agregar cobertura nominada del supuesto tipificado sin autorizacion individual y de sustitucion de optativa adicional con catalogo institucional verificable.
-4. Retirar de las nuevas pantallas la categoria activa `ELECTIVA`; la limpieza de nombres legacy en contratos internos requiere una migracion separada y pruebas de compatibilidad historica.
+3. Integrar y probar una cadena de sustitucion de optativa adicional cuando exista el catalogo institucional verificable. Esta ausencia no bloquea las correcciones ya expresas de RN-9.4.
+4. Mantener separada la presentacion sin categoria vigente `ELECTIVA` de la limpieza posterior de nombres internos heredados. Los nombres internos no reclasifican ni modifican registros historicos.
 
 La presentacion actual de Situacion academica no incorpora `ELECTIVA` como categoria vigente. Los nombres internos heredados no se eliminan en esta entrega porque son compatibilidad tecnica; no implican reclasificar ni modificar registros historicos.
 
-5. La validacion visual requiere desplegar el artefacto de esta ampliacion en WildFly y usar una sesion autenticada de prueba. El servidor local existe, pero no se ha desplegado este commit ni se producirian capturas autenticas desde una sesion no controlada; por tanto no se declara evidencia de escritorio ni movil.
+5. La validacion visual requiere desplegar el artefacto de esta ampliacion en WildFly y usar una sesion autenticada de prueba. El servidor local existe, pero no se ha desplegado este commit ni se producirian capturas autenticas desde una sesion no controlada; por tanto no se declara evidencia de escritorio ni movil. Intervencion requerida de Abel: desplegar el WAR de este commit en el WildFly autorizado, abrir la pestaña Situacion academica en escritorio y movil con perfiles anonimizados de fuente completa, trayectoria parcial, oferta vacia, error V2 controlado y cortes no informados o distintos; proporcionar las cinco capturas anonimizadas y la confirmacion de la sesion usada.
 
 ## Resultado
 

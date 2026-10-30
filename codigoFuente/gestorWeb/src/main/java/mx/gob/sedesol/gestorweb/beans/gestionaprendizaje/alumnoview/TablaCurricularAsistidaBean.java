@@ -272,6 +272,37 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 		return resumirFuentesConsulta(contexto != null ? contexto.getMetadatosConsulta() : null);
 	}
 
+	/** Evita que los KPI se interpreten como definitivos si una fuente material está incompleta. */
+    public boolean isResumenIndicadoresParcial() {
+        MetadatosConsultaAsistenteDTO metadatos = contexto != null ? contexto.getMetadatosConsulta() : null;
+        return sonIndicadoresParciales(metadatos);
+    }
+
+    static boolean sonIndicadoresParciales(MetadatosConsultaAsistenteDTO metadatos) {
+        return metadatos == null || esEstadoFuenteLimitante(metadatos.getEstadoExpediente())
+                || esEstadoFuenteLimitante(metadatos.getEstadoTrayectoria())
+                || esEstadoFuenteLimitante(metadatos.getEstadoOferta())
+                || esEstadoFuenteLimitante(metadatos.getEstadoEvaluacionV2());
+    }
+
+    public String getNotaIndicadoresParciales() {
+        MetadatosConsultaAsistenteDTO metadatos = contexto != null ? contexto.getMetadatosConsulta() : null;
+        return construirNotaIndicadoresParciales(metadatos);
+    }
+
+    static String construirNotaIndicadoresParciales(MetadatosConsultaAsistenteDTO metadatos) {
+        if (!sonIndicadoresParciales(metadatos)) return null;
+        String pendientes = metadatos == null || metadatos.getCamposPendientes().isEmpty() ? "fuentes pendientes de validar"
+                : StringUtils.join(metadatos.getCamposPendientes(), ", ");
+        return "Indicadores parciales: " + pendientes + ". Los totales pueden requerir actualización.";
+	}
+
+	private static boolean esEstadoFuenteLimitante(EstadoFuenteConsultaAsistente estado) {
+		return estado == null || estado == EstadoFuenteConsultaAsistente.PARCIAL
+				|| estado == EstadoFuenteConsultaAsistente.DESACTUALIZADO
+				|| estado == EstadoFuenteConsultaAsistente.ERROR;
+	}
+
 	static String resumirFuentesConsulta(MetadatosConsultaAsistenteDTO metadatos) {
 		if (metadatos == null) return "Información de consulta parcial: no se identificó el corte de datos.";
 		String version = StringUtils.isBlank(metadatos.getVersionReglas()) ? "versión normativa no disponible"
@@ -3351,7 +3382,12 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         if (fila == null || StringUtils.isBlank(fila.getEstatusPeriodo())) {
             return false;
         }
-        String estatus = normalizaTexto(fila.getEstatusPeriodo());
+        return esEstatusPeriodoActual(fila.getEstatusPeriodo());
+    }
+
+    static boolean esEstatusPeriodoActual(String estatusPeriodo) {
+        String estatus = Normalizer.normalize(StringUtils.defaultString(estatusPeriodo), Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "").toLowerCase(Locale.ROOT);
         return estatus.contains("en curso") || estatus.contains("cursando")
                 || estatus.contains("inscrita") || estatus.contains("registrada");
     }
@@ -4457,7 +4493,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         }
     }
 
-    private static class CreditosResumenMallaDTO implements Serializable {
+	static class CreditosResumenMallaDTO implements Serializable {
         private static final long serialVersionUID = 1L;
         private int requeridos;
         private int aprobados;

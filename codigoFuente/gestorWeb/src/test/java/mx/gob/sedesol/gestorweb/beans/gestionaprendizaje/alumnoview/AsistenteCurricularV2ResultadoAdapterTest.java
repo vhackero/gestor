@@ -157,6 +157,41 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertTrue(metadatos.getFechaEvaluacionV2() == null);
 	}
 
+	@Test
+	public void conservaDenominadorDelPlanYNoDuplicaCreditosPorIntentos() {
+		TablaCurricularAsistidaBean.CreditosResumenMallaDTO resumen = new TablaCurricularAsistidaBean.CreditosResumenMallaDTO();
+		resumen.registrarUnidadPlan("UD-01", "Obligatoria", "Unidad uno");
+		resumen.registrarUnidadPlan("UD-02", "Optativa", "Unidad dos");
+		resumen.registrarCreditos("UD-01", 6, true);
+		resumen.registrarCreditos("UD-01", 6, true); // Segundo intento de la misma UD.
+		resumen.registrarCreditos("UD-02", 4, false);
+
+		assertEquals(resumen.getTotalUnidadesPlan(), 2);
+		assertEquals(resumen.getTotalObligatoriasPlan(), 1);
+		assertEquals(resumen.getRequeridos(), 10);
+		assertEquals(resumen.getAprobados(), 6);
+	}
+
+	@Test
+	public void diferenciaEjecucionV2CorrectaDeFuentesParcialesEnIndicadores() {
+		MetadatosConsultaAsistenteDTO metadatos = new MetadatosConsultaAsistenteDTO();
+		metadatos.setEstadoExpediente(EstadoFuenteConsultaAsistente.DISPONIBLE);
+		metadatos.setEstadoTrayectoria(EstadoFuenteConsultaAsistente.PARCIAL);
+		metadatos.setEstadoOferta(EstadoFuenteConsultaAsistente.VACIO);
+		TablaCurricularAsistidaBean.actualizarEstadoEvaluacionV2(metadatos,
+				EstadoFuenteConsultaAsistente.DISPONIBLE, Calendar.getInstance().getTime());
+
+		assertTrue(TablaCurricularAsistidaBean.sonIndicadoresParciales(metadatos));
+		assertTrue(TablaCurricularAsistidaBean.construirNotaIndicadoresParciales(metadatos)
+				.contains("Indicadores parciales"));
+	}
+
+	@Test
+	public void bajaAplicadaNoCuentaComoVigenteYUnaSolicitudPendienteNoProduceEseEfecto() {
+		assertFalse(TablaCurricularAsistidaBean.esEstatusPeriodoActual("Baja parcial aplicada"));
+		assertTrue(TablaCurricularAsistidaBean.esEstatusPeriodoActual("En curso"));
+	}
+
 	private TrazaReglaAplicadaV2DTO trazaCausal(CodigoReglaCurricularV2 regla) {
 		TrazaReglaAplicadaV2DTO traza = new TrazaReglaAplicadaV2DTO();
 		traza.setCodigoRegla(regla);

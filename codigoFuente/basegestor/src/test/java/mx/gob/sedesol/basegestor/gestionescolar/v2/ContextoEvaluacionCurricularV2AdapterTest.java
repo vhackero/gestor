@@ -126,6 +126,24 @@ public class ContextoEvaluacionCurricularV2AdapterTest {
         assertEquals(Integer.valueOf(6), carga.getCargaMaximaNormativa());
     }
 
+    @Test
+    public void f0I08ConservaIdentidadDeUdSinDeduplicarPorNombreNiPlan() {
+        UnidadDecisionInscripcionDTO primera = unidad("UD-A", "Aprobada", null);
+        UnidadDecisionInscripcionDTO segunda = unidad("UD-B", "Aprobada", null);
+        primera.setUdId(Long.valueOf(1001L));
+        segunda.setUdId(Long.valueOf(1002L));
+        primera.setNombre("Nombre coincidente");
+        segunda.setNombre("Nombre coincidente");
+
+        ContextoEvaluacionCurricularV2DTO contexto = adapter.construirDesdeAsistente(asistente(java.util.Arrays.asList(primera, segunda)));
+
+        assertEquals(contexto.getIdPlan(), Long.valueOf(12L));
+        assertEquals(contexto.getUnidades().size(), 2);
+        assertEquals(contexto.getUnidades().get(0).getIdPrograma(), Long.valueOf(1001L));
+        assertEquals(contexto.getUnidades().get(1).getIdPrograma(), Long.valueOf(1002L));
+        assertFalse(contexto.getUnidades().get(0).getIdPrograma().equals(contexto.getIdPlan()));
+    }
+
     private AsistenteInscripcionContextoDTO asistente(UnidadDecisionInscripcionDTO unidad) {
         List<UnidadDecisionInscripcionDTO> unidades = new ArrayList<UnidadDecisionInscripcionDTO>();
         unidades.add(unidad);

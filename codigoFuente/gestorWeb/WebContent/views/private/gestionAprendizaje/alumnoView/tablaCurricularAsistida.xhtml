@@ -1955,6 +1955,9 @@
                                             <div class="section-subtitle" style="font-size:25px;">Resumen actual</div>
                                             <span class="resumen-heading-context">#{tablaCurricularAsistidaBean.etiquetaResumenActual}</span>
                                         </div>
+                                        <ui:fragment rendered="#{tablaCurricularAsistidaBean.resumenIndicadoresParcial}">
+                                            <div class="consulta-fuentes">#{tablaCurricularAsistidaBean.notaIndicadoresParciales}</div>
+                                        </ui:fragment>
                                         <div class="kpi-grid">
                                             <div class="kpi-card kpi-card-green"><div class="kpi-title">UD actualmente registradas o en curso</div><div class="kpi-value" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesActualesResumen}">#{tablaCurricularAsistidaBean.unidadesActualesRegistradasResumen}</div></div>
                                             <div class="kpi-card kpi-card-green"><div class="kpi-title">UD obligatorias actuales</div><div class="kpi-value" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesObligatoriasActualesResumen}">#{tablaCurricularAsistidaBean.unidadesObligatoriasActualesResumen}</div></div>
@@ -1970,6 +1973,9 @@
                                             <div class="section-subtitle" style="font-size:25px;">Resumen global</div>
                                             <span class="resumen-heading-context">Acumulado de la trayectoria académica</span>
                                         </div>
+                                        <ui:fragment rendered="#{tablaCurricularAsistidaBean.resumenIndicadoresParcial}">
+                                            <div class="consulta-fuentes">#{tablaCurricularAsistidaBean.notaIndicadoresParciales}</div>
+                                        </ui:fragment>
                                         <div class="kpi-grid">
                                             <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD acreditadas</div><div class="kpi-value" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesAcreditadasResumen}">#{tablaCurricularAsistidaBean.unidadesAcreditadasResumen} <span class="kpi-total">de <span class="kpi-total-numero">#{tablaCurricularAsistidaBean.totalUnidadesPlanResumen}</span></span></div></div>
                                             <div class="kpi-card kpi-card-blue"><div class="kpi-title">UD obligatorias acreditadas</div><div class="kpi-value" data-asistente-tooltip="#{tablaCurricularAsistidaBean.detalleUnidadesObligatoriasAcreditadasResumen}">#{tablaCurricularAsistidaBean.unidadesObligatoriasAcreditadasResumen} <span class="kpi-total">de <span class="kpi-total-numero">#{tablaCurricularAsistidaBean.totalUnidadesObligatoriasPlanResumen}</span></span></div></div>
