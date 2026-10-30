@@ -5,9 +5,12 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.testng.annotations.Test;
 
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MetadatosConsultaAsistenteDTO;
@@ -190,6 +193,30 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 	public void bajaAplicadaNoCuentaComoVigenteYUnaSolicitudPendienteNoProduceEseEfecto() {
 		assertFalse(TablaCurricularAsistidaBean.esEstatusPeriodoActual("Baja parcial aplicada"));
 		assertTrue(TablaCurricularAsistidaBean.esEstatusPeriodoActual("En curso"));
+	}
+
+	@Test
+	public void presentaReprobacionesRegistradasSinConvertirlasEnOportunidadesRn14() {
+		AsistenteInscripcionContextoDTO contexto = new AsistenteInscripcionContextoDTO();
+		Map<Long, Long> reprobaciones = new HashMap<Long, Long>();
+		reprobaciones.put(Long.valueOf(11L), Long.valueOf(2L));
+		contexto.setIntentosReprobadosPorUd(reprobaciones);
+		contexto.setIntentosReprobadosDisponibles(Boolean.TRUE);
+		TablaCurricularAsistidaBean.FilaAsistidaDTO fila = new TablaCurricularAsistidaBean.FilaAsistidaDTO();
+		fila.setUdId(Long.valueOf(11L));
+
+		assertEquals(TablaCurricularAsistidaBean.reprobacionesRegistradas(contexto, fila), "Reprobaciones registradas: 2");
+		assertEquals(TablaCurricularAsistidaBean.situacionOportunidadesNoDisponible(), "Cómputo de oportunidades no disponible");
+		assertTrue(TablaCurricularAsistidaBean.resumenReprobacionesRegistradas(contexto).contains("No permite determinar oportunidades"));
+	}
+
+	@Test
+	public void fuenteDeReprobacionesNoDisponibleNoSeMuestraComoCeroNiComoOportunidad() {
+		TablaCurricularAsistidaBean.FilaAsistidaDTO fila = new TablaCurricularAsistidaBean.FilaAsistidaDTO();
+		fila.setUdId(Long.valueOf(12L));
+		AsistenteInscripcionContextoDTO contexto = new AsistenteInscripcionContextoDTO();
+		assertEquals(TablaCurricularAsistidaBean.reprobacionesRegistradas(contexto, fila), "Dato no disponible");
+		assertTrue(TablaCurricularAsistidaBean.resumenReprobacionesRegistradas(contexto).contains("no está disponible"));
 	}
 
 	private TrazaReglaAplicadaV2DTO trazaCausal(CodigoReglaCurricularV2 regla) {

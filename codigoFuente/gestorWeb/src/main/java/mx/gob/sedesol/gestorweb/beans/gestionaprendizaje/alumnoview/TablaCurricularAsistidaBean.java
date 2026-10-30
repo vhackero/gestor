@@ -3530,32 +3530,40 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getResumenOportunidadesAcreditacionPrioritarias() {
-        if (contexto == null || !Boolean.TRUE.equals(contexto.getIntentosReprobadosDisponibles())) {
-            return "Las oportunidades por UD se rigen por RN-1.4. El historial de intentos no está disponible para esta consulta.";
-        }
-        return "Contadores individuales por UD. Las bajas autorizadas no se contabilizan como oportunidades de acreditación.";
+        return resumenReprobacionesRegistradas(contexto);
     }
 
-    /** Expone el contador disponible; no infiere periodos, calificaciones ni una oportunidad faltante. */
-    public String getOportunidadesUtilizadasFilaPrioritaria(FilaAsistidaDTO fila) {
+    static String resumenReprobacionesRegistradas(AsistenteInscripcionContextoDTO contexto) {
+        if (contexto == null || !Boolean.TRUE.equals(contexto.getIntentosReprobadosDisponibles())) {
+            return "El historial de reprobaciones no está disponible para esta consulta. El cómputo de oportunidades conforme a RN-1.4 requiere el detalle de cada inscripción.";
+        }
+        return "La fuente disponible registra reprobaciones con calificación final menor a 60 por UD. No permite determinar oportunidades consumidas, una oportunidad en curso ni las exclusiones por baja autorizada.";
+    }
+
+    /**
+     * La consulta legacy sólo devuelve reprobaciones agregadas por UD. No es un
+     * contador de oportunidades RN-1.4 porque no contiene primera inscripción,
+     * bajas autorizadas ni el estado del intento actual.
+     */
+    public String getReprobacionesRegistradasFilaPrioritaria(FilaAsistidaDTO fila) {
+        return reprobacionesRegistradas(contexto, fila);
+    }
+
+    static String reprobacionesRegistradas(AsistenteInscripcionContextoDTO contexto, FilaAsistidaDTO fila) {
         if (contexto == null || !Boolean.TRUE.equals(contexto.getIntentosReprobadosDisponibles())
                 || fila == null || fila.getUdId() == null) {
             return "Dato no disponible";
         }
-        Long utilizadas = contexto.getIntentosReprobadosPorUd().get(fila.getUdId());
-        if (utilizadas == null) return "0 de 3";
-        return utilizadas + " de 3";
+        Long reprobaciones = contexto.getIntentosReprobadosPorUd().get(fila.getUdId());
+        return "Reprobaciones registradas: " + (reprobaciones == null ? 0L : reprobaciones);
     }
 
     public String getSituacionOportunidadesFilaPrioritaria(FilaAsistidaDTO fila) {
-        if (contexto == null || !Boolean.TRUE.equals(contexto.getIntentosReprobadosDisponibles())
-                || fila == null || fila.getUdId() == null) {
-            return "Requiere revisión";
-        }
-        Long utilizadas = contexto.getIntentosReprobadosPorUd().get(fila.getUdId());
-        if (utilizadas == null || utilizadas.longValue() < 2L) return "Con oportunidades disponibles";
-        if (utilizadas.longValue() == 2L) return "Última oportunidad disponible";
-        return "Sin oportunidades restantes";
+        return situacionOportunidadesNoDisponible();
+    }
+
+    static String situacionOportunidadesNoDisponible() {
+        return "Cómputo de oportunidades no disponible";
     }
 
     public int getUnidadesDisponiblesParaRegistrarSituacion() {

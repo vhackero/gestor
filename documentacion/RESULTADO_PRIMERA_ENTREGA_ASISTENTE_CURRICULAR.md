@@ -150,3 +150,33 @@ La presentacion actual de Situacion academica no incorpora `ELECTIVA` como categ
 ## Resultado
 
 **ENTREGA_TECNICA_PARCIAL**. El contrato comun y la lectura de Situacion academica quedan listos para ser reutilizados. No se declara aprobacion visual ni se han construido aun los escenarios de logro o las alternativas de carga.
+
+## Adenda: contador de reprobaciones en UD prioritarias
+
+Esta adenda corresponde a `6bf30fd1 feat: integra oportunidades verificables ud prioritarias` y a la correccion posterior de presentacion. La fuente usada es `InscripcionRepository.consultarIntentosAsignaturas`, que agrupa `rel_grupo_participante.calificacion_final < 60` por `tbl_eventos.id_programa`; los campos expuestos son `intentos_reprobados`, `id_plan` e `id_programa`.
+
+### Significado y limite del dato
+
+`N` significa **reprobaciones registradas** para una UD curricular. No significa oportunidades consumidas ni el numero de una oportunidad actualmente en curso. La consulta no aporta primera inscripcion computable, identificador de cada intento, estado de una inscripcion en curso, ni marca para excluir bajas autorizadas. En consecuencia, la pantalla no presenta `N de 3`, oportunidades restantes ni etiquetas de ultima oportunidad. Muestra `Reprobaciones registradas: N` y `Computo de oportunidades no disponible`.
+
+El Motor V2 conserva RN-1.4 cuando recibe `IntentoAcreditacionUnidadV2DTO` normalizado. La fuente de esta pantalla no suministra ese contrato, por lo que no se sustituye una evaluacion V2 completa por un agregado legacy.
+
+### Casos y evidencia
+
+| Caso | Evidencia | Resultado que acredita |
+| --- | --- | --- |
+| Primera oportunidad reprobada | `EvaluacionCurricularV2Fase2DTest.f2DU02UnReprobadoDisponible` | El motor cuenta un intento normalizado por UD; no acredita que el agregado legacy sea oportunidad consumida. |
+| Recursamiento en curso | `EvaluacionCurricularV2Fase2DTest.f2DU10EnCursoNoCuentaFallo` | Un intento en curso no se convierte en reprobacion en el motor. La consulta legacy no expone este estado. |
+| Baja autorizada | `EvaluacionCurricularV2Fase2DTest.f2DU08BajaParcialNoCuentaFallo` | Una baja parcial normalizada no consume fallo. La consulta legacy no permite comprobar la autorizacion. |
+| Registro duplicado | `EvaluacionCurricularV2Fase2DTest.f2DU11DuplicadoMismoIntentoCuentaUnaVez` y `AsistenteInscripcionPrioridadesTest.cuentaIntentosPorIdentidadDeUdSinDuplicarPersonasNiUnidades` | El motor deduplica por id de ejecucion; la vista deduplica filas por UD, pero el SQL agregado no permite auditar duplicados de intento. |
+| Fuente no disponible | `AsistenteCurricularV2ResultadoAdapterTest.fuenteDeReprobacionesNoDisponibleNoSeMuestraComoCeroNiComoOportunidad` | La ausencia se presenta como dato no disponible, no como cero. |
+| Optativa adicional sin cadena verificable | `TablaCurricularAsistidaBean.getResumenSustitucionesOptativasPrioritarias` | Se conserva el dato individual verificable y se declara que el computo acumulado del adeudo no esta disponible; no se infiere reinicio de oportunidades. |
+
+La prueba `AsistenteCurricularV2ResultadoAdapterTest.presentaReprobacionesRegistradasSinConvertirlasEnOportunidadesRn14` acredita la etiqueta y la separacion de significados en la vista.
+
+### Pendientes especificos
+
+- Periodo y calificacion de la reprobacion: la consulta actual no los devuelve.
+- Oportunidades consumidas, oportunidad en curso y disponibilidad: requieren detalle de cada inscripcion computable, su estado, baja autorizada e identidad de intento.
+- Sustituciones de optativas adicionales: requieren la relacion institucional verificable entre UD original, sustitutas y adeudo; no debe duplicarse ni reiniciarse el adeudo mientras falte.
+- Bajas temporales: se mantienen como seguimiento de expediente institucional, sin inferir renovaciones ni autorizaciones.
