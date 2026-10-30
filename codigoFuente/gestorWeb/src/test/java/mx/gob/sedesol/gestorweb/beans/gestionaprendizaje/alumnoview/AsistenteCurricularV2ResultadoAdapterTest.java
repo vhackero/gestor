@@ -112,7 +112,7 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		Calendar fechaCorte = Calendar.getInstance();
 		fechaCorte.clear();
 		fechaCorte.set(2026, Calendar.OCTOBER, 30);
-		metadatos.setFechaCorte(fechaCorte.getTime());
+		metadatos.setFechaCorteTrayectoria(fechaCorte.getTime());
 		metadatos.setVersionReglas("PE2027-V1");
 		metadatos.setEstadoExpediente(EstadoFuenteConsultaAsistente.DISPONIBLE);
 		metadatos.setEstadoTrayectoria(EstadoFuenteConsultaAsistente.PARCIAL);
@@ -120,10 +120,41 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		metadatos.setEstadoEvaluacionV2(EstadoFuenteConsultaAsistente.DISPONIBLE);
 
 		String resumen = TablaCurricularAsistidaBean.resumirFuentesConsulta(metadatos);
-		assertTrue(resumen.contains("30/10/2026"));
+		assertTrue(resumen.contains("Trayectoria: parcial (corte 30/10/2026)"));
 		assertTrue(resumen.contains("Expediente: disponible"));
 		assertTrue(resumen.contains("Trayectoria: parcial"));
 		assertTrue(resumen.contains("Oferta: sin registros"));
+	}
+
+	@Test
+	public void expresaEstadosDeFuenteSinSimularUnCorteUnico() {
+		MetadatosConsultaAsistenteDTO metadatos = new MetadatosConsultaAsistenteDTO();
+		metadatos.setVersionReglas("PE2027-V1");
+		metadatos.setEstadoExpediente(EstadoFuenteConsultaAsistente.DESACTUALIZADO);
+		metadatos.setEstadoTrayectoria(EstadoFuenteConsultaAsistente.PARCIAL);
+		metadatos.setEstadoOferta(EstadoFuenteConsultaAsistente.VACIO);
+		metadatos.setEstadoEvaluacionV2(EstadoFuenteConsultaAsistente.ERROR);
+
+		String resumen = TablaCurricularAsistidaBean.resumirFuentesConsulta(metadatos);
+		assertTrue(resumen.contains("Expediente: desactualizada (corte no informado)"));
+		assertTrue(resumen.contains("Trayectoria: parcial (corte no informado)"));
+		assertTrue(resumen.contains("Oferta: sin registros (corte no informado)"));
+		assertTrue(resumen.contains("Evaluación curricular: con error (evaluada no informado)"));
+	}
+
+	@Test
+	public void errorDeEvaluacionV2EsControladoSinAlterarLosCortesDeLasFuentes() {
+		MetadatosConsultaAsistenteDTO metadatos = new MetadatosConsultaAsistenteDTO();
+		Calendar fechaTrayectoria = Calendar.getInstance();
+		fechaTrayectoria.clear();
+		fechaTrayectoria.set(2026, Calendar.OCTOBER, 30);
+		metadatos.setFechaCorteTrayectoria(fechaTrayectoria.getTime());
+		TablaCurricularAsistidaBean.actualizarEstadoEvaluacionV2(metadatos,
+				EstadoFuenteConsultaAsistente.ERROR, null);
+
+		assertEquals(metadatos.getEstadoEvaluacionV2(), EstadoFuenteConsultaAsistente.ERROR);
+		assertEquals(metadatos.getFechaCorteTrayectoria(), fechaTrayectoria.getTime());
+		assertTrue(metadatos.getFechaEvaluacionV2() == null);
 	}
 
 	private TrazaReglaAplicadaV2DTO trazaCausal(CodigoReglaCurricularV2 regla) {

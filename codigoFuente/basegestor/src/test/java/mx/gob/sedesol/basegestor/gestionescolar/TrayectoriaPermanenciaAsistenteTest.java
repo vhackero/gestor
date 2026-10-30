@@ -12,8 +12,17 @@ import java.util.Date;
 import org.testng.annotations.Test;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
 
 public class TrayectoriaPermanenciaAsistenteTest {
+
+    @Test
+    public void distingueConsultaDeOfertaVaciaDeFuenteParcial() {
+        assertEquals(AsistenteInscripcionServiceImpl.estadoOferta(Boolean.TRUE), EstadoFuenteConsultaAsistente.DISPONIBLE);
+        assertEquals(AsistenteInscripcionServiceImpl.estadoOferta(Boolean.FALSE), EstadoFuenteConsultaAsistente.VACIO);
+        assertEquals(AsistenteInscripcionServiceImpl.estadoOferta(null), EstadoFuenteConsultaAsistente.PARCIAL);
+        assertEquals(AsistenteInscripcionServiceImpl.estadoExpediente(false), EstadoFuenteConsultaAsistente.PARCIAL);
+    }
 
     @Test
     public void calculaPlazoEnTiempoCalendarioYNoPorSemestresInscritos() {

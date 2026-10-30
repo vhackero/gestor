@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Calendar;
+import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.text.Normalizer;
 import java.util.ArrayList;
@@ -255,7 +256,15 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
 	private void actualizarEstadoEvaluacionV2(EstadoFuenteConsultaAsistente estado) {
 		if (contexto == null || contexto.getMetadatosConsulta() == null) return;
-		contexto.getMetadatosConsulta().setEstadoEvaluacionV2(estado);
+		actualizarEstadoEvaluacionV2(contexto.getMetadatosConsulta(), estado, new Date());
+	}
+
+	/** Conserva el instante propio de V2; no lo hace pasar por corte de expediente u oferta. */
+	static void actualizarEstadoEvaluacionV2(MetadatosConsultaAsistenteDTO metadatos,
+			EstadoFuenteConsultaAsistente estado, Date fechaEvaluacion) {
+		if (metadatos == null) return;
+		metadatos.setEstadoEvaluacionV2(estado);
+		if (estado == EstadoFuenteConsultaAsistente.DISPONIBLE) metadatos.setFechaEvaluacionV2(fechaEvaluacion);
 	}
 
 	/** Resumen de origen para evitar presentar un corte parcial como información completa. */
@@ -265,15 +274,21 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
 	static String resumirFuentesConsulta(MetadatosConsultaAsistenteDTO metadatos) {
 		if (metadatos == null) return "Información de consulta parcial: no se identificó el corte de datos.";
-		String corte = metadatos.getFechaCorte() == null ? "corte no disponible"
-				: "corte " + new SimpleDateFormat("dd/MM/yyyy").format(metadatos.getFechaCorte());
 		String version = StringUtils.isBlank(metadatos.getVersionReglas()) ? "versión normativa no disponible"
 				: "versión " + metadatos.getVersionReglas();
-		return "Consulta con " + corte + " · " + version + " · Expediente: "
-				+ etiquetaEstadoFuente(metadatos.getEstadoExpediente()) + " · Trayectoria: "
-				+ etiquetaEstadoFuente(metadatos.getEstadoTrayectoria()) + " · Oferta: "
-				+ etiquetaEstadoFuente(metadatos.getEstadoOferta()) + " · Evaluación curricular: "
-				+ etiquetaEstadoFuente(metadatos.getEstadoEvaluacionV2()) + ".";
+		return version + " · Expediente: " + etiquetaEstadoFuente(metadatos.getEstadoExpediente())
+				+ " (corte " + formatearCorteFuente(metadatos.getFechaCorteExpediente()) + ") · Trayectoria: "
+				+ etiquetaEstadoFuente(metadatos.getEstadoTrayectoria()) + " (corte "
+				+ formatearCorteFuente(metadatos.getFechaCorteTrayectoria() != null
+						? metadatos.getFechaCorteTrayectoria() : metadatos.getFechaCorte()) + ") · Oferta: "
+				+ etiquetaEstadoFuente(metadatos.getEstadoOferta()) + " (corte "
+				+ formatearCorteFuente(metadatos.getFechaCorteOferta()) + ") · Evaluación curricular: "
+				+ etiquetaEstadoFuente(metadatos.getEstadoEvaluacionV2()) + " (evaluada "
+				+ formatearCorteFuente(metadatos.getFechaEvaluacionV2()) + ").";
+	}
+
+	private static String formatearCorteFuente(Date fecha) {
+		return fecha == null ? "no informado" : new SimpleDateFormat("dd/MM/yyyy").format(fecha);
 	}
 
 	private static String etiquetaEstadoFuente(EstadoFuenteConsultaAsistente estado) {

@@ -144,22 +144,21 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         MetadatosConsultaAsistenteDTO metadatos = new MetadatosConsultaAsistenteDTO();
         metadatos.setPeriodoActual(contexto.getPeriodoActivo());
         if (contexto.getTrayectoriaPermanencia() != null) {
-            metadatos.setFechaCorte(contexto.getTrayectoriaPermanencia().getFechaCorte());
+            metadatos.setFechaCorteTrayectoria(contexto.getTrayectoriaPermanencia().getFechaCorte());
             metadatos.setEstadoTrayectoria(Boolean.TRUE.equals(contexto.getTrayectoriaPermanencia().getDeterminable())
                     && contexto.getTrayectoriaPermanencia().getMensajeRevision() == null
                             ? EstadoFuenteConsultaAsistente.DISPONIBLE
                             : EstadoFuenteConsultaAsistente.PARCIAL);
         }
         boolean expedienteDisponible = contextoBase != null && contextoBase.getEstadoAcademico() != null;
-        metadatos.setEstadoExpediente(expedienteDisponible ? EstadoFuenteConsultaAsistente.DISPONIBLE
-                : EstadoFuenteConsultaAsistente.PARCIAL);
+        metadatos.setEstadoExpediente(estadoExpediente(expedienteDisponible));
         if (!expedienteDisponible) metadatos.getCamposPendientes().add("Expediente académico");
         // Una oferta inexistente es un dato válido; sólo el valor ausente deja la fuente incompleta.
         if (contexto.getOfertaVigenteReal() == null) {
             metadatos.setEstadoOferta(EstadoFuenteConsultaAsistente.PARCIAL);
             metadatos.getCamposPendientes().add("Oferta vigente");
         } else {
-            metadatos.setEstadoOferta(EstadoFuenteConsultaAsistente.DISPONIBLE);
+            metadatos.setEstadoOferta(estadoOferta(contexto.getOfertaVigenteReal()));
         }
         try {
             ConfiguracionEvaluacionCurricularV2DTO configuracion = configuracionEvaluacionCurricularV2Service
@@ -169,6 +168,17 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             metadatos.getCamposPendientes().add("Configuración normativa V2");
         }
         return metadatos;
+    }
+
+    static EstadoFuenteConsultaAsistente estadoExpediente(boolean disponible) {
+        return disponible ? EstadoFuenteConsultaAsistente.DISPONIBLE : EstadoFuenteConsultaAsistente.PARCIAL;
+    }
+
+    /** Una consulta de oferta sin UD vigentes es VACIO, no una fuente parcial. */
+    static EstadoFuenteConsultaAsistente estadoOferta(Boolean ofertaVigente) {
+        if (ofertaVigente == null) return EstadoFuenteConsultaAsistente.PARCIAL;
+        return ofertaVigente.booleanValue() ? EstadoFuenteConsultaAsistente.DISPONIBLE
+                : EstadoFuenteConsultaAsistente.VACIO;
     }
 
     private TrayectoriaPermanenciaDTO construirTrayectoriaPermanencia(Long idPersona, InscripcionContextoDTO contextoBase) {

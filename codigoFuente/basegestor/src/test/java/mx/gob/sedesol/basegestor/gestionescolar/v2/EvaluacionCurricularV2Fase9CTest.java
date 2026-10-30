@@ -10,6 +10,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoRequisitosE
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaAcademicaV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.RelacionSeriacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoComponenteCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoRelacionSeriacionV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoSeriacionV2;
@@ -73,6 +74,23 @@ public class EvaluacionCurricularV2Fase9CTest {
     @Test public void f9CU10ComponenteNoClasificadoRequiereRevision() { ContextoEvaluacionCurricularV2DTO c = contextoCompleto(); c.getComponentesFinalesSolicitados().add(999L); assertEquals(carga(c).getEstadoComponentesFinalesRn94(), EstadoRequisitoComponenteFinalV2.REQUIERE_REVISION); }
     @Test public void f9CU11Rn93YPromedioNoSustituyenRequisitosEgreso() { ContextoEvaluacionCurricularV2DTO c = contextoCompleto(); c.getUnidades().get(0).setEstado(EstadoUnidadCurricularV2.NO_CURSADA); c.setOportunidadesMejoraUtilizadas(Integer.valueOf(0)); assertEquals(carga(c).getEstadoRequisitosEgresoAcademicoRn94(), EstadoRequisitosEgresoAcademicoV2.REQUISITOS_ACADEMICOS_EGRESO_PENDIENTES); }
     @Test public void f9CU12DeterminismoEIdempotencia() { ContextoEvaluacionCurricularV2DTO c = contextoCompleto(); assertEquals(carga(c).getEstadoRequisitosEgresoAcademicoRn94(), carga(c).getEstadoRequisitosEgresoAcademicoRn94()); }
+
+    @Test public void f9CU13AdeudoOptativaAdicionalNoBloqueaCumplimientoCurricularPeroConservaRegularizacion() {
+        ContextoEvaluacionCurricularV2DTO c = contextoCompleto();
+        UnidadEvaluacionCurricularV2DTO adeudoAdicional = unidad(200L, "Optativa", 6, EstadoUnidadCurricularV2.REPROBADA);
+        adeudoAdicional.setOrdenAcreditacionOptativa(Integer.valueOf(9));
+        adeudoAdicional.setCausa(mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaPendienteUnidadV2.REPROBACION);
+        adeudoAdicional.setReprobacionVigenteConocida(Boolean.TRUE);
+        adeudoAdicional.setReprobacionPeriodoPrevioConocida(Boolean.TRUE);
+        c.getUnidades().add(adeudoAdicional);
+
+        ResultadoEvaluacionCurricularV2DTO resultado = servicio.evaluarSombra(c);
+        assertEquals(resultado.getEvaluacionCargaAcademica().getEstadoRequisitosEgresoAcademicoRn94(),
+                EstadoRequisitosEgresoAcademicoV2.REQUISITOS_ACADEMICOS_EGRESO_CUMPLIDOS);
+        assertEquals(resultado.getCantidadReprobadasVigentes(), Integer.valueOf(1));
+        assertEquals(resultado.getSituacionAcademica(), "IRREGULAR");
+        assertFalse(Boolean.TRUE.equals(resultado.getEfectosProductivosAplicados()));
+    }
 
     private ContextoEvaluacionCurricularV2DTO contextoCompleto() { return contextoConOptativas(8); }
     private ContextoEvaluacionCurricularV2DTO contextoConOptativas(int cantidad) { ContextoEvaluacionCurricularV2DTO c = new ContextoEvaluacionCurricularV2DTO(); c.setPeriodoNormativo("2027-1"); c.setSemestreObjetivo(Integer.valueOf(8)); c.setSeriacionComprobada(Boolean.TRUE); c.setEstructuraProgramaEducativoComprobada(Boolean.TRUE); c.getUnidades().add(unidad(1L, "Obligatoria", 1, EstadoUnidadCurricularV2.ACREDITADA)); c.getIdsObligatoriasRequeridasEgreso().add(1L); for (int i = 0; i < cantidad; i++) { UnidadEvaluacionCurricularV2DTO optativa = unidad(Long.valueOf(i + 2L), "Optativa", 2, EstadoUnidadCurricularV2.ACREDITADA); optativa.setOrdenAcreditacionOptativa(Integer.valueOf(i + 1)); c.getUnidades().add(optativa); } c.getUnidades().add(unidad(90L, "Electiva", 5, EstadoUnidadCurricularV2.ACREDITADA)); return c; }

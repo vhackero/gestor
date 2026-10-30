@@ -10,7 +10,15 @@ public class MetadatosConsultaAsistenteDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Compatibilidad con consumidores previos. Equivale al corte de trayectoria
+     * cuando existe; no representa un corte unificado de todas las fuentes.
+     */
     private Date fechaCorte;
+    private Date fechaCorteExpediente;
+    private Date fechaCorteOferta;
+    private Date fechaCorteTrayectoria;
+    private Date fechaEvaluacionV2;
     private String periodoActual;
     private String versionReglas;
     private EstadoFuenteConsultaAsistente estadoExpediente = EstadoFuenteConsultaAsistente.PARCIAL;
@@ -21,6 +29,17 @@ public class MetadatosConsultaAsistenteDTO implements Serializable {
 
     public Date getFechaCorte() { return fechaCorte; }
     public void setFechaCorte(Date valor) { fechaCorte = valor; }
+    public Date getFechaCorteExpediente() { return fechaCorteExpediente; }
+    public void setFechaCorteExpediente(Date valor) { fechaCorteExpediente = valor; }
+    public Date getFechaCorteOferta() { return fechaCorteOferta; }
+    public void setFechaCorteOferta(Date valor) { fechaCorteOferta = valor; }
+    public Date getFechaCorteTrayectoria() { return fechaCorteTrayectoria; }
+    public void setFechaCorteTrayectoria(Date valor) {
+        fechaCorteTrayectoria = valor;
+        fechaCorte = valor;
+    }
+    public Date getFechaEvaluacionV2() { return fechaEvaluacionV2; }
+    public void setFechaEvaluacionV2(Date valor) { fechaEvaluacionV2 = valor; }
     public String getPeriodoActual() { return periodoActual; }
     public void setPeriodoActual(String valor) { periodoActual = valor; }
     public String getVersionReglas() { return versionReglas; }

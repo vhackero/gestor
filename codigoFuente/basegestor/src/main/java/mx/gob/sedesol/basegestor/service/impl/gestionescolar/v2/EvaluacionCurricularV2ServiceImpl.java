@@ -984,7 +984,10 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         carga.setElectivasAcreditadasRn94(Integer.valueOf(0));
         boolean optativasCumplidas = carga.getEstadoRequerimientoOptativo() == EstadoRequerimientoOptativoV2.REQUERIMIENTO_OPTATIVO_CUMPLIDO
                 || carga.getCantidadOptativasAcreditadasRn711().intValue() >= 8;
-        if (carga.getEstadoRequerimientoOptativo() == EstadoRequerimientoOptativoV2.REQUIERE_REVISION) revision = true;
+        // Un adeudo adicional puede requerir prioridad o sustitución, pero no
+        // deshace las ocho optativas ya acreditadas ni bloquea RN-9.4 por sí solo.
+        if (carga.getEstadoRequerimientoOptativo() == EstadoRequerimientoOptativoV2.REQUIERE_REVISION
+                && !optativasCumplidas) revision = true;
 
         evaluarComponentesFinalesRn94(resultado, contexto, carga, porId);
         if (revision) carga.setEstadoRequisitosEgresoAcademicoRn94(EstadoRequisitosEgresoAcademicoV2.REQUIERE_REVISION);
