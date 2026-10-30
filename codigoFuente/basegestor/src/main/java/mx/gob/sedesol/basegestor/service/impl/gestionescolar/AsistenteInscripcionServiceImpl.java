@@ -30,6 +30,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoD
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademicaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MotivoDecisionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.OportunidadAcademicaDTO;
@@ -113,6 +114,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         dto.setIdProcesoInscripcion(resolverIdProcesoInscripcion(contextoBase));
         dto.setInscripcionVigente(Boolean.valueOf(tieneInscripcionVigente(materiasEnCurso)));
         dto.setOfertaVigenteReal(Boolean.valueOf(tieneOfertaVigenteReal(contextoBase)));
+        cargarIntentosReprobadosPorUd(dto, idPersona);
         dto.setEstadoOperativoSimulador(resolverEstadoOperativoSimulador(contextoBase,
                 Boolean.TRUE.equals(dto.getInscripcionVigente()),
                 Boolean.TRUE.equals(dto.getOfertaVigenteReal())));
@@ -138,6 +140,30 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         return dto;
     }
 
+    /** Fuente de lectura por UD; un intento no se convierte en una nueva UD. */
+    private void cargarIntentosReprobadosPorUd(AsistenteInscripcionContextoDTO contexto, Long idPersona) {
+        Map<Long, Long> intentosPorUd = new HashMap<Long, Long>();
+        if (contexto == null || idPersona == null) return;
+        try {
+            List<IntentosAsignaturasDTO> intentos = inscripcionService.consultarIntentosAsignaturas(String.valueOf(idPersona));
+            intentosPorUd.putAll(mapearIntentosReprobadosPorUd(intentos));
+            contexto.setIntentosReprobadosDisponibles(Boolean.TRUE);
+        } catch (RuntimeException ex) {
+            contexto.setIntentosReprobadosDisponibles(Boolean.FALSE);
+        }
+        contexto.setIntentosReprobadosPorUd(intentosPorUd);
+    }
+
+    static Map<Long, Long> mapearIntentosReprobadosPorUd(List<IntentosAsignaturasDTO> intentos) {
+        Map<Long, Long> resultado = new HashMap<Long, Long>();
+        if (intentos == null) return resultado;
+        for (IntentosAsignaturasDTO intento : intentos) {
+            if (intento == null || intento.getIdPrograma() == null || intento.getIntentosReprobados() == null) continue;
+            resultado.put(intento.getIdPrograma(), intento.getIntentosReprobados());
+        }
+        return resultado;
+    }
+
     /** Construye el corte y la disponibilidad sin convertir ausencia de datos en un resultado académico. */
     private MetadatosConsultaAsistenteDTO construirMetadatosConsulta(AsistenteInscripcionContextoDTO contexto,
             InscripcionContextoDTO contextoBase) {
@@ -159,6 +185,9 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             metadatos.getCamposPendientes().add("Oferta vigente");
         } else {
             metadatos.setEstadoOferta(estadoOferta(contexto.getOfertaVigenteReal()));
+        }
+        if (!Boolean.TRUE.equals(contexto.getIntentosReprobadosDisponibles())) {
+            metadatos.getCamposPendientes().add("Oportunidades de acreditación por UD");
         }
         try {
             ConfiguracionEvaluacionCurricularV2DTO configuracion = configuracionEvaluacionCurricularV2Service

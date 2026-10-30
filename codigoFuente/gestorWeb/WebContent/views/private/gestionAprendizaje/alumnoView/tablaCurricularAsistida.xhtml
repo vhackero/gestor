@@ -2097,7 +2097,12 @@
                                                     <h3>Oportunidades de acreditación</h3>
                                                     <div class="contador">#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias.size()}</div>
                                                     <p>Consulta las UD que requieren seguimiento de oportunidades conforme a la regla institucional aplicable.</p>
-                                                    <div class="prioridad-detalle">#{tablaCurricularAsistidaBean.resumenOportunidadesAcreditacionPrioritarias}</div>
+                                                    <div class="prioridad-detalle">
+                                                        <p>#{tablaCurricularAsistidaBean.resumenOportunidadesAcreditacionPrioritarias}</p>
+                                                        <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasReprobadasPrioritarias}">
+                                                            <ul><ui:repeat value="#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias}" var="filaOportunidad"><li>#{filaOportunidad.clave}: #{tablaCurricularAsistidaBean.oportunidadesUtilizadasFilaPrioritaria(filaOportunidad)} · #{tablaCurricularAsistidaBean.situacionOportunidadesFilaPrioritaria(filaOportunidad)}</li></ui:repeat></ul>
+                                                        </ui:fragment>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="dual-soft-panels">

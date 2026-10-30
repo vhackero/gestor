@@ -2,7 +2,9 @@ package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AsistenteInscripcionContextoDTO implements Serializable {
 
@@ -41,6 +43,9 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
     private OportunidadAcademicaDTO oportunidades;
     private TrayectoriaPermanenciaDTO trayectoriaPermanencia;
     private MetadatosConsultaAsistenteDTO metadatosConsulta;
+    /** Intentos reprobados por identidad curricular de UD; no modifica el historial. */
+    private Map<Long, Long> intentosReprobadosPorUd;
+    private Boolean intentosReprobadosDisponibles;
 
     private List<String> reglasActivas;
     private List<String> pendientesCriticos;
@@ -54,6 +59,8 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
         this.pendientesCriticos = new ArrayList<String>();
         this.unidades = new ArrayList<UnidadDecisionInscripcionDTO>();
         this.escenarios = new ArrayList<EscenarioCargaDTO>();
+        this.intentosReprobadosPorUd = new HashMap<Long, Long>();
+        this.intentosReprobadosDisponibles = Boolean.FALSE;
     }
 
     public InscripcionContextoDTO getContextoBase() {
@@ -286,6 +293,23 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
 
     public void setMetadatosConsulta(MetadatosConsultaAsistenteDTO metadatosConsulta) {
         this.metadatosConsulta = metadatosConsulta;
+    }
+
+    public Map<Long, Long> getIntentosReprobadosPorUd() {
+        return intentosReprobadosPorUd;
+    }
+
+    public void setIntentosReprobadosPorUd(Map<Long, Long> intentosReprobadosPorUd) {
+        this.intentosReprobadosPorUd = intentosReprobadosPorUd == null
+                ? new HashMap<Long, Long>() : new HashMap<Long, Long>(intentosReprobadosPorUd);
+    }
+
+    public Boolean getIntentosReprobadosDisponibles() {
+        return intentosReprobadosDisponibles;
+    }
+
+    public void setIntentosReprobadosDisponibles(Boolean intentosReprobadosDisponibles) {
+        this.intentosReprobadosDisponibles = intentosReprobadosDisponibles;
     }
 
     public List<String> getReglasActivas() {
