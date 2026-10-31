@@ -3521,6 +3521,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return construirFilasBajaPrioritarias("PARCIAL");
     }
 
+    /** Movimientos fuente, distinto de las UD afectadas que se deduplican para la tarjeta. */
+    public int getConteoMovimientosBajaParcialPrioritarias() {
+        return contarMovimientosBajaPorTipo(obtenerBajasContexto(), "PARCIAL");
+    }
+
     /** Registros de baja temporal disponibles; no se asumen autorizaciones ni vigencia. */
     public int getConteoBajasTemporalesPrioritarias() {
         return filtrarBajasPorTipo(obtenerBajasContexto(), "TEMPORAL").size();
@@ -3580,6 +3585,19 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return new ArrayList<InscripcionBajasDTO>(porIdentidad.values());
     }
 
+    static int contarMovimientosBajaPorTipo(List<InscripcionBajasDTO> bajas, String tipoEsperado) {
+        if (bajas == null || bajas.isEmpty() || StringUtils.isBlank(tipoEsperado)) return 0;
+        String tipo = tipoEsperado.toUpperCase(Locale.ROOT);
+        int movimientos = 0;
+        for (InscripcionBajasDTO baja : bajas) {
+            if (baja != null && baja.getTipoBaja() != null
+                    && baja.getTipoBaja().toUpperCase(Locale.ROOT).contains(tipo)) {
+                movimientos++;
+            }
+        }
+        return movimientos;
+    }
+
     public String getDetalleFilaPrioritaria(FilaAsistidaDTO fila) {
         if (fila == null) {
             return "Sin información verificable de la unidad didáctica.";
@@ -3607,7 +3625,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         if (registros == 0) {
             return "No se identifican registros de baja temporal en el contexto académico disponible.";
         }
-        return "Se identifican " + registros + " registro(s) de baja temporal. La fuente no acredita por sí sola autorización, vigencia ni periodos consumidos; deben consultarse en el expediente institucional.";
+        return "Registros asociados a baja temporal; autorización y vigencia no verificadas. No modifican regularidad, oportunidades, plazo ni reincorporación sin evidencia institucional.";
     }
 
     public String getResumenSustitucionesOptativasPrioritarias() {

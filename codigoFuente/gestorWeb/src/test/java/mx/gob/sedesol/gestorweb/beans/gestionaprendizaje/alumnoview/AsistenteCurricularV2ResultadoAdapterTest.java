@@ -262,6 +262,8 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 
 		assertEquals(TablaCurricularAsistidaBean.filtrarBajasPorTipo(
 				Arrays.asList(parcial, parcialDuplicada, temporal), "PARCIAL").size(), 1);
+		assertEquals(TablaCurricularAsistidaBean.contarMovimientosBajaPorTipo(
+				Arrays.asList(parcial, parcialDuplicada, temporal), "PARCIAL"), 2);
 		assertEquals(TablaCurricularAsistidaBean.filtrarBajasPorTipo(
 				Arrays.asList(parcial, parcialDuplicada, temporal), "TEMPORAL").size(), 1);
 	}
