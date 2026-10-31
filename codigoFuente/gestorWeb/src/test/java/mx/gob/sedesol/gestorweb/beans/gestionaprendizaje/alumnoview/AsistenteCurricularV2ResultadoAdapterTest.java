@@ -240,6 +240,13 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertEquals(resultado.get(0).getClave(), "UD-REPROBADA");
 	}
 
+	@Test
+	public void exponeFirmaElParaDetalleDeFilaPrioritaria() throws Exception {
+		assertEquals(TablaCurricularAsistidaBean.class
+				.getMethod("detalleFilaPrioritaria", TablaCurricularAsistidaBean.FilaAsistidaDTO.class)
+				.getReturnType(), String.class);
+	}
+
 	private TrazaReglaAplicadaV2DTO trazaCausal(CodigoReglaCurricularV2 regla) {
 		TrazaReglaAplicadaV2DTO traza = new TrazaReglaAplicadaV2DTO();
 		traza.setCodigoRegla(regla);

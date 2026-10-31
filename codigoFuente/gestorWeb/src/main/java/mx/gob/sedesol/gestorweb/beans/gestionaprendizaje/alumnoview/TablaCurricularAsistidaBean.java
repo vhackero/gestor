@@ -3543,6 +3543,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return detalle.toString();
     }
 
+    /** Firma invocable desde EL para el detalle por fila de UD prioritarias. */
+    public String detalleFilaPrioritaria(FilaAsistidaDTO fila) {
+        return getDetalleFilaPrioritaria(fila);
+    }
+
     public String getResumenBajasTemporalesPrioritarias() {
         if (!isEstadoOperativoBajaTemporal()) {
             return "No se identifica una baja temporal activa en el contexto académico actual.";
