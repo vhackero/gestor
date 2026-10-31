@@ -15,6 +15,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.commons.lang3.SerializationUtils;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
@@ -43,6 +44,9 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscri
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ConfiguracionEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.UnidadEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.inscripcion.InscripcionPreviaMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
@@ -1260,6 +1264,73 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     }
 
     private ProyeccionSiguientePeriodoDTO construirProyeccionSiguientePeriodo(AsistenteInscripcionContextoDTO contexto,
+            List<InscripcionPreviaMateriasDTO> materiasEnCurso,
+            InscripcionContextoDTO contextoBase, Map<Long, FichaDescProgramaDTO> programasPlan,
+            Map<Long, UbicacionCurricular> ubicacionesPlan) {
+        return construirProyeccionSiguientePeriodoV2(contexto, materiasEnCurso);
+    }
+
+    /**
+     * Las expectativas son hipótesis de sólo lectura. Cada una parte de una
+     * copia profunda del mismo contexto y vuelve a evaluar el motor V2.
+     */
+    private ProyeccionSiguientePeriodoDTO construirProyeccionSiguientePeriodoV2(AsistenteInscripcionContextoDTO contexto,
+            List<InscripcionPreviaMateriasDTO> materiasEnCurso) {
+        ProyeccionSiguientePeriodoDTO dto = new ProyeccionSiguientePeriodoDTO();
+        if (contexto == null || contextoEvaluacionCurricularV2Adapter == null || evaluacionCurricularV2Service == null) {
+            dto.setResumen("No es posible construir la expectativa: la evaluación curricular V2 no está disponible.");
+            return dto;
+        }
+        ContextoEvaluacionCurricularV2DTO base = contextoEvaluacionCurricularV2Adapter.construirDesdeAsistente(contexto);
+        if (configuracionEvaluacionCurricularV2Service != null) {
+            base.setVersionReglas(configuracionEvaluacionCurricularV2Service.obtenerConfiguracion().getVersionReglas());
+        }
+        Set<Long> enCurso = obtenerIdsMateriasEnCurso(contexto, materiasEnCurso);
+        dto.getEscenarios().add(evaluarEscenarioExpectativaV2("Situación registrada", "Sin hipótesis: conserva los resultados registrados.", base, Collections.<Long>emptySet(), Collections.<Long>emptySet(), enCurso));
+        if (enCurso.isEmpty()) {
+            dto.setResumen("No hay UD en curso verificables para construir hipótesis de acreditación. Se muestra únicamente la situación registrada.");
+            return dto;
+        }
+        dto.getEscenarios().add(evaluarEscenarioExpectativaV2("Si acredita la carga de UD actual", "Escenario conjunto: todas las UD actualmente en curso se consideran acreditadas; los demás registros se conservan.", base, enCurso, Collections.<Long>emptySet(), enCurso));
+        for (Long id : enCurso) {
+            dto.getEscenarios().add(evaluarEscenarioExpectativaV2("Si no acredita una UD en curso", "Hipótesis individual: sólo una UD en curso se considera no acreditada; las demás conservan su estado registrado.", base, Collections.<Long>emptySet(), Collections.singleton(id), enCurso));
+        }
+        dto.setResumen("Resultados hipotéticos de sólo lectura: no predicen calificaciones ni modifican historial, inscripción u oportunidades. La oferta futura requiere confirmación institucional.");
+        return dto;
+    }
+
+    private EscenarioProyeccionDTO evaluarEscenarioExpectativaV2(String nombre, String descripcion,
+            ContextoEvaluacionCurricularV2DTO base, Set<Long> acreditadas, Set<Long> reprobadas, Set<Long> enCurso) {
+        EscenarioProyeccionDTO escenario = new EscenarioProyeccionDTO();
+        escenario.setNombre(nombre);
+        escenario.setDescripcion(descripcion);
+        escenario.setMateriasOfertadas(Integer.valueOf(enCurso.size()));
+        try {
+            ContextoEvaluacionCurricularV2DTO hipotetico = SerializationUtils.clone(base);
+            for (UnidadEvaluacionCurricularV2DTO unidad : hipotetico.getUnidades()) {
+                if (unidad == null || unidad.getIdPrograma() == null) continue;
+                if (acreditadas.contains(unidad.getIdPrograma())) unidad.setEstado(EstadoUnidadCurricularV2.ACREDITADA);
+                if (reprobadas.contains(unidad.getIdPrograma())) unidad.setEstado(EstadoUnidadCurricularV2.REPROBADA);
+            }
+            ResultadoEvaluacionCurricularV2DTO resultado = evaluacionCurricularV2Service.evaluarSombra(hipotetico);
+            int habilitadas = 0;
+            int restringidas = 0;
+            for (DecisionUnidadCurricularV2DTO decision : resultado.getDecisiones()) {
+                if (Boolean.TRUE.equals(decision.getHabilitada())) habilitadas++; else restringidas++;
+            }
+            escenario.setMateriasHabilitadas(Integer.valueOf(habilitadas));
+            escenario.setMateriasBloqueadas(Integer.valueOf(restringidas));
+            escenario.getRecomendaciones().add("Situación hipotética V2: " + resultado.getSituacionAcademicaCalculada() + ". Reprobadas vigentes: " + resultado.getCantidadReprobadasVigentes() + ".");
+            if (!resultado.getRestricciones().isEmpty()) escenario.getRecomendaciones().add("Restricciones vigentes: " + resultado.getRestricciones() + ".");
+        } catch (RuntimeException ex) {
+            escenario.setMateriasHabilitadas(null);
+            escenario.setMateriasBloqueadas(null);
+            escenario.getRecomendaciones().add("La evaluación V2 del escenario no pudo completarse; no se presenta una conclusión legacy.");
+        }
+        return escenario;
+    }
+
+    private ProyeccionSiguientePeriodoDTO construirProyeccionSiguientePeriodoLegacy(AsistenteInscripcionContextoDTO contexto,
             List<InscripcionPreviaMateriasDTO> materiasEnCurso,
             InscripcionContextoDTO contextoBase, Map<Long, FichaDescProgramaDTO> programasPlan,
             Map<Long, UbicacionCurricular> ubicacionesPlan) {

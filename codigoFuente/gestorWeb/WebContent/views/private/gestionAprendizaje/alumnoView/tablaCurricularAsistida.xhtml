@@ -2158,15 +2158,15 @@
                                             <div class="expectativa-kpis">
                                                 <div class="expectativa-kpi">
                                                     <span class="label">UD consideradas según carga</span>
-                                                    <span class="value">#{escenarioProyeccion.materiasOfertadas ne null ? escenarioProyeccion.materiasOfertadas : 0}</span>
+                                                    <span class="value">#{escenarioProyeccion.materiasOfertadas ne null ? escenarioProyeccion.materiasOfertadas : 'No determinado'}</span>
                                                 </div>
                                                 <div class="expectativa-kpi">
                                                     <span class="label">UD posibles a registrar</span>
-                                                    <span class="value">#{escenarioProyeccion.materiasHabilitadas ne null ? escenarioProyeccion.materiasHabilitadas : 0}</span>
+                                                    <span class="value">#{escenarioProyeccion.materiasHabilitadas ne null ? escenarioProyeccion.materiasHabilitadas : 'No determinado'}</span>
                                                 </div>
                                                 <div class="expectativa-kpi">
                                                     <span class="label">UD bloqueadas</span>
-                                                    <span class="value">#{escenarioProyeccion.materiasBloqueadas ne null ? escenarioProyeccion.materiasBloqueadas : 0}</span>
+                                                    <span class="value">#{escenarioProyeccion.materiasBloqueadas ne null ? escenarioProyeccion.materiasBloqueadas : 'No determinado'}</span>
                                                 </div>
                                             </div>
                                             <ui:fragment rendered="#{not empty escenarioProyeccion.recomendaciones}">
