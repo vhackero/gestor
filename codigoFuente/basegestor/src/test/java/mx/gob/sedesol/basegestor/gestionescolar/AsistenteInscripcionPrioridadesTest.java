@@ -10,6 +10,9 @@ import java.util.Map;
 import org.testng.annotations.Test;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.UnidadEvaluacionCurricularV2DTO;
 
 public class AsistenteInscripcionPrioridadesTest {
 
@@ -41,6 +44,24 @@ public class AsistenteInscripcionPrioridadesTest {
                 Collections.singleton(Long.valueOf(100L)), Collections.<String>emptySet()), true);
         assertEquals(AsistenteInscripcionServiceImpl.coincideUnidadReinscrita(Long.valueOf(200L), "UD-100",
                 Collections.<Long>emptySet(), Collections.singleton("UD-100")), true);
+    }
+
+    @Test
+    public void copiaExpectativaNoMutaContextoRegistradoNiComparteUnidades() {
+        ContextoEvaluacionCurricularV2DTO original = new ContextoEvaluacionCurricularV2DTO();
+        UnidadEvaluacionCurricularV2DTO unidad = new UnidadEvaluacionCurricularV2DTO();
+        unidad.setIdPrograma(Long.valueOf(10L));
+        unidad.setEstado(EstadoUnidadCurricularV2.EN_CURSO);
+        original.getUnidades().add(unidad);
+
+        ContextoEvaluacionCurricularV2DTO primero = AsistenteInscripcionServiceImpl.copiarContextoExpectativa(original);
+        ContextoEvaluacionCurricularV2DTO segundo = AsistenteInscripcionServiceImpl.copiarContextoExpectativa(original);
+        primero.getUnidades().get(0).setEstado(EstadoUnidadCurricularV2.ACREDITADA);
+        segundo.getUnidades().get(0).setEstado(EstadoUnidadCurricularV2.REPROBADA);
+
+        assertEquals(original.getUnidades().get(0).getEstado(), EstadoUnidadCurricularV2.EN_CURSO);
+        assertEquals(primero.getUnidades().get(0).getEstado(), EstadoUnidadCurricularV2.ACREDITADA);
+        assertEquals(segundo.getUnidades().get(0).getEstado(), EstadoUnidadCurricularV2.REPROBADA);
     }
 
     private IntentosAsignaturasDTO intento(Long idPrograma, Long cantidad) {

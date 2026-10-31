@@ -1314,7 +1314,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         if (!reprobadas.isEmpty()) escenario.getSupuestos().add("Sólo la UD indicada se supone no acreditada; las demás UD en curso conservan su estado registrado.");
         if (acreditadas.isEmpty() && reprobadas.isEmpty()) escenario.getSupuestos().add("Referencia registrada: no es un resultado futuro.");
         try {
-            ContextoEvaluacionCurricularV2DTO hipotetico = SerializationUtils.clone(base);
+            ContextoEvaluacionCurricularV2DTO hipotetico = copiarContextoExpectativa(base);
             for (UnidadEvaluacionCurricularV2DTO unidad : hipotetico.getUnidades()) {
                 if (unidad == null || unidad.getIdPrograma() == null) continue;
                 if (acreditadas.contains(unidad.getIdPrograma())) unidad.setEstado(EstadoUnidadCurricularV2.ACREDITADA);
@@ -1338,6 +1338,10 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             escenario.getRecomendaciones().add("La evaluación V2 del escenario no pudo completarse; no se presenta una conclusión legacy.");
         }
         return escenario;
+    }
+
+    static ContextoEvaluacionCurricularV2DTO copiarContextoExpectativa(ContextoEvaluacionCurricularV2DTO contexto) {
+        return SerializationUtils.clone(contexto);
     }
 
     private ProyeccionSiguientePeriodoDTO construirProyeccionSiguientePeriodoLegacy(AsistenteInscripcionContextoDTO contexto,
