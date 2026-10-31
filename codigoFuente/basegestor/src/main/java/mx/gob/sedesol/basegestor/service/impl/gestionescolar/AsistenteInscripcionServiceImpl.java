@@ -1322,6 +1322,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             }
             ResultadoEvaluacionCurricularV2DTO resultado = evaluacionCurricularV2Service.evaluarSombra(hipotetico);
             escenario.setResultadoHipotetico(resultado.getSituacionAcademicaCalculada());
+            escenario.setReprobadasVigentes(resultado.getCantidadReprobadasVigentes());
             int habilitadas = 0;
             int restringidas = 0;
             for (DecisionUnidadCurricularV2DTO decision : resultado.getDecisiones()) {
@@ -2666,12 +2667,17 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             return ids;
         }
         for (InscripcionPreviaMateriasDTO materia : materiasEnCurso) {
-            if (materia == null || materia.getAsignatura() == null) {
+            if (materia == null) {
                 continue;
             }
-            String nombre = normalizarTexto(materia.getAsignatura());
             for (UnidadDecisionInscripcionDTO unidad : contexto.getUnidades()) {
-                if (unidad.getNombre() != null && normalizarTexto(unidad.getNombre()).equals(nombre) && unidad.getUdId() != null) {
+                if (unidad == null || unidad.getUdId() == null) {
+                    continue;
+                }
+                boolean mismaUnidad = materia.getIdPrograma() != null && materia.getIdPrograma().equals(unidad.getUdId());
+                boolean mismaClaveCurricular = materia.getClavePrograma() != null && unidad.getClave() != null
+                        && normalizarTexto(materia.getClavePrograma()).equals(normalizarTexto(unidad.getClave()));
+                if (mismaUnidad || mismaClaveCurricular) {
                     ids.add(unidad.getUdId());
                 }
             }

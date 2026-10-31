@@ -17,13 +17,21 @@ import org.testng.annotations.Test;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EscenarioProyeccionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoAcademicoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProyeccionSiguientePeriodoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.inscripcion.InscripcionPreviaMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.UnidadEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ContextoEvaluacionCurricularV2Adapter;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.EvaluacionCurricularV2Service;
+import mx.gob.sedesol.basegestor.service.impl.gestionescolar.v2.ContextoEvaluacionCurricularV2AdapterImpl;
+import mx.gob.sedesol.basegestor.service.impl.gestionescolar.v2.EvaluacionCurricularV2ServiceImpl;
 
 public class AsistenteInscripcionPrioridadesTest {
 
@@ -102,6 +110,29 @@ public class AsistenteInscripcionPrioridadesTest {
         assertEquals(base.getUnidades().get(0).getEstado(), EstadoUnidadCurricularV2.EN_CURSO);
     }
 
+    @Test
+    public void expectativaConMotorYAdaptadorRealesActivaRn64AlPasarDeTresACuatroReprobadas() throws Exception {
+        AsistenteInscripcionContextoDTO contexto = contextoExpectativaReal(3, false);
+        ProyeccionSiguientePeriodoDTO proyeccion = invocarExpectativaReal(contexto, materiaEnCurso(104L, "UD-104"));
+
+        assertEquals(proyeccion.getEscenarios().size(), 3);
+        assertEquals(proyeccion.getEscenarios().get(0).getReprobadasVigentes(), Integer.valueOf(3));
+        assertEquals(proyeccion.getEscenarios().get(1).getReprobadasVigentes(), Integer.valueOf(3));
+        assertEquals(proyeccion.getEscenarios().get(2).getReprobadasVigentes(), Integer.valueOf(4));
+        assertEquals(contexto.getUnidades().get(3).getEstatusHistorico(), "En curso");
+    }
+
+    @Test
+    public void expectativaConMotorYAdaptadorRealesDesactivaRn64SinRecuperarRegularidadPorAdeudo() throws Exception {
+        AsistenteInscripcionContextoDTO contexto = contextoExpectativaReal(4, true);
+        ProyeccionSiguientePeriodoDTO proyeccion = invocarExpectativaReal(contexto, materiaEnCurso(104L, "UD-104"));
+
+        assertEquals(proyeccion.getEscenarios().get(0).getReprobadasVigentes(), Integer.valueOf(4));
+        assertEquals(proyeccion.getEscenarios().get(1).getReprobadasVigentes(), Integer.valueOf(3));
+        assertEquals(proyeccion.getEscenarios().get(1).getResultadoHipotetico(), "IRREGULAR");
+        assertEquals(contexto.getUnidades().get(3).getEstatusHistorico(), "Reprobada");
+    }
+
     private ProyeccionSiguientePeriodoDTO invocarExpectativa(ContextoEvaluacionCurricularV2DTO base,
             ResultadoEvaluacionCurricularV2DTO resultado, boolean falla) throws Exception {
         AsistenteInscripcionServiceImpl servicio = new AsistenteInscripcionServiceImpl();
@@ -115,6 +146,65 @@ public class AsistenteInscripcionPrioridadesTest {
         Method metodo = AsistenteInscripcionServiceImpl.class.getDeclaredMethod("construirProyeccionSiguientePeriodoV2", AsistenteInscripcionContextoDTO.class, List.class);
         metodo.setAccessible(true);
         return (ProyeccionSiguientePeriodoDTO) metodo.invoke(servicio, new AsistenteInscripcionContextoDTO(), Collections.emptyList());
+    }
+
+    private ProyeccionSiguientePeriodoDTO invocarExpectativaReal(AsistenteInscripcionContextoDTO contexto,
+            InscripcionPreviaMateriasDTO materiaEnCurso) throws Exception {
+        AsistenteInscripcionServiceImpl servicio = new AsistenteInscripcionServiceImpl();
+        inyectar(servicio, "contextoEvaluacionCurricularV2Adapter", new ContextoEvaluacionCurricularV2AdapterImpl());
+        inyectar(servicio, "evaluacionCurricularV2Service", new EvaluacionCurricularV2ServiceImpl());
+        Method metodo = AsistenteInscripcionServiceImpl.class.getDeclaredMethod("construirProyeccionSiguientePeriodoV2", AsistenteInscripcionContextoDTO.class, List.class);
+        metodo.setAccessible(true);
+        return (ProyeccionSiguientePeriodoDTO) metodo.invoke(servicio, contexto, Collections.singletonList(materiaEnCurso));
+    }
+
+    private AsistenteInscripcionContextoDTO contextoExpectativaReal(int reprobadas, boolean ultimaEnCursoEsReprobada) {
+        AsistenteInscripcionContextoDTO contexto = new AsistenteInscripcionContextoDTO();
+        contexto.setPeriodoActivo("2027-1");
+        InscripcionPersonaDTO persona = new InscripcionPersonaDTO();
+        persona.setIdPersona(Long.valueOf(91L));
+        persona.setIdPlan(Long.valueOf(12L));
+        EstadoAcademicoDTO estado = new EstadoAcademicoDTO();
+        java.util.ArrayList<InscripcionMateriasReprobadasDTO> historico = new java.util.ArrayList<InscripcionMateriasReprobadasDTO>();
+        java.util.ArrayList<UnidadDecisionInscripcionDTO> unidades = new java.util.ArrayList<UnidadDecisionInscripcionDTO>();
+        for (int indice = 0; indice < reprobadas; indice++) {
+            Long id = Long.valueOf(101L + indice);
+            UnidadDecisionInscripcionDTO unidad = unidadReal(id, "UD-" + id, "Reprobada", 4);
+            if (indice == reprobadas - 1 && ultimaEnCursoEsReprobada) unidad.setEstatusPeriodo("En curso");
+            unidades.add(unidad);
+            InscripcionMateriasReprobadasDTO reprobada = new InscripcionMateriasReprobadasDTO();
+            reprobada.setIdPrograma(id);
+            reprobada.setIntentosReprobados(Long.valueOf(1L));
+            historico.add(reprobada);
+        }
+        if (!ultimaEnCursoEsReprobada) unidades.add(unidadReal(Long.valueOf(104L), "UD-104", "En curso", 4));
+        estado.setMateriasReprobadas(historico);
+        InscripcionContextoDTO base = new InscripcionContextoDTO();
+        base.setInscripcionPersona(persona);
+        base.setEstadoAcademico(estado);
+        contexto.setContextoBase(base);
+        contexto.setUnidades(unidades);
+        return contexto;
+    }
+
+    private UnidadDecisionInscripcionDTO unidadReal(Long id, String clave, String estado, int semestre) {
+        UnidadDecisionInscripcionDTO unidad = new UnidadDecisionInscripcionDTO();
+        unidad.setUdId(id);
+        unidad.setClave(clave);
+        unidad.setNombre("Unidad " + clave);
+        unidad.setTipoUd("OBLIGATORIA");
+        unidad.setSemestre(Integer.valueOf(semestre));
+        unidad.setBloque(Integer.valueOf(1));
+        unidad.setEstatusHistorico(estado);
+        unidad.setOfertada(Boolean.TRUE);
+        return unidad;
+    }
+
+    private InscripcionPreviaMateriasDTO materiaEnCurso(Long id, String clave) {
+        InscripcionPreviaMateriasDTO materia = new InscripcionPreviaMateriasDTO();
+        materia.setIdPrograma(id);
+        materia.setClavePrograma(clave);
+        return materia;
     }
 
     private void inyectar(Object destino, String nombre, Object valor) throws Exception { Field campo = destino.getClass().getDeclaredField(nombre); campo.setAccessible(true); campo.set(destino, valor); }

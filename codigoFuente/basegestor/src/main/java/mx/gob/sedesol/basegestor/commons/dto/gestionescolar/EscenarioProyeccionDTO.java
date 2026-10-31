@@ -13,6 +13,8 @@ public class EscenarioProyeccionDTO implements Serializable {
     private Integer materiasOfertadas;
     private Integer materiasHabilitadas;
     private Integer materiasBloqueadas;
+    /** Reprobadas vigentes calculadas para el escenario hipotético V2. */
+    private Integer reprobadasVigentes;
     private String situacionBase;
     private String resultadoHipotetico;
     private String periodoSimulado;
@@ -65,6 +67,14 @@ public class EscenarioProyeccionDTO implements Serializable {
 
     public void setMateriasBloqueadas(Integer materiasBloqueadas) {
         this.materiasBloqueadas = materiasBloqueadas;
+    }
+
+    public Integer getReprobadasVigentes() {
+        return reprobadasVigentes;
+    }
+
+    public void setReprobadasVigentes(Integer reprobadasVigentes) {
+        this.reprobadasVigentes = reprobadasVigentes;
     }
 
     public List<String> getRecomendaciones() {
