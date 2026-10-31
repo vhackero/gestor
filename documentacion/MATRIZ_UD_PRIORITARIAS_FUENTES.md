@@ -4,7 +4,7 @@
 
 - Rama: `feature/desacople_motor_historico`.
 - Entrega base: `c448a213 feat: integra fuentes verificables ud prioritarias`.
-- Precision de identidad y bajas: pendiente de registrar con el commit de esta entrega.
+- Precision de identidad y bajas: `bda945f2 fix: precisa identidad y bajas prioritarias`.
 - Alcance: consulta y orientacion. Ningun bloque modifica historial, oportunidades, regularidad, plazo, reincorporacion ni inscripcion.
 - Estado visual: pendiente de despliegue y validacion manual; empaquetar un WAR no constituye evidencia de despliegue.
 
