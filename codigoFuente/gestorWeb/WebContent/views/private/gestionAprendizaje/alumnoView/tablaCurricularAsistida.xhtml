@@ -1306,6 +1306,12 @@
                 font-weight: 700;
                 color: #2f3539;
             }
+            .prioridades-title {
+                color: #062765;
+                font-size: 31px;
+                font-weight: 700;
+                margin: 8px 0 16px;
+            }
             .section-intro-box {
                 background: #ffffff;
                 border: 1px solid #8eb7c4;
@@ -1374,42 +1380,124 @@
             .prioridades-grid {
                 display: grid;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 16px;
+                gap: 20px;
             }
             .prioridad-card {
                 background: #ffffff;
-                border: 1px solid #9abecd;
-                padding: 16px;
-                min-height: 180px;
+                border: 1px solid #b6d5e8;
+                border-radius: 9px;
+                padding: 15px 18px 16px;
+                min-height: 248px;
+                display: flex;
+                flex-direction: column;
             }
             .prioridad-card h3 {
                 margin: 0 0 8px;
-                color: #2f5969;
-                font-size: 16px;
+                color: #062765;
+                font-size: 21px;
+                line-height: 1.15;
+            }
+            .prioridad-resumen {
+                min-height: 55px;
+                display: flex;
+                align-items: center;
+                gap: 13px;
+                border-bottom: 1px solid #b9d8ea;
+                margin-bottom: 10px;
+                padding-bottom: 8px;
             }
             .prioridad-card .contador {
-                color: #234856;
-                font-size: 29px;
+                color: #062765;
+                font-size: 52px;
+                line-height: .95;
                 font-weight: 700;
-                margin-bottom: 8px;
+                white-space: nowrap;
             }
-            .prioridad-card p {
-                color: #4a555a;
-                line-height: 1.42;
-                margin: 0 0 10px;
+            .prioridad-unidad,
+            .prioridad-referencia {
+                color: #062765;
+                font-size: 21px;
+                line-height: 1.1;
             }
-            .prioridad-detalle {
-                background: #edf6fa;
-                border-left: 3px solid #78aebe;
-                color: #3c5058;
+            .prioridad-referencia {
+                border-left: 1px solid #93c4e1;
+                font-size: 16px;
+                padding-left: 14px;
+                flex: 1;
+            }
+            .prioridad-table-wrap {
+                border: 1px solid #d8e7f1;
+                border-radius: 7px;
+                overflow-y: auto;
+                overflow-x: auto;
+                max-height: 127px;
+                min-height: 108px;
+                flex: 1;
+            }
+            .prioridad-table-wrap table {
+                width: 100%;
+                border-collapse: collapse;
+                min-width: 510px;
+            }
+            .prioridad-table-wrap th {
+                position: sticky;
+                top: 0;
+                z-index: 1;
+                background: #e9f4fb;
+                color: #062765;
+                font-size: 13px;
+                font-weight: 700;
+                padding: 7px 10px;
+                text-align: left;
+                border-bottom: 1px solid #c8deeb;
+            }
+            .prioridad-table-wrap td {
+                color: #17366f;
+                font-size: 14px;
+                padding: 7px 10px;
+                vertical-align: middle;
+                border-bottom: 1px solid #edf3f7;
+            }
+            .prioridad-table-wrap tbody tr:nth-child(odd) {
+                background: #f8fbfd;
+            }
+            .prioridad-clave {
+                color: #062765;
+                display: block;
+                font-weight: 700;
+            }
+            .prioridad-nombre {
+                color: #7382a3;
+                display: block;
                 font-size: 12px;
-                line-height: 1.42;
-                margin-top: 8px;
-                padding: 9px 10px;
+                line-height: 1.2;
+                margin-top: 2px;
             }
-            .prioridad-detalle ul {
-                margin: 0;
-                padding-left: 16px;
+            .prioridad-nota {
+                color: #65759a;
+                font-size: 13px;
+                line-height: 1.3;
+                margin: 10px 0 0;
+            }
+            .prioridad-vacia {
+                color: #71809d;
+                font-size: 14px;
+                padding: 26px 16px;
+                text-align: center;
+            }
+            .prioridad-estado {
+                border-radius: 13px;
+                display: inline-block;
+                font-size: 12px;
+                font-weight: 700;
+                padding: 4px 10px;
+                white-space: nowrap;
+            }
+            .prioridad-estado.recursando { background: #dceeff; color: #0663c7; }
+            .prioridad-estado.regularizada { background: #d8f4d9; color: #166a2c; }
+            .prioridad-estado.pendiente { background: #fff0c9; color: #8b5200; }
+            .prioridad-estado.neutro { background: #edf1f6; color: #59657b; }
+            .ud-prioritarias-legacy { display: none; }
             }
             .dual-soft-panels {
                 display: grid;
@@ -2043,13 +2131,67 @@
                         <p:tab title="UD prioritarias">
                             <div class="asistente-section">
                                 <div class="panel-shell">
-                                    <div class="context-top-strip">
+                                    <div class="context-top-strip ud-prioritarias-legacy">
                                         <span class="context-top-chip">#{tablaCurricularAsistidaBean.descripcionSituacionAcademica}</span>
                                         <span class="context-top-chip soft-blue">UD pendientes: #{tablaCurricularAsistidaBean.conteoUdPendientesPanel}</span>
                                         <span class="context-top-chip soft-blue">Carga máxima: #{tablaCurricularAsistidaBean.cargaMaximaPanel} UD</span>
                                         <span class="context-top-chip">Seriación: #{tablaCurricularAsistidaBean.conteoSeriacionPanel}</span>
                                     </div>
-                                    <div class="prioritarias-layout">
+                                    <h2 class="prioridades-title">UD prioritarias <span style="font-weight:400; color:#71809d;">/ Regularización</span></h2>
+                                    <div class="prioridades-grid">
+                                        <div class="prioridad-card">
+                                            <h3>UD reprobadas pendientes</h3>
+                                            <div class="prioridad-resumen"><div class="contador">#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias.size()}</div><div class="prioridad-unidad">UD</div><div class="prioridad-referencia">#{tablaCurricularAsistidaBean.referenciaReprobadasPendientesPrioritarias}</div></div>
+                                            <div class="prioridad-table-wrap">
+                                                <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasReprobadasPrioritarias}"><table><thead><tr><th>Unidad didáctica</th><th>Periodo de reprobación</th><th>Calificación</th></tr></thead><tbody><ui:repeat value="#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias}" var="fila"><tr><td><span class="prioridad-clave">#{fila.clave}</span><span class="prioridad-nombre">#{fila.asignatura}</span></td><td>#{tablaCurricularAsistidaBean.periodoReprobacionPrioritaria(fila)}</td><td>#{tablaCurricularAsistidaBean.calificacionReprobacionPrioritaria(fila)}</td></tr></ui:repeat></tbody></table></ui:fragment>
+                                                <ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasReprobadasPrioritarias}"><div class="prioridad-vacia">No se identifican adeudos vigentes por reprobación en la consulta disponible.</div></ui:fragment>
+                                            </div>
+                                            <div class="prioridad-nota">Con 4 o más reprobadas pendientes, la carga se limita a regularización.</div>
+                                        </div>
+                                        <div class="prioridad-card">
+                                            <h3>Oportunidades de acreditación</h3>
+                                            <div class="prioridad-resumen"><div class="contador">#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias.size()}</div><div class="prioridad-unidad">UD</div><div class="prioridad-referencia">#{tablaCurricularAsistidaBean.referenciaOportunidadesPrioritarias}</div></div>
+                                            <div class="prioridad-table-wrap">
+                                                <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasReprobadasPrioritarias}"><table><thead><tr><th>Unidad didáctica</th><th>Reprobaciones registradas</th><th>Situación</th></tr></thead><tbody><ui:repeat value="#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias}" var="fila"><tr><td><span class="prioridad-clave">#{fila.clave}</span><span class="prioridad-nombre">#{fila.asignatura}</span></td><td>#{tablaCurricularAsistidaBean.reprobacionesRegistradasBreve(fila)}</td><td><span class="prioridad-estado neutro">Cómputo no disponible</span></td></tr></ui:repeat></tbody></table></ui:fragment>
+                                                <ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasReprobadasPrioritarias}"><div class="prioridad-vacia">No hay UD que requieran seguimiento de oportunidades en la consulta disponible.</div></ui:fragment>
+                                            </div>
+                                            <div class="prioridad-nota">RN-1.4 requiere el detalle de cursamientos computables y bajas autorizadas; no se infiere desde reprobaciones agregadas.</div>
+                                        </div>
+                                        <div class="prioridad-card">
+                                            <h3>UD con antecedente de recursamiento</h3>
+                                            <div class="prioridad-resumen"><div class="contador">#{tablaCurricularAsistidaBean.filasAntecedenteRecursamientoPrioritarias.size()}</div><div class="prioridad-unidad">UD</div><div class="prioridad-referencia">#{tablaCurricularAsistidaBean.referenciaRecursamientoPrioritarias}</div></div>
+                                            <div class="prioridad-table-wrap">
+                                                <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasAntecedenteRecursamientoPrioritarias}"><table><thead><tr><th>Unidad didáctica</th><th>Periodo y calificación</th><th>Recursamientos</th></tr></thead><tbody><ui:repeat value="#{tablaCurricularAsistidaBean.filasAntecedenteRecursamientoPrioritarias}" var="fila"><tr><td><span class="prioridad-clave">#{fila.clave}</span><span class="prioridad-nombre">#{fila.asignatura} <span class="prioridad-estado #{tablaCurricularAsistidaBean.claseEstadoAntecedenteRecursamiento(fila)}">#{tablaCurricularAsistidaBean.estadoAntecedenteRecursamiento(fila)}</span></span></td><td>#{tablaCurricularAsistidaBean.periodoReprobacionPrioritaria(fila)} · #{tablaCurricularAsistidaBean.calificacionReprobacionPrioritaria(fila)}</td><td>Dato no disponible</td></tr></ui:repeat></tbody></table></ui:fragment>
+                                                <ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasAntecedenteRecursamientoPrioritarias}"><div class="prioridad-vacia">No se identifican antecedentes verificables de recursamiento.</div></ui:fragment>
+                                            </div>
+                                            <div class="prioridad-nota">Una UD regularizada conserva su antecedente; no se presenta como pendiente vigente.</div>
+                                        </div>
+                                        <div class="prioridad-card">
+                                            <h3>Sustituciones de optativas adicionales</h3>
+                                            <div class="prioridad-resumen"><div class="contador">—</div><div class="prioridad-unidad">casos</div><div class="prioridad-referencia">#{tablaCurricularAsistidaBean.referenciaSustitucionesPrioritarias}</div></div>
+                                            <div class="prioridad-table-wrap"><table><thead><tr><th>UD original → actual</th><th>Oportunidades</th><th>Sustituciones</th><th>Situación</th></tr></thead><tbody><tr><td class="prioridad-vacia" colspan="4">No disponible: la fuente actual no relaciona el adeudo original con sus UD sustitutas.</td></tr></tbody></table></div>
+                                            <div class="prioridad-nota">Una sustitución no reinicia oportunidades ni regulariza el adeudo hasta acreditar la UD vinculada.</div>
+                                        </div>
+                                        <div class="prioridad-card">
+                                            <h3>Bajas parciales registradas</h3>
+                                            <div class="prioridad-resumen"><div class="contador">#{tablaCurricularAsistidaBean.conteoMovimientosBajaParcialPrioritarias}</div><div class="prioridad-unidad">movimientos</div><div class="prioridad-referencia">#{tablaCurricularAsistidaBean.referenciaBajasParcialesPrioritarias}</div></div>
+                                            <div class="prioridad-table-wrap">
+                                                <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}"><table><thead><tr><th>Unidad didáctica</th><th>Periodo de aplicación</th><th>Acreditación actual</th></tr></thead><tbody><ui:repeat value="#{tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}" var="fila"><tr><td><span class="prioridad-clave">#{fila.clave}</span><span class="prioridad-nombre">#{fila.asignatura}</span></td><td>No disponible</td><td><span class="prioridad-estado neutro">No disponible</span></td></tr></ui:repeat></tbody></table></ui:fragment>
+                                                <ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}"><div class="prioridad-vacia">No se identifican movimientos parciales en la consulta disponible.</div></ui:fragment>
+                                            </div>
+                                            <div class="prioridad-nota">UD afectadas: #{tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias.size()}. El NP por baja autorizada no consume oportunidades cuando la autorización sea verificable.</div>
+                                        </div>
+                                        <div class="prioridad-card">
+                                            <h3>Registros de baja temporal</h3>
+                                            <div class="prioridad-resumen"><div class="contador">#{tablaCurricularAsistidaBean.conteoBajasTemporalesPrioritarias}</div><div class="prioridad-unidad">UD</div><div class="prioridad-referencia">#{tablaCurricularAsistidaBean.referenciaBajasTemporalesPrioritarias}</div></div>
+                                            <div class="prioridad-table-wrap">
+                                                <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasBajaTemporalPrioritarias}"><table><thead><tr><th>UD asociada</th><th>Autorización</th><th>Situación de la baja</th></tr></thead><tbody><ui:repeat value="#{tablaCurricularAsistidaBean.filasBajaTemporalPrioritarias}" var="fila"><tr><td><span class="prioridad-clave">#{fila.clave}</span><span class="prioridad-nombre">#{fila.asignatura}</span></td><td>No verificada</td><td><span class="prioridad-estado neutro">Registro identificado</span></td></tr></ui:repeat></tbody></table></ui:fragment>
+                                                <ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasBajaTemporalPrioritarias}"><div class="prioridad-vacia">No se identifican registros de baja temporal en la consulta disponible.</div></ui:fragment>
+                                            </div>
+                                            <div class="prioridad-nota">Estos registros no modifican regularidad, oportunidades, plazo ni reincorporación sin evidencia institucional.</div>
+                                        </div>
+                                    </div>
+                                    <div class="prioritarias-layout ud-prioritarias-legacy">
                                         <div>
                                             <h2 class="section-heading-large">UD prioritarias / Regularización</h2>
                                             <div class="section-intro-box">#{tablaCurricularAsistidaBean.mensajeUdPrioritarias}</div>

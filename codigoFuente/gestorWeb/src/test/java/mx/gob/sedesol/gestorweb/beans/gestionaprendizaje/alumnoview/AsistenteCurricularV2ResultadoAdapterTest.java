@@ -9,11 +9,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.lang.reflect.Field;
 
 import org.testng.annotations.Test;
+import org.mockito.Mockito;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MetadatosConsultaAsistenteDTO;
@@ -267,6 +270,65 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 				Arrays.asList(parcial, parcialDuplicada, parcialDistinta, temporal), "PARCIAL"), 2);
 		assertEquals(TablaCurricularAsistidaBean.filtrarBajasPorTipo(
 				Arrays.asList(parcial, parcialDuplicada, parcialDistinta, temporal), "TEMPORAL").size(), 1);
+	}
+
+	@Test
+	public void conservaAntecedenteRegularizadoYRecursandoSinContarlosComoElMismoAdeudo() throws Exception {
+		AsistenteInscripcionContextoDTO contexto = new AsistenteInscripcionContextoDTO();
+		UnidadDecisionInscripcionDTO recursando = unidad(Long.valueOf(81L), "OB-E01", "Reprobada", "En curso");
+		UnidadDecisionInscripcionDTO regularizada = unidad(Long.valueOf(82L), "OB-R02", "Acreditada", null);
+		UnidadDecisionInscripcionDTO reprobadaSinRecursar = unidad(Long.valueOf(83L), "OB-P03", "Reprobada", null);
+		contexto.setUnidades(Arrays.asList(recursando, regularizada, reprobadaSinRecursar));
+		Map<Long, Long> reprobaciones = new HashMap<Long, Long>();
+		reprobaciones.put(Long.valueOf(81L), Long.valueOf(1L));
+		reprobaciones.put(Long.valueOf(82L), Long.valueOf(1L));
+		reprobaciones.put(Long.valueOf(83L), Long.valueOf(1L));
+		contexto.setIntentosReprobadosPorUd(reprobaciones);
+		contexto.setIntentosReprobadosDisponibles(Boolean.TRUE);
+		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
+		inyectar(bean, "contexto", contexto);
+		inyectar(bean, "decisionesV2PorPrograma", new HashMap<Long, DecisionUnidadCurricularV2DTO>());
+
+		List<TablaCurricularAsistidaBean.FilaAsistidaDTO> antecedentes = bean.getFilasAntecedenteRecursamientoPrioritarias();
+		assertEquals(antecedentes.size(), 2);
+		assertEquals(bean.getEstadoAntecedenteRecursamiento(antecedentes.get(0)), "Recursando");
+		assertEquals(bean.getEstadoAntecedenteRecursamiento(antecedentes.get(1)), "Regularizada");
+		assertEquals(bean.getFilasReprobadasPrioritarias().size(), 2);
+	}
+
+	@Test
+	public void noPresentaOportunidadesOSustitucionesComoDatosConcluyentesSinFuente() {
+		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
+		assertTrue(bean.getReferenciaOportunidadesPrioritarias().contains("no disponible"));
+		assertTrue(bean.getReferenciaSustitucionesPrioritarias().contains("no disponible"));
+		assertTrue(bean.getReferenciaBajasParcialesPrioritarias().contains("no verificadas"));
+		assertTrue(bean.getReferenciaBajasTemporalesPrioritarias().contains("no verificados"));
+	}
+
+	private UnidadDecisionInscripcionDTO unidad(Long id, String clave, String historico, String periodo) {
+		UnidadDecisionInscripcionDTO unidad = new UnidadDecisionInscripcionDTO();
+		unidad.setUdId(id);
+		unidad.setClave(clave);
+		unidad.setNombre("Unidad " + clave);
+		unidad.setEstatusHistorico(historico);
+		unidad.setEstatusPeriodo(periodo);
+		unidad.setOfertada(Boolean.TRUE);
+		return unidad;
+	}
+
+	private void inyectar(Object destino, String nombre, Object valor) throws Exception {
+		Class<?> tipo = destino.getClass();
+		Field campo = null;
+		while (tipo != null && campo == null) {
+			try {
+				campo = tipo.getDeclaredField(nombre);
+			} catch (NoSuchFieldException ex) {
+				tipo = tipo.getSuperclass();
+			}
+		}
+		if (campo == null) throw new NoSuchFieldException(nombre);
+		campo.setAccessible(true);
+		campo.set(destino, valor);
 	}
 
 	private InscripcionBajasDTO baja(Long idPrograma, Long idBaja, String tipo) {

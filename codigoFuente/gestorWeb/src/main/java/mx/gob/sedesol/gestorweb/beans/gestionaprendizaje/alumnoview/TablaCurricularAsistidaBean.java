@@ -3440,6 +3440,92 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Antecedentes visibles por identidad curricular. La fuente actual acredita
+     * reprobaciones registradas, pero no el contador completo de cursamientos
+     * computables; por eso no se infiere el margen de recursamientos.
+     */
+    public List<FilaAsistidaDTO> getFilasAntecedenteRecursamientoPrioritarias() {
+        Map<String, FilaAsistidaDTO> porIdentidad = new LinkedHashMap<String, FilaAsistidaDTO>();
+        for (FilaAsistidaDTO fila : obtenerFilasContextoParaRegularizacion()) {
+            if (fila == null || !tieneAntecedenteReprobacionVerificable(fila)) continue;
+            boolean recursando = esFilaNoAcreditadaPrioritaria(fila) && esFilaActual(fila);
+            boolean regularizada = esFilaAcreditada(fila);
+            if (recursando || regularizada) porIdentidad.putIfAbsent(claveUnicaFilaPrioritaria(fila), fila);
+        }
+        List<FilaAsistidaDTO> resultado = new ArrayList<FilaAsistidaDTO>(porIdentidad.values());
+        Collections.sort(resultado, Comparator
+                .comparing((FilaAsistidaDTO fila) -> !esFilaNoAcreditadaPrioritaria(fila))
+                .thenComparing(FilaAsistidaDTO::getClave, Comparator.nullsLast(String::compareTo)));
+        return resultado;
+    }
+
+    public String getReferenciaReprobadasPendientesPrioritarias() {
+        return getFilasReprobadasRecursandoPrioritarias().isEmpty()
+                ? "Pendientes de regularizar"
+                : "Actualmente en recursamiento";
+    }
+
+    public String getReferenciaOportunidadesPrioritarias() {
+        return Boolean.TRUE.equals(contexto == null ? null : contexto.getIntentosReprobadosDisponibles())
+                ? "Cómputo completo no disponible"
+                : "Información no disponible";
+    }
+
+    public String getReferenciaRecursamientoPrioritarias() {
+        return "Historial de cursamientos computables pendiente de integrar";
+    }
+
+    public String getReferenciaSustitucionesPrioritarias() {
+        return "Relación de adeudo y sustitutas no disponible";
+    }
+
+    public String getReferenciaBajasParcialesPrioritarias() {
+        return "Movimientos registrados; autorización y aplicación no verificadas";
+    }
+
+    public String getReferenciaBajasTemporalesPrioritarias() {
+        return "Autorización, vigencia y semestres no verificados";
+    }
+
+    public String getPeriodoReprobacionPrioritaria(FilaAsistidaDTO fila) {
+        return "Periodo no disponible";
+    }
+
+    public String getCalificacionReprobacionPrioritaria(FilaAsistidaDTO fila) {
+        return "No disponible";
+    }
+
+    public String getEstadoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        if (fila != null && esFilaNoAcreditadaPrioritaria(fila) && esFilaActual(fila)) return "Recursando";
+        if (fila != null && esFilaAcreditada(fila)) return "Regularizada";
+        return "Antecedente registrado";
+    }
+
+    public String getClaseEstadoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        String estado = getEstadoAntecedenteRecursamiento(fila);
+        return "Recursando".equals(estado) ? "recursando" : "Regularizada".equals(estado) ? "regularizada" : "neutro";
+    }
+
+    public String getReprobacionesRegistradasBreve(FilaAsistidaDTO fila) {
+        String valor = reprobacionesRegistradas(contexto, fila);
+        return valor.replace("Reprobaciones registradas: ", "");
+    }
+
+    private boolean tieneAntecedenteReprobacionVerificable(FilaAsistidaDTO fila) {
+        if (fila == null || fila.getUdId() == null || contexto == null
+                || !Boolean.TRUE.equals(contexto.getIntentosReprobadosDisponibles())) return false;
+        Long reprobaciones = contexto.getIntentosReprobadosPorUd().get(fila.getUdId());
+        return reprobaciones != null && reprobaciones.longValue() > 0L;
+    }
+
+    private boolean esFilaAcreditada(FilaAsistidaDTO fila) {
+        if (fila == null || StringUtils.isBlank(fila.getEstatusHistorico())) return false;
+        String estatus = normalizaTexto(fila.getEstatusHistorico());
+        if (estatus.contains("reprob") || estatus.contains("no acredit")) return false;
+        return estatus.contains("acredit") || estatus.contains("aprob");
+    }
+
     public List<FilaAsistidaDTO> getFilasIrregularesDetalle() {
         return obtenerFilasPlanas().stream()
                 .filter(this::esFilaIrregularParaDetalle)
@@ -3530,6 +3616,10 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     /** Registros de baja temporal disponibles; no se asumen autorizaciones ni vigencia. */
     public int getConteoBajasTemporalesPrioritarias() {
         return filtrarBajasPorTipo(obtenerBajasContexto(), "TEMPORAL").size();
+    }
+
+    public List<FilaAsistidaDTO> getFilasBajaTemporalPrioritarias() {
+        return construirFilasBajaPrioritarias("TEMPORAL");
     }
 
     private List<FilaAsistidaDTO> construirFilasBajaPrioritarias(String tipoBaja) {
