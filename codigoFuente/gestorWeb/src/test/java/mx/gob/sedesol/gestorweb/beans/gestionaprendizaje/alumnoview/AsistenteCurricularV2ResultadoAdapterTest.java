@@ -245,6 +245,12 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertEquals(TablaCurricularAsistidaBean.class
 				.getMethod("detalleFilaPrioritaria", TablaCurricularAsistidaBean.FilaAsistidaDTO.class)
 				.getReturnType(), String.class);
+		assertEquals(TablaCurricularAsistidaBean.class
+				.getMethod("reprobacionesRegistradasFilaPrioritaria", TablaCurricularAsistidaBean.FilaAsistidaDTO.class)
+				.getReturnType(), String.class);
+		assertEquals(TablaCurricularAsistidaBean.class
+				.getMethod("situacionOportunidadesFilaPrioritaria", TablaCurricularAsistidaBean.FilaAsistidaDTO.class)
+				.getReturnType(), String.class);
 	}
 
 	private TrazaReglaAplicadaV2DTO trazaCausal(CodigoReglaCurricularV2 regla) {

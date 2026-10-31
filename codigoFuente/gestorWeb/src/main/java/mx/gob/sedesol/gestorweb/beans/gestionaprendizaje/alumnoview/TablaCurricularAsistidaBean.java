@@ -3579,6 +3579,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return reprobacionesRegistradas(contexto, fila);
     }
 
+    /** Firma invocable desde EL para el contador de la fila prioritaria. */
+    public String reprobacionesRegistradasFilaPrioritaria(FilaAsistidaDTO fila) {
+        return getReprobacionesRegistradasFilaPrioritaria(fila);
+    }
+
     static String reprobacionesRegistradas(AsistenteInscripcionContextoDTO contexto, FilaAsistidaDTO fila) {
         if (contexto == null || !Boolean.TRUE.equals(contexto.getIntentosReprobadosDisponibles())
                 || fila == null || fila.getUdId() == null) {
@@ -3590,6 +3595,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public String getSituacionOportunidadesFilaPrioritaria(FilaAsistidaDTO fila) {
         return situacionOportunidadesNoDisponible();
+    }
+
+    /** Firma invocable desde EL para el estado de oportunidades de la fila. */
+    public String situacionOportunidadesFilaPrioritaria(FilaAsistidaDTO fila) {
+        return getSituacionOportunidadesFilaPrioritaria(fila);
     }
 
     static String situacionOportunidadesNoDisponible() {
