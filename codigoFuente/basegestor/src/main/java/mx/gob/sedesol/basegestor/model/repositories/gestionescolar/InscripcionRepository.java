@@ -598,7 +598,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 		List<InscripcionBajasDTO> lista = new ArrayList<InscripcionBajasDTO>();
 
-		String consulta = "SELECT rpb.id_plan, rpb.id_programa, ctb.id_tipo_baja, ctb.nombre tipo_baja, ctb.fecha_modificacion FROM rel_persona_bajas rpb\r\n"
+		String consulta = "SELECT rpb.id_baja, rpb.id_plan, rpb.id_programa, ctb.id_tipo_baja, ctb.nombre tipo_baja, ctb.fecha_modificacion FROM rel_persona_bajas rpb\r\n"
 				+ "         INNER JOIN rel_motivo_baja rmb ON rmb.id_motivo_baja = rpb.motivo_baja_id\r\n"
 				+ "         INNER JOIN cat_tipo_bajas ctb ON ctb.id_tipo_baja = rmb.tipo_baja_id\r\n"
 				+ "         WHERE rpb.id_persona = :id_persona";
@@ -750,11 +750,12 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 		InscripcionBajasDTO personaBaja = new InscripcionBajasDTO();
 
-		personaBaja.setIdPlan(Long.valueOf(obj[0].toString()));
-		personaBaja.setIdPrograma(Long.valueOf(obj[1].toString()));
-		personaBaja.setIdTipoBaja(Long.valueOf(obj[2].toString()));
-		personaBaja.setTipoBaja(obj[3].toString());
-		personaBaja.setFechaModificacion(LocalDateTime.parse(obj[4].toString()));
+		personaBaja.setIdBaja(Long.valueOf(obj[0].toString()));
+		personaBaja.setIdPlan(Long.valueOf(obj[1].toString()));
+		personaBaja.setIdPrograma(Long.valueOf(obj[2].toString()));
+		personaBaja.setIdTipoBaja(Long.valueOf(obj[3].toString()));
+		personaBaja.setTipoBaja(obj[4].toString());
+		personaBaja.setFechaModificacion(LocalDateTime.parse(obj[5].toString()));
 
 		return personaBaja;
 	}

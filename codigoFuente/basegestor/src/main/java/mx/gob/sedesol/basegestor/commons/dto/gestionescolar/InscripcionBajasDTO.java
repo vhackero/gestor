@@ -4,12 +4,21 @@ import java.time.LocalDateTime;
 
 public class InscripcionBajasDTO {
 
+	private Long idBaja;
 	private Long idPlan;
 	private Long idPrograma;
 	private String clavePrograma;
 	private Long idTipoBaja;
 	private String tipoBaja;
 	private LocalDateTime fechaModificacion;
+
+	public Long getIdBaja() {
+		return idBaja;
+	}
+
+	public void setIdBaja(Long idBaja) {
+		this.idBaja = idBaja;
+	}
 
 	public Long getIdPlan() {
 		return idPlan;

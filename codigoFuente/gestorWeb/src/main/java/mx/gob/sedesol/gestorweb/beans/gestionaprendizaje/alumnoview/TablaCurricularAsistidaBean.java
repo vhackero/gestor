@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Locale;
@@ -3521,7 +3522,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return construirFilasBajaPrioritarias("PARCIAL");
     }
 
-    /** Movimientos fuente, distinto de las UD afectadas que se deduplican para la tarjeta. */
+    /** Movimientos fuente identificados por la llave primaria de rel_persona_bajas. */
     public int getConteoMovimientosBajaParcialPrioritarias() {
         return contarMovimientosBajaPorTipo(obtenerBajasContexto(), "PARCIAL");
     }
@@ -3588,14 +3589,15 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     static int contarMovimientosBajaPorTipo(List<InscripcionBajasDTO> bajas, String tipoEsperado) {
         if (bajas == null || bajas.isEmpty() || StringUtils.isBlank(tipoEsperado)) return 0;
         String tipo = tipoEsperado.toUpperCase(Locale.ROOT);
-        int movimientos = 0;
+        Set<Long> movimientos = new LinkedHashSet<Long>();
         for (InscripcionBajasDTO baja : bajas) {
             if (baja != null && baja.getTipoBaja() != null
-                    && baja.getTipoBaja().toUpperCase(Locale.ROOT).contains(tipo)) {
-                movimientos++;
+                    && baja.getTipoBaja().toUpperCase(Locale.ROOT).contains(tipo)
+                    && baja.getIdBaja() != null) {
+                movimientos.add(baja.getIdBaja());
             }
         }
-        return movimientos;
+        return movimientos.size();
     }
 
     public String getDetalleFilaPrioritaria(FilaAsistidaDTO fila) {
@@ -3625,7 +3627,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         if (registros == 0) {
             return "No se identifican registros de baja temporal en el contexto académico disponible.";
         }
-        return "Registros asociados a baja temporal; autorización y vigencia no verificadas. No modifican regularidad, oportunidades, plazo ni reincorporación sin evidencia institucional.";
+        return "UD distintas asociadas a registros de baja temporal; autorización y vigencia no verificadas. No modifican regularidad, oportunidades, plazo ni reincorporación sin evidencia institucional.";
     }
 
     public String getResumenSustitucionesOptativasPrioritarias() {

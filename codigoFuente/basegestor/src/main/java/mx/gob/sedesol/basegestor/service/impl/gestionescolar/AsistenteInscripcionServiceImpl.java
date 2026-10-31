@@ -565,32 +565,34 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         if (unidades == null || unidades.isEmpty() || materiasEnCurso == null || materiasEnCurso.isEmpty()) {
             return;
         }
-        Set<String> nombresEnCurso = new HashSet<String>();
         Set<String> clavesEnCurso = new HashSet<String>();
-		Set<Long> idsEnCurso = new HashSet<Long>();
+        Set<Long> idsEnCurso = new HashSet<Long>();
         for (InscripcionPreviaMateriasDTO materia : materiasEnCurso) {
             if (materia != null) {
-				if (materia.getIdPrograma() != null) {
-					idsEnCurso.add(materia.getIdPrograma());
-				}
-                String nombre = normalizarTexto(materia.getAsignatura());
-                if (!nombre.isEmpty()) {
-                    nombresEnCurso.add(nombre);
+                if (materia.getIdPrograma() != null) {
+                    idsEnCurso.add(materia.getIdPrograma());
                 }
-				String clave = normalizarTexto(materia.getClavePrograma());
+                String clave = normalizarTexto(materia.getClavePrograma());
                 if (!clave.isEmpty()) {
                     clavesEnCurso.add(clave);
                 }
             }
         }
         for (UnidadDecisionInscripcionDTO unidad : unidades) {
-            if (unidad != null && (idsEnCurso.contains(unidad.getUdId())
-					|| clavesEnCurso.contains(normalizarTexto(unidad.getClave()))
-					|| nombresEnCurso.contains(normalizarTexto(unidad.getNombre()))
-					)) {
+            if (unidad != null && coincideUnidadReinscrita(unidad.getUdId(), unidad.getClave(), idsEnCurso, clavesEnCurso)) {
                 unidad.setEstatusPeriodo("EN_CURSO");
             }
         }
+    }
+
+    /** El nombre no identifica una UD curricular; sólo se admiten id o clave verificable. */
+    static boolean coincideUnidadReinscrita(Long idUnidad, String claveUnidad,
+            Set<Long> idsEnCurso, Set<String> clavesEnCurso) {
+        if (idUnidad != null && idsEnCurso != null && idsEnCurso.contains(idUnidad)) {
+            return true;
+        }
+        String clave = claveUnidad == null ? "" : claveUnidad.trim().toUpperCase();
+        return !clave.isEmpty() && clavesEnCurso != null && clavesEnCurso.contains(clave);
     }
 
     private DiagnosticoAcademicoDTO construirDiagnosticoActual(AsistenteInscripcionContextoDTO contexto,

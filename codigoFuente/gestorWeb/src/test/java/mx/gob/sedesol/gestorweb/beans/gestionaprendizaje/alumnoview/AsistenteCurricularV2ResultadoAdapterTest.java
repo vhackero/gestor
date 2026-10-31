@@ -256,21 +256,23 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 
 	@Test
 	public void deduplicaBajasParcialesYSeparaLasTemporalesPorTipoRegistrado() {
-		InscripcionBajasDTO parcial = baja(Long.valueOf(61L), "Baja parcial");
-		InscripcionBajasDTO parcialDuplicada = baja(Long.valueOf(61L), "BAJA PARCIAL");
-		InscripcionBajasDTO temporal = baja(Long.valueOf(62L), "Baja temporal");
+		InscripcionBajasDTO parcial = baja(Long.valueOf(61L), Long.valueOf(7001L), "Baja parcial");
+		InscripcionBajasDTO parcialDuplicada = baja(Long.valueOf(61L), Long.valueOf(7001L), "BAJA PARCIAL");
+		InscripcionBajasDTO parcialDistinta = baja(Long.valueOf(61L), Long.valueOf(7002L), "BAJA PARCIAL");
+		InscripcionBajasDTO temporal = baja(Long.valueOf(62L), Long.valueOf(7003L), "Baja temporal");
 
 		assertEquals(TablaCurricularAsistidaBean.filtrarBajasPorTipo(
-				Arrays.asList(parcial, parcialDuplicada, temporal), "PARCIAL").size(), 1);
+				Arrays.asList(parcial, parcialDuplicada, parcialDistinta, temporal), "PARCIAL").size(), 1);
 		assertEquals(TablaCurricularAsistidaBean.contarMovimientosBajaPorTipo(
-				Arrays.asList(parcial, parcialDuplicada, temporal), "PARCIAL"), 2);
+				Arrays.asList(parcial, parcialDuplicada, parcialDistinta, temporal), "PARCIAL"), 2);
 		assertEquals(TablaCurricularAsistidaBean.filtrarBajasPorTipo(
-				Arrays.asList(parcial, parcialDuplicada, temporal), "TEMPORAL").size(), 1);
+				Arrays.asList(parcial, parcialDuplicada, parcialDistinta, temporal), "TEMPORAL").size(), 1);
 	}
 
-	private InscripcionBajasDTO baja(Long idPrograma, String tipo) {
+	private InscripcionBajasDTO baja(Long idPrograma, Long idBaja, String tipo) {
 		InscripcionBajasDTO baja = new InscripcionBajasDTO();
 		baja.setIdPrograma(idPrograma);
+		baja.setIdBaja(idBaja);
 		baja.setTipoBaja(tipo);
 		return baja;
 	}

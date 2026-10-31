@@ -2078,13 +2078,13 @@
                                                 <div class="prioridad-card">
                                                     <h3>Registros de baja parcial</h3>
                                                     <div class="contador">#{tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias.size()}</div>
-                                                    <p>UD distintas afectadas. Movimientos registrados: #{tablaCurricularAsistidaBean.conteoMovimientosBajaParcialPrioritarias}. La fuente no acredita autorización ni aplicación.</p>
+                                                    <p>UD distintas afectadas. Movimientos identificados: #{tablaCurricularAsistidaBean.conteoMovimientosBajaParcialPrioritarias}. La fuente no acredita autorización ni aplicación.</p>
                                                     <div class="prioridad-detalle"><ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}"><ul><ui:repeat value="#{tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}" var="filaBaja"><li>#{tablaCurricularAsistidaBean.detalleFilaPrioritaria(filaBaja)}</li></ui:repeat></ul></ui:fragment><ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}">No se identifican bajas parciales en las UD visibles.</ui:fragment></div>
                                                 </div>
                                                 <div class="prioridad-card">
-                                                    <h3>Bajas temporales registradas</h3>
+                                                    <h3>UD asociadas a baja temporal</h3>
                                                     <div class="contador">#{tablaCurricularAsistidaBean.conteoBajasTemporalesPrioritarias}</div>
-                                                    <p>La fuente identifica registros de baja temporal; su autorización y vigencia deben verificarse en el expediente institucional.</p>
+                                                    <p>UD distintas asociadas a registros de baja temporal; su autorización y vigencia deben verificarse en el expediente institucional.</p>
                                                     <div class="prioridad-detalle">#{tablaCurricularAsistidaBean.resumenBajasTemporalesPrioritarias}</div>
                                                 </div>
                                                 <div class="prioridad-card">
