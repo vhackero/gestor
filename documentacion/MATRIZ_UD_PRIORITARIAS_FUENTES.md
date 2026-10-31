@@ -1,0 +1,18 @@
+# Matriz de fuentes: UD prioritarias
+
+## Alcance
+
+Esta matriz documenta los seis bloques de la pestaña **UD prioritarias / Regularizacion**. La vista es de consulta: no modifica historial, oportunidades, bajas ni inscripciones.
+
+| Bloque | Funcionalidad implementada | Fuente | Significado del contador | Prueba | Pendiente concreto |
+| --- | --- | --- | --- | --- | --- |
+| UD reprobadas pendientes | Lista UD con estado historico `NO_ACREDITADA` o reprobacion, incluso sin oferta vigente. | `EstadoAcademicoDTO.materiasReprobadas`, enriquecido en `AsistenteInscripcionServiceImpl.incorporarMateriasReprobadasNoPresentes`. | UD curriculares distintas con reprobacion vigente; no cuenta intentos. | `AsistenteCurricularV2ResultadoAdapterTest.priorizacionIncluyeReprobadaDelContextoAunqueNoEsteEnLaOfertaVisual`. | Periodo y calificacion de ultima reprobacion no estan expuestos por la fuente usada. |
+| UD con antecedentes de recursamiento | Filtra las reprobadas cuyo estado de periodo es en curso/registrada. | Historial de reprobadas y `InscripcionPreviaMateriasDTO` de cursamiento. | UD distintas que conservan reprobacion historica mientras se recursan; reinscribirse no regulariza. | `EvaluacionCurricularV2Fase2DTest.f2DU10EnCursoNoCuentaFallo`. | Fecha y calificacion del intento en curso; la fuente no ofrece esos campos en este contrato. |
+| Bajas parciales aplicadas | Lista registros con tipo de baja parcial, deduplicados por UD. | `EstadoAcademicoDTO.materiasBajas`, procedente de `rel_persona_bajas`, `rel_motivo_baja` y `cat_tipo_bajas`. | UD distintas con registro de baja parcial. La tabla fuente no contiene un estado separado de solicitud/autoridad. | `AsistenteCurricularV2ResultadoAdapterTest.deduplicaBajasParcialesYSeparaLasTemporalesPorTipoRegistrado`. | Confirmar en la fuente institucional si cada registro equivale a baja aplicada; la vista no presenta una solicitud como aplicada por inferencia. |
+| Bajas temporales registradas | Cuenta registros tipificados como baja temporal y advierte el limite de la fuente. | Mismo conjunto `materiasBajas`, filtrado por `tipoBaja`. | Registros distintos de baja temporal, no semestres autorizados ni vigentes. | `AsistenteCurricularV2ResultadoAdapterTest.deduplicaBajasParcialesYSeparaLasTemporalesPorTipoRegistrado`. | Autorizacion, vigencia, reincorporacion y periodos consumidos requieren expediente institucional. |
+| Sustituciones de optativas adicionales | No infiere cadenas ni equivalencias. | No localizada una relacion institucional verificable entre adeudo original y sustitutas. | No se muestra contador acumulado; un dato individual no representa el total del adeudo. | `TablaCurricularAsistidaBean.getResumenSustitucionesOptativasPrioritarias`. | Catalogo con UD origen, sustituta, vigencia y relacion de adeudo. |
+| Oportunidades de acreditacion | Presenta solo `Reprobaciones registradas: N`; no calcula RN-1.4. | `InscripcionRepository.consultarIntentosAsignaturas`: agregado de calificaciones finales menores de 60 por UD. | Reprobaciones registradas por UD; no son oportunidades consumidas, disponibles ni la oportunidad en curso. | `AsistenteCurricularV2ResultadoAdapterTest.presentaReprobacionesRegistradasSinConvertirlasEnOportunidadesRn14`. | Detalle de cada inscripcion computable, identificador de intento, bajas autorizadas y estado en curso. |
+
+## Regla de lectura
+
+Un campo no disponible se conserva como tal. No se sustituye por cero ni se transforma una suma de reprobaciones en una decision de RN-1.4. Las sustituciones de optativas adicionales permanecen fuera del computo hasta que exista la relacion curricular verificable.

@@ -3518,12 +3518,66 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public List<FilaAsistidaDTO> getFilasConBajaParcialPrioritarias() {
-        return obtenerFilasPlanas().stream()
-                .filter(fila -> fila != null && normalizaTexto(fila.getEstatusHistorico()).contains("baja parcial"))
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toMap(this::claveUnicaFila, fila -> fila,
-                                (primera, repetida) -> primera, LinkedHashMap::new),
-                        filasPorClave -> new ArrayList<FilaAsistidaDTO>(filasPorClave.values())));
+        return construirFilasBajaPrioritarias("PARCIAL");
+    }
+
+    /** Registros de baja temporal disponibles; no se asumen autorizaciones ni vigencia. */
+    public int getConteoBajasTemporalesPrioritarias() {
+        return filtrarBajasPorTipo(obtenerBajasContexto(), "TEMPORAL").size();
+    }
+
+    private List<FilaAsistidaDTO> construirFilasBajaPrioritarias(String tipoBaja) {
+        List<FilaAsistidaDTO> filas = new ArrayList<FilaAsistidaDTO>();
+        Map<String, FilaAsistidaDTO> porIdentidad = new LinkedHashMap<String, FilaAsistidaDTO>();
+        for (InscripcionBajasDTO baja : filtrarBajasPorTipo(obtenerBajasContexto(), tipoBaja)) {
+            FilaAsistidaDTO fila = buscarFilaContexto(baja);
+            if (fila == null) {
+                fila = new FilaAsistidaDTO();
+                fila.setUdId(baja.getIdPrograma());
+                fila.setClave(baja.getClavePrograma());
+                fila.setTipo("Tipo no determinado");
+                fila.setOfertada(Boolean.FALSE);
+            }
+            fila.setEstatusHistorico("BAJA " + tipoBaja);
+            porIdentidad.putIfAbsent(claveUnicaFilaPrioritaria(fila), fila);
+        }
+        filas.addAll(porIdentidad.values());
+        return filas;
+    }
+
+    private FilaAsistidaDTO buscarFilaContexto(InscripcionBajasDTO baja) {
+        if (baja == null || contexto == null || contexto.getUnidades() == null) return null;
+        for (UnidadDecisionInscripcionDTO unidad : contexto.getUnidades()) {
+            if (unidad == null) continue;
+            boolean mismoId = baja.getIdPrograma() != null && baja.getIdPrograma().equals(unidad.getUdId());
+            boolean mismaClave = !StringUtils.isBlank(baja.getClavePrograma())
+                    && baja.getClavePrograma().equalsIgnoreCase(unidad.getClave());
+            if (mismoId || mismaClave) return convertirAFila(unidad);
+        }
+        return null;
+    }
+
+    private List<InscripcionBajasDTO> obtenerBajasContexto() {
+        if (contexto == null || contexto.getContextoBase() == null
+                || contexto.getContextoBase().getEstadoAcademico() == null
+                || contexto.getContextoBase().getEstadoAcademico().getMateriasBajas() == null) {
+            return Collections.emptyList();
+        }
+        return contexto.getContextoBase().getEstadoAcademico().getMateriasBajas();
+    }
+
+    static List<InscripcionBajasDTO> filtrarBajasPorTipo(List<InscripcionBajasDTO> bajas, String tipoEsperado) {
+        if (bajas == null || bajas.isEmpty() || StringUtils.isBlank(tipoEsperado)) return Collections.emptyList();
+        String tipo = tipoEsperado.toUpperCase(Locale.ROOT);
+        Map<String, InscripcionBajasDTO> porIdentidad = new LinkedHashMap<String, InscripcionBajasDTO>();
+        for (InscripcionBajasDTO baja : bajas) {
+            if (baja == null || baja.getTipoBaja() == null
+                    || !baja.getTipoBaja().toUpperCase(Locale.ROOT).contains(tipo)) continue;
+            String identidad = baja.getIdPrograma() != null ? "ID:" + baja.getIdPrograma()
+                    : "CLAVE:" + StringUtils.defaultString(baja.getClavePrograma()).trim().toUpperCase(Locale.ROOT);
+            porIdentidad.putIfAbsent(identidad, baja);
+        }
+        return new ArrayList<InscripcionBajasDTO>(porIdentidad.values());
     }
 
     public String getDetalleFilaPrioritaria(FilaAsistidaDTO fila) {
@@ -3549,10 +3603,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getResumenBajasTemporalesPrioritarias() {
-        if (!isEstadoOperativoBajaTemporal()) {
-            return "No se identifica una baja temporal activa en el contexto académico actual.";
+        int registros = getConteoBajasTemporalesPrioritarias();
+        if (registros == 0) {
+            return "No se identifican registros de baja temporal en el contexto académico disponible.";
         }
-        return "Existe una baja temporal activa. La fecha de autorización y los periodos consumidos deben consultarse en el expediente institucional.";
+        return "Se identifican " + registros + " registro(s) de baja temporal. La fuente no acredita por sí sola autorización, vigencia ni periodos consumidos; deben consultarse en el expediente institucional.";
     }
 
     public String getResumenSustitucionesOptativasPrioritarias() {

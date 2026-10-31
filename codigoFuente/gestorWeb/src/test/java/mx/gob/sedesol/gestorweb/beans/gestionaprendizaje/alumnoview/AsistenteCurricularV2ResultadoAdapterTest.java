@@ -13,6 +13,7 @@ import java.util.Map;
 import org.testng.annotations.Test;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MetadatosConsultaAsistenteDTO;
@@ -251,6 +252,25 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertEquals(TablaCurricularAsistidaBean.class
 				.getMethod("situacionOportunidadesFilaPrioritaria", TablaCurricularAsistidaBean.FilaAsistidaDTO.class)
 				.getReturnType(), String.class);
+	}
+
+	@Test
+	public void deduplicaBajasParcialesYSeparaLasTemporalesPorTipoRegistrado() {
+		InscripcionBajasDTO parcial = baja(Long.valueOf(61L), "Baja parcial");
+		InscripcionBajasDTO parcialDuplicada = baja(Long.valueOf(61L), "BAJA PARCIAL");
+		InscripcionBajasDTO temporal = baja(Long.valueOf(62L), "Baja temporal");
+
+		assertEquals(TablaCurricularAsistidaBean.filtrarBajasPorTipo(
+				Arrays.asList(parcial, parcialDuplicada, temporal), "PARCIAL").size(), 1);
+		assertEquals(TablaCurricularAsistidaBean.filtrarBajasPorTipo(
+				Arrays.asList(parcial, parcialDuplicada, temporal), "TEMPORAL").size(), 1);
+	}
+
+	private InscripcionBajasDTO baja(Long idPrograma, String tipo) {
+		InscripcionBajasDTO baja = new InscripcionBajasDTO();
+		baja.setIdPrograma(idPrograma);
+		baja.setTipoBaja(tipo);
+		return baja;
 	}
 
 	private TrazaReglaAplicadaV2DTO trazaCausal(CodigoReglaCurricularV2 regla) {

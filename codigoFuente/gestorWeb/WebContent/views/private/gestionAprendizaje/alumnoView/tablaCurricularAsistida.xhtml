@@ -2082,9 +2082,9 @@
                                                     <div class="prioridad-detalle"><ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}"><ul><ui:repeat value="#{tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}" var="filaBaja"><li>#{tablaCurricularAsistidaBean.detalleFilaPrioritaria(filaBaja)}</li></ui:repeat></ul></ui:fragment><ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}">No se identifican bajas parciales en las UD visibles.</ui:fragment></div>
                                                 </div>
                                                 <div class="prioridad-card">
-                                                    <h3>Bajas temporales autorizadas</h3>
-                                                    <div class="contador">#{tablaCurricularAsistidaBean.estadoOperativoBajaTemporal ? 'Activa' : '0'}</div>
-                                                    <p>El seguimiento de una baja temporal corresponde al expediente institucional.</p>
+                                                    <h3>Bajas temporales registradas</h3>
+                                                    <div class="contador">#{tablaCurricularAsistidaBean.conteoBajasTemporalesPrioritarias}</div>
+                                                    <p>La fuente identifica registros de baja temporal; su autorización y vigencia deben verificarse en el expediente institucional.</p>
                                                     <div class="prioridad-detalle">#{tablaCurricularAsistidaBean.resumenBajasTemporalesPrioritarias}</div>
                                                 </div>
                                                 <div class="prioridad-card">
