@@ -3492,8 +3492,18 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return "Periodo no disponible";
     }
 
+    /** Firma invocable desde EL para el periodo de la fila prioritaria. */
+    public String periodoReprobacionPrioritaria(FilaAsistidaDTO fila) {
+        return getPeriodoReprobacionPrioritaria(fila);
+    }
+
     public String getCalificacionReprobacionPrioritaria(FilaAsistidaDTO fila) {
         return "No disponible";
+    }
+
+    /** Firma invocable desde EL para la calificación de la fila prioritaria. */
+    public String calificacionReprobacionPrioritaria(FilaAsistidaDTO fila) {
+        return getCalificacionReprobacionPrioritaria(fila);
     }
 
     public String getEstadoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
@@ -3502,14 +3512,29 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return "Antecedente registrado";
     }
 
+    /** Firma invocable desde EL para el estado del antecedente. */
+    public String estadoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        return getEstadoAntecedenteRecursamiento(fila);
+    }
+
     public String getClaseEstadoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
         String estado = getEstadoAntecedenteRecursamiento(fila);
         return "Recursando".equals(estado) ? "recursando" : "Regularizada".equals(estado) ? "regularizada" : "neutro";
     }
 
+    /** Firma invocable desde EL para la clase visual del antecedente. */
+    public String claseEstadoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        return getClaseEstadoAntecedenteRecursamiento(fila);
+    }
+
     public String getReprobacionesRegistradasBreve(FilaAsistidaDTO fila) {
         String valor = reprobacionesRegistradas(contexto, fila);
         return valor.replace("Reprobaciones registradas: ", "");
+    }
+
+    /** Firma invocable desde EL para el dato informativo de reprobaciones. */
+    public String reprobacionesRegistradasBreve(FilaAsistidaDTO fila) {
+        return getReprobacionesRegistradasBreve(fila);
     }
 
     private boolean tieneAntecedenteReprobacionVerificable(FilaAsistidaDTO fila) {

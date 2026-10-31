@@ -255,6 +255,21 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertEquals(TablaCurricularAsistidaBean.class
 				.getMethod("situacionOportunidadesFilaPrioritaria", TablaCurricularAsistidaBean.FilaAsistidaDTO.class)
 				.getReturnType(), String.class);
+		assertEquals(TablaCurricularAsistidaBean.class
+				.getMethod("periodoReprobacionPrioritaria", TablaCurricularAsistidaBean.FilaAsistidaDTO.class)
+				.getReturnType(), String.class);
+		assertEquals(TablaCurricularAsistidaBean.class
+				.getMethod("calificacionReprobacionPrioritaria", TablaCurricularAsistidaBean.FilaAsistidaDTO.class)
+				.getReturnType(), String.class);
+		assertEquals(TablaCurricularAsistidaBean.class
+				.getMethod("estadoAntecedenteRecursamiento", TablaCurricularAsistidaBean.FilaAsistidaDTO.class)
+				.getReturnType(), String.class);
+		assertEquals(TablaCurricularAsistidaBean.class
+				.getMethod("claseEstadoAntecedenteRecursamiento", TablaCurricularAsistidaBean.FilaAsistidaDTO.class)
+				.getReturnType(), String.class);
+		assertEquals(TablaCurricularAsistidaBean.class
+				.getMethod("reprobacionesRegistradasBreve", TablaCurricularAsistidaBean.FilaAsistidaDTO.class)
+				.getReturnType(), String.class);
 	}
 
 	@Test
