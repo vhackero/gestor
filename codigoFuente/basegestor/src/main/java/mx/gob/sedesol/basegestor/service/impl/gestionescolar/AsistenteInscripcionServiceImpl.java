@@ -1305,6 +1305,14 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         escenario.setNombre(nombre);
         escenario.setDescripcion(descripcion);
         escenario.setMateriasOfertadas(Integer.valueOf(enCurso.size()));
+        escenario.setSituacionBase(base.getSituacionAcademicaOrigen());
+        escenario.setPeriodoSimulado(base.getPeriodoNormativo());
+        escenario.setPeriodoElegibilidad(base.getPeriodoNormativo());
+        escenario.setVersionReglas(base.getVersionReglas());
+        escenario.setCorteDatos("Corte de las fuentes consultadas en el contexto registrado");
+        if (!acreditadas.isEmpty()) escenario.getSupuestos().add("Las UD en curso indicadas se suponen acreditadas; las demás conservan su estado registrado.");
+        if (!reprobadas.isEmpty()) escenario.getSupuestos().add("Sólo la UD indicada se supone no acreditada; las demás UD en curso conservan su estado registrado.");
+        if (acreditadas.isEmpty() && reprobadas.isEmpty()) escenario.getSupuestos().add("Referencia registrada: no es un resultado futuro.");
         try {
             ContextoEvaluacionCurricularV2DTO hipotetico = SerializationUtils.clone(base);
             for (UnidadEvaluacionCurricularV2DTO unidad : hipotetico.getUnidades()) {
@@ -1313,6 +1321,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
                 if (reprobadas.contains(unidad.getIdPrograma())) unidad.setEstado(EstadoUnidadCurricularV2.REPROBADA);
             }
             ResultadoEvaluacionCurricularV2DTO resultado = evaluacionCurricularV2Service.evaluarSombra(hipotetico);
+            escenario.setResultadoHipotetico(resultado.getSituacionAcademicaCalculada());
             int habilitadas = 0;
             int restringidas = 0;
             for (DecisionUnidadCurricularV2DTO decision : resultado.getDecisiones()) {
@@ -1323,6 +1332,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             escenario.getRecomendaciones().add("Situación hipotética V2: " + resultado.getSituacionAcademicaCalculada() + ". Reprobadas vigentes: " + resultado.getCantidadReprobadasVigentes() + ".");
             if (!resultado.getRestricciones().isEmpty()) escenario.getRecomendaciones().add("Restricciones vigentes: " + resultado.getRestricciones() + ".");
         } catch (RuntimeException ex) {
+            escenario.setResultadoHipotetico("NO_DETERMINADO");
             escenario.setMateriasHabilitadas(null);
             escenario.setMateriasBloqueadas(null);
             escenario.getRecomendaciones().add("La evaluación V2 del escenario no pudo completarse; no se presenta una conclusión legacy.");

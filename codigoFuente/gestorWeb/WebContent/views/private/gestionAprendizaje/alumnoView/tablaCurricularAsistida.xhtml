@@ -2155,6 +2155,7 @@
                                         <div class="expectativa-card">
                                             <div class="expectativa-head">#{escenarioProyeccion.nombre}</div>
                                             <div class="expectativa-desc">#{escenarioProyeccion.descripcion}</div>
+                                            <div class="expectativa-desc">Base: #{escenarioProyeccion.situacionBase} · Resultado hipotético: #{escenarioProyeccion.resultadoHipotetico} · Periodo simulado/elegibilidad: #{escenarioProyeccion.periodoSimulado} · Reglas: #{escenarioProyeccion.versionReglas}</div>
                                             <div class="expectativa-kpis">
                                                 <div class="expectativa-kpi">
                                                     <span class="label">UD consideradas según carga</span>
@@ -2176,6 +2177,7 @@
                                                     </ui:repeat>
                                                 </ul>
                                             </ui:fragment>
+                                            <ui:fragment rendered="#{not empty escenarioProyeccion.supuestos}"><ul><ui:repeat value="#{escenarioProyeccion.supuestos}" var="supuesto"><li>#{supuesto}</li></ui:repeat></ul></ui:fragment>
                                         </div>
                                     </ui:repeat>
                                 </div>

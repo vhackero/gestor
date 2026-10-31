@@ -13,10 +13,18 @@ public class EscenarioProyeccionDTO implements Serializable {
     private Integer materiasOfertadas;
     private Integer materiasHabilitadas;
     private Integer materiasBloqueadas;
+    private String situacionBase;
+    private String resultadoHipotetico;
+    private String periodoSimulado;
+    private String periodoElegibilidad;
+    private String versionReglas;
+    private String corteDatos;
+    private List<String> supuestos;
     private List<String> recomendaciones;
 
     public EscenarioProyeccionDTO() {
         this.recomendaciones = new ArrayList<String>();
+        this.supuestos = new ArrayList<String>();
     }
 
     public String getNombre() {
@@ -66,4 +74,18 @@ public class EscenarioProyeccionDTO implements Serializable {
     public void setRecomendaciones(List<String> recomendaciones) {
         this.recomendaciones = recomendaciones;
     }
+    public String getSituacionBase() { return situacionBase; }
+    public void setSituacionBase(String valor) { situacionBase = valor; }
+    public String getResultadoHipotetico() { return resultadoHipotetico; }
+    public void setResultadoHipotetico(String valor) { resultadoHipotetico = valor; }
+    public String getPeriodoSimulado() { return periodoSimulado; }
+    public void setPeriodoSimulado(String valor) { periodoSimulado = valor; }
+    public String getPeriodoElegibilidad() { return periodoElegibilidad; }
+    public void setPeriodoElegibilidad(String valor) { periodoElegibilidad = valor; }
+    public String getVersionReglas() { return versionReglas; }
+    public void setVersionReglas(String valor) { versionReglas = valor; }
+    public String getCorteDatos() { return corteDatos; }
+    public void setCorteDatos(String valor) { corteDatos = valor; }
+    public List<String> getSupuestos() { return supuestos; }
+    public void setSupuestos(List<String> valor) { supuestos = valor == null ? new ArrayList<String>() : valor; }
 }
