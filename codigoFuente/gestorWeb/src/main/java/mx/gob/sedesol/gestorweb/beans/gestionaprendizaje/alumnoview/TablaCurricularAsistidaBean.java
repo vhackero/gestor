@@ -1439,10 +1439,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     private boolean esFilaNoAcreditada(FilaAsistidaDTO fila) {
-        return fila != null
-                && fila.getEstatusHistorico() != null
-                && (fila.getEstatusHistorico().toUpperCase(Locale.ROOT).contains("NO ACREDIT")
-                        || fila.getEstatusHistorico().toUpperCase(Locale.ROOT).contains("REPROB"));
+        return esFilaNoAcreditadaPrioritaria(fila);
     }
 
     private boolean esFilaPendienteRiesgo(FilaAsistidaDTO fila) {
@@ -3393,18 +3390,46 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public List<FilaAsistidaDTO> getFilasReprobadasPrioritarias() {
-        // La regularización incluye cualquier UD con reprobación vigente,
-        // incluso si es optativa o no recibió una marca operativa de prioridad.
-        return obtenerFilasPlanas().stream()
-                .filter(this::esFilaNoAcreditada)
+        // La regularización debe usar el contexto curricular completo, no sólo
+        // las filas que la vista agrupó por semestre. Así una reprobada sin
+        // oferta o sin ubicación visual completa sigue siendo visible.
+        return filtrarFilasReprobadasPrioritarias(obtenerFilasContextoParaRegularizacion());
+    }
+
+    private List<FilaAsistidaDTO> obtenerFilasContextoParaRegularizacion() {
+        if (contexto == null || contexto.getUnidades() == null || contexto.getUnidades().isEmpty()) {
+            return obtenerFilasPlanas();
+        }
+        return contexto.getUnidades().stream()
+                .filter(unidad -> unidad != null)
+                .map(this::convertirAFila)
+                .collect(Collectors.toList());
+    }
+
+    static List<FilaAsistidaDTO> filtrarFilasReprobadasPrioritarias(List<FilaAsistidaDTO> filas) {
+        if (filas == null || filas.isEmpty()) return new ArrayList<FilaAsistidaDTO>();
+        Map<String, FilaAsistidaDTO> porIdentidad = new LinkedHashMap<String, FilaAsistidaDTO>();
+        filas.stream()
+                .filter(TablaCurricularAsistidaBean::esFilaNoAcreditadaPrioritaria)
                 .sorted(Comparator
                         .comparing(FilaAsistidaDTO::getSemestre, Comparator.nullsLast(Integer::compareTo))
                         .thenComparing(FilaAsistidaDTO::getBloque, Comparator.nullsLast(Integer::compareTo))
                         .thenComparing(FilaAsistidaDTO::getClave, Comparator.nullsLast(String::compareTo)))
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toMap(this::claveUnicaFila, fila -> fila,
-                                (primera, repetida) -> primera, LinkedHashMap::new),
-                        filasPorClave -> new ArrayList<FilaAsistidaDTO>(filasPorClave.values())));
+                .forEach(fila -> porIdentidad.putIfAbsent(claveUnicaFilaPrioritaria(fila), fila));
+        return new ArrayList<FilaAsistidaDTO>(porIdentidad.values());
+    }
+
+    private static boolean esFilaNoAcreditadaPrioritaria(FilaAsistidaDTO fila) {
+        if (fila == null || fila.getEstatusHistorico() == null) return false;
+        String estatus = fila.getEstatusHistorico().toUpperCase(Locale.ROOT);
+        return estatus.contains("NO ACREDIT") || estatus.contains("NO_ACREDIT") || estatus.contains("REPROB");
+    }
+
+    private static String claveUnicaFilaPrioritaria(FilaAsistidaDTO fila) {
+        if (fila == null) return "SIN_UD";
+        if (fila.getUdId() != null) return "ID:" + fila.getUdId();
+        if (!StringUtils.isBlank(fila.getClave())) return "CLAVE:" + fila.getClave().trim().toUpperCase(Locale.ROOT);
+        return "FILA:" + System.identityHashCode(fila);
     }
 
     /** Reprobadas que continúan en curso: se regularizan al acreditar, no al reinscribirse. */

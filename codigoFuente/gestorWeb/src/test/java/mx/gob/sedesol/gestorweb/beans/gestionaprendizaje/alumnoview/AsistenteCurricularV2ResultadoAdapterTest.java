@@ -5,7 +5,9 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Calendar;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.testng.annotations.Test;
@@ -217,6 +219,25 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		AsistenteInscripcionContextoDTO contexto = new AsistenteInscripcionContextoDTO();
 		assertEquals(TablaCurricularAsistidaBean.reprobacionesRegistradas(contexto, fila), "Dato no disponible");
 		assertTrue(TablaCurricularAsistidaBean.resumenReprobacionesRegistradas(contexto).contains("no está disponible"));
+	}
+
+	@Test
+	public void priorizacionIncluyeReprobadaDelContextoAunqueNoEsteEnLaOfertaVisual() {
+		TablaCurricularAsistidaBean.FilaAsistidaDTO reprobada = new TablaCurricularAsistidaBean.FilaAsistidaDTO();
+		reprobada.setUdId(Long.valueOf(51L));
+		reprobada.setClave("UD-REPROBADA");
+		reprobada.setSemestre(Integer.valueOf(5));
+		reprobada.setEstatusHistorico("NO_ACREDITADA");
+		TablaCurricularAsistidaBean.FilaAsistidaDTO ofertada = new TablaCurricularAsistidaBean.FilaAsistidaDTO();
+		ofertada.setUdId(Long.valueOf(52L));
+		ofertada.setClave("UD-OFERTADA");
+		ofertada.setEstatusHistorico("NO_INSCRITA");
+
+		List<TablaCurricularAsistidaBean.FilaAsistidaDTO> resultado = TablaCurricularAsistidaBean
+				.filtrarFilasReprobadasPrioritarias(Arrays.asList(ofertada, reprobada));
+
+		assertEquals(resultado.size(), 1);
+		assertEquals(resultado.get(0).getClave(), "UD-REPROBADA");
 	}
 
 	private TrazaReglaAplicadaV2DTO trazaCausal(CodigoReglaCurricularV2 regla) {
