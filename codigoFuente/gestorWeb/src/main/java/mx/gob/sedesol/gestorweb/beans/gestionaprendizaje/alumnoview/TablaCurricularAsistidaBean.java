@@ -3472,6 +3472,19 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                 : "Información no disponible";
     }
 
+    /**
+     * La fuente integrada sólo entrega reprobaciones agregadas por UD. No
+     * entrega la primera inscripción, bajas autorizadas ni el estado del
+     * intento vigente, por lo que no acredita el cómputo RN-1.4.
+     */
+    public String getConteoOportunidadesAcreditacionPrioritarias() {
+        return "N/D";
+    }
+
+    public boolean isOportunidadesAcreditacionDisponibles() {
+        return false;
+    }
+
     public String getReferenciaRecursamientoPrioritarias() {
         return "Historial de cursamientos computables pendiente de integrar";
     }

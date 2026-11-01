@@ -314,10 +314,35 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 	@Test
 	public void noPresentaOportunidadesOSustitucionesComoDatosConcluyentesSinFuente() {
 		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
+		assertEquals(bean.getConteoOportunidadesAcreditacionPrioritarias(), "N/D");
+		assertFalse(bean.isOportunidadesAcreditacionDisponibles());
 		assertTrue(bean.getReferenciaOportunidadesPrioritarias().contains("no disponible"));
 		assertTrue(bean.getReferenciaSustitucionesPrioritarias().contains("no disponible"));
 		assertTrue(bean.getReferenciaBajasParcialesPrioritarias().contains("no verificadas"));
 		assertTrue(bean.getReferenciaBajasTemporalesPrioritarias().contains("no verificados"));
+	}
+
+	@Test
+	public void separaAdeudosPendientesDeAntecedentesDeRecursamiento() throws Exception {
+		AsistenteInscripcionContextoDTO contexto = new AsistenteInscripcionContextoDTO();
+		UnidadDecisionInscripcionDTO recursando = unidad(Long.valueOf(91L), "UD-REC", "Reprobada", "En curso");
+		UnidadDecisionInscripcionDTO pendienteSinRecursar = unidad(Long.valueOf(92L), "UD-PEN", "Reprobada", null);
+		UnidadDecisionInscripcionDTO otraPendiente = unidad(Long.valueOf(93L), "UD-OTR", "Reprobada", null);
+		contexto.setUnidades(Arrays.asList(recursando, pendienteSinRecursar, otraPendiente));
+		Map<Long, Long> reprobaciones = new HashMap<Long, Long>();
+		reprobaciones.put(Long.valueOf(91L), Long.valueOf(1L));
+		reprobaciones.put(Long.valueOf(92L), Long.valueOf(1L));
+		reprobaciones.put(Long.valueOf(93L), Long.valueOf(1L));
+		contexto.setIntentosReprobadosPorUd(reprobaciones);
+		contexto.setIntentosReprobadosDisponibles(Boolean.TRUE);
+		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
+		inyectar(bean, "contexto", contexto);
+		inyectar(bean, "decisionesV2PorPrograma", new HashMap<Long, DecisionUnidadCurricularV2DTO>());
+
+		assertEquals(bean.getFilasReprobadasPrioritarias().size(), 3);
+		assertEquals(bean.getFilasAntecedenteRecursamientoPrioritarias().size(), 1);
+		assertEquals(bean.getFilasAntecedenteRecursamientoPrioritarias().get(0).getClave(), "UD-REC");
+		assertEquals(bean.getConteoOportunidadesAcreditacionPrioritarias(), "N/D");
 	}
 
 	private UnidadDecisionInscripcionDTO unidad(Long id, String clave, String historico, String periodo) {

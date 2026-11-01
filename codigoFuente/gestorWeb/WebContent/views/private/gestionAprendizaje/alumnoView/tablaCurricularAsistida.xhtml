@@ -2150,10 +2150,9 @@
                                         </div>
                                         <div class="prioridad-card">
                                             <h3>Oportunidades de acreditación</h3>
-                                            <div class="prioridad-resumen"><div class="contador">#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias.size()}</div><div class="prioridad-unidad">UD</div><div class="prioridad-referencia">#{tablaCurricularAsistidaBean.referenciaOportunidadesPrioritarias}</div></div>
+                                            <div class="prioridad-resumen"><div class="contador">#{tablaCurricularAsistidaBean.conteoOportunidadesAcreditacionPrioritarias}</div><div class="prioridad-unidad">UD</div><div class="prioridad-referencia">#{tablaCurricularAsistidaBean.referenciaOportunidadesPrioritarias}</div></div>
                                             <div class="prioridad-table-wrap">
-                                                <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasReprobadasPrioritarias}"><table><thead><tr><th>Unidad didáctica</th><th>Reprobaciones registradas</th><th>Situación</th></tr></thead><tbody><ui:repeat value="#{tablaCurricularAsistidaBean.filasReprobadasPrioritarias}" var="fila"><tr><td><span class="prioridad-clave">#{fila.clave}</span><span class="prioridad-nombre">#{fila.asignatura}</span></td><td>#{tablaCurricularAsistidaBean.reprobacionesRegistradasBreve(fila)}</td><td><span class="prioridad-estado neutro">Cómputo no disponible</span></td></tr></ui:repeat></tbody></table></ui:fragment>
-                                                <ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasReprobadasPrioritarias}"><div class="prioridad-vacia">No hay UD que requieran seguimiento de oportunidades en la consulta disponible.</div></ui:fragment>
+                                                <div class="prioridad-vacia">No disponible: esta consulta sólo recupera reprobaciones agregadas. El cómputo de oportunidades requiere cada inscripción computable, sus bajas autorizadas y el estado del intento actual.</div>
                                             </div>
                                             <div class="prioridad-nota">RN-1.4 requiere el detalle de cursamientos computables y bajas autorizadas; no se infiere desde reprobaciones agregadas.</div>
                                         </div>
