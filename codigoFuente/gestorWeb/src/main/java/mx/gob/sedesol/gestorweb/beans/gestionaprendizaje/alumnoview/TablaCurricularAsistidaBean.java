@@ -3394,7 +3394,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         // La regularización debe usar el contexto curricular completo, no sólo
         // las filas que la vista agrupó por semestre. Así una reprobada sin
         // oferta o sin ubicación visual completa sigue siendo visible.
-        return filtrarFilasReprobadasPrioritarias(obtenerFilasContextoParaRegularizacion());
+        return filtrarFilasReprobadasPrioritarias(obtenerFilasContextoParaRegularizacion()).stream()
+                // Una acreditación posterior regulariza el adeudo aunque una
+                // fuente auxiliar todavía conserve el antecedente reprobado.
+                .filter(fila -> !estaAcreditadaEnHistorial(fila))
+                .collect(Collectors.toList());
     }
 
     private List<FilaAsistidaDTO> obtenerFilasContextoParaRegularizacion() {
@@ -3450,8 +3454,16 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         for (FilaAsistidaDTO fila : obtenerFilasContextoParaRegularizacion()) {
             if (fila == null || !tieneAntecedenteReprobacionVerificable(fila)) continue;
             boolean recursando = esFilaNoAcreditadaPrioritaria(fila) && esFilaActual(fila);
-            boolean regularizada = esFilaAcreditada(fila);
+            boolean regularizada = esFilaAcreditada(fila) || estaAcreditadaEnHistorial(fila);
             if (recursando || regularizada) porIdentidad.putIfAbsent(claveUnicaFilaPrioritaria(fila), fila);
+        }
+        // Las UD acreditadas no siempre pertenecen al universo de oferta o de
+        // carga actual. Se incorporan aquí exclusivamente como antecedente,
+        // sin alterar el contexto ni la evaluación V2.
+        for (InscripcionMateriasCursadasDTO cursada : obtenerMateriasCursadasContexto()) {
+            if (!esCursadaAcreditada(cursada) || !tieneAntecedenteReprobacionVerificable(cursada)) continue;
+            FilaAsistidaDTO fila = convertirFilaAntecedenteRegularizado(cursada);
+            porIdentidad.putIfAbsent(claveUnicaFilaPrioritaria(fila), fila);
         }
         List<FilaAsistidaDTO> resultado = new ArrayList<FilaAsistidaDTO>(porIdentidad.values());
         Collections.sort(resultado, Comparator
@@ -3521,7 +3533,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public String getEstadoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
         if (fila != null && esFilaNoAcreditadaPrioritaria(fila) && esFilaActual(fila)) return "Recursando";
-        if (fila != null && esFilaAcreditada(fila)) return "Regularizada";
+        if (fila != null && (esFilaAcreditada(fila) || estaAcreditadaEnHistorial(fila))) return "Regularizada";
         return "Antecedente registrado";
     }
 
@@ -3555,6 +3567,52 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                 || !Boolean.TRUE.equals(contexto.getIntentosReprobadosDisponibles())) return false;
         Long reprobaciones = contexto.getIntentosReprobadosPorUd().get(fila.getUdId());
         return reprobaciones != null && reprobaciones.longValue() > 0L;
+    }
+
+    private boolean tieneAntecedenteReprobacionVerificable(InscripcionMateriasCursadasDTO cursada) {
+        if (cursada == null || cursada.getIdPrograma() == null || contexto == null
+                || !Boolean.TRUE.equals(contexto.getIntentosReprobadosDisponibles())) return false;
+        Long reprobaciones = contexto.getIntentosReprobadosPorUd().get(cursada.getIdPrograma());
+        return reprobaciones != null && reprobaciones.longValue() > 0L;
+    }
+
+    private List<InscripcionMateriasCursadasDTO> obtenerMateriasCursadasContexto() {
+        if (contexto == null || contexto.getContextoBase() == null
+                || contexto.getContextoBase().getEstadoAcademico() == null
+                || contexto.getContextoBase().getEstadoAcademico().getMateriasCursadas() == null) {
+            return Collections.emptyList();
+        }
+        return contexto.getContextoBase().getEstadoAcademico().getMateriasCursadas();
+    }
+
+    private boolean estaAcreditadaEnHistorial(FilaAsistidaDTO fila) {
+        if (fila == null) return false;
+        for (InscripcionMateriasCursadasDTO cursada : obtenerMateriasCursadasContexto()) {
+            if (cursada == null || !esCursadaAcreditada(cursada)) continue;
+            if (fila.getUdId() != null && fila.getUdId().equals(cursada.getIdPrograma())) return true;
+            if (!StringUtils.isBlank(fila.getClave()) && !StringUtils.isBlank(cursada.getClavePrograma())
+                    && fila.getClave().trim().equalsIgnoreCase(cursada.getClavePrograma().trim())) return true;
+        }
+        return false;
+    }
+
+    private boolean esCursadaAcreditada(InscripcionMateriasCursadasDTO cursada) {
+        return cursada != null && Integer.valueOf(1).equals(cursada.getEstatusAprobacion());
+    }
+
+    private FilaAsistidaDTO convertirFilaAntecedenteRegularizado(InscripcionMateriasCursadasDTO cursada) {
+        FilaAsistidaDTO fila = new FilaAsistidaDTO();
+        fila.setUdId(cursada.getIdPrograma());
+        fila.setClave(cursada.getClavePrograma());
+        fila.setAsignatura(cursada.getPrograma());
+        fila.setTipo(cursada.getTipoPrograma());
+        fila.setSemestre(parseNumero(cursada.getEstructura(), 0));
+        fila.setBloque(parseNumero(cursada.getSubestructura(), 0));
+        fila.setCreditos(cursada.getCreditos());
+        fila.setEstatusHistorico("ACREDITADA");
+        fila.setEstatusPeriodo(null);
+        fila.setOfertada(Boolean.FALSE);
+        return fila;
     }
 
     private boolean esFilaAcreditada(FilaAsistidaDTO fila) {

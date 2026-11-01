@@ -15,7 +15,10 @@ import org.testng.annotations.Test;
 import org.mockito.Mockito;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
@@ -343,6 +346,39 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertEquals(bean.getFilasAntecedenteRecursamientoPrioritarias().size(), 1);
 		assertEquals(bean.getFilasAntecedenteRecursamientoPrioritarias().get(0).getClave(), "UD-REC");
 		assertEquals(bean.getConteoOportunidadesAcreditacionPrioritarias(), "N/D");
+	}
+
+	@Test
+	public void excluyeRegularizadaDeAdeudosYLaConservaComoAntecedente() throws Exception {
+		AsistenteInscripcionContextoDTO contexto = new AsistenteInscripcionContextoDTO();
+		UnidadDecisionInscripcionDTO recursando = unidad(Long.valueOf(101L), "UD-REC", "Reprobada", "En curso");
+		UnidadDecisionInscripcionDTO pendiente = unidad(Long.valueOf(102L), "UD-PEN", "Reprobada", null);
+		UnidadDecisionInscripcionDTO historicoDesactualizado = unidad(Long.valueOf(103L), "UD-REG", "Reprobada", null);
+		contexto.setUnidades(Arrays.asList(recursando, pendiente, historicoDesactualizado));
+		Map<Long, Long> reprobaciones = new HashMap<Long, Long>();
+		reprobaciones.put(Long.valueOf(101L), Long.valueOf(1L));
+		reprobaciones.put(Long.valueOf(102L), Long.valueOf(1L));
+		reprobaciones.put(Long.valueOf(103L), Long.valueOf(1L));
+		contexto.setIntentosReprobadosPorUd(reprobaciones);
+		contexto.setIntentosReprobadosDisponibles(Boolean.TRUE);
+		InscripcionMateriasCursadasDTO regularizada = new InscripcionMateriasCursadasDTO();
+		regularizada.setIdPrograma(Long.valueOf(103L));
+		regularizada.setClavePrograma("UD-REG");
+		regularizada.setPrograma("Unidad regularizada");
+		regularizada.setEstatusAprobacion(Integer.valueOf(1));
+		EstadoAcademicoDTO estado = new EstadoAcademicoDTO();
+		estado.setMateriasCursadas(Arrays.asList(regularizada));
+		InscripcionContextoDTO contextoBase = new InscripcionContextoDTO();
+		contextoBase.setEstadoAcademico(estado);
+		contexto.setContextoBase(contextoBase);
+		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
+		inyectar(bean, "contexto", contexto);
+		inyectar(bean, "decisionesV2PorPrograma", new HashMap<Long, DecisionUnidadCurricularV2DTO>());
+
+		assertEquals(bean.getFilasReprobadasPrioritarias().size(), 2);
+		assertEquals(bean.getFilasAntecedenteRecursamientoPrioritarias().size(), 2);
+		assertEquals(bean.getEstadoAntecedenteRecursamiento(
+				bean.getFilasAntecedenteRecursamientoPrioritarias().get(1)), "Regularizada");
 	}
 
 	private UnidadDecisionInscripcionDTO unidad(Long id, String clave, String historico, String periodo) {
