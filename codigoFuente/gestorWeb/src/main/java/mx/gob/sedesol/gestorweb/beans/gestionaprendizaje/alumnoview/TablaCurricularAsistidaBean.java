@@ -3386,6 +3386,13 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     static boolean esEstatusPeriodoActual(String estatusPeriodo) {
         String estatus = Normalizer.normalize(StringUtils.defaultString(estatusPeriodo), Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "").toLowerCase(Locale.ROOT);
+        // No basta una coincidencia parcial: "NO_INSCRITA" contiene
+        // "inscrita", pero no representa una carga vigente ni recursamiento.
+        if (estatus.contains("no inscrita") || estatus.contains("no_inscrita")
+                || estatus.contains("no cursada") || estatus.contains("no_cursada")
+                || estatus.contains("baja")) {
+            return false;
+        }
         return estatus.contains("en curso") || estatus.contains("cursando")
                 || estatus.contains("inscrita") || estatus.contains("registrada");
     }

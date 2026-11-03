@@ -201,6 +201,8 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 	@Test
 	public void bajaAplicadaNoCuentaComoVigenteYUnaSolicitudPendienteNoProduceEseEfecto() {
 		assertFalse(TablaCurricularAsistidaBean.esEstatusPeriodoActual("Baja parcial aplicada"));
+		assertFalse(TablaCurricularAsistidaBean.esEstatusPeriodoActual("NO_INSCRITA"));
+		assertFalse(TablaCurricularAsistidaBean.esEstatusPeriodoActual("No cursada"));
 		assertTrue(TablaCurricularAsistidaBean.esEstatusPeriodoActual("En curso"));
 	}
 
@@ -379,6 +381,31 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertEquals(bean.getFilasAntecedenteRecursamientoPrioritarias().size(), 2);
 		assertEquals(bean.getEstadoAntecedenteRecursamiento(
 				bean.getFilasAntecedenteRecursamientoPrioritarias().get(1)), "Regularizada");
+	}
+
+	@Test
+	public void noConfundeNoInscritaConRecursamiento() throws Exception {
+		AsistenteInscripcionContextoDTO contexto = new AsistenteInscripcionContextoDTO();
+		UnidadDecisionInscripcionDTO pendienteUno = unidad(Long.valueOf(111L), "UD-P01", "Reprobada", "NO_INSCRITA");
+		UnidadDecisionInscripcionDTO pendienteDos = unidad(Long.valueOf(112L), "UD-P02", "Reprobada", "NO_INSCRITA");
+		UnidadDecisionInscripcionDTO pendienteTres = unidad(Long.valueOf(113L), "UD-P03", "Reprobada", "NO_INSCRITA");
+		UnidadDecisionInscripcionDTO regularizada = unidad(Long.valueOf(114L), "UD-REG", "Acreditada", null);
+		contexto.setUnidades(Arrays.asList(pendienteUno, pendienteDos, pendienteTres, regularizada));
+		Map<Long, Long> reprobaciones = new HashMap<Long, Long>();
+		reprobaciones.put(Long.valueOf(111L), Long.valueOf(1L));
+		reprobaciones.put(Long.valueOf(112L), Long.valueOf(1L));
+		reprobaciones.put(Long.valueOf(113L), Long.valueOf(1L));
+		reprobaciones.put(Long.valueOf(114L), Long.valueOf(1L));
+		contexto.setIntentosReprobadosPorUd(reprobaciones);
+		contexto.setIntentosReprobadosDisponibles(Boolean.TRUE);
+		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
+		inyectar(bean, "contexto", contexto);
+		inyectar(bean, "decisionesV2PorPrograma", new HashMap<Long, DecisionUnidadCurricularV2DTO>());
+
+		assertEquals(bean.getFilasReprobadasPrioritarias().size(), 3);
+		assertEquals(bean.getFilasAntecedenteRecursamientoPrioritarias().size(), 1);
+		assertEquals(bean.getEstadoAntecedenteRecursamiento(
+				bean.getFilasAntecedenteRecursamientoPrioritarias().get(0)), "Regularizada");
 	}
 
 	private UnidadDecisionInscripcionDTO unidad(Long id, String clave, String historico, String periodo) {
