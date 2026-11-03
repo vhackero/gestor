@@ -118,6 +118,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private String respuestaPreguntaOrientacion;
     private CreditosResumenMallaDTO creditosResumenMalla;
     private List<InscripcionPreviaMateriasDTO> inscripcionesActualesResumen;
+    /**
+     * La tarjeta de recursamiento se basa en el historial por idPrograma y la
+     * inscripción vigente, no en el agregado de reprobaciones del contexto V2.
+     */
+    private Map<String, AntecedenteRecursamientoDTO> antecedentesRecursamientoPrioritarios;
     /** Vista interna de la pestaña Simulador: selección o revisión final. */
     private boolean mostrarRevisionSeleccion;
 
@@ -538,6 +543,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public void setContexto(AsistenteInscripcionContextoDTO contexto) {
         this.contexto = contexto;
+        this.antecedentesRecursamientoPrioritarios = null;
     }
 
     public List<SemestreAsistidoDTO> getSemestres() {
@@ -3448,23 +3454,90 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     /**
-     * Antecedentes visibles por identidad curricular. La fuente actual acredita
-     * reprobaciones registradas, pero no el contador completo de cursamientos
-     * computables; por eso no se infiere el margen de recursamientos.
+     * Una UD sólo entra a esta tarjeta si hay evidencia de que se volvió a
+     * cursar: acreditación posterior a una reprobación o inscripción vigente
+     * sobre una UD con reprobación histórica. Las reprobadas pendientes por sí
+     * solas no constituyen antecedentes de recursamiento.
      */
     public List<FilaAsistidaDTO> getFilasAntecedenteRecursamientoPrioritarias() {
-        Map<String, FilaAsistidaDTO> porIdentidad = new LinkedHashMap<String, FilaAsistidaDTO>();
-        for (FilaAsistidaDTO fila : obtenerFilasContextoParaRegularizacion()) {
-            if (fila == null || !tieneAntecedenteReprobacionVerificable(fila)) continue;
-            boolean recursando = esFilaNoAcreditadaPrioritaria(fila) && esFilaActual(fila);
-            boolean regularizada = esFilaAcreditada(fila);
-            if (recursando || regularizada) porIdentidad.putIfAbsent(claveUnicaFilaPrioritaria(fila), fila);
+        List<FilaAsistidaDTO> resultado = new ArrayList<FilaAsistidaDTO>();
+        for (AntecedenteRecursamientoDTO antecedente : obtenerAntecedentesRecursamientoPrioritarios().values()) {
+            resultado.add(antecedente.getFila());
         }
-        List<FilaAsistidaDTO> resultado = new ArrayList<FilaAsistidaDTO>(porIdentidad.values());
         Collections.sort(resultado, Comparator
-                .comparing((FilaAsistidaDTO fila) -> !esFilaNoAcreditadaPrioritaria(fila))
+                .comparing((FilaAsistidaDTO fila) -> !esRecursando(fila))
                 .thenComparing(FilaAsistidaDTO::getClave, Comparator.nullsLast(String::compareTo)));
         return resultado;
+    }
+
+    private Map<String, AntecedenteRecursamientoDTO> obtenerAntecedentesRecursamientoPrioritarios() {
+        if (antecedentesRecursamientoPrioritarios != null) {
+            return antecedentesRecursamientoPrioritarios;
+        }
+        antecedentesRecursamientoPrioritarios = new LinkedHashMap<String, AntecedenteRecursamientoDTO>();
+        Long planId = resolverIdPlanV2();
+        if (idPersonaObjetivo == null || planId == null || inscripcionService == null) {
+            return antecedentesRecursamientoPrioritarios;
+        }
+
+        Map<Long, MallaAlumnoProgramaDTO> historialPorPrograma = new HashMap<Long, MallaAlumnoProgramaDTO>();
+        List<MallaAlumnoProgramaDTO> historial = inscripcionService
+                .obtenerProgramasMallaAlumno(idPersonaObjetivo, planId);
+        if (!ObjectUtils.isNullOrEmpty(historial)) {
+            for (MallaAlumnoProgramaDTO registro : historial) {
+                if (registro != null && registro.getIdPrograma() != null) {
+                    historialPorPrograma.put(registro.getIdPrograma(), registro);
+                }
+            }
+        }
+
+        Set<Long> programasConInscripcionVigente = new HashSet<Long>();
+        if (inscripcionPreviaMateriasService != null) {
+            List<InscripcionPreviaMateriasDTO> inscripciones = inscripcionPreviaMateriasService
+                    .obtenerInscripcionPrevia(idPersonaObjetivo);
+            if (!ObjectUtils.isNullOrEmpty(inscripciones)) {
+                for (InscripcionPreviaMateriasDTO inscripcion : inscripciones) {
+                    if (inscripcion != null && inscripcion.getIdPrograma() != null) {
+                        programasConInscripcionVigente.add(inscripcion.getIdPrograma());
+                    }
+                }
+            }
+        }
+
+        for (FilaAsistidaDTO fila : obtenerFilasContextoParaRegularizacion()) {
+            if (fila == null || fila.getUdId() == null) {
+                continue;
+            }
+            MallaAlumnoProgramaDTO historialUd = historialPorPrograma.get(fila.getUdId());
+            if (historialUd == null) {
+                continue;
+            }
+            boolean regularizada = Boolean.TRUE.equals(historialUd.getRegularizada());
+            boolean recursando = programasConInscripcionVigente.contains(fila.getUdId())
+                    && esReprobacionHistorica(historialUd);
+            if (!regularizada && !recursando) {
+                continue;
+            }
+            String identidad = claveUnicaFilaPrioritaria(fila);
+            antecedentesRecursamientoPrioritarios.putIfAbsent(identidad,
+                    new AntecedenteRecursamientoDTO(fila, recursando ? "Recursando" : "Regularizada"));
+        }
+        return antecedentesRecursamientoPrioritarios;
+    }
+
+    private static boolean esReprobacionHistorica(MallaAlumnoProgramaDTO historialUd) {
+        if (historialUd == null || historialUd.getCalificacionFinal() == null) {
+            return false;
+        }
+        double minima = historialUd.getCalificacionMinAprobatoria() != null
+                ? historialUd.getCalificacionMinAprobatoria().doubleValue() : 0d;
+        return historialUd.getCalificacionFinal().doubleValue() < minima;
+    }
+
+    private boolean esRecursando(FilaAsistidaDTO fila) {
+        AntecedenteRecursamientoDTO antecedente = obtenerAntecedentesRecursamientoPrioritarios()
+                .get(claveUnicaFilaPrioritaria(fila));
+        return antecedente != null && "Recursando".equals(antecedente.getEstado());
     }
 
     public String getReferenciaReprobadasPendientesPrioritarias() {
@@ -3493,7 +3566,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getReferenciaRecursamientoPrioritarias() {
-        return "Historial de cursamientos computables pendiente de integrar";
+        return "Antecedentes verificados en historial e inscripción vigente";
     }
 
     public String getReferenciaSustitucionesPrioritarias() {
@@ -3527,9 +3600,9 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getEstadoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
-        if (fila != null && esFilaNoAcreditadaPrioritaria(fila) && esFilaActual(fila)) return "Recursando";
-        if (fila != null && esFilaAcreditada(fila)) return "Regularizada";
-        return "Antecedente registrado";
+        AntecedenteRecursamientoDTO antecedente = obtenerAntecedentesRecursamientoPrioritarios()
+                .get(claveUnicaFilaPrioritaria(fila));
+        return antecedente != null ? antecedente.getEstado() : "Antecedente no determinado";
     }
 
     /** Firma invocable desde EL para el estado del antecedente. */
@@ -4417,6 +4490,25 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public String observacionValidacion(FilaAsistidaDTO fila) {
         return getObservacionValidacion(fila);
+    }
+
+    private static class AntecedenteRecursamientoDTO implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final FilaAsistidaDTO fila;
+        private final String estado;
+
+        AntecedenteRecursamientoDTO(FilaAsistidaDTO fila, String estado) {
+            this.fila = fila;
+            this.estado = estado;
+        }
+
+        FilaAsistidaDTO getFila() {
+            return fila;
+        }
+
+        String getEstado() {
+            return estado;
+        }
     }
 
     public static class SemestreAsistidoDTO implements Serializable {

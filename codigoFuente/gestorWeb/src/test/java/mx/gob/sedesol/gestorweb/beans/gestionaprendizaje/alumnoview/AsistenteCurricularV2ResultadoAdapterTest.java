@@ -16,7 +16,11 @@ import org.mockito.Mockito;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.inscripcion.InscripcionPreviaMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MetadatosConsultaAsistenteDTO;
@@ -24,6 +28,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoReglaCurric
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TrazaReglaAplicadaV2DTO;
+import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
+import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasService;
 
 public class AsistenteCurricularV2ResultadoAdapterTest {
 	@Test
@@ -290,8 +296,8 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 	}
 
 	@Test
-	public void conservaAntecedenteRegularizadoYRecursandoSinContarlosComoElMismoAdeudo() throws Exception {
-		AsistenteInscripcionContextoDTO contexto = new AsistenteInscripcionContextoDTO();
+	public void conservaSoloAntecedentesDeRecursamientoVerificadosPorHistorialEInscripcion() throws Exception {
+		AsistenteInscripcionContextoDTO contexto = contextoConPlan();
 		UnidadDecisionInscripcionDTO recursando = unidad(Long.valueOf(81L), "OB-E01", "Reprobada", "En curso");
 		UnidadDecisionInscripcionDTO regularizada = unidad(Long.valueOf(82L), "OB-R02", "Acreditada", null);
 		UnidadDecisionInscripcionDTO reprobadaSinRecursar = unidad(Long.valueOf(83L), "OB-P03", "Reprobada", null);
@@ -304,7 +310,18 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		contexto.setIntentosReprobadosDisponibles(Boolean.TRUE);
 		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
 		inyectar(bean, "contexto", contexto);
+		inyectar(bean, "idPersonaObjetivo", Long.valueOf(900L));
 		inyectar(bean, "decisionesV2PorPrograma", new HashMap<Long, DecisionUnidadCurricularV2DTO>());
+		InscripcionService inscripcionService = Mockito.mock(InscripcionService.class);
+		Mockito.when(inscripcionService.obtenerProgramasMallaAlumno(Long.valueOf(900L), Long.valueOf(77L)))
+				.thenReturn(Arrays.asList(historialMalla(81L, 55D, 70D, false),
+						historialMalla(82L, 75D, 70D, true),
+						historialMalla(83L, 55D, 70D, false)));
+		inyectar(bean, "inscripcionService", inscripcionService);
+		InscripcionPreviaMateriasService inscripciones = Mockito.mock(InscripcionPreviaMateriasService.class);
+		Mockito.when(inscripciones.obtenerInscripcionPrevia(Long.valueOf(900L)))
+				.thenReturn(Arrays.asList(inscripcionPrevia(81L)));
+		inyectar(bean, "inscripcionPreviaMateriasService", inscripciones);
 
 		List<TablaCurricularAsistidaBean.FilaAsistidaDTO> antecedentes = bean.getFilasAntecedenteRecursamientoPrioritarias();
 		assertEquals(antecedentes.size(), 2);
@@ -326,7 +343,7 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 
 	@Test
 	public void separaAdeudosPendientesDeAntecedentesDeRecursamiento() throws Exception {
-		AsistenteInscripcionContextoDTO contexto = new AsistenteInscripcionContextoDTO();
+		AsistenteInscripcionContextoDTO contexto = contextoConPlan();
 		UnidadDecisionInscripcionDTO recursando = unidad(Long.valueOf(91L), "UD-REC", "Reprobada", "En curso");
 		UnidadDecisionInscripcionDTO pendienteSinRecursar = unidad(Long.valueOf(92L), "UD-PEN", "Reprobada", null);
 		UnidadDecisionInscripcionDTO otraPendiente = unidad(Long.valueOf(93L), "UD-OTR", "Reprobada", null);
@@ -339,7 +356,18 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		contexto.setIntentosReprobadosDisponibles(Boolean.TRUE);
 		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
 		inyectar(bean, "contexto", contexto);
+		inyectar(bean, "idPersonaObjetivo", Long.valueOf(901L));
 		inyectar(bean, "decisionesV2PorPrograma", new HashMap<Long, DecisionUnidadCurricularV2DTO>());
+		InscripcionService inscripcionService = Mockito.mock(InscripcionService.class);
+		Mockito.when(inscripcionService.obtenerProgramasMallaAlumno(Long.valueOf(901L), Long.valueOf(77L)))
+				.thenReturn(Arrays.asList(historialMalla(91L, 55D, 70D, false),
+						historialMalla(92L, 55D, 70D, false),
+						historialMalla(93L, 55D, 70D, false)));
+		inyectar(bean, "inscripcionService", inscripcionService);
+		InscripcionPreviaMateriasService inscripciones = Mockito.mock(InscripcionPreviaMateriasService.class);
+		Mockito.when(inscripciones.obtenerInscripcionPrevia(Long.valueOf(901L)))
+				.thenReturn(Arrays.asList(inscripcionPrevia(91L)));
+		inyectar(bean, "inscripcionPreviaMateriasService", inscripciones);
 
 		assertEquals(bean.getFilasReprobadasPrioritarias().size(), 3);
 		assertEquals(bean.getFilasAntecedenteRecursamientoPrioritarias().size(), 1);
@@ -349,7 +377,7 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 
 	@Test
 	public void noConfundeNoInscritaConRecursamiento() throws Exception {
-		AsistenteInscripcionContextoDTO contexto = new AsistenteInscripcionContextoDTO();
+		AsistenteInscripcionContextoDTO contexto = contextoConPlan();
 		UnidadDecisionInscripcionDTO pendienteUno = unidad(Long.valueOf(111L), "UD-P01", "Reprobada", "NO_INSCRITA");
 		UnidadDecisionInscripcionDTO pendienteDos = unidad(Long.valueOf(112L), "UD-P02", "Reprobada", "NO_INSCRITA");
 		UnidadDecisionInscripcionDTO pendienteTres = unidad(Long.valueOf(113L), "UD-P03", "Reprobada", "NO_INSCRITA");
@@ -364,7 +392,18 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		contexto.setIntentosReprobadosDisponibles(Boolean.TRUE);
 		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
 		inyectar(bean, "contexto", contexto);
+		inyectar(bean, "idPersonaObjetivo", Long.valueOf(902L));
 		inyectar(bean, "decisionesV2PorPrograma", new HashMap<Long, DecisionUnidadCurricularV2DTO>());
+		InscripcionService inscripcionService = Mockito.mock(InscripcionService.class);
+		Mockito.when(inscripcionService.obtenerProgramasMallaAlumno(Long.valueOf(902L), Long.valueOf(77L)))
+				.thenReturn(Arrays.asList(historialMalla(111L, 55D, 70D, false),
+						historialMalla(112L, 55D, 70D, false),
+						historialMalla(113L, 55D, 70D, false),
+						historialMalla(114L, 75D, 70D, true)));
+		inyectar(bean, "inscripcionService", inscripcionService);
+		InscripcionPreviaMateriasService inscripciones = Mockito.mock(InscripcionPreviaMateriasService.class);
+		Mockito.when(inscripciones.obtenerInscripcionPrevia(Long.valueOf(902L))).thenReturn(Arrays.asList());
+		inyectar(bean, "inscripcionPreviaMateriasService", inscripciones);
 
 		assertEquals(bean.getFilasReprobadasPrioritarias().size(), 3);
 		assertEquals(bean.getFilasAntecedenteRecursamientoPrioritarias().size(), 1);
@@ -381,6 +420,32 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		unidad.setEstatusPeriodo(periodo);
 		unidad.setOfertada(Boolean.TRUE);
 		return unidad;
+	}
+
+	private AsistenteInscripcionContextoDTO contextoConPlan() {
+		AsistenteInscripcionContextoDTO contexto = new AsistenteInscripcionContextoDTO();
+		InscripcionPersonaDTO persona = new InscripcionPersonaDTO();
+		persona.setIdPlan(Long.valueOf(77L));
+		InscripcionContextoDTO contextoBase = new InscripcionContextoDTO();
+		contextoBase.setInscripcionPersona(persona);
+		contexto.setContextoBase(contextoBase);
+		return contexto;
+	}
+
+	private MallaAlumnoProgramaDTO historialMalla(Long idPrograma, Double calificacion, Double minima,
+			boolean regularizada) {
+		MallaAlumnoProgramaDTO historial = new MallaAlumnoProgramaDTO();
+		historial.setIdPrograma(idPrograma);
+		historial.setCalificacionFinal(calificacion);
+		historial.setCalificacionMinAprobatoria(minima);
+		historial.setRegularizada(Boolean.valueOf(regularizada));
+		return historial;
+	}
+
+	private InscripcionPreviaMateriasDTO inscripcionPrevia(Long idPrograma) {
+		InscripcionPreviaMateriasDTO inscripcion = new InscripcionPreviaMateriasDTO();
+		inscripcion.setIdPrograma(idPrograma);
+		return inscripcion;
 	}
 
 	private void inyectar(Object destino, String nombre, Object valor) throws Exception {
