@@ -523,7 +523,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		conectarProgramas(programasPlan, programasPorId);
 		resolverDependencias(programaAntecedentePorId, programaNombrePorId, dependenciasEntrantes, dependenciasSalientes);
 		aplicarTooltipsDependencias(programasPorId, dependenciasEntrantes, dependenciasSalientes);
-		aplicarEstatusEnCurso(programasPorId);
+		aplicarEstatusEnCurso(programasPorId, estatusPorPrograma);
 		aplicarBloqueos(programasPorId, programaAntecedentePorId, estatusPorPrograma);
 		aplicarIndicadoresVisuales(programasPorId, estatusPorPrograma);
 		reconstruirDetallesContextuales(programasPorId, fichasProgramaPorId);
@@ -1340,14 +1340,20 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		return tipo.contains("TEMPORAL") || tipo.contains("PARCIAL");
 	}
 
-	private void aplicarEstatusEnCurso(Map<Integer, MallaDiagramaNodoDTO> programasPorId) {
+	private void aplicarEstatusEnCurso(Map<Integer, MallaDiagramaNodoDTO> programasPorId,
+			Map<Integer, MallaAlumnoProgramaDTO> estatusPorPrograma) {
 		for (Map.Entry<Integer, MallaDiagramaNodoDTO> entry : programasPorId.entrySet()) {
 			MallaDiagramaNodoDTO nodo = entry.getValue();
+			boolean antecedenteBajaParcial = tieneAntecedenteBajaParcial(nodo, entry.getKey());
+			MallaAlumnoProgramaDTO estatusHistorico = estatusPorPrograma.get(entry.getKey());
+			boolean noPresentadaPorBajaParcial = debeMostrarCursamientoConAntecedenteBaja(
+					nodo.getEstatus(), nodo.isEnCurso(), antecedenteBajaParcial,
+					estatusHistorico != null ? estatusHistorico.getCalificacionFinal() : null);
 			if (nodo.isEnCurso()
 					&& !ESTATUS_APROBADA.equals(nodo.getEstatus())
-					&& !ESTATUS_NO_ACREDITADA.equals(nodo.getEstatus())
+					&& (!ESTATUS_NO_ACREDITADA.equals(nodo.getEstatus()) || noPresentadaPorBajaParcial)
 					&& (!ESTATUS_BAJA.equals(nodo.getEstatus())
-							|| tieneAntecedenteBajaParcial(nodo, entry.getKey()))) {
+							|| antecedenteBajaParcial)) {
 				String color = ESTATUS_COLORS.getOrDefault(ESTATUS_EN_CURSO, "#facc15");
 				nodo.setEstatus(ESTATUS_EN_CURSO);
 				nodo.setEstatusBackgroundColor(color);
@@ -1355,6 +1361,13 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 				nodo.setEstatusIconClass("fa fa-flag");
 			}
 		}
+	}
+
+	static boolean debeMostrarCursamientoConAntecedenteBaja(String estatus, boolean enCurso,
+			boolean antecedenteBajaParcial, Double calificacionFinal) {
+		return enCurso && antecedenteBajaParcial && ESTATUS_NO_ACREDITADA.equals(estatus)
+				&& calificacionFinal != null
+				&& Double.compare(calificacionFinal, CALIFICACION_NO_PRESENTADA) == 0;
 	}
 
 	/** Indicadores visuales: no alteran el estado académico usado por la malla. */

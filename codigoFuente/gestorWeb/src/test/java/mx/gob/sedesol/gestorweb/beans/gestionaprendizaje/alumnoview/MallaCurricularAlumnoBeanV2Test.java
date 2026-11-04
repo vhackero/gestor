@@ -152,6 +152,14 @@ public class MallaCurricularAlumnoBeanV2Test {
 	}
 
 	@Test
+	public void distingueNpPorBajaParcialDeUnaReprobacionNumerica() {
+		assertTrue(MallaCurricularAlumnoBean.debeMostrarCursamientoConAntecedenteBaja(
+				"No acreditada", true, true, Double.valueOf(666d)));
+		assertFalse(MallaCurricularAlumnoBean.debeMostrarCursamientoConAntecedenteBaja(
+				"No acreditada", true, true, Double.valueOf(55d)));
+	}
+
+	@Test
 	public void bloqueoCurricularNoConvierteObligatoriaEnSeriada() {
 		MallaDiagramaNodoDTO nodo = new MallaDiagramaNodoDTO();
 		nodo.setBloqueada(true);
