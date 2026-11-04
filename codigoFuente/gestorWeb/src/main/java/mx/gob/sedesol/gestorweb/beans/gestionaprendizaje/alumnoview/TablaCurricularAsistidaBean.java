@@ -2325,7 +2325,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         Set<String> claves = new HashSet<String>();
         List<InscripcionMateriasReprobadasDTO> reprobadas = obtenerReprobadasActivasParaDetalle();
         for (InscripcionMateriasReprobadasDTO reprobada : reprobadas) {
-            if (reprobada == null || tieneBajaActiva(reprobada)) {
+            if (reprobada == null || tieneBajaParcialAplicada(reprobada)) {
                 continue;
             }
             String clave = StringUtils.trimToNull(reprobada.getClavePrograma());
@@ -2346,7 +2346,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         }
         Set<Long> noAcreditadas = new HashSet<Long>();
         for (InscripcionMateriasReprobadasDTO reprobada : obtenerReprobadasActivasParaDetalle()) {
-            if (reprobada != null && !tieneBajaActiva(reprobada) && reprobada.getIdPrograma() != null
+            if (reprobada != null && !tieneBajaParcialAplicada(reprobada) && reprobada.getIdPrograma() != null
                     && !estaAprobadaEnHistorialActual(reprobada.getIdPrograma())) {
                 noAcreditadas.add(reprobada.getIdPrograma());
             }
@@ -2471,14 +2471,15 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return Collections.emptyList();
     }
 
-    private boolean tieneBajaActiva(InscripcionMateriasReprobadasDTO reprobada) {
+    /** Una baja temporal es semestral; solo la parcial puede excluir una UD. */
+    private boolean tieneBajaParcialAplicada(InscripcionMateriasReprobadasDTO reprobada) {
         if (contexto == null || contexto.getContextoBase() == null
                 || contexto.getContextoBase().getEstadoAcademico() == null
                 || contexto.getContextoBase().getEstadoAcademico().getMateriasBajas() == null) {
             return false;
         }
         for (InscripcionBajasDTO baja : contexto.getContextoBase().getEstadoAcademico().getMateriasBajas()) {
-            if (baja != null && ((reprobada.getIdPrograma() != null && reprobada.getIdPrograma().equals(baja.getIdPrograma()))
+            if (esBajaParcial(baja) && ((reprobada.getIdPrograma() != null && reprobada.getIdPrograma().equals(baja.getIdPrograma()))
                     || (StringUtils.isNotBlank(reprobada.getClavePrograma())
                             && reprobada.getClavePrograma().equalsIgnoreCase(baja.getClavePrograma())))) {
                 return true;
@@ -3983,13 +3984,21 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return contarMovimientosBajaPorTipo(obtenerBajasContexto(), "PARCIAL");
     }
 
-    /** Registros de baja temporal disponibles; no se asumen autorizaciones ni vigencia. */
+    /** Las bajas temporales se cuentan por movimiento, nunca por UD asociada. */
     public int getConteoBajasTemporalesPrioritarias() {
-        return filtrarBajasPorTipo(obtenerBajasContexto(), "TEMPORAL").size();
+        return filtrarBajasTemporalesPorMovimiento(obtenerBajasContexto()).size();
     }
 
     public List<FilaAsistidaDTO> getFilasBajaTemporalPrioritarias() {
-        return construirFilasBajaPrioritarias("TEMPORAL");
+        List<FilaAsistidaDTO> filas = new ArrayList<FilaAsistidaDTO>();
+        for (InscripcionBajasDTO baja : filtrarBajasTemporalesPorMovimiento(obtenerBajasContexto())) {
+            FilaAsistidaDTO fila = new FilaAsistidaDTO();
+            fila.setClave("Registro temporal");
+            fila.setAsignatura("Semestre, autorizacion y vigencia no verificables en la fuente disponible");
+            fila.setEstatusHistorico("BAJA TEMPORAL");
+            filas.add(fila);
+        }
+        return filas;
     }
 
     private List<FilaAsistidaDTO> construirFilasBajaPrioritarias(String tipoBaja) {
@@ -4046,6 +4055,31 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return new ArrayList<InscripcionBajasDTO>(porIdentidad.values());
     }
 
+    /**
+     * rel_persona_bajas.id_baja identifica el movimiento temporal. Una misma
+     * baja puede aparecer asociada tecnicamente a varias UD del semestre.
+     */
+    static List<InscripcionBajasDTO> filtrarBajasTemporalesPorMovimiento(List<InscripcionBajasDTO> bajas) {
+        if (bajas == null || bajas.isEmpty()) return Collections.emptyList();
+        Map<String, InscripcionBajasDTO> porMovimiento = new LinkedHashMap<String, InscripcionBajasDTO>();
+        int sinIdentificador = 0;
+        for (InscripcionBajasDTO baja : bajas) {
+            if (!esBajaTemporal(baja)) continue;
+            String identidad = baja.getIdBaja() != null ? "MOVIMIENTO:" + baja.getIdBaja()
+                    : "SIN_IDENTIFICADOR:" + (++sinIdentificador);
+            porMovimiento.putIfAbsent(identidad, baja);
+        }
+        return new ArrayList<InscripcionBajasDTO>(porMovimiento.values());
+    }
+
+    private static boolean esBajaParcial(InscripcionBajasDTO baja) {
+        return baja != null && StringUtils.containsIgnoreCase(baja.getTipoBaja(), "PARCIAL");
+    }
+
+    private static boolean esBajaTemporal(InscripcionBajasDTO baja) {
+        return baja != null && StringUtils.containsIgnoreCase(baja.getTipoBaja(), "TEMPORAL");
+    }
+
     static int contarMovimientosBajaPorTipo(List<InscripcionBajasDTO> bajas, String tipoEsperado) {
         if (bajas == null || bajas.isEmpty() || StringUtils.isBlank(tipoEsperado)) return 0;
         String tipo = tipoEsperado.toUpperCase(Locale.ROOT);
@@ -4087,7 +4121,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         if (registros == 0) {
             return "No se identifican registros de baja temporal en el contexto académico disponible.";
         }
-        return "UD distintas asociadas a registros de baja temporal; autorización y vigencia no verificadas. No modifican regularidad, oportunidades, plazo ni reincorporación sin evidencia institucional.";
+        return "Registros asociados a baja temporal; autorizacion, semestre y vigencia no verificadas. No modifican regularidad, oportunidades, plazo ni reincorporacion sin evidencia institucional.";
     }
 
     public String getResumenSustitucionesOptativasPrioritarias() {

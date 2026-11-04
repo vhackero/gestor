@@ -288,6 +288,8 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		InscripcionBajasDTO parcialDuplicada = baja(Long.valueOf(61L), Long.valueOf(7001L), "BAJA PARCIAL");
 		InscripcionBajasDTO parcialDistinta = baja(Long.valueOf(61L), Long.valueOf(7002L), "BAJA PARCIAL");
 		InscripcionBajasDTO temporal = baja(Long.valueOf(62L), Long.valueOf(7003L), "Baja temporal");
+		InscripcionBajasDTO temporalMismoMovimiento = baja(Long.valueOf(62L), Long.valueOf(7004L), "Baja temporal");
+		InscripcionBajasDTO temporalOtroMovimiento = baja(Long.valueOf(63L), Long.valueOf(7003L), "Baja temporal");
 
 		assertEquals(TablaCurricularAsistidaBean.filtrarBajasPorTipo(
 				Arrays.asList(parcial, parcialDuplicada, parcialDistinta, temporal), "PARCIAL").size(), 1);
@@ -295,6 +297,8 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 				Arrays.asList(parcial, parcialDuplicada, parcialDistinta, temporal), "PARCIAL"), 2);
 		assertEquals(TablaCurricularAsistidaBean.filtrarBajasPorTipo(
 				Arrays.asList(parcial, parcialDuplicada, parcialDistinta, temporal), "TEMPORAL").size(), 1);
+		assertEquals(TablaCurricularAsistidaBean.filtrarBajasTemporalesPorMovimiento(
+				Arrays.asList(temporal, temporalMismoMovimiento, temporalOtroMovimiento)).size(), 2);
 	}
 
 	@Test

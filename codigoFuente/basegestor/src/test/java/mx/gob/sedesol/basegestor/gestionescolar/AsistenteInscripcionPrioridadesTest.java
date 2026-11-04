@@ -19,6 +19,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcion
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EscenarioProyeccionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProyeccionSiguientePeriodoDTO;
@@ -63,6 +64,18 @@ public class AsistenteInscripcionPrioridadesTest {
                 Collections.singleton(Long.valueOf(100L)), Collections.<String>emptySet()), true);
         assertEquals(AsistenteInscripcionServiceImpl.coincideUnidadReinscrita(Long.valueOf(200L), "UD-100",
                 Collections.<Long>emptySet(), Collections.singleton("UD-100")), true);
+    }
+
+    @Test
+    public void bajaTemporalNoOcultaUnaReprobadaPeroLaParcialDeLaMismaUdSi() {
+        InscripcionMateriasReprobadasDTO reprobada = new InscripcionMateriasReprobadasDTO();
+        reprobada.setIdPrograma(Long.valueOf(100L));
+        reprobada.setClavePrograma("UD-100");
+
+        assertEquals(AsistenteInscripcionServiceImpl.bajaParcialAfectaReprobada(reprobada,
+                baja(Long.valueOf(1L), Long.valueOf(100L), "Baja temporal")), false);
+        assertEquals(AsistenteInscripcionServiceImpl.bajaParcialAfectaReprobada(reprobada,
+                baja(Long.valueOf(2L), Long.valueOf(100L), "Baja parcial")), true);
     }
 
     @Test
@@ -216,5 +229,13 @@ public class AsistenteInscripcionPrioridadesTest {
         dto.setIdPrograma(idPrograma);
         dto.setIntentosReprobados(cantidad);
         return dto;
+    }
+
+    private InscripcionBajasDTO baja(Long idBaja, Long idPrograma, String tipo) {
+        InscripcionBajasDTO baja = new InscripcionBajasDTO();
+        baja.setIdBaja(idBaja);
+        baja.setIdPrograma(idPrograma);
+        baja.setTipoBaja(tipo);
+        return baja;
     }
 }

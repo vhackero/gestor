@@ -606,7 +606,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         EstadoAcademicoDTO estado = contextoBase.getEstadoAcademico();
 
         int reprobadas = contarReprobadasReales(estado);
-        int bajas = contarBajasTemporalesOParciales(estado);
+        int bajas = contarBajasParcialesPorUd(estado);
         int enCurso = contarMateriasEnCursoUnicas(materiasEnCurso);
 		int obligatoriasEnCurso = contarMateriasEnCursoPorTipo(materiasEnCurso, true);
 		int optativasEnCurso = contarMateriasEnCursoPorTipo(materiasEnCurso, false);
@@ -1846,7 +1846,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         return cursada.getEstatusAprobacion() != null && cursada.getEstatusAprobacion().intValue() == 1;
     }
 
-    private boolean esMismaMateria(Long idPrograma1, Long idPrograma2, String clave1, String clave2) {
+    private static boolean esMismaMateria(Long idPrograma1, Long idPrograma2, String clave1, String clave2) {
         if (idPrograma1 != null && idPrograma2 != null) {
             return idPrograma1.equals(idPrograma2);
         }
@@ -2469,13 +2469,14 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         return total;
     }
 
-    private int contarBajasTemporalesOParciales(EstadoAcademicoDTO estado) {
+    /** Las bajas temporales son semestrales y no forman parte de este total por UD. */
+    private int contarBajasParcialesPorUd(EstadoAcademicoDTO estado) {
         if (estado == null || estado.getMateriasBajas() == null) {
             return 0;
         }
         Set<String> unidadesContabilizadas = new HashSet<String>();
         for (InscripcionBajasDTO baja : estado.getMateriasBajas()) {
-            if (baja != null && (esBajaTemporal(baja) || esBajaParcial(baja))) {
+            if (baja != null && esBajaParcial(baja)) {
                 String clavePrograma = baja.getClavePrograma();
                 String clave = clavePrograma != null && !clavePrograma.trim().isEmpty()
                         ? "CLAVE:" + clavePrograma.trim().toUpperCase()
@@ -2491,12 +2492,24 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             return false;
         }
         for (InscripcionBajasDTO baja : estado.getMateriasBajas()) {
-            if (baja != null && esMismaMateria(reprobada.getIdPrograma(), baja.getIdPrograma(),
-                    reprobada.getClavePrograma(), baja.getClavePrograma())) {
+            if (bajaParcialAfectaReprobada(reprobada, baja)) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * La baja temporal pertenece al periodo y no cancela el adeudo historico
+     * de una UD. Solo una baja parcial de la misma unidad se toma como efecto
+     * individual para este calculo.
+     */
+    static boolean bajaParcialAfectaReprobada(InscripcionMateriasReprobadasDTO reprobada,
+            InscripcionBajasDTO baja) {
+        return reprobada != null && baja != null && baja.getTipoBaja() != null
+                && baja.getTipoBaja().trim().toUpperCase().contains("PARCIAL")
+                && esMismaMateria(reprobada.getIdPrograma(), baja.getIdPrograma(),
+                        reprobada.getClavePrograma(), baja.getClavePrograma());
     }
 
     private String construirResumenRiesgos(RiesgoAcademicoDTO riesgos) {
