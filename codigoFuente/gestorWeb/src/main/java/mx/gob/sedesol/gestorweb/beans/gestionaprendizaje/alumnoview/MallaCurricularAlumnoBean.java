@@ -156,6 +156,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private Map<String, Set<String>> ubicacionesOptativasEnCurso;
 	private Set<Integer> programasConBaja;
 	private Set<Integer> programasConBajaParcial;
+	private Set<String> clavesProgramasConBajaParcial;
 	private Integer semestreEnCurso;
 	private Integer bloqueEnCurso;
 	private String estatusEstudiante;
@@ -189,6 +190,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		ubicacionesOptativasEnCurso = new HashMap<>();
 		programasConBaja = new HashSet<>();
 		programasConBajaParcial = new HashSet<>();
+		clavesProgramasConBajaParcial = new HashSet<>();
 		semestreEnCurso = null;
 		bloqueEnCurso = null;
 		estatusEstudiante = "Regular";
@@ -304,8 +306,15 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 				String nombreNormalizado = normalizaTexto(limpiaAsignatura(materia.getAsignatura()));
 				asignaturasEnCurso.add(nombreNormalizado);
 				registrarUbicacionProgramaEnCurso(nombreNormalizado, semestre, bloque);
+				if (StringUtils.isNotBlank(materia.getClavePrograma())) {
+					registrarUbicacionProgramaEnCurso(normalizaTexto(materia.getClavePrograma()), semestre, bloque);
+				}
 				if (esProgramaOpcional(materia.getTipoPrograma())) {
 					registrarUbicacionOptativa(ubicacionesOptativasEnCurso, nombreNormalizado, semestre, bloque);
+					if (StringUtils.isNotBlank(materia.getClavePrograma())) {
+						registrarUbicacionOptativa(ubicacionesOptativasEnCurso,
+								normalizaTexto(materia.getClavePrograma()), semestre, bloque);
+					}
 				}
 			}
 		}
@@ -1296,15 +1305,24 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private void cargarProgramasConBaja(Long idPersona) {
 		programasConBaja.clear();
 		programasConBajaParcial.clear();
+		clavesProgramasConBajaParcial.clear();
 		List<InscripcionBajasDTO> bajas = inscripcionService.obtenerBajasDeMateriasSolicitadas(idPersona);
 		if (ObjectUtils.isNullOrEmpty(bajas)) {
 			return;
 		}
 		for (InscripcionBajasDTO baja : bajas) {
-			if (baja != null && baja.getIdPrograma() != null && esBajaTemporalOParcial(baja)) {
+			if (baja == null || !esBajaTemporalOParcial(baja)) {
+				continue;
+			}
+			if (baja.getIdPrograma() != null) {
 				programasConBaja.add(baja.getIdPrograma().intValue());
-				if (esBajaParcial(baja)) {
+			}
+			if (esBajaParcial(baja)) {
+				if (baja.getIdPrograma() != null) {
 					programasConBajaParcial.add(baja.getIdPrograma().intValue());
+				}
+				if (StringUtils.isNotBlank(baja.getClavePrograma())) {
+					clavesProgramasConBajaParcial.add(normalizaTexto(baja.getClavePrograma()));
 				}
 			}
 		}
@@ -1329,7 +1347,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 					&& !ESTATUS_APROBADA.equals(nodo.getEstatus())
 					&& !ESTATUS_NO_ACREDITADA.equals(nodo.getEstatus())
 					&& (!ESTATUS_BAJA.equals(nodo.getEstatus())
-							|| programasConBajaParcial.contains(entry.getKey()))) {
+							|| tieneAntecedenteBajaParcial(nodo, entry.getKey()))) {
 				String color = ESTATUS_COLORS.getOrDefault(ESTATUS_EN_CURSO, "#facc15");
 				nodo.setEstatus(ESTATUS_EN_CURSO);
 				nodo.setEstatusBackgroundColor(color);
@@ -1347,13 +1365,21 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			MallaAlumnoProgramaDTO estatus = estatusPorPrograma.get(entry.getKey());
 			String indicador = resolverIndicadorVisual(nodo.getEstatus(), nodo.isEnCurso(),
 					estatus != null && Boolean.TRUE.equals(estatus.getRegularizada()),
-					programasConBajaParcial.contains(entry.getKey()));
+					tieneAntecedenteBajaParcial(nodo, entry.getKey()));
 			nodo.setEstatusVisual(indicador);
 			if (ESTATUS_RECURSANDO.equals(indicador) || ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA.equals(indicador)
 					|| ESTATUS_REGULARIZADA.equals(indicador)) {
 				nodo.setEstatusIconClass("");
 			}
 		}
+	}
+
+	private boolean tieneAntecedenteBajaParcial(MallaDiagramaNodoDTO nodo, Integer idPrograma) {
+		if (idPrograma != null && programasConBajaParcial.contains(idPrograma)) {
+			return true;
+		}
+		return nodo != null && StringUtils.isNotBlank(nodo.getClavePrograma())
+				&& clavesProgramasConBajaParcial.contains(normalizaTexto(nodo.getClavePrograma()));
 	}
 
 	static String resolverIndicadorVisual(String estatus, boolean enCurso, boolean regularizada) {
