@@ -1306,25 +1306,37 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		programasConBaja.clear();
 		programasConBajaParcial.clear();
 		clavesProgramasConBajaParcial.clear();
+		if (contextoAsistente != null && contextoAsistente.getContextoBase() != null
+				&& contextoAsistente.getContextoBase().getEstadoAcademico() != null
+				&& contextoAsistente.getContextoBase().getEstadoAcademico().getMateriasBajas() != null) {
+			for (InscripcionBajasDTO baja : contextoAsistente.getContextoBase().getEstadoAcademico().getMateriasBajas()) {
+				registrarProgramaConBaja(baja);
+			}
+		}
 		List<InscripcionBajasDTO> bajas = inscripcionService.obtenerBajasDeMateriasSolicitadas(idPersona);
 		if (ObjectUtils.isNullOrEmpty(bajas)) {
 			return;
 		}
 		for (InscripcionBajasDTO baja : bajas) {
-			if (baja == null || !esBajaTemporalOParcial(baja)) {
-				continue;
-			}
-			if (baja.getIdPrograma() != null) {
-				programasConBaja.add(baja.getIdPrograma().intValue());
-			}
-			if (esBajaParcial(baja)) {
-				if (baja.getIdPrograma() != null) {
-					programasConBajaParcial.add(baja.getIdPrograma().intValue());
-				}
-				if (StringUtils.isNotBlank(baja.getClavePrograma())) {
-					clavesProgramasConBajaParcial.add(normalizaTexto(baja.getClavePrograma()));
-				}
-			}
+			registrarProgramaConBaja(baja);
+		}
+	}
+
+	private void registrarProgramaConBaja(InscripcionBajasDTO baja) {
+		if (baja == null || !esBajaTemporalOParcial(baja)) {
+			return;
+		}
+		if (baja.getIdPrograma() != null) {
+			programasConBaja.add(baja.getIdPrograma().intValue());
+		}
+		if (!esBajaParcial(baja)) {
+			return;
+		}
+		if (baja.getIdPrograma() != null) {
+			programasConBajaParcial.add(baja.getIdPrograma().intValue());
+		}
+		if (StringUtils.isNotBlank(baja.getClavePrograma())) {
+			clavesProgramasConBajaParcial.add(normalizaTexto(baja.getClavePrograma()));
 		}
 	}
 
@@ -1346,9 +1358,11 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			MallaDiagramaNodoDTO nodo = entry.getValue();
 			boolean antecedenteBajaParcial = tieneAntecedenteBajaParcial(nodo, entry.getKey());
 			MallaAlumnoProgramaDTO estatusHistorico = estatusPorPrograma.get(entry.getKey());
+			UnidadDecisionInscripcionDTO unidadContextual = unidadesAsistentePorPrograma.get(Long.valueOf(entry.getKey().longValue()));
 			boolean noPresentadaPorBajaParcial = debeMostrarCursamientoConAntecedenteBaja(
 					nodo.getEstatus(), nodo.isEnCurso(), antecedenteBajaParcial,
-					estatusHistorico != null ? estatusHistorico.getCalificacionFinal() : null);
+					estatusHistorico != null ? estatusHistorico.getCalificacionFinal() : null,
+					unidadContextual != null ? unidadContextual.getEstatusHistorico() : null);
 			if (nodo.isEnCurso()
 					&& !ESTATUS_APROBADA.equals(nodo.getEstatus())
 					&& (!ESTATUS_NO_ACREDITADA.equals(nodo.getEstatus()) || noPresentadaPorBajaParcial)
@@ -1364,10 +1378,11 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	}
 
 	static boolean debeMostrarCursamientoConAntecedenteBaja(String estatus, boolean enCurso,
-			boolean antecedenteBajaParcial, Double calificacionFinal) {
+			boolean antecedenteBajaParcial, Double calificacionFinal, String estatusHistoricoContexto) {
 		return enCurso && antecedenteBajaParcial && ESTATUS_NO_ACREDITADA.equals(estatus)
-				&& calificacionFinal != null
-				&& Double.compare(calificacionFinal, CALIFICACION_NO_PRESENTADA) == 0;
+				&& ((calificacionFinal != null
+						&& Double.compare(calificacionFinal, CALIFICACION_NO_PRESENTADA) == 0)
+						|| "BAJA".equalsIgnoreCase(StringUtils.trimToEmpty(estatusHistoricoContexto)));
 	}
 
 	/** Indicadores visuales: no alteran el estado académico usado por la malla. */

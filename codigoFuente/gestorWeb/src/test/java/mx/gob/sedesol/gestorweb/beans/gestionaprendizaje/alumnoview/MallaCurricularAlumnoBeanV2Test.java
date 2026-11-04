@@ -154,9 +154,11 @@ public class MallaCurricularAlumnoBeanV2Test {
 	@Test
 	public void distingueNpPorBajaParcialDeUnaReprobacionNumerica() {
 		assertTrue(MallaCurricularAlumnoBean.debeMostrarCursamientoConAntecedenteBaja(
-				"No acreditada", true, true, Double.valueOf(666d)));
+				"No acreditada", true, true, Double.valueOf(666d), null));
 		assertFalse(MallaCurricularAlumnoBean.debeMostrarCursamientoConAntecedenteBaja(
-				"No acreditada", true, true, Double.valueOf(55d)));
+				"No acreditada", true, true, Double.valueOf(55d), null));
+		assertTrue(MallaCurricularAlumnoBean.debeMostrarCursamientoConAntecedenteBaja(
+				"No acreditada", true, true, Double.valueOf(0d), "BAJA"));
 	}
 
 	@Test
