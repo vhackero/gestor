@@ -2152,9 +2152,10 @@
                                             <h3>Oportunidades de acreditación</h3>
                                             <div class="prioridad-resumen"><div class="contador">#{tablaCurricularAsistidaBean.conteoOportunidadesAcreditacionPrioritarias}</div><div class="prioridad-unidad">UD</div><div class="prioridad-referencia">#{tablaCurricularAsistidaBean.referenciaOportunidadesPrioritarias}</div></div>
                                             <div class="prioridad-table-wrap">
-                                                <div class="prioridad-vacia">No disponible: esta consulta sólo recupera reprobaciones agregadas. El cómputo de oportunidades requiere cada inscripción computable, sus bajas autorizadas y el estado del intento actual.</div>
+                                                <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasOportunidadesAcreditacionPrioritarias}"><table><thead><tr><th>Unidad didáctica</th><th>Oportunidades utilizadas</th><th>Situación</th></tr></thead><tbody><ui:repeat value="#{tablaCurricularAsistidaBean.filasOportunidadesAcreditacionPrioritarias}" var="fila"><tr><td><span class="prioridad-clave">#{fila.clave}</span><span class="prioridad-nombre">#{fila.asignatura}</span></td><td>#{tablaCurricularAsistidaBean.oportunidadesUtilizadasFilaPrioritaria(fila)}</td><td><span class="prioridad-estado neutro">#{tablaCurricularAsistidaBean.situacionOportunidadesFilaPrioritaria(fila)}</span></td></tr></ui:repeat></tbody></table></ui:fragment>
+                                                <ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasOportunidadesAcreditacionPrioritarias}"><div class="prioridad-vacia">No se identifican oportunidades computables para las UD pendientes en la consulta disponible.</div></ui:fragment>
                                             </div>
-                                            <div class="prioridad-nota">RN-1.4 requiere el detalle de cursamientos computables y bajas autorizadas; no se infiere desde reprobaciones agregadas.</div>
+                                            <div class="prioridad-nota">El conteo incluye inscripciones cerradas y, cuando exista, la inscripción actual; los eventos marcados por baja autorizada se excluyen.</div>
                                         </div>
                                         <div class="prioridad-card">
                                             <h3>UD con antecedente de recursamiento</h3>

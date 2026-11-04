@@ -72,6 +72,8 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private static final long serialVersionUID = 1L;
     private static final int MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA = 8;
     private static final int MAXIMO_RECURSAMIENTOS_POR_UD = 2;
+    private static final int MAXIMO_OPORTUNIDADES_ACREDITACION_POR_UD = 3;
+    private static final double CALIFICACION_BAJA_AUTORIZADA = 666d;
     private static final Logger logger = Logger.getLogger(TablaCurricularAsistidaBean.class);
     private static final AsistenteCurricularV2ResultadoAdapter ADAPTADOR_RESULTADO_V2 = new AsistenteCurricularV2ResultadoAdapter();
     private static final String SESION_PRESELECCION_INSCRIPCION = "preseleccionInscripcionAsistente";
@@ -120,6 +122,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private CreditosResumenMallaDTO creditosResumenMalla;
     private List<InscripcionPreviaMateriasDTO> inscripcionesActualesResumen;
     private Map<String, List<EventoConstanciaDTO>> eventosHistorialPorClave;
+    private Map<String, OportunidadAcreditacionDTO> oportunidadesAcreditacionPrioritarias;
     /**
      * La tarjeta de recursamiento se basa en el historial por idPrograma y la
      * inscripción vigente, no en el agregado de reprobaciones del contexto V2.
@@ -547,6 +550,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         this.contexto = contexto;
         this.antecedentesRecursamientoPrioritarios = null;
         this.eventosHistorialPorClave = null;
+        this.oportunidadesAcreditacionPrioritarias = null;
     }
 
     public List<SemestreAsistidoDTO> getSemestres() {
@@ -3494,18 +3498,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             }
         }
 
-        Set<Long> programasConInscripcionVigente = new HashSet<Long>();
-        if (inscripcionPreviaMateriasService != null) {
-            List<InscripcionPreviaMateriasDTO> inscripciones = inscripcionPreviaMateriasService
-                    .obtenerInscripcionPrevia(idPersonaObjetivo);
-            if (!ObjectUtils.isNullOrEmpty(inscripciones)) {
-                for (InscripcionPreviaMateriasDTO inscripcion : inscripciones) {
-                    if (inscripcion != null && inscripcion.getIdPrograma() != null) {
-                        programasConInscripcionVigente.add(inscripcion.getIdPrograma());
-                    }
-                }
-            }
-        }
+        Set<Long> programasConInscripcionVigente = obtenerProgramasConInscripcionVigente();
 
         Map<String, List<EventoConstanciaDTO>> eventosPorClave = obtenerEventosHistorialPorClave();
         Map<Long, FilaAsistidaDTO> filasPorPrograma = new LinkedHashMap<Long, FilaAsistidaDTO>();
@@ -3651,22 +3644,102 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getReferenciaOportunidadesPrioritarias() {
-        return Boolean.TRUE.equals(contexto == null ? null : contexto.getIntentosReprobadosDisponibles())
-                ? "Cómputo completo no disponible"
-                : "Información no disponible";
+        if (!fuenteOportunidadesDisponible()) {
+            return "Historial de oportunidades no disponible";
+        }
+        List<FilaAsistidaDTO> filas = getFilasOportunidadesAcreditacionPrioritarias();
+        if (filas.isEmpty()) {
+            return getFilasReprobadasPrioritarias().isEmpty()
+                    ? "Sin UD pendientes con oportunidades por revisar"
+                    : "Historial de oportunidades no disponible para todas las UD pendientes";
+        }
+        for (FilaAsistidaDTO fila : filas) {
+            OportunidadAcreditacionDTO oportunidad = obtenerOportunidadesAcreditacionPrioritarias()
+                    .get(claveUnicaFilaPrioritaria(fila));
+            if (oportunidad != null && oportunidad.isEnCurso()) {
+                return oportunidad.getOportunidadesUtilizadas() == MAXIMO_OPORTUNIDADES_ACREDITACION_POR_UD
+                        ? "Última oportunidad en curso" : "Oportunidad en curso";
+            }
+        }
+        return "Oportunidades individuales verificadas";
     }
 
-    /**
-     * La fuente integrada sólo entrega reprobaciones agregadas por UD. No
-     * entrega la primera inscripción, bajas autorizadas ni el estado del
-     * intento vigente, por lo que no acredita el cómputo RN-1.4.
-     */
     public String getConteoOportunidadesAcreditacionPrioritarias() {
-        return "N/D";
+        return fuenteOportunidadesDisponible()
+                ? String.valueOf(getFilasOportunidadesAcreditacionPrioritarias().size()) : "N/D";
     }
 
     public boolean isOportunidadesAcreditacionDisponibles() {
-        return false;
+        return fuenteOportunidadesDisponible();
+    }
+
+    private boolean fuenteOportunidadesDisponible() {
+        return grupoParticipanteService != null && idPersonaObjetivo != null;
+    }
+
+    public List<FilaAsistidaDTO> getFilasOportunidadesAcreditacionPrioritarias() {
+        List<FilaAsistidaDTO> resultado = new ArrayList<FilaAsistidaDTO>();
+        for (OportunidadAcreditacionDTO oportunidad : obtenerOportunidadesAcreditacionPrioritarias().values()) {
+            resultado.add(oportunidad.getFila());
+        }
+        Collections.sort(resultado, Comparator
+                .comparing((FilaAsistidaDTO fila) -> !esOportunidadEnCurso(fila))
+                .thenComparing(FilaAsistidaDTO::getClave, Comparator.nullsLast(String::compareTo)));
+        return resultado;
+    }
+
+    private Map<String, OportunidadAcreditacionDTO> obtenerOportunidadesAcreditacionPrioritarias() {
+        if (oportunidadesAcreditacionPrioritarias != null) {
+            return oportunidadesAcreditacionPrioritarias;
+        }
+        oportunidadesAcreditacionPrioritarias = new LinkedHashMap<String, OportunidadAcreditacionDTO>();
+        Set<Long> programasEnCurso = obtenerProgramasConInscripcionVigente();
+        Map<String, List<EventoConstanciaDTO>> eventosPorClave = obtenerEventosHistorialPorClave();
+        for (FilaAsistidaDTO fila : getFilasReprobadasPrioritarias()) {
+            if (fila == null || fila.getUdId() == null) continue;
+            List<EventoConstanciaDTO> eventos = eventosPorClave.get(normalizaClaveCurricular(fila.getClave()));
+            int cerradosComputables = contarEventosComputables(eventos);
+            boolean enCurso = programasEnCurso.contains(fila.getUdId());
+            int oportunidadesUtilizadas = cerradosComputables + (enCurso ? 1 : 0);
+            if (oportunidadesUtilizadas <= 0) continue;
+            oportunidadesAcreditacionPrioritarias.putIfAbsent(claveUnicaFilaPrioritaria(fila),
+                    new OportunidadAcreditacionDTO(fila, oportunidadesUtilizadas, enCurso));
+        }
+        return oportunidadesAcreditacionPrioritarias;
+    }
+
+    private Set<Long> obtenerProgramasConInscripcionVigente() {
+        Set<Long> programas = new HashSet<Long>();
+        if (inscripcionPreviaMateriasService == null || idPersonaObjetivo == null) return programas;
+        List<InscripcionPreviaMateriasDTO> inscripciones = inscripcionPreviaMateriasService
+                .obtenerInscripcionPrevia(idPersonaObjetivo);
+        if (!ObjectUtils.isNullOrEmpty(inscripciones)) {
+            for (InscripcionPreviaMateriasDTO inscripcion : inscripciones) {
+                if (inscripcion != null && inscripcion.getIdPrograma() != null) {
+                    programas.add(inscripcion.getIdPrograma());
+                }
+            }
+        }
+        return programas;
+    }
+
+    private static int contarEventosComputables(List<EventoConstanciaDTO> eventos) {
+        int total = 0;
+        if (eventos == null) return total;
+        for (EventoConstanciaDTO evento : eventos) {
+            if (evento == null || (evento.getCalificacionFinal() != null
+                    && Double.compare(evento.getCalificacionFinal().doubleValue(), CALIFICACION_BAJA_AUTORIZADA) == 0)) {
+                continue;
+            }
+            total++;
+        }
+        return total;
+    }
+
+    private boolean esOportunidadEnCurso(FilaAsistidaDTO fila) {
+        OportunidadAcreditacionDTO oportunidad = obtenerOportunidadesAcreditacionPrioritarias()
+                .get(claveUnicaFilaPrioritaria(fila));
+        return oportunidad != null && oportunidad.isEnCurso();
     }
 
     public String getReferenciaRecursamientoPrioritarias() {
@@ -4056,12 +4129,33 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getSituacionOportunidadesFilaPrioritaria(FilaAsistidaDTO fila) {
-        return situacionOportunidadesNoDisponible();
+        OportunidadAcreditacionDTO oportunidad = obtenerOportunidadesAcreditacionPrioritarias()
+                .get(claveUnicaFilaPrioritaria(fila));
+        if (oportunidad == null) return situacionOportunidadesNoDisponible();
+        int utilizadas = oportunidad.getOportunidadesUtilizadas();
+        if (oportunidad.isEnCurso()) {
+            if (utilizadas >= MAXIMO_OPORTUNIDADES_ACREDITACION_POR_UD) return "Última oportunidad en curso";
+            return utilizadas == 1 ? "Primera oportunidad en curso" : "Segunda oportunidad en curso";
+        }
+        if (utilizadas >= MAXIMO_OPORTUNIDADES_ACREDITACION_POR_UD) return "Sin oportunidades";
+        if (utilizadas == MAXIMO_OPORTUNIDADES_ACREDITACION_POR_UD - 1) return "Última disponible";
+        return "Oportunidades disponibles";
     }
 
     /** Firma invocable desde EL para el estado de oportunidades de la fila. */
     public String situacionOportunidadesFilaPrioritaria(FilaAsistidaDTO fila) {
         return getSituacionOportunidadesFilaPrioritaria(fila);
+    }
+
+    public String getOportunidadesUtilizadasFilaPrioritaria(FilaAsistidaDTO fila) {
+        OportunidadAcreditacionDTO oportunidad = obtenerOportunidadesAcreditacionPrioritarias()
+                .get(claveUnicaFilaPrioritaria(fila));
+        return oportunidad != null ? oportunidad.getOportunidadesUtilizadas() + " de "
+                + MAXIMO_OPORTUNIDADES_ACREDITACION_POR_UD : "Dato no disponible";
+    }
+
+    public String oportunidadesUtilizadasFilaPrioritaria(FilaAsistidaDTO fila) {
+        return getOportunidadesUtilizadasFilaPrioritaria(fila);
     }
 
     static String situacionOportunidadesNoDisponible() {
@@ -4700,6 +4794,31 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
         Integer getRecursamientos() {
             return recursamientos;
+        }
+    }
+
+    private static class OportunidadAcreditacionDTO implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final FilaAsistidaDTO fila;
+        private final int oportunidadesUtilizadas;
+        private final boolean enCurso;
+
+        OportunidadAcreditacionDTO(FilaAsistidaDTO fila, int oportunidadesUtilizadas, boolean enCurso) {
+            this.fila = fila;
+            this.oportunidadesUtilizadas = oportunidadesUtilizadas;
+            this.enCurso = enCurso;
+        }
+
+        FilaAsistidaDTO getFila() {
+            return fila;
+        }
+
+        int getOportunidadesUtilizadas() {
+            return oportunidadesUtilizadas;
+        }
+
+        boolean isEnCurso() {
+            return enCurso;
         }
     }
 

@@ -483,6 +483,33 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertEquals(bean.getCalificacionReprobacionPrioritaria(fila), "55");
 	}
 
+	@Test
+	public void cuentaOportunidadesPorEventosComputablesYLaInscripcionActual() throws Exception {
+		AsistenteInscripcionContextoDTO contexto = contextoConPlan();
+		contexto.setUnidades(Arrays.asList(unidad(Long.valueOf(124L), "CCVP", "Reprobada", "En curso")));
+		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
+		inyectar(bean, "contexto", contexto);
+		inyectar(bean, "idPersonaObjetivo", Long.valueOf(906L));
+		inyectar(bean, "decisionesV2PorPrograma", new HashMap<Long, DecisionUnidadCurricularV2DTO>());
+		EventoConstanciaDTO reprobada = evento("CCVP", "2026-1", 55D, "ORD");
+		reprobada.setTipoConstancia(Integer.valueOf(0));
+		EventoConstanciaDTO bajaAutorizada = evento("CCVP", "2026-1", 666D, "REC");
+		bajaAutorizada.setTipoConstancia(Integer.valueOf(0));
+		GrupoParticipanteService grupoParticipanteService = Mockito.mock(GrupoParticipanteService.class);
+		Mockito.when(grupoParticipanteService.getParticipanteByActaCerradaYconstancia2(Long.valueOf(906L)))
+				.thenReturn(Arrays.asList(reprobada, bajaAutorizada));
+		inyectar(bean, "grupoParticipanteService", grupoParticipanteService);
+		InscripcionPreviaMateriasService inscripciones = Mockito.mock(InscripcionPreviaMateriasService.class);
+		Mockito.when(inscripciones.obtenerInscripcionPrevia(Long.valueOf(906L)))
+				.thenReturn(Arrays.asList(inscripcionPrevia(124L)));
+		inyectar(bean, "inscripcionPreviaMateriasService", inscripciones);
+
+		TablaCurricularAsistidaBean.FilaAsistidaDTO fila = bean.getFilasOportunidadesAcreditacionPrioritarias().get(0);
+		assertEquals(bean.getConteoOportunidadesAcreditacionPrioritarias(), "1");
+		assertEquals(bean.getOportunidadesUtilizadasFilaPrioritaria(fila), "2 de 3");
+		assertEquals(bean.getSituacionOportunidadesFilaPrioritaria(fila), "Segunda oportunidad en curso");
+	}
+
 	private UnidadDecisionInscripcionDTO unidad(Long id, String clave, String historico, String periodo) {
 		UnidadDecisionInscripcionDTO unidad = new UnidadDecisionInscripcionDTO();
 		unidad.setUdId(id);
