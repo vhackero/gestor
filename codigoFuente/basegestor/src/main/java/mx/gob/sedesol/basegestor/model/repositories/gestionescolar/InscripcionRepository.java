@@ -1236,7 +1236,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 	public List<InscripcionBajasDTO> obtenerBajasDeMateriasSolicitadas(Long idPersona) {
 
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT rpb.id_plan, ");
+		sql.append("SELECT rpb.id_baja, ");
+		sql.append("       rpb.id_plan, ");
 		sql.append("       rpb.id_programa, ");
 		sql.append("       tfdp.cve_programa, ");
 		sql.append("       ctb.id_tipo_baja, ");
@@ -1280,12 +1281,13 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 	private InscripcionBajasDTO mapearInscripcionBajas(Object[] row) {
 		InscripcionBajasDTO dto = new InscripcionBajasDTO();
-		dto.setIdPlan(getLongValue(row[0]));
-		dto.setIdPrograma(getLongValue(row[1]));
-		dto.setClavePrograma((String) row[2]);
-		dto.setIdTipoBaja(getLongValue(row[3]));
-		dto.setTipoBaja((String) row[4]);
-		dto.setFechaModificacion(getLocalDateTimeValue(row[5]));
+		dto.setIdBaja(getLongValue(row[0]));
+		dto.setIdPlan(getLongValue(row[1]));
+		dto.setIdPrograma(getLongValue(row[2]));
+		dto.setClavePrograma((String) row[3]);
+		dto.setIdTipoBaja(getLongValue(row[4]));
+		dto.setTipoBaja((String) row[5]);
+		dto.setFechaModificacion(getLocalDateTimeValue(row[6]));
 
 		return dto;
 	}
