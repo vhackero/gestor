@@ -3715,10 +3715,24 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public String getCalificacionAntecedenteRecursamiento(FilaAsistidaDTO fila) {
         EventoConstanciaDTO evento = getEventoAntecedenteRecursamiento(fila);
-        if (evento == null || evento.getCalificacionFinal() == null) {
+        if (evento == null) {
             return "No disponible";
         }
-        return String.valueOf(evento.getCalificacionFinal().intValue());
+        if (evento.getCalificacionFinal() != null) {
+            return String.valueOf(evento.getCalificacionFinal().intValue());
+        }
+        // El historial conserva la calificación textual aun cuando
+        // calificacionFinal no se pobló por un cruce de bajas ajeno a la UD.
+        String calificacion = StringUtils.trimToNull(evento.getCalificacion());
+        if (calificacion == null) {
+            return "No disponible";
+        }
+        try {
+            double valor = Double.parseDouble(calificacion);
+            return valor == Math.rint(valor) ? String.valueOf((int) valor) : calificacion;
+        } catch (NumberFormatException ex) {
+            return calificacion;
+        }
     }
 
     public String calificacionAntecedenteRecursamiento(FilaAsistidaDTO fila) {

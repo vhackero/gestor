@@ -438,6 +438,29 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertEquals(bean.getRecursamientosAntecedenteRecursamiento(fila), "1 de 2");
 	}
 
+	@Test
+	public void conservaCalificacionTextualCuandoElHistorialNoPoblaCalificacionFinal() throws Exception {
+		AsistenteInscripcionContextoDTO contexto = contextoConPlan();
+		contexto.setUnidades(Arrays.asList(unidad(Long.valueOf(122L), "CSNPD", "Acreditada", null)));
+		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
+		inyectar(bean, "contexto", contexto);
+		inyectar(bean, "idPersonaObjetivo", Long.valueOf(904L));
+		inyectar(bean, "decisionesV2PorPrograma", new HashMap<Long, DecisionUnidadCurricularV2DTO>());
+		InscripcionService inscripcionService = Mockito.mock(InscripcionService.class);
+		Mockito.when(inscripcionService.obtenerProgramasMallaAlumno(Long.valueOf(904L), Long.valueOf(77L)))
+				.thenReturn(Arrays.asList(historialMalla(122L, 80D, 70D, true)));
+		inyectar(bean, "inscripcionService", inscripcionService);
+		EventoConstanciaDTO evento = evento("CSNPD", "2026-1", 80D, "REC");
+		evento.setCalificacionFinal(null);
+		GrupoParticipanteService grupoParticipanteService = Mockito.mock(GrupoParticipanteService.class);
+		Mockito.when(grupoParticipanteService.getParticipanteByActaCerradaYconstancia2(Long.valueOf(904L)))
+				.thenReturn(Arrays.asList(evento));
+		inyectar(bean, "grupoParticipanteService", grupoParticipanteService);
+
+		TablaCurricularAsistidaBean.FilaAsistidaDTO fila = bean.getFilasAntecedenteRecursamientoPrioritarias().get(0);
+		assertEquals(bean.getCalificacionAntecedenteRecursamiento(fila), "80");
+	}
+
 	private UnidadDecisionInscripcionDTO unidad(Long id, String clave, String historico, String periodo) {
 		UnidadDecisionInscripcionDTO unidad = new UnidadDecisionInscripcionDTO();
 		unidad.setUdId(id);
@@ -480,6 +503,7 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		evento.setClave(clave);
 		evento.setPeriodo(periodo);
 		evento.setCalificacionFinal(calificacion);
+		evento.setCalificacion(String.valueOf(calificacion));
 		evento.setTipoEvaluacion(tipoEvaluacion);
 		return evento;
 	}
