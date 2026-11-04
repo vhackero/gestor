@@ -32,6 +32,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MetadatosConsultaAsistenteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EscenarioProyeccionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProyeccionSiguientePeriodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
@@ -129,6 +130,9 @@ public class TablaCurricularAsistidaBean extends BaseBean {
      * inscripción vigente, no en el agregado de reprobaciones del contexto V2.
      */
     private Map<String, AntecedenteRecursamientoDTO> antecedentesRecursamientoPrioritarios;
+    /** Selección transitoria de resultados hipotéticos de la pestaña Expectativa. */
+    private List<ExpectativaUnidadDTO> unidadesExpectativaLogro;
+    private ProyeccionSiguientePeriodoDTO expectativaLogro;
     /** Vista interna de la pestaña Simulador: selección o revisión final. */
     private boolean mostrarRevisionSeleccion;
 
@@ -552,6 +556,101 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         this.antecedentesRecursamientoPrioritarios = null;
         this.eventosHistorialPorClave = null;
         this.oportunidadesAcreditacionPrioritarias = null;
+        this.unidadesExpectativaLogro = null;
+        this.expectativaLogro = null;
+    }
+
+    /**
+     * Construye los controles únicamente con UD de la inscripción vigente. La
+     * identidad es el id curricular; la clave sólo se muestra al estudiante.
+     */
+    public List<ExpectativaUnidadDTO> getUnidadesExpectativaLogro() {
+        if (unidadesExpectativaLogro != null) return unidadesExpectativaLogro;
+        unidadesExpectativaLogro = new ArrayList<ExpectativaUnidadDTO>();
+        if (contexto == null || contexto.getUnidades() == null) return unidadesExpectativaLogro;
+        Set<Long> idsEnCurso = new LinkedHashSet<Long>();
+        for (InscripcionPreviaMateriasDTO materia : obtenerInscripcionesActualesResumen()) {
+            if (materia != null && materia.getIdPrograma() != null) idsEnCurso.add(materia.getIdPrograma());
+        }
+        for (UnidadDecisionInscripcionDTO unidad : contexto.getUnidades()) {
+            if (unidad == null || unidad.getUdId() == null || !idsEnCurso.contains(unidad.getUdId())) continue;
+            ExpectativaUnidadDTO control = new ExpectativaUnidadDTO();
+            control.setUdId(unidad.getUdId());
+            control.setClave(unidad.getClave());
+            control.setNombre(unidad.getNombre());
+            control.setTipo(unidad.getTipoUd());
+            control.setAcredita(Boolean.TRUE);
+            unidadesExpectativaLogro.add(control);
+        }
+        Collections.sort(unidadesExpectativaLogro, Comparator.comparing(ExpectativaUnidadDTO::getClave,
+                Comparator.nullsLast(String::compareTo)));
+        return unidadesExpectativaLogro;
+    }
+
+    public ProyeccionSiguientePeriodoDTO getExpectativaLogro() {
+        if (expectativaLogro == null && contexto != null) {
+            // El contexto inicial conserva escenarios informativos. La pestaña
+            // necesita desde el primer render la comparación conjunta V2.
+            actualizarExpectativaLogro();
+            if (expectativaLogro == null) expectativaLogro = contexto.getProyeccionSiguientePeriodo();
+        }
+        return expectativaLogro;
+    }
+
+    public EscenarioProyeccionDTO getEscenarioReferenciaExpectativa() {
+        return buscarEscenarioExpectativa("Situación registrada");
+    }
+
+    public EscenarioProyeccionDTO getEscenarioAcreditaTodaCarga() {
+        return buscarEscenarioExpectativa("Si acreditas toda tu carga");
+    }
+
+    public EscenarioProyeccionDTO getEscenarioSeleccionadoExpectativa() {
+        return buscarEscenarioExpectativa("Si no acreditas las UD seleccionadas");
+    }
+
+    private EscenarioProyeccionDTO buscarEscenarioExpectativa(String nombre) {
+        ProyeccionSiguientePeriodoDTO proyeccion = getExpectativaLogro();
+        if (proyeccion == null || proyeccion.getEscenarios() == null) return null;
+        for (EscenarioProyeccionDTO escenario : proyeccion.getEscenarios()) {
+            if (escenario != null && nombre.equals(escenario.getNombre())) return escenario;
+        }
+        return null;
+    }
+
+    /** Reevalúa el mismo contexto con la selección transitoria; nunca persiste una calificación. */
+    public void actualizarExpectativaLogro() {
+        if (asistenteInscripcionService == null || idPersonaObjetivo == null) return;
+        Set<Long> noAcreditadas = new LinkedHashSet<Long>();
+        for (ExpectativaUnidadDTO unidad : getUnidadesExpectativaLogro()) {
+            if (!Boolean.TRUE.equals(unidad.getAcredita()) && unidad.getUdId() != null) noAcreditadas.add(unidad.getUdId());
+        }
+        try {
+            AsistenteInscripcionContextoDTO actualizado = asistenteInscripcionService
+                    .obtenerExpectativaLogro(idPersonaObjetivo, noAcreditadas);
+            expectativaLogro = actualizado != null ? actualizado.getProyeccionSiguientePeriodo() : null;
+            if (expectativaLogro == null) mensajeError = "No fue posible actualizar la expectativa de logro.";
+        } catch (InscripcionException e) {
+            logger.warn("No fue posible actualizar la expectativa de logro con V2.", e);
+            expectativaLogro = null;
+            mensajeError = "No fue posible actualizar la expectativa de logro.";
+        }
+    }
+
+    public void restablecerExpectativaLogro() {
+        for (ExpectativaUnidadDTO unidad : getUnidadesExpectativaLogro()) unidad.setAcredita(Boolean.TRUE);
+        actualizarExpectativaLogro();
+    }
+
+    public String getPeriodoProyectadoExpectativa() {
+        String periodo = contexto != null ? contexto.getPeriodoActivo() : null;
+        if (StringUtils.isBlank(periodo) || !periodo.matches("\\d{4}-[12]")) return "No determinado";
+        int anio = Integer.parseInt(periodo.substring(0, 4));
+        return periodo.endsWith("-1") ? anio + "-2" : (anio + 1) + "-1";
+    }
+
+    public int getTotalUnidadesEvaluadasExpectativa() {
+        return contexto != null && contexto.getUnidades() != null ? contexto.getUnidades().size() : 0;
     }
 
     public List<SemestreAsistidoDTO> getSemestres() {
@@ -4916,6 +5015,27 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         public void setFilas(List<FilaAsistidaDTO> filas) {
             this.filas = filas;
         }
+    }
+
+    /** Control de presentación de una hipótesis; no representa un resultado escolar registrado. */
+    public static class ExpectativaUnidadDTO implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private Long udId;
+        private String clave;
+        private String nombre;
+        private String tipo;
+        private Boolean acredita;
+
+        public Long getUdId() { return udId; }
+        public void setUdId(Long udId) { this.udId = udId; }
+        public String getClave() { return clave; }
+        public void setClave(String clave) { this.clave = clave; }
+        public String getNombre() { return nombre; }
+        public void setNombre(String nombre) { this.nombre = nombre; }
+        public String getTipo() { return tipo; }
+        public void setTipo(String tipo) { this.tipo = tipo; }
+        public Boolean getAcredita() { return acredita; }
+        public void setAcredita(Boolean acredita) { this.acredita = acredita; }
     }
 
     public static class FilaAsistidaDTO implements Serializable {

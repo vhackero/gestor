@@ -302,6 +302,21 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     }
 
     @Override
+    public AsistenteInscripcionContextoDTO obtenerExpectativaLogro(Long idPersona, Set<Long> noAcreditadas)
+            throws InscripcionException {
+        AsistenteInscripcionContextoDTO contexto = obtenerContextoAsistido(idPersona);
+        if (contexto == null || contexto.getProyeccionSiguientePeriodo() == null) {
+            return contexto;
+        }
+        List<InscripcionPreviaMateriasDTO> materiasEnCurso = inscripcionPreviaMateriasService
+                .obtenerInscripcionPrevia(idPersona);
+        contexto.setProyeccionSiguientePeriodo(construirExpectativaSeleccionadaV2(contexto,
+                materiasEnCurso != null ? materiasEnCurso : Collections.<InscripcionPreviaMateriasDTO>emptyList(),
+                noAcreditadas != null ? noAcreditadas : Collections.<Long>emptySet()));
+        return contexto;
+    }
+
+    @Override
     public ResultadoSimulacionDTO simularInscripcion(Long idPersona, List<Long> unidadesIds)
             throws InscripcionException {
         AsistenteInscripcionContextoDTO contexto = obtenerContextoAsistido(idPersona);
@@ -1296,6 +1311,39 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             dto.getEscenarios().add(evaluarEscenarioExpectativaV2("Si no acredita una UD en curso", "Hipótesis individual: sólo una UD en curso se considera no acreditada; las demás conservan su estado registrado.", base, Collections.<Long>emptySet(), Collections.singleton(id), enCurso));
         }
         dto.setResumen("Resultados hipotéticos de sólo lectura: no predicen calificaciones ni modifican historial, inscripción u oportunidades. La oferta futura requiere confirmación institucional.");
+        return dto;
+    }
+
+    private ProyeccionSiguientePeriodoDTO construirExpectativaSeleccionadaV2(AsistenteInscripcionContextoDTO contexto,
+            List<InscripcionPreviaMateriasDTO> materiasEnCurso, Set<Long> noAcreditadas) {
+        ProyeccionSiguientePeriodoDTO dto = new ProyeccionSiguientePeriodoDTO();
+        if (contexto == null || contextoEvaluacionCurricularV2Adapter == null || evaluacionCurricularV2Service == null) {
+            dto.setResumen("No es posible actualizar la expectativa: la evaluación curricular V2 no está disponible.");
+            return dto;
+        }
+        ContextoEvaluacionCurricularV2DTO base = contextoEvaluacionCurricularV2Adapter.construirDesdeAsistente(contexto);
+        if (configuracionEvaluacionCurricularV2Service != null) {
+            base.setVersionReglas(configuracionEvaluacionCurricularV2Service.obtenerConfiguracion().getVersionReglas());
+        }
+        Set<Long> enCurso = obtenerIdsMateriasEnCurso(contexto, materiasEnCurso);
+        dto.getEscenarios().add(evaluarEscenarioExpectativaV2("Situación registrada",
+                "Sin hipótesis: conserva los resultados registrados.", base, Collections.<Long>emptySet(),
+                Collections.<Long>emptySet(), enCurso));
+        if (enCurso.isEmpty()) {
+            dto.setResumen("No hay UD en curso verificables para construir hipótesis de acreditación.");
+            return dto;
+        }
+        Set<Long> reprobadas = new HashSet<Long>(noAcreditadas);
+        reprobadas.retainAll(enCurso);
+        Set<Long> acreditadas = new HashSet<Long>(enCurso);
+        acreditadas.removeAll(reprobadas);
+        dto.getEscenarios().add(evaluarEscenarioExpectativaV2("Si acreditas toda tu carga",
+                "Escenario conjunto: todas las UD en curso se consideran acreditadas.", base, enCurso,
+                Collections.<Long>emptySet(), enCurso));
+        dto.getEscenarios().add(evaluarEscenarioExpectativaV2("Si no acreditas las UD seleccionadas",
+                "Escenario conjunto: las UD seleccionadas se consideran no acreditadas y las demás UD en curso se consideran acreditadas.",
+                base, acreditadas, reprobadas, enCurso));
+        dto.setResumen("Resultados hipotéticos: la consulta no modifica historial ni formaliza inscripción. La oferta futura requiere confirmación institucional.");
         return dto;
     }
 

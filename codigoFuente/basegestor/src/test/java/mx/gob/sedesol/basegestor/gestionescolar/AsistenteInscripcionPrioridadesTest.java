@@ -146,6 +146,18 @@ public class AsistenteInscripcionPrioridadesTest {
         assertEquals(contexto.getUnidades().get(3).getEstatusHistorico(), "Reprobada");
     }
 
+    @Test
+    public void expectativaSeleccionadaReevaluaConjuntoDeResultadosSinMutarLaBase() throws Exception {
+        AsistenteInscripcionContextoDTO contexto = contextoExpectativaReal(3, false);
+        ProyeccionSiguientePeriodoDTO proyeccion = invocarExpectativaSeleccionadaReal(contexto,
+                materiaEnCurso(104L, "UD-104"), Collections.singleton(Long.valueOf(104L)));
+
+        assertEquals(proyeccion.getEscenarios().size(), 3);
+        assertEquals(proyeccion.getEscenarios().get(1).getReprobadasVigentes(), Integer.valueOf(3));
+        assertEquals(proyeccion.getEscenarios().get(2).getReprobadasVigentes(), Integer.valueOf(4));
+        assertEquals(contexto.getUnidades().get(3).getEstatusHistorico(), "En curso");
+    }
+
     private ProyeccionSiguientePeriodoDTO invocarExpectativa(ContextoEvaluacionCurricularV2DTO base,
             ResultadoEvaluacionCurricularV2DTO resultado, boolean falla) throws Exception {
         AsistenteInscripcionServiceImpl servicio = new AsistenteInscripcionServiceImpl();
@@ -169,6 +181,18 @@ public class AsistenteInscripcionPrioridadesTest {
         Method metodo = AsistenteInscripcionServiceImpl.class.getDeclaredMethod("construirProyeccionSiguientePeriodoV2", AsistenteInscripcionContextoDTO.class, List.class);
         metodo.setAccessible(true);
         return (ProyeccionSiguientePeriodoDTO) metodo.invoke(servicio, contexto, Collections.singletonList(materiaEnCurso));
+    }
+
+    private ProyeccionSiguientePeriodoDTO invocarExpectativaSeleccionadaReal(AsistenteInscripcionContextoDTO contexto,
+            InscripcionPreviaMateriasDTO materiaEnCurso, java.util.Set<Long> noAcreditadas) throws Exception {
+        AsistenteInscripcionServiceImpl servicio = new AsistenteInscripcionServiceImpl();
+        inyectar(servicio, "contextoEvaluacionCurricularV2Adapter", new ContextoEvaluacionCurricularV2AdapterImpl());
+        inyectar(servicio, "evaluacionCurricularV2Service", new EvaluacionCurricularV2ServiceImpl());
+        Method metodo = AsistenteInscripcionServiceImpl.class.getDeclaredMethod("construirExpectativaSeleccionadaV2",
+                AsistenteInscripcionContextoDTO.class, List.class, java.util.Set.class);
+        metodo.setAccessible(true);
+        return (ProyeccionSiguientePeriodoDTO) metodo.invoke(servicio, contexto,
+                Collections.singletonList(materiaEnCurso), noAcreditadas);
     }
 
     private AsistenteInscripcionContextoDTO contextoExpectativaReal(int reprobadas, boolean ultimaEnCursoEsReprobada) {

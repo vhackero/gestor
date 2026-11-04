@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.service.gestionescolar;
 
 import java.util.List;
+import java.util.Set;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EscenarioCargaDTO;
@@ -23,4 +24,11 @@ public interface AsistenteInscripcionService {
      * validaciones vigentes; su consumidor deberá tratarla como diagnóstico.
      */
     ResultadoEvaluacionCurricularV2DTO obtenerEvaluacionCurricularSombra(Long idPersona) throws InscripcionException;
+
+    /**
+     * Evalua una expectativa de logro en memoria. Las UD indicadas se suponen
+     * no acreditadas y las demás UD vigentes se suponen acreditadas.
+     */
+    AsistenteInscripcionContextoDTO obtenerExpectativaLogro(Long idPersona, Set<Long> noAcreditadas)
+            throws InscripcionException;
 }

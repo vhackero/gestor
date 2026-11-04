@@ -708,6 +708,39 @@
                 font-weight: 700;
                 color: #111111;
             }
+            .expectativa-logro { color: #12315d; }
+            .expectativa-logro h2 { margin: 4px 0 2px; font-size: 30px; color: #082757; }
+            .expectativa-subtitulo { margin: 0 0 10px; font-size: 17px; color: #4e6791; }
+            .expectativa-contexto, .expectativa-aviso {
+                border: 1px solid #c8dceb; border-radius: 6px; padding: 9px 14px;
+                background: #f1f8fd; margin: 7px 0; color: #173c70;
+            }
+            .expectativa-contexto span { display: inline-block; margin-right: 28px; }
+            .expectativa-aviso .fa { color: #0876c9; margin-right: 8px; }
+            .expectativa-comparacion { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+            .expectativa-panel { border: 1px solid #b9dce6; border-radius: 8px; padding: 14px; background: #fff; }
+            .expectativa-panel-alternativo { border-color: #ead4ae; background: #fffdfa; }
+            .expectativa-panel h3 { color: #062c66; margin: 0 0 11px; font-size: 21px; }
+            .expectativa-deuda { display: flex; align-items: center; gap: 16px; background: #eef9f7; padding: 12px; border-radius: 7px; }
+            .expectativa-panel-alternativo .expectativa-deuda { background: #fff6e8; }
+            .expectativa-deuda strong { font-size: 38px; color: #006c6c; line-height: 1; }
+            .expectativa-panel-alternativo .expectativa-deuda strong { color: #9a5100; }
+            .expectativa-controles { width: 100%; border-collapse: collapse; margin: 5px 0 12px; }
+            .expectativa-controles th, .expectativa-controles td { border-bottom: 1px solid #dbe6ef; padding: 7px; text-align: left; }
+            .expectativa-controles th { color: #1c345c; font-size: 13px; background: #f2f8fc; }
+            .expectativa-controles label { margin-right: 11px; color: #314c75; cursor: pointer; }
+            .expectativa-kpis-modernas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+            .expectativa-kpi-moderna { border: 1px solid #dce7f0; border-radius: 7px; padding: 9px; text-align: center; }
+            .expectativa-kpi-moderna strong { display: block; color: #062b64; font-size: 23px; }
+            .expectativa-kpi-moderna span { color: #526c91; font-size: 13px; }
+            .expectativa-resultados { list-style: none; padding: 0; margin: 10px 0; }
+            .expectativa-resultados li { padding: 5px 0; color: #153b72; }
+            .expectativa-supuesto { background: #eaf4fd; border-radius: 5px; padding: 8px; color: #245080; font-size: 13px; }
+            .expectativa-tabla { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            .expectativa-tabla th, .expectativa-tabla td { border: 1px solid #d8e4ee; padding: 7px; vertical-align: top; }
+            .expectativa-tabla th { background: #eaf4fb; color: #0d315f; text-align: left; }
+            .expectativa-orientacion { background: #f0f8fd; border-radius: 7px; padding: 12px 15px; margin-top: 10px; }
+            .expectativa-restablecer { float: right; }
             .oportunidad-box {
                 margin-top: 34px;
                 background: #ffffff;
@@ -1883,6 +1916,7 @@
                 .escenarios-grid {
                     grid-template-columns: repeat(2, minmax(220px, 1fr));
                 }
+                .expectativa-comparacion { grid-template-columns: 1fr; }
                 .riesgo-box {
                     width: 100%;
                 }
@@ -1911,6 +1945,15 @@
                 .validation-summary-grid {
                     grid-template-columns: repeat(2, minmax(140px, 1fr));
                 }
+            }
+            @media (max-width: 560px) {
+                .expectativa-logro h2 { font-size: 25px; }
+                .expectativa-contexto span { display: block; margin: 5px 0; }
+                .expectativa-kpis-modernas { grid-template-columns: 1fr; }
+                .expectativa-controles { font-size: 12px; }
+                .expectativa-controles th, .expectativa-controles td { padding: 5px; }
+                .expectativa-deuda strong { font-size: 31px; }
+                .expectativa-restablecer { float: none; display: block; margin-top: 6px; }
             }
             @media (max-width: 640px) {
                 .kpi-grid,
@@ -2286,44 +2329,63 @@
                         </p:tab>
 
                         <p:tab title="Expectativa de logro" rendered="#{tablaCurricularAsistidaBean.periodoCursamiento}">
-                            <div class="asistente-section">
-                                <div class="expectativa-alerta">
-                                    <i class="fa fa-warning" />
-                                    <span>#{tablaCurricularAsistidaBean.contexto.proyeccionSiguientePeriodo.resumen}</span>
+                            <p:outputPanel id="expectativaLogro" styleClass="asistente-section expectativa-logro">
+                                <h2>Expectativa de logro</h2>
+                                <p class="expectativa-subtitulo">Consulta qué cambiaría según los resultados supuestos de tus UD en curso.</p>
+                                <div class="expectativa-contexto">
+                                    <span><strong>Periodo evaluado:</strong> #{tablaCurricularAsistidaBean.contexto.periodoActivo}</span>
+                                    <span><strong>Proyección:</strong> #{tablaCurricularAsistidaBean.periodoProyectadoExpectativa}</span>
+                                    <span><strong>Carga actual:</strong> #{tablaCurricularAsistidaBean.unidadesExpectativaLogro.size()} UD</span>
+                                    <span><strong>Reprobadas previas:</strong> #{tablaCurricularAsistidaBean.escenarioReferenciaExpectativa ne null ? tablaCurricularAsistidaBean.escenarioReferenciaExpectativa.reprobadasVigentes : 'No determinado'}</span>
                                 </div>
+                                <div class="expectativa-aviso"><i class="fa fa-info-circle" />Resultados hipotéticos. Esta consulta no modifica tu historial ni formaliza tu inscripción.</div>
 
-                                <div class="expectativa-grid">
-                                    <ui:repeat value="#{tablaCurricularAsistidaBean.contexto.proyeccionSiguientePeriodo.escenarios}" var="escenarioProyeccion">
-                                        <div class="expectativa-card">
-                                            <div class="expectativa-head">#{escenarioProyeccion.nombre}</div>
-                                            <div class="expectativa-desc">#{escenarioProyeccion.descripcion}</div>
-                                            <div class="expectativa-desc">Base: #{escenarioProyeccion.situacionBase} · Resultado hipotético: #{escenarioProyeccion.resultadoHipotetico} · Periodo simulado/elegibilidad: #{escenarioProyeccion.periodoSimulado} · Reglas: #{escenarioProyeccion.versionReglas}</div>
-                                            <div class="expectativa-kpis">
-                                                <div class="expectativa-kpi">
-                                                    <span class="label">UD consideradas según carga</span>
-                                                    <span class="value">#{escenarioProyeccion.materiasOfertadas ne null ? escenarioProyeccion.materiasOfertadas : 'No determinado'}</span>
-                                                </div>
-                                                <div class="expectativa-kpi">
-                                                    <span class="label">UD posibles a registrar</span>
-                                                    <span class="value">#{escenarioProyeccion.materiasHabilitadas ne null ? escenarioProyeccion.materiasHabilitadas : 'No determinado'}</span>
-                                                </div>
-                                                <div class="expectativa-kpi">
-                                                    <span class="label">UD bloqueadas</span>
-                                                    <span class="value">#{escenarioProyeccion.materiasBloqueadas ne null ? escenarioProyeccion.materiasBloqueadas : 'No determinado'}</span>
-                                                </div>
+                                <ui:fragment rendered="#{empty tablaCurricularAsistidaBean.unidadesExpectativaLogro}">
+                                    <div class="soft-panel"><strong>No hay UD en curso para construir hipótesis.</strong> Se conserva la situación registrada como referencia.</div>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.unidadesExpectativaLogro}">
+                                    <div class="expectativa-comparacion">
+                                        <div class="expectativa-panel">
+                                            <h3>Si acreditas toda tu carga</h3>
+                                            <ui:param name="acreditaToda" value="#{tablaCurricularAsistidaBean.escenarioAcreditaTodaCarga}" />
+                                            <div class="expectativa-deuda"><strong>#{acreditaToda.reprobadasVigentes}</strong><span>UD reprobadas<br />pendientes</span></div>
+                                            <div class="expectativa-kpis-modernas">
+                                                <div class="expectativa-kpi-moderna"><strong>#{tablaCurricularAsistidaBean.totalUnidadesEvaluadasExpectativa}</strong><span>UD evaluadas</span></div>
+                                                <div class="expectativa-kpi-moderna"><strong>#{acreditaToda.materiasHabilitadas ne null ? acreditaToda.materiasHabilitadas : '-'}</strong><span>Cumplen requisitos</span></div>
+                                                <div class="expectativa-kpi-moderna"><strong>#{acreditaToda.materiasBloqueadas ne null ? acreditaToda.materiasBloqueadas : '-'}</strong><span>Con restricciones</span></div>
                                             </div>
-                                            <ui:fragment rendered="#{not empty escenarioProyeccion.recomendaciones}">
-                                                <ul>
-                                                    <ui:repeat value="#{escenarioProyeccion.recomendaciones}" var="recomendacion">
-                                                        <li>#{recomendacion}</li>
-                                                    </ui:repeat>
-                                                </ul>
-                                            </ui:fragment>
-                                            <ui:fragment rendered="#{not empty escenarioProyeccion.supuestos}"><ul><ui:repeat value="#{escenarioProyeccion.supuestos}" var="supuesto"><li>#{supuesto}</li></ui:repeat></ul></ui:fragment>
+                                            <ul class="expectativa-resultados"><ui:repeat value="#{acreditaToda.recomendaciones}" var="recomendacion"><li><i class="fa fa-check-circle" /> #{recomendacion}</li></ui:repeat></ul>
+                                            <div class="expectativa-supuesto"><ui:repeat value="#{acreditaToda.supuestos}" var="supuesto">#{supuesto}</ui:repeat></div>
                                         </div>
-                                    </ui:repeat>
-                                </div>
-                            </div>
+                                        <div class="expectativa-panel expectativa-panel-alternativo">
+                                            <h3>Si no acreditas las UD seleccionadas <p:commandLink value="Restablecer" actionListener="#{tablaCurricularAsistidaBean.restablecerExpectativaLogro}" process="@this" update="expectativaLogro" styleClass="expectativa-restablecer" /></h3>
+                                            <p>Elige un resultado supuesto por UD.</p>
+                                            <table class="expectativa-controles"><thead><tr><th>Unidad didáctica</th><th>Acredito</th><th>No acredito</th></tr></thead><tbody>
+                                                <ui:repeat value="#{tablaCurricularAsistidaBean.unidadesExpectativaLogro}" var="unidadExpectativa">
+                                                    <tr><td><strong>#{unidadExpectativa.clave}</strong><br /><span>#{unidadExpectativa.nombre}</span></td>
+                                                        <td><p:selectOneRadio value="#{unidadExpectativa.acredita}" layout="lineDirection"><f:selectItem itemValue="true" itemLabel="Acredito" /><p:ajax process="@this" listener="#{tablaCurricularAsistidaBean.actualizarExpectativaLogro}" update="expectativaLogro" /></p:selectOneRadio></td>
+                                                        <td><p:selectOneRadio value="#{unidadExpectativa.acredita}" layout="lineDirection"><f:selectItem itemValue="false" itemLabel="No acredito" /><p:ajax process="@this" listener="#{tablaCurricularAsistidaBean.actualizarExpectativaLogro}" update="expectativaLogro" /></p:selectOneRadio></td></tr>
+                                                </ui:repeat>
+                                            </tbody></table>
+                                            <ui:param name="alternativo" value="#{tablaCurricularAsistidaBean.escenarioSeleccionadoExpectativa}" />
+                                            <div class="expectativa-deuda"><strong>#{alternativo.reprobadasVigentes}</strong><span>UD reprobadas<br />pendientes</span></div>
+                                            <div class="expectativa-kpis-modernas">
+                                                <div class="expectativa-kpi-moderna"><strong>#{tablaCurricularAsistidaBean.totalUnidadesEvaluadasExpectativa}</strong><span>UD evaluadas</span></div>
+                                                <div class="expectativa-kpi-moderna"><strong>#{alternativo.materiasHabilitadas ne null ? alternativo.materiasHabilitadas : '-'}</strong><span>Cumplen requisitos</span></div>
+                                                <div class="expectativa-kpi-moderna"><strong>#{alternativo.materiasBloqueadas ne null ? alternativo.materiasBloqueadas : '-'}</strong><span>Con restricciones</span></div>
+                                            </div>
+                                            <ul class="expectativa-resultados"><ui:repeat value="#{alternativo.recomendaciones}" var="recomendacion"><li><i class="fa fa-info-circle" /> #{recomendacion}</li></ui:repeat></ul>
+                                            <div class="expectativa-supuesto"><ui:repeat value="#{alternativo.supuestos}" var="supuesto">#{supuesto}</ui:repeat></div>
+                                        </div>
+                                    </div>
+                                    <div class="expectativa-aviso"><i class="fa fa-info-circle" />Cumplir requisitos evaluados no garantiza oferta ni determina la carga autorizada.</div>
+                                    <h3>Qué cambia por unidad didáctica</h3>
+                                    <table class="expectativa-tabla"><thead><tr><th>Unidad didáctica</th><th>Si acreditas toda la carga</th><th>Escenario seleccionado</th></tr></thead><tbody>
+                                        <ui:repeat value="#{tablaCurricularAsistidaBean.unidadesExpectativaLogro}" var="unidadExpectativa"><tr><td><strong>#{unidadExpectativa.clave}</strong><br />#{unidadExpectativa.nombre}</td><td>Se considera acreditada para esta hipótesis.</td><td>#{unidadExpectativa.acredita ? 'Se considera acreditada para esta hipótesis.' : 'Queda pendiente de regularización en esta hipótesis.'}</td></tr></ui:repeat>
+                                    </tbody></table>
+                                    <div class="expectativa-orientacion"><h3>Qué considerar para tu próxima inscripción</h3><ui:repeat value="#{tablaCurricularAsistidaBean.escenarioSeleccionadoExpectativa.recomendaciones}" var="recomendacion"><div>#{recomendacion}</div></ui:repeat></div>
+                                </ui:fragment>
+                            </p:outputPanel>
                         </p:tab>
 
                         <p:tab title="Proyección de carga" rendered="#{not tablaCurricularAsistidaBean.periodoCursamiento}">
