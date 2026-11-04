@@ -4030,6 +4030,10 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                 fila.setTipo("Tipo no determinado");
                 fila.setOfertada(Boolean.FALSE);
             }
+            // La consulta excluye una acreditacion posterior; reinscribirse no
+            // cambia este estado hasta que exista una calificacion aprobatoria.
+            fila.setPeriodoReferencia(StringUtils.defaultIfBlank(baja.getPeriodoEvento(), "Periodo no disponible"));
+            fila.setAcreditacionActualBajaParcial("Aún sin acreditar");
             fila.setEstatusHistorico("BAJA " + tipoBaja);
             porIdentidad.putIfAbsent(claveUnicaFilaPrioritaria(fila), fila);
         }
@@ -4929,6 +4933,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         private String inicioBaja;
         private String finBaja;
         private String clavesBajaTemporal;
+        private String acreditacionActualBajaParcial;
         private String estatusPeriodo;
         private String prioridad;
         private String motivoPrincipal;
@@ -5053,6 +5058,14 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
         public void setClavesBajaTemporal(String clavesBajaTemporal) {
             this.clavesBajaTemporal = clavesBajaTemporal;
+        }
+
+        public String getAcreditacionActualBajaParcial() {
+            return acreditacionActualBajaParcial;
+        }
+
+        public void setAcreditacionActualBajaParcial(String acreditacionActualBajaParcial) {
+            this.acreditacionActualBajaParcial = acreditacionActualBajaParcial;
         }
 
         public String getEstatusPeriodo() {
