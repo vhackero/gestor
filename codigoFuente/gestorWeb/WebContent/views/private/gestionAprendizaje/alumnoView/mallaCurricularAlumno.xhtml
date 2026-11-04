@@ -237,6 +237,7 @@
 				background-size: 11px 11px;
 			}
 			.icon-recursando,
+			.icon-cursamiento-antecedente-baja,
 			.icon-regularizada {
 				width: 16px;
 				height: 16px;
@@ -246,8 +247,10 @@
 				background-size: 16px 16px;
 			}
 			.icon-recursando { background-image: url("#{resource['images/recursando.svg']}"); }
+			.icon-cursamiento-antecedente-baja { background-image: url("#{resource['images/recursando.svg']}"); }
 			.icon-regularizada { background-image: url("#{resource['images/regularizada.svg']}"); }
 			.icon-recursando,
+			.icon-cursamiento-antecedente-baja,
 			.icon-regularizada {
 				/* The SVG glyphs use currentColor; as background images, render them white. */
 				filter: brightness(0) invert(1);
@@ -263,6 +266,12 @@
 			.malla-leyenda-box.estatus.estatus-recursando {
 				background: #C81E2A !important;
 				border: 1px solid #C81E2A !important;
+			}
+			.malla-estado.estatus-cursamiento-con-antecedente-de-baja,
+			.malla-table-icon.estatus-cursamiento-con-antecedente-de-baja,
+			.malla-leyenda-box.estatus.estatus-cursamiento-con-antecedente-de-baja {
+				background: #C19E00 !important;
+				border: 1px solid #C19E00 !important;
 			}
 			.malla-estado.estatus-regularizada,
 			.malla-table-icon.estatus-regularizada,
@@ -536,6 +545,7 @@
 				background-size: 9px 9px;
 			}
 			.malla-leyenda-box.estatus .icon-recursando,
+			.malla-leyenda-box.estatus .icon-cursamiento-antecedente-baja,
 			.malla-leyenda-box.estatus .icon-regularizada {
 				width: 14px;
 				height: 14px;
@@ -675,6 +685,7 @@
 				background-size: 12px 12px;
 			}
 			.malla-table-icon .icon-recursando,
+			.malla-table-icon .icon-cursamiento-antecedente-baja,
 			.malla-table-icon .icon-regularizada {
 				width: 18px;
 				height: 18px;
@@ -1044,13 +1055,13 @@
 							<div class="malla-indicadores-contenido">
 								<div class="malla-indicadores-linea">
 									<ui:repeat value="#{mallaCurricularAlumnoBean.estatusPrograma}" var="estatus">
-										<ui:fragment rendered="#{estatus.nombre ne 'Por cursar'}">
+										<ui:fragment rendered="#{estatus.nombre ne 'Por cursar' and estatus.nombre ne 'Cursamiento con antecedente de baja'}">
 											<span class="malla-leyenda-item">
 												<span class="malla-leyenda-box estatus #{estatus.nombre eq 'Recursando' ? 'estatus-recursando' : ''} #{estatus.nombre eq 'Regularizada' ? 'estatus-regularizada' : ''}" style="#{estatus.nombre eq 'En curso' ? 'background:#ffffff;border:1px solid #C19E00;' : 'background:'.concat(estatus.backgroundColor).concat(';border-color:').concat(estatus.borderColor).concat(';')}">
-													<ui:fragment rendered="#{estatus.nombre eq 'En curso'}"><span class="icon-en-curso"></span></ui:fragment>
-													<ui:fragment rendered="#{estatus.nombre eq 'Recursando'}"><span class="icon-recursando"></span></ui:fragment>
-													<ui:fragment rendered="#{estatus.nombre eq 'Regularizada'}"><span class="icon-regularizada"></span></ui:fragment>
-													<ui:fragment rendered="#{estatus.nombre ne 'En curso' and estatus.nombre ne 'Recursando' and estatus.nombre ne 'Regularizada'}"><i class="#{estatus.iconClass}"></i></ui:fragment>
+												<ui:fragment rendered="#{estatus.nombre eq 'En curso'}"><span class="icon-en-curso"></span></ui:fragment>
+												<ui:fragment rendered="#{estatus.nombre eq 'Recursando'}"><span class="icon-recursando"></span></ui:fragment>
+												<ui:fragment rendered="#{estatus.nombre eq 'Regularizada'}"><span class="icon-regularizada"></span></ui:fragment>
+												<ui:fragment rendered="#{estatus.nombre ne 'En curso' and estatus.nombre ne 'Recursando' and estatus.nombre ne 'Cursamiento con antecedente de baja' and estatus.nombre ne 'Regularizada'}"><i class="#{estatus.iconClass}"></i></ui:fragment>
 												</span>
 												#{estatus.nombre}
 											</span>
@@ -1058,6 +1069,14 @@
 									</ui:repeat>
 								</div>
 								<div class="malla-indicadores-linea">
+									<ui:repeat value="#{mallaCurricularAlumnoBean.estatusPrograma}" var="estatus">
+										<ui:fragment rendered="#{estatus.nombre eq 'Cursamiento con antecedente de baja'}">
+											<span class="malla-leyenda-item">
+												<span class="malla-leyenda-box estatus estatus-cursamiento-con-antecedente-de-baja"><span class="icon-cursamiento-antecedente-baja"></span></span>
+												#{estatus.nombre}
+											</span>
+										</ui:fragment>
+									</ui:repeat>
 									<ui:repeat value="#{mallaCurricularAlumnoBean.estatusPrograma}" var="estatus">
 										<ui:fragment rendered="#{estatus.nombre eq 'Por cursar'}">
 											<span class="malla-leyenda-item">
@@ -1141,8 +1160,9 @@
 											<span class="icon-en-curso"></span>
 										</ui:fragment>
 										<ui:fragment rendered="#{nodo.estatusCss eq 'estatus-recursando'}"><span class="icon-recursando"></span></ui:fragment>
+										<ui:fragment rendered="#{nodo.estatusCss eq 'estatus-cursamiento-con-antecedente-de-baja'}"><span class="icon-cursamiento-antecedente-baja"></span></ui:fragment>
 										<ui:fragment rendered="#{nodo.estatusCss eq 'estatus-regularizada'}"><span class="icon-regularizada"></span></ui:fragment>
-										<ui:fragment rendered="#{nodo.estatusCss ne 'estatus-en-curso' and nodo.estatusCss ne 'estatus-recursando' and nodo.estatusCss ne 'estatus-regularizada'}">
+										<ui:fragment rendered="#{nodo.estatusCss ne 'estatus-en-curso' and nodo.estatusCss ne 'estatus-recursando' and nodo.estatusCss ne 'estatus-cursamiento-con-antecedente-de-baja' and nodo.estatusCss ne 'estatus-regularizada'}">
 											<i class="#{nodo.estatusIconClass}"></i>
 										</ui:fragment>
 									</span>
@@ -1201,9 +1221,10 @@
 															<ui:fragment rendered="#{fila.estatusCss eq 'estatus-en-curso'}">
 																<span class="icon-en-curso"></span>
 															</ui:fragment>
-															<ui:fragment rendered="#{fila.estatusCss eq 'estatus-recursando'}"><span class="icon-recursando"></span></ui:fragment>
-															<ui:fragment rendered="#{fila.estatusCss eq 'estatus-regularizada'}"><span class="icon-regularizada"></span></ui:fragment>
-															<ui:fragment rendered="#{fila.estatusCss ne 'estatus-en-curso' and fila.estatusCss ne 'estatus-recursando' and fila.estatusCss ne 'estatus-regularizada'}">
+																<ui:fragment rendered="#{fila.estatusCss eq 'estatus-recursando'}"><span class="icon-recursando"></span></ui:fragment>
+																<ui:fragment rendered="#{fila.estatusCss eq 'estatus-cursamiento-con-antecedente-de-baja'}"><span class="icon-cursamiento-antecedente-baja"></span></ui:fragment>
+																<ui:fragment rendered="#{fila.estatusCss eq 'estatus-regularizada'}"><span class="icon-regularizada"></span></ui:fragment>
+																<ui:fragment rendered="#{fila.estatusCss ne 'estatus-en-curso' and fila.estatusCss ne 'estatus-recursando' and fila.estatusCss ne 'estatus-cursamiento-con-antecedente-de-baja' and fila.estatusCss ne 'estatus-regularizada'}">
 																<i class="#{fila.estatusIconClass}"></i>
 															</ui:fragment>
 														</ui:fragment>

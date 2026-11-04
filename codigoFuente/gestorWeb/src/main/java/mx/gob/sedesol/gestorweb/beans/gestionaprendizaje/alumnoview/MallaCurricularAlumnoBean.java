@@ -93,6 +93,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private static final String ESTATUS_NO_INSCRITA = "No inscrita";
 	private static final String ESTATUS_EN_CURSO = "En curso";
 	private static final String ESTATUS_RECURSANDO = "Recursando";
+	private static final String ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA = "Cursamiento con antecedente de baja";
 	private static final String ESTATUS_REGULARIZADA = "Regularizada";
 	private static final String ESTATUS_BAJA = "Baja";
 	private static final String ESTATUS_BLOQUEADA = "Bloqueada";
@@ -108,6 +109,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		ESTATUS_COLORS.put(ESTATUS_BAJA, "#ED9A55");
 		ESTATUS_COLORS.put(ESTATUS_EN_CURSO, "#C19E00");
 		ESTATUS_COLORS.put(ESTATUS_RECURSANDO, "#C81E2A");
+		ESTATUS_COLORS.put(ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA, "#C19E00");
 		ESTATUS_COLORS.put(ESTATUS_REGULARIZADA, "#229447");
 		ESTATUS_COLORS.put(ESTATUS_BLOQUEADA, "#000000");
 	}
@@ -153,6 +155,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private Map<String, Set<String>> ubicacionesOptativasHistoricas;
 	private Map<String, Set<String>> ubicacionesOptativasEnCurso;
 	private Set<Integer> programasConBaja;
+	private Set<Integer> programasConBajaParcial;
 	private Integer semestreEnCurso;
 	private Integer bloqueEnCurso;
 	private String estatusEstudiante;
@@ -185,6 +188,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		ubicacionesOptativasHistoricas = new HashMap<>();
 		ubicacionesOptativasEnCurso = new HashMap<>();
 		programasConBaja = new HashSet<>();
+		programasConBajaParcial = new HashSet<>();
 		semestreEnCurso = null;
 		bloqueEnCurso = null;
 		estatusEstudiante = "Regular";
@@ -579,7 +583,8 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	}
 
 	private String resolveEstatusTabla(String estatus) {
-		if (ESTATUS_RECURSANDO.equals(estatus) || ESTATUS_REGULARIZADA.equals(estatus)) {
+		if (ESTATUS_RECURSANDO.equals(estatus) || ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA.equals(estatus)
+				|| ESTATUS_REGULARIZADA.equals(estatus)) {
 			return estatus;
 		}
 		if (ESTATUS_APROBADA.equals(estatus)) {
@@ -623,6 +628,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 		String estatusVisual = programaNodo.getEstatusVisual();
 		programaNodo.setDetalleEstatusPeriodo(ESTATUS_RECURSANDO.equals(estatusVisual)
+				|| ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA.equals(estatusVisual)
 				|| ESTATUS_REGULARIZADA.equals(estatusVisual) ? estatusVisual
 				: ADAPTADOR_RESULTADO_V2.construirEstatusContextual(estatusHistorico, estatusPeriodo, programaNodo));
 		programaNodo.setDetalleMotivoPrincipal(construirSituacionDetalle(programaNodo, programa, unidad));
@@ -1248,6 +1254,8 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_EN_CURSO, "#facc15", "#facc15", "#facc15", "fa fa-flag"));
 		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_RECURSANDO, "#c81e2a", "#c81e2a", "#c81e2a", ""));
 		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_REGULARIZADA, "#229447", "#229447", "#229447", ""));
+		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA,
+				"#c19e00", "#c19e00", "#c19e00", ""));
 		estatusPrograma.add(new MallaDiagramaTipoDTO("Por cursar", "#111827", "#111827", "#111827", "fa fa-lock"));
 	}
 
@@ -1287,6 +1295,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 
 	private void cargarProgramasConBaja(Long idPersona) {
 		programasConBaja.clear();
+		programasConBajaParcial.clear();
 		List<InscripcionBajasDTO> bajas = inscripcionService.obtenerBajasDeMateriasSolicitadas(idPersona);
 		if (ObjectUtils.isNullOrEmpty(bajas)) {
 			return;
@@ -1294,8 +1303,15 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		for (InscripcionBajasDTO baja : bajas) {
 			if (baja != null && baja.getIdPrograma() != null && esBajaTemporalOParcial(baja)) {
 				programasConBaja.add(baja.getIdPrograma().intValue());
+				if (esBajaParcial(baja)) {
+					programasConBajaParcial.add(baja.getIdPrograma().intValue());
+				}
 			}
 		}
+	}
+
+	private boolean esBajaParcial(InscripcionBajasDTO baja) {
+		return baja != null && StringUtils.containsIgnoreCase(StringUtils.trimToEmpty(baja.getTipoBaja()), "PARCIAL");
 	}
 
 	private boolean esBajaTemporalOParcial(InscripcionBajasDTO baja) {
@@ -1307,11 +1323,13 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	}
 
 	private void aplicarEstatusEnCurso(Map<Integer, MallaDiagramaNodoDTO> programasPorId) {
-		for (MallaDiagramaNodoDTO nodo : programasPorId.values()) {
+		for (Map.Entry<Integer, MallaDiagramaNodoDTO> entry : programasPorId.entrySet()) {
+			MallaDiagramaNodoDTO nodo = entry.getValue();
 			if (nodo.isEnCurso()
 					&& !ESTATUS_APROBADA.equals(nodo.getEstatus())
 					&& !ESTATUS_NO_ACREDITADA.equals(nodo.getEstatus())
-					&& !ESTATUS_BAJA.equals(nodo.getEstatus())) {
+					&& (!ESTATUS_BAJA.equals(nodo.getEstatus())
+							|| programasConBajaParcial.contains(entry.getKey()))) {
 				String color = ESTATUS_COLORS.getOrDefault(ESTATUS_EN_CURSO, "#facc15");
 				nodo.setEstatus(ESTATUS_EN_CURSO);
 				nodo.setEstatusBackgroundColor(color);
@@ -1328,17 +1346,27 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			MallaDiagramaNodoDTO nodo = entry.getValue();
 			MallaAlumnoProgramaDTO estatus = estatusPorPrograma.get(entry.getKey());
 			String indicador = resolverIndicadorVisual(nodo.getEstatus(), nodo.isEnCurso(),
-					estatus != null && Boolean.TRUE.equals(estatus.getRegularizada()));
+					estatus != null && Boolean.TRUE.equals(estatus.getRegularizada()),
+					programasConBajaParcial.contains(entry.getKey()));
 			nodo.setEstatusVisual(indicador);
-			if (ESTATUS_RECURSANDO.equals(indicador) || ESTATUS_REGULARIZADA.equals(indicador)) {
+			if (ESTATUS_RECURSANDO.equals(indicador) || ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA.equals(indicador)
+					|| ESTATUS_REGULARIZADA.equals(indicador)) {
 				nodo.setEstatusIconClass("");
 			}
 		}
 	}
 
 	static String resolverIndicadorVisual(String estatus, boolean enCurso, boolean regularizada) {
+		return resolverIndicadorVisual(estatus, enCurso, regularizada, false);
+	}
+
+	static String resolverIndicadorVisual(String estatus, boolean enCurso, boolean regularizada,
+			boolean cursamientoConAntecedenteBaja) {
 		if (enCurso && ESTATUS_NO_ACREDITADA.equals(estatus)) {
 			return ESTATUS_RECURSANDO;
+		}
+		if (enCurso && ESTATUS_EN_CURSO.equals(estatus) && cursamientoConAntecedenteBaja) {
+			return ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA;
 		}
 		if (ESTATUS_APROBADA.equals(estatus) && regularizada) {
 			return ESTATUS_REGULARIZADA;
@@ -1751,6 +1779,9 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 		if ("estatus-recursando".equals(estatusCss)) {
 			return "#C81E2A";
+		}
+		if ("estatus-cursamiento-con-antecedente-de-baja".equals(estatusCss)) {
+			return "#C19E00";
 		}
 		if ("estatus-regularizada".equals(estatusCss)) {
 			return "#229447";

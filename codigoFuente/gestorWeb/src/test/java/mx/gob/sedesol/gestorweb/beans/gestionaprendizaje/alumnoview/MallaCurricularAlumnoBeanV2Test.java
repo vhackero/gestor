@@ -133,6 +133,25 @@ public class MallaCurricularAlumnoBeanV2Test {
 	}
 
 	@Test
+	public void identificaCursamientoConAntecedenteDeBajaSinConvertirloEnRecursamiento() {
+		MallaDiagramaNodoDTO cursamientoConBaja = new MallaDiagramaNodoDTO();
+		cursamientoConBaja.setEstatus("En curso");
+		cursamientoConBaja.setEnCurso(true);
+		cursamientoConBaja.setEstatusVisual(MallaCurricularAlumnoBean.resolverIndicadorVisual(
+				cursamientoConBaja.getEstatus(), true, false, true));
+
+		MallaDiagramaNodoDTO recursando = new MallaDiagramaNodoDTO();
+		recursando.setEstatus("No acreditada");
+		recursando.setEnCurso(true);
+		recursando.setEstatusVisual(MallaCurricularAlumnoBean.resolverIndicadorVisual(
+				recursando.getEstatus(), true, false, true));
+
+		assertEquals(cursamientoConBaja.getEstatus(), "En curso");
+		assertEquals(cursamientoConBaja.getEstatusVisual(), "Cursamiento con antecedente de baja");
+		assertEquals(recursando.getEstatusVisual(), "Recursando");
+	}
+
+	@Test
 	public void bloqueoCurricularNoConvierteObligatoriaEnSeriada() {
 		MallaDiagramaNodoDTO nodo = new MallaDiagramaNodoDTO();
 		nodo.setBloqueada(true);
