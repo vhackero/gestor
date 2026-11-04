@@ -3992,15 +3992,30 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public List<FilaAsistidaDTO> getFilasBajaTemporalPrioritarias() {
         List<FilaAsistidaDTO> filas = new ArrayList<FilaAsistidaDTO>();
-        for (InscripcionBajasDTO baja : filtrarBajasTemporalesPorMovimiento(obtenerBajasContexto())) {
+        List<InscripcionBajasDTO> bajas = obtenerBajasContexto();
+        for (InscripcionBajasDTO baja : filtrarBajasTemporalesPorMovimiento(bajas)) {
             FilaAsistidaDTO fila = new FilaAsistidaDTO();
             fila.setPeriodoReferencia(StringUtils.defaultIfBlank(baja.getPeriodoEvento(), "Periodo no disponible"));
             fila.setInicioBaja(formatearFechaBaja(baja.getFechaInicioEvento()));
             fila.setFinBaja(formatearFechaBaja(baja.getFechaFinEvento()));
+            fila.setClavesBajaTemporal(clavesBajaTemporalAgrupada(baja, bajas));
             fila.setEstatusHistorico("BAJA TEMPORAL");
             filas.add(fila);
         }
         return filas;
+    }
+
+    private String clavesBajaTemporalAgrupada(InscripcionBajasDTO referencia, List<InscripcionBajasDTO> bajas) {
+        String identidad = identidadPeriodoBajaTemporal(referencia);
+        LinkedHashSet<String> claves = new LinkedHashSet<String>();
+        if (identidad == null || bajas == null) return "No disponible";
+        for (InscripcionBajasDTO baja : bajas) {
+            if (esBajaTemporal(baja) && identidad.equals(identidadPeriodoBajaTemporal(baja))
+                    && StringUtils.isNotBlank(baja.getClavePrograma())) {
+                claves.add(baja.getClavePrograma().trim().toUpperCase(Locale.ROOT));
+            }
+        }
+        return claves.isEmpty() ? "No disponible" : String.join(", ", claves);
     }
 
     private List<FilaAsistidaDTO> construirFilasBajaPrioritarias(String tipoBaja) {
@@ -4913,6 +4928,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         private String periodoReferencia;
         private String inicioBaja;
         private String finBaja;
+        private String clavesBajaTemporal;
         private String estatusPeriodo;
         private String prioridad;
         private String motivoPrincipal;
@@ -5029,6 +5045,14 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
         public void setFinBaja(String finBaja) {
             this.finBaja = finBaja;
+        }
+
+        public String getClavesBajaTemporal() {
+            return clavesBajaTemporal;
+        }
+
+        public void setClavesBajaTemporal(String clavesBajaTemporal) {
+            this.clavesBajaTemporal = clavesBajaTemporal;
         }
 
         public String getEstatusPeriodo() {
