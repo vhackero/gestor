@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Calendar;
 import java.util.Arrays;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -297,6 +298,12 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 				Arrays.asList(parcial, parcialDuplicada, parcialDistinta, temporal), "PARCIAL"), 2);
 		assertEquals(TablaCurricularAsistidaBean.filtrarBajasPorTipo(
 				Arrays.asList(parcial, parcialDuplicada, parcialDistinta, temporal), "TEMPORAL").size(), 1);
+		temporal.setFechaInicioEvento(LocalDateTime.of(2026, 1, 12, 0, 0));
+		temporal.setFechaFinEvento(LocalDateTime.of(2026, 6, 14, 0, 0));
+		temporalMismoMovimiento.setFechaInicioEvento(LocalDateTime.of(2026, 1, 12, 0, 0));
+		temporalMismoMovimiento.setFechaFinEvento(LocalDateTime.of(2026, 6, 14, 0, 0));
+		temporalOtroMovimiento.setFechaInicioEvento(LocalDateTime.of(2026, 7, 6, 0, 0));
+		temporalOtroMovimiento.setFechaFinEvento(LocalDateTime.of(2026, 12, 6, 0, 0));
 		assertEquals(TablaCurricularAsistidaBean.filtrarBajasTemporalesPorMovimiento(
 				Arrays.asList(temporal, temporalMismoMovimiento, temporalOtroMovimiento)).size(), 2);
 	}
@@ -345,6 +352,7 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertTrue(bean.getReferenciaSustitucionesPrioritarias().contains("no disponible"));
 		assertTrue(bean.getReferenciaBajasParcialesPrioritarias().contains("autorizadas y aplicadas"));
 		assertTrue(bean.getReferenciaBajasTemporalesPrioritarias().contains("Autorizadas y aplicadas"));
+		assertTrue(bean.getReferenciaBajasTemporalesPrioritarias().contains("evento"));
 	}
 
 	@Test

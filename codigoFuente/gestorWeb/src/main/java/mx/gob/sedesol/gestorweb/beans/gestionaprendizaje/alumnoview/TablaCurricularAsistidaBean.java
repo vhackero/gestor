@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.Set;
+import java.time.LocalDateTime;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -3756,7 +3757,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getReferenciaBajasTemporalesPrioritarias() {
-        return "Autorizadas y aplicadas; semestre y vigencia no disponibles";
+        return "Autorizadas y aplicadas; periodo e intervalo obtenidos del evento";
     }
 
     public String getPeriodoReprobacionPrioritaria(FilaAsistidaDTO fila) {
@@ -3984,7 +3985,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return contarMovimientosBajaPorTipo(obtenerBajasContexto(), "PARCIAL");
     }
 
-    /** Las bajas temporales se cuentan por movimiento, nunca por UD asociada. */
+    /** Las bajas temporales se agrupan por el intervalo academico del evento. */
     public int getConteoBajasTemporalesPrioritarias() {
         return filtrarBajasTemporalesPorMovimiento(obtenerBajasContexto()).size();
     }
@@ -3993,8 +3994,9 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         List<FilaAsistidaDTO> filas = new ArrayList<FilaAsistidaDTO>();
         for (InscripcionBajasDTO baja : filtrarBajasTemporalesPorMovimiento(obtenerBajasContexto())) {
             FilaAsistidaDTO fila = new FilaAsistidaDTO();
-            fila.setClave("Registro temporal");
-            fila.setAsignatura("Semestre, autorizacion y vigencia no verificables en la fuente disponible");
+            fila.setPeriodoReferencia(StringUtils.defaultIfBlank(baja.getPeriodoEvento(), "Periodo no disponible"));
+            fila.setInicioBaja(formatearFechaBaja(baja.getFechaInicioEvento()));
+            fila.setFinBaja(formatearFechaBaja(baja.getFechaFinEvento()));
             fila.setEstatusHistorico("BAJA TEMPORAL");
             filas.add(fila);
         }
@@ -4055,21 +4057,31 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return new ArrayList<InscripcionBajasDTO>(porIdentidad.values());
     }
 
-    /**
-     * rel_persona_bajas.id_baja identifica el movimiento temporal. Una misma
-     * baja puede aparecer asociada tecnicamente a varias UD del semestre.
-     */
+    /** Una baja temporal puede crear varias filas por UD, pero comparte fechas de evento. */
     static List<InscripcionBajasDTO> filtrarBajasTemporalesPorMovimiento(List<InscripcionBajasDTO> bajas) {
         if (bajas == null || bajas.isEmpty()) return Collections.emptyList();
         Map<String, InscripcionBajasDTO> porMovimiento = new LinkedHashMap<String, InscripcionBajasDTO>();
         int sinIdentificador = 0;
         for (InscripcionBajasDTO baja : bajas) {
             if (!esBajaTemporal(baja)) continue;
-            String identidad = baja.getIdBaja() != null ? "MOVIMIENTO:" + baja.getIdBaja()
-                    : "SIN_IDENTIFICADOR:" + (++sinIdentificador);
+            String identidad = identidadPeriodoBajaTemporal(baja);
+            if (identidad == null) identidad = "SIN_IDENTIFICADOR:" + (++sinIdentificador);
             porMovimiento.putIfAbsent(identidad, baja);
         }
         return new ArrayList<InscripcionBajasDTO>(porMovimiento.values());
+    }
+
+    private static String identidadPeriodoBajaTemporal(InscripcionBajasDTO baja) {
+        if (baja == null) return null;
+        if (baja.getFechaInicioEvento() != null && baja.getFechaFinEvento() != null) {
+            return "INTERVALO:" + baja.getFechaInicioEvento() + "|" + baja.getFechaFinEvento();
+        }
+        if (baja.getIdEvento() != null) return "EVENTO:" + baja.getIdEvento();
+        return baja.getIdBaja() != null ? "MOVIMIENTO:" + baja.getIdBaja() : null;
+    }
+
+    private String formatearFechaBaja(LocalDateTime fecha) {
+        return fecha == null ? "No disponible" : fecha.toLocalDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
     private static boolean esBajaParcial(InscripcionBajasDTO baja) {
@@ -4121,7 +4133,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         if (registros == 0) {
             return "No se identifican registros de baja temporal en el contexto académico disponible.";
         }
-        return "Registros de baja temporal autorizados y aplicados; el semestre autorizado, la vigencia y la reincorporacion requieren una fuente institucional adicional.";
+        return "Bajas temporales autorizadas y aplicadas, agrupadas por inicio y fin del evento. La reincorporacion y su vigencia requieren una fuente institucional adicional.";
     }
 
     public String getResumenSustitucionesOptativasPrioritarias() {
@@ -4898,6 +4910,9 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         private String clave;
         private Integer creditos;
         private String estatusHistorico;
+        private String periodoReferencia;
+        private String inicioBaja;
+        private String finBaja;
         private String estatusPeriodo;
         private String prioridad;
         private String motivoPrincipal;
@@ -4990,6 +5005,30 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
         public void setEstatusHistorico(String estatusHistorico) {
             this.estatusHistorico = estatusHistorico;
+        }
+
+        public String getPeriodoReferencia() {
+            return periodoReferencia;
+        }
+
+        public void setPeriodoReferencia(String periodoReferencia) {
+            this.periodoReferencia = periodoReferencia;
+        }
+
+        public String getInicioBaja() {
+            return inicioBaja;
+        }
+
+        public void setInicioBaja(String inicioBaja) {
+            this.inicioBaja = inicioBaja;
+        }
+
+        public String getFinBaja() {
+            return finBaja;
+        }
+
+        public void setFinBaja(String finBaja) {
+            this.finBaja = finBaja;
         }
 
         public String getEstatusPeriodo() {

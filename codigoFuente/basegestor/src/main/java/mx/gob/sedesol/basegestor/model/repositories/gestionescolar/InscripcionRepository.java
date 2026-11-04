@@ -1242,11 +1242,16 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("       tfdp.cve_programa, ");
 		sql.append("       ctb.id_tipo_baja, ");
 		sql.append("       ctb.nombre AS tipo_baja, ");
-		sql.append("       ctb.fecha_modificacion ");
+		sql.append("       ctb.fecha_modificacion, ");
+		sql.append("       rpb.id_evento, ");
+		sql.append("       SUBSTRING_INDEX(evento.cve_evento_cap, '-', -2) AS periodo_evento, ");
+		sql.append("       evento.fecha_inicial, ");
+		sql.append("       evento.fecha_final ");
 		sql.append("FROM rel_persona_bajas rpb ");
 		sql.append("INNER JOIN rel_motivo_baja rmb ON rmb.id_motivo_baja = rpb.motivo_baja_id ");
 		sql.append("INNER JOIN cat_tipo_bajas ctb ON ctb.id_tipo_baja = rmb.tipo_baja_id ");
 		sql.append("INNER JOIN tbl_ficha_descriptiva_programa tfdp ON tfdp.id_programa = rpb.id_programa ");
+		sql.append("LEFT JOIN tbl_eventos evento ON evento.id_evento = rpb.id_evento ");
 		// Una baja con contabilizar = 0 se conserva como antecedente auditado,
 		// pero ya no debe prevalecer sobre una reinscripción acreditada.
 		// Del mismo modo, una baja contabilizable deja de ser una restricción activa
@@ -1288,6 +1293,10 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setIdTipoBaja(getLongValue(row[4]));
 		dto.setTipoBaja((String) row[5]);
 		dto.setFechaModificacion(getLocalDateTimeValue(row[6]));
+		dto.setIdEvento(getLongValue(row[7]));
+		dto.setPeriodoEvento((String) row[8]);
+		dto.setFechaInicioEvento(getLocalDateTimeValue(row[9]));
+		dto.setFechaFinEvento(getLocalDateTimeValue(row[10]));
 
 		return dto;
 	}
