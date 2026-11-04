@@ -2173,7 +2173,7 @@
                                             <div class="prioridad-nota">Una sustitución no reinicia oportunidades ni regulariza el adeudo hasta acreditar la UD vinculada.</div>
                                         </div>
                                         <div class="prioridad-card">
-                                            <h3>Bajas parciales registradas</h3>
+                                            <h3>Bajas parciales aplicadas</h3>
                                             <div class="prioridad-resumen"><div class="contador">#{tablaCurricularAsistidaBean.conteoMovimientosBajaParcialPrioritarias}</div><div class="prioridad-unidad">movimientos</div><div class="prioridad-referencia">#{tablaCurricularAsistidaBean.referenciaBajasParcialesPrioritarias}</div></div>
                                             <div class="prioridad-table-wrap">
                                                 <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}"><table><thead><tr><th>Unidad didáctica</th><th>Periodo de aplicación</th><th>Acreditación actual</th></tr></thead><tbody><ui:repeat value="#{tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}" var="fila"><tr><td><span class="prioridad-clave">#{fila.clave}</span><span class="prioridad-nombre">#{fila.asignatura}</span></td><td>No disponible</td><td><span class="prioridad-estado neutro">No disponible</span></td></tr></ui:repeat></tbody></table></ui:fragment>
@@ -2182,13 +2182,13 @@
                                             <div class="prioridad-nota">UD afectadas: #{tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias.size()}. El NP por baja autorizada no consume oportunidades cuando la autorización sea verificable.</div>
                                         </div>
                                         <div class="prioridad-card">
-                                            <h3>Registros de baja temporal</h3>
+                                            <h3>Bajas temporales autorizadas</h3>
                                             <div class="prioridad-resumen"><div class="contador">#{tablaCurricularAsistidaBean.conteoBajasTemporalesPrioritarias}</div><div class="prioridad-unidad">registros</div><div class="prioridad-referencia">#{tablaCurricularAsistidaBean.referenciaBajasTemporalesPrioritarias}</div></div>
                                             <div class="prioridad-table-wrap">
-                                                <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasBajaTemporalPrioritarias}"><table><thead><tr><th>Semestre autorizado</th><th>Autorización</th><th>Situación de la baja</th></tr></thead><tbody><ui:repeat value="#{tablaCurricularAsistidaBean.filasBajaTemporalPrioritarias}" var="fila"><tr><td><span class="prioridad-clave">No disponible</span><span class="prioridad-nombre">La fuente actual no expone el semestre autorizado</span></td><td>No verificada</td><td><span class="prioridad-estado neutro">Registro identificado</span></td></tr></ui:repeat></tbody></table></ui:fragment>
+                                                <ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasBajaTemporalPrioritarias}"><table><thead><tr><th>Semestre autorizado</th><th>Autorización</th><th>Situación de la baja</th></tr></thead><tbody><ui:repeat value="#{tablaCurricularAsistidaBean.filasBajaTemporalPrioritarias}" var="fila"><tr><td><span class="prioridad-clave">No disponible</span><span class="prioridad-nombre">La fuente actual no expone el semestre autorizado</span></td><td>Autorizada y aplicada</td><td><span class="prioridad-estado neutro">Aplicada</span></td></tr></ui:repeat></tbody></table></ui:fragment>
                                                 <ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasBajaTemporalPrioritarias}"><div class="prioridad-vacia">No se identifican registros de baja temporal en la consulta disponible.</div></ui:fragment>
                                             </div>
-                                            <div class="prioridad-nota">Estos registros no modifican regularidad, oportunidades, plazo ni reincorporación sin evidencia institucional.</div>
+                                            <div class="prioridad-nota">El semestre autorizado, la vigencia y la reincorporación requieren una fuente institucional adicional.</div>
                                         </div>
                                     </div>
                                     <div class="prioritarias-layout ud-prioritarias-legacy">
@@ -2224,9 +2224,9 @@
                                                     <div class="prioridad-detalle"><ui:fragment rendered="#{not empty tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}"><ul><ui:repeat value="#{tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}" var="filaBaja"><li>#{tablaCurricularAsistidaBean.detalleFilaPrioritaria(filaBaja)}</li></ui:repeat></ul></ui:fragment><ui:fragment rendered="#{empty tablaCurricularAsistidaBean.filasConBajaParcialPrioritarias}">No se identifican bajas parciales en las UD visibles.</ui:fragment></div>
                                                 </div>
                                                 <div class="prioridad-card">
-                                                    <h3>UD asociadas a baja temporal</h3>
+                                                    <h3>Bajas temporales autorizadas</h3>
                                                     <div class="contador">#{tablaCurricularAsistidaBean.conteoBajasTemporalesPrioritarias}</div>
-                                                    <p>UD distintas asociadas a registros de baja temporal; su autorización y vigencia deben verificarse en el expediente institucional.</p>
+                                                    <p>Registros autorizados y aplicados; el semestre y la vigencia requieren una fuente institucional adicional.</p>
                                                     <div class="prioridad-detalle">#{tablaCurricularAsistidaBean.resumenBajasTemporalesPrioritarias}</div>
                                                 </div>
                                                 <div class="prioridad-card">

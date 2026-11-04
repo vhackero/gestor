@@ -3752,11 +3752,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getReferenciaBajasParcialesPrioritarias() {
-        return "Movimientos registrados; autorización y aplicación no verificadas";
+        return "Solicitudes autorizadas y aplicadas; movimientos identificados";
     }
 
     public String getReferenciaBajasTemporalesPrioritarias() {
-        return "Autorización, vigencia y semestres no verificados";
+        return "Autorizadas y aplicadas; semestre y vigencia no disponibles";
     }
 
     public String getPeriodoReprobacionPrioritaria(FilaAsistidaDTO fila) {
@@ -4121,7 +4121,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         if (registros == 0) {
             return "No se identifican registros de baja temporal en el contexto académico disponible.";
         }
-        return "Registros asociados a baja temporal; autorizacion, semestre y vigencia no verificadas. No modifican regularidad, oportunidades, plazo ni reincorporacion sin evidencia institucional.";
+        return "Registros de baja temporal autorizados y aplicados; el semestre autorizado, la vigencia y la reincorporacion requieren una fuente institucional adicional.";
     }
 
     public String getResumenSustitucionesOptativasPrioritarias() {

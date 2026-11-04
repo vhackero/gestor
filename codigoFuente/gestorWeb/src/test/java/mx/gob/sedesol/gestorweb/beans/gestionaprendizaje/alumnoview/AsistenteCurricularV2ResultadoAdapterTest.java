@@ -343,8 +343,8 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertFalse(bean.isOportunidadesAcreditacionDisponibles());
 		assertTrue(bean.getReferenciaOportunidadesPrioritarias().contains("no disponible"));
 		assertTrue(bean.getReferenciaSustitucionesPrioritarias().contains("no disponible"));
-		assertTrue(bean.getReferenciaBajasParcialesPrioritarias().contains("no verificadas"));
-		assertTrue(bean.getReferenciaBajasTemporalesPrioritarias().contains("no verificados"));
+		assertTrue(bean.getReferenciaBajasParcialesPrioritarias().contains("autorizadas y aplicadas"));
+		assertTrue(bean.getReferenciaBajasTemporalesPrioritarias().contains("Autorizadas y aplicadas"));
 	}
 
 	@Test
