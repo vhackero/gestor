@@ -20,6 +20,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoD
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.inscripcion.InscripcionPreviaMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
@@ -29,6 +30,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCur
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TrazaReglaAplicadaV2DTO;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasService;
 
 public class AsistenteCurricularV2ResultadoAdapterTest {
@@ -411,6 +413,31 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 				bean.getFilasAntecedenteRecursamientoPrioritarias().get(0)), "Regularizada");
 	}
 
+	@Test
+	public void muestraPeriodoCalificacionYRecursamientosDesdeEventosDelHistorial() throws Exception {
+		AsistenteInscripcionContextoDTO contexto = contextoConPlan();
+		contexto.setUnidades(Arrays.asList(unidad(Long.valueOf(121L), "CSNPD", "Acreditada", null)));
+		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
+		inyectar(bean, "contexto", contexto);
+		inyectar(bean, "idPersonaObjetivo", Long.valueOf(903L));
+		inyectar(bean, "decisionesV2PorPrograma", new HashMap<Long, DecisionUnidadCurricularV2DTO>());
+		InscripcionService inscripcionService = Mockito.mock(InscripcionService.class);
+		Mockito.when(inscripcionService.obtenerProgramasMallaAlumno(Long.valueOf(903L), Long.valueOf(77L)))
+				.thenReturn(Arrays.asList(historialMalla(121L, 80D, 70D, true)));
+		inyectar(bean, "inscripcionService", inscripcionService);
+		GrupoParticipanteService grupoParticipanteService = Mockito.mock(GrupoParticipanteService.class);
+		Mockito.when(grupoParticipanteService.getParticipanteByActaCerradaYconstancia2(Long.valueOf(903L)))
+				.thenReturn(Arrays.asList(evento("CSNPD", "2026-1", 55D, "ORD"),
+						evento("CSNPD", "2026-2", 80D, "REC")));
+		inyectar(bean, "grupoParticipanteService", grupoParticipanteService);
+
+		TablaCurricularAsistidaBean.FilaAsistidaDTO fila = bean.getFilasAntecedenteRecursamientoPrioritarias().get(0);
+		assertEquals(bean.getEstadoAntecedenteRecursamiento(fila), "Regularizada");
+		assertEquals(bean.getPeriodoAntecedenteRecursamiento(fila), "2026-2");
+		assertEquals(bean.getCalificacionAntecedenteRecursamiento(fila), "80");
+		assertEquals(bean.getRecursamientosAntecedenteRecursamiento(fila), "1 de 2");
+	}
+
 	private UnidadDecisionInscripcionDTO unidad(Long id, String clave, String historico, String periodo) {
 		UnidadDecisionInscripcionDTO unidad = new UnidadDecisionInscripcionDTO();
 		unidad.setUdId(id);
@@ -446,6 +473,15 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		InscripcionPreviaMateriasDTO inscripcion = new InscripcionPreviaMateriasDTO();
 		inscripcion.setIdPrograma(idPrograma);
 		return inscripcion;
+	}
+
+	private EventoConstanciaDTO evento(String clave, String periodo, Double calificacion, String tipoEvaluacion) {
+		EventoConstanciaDTO evento = new EventoConstanciaDTO();
+		evento.setClave(clave);
+		evento.setPeriodo(periodo);
+		evento.setCalificacionFinal(calificacion);
+		evento.setTipoEvaluacion(tipoEvaluacion);
+		return evento;
 	}
 
 	private void inyectar(Object destino, String nombre, Object valor) throws Exception {

@@ -71,6 +71,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     private static final long serialVersionUID = 1L;
     private static final int MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA = 8;
+    private static final int MAXIMO_RECURSAMIENTOS_POR_UD = 2;
     private static final Logger logger = Logger.getLogger(TablaCurricularAsistidaBean.class);
     private static final AsistenteCurricularV2ResultadoAdapter ADAPTADOR_RESULTADO_V2 = new AsistenteCurricularV2ResultadoAdapter();
     private static final String SESION_PRESELECCION_INSCRIPCION = "preseleccionInscripcionAsistente";
@@ -3504,6 +3505,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             }
         }
 
+        Map<String, List<EventoConstanciaDTO>> eventosPorClave = obtenerEventosHistorialPorClave();
         Map<Long, FilaAsistidaDTO> filasPorPrograma = new LinkedHashMap<Long, FilaAsistidaDTO>();
         for (FilaAsistidaDTO fila : obtenerFilasContextoParaRegularizacion()) {
             if (fila != null && fila.getUdId() != null) {
@@ -3549,9 +3551,77 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             }
             String identidad = claveUnicaFilaPrioritaria(fila);
             antecedentesRecursamientoPrioritarios.putIfAbsent(identidad,
-                    new AntecedenteRecursamientoDTO(fila, recursando ? "Recursando" : "Regularizada"));
+                    construirAntecedenteRecursamiento(fila, recursando ? "Recursando" : "Regularizada",
+                            eventosPorClave.get(normalizaClaveCurricular(fila.getClave()))));
         }
         return antecedentesRecursamientoPrioritarios;
+    }
+
+    private Map<String, List<EventoConstanciaDTO>> obtenerEventosHistorialPorClave() {
+        Map<String, List<EventoConstanciaDTO>> eventosPorClave = new HashMap<String, List<EventoConstanciaDTO>>();
+        if (grupoParticipanteService == null || idPersonaObjetivo == null) {
+            return eventosPorClave;
+        }
+        List<EventoConstanciaDTO> eventos = grupoParticipanteService
+                .getParticipanteByActaCerradaYconstancia2(idPersonaObjetivo);
+        if (ObjectUtils.isNullOrEmpty(eventos)) {
+            return eventosPorClave;
+        }
+        for (EventoConstanciaDTO evento : eventos) {
+            String clave = evento != null ? normalizaClaveCurricular(evento.getClave()) : null;
+            if (StringUtils.isBlank(clave)) {
+                continue;
+            }
+            List<EventoConstanciaDTO> eventosUd = eventosPorClave.get(clave);
+            if (eventosUd == null) {
+                eventosUd = new ArrayList<EventoConstanciaDTO>();
+                eventosPorClave.put(clave, eventosUd);
+            }
+            eventosUd.add(evento);
+        }
+        return eventosPorClave;
+    }
+
+    private AntecedenteRecursamientoDTO construirAntecedenteRecursamiento(FilaAsistidaDTO fila, String estado,
+            List<EventoConstanciaDTO> eventos) {
+        EventoConstanciaDTO ultimo = null;
+        int recursamientos = 0;
+        if (eventos != null) {
+            for (EventoConstanciaDTO evento : eventos) {
+                if (evento == null) {
+                    continue;
+                }
+                if ("REC".equalsIgnoreCase(StringUtils.trimToEmpty(evento.getTipoEvaluacion()))) {
+                    recursamientos++;
+                }
+                if (ultimo == null || esPosterior(evento, ultimo)) {
+                    ultimo = evento;
+                }
+            }
+        }
+        return new AntecedenteRecursamientoDTO(fila, estado, ultimo,
+                recursamientos > 0 ? Integer.valueOf(recursamientos) : null);
+    }
+
+    private static boolean esPosterior(EventoConstanciaDTO candidato, EventoConstanciaDTO referencia) {
+        if (referencia == null) {
+            return true;
+        }
+        if (candidato.getFecha() != null && referencia.getFecha() != null) {
+            return candidato.getFecha().after(referencia.getFecha());
+        }
+        if (candidato.getFecha() != null) {
+            return true;
+        }
+        if (referencia.getFecha() != null) {
+            return false;
+        }
+        return StringUtils.defaultString(candidato.getPeriodo())
+                .compareTo(StringUtils.defaultString(referencia.getPeriodo())) > 0;
+    }
+
+    private static String normalizaClaveCurricular(String clave) {
+        return StringUtils.upperCase(StringUtils.trimToEmpty(clave));
     }
 
     private static boolean esReprobacionHistorica(MallaAlumnoProgramaDTO historialUd) {
@@ -3632,6 +3702,45 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         AntecedenteRecursamientoDTO antecedente = obtenerAntecedentesRecursamientoPrioritarios()
                 .get(claveUnicaFilaPrioritaria(fila));
         return antecedente != null ? antecedente.getEstado() : "Antecedente no determinado";
+    }
+
+    public String getPeriodoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        EventoConstanciaDTO evento = getEventoAntecedenteRecursamiento(fila);
+        return evento != null && StringUtils.isNotBlank(evento.getPeriodo()) ? evento.getPeriodo() : "No disponible";
+    }
+
+    public String periodoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        return getPeriodoAntecedenteRecursamiento(fila);
+    }
+
+    public String getCalificacionAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        EventoConstanciaDTO evento = getEventoAntecedenteRecursamiento(fila);
+        if (evento == null || evento.getCalificacionFinal() == null) {
+            return "No disponible";
+        }
+        return String.valueOf(evento.getCalificacionFinal().intValue());
+    }
+
+    public String calificacionAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        return getCalificacionAntecedenteRecursamiento(fila);
+    }
+
+    public String getRecursamientosAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        AntecedenteRecursamientoDTO antecedente = obtenerAntecedentesRecursamientoPrioritarios()
+                .get(claveUnicaFilaPrioritaria(fila));
+        return antecedente != null && antecedente.getRecursamientos() != null
+                ? antecedente.getRecursamientos() + " de " + MAXIMO_RECURSAMIENTOS_POR_UD
+                : "Dato no disponible";
+    }
+
+    public String recursamientosAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        return getRecursamientosAntecedenteRecursamiento(fila);
+    }
+
+    private EventoConstanciaDTO getEventoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        AntecedenteRecursamientoDTO antecedente = obtenerAntecedentesRecursamientoPrioritarios()
+                .get(claveUnicaFilaPrioritaria(fila));
+        return antecedente != null ? antecedente.getUltimoEvento() : null;
     }
 
     /** Firma invocable desde EL para el estado del antecedente. */
@@ -4525,10 +4634,15 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         private static final long serialVersionUID = 1L;
         private final FilaAsistidaDTO fila;
         private final String estado;
+        private final EventoConstanciaDTO ultimoEvento;
+        private final Integer recursamientos;
 
-        AntecedenteRecursamientoDTO(FilaAsistidaDTO fila, String estado) {
+        AntecedenteRecursamientoDTO(FilaAsistidaDTO fila, String estado, EventoConstanciaDTO ultimoEvento,
+                Integer recursamientos) {
             this.fila = fila;
             this.estado = estado;
+            this.ultimoEvento = ultimoEvento;
+            this.recursamientos = recursamientos;
         }
 
         FilaAsistidaDTO getFila() {
@@ -4537,6 +4651,14 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
         String getEstado() {
             return estado;
+        }
+
+        EventoConstanciaDTO getUltimoEvento() {
+            return ultimoEvento;
+        }
+
+        Integer getRecursamientos() {
+            return recursamientos;
         }
     }
 
