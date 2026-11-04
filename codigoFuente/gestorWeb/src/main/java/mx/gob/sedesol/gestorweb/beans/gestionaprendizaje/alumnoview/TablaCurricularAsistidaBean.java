@@ -3504,7 +3504,36 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             }
         }
 
+        Map<Long, FilaAsistidaDTO> filasPorPrograma = new LinkedHashMap<Long, FilaAsistidaDTO>();
         for (FilaAsistidaDTO fila : obtenerFilasContextoParaRegularizacion()) {
+            if (fila != null && fila.getUdId() != null) {
+                filasPorPrograma.putIfAbsent(fila.getUdId(), fila);
+            }
+        }
+        // El contexto de inscripción puede omitir una UD ya acreditada. La
+        // Malla sí consulta todo el plan; completamos esas filas para no perder
+        // antecedentes regularizados como CSNPD.
+        if (fecServiceFacade != null && fecServiceFacade.getFichaDescProgramaService() != null) {
+            List<FichaDescProgramaDTO> programasPlan = fecServiceFacade.getFichaDescProgramaService()
+                    .buscarProgramasPorPlan(planId.intValue());
+            if (!ObjectUtils.isNullOrEmpty(programasPlan)) {
+                for (FichaDescProgramaDTO programa : programasPlan) {
+                    if (programa == null || programa.getIdPrograma() == null
+                            || filasPorPrograma.containsKey(programa.getIdPrograma().longValue())) {
+                        continue;
+                    }
+                    FilaAsistidaDTO fila = new FilaAsistidaDTO();
+                    fila.setUdId(programa.getIdPrograma().longValue());
+                    fila.setClave(programa.getCvePrograma());
+                    fila.setAsignatura(resolveNombrePrograma(programa));
+                    fila.setTipo(programa.getTipo());
+                    fila.setCreditos(programa.getCreditos());
+                    filasPorPrograma.put(fila.getUdId(), fila);
+                }
+            }
+        }
+
+        for (FilaAsistidaDTO fila : filasPorPrograma.values()) {
             if (fila == null || fila.getUdId() == null) {
                 continue;
             }
