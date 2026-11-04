@@ -119,6 +119,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private String respuestaPreguntaOrientacion;
     private CreditosResumenMallaDTO creditosResumenMalla;
     private List<InscripcionPreviaMateriasDTO> inscripcionesActualesResumen;
+    private Map<String, List<EventoConstanciaDTO>> eventosHistorialPorClave;
     /**
      * La tarjeta de recursamiento se basa en el historial por idPrograma y la
      * inscripción vigente, no en el agregado de reprobaciones del contexto V2.
@@ -545,6 +546,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     public void setContexto(AsistenteInscripcionContextoDTO contexto) {
         this.contexto = contexto;
         this.antecedentesRecursamientoPrioritarios = null;
+        this.eventosHistorialPorClave = null;
     }
 
     public List<SemestreAsistidoDTO> getSemestres() {
@@ -3558,28 +3560,31 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     private Map<String, List<EventoConstanciaDTO>> obtenerEventosHistorialPorClave() {
-        Map<String, List<EventoConstanciaDTO>> eventosPorClave = new HashMap<String, List<EventoConstanciaDTO>>();
+        if (eventosHistorialPorClave != null) {
+            return eventosHistorialPorClave;
+        }
+        eventosHistorialPorClave = new HashMap<String, List<EventoConstanciaDTO>>();
         if (grupoParticipanteService == null || idPersonaObjetivo == null) {
-            return eventosPorClave;
+            return eventosHistorialPorClave;
         }
         List<EventoConstanciaDTO> eventos = grupoParticipanteService
                 .getParticipanteByActaCerradaYconstancia2(idPersonaObjetivo);
         if (ObjectUtils.isNullOrEmpty(eventos)) {
-            return eventosPorClave;
+            return eventosHistorialPorClave;
         }
         for (EventoConstanciaDTO evento : eventos) {
             String clave = evento != null ? normalizaClaveCurricular(evento.getClave()) : null;
             if (StringUtils.isBlank(clave)) {
                 continue;
             }
-            List<EventoConstanciaDTO> eventosUd = eventosPorClave.get(clave);
+            List<EventoConstanciaDTO> eventosUd = eventosHistorialPorClave.get(clave);
             if (eventosUd == null) {
                 eventosUd = new ArrayList<EventoConstanciaDTO>();
-                eventosPorClave.put(clave, eventosUd);
+                eventosHistorialPorClave.put(clave, eventosUd);
             }
             eventosUd.add(evento);
         }
-        return eventosPorClave;
+        return eventosHistorialPorClave;
     }
 
     private AntecedenteRecursamientoDTO construirAntecedenteRecursamiento(FilaAsistidaDTO fila, String estado,
@@ -3681,7 +3686,8 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getPeriodoReprobacionPrioritaria(FilaAsistidaDTO fila) {
-        return "Periodo no disponible";
+        EventoConstanciaDTO evento = getUltimoEventoReprobado(fila);
+        return evento != null && StringUtils.isNotBlank(evento.getPeriodo()) ? evento.getPeriodo() : "Periodo no disponible";
     }
 
     /** Firma invocable desde EL para el periodo de la fila prioritaria. */
@@ -3690,7 +3696,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getCalificacionReprobacionPrioritaria(FilaAsistidaDTO fila) {
-        return "No disponible";
+        return formatearCalificacionEvento(getUltimoEventoReprobado(fila));
     }
 
     /** Firma invocable desde EL para la calificación de la fila prioritaria. */
@@ -3714,10 +3720,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public String getCalificacionAntecedenteRecursamiento(FilaAsistidaDTO fila) {
-        EventoConstanciaDTO evento = getEventoAntecedenteRecursamiento(fila);
-        if (evento == null) {
-            return "No disponible";
-        }
+        return formatearCalificacionEvento(getEventoAntecedenteRecursamiento(fila));
+    }
+
+    private String formatearCalificacionEvento(EventoConstanciaDTO evento) {
+        if (evento == null) return "No disponible";
         if (evento.getCalificacionFinal() != null) {
             return String.valueOf(evento.getCalificacionFinal().intValue());
         }
@@ -3733,6 +3740,26 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         } catch (NumberFormatException ex) {
             return calificacion;
         }
+    }
+
+    private EventoConstanciaDTO getUltimoEventoReprobado(FilaAsistidaDTO fila) {
+        if (fila == null) return null;
+        List<EventoConstanciaDTO> eventos = obtenerEventosHistorialPorClave()
+                .get(normalizaClaveCurricular(fila.getClave()));
+        EventoConstanciaDTO ultimo = null;
+        if (eventos == null) return null;
+        for (EventoConstanciaDTO evento : eventos) {
+            if (!esEventoNoAcreditado(evento)) continue;
+            if (ultimo == null || esPosterior(evento, ultimo)) {
+                ultimo = evento;
+            }
+        }
+        return ultimo;
+    }
+
+    private static boolean esEventoNoAcreditado(EventoConstanciaDTO evento) {
+        return evento != null && evento.getTipoConstancia() != null
+                && evento.getTipoConstancia().intValue() != 1;
     }
 
     public String calificacionAntecedenteRecursamiento(FilaAsistidaDTO fila) {

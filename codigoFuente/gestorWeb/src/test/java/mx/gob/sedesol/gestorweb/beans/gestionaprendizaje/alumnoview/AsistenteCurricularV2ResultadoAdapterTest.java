@@ -461,6 +461,28 @@ public class AsistenteCurricularV2ResultadoAdapterTest {
 		assertEquals(bean.getCalificacionAntecedenteRecursamiento(fila), "80");
 	}
 
+	@Test
+	public void muestraUltimoPeriodoYCalificacionDelEventoReprobadoPendiente() throws Exception {
+		AsistenteInscripcionContextoDTO contexto = contextoConPlan();
+		contexto.setUnidades(Arrays.asList(unidad(Long.valueOf(123L), "CCVP", "Reprobada", null)));
+		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
+		inyectar(bean, "contexto", contexto);
+		inyectar(bean, "idPersonaObjetivo", Long.valueOf(905L));
+		inyectar(bean, "decisionesV2PorPrograma", new HashMap<Long, DecisionUnidadCurricularV2DTO>());
+		EventoConstanciaDTO primerIntento = evento("CCVP", "2025-2", 45D, "ORD");
+		primerIntento.setTipoConstancia(Integer.valueOf(0));
+		EventoConstanciaDTO ultimoIntento = evento("CCVP", "2026-1", 55D, "ORD");
+		ultimoIntento.setTipoConstancia(Integer.valueOf(0));
+		GrupoParticipanteService grupoParticipanteService = Mockito.mock(GrupoParticipanteService.class);
+		Mockito.when(grupoParticipanteService.getParticipanteByActaCerradaYconstancia2(Long.valueOf(905L)))
+				.thenReturn(Arrays.asList(primerIntento, ultimoIntento));
+		inyectar(bean, "grupoParticipanteService", grupoParticipanteService);
+
+		TablaCurricularAsistidaBean.FilaAsistidaDTO fila = bean.getFilasReprobadasPrioritarias().get(0);
+		assertEquals(bean.getPeriodoReprobacionPrioritaria(fila), "2026-1");
+		assertEquals(bean.getCalificacionReprobacionPrioritaria(fila), "55");
+	}
+
 	private UnidadDecisionInscripcionDTO unidad(Long id, String clave, String historico, String periodo) {
 		UnidadDecisionInscripcionDTO unidad = new UnidadDecisionInscripcionDTO();
 		unidad.setUdId(id);
