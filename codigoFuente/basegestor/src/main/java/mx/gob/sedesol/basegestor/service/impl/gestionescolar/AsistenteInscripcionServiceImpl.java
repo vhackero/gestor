@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -3505,16 +3507,84 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         if (contexto == null || contexto.getUnidades() == null || contexto.getUnidades().isEmpty()) {
             return Collections.emptyList();
         }
+        if (contextoEvaluacionCurricularV2Adapter == null || evaluacionCurricularV2Service == null) {
+            return Collections.emptyList();
+        }
+        try {
+            ContextoEvaluacionCurricularV2DTO contextoV2 = contextoEvaluacionCurricularV2Adapter.construirDesdeAsistente(contexto);
+            if (configuracionEvaluacionCurricularV2Service != null) {
+                contextoV2.setVersionReglas(configuracionEvaluacionCurricularV2Service.obtenerConfiguracion().getVersionReglas());
+            }
+            ResultadoEvaluacionCurricularV2DTO resultado = evaluacionCurricularV2Service.evaluarSombra(contextoV2);
+            return construirEscenariosDesdeV2(contexto, resultado);
+        } catch (RuntimeException ex) {
+            // La proyeccion no puede sustituir V2 con reglas locales si la evaluacion falla.
+            return Collections.emptyList();
+        }
+    }
 
+    /** Construye alternativas de consulta desde decisiones y limites normativos V2. */
+    private List<EscenarioCargaDTO> construirEscenariosDesdeV2(AsistenteInscripcionContextoDTO contexto,
+            ResultadoEvaluacionCurricularV2DTO resultado) {
+        if (resultado == null || resultado.getEvaluacionCargaAcademica() == null) return Collections.emptyList();
+        Integer minimo = resultado.getEvaluacionCargaAcademica().getCargaMinimaNormativa();
+        Integer maximo = resultado.getEvaluacionCargaAcademica().getCargaMaximaNormativa();
+        if (minimo == null || maximo == null || maximo.intValue() <= 0) return Collections.emptyList();
+
+        Map<Long, DecisionUnidadCurricularV2DTO> decisiones = new LinkedHashMap<Long, DecisionUnidadCurricularV2DTO>();
+        for (DecisionUnidadCurricularV2DTO decision : resultado.getDecisiones()) {
+            if (decision != null && decision.getIdPrograma() != null) decisiones.put(decision.getIdPrograma(), decision);
+        }
+        final boolean soloRegularizacion = Boolean.TRUE.equals(resultado.getEvaluacionCargaAcademica().getAplicaRn64());
+        List<UnidadDecisionInscripcionDTO> candidatas = new ArrayList<UnidadDecisionInscripcionDTO>();
+        for (UnidadDecisionInscripcionDTO unidad : contexto.getUnidades()) {
+            if (unidad == null || unidad.getUdId() == null || "ACREDITADA".equalsIgnoreCase(unidad.getEstatusHistorico())) continue;
+            DecisionUnidadCurricularV2DTO decision = decisiones.get(unidad.getUdId());
+            boolean prioritaria = decision != null && Boolean.TRUE.equals(decision.getPrioritaria());
+            boolean habilitada = decision != null && Boolean.TRUE.equals(decision.getHabilitada());
+            boolean reprobada = "REPROBADA".equalsIgnoreCase(unidad.getEstatusHistorico());
+            if ((soloRegularizacion && reprobada) || (!soloRegularizacion && (prioritaria || habilitada))) candidatas.add(unidad);
+        }
+        Collections.sort(candidatas, (a, b) -> {
+            DecisionUnidadCurricularV2DTO da = decisiones.get(a.getUdId());
+            DecisionUnidadCurricularV2DTO db = decisiones.get(b.getUdId());
+            boolean pa = da != null && Boolean.TRUE.equals(da.getPrioritaria());
+            boolean pb = db != null && Boolean.TRUE.equals(db.getPrioritaria());
+            if (pa != pb) return pa ? -1 : 1;
+            boolean ra = "REPROBADA".equalsIgnoreCase(a.getEstatusHistorico());
+            boolean rb = "REPROBADA".equalsIgnoreCase(b.getEstatusHistorico());
+            if (ra != rb) return ra ? -1 : 1;
+            return compararUnidades(a, b);
+        });
+        if (candidatas.isEmpty()) return Collections.emptyList();
+
+        int limite = Math.min(maximo.intValue(), candidatas.size());
+        int reducida = Math.min(Math.max(1, minimo.intValue()), limite);
+        int intermedia = Math.min(limite, Math.max(reducida, (reducida + limite) / 2));
         List<EscenarioCargaDTO> escenarios = new ArrayList<EscenarioCargaDTO>();
-        List<UnidadDecisionInscripcionDTO> elegibles = contexto.getUnidades().stream()
-                .filter(this::esUnidadSeleccionableEscenario)
-                .collect(java.util.stream.Collectors.toList());
-
-        escenarios.add(construirEscenarioMinimo(elegibles, contexto));
-        escenarios.add(construirEscenarioBalanceado(elegibles, contexto));
-        escenarios.add(construirEscenarioMaximo(elegibles, contexto));
+        agregarEscenarioV2(escenarios, "MINIMO", "Carga reducida", "Alternativa menor compatible con los límites V2.", candidatas, reducida, soloRegularizacion);
+        agregarEscenarioV2(escenarios, "BALANCEADO", "Carga intermedia", "Alternativa entre el mínimo aplicable y el límite V2.", candidatas, intermedia, soloRegularizacion);
+        agregarEscenarioV2(escenarios, "MAXIMO", "Carga intensiva", "Alternativa máxima compatible con los límites V2.", candidatas, limite, soloRegularizacion);
         return escenarios;
+    }
+
+    private void agregarEscenarioV2(List<EscenarioCargaDTO> destinos, String tipo, String nombre, String descripcion,
+            List<UnidadDecisionInscripcionDTO> candidatas, int cantidad, boolean soloRegularizacion) {
+        List<UnidadDecisionInscripcionDTO> seleccion = new ArrayList<UnidadDecisionInscripcionDTO>(candidatas.subList(0, cantidad));
+        Set<Long> ids = new LinkedHashSet<Long>();
+        for (UnidadDecisionInscripcionDTO unidad : seleccion) ids.add(unidad.getUdId());
+        for (EscenarioCargaDTO existente : destinos) {
+            if (new LinkedHashSet<Long>(existente.getUnidadesIds()).equals(ids)) return;
+        }
+        EscenarioCargaDTO escenario = crearEscenarioBase(tipo, nombre, descripcion, seleccion);
+        escenario.setBeneficioPrincipal(soloRegularizacion
+                ? "Incluye exclusivamente UD destinadas a regularización."
+                : "Combina prioridades V2 y UD académicamente habilitadas.");
+        escenario.setRiesgoGeneral(cantidad == candidatas.size()
+                ? "Integra el máximo disponible dentro del límite individual."
+                : "Incluye menos UD para atender simultáneamente.");
+        escenario.getRazones().add("Propuesta informativa: se valida nuevamente en el Simulador.");
+        destinos.add(escenario);
     }
 
     private EscenarioCargaDTO construirEscenarioMinimo(List<UnidadDecisionInscripcionDTO> elegibles,

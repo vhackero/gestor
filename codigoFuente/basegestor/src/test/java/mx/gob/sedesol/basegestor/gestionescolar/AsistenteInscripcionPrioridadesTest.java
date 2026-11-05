@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EscenarioProyeccionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EscenarioCargaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
@@ -29,6 +30,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacio
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.UnidadEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaAcademicaV2DTO;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ContextoEvaluacionCurricularV2Adapter;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.EvaluacionCurricularV2Service;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.v2.ContextoEvaluacionCurricularV2AdapterImpl;
@@ -157,6 +160,46 @@ public class AsistenteInscripcionPrioridadesTest {
         assertEquals(proyeccion.getEscenarios().get(1).getReprobadasVigentes(), Integer.valueOf(3));
         assertEquals(proyeccion.getEscenarios().get(2).getReprobadasVigentes(), Integer.valueOf(4));
         assertEquals(contexto.getUnidades().get(3).getEstatusHistorico(), "En curso");
+    }
+
+    @Test
+    public void proyeccionRespetaRestriccionV2DeRegularizacionSinAgregarUdsNuevas() throws Exception {
+        AsistenteInscripcionContextoDTO contexto = new AsistenteInscripcionContextoDTO();
+        contexto.setUnidades(Arrays.asList(
+                unidadReal(1L, "R-01", "Reprobada", 2),
+                unidadReal(2L, "R-02", "Reprobada", 2),
+                unidadReal(3L, "R-03", "Reprobada", 3),
+                unidadReal(4L, "R-04", "Reprobada", 3),
+                unidadReal(5L, "N-01", "No inscrita", 4)));
+        ContextoEvaluacionCurricularV2DTO contextoV2 = new ContextoEvaluacionCurricularV2DTO();
+        ResultadoEvaluacionCurricularV2DTO resultado = new ResultadoEvaluacionCurricularV2DTO();
+        EvaluacionCargaAcademicaV2DTO carga = new EvaluacionCargaAcademicaV2DTO();
+        carga.setCargaMinimaNormativa(Integer.valueOf(3));
+        carga.setCargaMaximaNormativa(Integer.valueOf(6));
+        carga.setAplicaRn64(Boolean.TRUE);
+        resultado.setEvaluacionCargaAcademica(carga);
+        for (long id = 1; id <= 5; id++) {
+            DecisionUnidadCurricularV2DTO decision = new DecisionUnidadCurricularV2DTO();
+            decision.setIdPrograma(Long.valueOf(id));
+            decision.setHabilitada(Boolean.TRUE);
+            decision.setPrioritaria(Boolean.valueOf(id < 5));
+            resultado.getDecisiones().add(decision);
+        }
+        AsistenteInscripcionServiceImpl servicio = new AsistenteInscripcionServiceImpl();
+        ContextoEvaluacionCurricularV2Adapter adaptador = Mockito.mock(ContextoEvaluacionCurricularV2Adapter.class);
+        EvaluacionCurricularV2Service evaluador = Mockito.mock(EvaluacionCurricularV2Service.class);
+        Mockito.when(adaptador.construirDesdeAsistente(contexto)).thenReturn(contextoV2);
+        Mockito.when(evaluador.evaluarSombra(contextoV2)).thenReturn(resultado);
+        inyectar(servicio, "contextoEvaluacionCurricularV2Adapter", adaptador);
+        inyectar(servicio, "evaluacionCurricularV2Service", evaluador);
+        Method metodo = AsistenteInscripcionServiceImpl.class.getDeclaredMethod("construirEscenarios", AsistenteInscripcionContextoDTO.class);
+        metodo.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        List<EscenarioCargaDTO> escenarios = (List<EscenarioCargaDTO>) metodo.invoke(servicio, contexto);
+
+        assertTrue(!escenarios.isEmpty());
+        for (EscenarioCargaDTO escenario : escenarios) assertTrue(!escenario.getUnidadesIds().contains(Long.valueOf(5L)));
+        assertEquals(escenarios.get(escenarios.size() - 1).getUnidadesIds().size(), 4);
     }
 
     private ProyeccionSiguientePeriodoDTO invocarExpectativa(ContextoEvaluacionCurricularV2DTO base,

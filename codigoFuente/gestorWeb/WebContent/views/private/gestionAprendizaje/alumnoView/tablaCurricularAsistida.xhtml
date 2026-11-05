@@ -741,6 +741,27 @@
             .expectativa-tabla th { background: #eaf4fb; color: #0d315f; text-align: left; }
             .expectativa-orientacion { background: #f0f8fd; border-radius: 7px; padding: 12px 15px; margin-top: 10px; }
             .expectativa-restablecer { float: right; }
+            .proyeccion-carga h2 { color: #082757; font-size: 32px; margin: 3px 0; }
+            .proyeccion-subtitulo { color: #526d97; font-size: 17px; margin: 0 0 13px; }
+            .proyeccion-contexto { background: #eaf6fd; border-radius: 7px; padding: 12px 16px; margin: 10px 0 16px; color: #15386d; }
+            .proyeccion-contexto span { margin-right: 20px; }
+            .proyeccion-aviso { background: #eaf6fd; border-radius: 7px; padding: 12px; color: #20518a; margin-bottom: 14px; }
+            .proyeccion-grid { display: grid; grid-template-columns: repeat(3, minmax(250px, 1fr)); gap: 16px; }
+            .proyeccion-card { border: 1px solid #b9ddeb; border-radius: 8px; overflow: hidden; background: #fff; padding-bottom: 13px; }
+            .proyeccion-card-head { background: #e4f5ff; padding: 12px 16px; color: #062c65; }
+            .proyeccion-card-head h3 { margin: 0; font-size: 23px; }
+            .proyeccion-card-body { padding: 12px 16px; }
+            .proyeccion-total { font-size: 26px; font-weight: 700; color: #082c64; margin: 0 0 5px; }
+            .proyeccion-referencia { color: #355a8b; min-height: 42px; }
+            .proyeccion-bloques span { display: inline-block; padding: 5px 13px; margin: 5px 7px 9px 0; border-radius: 6px; background: #eaf5fd; color: #123b75; font-weight: 700; }
+            .proyeccion-tabla { width: 100%; border-collapse: collapse; font-size: 13px; max-height: 220px; overflow: auto; display: block; }
+            .proyeccion-tabla th, .proyeccion-tabla td { border: 1px solid #dce8f1; padding: 7px; white-space: normal; }
+            .proyeccion-tabla th { background: #f0f8fc; color: #143661; }
+            .finalidad-proyeccion { border-radius: 8px; padding: 4px 8px; background: #e5f3ff; color: #0862a6; white-space: nowrap; }
+            .finalidad-proyeccion.regularizar { background: #fff0cb; color: #925700; }
+            .proyeccion-notas { margin: 12px 0; color: #274b7f; }
+            .proyeccion-notas div { margin: 7px 0; }
+            .proyeccion-card .ui-button { width: 100%; margin-top: 8px; }
             .oportunidad-box {
                 margin-top: 34px;
                 background: #ffffff;
@@ -2390,68 +2411,42 @@
                             </p:outputPanel>
                         </p:tab>
 
-                        <p:tab title="Proyección de carga" rendered="#{not tablaCurricularAsistidaBean.periodoCursamiento}">
-                            <div class="asistente-section">
+                        <p:tab title="Proyección de carga académica">
+                            <div class="asistente-section proyeccion-carga">
                                 <ui:fragment rendered="#{not tablaCurricularAsistidaBean.mostrarProyeccionConDatos}">
                                     <div class="soft-panel">
                                         <h3>Proyección de carga no disponible</h3>
-                                        <p>Aún no se cuenta con información suficiente para mostrar la proyección de carga de este estudiante.</p>
+                                        <p>No hay decisiones V2 suficientes para construir alternativas. Consulta nuevamente cuando se complete la información curricular.</p>
                                     </div>
                                 </ui:fragment>
                                 <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarProyeccionConDatos}">
-                                <div class="meta-strip">
-                                    <div class="meta-strip-left">
-                                        <div class="meta-pill">
-                                            <strong>#{tablaCurricularAsistidaBean.descripcionSituacionAcademica}</strong>
-                                            <span style="margin-left:20px;"><strong>#{tablaCurricularAsistidaBean.etiquetaPeriodoInscripcion}:</strong> #{tablaCurricularAsistidaBean.contexto.periodoActivo}</span>
-                                        </div>
+                                    <h2>Proyección de carga académica</h2>
+                                    <p class="proyeccion-subtitulo">Compara propuestas académicas construidas con las decisiones vigentes del Motor curricular.</p>
+                                    <div class="proyeccion-contexto">
+                                        <span><strong>Periodo objetivo:</strong> #{tablaCurricularAsistidaBean.periodoProyectadoExpectativa}</span>
+                                        <span><strong>Situación proyectada:</strong> #{tablaCurricularAsistidaBean.escenarioSeleccionadoExpectativa ne null ? tablaCurricularAsistidaBean.escenarioSeleccionadoExpectativa.resultadoHipotetico : tablaCurricularAsistidaBean.descripcionSituacionAcademica}</span>
+                                        <span><strong>UD reprobadas pendientes:</strong> #{tablaCurricularAsistidaBean.escenarioSeleccionadoExpectativa ne null ? tablaCurricularAsistidaBean.escenarioSeleccionadoExpectativa.reprobadasVigentes : 'No determinado'}</span>
                                     </div>
-                                    <div class="meta-strip-right">
-                                        <div class="meta-box">Créditos del Programa Educativo: <strong>#{tablaCurricularAsistidaBean.contexto.creditosTotalesPlan}</strong></div>
-                                        <div class="meta-box">Créditos acumulados: <strong>#{tablaCurricularAsistidaBean.contexto.creditosAcumulados}</strong></div>
-                                        <div class="meta-box">% acumulado:
-                                            <strong>
-                                                <h:outputText value="#{tablaCurricularAsistidaBean.contexto.porcentajeCreditosCompletados / 100}">
-                                                    <f:convertNumber type="percent" minFractionDigits="1" maxFractionDigits="1" />
-                                                </h:outputText>
-                                            </strong>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="escenarios-grid">
-                                    <ui:repeat value="#{tablaCurricularAsistidaBean.contexto.escenarios}" var="escenario" varStatus="st">
-                                        <div class="escenario-card #{st.index eq 0 ? 'escenario-card-min' : (st.index eq 1 ? 'escenario-card-bal' : 'escenario-card-max')}">
-                                            <div class="escenario-head">#{escenario.nombre}</div>
-                                            <div class="escenario-desc">#{escenario.descripcion}</div>
-                                            <div class="escenario-kpis">
-                                                <div class="escenario-kpi">
-                                                    <span class="label">UD</span>
-                                                    <span class="value">#{escenario.totalMaterias}</span>
-                                                </div>
-                                                <div class="escenario-kpi">
-                                                    <span class="label">CRÉDITOS</span>
-                                                    <span class="value">#{escenario.totalCreditos}</span>
+                                    <div class="proyeccion-aviso"><i class="fa fa-info-circle" /> #{tablaCurricularAsistidaBean.resumenBaseProyeccion} La oferta de referencia requiere confirmación y ninguna propuesta reserva cupo.</div>
+                                    <div class="proyeccion-grid">
+                                        <ui:repeat value="#{tablaCurricularAsistidaBean.contexto.escenarios}" var="escenario">
+                                            <div class="proyeccion-card">
+                                                <div class="proyeccion-card-head"><h3>#{tablaCurricularAsistidaBean.getTituloProyeccion(escenario)}</h3></div>
+                                                <div class="proyeccion-card-body">
+                                                    <div class="proyeccion-total">#{escenario.totalMaterias} UD <span>|</span> #{escenario.totalCreditos} créditos</div>
+                                                    <div class="proyeccion-referencia">#{tablaCurricularAsistidaBean.getReferenciaProyeccion(escenario)}</div>
+                                                    <div class="proyeccion-bloques"><span>B1: #{tablaCurricularAsistidaBean.getCantidadBloqueProyeccion(escenario, 1)} UD</span><span>B2: #{tablaCurricularAsistidaBean.getCantidadBloqueProyeccion(escenario, 2)} UD</span></div>
+                                                    <table class="proyeccion-tabla"><thead><tr><th>Unidad didáctica</th><th>Créditos</th><th>Bloque</th><th>Finalidad</th></tr></thead><tbody>
+                                                        <ui:repeat value="#{tablaCurricularAsistidaBean.getFilasProyeccion(escenario)}" var="filaProyeccion"><tr><td><strong>#{filaProyeccion.clave}</strong><br />#{filaProyeccion.nombre}</td><td>#{filaProyeccion.creditos}</td><td>B#{filaProyeccion.bloque}</td><td><span class="finalidad-proyeccion #{tablaCurricularAsistidaBean.getFinalidadProyeccion(filaProyeccion) eq 'Regularizar' ? 'regularizar' : ''}">#{tablaCurricularAsistidaBean.getFinalidadProyeccion(filaProyeccion)}</span></td></tr></ui:repeat>
+                                                    </tbody></table>
+                                                    <div class="proyeccion-notas"><div><strong>Qué aporta:</strong> #{escenario.beneficioPrincipal}</div><div><strong>Qué considerar:</strong> #{escenario.riesgoGeneral}</div></div>
+                                                    <p:commandButton value="Probar esta carga" actionListener="#{tablaCurricularAsistidaBean.probarProyeccion(escenario)}" process="@this" update="@form" disabled="#{not tablaCurricularAsistidaBean.puedeProbarProyeccion}" oncomplete="if (PF('asistenteTabsWidget')) { PF('asistenteTabsWidget').select(4); }" styleClass="btn btn-primary" />
+                                                    <div class="text-center small">#{tablaCurricularAsistidaBean.puedeProbarProyeccion ? 'La propuesta se volverá a validar en el Simulador; no formaliza inscripción.' : 'El simulador no está habilitado; esta consulta no formaliza inscripción.'}</div>
                                                 </div>
                                             </div>
-                                            <ui:fragment rendered="#{not empty escenario.razones}">
-                                                <ul>
-                                                    <ui:repeat value="#{escenario.razones}" var="razon">
-                                                        <li>#{razon}</li>
-                                                    </ui:repeat>
-                                                </ul>
-                                            </ui:fragment>
-                                            <div class="escenario-mark escenario-beneficio">
-                                                <i class="fa fa-check-circle" /> Beneficio
-                                            </div>
-                                            <div style="margin-top:8px;">#{escenario.beneficioPrincipal}</div>
-                                            <div class="escenario-mark escenario-riesgo">
-                                                <i class="fa fa-warning" /> Riesgo
-                                            </div>
-                                            <div style="margin-top:8px;">#{escenario.riesgoGeneral}</div>
-                                        </div>
-                                    </ui:repeat>
-                                </div>
+                                        </ui:repeat>
+                                    </div>
+                                    <div class="proyeccion-aviso"><strong>Para todas las alternativas.</strong> Si hay 4 o más reprobadas vigentes, V2 limita la carga a UD destinadas a regularización. Recuperar identifica una UD pendiente por baja autorizada, no una reprobación.</div>
                                 </ui:fragment>
                             </div>
                         </p:tab>

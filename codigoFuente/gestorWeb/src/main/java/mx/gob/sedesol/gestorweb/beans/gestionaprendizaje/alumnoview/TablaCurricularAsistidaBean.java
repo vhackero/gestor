@@ -32,6 +32,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MetadatosConsultaAsistenteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EscenarioProyeccionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EscenarioCargaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProyeccionSiguientePeriodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
@@ -651,6 +652,63 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public int getTotalUnidadesEvaluadasExpectativa() {
         return contexto != null && contexto.getUnidades() != null ? contexto.getUnidades().size() : 0;
+    }
+
+    /** Datos de presentación de una propuesta ya calculada por el servicio. */
+    public List<FilaAsistidaDTO> getFilasProyeccion(EscenarioCargaDTO escenario) {
+        if (escenario == null || escenario.getUnidadesIds() == null) return Collections.emptyList();
+        Set<Long> ids = new LinkedHashSet<Long>(escenario.getUnidadesIds());
+        return obtenerFilasPlanas().stream().filter(fila -> fila.getUdId() != null && ids.contains(fila.getUdId()))
+                .sorted(Comparator.comparing(FilaAsistidaDTO::getBloque, Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(FilaAsistidaDTO::getClave, Comparator.nullsLast(String::compareTo)))
+                .collect(Collectors.toList());
+    }
+
+    public int getCantidadBloqueProyeccion(EscenarioCargaDTO escenario, int bloque) {
+        return (int) getFilasProyeccion(escenario).stream()
+                .filter(fila -> Integer.valueOf(bloque).equals(fila.getBloque())).count();
+    }
+
+    public String getTituloProyeccion(EscenarioCargaDTO escenario) {
+        if (escenario == null) return "Alternativa de carga";
+        if ("MINIMO".equals(escenario.getTipoEscenario())) return "Carga reducida";
+        if ("BALANCEADO".equals(escenario.getTipoEscenario())) return "Carga intermedia";
+        if ("MAXIMO".equals(escenario.getTipoEscenario())) return "Carga intensiva";
+        return escenario.getNombre();
+    }
+
+    public String getReferenciaProyeccion(EscenarioCargaDTO escenario) {
+        if (escenario == null) return "Propuesta sujeta a validación.";
+        if ("MINIMO".equals(escenario.getTipoEscenario())) return "Mínima aplicable en tu caso";
+        if ("BALANCEADO".equals(escenario.getTipoEscenario())) return "Entre el mínimo y tu límite";
+        if ("MAXIMO".equals(escenario.getTipoEscenario())) return "Máxima aplicable en tu caso";
+        return escenario.getDescripcion();
+    }
+
+    public String getFinalidadProyeccion(FilaAsistidaDTO fila) {
+        if (fila == null) return "Avanzar";
+        if ("REPROBADA".equalsIgnoreCase(fila.getEstatusHistorico())) return "Regularizar";
+        if (!StringUtils.isBlank(fila.getAcreditacionActualBajaParcial())) return "Recuperar";
+        return "Avanzar";
+    }
+
+    public String getResumenBaseProyeccion() {
+        EscenarioProyeccionDTO referencia = getEscenarioReferenciaExpectativa();
+        return referencia == null ? "Situación registrada." : "Base: " + referencia.getDescripcion();
+    }
+
+    public boolean isPuedeProbarProyeccion() {
+        return isMostrarSimuladorParaEstudiante() && !isSimuladorSoloConsulta();
+    }
+
+    /** Traslada una propuesta de consulta al simulador sombra, sin inscribir ni reservar cupo. */
+    public void probarProyeccion(EscenarioCargaDTO escenario) {
+        if (!isPuedeProbarProyeccion() || escenario == null || escenario.getUnidadesIds() == null) return;
+        Set<Long> seleccion = new HashSet<Long>(escenario.getUnidadesIds());
+        for (FilaAsistidaDTO fila : obtenerFilasPlanas()) {
+            if (fila != null && fila.getUdId() != null) fila.setSeleccionada(Boolean.valueOf(seleccion.contains(fila.getUdId())));
+        }
+        simularSeleccion();
     }
 
     public List<SemestreAsistidoDTO> getSemestres() {
