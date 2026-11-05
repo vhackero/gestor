@@ -701,6 +701,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return isMostrarSimuladorParaEstudiante() && !isSimuladorSoloConsulta();
     }
 
+    /** La pestaña de expectativa sólo existe durante cursamiento; no usar índices fijos en AJAX. */
+    public int getIndicePestanaSimulador() {
+        return isPeriodoCursamiento() ? 4 : 3;
+    }
+
     /** Traslada una propuesta de consulta al simulador sombra, sin inscribir ni reservar cupo. */
     public void probarProyeccion(EscenarioCargaDTO escenario) {
         if (!isPuedeProbarProyeccion() || escenario == null || escenario.getUnidadesIds() == null) return;
