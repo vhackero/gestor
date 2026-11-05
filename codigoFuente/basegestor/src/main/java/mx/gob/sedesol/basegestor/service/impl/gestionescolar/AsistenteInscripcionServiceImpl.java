@@ -43,6 +43,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RiesgoAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ConfiguracionEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaPendienteUnidadV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
@@ -1365,8 +1366,22 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             ContextoEvaluacionCurricularV2DTO hipotetico = copiarContextoExpectativa(base);
             for (UnidadEvaluacionCurricularV2DTO unidad : hipotetico.getUnidades()) {
                 if (unidad == null || unidad.getIdPrograma() == null) continue;
-                if (acreditadas.contains(unidad.getIdPrograma())) unidad.setEstado(EstadoUnidadCurricularV2.ACREDITADA);
-                if (reprobadas.contains(unidad.getIdPrograma())) unidad.setEstado(EstadoUnidadCurricularV2.REPROBADA);
+                if (acreditadas.contains(unidad.getIdPrograma())) {
+                    unidad.setEstado(EstadoUnidadCurricularV2.ACREDITADA);
+                    unidad.setCausa(null);
+                    unidad.setReprobacionVigenteConocida(Boolean.FALSE);
+                    unidad.setReprobacionPeriodoPrevioConocida(Boolean.FALSE);
+                    unidad.setAcreditadaDurantePeriodo(Boolean.TRUE);
+                }
+                if (reprobadas.contains(unidad.getIdPrograma())) {
+                    unidad.setEstado(EstadoUnidadCurricularV2.REPROBADA);
+                    unidad.setCausa(CausaPendienteUnidadV2.REPROBACION);
+                    // El resultado supuesto constituye la evidencia vigente del escenario,
+                    // sin alterar los registros académicos de origen.
+                    unidad.setReprobacionVigenteConocida(Boolean.TRUE);
+                    unidad.setReprobacionPeriodoPrevioConocida(Boolean.TRUE);
+                    unidad.setAcreditadaDurantePeriodo(Boolean.FALSE);
+                }
             }
             ResultadoEvaluacionCurricularV2DTO resultado = evaluacionCurricularV2Service.evaluarSombra(hipotetico);
             escenario.setResultadoHipotetico(resultado.getSituacionAcademicaCalculada());
@@ -1378,6 +1393,8 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             }
             escenario.setMateriasHabilitadas(Integer.valueOf(habilitadas));
             escenario.setMateriasBloqueadas(Integer.valueOf(restringidas));
+            escenario.setCargaMaximaNormativa(resultado.getEvaluacionCargaAcademica() != null
+                    ? resultado.getEvaluacionCargaAcademica().getCargaMaximaNormativa() : null);
             escenario.getRecomendaciones().add("Situación hipotética V2: " + resultado.getSituacionAcademicaCalculada() + ". Reprobadas vigentes: " + resultado.getCantidadReprobadasVigentes() + ".");
             if (!resultado.getRestricciones().isEmpty()) escenario.getRecomendaciones().add("Restricciones vigentes: " + resultado.getRestricciones() + ".");
         } catch (RuntimeException ex) {

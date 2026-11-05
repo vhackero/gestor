@@ -13,6 +13,8 @@ public class EscenarioProyeccionDTO implements Serializable {
     private Integer materiasOfertadas;
     private Integer materiasHabilitadas;
     private Integer materiasBloqueadas;
+    /** Límite de carga calculado por V2 para el escenario hipotético. */
+    private Integer cargaMaximaNormativa;
     /** Reprobadas vigentes calculadas para el escenario hipotético V2. */
     private Integer reprobadasVigentes;
     private String situacionBase;
@@ -67,6 +69,14 @@ public class EscenarioProyeccionDTO implements Serializable {
 
     public void setMateriasBloqueadas(Integer materiasBloqueadas) {
         this.materiasBloqueadas = materiasBloqueadas;
+    }
+
+    public Integer getCargaMaximaNormativa() {
+        return cargaMaximaNormativa;
+    }
+
+    public void setCargaMaximaNormativa(Integer cargaMaximaNormativa) {
+        this.cargaMaximaNormativa = cargaMaximaNormativa;
     }
 
     public Integer getReprobadasVigentes() {

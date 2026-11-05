@@ -2011,7 +2011,7 @@
 
             <p:outputPanel rendered="#{empty tablaCurricularAsistidaBean.mensajeError and not empty tablaCurricularAsistidaBean.contexto}">
                 <div class="asistente-wrap">
-                    <p:tabView styleClass="asistente-tabs" widgetVar="asistenteTabsWidget">
+                    <p:tabView id="asistenteTabs" styleClass="asistente-tabs" widgetVar="asistenteTabsWidget">
                         <p:tab title="Situación académica">
                             <div class="asistente-section">
                                 <div class="situacion-layout">
@@ -2328,7 +2328,7 @@
                             </div>
                         </p:tab>
 
-                        <p:tab title="Expectativa de logro" rendered="#{tablaCurricularAsistidaBean.periodoCursamiento}">
+                        <p:tab id="expectativaLogroTab" title="Expectativa de logro" rendered="#{tablaCurricularAsistidaBean.periodoCursamiento}">
                             <p:outputPanel id="expectativaLogro" styleClass="asistente-section expectativa-logro">
                                 <h2>Expectativa de logro</h2>
                                 <p class="expectativa-subtitulo">Consulta qué cambiaría según los resultados supuestos de tus UD en curso.</p>
@@ -2353,18 +2353,19 @@
                                                 <div class="expectativa-kpi-moderna"><strong>#{tablaCurricularAsistidaBean.totalUnidadesEvaluadasExpectativa}</strong><span>UD evaluadas</span></div>
                                                 <div class="expectativa-kpi-moderna"><strong>#{acreditaToda.materiasHabilitadas ne null ? acreditaToda.materiasHabilitadas : '-'}</strong><span>Cumplen requisitos</span></div>
                                                 <div class="expectativa-kpi-moderna"><strong>#{acreditaToda.materiasBloqueadas ne null ? acreditaToda.materiasBloqueadas : '-'}</strong><span>Con restricciones</span></div>
+                                                <div class="expectativa-kpi-moderna"><strong>#{acreditaToda.cargaMaximaNormativa ne null ? acreditaToda.cargaMaximaNormativa : '-'}</strong><span>Carga máxima V2</span></div>
                                             </div>
                                             <ul class="expectativa-resultados"><ui:repeat value="#{acreditaToda.recomendaciones}" var="recomendacion"><li><i class="fa fa-check-circle" /> #{recomendacion}</li></ui:repeat></ul>
                                             <div class="expectativa-supuesto"><ui:repeat value="#{acreditaToda.supuestos}" var="supuesto">#{supuesto}</ui:repeat></div>
                                         </div>
                                         <div class="expectativa-panel expectativa-panel-alternativo">
-                                            <h3>Si no acreditas las UD seleccionadas <p:commandLink value="Restablecer" actionListener="#{tablaCurricularAsistidaBean.restablecerExpectativaLogro}" process="@this" update="@form" styleClass="expectativa-restablecer" /></h3>
+                                            <h3>Si no acreditas las UD seleccionadas <p:commandLink value="Restablecer" actionListener="#{tablaCurricularAsistidaBean.restablecerExpectativaLogro}" process="@this" update=":mainForm:asistenteTabs:expectativaLogroTab:expectativaLogro" styleClass="expectativa-restablecer" /></h3>
                                             <p>Elige un resultado supuesto por UD.</p>
                                             <table class="expectativa-controles"><thead><tr><th>Unidad didáctica</th><th>Acredito</th><th>No acredito</th></tr></thead><tbody>
                                                 <ui:repeat value="#{tablaCurricularAsistidaBean.unidadesExpectativaLogro}" var="unidadExpectativa">
                                                     <tr><td><strong>#{unidadExpectativa.clave}</strong><br /><span>#{unidadExpectativa.nombre}</span></td>
-                                                        <td><p:selectOneRadio value="#{unidadExpectativa.acredita}" layout="lineDirection"><f:selectItem itemValue="true" itemLabel="Acredito" /><p:ajax process="@this" listener="#{tablaCurricularAsistidaBean.actualizarExpectativaLogro}" update="@form" /></p:selectOneRadio></td>
-                                                        <td><p:selectOneRadio value="#{unidadExpectativa.acredita}" layout="lineDirection"><f:selectItem itemValue="false" itemLabel="No acredito" /><p:ajax process="@this" listener="#{tablaCurricularAsistidaBean.actualizarExpectativaLogro}" update="@form" /></p:selectOneRadio></td></tr>
+                                                        <td><p:selectOneRadio value="#{unidadExpectativa.acredita}" layout="lineDirection"><f:selectItem itemValue="true" itemLabel="Acredito" /><p:ajax process="@this" listener="#{tablaCurricularAsistidaBean.actualizarExpectativaLogro}" update=":mainForm:asistenteTabs:expectativaLogroTab:expectativaLogro" /></p:selectOneRadio></td>
+                                                        <td><p:selectOneRadio value="#{unidadExpectativa.acredita}" layout="lineDirection"><f:selectItem itemValue="false" itemLabel="No acredito" /><p:ajax process="@this" listener="#{tablaCurricularAsistidaBean.actualizarExpectativaLogro}" update=":mainForm:asistenteTabs:expectativaLogroTab:expectativaLogro" /></p:selectOneRadio></td></tr>
                                                 </ui:repeat>
                                             </tbody></table>
                                             <ui:param name="alternativo" value="#{tablaCurricularAsistidaBean.escenarioSeleccionadoExpectativa}" />
@@ -2373,6 +2374,7 @@
                                                 <div class="expectativa-kpi-moderna"><strong>#{tablaCurricularAsistidaBean.totalUnidadesEvaluadasExpectativa}</strong><span>UD evaluadas</span></div>
                                                 <div class="expectativa-kpi-moderna"><strong>#{alternativo.materiasHabilitadas ne null ? alternativo.materiasHabilitadas : '-'}</strong><span>Cumplen requisitos</span></div>
                                                 <div class="expectativa-kpi-moderna"><strong>#{alternativo.materiasBloqueadas ne null ? alternativo.materiasBloqueadas : '-'}</strong><span>Con restricciones</span></div>
+                                                <div class="expectativa-kpi-moderna"><strong>#{alternativo.cargaMaximaNormativa ne null ? alternativo.cargaMaximaNormativa : '-'}</strong><span>Carga máxima V2</span></div>
                                             </div>
                                             <ul class="expectativa-resultados"><ui:repeat value="#{alternativo.recomendaciones}" var="recomendacion"><li><i class="fa fa-info-circle" /> #{recomendacion}</li></ui:repeat></ul>
                                             <div class="expectativa-supuesto"><ui:repeat value="#{alternativo.supuestos}" var="supuesto">#{supuesto}</ui:repeat></div>

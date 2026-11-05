@@ -132,6 +132,7 @@ public class AsistenteInscripcionPrioridadesTest {
         assertEquals(proyeccion.getEscenarios().get(0).getReprobadasVigentes(), Integer.valueOf(3));
         assertEquals(proyeccion.getEscenarios().get(1).getReprobadasVigentes(), Integer.valueOf(3));
         assertEquals(proyeccion.getEscenarios().get(2).getReprobadasVigentes(), Integer.valueOf(4));
+        assertEquals(proyeccion.getEscenarios().get(2).getCargaMaximaNormativa(), Integer.valueOf(6));
         assertEquals(contexto.getUnidades().get(3).getEstatusHistorico(), "En curso");
     }
 
