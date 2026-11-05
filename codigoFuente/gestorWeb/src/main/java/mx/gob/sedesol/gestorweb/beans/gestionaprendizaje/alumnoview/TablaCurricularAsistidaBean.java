@@ -687,8 +687,10 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public String getFinalidadProyeccion(FilaAsistidaDTO fila) {
         if (fila == null) return "Avanzar";
-        if ("REPROBADA".equalsIgnoreCase(fila.getEstatusHistorico())) return "Regularizar";
-        if (!StringUtils.isBlank(fila.getAcreditacionActualBajaParcial())) return "Recuperar";
+        if ("REPROBADA".equalsIgnoreCase(fila.getEstatusHistorico())
+                || "NO_ACREDITADA".equalsIgnoreCase(fila.getEstatusHistorico())) return "Regularizar";
+        if ("BAJA".equalsIgnoreCase(fila.getEstatusHistorico())
+                || !StringUtils.isBlank(fila.getAcreditacionActualBajaParcial())) return "Recuperar";
         return "Avanzar";
     }
 

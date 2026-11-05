@@ -3536,24 +3536,26 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             if (decision != null && decision.getIdPrograma() != null) decisiones.put(decision.getIdPrograma(), decision);
         }
         final boolean soloRegularizacion = Boolean.TRUE.equals(resultado.getEvaluacionCargaAcademica().getAplicaRn64());
+        final Set<Long> optativasAdicionales = new HashSet<Long>(
+                resultado.getEvaluacionCargaAcademica().getUdsOptativasAdicionalesRn711());
         List<UnidadDecisionInscripcionDTO> candidatas = new ArrayList<UnidadDecisionInscripcionDTO>();
         for (UnidadDecisionInscripcionDTO unidad : contexto.getUnidades()) {
             if (unidad == null || unidad.getUdId() == null || "ACREDITADA".equalsIgnoreCase(unidad.getEstatusHistorico())) continue;
             DecisionUnidadCurricularV2DTO decision = decisiones.get(unidad.getUdId());
             boolean prioritaria = decision != null && Boolean.TRUE.equals(decision.getPrioritaria());
             boolean habilitada = decision != null && Boolean.TRUE.equals(decision.getHabilitada());
-            boolean reprobada = "REPROBADA".equalsIgnoreCase(unidad.getEstatusHistorico());
+            boolean reprobada = esUnidadReprobada(unidad);
             if ((soloRegularizacion && reprobada) || (!soloRegularizacion && (prioritaria || habilitada))) candidatas.add(unidad);
         }
         Collections.sort(candidatas, (a, b) -> {
-            DecisionUnidadCurricularV2DTO da = decisiones.get(a.getUdId());
-            DecisionUnidadCurricularV2DTO db = decisiones.get(b.getUdId());
-            boolean pa = da != null && Boolean.TRUE.equals(da.getPrioritaria());
-            boolean pb = db != null && Boolean.TRUE.equals(db.getPrioritaria());
-            if (pa != pb) return pa ? -1 : 1;
-            boolean ra = "REPROBADA".equalsIgnoreCase(a.getEstatusHistorico());
-            boolean rb = "REPROBADA".equalsIgnoreCase(b.getEstatusHistorico());
-            if (ra != rb) return ra ? -1 : 1;
+            int categoriaA = prioridadProyeccionV2(a, contexto, optativasAdicionales);
+            int categoriaB = prioridadProyeccionV2(b, contexto, optativasAdicionales);
+            if (categoriaA != categoriaB) return Integer.compare(categoriaA, categoriaB);
+            // Para avance, el siguiente semestre compatible se atiende antes que niveles posteriores.
+            if (categoriaA >= 2) {
+                int semestre = compararNullable(a.getSemestre(), b.getSemestre());
+                if (semestre != 0) return semestre;
+            }
             return compararUnidades(a, b);
         });
         if (candidatas.isEmpty()) return Collections.emptyList();
@@ -3566,6 +3568,32 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         agregarEscenarioV2(escenarios, "BALANCEADO", "Carga intermedia", "Alternativa entre el mínimo aplicable y el límite V2.", candidatas, intermedia, soloRegularizacion);
         agregarEscenarioV2(escenarios, "MAXIMO", "Carga intensiva", "Alternativa máxima compatible con los límites V2.", candidatas, limite, soloRegularizacion);
         return escenarios;
+    }
+
+    /** Orden de propuesta: reprobadas, bajas por UD y avance secuencial por tipo curricular. */
+    private int prioridadProyeccionV2(UnidadDecisionInscripcionDTO unidad, AsistenteInscripcionContextoDTO contexto,
+            Set<Long> optativasAdicionales) {
+        if (esUnidadReprobada(unidad)) return 0;
+        if (esUnidadConBajaParcial(unidad, contexto)) return 1;
+        if (unidad.getTipoUd() != null && InscripcionUtils.esMateriaObligatoria(unidad.getTipoUd())) return 2;
+        if (unidad.getTipoUd() != null && InscripcionUtils.esMateriaOptativa(unidad.getTipoUd())) {
+            return optativasAdicionales.contains(unidad.getUdId()) ? 4 : 3;
+        }
+        return 5;
+    }
+
+    private boolean esUnidadReprobada(UnidadDecisionInscripcionDTO unidad) {
+        return unidad != null && ("REPROBADA".equalsIgnoreCase(unidad.getEstatusHistorico())
+                || "NO_ACREDITADA".equalsIgnoreCase(unidad.getEstatusHistorico()));
+    }
+
+    /** Sólo una baja parcial relacionable por UD constituye una recuperación en la propuesta. */
+    private boolean esUnidadConBajaParcial(UnidadDecisionInscripcionDTO unidad, AsistenteInscripcionContextoDTO contexto) {
+        if (unidad == null || contexto == null || contexto.getContextoBase() == null) return false;
+        for (InscripcionBajasDTO baja : obtenerBajasParciales(contexto.getContextoBase())) {
+            if (esMismaMateria(unidad.getUdId(), baja.getIdPrograma(), unidad.getClave(), baja.getClavePrograma())) return true;
+        }
+        return false;
     }
 
     private void agregarEscenarioV2(List<EscenarioCargaDTO> destinos, String tipo, String nombre, String descripcion,
