@@ -2358,13 +2358,13 @@
                                             <div class="expectativa-supuesto"><ui:repeat value="#{acreditaToda.supuestos}" var="supuesto">#{supuesto}</ui:repeat></div>
                                         </div>
                                         <div class="expectativa-panel expectativa-panel-alternativo">
-                                            <h3>Si no acreditas las UD seleccionadas <p:commandLink value="Restablecer" actionListener="#{tablaCurricularAsistidaBean.restablecerExpectativaLogro}" process="@this" update="expectativaLogro" styleClass="expectativa-restablecer" /></h3>
+                                            <h3>Si no acreditas las UD seleccionadas <p:commandLink value="Restablecer" actionListener="#{tablaCurricularAsistidaBean.restablecerExpectativaLogro}" process="@this" update="@form" styleClass="expectativa-restablecer" /></h3>
                                             <p>Elige un resultado supuesto por UD.</p>
                                             <table class="expectativa-controles"><thead><tr><th>Unidad didáctica</th><th>Acredito</th><th>No acredito</th></tr></thead><tbody>
                                                 <ui:repeat value="#{tablaCurricularAsistidaBean.unidadesExpectativaLogro}" var="unidadExpectativa">
                                                     <tr><td><strong>#{unidadExpectativa.clave}</strong><br /><span>#{unidadExpectativa.nombre}</span></td>
-                                                        <td><p:selectOneRadio value="#{unidadExpectativa.acredita}" layout="lineDirection"><f:selectItem itemValue="true" itemLabel="Acredito" /><p:ajax process="@this" listener="#{tablaCurricularAsistidaBean.actualizarExpectativaLogro}" update="expectativaLogro" /></p:selectOneRadio></td>
-                                                        <td><p:selectOneRadio value="#{unidadExpectativa.acredita}" layout="lineDirection"><f:selectItem itemValue="false" itemLabel="No acredito" /><p:ajax process="@this" listener="#{tablaCurricularAsistidaBean.actualizarExpectativaLogro}" update="expectativaLogro" /></p:selectOneRadio></td></tr>
+                                                        <td><p:selectOneRadio value="#{unidadExpectativa.acredita}" layout="lineDirection"><f:selectItem itemValue="true" itemLabel="Acredito" /><p:ajax process="@this" listener="#{tablaCurricularAsistidaBean.actualizarExpectativaLogro}" update="@form" /></p:selectOneRadio></td>
+                                                        <td><p:selectOneRadio value="#{unidadExpectativa.acredita}" layout="lineDirection"><f:selectItem itemValue="false" itemLabel="No acredito" /><p:ajax process="@this" listener="#{tablaCurricularAsistidaBean.actualizarExpectativaLogro}" update="@form" /></p:selectOneRadio></td></tr>
                                                 </ui:repeat>
                                             </tbody></table>
                                             <ui:param name="alternativo" value="#{tablaCurricularAsistidaBean.escenarioSeleccionadoExpectativa}" />
