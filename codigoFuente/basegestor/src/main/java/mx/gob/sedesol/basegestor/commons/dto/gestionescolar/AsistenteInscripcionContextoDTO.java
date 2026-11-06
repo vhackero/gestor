@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PeriodoTrayectoriaV2DTO;
 
 public class AsistenteInscripcionContextoDTO implements Serializable {
 
@@ -53,6 +54,7 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
     /** Malla completa del plan, distinta de la oferta/candidatas del periodo. */
     private List<UnidadDecisionInscripcionDTO> unidadesMapaPlan;
     private List<UnidadDecisionInscripcionDTO> unidadesCandidatasPeriodo;
+    private List<PeriodoTrayectoriaV2DTO> periodosTrayectoriaV2;
     private List<EscenarioCargaDTO> escenarios;
 
     private String auditoriaDecisionId;
@@ -63,6 +65,7 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
         this.unidades = new ArrayList<UnidadDecisionInscripcionDTO>();
         this.unidadesMapaPlan = new ArrayList<UnidadDecisionInscripcionDTO>();
         this.unidadesCandidatasPeriodo = new ArrayList<UnidadDecisionInscripcionDTO>();
+        this.periodosTrayectoriaV2 = new ArrayList<PeriodoTrayectoriaV2DTO>();
         this.escenarios = new ArrayList<EscenarioCargaDTO>();
         this.intentosReprobadosPorUd = new HashMap<Long, Long>();
         this.intentosReprobadosDisponibles = Boolean.FALSE;
@@ -345,6 +348,8 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
     public void setUnidadesMapaPlan(List<UnidadDecisionInscripcionDTO> valores) { unidadesMapaPlan = valores == null ? new ArrayList<UnidadDecisionInscripcionDTO>() : valores; }
     public List<UnidadDecisionInscripcionDTO> getUnidadesCandidatasPeriodo() { return unidadesCandidatasPeriodo; }
     public void setUnidadesCandidatasPeriodo(List<UnidadDecisionInscripcionDTO> valores) { unidadesCandidatasPeriodo = valores == null ? new ArrayList<UnidadDecisionInscripcionDTO>() : valores; }
+    public List<PeriodoTrayectoriaV2DTO> getPeriodosTrayectoriaV2() { return periodosTrayectoriaV2; }
+    public void setPeriodosTrayectoriaV2(List<PeriodoTrayectoriaV2DTO> valores) { periodosTrayectoriaV2 = valores == null ? new ArrayList<PeriodoTrayectoriaV2DTO>() : valores; }
 
     public List<EscenarioCargaDTO> getEscenarios() {
         return escenarios;

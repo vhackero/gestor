@@ -59,12 +59,6 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         resultado.setSemestreMaximoCandidatas(obtenerSemestreMaximo(resultado.getUnidades()));
         SemestreReferenciaV2DTO referencia = new SemestreReferenciaV2ServiceImpl().calcular(periodoActivo,
                 obtenerSemestreMaximo(resultado.getUnidades()), resultado.getPeriodosTrayectoria(), null);
-        if (referencia.getValor() == null && resultado.getSemestreMaximoCandidatas() != null) {
-            referencia.setValor(resultado.getSemestreMaximoCandidatas());
-            referencia.setEstado("PARCIAL");
-            referencia.setCalidadDato("INFERIDA");
-            referencia.getPeriodosExcluidos().add("TRAYECTORIA:NO_INTEGRADA; no sustituye la referencia RN-6.9");
-        }
         resultado.setDetalleSemestreReferencia(referencia);
         resultado.setHuellaOferta(construirHuella(periodoActivo, resultado.getUnidades()));
         return resultado;
@@ -82,8 +76,9 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
                 universo, contextoAsistente.getPeriodoActivo(),
                 contextoAsistente.getIdProcesoInscripcion());
         resultado.setUniversoMapaCompleto(Boolean.valueOf(mapa != null && !mapa.isEmpty()));
-        // La fuente actual entrega estados resumidos, no todos los intentos por UD.
-        resultado.setHistorialCompleto(Boolean.FALSE);
+        resultado.setPeriodosTrayectoria(contextoAsistente.getPeriodosTrayectoriaV2());
+        resultado.setHistorialCompleto(Boolean.valueOf(contextoAsistente.getPeriodosTrayectoriaV2() != null
+                && !contextoAsistente.getPeriodosTrayectoriaV2().isEmpty()));
         List<UnidadDecisionInscripcionDTO> candidatas = contextoAsistente.getUnidadesCandidatasPeriodo();
         if (candidatas == null || candidatas.isEmpty()) candidatas = contextoAsistente.getUnidades();
         resultado.setIdsUnidadesCandidatas(idsUnidades(candidatas));

@@ -38,6 +38,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaD
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PeriodoTrayectoriaV2DTO;
 
 @Repository
 public class InscripcionRepository implements IinscripcionRepository {
@@ -70,6 +71,46 @@ public class InscripcionRepository implements IinscripcionRepository {
 		Date inicioPeriodoCorte = (Date) periodoCorte[1];
 		resultado.setPeriodosAcademicosTranscurridos(contarPeriodosAcademicos(idPlan, inicioPrimerPeriodo, inicioPeriodoCorte));
 		resultado.setPeriodosConInscripcion(contarPeriodosAcademicosConInscripcion(idPersona, idPlan, fechaCorte));
+		return resultado;
+	}
+
+	/**
+	 * Recupera una fila por periodo académico. La clave se obtiene del evento
+	 * asociado a la inscripción y no del semestre almacenado en la inscripción.
+	 * Las bajas temporales aprobadas (contabilizar=1, tipo=2) se agrupan por
+	 * periodo, por lo que B1 y B2 no incrementan la referencia dos veces.
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<PeriodoTrayectoriaV2DTO> obtenerPeriodosTrayectoriaV2(Long idPersona, Long idPlan) {
+		List<PeriodoTrayectoriaV2DTO> resultado = new ArrayList<PeriodoTrayectoriaV2DTO>();
+		if (idPersona == null || idPlan == null) return resultado;
+		String sql = "SELECT pi.nombre_periodo, "
+				+ "MAX(CASE WHEN ti.id IS NOT NULL THEN 1 ELSE 0 END), "
+				+ "MAX(CASE WHEN rgp.calificacion_final IS NOT NULL THEN 1 ELSE 0 END), "
+				+ "MAX(CASE WHEN rgp.id_grupo IS NOT NULL THEN 1 ELSE 0 END), "
+				+ "MAX(CASE WHEN baja.id_baja IS NOT NULL THEN 1 ELSE 0 END) "
+				+ "FROM tbl_inscripciones ti "
+				+ "LEFT JOIN tbl_eventos e ON e.id_evento = ti.idevento "
+				+ "LEFT JOIN tbl_periodos_inscripcion pi ON e.cve_evento_cap LIKE CONCAT('%', pi.nombre_periodo, '%') "
+				+ "LEFT JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = ti.Idpersona "
+				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona = ti.Idpersona "
+				+ " AND baja.id_evento = ti.idevento AND baja.contabilizar = 1 "
+				+ " AND EXISTS (SELECT 1 FROM rel_motivo_baja mb WHERE mb.id_motivo_baja = baja.motivo_baja_id AND mb.tipo_baja_id = 2) "
+				+ "WHERE ti.Idpersona = :idPersona AND ti.idplan = :idPlan "
+				+ "AND pi.nombre_periodo IS NOT NULL GROUP BY pi.nombre_periodo ORDER BY pi.nombre_periodo";
+		List<Object[]> filas = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona)
+				.setParameter("idPlan", idPlan).getResultList();
+		for (Object[] fila : filas) {
+			PeriodoTrayectoriaV2DTO periodo = new PeriodoTrayectoriaV2DTO();
+			periodo.setPeriodo(fila[0] == null ? null : String.valueOf(fila[0]));
+			periodo.setInscripcionFormal(Boolean.valueOf(getIntegerValue(fila[1]) != null && getIntegerValue(fila[1]).intValue() > 0));
+			periodo.setCalificacionFinal(Boolean.valueOf(getIntegerValue(fila[2]) != null && getIntegerValue(fila[2]).intValue() > 0));
+			periodo.setParticipacionGrupo(Boolean.valueOf(getIntegerValue(fila[3]) != null && getIntegerValue(fila[3]).intValue() > 0));
+			periodo.setNpBajaParcial(Boolean.FALSE);
+			periodo.setBajaTemporalCompleta(Boolean.valueOf(getIntegerValue(fila[4]) != null && getIntegerValue(fila[4]).intValue() > 0));
+			resultado.add(periodo);
+		}
 		return resultado;
 	}
 

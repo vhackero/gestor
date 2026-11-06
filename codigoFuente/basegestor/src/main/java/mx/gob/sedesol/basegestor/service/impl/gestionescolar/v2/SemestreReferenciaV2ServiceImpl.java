@@ -21,6 +21,12 @@ public class SemestreReferenciaV2ServiceImpl implements SemestreReferenciaV2Serv
             resultado.getPeriodosExcluidos().add("CONTEXTO:INSUFICIENTE");
             return resultado;
         }
+        if (periodos.isEmpty()) {
+            resultado.getPeriodosExcluidos().add("SIN_INSCRIPCION");
+            resultado.setEstado("PARCIAL");
+            resultado.setCalidadDato("NO_DISPONIBLE");
+            return resultado;
+        }
         List<PeriodoTrayectoriaV2DTO> ordenados = new ArrayList<PeriodoTrayectoriaV2DTO>(periodos);
         Collections.sort(ordenados, new Comparator<PeriodoTrayectoriaV2DTO>() { public int compare(PeriodoTrayectoriaV2DTO a, PeriodoTrayectoriaV2DTO b) { return valor(a).compareTo(valor(b)); } private String valor(PeriodoTrayectoriaV2DTO p) { return p == null || p.getPeriodo() == null ? "" : p.getPeriodo(); } });
         int contados = 0;

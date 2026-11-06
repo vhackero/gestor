@@ -35,6 +35,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Integer semestreObjetivo;
     private Integer semestreReferencia;
     private Integer semestreMaximoCandidatas;
+    /** Compatibilidad de contratos de prueba/cliente previos; el adaptador productivo no lo llena. */
+    private Boolean candidataQuintoDeclaradaCompatibilidad = Boolean.FALSE;
     private SemestreReferenciaV2DTO detalleSemestreReferencia;
     private ParametrosCurricularesV2DTO parametrosCurriculares;
     private String ambitoRnPe2024_2027 = "REQUIERE_REVISION";
@@ -156,11 +158,14 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
         semestreObjetivo = valor;
         semestreReferencia = valor;
         semestreMaximoCandidatas = valor;
+        candidataQuintoDeclaradaCompatibilidad = Boolean.valueOf(Integer.valueOf(5).equals(valor));
     }
     public Integer getSemestreReferencia() { return semestreReferencia; }
     public void setSemestreReferencia(Integer valor) { semestreReferencia = valor; }
     public Integer getSemestreMaximoCandidatas() { return semestreMaximoCandidatas; }
     public void setSemestreMaximoCandidatas(Integer valor) { semestreMaximoCandidatas = valor; }
+    public Boolean getCandidataQuintoDeclaradaCompatibilidad() { return candidataQuintoDeclaradaCompatibilidad; }
+    public void setCandidataQuintoDeclaradaCompatibilidad(Boolean valor) { candidataQuintoDeclaradaCompatibilidad = valor; }
     public SemestreReferenciaV2DTO getDetalleSemestreReferencia() { return detalleSemestreReferencia; }
     public void setDetalleSemestreReferencia(SemestreReferenciaV2DTO valor) { detalleSemestreReferencia = valor; semestreReferencia = valor == null ? semestreReferencia : valor.getValor(); }
     public ParametrosCurricularesV2DTO getParametrosCurriculares() { return parametrosCurriculares; }

@@ -128,7 +128,9 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         dto.setModoProyeccion(Boolean.TRUE.equals(dto.getInscripcionVigente()) ? "UNIVERSO_CURRICULAR" : "OFERTA_VIGENTE");
 
         mapearResumenPeriodo(dto, contextoBase);
-		dto.setTrayectoriaPermanencia(construirTrayectoriaPermanencia(idPersona, contextoBase));
+        dto.setTrayectoriaPermanencia(construirTrayectoriaPermanencia(idPersona, contextoBase));
+        dto.setPeriodosTrayectoriaV2(inscripcionService.obtenerPeriodosTrayectoriaV2(idPersona,
+                contextoBase.getInscripcionPersona().getIdPlan()));
         dto.setPromedioPronosticado(calcularPromedioPronosticado(contextoBase));
         mapearPendientesYReglas(dto, contextoBase);
         mapearUnidades(dto, contextoBase, programasPlan, cobertura, materiasEnCurso, ubicacionesPlan);
@@ -499,6 +501,44 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         aplicarReglasOptativasElectivas(unidades, cobertura, contextoBase);
         marcarUnidadesReinscritasComoEnCurso(unidades, materiasEnCurso);
         dto.setUnidades(unidades);
+        // La oferta es candidata del periodo; la evaluacion V2 requiere ademas
+        // el universo completo que el mapa curricular ya representa.
+        dto.setUnidadesCandidatasPeriodo(new ArrayList<UnidadDecisionInscripcionDTO>(unidades));
+        dto.setUnidadesMapaPlan(construirUniversoMapaPlan(unidades, contextoBase, programasPlan,
+                ubicacionesPlan, creditosPorPrograma));
+    }
+
+    private List<UnidadDecisionInscripcionDTO> construirUniversoMapaPlan(
+            List<UnidadDecisionInscripcionDTO> candidatas,
+            InscripcionContextoDTO contextoBase,
+            Map<Long, FichaDescProgramaDTO> programasPlan,
+            Map<Long, UbicacionCurricular> ubicacionesPlan,
+            Map<Long, Integer> creditosPorPrograma) {
+        Map<Long, UnidadDecisionInscripcionDTO> porId = new LinkedHashMap<Long, UnidadDecisionInscripcionDTO>();
+        if (candidatas != null) {
+            for (UnidadDecisionInscripcionDTO candidata : candidatas) {
+                if (candidata != null && candidata.getUdId() != null) {
+                    porId.put(candidata.getUdId(), candidata);
+                }
+            }
+        }
+        if (programasPlan != null && ubicacionesPlan != null) {
+            for (FichaDescProgramaDTO programa : programasPlan.values()) {
+                if (programa == null || programa.getIdPrograma() == null) continue;
+                Long idPrograma = programa.getIdPrograma().longValue();
+                if (porId.containsKey(idPrograma)) continue;
+                UbicacionCurricular ubicacion = ubicacionesPlan.get(idPrograma);
+                if (ubicacion == null) continue;
+                InscripcionMateriasDTO materia = construirMateriaSimulada(programa, contextoBase, ubicacion, false);
+                UnidadDecisionInscripcionDTO unidad = construirUnidadDecision(materia, contextoBase,
+                        programasPlan, creditosPorPrograma);
+                // No ofertada no significa no cursada ni reprobada: conserva la
+                // ausencia de oferta como dato operativo separado.
+                unidad.setOfertada(Boolean.FALSE);
+                porId.put(idPrograma, unidad);
+            }
+        }
+        return new ArrayList<UnidadDecisionInscripcionDTO>(porId.values());
     }
 
     /**

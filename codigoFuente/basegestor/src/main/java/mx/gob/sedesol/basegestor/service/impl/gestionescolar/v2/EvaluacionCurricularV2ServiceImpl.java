@@ -881,7 +881,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         if (carga == null) return;
         agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_9_3);
         agregarUnico(carga.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_9_3);
-        Integer semestre = contexto.getSemestreObjetivo();
+        Integer semestre = contexto.getSemestreReferencia();
         if (semestre == null) { finalizarRevisionCreditosRn93(resultado, contexto, carga, "SEMESTRE_OBJETIVO_NO_DETERMINADO"); return; }
         if (!esSemestreElectivas(semestre)) {
             carga.setEstadoAvanceUltimosSemestresRn93(EstadoAvanceUltimosSemestresV2.NO_APLICA);
@@ -1411,7 +1411,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         agregarUnico(evaluacion.getReglasRelacionadas(), CodigoReglaCurricularV2.CTR_02);
         resultado.setEvaluacionCargaMinima(evaluacion);
 
-        if (contexto.getSemestreObjetivo() == null) {
+        if (contexto.getSemestreReferencia() == null) {
             evaluacion.setAplicaCargaMinimaNormativa(null);
             evaluacion.setEstado(EstadoCargaMinimaCurricularV2.NO_DETERMINADO);
             agregarUnico(evaluacion.getMotivos(), CodigoMotivoCurricularV2.DATOS_INSUFICIENTES);
@@ -1421,7 +1421,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                     "No se evalúa la carga mínima sin semestre objetivo verificable.");
             return;
         }
-        if (contexto.getSemestreObjetivo().intValue() <= 1) {
+        if (contexto.getSemestreReferencia().intValue() <= 1) {
             evaluacion.setAplicaCargaMinimaNormativa(Boolean.FALSE);
             evaluacion.setEstado(EstadoCargaMinimaCurricularV2.NO_DETERMINADO);
             evaluacion.getEvidencias().add("PRIMER_SEMESTRE_REQUIERE_REGLA_ESPECIFICA_NUEVO_INGRESO");
@@ -1597,7 +1597,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             agregarUnico(evaluacion.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_4);
             evaluacion.getEvidencias().add("RN_6_4_OBSERVACIONAL_SIN_EFECTO_PRODUCTIVO");
         }
-        if (Integer.valueOf(5).equals(contexto.getSemestreObjetivo())) {
+        if (Integer.valueOf(5).equals(contexto.getSemestreReferencia())) {
             agregarUnico(evaluacion.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_6_1);
             evaluacion.getEvidencias().add("CTR_01_RN_6_1_PROCEDENCIA_FUTURA_SIN_ACTIVAR");
         }
@@ -2495,7 +2495,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         EvaluacionCargaAcademicaV2DTO c=resultado.getEvaluacionCargaAcademica(); if(c==null)return;
         agregarUnico(c.getReglasRelacionadas(),CodigoReglaCurricularV2.RN_6_2);agregarUnico(resultado.getReglasEvaluadas(),CodigoReglaCurricularV2.RN_6_2);
         if(contexto.getAdmitido()==null||contexto.getInscripcionInicialRealizada()==null){c.setAplicaRn62(null);c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.REQUIERE_REVISION);registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_2,CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,70,"RN62_REQUIERE_REVISION","Admisión o inscripción inicial no determinable.");return;}
-        boolean aplica=Boolean.TRUE.equals(contexto.getAdmitido())&&!Boolean.TRUE.equals(contexto.getInscripcionInicialRealizada());c.setAplicaRn62(aplica?Boolean.TRUE:Boolean.FALSE);if(!aplica){c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.NO_APLICA);registrarTrazaInscripcionInicialDiferida(resultado,contexto,c);return;}c.setCondicionTrayectoriaRn62("INSCRIPCION_INICIAL_DIFERIDA");c.setPeriodoAdmisionRn62(contexto.getPeriodoAdmision());c.setPeriodoIncorporacionRn62(contexto.getPeriodoIncorporacion());c.setSemestreObjetivoRn62(contexto.getSemestreObjetivo());
+        boolean aplica=Boolean.TRUE.equals(contexto.getAdmitido())&&!Boolean.TRUE.equals(contexto.getInscripcionInicialRealizada());c.setAplicaRn62(aplica?Boolean.TRUE:Boolean.FALSE);if(!aplica){c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.NO_APLICA);registrarTrazaInscripcionInicialDiferida(resultado,contexto,c);return;}c.setCondicionTrayectoriaRn62("INSCRIPCION_INICIAL_DIFERIDA");c.setPeriodoAdmisionRn62(contexto.getPeriodoAdmision());c.setPeriodoIncorporacionRn62(contexto.getPeriodoIncorporacion());c.setSemestreObjetivoRn62(contexto.getSemestreReferencia());
         if(Boolean.TRUE.equals(contexto.getLimiteInactividadAlcanzado())){c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.NO_PROCEDE_POR_INACTIVIDAD);registrarTrazaInscripcionInicialDiferida(resultado,contexto,c);return;}
         if(!Boolean.TRUE.equals(contexto.getActividadAcademicaComprobada())){c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.REQUIERE_REVISION);registrarTrazaInscripcionInicialDiferida(resultado,contexto,c);return;}
         boolean bloqueo=false,revision=false; for(UnidadEvaluacionCurricularV2DTO u:unidades)if(Integer.valueOf(2).equals(u.getSemestre())){if(Boolean.TRUE.equals(u.getSeriacionDirectaConocida())||Boolean.TRUE.equals(u.getSeriacionIndirectaConocida())){agregarIdUnico(c.getUdsSemestre2BloqueadasRn62(),u.getIdPrograma());bloqueo=true;}else if(Boolean.TRUE.equals(u.getSeriacionConocida())){revision=true;}else agregarIdUnico(c.getUdsSemestre2CompatiblesRn62(),u.getIdPrograma());}
@@ -2504,7 +2504,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
     }
 
     private void registrarTrazaInscripcionInicialDiferida(ResultadoEvaluacionCurricularV2DTO resultado, ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga) {
-        String evidencia="Trayectoria="+carga.getCondicionTrayectoriaRn62()+"; periodoAdmision="+contexto.getPeriodoAdmision()+"; periodoIncorporacion="+contexto.getPeriodoIncorporacion()+"; semestreObjetivo="+contexto.getSemestreObjetivo()+"; S2 compatibles="+carga.getUdsSemestre2CompatiblesRn62()+"; bloqueadas="+carga.getUdsSemestre2BloqueadasRn62()+"; CTR01="+carga.getAplicaCtr01();agregarUnico(carga.getEvidencias(),evidencia);registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_2,null,70,"RN62_"+carga.getEstadoIncorporacionDiferida(),evidencia);
+        String evidencia="Trayectoria="+carga.getCondicionTrayectoriaRn62()+"; periodoAdmision="+contexto.getPeriodoAdmision()+"; periodoIncorporacion="+contexto.getPeriodoIncorporacion()+"; semestreReferencia="+contexto.getSemestreReferencia()+"; S2 compatibles="+carga.getUdsSemestre2CompatiblesRn62()+"; bloqueadas="+carga.getUdsSemestre2BloqueadasRn62()+"; CTR01="+carga.getAplicaCtr01();agregarUnico(carga.getEvidencias(),evidencia);registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_2,null,70,"RN62_"+carga.getEstadoIncorporacionDiferida(),evidencia);
     }
 
     /**
@@ -2565,7 +2565,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         if (!Boolean.TRUE.equals(contexto.getCausaInterrupcionConocida())
                 || !textoPresente(contexto.getCausaInterrupcion())
                 || !trayectoriaReincorporacionCompleta(contexto)
-                || contexto.getSemestreObjetivo() == null) {
+                || contexto.getSemestreReferencia() == null) {
             carga.setEstadoReincorporacionRn65(EstadoReincorporacionPeriodoNoCursadoV2.REQUIERE_REVISION);
             carga.setRequiereRevision(Boolean.TRUE);
             registrarTrazaReincorporacionRn65(resultado, contexto, carga,
@@ -2601,7 +2601,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
 
         int espacios = carga.getCargaMaximaNormativa().intValue();
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
-            if (!esPendienteObligatoriaRn65(unidad, contexto.getSemestreObjetivo())) continue;
+            if (!esPendienteObligatoriaRn65(unidad, contexto.getSemestreReferencia())) continue;
             if (unidad.getEstado() == EstadoUnidadCurricularV2.NO_DETERMINADO
                     || unidad.getCausa() == CausaPendienteUnidadV2.NO_DETERMINADA) {
                 marcarRevisionRn65(resultado, contexto, carga, unidad, "PENDIENTE_NO_DETERMINADA");
@@ -2636,7 +2636,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         }
 
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
-            if (!esPosteriorCandidataRn65(unidad, contexto.getSemestreObjetivo())) continue;
+            if (!esPosteriorCandidataRn65(unidad, contexto.getSemestreReferencia())) continue;
             if (Boolean.TRUE.equals(carga.getAplicaRn64()) && esObligatoria(unidad)) {
                 agregarUnico(carga.getUdsExcluidas(), obtenerLlaveUnidad(unidad) + ":RN_6_4");
                 registrarDecisionRn65(resultado, contexto, unidad, CodigoMotivoCurricularV2.REZAGO_SEVERO,
@@ -2893,7 +2893,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 marcarRevisionRn66(resultado, contexto, carga, unidad, "EN_CURSO_AL_INICIO_BAJA_SIN_CIERRE_INSTITUCIONAL");
                 continue;
             }
-            if (!esPendienteObligatoriaRn66(unidad, contexto.getSemestreObjetivo())) continue;
+            if (!esPendienteObligatoriaRn66(unidad, contexto.getSemestreReferencia())) continue;
             if (unidad.getEstado() == EstadoUnidadCurricularV2.NO_DETERMINADO
                     || unidad.getCausa() == CausaPendienteUnidadV2.NO_DETERMINADA) {
                 marcarRevisionRn66(resultado, contexto, carga, unidad, "PENDIENTE_NO_DETERMINADA");
@@ -2928,7 +2928,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         }
 
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
-            if (!esPosteriorCandidataRn66(unidad, contexto.getSemestreObjetivo())) continue;
+            if (!esPosteriorCandidataRn66(unidad, contexto.getSemestreReferencia())) continue;
             if (Boolean.TRUE.equals(carga.getAplicaRn64()) && esObligatoria(unidad)) {
                 agregarUnico(carga.getUdsExcluidas(), obtenerLlaveUnidad(unidad) + ":RN_6_4");
                 registrarDecisionRn66(resultado, contexto, unidad, CodigoMotivoCurricularV2.REZAGO_SEVERO,
@@ -2991,7 +2991,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         carga.setPeriodoFinBajaTemporalRn66(contexto.getPeriodoFinBajaTemporal());
         carga.setUltimoPeriodoEfectivamenteCursadoRn66(contexto.getUltimoPeriodoCursado());
         carga.setSemestreEfectivoPrevioBajaRn66(contexto.getSemestreEfectivoPrevioBaja());
-        carga.setSemestreObjetivoRn66(contexto.getSemestreObjetivo());
+        carga.setSemestreObjetivoRn66(contexto.getSemestreReferencia());
         carga.setDentroCalendarioReincorporacionRn66(contexto.getDentroCalendarioReincorporacion());
     }
 
@@ -3000,7 +3000,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 && textoPresente(contexto.getPeriodoInicioBajaTemporal())
                 && textoPresente(contexto.getPeriodoFinBajaTemporal())
                 && contexto.getSemestreEfectivoPrevioBaja() != null
-                && contexto.getSemestreObjetivo() != null;
+                && contexto.getSemestreReferencia() != null;
     }
 
     private boolean esPendienteObligatoriaRn66(UnidadEvaluacionCurricularV2DTO unidad, Integer semestreObjetivo) {
@@ -3091,7 +3091,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         carga.setAplicaRn67(Boolean.TRUE);
         carga.setCondicionTrayectoriaRn67("REINCORPORACION_TRAS_BAJA_PARCIAL");
         agregarUnico(resultado.getCondicionesDetectadas(), CondicionCurricularV2.REINCORPORACION_TRAS_BAJA_PARCIAL);
-        if (contexto.getSemestreObjetivo() == null || carga.getCargaMaximaNormativa() == null) {
+        if (contexto.getSemestreReferencia() == null || carga.getCargaMaximaNormativa() == null) {
             carga.setEstadoReincorporacionRn67(EstadoReincorporacionBajaParcialV2.REQUIERE_REVISION);
             carga.setRequiereRevision(Boolean.TRUE);
             registrarTrazaReincorporacionRn67(resultado, contexto, carga, CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,
@@ -3189,7 +3189,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         }
 
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
-            if (!esPosteriorCandidataRn67(unidad, contexto.getSemestreObjetivo())) continue;
+            if (!esPosteriorCandidataRn67(unidad, contexto.getSemestreReferencia())) continue;
             if (Boolean.TRUE.equals(carga.getAplicaRn64()) && esObligatoria(unidad)) {
                 registrarDecisionRn67(resultado, contexto, unidad, CodigoMotivoCurricularV2.REZAGO_SEVERO,
                         "POSTERIOR_EXCLUIDA_RN64", "RN_6_4");
@@ -3371,14 +3371,14 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             finalizarRn68(resultado, contexto, carga, EstadoActualizacionTrayectoriaRn68V2.NO_APLICA_ESPECIFICO_NON_PAR);
             return;
         }
-        if (contexto.getSemestreObjetivo() == null
-                || contexto.getSemestreObjetivo().intValue() != semestreCierre.intValue() + 1
-                || contexto.getSemestreObjetivo().intValue() % 2 != 0) {
+        if (contexto.getSemestreReferencia() == null
+                || contexto.getSemestreReferencia().intValue() != semestreCierre.intValue() + 1
+                || contexto.getSemestreReferencia().intValue() % 2 != 0) {
             marcarRevisionRn68(resultado, contexto, carga, null, "SEMESTRE_PAR_SIGUIENTE_NO_DETERMINABLE_POR_TRAYECTORIA");
             finalizarRn68(resultado, contexto, carga, EstadoActualizacionTrayectoriaRn68V2.REQUIERE_REVISION);
             return;
         }
-        carga.setSemestreObjetivoParRn68(contexto.getSemestreObjetivo());
+        carga.setSemestreObjetivoParRn68(contexto.getSemestreReferencia());
         if (!Boolean.TRUE.equals(contexto.getBloqueosContinuidadAntesComprobados())) {
             marcarRevisionRn68(resultado, contexto, carga, null, "BLOQUEOS_PREVIOS_NO_COMPROBADOS");
             finalizarRn68(resultado, contexto, carga, EstadoActualizacionTrayectoriaRn68V2.REQUIERE_REVISION);
@@ -3458,7 +3458,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
             if (unidad.getEstado() != EstadoUnidadCurricularV2.NO_INSCRITA
                     || unidad.getSemestre() == null
-                    || unidad.getSemestre().intValue() != contexto.getSemestreObjetivo().intValue()) continue;
+                    || unidad.getSemestre().intValue() != contexto.getSemestreReferencia().intValue()) continue;
             if (esOptativa(unidad) || esElectiva(unidad)) {
                 marcarRevisionRn68(resultado, contexto, carga, unidad, "TIPO_UD_REQUIERE_REGLA_RN7");
                 continue;
@@ -3933,13 +3933,13 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
     private String evaluarElectivaNuevaRn72(ResultadoEvaluacionCurricularV2DTO resultado,
             ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga,
             UnidadEvaluacionCurricularV2DTO unidad) {
-        if (contexto.getSemestreObjetivo() == null) {
+        if (contexto.getSemestreReferencia() == null) {
             marcarRevisionElectivaRn72(resultado, contexto, carga, unidad, "SEMESTRE_OBJETIVO_NO_DETERMINADO");
             return "RESTRINGIDA";
         }
-        if (!esSemestreElectivas(contexto.getSemestreObjetivo())) {
+        if (!esSemestreElectivas(contexto.getSemestreReferencia())) {
             registrarDecisionElectivaRn72(resultado, contexto, unidad, null, "NO_ELEGIBLE_POR_SEMESTRE",
-                    "SEMESTRE_OBJETIVO=" + contexto.getSemestreObjetivo());
+                    "SEMESTRE_REFERENCIA=" + contexto.getSemestreReferencia());
             return "RESTRINGIDA";
         }
         if (unidad.getSemestre() == null || (unidad.getSemestre().intValue() != 5 && unidad.getSemestre().intValue() != 6)) {
@@ -4216,7 +4216,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             List<UnidadEvaluacionCurricularV2DTO> unidades) {
         if (contexto.getIdsUnidadesPretendidas().isEmpty()
                 && contexto.getIdsUnidadesCandidatas().isEmpty()) {
-            if (Integer.valueOf(5).equals(contexto.getSemestreMaximoCandidatas())) return true;
+            if (Boolean.TRUE.equals(contexto.getCandidataQuintoDeclaradaCompatibilidad())) return true;
             for (UnidadEvaluacionCurricularV2DTO unidad : unidades)
                 if (unidad != null && Boolean.TRUE.equals(unidad.getOfertada()) && Integer.valueOf(5).equals(unidad.getSemestre())) return true;
         }
