@@ -229,7 +229,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarActualizacionTrayectoriaTrasRegularizacion(resultado, contexto, unidadesNormalizadas);
         consolidarFase6ReincorporacionYTrayectoria(resultado, contexto);
         evaluarOptativasRn71(resultado, contexto, unidadesNormalizadas);
-        evaluarElectivasRn72(resultado, contexto, unidadesNormalizadas);
+        evaluarPrincipioGeneralOptativasReprobadasRn72(resultado, contexto, unidadesNormalizadas);
         // RN-7.3 no forma parte de las RN vigentes; RN-7.2 concentra las optativas reprobadas.
         // El cierre histórico de RN-7.3/electivas queda fuera de PE2024/2027.
         evaluarSeriacionInterbloqueRn81(resultado, contexto, unidadesNormalizadas);
@@ -1174,14 +1174,12 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
     private void evaluarLimiteIntentos(ResultadoEvaluacionCurricularV2DTO resultado,
             ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
-            EvaluacionIntentosUnidadV2DTO evaluacion = evaluarIntentosUnidad(unidad);
+            EvaluacionIntentosUnidadV2DTO evaluacion = evaluarIntentosUnidad(unidad, contexto);
             resultado.getEvaluacionesIntentos().add(evaluacion);
             CodigoMotivoCurricularV2 motivo = (evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.LIMITE_AGOTADO
                     || evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.AGOTADA)
                     ? CodigoMotivoCurricularV2.LIMITE_INTENTOS
-                    : (evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.REQUIERE_REVISION
-                            || evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.NO_DETERMINADO
-                            ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null);
+                    : motivoRevisionOportunidad(evaluacion);
             String detalle = "UD=" + evaluacion.getIdPrograma() + "; fallidos=" + evaluacion.getIntentosFallidos()
                     + "; acreditados=" + evaluacion.getIntentosAcreditados() + "; estado=" + evaluacion.getEstadoLimite()
                     + "; evidencia=" + evaluacion.getEvidencias() + "; duplicados=" + evaluacion.getDuplicadosDescartados();
@@ -1202,7 +1200,20 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         }
     }
 
-    private EvaluacionIntentosUnidadV2DTO evaluarIntentosUnidad(UnidadEvaluacionCurricularV2DTO unidad) {
+    private CodigoMotivoCurricularV2 motivoRevisionOportunidad(EvaluacionIntentosUnidadV2DTO evaluacion) {
+        if (evaluacion.getAviso() == null) return evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.REQUIERE_REVISION
+                ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null;
+        if (evaluacion.getAviso().contains(CodigoMotivoCurricularV2.BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION.name()))
+            return CodigoMotivoCurricularV2.BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION;
+        if (evaluacion.getAviso().contains(CodigoMotivoCurricularV2.EXTRAORDINARIO_HISTORICO_REQUIERE_REVISION.name()))
+            return CodigoMotivoCurricularV2.EXTRAORDINARIO_HISTORICO_REQUIERE_REVISION;
+        if (evaluacion.getAviso().contains(CodigoMotivoCurricularV2.NP_SIN_BAJA_REQUIERE_REVISION.name()))
+            return CodigoMotivoCurricularV2.NP_SIN_BAJA_REQUIERE_REVISION;
+        return CodigoMotivoCurricularV2.DATOS_INSUFICIENTES;
+    }
+
+    private EvaluacionIntentosUnidadV2DTO evaluarIntentosUnidad(UnidadEvaluacionCurricularV2DTO unidad,
+            ContextoEvaluacionCurricularV2DTO contexto) {
         EvaluacionIntentosUnidadV2DTO evaluacion = new EvaluacionIntentosUnidadV2DTO();
         evaluacion.setIdPrograma(unidad.getIdPrograma()); evaluacion.setClave(unidad.getClave());
         if (unidad.getEstado() == EstadoUnidadCurricularV2.ACREDITADA) {
@@ -1226,7 +1237,8 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             if (intento.getEstado() == EstadoIntentoAcreditacionV2.EN_CURSO) enCurso = true;
             if (intento.getEstado() == EstadoIntentoAcreditacionV2.NO_DETERMINADO) {
                 identidadInsuficiente = true;
-                motivoRevisionHistorica = CodigoMotivoCurricularV2.NP_SIN_BAJA_REQUIERE_REVISION;
+                motivoRevisionHistorica = intento.getEvidenciaFuente() != null && intento.getEvidenciaFuente().contains("BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION")
+                        ? CodigoMotivoCurricularV2.BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION : CodigoMotivoCurricularV2.NP_SIN_BAJA_REQUIERE_REVISION;
             }
             if (intento.getEstado() == EstadoIntentoAcreditacionV2.EXTRAORDINARIO_HISTORICO) {
                 identidadInsuficiente = true;
@@ -1243,7 +1255,10 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         }
         evaluacion.setOportunidadesConsumidas(Integer.valueOf(evaluacion.getIntentosFallidos().intValue()
                 + (enCurso ? 1 : 0)));
-        evaluacion.setOportunidadesDisponibles(Integer.valueOf(Math.max(0, 3 - evaluacion.getOportunidadesConsumidas().intValue())));
+        int limiteOportunidades = contexto.getParametrosCurriculares() == null
+                || contexto.getParametrosCurriculares().getOportunidadesPorUd() == null ? 3
+                : contexto.getParametrosCurriculares().getOportunidadesPorUd().intValue();
+        evaluacion.setOportunidadesDisponibles(Integer.valueOf(Math.max(0, limiteOportunidades - evaluacion.getOportunidadesConsumidas().intValue())));
         unidad.setOportunidadesConsumidas(evaluacion.getOportunidadesConsumidas());
         unidad.setOportunidadesDisponibles(evaluacion.getOportunidadesDisponibles());
         if (evaluacion.getIntentosAcreditados().intValue() > 0 || unidad.getEstado() == EstadoUnidadCurricularV2.ACREDITADA) {
@@ -1252,13 +1267,13 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.REQUIERE_REVISION);
             evaluacion.setAviso(motivoRevisionHistorica == null ? "Historial insuficiente para determinar oportunidades."
                     : motivoRevisionHistorica.name());
-        } else if (evaluacion.getIntentosFallidos().intValue() > 3 || evaluacion.getIntentosIdentificados().intValue() > 3) {
+        } else if (evaluacion.getIntentosFallidos().intValue() > limiteOportunidades || evaluacion.getIntentosIdentificados().intValue() > limiteOportunidades) {
             evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.REQUIERE_REVISION);
             evaluacion.setRequiereEscalamiento(Boolean.TRUE);
-        } else if (evaluacion.getIntentosFallidos().intValue() == 3) {
+        } else if (evaluacion.getIntentosFallidos().intValue() == limiteOportunidades) {
             evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.AGOTADA);
             evaluacion.setLimiteAgotado(Boolean.TRUE); evaluacion.setRequiereEscalamiento(Boolean.TRUE);
-        } else if (evaluacion.getIntentosFallidos().intValue() == 2) {
+        } else if (evaluacion.getIntentosFallidos().intValue() == limiteOportunidades - 1) {
             evaluacion.setEstadoLimite(enCurso ? EstadoLimiteIntentosV2.ULTIMA_EN_CURSO : EstadoLimiteIntentosV2.ULTIMA_DISPONIBLE);
             evaluacion.setUltimaOportunidad(Boolean.TRUE);
             evaluacion.setAviso(enCurso ? "Estas cursando la ultima oportunidad aplicable."
@@ -3932,7 +3947,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
     }
 
     /** RN-7.2 definitivo trata optativas reprobadas; no crea una categoría ELECTIVA. */
-    private void evaluarElectivasRn72(ResultadoEvaluacionCurricularV2DTO resultado,
+    private void evaluarPrincipioGeneralOptativasReprobadasRn72(ResultadoEvaluacionCurricularV2DTO resultado,
             ContextoEvaluacionCurricularV2DTO contexto, List<UnidadEvaluacionCurricularV2DTO> unidades) {
         EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
         if (carga == null) return;
@@ -3959,71 +3974,9 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
     private String evaluarElectivaNuevaRn72(ResultadoEvaluacionCurricularV2DTO resultado,
             ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga,
             UnidadEvaluacionCurricularV2DTO unidad) {
-        if (contexto.getSemestreReferencia() == null) {
-            marcarRevisionElectivaRn72(resultado, contexto, carga, unidad, "SEMESTRE_OBJETIVO_NO_DETERMINADO");
-            return "RESTRINGIDA";
-        }
-        if (!esSemestreElectivas(contexto.getSemestreReferencia())) {
-            registrarDecisionElectivaRn72(resultado, contexto, unidad, null, "NO_ELEGIBLE_POR_SEMESTRE",
-                    "SEMESTRE_REFERENCIA=" + contexto.getSemestreReferencia());
-            return "RESTRINGIDA";
-        }
-        if (unidad.getSemestre() == null || (unidad.getSemestre().intValue() != 5 && unidad.getSemestre().intValue() != 6)) {
-            marcarRevisionElectivaRn72(resultado, contexto, carga, unidad, "SEMESTRE_ORIGEN_ELECTIVA_NO_VALIDO");
-            return "RESTRINGIDA";
-        }
-        if (contexto.getIdPlan() == null || unidad.getIdPlanOrigenElectiva() == null) {
-            marcarRevisionElectivaRn72(resultado, contexto, carga, unidad, "PE_ESTUDIANTE_U_ORIGEN_NO_DETERMINADO");
-            return "RESTRINGIDA";
-        }
-        if (contexto.getIdPlan().equals(unidad.getIdPlanOrigenElectiva())) {
-            agregarIdUnico(carga.getUdsElectivasMismoPeRn72(), unidad.getIdPrograma());
-            registrarDecisionElectivaRn72(resultado, contexto, unidad, CodigoMotivoCurricularV2.ESTRUCTURA_PE_NO_DETERMINADA,
-                    "NO_ELEGIBLE_POR_MISMO_PE", "PE_ESTUDIANTE=" + contexto.getIdPlan());
-            return "RESTRINGIDA";
-        }
-        String disponibilidad = disponibilidadRn65(unidad);
-        if ("SIN_OFERTA".equals(disponibilidad)) {
-            agregarIdUnico(carga.getUdsElectivasSinOfertaRn72(), unidad.getIdPrograma());
-            registrarDecisionElectivaRn72(resultado, contexto, unidad, CodigoMotivoCurricularV2.SIN_OFERTA,
-                    "ELECTIVA_NO_DISPONIBLE", "SIN_OFERTA");
-            return "RESTRINGIDA";
-        }
-        if ("SIN_CUPO".equals(disponibilidad)) {
-            agregarIdUnico(carga.getUdsElectivasSinCupoRn72(), unidad.getIdPrograma());
-            registrarDecisionElectivaRn72(resultado, contexto, unidad, CodigoMotivoCurricularV2.SIN_CUPO,
-                    "ELECTIVA_NO_DISPONIBLE", "SIN_CUPO");
-            return "RESTRINGIDA";
-        }
-        if (!"DISPONIBLE".equals(disponibilidad)) {
-            marcarRevisionElectivaRn72(resultado, contexto, carga, unidad, "OFERTA_O_CUPO_NO_DETERMINADO");
-            return "RESTRINGIDA";
-        }
-        if (Boolean.TRUE.equals(unidad.getSeriacionDirectaConocida()) || Boolean.TRUE.equals(unidad.getSeriacionIndirectaConocida())) {
-            agregarIdUnico(carga.getUdsElectivasBloqueadasSeriacionRn72(), unidad.getIdPrograma());
-            registrarDecisionElectivaRn72(resultado, contexto, unidad,
-                    Boolean.TRUE.equals(unidad.getSeriacionDirectaConocida()) ? CodigoMotivoCurricularV2.SERIACION_DIRECTA : CodigoMotivoCurricularV2.SERIACION_INDIRECTA,
-                    "ELECTIVA_BLOQUEADA_SERIACION", "RELACION_FORMAL_DETECTADA");
-            return "RESTRINGIDA";
-        }
-        if (carga.getCargaMaximaNormativa() == null || carga.getCargaEvaluada() == null) {
-            marcarRevisionElectivaRn72(resultado, contexto, carga, unidad, "CARGA_NO_DETERMINABLE");
-            return "RESTRINGIDA";
-        }
-        if (carga.getCargaEvaluada().intValue() >= carga.getCargaMaximaNormativa().intValue()) {
-            registrarDecisionElectivaRn72(resultado, contexto, unidad, null, "ELECTIVA_RESTRINGIDA_CARGA", "CARGA_MAXIMA_ALCANZADA");
-            return "RESTRINGIDA";
-        }
-        // RN-6.3 expone las reprobadas ofertadas; RN-7.2 no las desplaza con una electiva nueva.
-        if (!carga.getUdsReprobadasOfertadas().isEmpty()) {
-            agregarIdUnico(carga.getUdsElectivasConRestriccionPrioridadRn72(), unidad.getIdPrograma());
-            registrarDecisionElectivaRn72(resultado, contexto, unidad, null, "ELECTIVA_ELEGIBLE_CON_PRIORIDAD_PREVIA",
-                    "RN63_DEBE_ATENDERSE_ANTES");
-            return "RESTRINGIDA";
-        }
-        agregarIdUnico(carga.getUdsElectivasElegiblesRn72(), unidad.getIdPrograma());
-        registrarDecisionElectivaRn72(resultado, contexto, unidad, null, "ELECTIVA_ELEGIBLE", "OTRO_PE_CARGA_Y_DISPONIBILIDAD_VALIDAS");
-        return "ELEGIBLE";
+        // Compatibilidad binaria: RN-7.2 ya no evalúa una categoría ELECTIVA.
+        marcarRevisionElectivaRn72(resultado, contexto, carga, unidad, "CATEGORIA_ELECTIVA_RETIRADA_RN72");
+        return "NO_APLICA";
     }
 
     private boolean esSemestreElectivas(Integer semestreObjetivo) {
@@ -4453,9 +4406,13 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.HABILITADA);
             decision.setExplicacionTecnica("Oferta origen disponible; la evaluación V2 la replica para comparación.");
         } else {
+            // La falta de oferta no borra la prioridad curricular ni vuelve seleccionable la UD.
+            agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.PRIORITARIA);
             agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.REQUIERE_REVISION);
+            decision.setPrioritaria(Boolean.TRUE);
+            decision.setHabilitada(Boolean.FALSE);
             agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.SIN_OFERTA);
-            decision.setExplicacionTecnica("La UD no forma parte de la oferta origen y requiere revisión en V2.");
+            decision.setExplicacionTecnica("La UD permanece prioritaria, pero no está ofertada y no es seleccionable.");
         }
         return decision;
     }

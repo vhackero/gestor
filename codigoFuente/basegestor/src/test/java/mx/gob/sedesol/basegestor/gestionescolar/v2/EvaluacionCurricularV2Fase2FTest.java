@@ -57,7 +57,7 @@ public class EvaluacionCurricularV2Fase2FTest {
         ResultadoEvaluacionCurricularV2DTO r = evaluar(contexto(reprobada(6L, 3)));
         assertEquals(r.getCantidadReprobadasVigentes(), Integer.valueOf(1));
         assertEquals(intentos(r, 6L).getIntentosFallidos(), Integer.valueOf(3));
-        assertEquals(intentos(r, 6L).getEstadoLimite(), EstadoLimiteIntentosV2.LIMITE_AGOTADO);
+        assertEquals(intentos(r, 6L).getEstadoLimite(), EstadoLimiteIntentosV2.AGOTADA);
     }
 
     @Test public void f2FU05AcreditacionPosteriorEliminaReprobadaVigenteYConservaHistorial() {
@@ -111,7 +111,7 @@ public class EvaluacionCurricularV2Fase2FTest {
         assertEquals(r.getSituacionAcademicaCalculada(), "IRREGULAR");
     }
 
-    @Test public void f2FU10MejoraPromedioNoAlteraRegularidadNiIntentos() {
+    @Test public void f2FU10AcreditadaNoExponeMejoraPromedioRetirada() {
         UnidadEvaluacionCurricularV2DTO u = acreditada(13L);
         u.getIntentosAcreditacion().add(intento("UD13-A", EstadoIntentoAcreditacionV2.ACREDITADO, 8.7, false));
         u.getIntentosAcreditacion().add(intento("UD13-M", EstadoIntentoAcreditacionV2.ACREDITADO, 9.2, true));
@@ -119,18 +119,17 @@ public class EvaluacionCurricularV2Fase2FTest {
         c.setOportunidadesMejoraUtilizadas(null);
         ResultadoEvaluacionCurricularV2DTO r = evaluar(c);
         assertEquals(r.getSituacionAcademicaCalculada(), "REGULAR");
-        assertEquals(r.getOportunidadesMejoraUtilizadas(), Integer.valueOf(1));
-        assertEquals(mejora(r, 13L).getEstado(), EstadoMejoraPromedioV2.NO_ELEGIBLE);
-        assertEquals(mejora(r, 13L).getCalificacionFavorable(), Double.valueOf(9.2));
+        assertNull(r.getOportunidadesMejoraUtilizadas());
+        assertTrue(r.getEvaluacionesMejoraPromedio().isEmpty());
         assertEquals(intentos(r, 13L).getEstadoLimite(), EstadoLimiteIntentosV2.ACREDITADA_SIN_OPORTUNIDAD_REQUERIDA);
     }
 
-    @Test public void f2FU11TresMejorasGlobalesNoAfectanReprobadasNiIntentos() {
+    @Test public void f2FU11ContadorLegacyDeMejoraNoProduceDecision() {
         ContextoEvaluacionCurricularV2DTO c = contexto(acreditada(14L));
         c.setOportunidadesMejoraUtilizadas(Integer.valueOf(3));
         ResultadoEvaluacionCurricularV2DTO r = evaluar(c);
         assertEquals(r.getCantidadReprobadasVigentes(), Integer.valueOf(0));
-        assertEquals(mejora(r, 14L).getEstado(), EstadoMejoraPromedioV2.NO_ELEGIBLE);
+        assertTrue(r.getEvaluacionesMejoraPromedio().isEmpty());
         assertEquals(intentos(r, 14L).getIntentosFallidos(), Integer.valueOf(0));
     }
 
@@ -157,10 +156,10 @@ public class EvaluacionCurricularV2Fase2FTest {
         assertTrue(r.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_1_2));
         assertTrue(r.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_1_3));
         assertTrue(r.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_1_4));
-        assertTrue(r.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_1_5));
+        assertFalse(r.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_1_5));
         assertEquals(Integer.valueOf(r.getDecisiones().size()), Integer.valueOf(2));
         assertEquals(Integer.valueOf(r.getEvaluacionesIntentos().size()), Integer.valueOf(2));
-        assertEquals(Integer.valueOf(r.getEvaluacionesMejoraPromedio().size()), Integer.valueOf(2));
+        assertTrue(r.getEvaluacionesMejoraPromedio().isEmpty());
         assertTrue(r.getTrazas().size() >= 8);
         assertFalse(r.getEfectosProductivosAplicados());
     }

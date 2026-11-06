@@ -233,6 +233,14 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
     private void aplicarParametros(ContextoEvaluacionCurricularV2DTO contexto) {
         ConfiguracionEvaluacionCurricularV2DTO configuracion = new ConfiguracionEvaluacionCurricularV2ServiceImpl().obtenerConfiguracion();
         ParametrosCurricularesV2DTO parametros = new ParametrosCurricularesV2DTO();
+        parametros.setOportunidadesPorUd(configuracion.getParametrosCurriculares().getOportunidadesPorUd());
+        parametros.setCalificacionMinimaAprobatoria(configuracion.getParametrosCurriculares().getCalificacionMinimaAprobatoria());
+        parametros.setCargaMinima(configuracion.getParametrosCurriculares().getCargaMinima());
+        parametros.setCargaMaxRegular(configuracion.getParametrosCurriculares().getCargaMaxRegular());
+        parametros.setCargaMaxIrregular(configuracion.getParametrosCurriculares().getCargaMaxIrregular());
+        parametros.setUmbralRezagoSevero(configuracion.getParametrosCurriculares().getUmbralRezagoSevero());
+        parametros.setMaxSemestresBajaTemporal(configuracion.getParametrosCurriculares().getMaxSemestresBajaTemporal());
+        parametros.setOptativasRequeridas(configuracion.getParametrosCurriculares().getOptativasRequeridas());
         parametros.setCtr01PeriodoInicio(configuracion.getCtr01PeriodoInicio());
         parametros.setCtr01Semestre(configuracion.getCtr01SemestreObjetivo());
         parametros.setDocumentoRespaldo("P2024-2027- Reglas de negocio_Octubre 2026_act_20261105.docx");

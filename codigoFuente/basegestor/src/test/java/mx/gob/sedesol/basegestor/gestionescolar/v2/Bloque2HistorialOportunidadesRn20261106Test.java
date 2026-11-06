@@ -2,9 +2,11 @@ package mx.gob.sedesol.basegestor.gestionescolar.v2;
 
 import static org.testng.Assert.*;
 import java.util.Date;
+import java.lang.reflect.Method;
 import org.testng.annotations.Test;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.*;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.v2.EvaluacionCurricularV2ServiceImpl;
+import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.InscripcionRepository;
 
 /** Casos dorados GC-08, GC-09, GC-11 y GC-15 del Bloque 2. */
 public class Bloque2HistorialOportunidadesRn20261106Test {
@@ -37,6 +39,42 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         ResultadoEvaluacionCurricularV2DTO r = evaluar(u);
         assertEquals(r.getCantidadReprobadasVigentes(), Integer.valueOf(0));
         assertEquals(r.getEvaluacionesIntentos().get(0).getOportunidadesConsumidas(), Integer.valueOf(0));
+    }
+    @Test public void bajasMapeadasPorTipoYMotivoNoUsanCategoriaResidual() throws Exception {
+        assertEquals(mapearBaja(1, "solicitud", 1).getEstado(), EstadoIntentoAcreditacionV2.BAJA_PARCIAL);
+        assertEquals(mapearBaja(1, "SERiACION", 0).getEstado(), EstadoIntentoAcreditacionV2.BAJA_PARCIAL);
+        assertEquals(mapearBaja(2, "", 0).getEstado(), EstadoIntentoAcreditacionV2.BAJA_TEMPORAL);
+        assertEquals(mapearBaja(7, "", 0).getEstado(), EstadoIntentoAcreditacionV2.BAJA_TEMPORAL);
+        assertEquals(mapearBaja(8, "", 0).getEstado(), EstadoIntentoAcreditacionV2.BAJA_TEMPORAL);
+        assertTrue(mapearBaja(4, "", 0).getEvidenciaFuente().contains("BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION"));
+        assertTrue(mapearBaja(5, "", 0).getEvidenciaFuente().contains("BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION"));
+        assertTrue(mapearBaja(3, "", 0).getEvidenciaFuente().contains("BAJA_DEFINITIVA"));
+        assertTrue(mapearBaja(6, "", 0).getEvidenciaFuente().contains("BAJA_DEFINITIVA"));
+        assertTrue(mapearBaja(9, "", 0).getEvidenciaFuente().contains("NO_MAPEADO_REQUIERE_REVISION"));
+    }
+    @Test public void extraordinarioHistoricoNoSumaReprobacionNiOportunidad() {
+        ResultadoEvaluacionCurricularV2DTO r=evaluar(ud(25L, intento("ordinaria", EstadoIntentoAcreditacionV2.REPROBADO), intento("extra", EstadoIntentoAcreditacionV2.EXTRAORDINARIO_HISTORICO)));
+        assertEquals(r.getCantidadReprobadasVigentes(), Integer.valueOf(1));
+        assertEquals(r.getEvaluacionesIntentos().get(0).getOportunidadesConsumidas(), Integer.valueOf(1));
+        assertEquals(r.getEvaluacionesIntentos().get(0).getEstadoLimite(), EstadoLimiteIntentosV2.REQUIERE_REVISION);
+    }
+    @Test public void calificacionFueraDeRangoSeReportaComoNpSinBaja() throws Exception {
+        IntentoAcreditacionUnidadV2DTO intento=mapearFila(null, 101D);
+        assertEquals(intento.getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
+        assertTrue(intento.getEvidenciaFuente().contains("NP_SIN_BAJA_REQUIERE_REVISION"));
+    }
+    @Test public void rn72EsPrincipioGeneralDeOptativasReprobadas() {
+        UnidadEvaluacionCurricularV2DTO u=ud(26L, intento("opt", EstadoIntentoAcreditacionV2.REPROBADO)); u.setTipoUd("Optativa");
+        ResultadoEvaluacionCurricularV2DTO r=evaluar(u);
+        assertTrue(r.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_7_2));
+        assertFalse(r.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_7_3));
+    }
+    private IntentoAcreditacionUnidadV2DTO mapearBaja(int tipo, String motivo, int solicitud) throws Exception { return mapearFila(Integer.valueOf(tipo), null, motivo, Integer.valueOf(solicitud)); }
+    private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion) throws Exception { return mapearFila(tipo, calificacion, null, null); }
+    private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion, String motivo, Integer solicitud) throws Exception {
+        Method m=InscripcionRepository.class.getDeclaredMethod("mapearIntentoCurricularV2", Object[].class); m.setAccessible(true);
+        Object[] fila=new Object[]{1L, 1L, "2026-2", 1L, 1L, calificacion, tipo, motivo, solicitud};
+        return (IntentoAcreditacionUnidadV2DTO)m.invoke(new InscripcionRepository(), new Object[]{fila});
     }
     private void assertEstado(UnidadEvaluacionCurricularV2DTO u, EstadoLimiteIntentosV2 esperado, int consumidas, int disponibles) {
         EvaluacionIntentosUnidadV2DTO e=evaluar(u).getEvaluacionesIntentos().get(0);

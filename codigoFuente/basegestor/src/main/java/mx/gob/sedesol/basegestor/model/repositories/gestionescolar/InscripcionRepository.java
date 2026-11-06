@@ -122,7 +122,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 	public List<IntentoAcreditacionUnidadV2DTO> obtenerIntentosCurricularesV2(Long idPersona, Long idPlan) {
 		List<IntentoAcreditacionUnidadV2DTO> resultado = new ArrayList<IntentoAcreditacionUnidadV2DTO>();
 		if (idPersona == null || idPlan == null) return resultado;
-		String sql = "SELECT ti.id, ti.idprograma, pi.nombre_periodo, rgp.id, rgp.id_grupo, rgp.calificacion_final, fd.calificacion_min_aprobatoria, mb.tipo_baja_id "
+		String sql = "SELECT ti.id, ti.idprograma, pi.nombre_periodo, rgp.id, rgp.id_grupo, rgp.calificacion_final, mb.tipo_baja_id, mb.descripcion, baja.solicitud "
 				+ "FROM tbl_inscripciones ti LEFT JOIN tbl_eventos e ON e.id_evento=ti.idevento "
 				+ "LEFT JOIN tbl_periodos_inscripcion pi ON e.cve_evento_cap LIKE CONCAT('%',pi.nombre_periodo,'%') "
 				+ "LEFT JOIN tbl_grupos g ON g.id=ti.groupbase "
@@ -142,21 +142,47 @@ public class InscripcionRepository implements IinscripcionRepository {
 		intento.setIdEjecucionTecnico(idInscripcion == null ? null : "INSCRIPCION:" + idInscripcion);
 		intento.setIdPrograma(getLongValue(fila[1])); intento.setPeriodo(fila[2] == null ? null : String.valueOf(fila[2]));
 		intento.setIdParticipacion(getLongValue(fila[3])); intento.setIdGrupo(getLongValue(fila[4]));
-		Double calificacion = getDoubleValue(fila[5]); Double minima = getDoubleValue(fila[6]); Integer tipoBaja = getIntegerValue(fila[7]);
+		Double calificacion = getDoubleValue(fila[5]); Integer tipoBaja = getIntegerValue(fila[6]);
+		String motivoBaja = fila[7] == null ? null : String.valueOf(fila[7]); Boolean solicitud = getIntegerValue(fila[8]) == null ? null : Boolean.valueOf(getIntegerValue(fila[8]).intValue() == 1);
 		intento.setCalificacionFinal(calificacion);
 		if (tipoBaja != null) {
-			intento.setEstado(tipoBaja.intValue() == 2 ? EstadoIntentoAcreditacionV2.BAJA_TEMPORAL : EstadoIntentoAcreditacionV2.BAJA_PARCIAL);
-			intento.setEvidenciaFuente("REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja);
+			mapearBajaContabilizable(intento, tipoBaja, motivoBaja, solicitud);
 		} else if (calificacion == null) {
 			intento.setEstado(intento.getIdGrupo() == null ? EstadoIntentoAcreditacionV2.NO_DETERMINADO : EstadoIntentoAcreditacionV2.EN_CURSO);
 			intento.setEvidenciaFuente("INSCRIPCION_SIN_CALIFICACION");
-		} else if (calificacion.doubleValue() < 0D || calificacion.doubleValue() > 100D || minima == null) {
-			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente("CALIFICACION_O_UMBRAL_NO_VERIFICABLE");
+		} else if (calificacion.doubleValue() < 0D || calificacion.doubleValue() > 100D) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente("NP_SIN_BAJA_REQUIERE_REVISION:CALIFICACION_FUERA_RANGO_0_100");
 		} else {
-			intento.setEstado(calificacion.doubleValue() >= minima.doubleValue() ? EstadoIntentoAcreditacionV2.ACREDITADO : EstadoIntentoAcreditacionV2.REPROBADO);
-			intento.setEvidenciaFuente("INSCRIPCION_GRUPO_ACTA");
+			int umbral = umbralAprobatorioV2();
+			intento.setEstado(calificacion.doubleValue() >= umbral ? EstadoIntentoAcreditacionV2.ACREDITADO : EstadoIntentoAcreditacionV2.REPROBADO);
+			intento.setEvidenciaFuente("INSCRIPCION_GRUPO_ACTA:UMBRAL_V2=" + umbral);
 		}
 		return intento;
+	}
+
+	private int umbralAprobatorioV2() {
+		try { return Integer.parseInt(System.getProperty("V2_CALIFICACION_MINIMA_APROBATORIA", "60")); }
+		catch (NumberFormatException e) { return 60; }
+	}
+
+	private void mapearBajaContabilizable(IntentoAcreditacionUnidadV2DTO intento, Integer tipoBaja, String motivo, Boolean solicitud) {
+		String evidencia = "REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja + ";MOTIVO=" + (motivo == null ? "" : motivo);
+		if (tipoBaja.intValue() == 2 || tipoBaja.intValue() == 7 || tipoBaja.intValue() == 8) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.BAJA_TEMPORAL); intento.setEvidenciaFuente(evidencia); return;
+		}
+		if (tipoBaja.intValue() == 1 && Boolean.TRUE.equals(solicitud)) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.BAJA_PARCIAL); intento.setEvidenciaFuente(evidencia + ";CAUSA=SOLICITADA"); return;
+		}
+		if (tipoBaja.intValue() == 1 && motivo != null && motivo.toUpperCase().contains("SERIACION")) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.BAJA_PARCIAL); intento.setEvidenciaFuente(evidencia + ";CAUSA=SERIACION"); return;
+		}
+		if (tipoBaja.intValue() == 3 || tipoBaja.intValue() == 6) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente(evidencia + ";ESTADO_EXPEDIENTE=BAJA_DEFINITIVA"); return;
+		}
+		if (tipoBaja.intValue() == 4 || tipoBaja.intValue() == 5) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente(evidencia + ";BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION"); return;
+		}
+		intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente(evidencia + ";TIPO_BAJA_NO_MAPEADO_REQUIERE_REVISION");
 	}
 
 	private Date obtenerPrimeraInscripcionValida(Long idPersona) {

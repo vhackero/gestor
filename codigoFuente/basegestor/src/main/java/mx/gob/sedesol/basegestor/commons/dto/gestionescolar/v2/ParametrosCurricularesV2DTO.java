@@ -6,6 +6,7 @@ import java.io.Serializable;
 public class ParametrosCurricularesV2DTO implements Serializable {
     private static final long serialVersionUID = 1L;
     private Integer oportunidadesPorUd = Integer.valueOf(3);
+    private Integer calificacionMinimaAprobatoria = Integer.valueOf(60);
     private Integer cargaMinima = Integer.valueOf(3);
     private Integer cargaMaxRegular = Integer.valueOf(8);
     private Integer cargaMaxIrregular = Integer.valueOf(6);
@@ -18,6 +19,7 @@ public class ParametrosCurricularesV2DTO implements Serializable {
     private String vigencia;
     private String ambito;
     public Integer getOportunidadesPorUd() { return oportunidadesPorUd; } public void setOportunidadesPorUd(Integer v) { oportunidadesPorUd = v; }
+    public Integer getCalificacionMinimaAprobatoria() { return calificacionMinimaAprobatoria; } public void setCalificacionMinimaAprobatoria(Integer v) { calificacionMinimaAprobatoria = v; }
     public Integer getCargaMinima() { return cargaMinima; } public void setCargaMinima(Integer v) { cargaMinima = v; }
     public Integer getCargaMaxRegular() { return cargaMaxRegular; } public void setCargaMaxRegular(Integer v) { cargaMaxRegular = v; }
     public Integer getCargaMaxIrregular() { return cargaMaxIrregular; } public void setCargaMaxIrregular(Integer v) { cargaMaxIrregular = v; }

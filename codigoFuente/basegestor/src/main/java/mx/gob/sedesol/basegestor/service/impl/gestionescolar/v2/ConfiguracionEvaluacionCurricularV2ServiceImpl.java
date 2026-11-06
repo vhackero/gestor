@@ -27,6 +27,7 @@ public class ConfiguracionEvaluacionCurricularV2ServiceImpl implements Configura
         configuracion.setCtr01PeriodoInicio(obtenerPropiedad("CTR01_PERIODO_INICIO", CTR01_PERIODO_INICIO));
         configuracion.setCtr01SemestreObjetivo(obtenerEntero("CTR01_SEMESTRE_OBJETIVO", CTR01_SEMESTRE_OBJETIVO));
         ParametrosCurricularesV2DTO parametros = new ParametrosCurricularesV2DTO();
+        parametros.setCalificacionMinimaAprobatoria(obtenerEntero("V2_CALIFICACION_MINIMA_APROBATORIA", Integer.valueOf(60)));
         parametros.setOportunidadesPorUd(obtenerEntero("V2_OPORTUNIDADES_POR_UD", Integer.valueOf(3)));
         parametros.setCargaMinima(obtenerEntero("V2_CARGA_MINIMA", Integer.valueOf(3)));
         parametros.setCargaMaxRegular(obtenerEntero("V2_CARGA_MAX_REGULAR", Integer.valueOf(8)));

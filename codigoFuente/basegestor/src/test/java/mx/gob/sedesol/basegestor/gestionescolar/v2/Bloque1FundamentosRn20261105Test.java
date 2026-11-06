@@ -89,8 +89,8 @@ public class Bloque1FundamentosRn20261105Test {
         DecisionUnidadCurricularV2DTO ob33 = decision(resultado, 33L);
         DecisionUnidadCurricularV2DTO ob51 = decision(resultado, 51L);
         DecisionUnidadCurricularV2DTO ob53 = decision(resultado, 53L);
-        assertTrue(ob33.getEstadosSombra().contains(EstadoDecisionUnidadCurricularV2.REQUIERE_REVISION)
-                || ob33.getEstadosSombra().contains(EstadoDecisionUnidadCurricularV2.HABILITADA));
+        assertTrue(ob33.getEstadosSombra().contains(EstadoDecisionUnidadCurricularV2.PRIORITARIA));
+        assertFalse(ob33.getEstadosSombra().contains(EstadoDecisionUnidadCurricularV2.HABILITADA));
         assertTrue(ob33.getMotivos().contains(CodigoMotivoCurricularV2.SIN_OFERTA));
         assertTrue(ob51.getEstadosSombra().contains(EstadoDecisionUnidadCurricularV2.HABILITADA));
         assertTrue(ob53.getEstadosSombra().contains(EstadoDecisionUnidadCurricularV2.BLOQUEADA));
