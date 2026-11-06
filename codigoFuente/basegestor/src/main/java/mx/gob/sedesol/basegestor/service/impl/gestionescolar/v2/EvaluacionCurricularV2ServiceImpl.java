@@ -124,6 +124,12 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             resultado.getMensajes().add("No fue posible construir el contexto de evaluación sombra.");
             return resultado;
         }
+        if (!"APLICA".equals(contexto.getAmbitoRnPe2024_2027()) && !"REQUIERE_REVISION".equals(contexto.getAmbitoRnPe2024_2027())) {
+            resultado.setSituacionAcademicaCalculada("REQUIERE_REVISION");
+            resultado.getMensajes().add("El expediente no tiene ámbito validado para las RN PE2024-2027.");
+            resultado.getRestricciones().add(CodigoMotivoCurricularV2.ESTRUCTURA_PE_NO_DETERMINADA);
+            return resultado;
+        }
 
         int reprobadas = 0;
         boolean datosInsuficientesSituacion = false;
@@ -240,6 +246,8 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 "EVALUACION_PREVIA_REINSCRIPCION_SOMBRA",
                 "Se construyó una oferta individual V2 separada de la oferta y seleccionabilidad origen.");
         resultado.getMensajes().add("Resultado generado en modo sombra; no modifica la elegibilidad vigente.");
+        if (Boolean.FALSE.equals(contexto.getUniversoMapaCompleto()) || Boolean.FALSE.equals(contexto.getHistorialCompleto()))
+            resultado.getMensajes().add("Evaluación parcial: falta integrar el mapa completo del plan o el historial completo; no equivale a ausencia de pendientes.");
         return resultado;
     }
 
@@ -846,7 +854,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         if (carga == null) return;
         agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_9_5);
         agregarUnico(carga.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_9_5);
-        String resumen = "situacion=" + resultado.getSituacionAcademicaCalculada() + "; semestreObjetivo=" + contexto.getSemestreObjetivo()
+        String resumen = "situacion=" + resultado.getSituacionAcademicaCalculada() + "; semestreReferencia=" + contexto.getSemestreReferencia()
                 + "; totalReprobadas=" + resultado.getTotalReprobadas() + "; rn61="
                 + (Boolean.TRUE.equals(carga.getAplicaRn61()) ? "APLICA:" + carga.getDecisionGlobalRn61() : "NO_APLICA")
                 + "; rn64=" + carga.getAplicaRn64() + "; excepciones=" + resultado.getExcepcionesEvaluadas().size()
@@ -4199,13 +4207,19 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         if (!tieneCandidataQuinto(contexto, unidades)) return Boolean.FALSE;
         String periodo = contexto.getPeriodoNormativo();
         if (periodo == null || !periodo.matches("\\d{4}-[12]")) return null;
-        return Boolean.valueOf(periodo.compareTo("2027-1") >= 0);
+        String inicio = contexto.getParametrosCurriculares() == null ? "2027-1"
+                : contexto.getParametrosCurriculares().getCtr01PeriodoInicio();
+        return Boolean.valueOf(periodo.compareTo(inicio == null ? "2027-1" : inicio) >= 0);
     }
 
     private boolean tieneCandidataQuinto(ContextoEvaluacionCurricularV2DTO contexto,
             List<UnidadEvaluacionCurricularV2DTO> unidades) {
         if (contexto.getIdsUnidadesPretendidas().isEmpty()
-                && Integer.valueOf(5).equals(contexto.getSemestreObjetivo())) return true;
+                && contexto.getIdsUnidadesCandidatas().isEmpty()) {
+            if (Integer.valueOf(5).equals(contexto.getSemestreMaximoCandidatas())) return true;
+            for (UnidadEvaluacionCurricularV2DTO unidad : unidades)
+                if (unidad != null && Boolean.TRUE.equals(unidad.getOfertada()) && Integer.valueOf(5).equals(unidad.getSemestre())) return true;
+        }
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades)
             if (esCandidataQuinto(contexto, unidad)) return true;
         return false;
@@ -4215,6 +4229,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             UnidadEvaluacionCurricularV2DTO unidad) {
         if (unidad == null || !Integer.valueOf(5).equals(unidad.getSemestre())) return false;
         List<Long> pretendidas = contexto.getIdsUnidadesPretendidas();
+        if (pretendidas == null || pretendidas.isEmpty()) pretendidas = contexto.getIdsUnidadesCandidatas();
         return pretendidas == null || pretendidas.isEmpty()
                 || (unidad.getIdPrograma() != null && pretendidas.contains(unidad.getIdPrograma()));
     }

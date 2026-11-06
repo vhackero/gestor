@@ -113,7 +113,7 @@ public class EvaluacionCurricularV2ServiceTest {
         ConfiguracionEvaluacionCurricularV2ServiceImpl configuracionService = new ConfiguracionEvaluacionCurricularV2ServiceImpl();
         ConfiguracionEvaluacionCurricularV2DTO configuracion = configuracionService.obtenerConfiguracion();
 
-        assertEquals("PE2027-V1", configuracion.getVersionReglas());
+        assertEquals("RN-PE2024-2027-act-20261105", configuracion.getVersionReglas());
         assertEquals("2027-1", configuracion.getCtr01PeriodoInicio());
         assertEquals(Integer.valueOf(5), configuracion.getCtr01SemestreObjetivo());
         assertTrue(configuracion.getEvaluacionV2Habilitada());

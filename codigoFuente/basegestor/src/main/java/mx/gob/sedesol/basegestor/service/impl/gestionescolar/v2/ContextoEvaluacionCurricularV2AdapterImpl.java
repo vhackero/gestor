@@ -24,6 +24,10 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.UnidadEvaluacionC
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.RelacionSeriacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoRelacionSeriacionV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoSeriacionV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PeriodoTrayectoriaV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.SemestreReferenciaV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ParametrosCurricularesV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ConfiguracionEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ContextoEvaluacionCurricularV2Adapter;
 
 /**
@@ -49,8 +53,19 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
             }
         }
         resultado.setUnidades(mapearUnidades(unidades));
+        resultado.setUniversoMapaCompleto(Boolean.FALSE);
+        resultado.setHistorialCompleto(Boolean.FALSE);
         marcarReprobacionesVigentes(resultado, contextoInscripcion);
-        resultado.setSemestreObjetivo(obtenerSemestreObjetivo(resultado.getUnidades()));
+        resultado.setSemestreMaximoCandidatas(obtenerSemestreMaximo(resultado.getUnidades()));
+        SemestreReferenciaV2DTO referencia = new SemestreReferenciaV2ServiceImpl().calcular(periodoActivo,
+                obtenerSemestreMaximo(resultado.getUnidades()), resultado.getPeriodosTrayectoria(), null);
+        if (referencia.getValor() == null && resultado.getSemestreMaximoCandidatas() != null) {
+            referencia.setValor(resultado.getSemestreMaximoCandidatas());
+            referencia.setEstado("PARCIAL");
+            referencia.setCalidadDato("INFERIDA");
+            referencia.getPeriodosExcluidos().add("TRAYECTORIA:NO_INTEGRADA; no sustituye la referencia RN-6.9");
+        }
+        resultado.setDetalleSemestreReferencia(referencia);
         resultado.setHuellaOferta(construirHuella(periodoActivo, resultado.getUnidades()));
         return resultado;
     }
@@ -60,9 +75,25 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         if (contextoAsistente == null) {
             return construirDesdeInscripcion(null, null, null, null);
         }
+        List<UnidadDecisionInscripcionDTO> mapa = contextoAsistente.getUnidadesMapaPlan();
+        List<UnidadDecisionInscripcionDTO> universo = mapa == null || mapa.isEmpty()
+                ? contextoAsistente.getUnidades() : mapa;
         ContextoEvaluacionCurricularV2DTO resultado = construirDesdeInscripcion(contextoAsistente.getContextoBase(),
-                contextoAsistente.getUnidades(), contextoAsistente.getPeriodoActivo(),
+                universo, contextoAsistente.getPeriodoActivo(),
                 contextoAsistente.getIdProcesoInscripcion());
+        resultado.setUniversoMapaCompleto(Boolean.valueOf(mapa != null && !mapa.isEmpty()));
+        // La fuente actual entrega estados resumidos, no todos los intentos por UD.
+        resultado.setHistorialCompleto(Boolean.FALSE);
+        List<UnidadDecisionInscripcionDTO> candidatas = contextoAsistente.getUnidadesCandidatasPeriodo();
+        if (candidatas == null || candidatas.isEmpty()) candidatas = contextoAsistente.getUnidades();
+        resultado.setIdsUnidadesCandidatas(idsUnidades(candidatas));
+        resultado.setSemestreMaximoCandidatas(obtenerSemestreMaximo(mapearUnidades(candidatas)));
+        SemestreReferenciaV2DTO referencia = new SemestreReferenciaV2ServiceImpl().calcular(
+                contextoAsistente.getPeriodoActivo(), obtenerSemestreMaximo(resultado.getUnidades()),
+                resultado.getPeriodosTrayectoria(), null);
+        resultado.setDetalleSemestreReferencia(referencia);
+        if (referencia.getValor() == null) resultado.setSemestreReferencia(null);
+        aplicarParametros(resultado);
         resultado.setOrigenConsulta("ASISTENTE_INSCRIPCION_SOLO_LECTURA");
         resultado.setPerfilConsulta("ESTUDIANTE_O_GESTOR_NO_DETERMINADO");
         resultado.setSituacionAcademicaOrigen(contextoAsistente.getSituacionAcademicaPeriodo());
@@ -162,15 +193,37 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         return estado == EstadoUnidadCurricularV2.NO_DETERMINADO ? CausaPendienteUnidadV2.NO_DETERMINADA : null;
     }
 
-    private Integer obtenerSemestreObjetivo(List<UnidadEvaluacionCurricularV2DTO> unidades) {
+    private Integer obtenerSemestreMaximo(List<UnidadEvaluacionCurricularV2DTO> unidades) {
         Integer resultado = null;
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
-            if (Boolean.TRUE.equals(unidad.getOfertada()) && unidad.getSemestre() != null
+            if (unidad.getSemestre() != null
                     && (resultado == null || unidad.getSemestre().compareTo(resultado) > 0)) {
                 resultado = unidad.getSemestre();
             }
         }
         return resultado;
+    }
+
+    private List<Long> idsUnidades(List<UnidadDecisionInscripcionDTO> unidades) {
+        List<Long> ids = new ArrayList<Long>();
+        if (unidades == null) return ids;
+        for (UnidadDecisionInscripcionDTO unidad : unidades)
+            if (unidad != null && unidad.getUdId() != null && !ids.contains(unidad.getUdId())) ids.add(unidad.getUdId());
+        return ids;
+    }
+
+    private void aplicarParametros(ContextoEvaluacionCurricularV2DTO contexto) {
+        ConfiguracionEvaluacionCurricularV2DTO configuracion = new ConfiguracionEvaluacionCurricularV2ServiceImpl().obtenerConfiguracion();
+        ParametrosCurricularesV2DTO parametros = new ParametrosCurricularesV2DTO();
+        parametros.setCtr01PeriodoInicio(configuracion.getCtr01PeriodoInicio());
+        parametros.setCtr01Semestre(configuracion.getCtr01SemestreObjetivo());
+        parametros.setDocumentoRespaldo("P2024-2027- Reglas de negocio_Octubre 2026_act_20261105.docx");
+        parametros.setVigencia("2026-11-05");
+        parametros.setAmbito("REQUIERE_REVISION");
+        contexto.setParametrosCurriculares(parametros);
+        contexto.setVersionReglas(configuracion.getVersionReglas());
+        contexto.setAmbitoRnPe2024_2027(new AmbitoReglasCurricularesV2ServiceImpl().resolver(
+                contexto.getClavePlan(), contexto.getEstructuraProgramaEducativoComprobada()));
     }
 
     private String construirHuella(String periodoActivo, List<UnidadEvaluacionCurricularV2DTO> unidades) {

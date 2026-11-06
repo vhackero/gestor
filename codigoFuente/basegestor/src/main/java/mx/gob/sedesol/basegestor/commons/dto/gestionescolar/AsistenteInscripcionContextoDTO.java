@@ -50,6 +50,9 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
     private List<String> reglasActivas;
     private List<String> pendientesCriticos;
     private List<UnidadDecisionInscripcionDTO> unidades;
+    /** Malla completa del plan, distinta de la oferta/candidatas del periodo. */
+    private List<UnidadDecisionInscripcionDTO> unidadesMapaPlan;
+    private List<UnidadDecisionInscripcionDTO> unidadesCandidatasPeriodo;
     private List<EscenarioCargaDTO> escenarios;
 
     private String auditoriaDecisionId;
@@ -58,6 +61,8 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
         this.reglasActivas = new ArrayList<String>();
         this.pendientesCriticos = new ArrayList<String>();
         this.unidades = new ArrayList<UnidadDecisionInscripcionDTO>();
+        this.unidadesMapaPlan = new ArrayList<UnidadDecisionInscripcionDTO>();
+        this.unidadesCandidatasPeriodo = new ArrayList<UnidadDecisionInscripcionDTO>();
         this.escenarios = new ArrayList<EscenarioCargaDTO>();
         this.intentosReprobadosPorUd = new HashMap<Long, Long>();
         this.intentosReprobadosDisponibles = Boolean.FALSE;
@@ -335,6 +340,11 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
     public void setUnidades(List<UnidadDecisionInscripcionDTO> unidades) {
         this.unidades = unidades;
     }
+
+    public List<UnidadDecisionInscripcionDTO> getUnidadesMapaPlan() { return unidadesMapaPlan; }
+    public void setUnidadesMapaPlan(List<UnidadDecisionInscripcionDTO> valores) { unidadesMapaPlan = valores == null ? new ArrayList<UnidadDecisionInscripcionDTO>() : valores; }
+    public List<UnidadDecisionInscripcionDTO> getUnidadesCandidatasPeriodo() { return unidadesCandidatasPeriodo; }
+    public void setUnidadesCandidatasPeriodo(List<UnidadDecisionInscripcionDTO> valores) { unidadesCandidatasPeriodo = valores == null ? new ArrayList<UnidadDecisionInscripcionDTO>() : valores; }
 
     public List<EscenarioCargaDTO> getEscenarios() {
         return escenarios;

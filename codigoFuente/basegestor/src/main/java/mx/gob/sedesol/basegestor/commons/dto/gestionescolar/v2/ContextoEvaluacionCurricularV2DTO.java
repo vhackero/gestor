@@ -17,6 +17,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
 
     private Long idPersona;
     private Long idPlan;
+    private String clavePlan;
+    private String cohorte;
     private Long idPeriodo;
     private String periodoNormativo;
     private Long idProcesoInscripcion;
@@ -29,7 +31,17 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private String instanciaResolutoraExtraordinaria;
     private String fundamentacionExtraordinaria;
     private String folioInstitucionalExtraordinario;
+    /** @deprecated Dato de compatibilidad: no debe gobernar reglas académicas. */
     private Integer semestreObjetivo;
+    private Integer semestreReferencia;
+    private Integer semestreMaximoCandidatas;
+    private SemestreReferenciaV2DTO detalleSemestreReferencia;
+    private ParametrosCurricularesV2DTO parametrosCurriculares;
+    private String ambitoRnPe2024_2027 = "REQUIERE_REVISION";
+    private Boolean universoMapaCompleto;
+    private Boolean historialCompleto;
+    private List<PeriodoTrayectoriaV2DTO> periodosTrayectoria = new ArrayList<PeriodoTrayectoriaV2DTO>();
+    private List<Long> idsUnidadesCandidatas = new ArrayList<Long>();
     private String bloqueObjetivo;
     private String perfilConsulta;
     private String origenConsulta;
@@ -115,6 +127,10 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setIdPersona(Long idPersona) { this.idPersona = idPersona; }
     public Long getIdPlan() { return idPlan; }
     public void setIdPlan(Long idPlan) { this.idPlan = idPlan; }
+    public String getClavePlan() { return clavePlan; }
+    public void setClavePlan(String valor) { clavePlan = valor; }
+    public String getCohorte() { return cohorte; }
+    public void setCohorte(String valor) { cohorte = valor; }
     public Long getIdPeriodo() { return idPeriodo; }
     public void setIdPeriodo(Long idPeriodo) { this.idPeriodo = idPeriodo; }
     public String getPeriodoNormativo() { return periodoNormativo; }
@@ -133,8 +149,30 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setFundamentacionExtraordinaria(String valor) { fundamentacionExtraordinaria = valor; }
     public String getFolioInstitucionalExtraordinario() { return folioInstitucionalExtraordinario; }
     public void setFolioInstitucionalExtraordinario(String valor) { folioInstitucionalExtraordinario = valor; }
-    public Integer getSemestreObjetivo() { return semestreObjetivo; }
-    public void setSemestreObjetivo(Integer semestreObjetivo) { this.semestreObjetivo = semestreObjetivo; }
+    /** @deprecated Use getSemestreReferencia(); conservado para contratos binarios previos. */
+    public Integer getSemestreObjetivo() { return semestreReferencia; }
+    /** Compatibilidad de contratos previos; los evaluadores usan semestreReferencia. */
+    public void setSemestreObjetivo(Integer valor) {
+        semestreObjetivo = valor;
+        semestreReferencia = valor;
+        semestreMaximoCandidatas = valor;
+    }
+    public Integer getSemestreReferencia() { return semestreReferencia; }
+    public void setSemestreReferencia(Integer valor) { semestreReferencia = valor; }
+    public Integer getSemestreMaximoCandidatas() { return semestreMaximoCandidatas; }
+    public void setSemestreMaximoCandidatas(Integer valor) { semestreMaximoCandidatas = valor; }
+    public SemestreReferenciaV2DTO getDetalleSemestreReferencia() { return detalleSemestreReferencia; }
+    public void setDetalleSemestreReferencia(SemestreReferenciaV2DTO valor) { detalleSemestreReferencia = valor; semestreReferencia = valor == null ? semestreReferencia : valor.getValor(); }
+    public ParametrosCurricularesV2DTO getParametrosCurriculares() { return parametrosCurriculares; }
+    public void setParametrosCurriculares(ParametrosCurricularesV2DTO valor) { parametrosCurriculares = valor; }
+    public String getAmbitoRnPe2024_2027() { return ambitoRnPe2024_2027; }
+    public void setAmbitoRnPe2024_2027(String valor) { ambitoRnPe2024_2027 = valor; }
+    public Boolean getUniversoMapaCompleto() { return universoMapaCompleto; }
+    public void setUniversoMapaCompleto(Boolean valor) { universoMapaCompleto = valor; }
+    public Boolean getHistorialCompleto() { return historialCompleto; }
+    public void setHistorialCompleto(Boolean valor) { historialCompleto = valor; }
+    public List<PeriodoTrayectoriaV2DTO> getPeriodosTrayectoria() { return periodosTrayectoria; }
+    public void setPeriodosTrayectoria(List<PeriodoTrayectoriaV2DTO> valores) { periodosTrayectoria = valores == null ? new ArrayList<PeriodoTrayectoriaV2DTO>() : valores; }
     public String getBloqueObjetivo() { return bloqueObjetivo; }
     public void setBloqueObjetivo(String bloqueObjetivo) { this.bloqueObjetivo = bloqueObjetivo; }
     public String getPerfilConsulta() { return perfilConsulta; }
@@ -269,6 +307,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public void setComponentesFinalesSolicitados(List<Long> valores) { componentesFinalesSolicitados = valores == null ? new ArrayList<Long>() : valores; }
     public List<Long> getIdsUnidadesPretendidas() { return idsUnidadesPretendidas; }
     public void setIdsUnidadesPretendidas(List<Long> valores) { idsUnidadesPretendidas = valores == null ? new ArrayList<Long>() : valores; }
+    public List<Long> getIdsUnidadesCandidatas() { return idsUnidadesCandidatas; }
+    public void setIdsUnidadesCandidatas(List<Long> valores) { idsUnidadesCandidatas = valores == null ? new ArrayList<Long>() : valores; }
     public Date getFechaEvaluacion() { return fechaEvaluacion; }
     public void setFechaEvaluacion(Date fechaEvaluacion) { this.fechaEvaluacion = fechaEvaluacion; }
     public List<UnidadEvaluacionCurricularV2DTO> getUnidades() { return unidades; }
