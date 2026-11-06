@@ -78,7 +78,9 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         resultado.setUniversoMapaCompleto(Boolean.valueOf(mapa != null && !mapa.isEmpty()));
         resultado.setPeriodosTrayectoria(contextoAsistente.getPeriodosTrayectoriaV2());
         resultado.setHistorialCompleto(Boolean.valueOf(contextoAsistente.getPeriodosTrayectoriaV2() != null
-                && !contextoAsistente.getPeriodosTrayectoriaV2().isEmpty()));
+                && !contextoAsistente.getPeriodosTrayectoriaV2().isEmpty()
+                && contextoAsistente.getHistorialIntentosV2() != null));
+        asociarIntentosHistoricos(resultado.getUnidades(), contextoAsistente.getHistorialIntentosV2());
         List<UnidadDecisionInscripcionDTO> candidatas = contextoAsistente.getUnidadesCandidatasPeriodo();
         if (candidatas == null || candidatas.isEmpty()) candidatas = contextoAsistente.getUnidades();
         resultado.setIdsUnidadesCandidatas(idsUnidades(candidatas));
@@ -137,6 +139,26 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         return resultado;
     }
 
+    /** Une intentos por id de programa; si no hay identidad no sustituye el estado existente. */
+    private void asociarIntentosHistoricos(List<UnidadEvaluacionCurricularV2DTO> unidades,
+            List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO> intentos) {
+        if (unidades == null || intentos == null) return;
+        for (mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO intento : intentos) {
+            if (intento == null || intento.getIdPrograma() == null) continue;
+            for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+                if (!intento.getIdPrograma().equals(unidad.getIdPrograma())) continue;
+                unidad.getIntentosAcreditacion().add(intento);
+                if (intento.getEstado() == mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcreditacionV2.BAJA_TEMPORAL)
+                    unidad.setEstado(EstadoUnidadCurricularV2.BAJA_TEMPORAL);
+                else if (intento.getEstado() == mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcreditacionV2.BAJA_PARCIAL)
+                    unidad.setEstado(EstadoUnidadCurricularV2.BAJA_PARCIAL);
+                else if (intento.getEstado() == mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcreditacionV2.NO_DETERMINADO)
+                    unidad.setEstado(EstadoUnidadCurricularV2.NO_DETERMINADO);
+                break;
+            }
+        }
+    }
+
     private void mapearRelacionesSeriacion(UnidadEvaluacionCurricularV2DTO consecuente,
             List<RelacionSeriacionDTO> antecedentes) {
         if (antecedentes == null) return;
@@ -173,6 +195,7 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         String periodo = normalizar(estatusPeriodo);
         if (contiene(historico, "REPROBADA") || contiene(historico, "NO ACREDITADA")) return EstadoUnidadCurricularV2.REPROBADA;
         if (contiene(historico, "APROBADA") || contiene(historico, "ACREDITADA")) return EstadoUnidadCurricularV2.ACREDITADA;
+        if (contiene(historico, "BAJA TEMPORAL")) return EstadoUnidadCurricularV2.BAJA_TEMPORAL;
         if (contiene(historico, "BAJA")) return EstadoUnidadCurricularV2.BAJA_PARCIAL;
         if (contiene(historico, "EN CURSO") || contiene(historico, "CURSANDO")
                 || contiene(periodo, "EN CURSO") || contiene(periodo, "CURSANDO")) return EstadoUnidadCurricularV2.EN_CURSO;

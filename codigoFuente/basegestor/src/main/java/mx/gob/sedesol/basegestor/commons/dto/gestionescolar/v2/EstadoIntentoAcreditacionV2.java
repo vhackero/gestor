@@ -5,6 +5,8 @@ public enum EstadoIntentoAcreditacionV2 {
     REPROBADO,
     ACREDITADO,
     BAJA_PARCIAL,
+    BAJA_TEMPORAL,
+    EXTRAORDINARIO_HISTORICO,
     NO_CURSADA,
     NO_INSCRITA,
     EN_CURSO,

@@ -191,7 +191,8 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarActividadAcademica(resultado, contexto);
         evaluarRecuperacionRegularidad(resultado, contexto, unidadesNormalizadas);
         evaluarLimiteIntentos(resultado, contexto, unidadesNormalizadas);
-        evaluarMejoraPromedio(resultado, contexto, unidadesNormalizadas);
+        // RN-1.5 vigente impide reinscribir una UD acreditada para mejorar promedio.
+        // El resultado PE2024/2027 no expone contadores ni la "mejor" calificacion.
         resultado.setAvanceCondicionado(Boolean.valueOf(Boolean.TRUE.equals(contexto.getAvanceCondicionado())));
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.CTR_03, null, 20,
                 "SITUACION_SEPARADA_DE_AVANCE",
@@ -229,8 +230,8 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         consolidarFase6ReincorporacionYTrayectoria(resultado, contexto);
         evaluarOptativasRn71(resultado, contexto, unidadesNormalizadas);
         evaluarElectivasRn72(resultado, contexto, unidadesNormalizadas);
-        consolidarPrincipioOptativasElectivasRn73(resultado, contexto, unidadesNormalizadas);
-        consolidarCierreTiposUdFase7(resultado, contexto, unidadesNormalizadas);
+        // RN-7.3 no forma parte de las RN vigentes; RN-7.2 concentra las optativas reprobadas.
+        // El cierre histórico de RN-7.3/electivas queda fuera de PE2024/2027.
         evaluarSeriacionInterbloqueRn81(resultado, contexto, unidadesNormalizadas);
         evaluarSeriacionIntersemestralRn82(resultado, contexto, unidadesNormalizadas);
         evaluarSeriacionInteranualRn83(resultado, contexto, unidadesNormalizadas);
@@ -1175,7 +1176,8 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
             EvaluacionIntentosUnidadV2DTO evaluacion = evaluarIntentosUnidad(unidad);
             resultado.getEvaluacionesIntentos().add(evaluacion);
-            CodigoMotivoCurricularV2 motivo = evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.LIMITE_AGOTADO
+            CodigoMotivoCurricularV2 motivo = (evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.LIMITE_AGOTADO
+                    || evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.AGOTADA)
                     ? CodigoMotivoCurricularV2.LIMITE_INTENTOS
                     : (evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.REQUIERE_REVISION
                             || evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.NO_DETERMINADO
@@ -1193,6 +1195,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 decision.getTrazas().add(traza);
                 if (motivo != null) agregarUnico(decision.getMotivos(), motivo);
                 if (evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.LIMITE_AGOTADO
+                        || evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.AGOTADA
                         || evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.REQUIERE_REVISION)
                     agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.REQUIERE_REVISION);
             }
@@ -1207,6 +1210,8 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         }
         Set<String> ejecuciones = new HashSet<String>();
         boolean identidadInsuficiente = false;
+        boolean enCurso = unidad.getEstado() == EstadoUnidadCurricularV2.EN_CURSO;
+        CodigoMotivoCurricularV2 motivoRevisionHistorica = null;
         for (IntentoAcreditacionUnidadV2DTO intento : unidad.getIntentosAcreditacion()) {
             if (intento == null) { identidadInsuficiente = true; continue; }
             String llave = llaveIntento(intento);
@@ -1218,6 +1223,15 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 evaluacion.setIntentosFallidos(Integer.valueOf(evaluacion.getIntentosFallidos().intValue() + 1));
             if (intento.getEstado() == EstadoIntentoAcreditacionV2.ACREDITADO)
                 evaluacion.setIntentosAcreditados(Integer.valueOf(evaluacion.getIntentosAcreditados().intValue() + 1));
+            if (intento.getEstado() == EstadoIntentoAcreditacionV2.EN_CURSO) enCurso = true;
+            if (intento.getEstado() == EstadoIntentoAcreditacionV2.NO_DETERMINADO) {
+                identidadInsuficiente = true;
+                motivoRevisionHistorica = CodigoMotivoCurricularV2.NP_SIN_BAJA_REQUIERE_REVISION;
+            }
+            if (intento.getEstado() == EstadoIntentoAcreditacionV2.EXTRAORDINARIO_HISTORICO) {
+                identidadInsuficiente = true;
+                motivoRevisionHistorica = CodigoMotivoCurricularV2.EXTRAORDINARIO_HISTORICO_REQUIERE_REVISION;
+            }
         }
         if (unidad.getIntentosAcreditacion().isEmpty() && unidad.getIntentosFallidosHistoricosConfiables() != null) {
             evaluacion.setIntentosIdentificados(unidad.getIntentosFallidosHistoricosConfiables());
@@ -1227,22 +1241,33 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             identidadInsuficiente = true;
             evaluacion.getEvidencias().add("CONTEO_LEGADO_SIN_CALIDAD_DE_INTENTO:" + unidad.getIntentos());
         }
+        evaluacion.setOportunidadesConsumidas(Integer.valueOf(evaluacion.getIntentosFallidos().intValue()
+                + (enCurso ? 1 : 0)));
+        evaluacion.setOportunidadesDisponibles(Integer.valueOf(Math.max(0, 3 - evaluacion.getOportunidadesConsumidas().intValue())));
+        unidad.setOportunidadesConsumidas(evaluacion.getOportunidadesConsumidas());
+        unidad.setOportunidadesDisponibles(evaluacion.getOportunidadesDisponibles());
         if (evaluacion.getIntentosAcreditados().intValue() > 0 || unidad.getEstado() == EstadoUnidadCurricularV2.ACREDITADA) {
             evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.ACREDITADA_SIN_OPORTUNIDAD_REQUERIDA);
         } else if (identidadInsuficiente) {
             evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.REQUIERE_REVISION);
+            evaluacion.setAviso(motivoRevisionHistorica == null ? "Historial insuficiente para determinar oportunidades."
+                    : motivoRevisionHistorica.name());
         } else if (evaluacion.getIntentosFallidos().intValue() > 3 || evaluacion.getIntentosIdentificados().intValue() > 3) {
             evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.REQUIERE_REVISION);
             evaluacion.setRequiereEscalamiento(Boolean.TRUE);
         } else if (evaluacion.getIntentosFallidos().intValue() == 3) {
-            evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.LIMITE_AGOTADO);
+            evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.AGOTADA);
             evaluacion.setLimiteAgotado(Boolean.TRUE); evaluacion.setRequiereEscalamiento(Boolean.TRUE);
         } else if (evaluacion.getIntentosFallidos().intValue() == 2) {
-            evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.ULTIMA_OPORTUNIDAD);
+            evaluacion.setEstadoLimite(enCurso ? EstadoLimiteIntentosV2.ULTIMA_EN_CURSO : EstadoLimiteIntentosV2.ULTIMA_DISPONIBLE);
             evaluacion.setUltimaOportunidad(Boolean.TRUE);
+            evaluacion.setAviso(enCurso ? "Estas cursando la ultima oportunidad aplicable."
+                    : "Queda una ultima oportunidad aplicable, sujeta a oferta y condiciones.");
         } else {
             evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.DISPONIBLE);
         }
+        unidad.setEstadoOportunidad(evaluacion.getEstadoLimite().name());
+        unidad.setAvisoUltimaOportunidad(evaluacion.getUltimaOportunidad());
         return evaluacion;
     }
 
@@ -2083,6 +2108,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             UnidadEvaluacionCurricularV2DTO unidad, String causa) {
         if (decision == null) return;
         agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.REQUIERE_REVISION);
+        decision.setHabilitada(Boolean.FALSE);
         if ("SIN_CUPO".equals(causa)) agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.SIN_CUPO);
         else if ("SERIACION".equals(causa)) agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.SERIACION_DIRECTA);
         else if ("DATOS_INSUFICIENTES".equals(causa)) agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.DATOS_INSUFICIENTES);

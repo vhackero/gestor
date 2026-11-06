@@ -12,6 +12,9 @@ public class EvaluacionIntentosUnidadV2DTO implements Serializable {
     private Integer intentosIdentificados = Integer.valueOf(0);
     private Integer intentosFallidos = Integer.valueOf(0);
     private Integer intentosAcreditados = Integer.valueOf(0);
+    private Integer oportunidadesConsumidas;
+    private Integer oportunidadesDisponibles;
+    private String aviso;
     private EstadoLimiteIntentosV2 estadoLimite = EstadoLimiteIntentosV2.NO_DETERMINADO;
     private Boolean ultimaOportunidad = Boolean.FALSE;
     private Boolean limiteAgotado = Boolean.FALSE;
@@ -28,6 +31,12 @@ public class EvaluacionIntentosUnidadV2DTO implements Serializable {
     public void setIntentosFallidos(Integer valor) { intentosFallidos = valor; }
     public Integer getIntentosAcreditados() { return intentosAcreditados; }
     public void setIntentosAcreditados(Integer valor) { intentosAcreditados = valor; }
+    public Integer getOportunidadesConsumidas() { return oportunidadesConsumidas; }
+    public void setOportunidadesConsumidas(Integer valor) { oportunidadesConsumidas = valor; }
+    public Integer getOportunidadesDisponibles() { return oportunidadesDisponibles; }
+    public void setOportunidadesDisponibles(Integer valor) { oportunidadesDisponibles = valor; }
+    public String getAviso() { return aviso; }
+    public void setAviso(String valor) { aviso = valor; }
     public EstadoLimiteIntentosV2 getEstadoLimite() { return estadoLimite; }
     public void setEstadoLimite(EstadoLimiteIntentosV2 valor) { estadoLimite = valor; }
     public Boolean getUltimaOportunidad() { return ultimaOportunidad; }

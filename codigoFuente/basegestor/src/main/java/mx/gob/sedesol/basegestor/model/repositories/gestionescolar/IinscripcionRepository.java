@@ -24,6 +24,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademic
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PeriodoTrayectoriaV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 
 public interface IinscripcionRepository {
 
@@ -35,6 +36,9 @@ public interface IinscripcionRepository {
 	TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Long idPlan, Date fechaCorte);
 
 	List<PeriodoTrayectoriaV2DTO> obtenerPeriodosTrayectoriaV2(Long idPersona, Long idPlan);
+
+	/** Historial canónico por inscripción/UD; no infiere NP ni baja sin evidencia. */
+	List<IntentoAcreditacionUnidadV2DTO> obtenerIntentosCurricularesV2(Long idPersona, Long idPlan);
 
 	Optional<LimitesCargaAcademicaDTO> obtenerLimitesCargaAcademicaPorPlan(Long idPlan);
 

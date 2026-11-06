@@ -39,6 +39,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasD
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PeriodoTrayectoriaV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcreditacionV2;
 
 @Repository
 public class InscripcionRepository implements IinscripcionRepository {
@@ -112,6 +114,49 @@ public class InscripcionRepository implements IinscripcionRepository {
 			resultado.add(periodo);
 		}
 		return resultado;
+	}
+
+	/** Fuente canónica: una fila por inscripción, sin inferir bajas no contabilizables. */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<IntentoAcreditacionUnidadV2DTO> obtenerIntentosCurricularesV2(Long idPersona, Long idPlan) {
+		List<IntentoAcreditacionUnidadV2DTO> resultado = new ArrayList<IntentoAcreditacionUnidadV2DTO>();
+		if (idPersona == null || idPlan == null) return resultado;
+		String sql = "SELECT ti.id, ti.idprograma, pi.nombre_periodo, rgp.id, rgp.id_grupo, rgp.calificacion_final, fd.calificacion_min_aprobatoria, mb.tipo_baja_id "
+				+ "FROM tbl_inscripciones ti LEFT JOIN tbl_eventos e ON e.id_evento=ti.idevento "
+				+ "LEFT JOIN tbl_periodos_inscripcion pi ON e.cve_evento_cap LIKE CONCAT('%',pi.nombre_periodo,'%') "
+				+ "LEFT JOIN tbl_grupos g ON g.id=ti.groupbase "
+				+ "LEFT JOIN rel_grupo_participante rgp ON rgp.id_grupo=g.id AND rgp.id_persona_participante=ti.Idpersona "
+				+ "LEFT JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa=ti.idprograma "
+				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona=ti.Idpersona AND baja.id_inscripcion=ti.id AND baja.contabilizar=1 "
+				+ "LEFT JOIN rel_motivo_baja mb ON mb.id_motivo_baja=baja.motivo_baja_id "
+				+ "WHERE ti.Idpersona=:idPersona AND ti.idplan=:idPlan ORDER BY ti.id";
+		List<Object[]> filas = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona).setParameter("idPlan", idPlan).getResultList();
+		for (Object[] fila : filas) resultado.add(mapearIntentoCurricularV2(fila));
+		return resultado;
+	}
+
+	private IntentoAcreditacionUnidadV2DTO mapearIntentoCurricularV2(Object[] fila) {
+		IntentoAcreditacionUnidadV2DTO intento = new IntentoAcreditacionUnidadV2DTO();
+		Long idInscripcion = getLongValue(fila[0]);
+		intento.setIdEjecucionTecnico(idInscripcion == null ? null : "INSCRIPCION:" + idInscripcion);
+		intento.setIdPrograma(getLongValue(fila[1])); intento.setPeriodo(fila[2] == null ? null : String.valueOf(fila[2]));
+		intento.setIdParticipacion(getLongValue(fila[3])); intento.setIdGrupo(getLongValue(fila[4]));
+		Double calificacion = getDoubleValue(fila[5]); Double minima = getDoubleValue(fila[6]); Integer tipoBaja = getIntegerValue(fila[7]);
+		intento.setCalificacionFinal(calificacion);
+		if (tipoBaja != null) {
+			intento.setEstado(tipoBaja.intValue() == 2 ? EstadoIntentoAcreditacionV2.BAJA_TEMPORAL : EstadoIntentoAcreditacionV2.BAJA_PARCIAL);
+			intento.setEvidenciaFuente("REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja);
+		} else if (calificacion == null) {
+			intento.setEstado(intento.getIdGrupo() == null ? EstadoIntentoAcreditacionV2.NO_DETERMINADO : EstadoIntentoAcreditacionV2.EN_CURSO);
+			intento.setEvidenciaFuente("INSCRIPCION_SIN_CALIFICACION");
+		} else if (calificacion.doubleValue() < 0D || calificacion.doubleValue() > 100D || minima == null) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente("CALIFICACION_O_UMBRAL_NO_VERIFICABLE");
+		} else {
+			intento.setEstado(calificacion.doubleValue() >= minima.doubleValue() ? EstadoIntentoAcreditacionV2.ACREDITADO : EstadoIntentoAcreditacionV2.REPROBADO);
+			intento.setEvidenciaFuente("INSCRIPCION_GRUPO_ACTA");
+		}
+		return intento;
 	}
 
 	private Date obtenerPrimeraInscripcionValida(Long idPersona) {

@@ -6,6 +6,8 @@ import java.io.Serializable;
 public class IntentoAcreditacionUnidadV2DTO implements Serializable {
     private static final long serialVersionUID = 1L;
     private String idEjecucionTecnico;
+    private Long idPrograma;
+    private String periodo;
     private Long idPeriodo;
     private Long idGrupo;
     private Long idParticipacion;
@@ -15,6 +17,10 @@ public class IntentoAcreditacionUnidadV2DTO implements Serializable {
     private String evidenciaFuente;
     public String getIdEjecucionTecnico() { return idEjecucionTecnico; }
     public void setIdEjecucionTecnico(String valor) { idEjecucionTecnico = valor; }
+    public Long getIdPrograma() { return idPrograma; }
+    public void setIdPrograma(Long valor) { idPrograma = valor; }
+    public String getPeriodo() { return periodo; }
+    public void setPeriodo(String valor) { periodo = valor; }
     public Long getIdPeriodo() { return idPeriodo; }
     public void setIdPeriodo(Long valor) { idPeriodo = valor; }
     public Long getIdGrupo() { return idGrupo; }

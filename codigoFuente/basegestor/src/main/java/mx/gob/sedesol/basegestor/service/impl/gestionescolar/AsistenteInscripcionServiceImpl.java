@@ -131,6 +131,8 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         dto.setTrayectoriaPermanencia(construirTrayectoriaPermanencia(idPersona, contextoBase));
         dto.setPeriodosTrayectoriaV2(inscripcionService.obtenerPeriodosTrayectoriaV2(idPersona,
                 contextoBase.getInscripcionPersona().getIdPlan()));
+        dto.setHistorialIntentosV2(inscripcionService.obtenerIntentosCurricularesV2(idPersona,
+                contextoBase.getInscripcionPersona().getIdPlan()));
         dto.setPromedioPronosticado(calcularPromedioPronosticado(contextoBase));
         mapearPendientesYReglas(dto, contextoBase);
         mapearUnidades(dto, contextoBase, programasPlan, cobertura, materiasEnCurso, ubicacionesPlan);

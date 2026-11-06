@@ -25,6 +25,7 @@ import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ReenvioCorreoInscripcio
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PeriodoTrayectoriaV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 
 /**
  * 
@@ -41,6 +42,8 @@ public interface InscripcionService {
 
 	/** Hechos de inscripción, evento y baja para la referencia RN-6.9; sólo lectura. */
 	List<PeriodoTrayectoriaV2DTO> obtenerPeriodosTrayectoriaV2(Long idPersona, Long idPlan);
+
+	List<IntentoAcreditacionUnidadV2DTO> obtenerIntentosCurricularesV2(Long idPersona, Long idPlan);
 
 	Optional<LimitesCargaAcademicaDTO> obtenerLimitesCargaAcademicaPorPlan(Long idPlan);
 

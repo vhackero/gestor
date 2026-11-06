@@ -319,6 +319,11 @@ public class InscripcionServiceImpl implements InscripcionService {
 	}
 
 	@Override
+	public List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO> obtenerIntentosCurricularesV2(Long idPersona, Long idPlan) {
+		return inscripcionesRepository.obtenerIntentosCurricularesV2(idPersona, idPlan);
+	}
+
+	@Override
 	public Boolean consultarNuevoIngreso(String id_persona) {
 		return inscripcionesRepository.consultarNuevoIngreso(id_persona);
 
