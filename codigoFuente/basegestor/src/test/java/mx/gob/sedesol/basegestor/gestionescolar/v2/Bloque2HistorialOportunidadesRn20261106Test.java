@@ -47,10 +47,18 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         assertEquals(mapearBaja(7, "", 0).getEstado(), EstadoIntentoAcreditacionV2.BAJA_TEMPORAL);
         assertEquals(mapearBaja(8, "", 0).getEstado(), EstadoIntentoAcreditacionV2.BAJA_TEMPORAL);
         assertTrue(mapearBaja(4, "", 0).getEvidenciaFuente().contains("BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION"));
-        assertTrue(mapearBaja(5, "", 0).getEvidenciaFuente().contains("BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION"));
+        assertTrue(mapearBaja(5, "", 0).getEvidenciaFuente().contains("BAJA_ART40_SUBTIPO_NO_DETERMINADO"));
         assertTrue(mapearBaja(3, "", 0).getEvidenciaFuente().contains("BAJA_DEFINITIVA"));
         assertTrue(mapearBaja(6, "", 0).getEvidenciaFuente().contains("BAJA_DEFINITIVA"));
         assertTrue(mapearBaja(9, "", 0).getEvidenciaFuente().contains("NO_MAPEADO_REQUIERE_REVISION"));
+    }
+    @Test public void gc08cLimiteAgotadoBloqueaUnidadConMotivoExplicito() {
+        ResultadoEvaluacionCurricularV2DTO r = evaluar(ud(27L, intento("a", EstadoIntentoAcreditacionV2.REPROBADO),
+                intento("b", EstadoIntentoAcreditacionV2.REPROBADO), intento("c", EstadoIntentoAcreditacionV2.REPROBADO)));
+        DecisionUnidadCurricularV2DTO d = decision(r, 27L);
+        assertTrue(d.getEstadosSombra().contains(EstadoDecisionUnidadCurricularV2.BLOQUEADA));
+        assertTrue(d.getMotivos().contains(CodigoMotivoCurricularV2.LIMITE_INTENTOS));
+        assertFalse(d.getHabilitada());
     }
     @Test public void extraordinarioHistoricoNoSumaReprobacionNiOportunidad() {
         ResultadoEvaluacionCurricularV2DTO r=evaluar(ud(25L, intento("ordinaria", EstadoIntentoAcreditacionV2.REPROBADO), intento("extra", EstadoIntentoAcreditacionV2.EXTRAORDINARIO_HISTORICO)));

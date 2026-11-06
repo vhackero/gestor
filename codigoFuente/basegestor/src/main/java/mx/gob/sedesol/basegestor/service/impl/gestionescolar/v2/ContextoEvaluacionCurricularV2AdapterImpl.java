@@ -80,7 +80,7 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         resultado.setHistorialCompleto(Boolean.valueOf(contextoAsistente.getPeriodosTrayectoriaV2() != null
                 && !contextoAsistente.getPeriodosTrayectoriaV2().isEmpty()
                 && contextoAsistente.getHistorialIntentosV2() != null));
-        asociarIntentosHistoricos(resultado.getUnidades(), contextoAsistente.getHistorialIntentosV2());
+        asociarIntentosHistoricos(resultado, contextoAsistente.getHistorialIntentosV2());
         List<UnidadDecisionInscripcionDTO> candidatas = contextoAsistente.getUnidadesCandidatasPeriodo();
         if (candidatas == null || candidatas.isEmpty()) candidatas = contextoAsistente.getUnidades();
         resultado.setIdsUnidadesCandidatas(idsUnidades(candidatas));
@@ -140,11 +140,16 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
     }
 
     /** Une intentos por id de programa; si no hay identidad no sustituye el estado existente. */
-    private void asociarIntentosHistoricos(List<UnidadEvaluacionCurricularV2DTO> unidades,
+    private void asociarIntentosHistoricos(ContextoEvaluacionCurricularV2DTO contexto,
             List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO> intentos) {
+        List<UnidadEvaluacionCurricularV2DTO> unidades = contexto.getUnidades();
         if (unidades == null || intentos == null) return;
         for (mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO intento : intentos) {
             if (intento == null || intento.getIdPrograma() == null) continue;
+            if (intento.getEvidenciaFuente() != null
+                    && intento.getEvidenciaFuente().contains("ESTADO_EXPEDIENTE=BAJA_DEFINITIVA")) {
+                contexto.setBajaDefinitivaRegistrada(Boolean.TRUE);
+            }
             for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
                 if (!intento.getIdPrograma().equals(unidad.getIdPrograma())) continue;
                 unidad.getIntentosAcreditacion().add(intento);

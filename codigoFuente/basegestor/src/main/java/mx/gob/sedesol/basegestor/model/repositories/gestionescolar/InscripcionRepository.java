@@ -79,7 +79,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 	/**
 	 * Recupera una fila por periodo académico. La clave se obtiene del evento
 	 * asociado a la inscripción y no del semestre almacenado en la inscripción.
-	 * Las bajas temporales aprobadas (contabilizar=1, tipo=2) se agrupan por
+	 * Las bajas temporales aprobadas (contabilizar=1, tipos 2, 7 y 8) se agrupan por
 	 * periodo, por lo que B1 y B2 no incrementan la referencia dos veces.
 	 */
 	@SuppressWarnings("unchecked")
@@ -98,7 +98,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "LEFT JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = ti.Idpersona "
 				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona = ti.Idpersona "
 				+ " AND baja.id_evento = ti.idevento AND baja.contabilizar = 1 "
-				+ " AND EXISTS (SELECT 1 FROM rel_motivo_baja mb WHERE mb.id_motivo_baja = baja.motivo_baja_id AND mb.tipo_baja_id = 2) "
+				+ " AND EXISTS (SELECT 1 FROM rel_motivo_baja mb WHERE mb.id_motivo_baja = baja.motivo_baja_id AND mb.tipo_baja_id IN (2,7,8)) "
 				+ "WHERE ti.Idpersona = :idPersona AND ti.idplan = :idPlan "
 				+ "AND pi.nombre_periodo IS NOT NULL GROUP BY pi.nombre_periodo ORDER BY pi.nombre_periodo";
 		List<Object[]> filas = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona)
@@ -145,17 +145,23 @@ public class InscripcionRepository implements IinscripcionRepository {
 		Double calificacion = getDoubleValue(fila[5]); Integer tipoBaja = getIntegerValue(fila[6]);
 		String motivoBaja = fila[7] == null ? null : String.valueOf(fila[7]); Boolean solicitud = getIntegerValue(fila[8]) == null ? null : Boolean.valueOf(getIntegerValue(fila[8]).intValue() == 1);
 		intento.setCalificacionFinal(calificacion);
-		if (tipoBaja != null) {
+		// La baja definitiva afecta al expediente, no borra la calificacion ya registrada.
+		boolean conservaResultado = tipoBaja != null && (tipoBaja.intValue() == 3 || tipoBaja.intValue() == 6);
+		if (tipoBaja != null && !conservaResultado) {
 			mapearBajaContabilizable(intento, tipoBaja, motivoBaja, solicitud);
 		} else if (calificacion == null) {
 			intento.setEstado(intento.getIdGrupo() == null ? EstadoIntentoAcreditacionV2.NO_DETERMINADO : EstadoIntentoAcreditacionV2.EN_CURSO);
-			intento.setEvidenciaFuente("INSCRIPCION_SIN_CALIFICACION");
+			intento.setEvidenciaFuente(conservaResultado
+					? "REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja + ";ESTADO_EXPEDIENTE=BAJA_DEFINITIVA;INSCRIPCION_SIN_CALIFICACION"
+					: "INSCRIPCION_SIN_CALIFICACION");
 		} else if (calificacion.doubleValue() < 0D || calificacion.doubleValue() > 100D) {
 			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente("NP_SIN_BAJA_REQUIERE_REVISION:CALIFICACION_FUERA_RANGO_0_100");
 		} else {
 			int umbral = umbralAprobatorioV2();
 			intento.setEstado(calificacion.doubleValue() >= umbral ? EstadoIntentoAcreditacionV2.ACREDITADO : EstadoIntentoAcreditacionV2.REPROBADO);
-			intento.setEvidenciaFuente("INSCRIPCION_GRUPO_ACTA:UMBRAL_V2=" + umbral);
+			intento.setEvidenciaFuente((conservaResultado
+					? "REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja + ";ESTADO_EXPEDIENTE=BAJA_DEFINITIVA;"
+					: "") + "INSCRIPCION_GRUPO_ACTA:UMBRAL_V2=" + umbral);
 		}
 		return intento;
 	}
@@ -168,7 +174,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 	private void mapearBajaContabilizable(IntentoAcreditacionUnidadV2DTO intento, Integer tipoBaja, String motivo, Boolean solicitud) {
 		String evidencia = "REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja + ";MOTIVO=" + (motivo == null ? "" : motivo);
 		if (tipoBaja.intValue() == 2 || tipoBaja.intValue() == 7 || tipoBaja.intValue() == 8) {
-			intento.setEstado(EstadoIntentoAcreditacionV2.BAJA_TEMPORAL); intento.setEvidenciaFuente(evidencia); return;
+			intento.setEstado(EstadoIntentoAcreditacionV2.BAJA_TEMPORAL); intento.setEvidenciaFuente(evidencia + ";MOTIVO=BAJA_TEMPORAL"); return;
 		}
 		if (tipoBaja.intValue() == 1 && Boolean.TRUE.equals(solicitud)) {
 			intento.setEstado(EstadoIntentoAcreditacionV2.BAJA_PARCIAL); intento.setEvidenciaFuente(evidencia + ";CAUSA=SOLICITADA"); return;
@@ -176,11 +182,11 @@ public class InscripcionRepository implements IinscripcionRepository {
 		if (tipoBaja.intValue() == 1 && motivo != null && motivo.toUpperCase().contains("SERIACION")) {
 			intento.setEstado(EstadoIntentoAcreditacionV2.BAJA_PARCIAL); intento.setEvidenciaFuente(evidencia + ";CAUSA=SERIACION"); return;
 		}
-		if (tipoBaja.intValue() == 3 || tipoBaja.intValue() == 6) {
-			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente(evidencia + ";ESTADO_EXPEDIENTE=BAJA_DEFINITIVA"); return;
-		}
-		if (tipoBaja.intValue() == 4 || tipoBaja.intValue() == 5) {
+		if (tipoBaja.intValue() == 4) {
 			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente(evidencia + ";BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION"); return;
+		}
+		if (tipoBaja.intValue() == 5) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente(evidencia + ";BAJA_ART40_SUBTIPO_NO_DETERMINADO"); return;
 		}
 		intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente(evidencia + ";TIPO_BAJA_NO_MAPEADO_REQUIERE_REVISION");
 	}
