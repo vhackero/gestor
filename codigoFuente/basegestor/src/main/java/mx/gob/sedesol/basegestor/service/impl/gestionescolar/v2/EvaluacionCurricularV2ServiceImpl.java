@@ -4516,7 +4516,8 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         if (!Boolean.TRUE.equals(contexto.getAdmitido()) || Boolean.TRUE.equals(contexto.getInscripcionInicialRealizada())) return;
         int obligatorias=0,optativas=0; Set<String> claves=new HashSet<String>(); Set<String> bloques=new HashSet<String>();
         for(UnidadEvaluacionCurricularV2DTO u:unidades) if(contexto.getIdsUnidadesPretendidas().contains(u.getIdPrograma())) { if(esObligatoria(u)) obligatorias++; if(esOptativa(u)){optativas++;claves.add(u.getClave());bloques.add(u.getBloque());} }
-        if (obligatorias != 4 || optativas != 2 || claves.size()!=2 || bloques.size()!=2) agregarUnico(resultado.getRestricciones(), CodigoMotivoCurricularV2.DATOS_INSUFICIENTES);
+        if (obligatorias != 4 || optativas != 2 || claves.size()!=2 || bloques.size()!=2)
+            agregarUnico(resultado.getRestricciones(), CodigoMotivoCurricularV2.OPTATIVA_LIMITE_SELECCION);
     }
 
     private boolean tieneAntecedenteNoAcreditado(UnidadEvaluacionCurricularV2DTO unidad,
