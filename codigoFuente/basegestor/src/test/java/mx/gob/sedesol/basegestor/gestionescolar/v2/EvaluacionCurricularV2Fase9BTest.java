@@ -12,6 +12,9 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoAvanceUltim
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaAcademicaV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.RelacionSeriacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.SemestreReferenciaV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoComponenteCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoRelacionSeriacionV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoSeriacionV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.UnidadEvaluacionCurricularV2DTO;
@@ -62,6 +65,42 @@ public class EvaluacionCurricularV2Fase9BTest {
     @Test public void f9BU13PendienteNoRelacionadoNoCreaBloqueoGlobalYSinConfiguracionHayRevision() {
         ContextoEvaluacionCurricularV2DTO sinRelacion = conCreditos(7, "100"); sinRelacion.getUnidades().add(unidad(1L, 4, EstadoUnidadCurricularV2.NO_CURSADA, "0")); UnidadEvaluacionCurricularV2DTO seminario = unidad(2L, 7, EstadoUnidadCurricularV2.NO_INSCRITA, "0"); seminario.setComponenteSeminarioTitulacion(Boolean.TRUE); seminario.setRequisitosEspecificosPeComprobados(Boolean.TRUE); sinRelacion.getUnidades().add(seminario); assertFalse(carga(sinRelacion).getComponentesRestringidosRequisitoPeRn93().contains(2L));
         ContextoEvaluacionCurricularV2DTO sinConfig = conCreditos(7, "100"); UnidadEvaluacionCurricularV2DTO electiva = unidad(3L, 5, EstadoUnidadCurricularV2.NO_INSCRITA, "0"); electiva.setTipoUd("Electiva"); sinConfig.getUnidades().add(electiva); assertFalse(Boolean.TRUE.equals(carga(sinConfig).getRequiereRevisionRn93()));
+    }
+
+    @Test public void gc14SeminarioNoSeBloqueaPorAdeudoAjenoNiPorSuUbicacion() {
+        ContextoEvaluacionCurricularV2DTO c = contexto(7);
+        UnidadEvaluacionCurricularV2DTO adeudo = unidad(4L, 4, EstadoUnidadCurricularV2.REPROBADA, "0");
+        UnidadEvaluacionCurricularV2DTO seminario = unidad(14L, 7, EstadoUnidadCurricularV2.NO_INSCRITA, "0");
+        seminario.setClave("STIT01");
+        seminario.setNombre("Seminario de titulacion I");
+        seminario.setTipoComponenteCurricular(TipoComponenteCurricularV2.SEMINARIO_TITULACION);
+        seminario.setComponenteSeminarioTitulacion(Boolean.TRUE);
+        seminario.setRequisitosEspecificosPeComprobados(Boolean.TRUE);
+        c.getUnidades().add(adeudo); c.getUnidades().add(seminario);
+
+        ResultadoEvaluacionCurricularV2DTO r = servicio.evaluarSombra(c);
+        mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO decisionSeminario = null;
+        for (mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO d : r.getDecisiones()) if (Long.valueOf(14L).equals(d.getIdPrograma())) decisionSeminario = d;
+        assertNotNull(decisionSeminario);
+        assertTrue(decisionSeminario.getEstadosSombra().contains(mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoDecisionUnidadCurricularV2.HABILITADA));
+        assertFalse(decisionSeminario.getEstadosSombra().contains(mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoDecisionUnidadCurricularV2.BLOQUEADA));
+        assertFalse(decisionSeminario.getMotivos().contains(mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2.REPROBACION_ACUMULADA));
+    }
+
+    @Test public void f9BU15TrazaRn95IncluyeAmbitoSemestreYParametros() {
+        ContextoEvaluacionCurricularV2DTO c = contexto(7); c.setAmbitoRnPe2024_2027("APLICA"); c.setClavePlan("PE2027"); c.setCohorte("2026");
+        mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ParametrosCurricularesV2DTO p = new mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ParametrosCurricularesV2DTO();
+        p.setDocumentoRespaldo("RN_OFICIALES"); p.setVigencia("2026-11-05"); p.setAmbito("PE2024/2027"); c.setParametrosCurriculares(p);
+        SemestreReferenciaV2DTO s = new SemestreReferenciaV2DTO(); s.setValor(Integer.valueOf(7)); s.setFuente("EVENTOS"); s.getPeriodosContados().add("2026-1"); s.getPeriodosExcluidos().add("2026-2:BAJA_TEMPORAL"); c.setDetalleSemestreReferencia(s);
+        ResultadoEvaluacionCurricularV2DTO r = servicio.evaluarSombra(c);
+        boolean encontrada = false; String detalles = "";
+        for (mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TrazaReglaAplicadaV2DTO t : r.getTrazas()) if ("RN95_COBERTURA_CONTEXTO".equals(t.getResultado())) {
+            detalles += t.getDetalle();
+            encontrada = t.getDetalle().contains("ambito=APLICA") && t.getDetalle().contains("contados=[2026-1]")
+                    && t.getDetalle().contains("excluidos=[2026-2:BAJA_TEMPORAL]") && t.getDetalle().contains("documento=RN_OFICIALES")
+                    && t.getDetalle().contains("vigencia=2026-11-05");
+        }
+        assertTrue(encontrada, detalles);
     }
 
     @Test public void f9BU14OfertaCupoYDeterminismoSinEfectoProductivo() { ContextoEvaluacionCurricularV2DTO c = conCreditos(7, "100"); UnidadEvaluacionCurricularV2DTO u = unidad(2L, 7, EstadoUnidadCurricularV2.NO_INSCRITA, "0"); u.setOfertada(Boolean.FALSE); u.setCupoDisponibleConocido(Boolean.FALSE); c.getUnidades().add(u); EvaluacionCargaAcademicaV2DTO primera = carga(c), segunda = carga(c); assertEquals(primera.getPorcentajeCreditosAcreditadosRn93(), segunda.getPorcentajeCreditosAcreditadosRn93()); assertFalse(Boolean.TRUE.equals(servicio.evaluarSombra(c).getEfectosProductivosAplicados())); }

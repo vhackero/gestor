@@ -21,6 +21,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoReglaCurric
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CondicionCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ParametrosCurricularesV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcreditacionV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoLimiteIntentosV2;
@@ -856,10 +857,13 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         if (carga == null) return;
         agregarUnico(resultado.getReglasEvaluadas(), CodigoReglaCurricularV2.RN_9_5);
         agregarUnico(carga.getReglasRelacionadas(), CodigoReglaCurricularV2.RN_9_5);
-        String resumen = "situacion=" + resultado.getSituacionAcademicaCalculada() + "; semestreReferencia=" + contexto.getSemestreReferencia()
+        String resumen = "ambito=" + contexto.getAmbitoRnPe2024_2027() + "; plan=" + contexto.getClavePlan()
+                + "; cohorte=" + contexto.getCohorte() + "; situacion=" + resultado.getSituacionAcademicaCalculada()
+                + "; semestreReferencia=" + detalleSemestreReferenciaRn95(contexto)
                 + "; totalReprobadas=" + resultado.getTotalReprobadas() + "; rn61="
                 + (Boolean.TRUE.equals(carga.getAplicaRn61()) ? "APLICA:" + carga.getDecisionGlobalRn61() : "NO_APLICA")
                 + "; rn64=" + carga.getAplicaRn64() + "; excepciones=" + resultado.getExcepcionesEvaluadas().size()
+                + "; parametros=" + detalleParametrosRn95(contexto.getParametrosCurriculares())
                 + "; fecha=" + contexto.getFechaEvaluacion() + "; version=" + contexto.getVersionReglas();
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_9_5, null, 90, "RN95_COBERTURA_CONTEXTO", resumen);
         Set<Long> auditadas = new HashSet<Long>();
@@ -870,10 +874,42 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                     : (unidad.getCausaIndisponibilidadOferta() == CausaIndisponibilidadOfertaV2.SIN_CUPO ? "SIN_CUPO" : "SIN_OFERTA");
             String detalle = "ud=" + unidad.getIdPrograma() + "; estado=" + unidad.getEstado() + "; causa=" + unidad.getCausa()
                     + "; disponibilidad=" + oferta + "; cupoConocido=" + unidad.getCupoDisponibleConocido()
+                    + "; criterio={reprobacionVigente=" + unidad.getReprobacionVigenteConocida()
+                    + ",intentos=" + unidad.getIntentos() + ",oportunidadesConsumidas=" + unidad.getOportunidadesConsumidas()
+                    + ",estadoOportunidad=" + unidad.getEstadoOportunidad() + "}"
                     + "; decision=" + (decision == null ? "NO_DETERMINADA" : decision.getEstadosSombra())
                     + "; motivos=" + (decision == null ? "[]" : decision.getMotivos());
             registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_9_5, null, 90, "RN95_COBERTURA_UD", detalle);
         }
+    }
+
+    private String detalleSemestreReferenciaRn95(ContextoEvaluacionCurricularV2DTO contexto) {
+        if (contexto.getDetalleSemestreReferencia() == null) {
+            return "{valor=" + contexto.getSemestreReferencia() + ",fuente=CONTEXTO_DIRECTO,contados=NO_DISPONIBLES,excluidos=NO_DISPONIBLES}";
+        }
+        return "{valor=" + contexto.getDetalleSemestreReferencia().getValor()
+                + ",estado=" + contexto.getDetalleSemestreReferencia().getEstado()
+                + ",fuente=" + contexto.getDetalleSemestreReferencia().getFuente()
+                + ",corte=" + contexto.getDetalleSemestreReferencia().getCorte()
+                + ",contados=" + contexto.getDetalleSemestreReferencia().getPeriodosContados()
+                + ",excluidos=" + contexto.getDetalleSemestreReferencia().getPeriodosExcluidos() + "}";
+    }
+
+    private String detalleParametrosRn95(ParametrosCurricularesV2DTO parametros) {
+        if (parametros == null) return "NO_DISPONIBLES";
+        return "{oportunidadesPorUd=" + parametros.getOportunidadesPorUd()
+                + ",calificacionMinima=" + parametros.getCalificacionMinimaAprobatoria()
+                + ",cargaMinima=" + parametros.getCargaMinima()
+                + ",cargaMaxRegular=" + parametros.getCargaMaxRegular()
+                + ",cargaMaxIrregular=" + parametros.getCargaMaxIrregular()
+                + ",umbralRezago=" + parametros.getUmbralRezagoSevero()
+                + ",maxBajasTemporales=" + parametros.getMaxSemestresBajaTemporal()
+                + ",optativasRequeridas=" + parametros.getOptativasRequeridas()
+                + ",ctr01Periodo=" + parametros.getCtr01PeriodoInicio()
+                + ",ctr01Semestre=" + parametros.getCtr01Semestre()
+                + ",documento=" + parametros.getDocumentoRespaldo()
+                + ",ambito=" + parametros.getAmbito()
+                + ",vigencia=" + parametros.getVigencia() + "}";
     }
 
     /** RN-9.3 para S7/S8 reutiliza F6-F8; no establece un umbral porcentual de créditos. */
