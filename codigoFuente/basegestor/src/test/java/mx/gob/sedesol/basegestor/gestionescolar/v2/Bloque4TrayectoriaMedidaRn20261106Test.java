@@ -24,8 +24,9 @@ public class Bloque4TrayectoriaMedidaRn20261106Test {
 
     @Test public void gc05CuartaBajaTemporalAcumuladaEsExcedente() {
         ResultadoEvaluacionCurricularV2DTO r = servicio.evaluarSombra(bajaTemporal(4));
-        assertEquals(r.getEvaluacionCargaAcademica().getEstadoReincorporacionRn66(), EstadoReincorporacionBajaTemporalV2.NO_PROCEDE_POR_MAXIMO_BAJAS_TEMPORALES);
-        assertTrue(r.getRestricciones().contains(CodigoMotivoCurricularV2.INACTIVIDAD));
+        assertEquals(r.getEvaluacionCargaAcademica().getEstadoReincorporacionRn66(), EstadoReincorporacionBajaTemporalV2.MAXIMO_BAJAS_TEMPORALES_EXCEDIDO);
+        assertTrue(r.getRestricciones().contains(CodigoMotivoCurricularV2.MAXIMO_BAJAS_TEMPORALES_EXCEDIDO));
+        assertFalse(r.getRestricciones().contains(CodigoMotivoCurricularV2.INACTIVIDAD));
     }
 
     @Test public void gc13MedidaAdministrativaSinVigenciaRequiereRevision() {
@@ -41,6 +42,26 @@ public class Bloque4TrayectoriaMedidaRn20261106Test {
         c.setMedidaAdministrativaRegistrada(Boolean.TRUE); c.setAlcanceMedidaAdministrativa("CONSULTA");
         c.setInicioVigenciaMedidaAdministrativa("2026-01-01"); c.setFinVigenciaMedidaAdministrativa("2026-12-31");
         assertFalse(servicio.evaluarSombra(c).getRestricciones().contains(CodigoMotivoCurricularV2.MEDIDA_ADMINISTRATIVA_SIN_VIGENCIA));
+    }
+
+    @Test public void gc13MedidaVigenteDeReinscripcionImpideAvanceCondicionado() {
+        ContextoEvaluacionCurricularV2DTO c = avanceQuinto();
+        c.setFechaEvaluacion(java.sql.Date.valueOf("2026-06-15"));
+        c.setMedidaAdministrativaRegistrada(Boolean.TRUE); c.setAlcanceMedidaAdministrativa("REINSCRIPCION");
+        c.setInicioVigenciaMedidaAdministrativa("2026-01-01"); c.setFinVigenciaMedidaAdministrativa("2026-12-31");
+        ResultadoEvaluacionCurricularV2DTO r = servicio.evaluarSombra(c);
+        assertEquals(r.getEvaluacionCargaAcademica().getEstadoResolucionAvance(), EstadoResolucionAvanceV2.NO_PROCEDE_AVANCE_CONDICIONADO);
+        assertTrue(r.getRestricciones().contains(CodigoMotivoCurricularV2.MEDIDA_ADMINISTRATIVA_VIGENTE));
+    }
+
+    @Test public void gc13MedidaVencidaNoImpideAvanceCondicionado() {
+        ContextoEvaluacionCurricularV2DTO c = avanceQuinto();
+        c.setFechaEvaluacion(java.sql.Date.valueOf("2026-06-15"));
+        c.setMedidaAdministrativaRegistrada(Boolean.TRUE); c.setAlcanceMedidaAdministrativa("REINSCRIPCION");
+        c.setInicioVigenciaMedidaAdministrativa("2025-01-01"); c.setFinVigenciaMedidaAdministrativa("2025-12-31");
+        ResultadoEvaluacionCurricularV2DTO r = servicio.evaluarSombra(c);
+        assertFalse(r.getRestricciones().contains(CodigoMotivoCurricularV2.MEDIDA_ADMINISTRATIVA_VIGENTE));
+        assertFalse(r.getEvaluacionCargaAcademica().getEstadoResolucionAvance() == EstadoResolucionAvanceV2.NO_PROCEDE_AVANCE_CONDICIONADO);
     }
 
     private ContextoEvaluacionCurricularV2DTO bajaTemporal(int acumuladas) {

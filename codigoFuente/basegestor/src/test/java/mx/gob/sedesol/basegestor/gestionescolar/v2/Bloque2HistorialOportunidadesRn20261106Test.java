@@ -33,6 +33,7 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         UnidadEvaluacionCurricularV2DTO u = ud(15L, intento("r", EstadoIntentoAcreditacionV2.REPROBADO)); u.setTipoUd("ELECTIVA");
         ResultadoEvaluacionCurricularV2DTO r = evaluar(u);
         assertFalse(r.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_7_3));
+        assertFalse(tieneTraza(r, CodigoReglaCurricularV2.RN_7_3));
     }
     @Test public void c05BajaTemporalNoEsReprobacionNiOportunidad() {
         UnidadEvaluacionCurricularV2DTO u=ud(20L, intento("bt", EstadoIntentoAcreditacionV2.BAJA_TEMPORAL)); u.setEstado(EstadoUnidadCurricularV2.BAJA_TEMPORAL);
@@ -76,6 +77,7 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         ResultadoEvaluacionCurricularV2DTO r=evaluar(u);
         assertTrue(r.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_7_2));
         assertFalse(r.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_7_3));
+        assertFalse(tieneTraza(r, CodigoReglaCurricularV2.RN_7_3));
     }
     private IntentoAcreditacionUnidadV2DTO mapearBaja(int tipo, String motivo, int solicitud) throws Exception { return mapearFila(Integer.valueOf(tipo), null, motivo, Integer.valueOf(solicitud)); }
     private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion) throws Exception { return mapearFila(tipo, calificacion, null, null); }
@@ -92,4 +94,5 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
     private UnidadEvaluacionCurricularV2DTO ud(Long id, IntentoAcreditacionUnidadV2DTO... intentos) { UnidadEvaluacionCurricularV2DTO u=new UnidadEvaluacionCurricularV2DTO(); u.setIdPrograma(id); u.setClave("UD"+id); u.setTipoUd("Obligatoria"); u.setSemestre(Integer.valueOf(2)); u.setEstado(EstadoUnidadCurricularV2.REPROBADA); u.setOfertada(Boolean.TRUE); u.setCupoDisponibleConocido(Boolean.TRUE); for(IntentoAcreditacionUnidadV2DTO i:intentos)u.getIntentosAcreditacion().add(i); return u; }
     private IntentoAcreditacionUnidadV2DTO intento(String id, EstadoIntentoAcreditacionV2 estado) { IntentoAcreditacionUnidadV2DTO i=new IntentoAcreditacionUnidadV2DTO(); i.setIdEjecucionTecnico(id); i.setEstado(estado); return i; }
     private DecisionUnidadCurricularV2DTO decision(ResultadoEvaluacionCurricularV2DTO r, Long id) { for(DecisionUnidadCurricularV2DTO d:r.getDecisiones()) if(id.equals(d.getIdPrograma()))return d; return null; }
+    private boolean tieneTraza(ResultadoEvaluacionCurricularV2DTO r, CodigoReglaCurricularV2 regla) { for(TrazaReglaAplicadaV2DTO t:r.getTrazas()) if(regla == t.getCodigoRegla()) return true; return false; }
 }

@@ -2555,12 +2555,34 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                     "RN615_REQUIERE_REVISION_MEDIDA_ADMINISTRATIVA",
                     "La medida administrativa registrada no cuenta con alcance e inicio y fin o condición de vigencia verificables.");
         }
+        boolean medidaVigenteImpeditiva = medidaAdministrativaVigenteParaReinscripcion(contexto);
+        if (medidaVigenteImpeditiva) {
+            c.getImpedimentosAvanceRn615().add("MEDIDA_ADMINISTRATIVA_VIGENTE:" + contexto.getAlcanceMedidaAdministrativa());
+            agregarUnico(resultado.getRestricciones(), CodigoMotivoCurricularV2.MEDIDA_ADMINISTRATIVA_VIGENTE);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_5,
+                    CodigoMotivoCurricularV2.MEDIDA_ADMINISTRATIVA_VIGENTE, 100,
+                    "RN615_MEDIDA_ADMINISTRATIVA_VIGENTE",
+                    "La medida vigente tiene alcance impeditivo para reinscripción; el motor no autoriza ni modifica la medida.");
+        }
         if(Boolean.TRUE.equals(contexto.getRestriccionPeNormativaConocida())&&Boolean.TRUE.equals(contexto.getRestriccionPeNormativaImpeditiva()))c.getImpedimentosAvanceRn615().add("RESTRICCION_PE_NORMATIVA:"+contexto.getCodigoRestriccionPeNormativa()+":"+contexto.getFuenteRestriccionPeNormativa());
         if(!Boolean.TRUE.equals(contexto.getSancionImpedimentoConocida())||!Boolean.TRUE.equals(contexto.getRestriccionPeNormativaConocida())||Boolean.TRUE.equals(c.getRequiereRevision())){c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.REQUIERE_REVISION);}
-        else if(Boolean.TRUE.equals(c.getAplicaRn64()) || Boolean.TRUE.equals(contexto.getSancionImpedimentoRegistrada()) || Boolean.TRUE.equals(contexto.getRestriccionPeNormativaImpeditiva()))c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.NO_PROCEDE_AVANCE_CONDICIONADO);
+        else if(Boolean.TRUE.equals(c.getAplicaRn64()) || Boolean.TRUE.equals(contexto.getSancionImpedimentoRegistrada()) || Boolean.TRUE.equals(contexto.getRestriccionPeNormativaImpeditiva()) || medidaVigenteImpeditiva)c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.NO_PROCEDE_AVANCE_CONDICIONADO);
         else if(c.getEstadoSupuestosAvance()==EstadoSupuestosAvanceV2.SIN_SUPUESTO_TIPIFICADO){c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.REQUIERE_RESOLUCION_EXTRAORDINARIA);c.getRutaInstitucionalExtraordinariaRn616().add("DIRECCION_DIVISION:PENDIENTE_FUNDAMENTACION_ACADEMICA");c.getRutaInstitucionalExtraordinariaRn616().add("CAI:PENDIENTE_DEFINICION_ACADEMICA");c.getRutaInstitucionalExtraordinariaRn616().add("DAEAE:PENDIENTE_DETERMINACION_ESCOLAR_NORMATIVA");c.getRutaInstitucionalExtraordinariaRn616().add("CTIE:RESOLUCION_DOCUMENTADA_PENDIENTE_EJECUCION");}
         else c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.CONTINUA_EVALUACION_ORDINARIA_RN61);
         registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_1_5,null,100,"RN615_"+c.getEstadoResolucionAvance(),"Impedimentos="+c.getImpedimentosAvanceRn615());registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_1_6,null,100,"RN616_"+c.getEstadoResolucionAvance(),"Ruta="+c.getRutaInstitucionalExtraordinariaRn616());
+    }
+
+    private boolean medidaAdministrativaVigenteParaReinscripcion(ContextoEvaluacionCurricularV2DTO contexto) {
+        if (!Boolean.TRUE.equals(contexto.getMedidaAdministrativaRegistrada())
+                || !textoPresente(contexto.getAlcanceMedidaAdministrativa())
+                || !textoPresente(contexto.getInicioVigenciaMedidaAdministrativa())
+                || !textoPresente(contexto.getFinVigenciaMedidaAdministrativa())) return false;
+        String alcance = contexto.getAlcanceMedidaAdministrativa().toUpperCase();
+        if (!alcance.contains("INSCRIPCION") && !alcance.contains("REINSCRIPCION")) return false;
+        String fecha = new java.text.SimpleDateFormat("yyyy-MM-dd").format(
+                contexto.getFechaEvaluacion() == null ? new Date() : contexto.getFechaEvaluacion());
+        return contexto.getInicioVigenciaMedidaAdministrativa().compareTo(fecha) <= 0
+                && contexto.getFinVigenciaMedidaAdministrativa().compareTo(fecha) >= 0;
     }
 
     /** Fase 5F: compone resultados RN-6.1.1..6 sin recalcularlos ni activar efectos. */
@@ -2946,9 +2968,9 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             return;
         }
         if (bajasAcumuladas.intValue() > maximoBajas.intValue()) {
-            carga.setEstadoReincorporacionRn66(EstadoReincorporacionBajaTemporalV2.NO_PROCEDE_POR_MAXIMO_BAJAS_TEMPORALES);
-            agregarUnico(resultado.getRestricciones(), CodigoMotivoCurricularV2.INACTIVIDAD);
-            registrarTrazaReincorporacionRn66(resultado, contexto, carga, CodigoMotivoCurricularV2.INACTIVIDAD,
+            carga.setEstadoReincorporacionRn66(EstadoReincorporacionBajaTemporalV2.MAXIMO_BAJAS_TEMPORALES_EXCEDIDO);
+            agregarUnico(resultado.getRestricciones(), CodigoMotivoCurricularV2.MAXIMO_BAJAS_TEMPORALES_EXCEDIDO);
+            registrarTrazaReincorporacionRn66(resultado, contexto, carga, CodigoMotivoCurricularV2.MAXIMO_BAJAS_TEMPORALES_EXCEDIDO,
                     "RN66_MAXIMO_BAJAS_TEMPORALES_EXCEDIDO", "Bajas temporales acumuladas=" + bajasAcumuladas + "; máximo aplicable=" + maximoBajas + ".");
             return;
         }
@@ -4554,6 +4576,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             if (contexto.getIdsUnidadesPretendidas().contains(u.getIdPrograma()) && esOptativa(u)) seleccionadas.add(u);
         if (seleccionadas.isEmpty()) return;
         boolean irregular = "IRREGULAR".equals(resultado.getSituacionAcademicaCalculada());
+        boolean irregularSoloPorOptativa = irregular && !existePendienteObligatoria(unidades);
         int nuevas = 0; boolean hayReferenciaDisponible = false; boolean seleccionaReferencia = false; Set<String> bloques = new HashSet<String>();
         for (UnidadEvaluacionCurricularV2DTO u : unidades)
             if (esOptativa(u) && Boolean.TRUE.equals(u.getOfertada()) && u.getSemestre() != null
@@ -4567,13 +4590,19 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             if (!recursa) {
                 nuevas++; if (bloques.contains(u.getBloque())) bloquearPorOptativa(resultado, d, CodigoMotivoCurricularV2.OPTATIVA_LIMITE_SELECCION); bloques.add(u.getBloque());
                 if (u.getSemestre() != null && contexto.getSemestreReferencia() != null && u.getSemestre().intValue() != contexto.getSemestreReferencia().intValue()) {
-                    if (irregular) bloquearPorOptativa(resultado, d, CodigoMotivoCurricularV2.OPTATIVA_OTRO_SEMESTRE_SOLO_REGULAR);
+                    if (irregular && !irregularSoloPorOptativa) bloquearPorOptativa(resultado, d, CodigoMotivoCurricularV2.OPTATIVA_OTRO_SEMESTRE_SOLO_REGULAR);
                     else if (hayReferenciaDisponible && !seleccionaReferencia) bloquearPorOptativa(resultado, d, CodigoMotivoCurricularV2.OPTATIVA_SEMESTRE_REFERENCIA_PRIMERO);
                 }
             }
             if ("INARTIFI".equals(u.getClave()) && contarOptativasAcreditadas(unidades) >= 8 && !recursa) bloquearPorOptativa(resultado, d, CodigoMotivoCurricularV2.OPTATIVA_LIMITE_SELECCION);
         }
         if (nuevas > 2) for (UnidadEvaluacionCurricularV2DTO u : seleccionadas) if (!esReprobacionVigentePrevia(u)) bloquearPorOptativa(resultado, buscarDecision(resultado, u.getIdPrograma()), CodigoMotivoCurricularV2.OPTATIVA_LIMITE_SELECCION);
+    }
+
+    private boolean existePendienteObligatoria(List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades)
+            if (esObligatoria(unidad) && esPendiente(unidad)) return true;
+        return false;
     }
 
     private int contarOptativasAcreditadas(List<UnidadEvaluacionCurricularV2DTO> unidades) { int n=0; for (UnidadEvaluacionCurricularV2DTO u:unidades) if(esOptativa(u)&&u.getEstado()==EstadoUnidadCurricularV2.ACREDITADA)n++; return n; }
