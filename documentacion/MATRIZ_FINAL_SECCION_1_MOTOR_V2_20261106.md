@@ -38,9 +38,9 @@ Caso ejecutado en `EvaluacionCurricularV2Fase9BTest.gc14SeminarioNoSeBloqueaPorA
 | RN-1.5 | Conforme | Prohibe reinscribir UD acreditada solo para mejorar promedio. |
 | RN-2.1 | Fuera de alcance | La administracion de la oferta y sus actos institucionales no se ejecutan desde la evaluacion en sombra. |
 | RN-2.2 | Conforme | Evalua elegibilidad curricular previa a reinscripcion y carga, incluyendo seriacion mediante relaciones verificables. La traza usa `RN_2_2`; evidencia: `EvaluacionCurricularV2Fase1BTest`. |
-| RN-3.1 | Fuera de alcance | La programacion/operacion institucional correspondiente no se infiere ni se ejecuta desde el motor. |
-| RN-3.2 | Fuera de alcance | La asignacion operativa de oferta, grupo o cupo corresponde al proceso institucional; V2 solo consume su disponibilidad. |
-| RN-3.3 | Fuera de alcance | La formalizacion operativa posterior a la evaluacion curricular no es una decision del motor en sombra. |
+| RN-3.1 | Conforme | Valida la carga de nuevo ingreso: cuatro obligatorias y dos optativas distintas, distribuidas entre B1 y B2. Evidencia: `GC-16` en `Bloque3OfertaYPreseleccionRn20261106Test`. La confirmacion de la inscripcion corresponde al proceso de Inscripcion. |
+| RN-3.2 | Conforme | Desde segundo semestre permite de cero a dos optativas nuevas; una optativa en recursamiento no consume ese tope. Evidencia: `GC-06d` en `Bloque3OfertaYPreseleccionRn20261106Test`. La oferta y confirmacion productiva siguen siendo responsabilidad de Inscripcion. |
+| RN-3.3 | Conforme | Valida una optativa por bloque, sin repetir clave ni una ya acreditada. Evidencia: `GC-16` y reglas de seleccion optativa en `Bloque3OfertaYPreseleccionRn20261106Test`. La confirmacion de la inscripcion corresponde a Inscripcion. |
 | RN-4 | Conforme | Integra carga academica en sombra. |
 | RN-4.1 | Conforme | Evalua minimo y excepciones tipificadas, sin inventar una carga. |
 | RN-4.2 | Conforme | Aplica maximo individual desde parametros y situacion V2. |
@@ -49,9 +49,9 @@ Caso ejecutado en `EvaluacionCurricularV2Fase9BTest.gc14SeminarioNoSeBloqueaPorA
 | RN-5.1 | Conforme | Identifica rezago leve a partir del expediente normalizado. |
 | RN-5.2 | Conforme | Identifica rezago severo y restringe la propuesta a regularizacion conforme al umbral parametrico. |
 | RN-6.1 | Conforme | Evalua avance por UD candidata de quinto, no por semestre maximo de oferta. |
-| RN-6.1.1 | Conforme | Evalua las condiciones comunes de avance para cada candidata de quinto, incluidos pendientes, seriacion y evidencia del PE. Emite trazas `RN_6_1_1`; prueba `EvaluacionCurricularV2Fase5ATest`. |
-| RN-6.1.2 | Conforme | Determina los supuestos tipificados de avance condicionado, sin requerir autorizacion individual cuando la evidencia esta completa. Emite trazas `RN_6_1_2`; prueba `EvaluacionCurricularV2Fase5BTest`. |
-| RN-6.1.3 | Conforme | Consolida causas concurrentes y falta de oferta de los pendientes; no incorpora un maximo de pendientes no previsto. Emite trazas `RN_6_1_3`; prueba `EvaluacionCurricularV2Fase5CTest`. |
+| RN-6.1.1 | Conforme | Construye la base de evaluacion: todas las obligatorias de 1.º a 4.º y sus pendientes con causa; distingue acceso ordinario de base con pendientes. Emite trazas `RN_6_1_1`; prueba `EvaluacionCurricularV2Fase5ATest` y trazabilidad directa `TrazabilidadNumeracionRn61Test`. |
+| RN-6.1.2 | Conforme | Evalua condiciones comunes de avance y registra `PENDIENTE_OMITIDA_AVANCE_CONDICIONADO` cuando la carga de quinto omite una pendiente ofertada. Emite trazas `RN_6_1_2`; prueba `EvaluacionCurricularV2Fase5BTest`, `GC-03` y `TrazabilidadNumeracionRn61Test`. |
+| RN-6.1.3 | Conforme | Determina los supuestos tipificados, incluida falta de oferta y concurrencia, sin incorporar un maximo de pendientes no previsto. Emite trazas `RN_6_1_3`; prueba `EvaluacionCurricularV2Fase5CTest` y trazabilidad directa `TrazabilidadNumeracionRn61Test`. |
 | RN-6.1.4 | Conforme | Distingue falta de oferta de restriccion academica. |
 | RN-6.1.5 | Conforme | Medida sin alcance/vigencia queda `REQUIERE_REVISION`; una medida vigente con alcance de inscripcion/reinscripcion impide el avance condicionado y una vencida no. Trazas `RN_6_1_5`; prueba `Bloque4TrayectoriaMedidaRn20261106Test`. |
 | RN-6.1.6 | Pendiente de dato | Requiere fuente institucional de resolucion extraordinaria para resolver casos reales. |
@@ -88,6 +88,6 @@ cd codigoFuente/basegestor
 mvn -q -Dtest='mx.gob.sedesol.basegestor.gestionescolar.v2.*Test' test
 ```
 
-Resultado: `Tests run: 749, Failures: 0, Errors: 0, Skipped: 0`.
+Resultado: `Tests run: 750, Failures: 0, Errors: 0, Skipped: 0`.
 
 La evidencia de GC-13 (medida vigente/vencida y cuarta baja), GC-14 y RN-9.5 esta en `Bloque4TrayectoriaMedidaRn20261106Test` y `EvaluacionCurricularV2Fase9BTest`, incluidas en la regresion.

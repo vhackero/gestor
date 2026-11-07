@@ -4648,6 +4648,10 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             DecisionUnidadCurricularV2DTO decision = buscarDecision(resultado, unidad.getIdPrograma());
             if (decision != null) agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.PENDIENTE_OMITIDA_AVANCE_CONDICIONADO);
             agregarUnico(resultado.getRestricciones(), CodigoMotivoCurricularV2.PENDIENTE_OMITIDA_AVANCE_CONDICIONADO);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_2,
+                    CodigoMotivoCurricularV2.PENDIENTE_OMITIDA_AVANCE_CONDICIONADO, 100,
+                    "RN612_PENDIENTE_OMITIDA_AVANCE_CONDICIONADO",
+                    "La carga propuesta de quinto omite la pendiente ofertada " + obtenerLlaveUnidad(unidad) + ".");
         }
     }
 
