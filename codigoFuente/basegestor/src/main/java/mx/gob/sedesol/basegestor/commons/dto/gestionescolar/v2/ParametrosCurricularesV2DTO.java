@@ -18,6 +18,8 @@ public class ParametrosCurricularesV2DTO implements Serializable {
     private String documentoRespaldo;
     private String vigencia;
     private String ambito;
+    /** Tabla 2 RN-7.1; formato CLAVE:SEMESTRE, configurado por ámbito y vigencia. */
+    private String catalogoOptativas;
     public Integer getOportunidadesPorUd() { return oportunidadesPorUd; } public void setOportunidadesPorUd(Integer v) { oportunidadesPorUd = v; }
     public Integer getCalificacionMinimaAprobatoria() { return calificacionMinimaAprobatoria; } public void setCalificacionMinimaAprobatoria(Integer v) { calificacionMinimaAprobatoria = v; }
     public Integer getCargaMinima() { return cargaMinima; } public void setCargaMinima(Integer v) { cargaMinima = v; }
@@ -31,4 +33,5 @@ public class ParametrosCurricularesV2DTO implements Serializable {
     public String getDocumentoRespaldo() { return documentoRespaldo; } public void setDocumentoRespaldo(String v) { documentoRespaldo = v; }
     public String getVigencia() { return vigencia; } public void setVigencia(String v) { vigencia = v; }
     public String getAmbito() { return ambito; } public void setAmbito(String v) { ambito = v; }
+    public String getCatalogoOptativas() { return catalogoOptativas; } public void setCatalogoOptativas(String v) { catalogoOptativas = v; }
 }

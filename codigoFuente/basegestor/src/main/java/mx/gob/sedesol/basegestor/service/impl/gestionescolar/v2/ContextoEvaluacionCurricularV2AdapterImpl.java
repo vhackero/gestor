@@ -248,6 +248,9 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         parametros.setOptativasRequeridas(configuracion.getParametrosCurriculares().getOptativasRequeridas());
         parametros.setCtr01PeriodoInicio(configuracion.getCtr01PeriodoInicio());
         parametros.setCtr01Semestre(configuracion.getCtr01SemestreObjetivo());
+        parametros.setCatalogoOptativas(configuracion.getParametrosCurriculares().getCatalogoOptativas());
+        parametros.setAmbito(configuracion.getParametrosCurriculares().getAmbito());
+        parametros.setVigencia(configuracion.getParametrosCurriculares().getVigencia());
         parametros.setDocumentoRespaldo("P2024-2027- Reglas de negocio_Octubre 2026_act_20261105.docx");
         parametros.setVigencia("2026-11-05");
         parametros.setAmbito("REQUIERE_REVISION");

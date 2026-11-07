@@ -4463,7 +4463,14 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
     }
 
     /** Tabla 2 RN-7.1: catálogo común de lectura para PE2024/2027. */
-    private int semestreCatalogoOptativa(String clave) {
+    private int semestreCatalogoOptativa(ContextoEvaluacionCurricularV2DTO contexto, String clave) {
+        if (contexto.getParametrosCurriculares() != null && contexto.getParametrosCurriculares().getCatalogoOptativas() != null) {
+            for (String entrada : contexto.getParametrosCurriculares().getCatalogoOptativas().split(",")) {
+                String[] par = entrada.split(":");
+                if (par.length == 2 && par[0].trim().equals(clave)) try { return Integer.parseInt(par[1].trim()); } catch (NumberFormatException e) { return -1; }
+            }
+            return -1;
+        }
         if (clave == null) return -1;
         if ("USTAPREN".equals(clave) || "RECVIRTU".equals(clave) || "PRINVEST".equals(clave)) return 1;
         if ("PGHRATRS".equals(clave) || "INAVIRTU".equals(clave) || "ANDHUMAN".equals(clave)) return 2;
@@ -4487,7 +4494,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             if (u.getSemestre() != null && u.getSemestre().equals(contexto.getSemestreReferencia())) seleccionaReferencia = true;
         for (UnidadEvaluacionCurricularV2DTO u : seleccionadas) {
             DecisionUnidadCurricularV2DTO d = buscarDecision(resultado, u.getIdPrograma());
-            int semestreCatalogo = semestreCatalogoOptativa(u.getClave()); boolean recursa = esReprobacionVigentePrevia(u);
+            int semestreCatalogo = semestreCatalogoOptativa(contexto, u.getClave()); boolean recursa = esReprobacionVigentePrevia(u);
             if (semestreCatalogo < 0) { bloquearPorOptativa(resultado, d, CodigoMotivoCurricularV2.DATOS_INSUFICIENTES); continue; }
             if (!recursa) {
                 nuevas++; if (bloques.contains(u.getBloque())) bloquearPorOptativa(resultado, d, CodigoMotivoCurricularV2.OPTATIVA_LIMITE_SELECCION); bloques.add(u.getBloque());

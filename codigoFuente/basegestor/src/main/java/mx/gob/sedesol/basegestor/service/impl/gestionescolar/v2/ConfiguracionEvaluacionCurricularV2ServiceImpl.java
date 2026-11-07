@@ -39,6 +39,8 @@ public class ConfiguracionEvaluacionCurricularV2ServiceImpl implements Configura
         parametros.setCtr01Semestre(configuracion.getCtr01SemestreObjetivo());
         parametros.setDocumentoRespaldo("P2024-2027- Reglas de negocio_Octubre 2026_act_20261105.docx");
         parametros.setVigencia("2026-11-05");
+        parametros.setAmbito(obtenerPropiedad("V2_CATALOGO_OPTATIVAS_AMBITO", "PE2024/2027"));
+        parametros.setCatalogoOptativas(obtenerPropiedad("V2_CATALOGO_OPTATIVAS", "USTAPREN:1,RECVIRTU:1,PRINVEST:1,PGHRATRS:2,INAVIRTU:2,ANDHUMAN:2,BAIDOCUM:3,BAICAMPO:3,REACADEM:3,INARTIFI:3,PECRITIC:4,HIMEXICO:4,MECMUNDI:4"));
         configuracion.setParametrosCurriculares(parametros);
         return configuracion;
     }
