@@ -134,7 +134,9 @@ public class InscripcionRepository implements IinscripcionRepository {
 	 * garantiza la columna id_inscripcion.
 	 */
 	private String consultaIntentosCurricularesV2() {
-		return "SELECT ti.id, ti.idprograma, pi.nombre_periodo, rgp.id, rgp.id_grupo, rgp.calificacion_final, mb.tipo_baja_id, mb.descripcion, baja.solicitud "
+		return "SELECT ti.id AS id_inscripcion_v2, ti.idprograma AS id_programa_v2, pi.nombre_periodo AS periodo_v2, "
+				+ "rgp.id AS id_participacion_v2, rgp.id_grupo AS id_grupo_v2, rgp.calificacion_final AS calificacion_final_v2, "
+				+ "mb.tipo_baja_id AS tipo_baja_v2, mb.descripcion AS motivo_baja_v2, baja.solicitud AS solicitud_baja_v2 "
 				+ "FROM tbl_inscripciones ti LEFT JOIN tbl_eventos e ON e.id_evento=ti.idevento "
 				+ "LEFT JOIN tbl_periodos_inscripcion pi ON e.cve_evento_cap LIKE CONCAT('%',pi.nombre_periodo,'%') "
 				+ "LEFT JOIN tbl_grupos g ON g.id=ti.groupbase "

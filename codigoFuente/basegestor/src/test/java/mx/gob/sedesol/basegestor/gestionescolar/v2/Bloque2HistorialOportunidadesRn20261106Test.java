@@ -79,6 +79,8 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         assertTrue(sql.contains("baja.id_plan=ti.idplan"));
         assertTrue(sql.contains("baja.id_programa=ti.idprograma"));
         assertTrue(sql.contains("baja.id_evento=ti.idevento"));
+        assertTrue(sql.contains("ti.id AS id_inscripcion_v2"));
+        assertTrue(sql.contains("rgp.id AS id_participacion_v2"));
     }
     @Test public void rn72EsPrincipioGeneralDeOptativasReprobadas() {
         UnidadEvaluacionCurricularV2DTO u=ud(26L, intento("opt", EstadoIntentoAcreditacionV2.REPROBADO)); u.setTipoUd("Optativa");
