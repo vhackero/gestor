@@ -129,9 +129,9 @@ public class EvaluacionCurricularV2Fase6BTest {
         assertEquals(cargaQuinto.getEstadoReincorporacionRn65(), EstadoReincorporacionPeriodoNoCursadoV2.REINCORPORACION_SUJETA_RN61);
     }
 
-    @Test public void f6BU13InactividadExcedidaONoComprobadaNoProcedeORequiereRevision() {
+    @Test public void f6BU13InactividadSeIdentificaYDatoNoComprobadoRequiereRevision() {
         ContextoEvaluacionCurricularV2DTO excedida = base(); excedida.setLimiteInactividadAlcanzado(Boolean.TRUE);
-        assertEquals(carga(excedida).getEstadoReincorporacionRn65(), EstadoReincorporacionPeriodoNoCursadoV2.NO_PROCEDE_POR_INACTIVIDAD);
+        assertEquals(carga(excedida).getEstadoReincorporacionRn65(), EstadoReincorporacionPeriodoNoCursadoV2.REINCORPORACION_PROCEDE_CON_RUTA_REGULARIZACION);
         ContextoEvaluacionCurricularV2DTO incierta = base(); incierta.setLimiteInactividadComprobado(Boolean.FALSE);
         assertEquals(carga(incierta).getEstadoReincorporacionRn65(), EstadoReincorporacionPeriodoNoCursadoV2.REQUIERE_REVISION);
     }

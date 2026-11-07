@@ -1099,7 +1099,6 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 && resultado.getCantidadReprobadasVigentes().intValue() >= 4;
         boolean actividadIndeterminada = resultado.getEstadoActividadAcademica() == EstadoActividadAcademicaV2.NO_DETERMINADO;
         boolean actividadImpide = resultado.getEstadoActividadAcademica() == EstadoActividadAcademicaV2.INACTIVO
-                || resultado.getEstadoActividadAcademica() == EstadoActividadAcademicaV2.LIMITE_INACTIVIDAD_ALCANZADO
                 || resultado.getEstadoActividadAcademica() == EstadoActividadAcademicaV2.REINCORPORACION_PENDIENTE;
         boolean permanenciaIndeterminada = !Boolean.TRUE.equals(contexto.getPermanenciaDentroLimiteComprobada())
                 && !Boolean.TRUE.equals(contexto.getLimitePermanenciaExcedido());
@@ -1113,14 +1112,13 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         if (Boolean.TRUE.equals(contexto.getPermanenciaDentroLimiteComprobada()))
             resultado.getCondicionesRecuperacionCumplidas().add("PERMANENCIA_DENTRO_LIMITE_COMPROBADA");
         else if (Boolean.TRUE.equals(contexto.getLimitePermanenciaExcedido()))
-            resultado.getCondicionesRecuperacionNoCumplidas().add("LIMITE_PERMANENCIA_EXCEDIDO");
+            resultado.getCondicionesRecuperacionCumplidas().add("PLAZO_MAXIMO_IDENTIFICADO_REQUIERE_RESOLUCION_INSTITUCIONAL");
         else resultado.getCondicionesRecuperacionNoCumplidas().add("PERMANENCIA_NO_DETERMINADA");
         if (!actividadIndeterminada && !actividadImpide) resultado.getCondicionesRecuperacionCumplidas().add("ACTIVIDAD_COMPATIBLE");
         else if (actividadIndeterminada) resultado.getCondicionesRecuperacionNoCumplidas().add("ACTIVIDAD_NO_DETERMINADA");
         else resultado.getCondicionesRecuperacionNoCumplidas().add("ACTIVIDAD_IMPIDE_CONTINUIDAD:" + resultado.getEstadoActividadAcademica());
 
-        if (hayReprobadas || seriacionPendiente || severa || actividadImpide
-                || Boolean.TRUE.equals(contexto.getLimitePermanenciaExcedido())) {
+        if (hayReprobadas || seriacionPendiente || severa || actividadImpide) {
             resultado.setRecuperacionRegularidadProcede(Boolean.FALSE);
             resultado.setResultadoRecuperacionRegularidad("NO_PROCEDE");
         } else if ("NO_DETERMINADA".equals(resultado.getSituacionAcademicaCalculada())
@@ -2250,9 +2248,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         }
 
         boolean rn64Activa = Boolean.TRUE.equals(control.getAplicaRn64());
-        boolean restriccionConcurrente = rn64Activa || Boolean.TRUE.equals(contexto.getLimitePermanenciaExcedido())
-                || Boolean.TRUE.equals(contexto.getLimiteInactividadAlcanzado())
-                || Boolean.TRUE.equals(contexto.getBajaDefinitivaRegistrada())
+        boolean restriccionConcurrente = rn64Activa || Boolean.TRUE.equals(contexto.getBajaDefinitivaRegistrada())
                 || resultado.getCondicionesDetectadas().contains(CondicionCurricularV2.SERIACION);
         if (rn64Activa || restriccionConcurrente) {
             control.setAccesoOrdinarioQuinto(Boolean.FALSE);
@@ -2509,6 +2505,20 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         c.getUdsQuintoNoSusceptiblesRn615().addAll(c.getUdsQuintoBloqueadasSeriacionDirectaRn612());c.getUdsQuintoNoSusceptiblesRn615().addAll(c.getUdsQuintoBloqueadasSeriacionIndirectaRn612());
         if(!c.getUdsQuintoNoSusceptiblesRn615().isEmpty())c.getImpedimentosAvanceRn615().add("SERIACION_DIRECTA_O_INDIRECTA");
         if(Boolean.TRUE.equals(contexto.getSancionImpedimentoConocida())&&Boolean.TRUE.equals(contexto.getSancionImpedimentoRegistrada()))c.getImpedimentosAvanceRn615().add("SANCION_IMPEDITIVA");
+        boolean medidaSinVigencia = Boolean.TRUE.equals(contexto.getMedidaAdministrativaRegistrada())
+                && (!textoPresente(contexto.getAlcanceMedidaAdministrativa())
+                || !textoPresente(contexto.getInicioVigenciaMedidaAdministrativa())
+                || (!textoPresente(contexto.getFinVigenciaMedidaAdministrativa())
+                && !textoPresente(contexto.getCondicionVigenciaMedidaAdministrativa())));
+        if (medidaSinVigencia) {
+            c.getImpedimentosAvanceRn615().add("MEDIDA_ADMINISTRATIVA_SIN_VIGENCIA");
+            c.setRequiereRevision(Boolean.TRUE);
+            agregarUnico(resultado.getRestricciones(), CodigoMotivoCurricularV2.MEDIDA_ADMINISTRATIVA_SIN_VIGENCIA);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_5,
+                    CodigoMotivoCurricularV2.MEDIDA_ADMINISTRATIVA_SIN_VIGENCIA, 100,
+                    "RN615_REQUIERE_REVISION_MEDIDA_ADMINISTRATIVA",
+                    "La medida administrativa registrada no cuenta con alcance e inicio y fin o condición de vigencia verificables.");
+        }
         if(Boolean.TRUE.equals(contexto.getRestriccionPeNormativaConocida())&&Boolean.TRUE.equals(contexto.getRestriccionPeNormativaImpeditiva()))c.getImpedimentosAvanceRn615().add("RESTRICCION_PE_NORMATIVA:"+contexto.getCodigoRestriccionPeNormativa()+":"+contexto.getFuenteRestriccionPeNormativa());
         if(!Boolean.TRUE.equals(contexto.getSancionImpedimentoConocida())||!Boolean.TRUE.equals(contexto.getRestriccionPeNormativaConocida())||Boolean.TRUE.equals(c.getRequiereRevision())){c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.REQUIERE_REVISION);}
         else if(Boolean.TRUE.equals(c.getAplicaRn64()) || Boolean.TRUE.equals(contexto.getSancionImpedimentoRegistrada()) || Boolean.TRUE.equals(contexto.getRestriccionPeNormativaImpeditiva()))c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.NO_PROCEDE_AVANCE_CONDICIONADO);
@@ -2542,7 +2552,15 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         agregarUnico(c.getReglasRelacionadas(),CodigoReglaCurricularV2.RN_6_2);agregarUnico(resultado.getReglasEvaluadas(),CodigoReglaCurricularV2.RN_6_2);
         if(contexto.getAdmitido()==null||contexto.getInscripcionInicialRealizada()==null){c.setAplicaRn62(null);c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.REQUIERE_REVISION);registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_2,CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,70,"RN62_REQUIERE_REVISION","Admisión o inscripción inicial no determinable.");return;}
         boolean aplica=Boolean.TRUE.equals(contexto.getAdmitido())&&!Boolean.TRUE.equals(contexto.getInscripcionInicialRealizada());c.setAplicaRn62(aplica?Boolean.TRUE:Boolean.FALSE);if(!aplica){c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.NO_APLICA);registrarTrazaInscripcionInicialDiferida(resultado,contexto,c);return;}c.setCondicionTrayectoriaRn62("INSCRIPCION_INICIAL_DIFERIDA");c.setPeriodoAdmisionRn62(contexto.getPeriodoAdmision());c.setPeriodoIncorporacionRn62(contexto.getPeriodoIncorporacion());c.setSemestreObjetivoRn62(contexto.getSemestreReferencia());
-        if(Boolean.TRUE.equals(contexto.getLimiteInactividadAlcanzado())){c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.NO_PROCEDE_POR_INACTIVIDAD);registrarTrazaInscripcionInicialDiferida(resultado,contexto,c);return;}
+        if (!textoPresente(contexto.getReferenciaConvocatoriaOResolucionRn62())) {
+            c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.REQUIERE_REVISION); c.setRequiereRevision(Boolean.TRUE);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_2, CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,
+                    70, "RN62_REQUIERE_REVISION_REFERENCIA", "Falta referencia verificable de convocatoria o resolución para la incorporación diferida."); return;
+        }
+        if(Boolean.TRUE.equals(contexto.getLimiteInactividadAlcanzado())){
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_2, CodigoMotivoCurricularV2.INACTIVIDAD,
+                    70, "RN62_IDENTIFICA_INACTIVIDAD", "El límite de inactividad se identifica; no sustituye la resolución institucional.");
+        }
         if(!Boolean.TRUE.equals(contexto.getActividadAcademicaComprobada())){c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.REQUIERE_REVISION);registrarTrazaInscripcionInicialDiferida(resultado,contexto,c);return;}
         boolean bloqueo=false,revision=false; for(UnidadEvaluacionCurricularV2DTO u:unidades)if(Integer.valueOf(2).equals(u.getSemestre())){if(Boolean.TRUE.equals(u.getSeriacionDirectaConocida())||Boolean.TRUE.equals(u.getSeriacionIndirectaConocida())){agregarIdUnico(c.getUdsSemestre2BloqueadasRn62(),u.getIdPrograma());bloqueo=true;}else if(Boolean.TRUE.equals(u.getSeriacionConocida())){revision=true;}else agregarIdUnico(c.getUdsSemestre2CompatiblesRn62(),u.getIdPrograma());}
         if(revision)c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.REQUIERE_REVISION);else if(bloqueo)c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.INCORPORACION_SEMESTRE_2_NO_PROCEDE_POR_SERIACION);else if(!c.getUdsSemestre2CompatiblesRn62().isEmpty())c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.INCORPORACION_SEMESTRE_2_PROCEDE_EN_SOMBRA);else c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.INCORPORACION_DIFERIDA_SEMESTRE_1_PROCEDE_EN_SOMBRA);
@@ -2629,11 +2647,9 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             return;
         }
         if (Boolean.TRUE.equals(contexto.getLimiteInactividadAlcanzado())) {
-            carga.setEstadoReincorporacionRn65(EstadoReincorporacionPeriodoNoCursadoV2.NO_PROCEDE_POR_INACTIVIDAD);
             registrarTrazaReincorporacionRn65(resultado, contexto, carga,
-                    CodigoMotivoCurricularV2.INACTIVIDAD, "RN65_NO_PROCEDE_INACTIVIDAD",
-                    "La reincorporacion no procede en sombra porque el limite de inactividad fue excedido.");
-            return;
+                    CodigoMotivoCurricularV2.INACTIVIDAD, "RN65_IDENTIFICA_INACTIVIDAD",
+                    "El límite de inactividad se identifica; no produce una baja ni una denegación automática.");
         }
 
         if (carga.getCargaMaximaNormativa() == null) {
@@ -2883,6 +2899,24 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             return;
         }
 
+        Integer maximoBajas = contexto.getParametrosCurriculares() == null
+                ? Integer.valueOf(3) : contexto.getParametrosCurriculares().getMaxSemestresBajaTemporal();
+        Integer bajasAcumuladas = contexto.getPeriodosBajaTemporalTranscurridos();
+        if (maximoBajas == null || bajasAcumuladas == null || maximoBajas.intValue() < 0 || bajasAcumuladas.intValue() < 0) {
+            carga.setEstadoReincorporacionRn66(EstadoReincorporacionBajaTemporalV2.REQUIERE_REVISION);
+            carga.setRequiereRevision(Boolean.TRUE);
+            registrarTrazaReincorporacionRn66(resultado, contexto, carga, CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,
+                    "RN66_REQUIERE_REVISION_ACUMULADO", "No existe un conteo verificable de bajas temporales acumuladas en el programa.");
+            return;
+        }
+        if (bajasAcumuladas.intValue() > maximoBajas.intValue()) {
+            carga.setEstadoReincorporacionRn66(EstadoReincorporacionBajaTemporalV2.NO_PROCEDE_POR_MAXIMO_BAJAS_TEMPORALES);
+            agregarUnico(resultado.getRestricciones(), CodigoMotivoCurricularV2.INACTIVIDAD);
+            registrarTrazaReincorporacionRn66(resultado, contexto, carga, CodigoMotivoCurricularV2.INACTIVIDAD,
+                    "RN66_MAXIMO_BAJAS_TEMPORALES_EXCEDIDO", "Bajas temporales acumuladas=" + bajasAcumuladas + "; máximo aplicable=" + maximoBajas + ".");
+            return;
+        }
+
         if (!trayectoriaPreviaBajaCompleta(contexto)) {
             carga.setEstadoReincorporacionRn66(EstadoReincorporacionBajaTemporalV2.REQUIERE_REVISION);
             carga.setRequiereRevision(Boolean.TRUE);
@@ -2901,11 +2935,9 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             return;
         }
         if (Boolean.TRUE.equals(contexto.getLimitePermanenciaExcedido())) {
-            carga.setEstadoReincorporacionRn66(EstadoReincorporacionBajaTemporalV2.NO_PROCEDE_POR_PERMANENCIA);
             registrarTrazaReincorporacionRn66(resultado, contexto, carga,
-                    CodigoMotivoCurricularV2.INACTIVIDAD, "RN66_NO_PROCEDE_PERMANENCIA",
-                    "La reincorporación no procede en sombra porque el límite de permanencia fue excedido.");
-            return;
+                    CodigoMotivoCurricularV2.INACTIVIDAD, "RN66_IDENTIFICA_PLAZO_MAXIMO",
+                    "El plazo máximo, incluidas las bajas, se identifica sin inferir la improcedencia de la reincorporación.");
         }
 
         if (!Boolean.TRUE.equals(contexto.getCalendarioReincorporacionComprobado())

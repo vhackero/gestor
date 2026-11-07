@@ -70,7 +70,7 @@ public class EvaluacionCurricularV2Fase6ACierreTest {
     private ContextoEvaluacionCurricularV2DTO base() {
         ContextoEvaluacionCurricularV2DTO contexto = new ContextoEvaluacionCurricularV2DTO();
         contexto.setAdmitido(Boolean.TRUE); contexto.setInscripcionInicialRealizada(Boolean.FALSE);
-        contexto.setActividadAcademicaComprobada(Boolean.TRUE); contexto.setPeriodoAdmision("2026-2"); contexto.setPeriodoIncorporacion("2027-1"); contexto.setSemestreObjetivo(2);
+        contexto.setActividadAcademicaComprobada(Boolean.TRUE); contexto.setPeriodoAdmision("2026-2"); contexto.setPeriodoIncorporacion("2027-1"); contexto.setReferenciaConvocatoriaOResolucionRn62("CONVOCATORIA-PRUEBA"); contexto.setSemestreObjetivo(2);
         contexto.getUnidades().add(unidad(20L, 2)); return contexto;
     }
     private UnidadEvaluacionCurricularV2DTO unidad(Long id, int semestre) {

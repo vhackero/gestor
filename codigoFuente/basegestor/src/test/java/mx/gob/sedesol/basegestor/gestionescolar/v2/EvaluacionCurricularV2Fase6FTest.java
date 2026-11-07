@@ -130,7 +130,7 @@ public class EvaluacionCurricularV2Fase6FTest {
 
     private ContextoEvaluacionCurricularV2DTO inicialDiferida() {
         ContextoEvaluacionCurricularV2DTO c = normal(); c.setAdmitido(Boolean.TRUE); c.setInscripcionInicialRealizada(Boolean.FALSE); c.setHaCursadoUnoOMasPeriodos(Boolean.FALSE);
-        c.setActividadAcademicaComprobada(Boolean.TRUE); c.setLimiteInactividadAlcanzado(Boolean.FALSE); c.getUnidades().add(noInscrita(20L, 2)); return c;
+        c.setActividadAcademicaComprobada(Boolean.TRUE); c.setLimiteInactividadAlcanzado(Boolean.FALSE); c.setReferenciaConvocatoriaOResolucionRn62("CONVOCATORIA-PRUEBA"); c.getUnidades().add(noInscrita(20L, 2)); return c;
     }
 
     private ContextoEvaluacionCurricularV2DTO periodoNoCursado() {
@@ -142,7 +142,7 @@ public class EvaluacionCurricularV2Fase6FTest {
     private ContextoEvaluacionCurricularV2DTO bajaTemporal() {
         ContextoEvaluacionCurricularV2DTO c = normal(); c.setBajaTemporalFormalComprobada(Boolean.TRUE); c.setBajaTemporalRegistrada(Boolean.TRUE); c.setBajaTemporalTotalRegistrada(Boolean.TRUE);
         c.setBajaTemporalConcluida(Boolean.TRUE); c.setUltimoPeriodoCursado("2026-1"); c.setPeriodoInicioBajaTemporal("2026-2"); c.setPeriodoFinBajaTemporal("2027-1");
-        c.setSemestreEfectivoPrevioBaja(Integer.valueOf(3)); c.setLimitePermanenciaComprobado(Boolean.TRUE); c.setLimitePermanenciaExcedido(Boolean.FALSE); c.setCalendarioReincorporacionComprobado(Boolean.TRUE); c.setDentroCalendarioReincorporacion(Boolean.TRUE); return c;
+        c.setSemestreEfectivoPrevioBaja(Integer.valueOf(3)); c.setLimitePermanenciaComprobado(Boolean.TRUE); c.setLimitePermanenciaExcedido(Boolean.FALSE); c.setCalendarioReincorporacionComprobado(Boolean.TRUE); c.setDentroCalendarioReincorporacion(Boolean.TRUE); c.setPeriodosBajaTemporalTranscurridos(Integer.valueOf(1)); return c;
     }
 
     private UnidadEvaluacionCurricularV2DTO bajaParcial(Long id, int semestre) { UnidadEvaluacionCurricularV2DTO u = unidad(id, semestre, "Obligatoria", EstadoUnidadCurricularV2.BAJA_PARCIAL); u.setCausa(CausaPendienteUnidadV2.BAJA_PARCIAL); u.setBajaParcialFormalComprobada(Boolean.TRUE); u.setBajaParcialDerivadaSancion(Boolean.FALSE); return u; }

@@ -77,6 +77,7 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
                 contextoAsistente.getIdProcesoInscripcion());
         resultado.setUniversoMapaCompleto(Boolean.valueOf(mapa != null && !mapa.isEmpty()));
         resultado.setPeriodosTrayectoria(contextoAsistente.getPeriodosTrayectoriaV2());
+        aplicarBajasTemporalesAcumuladas(resultado);
         resultado.setHistorialCompleto(Boolean.valueOf(contextoAsistente.getPeriodosTrayectoriaV2() != null
                 && !contextoAsistente.getPeriodosTrayectoriaV2().isEmpty()
                 && contextoAsistente.getHistorialIntentosV2() != null));
@@ -225,6 +226,22 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
             }
         }
         return resultado;
+    }
+
+    /** Cada periodo temporal agrupado por la fuente canónica cuenta una vez. */
+    private void aplicarBajasTemporalesAcumuladas(ContextoEvaluacionCurricularV2DTO contexto) {
+        if (contexto.getPeriodosTrayectoria() == null) return;
+        int acumuladas = 0;
+        for (PeriodoTrayectoriaV2DTO periodo : contexto.getPeriodosTrayectoria()) {
+            if (periodo != null && Boolean.TRUE.equals(periodo.getBajaTemporalCompleta())) acumuladas++;
+        }
+        if (acumuladas > 0) {
+            contexto.setBajaTemporalRegistrada(Boolean.TRUE);
+            contexto.setBajaTemporalTotalRegistrada(Boolean.TRUE);
+            contexto.setBajaTemporalFormalComprobada(Boolean.TRUE);
+            contexto.setPeriodosBajaTemporalTranscurridos(Integer.valueOf(acumuladas));
+            contexto.getEvidenciasActividad().add("REL_PERSONA_BAJAS_CONTABILIZAR_1:TEMPORALES_ACUMULADAS=" + acumuladas);
+        }
     }
 
     private List<Long> idsUnidades(List<UnidadDecisionInscripcionDTO> unidades) {

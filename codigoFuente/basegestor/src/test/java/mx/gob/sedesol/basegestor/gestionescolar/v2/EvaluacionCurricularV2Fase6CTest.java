@@ -131,7 +131,7 @@ public class EvaluacionCurricularV2Fase6CTest {
 
     @Test public void f6CU14PermanenciaYCalendarioNoSeInfieren() {
         ContextoEvaluacionCurricularV2DTO excedida = base(); excedida.setLimitePermanenciaExcedido(Boolean.TRUE);
-        assertEquals(carga(excedida).getEstadoReincorporacionRn66(), EstadoReincorporacionBajaTemporalV2.NO_PROCEDE_POR_PERMANENCIA);
+        assertEquals(carga(excedida).getEstadoReincorporacionRn66(), EstadoReincorporacionBajaTemporalV2.REINCORPORACION_PROCEDE_CON_RUTA_REGULARIZACION);
         ContextoEvaluacionCurricularV2DTO calendario = base(); calendario.setCalendarioReincorporacionComprobado(Boolean.FALSE);
         assertEquals(carga(calendario).getEstadoReincorporacionRn66(), EstadoReincorporacionBajaTemporalV2.REQUIERE_REVISION);
     }
@@ -158,6 +158,7 @@ public class EvaluacionCurricularV2Fase6CTest {
         contexto.setSemestreEfectivoPrevioBaja(Integer.valueOf(3)); contexto.setSemestreObjetivo(Integer.valueOf(4));
         contexto.setLimitePermanenciaComprobado(Boolean.TRUE); contexto.setLimitePermanenciaExcedido(Boolean.FALSE);
         contexto.setCalendarioReincorporacionComprobado(Boolean.TRUE); contexto.setDentroCalendarioReincorporacion(Boolean.TRUE);
+        contexto.setPeriodosBajaTemporalTranscurridos(Integer.valueOf(1));
         contexto.setPeriodoNormativo("2027-1"); contexto.getUnidades().add(noCursada(10L, 3));
         return contexto;
     }

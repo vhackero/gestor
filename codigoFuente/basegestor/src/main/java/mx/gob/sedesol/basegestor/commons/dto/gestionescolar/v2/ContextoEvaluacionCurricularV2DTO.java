@@ -87,6 +87,14 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private Boolean inscripcionInicialRealizada;
     private String periodoAdmision;
     private String periodoIncorporacion;
+    /** Referencia verificable de la convocatoria o resolución requerida por RN-6.2. */
+    private String referenciaConvocatoriaOResolucionRn62;
+    /** Medida administrativa externa: no se infiere su alcance ni su vigencia. */
+    private Boolean medidaAdministrativaRegistrada;
+    private String alcanceMedidaAdministrativa;
+    private String inicioVigenciaMedidaAdministrativa;
+    private String finVigenciaMedidaAdministrativa;
+    private String condicionVigenciaMedidaAdministrativa;
     /** Evidencia de trayectoria requerida por RN-6.5; null conserva incertidumbre. */
     private Boolean haCursadoUnoOMasPeriodos;
     private Boolean noCursoPeriodoInmediatoSiguiente;
@@ -254,6 +262,12 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public Boolean getInscripcionInicialRealizada() { return inscripcionInicialRealizada; } public void setInscripcionInicialRealizada(Boolean valor) { inscripcionInicialRealizada = valor; }
     public String getPeriodoAdmision() { return periodoAdmision; } public void setPeriodoAdmision(String valor) { periodoAdmision = valor; }
     public String getPeriodoIncorporacion() { return periodoIncorporacion; } public void setPeriodoIncorporacion(String valor) { periodoIncorporacion = valor; }
+    public String getReferenciaConvocatoriaOResolucionRn62() { return referenciaConvocatoriaOResolucionRn62; } public void setReferenciaConvocatoriaOResolucionRn62(String valor) { referenciaConvocatoriaOResolucionRn62 = valor; }
+    public Boolean getMedidaAdministrativaRegistrada() { return medidaAdministrativaRegistrada; } public void setMedidaAdministrativaRegistrada(Boolean valor) { medidaAdministrativaRegistrada = valor; }
+    public String getAlcanceMedidaAdministrativa() { return alcanceMedidaAdministrativa; } public void setAlcanceMedidaAdministrativa(String valor) { alcanceMedidaAdministrativa = valor; }
+    public String getInicioVigenciaMedidaAdministrativa() { return inicioVigenciaMedidaAdministrativa; } public void setInicioVigenciaMedidaAdministrativa(String valor) { inicioVigenciaMedidaAdministrativa = valor; }
+    public String getFinVigenciaMedidaAdministrativa() { return finVigenciaMedidaAdministrativa; } public void setFinVigenciaMedidaAdministrativa(String valor) { finVigenciaMedidaAdministrativa = valor; }
+    public String getCondicionVigenciaMedidaAdministrativa() { return condicionVigenciaMedidaAdministrativa; } public void setCondicionVigenciaMedidaAdministrativa(String valor) { condicionVigenciaMedidaAdministrativa = valor; }
     public Boolean getHaCursadoUnoOMasPeriodos() { return haCursadoUnoOMasPeriodos; }
     public void setHaCursadoUnoOMasPeriodos(Boolean valor) { haCursadoUnoOMasPeriodos = valor; }
     public Boolean getNoCursoPeriodoInmediatoSiguiente() { return noCursoPeriodoInmediatoSiguiente; }
