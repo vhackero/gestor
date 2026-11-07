@@ -122,18 +122,29 @@ public class InscripcionRepository implements IinscripcionRepository {
 	public List<IntentoAcreditacionUnidadV2DTO> obtenerIntentosCurricularesV2(Long idPersona, Long idPlan) {
 		List<IntentoAcreditacionUnidadV2DTO> resultado = new ArrayList<IntentoAcreditacionUnidadV2DTO>();
 		if (idPersona == null || idPlan == null) return resultado;
-		String sql = "SELECT ti.id, ti.idprograma, pi.nombre_periodo, rgp.id, rgp.id_grupo, rgp.calificacion_final, mb.tipo_baja_id, mb.descripcion, baja.solicitud "
+		String sql = consultaIntentosCurricularesV2();
+		List<Object[]> filas = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona).setParameter("idPlan", idPlan).getResultList();
+		for (Object[] fila : filas) resultado.add(mapearIntentoCurricularV2(fila));
+		return resultado;
+	}
+
+	/**
+	 * Relaciona la baja con la inscripción por su identidad curricular disponible
+	 * en todas las bases: persona, plan, UD y evento. La tabla histórica no
+	 * garantiza la columna id_inscripcion.
+	 */
+	private String consultaIntentosCurricularesV2() {
+		return "SELECT ti.id, ti.idprograma, pi.nombre_periodo, rgp.id, rgp.id_grupo, rgp.calificacion_final, mb.tipo_baja_id, mb.descripcion, baja.solicitud "
 				+ "FROM tbl_inscripciones ti LEFT JOIN tbl_eventos e ON e.id_evento=ti.idevento "
 				+ "LEFT JOIN tbl_periodos_inscripcion pi ON e.cve_evento_cap LIKE CONCAT('%',pi.nombre_periodo,'%') "
 				+ "LEFT JOIN tbl_grupos g ON g.id=ti.groupbase "
 				+ "LEFT JOIN rel_grupo_participante rgp ON rgp.id_grupo=g.id AND rgp.id_persona_participante=ti.Idpersona "
 				+ "LEFT JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa=ti.idprograma "
-				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona=ti.Idpersona AND baja.id_inscripcion=ti.id AND baja.contabilizar=1 "
+				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona=ti.Idpersona AND baja.id_plan=ti.idplan "
+				+ "AND baja.id_programa=ti.idprograma AND baja.id_evento=ti.idevento "
+				+ "AND (baja.id_grupo IS NULL OR baja.id_grupo=ti.groupbase) AND baja.contabilizar=1 "
 				+ "LEFT JOIN rel_motivo_baja mb ON mb.id_motivo_baja=baja.motivo_baja_id "
 				+ "WHERE ti.Idpersona=:idPersona AND ti.idplan=:idPlan ORDER BY ti.id";
-		List<Object[]> filas = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona).setParameter("idPlan", idPlan).getResultList();
-		for (Object[] fila : filas) resultado.add(mapearIntentoCurricularV2(fila));
-		return resultado;
 	}
 
 	private IntentoAcreditacionUnidadV2DTO mapearIntentoCurricularV2(Object[] fila) {

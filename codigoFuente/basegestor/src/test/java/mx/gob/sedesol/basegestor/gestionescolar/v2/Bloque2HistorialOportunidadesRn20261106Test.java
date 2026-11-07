@@ -72,6 +72,14 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         assertEquals(intento.getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
         assertTrue(intento.getEvidenciaFuente().contains("NP_SIN_BAJA_REQUIERE_REVISION"));
     }
+    @Test public void historialV2RelacionaBajaPorIdentidadCurricularSinColumnaNoDisponible() throws Exception {
+        Method m=InscripcionRepository.class.getDeclaredMethod("consultaIntentosCurricularesV2"); m.setAccessible(true);
+        String sql=(String)m.invoke(new InscripcionRepository());
+        assertFalse(sql.contains("baja.id_inscripcion"));
+        assertTrue(sql.contains("baja.id_plan=ti.idplan"));
+        assertTrue(sql.contains("baja.id_programa=ti.idprograma"));
+        assertTrue(sql.contains("baja.id_evento=ti.idevento"));
+    }
     @Test public void rn72EsPrincipioGeneralDeOptativasReprobadas() {
         UnidadEvaluacionCurricularV2DTO u=ud(26L, intento("opt", EstadoIntentoAcreditacionV2.REPROBADO)); u.setTipoUd("Optativa");
         ResultadoEvaluacionCurricularV2DTO r=evaluar(u);
