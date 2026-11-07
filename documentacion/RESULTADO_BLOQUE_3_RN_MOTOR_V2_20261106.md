@@ -45,3 +45,17 @@ Cada salida expone estado curricular, decisión, motivos, `preseleccionada`, `or
 `Bloque3OfertaYPreseleccionRn20261106Test`: 7 pruebas, 0 fallas, 0 errores, 0 omitidas.
 
 Pendiente para aceptación funcional: integrar el catálogo oficial de optativas por plan/cohorte y la fuente verificable de rutas de sustitución. No se inició Bloque 4.
+
+## Bloque 3-bis
+
+El catálogo común de Tabla 2 quedó configurado en el evaluador para PE2024/2027: S1 `USTAPREN`, `RECVIRTU`, `PRINVEST`; S2 `PGHRATRS`, `INAVIRTU`, `ANDHUMAN`; S3 `BAIDOCUM`, `BAICAMPO`, `REACADEM`, `INARTIFI`; S4 `PECRITIC`, `HIMEXICO`, `MECMUNDI`. Las claves se validan en la propuesta, los créditos siguen siendo los del plan y no se crean registros de selección.
+
+| Caso | Resultado |
+|---|---|
+| GC-06 | Irregular con optativa fuera de referencia: `BLOQUEADA` / `OPTATIVA_OTRO_SEMESTRE_SOLO_REGULAR`. Regular puede combinar S3 y S1 si incluye S3; omitir S3 disponible genera `OPTATIVA_SEMESTRE_REFERENCIA_PRIMERO`. |
+| GC-07b | Con ocho requeridas acreditadas, `INARTIFI` no se incorpora como adicional. |
+| GC-16 | Nuevo ingreso requiere 4 obligatorias y 2 optativas distintas, una B1 y otra B2; cualquier falta, duplicidad o bloque repetido queda en revisión. |
+| C-10 ampliado | Una propuesta con quinto no puede omitir una pendiente ofertada de semestres 1 a 4: reprobada, nunca cursada o con baja parcial. |
+| GC-01 | Las reprobadas preseleccionadas bajo RN-6.4 conservan `desmarcable=true`; la restricción aplicable es impedir agregar UD ajenas a regularización. Si se desmarca, el Simulador vuelve a evaluar la carga mínima y sus excepciones RN-4.1. |
+
+Pruebas focalizadas del Bloque 3: 10, 0 fallas, 0 errores, 0 omitidas. Regresión V2: 732, 0 fallas, 0 errores, 0 omitidas. La única dependencia abierta es la fuente institucional de relaciones de sustitución de optativas adicionales; permanece en `REQUIERE_REVISION`.
