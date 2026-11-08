@@ -18,6 +18,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscri
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaMaximaCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcreditacionV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.v2.ContextoEvaluacionCurricularV2AdapterImpl;
 import mx.gob.sedesol.basegestor.service.impl.gestionescolar.v2.EvaluacionCurricularV2ServiceImpl;
@@ -144,6 +146,23 @@ public class ContextoEvaluacionCurricularV2AdapterTest {
         assertFalse(contexto.getUnidades().get(0).getIdPrograma().equals(contexto.getIdPlan()));
     }
 
+    @Test
+    public void f12A1C01HistorialCanonicoCompletaEstadoDesconocidoSinBorrarReprobacionEnCurso() {
+        UnidadDecisionInscripcionDTO unidad = unidad("HIS", "Sin dato", null);
+        AsistenteInscripcionContextoDTO asistente = asistente(unidad);
+        IntentoAcreditacionUnidadV2DTO reprobado = intento(unidad.getUdId(), "I-1", EstadoIntentoAcreditacionV2.REPROBADO);
+        IntentoAcreditacionUnidadV2DTO enCurso = intento(unidad.getUdId(), "I-2", EstadoIntentoAcreditacionV2.EN_CURSO);
+        asistente.setHistorialIntentosV2(java.util.Arrays.asList(reprobado, enCurso));
+
+        ContextoEvaluacionCurricularV2DTO contexto = adapter.construirDesdeAsistente(asistente);
+        ResultadoEvaluacionCurricularV2DTO resultado = evaluator.evaluarSombra(contexto);
+
+        assertEquals(contexto.getUnidades().get(0).getEstado(), EstadoUnidadCurricularV2.REPROBADA);
+        assertTrue(contexto.getUnidades().get(0).getReprobacionVigenteConocida());
+        assertEquals(resultado.getSituacionAcademicaCalculada(), "IRREGULAR");
+        assertEquals(resultado.getEvaluacionCargaMaxima().getCargaMaximaNormativa(), Integer.valueOf(6));
+    }
+
     private AsistenteInscripcionContextoDTO asistente(UnidadDecisionInscripcionDTO unidad) {
         List<UnidadDecisionInscripcionDTO> unidades = new ArrayList<UnidadDecisionInscripcionDTO>();
         unidades.add(unidad);
@@ -175,5 +194,14 @@ public class ContextoEvaluacionCurricularV2AdapterTest {
         unidad.setEstatusPeriodo(estatusPeriodo);
         unidad.setOfertada(Boolean.TRUE);
         return unidad;
+    }
+
+    private IntentoAcreditacionUnidadV2DTO intento(Long idPrograma, String id,
+            EstadoIntentoAcreditacionV2 estado) {
+        IntentoAcreditacionUnidadV2DTO intento = new IntentoAcreditacionUnidadV2DTO();
+        intento.setIdPrograma(idPrograma);
+        intento.setIdEjecucionTecnico(id);
+        intento.setEstado(estado);
+        return intento;
     }
 }

@@ -64,7 +64,12 @@ public class SimuladorCurricularV2ServiceTest {
  @Test public void f12A1B05CargaNoDeterminadaNoInfiereMaximo() throws Exception {
   ResultadoEvaluacionCurricularV2DTO v2=resultado(true); v2.setSituacionAcademicaCalculada("NO_DETERMINADA");
   mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ResultadoSimulacionDTO r=servicio(fuente(),v2).simularSombra(9L,Arrays.asList(7L));
-  assertFalse(r.getValida()); assertEquals(r.getMotivos().get(0).getCodigo(),"RN_4_2");
+  assertFalse(r.getValida()); assertEquals(r.getMotivos().get(0).getCodigo(),"RN_4_2");assertEquals(r.getMotivos().get(0).getMensajeCorto(),"Carga máxima en revisión");assertTrue(r.getMotivos().get(0).getMensajeDetallado().contains("situación académica"));
+ }
+ @Test public void f12A1C02AgrupaDatosInsuficientesYLosExplicaSinCodigosTecnicos() throws Exception {
+  ResultadoEvaluacionCurricularV2DTO v2=resultadoConCarga(false,8,"REGULAR");v2.getDecisiones().get(0).getMotivos().add(CodigoMotivoCurricularV2.DATOS_INSUFICIENTES);v2.getDecisiones().get(1).getMotivos().add(CodigoMotivoCurricularV2.DATOS_INSUFICIENTES);
+  mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ResultadoSimulacionDTO r=servicio(fuenteConUnidades(2),v2).simularSombra(9L,seleccion(2));
+  assertFalse(r.getValida());assertEquals(r.getMotivos().size(),1);assertEquals(r.getMotivos().get(0).getCodigo(),"DATOS_INSUFICIENTES");assertEquals(r.getMotivos().get(0).getMensajeCorto(),"Información curricular pendiente de validación");assertTrue(r.getMotivos().get(0).getMensajeDetallado().contains("2 UD seleccionadas"));assertFalse(r.getMotivos().get(0).getMensajeDetallado().contains("["));
  }
  @Test public void f12A1B07CargaMinimaV2ImpideSeleccionVacia() throws Exception {
   ResultadoEvaluacionCurricularV2DTO v2=resultadoConCarga(true,8,"REGULAR");EvaluacionCargaAcademicaV2DTO carga=new EvaluacionCargaAcademicaV2DTO();carga.setCargaMinimaNormativa(Integer.valueOf(3));v2.setEvaluacionCargaAcademica(carga);

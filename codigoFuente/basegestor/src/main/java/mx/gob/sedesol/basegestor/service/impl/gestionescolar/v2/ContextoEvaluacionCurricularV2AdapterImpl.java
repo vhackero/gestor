@@ -20,6 +20,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaPendienteUni
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaIndisponibilidadOfertaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcreditacionV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.UnidadEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.RelacionSeriacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoRelacionSeriacionV2;
@@ -142,10 +144,10 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
 
     /** Une intentos por id de programa; si no hay identidad no sustituye el estado existente. */
     private void asociarIntentosHistoricos(ContextoEvaluacionCurricularV2DTO contexto,
-            List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO> intentos) {
+            List<IntentoAcreditacionUnidadV2DTO> intentos) {
         List<UnidadEvaluacionCurricularV2DTO> unidades = contexto.getUnidades();
         if (unidades == null || intentos == null) return;
-        for (mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO intento : intentos) {
+        for (IntentoAcreditacionUnidadV2DTO intento : intentos) {
             if (intento == null || intento.getIdPrograma() == null) continue;
             if (intento.getEvidenciaFuente() != null
                     && intento.getEvidenciaFuente().contains("ESTADO_EXPEDIENTE=BAJA_DEFINITIVA")) {
@@ -154,14 +156,58 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
             for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
                 if (!intento.getIdPrograma().equals(unidad.getIdPrograma())) continue;
                 unidad.getIntentosAcreditacion().add(intento);
-                if (intento.getEstado() == mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcreditacionV2.BAJA_TEMPORAL)
-                    unidad.setEstado(EstadoUnidadCurricularV2.BAJA_TEMPORAL);
-                else if (intento.getEstado() == mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcreditacionV2.BAJA_PARCIAL)
-                    unidad.setEstado(EstadoUnidadCurricularV2.BAJA_PARCIAL);
-                else if (intento.getEstado() == mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcreditacionV2.NO_DETERMINADO)
-                    unidad.setEstado(EstadoUnidadCurricularV2.NO_DETERMINADO);
                 break;
             }
+        }
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades) {
+            completarEstadoConHistorialVerificable(unidad);
+        }
+    }
+
+    /**
+     * La consulta canónica complementa un estado que el origen no pudo
+     * clasificar. No sustituye estados ya determinados por la malla, porque
+     * una reinscripción en curso no borra una reprobación previa vigente.
+     */
+    private void completarEstadoConHistorialVerificable(UnidadEvaluacionCurricularV2DTO unidad) {
+        if (unidad == null || (unidad.getEstado() != EstadoUnidadCurricularV2.NO_DETERMINADO
+                && unidad.getEstado() != EstadoUnidadCurricularV2.NO_INSCRITA)) return;
+        EstadoIntentoAcreditacionV2 ultimoResultado = null;
+        boolean hayReprobacionNoRegularizada = false;
+        for (IntentoAcreditacionUnidadV2DTO intento : unidad.getIntentosAcreditacion()) {
+            if (intento == null || intento.getEstado() == null) continue;
+            if (intento.getEstado() == EstadoIntentoAcreditacionV2.ACREDITADO) {
+                ultimoResultado = intento.getEstado();
+                hayReprobacionNoRegularizada = false;
+            } else if (intento.getEstado() == EstadoIntentoAcreditacionV2.REPROBADO) {
+                ultimoResultado = intento.getEstado();
+                hayReprobacionNoRegularizada = true;
+            } else if (ultimoResultado == null) {
+                ultimoResultado = intento.getEstado();
+            }
+        }
+        if (hayReprobacionNoRegularizada || ultimoResultado == EstadoIntentoAcreditacionV2.REPROBADO) {
+            unidad.setEstado(EstadoUnidadCurricularV2.REPROBADA);
+            unidad.setCausa(CausaPendienteUnidadV2.REPROBACION);
+            unidad.setReprobacionVigenteConocida(Boolean.TRUE);
+            unidad.setReprobacionPeriodoPrevioConocida(Boolean.TRUE);
+            unidad.getReferenciasHistoricas().add("HISTORIAL_CANONICO:REPROBACION_VIGENTE");
+        } else if (ultimoResultado == EstadoIntentoAcreditacionV2.ACREDITADO) {
+            unidad.setEstado(EstadoUnidadCurricularV2.ACREDITADA);
+            unidad.setCausa(null);
+            unidad.setReprobacionVigenteConocida(Boolean.FALSE);
+            unidad.setReprobacionPeriodoPrevioConocida(Boolean.FALSE);
+            unidad.getReferenciasHistoricas().add("HISTORIAL_CANONICO:ACREDITACION");
+        } else if (ultimoResultado == EstadoIntentoAcreditacionV2.BAJA_TEMPORAL) {
+            unidad.setEstado(EstadoUnidadCurricularV2.BAJA_TEMPORAL);
+            unidad.getReferenciasHistoricas().add("HISTORIAL_CANONICO:BAJA_TEMPORAL");
+        } else if (ultimoResultado == EstadoIntentoAcreditacionV2.BAJA_PARCIAL) {
+            unidad.setEstado(EstadoUnidadCurricularV2.BAJA_PARCIAL);
+            unidad.setCausa(CausaPendienteUnidadV2.BAJA_PARCIAL);
+            unidad.getReferenciasHistoricas().add("HISTORIAL_CANONICO:BAJA_PARCIAL");
+        } else if (ultimoResultado == EstadoIntentoAcreditacionV2.EN_CURSO) {
+            unidad.setEstado(EstadoUnidadCurricularV2.EN_CURSO);
+            unidad.getReferenciasHistoricas().add("HISTORIAL_CANONICO:EN_CURSO");
         }
     }
 

@@ -57,8 +57,8 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
         for (UnidadDecisionInscripcionDTO unidad : seleccion) {
             resultado.setTotalMaterias(Integer.valueOf(resultado.getTotalMaterias() == null ? 1 : resultado.getTotalMaterias().intValue() + 1));
             resultado.setTotalCreditos(Integer.valueOf((resultado.getTotalCreditos() == null ? 0 : resultado.getTotalCreditos().intValue()) + (unidad.getCreditos() == null ? 0 : unidad.getCreditos().intValue())));
-            agregarRestricciones(evaluacion, unidad.getUdId(), resultado);
         }
+        agregarRestricciones(evaluacion, seleccionados, resultado);
         aplicarCargaV2(evaluacion, seleccionados.size(), resultado);
         aplicarValidacionesComplementarias(fuente, seleccion, seleccionados, resultado);
         resultado.setValida(Boolean.valueOf(resultado.getMotivos().isEmpty()));
@@ -93,8 +93,8 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
         Integer maxima = obtenerCargaMaximaV2(evaluacion);
         if (maxima == null) {
             resultado.getMotivos().add(new MotivoDecisionDTO("RN_4_2", "ALTA",
-                    "Carga máxima no determinada", "RN-4.2 requiere revisión para determinar la carga máxima aplicable.",
-                    "Revisa la situación académica y la evidencia de RN-4.2.", Boolean.TRUE));
+                    "Carga máxima en revisión", detalleCargaMaximaNoDeterminada(evaluacion),
+                    "Verifica el historial académico y vuelve a consultar antes de definir tu carga.", Boolean.TRUE));
         } else if (cargaSeleccionada > maxima.intValue()) {
             resultado.getMotivos().add(new MotivoDecisionDTO("RN_4_2", "ALTA",
                     "Carga máxima excedida", "La selección contiene " + cargaSeleccionada
@@ -176,17 +176,68 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
         }
     }
 
-    private void agregarRestricciones(ResultadoEvaluacionCurricularV2DTO evaluacion, Long id, ResultadoSimulacionDTO resultado) {
-        for (DecisionUnidadCurricularV2DTO decision : evaluacion.getDecisiones()) if (id.equals(decision.getIdPrograma()) && !Boolean.TRUE.equals(decision.getHabilitada())) {
-            if (decision.getMotivos().isEmpty()) {
-                resultado.getMotivos().add(new MotivoDecisionDTO("V2_RESTRICCION", "ALTA",
-                        "UD restringida por reglas curriculares V2", String.valueOf(decision.getMotivos()),
-                        "Revisa los motivos concurrentes del resultado V2.", Boolean.TRUE));
+    private String detalleCargaMaximaNoDeterminada(ResultadoEvaluacionCurricularV2DTO evaluacion) {
+        String situacion = evaluacion == null ? null : evaluacion.getSituacionAcademicaCalculada();
+        if (situacion == null && evaluacion != null) situacion = evaluacion.getSituacionAcademica();
+        if ("NO_DETERMINADA".equals(situacion)) {
+            return "No fue posible clasificar tu situación académica con la información disponible; por ello aún no se puede determinar la carga máxima aplicable.";
+        }
+        return "No fue posible determinar la carga máxima aplicable con la información disponible.";
+    }
+
+    /** Agrupa causas por código sin alterar las decisiones por UD del resultado V2 adjunto. */
+    private void agregarRestricciones(ResultadoEvaluacionCurricularV2DTO evaluacion, List<Long> ids,
+            ResultadoSimulacionDTO resultado) {
+        if (evaluacion == null || evaluacion.getDecisiones() == null || ids == null) return;
+        Map<String, Integer> cantidadPorMotivo = new LinkedHashMap<String, Integer>();
+        for (DecisionUnidadCurricularV2DTO decision : evaluacion.getDecisiones()) {
+            if (decision == null || decision.getIdPrograma() == null || !ids.contains(decision.getIdPrograma())
+                    || Boolean.TRUE.equals(decision.getHabilitada())) continue;
+            if (decision.getMotivos() == null || decision.getMotivos().isEmpty()) {
+                acumularMotivo(cantidadPorMotivo, "V2_RESTRICCION");
             } else for (Object motivo : decision.getMotivos()) {
-                resultado.getMotivos().add(new MotivoDecisionDTO(String.valueOf(motivo), "ALTA",
-                        "UD restringida por reglas curriculares V2", String.valueOf(decision.getMotivos()),
-                        "Revisa los motivos concurrentes del resultado V2.", Boolean.TRUE));
+                acumularMotivo(cantidadPorMotivo, String.valueOf(motivo));
             }
         }
+        for (Map.Entry<String, Integer> motivo : cantidadPorMotivo.entrySet()) {
+            resultado.getMotivos().add(new MotivoDecisionDTO(motivo.getKey(), "ALTA",
+                    tituloRestriccion(motivo.getKey()), detalleRestriccion(motivo.getKey(), motivo.getValue().intValue()),
+                    recomendacionRestriccion(motivo.getKey()), Boolean.TRUE));
+        }
+    }
+
+    private void acumularMotivo(Map<String, Integer> motivos, String codigo) {
+        motivos.put(codigo, Integer.valueOf(motivos.containsKey(codigo) ? motivos.get(codigo).intValue() + 1 : 1));
+    }
+
+    private String tituloRestriccion(String codigo) {
+        if ("DATOS_INSUFICIENTES".equals(codigo)) return "Información curricular pendiente de validación";
+        if (codigo != null && codigo.contains("SERIACION")) return "Prerequisito pendiente";
+        if ("SIN_OFERTA".equals(codigo)) return "UD sin oferta en el periodo";
+        if ("REPROBACION_ACUMULADA".equals(codigo)) return "UD pendiente de regularizar";
+        return "Restricción curricular";
+    }
+
+    private String detalleRestriccion(String codigo, int cantidad) {
+        String unidades = cantidad == 1 ? "una UD seleccionada" : cantidad + " UD seleccionadas";
+        if ("DATOS_INSUFICIENTES".equals(codigo)) {
+            return "No fue posible confirmar la información curricular necesaria para evaluar " + unidades + ".";
+        }
+        if (codigo != null && codigo.contains("SERIACION")) {
+            return "Existe un prerrequisito pendiente para " + unidades + ".";
+        }
+        if ("SIN_OFERTA".equals(codigo)) return "No hay oferta disponible para " + unidades + ".";
+        if ("REPROBACION_ACUMULADA".equals(codigo)) return "La selección incluye " + unidades + " que requiere regularización.";
+        return "La selección incluye " + unidades + " con una restricción curricular que debe revisarse.";
+    }
+
+    private String recomendacionRestriccion(String codigo) {
+        if ("DATOS_INSUFICIENTES".equals(codigo)) {
+            return "Verifica el historial académico, la oferta y los datos de la UD antes de continuar.";
+        }
+        if (codigo != null && codigo.contains("SERIACION")) return "Acredita primero el prerrequisito correspondiente.";
+        if ("SIN_OFERTA".equals(codigo)) return "Consulta si la UD será ofertada en otro periodo.";
+        if ("REPROBACION_ACUMULADA".equals(codigo)) return "Prioriza la regularización de la UD.";
+        return "Revisa el detalle curricular de las UD seleccionadas.";
     }
 }
