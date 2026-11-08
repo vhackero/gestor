@@ -65,29 +65,36 @@
                     }
                 }
 
+                window.actualizarBotonAsistenteVirtual = function(boton, contraido) {
+                    boton.innerHTML = contraido ? '&#9654;' : '&#9664;';
+                    boton.setAttribute('aria-label', contraido ? 'Expandir asistente virtual' : 'Contraer asistente virtual');
+                    boton.setAttribute('title', contraido ? 'Expandir asistente virtual' : 'Contraer asistente virtual');
+                };
+
+                window.alternarAsistenteVirtual = function(boton) {
+                    var rail = boton.parentNode.parentNode;
+                    var contraido = !rail.classList.contains('is-collapsed');
+                    rail.classList.toggle('is-collapsed', contraido);
+                    if (rail.parentNode) {
+                        rail.parentNode.classList.toggle('rail-collapsed', contraido);
+                    }
+                    window.actualizarBotonAsistenteVirtual(boton, contraido);
+                };
+
                 window.instalarControlesAsistente = function() {
-                    var encabezados = document.querySelectorAll('.assistant-right-rail.asistente-plegable .rail-head:not([data-colapsable])');
+                    var encabezados = document.querySelectorAll('.assistant-right-rail.asistente-plegable .rail-head');
                     for (var i = 0; i < encabezados.length; i++) {
                         var encabezado = encabezados[i];
-                        encabezado.setAttribute('data-colapsable', 'true');
-                        var boton = document.createElement('button');
-                        boton.type = 'button';
-                        boton.className = 'rail-collapse-button';
-                        boton.setAttribute('aria-label', 'Contraer asistente virtual');
-                        boton.setAttribute('title', 'Contraer asistente virtual');
-                        boton.innerHTML = '&#9664;';
-                        boton.onclick = function() {
-                            var rail = this.parentNode.parentNode;
-                            var contraido = !rail.classList.contains('is-collapsed');
-                            rail.classList.toggle('is-collapsed', contraido);
-                            if (rail.parentNode) {
-                                rail.parentNode.classList.toggle('rail-collapsed', contraido);
-                            }
-                            this.innerHTML = contraido ? '&#9654;' : '&#9664;';
-                            this.setAttribute('aria-label', contraido ? 'Expandir asistente virtual' : 'Contraer asistente virtual');
-                            this.setAttribute('title', contraido ? 'Expandir asistente virtual' : 'Contraer asistente virtual');
-                        };
-                        encabezado.appendChild(boton);
+                        var boton = encabezado.querySelector('.rail-collapse-button');
+                        if (!boton) {
+                            boton = document.createElement('button');
+                            boton.type = 'button';
+                            boton.className = 'rail-collapse-button';
+                            encabezado.appendChild(boton);
+                        }
+                        boton.onclick = function() { window.alternarAsistenteVirtual(this); };
+                        window.actualizarBotonAsistenteVirtual(boton,
+                            encabezado.parentNode.classList.contains('is-collapsed'));
                     }
                     instalarTooltipsResumenAsistente();
                 };
@@ -99,7 +106,7 @@
                 if (window.jsf && window.jsf.ajax) {
                     window.jsf.ajax.addOnEvent(function(data) {
                         if (data.status === 'success') {
-                            window.instalarControlesAsistente();
+                            window.setTimeout(window.instalarControlesAsistente, 0);
                         }
                     });
                 }
@@ -2493,10 +2500,12 @@
                                     <p:commandButton value="Validar selección"
                                         action="#{tablaCurricularAsistidaBean.simularSeleccion}" process="@form"
                                         update="@form" styleClass="btn btn-primary"
+                                        oncomplete="if (window.instalarControlesAsistente) { window.instalarControlesAsistente(); }"
                                         disabled="#{tablaCurricularAsistidaBean.simuladorSoloConsulta}" />
                                     <p:commandButton value="Simular reinscripción"
                                         action="#{tablaCurricularAsistidaBean.validarSeleccionFinal}" process="@form"
                                         update="@form"
+                                        oncomplete="if (window.instalarControlesAsistente) { window.instalarControlesAsistente(); }"
                                         styleClass="btn btn-default" style="margin-left:10px; min-width:220px;"
                                         disabled="#{not tablaCurricularAsistidaBean.permiteValidacionFinal}" />
                                 </div>
