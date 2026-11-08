@@ -58,7 +58,7 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
             resultado.setTotalMaterias(Integer.valueOf(resultado.getTotalMaterias() == null ? 1 : resultado.getTotalMaterias().intValue() + 1));
             resultado.setTotalCreditos(Integer.valueOf((resultado.getTotalCreditos() == null ? 0 : resultado.getTotalCreditos().intValue()) + (unidad.getCreditos() == null ? 0 : unidad.getCreditos().intValue())));
         }
-        agregarRestricciones(evaluacion, seleccionados, resultado);
+        agregarRestricciones(evaluacion, seleccion, resultado);
         aplicarCargaV2(evaluacion, seleccionados.size(), resultado);
         aplicarValidacionesComplementarias(fuente, seleccion, seleccionados, resultado);
         resultado.setValida(Boolean.valueOf(resultado.getMotivos().isEmpty()));
@@ -186,28 +186,45 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
     }
 
     /** Agrupa causas por código sin alterar las decisiones por UD del resultado V2 adjunto. */
-    private void agregarRestricciones(ResultadoEvaluacionCurricularV2DTO evaluacion, List<Long> ids,
+    private void agregarRestricciones(ResultadoEvaluacionCurricularV2DTO evaluacion,
+            List<UnidadDecisionInscripcionDTO> seleccion,
             ResultadoSimulacionDTO resultado) {
-        if (evaluacion == null || evaluacion.getDecisiones() == null || ids == null) return;
-        Map<String, Integer> cantidadPorMotivo = new LinkedHashMap<String, Integer>();
-        for (DecisionUnidadCurricularV2DTO decision : evaluacion.getDecisiones()) {
-            if (decision == null || decision.getIdPrograma() == null || !ids.contains(decision.getIdPrograma())
-                    || Boolean.TRUE.equals(decision.getHabilitada())) continue;
-            if (decision.getMotivos() == null || decision.getMotivos().isEmpty()) {
-                acumularMotivo(cantidadPorMotivo, "RESTRICCION_CURRICULAR");
-            } else for (Object motivo : decision.getMotivos()) {
-                acumularMotivo(cantidadPorMotivo, String.valueOf(motivo));
+        if (evaluacion == null || evaluacion.getDecisiones() == null || seleccion == null) return;
+        Map<Long, String> clavesPorUd = new LinkedHashMap<Long, String>();
+        for (UnidadDecisionInscripcionDTO unidad : seleccion) {
+            if (unidad != null && unidad.getUdId() != null) {
+                clavesPorUd.put(unidad.getUdId(), claveVisible(unidad));
             }
         }
-        for (Map.Entry<String, Integer> motivo : cantidadPorMotivo.entrySet()) {
+        Map<String, Set<String>> clavesPorMotivo = new LinkedHashMap<String, Set<String>>();
+        for (DecisionUnidadCurricularV2DTO decision : evaluacion.getDecisiones()) {
+            if (decision == null || decision.getIdPrograma() == null || !clavesPorUd.containsKey(decision.getIdPrograma())
+                    || Boolean.TRUE.equals(decision.getHabilitada())) continue;
+            if (decision.getMotivos() == null || decision.getMotivos().isEmpty()) {
+                acumularMotivo(clavesPorMotivo, "RESTRICCION_CURRICULAR", clavesPorUd.get(decision.getIdPrograma()));
+            } else for (Object motivo : decision.getMotivos()) {
+                acumularMotivo(clavesPorMotivo, String.valueOf(motivo), clavesPorUd.get(decision.getIdPrograma()));
+            }
+        }
+        for (Map.Entry<String, Set<String>> motivo : clavesPorMotivo.entrySet()) {
             resultado.getMotivos().add(new MotivoDecisionDTO(motivo.getKey(), "ALTA",
-                    tituloRestriccion(motivo.getKey()), detalleRestriccion(motivo.getKey(), motivo.getValue().intValue()),
+                    tituloRestriccion(motivo.getKey()), detalleRestriccion(motivo.getKey(), motivo.getValue()),
                     recomendacionRestriccion(motivo.getKey()), Boolean.TRUE));
         }
     }
 
-    private void acumularMotivo(Map<String, Integer> motivos, String codigo) {
-        motivos.put(codigo, Integer.valueOf(motivos.containsKey(codigo) ? motivos.get(codigo).intValue() + 1 : 1));
+    private String claveVisible(UnidadDecisionInscripcionDTO unidad) {
+        return unidad.getClave() == null || unidad.getClave().trim().isEmpty()
+                ? "Clave no disponible" : unidad.getClave().trim();
+    }
+
+    private void acumularMotivo(Map<String, Set<String>> motivos, String codigo, String clave) {
+        Set<String> claves = motivos.get(codigo);
+        if (claves == null) {
+            claves = new LinkedHashSet<String>();
+            motivos.put(codigo, claves);
+        }
+        claves.add(clave == null ? "Clave no disponible" : clave);
     }
 
     private String tituloRestriccion(String codigo) {
@@ -218,17 +235,29 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
         return "Restricción curricular";
     }
 
-    private String detalleRestriccion(String codigo, int cantidad) {
-        String unidades = cantidad == 1 ? "una UD seleccionada" : cantidad + " UD seleccionadas";
+    private String detalleRestriccion(String codigo, Set<String> claves) {
+        int cantidad = claves == null ? 0 : claves.size();
+        String unidades = cantidad == 1 ? "la UD seleccionada" : "las UD seleccionadas";
+        String identificacion = " Clave" + (cantidad == 1 ? ": " : "s: ")
+                + (claves == null || claves.isEmpty() ? "no disponible" : unirClaves(claves)) + ".";
         if ("DATOS_INSUFICIENTES".equals(codigo)) {
-            return "No fue posible confirmar la información curricular necesaria para evaluar " + unidades + ".";
+            return "No fue posible confirmar la información curricular necesaria para evaluar " + unidades + "." + identificacion;
         }
         if (codigo != null && codigo.contains("SERIACION")) {
-            return "Existe un prerrequisito pendiente para " + unidades + ".";
+            return "Existe un prerrequisito pendiente para " + unidades + "." + identificacion;
         }
-        if ("SIN_OFERTA".equals(codigo)) return "No hay oferta disponible para " + unidades + ".";
-        if ("REPROBACION_ACUMULADA".equals(codigo)) return "La selección incluye " + unidades + " que requiere regularización.";
-        return "La selección incluye " + unidades + " con una restricción curricular que debe revisarse.";
+        if ("SIN_OFERTA".equals(codigo)) return "No hay oferta disponible para " + unidades + "." + identificacion;
+        if ("REPROBACION_ACUMULADA".equals(codigo)) return "La selección incluye " + unidades + " que requiere regularización." + identificacion;
+        return "La selección incluye " + unidades + " con una restricción curricular que debe revisarse." + identificacion;
+    }
+
+    private String unirClaves(Set<String> claves) {
+        StringBuilder texto = new StringBuilder();
+        for (String clave : claves) {
+            if (texto.length() > 0) texto.append(", ");
+            texto.append(clave);
+        }
+        return texto.toString();
     }
 
     private String recomendacionRestriccion(String codigo) {
