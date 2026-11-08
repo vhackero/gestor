@@ -122,7 +122,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         ResultadoEvaluacionCurricularV2DTO resultado = new ResultadoEvaluacionCurricularV2DTO();
         resultado.setEfectosProductivosAplicados(Boolean.FALSE);
         if (contexto == null) {
-            resultado.getMensajes().add("No fue posible construir el contexto de evaluación sombra.");
+            resultado.getMensajes().add("No fue posible construir el contexto de evaluación curricular.");
             return resultado;
         }
         if (!"APLICA".equals(contexto.getAmbitoRnPe2024_2027()) && !"REQUIERE_REVISION".equals(contexto.getAmbitoRnPe2024_2027())) {
@@ -247,8 +247,8 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 "Las condiciones y motivos se acumulan; no se reduce el resultado a una categoría excluyente.");
         registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_2_2, null, 25,
                 "EVALUACION_PREVIA_REINSCRIPCION_SOMBRA",
-                "Se construyó una oferta individual V2 separada de la oferta y seleccionabilidad origen.");
-        resultado.getMensajes().add("Resultado generado en modo sombra; no modifica la elegibilidad vigente.");
+                "Se construyó una oferta individual de consulta separada de la oferta y seleccionabilidad de origen.");
+        resultado.getMensajes().add("Resultado de consulta; no modifica la elegibilidad vigente.");
         if (Boolean.FALSE.equals(contexto.getUniversoMapaCompleto()) || Boolean.FALSE.equals(contexto.getHistorialCompleto()))
             resultado.getMensajes().add("Evaluación parcial: falta integrar el mapa completo del plan o el historial completo; no equivale a ausencia de pendientes.");
         return resultado;
@@ -1414,7 +1414,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         if (Boolean.TRUE.equals(contexto.getDatosActividadContradictorios())) {
             estado = EstadoActividadAcademicaV2.NO_DETERMINADO;
             codigoResultado = "DATOS_ACTIVIDAD_CONTRADICTORIOS";
-            detalle = "Las evidencias de actividad son contradictorias; V2 no infiere una baja, reincorporación ni inactividad.";
+            detalle = "Las evidencias de actividad son contradictorias; la evaluación no infiere una baja, reincorporación ni inactividad.";
             motivo = CodigoMotivoCurricularV2.DATOS_INSUFICIENTES;
         } else if (Boolean.TRUE.equals(contexto.getBajaDefinitivaRegistrada())) {
             estado = EstadoActividadAcademicaV2.INACTIVO;
@@ -4681,7 +4681,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         decision.getReferenciasFuente().addAll(unidad.getReferenciasHistoricas());
         if (Boolean.TRUE.equals(unidad.getOfertada())) {
             agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.HABILITADA);
-            decision.setExplicacionTecnica("Oferta origen disponible; la evaluación V2 la replica para comparación.");
+            decision.setExplicacionTecnica("Oferta de origen disponible; se replica para la comparación.");
         } else {
             // La falta de oferta no borra la prioridad curricular ni vuelve seleccionable la UD.
             agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.PRIORITARIA);

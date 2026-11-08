@@ -88,7 +88,7 @@ public class MallaCurricularV2ResultadoAdapter {
 			}
 			if (Boolean.TRUE.equals(decision.getPrioritaria())) {
 				String recomendacion = StringUtils.defaultString(nodo.getDetalleAccionSugerida());
-				nodo.setDetalleAccionSugerida((recomendacion + " UD prioritaria para regularización según V2.").trim());
+				nodo.setDetalleAccionSugerida((recomendacion + " UD prioritaria para regularización según las reglas aplicables.").trim());
 			}
 		}
 		return aplicacion;

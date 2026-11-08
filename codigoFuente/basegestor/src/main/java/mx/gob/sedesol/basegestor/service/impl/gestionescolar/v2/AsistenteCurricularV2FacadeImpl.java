@@ -107,7 +107,7 @@ public class AsistenteCurricularV2FacadeImpl implements AsistenteCurricularV2Fac
 
         if (caso == null) {
             ficha.setMensajeGestor("No existe un caso V2 persistido para el contexto actual.");
-            ficha.setMensajeEstudiante("Aun no existe un dictamen V2 disponible para tu trayectoria.");
+            ficha.setMensajeEstudiante("Aún no existe un dictamen académico disponible para tu trayectoria.");
             ficha.setAccionSugerida("Generar orientación académica operativa");
             ficha.setReglaAplicada("Sin regla aplicada");
             ficha.setRequiereSeguimiento(Boolean.FALSE);

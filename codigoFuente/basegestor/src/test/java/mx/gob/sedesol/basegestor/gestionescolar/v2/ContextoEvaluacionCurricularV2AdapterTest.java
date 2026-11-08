@@ -79,7 +79,8 @@ public class ContextoEvaluacionCurricularV2AdapterTest {
         ResultadoEvaluacionCurricularV2DTO resultado = evaluator.evaluarSombra(contexto);
 
         assertTrue(resultado.getDecisiones().get(0).getHabilitada());
-        assertTrue(resultado.getMensajes().get(0).contains("modo sombra"));
+        assertTrue(resultado.getMensajes().get(0).contains("Resultado de consulta"));
+        assertFalse(resultado.getMensajes().get(0).contains("modo sombra"));
     }
 
     @Test

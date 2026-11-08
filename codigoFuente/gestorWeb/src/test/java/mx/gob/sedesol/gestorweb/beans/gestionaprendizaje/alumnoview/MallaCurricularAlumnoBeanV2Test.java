@@ -39,6 +39,7 @@ public class MallaCurricularAlumnoBeanV2Test {
 		assertTrue(nodo.getDetalleMotivoPrincipal().contains("Requiere acreditar previamente"));
 		assertFalse(nodo.getDetalleMotivoPrincipal().contains("SERIACION_DIRECTA"));
 		assertTrue(nodo.getDetalleAccionSugerida().contains("prioritaria"));
+		assertFalse(nodo.getDetalleAccionSugerida().contains("V2"));
 		assertEquals("IRREGULAR", aplicacion.getSituacionAcademica());
 	}
 

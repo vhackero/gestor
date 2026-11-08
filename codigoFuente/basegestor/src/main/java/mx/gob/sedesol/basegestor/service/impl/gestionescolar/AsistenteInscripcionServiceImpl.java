@@ -205,7 +205,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
                     .obtenerConfiguracion();
             if (configuracion != null) metadatos.setVersionReglas(configuracion.getVersionReglas());
         } catch (RuntimeException ex) {
-            metadatos.getCamposPendientes().add("Configuración normativa V2");
+            metadatos.getCamposPendientes().add("Configuración normativa");
         }
         return metadatos;
     }
@@ -348,11 +348,11 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
                 .obtenerConfiguracion();
         ResultadoEvaluacionCurricularV2DTO resultado = new ResultadoEvaluacionCurricularV2DTO();
         if (!Boolean.TRUE.equals(configuracion.getEvaluacionV2Habilitada())) {
-            resultado.getMensajes().add("La evaluación curricular V2 se encuentra deshabilitada por configuración.");
+            resultado.getMensajes().add("La evaluación curricular no está disponible por configuración.");
             return resultado;
         }
         if (!Boolean.TRUE.equals(configuracion.getModoSombra())) {
-            resultado.getMensajes().add("La evaluación curricular V2 requiere modo sombra en FASE 0.");
+            resultado.getMensajes().add("La evaluación curricular requiere una configuración de consulta válida.");
             return resultado;
         }
         AsistenteInscripcionContextoDTO contextoVigente = obtenerContextoAsistido(idPersona);
@@ -364,7 +364,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             trazabilidadEvaluacionCurricularV2Service.registrarSombra(contextoSombra, resultado);
         } catch (RuntimeException ex) {
             // RN-9.5 en modo sombra jamás interrumpe el flujo vigente de inscripción/asistente.
-            resultado.getMensajes().add("La trazabilidad V2 no pudo registrarse; la evaluación vigente permanece sin cambios.");
+            resultado.getMensajes().add("No fue posible registrar la trazabilidad de la evaluación; la información vigente permanece sin cambios.");
         }
         return resultado;
     }
@@ -1338,7 +1338,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             List<InscripcionPreviaMateriasDTO> materiasEnCurso) {
         ProyeccionSiguientePeriodoDTO dto = new ProyeccionSiguientePeriodoDTO();
         if (contexto == null || contextoEvaluacionCurricularV2Adapter == null || evaluacionCurricularV2Service == null) {
-            dto.setResumen("No es posible construir la expectativa: la evaluación curricular V2 no está disponible.");
+            dto.setResumen("No es posible construir la expectativa: la evaluación curricular no está disponible.");
             return dto;
         }
         ContextoEvaluacionCurricularV2DTO base = contextoEvaluacionCurricularV2Adapter.construirDesdeAsistente(contexto);
@@ -1363,7 +1363,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             List<InscripcionPreviaMateriasDTO> materiasEnCurso, Set<Long> noAcreditadas) {
         ProyeccionSiguientePeriodoDTO dto = new ProyeccionSiguientePeriodoDTO();
         if (contexto == null || contextoEvaluacionCurricularV2Adapter == null || evaluacionCurricularV2Service == null) {
-            dto.setResumen("No es posible actualizar la expectativa: la evaluación curricular V2 no está disponible.");
+            dto.setResumen("No es posible actualizar la expectativa: la evaluación curricular no está disponible.");
             return dto;
         }
         ContextoEvaluacionCurricularV2DTO base = contextoEvaluacionCurricularV2Adapter.construirDesdeAsistente(contexto);
@@ -1439,13 +1439,13 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             escenario.setMateriasBloqueadas(Integer.valueOf(restringidas));
             escenario.setCargaMaximaNormativa(resultado.getEvaluacionCargaAcademica() != null
                     ? resultado.getEvaluacionCargaAcademica().getCargaMaximaNormativa() : null);
-            escenario.getRecomendaciones().add("Situación hipotética V2: " + resultado.getSituacionAcademicaCalculada() + ". Reprobadas vigentes: " + resultado.getCantidadReprobadasVigentes() + ".");
+            escenario.getRecomendaciones().add("Situación hipotética: " + resultado.getSituacionAcademicaCalculada() + ". Reprobadas vigentes: " + resultado.getCantidadReprobadasVigentes() + ".");
             if (!resultado.getRestricciones().isEmpty()) escenario.getRecomendaciones().add("Restricciones vigentes: " + resultado.getRestricciones() + ".");
         } catch (RuntimeException ex) {
             escenario.setResultadoHipotetico("NO_DETERMINADO");
             escenario.setMateriasHabilitadas(null);
             escenario.setMateriasBloqueadas(null);
-            escenario.getRecomendaciones().add("La evaluación V2 del escenario no pudo completarse; no se presenta una conclusión legacy.");
+            escenario.getRecomendaciones().add("La evaluación del escenario no pudo completarse; no se presenta una conclusión sin sustento actual.");
         }
         return escenario;
     }
@@ -3606,9 +3606,9 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         int reducida = Math.min(Math.max(1, minimo.intValue()), limite);
         int intermedia = Math.min(limite, Math.max(reducida, (reducida + limite) / 2));
         List<EscenarioCargaDTO> escenarios = new ArrayList<EscenarioCargaDTO>();
-        agregarEscenarioV2(escenarios, "MINIMO", "Carga reducida", "Alternativa menor compatible con los límites V2.", candidatas, reducida, soloRegularizacion);
-        agregarEscenarioV2(escenarios, "BALANCEADO", "Carga intermedia", "Alternativa entre el mínimo aplicable y el límite V2.", candidatas, intermedia, soloRegularizacion);
-        agregarEscenarioV2(escenarios, "MAXIMO", "Carga intensiva", "Alternativa máxima compatible con los límites V2.", candidatas, limite, soloRegularizacion);
+        agregarEscenarioV2(escenarios, "MINIMO", "Carga reducida", "Alternativa menor compatible con los límites aplicables.", candidatas, reducida, soloRegularizacion);
+        agregarEscenarioV2(escenarios, "BALANCEADO", "Carga intermedia", "Alternativa entre el mínimo aplicable y tu límite.", candidatas, intermedia, soloRegularizacion);
+        agregarEscenarioV2(escenarios, "MAXIMO", "Carga intensiva", "Alternativa máxima compatible con tu límite.", candidatas, limite, soloRegularizacion);
         return escenarios;
     }
 
@@ -3649,7 +3649,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         EscenarioCargaDTO escenario = crearEscenarioBase(tipo, nombre, descripcion, seleccion);
         escenario.setBeneficioPrincipal(soloRegularizacion
                 ? "Incluye exclusivamente UD destinadas a regularización."
-                : "Combina prioridades V2 y UD académicamente habilitadas.");
+                : "Combina prioridades y UD académicamente habilitadas.");
         escenario.setRiesgoGeneral(cantidad == candidatas.size()
                 ? "Integra el máximo disponible dentro del límite individual."
                 : "Incluye menos UD para atender simultáneamente.");

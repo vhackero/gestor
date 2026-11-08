@@ -2374,7 +2374,7 @@
                                                 <div class="expectativa-kpi-moderna"><strong>#{tablaCurricularAsistidaBean.totalUnidadesEvaluadasExpectativa}</strong><span>UD evaluadas</span></div>
                                                 <div class="expectativa-kpi-moderna"><strong>#{acreditaToda.materiasHabilitadas ne null ? acreditaToda.materiasHabilitadas : '-'}</strong><span>Cumplen requisitos</span></div>
                                                 <div class="expectativa-kpi-moderna"><strong>#{acreditaToda.materiasBloqueadas ne null ? acreditaToda.materiasBloqueadas : '-'}</strong><span>Con restricciones</span></div>
-                                                <div class="expectativa-kpi-moderna"><strong>#{acreditaToda.cargaMaximaNormativa ne null ? acreditaToda.cargaMaximaNormativa : '-'}</strong><span>Carga máxima V2</span></div>
+                                                <div class="expectativa-kpi-moderna"><strong>#{acreditaToda.cargaMaximaNormativa ne null ? acreditaToda.cargaMaximaNormativa : '-'}</strong><span>Carga máxima aplicable</span></div>
                                             </div>
                                             <ul class="expectativa-resultados"><ui:repeat value="#{acreditaToda.recomendaciones}" var="recomendacion"><li><i class="fa fa-check-circle" /> #{recomendacion}</li></ui:repeat></ul>
                                             <div class="expectativa-supuesto"><ui:repeat value="#{acreditaToda.supuestos}" var="supuesto">#{supuesto}</ui:repeat></div>
@@ -2395,7 +2395,7 @@
                                                 <div class="expectativa-kpi-moderna"><strong>#{tablaCurricularAsistidaBean.totalUnidadesEvaluadasExpectativa}</strong><span>UD evaluadas</span></div>
                                                 <div class="expectativa-kpi-moderna"><strong>#{alternativo.materiasHabilitadas ne null ? alternativo.materiasHabilitadas : '-'}</strong><span>Cumplen requisitos</span></div>
                                                 <div class="expectativa-kpi-moderna"><strong>#{alternativo.materiasBloqueadas ne null ? alternativo.materiasBloqueadas : '-'}</strong><span>Con restricciones</span></div>
-                                                <div class="expectativa-kpi-moderna"><strong>#{alternativo.cargaMaximaNormativa ne null ? alternativo.cargaMaximaNormativa : '-'}</strong><span>Carga máxima V2</span></div>
+                                                <div class="expectativa-kpi-moderna"><strong>#{alternativo.cargaMaximaNormativa ne null ? alternativo.cargaMaximaNormativa : '-'}</strong><span>Carga máxima aplicable</span></div>
                                             </div>
                                             <ul class="expectativa-resultados"><ui:repeat value="#{alternativo.recomendaciones}" var="recomendacion"><li><i class="fa fa-info-circle" /> #{recomendacion}</li></ui:repeat></ul>
                                             <div class="expectativa-supuesto"><ui:repeat value="#{alternativo.supuestos}" var="supuesto">#{supuesto}</ui:repeat></div>
@@ -2416,12 +2416,12 @@
                                 <ui:fragment rendered="#{not tablaCurricularAsistidaBean.mostrarProyeccionConDatos}">
                                     <div class="soft-panel">
                                         <h3>Proyección de carga no disponible</h3>
-                                        <p>No hay decisiones V2 suficientes para construir alternativas. Consulta nuevamente cuando se complete la información curricular.</p>
+                                    <p>No hay decisiones curriculares suficientes para construir alternativas. Consulta nuevamente cuando se complete la información curricular.</p>
                                     </div>
                                 </ui:fragment>
                                 <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarProyeccionConDatos}">
                                     <h2>Proyección de carga académica</h2>
-                                    <p class="proyeccion-subtitulo">Compara propuestas académicas construidas con las decisiones vigentes del Motor curricular.</p>
+                                    <p class="proyeccion-subtitulo">Compara propuestas académicas construidas con las decisiones curriculares vigentes.</p>
                                     <div class="proyeccion-contexto">
                                         <span><strong>Periodo objetivo:</strong> #{tablaCurricularAsistidaBean.periodoProyectadoExpectativa}</span>
                                         <span><strong>Situación proyectada:</strong> #{tablaCurricularAsistidaBean.escenarioSeleccionadoExpectativa ne null ? tablaCurricularAsistidaBean.escenarioSeleccionadoExpectativa.resultadoHipotetico : tablaCurricularAsistidaBean.descripcionSituacionAcademica}</span>
@@ -2446,7 +2446,7 @@
                                             </div>
                                         </ui:repeat>
                                     </div>
-                                    <div class="proyeccion-aviso"><strong>Para todas las alternativas.</strong> Si hay 4 o más reprobadas vigentes, V2 limita la carga a UD destinadas a regularización. Recuperar identifica una UD pendiente por baja autorizada, no una reprobación.</div>
+                                    <div class="proyeccion-aviso"><strong>Para todas las alternativas.</strong> Si hay 4 o más reprobadas vigentes, la carga se limita a UD destinadas a regularización. Recuperar identifica una UD pendiente por baja autorizada, no una reprobación.</div>
                                 </ui:fragment>
                             </div>
                         </p:tab>

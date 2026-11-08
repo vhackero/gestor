@@ -194,7 +194,7 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
             if (decision == null || decision.getIdPrograma() == null || !ids.contains(decision.getIdPrograma())
                     || Boolean.TRUE.equals(decision.getHabilitada())) continue;
             if (decision.getMotivos() == null || decision.getMotivos().isEmpty()) {
-                acumularMotivo(cantidadPorMotivo, "V2_RESTRICCION");
+                acumularMotivo(cantidadPorMotivo, "RESTRICCION_CURRICULAR");
             } else for (Object motivo : decision.getMotivos()) {
                 acumularMotivo(cantidadPorMotivo, String.valueOf(motivo));
             }

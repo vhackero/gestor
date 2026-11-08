@@ -416,7 +416,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 		String resumen = construirResumenClasificacionNoRegularV2(resultado);
 		if (resumen == null) return null;
 		List<String> reglas = obtenerReglasCausalesClasificacion(resultado);
-		return resumen + " Fundamento V2: " + (reglas.isEmpty() ? "requiere revisión de evidencia curricular" : StringUtils.join(reglas, ", ")) + ".";
+		return resumen + " Fundamento normativo: " + (reglas.isEmpty() ? "requiere revisión de evidencia curricular" : StringUtils.join(reglas, ", ")) + ".";
 	}
 
 	private static List<String> obtenerReglasCausalesClasificacion(ResultadoEvaluacionCurricularV2DTO resultado) {
