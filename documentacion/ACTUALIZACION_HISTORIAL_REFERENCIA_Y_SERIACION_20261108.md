@@ -64,6 +64,7 @@ La coincidencia anterior por `LIKE '%nombre_periodo%'` no era segura: **101 even
 | Eventos con más de un periodo por coincidencia `LIKE` | 101 |
 | Eventos con más de un periodo con el sufijo exacto | 0 |
 | Eventos que no encuentran periodo con la coincidencia histórica `LIKE` | 2 |
+| Eventos que no encuentran periodo con el sufijo exacto | 8 |
 
 Si una clave futura no termina con un periodo catalogado, el historial no la convierte en un intento completo: queda sin periodo verificable y debe llegar como `REQUIERE_REVISION`.
 
