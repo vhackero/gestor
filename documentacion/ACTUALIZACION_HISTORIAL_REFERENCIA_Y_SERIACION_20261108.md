@@ -45,7 +45,7 @@ JOIN tbl_grupos g ON g.id = rgp.id_grupo
 JOIN tbl_eventos e ON e.id_evento = g.id_evento
 JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa
 LEFT JOIN tbl_periodos_inscripcion pi
-  ON e.cve_evento_cap LIKE CONCAT('%',pi.nombre_periodo,'%')
+  ON SUBSTRING_INDEX(e.cve_evento_cap, '-', -2) = pi.nombre_periodo
 WHERE fd.id_plan IN (3,4,5,6,7,11);
 ```
 
@@ -54,6 +54,22 @@ WHERE fd.id_plan IN (3,4,5,6,7,11);
 | 241,066 | 233,099 | 0 |
 
 Hay 1,128 granos con más de una participación y 7,967 participaciones adicionales. La consulta de conflicto de calificación devolvió **0 granos conflictivos**. Por eso la consolidación no descarta resultados opuestos en la base de pruebas; aun así, el adaptador conserva el control para datos futuros.
+
+### Precisión de periodo
+
+La coincidencia anterior por `LIKE '%nombre_periodo%'` no era segura: **101 eventos** coincidían con más de un periodo del catálogo. Por ejemplo, una clave que contiene `2024-2024-1` también contenía accidentalmente `2024-2`. La relación productiva usa ahora sólo el sufijo `AAAA-N` de `cve_evento_cap` mediante `SUBSTRING_INDEX(..., '-', -2) = nombre_periodo`.
+
+| Control agregado en base de pruebas | Resultado |
+|---|---:|
+| Eventos con más de un periodo por coincidencia `LIKE` | 101 |
+| Eventos con más de un periodo con el sufijo exacto | 0 |
+| Eventos que no encuentran periodo con la coincidencia histórica `LIKE` | 2 |
+
+Si una clave futura no termina con un periodo catalogado, el historial no la convierte en un intento completo: queda sin periodo verificable y debe llegar como `REQUIERE_REVISION`.
+
+### Identidad de la UD
+
+`fd.id_programa` es la misma identidad que consume el universo del mapa: `FichaDescProgramaDTO.idPrograma` se convierte en `UnidadDecisionInscripcionDTO.udId` y luego en `UnidadEvaluacionCurricularV2DTO.idPrograma`. La verificación agregada sobre la base de pruebas encontró **0 UD históricas fuera del universo del plan**; se cotejaron 273 identidades distintas de UD del historial contra 273 identidades presentes en el universo de sus planes. No se usó nombre ni clave como equivalencia.
 
 ### Archivos modificados
 
@@ -99,6 +115,29 @@ Los siguientes datos corresponden a la base de pruebas, seis planes PE2024 local
 
 La diferencia confirma que `tbl_grupos.clave` no era una identidad curricular suficiente. El nuevo conteo identifica UD por `id_programa` y evita duplicar la misma UD por participaciones del mismo periodo. Antes de usar estos números para una decisión institucional deben repetirse sobre producción con los PE2027 cargados y validar el catálogo de periodo.
 
+### Sensibilidad de calificación cero sin baja
+
+El valor histórico de 8,953 no debe interpretarse como el mismo cálculo que realiza hoy el adaptador: incluía cualquier `0`, incluso cuando existía baja aplicada. Con el grano y la clasificación actuales, `0` sin baja ligada es reprobación y `0` con baja ligada es NP por baja.
+
+| Definición agregada, base de pruebas | Estudiantes con 4+ UD vigentes |
+|---|---:|
+| Conteo histórico: calificación 0–59, sin separar baja | 9,012 |
+| Clasificación actual: 1–59, más 0 sin baja aplicada | 8,698 |
+| Sensibilidad: sólo 1–59; ningún 0 cuenta como reprobación | 1,394 |
+| Personas que bajarían de 4 al retirar sólo 0 sin baja | 7,304 |
+
+Desglose de estudiantes con al menos un `0` sin baja por periodo; el patrón “todas” compara únicamente UD con calificación final del mismo periodo, no identifica abandono por sí solo:
+
+| Periodo | Con algún 0 sin baja | Todas las UD calificadas en 0 | Sólo algunas UD en 0 |
+|---|---:|---:|---:|
+| 2024-1 | 2,005 | 629 | 1,376 |
+| 2024-2 | 894 | 411 | 483 |
+| 2025-1 | 3,277 | 1,230 | 2,047 |
+| 2025-2 | 1,563 | 660 | 903 |
+| 2026-1 | 4,464 | 1,788 | 2,676 |
+
+Esta sensibilidad sirve para la decisión institucional P6; no cambia por sí sola la regla del motor. Confirmar con DAEAE el significado de `0` sin baja antes de modificar la política de reprobación.
+
 ## 5. Validación ejecutada
 
 | Cobertura | Resultado |
@@ -142,10 +181,10 @@ Propuesta de catálogo relacional con vigencia, sin crearla todavía:
 | `id_plan`, `version_plan`, `cohorte_desde`, `cohorte_hasta` | Ámbito curricular y población aplicable. |
 | `id_ud_antecedente`, `clave_ud_antecedente` | Prerrequisito verificable. |
 | `id_ud_consecuente`, `clave_ud_consecuente` | UD evaluada. |
-| `tipo_relacion` | Directa o indirecta. |
+| `tipo_relacion` | Sólo `DIRECTA`: es la relación aprobada y almacenada. |
 | `tipo_seriacion` | Interbloque, intersemestral, interanual u otro catálogo aprobado. |
 | `vigencia_inicio`, `vigencia_fin`, `activo` | Aplicación temporal controlada. |
 | `documento_fuente`, `numeral_fuente`, `fecha_aprobacion` | Trazabilidad académica para auditoría. |
 | `observacion` | Precisión aprobada que no altere el significado normativo. |
 
-CAI debe entregar el catálogo poblado y aprobar las relaciones por plan/cohorte. El motor sólo consume la relación vigente; no debe deducir seriación por nombre, semestre o cercanía entre UD.
+CAI debe entregar el catálogo poblado y aprobar las relaciones directas por plan/cohorte. El motor deriva las relaciones indirectas por transitividad sobre ese grafo directo, conservando el camino de evidencia; no se cargan relaciones indirectas en el catálogo para evitar contradicciones. El motor no debe deducir seriación por nombre, semestre o cercanía entre UD.

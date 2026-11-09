@@ -81,6 +81,8 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         assertTrue(sql.contains("baja.id_grupo=rgp.id_grupo"));
         assertFalse(sql.contains("groupbase"));
         assertFalse(sql.contains("baja.solicitud"));
+        assertTrue(sql.contains("SUBSTRING_INDEX(e.cve_evento_cap, '-', -2)=pi.nombre_periodo"));
+        assertFalse(sql.contains("LIKE CONCAT('%',pi.nombre_periodo,'%')"));
         assertTrue(sql.contains("MIN(rgp.id) AS id_participacion_v2"));
         assertTrue(sql.contains("calificacion_conflictiva_v2"));
     }

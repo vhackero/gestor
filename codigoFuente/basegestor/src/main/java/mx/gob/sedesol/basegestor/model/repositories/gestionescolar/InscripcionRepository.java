@@ -96,7 +96,9 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "INNER JOIN tbl_grupos g ON g.id = rgp.id_grupo "
 				+ "INNER JOIN tbl_eventos e ON e.id_evento = g.id_evento "
 				+ "INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa "
-				+ "LEFT JOIN tbl_periodos_inscripcion pi ON e.cve_evento_cap LIKE CONCAT('%', pi.nombre_periodo, '%') "
+				// El periodo es el sufijo AAAA-N de la clave del evento. LIKE puede
+				// coincidir con segmentos internos de la clave y duplicar trayectoria.
+				+ "LEFT JOIN tbl_periodos_inscripcion pi ON SUBSTRING_INDEX(e.cve_evento_cap, '-', -2) = pi.nombre_periodo "
 				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona = rgp.id_persona_participante "
 				+ " AND baja.id_grupo = rgp.id_grupo AND baja.contabilizar = 1 "
 				+ "LEFT JOIN rel_motivo_baja mb ON mb.id_motivo_baja = baja.motivo_baja_id "
@@ -145,7 +147,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "INNER JOIN tbl_grupos g ON g.id=rgp.id_grupo "
 				+ "INNER JOIN tbl_eventos e ON e.id_evento=g.id_evento "
 				+ "INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa=e.id_programa "
-				+ "LEFT JOIN tbl_periodos_inscripcion pi ON e.cve_evento_cap LIKE CONCAT('%',pi.nombre_periodo,'%') "
+				+ "LEFT JOIN tbl_periodos_inscripcion pi ON SUBSTRING_INDEX(e.cve_evento_cap, '-', -2)=pi.nombre_periodo "
 				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona=rgp.id_persona_participante "
 				+ "AND baja.id_grupo=rgp.id_grupo AND baja.contabilizar=1 "
 				+ "LEFT JOIN rel_motivo_baja mb ON mb.id_motivo_baja=baja.motivo_baja_id "
