@@ -170,7 +170,9 @@ El motor recibe relaciones dentro de cada `UnidadEvaluacionCurricularV2DTO` medi
 | `tipoSeriacion` | Interbloque, intersemestral, interanual o no determinada. |
 | `evidencia` | Fuente documental/técnica de la relación. |
 
-En la base de pruebas no existe tabla de relaciones entre UD. La malla actual no sustituye ese contrato: dibujar UD por semestre o bloque no prueba una dependencia normativa.
+La fuente actual de seriación directa es `tbl_ficha_descriptiva_programa.id_programa_antecedente`: una UD consecuente apunta a una UD antecedente del mismo plan. No existe una **tabla relacional separada** de seriación. La Malla ya consume ese vínculo para dibujar el indicador, el tooltip “Depende de/Libera” y el bloqueo visual; el adaptador lo entrega a V2 como relación directa. Dibujar UD por semestre o bloque, por sí solo, no prueba una dependencia normativa.
+
+La estructura actual admite un solo antecedente directo por UD y no conserva explícitamente tipo de seriación, vigencia, fuente documental ni una relación de varios antecedentes. Por ello, el catálogo propuesto no pretende sustituir la definición existente: la formaliza, conserva el vínculo directo ya aprobado y permite ampliar los atributos que el Motor necesita para evaluar RN-8 sin inferirlos.
 
 ### Estructura propuesta para presentar a CAI
 
@@ -188,4 +190,4 @@ Propuesta de catálogo relacional con vigencia, sin crearla todavía:
 | `documento_fuente`, `numeral_fuente`, `fecha_aprobacion` | Trazabilidad académica para auditoría. |
 | `observacion` | Precisión aprobada que no altere el significado normativo. |
 
-CAI debe entregar el catálogo poblado y aprobar las relaciones directas por plan/cohorte. El motor deriva las relaciones indirectas por transitividad sobre ese grafo directo, conservando el camino de evidencia; no se cargan relaciones indirectas en el catálogo para evitar contradicciones. El motor no debe deducir seriación por nombre, semestre o cercanía entre UD.
+CAI debe validar la migración de las relaciones directas ya existentes y completar sus atributos por plan/cohorte. El motor deriva las relaciones indirectas por transitividad sobre ese grafo directo, conservando el camino de evidencia; no se cargan relaciones indirectas en el catálogo para evitar contradicciones. El motor no debe deducir seriación por nombre, semestre o cercanía entre UD.
