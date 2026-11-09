@@ -149,7 +149,7 @@ Esta sensibilidad sirve para la decisión institucional P6; no cambia por sí so
 
 ### Pendiente: tres expedientes reales anonimizados
 
-No se ejecutaron GC-04, GC-05 y GC-08 sobre tres expedientes reales a través del artefacto corregido. El WAR desplegado no contiene todavía esta modificación y el entorno de trabajo no expone una invocación JPA/servicio de solo lectura al artefacto compilado. No se debe presentar esta parte como validada.
+No se ejecutaron GC-04, GC-05 y GC-08 sobre tres expedientes reales a través del artefacto corregido. El WAR detectado en el ambiente de pruebas fue compilado el **2026-11-07 22:30:59 -06:00**, anterior a los commits `d391a42f` y `b1da50da`; además, su manifiesto no contiene SHA de Git. Por tanto no acredita incluir la corrección de historial ni el enlace exacto de periodo. No se debe presentar esta parte como validada.
 
 Para cerrarlo: desplegar el WAR compilado en el ambiente de pruebas autorizado y ejecutar los tres casos mediante el Asistente/Adaptador, registrando sólo etiquetas anonimizadas `A`, `B` y `C`, plan, periodo, número de intentos, resultado por UD y resultado del motor; sin nombre, matrícula ni identificadores personales.
 
