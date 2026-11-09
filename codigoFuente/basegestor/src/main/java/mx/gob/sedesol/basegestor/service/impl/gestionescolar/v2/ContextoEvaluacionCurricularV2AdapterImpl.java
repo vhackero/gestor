@@ -82,7 +82,8 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         aplicarBajasTemporalesAcumuladas(resultado);
         resultado.setHistorialCompleto(Boolean.valueOf(contextoAsistente.getPeriodosTrayectoriaV2() != null
                 && !contextoAsistente.getPeriodosTrayectoriaV2().isEmpty()
-                && contextoAsistente.getHistorialIntentosV2() != null));
+                && contextoAsistente.getHistorialIntentosV2() != null
+                && !contextoAsistente.getHistorialIntentosV2().isEmpty()));
         asociarIntentosHistoricos(resultado, contextoAsistente.getHistorialIntentosV2());
         List<UnidadDecisionInscripcionDTO> candidatas = contextoAsistente.getUnidadesCandidatasPeriodo();
         if (candidatas == null || candidatas.isEmpty()) candidatas = contextoAsistente.getUnidades();

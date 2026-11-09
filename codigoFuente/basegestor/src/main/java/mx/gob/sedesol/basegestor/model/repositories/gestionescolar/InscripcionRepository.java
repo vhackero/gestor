@@ -77,10 +77,9 @@ public class InscripcionRepository implements IinscripcionRepository {
 	}
 
 	/**
-	 * Recupera una fila por periodo académico. La clave se obtiene del evento
-	 * asociado a la inscripción y no del semestre almacenado en la inscripción.
-	 * Las bajas temporales aprobadas (contabilizar=1, tipos 2, 7 y 8) se agrupan por
-	 * periodo, por lo que B1 y B2 no incrementan la referencia dos veces.
+	 * Recupera una fila por periodo académico a partir de participación verificable.
+	 * Un periodo cuenta para RN-6.9 únicamente con calificación final o NP por baja;
+	 * las bajas temporales contabilizables se agrupan por periodo.
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -88,18 +87,20 @@ public class InscripcionRepository implements IinscripcionRepository {
 		List<PeriodoTrayectoriaV2DTO> resultado = new ArrayList<PeriodoTrayectoriaV2DTO>();
 		if (idPersona == null || idPlan == null) return resultado;
 		String sql = "SELECT pi.nombre_periodo, "
-				+ "MAX(CASE WHEN ti.id IS NOT NULL THEN 1 ELSE 0 END), "
+				+ "1 AS participacion_formal_v2, "
 				+ "MAX(CASE WHEN rgp.calificacion_final IS NOT NULL THEN 1 ELSE 0 END), "
-				+ "MAX(CASE WHEN rgp.id_grupo IS NOT NULL THEN 1 ELSE 0 END), "
-				+ "MAX(CASE WHEN baja.id_baja IS NOT NULL THEN 1 ELSE 0 END) "
-				+ "FROM tbl_inscripciones ti "
-				+ "LEFT JOIN tbl_eventos e ON e.id_evento = ti.idevento "
+				+ "1 AS participacion_grupo_v2, "
+				+ "MAX(CASE WHEN mb.tipo_baja_id IN (2,7,8) THEN 1 ELSE 0 END), "
+				+ "MAX(CASE WHEN mb.tipo_baja_id = 1 THEN 1 ELSE 0 END) "
+				+ "FROM rel_grupo_participante rgp "
+				+ "INNER JOIN tbl_grupos g ON g.id = rgp.id_grupo "
+				+ "INNER JOIN tbl_eventos e ON e.id_evento = g.id_evento "
+				+ "INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa "
 				+ "LEFT JOIN tbl_periodos_inscripcion pi ON e.cve_evento_cap LIKE CONCAT('%', pi.nombre_periodo, '%') "
-				+ "LEFT JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = ti.Idpersona "
-				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona = ti.Idpersona "
-				+ " AND baja.id_evento = ti.idevento AND baja.contabilizar = 1 "
-				+ " AND EXISTS (SELECT 1 FROM rel_motivo_baja mb WHERE mb.id_motivo_baja = baja.motivo_baja_id AND mb.tipo_baja_id IN (2,7,8)) "
-				+ "WHERE ti.Idpersona = :idPersona AND ti.idplan = :idPlan "
+				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona = rgp.id_persona_participante "
+				+ " AND baja.id_grupo = rgp.id_grupo AND baja.contabilizar = 1 "
+				+ "LEFT JOIN rel_motivo_baja mb ON mb.id_motivo_baja = baja.motivo_baja_id "
+				+ "WHERE rgp.id_persona_participante = :idPersona AND fd.id_plan = :idPlan "
 				+ "AND pi.nombre_periodo IS NOT NULL GROUP BY pi.nombre_periodo ORDER BY pi.nombre_periodo";
 		List<Object[]> filas = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona)
 				.setParameter("idPlan", idPlan).getResultList();
@@ -109,14 +110,18 @@ public class InscripcionRepository implements IinscripcionRepository {
 			periodo.setInscripcionFormal(Boolean.valueOf(getIntegerValue(fila[1]) != null && getIntegerValue(fila[1]).intValue() > 0));
 			periodo.setCalificacionFinal(Boolean.valueOf(getIntegerValue(fila[2]) != null && getIntegerValue(fila[2]).intValue() > 0));
 			periodo.setParticipacionGrupo(Boolean.valueOf(getIntegerValue(fila[3]) != null && getIntegerValue(fila[3]).intValue() > 0));
-			periodo.setNpBajaParcial(Boolean.FALSE);
+			periodo.setNpBajaParcial(Boolean.valueOf(getIntegerValue(fila[5]) != null && getIntegerValue(fila[5]).intValue() > 0));
 			periodo.setBajaTemporalCompleta(Boolean.valueOf(getIntegerValue(fila[4]) != null && getIntegerValue(fila[4]).intValue() > 0));
 			resultado.add(periodo);
 		}
 		return resultado;
 	}
 
-	/** Fuente canónica: una fila por inscripción, sin inferir bajas no contabilizables. */
+	/**
+	 * Fuente canónica: una fila por participación académica.
+	 * El grano es estudiante + UD (id_programa) + periodo; no se une con
+	 * evaluaciones parciales, por lo que no multiplica intentos por evaluación.
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<IntentoAcreditacionUnidadV2DTO> obtenerIntentosCurricularesV2(Long idPersona, Long idPlan) {
@@ -128,45 +133,54 @@ public class InscripcionRepository implements IinscripcionRepository {
 		return resultado;
 	}
 
-	/**
-	 * Relaciona la baja con la inscripción por su identidad curricular disponible
-	 * en todas las bases: persona, plan, UD y evento. La tabla histórica no
-	 * garantiza la columna id_inscripcion.
-	 */
+	/** Relaciona bajas aplicadas por persona y grupo, la llave verificable de la participación. */
 	private String consultaIntentosCurricularesV2() {
-		return "SELECT ti.id AS id_inscripcion_v2, ti.idprograma AS id_programa_v2, pi.nombre_periodo AS periodo_v2, "
-				+ "rgp.id AS id_participacion_v2, rgp.id_grupo AS id_grupo_v2, rgp.calificacion_final AS calificacion_final_v2, "
-				+ "mb.tipo_baja_id AS tipo_baja_v2, mb.descripcion AS motivo_baja_v2, baja.solicitud AS solicitud_baja_v2 "
-				+ "FROM tbl_inscripciones ti LEFT JOIN tbl_eventos e ON e.id_evento=ti.idevento "
+		return "SELECT MIN(rgp.id) AS id_participacion_v2, fd.id_programa AS id_programa_v2, "
+				+ "pi.nombre_periodo AS periodo_v2, MIN(rgp.id_grupo) AS id_grupo_v2, "
+				+ "MAX(rgp.calificacion_final) AS calificacion_final_v2, "
+				+ "MAX(mb.tipo_baja_id) AS tipo_baja_v2, MAX(mb.descripcion) AS motivo_baja_v2, "
+				+ "MAX(e.fecha_final) AS fecha_fin_evento_v2, "
+				+ "CASE WHEN COUNT(DISTINCT COALESCE(rgp.calificacion_final,-999999)) > 1 THEN 1 ELSE 0 END AS calificacion_conflictiva_v2 "
+				+ "FROM rel_grupo_participante rgp "
+				+ "INNER JOIN tbl_grupos g ON g.id=rgp.id_grupo "
+				+ "INNER JOIN tbl_eventos e ON e.id_evento=g.id_evento "
+				+ "INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa=e.id_programa "
 				+ "LEFT JOIN tbl_periodos_inscripcion pi ON e.cve_evento_cap LIKE CONCAT('%',pi.nombre_periodo,'%') "
-				+ "LEFT JOIN tbl_grupos g ON g.id=ti.groupbase "
-				+ "LEFT JOIN rel_grupo_participante rgp ON rgp.id_grupo=g.id AND rgp.id_persona_participante=ti.Idpersona "
-				+ "LEFT JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa=ti.idprograma "
-				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona=ti.Idpersona AND baja.id_plan=ti.idplan "
-				+ "AND baja.id_programa=ti.idprograma AND baja.id_evento=ti.idevento "
-				+ "AND (baja.id_grupo IS NULL OR baja.id_grupo=ti.groupbase) AND baja.contabilizar=1 "
+				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona=rgp.id_persona_participante "
+				+ "AND baja.id_grupo=rgp.id_grupo AND baja.contabilizar=1 "
 				+ "LEFT JOIN rel_motivo_baja mb ON mb.id_motivo_baja=baja.motivo_baja_id "
-				+ "WHERE ti.Idpersona=:idPersona AND ti.idplan=:idPlan ORDER BY ti.id";
+				+ "WHERE rgp.id_persona_participante=:idPersona AND fd.id_plan=:idPlan "
+				+ "GROUP BY fd.id_programa, pi.nombre_periodo ORDER BY pi.nombre_periodo, fd.id_programa";
 	}
 
 	private IntentoAcreditacionUnidadV2DTO mapearIntentoCurricularV2(Object[] fila) {
 		IntentoAcreditacionUnidadV2DTO intento = new IntentoAcreditacionUnidadV2DTO();
-		Long idInscripcion = getLongValue(fila[0]);
-		intento.setIdEjecucionTecnico(idInscripcion == null ? null : "INSCRIPCION:" + idInscripcion);
+		Long idParticipacion = getLongValue(fila[0]);
+		intento.setIdEjecucionTecnico(idParticipacion == null ? null : "PARTICIPACION:" + idParticipacion);
 		intento.setIdPrograma(getLongValue(fila[1])); intento.setPeriodo(fila[2] == null ? null : String.valueOf(fila[2]));
-		intento.setIdParticipacion(getLongValue(fila[3])); intento.setIdGrupo(getLongValue(fila[4]));
-		Double calificacion = getDoubleValue(fila[5]); Integer tipoBaja = getIntegerValue(fila[6]);
-		String motivoBaja = fila[7] == null ? null : String.valueOf(fila[7]); Boolean solicitud = getIntegerValue(fila[8]) == null ? null : Boolean.valueOf(getIntegerValue(fila[8]).intValue() == 1);
+		intento.setIdParticipacion(idParticipacion); intento.setIdGrupo(getLongValue(fila[3]));
+		Double calificacion = getDoubleValue(fila[4]); Integer tipoBaja = getIntegerValue(fila[5]);
+		String motivoBaja = fila[6] == null ? null : String.valueOf(fila[6]); Date fechaFinEvento = fila[7] instanceof Date ? (Date) fila[7] : null;
+		boolean calificacionConflictiva = getIntegerValue(fila[8]) != null && getIntegerValue(fila[8]).intValue() > 0;
 		intento.setCalificacionFinal(calificacion);
+		if (intento.getIdPrograma() == null || intento.getPeriodo() == null || calificacionConflictiva) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO);
+			intento.setEvidenciaFuente(calificacionConflictiva
+					? "HISTORIAL_PARTICIPACION_CALIFICACION_CONFLICTIVA_REQUIERE_REVISION"
+					: "HISTORIAL_PARTICIPACION_SIN_IDENTIDAD_UD_O_PERIODO_REQUIERE_REVISION");
+			return intento;
+		}
 		// La baja definitiva afecta al expediente, no borra la calificacion ya registrada.
 		boolean conservaResultado = tipoBaja != null && (tipoBaja.intValue() == 3 || tipoBaja.intValue() == 6);
 		if (tipoBaja != null && !conservaResultado) {
-			mapearBajaContabilizable(intento, tipoBaja, motivoBaja, solicitud);
+			mapearBajaContabilizable(intento, tipoBaja, motivoBaja);
 		} else if (calificacion == null) {
-			intento.setEstado(intento.getIdGrupo() == null ? EstadoIntentoAcreditacionV2.NO_DETERMINADO : EstadoIntentoAcreditacionV2.EN_CURSO);
-			intento.setEvidenciaFuente(conservaResultado
-					? "REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja + ";ESTADO_EXPEDIENTE=BAJA_DEFINITIVA;INSCRIPCION_SIN_CALIFICACION"
-					: "INSCRIPCION_SIN_CALIFICACION");
+			boolean periodoCerrado = fechaFinEvento != null && fechaFinEvento.before(new Date());
+			intento.setEstado(periodoCerrado ? EstadoIntentoAcreditacionV2.NO_DETERMINADO : EstadoIntentoAcreditacionV2.EN_CURSO);
+			intento.setEvidenciaFuente((conservaResultado
+					? "REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja + ";ESTADO_EXPEDIENTE=BAJA_DEFINITIVA;"
+					: "") + (periodoCerrado ? "PARTICIPACION_SIN_CALIFICACION_EN_PERIODO_CERRADO_REQUIERE_REVISION"
+							: "PARTICIPACION_EN_CURSO_SIN_CALIFICACION"));
 		} else if (calificacion.doubleValue() < 0D || calificacion.doubleValue() > 100D) {
 			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente("NP_SIN_BAJA_REQUIERE_REVISION:CALIFICACION_FUERA_RANGO_0_100");
 		} else {
@@ -184,16 +198,13 @@ public class InscripcionRepository implements IinscripcionRepository {
 		catch (NumberFormatException e) { return 60; }
 	}
 
-	private void mapearBajaContabilizable(IntentoAcreditacionUnidadV2DTO intento, Integer tipoBaja, String motivo, Boolean solicitud) {
+	private void mapearBajaContabilizable(IntentoAcreditacionUnidadV2DTO intento, Integer tipoBaja, String motivo) {
 		String evidencia = "REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja + ";MOTIVO=" + (motivo == null ? "" : motivo);
 		if (tipoBaja.intValue() == 2 || tipoBaja.intValue() == 7 || tipoBaja.intValue() == 8) {
 			intento.setEstado(EstadoIntentoAcreditacionV2.BAJA_TEMPORAL); intento.setEvidenciaFuente(evidencia + ";MOTIVO=BAJA_TEMPORAL"); return;
 		}
-		if (tipoBaja.intValue() == 1 && Boolean.TRUE.equals(solicitud)) {
-			intento.setEstado(EstadoIntentoAcreditacionV2.BAJA_PARCIAL); intento.setEvidenciaFuente(evidencia + ";CAUSA=SOLICITADA"); return;
-		}
-		if (tipoBaja.intValue() == 1 && motivo != null && motivo.toUpperCase().contains("SERIACION")) {
-			intento.setEstado(EstadoIntentoAcreditacionV2.BAJA_PARCIAL); intento.setEvidenciaFuente(evidencia + ";CAUSA=SERIACION"); return;
+		if (tipoBaja.intValue() == 1) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.BAJA_PARCIAL); intento.setEvidenciaFuente(evidencia + ";CAUSA=BAJA_PARCIAL_APLICADA"); return;
 		}
 		if (tipoBaja.intValue() == 4) {
 			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente(evidencia + ";BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION"); return;

@@ -42,16 +42,16 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         assertEquals(r.getEvaluacionesIntentos().get(0).getOportunidadesConsumidas(), Integer.valueOf(0));
     }
     @Test public void bajasMapeadasPorTipoYMotivoNoUsanCategoriaResidual() throws Exception {
-        assertEquals(mapearBaja(1, "solicitud", 1).getEstado(), EstadoIntentoAcreditacionV2.BAJA_PARCIAL);
-        assertEquals(mapearBaja(1, "SERiACION", 0).getEstado(), EstadoIntentoAcreditacionV2.BAJA_PARCIAL);
-        assertEquals(mapearBaja(2, "", 0).getEstado(), EstadoIntentoAcreditacionV2.BAJA_TEMPORAL);
-        assertEquals(mapearBaja(7, "", 0).getEstado(), EstadoIntentoAcreditacionV2.BAJA_TEMPORAL);
-        assertEquals(mapearBaja(8, "", 0).getEstado(), EstadoIntentoAcreditacionV2.BAJA_TEMPORAL);
-        assertTrue(mapearBaja(4, "", 0).getEvidenciaFuente().contains("BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION"));
-        assertTrue(mapearBaja(5, "", 0).getEvidenciaFuente().contains("BAJA_ART40_SUBTIPO_NO_DETERMINADO"));
-        assertTrue(mapearBaja(3, "", 0).getEvidenciaFuente().contains("BAJA_DEFINITIVA"));
-        assertTrue(mapearBaja(6, "", 0).getEvidenciaFuente().contains("BAJA_DEFINITIVA"));
-        assertTrue(mapearBaja(9, "", 0).getEvidenciaFuente().contains("NO_MAPEADO_REQUIERE_REVISION"));
+        assertEquals(mapearBaja(1, "solicitud").getEstado(), EstadoIntentoAcreditacionV2.BAJA_PARCIAL);
+        assertEquals(mapearBaja(1, "SERiACION").getEstado(), EstadoIntentoAcreditacionV2.BAJA_PARCIAL);
+        assertEquals(mapearBaja(2, "").getEstado(), EstadoIntentoAcreditacionV2.BAJA_TEMPORAL);
+        assertEquals(mapearBaja(7, "").getEstado(), EstadoIntentoAcreditacionV2.BAJA_TEMPORAL);
+        assertEquals(mapearBaja(8, "").getEstado(), EstadoIntentoAcreditacionV2.BAJA_TEMPORAL);
+        assertTrue(mapearBaja(4, "").getEvidenciaFuente().contains("BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION"));
+        assertTrue(mapearBaja(5, "").getEvidenciaFuente().contains("BAJA_ART40_SUBTIPO_NO_DETERMINADO"));
+        assertTrue(mapearBaja(3, "").getEvidenciaFuente().contains("BAJA_DEFINITIVA"));
+        assertTrue(mapearBaja(6, "").getEvidenciaFuente().contains("BAJA_DEFINITIVA"));
+        assertTrue(mapearBaja(9, "").getEvidenciaFuente().contains("NO_MAPEADO_REQUIERE_REVISION"));
     }
     @Test public void gc08cLimiteAgotadoBloqueaUnidadConMotivoExplicito() {
         ResultadoEvaluacionCurricularV2DTO r = evaluar(ud(27L, intento("a", EstadoIntentoAcreditacionV2.REPROBADO),
@@ -76,11 +76,13 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         Method m=InscripcionRepository.class.getDeclaredMethod("consultaIntentosCurricularesV2"); m.setAccessible(true);
         String sql=(String)m.invoke(new InscripcionRepository());
         assertFalse(sql.contains("baja.id_inscripcion"));
-        assertTrue(sql.contains("baja.id_plan=ti.idplan"));
-        assertTrue(sql.contains("baja.id_programa=ti.idprograma"));
-        assertTrue(sql.contains("baja.id_evento=ti.idevento"));
-        assertTrue(sql.contains("ti.id AS id_inscripcion_v2"));
-        assertTrue(sql.contains("rgp.id AS id_participacion_v2"));
+        assertTrue(sql.contains("FROM rel_grupo_participante rgp"));
+        assertTrue(sql.contains("baja.id_persona=rgp.id_persona_participante"));
+        assertTrue(sql.contains("baja.id_grupo=rgp.id_grupo"));
+        assertFalse(sql.contains("groupbase"));
+        assertFalse(sql.contains("baja.solicitud"));
+        assertTrue(sql.contains("MIN(rgp.id) AS id_participacion_v2"));
+        assertTrue(sql.contains("calificacion_conflictiva_v2"));
     }
     @Test public void rn72EsPrincipioGeneralDeOptativasReprobadas() {
         UnidadEvaluacionCurricularV2DTO u=ud(26L, intento("opt", EstadoIntentoAcreditacionV2.REPROBADO)); u.setTipoUd("Optativa");
@@ -89,11 +91,23 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         assertFalse(r.getReglasEvaluadas().contains(CodigoReglaCurricularV2.RN_7_3));
         assertFalse(tieneTraza(r, CodigoReglaCurricularV2.RN_7_3));
     }
-    private IntentoAcreditacionUnidadV2DTO mapearBaja(int tipo, String motivo, int solicitud) throws Exception { return mapearFila(Integer.valueOf(tipo), null, motivo, Integer.valueOf(solicitud)); }
-    private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion) throws Exception { return mapearFila(tipo, calificacion, null, null); }
-    private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion, String motivo, Integer solicitud) throws Exception {
+    @Test public void ceroSinBajaEsReprobadaYCeroConBajaEsNpPorBaja() throws Exception {
+        assertEquals(mapearFila(null, 0D, null, new Date(System.currentTimeMillis() + 86400000L)).getEstado(), EstadoIntentoAcreditacionV2.REPROBADO);
+        assertEquals(mapearFila(Integer.valueOf(1), 0D, "", new Date(System.currentTimeMillis() + 86400000L)).getEstado(), EstadoIntentoAcreditacionV2.BAJA_PARCIAL);
+    }
+    @Test public void nuloCerradoRequiereRevisionYNuloVigenteEstaEnCurso() throws Exception {
+        assertEquals(mapearFila(null, null, null, new Date(0)).getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
+        assertEquals(mapearFila(null, null, null, new Date(System.currentTimeMillis() + 86400000L)).getEstado(), EstadoIntentoAcreditacionV2.EN_CURSO);
+    }
+    @Test public void calificacionesConflictoMismoPeriodoRequierenRevision() throws Exception {
+        assertEquals(mapearFila(null, 80D, null, new Date(System.currentTimeMillis() + 86400000L), 1).getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
+    }
+    private IntentoAcreditacionUnidadV2DTO mapearBaja(int tipo, String motivo) throws Exception { return mapearFila(Integer.valueOf(tipo), null, motivo, new Date(System.currentTimeMillis() + 86400000L)); }
+    private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion) throws Exception { return mapearFila(tipo, calificacion, null, new Date(System.currentTimeMillis() + 86400000L)); }
+    private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion, String motivo, Date fechaFin) throws Exception { return mapearFila(tipo, calificacion, motivo, fechaFin, 0); }
+    private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion, String motivo, Date fechaFin, int conflicto) throws Exception {
         Method m=InscripcionRepository.class.getDeclaredMethod("mapearIntentoCurricularV2", Object[].class); m.setAccessible(true);
-        Object[] fila=new Object[]{1L, 1L, "2026-2", 1L, 1L, calificacion, tipo, motivo, solicitud};
+        Object[] fila=new Object[]{1L, 1L, "2026-2", 1L, calificacion, tipo, motivo, fechaFin, Integer.valueOf(conflicto)};
         return (IntentoAcreditacionUnidadV2DTO)m.invoke(new InscripcionRepository(), new Object[]{fila});
     }
     private void assertEstado(UnidadEvaluacionCurricularV2DTO u, EstadoLimiteIntentosV2 esperado, int consumidas, int disponibles) {

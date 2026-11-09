@@ -37,7 +37,7 @@ public interface IinscripcionRepository {
 
 	List<PeriodoTrayectoriaV2DTO> obtenerPeriodosTrayectoriaV2(Long idPersona, Long idPlan);
 
-	/** Historial canónico por inscripción/UD; no infiere NP ni baja sin evidencia. */
+	/** Historial canónico por participación/UD/periodo; no infiere NP ni baja sin evidencia. */
 	List<IntentoAcreditacionUnidadV2DTO> obtenerIntentosCurricularesV2(Long idPersona, Long idPlan);
 
 	Optional<LimitesCargaAcademicaDTO> obtenerLimitesCargaAcademicaPorPlan(Long idPlan);

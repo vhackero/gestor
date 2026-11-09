@@ -34,15 +34,18 @@ public class SemestreReferenciaV2ServiceImpl implements SemestreReferenciaV2Serv
         for (PeriodoTrayectoriaV2DTO periodo : ordenados) {
             if (periodo == null || !esPeriodo(periodo.getPeriodo()) || periodo.getPeriodo().compareTo(periodoEvaluado) >= 0) continue;
             if (Boolean.TRUE.equals(periodo.getBajaTemporalCompleta())) { resultado.getPeriodosExcluidos().add(periodo.getPeriodo() + ":BAJA_TEMPORAL"); continue; }
-            if (Boolean.TRUE.equals(periodo.getInscripcionFormal())
-                    && !Boolean.TRUE.equals(periodo.getCalificacionFinal())
-                    && !Boolean.TRUE.equals(periodo.getNpBajaParcial())
-                    && !Boolean.TRUE.equals(periodo.getParticipacionGrupo())) {
+            if (Boolean.TRUE.equals(periodo.getCalificacionFinal()) || Boolean.TRUE.equals(periodo.getNpBajaParcial())) {
+                resultado.getPeriodosContados().add(periodo.getPeriodo()); contados++; continue;
+            }
+            if (Boolean.TRUE.equals(periodo.getParticipacionGrupo())) {
+                resultado.getPeriodosExcluidos().add(periodo.getPeriodo() + ":PARTICIPACION_SIN_CALIFICACION_FINAL");
+                inferida = true;
+                continue;
+            }
+            if (Boolean.TRUE.equals(periodo.getInscripcionFormal())) {
                 resultado.getPeriodosExcluidos().add(periodo.getPeriodo() + ":INSCRIPCION_SIN_EVIDENCIA_DE_CURSAMIENTO");
                 continue;
             }
-            if (Boolean.TRUE.equals(periodo.getInscripcionFormal())) { resultado.getPeriodosContados().add(periodo.getPeriodo()); contados++; continue; }
-            if (Boolean.TRUE.equals(periodo.getCalificacionFinal()) || Boolean.TRUE.equals(periodo.getNpBajaParcial()) || Boolean.TRUE.equals(periodo.getParticipacionGrupo())) { resultado.getPeriodosContados().add(periodo.getPeriodo() + ":INFERIDA"); contados++; inferida = true; continue; }
             resultado.getPeriodosExcluidos().add(periodo.getPeriodo() + ":SIN_INSCRIPCION");
         }
         resultado.setValor(Integer.valueOf(Math.min(ultimoSemestreMapa.intValue(), 1 + contados)));

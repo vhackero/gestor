@@ -164,6 +164,16 @@ public class ContextoEvaluacionCurricularV2AdapterTest {
         assertEquals(resultado.getEvaluacionCargaMaxima().getCargaMaximaNormativa(), Integer.valueOf(6));
     }
 
+    @Test
+    public void historialSinIntentosVerificablesNoSePresentaComoCompleto() {
+        AsistenteInscripcionContextoDTO asistente = asistente(unidad("SIN-HIST", "No inscrita", null));
+        asistente.setHistorialIntentosV2(new ArrayList<IntentoAcreditacionUnidadV2DTO>());
+
+        ContextoEvaluacionCurricularV2DTO contexto = adapter.construirDesdeAsistente(asistente);
+
+        assertFalse(contexto.getHistorialCompleto());
+    }
+
     private AsistenteInscripcionContextoDTO asistente(UnidadDecisionInscripcionDTO unidad) {
         List<UnidadDecisionInscripcionDTO> unidades = new ArrayList<UnidadDecisionInscripcionDTO>();
         unidades.add(unidad);
