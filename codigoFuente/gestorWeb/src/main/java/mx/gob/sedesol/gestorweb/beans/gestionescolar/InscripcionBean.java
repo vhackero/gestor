@@ -94,6 +94,7 @@ public class InscripcionBean extends BaseBean {
 	}
 
 	public void validarSeleccionMateria(InscripcionMateriasDTO materiaSeleccionada) {
+        contextoInscripcion.setAceptaUltimaOportunidad(false);
 		if (esSeleccionEnFalse(materiaSeleccionada)) {
 			return;
 		}
@@ -107,12 +108,29 @@ public class InscripcionBean extends BaseBean {
 
 	}
 
+    public void actualizarEvaluacion() {
+        if(contextoInscripcion==null) return;
+        try {
+            String anterior=contextoInscripcion.getEvidenciaEvaluacion();
+            contextoInscripcion=inscripcionFacade.actualizarEvaluacion(contextoInscripcion);
+            if(!java.util.Objects.equals(anterior,contextoInscripcion.getEvidenciaEvaluacion())) {
+                aceptaTerminos=false;
+                RequestContext.getCurrentInstance().update("mainForm");
+                mostrarMensajeDialog("Se actualizaron tu situación académica, carga y oferta. Revisa la selección antes de confirmar.");
+            }
+        } catch(InscripcionException ex) { mostrarMensajeDialog(ex.getMessage()); }
+        catch(Exception ex) { manejarErrorGeneral(ex); }
+    }
+
 	public void finalizarInscripcion() {
 		try {
 			inscripcionFacade.finalizarInscripcion(aceptaTerminos, contextoInscripcion);
+            String avisoOmisiones = contextoInscripcion.getMensajeOmisionReinscripcion();
+            if (avisoOmisiones == null) avisoOmisiones = "";
+            else avisoOmisiones = " " + avisoOmisiones;
 			limpiarContextoInscripcion();
-			mostrarMensajeDialog("Inscripción de unidades didácticas realizada con éxito, por favor, revisa tu correo institucional.");
-			mostrarAviso("Inscripción de unidades didácticas completada con exito.", ConstantesGestorWeb.TIPO_AVISO_SUCCESS);
+			mostrarMensajeDialog("Inscripción de unidades didácticas realizada con éxito, por favor, revisa tu correo institucional." + avisoOmisiones);
+			mostrarAviso("Inscripción de unidades didácticas completada con exito." + avisoOmisiones, ConstantesGestorWeb.TIPO_AVISO_SUCCESS);
 		} catch (InscripcionException ie) {
 			manejarErrorDeFinalizacion(ie);
 		} catch (Exception e) {

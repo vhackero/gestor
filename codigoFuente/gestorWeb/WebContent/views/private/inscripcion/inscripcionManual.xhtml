@@ -44,7 +44,45 @@
 				</div>
 			</p:panel>
 
-			<p:outputPanel styleClass="mt-2"
+			<p:poll interval="60" listener="#{inscripcionManualBean.actualizarEvaluacion}" process="@this" update=":pnlMensaje" rendered="#{inscripcionManualBean.contextoInscripcion != null}" />
+            <p:outputPanel id="avisoUltimaOportunidad" styleClass="mt-2">
+                <p:outputPanel rendered="#{not empty inscripcionManualBean.contextoInscripcion.avisoUltimaOportunidad}">
+                    <div class="alert alert-warning" role="alert"><h:outputText value="#{inscripcionManualBean.contextoInscripcion.avisoUltimaOportunidad}" /></div>
+                    <p:selectBooleanCheckbox value="#{inscripcionManualBean.contextoInscripcion.aceptaUltimaOportunidad}"><p:ajax event="change" process="@this" update="panelFinalizar" /></p:selectBooleanCheckbox>
+                    <h:outputText value=" He leído el aviso de última oportunidad de las UD seleccionadas." />
+                </p:outputPanel>
+            </p:outputPanel>
+            <p:panel header="Oportunidades registradas por unidad didáctica" toggleable="true" collapsed="true" rendered="#{not empty inscripcionManualBean.contextoInscripcion.oportunidades}">
+                <p:dataTable value="#{inscripcionManualBean.contextoInscripcion.oportunidades}" var="oportunidad" emptyMessage="No hay inscripciones anteriores.">
+                    <p:column headerText="Unidad didáctica"><h:outputText value="#{oportunidad.nombre}" /></p:column>
+                    <p:column headerText="Consumidas"><h:outputText value="#{oportunidad.consumidas}" /></p:column>
+                    <p:column headerText="Disponibles"><h:outputText value="#{oportunidad.limiteActivo ? oportunidad.disponibles : 'Sin límite aplicado'}" /></p:column>
+                </p:dataTable>
+            </p:panel>
+            <p:outputPanel id="adeudosAdicionales" styleClass="mt-2">
+                <p:panel header="Oportunidades acumuladas de optativas adicionales" rendered="#{not empty inscripcionManualBean.contextoInscripcion.estadoAcademico.adeudosOptativasAdicionales}">
+                    <p:dataTable value="#{inscripcionManualBean.contextoInscripcion.estadoAcademico.adeudosOptativasAdicionales}" var="adeudoAdicional">
+                        <p:column headerText="UD que conserva el adeudo"><h:outputText value="#{adeudoAdicional.nombrePrograma}" /></p:column>
+                        <p:column headerText="Oportunidades acumuladas"><h:outputText value="#{adeudoAdicional.intentosReprobados}" /></p:column>
+                        <p:column headerText="Disponibles para el adeudo"><h:outputText value="#{adeudoAdicional.limiteOportunidadesActivo ? adeudoAdicional.oportunidadesDisponibles : 'Sin límite aplicado'}" /></p:column>
+                        <p:column headerText="Cambios de UD realizados"><h:outputText value="#{adeudoAdicional.sustituciones}" /></p:column>
+                        <p:column headerText="Sustituciones disponibles"><h:outputText value="#{adeudoAdicional.limiteSustitucionesActivo ? adeudoAdicional.sustitucionesDisponibles : 'Sin límite aplicado'}" /></p:column>
+                        <p:column headerText="Aviso"><h:outputText value="#{inscripcionManualBean.contextoInscripcion.mensajeAdeudo(adeudoAdicional)}" /></p:column>
+                    </p:dataTable>
+                </p:panel>
+            </p:outputPanel>
+            <p:outputPanel id="conclusionEstudios" styleClass="mt-2" rendered="#{inscripcionManualBean.contextoInscripcion != null}">
+                <h:outputText value="Créditos aprobados para conclusión: #{inscripcionManualBean.contextoInscripcion.conclusionEstudios.creditosAprobados} de #{inscripcionManualBean.contextoInscripcion.conclusionEstudios.creditosRequeridos}. Obligatorias acreditadas: #{inscripcionManualBean.contextoInscripcion.conclusionEstudios.obligatoriasAcreditadas} de #{inscripcionManualBean.contextoInscripcion.conclusionEstudios.obligatoriasRequeridas}. Bloques con optativa requerida acreditada: #{inscripcionManualBean.contextoInscripcion.conclusionEstudios.bloquesCubiertos} de #{inscripcionManualBean.contextoInscripcion.conclusionEstudios.bloquesRequeridos}." />
+                <p:outputPanel rendered="#{inscripcionManualBean.contextoInscripcion.conclusionEstudios.concluido}"><div class="alert alert-info" role="alert"><h:outputText value="#{inscripcionManualBean.contextoInscripcion.conclusionEstudios.mensaje}" /></div></p:outputPanel>
+            </p:outputPanel>
+            <p:outputPanel id="evaluacionAcademica" rendered="#{inscripcionManualBean.contextoInscripcion != null}" styleClass="mt-2">
+                <h:outputText value="Situación académica: #{inscripcionManualBean.contextoInscripcion.estadoAcademico.esRegular ? 'Regular' : 'Irregular'}. Adeudos vigentes: #{inscripcionManualBean.contextoInscripcion.estadoAcademico.materiasReprobadas.size()}. Carga máxima: #{inscripcionManualBean.contextoInscripcion.cargaMaximaActual} UD, sujeta a oferta y demás reglas." />
+                <br /><h:outputText value="Semestre de referencia: #{inscripcionManualBean.contextoInscripcion.semestreReferencia}" rendered="#{inscripcionManualBean.contextoInscripcion.semestreReferencia != null}" />
+                <h:outputText value="#{inscripcionManualBean.contextoInscripcion.mensajeReferencia}" />
+                <br /><h:outputText value="Evaluación: " /><h:outputText value="#{inscripcionManualBean.contextoInscripcion.fechaEvaluacion}"><f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" timeZone="America/Mexico_City" /></h:outputText>
+                <p:commandButton value="Actualizar situación y oferta" action="#{inscripcionManualBean.actualizarEvaluacion}" process="@this" update="@form :pnlMensaje" />
+            </p:outputPanel>
+            <p:outputPanel styleClass="mt-2"
 				rendered="#{inscripcionManualBean.mostrarAviso}">
 				<div class="alert alert-#{inscripcionManualBean.tipoAviso}"
 					role="alert">#{inscripcionManualBean.textoAviso}</div>
@@ -77,10 +115,15 @@
 					<div class="alert alert-#{inscripcionManualBean.contextoInscripcion.permiteInscripcionLimiteReprobadas ? 'warning' : 'danger'} mb-0" role="alert">#{inscripcionManualBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}</div>
 				</p:outputPanel>
 
-				<div class="form-group mt-1">
+				 <p:outputPanel id="avisoOmisionReinscripcion" styleClass="mt-2"><p:outputPanel rendered="#{not empty inscripcionManualBean.contextoInscripcion.mensajeOmisionReinscripcion}">
+<div class="alert alert-#{inscripcionManualBean.contextoInscripcion.permiteInscripcionOmision ? 'warning' : 'danger'}" role="alert"><h:outputText value="#{inscripcionManualBean.contextoInscripcion.mensajeOmisionReinscripcion}" /></div></p:outputPanel></p:outputPanel>
+<div class="form-group mt-1">
 					<div class="row">
 						<div class="col-md-12">
 
+                            <h:panelGroup layout="block" rendered="#{not empty inscripcionManualBean.contextoInscripcion.estadoAcademico.adeudosOptativasAdicionales}" styleClass="alert alert-info">
+                                <h:outputText value="Puedes recursar una optativa adicional reprobada o elegir otra elegible para regularizar su adeudo. Selecciona el adeudo antes de marcar la sustituta. La inscripción conserva la deuda hasta acreditarla." />
+                            </h:panelGroup>
 							<p:dataTable id="tblEditaComp"
 								value="#{inscripcionManualBean.contextoInscripcion.estadoAcademico.materiasDisponibles}"
 								tableStyleClass="table" var="inscripcion" paginator="false"
@@ -114,12 +157,26 @@
 									<h:outputText value="#{inscripcion.subestructura}" />
 								</p:column>
 
+                                <p:column headerText="Adeudo que regulariza">
+                                    <h:outputText value="Selección ordinaria" rendered="#{not inscripcion.optativaAdicional and not inscripcion.admiteSustitucionOptativa and inscripcion.tipoPrograma eq 'Optativa'}" />
+                                    <p:selectOneMenu value="#{inscripcion.idAdeudoOptativa}" converter="javax.faces.Long"
+                                        rendered="#{inscripcion.admiteSustitucionOptativa and not empty inscripcionManualBean.contextoInscripcion.estadoAcademico.adeudosOptativasAdicionales}">
+                                        <f:selectItem itemLabel="Selecciona el adeudo" itemValue="#{null}" noSelectionOption="true" />
+                                        <f:selectItems value="#{inscripcionManualBean.contextoInscripcion.estadoAcademico.adeudosOptativasAdicionales}" var="adeudo"
+                                            itemValue="#{adeudo.idOrigen}" itemLabel="#{adeudo.descripcion}" itemDisabled="#{adeudo.enCurso or not adeudo.admiteOtraOportunidad}" />
+                                        <p:ajax process="@this" listener="#{inscripcionManualBean.validarSeleccionMateria(inscripcion)}" update="@this :mainForm:tblEditaComp :pnlMensaje :mainForm:avisoUltimaOportunidad :mainForm:adeudosAdicionales :mainForm:conclusionEstudios :mainForm:panelFinalizar" />
+                                    </p:selectOneMenu>
+                                    <h:outputText value="Optativa adicional" rendered="#{inscripcion.optativaAdicional and empty inscripcionManualBean.contextoInscripcion.estadoAcademico.adeudosOptativasAdicionales}" />
+                                </p:column>
+<p:column headerText="Aviso de oportunidades"><h:outputText value="#{inscripcionManualBean.contextoInscripcion.mensajeOportunidad(inscripcion)}" /></p:column>
+                                <p:column headerText="Oportunidades consumidas"><h:outputText value="#{inscripcion.oportunidades.consumidas}" /></p:column>
+                                <p:column headerText="Oportunidades disponibles"><h:outputText value="#{inscripcion.oportunidades.limiteActivo ? inscripcion.oportunidades.disponibles : 'Sin límite aplicado'}" /></p:column>
 								<p:column headerText="#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.tablaColumna.seleccionar')}" styleClass="text-center">
-									<p:selectBooleanCheckbox disabled="#{inscripcion.disabled}"
+									<p:selectBooleanCheckbox disabled="#{inscripcion.disabled or inscripcion.oportunidades.agotada or not inscripcionManualBean.contextoInscripcion.permiteInscripcionOmision or inscripcionManualBean.contextoInscripcion.conclusionEstudios.bloqueaInscripcion}"
 										value="#{inscripcion.check}" styleClass="cursor-pointer">
 										<p:ajax
 											listener="#{inscripcionManualBean.validarSeleccionMateria(inscripcion)}"
-											event="change" update="@this :pnlMensaje" />
+											event="change" update="@this :mainForm:tblEditaComp :pnlMensaje :mainForm:avisoUltimaOportunidad :mainForm:adeudosAdicionales :mainForm:conclusionEstudios :mainForm:avisoOmisionReinscripcion :mainForm:panelFinalizar" />
 									</p:selectBooleanCheckbox>
 								</p:column>
 
@@ -146,7 +203,7 @@
 
 				<p:outputPanel id="panelFinalizar" styleClass="text-center mt-2">
 					<p:commandButton id="finalizarBtn"
-						disabled="#{(inscripcionManualBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionManualBean.aceptaTerminos) or (not empty inscripcionManualBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado and not inscripcionManualBean.contextoInscripcion.permiteInscripcionLimiteReprobadas)}"
+						disabled="#{(inscripcionManualBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionManualBean.aceptaTerminos) or (not empty inscripcionManualBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado and not inscripcionManualBean.contextoInscripcion.permiteInscripcionLimiteReprobadas) or not inscripcionManualBean.contextoInscripcion.permiteInscripcionOmision or inscripcionManualBean.contextoInscripcion.conclusionEstudios.bloqueaInscripcion or (not empty inscripcionManualBean.contextoInscripcion.avisoUltimaOportunidad and not inscripcionManualBean.contextoInscripcion.aceptaUltimaOportunidad)}"
 						value="#{sistema.obtenerTexto('gw.inscripcionManual.panelInscripcion.boton.finalizarInscripcion')}" update="@form :pnlMensaje"
 						action="#{inscripcionManualBean.finalizarInscripcion}"
 						styleClass="btn btn-primary" />

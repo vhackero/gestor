@@ -1,6 +1,7 @@
 package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 
 import java.util.Date;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOmisionReinscripcionDTO;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +25,24 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademic
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 
 public interface IinscripcionRepository {
+    mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOportunidadesDTO obtenerConfiguracionOportunidades();
+    void guardarConfiguracionOportunidades(mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOportunidadesDTO d,Long usuario);
+    List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.OportunidadesUnidadDTO> obtenerOportunidades(Long persona,Long plan,int limite);
+    mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConclusionEstudiosDTO evaluarConclusionEstudios(Long persona, Long plan, Long convocatoria);
+    List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO> obtenerConfiguracionesConclusion();
+    void guardarConfiguracionConclusion(mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO configuracion, Long usuario);
+    String obtenerEvidenciaEvaluacion(Long persona, Long plan, java.util.Date fecha);
+    void registrarEvaluacion(Long persona, Long plan, Long proceso, String momento, String anterior, String resultado);
+
+    boolean tieneObligatoriasPendientes(Long persona, Long plan);
+
+    List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AdeudoOptativaDTO> obtenerAdeudosOptativasAdicionales(Long persona, Long plan);
+    int obtenerOptativasRequeridasAcreditadas(Long persona, Long plan, Long convocatoria);
+    long contarInscripcionesOptativa(Long persona, Long plan, Long programa);
+
+    String[] obtenerConfiguracionBajasInscripcion();
+    void guardarConfiguracionBajasInscripcion(String[] valores, Long idUsuario);
+
 
 	List<InscripcionPersonaDTO> obtenerInscripcionPorPersona(String idPersona);
 
@@ -67,6 +86,11 @@ public interface IinscripcionRepository {
 
 	/** Serializa la finalización de inscripciones de una persona dentro de la transacción. */
 	void bloquearPersonaParaInscripcion(Long idPersona);
+
+	boolean personaActivaParaInscripcion(Long idPersona);
+    ConfiguracionOmisionReinscripcionDTO obtenerConfiguracionOmisionReinscripcion();
+    void guardarConfiguracionOmisionReinscripcion(ConfiguracionOmisionReinscripcionDTO configuracion, Long idUsuario);
+    List<String> obtenerPeriodosSinReinscripcion(Long idPersona, Long idPlan, Date fechaActual);
 
 	/** Incluye cualquier materia del proceso, incluso electivas de otro plan. */
 	Boolean existeInscripcionEnProceso(Long idPersona, Long idProcesoInscripcion);

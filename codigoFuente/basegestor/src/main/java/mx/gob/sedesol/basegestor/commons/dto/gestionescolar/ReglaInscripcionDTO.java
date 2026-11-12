@@ -7,6 +7,9 @@ public class ReglaInscripcionDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private String clave;
+    private Long idPlan;
+    public Long getIdPlan() { return idPlan; }
+    public void setIdPlan(Long v) { idPlan=v; }
 	private String nombre;
 	private String descripcion;
 	private String categoria;

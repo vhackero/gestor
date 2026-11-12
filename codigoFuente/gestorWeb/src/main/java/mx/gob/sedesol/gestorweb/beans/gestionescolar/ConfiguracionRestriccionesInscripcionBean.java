@@ -2,6 +2,7 @@ package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
 import java.util.ArrayList;
 import java.util.List;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOmisionReinscripcionDTO;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -29,7 +30,59 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 	@ManagedProperty(value = "#{inscripcionService}")
 	private InscripcionService inscripcionService;
 
-	private List<ReglaInscripcionDTO> reglas;
+	    private ConfiguracionOmisionReinscripcionDTO configuracionOmisionReinscripcion;
+    public ConfiguracionOmisionReinscripcionDTO getConfiguracionOmisionReinscripcion() { return configuracionOmisionReinscripcion; }
+    public void guardarOmisionReinscripcion() {
+        try {
+            inscripcionService.guardarConfiguracionOmisionReinscripcion(configuracionOmisionReinscripcion, getUsuarioEnSession().getIdPersona());
+            consultarReglas();
+            mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada", "La regla de periodos sin reinscripción fue actualizada.");
+        } catch (Exception e) {
+            logger.error("No fue posible guardar la regla de omisiones", e);
+            mensajeError("No fue posible guardar la regla de omisiones", e);
+        }
+    }
+    private String[] configuracionBajasInscripcion;
+    public String[] getConfiguracionBajasInscripcion() { return configuracionBajasInscripcion; }
+    public List<String> getTiposBajaConUd() { return tiposBajaSeleccionados(1); }
+    public void setTiposBajaConUd(List<String> tipos) { configuracionBajasInscripcion[1]=tipos==null?"":String.join(",",tipos); }
+    public List<String> getTiposBajaSinUd() { return tiposBajaSeleccionados(2); }
+    public void setTiposBajaSinUd(List<String> tipos) { configuracionBajasInscripcion[2]=tipos==null?"":String.join(",",tipos); }
+    private List<String> tiposBajaSeleccionados(int indice) {
+        if(configuracionBajasInscripcion==null || configuracionBajasInscripcion[indice]==null || configuracionBajasInscripcion[indice].isEmpty())return new ArrayList<>();
+        return new ArrayList<>(java.util.Arrays.asList(configuracionBajasInscripcion[indice].split(",")));
+    }
+    public void guardarBajasInscripcion() {
+        try {
+            inscripcionService.guardarConfiguracionBajasInscripcion(configuracionBajasInscripcion,getUsuarioEnSession().getIdPersona());
+            consultarReglas();
+            mensaje(FacesMessage.SEVERITY_INFO,"Configuración guardada","El tratamiento de bajas en inscripción fue actualizado.");
+        } catch(Exception e) {
+            logger.error("No fue posible guardar el tratamiento de bajas",e);
+            mensajeError("No fue posible guardar el tratamiento de bajas",e);
+        }
+    }
+    private List<ReglaInscripcionDTO> reglas;
+    private mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOportunidadesDTO configuracionOportunidades;
+    public mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOportunidadesDTO getConfiguracionOportunidades() { return configuracionOportunidades; }
+    public void guardarOportunidades() {
+        try {
+            inscripcionService.guardarConfiguracionOportunidades(configuracionOportunidades,getUsuarioEnSession().getIdPersona());
+            consultarReglas();mensaje(FacesMessage.SEVERITY_INFO,"Configuración guardada","Límite y mensajes de oportunidades actualizados.");
+        } catch(Exception e) { logger.error("No fue posible guardar oportunidades",e);mensajeError("No fue posible guardar oportunidades",e); }
+    }
+    private List<ReglaInscripcionDTO> configuracionesConclusion = new ArrayList<>();
+    public List<ReglaInscripcionDTO> getConfiguracionesConclusion() { return configuracionesConclusion; }
+    public void guardarConclusion(ReglaInscripcionDTO configuracion) {
+        try {
+            inscripcionService.guardarConfiguracionConclusion(configuracion,getUsuarioEnSession().getIdPersona());
+            consultarReglas();
+            mensaje(FacesMessage.SEVERITY_INFO,"Configuración guardada","La validación de conclusión del plan fue actualizada.");
+        } catch(Exception e) {
+            logger.error("No fue posible guardar la validación de conclusión",e);
+            mensajeError("No fue posible guardar la validación de conclusión",e);
+        }
+    }
 	private ConfiguracionCargaNuevoIngresoDTO configuracionGeneralCargaNuevoIngreso;
 	private List<ConfiguracionCargaNuevoIngresoDTO> configuracionesCargaNuevoIngreso;
 	private List<ConfiguracionCargaNuevoIngresoDTO> planesDisponiblesCargaNuevoIngreso;
@@ -53,6 +106,7 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 
 	private void consultarReglas() {
 		reglas = new ArrayList<>();
+        configuracionesConclusion = new ArrayList<>();
 		configuracionGeneralCargaNuevoIngreso = new ConfiguracionCargaNuevoIngresoDTO();
 		configuracionesCargaNuevoIngreso = new ArrayList<>();
 		planesDisponiblesCargaNuevoIngreso = new ArrayList<>();
@@ -65,6 +119,11 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 		configuracionRestriccionesAcademicasGenerales = new ConfiguracionCargaRegularDTO();
 		try {
 			reglas = inscripcionService.obtenerReglasInscripcion();
+            reglas.removeIf(r->"PERMITE_INSCRIPCION_LIMITE_REPROBADAS".equals(r.getClave()));
+            configuracionOportunidades=inscripcionService.obtenerConfiguracionOportunidades();
+            configuracionesConclusion = inscripcionService.obtenerConfiguracionesConclusion();
+            configuracionBajasInscripcion = inscripcionService.obtenerConfiguracionBajasInscripcion();
+            configuracionOmisionReinscripcion = inscripcionService.obtenerConfiguracionOmisionReinscripcion();
 			configuracionGeneralCargaNuevoIngreso = inscripcionService.obtenerConfiguracionGeneralCargaNuevoIngreso();
 			configuracionesCargaNuevoIngreso = inscripcionService.obtenerConfiguracionesCargaNuevoIngreso();
 			planesDisponiblesCargaNuevoIngreso = inscripcionService.obtenerPlanesDisponiblesCargaNuevoIngreso();

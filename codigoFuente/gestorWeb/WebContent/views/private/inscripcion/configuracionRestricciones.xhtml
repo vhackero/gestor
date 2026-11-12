@@ -74,6 +74,32 @@
 					<p class="help-block mt-2">Estas reglas tienen alcance general para todos los escenarios de inscripción. El texto de cada regla indica si representa una restricción o una autorización.</p>
 				</p:panel>
 
+                <p:panel header="Oportunidades de acreditación" styleClass="fondoPrimario mt-2">
+                    <p class="help-block">Se reutilizan PERMITE_INSCRIPCION_LIMITE_REPROBADAS y LIMITE_REPROBACIONES_POR_MATERIA. Al activar la regla, el límite incluye la inscripción inicial y las inscripciones sin resultado y excluye las bajas autorizadas. Al desactivarla, se conservan los conteos, pero este límite y el aviso de última oportunidad no impiden continuar. Permitir otras UD sólo se utiliza cuando la regla está activa.</p>
+                    <h:panelGrid columns="2" cellpadding="5">
+                        <h:outputLabel value="Aplicar límite de oportunidades por UD y por adeudo adicional:" /><p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionOportunidades.aplicarLimite}" />
+                        <h:outputLabel value="Permitir continuar con otras UD elegibles:" /><p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionOportunidades.permiteContinuar}" />
+                        <h:outputLabel value="Máximo de oportunidades por UD:" /><p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionOportunidades.limite}" required="true" label="Máximo de oportunidades"><f:validateLongRange minimum="1" maximum="3" /></p:inputText>
+                        <h:outputLabel value="Máximo acumulado por adeudo adicional:" /><p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionOportunidades.limiteAcumulado}" required="true" label="Máximo acumulado"><f:validateLongRange minimum="1" maximum="3" /></p:inputText>
+                        <h:outputLabel value="Aplicar límite de cambios de UD (sustituciones):" /><p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionOportunidades.aplicarLimiteSustituciones}" />
+                        <h:outputLabel value="Máximo de sustituciones por adeudo:" /><p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionOportunidades.limiteSustituciones}" required="true" label="Máximo de sustituciones"><f:validateLongRange minimum="0" maximum="2" /></p:inputText>
+                        <h:outputLabel value="Mensaje antes de la última oportunidad:" /><p:inputTextarea value="#{configuracionRestriccionesInscripcionBean.configuracionOportunidades.mensajeUltima}" required="true" maxlength="1000" rows="4" cols="80" />
+                        <h:outputLabel value="Mensaje al agotar oportunidades:" /><p:inputTextarea value="#{configuracionRestriccionesInscripcionBean.configuracionOportunidades.mensajeAgotada}" required="true" maxlength="1000" rows="4" cols="80" />
+                        <h:outputLabel value="Mensaje de última oportunidad acumulada:" /><p:inputTextarea value="#{configuracionRestriccionesInscripcionBean.configuracionOportunidades.mensajeUltimaAcumulada}" required="true" maxlength="1000" rows="4" cols="80" />
+                        <h:outputLabel value="Mensaje de agotamiento acumulado:" /><p:inputTextarea value="#{configuracionRestriccionesInscripcionBean.configuracionOportunidades.mensajeAgotadaAcumulada}" required="true" maxlength="1000" rows="4" cols="80" />
+                        <h:outputLabel value="Mensaje de sustituciones agotadas:" /><p:inputTextarea value="#{configuracionRestriccionesInscripcionBean.configuracionOportunidades.mensajeSustituciones}" required="true" maxlength="1000" rows="4" cols="80" />
+                    </h:panelGrid>
+                    <p class="help-block">Los mensajes por UD requieren {unidad}; admiten {consumidas}, {disponibles}, {limite}. Los de adeudo adicional requieren {adeudo} y admiten también {unidad}, {sustituciones}, {max_sustituciones}. Dos sustituciones significan cambiar de A a B y después de B a C; recursar B consume una oportunidad, pero no es otro cambio de UD.</p>
+                    <p:commandButton value="Guardar oportunidades" action="#{configuracionRestriccionesInscripcionBean.guardarOportunidades}" ajax="false" />
+                </p:panel>
+                <p:panel header="Conclusión de estudios por plan" styleClass="fondoPrimario mt-2">
+                    <p class="help-block">La regla general «Validar conclusión de estudios al inscribir» debe estar activa. Aquí puedes habilitar o deshabilitar el bloqueo para cada plan. Desactivarlo conserva el cálculo de avance y las demás validaciones de inscripción.</p>
+                    <p:dataTable id="tablaConclusion" value="#{configuracionRestriccionesInscripcionBean.configuracionesConclusion}" var="conclusion" emptyMessage="No hay planes con créditos requeridos configurados.">
+                        <p:column headerText="Plan"><h:outputText value="#{conclusion.nombre}" /></p:column>
+                        <p:column headerText="Validar conclusión"><p:selectBooleanCheckbox value="#{conclusion.activa}" styleClass="reglas-check" /></p:column>
+                        <p:column headerText="Acciones"><p:commandButton value="Guardar" action="#{configuracionRestriccionesInscripcionBean.guardarConclusion(conclusion)}" ajax="false" /></p:column>
+                    </p:dataTable>
+                </p:panel>
 				<p:panel header="Nuevo ingreso - #{configuracionRestriccionesInscripcionBean.nombreReglaCargaNuevoIngreso}" styleClass="fondoPrimario mt-2">
 					<p class="help-block">#{configuracionRestriccionesInscripcionBean.descripcionReglaCargaNuevoIngreso}</p>
 					<p:panel header="Regla general para todos los planes" styleClass="mb-2">
@@ -276,10 +302,10 @@
 					<h:panelGrid columns="2" cellpadding="5">
 						<h:outputLabel value="Aplicar restricciones:" />
 						<p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.activa}" styleClass="reglas-check" />
-						<h:outputLabel value="Límite de reprobaciones por asignatura:" />
+						<h:outputLabel value="Máximo de oportunidades por UD:" />
 						<h:panelGroup>
-							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.limiteReprobacionesPorMateria}" size="4" required="true" label="Límite de reprobaciones por asignatura"><f:validateLongRange minimum="1" /></p:inputText>
-							<small class="help-block">Se mantiene la autorización general para inscribir después de alcanzar este límite.</small>
+							<h:outputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.limiteReprobacionesPorMateria}" />
+							<small class="help-block">Se modifica junto con los mensajes en el panel Oportunidades de acreditación.</small>
 						</h:panelGroup>
 						<h:outputLabel value="Semestre mínimo de los espacios electivos:" />
 						<h:panelGroup>
@@ -330,6 +356,43 @@
 					<p:commandButton value="Guardar restricciones académicas" icon="fa fa-save"
 						action="#{configuracionRestriccionesInscripcionBean.guardarRestriccionesAcademicasGenerales}" ajax="false" />
 				</p:panel>
+			                <p:panel header="Periodos consecutivos sin reinscripción" styleClass="fondoPrimario mt-2">
+                    <p class="help-block">Detecta periodos académicos concluidos sin reinscripción. No cuenta el periodo de regreso abierto, ni periodos anteriores a la primera inscripción. Una baja temporal autorizada interrumpe la secuencia.</p>
+                    <h:panelGrid columns="2" cellpadding="5">
+                        <h:outputLabel value="Aplicar regla:" />
+                        <p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionOmisionReinscripcion.activa}" />
+                        <h:outputLabel value="Periodos consecutivos:" />
+                        <p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionOmisionReinscripcion.periodosConsecutivos}" size="4" />
+                        <h:outputLabel value="Acción al alcanzar el límite:" />
+                        <p:selectOneMenu value="#{configuracionRestriccionesInscripcionBean.configuracionOmisionReinscripcion.permitirInscripcion}">
+                            <f:selectItem itemLabel="Permitir inscripción y mostrar aviso" itemValue="#{true}" />
+                            <f:selectItem itemLabel="No permitir inscripción y mostrar aviso" itemValue="#{false}" />
+                        </p:selectOneMenu>
+                        <h:outputLabel value="Mensaje al estudiante:" />
+                        <h:panelGroup>
+                            <p:inputTextarea value="#{configuracionRestriccionesInscripcionBean.configuracionOmisionReinscripcion.mensaje}" rows="4" cols="75" maxlength="1000" autoResize="false" />
+                            <small class="help-block">Usa {cantidad} para el número detectado y {periodos} para su listado. El mensaje se muestra tanto si se permite como si se impide la inscripción.</small>
+                        </h:panelGroup>
+                    </h:panelGrid>
+                    <p:commandButton value="Guardar regla de omisiones" icon="fa fa-save" action="#{configuracionRestriccionesInscripcionBean.guardarOmisionReinscripcion}" ajax="false" />
+                </p:panel>
+                <p:panel header="Bajas y conservación de situación académica" styleClass="fondoPrimario mt-2">
+                    <p class="help-block">Una baja con UD protege sus participaciones relacionadas. Una baja sin UD conserva la situación previa en su periodo y no elimina adeudos, acredita materias ni genera avance.</p>
+                    <h:panelGrid columns="2" cellpadding="5">
+                        <h:outputLabel value="Aplicar tratamiento de bajas:" />
+                        <p:selectOneMenu value="#{configuracionRestriccionesInscripcionBean.configuracionBajasInscripcion[0]}"><f:selectItem itemValue="1" itemLabel="Sí" /><f:selectItem itemValue="0" itemLabel="No" /></p:selectOneMenu>
+                        <h:outputLabel value="Tipos con UD relacionadas:" />
+                        <p:selectCheckboxMenu value="#{configuracionRestriccionesInscripcionBean.tiposBajaConUd}" label="Seleccionar tipos de baja" updateLabel="true">
+                            <f:selectItem itemValue="1" itemLabel="Parcial" /><f:selectItem itemValue="2" itemLabel="Temporal" /><f:selectItem itemValue="7" itemLabel="Temporal con asignaturas" /><f:selectItem itemValue="8" itemLabel="Temporal sin asignaturas" />
+                        </p:selectCheckboxMenu>
+                        <h:outputLabel value="Tipos sin inscripción ni UD:" />
+                        <p:selectCheckboxMenu value="#{configuracionRestriccionesInscripcionBean.tiposBajaSinUd}" label="Seleccionar tipos de baja" updateLabel="true">
+                            <f:selectItem itemValue="1" itemLabel="Parcial" /><f:selectItem itemValue="2" itemLabel="Temporal" /><f:selectItem itemValue="7" itemLabel="Temporal con asignaturas" /><f:selectItem itemValue="8" itemLabel="Temporal sin asignaturas" />
+                        </p:selectCheckboxMenu>
+                    </h:panelGrid>
+                    <p class="help-block">Selecciona al menos un tipo para cada alcance. Sin UD se reconoce persona, plan y periodo institucional; no se crean relaciones ficticias. Las bajas parciales no justifican la omisión del periodo completo. Sólo se consideran bajas contabilizables. Esta configuración no modifica las reglas de actas.</p>
+                    <p:commandButton value="Guardar tratamiento de bajas" icon="fa fa-save" action="#{configuracionRestriccionesInscripcionBean.guardarBajasInscripcion}" ajax="false" />
+                </p:panel>
 			</h:form>
 		</sec:authorize>
 	</ui:define>

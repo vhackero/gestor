@@ -9,6 +9,8 @@ import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ReenvioCorreoInscripcio
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 
 public interface InscripcionFacade {
+    InscripcionContextoDTO actualizarEvaluacion(InscripcionContextoDTO anterior) throws InscripcionException;
+
 	InscripcionContextoDTO obtenerContextoInscripcion(Long idPersona) throws InscripcionException;
 	InscripcionContextoDTO obtenerContextoInscripcionConsulta(Long idPersona) throws InscripcionException;
 	/**

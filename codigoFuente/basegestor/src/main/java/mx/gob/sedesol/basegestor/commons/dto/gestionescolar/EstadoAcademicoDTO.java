@@ -3,9 +3,28 @@ package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 import java.util.List;
 
 public class EstadoAcademicoDTO {
+    private Long idProcesoEvaluado;
+    public Long getIdProcesoEvaluado() { return idProcesoEvaluado; }
+    public void setIdProcesoEvaluado(Long v) { idProcesoEvaluado=v; }
+    private List<AdeudoOptativaDTO> adeudosOptativasAdicionales = new java.util.ArrayList<>();
+    private int optativasRequeridasAcreditadas;
+    public List<AdeudoOptativaDTO> getAdeudosOptativasAdicionales() { return adeudosOptativasAdicionales; }
+    public void setAdeudosOptativasAdicionales(List<AdeudoOptativaDTO> v) { adeudosOptativasAdicionales=v; }
+    public int getOptativasRequeridasAcreditadas() { return optativasRequeridasAcreditadas; }
+    public void setOptativasRequeridasAcreditadas(int v) { optativasRequeridasAcreditadas=v; }
+
 	private Boolean esRegular;
 	private Boolean esNuevoIngreso;
 	private Boolean primerSemestrePendiente;
+	private Integer semestrePrioritarioBajaTemporal;
+
+	public Integer getSemestrePrioritarioBajaTemporal() {
+		return semestrePrioritarioBajaTemporal;
+	}
+
+	public void setSemestrePrioritarioBajaTemporal(Integer semestre) {
+		this.semestrePrioritarioBajaTemporal = semestre;
+	}
 
 	private List<InscripcionMateriasCursadasDTO> materiasCursadas;
 	private List<InscripcionMateriasReprobadasDTO> materiasReprobadas;
