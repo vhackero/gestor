@@ -45,12 +45,12 @@ public final class OptativasAdicionalesRepository {
     @SuppressWarnings("unchecked")
     public List<AdeudoOptativaDTO> adeudos(Long persona,Long plan) {
         String sinBaja=repo.participacionSinBaja("gp","g","e","f");
-        String sql="SELECT o.id_inscripcion,COALESCE(o.id_adeudo_origen,o.id_inscripcion),o.id_inscripcion_anterior,"
-            + "i.idprograma,f.nombre_tentativo,f.cve_programa,b.nombre,s.nombre,f.id_programa_antecedente,"
-            + "MAX(CASE WHEN gp.calificacion_final>=f.calificacion_min_aprobatoria AND "+sinBaja+" THEN 1 ELSE 0 END),"
-            + "MAX(CASE WHEN gp.calificacion_final<f.calificacion_min_aprobatoria AND "+sinBaja+" THEN 1 ELSE 0 END),"
-            + "CASE WHEN COUNT(gp.id)>0 AND MAX(CASE WHEN "+sinBaja+" THEN 1 ELSE 0 END)=0 THEN 1 ELSE 0 END,"
-            + "COUNT(gp.calificacion_final) "
+        String sql="SELECT o.id_inscripcion AS inscripcion_id,COALESCE(o.id_adeudo_origen,o.id_inscripcion) AS adeudo_origen_id,o.id_inscripcion_anterior AS inscripcion_anterior_id,"
+            + "i.idprograma AS programa_id,f.nombre_tentativo AS nombre_ud,f.cve_programa AS clave_ud,b.nombre AS nombre_bloque,s.nombre AS nombre_semestre,f.id_programa_antecedente AS programa_antecedente_id,"
+            + "MAX(CASE WHEN gp.calificacion_final>=f.calificacion_min_aprobatoria AND "+sinBaja+" THEN 1 ELSE 0 END) AS tiene_acreditacion,"
+            + "MAX(CASE WHEN gp.calificacion_final<f.calificacion_min_aprobatoria AND "+sinBaja+" THEN 1 ELSE 0 END) AS tiene_reprobacion,"
+            + "CASE WHEN COUNT(gp.id)>0 AND MAX(CASE WHEN "+sinBaja+" THEN 1 ELSE 0 END)=0 THEN 1 ELSE 0 END AS excluida_por_baja,"
+            + "COUNT(gp.calificacion_final) AS resultados_registrados "
             + "FROM rel_inscripcion_optativa o JOIN tbl_inscripciones i ON i.id=o.id_inscripcion "
             + "JOIN tbl_ficha_descriptiva_programa f ON f.id_programa=i.idprograma "
             + "JOIN tbl_malla_curricular b ON b.id=f.id_eje_capacitacion JOIN tbl_malla_curricular s ON s.id=b.id_padre "
@@ -100,12 +100,13 @@ public final class OptativasAdicionalesRepository {
             + "JOIN tbl_ficha_descriptiva_programa f ON f.id_programa=:programa AND "+repo.mismaUnidad("d","f")+" WHERE d.id_plan=:plan")
             .setParameter("programa",programa).setParameter("plan",plan).getSingleResult();
         if(id==null)return 0;
-        return new OportunidadesInscripcionRepository(repo).contar(persona,plan,3).stream().filter(d->d.getIdPrograma()==n(id))
+        return new OportunidadesInscripcionRepository(repo).contar(persona,plan,new OportunidadesInscripcionRepository(repo).configuracion().getLimite()).stream().filter(d->d.getIdPrograma()==n(id))
             .mapToLong(d->d.getConsumidas()).findFirst().orElse(0);
     }
 
     public void registrar(Long idInscripcion,InscripcionInsertDTO dto) {
         if(!dto.isOptativa())return;
+        mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaRegularDTO configuracionAcademica=repo.obtenerConfiguracionRestriccionesAcademicasGenerales();
         long elegible=n(repo.entityManager.createNativeQuery("SELECT COUNT(*) FROM tbl_ficha_descriptiva_programa f JOIN rel_convocatoria_planesyprogramas cp ON cp.id_programa=f.id_programa "
             + "WHERE f.id_programa=:ud AND f.id_plan=:plan AND f.tipo='Optativa' AND f.creditos>0 AND cp.id_plan=:plan AND cp.id_convocatoria=:conv")
             .setParameter("ud",dto.getIdPrograma()).setParameter("plan",dto.getIdPlan()).setParameter("conv",dto.getIdConvocatoria()).getSingleResult());
@@ -125,7 +126,7 @@ public final class OptativasAdicionalesRepository {
             + "WHERE ip.Idpersona=:persona AND ip.idplan=:plan AND op.caracter='REQUERIDA' AND "+repo.mismaUnidad("fp","fd"))
             .setParameter("ud",dto.getIdPrograma()).setParameter("persona",dto.getIdPersona()).setParameter("plan",dto.getIdPlan()).getSingleResult())>0;
         if(deuda!=null && requeridaPrevia)throw new IllegalArgumentException("Una optativa requerida no puede sustituir el adeudo de otra.");
-        boolean adicional=deuda!=null || (aprobadas>=8 && !requeridaPrevia && !Integer.valueOf(1).equals(dto.getRecursamiento()));
+        boolean adicional=deuda!=null || (aprobadas>=configuracionAcademica.getOptativasRequeridasPlan() && !requeridaPrevia && !Integer.valueOf(1).equals(dto.getRecursamiento()));
         if(adicional && deuda==null) {
             long sinClasificar=n(repo.entityManager.createNativeQuery("SELECT COUNT(*) FROM tbl_inscripciones ip JOIN tbl_ficha_descriptiva_programa fp ON fp.id_programa=ip.idprograma "
                 + "JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa=:ud WHERE ip.Idpersona=:persona AND ip.idplan=:plan AND ip.id<:nueva "
@@ -133,8 +134,8 @@ public final class OptativasAdicionalesRepository {
                 .setParameter("ud",dto.getIdPrograma()).setParameter("persona",dto.getIdPersona()).setParameter("plan",dto.getIdPlan()).setParameter("nueva",idInscripcion).getSingleResult());
             if(sinClasificar>0)throw new IllegalArgumentException("La clasificación histórica de esta optativa requiere conciliación antes de inscribirla como adicional.");
         }
-        if(adicional && dto.getAsignatura()!=null && dto.getAsignatura().toLowerCase(Locale.ROOT).contains("inteligencia artificial"))
-            throw new IllegalArgumentException("Inteligencia Artificial sólo puede cursarse como optativa requerida.");
+        if(adicional && configuracionAcademica.esOptativaSoloRequerida(dto.getAsignatura()))
+            throw new IllegalArgumentException(configuracionAcademica.avisoOptativaSoloRequerida(dto.getAsignatura()));
         if(deuda!=null && Objects.equals(deuda.getIdInscripcionActual(),idInscripcion))throw new IllegalArgumentException("Vínculo de optativa inválido.");
         Query q=repo.entityManager.createNativeQuery("INSERT INTO rel_inscripcion_optativa (id_inscripcion,caracter,id_adeudo_origen,id_inscripcion_anterior,id_proceso,optativas_requeridas_acreditadas) "
             + "VALUES(:id,:caracter,:origen,:anterior,:proceso,:aprobadas)");

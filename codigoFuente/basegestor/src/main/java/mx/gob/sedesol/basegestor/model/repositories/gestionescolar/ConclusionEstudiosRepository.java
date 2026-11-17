@@ -26,10 +26,10 @@ public final class ConclusionEstudiosRepository {
             + "AND "+repo.mismaUnidad("f","origen")+" AND "+repo.participacionSinBaja("gp","g","e","origen");
         String curricular=aprobada+" AND "+new OptativasAdicionalesRepository(repo).sinRegistroAdicional("gp.id_persona_participante","e.id_evento","origen.id_programa");
         // Una fila por UD del mapa elegible; EXISTS evita multiplicar por participaciones o por catálogo de convocatoria.
-        String sql="SELECT f.id_programa,f.nombre_tentativo,f.tipo,f.creditos,f.id_eje_capacitacion,"
-            + "EXISTS("+aprobada+"),EXISTS("+curricular+"),"
+        String sql="SELECT f.id_programa AS programa_id,f.nombre_tentativo AS nombre_ud,f.tipo AS tipo_ud,f.creditos AS creditos_ud,f.id_eje_capacitacion AS bloque_id,"
+            + "EXISTS("+aprobada+") AS acreditada,EXISTS("+curricular+") AS acreditada_curricular,"
             + "(SELECT MIN(c.id_programa) FROM tbl_ficha_descriptiva_programa c WHERE c.id_plan=:plan AND "+repo.mismaUnidad("f","c")
-            + " AND (c.tipo='Obligatoria' OR EXISTS(SELECT 1 FROM rel_convocatoria_planesyprogramas cc WHERE cc.id_programa=c.id_programa AND cc.id_plan=:plan AND cc.id_convocatoria=:conv))) "
+            + " AND (c.tipo='Obligatoria' OR EXISTS(SELECT 1 FROM rel_convocatoria_planesyprogramas cc WHERE cc.id_programa=c.id_programa AND cc.id_plan=:plan AND cc.id_convocatoria=:conv))) AS identidad_programa_id "
             + "FROM tbl_ficha_descriptiva_programa f WHERE f.id_plan=:plan AND (f.tipo='Obligatoria' OR EXISTS("
             + "SELECT 1 FROM rel_convocatoria_planesyprogramas cp WHERE cp.id_programa=f.id_programa AND cp.id_plan=:plan AND cp.id_convocatoria=:conv)) "
             + "ORDER BY f.id_programa";

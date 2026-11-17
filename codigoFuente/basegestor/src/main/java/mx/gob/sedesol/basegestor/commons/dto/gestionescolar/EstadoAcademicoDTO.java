@@ -3,6 +3,9 @@ package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 import java.util.List;
 
 public class EstadoAcademicoDTO {
+	private EstadoInscripcionEstudianteDTO clasificacionInscripcion;
+	public EstadoInscripcionEstudianteDTO getClasificacionInscripcion() { return clasificacionInscripcion; }
+	public void setClasificacionInscripcion(EstadoInscripcionEstudianteDTO valor) { clasificacionInscripcion = valor; }
     private Long idProcesoEvaluado;
     public Long getIdProcesoEvaluado() { return idProcesoEvaluado; }
     public void setIdProcesoEvaluado(Long v) { idProcesoEvaluado=v; }

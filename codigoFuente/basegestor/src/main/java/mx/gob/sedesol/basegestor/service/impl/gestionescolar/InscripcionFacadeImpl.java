@@ -1079,6 +1079,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 				materiasDisponibles, materiasBajas);
 		estadoAcademico.setSemestrePrioritarioBajaTemporal(semestreBajaTemporal);
         estadoAcademico.setIdProcesoEvaluado(idProcesoInscripcion);
+		estadoAcademico.setClasificacionInscripcion(estadoInscripcion);
         prepararOptativasAdicionales(estadoAcademico,persona);
 
 		return estadoAcademico;
@@ -1091,6 +1092,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
     }
 
     private void prepararOptativasAdicionales(EstadoAcademicoDTO estado,InscripcionPersonaDTO persona) {
+        ConfiguracionCargaRegularDTO configuracionOptativas=obtenerConfiguracionRestriccionesAcademicasGenerales();
+        int requeridas=configuracionOptativas.getOptativasRequeridasPlan();
         List<AdeudoOptativaDTO> deudas=inscripcionService.obtenerAdeudosOptativasAdicionales(persona.getIdPersona(),persona.getIdPlan());
         int acreditadas=inscripcionService.obtenerOptativasRequeridasAcreditadas(persona.getIdPersona(),persona.getIdPlan(),persona.getIdConvocatoria());
         estado.setAdeudosOptativasAdicionales(deudas);estado.setOptativasRequeridasAcreditadas(acreditadas);
@@ -1099,8 +1102,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
         for(InscripcionMateriasDTO m:estado.getMateriasDisponibles()) {
             if(!InscripcionUtils.esMateriaOptativa(m.getTipoPrograma())) { permitidas.add(m);continue; }
             boolean requeridaReprobada=estado.getMateriasReprobadas().stream().anyMatch(d->!(d instanceof AdeudoOptativaDTO) && mismaOptativa(m,d));
-            m.setOptativaAdicional(acreditadas>=8 && !requeridaReprobada);
-            m.setAdmiteSustitucionOptativa(!requeridaReprobada && !normalizarNombreMateria(m.getNombreTentativoPrograma()).contains("INTELIGENCIA ARTIFICIAL")
+            m.setOptativaAdicional(acreditadas>=requeridas && !requeridaReprobada);
+            m.setAdmiteSustitucionOptativa(!requeridaReprobada && !configuracionOptativas.esOptativaSoloRequerida(m.getNombreTentativoPrograma())
                 && deudas.stream().anyMatch(d->!d.isEnCurso() && d.isAdmiteOtraOportunidad() && (d.isAdmiteSustitucion() || mismaOptativa(m,d))));
             AdeudoOptativaDTO propia=deudas.stream().filter(d->mismaOptativa(m,d)).findFirst().orElse(null);
             if(propia!=null) {
@@ -1109,7 +1112,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
                 m.setIdAdeudoOptativa(propia.getIdOrigen());m.setCheck(false);m.setDisabled(false);
             }
             if(m.isOptativaAdicional()) {
-                if(normalizarNombreMateria(m.getNombreTentativoPrograma()).contains("INTELIGENCIA ARTIFICIAL"))continue;
+                if(configuracionOptativas.esOptativaSoloRequerida(m.getNombreTentativoPrograma()))continue;
                 boolean puedeRegularizar=deudas.stream().anyMatch(d->!d.isEnCurso() && d.isAdmiteOtraOportunidad() && (d.isAdmiteSustitucion() || mismaOptativa(m,d)));
                 if((obligatoriasCubiertas || !deudas.isEmpty()) && !puedeRegularizar)continue;
             }
@@ -1119,6 +1122,8 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
     }
 
     private void validarOptativasAdicionales(InscripcionContextoDTO contexto) throws InscripcionException {
+        ConfiguracionCargaRegularDTO configuracionOptativas=obtenerConfiguracionRestriccionesAcademicasGenerales();
+        int requeridas=configuracionOptativas.getOptativasRequeridasPlan();
         InscripcionPersonaDTO persona=contexto.getInscripcionPersona();
         List<AdeudoOptativaDTO> deudas=inscripcionService.obtenerAdeudosOptativasAdicionales(persona.getIdPersona(),persona.getIdPlan());
         int acreditadas=inscripcionService.obtenerOptativasRequeridasAcreditadas(persona.getIdPersona(),persona.getIdPlan(),persona.getIdConvocatoria());
@@ -1144,19 +1149,19 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
                 if(!mismaOptativa(m,deuda) && !deuda.isAdmiteSustitucion())throw new InscripcionException(inscripcionService.obtenerConfiguracionOportunidades().mensajeAdeudo(inscripcionService.obtenerConfiguracionOportunidades().getMensajeSustituciones(),deuda,m.getNombreTentativoPrograma()));
                 if(deuda.isLimiteOportunidadesActivo() && inscripcionService.contarInscripcionesOptativa(persona.getIdPersona(),persona.getIdPlan(),m.getIdPrograma())>=inscripcionService.obtenerConfiguracionOportunidades().getLimite())
                     throw new InscripcionException("La optativa seleccionada agotó sus oportunidades individuales.");
-                if(nombre.contains("INTELIGENCIA ARTIFICIAL"))throw new InscripcionException("Inteligencia Artificial sólo puede cursarse como requerida.");
-            } else if(acreditadas>=8 && !requeridaReprobada && !deudas.isEmpty()) {
+                if(configuracionOptativas.esOptativaSoloRequerida(m.getNombreTentativoPrograma()))throw new InscripcionException(configuracionOptativas.avisoOptativaSoloRequerida(m.getNombreTentativoPrograma()));
+            } else if(acreditadas>=requeridas && !requeridaReprobada && !deudas.isEmpty()) {
                 throw new InscripcionException("Selecciona el adeudo de optativa adicional que deseas regularizar.");
-            } else if(acreditadas<8 && !requeridaReprobada) {
+            } else if(acreditadas<requeridas && !requeridaReprobada) {
                 nuevasRequeridas++;
             }
         }
-        if(nuevasRequeridas>Math.max(0,8-acreditadas))throw new InscripcionException("La selección excede las optativas requeridas que faltan para completar las ocho.");
+        if(nuevasRequeridas>Math.max(0,requeridas-acreditadas))throw new InscripcionException("La selección excede las optativas requeridas que faltan para completar el requisito configurado de "+requeridas+".");
     }
 
 	private EstadoInscripcionEstudianteDTO obtenerEstadoInscripcion(InscripcionPersonaDTO persona,
 			Long idProcesoInscripcion) {
-		return inscripcionService.obtenerEstadoInscripcionEstudiante(persona.getIdPersona(), idProcesoInscripcion)
+		return inscripcionService.obtenerEstadoInscripcionEstudiante(persona.getIdPersona(), idProcesoInscripcion, persona.getIdPlan())
 				.orElse(new EstadoInscripcionEstudianteDTO());
 	}
 
@@ -1519,13 +1524,9 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 			Integer semestreBajaTemporal)
 			throws InscripcionException {
 
-		if (esInscripcionExtraordinariaInicial(estadoInscripcion)) {
-			// logger.info("esInscripcionExtraordinariaInicial");
-			// Filtra las materias ofertadas y se queda solo con las del semestre ordinario
-			// y todas las optativas ofertadas (de todos los semestres y bloques).
-			materiasOfertadas = obtenerMateriasSemestreInscripcionOrdinariaConOptativas(materiasOfertadas,
-					estadoInscripcion);
-		}
+		// El tipo de catálogo del proceso no sustituye la trayectoria ni autoriza
+		// una carga distinta. Inicial y reinscripción usan las reglas académicas
+		// siguientes, conservando las UD de ambos bloques que cumplan requisitos.
 
 		if (Boolean.TRUE.equals(primerSemestrePendiente)) {
 			ConfiguracionCargaNuevoIngresoDTO configuracion = obtenerConfiguracionCargaNuevoIngresoControlada(
@@ -1546,7 +1547,7 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 		materiasOfertadas = modificaMateriasOptativasDeAcuerdoAProbacion(materiasOfertadas, materiasCursadas);
 
 		// Estudiantes regulares que no son de nuevo ingreso
-		if ((!esEstudianteNuevoIngreso && esEstudianteRegular) || esInscripcionOrdinariaInicial(estadoInscripcion)) {
+		if (!esEstudianteNuevoIngreso && esEstudianteRegular) {
 			// logger.info("Estudiantes regulares que no son de nuevo ingreso");
 			return obtenerMateriasPorAvanceAnualEstudianteRegular(materiasOfertadas, persona, semestreBajaTemporal);
 		}

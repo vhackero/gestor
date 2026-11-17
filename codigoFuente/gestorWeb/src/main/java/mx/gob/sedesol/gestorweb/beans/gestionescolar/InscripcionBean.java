@@ -15,6 +15,7 @@ import org.primefaces.context.RequestContext;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AdeudoOptativaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.inscripcion.InscripcionPreviaMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionPreviaException;
@@ -99,13 +100,34 @@ public class InscripcionBean extends BaseBean {
 			return;
 		}
 		try {
+			vincularAdeudoSinSelector(materiaSeleccionada);
 			inscripcionFacade.validarSeleccionMateria(materiaSeleccionada, contextoInscripcion);
 		} catch (InscripcionException ie) {
+			if ("Selecciona el adeudo de optativa adicional que deseas regularizar.".equals(ie.getMessage())) {
+				ie = new InscripcionException("La regularización de estas optativas requiere revisión en inscripción manual.");
+			}
 			manejarErrorSeleccionMateria(materiaSeleccionada, ie);
 		} catch (Exception e) {
 			manejarErrorGeneral(materiaSeleccionada, e);
 		}
 
+	}
+
+	/** Sin un selector visible sólo se vincula una sustitución cuando no hay ambigüedad. */
+	private void vincularAdeudoSinSelector(InscripcionMateriasDTO materia) {
+		if (materia.getIdAdeudoOptativa() != null || !materia.isOptativaAdicional()
+				|| !materia.isAdmiteSustitucionOptativa()) {
+			return;
+		}
+		List<AdeudoOptativaDTO> candidatas = new ArrayList<>();
+		for (AdeudoOptativaDTO deuda : contextoInscripcion.getEstadoAcademico().getAdeudosOptativasAdicionales()) {
+			if (!deuda.isEnCurso() && deuda.isAdmiteOtraOportunidad() && deuda.isAdmiteSustitucion()) {
+				candidatas.add(deuda);
+			}
+		}
+		if (candidatas.size() == 1) {
+			materia.setIdAdeudoOptativa(candidatas.get(0).getIdOrigen());
+		}
 	}
 
     public void actualizarEvaluacion() {

@@ -416,9 +416,16 @@ public class InscripcionRepository implements IinscripcionRepository {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Optional<EstadoInscripcionEstudianteDTO> obtenerEstadoInscripcionEstudiante(Long idPersona,
 			Long idProcesoInscripcion) {
+		// Compatibilidad del contrato anterior; el flujo de inscripción indica el plan.
+		return obtenerEstadoInscripcionEstudiante(idPersona, idProcesoInscripcion, null);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Optional<EstadoInscripcionEstudianteDTO> obtenerEstadoInscripcionEstudiante(Long idPersona,
+			Long idProcesoInscripcion, Long idPlan) {
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT ");
@@ -426,7 +433,9 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("        SELECT 1 ");
 		sql.append("        FROM tbl_inscripciones ti ");
 		sql.append("        WHERE ti.Idpersona = tp.id_persona ");
-		sql.append("    )) AS esInscripcionOrdinariaInicial, ");
+		sql.append("          AND (:idPlan IS NULL OR ti.idplan = :idPlan) ");
+		sql.append("    ) AND EXISTS(SELECT 1 FROM tbl_procesos_inscripcion po ");
+		sql.append("        WHERE po.proceso_inscripcion_id=:idProcesoInscripcion AND po.id_tipo_proceso=1)) AS esInscripcionOrdinariaInicial, ");
 		sql.append("    ");
 		sql.append("    (EXISTS( ");
 		sql.append("        SELECT 1 ");
@@ -435,6 +444,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("                SELECT 1 ");
 		sql.append("                FROM tbl_inscripciones ti2 ");
 		sql.append("                WHERE ti2.Idpersona = tp.id_persona ");
+		sql.append("                  AND (:idPlan IS NULL OR ti2.idplan = :idPlan) ");
 		sql.append("              ) ");
 		sql.append("          AND tpi.proceso_inscripcion_id = :idProcesoInscripcion ");
 		sql.append("          AND tpi.id_tipo_proceso = 2 ");
@@ -466,25 +476,31 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("                SELECT IFNULL(MAX(t.semestre), 1) + 1 ");
 		sql.append("                FROM tbl_inscripciones t ");
 		sql.append("                WHERE t.Idpersona = tp.id_persona ");
+		sql.append("                  AND (:idPlan IS NULL OR t.idplan = :idPlan) ");
 		sql.append("          ) ");
 		sql.append("          AND n NOT IN ( ");
 		sql.append("                SELECT t2.semestre ");
 		sql.append("                FROM tbl_inscripciones t2 ");
 		sql.append("                WHERE t2.Idpersona = tp.id_persona ");
+		sql.append("                  AND (:idPlan IS NULL OR t2.idplan = :idPlan) AND t2.semestre IS NOT NULL ");
 		sql.append("          ) ");
-		sql.append("    ) AS semestreInscripcionOrdinaria ");
+		sql.append("    ) AS semestreInscripcionOrdinaria, ");
+		sql.append("    NOT EXISTS(SELECT 1 FROM tbl_inscripciones inicial ");
+		sql.append("        WHERE inicial.Idpersona=tp.id_persona AND (:idPlan IS NULL OR inicial.idplan=:idPlan)) AS esInscripcionInicial ");
 		sql.append("FROM tbl_persona tp ");
 		sql.append("WHERE tp.id_persona = :idPersona");
 
 		List<Object[]> resultados = entityManager.createNativeQuery(sql.toString()).setParameter("idPersona", idPersona)
-				.setParameter("idProcesoInscripcion", idProcesoInscripcion).getResultList();
+				.setParameter("idProcesoInscripcion", idProcesoInscripcion).setParameter("idPlan", idPlan).getResultList();
 
 		if (resultados.isEmpty()) {
 			return Optional.empty();
 		}
 
 		Object[] row = resultados.get(0);
-		return Optional.of(mapearEstadoInscripcionEstudiante(row));
+		EstadoInscripcionEstudianteDTO estado = mapearEstadoInscripcionEstudiante(row);
+		estado.setIdPlan(idPlan);
+		return Optional.of(estado);
 	}
 
 	private EstadoInscripcionEstudianteDTO mapearEstadoInscripcionEstudiante(Object[] row) {
@@ -493,6 +509,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setEsInscripcionOrdinariaInicial(getBooleanValue(row[0])); // esIncripcionOrdinariaInicial
 		dto.setEsInscripcionExtraordinariaInicial(getBooleanValue(row[1])); // esInscripcionExtraordinariaInicial
 		dto.setSemestreInscripcionOrdinaria(getIntegerValue(row[2])); // semestreInscripcionOrdinaria
+		dto.setEsInscripcionInicial(getBooleanValue(row[3]));
 
 		return dto;
 	}
@@ -625,7 +642,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 		List<IntentosAsignaturasDTO> lista = new ArrayList<IntentosAsignaturasDTO>();
 
-		String consulta = "SELECT COUNT(if(rgp.calificacion_final < 60, 1,0)) as intentos_reprobados,\r\n"
+		String consulta = "SELECT COUNT(if(rgp.calificacion_final < fd.calificacion_min_aprobatoria, 1,0)) as intentos_reprobados,\r\n"
 				+ "    tpl.id_plan id_plan,\r\n" + "    fd.id_programa id_programa\r\n" + "FROM tbl_persona tp\r\n"
 				+ "         INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona AND calificacion_final IS NOT NULL\r\n"
 				+ "         INNER JOIN tbl_grupos tg ON tg.id = rgp.id_grupo\r\n"
@@ -633,7 +650,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "         INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = te.id_programa\r\n"
 				+ "         INNER JOIN tbl_planes tpl ON tpl.id_plan = fd.id_plan\r\n"
 				+ "         INNER JOIN tbl_malla_curricular tmc ON tmc.id = fd.id_eje_capacitacion\r\n"
-				+ "WHERE tp.id_persona = :id_persona and rgp.calificacion_final < 60 group by te.id_programa";
+				+ "WHERE tp.id_persona = :id_persona and rgp.calificacion_final < fd.calificacion_min_aprobatoria group by te.id_programa";
 
 		Query query = entityManager.createNativeQuery(consulta);
 		query.setParameter("id_persona", id_persona);
@@ -2428,7 +2445,9 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "MAX(CASE WHEN p.clave_parametro='SEMESTRE_MINIMO_ELECTIVAS' THEN p.valor_default END) AS semestre_minimo_electivas,"
 				+ "MAX(CASE WHEN p.clave_parametro='PRIMER_SEMESTRE_ORIGEN_ELECTIVAS' THEN p.valor_default END) AS primer_semestre_origen_electivas,"
 				+ "MAX(CASE WHEN p.clave_parametro='SEGUNDO_SEMESTRE_ORIGEN_ELECTIVAS' THEN p.valor_default END) AS segundo_semestre_origen_electivas,"
-				+ "MAX(CASE WHEN p.clave_parametro='MINIMO_OPTATIVAS_PLAN_ASISTENTE' THEN p.valor_default END) AS minimo_optativas_plan_asistente "
+				+ "MAX(CASE WHEN p.clave_parametro='OPTATIVAS_REQUERIDAS_PLAN' THEN p.valor_default END) AS optativas_requeridas_plan,"
+				+ "MAX(CASE WHEN p.clave_parametro='OPTATIVAS_SOLO_REQUERIDAS' THEN p.valor_default END) AS optativas_solo_requeridas,"
+				+ "MAX(CASE WHEN p.clave_parametro='MENSAJE_OPTATIVA_SOLO_REQUERIDA' THEN p.valor_default END) AS mensaje_optativa_solo_requerida "
 				+ "FROM cat_reglas_inscripcion cri JOIN cat_parametros_regla_inscripcion p ON p.clave_regla=cri.clave "
 				+ "WHERE cri.clave='RESTRICCIONES_ACADEMICAS_GENERALES' GROUP BY cri.nombre,cri.descripcion,cri.activo";
 		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
@@ -2454,7 +2473,10 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setSemestreMinimoElectivas(obtenerEnteroConfiguracion(row[14], "SEMESTRE_MINIMO_ELECTIVAS", "general"));
 		dto.setPrimerSemestreOrigenElectivas(obtenerEnteroConfiguracion(row[15], "PRIMER_SEMESTRE_ORIGEN_ELECTIVAS", "general"));
 		dto.setSegundoSemestreOrigenElectivas(obtenerEnteroConfiguracion(row[16], "SEGUNDO_SEMESTRE_ORIGEN_ELECTIVAS", "general"));
-		dto.setMinimoOptativasPlanAsistente(obtenerEnteroConfiguracion(row[17], "MINIMO_OPTATIVAS_PLAN_ASISTENTE", "general"));
+		dto.setOptativasRequeridasPlan(obtenerEnteroConfiguracion(row[17], "OPTATIVAS_REQUERIDAS_PLAN", "general"));
+		if(row[18]==null || row[19]==null)throw new IllegalArgumentException("Faltan parámetros de optativas requeridas/adicionales. Ejecute R080.");
+		dto.setOptativasSoloRequeridas(row[18].toString());
+		dto.setMensajeOptativaSoloRequerida(row[19].toString());
 		validarRestriccionesAcademicas(dto);
 		return dto;
 	}
@@ -2478,7 +2500,11 @@ public class InscripcionRepository implements IinscripcionRepository {
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "SEMESTRE_MINIMO_ELECTIVAS", configuracion.getSemestreMinimoElectivas().toString());
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "PRIMER_SEMESTRE_ORIGEN_ELECTIVAS", configuracion.getPrimerSemestreOrigenElectivas().toString());
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "SEGUNDO_SEMESTRE_ORIGEN_ELECTIVAS", configuracion.getSegundoSemestreOrigenElectivas().toString());
-		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "MINIMO_OPTATIVAS_PLAN_ASISTENTE", configuracion.getMinimoOptativasPlanAsistente().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "OPTATIVAS_REQUERIDAS_PLAN", configuracion.getOptativasRequeridasPlan().toString());
+		// Compatibilidad con instalaciones aún sin actualizar; no es una configuración independiente.
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "MINIMO_OPTATIVAS_PLAN_ASISTENTE", configuracion.getOptativasRequeridasPlan().toString());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "OPTATIVAS_SOLO_REQUERIDAS", configuracion.getOptativasSoloRequeridas());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "MENSAJE_OPTATIVA_SOLO_REQUERIDA", configuracion.getMensajeOptativaSoloRequerida());
 	}
 
 	private void validarRestriccionesAcademicas(ConfiguracionCargaRegularDTO configuracion) {
@@ -2494,8 +2520,16 @@ public class InscripcionRepository implements IinscripcionRepository {
 		if (configuracion.getSegundoSemestreOrigenElectivas() == null || configuracion.getSegundoSemestreOrigenElectivas() < 1) {
 			throw new IllegalArgumentException("Valor no válido: Segundo semestre de origen para electivas");
 		}
-		if (configuracion.getMinimoOptativasPlanAsistente() == null || configuracion.getMinimoOptativasPlanAsistente() < 0) {
-			throw new IllegalArgumentException("Valor no válido: Optativas requeridas para el diagnóstico del asistente");
+		if (configuracion.getOptativasRequeridasPlan() == null || configuracion.getOptativasRequeridasPlan() < 0) {
+			throw new IllegalArgumentException("Valor no válido: Optativas requeridas del plan");
+		}
+		String soloRequeridas=configuracion.getOptativasSoloRequeridas();
+		String mensaje=configuracion.getMensajeOptativaSoloRequerida();
+		if(soloRequeridas==null || soloRequeridas.length()>1000)
+			throw new IllegalArgumentException("Indica las optativas sólo requeridas; usa vacío para no aplicar exclusiones (máximo 1000 caracteres).");
+		if(mensaje==null || mensaje.trim().isEmpty() || mensaje.length()>1000 || !mensaje.contains("{unidad}")
+			|| mensaje.replace("{unidad}","").contains("{") || mensaje.replace("{unidad}","").contains("}")) {
+			throw new IllegalArgumentException("El mensaje de optativa sólo requerida debe contener {unidad}, sin otras variables, y de 1 a 1000 caracteres.");
 		}
 		if (configuracion.getPorcentajeMinimoTramoFinal() == null || configuracion.getPorcentajeMinimoTramoFinal() < 0
 				|| configuracion.getPorcentajeMinimoTramoFinal() > 100) {

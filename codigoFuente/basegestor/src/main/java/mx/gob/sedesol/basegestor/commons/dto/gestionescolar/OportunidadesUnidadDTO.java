@@ -6,8 +6,8 @@ public class OportunidadesUnidadDTO {
     private String nombre;
     private int consumidas;
     private int limite;
-    private boolean limiteActivo = true;
-    public boolean isLimiteActivo() { return limiteActivo; }
+    private Boolean limiteActivo;
+    public boolean isLimiteActivo() { if(limiteActivo==null)throw new IllegalStateException("Falta el interruptor de oportunidades configurado.");return limiteActivo; }
     public void setLimiteActivo(boolean v) { limiteActivo=v; }
     private boolean acreditada;
     public boolean isAcreditada() { return acreditada; }
@@ -23,7 +23,7 @@ public class OportunidadesUnidadDTO {
     public int getLimite() { return limite; }
     public void setLimite(int v) { limite=v; }
     public int getDisponibles() { return Math.max(0,limite-consumidas); }
-    public boolean isAgotada() { return limiteActivo && !acreditada && consumidas>=limite; }
+    public boolean isAgotada() { return isLimiteActivo() && !acreditada && consumidas>=limite; }
     public List<Long> getInscripciones() { return inscripciones; }
     public List<Long> getExcluidasPorBaja() { return excluidasPorBaja; }
 }

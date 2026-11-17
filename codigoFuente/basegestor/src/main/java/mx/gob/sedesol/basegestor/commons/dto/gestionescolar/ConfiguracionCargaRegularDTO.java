@@ -78,7 +78,34 @@ public class ConfiguracionCargaRegularDTO implements Serializable {
 	public Integer getSegundoSemestreOrigenElectivas() { return segundoSemestreOrigenElectivas; }
 	public void setSegundoSemestreOrigenElectivas(Integer valor) { this.segundoSemestreOrigenElectivas = valor; }
 
-	private Integer minimoOptativasPlanAsistente;
-	public Integer getMinimoOptativasPlanAsistente() { return minimoOptativasPlanAsistente; }
-	public void setMinimoOptativasPlanAsistente(Integer valor) { this.minimoOptativasPlanAsistente = valor; }
+	private Integer optativasRequeridasPlan;
+	private String optativasSoloRequeridas;
+	private String mensajeOptativaSoloRequerida;
+	public Integer getOptativasRequeridasPlan() { return optativasRequeridasPlan; }
+	public void setOptativasRequeridasPlan(Integer valor) { optativasRequeridasPlan=valor; }
+	public String getOptativasSoloRequeridas() { return optativasSoloRequeridas; }
+	public void setOptativasSoloRequeridas(String valor) { optativasSoloRequeridas=valor; }
+	public String getMensajeOptativaSoloRequerida() { return mensajeOptativaSoloRequerida; }
+	public void setMensajeOptativaSoloRequerida(String valor) { mensajeOptativaSoloRequerida=valor; }
+	public boolean esOptativaSoloRequerida(String nombre) {
+		if(optativasSoloRequeridas==null)throw new IllegalStateException("Falta OPTATIVAS_SOLO_REQUERIDAS.");
+		String unidad=normalizarOptativa(nombre);
+		for(String fragmento:optativasSoloRequeridas.split(";")) {
+			String criterio=normalizarOptativa(fragmento);
+			if(!criterio.isEmpty() && unidad.contains(criterio))return true;
+		}
+		return false;
+	}
+	public String avisoOptativaSoloRequerida(String nombre) {
+		if(mensajeOptativaSoloRequerida==null)throw new IllegalStateException("Falta MENSAJE_OPTATIVA_SOLO_REQUERIDA.");
+		return mensajeOptativaSoloRequerida.replace("{unidad}",java.util.Objects.toString(nombre,""));
+	}
+	private String normalizarOptativa(String nombre) {
+		return java.text.Normalizer.normalize(java.util.Objects.toString(nombre,""),java.text.Normalizer.Form.NFD)
+			.replaceAll("\\p{M}","").toLowerCase(java.util.Locale.ROOT).trim().replaceAll("\\s+"," ");
+	}
+	/** Alias de compatibilidad: el asistente usa el mismo umbral del plan. */
+	@Deprecated
+	public Integer getMinimoOptativasPlanAsistente() { return optativasRequeridasPlan; }
+	public void setMinimoOptativasPlanAsistente(Integer valor) { this.optativasRequeridasPlan = valor; }
 }

@@ -11,17 +11,17 @@ public final class OportunidadesInscripcionRepository {
     private long n(Object x) { return x==null?0:x instanceof Boolean?((Boolean)x?1:0):x instanceof Number?((Number)x).longValue():Long.parseLong(x.toString()); }
     @SuppressWarnings("unchecked")
     public ConfiguracionOportunidadesDTO configuracion() {
-        List<Object[]> rows=repo.entityManager.createNativeQuery("SELECT r.activo, "
-            + "(SELECT valor_default FROM cat_parametros_regla_inscripcion WHERE clave_regla='RESTRICCIONES_ACADEMICAS_GENERALES' AND clave_parametro='LIMITE_REPROBACIONES_POR_MATERIA'),"
-            + "MAX(CASE WHEN p.clave_parametro='MENSAJE_ULTIMA_OPORTUNIDAD' THEN p.valor_default END),"
-            + "MAX(CASE WHEN p.clave_parametro='MENSAJE_OPORTUNIDADES_AGOTADAS' THEN p.valor_default END),"
-            + "MAX(CASE WHEN p.clave_parametro='APLICAR_LIMITE_OPORTUNIDADES' THEN p.valor_default END),"
-            + "MAX(CASE WHEN p.clave_parametro='LIMITE_OPORTUNIDADES_ADICIONALES' THEN p.valor_default END),"
-            + "MAX(CASE WHEN p.clave_parametro='APLICAR_LIMITE_SUSTITUCIONES' THEN p.valor_default END),"
-            + "MAX(CASE WHEN p.clave_parametro='LIMITE_SUSTITUCIONES_ADICIONALES' THEN p.valor_default END),"
-            + "MAX(CASE WHEN p.clave_parametro='MENSAJE_ULTIMA_OPORTUNIDAD_ADICIONAL' THEN p.valor_default END),"
-            + "MAX(CASE WHEN p.clave_parametro='MENSAJE_AGOTAMIENTO_ADICIONAL' THEN p.valor_default END),"
-            + "MAX(CASE WHEN p.clave_parametro='MENSAJE_LIMITE_SUSTITUCIONES' THEN p.valor_default END) "
+        List<Object[]> rows=repo.entityManager.createNativeQuery("SELECT r.activo AS permite_continuar, "
+            + "(SELECT valor_default FROM cat_parametros_regla_inscripcion WHERE clave_regla='RESTRICCIONES_ACADEMICAS_GENERALES' AND clave_parametro='LIMITE_REPROBACIONES_POR_MATERIA') AS limite_por_ud,"
+            + "MAX(CASE WHEN p.clave_parametro='MENSAJE_ULTIMA_OPORTUNIDAD' THEN p.valor_default END) AS mensaje_ultima,"
+            + "MAX(CASE WHEN p.clave_parametro='MENSAJE_OPORTUNIDADES_AGOTADAS' THEN p.valor_default END) AS mensaje_agotada,"
+            + "MAX(CASE WHEN p.clave_parametro='APLICAR_LIMITE_OPORTUNIDADES' THEN p.valor_default END) AS aplicar_limite,"
+            + "MAX(CASE WHEN p.clave_parametro='LIMITE_OPORTUNIDADES_ADICIONALES' THEN p.valor_default END) AS limite_acumulado,"
+            + "MAX(CASE WHEN p.clave_parametro='APLICAR_LIMITE_SUSTITUCIONES' THEN p.valor_default END) AS aplicar_sustituciones,"
+            + "MAX(CASE WHEN p.clave_parametro='LIMITE_SUSTITUCIONES_ADICIONALES' THEN p.valor_default END) AS limite_sustituciones,"
+            + "MAX(CASE WHEN p.clave_parametro='MENSAJE_ULTIMA_OPORTUNIDAD_ADICIONAL' THEN p.valor_default END) AS mensaje_ultima_acumulada,"
+            + "MAX(CASE WHEN p.clave_parametro='MENSAJE_AGOTAMIENTO_ADICIONAL' THEN p.valor_default END) AS mensaje_agotada_acumulada,"
+            + "MAX(CASE WHEN p.clave_parametro='MENSAJE_LIMITE_SUSTITUCIONES' THEN p.valor_default END) AS mensaje_sustituciones "
             + "FROM cat_reglas_inscripcion r LEFT JOIN cat_parametros_regla_inscripcion p ON p.clave_regla=r.clave "
             + "WHERE r.clave='"+REGLA+"' GROUP BY r.activo").getResultList();
         if(rows.isEmpty())throw new IllegalStateException("Falta la configuración de oportunidades. Ejecute R077.");
@@ -72,7 +72,7 @@ public final class OportunidadesInscripcionRepository {
             + "JOIN tbl_eventos ae ON ae.id_evento=ag.id_evento JOIN tbl_ficha_descriptiva_programa af ON af.id_programa=ae.id_programa "
             + "WHERE agp.id_persona_participante=:persona AND agp.calificacion_final>=af.calificacion_min_aprobatoria "
             + "AND "+repo.mismaUnidad("destino","af")+" AND "+repo.participacionSinBaja("agp","ag","ae","af")+")";
-        String sql="SELECT destino.id_programa,destino.nombre_tentativo,i.id,COALESCE(e.id_evento,0),i.groupbase,i.fecha_registro,"+baja+","+aprobada+" "
+        String sql="SELECT destino.id_programa AS programa_id,destino.nombre_tentativo AS nombre_ud,i.id AS inscripcion_id,COALESCE(e.id_evento,0) AS evento_id,i.groupbase AS clave_inscripcion,i.fecha_registro AS fecha_inscripcion,"+baja+" AS excluida_por_baja,"+aprobada+" AS acreditada "
             + "FROM tbl_inscripciones i JOIN tbl_ficha_descriptiva_programa f ON f.id_programa=i.idprograma "
             + "JOIN tbl_ficha_descriptiva_programa destino ON destino.id_programa=(SELECT MIN(d.id_programa) "
             + "FROM tbl_ficha_descriptiva_programa d WHERE d.id_plan=:plan AND "+repo.mismaUnidad("d","f")+") "

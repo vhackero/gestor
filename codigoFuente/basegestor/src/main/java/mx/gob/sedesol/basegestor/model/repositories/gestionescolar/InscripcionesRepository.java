@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -1151,17 +1152,48 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		return dto;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void eliminarInscripcionesPorIds(List<Long> ids) {
 		if (ids == null || ids.isEmpty()) {
 			return;
 		}
 
-		StringBuilder sql = new StringBuilder();
-		sql.append("DELETE FROM tbl_inscripciones ");
-		sql.append("WHERE id IN (:ids)");
-
-		entityManager.createNativeQuery(sql.toString()).setParameter("ids", ids).executeUpdate();
+		List<Long> seleccion = ids.stream().filter(Objects::nonNull).distinct().sorted().collect(Collectors.toList());
+		if (seleccion.isEmpty()) {
+			return;
+		}
+		// La transacción del servicio abarca los vínculos de optativas y la inscripción.
+		entityManager.createNativeQuery("SELECT id FROM tbl_inscripciones WHERE id IN (:ids) ORDER BY id FOR UPDATE")
+				.setParameter("ids", seleccion).getResultList();
+		List<Object[]> pendientes = new ArrayList<>(entityManager.createNativeQuery(
+				"SELECT id_inscripcion, id_adeudo_origen, id_inscripcion_anterior FROM rel_inscripcion_optativa "
+				+ "WHERE id_inscripcion IN (:ids) ORDER BY id_inscripcion FOR UPDATE")
+				.setParameter("ids", seleccion).getResultList());
+		Number posteriores = (Number) entityManager.createNativeQuery(
+				"SELECT COUNT(*) FROM rel_inscripcion_optativa WHERE id_inscripcion NOT IN (:ids) "
+				+ "AND (id_adeudo_origen IN (:ids) OR id_inscripcion_anterior IN (:ids))")
+				.setParameter("ids", seleccion).getSingleResult();
+		if (posteriores.longValue() > 0) {
+			throw new IllegalArgumentException("No puedes eliminar una inscripción que es antecedente de otras optativas "
+					+ "vigentes. Revisa primero los registros posteriores de ese adeudo.");
+		}
+		// Las sustitutas se retiran antes que sus antecedentes; nunca se rompe una cadena externa.
+		while (!pendientes.isEmpty()) {
+			List<Long> hojas = pendientes.stream().filter(fila -> pendientes.stream().noneMatch(otra ->
+					!Objects.equals(getLongValue(fila[0]), getLongValue(otra[0]))
+					&& (Objects.equals(getLongValue(fila[0]), getLongValue(otra[1]))
+							|| Objects.equals(getLongValue(fila[0]), getLongValue(otra[2])))))
+					.map(fila -> getLongValue(fila[0])).collect(Collectors.toList());
+			if (hojas.isEmpty()) {
+				throw new IllegalArgumentException("La cadena de optativas requiere conciliación antes de eliminarla.");
+			}
+			entityManager.createNativeQuery("DELETE FROM rel_inscripcion_optativa WHERE id_inscripcion IN (:ids)")
+					.setParameter("ids", hojas).executeUpdate();
+			pendientes.removeIf(fila -> hojas.contains(getLongValue(fila[0])));
+		}
+		entityManager.createNativeQuery("DELETE FROM tbl_inscripciones WHERE id IN (:ids)")
+				.setParameter("ids", seleccion).executeUpdate();
 
 	}
 

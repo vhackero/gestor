@@ -125,8 +125,9 @@ public class ModificacionInscripcionBean extends BaseBean {
 
 	public void actualizarInscripcion() {
 		List<Long> idsEliminar = seleccionarLasQueNoEstanMarcadas();
-		inscripcionesService.eliminarInscripcionesPorIds(idsEliminar);
-		eliminarLasQueNoEstanMarcadasTabla();
+		if (eliminarInscripciones(idsEliminar)) {
+			eliminarLasQueNoEstanMarcadasTabla();
+		}
 	}
 
 	private void eliminarLasQueNoEstanMarcadasTabla() {
@@ -140,8 +141,22 @@ public class ModificacionInscripcionBean extends BaseBean {
 
 	public void eliminarTodaInscripcion() {
 		List<Long> idsEliminar = obtenerIdsTodasMaterias();
-		inscripcionesService.eliminarInscripcionesPorIds(idsEliminar);
-		eliminarTodasMateriasMostradasTabla();
+		if (eliminarInscripciones(idsEliminar)) {
+			eliminarTodasMateriasMostradasTabla();
+		}
+	}
+
+	private boolean eliminarInscripciones(List<Long> ids) {
+		try {
+			inscripcionesService.eliminarInscripcionesPorIds(ids);
+			return true;
+		} catch (IllegalArgumentException ex) {
+			agregarMsgWarn("No fue posible eliminar la inscripción", ex.getMessage());
+		} catch (Exception ex) {
+			logger.error("Error al eliminar las inscripciones seleccionadas", ex);
+			agregarMsgError("No fue posible eliminar la inscripción", "No se completó la operación. Revisa el registro del aplicativo.");
+		}
+		return false;
 	}
 
 	private void eliminarTodasMateriasMostradasTabla() {

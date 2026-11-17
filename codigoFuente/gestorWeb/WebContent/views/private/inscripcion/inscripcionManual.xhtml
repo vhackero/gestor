@@ -44,7 +44,6 @@
 				</div>
 			</p:panel>
 
-			<p:poll interval="60" listener="#{inscripcionManualBean.actualizarEvaluacion}" process="@this" update=":pnlMensaje" rendered="#{inscripcionManualBean.contextoInscripcion != null}" />
             <p:outputPanel id="avisoUltimaOportunidad" styleClass="mt-2">
                 <p:outputPanel rendered="#{not empty inscripcionManualBean.contextoInscripcion.avisoUltimaOportunidad}">
                     <div class="alert alert-warning" role="alert"><h:outputText value="#{inscripcionManualBean.contextoInscripcion.avisoUltimaOportunidad}" /></div>
@@ -80,7 +79,6 @@
                 <br /><h:outputText value="Semestre de referencia: #{inscripcionManualBean.contextoInscripcion.semestreReferencia}" rendered="#{inscripcionManualBean.contextoInscripcion.semestreReferencia != null}" />
                 <h:outputText value="#{inscripcionManualBean.contextoInscripcion.mensajeReferencia}" />
                 <br /><h:outputText value="Evaluación: " /><h:outputText value="#{inscripcionManualBean.contextoInscripcion.fechaEvaluacion}"><f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" timeZone="America/Mexico_City" /></h:outputText>
-                <p:commandButton value="Actualizar situación y oferta" action="#{inscripcionManualBean.actualizarEvaluacion}" process="@this" update="@form :pnlMensaje" />
             </p:outputPanel>
             <p:outputPanel styleClass="mt-2"
 				rendered="#{inscripcionManualBean.mostrarAviso}">

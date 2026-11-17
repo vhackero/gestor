@@ -322,11 +322,21 @@
 							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.segundoSemestreOrigenElectivas}" size="4" required="true" label="Segundo semestre de origen para electivas"><f:validateLongRange minimum="1" /></p:inputText>
 							<small class="help-block">Segundo semestre elegible de otros planes; no representa un rango.</small>
 						</h:panelGroup>
-						<h:outputLabel value="Optativas requeridas para el diagnóstico del asistente:" />
+						<h:outputLabel value="Optativas requeridas del plan:" />
 						<h:panelGroup>
-							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.minimoOptativasPlanAsistente}" size="4" required="true" label="Optativas requeridas para el diagnóstico del asistente"><f:validateLongRange minimum="0" /></p:inputText>
-							<small class="help-block">Determina las optativas pendientes del plan en el asistente; no impone una carga por periodo.</small>
+							<p:inputText id="optativasRequeridasPlan" value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.optativasRequeridasPlan}" size="4" required="true" label="Optativas requeridas del plan"><f:validateLongRange minimum="0" /></p:inputText>
+							<small class="help-block">Umbral común para distinguir requeridas y adicionales, validar la selección y diagnosticar pendientes en el asistente. Debe ser coherente con el mapa curricular; no impone una carga por periodo.</small>
 						</h:panelGroup>
+						<h:outputLabel value="Optativas permitidas únicamente como requeridas:" />
+                        <h:panelGroup>
+                            <p:inputText id="optativasSoloRequeridas" value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.optativasSoloRequeridas}" size="70" maxlength="1000" />
+                            <small class="help-block">Fragmentos de nombre separados por punto y coma. Vacío permite cualquier optativa adicional que cumpla las demás reglas.</small>
+                        </h:panelGroup>
+                        <h:outputLabel value="Mensaje de optativa sólo requerida:" />
+                        <h:panelGroup>
+                            <p:inputTextarea id="mensajeOptativaSoloRequerida" value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.mensajeOptativaSoloRequerida}" required="true" label="Mensaje de optativa sólo requerida" maxlength="1000" rows="3" cols="70" />
+                            <small class="help-block">Requiere {unidad}; no admite otras variables. Máximo 1000 caracteres.</small>
+                        </h:panelGroup>
 						<h:outputLabel value="Porcentaje mínimo para tramo final:" />
 						<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.porcentajeMinimoTramoFinal}" size="4" />
 						<h:outputLabel value="Semestre de inicio del tramo final:" />

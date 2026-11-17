@@ -1,22 +1,22 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
 public class ConfiguracionOportunidadesDTO {
-    private boolean aplicarLimite = true;
-    public boolean isAplicarLimite() { return aplicarLimite; }
+    private Boolean aplicarLimite;
+    public boolean isAplicarLimite() { return configurado(aplicarLimite,"APLICAR_LIMITE_OPORTUNIDADES"); }
     public void setAplicarLimite(boolean v) { aplicarLimite=v; }
     private boolean permiteContinuar;
     private int limite;
     private String mensajeUltima;
     private String mensajeAgotada;
-    private int limiteAcumulado = 3;
-    private boolean aplicarLimiteSustituciones = true;
-    private int limiteSustituciones = 2;
-    private String mensajeUltimaAcumulada = "La inscripción de {unidad} utilizará la última oportunidad del adeudo {adeudo}: {consumidas} consumidas de {limite}.";
-    private String mensajeAgotadaAcumulada = "No puedes regularizar {adeudo}: agotaste sus {limite} oportunidades acumuladas.";
-    private String mensajeSustituciones = "El adeudo {adeudo} alcanzó el límite de {max_sustituciones} sustituciones.";
+    private int limiteAcumulado;
+    private Boolean aplicarLimiteSustituciones;
+    private int limiteSustituciones;
+    private String mensajeUltimaAcumulada;
+    private String mensajeAgotadaAcumulada;
+    private String mensajeSustituciones;
     public int getLimiteAcumulado() { return limiteAcumulado; }
     public void setLimiteAcumulado(int v) { limiteAcumulado=v; }
-    public boolean isAplicarLimiteSustituciones() { return aplicarLimiteSustituciones; }
+    public boolean isAplicarLimiteSustituciones() { return configurado(aplicarLimiteSustituciones,"APLICAR_LIMITE_SUSTITUCIONES"); }
     public void setAplicarLimiteSustituciones(boolean v) { aplicarLimiteSustituciones=v; }
     public int getLimiteSustituciones() { return limiteSustituciones; }
     public void setLimiteSustituciones(int v) { limiteSustituciones=v; }
@@ -34,7 +34,12 @@ public class ConfiguracionOportunidadesDTO {
     public void setMensajeUltima(String v) { mensajeUltima=v; }
     public String getMensajeAgotada() { return mensajeAgotada; }
     public void setMensajeAgotada(String v) { mensajeAgotada=v; }
+    private boolean configurado(Boolean valor,String clave) {
+        if(valor==null)throw new IllegalStateException("Falta configurar "+clave+".");
+        return valor;
+    }
     public void validar() {
+        isAplicarLimite();isAplicarLimiteSustituciones();
         if(limite<1 || limite>3)throw new IllegalArgumentException("El límite de oportunidades debe estar entre 1 y 3.");
         if(limiteAcumulado<1 || limiteAcumulado>3)throw new IllegalArgumentException("El límite acumulado debe estar entre 1 y 3.");
         if(limiteSustituciones<0 || limiteSustituciones>2)throw new IllegalArgumentException("El límite de sustituciones debe estar entre 0 y 2.");

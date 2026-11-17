@@ -478,6 +478,12 @@ private static final Logger logger = Logger.getLogger(InscripcionServiceImpl.cla
 	}
 
 	@Override
+	public Optional<EstadoInscripcionEstudianteDTO> obtenerEstadoInscripcionEstudiante(Long idPersona,
+			Long idProcesoInscripcion, Long idPlan) {
+		return inscripcionesRepository.obtenerEstadoInscripcionEstudiante(idPersona, idProcesoInscripcion, idPlan);
+	}
+
+	@Override
 	public List<AprobacionAsignaturasPorSemestreDTO> obtenerAprobacionAsignaturasPorSemestre(Long idPlan,
 			Long idPersona) {
 		return inscripcionesRepository.obtenerAprobacionAsignaturasPorSemestre(idPlan, idPersona);
