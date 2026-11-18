@@ -43,7 +43,83 @@ El archivo [C20_HISTORIAL_RN20261117_SOLO_LECTURA.sql](/home/abelinux/gestor/rep
 - Reporta `id_plan` y nombre del PE, estudiantes distintos y UD distintas.
 - Separa tercera oportunidad en curso y revisiones por causa de la consulta de límites.
 
-La versión instalada localmente es MySQL 5.7.42. El script se ejecutó el 2026-11-17 contra `des_sisi_gestor` con una cuenta autorizada y devolvió únicamente agregados. La consulta de tercera oportunidad en curso no devolvió filas para ese corte. El script no devuelve datos personales.
+La versión instalada localmente es MySQL 5.7.42. El script se ejecutó el 2026-11-17 contra `des_sisi_gestor` con una cuenta autorizada y devolvió únicamente agregados. El script no devuelve datos personales.
+
+## Resultados C-20
+
+Fecha de corte de la ejecución: `2026-11-17 22:55:55`. Versión: `5.7.42-0ubuntu0.18.04.1`. Los resultados siguientes no contienen identificadores personales.
+
+### Límites por PE
+
+| PE | Estudiantes con 3 fallidos sin acreditar | UD con 3 fallidos sin acreditar | Estudiantes con más de 3 | UD con más de 3 | Estudiantes con al menos una UD en cualquiera de las categorías |
+|---|---:|---:|---:|---:|---:|
+| Capacitación UnADM | 0 | 0 | 0 | 0 | 0 |
+| Capacitación UnADM 2024 | 0 | 0 | 0 | 0 | 0 |
+| Contaduría y Finanzas Públicas | 27 | 6 | 0 | 0 | 27 |
+| Administración y Gestión Pública | 34 | 6 | 0 | 0 | 34 |
+| Enseñanza de la Matemática | 15 | 6 | 0 | 0 | 15 |
+| Gestión Industrial | 34 | 6 | 0 | 0 | 34 |
+| Seguridad Alimentaria | 18 | 6 | 0 | 0 | 18 |
+| Derecho | 41 | 6 | 0 | 0 | 41 |
+| Capacitación docente 2024 | 0 | 0 | 0 | 0 | 0 |
+| Capacitación docente 2025 | 0 | 0 | 0 | 0 | 0 |
+| **Total global distinto** | **169** | **36** | **0** | **0** | **169** |
+
+La fila total usa estudiantes distintos en todos los PE; las UD se suman por PE.
+
+### Tercera oportunidad en curso
+
+No se obtuvieron filas por PE y periodo. El control de corte confirmó `0` participaciones con `calificacion_final IS NULL` y `fecha_final >= CURDATE()`, `0` estudiantes distintos y `NULL` como fecha final máxima de eventos PE2024. Por ello, el cero corresponde al corte de datos sin eventos/participaciones en curso, no a una conclusión de que no haya trayectorias con oportunidades históricas.
+
+### Revisiones
+
+La consulta asigna una sola causa por registro, conforme al primer caso que cumple en este orden: calificación vacía en periodo cerrado, baja sin `contabilizar=1`, evento sin periodo. Los conteos siguientes suman registros de todos los periodos; los estudiantes y UD son distintos dentro de cada PE y causa.
+
+| PE | Causa | Registros agregados | Estudiantes distintos | UD distintas |
+|---|---|---:|---:|---:|
+| Capacitación UnADM | Calificación vacía en periodo cerrado | 10 | 10 | 1 |
+| Capacitación UnADM 2024 | Calificación vacía en periodo cerrado | 5 | 5 | 1 |
+| Contaduría y Finanzas Públicas | Calificación vacía en periodo cerrado | 10,223 | 2,565 | 47 |
+| Administración y Gestión Pública | Calificación vacía en periodo cerrado | 9,412 | 2,327 | 45 |
+| Administración y Gestión Pública | Baja sin contabilizar=1 | 2 | 1 | 2 |
+| Administración y Gestión Pública | Evento sin periodo | 6 | 1 | 6 |
+| Enseñanza de la Matemática | Calificación vacía en periodo cerrado | 1,652 | 479 | 43 |
+| Gestión Industrial | Calificación vacía en periodo cerrado | 7,234 | 1,955 | 45 |
+| Seguridad Alimentaria | Calificación vacía en periodo cerrado | 1,593 | 444 | 40 |
+| Derecho | Calificación vacía en periodo cerrado | 15,353 | 4,042 | 45 |
+| Capacitación docente 2024 | Calificación vacía en periodo cerrado | 201 | 97 | 1 |
+| Capacitación docente 2025 | Calificación vacía en periodo cerrado | 2 | 2 | 1 |
+
+Detalle por periodo para `CALIFICACION_VACIA_PERIODO_CERRADO`:
+
+| PE | Periodo | Estudiantes distintos | UD distintas |
+|---|---|---:|---:|
+| Capacitación UnADM | 2024-1 | 10 | 1 |
+| Capacitación UnADM 2024 | 2024-1 | 5 | 1 |
+| Contaduría y Finanzas Públicas | 2024-1 / 2024-2 / 2025-1 / 2025-2 / 2026-1 / 2026-2 | 31 / 28 / 66 / 70 / 121 / 2,514 | 6 / 6 / 12 / 12 / 28 / 13 |
+| Administración y Gestión Pública | 2024-1 / 2024-2 / 2025-1 / 2025-2 / 2026-1 / 2026-2 | 32 / 30 / 81 / 75 / 97 / 2,293 | 6 / 6 / 12 / 12 / 26 / 13 |
+| Enseñanza de la Matemática | 2024-1 / 2024-2 / 2025-1 / 2025-2 / 2026-1 / 2026-2 | 19 / 21 / 24 / 24 / 21 / 457 | 6 / 6 / 12 / 12 / 24 / 13 |
+| Gestión Industrial | 2024-1 / 2024-2 / 2025-1 / 2025-2 / 2026-1 / 2026-2 | 26 / 29 / 68 / 63 / 84 / 1,921 | 6 / 6 / 12 / 12 / 26 / 13 |
+| Seguridad Alimentaria | 2024-1 / 2024-2 / 2025-1 / 2025-2 / 2026-1 / 2026-2 | 15 / 24 / 18 / 18 / 25 / 415 | 6 / 6 / 12 / 12 / 22 / 11 |
+| Derecho | 2024-1 / 2024-2 / 2025-1 / 2025-2 / 2026-1 / 2026-2 | 41 / 40 / 88 / 93 / 167 / 3,933 | 6 / 6 / 12 / 12 / 26 / 13 |
+| Capacitación docente 2024 | 2024-1 | 97 | 1 |
+| Capacitación docente 2025 | 2025-1 | 2 | 1 |
+
+### Comparación de adeudos y resultados reprobatorios
+
+| PE | Universo de estudiantes | 4 o más adeudos vigentes | % universo | 4 o más resultados reprobatorios | % universo |
+|---|---:|---:|---:|---:|---:|
+| Capacitación UnADM | 10 | 0 | 0.00% | 0 | 0.00% |
+| Capacitación UnADM 2024 | 5 | 0 | 0.00% | 0 | 0.00% |
+| Contaduría y Finanzas Públicas | 4,575 | 1,929 | 42.16% | 1,987 | 43.43% |
+| Administración y Gestión Pública | 4,221 | 1,866 | 44.21% | 1,924 | 45.58% |
+| Enseñanza de la Matemática | 1,043 | 496 | 47.56% | 513 | 49.19% |
+| Gestión Industrial | 3,628 | 1,748 | 48.18% | 1,806 | 49.78% |
+| Seguridad Alimentaria | 1,063 | 592 | 55.69% | 610 | 57.38% |
+| Derecho | 6,105 | 2,022 | 33.12% | 2,121 | 34.74% |
+| Capacitación docente 2024 | 97 | 0 | 0.00% | 0 | 0.00% |
+| Capacitación docente 2025 | 2 | 0 | 0.00% | 0 | 0.00% |
+| **Total global distinto** | **20,513** | **8,653** | **42.18%** | **8,961** | **43.68%** |
 
 ## Evidencia de integración de consumidores
 
@@ -71,9 +147,8 @@ La prueba contractual de los cuatro consumidores contra un despliegue requiere e
 - `EvaluacionCurricularV2ServiceImpl`: saldo cero para UD acreditada.
 - `Bloque5HistorialRn20261117Test`: aserción GC-17 de estado acreditado y saldo cero.
 - `Bloque3OfertaYPreseleccionRn20261106Test`: evidencia Q5 sin cambio de regla.
-- `C20_HISTORIAL_RN20261117_SOLO_LECTURA.sql`: variantes MySQL 8/5.7 y agregados solicitados.
+- `C20_HISTORIAL_RN20261117_SOLO_LECTURA.sql`: consulta agregada ejecutable en MySQL 5.7.
 
 ## Limitaciones
 
 - La consistencia dinámica entre los cuatro consumidores sigue pendiente de ejecutar en el ambiente autorizado.
-- El SQL C-20 está preparado para ejecución autorizada; no se ejecutó contra una base de datos en esta entrega.
