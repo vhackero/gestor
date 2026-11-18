@@ -9,12 +9,14 @@ SELECT VERSION() AS version_mysql, NOW() AS fecha_corte,
        'C20_HISTORIAL_RN20261117' AS criterio;
 
 /*
- * VARIANTE MYSQL 8.0+
+ * VARIANTE MYSQL 8.0+ (referencia; MySQL 5.7 la ignora mediante comentario
+ * versionado). Para ejecutar el archivo completo en 5.7 use la variante 5.7
+ * que inicia después de este bloque.
  * La CTE "intento_periodo" consolida antes de contar: no duplica bloque, grupo
  * ni evaluación de la misma persona/UD/periodo. Las UD acreditadas después del
  * límite se excluyen de las categorías de límite y de adeudo.
  */
-WITH intento_periodo AS (
+/*!80000 WITH intento_periodo AS (
     SELECT fd.id_plan, rgp.id_persona_participante AS id_persona, fd.id_programa,
            pi.nombre_periodo AS periodo,
            MAX(CASE WHEN baja_aplicada.id_persona IS NULL
@@ -74,10 +76,10 @@ SELECT l.id_plan, p.nombre AS nombre_pe, l.periodo_limite,
  WHERE l.periodo_limite IS NOT NULL
    AND l.tiene_acreditacion = 0
  GROUP BY l.id_plan, p.nombre, l.periodo_limite
- ORDER BY l.id_plan, l.periodo_limite;
+ ORDER BY l.id_plan, l.periodo_limite; */
 
 /* Categoría sin límite: tercera oportunidad actualmente en curso, por PE y periodo. */
-WITH intento_periodo AS (
+/*!80000 WITH intento_periodo AS (
     SELECT fd.id_plan, rgp.id_persona_participante AS id_persona, fd.id_programa,
            pi.nombre_periodo AS periodo,
            MAX(CASE WHEN baja.id_persona IS NULL AND rgp.calificacion_final >= 0 AND rgp.calificacion_final < 60 THEN 1 ELSE 0 END) AS fallido_confirmado,
@@ -96,10 +98,10 @@ SELECT a.id_plan,p.nombre AS nombre_pe,a.periodo,
        COUNT(DISTINCT a.id_programa) AS uds_tercera_oportunidad_en_curso
   FROM acumulado a JOIN tbl_planes p ON p.id_plan=a.id_plan
  WHERE a.fallidos_acumulados=2 AND a.en_curso=1
- GROUP BY a.id_plan,p.nombre,a.periodo ORDER BY a.id_plan,a.periodo;
+ GROUP BY a.id_plan,p.nombre,a.periodo ORDER BY a.id_plan,a.periodo; */
 
 /* Categorías en revisión, separadas por causa y por PE/periodo. */
-WITH intento_periodo AS (
+/*!80000 WITH intento_periodo AS (
     SELECT fd.id_plan,rgp.id_persona_participante AS id_persona,fd.id_programa,pi.nombre_periodo AS periodo,
            MAX(CASE WHEN baja_aplicada.id_persona IS NULL AND rgp.calificacion_final IS NULL AND e.fecha_final<CURDATE() THEN 1 ELSE 0 END) AS calificacion_vacia_periodo_cerrado,
            MAX(CASE WHEN baja_registrada.id_persona IS NOT NULL AND COALESCE(baja_registrada.contabilizar,0)<>1 THEN 1 ELSE 0 END) AS baja_sin_contabilizar,
@@ -119,10 +121,10 @@ SELECT r.id_plan,p.nombre,r.periodo,'BAJA_SIN_CONTABILIZAR',COUNT(DISTINCT r.id_
   FROM intento_periodo r JOIN tbl_planes p ON p.id_plan=r.id_plan WHERE r.baja_sin_contabilizar=1 GROUP BY r.id_plan,p.nombre,r.periodo
 UNION ALL
 SELECT r.id_plan,p.nombre,COALESCE(r.periodo,'SIN_PERIODO'),'EVENTO_SIN_PERIODO',COUNT(DISTINCT r.id_persona),COUNT(DISTINCT r.id_programa)
-  FROM intento_periodo r JOIN tbl_planes p ON p.id_plan=r.id_plan WHERE r.evento_sin_periodo=1 GROUP BY r.id_plan,p.nombre,COALESCE(r.periodo,'SIN_PERIODO');
+  FROM intento_periodo r JOIN tbl_planes p ON p.id_plan=r.id_plan WHERE r.evento_sin_periodo=1 GROUP BY r.id_plan,p.nombre,COALESCE(r.periodo,'SIN_PERIODO'); */
 
 /* C-19: primero se consolida persona+UD+periodo; una acreditación posterior elimina el adeudo. */
-WITH intento_periodo AS (
+/*!80000 WITH intento_periodo AS (
     SELECT fd.id_plan,rgp.id_persona_participante AS id_persona,fd.id_programa,pi.nombre_periodo AS periodo,
            MAX(CASE WHEN baja.id_persona IS NULL AND rgp.calificacion_final>=0 AND rgp.calificacion_final<60 THEN 1 ELSE 0 END) AS reprobada,
            MAX(CASE WHEN baja.id_persona IS NULL AND rgp.calificacion_final>=60 THEN 1 ELSE 0 END) AS acreditada
@@ -140,11 +142,11 @@ WITH intento_periodo AS (
 SELECT pp.id_plan,p.nombre AS nombre_pe,
        COUNT(DISTINCT CASE WHEN pp.adeudos_vigentes>=4 THEN pp.id_persona END) AS estudiantes_con_cuatro_o_mas_adeudos,
        COUNT(DISTINCT CASE WHEN pp.resultados_reprobatorios>=4 THEN pp.id_persona END) AS estudiantes_con_cuatro_o_mas_resultados_reprobatorios
-  FROM por_persona pp JOIN tbl_planes p ON p.id_plan=pp.id_plan GROUP BY pp.id_plan,p.nombre ORDER BY pp.id_plan;
+  FROM por_persona pp JOIN tbl_planes p ON p.id_plan=pp.id_plan GROUP BY pp.id_plan,p.nombre ORDER BY pp.id_plan; */
 
 /*
- * VARIANTE MYSQL 5.7: sustituye SUM() OVER por totales por UD. Ejecutar en
- * lugar de las tres consultas WITH anteriores si SELECT VERSION() indica 5.7.
+ * VARIANTE MYSQL 5.7: sustituye SUM() OVER por totales por UD. Es la ruta que
+ * ejecuta este archivo con MySQL 5.7.42.
  * Mantiene el mismo grano; para obtener el periodo límite, agrega primero por
  * persona+UD+periodo y une el total acumulado por UD en una tabla derivada.
  */

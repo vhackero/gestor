@@ -36,14 +36,14 @@ Por tanto, el motor actual prioriza la UD de quinto como regularización mediant
 
 El archivo [C20_HISTORIAL_RN20261117_SOLO_LECTURA.sql](/home/abelinux/gestor/repo/gestor/documentacion/C20_HISTORIAL_RN20261117_SOLO_LECTURA.sql) contiene exclusivamente `SELECT` y comienza con `SELECT VERSION()`.
 
-- Variante MySQL 8: usa `SUM() OVER (PARTITION BY persona, UD ORDER BY periodo)`.
-- Variante MySQL 5.7: usa totales por UD sin funciones de ventana.
+- Variante MySQL 8: usa `SUM() OVER (PARTITION BY persona, UD ORDER BY periodo)` y queda dentro de comentarios versionados `/*!80000 ... */`.
+- Variante MySQL 5.7: es la ruta ejecutable por defecto y usa totales por UD sin funciones de ventana.
 - Consolida primero persona + UD + periodo.
 - Excluye de límite y adeudo las UD con acreditación posterior verificable.
 - Reporta `id_plan` y nombre del PE, estudiantes distintos y UD distintas.
 - Separa tercera oportunidad en curso y revisiones por causa de la consulta de límites.
 
-La versión del motor de base de datos no se consultó en esta entrega: su ejecución requiere una cuenta autorizada. El script no devuelve datos personales.
+La versión instalada localmente es MySQL 5.7.42. La conexión de comprobación con el usuario local sin contraseña devolvió `ERROR 1045`; la ejecución requiere una cuenta autorizada. El script no devuelve datos personales.
 
 ## Evidencia de integración de consumidores
 
