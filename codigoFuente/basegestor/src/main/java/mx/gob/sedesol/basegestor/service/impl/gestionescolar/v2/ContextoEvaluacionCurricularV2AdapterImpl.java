@@ -209,6 +209,10 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         } else if (ultimoResultado == EstadoIntentoAcreditacionV2.EN_CURSO) {
             unidad.setEstado(EstadoUnidadCurricularV2.EN_CURSO);
             unidad.getReferenciasHistoricas().add("HISTORIAL_CANONICO:EN_CURSO");
+        } else if (ultimoResultado == EstadoIntentoAcreditacionV2.PENDIENTE_CALIFICACION) {
+            unidad.setEstado(EstadoUnidadCurricularV2.NO_DETERMINADO);
+            unidad.setCausa(CausaPendienteUnidadV2.NO_DETERMINADA);
+            unidad.getReferenciasHistoricas().add("HISTORIAL_CANONICO:PENDIENTE_CALIFICACION");
         }
     }
 
@@ -313,6 +317,13 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         parametros.setCtr01PeriodoInicio(configuracion.getCtr01PeriodoInicio());
         parametros.setCtr01Semestre(configuracion.getCtr01SemestreObjetivo());
         parametros.setCatalogoOptativas(configuracion.getParametrosCurriculares().getCatalogoOptativas());
+        parametros.setTratamientoCeroSinBaja(configuracion.getParametrosCurriculares().getTratamientoCeroSinBaja());
+        parametros.setTratamientoRecursamientoQuinto(configuracion.getParametrosCurriculares().getTratamientoRecursamientoQuinto());
+        parametros.setTratamientoOptativasFaltantesQuintoAOcho(configuracion.getParametrosCurriculares().getTratamientoOptativasFaltantesQuintoAOcho());
+        parametros.setTratamientoBloqueOptativaBajaOSustituta(configuracion.getParametrosCurriculares().getTratamientoBloqueOptativaBajaOSustituta());
+        parametros.setTratamientoUdB2SeriadaCarga(configuracion.getParametrosCurriculares().getTratamientoUdB2SeriadaCarga());
+        parametros.setDocumentoRespaldoDecisionesPendientes(configuracion.getParametrosCurriculares().getDocumentoRespaldoDecisionesPendientes());
+        parametros.setVigenciaDecisionesPendientes(configuracion.getParametrosCurriculares().getVigenciaDecisionesPendientes());
         parametros.setPeriodoComunicadoInstitucional(configuracion.getParametrosCurriculares().getPeriodoComunicadoInstitucional());
         parametros.setTextoComunicadoInstitucional(configuracion.getParametrosCurriculares().getTextoComunicadoInstitucional());
         parametros.setReferenciaComunicadoInstitucional(configuracion.getParametrosCurriculares().getReferenciaComunicadoInstitucional());

@@ -10,5 +10,6 @@ public enum EstadoIntentoAcreditacionV2 {
     NO_CURSADA,
     NO_INSCRITA,
     EN_CURSO,
+    PENDIENTE_CALIFICACION,
     NO_DETERMINADO
 }

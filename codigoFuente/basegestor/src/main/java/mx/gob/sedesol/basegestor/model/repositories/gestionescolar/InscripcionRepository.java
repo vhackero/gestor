@@ -141,7 +141,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "pi.nombre_periodo AS periodo_v2, MIN(rgp.id_grupo) AS id_grupo_v2, "
 				+ "MAX(rgp.calificacion_final) AS calificacion_final_v2, "
 				+ "MAX(mb.tipo_baja_id) AS tipo_baja_v2, MAX(mb.descripcion) AS motivo_baja_v2, "
-				+ "MAX(e.fecha_final) AS fecha_fin_evento_v2, "
+				+ "MAX(e.fecha_final) AS fecha_fin_evento_v2, MAX(g.acta_cerrada) AS acta_cerrada_v2, "
 				// La fecha de un bloque no cierra por si sola el periodo academico.
 				+ "MAX(calendario.fecha_final_periodo) AS fecha_fin_periodo_v2, "
 				+ "CASE WHEN COUNT(DISTINCT COALESCE(rgp.calificacion_final,-999999)) > 1 THEN 1 ELSE 0 END AS calificacion_conflictiva_v2, "
@@ -173,10 +173,13 @@ public class InscripcionRepository implements IinscripcionRepository {
 		intento.setIdParticipacion(idParticipacion); intento.setIdGrupo(getLongValue(fila[3]));
 		Double calificacion = getDoubleValue(fila[4]); Integer tipoBaja = getIntegerValue(fila[5]);
 		String motivoBaja = fila[6] == null ? null : String.valueOf(fila[6]); Date fechaFinEvento = fila[7] instanceof Date ? (Date) fila[7] : null;
-		Date fechaFinPeriodo = fila.length > 8 && fila[8] instanceof Date ? (Date) fila[8] : null;
-		boolean calificacionConflictiva = getIntegerValue(fila[9]) != null && getIntegerValue(fila[9]).intValue() > 0;
-		boolean bajaSinConfirmar = fila.length > 10 && getIntegerValue(fila[10]) != null && getIntegerValue(fila[10]).intValue() > 0;
+		boolean contratoConActa = fila.length > 11;
+		boolean actaCerrada = contratoConActa && getIntegerValue(fila[8]) != null && getIntegerValue(fila[8]).intValue() > 0;
+		Date fechaFinPeriodo = fila.length > (contratoConActa ? 9 : 8) && fila[contratoConActa ? 9 : 8] instanceof Date ? (Date) fila[contratoConActa ? 9 : 8] : null;
+		boolean calificacionConflictiva = getIntegerValue(fila[contratoConActa ? 10 : 9]) != null && getIntegerValue(fila[contratoConActa ? 10 : 9]).intValue() > 0;
+		boolean bajaSinConfirmar = fila.length > (contratoConActa ? 11 : 10) && getIntegerValue(fila[contratoConActa ? 11 : 10]) != null && getIntegerValue(fila[contratoConActa ? 11 : 10]).intValue() > 0;
 		intento.setCalificacionFinal(calificacion);
+		intento.setActaCerrada(Boolean.valueOf(actaCerrada));
 		if (intento.getIdPrograma() == null || intento.getPeriodo() == null || calificacionConflictiva || (bajaSinConfirmar && tipoBaja == null)) {
 			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO);
 			intento.setEvidenciaFuente(bajaSinConfirmar && tipoBaja == null
@@ -191,6 +194,12 @@ public class InscripcionRepository implements IinscripcionRepository {
 		if (tipoBaja != null && !conservaResultado) {
 			mapearBajaContabilizable(intento, tipoBaja, motivoBaja);
 		} else if (calificacion == null) {
+			if (actaCerrada) {
+				intento.setEstado(EstadoIntentoAcreditacionV2.PENDIENTE_CALIFICACION);
+				intento.setEvidenciaFuente("PENDIENTE_CALIFICACION:ACTA_CERRADA_SIN_CALIFICACION;FECHA_FIN_EVENTO="
+						+ (fechaFinEvento == null ? "SIN_DATO" : fechaFinEvento));
+				return intento;
+			}
 			// El cierre se determina por periodo academico, no por el bloque que genero la participacion.
 			boolean periodoCerrado = fechaFinPeriodo == null || fechaFinPeriodo.before(new Date());
 			intento.setEstado(periodoCerrado ? EstadoIntentoAcreditacionV2.NO_DETERMINADO : EstadoIntentoAcreditacionV2.EN_CURSO);

@@ -13,6 +13,8 @@ public class IntentoAcreditacionUnidadV2DTO implements Serializable {
     private Long idParticipacion;
     private EstadoIntentoAcreditacionV2 estado;
     private Double calificacionFinal;
+    /** El acta del grupo cerró sin calificación final; no equivale a EN_CURSO. */
+    private Boolean actaCerrada;
     private Boolean recursamientoMejora = Boolean.FALSE;
     private String evidenciaFuente;
     public String getIdEjecucionTecnico() { return idEjecucionTecnico; }
@@ -31,6 +33,8 @@ public class IntentoAcreditacionUnidadV2DTO implements Serializable {
     public void setEstado(EstadoIntentoAcreditacionV2 valor) { estado = valor; }
     public Double getCalificacionFinal() { return calificacionFinal; }
     public void setCalificacionFinal(Double valor) { calificacionFinal = valor; }
+    public Boolean getActaCerrada() { return actaCerrada; }
+    public void setActaCerrada(Boolean valor) { actaCerrada = valor; }
     public Boolean getRecursamientoMejora() { return recursamientoMejora; }
     public void setRecursamientoMejora(Boolean valor) { recursamientoMejora = valor; }
     public String getEvidenciaFuente() { return evidenciaFuente; }

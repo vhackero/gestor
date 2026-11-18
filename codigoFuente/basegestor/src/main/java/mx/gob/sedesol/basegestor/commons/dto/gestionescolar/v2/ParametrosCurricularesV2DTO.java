@@ -20,6 +20,14 @@ public class ParametrosCurricularesV2DTO implements Serializable {
     private String ambito;
     /** Tabla 2 RN-7.1; formato CLAVE:SEMESTRE, configurado por ámbito y vigencia. */
     private String catalogoOptativas;
+    /** Decisiones pendientes de confirmación institucional; los valores por omisión preservan RN vigente. */
+    private String tratamientoCeroSinBaja = "REPROBACION";
+    private String tratamientoRecursamientoQuinto = "AVANCE_CONDICIONADO";
+    private String tratamientoOptativasFaltantesQuintoAOcho = "BLOQUEAR";
+    private String tratamientoBloqueOptativaBajaOSustituta = "AMBOS_BLOQUES";
+    private String tratamientoUdB2SeriadaCarga = "CUENTA_MIN_Y_MAX";
+    private String documentoRespaldoDecisionesPendientes;
+    private String vigenciaDecisionesPendientes;
     /** Comunicado institucional de consulta aplicable a un periodo específico. */
     private String periodoComunicadoInstitucional;
     private String textoComunicadoInstitucional;
@@ -39,6 +47,13 @@ public class ParametrosCurricularesV2DTO implements Serializable {
     public String getVigencia() { return vigencia; } public void setVigencia(String v) { vigencia = v; }
     public String getAmbito() { return ambito; } public void setAmbito(String v) { ambito = v; }
     public String getCatalogoOptativas() { return catalogoOptativas; } public void setCatalogoOptativas(String v) { catalogoOptativas = v; }
+    public String getTratamientoCeroSinBaja() { return tratamientoCeroSinBaja; } public void setTratamientoCeroSinBaja(String v) { tratamientoCeroSinBaja = v; }
+    public String getTratamientoRecursamientoQuinto() { return tratamientoRecursamientoQuinto; } public void setTratamientoRecursamientoQuinto(String v) { tratamientoRecursamientoQuinto = v; }
+    public String getTratamientoOptativasFaltantesQuintoAOcho() { return tratamientoOptativasFaltantesQuintoAOcho; } public void setTratamientoOptativasFaltantesQuintoAOcho(String v) { tratamientoOptativasFaltantesQuintoAOcho = v; }
+    public String getTratamientoBloqueOptativaBajaOSustituta() { return tratamientoBloqueOptativaBajaOSustituta; } public void setTratamientoBloqueOptativaBajaOSustituta(String v) { tratamientoBloqueOptativaBajaOSustituta = v; }
+    public String getTratamientoUdB2SeriadaCarga() { return tratamientoUdB2SeriadaCarga; } public void setTratamientoUdB2SeriadaCarga(String v) { tratamientoUdB2SeriadaCarga = v; }
+    public String getDocumentoRespaldoDecisionesPendientes() { return documentoRespaldoDecisionesPendientes; } public void setDocumentoRespaldoDecisionesPendientes(String v) { documentoRespaldoDecisionesPendientes = v; }
+    public String getVigenciaDecisionesPendientes() { return vigenciaDecisionesPendientes; } public void setVigenciaDecisionesPendientes(String v) { vigenciaDecisionesPendientes = v; }
     public String getPeriodoComunicadoInstitucional() { return periodoComunicadoInstitucional; } public void setPeriodoComunicadoInstitucional(String v) { periodoComunicadoInstitucional = v; }
     public String getTextoComunicadoInstitucional() { return textoComunicadoInstitucional; } public void setTextoComunicadoInstitucional(String v) { textoComunicadoInstitucional = v; }
     public String getReferenciaComunicadoInstitucional() { return referenciaComunicadoInstitucional; } public void setReferenciaComunicadoInstitucional(String v) { referenciaComunicadoInstitucional = v; }
