@@ -14,6 +14,13 @@ public class EvaluacionIntentosUnidadV2DTO implements Serializable {
     private Integer intentosAcreditados = Integer.valueOf(0);
     private Integer oportunidadesConsumidas;
     private Integer oportunidadesDisponibles;
+    /** RN-1.4: intentos cuya identidad, UD y periodo quedaron verificados. */
+    private Integer intentosConfirmados = Integer.valueOf(0);
+    /** Intentos que no pueden incluirse ni descartarse sin una fuente adicional. */
+    private Integer intentosEnRevision = Integer.valueOf(0);
+    private Boolean intentoEnCurso = Boolean.FALSE;
+    private Integer oportunidadesDisponiblesMinimas;
+    private Integer oportunidadesDisponiblesMaximas;
     private String aviso;
     private EstadoLimiteIntentosV2 estadoLimite = EstadoLimiteIntentosV2.NO_DETERMINADO;
     private Boolean ultimaOportunidad = Boolean.FALSE;
@@ -35,6 +42,16 @@ public class EvaluacionIntentosUnidadV2DTO implements Serializable {
     public void setOportunidadesConsumidas(Integer valor) { oportunidadesConsumidas = valor; }
     public Integer getOportunidadesDisponibles() { return oportunidadesDisponibles; }
     public void setOportunidadesDisponibles(Integer valor) { oportunidadesDisponibles = valor; }
+    public Integer getIntentosConfirmados() { return intentosConfirmados; }
+    public void setIntentosConfirmados(Integer valor) { intentosConfirmados = valor; }
+    public Integer getIntentosEnRevision() { return intentosEnRevision; }
+    public void setIntentosEnRevision(Integer valor) { intentosEnRevision = valor; }
+    public Boolean getIntentoEnCurso() { return intentoEnCurso; }
+    public void setIntentoEnCurso(Boolean valor) { intentoEnCurso = valor; }
+    public Integer getOportunidadesDisponiblesMinimas() { return oportunidadesDisponiblesMinimas; }
+    public void setOportunidadesDisponiblesMinimas(Integer valor) { oportunidadesDisponiblesMinimas = valor; }
+    public Integer getOportunidadesDisponiblesMaximas() { return oportunidadesDisponiblesMaximas; }
+    public void setOportunidadesDisponiblesMaximas(Integer valor) { oportunidadesDisponiblesMaximas = valor; }
     public String getAviso() { return aviso; }
     public void setAviso(String valor) { aviso = valor; }
     public EstadoLimiteIntentosV2 getEstadoLimite() { return estadoLimite; }
