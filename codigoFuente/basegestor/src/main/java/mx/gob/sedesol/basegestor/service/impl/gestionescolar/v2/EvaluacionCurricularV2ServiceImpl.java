@@ -139,7 +139,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             DecisionUnidadCurricularV2DTO decision = crearDecisionSombra(unidad);
             decision.setPrioritaria(Boolean.valueOf(unidad.getEstado() == EstadoUnidadCurricularV2.REPROBADA));
 
-            if (esAdeudoVigente(unidad)) {
+            if (esAdeudoVigente(unidad) && !adeudoTrasladadoAUnaSustituta(unidad, unidadesNormalizadas)) {
                 reprobadas++;
                 if (unidad.getIdPrograma() != null) resultado.getUnidadesOrigenIrregularidad().add(unidad.getIdPrograma());
                 resultado.getEvidenciasSituacionAcademica().add("REPROBACION_VIGENTE_PREVIA:" + obtenerLlaveUnidad(unidad));
@@ -1376,6 +1376,16 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             if (intento.getEstado() == EstadoIntentoAcreditacionV2.REPROBADO) reprobada = true;
         }
         return reprobada || esReprobacionVigentePrevia(unidad);
+    }
+
+    /** La sustituta conserva un solo adeudo; la UD origen mantiene únicamente su historial. */
+    private boolean adeudoTrasladadoAUnaSustituta(UnidadEvaluacionCurricularV2DTO unidad,
+            List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        if (unidad == null || unidad.getIdPrograma() == null) return false;
+        for (UnidadEvaluacionCurricularV2DTO candidata : unidades) {
+            if (candidata != null && unidad.getIdPrograma().equals(candidata.getIdAdeudoOptativaOriginal())) return true;
+        }
+        return false;
     }
 
     private int contarAdeudosEnRevision(List<UnidadEvaluacionCurricularV2DTO> unidades) {
@@ -3339,10 +3349,9 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                             "RESTRINGIDA_POR_SANCION", "SIN_FLEXIBILIZACION_AUTOMATICA");
                     continue;
                 }
-            } else if (unidad.getBajaParcialDerivadaSancion() == null) {
-                marcarRevisionRn67(resultado, contexto, carga, unidad, "SANCION_NO_DETERMINADA");
-                continue;
             }
+            // La falta de subtipo no convierte una baja parcial aplicada en sanción.
+            // Sólo una sanción explícita requiere su resolución institucional.
 
             if (esElectiva(unidad)) {
                 marcarRevisionRn67(resultado, contexto, carga, unidad, "ELECTIVA_SIN_REGLA_RN67_EXPRESA");

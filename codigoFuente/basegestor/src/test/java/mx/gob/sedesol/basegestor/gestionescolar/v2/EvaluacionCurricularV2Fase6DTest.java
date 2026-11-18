@@ -40,6 +40,14 @@ public class EvaluacionCurricularV2Fase6DTest {
         assertEquals(carga.getEstadoReincorporacionRn67(), EstadoReincorporacionBajaParcialV2.REQUIERE_REVISION);
     }
 
+    @Test public void f6DU03bSubtipoAusenteNoImpideRecuperacionDeBajaAplicada() {
+        ContextoEvaluacionCurricularV2DTO contexto = base();
+        contexto.getUnidades().get(0).setBajaParcialDerivadaSancion(null);
+        EvaluacionCargaAcademicaV2DTO carga = carga(contexto);
+        assertTrue(carga.getUdsBajaParcialPrioritariasRn67().contains(10L));
+        assertFalse(carga.getUdsBajaParcialRevisionRn67().contains(10L));
+    }
+
     @Test public void f6DU04BajaParcialNoEsReprobacionNiIrregularidad() {
         ResultadoEvaluacionCurricularV2DTO resultado = servicio.evaluarSombra(base());
         assertEquals(resultado.getCantidadReprobadasVigentes(), Integer.valueOf(0));

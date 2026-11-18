@@ -20,6 +20,8 @@ public class UnidadEvaluacionCurricularV2DTO implements Serializable {
  private Boolean correspondeSemestreParInmediatoAnterior;
  private Integer ordenAcreditacionOptativa;
  private Long idPlanOrigenElectiva;
+ /** Adeudo de optativa adicional trasladado desde esta UD; opcional y sólo de lectura. */
+ private Long idAdeudoOptativaOriginal;
  private List<RelacionSeriacionCurricularV2DTO> relacionesSeriacion = new ArrayList<RelacionSeriacionCurricularV2DTO>();
  private Integer intentos; private Integer intentosFallidosHistoricosConfiables; private Boolean reprobacionVigenteConocida; private Boolean reprobacionPeriodoPrevioConocida;
  private Boolean preseleccionada=Boolean.FALSE; private Integer ordenPreseleccion; private Boolean desmarcable=Boolean.TRUE;
@@ -39,5 +41,6 @@ public class UnidadEvaluacionCurricularV2DTO implements Serializable {
  public EstadoUnidadCurricularV2 getEstadoAnteriorCierre(){return estadoAnteriorCierre;} public void setEstadoAnteriorCierre(EstadoUnidadCurricularV2 v){estadoAnteriorCierre=v;} public Boolean getAcreditadaDurantePeriodo(){return acreditadaDurantePeriodo;} public void setAcreditadaDurantePeriodo(Boolean v){acreditadaDurantePeriodo=v;} public Boolean getImpediaContinuidadAntesCierre(){return impediaContinuidadAntesCierre;} public void setImpediaContinuidadAntesCierre(Boolean v){impediaContinuidadAntesCierre=v;} public String getEvidenciaContinuidadAntesCierre(){return evidenciaContinuidadAntesCierre;} public void setEvidenciaContinuidadAntesCierre(String v){evidenciaContinuidadAntesCierre=v;} public Boolean getCorrespondeSemestreParInmediatoAnterior(){return correspondeSemestreParInmediatoAnterior;} public void setCorrespondeSemestreParInmediatoAnterior(Boolean v){correspondeSemestreParInmediatoAnterior=v;}
  public Integer getOrdenAcreditacionOptativa(){return ordenAcreditacionOptativa;} public void setOrdenAcreditacionOptativa(Integer v){ordenAcreditacionOptativa=v;}
  public Long getIdPlanOrigenElectiva(){return idPlanOrigenElectiva;} public void setIdPlanOrigenElectiva(Long v){idPlanOrigenElectiva=v;}
+ public Long getIdAdeudoOptativaOriginal(){return idAdeudoOptativaOriginal;} public void setIdAdeudoOptativaOriginal(Long v){idAdeudoOptativaOriginal=v;}
  public List<RelacionSeriacionCurricularV2DTO> getRelacionesSeriacion(){return relacionesSeriacion;} public void setRelacionesSeriacion(List<RelacionSeriacionCurricularV2DTO> v){relacionesSeriacion=v==null?new ArrayList<RelacionSeriacionCurricularV2DTO>():v;}
 }

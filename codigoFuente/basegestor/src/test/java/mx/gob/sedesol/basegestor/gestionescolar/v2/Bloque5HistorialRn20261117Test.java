@@ -75,6 +75,21 @@ public class Bloque5HistorialRn20261117Test {
         assertEquals(evaluacion.getOportunidadesConsumidas(), Integer.valueOf(0));
     }
 
+    @Test public void gc17dUbicaUnSoloAdeudoEnLaSustitutaCuandoLaRelacionEsVerificable() {
+        UnidadEvaluacionCurricularV2DTO original = ud(31L, "OPT-ORIG", EstadoUnidadCurricularV2.REPROBADA,
+                intento("ORIG-1", "2026-1", EstadoIntentoAcreditacionV2.REPROBADO));
+        UnidadEvaluacionCurricularV2DTO sustituta = ud(32L, "OPT-SUST", EstadoUnidadCurricularV2.REPROBADA,
+                intento("SUST-1", "2027-1", EstadoIntentoAcreditacionV2.REPROBADO));
+        sustituta.setIdAdeudoOptativaOriginal(31L);
+        sustituta.getReferenciasHistoricas().add("SUSTITUCION_VERIFICABLE:OPT-ORIG->OPT-SUST");
+        ResultadoEvaluacionCurricularV2DTO resultado = evaluar(original, sustituta);
+        assertEquals(resultado.getCantidadReprobadasVigentes(), Integer.valueOf(1));
+        assertFalse(resultado.getUnidadesOrigenIrregularidad().contains(31L));
+        assertTrue(resultado.getUnidadesOrigenIrregularidad().contains(32L));
+        assertEquals(intentos(resultado, 31L).getOportunidadesConsumidas(), Integer.valueOf(1));
+        assertEquals(intentos(resultado, 32L).getOportunidadesConsumidas(), Integer.valueOf(1));
+    }
+
     private ResultadoEvaluacionCurricularV2DTO evaluar(UnidadEvaluacionCurricularV2DTO... unidades) {
         ContextoEvaluacionCurricularV2DTO contexto = new ContextoEvaluacionCurricularV2DTO();
         contexto.setAmbitoRnPe2024_2027("APLICA");
