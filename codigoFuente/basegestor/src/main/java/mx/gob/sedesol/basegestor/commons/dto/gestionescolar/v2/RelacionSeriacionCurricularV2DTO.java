@@ -19,6 +19,8 @@ public class RelacionSeriacionCurricularV2DTO implements Serializable {
     private EstadoUnidadCurricularV2 estadoAntecedente = EstadoUnidadCurricularV2.NO_DETERMINADO;
     private EstadoCumplimientoSeriacionV2 decision = EstadoCumplimientoSeriacionV2.NO_APLICA;
     private String motivo;
+    /** Estado de consulta RN-8.1; el motor no ejecuta altas, cierres ni bajas. */
+    private String estadoOperativoInterbloque;
     private String evidencia;
     private Integer profundidadCadena;
     private List<Long> caminoCurricular = new ArrayList<Long>();
@@ -47,6 +49,8 @@ public class RelacionSeriacionCurricularV2DTO implements Serializable {
     public void setDecision(EstadoCumplimientoSeriacionV2 valor) { decision = valor; }
     public String getMotivo() { return motivo; }
     public void setMotivo(String valor) { motivo = valor; }
+    public String getEstadoOperativoInterbloque() { return estadoOperativoInterbloque; }
+    public void setEstadoOperativoInterbloque(String valor) { estadoOperativoInterbloque = valor; }
     public String getEvidencia() { return evidencia; }
     public void setEvidencia(String valor) { evidencia = valor; }
     public Integer getProfundidadCadena() { return profundidadCadena; }

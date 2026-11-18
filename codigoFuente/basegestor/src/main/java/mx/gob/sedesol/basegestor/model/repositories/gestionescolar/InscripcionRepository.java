@@ -142,7 +142,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "MAX(rgp.calificacion_final) AS calificacion_final_v2, "
 				+ "MAX(mb.tipo_baja_id) AS tipo_baja_v2, MAX(mb.descripcion) AS motivo_baja_v2, "
 				+ "MAX(e.fecha_final) AS fecha_fin_evento_v2, "
-				+ "CASE WHEN COUNT(DISTINCT COALESCE(rgp.calificacion_final,-999999)) > 1 THEN 1 ELSE 0 END AS calificacion_conflictiva_v2 "
+				+ "CASE WHEN COUNT(DISTINCT COALESCE(rgp.calificacion_final,-999999)) > 1 THEN 1 ELSE 0 END AS calificacion_conflictiva_v2, "
+				+ "MAX(CASE WHEN baja_registrada.id_persona IS NOT NULL AND COALESCE(baja_registrada.contabilizar,0) <> 1 THEN 1 ELSE 0 END) AS baja_sin_confirmar_v2 "
 				+ "FROM rel_grupo_participante rgp "
 				+ "INNER JOIN tbl_grupos g ON g.id=rgp.id_grupo "
 				+ "INNER JOIN tbl_eventos e ON e.id_evento=g.id_evento "
@@ -150,6 +151,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "LEFT JOIN tbl_periodos_inscripcion pi ON SUBSTRING_INDEX(e.cve_evento_cap, '-', -2)=pi.nombre_periodo "
 				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona=rgp.id_persona_participante "
 				+ "AND baja.id_grupo=rgp.id_grupo AND baja.contabilizar=1 "
+				+ "LEFT JOIN rel_persona_bajas baja_registrada ON baja_registrada.id_persona=rgp.id_persona_participante "
+				+ "AND baja_registrada.id_grupo=rgp.id_grupo "
 				+ "LEFT JOIN rel_motivo_baja mb ON mb.id_motivo_baja=baja.motivo_baja_id "
 				+ "WHERE rgp.id_persona_participante=:idPersona AND fd.id_plan=:idPlan "
 				+ "GROUP BY fd.id_programa, pi.nombre_periodo ORDER BY pi.nombre_periodo, fd.id_programa";
@@ -164,10 +167,13 @@ public class InscripcionRepository implements IinscripcionRepository {
 		Double calificacion = getDoubleValue(fila[4]); Integer tipoBaja = getIntegerValue(fila[5]);
 		String motivoBaja = fila[6] == null ? null : String.valueOf(fila[6]); Date fechaFinEvento = fila[7] instanceof Date ? (Date) fila[7] : null;
 		boolean calificacionConflictiva = getIntegerValue(fila[8]) != null && getIntegerValue(fila[8]).intValue() > 0;
+		boolean bajaSinConfirmar = fila.length > 9 && getIntegerValue(fila[9]) != null && getIntegerValue(fila[9]).intValue() > 0;
 		intento.setCalificacionFinal(calificacion);
-		if (intento.getIdPrograma() == null || intento.getPeriodo() == null || calificacionConflictiva) {
+		if (intento.getIdPrograma() == null || intento.getPeriodo() == null || calificacionConflictiva || (bajaSinConfirmar && tipoBaja == null)) {
 			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO);
-			intento.setEvidenciaFuente(calificacionConflictiva
+			intento.setEvidenciaFuente(bajaSinConfirmar && tipoBaja == null
+					? "HISTORIAL_PARTICIPACION_BAJA_SIN_CONTABILIZAR_REQUIERE_REVISION"
+					: calificacionConflictiva
 					? "HISTORIAL_PARTICIPACION_CALIFICACION_CONFLICTIVA_REQUIERE_REVISION"
 					: "HISTORIAL_PARTICIPACION_SIN_IDENTIDAD_UD_O_PERIODO_REQUIERE_REVISION");
 			return intento;

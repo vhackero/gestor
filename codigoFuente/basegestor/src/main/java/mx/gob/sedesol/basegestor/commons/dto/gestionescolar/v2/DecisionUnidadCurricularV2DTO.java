@@ -16,6 +16,8 @@ public class DecisionUnidadCurricularV2DTO implements Serializable {
     private Boolean ofertaEvaluadaV2;
     private Boolean seleccionableOrigen;
     private Boolean bloqueadaOrigen;
+    /** Estado consultable de RN-8.1: no ejecuta cierres ni movimientos escolares. */
+    private String estadoOperativoInterbloque;
     private String explicacionTecnica;
     private List<EstadoDecisionUnidadCurricularV2> estadosSombra = new ArrayList<EstadoDecisionUnidadCurricularV2>();
     private List<CodigoMotivoCurricularV2> motivos = new ArrayList<CodigoMotivoCurricularV2>();
@@ -37,6 +39,8 @@ public class DecisionUnidadCurricularV2DTO implements Serializable {
     public void setSeleccionableOrigen(Boolean seleccionableOrigen) { this.seleccionableOrigen = seleccionableOrigen; }
     public Boolean getBloqueadaOrigen() { return bloqueadaOrigen; }
     public void setBloqueadaOrigen(Boolean bloqueadaOrigen) { this.bloqueadaOrigen = bloqueadaOrigen; }
+    public String getEstadoOperativoInterbloque() { return estadoOperativoInterbloque; }
+    public void setEstadoOperativoInterbloque(String estadoOperativoInterbloque) { this.estadoOperativoInterbloque = estadoOperativoInterbloque; }
     public String getExplicacionTecnica() { return explicacionTecnica; }
     public void setExplicacionTecnica(String explicacionTecnica) { this.explicacionTecnica = explicacionTecnica; }
     public List<EstadoDecisionUnidadCurricularV2> getEstadosSombra() { return estadosSombra; }

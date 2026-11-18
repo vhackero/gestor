@@ -12,6 +12,8 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     private String situacionAcademica;
     private String situacionAcademicaCalculada;
     private Integer cantidadReprobadasVigentes = Integer.valueOf(0);
+    /** Agregado histórico informativo; no se usa para aplicar RN-6.4. */
+    private Integer resultadosReprobatoriosInformativos = Integer.valueOf(0);
     private Integer cargaMaximaFuturaSombra;
     private List<Long> unidadesOrigenIrregularidad = new ArrayList<Long>();
     private List<String> evidenciasSituacionAcademica = new ArrayList<String>();
@@ -51,6 +53,8 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     public void setSituacionAcademicaCalculada(String valor) { situacionAcademicaCalculada = valor; }
     public Integer getCantidadReprobadasVigentes() { return cantidadReprobadasVigentes; }
     public void setCantidadReprobadasVigentes(Integer valor) { cantidadReprobadasVigentes = valor; }
+    public Integer getResultadosReprobatoriosInformativos() { return resultadosReprobatoriosInformativos; }
+    public void setResultadosReprobatoriosInformativos(Integer valor) { resultadosReprobatoriosInformativos = valor; }
     public Integer getCargaMaximaFuturaSombra() { return cargaMaximaFuturaSombra; }
     public void setCargaMaximaFuturaSombra(Integer valor) { cargaMaximaFuturaSombra = valor; }
     public List<Long> getUnidadesOrigenIrregularidad() { return unidadesOrigenIrregularidad; }

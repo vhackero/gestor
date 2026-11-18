@@ -7,6 +7,7 @@ import org.testng.annotations.Test;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaIndisponibilidadOfertaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaPendienteUnidadV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoCumplimientoSeriacionV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaAcademicaV2DTO;
@@ -151,6 +152,18 @@ public class EvaluacionCurricularV2Fase8ATest {
         assertEquals(primera.getRelacionesSeriacionV2().size(), segunda.getRelacionesSeriacionV2().size());
     }
 
+    @Test public void gc18ExponeEstadoOperativoInterbloqueSinEjecutarCierres() {
+        ResultadoEvaluacionCurricularV2DTO acreditada = servicio.evaluarSombra(contexto(EstadoUnidadCurricularV2.ACREDITADA));
+        ResultadoEvaluacionCurricularV2DTO enCurso = servicio.evaluarSombra(contexto(EstadoUnidadCurricularV2.EN_CURSO));
+        ResultadoEvaluacionCurricularV2DTO pendiente = servicio.evaluarSombra(contexto(EstadoUnidadCurricularV2.NO_DETERMINADO));
+        assertEquals(decision(acreditada, 2L).getEstadoOperativoInterbloque(), "INSCRITA");
+        assertEquals(decision(enCurso, 2L).getEstadoOperativoInterbloque(), "PENDIENTE_POR_SERIACION");
+        assertEquals(decision(pendiente, 2L).getEstadoOperativoInterbloque(), "PENDIENTE_DE_CONFIRMACION");
+        assertFalse(Boolean.TRUE.equals(acreditada.getEfectosProductivosAplicados()));
+        assertFalse(Boolean.TRUE.equals(enCurso.getEfectosProductivosAplicados()));
+        assertFalse(Boolean.TRUE.equals(pendiente.getEfectosProductivosAplicados()));
+    }
+
     @Test public void f8AU22NoExisteEfectoProductivo() {
         assertFalse(Boolean.TRUE.equals(servicio.evaluarSombra(contexto(EstadoUnidadCurricularV2.ACREDITADA)).getEfectosProductivosAplicados()));
     }
@@ -164,4 +177,5 @@ public class EvaluacionCurricularV2Fase8ATest {
     private RelacionSeriacionCurricularV2DTO relacion(Long antecedente, Long consecuente) { RelacionSeriacionCurricularV2DTO relacion = new RelacionSeriacionCurricularV2DTO(); relacion.setIdAntecedente(antecedente); relacion.setIdConsecuente(consecuente); relacion.setSemestreAntecedente(Integer.valueOf(2)); relacion.setSemestreConsecuente(Integer.valueOf(2)); relacion.setBloqueAntecedente("1"); relacion.setBloqueConsecuente("2"); relacion.setTipoSeriacion(TipoSeriacionV2.INTERBLOQUE); relacion.setTipoRelacion(TipoRelacionSeriacionV2.DIRECTA); relacion.setEvidencia("PE_TEST:" + antecedente + "->" + consecuente); return relacion; }
     private EvaluacionCargaAcademicaV2DTO carga(ContextoEvaluacionCurricularV2DTO contexto) { return servicio.evaluarSombra(contexto).getEvaluacionCargaAcademica(); }
     private RelacionSeriacionCurricularV2DTO relacion(EvaluacionCargaAcademicaV2DTO carga) { return carga.getRelacionesSeriacionV2().get(0); }
+    private DecisionUnidadCurricularV2DTO decision(ResultadoEvaluacionCurricularV2DTO resultado, Long id) { for (DecisionUnidadCurricularV2DTO decision : resultado.getDecisiones()) if (id.equals(decision.getIdPrograma())) return decision; fail("No existe decisión para " + id); return null; }
 }

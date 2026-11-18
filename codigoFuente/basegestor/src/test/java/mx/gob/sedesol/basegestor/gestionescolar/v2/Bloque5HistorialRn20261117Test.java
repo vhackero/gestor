@@ -43,9 +43,11 @@ public class Bloque5HistorialRn20261117Test {
 
     @Test public void gc17bReportaAgotadaYLimiteHistoricoSinProponerCuarta() {
         ResultadoEvaluacionCurricularV2DTO resultado = evaluar(
-                ud(7L, "F", EstadoUnidadCurricularV2.REPROBADA, intento("F1", EstadoIntentoAcreditacionV2.REPROBADO), intento("F2", EstadoIntentoAcreditacionV2.REPROBADO), intento("F3", EstadoIntentoAcreditacionV2.REPROBADO)),
-                ud(8L, "FP", EstadoUnidadCurricularV2.REPROBADA, intento("P1", EstadoIntentoAcreditacionV2.REPROBADO), intento("P2", EstadoIntentoAcreditacionV2.REPROBADO), intento("P3", EstadoIntentoAcreditacionV2.REPROBADO), intento("P4", EstadoIntentoAcreditacionV2.REPROBADO)));
-        assertEquals(intentos(resultado, 7L).getEstadoLimite(), EstadoLimiteIntentosV2.AGOTADA);
+                ud(7L, "F", EstadoUnidadCurricularV2.REPROBADA, intento("F1", "2026-1", EstadoIntentoAcreditacionV2.REPROBADO), intento("F2", "2026-1", EstadoIntentoAcreditacionV2.REPROBADO), intento("F3", "2026-1", EstadoIntentoAcreditacionV2.REPROBADO)),
+                ud(8L, "FP", EstadoUnidadCurricularV2.REPROBADA, intento("P1", "2026-1", EstadoIntentoAcreditacionV2.REPROBADO), intento("P2", "2026-1", EstadoIntentoAcreditacionV2.REPROBADO), intento("P3", "2026-1", EstadoIntentoAcreditacionV2.REPROBADO), intento("P4", "2026-1", EstadoIntentoAcreditacionV2.REPROBADO)));
+        EvaluacionIntentosUnidadV2DTO agotada = intentos(resultado, 7L);
+        assertEquals(agotada.getEstadoLimite(), EstadoLimiteIntentosV2.AGOTADA);
+        assertTrue(agotada.getAviso().contains("PENDIENTE_DISPOSICION_TRANSITORIA"));
         EvaluacionIntentosUnidadV2DTO excedida = intentos(resultado, 8L);
         assertEquals(excedida.getEstadoLimite(), EstadoLimiteIntentosV2.AGOTADA);
         assertTrue(excedida.getAviso().contains("LIMITE_SUPERADO_HISTORIAL_PREVIO"));
@@ -99,8 +101,11 @@ public class Bloque5HistorialRn20261117Test {
     }
 
     private IntentoAcreditacionUnidadV2DTO intento(String id, EstadoIntentoAcreditacionV2 estado) {
+        return intento(id, null, estado);
+    }
+    private IntentoAcreditacionUnidadV2DTO intento(String id, String periodo, EstadoIntentoAcreditacionV2 estado) {
         IntentoAcreditacionUnidadV2DTO intento = new IntentoAcreditacionUnidadV2DTO();
-        intento.setIdEjecucionTecnico(id); intento.setEstado(estado); return intento;
+        intento.setIdEjecucionTecnico(id); intento.setPeriodo(periodo); intento.setEstado(estado); return intento;
     }
 
     private EvaluacionIntentosUnidadV2DTO intentos(ResultadoEvaluacionCurricularV2DTO resultado, Long id) {

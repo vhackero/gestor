@@ -34,17 +34,9 @@ public class SemestreReferenciaV2ServiceImpl implements SemestreReferenciaV2Serv
         for (PeriodoTrayectoriaV2DTO periodo : ordenados) {
             if (periodo == null || !esPeriodo(periodo.getPeriodo()) || periodo.getPeriodo().compareTo(periodoEvaluado) >= 0) continue;
             if (Boolean.TRUE.equals(periodo.getBajaTemporalCompleta())) { resultado.getPeriodosExcluidos().add(periodo.getPeriodo() + ":BAJA_TEMPORAL"); continue; }
-            if (Boolean.TRUE.equals(periodo.getCalificacionFinal()) || Boolean.TRUE.equals(periodo.getNpBajaParcial())) {
+            // RN-6.9 cuenta la inscripción formal; no exige resultado final.
+            if (Boolean.TRUE.equals(periodo.getParticipacionGrupo()) || Boolean.TRUE.equals(periodo.getInscripcionFormal())) {
                 resultado.getPeriodosContados().add(periodo.getPeriodo()); contados++; continue;
-            }
-            if (Boolean.TRUE.equals(periodo.getParticipacionGrupo())) {
-                resultado.getPeriodosExcluidos().add(periodo.getPeriodo() + ":PARTICIPACION_SIN_CALIFICACION_FINAL");
-                inferida = true;
-                continue;
-            }
-            if (Boolean.TRUE.equals(periodo.getInscripcionFormal())) {
-                resultado.getPeriodosExcluidos().add(periodo.getPeriodo() + ":INSCRIPCION_SIN_EVIDENCIA_DE_CURSAMIENTO");
-                continue;
             }
             resultado.getPeriodosExcluidos().add(periodo.getPeriodo() + ":SIN_INSCRIPCION");
         }

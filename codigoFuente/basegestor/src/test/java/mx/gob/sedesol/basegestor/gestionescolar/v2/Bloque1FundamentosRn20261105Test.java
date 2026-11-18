@@ -60,7 +60,7 @@ public class Bloque1FundamentosRn20261105Test {
         List<PeriodoTrayectoriaV2DTO> incompleto = new ArrayList<PeriodoTrayectoriaV2DTO>();
         PeriodoTrayectoriaV2DTO registroSinEvidencia=periodo("2027-1", true, false); registroSinEvidencia.setParticipacionGrupo(Boolean.FALSE); registroSinEvidencia.setCalificacionFinal(Boolean.FALSE); incompleto.add(registroSinEvidencia);
         SemestreReferenciaV2DTO sinEvidencia = servicio.calcular("2027-2", Integer.valueOf(8), incompleto, null);
-        assertTrue(sinEvidencia.getPeriodosExcluidos().contains("2027-1:INSCRIPCION_SIN_EVIDENCIA_DE_CURSAMIENTO"));
+        assertTrue(sinEvidencia.getPeriodosContados().contains("2027-1"));
     }
 
     @Test public void c02NingunaReglaUsaSemestreHeredadoNiMaximoCandidatas() throws Exception {
@@ -111,18 +111,18 @@ public class Bloque1FundamentosRn20261105Test {
         try {
             System.setProperty("CTR01_PERIODO_INICIO", "2028-1");
             ConfiguracionEvaluacionCurricularV2DTO configuracion = new ConfiguracionEvaluacionCurricularV2ServiceImpl().obtenerConfiguracion();
-            assertEquals(configuracion.getVersionReglas(), "RN-PE2024-2027-act-20261105");
+            assertEquals(configuracion.getVersionReglas(), "RN-PE2024-2027-act-20261117");
             assertEquals(configuracion.getParametrosCurriculares().getCtr01PeriodoInicio(), "2028-1");
             assertEquals(configuracion.getParametrosCurriculares().getCargaMaxIrregular(), Integer.valueOf(6));
         } finally { if (anterior == null) System.clearProperty("CTR01_PERIODO_INICIO"); else System.setProperty("CTR01_PERIODO_INICIO", anterior); }
     }
 
-    @Test public void rn69CuentaSoloCalificacionFinalONpPorBaja() {
+    @Test public void rn69CuentaParticipacionFormalAunqueElResultadoEstePendiente() {
         PeriodoTrayectoriaV2DTO conParticipacionSinResultado = periodo("2027-1", true, false);
         conParticipacionSinResultado.setCalificacionFinal(Boolean.FALSE);
         SemestreReferenciaV2DTO resultado = new SemestreReferenciaV2ServiceImpl().calcular("2027-2", Integer.valueOf(8), java.util.Arrays.asList(conParticipacionSinResultado), null);
-        assertEquals(resultado.getValor(), Integer.valueOf(1));
-        assertTrue(resultado.getPeriodosExcluidos().contains("2027-1:PARTICIPACION_SIN_CALIFICACION_FINAL"));
+        assertEquals(resultado.getValor(), Integer.valueOf(2));
+        assertTrue(resultado.getPeriodosContados().contains("2027-1"));
     }
     private PeriodoTrayectoriaV2DTO periodo(String valor, boolean formal, boolean bajaTemporal) { PeriodoTrayectoriaV2DTO p = new PeriodoTrayectoriaV2DTO(); p.setPeriodo(valor); p.setInscripcionFormal(Boolean.valueOf(formal)); p.setParticipacionGrupo(Boolean.valueOf(formal)); p.setCalificacionFinal(Boolean.valueOf(formal && !bajaTemporal)); p.setBajaTemporalCompleta(Boolean.valueOf(bajaTemporal)); return p; }
     private ContextoEvaluacionCurricularV2DTO base() { ContextoEvaluacionCurricularV2DTO c = new ContextoEvaluacionCurricularV2DTO(); c.setPeriodoNormativo("2027-2"); c.setSemestreReferencia(Integer.valueOf(5)); c.setAmbitoRnPe2024_2027("APLICA"); c.setFechaEvaluacion(new Date(0)); c.setActividadAcademicaComprobada(Boolean.TRUE); c.setPermanenciaDentroLimiteComprobada(Boolean.TRUE); c.setSeriacionComprobada(Boolean.TRUE); c.setEstructuraProgramaEducativoComprobada(Boolean.TRUE); c.setSancionImpedimentoConocida(Boolean.TRUE); c.setSancionImpedimentoRegistrada(Boolean.FALSE); return c; }

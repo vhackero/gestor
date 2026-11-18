@@ -196,6 +196,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         }
         determinarSituacionAcademica(resultado, contexto, reprobadas, datosInsuficientesSituacion);
         resultado.setTotalReprobadas(Integer.valueOf(reprobadas));
+        resultado.setResultadosReprobatoriosInformativos(Integer.valueOf(contarResultadosReprobatorios(unidadesNormalizadas)));
         evaluarActividadAcademica(resultado, contexto);
         evaluarRecuperacionRegularidad(resultado, contexto, unidadesNormalizadas);
         evaluarLimiteIntentos(resultado, contexto, unidadesNormalizadas);
@@ -355,17 +356,21 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         relacion.setEstadoAntecedente(antecedente.getEstado());
         EstadoUnidadCurricularV2 estado = antecedente.getEstado();
         if (estado == EstadoUnidadCurricularV2.ACREDITADA) {
+            relacion.setEstadoOperativoInterbloque("INSCRITA");
             registrarResultadoInterbloque(resultado, contexto, carga, decision, consecuente, relacion,
-                    EstadoCumplimientoSeriacionV2.CUMPLIDA, null, "ANTECEDENTE_ACREDITADO");
+                    EstadoCumplimientoSeriacionV2.CUMPLIDA, null, "INSCRITA:ANTECEDENTE_ACREDITADO");
         } else if (estado == EstadoUnidadCurricularV2.EN_CURSO) {
+            relacion.setEstadoOperativoInterbloque("PENDIENTE_POR_SERIACION");
             registrarResultadoInterbloque(resultado, contexto, carga, decision, consecuente, relacion,
                     EstadoCumplimientoSeriacionV2.CONDICIONADA, CodigoMotivoCurricularV2.SERIACION_DIRECTA,
-                    "CONDICIONADA_A_ACREDITACION_ANTECEDENTE_B1");
+                    "PENDIENTE_POR_SERIACION:ANTECEDENTE_B1_EN_CURSO");
         } else if (estado == EstadoUnidadCurricularV2.NO_DETERMINADO || estado == null) {
+            relacion.setEstadoOperativoInterbloque("PENDIENTE_DE_CONFIRMACION");
             registrarResultadoInterbloque(resultado, contexto, carga, decision, consecuente, relacion,
                     EstadoCumplimientoSeriacionV2.REQUIERE_REVISION, CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,
-                    "ESTADO_ANTECEDENTE_NO_DETERMINADO");
+                    "PENDIENTE_DE_CONFIRMACION:RESULTADO_ANTECEDENTE_NO_DISPONIBLE");
         } else {
+            relacion.setEstadoOperativoInterbloque("PENDIENTE_POR_SERIACION");
             registrarResultadoInterbloque(resultado, contexto, carga, decision, consecuente, relacion,
                     EstadoCumplimientoSeriacionV2.NO_CUMPLIDA, CodigoMotivoCurricularV2.SERIACION_DIRECTA,
                     "ANTECEDENTE_NO_ACREDITADO:" + estado);
@@ -400,6 +405,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             carga.setRequiereRevision(Boolean.TRUE);
         }
         if (decision != null) {
+            decision.setEstadoOperativoInterbloque(relacion.getEstadoOperativoInterbloque());
             if (motivo != null) agregarUnico(decision.getMotivos(), motivo);
             if (estado == EstadoCumplimientoSeriacionV2.NO_CUMPLIDA) agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.BLOQUEADA);
             if (estado == EstadoCumplimientoSeriacionV2.REQUIERE_REVISION) agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.REQUIERE_REVISION);
@@ -1239,6 +1245,10 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                     agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.BLOQUEADA);
                     decision.setHabilitada(Boolean.FALSE);
                     agregarExplicacion(decision, "La UD agotó las oportunidades computables; no procede una inscripción ordinaria adicional.");
+                    if (evaluacion.getAviso() != null && evaluacion.getAviso().contains("PENDIENTE_DISPOSICION_TRANSITORIA")) {
+                        agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.PENDIENTE_DISPOSICION_TRANSITORIA);
+                        agregarExplicacion(decision, "Debe consultarse orientación DAEAE; no se genera baja automática.");
+                    }
                 } else if (evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.REQUIERE_REVISION) {
                     agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.REQUIERE_REVISION);
                 }
@@ -1336,6 +1346,8 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         } else if (evaluacion.getIntentosFallidos().intValue() == limiteOportunidades) {
             evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.AGOTADA);
             evaluacion.setLimiteAgotado(Boolean.TRUE); evaluacion.setRequiereEscalamiento(Boolean.TRUE);
+            if (hayFalloAnteriorAlPeriodoNormativo(unidad, contexto))
+                evaluacion.setAviso("PENDIENTE_DISPOSICION_TRANSITORIA");
         } else if (evaluacion.getIntentosFallidos().intValue() == limiteOportunidades - 1) {
             evaluacion.setEstadoLimite(enCurso ? EstadoLimiteIntentosV2.ULTIMA_EN_CURSO : EstadoLimiteIntentosV2.ULTIMA_DISPONIBLE);
             evaluacion.setUltimaOportunidad(Boolean.TRUE);
@@ -1376,6 +1388,23 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             }
         }
         return total;
+    }
+
+    private int contarResultadosReprobatorios(List<UnidadEvaluacionCurricularV2DTO> unidades) {
+        int total = 0;
+        for (UnidadEvaluacionCurricularV2DTO unidad : unidades)
+            for (IntentoAcreditacionUnidadV2DTO intento : unidad.getIntentosAcreditacion())
+                if (intento != null && intento.getEstado() == EstadoIntentoAcreditacionV2.REPROBADO) total++;
+        return total;
+    }
+
+    private boolean hayFalloAnteriorAlPeriodoNormativo(UnidadEvaluacionCurricularV2DTO unidad,
+            ContextoEvaluacionCurricularV2DTO contexto) {
+        if (contexto.getPeriodoNormativo() == null) return false;
+        for (IntentoAcreditacionUnidadV2DTO intento : unidad.getIntentosAcreditacion())
+            if (intento != null && intento.getEstado() == EstadoIntentoAcreditacionV2.REPROBADO
+                    && intento.getPeriodo() != null && intento.getPeriodo().compareTo(contexto.getPeriodoNormativo()) < 0) return true;
+        return false;
     }
 
     private String llaveIntento(IntentoAcreditacionUnidadV2DTO intento) {
@@ -4600,7 +4629,9 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             DecisionUnidadCurricularV2DTO decision = buscarDecision(resultado, unidad.getIdPrograma());
             if (decision != null && !decision.getEstadosSombra().contains(EstadoDecisionUnidadCurricularV2.BLOQUEADA)) {
                 unidad.setPreseleccionada(Boolean.TRUE); unidad.setDesmarcable(Boolean.FALSE);
-                agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.PRESELECCION_CONDICIONADA_INTERBLOQUE);
+                String estado = decision.getEstadoOperativoInterbloque();
+                if (estado == null) estado = "PENDIENTE_DE_CONFIRMACION";
+                agregarExplicacion(decision, "RN-8.1: estado operativo interbloque=" + estado + ".");
             }
         }
     }
