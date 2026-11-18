@@ -84,6 +84,8 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         assertTrue(sql.contains("SUBSTRING_INDEX(e.cve_evento_cap, '-', -2)=pi.nombre_periodo"));
         assertFalse(sql.contains("LIKE CONCAT('%',pi.nombre_periodo,'%')"));
         assertTrue(sql.contains("MIN(rgp.id) AS id_participacion_v2"));
+        assertTrue(sql.contains("fecha_fin_periodo_v2"));
+        assertTrue(sql.contains("MAX(e_cal.fecha_final) AS fecha_final_periodo"));
         assertTrue(sql.contains("calificacion_conflictiva_v2"));
         assertTrue(sql.contains("baja_sin_confirmar_v2"));
     }
@@ -99,32 +101,34 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         assertEquals(mapearFila(Integer.valueOf(1), 0D, "", new Date(System.currentTimeMillis() + 86400000L)).getEstado(), EstadoIntentoAcreditacionV2.BAJA_PARCIAL);
     }
     @Test public void nuloCerradoRequiereRevisionYNuloVigenteEstaEnCurso() throws Exception {
-        assertEquals(mapearFila(null, null, null, new Date(0)).getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
-        assertEquals(mapearFila(null, null, null, new Date(System.currentTimeMillis() + 86400000L)).getEstado(), EstadoIntentoAcreditacionV2.EN_CURSO);
+        assertEquals(mapearFila(null, null, null, new Date(System.currentTimeMillis() - 86400000L), new Date(0)).getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
+        assertEquals(mapearFila(null, null, null, new Date(0), new Date(System.currentTimeMillis() + 86400000L)).getEstado(), EstadoIntentoAcreditacionV2.EN_CURSO);
     }
     @Test public void calificacionesConflictoMismoPeriodoRequierenRevision() throws Exception {
         assertEquals(mapearFila(null, 80D, null, new Date(System.currentTimeMillis() + 86400000L), 1).getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
     }
     @Test public void bajaSinContabilizarQuedaEnRevision() throws Exception {
         Method m=InscripcionRepository.class.getDeclaredMethod("mapearIntentoCurricularV2", Object[].class); m.setAccessible(true);
-        Object[] fila=new Object[]{1L, 1L, "2026-2", 1L, null, null, null, new Date(0), Integer.valueOf(0), Integer.valueOf(1)};
+        Object[] fila=new Object[]{1L, 1L, "2026-2", 1L, null, null, null, new Date(0), new Date(0), Integer.valueOf(0), Integer.valueOf(1)};
         IntentoAcreditacionUnidadV2DTO intento=(IntentoAcreditacionUnidadV2DTO)m.invoke(new InscripcionRepository(), new Object[]{fila});
         assertEquals(intento.getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
         assertTrue(intento.getEvidenciaFuente().contains("BAJA_SIN_CONTABILIZAR"));
     }
     @Test public void eventoSinPeriodoQuedaEnRevision() throws Exception {
         Method m=InscripcionRepository.class.getDeclaredMethod("mapearIntentoCurricularV2", Object[].class); m.setAccessible(true);
-        Object[] fila=new Object[]{1L, 1L, null, 1L, 50D, null, null, new Date(0), Integer.valueOf(0), Integer.valueOf(0)};
+        Object[] fila=new Object[]{1L, 1L, null, 1L, 50D, null, null, new Date(0), new Date(0), Integer.valueOf(0), Integer.valueOf(0)};
         IntentoAcreditacionUnidadV2DTO intento=(IntentoAcreditacionUnidadV2DTO)m.invoke(new InscripcionRepository(), new Object[]{fila});
         assertEquals(intento.getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
         assertTrue(intento.getEvidenciaFuente().contains("SIN_IDENTIDAD_UD_O_PERIODO"));
     }
     private IntentoAcreditacionUnidadV2DTO mapearBaja(int tipo, String motivo) throws Exception { return mapearFila(Integer.valueOf(tipo), null, motivo, new Date(System.currentTimeMillis() + 86400000L)); }
     private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion) throws Exception { return mapearFila(tipo, calificacion, null, new Date(System.currentTimeMillis() + 86400000L)); }
-    private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion, String motivo, Date fechaFin) throws Exception { return mapearFila(tipo, calificacion, motivo, fechaFin, 0); }
-    private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion, String motivo, Date fechaFin, int conflicto) throws Exception {
+    private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion, String motivo, Date fechaFin) throws Exception { return mapearFila(tipo, calificacion, motivo, fechaFin, fechaFin, 0); }
+    private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion, String motivo, Date fechaFinEvento, Date fechaFinPeriodo) throws Exception { return mapearFila(tipo, calificacion, motivo, fechaFinEvento, fechaFinPeriodo, 0); }
+    private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion, String motivo, Date fechaFin, int conflicto) throws Exception { return mapearFila(tipo, calificacion, motivo, fechaFin, fechaFin, conflicto); }
+    private IntentoAcreditacionUnidadV2DTO mapearFila(Integer tipo, Double calificacion, String motivo, Date fechaFinEvento, Date fechaFinPeriodo, int conflicto) throws Exception {
         Method m=InscripcionRepository.class.getDeclaredMethod("mapearIntentoCurricularV2", Object[].class); m.setAccessible(true);
-        Object[] fila=new Object[]{1L, 1L, "2026-2", 1L, calificacion, tipo, motivo, fechaFin, Integer.valueOf(conflicto)};
+        Object[] fila=new Object[]{1L, 1L, "2026-2", 1L, calificacion, tipo, motivo, fechaFinEvento, fechaFinPeriodo, Integer.valueOf(conflicto), Integer.valueOf(0)};
         return (IntentoAcreditacionUnidadV2DTO)m.invoke(new InscripcionRepository(), new Object[]{fila});
     }
     private void assertEstado(UnidadEvaluacionCurricularV2DTO u, EstadoLimiteIntentosV2 esperado, int consumidas, int disponibles) {

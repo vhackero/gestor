@@ -2,25 +2,72 @@
 
 ## Alcance
 
-Rama analizada: `feature/desacople_motor_historico`.
+Rama: `feature/desacople_motor_historico`.
 
-Esta entrega conserva modo sombra. No escribe en inscripción, bajas, grupos, oferta ni calificaciones. Los casos añadidos son sintéticos y no contienen datos personales.
+La entrega conserva modo sombra. No escribe en inscripción, bajas, grupos, oferta ni calificaciones. Las pruebas funcionales usan datos sintéticos; C-20 usa únicamente consultas `SELECT` con salidas agregadas y sin datos personales.
+
+## Corrección de detección de periodo en curso
+
+### Hallazgo
+
+El adaptador canónico de historial evaluaba una participación con calificación `NULL` usando `MAX(tbl_eventos.fecha_final)` de **su bloque**. Eso es insuficiente: cada bloque puede cerrar antes que el periodo académico completo.
+
+| Periodo | Eventos PE2024 | `fecha_final` nula | Mínima | Máxima |
+|---|---:|---:|---|---|
+| 2026-1 | 906 | 0 | 2026-03-22 | 2026-06-14 |
+| 2026-2 | 432 | 0 | 2026-09-13 | 2026-12-06 23:59:59 |
+
+Los periodos se identifican con el sufijo exacto `AAAA-N` de `tbl_eventos.cve_evento_cap`, contrastado contra `tbl_periodos_inscripcion.nombre_periodo`. No se usa `LIKE`.
+
+### Criterio aplicado
+
+`tbl_periodos_inscripcion.fecha_finalizacion` es una ventana administrativa de inscripción, no la duración académica del semestre: para `2026-2` termina el 2026-07-17. Por ello no es fuente válida para cerrar el cursamiento.
+
+El adaptador ahora obtiene `fecha_fin_periodo_v2 = MAX(tbl_eventos.fecha_final)` por `id_plan + periodo`. Conserva la fecha del evento individual como evidencia, pero para una calificación `NULL` decide así:
+
+| Condición | Estado de intento |
+|---|---|
+| Cierre de periodo conocido y mayor o igual a la fecha de evaluación | `EN_CURSO` |
+| Cierre de periodo anterior o no determinable | `NO_DETERMINADO` con revisión |
+
+Este criterio es una fuente temporal académica verificable mientras no exista un calendario institucional separado por bloque/cierre de acta. No interpreta la ventana de inscripción como calendario.
+
+### Evidencia de ejecución
+
+Para `2026-2`, sin baja aplicada y con calificación `NULL`:
+
+| Criterio de clasificación | Participaciones | `EN_CURSO` | `NO_DETERMINADO` |
+|---|---:|---:|---:|
+| Antes: fecha final del evento individual | 34,391 | 0 | 34,391 |
+| Después: cierre agregado del periodo | 34,391 | 34,391 | 0 |
+
+Desglose después de la corrección:
+
+| PE | Participaciones `EN_CURSO` 2026-2 | Estudiantes distintos | Cierre de periodo |
+|---|---:|---:|---|
+| Contaduría y Finanzas Públicas | 7,620 | 2,514 | 2026-12-06 23:59:59 |
+| Administración y Gestión Pública | 6,858 | 2,293 | 2026-12-06 23:59:59 |
+| Enseñanza de la Matemática | 1,128 | 457 | 2026-12-06 23:59:59 |
+| Gestión Industrial | 5,650 | 1,921 | 2026-12-06 23:59:59 |
+| Seguridad Alimentaria | 1,138 | 415 | 2026-12-06 23:59:59 |
+| Derecho | 11,997 | 3,933 | 2026-12-06 23:59:59 |
+| **Total** | **34,391** | **11,533** | — |
+
+La corrección está en `InscripcionRepository.consultaIntentosCurricularesV2` y `mapearIntentoCurricularV2`. La prueba `Bloque2HistorialOportunidadesRn20261106Test.nuloCerradoRequiereRevisionYNuloVigenteEstaEnCurso` comprueba ambos casos: evento de bloque terminado con periodo vigente produce `EN_CURSO`; periodo cerrado con `NULL` produce revisión.
 
 ## Estado de oportunidad de UD acreditada
 
-Una UD acreditada ahora conserva el estado técnico `ACREDITADA_SIN_OPORTUNIDAD_REQUERIDA` y expone cero oportunidades disponibles, mínimas y máximas. No puede aparecer como `DISPONIBLE` ni como reinscribible por saldo residual.
+Una UD acreditada expone `ACREDITADA_SIN_OPORTUNIDAD_REQUERIDA` y cero oportunidades disponibles; no aparece como disponible ni reinscribible por saldo residual.
 
 | Caso GC-17 | Resultado comprobado |
 |---|---|
-| A | `intentosConfirmados=3`: 2 resultados concluidos reprobatorios + 1 cursamiento en curso; estado `ULTIMA_EN_CURSO`. |
-| C | Acreditada; estado `ACREDITADA_SIN_OPORTUNIDAD_REQUERIDA`; oportunidades disponibles `0`. |
-| Adeudos vigentes | `3`; no se duplica la recursada en curso. |
-
-Evidencia: `Bloque5HistorialRn20261117Test.gc17CuentaAdeudosPorUdYNoDuplicaLaRecursadaEnCurso`.
+| A | `intentosConfirmados=3`: dos resultados concluidos reprobatorios y un cursamiento en curso; `ULTIMA_EN_CURSO`. |
+| C | Acreditada; `ACREDITADA_SIN_OPORTUNIDAD_REQUERIDA`; oportunidades disponibles `0`. |
+| Adeudos vigentes | `3`; la recursada en curso no se duplica. |
 
 ## Q5 - UD de quinto ya reprobada con cuatro o más adeudos
 
-Salida real de la prueba sintética, sin alterar comportamiento:
+Salida de la prueba sintética, sin cambio de comportamiento:
 
 ```text
 UD=OB5-1
@@ -30,125 +77,137 @@ Decisión efectiva para regularización=PRIORITARIA
 Bloqueada=false
 ```
 
-Por tanto, el motor actual prioriza la UD de quinto como regularización mediante RN-6.4; no emite `BLOQUEADA` por RN-6.1.5 para ese caso. La marca `REQUIERE_REVISION` proviene de la evidencia insuficiente del control de avance en el contexto sintético. Evidencia: `Bloque3OfertaYPreseleccionRn20261106Test.q5ReprobadaDeQuintoConCuatroAdeudosReportaDecisionVigente`.
+El motor prioriza la UD de quinto como regularización por RN-6.4; no emite `BLOQUEADA` por RN-6.1.5 en ese caso. La revisión procede de evidencia insuficiente del control de avance del contexto sintético.
 
 ## SQL C-20
 
-El archivo [C20_HISTORIAL_RN20261117_SOLO_LECTURA.sql](/home/abelinux/gestor/repo/gestor/documentacion/C20_HISTORIAL_RN20261117_SOLO_LECTURA.sql) contiene exclusivamente `SELECT` y comienza con `SELECT VERSION()`.
+El archivo [C20_HISTORIAL_RN20261117_SOLO_LECTURA.sql](/home/abelinux/gestor/repo/gestor/documentacion/C20_HISTORIAL_RN20261117_SOLO_LECTURA.sql) es compatible con MySQL 5.7: no usa CTE ni funciones de ventana. Su universo se limita a los planes `3, 4, 5, 6, 7 y 11`; excluye capacitación y cualquier otro plan.
 
-- La versión distribuida es compatible con MySQL 5.7: usa tablas derivadas y totales por UD, sin CTE ni funciones de ventana.
-- Una variante MySQL 8 con `SUM() OVER (PARTITION BY persona, UD ORDER BY periodo)` puede construirse como optimización separada, pero no se mezcla con el archivo ejecutable en MySQL 5.7.
-- Consolida primero persona + UD + periodo.
-- Excluye de límite y adeudo las UD con acreditación posterior verificable.
-- Reporta `id_plan` y nombre del PE, estudiantes distintos y UD distintas.
-- Separa tercera oportunidad en curso y revisiones por causa de la consulta de límites.
-
-La versión instalada localmente es MySQL 5.7.42. El script se ejecutó el 2026-11-17 contra `des_sisi_gestor` con una cuenta autorizada y devolvió únicamente agregados. El script no devuelve datos personales.
-
-## Resultados C-20
-
-Fecha de corte de la ejecución: `2026-11-17 22:55:55`. Versión: `5.7.42-0ubuntu0.18.04.1`. Los resultados siguientes no contienen identificadores personales.
+La ejecución contra `des_sisi_gestor` fue el `2026-11-18 10:04:58`, con MySQL `5.7.42-0ubuntu0.18.04.1`. Devuelve únicamente agregados.
 
 ### Límites por PE
 
-| PE | Estudiantes con 3 fallidos sin acreditar | UD con 3 fallidos sin acreditar | Estudiantes con más de 3 | UD con más de 3 | Estudiantes con al menos una UD en cualquiera de las categorías |
-|---|---:|---:|---:|---:|---:|
-| Capacitación UnADM | 0 | 0 | 0 | 0 | 0 |
-| Capacitación UnADM 2024 | 0 | 0 | 0 | 0 | 0 |
-| Contaduría y Finanzas Públicas | 27 | 6 | 0 | 0 | 27 |
-| Administración y Gestión Pública | 34 | 6 | 0 | 0 | 34 |
-| Enseñanza de la Matemática | 15 | 6 | 0 | 0 | 15 |
-| Gestión Industrial | 34 | 6 | 0 | 0 | 34 |
-| Seguridad Alimentaria | 18 | 6 | 0 | 0 | 18 |
-| Derecho | 41 | 6 | 0 | 0 | 41 |
-| Capacitación docente 2024 | 0 | 0 | 0 | 0 | 0 |
-| Capacitación docente 2025 | 0 | 0 | 0 | 0 | 0 |
-| **Total global distinto** | **169** | **36** | **0** | **0** | **169** |
-
-La fila total usa estudiantes distintos en todos los PE; las UD se suman por PE.
+| PE | Estudiantes con 3 fallidos sin acreditar | UD con 3 fallidos | Estudiantes con más de 3 | UD con más de 3 |
+|---|---:|---:|---:|---:|
+| Contaduría y Finanzas Públicas | 27 | 6 | 0 | 0 |
+| Administración y Gestión Pública | 34 | 6 | 0 | 0 |
+| Enseñanza de la Matemática | 15 | 6 | 0 | 0 |
+| Gestión Industrial | 34 | 6 | 0 | 0 |
+| Seguridad Alimentaria | 18 | 6 | 0 | 0 |
+| Derecho | 41 | 6 | 0 | 0 |
+| **Total distinto** | **169** | **36** | **0** | **0** |
 
 ### Tercera oportunidad en curso
 
-No se obtuvieron filas por PE y periodo. El control de corte confirmó `0` participaciones con `calificacion_final IS NULL` y `fecha_final >= CURDATE()`, `0` estudiantes distintos y `NULL` como fecha final máxima de eventos PE2024. Por ello, el cero corresponde al corte de datos sin eventos/participaciones en curso, no a una conclusión de que no haya trayectorias con oportunidades históricas.
-
-### Revisiones
-
-La consulta asigna una sola causa por registro, conforme al primer caso que cumple en este orden: calificación vacía en periodo cerrado, baja sin `contabilizar=1`, evento sin periodo. Los conteos siguientes suman registros de todos los periodos; los estudiantes y UD son distintos dentro de cada PE y causa.
-
-| PE | Causa | Registros agregados | Estudiantes distintos | UD distintas |
-|---|---|---:|---:|---:|
-| Capacitación UnADM | Calificación vacía en periodo cerrado | 10 | 10 | 1 |
-| Capacitación UnADM 2024 | Calificación vacía en periodo cerrado | 5 | 5 | 1 |
-| Contaduría y Finanzas Públicas | Calificación vacía en periodo cerrado | 10,223 | 2,565 | 47 |
-| Administración y Gestión Pública | Calificación vacía en periodo cerrado | 9,412 | 2,327 | 45 |
-| Administración y Gestión Pública | Baja sin contabilizar=1 | 2 | 1 | 2 |
-| Administración y Gestión Pública | Evento sin periodo | 6 | 1 | 6 |
-| Enseñanza de la Matemática | Calificación vacía en periodo cerrado | 1,652 | 479 | 43 |
-| Gestión Industrial | Calificación vacía en periodo cerrado | 7,234 | 1,955 | 45 |
-| Seguridad Alimentaria | Calificación vacía en periodo cerrado | 1,593 | 444 | 40 |
-| Derecho | Calificación vacía en periodo cerrado | 15,353 | 4,042 | 45 |
-| Capacitación docente 2024 | Calificación vacía en periodo cerrado | 201 | 97 | 1 |
-| Capacitación docente 2025 | Calificación vacía en periodo cerrado | 2 | 2 | 1 |
-
-Detalle por periodo para `CALIFICACION_VACIA_PERIODO_CERRADO`:
-
-| PE | Periodo | Estudiantes distintos | UD distintas |
+| PE | Periodo | Estudiantes | UD |
 |---|---|---:|---:|
-| Capacitación UnADM | 2024-1 | 10 | 1 |
-| Capacitación UnADM 2024 | 2024-1 | 5 | 1 |
-| Contaduría y Finanzas Públicas | 2024-1 / 2024-2 / 2025-1 / 2025-2 / 2026-1 / 2026-2 | 31 / 28 / 66 / 70 / 121 / 2,514 | 6 / 6 / 12 / 12 / 28 / 13 |
-| Administración y Gestión Pública | 2024-1 / 2024-2 / 2025-1 / 2025-2 / 2026-1 / 2026-2 | 32 / 30 / 81 / 75 / 97 / 2,293 | 6 / 6 / 12 / 12 / 26 / 13 |
-| Enseñanza de la Matemática | 2024-1 / 2024-2 / 2025-1 / 2025-2 / 2026-1 / 2026-2 | 19 / 21 / 24 / 24 / 21 / 457 | 6 / 6 / 12 / 12 / 24 / 13 |
-| Gestión Industrial | 2024-1 / 2024-2 / 2025-1 / 2025-2 / 2026-1 / 2026-2 | 26 / 29 / 68 / 63 / 84 / 1,921 | 6 / 6 / 12 / 12 / 26 / 13 |
-| Seguridad Alimentaria | 2024-1 / 2024-2 / 2025-1 / 2025-2 / 2026-1 / 2026-2 | 15 / 24 / 18 / 18 / 25 / 415 | 6 / 6 / 12 / 12 / 22 / 11 |
-| Derecho | 2024-1 / 2024-2 / 2025-1 / 2025-2 / 2026-1 / 2026-2 | 41 / 40 / 88 / 93 / 167 / 3,933 | 6 / 6 / 12 / 12 / 26 / 13 |
-| Capacitación docente 2024 | 2024-1 | 97 | 1 |
-| Capacitación docente 2025 | 2025-1 | 2 | 1 |
+| Contaduría y Finanzas Públicas | 2026-2 | 20 | 3 |
+| Administración y Gestión Pública | 2026-2 | 20 | 3 |
+| Enseñanza de la Matemática | 2026-2 | 14 | 3 |
+| Gestión Industrial | 2026-2 | 31 | 3 |
+| Seguridad Alimentaria | 2026-2 | 11 | 3 |
+| Derecho | 2026-2 | 12 | 3 |
 
-### Comparación de adeudos y resultados reprobatorios
+### Revisiones posteriores a la corrección
 
-| PE | Universo de estudiantes | 4 o más adeudos vigentes | % universo | 4 o más resultados reprobatorios | % universo |
-|---|---:|---:|---:|---:|---:|
-| Capacitación UnADM | 10 | 0 | 0.00% | 0 | 0.00% |
-| Capacitación UnADM 2024 | 5 | 0 | 0.00% | 0 | 0.00% |
-| Contaduría y Finanzas Públicas | 4,575 | 1,929 | 42.16% | 1,987 | 43.43% |
-| Administración y Gestión Pública | 4,221 | 1,866 | 44.21% | 1,924 | 45.58% |
-| Enseñanza de la Matemática | 1,043 | 496 | 47.56% | 513 | 49.19% |
-| Gestión Industrial | 3,628 | 1,748 | 48.18% | 1,806 | 49.78% |
-| Seguridad Alimentaria | 1,063 | 592 | 55.69% | 610 | 57.38% |
-| Derecho | 6,105 | 2,022 | 33.12% | 2,121 | 34.74% |
-| Capacitación docente 2024 | 97 | 0 | 0.00% | 0 | 0.00% |
-| Capacitación docente 2025 | 2 | 0 | 0.00% | 0 | 0.00% |
-| **Total global distinto** | **20,513** | **8,653** | **42.18%** | **8,961** | **43.68%** |
+`2026-2` ya no aparece como `CALIFICACION_VACIA_PERIODO_CERRADO`. La consulta asigna una sola causa por registro, en este orden: calificación vacía en periodo cerrado, baja sin `contabilizar=1`, evento sin periodo.
+
+| PE | Calificación vacía en periodos cerrados | Baja sin contabilizar | Evento sin periodo |
+|---|---:|---:|---:|
+| Contaduría y Finanzas Públicas | 2,603 | 0 | 0 |
+| Administración y Gestión Pública | 2,554 | 2 | 6 |
+| Enseñanza de la Matemática | 524 | 0 | 0 |
+| Gestión Industrial | 1,584 | 0 | 0 |
+| Seguridad Alimentaria | 455 | 0 | 0 |
+| Derecho | 3,356 | 0 | 0 |
+
+El detalle de calificación vacía permanece en los periodos `2024-1`, `2024-2`, `2025-1`, `2025-2` y `2026-1`; no hay filas de esa causa para `2026-2`.
+
+### Sensibilidad Q6: efecto de calificación cero sin baja
+
+Cada columna cuenta estudiantes con cuatro o más adeudos vigentes. La segunda excluye reprobaciones de un periodo en que **todas** las UD de la persona están en cero y sin baja aplicada. La tercera excluye cualquier reprobación con cero sin baja, aunque coexistiera con otros resultados del periodo.
+
+| PE | Total | Sin periodos completos en cero | Sin ningún cero sin baja |
+|---|---:|---:|---:|
+| Contaduría y Finanzas Públicas | 1,929 | 1,254 | 256 |
+| Administración y Gestión Pública | 1,866 | 1,183 | 283 |
+| Enseñanza de la Matemática | 496 | 351 | 100 |
+| Gestión Industrial | 1,748 | 1,126 | 297 |
+| Seguridad Alimentaria | 592 | 367 | 99 |
+| Derecho | 2,022 | 1,304 | 332 |
+
+Estos resultados son sensibilidad de la base de pruebas, no un cambio de regla: mientras DAEAE no determine otra interpretación, `0` sin baja aplicada sigue siendo reprobación conforme al adaptador.
+
+### UD donde se concentra el límite
+
+Las seis UD siguientes por PE acumulan los 169 estudiantes del umbral. El semestre proviene del mapa curricular (`tmp_claves_programas`), no de la oferta.
+
+| PE | Clave | Unidad didáctica | Semestre | Estudiantes |
+|---|---|---|---:|---:|
+| Contaduría y Finanzas Públicas | CCGEP | Contabilidad gubernamental y los entes públicos | 1 | 23 |
+| Contaduría y Finanzas Públicas | CSPAG | El servidor público en la administración gubernamental | 1 | 22 |
+| Contaduría y Finanzas Públicas | CRCV | Redacción en contextos virtuales | 1 | 20 |
+| Contaduría y Finanzas Públicas | CTO | Tipos de organizaciones | 1 | 18 |
+| Contaduría y Finanzas Públicas | CISP | Integridad en el servicio público | 1 | 14 |
+| Contaduría y Finanzas Públicas | CUTA | Uso de la tecnología en el aprendizaje | 1 | 14 |
+| Administración y Gestión Pública | AAGPC | Administrar y gestionar un proyecto comunitario | 1 | 28 |
+| Administración y Gestión Pública | ARCV | Redacción en contextos virtuales | 1 | 23 |
+| Administración y Gestión Pública | ADP | División de poderes | 1 | 18 |
+| Administración y Gestión Pública | AUTA | Uso de la tecnología en el aprendizaje | 1 | 18 |
+| Administración y Gestión Pública | AISP | Integridad en el servicio público | 1 | 16 |
+| Administración y Gestión Pública | AGP | Gestión pública | 1 | 15 |
+| Enseñanza de la Matemática | EFDA | Fundamentos y didáctica de la aritmética | 1 | 13 |
+| Enseñanza de la Matemática | ETP | Teorías pedagógicas | 1 | 12 |
+| Enseñanza de la Matemática | ERCV | Redacción en contextos virtuales | 1 | 11 |
+| Enseñanza de la Matemática | EHM | Historia de la matemática | 1 | 10 |
+| Enseñanza de la Matemática | ETEE | Teorías educativas de la enseñanza | 1 | 10 |
+| Enseñanza de la Matemática | EUTA | Uso de la tecnología en el aprendizaje | 1 | 9 |
+| Gestión Industrial | GGA | Geometría analítica | 1 | 31 |
+| Gestión Industrial | GE | Economía | 1 | 26 |
+| Gestión Industrial | GRCV | Redacción en contextos virtuales | 1 | 26 |
+| Gestión Industrial | GFGI | Fundamentos de la gestión industrial | 1 | 15 |
+| Gestión Industrial | GUTA | Uso de la tecnología en el aprendizaje | 1 | 15 |
+| Gestión Industrial | GLM | Lenguaje matemático | 1 | 13 |
+| Seguridad Alimentaria | SAA | Antropología de la alimentación | 1 | 14 |
+| Seguridad Alimentaria | SUTA | Uso de la tecnología en el aprendizaje | 1 | 14 |
+| Seguridad Alimentaria | SADH | Alimentación y derechos humanos | 1 | 11 |
+| Seguridad Alimentaria | SSA | Sustentabilidad y alimentación | 1 | 11 |
+| Seguridad Alimentaria | SRCV | Redacción en contextos virtuales | 1 | 10 |
+| Seguridad Alimentaria | SISA | Introducción a la seguridad alimentaria | 1 | 9 |
+| Derecho | DRCV | Redacción en contextos virtuales | 1 | 31 |
+| Derecho | DFD | Filosofía del Derecho | 1 | 28 |
+| Derecho | DEMJ | Ética y Moral jurídica | 1 | 27 |
+| Derecho | DISP | Integridad en el servicio público | 1 | 21 |
+| Derecho | DHDM | Historia del Derecho en México | 1 | 19 |
+| Derecho | DUTA | Uso de la tecnología en el aprendizaje | 1 | 17 |
 
 ## Evidencia de integración de consumidores
 
-| Consumidor | Invocación y contexto | Mapeo de resultado | Reinterpretación identificada |
-|---|---|---|---|
-| Malla curricular | `MallaCurricularAlumnoBean.cargarResultadoEvaluacionV2` construye `contextoAsistente` y llama `MallaCurricularV2FacadeImpl.evaluarSombra`; el facade adapta con `ContextoEvaluacionCurricularV2Adapter` y llama al evaluador. | `MallaCurricularV2ResultadoAdapter.aplicar` recibe decisiones por `idPrograma` y situación para representar nodos. | Decide icono/CSS y conteos visuales; no recalcula decisión, motivos, oportunidades ni adeudos. |
-| Asistente de inscripción y orientación educativa | `TablaCurricularAsistidaBean.cargarResultadoEvaluacionV2` llama `AsistenteCurricularV2FacadeImpl.evaluarSombra` con el contexto del expediente. | `AsistenteCurricularResultadoAdapter.adaptar` proyecta situación, carga, motivos, reglas y alertas; la misma bean usa la carga V2 para proyección. | Convierte códigos a textos y narrativas. No debe alterar decisiones; las leyendas son presentación. |
-| Simulador | `TablaCurricularAsistidaBean.simularSeleccion` llama `SimuladorCurricularV2ServiceImpl.simularSombra(idPersona, idsSeleccionados)`. | El servicio construye el contexto con la selección hipotética y transforma el resultado en `ResultadoSimulacionDTO`. | Mantiene validaciones complementarias de selección; la decisión académica, motivos y carga proceden de la evaluación. |
-| Asistente virtual | El panel se alimenta en `TablaCurricularAsistidaBean.cargarResultadoEvaluacionV2` mediante `AsistenteCurricularResultadoAdapter.adaptar(resultadoEvaluacionV2)`. | Consume situación, reglas aplicadas, restricciones y alertas del mismo resultado del Asistente. | Resume y redacta; no calcula oportunidades ni adeudos. |
-
-Referencias de código: `MallaCurricularAlumnoBean:251`, `MallaCurricularV2FacadeImpl:36`, `TablaCurricularAsistidaBean:248`, `TablaCurricularAsistidaBean:1233`, `AsistenteCurricularV2FacadeImpl:85`, `SimuladorCurricularV2ServiceImpl:48` y `AsistenteCurricularResultadoAdapter:11`.
-
-La prueba contractual de los cuatro consumidores contra un despliegue requiere el ambiente de pruebas. Esta entrega aporta evidencia estática de la ruta y no la declara ejecutada en WildFly.
-
-## Pruebas y regresión
-
-| Comando | Alcance | Resultado |
+| Consumidor | Ruta de evaluación | Alcance de presentación |
 |---|---|---|
-| `mvn -Dtest=Bloque5HistorialRn20261117Test,Bloque3OfertaYPreseleccionRn20261106Test test` | GC-17 y Q5 sintéticos | 21 pruebas, 0 fallas, 0 errores, 0 omitidas. |
-| `mvn test` en `basegestor` | Regresión completa | 788 pruebas, 0 fallas, 0 errores, 0 omitidas. |
-| `mvn test` en `gestorWeb` | Regresión completa web | 38 pruebas, 0 fallas, 0 errores, 0 omitidas. |
+| Malla curricular | `MallaCurricularAlumnoBean` → `MallaCurricularV2FacadeImpl` → adaptador y evaluador | Mapea decisión y motivos a icono/CSS; no recalcula oportunidades ni adeudos. |
+| Asistente de inscripción | `TablaCurricularAsistidaBean` → `AsistenteCurricularV2FacadeImpl` | Proyecta situación, carga, motivos y alertas; solo redacta códigos. |
+| Simulador | `TablaCurricularAsistidaBean.simularSeleccion` → `SimuladorCurricularV2ServiceImpl` | Añade validaciones complementarias, pero obtiene decisión académica y carga de la evaluación. |
+| Asistente virtual | `TablaCurricularAsistidaBean` → `AsistenteCurricularResultadoAdapter` | Resume la misma evaluación; no calcula oportunidades ni adeudos. |
+
+La consistencia dinámica entre consumidores continúa pendiente de comprobar en WildFly autorizado.
 
 ## Archivos modificados
 
-- `EvaluacionCurricularV2ServiceImpl`: saldo cero para UD acreditada.
-- `Bloque5HistorialRn20261117Test`: aserción GC-17 de estado acreditado y saldo cero.
-- `Bloque3OfertaYPreseleccionRn20261106Test`: evidencia Q5 sin cambio de regla.
-- `C20_HISTORIAL_RN20261117_SOLO_LECTURA.sql`: consulta agregada ejecutable en MySQL 5.7.
+- `InscripcionRepository`: clasificación de calificación ausente por cierre académico del periodo.
+- `Bloque2HistorialOportunidadesRn20261106Test`: casos sintéticos de periodo vigente y cerrado con calificación ausente.
+- `C20_HISTORIAL_RN20261117_SOLO_LECTURA.sql`: universo PE2024, cierre por periodo, control de cursamiento, sensibilidad y UD del umbral.
+
+## Pruebas y regresión
+
+| Comando | Resultado |
+|---|---|
+| `mvn -Dtest=Bloque2HistorialOportunidadesRn20261106Test test` en `basegestor` | 16 pruebas, 0 fallas, 0 errores, 0 omitidas. |
+| `mvn test` en `basegestor` | 788 pruebas, 0 fallas, 0 errores, 0 omitidas. |
+| `mvn test` en `gestorWeb` | 38 pruebas, 0 fallas, 0 errores, 0 omitidas. |
 
 ## Limitaciones
 
-- La consistencia dinámica entre los cuatro consumidores sigue pendiente de ejecutar en el ambiente autorizado.
+- La fecha de cierre se deriva de los eventos de cada plan y periodo. Si el calendario institucional define un cierre de acta distinto, debe integrarse como fuente preferente.
+- La clasificación de `0` sin baja aplicada sigue parametrizada como reprobación; las cifras de sensibilidad no cambian esa regla.
+- La consistencia en UI requiere despliegue y validación controlada en WildFly.

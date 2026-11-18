@@ -142,6 +142,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "MAX(rgp.calificacion_final) AS calificacion_final_v2, "
 				+ "MAX(mb.tipo_baja_id) AS tipo_baja_v2, MAX(mb.descripcion) AS motivo_baja_v2, "
 				+ "MAX(e.fecha_final) AS fecha_fin_evento_v2, "
+				// La fecha de un bloque no cierra por si sola el periodo academico.
+				+ "MAX(calendario.fecha_final_periodo) AS fecha_fin_periodo_v2, "
 				+ "CASE WHEN COUNT(DISTINCT COALESCE(rgp.calificacion_final,-999999)) > 1 THEN 1 ELSE 0 END AS calificacion_conflictiva_v2, "
 				+ "MAX(CASE WHEN baja_registrada.id_persona IS NOT NULL AND COALESCE(baja_registrada.contabilizar,0) <> 1 THEN 1 ELSE 0 END) AS baja_sin_confirmar_v2 "
 				+ "FROM rel_grupo_participante rgp "
@@ -149,6 +151,11 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "INNER JOIN tbl_eventos e ON e.id_evento=g.id_evento "
 				+ "INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa=e.id_programa "
 				+ "LEFT JOIN tbl_periodos_inscripcion pi ON SUBSTRING_INDEX(e.cve_evento_cap, '-', -2)=pi.nombre_periodo "
+				+ "LEFT JOIN (SELECT fd_cal.id_plan AS id_plan_cal, SUBSTRING_INDEX(e_cal.cve_evento_cap, '-', -2) AS periodo_cal, "
+				+ "MAX(e_cal.fecha_final) AS fecha_final_periodo "
+				+ "FROM tbl_eventos e_cal INNER JOIN tbl_ficha_descriptiva_programa fd_cal ON fd_cal.id_programa=e_cal.id_programa "
+				+ "WHERE e_cal.fecha_final IS NOT NULL GROUP BY fd_cal.id_plan, SUBSTRING_INDEX(e_cal.cve_evento_cap, '-', -2)) calendario "
+				+ "ON calendario.id_plan_cal=fd.id_plan AND calendario.periodo_cal=pi.nombre_periodo "
 				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona=rgp.id_persona_participante "
 				+ "AND baja.id_grupo=rgp.id_grupo AND baja.contabilizar=1 "
 				+ "LEFT JOIN rel_persona_bajas baja_registrada ON baja_registrada.id_persona=rgp.id_persona_participante "
@@ -166,8 +173,9 @@ public class InscripcionRepository implements IinscripcionRepository {
 		intento.setIdParticipacion(idParticipacion); intento.setIdGrupo(getLongValue(fila[3]));
 		Double calificacion = getDoubleValue(fila[4]); Integer tipoBaja = getIntegerValue(fila[5]);
 		String motivoBaja = fila[6] == null ? null : String.valueOf(fila[6]); Date fechaFinEvento = fila[7] instanceof Date ? (Date) fila[7] : null;
-		boolean calificacionConflictiva = getIntegerValue(fila[8]) != null && getIntegerValue(fila[8]).intValue() > 0;
-		boolean bajaSinConfirmar = fila.length > 9 && getIntegerValue(fila[9]) != null && getIntegerValue(fila[9]).intValue() > 0;
+		Date fechaFinPeriodo = fila.length > 8 && fila[8] instanceof Date ? (Date) fila[8] : null;
+		boolean calificacionConflictiva = getIntegerValue(fila[9]) != null && getIntegerValue(fila[9]).intValue() > 0;
+		boolean bajaSinConfirmar = fila.length > 10 && getIntegerValue(fila[10]) != null && getIntegerValue(fila[10]).intValue() > 0;
 		intento.setCalificacionFinal(calificacion);
 		if (intento.getIdPrograma() == null || intento.getPeriodo() == null || calificacionConflictiva || (bajaSinConfirmar && tipoBaja == null)) {
 			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO);
@@ -183,12 +191,15 @@ public class InscripcionRepository implements IinscripcionRepository {
 		if (tipoBaja != null && !conservaResultado) {
 			mapearBajaContabilizable(intento, tipoBaja, motivoBaja);
 		} else if (calificacion == null) {
-			boolean periodoCerrado = fechaFinEvento != null && fechaFinEvento.before(new Date());
+			// El cierre se determina por periodo academico, no por el bloque que genero la participacion.
+			boolean periodoCerrado = fechaFinPeriodo == null || fechaFinPeriodo.before(new Date());
 			intento.setEstado(periodoCerrado ? EstadoIntentoAcreditacionV2.NO_DETERMINADO : EstadoIntentoAcreditacionV2.EN_CURSO);
 			intento.setEvidenciaFuente((conservaResultado
 					? "REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja + ";ESTADO_EXPEDIENTE=BAJA_DEFINITIVA;"
 					: "") + (periodoCerrado ? "PARTICIPACION_SIN_CALIFICACION_EN_PERIODO_CERRADO_REQUIERE_REVISION"
-							: "PARTICIPACION_EN_CURSO_SIN_CALIFICACION"));
+							: "PARTICIPACION_EN_CURSO_SIN_CALIFICACION")
+							+ ";FECHA_FIN_EVENTO=" + (fechaFinEvento == null ? "SIN_DATO" : fechaFinEvento)
+							+ ";FECHA_FIN_PERIODO=" + (fechaFinPeriodo == null ? "SIN_DATO" : fechaFinPeriodo));
 		} else if (calificacion.doubleValue() < 0D || calificacion.doubleValue() > 100D) {
 			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente("NP_SIN_BAJA_REQUIERE_REVISION:CALIFICACION_FUERA_RANGO_0_100");
 		} else {
