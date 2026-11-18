@@ -89,6 +89,12 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         assertTrue(sql.contains("calificacion_conflictiva_v2"));
         assertTrue(sql.contains("baja_sin_confirmar_v2"));
     }
+    @Test public void bajasParaConsumidoresExigenConfirmacionExplicita() throws Exception {
+        Method m=InscripcionRepository.class.getDeclaredMethod("consultaBajasDeMateriasSolicitadas"); m.setAccessible(true);
+        String sql=(String)m.invoke(new InscripcionRepository());
+        assertTrue(sql.contains("AND rpb.contabilizar = 1"));
+        assertFalse(sql.contains("COALESCE(rpb.contabilizar, 1) = 1"));
+    }
     @Test public void rn72EsPrincipioGeneralDeOptativasReprobadas() {
         UnidadEvaluacionCurricularV2DTO u=ud(26L, intento("opt", EstadoIntentoAcreditacionV2.REPROBADO)); u.setTipoUd("Optativa");
         ResultadoEvaluacionCurricularV2DTO r=evaluar(u);
