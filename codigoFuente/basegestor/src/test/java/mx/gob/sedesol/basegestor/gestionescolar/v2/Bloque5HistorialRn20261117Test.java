@@ -31,11 +31,16 @@ public class Bloque5HistorialRn20261117Test {
 
         EvaluacionIntentosUnidadV2DTO a = intentos(resultado, 1L);
         EvaluacionIntentosUnidadV2DTO b = intentos(resultado, 2L);
+        EvaluacionIntentosUnidadV2DTO c = intentos(resultado, 3L);
         EvaluacionIntentosUnidadV2DTO d = intentos(resultado, 4L);
         assertEquals(a.getEstadoLimite(), EstadoLimiteIntentosV2.ULTIMA_EN_CURSO);
+        // Confirmados incluye dos resultados concluidos y el cursamiento vigente.
         assertEquals(a.getIntentosConfirmados(), Integer.valueOf(3));
+        assertEquals(a.getIntentosFallidos(), Integer.valueOf(2));
         assertTrue(a.getIntentoEnCurso());
         assertEquals(b.getOportunidadesConsumidas(), Integer.valueOf(1));
+        assertEquals(c.getEstadoLimite(), EstadoLimiteIntentosV2.ACREDITADA_SIN_OPORTUNIDAD_REQUERIDA);
+        assertEquals(c.getOportunidadesDisponibles(), Integer.valueOf(0));
         assertEquals(d.getEstadoLimite(), EstadoLimiteIntentosV2.ULTIMA_DISPONIBLE);
         assertEquals(resultado.getCantidadReprobadasVigentes(), Integer.valueOf(3));
         assertFalse(resultado.getCondicionesDetectadas().toString().contains("CUATRO_O_MAS_REPROBADAS"));

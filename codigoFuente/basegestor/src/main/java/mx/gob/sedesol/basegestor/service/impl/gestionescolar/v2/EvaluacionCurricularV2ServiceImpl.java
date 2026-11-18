@@ -1333,6 +1333,11 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         unidad.setOportunidadesDisponibles(evaluacion.getOportunidadesDisponibles());
         if (evaluacion.getIntentosAcreditados().intValue() > 0 || unidad.getEstado() == EstadoUnidadCurricularV2.ACREDITADA) {
             evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.ACREDITADA_SIN_OPORTUNIDAD_REQUERIDA);
+            // Una UD acreditada no conserva saldo de oportunidades para reinscribirse.
+            evaluacion.setOportunidadesDisponibles(Integer.valueOf(0));
+            evaluacion.setOportunidadesDisponiblesMinimas(Integer.valueOf(0));
+            evaluacion.setOportunidadesDisponiblesMaximas(Integer.valueOf(0));
+            unidad.setOportunidadesDisponibles(Integer.valueOf(0));
         } else if (identidadInsuficiente) {
             evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.REQUIERE_REVISION);
             evaluacion.setAviso(motivoRevisionHistorica == null
