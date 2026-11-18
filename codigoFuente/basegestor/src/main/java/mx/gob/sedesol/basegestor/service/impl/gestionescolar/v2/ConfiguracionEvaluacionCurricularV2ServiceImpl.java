@@ -17,6 +17,9 @@ public class ConfiguracionEvaluacionCurricularV2ServiceImpl implements Configura
     public static final String REGLAS_V2_VERSION = "RN-PE2024-2027-act-20261117";
     public static final String CTR01_PERIODO_INICIO = "2027-1";
     public static final Integer CTR01_SEMESTRE_OBJETIVO = Integer.valueOf(5);
+    public static final String PERIODO_COMUNICADO_INSTITUCIONAL = "2027-1";
+    public static final String TEXTO_COMUNICADO_INSTITUCIONAL = "Esta simulación aplica las reglas generales. Para el proceso de Inscripción puede aplicar autorizaciones institucionales específicas. La inscripción efectiva puede diferir del resultado que se muestra aquí.";
+    public static final String REFERENCIA_COMUNICADO_INSTITUCIONAL = "Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4, secciones A y C";
 
     @Override
     public ConfiguracionEvaluacionCurricularV2DTO obtenerConfiguracion() {
@@ -41,6 +44,10 @@ public class ConfiguracionEvaluacionCurricularV2ServiceImpl implements Configura
         parametros.setVigencia("2026-11-17");
         parametros.setAmbito(obtenerPropiedad("V2_CATALOGO_OPTATIVAS_AMBITO", "PE2024/2027"));
         parametros.setCatalogoOptativas(obtenerPropiedad("V2_CATALOGO_OPTATIVAS", "USTAPREN:1,RECVIRTU:1,PRINVEST:1,PGHRATRS:2,INAVIRTU:2,ANDHUMAN:2,BAIDOCUM:3,BAICAMPO:3,REACADEM:3,INARTIFI:3,PECRITIC:4,HIMEXICO:4,MECMUNDI:4"));
+        parametros.setPeriodoComunicadoInstitucional(obtenerPropiedad("V2_COMUNICADO_INSTITUCIONAL_PERIODO", PERIODO_COMUNICADO_INSTITUCIONAL));
+        parametros.setTextoComunicadoInstitucional(obtenerPropiedad("V2_COMUNICADO_INSTITUCIONAL_TEXTO", TEXTO_COMUNICADO_INSTITUCIONAL));
+        parametros.setReferenciaComunicadoInstitucional(obtenerPropiedad("V2_COMUNICADO_INSTITUCIONAL_REFERENCIA", REFERENCIA_COMUNICADO_INSTITUCIONAL));
+        parametros.setVigenciaComunicadoInstitucional(obtenerPropiedad("V2_COMUNICADO_INSTITUCIONAL_VIGENCIA", "2027-1"));
         configuracion.setParametrosCurriculares(parametros);
         return configuracion;
     }

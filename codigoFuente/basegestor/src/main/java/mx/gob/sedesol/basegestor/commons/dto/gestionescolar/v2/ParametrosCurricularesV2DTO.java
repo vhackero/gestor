@@ -20,6 +20,11 @@ public class ParametrosCurricularesV2DTO implements Serializable {
     private String ambito;
     /** Tabla 2 RN-7.1; formato CLAVE:SEMESTRE, configurado por ámbito y vigencia. */
     private String catalogoOptativas;
+    /** Comunicado institucional de consulta aplicable a un periodo específico. */
+    private String periodoComunicadoInstitucional;
+    private String textoComunicadoInstitucional;
+    private String referenciaComunicadoInstitucional;
+    private String vigenciaComunicadoInstitucional;
     public Integer getOportunidadesPorUd() { return oportunidadesPorUd; } public void setOportunidadesPorUd(Integer v) { oportunidadesPorUd = v; }
     public Integer getCalificacionMinimaAprobatoria() { return calificacionMinimaAprobatoria; } public void setCalificacionMinimaAprobatoria(Integer v) { calificacionMinimaAprobatoria = v; }
     public Integer getCargaMinima() { return cargaMinima; } public void setCargaMinima(Integer v) { cargaMinima = v; }
@@ -34,4 +39,8 @@ public class ParametrosCurricularesV2DTO implements Serializable {
     public String getVigencia() { return vigencia; } public void setVigencia(String v) { vigencia = v; }
     public String getAmbito() { return ambito; } public void setAmbito(String v) { ambito = v; }
     public String getCatalogoOptativas() { return catalogoOptativas; } public void setCatalogoOptativas(String v) { catalogoOptativas = v; }
+    public String getPeriodoComunicadoInstitucional() { return periodoComunicadoInstitucional; } public void setPeriodoComunicadoInstitucional(String v) { periodoComunicadoInstitucional = v; }
+    public String getTextoComunicadoInstitucional() { return textoComunicadoInstitucional; } public void setTextoComunicadoInstitucional(String v) { textoComunicadoInstitucional = v; }
+    public String getReferenciaComunicadoInstitucional() { return referenciaComunicadoInstitucional; } public void setReferenciaComunicadoInstitucional(String v) { referenciaComunicadoInstitucional = v; }
+    public String getVigenciaComunicadoInstitucional() { return vigenciaComunicadoInstitucional; } public void setVigenciaComunicadoInstitucional(String v) { vigenciaComunicadoInstitucional = v; }
 }

@@ -313,11 +313,13 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         parametros.setCtr01PeriodoInicio(configuracion.getCtr01PeriodoInicio());
         parametros.setCtr01Semestre(configuracion.getCtr01SemestreObjetivo());
         parametros.setCatalogoOptativas(configuracion.getParametrosCurriculares().getCatalogoOptativas());
+        parametros.setPeriodoComunicadoInstitucional(configuracion.getParametrosCurriculares().getPeriodoComunicadoInstitucional());
+        parametros.setTextoComunicadoInstitucional(configuracion.getParametrosCurriculares().getTextoComunicadoInstitucional());
+        parametros.setReferenciaComunicadoInstitucional(configuracion.getParametrosCurriculares().getReferenciaComunicadoInstitucional());
+        parametros.setVigenciaComunicadoInstitucional(configuracion.getParametrosCurriculares().getVigenciaComunicadoInstitucional());
         parametros.setAmbito(configuracion.getParametrosCurriculares().getAmbito());
         parametros.setVigencia(configuracion.getParametrosCurriculares().getVigencia());
-        parametros.setDocumentoRespaldo("P2024-2027- Reglas de negocio_Octubre 2026_act_20261105.docx");
-        parametros.setVigencia("2026-11-05");
-        parametros.setAmbito("REQUIERE_REVISION");
+        parametros.setDocumentoRespaldo(configuracion.getParametrosCurriculares().getDocumentoRespaldo());
         contexto.setParametrosCurriculares(parametros);
         contexto.setVersionReglas(configuracion.getVersionReglas());
         contexto.setAmbitoRnPe2024_2027(new AmbitoReglasCurricularesV2ServiceImpl().resolver(

@@ -52,7 +52,7 @@ public class Bloque5HistorialRn20261117Test {
                 ud(8L, "FP", EstadoUnidadCurricularV2.REPROBADA, intento("P1", "2026-1", EstadoIntentoAcreditacionV2.REPROBADO), intento("P2", "2026-1", EstadoIntentoAcreditacionV2.REPROBADO), intento("P3", "2026-1", EstadoIntentoAcreditacionV2.REPROBADO), intento("P4", "2026-1", EstadoIntentoAcreditacionV2.REPROBADO)));
         EvaluacionIntentosUnidadV2DTO agotada = intentos(resultado, 7L);
         assertEquals(agotada.getEstadoLimite(), EstadoLimiteIntentosV2.AGOTADA);
-        assertTrue(agotada.getAviso().contains("PENDIENTE_DISPOSICION_TRANSITORIA"));
+        assertFalse(agotada.getAviso() != null && agotada.getAviso().contains("PENDIENTE_DISPOSICION_TRANSITORIA"));
         EvaluacionIntentosUnidadV2DTO excedida = intentos(resultado, 8L);
         assertEquals(excedida.getEstadoLimite(), EstadoLimiteIntentosV2.AGOTADA);
         assertTrue(excedida.getAviso().contains("LIMITE_SUPERADO_HISTORIAL_PREVIO"));

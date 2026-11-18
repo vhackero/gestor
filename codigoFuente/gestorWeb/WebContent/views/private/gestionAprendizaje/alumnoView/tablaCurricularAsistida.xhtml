@@ -2057,6 +2057,9 @@
                                                 <p:commandButton value="#{tablaCurricularAsistidaBean.conteoUdPendientesAlerta eq 1 ? 'Consultar UD pendiente' : 'Consultar UDs pendientes'}" type="button" styleClass="btn btn-primary" onclick="PF('udIrregularesDialog').show(); return false;" />
                                             </div>
                                         </ui:fragment>
+                                        <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarAvisoComunicadoInstitucional}">
+                                            <div class="alert-box alert-box-info">#{tablaCurricularAsistidaBean.avisoComunicadoInstitucional}</div>
+                                        </ui:fragment>
                                         <div class="consulta-fuentes">#{tablaCurricularAsistidaBean.resumenFuentesSituacion}</div>
 
                                         <div class="avance-grid">
@@ -2344,6 +2347,9 @@
                                                             <li><strong class="diagnostico-numero" data-ayuda="#{tablaCurricularAsistidaBean.detalleUdPendientesRegistroDiagnosticoV2}">#{tablaCurricularAsistidaBean.udPendientesRegistroOfertadasDiagnosticoV2 + tablaCurricularAsistidaBean.udPendientesRegistroPreviasDiagnosticoV2}</strong>-UD pendientes de registro: #{tablaCurricularAsistidaBean.udPendientesRegistroOfertadasDiagnosticoV2} ofertadas en este periodo y #{tablaCurricularAsistidaBean.udPendientesRegistroPreviasDiagnosticoV2} de semestres previos.</li>
                                                         </ul>
                                                         <span class="diagnostico-nota">Te faltan #{tablaCurricularAsistidaBean.creditosPendientesDiagnosticoV2} créditos requeridos para concluir tu programa educativo.</span>
+                                                    </ui:fragment>
+                                                    <ui:fragment rendered="#{tablaCurricularAsistidaBean.mostrarAvisoComunicadoInstitucional}">
+                                                        <div class="diagnostico-nota">#{tablaCurricularAsistidaBean.avisoComunicadoInstitucional}</div>
                                                     </ui:fragment>
                                                     <ui:fragment rendered="#{not tablaCurricularAsistidaBean.mostrarResultadoMotorV2}">
                                                         <span>#{tablaCurricularAsistidaBean.contenidoResumenDiagnosticoAsistenteVirtual}</span>

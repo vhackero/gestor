@@ -45,6 +45,8 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     private List<String> excepciones = new ArrayList<String>();
     private List<ExcepcionCurricularV2DTO> excepcionesEvaluadas = new ArrayList<ExcepcionCurricularV2DTO>();
     private List<String> mensajes = new ArrayList<String>();
+    /** Avisos institucionales de consulta, sin efectos en decisiones ni motivos. */
+    private List<AvisoEvaluacionCurricularV2DTO> avisos = new ArrayList<AvisoEvaluacionCurricularV2DTO>();
     private List<TrazaReglaAplicadaV2DTO> trazas = new ArrayList<TrazaReglaAplicadaV2DTO>();
 
     public String getSituacionAcademica() { return situacionAcademica; }
@@ -101,5 +103,6 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     public List<String> getExcepciones() { return excepciones; }
     public List<ExcepcionCurricularV2DTO> getExcepcionesEvaluadas() { return excepcionesEvaluadas; }
     public List<String> getMensajes() { return mensajes; }
+    public List<AvisoEvaluacionCurricularV2DTO> getAvisos() { return avisos; }
     public List<TrazaReglaAplicadaV2DTO> getTrazas() { return trazas; }
 }

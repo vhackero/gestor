@@ -53,6 +53,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCaso
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PanelAsistenteVirtualDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AvisoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoAvisoEvaluacionCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TrazaReglaAplicadaV2DTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
@@ -402,6 +404,20 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 	public String getDetalleClasificacionNoRegularV2() {
 		return construirDetalleClasificacionNoRegularV2(resultadoEvaluacionV2);
 	}
+
+    /** Aviso de consulta configurado por el motor, nunca una autorización escolar. */
+    public boolean isMostrarAvisoComunicadoInstitucional() {
+        return getAvisoComunicadoInstitucional() != null;
+    }
+
+    public String getAvisoComunicadoInstitucional() {
+        if (resultadoEvaluacionV2 == null || resultadoEvaluacionV2.getAvisos() == null) return null;
+        for (AvisoEvaluacionCurricularV2DTO aviso : resultadoEvaluacionV2.getAvisos()) {
+            if (aviso != null && aviso.getCodigo() == CodigoAvisoEvaluacionCurricularV2.AVISO_COMUNICADO_2027_1
+                    && !StringUtils.isBlank(aviso.getTexto())) return aviso.getTexto();
+        }
+        return null;
+    }
 
 	static String construirResumenClasificacionNoRegularV2(ResultadoEvaluacionCurricularV2DTO resultado) {
 		if (resultado == null || "REGULAR".equals(resultado.getSituacionAcademicaCalculada())) return null;

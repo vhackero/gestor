@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaPendienteUnidadV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaPrincipalTrayectoriaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaIndisponibilidadOfertaV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AvisoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoAvisoEvaluacionCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoExcepcionCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoReglaCurricularV2;
@@ -232,6 +234,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         evaluarImpedimentosYExtraordinario(resultado, contexto);
         consolidarDecisionControlAvance(resultado, contexto);
         evaluarInscripcionInicialDiferida(resultado, contexto, unidadesNormalizadas);
+        agregarAvisoComunicadoInstitucional20271(resultado, contexto);
         evaluarReincorporacionTrasPeriodoNoCursado(resultado, contexto, unidadesNormalizadas);
         evaluarReincorporacionTrasBajaTemporal(resultado, contexto, unidadesNormalizadas);
         evaluarReincorporacionTrasBajaParcial(resultado, contexto, unidadesNormalizadas);
@@ -1245,10 +1248,6 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                     agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.BLOQUEADA);
                     decision.setHabilitada(Boolean.FALSE);
                     agregarExplicacion(decision, "La UD agotó las oportunidades computables; no procede una inscripción ordinaria adicional.");
-                    if (evaluacion.getAviso() != null && evaluacion.getAviso().contains("PENDIENTE_DISPOSICION_TRANSITORIA")) {
-                        agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.PENDIENTE_DISPOSICION_TRANSITORIA);
-                        agregarExplicacion(decision, "Debe consultarse orientación DAEAE; no se genera baja automática.");
-                    }
                 } else if (evaluacion.getEstadoLimite() == EstadoLimiteIntentosV2.REQUIERE_REVISION) {
                     agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.REQUIERE_REVISION);
                 }
@@ -1347,12 +1346,11 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.AGOTADA);
             evaluacion.setRequiereEscalamiento(Boolean.TRUE);
             evaluacion.setLimiteAgotado(Boolean.TRUE);
-            evaluacion.setAviso("LIMITE_SUPERADO_HISTORIAL_PREVIO;PENDIENTE_DISPOSICION_TRANSITORIA");
+            evaluacion.setAviso("LIMITE_SUPERADO_HISTORIAL_PREVIO" + marcadorComunicado20271(contexto));
         } else if (evaluacion.getIntentosFallidos().intValue() == limiteOportunidades) {
             evaluacion.setEstadoLimite(EstadoLimiteIntentosV2.AGOTADA);
             evaluacion.setLimiteAgotado(Boolean.TRUE); evaluacion.setRequiereEscalamiento(Boolean.TRUE);
-            if (hayFalloAnteriorAlPeriodoNormativo(unidad, contexto))
-                evaluacion.setAviso("PENDIENTE_DISPOSICION_TRANSITORIA");
+            evaluacion.setAviso(marcadorComunicado20271(contexto));
         } else if (evaluacion.getIntentosFallidos().intValue() == limiteOportunidades - 1) {
             evaluacion.setEstadoLimite(enCurso ? EstadoLimiteIntentosV2.ULTIMA_EN_CURSO : EstadoLimiteIntentosV2.ULTIMA_DISPONIBLE);
             evaluacion.setUltimaOportunidad(Boolean.TRUE);
@@ -2724,6 +2722,48 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
 
     private void registrarTrazaInscripcionInicialDiferida(ResultadoEvaluacionCurricularV2DTO resultado, ContextoEvaluacionCurricularV2DTO contexto, EvaluacionCargaAcademicaV2DTO carga) {
         String evidencia="Trayectoria="+carga.getCondicionTrayectoriaRn62()+"; periodoAdmision="+contexto.getPeriodoAdmision()+"; periodoIncorporacion="+contexto.getPeriodoIncorporacion()+"; semestreReferencia="+contexto.getSemestreReferencia()+"; S2 compatibles="+carga.getUdsSemestre2CompatiblesRn62()+"; bloqueadas="+carga.getUdsSemestre2BloqueadasRn62()+"; CTR01="+carga.getAplicaCtr01();agregarUnico(carga.getEvidencias(),evidencia);registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_2,null,70,"RN62_"+carga.getEstadoIncorporacionDiferida(),evidencia);
+    }
+
+    /**
+     * Comunicado de consulta para 2027-1. Se conserva fuera de motivos y
+     * decisiones: Inscripción determina de forma independiente a quienes aplica.
+     */
+    private void agregarAvisoComunicadoInstitucional20271(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto) {
+        ParametrosCurricularesV2DTO parametros = contexto.getParametrosCurriculares();
+        if (parametros == null || !mismoPeriodo(contexto.getPeriodoNormativo(),
+                parametros.getPeriodoComunicadoInstitucional())) return;
+        boolean limiteIntentos = false;
+        for (EvaluacionIntentosUnidadV2DTO intento : resultado.getEvaluacionesIntentos()) {
+            if (intento != null && (intento.getEstadoLimite() == EstadoLimiteIntentosV2.AGOTADA
+                    || intento.getEstadoLimite() == EstadoLimiteIntentosV2.LIMITE_AGOTADO)) {
+                limiteIntentos = true;
+                break;
+            }
+        }
+        EvaluacionCargaAcademicaV2DTO carga = resultado.getEvaluacionCargaAcademica();
+        boolean incorporacionSinReferencia = carga != null && Boolean.TRUE.equals(carga.getAplicaRn62())
+                && carga.getEstadoIncorporacionDiferida() == EstadoIncorporacionDiferidaV2.REQUIERE_REVISION
+                && !textoPresente(contexto.getReferenciaConvocatoriaOResolucionRn62());
+        if (!limiteIntentos && !incorporacionSinReferencia) return;
+        AvisoEvaluacionCurricularV2DTO aviso = new AvisoEvaluacionCurricularV2DTO();
+        aviso.setCodigo(CodigoAvisoEvaluacionCurricularV2.AVISO_COMUNICADO_2027_1);
+        aviso.setTexto(parametros.getTextoComunicadoInstitucional());
+        aviso.setReferencia(parametros.getReferenciaComunicadoInstitucional());
+        aviso.setPeriodoAplicacion(parametros.getPeriodoComunicadoInstitucional());
+        aviso.setVigencia(parametros.getVigenciaComunicadoInstitucional());
+        resultado.getAvisos().add(aviso);
+    }
+
+    private String marcadorComunicado20271(ContextoEvaluacionCurricularV2DTO contexto) {
+        ParametrosCurricularesV2DTO parametros = contexto.getParametrosCurriculares();
+        return parametros != null && mismoPeriodo(contexto.getPeriodoNormativo(),
+                parametros.getPeriodoComunicadoInstitucional())
+                ? ";AUTORIZACION_INSTITUCIONAL_POSIBLE_2027_1" : "";
+    }
+
+    private boolean mismoPeriodo(String primero, String segundo) {
+        return primero != null && segundo != null && primero.trim().equalsIgnoreCase(segundo.trim());
     }
 
     /**

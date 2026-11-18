@@ -24,6 +24,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscri
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.inscripcion.InscripcionPreviaMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AvisoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoAvisoEvaluacionCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MetadatosConsultaAsistenteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoReglaCurricularV2;
@@ -35,6 +37,20 @@ import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService
 import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasService;
 
 public class AsistenteCurricularV2ResultadoAdapterTest {
+	@Test
+	public void comunicadoInstitucionalSeExponeSoloDesdeElResultadoV2() throws Exception {
+		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
+		ResultadoEvaluacionCurricularV2DTO resultado = new ResultadoEvaluacionCurricularV2DTO();
+		AvisoEvaluacionCurricularV2DTO aviso = new AvisoEvaluacionCurricularV2DTO();
+		aviso.setCodigo(CodigoAvisoEvaluacionCurricularV2.AVISO_COMUNICADO_2027_1);
+		aviso.setTexto("Esta simulación aplica las reglas generales. Para el proceso de Inscripción puede aplicar autorizaciones institucionales específicas. La inscripción efectiva puede diferir del resultado que se muestra aquí.");
+		resultado.getAvisos().add(aviso);
+		Field campo = TablaCurricularAsistidaBean.class.getDeclaredField("resultadoEvaluacionV2");
+		campo.setAccessible(true);
+		campo.set(bean, resultado);
+		assertTrue(bean.isMostrarAvisoComunicadoInstitucional());
+		assertEquals(bean.getAvisoComunicadoInstitucional(), aviso.getTexto());
+	}
 	@Test
 	public void f12A3U02NoRecomiendaUnidadRestringidaPorSeriacion() {
 		TablaCurricularAsistidaBean.FilaAsistidaDTO fila = new TablaCurricularAsistidaBean.FilaAsistidaDTO();

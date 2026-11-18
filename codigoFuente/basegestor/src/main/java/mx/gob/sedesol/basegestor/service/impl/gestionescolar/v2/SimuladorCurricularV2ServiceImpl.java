@@ -16,6 +16,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MotivoDecisionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ResultadoSimulacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AvisoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoAvisoEvaluacionCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaMaximaCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
@@ -61,6 +63,7 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
         agregarRestricciones(evaluacion, seleccion, resultado);
         aplicarCargaV2(evaluacion, seleccionados.size(), resultado);
         aplicarValidacionesComplementarias(fuente, seleccion, seleccionados, resultado);
+        agregarAvisosDeEvaluacion(evaluacion, resultado);
         resultado.setValida(Boolean.valueOf(resultado.getMotivos().isEmpty()));
         resultado.setMensajeGeneral(Boolean.TRUE.equals(resultado.getValida())
                 ? "Escenario academico valido."
@@ -69,6 +72,18 @@ public class SimuladorCurricularV2ServiceImpl implements SimuladorCurricularV2Se
         registrarResumenAplicacion(evaluacion, seleccionados.size(), resultado);
         LOGGER.info("[SIMULADOR_V2] Simulacion finalizada");
         return resultado;
+    }
+
+    /** Los avisos de consulta no se convierten en restricciones de la selección. */
+    private void agregarAvisosDeEvaluacion(ResultadoEvaluacionCurricularV2DTO evaluacion,
+            ResultadoSimulacionDTO resultado) {
+        if (evaluacion == null || evaluacion.getAvisos() == null) return;
+        for (AvisoEvaluacionCurricularV2DTO aviso : evaluacion.getAvisos()) {
+            if (aviso != null && aviso.getCodigo() == CodigoAvisoEvaluacionCurricularV2.AVISO_COMUNICADO_2027_1
+                    && aviso.getTexto() != null && !resultado.getAdvertencias().contains(aviso.getTexto())) {
+                resultado.getAdvertencias().add(aviso.getTexto());
+            }
+        }
     }
 
     private List<UnidadDecisionInscripcionDTO> obtenerSeleccion(AsistenteInscripcionContextoDTO fuente,

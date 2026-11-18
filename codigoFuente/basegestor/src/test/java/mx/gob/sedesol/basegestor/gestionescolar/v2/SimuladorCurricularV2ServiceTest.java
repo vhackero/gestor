@@ -16,6 +16,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoD
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AvisoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoAvisoEvaluacionCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionCargaMaximaCurricularV2DTO;
@@ -89,6 +91,11 @@ public class SimuladorCurricularV2ServiceTest {
   mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ResultadoSimulacionDTO r=servicio(f,resultadoConCarga(true,8,"REGULAR")).simularSombra(9L,Arrays.asList(1L));
   assertTrue(r.getValida());assertEquals(r.getAdvertencias().size(),1);r=servicio(f,resultadoConCarga(true,8,"REGULAR")).simularSombra(9L,seleccion(2));
   assertTrue(r.getValida());assertFalse(contieneMotivo(r,"ELECTIVA_MAXIMA_EXCEDIDA"));
+ }
+ @Test public void gc19SimuladorMuestraUnaSolaNotaDelResultadoSinCambiarLaValidez() throws Exception {
+  ResultadoEvaluacionCurricularV2DTO v2=resultadoConCarga(true,8,"REGULAR");AvisoEvaluacionCurricularV2DTO aviso=new AvisoEvaluacionCurricularV2DTO();aviso.setCodigo(CodigoAvisoEvaluacionCurricularV2.AVISO_COMUNICADO_2027_1);aviso.setTexto("Esta simulación aplica las reglas generales. Para el proceso de Inscripción puede aplicar autorizaciones institucionales específicas. La inscripción efectiva puede diferir del resultado que se muestra aquí.");v2.getAvisos().add(aviso);v2.getAvisos().add(aviso);
+  mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ResultadoSimulacionDTO r=servicio(fuente(),v2).simularSombra(9L,Arrays.asList(7L));
+  assertTrue(r.getValida());assertEquals(r.getAdvertencias().size(),1);assertEquals(r.getAdvertencias().get(0),aviso.getTexto());
  }
  @DataProvider(name="motivosV2") public Object[][] motivosV2(){return new Object[][]{{CodigoMotivoCurricularV2.REPROBACION_ACUMULADA},{CodigoMotivoCurricularV2.SERIACION_INDIRECTA},{CodigoMotivoCurricularV2.PENDIENTE_NO_CURSADA},{CodigoMotivoCurricularV2.BAJA_PARCIAL},{CodigoMotivoCurricularV2.SIN_OFERTA},{CodigoMotivoCurricularV2.REQUISITO_CURRICULAR_PENDIENTE}};}
  @Test(dataProvider="motivosV2") public void f12A1B06PropagaRestriccionesDelMotorSinReinterpretarlas(CodigoMotivoCurricularV2 motivo) throws Exception {
