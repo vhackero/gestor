@@ -1288,7 +1288,6 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             evaluacion.setIntentosIdentificados(Integer.valueOf(evaluacion.getIntentosIdentificados().intValue() + 1));
             evaluacion.getEvidencias().add(intento.getEvidenciaFuente() == null ? "INTENTO:" + llave : intento.getEvidenciaFuente());
             if (intento.getEstado() == EstadoIntentoAcreditacionV2.NO_DETERMINADO
-                    || intento.getEstado() == EstadoIntentoAcreditacionV2.PENDIENTE_CALIFICACION
                     || intento.getEstado() == EstadoIntentoAcreditacionV2.EXTRAORDINARIO_HISTORICO) {
                 identidadInsuficiente = true;
                 incrementarRevision(evaluacion, intento.getEstado() == EstadoIntentoAcreditacionV2.EXTRAORDINARIO_HISTORICO
@@ -1302,9 +1301,12 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 evaluacion.setIntentosFallidos(Integer.valueOf(evaluacion.getIntentosFallidos().intValue() + 1));
             if (intento.getEstado() == EstadoIntentoAcreditacionV2.ACREDITADO)
                 evaluacion.setIntentosAcreditados(Integer.valueOf(evaluacion.getIntentosAcreditados().intValue() + 1));
-            if (intento.getEstado() == EstadoIntentoAcreditacionV2.EN_CURSO) { enCurso = true; evaluacion.setIntentoEnCurso(Boolean.TRUE); }
-            if (intento.getEstado() == EstadoIntentoAcreditacionV2.NO_DETERMINADO
+            if (intento.getEstado() == EstadoIntentoAcreditacionV2.EN_CURSO
                     || intento.getEstado() == EstadoIntentoAcreditacionV2.PENDIENTE_CALIFICACION) {
+                enCurso = true;
+                evaluacion.setIntentoEnCurso(Boolean.TRUE);
+            }
+            if (intento.getEstado() == EstadoIntentoAcreditacionV2.NO_DETERMINADO) {
                 identidadInsuficiente = true;
                 motivoRevisionHistorica = intento.getEvidenciaFuente() != null && intento.getEvidenciaFuente().contains("BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION")
                         ? CodigoMotivoCurricularV2.BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION : CodigoMotivoCurricularV2.NP_SIN_BAJA_REQUIERE_REVISION;
@@ -1682,7 +1684,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 || Boolean.TRUE.equals(unidad.getSeriacionConocida())
                 || (decision != null && (decision.getEstadosSombra().contains(EstadoDecisionUnidadCurricularV2.BLOQUEADA)
                         || decision.getEstadosSombra().contains(EstadoDecisionUnidadCurricularV2.REQUIERE_REVISION)))) {
-            String tratamiento = parametro(contexto, "Q4_UD_B2_SERIADA_CARGA", "NO_CUENTA");
+            String tratamiento = parametro(contexto, "Q4_UD_B2_SERIADA_CARGA", "SOLO_MAX");
             boolean b2 = "B2".equalsIgnoreCase(unidad.getBloque()) || "2".equals(unidad.getBloque());
             if (b2 && "CUENTA_MIN_Y_MAX".equals(tratamiento)) return null;
             if (b2 && paraMaximo && "SOLO_MAX".equals(tratamiento)) return null;
@@ -4934,7 +4936,12 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         else if ("Q7_OPTATIVAS_FALTANTES_5_A_8".equals(nombre)) valor = contexto.getParametrosCurriculares().getTratamientoOptativasFaltantesQuintoAOcho();
         else if ("Q11_BLOQUE_OPTATIVA_BAJA".equals(nombre)) valor = contexto.getParametrosCurriculares().getTratamientoBloqueOptativaBajaOSustituta();
         else valor = null;
-        return valor == null || valor.trim().isEmpty() ? predeterminado : valor.trim();
+        if (valor == null || valor.trim().isEmpty()) return predeterminado;
+        valor = valor.trim();
+        // RN-4.2 exige que la B2 pendiente por seriación siempre ocupe lugar en el máximo.
+        // Se absorbe la configuración histórica para no volver a habilitar el comportamiento retirado.
+        if ("Q4_UD_B2_SERIADA_CARGA".equals(nombre) && "NO_CUENTA".equals(valor)) return "SOLO_MAX";
+        return valor;
     }
 
     private boolean hayRecursamientoDeQuintoCandidato(ContextoEvaluacionCurricularV2DTO contexto) {

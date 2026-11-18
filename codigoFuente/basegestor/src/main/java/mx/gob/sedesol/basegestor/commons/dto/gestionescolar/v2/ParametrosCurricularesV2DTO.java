@@ -25,7 +25,8 @@ public class ParametrosCurricularesV2DTO implements Serializable {
     private String tratamientoRecursamientoQuinto = "AVANCE_CONDICIONADO";
     private String tratamientoOptativasFaltantesQuintoAOcho = "BLOQUEAR";
     private String tratamientoBloqueOptativaBajaOSustituta = "AMBOS_BLOQUES";
-    private String tratamientoUdB2SeriadaCarga = "CUENTA_MIN_Y_MAX";
+    /** RN-4.2: una UD B2 restringida siempre ocupa lugar en el máximo. */
+    private String tratamientoUdB2SeriadaCarga = "SOLO_MAX";
     private String documentoRespaldoDecisionesPendientes;
     private String vigenciaDecisionesPendientes;
     /** Comunicado institucional de consulta aplicable a un periodo específico. */

@@ -194,14 +194,15 @@ public class InscripcionRepository implements IinscripcionRepository {
 		if (tipoBaja != null && !conservaResultado) {
 			mapearBajaContabilizable(intento, tipoBaja, motivoBaja);
 		} else if (calificacion == null) {
-			if (actaCerrada) {
+			// Un acta cerrada sólo confirma pendiente de captura mientras el periodo sigue vigente.
+			boolean periodoCerrado = fechaFinPeriodo == null || fechaFinPeriodo.before(new Date());
+			if (actaCerrada && !periodoCerrado) {
 				intento.setEstado(EstadoIntentoAcreditacionV2.PENDIENTE_CALIFICACION);
 				intento.setEvidenciaFuente("PENDIENTE_CALIFICACION:ACTA_CERRADA_SIN_CALIFICACION;FECHA_FIN_EVENTO="
 						+ (fechaFinEvento == null ? "SIN_DATO" : fechaFinEvento));
 				return intento;
 			}
 			// El cierre se determina por periodo academico, no por el bloque que genero la participacion.
-			boolean periodoCerrado = fechaFinPeriodo == null || fechaFinPeriodo.before(new Date());
 			intento.setEstado(periodoCerrado ? EstadoIntentoAcreditacionV2.NO_DETERMINADO : EstadoIntentoAcreditacionV2.EN_CURSO);
 			intento.setEvidenciaFuente((conservaResultado
 					? "REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja + ";ESTADO_EXPEDIENTE=BAJA_DEFINITIVA;"

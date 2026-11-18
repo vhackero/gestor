@@ -20,8 +20,8 @@ public class ConfiguracionEvaluacionCurricularV2ServiceImpl implements Configura
     public static final String PERIODO_COMUNICADO_INSTITUCIONAL = "2027-1";
     public static final String TEXTO_COMUNICADO_INSTITUCIONAL = "Esta simulación aplica las reglas generales. Para el proceso de Inscripción puede aplicar autorizaciones institucionales específicas. La inscripción efectiva puede diferir del resultado que se muestra aquí.";
     public static final String REFERENCIA_COMUNICADO_INSTITUCIONAL = "Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4, secciones A y C";
-    public static final String DOCUMENTO_DECISIONES_PENDIENTES = "Decisiones_institucionales_motor_v2_RN_PE2024_2027_20261117.md";
-    public static final String VIGENCIA_DECISIONES_PENDIENTES = "2026-11-17";
+    public static final String DOCUMENTO_DECISIONES_PENDIENTES = "Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4";
+    public static final String VIGENCIA_DECISIONES_PENDIENTES = "2026-11-18";
 
     @Override
     public ConfiguracionEvaluacionCurricularV2DTO obtenerConfiguracion() {
@@ -50,7 +50,7 @@ public class ConfiguracionEvaluacionCurricularV2ServiceImpl implements Configura
         parametros.setTratamientoRecursamientoQuinto(obtenerPropiedad("V2_Q5_RECURSAMIENTO_QUINTO", "AVANCE_CONDICIONADO"));
         parametros.setTratamientoOptativasFaltantesQuintoAOcho(obtenerPropiedad("V2_Q7_OPTATIVAS_FALTANTES_5_A_8", "BLOQUEAR"));
         parametros.setTratamientoBloqueOptativaBajaOSustituta(obtenerPropiedad("V2_Q11_BLOQUE_OPTATIVA_BAJA", "AMBOS_BLOQUES"));
-        parametros.setTratamientoUdB2SeriadaCarga(obtenerPropiedad("V2_Q4_UD_B2_SERIADA_CARGA", "CUENTA_MIN_Y_MAX"));
+        parametros.setTratamientoUdB2SeriadaCarga(obtenerPropiedad("V2_Q4_UD_B2_SERIADA_CARGA", "SOLO_MAX"));
         parametros.setDocumentoRespaldoDecisionesPendientes(obtenerPropiedad("V2_DECISIONES_PENDIENTES_DOCUMENTO", DOCUMENTO_DECISIONES_PENDIENTES));
         parametros.setVigenciaDecisionesPendientes(obtenerPropiedad("V2_DECISIONES_PENDIENTES_VIGENCIA", VIGENCIA_DECISIONES_PENDIENTES));
         parametros.setPeriodoComunicadoInstitucional(obtenerPropiedad("V2_COMUNICADO_INSTITUCIONAL_PERIODO", PERIODO_COMUNICADO_INSTITUCIONAL));

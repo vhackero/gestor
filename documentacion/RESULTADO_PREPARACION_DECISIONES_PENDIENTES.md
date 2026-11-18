@@ -10,9 +10,20 @@ Se prepararon configuraciones de lectura para Q4, Q5, Q6, Q7 y Q11. Sus valores 
 | Q5 | `AVANCE_CONDICIONADO` | `REGULARIZACION` | La alternativa registra el impedimento de regularización para recursamiento candidato de quinto con menos de cuatro adeudos. |
 | Q7 | `BLOQUEAR` | `PERMITIR_TRAS_PENDIENTES` | Aplica a referencia 5.º-8.º y conserva las demás validaciones de optativas. |
 | Q11 | `AMBOS_BLOQUES` | `BLOQUE_ORIGINAL` | El segundo requiere evidencia `BLOQUE_ORIGINAL:B1/B2`; sin ella no se inventa un bloque. |
-| Q4 | `NO_CUENTA` | `SOLO_MAX`, `CUENTA_MIN_Y_MAX` | Controla si una B2 seriada participa en mínimo/máximo; el estado de seriación no se modifica. |
+| Q4 | `SOLO_MAX` | `CUENTA_MIN_Y_MAX` | Una B2 seriada siempre cuenta en máximo por RN-4.2; Q4 sólo define si también participa en mínimo. `NO_CUENTA` queda retirado y se normaliza a `SOLO_MAX`. |
 
-Todos incluyen documento `Decisiones_institucionales_motor_v2_RN_PE2024_2027_20261117.md` y vigencia `2026-11-17` dentro de los parámetros.
+Todos incluyen documento `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4` y vigencia `2026-11-18` dentro de los parámetros.
+
+## Comunicados 2027-1
+
+El resultado agrega `AVISO_COMUNICADO_2027_1` sólo cuando coincide `V2_COMUNICADO_INSTITUCIONAL_PERIODO` (predeterminado `2027-1`). El marcador `AUTORIZACION_INSTITUCIONAL_POSIBLE_2027_1` conserva trazabilidad de una posible autorización institucional, sin concederla ni crear una inscripción.
+
+| Parámetro | Predeterminado | Propósito |
+| --- | --- | --- |
+| `V2_COMUNICADO_INSTITUCIONAL_PERIODO` | `2027-1` | Ámbito temporal del aviso. |
+| `V2_COMUNICADO_INSTITUCIONAL_TEXTO` | Comunicado general de reglas e inscripción | Texto presentado en consulta. |
+| `V2_COMUNICADO_INSTITUCIONAL_REFERENCIA` | `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4, secciones A y C` | Respaldo institucional. |
+| `V2_COMUNICADO_INSTITUCIONAL_VIGENCIA` | `2027-1` | Vigencia declarada del comunicado. |
 
 ## PE2027 (Q2)
 
@@ -22,7 +33,7 @@ Resultado: el motor usa `idPlan`, ámbito, parámetros y mapa entregados por con
 
 ## Cierre de acta B1
 
-La fuente localizada es `tbl_grupos.acta_cerrada`, ligada a `rel_grupo_participante.id_grupo`. El adaptador de historial ahora la incorpora: calificación `NULL` con acta cerrada se clasifica como `PENDIENTE_CALIFICACION`, no `EN_CURSO`; una consecuente B2 interbloque recibe `PENDIENTE_DE_CONFIRMACION`.
+La fuente localizada es `tbl_grupos.acta_cerrada`, ligada a `rel_grupo_participante.id_grupo`. El adaptador de historial ahora la incorpora: calificación `NULL` con acta cerrada sólo se clasifica como `PENDIENTE_CALIFICACION` cuando el periodo sigue vigente. En periodo cerrado permanece en revisión. `PENDIENTE_CALIFICACION` cuenta como intento en curso para RN-1.4, no crea ni elimina un adeudo y una consecuente B2 interbloque recibe `PENDIENTE_DE_CONFIRMACION`.
 
 No existe una fuente separada de cierre de bloque institucional: la marca es por grupo. Por ello no se usa para declarar cerrado todo el periodo ni grupos distintos del B1 consultado.
 
@@ -39,12 +50,15 @@ No existe una fuente separada de cierre de bloque institucional: la marca es por
 | Q11 valor alternativo | Pasa |
 | PE2027 sintético, 17 planes | Pasa |
 | Acta cerrada sin calificación y B2 | Pasa |
+| Acta cerrada: periodo vigente/cerrado | Pasa |
+| C-18: dos fallidos y pendiente de calificación | Pasa: `ULTIMA_EN_CURSO` |
+| Adeudo con pendiente de calificación | Pasa: no crea ni elimina adeudo |
 
 ## Regresión
 
 | Módulo | Ejecución | Pruebas | Fallas | Errores | Omitidas |
 | --- | --- | ---: | ---: | ---: | ---: |
-| `basegestor` | `mvn -q test` | 805 | 0 | 0 | 0 |
+| `basegestor` | `mvn -q test` | 808 | 0 | 0 | 0 |
 | `gestorWeb` | `mvn -q test` | 39 | 0 | 0 | 0 |
 
 La ejecución se realizó sin escrituras de datos y no cambia `REGLAS_V2_MODO_SOMBRA=true`.
