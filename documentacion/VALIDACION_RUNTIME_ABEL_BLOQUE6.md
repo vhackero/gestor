@@ -5,11 +5,13 @@
 | Dato | Valor |
 | --- | --- |
 | Rama | `feature/desacople_motor_historico` |
-| Commit de código y WAR | `ec2a3c09` |
-| WAR | `codigoFuente/gestorWeb/target/plataforma.war` |
-| Tamaño | `82,750,278` bytes |
+| Commit de código | `ec2a3c09` |
+| WAR autorizado | Artefacto entregado a Abel, identificado por la huella siguiente; no usar el `target` local como sustituto. |
+| Tamaño autorizado | `82,750,278` bytes |
 | SHA-256 | `9af687c130729018cadb3355e054634b86c55954732bc9fa4ea4898ac2526236` |
 | Modo requerido | Sombra; no formaliza inscripciones ni modifica bajas, grupos, oferta o calificaciones. |
+
+**Control de artefacto:** el `target/plataforma.war` presente en este espacio de trabajo no coincide con la huella autorizada y no es desplegable para esta validación. Abel debe usar exclusivamente la copia entregada con la huella `9af687c130729018cadb3355e054634b86c55954732bc9fa4ea4898ac2526236`.
 
 ## Despliegue
 
@@ -185,7 +187,7 @@ Los casos **pendiente interbloque** y **recursamiento de quinto** no tienen una 
 | `PreparacionDecisionesPendientesV2Test#rn43AjusteYConfirmacionPosteriorNoExcedenMaximo` | Verde | La carga de ajuste y su nueva evaluación conservan tres UD ante un máximo de tres; no aumenta por una confirmación posterior. |
 | `Bloque4TrayectoriaMedidaRn20261106Test#gc13MedidaRevocadaNoConservaRestriccionVigente` | Verde | La fuente canónica representa una medida revocada como no registrada; la reevaluación no conserva motivos de medida vigente ni de vigencia incompleta. |
 
-Las tres pruebas ejecutaron junto con la cobertura existente: `24` pruebas, `0` fallas, `0` errores y `0` omitidas. Son cambios de pruebas y documentación; el WAR entregado conserva el hash indicado en este documento.
+Las tres pruebas ejecutaron junto con la cobertura existente: `24` pruebas, `0` fallas, `0` errores y `0` omitidas. Son cambios de pruebas y documentación; no autorizan sustituir el WAR entregado ni modificar la huella indicada en este documento.
 
 ## Lista de verificacion
 
