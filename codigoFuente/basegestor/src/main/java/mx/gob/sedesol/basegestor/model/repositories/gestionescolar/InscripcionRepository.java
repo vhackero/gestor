@@ -191,23 +191,24 @@ public class InscripcionRepository implements IinscripcionRepository {
 		}
 		// La baja definitiva afecta al expediente, no borra la calificacion ya registrada.
 		boolean conservaResultado = tipoBaja != null && (tipoBaja.intValue() == 3 || tipoBaja.intValue() == 6);
-		if (tipoBaja != null && !conservaResultado) {
+		boolean calificacionNumericaIncompatibleConBaja = tipoBaja != null && !conservaResultado
+				&& calificacion != null && (calificacion.doubleValue() >= 60D
+						|| (calificacion.doubleValue() >= 1D && calificacion.doubleValue() < 60D));
+		if (calificacionNumericaIncompatibleConBaja) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO);
+			intento.setEvidenciaFuente("BAJA_AUTORIZADA_CON_CALIFICACION_NUMERICA_REQUIERE_REVISION:TIPO="
+					+ tipoBaja + ";CALIFICACION=" + calificacion);
+		} else if (tipoBaja != null && !conservaResultado) {
 			mapearBajaContabilizable(intento, tipoBaja, motivoBaja);
 		} else if (calificacion == null) {
-			// Un acta cerrada sólo confirma pendiente de captura mientras el periodo sigue vigente.
+			// RN-2.2: acta cerrada sin resultado se revisa; con acta abierta el intento sigue en curso,
+			// incluso si el periodo calendario terminó (G1).
 			boolean periodoCerrado = fechaFinPeriodo == null || fechaFinPeriodo.before(new Date());
-			if (actaCerrada && !periodoCerrado) {
-				intento.setEstado(EstadoIntentoAcreditacionV2.PENDIENTE_CALIFICACION);
-				intento.setEvidenciaFuente("PENDIENTE_CALIFICACION:ACTA_CERRADA_SIN_CALIFICACION;FECHA_FIN_EVENTO="
-						+ (fechaFinEvento == null ? "SIN_DATO" : fechaFinEvento));
-				return intento;
-			}
-			// El cierre se determina por periodo academico, no por el bloque que genero la participacion.
-			intento.setEstado(periodoCerrado ? EstadoIntentoAcreditacionV2.NO_DETERMINADO : EstadoIntentoAcreditacionV2.EN_CURSO);
+			intento.setEstado(actaCerrada ? EstadoIntentoAcreditacionV2.NO_DETERMINADO : EstadoIntentoAcreditacionV2.EN_CURSO);
 			intento.setEvidenciaFuente((conservaResultado
 					? "REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja + ";ESTADO_EXPEDIENTE=BAJA_DEFINITIVA;"
-					: "") + (periodoCerrado ? "PARTICIPACION_SIN_CALIFICACION_EN_PERIODO_CERRADO_REQUIERE_REVISION"
-							: "PARTICIPACION_EN_CURSO_SIN_CALIFICACION")
+					: "") + (actaCerrada ? "ACTA_CERRADA_SIN_CALIFICACION_REQUIERE_REVISION"
+							: "PARTICIPACION_EN_CURSO_ACTA_ABIERTA")
 							+ ";FECHA_FIN_EVENTO=" + (fechaFinEvento == null ? "SIN_DATO" : fechaFinEvento)
 							+ ";FECHA_FIN_PERIODO=" + (fechaFinPeriodo == null ? "SIN_DATO" : fechaFinPeriodo));
 		} else if (calificacion.doubleValue() < 0D || calificacion.doubleValue() > 100D) {

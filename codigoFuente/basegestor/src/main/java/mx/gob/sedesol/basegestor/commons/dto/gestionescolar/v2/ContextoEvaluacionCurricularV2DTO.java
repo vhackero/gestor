@@ -91,6 +91,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     private String referenciaConvocatoriaOResolucionRn62;
     /** Evidencia opcional; no modifica decisiones de una evaluación en sombra. */
     private AutorizacionIndividualCurricularV2DTO autorizacionIndividual;
+    /** Excepciones institucionales vigentes; reemplaza gradualmente autorizaciones por persona. */
+    private List<ExcepcionInstitucionalCurricularV2DTO> excepcionesInstitucionales = new ArrayList<ExcepcionInstitucionalCurricularV2DTO>();
     /** Medida administrativa externa: no se infiere su alcance ni su vigencia. */
     private Boolean medidaAdministrativaRegistrada;
     private String alcanceMedidaAdministrativa;
@@ -267,6 +269,8 @@ public class ContextoEvaluacionCurricularV2DTO implements Serializable {
     public String getReferenciaConvocatoriaOResolucionRn62() { return referenciaConvocatoriaOResolucionRn62; } public void setReferenciaConvocatoriaOResolucionRn62(String valor) { referenciaConvocatoriaOResolucionRn62 = valor; }
     public AutorizacionIndividualCurricularV2DTO getAutorizacionIndividual() { return autorizacionIndividual; }
     public void setAutorizacionIndividual(AutorizacionIndividualCurricularV2DTO valor) { autorizacionIndividual = valor; }
+    public List<ExcepcionInstitucionalCurricularV2DTO> getExcepcionesInstitucionales() { return excepcionesInstitucionales; }
+    public void setExcepcionesInstitucionales(List<ExcepcionInstitucionalCurricularV2DTO> valores) { excepcionesInstitucionales = valores == null ? new ArrayList<ExcepcionInstitucionalCurricularV2DTO>() : valores; }
     public Boolean getMedidaAdministrativaRegistrada() { return medidaAdministrativaRegistrada; } public void setMedidaAdministrativaRegistrada(Boolean valor) { medidaAdministrativaRegistrada = valor; }
     public String getAlcanceMedidaAdministrativa() { return alcanceMedidaAdministrativa; } public void setAlcanceMedidaAdministrativa(String valor) { alcanceMedidaAdministrativa = valor; }
     public String getInicioVigenciaMedidaAdministrativa() { return inicioVigenciaMedidaAdministrativa; } public void setInicioVigenciaMedidaAdministrativa(String valor) { inicioVigenciaMedidaAdministrativa = valor; }

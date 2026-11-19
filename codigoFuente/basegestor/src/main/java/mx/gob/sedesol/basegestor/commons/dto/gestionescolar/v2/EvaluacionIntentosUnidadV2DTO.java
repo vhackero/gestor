@@ -12,6 +12,8 @@ public class EvaluacionIntentosUnidadV2DTO implements Serializable {
     private Integer intentosIdentificados = Integer.valueOf(0);
     private Integer intentosFallidos = Integer.valueOf(0);
     private Integer intentosAcreditados = Integer.valueOf(0);
+    /** Recursamientos = inscripciones computables posteriores a la primera. */
+    private Integer recursamientos = Integer.valueOf(0);
     private Integer oportunidadesConsumidas;
     private Integer oportunidadesDisponibles;
     /** RN-1.4: intentos cuya identidad, UD y periodo quedaron verificados. */
@@ -38,6 +40,8 @@ public class EvaluacionIntentosUnidadV2DTO implements Serializable {
     public void setIntentosFallidos(Integer valor) { intentosFallidos = valor; }
     public Integer getIntentosAcreditados() { return intentosAcreditados; }
     public void setIntentosAcreditados(Integer valor) { intentosAcreditados = valor; }
+    public Integer getRecursamientos() { return recursamientos; }
+    public void setRecursamientos(Integer valor) { recursamientos = valor; }
     public Integer getOportunidadesConsumidas() { return oportunidadesConsumidas; }
     public void setOportunidadesConsumidas(Integer valor) { oportunidadesConsumidas = valor; }
     public Integer getOportunidadesDisponibles() { return oportunidadesDisponibles; }

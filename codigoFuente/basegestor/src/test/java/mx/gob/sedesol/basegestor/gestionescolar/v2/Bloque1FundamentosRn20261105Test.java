@@ -111,7 +111,7 @@ public class Bloque1FundamentosRn20261105Test {
         try {
             System.setProperty("CTR01_PERIODO_INICIO", "2028-1");
             ConfiguracionEvaluacionCurricularV2DTO configuracion = new ConfiguracionEvaluacionCurricularV2ServiceImpl().obtenerConfiguracion();
-            assertEquals(configuracion.getVersionReglas(), "RN-PE2024-2027-act-20261117");
+            assertEquals(configuracion.getVersionReglas(), "RN-PE2024-2027-act-20261119");
             assertEquals(configuracion.getParametrosCurriculares().getCtr01PeriodoInicio(), "2028-1");
             assertEquals(configuracion.getParametrosCurriculares().getCargaMaxIrregular(), Integer.valueOf(6));
         } finally { if (anterior == null) System.clearProperty("CTR01_PERIODO_INICIO"); else System.setProperty("CTR01_PERIODO_INICIO", anterior); }

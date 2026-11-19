@@ -158,7 +158,7 @@ public class EvaluacionCurricularV2Fase8ATest {
         ResultadoEvaluacionCurricularV2DTO pendiente = servicio.evaluarSombra(contexto(EstadoUnidadCurricularV2.NO_DETERMINADO));
         assertEquals(decision(acreditada, 2L).getEstadoOperativoInterbloque(), "INSCRITA");
         assertEquals(decision(enCurso, 2L).getEstadoOperativoInterbloque(), "PENDIENTE_POR_SERIACION");
-        assertEquals(decision(pendiente, 2L).getEstadoOperativoInterbloque(), "PENDIENTE_DE_CONFIRMACION");
+        assertEquals(decision(pendiente, 2L).getEstadoOperativoInterbloque(), "PENDIENTE_POR_SERIACION");
         assertFalse(Boolean.TRUE.equals(acreditada.getEfectosProductivosAplicados()));
         assertFalse(Boolean.TRUE.equals(enCurso.getEfectosProductivosAplicados()));
         assertFalse(Boolean.TRUE.equals(pendiente.getEfectosProductivosAplicados()));

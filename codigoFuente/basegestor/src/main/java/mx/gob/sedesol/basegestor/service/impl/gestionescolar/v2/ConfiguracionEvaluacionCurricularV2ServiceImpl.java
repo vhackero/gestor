@@ -14,14 +14,14 @@ import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ConfiguracionEvaluaci
 @Service("configuracionEvaluacionCurricularV2Service")
 public class ConfiguracionEvaluacionCurricularV2ServiceImpl implements ConfiguracionEvaluacionCurricularV2Service {
 
-    public static final String REGLAS_V2_VERSION = "RN-PE2024-2027-act-20261117";
+    public static final String REGLAS_V2_VERSION = "RN-PE2024-2027-act-20261119";
     public static final String CTR01_PERIODO_INICIO = "2027-1";
     public static final Integer CTR01_SEMESTRE_OBJETIVO = Integer.valueOf(5);
     public static final String PERIODO_COMUNICADO_INSTITUCIONAL = "2027-1";
     public static final String TEXTO_COMUNICADO_INSTITUCIONAL = "Esta simulación aplica la normativa y reglas generales vigentes. En un proceso de Inscripción efectivo puede aplicar autorizaciones institucionales específicas. La inscripción efectiva puede diferir del resultado que se muestra aquí.";
-    public static final String REFERENCIA_COMUNICADO_INSTITUCIONAL = "Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4, secciones A y C";
-    public static final String DOCUMENTO_DECISIONES_PENDIENTES = "Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4";
-    public static final String VIGENCIA_DECISIONES_PENDIENTES = "2026-11-18";
+    public static final String REFERENCIA_COMUNICADO_INSTITUCIONAL = "Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v6, secciones A y C";
+    public static final String DOCUMENTO_DECISIONES_PENDIENTES = "Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v6";
+    public static final String VIGENCIA_DECISIONES_PENDIENTES = "2026-11-19";
 
     @Override
     public ConfiguracionEvaluacionCurricularV2DTO obtenerConfiguracion() {
@@ -42,16 +42,17 @@ public class ConfiguracionEvaluacionCurricularV2ServiceImpl implements Configura
         parametros.setOptativasRequeridas(obtenerEntero("V2_OPTATIVAS_REQUERIDAS", Integer.valueOf(8)));
         parametros.setCtr01PeriodoInicio(configuracion.getCtr01PeriodoInicio());
         parametros.setCtr01Semestre(configuracion.getCtr01SemestreObjetivo());
-        parametros.setDocumentoRespaldo("P2024-2027- Reglas de negocio_Octubre 2026_20261117.docx");
-        parametros.setVigencia("2026-11-17");
+        parametros.setDocumentoRespaldo("P2024-2027- Reglas de negocio_Octubre 2026_20261119_0055.docx");
+        parametros.setVigencia("2026-11-19");
         parametros.setAmbito(obtenerPropiedad("V2_CATALOGO_OPTATIVAS_AMBITO", "PE2024/2027"));
         parametros.setCatalogoOptativas(obtenerPropiedad("V2_CATALOGO_OPTATIVAS", "USTAPREN:1,RECVIRTU:1,PRINVEST:1,PGHRATRS:2,INAVIRTU:2,ANDHUMAN:2,BAIDOCUM:3,BAICAMPO:3,REACADEM:3,INARTIFI:3,PECRITIC:4,HIMEXICO:4,MECMUNDI:4"));
-        parametros.setTratamientoCeroSinBaja(obtenerPropiedad("V2_Q6_CERO_SIN_BAJA", "REPROBACION"));
-        parametros.setTratamientoRecursamientoQuinto(obtenerPropiedad("V2_Q5_RECURSAMIENTO_QUINTO", "AVANCE_CONDICIONADO"));
-        parametros.setTratamientoRecursamientoQuintoCon64(obtenerPropiedad("V2_Q5_RECURSAMIENTO_QUINTO_CON_64", "REGULARIZACION_64"));
-        parametros.setTratamientoOptativasFaltantesQuintoAOcho(obtenerPropiedad("V2_Q7_OPTATIVAS_FALTANTES_5_A_8", "BLOQUEAR"));
-        parametros.setTratamientoBloqueOptativaBajaOSustituta(obtenerPropiedad("V2_Q11_BLOQUE_OPTATIVA_BAJA", "AMBOS_BLOQUES"));
-        parametros.setTratamientoUdB2SeriadaCarga(obtenerPropiedad("V2_Q4_UD_B2_SERIADA_CARGA", "SOLO_MAX"));
+        // RN vigente: estos criterios dejaron de ser alternativas institucionales.
+        parametros.setTratamientoCeroSinBaja("REPROBACION");
+        parametros.setTratamientoRecursamientoQuinto("REGULARIZACION");
+        parametros.setTratamientoRecursamientoQuintoCon64("REGULARIZACION_64");
+        parametros.setTratamientoOptativasFaltantesQuintoAOcho("PERMITIR_TRAS_PENDIENTES");
+        parametros.setTratamientoBloqueOptativaBajaOSustituta("OFERTA_AUTORIZADA");
+        parametros.setTratamientoUdB2SeriadaCarga("CUENTA_MIN_Y_MAX");
         parametros.setDocumentoRespaldoDecisionesPendientes(obtenerPropiedad("V2_DECISIONES_PENDIENTES_DOCUMENTO", DOCUMENTO_DECISIONES_PENDIENTES));
         parametros.setVigenciaDecisionesPendientes(obtenerPropiedad("V2_DECISIONES_PENDIENTES_VIGENCIA", VIGENCIA_DECISIONES_PENDIENTES));
         parametros.setPeriodoComunicadoInstitucional(obtenerPropiedad("V2_COMUNICADO_INSTITUCIONAL_PERIODO", PERIODO_COMUNICADO_INSTITUCIONAL));

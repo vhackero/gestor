@@ -107,7 +107,7 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         assertEquals(mapearFila(Integer.valueOf(1), 0D, "", new Date(System.currentTimeMillis() + 86400000L)).getEstado(), EstadoIntentoAcreditacionV2.BAJA_PARCIAL);
     }
     @Test public void nuloCerradoRequiereRevisionYNuloVigenteEstaEnCurso() throws Exception {
-        assertEquals(mapearFila(null, null, null, new Date(System.currentTimeMillis() - 86400000L), new Date(0)).getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
+        assertEquals(mapearFila(null, null, null, new Date(System.currentTimeMillis() - 86400000L), new Date(0), 1).getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
         assertEquals(mapearFila(null, null, null, new Date(0), new Date(System.currentTimeMillis() + 86400000L)).getEstado(), EstadoIntentoAcreditacionV2.EN_CURSO);
     }
     @Test public void calificacionesConflictoMismoPeriodoRequierenRevision() throws Exception {

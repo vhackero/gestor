@@ -30,33 +30,23 @@ import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.InscripcionRe
 public class PreparacionDecisionesPendientesV2Test {
     private final EvaluacionCurricularV2ServiceImpl service = new EvaluacionCurricularV2ServiceImpl();
 
-    @Test public void q6AlternativasCambianSoloElTratamientoConfiguradoDelCeroSinBaja() {
+    @Test public void rn22CeroSinBajaSiempreEsReprobacionDefinitiva() {
         ContextoEvaluacionCurricularV2DTO actual = contexto(); actual.getUnidades().add(cero(1L));
         assertEquals(service.evaluarSombra(actual).getCantidadReprobadasVigentes(), Integer.valueOf(1));
-        ContextoEvaluacionCurricularV2DTO excluir = contexto(); excluir.getParametrosCurriculares().setTratamientoCeroSinBaja("EXCLUIR_PERIODO_COMPLETO_EN_CERO"); excluir.getUnidades().add(cero(1L));
-        assertEquals(service.evaluarSombra(excluir).getCantidadReprobadasVigentes(), Integer.valueOf(0));
-        ContextoEvaluacionCurricularV2DTO revision = contexto(); revision.getParametrosCurriculares().setTratamientoCeroSinBaja("REVISION"); revision.getUnidades().add(cero(1L));
-        assertEquals(service.evaluarSombra(revision).getSituacionAcademicaCalculada(), "NO_DETERMINADA");
+        ContextoEvaluacionCurricularV2DTO legado = contexto(); legado.getParametrosCurriculares().setTratamientoCeroSinBaja("REVISION"); legado.getUnidades().add(cero(1L));
+        assertEquals(service.evaluarSombra(legado).getCantidadReprobadasVigentes(), Integer.valueOf(1));
     }
 
-    @Test public void q4AlternativasControlanConteoDeB2SeriadaEnMinimoYMaximo() {
+    @Test public void rn43B2PendienteCuentaSiempreEnMinimoYMaximo() {
         ContextoEvaluacionCurricularV2DTO vigente = contexto(); vigente.getUnidades().add(b2Seriada(2L));
         ResultadoEvaluacionCurricularV2DTO resultadoVigente = service.evaluarSombra(vigente);
-        assertEquals(resultadoVigente.getEvaluacionCargaMinima().getCantidadTotalElegible(), Integer.valueOf(0));
+        assertEquals(resultadoVigente.getEvaluacionCargaMinima().getCantidadTotalElegible(), Integer.valueOf(1));
         assertEquals(resultadoVigente.getEvaluacionCargaMaxima().getCargaActualEvaluada(), Integer.valueOf(1));
-        ContextoEvaluacionCurricularV2DTO legado = contexto(); legado.getParametrosCurriculares().setTratamientoUdB2SeriadaCarga("NO_CUENTA"); legado.getUnidades().add(b2Seriada(2L));
-        assertEquals(service.evaluarSombra(legado).getEvaluacionCargaMaxima().getCargaActualEvaluada(), Integer.valueOf(1));
-        ContextoEvaluacionCurricularV2DTO ambos = contexto(); ambos.getParametrosCurriculares().setTratamientoUdB2SeriadaCarga("CUENTA_MIN_Y_MAX"); ambos.getUnidades().add(b2Seriada(2L));
-        assertEquals(service.evaluarSombra(ambos).getEvaluacionCargaMinima().getCantidadTotalElegible(), Integer.valueOf(1));
-        ContextoEvaluacionCurricularV2DTO soloMax = contexto(); soloMax.getParametrosCurriculares().setTratamientoUdB2SeriadaCarga("SOLO_MAX"); soloMax.getUnidades().add(b2Seriada(2L));
-        ResultadoEvaluacionCurricularV2DTO resultado = service.evaluarSombra(soloMax);
-        assertEquals(resultado.getEvaluacionCargaMinima().getCantidadTotalElegible(), Integer.valueOf(0));
-        assertEquals(resultado.getEvaluacionCargaMaxima().getCargaActualEvaluada(), Integer.valueOf(1));
     }
 
     @Test public void q5RecursamientoDeQuintoPuedePrepararseComoRutaRegularizacion() {
         ContextoEvaluacionCurricularV2DTO actual = contextoQuinto();
-        assertFalse(service.evaluarSombra(actual).getEvaluacionCargaAcademica().getImpedimentosAvanceRn615().contains("Q5_RECURSAMIENTO_QUINTO_REGULARIZACION"));
+        assertTrue(service.evaluarSombra(actual).getEvaluacionCargaAcademica().getImpedimentosAvanceRn615().contains("Q5_RECURSAMIENTO_QUINTO_REGULARIZACION"));
         ContextoEvaluacionCurricularV2DTO alternativa = contextoQuinto(); alternativa.getParametrosCurriculares().setTratamientoRecursamientoQuinto("REGULARIZACION");
         assertTrue(service.evaluarSombra(alternativa).getEvaluacionCargaAcademica().getImpedimentosAvanceRn615().contains("Q5_RECURSAMIENTO_QUINTO_REGULARIZACION"));
     }
@@ -65,20 +55,19 @@ public class PreparacionDecisionesPendientesV2Test {
         ContextoEvaluacionCurricularV2DTO regularizacion = contextoQuintoCon64();
         ResultadoEvaluacionCurricularV2DTO resultadoRegularizacion = service.evaluarSombra(regularizacion);
         assertTrue(resultadoRegularizacion.getEvaluacionCargaAcademica().getImpedimentosAvanceRn615()
-                .contains("DEFINICION_INSTITUCIONAL_PENDIENTE_Q5:REGULARIZACION_64"));
+                .contains("RN615_RECURSAMIENTO_QUINTO_REGULARIZACION:REGULARIZACION_64"));
         assertTrue(contieneTraza(resultadoRegularizacion, "RN615_Q5_RECURSAMIENTO_QUINTO_CON_64_REGULARIZACION_64"));
         ContextoEvaluacionCurricularV2DTO bloqueo = contextoQuintoCon64();
         bloqueo.getParametrosCurriculares().setTratamientoRecursamientoQuintoCon64("AVANCE_CONDICIONADO_NO_PROCEDE");
         ResultadoEvaluacionCurricularV2DTO resultadoBloqueo = service.evaluarSombra(bloqueo);
-        assertTrue(resultadoBloqueo.getEvaluacionCargaAcademica().getImpedimentosAvanceRn615()
+        assertFalse(resultadoBloqueo.getEvaluacionCargaAcademica().getImpedimentosAvanceRn615()
                 .contains("Q5_RECURSAMIENTO_QUINTO_CON_64_NO_PROCEDE"));
-        assertTrue(contieneTraza(resultadoBloqueo, "RN615_Q5_RECURSAMIENTO_QUINTO_CON_64_AVANCE_CONDICIONADO_NO_PROCEDE"));
-        assertTrue(bloqueada(resultadoBloqueo, 22L));
+        assertTrue(contieneTraza(resultadoBloqueo, "RN615_Q5_RECURSAMIENTO_QUINTO_CON_64_REGULARIZACION_64"));
     }
 
     @Test public void q7PermiteOptativaFaltanteEnReferenciaAltaSoloCuandoSeConfigure() {
         ContextoEvaluacionCurricularV2DTO bloquear = contextoOptativaAlta();
-        assertTrue(bloqueada(service.evaluarSombra(bloquear), 31L));
+        assertFalse(bloqueada(service.evaluarSombra(bloquear), 31L));
         ContextoEvaluacionCurricularV2DTO permitir = contextoOptativaAlta(); permitir.getParametrosCurriculares().setTratamientoOptativasFaltantesQuintoAOcho("PERMITIR_TRAS_PENDIENTES");
         assertFalse(bloqueada(service.evaluarSombra(permitir), 31L));
     }
@@ -87,7 +76,7 @@ public class PreparacionDecisionesPendientesV2Test {
         ContextoEvaluacionCurricularV2DTO ambos = contexto(); UnidadEvaluacionCurricularV2DTO optativa = optativa(41L, "USTAPREN", 1, "B2"); optativa.setEstado(EstadoUnidadCurricularV2.BAJA_PARCIAL); optativa.setCausa(CausaPendienteUnidadV2.BAJA_PARCIAL); optativa.getReferenciasHistoricas().add("BLOQUE_ORIGINAL:B1"); ambos.getUnidades().add(optativa); ambos.getIdsUnidadesPretendidas().add(41L);
         assertFalse(bloqueada(service.evaluarSombra(ambos), 41L));
         ContextoEvaluacionCurricularV2DTO original = contexto(); original.getParametrosCurriculares().setTratamientoBloqueOptativaBajaOSustituta("BLOQUE_ORIGINAL"); original.getUnidades().add(optativa(41L, "USTAPREN", 1, "B2")); original.getUnidades().get(0).setEstado(EstadoUnidadCurricularV2.BAJA_PARCIAL); original.getUnidades().get(0).setCausa(CausaPendienteUnidadV2.BAJA_PARCIAL); original.getUnidades().get(0).getReferenciasHistoricas().add("BLOQUE_ORIGINAL:B1"); original.getIdsUnidadesPretendidas().add(41L);
-        assertTrue(bloqueada(service.evaluarSombra(original), 41L));
+        assertFalse(bloqueada(service.evaluarSombra(original), 41L));
     }
 
     @Test public void q2MapaPe2027SinteticoNoDependeDeIdsPe2024() {
@@ -107,20 +96,20 @@ public class PreparacionDecisionesPendientesV2Test {
         }
     }
 
-    @Test public void cierreDeActaSinCalificacionMantieneInterbloquePendienteDeConfirmacion() {
+    @Test public void cierreDeActaSinCalificacionMantieneInterbloquePendientePorSeriacion() {
         ContextoEvaluacionCurricularV2DTO contexto = contexto();
         UnidadEvaluacionCurricularV2DTO b1 = obligatoria(61L, 1, "B1", EstadoUnidadCurricularV2.NO_DETERMINADO);
         b1.getReferenciasHistoricas().add("HISTORIAL_CANONICO:PENDIENTE_CALIFICACION");
         UnidadEvaluacionCurricularV2DTO b2 = obligatoria(62L, 1, "B2", EstadoUnidadCurricularV2.NO_CURSADA);
         b2.getRelacionesSeriacion().add(relacion(61L, 62L, 1, 1, "1", "2")); contexto.getUnidades().add(b1); contexto.getUnidades().add(b2);
-        assertEquals(decision(service.evaluarSombra(contexto), 62L).getEstadoOperativoInterbloque(), "PENDIENTE_DE_CONFIRMACION");
+        assertEquals(decision(service.evaluarSombra(contexto), 62L).getEstadoOperativoInterbloque(), "PENDIENTE_POR_SERIACION");
     }
 
-    @Test public void pendienteCalificacionSoloAplicaConActaCerradaEnPeriodoVigente() throws Exception {
+    @Test public void actaCerradaSinCalificacionSiempreQuedaEnRevision() throws Exception {
         Date ahora = new Date();
         IntentoAcreditacionUnidadV2DTO vigente = mapearIntento(null, Integer.valueOf(1), new Date(ahora.getTime() + 86400000L));
         IntentoAcreditacionUnidadV2DTO cerrado = mapearIntento(null, Integer.valueOf(1), new Date(ahora.getTime() - 86400000L));
-        assertEquals(vigente.getEstado(), EstadoIntentoAcreditacionV2.PENDIENTE_CALIFICACION);
+        assertEquals(vigente.getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
         assertEquals(cerrado.getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
     }
 
@@ -131,7 +120,7 @@ public class PreparacionDecisionesPendientesV2Test {
         unidad.getIntentosAcreditacion().add(intento("P71-1", "2026-1", 50D));
         unidad.getIntentosAcreditacion().add(intento("P71-2", "2026-2", 55D));
         IntentoAcreditacionUnidadV2DTO pendiente = intento("P71-3", "2027-1", null);
-        pendiente.setEstado(EstadoIntentoAcreditacionV2.PENDIENTE_CALIFICACION);
+        pendiente.setEstado(EstadoIntentoAcreditacionV2.EN_CURSO);
         unidad.getIntentosAcreditacion().add(pendiente);
         contexto.getUnidades().add(unidad);
         ResultadoEvaluacionCurricularV2DTO resultado = service.evaluarSombra(contexto);
@@ -152,7 +141,7 @@ public class PreparacionDecisionesPendientesV2Test {
         mismaReprobada.setCausa(CausaPendienteUnidadV2.REPROBACION);
         mismaReprobada.getIntentosAcreditacion().add(intento("P72-1", "2026-1", 50D));
         IntentoAcreditacionUnidadV2DTO pendiente = intento("P72-2", "2027-1", null);
-        pendiente.setEstado(EstadoIntentoAcreditacionV2.PENDIENTE_CALIFICACION);
+        pendiente.setEstado(EstadoIntentoAcreditacionV2.EN_CURSO);
         mismaReprobada.getIntentosAcreditacion().add(pendiente);
         conPendiente.getUnidades().add(mismaReprobada);
         assertEquals(service.evaluarSombra(conPendiente).getCantidadReprobadasVigentes(),

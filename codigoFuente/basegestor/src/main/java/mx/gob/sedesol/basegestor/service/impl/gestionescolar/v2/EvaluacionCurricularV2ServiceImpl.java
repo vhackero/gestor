@@ -72,6 +72,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoDecisionUni
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoActividadAcademicaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoExcepcionCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ExcepcionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ExcepcionInstitucionalCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TrazaReglaAplicadaV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TipoExcepcionCurricularV2;
@@ -370,10 +371,10 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                     EstadoCumplimientoSeriacionV2.CONDICIONADA, CodigoMotivoCurricularV2.SERIACION_DIRECTA,
                     "PENDIENTE_POR_SERIACION:ANTECEDENTE_B1_EN_CURSO");
         } else if (estado == EstadoUnidadCurricularV2.NO_DETERMINADO || estado == null) {
-            relacion.setEstadoOperativoInterbloque("PENDIENTE_DE_CONFIRMACION");
+            relacion.setEstadoOperativoInterbloque("PENDIENTE_POR_SERIACION");
             registrarResultadoInterbloque(resultado, contexto, carga, decision, consecuente, relacion,
                     EstadoCumplimientoSeriacionV2.REQUIERE_REVISION, CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,
-                    "PENDIENTE_DE_CONFIRMACION:RESULTADO_ANTECEDENTE_NO_DISPONIBLE");
+                    "PENDIENTE_POR_SERIACION:RESULTADO_ANTECEDENTE_EN_REVISION;FUERA_CARGA_CONFIRMADA");
         } else {
             relacion.setEstadoOperativoInterbloque("PENDIENTE_POR_SERIACION");
             registrarResultadoInterbloque(resultado, contexto, carga, decision, consecuente, relacion,
@@ -1327,6 +1328,8 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         }
         evaluacion.setOportunidadesConsumidas(Integer.valueOf(evaluacion.getIntentosFallidos().intValue()
                 + (enCurso ? 1 : 0)));
+        evaluacion.setRecursamientos(Integer.valueOf(Math.max(0,
+                evaluacion.getIntentosConfirmados().intValue() - 1)));
         int limiteOportunidades = contexto.getParametrosCurriculares() == null
                 || contexto.getParametrosCurriculares().getOportunidadesPorUd() == null ? 3
                 : contexto.getParametrosCurriculares().getOportunidadesPorUd().intValue();
@@ -2649,19 +2652,19 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         agregarUnico(c.getReglasRelacionadas(),CodigoReglaCurricularV2.RN_6_1_5);agregarUnico(c.getReglasRelacionadas(),CodigoReglaCurricularV2.RN_6_1_6);
         if(!Boolean.TRUE.equals(c.getAplicaCtr01())||!Boolean.TRUE.equals(c.getRequiereEvaluacionAvanceCondicionado())){c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.NO_APLICA);return;}
         if(Boolean.TRUE.equals(c.getAplicaRn64()))c.getImpedimentosAvanceRn615().add("RN_6_4_REZAGO_SEVERO");
-        if ("REGULARIZACION".equals(parametro(contexto, "Q5_RECURSAMIENTO_QUINTO", "AVANCE_CONDICIONADO"))
+        if ("REGULARIZACION".equals(parametro(contexto, "Q5_RECURSAMIENTO_QUINTO", "REGULARIZACION"))
                 && !Boolean.TRUE.equals(c.getAplicaRn64()) && hayRecursamientoDeQuintoCandidato(contexto)) {
             c.getImpedimentosAvanceRn615().add("Q5_RECURSAMIENTO_QUINTO_REGULARIZACION");
         }
         if (Boolean.TRUE.equals(c.getAplicaRn64()) && hayRecursamientoDeQuintoCandidato(contexto)) {
             String tratamientoQ5Con64 = parametro(contexto, "Q5_RECURSAMIENTO_QUINTO_CON_64", "REGULARIZACION_64");
-            c.getImpedimentosAvanceRn615().add("DEFINICION_INSTITUCIONAL_PENDIENTE_Q5:" + tratamientoQ5Con64);
+            c.getImpedimentosAvanceRn615().add("RN615_RECURSAMIENTO_QUINTO_REGULARIZACION:" + tratamientoQ5Con64);
             if ("AVANCE_CONDICIONADO_NO_PROCEDE".equals(tratamientoQ5Con64)) {
                 c.getImpedimentosAvanceRn615().add("Q5_RECURSAMIENTO_QUINTO_CON_64_NO_PROCEDE");
             }
             registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_5, null, 100,
                     "RN615_Q5_RECURSAMIENTO_QUINTO_CON_64_" + tratamientoQ5Con64,
-                    "Definición institucional pendiente Q5; tratamiento=" + tratamientoQ5Con64 + ".");
+                    "Recursamiento de quinto tratado como regularización; tratamiento=" + tratamientoQ5Con64 + ".");
         }
         c.getUdsQuintoNoSusceptiblesRn615().addAll(c.getUdsQuintoBloqueadasSeriacionDirectaRn612());c.getUdsQuintoNoSusceptiblesRn615().addAll(c.getUdsQuintoBloqueadasSeriacionIndirectaRn612());
         if(!c.getUdsQuintoNoSusceptiblesRn615().isEmpty())c.getImpedimentosAvanceRn615().add("SERIACION_DIRECTA_O_INDIRECTA");
@@ -2801,7 +2804,36 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         aviso.setPeriodoAplicacion(parametros.getPeriodoComunicadoInstitucional());
         aviso.setVigencia(parametros.getVigenciaComunicadoInstitucional());
         resultado.getAvisos().add(aviso);
+        agregarAvisosExcepcionesInstitucionales(resultado, contexto);
+    }
+
+    /** RN-2.3: una excepción se informa sin borrar la restricción detectada. */
+    private void agregarAvisosExcepcionesInstitucionales(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto) {
+        for (ExcepcionInstitucionalCurricularV2DTO excepcion : contexto.getExcepcionesInstitucionales()) {
+            if (!excepcionInstitucionalVigente(excepcion, contexto)) continue;
+            AvisoEvaluacionCurricularV2DTO aviso = new AvisoEvaluacionCurricularV2DTO();
+            aviso.setCodigo(CodigoAvisoEvaluacionCurricularV2.HABILITACION_CONCEDIDA_POR_EXCEPCION_INSTITUCIONAL);
+            aviso.setTexto("Habilitación concedida por excepción institucional: " + excepcion.getReferencia()
+                    + ". La restricción académica se conserva en esta evaluación en sombra.");
+            aviso.setReferencia(excepcion.getReferencia());
+            aviso.setPeriodoAplicacion(excepcion.getPeriodoAplicacion());
+            aviso.setVigencia(excepcion.getInicioVigencia() + " a " + excepcion.getFinVigencia());
+            resultado.getAvisos().add(aviso);
+        }
+        // Compatibilidad de lectura mientras no exista el catálogo institucional de excepciones.
         agregarAvisoAutorizacionIndividual(resultado, contexto);
+    }
+
+    private boolean excepcionInstitucionalVigente(ExcepcionInstitucionalCurricularV2DTO excepcion,
+            ContextoEvaluacionCurricularV2DTO contexto) {
+        if (excepcion == null || !Boolean.TRUE.equals(excepcion.getAplicable()) || Boolean.TRUE.equals(excepcion.getRevocada())
+                || !textoPresente(excepcion.getReferencia()) || !textoPresente(excepcion.getAutoridad())
+                || !textoPresente(excepcion.getReglasComprendidas()) || !textoPresente(excepcion.getProceso())
+                || !textoPresente(excepcion.getInicioVigencia()) || !textoPresente(excepcion.getFinVigencia())) return false;
+        if (textoPresente(excepcion.getPeriodoAplicacion()) && !mismoPeriodo(excepcion.getPeriodoAplicacion(), contexto.getPeriodoNormativo())) return false;
+        String fecha = new java.text.SimpleDateFormat("yyyy-MM-dd").format(contexto.getFechaEvaluacion() == null ? new Date() : contexto.getFechaEvaluacion());
+        return excepcion.getInicioVigencia().compareTo(fecha) <= 0 && excepcion.getFinVigencia().compareTo(fecha) >= 0;
     }
 
     private void agregarAvisoAutorizacionIndividual(ResultadoEvaluacionCurricularV2DTO resultado,
@@ -4767,7 +4799,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
             if (decision != null && !decision.getEstadosSombra().contains(EstadoDecisionUnidadCurricularV2.BLOQUEADA)) {
                 unidad.setPreseleccionada(Boolean.TRUE); unidad.setDesmarcable(Boolean.FALSE);
                 String estado = decision.getEstadoOperativoInterbloque();
-                if (estado == null) estado = "PENDIENTE_DE_CONFIRMACION";
+                if (estado == null) estado = "PENDIENTE_POR_SERIACION";
                 agregarExplicacion(decision, "RN-8.1: estado operativo interbloque=" + estado + ".");
             }
         }
@@ -5005,7 +5037,12 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         valor = valor.trim();
         // RN-4.2 exige que la B2 pendiente por seriación siempre ocupe lugar en el máximo.
         // Se absorbe la configuración histórica para no volver a habilitar el comportamiento retirado.
-        if ("Q4_UD_B2_SERIADA_CARGA".equals(nombre) && "NO_CUENTA".equals(valor)) return "SOLO_MAX";
+        if ("Q4_UD_B2_SERIADA_CARGA".equals(nombre)) return "CUENTA_MIN_Y_MAX";
+        if ("Q5_RECURSAMIENTO_QUINTO".equals(nombre)) return "REGULARIZACION";
+        if ("Q5_RECURSAMIENTO_QUINTO_CON_64".equals(nombre)) return "REGULARIZACION_64";
+        if ("Q6_CERO_SIN_BAJA".equals(nombre)) return "REPROBACION";
+        if ("Q7_OPTATIVAS_FALTANTES_5_A_8".equals(nombre)) return "PERMITIR_TRAS_PENDIENTES";
+        if ("Q11_BLOQUE_OPTATIVA_BAJA".equals(nombre)) return "OFERTA_AUTORIZADA";
         return valor;
     }
 
