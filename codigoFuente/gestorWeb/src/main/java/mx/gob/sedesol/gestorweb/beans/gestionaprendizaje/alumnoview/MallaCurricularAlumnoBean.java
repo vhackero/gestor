@@ -155,6 +155,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private Map<String, Set<String>> ubicacionesOptativasHistoricas;
 	private Map<String, Set<String>> ubicacionesOptativasEnCurso;
 	private Set<Integer> programasConBaja;
+	private Set<String> clavesProgramasConBaja;
 	private Set<Integer> programasConBajaParcial;
 	private Set<String> clavesProgramasConBajaParcial;
 	private Integer semestreEnCurso;
@@ -189,6 +190,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		ubicacionesOptativasHistoricas = new HashMap<>();
 		ubicacionesOptativasEnCurso = new HashMap<>();
 		programasConBaja = new HashSet<>();
+		clavesProgramasConBaja = new HashSet<>();
 		programasConBajaParcial = new HashSet<>();
 		clavesProgramasConBajaParcial = new HashSet<>();
 		semestreEnCurso = null;
@@ -1276,18 +1278,8 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			calificacionFinal = estatusDto.getCalificacionFinal();
 			calificacionMin = estatusDto.getCalificacionMinAprobatoria();
 		}
-		// Una baja temporal/parcial se conserva como antecedente administrativo,
-		// pero nunca debe ocultar una acreditación posterior cerrada.
-		if (calificacionFinal != null) {
-			if (Double.compare(calificacionFinal, CALIFICACION_NO_PRESENTADA) == 0) {
-				estatus = ESTATUS_NO_ACREDITADA;
-			} else {
-				double min = calificacionMin != null ? calificacionMin : 0d;
-				estatus = calificacionFinal >= min ? ESTATUS_APROBADA : ESTATUS_NO_ACREDITADA;
-			}
-		} else if (idPrograma != null && programasConBaja.contains(idPrograma)) {
-			estatus = ESTATUS_BAJA;
-		}
+		estatus = resolverEstatusHistorico(calificacionFinal, calificacionMin,
+				idPrograma != null && programasConBaja.contains(idPrograma));
 		String color = ESTATUS_COLORS.getOrDefault(estatus, "#6b7280");
 		nodo.setEstatus(estatus);
 		nodo.setEstatusBackgroundColor(color);
@@ -1302,8 +1294,31 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 	}
 
+	/**
+	 * Una baja aplicada no es una reprobacion aunque el origen conserve 0, NP o
+	 * una calificacion menor a la minima. Una acreditacion posterior si prevalece
+	 * porque resuelve el antecedente academico.
+	 */
+	static String resolverEstatusHistorico(Double calificacionFinal, Double calificacionMin,
+			boolean bajaAplicada) {
+		if (calificacionFinal != null && Double.compare(calificacionFinal, CALIFICACION_NO_PRESENTADA) != 0) {
+			double minima = calificacionMin != null ? calificacionMin : 0d;
+			if (calificacionFinal >= minima) {
+				return ESTATUS_APROBADA;
+			}
+		}
+		if (bajaAplicada) {
+			return ESTATUS_BAJA;
+		}
+		if (calificacionFinal != null) {
+			return ESTATUS_NO_ACREDITADA;
+		}
+		return ESTATUS_NO_INSCRITA;
+	}
+
 	private void cargarProgramasConBaja(Long idPersona) {
 		programasConBaja.clear();
+		clavesProgramasConBaja.clear();
 		programasConBajaParcial.clear();
 		clavesProgramasConBajaParcial.clear();
 		if (contextoAsistente != null && contextoAsistente.getContextoBase() != null
@@ -1328,6 +1343,9 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 		if (baja.getIdPrograma() != null) {
 			programasConBaja.add(baja.getIdPrograma().intValue());
+		}
+		if (StringUtils.isNotBlank(baja.getClavePrograma())) {
+			clavesProgramasConBaja.add(normalizaTexto(baja.getClavePrograma()));
 		}
 		if (!esBajaParcial(baja)) {
 			return;
@@ -1356,18 +1374,18 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			Map<Integer, MallaAlumnoProgramaDTO> estatusPorPrograma) {
 		for (Map.Entry<Integer, MallaDiagramaNodoDTO> entry : programasPorId.entrySet()) {
 			MallaDiagramaNodoDTO nodo = entry.getValue();
-			boolean antecedenteBajaParcial = tieneAntecedenteBajaParcial(nodo, entry.getKey());
+			boolean antecedenteBajaAplicada = tieneAntecedenteBajaAplicada(nodo, entry.getKey());
 			MallaAlumnoProgramaDTO estatusHistorico = estatusPorPrograma.get(entry.getKey());
 			UnidadDecisionInscripcionDTO unidadContextual = unidadesAsistentePorPrograma.get(Long.valueOf(entry.getKey().longValue()));
 			boolean noPresentadaPorBajaParcial = debeMostrarCursamientoConAntecedenteBaja(
-					nodo.getEstatus(), nodo.isEnCurso(), antecedenteBajaParcial,
+					nodo.getEstatus(), nodo.isEnCurso(), antecedenteBajaAplicada,
 					estatusHistorico != null ? estatusHistorico.getCalificacionFinal() : null,
 					unidadContextual != null ? unidadContextual.getEstatusHistorico() : null);
 			if (nodo.isEnCurso()
 					&& !ESTATUS_APROBADA.equals(nodo.getEstatus())
 					&& (!ESTATUS_NO_ACREDITADA.equals(nodo.getEstatus()) || noPresentadaPorBajaParcial)
 					&& (!ESTATUS_BAJA.equals(nodo.getEstatus())
-							|| antecedenteBajaParcial)) {
+							|| antecedenteBajaAplicada)) {
 				String color = ESTATUS_COLORS.getOrDefault(ESTATUS_EN_CURSO, "#facc15");
 				nodo.setEstatus(ESTATUS_EN_CURSO);
 				nodo.setEstatusBackgroundColor(color);
@@ -1393,7 +1411,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			MallaAlumnoProgramaDTO estatus = estatusPorPrograma.get(entry.getKey());
 			String indicador = resolverIndicadorVisual(nodo.getEstatus(), nodo.isEnCurso(),
 					estatus != null && Boolean.TRUE.equals(estatus.getRegularizada()),
-					tieneAntecedenteBajaParcial(nodo, entry.getKey()));
+					tieneAntecedenteBajaAplicada(nodo, entry.getKey()));
 			nodo.setEstatusVisual(indicador);
 			if (ESTATUS_RECURSANDO.equals(indicador) || ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA.equals(indicador)
 					|| ESTATUS_REGULARIZADA.equals(indicador)) {
@@ -1408,6 +1426,14 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 		return nodo != null && StringUtils.isNotBlank(nodo.getClavePrograma())
 				&& clavesProgramasConBajaParcial.contains(normalizaTexto(nodo.getClavePrograma()));
+	}
+
+	private boolean tieneAntecedenteBajaAplicada(MallaDiagramaNodoDTO nodo, Integer idPrograma) {
+		if (idPrograma != null && programasConBaja.contains(idPrograma)) {
+			return true;
+		}
+		return nodo != null && StringUtils.isNotBlank(nodo.getClavePrograma())
+				&& clavesProgramasConBaja.contains(normalizaTexto(nodo.getClavePrograma()));
 	}
 
 	static String resolverIndicadorVisual(String estatus, boolean enCurso, boolean regularizada) {

@@ -163,6 +163,16 @@ public class MallaCurricularAlumnoBeanV2Test {
 	}
 
 	@Test
+	public void bajaAplicadaPrevaleceSobreCeroOCincoPeroNoSobreAcreditacionPosterior() {
+		assertEquals(MallaCurricularAlumnoBean.resolverEstatusHistorico(Double.valueOf(0d), Double.valueOf(60d), true),
+				"Baja");
+		assertEquals(MallaCurricularAlumnoBean.resolverEstatusHistorico(Double.valueOf(5d), Double.valueOf(60d), true),
+				"Baja");
+		assertEquals(MallaCurricularAlumnoBean.resolverEstatusHistorico(Double.valueOf(80d), Double.valueOf(60d), true),
+				"Aprobada");
+	}
+
+	@Test
 	public void bloqueoCurricularNoConvierteObligatoriaEnSeriada() {
 		MallaDiagramaNodoDTO nodo = new MallaDiagramaNodoDTO();
 		nodo.setBloqueada(true);
