@@ -32,11 +32,43 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoReglaCurric
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TrazaReglaAplicadaV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PeriodoTrayectoriaV2DTO;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasService;
 
 public class AsistenteCurricularV2ResultadoAdapterTest {
+	@Test
+	public void trayectoriaDistingueBajaTemporalYPeriodoSinInscripcion() throws Exception {
+		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);
+		AsistenteInscripcionContextoDTO contexto = new AsistenteInscripcionContextoDTO();
+		TrayectoriaPermanenciaDTO trayectoria = new TrayectoriaPermanenciaDTO();
+		trayectoria.setPeriodoPrimeraInscripcion("2026-1");
+		trayectoria.setPeriodosAcademicosTranscurridos(Integer.valueOf(3));
+		trayectoria.setSemestresConcluidos(Integer.valueOf(2));
+		trayectoria.setSemestreEnCurso(Boolean.TRUE);
+		trayectoria.setDuracionNominalSemestres(Integer.valueOf(8));
+		contexto.setTrayectoriaPermanencia(trayectoria);
+		PeriodoTrayectoriaV2DTO bajaTemporal = new PeriodoTrayectoriaV2DTO();
+		bajaTemporal.setPeriodo("2026-1");
+		bajaTemporal.setParticipacionGrupo(Boolean.TRUE);
+		bajaTemporal.setBajaTemporalCompleta(Boolean.TRUE);
+		contexto.getPeriodosTrayectoriaV2().add(bajaTemporal);
+		PeriodoTrayectoriaV2DTO cursado = new PeriodoTrayectoriaV2DTO();
+		cursado.setPeriodo("2026-2");
+		cursado.setParticipacionGrupo(Boolean.TRUE);
+		contexto.getPeriodosTrayectoriaV2().add(cursado);
+		Field campo = TablaCurricularAsistidaBean.class.getDeclaredField("contexto");
+		campo.setAccessible(true);
+		campo.set(bean, contexto);
+
+		assertEquals(bean.getEstadoHitoTrayectoria(Integer.valueOf(1)), "baja-temporal");
+		assertEquals(bean.getEstadoHitoTrayectoria(Integer.valueOf(2)), "concluido");
+		assertEquals(bean.getEstadoHitoTrayectoria(Integer.valueOf(3)), "no-cursado");
+		assertEquals(bean.getEstadoHitoTrayectoria(Integer.valueOf(4)), "pendiente");
+	}
+
 	@Test
 	public void comunicadoInstitucionalSeExponeSoloDesdeElResultadoV2() throws Exception {
 		TablaCurricularAsistidaBean bean = Mockito.mock(TablaCurricularAsistidaBean.class, Mockito.CALLS_REAL_METHODS);

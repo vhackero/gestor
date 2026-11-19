@@ -57,6 +57,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AvisoEvaluacionCu
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoAvisoEvaluacionCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TrazaReglaAplicadaV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PeriodoTrayectoriaV2DTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ObjetoCurricularEnum;
@@ -3526,6 +3527,16 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         if (semestre == null || contexto == null || contexto.getTrayectoriaPermanencia() == null) {
             return "pendiente";
         }
+        String periodo = getEtiquetaPeriodoTrayectoria(semestre);
+        PeriodoTrayectoriaV2DTO evidenciaPeriodo = obtenerEvidenciaPeriodoTrayectoria(periodo);
+        // Una baja temporal aplicada se conserva como hecho de trayectoria,
+        // aunque exista una calificación capturada en alguna UD del periodo.
+        if (evidenciaPeriodo != null && Boolean.TRUE.equals(evidenciaPeriodo.getBajaTemporalCompleta())) {
+            return "baja-temporal";
+        }
+        if (esPeriodoTranscurridoSinInscripcion(semestre, evidenciaPeriodo)) {
+            return "no-cursado";
+        }
         Integer concluidos = contexto.getTrayectoriaPermanencia().getSemestresConcluidos();
         if (concluidos != null && semestre.intValue() <= concluidos.intValue()) {
             return "concluido";
@@ -3536,6 +3547,30 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             return "actual";
         }
         return "pendiente";
+    }
+
+    private PeriodoTrayectoriaV2DTO obtenerEvidenciaPeriodoTrayectoria(String periodo) {
+        if (StringUtils.isBlank(periodo) || contexto == null || contexto.getPeriodosTrayectoriaV2() == null) {
+            return null;
+        }
+        for (PeriodoTrayectoriaV2DTO candidato : contexto.getPeriodosTrayectoriaV2()) {
+            if (candidato != null && periodo.equals(candidato.getPeriodo())) {
+                return candidato;
+            }
+        }
+        return null;
+    }
+
+    private boolean esPeriodoTranscurridoSinInscripcion(Integer semestre, PeriodoTrayectoriaV2DTO evidenciaPeriodo) {
+        if (semestre == null || contexto == null || contexto.getTrayectoriaPermanencia() == null) {
+            return false;
+        }
+        Integer transcurridos = contexto.getTrayectoriaPermanencia().getPeriodosAcademicosTranscurridos();
+        if (transcurridos == null || semestre.intValue() > transcurridos.intValue()) {
+            return false;
+        }
+        return evidenciaPeriodo == null || (!Boolean.TRUE.equals(evidenciaPeriodo.getParticipacionGrupo())
+                && !Boolean.TRUE.equals(evidenciaPeriodo.getInscripcionFormal()));
     }
 
     public String getEtiquetaPeriodoTrayectoria(Integer semestre) {

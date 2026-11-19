@@ -516,6 +516,14 @@
                 --color-hito: #1671ad;
                 color: #ffffff;
             }
+            .trayectoria-hito.baja-temporal {
+                --color-hito: #f1c232;
+                color: #3f3000;
+            }
+            .trayectoria-hito.no-cursado {
+                --color-hito: #aeb5bc;
+                color: #26323d;
+            }
             .trayectoria-hito.pendiente {
                 --color-hito: #c8c8c8;
             }
@@ -550,6 +558,15 @@
                 font-weight: 400;
                 margin-top: 3px;
             }
+            .trayectoria-periodo .baja-temporal,
+            .trayectoria-periodo .no-cursado {
+                display: block;
+                font-size: 12px;
+                font-weight: 700;
+                margin-top: 3px;
+            }
+            .trayectoria-periodo .baja-temporal { color: #8b6500; }
+            .trayectoria-periodo .no-cursado { color: #58626d; }
             .trayectoria-periodo.adicional {
                 flex: 1.7 1 165px;
             }
@@ -2099,7 +2116,7 @@
                                             <ui:fragment rendered="#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo gt 0}"><div class="trayectoria-hito adicional">#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo} semestres más</div></ui:fragment>
                                         </div>
                                         <div class="trayectoria-periodos">
-                                            <ui:repeat value="#{tablaCurricularAsistidaBean.hitosTrayectoria}" var="semestreTrayectoria"><div class="trayectoria-periodo">#{tablaCurricularAsistidaBean.getEtiquetaPeriodoTrayectoria(semestreTrayectoria)}<ui:fragment rendered="#{tablaCurricularAsistidaBean.getEstadoHitoTrayectoria(semestreTrayectoria) eq 'actual'}"><span class="en-curso">En curso</span></ui:fragment><ui:fragment rendered="#{semestreTrayectoria eq tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres}"><span class="duracion-plan">Duración del plan</span></ui:fragment></div></ui:repeat>
+                                            <ui:repeat value="#{tablaCurricularAsistidaBean.hitosTrayectoria}" var="semestreTrayectoria"><div class="trayectoria-periodo">#{tablaCurricularAsistidaBean.getEtiquetaPeriodoTrayectoria(semestreTrayectoria)}<ui:fragment rendered="#{tablaCurricularAsistidaBean.getEstadoHitoTrayectoria(semestreTrayectoria) eq 'actual'}"><span class="en-curso">En curso</span></ui:fragment><ui:fragment rendered="#{tablaCurricularAsistidaBean.getEstadoHitoTrayectoria(semestreTrayectoria) eq 'baja-temporal'}"><span class="baja-temporal">Baja temporal</span></ui:fragment><ui:fragment rendered="#{tablaCurricularAsistidaBean.getEstadoHitoTrayectoria(semestreTrayectoria) eq 'no-cursado'}"><span class="no-cursado">No cursado</span></ui:fragment><ui:fragment rendered="#{semestreTrayectoria eq tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalSemestres}"><span class="duracion-plan">Duración del plan</span></ui:fragment></div></ui:repeat>
                                             <ui:fragment rendered="#{tablaCurricularAsistidaBean.semestresAdicionalesMaximo gt 0}"><div class="trayectoria-periodo adicional">Plazo adicional máximo</div></ui:fragment>
                                         </div>
                                         <div class="kpi-inline-note"><strong>Plazo máximo total para concluir:</strong> #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.plazoMaximoAnios} años, incluidos los #{tablaCurricularAsistidaBean.contexto.trayectoriaPermanencia.duracionNominalAnios} años de duración nominal del plan.</div>
