@@ -78,6 +78,8 @@ La revisión de código y metadatos SIGIE no localizó una fuente institucional 
 
 Propuesta de fuente, sin crear estructura: `cfg_excepcion_institucional_curricular` con identificador, versión/regla, beneficiario por persona/lista/criterio, proceso, periodo, inicio, fin o condición de vigencia, alcance, referencia documental, responsable, fecha de captura, estado y auditoría. Debe validar periodo, vigencia, alcance y no permitir habilitar una excepción sin referencia institucional. C1 y C2 se modelan como excepciones de población. Mientras no exista una excepción aplicable, se conserva el aviso general 2027-1.
 
+La matriz v6 con las columnas de implementación y evidencia, incluidas las preguntas cerradas, está en `MATRIZ_CUESTIONAMIENTOS_V6_BLOQUE6.md`.
+
 ## Pruebas y compilación
 
 | Prueba | Criterio acreditado |
@@ -88,8 +90,18 @@ Propuesta de fuente, sin crear estructura: `cfg_excepcion_institucional_curricul
 | `Bloque4TrayectoriaMedidaRn20261106Test#gc13MedidaVencidaNoImpideAvanceCondicionado` | Medida vencida se retira al reevaluar; no se conserva como bloqueo. |
 | `Bloque3OfertaYPreseleccionRn20261106Test#c10IncluyeNuncaInscritaYBajaParcialEnOmitidasDeQuinto` | Una pendiente por baja entra al análisis RN-6.1 y no se convierte en reprobación. |
 | `Bloque6Rn20261119Test#rn711ExponeSustitucionesSoloCuandoLaFuenteLasAcredita` | El contador de sustituciones se expone sólo si la relación fue proporcionada por la fuente. |
+| `ComunicadosInstitucionales20271Test#autorizacionIndividualVigenteSeMuestraSinCambiarLaDecision` | Autorización vigente: conserva restricción y muestra habilitación/aviso trazable. |
+| `ComunicadosInstitucionales20271Test#autorizacionIndividualVencidaNoSeMuestra` | Autorización vencida: se retira al reevaluar. |
+| `ComunicadosInstitucionales20271Test#autorizacionIndividualAusenteNoSeInfiere` | Sin autorización: no se infiere habilitación y permanece el aviso general aplicable. |
+| `ComunicadosInstitucionales20271Test#gc19gComunicadoNoModificaDecisionMotivosNiCarga` | En 2027-2 no se emite el comunicado ni se arrastra su marcador. |
 
 Los escenarios de sustitución formalizada, baja posterior, recursamiento de sustituta y tercera sustitución requieren la fuente institucional Q12 para construir el vínculo original-sustituta. El motor no los simula desde intentos aislados ni inventa una relación.
+
+## Validación del enlace de bajas (RN-2.2)
+
+`rel_persona_bajas.id_grupo` se relaciona con `tbl_grupos.id`; ese grupo contiene `clave`, `id_moodle` e `id_evento`. El adaptador valida la baja aplicada por `persona + id_grupo + contabilizar=1` y obtiene el periodo mediante `tbl_grupos.id_evento -> tbl_eventos.cve_evento_cap -> tbl_periodos_inscripcion.nombre_periodo`. El control agregado devolvió `3,181` bajas aplicadas enlazadas a evento y periodo y `0` sin alguno de esos dos datos.
+
+Esto confirma la llave técnica del grupo/Aula en SIGIE y su periodo. No se equipara `id_grupo` con una clave textual externa: la relación verificable es el identificador interno del grupo, con `id_moodle` disponible como atributo del mismo grupo.
 
 | Módulo | Comando | Resultado |
 | --- | --- | --- |
