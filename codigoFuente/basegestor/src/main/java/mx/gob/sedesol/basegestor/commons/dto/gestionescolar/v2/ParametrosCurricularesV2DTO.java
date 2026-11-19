@@ -23,6 +23,8 @@ public class ParametrosCurricularesV2DTO implements Serializable {
     /** Decisiones pendientes de confirmación institucional; los valores por omisión preservan RN vigente. */
     private String tratamientoCeroSinBaja = "REPROBACION";
     private String tratamientoRecursamientoQuinto = "AVANCE_CONDICIONADO";
+    /** Q5 para recursamiento de quinto cuando aplica RN-6.4. */
+    private String tratamientoRecursamientoQuintoCon64 = "REGULARIZACION_64";
     private String tratamientoOptativasFaltantesQuintoAOcho = "BLOQUEAR";
     private String tratamientoBloqueOptativaBajaOSustituta = "AMBOS_BLOQUES";
     /** RN-4.2: una UD B2 restringida siempre ocupa lugar en el máximo. */
@@ -50,6 +52,7 @@ public class ParametrosCurricularesV2DTO implements Serializable {
     public String getCatalogoOptativas() { return catalogoOptativas; } public void setCatalogoOptativas(String v) { catalogoOptativas = v; }
     public String getTratamientoCeroSinBaja() { return tratamientoCeroSinBaja; } public void setTratamientoCeroSinBaja(String v) { tratamientoCeroSinBaja = v; }
     public String getTratamientoRecursamientoQuinto() { return tratamientoRecursamientoQuinto; } public void setTratamientoRecursamientoQuinto(String v) { tratamientoRecursamientoQuinto = v; }
+    public String getTratamientoRecursamientoQuintoCon64() { return tratamientoRecursamientoQuintoCon64; } public void setTratamientoRecursamientoQuintoCon64(String v) { tratamientoRecursamientoQuintoCon64 = v; }
     public String getTratamientoOptativasFaltantesQuintoAOcho() { return tratamientoOptativasFaltantesQuintoAOcho; } public void setTratamientoOptativasFaltantesQuintoAOcho(String v) { tratamientoOptativasFaltantesQuintoAOcho = v; }
     public String getTratamientoBloqueOptativaBajaOSustituta() { return tratamientoBloqueOptativaBajaOSustituta; } public void setTratamientoBloqueOptativaBajaOSustituta(String v) { tratamientoBloqueOptativaBajaOSustituta = v; }
     public String getTratamientoUdB2SeriadaCarga() { return tratamientoUdB2SeriadaCarga; } public void setTratamientoUdB2SeriadaCarga(String v) { tratamientoUdB2SeriadaCarga = v; }

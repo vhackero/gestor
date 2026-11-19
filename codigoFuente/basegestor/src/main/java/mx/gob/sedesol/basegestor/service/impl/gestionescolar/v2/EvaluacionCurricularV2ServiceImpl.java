@@ -16,6 +16,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaPendienteUni
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaPrincipalTrayectoriaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaIndisponibilidadOfertaV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AvisoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AutorizacionIndividualCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoAvisoEvaluacionCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoExcepcionCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
@@ -2652,6 +2653,16 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 && !Boolean.TRUE.equals(c.getAplicaRn64()) && hayRecursamientoDeQuintoCandidato(contexto)) {
             c.getImpedimentosAvanceRn615().add("Q5_RECURSAMIENTO_QUINTO_REGULARIZACION");
         }
+        if (Boolean.TRUE.equals(c.getAplicaRn64()) && hayRecursamientoDeQuintoCandidato(contexto)) {
+            String tratamientoQ5Con64 = parametro(contexto, "Q5_RECURSAMIENTO_QUINTO_CON_64", "REGULARIZACION_64");
+            c.getImpedimentosAvanceRn615().add("DEFINICION_INSTITUCIONAL_PENDIENTE_Q5:" + tratamientoQ5Con64);
+            if ("AVANCE_CONDICIONADO_NO_PROCEDE".equals(tratamientoQ5Con64)) {
+                c.getImpedimentosAvanceRn615().add("Q5_RECURSAMIENTO_QUINTO_CON_64_NO_PROCEDE");
+            }
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_1_5, null, 100,
+                    "RN615_Q5_RECURSAMIENTO_QUINTO_CON_64_" + tratamientoQ5Con64,
+                    "Definición institucional pendiente Q5; tratamiento=" + tratamientoQ5Con64 + ".");
+        }
         c.getUdsQuintoNoSusceptiblesRn615().addAll(c.getUdsQuintoBloqueadasSeriacionDirectaRn612());c.getUdsQuintoNoSusceptiblesRn615().addAll(c.getUdsQuintoBloqueadasSeriacionIndirectaRn612());
         if(!c.getUdsQuintoNoSusceptiblesRn615().isEmpty())c.getImpedimentosAvanceRn615().add("SERIACION_DIRECTA_O_INDIRECTA");
         if(Boolean.TRUE.equals(contexto.getSancionImpedimentoConocida())&&Boolean.TRUE.equals(contexto.getSancionImpedimentoRegistrada()))c.getImpedimentosAvanceRn615().add("SANCION_IMPEDITIVA");
@@ -2680,7 +2691,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         }
         if(Boolean.TRUE.equals(contexto.getRestriccionPeNormativaConocida())&&Boolean.TRUE.equals(contexto.getRestriccionPeNormativaImpeditiva()))c.getImpedimentosAvanceRn615().add("RESTRICCION_PE_NORMATIVA:"+contexto.getCodigoRestriccionPeNormativa()+":"+contexto.getFuenteRestriccionPeNormativa());
         if(!Boolean.TRUE.equals(contexto.getSancionImpedimentoConocida())||!Boolean.TRUE.equals(contexto.getRestriccionPeNormativaConocida())||Boolean.TRUE.equals(c.getRequiereRevision())){c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.REQUIERE_REVISION);}
-        else if(Boolean.TRUE.equals(c.getAplicaRn64()) || Boolean.TRUE.equals(contexto.getSancionImpedimentoRegistrada()) || Boolean.TRUE.equals(contexto.getRestriccionPeNormativaImpeditiva()) || medidaVigenteImpeditiva || c.getImpedimentosAvanceRn615().contains("Q5_RECURSAMIENTO_QUINTO_REGULARIZACION"))c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.NO_PROCEDE_AVANCE_CONDICIONADO);
+        else if(Boolean.TRUE.equals(c.getAplicaRn64()) || Boolean.TRUE.equals(contexto.getSancionImpedimentoRegistrada()) || Boolean.TRUE.equals(contexto.getRestriccionPeNormativaImpeditiva()) || medidaVigenteImpeditiva || c.getImpedimentosAvanceRn615().contains("Q5_RECURSAMIENTO_QUINTO_REGULARIZACION") || c.getImpedimentosAvanceRn615().contains("Q5_RECURSAMIENTO_QUINTO_CON_64_NO_PROCEDE"))c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.NO_PROCEDE_AVANCE_CONDICIONADO);
         else if(c.getEstadoSupuestosAvance()==EstadoSupuestosAvanceV2.SIN_SUPUESTO_TIPIFICADO){c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.REQUIERE_RESOLUCION_EXTRAORDINARIA);c.getRutaInstitucionalExtraordinariaRn616().add("DIRECCION_DIVISION:PENDIENTE_FUNDAMENTACION_ACADEMICA");c.getRutaInstitucionalExtraordinariaRn616().add("CAI:PENDIENTE_DEFINICION_ACADEMICA");c.getRutaInstitucionalExtraordinariaRn616().add("DAEAE:PENDIENTE_DETERMINACION_ESCOLAR_NORMATIVA");c.getRutaInstitucionalExtraordinariaRn616().add("CTIE:RESOLUCION_DOCUMENTADA_PENDIENTE_EJECUCION");}
         else c.setEstadoResolucionAvance(EstadoResolucionAvanceV2.CONTINUA_EVALUACION_ORDINARIA_RN61);
         registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_1_5,null,100,"RN615_"+c.getEstadoResolucionAvance(),"Impedimentos="+c.getImpedimentosAvanceRn615());registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_1_6,null,100,"RN616_"+c.getEstadoResolucionAvance(),"Ruta="+c.getRutaInstitucionalExtraordinariaRn616());
@@ -2714,7 +2725,18 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         for(Long id:c.getUdsQuintoBloqueadasSeriacionDirectaRn612())c.getDecisionesPorUdQuintoRn61().add(id+":NO_PROCEDE_POR_SERIACION_DIRECTA");
         for(Long id:c.getUdsQuintoBloqueadasSeriacionIndirectaRn612())c.getDecisionesPorUdQuintoRn61().add(id+":NO_PROCEDE_POR_SERIACION_INDIRECTA");
         for(Long id:c.getUdsQuintoRevisionSeriacionRn612())c.getDecisionesPorUdQuintoRn61().add(id+":REQUIERE_REVISION_SERIACION");
-        for(Long id:c.getUdsQuintoCompatiblesRn612())c.getDecisionesPorUdQuintoRn61().add(id+":"+(d==EstadoDecisionControlAvanceRn61V2.AVANCE_CONDICIONADO_PROCEDE_PARA_UD_COMPATIBLES?"AVANCE_CONDICIONADO_PROCEDE_EN_SOMBRA":d.name()));
+        for(Long id:c.getUdsQuintoCompatiblesRn612()) {
+            c.getDecisionesPorUdQuintoRn61().add(id+":"+(d==EstadoDecisionControlAvanceRn61V2.AVANCE_CONDICIONADO_PROCEDE_PARA_UD_COMPATIBLES?"AVANCE_CONDICIONADO_PROCEDE_EN_SOMBRA":d.name()));
+            if (c.getImpedimentosAvanceRn615().contains("Q5_RECURSAMIENTO_QUINTO_CON_64_NO_PROCEDE")) {
+                DecisionUnidadCurricularV2DTO decision = buscarDecision(resultado, id);
+                if (decision != null) {
+                    decision.setHabilitada(Boolean.FALSE);
+                    agregarUnico(decision.getEstadosSombra(), EstadoDecisionUnidadCurricularV2.BLOQUEADA);
+                    agregarUnico(decision.getMotivos(), CodigoMotivoCurricularV2.PENDIENTE_OMITIDA_AVANCE_CONDICIONADO);
+                    agregarExplicacion(decision, "RN-6.1.5: el recursamiento de quinto no procede mientras exista la definición institucional pendiente Q5.");
+                }
+            }
+        }
         registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_1,null,100,"DECISION_RN61_"+d,"DecisionesUD5="+c.getDecisionesPorUdQuintoRn61()+"; sin efecto productivo.");
     }
 
@@ -2723,6 +2745,13 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         EvaluacionCargaAcademicaV2DTO c=resultado.getEvaluacionCargaAcademica(); if(c==null)return;
         agregarUnico(c.getReglasRelacionadas(),CodigoReglaCurricularV2.RN_6_2);agregarUnico(resultado.getReglasEvaluadas(),CodigoReglaCurricularV2.RN_6_2);
         if(contexto.getAdmitido()==null||contexto.getInscripcionInicialRealizada()==null){c.setAplicaRn62(null);c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.REQUIERE_REVISION);registrarTraza(resultado,contexto,CodigoReglaCurricularV2.RN_6_2,CodigoMotivoCurricularV2.DATOS_INSUFICIENTES,70,"RN62_REQUIERE_REVISION","Admisión o inscripción inicial no determinable.");return;}
+        if (tieneInscripcionFormalComprobada(contexto)) {
+            c.setAplicaRn62(Boolean.FALSE);
+            c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.NO_APLICA);
+            registrarTraza(resultado, contexto, CodigoReglaCurricularV2.RN_6_2, null, 70,
+                    "RN62_NO_APLICA_INSCRIPCION_FORMAL", "Existe al menos un intento formal comprobado; C2 no concurre con C1.");
+            return;
+        }
         boolean aplica=Boolean.TRUE.equals(contexto.getAdmitido())&&!Boolean.TRUE.equals(contexto.getInscripcionInicialRealizada());c.setAplicaRn62(aplica?Boolean.TRUE:Boolean.FALSE);if(!aplica){c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.NO_APLICA);registrarTrazaInscripcionInicialDiferida(resultado,contexto,c);return;}c.setCondicionTrayectoriaRn62("INSCRIPCION_INICIAL_DIFERIDA");c.setPeriodoAdmisionRn62(contexto.getPeriodoAdmision());c.setPeriodoIncorporacionRn62(contexto.getPeriodoIncorporacion());c.setSemestreObjetivoRn62(contexto.getSemestreReferencia());
         if (!textoPresente(contexto.getReferenciaConvocatoriaOResolucionRn62())) {
             c.setEstadoIncorporacionDiferida(EstadoIncorporacionDiferidaV2.REQUIERE_REVISION); c.setRequiereRevision(Boolean.TRUE);
@@ -2772,6 +2801,41 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         aviso.setPeriodoAplicacion(parametros.getPeriodoComunicadoInstitucional());
         aviso.setVigencia(parametros.getVigenciaComunicadoInstitucional());
         resultado.getAvisos().add(aviso);
+        agregarAvisoAutorizacionIndividual(resultado, contexto);
+    }
+
+    private void agregarAvisoAutorizacionIndividual(ResultadoEvaluacionCurricularV2DTO resultado,
+            ContextoEvaluacionCurricularV2DTO contexto) {
+        AutorizacionIndividualCurricularV2DTO autorizacion = contexto.getAutorizacionIndividual();
+        if (!autorizacionIndividualVigente(autorizacion, contexto.getFechaEvaluacion())) return;
+        AvisoEvaluacionCurricularV2DTO aviso = new AvisoEvaluacionCurricularV2DTO();
+        aviso.setCodigo(CodigoAvisoEvaluacionCurricularV2.AUTORIZACION_INDIVIDUAL_ACREDITADA);
+        aviso.setTexto("Existe una autorización institucional individual acreditada: " + autorizacion.getReferencia()
+                + ". No modifica esta evaluación en sombra; Inscripción determina su aplicación efectiva.");
+        aviso.setReferencia(autorizacion.getReferencia());
+        aviso.setPeriodoAplicacion(contexto.getPeriodoNormativo());
+        aviso.setVigencia(autorizacion.getInicioVigencia() + " a " + autorizacion.getFinVigencia());
+        resultado.getAvisos().add(aviso);
+    }
+
+    private boolean autorizacionIndividualVigente(AutorizacionIndividualCurricularV2DTO autorizacion, Date fechaEvaluacion) {
+        if (autorizacion == null || !textoPresente(autorizacion.getReferencia())
+                || !textoPresente(autorizacion.getAutoridad()) || !textoPresente(autorizacion.getUnidadOSupuesto())
+                || !textoPresente(autorizacion.getInicioVigencia()) || !textoPresente(autorizacion.getFinVigencia())) return false;
+        String fecha = new java.text.SimpleDateFormat("yyyy-MM-dd").format(fechaEvaluacion == null ? new Date() : fechaEvaluacion);
+        return autorizacion.getInicioVigencia().compareTo(fecha) <= 0 && autorizacion.getFinVigencia().compareTo(fecha) >= 0;
+    }
+
+    private boolean tieneInscripcionFormalComprobada(ContextoEvaluacionCurricularV2DTO contexto) {
+        for (UnidadEvaluacionCurricularV2DTO unidad : contexto.getUnidades()) {
+            if (unidad == null) continue;
+            for (IntentoAcreditacionUnidadV2DTO intento : unidad.getIntentosAcreditacion()) {
+                if (intento != null && intento.getEstado() != null
+                        && intento.getEstado() != EstadoIntentoAcreditacionV2.NO_DETERMINADO
+                        && intento.getEstado() != EstadoIntentoAcreditacionV2.EXTRAORDINARIO_HISTORICO) return true;
+            }
+        }
+        return false;
     }
 
     private String marcadorComunicado20271(ContextoEvaluacionCurricularV2DTO contexto) {
@@ -4932,6 +4996,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         String valor;
         if ("Q4_UD_B2_SERIADA_CARGA".equals(nombre)) valor = contexto.getParametrosCurriculares().getTratamientoUdB2SeriadaCarga();
         else if ("Q5_RECURSAMIENTO_QUINTO".equals(nombre)) valor = contexto.getParametrosCurriculares().getTratamientoRecursamientoQuinto();
+        else if ("Q5_RECURSAMIENTO_QUINTO_CON_64".equals(nombre)) valor = contexto.getParametrosCurriculares().getTratamientoRecursamientoQuintoCon64();
         else if ("Q6_CERO_SIN_BAJA".equals(nombre)) valor = contexto.getParametrosCurriculares().getTratamientoCeroSinBaja();
         else if ("Q7_OPTATIVAS_FALTANTES_5_A_8".equals(nombre)) valor = contexto.getParametrosCurriculares().getTratamientoOptativasFaltantesQuintoAOcho();
         else if ("Q11_BLOQUE_OPTATIVA_BAJA".equals(nombre)) valor = contexto.getParametrosCurriculares().getTratamientoBloqueOptativaBajaOSustituta();

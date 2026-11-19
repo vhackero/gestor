@@ -18,7 +18,7 @@ public class ConfiguracionEvaluacionCurricularV2ServiceImpl implements Configura
     public static final String CTR01_PERIODO_INICIO = "2027-1";
     public static final Integer CTR01_SEMESTRE_OBJETIVO = Integer.valueOf(5);
     public static final String PERIODO_COMUNICADO_INSTITUCIONAL = "2027-1";
-    public static final String TEXTO_COMUNICADO_INSTITUCIONAL = "Esta simulación aplica las reglas generales. Para el proceso de Inscripción puede aplicar autorizaciones institucionales específicas. La inscripción efectiva puede diferir del resultado que se muestra aquí.";
+    public static final String TEXTO_COMUNICADO_INSTITUCIONAL = "Esta simulación aplica la normativa y reglas generales vigentes. En un proceso de Inscripción efectivo puede aplicar autorizaciones institucionales específicas. La inscripción efectiva puede diferir del resultado que se muestra aquí.";
     public static final String REFERENCIA_COMUNICADO_INSTITUCIONAL = "Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4, secciones A y C";
     public static final String DOCUMENTO_DECISIONES_PENDIENTES = "Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4";
     public static final String VIGENCIA_DECISIONES_PENDIENTES = "2026-11-18";
@@ -48,6 +48,7 @@ public class ConfiguracionEvaluacionCurricularV2ServiceImpl implements Configura
         parametros.setCatalogoOptativas(obtenerPropiedad("V2_CATALOGO_OPTATIVAS", "USTAPREN:1,RECVIRTU:1,PRINVEST:1,PGHRATRS:2,INAVIRTU:2,ANDHUMAN:2,BAIDOCUM:3,BAICAMPO:3,REACADEM:3,INARTIFI:3,PECRITIC:4,HIMEXICO:4,MECMUNDI:4"));
         parametros.setTratamientoCeroSinBaja(obtenerPropiedad("V2_Q6_CERO_SIN_BAJA", "REPROBACION"));
         parametros.setTratamientoRecursamientoQuinto(obtenerPropiedad("V2_Q5_RECURSAMIENTO_QUINTO", "AVANCE_CONDICIONADO"));
+        parametros.setTratamientoRecursamientoQuintoCon64(obtenerPropiedad("V2_Q5_RECURSAMIENTO_QUINTO_CON_64", "REGULARIZACION_64"));
         parametros.setTratamientoOptativasFaltantesQuintoAOcho(obtenerPropiedad("V2_Q7_OPTATIVAS_FALTANTES_5_A_8", "BLOQUEAR"));
         parametros.setTratamientoBloqueOptativaBajaOSustituta(obtenerPropiedad("V2_Q11_BLOQUE_OPTATIVA_BAJA", "AMBOS_BLOQUES"));
         parametros.setTratamientoUdB2SeriadaCarga(obtenerPropiedad("V2_Q4_UD_B2_SERIADA_CARGA", "SOLO_MAX"));

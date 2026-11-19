@@ -9,6 +9,7 @@ import java.util.Date;
 import org.testng.annotations.Test;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoAvisoEvaluacionCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AutorizacionIndividualCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcreditacionV2;
@@ -59,7 +60,7 @@ public class ComunicadosInstitucionales20271Test {
         ParametrosCurricularesV2DTO parametros = new ConfiguracionEvaluacionCurricularV2ServiceImpl()
                 .obtenerConfiguracion().getParametrosCurriculares();
         assertEquals(parametros.getPeriodoComunicadoInstitucional(), "2027-1");
-        assertTrue(parametros.getTextoComunicadoInstitucional().startsWith("Esta simulación aplica las reglas generales."));
+        assertEquals(parametros.getTextoComunicadoInstitucional(), "Esta simulación aplica la normativa y reglas generales vigentes. En un proceso de Inscripción efectivo puede aplicar autorizaciones institucionales específicas. La inscripción efectiva puede diferir del resultado que se muestra aquí.");
         assertNotNull(parametros.getReferenciaComunicadoInstitucional());
         assertNotNull(parametros.getVigenciaComunicadoInstitucional());
     }
@@ -86,13 +87,37 @@ public class ComunicadosInstitucionales20271Test {
         assertAvisoUnico(resultado);
     }
 
-    @Test public void gc19eSupuestosConcurrentesProducenUnSoloAviso() {
+    @Test public void gc19eUnMismoExpedienteNoPuedeTenerMarcadoresC1YC2() {
         ContextoEvaluacionCurricularV2DTO contexto = contexto("2027-1");
         contexto.getUnidades().add(ud(4L, 3));
         contexto.setAdmitido(Boolean.TRUE);
         contexto.setInscripcionInicialRealizada(Boolean.FALSE);
         ResultadoEvaluacionCurricularV2DTO resultado = new EvaluacionCurricularV2ServiceImpl().evaluarSombra(contexto);
+        assertEquals(resultado.getEvaluacionCargaAcademica().getEstadoIncorporacionDiferida(), EstadoIncorporacionDiferidaV2.NO_APLICA);
+        assertTrue(contieneTraza(resultado, "RN62_NO_APLICA_INSCRIPCION_FORMAL"));
         assertAvisoUnico(resultado);
+    }
+
+    @Test public void autorizacionIndividualVigenteSeMuestraSinCambiarLaDecision() {
+        ContextoEvaluacionCurricularV2DTO contexto = contexto("2027-1");
+        contexto.setFechaEvaluacion(fecha("2027-01-15"));
+        contexto.getUnidades().add(ud(41L, 3));
+        AutorizacionIndividualCurricularV2DTO autorizacion = autorizacion("2027-01-01", "2027-01-31");
+        contexto.setAutorizacionIndividual(autorizacion);
+        ResultadoEvaluacionCurricularV2DTO resultado = new EvaluacionCurricularV2ServiceImpl().evaluarSombra(contexto);
+        assertFalse(decision(resultado, 41L).getHabilitada());
+        assertEquals(resultado.getAvisos().size(), 2);
+        assertEquals(resultado.getAvisos().get(1).getCodigo(), CodigoAvisoEvaluacionCurricularV2.AUTORIZACION_INDIVIDUAL_ACREDITADA);
+        assertEquals(resultado.getAvisos().get(1).getReferencia(), "REF-AUT-1");
+    }
+
+    @Test public void autorizacionIndividualVencidaONoInformadaNoSeInfiere() {
+        ContextoEvaluacionCurricularV2DTO vencida = contexto("2027-1");
+        vencida.setFechaEvaluacion(fecha("2027-01-15"));
+        vencida.getUnidades().add(ud(42L, 3));
+        vencida.setAutorizacionIndividual(autorizacion("2026-12-01", "2026-12-31"));
+        assertAvisoUnico(new EvaluacionCurricularV2ServiceImpl().evaluarSombra(vencida));
+        assertAvisoUnico(evaluar("2027-1", ud(43L, 3)));
     }
 
     @Test public void gc19fSinRestriccionNoMuestraAviso() {
@@ -137,6 +162,21 @@ public class ComunicadosInstitucionales20271Test {
         parametros.setVigenciaComunicadoInstitucional("2027-1");
         contexto.setParametrosCurriculares(parametros);
         return contexto;
+    }
+
+    private AutorizacionIndividualCurricularV2DTO autorizacion(String inicio, String fin) {
+        AutorizacionIndividualCurricularV2DTO autorizacion = new AutorizacionIndividualCurricularV2DTO();
+        autorizacion.setReferencia("REF-AUT-1");
+        autorizacion.setAutoridad("Autoridad institucional");
+        autorizacion.setUnidadOSupuesto("C1");
+        autorizacion.setInicioVigencia(inicio);
+        autorizacion.setFinVigencia(fin);
+        return autorizacion;
+    }
+
+    private Date fecha(String valor) {
+        try { return new java.text.SimpleDateFormat("yyyy-MM-dd").parse(valor); }
+        catch (java.text.ParseException e) { throw new AssertionError(e); }
     }
 
     private UnidadEvaluacionCurricularV2DTO ud(Long id, int fallidos) {
