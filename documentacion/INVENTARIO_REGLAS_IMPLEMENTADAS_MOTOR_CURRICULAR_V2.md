@@ -56,12 +56,12 @@
 
 | Pregunta | Propiedad JVM | Predeterminado vigente | Alternativas probadas | Documento/vigencia |
 | --- | --- | --- | --- | --- |
-| Q6 cero sin baja | `V2_Q6_CERO_SIN_BAJA` | `REPROBACION` | `EXCLUIR_PERIODO_COMPLETO_EN_CERO`, `REVISION` | `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4` / 2026-11-18 |
-| Q5 recursamiento de quinto | `V2_Q5_RECURSAMIENTO_QUINTO` | `AVANCE_CONDICIONADO` | `REGULARIZACION` | `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4` / 2026-11-18 |
+| Q6 cero sin baja | `V2_Q6_CERO_SIN_BAJA` | `REPROBACION` | `EXCLUIR_PERIODO_COMPLETO_EN_CERO`, `REVISION` | `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v5` / 2026-11-18 |
+| Q5 recursamiento de quinto | `V2_Q5_RECURSAMIENTO_QUINTO` | `AVANCE_CONDICIONADO` | `REGULARIZACION` | `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v5` / 2026-11-18 |
 | Q5 recursamiento de quinto con RN-6.4 | `V2_Q5_RECURSAMIENTO_QUINTO_CON_64` | `REGULARIZACION_64` | `AVANCE_CONDICIONADO_NO_PROCEDE` | `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v5` / 2026-11-18 |
-| Q7 optativas faltantes 5.º-8.º | `V2_Q7_OPTATIVAS_FALTANTES_5_A_8` | `BLOQUEAR` | `PERMITIR_TRAS_PENDIENTES` | `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4` / 2026-11-18 |
-| Q11 bloque de baja/sustituta | `V2_Q11_BLOQUE_OPTATIVA_BAJA` | `AMBOS_BLOQUES` | `BLOQUE_ORIGINAL` | `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4` / 2026-11-18 |
-| Q4 B2 seriada en carga | `V2_Q4_UD_B2_SERIADA_CARGA` | `SOLO_MAX` | `CUENTA_MIN_Y_MAX` | `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4` / 2026-11-18 |
+| Q7 optativas faltantes 5.º-8.º | `V2_Q7_OPTATIVAS_FALTANTES_5_A_8` | `BLOQUEAR` | `PERMITIR_TRAS_PENDIENTES` | `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v5` / 2026-11-18 |
+| Q11 bloque de baja/sustituta | `V2_Q11_BLOQUE_OPTATIVA_BAJA` | `AMBOS_BLOQUES` | `BLOQUE_ORIGINAL` | `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v5` / 2026-11-18 |
+| Q4 B2 seriada en carga | `V2_Q4_UD_B2_SERIADA_CARGA` | `SOLO_MAX` | `CUENTA_MIN_Y_MAX` | `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v5` / 2026-11-18 |
 
 Los parámetros incluyen ámbito `PE2024/2027`, documento de respaldo y vigencia en `ParametrosCurricularesV2DTO`. La carga de una opción alternativa no abandona modo sombra.
 
@@ -75,7 +75,7 @@ Los parámetros incluyen ámbito `PE2024/2027`, documento de respaldo y vigencia
 | Marcador | `AUTORIZACION_INSTITUCIONAL_POSIBLE_2027_1` | Trazabilidad de que puede existir autorización externa; no concede ni registra una autorización. |
 | Periodo | `V2_COMUNICADO_INSTITUCIONAL_PERIODO` | Predeterminado `2027-1`. |
 | Texto | `V2_COMUNICADO_INSTITUCIONAL_TEXTO` | Comunicado visible en resultados de consulta. |
-| Referencia | `V2_COMUNICADO_INSTITUCIONAL_REFERENCIA` | `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v4, secciones A y C`. |
+| Referencia | `V2_COMUNICADO_INSTITUCIONAL_REFERENCIA` | `Decisiones_institucionales_motor_v2_RN_PE2024_2027.md v5, secciones A y C`. |
 | Vigencia | `V2_COMUNICADO_INSTITUCIONAL_VIGENCIA` | Predeterminado `2027-1`. |
 
 ## Q8: evidencia de `contabilizar`

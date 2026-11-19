@@ -26,13 +26,13 @@ Se aplicaron las precisiones del documento `Codex_INSTRUCCIONES_bloque5c_precisi
 
 ## Q6: sensibilidad de calificación cero sin baja
 
-Población: estudiantes distintos de los planes PE2024 `3, 4, 5, 6, 7 y 11`, base de pruebas, corte previo documentado en `RESULTADO_ENTREGA_2TER_BLOQUE5_RN20261117.md`.
+Corte de consulta: `2026-11-18 23:17:20` (base de pruebas). El universo exacto es de **20,434 estudiantes distintos** con al menos una participación asociada a los planes PE2024 `3, 4, 5, 6, 7 y 11`; no se incluyen identificadores personales en la salida. La consulta usa el mismo grano `persona + UD + periodo` definido en `C20_HISTORIAL_RN20261117_SOLO_LECTURA.sql`.
 
-| Escenario SQL | Estudiantes con 4 o más adeudos | Porcentaje sobre el escenario `REPROBACION` |
-| --- | ---: | ---: |
-| `REPROBACION`: cuenta 1–59 y 0 sin baja aplicada | 8,653 | 100.00 % |
-| `EXCLUIR_PERIODO_COMPLETO_EN_CERO`: excluye un periodo si todas sus UD calificadas son 0 sin baja aplicada | 5,585 | 64.55 % |
-| `REVISION`: excluye todo 0 sin baja aplicada del cómputo automático | 1,367 | 15.80 % |
+| Escenario SQL | Definición aplicada por la consulta | Estudiantes con 4 o más adeudos | % sobre población total | Relativo al escenario `REPROBACION` |
+| --- | --- | ---: | ---: | ---: |
+| `REPROBACION` | Cuenta como reprobación toda calificación `0..59` sin baja aplicada, incluido `0` sin baja. | 8,653 | 42.35 % | 100.00 % |
+| `EXCLUIR_PERIODO_COMPLETO_EN_CERO` | Excluye del cómputo las reprobaciones del periodo cuando todas las UD de la persona en ese periodo están en `0` sin baja aplicada. | 5,585 | 27.33 % | 64.55 % |
+| `REVISION` | Excluye del cómputo automático cada resultado `0` sin baja aplicada; esos resultados requieren definición institucional. | 1,367 | 6.69 % | 15.80 % |
 
 Los escenarios son sensibilidad de datos, no una decisión normativa. El valor por omisión sigue siendo `REPROBACION` hasta determinación institucional.
 
@@ -46,6 +46,15 @@ Los registros sin `contabilizar=1` quedan en revisión y no excluyen un intento.
 
 `mvn -Dtest=ComunicadosInstitucionales20271Test,PreparacionDecisionesPendientesV2Test test`
 
-Resultado: 22 pruebas, 0 fallas, 0 errores, 0 omitidas.
+| Prueba | Resultado |
+| --- | --- |
+| `autorizacionIndividualVigenteSeMuestraSinCambiarLaDecision` | Exitosa: emite el aviso acreditado sin alterar la decisión en sombra. |
+| `autorizacionIndividualVencidaNoSeMuestra` | Exitosa: no infiere autorización fuera de vigencia. |
+| `autorizacionIndividualAusenteNoSeInfiere` | Exitosa: no infiere autorización si falta el registro. |
+| `gc19cFueraDe20271ConservaRestriccionSinComunicado` | Exitosa: para `2027-2`, sin nota ni marcador, conserva la restricción y no emite el comunicado. |
 
-Regresión completa `basegestor`: 812 pruebas, 0 fallas, 0 errores, 0 omitidas.
+Resultado focalizado: **23 pruebas, 0 fallas, 0 errores, 0 omitidas**.
+
+Regresión completa `basegestor`: **813 pruebas, 0 fallas, 0 errores, 0 omitidas**.
+
+Regresión completa `gestorWeb`: **40 pruebas, 0 fallas, 0 errores, 0 omitidas**.

@@ -111,12 +111,15 @@ public class ComunicadosInstitucionales20271Test {
         assertEquals(resultado.getAvisos().get(1).getReferencia(), "REF-AUT-1");
     }
 
-    @Test public void autorizacionIndividualVencidaONoInformadaNoSeInfiere() {
+    @Test public void autorizacionIndividualVencidaNoSeMuestra() {
         ContextoEvaluacionCurricularV2DTO vencida = contexto("2027-1");
         vencida.setFechaEvaluacion(fecha("2027-01-15"));
         vencida.getUnidades().add(ud(42L, 3));
         vencida.setAutorizacionIndividual(autorizacion("2026-12-01", "2026-12-31"));
         assertAvisoUnico(new EvaluacionCurricularV2ServiceImpl().evaluarSombra(vencida));
+    }
+
+    @Test public void autorizacionIndividualAusenteNoSeInfiere() {
         assertAvisoUnico(evaluar("2027-1", ud(43L, 3)));
     }
 
