@@ -46,7 +46,7 @@
 | --- | --- |
 | Artefacto | `codigoFuente/gestorWeb/target/plataforma.war` |
 | Tamaño | `82,750,278` bytes |
-| SHA-256 | `1418b406b00669bf201b2911b9a67f07a0ba9cba3a5db3f48b2e0de28b7f9323` |
+| SHA-256 | `25126b850882e71a7571d13e10e4a53019daf0960ed916d6a9077e97e49e287a` |
 | Despliegue | Pendiente de Abel; esta entrega no despliega ni usa expedientes identificables. |
 
 Para la validación de Abel: desplegar el WAR, mantener `REGLAS_V2_MODO_SOMBRA=true`, verificar GC-17/GC-18/GC-19 en escritorio y móvil, y capturar sin datos personales: oportunidades/recursamientos, NULL con acta cerrada, interbloque pendiente, recursamiento de quinto y aviso de excepción configurada. Las capturas deben ocultar matrícula, nombre, CURP y correo.
