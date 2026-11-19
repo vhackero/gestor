@@ -44,6 +44,21 @@ public class PreparacionDecisionesPendientesV2Test {
         assertEquals(resultadoVigente.getEvaluacionCargaMaxima().getCargaActualEvaluada(), Integer.valueOf(1));
     }
 
+    @Test public void rn43AjusteYConfirmacionPosteriorNoExcedenMaximo() {
+        ContextoEvaluacionCurricularV2DTO ajuste = contexto();
+        ajuste.getParametrosCurriculares().setCargaMaxRegular(Integer.valueOf(3));
+        for (long id = 1L; id <= 3L; id++) {
+            UnidadEvaluacionCurricularV2DTO u = obligatoria(id, 2, "B" + id, EstadoUnidadCurricularV2.NO_CURSADA);
+            ajuste.getUnidades().add(u); ajuste.getIdsUnidadesPretendidas().add(Long.valueOf(id));
+        }
+        ResultadoEvaluacionCurricularV2DTO antes = service.evaluarSombra(ajuste);
+        ResultadoEvaluacionCurricularV2DTO despues = service.evaluarSombra(ajuste);
+        assertEquals(antes.getEvaluacionCargaMaxima().getCargaActualEvaluada(), Integer.valueOf(3));
+        assertEquals(despues.getEvaluacionCargaMaxima().getCargaActualEvaluada(), Integer.valueOf(3));
+        assertTrue(despues.getEvaluacionCargaMaxima().getCargaActualEvaluada().intValue()
+                <= despues.getEvaluacionCargaMaxima().getCargaMaximaNormativa().intValue());
+    }
+
     @Test public void q5RecursamientoDeQuintoPuedePrepararseComoRutaRegularizacion() {
         ContextoEvaluacionCurricularV2DTO actual = contextoQuinto();
         assertTrue(service.evaluarSombra(actual).getEvaluacionCargaAcademica().getImpedimentosAvanceRn615().contains("Q5_RECURSAMIENTO_QUINTO_REGULARIZACION"));

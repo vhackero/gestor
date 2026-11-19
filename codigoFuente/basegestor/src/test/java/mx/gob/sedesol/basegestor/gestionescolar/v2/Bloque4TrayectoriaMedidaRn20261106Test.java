@@ -64,6 +64,16 @@ public class Bloque4TrayectoriaMedidaRn20261106Test {
         assertFalse(r.getEvaluacionCargaAcademica().getEstadoResolucionAvance() == EstadoResolucionAvanceV2.NO_PROCEDE_AVANCE_CONDICIONADO);
     }
 
+    @Test public void gc13MedidaRevocadaNoConservaRestriccionVigente() {
+        ContextoEvaluacionCurricularV2DTO c = avanceQuinto();
+        c.setFechaEvaluacion(java.sql.Date.valueOf("2026-06-15"));
+        // La fuente canónica representa una revocación al no mantener la medida como registrada.
+        c.setMedidaAdministrativaRegistrada(Boolean.FALSE);
+        ResultadoEvaluacionCurricularV2DTO r = servicio.evaluarSombra(c);
+        assertFalse(r.getRestricciones().contains(CodigoMotivoCurricularV2.MEDIDA_ADMINISTRATIVA_VIGENTE));
+        assertFalse(r.getRestricciones().contains(CodigoMotivoCurricularV2.MEDIDA_ADMINISTRATIVA_SIN_VIGENCIA));
+    }
+
     private ContextoEvaluacionCurricularV2DTO bajaTemporal(int acumuladas) {
         ContextoEvaluacionCurricularV2DTO c = new ContextoEvaluacionCurricularV2DTO();
         c.setBajaTemporalFormalComprobada(Boolean.TRUE); c.setBajaTemporalConcluida(Boolean.TRUE); c.setHaCursadoUnoOMasPeriodos(Boolean.TRUE);
