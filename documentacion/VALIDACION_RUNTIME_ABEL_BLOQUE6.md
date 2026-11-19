@@ -5,7 +5,7 @@
 | Dato | Valor |
 | --- | --- |
 | Rama | `feature/desacople_motor_historico` |
-| Commit de código y WAR | `0b903611` |
+| Commit de código y WAR | `ec2a3c09` |
 | WAR | `codigoFuente/gestorWeb/target/plataforma.war` |
 | Tamaño | `82,750,278` bytes |
 | SHA-256 | `9af687c130729018cadb3355e054634b86c55954732bc9fa4ea4898ac2526236` |

@@ -9,14 +9,14 @@
 | SHA-256 | `e93a476672d72ba5320ee3e26f14a15a11328951f8ded803290c58ff2e1322aa` |
 | Versión configurada | `RN-PE2024-2027-act-20261119` |
 | Modo | Sombra; sin escrituras en Inscripción, bajas, grupos, oferta ni calificaciones. |
-| Commit de código y WAR | `0b903611` |
+| Commit de código y WAR | `ec2a3c09` |
 
 ## Cambios aplicados
 
 | Criterio | Implementación | Evidencia |
 | --- | --- | --- |
 | 1.4 | El resultado por UD separa oportunidades consumidas, disponibles y `recursamientos`; una baja aplicada no consume oportunidad. | `Bloque6Rn20261119Test` |
-| 2.2 | El adaptador cruza participación, grupo, acta, calificación y baja aplicada por persona/grupo. Un `NULL` queda en curso sólo si el acta está abierta y el periodo oficial sigue vigente; con acta cerrada o periodo concluido queda en revisión. Una baja con calificación 1-59 o >=60 queda en revisión. | `Bloque2HistorialOportunidadesRn20261106Test`, `PreparacionDecisionesPendientesV2Test#g1G2ActaAbiertaConPeriodoConcluidoQuedaEnRevisionYPeriodoVigenteSigueEnCurso` |
+| 2.2 | El adaptador cruza participación, grupo, acta, calificación y baja aplicada por persona/grupo. Un `NULL` con acta abierta queda en curso; con acta cerrada queda en revisión. La fecha de fin académica se conserva para el diagnóstico G1/G2 y no sustituye el cierre del acta. Una baja con calificación 1-59 o >=60 queda en revisión. | `Bloque2HistorialOportunidadesRn20261106Test`, `PreparacionDecisionesPendientesV2Test#g1G2ActaAbiertaConservaEnCursoAunqueTermineElEventoHastaQueCierreElActa` |
 | 2.3 | Se incorporó el contrato de lectura `ExcepcionInstitucionalCurricularV2DTO`; conserva la restricción y agrega aviso trazable cuando la excepción vigente y aplicable está disponible. | Contrato y evaluación V2; la fuente SIGIE queda pendiente. |
 | 4.3 | La B2 pendiente por seriación cuenta una sola vez para mínimo y máximo de la carga inicial. | `PreparacionDecisionesPendientesV2Test` |
 | 6.1.5 | El recursamiento de quinto se trata como regularización, incluso con RN-6.4; se retiró el marcador de definición pendiente Q5. | `PreparacionDecisionesPendientesV2Test` |
@@ -49,20 +49,27 @@ JOIN tbl_eventos e ON e.id_evento = g.id_evento
 JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa
 JOIN tbl_periodos_inscripcion pi
   ON SUBSTRING_INDEX(e.cve_evento_cap, '-', -2) = pi.nombre_periodo
+JOIN (
+  SELECT fd2.id_plan, SUBSTRING_INDEX(e2.cve_evento_cap, '-', -2) AS periodo,
+         MAX(e2.fecha_final) AS fecha_fin_academica
+  FROM tbl_eventos e2
+  JOIN tbl_ficha_descriptiva_programa fd2 ON fd2.id_programa = e2.id_programa
+  GROUP BY fd2.id_plan, SUBSTRING_INDEX(e2.cve_evento_cap, '-', -2)
+) cierre ON cierre.id_plan = fd.id_plan AND cierre.periodo = pi.nombre_periodo
 WHERE fd.id_plan IN (3,4,5,6,7,11)
   AND pi.nombre_periodo BETWEEN '2024-1' AND '2026-2'
-  AND pi.fecha_finalizacion < CURDATE()
+  AND cierre.fecha_fin_academica < CURDATE()
   AND COALESCE(g.acta_cerrada,0) = 0
 GROUP BY fd.id_plan, pi.nombre_periodo;
 ```
 
 | Periodo | Grupos con acta abierta | Participaciones | NULL | 0 | 1-59 | >=60 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 2026-2, seis PE2024 | 423 | 34,391 | 34,391 | 0 | 0 | 0 |
+| Periodos académicamente concluidos, seis PE2024 | 0 | 0 | 0 | 0 | 0 | 0 |
 
-Con el criterio anterior, las 34,391 participaciones se clasificaban como `EN_CURSO`. No hay ceros en este conjunto que dejen de ser reprobación. La cantidad no es despreciable; se adoptó el criterio combinado G1/G2: `EN_CURSO` sólo con acta abierta y periodo oficial vigente. Con acta cerrada **o** periodo concluido y calificación `NULL`, el resultado es `NO_DETERMINADO` y requiere revisión.
+`tbl_periodos_inscripcion` no puede ser el cierre académico: para 2026-2 termina el `2026-07-17`, mientras los eventos académicos del mismo periodo terminan hasta `2026-12-06`. Por eso las 34,391 participaciones de 2026-2 con acta abierta y `NULL` no pertenecen a un periodo académico concluido al corte; siguen `EN_CURSO` conforme G1. Usar la ventana administrativa las habría convertido incorrectamente en revisión.
 
-La fuente de cierre común es `tbl_periodos_inscripcion.fecha_finalizacion`, unida por coincidencia exacta de `SUBSTRING_INDEX(e.cve_evento_cap,'-',-2)` con `nombre_periodo`; no se usa `LIKE`. La validación detectó `0` eventos con más de un periodo coincidente. Para 2026-1 los eventos terminan entre `2026-03-22` y `2026-06-14`; para 2026-2, entre `2026-09-13` y `2026-12-06`, según plan. La fecha de evento se conserva como evidencia, no como criterio de cierre curricular.
+El adaptador toma el cierre académico agregado por `plan + periodo` como `MAX(tbl_eventos.fecha_final)`, unido al periodo por coincidencia exacta de `SUBSTRING_INDEX(e.cve_evento_cap,'-',-2)` con `nombre_periodo`; no se usa `LIKE`. La validación detectó `0` eventos con más de un periodo coincidente. Para 2026-1 los eventos terminan entre `2026-03-22` y `2026-06-14`; para 2026-2, entre `2026-09-13` y `2026-12-06`, según plan. Al corte, ningún periodo académicamente concluido conserva acta abierta en el universo consultado, por lo que no procede cambiar G1/G2 ni proponer el criterio combinado.
 
 ## Parámetros fijados por RN
 
@@ -85,7 +92,7 @@ La matriz v6 con las columnas de implementación y evidencia, incluidas las preg
 | Prueba | Criterio acreditado |
 | --- | --- |
 | `Bloque6Rn20261119Test#rn22CuatroAdeudosConfirmadosNoSeAnulanPorUnResultadoEnRevision` | Cuatro adeudos confirmados activan RN-6.4 aunque otra UD quede en revisión. |
-| `PreparacionDecisionesPendientesV2Test#g1G2ActaAbiertaConPeriodoConcluidoQuedaEnRevisionYPeriodoVigenteSigueEnCurso` | NULL en periodo concluido con acta abierta queda en revisión; con periodo vigente queda en curso. |
+| `PreparacionDecisionesPendientesV2Test#g1G2ActaAbiertaConservaEnCursoAunqueTermineElEventoHastaQueCierreElActa` | NULL con acta abierta permanece en curso; la fecha académica se mide, pero no sustituye el cierre del acta. |
 | `PreparacionDecisionesPendientesV2Test#rn43B2PendienteCuentaSiempreEnMinimoYMaximo` | La B2 pendiente cuenta una sola vez para mínimo y máximo de la carga inicial. |
 | `Bloque4TrayectoriaMedidaRn20261106Test#gc13MedidaVencidaNoImpideAvanceCondicionado` | Medida vencida se retira al reevaluar; no se conserva como bloqueo. |
 | `Bloque3OfertaYPreseleccionRn20261106Test#c10IncluyeNuncaInscritaYBajaParcialEnOmitidasDeQuinto` | Una pendiente por baja entra al análisis RN-6.1 y no se convierte en reprobación. |
