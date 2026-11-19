@@ -14,6 +14,8 @@ public class EvaluacionIntentosUnidadV2DTO implements Serializable {
     private Integer intentosAcreditados = Integer.valueOf(0);
     /** Recursamientos = inscripciones computables posteriores a la primera. */
     private Integer recursamientos = Integer.valueOf(0);
+    /** RN-7.1.1: movimientos de sustitución formal del mismo adeudo. */
+    private Integer sustitucionesUtilizadas;
     private Integer oportunidadesConsumidas;
     private Integer oportunidadesDisponibles;
     /** RN-1.4: intentos cuya identidad, UD y periodo quedaron verificados. */
@@ -42,6 +44,8 @@ public class EvaluacionIntentosUnidadV2DTO implements Serializable {
     public void setIntentosAcreditados(Integer valor) { intentosAcreditados = valor; }
     public Integer getRecursamientos() { return recursamientos; }
     public void setRecursamientos(Integer valor) { recursamientos = valor; }
+    public Integer getSustitucionesUtilizadas() { return sustitucionesUtilizadas; }
+    public void setSustitucionesUtilizadas(Integer valor) { sustitucionesUtilizadas = valor; }
     public Integer getOportunidadesConsumidas() { return oportunidadesConsumidas; }
     public void setOportunidadesConsumidas(Integer valor) { oportunidadesConsumidas = valor; }
     public Integer getOportunidadesDisponibles() { return oportunidadesDisponibles; }

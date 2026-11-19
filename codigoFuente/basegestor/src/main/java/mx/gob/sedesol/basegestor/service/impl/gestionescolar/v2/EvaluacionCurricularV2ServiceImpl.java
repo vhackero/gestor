@@ -1330,6 +1330,9 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                 + (enCurso ? 1 : 0)));
         evaluacion.setRecursamientos(Integer.valueOf(Math.max(0,
                 evaluacion.getIntentosConfirmados().intValue() - 1)));
+        // La fuente de sustituciones debe entregar movimientos formales; un recursamiento
+        // de la misma sustituta no incrementa este contador.
+        evaluacion.setSustitucionesUtilizadas(unidad.getSustitucionesUtilizadas());
         int limiteOportunidades = contexto.getParametrosCurriculares() == null
                 || contexto.getParametrosCurriculares().getOportunidadesPorUd() == null ? 3
                 : contexto.getParametrosCurriculares().getOportunidadesPorUd().intValue();

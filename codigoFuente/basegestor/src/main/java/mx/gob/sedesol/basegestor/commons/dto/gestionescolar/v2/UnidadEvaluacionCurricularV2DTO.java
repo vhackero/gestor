@@ -22,6 +22,8 @@ public class UnidadEvaluacionCurricularV2DTO implements Serializable {
  private Long idPlanOrigenElectiva;
  /** Adeudo de optativa adicional trasladado desde esta UD; opcional y sólo de lectura. */
  private Long idAdeudoOptativaOriginal;
+ /** Movimientos formales de sustitución informados por la fuente institucional. */
+ private Integer sustitucionesUtilizadas;
  private List<RelacionSeriacionCurricularV2DTO> relacionesSeriacion = new ArrayList<RelacionSeriacionCurricularV2DTO>();
  private Integer intentos; private Integer intentosFallidosHistoricosConfiables; private Boolean reprobacionVigenteConocida; private Boolean reprobacionPeriodoPrevioConocida;
  private Boolean preseleccionada=Boolean.FALSE; private Integer ordenPreseleccion; private Boolean desmarcable=Boolean.TRUE;
@@ -42,5 +44,6 @@ public class UnidadEvaluacionCurricularV2DTO implements Serializable {
  public Integer getOrdenAcreditacionOptativa(){return ordenAcreditacionOptativa;} public void setOrdenAcreditacionOptativa(Integer v){ordenAcreditacionOptativa=v;}
  public Long getIdPlanOrigenElectiva(){return idPlanOrigenElectiva;} public void setIdPlanOrigenElectiva(Long v){idPlanOrigenElectiva=v;}
  public Long getIdAdeudoOptativaOriginal(){return idAdeudoOptativaOriginal;} public void setIdAdeudoOptativaOriginal(Long v){idAdeudoOptativaOriginal=v;}
+ public Integer getSustitucionesUtilizadas(){return sustitucionesUtilizadas;} public void setSustitucionesUtilizadas(Integer v){sustitucionesUtilizadas=v;}
  public List<RelacionSeriacionCurricularV2DTO> getRelacionesSeriacion(){return relacionesSeriacion;} public void setRelacionesSeriacion(List<RelacionSeriacionCurricularV2DTO> v){relacionesSeriacion=v==null?new ArrayList<RelacionSeriacionCurricularV2DTO>():v;}
 }

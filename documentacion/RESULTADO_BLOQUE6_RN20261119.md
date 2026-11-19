@@ -14,12 +14,12 @@
 
 | Criterio | Implementación | Evidencia |
 | --- | --- | --- |
-| 1.4 | El resultado por UD separa oportunidades consumidas, disponibles y `recursamientos`; una baja aplicada no consume oportunidad. | `PreparacionDecisionesPendientesV2Test` |
+| 1.4 | El resultado por UD separa oportunidades consumidas, disponibles y `recursamientos`; una baja aplicada no consume oportunidad. | `Bloque6Rn20261119Test` |
 | 2.2 | El adaptador cruza participación, grupo, acta, calificación y baja aplicada por persona/grupo. Acta cerrada con NULL queda en revisión; acta abierta con NULL queda en curso; baja con calificación 1-59 o >=60 queda en revisión. | `Bloque2HistorialOportunidadesRn20261106Test` |
 | 2.3 | Se incorporó el contrato de lectura `ExcepcionInstitucionalCurricularV2DTO`; conserva la restricción y agrega aviso trazable cuando la excepción vigente y aplicable está disponible. | Contrato y evaluación V2; la fuente SIGIE queda pendiente. |
 | 4.3 | La B2 pendiente por seriación cuenta una sola vez para mínimo y máximo de la carga inicial. | `PreparacionDecisionesPendientesV2Test` |
 | 6.1.5 | El recursamiento de quinto se trata como regularización, incluso con RN-6.4; se retiró el marcador de definición pendiente Q5. | `PreparacionDecisionesPendientesV2Test` |
-| 7.1 / 7.1.1 | Con 1 a 3 adeudos y referencia >=5 se permiten requeridas faltantes después de prioridad; el bloque se toma de la oferta autorizada. | `Bloque3OfertaYPreseleccionRn20261106Test` |
+| 7.1 / 7.1.1 | Con 1 a 3 adeudos y referencia >=5 se permiten requeridas faltantes después de prioridad; el bloque se toma de la oferta autorizada. El contrato ya expone `sustitucionesUtilizadas` si la fuente lo acredita. | `Bloque3OfertaYPreseleccionRn20261106Test`, `Bloque6Rn20261119Test` |
 | 8.1 | Se retiró `PENDIENTE_DE_CONFIRMACION`: una antecedente en revisión conserva la consecuente `PENDIENTE_POR_SERIACION` fuera de carga confirmada. | `EvaluacionCurricularV2Fase8ATest` |
 | 6.7 | El enlace de bajas conserva como condición `contabilizar=1`, persona, grupo y periodo; una solicitud sin esa evidencia queda en revisión. | `InscripcionRepository` y pruebas históricas. |
 
@@ -36,7 +36,7 @@
 
 | Módulo | Comando | Resultado |
 | --- | --- | --- |
-| Basegestor | `mvn -q -f codigoFuente/basegestor/pom.xml test` | 813 pruebas; 0 fallas, 0 errores, 0 omitidas. |
+| Basegestor | `mvn -q -f codigoFuente/basegestor/pom.xml test` | 816 pruebas; 0 fallas, 0 errores, 0 omitidas. |
 | GestorWeb | `mvn -q -f codigoFuente/gestorWeb/pom.xml test` | 41 pruebas; 0 fallas, 0 errores, 0 omitidas. |
 | WAR | `mvn -q -f codigoFuente/gestorWeb/pom.xml -DskipTests package` | `SUCCESS` |
 
