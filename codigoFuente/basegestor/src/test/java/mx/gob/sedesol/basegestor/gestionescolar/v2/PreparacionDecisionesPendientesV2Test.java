@@ -113,6 +113,15 @@ public class PreparacionDecisionesPendientesV2Test {
         assertEquals(cerrado.getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
     }
 
+    @Test public void g1G2ActaAbiertaConPeriodoConcluidoQuedaEnRevisionYPeriodoVigenteSigueEnCurso() throws Exception {
+        Date ahora = new Date();
+        IntentoAcreditacionUnidadV2DTO periodoConcluido = mapearIntento(null, Integer.valueOf(0), new Date(ahora.getTime() - 86400000L));
+        IntentoAcreditacionUnidadV2DTO periodoVigente = mapearIntento(null, Integer.valueOf(0), new Date(ahora.getTime() + 86400000L));
+        assertEquals(periodoConcluido.getEstado(), EstadoIntentoAcreditacionV2.NO_DETERMINADO);
+        assertTrue(periodoConcluido.getEvidenciaFuente().contains("PERIODO_CONCLUIDO"));
+        assertEquals(periodoVigente.getEstado(), EstadoIntentoAcreditacionV2.EN_CURSO);
+    }
+
     @Test public void pendienteCalificacionCuentaComoUltimaOportunidadEnCurso() {
         ContextoEvaluacionCurricularV2DTO contexto = contexto();
         UnidadEvaluacionCurricularV2DTO unidad = obligatoria(71L, 3, "B1", EstadoUnidadCurricularV2.REPROBADA);

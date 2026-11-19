@@ -85,7 +85,8 @@ public class Bloque2HistorialOportunidadesRn20261106Test {
         assertFalse(sql.contains("LIKE CONCAT('%',pi.nombre_periodo,'%')"));
         assertTrue(sql.contains("MIN(rgp.id) AS id_participacion_v2"));
         assertTrue(sql.contains("fecha_fin_periodo_v2"));
-        assertTrue(sql.contains("MAX(e_cal.fecha_final) AS fecha_final_periodo"));
+        assertTrue(sql.contains("MAX(pi.fecha_finalizacion) AS fecha_fin_periodo_v2"));
+        assertFalse(sql.contains("MAX(e_cal.fecha_final) AS fecha_final_periodo"));
         assertTrue(sql.contains("calificacion_conflictiva_v2"));
         assertTrue(sql.contains("baja_sin_confirmar_v2"));
     }
