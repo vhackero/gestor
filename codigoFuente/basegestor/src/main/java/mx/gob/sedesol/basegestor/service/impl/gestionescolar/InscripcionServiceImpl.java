@@ -484,6 +484,11 @@ private static final Logger logger = Logger.getLogger(InscripcionServiceImpl.cla
 	}
 
 	@Override
+	public Boolean procesoVigenteParaInscripcion(Long proceso, Long plan, Long convocatoria, Date fecha, boolean bloquear) {
+		return inscripcionesRepository.procesoVigenteParaInscripcion(proceso, plan, convocatoria, fecha, bloquear);
+	}
+
+	@Override
 	public List<AprobacionAsignaturasPorSemestreDTO> obtenerAprobacionAsignaturasPorSemestre(Long idPlan,
 			Long idPersona) {
 		return inscripcionesRepository.obtenerAprobacionAsignaturasPorSemestre(idPlan, idPersona);

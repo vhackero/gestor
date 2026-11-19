@@ -102,7 +102,7 @@ public class InscripcionManualBean extends BaseBean {
 
 	public void finalizarInscripcion() {
 		try {
-			inscripcionFacade.finalizarInscripcion(aceptaTerminos, contextoInscripcion);
+			inscripcionFacade.finalizarInscripcionManual(aceptaTerminos, contextoInscripcion);
             String avisoOmisiones = contextoInscripcion.getMensajeOmisionReinscripcion();
             if (avisoOmisiones == null) avisoOmisiones = "";
             else avisoOmisiones = " " + avisoOmisiones;

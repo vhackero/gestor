@@ -117,6 +117,8 @@ public interface InscripcionService {
 	Optional<EstadoInscripcionEstudianteDTO> obtenerEstadoInscripcionEstudiante(Long idPersona,
 			Long idProcesoInscripcion, Long idPlan);
 
+	Boolean procesoVigenteParaInscripcion(Long proceso, Long plan, Long convocatoria, Date fecha, boolean bloquear);
+
 	List<AprobacionAsignaturasPorSemestreDTO> obtenerAprobacionAsignaturasPorSemestre(Long idPlan, Long idPersona);
 
 	List<MallaAlumnoProgramaDTO> obtenerProgramasMallaAlumno(Long idPersona, Long idPlan);

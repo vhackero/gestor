@@ -12,6 +12,25 @@ public class ConfiguracionCargaRegularDTO implements Serializable {
 	private String descripcionRegla;
 	private Boolean activa;
 	private Boolean restringirAvanceAnual;
+	private String semestreAplicacionAvanceAnual;
+	public String getSemestreAplicacionAvanceAnual() { return semestreAplicacionAvanceAnual; }
+	public void setSemestreAplicacionAvanceAnual(String valor) { semestreAplicacionAvanceAnual = valor; }
+	public java.util.Set<Integer> getSemestresAplicacionAvanceAnual() {
+		String mensaje = "Indica uno o más valores numéricos positivos separados por comas para el avance anual.";
+		if (semestreAplicacionAvanceAnual == null || semestreAplicacionAvanceAnual.trim().isEmpty()
+				|| semestreAplicacionAvanceAnual.length() > 1000) throw new IllegalArgumentException(mensaje);
+		java.util.Set<Integer> valores = new java.util.LinkedHashSet<>();
+		for (String parte : semestreAplicacionAvanceAnual.split(",", -1)) {
+			String valor = parte.trim();
+			if (!valor.matches("[0-9]+")) throw new IllegalArgumentException(mensaje);
+			try {
+				int numero = Integer.parseInt(valor);
+				if (numero < 1) throw new IllegalArgumentException(mensaje);
+				valores.add(numero);
+			} catch (NumberFormatException e) { throw new IllegalArgumentException(mensaje, e); }
+		}
+		return java.util.Collections.unmodifiableSet(valores);
+	}
 	private Boolean permitirSemestreAdyacente;
 	private Integer minimoObligatorias;
 	private Integer maximoElectivasPorPeriodo;

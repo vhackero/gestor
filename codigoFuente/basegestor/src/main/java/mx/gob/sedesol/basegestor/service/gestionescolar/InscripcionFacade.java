@@ -20,6 +20,8 @@ public interface InscripcionFacade {
 	void validarPropuestaInscripcion(Long idPersona, List<Long> idsProgramas) throws InscripcionException;
 	void validarSeleccionMateria(InscripcionMateriasDTO materiaSeleccionada, InscripcionContextoDTO contexto) throws InscripcionException;
 	void finalizarInscripcion(Boolean aceptaTerminos, InscripcionContextoDTO contexto) throws InscripcionException;
+
+	void finalizarInscripcionManual(Boolean aceptaTerminos, InscripcionContextoDTO contexto) throws InscripcionException;
 	boolean intentarReenviarCorreoInscripcion(ReenvioCorreoInscripcionDTO inscripcion);
 	boolean intentarReenviarCorreoInscripcion(ReenvioCorreoInscripcionDTO inscripcion, List<ReenvioCorreoMateriasDTO> materias);
 }

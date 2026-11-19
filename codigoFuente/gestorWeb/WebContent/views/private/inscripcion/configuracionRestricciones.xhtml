@@ -322,6 +322,11 @@
 							<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.segundoSemestreOrigenElectivas}" size="4" required="true" label="Segundo semestre de origen para electivas"><f:validateLongRange minimum="1" /></p:inputText>
 							<small class="help-block">Segundo semestre elegible de otros planes; no representa un rango.</small>
 						</h:panelGroup>
+						<h:outputLabel value="Niveles de aplicación del avance anual:" />
+						<h:panelGroup>
+							<p:inputText id="semestreAplicacionAvanceAnual" value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.semestreAplicacionAvanceAnual}" size="24" maxlength="1000" required="true" label="Niveles de aplicación del avance anual" />
+							<small class="help-block">Uno o más valores numéricos separados por comas, por ejemplo 5,7. Se utiliza el número del nivel de estructura, cualquiera que sea su nombre. Las UD de otros niveles conservan sus validaciones.</small>
+						</h:panelGroup>
 						<h:outputLabel value="Optativas requeridas del plan:" />
 						<h:panelGroup>
 							<p:inputText id="optativasRequeridasPlan" value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.optativasRequeridasPlan}" size="4" required="true" label="Optativas requeridas del plan"><f:validateLongRange minimum="0" /></p:inputText>

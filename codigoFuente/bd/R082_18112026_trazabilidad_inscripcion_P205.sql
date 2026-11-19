@@ -1,0 +1,3 @@
+ALTER TABLE tbl_inscripciones
+    ADD COLUMN IF NOT EXISTS id_proceso_inscripcion INT NULL DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS via_registro VARCHAR(24) NULL DEFAULT NULL;

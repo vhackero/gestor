@@ -7,11 +7,15 @@ public class InscripcionInsertDTO {
     private boolean optativa;
     private Long idAdeudoOptativa;
     private Long idProcesoInscripcion;
+    private String viaRegistro;
     private Long idConvocatoria;
     public boolean isOptativa() { return optativa; }
     public void setOptativa(boolean v) { optativa=v; }
     public Long getIdAdeudoOptativa() { return idAdeudoOptativa; }
     public void setIdAdeudoOptativa(Long v) { idAdeudoOptativa=v; }
+    public String getViaRegistro() { return viaRegistro; }
+    public void setViaRegistro(String viaRegistro) { this.viaRegistro = viaRegistro; }
+
     public Long getIdProcesoInscripcion() { return idProcesoInscripcion; }
     public void setIdProcesoInscripcion(Long v) { idProcesoInscripcion=v; }
     public Long getIdConvocatoria() { return idConvocatoria; }

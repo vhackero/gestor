@@ -81,6 +81,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	@Override
 	public InscripcionContextoDTO obtenerContextoInscripcion(Long idPersona) throws InscripcionException {
 		InscripcionContextoDTO actual = construirContextoInscripcion(idPersona, true);
+		validarVigenciaProcesos(actual, false);
         registrarEvaluacion(actual, null, "APERTURA");
         return actual;
 	}
@@ -95,6 +96,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	@Transactional(readOnly = true)
 	public void validarPropuestaInscripcion(Long idPersona, List<Long> idsProgramas) throws InscripcionException {
 		InscripcionContextoDTO contexto = construirContextoInscripcion(idPersona, false);
+		validarVigenciaProcesos(contexto, false);
         validarOportunidades(contexto,false);
 		validarConclusionEstudios(contexto, true);
 		validarOmisionReinscripcion(contexto, true);
@@ -217,6 +219,18 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	@Override
 	public void finalizarInscripcion(Boolean aceptaTerminos, InscripcionContextoDTO contexto)
 			throws InscripcionException {
+        finalizarInscripcion(aceptaTerminos, contexto, "ESTUDIANTE");
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = InscripcionException.class)
+    @Override
+    public void finalizarInscripcionManual(Boolean aceptaTerminos, InscripcionContextoDTO contexto)
+            throws InscripcionException {
+        finalizarInscripcion(aceptaTerminos, contexto, "MANUAL_SIGIE");
+    }
+
+    private void finalizarInscripcion(Boolean aceptaTerminos, InscripcionContextoDTO contexto, String viaRegistro)
+            throws InscripcionException {
 		validarAceptaTerminos(aceptaTerminos);
 		validarInscripcionPreviaAlFinalizar(contexto);
 		InscripcionContextoDTO contextoVista = contexto;
@@ -227,7 +241,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		contextoVista.setMensajeOmisionReinscripcion(contexto.getMensajeOmisionReinscripcion());
 		contextoVista.setPermiteInscripcionOmision(contexto.getPermiteInscripcionOmision());
         registrarAvisoEnEvidencia(contexto);
-		guardarInscripcion(contexto);
+		guardarInscripcion(contexto, viaRegistro);
         inscripcionService.registrarConfirmacionEvaluacion(contexto.obtenerIdPersona(),contexto.getInscripcionPersona().getIdPlan(),
             contexto.getEstadoAcademico().getIdProcesoEvaluado(),contexto.getEvidenciaEvaluacion());
 		gestionarEnvioCorreoInscripcion(contexto);
@@ -315,6 +329,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		// no autoriza persistir si la persona dejó de estar activa en SIGIE.
 		validarHabilitacionInscripcion(idPersona);
 		validarOmisionReinscripcion(contexto, true);
+		validarVigenciaProcesos(contexto, true);
 		if (inscripcionService.existeInscripcionEnProceso(idPersona, idProceso)) {
 			throw new InscripcionPreviaException("Ya cuenta con una inscripción para este periodo. "
 					+ "Actualiza la página para consultar las asignaturas inscritas.");
@@ -370,8 +385,42 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		return parametroSistemaService.obtenerParametro(ConstantesGestor.ENVIAR_CORREO_INSCRIPCION);
 	}
 
-	private void guardarInscripcion(InscripcionContextoDTO contexto) throws InscripcionException {
+	private Date validarVigenciaProcesos(InscripcionContextoDTO contexto, boolean bloquear) throws InscripcionException {
+		if (contexto == null || contexto.getInscripcionPersona() == null || contexto.getEstadoAcademico() == null)
+			throw new InscripcionException("No existe un proceso disponible para inscribir. Consulta nuevamente.");
+		InscripcionPersonaDTO persona = contexto.getInscripcionPersona();
+		java.util.Map<Long, java.util.Set<Long>> procesos = new java.util.TreeMap<>();
+		Long principal = contexto.getEstadoAcademico().getIdProcesoEvaluado();
+		if (principal == null) {
+			try { principal = contexto.obtenerIdProcesoInscripcionDesdeMateriasDisponibles(); }
+			catch (IllegalStateException ex) { throw new InscripcionException("No existe un proceso de inscripción activo y dentro de fechas.", ex); }
+		}
+		if (persona.getIdPlan() == null) throw new InscripcionException("No se pudo identificar el plan de inscripción.");
+		procesos.computeIfAbsent(principal, id -> new java.util.TreeSet<>()).add(persona.getIdPlan());
+		for (InscripcionMateriasDTO materia : contexto.getEstadoAcademico().getMateriasDisponibles()) {
+			if (!Boolean.TRUE.equals(materia.getCheck())) continue;
+			if (materia.getIdProcesoInscripcion() == null || materia.getIdPlan() == null)
+				throw new InscripcionException("No se pudo identificar el proceso o plan de una UD seleccionada. Consulta nuevamente.");
+			procesos.computeIfAbsent(materia.getIdProcesoInscripcion(), id -> new java.util.TreeSet<>()).add(materia.getIdPlan());
+		}
+		Date fecha = new Date();
+		for (java.util.Map.Entry<Long, java.util.Set<Long>> proceso : procesos.entrySet()) {
+			for (Long plan : proceso.getValue()) {
+				if (!Boolean.TRUE.equals(inscripcionService.procesoVigenteParaInscripcion(proceso.getKey(), plan,
+						persona.getIdConvocatoria(), fecha, bloquear)))
+					throw new InscripcionException("El proceso de inscripción está inactivo o fuera de fechas, o no corresponde al plan y convocatoria. Consulta nuevamente antes de registrar.");
+			}
+		}
+		return fecha;
+	}
+
+	private void guardarInscripcion(InscripcionContextoDTO contexto, String viaRegistro) throws InscripcionException {
+		Date fechaRegistro = validarVigenciaProcesos(contexto, true);
 		List<InscripcionInsertDTO> inscripciones = mapearModelosInscripcion(contexto);
+		inscripciones.forEach(inscripcion -> {
+            inscripcion.setFechaRegistro(fechaRegistro);
+            inscripcion.setViaRegistro(viaRegistro);
+        });
         try {
             inscripcionService.insertarInscripciones(inscripciones);
         } catch(IllegalArgumentException ex) {
@@ -655,13 +704,18 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		StringBuilder sb = new StringBuilder();
 		sb.append(generarAcronimoMayusculas(materia.getNombrePlan()));
 		sb.append("-");
-		sb.append(generarAcronimoMayusculas(materia.getClavePrograma()));
-		sb.append(generarAcronimo(materia.getSubestructura()));
-		sb.append(generarAcronimo(materia.getEstructura()));
+		String bloque = materia.getSubestructura().trim().substring(0, 1) + obtenerBloque(materia);
+		String semestre = materia.getEstructura().trim().substring(0, 1)
+				+ InscripcionUtils.obtenerNumeroSemestre(materia.getEstructura());
+		String clave = materia.getClavePrograma();
+		sb.append(clave);
+		if (!clave.endsWith(bloque + semestre)) {
+			sb.append(bloque).append(semestre);
+		}
 		sb.append("-");
 		sb.append(generarPeriodo(materia));
 		sb.append("-");
-		sb.append(generarAcronimo(materia.getSubestructura()));
+		sb.append(bloque);
 		sb.append("-000");
 		return sb.toString();
 	}
@@ -1545,11 +1599,13 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 
 		// Verifica si las materias a msotrar de tipo optativas son opcionales tomar
 		materiasOfertadas = modificaMateriasOptativasDeAcuerdoAProbacion(materiasOfertadas, materiasCursadas);
+		final List<InscripcionMateriasDTO> ofertaAvanceAnual = materiasOfertadas;
 
 		// Estudiantes regulares que no son de nuevo ingreso
 		if (!esEstudianteNuevoIngreso && esEstudianteRegular) {
 			// logger.info("Estudiantes regulares que no son de nuevo ingreso");
-			return obtenerMateriasPorAvanceAnualEstudianteRegular(materiasOfertadas, persona, semestreBajaTemporal);
+			return aplicarAvanceAnualPorSemestre(ofertaAvanceAnual,
+					() -> obtenerMateriasPorAvanceAnualEstudianteRegular(ofertaAvanceAnual, persona, semestreBajaTemporal));
 		}
 
 		// Estudiantes irregulares de nuevo ingreso
@@ -1580,13 +1636,14 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 			if (cantidadMateriasReprobadasObligatorias >= 1
 					&& cantidadDeMateriasREprobadasTotales <= configuracion.getMaxReprobadasAvanceAnual()) {
 				logger.info("Estudiante irregular: avance anual dentro del máximo configurado");
-				return obtenerMateriasPorAvanceAnualIrregulares(materiasConReprobadasMarcadas, materiasReprobadas, configuracion, semestreBajaTemporal);
+				return aplicarAvanceAnualPorSemestre(materiasConReprobadasMarcadas,
+						() -> obtenerMateriasPorAvanceAnualIrregulares(materiasConReprobadasMarcadas, materiasReprobadas, configuracion, semestreBajaTemporal));
 			}
 
 			if (cantidadMateriasReprobadasObligatorias == 0) {
 				logger.info("Estudiantes irregulares sin reprobadas obligatorias");
-				return obtenerMateriasPorAvanceAnualSinTomarEnCuentaObligatorias(materiasConReprobadasMarcadas,
-						persona, semestreBajaTemporal);
+				return aplicarAvanceAnualPorSemestre(materiasConReprobadasMarcadas,
+						() -> obtenerMateriasPorAvanceAnualSinTomarEnCuentaObligatorias(materiasConReprobadasMarcadas, persona, semestreBajaTemporal));
 			}
 
 			// Concentración de reprobadas en un semestre ofertado (umbral inclusivo).
@@ -1602,6 +1659,16 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 			return obtenerMateriasReprobadasUOptativas(materiasConReprobadasMarcadas, materiasReprobadas, configuracion);
 		}
 		return Collections.emptyList();
+	}
+
+	/** El control afecta únicamente las UD del semestre configurado, incluso en carga mixta. */
+	private List<InscripcionMateriasDTO> aplicarAvanceAnualPorSemestre(List<InscripcionMateriasDTO> oferta,
+			java.util.function.Supplier<List<InscripcionMateriasDTO>> evaluarAvance) {
+		Set<Integer> semestres = obtenerConfiguracionRestriccionesAcademicasGenerales().getSemestresAplicacionAvanceAnual();
+		Predicate<InscripcionMateriasDTO> aplica = m -> semestres.contains(InscripcionUtils.obtenerNumeroSemestre(m.getEstructura()));
+		if (oferta.stream().noneMatch(aplica)) return oferta;
+		Set<InscripcionMateriasDTO> permitidas = new HashSet<>(evaluarAvance.get());
+		return oferta.stream().filter(m -> !aplica.test(m) || permitidas.contains(m)).collect(Collectors.toList());
 	}
 
 	private List<InscripcionMateriasDTO> modificaMateriasOptativasDeAcuerdoAProbacion(

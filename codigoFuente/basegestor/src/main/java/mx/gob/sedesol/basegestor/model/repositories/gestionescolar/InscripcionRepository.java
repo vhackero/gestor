@@ -580,7 +580,9 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 		List<InscripcionMateriasInsDTO> lista = new ArrayList<InscripcionMateriasInsDTO>();
 
-		String consulta = "SELECT ti.* FROM tbl_inscripciones ti\r\n"
+		String consulta = "SELECT ti.id, ti.Idpersona, ti.programa, ti.asignatura, ti.groupbase, ti.idplan, "
+				+ "ti.idprograma, ti.idevento, ti.nivel, ti.division, ti.profile_field_perfil, ti.bloque, "
+				+ "ti.clave_asig, ti.nuevoingreso, ti.recursamiento, ti.alta, ti.semestre, ti.fecha_registro FROM tbl_inscripciones ti\r\n"
 				+ "             INNER JOIN tbl_procesos_inscripcion tpi ON ti.fecha_registro >= tpi.fecha_inicio AND ti.fecha_registro <= tpi.fecha_fin\r\n"
 				+ "             INNER JOIN rel_proceso_inscipcion_planesyprogramas rgp ON rgp.id_programa = ti.idprograma ANd rgp.id_plan = ti.idplan AND tpi.proceso_inscripcion_id =  rgp.id_proceso_inscripcion\r\n"
 				+ "             WHERE ti.Idpersona = :idpersona  AND ti.idplan = :plan AND ti.semestre = tpi.semestre";
@@ -722,10 +724,10 @@ public class InscripcionRepository implements IinscripcionRepository {
 	public void insertarRegistro(InscripcionInsertDTO dto) {
 		String sql = "INSERT INTO tbl_inscripciones (Idpersona, programa, asignatura, groupbase, idplan, idprograma, "
 				+ "idevento, nivel, division, profile_field_perfil, bloque, clave_asig, nuevoingreso, "
-				+ "recursamiento, alta, semestre, fecha_registro) "
+				+ "recursamiento, alta, semestre, fecha_registro, id_proceso_inscripcion, via_registro) "
 				+ "VALUES ( :Idpersona, :programa, :asignatura, :groupbase, :idplan, :idprograma, :idevento, "
 				+ ":nivel, :division, :profileFieldPerfil, :bloque, :claveAsig, :nuevoIngreso, :recursamiento, "
-				+ ":alta, :semestre, :fechaRegistro)";
+				+ ":alta, :semestre, :fechaRegistro, :idProcesoInscripcion, :viaRegistro)";
 
 		entityManager.createNativeQuery(sql).setParameter("Idpersona", dto.getIdPersona())
 				.setParameter("programa", dto.getPrograma()).setParameter("asignatura", dto.getAsignatura())
@@ -736,6 +738,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 				.setParameter("claveAsig", dto.getClaveAsig()).setParameter("nuevoIngreso", dto.getNuevoIngreso())
 				.setParameter("recursamiento", dto.getRecursamiento()).setParameter("alta", dto.getAlta())
 				.setParameter("semestre", dto.getSemestre()).setParameter("fechaRegistro", dto.getFechaRegistro())
+				.setParameter("idProcesoInscripcion", dto.getIdProcesoInscripcion())
+				.setParameter("viaRegistro", dto.getViaRegistro())
 				.executeUpdate();
         if(dto.isOptativa()) {
             Number id=(Number)entityManager.createNativeQuery("SELECT LAST_INSERT_ID()").getSingleResult();
@@ -933,7 +937,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("JOIN cat_nivel_ensenanza_programa cne ON cne.id = tp.id_nivel_ensenanza ");
 		sql.append("JOIN cat_divisiones_plan cdp ON cdp.id = tp.id_divisiones_plan ");
 		sql.append(
-				"WHERE :fechaActual > tpi.fecha_inicio AND :fechaActual < tpi.fecha_fin AND tpi.convocatoria_id = :idConvocatoria ");
+				"WHERE tpi.estatus=1 AND :fechaActual BETWEEN tpi.fecha_inicio AND tpi.fecha_fin AND tpi.convocatoria_id = :idConvocatoria ");
 		sql.append("ORDER BY estructura ASC, subestructura ASC, programa ASC");
 
 		List<Object[]> resultados = entityManager.createNativeQuery(sql.toString())
@@ -1139,6 +1143,19 @@ public class InscripcionRepository implements IinscripcionRepository {
 	}
 
 	@Override
+	public Boolean procesoVigenteParaInscripcion(Long proceso, Long plan, Long convocatoria, Date fecha, boolean bloquear) {
+		if (proceso == null || plan == null || convocatoria == null || fecha == null) return false;
+		String sql = "SELECT p.proceso_inscripcion_id FROM tbl_procesos_inscripcion p "
+				+ "WHERE p.proceso_inscripcion_id=:proceso AND p.estatus=1 AND p.convocatoria_id=:convocatoria "
+				+ "AND :fecha BETWEEN p.fecha_inicio AND p.fecha_fin "
+				+ "AND EXISTS(SELECT 1 FROM rel_proceso_inscipcion_planesyprogramas r "
+				+ "WHERE r.id_proceso_inscripcion=p.proceso_inscripcion_id AND r.id_plan=:plan)"
+				+ (bloquear ? " FOR UPDATE" : "");
+		return !entityManager.createNativeQuery(sql).setParameter("proceso", proceso).setParameter("plan", plan)
+				.setParameter("convocatoria", convocatoria).setParameter("fecha", fecha).getResultList().isEmpty();
+	}
+
+	@Override
 	public Boolean existeInscripcionEnProceso(Long idPersona, Long idProcesoInscripcion) {
 		String sql = "SELECT ti.id FROM tbl_inscripciones ti "
 				+ "JOIN tbl_procesos_inscripcion proceso ON proceso.proceso_inscripcion_id = :idProceso "
@@ -1159,7 +1176,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 				"INNER JOIN tbl_procesos_inscripcion tpi ON ti.fecha_registro >= tpi.fecha_inicio AND ti.fecha_registro <= tpi.fecha_fin ");
 		sql.append(
 				"INNER JOIN rel_proceso_inscipcion_planesyprogramas rgp ON rgp.id_programa = ti.idprograma AND rgp.id_plan = ti.idplan AND tpi.proceso_inscripcion_id = rgp.id_proceso_inscripcion ");
-		sql.append("WHERE :fechaActual > tpi.fecha_inicio AND :fechaActual < tpi.fecha_fin ");
+		sql.append("WHERE :fechaActual BETWEEN tpi.fecha_inicio AND tpi.fecha_fin ");
 		sql.append("AND tpi.convocatoria_id = :idConvocatoriaPersona ");
 		sql.append("AND ti.Idpersona = :idPersona ");
 		sql.append("AND ti.idplan = :idPlanPersona ");
@@ -1504,6 +1521,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("INNER JOIN rel_configuracion_electivas rce ON rce.id_proceso_inscripcion = tpi.proceso_inscripcion_id ");
 		sql.append("    AND rce.id_programa = tfd.id_programa AND rce.activo = 1 ");
 		sql.append("WHERE tfd.tipo = 'Obligatoria' ");
+		sql.append("  AND tpi.estatus = 1 ");
 		sql.append("  AND rpip.id_plan NOT IN (:id_plan_persona) ");
 		sql.append("  AND :fecha_actual >= tpi.fecha_inicio ");
 		sql.append("  AND :fecha_actual <= tpi.fecha_fin ");
@@ -1558,7 +1576,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "tpi.nombre AS nombre_proceso, tc.nombre AS nombre_convocatoria "
 				+ "FROM tbl_procesos_inscripcion tpi "
 				+ "INNER JOIN tbl_convocatoria tc ON tc.convocatoria_id = tpi.convocatoria_id "
-				+ "WHERE tpi.estatus = 1 AND CURRENT_DATE BETWEEN tpi.fecha_inicio AND tpi.fecha_fin "
+				+ "WHERE tpi.estatus = 1 AND CURRENT_TIMESTAMP BETWEEN tpi.fecha_inicio AND tpi.fecha_fin "
 				+ "ORDER BY tc.nombre, tpi.nombre";
 		List<Object[]> rows = entityManager.createNativeQuery(sql).getResultList();
 		List<ConfiguracionElectivaDTO> resultado = new ArrayList<>();
@@ -2447,7 +2465,8 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "MAX(CASE WHEN p.clave_parametro='SEGUNDO_SEMESTRE_ORIGEN_ELECTIVAS' THEN p.valor_default END) AS segundo_semestre_origen_electivas,"
 				+ "MAX(CASE WHEN p.clave_parametro='OPTATIVAS_REQUERIDAS_PLAN' THEN p.valor_default END) AS optativas_requeridas_plan,"
 				+ "MAX(CASE WHEN p.clave_parametro='OPTATIVAS_SOLO_REQUERIDAS' THEN p.valor_default END) AS optativas_solo_requeridas,"
-				+ "MAX(CASE WHEN p.clave_parametro='MENSAJE_OPTATIVA_SOLO_REQUERIDA' THEN p.valor_default END) AS mensaje_optativa_solo_requerida "
+				+ "MAX(CASE WHEN p.clave_parametro='MENSAJE_OPTATIVA_SOLO_REQUERIDA' THEN p.valor_default END) AS mensaje_optativa_solo_requerida,"
+				+ "MAX(CASE WHEN p.clave_parametro='SEMESTRE_APLICACION_AVANCE_ANUAL' THEN p.valor_default END) AS semestre_aplicacion_avance_anual "
 				+ "FROM cat_reglas_inscripcion cri JOIN cat_parametros_regla_inscripcion p ON p.clave_regla=cri.clave "
 				+ "WHERE cri.clave='RESTRICCIONES_ACADEMICAS_GENERALES' GROUP BY cri.nombre,cri.descripcion,cri.activo";
 		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
@@ -2477,6 +2496,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		if(row[18]==null || row[19]==null)throw new IllegalArgumentException("Faltan parámetros de optativas requeridas/adicionales. Ejecute R080.");
 		dto.setOptativasSoloRequeridas(row[18].toString());
 		dto.setMensajeOptativaSoloRequerida(row[19].toString());
+		dto.setSemestreAplicacionAvanceAnual(row[20] == null ? null : row[20].toString());
 		validarRestriccionesAcademicas(dto);
 		return dto;
 	}
@@ -2505,9 +2525,12 @@ public class InscripcionRepository implements IinscripcionRepository {
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "MINIMO_OPTATIVAS_PLAN_ASISTENTE", configuracion.getOptativasRequeridasPlan().toString());
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "OPTATIVAS_SOLO_REQUERIDAS", configuracion.getOptativasSoloRequeridas());
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "MENSAJE_OPTATIVA_SOLO_REQUERIDA", configuracion.getMensajeOptativaSoloRequerida());
+		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "SEMESTRE_APLICACION_AVANCE_ANUAL",
+				configuracion.getSemestresAplicacionAvanceAnual().stream().map(String::valueOf).collect(Collectors.joining(",")));
 	}
 
 	private void validarRestriccionesAcademicas(ConfiguracionCargaRegularDTO configuracion) {
+		configuracion.getSemestresAplicacionAvanceAnual();
 		if (configuracion.getLimiteReprobacionesPorMateria() == null || configuracion.getLimiteReprobacionesPorMateria() < 1 || configuracion.getLimiteReprobacionesPorMateria()>3) {
 			throw new IllegalArgumentException("El límite de oportunidades por UD debe estar entre 1 y 3.");
 		}

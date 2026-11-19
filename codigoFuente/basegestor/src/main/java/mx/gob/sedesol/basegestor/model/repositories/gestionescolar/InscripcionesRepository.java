@@ -35,6 +35,12 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 
 @Repository
 public class InscripcionesRepository implements IinscripcionesRepository {
+	private void validarFechasProceso(java.util.Date inicio, java.util.Date fin) {
+		if (inicio == null || fin == null || fin.before(inicio)) {
+			throw new IllegalArgumentException("Captura inicio y fin del proceso; el fin no puede ser anterior al inicio.");
+		}
+	}
+
 
 	private static final int TIPO_PROCESO_ORDINARIO = 1;
 	private static final int TIPO_PROCESO_EXTRAORDINARIO = 2;
@@ -479,6 +485,9 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 	public void updateProcesoInscripcion(Long procesoInscripcionId, String nombre, LocalDateTime fechaInicio,
 			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId, String claveProceso,
 			String semestre, String perfil) {
+		if (fechaInicio == null || fechaFin == null || fechaFin.isBefore(fechaInicio)) {
+			throw new IllegalArgumentException("Captura inicio y fin del proceso; el fin no puede ser anterior al inicio.");
+		}
 
 		String query = "UPDATE tbl_procesos_inscripcion " + "SET nombre = ?, " + "fecha_inicio = ?, "
 				+ "fecha_fin = ?, " + "estatus = ?, " + "id_tipo_proceso = ?, " + "convocatoria_id = ?, "
@@ -614,6 +623,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		if (inscripcionParamNueva == null) {
 			return;
 		}
+		validarFechasProceso(inscripcionParamNueva.getFechaInicio(), inscripcionParamNueva.getFechaFin());
 
 		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
 		DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -808,6 +818,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		if (inscripcionParamNueva == null) {
 			return;
 		}
+		validarFechasProceso(inscripcionParamNueva.getFechaInicio(), inscripcionParamNueva.getFechaFin());
 
 		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
 		DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

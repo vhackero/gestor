@@ -13,7 +13,7 @@ public class EstadoInscripcionEstudianteDTO {
 	}
 
 	/** El tipo de catálogo Extraordinario no acredita una fecha posterior al cierre. */
-	public String getCaracterTemporal() { return "SIN_REFERENCIA_CIERRE_ORDINARIO"; }
+	public String getCaracterTemporal() { return "NO_APLICA_EN_ALCANCE_ACORDADO"; }
 
 	// Indicadores legados del tipo de catálogo; no acreditan extemporaneidad.
 	private Boolean esInscripcionOrdinariaInicial;
