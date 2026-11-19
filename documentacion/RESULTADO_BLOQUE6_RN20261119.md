@@ -9,6 +9,7 @@
 | SHA-256 | `e93a476672d72ba5320ee3e26f14a15a11328951f8ded803290c58ff2e1322aa` |
 | Versión configurada | `RN-PE2024-2027-act-20261119` |
 | Modo | Sombra; sin escrituras en Inscripción, bajas, grupos, oferta ni calificaciones. |
+| Commit de código y WAR | `0b903611` |
 
 ## Cambios aplicados
 
@@ -92,7 +93,7 @@ Los escenarios de sustitución formalizada, baja posterior, recursamiento de sus
 
 | Módulo | Comando | Resultado |
 | --- | --- | --- |
-| Basegestor | `mvn -q -f codigoFuente/basegestor/pom.xml test` | 816 pruebas; 0 fallas, 0 errores, 0 omitidas. |
+| Basegestor | `mvn -q -f codigoFuente/basegestor/pom.xml test` | 817 pruebas; 0 fallas, 0 errores, 0 omitidas. |
 | GestorWeb | `mvn -q -f codigoFuente/gestorWeb/pom.xml test` | 41 pruebas; 0 fallas, 0 errores, 0 omitidas. |
 | WAR | `mvn -q -f codigoFuente/gestorWeb/pom.xml -DskipTests package` | `SUCCESS` |
 
@@ -102,7 +103,7 @@ Los escenarios de sustitución formalizada, baja posterior, recursamiento de sus
 | --- | --- |
 | Artefacto | `codigoFuente/gestorWeb/target/plataforma.war` |
 | Tamaño | `82,750,278` bytes |
-| SHA-256 | `25126b850882e71a7571d13e10e4a53019daf0960ed916d6a9077e97e49e287a` |
+| SHA-256 | `9af687c130729018cadb3355e054634b86c55954732bc9fa4ea4898ac2526236` |
 | Despliegue | Pendiente de Abel; esta entrega no despliega ni usa expedientes identificables. |
 
 El paquete operativo completo se entrega en `VALIDACION_RUNTIME_ABEL_BLOQUE6.md`. Incluye artefacto, propiedades, consulta de identificadores internos, matriz de pantallas y reglas para capturas anonimizadas.

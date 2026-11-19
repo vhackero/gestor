@@ -5,9 +5,10 @@
 | Dato | Valor |
 | --- | --- |
 | Rama | `feature/desacople_motor_historico` |
-| Commit de entrega | Pendiente de generar al cierre de este bloque |
+| Commit de código y WAR | `0b903611` |
 | WAR | `codigoFuente/gestorWeb/target/plataforma.war` |
-| SHA-256 | Debe recalcularse despues de empaquetar el commit final. |
+| Tamaño | `82,750,278` bytes |
+| SHA-256 | `9af687c130729018cadb3355e054634b86c55954732bc9fa4ea4898ac2526236` |
 | Modo requerido | Sombra; no formaliza inscripciones ni modifica bajas, grupos, oferta o calificaciones. |
 
 ## Despliegue
