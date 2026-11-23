@@ -37,4 +37,4 @@ También se ejecutó el conjunto dirigido del catálogo: 71 pruebas, 0 fallas, 0
 
 ## Código modificado
 
-Se agregó una prueba en `basegestor`; no cambia comportamiento productivo. Commit de cierre: pendiente de crear al finalizar la revisión Git. El usuario deberá compilar y desplegar con sus scripts habituales `../../scripts/*.sh`; este bloque no genera ni despliega WAR.
+Se agregó una prueba en `basegestor`; no cambia comportamiento productivo. Commit funcional: `eace4ff8` (`test: consolida catalogo y cobertura motor v2`). El usuario deberá compilar y desplegar con sus scripts habituales `../../scripts/*.sh`; este bloque no genera ni despliega WAR.
