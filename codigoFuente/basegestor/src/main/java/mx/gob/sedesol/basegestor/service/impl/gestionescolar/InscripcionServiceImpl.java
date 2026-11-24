@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignaturasPorSemestreDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CupoOptativaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaIrregularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaRegularDTO;
@@ -391,11 +392,32 @@ private static final Logger logger = Logger.getLogger(InscripcionServiceImpl.cla
 		return listaBajasAsignaturas;
 	}
 
-	@Override
-	@Transactional
-	public void insertarInscripciones(List<InscripcionInsertDTO> inscripciones) {
-		inscripciones.forEach(inscripcionesRepository::insertarRegistro);
-	}
+    @Override
+    public boolean controlaCupoOptativas(Long proceso) {
+        return inscripcionesRepository.controlaCupoOptativas(proceso);
+    }
+
+    @Override
+    public List<CupoOptativaDTO> obtenerCuposOptativas(Long proceso) {
+        return inscripcionesRepository.obtenerCuposOptativas(proceso);
+    }
+
+    @Override
+    @Transactional
+    public void guardarCuposOptativas(Long proceso, boolean activo, List<CupoOptativaDTO> cupos) {
+        inscripcionesRepository.guardarCuposOptativas(proceso, activo, cupos);
+    }
+
+    @Override
+    @Transactional
+    public void insertarInscripciones(List<InscripcionInsertDTO> inscripciones) {
+        for (InscripcionInsertDTO inscripcion : inscripciones) {
+            if (inscripcion.isOptativa() && inscripcion.getIdProcesoInscripcion() != null) {
+                inscripcionesRepository.validarCupoOptativaParaGuardar(inscripcion);
+            }
+            inscripcionesRepository.insertarRegistro(inscripcion);
+        }
+    }
 
 	@Override
 	public List<InscripcionMateriasDTO> obtenerMateriasPorPeriodoInscripcion(Long idPlan, Date fechaActual,

@@ -35,6 +35,22 @@ public class ConfiguracionCargaRegularDTO implements Serializable {
 	private Integer minimoObligatorias;
 	private Integer maximoElectivasPorPeriodo;
 	private Integer maximoOptativasPorBloque;
+    private Boolean priorizarOptativasSemestreReferencia;
+    private Boolean limitarOptativasOrdinariasPorPeriodo;
+
+    public Boolean getPriorizarOptativasSemestreReferencia() {
+        return priorizarOptativasSemestreReferencia;
+    }
+
+    public void setPriorizarOptativasSemestreReferencia(Boolean valor) {
+        priorizarOptativasSemestreReferencia = valor;
+    }
+    private Integer maximoOptativasOrdinariasPorPeriodo;
+
+    public Boolean getLimitarOptativasOrdinariasPorPeriodo() { return limitarOptativasOrdinariasPorPeriodo; }
+    public void setLimitarOptativasOrdinariasPorPeriodo(Boolean valor) { limitarOptativasOrdinariasPorPeriodo = valor; }
+    public Integer getMaximoOptativasOrdinariasPorPeriodo() { return maximoOptativasOrdinariasPorPeriodo; }
+    public void setMaximoOptativasOrdinariasPorPeriodo(Integer valor) { maximoOptativasOrdinariasPorPeriodo = valor; }
 	private Integer optativasAprobadasParaOpcionales;
 	private Boolean impedirClaveOptativaRepetida;
 	private Integer porcentajeMinimoTramoFinal;

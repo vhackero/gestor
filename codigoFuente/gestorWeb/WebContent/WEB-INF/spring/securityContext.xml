@@ -25,6 +25,16 @@
         <custom-filter ref="authenticationTokenProcessingFilter" position="PRE_AUTH_FILTER" />
         <csrf disabled="true" />
         <intercept-url pattern="/views/public/**" access="permitAll" />
+        <intercept-url pattern="/views/private/inscripcion/inscripcionManual*"
+            access="hasAnyRole('ROLE_ADMIN','ROLE_USUARIO','ROLE_ALUMNO','ROLE_DOCENTE') and hasPermission(null, 'INS_MANUAL')" />
+        <intercept-url pattern="/views/private/inscripcion/reenvioCorreo*"
+            access="hasAnyRole('ROLE_ADMIN','ROLE_USUARIO','ROLE_ALUMNO','ROLE_DOCENTE') and hasPermission(null, 'REENV_CORR_INS')" />
+        <intercept-url pattern="/views/private/inscripcion/modificacionInscripcion*"
+            access="hasAnyRole('ROLE_ADMIN','ROLE_USUARIO','ROLE_ALUMNO','ROLE_DOCENTE') and hasPermission(null, 'MOD_INS')" />
+        <intercept-url pattern="/views/private/inscripcion/configuracionElectivas*"
+            access="hasAnyRole('ROLE_ADMIN','ROLE_USUARIO','ROLE_ALUMNO','ROLE_DOCENTE') and hasPermission(null, 'CONF_ELECTIVAS')" />
+        <intercept-url pattern="/views/private/inscripcion/configuracionRestricciones*"
+            access="hasAnyRole('ROLE_ADMIN','ROLE_USUARIO','ROLE_ALUMNO','ROLE_DOCENTE') and hasPermission(null, 'CONF_RESTR_INS')" />
         <intercept-url pattern="/views/private/**"
             access="hasAnyRole('ROLE_ADMIN','ROLE_USUARIO','ROLE_ALUMNO','ROLE_DOCENTE')" />
 

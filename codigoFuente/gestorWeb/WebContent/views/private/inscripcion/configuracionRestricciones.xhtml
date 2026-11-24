@@ -363,6 +363,24 @@
 						</h:panelGroup>
 						<h:outputLabel value="Máximo de optativas por bloque:" />
 						<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.maximoOptativasPorBloque}" size="4" />
+                        <h:outputLabel value="Priorizar optativas del semestre de referencia" />
+                        <h:panelGroup>
+                            <p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.priorizarOptativasSemestreReferencia}" />
+                            <h:outputText styleClass="help-block"
+                                value="Habilitado. Las optativas elegibles del semestre de referencia aparecen primero. Solo estudiantes regulares pueden completar su selección con optativas de otros semestres después de atender las opciones de referencia." />
+                            <h:outputText styleClass="help-block"
+                                value="Deshabilitado. Se conserva el orden de la oferta y se omite la validación de prioridad por semestre." />
+                        </h:panelGroup>
+                        <h:outputLabel value="Limitar optativas ordinarias por periodo" />
+                        <h:panelGroup>
+                            <p:selectBooleanCheckbox value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.limitarOptativasOrdinariasPorPeriodo}" />
+                            <h:outputText styleClass="help-block"
+                                value="Habilitado. El límite por bloque se aplica a todo el periodo, aunque las optativas sean de semestres distintos. También se aplica el máximo total del periodo." />
+                            <h:outputText styleClass="help-block"
+                                value="Deshabilitado. Se conserva el límite anterior por bloque y semestre. El máximo total del periodo queda desactivado." />
+                        </h:panelGroup>
+                        <h:outputLabel value="Máximo de optativas ordinarias por periodo" />
+                        <p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.maximoOptativasOrdinariasPorPeriodo}" size="4" />
 						<h:outputLabel value="Optativas aprobadas para volverlas opcionales:" />
 						<p:inputText value="#{configuracionRestriccionesInscripcionBean.configuracionRestriccionesAcademicasGenerales.optativasAprobadasParaOpcionales}" size="4" />
 						<h:outputLabel value="Impedir clave optativa repetida:" />

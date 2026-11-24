@@ -109,13 +109,23 @@
 					rendered="#{not empty inscripcionBean.contextoInscripcion.mensajeSeriacion}">
 					<div class="alert alert-info mb-0" role="alert">#{inscripcionBean.contextoInscripcion.mensajeSeriacion}</div>
 				</p:outputPanel>
+				<p:outputPanel rendered="#{not empty inscripcionBean.contextoInscripcion.mensajeReferencia}">
+					<div class="alert alert-warning" role="alert">
+						<h:outputText value="#{inscripcionBean.contextoInscripcion.mensajeReferencia}" />
+					</div>
+				</p:outputPanel>
 
 				<p:outputPanel styleClass="mt-2"
 					rendered="#{not empty inscripcionBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}">
 					<div class="alert alert-#{inscripcionBean.contextoInscripcion.permiteInscripcionLimiteReprobadas ? 'warning' : 'danger'} mb-0" role="alert">#{inscripcionBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}</div>
 				</p:outputPanel>
 
-				 <p:outputPanel id="avisoOmisionReinscripcion" styleClass="mt-2"><p:outputPanel rendered="#{not empty inscripcionBean.contextoInscripcion.mensajeOmisionReinscripcion}">
+				 <p:outputPanel rendered="#{not empty inscripcionBean.contextoInscripcion.estadoAcademico.avisoCupoOptativas}">
+                <div class="alert alert-warning" role="alert">
+                    <h:outputText value="#{inscripcionBean.contextoInscripcion.estadoAcademico.avisoCupoOptativas}" />
+                </div>
+            </p:outputPanel>
+            <p:outputPanel id="avisoOmisionReinscripcion" styleClass="mt-2"><p:outputPanel rendered="#{not empty inscripcionBean.contextoInscripcion.mensajeOmisionReinscripcion}">
 <div class="alert alert-#{inscripcionBean.contextoInscripcion.permiteInscripcionOmision ? 'warning' : 'danger'}" role="alert"><h:outputText value="#{inscripcionBean.contextoInscripcion.mensajeOmisionReinscripcion}" /></div></p:outputPanel></p:outputPanel>
 <div class="form-group mt-1">
 					<div class="row">

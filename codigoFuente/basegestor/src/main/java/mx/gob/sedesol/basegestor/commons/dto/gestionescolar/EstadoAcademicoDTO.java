@@ -3,6 +3,23 @@ package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 import java.util.List;
 
 public class EstadoAcademicoDTO {
+    private final java.util.List<String> optativasSinCupo = new java.util.ArrayList<>();
+    private final java.util.List<String> optativasSinCupoConfigurado = new java.util.ArrayList<>();
+
+    public java.util.List<String> getOptativasSinCupo() { return optativasSinCupo; }
+    public java.util.List<String> getOptativasSinCupoConfigurado() { return optativasSinCupoConfigurado; }
+
+    public String getAvisoCupoOptativas() {
+        java.util.List<String> avisos = new java.util.ArrayList<>();
+        if (!optativasSinCupo.isEmpty()) {
+            avisos.add("Optativas sin lugares disponibles: " + String.join(", ", optativasSinCupo) + ".");
+        }
+        if (!optativasSinCupoConfigurado.isEmpty()) {
+            avisos.add("Optativas sin cupo configurado: " + String.join(", ", optativasSinCupoConfigurado) + ".");
+        }
+        return String.join(" ", avisos);
+    }
+
 	private EstadoInscripcionEstudianteDTO clasificacionInscripcion;
 	public EstadoInscripcionEstudianteDTO getClasificacionInscripcion() { return clasificacionInscripcion; }
 	public void setClasificacionInscripcion(EstadoInscripcionEstudianteDTO valor) { clasificacionInscripcion = valor; }

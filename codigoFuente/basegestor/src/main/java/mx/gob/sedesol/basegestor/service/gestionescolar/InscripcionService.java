@@ -8,6 +8,7 @@ import java.util.Optional;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignaturasPorSemestreDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CupoOptativaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaIrregularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaRegularDTO;
@@ -130,6 +131,12 @@ public interface InscripcionService {
 	void guardarConfiguracionElectiva(ConfiguracionElectivaDTO configuracion);
 
 	boolean tieneCupoElectiva(Long idProcesoInscripcion, Long idPrograma);
+
+    boolean controlaCupoOptativas(Long proceso);
+
+    List<CupoOptativaDTO> obtenerCuposOptativas(Long proceso);
+
+    void guardarCuposOptativas(Long proceso, boolean activo, List<CupoOptativaDTO> cupos);
 
 	List<ReglaInscripcionDTO> obtenerReglasInscripcion();
 

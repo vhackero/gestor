@@ -113,7 +113,12 @@
 					<div class="alert alert-#{inscripcionManualBean.contextoInscripcion.permiteInscripcionLimiteReprobadas ? 'warning' : 'danger'} mb-0" role="alert">#{inscripcionManualBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}</div>
 				</p:outputPanel>
 
-				 <p:outputPanel id="avisoOmisionReinscripcion" styleClass="mt-2"><p:outputPanel rendered="#{not empty inscripcionManualBean.contextoInscripcion.mensajeOmisionReinscripcion}">
+				 <p:outputPanel rendered="#{not empty inscripcionManualBean.contextoInscripcion.estadoAcademico.avisoCupoOptativas}">
+                <div class="alert alert-warning" role="alert">
+                    <h:outputText value="#{inscripcionManualBean.contextoInscripcion.estadoAcademico.avisoCupoOptativas}" />
+                </div>
+            </p:outputPanel>
+            <p:outputPanel id="avisoOmisionReinscripcion" styleClass="mt-2"><p:outputPanel rendered="#{not empty inscripcionManualBean.contextoInscripcion.mensajeOmisionReinscripcion}">
 <div class="alert alert-#{inscripcionManualBean.contextoInscripcion.permiteInscripcionOmision ? 'warning' : 'danger'}" role="alert"><h:outputText value="#{inscripcionManualBean.contextoInscripcion.mensajeOmisionReinscripcion}" /></div></p:outputPanel></p:outputPanel>
 <div class="form-group mt-1">
 					<div class="row">

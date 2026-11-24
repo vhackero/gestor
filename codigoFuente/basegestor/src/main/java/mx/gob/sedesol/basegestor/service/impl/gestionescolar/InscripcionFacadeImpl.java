@@ -40,6 +40,8 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoInscripcionEst
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionInsertDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CupoOptativaDTO;
+import mx.gob.sedesol.basegestor.commons.utils.CupoOptativaException;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
@@ -132,6 +134,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
                 evidencia);
             c.setSemestreReferencia(e.path("semestreReferencia").isNumber()?e.path("semestreReferencia").asInt():null);
             c.setMensajeReferencia(e.path("conciliacion").asText());
+            ordenarOptativasPorSemestreReferencia(c);
             e.set("estadoAcademico",mapper.valueToTree(c.getEstadoAcademico()));
             e.set("limitesCarga",mapper.valueToTree(c.getLimitesCargaAcademica()));
             e.set("adscripcion",mapper.valueToTree(c.getInscripcionPersona()));
@@ -256,7 +259,9 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
         if(cambio) {
             copiarEvaluacion(anterior,actual);
             validarConclusionEstudios(anterior, true);
-            throw new InscripcionException("Tu historial o las reglas cambiaron. Se actualizaron tu situación, carga y oferta. Revisa la selección y confirma nuevamente.");
+            String avisoCupo = actual.getEstadoAcademico().getAvisoCupoOptativas();
+            throw new InscripcionException("Tu historial o las reglas cambiaron. Se actualizaron tu situación, carga y oferta. "
+                + (avisoCupo.isEmpty() ? "" : avisoCupo + " ") + "Revisa la selección y confirma nuevamente.");
         }
         try { validarYRestaurarSeleccionActual(anterior, actual); }
         catch(InscripcionException ex) { copiarEvaluacion(anterior,actual); throw ex; }
@@ -423,11 +428,23 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
         });
         try {
             inscripcionService.insertarInscripciones(inscripciones);
+        } catch (CupoOptativaException ex) {
+            registrarRechazoCupoOptativas(contexto, ex.getMomentoEvaluacion(), ex.getMessage());
+            throw new InscripcionException(ex.getMessage(), ex);
         } catch(IllegalArgumentException ex) {
             // La transacción se revierte y la vista conserva el motivo que debe atenderse.
             throw new InscripcionException(ex.getMessage(),ex);
         }
 	}
+
+    private void registrarRechazoCupoOptativas(InscripcionContextoDTO contexto, String momento, String mensaje) {
+        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        com.fasterxml.jackson.databind.node.ObjectNode evidencia = mapper.createObjectNode();
+        evidencia.put("motivo", mensaje);
+        inscripcionService.registrarEvaluacion(contexto.obtenerIdPersona(), contexto.getInscripcionPersona().getIdPlan(),
+            contexto.getEstadoAcademico().getIdProcesoEvaluado(), momento,
+            contexto.getEvidenciaEvaluacion(), evidencia.toString());
+    }
 
 	private boolean intentarEnviarCorreoInscripcionAlEstudiante(InscripcionContextoDTO contexto) {
 		CorreoDTO correo = crearContenidoCorreo(contexto);
@@ -900,13 +917,40 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private void validarCargaPrimerSemestre(ResumenSeleccionMateriasDTO resumen, InscripcionContextoDTO contexto,
 			ConfiguracionCargaNuevoIngresoDTO configuracion) throws InscripcionException {
 		List<InscripcionMateriasDTO> materiasDisponibles = contexto.getEstadoAcademico().getMateriasDisponibles();
-		int cantidadMateriasOfertadas = materiasDisponibles.size();
-		long cantidadMaxMaterias = configuracion.getObligatoriasRequeridas()
-				+ configuracion.getOptativasRequeridas();
+		List<String> faltantes = new ArrayList<>();
+		long obligatoriasOfertadas = resumen.getObligatoriasDisponibles();
+		if (obligatoriasOfertadas < configuracion.getObligatoriasRequeridas()) {
+			faltantes.add("se requieren " + configuracion.getObligatoriasRequeridas()
+					+ " UD obligatorias y hay " + obligatoriasOfertadas + " disponibles");
+		}
 
-		if (cantidadMateriasOfertadas < cantidadMaxMaterias) {
-			throw new InscripcionException("La oferta disponible no permite cumplir la carga configurada para nuevo ingreso. "
-					+ "Contacta al administrador para revisar la configuración del plan.");
+		List<InscripcionMateriasDTO> optativasOfertadas = materiasDisponibles.stream()
+				.filter(materia -> InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma()))
+				.filter(materia -> !Boolean.TRUE.equals(materia.getDisabled()) || Boolean.TRUE.equals(materia.getCheck()))
+				.collect(Collectors.toList());
+		if (optativasOfertadas.size() < configuracion.getOptativasRequeridas()) {
+			faltantes.add("se requieren " + configuracion.getOptativasRequeridas()
+					+ " UD optativas y hay " + optativasOfertadas.size() + " disponibles");
+		}
+		if (configuracion.getOptativasRequeridas() == 2) {
+			for (String bloque : new String[] {"Bloque 1", "Bloque 2"}) {
+				if (optativasOfertadas.stream().noneMatch(materia -> bloque.equalsIgnoreCase(materia.getSubestructura()))) {
+					faltantes.add("no hay optativas disponibles en el " + bloque);
+				}
+			}
+		}
+		if (!faltantes.isEmpty()) {
+            EstadoAcademicoDTO estado = contexto.getEstadoAcademico();
+            String avisoCupo = estado.getAvisoCupoOptativas();
+            String mensaje = "No se puede finalizar la inscripción porque la oferta de nuevo ingreso es insuficiente: "
+                + String.join(", ", faltantes) + ". " + (avisoCupo.isEmpty() ? "" : avisoCupo + " ")
+                + "Contacta al administrador para revisar la oferta del plan.";
+            if (!estado.getOptativasSinCupo().isEmpty()) {
+                registrarRechazoCupoOptativas(contexto, "FALTA_CUPO_OPTATIVAS", mensaje);
+            } else if (!estado.getOptativasSinCupoConfigurado().isEmpty()) {
+                registrarRechazoCupoOptativas(contexto, "CUPO_OPTATIVAS_SIN_CONFIGURAR", mensaje);
+            }
+            throw new InscripcionException(mensaje);
 		}
 
 		if (esCargaAcademicaInvalidaPrimerSemestre(resumen.getObligatoriasSeleccionadas(),
@@ -967,7 +1011,9 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		for (InscripcionMateriasDTO materia : materiasSeleccionadas) {
 			validarPorcentajeAvanceCreditos(porcentajeCreditosActual, materia, configuracionGeneral);
 			validarSeleccionMateriasOctavoSemestre(materia, materiasReprobadasActuales, configuracionGeneral);
-			validarSeleccionOptativas(materia, materiasDisponibles, configuracionGeneral);
+			validarSeleccionOptativas(materia, materiasDisponibles, configuracionGeneral, materiasReprobadasActuales);
+            validarPrioridadOptativas(contexto, materia, configuracionGeneral, materiasReprobadasActuales,
+                porcentajeCreditosActual);
 			validarSeriacionAlFinalizar(materia, materiasSeleccionadas, materiasCursadasActuales);
 		}
 	}
@@ -1069,7 +1115,9 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 		validarPorcentajeAvanceCreditos(porcentajeCreditosCompletados, materiaSeleccionada, configuracionGeneral);
 		validarSeleccionMateriasOctavoSemestre(materiaSeleccionada, materiasReprobadas, configuracionGeneral);
-		validarSeleccionOptativas(materiaSeleccionada, materiasDisponibles, configuracionGeneral);
+		validarSeleccionOptativas(materiaSeleccionada, materiasDisponibles, configuracionGeneral, materiasReprobadas);
+        validarPrioridadOptativas(contexto, materiaSeleccionada, configuracionGeneral, materiasReprobadas,
+            porcentajeCreditosCompletados);
 		if (InscripcionUtils.esMateriaElectiva(materiaSeleccionada.getTipoPrograma())) {
 			validarSeleccionElectivas(materiasDisponibles, cantidadMaximaMateriasElectivas);
 		}
@@ -1135,10 +1183,42 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
         estadoAcademico.setIdProcesoEvaluado(idProcesoInscripcion);
 		estadoAcademico.setClasificacionInscripcion(estadoInscripcion);
         prepararOptativasAdicionales(estadoAcademico,persona);
+        aplicarCupoOfertaOptativas(estadoAcademico);
 
-		return estadoAcademico;
+        return estadoAcademico;
+    }
 
-	}
+    private void aplicarCupoOfertaOptativas(EstadoAcademicoDTO estado) {
+        Map<Long, Map<String, CupoOptativaDTO>> cuposPorProceso = new HashMap<>();
+        List<InscripcionMateriasDTO> disponibles = new ArrayList<>();
+        for (InscripcionMateriasDTO ud : estado.getMateriasDisponibles()) {
+            if (!InscripcionUtils.esMateriaOptativa(ud.getTipoPrograma()) || ud.getIdProcesoInscripcion() == null) {
+                disponibles.add(ud);
+                continue;
+            }
+            Long proceso = ud.getIdProcesoInscripcion();
+            if (!cuposPorProceso.containsKey(proceso)) {
+                cuposPorProceso.put(proceso, inscripcionService.controlaCupoOptativas(proceso)
+                    ? inscripcionService.obtenerCuposOptativas(proceso).stream()
+                        .collect(Collectors.toMap(CupoOptativaDTO::getClave, item -> item))
+                    : null);
+            }
+            Map<String, CupoOptativaDTO> cupos = cuposPorProceso.get(proceso);
+            String nombre = ud.getNombreTentativoPrograma();
+            String clave = nombre == null ? "" : nombre.trim().toLowerCase(java.util.Locale.ROOT);
+            CupoOptativaDTO cupo = cupos == null ? null : cupos.get(clave);
+            String etiqueta = ud.getNombreTentativoPrograma() + " (" + ud.getSubestructura() + ")";
+            if (cupos == null || (cupo != null && cupo.getMaximo() != null
+                && cupo.getOcupados() < cupo.getMaximo())) {
+                disponibles.add(ud);
+            } else if (cupo == null || cupo.getMaximo() == null) {
+                estado.getOptativasSinCupoConfigurado().add(etiqueta);
+            } else {
+                estado.getOptativasSinCupo().add(etiqueta);
+            }
+        }
+        estado.setMateriasDisponibles(disponibles);
+    }
 
     private boolean mismaOptativa(InscripcionMateriasDTO m, InscripcionMateriasReprobadasDTO d) {
         return Objects.equals(m.getIdPrograma(),d.getIdPrograma()) || (!normalizarNombreMateria(m.getNombreTentativoPrograma()).isEmpty()
@@ -2449,16 +2529,25 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 	public void validarSeleccionOptativas(InscripcionMateriasDTO materiaSeleccionada,
 			List<InscripcionMateriasDTO> materiasDisponibles, ConfiguracionCargaRegularDTO configuracion)
 			throws InscripcionException {
+        validarSeleccionOptativas(materiaSeleccionada, materiasDisponibles, configuracion, Collections.emptyList());
+    }
+
+    private void validarSeleccionOptativas(InscripcionMateriasDTO materiaSeleccionada,
+            List<InscripcionMateriasDTO> materiasDisponibles, ConfiguracionCargaRegularDTO configuracion,
+            List<InscripcionMateriasReprobadasDTO> reprobadas) throws InscripcionException {
 		if (!Boolean.TRUE.equals(configuracion.getActiva())) {
 			return;
 		}
 		if (InscripcionUtils.esMateriaOptativa(materiaSeleccionada.getTipoPrograma())) {
-			if (materiaSeleccionada.getIdAdeudoOptativa()==null && contarOptativasBloqueSemestreSeleccionadas(materiaSeleccionada, materiasDisponibles)
+            if (Boolean.TRUE.equals(configuracion.getLimitarOptativasOrdinariasPorPeriodo())) {
+                validarLimitesOptativasOrdinarias(materiaSeleccionada, materiasDisponibles, configuracion, reprobadas);
+            } else if (materiaSeleccionada.getIdAdeudoOptativa()==null && contarOptativasBloqueSemestreSeleccionadas(materiaSeleccionada, materiasDisponibles)
 					>= configuracion.getMaximoOptativasPorBloque()) {
 				throw new InscripcionException("Solo se permite seleccionar un máximo de "
 						+ configuracion.getMaximoOptativasPorBloque()
 						+ " unidad(es) didáctica(s) optativa(s) por bloque, por favor revisa tu selección.");
-			} else if (Boolean.TRUE.equals(configuracion.getImpedirClaveOptativaRepetida())
+			}
+            if (Boolean.TRUE.equals(configuracion.getImpedirClaveOptativaRepetida())
 					&& esClaveOptativaYaSeleccionada(materiaSeleccionada, materiasDisponibles)) {
 				throw new InscripcionException(
 						"No es posible tomar la misma unidad didáctica dos veces, por favor revisa tu selección.");
@@ -2466,6 +2555,106 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 
 		}
 	}
+
+    private boolean aplicaPrioridadOptativas(InscripcionContextoDTO contexto, ConfiguracionCargaRegularDTO configuracion) {
+        return Boolean.TRUE.equals(configuracion.getActiva())
+            && Boolean.TRUE.equals(configuracion.getPriorizarOptativasSemestreReferencia())
+            && !Boolean.TRUE.equals(esNuevoIngreso(contexto))
+            && contexto.getSemestreReferencia() != null && contexto.getSemestreReferencia() > 1;
+    }
+
+    private boolean esOptativaOrdinaria(InscripcionMateriasDTO ud, Predicate<InscripcionMateriasDTO> esReprobada) {
+        return InscripcionUtils.esMateriaOptativa(ud.getTipoPrograma())
+            && ud.getIdAdeudoOptativa() == null && !esReprobada.test(ud);
+    }
+
+    private Predicate<InscripcionMateriasDTO> optativaDisponibleDeReferencia(InscripcionContextoDTO contexto,
+            ConfiguracionCargaRegularDTO configuracion, List<InscripcionMateriasReprobadasDTO> reprobadas,
+            Double avance) {
+        Predicate<InscripcionMateriasDTO> esReprobada = crearComparacionMateriasReprobadas(reprobadas);
+        return ud -> {
+            if (!esOptativaOrdinaria(ud, esReprobada)
+                    || !Objects.equals(contexto.getSemestreReferencia(), InscripcionUtils.obtenerNumeroSemestre(ud.getEstructura()))
+                    || (Boolean.TRUE.equals(ud.getDisabled()) && !Boolean.TRUE.equals(ud.getCheck()))
+                    || (ud.getOportunidades() != null && ud.getOportunidades().isAgotada())) {
+                return false;
+            }
+            try {
+                validarPorcentajeAvanceCreditos(avance, ud, configuracion);
+                validarSeleccionMateriasOctavoSemestre(ud, reprobadas, configuracion);
+                return true;
+            } catch (InscripcionException ex) {
+                return false;
+            }
+        };
+    }
+
+    private void ordenarOptativasPorSemestreReferencia(InscripcionContextoDTO contexto) {
+        if (contexto.getSemestreReferencia() == null || Boolean.TRUE.equals(esNuevoIngreso(contexto))) {
+            return;
+        }
+        ConfiguracionCargaRegularDTO configuracion = obtenerConfiguracionRestriccionesAcademicasGenerales();
+        if (aplicaPrioridadOptativas(contexto, configuracion)) {
+            Predicate<InscripcionMateriasDTO> prioritaria = optativaDisponibleDeReferencia(contexto, configuracion,
+                obtenerMateriasReprobadas(contexto), obtenerPorcentajeCreditosCompletados(contexto));
+            obtenerMateriasDisponibles(contexto).sort(Comparator.comparing(prioritaria.negate()::test));
+        }
+    }
+
+    private void validarPrioridadOptativas(InscripcionContextoDTO contexto, InscripcionMateriasDTO seleccionada,
+            ConfiguracionCargaRegularDTO configuracion, List<InscripcionMateriasReprobadasDTO> reprobadas,
+            Double avance) throws InscripcionException {
+        if (!aplicaPrioridadOptativas(contexto, configuracion)
+                || !esOptativaOrdinaria(seleccionada, crearComparacionMateriasReprobadas(reprobadas))
+                || Objects.equals(contexto.getSemestreReferencia(), InscripcionUtils.obtenerNumeroSemestre(seleccionada.getEstructura()))) {
+            return;
+        }
+        if (!Boolean.TRUE.equals(esRegular(contexto))) {
+            throw new InscripcionException("Solo los estudiantes regulares pueden complementar su selección con optativas de otros semestres.");
+        }
+
+        List<InscripcionMateriasDTO> prioritarias = obtenerMateriasDisponibles(contexto).stream()
+            .filter(optativaDisponibleDeReferencia(contexto, configuracion, reprobadas, avance))
+            .collect(Collectors.toList());
+        List<InscripcionMateriasDTO> elegidas = prioritarias.stream()
+            .filter(ud -> Boolean.TRUE.equals(ud.getCheck())).collect(Collectors.toList());
+        Set<String> nombresElegidos = elegidas.stream()
+            .map(ud -> normalizarNombreMateria(ud.getNombreTentativoPrograma()))
+            .filter(nombre -> !nombre.isEmpty()).collect(Collectors.toSet());
+        boolean quedanOpciones = prioritarias.stream()
+            .filter(ud -> !nombresElegidos.contains(normalizarNombreMateria(ud.getNombreTentativoPrograma())))
+            .anyMatch(ud -> elegidas.stream().noneMatch(elegida ->
+                Objects.equals(ud.getSubestructura(), elegida.getSubestructura())
+                    || (Boolean.TRUE.equals(configuracion.getImpedirClaveOptativaRepetida())
+                        && elegida.getClavePrograma() != null && esClaveProgramaIgual(ud, elegida))));
+        if (quedanOpciones) {
+            throw new InscripcionException("Selecciona primero las optativas disponibles del semestre de referencia ("
+                + contexto.getSemestreReferencia() + ") antes de elegir optativas de otros semestres.");
+        }
+    }
+
+    private void validarLimitesOptativasOrdinarias(InscripcionMateriasDTO seleccionada,
+            List<InscripcionMateriasDTO> disponibles, ConfiguracionCargaRegularDTO configuracion,
+            List<InscripcionMateriasReprobadasDTO> reprobadas) throws InscripcionException {
+        Predicate<InscripcionMateriasDTO> esReprobada = crearComparacionMateriasReprobadas(reprobadas);
+        if (seleccionada.getIdAdeudoOptativa() != null || esReprobada.test(seleccionada)) {
+            return;
+        }
+        List<InscripcionMateriasDTO> otrasOrdinarias = disponibles.stream()
+            .filter(ud -> ud != seleccionada && Boolean.TRUE.equals(ud.getCheck()))
+            .filter(ud -> esOptativaOrdinaria(ud, esReprobada))
+            .collect(Collectors.toList());
+        long mismoBloque = otrasOrdinarias.stream()
+            .filter(ud -> Objects.equals(ud.getSubestructura(), seleccionada.getSubestructura())).count();
+        if (mismoBloque >= configuracion.getMaximoOptativasPorBloque()) {
+            throw new InscripcionException("Solo puedes seleccionar hasta " + configuracion.getMaximoOptativasPorBloque()
+                + " optativa(s) nueva(s) por bloque en este periodo. Revisa tu selección.");
+        }
+        if (otrasOrdinarias.size() >= configuracion.getMaximoOptativasOrdinariasPorPeriodo()) {
+            throw new InscripcionException("Solo puedes seleccionar hasta " + configuracion.getMaximoOptativasOrdinariasPorPeriodo()
+                + " optativa(s) nueva(s) en este periodo. Revisa tu selección.");
+        }
+    }
 
 	private boolean esClaveOptativaYaSeleccionada(InscripcionMateriasDTO materiaSeleccionada,
 			List<InscripcionMateriasDTO> materiasDisponibles) {

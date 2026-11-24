@@ -23,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignaturasPorSemestreDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CupoOptativaDTO;
+import mx.gob.sedesol.basegestor.commons.utils.CupoOptativaException;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaIrregularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaRegularDTO;
@@ -1656,6 +1658,96 @@ public class InscripcionRepository implements IinscripcionRepository {
 	}
 
 	@SuppressWarnings("unchecked")
+    @Override
+    public boolean controlaCupoOptativas(Long proceso) {
+        return estadoCupoOptativas(proceso, false);
+    }
+
+    private boolean estadoCupoOptativas(Long proceso, boolean bloquear) {
+        String sql = "SELECT control_cupo_optativas FROM tbl_procesos_inscripcion "
+            + "WHERE proceso_inscripcion_id = :proceso" + (bloquear ? " FOR UPDATE" : "");
+        Object value = entityManager.createNativeQuery(sql).setParameter("proceso", proceso).getSingleResult();
+        return Integer.valueOf(1).equals(getIntegerValue(value));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<CupoOptativaDTO> obtenerCuposOptativas(Long proceso) {
+        String clave = "LOWER(TRIM(CONVERT(f.nombre_tentativo USING utf8mb4))) COLLATE utf8mb4_bin";
+        String sql = "SELECT oferta.clave, oferta.nombre, c.cupo_maximo, "
+            + "(SELECT COUNT(DISTINCT i.id) FROM tbl_inscripciones i "
+            + "JOIN tbl_ficha_descriptiva_programa f ON f.id_programa = i.idprograma AND f.id_plan = i.idplan "
+            + "WHERE i.id_proceso_inscripcion = :proceso AND f.tipo = 'Optativa' AND "
+            + clave + " = oferta.clave) ocupados "
+            + "FROM (SELECT " + clave + " clave, MIN(TRIM(f.nombre_tentativo)) nombre "
+            + "FROM rel_proceso_inscipcion_planesyprogramas o "
+            + "JOIN tbl_ficha_descriptiva_programa f ON f.id_programa = o.id_programa AND f.id_plan = o.id_plan "
+            + "WHERE o.id_proceso_inscripcion = :proceso AND f.tipo = 'Optativa' AND TRIM(f.nombre_tentativo) <> '' "
+            + "GROUP BY " + clave + ") oferta "
+            + "LEFT JOIN rel_cupo_optativa_proceso c ON c.id_proceso_inscripcion = :proceso "
+            + "AND c.clave_optativa = oferta.clave ORDER BY oferta.nombre, oferta.clave";
+        List<Object[]> rows = entityManager.createNativeQuery(sql).setParameter("proceso", proceso).getResultList();
+        return rows.stream().map(row -> new CupoOptativaDTO((String) row[0], (String) row[1],
+            getIntegerValue(row[2]), getLongValue(row[3]))).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    public void guardarCuposOptativas(Long proceso, boolean activo, List<CupoOptativaDTO> cupos) {
+        estadoCupoOptativas(proceso, true);
+        List<CupoOptativaDTO> oferta = obtenerCuposOptativas(proceso);
+        java.util.Map<String, Integer> editados = new java.util.HashMap<>();
+        for (CupoOptativaDTO cupo : cupos) {
+            if (editados.containsKey(cupo.getClave())) {
+                throw new IllegalArgumentException("La configuración contiene una optativa duplicada.");
+            }
+            editados.put(cupo.getClave(), cupo.getMaximo());
+        }
+        if (oferta.size() != editados.size() || oferta.stream().anyMatch(ud -> !editados.containsKey(ud.getClave()))) {
+            throw new IllegalArgumentException("La oferta cambió. Vuelve a consultar el proceso antes de guardar.");
+        }
+        for (CupoOptativaDTO ud : oferta) {
+            Integer maximo = editados.get(ud.getClave());
+            if ((activo && maximo == null) || (maximo != null && (maximo <= 0 || (activo && maximo < ud.getOcupados())))) {
+                throw new IllegalArgumentException("Captura un cupo positivo que cubra las inscripciones confirmadas de "
+                    + ud.getNombre() + " (" + ud.getOcupados() + ").");
+            }
+            if (maximo == null) {
+                entityManager.createNativeQuery("DELETE FROM rel_cupo_optativa_proceso "
+                    + "WHERE id_proceso_inscripcion = :proceso AND clave_optativa = :optativa")
+                    .setParameter("proceso", proceso).setParameter("optativa", ud.getClave()).executeUpdate();
+            } else {
+                entityManager.createNativeQuery("INSERT INTO rel_cupo_optativa_proceso "
+                    + "(id_proceso_inscripcion,clave_optativa,cupo_maximo) VALUES (:proceso,:optativa,:maximo) "
+                    + "ON DUPLICATE KEY UPDATE cupo_maximo = VALUES(cupo_maximo)")
+                    .setParameter("proceso", proceso).setParameter("optativa", ud.getClave())
+                    .setParameter("maximo", maximo).executeUpdate();
+            }
+        }
+        entityManager.createNativeQuery("UPDATE tbl_procesos_inscripcion SET control_cupo_optativas = :activo "
+            + "WHERE proceso_inscripcion_id = :proceso")
+            .setParameter("activo", activo ? 1 : 0).setParameter("proceso", proceso).executeUpdate();
+    }
+
+    @Override
+    public void validarCupoOptativaParaGuardar(InscripcionInsertDTO inscripcion) {
+        Long proceso = inscripcion.getIdProcesoInscripcion();
+        if (!estadoCupoOptativas(proceso, true)) {
+            return;
+        }
+        String asignatura = inscripcion.getAsignatura();
+        String clave = asignatura == null ? "" : asignatura.trim().toLowerCase(java.util.Locale.ROOT);
+        CupoOptativaDTO cupo = obtenerCuposOptativas(proceso).stream()
+            .filter(ud -> ud.getClave().equals(clave)).findFirst().orElse(null);
+        if (cupo == null || cupo.getMaximo() == null) {
+            throw new CupoOptativaException("Falta configurar el cupo de la optativa " + asignatura
+                + ". Contacta al administrador para revisar la oferta.", true);
+        }
+        if (cupo.getOcupados() >= cupo.getMaximo()) {
+            throw new CupoOptativaException("Falta de cupo para la optativa " + asignatura
+                + ". Actualiza tu selección y elige una alternativa disponible.", false);
+        }
+    }
+
 	@Override
 	public boolean tieneCupoElectiva(Long idProcesoInscripcion, Long idPrograma) {
 		String configSql = "SELECT sin_limite, cupo_maximo FROM rel_configuracion_electivas "
@@ -2466,7 +2558,10 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "MAX(CASE WHEN p.clave_parametro='OPTATIVAS_REQUERIDAS_PLAN' THEN p.valor_default END) AS optativas_requeridas_plan,"
 				+ "MAX(CASE WHEN p.clave_parametro='OPTATIVAS_SOLO_REQUERIDAS' THEN p.valor_default END) AS optativas_solo_requeridas,"
 				+ "MAX(CASE WHEN p.clave_parametro='MENSAJE_OPTATIVA_SOLO_REQUERIDA' THEN p.valor_default END) AS mensaje_optativa_solo_requerida,"
-				+ "MAX(CASE WHEN p.clave_parametro='SEMESTRE_APLICACION_AVANCE_ANUAL' THEN p.valor_default END) AS semestre_aplicacion_avance_anual "
+				+ "MAX(CASE WHEN p.clave_parametro='SEMESTRE_APLICACION_AVANCE_ANUAL' THEN p.valor_default END) AS semestre_aplicacion_avance_anual,"
+                + "MAX(CASE WHEN p.clave_parametro='LIMITAR_OPTATIVAS_ORDINARIAS_POR_PERIODO' THEN p.valor_default END),"
+                + "MAX(CASE WHEN p.clave_parametro='MAXIMO_OPTATIVAS_ORDINARIAS_POR_PERIODO' THEN p.valor_default END),"
+                + "MAX(CASE WHEN p.clave_parametro='PRIORIZAR_OPTATIVAS_SEMESTRE_REFERENCIA' THEN p.valor_default END) "
 				+ "FROM cat_reglas_inscripcion cri JOIN cat_parametros_regla_inscripcion p ON p.clave_regla=cri.clave "
 				+ "WHERE cri.clave='RESTRICCIONES_ACADEMICAS_GENERALES' GROUP BY cri.nombre,cri.descripcion,cri.activo";
 		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
@@ -2497,6 +2592,9 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setOptativasSoloRequeridas(row[18].toString());
 		dto.setMensajeOptativaSoloRequerida(row[19].toString());
 		dto.setSemestreAplicacionAvanceAnual(row[20] == null ? null : row[20].toString());
+        dto.setPriorizarOptativasSemestreReferencia(obtenerBooleanoConfiguracion(row[23], "PRIORIZAR_OPTATIVAS_SEMESTRE_REFERENCIA", "general"));
+        dto.setLimitarOptativasOrdinariasPorPeriodo(obtenerBooleanoConfiguracion(row[21], "LIMITAR_OPTATIVAS_ORDINARIAS_POR_PERIODO", "general"));
+        dto.setMaximoOptativasOrdinariasPorPeriodo(obtenerEnteroConfiguracion(row[22], "MAXIMO_OPTATIVAS_ORDINARIAS_POR_PERIODO", "general"));
 		validarRestriccionesAcademicas(dto);
 		return dto;
 	}
@@ -2513,6 +2611,12 @@ public class InscripcionRepository implements IinscripcionRepository {
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "SEMESTRE_INICIAL_ANTECEDENTES", configuracion.getSemestreInicialAntecedentes().toString());
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "SEMESTRE_FINAL_ANTECEDENTES", configuracion.getSemestreFinalAntecedentes().toString());
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "MAXIMO_OPTATIVAS_POR_BLOQUE", configuracion.getMaximoOptativasPorBloque().toString());
+        guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "PRIORIZAR_OPTATIVAS_SEMESTRE_REFERENCIA",
+            booleano(configuracion.getPriorizarOptativasSemestreReferencia()));
+        guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "LIMITAR_OPTATIVAS_ORDINARIAS_POR_PERIODO",
+            booleano(configuracion.getLimitarOptativasOrdinariasPorPeriodo()));
+        guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "MAXIMO_OPTATIVAS_ORDINARIAS_POR_PERIODO",
+            configuracion.getMaximoOptativasOrdinariasPorPeriodo().toString());
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "OPTATIVAS_APROBADAS_PARA_OPCIONALES", configuracion.getOptativasAprobadasParaOpcionales().toString());
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "IMPEDIR_CLAVE_OPTATIVA_REPETIDA", booleano(configuracion.getImpedirClaveOptativaRepetida()));
 		guardarValorDefaultRegla("RESTRICCIONES_ACADEMICAS_GENERALES", "MAXIMO_ELECTIVAS_POR_PERIODO", configuracion.getMaximoElectivasPorPeriodo().toString());
@@ -2564,6 +2668,10 @@ public class InscripcionRepository implements IinscripcionRepository {
 				|| configuracion.getSemestreFinalAntecedentes() == null
 				|| configuracion.getSemestreFinalAntecedentes() < configuracion.getSemestreInicialAntecedentes()
 				|| configuracion.getMaximoOptativasPorBloque() == null || configuracion.getMaximoOptativasPorBloque() < 0
+                || configuracion.getPriorizarOptativasSemestreReferencia() == null
+                || configuracion.getLimitarOptativasOrdinariasPorPeriodo() == null
+                || configuracion.getMaximoOptativasOrdinariasPorPeriodo() == null
+                || configuracion.getMaximoOptativasOrdinariasPorPeriodo() < 0
 				|| configuracion.getOptativasAprobadasParaOpcionales() == null
 				|| configuracion.getOptativasAprobadasParaOpcionales() < 0
 				|| configuracion.getMaximoElectivasPorPeriodo() == null || configuracion.getMaximoElectivasPorPeriodo() < 0) {

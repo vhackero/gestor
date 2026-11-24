@@ -13,9 +13,11 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.FacesContext;
 
 import org.apache.log4j.Logger;
 import org.primefaces.context.RequestContext;
@@ -34,6 +36,8 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescrip
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 import mx.gob.sedesol.basegestor.service.gestionescolar.ConvocatoriaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionesService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CupoOptativaDTO;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 
 @ManagedBean
@@ -210,6 +214,9 @@ public class InscripocionesBean extends BaseBean {
 	}
 	
 	public void altaInscripcionExtra() throws Exception {
+        if (!validarFechasProceso(inscripcionParamNueva.getFechaInicio(), inscripcionParamNueva.getFechaFin())) {
+            return;
+        }
 		
 		logger.info("***********************Inicio Alta Inscripcion Extraordinaria***********************");
 		
@@ -266,6 +273,9 @@ public class InscripocionesBean extends BaseBean {
 	
 	
 	public void altaInscripcion() throws Exception {
+        if (!validarFechasProceso(inscripcionParamNueva.getFechaInicio(), inscripcionParamNueva.getFechaFin())) {
+            return;
+        }
 		
 		logger.info("***********************Inicio Alta Inscripcion Ordinaria***********************");
 		
@@ -571,6 +581,39 @@ public class InscripocionesBean extends BaseBean {
 		this.paginaActual = "";
 	}
 
+    @ManagedProperty("#{inscripcionService}")
+    private InscripcionService inscripcionService;
+    private boolean controlCupoOptativas;
+    private List<CupoOptativaDTO> cuposOptativas = new ArrayList<>();
+
+    public void setInscripcionService(InscripcionService service) {
+        this.inscripcionService = service;
+    }
+
+    public boolean isControlCupoOptativas() { return controlCupoOptativas; }
+    public void setControlCupoOptativas(boolean activo) { controlCupoOptativas = activo; }
+    public List<CupoOptativaDTO> getCuposOptativas() { return cuposOptativas; }
+
+    private void consultarCuposOptativas(Long proceso) {
+        controlCupoOptativas = inscripcionService.controlaCupoOptativas(proceso);
+        cuposOptativas = inscripcionService.obtenerCuposOptativas(proceso);
+    }
+
+    public void guardarCuposOptativas() {
+        Long proceso = Long.valueOf(registroSeleccionado.getProcesoInscripcionId());
+        FacesContext context = FacesContext.getCurrentInstance();
+        try {
+            inscripcionService.guardarCuposOptativas(proceso, controlCupoOptativas, cuposOptativas);
+            consultarCuposOptativas(proceso);
+            context.addMessage("mensajeCupoOptativas", new FacesMessage(FacesMessage.SEVERITY_INFO,
+                "Cupo de optativas guardado.", null));
+        } catch (IllegalArgumentException ex) {
+            context.addMessage("mensajeCupoOptativas", new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                ex.getMessage(), null));
+            context.validationFailed();
+        }
+    }
+
 	public void habilitarEdicion(InscripcionesConsultaResumen registro) throws Exception {
 	    // 1) Parseamos las fechas de inicio y fin desde el registro
 	    SimpleDateFormat formatoEntrada = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
@@ -589,6 +632,7 @@ public class InscripocionesBean extends BaseBean {
 
 	    registroSeleccionado = registro;
 		prepararPlanProgramaEdicion();
+        consultarCuposOptativas(Long.valueOf(registro.getProcesoInscripcionId()));
 	    this.mostrarFormularioEdicion = true;
 	}
 
@@ -598,7 +642,26 @@ public class InscripocionesBean extends BaseBean {
 //		eliminarRegistro(procesoInscripcionId);
 //	}
 
-	public void guardarCambios() throws Exception {
+	private boolean validarFechasProceso(Date inicio, Date fin) {
+        String mensaje;
+        if (inicio == null || fin == null) {
+            mensaje = "Captura la fecha de inicio y la fecha de fin del proceso.";
+        } else if (fin.before(inicio)) {
+            mensaje = "La fecha de fin no puede ser anterior a la fecha de inicio.";
+        } else {
+            return true;
+        }
+
+        FacesContext contexto = FacesContext.getCurrentInstance();
+        contexto.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, mensaje, null));
+        contexto.validationFailed();
+        return false;
+    }
+
+    public void guardarCambios() throws Exception {
+        if (!validarFechasProceso(fechaInicioEdit, fechaFinEdit)) {
+            return;
+        }
 	    try {
 	        Long procesoInscripcionId = Long.parseLong(registroSeleccionado.getProcesoInscripcionId());
 	        String nombre = registroSeleccionado.getNombre();
