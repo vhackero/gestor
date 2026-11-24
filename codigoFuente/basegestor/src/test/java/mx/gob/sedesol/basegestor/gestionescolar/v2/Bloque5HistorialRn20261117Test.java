@@ -71,9 +71,20 @@ public class Bloque5HistorialRn20261117Test {
         assertEquals(resultado.getAdeudosVigentes(), Integer.valueOf(3));
         assertEquals(resultado.getAdeudosEnRevision(), Integer.valueOf(1));
         assertTrue(resultado.getRestricciones().contains(CodigoMotivoCurricularV2.UMBRAL_64_EN_REVISION));
+        assertFalse(resultado.getCondicionesDetectadas().toString().contains("CUATRO_O_MAS_REPROBADAS"));
         assertEquals(intentos(resultado, 14L).getEstadoLimite(), EstadoLimiteIntentosV2.REQUIERE_REVISION);
         assertEquals(intentos(resultado, 14L).getOportunidadesDisponiblesMinimas(), Integer.valueOf(2));
         assertEquals(intentos(resultado, 14L).getOportunidadesDisponiblesMaximas(), Integer.valueOf(3));
+    }
+
+    @Test public void cuatroAdeudosConfirmadosAplicaRn64SinConfundirRevision() {
+        ResultadoEvaluacionCurricularV2DTO resultado = evaluar(
+                ud(15L, "A", EstadoUnidadCurricularV2.REPROBADA, intento("A1", EstadoIntentoAcreditacionV2.REPROBADO)),
+                ud(16L, "B", EstadoUnidadCurricularV2.REPROBADA, intento("B1", EstadoIntentoAcreditacionV2.REPROBADO)),
+                ud(17L, "C", EstadoUnidadCurricularV2.REPROBADA, intento("C1", EstadoIntentoAcreditacionV2.REPROBADO)),
+                ud(18L, "D", EstadoUnidadCurricularV2.REPROBADA, intento("D1", EstadoIntentoAcreditacionV2.REPROBADO)));
+        assertEquals(resultado.getAdeudosVigentes(), Integer.valueOf(4));
+        assertTrue(resultado.getCondicionesDetectadas().toString().contains("CUATRO_O_MAS_REPROBADAS"));
     }
 
     @Test public void gc17dNoInfiereUnaSustitucionAdicionalSinFuenteVerificable() {

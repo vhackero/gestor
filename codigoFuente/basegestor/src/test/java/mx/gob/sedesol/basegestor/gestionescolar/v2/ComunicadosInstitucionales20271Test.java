@@ -17,6 +17,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIncorporaci
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoLimiteIntentosV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EvaluacionIntentosUnidadV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ExcepcionInstitucionalCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ParametrosCurricularesV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
@@ -123,6 +124,28 @@ public class ComunicadosInstitucionales20271Test {
         assertAvisoUnico(evaluar("2027-1", ud(43L, 3)));
     }
 
+    @Test public void excepcionVigenteConservaRestriccionYConcedeHabilitacionInformativaSinReiniciarOportunidades() {
+        ContextoEvaluacionCurricularV2DTO sinExcepcion = contexto("2027-1");
+        sinExcepcion.setFechaEvaluacion(fecha("2027-01-15"));
+        sinExcepcion.getUnidades().add(ud(44L, 3));
+        ResultadoEvaluacionCurricularV2DTO base = new EvaluacionCurricularV2ServiceImpl().evaluarSombra(sinExcepcion);
+
+        ContextoEvaluacionCurricularV2DTO conExcepcion = contexto("2027-1");
+        conExcepcion.setFechaEvaluacion(fecha("2027-01-15"));
+        conExcepcion.getUnidades().add(ud(44L, 3));
+        ExcepcionInstitucionalCurricularV2DTO excepcion = new ExcepcionInstitucionalCurricularV2DTO();
+        excepcion.setAplicable(Boolean.TRUE); excepcion.setReferencia("EXC-SINT-44");
+        excepcion.setAutoridad("AUTORIDAD"); excepcion.setReglasComprendidas("RN-1.4");
+        excepcion.setProceso("INSCRIPCION"); excepcion.setPeriodoAplicacion("2027-1");
+        excepcion.setInicioVigencia("2027-01-01"); excepcion.setFinVigencia("2027-01-31");
+        conExcepcion.getExcepcionesInstitucionales().add(excepcion);
+        ResultadoEvaluacionCurricularV2DTO resultado = new EvaluacionCurricularV2ServiceImpl().evaluarSombra(conExcepcion);
+
+        assertFalse(decision(resultado, 44L).getHabilitada());
+        assertEquals(intentos(resultado, 44L).getOportunidadesConsumidas(), intentos(base, 44L).getOportunidadesConsumidas());
+        assertTrue(contieneAviso(resultado, CodigoAvisoEvaluacionCurricularV2.HABILITACION_CONCEDIDA_POR_EXCEPCION_INSTITUCIONAL));
+    }
+
     @Test public void gc19fSinRestriccionNoMuestraAviso() {
         ResultadoEvaluacionCurricularV2DTO resultado = evaluar("2027-1", ud(5L, 1));
         assertTrue(resultado.getAvisos().isEmpty());
@@ -145,6 +168,13 @@ public class ComunicadosInstitucionales20271Test {
         ContextoEvaluacionCurricularV2DTO contexto = contexto(periodo);
         contexto.getUnidades().add(unidad);
         return new EvaluacionCurricularV2ServiceImpl().evaluarSombra(contexto);
+    }
+
+    private boolean contieneAviso(ResultadoEvaluacionCurricularV2DTO resultado, CodigoAvisoEvaluacionCurricularV2 codigo) {
+        for (mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AvisoEvaluacionCurricularV2DTO aviso : resultado.getAvisos()) {
+            if (codigo == aviso.getCodigo()) return true;
+        }
+        return false;
     }
 
     private ContextoEvaluacionCurricularV2DTO contexto(String periodo) {

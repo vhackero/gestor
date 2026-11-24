@@ -8,6 +8,7 @@ import java.util.Collections;
 
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
+import org.testng.annotations.DataProvider;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
@@ -27,9 +28,16 @@ import mx.gob.sedesol.basegestor.service.impl.gestionescolar.v2.SimuladorCurricu
 /** Contrato común Bloque 7: ningún consumidor reinterpreta la evaluación V2. */
 public class ConsistenciaConsumidoresBloque7Test {
 
-    @Test
-    public void catalogoB7CasoRepresentativoEntregaElMismoContratoALosCuatroConsumidores() throws Exception {
-        AsistenteInscripcionContextoDTO fuente = fuente();
+    @DataProvider(name = "escenariosContratoComun")
+    public Object[][] escenariosContratoComun() {
+        return new Object[][] {{"rezago-severo-64"}, {"b2-pendiente-seriacion"},
+                {"acta-cerrada-sin-calificacion"}, {"comunicado-2027-1"},
+                {"excepcion-vigente"}, {"recursamiento-quinto"}};
+    }
+
+    @Test(dataProvider = "escenariosContratoComun")
+    public void catalogoB7EntregaElMismoContratoALosCuatroConsumidores(String escenario) throws Exception {
+        AsistenteInscripcionContextoDTO fuente = fuente(escenario);
         ContextoEvaluacionCurricularV2AdapterImpl adaptador = new ContextoEvaluacionCurricularV2AdapterImpl();
         EvaluacionCurricularV2ServiceImpl evaluador = new EvaluacionCurricularV2ServiceImpl();
 
@@ -67,12 +75,12 @@ public class ConsistenciaConsumidoresBloque7Test {
                 + resultado.getDecisiones().get(0).getEstadoOperativoInterbloque() + "|" + resultado.getAvisos();
     }
 
-    private AsistenteInscripcionContextoDTO fuente() {
+    private AsistenteInscripcionContextoDTO fuente(String escenario) {
         InscripcionPersonaDTO persona = new InscripcionPersonaDTO(); persona.setIdPersona(Long.valueOf(7001L)); persona.setIdPlan(Long.valueOf(202402L));
         InscripcionContextoDTO base = new InscripcionContextoDTO(); base.setInscripcionPersona(persona);
         UnidadDecisionInscripcionDTO unidad = new UnidadDecisionInscripcionDTO();
         unidad.setUdId(Long.valueOf(501L)); unidad.setClave("B7-REP"); unidad.setNombre("Unidad sintética");
-        unidad.setTipoUd("Obligatoria"); unidad.setSemestre(Integer.valueOf(3)); unidad.setBloque(Integer.valueOf(1));
+        unidad.setTipoUd("Obligatoria"); unidad.setSemestre(Integer.valueOf("recursamiento-quinto".equals(escenario) ? 5 : 3)); unidad.setBloque(Integer.valueOf("b2-pendiente-seriacion".equals(escenario) ? 2 : 1));
         unidad.setEstatusHistorico("Reprobada"); unidad.setOfertada(Boolean.TRUE); unidad.setSeleccionable(Boolean.TRUE);
         IntentoAcreditacionUnidadV2DTO intento = new IntentoAcreditacionUnidadV2DTO();
         intento.setIdPrograma(Long.valueOf(501L)); intento.setIdEjecucionTecnico("B7-I-1"); intento.setPeriodo("2026-2"); intento.setEstado(EstadoIntentoAcreditacionV2.REPROBADO);

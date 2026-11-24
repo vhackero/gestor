@@ -240,6 +240,8 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         consolidarDecisionControlAvance(resultado, contexto);
         evaluarInscripcionInicialDiferida(resultado, contexto, unidadesNormalizadas);
         agregarAvisoComunicadoInstitucional20271(resultado, contexto);
+        // RN-2.3 es una evidencia independiente del comunicado general 2027-1.
+        agregarAvisosExcepcionesInstitucionales(resultado, contexto);
         evaluarReincorporacionTrasPeriodoNoCursado(resultado, contexto, unidadesNormalizadas);
         evaluarReincorporacionTrasBajaTemporal(resultado, contexto, unidadesNormalizadas);
         evaluarReincorporacionTrasBajaParcial(resultado, contexto, unidadesNormalizadas);
@@ -2810,7 +2812,6 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
         aviso.setPeriodoAplicacion(parametros.getPeriodoComunicadoInstitucional());
         aviso.setVigencia(parametros.getVigenciaComunicadoInstitucional());
         resultado.getAvisos().add(aviso);
-        agregarAvisosExcepcionesInstitucionales(resultado, contexto);
     }
 
     /** RN-2.3: una excepción se informa sin borrar la restricción detectada. */
