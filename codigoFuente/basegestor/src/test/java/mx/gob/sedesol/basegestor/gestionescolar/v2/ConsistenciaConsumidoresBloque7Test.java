@@ -59,7 +59,8 @@ public class ConsistenciaConsumidoresBloque7Test {
 
     private String huella(ResultadoEvaluacionCurricularV2DTO resultado) {
         return resultado.getSituacionAcademicaCalculada() + "|" + resultado.getCantidadReprobadasVigentes()
-                + "|" + resultado.getUnidadesOrigenIrregularidad() + "|" + resultado.getDecisiones().get(0).getHabilitada()
+                + "|" + resultado.getAdeudosVigentes() + "|" + resultado.getAdeudosEnRevision()
+                + "|" + resultado.getResultadosReprobatoriosInformativos() + "|" + resultado.getUnidadesOrigenIrregularidad() + "|" + resultado.getDecisiones().get(0).getHabilitada()
                 + "|" + resultado.getDecisiones().get(0).getMotivos() + "|"
                 + resultado.getEvaluacionesIntentos().get(0).getOportunidadesConsumidas() + "|"
                 + resultado.getEvaluacionesIntentos().get(0).getRecursamientos() + "|"

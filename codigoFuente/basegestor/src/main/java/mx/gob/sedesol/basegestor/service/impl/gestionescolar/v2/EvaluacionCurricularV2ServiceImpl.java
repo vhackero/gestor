@@ -200,6 +200,8 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                     + ";enRevision=" + reprobadasConRevision);
         }
         determinarSituacionAcademica(resultado, contexto, reprobadas, datosInsuficientesSituacion);
+        resultado.setAdeudosVigentes(Integer.valueOf(reprobadas));
+        resultado.setAdeudosEnRevision(Integer.valueOf(reprobadasConRevision));
         resultado.setTotalReprobadas(Integer.valueOf(reprobadas));
         resultado.setResultadosReprobatoriosInformativos(Integer.valueOf(contarResultadosReprobatorios(unidadesNormalizadas)));
         evaluarActividadAcademica(resultado, contexto);
@@ -1134,6 +1136,7 @@ public class EvaluacionCurricularV2ServiceImpl implements EvaluacionCurricularV2
                         : (datosInsuficientes ? CodigoMotivoCurricularV2.DATOS_INSUFICIENTES : null),
                 80, "SITUACION_ACADEMICA_" + situacion, detalle);
     }
+
 
     /** RN-1.3 reutiliza RN-1.2; no recalcula ni modifica la situación productiva. */
     private void evaluarRecuperacionRegularidad(ResultadoEvaluacionCurricularV2DTO resultado,

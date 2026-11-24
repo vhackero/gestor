@@ -402,6 +402,16 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 		return construirResumenClasificacionNoRegularV2(resultadoEvaluacionV2);
 	}
 
+    /** Agregados del contrato V2: no se recalculan en la vista. */
+    public String getResumenAdeudosV2() {
+        if (resultadoEvaluacionV2 == null) return null;
+        int vigentes = resultadoEvaluacionV2.getAdeudosVigentes() == null ? 0 : resultadoEvaluacionV2.getAdeudosVigentes().intValue();
+        int revision = resultadoEvaluacionV2.getAdeudosEnRevision() == null ? 0 : resultadoEvaluacionV2.getAdeudosEnRevision().intValue();
+        int historicos = resultadoEvaluacionV2.getResultadosReprobatoriosInformativos() == null ? 0 : resultadoEvaluacionV2.getResultadosReprobatoriosInformativos().intValue();
+        return "Adeudos vigentes: " + vigentes + ". Adeudos en revisión: " + revision
+                + ". Resultados reprobatorios informativos: " + historicos + ".";
+    }
+
 	public String getDetalleClasificacionNoRegularV2() {
 		return construirDetalleClasificacionNoRegularV2(resultadoEvaluacionV2);
 	}

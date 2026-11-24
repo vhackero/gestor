@@ -12,6 +12,10 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     private String situacionAcademica;
     private String situacionAcademicaCalculada;
     private Integer cantidadReprobadasVigentes = Integer.valueOf(0);
+    /** UD distintas con adeudo vigente; es la base de RN-6.4. */
+    private Integer adeudosVigentes = Integer.valueOf(0);
+    /** UD con evidencia insuficiente para confirmar o descartar un adeudo. */
+    private Integer adeudosEnRevision = Integer.valueOf(0);
     /** Agregado histórico informativo; no se usa para aplicar RN-6.4. */
     private Integer resultadosReprobatoriosInformativos = Integer.valueOf(0);
     private Integer cargaMaximaFuturaSombra;
@@ -55,6 +59,10 @@ public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
     public void setSituacionAcademicaCalculada(String valor) { situacionAcademicaCalculada = valor; }
     public Integer getCantidadReprobadasVigentes() { return cantidadReprobadasVigentes; }
     public void setCantidadReprobadasVigentes(Integer valor) { cantidadReprobadasVigentes = valor; }
+    public Integer getAdeudosVigentes() { return adeudosVigentes; }
+    public void setAdeudosVigentes(Integer valor) { adeudosVigentes = valor; }
+    public Integer getAdeudosEnRevision() { return adeudosEnRevision; }
+    public void setAdeudosEnRevision(Integer valor) { adeudosEnRevision = valor; }
     public Integer getResultadosReprobatoriosInformativos() { return resultadosReprobatoriosInformativos; }
     public void setResultadosReprobatoriosInformativos(Integer valor) { resultadosReprobatoriosInformativos = valor; }
     public Integer getCargaMaximaFuturaSombra() { return cargaMaximaFuturaSombra; }

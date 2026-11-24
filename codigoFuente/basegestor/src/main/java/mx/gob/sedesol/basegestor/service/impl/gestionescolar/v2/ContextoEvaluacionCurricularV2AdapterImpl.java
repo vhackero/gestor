@@ -212,7 +212,7 @@ public class ContextoEvaluacionCurricularV2AdapterImpl implements ContextoEvalua
         } else if (ultimoResultado == EstadoIntentoAcreditacionV2.PENDIENTE_CALIFICACION) {
             unidad.setEstado(EstadoUnidadCurricularV2.NO_DETERMINADO);
             unidad.setCausa(CausaPendienteUnidadV2.NO_DETERMINADA);
-            unidad.getReferenciasHistoricas().add("HISTORIAL_CANONICO:PENDIENTE_CALIFICACION");
+            unidad.getReferenciasHistoricas().add("HISTORIAL_CANONICO:ACTA_CERRADA_SIN_CALIFICACION_EN_REVISION");
         }
     }
 

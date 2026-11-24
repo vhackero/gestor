@@ -9,7 +9,45 @@
 | Ejecución | Sólo lectura y modo sombra; no crea ni modifica inscripción, bajas, grupos, oferta o calificaciones. |
 | Convención | Cada fila enumera las variantes **P**ositiva, **N**egativa, **L**ímite, **D**ato faltante e **I**nteracción de su numeral. El resultado siempre conserva las conclusiones que sí pueden comprobarse. |
 
-`Dec.` significa decisión por UD; `Opp.` oportunidades; `Ade.` adeudos vigentes; `8.1` estado interbloque; `Nota` aviso institucional. Las pruebas son sintéticas salvo que se indique fuente. Un estado **Bloqueado por fuente** no se sustituye por una inferencia.
+`Dec.` significa decisión por UD; `Opp.` oportunidades; `Ade.` adeudos vigentes; `8.1` estado interbloque; `Nota` aviso institucional. Las pruebas son sintéticas salvo que se indique fuente. **Lógica** identifica cobertura del motor; **validación real** indica si existe un expediente o fuente institucional utilizable. Un estado bloqueado nunca se sustituye por una inferencia.
+
+## Matriz por variante
+
+Cada familia anterior se desglosa en estas cinco filas operativas; la prueba indicada en la familia cubre la variante salvo que se anote `No cubierto`. `D` siempre conserva conclusiones comprobables y agrega revisión.
+
+| ID | Numeral | Tipo | Precondición | Entrada | Resultado esperado (decisión, motivo, oportunidades, adeudos, estado 8.1, nota) | Componentes donde se verifica | Prueba (clase#método) | Lógica | Validación con datos reales |
+|---|---|---|---|---|---|---|---|---|---|
+| VAR-12-P | 1.2 | P | Adeudo confirmado | Una UD reprobada | Ade.=1; Opp. individual; decisión prioritaria | Todos | `Bloque5HistorialRn20261117Test#gc17CuentaAdeudosPorUdYNoDuplicaLaRecursadaEnCurso` | Cubierto | Disponible |
+| VAR-12-N | 1.2 | N | Acreditación posterior | Reprobada y luego acreditada | Ade.=0; sin pendiente | Todos | `Bloque5HistorialRn20261117Test#gc17CuentaAdeudosPorUdYNoDuplicaLaRecursadaEnCurso` | Cubierto | Disponible |
+| VAR-12-L | 1.2 | L | Umbral | Cuatro adeudos | 6.4; sólo regularización | Todos | `Bloque6Rn20261119Test#rn22CuatroAdeudosConfirmadosNoSeAnulanPorUnResultadoEnRevision` | Cubierto | Disponible |
+| VAR-12-D | 1.2 | D | Evidencia inconsistente | Cuarto incierto | 3 vigentes/1 revisión; 6.4 comprobable conserva aplicación | Todos | `Bloque5HistorialRn20261117Test#gc17cMantieneEnRevisionElUmbralCuandoPuedeCambiar` | Cubierto | Disponible |
+| VAR-12-I | 1.2 | I | Historial repetido | Recursa en curso | Un adeudo, no dos; resultados informativos separados | Todos | `Bloque5HistorialRn20261117Test#gc17CuentaAdeudosPorUdYNoDuplicaLaRecursadaEnCurso` | Cubierto | Disponible |
+| VAR-22-P | 2.2 | P | Acta abierta | NULL | EN_CURSO; Opp. en curso | Todos | `Bloque2HistorialOportunidadesRn20261106Test#nuloCerradoRequiereRevisionYNuloVigenteEstaEnCurso` | Cubierto | Bloqueado por fuente: cierre real |
+| VAR-22-N | 2.2 | N | Acta cerrada | NULL | UD/adeudo en revisión, no EN_CURSO | Todos | `Bloque2HistorialOportunidadesRn20261106Test#nuloCerradoRequiereRevisionYNuloVigenteEstaEnCurso` | Cubierto | Bloqueado por fuente: cierre real |
+| VAR-22-L | 2.2 | L | Tercera | 2 fallidos + NULL | Rango de Opp.; sin agotamiento inferido | Todos | `PreparacionDecisionesPendientesV2Test` | Cubierto | Bloqueado por fuente: cierre real |
+| VAR-22-D | 2.2 | D | Baja no aplicada | NULL/0 con baja sin contabilizar | Revisión; no consume | Todos | `Bloque2HistorialOportunidadesRn20261106Test#bajaSinContabilizarQuedaEnRevision` | Cubierto | Disponible |
+| VAR-22-I | 2.2 | I | Interbloque | Antecedente en revisión | Consecuente `PENDIENTE_POR_SERIACION`, fuera de carga confirmada | Malla, Simulador | `PreparacionDecisionesPendientesV2Test` | Cubierto | Bloqueado por fuente: cierre real |
+| VAR-61-P | 6.1 | P | Base acreditada | Candidata quinto | HABILITADA ordinaria si seriación/oferta/carga cumplen | Todos | `EvaluacionCurricularV2Fase5ATest#f5AU08BaseCompletaDaAccesoOrdinarioSombra` | Cubierto | Disponible |
+| VAR-61-N | 6.1 | N | Pendiente sin supuesto | Candidata quinto | BLOQUEADA con motivo de condición no satisfecha | Todos | `Bloque3OfertaYPreseleccionRn20261106Test#c10IncluyeNuncaInscritaYBajaParcialEnOmitidasDeQuinto` | Cubierto | Disponible |
+| VAR-61-L | 6.1 | L | Referencia 5 | Una candidata quinto | Evalúa sólo esa candidata, no otras UD | Todos | `EvaluacionCurricularV2Fase5ATest#f5AU02DesdeVigenciaEnQuintoAplica` | Cubierto | Disponible |
+| VAR-61-D | 6.1 | D | Referencia incierta | Sin periodo verificable | REQUIERE_REVISION | Todos | `EvaluacionCurricularV2Fase6BTest#f6BU04DatosTrayectoriaOCausaIncompletosRequierenRevision` | Cubierto | Disponible |
+| VAR-61-I | 6.1 | I | 4 adeudos/recursa quinto | Candidata reprobada | PRIORITARIA de regularización; 6.4 prevalece | Todos | `Bloque3OfertaYPreseleccionRn20261106Test#q5ReprobadaDeQuintoConCuatroAdeudosReportaDecisionVigente` | Cubierto | Disponible |
+| VAR-62-P | 6.2 | P | Resolución válida | Incorporación diferida | Identifica incorporación sin inferir inactividad | Todos | `EvaluacionCurricularV2Fase6ATest` | Cubierto | Bloqueado por fuente: resolución |
+| VAR-62-N | 6.2 | N | Sin resolución | Incorporación alegada | REQUIERE_REVISION | Todos | `ComunicadosInstitucionales20271Test#gc19dIncorporacionDiferidaSinReferenciaConservaSemestreUnoSinInactividad` | Cubierto | Bloqueado por fuente: convocatoria/resolución |
+| VAR-711-P | 7.1.1 | P | Relación formal | Original -> sustituta | Un adeudo en sustituta, Opp. acumuladas | Todos | `Bloque5HistorialRn20261117Test#gc17dUbicaUnSoloAdeudoEnLaSustitutaCuandoLaRelacionEsVerificable` | Cubierto | Bloqueado por fuente: relación real |
+| VAR-711-N | 7.1.1 | N | Tercera sustitución | Candidata formal | No procede; sin reinicio | Simulador | No cubierto | Bloqueado por fuente: movimiento candidato |
+| VAR-711-D | 7.1.1 | D | Sin relación | Adeudo adicional | REQUIERE_REVISION; no duplica ni inventa ruta | Todos | `Bloque5HistorialRn20261117Test#gc17dNoInfiereUnaSustitucionAdicionalSinFuenteVerificable` | Cubierto | Bloqueado por fuente: relación real |
+| VAR-81-P | 8.1 | P | Antecedente acreditada | B2 | `INSCRITA` | Malla, Simulador | `PreparacionDecisionesPendientesV2Test` | Cubierto | Bloqueado por fuente: cierre B1 |
+| VAR-81-N | 8.1 | N | Antecedente no acreditada | B2 | BLOQUEADA/PENDIENTE_POR_SERIACION según etapa | Malla, Simulador | `PreparacionDecisionesPendientesV2Test` | Cubierto | Bloqueado por fuente: cierre B1 |
+| VAR-81-L | 8.1 | L | B1 vigente | Sin resultado | `PENDIENTE_POR_SERIACION`, fuera de carga confirmada | Malla, Simulador | `PreparacionDecisionesPendientesV2Test` | Cubierto | Bloqueado por fuente: cierre B1 |
+| VAR-81-D | 8.1 | D | Cierre desconocido | Antecedente NULL | REQUIERE_REVISION/PENDIENTE_POR_SERIACION; no habilita | Malla, Simulador | `PreparacionDecisionesPendientesV2Test` | Cubierto | Bloqueado por fuente: cierre B1 |
+| VAR-81-I | 8.1 | I | Carga ajustada | B2 seriada | Cuenta máximo y no excede 4.3 | Simulador | `PreparacionDecisionesPendientesV2Test#rn43AjusteYConfirmacionPosteriorNoExcedenMaximo` | Cubierto | Bloqueado por fuente: cierre B1 |
+| VAR-67-I | 6.7 | I | Baja de UD quinto | Pendiente no reprobatorio | Aplica 6.1; no clasifica como 6.1.5 | Todos | `Bloque3OfertaYPreseleccionRn20261106Test#c10IncluyeNuncaInscritaYBajaParcialEnOmitidasDeQuinto` | Cubierto | Disponible |
+| VAR-71-I | 7.1 | I | Regular/irregular 5-8 | Faltante requerida | Aplica prioridad y reglas de optativa, sin bloqueo fijo | Todos | `Bloque3OfertaYPreseleccionRn20261106Test#referenciaCincoAOchoPermiteOptativaFaltanteTrasPrioridadConUnoATresAdeudos` | Cubierto | Disponible |
+| VAR-93-P | 9.3 | P | Séptimo/octavo | Requisitos presentes | Decisión según plan; no aplica 6.1 | Todos | `EvaluacionCurricularV2Fase9BTest` | Cubierto | Bloqueado por fuente: mapas PE2027 |
+| VAR-94-I | 9.4 | I | Adeudo adicional | Cumplimiento curricular | No bloquea por sí mismo cumplimiento | Asistente, Virtual | `EvaluacionCurricularV2Fase9CTest` | Cubierto | Bloqueado por fuente: sustitución real |
+
+`PENDIENTE_CALIFICACION` sólo se conserva como estado técnico del intento para el cómputo de oportunidades. La UD se proyecta como `NO_DETERMINADO`/revisión cuando existe acta cerrada sin calificación. La denominación de salida vigente para interbloque es `PENDIENTE_POR_SERIACION`; no se usa “pendiente de confirmación” como estado normativo.
 
 ## Casos por numeral
 

@@ -2078,6 +2078,7 @@
                                             <div class="alert-box alert-box-info">#{tablaCurricularAsistidaBean.avisoComunicadoInstitucional}</div>
                                         </ui:fragment>
                                         <div class="consulta-fuentes">#{tablaCurricularAsistidaBean.resumenFuentesSituacion}</div>
+                                        <h:panelGroup rendered="#{not empty tablaCurricularAsistidaBean.resumenAdeudosV2}" layout="block" styleClass="consulta-fuentes">#{tablaCurricularAsistidaBean.resumenAdeudosV2}</h:panelGroup>
 
                                         <div class="avance-grid">
                                             <div class="avance-panel avance-panel-creditos">
@@ -2979,6 +2980,7 @@
                         <i class="fa fa-info-circle" aria-hidden="true" />
                         <h:outputText id="clasificacionNoRegularV2" value="#{tablaCurricularAsistidaBean.resumenClasificacionNoRegularV2} Ver fundamento." title="#{tablaCurricularAsistidaBean.detalleClasificacionNoRegularV2}" />
                         <p:tooltip for="clasificacionNoRegularV2" value="#{tablaCurricularAsistidaBean.detalleClasificacionNoRegularV2}" position="top" />
+                        <h:outputText value=" #{tablaCurricularAsistidaBean.resumenAdeudosV2}" />
                     </h:panelGroup>
                 </div>
             </p:outputPanel>
