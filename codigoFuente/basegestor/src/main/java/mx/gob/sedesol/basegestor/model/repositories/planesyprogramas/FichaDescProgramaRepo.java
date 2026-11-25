@@ -15,6 +15,22 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescrip
 @Repository
 public interface FichaDescProgramaRepo extends JpaRepository<TblFichaDescriptivaPrograma, Integer>,JpaSpecificationExecutor<TblFichaDescriptivaPrograma> {
 
+	String CONFLICTO_MOVILIDAD_SQL = "SELECT id_programa, nombre_tentativo, clave_movilidad "
+			+ "FROM tbl_ficha_descriptiva_programa WHERE clave_movilidad = :clave "
+			+ "AND (:idExcluido IS NULL OR id_programa <> :idExcluido) "
+			+ "AND LOWER(TRIM(COALESCE(nombre_tentativo, ''))) <> LOWER(TRIM(COALESCE(:nombre, ''))) ";
+	@Query(value = CONFLICTO_MOVILIDAD_SQL, nativeQuery = true)
+	List<Object[]> buscarConflictoClaveMovilidad(@Param("clave") String clave,
+			@Param("idExcluido") Integer idExcluido, @Param("nombre") String nombre);
+	@Query(value = CONFLICTO_MOVILIDAD_SQL + "FOR UPDATE", nativeQuery = true)
+	List<Object[]> buscarConflictoMovilidadParaGuardar(@Param("clave") String clave,
+			@Param("idExcluido") Integer idExcluido, @Param("nombre") String nombre);
+	@Query(value = "SELECT id FROM tbl_control_clave_movilidad WHERE id = 1 FOR UPDATE", nativeQuery = true)
+	Integer bloquearClavesMovilidad();
+	@Query(value = "SELECT clave_movilidad, nombre_tentativo FROM tbl_ficha_descriptiva_programa "
+			+ "WHERE id_programa = :id FOR UPDATE", nativeQuery = true)
+	List<Object[]> consultarClaveNombreMovilidad(@Param("id") Integer id);
+
 	@Query("SELECT prg FROM TblFichaDescriptivaPrograma prg WHERE prg.catStatusPrograma.id = 1 ORDER BY prg.fechaActualizacion desc")
 	public List<TblFichaDescriptivaPrograma> consultaUltimosProgramas( Pageable paginado);
 	

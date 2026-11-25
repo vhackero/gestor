@@ -1,6 +1,5 @@
 package mx.gob.sedesol.basegestor.model.repositories.admin;
 
-import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -217,6 +216,48 @@ public class UsuariosImportarRepo implements IUsuariosImportarRepo {
 				.setParameter(2, programaEducativo).setParameter(3, idConvocatoria).executeUpdate();
 	}
 
+	private String filtroFuenteImportar() {
+		return " FROM tbl_persona_externos tpe WHERE tpe.id_fuente_externa=:fuente AND tpe.id_convocatoria=:convocatoria "
+				+ "AND NOT EXISTS (SELECT 1 FROM tbl_persona p WHERE p.sso_idUsuario=tpe.nombre_usuario) ";
+	}
+	@Override
+	public long[] resumenFuenteImportar(Integer fuente,Integer convocatoria) {
+		Object[] fila=(Object[])entityManager.createNativeQuery("SELECT COALESCE(MAX(tpe.id_persona_externo),0) AS corte, COUNT(*) AS total "+filtroFuenteImportar())
+				.setParameter("fuente",fuente).setParameter("convocatoria",convocatoria).getSingleResult();
+		return new long[]{((Number)fila[0]).longValue(),((Number)fila[1]).longValue()};
+	}
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<PersonaSigeDTO> paginaFuenteImportar(Integer fuente,Integer convocatoria,long ultimo,long corte,int limite) {
+		List<Object[]> filas=entityManager.createNativeQuery("SELECT tpe.id_persona_externo,tpe.nombre_usuario,tpe.password,tpe.nombre,"
+				+ "tpe.apellidop,tpe.apellidom,tpe.id_plan,tpe.division,tpe.correo_institucional,tpe.fecha_nacimiento,tpe.curp,tpe.nivel "
+				+ filtroFuenteImportar()+"AND tpe.id_persona_externo>:ultimo AND tpe.id_persona_externo<=:corte ORDER BY tpe.id_persona_externo")
+				.setParameter("fuente",fuente).setParameter("convocatoria",convocatoria)
+				.setParameter("ultimo",ultimo).setParameter("corte",corte).setMaxResults(limite).getResultList();
+		List<PersonaSigeDTO> resultado=new ArrayList<>();
+		for(Object[] fila:filas) {
+			PersonaSigeDTO dto=new PersonaSigeDTO();dto.setIdPersonaSige(((Number)fila[0]).longValue());
+			dto.setMatricula((String)fila[1]);dto.setPassword((String)fila[2]);dto.setNombre((String)fila[3]);
+			dto.setApellidoPaterno((String)fila[4]);dto.setApellidoMaterno((String)fila[5]);dto.setProgramaEducativo(fila[6].toString());
+			dto.setDivision((String)fila[7]);dto.setCorreoInstitucional((String)fila[8]);dto.setFechaNacimiento((Date)fila[9]);
+			dto.setCurp((String)fila[10]);dto.setNivelSige((String)fila[11]);resultado.add(dto);
+		}
+		return resultado;
+	}
+	@Override
+	public void insertarAspirantesFuenteLote(List<mx.gob.sedesol.basegestor.commons.dto.admin.CapturaPersonaDTO> datos,Integer convocatoria) {
+		List<String> valores=new ArrayList<>();
+		for(int n=0;n<datos.size();n++) valores.add("(:persona"+n+",:plan"+n+",:convocatoria)");
+		if(valores.isEmpty()) return;
+		Query insert=entityManager.createNativeQuery("INSERT INTO tbl_persona_aspirante(id_persona,id_plan,id_convocatoria) VALUES "+String.join(",",valores));
+		insert.setParameter("convocatoria",convocatoria);
+		for(int n=0;n<datos.size();n++) {
+			insert.setParameter("persona"+n,datos.get(n).getPersona().getIdPersona());
+			insert.setParameter("plan"+n,Integer.valueOf(datos.get(n).getPersona().getFuenteExterna()));
+		}
+		insert.executeUpdate();
+	}
+
 	public static Date convertStringToDate(String dateString) {
 	    if (dateString != null) {
 	        try {
@@ -252,10 +293,10 @@ public class UsuariosImportarRepo implements IUsuariosImportarRepo {
 		query.setParameter("convocatoria_id", convocatoria2);
 		Integer resultado = 0;
 		
-		List<BigInteger> lista = query.getResultList();
+		List<?> lista = query.getResultList();
 		
 		if (!lista.isEmpty()) {
-			 BigInteger rel = lista.get(0);
+			 Number rel = (Number) lista.get(0);
 			 resultado = rel.intValue();
 		}
 		

@@ -29,6 +29,9 @@ public interface IUsuariosImportarRepo {
 	List<SelectImportarDTO> consultaGruposPorEvento(Integer idEvento);
 
 	List<PersonaSigeDTO> consultaPersonasImportar(String fuenteExterna, String convocatoria);
+	long[] resumenFuenteImportar(Integer fuente,Integer convocatoria);
+	List<PersonaSigeDTO> paginaFuenteImportar(Integer fuente,Integer convocatoria,long ultimo,long corte,int limite);
+	void insertarAspirantesFuenteLote(List<mx.gob.sedesol.basegestor.commons.dto.admin.CapturaPersonaDTO> datos,Integer convocatoria);
 
 	void insertAspirante(String idPersonaRegistrada, String programaEducativo, String idConvocatoria);
 

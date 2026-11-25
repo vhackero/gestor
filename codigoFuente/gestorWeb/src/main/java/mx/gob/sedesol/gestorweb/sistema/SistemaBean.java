@@ -3,6 +3,8 @@ package mx.gob.sedesol.gestorweb.sistema;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.LinkedHashMap;
+import mx.gob.sedesol.basegestor.commons.utils.ColumnasHistorial;
 import java.util.logging.Level;
 
 import javax.annotation.PostConstruct;
@@ -59,6 +61,36 @@ public class SistemaBean implements Serializable {
         return textos.getOrDefault(clave, clave);
 	}
 	
+	public String obtenerCabeceraHistorial(String claveColumna) {
+		if (claveColumna == null || claveColumna.trim().isEmpty()) return "";
+		ColumnasHistorial columna;
+		try {
+			columna = ColumnasHistorial.valueOf(claveColumna.trim());
+		} catch (IllegalArgumentException ex) {
+			return claveColumna;
+		}
+		String texto = textos.get(columna.getClaveTexto());
+		return texto != null ? texto : columna.getEtiqueta();
+	}
+
+	/** Resuelve la cabecera cuando p:columns entrega el enum completo. */
+	public String obtenerCabeceraHistorial(Object columna) {
+		if (columna instanceof ColumnasHistorial) {
+			ColumnasHistorial valor = (ColumnasHistorial) columna;
+			String texto = textos.get(valor.getClaveTexto());
+			return texto != null ? texto : valor.getEtiqueta();
+		}
+		return obtenerCabeceraHistorial(columna == null ? null : columna.toString());
+	}
+
+	public Map<String, String> getCabecerasHistorial() {
+		Map<String, String> cabeceras = new LinkedHashMap<>();
+		for (ColumnasHistorial columna : ColumnasHistorial.values()) {
+			cabeceras.put(columna.getClave(), obtenerCabeceraHistorial(columna.getClave()));
+		}
+		return cabeceras;
+	}
+
 	public String obtenerClave(String clave) {
 		return parametroSistemaService.obtenerParametro(clave);
 	}

@@ -4,18 +4,18 @@ info:
   version: 1.0.0
   description: API de solo lectura para que SISS consulte identidad y avance academico oficial. No determina elegibilidad para servicio social.
 servers:
-  - url: https://<HOST_DESARROLLO>
+  - url: https://<IP_DESARROLLO>
     description: Desarrollo - PENDIENTE DE CONFIGURACION
-  - url: https://<HOST_QA>
+  - url: https://<IP_QA>
     description: QA - PENDIENTE DE CONFIGURACION
-  - url: https://<HOST_PRODUCCION>
+  - url: https://<IP_PRODUCCION>
     description: Produccion - PENDIENTE DE CONFIGURACION
 paths:
   /SIGIE/v1/estudiantes/{matricula}:
     get:
       operationId: consultarEstudiantePorMatricula
       summary: Consulta un estudiante exclusivamente por matricula
-      description: Requiere HTTPS TLS 1.2 o superior, credencial de cliente y scope sigie:estudiantes:read. Sujeto a rate limiting configurable.
+      description: Requiere IP literal en el host de la URL, HTTPS TLS 1.2 o superior, credencial de cliente y scope sigie:estudiantes:read. El acceso por dominio devuelve 403 ACCESO_SOLO_POR_IP. Sujeto a rate limiting configurable.
       security:
         - basicAuth: []
       parameters:
@@ -126,7 +126,7 @@ components:
       additionalProperties: false
       required: [codigo, mensaje, folio_consulta]
       properties:
-        codigo: { type: string, enum: [MATRICULA_INVALIDA, MATRICULA_NO_ENCONTRADA, NO_AUTORIZADO, DATOS_INCOMPLETOS, LIMITE_EXCEDIDO, ERROR_INTERNO, SERVICIO_NO_DISPONIBLE] }
+        codigo: { type: string, enum: [MATRICULA_INVALIDA, MATRICULA_NO_ENCONTRADA, NO_AUTORIZADO, ACCESO_SOLO_POR_IP, DATOS_INCOMPLETOS, LIMITE_EXCEDIDO, ERROR_INTERNO, SERVICIO_NO_DISPONIBLE] }
         mensaje: { type: string }
         folio_consulta: { type: string }
   responses:
@@ -137,7 +137,7 @@ components:
       description: Credencial ausente o invalida
       content: { application/json: { schema: { $ref: '#/components/schemas/Error' }, example: { codigo: NO_AUTORIZADO, mensaje: La credencial de acceso esta ausente o no es valida., folio_consulta: SIGIE-20260817-<UUID> } } }
     NoAutorizado403:
-      description: Scope o IP no autorizados
+      description: Dominio o Host invalido (ACCESO_SOLO_POR_IP), o scope o IP de origen no autorizados (NO_AUTORIZADO)
       content: { application/json: { schema: { $ref: '#/components/schemas/Error' }, example: { codigo: NO_AUTORIZADO, mensaje: El consumidor no tiene autorizacion para consultar estudiantes., folio_consulta: SIGIE-20260817-<UUID> } } }
     NoEncontrada:
       description: Matricula no encontrada

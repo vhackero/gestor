@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
+import org.primefaces.context.RequestContext;
 
 import mx.gob.sedesol.basegestor.commons.dto.analisisdatos.ReporteadorParametroDTO;
 import mx.gob.sedesol.basegestor.commons.dto.analisisdatos.ReporteadorReporteDTO;
@@ -112,6 +113,7 @@ public class ReporteadorBean extends BaseBean {
 		try {
 			resultado = reporteadorService.ejecutarReporte(reporteSeleccionado, valoresParametros);
 			archivoReporte = construirExcel(resultado);
+			RequestContext.getCurrentInstance().addCallbackParam("archivoReporteListo", true);
 			if (resultado.getFilas().isEmpty()) {
 				agregarMensaje(FacesMessage.SEVERITY_WARN, SIN_INFORMACION);
 			}

@@ -1317,6 +1317,8 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 					evento.setCalificacionTotal(calificacionTotal);
 					evento.setPorcentajeAsistencia(porcentajeAsistencia);
 					
+					// Conserva la nota de las materias sin una baja NP en su propio grupo.
+					evento.setCalificacionFinal(gp.getCalifFinal());
 					// ITTIVA validacion si es una materia baja
 					
 					if(!bajas.isEmpty()) {
@@ -1328,13 +1330,12 @@ public class GrupoParticipanteServiceImpl extends ComunValidacionService<RelGrup
 	
 							if(idg.equals(idgb) ) {
 								evento.setCalificacionFinal(new Double(666.0));
+								evento.setCalificacion("NP");
 								break;
 							} 
 	
 						}
 						
-					} else {
-						evento.setCalificacionFinal(new Double(grupoCalificacionFinal));
 					}
 
 					

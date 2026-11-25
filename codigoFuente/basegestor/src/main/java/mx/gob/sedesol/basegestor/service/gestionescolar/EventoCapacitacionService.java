@@ -32,6 +32,8 @@ public interface EventoCapacitacionService {
 	List<ProgramaEventoFiltroDTO> obtenerProgramasConEventosParaFiltro();
 	List<ConsultaActaEventoDTO> consultarActasPorFiltros(String anioPeriodo, String numeroElementos,
 			List<Long> idprogramaSelecionado, Integer estatus);
+	List<ConsultaActaEventoDTO> consultarActasPorFiltros(String anioPeriodo, String numeroElementos,
+			List<Long> idprogramaSelecionado, Integer estatus, String textoEvento);
 	List<ProgramaEventoEstatusDTO> obtenerProgramasConEventosParaCambioEstatus();
 	List<ProgramaEventoEstatusDTO> buscarEventosParaCambioEstatus(String anioPeriodo, String numeroElementos, List<Integer> idsPrograma);
 	boolean modificarEstatusEvento(Integer idEstatus, Integer idEvento);

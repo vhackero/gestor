@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui">
+    <!-- Un mismo modelo ordenado para las vistas de estudiante y gestor. -->
+    <p:columns value="#{constanciasBean.columnasHistorial}" var="columna"
+        headerText="#{sistema.obtenerCabeceraHistorial(columna)}"
+        sortBy="#{evento[columna.propiedadOrden]}" filterBy="#{evento[columna.propiedadOrden]}"
+        filterMatchMode="contains" filterStyle="display:none">
+        <h:outputText value="#{evento[columna.propiedad]}"
+            rendered="#{columna.clave ne 'FECHA' and columna.clave ne 'ENCUESTA' and columna.clave ne 'PROMEDIO' and columna.clave ne 'ASISTENCIA' and columna.clave ne 'CONSTANCIAS'}" />
+        <h:outputText value="#{evento.fecha}" rendered="#{columna.clave eq 'FECHA'}">
+            <f:convertDateTime type="date" pattern="#{sistema.obtenerTexto('gw.textos.menu.formatoFecha')}" />
+        </h:outputText>
+        <h:panelGroup rendered="#{columna.clave eq 'ENCUESTA'}">
+            <h:outputText id="enc" value="#{evento.nombreEstatusEncuesta}"
+                styleClass="#{evento.nombreEstatusEncuesta eq 'Pendiente' ? 'colorRojo' : ''}" />
+            <p:tooltip for="enc" rendered="#{evento.nombreEstatusEncuesta eq 'Pendiente'}"
+                value="#{sistema.obtenerTexto('gw.alumno.constancias.encuestaPendiente')}" />
+        </h:panelGroup>
+        <h:outputText rendered="#{columna.clave eq 'PROMEDIO' or columna.clave eq 'ASISTENCIA'}"
+            value="#{evento.modalidad eq 'En línea' ? sistema.obtenerTexto('gw.alumno.constancias.noAplica') : evento[columna.propiedad]}" />
+            <h:panelGroup rendered="#{columna.clave eq 'CONSTANCIAS'}">
+            <p:commandButton action="#{constanciasBean.generarConstancia}" ajax="true" id="btnConstanciaAcreditacion" disabled="#{evento.nombreEstatusEncuesta eq 'Pendiente'}" rendered="#{evento.tipoConstancia eq 1}" styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye">
+                <f:setPropertyActionListener value="#{evento}" target="#{constanciasBean.eventoSeleccionado}" />
+            </p:commandButton>
+            <p:commandButton action="#{constanciasBean.generarConstancia}" ajax="true" id="btnConstanciaParticipacion" disabled="#{evento.nombreEstatusEncuesta eq 'Pendiente'}" rendered="#{evento.tipoConstancia eq 2}" styleClass="btn-icon btn btn-default icono_sisi fa fa-solid fa-eye">
+                <f:setPropertyActionListener value="#{evento}" target="#{constanciasBean.eventoSeleccionado}" />
+            </p:commandButton>
+        </h:panelGroup>
+    </p:columns>
+</ui:composition>

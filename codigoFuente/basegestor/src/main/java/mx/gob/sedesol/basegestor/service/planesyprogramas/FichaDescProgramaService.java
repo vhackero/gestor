@@ -8,6 +8,7 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescrip
 import mx.gob.sedesol.basegestor.service.admin.CommonService;
 
 public interface FichaDescProgramaService extends CommonService<FichaDescProgramaDTO, Integer> {
+	FichaDescProgramaDTO buscarConflictoClaveMovilidad(String clave, Integer idExcluido, String nombre);
 
 	public List<FichaDescProgramaDTO>buscaProgramasPorCriterios(FichaDescProgramaDTO filtro);
 	

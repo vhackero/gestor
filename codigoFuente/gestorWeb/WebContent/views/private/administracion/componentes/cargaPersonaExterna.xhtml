@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:p="http://primefaces.org/ui">
+    <p:panel id="panelCargaPersonaExterna" header="Importar datos a fuente externa">
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <h:outputText value="Descargar: " />
+                <p:commandButton value="Plantilla" ajax="false" immediate="true" styleClass="btn btn-primary">
+                    <p:fileDownload value="#{personaExternaCargaBean.plantilla}" />
+                </p:commandButton>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <h:outputText value="Seleccionar archivo (.csv, .xls, .xlsx)" styleClass="bloque" />
+                <p:fileUpload id="archivoPersonasExternas" mode="advanced" auto="true" multiple="false"
+                    label="Seleccionar archivo" styleClass="cargarArchivo" sizeLimit="5242880"
+                    allowTypes="/(\.|\/)(csv|xls|xlsx)$/i"
+                    invalidFileMessage="Seleccione un archivo CSV, XLS o XLSX."
+                    invalidSizeMessage="El archivo no debe superar 5 MB."
+                    fileUploadListener="#{personaExternaCargaBean.cargarArchivo}"
+                    update="panelCargaPersonaExterna" />
+                <h:outputText value="#{empty personaExternaCargaBean.nombreArchivo ? 'Sin archivo seleccionado' : personaExternaCargaBean.nombreArchivo}" />
+            </div>
+            <div class="col-md-4" style="padding-top:25px">
+                <p:commandButton value="Importar" process="@this" update="panelCargaPersonaExterna"
+                    action="#{personaExternaCargaBean.importar}" disabled="#{not personaExternaCargaBean.archivoSeleccionado}"
+                    styleClass="btn btn-primary" />
+                <p:commandButton type="button" icon="fa fa-question-circle" title="Ayuda para importar datos"
+                    styleClass="btn-icon btn btn-default" onclick="PF('ayudaCargaPersonaExterna').show();" />
+            </div>
+        </div>
+        <h:panelGroup rendered="#{not empty personaExternaCargaBean.errores}" layout="block">
+            <p>Corrija el archivo y vuelva a seleccionarlo. No se agregó ningún registro.</p>
+            <ul><ui:repeat value="#{personaExternaCargaBean.errores}" var="error"><li><h:outputText value="#{error}" /></li></ui:repeat></ul>
+        </h:panelGroup>
+    </p:panel>
+    <p:dialog widgetVar="ayudaCargaPersonaExterna" header="Datos requeridos para importar" modal="true"
+        width="700" responsive="true" resizable="false">
+        <p>El archivo debe tener estos 14 encabezados en el orden de la plantilla. Todos los campos son obligatorios:</p>
+        <ol><ui:repeat value="#{personaExternaCargaBean.columnas}" var="columna"><li><h:outputText value="#{columna}" /></li></ui:repeat></ol>
+        <ul>
+            <li>Nombre de usuario único, máximo 100 caracteres; sin espacios ni acentos. No se distinguen mayúsculas y minúsculas al detectar duplicados.</li>
+            <li>Fechas en AAAA-MM-DD o formato fecha de Excel. Correo válido y CURP de 18 caracteres.</li>
+            <li>Los IDs deben existir y el plan debe pertenecer a la convocatoria. Consulte la hoja Catalogos de la plantilla.</li>
+            <li>tipo_usuario: 1 = Interno, 2 = Externo. Reemplace los datos de ejemplo antes de importar.</li>
+            <li>CSV en UTF-8, separado por coma o punto y coma. Excel: primera hoja de datos, sin fórmulas; matrículas, contraseñas y textos con formato Texto.</li>
+            <li>Máximo 5 MB y 15000 registros. Si hay errores o duplicados, no se importa el lote.</li>
+        </ul>
+        <p:commandButton value="Cerrar" type="button" styleClass="btn btn-default" onclick="PF('ayudaCargaPersonaExterna').hide();" />
+    </p:dialog>
+</ui:composition>

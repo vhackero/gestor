@@ -59,6 +59,10 @@ public class TblFichaDescriptivaPrograma implements Serializable {
 
 	@Column(name = "identificador_final")
 	private String identificadorFinal;
+	@Column(name = "clave_movilidad", length = 100)
+	private String claveMovilidad;
+	public String getClaveMovilidad() { return claveMovilidad; }
+	public void setClaveMovilidad(String claveMovilidad) { this.claveMovilidad = claveMovilidad; }
 
 	@Column(name = "instrumento_aprendizaje")
 	private String instrumentoAprendizaje;

@@ -1,6 +1,9 @@
 package mx.gob.sedesol.gestorweb.beans.administracion;
 
 import java.util.Date;
+import java.util.ArrayList;
+import org.primefaces.model.DualListModel;
+import mx.gob.sedesol.basegestor.commons.utils.ColumnasHistorial;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -41,6 +44,7 @@ public class ParametroSistemaBean extends BaseBean {
 	private ParametroSistemaDTO parametroModificar;
 
 	private boolean nuevo;
+	private DualListModel<String> columnasHistorialModelo = new DualListModel<>(new ArrayList<String>(), new ArrayList<String>());
 
 	private transient ModelMapper modelMapper = new ModelMapper();
 
@@ -60,6 +64,17 @@ public class ParametroSistemaBean extends BaseBean {
 		parametro.setUsuarioModifico(getUsuarioEnSession().getIdPersona());
 		parametro.setFechaActualizacion(new Date());
 
+		if (isParametroColumnasHistorial()) {
+			List<String> visibles = new ArrayList<>();
+			for (ColumnasHistorial columna : ColumnasHistorial.leer(parametro.getValor())) {
+				visibles.add(columna.getClave());
+			}
+			List<String> ocultas = new ArrayList<>();
+			for (ColumnasHistorial columna : ColumnasHistorial.values()) {
+				if (!visibles.contains(columna.getClave())) ocultas.add(columna.getClave());
+			}
+			columnasHistorialModelo = new DualListModel<>(ocultas, visibles);
+		}
 		setNuevo(false);
 	}
 
@@ -72,7 +87,17 @@ public class ParametroSistemaBean extends BaseBean {
 		return true;
 	}
 
+	public boolean isParametroColumnasHistorial() {
+		return parametro != null && ColumnasHistorial.PARAMETRO.equals(parametro.getClave());
+	}
+
+	public DualListModel<String> getColumnasHistorialModelo() { return columnasHistorialModelo; }
+	public void setColumnasHistorialModelo(DualListModel<String> columnas) { columnasHistorialModelo = columnas; }
+
 	public void guardarParametro() {
+		if (isParametroColumnasHistorial()) {
+			parametro.setValor(ColumnasHistorial.serializar(columnasHistorialModelo.getTarget()));
+		}
 		ResultadoDTO<ParametroSistemaDTO> resultado;
 		if (isNuevo()) {
 			if (buscarClave(parametro, parametros)) {

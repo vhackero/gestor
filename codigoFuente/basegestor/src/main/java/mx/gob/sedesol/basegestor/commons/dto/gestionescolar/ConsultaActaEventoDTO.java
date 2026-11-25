@@ -18,6 +18,26 @@ public class ConsultaActaEventoDTO implements Serializable {
 	private String grupo;
 	private Integer estatus;
 	private String textoEstatus;
+	private Boolean actaCerrada;
+	private int numeroActas;
+	private int numeroAlumnos;
+	private int alumnosCalificados;
+	private int documentosInvalidos;
+
+	public Boolean getActaCerrada() { return actaCerrada; }
+	public void setActaCerrada(Boolean actaCerrada) { this.actaCerrada = actaCerrada; }
+	public int getNumeroActas() { return numeroActas; }
+	public void setNumeroActas(int numeroActas) { this.numeroActas = numeroActas; }
+	public int getNumeroAlumnos() { return numeroAlumnos; }
+	public void setNumeroAlumnos(int numeroAlumnos) { this.numeroAlumnos = numeroAlumnos; }
+	public int getAlumnosCalificados() { return alumnosCalificados; }
+	public void setAlumnosCalificados(int alumnosCalificados) { this.alumnosCalificados = alumnosCalificados; }
+	public int getDocumentosInvalidos() { return documentosInvalidos; }
+	public void setDocumentosInvalidos(int documentosInvalidos) { this.documentosInvalidos = documentosInvalidos; }
+	public int getCalificacionesPendientes() { return numeroAlumnos - alumnosCalificados; }
+	public String getEstadoGrupo() {
+		return actaCerrada == null ? "Sin definir" : (actaCerrada ? "Cerrado" : "Abierto");
+	}
 
 	public Long getIdPlan() {
 		return idPlan;

@@ -1009,6 +1009,7 @@ public class FECServiceFacade {
         progClon.setRelProgramaResponsables(null);
         progClon.setIdPrograma(null);
         progClon.setIdentificadorFinal(null);
+        progClon.setClaveMovilidad(null);
         progClon.setCatStatusPrograma(catStatusProgramaService.buscarPorId(EstatusProgramaEnum.BORRADOR.getId(), CatStatusPrograma.class));
 
         Date fechaActual = new Date();

@@ -93,6 +93,10 @@
 
 	<!-- USUARIOS -->
 	<url-mapping>
+		<pattern value="/administracion/usuarios/asignacion-plan" />
+		<view-id value="/views/private/administracion/usuario/AsignacionPlanUsuario.xhtml" />
+	</url-mapping>
+	<url-mapping>
 		<pattern value="/administracion/usuarios" />
 		<view-id
 			value="/views/private/administracion/usuario/AdministraUsuarios.xhtml" />

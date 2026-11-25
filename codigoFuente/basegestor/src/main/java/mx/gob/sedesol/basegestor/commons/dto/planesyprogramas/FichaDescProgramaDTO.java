@@ -45,6 +45,16 @@ public class FichaDescProgramaDTO implements Serializable {
 	private Integer idNivelDominioPrograma;
 	private FichaDescProgramaDTO programaAntecedente;
 	private String identificadorFinal;
+	@javax.validation.constraints.Size(max = 100, message = "La clave de movilidad admite hasta 100 caracteres.")
+	private String claveMovilidad;
+	// Distingue omisión en DTOs parciales de la limpieza explícita del campo en la captura.
+	private boolean claveMovilidadInformada;
+	public String getClaveMovilidad() { return claveMovilidad; }
+	public void setClaveMovilidad(String clave) {
+		claveMovilidad = clave == null || clave.trim().isEmpty() ? null : clave.trim();
+		claveMovilidadInformada = true;
+	}
+	public boolean isClaveMovilidadInformada() { return claveMovilidadInformada; }
 	private String instrumentoAprendizaje;
 	@NotEmpty(message=MensajesSistemaEnum.Constantes.GESTOR_WEB_GENERAL_DATO_REQUERIDO)
 	private String justificacionAcademica;

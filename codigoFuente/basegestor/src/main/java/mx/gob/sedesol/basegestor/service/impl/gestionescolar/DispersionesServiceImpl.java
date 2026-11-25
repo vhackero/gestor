@@ -73,6 +73,19 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelEstructuraUn
 
 @Service("dispersionesService")
 public class DispersionesServiceImpl implements DispersionesService {
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionPendienteDTO> consultarPendientesDispersion(MatricularDispersionDTO solicitud) {
+        if (solicitud == null || solicitud.getIdDispersion() == null || solicitud.getIdProcesoInscripcion() == null)
+            return java.util.Collections.emptyList();
+        List<Long> personas = Boolean.TRUE.equals(solicitud.getMatriculacionCompartidos())
+            ? iDispersionesRepository.obtenerPersonasMatriculacionCompartidos(solicitud.getIdDispersion(),
+                solicitud.getIdProcesoInscripcion(), solicitud.getIdPrograma(), solicitud.getNombreProgramaSeleccionado(), solicitud.getBloquePrograma())
+            : iDispersionesRepository.obtenerPersonasMatriculacion(solicitud.getIdDispersion(),
+                solicitud.getIdConvocatoria(), solicitud.getIdTipoProceso(), solicitud.getIdProcesoInscripcion());
+        if (personas.isEmpty()) return java.util.Collections.emptyList();
+        return iDispersionesRepository.consultarDetallesPendientesDispersion(personas, solicitud);
+    }
 
 private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.class);
 	private static final int TIPO_MATRICULACION_EVENTO_POR_GRUPO = 1;
@@ -251,6 +264,12 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 			Integer idProcesoMatricular) {
 		return iDispersionesRepository.consultarDispersionesExistentes(idProcesoConDispersion, idProcesoMatricular);
 	}
+
+	@Override
+	public List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DispersionPendienteDTO> consultarPendientesDispersionExistente(
+			Integer idDispersion, Integer idProcesoMatricular, Integer idPrograma) {
+		return iDispersionesRepository.consultarPendientesDispersionExistente(idDispersion, idProcesoMatricular, idPrograma);
+	}
 	
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -272,10 +291,17 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 			return resultado;
 		}
 		
+		List<Long> personas = iDispersionesRepository.obtenerPersonasMatriculaExistente(
+				dispersion.getIdProcesoInscripcionMatricular(), dispersion.getIdPrograma());
+		if (personas == null || personas.isEmpty()) {
+			resultado.setResultado(ResultadoTransaccionEnum.EXITOSO);
+			resultado.agregaMensaje("No hay alumnos elegibles pendientes de matricular.");
+			return resultado;
+		}
 		Integer idNuevaDispersion = iDispersionesRepository.crearDispersionBasica(
 				dispersion.getIdProcesoInscripcionMatricular(),
 				dispersion.getIdPrograma(),
-				dispersion.getNoEstudiantesInscritos(),
+				personas.size(),
 				0,
 				idUsuario);
 		if (idNuevaDispersion == null) {
@@ -288,10 +314,12 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 					grupo.getIdGrupo(), idUsuario);
 		}
 		
-		List<Long> personas = iDispersionesRepository.obtenerPersonasMatriculaExistente(
+		// Volver a consultar tras adquirir el bloqueo del proceso de destino.
+		personas = iDispersionesRepository.obtenerPersonasMatriculaExistente(
 				dispersion.getIdProcesoInscripcionMatricular(), dispersion.getIdPrograma());
 		if (personas == null || personas.isEmpty()) {
-			resultado.agregaMensaje("No se encontraron inscripciones para matricular.");
+			resultado.setResultado(ResultadoTransaccionEnum.EXITOSO);
+			resultado.agregaMensaje("No hay alumnos elegibles pendientes de matricular.");
 			return resultado;
 		}
 		
@@ -317,7 +345,6 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 			asignaciones.get(indice).asignar(persona);
 		}
 		
-		int matriculados = 0;
 		int gruposProcesados = 0;
 		Map<Integer, ParametroWSMoodleDTO> cachePlataformas = new HashMap<>();
 		for (GrupoAsignacion asignacion : asignaciones) {
@@ -330,10 +357,10 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 			if (!respuesta.esCorrecto()) {
 				throw new RuntimeException("No fue posible matricular el grupo " + asignacion.info.getIdGrupo());
 			}
-			matriculados += asignacion.personas.size();
 			gruposProcesados++;
 		}
 		
+		int matriculados = iDispersionesRepository.contarParticipantesRegistrados(idNuevaDispersion, personas);
 		detalle.setGruposProcesados(gruposProcesados);
 		detalle.setParticipantesDetectados(personas.size());
 		detalle.setParticipantesMatriculados(matriculados);
@@ -345,6 +372,11 @@ private static final Logger logger = Logger.getLogger(DispersionesServiceImpl.cl
 					gruposProcesados));
 		} else {
 			resultado.agregaMensaje("No se asignaron participantes a los grupos seleccionados.");
+		}
+		int pendientes = iDispersionesRepository.obtenerPersonasMatriculaExistente(
+				dispersion.getIdProcesoInscripcionMatricular(), dispersion.getIdPrograma()).size();
+		if (pendientes > 0) {
+			resultado.agregaMensaje("Quedan " + pendientes + " alumno(s) pendientes; puede descargar el Excel y reintentar la matricula.");
 		}
 		
 		return resultado;

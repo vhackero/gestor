@@ -133,6 +133,11 @@
 	<filter-mapping>
 		<filter-name>sigieSecurityFilter</filter-name>
 		<url-pattern>/SIGIE/*</url-pattern>
+		<url-pattern>/ws/v1/estudiantes</url-pattern>
+		<url-pattern>/ws/v1/estudiantes/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
 	</filter-mapping>
 
 	<filter>

@@ -22,6 +22,7 @@ import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.RelProgDuracionDTO
 import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
+import mx.gob.sedesol.basegestor.commons.utils.ClaveMovilidadDuplicadaException;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.RelProgramaCargaHoraria;
 import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblFichaDescriptivaPrograma;
 import mx.gob.sedesol.basegestor.model.especificaciones.FichaProgramaEspecificacion;
@@ -142,6 +143,7 @@ public class FichaDescProgramaServiceImpl extends ComunValidacionService<FichaDe
             dto.setNombreTentativo(programa.getNombreTentativo());
             dto.setIdentificadorFinal(programa.getIdentificadorFinal());
             dto.setCvePrograma(programa.getCvePrograma());
+            dto.setClaveMovilidad(programa.getClaveMovilidad());
             dto.setTipo(programa.getTipo());
             dto.setCreditos(programa.getCreditos());
             dto.setEjeCapacitacion(programa.getEjeCapacitacion());
@@ -250,7 +252,52 @@ public class FichaDescProgramaServiceImpl extends ComunValidacionService<FichaDe
     }
 
     @Override
+    @Transactional(readOnly = true, propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+    public FichaDescProgramaDTO buscarConflictoClaveMovilidad(String clave, Integer idExcluido, String nombre) {
+        if (clave == null || clave.trim().isEmpty()) { return null; }
+        List<Object[]> filas = fichaDescProgramaRepo.buscarConflictoClaveMovilidad(clave.trim(), idExcluido, nombre);
+        if (filas.isEmpty()) { return null; }
+        FichaDescProgramaDTO conflicto = new FichaDescProgramaDTO();
+        conflicto.setIdPrograma(((Number) filas.get(0)[0]).intValue());
+        conflicto.setNombreTentativo((String) filas.get(0)[1]);
+        conflicto.setClaveMovilidad((String) filas.get(0)[2]);
+        return conflicto;
+    }
+
+    private void validarClaveMovilidad(FichaDescProgramaDTO dto) {
+        if (dto == null) { return; }
+        if (dto.getIdPrograma() != null || dto.getClaveMovilidad() != null) {
+            if (fichaDescProgramaRepo.bloquearClavesMovilidad() == null) {
+                throw new IllegalStateException("Falta aplicar la migración de claves de movilidad.");
+            }
+        }
+        if (dto.getIdPrograma() != null && (!dto.isClaveMovilidadInformada() || dto.getNombreTentativo() == null)) {
+            List<Object[]> vigente = fichaDescProgramaRepo.consultarClaveNombreMovilidad(dto.getIdPrograma());
+            if (!vigente.isEmpty()) {
+                if (!dto.isClaveMovilidadInformada()) { dto.setClaveMovilidad((String) vigente.get(0)[0]); }
+                if (dto.getNombreTentativo() == null) { dto.setNombreTentativo((String) vigente.get(0)[1]); }
+            }
+        }
+        if (dto.getClaveMovilidad() == null) { return; }
+        if (dto.getClaveMovilidad().length() > 100) {
+            throw new IllegalArgumentException("La clave de movilidad admite hasta 100 caracteres.");
+        }
+        if (dto.getNombreTentativo() == null || dto.getNombreTentativo().trim().isEmpty()) {
+            throw new IllegalArgumentException("Indique el nombre del programa antes de asignar una clave de movilidad.");
+        }
+        List<Object[]> conflictos = fichaDescProgramaRepo.buscarConflictoMovilidadParaGuardar(
+                dto.getClaveMovilidad(), dto.getIdPrograma(), dto.getNombreTentativo());
+        if (!conflictos.isEmpty()) {
+            throw new ClaveMovilidadDuplicadaException("La clave de movilidad '" + dto.getClaveMovilidad()
+                    + "' ya pertenece al programa '" + conflictos.get(0)[1]
+                    + "' (ID " + conflictos.get(0)[0] + "), cuyo nombre es diferente.");
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public ResultadoDTO<FichaDescProgramaDTO> guardar(FichaDescProgramaDTO dto) {
+        validarClaveMovilidad(dto);
         ResultadoDTO<FichaDescProgramaDTO> rs = sonDatosRequeridosValidos(TipoAccion.PERSISTENCIA, dto);
         if (ObjectUtils.isNotNull(rs) && rs.getResultado().getValor()) {
             try {
@@ -258,7 +305,7 @@ public class FichaDescProgramaServiceImpl extends ComunValidacionService<FichaDe
                 TblFichaDescriptivaPrograma entityForSave = new TblFichaDescriptivaPrograma();
                 //TblFichaDescriptivaPrograma programa = fichaDescProgMapper.map(dto, entityForSave);
                 fichaDescProgMapper.map(dto, entityForSave);
-                entityForSave = fichaDescProgramaRepo.save(entityForSave);
+                entityForSave = fichaDescProgramaRepo.saveAndFlush(entityForSave);
 
                 rs = new ResultadoDTO<FichaDescProgramaDTO>();
                 FichaDescProgramaDTO dtoSvd = new FichaDescProgramaDTO();
@@ -280,6 +327,7 @@ public class FichaDescProgramaServiceImpl extends ComunValidacionService<FichaDe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ResultadoDTO<FichaDescProgramaDTO> actualizar(FichaDescProgramaDTO dto) {
+        validarClaveMovilidad(dto);
         ResultadoDTO<FichaDescProgramaDTO> rs = sonDatosRequeridosValidos(TipoAccion.ACTUALIZACION, dto);
         if (ObjectUtils.isNotNull(rs) && rs.getResultado().getValor()) {
             try {

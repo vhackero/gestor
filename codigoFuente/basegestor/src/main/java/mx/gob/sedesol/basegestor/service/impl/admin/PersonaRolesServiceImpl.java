@@ -271,6 +271,11 @@ public class PersonaRolesServiceImpl extends ComunValidacionService<PersonaRolDT
 	public ResultadoDTO<PersonaRolDTO> almacenarRolesUsuario(PersonaDTO persona, List<RolDTO> roles,
 			long usuarioModifico) {
 		ResultadoDTO<PersonaRolDTO> resultado = new ResultadoDTO<>();
+		if (roles == null || roles.isEmpty()) {
+			resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+			resultado.agregaMensaje("gw.adminPersona.roles.minimo");
+			return resultado;
+		}
 		try {
 			PersonaRolDTO prdto = new PersonaRolDTO();
 			prdto.setPersona(persona);
@@ -296,6 +301,9 @@ public class PersonaRolesServiceImpl extends ComunValidacionService<PersonaRolDT
 		} catch (Exception e) {
 			resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
 			logger.info("Error al actualizar rol: " + e);
+			if (org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive()) {
+				org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+			}
 		}
 		return resultado;
 	}

@@ -62,6 +62,8 @@ public class SigieSecurityFilterTest {
     private MockHttpServletResponse ejecutar(String authorization, String remoteAddress) throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/SIGIE/v1/estudiantes/ES241100064");
         request.setRemoteAddr(remoteAddress);
+        request.addHeader("Host", "192.0.2.10");
+        request.setServerName("192.0.2.10");
         if (authorization != null) { request.addHeader("Authorization", authorization); }
         MockHttpServletResponse response = new MockHttpServletResponse();
         filter.doFilter(request, response, new MockFilterChain());

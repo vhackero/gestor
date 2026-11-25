@@ -76,6 +76,10 @@
 
 
 
-		</h:form>
+		    <p:commandButton id="descargarExcelPendientes" ajax="false" immediate="true" process="@this"
+        value="Descargar Excel generado" style="display:none">
+        <p:fileDownload value="#{dispersionesBean.archivoPendientes}" />
+    </p:commandButton>
+        </h:form>
 	</ui:define>
 </ui:composition>

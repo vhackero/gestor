@@ -108,16 +108,37 @@
 							</p:inputText>
 							<p:message for="clave" />
 						</div>
-						<div class="col-md-6">
-							<p:outputLabel for="valor"
+						<div class="#{parametroSistemaBean.parametroColumnasHistorial ? 'col-md-12' : 'col-md-6'}">
+							<p:outputLabel rendered="#{not parametroSistemaBean.parametroColumnasHistorial}" for="valor"
 								value="#{sistema.obtenerTexto('gw.parametros.sistema.modal.etiqueta.valor')}:" />
 							<!-- Longitud de campo -->
-							<p:inputText id="valor" styleClass="form-control" required="true"
+							<p:inputText rendered="#{not parametroSistemaBean.parametroColumnasHistorial}" id="valor" styleClass="form-control" required="true"
 								maxlength="255"
 								requiredMessage="#{sistema.obtenerTexto('gw.global.msg.dato.req')}"
 								placeholder="#{sistema.obtenerTexto('gw.parametros.sistema.modal.etiqueta.valor')}"
 								value="#{parametroSistemaBean.parametro.valor}" />
 							<p:message for="valor" />
+                            <h:panelGroup layout="block" rendered="#{parametroSistemaBean.parametroColumnasHistorial}">
+                                <p:outputLabel for="columnasHistorial" value="Visibilidad y orden de columnas" />
+                                <p:pickList id="columnasHistorial"
+                                    value="#{parametroSistemaBean.columnasHistorialModelo}" var="columna"
+                                    itemValue="#{columna}" itemLabel="#{sistema.obtenerCabeceraHistorial(columna)}"
+                                    showTargetControls="true" responsive="true" required="true"
+                                    requiredMessage="Seleccione al menos una columna visible."
+                                    addLabel="Mostrar" addAllLabel="Mostrar todas"
+                                    removeLabel="Ocultar" removeAllLabel="Ocultar todas"
+                                    moveUpLabel="Subir" moveTopLabel="Mover al principio"
+                                    moveDownLabel="Bajar" moveBottomLabel="Mover al final">
+                                    <f:facet name="sourceCaption">Ocultas</f:facet>
+                                    <f:facet name="targetCaption">Visibles (en este orden)</f:facet>
+                                </p:pickList>
+                                <p:message for="columnasHistorial" />
+                                <h:outputText value="Mueve las columnas entre Ocultas y Visibles. Arrastra las visibles o utiliza los botones para ordenarlas. Guarda para aplicar el mismo orden al estudiante, al gestor y al PDF."
+                                    styleClass="help-block" />
+                            </h:panelGroup>
+							<h:outputText rendered="#{parametroSistemaBean.parametro.clave eq 'TIPOS_BAJA_NP_ACTA'}"
+								value="IDs de tipos de baja separados por comas (ejemplo: 1,2,7,8). Aplica a NP en actas, historial, constancias y malla curricular."
+								styleClass="help-block" />
 						</div>
 					</div>
 				</div>

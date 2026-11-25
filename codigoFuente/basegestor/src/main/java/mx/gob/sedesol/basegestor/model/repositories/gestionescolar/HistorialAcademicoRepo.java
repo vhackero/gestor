@@ -21,12 +21,16 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoLi
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBaja2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaBajaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
+import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 
 @Repository
 public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 
 	@Autowired
 	public EntityManager entityManager;
+
+	@Autowired
+	private ParametroSistemaService parametroSistemaService;
 
 	@Override
 	public HistorialAcademicoDTO consultaDatosHistorialAcademico(String id_persona) {
@@ -40,7 +44,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				"                          INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona\n" +
 				"                 WHERE tp.id_persona = p.id_persona  AND NOT EXISTS (SELECT NULL\n" +
 				"                                                                     FROM rel_persona_bajas t2\n" +
-				"                                                                              INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\n" +
+				"                                                                              INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND mb2.tipo_baja_id IN (:tiposBajaNp) AND t2.contabilizar = 1\n" +
 				"                                                                     WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) promedio,\n" +
 				"                (SELECT SUM(tblf.creditos)\n" +
 				"                 FROM tbl_persona tp\n" +
@@ -50,7 +54,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				"                          INNER JOIN tbl_ficha_descriptiva_programa tblf ON tblf.id_programa = tble.id_programa\n" +
 				"                 WHERE tp.id_persona = p.id_persona  AND rgp.calificacion_final >= tble.calificacion_min_aprobatoria AND NOT EXISTS (SELECT NULL\n" +
 				"                                                                                                                                     FROM rel_persona_bajas t2\n" +
-				"                                                                                                                                              INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\n" +
+				"                                                                                                                                              INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND mb2.tipo_baja_id IN (:tiposBajaNp) AND t2.contabilizar = 1\n" +
 				"                                                                                                                         WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) creditos,\n" +
 				"                rctp.total_creditos as totalCreditos,\n" +
 				"                (SELECT COUNT(rgp.calificacion_final)\n" +
@@ -61,7 +65,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				"                          INNER JOIN tbl_ficha_descriptiva_programa tblf ON tblf.id_programa = tble.id_programa\n" +
 				"                 WHERE tp.id_persona = p.id_persona  AND rgp.calificacion_final >= tble.calificacion_min_aprobatoria AND NOT EXISTS (SELECT NULL\n" +
 				"                                                                                                                                     FROM rel_persona_bajas t2\n" +
-				"                                                                                                                                              INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\n" +
+				"                                                                                                                                              INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND mb2.tipo_baja_id IN (:tiposBajaNp) AND t2.contabilizar = 1\n" +
 				"                                                                                                                                     WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) aprobadas,\n" +
 				"                (SELECT COUNT(rgp.calificacion_final)\n" +
 				"                 FROM tbl_persona tp\n" +
@@ -71,7 +75,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				"                          INNER JOIN tbl_ficha_descriptiva_programa tblf ON tblf.id_programa = tble.id_programa\n" +
 				"                 WHERE tp.id_persona = p.id_persona  AND rgp.calificacion_final < tble.calificacion_min_aprobatoria AND NOT EXISTS (SELECT NULL\n" +
 				"                                                                                                                                    FROM rel_persona_bajas t2\n" +
-				"                                                                                                                                             INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\n" +
+				"                                                                                                                                             INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND mb2.tipo_baja_id IN (:tiposBajaNp) AND t2.contabilizar = 1\n" +
 				"                                                                                                                                    WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) reprobadas,\n" +
 				"                (SELECT COUNT(rgp.id_grupo)\n" +
 				"                 FROM tbl_persona tp\n" +
@@ -81,7 +85,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 				"                          INNER JOIN tbl_ficha_descriptiva_programa tblf ON tblf.id_programa = tble.id_programa\n" +
 				"                 WHERE tp.id_persona = p.id_persona  AND  EXISTS (SELECT t2.id_baja\n" +
 				"                                                                  FROM rel_persona_bajas t2\n" +
-				"                                                                           INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND (mb2.tipo_baja_id = 1 OR mb2.tipo_baja_id = 2)\n" +
+				"                                                                           INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id AND mb2.tipo_baja_id IN (:tiposBajaNp) AND t2.contabilizar = 1\n" +
 				"                                                                  WHERE t2.id_persona = tp.id_persona AND rgp.id_grupo = t2.id_grupo) ) nopresentadas,\n" +
 				"                CONCAT(cr.nombre,' ', cne.nombre,' ',IF(p.activo = 1,'activo','inactivo')) estatus,\n" +
 				"                cne.nombre nivel,\n" +
@@ -111,6 +115,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 
 		Query query = entityManager.createNativeQuery(consulta);
 		query.setParameter("id_persona", id_persona);
+		query.setParameter("tiposBajaNp", parametroSistemaService.obtenerTiposBajaNp());
 
 		List<Object[]> lista = query.getResultList();
 
@@ -442,16 +447,18 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 
 		List<TiraMateriaBaja2DTO>  regresa = new ArrayList<TiraMateriaBaja2DTO>();
 
-		String consulta = "SELECT t2.id_grupo grupo, t2.id_persona persona  \r\n"
+		String consulta = "SELECT DISTINCT t2.id_grupo grupo, t2.id_persona persona  \r\n"
 				+ "FROM rel_persona_bajas t2\r\n"
 				+ "         INNER JOIN rel_motivo_baja mb2 ON mb2.id_motivo_baja = t2.motivo_baja_id\r\n"
 				+ "         INNER JOIN cat_tipo_bajas tb ON tb.id_tipo_baja = mb2.tipo_baja_id\r\n"
 				+ "         INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = t2.id_programa\r\n"
 				+ "         INNER JOIN tbl_eventos e ON e.id_evento = t2.id_evento\r\n"
-				+ "WHERE t2.id_persona = :id_persona";
+				+ "WHERE t2.id_persona = :id_persona AND t2.contabilizar = 1 "
+				+ "AND mb2.tipo_baja_id IN (:tiposBajaNp) AND t2.id_grupo IS NOT NULL";
 
 		Query query = entityManager.createNativeQuery(consulta);
 		query.setParameter("id_persona", id_persona);
+		query.setParameter("tiposBajaNp", parametroSistemaService.obtenerTiposBajaNp());
 
 		List<Object[]> lista = query.getResultList();
 
@@ -520,7 +527,11 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 
 		List<Object[]> lista = new ArrayList<>();
 
-		String consulta = "SELECT tp.sso_idUsuario matricula, CONCAT(tp.sso_apellidoPaterno, ' ', IF(tp.sso_apellidoMaterno != '', CONCAT(tp.sso_apellidoMaterno, ' '),'' ), tp.sso_nombre) nombre, gp.calificacion_final calificacion\r\n" + 
+		String consulta = "SELECT tp.sso_idUsuario matricula, CONCAT(tp.sso_apellidoPaterno, ' ', IF(tp.sso_apellidoMaterno != '', CONCAT(tp.sso_apellidoMaterno, ' '),'' ), tp.sso_nombre) nombre, CASE WHEN EXISTS (SELECT 1 FROM rel_persona_bajas baja " +
+				"JOIN rel_motivo_baja motivo ON motivo.id_motivo_baja = baja.motivo_baja_id " +
+				"WHERE baja.id_persona = gp.id_persona_participante AND baja.id_grupo = gp.id_grupo " +
+				"AND baja.contabilizar = 1 AND motivo.tipo_baja_id IN (:tiposBajaNp)) " +
+				"THEN 'NP' ELSE CAST(gp.calificacion_final AS CHAR) END calificacion\r\n" +
 				"FROM rel_grupo_participante gp\r\n" + 
 				"         JOIN tbl_persona tp ON tp.id_persona = gp.id_persona_participante\r\n" + 
 				"         JOIN tbl_grupos g ON gp.id_grupo = g.id\r\n" + 
@@ -531,6 +542,7 @@ public class HistorialAcademicoRepo implements IHistorialAcademicoRepo {
 
 		Query query = entityManager.createNativeQuery(consulta);
 		query.setParameter("idGrupo", idGrupo);
+		query.setParameter("tiposBajaNp", parametroSistemaService.obtenerTiposBajaNp());
 
 		lista = query.getResultList();
 

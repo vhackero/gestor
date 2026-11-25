@@ -17,6 +17,9 @@ import mx.gob.sedesol.basegestor.commons.utils.MensajesSistemaEnum;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ResultadoTransaccionEnum;
 import mx.gob.sedesol.basegestor.commons.utils.TipoAccion;
+import mx.gob.sedesol.basegestor.commons.utils.ParametrosSistemaEnum;
+import mx.gob.sedesol.basegestor.commons.utils.TiposBajaNp;
+import mx.gob.sedesol.basegestor.commons.utils.ColumnasHistorial;
 import mx.gob.sedesol.basegestor.model.entities.admin.CatParametroSistema;
 import mx.gob.sedesol.basegestor.model.repositories.admin.ParametroSistemaRepo;
 import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
@@ -107,6 +110,7 @@ public class ParametroSistemaServiceImpl extends ComunValidacionService<Parametr
 
 	@Override
 	public void validarPersistencia(ParametroSistemaDTO dto, ResultadoDTO<ParametroSistemaDTO> resultado) {
+		validarParametrosEspeciales(dto, resultado);
 		if (ObjectUtils.isNullOrEmpty(dto.getClave())) {
 			resultado.setMensajeError(MensajesSistemaEnum.PARAMETROS_SISTEMA_CLAVE_REQ);
 		}
@@ -123,6 +127,7 @@ public class ParametroSistemaServiceImpl extends ComunValidacionService<Parametr
 
 	@Override
 	public void validarActualizacion(ParametroSistemaDTO dto, ResultadoDTO<ParametroSistemaDTO> resultado) {
+		validarParametrosEspeciales(dto, resultado);
 		if (ObjectUtils.isNullOrEmpty(dto.getClave())) {
 			resultado.setMensajeError(MensajesSistemaEnum.PARAMETROS_SISTEMA_CLAVE_REQ);
 		}
@@ -148,6 +153,32 @@ public class ParametroSistemaServiceImpl extends ComunValidacionService<Parametr
 		if (ObjectUtils.isNullOrEmpty(dto.getUsuarioModifico())) {
 			resultado.setMensajeError(MensajesSistemaEnum.MSG_GENERAL_USUARIO_MODIFICO_REQ);
 		}
+	}
+
+	private void validarParametrosEspeciales(ParametroSistemaDTO dto, ResultadoDTO<ParametroSistemaDTO> resultado) {
+		if (ColumnasHistorial.PARAMETRO.equals(dto.getClave())) {
+			try {
+				ColumnasHistorial.leer(dto.getValor() == null ? "" : dto.getValor());
+			} catch (IllegalArgumentException e) {
+				resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+				resultado.agregaMensaje(ColumnasHistorial.ERROR);
+			}
+		}
+		if (ParametrosSistemaEnum.PS_TIPOS_BAJA_NP_ACTA.getClave().equals(dto.getClave())) {
+			try {
+				TiposBajaNp.parsear(dto.getValor());
+			} catch (IllegalArgumentException e) {
+				resultado.setResultado(ResultadoTransaccionEnum.FALLIDO);
+				resultado.agregaMensaje(TiposBajaNp.MENSAJE_FORMATO);
+			}
+		}
+	}
+
+	@Override
+	public List<Integer> obtenerTiposBajaNp() {
+		String valor = obtenerParametro(ParametrosSistemaEnum.PS_TIPOS_BAJA_NP_ACTA.getClave());
+		// Compatibilidad mientras se instala el parametro; no se ocultan valores invalidos.
+		return TiposBajaNp.parsear(valor == null ? TiposBajaNp.VALOR_COMPATIBILIDAD : valor);
 	}
 
 	@Override

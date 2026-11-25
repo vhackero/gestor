@@ -130,6 +130,12 @@ public class EventoConstanciaDTO implements Serializable{
 	public Double getCalificacionFinal() {
 		return calificacionFinal;
 	}
+	/** Representacion compartida por la vista y el PDF; una nota ausente no es cero. */
+	public String getCalificacionFinalTexto() {
+		if (calificacionFinal == null) return "";
+		return Double.compare(calificacionFinal, 666.0D) == 0 ? "NP" : calificacionFinal.toString();
+	}
+
 	public void setCalificacionFinal(Double calificacionFinal) {
 		this.calificacionFinal = calificacionFinal;
 	}
