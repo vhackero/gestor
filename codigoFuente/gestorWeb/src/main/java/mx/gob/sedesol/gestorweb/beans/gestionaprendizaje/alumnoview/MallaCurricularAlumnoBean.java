@@ -24,7 +24,8 @@ import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestion.aprendizaje.EventoConstanciaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionPersonaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
@@ -54,6 +55,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(MallaCurricularAlumnoBean.class);
+	private static final MallaCurricularV2ResultadoAdapter ADAPTADOR_RESULTADO_V2 = new MallaCurricularV2ResultadoAdapter();
 
 	private static final int COL_WIDTH = 260;
 	private static final int SEMESTRE_Y = 20;
@@ -90,6 +92,9 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private static final String ESTATUS_NO_ACREDITADA = "No acreditada";
 	private static final String ESTATUS_NO_INSCRITA = "No inscrita";
 	private static final String ESTATUS_EN_CURSO = "En curso";
+	private static final String ESTATUS_RECURSANDO = "Recursando";
+	private static final String ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA = "Cursamiento con antecedente de baja";
+	private static final String ESTATUS_REGULARIZADA = "Regularizada";
 	private static final String ESTATUS_BAJA = "Baja";
 	private static final String ESTATUS_BLOQUEADA = "Bloqueada";
 	private static final Map<String, String> ESTATUS_COLORS = new LinkedHashMap<>();
@@ -103,6 +108,9 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		ESTATUS_COLORS.put(ESTATUS_NO_INSCRITA, "#506172");
 		ESTATUS_COLORS.put(ESTATUS_BAJA, "#ED9A55");
 		ESTATUS_COLORS.put(ESTATUS_EN_CURSO, "#C19E00");
+		ESTATUS_COLORS.put(ESTATUS_RECURSANDO, "#C81E2A");
+		ESTATUS_COLORS.put(ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA, "#C19E00");
+		ESTATUS_COLORS.put(ESTATUS_REGULARIZADA, "#229447");
 		ESTATUS_COLORS.put(ESTATUS_BLOQUEADA, "#000000");
 	}
 
@@ -147,6 +155,9 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private Map<String, Set<String>> ubicacionesOptativasHistoricas;
 	private Map<String, Set<String>> ubicacionesOptativasEnCurso;
 	private Set<Integer> programasConBaja;
+	private Set<String> clavesProgramasConBaja;
+	private Set<Integer> programasConBajaParcial;
+	private Set<String> clavesProgramasConBajaParcial;
 	private Integer semestreEnCurso;
 	private Integer bloqueEnCurso;
 	private String estatusEstudiante;
@@ -156,9 +167,10 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	private String nombrePersonaObjetivo;
 	private String matriculaPersonaObjetivo;
 	private AsistenteInscripcionContextoDTO contextoAsistente;
-	private FichaIntegralCasoDTO fichaIntegralV2;
+	private ResultadoEvaluacionCurricularV2DTO resultadoEvaluacionV2;
 	private boolean intentoCargaFichaIntegralV2;
 	private Map<Long, UnidadDecisionInscripcionDTO> unidadesAsistentePorPrograma;
+	private Map<Long, DecisionUnidadCurricularV2DTO> decisionesV2PorPrograma;
 
 	@PostConstruct
 	public void init() {
@@ -178,11 +190,15 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		ubicacionesOptativasHistoricas = new HashMap<>();
 		ubicacionesOptativasEnCurso = new HashMap<>();
 		programasConBaja = new HashSet<>();
+		clavesProgramasConBaja = new HashSet<>();
+		programasConBajaParcial = new HashSet<>();
+		clavesProgramasConBajaParcial = new HashSet<>();
 		semestreEnCurso = null;
 		bloqueEnCurso = null;
 		estatusEstudiante = "Regular";
 		semestresTabla = new ArrayList<>();
 		unidadesAsistentePorPrograma = new HashMap<>();
+		decisionesV2PorPrograma = new HashMap<>();
 
 		Long idPersona = trayectoriaAcademicaContextoBean.resolverIdPersonaObjetivo(idPersonaEnSesion());
 		idPersonaObjetivo = idPersona;
@@ -197,7 +213,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 		planId = inscripcion.getIdPlan();
 		planNombre = inscripcion.getPlan();
-		cargarFichaIntegralV2();
+		// D1: la malla no consume ficha histórica para orientación académica.
 
 		MallaCurricularDTO raiz = fecServiceFacade.getMallaCurricularService()
 				.obtenerMallaCurricularPorIdPlan(planId.intValue());
@@ -226,6 +242,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 					unidadesAsistentePorPrograma.put(unidad.getUdId(), unidad);
 				}
 			}
+			cargarResultadoEvaluacionV2();
 		} catch (InscripcionException e) {
 			logger.warn("No fue posible cargar el contexto asistido para la malla curricular.", e);
 		} catch (Exception e) {
@@ -233,26 +250,29 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 	}
 
-	private void cargarFichaIntegralV2() {
-		intentoCargaFichaIntegralV2 = true;
-		fichaIntegralV2 = null;
-		if (mallaCurricularV2Facade == null || idPersonaObjetivo == null) {
+	private void cargarResultadoEvaluacionV2() {
+		resultadoEvaluacionV2 = null;
+		decisionesV2PorPrograma.clear();
+		if (mallaCurricularV2Facade == null || contextoAsistente == null) {
 			return;
 		}
 		try {
-			fichaIntegralV2 = mallaCurricularV2Facade.obtenerContextoMalla(construirContextoV2());
-		} catch (InscripcionException e) {
-			logger.warn("No fue posible cargar la ficha integral V2 para malla curricular.", e);
+			logger.info("[MALLA_V2] Inicio de evaluacion curricular");
+			logger.info("[MALLA_V2] Evaluando reglas curriculares");
+			resultadoEvaluacionV2 = mallaCurricularV2Facade.evaluarSombra(contextoAsistente);
+			if (resultadoEvaluacionV2 == null) {
+				logger.warn("[MALLA_V2] No fue posible obtener el resultado de la evaluacion curricular");
+				return;
+			}
+			for (DecisionUnidadCurricularV2DTO decision : resultadoEvaluacionV2.getDecisiones()) {
+				if (decision != null && decision.getIdPrograma() != null) {
+					decisionesV2PorPrograma.put(decision.getIdPrograma(), decision);
+				}
+			}
+			logger.info("[MALLA_V2] Resultado de evaluacion curricular obtenido correctamente");
 		} catch (Exception e) {
-			logger.warn("Error inesperado al cargar la ficha integral V2 para malla curricular.", e);
+			logger.warn("[MALLA_V2] Error al evaluar las reglas curriculares", e);
 		}
-	}
-
-	private void asegurarFichaIntegralV2() {
-		if (fichaIntegralV2 != null || intentoCargaFichaIntegralV2) {
-			return;
-		}
-		cargarFichaIntegralV2();
 	}
 
 	private ContextoAsistenteCurricularV2DTO construirContextoV2() {
@@ -288,8 +308,15 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 				String nombreNormalizado = normalizaTexto(limpiaAsignatura(materia.getAsignatura()));
 				asignaturasEnCurso.add(nombreNormalizado);
 				registrarUbicacionProgramaEnCurso(nombreNormalizado, semestre, bloque);
+				if (StringUtils.isNotBlank(materia.getClavePrograma())) {
+					registrarUbicacionProgramaEnCurso(normalizaTexto(materia.getClavePrograma()), semestre, bloque);
+				}
 				if (esProgramaOpcional(materia.getTipoPrograma())) {
 					registrarUbicacionOptativa(ubicacionesOptativasEnCurso, nombreNormalizado, semestre, bloque);
+					if (StringUtils.isNotBlank(materia.getClavePrograma())) {
+						registrarUbicacionOptativa(ubicacionesOptativasEnCurso,
+								normalizaTexto(materia.getClavePrograma()), semestre, bloque);
+					}
 				}
 			}
 		}
@@ -498,13 +525,37 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		conectarProgramas(programasPlan, programasPorId);
 		resolverDependencias(programaAntecedentePorId, programaNombrePorId, dependenciasEntrantes, dependenciasSalientes);
 		aplicarTooltipsDependencias(programasPorId, dependenciasEntrantes, dependenciasSalientes);
-		aplicarEstatusEnCurso(programasPorId);
+		aplicarEstatusEnCurso(programasPorId, estatusPorPrograma);
 		aplicarBloqueos(programasPorId, programaAntecedentePorId, estatusPorPrograma);
+		aplicarIndicadoresVisuales(programasPorId, estatusPorPrograma);
 		reconstruirDetallesContextuales(programasPorId, fichasProgramaPorId);
+		aplicarResultadoV2(programasPorId);
 		actualizarFilasTabla(filasTablaPorPrograma, programasPorId);
 		tiposPrograma = new ArrayList<>(tiposMap.values());
 		diagramWidth = maxX + DIAGRAMA_PADDING;
 		diagramHeight = maxY + DIAGRAMA_PADDING;
+	}
+
+	private void aplicarResultadoV2(Map<Integer, MallaDiagramaNodoDTO> programasPorId) {
+		if (resultadoEvaluacionV2 == null || decisionesV2PorPrograma.isEmpty()) {
+			return;
+		}
+		MallaCurricularV2ResultadoAdapter.AplicacionResultadoMallaV2 aplicacion = ADAPTADOR_RESULTADO_V2
+				.aplicar(programasPorId, decisionesV2PorPrograma, resultadoEvaluacionV2.getSituacionAcademicaCalculada());
+		aplicarSituacionAcademicaV2(aplicacion.getSituacionAcademica());
+		logger.info("[MALLA_V2] Resultado V2 aplicado a Malla Curricular");
+		logger.info("[MALLA_V2] Resumen aplicado - acreditadas=" + aplicacion.getAcreditadas() + " - reprobadas="
+				+ aplicacion.getReprobadas() + " - restringidas=" + aplicacion.getRestringidas() + " - habilitadas="
+				+ aplicacion.getHabilitadas() + " - requiereRevision=" + aplicacion.getRequiereRevision());
+	}
+
+	private void aplicarSituacionAcademicaV2(String situacionAcademicaV2) {
+		String situacionV2 = StringUtils.upperCase(StringUtils.trimToEmpty(situacionAcademicaV2));
+		if ("REGULAR".equals(situacionV2)) {
+			estatusEstudiante = "Regular";
+		} else if ("IRREGULAR".equals(situacionV2)) {
+			estatusEstudiante = "Irregular";
+		}
 	}
 
 	private void actualizarFilasTabla(Map<Integer, ProgramaTablaDTO> filasTablaPorPrograma,
@@ -515,7 +566,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 				continue;
 			}
 			ProgramaTablaDTO fila = entry.getValue();
-			fila.setEstatus(resolveEstatusTabla(nodo.getEstatus()));
+			fila.setEstatus(resolveEstatusTabla(nodo.getEstatusVisual()));
 			fila.setEstatusCss(nodo.getEstatusCss());
 			fila.setEstatusIconClass(nodo.getEstatusIconClass());
 			fila.setEstatusColor(resolveColorByEstatusCss(nodo.getEstatusCss()));
@@ -543,6 +594,10 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	}
 
 	private String resolveEstatusTabla(String estatus) {
+		if (ESTATUS_RECURSANDO.equals(estatus) || ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA.equals(estatus)
+				|| ESTATUS_REGULARIZADA.equals(estatus)) {
+			return estatus;
+		}
 		if (ESTATUS_APROBADA.equals(estatus)) {
 			return "Aprobada";
 		}
@@ -574,12 +629,19 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			unidad = unidadesAsistentePorPrograma.get(idPrograma.longValue());
 		}
 		programaNodo.setDetalleTipoUd(formatearTipoDetalle(programaNodo, programa, unidad));
-		programaNodo.setDetalleEstatusHistorico(normalizarEstadoDetalleContextual(resolveEstatusDetalle(programaNodo, unidad), programaNodo));
+		String estatusHistorico = normalizarEstadoDetalleContextual(resolveEstatusDetalle(programaNodo, unidad), programaNodo);
+		programaNodo.setDetalleEstatusHistorico(estatusHistorico);
+		String estatusPeriodo;
 		if (unidad != null && StringUtils.isNotBlank(unidad.getEstatusPeriodo())) {
-			programaNodo.setDetalleEstatusPeriodo(normalizarEstadoDetalleContextual(unidad.getEstatusPeriodo(), programaNodo));
+			estatusPeriodo = unidad.getEstatusPeriodo();
 		} else {
-			programaNodo.setDetalleEstatusPeriodo(normalizarEstadoDetalleContextual(resolveEstatusPeriodoContextual(programaNodo), programaNodo));
+			estatusPeriodo = resolveEstatusPeriodoContextual(programaNodo);
 		}
+		String estatusVisual = programaNodo.getEstatusVisual();
+		programaNodo.setDetalleEstatusPeriodo(ESTATUS_RECURSANDO.equals(estatusVisual)
+				|| ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA.equals(estatusVisual)
+				|| ESTATUS_REGULARIZADA.equals(estatusVisual) ? estatusVisual
+				: ADAPTADOR_RESULTADO_V2.construirEstatusContextual(estatusHistorico, estatusPeriodo, programaNodo));
 		programaNodo.setDetalleMotivoPrincipal(construirSituacionDetalle(programaNodo, programa, unidad));
 		programaNodo.setDetalleAccionSugerida(construirRecomendacionDetalle(programaNodo, programa, unidad));
 		programaNodo.setDetalleRiesgo(construirImpactoDetalle(programaNodo, programa, unidad));
@@ -600,10 +662,14 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			return "Optativa";
 		}
 		if (normalizado.contains("oblig")) {
-			return programaNodo != null && (programaNodo.isBloqueada() || programaNodo.isTieneDependencias())
+			return esObligatoriaSeriada(programaNodo)
 					? "Obligatoria seriada" : "Obligatoria";
 		}
 		return StringUtils.defaultIfBlank(tipo, "Sin información");
+	}
+
+	static boolean esObligatoriaSeriada(MallaDiagramaNodoDTO programaNodo) {
+		return programaNodo != null && programaNodo.isTieneDependencias();
 	}
 
 	private String resolveEstatusDetalle(MallaDiagramaNodoDTO programaNodo, UnidadDecisionInscripcionDTO unidad) {
@@ -754,47 +820,7 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 	}
 
 	private String normalizarEstadoDetalleContextual(String estado, MallaDiagramaNodoDTO programaNodo) {
-		String valor = StringUtils.trimToEmpty(estado);
-		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_APROBADA) || StringUtils.equalsIgnoreCase(valor, "Acreditada")) {
-			return "Aprobada";
-		}
-		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_NO_ACREDITADA)
-				|| StringUtils.equalsIgnoreCase(valor, "Pendiente de acreditar")) {
-			return "No acreditada";
-		}
-		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_NO_INSCRITA)) {
-			return "No inscrita";
-		}
-		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_BAJA) || valor.toLowerCase(Locale.ROOT).contains("baja")) {
-			return "Baja";
-		}
-		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_EN_CURSO)) {
-			return "En curso";
-		}
-		if (StringUtils.equalsIgnoreCase(valor, ESTATUS_BLOQUEADA)
-				|| StringUtils.equalsIgnoreCase(valor, "RECOMENDADA")
-				|| StringUtils.equalsIgnoreCase(valor, "Opcional")
-				|| StringUtils.equalsIgnoreCase(valor, "Pendiente de cursar")
-				|| StringUtils.equalsIgnoreCase(valor, "Pendiente de validación")
-				|| StringUtils.equalsIgnoreCase(valor, "Seguimiento de trayectoria")) {
-			return "Por cursar";
-		}
-		if (programaNodo != null && programaNodo.isBloqueada()) {
-			return "Por cursar";
-		}
-		if (programaNodo != null && ESTATUS_EN_CURSO.equals(programaNodo.getEstatus())) {
-			return "En curso";
-		}
-		if (programaNodo != null && ESTATUS_APROBADA.equals(programaNodo.getEstatus())) {
-			return "Aprobada";
-		}
-		if (programaNodo != null && ESTATUS_NO_ACREDITADA.equals(programaNodo.getEstatus())) {
-			return "No acreditada";
-		}
-		if (programaNodo != null && ESTATUS_BAJA.equals(programaNodo.getEstatus())) {
-			return "Baja";
-		}
-		return "Por cursar";
+		return ADAPTADOR_RESULTADO_V2.normalizarEstatusDetalle(estado, programaNodo);
 	}
 
 	private void acumularCreditos(String tipo, Integer creditos, MallaAlumnoProgramaDTO estatusDto,
@@ -1077,7 +1103,10 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		if (programaNodo == null || !esProgramaOpcional(programaNodo.getTipoPrograma())) {
 			return false;
 		}
-		if (ESTATUS_APROBADA.equals(programaNodo.getEstatus())) {
+		if (ESTATUS_APROBADA.equals(programaNodo.getEstatus())
+				|| ESTATUS_NO_ACREDITADA.equals(programaNodo.getEstatus())
+				|| ESTATUS_BAJA.equals(programaNodo.getEstatus())
+				|| ESTATUS_EN_CURSO.equals(programaNodo.getEstatus())) {
 			return false;
 		}
 		// Al cubrir el mínimo global de optativas del programa educativo, las
@@ -1234,6 +1263,10 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_NO_INSCRITA, "#506172", "#506172", "#506172", "fa fa-exclamation-triangle"));
 		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_BAJA, "#fb923c", "#fb923c", "#fb923c", "fa fa-arrow-down"));
 		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_EN_CURSO, "#facc15", "#facc15", "#facc15", "fa fa-flag"));
+		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_RECURSANDO, "#c81e2a", "#c81e2a", "#c81e2a", ""));
+		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_REGULARIZADA, "#229447", "#229447", "#229447", ""));
+		estatusPrograma.add(new MallaDiagramaTipoDTO(ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA,
+				"#c19e00", "#c19e00", "#c19e00", ""));
 		estatusPrograma.add(new MallaDiagramaTipoDTO("Por cursar", "#111827", "#111827", "#111827", "fa fa-lock"));
 	}
 
@@ -1245,18 +1278,8 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 			calificacionFinal = estatusDto.getCalificacionFinal();
 			calificacionMin = estatusDto.getCalificacionMinAprobatoria();
 		}
-		// Una baja temporal/parcial se conserva como antecedente administrativo,
-		// pero nunca debe ocultar una acreditación posterior cerrada.
-		if (calificacionFinal != null) {
-			if (Double.compare(calificacionFinal, CALIFICACION_NO_PRESENTADA) == 0) {
-				estatus = ESTATUS_NO_ACREDITADA;
-			} else {
-				double min = calificacionMin != null ? calificacionMin : 0d;
-				estatus = calificacionFinal >= min ? ESTATUS_APROBADA : ESTATUS_NO_ACREDITADA;
-			}
-		} else if (idPrograma != null && programasConBaja.contains(idPrograma)) {
-			estatus = ESTATUS_BAJA;
-		}
+		estatus = resolverEstatusHistorico(calificacionFinal, calificacionMin,
+				idPrograma != null && programasConBaja.contains(idPrograma));
 		String color = ESTATUS_COLORS.getOrDefault(estatus, "#6b7280");
 		nodo.setEstatus(estatus);
 		nodo.setEstatusBackgroundColor(color);
@@ -1271,17 +1294,72 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 	}
 
+	/**
+	 * Una baja aplicada no es una reprobacion aunque el origen conserve 0, NP o
+	 * una calificacion menor a la minima. Una acreditacion posterior si prevalece
+	 * porque resuelve el antecedente academico.
+	 */
+	static String resolverEstatusHistorico(Double calificacionFinal, Double calificacionMin,
+			boolean bajaAplicada) {
+		if (calificacionFinal != null && Double.compare(calificacionFinal, CALIFICACION_NO_PRESENTADA) != 0) {
+			double minima = calificacionMin != null ? calificacionMin : 0d;
+			if (calificacionFinal >= minima) {
+				return ESTATUS_APROBADA;
+			}
+		}
+		if (bajaAplicada) {
+			return ESTATUS_BAJA;
+		}
+		if (calificacionFinal != null) {
+			return ESTATUS_NO_ACREDITADA;
+		}
+		return ESTATUS_NO_INSCRITA;
+	}
+
 	private void cargarProgramasConBaja(Long idPersona) {
 		programasConBaja.clear();
+		clavesProgramasConBaja.clear();
+		programasConBajaParcial.clear();
+		clavesProgramasConBajaParcial.clear();
+		if (contextoAsistente != null && contextoAsistente.getContextoBase() != null
+				&& contextoAsistente.getContextoBase().getEstadoAcademico() != null
+				&& contextoAsistente.getContextoBase().getEstadoAcademico().getMateriasBajas() != null) {
+			for (InscripcionBajasDTO baja : contextoAsistente.getContextoBase().getEstadoAcademico().getMateriasBajas()) {
+				registrarProgramaConBaja(baja);
+			}
+		}
 		List<InscripcionBajasDTO> bajas = inscripcionService.obtenerBajasDeMateriasSolicitadas(idPersona);
 		if (ObjectUtils.isNullOrEmpty(bajas)) {
 			return;
 		}
 		for (InscripcionBajasDTO baja : bajas) {
-			if (baja != null && baja.getIdPrograma() != null && esBajaTemporalOParcial(baja)) {
-				programasConBaja.add(baja.getIdPrograma().intValue());
-			}
+			registrarProgramaConBaja(baja);
 		}
+	}
+
+	private void registrarProgramaConBaja(InscripcionBajasDTO baja) {
+		if (baja == null || !esBajaTemporalOParcial(baja)) {
+			return;
+		}
+		if (baja.getIdPrograma() != null) {
+			programasConBaja.add(baja.getIdPrograma().intValue());
+		}
+		if (StringUtils.isNotBlank(baja.getClavePrograma())) {
+			clavesProgramasConBaja.add(normalizaTexto(baja.getClavePrograma()));
+		}
+		if (!esBajaParcial(baja)) {
+			return;
+		}
+		if (baja.getIdPrograma() != null) {
+			programasConBajaParcial.add(baja.getIdPrograma().intValue());
+		}
+		if (StringUtils.isNotBlank(baja.getClavePrograma())) {
+			clavesProgramasConBajaParcial.add(normalizaTexto(baja.getClavePrograma()));
+		}
+	}
+
+	private boolean esBajaParcial(InscripcionBajasDTO baja) {
+		return baja != null && StringUtils.containsIgnoreCase(StringUtils.trimToEmpty(baja.getTipoBaja()), "PARCIAL");
 	}
 
 	private boolean esBajaTemporalOParcial(InscripcionBajasDTO baja) {
@@ -1292,12 +1370,22 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		return tipo.contains("TEMPORAL") || tipo.contains("PARCIAL");
 	}
 
-	private void aplicarEstatusEnCurso(Map<Integer, MallaDiagramaNodoDTO> programasPorId) {
-		for (MallaDiagramaNodoDTO nodo : programasPorId.values()) {
+	private void aplicarEstatusEnCurso(Map<Integer, MallaDiagramaNodoDTO> programasPorId,
+			Map<Integer, MallaAlumnoProgramaDTO> estatusPorPrograma) {
+		for (Map.Entry<Integer, MallaDiagramaNodoDTO> entry : programasPorId.entrySet()) {
+			MallaDiagramaNodoDTO nodo = entry.getValue();
+			boolean antecedenteBajaAplicada = tieneAntecedenteBajaAplicada(nodo, entry.getKey());
+			MallaAlumnoProgramaDTO estatusHistorico = estatusPorPrograma.get(entry.getKey());
+			UnidadDecisionInscripcionDTO unidadContextual = unidadesAsistentePorPrograma.get(Long.valueOf(entry.getKey().longValue()));
+			boolean noPresentadaPorBajaParcial = debeMostrarCursamientoConAntecedenteBaja(
+					nodo.getEstatus(), nodo.isEnCurso(), antecedenteBajaAplicada,
+					estatusHistorico != null ? estatusHistorico.getCalificacionFinal() : null,
+					unidadContextual != null ? unidadContextual.getEstatusHistorico() : null);
 			if (nodo.isEnCurso()
 					&& !ESTATUS_APROBADA.equals(nodo.getEstatus())
-					&& !ESTATUS_NO_ACREDITADA.equals(nodo.getEstatus())
-					&& !ESTATUS_BAJA.equals(nodo.getEstatus())) {
+					&& (!ESTATUS_NO_ACREDITADA.equals(nodo.getEstatus()) || noPresentadaPorBajaParcial)
+					&& (!ESTATUS_BAJA.equals(nodo.getEstatus())
+							|| antecedenteBajaAplicada)) {
 				String color = ESTATUS_COLORS.getOrDefault(ESTATUS_EN_CURSO, "#facc15");
 				nodo.setEstatus(ESTATUS_EN_CURSO);
 				nodo.setEstatusBackgroundColor(color);
@@ -1305,6 +1393,65 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 				nodo.setEstatusIconClass("fa fa-flag");
 			}
 		}
+	}
+
+	static boolean debeMostrarCursamientoConAntecedenteBaja(String estatus, boolean enCurso,
+			boolean antecedenteBajaParcial, Double calificacionFinal, String estatusHistoricoContexto) {
+		return enCurso && antecedenteBajaParcial && ESTATUS_NO_ACREDITADA.equals(estatus)
+				&& ((calificacionFinal != null
+						&& Double.compare(calificacionFinal, CALIFICACION_NO_PRESENTADA) == 0)
+						|| "BAJA".equalsIgnoreCase(StringUtils.trimToEmpty(estatusHistoricoContexto)));
+	}
+
+	/** Indicadores visuales: no alteran el estado académico usado por la malla. */
+	private void aplicarIndicadoresVisuales(Map<Integer, MallaDiagramaNodoDTO> programasPorId,
+			Map<Integer, MallaAlumnoProgramaDTO> estatusPorPrograma) {
+		for (Map.Entry<Integer, MallaDiagramaNodoDTO> entry : programasPorId.entrySet()) {
+			MallaDiagramaNodoDTO nodo = entry.getValue();
+			MallaAlumnoProgramaDTO estatus = estatusPorPrograma.get(entry.getKey());
+			String indicador = resolverIndicadorVisual(nodo.getEstatus(), nodo.isEnCurso(),
+					estatus != null && Boolean.TRUE.equals(estatus.getRegularizada()),
+					tieneAntecedenteBajaAplicada(nodo, entry.getKey()));
+			nodo.setEstatusVisual(indicador);
+			if (ESTATUS_RECURSANDO.equals(indicador) || ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA.equals(indicador)
+					|| ESTATUS_REGULARIZADA.equals(indicador)) {
+				nodo.setEstatusIconClass("");
+			}
+		}
+	}
+
+	private boolean tieneAntecedenteBajaParcial(MallaDiagramaNodoDTO nodo, Integer idPrograma) {
+		if (idPrograma != null && programasConBajaParcial.contains(idPrograma)) {
+			return true;
+		}
+		return nodo != null && StringUtils.isNotBlank(nodo.getClavePrograma())
+				&& clavesProgramasConBajaParcial.contains(normalizaTexto(nodo.getClavePrograma()));
+	}
+
+	private boolean tieneAntecedenteBajaAplicada(MallaDiagramaNodoDTO nodo, Integer idPrograma) {
+		if (idPrograma != null && programasConBaja.contains(idPrograma)) {
+			return true;
+		}
+		return nodo != null && StringUtils.isNotBlank(nodo.getClavePrograma())
+				&& clavesProgramasConBaja.contains(normalizaTexto(nodo.getClavePrograma()));
+	}
+
+	static String resolverIndicadorVisual(String estatus, boolean enCurso, boolean regularizada) {
+		return resolverIndicadorVisual(estatus, enCurso, regularizada, false);
+	}
+
+	static String resolverIndicadorVisual(String estatus, boolean enCurso, boolean regularizada,
+			boolean cursamientoConAntecedenteBaja) {
+		if (enCurso && ESTATUS_NO_ACREDITADA.equals(estatus)) {
+			return ESTATUS_RECURSANDO;
+		}
+		if (enCurso && ESTATUS_EN_CURSO.equals(estatus) && cursamientoConAntecedenteBaja) {
+			return ESTATUS_CURSAMIENTO_ANTECEDENTE_BAJA;
+		}
+		if (ESTATUS_APROBADA.equals(estatus) && regularizada) {
+			return ESTATUS_REGULARIZADA;
+		}
+		return estatus;
 	}
 
 	private void aplicarBloqueos(Map<Integer, MallaDiagramaNodoDTO> programasPorId,
@@ -1564,86 +1711,6 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		return "Consulta tu trayectoria curricular y revisa cómo cada unidad didáctica influye en tu avance académico.";
 	}
 
-	public FichaIntegralCasoDTO getFichaIntegralV2() {
-		asegurarFichaIntegralV2();
-		return fichaIntegralV2;
-	}
-
-	public boolean isTieneFichaIntegralV2() {
-		asegurarFichaIntegralV2();
-		return fichaIntegralV2 != null;
-	}
-
-	public boolean isMostrarPrevencionEstudianteV2() {
-		asegurarFichaIntegralV2();
-		return !vistaGestor && fichaIntegralV2 != null;
-	}
-
-	public boolean isMostrarSeguimientoCasoEstudianteV2() {
-		asegurarFichaIntegralV2();
-		return !vistaGestor && fichaIntegralV2 != null;
-	}
-
-	public String getEstatusCasoEstudianteV2() {
-		asegurarFichaIntegralV2();
-		if (fichaIntegralV2 == null || fichaIntegralV2.getCasoAcademico() == null
-				|| StringUtils.isBlank(fichaIntegralV2.getCasoAcademico().getEstatusCaso())) {
-			return "Orientación general";
-		}
-		return fichaIntegralV2.getCasoAcademico().getEstatusCaso().trim();
-	}
-
-	public String getMensajeCasoEstudianteV2() {
-		asegurarFichaIntegralV2();
-		if (fichaIntegralV2 == null || StringUtils.isBlank(fichaIntegralV2.getMensajeEstudiante())) {
-			return "Tu trayectoria no muestra un riesgo académico inmediato en este momento.";
-		}
-		return fichaIntegralV2.getMensajeEstudiante().trim();
-	}
-
-	public String getResolucionCasoEstudianteV2() {
-		asegurarFichaIntegralV2();
-		if (fichaIntegralV2 == null || StringUtils.isBlank(fichaIntegralV2.getAccionSugerida())) {
-			return "Mantén tu avance actual y revisa el siguiente periodo conforme a tu trayectoria.";
-		}
-		return fichaIntegralV2.getAccionSugerida().trim();
-	}
-
-	public String getResumenPrevencionEstudianteV2() {
-		asegurarFichaIntegralV2();
-		if (fichaIntegralV2 == null) {
-			return getMensajePanelContextual();
-		}
-		StringBuilder texto = new StringBuilder();
-		if (StringUtils.isNotBlank(fichaIntegralV2.getMensajeEstudiante())) {
-			texto.append(fichaIntegralV2.getMensajeEstudiante().trim());
-		}
-		if (StringUtils.isNotBlank(fichaIntegralV2.getAccionSugerida())) {
-			if (texto.length() > 0) {
-				texto.append(" ");
-			}
-			texto.append("Siguiente paso: ").append(fichaIntegralV2.getAccionSugerida()).append(".");
-		}
-		if (texto.length() == 0) {
-			return getMensajePanelContextual();
-		}
-		return texto.toString().trim();
-	}
-
-	public String getPrevencionTicketEstudianteV2() {
-		asegurarFichaIntegralV2();
-		if (vistaGestor) {
-			return null;
-		}
-		StringBuilder texto = new StringBuilder();
-		texto.append("Antes de pedir apoyo adicional revisa el detalle contextual de la UD, confirma la regla aplicada");
-		if (fichaIntegralV2 != null && StringUtils.isNotBlank(fichaIntegralV2.getReglaAplicada())) {
-			texto.append(" (").append(fichaIntegralV2.getReglaAplicada()).append(")");
-		}
-		texto.append(" y usa el Asistente de inscripción y orientación educativa para validar tu siguiente paso.");
-		return texto.toString();
-	}
-
 	private String formatearEtiquetaTipoPlural(String tipo) {
 		String normalizado = StringUtils.defaultString(tipo).trim();
 		if (StringUtils.isBlank(normalizado)) {
@@ -1789,6 +1856,15 @@ public class MallaCurricularAlumnoBean extends BaseBean {
 		}
 		if ("estatus-en-curso".equals(estatusCss)) {
 			return "#C19E00";
+		}
+		if ("estatus-recursando".equals(estatusCss)) {
+			return "#C81E2A";
+		}
+		if ("estatus-cursamiento-con-antecedente-de-baja".equals(estatusCss)) {
+			return "#C19E00";
+		}
+		if ("estatus-regularizada".equals(estatusCss)) {
+			return "#229447";
 		}
 		if ("estatus-bloqueada".equals(estatusCss)) {
 			return "#000000";

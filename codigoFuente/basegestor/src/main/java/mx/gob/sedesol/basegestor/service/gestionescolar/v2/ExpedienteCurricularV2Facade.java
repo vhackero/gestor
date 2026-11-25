@@ -6,5 +6,7 @@ import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 
 public interface ExpedienteCurricularV2Facade {
 
+    /** @deprecated El expediente sólo conserva seguimiento operativo; no orientación histórica. */
+    @Deprecated
     FichaIntegralCasoDTO obtenerContextoExpediente(ContextoAsistenteCurricularV2DTO contexto) throws InscripcionException;
 }

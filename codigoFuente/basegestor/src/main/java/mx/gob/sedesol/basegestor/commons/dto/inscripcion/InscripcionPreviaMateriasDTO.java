@@ -2,6 +2,8 @@ package mx.gob.sedesol.basegestor.commons.dto.inscripcion;
 
 public class InscripcionPreviaMateriasDTO {
 
+    private Long idPrograma;
+    private String clavePrograma;
     private String programa;
 	private String asignatura;
 	private String tipoPrograma;
@@ -14,6 +16,22 @@ public class InscripcionPreviaMateriasDTO {
 
 	public void setPrograma(String programa) {
 		this.programa = programa;
+	}
+
+	public Long getIdPrograma() {
+		return idPrograma;
+	}
+
+	public void setIdPrograma(Long idPrograma) {
+		this.idPrograma = idPrograma;
+	}
+
+	public String getClavePrograma() {
+		return clavePrograma;
+	}
+
+	public void setClavePrograma(String clavePrograma) {
+		this.clavePrograma = clavePrograma;
 	}
 
 	public String getAsignatura() {
@@ -50,8 +68,9 @@ public class InscripcionPreviaMateriasDTO {
 	
 	@Override
 	public String toString() {
-		return "InscripcionPreviaMateriasDTO [programa=" + programa + ", asignatura=" + asignatura + ", bloque="
-				+ bloque + ", semestre=" + semestre +", tipoPrograma=" + tipoPrograma+ "]";
+		return "InscripcionPreviaMateriasDTO [idPrograma=" + idPrograma + ", clavePrograma=" + clavePrograma
+				+ ", programa=" + programa + ", asignatura=" + asignatura + ", bloque=" + bloque
+				+ ", semestre=" + semestre +", tipoPrograma=" + tipoPrograma+ "]";
 	}
 
 }

@@ -30,6 +30,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademic
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
 import mx.gob.sedesol.basegestor.model.repositories.gestionescolar.IinscripcionRepository;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
 
@@ -303,6 +304,11 @@ private static final Logger logger = Logger.getLogger(InscripcionServiceImpl.cla
 	}
 
 	@Override
+	public TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Long idPlan, Date fechaCorte) {
+		return inscripcionesRepository.obtenerTrayectoriaPermanencia(idPersona, idPlan, fechaCorte);
+	}
+
+	@Override
 	public List<InscripcionMateriasDTO> consultarMateriasPorConvocatoria(String id_plan, String id_convocatoria,
 			String id_estructura) {
 		List<InscripcionMateriasDTO> listaMaterias = new ArrayList<>();
@@ -372,6 +378,16 @@ private static final Logger logger = Logger.getLogger(InscripcionServiceImpl.cla
 			return listaIntentosAsignaturas;
 		}
 		return listaIntentosAsignaturas;
+	}
+
+	@Override
+	public List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PeriodoTrayectoriaV2DTO> obtenerPeriodosTrayectoriaV2(Long idPersona, Long idPlan) {
+		return inscripcionesRepository.obtenerPeriodosTrayectoriaV2(idPersona, idPlan);
+	}
+
+	@Override
+	public List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO> obtenerIntentosCurricularesV2(Long idPersona, Long idPlan) {
+		return inscripcionesRepository.obtenerIntentosCurricularesV2(idPersona, idPlan);
 	}
 
 	@Override

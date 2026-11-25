@@ -3,10 +3,13 @@ package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,9 +17,12 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.commons.lang3.SerializationUtils;
 
 import mx.gob.sedesol.basegestor.commons.constantes.ConstantesGestor;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MetadatosConsultaAsistenteDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.DiagnosticoAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EscenarioCargaDTO;
@@ -27,6 +33,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoD
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasReprobadasDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademicaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MotivoDecisionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.OportunidadAcademicaDTO;
@@ -36,6 +43,14 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RelacionSeriacionDTO
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ResultadoSimulacionDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.RiesgoAcademicoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.UnidadDecisionInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ConfiguracionEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CausaPendienteUnidadV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoUnidadCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.UnidadEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.inscripcion.InscripcionPreviaMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.MallaCurricularDTO;
@@ -46,6 +61,10 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNu
 import mx.gob.sedesol.basegestor.service.gestionescolar.AsistenteInscripcionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionFacade;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ConfiguracionEvaluacionCurricularV2Service;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ContextoEvaluacionCurricularV2Adapter;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.EvaluacionCurricularV2Service;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.TrazabilidadEvaluacionCurricularV2Service;
 import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.FichaDescProgramaService;
 import mx.gob.sedesol.basegestor.service.planesyprogramas.MallaCurricularService;
@@ -57,6 +76,10 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     private static final double PROMEDIO_MINIMO_MAESTRIA = 8.0D;
     private static final double PROMEDIO_MINIMO_BECA = 8.5D;
     private static final double CALIFICACION_NO_PRESENTADA = 666.0D;
+    private static final int DURACION_NOMINAL_LICENCIATURA_SEMESTRES = 8;
+    private static final int DURACION_NOMINAL_LICENCIATURA_ANIOS = 4;
+    private static final int PLAZO_MAXIMO_LICENCIATURA_SEMESTRES = 16;
+    private static final int PLAZO_MAXIMO_LICENCIATURA_ANIOS = 8;
 
     @Autowired
     private InscripcionFacade inscripcionFacade;
@@ -73,6 +96,18 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     @Autowired
     private MallaCurricularService mallaCurricularService;
 
+    @Autowired
+    private ConfiguracionEvaluacionCurricularV2Service configuracionEvaluacionCurricularV2Service;
+
+    @Autowired
+    private ContextoEvaluacionCurricularV2Adapter contextoEvaluacionCurricularV2Adapter;
+
+    @Autowired
+    private EvaluacionCurricularV2Service evaluacionCurricularV2Service;
+
+    @Autowired
+    private TrazabilidadEvaluacionCurricularV2Service trazabilidadEvaluacionCurricularV2Service;
+
     @Override
     public AsistenteInscripcionContextoDTO obtenerContextoAsistido(Long idPersona) throws InscripcionException {
         InscripcionContextoDTO contextoBase = inscripcionFacade.obtenerContextoInscripcionConsulta(idPersona);
@@ -86,26 +121,173 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         dto.setIdProcesoInscripcion(resolverIdProcesoInscripcion(contextoBase));
         dto.setInscripcionVigente(Boolean.valueOf(tieneInscripcionVigente(materiasEnCurso)));
         dto.setOfertaVigenteReal(Boolean.valueOf(tieneOfertaVigenteReal(contextoBase)));
+        cargarIntentosReprobadosPorUd(dto, idPersona);
         dto.setEstadoOperativoSimulador(resolverEstadoOperativoSimulador(contextoBase,
                 Boolean.TRUE.equals(dto.getInscripcionVigente()),
                 Boolean.TRUE.equals(dto.getOfertaVigenteReal())));
         dto.setModoProyeccion(Boolean.TRUE.equals(dto.getInscripcionVigente()) ? "UNIVERSO_CURRICULAR" : "OFERTA_VIGENTE");
 
         mapearResumenPeriodo(dto, contextoBase);
+        dto.setTrayectoriaPermanencia(construirTrayectoriaPermanencia(idPersona, contextoBase));
+        dto.setPeriodosTrayectoriaV2(inscripcionService.obtenerPeriodosTrayectoriaV2(idPersona,
+                contextoBase.getInscripcionPersona().getIdPlan()));
+        dto.setHistorialIntentosV2(inscripcionService.obtenerIntentosCurricularesV2(idPersona,
+                contextoBase.getInscripcionPersona().getIdPlan()));
         dto.setPromedioPronosticado(calcularPromedioPronosticado(contextoBase));
         mapearPendientesYReglas(dto, contextoBase);
         mapearUnidades(dto, contextoBase, programasPlan, cobertura, materiasEnCurso, ubicacionesPlan);
         dto.setPendientesPlan(construirPendientesPlan(dto, contextoBase, programasPlan, cobertura,
                 ubicacionesPlan, materiasEnCurso));
-        dto.setDiagnosticoActual(construirDiagnosticoActual(dto, contextoBase, materiasEnCurso, programasPlan));
+        dto.setDiagnosticoActual(construirDiagnosticoActual(dto, contextoBase, materiasEnCurso, programasPlan,
+                cobertura));
         dto.setRiesgos(construirRiesgos(dto, contextoBase));
         dto.setProyeccionSiguientePeriodo(
                 construirProyeccionSiguientePeriodo(dto, materiasEnCurso, contextoBase, programasPlan, ubicacionesPlan));
         dto.setOportunidades(construirOportunidades(dto));
         dto.setEscenarios(construirEscenarios(dto));
+        dto.setMetadatosConsulta(construirMetadatosConsulta(dto, contextoBase));
         dto.setAuditoriaDecisionId(null);
 
         return dto;
+    }
+
+    /** Fuente de lectura por UD; un intento no se convierte en una nueva UD. */
+    private void cargarIntentosReprobadosPorUd(AsistenteInscripcionContextoDTO contexto, Long idPersona) {
+        Map<Long, Long> intentosPorUd = new HashMap<Long, Long>();
+        if (contexto == null || idPersona == null) return;
+        try {
+            List<IntentosAsignaturasDTO> intentos = inscripcionService.consultarIntentosAsignaturas(String.valueOf(idPersona));
+            intentosPorUd.putAll(mapearIntentosReprobadosPorUd(intentos));
+            contexto.setIntentosReprobadosDisponibles(Boolean.TRUE);
+        } catch (RuntimeException ex) {
+            contexto.setIntentosReprobadosDisponibles(Boolean.FALSE);
+        }
+        contexto.setIntentosReprobadosPorUd(intentosPorUd);
+    }
+
+    static Map<Long, Long> mapearIntentosReprobadosPorUd(List<IntentosAsignaturasDTO> intentos) {
+        Map<Long, Long> resultado = new HashMap<Long, Long>();
+        if (intentos == null) return resultado;
+        for (IntentosAsignaturasDTO intento : intentos) {
+            if (intento == null || intento.getIdPrograma() == null || intento.getIntentosReprobados() == null) continue;
+            resultado.put(intento.getIdPrograma(), intento.getIntentosReprobados());
+        }
+        return resultado;
+    }
+
+    /** Construye el corte y la disponibilidad sin convertir ausencia de datos en un resultado académico. */
+    private MetadatosConsultaAsistenteDTO construirMetadatosConsulta(AsistenteInscripcionContextoDTO contexto,
+            InscripcionContextoDTO contextoBase) {
+        MetadatosConsultaAsistenteDTO metadatos = new MetadatosConsultaAsistenteDTO();
+        metadatos.setPeriodoActual(contexto.getPeriodoActivo());
+        if (contexto.getTrayectoriaPermanencia() != null) {
+            metadatos.setFechaCorteTrayectoria(contexto.getTrayectoriaPermanencia().getFechaCorte());
+            metadatos.setEstadoTrayectoria(Boolean.TRUE.equals(contexto.getTrayectoriaPermanencia().getDeterminable())
+                    && contexto.getTrayectoriaPermanencia().getMensajeRevision() == null
+                            ? EstadoFuenteConsultaAsistente.DISPONIBLE
+                            : EstadoFuenteConsultaAsistente.PARCIAL);
+        }
+        boolean expedienteDisponible = contextoBase != null && contextoBase.getEstadoAcademico() != null;
+        metadatos.setEstadoExpediente(estadoExpediente(expedienteDisponible));
+        if (!expedienteDisponible) metadatos.getCamposPendientes().add("Expediente académico");
+        // Una oferta inexistente es un dato válido; sólo el valor ausente deja la fuente incompleta.
+        if (contexto.getOfertaVigenteReal() == null) {
+            metadatos.setEstadoOferta(EstadoFuenteConsultaAsistente.PARCIAL);
+            metadatos.getCamposPendientes().add("Oferta vigente");
+        } else {
+            metadatos.setEstadoOferta(estadoOferta(contexto.getOfertaVigenteReal()));
+        }
+        if (!Boolean.TRUE.equals(contexto.getIntentosReprobadosDisponibles())) {
+            metadatos.getCamposPendientes().add("Oportunidades de acreditación por UD");
+        }
+        try {
+            ConfiguracionEvaluacionCurricularV2DTO configuracion = configuracionEvaluacionCurricularV2Service
+                    .obtenerConfiguracion();
+            if (configuracion != null) metadatos.setVersionReglas(configuracion.getVersionReglas());
+        } catch (RuntimeException ex) {
+            metadatos.getCamposPendientes().add("Configuración normativa");
+        }
+        return metadatos;
+    }
+
+    static EstadoFuenteConsultaAsistente estadoExpediente(boolean disponible) {
+        return disponible ? EstadoFuenteConsultaAsistente.DISPONIBLE : EstadoFuenteConsultaAsistente.PARCIAL;
+    }
+
+    /** Una consulta de oferta sin UD vigentes es VACIO, no una fuente parcial. */
+    static EstadoFuenteConsultaAsistente estadoOferta(Boolean ofertaVigente) {
+        if (ofertaVigente == null) return EstadoFuenteConsultaAsistente.PARCIAL;
+        return ofertaVigente.booleanValue() ? EstadoFuenteConsultaAsistente.DISPONIBLE
+                : EstadoFuenteConsultaAsistente.VACIO;
+    }
+
+    private TrayectoriaPermanenciaDTO construirTrayectoriaPermanencia(Long idPersona, InscripcionContextoDTO contextoBase) {
+        Long idPlan = contextoBase != null && contextoBase.getInscripcionPersona() != null
+                ? contextoBase.getInscripcionPersona().getIdPlan() : null;
+        TrayectoriaPermanenciaDTO trayectoria = inscripcionService.obtenerTrayectoriaPermanencia(idPersona, idPlan, new Date());
+        return completarIndicadoresTrayectoria(trayectoria);
+    }
+
+    /**
+     * Art. 35 y 48: duración nominal de ocho semestres y plazo ordinario de
+     * ocho años. Los semestres son indicadores organizativos; el plazo se
+     * calcula con tiempo calendario desde la inscripción efectiva validada.
+     */
+    static TrayectoriaPermanenciaDTO completarIndicadoresTrayectoria(TrayectoriaPermanenciaDTO trayectoria) {
+        TrayectoriaPermanenciaDTO resultado = trayectoria == null ? new TrayectoriaPermanenciaDTO() : trayectoria;
+        resultado.setDuracionNominalSemestres(Integer.valueOf(DURACION_NOMINAL_LICENCIATURA_SEMESTRES));
+        resultado.setDuracionNominalAnios(Integer.valueOf(DURACION_NOMINAL_LICENCIATURA_ANIOS));
+        resultado.setPlazoMaximoSemestres(Integer.valueOf(PLAZO_MAXIMO_LICENCIATURA_SEMESTRES));
+        resultado.setPlazoMaximoAnios(Integer.valueOf(PLAZO_MAXIMO_LICENCIATURA_ANIOS));
+        if (resultado.getFechaPrimeraInscripcion() == null || resultado.getFechaCorte() == null) {
+            resultado.setDeterminable(Boolean.FALSE);
+            resultado.setMensajeRevision("Plazo de estudios pendiente de validación. No contamos con la información completa para calcularlo. Solicita la revisión de tu expediente mediante la Mesa de Servicio.");
+            return resultado;
+        }
+
+        resultado.setTiempoCalendarioTranscurrido(describirTiempoCalendario(resultado.getFechaPrimeraInscripcion(), resultado.getFechaCorte()));
+        Date fechaLimite = sumarAnios(resultado.getFechaPrimeraInscripcion(), PLAZO_MAXIMO_LICENCIATURA_ANIOS);
+        resultado.setFechaLimiteEstudios(fechaLimite);
+        boolean agotado = !resultado.getFechaCorte().before(fechaLimite);
+        resultado.setPlazoAgotado(Boolean.valueOf(agotado));
+        resultado.setPlazoRestanteCalendario(agotado ? "Plazo máximo agotado"
+                : describirTiempoCalendario(resultado.getFechaCorte(), fechaLimite));
+        if (resultado.getPeriodosAcademicosTranscurridos() != null
+                && resultado.getPeriodoPrimeraInscripcion() != null && resultado.getPeriodoCorte() != null) {
+            int transcurridos = Math.max(0, resultado.getPeriodosAcademicosTranscurridos().intValue());
+            resultado.setPeriodosAcademicosTranscurridos(Integer.valueOf(transcurridos));
+            resultado.setSemestresConcluidos(Integer.valueOf(Math.max(0, transcurridos - 1)));
+            resultado.setSemestreEnCurso(Boolean.valueOf(transcurridos > 0));
+            resultado.setMensajeRevision(null);
+        } else {
+            resultado.setMensajeRevision("Se calculó el plazo calendario, pero falta el calendario académico aplicable para completar los indicadores semestrales.");
+        }
+        resultado.setDeterminable(Boolean.TRUE);
+        return resultado;
+    }
+
+    private static Date sumarAnios(Date fecha, int anios) {
+        Calendar calendario = Calendar.getInstance();
+        calendario.setTime(fecha);
+        calendario.add(Calendar.YEAR, anios);
+        return calendario.getTime();
+    }
+
+    private static String describirTiempoCalendario(Date inicio, Date corte) {
+        Calendar inicioCalendario = Calendar.getInstance();
+        inicioCalendario.setTime(inicio);
+        Calendar corteCalendario = Calendar.getInstance();
+        corteCalendario.setTime(corte);
+        int meses = (corteCalendario.get(Calendar.YEAR) - inicioCalendario.get(Calendar.YEAR)) * 12
+                + corteCalendario.get(Calendar.MONTH) - inicioCalendario.get(Calendar.MONTH);
+        if (corteCalendario.get(Calendar.DAY_OF_MONTH) < inicioCalendario.get(Calendar.DAY_OF_MONTH)) meses--;
+        meses = Math.max(0, meses);
+        int anios = meses / 12;
+        int mesesRestantes = meses % 12;
+        if (anios == 0) return mesesRestantes + (mesesRestantes == 1 ? " mes" : " meses");
+        if (mesesRestantes == 0) return anios + (anios == 1 ? " año" : " años");
+        return anios + (anios == 1 ? " año" : " años") + " y " + mesesRestantes
+                + (mesesRestantes == 1 ? " mes" : " meses");
     }
 
     private Long resolverIdProcesoInscripcion(InscripcionContextoDTO contextoBase) {
@@ -127,6 +309,21 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     }
 
     @Override
+    public AsistenteInscripcionContextoDTO obtenerExpectativaLogro(Long idPersona, Set<Long> noAcreditadas)
+            throws InscripcionException {
+        AsistenteInscripcionContextoDTO contexto = obtenerContextoAsistido(idPersona);
+        if (contexto == null || contexto.getProyeccionSiguientePeriodo() == null) {
+            return contexto;
+        }
+        List<InscripcionPreviaMateriasDTO> materiasEnCurso = inscripcionPreviaMateriasService
+                .obtenerInscripcionPrevia(idPersona);
+        contexto.setProyeccionSiguientePeriodo(construirExpectativaSeleccionadaV2(contexto,
+                materiasEnCurso != null ? materiasEnCurso : Collections.<InscripcionPreviaMateriasDTO>emptyList(),
+                noAcreditadas != null ? noAcreditadas : Collections.<Long>emptySet()));
+        return contexto;
+    }
+
+    @Override
     public ResultadoSimulacionDTO simularInscripcion(Long idPersona, List<Long> unidadesIds)
             throws InscripcionException {
         AsistenteInscripcionContextoDTO contexto = obtenerContextoAsistido(idPersona);
@@ -138,6 +335,38 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             throws InscripcionException {
         AsistenteInscripcionContextoDTO contexto = obtenerContextoAsistido(idPersona);
         return evaluarSeleccion(contexto, unidadesIds, true);
+    }
+
+    /**
+     * Punto de integración de FASE 0C. Se mantiene fuera de los flujos de UI y
+     * de inscripción: únicamente materializa una comparación de lectura.
+     */
+    @Override
+    public ResultadoEvaluacionCurricularV2DTO obtenerEvaluacionCurricularSombra(Long idPersona)
+            throws InscripcionException {
+        ConfiguracionEvaluacionCurricularV2DTO configuracion = configuracionEvaluacionCurricularV2Service
+                .obtenerConfiguracion();
+        ResultadoEvaluacionCurricularV2DTO resultado = new ResultadoEvaluacionCurricularV2DTO();
+        if (!Boolean.TRUE.equals(configuracion.getEvaluacionV2Habilitada())) {
+            resultado.getMensajes().add("La evaluación curricular no está disponible por configuración.");
+            return resultado;
+        }
+        if (!Boolean.TRUE.equals(configuracion.getModoSombra())) {
+            resultado.getMensajes().add("La evaluación curricular requiere una configuración de consulta válida.");
+            return resultado;
+        }
+        AsistenteInscripcionContextoDTO contextoVigente = obtenerContextoAsistido(idPersona);
+        ContextoEvaluacionCurricularV2DTO contextoSombra = contextoEvaluacionCurricularV2Adapter
+                .construirDesdeAsistente(contextoVigente);
+        contextoSombra.setVersionReglas(configuracion.getVersionReglas());
+        resultado = evaluacionCurricularV2Service.evaluarSombra(contextoSombra);
+        try {
+            trazabilidadEvaluacionCurricularV2Service.registrarSombra(contextoSombra, resultado);
+        } catch (RuntimeException ex) {
+            // RN-9.5 en modo sombra jamás interrumpe el flujo vigente de inscripción/asistente.
+            resultado.getMensajes().add("No fue posible registrar la trazabilidad de la evaluación; la información vigente permanece sin cambios.");
+        }
+        return resultado;
     }
 
     private void mapearResumenPeriodo(AsistenteInscripcionContextoDTO dto, InscripcionContextoDTO contextoBase) {
@@ -253,15 +482,18 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
          * inferencia curricular se conserva sólo como respaldo cuando aún no
          * hay oferta dinámica publicada.
          */
-        List<InscripcionMateriasDTO> materiasFuente = estado.getMateriasDisponibles();
+        List<InscripcionMateriasDTO> materiasFuente = estado.getMateriasDisponibles() != null
+                ? new ArrayList<InscripcionMateriasDTO>(estado.getMateriasDisponibles())
+                : new ArrayList<InscripcionMateriasDTO>();
         if (Boolean.TRUE.equals(dto.getInscripcionVigente())
-                && (materiasFuente == null || materiasFuente.isEmpty())) {
+                && materiasFuente.isEmpty()) {
             materiasFuente = construirMateriasSimuladas(contextoBase, programasPlan, materiasEnCurso, ubicacionesPlan);
         }
-        if (materiasFuente == null) {
-            dto.setUnidades(unidades);
-            return;
-        }
+
+        incorporarMateriasEnCursoNoPresentes(materiasFuente, materiasEnCurso, programasPlan, contextoBase,
+                ubicacionesPlan);
+        incorporarMateriasReprobadasNoPresentes(materiasFuente, estado, programasPlan, contextoBase,
+                ubicacionesPlan);
 
         for (InscripcionMateriasDTO materia : materiasFuente) {
             unidades.add(construirUnidadDecision(materia, contextoBase, programasPlan, creditosPorPrograma));
@@ -269,18 +501,179 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
         completarRelacionesDesbloqueo(unidades);
         aplicarReglasOptativasElectivas(unidades, cobertura, contextoBase);
+        marcarUnidadesReinscritasComoEnCurso(unidades, materiasEnCurso);
         dto.setUnidades(unidades);
+        // La oferta es candidata del periodo; la evaluacion V2 requiere ademas
+        // el universo completo que el mapa curricular ya representa.
+        dto.setUnidadesCandidatasPeriodo(new ArrayList<UnidadDecisionInscripcionDTO>(unidades));
+        dto.setUnidadesMapaPlan(construirUniversoMapaPlan(unidades, contextoBase, programasPlan,
+                ubicacionesPlan, creditosPorPrograma));
+    }
+
+    private List<UnidadDecisionInscripcionDTO> construirUniversoMapaPlan(
+            List<UnidadDecisionInscripcionDTO> candidatas,
+            InscripcionContextoDTO contextoBase,
+            Map<Long, FichaDescProgramaDTO> programasPlan,
+            Map<Long, UbicacionCurricular> ubicacionesPlan,
+            Map<Long, Integer> creditosPorPrograma) {
+        Map<Long, UnidadDecisionInscripcionDTO> porId = new LinkedHashMap<Long, UnidadDecisionInscripcionDTO>();
+        if (candidatas != null) {
+            for (UnidadDecisionInscripcionDTO candidata : candidatas) {
+                if (candidata != null && candidata.getUdId() != null) {
+                    porId.put(candidata.getUdId(), candidata);
+                }
+            }
+        }
+        if (programasPlan != null && ubicacionesPlan != null) {
+            for (FichaDescProgramaDTO programa : programasPlan.values()) {
+                if (programa == null || programa.getIdPrograma() == null) continue;
+                Long idPrograma = programa.getIdPrograma().longValue();
+                if (porId.containsKey(idPrograma)) continue;
+                UbicacionCurricular ubicacion = ubicacionesPlan.get(idPrograma);
+                if (ubicacion == null) continue;
+                InscripcionMateriasDTO materia = construirMateriaSimulada(programa, contextoBase, ubicacion, false);
+                UnidadDecisionInscripcionDTO unidad = construirUnidadDecision(materia, contextoBase,
+                        programasPlan, creditosPorPrograma);
+                // No ofertada no significa no cursada ni reprobada: conserva la
+                // ausencia de oferta como dato operativo separado.
+                unidad.setOfertada(Boolean.FALSE);
+                porId.put(idPrograma, unidad);
+            }
+        }
+        return new ArrayList<UnidadDecisionInscripcionDTO>(porId.values());
+    }
+
+    /**
+     * La oferta y la carga ya registrada no siempre se publican en la misma
+     * consulta. Se agregan sólo las UDs vigentes ausentes para describir la
+     * carga actual, sin convertirlas en una nueva opción de inscripción.
+     */
+    private void incorporarMateriasEnCursoNoPresentes(List<InscripcionMateriasDTO> materiasFuente,
+            List<InscripcionPreviaMateriasDTO> materiasEnCurso, Map<Long, FichaDescProgramaDTO> programasPlan,
+            InscripcionContextoDTO contextoBase, Map<Long, UbicacionCurricular> ubicacionesPlan) {
+        if (materiasFuente == null || materiasEnCurso == null || programasPlan == null || ubicacionesPlan == null) {
+            return;
+        }
+        Set<Long> idsPresentes = new HashSet<Long>();
+        for (InscripcionMateriasDTO materia : materiasFuente) {
+            if (materia != null && materia.getIdPrograma() != null) {
+                idsPresentes.add(materia.getIdPrograma());
+            }
+        }
+        for (InscripcionPreviaMateriasDTO materiaEnCurso : materiasEnCurso) {
+            if (materiaEnCurso == null || materiaEnCurso.getIdPrograma() == null
+                    || idsPresentes.contains(materiaEnCurso.getIdPrograma())) {
+                continue;
+            }
+            FichaDescProgramaDTO programa = programasPlan.get(materiaEnCurso.getIdPrograma());
+            UbicacionCurricular ubicacion = ubicacionesPlan.get(materiaEnCurso.getIdPrograma());
+            if (programa == null || ubicacion == null || ubicacion.getSemestre() == null) {
+                continue;
+            }
+            InscripcionMateriasDTO materia = construirMateriaSimulada(programa, contextoBase, ubicacion, false);
+            materia.setPerfil(null);
+            materiasFuente.add(materia);
+            idsPresentes.add(materiaEnCurso.getIdPrograma());
+        }
+    }
+
+    /** La oferta no es el universo de regularización: conserva reprobadas no ofertadas como consulta. */
+    private void incorporarMateriasReprobadasNoPresentes(List<InscripcionMateriasDTO> materiasFuente,
+            EstadoAcademicoDTO estado, Map<Long, FichaDescProgramaDTO> programasPlan,
+            InscripcionContextoDTO contextoBase, Map<Long, UbicacionCurricular> ubicacionesPlan) {
+        if (materiasFuente == null || estado == null || estado.getMateriasReprobadas() == null) return;
+        Set<Long> idsPresentes = new HashSet<Long>();
+        Set<String> clavesPresentes = new HashSet<String>();
+        for (InscripcionMateriasDTO materia : materiasFuente) {
+            if (materia == null) continue;
+            if (materia.getIdPrograma() != null) idsPresentes.add(materia.getIdPrograma());
+            String clave = normalizarTexto(materia.getClavePrograma());
+            if (!clave.isEmpty()) clavesPresentes.add(clave);
+        }
+        for (InscripcionMateriasReprobadasDTO reprobada : estado.getMateriasReprobadas()) {
+            if (reprobada == null) continue;
+            String clave = normalizarTexto(reprobada.getClavePrograma());
+            if ((reprobada.getIdPrograma() != null && idsPresentes.contains(reprobada.getIdPrograma()))
+                    || (!clave.isEmpty() && clavesPresentes.contains(clave))) continue;
+            FichaDescProgramaDTO programa = reprobada.getIdPrograma() != null && programasPlan != null
+                    ? programasPlan.get(reprobada.getIdPrograma()) : null;
+            UbicacionCurricular ubicacion = reprobada.getIdPrograma() != null && ubicacionesPlan != null
+                    ? ubicacionesPlan.get(reprobada.getIdPrograma()) : null;
+            InscripcionMateriasDTO materia;
+            if (programa != null && ubicacion != null) {
+                materia = construirMateriaSimulada(programa, contextoBase, ubicacion, true);
+            } else {
+                materia = new InscripcionMateriasDTO();
+                materia.setIdPrograma(reprobada.getIdPrograma());
+                materia.setClavePrograma(reprobada.getClavePrograma());
+                materia.setNombreTentativoPrograma(reprobada.getNombrePrograma());
+                materia.setTipoPrograma(reprobada.getTipoPrograma());
+                materia.setEstructura(reprobada.getEstructura());
+                materia.setSubestructura(reprobada.getSubestructura());
+                materia.setIdProgramaAntecedente(reprobada.getIdProgramaAntecedente());
+                materia.setPerfil("HISTORIAL_REPROBADA_SIN_MALLA");
+            }
+            materiasFuente.add(materia);
+            if (materia.getIdPrograma() != null) idsPresentes.add(materia.getIdPrograma());
+            if (!clave.isEmpty()) clavesPresentes.add(clave);
+        }
+    }
+
+    /**
+     * La oferta clasifica opciones para seleccionar; la reinscripción previa
+     * identifica las UD que ya forman parte de la carga vigente. Esta última
+     * condición debe prevalecer en la vista sin borrar sus motivos curriculares.
+     */
+    private void marcarUnidadesReinscritasComoEnCurso(List<UnidadDecisionInscripcionDTO> unidades,
+            List<InscripcionPreviaMateriasDTO> materiasEnCurso) {
+        if (unidades == null || unidades.isEmpty() || materiasEnCurso == null || materiasEnCurso.isEmpty()) {
+            return;
+        }
+        Set<String> clavesEnCurso = new HashSet<String>();
+        Set<Long> idsEnCurso = new HashSet<Long>();
+        for (InscripcionPreviaMateriasDTO materia : materiasEnCurso) {
+            if (materia != null) {
+                if (materia.getIdPrograma() != null) {
+                    idsEnCurso.add(materia.getIdPrograma());
+                }
+                String clave = normalizarTexto(materia.getClavePrograma());
+                if (!clave.isEmpty()) {
+                    clavesEnCurso.add(clave);
+                }
+            }
+        }
+        for (UnidadDecisionInscripcionDTO unidad : unidades) {
+            if (unidad != null && coincideUnidadReinscrita(unidad.getUdId(), unidad.getClave(), idsEnCurso, clavesEnCurso)) {
+                unidad.setEstatusPeriodo("EN_CURSO");
+            }
+        }
+    }
+
+    /** El nombre no identifica una UD curricular; sólo se admiten id o clave verificable. */
+    static boolean coincideUnidadReinscrita(Long idUnidad, String claveUnidad,
+            Set<Long> idsEnCurso, Set<String> clavesEnCurso) {
+        if (idUnidad != null && idsEnCurso != null && idsEnCurso.contains(idUnidad)) {
+            return true;
+        }
+        String clave = claveUnidad == null ? "" : claveUnidad.trim().toUpperCase();
+        return !clave.isEmpty() && clavesEnCurso != null && clavesEnCurso.contains(clave);
     }
 
     private DiagnosticoAcademicoDTO construirDiagnosticoActual(AsistenteInscripcionContextoDTO contexto,
             InscripcionContextoDTO contextoBase, List<InscripcionPreviaMateriasDTO> materiasEnCurso,
-            Map<Long, FichaDescProgramaDTO> programasPlan) {
+            Map<Long, FichaDescProgramaDTO> programasPlan, CoberturaCurricularInfo cobertura) {
         DiagnosticoAcademicoDTO dto = new DiagnosticoAcademicoDTO();
         EstadoAcademicoDTO estado = contextoBase.getEstadoAcademico();
 
         int reprobadas = contarReprobadasReales(estado);
-        int bajas = contarBajasTemporalesOParciales(estado);
+        int bajas = contarBajasParcialesPorUd(estado);
         int enCurso = contarMateriasEnCursoUnicas(materiasEnCurso);
+		int obligatoriasEnCurso = contarMateriasEnCursoPorTipo(materiasEnCurso, true);
+		int optativasEnCurso = contarMateriasEnCursoPorTipo(materiasEnCurso, false);
+		int optativasCubiertasPrevias = cobertura != null
+				? Math.max(0, cobertura.getOptativasCubiertas() - optativasEnCurso) : 0;
+		int optativasRequeridasEnCurso = Math.min(optativasEnCurso,
+				Math.max(0, obtenerMinimoOptativasPlanAsistente() - optativasCubiertasPrevias));
         int criticas = contarUnidadesUnicas(contexto.getUnidades(), new CriterioUnidad() {
             @Override
             public boolean cumple(UnidadDecisionInscripcionDTO unidad) {
@@ -295,6 +688,9 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
         dto.setRegular(Boolean.valueOf(esSituacionRegular(estado)));
         dto.setMateriasEnCurso(Integer.valueOf(enCurso));
+		dto.setMateriasEnCursoObligatorias(Integer.valueOf(obligatoriasEnCurso));
+		dto.setMateriasEnCursoOptativasRequeridas(Integer.valueOf(optativasRequeridasEnCurso));
+		dto.setMateriasEnCursoOptativasAdicionales(Integer.valueOf(optativasEnCurso - optativasRequeridasEnCurso));
         dto.setMateriasReprobadasActivas(reprobadas);
         dto.setMateriasConBaja(bajas);
         dto.setMateriasPendientesNoInscritas(contexto.getPendientesPlan() != null
@@ -345,6 +741,31 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
         return dto;
     }
+
+	private int contarMateriasEnCursoPorTipo(List<InscripcionPreviaMateriasDTO> materiasEnCurso,
+			boolean obligatorias) {
+		Set<String> materias = new HashSet<String>();
+		if (materiasEnCurso == null) {
+			return 0;
+		}
+		for (InscripcionPreviaMateriasDTO materia : materiasEnCurso) {
+			if (materia == null) {
+				continue;
+			}
+			boolean coincideTipo = obligatorias
+					? InscripcionUtils.esMateriaObligatoria(materia.getTipoPrograma())
+					: InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma());
+			if (coincideTipo) {
+				materias.add(llaveMateriaEnCurso(materia));
+			}
+		}
+		return materias.size();
+	}
+
+	private int obtenerMinimoOptativasPlanAsistente() {
+		return inscripcionService.obtenerConfiguracionRestriccionesAcademicasGenerales()
+				.getMinimoOptativasPlanAsistente();
+	}
 
     private int contarBloqueadasSeriacionPlan(Map<Long, FichaDescProgramaDTO> programasPlan,
             InscripcionContextoDTO contextoBase) {
@@ -408,9 +829,14 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     }
 
     private String llaveMateriaEnCurso(InscripcionPreviaMateriasDTO materia) {
-        // `programa` identifica el Programa Educativo (por ejemplo, Derecho),
-        // por lo que no distingue las UDs de una misma persona. La asignatura
-        // es la identidad disponible de la UD en esta consulta.
+        if (materia.getIdPrograma() != null) {
+            return "ID:" + materia.getIdPrograma();
+        }
+        String clave = normalizarTexto(materia.getClavePrograma());
+        if (!clave.isEmpty()) {
+            return "CLAVE:" + clave;
+        }
+        // Respaldo para registros históricos sin identificador curricular.
         String asignatura = normalizarTexto(materia.getAsignatura());
         return !asignatura.isEmpty() ? "UD:" + asignatura : "PROGRAMA:" + normalizarTexto(materia.getPrograma());
     }
@@ -643,8 +1069,8 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             return claves;
         }
         for (InscripcionPreviaMateriasDTO materia : materiasEnCurso) {
-            if (materia != null && materia.getPrograma() != null) {
-                claves.add(materia.getPrograma().toUpperCase());
+            if (materia != null && materia.getClavePrograma() != null) {
+                claves.add(materia.getClavePrograma().toUpperCase());
             }
         }
         return claves;
@@ -898,6 +1324,137 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
     }
 
     private ProyeccionSiguientePeriodoDTO construirProyeccionSiguientePeriodo(AsistenteInscripcionContextoDTO contexto,
+            List<InscripcionPreviaMateriasDTO> materiasEnCurso,
+            InscripcionContextoDTO contextoBase, Map<Long, FichaDescProgramaDTO> programasPlan,
+            Map<Long, UbicacionCurricular> ubicacionesPlan) {
+        return construirProyeccionSiguientePeriodoV2(contexto, materiasEnCurso);
+    }
+
+    /**
+     * Las expectativas son hipótesis de sólo lectura. Cada una parte de una
+     * copia profunda del mismo contexto y vuelve a evaluar el motor V2.
+     */
+    private ProyeccionSiguientePeriodoDTO construirProyeccionSiguientePeriodoV2(AsistenteInscripcionContextoDTO contexto,
+            List<InscripcionPreviaMateriasDTO> materiasEnCurso) {
+        ProyeccionSiguientePeriodoDTO dto = new ProyeccionSiguientePeriodoDTO();
+        if (contexto == null || contextoEvaluacionCurricularV2Adapter == null || evaluacionCurricularV2Service == null) {
+            dto.setResumen("No es posible construir la expectativa: la evaluación curricular no está disponible.");
+            return dto;
+        }
+        ContextoEvaluacionCurricularV2DTO base = contextoEvaluacionCurricularV2Adapter.construirDesdeAsistente(contexto);
+        if (configuracionEvaluacionCurricularV2Service != null) {
+            base.setVersionReglas(configuracionEvaluacionCurricularV2Service.obtenerConfiguracion().getVersionReglas());
+        }
+        Set<Long> enCurso = obtenerIdsMateriasEnCurso(contexto, materiasEnCurso);
+        dto.getEscenarios().add(evaluarEscenarioExpectativaV2("Situación registrada", "Sin hipótesis: conserva los resultados registrados.", base, Collections.<Long>emptySet(), Collections.<Long>emptySet(), enCurso));
+        if (enCurso.isEmpty()) {
+            dto.setResumen("No hay UD en curso verificables para construir hipótesis de acreditación. Se muestra únicamente la situación registrada.");
+            return dto;
+        }
+        dto.getEscenarios().add(evaluarEscenarioExpectativaV2("Si acredita la carga de UD actual", "Escenario conjunto: todas las UD actualmente en curso se consideran acreditadas; los demás registros se conservan.", base, enCurso, Collections.<Long>emptySet(), enCurso));
+        for (Long id : enCurso) {
+            dto.getEscenarios().add(evaluarEscenarioExpectativaV2("Si no acredita una UD en curso", "Hipótesis individual: sólo una UD en curso se considera no acreditada; las demás conservan su estado registrado.", base, Collections.<Long>emptySet(), Collections.singleton(id), enCurso));
+        }
+        dto.setResumen("Resultados hipotéticos de sólo lectura: no predicen calificaciones ni modifican historial, inscripción u oportunidades. La oferta futura requiere confirmación institucional.");
+        return dto;
+    }
+
+    private ProyeccionSiguientePeriodoDTO construirExpectativaSeleccionadaV2(AsistenteInscripcionContextoDTO contexto,
+            List<InscripcionPreviaMateriasDTO> materiasEnCurso, Set<Long> noAcreditadas) {
+        ProyeccionSiguientePeriodoDTO dto = new ProyeccionSiguientePeriodoDTO();
+        if (contexto == null || contextoEvaluacionCurricularV2Adapter == null || evaluacionCurricularV2Service == null) {
+            dto.setResumen("No es posible actualizar la expectativa: la evaluación curricular no está disponible.");
+            return dto;
+        }
+        ContextoEvaluacionCurricularV2DTO base = contextoEvaluacionCurricularV2Adapter.construirDesdeAsistente(contexto);
+        if (configuracionEvaluacionCurricularV2Service != null) {
+            base.setVersionReglas(configuracionEvaluacionCurricularV2Service.obtenerConfiguracion().getVersionReglas());
+        }
+        Set<Long> enCurso = obtenerIdsMateriasEnCurso(contexto, materiasEnCurso);
+        dto.getEscenarios().add(evaluarEscenarioExpectativaV2("Situación registrada",
+                "Sin hipótesis: conserva los resultados registrados.", base, Collections.<Long>emptySet(),
+                Collections.<Long>emptySet(), enCurso));
+        if (enCurso.isEmpty()) {
+            dto.setResumen("No hay UD en curso verificables para construir hipótesis de acreditación.");
+            return dto;
+        }
+        Set<Long> reprobadas = new HashSet<Long>(noAcreditadas);
+        reprobadas.retainAll(enCurso);
+        Set<Long> acreditadas = new HashSet<Long>(enCurso);
+        acreditadas.removeAll(reprobadas);
+        dto.getEscenarios().add(evaluarEscenarioExpectativaV2("Si acreditas toda tu carga",
+                "Escenario conjunto: todas las UD en curso se consideran acreditadas.", base, enCurso,
+                Collections.<Long>emptySet(), enCurso));
+        dto.getEscenarios().add(evaluarEscenarioExpectativaV2("Si no acreditas las UD seleccionadas",
+                "Escenario conjunto: las UD seleccionadas se consideran no acreditadas y las demás UD en curso se consideran acreditadas.",
+                base, acreditadas, reprobadas, enCurso));
+        dto.setResumen("Resultados hipotéticos: la consulta no modifica historial ni formaliza inscripción. La oferta futura requiere confirmación institucional.");
+        return dto;
+    }
+
+    private EscenarioProyeccionDTO evaluarEscenarioExpectativaV2(String nombre, String descripcion,
+            ContextoEvaluacionCurricularV2DTO base, Set<Long> acreditadas, Set<Long> reprobadas, Set<Long> enCurso) {
+        EscenarioProyeccionDTO escenario = new EscenarioProyeccionDTO();
+        escenario.setNombre(nombre);
+        escenario.setDescripcion(descripcion);
+        escenario.setMateriasOfertadas(Integer.valueOf(enCurso.size()));
+        escenario.setSituacionBase(base.getSituacionAcademicaOrigen());
+        escenario.setPeriodoSimulado(base.getPeriodoNormativo());
+        escenario.setPeriodoElegibilidad(base.getPeriodoNormativo());
+        escenario.setVersionReglas(base.getVersionReglas());
+        escenario.setCorteDatos("Corte de las fuentes consultadas en el contexto registrado");
+        if (!acreditadas.isEmpty()) escenario.getSupuestos().add("Las UD en curso indicadas se suponen acreditadas; las demás conservan su estado registrado.");
+        if (!reprobadas.isEmpty()) escenario.getSupuestos().add("Sólo la UD indicada se supone no acreditada; las demás UD en curso conservan su estado registrado.");
+        if (acreditadas.isEmpty() && reprobadas.isEmpty()) escenario.getSupuestos().add("Referencia registrada: no es un resultado futuro.");
+        try {
+            ContextoEvaluacionCurricularV2DTO hipotetico = copiarContextoExpectativa(base);
+            for (UnidadEvaluacionCurricularV2DTO unidad : hipotetico.getUnidades()) {
+                if (unidad == null || unidad.getIdPrograma() == null) continue;
+                if (acreditadas.contains(unidad.getIdPrograma())) {
+                    unidad.setEstado(EstadoUnidadCurricularV2.ACREDITADA);
+                    unidad.setCausa(null);
+                    unidad.setReprobacionVigenteConocida(Boolean.FALSE);
+                    unidad.setReprobacionPeriodoPrevioConocida(Boolean.FALSE);
+                    unidad.setAcreditadaDurantePeriodo(Boolean.TRUE);
+                }
+                if (reprobadas.contains(unidad.getIdPrograma())) {
+                    unidad.setEstado(EstadoUnidadCurricularV2.REPROBADA);
+                    unidad.setCausa(CausaPendienteUnidadV2.REPROBACION);
+                    // El resultado supuesto constituye la evidencia vigente del escenario,
+                    // sin alterar los registros académicos de origen.
+                    unidad.setReprobacionVigenteConocida(Boolean.TRUE);
+                    unidad.setReprobacionPeriodoPrevioConocida(Boolean.TRUE);
+                    unidad.setAcreditadaDurantePeriodo(Boolean.FALSE);
+                }
+            }
+            ResultadoEvaluacionCurricularV2DTO resultado = evaluacionCurricularV2Service.evaluarSombra(hipotetico);
+            escenario.setResultadoHipotetico(resultado.getSituacionAcademicaCalculada());
+            escenario.setReprobadasVigentes(resultado.getCantidadReprobadasVigentes());
+            int habilitadas = 0;
+            int restringidas = 0;
+            for (DecisionUnidadCurricularV2DTO decision : resultado.getDecisiones()) {
+                if (Boolean.TRUE.equals(decision.getHabilitada())) habilitadas++; else restringidas++;
+            }
+            escenario.setMateriasHabilitadas(Integer.valueOf(habilitadas));
+            escenario.setMateriasBloqueadas(Integer.valueOf(restringidas));
+            escenario.setCargaMaximaNormativa(resultado.getEvaluacionCargaAcademica() != null
+                    ? resultado.getEvaluacionCargaAcademica().getCargaMaximaNormativa() : null);
+            escenario.getRecomendaciones().add("Situación hipotética: " + resultado.getSituacionAcademicaCalculada() + ". Reprobadas vigentes: " + resultado.getCantidadReprobadasVigentes() + ".");
+            if (!resultado.getRestricciones().isEmpty()) escenario.getRecomendaciones().add("Restricciones vigentes: " + resultado.getRestricciones() + ".");
+        } catch (RuntimeException ex) {
+            escenario.setResultadoHipotetico("NO_DETERMINADO");
+            escenario.setMateriasHabilitadas(null);
+            escenario.setMateriasBloqueadas(null);
+            escenario.getRecomendaciones().add("La evaluación del escenario no pudo completarse; no se presenta una conclusión sin sustento actual.");
+        }
+        return escenario;
+    }
+
+    static ContextoEvaluacionCurricularV2DTO copiarContextoExpectativa(ContextoEvaluacionCurricularV2DTO contexto) {
+        return SerializationUtils.clone(contexto);
+    }
+
+    private ProyeccionSiguientePeriodoDTO construirProyeccionSiguientePeriodoLegacy(AsistenteInscripcionContextoDTO contexto,
             List<InscripcionPreviaMateriasDTO> materiasEnCurso,
             InscripcionContextoDTO contextoBase, Map<Long, FichaDescProgramaDTO> programasPlan,
             Map<Long, UbicacionCurricular> ubicacionesPlan) {
@@ -1398,7 +1955,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         return cursada.getEstatusAprobacion() != null && cursada.getEstatusAprobacion().intValue() == 1;
     }
 
-    private boolean esMismaMateria(Long idPrograma1, Long idPrograma2, String clave1, String clave2) {
+    private static boolean esMismaMateria(Long idPrograma1, Long idPrograma2, String clave1, String clave2) {
         if (idPrograma1 != null && idPrograma2 != null) {
             return idPrograma1.equals(idPrograma2);
         }
@@ -2021,13 +2578,14 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         return total;
     }
 
-    private int contarBajasTemporalesOParciales(EstadoAcademicoDTO estado) {
+    /** Las bajas temporales son semestrales y no forman parte de este total por UD. */
+    private int contarBajasParcialesPorUd(EstadoAcademicoDTO estado) {
         if (estado == null || estado.getMateriasBajas() == null) {
             return 0;
         }
         Set<String> unidadesContabilizadas = new HashSet<String>();
         for (InscripcionBajasDTO baja : estado.getMateriasBajas()) {
-            if (baja != null && (esBajaTemporal(baja) || esBajaParcial(baja))) {
+            if (baja != null && esBajaParcial(baja)) {
                 String clavePrograma = baja.getClavePrograma();
                 String clave = clavePrograma != null && !clavePrograma.trim().isEmpty()
                         ? "CLAVE:" + clavePrograma.trim().toUpperCase()
@@ -2043,12 +2601,24 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             return false;
         }
         for (InscripcionBajasDTO baja : estado.getMateriasBajas()) {
-            if (baja != null && esMismaMateria(reprobada.getIdPrograma(), baja.getIdPrograma(),
-                    reprobada.getClavePrograma(), baja.getClavePrograma())) {
+            if (bajaParcialAfectaReprobada(reprobada, baja)) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * La baja temporal pertenece al periodo y no cancela el adeudo historico
+     * de una UD. Solo una baja parcial de la misma unidad se toma como efecto
+     * individual para este calculo.
+     */
+    static boolean bajaParcialAfectaReprobada(InscripcionMateriasReprobadasDTO reprobada,
+            InscripcionBajasDTO baja) {
+        return reprobada != null && baja != null && baja.getTipoBaja() != null
+                && baja.getTipoBaja().trim().toUpperCase().contains("PARCIAL")
+                && esMismaMateria(reprobada.getIdPrograma(), baja.getIdPrograma(),
+                        reprobada.getClavePrograma(), baja.getClavePrograma());
     }
 
     private String construirResumenRiesgos(RiesgoAcademicoDTO riesgos) {
@@ -2219,12 +2789,17 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
             return ids;
         }
         for (InscripcionPreviaMateriasDTO materia : materiasEnCurso) {
-            if (materia == null || materia.getAsignatura() == null) {
+            if (materia == null) {
                 continue;
             }
-            String nombre = normalizarTexto(materia.getAsignatura());
             for (UnidadDecisionInscripcionDTO unidad : contexto.getUnidades()) {
-                if (unidad.getNombre() != null && normalizarTexto(unidad.getNombre()).equals(nombre) && unidad.getUdId() != null) {
+                if (unidad == null || unidad.getUdId() == null) {
+                    continue;
+                }
+                boolean mismaUnidad = materia.getIdPrograma() != null && materia.getIdPrograma().equals(unidad.getUdId());
+                boolean mismaClaveCurricular = materia.getClavePrograma() != null && unidad.getClave() != null
+                        && normalizarTexto(materia.getClavePrograma()).equals(normalizarTexto(unidad.getClave()));
+                if (mismaUnidad || mismaClaveCurricular) {
                     ids.add(unidad.getUdId());
                 }
             }
@@ -2974,16 +3549,112 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         if (contexto == null || contexto.getUnidades() == null || contexto.getUnidades().isEmpty()) {
             return Collections.emptyList();
         }
+        if (contextoEvaluacionCurricularV2Adapter == null || evaluacionCurricularV2Service == null) {
+            return Collections.emptyList();
+        }
+        try {
+            ContextoEvaluacionCurricularV2DTO contextoV2 = contextoEvaluacionCurricularV2Adapter.construirDesdeAsistente(contexto);
+            if (configuracionEvaluacionCurricularV2Service != null) {
+                contextoV2.setVersionReglas(configuracionEvaluacionCurricularV2Service.obtenerConfiguracion().getVersionReglas());
+            }
+            ResultadoEvaluacionCurricularV2DTO resultado = evaluacionCurricularV2Service.evaluarSombra(contextoV2);
+            return construirEscenariosDesdeV2(contexto, resultado);
+        } catch (RuntimeException ex) {
+            // La proyeccion no puede sustituir V2 con reglas locales si la evaluacion falla.
+            return Collections.emptyList();
+        }
+    }
 
+    /** Construye alternativas de consulta desde decisiones y limites normativos V2. */
+    private List<EscenarioCargaDTO> construirEscenariosDesdeV2(AsistenteInscripcionContextoDTO contexto,
+            ResultadoEvaluacionCurricularV2DTO resultado) {
+        if (resultado == null || resultado.getEvaluacionCargaAcademica() == null) return Collections.emptyList();
+        Integer minimo = resultado.getEvaluacionCargaAcademica().getCargaMinimaNormativa();
+        Integer maximo = resultado.getEvaluacionCargaAcademica().getCargaMaximaNormativa();
+        if (minimo == null || maximo == null || maximo.intValue() <= 0) return Collections.emptyList();
+
+        Map<Long, DecisionUnidadCurricularV2DTO> decisiones = new LinkedHashMap<Long, DecisionUnidadCurricularV2DTO>();
+        for (DecisionUnidadCurricularV2DTO decision : resultado.getDecisiones()) {
+            if (decision != null && decision.getIdPrograma() != null) decisiones.put(decision.getIdPrograma(), decision);
+        }
+        final boolean soloRegularizacion = Boolean.TRUE.equals(resultado.getEvaluacionCargaAcademica().getAplicaRn64());
+        final Set<Long> optativasAdicionales = new HashSet<Long>(
+                resultado.getEvaluacionCargaAcademica().getUdsOptativasAdicionalesRn711());
+        List<UnidadDecisionInscripcionDTO> candidatas = new ArrayList<UnidadDecisionInscripcionDTO>();
+        for (UnidadDecisionInscripcionDTO unidad : contexto.getUnidades()) {
+            if (unidad == null || unidad.getUdId() == null || "ACREDITADA".equalsIgnoreCase(unidad.getEstatusHistorico())) continue;
+            DecisionUnidadCurricularV2DTO decision = decisiones.get(unidad.getUdId());
+            boolean prioritaria = decision != null && Boolean.TRUE.equals(decision.getPrioritaria());
+            boolean habilitada = decision != null && Boolean.TRUE.equals(decision.getHabilitada());
+            boolean reprobada = esUnidadReprobada(unidad);
+            if ((soloRegularizacion && reprobada) || (!soloRegularizacion && (prioritaria || habilitada))) candidatas.add(unidad);
+        }
+        Collections.sort(candidatas, (a, b) -> {
+            int categoriaA = prioridadProyeccionV2(a, contexto, optativasAdicionales);
+            int categoriaB = prioridadProyeccionV2(b, contexto, optativasAdicionales);
+            if (categoriaA != categoriaB) return Integer.compare(categoriaA, categoriaB);
+            // Para avance, el siguiente semestre compatible se atiende antes que niveles posteriores.
+            if (categoriaA >= 2) {
+                int semestre = compararNullable(a.getSemestre(), b.getSemestre());
+                if (semestre != 0) return semestre;
+            }
+            return compararUnidades(a, b);
+        });
+        if (candidatas.isEmpty()) return Collections.emptyList();
+
+        int limite = Math.min(maximo.intValue(), candidatas.size());
+        int reducida = Math.min(Math.max(1, minimo.intValue()), limite);
+        int intermedia = Math.min(limite, Math.max(reducida, (reducida + limite) / 2));
         List<EscenarioCargaDTO> escenarios = new ArrayList<EscenarioCargaDTO>();
-        List<UnidadDecisionInscripcionDTO> elegibles = contexto.getUnidades().stream()
-                .filter(this::esUnidadSeleccionableEscenario)
-                .collect(java.util.stream.Collectors.toList());
-
-        escenarios.add(construirEscenarioMinimo(elegibles, contexto));
-        escenarios.add(construirEscenarioBalanceado(elegibles, contexto));
-        escenarios.add(construirEscenarioMaximo(elegibles, contexto));
+        agregarEscenarioV2(escenarios, "MINIMO", "Carga reducida", "Alternativa menor compatible con los límites aplicables.", candidatas, reducida, soloRegularizacion);
+        agregarEscenarioV2(escenarios, "BALANCEADO", "Carga intermedia", "Alternativa entre el mínimo aplicable y tu límite.", candidatas, intermedia, soloRegularizacion);
+        agregarEscenarioV2(escenarios, "MAXIMO", "Carga intensiva", "Alternativa máxima compatible con tu límite.", candidatas, limite, soloRegularizacion);
         return escenarios;
+    }
+
+    /** Orden de propuesta: reprobadas, bajas por UD y avance secuencial por tipo curricular. */
+    private int prioridadProyeccionV2(UnidadDecisionInscripcionDTO unidad, AsistenteInscripcionContextoDTO contexto,
+            Set<Long> optativasAdicionales) {
+        if (esUnidadReprobada(unidad)) return 0;
+        if (esUnidadConBajaParcial(unidad, contexto)) return 1;
+        if (unidad.getTipoUd() != null && InscripcionUtils.esMateriaObligatoria(unidad.getTipoUd())) return 2;
+        if (unidad.getTipoUd() != null && InscripcionUtils.esMateriaOptativa(unidad.getTipoUd())) {
+            return optativasAdicionales.contains(unidad.getUdId()) ? 4 : 3;
+        }
+        return 5;
+    }
+
+    private boolean esUnidadReprobada(UnidadDecisionInscripcionDTO unidad) {
+        return unidad != null && ("REPROBADA".equalsIgnoreCase(unidad.getEstatusHistorico())
+                || "NO_ACREDITADA".equalsIgnoreCase(unidad.getEstatusHistorico()));
+    }
+
+    /** Sólo una baja parcial relacionable por UD constituye una recuperación en la propuesta. */
+    private boolean esUnidadConBajaParcial(UnidadDecisionInscripcionDTO unidad, AsistenteInscripcionContextoDTO contexto) {
+        if (unidad == null || contexto == null || contexto.getContextoBase() == null) return false;
+        for (InscripcionBajasDTO baja : obtenerBajasParciales(contexto.getContextoBase())) {
+            if (esMismaMateria(unidad.getUdId(), baja.getIdPrograma(), unidad.getClave(), baja.getClavePrograma())) return true;
+        }
+        return false;
+    }
+
+    private void agregarEscenarioV2(List<EscenarioCargaDTO> destinos, String tipo, String nombre, String descripcion,
+            List<UnidadDecisionInscripcionDTO> candidatas, int cantidad, boolean soloRegularizacion) {
+        List<UnidadDecisionInscripcionDTO> seleccion = new ArrayList<UnidadDecisionInscripcionDTO>(candidatas.subList(0, cantidad));
+        Set<Long> ids = new LinkedHashSet<Long>();
+        for (UnidadDecisionInscripcionDTO unidad : seleccion) ids.add(unidad.getUdId());
+        for (EscenarioCargaDTO existente : destinos) {
+            if (new LinkedHashSet<Long>(existente.getUnidadesIds()).equals(ids)) return;
+        }
+        EscenarioCargaDTO escenario = crearEscenarioBase(tipo, nombre, descripcion, seleccion);
+        escenario.setBeneficioPrincipal(soloRegularizacion
+                ? "Incluye exclusivamente UD destinadas a regularización."
+                : "Combina prioridades y UD académicamente habilitadas.");
+        escenario.setRiesgoGeneral(cantidad == candidatas.size()
+                ? "Integra el máximo disponible dentro del límite individual."
+                : "Incluye menos UD para atender simultáneamente.");
+        escenario.getRazones().add("Propuesta informativa: se valida nuevamente en el Simulador.");
+        destinos.add(escenario);
     }
 
     private EscenarioCargaDTO construirEscenarioMinimo(List<UnidadDecisionInscripcionDTO> elegibles,
@@ -3301,8 +3972,14 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
 
     private FichaDescProgramaDTO resolverProgramaPlanPorMateriaEnCurso(Map<Long, FichaDescProgramaDTO> programasPlan,
             InscripcionPreviaMateriasDTO materiaEnCurso) {
+        if (materiaEnCurso.getIdPrograma() != null) {
+            FichaDescProgramaDTO programa = programasPlan.get(materiaEnCurso.getIdPrograma());
+            if (programa != null) {
+                return programa;
+            }
+        }
         String nombre = normalizarTexto(materiaEnCurso.getAsignatura());
-        String clave = normalizarTexto(materiaEnCurso.getPrograma());
+        String clave = normalizarTexto(materiaEnCurso.getClavePrograma());
         for (FichaDescProgramaDTO programa : programasPlan.values()) {
             if (programa == null) {
                 continue;

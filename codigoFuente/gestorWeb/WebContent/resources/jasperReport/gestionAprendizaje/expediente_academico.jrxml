@@ -329,7 +329,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$P{HISTORIAL_NO_PRESENTADAS}]]></textFieldExpression>
 			</textField>
-			
+
 			<textField isBlankWhenNull="true">
 				<reportElement x="74" y="141" width="90" height="12" uuid="b30e8b62-facd-4008-a00f-33e94e602a4b" />
 				<box>
@@ -674,14 +674,3 @@ de acta]]></text>
 		</band>
 	</detail>
 </jasperReport>
-
-
-
-
-
-
-
-
-
-
-

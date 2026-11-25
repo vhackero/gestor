@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" aria-label="Regularizada">
+  <g fill="currentColor">
+    <path d="M40.5 103A44 44 0 0 1 65 20" stroke="currentColor" stroke-width="7" stroke-linecap="butt" fill="none"/>
+    <path d="M59 8 79 25 59 40Z"/>
+    <path d="M87.5 25A44 44 0 0 1 63 108" stroke="currentColor" stroke-width="7" stroke-linecap="butt" fill="none"/>
+    <path d="M69 120 49 103 69 88Z"/>
+    <path d="m37.5 68.5 8.2-8.2 14.2 14.2 27.2-27.2 8.2 8.2-35.4 35.4Z"/>
+  </g>
+</svg>

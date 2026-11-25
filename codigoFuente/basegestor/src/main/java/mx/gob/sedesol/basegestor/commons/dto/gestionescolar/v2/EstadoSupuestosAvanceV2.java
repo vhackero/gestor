@@ -1,0 +1,2 @@
+package mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2;
+public enum EstadoSupuestosAvanceV2 { NO_APLICA, SUPUESTO_TIPIFICADO_IDENTIFICADO, MULTIPLES_SUPUESTOS_TIPIFICADOS, SIN_SUPUESTO_TIPIFICADO, REQUIERE_REVISION, NO_DETERMINADO }

@@ -334,80 +334,16 @@
 					</div>
 
 					<div class="hub-subcard">
-						<h3>Ficha integral de orientación</h3>
-						<h:panelGroup rendered="#{not empty expedienteAlumnoBean.fichaIntegralCasoV2}">
+						<h3>Seguimiento operativo</h3>
+						<h:panelGroup rendered="#{not empty expedienteAlumnoBean.casoSeleccionadoV2}">
 							<div class="hub-microcopy">
 								Referencia: <strong>#{expedienteAlumnoBean.casoSeleccionadoV2.folioExterno}</strong>
 								| Estado actual: <strong>#{expedienteAlumnoBean.casoSeleccionadoV2.estatusCaso}</strong>
 							</div>
-							<div class="hub-kpi-strip">
-								<div class="hub-kpi-note">
-									<strong>Regla aplicada</strong>
-									#{expedienteAlumnoBean.fichaIntegralCasoV2.reglaAplicada}
-								</div>
-								<div class="hub-kpi-note">
-									<strong>Siguiente paso recomendado</strong>
-									#{expedienteAlumnoBean.fichaIntegralCasoV2.accionSugerida}
-								</div>
-								<div class="hub-kpi-note">
-									<strong>Mensaje para gestor</strong>
-									#{expedienteAlumnoBean.fichaIntegralCasoV2.mensajeGestor}
-								</div>
-								<div class="hub-kpi-note">
-									<strong>Mensaje para estudiante</strong>
-									#{expedienteAlumnoBean.fichaIntegralCasoV2.mensajeEstudiante}
-								</div>
-							</div>
-
-							<div style="margin-top:16px;">
-								<strong>Patrones de conocimiento</strong><br />
-								<ui:repeat value="#{expedienteAlumnoBean.fichaIntegralCasoV2.patronesConocimiento}" var="patronV2">
-									<span class="hub-badge">#{patronV2.nombrePatron}</span>
-								</ui:repeat>
-								<h:panelGroup rendered="#{empty expedienteAlumnoBean.fichaIntegralCasoV2.patronesConocimiento}">
-									<div class="hub-empty">No hay patrones asociados a la orientación seleccionada.</div>
-								</h:panelGroup>
-							</div>
-
-							<div style="margin-top:16px;">
-								<strong>Mensajes contextuales</strong><br />
-								<ui:repeat value="#{expedienteAlumnoBean.fichaIntegralCasoV2.mensajesContextuales}" var="mensajeV2">
-									<span class="hub-badge">#{mensajeV2.titulo}</span>
-								</ui:repeat>
-								<h:panelGroup rendered="#{empty expedienteAlumnoBean.fichaIntegralCasoV2.mensajesContextuales}">
-									<div class="hub-empty">No hay mensajes contextuales configurados para este perfil y periodo.</div>
-								</h:panelGroup>
-							</div>
-
-							<div style="margin-top:16px;">
-								<strong>Orientaciones similares</strong>
-								<p:dataTable value="#{expedienteAlumnoBean.fichaIntegralCasoV2.casosSimilares}" var="casoSimilar"
-									emptyMessage="No se encontraron orientaciones similares."
-									paginator="false">
-									<p:column headerText="Folio relacionado">
-										<h:outputText value="#{casoSimilar.folioCasoRelacion}" />
-									</p:column>
-									<p:column headerText="Similitud">
-										<h:outputText value="#{casoSimilar.puntajeSimilitud}" />
-									</p:column>
-									<p:column headerText="Motivo">
-										<h:outputText value="#{casoSimilar.motivoRelacion}" />
-									</p:column>
-								</p:dataTable>
-							</div>
-
-							<div style="margin-top:16px;">
-								<strong>Alertas</strong><br />
-								<ui:repeat value="#{expedienteAlumnoBean.fichaIntegralCasoV2.alertas}" var="alertaCasoV2">
-									<span class="hub-badge hub-state-risk">#{alertaCasoV2}</span>
-								</ui:repeat>
-								<h:panelGroup rendered="#{empty expedienteAlumnoBean.fichaIntegralCasoV2.alertas}">
-									<div class="hub-empty">Sin alertas activas.</div>
-								</h:panelGroup>
-							</div>
+							<div class="hub-empty">Este panel conserva exclusivamente folio y estado de seguimiento. La orientación académica se consulta desde PE2027.</div>
 						</h:panelGroup>
-						<h:panelGroup rendered="#{empty expedienteAlumnoBean.fichaIntegralCasoV2}">
-							<div class="hub-empty">Selecciona una orientación para consultar la ficha integral.</div>
+						<h:panelGroup rendered="#{empty expedienteAlumnoBean.casoSeleccionadoV2}">
+							<div class="hub-empty">Selecciona un caso para consultar su seguimiento operativo.</div>
 						</h:panelGroup>
 					</div>
 				</div>

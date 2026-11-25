@@ -10,6 +10,9 @@ public class DiagnosticoAcademicoDTO implements Serializable {
 
     private Boolean regular;
     private Integer materiasEnCurso;
+    private Integer materiasEnCursoObligatorias;
+    private Integer materiasEnCursoOptativasRequeridas;
+    private Integer materiasEnCursoOptativasAdicionales;
     private Integer materiasReprobadasActivas;
     private Integer materiasConBaja;
     private Integer materiasPendientesNoInscritas;
@@ -38,6 +41,30 @@ public class DiagnosticoAcademicoDTO implements Serializable {
 
     public void setMateriasEnCurso(Integer materiasEnCurso) {
         this.materiasEnCurso = materiasEnCurso;
+    }
+
+    public Integer getMateriasEnCursoObligatorias() {
+        return materiasEnCursoObligatorias;
+    }
+
+    public void setMateriasEnCursoObligatorias(Integer materiasEnCursoObligatorias) {
+        this.materiasEnCursoObligatorias = materiasEnCursoObligatorias;
+    }
+
+    public Integer getMateriasEnCursoOptativasRequeridas() {
+        return materiasEnCursoOptativasRequeridas;
+    }
+
+    public void setMateriasEnCursoOptativasRequeridas(Integer materiasEnCursoOptativasRequeridas) {
+        this.materiasEnCursoOptativasRequeridas = materiasEnCursoOptativasRequeridas;
+    }
+
+    public Integer getMateriasEnCursoOptativasAdicionales() {
+        return materiasEnCursoOptativasAdicionales;
+    }
+
+    public void setMateriasEnCursoOptativasAdicionales(Integer materiasEnCursoOptativasAdicionales) {
+        this.materiasEnCursoOptativasAdicionales = materiasEnCursoOptativasAdicionales;
     }
 
     public Integer getMateriasReprobadasActivas() {

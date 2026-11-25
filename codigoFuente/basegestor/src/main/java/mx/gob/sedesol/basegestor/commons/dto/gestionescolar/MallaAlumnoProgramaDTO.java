@@ -5,6 +5,7 @@ public class MallaAlumnoProgramaDTO {
 	private Long idPrograma;
 	private Double calificacionFinal;
 	private Double calificacionMinAprobatoria;
+	private Boolean regularizada;
 
 	public Long getIdPrograma() {
 		return idPrograma;
@@ -28,5 +29,13 @@ public class MallaAlumnoProgramaDTO {
 
 	public void setCalificacionMinAprobatoria(Double calificacionMinAprobatoria) {
 		this.calificacionMinAprobatoria = calificacionMinAprobatoria;
+	}
+
+	public Boolean getRegularizada() {
+		return regularizada;
+	}
+
+	public void setRegularizada(Boolean regularizada) {
+		this.regularizada = regularizada;
 	}
 }

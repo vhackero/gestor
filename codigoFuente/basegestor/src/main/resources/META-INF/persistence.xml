@@ -254,6 +254,10 @@
         <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblCasoBitacoraV2</class>
         <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblCasoEvidenciaV2</class>
         <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblCasoPatronAplicadoV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblEvaluacionCurricularV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblEvaluacionCurricularUdV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblEvaluacionCurricularReglaV2</class>
+        <class>mx.gob.sedesol.basegestor.model.entities.gestionescolar.v2.TblEvaluacionCurricularExcepcionV2</class>
 
         <!-- Fin de seccion de entidades optimizadas -->
         <properties>

@@ -29,7 +29,6 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.HistorialAcademicoDT
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TiraMateriaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
 import mx.gob.sedesol.basegestor.commons.utils.ColumnasHistorial;
 import mx.gob.sedesol.basegestor.commons.utils.DateUtils;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
@@ -40,7 +39,6 @@ import mx.gob.sedesol.basegestor.service.ParametroSistemaService;
 import mx.gob.sedesol.basegestor.service.admin.PlantillaService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.AsistenteInscripcionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
-import mx.gob.sedesol.basegestor.service.gestionescolar.v2.ExpedienteCurricularV2Facade;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 import mx.gob.sedesol.gestorweb.beans.administracion.BitacoraBean;
 import mx.gob.sedesol.gestorweb.beans.gestionaprendizaje.TrayectoriaAcademicaContextoBean;
@@ -85,8 +83,6 @@ public class ConstanciasBean extends BaseBean {
 	@ManagedProperty(value = "#{asistenteInscripcionServiceImpl}")
 	private AsistenteInscripcionService asistenteInscripcionService;
 
-	@ManagedProperty(value = "#{expedienteCurricularV2Facade}")
-	private ExpedienteCurricularV2Facade expedienteCurricularV2Facade;
 
 	private List<EventoConstanciaDTO> eventos;
 	private Long idPersona;
@@ -95,8 +91,6 @@ public class ConstanciasBean extends BaseBean {
 	private EventoConstanciaDTO eventoSeleccionado;
 	private HistorialAcademicoDTO historialAcademico;
 	private AsistenteInscripcionContextoDTO contextoAsistente;
-	private FichaIntegralCasoDTO fichaIntegralV2;
-	private boolean intentoCargaFichaIntegralV2;
 	private boolean vistaGestor;
 	private List<ColumnasHistorial> columnasHistorial = ColumnasHistorial.leer(null);
 	private String nombrePersonaObjetivo;
@@ -112,7 +106,6 @@ public class ConstanciasBean extends BaseBean {
 		eventos = grupoParticipanteService.getParticipanteByActaCerradaYconstancia2(idPersona);
 		historialAcademico = grupoParticipanteService.consultaDatosHistorialAcademico(idPersona.toString());
 		cargarContextoAsistente();
-		cargarFichaIntegralV2();
 
 	}
 
@@ -128,28 +121,6 @@ public class ConstanciasBean extends BaseBean {
 		} catch (Exception e) {
 			log.warn("Error inesperado al obtener el contexto asistido para historial académico.", e);
 		}
-	}
-
-	private void cargarFichaIntegralV2() {
-		intentoCargaFichaIntegralV2 = true;
-		fichaIntegralV2 = null;
-		if (expedienteCurricularV2Facade == null || idPersona == null) {
-			return;
-		}
-		try {
-			fichaIntegralV2 = expedienteCurricularV2Facade.obtenerContextoExpediente(construirContextoV2());
-		} catch (InscripcionException e) {
-			log.warn("No fue posible cargar la ficha integral V2 para historial académico.", e);
-		} catch (Exception e) {
-			log.warn("Error inesperado al cargar la ficha integral V2 para historial académico.", e);
-		}
-	}
-
-	private void asegurarFichaIntegralV2() {
-		if (fichaIntegralV2 != null || intentoCargaFichaIntegralV2) {
-			return;
-		}
-		cargarFichaIntegralV2();
 	}
 
 	private ContextoAsistenteCurricularV2DTO construirContextoV2() {
@@ -430,47 +401,6 @@ public class ConstanciasBean extends BaseBean {
 		trayectoriaAcademicaContextoBean.configurarContextoAsistenteDesdeHistorial();
 		return ConstantesGestorWeb.NAVEGA_TABLA_CURRICULAR_ASISTIDA;
 	}
-
-	public FichaIntegralCasoDTO getFichaIntegralV2() {
-		asegurarFichaIntegralV2();
-		return fichaIntegralV2;
-	}
-
-	public boolean isTieneFichaIntegralV2() {
-		asegurarFichaIntegralV2();
-		return fichaIntegralV2 != null;
-	}
-
-	public boolean isMostrarSeguimientoCasoEstudianteV2() {
-		asegurarFichaIntegralV2();
-		return !vistaGestor && fichaIntegralV2 != null;
-	}
-
-	public String getEstatusCasoEstudianteV2() {
-		asegurarFichaIntegralV2();
-		if (fichaIntegralV2 == null || fichaIntegralV2.getCasoAcademico() == null
-				|| StringUtils.isBlank(fichaIntegralV2.getCasoAcademico().getEstatusCaso())) {
-			return "Orientación general";
-		}
-		return fichaIntegralV2.getCasoAcademico().getEstatusCaso().trim();
-	}
-
-	public String getMensajeCasoEstudianteV2() {
-		asegurarFichaIntegralV2();
-		if (fichaIntegralV2 == null || StringUtils.isBlank(fichaIntegralV2.getMensajeEstudiante())) {
-			return "Tu trayectoria no muestra un riesgo académico inmediato en este momento.";
-		}
-		return fichaIntegralV2.getMensajeEstudiante().trim();
-	}
-
-	public String getResolucionCasoEstudianteV2() {
-		asegurarFichaIntegralV2();
-		if (fichaIntegralV2 == null || StringUtils.isBlank(fichaIntegralV2.getAccionSugerida())) {
-			return "Mantén tu avance actual y vuelve a revisar tu orientación cuando cambie el periodo.";
-		}
-		return fichaIntegralV2.getAccionSugerida().trim();
-	}
-
 	public void setHistorialAcademico(HistorialAcademicoDTO historialAcademico) {
 		this.historialAcademico = historialAcademico;
 	}
@@ -563,12 +493,5 @@ public class ConstanciasBean extends BaseBean {
 		this.asistenteInscripcionService = asistenteInscripcionService;
 	}
 
-	public ExpedienteCurricularV2Facade getExpedienteCurricularV2Facade() {
-		return expedienteCurricularV2Facade;
-	}
-
-	public void setExpedienteCurricularV2Facade(ExpedienteCurricularV2Facade expedienteCurricularV2Facade) {
-		this.expedienteCurricularV2Facade = expedienteCurricularV2Facade;
-	}
 
 }

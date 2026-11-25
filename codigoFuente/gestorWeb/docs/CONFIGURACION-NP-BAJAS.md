@@ -73,4 +73,3 @@ del historial reciben el indicador NP resultante de este parámetro.
 - PDFs de acta y calificaciones por grupo exportados con sus plantillas compiladas actuales; ambos mostraron NP.
 - Parámetro registrado en la base local con valor "1,2,7,8".
 - Queda pendiente la validación de navegación y edición en el navegador tras desplegar.
-

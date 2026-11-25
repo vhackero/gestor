@@ -16,6 +16,7 @@ public class ExpedienteCurricularV2FacadeImpl implements ExpedienteCurricularV2F
     private AsistenteCurricularV2Facade asistenteFacade;
 
     @Override
+    @Deprecated
     public FichaIntegralCasoDTO obtenerContextoExpediente(ContextoAsistenteCurricularV2DTO contexto)
             throws InscripcionException {
         return asistenteFacade.obtenerFichaIntegral(contexto);
