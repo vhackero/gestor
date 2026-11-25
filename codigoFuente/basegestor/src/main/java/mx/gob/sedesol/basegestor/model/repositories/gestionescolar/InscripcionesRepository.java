@@ -1,5 +1,6 @@
 package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 
+import mx.gob.sedesol.basegestor.service.admin.TextoSistemaService;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -35,9 +36,13 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 
 @Repository
 public class InscripcionesRepository implements IinscripcionesRepository {
+
+	@org.springframework.beans.factory.annotation.Autowired
+	private TextoSistemaService textosInscripcion;
+
 	private void validarFechasProceso(java.util.Date inicio, java.util.Date fin) {
 		if (inicio == null || fin == null || fin.before(inicio)) {
-			throw new IllegalArgumentException("Captura inicio y fin del proceso; el fin no puede ser anterior al inicio.");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.captura.inicio.y.fin.del.proceso.el.fin"));
 		}
 	}
 
@@ -486,7 +491,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId, String claveProceso,
 			String semestre, String perfil) {
 		if (fechaInicio == null || fechaFin == null || fechaFin.isBefore(fechaInicio)) {
-			throw new IllegalArgumentException("Captura inicio y fin del proceso; el fin no puede ser anterior al inicio.");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.captura.inicio.y.fin.del.proceso.el.fin"));
 		}
 
 		String query = "UPDATE tbl_procesos_inscripcion " + "SET nombre = ?, " + "fecha_inicio = ?, "
@@ -961,7 +966,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 			String deletePrincipalQuery = "DELETE FROM tbl_procesos_inscripcion WHERE proceso_inscripcion_id = ?";
 			entityManager.createNativeQuery(deletePrincipalQuery).setParameter(1, procesoInscripcionId).executeUpdate();
 		} catch (Exception e) {
-			throw new RuntimeException("Error al eliminar el proceso de inscripción y sus relaciones", e);
+			throw new RuntimeException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.error.al.eliminar.el.proceso.de.inscripcion.y"), e);
 		}
 	}
 	
@@ -1186,8 +1191,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 				+ "AND (id_adeudo_origen IN (:ids) OR id_inscripcion_anterior IN (:ids))")
 				.setParameter("ids", seleccion).getSingleResult();
 		if (posteriores.longValue() > 0) {
-			throw new IllegalArgumentException("No puedes eliminar una inscripción que es antecedente de otras optativas "
-					+ "vigentes. Revisa primero los registros posteriores de ese adeudo.");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.puedes.eliminar.una.inscripcion.que.es.antecedente"));
 		}
 		// Las sustitutas se retiran antes que sus antecedentes; nunca se rompe una cadena externa.
 		while (!pendientes.isEmpty()) {
@@ -1197,7 +1201,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 							|| Objects.equals(getLongValue(fila[0]), getLongValue(otra[2])))))
 					.map(fila -> getLongValue(fila[0])).collect(Collectors.toList());
 			if (hojas.isEmpty()) {
-				throw new IllegalArgumentException("La cadena de optativas requiere conciliación antes de eliminarla.");
+				throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.cadena.de.optativas.requiere.conciliacion.antes.de"));
 			}
 			entityManager.createNativeQuery("DELETE FROM rel_inscripcion_optativa WHERE id_inscripcion IN (:ids)")
 					.setParameter("ids", hojas).executeUpdate();

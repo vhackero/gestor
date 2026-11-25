@@ -7,6 +7,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.*;
 
 /** Registro de carácter y vínculos al confirmar, sin inferir reclasificaciones históricas. */
 public final class OptativasAdicionalesRepository {
+
     private final InscripcionRepository repo;
     public OptativasAdicionalesRepository(InscripcionRepository repo) { this.repo=repo; }
     private long n(Object v) { return v==null?0:((Number)v).longValue(); }
@@ -69,13 +70,13 @@ public final class OptativasAdicionalesRepository {
             Set<Long> anteriores=new HashSet<>();Map<Long,Object[]> porId=new HashMap<>();
             for(Object[] row:cadena){porId.put(n(row[0]),row);if(row[2]!=null)anteriores.add(n(row[2]));}
             List<Object[]> ultimas=new ArrayList<>();for(Object[] row:cadena)if(!anteriores.contains(n(row[0])))ultimas.add(row);
-            if(ultimas.size()!=1 || !porId.containsKey(entry.getKey()))throw new IllegalStateException("El adeudo de optativa requiere conciliación de su historial.");
+            if(ultimas.size()!=1 || !porId.containsKey(entry.getKey()))throw new IllegalStateException(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.el.adeudo.de.optativa.requiere.conciliacion.de.su"));
             Object[] actual=ultimas.get(0);int cambios=0;long consumidas=0;
             for(Object[] row:cadena) {
                 if(n(row[11])==0)consumidas++;
                 if(row[2]!=null) {
                     Object[] anterior=porId.get(n(row[2]));
-                    if(anterior==null)throw new IllegalStateException("Falta el antecedente de la optativa sustituta.");
+                    if(anterior==null)throw new IllegalStateException(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.falta.el.antecedente.de.la.optativa.sustituta"));
                     if(!misma(n(row[3]),texto(row[4]),n(anterior[3]),texto(anterior[4])))cambios++;
                 }
             }
@@ -110,33 +111,33 @@ public final class OptativasAdicionalesRepository {
         long elegible=n(repo.entityManager.createNativeQuery("SELECT COUNT(*) FROM tbl_ficha_descriptiva_programa f JOIN rel_convocatoria_planesyprogramas cp ON cp.id_programa=f.id_programa "
             + "WHERE f.id_programa=:ud AND f.id_plan=:plan AND f.tipo='Optativa' AND f.creditos>0 AND cp.id_plan=:plan AND cp.id_convocatoria=:conv")
             .setParameter("ud",dto.getIdPrograma()).setParameter("plan",dto.getIdPlan()).setParameter("conv",dto.getIdConvocatoria()).getSingleResult());
-        if(elegible==0 || dto.getIdProcesoInscripcion()==null)throw new IllegalArgumentException("La optativa no es elegible para el plan y convocatoria de esta inscripción.");
+        if(elegible==0 || dto.getIdProcesoInscripcion()==null)throw new IllegalArgumentException(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.la.optativa.no.es.elegible.para.el.plan"));
         int aprobadas=requeridasAcreditadas(dto.getIdPersona(),dto.getIdPlan(),dto.getIdConvocatoria());
         AdeudoOptativaDTO deuda=null;
         if(dto.getIdAdeudoOptativa()!=null) {
             for(AdeudoOptativaDTO d:adeudos(dto.getIdPersona(),dto.getIdPlan()))if(d.getIdOrigen().equals(dto.getIdAdeudoOptativa()))deuda=d;
-            if(deuda==null || deuda.isEnCurso())throw new IllegalArgumentException("El adeudo ya no admite otra inscripción.");
+            if(deuda==null || deuda.isEnCurso())throw new IllegalArgumentException(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.el.adeudo.ya.no.admite.otra.inscripcion"));
             ConfiguracionOportunidadesDTO config=new OportunidadesInscripcionRepository(repo).configuracion();
             if(!deuda.isAdmiteOtraOportunidad())throw new IllegalArgumentException(config.mensajeAdeudo(config.getMensajeAgotadaAcumulada(),deuda,dto.getAsignatura()));
             if(!deuda.isAdmiteSustitucion() && !misma(deuda.getIdPrograma(),deuda.getNombrePrograma(),dto.getIdPrograma(),dto.getAsignatura()))throw new IllegalArgumentException(config.mensajeAdeudo(config.getMensajeSustituciones(),deuda,dto.getAsignatura()));
-            if(deuda.isLimiteOportunidadesActivo() && inscripcionesPorUnidad(dto.getIdPersona(),dto.getIdPlan(),dto.getIdPrograma())>new OportunidadesInscripcionRepository(repo).configuracion().getLimite())throw new IllegalArgumentException("La UD ya agotó sus oportunidades.");
+            if(deuda.isLimiteOportunidadesActivo() && inscripcionesPorUnidad(dto.getIdPersona(),dto.getIdPlan(),dto.getIdPrograma())>new OportunidadesInscripcionRepository(repo).configuracion().getLimite())throw new IllegalArgumentException(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.la.ud.ya.agoto.sus.oportunidades"));
         }
         boolean requeridaPrevia=n(repo.entityManager.createNativeQuery("SELECT COUNT(*) FROM rel_inscripcion_optativa op JOIN tbl_inscripciones ip ON ip.id=op.id_inscripcion "
             + "JOIN tbl_ficha_descriptiva_programa fp ON fp.id_programa=ip.idprograma JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa=:ud "
             + "WHERE ip.Idpersona=:persona AND ip.idplan=:plan AND op.caracter='REQUERIDA' AND "+repo.mismaUnidad("fp","fd"))
             .setParameter("ud",dto.getIdPrograma()).setParameter("persona",dto.getIdPersona()).setParameter("plan",dto.getIdPlan()).getSingleResult())>0;
-        if(deuda!=null && requeridaPrevia)throw new IllegalArgumentException("Una optativa requerida no puede sustituir el adeudo de otra.");
+        if(deuda!=null && requeridaPrevia)throw new IllegalArgumentException(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.una.optativa.requerida.no.puede.sustituir.el.adeudo"));
         boolean adicional=deuda!=null || (aprobadas>=configuracionAcademica.getOptativasRequeridasPlan() && !requeridaPrevia && !Integer.valueOf(1).equals(dto.getRecursamiento()));
         if(adicional && deuda==null) {
             long sinClasificar=n(repo.entityManager.createNativeQuery("SELECT COUNT(*) FROM tbl_inscripciones ip JOIN tbl_ficha_descriptiva_programa fp ON fp.id_programa=ip.idprograma "
                 + "JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa=:ud WHERE ip.Idpersona=:persona AND ip.idplan=:plan AND ip.id<:nueva "
                 + "AND "+repo.mismaUnidad("fp","fd")+" AND NOT EXISTS(SELECT 1 FROM rel_inscripcion_optativa op WHERE op.id_inscripcion=ip.id)")
                 .setParameter("ud",dto.getIdPrograma()).setParameter("persona",dto.getIdPersona()).setParameter("plan",dto.getIdPlan()).setParameter("nueva",idInscripcion).getSingleResult());
-            if(sinClasificar>0)throw new IllegalArgumentException("La clasificación histórica de esta optativa requiere conciliación antes de inscribirla como adicional.");
+            if(sinClasificar>0)throw new IllegalArgumentException(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.la.clasificacion.historica.de.esta.optativa.requiere.conciliacion"));
         }
         if(adicional && configuracionAcademica.esOptativaSoloRequerida(dto.getAsignatura()))
             throw new IllegalArgumentException(configuracionAcademica.avisoOptativaSoloRequerida(dto.getAsignatura()));
-        if(deuda!=null && Objects.equals(deuda.getIdInscripcionActual(),idInscripcion))throw new IllegalArgumentException("Vínculo de optativa inválido.");
+        if(deuda!=null && Objects.equals(deuda.getIdInscripcionActual(),idInscripcion))throw new IllegalArgumentException(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.vinculo.de.optativa.invalido"));
         Query q=repo.entityManager.createNativeQuery("INSERT INTO rel_inscripcion_optativa (id_inscripcion,caracter,id_adeudo_origen,id_inscripcion_anterior,id_proceso,optativas_requeridas_acreditadas) "
             + "VALUES(:id,:caracter,:origen,:anterior,:proceso,:aprobadas)");
         q.setParameter("id",idInscripcion).setParameter("caracter",adicional?"ADICIONAL":"REQUERIDA")

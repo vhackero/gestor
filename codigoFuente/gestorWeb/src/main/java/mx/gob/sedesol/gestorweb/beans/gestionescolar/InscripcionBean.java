@@ -1,5 +1,6 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
+import mx.gob.sedesol.basegestor.service.admin.TextoSistemaService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -15,7 +16,6 @@ import org.primefaces.context.RequestContext;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasDTO;
-import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AdeudoOptativaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.inscripcion.InscripcionPreviaMateriasDTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionPreviaException;
@@ -27,6 +27,14 @@ import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasSe
 @ManagedBean
 @ViewScoped
 public class InscripcionBean extends BaseBean {
+
+	@javax.faces.bean.ManagedProperty(value = "#{textoSistemaService}")
+	private transient TextoSistemaService textosInscripcion;
+
+	public void setTextosInscripcion(TextoSistemaService textosInscripcion) {
+		this.textosInscripcion = textosInscripcion;
+	}
+
 
 	private static final long serialVersionUID = -4348522429538060563L;
 
@@ -100,12 +108,8 @@ public class InscripcionBean extends BaseBean {
 			return;
 		}
 		try {
-			vincularAdeudoSinSelector(materiaSeleccionada);
 			inscripcionFacade.validarSeleccionMateria(materiaSeleccionada, contextoInscripcion);
 		} catch (InscripcionException ie) {
-			if ("Selecciona el adeudo de optativa adicional que deseas regularizar.".equals(ie.getMessage())) {
-				ie = new InscripcionException("La regularización de estas optativas requiere revisión en inscripción manual.");
-			}
 			manejarErrorSeleccionMateria(materiaSeleccionada, ie);
 		} catch (Exception e) {
 			manejarErrorGeneral(materiaSeleccionada, e);
@@ -113,21 +117,19 @@ public class InscripcionBean extends BaseBean {
 
 	}
 
-	/** Sin un selector visible sólo se vincula una sustitución cuando no hay ambigüedad. */
-	private void vincularAdeudoSinSelector(InscripcionMateriasDTO materia) {
-		if (materia.getIdAdeudoOptativa() != null || !materia.isOptativaAdicional()
-				|| !materia.isAdmiteSustitucionOptativa()) {
-			return;
+	public boolean isMostrarSelectorAdeudo() {
+		if (contextoInscripcion == null || contextoInscripcion.getEstadoAcademico() == null
+				|| !Boolean.TRUE.equals(contextoInscripcion.getPermiteInscripcionOmision())
+				|| (contextoInscripcion.getConclusionEstudios() != null
+						&& contextoInscripcion.getConclusionEstudios().isBloqueaInscripcion())) {
+			return false;
 		}
-		List<AdeudoOptativaDTO> candidatas = new ArrayList<>();
-		for (AdeudoOptativaDTO deuda : contextoInscripcion.getEstadoAcademico().getAdeudosOptativasAdicionales()) {
-			if (!deuda.isEnCurso() && deuda.isAdmiteOtraOportunidad() && deuda.isAdmiteSustitucion()) {
-				candidatas.add(deuda);
-			}
-		}
-		if (candidatas.size() == 1) {
-			materia.setIdAdeudoOptativa(candidatas.get(0).getIdOrigen());
-		}
+		return contextoInscripcion.getEstadoAcademico().getAdeudosOptativasAdicionales().stream()
+				.anyMatch(adeudo -> !adeudo.isEnCurso() && adeudo.isAdmiteOtraOportunidad() && adeudo.isAdmiteSustitucion())
+				&& contextoInscripcion.getEstadoAcademico().getMateriasDisponibles().stream()
+						.anyMatch(materia -> materia.isAdmiteSustitucionOptativa()
+								&& !Boolean.TRUE.equals(materia.getDisabled())
+								&& (materia.getOportunidades() == null || !materia.getOportunidades().isAgotada()));
 	}
 
     public void actualizarEvaluacion() {
@@ -138,7 +140,7 @@ public class InscripcionBean extends BaseBean {
             if(!java.util.Objects.equals(anterior,contextoInscripcion.getEvidenciaEvaluacion())) {
                 aceptaTerminos=false;
                 RequestContext.getCurrentInstance().update("mainForm");
-                mostrarMensajeDialog("Se actualizaron tu situación académica, carga y oferta. Revisa la selección antes de confirmar.");
+                mostrarMensajeDialog(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.se.actualizaron.tu.situacion.academica.carga.y.oferta"));
             }
         } catch(InscripcionException ex) { mostrarMensajeDialog(ex.getMessage()); }
         catch(Exception ex) { manejarErrorGeneral(ex); }
@@ -151,8 +153,8 @@ public class InscripcionBean extends BaseBean {
             if (avisoOmisiones == null) avisoOmisiones = "";
             else avisoOmisiones = " " + avisoOmisiones;
 			limpiarContextoInscripcion();
-			mostrarMensajeDialog("Inscripción de unidades didácticas realizada con éxito, por favor, revisa tu correo institucional." + avisoOmisiones);
-			mostrarAviso("Inscripción de unidades didácticas completada con exito." + avisoOmisiones, ConstantesGestorWeb.TIPO_AVISO_SUCCESS);
+			mostrarMensajeDialog(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.inscripcion.de.unidades.didacticas.realizada.con.exito.por", avisoOmisiones));
+			mostrarAviso(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.inscripcion.de.unidades.didacticas.completada.con.exito", avisoOmisiones), ConstantesGestorWeb.TIPO_AVISO_SUCCESS);
 		} catch (InscripcionException ie) {
 			manejarErrorDeFinalizacion(ie);
 		} catch (Exception e) {
@@ -242,7 +244,7 @@ public class InscripcionBean extends BaseBean {
 
 	private void manejarErrorGeneral(Exception e) {
 		logger.error("Error inesperado: ", e);
-		mostrarMensajeDialog("Ha ocurrido un error inesperado");
+		mostrarMensajeDialog(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.ha.ocurrido.un.error.inesperado"));
 	}
 
 	private void mostrarMensajeDialog(String mensaje) {

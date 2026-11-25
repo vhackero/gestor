@@ -12,4 +12,9 @@ public interface TextoSistemaService extends CommonService<TextoSistemaDTO, Stri
 
 	String obtenerTexto(String id);
 
+	default String obtenerTextoFormateado(String id, Object... valores) {
+		Object[] argumentos = java.util.Arrays.stream(valores).map(String::valueOf).toArray();
+		return java.text.MessageFormat.format(obtenerTexto(id), argumentos);
+	}
+
 }

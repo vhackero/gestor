@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /** Evidencia reproducible de 1.3/6.9/9.5; nunca deduce periodos desde la fecha de captura. */
 public final class EvaluacionInscripcionRepository {
+
     private final InscripcionRepository repo;
     public EvaluacionInscripcionRepository(InscripcionRepository repo) { this.repo=repo; }
     @SuppressWarnings("unchecked")
@@ -40,13 +41,13 @@ public final class EvaluacionInscripcionRepository {
             + "WHERE b.id_persona=:persona ORDER BY b.id_baja",persona,plan);
         e.put("bajas_columnas",Arrays.asList("id","plan","UD","evento","grupo","inscripcion","tipo","contabilizar","periodo","periodoEvento"));e.put("bajas",bajas);
         Set<String> incluidos=new TreeSet<>(), excluidos=new TreeSet<>(); List<String> motivos=new ArrayList<>();
-        if(actual==null)motivos.add("No existe un único periodo académico vigente.");
+        if(actual==null)motivos.add(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.no.existe.un.unico.periodo.academico.vigente"));
         Map<String,List<Object[]>> porPeriodo=new TreeMap<>();
         for(Object[] i:ins) {
             String per=Objects.toString(i[4],"");
-            if(!per.matches("[0-9]{4}-[12]")) { motivos.add("Inscripción "+i[0]+": periodo académico no comprobado.");continue; }
+            if(!per.matches("[0-9]{4}-[12]")) { motivos.add(repo.textosInscripcion().obtenerTextoFormateado("gw.inscripcion.mensaje.conciliacion.periodoNoComprobado", i[0]));continue; }
             if(actual!=null && per.compareTo(actual)>=0)continue;
-            if(n(i[5])!=1) { motivos.add("Plan de origen "+i[1]+", periodo "+per+": correspondencia pendiente de conciliación."); continue; }
+            if(n(i[5])!=1) { motivos.add(repo.textosInscripcion().obtenerTextoFormateado("gw.inscripcion.mensaje.conciliacion.correspondenciaPendiente", i[1], per)); continue; }
             porPeriodo.computeIfAbsent(per,k->new ArrayList<>()).add(i);
         }
         for(Map.Entry<String,List<Object[]>> entry:porPeriodo.entrySet()) {
@@ -69,11 +70,11 @@ public final class EvaluacionInscripcionRepository {
             + "FROM tbl_ficha_descriptiva_programa f JOIN tbl_malla_curricular b ON b.id=f.id_eje_capacitacion "
             + "JOIN tbl_malla_curricular s ON s.id=b.id_padre WHERE f.id_plan=:plan AND s.nombre REGEXP '^Semestre [0-9]+$'")
             .setParameter("plan",plan).getSingleResult();
-        if(n(ultimo)<1)motivos.add("No se comprobó el último semestre del mapa curricular.");
+        if(n(ultimo)<1)motivos.add(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.no.se.comprobo.el.ultimo.semestre.del.mapa"));
         e.put("periodosIncluidos",incluidos); e.put("periodosExcluidosBajaTemporalCompleta",excluidos);
         e.put("semestreReferencia",motivos.isEmpty()?Math.min(incluidos.size()+1,(int)n(ultimo)):null);
         e.put("conciliacionDetalles",new LinkedHashSet<>(motivos));
-        e.put("conciliacion",motivos.isEmpty()?"":"Semestre de referencia pendiente de conciliación: hay periodos, correspondencias o datos del mapa curricular sin comprobar.");
+        e.put("conciliacion",motivos.isEmpty()?"":repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.semestre.de.referencia.pendiente.de.conciliacion.hay.periodos"));
         e.put("correspondenciasOrigen",filas("SELECT id_plan_origen,periodo,documento,usuario_valido,fecha_validacion FROM rel_periodo_origen_validado WHERE id_persona=:persona AND id_plan_destino=:plan ORDER BY id_plan_origen,periodo",persona,plan));
         e.put("historial_columnas",Arrays.asList("participacion","grupo","evento","UD","plan","periodo","nota","minimaAprobatoria","sinBajaAplicable","nombreUD"));
         // Hibernate descubre las columnas por etiqueta: cada proyección debe tener un alias único.
@@ -104,6 +105,6 @@ public final class EvaluacionInscripcionRepository {
             "NULL sin baja: en curso; no se convierte en reprobación.","Acreditación válida: resuelve adeudo equivalente conforme a la identidad del módulo.",
             "Adicional: una deuda por cadena, conserva oportunidades y causa.","6.9: periodos formales distintos anteriores; excluye temporal de semestre completo; no usa generación ni fecha de captura."));
         try { return new ObjectMapper().writeValueAsString(e); }
-        catch(java.io.IOException ex) { throw new IllegalStateException("No se pudo serializar la evidencia académica",ex); }
+        catch(java.io.IOException ex) { throw new IllegalStateException(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.no.se.pudo.serializar.la.evidencia.academica"),ex); }
     }
 }

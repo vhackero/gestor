@@ -1,5 +1,6 @@
 package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 
+import mx.gob.sedesol.basegestor.service.admin.TextoSistemaService;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.Normalizer;
@@ -65,6 +66,10 @@ import mx.gob.sedesol.basegestor.service.inscripcion.EnvioCorreoService;
 @Service("inscripcionFacade")
 public class InscripcionFacadeImpl implements InscripcionFacade {
 
+	@org.springframework.beans.factory.annotation.Autowired
+	private TextoSistemaService textosInscripcion;
+
+
 	private static final Logger logger = Logger.getLogger(InscripcionFacadeImpl.class);
 
 	@Autowired
@@ -110,7 +115,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 		for (Long idPrograma : idsSeleccionados) {
 			if (idPrograma != null && !idsOfertados.contains(idPrograma)) {
-				throw new InscripcionException("La unidad didáctica seleccionada no forma parte de la oferta vigente.");
+				throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.unidad.didactica.seleccionada.no.forma.parte.de"));
 			}
 		}
 		for (InscripcionMateriasDTO materia : materiasDisponibles) {
@@ -163,7 +168,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
             }
             e.set("resultadoPorRegistro",resultados);
             c.setEvidenciaEvaluacion(mapper.writeValueAsString(e)); c.setFechaEvaluacion(fecha);
-        } catch(java.io.IOException ex) { throw new InscripcionException("No se pudo preparar la evidencia de evaluación.",ex); }
+        } catch(java.io.IOException ex) { throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.se.pudo.preparar.la.evidencia.de.evaluacion"),ex); }
     }
     private void registrarEvaluacion(InscripcionContextoDTO actual, InscripcionContextoDTO anterior, String momento) {
         Long proceso=actual.getEstadoAcademico().getIdProcesoEvaluado();
@@ -260,8 +265,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
             copiarEvaluacion(anterior,actual);
             validarConclusionEstudios(anterior, true);
             String avisoCupo = actual.getEstadoAcademico().getAvisoCupoOptativas();
-            throw new InscripcionException("Tu historial o las reglas cambiaron. Se actualizaron tu situación, carga y oferta. "
-                + (avisoCupo.isEmpty() ? "" : avisoCupo + " ") + "Revisa la selección y confirma nuevamente.");
+            throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.tu.historial.o.las.reglas.cambiaron.se.actualizaron", (avisoCupo.isEmpty() ? "" : avisoCupo + " ")));
         }
         try { validarYRestaurarSeleccionActual(anterior, actual); }
         catch(InscripcionException ex) { copiarEvaluacion(anterior,actual); throw ex; }
@@ -272,31 +276,28 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 	private void validarYRestaurarSeleccionActual(InscripcionContextoDTO anterior, InscripcionContextoDTO actual)
 			throws InscripcionException {
 		if (!Objects.equals(anterior.getInscripcionPersona().getIdPlan(), actual.getInscripcionPersona().getIdPlan())) {
-			throw new InscripcionException("Tu plan de estudios cambió. Actualiza la página para revisar tu inscripción.");
+			throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.tu.plan.de.estudios.cambio.actualiza.la.pagina"));
 		}
 		List<InscripcionMateriasDTO> disponibles = actual.getEstadoAcademico().getMateriasDisponibles();
 		Long procesoAnterior = anterior.obtenerIdProcesoInscripcionDesdeMateriasDisponibles();
 		if (disponibles.isEmpty() || disponibles.stream()
 				.anyMatch(materia -> !Objects.equals(procesoAnterior, materia.getIdProcesoInscripcion()))) {
-			throw new InscripcionException("La oferta o el proceso de inscripción cambió. Actualiza la página.");
+			throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.oferta.o.el.proceso.de.inscripcion.cambio"));
 		}
 		List<InscripcionMateriasDTO> seleccionadas = anterior.obtenerMateriasSeleccionadas();
 		for (InscripcionMateriasDTO seleccionada : seleccionadas) {
 			if (disponibles.stream().noneMatch(materia -> mismaMateriaOfertada(materia, seleccionada))) {
-				throw new InscripcionException("La unidad didáctica " + seleccionada.getNombreTentativoPrograma()
-						+ " ya no está permitida para tu situación académica. Actualiza la página.");
+				throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.la.unidad.didactica.ya.no.esta.permitida.para", seleccionada.getNombreTentativoPrograma()));
 			}
 		}
 		for (InscripcionMateriasDTO materia : disponibles) {
 			boolean seleccionada = seleccionadas.stream().anyMatch(previa -> mismaMateriaOfertada(materia, previa));
 			if (Boolean.TRUE.equals(materia.getCheck()) && Boolean.TRUE.equals(materia.getDisabled())
 					&& !seleccionada) {
-				throw new InscripcionException("Debes incluir la unidad didáctica " + materia.getNombreTentativoPrograma()
-						+ " según tu situación académica actual. Actualiza la página.");
+				throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.debes.incluir.la.unidad.didactica.segun.tu.situacion", materia.getNombreTentativoPrograma()));
 			}
 			if (seleccionada && Boolean.TRUE.equals(materia.getDisabled()) && !Boolean.TRUE.equals(materia.getCheck())) {
-				throw new InscripcionException("La unidad didáctica " + materia.getNombreTentativoPrograma()
-						+ " no está habilitada para inscripción. Actualiza la página.");
+				throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.la.unidad.didactica.no.esta.habilitada.para.inscripcion", materia.getNombreTentativoPrograma()));
 			}
             if(seleccionada) {
                 InscripcionMateriasDTO previa=seleccionadas.stream().filter(x->mismaMateriaOfertada(materia,x)).findFirst().get();
@@ -320,13 +321,13 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			throws InscripcionException {
 		if (contexto == null || contexto.getInscripcionPersona() == null
 				|| contexto.obtenerIdPersona() == null) {
-			throw new InscripcionException("No existe una inscripción disponible para finalizar. Actualiza la página.");
+			throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.existe.una.inscripcion.disponible.para.finalizar.actualiza"));
 		}
 		Long idProceso;
 		try {
 			idProceso = contexto.obtenerIdProcesoInscripcionDesdeMateriasDisponibles();
 		} catch (IllegalStateException e) {
-			throw new InscripcionException("No se pudo identificar el proceso de inscripción. Actualiza la página.", e);
+			throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.se.pudo.identificar.el.proceso.de.inscripcion"), e);
 		}
 		Long idPersona = contexto.obtenerIdPersona();
 		inscripcionService.bloquearPersonaParaInscripcion(idPersona);
@@ -336,8 +337,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		validarOmisionReinscripcion(contexto, true);
 		validarVigenciaProcesos(contexto, true);
 		if (inscripcionService.existeInscripcionEnProceso(idPersona, idProceso)) {
-			throw new InscripcionPreviaException("Ya cuenta con una inscripción para este periodo. "
-					+ "Actualiza la página para consultar las asignaturas inscritas.");
+			throw new InscripcionPreviaException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.ya.cuenta.con.una.inscripcion.para.este.periodo"));
 		}
 	}
 
@@ -392,20 +392,20 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 	private Date validarVigenciaProcesos(InscripcionContextoDTO contexto, boolean bloquear) throws InscripcionException {
 		if (contexto == null || contexto.getInscripcionPersona() == null || contexto.getEstadoAcademico() == null)
-			throw new InscripcionException("No existe un proceso disponible para inscribir. Consulta nuevamente.");
+			throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.existe.un.proceso.disponible.para.inscribir.consulta"));
 		InscripcionPersonaDTO persona = contexto.getInscripcionPersona();
 		java.util.Map<Long, java.util.Set<Long>> procesos = new java.util.TreeMap<>();
 		Long principal = contexto.getEstadoAcademico().getIdProcesoEvaluado();
 		if (principal == null) {
 			try { principal = contexto.obtenerIdProcesoInscripcionDesdeMateriasDisponibles(); }
-			catch (IllegalStateException ex) { throw new InscripcionException("No existe un proceso de inscripción activo y dentro de fechas.", ex); }
+			catch (IllegalStateException ex) { throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.existe.un.proceso.de.inscripcion.activo.y"), ex); }
 		}
-		if (persona.getIdPlan() == null) throw new InscripcionException("No se pudo identificar el plan de inscripción.");
+		if (persona.getIdPlan() == null) throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.se.pudo.identificar.el.plan.de.inscripcion"));
 		procesos.computeIfAbsent(principal, id -> new java.util.TreeSet<>()).add(persona.getIdPlan());
 		for (InscripcionMateriasDTO materia : contexto.getEstadoAcademico().getMateriasDisponibles()) {
 			if (!Boolean.TRUE.equals(materia.getCheck())) continue;
 			if (materia.getIdProcesoInscripcion() == null || materia.getIdPlan() == null)
-				throw new InscripcionException("No se pudo identificar el proceso o plan de una UD seleccionada. Consulta nuevamente.");
+				throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.se.pudo.identificar.el.proceso.o.plan"));
 			procesos.computeIfAbsent(materia.getIdProcesoInscripcion(), id -> new java.util.TreeSet<>()).add(materia.getIdPlan());
 		}
 		Date fecha = new Date();
@@ -413,7 +413,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			for (Long plan : proceso.getValue()) {
 				if (!Boolean.TRUE.equals(inscripcionService.procesoVigenteParaInscripcion(proceso.getKey(), plan,
 						persona.getIdConvocatoria(), fecha, bloquear)))
-					throw new InscripcionException("El proceso de inscripción está inactivo o fuera de fechas, o no corresponde al plan y convocatoria. Consulta nuevamente antes de registrar.");
+					throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.proceso.de.inscripcion.esta.inactivo.o.fuera"));
 			}
 		}
 		return fecha;
@@ -429,7 +429,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
         try {
             inscripcionService.insertarInscripciones(inscripciones);
         } catch (CupoOptativaException ex) {
-            registrarRechazoCupoOptativas(contexto, ex.getMomentoEvaluacion(), ex.getMessage());
+            registrarRechazoInscripcion(contexto, ex.getMomentoEvaluacion(), ex.getMessage());
             throw new InscripcionException(ex.getMessage(), ex);
         } catch(IllegalArgumentException ex) {
             // La transacción se revierte y la vista conserva el motivo que debe atenderse.
@@ -437,7 +437,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
         }
 	}
 
-    private void registrarRechazoCupoOptativas(InscripcionContextoDTO contexto, String momento, String mensaje) {
+    private void registrarRechazoInscripcion(InscripcionContextoDTO contexto, String momento, String mensaje) {
         com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
         com.fasterxml.jackson.databind.node.ObjectNode evidencia = mapper.createObjectNode();
         evidencia.put("motivo", mensaje);
@@ -481,7 +481,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 	private Integer obtenerPeriodoDePrimerMateria(List<InscripcionMateriasDTO> materias) {
 		if (materias == null || materias.isEmpty()) {
-			throw new IllegalArgumentException("La lista de materias al construir el correo no puede estar vacía");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.lista.de.materias.al.construir.el.correo"));
 		}
 		InscripcionMateriasDTO primerMateria = materias.get(0);
 		return primerMateria.getPeriodo();
@@ -850,8 +850,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		}
 		if (resumen.getObligatoriasDisponibles() >= minimoObligatorias
 				&& resumen.getObligatoriasSeleccionadas() < minimoObligatorias) {
-			throw new InscripcionException("Estimad(a/o) estudiante, debes seleccionar al menos "
-					+ minimoObligatorias + " unidades didácticas obligatorias.");
+			throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.estimad.a.o.estudiante.debes.seleccionar.al.menos", minimoObligatorias));
 		}
 	}
 
@@ -867,7 +866,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 			if (resumen.getTotalSeleccionadas() > maxProgramasRegulares) {
 				throw new InscripcionException(
-						"Puedes seleccionar máximo " + maxProgramasRegulares + " unidades didácticas");
+						textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.puedes.seleccionar.maximo.unidades.didacticas", maxProgramasRegulares));
 			}
 			return;
 		}
@@ -879,7 +878,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		Integer maxProgramasIrregulares = obtenerMaxProgramasIrregulares(contexto);
 		if (resumen.getTotalSeleccionadas() > maxProgramasIrregulares) {
 			throw new InscripcionException(
-					"Puedes seleccionar máximo " + maxProgramasIrregulares + " unidades didácticas");
+					textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.puedes.seleccionar.maximo.unidades.didacticas", maxProgramasIrregulares));
 		}
 	}
 
@@ -899,14 +898,14 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 			int cantidadMateriasOfertadasmarcadas = (int) materiasDisponibles.stream()
 					.filter(m -> m.getTipoPrograma() != null).filter(m -> m.getCheck().equals(true)).count();
 			if (cantidadMateriasOfertadasmarcadas == 0) {
-				throw new InscripcionException("Debes seleccionar al menos 1 unidades didáctica");
+				throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.debes.seleccionar.al.menos.unidades.didactica"));
 			}
 			return;
 		}
 
 		if (resumen.getTotalSeleccionadas() < minProgramasPorPeriodo) {
 			throw new InscripcionException(
-					"Debes seleccionar al menos " + minProgramasPorPeriodo + " unidades didáctica(s)");
+					textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.debes.seleccionar.al.menos.unidades.didactica.s", minProgramasPorPeriodo));
 		}
 	}
 
@@ -920,8 +919,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		List<String> faltantes = new ArrayList<>();
 		long obligatoriasOfertadas = resumen.getObligatoriasDisponibles();
 		if (obligatoriasOfertadas < configuracion.getObligatoriasRequeridas()) {
-			faltantes.add("se requieren " + configuracion.getObligatoriasRequeridas()
-					+ " UD obligatorias y hay " + obligatoriasOfertadas + " disponibles");
+			faltantes.add(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.se.requieren.ud.obligatorias.y.hay.disponibles", configuracion.getObligatoriasRequeridas(), obligatoriasOfertadas));
 		}
 
 		List<InscripcionMateriasDTO> optativasOfertadas = materiasDisponibles.stream()
@@ -929,38 +927,33 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 				.filter(materia -> !Boolean.TRUE.equals(materia.getDisabled()) || Boolean.TRUE.equals(materia.getCheck()))
 				.collect(Collectors.toList());
 		if (optativasOfertadas.size() < configuracion.getOptativasRequeridas()) {
-			faltantes.add("se requieren " + configuracion.getOptativasRequeridas()
-					+ " UD optativas y hay " + optativasOfertadas.size() + " disponibles");
+			faltantes.add(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.se.requieren.ud.optativas.y.hay.disponibles", configuracion.getOptativasRequeridas(), optativasOfertadas.size()));
 		}
 		if (configuracion.getOptativasRequeridas() == 2) {
 			for (String bloque : new String[] {"Bloque 1", "Bloque 2"}) {
 				if (optativasOfertadas.stream().noneMatch(materia -> bloque.equalsIgnoreCase(materia.getSubestructura()))) {
-					faltantes.add("no hay optativas disponibles en el " + bloque);
+					faltantes.add(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.no.hay.optativas.disponibles.en.el", bloque));
 				}
 			}
 		}
 		if (!faltantes.isEmpty()) {
             EstadoAcademicoDTO estado = contexto.getEstadoAcademico();
             String avisoCupo = estado.getAvisoCupoOptativas();
-            String mensaje = "No se puede finalizar la inscripción porque la oferta de nuevo ingreso es insuficiente: "
-                + String.join(", ", faltantes) + ". " + (avisoCupo.isEmpty() ? "" : avisoCupo + " ")
-                + "Contacta al administrador para revisar la oferta del plan.";
+            String mensaje = textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.no.se.puede.finalizar.la.inscripcion.porque.la", String.join(", ", faltantes), (avisoCupo.isEmpty() ? "" : avisoCupo + " "));
+            String momento = "OFERTA_NUEVO_INGRESO_INSUFICIENTE";
             if (!estado.getOptativasSinCupo().isEmpty()) {
-                registrarRechazoCupoOptativas(contexto, "FALTA_CUPO_OPTATIVAS", mensaje);
+                momento = "FALTA_CUPO_OPTATIVAS";
             } else if (!estado.getOptativasSinCupoConfigurado().isEmpty()) {
-                registrarRechazoCupoOptativas(contexto, "CUPO_OPTATIVAS_SIN_CONFIGURAR", mensaje);
+                momento = "CUPO_OPTATIVAS_SIN_CONFIGURAR";
             }
+            registrarRechazoInscripcion(contexto, momento, mensaje);
             throw new InscripcionException(mensaje);
 		}
 
 		if (esCargaAcademicaInvalidaPrimerSemestre(resumen.getObligatoriasSeleccionadas(),
 				resumen.getOptativasSeleccionadas(), configuracion)) {
 
-			throw new InscripcionException("Para finalizar la inscripción, debe seleccionar "
-					+ configuracion.getObligatoriasRequeridas()
-					+ " unidades didácticas obligatorias y "
-					+ configuracion.getOptativasRequeridas()
-					+ " unidades didácticas optativas.");
+			throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.para.finalizar.la.inscripcion.debe.seleccionar.unidades.didacticas", configuracion.getObligatoriasRequeridas(), configuracion.getOptativasRequeridas()));
 		}
 	}
 
@@ -1030,9 +1023,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		boolean antecedenteSeleccionadoMismoSemestre = materiasSeleccionadas.stream()
 				.anyMatch(antecedente -> esAntecedenteSeleccionadoMismoSemestre(materia, antecedente));
 		if (!antecedenteAprobado && !antecedenteSeleccionadoMismoSemestre) {
-			throw new InscripcionException("No es posible seleccionar la unidad didáctica "
-					+ materia.getNombreTentativoPrograma()
-					+ " porque no se ha acreditado ni seleccionado su antecedente conforme a la seriación del plan.");
+			throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.no.es.posible.seleccionar.la.unidad.didactica.porque", materia.getNombreTentativoPrograma()));
 		}
 	}
 
@@ -1089,7 +1080,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 
 	private void validarAceptaTerminos(Boolean aceptaTerminos) throws InscripcionException {
 		if (Boolean.FALSE.equals(aceptaTerminos)) {
-			throw new InscripcionException("Acepta los términos y condiciones");
+			throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.acepta.los.terminos.y.condiciones"));
 		}
 	}
 
@@ -1218,6 +1209,16 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
             }
         }
         estado.setMateriasDisponibles(disponibles);
+        List<String> avisos = new ArrayList<>();
+        if (!estado.getOptativasSinCupo().isEmpty()) {
+            avisos.add(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.cupo.sinLugares",
+                    String.join(", ", estado.getOptativasSinCupo())));
+        }
+        if (!estado.getOptativasSinCupoConfigurado().isEmpty()) {
+            avisos.add(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.cupo.sinConfigurar",
+                    String.join(", ", estado.getOptativasSinCupoConfigurado())));
+        }
+        estado.setAvisoCupoOptativas(String.join(" ", avisos));
     }
 
     private boolean mismaOptativa(InscripcionMateriasDTO m, InscripcionMateriasReprobadasDTO d) {
@@ -1264,33 +1265,33 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
         Set<Long> usadas=new HashSet<>();Set<String> unidades=new HashSet<>();int nuevasRequeridas=0;
         for(InscripcionMateriasDTO m:contexto.obtenerMateriasSeleccionadas()) {
             if(!InscripcionUtils.esMateriaOptativa(m.getTipoPrograma())) {
-                if(m.getIdAdeudoOptativa()!=null)throw new InscripcionException("Sólo una optativa adicional puede regularizar este adeudo.");
+                if(m.getIdAdeudoOptativa()!=null)throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.solo.una.optativa.adicional.puede.regularizar.este.adeudo"));
                 continue;
             }
             String nombre=normalizarNombreMateria(m.getNombreTentativoPrograma());
-            if(!unidades.add(nombre))throw new InscripcionException("No puedes inscribir dos veces la misma optativa.");
+            if(!unidades.add(nombre))throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.puedes.inscribir.dos.veces.la.misma.optativa"));
             boolean requeridaReprobada=contexto.getEstadoAcademico().getMateriasReprobadas().stream().anyMatch(d->!(d instanceof AdeudoOptativaDTO) && mismaOptativa(m,d));
             AdeudoOptativaDTO propia=deudas.stream().filter(d->mismaOptativa(m,d)).findFirst().orElse(null);
             if(m.getIdAdeudoOptativa()==null && propia!=null)m.setIdAdeudoOptativa(propia.getIdOrigen());
             if(m.getIdAdeudoOptativa()!=null) {
-                if(requeridaReprobada)throw new InscripcionException("Una optativa requerida reprobada debe recursarse; no puede sustituir otro adeudo.");
+                if(requeridaReprobada)throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.una.optativa.requerida.reprobada.debe.recursarse.no.puede"));
                 AdeudoOptativaDTO deuda=deudas.stream().filter(d->d.getIdOrigen().equals(m.getIdAdeudoOptativa())).findFirst().orElse(null);
-                if(deuda==null)throw new InscripcionException("El adeudo seleccionado ya no está vigente. Actualiza la página.");
-                if(!usadas.add(deuda.getIdOrigen()))throw new InscripcionException("Selecciona una sola optativa para regularizar cada adeudo.");
-                if(deuda.isEnCurso())throw new InscripcionException("La optativa que conserva este adeudo está en curso.");
+                if(deuda==null)throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.adeudo.seleccionado.ya.no.esta.vigente.actualiza"));
+                if(!usadas.add(deuda.getIdOrigen()))throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.selecciona.una.sola.optativa.para.regularizar.cada.adeudo"));
+                if(deuda.isEnCurso())throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.optativa.que.conserva.este.adeudo.esta.en"));
                 if(!deuda.isAdmiteOtraOportunidad())throw new InscripcionException(inscripcionService.obtenerConfiguracionOportunidades().mensajeAdeudo(inscripcionService.obtenerConfiguracionOportunidades().getMensajeAgotadaAcumulada(),deuda,m.getNombreTentativoPrograma()));
-                if(propia!=null && !propia.getIdOrigen().equals(deuda.getIdOrigen()))throw new InscripcionException("La optativa ya conserva otro adeudo vigente.");
+                if(propia!=null && !propia.getIdOrigen().equals(deuda.getIdOrigen()))throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.optativa.ya.conserva.otro.adeudo.vigente"));
                 if(!mismaOptativa(m,deuda) && !deuda.isAdmiteSustitucion())throw new InscripcionException(inscripcionService.obtenerConfiguracionOportunidades().mensajeAdeudo(inscripcionService.obtenerConfiguracionOportunidades().getMensajeSustituciones(),deuda,m.getNombreTentativoPrograma()));
                 if(deuda.isLimiteOportunidadesActivo() && inscripcionService.contarInscripcionesOptativa(persona.getIdPersona(),persona.getIdPlan(),m.getIdPrograma())>=inscripcionService.obtenerConfiguracionOportunidades().getLimite())
-                    throw new InscripcionException("La optativa seleccionada agotó sus oportunidades individuales.");
+                    throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.optativa.seleccionada.agoto.sus.oportunidades.individuales"));
                 if(configuracionOptativas.esOptativaSoloRequerida(m.getNombreTentativoPrograma()))throw new InscripcionException(configuracionOptativas.avisoOptativaSoloRequerida(m.getNombreTentativoPrograma()));
             } else if(acreditadas>=requeridas && !requeridaReprobada && !deudas.isEmpty()) {
-                throw new InscripcionException("Selecciona el adeudo de optativa adicional que deseas regularizar.");
+                throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.selecciona.el.adeudo.de.optativa.adicional.que.deseas"));
             } else if(acreditadas<requeridas && !requeridaReprobada) {
                 nuevasRequeridas++;
             }
         }
-        if(nuevasRequeridas>Math.max(0,requeridas-acreditadas))throw new InscripcionException("La selección excede las optativas requeridas que faltan para completar el requisito configurado de "+requeridas+".");
+        if(nuevasRequeridas>Math.max(0,requeridas-acreditadas))throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.la.seleccion.excede.las.optativas.requeridas.que.faltan", requeridas));
     }
 
 	private EstadoInscripcionEstudianteDTO obtenerEstadoInscripcion(InscripcionPersonaDTO persona,
@@ -1377,7 +1378,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 		Boolean existeInscripcionPrevia = inscripcionService.existeInscripcionPrevia(persona, fechaActual);
 
 		if (existeInscripcionPrevia) {
-			throw new InscripcionPreviaException("Ya cuenta con una inscripción para este periodo.");
+			throw new InscripcionPreviaException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.ya.cuenta.con.una.inscripcion.para.este.periodo.2"));
 		}
 	}
 
@@ -1474,8 +1475,7 @@ public class InscripcionFacadeImpl implements InscripcionFacade {
 private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionException {
 		if (inscripcionService.reglaInscripcionActiva("VALIDAR_USUARIO_ACTIVO_INSCRIPCION")
 				&& !inscripcionService.personaActivaParaInscripcion(idPersona)) {
-			throw new InscripcionException("Tu usuario no está activo en SIGIE. No es posible realizar la inscripción. "
-					+ "Comunícate con el área de control escolar.");
+			throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.tu.usuario.no.esta.activo.en.sigie.no"));
 		}
 	}
 
@@ -1508,8 +1508,7 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 						&& Objects.equals(m.getEstructura(), elegida.getEstructura())
 						&& Objects.equals(m.getSubestructura(), elegida.getSubestructura())));
 		if (complementa && (omitePrioritaria || omiteOptativa)) {
-			throw new InscripcionException("Debes dar prioridad a las unidades didácticas disponibles del semestre "
-					+ semestre + " antes de complementar con semestres posteriores por tu antecedente de baja temporal.");
+			throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.debes.dar.prioridad.a.las.unidades.didacticas.disponibles", semestre));
 		}
 	}
 
@@ -2033,21 +2032,31 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 		int maxReprobadasPermitidasIrregulares = Integer.valueOf(limitesCargaAcademica.getMaxProgramasIrregulares());
 
 		Predicate<InscripcionMateriasDTO> esReprobada = crearComparacionMateriasReprobadas(materiasReprobadas);
+		Set<Long> variantesOptativasReprobadas = materiasReprobadas.stream()
+				.filter(materia -> InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma()))
+				.map(InscripcionMateriasReprobadasDTO::getIdProgramaReprobado)
+				.filter(Objects::nonNull).collect(Collectors.toSet());
 
 		int cantidadMateriasMarcadas = 0;
 
 		for (InscripcionMateriasDTO materia : materiasOfertadas) {
-			boolean estaReprobada = esReprobada.test(materia);
-			boolean exigirSeleccion = (InscripcionUtils.esMateriaObligatoria(materia.getTipoPrograma())
-					&& Boolean.TRUE.equals(configuracion.getMarcarReprobadasObligatorias()))
-					|| (InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma())
-					&& Boolean.TRUE.equals(configuracion.getMarcarReprobadasOptativas()));
+			boolean esOptativa = InscripcionUtils.esMateriaOptativa(materia.getTipoPrograma());
+			boolean estaReprobada = esOptativa
+					? variantesOptativasReprobadas.contains(materia.getIdPrograma()) && !Boolean.TRUE.equals(materia.getDisabled())
+					: esReprobada.test(materia);
+			boolean exigirSeleccion = esOptativa
+					? Boolean.TRUE.equals(configuracion.getMarcarReprobadasOptativas())
+					: InscripcionUtils.esMateriaObligatoria(materia.getTipoPrograma())
+							&& Boolean.TRUE.equals(configuracion.getMarcarReprobadasObligatorias());
             boolean deudaAdicional=materiasReprobadas.stream().anyMatch(d->d instanceof AdeudoOptativaDTO
                 && normalizarNombreMateria(d.getNombrePrograma()).equals(normalizarNombreMateria(materia.getNombreTentativoPrograma())));
 			if (estaReprobada && !deudaAdicional && exigirSeleccion
 					&& cantidadMateriasMarcadas < maxReprobadasPermitidasIrregulares) {
 				materia.setCheck(Boolean.TRUE);
 				materia.setDisabled(Boolean.TRUE);
+				if (esOptativa) {
+					variantesOptativasReprobadas.remove(materia.getIdPrograma());
+				}
 				cantidadMateriasMarcadas++;
 			}
 		}
@@ -2161,8 +2170,7 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 			return inscripcionService.obtenerConfiguracionCargaNuevoIngreso(idPlan, idPersona);
 		} catch (RuntimeException e) {
 			logger.error("No fue posible aplicar la configuración de nuevo ingreso para el plan " + idPlan, e);
-			throw new InscripcionException("No fue posible aplicar la configuración de nuevo ingreso para el plan "
-					+ idPlan + ": " + obtenerCausaErrorConfiguracion(e));
+			throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.no.fue.posible.aplicar.la.configuracion.de.nuevo", idPlan, obtenerCausaErrorConfiguracion(e)));
 		}
 	}
 
@@ -2320,11 +2328,10 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 		String prefijoMateria = nombresMaterias.size() > 1 ? "las materias: " : "la materia: ";
 
 		String resultado = permiteInscripcion
-				? "Cuenta con autorización para realizar una nueva inscripción."
-				: "No le es permitido realizar una nueva inscripción. Contacte a la mesa de ayuda para revisar su caso.";
+				? textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.procedeInscripcion")
+				: textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.noProcedeInscripcion");
 
-		String mensaje = String.format(
-				"Estimad(a/o) estudiante, ha alcanzado el límite de %d reprobaciones en %s%s. %s",
+		String mensaje = textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.limiteReprobaciones",
 				obtenerLimiteReprobacionesPorMateria(), prefijoMateria, materiasFormateadas, resultado);
 
 		return mensaje;
@@ -2371,7 +2378,7 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
             if(marcarOferta && d.isAgotada()){m.setCheck(false);m.setDisabled(true);}
         }
         String agotadas=lista.stream().filter(x->x.isAgotada()).map(x->config.mensaje(config.getMensajeAgotada(),x)).collect(Collectors.joining(" "));
-        if(!agotadas.isEmpty() && config.isPermiteContinuar())agotadas+=" Puedes inscribir únicamente otras UD con oportunidades disponibles.";
+        if(!agotadas.isEmpty() && config.isPermiteContinuar())agotadas+= " " + textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.continuarConOportunidades");
         c.setMensajeLimiteReprobacionesAlcanzado(agotadas);
     }
     private void validarOportunidades(InscripcionContextoDTO c,boolean confirmar) throws InscripcionException {
@@ -2379,18 +2386,18 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
         Set<String> unidades=new HashSet<>();
         for(InscripcionMateriasDTO m:c.obtenerMateriasSeleccionadas()) {
             String nombre=normalizarNombreMateria(m.getNombreTentativoPrograma());
-            if(!unidades.add(nombre.isEmpty()?"ID:"+m.getIdPrograma():nombre))throw new InscripcionException("No puedes inscribir dos variantes de la misma UD.");
+            if(!unidades.add(nombre.isEmpty()?"ID:"+m.getIdPrograma():nombre))throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.puedes.inscribir.dos.variantes.de.la.misma"));
             if(m.getOportunidades().isAgotada())throw new InscripcionException(c.getConfiguracionOportunidades().mensaje(c.getConfiguracionOportunidades().getMensajeAgotada(),m.getOportunidades()));
             if(m.getIdAdeudoOptativa()!=null) {
                 AdeudoOptativaDTO d=c.obtenerAdeudoSeleccionado(m);
-                if(d==null)throw new InscripcionException("El adeudo seleccionado ya no está vigente. Actualiza la página.");
-                if(d.isEnCurso())throw new InscripcionException("La optativa que conserva este adeudo está en curso.");
+                if(d==null)throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.adeudo.seleccionado.ya.no.esta.vigente.actualiza"));
+                if(d.isEnCurso())throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.optativa.que.conserva.este.adeudo.esta.en"));
                 if(!d.isAdmiteOtraOportunidad())throw new InscripcionException(c.getConfiguracionOportunidades().mensajeAdeudo(c.getConfiguracionOportunidades().getMensajeAgotadaAcumulada(),d,m.getNombreTentativoPrograma()));
                 if(!mismaOptativa(m,d) && !d.isAdmiteSustitucion())throw new InscripcionException(c.getConfiguracionOportunidades().mensajeAdeudo(c.getConfiguracionOportunidades().getMensajeSustituciones(),d,m.getNombreTentativoPrograma()));
             }
         }
         if(!c.getPermiteInscripcionLimiteReprobadas() && !c.getMensajeLimiteReprobacionesAlcanzado().isEmpty())throw new InscripcionException(c.getMensajeLimiteReprobacionesAlcanzado());
-        if(confirmar && !c.getAvisoUltimaOportunidad().isEmpty() && !c.isAceptaUltimaOportunidad())throw new InscripcionException(c.getAvisoUltimaOportunidad()+" Lee y confirma el aviso de última oportunidad antes de continuar.");
+        if(confirmar && !c.getAvisoUltimaOportunidad().isEmpty() && !c.isAceptaUltimaOportunidad())throw new InscripcionException(c.getAvisoUltimaOportunidad() + " " + textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.aceptarUltimaOportunidad"));
     }
     private void registrarAvisoEnEvidencia(InscripcionContextoDTO c) throws InscripcionException {
         try {
@@ -2399,7 +2406,7 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
             evidencia.put("avisoUltimaOportunidad",c.getAvisoUltimaOportunidad());evidencia.put("avisoUltimaReconocido",c.isAceptaUltimaOportunidad());
             evidencia.set("seleccionConfirmada",mapper.valueToTree(c.obtenerMateriasSeleccionadas()));
             c.setEvidenciaEvaluacion(mapper.writeValueAsString(evidencia));
-        } catch(java.io.IOException ex) { throw new InscripcionException("No fue posible registrar la evidencia del aviso de oportunidades.",ex); }
+        } catch(java.io.IOException ex) { throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.registrar.la.evidencia.del.aviso"),ex); }
     }
 
 	private ResultadoElectivasDTO procesarMateriasElectivas(List<InscripcionMateriasDTO> materiasOfertadas,
@@ -2470,12 +2477,12 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 
 	private LimitesCargaAcademicaDTO obtenerLimitesCargaAcademicaPorPlan(Long idPlan) throws InscripcionException {
 		return inscripcionService.obtenerLimitesCargaAcademicaPorPlan(idPlan)
-				.orElseThrow(() -> new InscripcionException("No existen máximos y mínimos configurados en el plan"));
+				.orElseThrow(() -> new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.existen.maximos.y.minimos.configurados.en.el")));
 	}
 
 	private CreditosTotalesPlanDTO obtenerCreditosTotalesPorPlan(Long idPlan) throws InscripcionException {
 		return inscripcionService.obtenerCreditosTotalesPorPlan(idPlan)
-				.orElseThrow(() -> new InscripcionException("No se capturaron los creditos totales del plan"));
+				.orElseThrow(() -> new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.se.capturaron.los.creditos.totales.del.plan")));
 	}
 
 	private Long obtenerCantidadMaximaMateriasElectivas(InscripcionContextoDTO contexto) {
@@ -2504,7 +2511,7 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 
 		if (cantidadElectivasSeleccionadas > cantidadMaximaMateriasElectivas) {
 			throw new InscripcionException(
-					String.format("Solo puedes seleccionar un máximo de %d unidades didácticas electivas",
+					textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.maximoElectivas",
 							cantidadMaximaMateriasElectivas));
 		}
 
@@ -2515,9 +2522,7 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 			if (estaSeleccionada(materia) && InscripcionUtils.esMateriaElectiva(materia.getTipoPrograma())
 					&& (materia.getIdProcesoInscripcion() == null || !inscripcionService.tieneCupoElectiva(
 							materia.getIdProcesoInscripcion(), materia.getIdPrograma()))) {
-				throw new InscripcionException("La unidad didáctica electiva "
-						+ materia.getNombreTentativoPrograma()
-						+ " ya no cuenta con lugares disponibles. Actualiza tu selección.");
+				throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.la.unidad.didactica.electiva.ya.no.cuenta.con", materia.getNombreTentativoPrograma()));
 			}
 		}
 	}
@@ -2543,14 +2548,12 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
                 validarLimitesOptativasOrdinarias(materiaSeleccionada, materiasDisponibles, configuracion, reprobadas);
             } else if (materiaSeleccionada.getIdAdeudoOptativa()==null && contarOptativasBloqueSemestreSeleccionadas(materiaSeleccionada, materiasDisponibles)
 					>= configuracion.getMaximoOptativasPorBloque()) {
-				throw new InscripcionException("Solo se permite seleccionar un máximo de "
-						+ configuracion.getMaximoOptativasPorBloque()
-						+ " unidad(es) didáctica(s) optativa(s) por bloque, por favor revisa tu selección.");
+				throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.solo.se.permite.seleccionar.un.maximo.de.unidad", configuracion.getMaximoOptativasPorBloque()));
 			}
             if (Boolean.TRUE.equals(configuracion.getImpedirClaveOptativaRepetida())
 					&& esClaveOptativaYaSeleccionada(materiaSeleccionada, materiasDisponibles)) {
 				throw new InscripcionException(
-						"No es posible tomar la misma unidad didáctica dos veces, por favor revisa tu selección.");
+						textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.es.posible.tomar.la.misma.unidad.didactica"));
 			}
 
 		}
@@ -2610,7 +2613,7 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
             return;
         }
         if (!Boolean.TRUE.equals(esRegular(contexto))) {
-            throw new InscripcionException("Solo los estudiantes regulares pueden complementar su selección con optativas de otros semestres.");
+            throw new InscripcionException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.solo.los.estudiantes.regulares.pueden.complementar.su.seleccion"));
         }
 
         List<InscripcionMateriasDTO> prioritarias = obtenerMateriasDisponibles(contexto).stream()
@@ -2628,8 +2631,7 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
                     || (Boolean.TRUE.equals(configuracion.getImpedirClaveOptativaRepetida())
                         && elegida.getClavePrograma() != null && esClaveProgramaIgual(ud, elegida))));
         if (quedanOpciones) {
-            throw new InscripcionException("Selecciona primero las optativas disponibles del semestre de referencia ("
-                + contexto.getSemestreReferencia() + ") antes de elegir optativas de otros semestres.");
+            throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.selecciona.primero.las.optativas.disponibles.del.semestre.de", contexto.getSemestreReferencia()));
         }
     }
 
@@ -2647,12 +2649,10 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
         long mismoBloque = otrasOrdinarias.stream()
             .filter(ud -> Objects.equals(ud.getSubestructura(), seleccionada.getSubestructura())).count();
         if (mismoBloque >= configuracion.getMaximoOptativasPorBloque()) {
-            throw new InscripcionException("Solo puedes seleccionar hasta " + configuracion.getMaximoOptativasPorBloque()
-                + " optativa(s) nueva(s) por bloque en este periodo. Revisa tu selección.");
+            throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.solo.puedes.seleccionar.hasta.optativa.s.nueva.s", configuracion.getMaximoOptativasPorBloque()));
         }
         if (otrasOrdinarias.size() >= configuracion.getMaximoOptativasOrdinariasPorPeriodo()) {
-            throw new InscripcionException("Solo puedes seleccionar hasta " + configuracion.getMaximoOptativasOrdinariasPorPeriodo()
-                + " optativa(s) nueva(s) en este periodo. Revisa tu selección.");
+            throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.solo.puedes.seleccionar.hasta.optativa.s.nueva.s.2", configuracion.getMaximoOptativasOrdinariasPorPeriodo()));
         }
     }
 
@@ -2711,9 +2711,7 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 		if (Boolean.TRUE.equals(configuracion.getActiva())
 				&& esMateriaDelTramoFinal(materiaSeleccionada, configuracion.getSemestreInicioTramoFinal())) {
 			if (porcentajeCreditosCompletados < configuracion.getPorcentajeMinimoTramoFinal()) {
-				throw new InscripcionException("Para seleccionar unidades didácticas de este semestre, debes haber acreditado al menos el "
-						+ configuracion.getPorcentajeMinimoTramoFinal()
-						+ "% del total de créditos de tu plan de estudios.");
+				throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.para.seleccionar.unidades.didacticas.de.este.semestre.debes", configuracion.getPorcentajeMinimoTramoFinal()));
 			}
 		}
 	}
@@ -2734,11 +2732,7 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 					materiasReprobadas, configuracion.getSemestreInicialAntecedentes(),
 					configuracion.getSemestreFinalAntecedentes());
 			if (materiaEncontrada.isPresent()) {
-				throw new InscripcionException("Para cursar materias de semestre "
-						+ configuracion.getSemestreDestinoRezagos()
-						+ ", debes haber aprobado todas las materias seriadas de semestre "
-						+ configuracion.getSemestreInicialAntecedentes() + " a semestre "
-						+ configuracion.getSemestreFinalAntecedentes() + ".");
+				throw new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.para.cursar.materias.de.semestre.debes.haber.aprobado", configuracion.getSemestreDestinoRezagos(), configuracion.getSemestreInicialAntecedentes(), configuracion.getSemestreFinalAntecedentes()));
 			}
 		}
 
@@ -2805,7 +2799,7 @@ private void validarHabilitacionInscripcion(Long idPersona) throws InscripcionEx
 
 	private Long obtenerPeriodoPrimerMateria(List<ReenvioCorreoMateriasDTO> materias) {
 		if (materias == null || materias.isEmpty()) {
-			throw new IllegalArgumentException("La lista de materias al construir el correo no puede estar vacía");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.lista.de.materias.al.construir.el.correo"));
 		}
 		ReenvioCorreoMateriasDTO primerMateria = materias.get(0);
 		return primerMateria.getPeriodo();

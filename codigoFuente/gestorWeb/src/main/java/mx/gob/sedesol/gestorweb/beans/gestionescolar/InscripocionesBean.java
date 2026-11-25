@@ -1,5 +1,6 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
+import mx.gob.sedesol.basegestor.service.admin.TextoSistemaService;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -43,6 +44,14 @@ import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 @ManagedBean
 @ViewScoped
 public class InscripocionesBean extends BaseBean {
+
+	@javax.faces.bean.ManagedProperty(value = "#{textoSistemaService}")
+	private transient TextoSistemaService textosInscripcion;
+
+	public void setTextosInscripcion(TextoSistemaService textosInscripcion) {
+		this.textosInscripcion = textosInscripcion;
+	}
+
 
 	public TimeZone getZonaHoraria() {
 		return TimeZone.getDefault();
@@ -139,7 +148,7 @@ public class InscripocionesBean extends BaseBean {
 
 	private boolean sinTiposProcesoDisponibles;
 	
-	private String mensajeEliminacion = "Proceso de inscripción eliminado correctamente.";
+	private String mensajeEliminacion;
 
 	// REDIRECCION OPCIONES
 	private String paginaActual;
@@ -606,7 +615,7 @@ public class InscripocionesBean extends BaseBean {
             inscripcionService.guardarCuposOptativas(proceso, controlCupoOptativas, cuposOptativas);
             consultarCuposOptativas(proceso);
             context.addMessage("mensajeCupoOptativas", new FacesMessage(FacesMessage.SEVERITY_INFO,
-                "Cupo de optativas guardado.", null));
+                textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.cupo.de.optativas.guardado"), null));
         } catch (IllegalArgumentException ex) {
             context.addMessage("mensajeCupoOptativas", new FacesMessage(FacesMessage.SEVERITY_ERROR,
                 ex.getMessage(), null));
@@ -645,9 +654,9 @@ public class InscripocionesBean extends BaseBean {
 	private boolean validarFechasProceso(Date inicio, Date fin) {
         String mensaje;
         if (inicio == null || fin == null) {
-            mensaje = "Captura la fecha de inicio y la fecha de fin del proceso.";
+            mensaje = textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.captura.la.fecha.de.inicio.y.la.fecha");
         } else if (fin.before(inicio)) {
-            mensaje = "La fecha de fin no puede ser anterior a la fecha de inicio.";
+            mensaje = textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.fecha.de.fin.no.puede.ser.anterior");
         } else {
             return true;
         }
@@ -746,13 +755,13 @@ public class InscripocionesBean extends BaseBean {
 
 	            inscripcionesService.deleteProcesoInscripcion(procesoInscripcionId, convocatoriaId, tipoProceso);
 	            logger.info("Registro eliminado correctamente con ID: " + procesoInscripcionId);
-				mensajeEliminacion = "Proceso de inscripción eliminado correctamente.";
+				mensajeEliminacion = textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.proceso.de.inscripcion.eliminado.correctamente");
 				RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccionDelete').show()");
 	            consultarFiltros(); // Refresca la lista después de eliminar
 	        }
 	    } catch (Exception e) {
 	        logger.error("Error al eliminar el registro.", e);
-	        mensajeEliminacion = "error al intentar eliminar el proceso de inscripción";
+	        mensajeEliminacion = textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.error.al.intentar.eliminar.el.proceso.de.inscripcion");
 			RequestContext.getCurrentInstance().execute("PF('dlgValidarSeleccionDelete').show()");
 	    }
 	}
@@ -1095,7 +1104,7 @@ public class InscripocionesBean extends BaseBean {
 	}
 
 	public String getMensajeEliminacion() {
-		return mensajeEliminacion;
+		return mensajeEliminacion != null ? mensajeEliminacion : textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.proceso.de.inscripcion.eliminado.correctamente");
 	}
 
 	public void setMensajeEliminacion(String mensajeEliminacion) {

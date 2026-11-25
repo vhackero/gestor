@@ -5,6 +5,7 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.*;
 
 /** Cuenta inscripciones formales; las notas y participaciones no multiplican una oportunidad. */
 public final class OportunidadesInscripcionRepository {
+
     private final InscripcionRepository repo;
     public static final String REGLA="PERMITE_INSCRIPCION_LIMITE_REPROBADAS";
     public OportunidadesInscripcionRepository(InscripcionRepository r) { repo=r; }
@@ -24,17 +25,17 @@ public final class OportunidadesInscripcionRepository {
             + "MAX(CASE WHEN p.clave_parametro='MENSAJE_LIMITE_SUSTITUCIONES' THEN p.valor_default END) AS mensaje_sustituciones "
             + "FROM cat_reglas_inscripcion r LEFT JOIN cat_parametros_regla_inscripcion p ON p.clave_regla=r.clave "
             + "WHERE r.clave='"+REGLA+"' GROUP BY r.activo").getResultList();
-        if(rows.isEmpty())throw new IllegalStateException("Falta la configuración de oportunidades. Ejecute R077.");
+        if(rows.isEmpty())throw new IllegalStateException(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.falta.la.configuracion.de.oportunidades.ejecute.r077"));
         Object[] r=rows.get(0);ConfiguracionOportunidadesDTO d=new ConfiguracionOportunidadesDTO();
         d.setPermiteContinuar(n(r[0])==1);d.setLimite(Integer.parseInt(Objects.toString(r[1],"0")));
-        if(!"1".equals(r[4]) && !"0".equals(r[4]))throw new IllegalStateException("Falta el interruptor de aplicación de oportunidades. Ejecute R078.");
-        if(r[5]==null || r[7]==null || (!"1".equals(r[6]) && !"0".equals(r[6])))throw new IllegalStateException("Falta la parametrización de adicionales. Ejecute R079.");
+        if(!"1".equals(r[4]) && !"0".equals(r[4]))throw new IllegalStateException(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.falta.el.interruptor.de.aplicacion.de.oportunidades.ejecute"));
+        if(r[5]==null || r[7]==null || (!"1".equals(r[6]) && !"0".equals(r[6])))throw new IllegalStateException(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.falta.la.parametrizacion.de.adicionales.ejecute.r079"));
         d.setAplicarLimite("1".equals(r[4]));d.setMensajeUltima((String)r[2]);d.setMensajeAgotada((String)r[3]);
         d.setLimiteAcumulado(Integer.parseInt(r[5].toString()));d.setAplicarLimiteSustituciones("1".equals(r[6]));d.setLimiteSustituciones(Integer.parseInt(r[7].toString()));
         d.setMensajeUltimaAcumulada((String)r[8]);d.setMensajeAgotadaAcumulada((String)r[9]);d.setMensajeSustituciones((String)r[10]);d.validar();return d;
     }
     public void guardar(ConfiguracionOportunidadesDTO d,Long usuario) {
-        if(d==null || usuario==null)throw new IllegalArgumentException("Configuración de oportunidades incompleta.");
+        if(d==null || usuario==null)throw new IllegalArgumentException(repo.textosInscripcion().obtenerTexto("gw.inscripcion.mensaje.configuracion.de.oportunidades.incompleta"));
         d.validar();ReglaInscripcionDTO regla=new ReglaInscripcionDTO();regla.setClave(REGLA);regla.setActiva(d.isPermiteContinuar());repo.guardarReglaInscripcion(regla,usuario);
         parametro(REGLA,"APLICAR_LIMITE_OPORTUNIDADES",d.isAplicarLimite()?"1":"0");
         parametro("RESTRICCIONES_ACADEMICAS_GENERALES","LIMITE_REPROBACIONES_POR_MATERIA",String.valueOf(d.getLimite()));
@@ -52,7 +53,7 @@ public final class OportunidadesInscripcionRepository {
         if(cambios==0) {
             Number existe=(Number)repo.entityManager.createNativeQuery("SELECT COUNT(*) FROM cat_parametros_regla_inscripcion WHERE clave_regla=:regla AND clave_parametro=:clave")
                 .setParameter("regla",regla).setParameter("clave",clave).getSingleResult();
-            if(existe.intValue()!=1)throw new IllegalStateException("Falta el parámetro "+clave+". Ejecute R077.");
+            if(existe.intValue()!=1)throw new IllegalStateException(repo.textosInscripcion().obtenerTextoFormateado("gw.inscripcion.mensaje.falta.el.parametro.ejecute.r077", clave));
         }
     }
     @SuppressWarnings("unchecked")

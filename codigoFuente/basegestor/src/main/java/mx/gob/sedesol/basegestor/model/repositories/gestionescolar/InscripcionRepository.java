@@ -1,5 +1,6 @@
 package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 
+import mx.gob.sedesol.basegestor.service.admin.TextoSistemaService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +44,14 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO;
 
 @Repository
 public class InscripcionRepository implements IinscripcionRepository {
+
+	@org.springframework.beans.factory.annotation.Autowired
+	private TextoSistemaService textosInscripcion;
+
+	TextoSistemaService textosInscripcion() {
+		return textosInscripcion;
+	}
+
     @Override
     public mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOportunidadesDTO obtenerConfiguracionOportunidades() { return new OportunidadesInscripcionRepository(this).configuracion(); }
     @Override
@@ -133,24 +142,24 @@ public class InscripcionRepository implements IinscripcionRepository {
             + "MAX(CASE WHEN p.clave_parametro='SIN_UD' THEN p.valor_default END) "
             + "FROM cat_reglas_inscripcion r JOIN cat_parametros_regla_inscripcion p ON p.clave_regla=r.clave "
             + "WHERE r.clave='BAJAS_SITUACION_ACADEMICA' GROUP BY r.activo").getResultList();
-        if(filas.isEmpty()) throw new IllegalStateException("Falta la configuración de bajas. Ejecute R073.");
+        if(filas.isEmpty()) throw new IllegalStateException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.falta.la.configuracion.de.bajas.ejecute.r073"));
         Object[] f=filas.get(0);
         return new String[]{Integer.valueOf(1).equals(getIntegerValue(f[0]))?"1":"0",(String)f[1],(String)f[2]};
     }
 
     private String validarTiposBajaInscripcion(String valor) {
         if(valor==null || !valor.matches("[1278](,[1278])*"))
-            throw new IllegalArgumentException("Selecciona tipos de baja autorizados: 1, 2, 7 u 8, separados por comas y sin espacios.");
+            throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.selecciona.tipos.de.baja.autorizados.u.separados.por"));
         List<String> tipos=Arrays.asList(valor.split(","));
         if(new java.util.HashSet<String>(tipos).size()!=tipos.size())
-            throw new IllegalArgumentException("No repitas tipos de baja.");
+            throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.repitas.tipos.de.baja"));
         return valor;
     }
 
     @Override
     public void guardarConfiguracionBajasInscripcion(String[] valores, Long idUsuario) {
         if(valores==null || valores.length!=3 || !("1".equals(valores[0]) || "0".equals(valores[0])))
-            throw new IllegalArgumentException("Configuración de bajas incompleta.");
+            throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.de.bajas.incompleta"));
         String con=validarTiposBajaInscripcion(valores[1]);
         String sin=validarTiposBajaInscripcion(valores[2]);
         actualizarEstadoRegla("BAJAS_SITUACION_ACADEMICA", "1".equals(valores[0]),idUsuario);
@@ -166,7 +175,7 @@ public class InscripcionRepository implements IinscripcionRepository {
                 + "MAX(CASE WHEN p.clave_parametro='MENSAJE' THEN p.valor_default END) "
                 + "FROM cat_reglas_inscripcion r JOIN cat_parametros_regla_inscripcion p ON p.clave_regla=r.clave "
                 + "WHERE r.clave='OMISION_REINSCRIPCION' GROUP BY r.activo").getResultList();
-        if (filas.isEmpty()) throw new IllegalStateException("Falta configurar OMISION_REINSCRIPCION. Ejecute la migración R072.");
+        if (filas.isEmpty()) throw new IllegalStateException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.falta.configurar.omision.reinscripcion.ejecute.la.migracion.r072"));
         Object[] f = filas.get(0);
         ConfiguracionOmisionReinscripcionDTO c = new ConfiguracionOmisionReinscripcionDTO();
         c.setActiva(Integer.valueOf(1).equals(getIntegerValue(f[0])));
@@ -181,7 +190,7 @@ public class InscripcionRepository implements IinscripcionRepository {
         if (c == null || c.getActiva() == null || c.getPermitirInscripcion() == null
                 || c.getPeriodosConsecutivos() == null || c.getPeriodosConsecutivos() < 1
                 || c.getMensaje() == null || c.getMensaje().trim().isEmpty() || c.getMensaje().length() > 1000) {
-            throw new IllegalArgumentException("Indica la acción, un número positivo de periodos y un mensaje de 1 a 1000 caracteres.");
+            throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.indica.la.accion.un.numero.positivo.de.periodos"));
         }
     }
 
@@ -199,7 +208,7 @@ public class InscripcionRepository implements IinscripcionRepository {
         List<?> actuales = entityManager.createNativeQuery("SELECT nombre_periodo FROM tbl_periodos_inscripcion "
                 + "WHERE :fecha BETWEEN fecha_inicio AND fecha_finalizacion AND nombre_periodo REGEXP '^[0-9]{4}-[12]$'")
                 .setParameter("fecha", fechaActual).getResultList();
-        if (actuales.size() != 1) throw new IllegalStateException("Debe existir un único periodo académico vigente para evaluar la falta de reinscripción.");
+        if (actuales.size() != 1) throw new IllegalStateException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.debe.existir.un.unico.periodo.academico.vigente.para"));
         String actual = (String) actuales.get(0);
         String periodoEvento = "SUBSTRING_INDEX(e.cve_evento_cap,'-',-2)";
         String inscrito = "EXISTS(SELECT 1 FROM tbl_inscripciones i LEFT JOIN tbl_eventos e ON e.id_evento=i.idevento "
@@ -227,7 +236,7 @@ public class InscripcionRepository implements IinscripcionRepository {
         for (Object[] f : filas) {
             if (mitad == 1) { anio--; mitad = 2; } else { mitad = 1; }
             String esperado = anio + "-" + mitad;
-            if (!esperado.equals(f[0])) throw new IllegalStateException("Falta el periodo " + esperado + " en el calendario académico histórico.");
+            if (!esperado.equals(f[0])) throw new IllegalStateException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.falta.el.periodo.en.el.calendario.academico.historico", esperado));
             // Una inscripción o baja temporal autorizada interrumpe la secuencia de omisiones.
             if (Integer.valueOf(1).equals(getIntegerValue(f[1])) || Integer.valueOf(1).equals(getIntegerValue(f[2]))) break;
             omitidos.add((String) f[0]);
@@ -1290,7 +1299,11 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("       ) AS estructura, ");
 		sql.append("       destino.id_programa_antecedente AS id_programa_antecedente, ");
 		sql.append("       destino.nombre_tentativo AS nombrePrograma, ");
-		sql.append("       destino.tipo AS tipo ");
+		sql.append("       destino.tipo AS tipo, ");
+		// La identidad del adeudo se conserva, junto con la variante del intento reprobado más reciente.
+		sql.append("       CAST(SUBSTRING_INDEX(GROUP_CONCAT(fd.id_programa ");
+		sql.append("           ORDER BY COALESCE(te.fecha_final, te.fecha_inicial, rgp.fecha_registro) DESC, rgp.id DESC), ");
+		sql.append("           ',', 1) AS UNSIGNED) AS id_programa_reprobado ");
 		sql.append("FROM tbl_persona tp ");
 		sql.append(
 				"INNER JOIN rel_grupo_participante rgp ON rgp.id_persona_participante = tp.id_persona AND rgp.calificacion_final IS NOT NULL ");
@@ -1360,6 +1373,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setIdProgramaAntecedente(getLongValue(row[6]));
 		dto.setNombrePrograma((String) row[7]);
 		dto.setTipoPrograma((String) row[8]);
+		dto.setIdProgramaReprobado(getLongValue(row[9]));
 		return dto;
 	}
 
@@ -1698,18 +1712,17 @@ public class InscripcionRepository implements IinscripcionRepository {
         java.util.Map<String, Integer> editados = new java.util.HashMap<>();
         for (CupoOptativaDTO cupo : cupos) {
             if (editados.containsKey(cupo.getClave())) {
-                throw new IllegalArgumentException("La configuración contiene una optativa duplicada.");
+                throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.configuracion.contiene.una.optativa.duplicada"));
             }
             editados.put(cupo.getClave(), cupo.getMaximo());
         }
         if (oferta.size() != editados.size() || oferta.stream().anyMatch(ud -> !editados.containsKey(ud.getClave()))) {
-            throw new IllegalArgumentException("La oferta cambió. Vuelve a consultar el proceso antes de guardar.");
+            throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.oferta.cambio.vuelve.a.consultar.el.proceso"));
         }
         for (CupoOptativaDTO ud : oferta) {
             Integer maximo = editados.get(ud.getClave());
             if ((activo && maximo == null) || (maximo != null && (maximo <= 0 || (activo && maximo < ud.getOcupados())))) {
-                throw new IllegalArgumentException("Captura un cupo positivo que cubra las inscripciones confirmadas de "
-                    + ud.getNombre() + " (" + ud.getOcupados() + ").");
+                throw new IllegalArgumentException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.captura.un.cupo.positivo.que.cubra.las.inscripciones", ud.getNombre(), ud.getOcupados()));
             }
             if (maximo == null) {
                 entityManager.createNativeQuery("DELETE FROM rel_cupo_optativa_proceso "
@@ -1739,12 +1752,10 @@ public class InscripcionRepository implements IinscripcionRepository {
         CupoOptativaDTO cupo = obtenerCuposOptativas(proceso).stream()
             .filter(ud -> ud.getClave().equals(clave)).findFirst().orElse(null);
         if (cupo == null || cupo.getMaximo() == null) {
-            throw new CupoOptativaException("Falta configurar el cupo de la optativa " + asignatura
-                + ". Contacta al administrador para revisar la oferta.", true);
+            throw new CupoOptativaException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.falta.configurar.el.cupo.de.la.optativa.contacta", asignatura), true);
         }
         if (cupo.getOcupados() >= cupo.getMaximo()) {
-            throw new CupoOptativaException("Falta de cupo para la optativa " + asignatura
-                + ". Actualiza tu selección y elige una alternativa disponible.", false);
+            throw new CupoOptativaException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.falta.de.cupo.para.la.optativa.actualiza.tu", asignatura), false);
         }
     }
 
@@ -1847,7 +1858,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "GROUP BY cri.nombre,cri.descripcion,cri.activo";
 		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
 		if (resultados.isEmpty()) {
-			throw new IllegalArgumentException("No existe la regla general CARGA_NUEVO_INGRESO");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.existe.la.regla.general.carga.nuevo.ingreso"));
 		}
 		Object[] row = resultados.get(0);
 		ConfiguracionCargaNuevoIngresoDTO dto = new ConfiguracionCargaNuevoIngresoDTO();
@@ -1907,7 +1918,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 						+ ") configuracion_carga WHERE configuracion_carga.id_plan_configuracion = :idPlan")
 				.setParameter("idPlan", idPlan).getResultList();
 		if (resultados.isEmpty()) {
-			throw new IllegalArgumentException("No existe configuración de carga de nuevo ingreso para el plan " + idPlan);
+			throw new IllegalArgumentException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.no.existe.configuracion.de.carga.de.nuevo.ingreso", idPlan));
 		}
 		return mapearConfiguracionCargaNuevoIngreso(resultados.get(0));
 	}
@@ -2006,24 +2017,22 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 	private Integer obtenerEnteroConfiguracion(Object valor, String parametro, String alcance) {
 		if (valor == null) {
-			throw new IllegalStateException("Falta configurar el parámetro " + parametro + " para la regla " + alcance);
+			throw new IllegalStateException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.falta.configurar.el.parametro.para.la.regla", parametro, alcance));
 		}
 		try {
 			return Integer.valueOf(valor.toString());
 		} catch (NumberFormatException e) {
-			throw new IllegalStateException("El parámetro " + parametro + " de la regla " + alcance
-					+ " debe contener un número entero y tiene el valor '" + valor + "'", e);
+			throw new IllegalStateException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.el.parametro.de.la.regla.debe.contener.un", parametro, alcance, valor), e);
 		}
 	}
 
 	private Boolean obtenerBooleanoConfiguracion(Object valor, String parametro, String alcance) {
 		if (valor == null) {
-			throw new IllegalStateException("Falta configurar el parámetro " + parametro + " para la regla " + alcance);
+			throw new IllegalStateException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.falta.configurar.el.parametro.para.la.regla", parametro, alcance));
 		}
 		String texto = valor.toString();
 		if (!"0".equals(texto) && !"1".equals(texto)) {
-			throw new IllegalStateException("El parámetro " + parametro + " de la regla " + alcance
-					+ " debe contener 0 o 1 y tiene el valor '" + texto + "'");
+			throw new IllegalStateException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.el.parametro.de.la.regla.debe.contener.o", parametro, alcance, texto));
 		}
 		return "1".equals(texto);
 	}
@@ -2033,7 +2042,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 			Long idUsuario) {
 		validarConfiguracionCargaNuevoIngreso(configuracion);
 		if (configuracion.getIdPlan() == null) {
-			throw new IllegalArgumentException("El plan es obligatorio para una regla específica");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.plan.es.obligatorio.para.una.regla.especifica"));
 		}
 		Long idPersona = obtenerIdPersonaConfiguracion(configuracion);
 		if (idPersona != null) {
@@ -2071,12 +2080,10 @@ public class InscripcionRepository implements IinscripcionRepository {
 				.setParameter("username", configuracion.getUsername())
 				.setParameter("idPlan", configuracion.getIdPlan()).getResultList();
 		if (personas.isEmpty()) {
-			throw new IllegalArgumentException("El username '" + configuracion.getUsername()
-					+ "' no existe o no corresponde al plan " + configuracion.getIdPlan());
+			throw new IllegalArgumentException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.el.username.no.existe.o.no.corresponde.al", configuracion.getUsername(), configuracion.getIdPlan()));
 		}
 		if (personas.size() > 1) {
-			throw new IllegalArgumentException("El username '" + configuracion.getUsername()
-					+ "' está asociado más de una vez al plan " + configuracion.getIdPlan());
+			throw new IllegalArgumentException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.el.username.esta.asociado.mas.de.una.vez", configuracion.getUsername(), configuracion.getIdPlan()));
 		}
 		return getLongValue(personas.get(0));
 	}
@@ -2087,7 +2094,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		Object resultado = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona)
 				.setParameter("idPlan", idPlan).getSingleResult();
 		if (getLongValue(resultado) == 0L) {
-			throw new IllegalArgumentException("El usuario no corresponde al plan " + idPlan);
+			throw new IllegalArgumentException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.el.usuario.no.corresponde.al.plan", idPlan));
 		}
 	}
 
@@ -2114,15 +2121,15 @@ public class InscripcionRepository implements IinscripcionRepository {
 	private void validarConfiguracionCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion) {
 		if (configuracion.getObligatoriasRequeridas() == null || configuracion.getObligatoriasRequeridas() < 0
 				|| configuracion.getOptativasRequeridas() == null || configuracion.getOptativasRequeridas() < 0) {
-			throw new IllegalArgumentException("Las cantidades de unidades didácticas no pueden ser negativas");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.las.cantidades.de.unidades.didacticas.no.pueden.ser"));
 		}
 		if (configuracion.getObligatoriasRequeridas() + configuracion.getOptativasRequeridas() == 0) {
-			throw new IllegalArgumentException("La carga configurada debe requerir al menos una unidad didáctica");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.carga.configurada.debe.requerir.al.menos.una"));
 		}
 		if (Boolean.TRUE.equals(configuracion.getBloquearObligatorias())
 				&& !Boolean.TRUE.equals(configuracion.getAutoseleccionarObligatorias())) {
 			throw new IllegalArgumentException(
-					"No se pueden bloquear las obligatorias si no se seleccionan automáticamente");
+					textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.se.pueden.bloquear.las.obligatorias.si.no"));
 		}
 	}
 
@@ -2147,7 +2154,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 	@Override
 	public void eliminarConfiguracionCargaNuevoIngreso(ConfiguracionCargaNuevoIngresoDTO configuracion) {
 		if (configuracion == null || configuracion.getIdPlan() == null) {
-			throw new IllegalArgumentException("El plan es obligatorio para eliminar la regla específica");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.plan.es.obligatorio.para.eliminar.la.regla"));
 		}
 		if (configuracion.getIdPersona() != null) {
 			eliminarConfiguracionCargaNuevoIngresoPersona(configuracion);
@@ -2161,8 +2168,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "WHERE clave_regla='CARGA_NUEVO_INGRESO' AND id_plan=:idPlan";
 		int eliminadas = entityManager.createNativeQuery(eliminarRegla).setParameter("idPlan", configuracion.getIdPlan()).executeUpdate();
 		if (eliminadas == 0) {
-			throw new IllegalArgumentException("No existe una regla específica de nuevo ingreso para el plan "
-					+ configuracion.getIdPlan());
+			throw new IllegalArgumentException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.no.existe.una.regla.especifica.de.nuevo.ingreso", configuracion.getIdPlan()));
 		}
 	}
 
@@ -2177,8 +2183,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 				.setParameter("idPlan", configuracion.getIdPlan())
 				.setParameter("idPersona", configuracion.getIdPersona()).executeUpdate();
 		if (eliminadas == 0) {
-			throw new IllegalArgumentException("No existe una regla específica de nuevo ingreso para el username '"
-					+ configuracion.getUsername() + "' en el plan " + configuracion.getIdPlan());
+			throw new IllegalArgumentException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.no.existe.una.regla.especifica.de.nuevo.ingreso.2", configuracion.getUsername(), configuracion.getIdPlan()));
 		}
 	}
 
@@ -2216,7 +2221,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		String sql = construirConsultaConfiguracionRegular(false, false);
 		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
 		if (resultados.isEmpty()) {
-			throw new IllegalArgumentException("No existe la regla general CARGA_ESTUDIANTE_REGULAR");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.existe.la.regla.general.carga.estudiante.regular"));
 		}
 		return mapearConfiguracionRegular(resultados.get(0));
 	}
@@ -2251,7 +2256,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		List<Object[]> resultados = entityManager.createNativeQuery(construirConsultaConfiguracionRegular(true, false))
 				.setParameter("idPlan", idPlan).getResultList();
 		if (resultados.isEmpty()) {
-			throw new IllegalArgumentException("No existe configuración de carga regular para el plan " + idPlan);
+			throw new IllegalArgumentException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.no.existe.configuracion.de.carga.regular.para.el", idPlan));
 		}
 		return mapearConfiguracionRegular(resultados.get(0));
 	}
@@ -2312,7 +2317,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 	public void guardarConfiguracionCargaRegular(ConfiguracionCargaRegularDTO configuracion, Long idUsuario) {
 		validarConfiguracionRegular(configuracion);
 		if (configuracion.getIdPlan() == null) {
-			throw new IllegalArgumentException("El plan es obligatorio para la carga regular");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.plan.es.obligatorio.para.la.carga.regular"));
 		}
 		guardarEstadoReglaPlan("CARGA_ESTUDIANTE_REGULAR", configuracion.getIdPlan(), configuracion.getActiva(), idUsuario);
 		guardarValorReglaPlan("CARGA_ESTUDIANTE_REGULAR", configuracion.getIdPlan(), "RESTRINGIR_AVANCE_ANUAL", booleano(configuracion.getRestringirAvanceAnual()), idUsuario);
@@ -2323,7 +2328,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 	@Override
 	public void eliminarConfiguracionCargaRegular(ConfiguracionCargaRegularDTO configuracion) {
 		if (configuracion == null || configuracion.getIdPlan() == null) {
-			throw new IllegalArgumentException("El plan es obligatorio para eliminar la carga regular");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.plan.es.obligatorio.para.eliminar.la.carga"));
 		}
 		entityManager.createNativeQuery("DELETE FROM rel_valor_parametro_regla_plan WHERE clave_regla='CARGA_ESTUDIANTE_REGULAR' AND id_plan=:idPlan")
 				.setParameter("idPlan", configuracion.getIdPlan()).executeUpdate();
@@ -2333,7 +2338,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 	private void validarConfiguracionRegular(ConfiguracionCargaRegularDTO configuracion) {
 		if (configuracion.getMinimoObligatorias() == null || configuracion.getMinimoObligatorias() < 0) {
-			throw new IllegalArgumentException("Los límites de carga regular no pueden ser negativos");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.los.limites.de.carga.regular.no.pueden.ser"));
 		}
 	}
 
@@ -2343,7 +2348,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		String sql = construirConsultaConfiguracionIrregular(false, false);
 		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
 		if (resultados.isEmpty()) {
-			throw new IllegalArgumentException("No existe la regla general CARGA_ESTUDIANTE_IRREGULAR");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.existe.la.regla.general.carga.estudiante.irregular"));
 		}
 		return mapearConfiguracionIrregular(resultados.get(0));
 	}
@@ -2378,7 +2383,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		List<Object[]> resultados = entityManager.createNativeQuery(construirConsultaConfiguracionIrregular(true, false))
 				.setParameter("idPlan", idPlan).getResultList();
 		if (resultados.isEmpty()) {
-			throw new IllegalArgumentException("No existe configuración de carga irregular para el plan " + idPlan);
+			throw new IllegalArgumentException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.no.existe.configuracion.de.carga.irregular.para.el", idPlan));
 		}
 		return mapearConfiguracionIrregular(resultados.get(0));
 	}
@@ -2467,7 +2472,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 	public void guardarConfiguracionCargaIrregular(ConfiguracionCargaIrregularDTO configuracion, Long idUsuario) {
 		validarConfiguracionIrregular(configuracion);
 		if (configuracion.getIdPlan() == null) {
-			throw new IllegalArgumentException("El plan es obligatorio para la carga irregular");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.plan.es.obligatorio.para.la.carga.irregular"));
 		}
 		guardarEstadoReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), configuracion.getActiva(), idUsuario);
 		guardarValorReglaPlan("CARGA_ESTUDIANTE_IRREGULAR", configuracion.getIdPlan(), "MAX_REPROBADAS_AVANCE_ANUAL", configuracion.getMaxReprobadasAvanceAnual().toString(), idUsuario);
@@ -2487,7 +2492,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 	@Override
 	public void eliminarConfiguracionCargaIrregular(ConfiguracionCargaIrregularDTO configuracion) {
 		if (configuracion == null || configuracion.getIdPlan() == null) {
-			throw new IllegalArgumentException("El plan es obligatorio para eliminar la carga irregular");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.plan.es.obligatorio.para.eliminar.la.carga.2"));
 		}
 		entityManager.createNativeQuery("DELETE FROM rel_valor_parametro_regla_plan WHERE clave_regla='CARGA_ESTUDIANTE_IRREGULAR' AND id_plan=:idPlan")
 				.setParameter("idPlan", configuracion.getIdPlan()).executeUpdate();
@@ -2497,43 +2502,43 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 	private void validarConfiguracionIrregular(ConfiguracionCargaIrregularDTO configuracion) {
 		if (configuracion == null || configuracion.getMinReprobadasPriorizarAsistente() == null || configuracion.getMinReprobadasPriorizarAsistente() < 1) {
-			throw new IllegalArgumentException("El umbral de reprobadas para el asistente debe ser positivo");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.umbral.de.reprobadas.para.el.asistente.debe"));
 		}
 		if (configuracion == null || configuracion.getActiva() == null) {
-			throw new IllegalArgumentException("La configuración irregular y su estado son obligatorios");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.configuracion.irregular.y.su.estado.son.obligatorios"));
 		}
 		if (configuracion.getMaxReprobadasAvanceAnual() == null || configuracion.getMaxReprobadasAvanceAnual() < 1) {
-			throw new IllegalArgumentException("Valor no válido: Máximo de reprobadas totales para avance anual");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.maximo.de.reprobadas.totales.para"));
 		}
 		if (configuracion.getMinReprobadasMismoSemestre() == null || configuracion.getMinReprobadasMismoSemestre() < 1) {
-			throw new IllegalArgumentException("Valor no válido: Restringir a un semestre a partir de reprobadas");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.restringir.a.un.semestre.a"));
 		}
 		if (configuracion.getMinReprobadasRestringirOptativas() == null || configuracion.getMinReprobadasRestringirOptativas() < 1) {
-			throw new IllegalArgumentException("Valor no válido: Restringir optativas a partir de reprobadas totales");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.restringir.optativas.a.partir.de"));
 		}
 		if (configuracion.getMinOptativasReprobadasRestringir() == null || configuracion.getMinOptativasReprobadasRestringir() < 1) {
-			throw new IllegalArgumentException("Valor no válido: Restringir optativas a partir de optativas reprobadas");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.restringir.optativas.a.partir.de.2"));
 		}
 		if (configuracion.getMinimoObligatorias() == null || configuracion.getMinimoObligatorias() < 0) {
-			throw new IllegalArgumentException("Valor no válido: Mínimo de obligatorias seleccionadas");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.minimo.de.obligatorias.seleccionadas"));
 		}
 		if (configuracion.getPermitirSemestreAdyacente() == null) {
-			throw new IllegalArgumentException("Valor no válido: Permitir semestre complementario del mismo año");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.permitir.semestre.complementario.del.mismo"));
 		}
 		if (configuracion.getPermitirOptativasOtrosSemestresAvance() == null) {
-			throw new IllegalArgumentException("Valor no válido: Permitir optativas de otros semestres durante el avance anual");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.permitir.optativas.de.otros.semestres"));
 		}
 		if (configuracion.getRestringirOptativasPorRezago() == null) {
-			throw new IllegalArgumentException("Valor no válido: Aplicar restricción de optativas en la ruta restante");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.aplicar.restriccion.de.optativas.en"));
 		}
 		if (configuracion.getMarcarReprobadasObligatorias() == null) {
-			throw new IllegalArgumentException("Valor no válido: Exigir selección de obligatorias reprobadas");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.exigir.seleccion.de.obligatorias.reprobadas"));
 		}
 		if (configuracion.getMarcarReprobadasOptativas() == null) {
-			throw new IllegalArgumentException("Valor no válido: Exigir selección de optativas reprobadas");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.exigir.seleccion.de.optativas.reprobadas"));
 		}
 		if (configuracion.getMarcarObligatoriasSemestreRestringido() == null) {
-			throw new IllegalArgumentException("Valor no válido: Exigir todas las obligatorias del semestre restringido");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.exigir.todas.las.obligatorias.del"));
 		}
 	}
 
@@ -2566,7 +2571,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 				+ "WHERE cri.clave='RESTRICCIONES_ACADEMICAS_GENERALES' GROUP BY cri.nombre,cri.descripcion,cri.activo";
 		List<Object[]> resultados = entityManager.createNativeQuery(sql).getResultList();
 		if (resultados.isEmpty()) {
-			throw new IllegalArgumentException("No existe la regla RESTRICCIONES_ACADEMICAS_GENERALES");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.existe.la.regla.restricciones.academicas.generales"));
 		}
 		Object[] row = resultados.get(0);
 		ConfiguracionCargaRegularDTO dto = new ConfiguracionCargaRegularDTO();
@@ -2588,7 +2593,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setPrimerSemestreOrigenElectivas(obtenerEnteroConfiguracion(row[15], "PRIMER_SEMESTRE_ORIGEN_ELECTIVAS", "general"));
 		dto.setSegundoSemestreOrigenElectivas(obtenerEnteroConfiguracion(row[16], "SEGUNDO_SEMESTRE_ORIGEN_ELECTIVAS", "general"));
 		dto.setOptativasRequeridasPlan(obtenerEnteroConfiguracion(row[17], "OPTATIVAS_REQUERIDAS_PLAN", "general"));
-		if(row[18]==null || row[19]==null)throw new IllegalArgumentException("Faltan parámetros de optativas requeridas/adicionales. Ejecute R080.");
+		if(row[18]==null || row[19]==null)throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.faltan.parametros.de.optativas.requeridas.adicionales.ejecute.r080"));
 		dto.setOptativasSoloRequeridas(row[18].toString());
 		dto.setMensajeOptativaSoloRequerida(row[19].toString());
 		dto.setSemestreAplicacionAvanceAnual(row[20] == null ? null : row[20].toString());
@@ -2636,31 +2641,31 @@ public class InscripcionRepository implements IinscripcionRepository {
 	private void validarRestriccionesAcademicas(ConfiguracionCargaRegularDTO configuracion) {
 		configuracion.getSemestresAplicacionAvanceAnual();
 		if (configuracion.getLimiteReprobacionesPorMateria() == null || configuracion.getLimiteReprobacionesPorMateria() < 1 || configuracion.getLimiteReprobacionesPorMateria()>3) {
-			throw new IllegalArgumentException("El límite de oportunidades por UD debe estar entre 1 y 3.");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.limite.de.oportunidades.por.ud.debe.estar"));
 		}
 		if (configuracion.getSemestreMinimoElectivas() == null || configuracion.getSemestreMinimoElectivas() < 1) {
-			throw new IllegalArgumentException("Valor no válido: Semestre mínimo de los espacios electivos");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.semestre.minimo.de.los.espacios"));
 		}
 		if (configuracion.getPrimerSemestreOrigenElectivas() == null || configuracion.getPrimerSemestreOrigenElectivas() < 1) {
-			throw new IllegalArgumentException("Valor no válido: Primer semestre de origen para electivas");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.primer.semestre.de.origen.para"));
 		}
 		if (configuracion.getSegundoSemestreOrigenElectivas() == null || configuracion.getSegundoSemestreOrigenElectivas() < 1) {
-			throw new IllegalArgumentException("Valor no válido: Segundo semestre de origen para electivas");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.segundo.semestre.de.origen.para"));
 		}
 		if (configuracion.getOptativasRequeridasPlan() == null || configuracion.getOptativasRequeridasPlan() < 0) {
-			throw new IllegalArgumentException("Valor no válido: Optativas requeridas del plan");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.valor.no.valido.optativas.requeridas.del.plan"));
 		}
 		String soloRequeridas=configuracion.getOptativasSoloRequeridas();
 		String mensaje=configuracion.getMensajeOptativaSoloRequerida();
 		if(soloRequeridas==null || soloRequeridas.length()>1000)
-			throw new IllegalArgumentException("Indica las optativas sólo requeridas; usa vacío para no aplicar exclusiones (máximo 1000 caracteres).");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.indica.las.optativas.solo.requeridas.usa.vacio.para"));
 		if(mensaje==null || mensaje.trim().isEmpty() || mensaje.length()>1000 || !mensaje.contains("{unidad}")
 			|| mensaje.replace("{unidad}","").contains("{") || mensaje.replace("{unidad}","").contains("}")) {
-			throw new IllegalArgumentException("El mensaje de optativa sólo requerida debe contener {unidad}, sin otras variables, y de 1 a 1000 caracteres.");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.mensaje.de.optativa.solo.requerida.debe.contener"));
 		}
 		if (configuracion.getPorcentajeMinimoTramoFinal() == null || configuracion.getPorcentajeMinimoTramoFinal() < 0
 				|| configuracion.getPorcentajeMinimoTramoFinal() > 100) {
-			throw new IllegalArgumentException("El porcentaje del tramo final debe estar entre 0 y 100");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.porcentaje.del.tramo.final.debe.estar.entre"));
 		}
 		if (configuracion.getSemestreInicioTramoFinal() == null || configuracion.getSemestreInicioTramoFinal() < 1
 				|| configuracion.getSemestreDestinoRezagos() == null || configuracion.getSemestreDestinoRezagos() < 1
@@ -2675,7 +2680,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 				|| configuracion.getOptativasAprobadasParaOpcionales() == null
 				|| configuracion.getOptativasAprobadasParaOpcionales() < 0
 				|| configuracion.getMaximoElectivasPorPeriodo() == null || configuracion.getMaximoElectivasPorPeriodo() < 0) {
-			throw new IllegalArgumentException("Los parámetros académicos generales no son válidos");
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.los.parametros.academicos.generales.no.son.validos"));
 		}
 	}
 

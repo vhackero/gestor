@@ -24,7 +24,7 @@
                 <p:outputPanel rendered="#{not empty inscripcionBean.contextoInscripcion.avisoUltimaOportunidad}">
                     <div class="alert alert-warning" role="alert"><h:outputText value="#{inscripcionBean.contextoInscripcion.avisoUltimaOportunidad}" /></div>
                     <p:selectBooleanCheckbox value="#{inscripcionBean.contextoInscripcion.aceptaUltimaOportunidad}"><p:ajax event="change" process="@this" update="panelFinalizar" /></p:selectBooleanCheckbox>
-                    <h:outputText value=" He leído el aviso de última oportunidad de las UD seleccionadas." />
+                    <h:outputText value="#{sistema.obtenerTexto('gw.inscripcion.mensaje.he.leido.el.aviso.de.ultima.oportunidad.de.2')}" />
                 </p:outputPanel>
             </p:outputPanel>
             <p:outputPanel id="adeudosAdicionales" />
@@ -163,6 +163,20 @@
 									</f:facet>
 									<h:outputText value="#{inscripcion.subestructura}" />
 								</p:column>
+
+                                <p:column headerText="#{sistema.obtenerTexto('gw.inscripcion.adeudo.columna')}"
+                                    rendered="#{inscripcionBean.mostrarSelectorAdeudo}">
+                                    <p:selectOneMenu value="#{inscripcion.idAdeudoOptativa}" converter="javax.faces.Long"
+                                        rendered="#{inscripcion.admiteSustitucionOptativa and not inscripcion.disabled and not inscripcion.oportunidades.agotada}">
+                                        <f:selectItem itemLabel="#{sistema.obtenerTexto('gw.inscripcion.adeudo.seleccionar')}"
+                                            itemValue="#{null}" noSelectionOption="true" />
+                                        <f:selectItems value="#{inscripcionBean.contextoInscripcion.estadoAcademico.adeudosOptativasAdicionales}"
+                                            var="adeudo" itemValue="#{adeudo.idOrigen}" itemLabel="#{adeudo.descripcion}"
+                                            itemDisabled="#{adeudo.enCurso or not adeudo.admiteOtraOportunidad or not adeudo.admiteSustitucion}" />
+                                        <p:ajax process="@this" listener="#{inscripcionBean.validarSeleccionMateria(inscripcion)}"
+                                            update=":mainForm:tblEditaComp :pnlMensaje :mainForm:avisoUltimaOportunidad :mainForm:adeudosAdicionales :mainForm:conclusionEstudios :mainForm:panelFinalizar" />
+                                    </p:selectOneMenu>
+                                </p:column>
 
 								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.inscripcion.unidadesDidacticasDisponibles.seleccionar')}" styleClass="text-center">
 									<p:selectBooleanCheckbox disabled="#{inscripcion.disabled or inscripcion.oportunidades.agotada or not inscripcionBean.contextoInscripcion.permiteInscripcionOmision or inscripcionBean.contextoInscripcion.conclusionEstudios.bloqueaInscripcion}"

@@ -4,6 +4,7 @@ public class InscripcionMateriasReprobadasDTO {
 	private Long intentosReprobados;
 	private Long idPlan;
 	private Long idPrograma;
+	private Long idProgramaReprobado;
 	private String clavePrograma;
 	private String estructura;
 	private String subestructura;
@@ -33,6 +34,14 @@ public class InscripcionMateriasReprobadasDTO {
 
 	public void setIdPrograma(Long idPrograma) {
 		this.idPrograma = idPrograma;
+	}
+
+	public Long getIdProgramaReprobado() {
+		return idProgramaReprobado;
+	}
+
+	public void setIdProgramaReprobado(Long idProgramaReprobado) {
+		this.idProgramaReprobado = idProgramaReprobado;
 	}
 
 	public String getClavePrograma() {

@@ -9,16 +9,9 @@ public class EstadoAcademicoDTO {
     public java.util.List<String> getOptativasSinCupo() { return optativasSinCupo; }
     public java.util.List<String> getOptativasSinCupoConfigurado() { return optativasSinCupoConfigurado; }
 
-    public String getAvisoCupoOptativas() {
-        java.util.List<String> avisos = new java.util.ArrayList<>();
-        if (!optativasSinCupo.isEmpty()) {
-            avisos.add("Optativas sin lugares disponibles: " + String.join(", ", optativasSinCupo) + ".");
-        }
-        if (!optativasSinCupoConfigurado.isEmpty()) {
-            avisos.add("Optativas sin cupo configurado: " + String.join(", ", optativasSinCupoConfigurado) + ".");
-        }
-        return String.join(" ", avisos);
-    }
+    private String avisoCupoOptativas = "";
+    public String getAvisoCupoOptativas() { return avisoCupoOptativas; }
+    public void setAvisoCupoOptativas(String avisoCupoOptativas) { this.avisoCupoOptativas = avisoCupoOptativas; }
 
 	private EstadoInscripcionEstudianteDTO clasificacionInscripcion;
 	public EstadoInscripcionEstudianteDTO getClasificacionInscripcion() { return clasificacionInscripcion; }

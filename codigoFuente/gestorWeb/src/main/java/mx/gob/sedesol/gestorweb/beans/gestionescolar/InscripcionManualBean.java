@@ -1,5 +1,6 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
+import mx.gob.sedesol.basegestor.service.admin.TextoSistemaService;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
@@ -19,6 +20,14 @@ import mx.gob.sedesol.gestorweb.commons.constantes.ConstantesGestorWeb;
 @ManagedBean
 @ViewScoped
 public class InscripcionManualBean extends BaseBean {
+
+	@javax.faces.bean.ManagedProperty(value = "#{textoSistemaService}")
+	private transient TextoSistemaService textosInscripcion;
+
+	public void setTextosInscripcion(TextoSistemaService textosInscripcion) {
+		this.textosInscripcion = textosInscripcion;
+	}
+
 
 	private static final long serialVersionUID = -4348522429538060563L;
 
@@ -94,7 +103,7 @@ public class InscripcionManualBean extends BaseBean {
             if(!java.util.Objects.equals(anterior,contextoInscripcion.getEvidenciaEvaluacion())) {
                 aceptaTerminos=false;
                 RequestContext.getCurrentInstance().update("mainForm");
-                mostrarMensajeDialog("Se actualizaron tu situación académica, carga y oferta. Revisa la selección antes de confirmar.");
+                mostrarMensajeDialog(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.se.actualizaron.tu.situacion.academica.carga.y.oferta.2"));
             }
         } catch(InscripcionException ex) { mostrarMensajeDialog(ex.getMessage()); }
         catch(Exception ex) { manejarErrorGeneral(ex); }
@@ -107,8 +116,8 @@ public class InscripcionManualBean extends BaseBean {
             if (avisoOmisiones == null) avisoOmisiones = "";
             else avisoOmisiones = " " + avisoOmisiones;
 			limpiarContextoInscripcion();
-			mostrarMensajeDialog("Inscripcion de materias completa" + avisoOmisiones);
-			mostrarAviso("Inscripcion de materias completa" + avisoOmisiones, ConstantesGestorWeb.TIPO_AVISO_SUCCESS);
+			mostrarMensajeDialog(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.inscripcion.de.materias.completa", avisoOmisiones));
+			mostrarAviso(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.inscripcion.de.materias.completa", avisoOmisiones), ConstantesGestorWeb.TIPO_AVISO_SUCCESS);
 		} catch (InscripcionException ie) {
 			manejarErrorDeFinalizacion(ie);
 		} catch (Exception e) {
@@ -145,7 +154,7 @@ public class InscripcionManualBean extends BaseBean {
 
 	private Long obtenerIdPersona(String matricula) throws InscripcionException {
 		return personaService.obtenerIdPersonaPorMatricula(matricula)
-				.orElseThrow(() -> new InscripcionException("No se encontró la matrícula: " + matricula));
+				.orElseThrow(() -> new InscripcionException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.no.se.encontro.la.matricula", matricula)));
 	}
 
 	private boolean obtenerValorPorDefecto() {
@@ -188,7 +197,7 @@ public class InscripcionManualBean extends BaseBean {
 
 	private void manejarErrorGeneral(Exception e) {
 		logger.error("Error inesperado: ", e);
-		mostrarMensajeDialog("Ha ocurrido un error inesperado");
+		mostrarMensajeDialog(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.ha.ocurrido.un.error.inesperado.2"));
 	}
 
 	private void mostrarMensajeDialog(String mensaje) {
