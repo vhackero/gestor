@@ -1,6 +1,21 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
 public class EstadoInscripcionEstudianteDTO {
+	private Long idPlan;
+	private Boolean esInscripcionInicial;
+
+	public Long getIdPlan() { return idPlan; }
+	public void setIdPlan(Long valor) { idPlan = valor; }
+	public Boolean getEsInscripcionInicial() { return esInscripcionInicial; }
+	public void setEsInscripcionInicial(Boolean valor) { esInscripcionInicial = valor; }
+	public Boolean getEsReinscripcionSemestral() {
+		return esInscripcionInicial == null ? null : !esInscripcionInicial;
+	}
+
+	/** El tipo de catálogo Extraordinario no acredita una fecha posterior al cierre. */
+	public String getCaracterTemporal() { return "NO_APLICA_EN_ALCANCE_ACORDADO"; }
+
+	// Indicadores legados del tipo de catálogo; no acreditan extemporaneidad.
 	private Boolean esInscripcionOrdinariaInicial;
 	private Boolean esInscripcionExtraordinariaInicial;
 	private Integer semestreInscripcionOrdinaria;

@@ -1,5 +1,6 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
+import mx.gob.sedesol.basegestor.service.admin.TextoSistemaService;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,14 @@ import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 @ManagedBean
 @ViewScoped
 public class ConfiguracionElectivasBean extends BaseBean {
+
+	@javax.faces.bean.ManagedProperty(value = "#{textoSistemaService}")
+	private transient TextoSistemaService textosInscripcion;
+
+	public void setTextosInscripcion(TextoSistemaService textosInscripcion) {
+		this.textosInscripcion = textosInscripcion;
+	}
+
     private static final long serialVersionUID = 1L;
     private static final Logger logger = Logger.getLogger(ConfiguracionElectivasBean.class);
 
@@ -37,8 +46,8 @@ public class ConfiguracionElectivasBean extends BaseBean {
         } catch (Exception e) {
             logger.error("No fue posible consultar los procesos para configurar electivas", e);
             procesos = new ArrayList<>();
-            mensaje(FacesMessage.SEVERITY_ERROR, "Error",
-                    "No fue posible consultar los procesos de inscripción activos.");
+            mensaje(FacesMessage.SEVERITY_ERROR, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.error"),
+                    textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.consultar.los.procesos.de.inscripcion"));
         }
     }
 
@@ -55,25 +64,24 @@ public class ConfiguracionElectivasBean extends BaseBean {
             validar(configuracion);
             inscripcionService.guardarConfiguracionElectiva(configuracion);
             consultarAsignaturas();
-            mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada",
-                    "La asignatura electiva fue actualizada correctamente.");
+            mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.guardada"),
+                    textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.asignatura.electiva.fue.actualizada.correctamente"));
         } catch (IllegalArgumentException e) {
-            mensaje(FacesMessage.SEVERITY_WARN, "Revisa la configuración", e.getMessage());
+            mensaje(FacesMessage.SEVERITY_WARN, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.revisa.la.configuracion"), e.getMessage());
         } catch (Exception e) {
             logger.error("No fue posible guardar la configuración de la electiva", e);
-            mensaje(FacesMessage.SEVERITY_ERROR, "Error", "No fue posible guardar la configuración.");
+            mensaje(FacesMessage.SEVERITY_ERROR, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.error"), textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.guardar.la.configuracion"));
         }
     }
 
     private void validar(ConfiguracionElectivaDTO configuracion) {
         if (!Boolean.TRUE.equals(configuracion.getSinLimite())) {
             if (configuracion.getCupoMaximo() == null || configuracion.getCupoMaximo() <= 0) {
-                throw new IllegalArgumentException("El cupo máximo debe ser mayor que cero.");
+                throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.cupo.maximo.debe.ser.mayor.que.cero"));
             }
             if (configuracion.getCupoOcupado() != null
                     && configuracion.getCupoMaximo().longValue() < configuracion.getCupoOcupado()) {
-                throw new IllegalArgumentException("El cupo no puede ser menor que los "
-                        + configuracion.getCupoOcupado() + " lugares actualmente ocupados.");
+                throw new IllegalArgumentException(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.el.cupo.no.puede.ser.menor.que.los", configuracion.getCupoOcupado()));
             }
         }
     }

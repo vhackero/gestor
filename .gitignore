@@ -121,6 +121,7 @@ local.properties
 
 # Testing environment specific
 derby.log
+/.pruebas-locales/
 
 
 ######################

@@ -1,5 +1,6 @@
 package mx.gob.sedesol.basegestor.model.repositories.gestionescolar;
 
+import mx.gob.sedesol.basegestor.service.admin.TextoSistemaService;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -10,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -34,6 +36,16 @@ import mx.gob.sedesol.basegestor.model.entities.planesyprogramas.TblPlan;
 
 @Repository
 public class InscripcionesRepository implements IinscripcionesRepository {
+
+	@org.springframework.beans.factory.annotation.Autowired
+	private TextoSistemaService textosInscripcion;
+
+	private void validarFechasProceso(java.util.Date inicio, java.util.Date fin) {
+		if (inicio == null || fin == null || fin.before(inicio)) {
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.captura.inicio.y.fin.del.proceso.el.fin"));
+		}
+	}
+
 
 	private static final int TIPO_PROCESO_ORDINARIO = 1;
 	private static final int TIPO_PROCESO_EXTRAORDINARIO = 2;
@@ -478,6 +490,9 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 	public void updateProcesoInscripcion(Long procesoInscripcionId, String nombre, LocalDateTime fechaInicio,
 			LocalDateTime fechaFin, int estatus, Long idTipoProceso, Long convocatoriaId, String claveProceso,
 			String semestre, String perfil) {
+		if (fechaInicio == null || fechaFin == null || fechaFin.isBefore(fechaInicio)) {
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.captura.inicio.y.fin.del.proceso.el.fin"));
+		}
 
 		String query = "UPDATE tbl_procesos_inscripcion " + "SET nombre = ?, " + "fecha_inicio = ?, "
 				+ "fecha_fin = ?, " + "estatus = ?, " + "id_tipo_proceso = ?, " + "convocatoria_id = ?, "
@@ -613,6 +628,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		if (inscripcionParamNueva == null) {
 			return;
 		}
+		validarFechasProceso(inscripcionParamNueva.getFechaInicio(), inscripcionParamNueva.getFechaFin());
 
 		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
 		DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -807,6 +823,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		if (inscripcionParamNueva == null) {
 			return;
 		}
+		validarFechasProceso(inscripcionParamNueva.getFechaInicio(), inscripcionParamNueva.getFechaFin());
 
 		DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
 		DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -949,7 +966,7 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 			String deletePrincipalQuery = "DELETE FROM tbl_procesos_inscripcion WHERE proceso_inscripcion_id = ?";
 			entityManager.createNativeQuery(deletePrincipalQuery).setParameter(1, procesoInscripcionId).executeUpdate();
 		} catch (Exception e) {
-			throw new RuntimeException("Error al eliminar el proceso de inscripción y sus relaciones", e);
+			throw new RuntimeException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.error.al.eliminar.el.proceso.de.inscripcion.y"), e);
 		}
 	}
 	
@@ -1151,17 +1168,47 @@ public class InscripcionesRepository implements IinscripcionesRepository {
 		return dto;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void eliminarInscripcionesPorIds(List<Long> ids) {
 		if (ids == null || ids.isEmpty()) {
 			return;
 		}
 
-		StringBuilder sql = new StringBuilder();
-		sql.append("DELETE FROM tbl_inscripciones ");
-		sql.append("WHERE id IN (:ids)");
-
-		entityManager.createNativeQuery(sql.toString()).setParameter("ids", ids).executeUpdate();
+		List<Long> seleccion = ids.stream().filter(Objects::nonNull).distinct().sorted().collect(Collectors.toList());
+		if (seleccion.isEmpty()) {
+			return;
+		}
+		// La transacción del servicio abarca los vínculos de optativas y la inscripción.
+		entityManager.createNativeQuery("SELECT id FROM tbl_inscripciones WHERE id IN (:ids) ORDER BY id FOR UPDATE")
+				.setParameter("ids", seleccion).getResultList();
+		List<Object[]> pendientes = new ArrayList<>(entityManager.createNativeQuery(
+				"SELECT id_inscripcion, id_adeudo_origen, id_inscripcion_anterior FROM rel_inscripcion_optativa "
+				+ "WHERE id_inscripcion IN (:ids) ORDER BY id_inscripcion FOR UPDATE")
+				.setParameter("ids", seleccion).getResultList());
+		Number posteriores = (Number) entityManager.createNativeQuery(
+				"SELECT COUNT(*) FROM rel_inscripcion_optativa WHERE id_inscripcion NOT IN (:ids) "
+				+ "AND (id_adeudo_origen IN (:ids) OR id_inscripcion_anterior IN (:ids))")
+				.setParameter("ids", seleccion).getSingleResult();
+		if (posteriores.longValue() > 0) {
+			throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.puedes.eliminar.una.inscripcion.que.es.antecedente"));
+		}
+		// Las sustitutas se retiran antes que sus antecedentes; nunca se rompe una cadena externa.
+		while (!pendientes.isEmpty()) {
+			List<Long> hojas = pendientes.stream().filter(fila -> pendientes.stream().noneMatch(otra ->
+					!Objects.equals(getLongValue(fila[0]), getLongValue(otra[0]))
+					&& (Objects.equals(getLongValue(fila[0]), getLongValue(otra[1]))
+							|| Objects.equals(getLongValue(fila[0]), getLongValue(otra[2])))))
+					.map(fila -> getLongValue(fila[0])).collect(Collectors.toList());
+			if (hojas.isEmpty()) {
+				throw new IllegalArgumentException(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.cadena.de.optativas.requiere.conciliacion.antes.de"));
+			}
+			entityManager.createNativeQuery("DELETE FROM rel_inscripcion_optativa WHERE id_inscripcion IN (:ids)")
+					.setParameter("ids", hojas).executeUpdate();
+			pendientes.removeIf(fila -> hojas.contains(getLongValue(fila[0])));
+		}
+		entityManager.createNativeQuery("DELETE FROM tbl_inscripciones WHERE id IN (:ids)")
+				.setParameter("ids", seleccion).executeUpdate();
 
 	}
 

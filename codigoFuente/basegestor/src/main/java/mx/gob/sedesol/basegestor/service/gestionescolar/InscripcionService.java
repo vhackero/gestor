@@ -1,12 +1,14 @@
 package mx.gob.sedesol.basegestor.service.gestionescolar;
 
 import java.util.Date;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOmisionReinscripcionDTO;
 import java.util.List;
 import java.util.Optional;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignaturasPorSemestreDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CupoOptativaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaIrregularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaRegularDTO;
@@ -33,6 +35,25 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditaci
  * 
  */
 public interface InscripcionService {
+    mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOportunidadesDTO obtenerConfiguracionOportunidades();
+    void guardarConfiguracionOportunidades(mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOportunidadesDTO d,Long usuario);
+    List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.OportunidadesUnidadDTO> obtenerOportunidades(Long persona,Long plan,int limite);
+    mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConclusionEstudiosDTO evaluarConclusionEstudios(Long persona, Long plan, Long convocatoria);
+    List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO> obtenerConfiguracionesConclusion();
+    void guardarConfiguracionConclusion(mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO configuracion, Long usuario);
+    String obtenerEvidenciaEvaluacion(Long persona, Long plan, java.util.Date fecha);
+    void registrarEvaluacion(Long persona, Long plan, Long proceso, String momento, String anterior, String resultado);
+    void registrarConfirmacionEvaluacion(Long persona, Long plan, Long proceso, String resultado);
+
+    boolean tieneObligatoriasPendientes(Long persona, Long plan);
+
+    List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AdeudoOptativaDTO> obtenerAdeudosOptativasAdicionales(Long persona, Long plan);
+    int obtenerOptativasRequeridasAcreditadas(Long persona, Long plan, Long convocatoria);
+    long contarInscripcionesOptativa(Long persona, Long plan, Long programa);
+
+    String[] obtenerConfiguracionBajasInscripcion();
+    void guardarConfiguracionBajasInscripcion(String[] valores, Long idUsuario);
+
 
 	InscripcionPersonaDTO obtenerInscripcionPorPersona(String idPersona);
 
@@ -81,6 +102,11 @@ public interface InscripcionService {
 	/** Serializa la finalización de inscripciones de una persona dentro de la transacción. */
 	void bloquearPersonaParaInscripcion(Long idPersona);
 
+	boolean personaActivaParaInscripcion(Long idPersona);
+    ConfiguracionOmisionReinscripcionDTO obtenerConfiguracionOmisionReinscripcion();
+    void guardarConfiguracionOmisionReinscripcion(ConfiguracionOmisionReinscripcionDTO configuracion, Long idUsuario);
+    List<String> obtenerPeriodosSinReinscripcion(Long idPersona, Long idPlan, Date fechaActual);
+
 	/** Incluye cualquier materia del proceso, incluso electivas de otro plan. */
 	Boolean existeInscripcionEnProceso(Long idPersona, Long idProcesoInscripcion);
 
@@ -99,6 +125,11 @@ public interface InscripcionService {
 	Optional<EstadoInscripcionEstudianteDTO> obtenerEstadoInscripcionEstudiante(Long idPersona,
 			Long idProcesoInscripcion);
 
+	Optional<EstadoInscripcionEstudianteDTO> obtenerEstadoInscripcionEstudiante(Long idPersona,
+			Long idProcesoInscripcion, Long idPlan);
+
+	Boolean procesoVigenteParaInscripcion(Long proceso, Long plan, Long convocatoria, Date fecha, boolean bloquear);
+
 	List<AprobacionAsignaturasPorSemestreDTO> obtenerAprobacionAsignaturasPorSemestre(Long idPlan, Long idPersona);
 
 	List<MallaAlumnoProgramaDTO> obtenerProgramasMallaAlumno(Long idPersona, Long idPlan);
@@ -110,6 +141,12 @@ public interface InscripcionService {
 	void guardarConfiguracionElectiva(ConfiguracionElectivaDTO configuracion);
 
 	boolean tieneCupoElectiva(Long idProcesoInscripcion, Long idPrograma);
+
+    boolean controlaCupoOptativas(Long proceso);
+
+    List<CupoOptativaDTO> obtenerCuposOptativas(Long proceso);
+
+    void guardarCuposOptativas(Long proceso, boolean activo, List<CupoOptativaDTO> cupos);
 
 	List<ReglaInscripcionDTO> obtenerReglasInscripcion();
 

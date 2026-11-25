@@ -9,6 +9,8 @@ import mx.gob.sedesol.basegestor.commons.dto.inscripcion.ReenvioCorreoInscripcio
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 
 public interface InscripcionFacade {
+    InscripcionContextoDTO actualizarEvaluacion(InscripcionContextoDTO anterior) throws InscripcionException;
+
 	InscripcionContextoDTO obtenerContextoInscripcion(Long idPersona) throws InscripcionException;
 	InscripcionContextoDTO obtenerContextoInscripcionConsulta(Long idPersona) throws InscripcionException;
 	/**
@@ -18,6 +20,8 @@ public interface InscripcionFacade {
 	void validarPropuestaInscripcion(Long idPersona, List<Long> idsProgramas) throws InscripcionException;
 	void validarSeleccionMateria(InscripcionMateriasDTO materiaSeleccionada, InscripcionContextoDTO contexto) throws InscripcionException;
 	void finalizarInscripcion(Boolean aceptaTerminos, InscripcionContextoDTO contexto) throws InscripcionException;
+
+	void finalizarInscripcionManual(Boolean aceptaTerminos, InscripcionContextoDTO contexto) throws InscripcionException;
 	boolean intentarReenviarCorreoInscripcion(ReenvioCorreoInscripcionDTO inscripcion);
 	boolean intentarReenviarCorreoInscripcion(ReenvioCorreoInscripcionDTO inscripcion, List<ReenvioCorreoMateriasDTO> materias);
 }

@@ -1,6 +1,10 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
 public class InscripcionMateriasCursadasDTO {
+    private boolean optativaAdicional;
+    public boolean isOptativaAdicional() { return optativaAdicional; }
+    public void setOptativaAdicional(boolean v) { optativaAdicional=v; }
+
 
 	private String plan;
 	private Long idPlan;

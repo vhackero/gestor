@@ -1145,7 +1145,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         }
         if (cobertura.getOptativasObligatoriasPendientes() > 0) {
             dto.getPendientesRelevantes().add("Faltan " + cobertura.getOptativasObligatoriasPendientes()
-                    + " unidades didácticas optativas para cubrir el mínimo requerido de " + inscripcionService.obtenerConfiguracionRestriccionesAcademicasGenerales().getMinimoOptativasPlanAsistente() + ".");
+                    + " unidades didácticas optativas para cubrir el mínimo requerido de " + inscripcionService.obtenerConfiguracionRestriccionesAcademicasGenerales().getOptativasRequeridasPlan() + ".");
         }
         if (electivas > 0) {
             dto.getPendientesRelevantes().add("Quedan " + electivas + " unidades didácticas electivas pendientes y forman parte obligatoria del cierre del Programa Educativo.");
@@ -3955,7 +3955,7 @@ public class AsistenteInscripcionServiceImpl implements AsistenteInscripcionServ
         int optativasCubiertasCantidad = optativasCubiertas.size();
         int minimoOptativasRequeridas = inscripcionService
                 .obtenerConfiguracionRestriccionesAcademicasGenerales()
-                .getMinimoOptativasPlanAsistente();
+                .getOptativasRequeridasPlan();
         int optativasObligatoriasPendientes = Math.max(0,
                 minimoOptativasRequeridas - optativasCubiertasCantidad);
         int optativasOpcionalesDisponibles = Math.max(0,

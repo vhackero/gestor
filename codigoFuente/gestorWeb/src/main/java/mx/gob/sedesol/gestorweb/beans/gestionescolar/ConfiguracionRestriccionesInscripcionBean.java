@@ -1,7 +1,9 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
+import mx.gob.sedesol.basegestor.service.admin.TextoSistemaService;
 import java.util.ArrayList;
 import java.util.List;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOmisionReinscripcionDTO;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -22,6 +24,13 @@ import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 @ManagedBean
 @ViewScoped
 public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
+    @javax.faces.bean.ManagedProperty(value = "#{textoSistemaService}")
+    private transient TextoSistemaService textosInscripcion;
+
+    public void setTextosInscripcion(TextoSistemaService textosInscripcion) {
+        this.textosInscripcion = textosInscripcion;
+    }
+
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(ConfiguracionRestriccionesInscripcionBean.class);
@@ -29,7 +38,59 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 	@ManagedProperty(value = "#{inscripcionService}")
 	private InscripcionService inscripcionService;
 
-	private List<ReglaInscripcionDTO> reglas;
+	    private ConfiguracionOmisionReinscripcionDTO configuracionOmisionReinscripcion;
+    public ConfiguracionOmisionReinscripcionDTO getConfiguracionOmisionReinscripcion() { return configuracionOmisionReinscripcion; }
+    public void guardarOmisionReinscripcion() {
+        try {
+            inscripcionService.guardarConfiguracionOmisionReinscripcion(configuracionOmisionReinscripcion, getUsuarioEnSession().getIdPersona());
+            consultarReglas();
+            mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.guardada"), textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.regla.de.periodos.sin.reinscripcion.fue.actualizada"));
+        } catch (Exception e) {
+            logger.error("No fue posible guardar la regla de omisiones", e);
+            mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.guardar.la.regla.de.omisiones"), e);
+        }
+    }
+    private String[] configuracionBajasInscripcion;
+    public String[] getConfiguracionBajasInscripcion() { return configuracionBajasInscripcion; }
+    public List<String> getTiposBajaConUd() { return tiposBajaSeleccionados(1); }
+    public void setTiposBajaConUd(List<String> tipos) { configuracionBajasInscripcion[1]=tipos==null?"":String.join(",",tipos); }
+    public List<String> getTiposBajaSinUd() { return tiposBajaSeleccionados(2); }
+    public void setTiposBajaSinUd(List<String> tipos) { configuracionBajasInscripcion[2]=tipos==null?"":String.join(",",tipos); }
+    private List<String> tiposBajaSeleccionados(int indice) {
+        if(configuracionBajasInscripcion==null || configuracionBajasInscripcion[indice]==null || configuracionBajasInscripcion[indice].isEmpty())return new ArrayList<>();
+        return new ArrayList<>(java.util.Arrays.asList(configuracionBajasInscripcion[indice].split(",")));
+    }
+    public void guardarBajasInscripcion() {
+        try {
+            inscripcionService.guardarConfiguracionBajasInscripcion(configuracionBajasInscripcion,getUsuarioEnSession().getIdPersona());
+            consultarReglas();
+            mensaje(FacesMessage.SEVERITY_INFO,textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.guardada"),textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.tratamiento.de.bajas.en.inscripcion.fue.actualizado"));
+        } catch(Exception e) {
+            logger.error("No fue posible guardar el tratamiento de bajas",e);
+            mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.guardar.el.tratamiento.de.bajas"),e);
+        }
+    }
+    private List<ReglaInscripcionDTO> reglas;
+    private mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOportunidadesDTO configuracionOportunidades;
+    public mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOportunidadesDTO getConfiguracionOportunidades() { return configuracionOportunidades; }
+    public void guardarOportunidades() {
+        try {
+            inscripcionService.guardarConfiguracionOportunidades(configuracionOportunidades,getUsuarioEnSession().getIdPersona());
+            consultarReglas();mensaje(FacesMessage.SEVERITY_INFO,textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.guardada"),textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.limite.y.mensajes.de.oportunidades.actualizados"));
+        } catch(Exception e) { logger.error("No fue posible guardar oportunidades",e);mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.guardar.oportunidades"),e); }
+    }
+    private List<ReglaInscripcionDTO> configuracionesConclusion = new ArrayList<>();
+    public List<ReglaInscripcionDTO> getConfiguracionesConclusion() { return configuracionesConclusion; }
+    public void guardarConclusion(ReglaInscripcionDTO configuracion) {
+        try {
+            inscripcionService.guardarConfiguracionConclusion(configuracion,getUsuarioEnSession().getIdPersona());
+            consultarReglas();
+            mensaje(FacesMessage.SEVERITY_INFO,textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.guardada"),textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.validacion.de.conclusion.del.plan.fue.actualizada"));
+        } catch(Exception e) {
+            logger.error("No fue posible guardar la validación de conclusión",e);
+            mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.guardar.la.validacion.de.conclusion"),e);
+        }
+    }
 	private ConfiguracionCargaNuevoIngresoDTO configuracionGeneralCargaNuevoIngreso;
 	private List<ConfiguracionCargaNuevoIngresoDTO> configuracionesCargaNuevoIngreso;
 	private List<ConfiguracionCargaNuevoIngresoDTO> planesDisponiblesCargaNuevoIngreso;
@@ -53,6 +114,7 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 
 	private void consultarReglas() {
 		reglas = new ArrayList<>();
+        configuracionesConclusion = new ArrayList<>();
 		configuracionGeneralCargaNuevoIngreso = new ConfiguracionCargaNuevoIngresoDTO();
 		configuracionesCargaNuevoIngreso = new ArrayList<>();
 		planesDisponiblesCargaNuevoIngreso = new ArrayList<>();
@@ -65,6 +127,11 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 		configuracionRestriccionesAcademicasGenerales = new ConfiguracionCargaRegularDTO();
 		try {
 			reglas = inscripcionService.obtenerReglasInscripcion();
+            reglas.removeIf(r->"PERMITE_INSCRIPCION_LIMITE_REPROBADAS".equals(r.getClave()));
+            configuracionOportunidades=inscripcionService.obtenerConfiguracionOportunidades();
+            configuracionesConclusion = inscripcionService.obtenerConfiguracionesConclusion();
+            configuracionBajasInscripcion = inscripcionService.obtenerConfiguracionBajasInscripcion();
+            configuracionOmisionReinscripcion = inscripcionService.obtenerConfiguracionOmisionReinscripcion();
 			configuracionGeneralCargaNuevoIngreso = inscripcionService.obtenerConfiguracionGeneralCargaNuevoIngreso();
 			configuracionesCargaNuevoIngreso = inscripcionService.obtenerConfiguracionesCargaNuevoIngreso();
 			planesDisponiblesCargaNuevoIngreso = inscripcionService.obtenerPlanesDisponiblesCargaNuevoIngreso();
@@ -78,7 +145,7 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 					.obtenerConfiguracionRestriccionesAcademicasGenerales();
 		} catch (Exception e) {
 			logger.error("No fue posible consultar las reglas de inscripción", e);
-			mensajeError("No fue posible consultar las reglas de inscripción", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.consultar.las.reglas.de.inscripcion"), e);
 		}
 	}
 
@@ -87,17 +154,17 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 			inscripcionService.guardarConfiguracionGeneralCargaRegular(configuracionGeneralCargaRegular,
 					getUsuarioEnSession().getIdPersona());
 			consultarReglas();
-			mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada",
-					"La carga académica general para estudiantes regulares fue actualizada.");
+			mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.guardada"),
+					textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.carga.academica.general.para.estudiantes.regulares.fue"));
 		} catch (Exception e) {
 			logger.error("No fue posible guardar la carga regular general", e);
-			mensajeError("No fue posible guardar la carga regular general", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.guardar.la.carga.regular.general"), e);
 		}
 	}
 
 	public void agregarCargaRegular() {
 		if (idPlanNuevaConfiguracionRegular == null) {
-			mensaje(FacesMessage.SEVERITY_WARN, "Plan requerido", "Selecciona el plan al que se aplicará la regla.");
+			mensaje(FacesMessage.SEVERITY_WARN, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.plan.requerido"), textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.selecciona.el.plan.al.que.se.aplicara.la"));
 			return;
 		}
 		try {
@@ -107,10 +174,10 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 			inscripcionService.guardarConfiguracionCargaRegular(configuracion, getUsuarioEnSession().getIdPersona());
 			idPlanNuevaConfiguracionRegular = null;
 			consultarReglas();
-			mensaje(FacesMessage.SEVERITY_INFO, "Regla agregada", "La configuración regular fue creada para el plan.");
+			mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.regla.agregada"), textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.configuracion.regular.fue.creada.para.el.plan"));
 		} catch (Exception e) {
 			logger.error("No fue posible agregar la carga regular", e);
-			mensajeError("No fue posible agregar la carga regular", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.agregar.la.carga.regular"), e);
 		}
 	}
 
@@ -118,10 +185,10 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 		try {
 			inscripcionService.guardarConfiguracionCargaRegular(configuracion, getUsuarioEnSession().getIdPersona());
 			consultarReglas();
-			mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada", "La carga regular del plan fue actualizada.");
+			mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.guardada"), textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.carga.regular.del.plan.fue.actualizada"));
 		} catch (Exception e) {
 			logger.error("No fue posible guardar la carga regular", e);
-			mensajeError("No fue posible guardar la carga regular", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.guardar.la.carga.regular"), e);
 		}
 	}
 
@@ -129,11 +196,11 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 		try {
 			inscripcionService.eliminarConfiguracionCargaRegular(configuracion);
 			consultarReglas();
-			mensaje(FacesMessage.SEVERITY_INFO, "Configuración eliminada",
-					"El plan vuelve a utilizar la regla general para estudiantes regulares.");
+			mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.eliminada"),
+					textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.plan.vuelve.a.utilizar.la.regla.general"));
 		} catch (Exception e) {
 			logger.error("No fue posible eliminar la carga regular", e);
-			mensajeError("No fue posible eliminar la carga regular", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.eliminar.la.carga.regular"), e);
 		}
 	}
 
@@ -142,22 +209,22 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 			inscripcionService.guardarConfiguracionGeneralCargaIrregular(configuracionGeneralCargaIrregular,
 					getUsuarioEnSession().getIdPersona());
 			consultarReglas();
-			mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada",
-					"La carga académica general para estudiantes irregulares fue actualizada.");
+			mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.guardada"),
+					textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.carga.academica.general.para.estudiantes.irregulares.fue"));
 		} catch (Exception e) {
 			logger.error("No fue posible guardar la carga irregular general", e);
-			mensajeError("No fue posible guardar la carga irregular general", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.guardar.la.carga.irregular.general"), e);
 		}
 	}
 
 	public void agregarCargaIrregular() {
 		if (idPlanNuevaConfiguracionIrregular == null) {
-			mensaje(FacesMessage.SEVERITY_WARN, "Plan requerido", "Selecciona el plan al que se aplicará la regla.");
+			mensaje(FacesMessage.SEVERITY_WARN, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.plan.requerido"), textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.selecciona.el.plan.al.que.se.aplicara.la"));
 			return;
 		}
 		if (configuracionesCargaIrregular.stream()
 				.anyMatch(configuracion -> idPlanNuevaConfiguracionIrregular.equals(configuracion.getIdPlan()))) {
-			mensaje(FacesMessage.SEVERITY_WARN, "Regla existente", "El plan ya tiene una configuración irregular. Edita esa regla.");
+			mensaje(FacesMessage.SEVERITY_WARN, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.regla.existente"), textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.plan.ya.tiene.una.configuracion.irregular.edita"));
 			return;
 		}
 		try {
@@ -167,10 +234,10 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 			inscripcionService.guardarConfiguracionCargaIrregular(configuracion, getUsuarioEnSession().getIdPersona());
 			idPlanNuevaConfiguracionIrregular = null;
 			consultarReglas();
-			mensaje(FacesMessage.SEVERITY_INFO, "Regla agregada", "La configuración irregular fue creada para el plan.");
+			mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.regla.agregada"), textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.configuracion.irregular.fue.creada.para.el.plan"));
 		} catch (Exception e) {
 			logger.error("No fue posible agregar la carga irregular", e);
-			mensajeError("No fue posible agregar la carga irregular", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.agregar.la.carga.irregular"), e);
 		}
 	}
 
@@ -178,10 +245,10 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 		try {
 			inscripcionService.guardarConfiguracionCargaIrregular(configuracion, getUsuarioEnSession().getIdPersona());
 			consultarReglas();
-			mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada", "La carga irregular del plan fue actualizada.");
+			mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.guardada"), textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.carga.irregular.del.plan.fue.actualizada"));
 		} catch (Exception e) {
 			logger.error("No fue posible guardar la carga irregular", e);
-			mensajeError("No fue posible guardar la carga irregular", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.guardar.la.carga.irregular"), e);
 		}
 	}
 
@@ -189,11 +256,11 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 		try {
 			inscripcionService.eliminarConfiguracionCargaIrregular(configuracion);
 			consultarReglas();
-			mensaje(FacesMessage.SEVERITY_INFO, "Configuración eliminada",
-					"El plan vuelve a utilizar la regla general para estudiantes irregulares.");
+			mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.eliminada"),
+					textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.plan.vuelve.a.utilizar.la.regla.general.2"));
 		} catch (Exception e) {
 			logger.error("No fue posible eliminar la carga irregular", e);
-			mensajeError("No fue posible eliminar la carga irregular", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.eliminar.la.carga.irregular"), e);
 		}
 	}
 
@@ -202,11 +269,11 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 			inscripcionService.guardarConfiguracionRestriccionesAcademicasGenerales(
 					configuracionRestriccionesAcademicasGenerales, getUsuarioEnSession().getIdPersona());
 			consultarReglas();
-			mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada",
-					"Las restricciones académicas generales fueron actualizadas.");
+			mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.guardada"),
+					textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.las.restricciones.academicas.generales.fueron.actualizadas"));
 		} catch (Exception e) {
 			logger.error("No fue posible guardar las restricciones académicas generales", e);
-			mensajeError("No fue posible guardar las restricciones académicas generales", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.guardar.las.restricciones.academicas.generales"), e);
 		}
 	}
 
@@ -215,18 +282,18 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 			inscripcionService.guardarConfiguracionGeneralCargaNuevoIngreso(configuracionGeneralCargaNuevoIngreso,
 					getUsuarioEnSession().getIdPersona());
 			consultarReglas();
-			mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada",
-					"La regla general de nuevo ingreso fue actualizada correctamente.");
+			mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.guardada"),
+					textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.regla.general.de.nuevo.ingreso.fue.actualizada"));
 		} catch (Exception e) {
 			logger.error("No fue posible guardar la regla general de nuevo ingreso", e);
-			mensajeError("No fue posible guardar la regla general de nuevo ingreso", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.guardar.la.regla.general.de"), e);
 		}
 	}
 
 	public void agregarCargaNuevoIngreso() {
 		if (idPlanNuevaConfiguracion == null) {
-			mensaje(FacesMessage.SEVERITY_WARN, "Plan requerido",
-					"Selecciona el plan al que se aplicará la regla.");
+			mensaje(FacesMessage.SEVERITY_WARN, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.plan.requerido"),
+					textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.selecciona.el.plan.al.que.se.aplicara.la"));
 			return;
 		}
 		String username = usernameNuevaConfiguracion == null ? null : usernameNuevaConfiguracion.trim();
@@ -234,10 +301,10 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 			username = null;
 		}
 		if (existeConfiguracionEspecifica(idPlanNuevaConfiguracion, username)) {
-			mensaje(FacesMessage.SEVERITY_WARN, "Regla existente",
+			mensaje(FacesMessage.SEVERITY_WARN, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.regla.existente"),
 					username == null
-							? "El plan seleccionado ya tiene una regla específica para todos sus usuarios. Puedes modificarla en la tabla."
-							: "El username indicado ya tiene una regla específica para el plan seleccionado. Puedes modificarla en la tabla.");
+							? textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.plan.seleccionado.ya.tiene.una.regla.especifica")
+							: textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.el.username.indicado.ya.tiene.una.regla.especifica"));
 			return;
 		}
 		try {
@@ -250,13 +317,13 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 			idPlanNuevaConfiguracion = null;
 			usernameNuevaConfiguracion = null;
 			consultarReglas();
-			mensaje(FacesMessage.SEVERITY_INFO, "Regla agregada",
+			mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.regla.agregada"),
 					configuracion.getUsername() == null || configuracion.getUsername().isEmpty()
-							? "La configuración fue creada para todos los usuarios del plan seleccionado."
-							: "La configuración fue creada para el username indicado dentro del plan.");
+							? textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.configuracion.fue.creada.para.todos.los.usuarios")
+							: textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.configuracion.fue.creada.para.el.username.indicado"));
 		} catch (Exception e) {
 			logger.error("No fue posible agregar la regla de nuevo ingreso para el plan " + idPlanNuevaConfiguracion, e);
-			mensajeError("No fue posible agregar la regla para el plan", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.agregar.la.regla.para.el"), e);
 		}
 	}
 
@@ -286,11 +353,11 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 			inscripcionService.guardarConfiguracionCargaNuevoIngreso(configuracion,
 					getUsuarioEnSession().getIdPersona());
 			consultarReglas();
-			mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada",
-					"La carga de nuevo ingreso fue actualizada para el plan seleccionado.");
+			mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.guardada"),
+					textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.carga.de.nuevo.ingreso.fue.actualizada.para"));
 		} catch (Exception e) {
 			logger.error("No fue posible guardar la carga de nuevo ingreso del plan " + configuracion.getIdPlan(), e);
-			mensajeError("No fue posible guardar la configuración de nuevo ingreso", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.guardar.la.configuracion.de.nuevo"), e);
 		}
 	}
 
@@ -298,13 +365,13 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 		try {
 			inscripcionService.eliminarConfiguracionCargaNuevoIngreso(configuracion);
 			consultarReglas();
-			mensaje(FacesMessage.SEVERITY_INFO, "Configuración eliminada",
+			mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.eliminada"),
 					configuracion.getIdPersona() == null
 							? "El plan vuelve a utilizar la regla general de nuevo ingreso."
 							: "El usuario vuelve a utilizar la configuración del plan o, si no existe, la regla general.");
 		} catch (Exception e) {
 			logger.error("No fue posible eliminar la carga de nuevo ingreso del plan " + configuracion.getIdPlan(), e);
-			mensajeError("No fue posible eliminar la configuración específica del plan", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.eliminar.la.configuracion.especifica.del"), e);
 		}
 	}
 
@@ -312,11 +379,11 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 		try {
 			inscripcionService.guardarReglaInscripcion(regla, getUsuarioEnSession().getIdPersona());
 			consultarReglas();
-			mensaje(FacesMessage.SEVERITY_INFO, "Configuración guardada",
-					"La regla de inscripción fue actualizada correctamente.");
+			mensaje(FacesMessage.SEVERITY_INFO, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.configuracion.guardada"),
+					textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.la.regla.de.inscripcion.fue.actualizada.correctamente"));
 		} catch (Exception e) {
 			logger.error("No fue posible guardar la regla de inscripción " + regla.getClave(), e);
-			mensajeError("No fue posible guardar la regla de inscripción", e);
+			mensajeError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.guardar.la.regla.de.inscripcion"), e);
 		}
 	}
 
@@ -325,7 +392,7 @@ public class ConfiguracionRestriccionesInscripcionBean extends BaseBean {
 	}
 
 	private void mensajeError(String contexto, Throwable error) {
-		mensaje(FacesMessage.SEVERITY_ERROR, "Error", contexto + ": " + obtenerCausaError(error));
+		mensaje(FacesMessage.SEVERITY_ERROR, textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.error"), contexto + ": " + obtenerCausaError(error));
 	}
 
 	private String obtenerCausaError(Throwable error) {

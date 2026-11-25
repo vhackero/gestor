@@ -1,6 +1,19 @@
 package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
 public class InscripcionMateriasDTO {
+    private OportunidadesUnidadDTO oportunidades;
+    public OportunidadesUnidadDTO getOportunidades() { return oportunidades; }
+    public void setOportunidades(OportunidadesUnidadDTO v) { oportunidades=v; }
+    private Long idAdeudoOptativa;
+    private boolean optativaAdicional;
+    private boolean admiteSustitucionOptativa;
+    public boolean isAdmiteSustitucionOptativa() { return admiteSustitucionOptativa; }
+    public void setAdmiteSustitucionOptativa(boolean v) { admiteSustitucionOptativa=v; }
+    public Long getIdAdeudoOptativa() { return idAdeudoOptativa; }
+    public void setIdAdeudoOptativa(Long v) { idAdeudoOptativa=v; }
+    public boolean isOptativaAdicional() { return optativaAdicional; }
+    public void setOptativaAdicional(boolean v) { optativaAdicional=v; }
+
 
     private String clavePlan;
 	private String clavePrograma;

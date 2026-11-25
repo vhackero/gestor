@@ -2,6 +2,7 @@ package mx.gob.sedesol.basegestor.service.impl.gestionescolar;
 
 import java.util.ArrayList;
 import java.util.Date;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOmisionReinscripcionDTO;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AprobacionAsignaturasPorSemestreDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CreditosTotalesPlanDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionElectivaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.CupoOptativaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaNuevoIngresoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaIrregularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionCargaRegularDTO;
@@ -40,8 +42,73 @@ import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
  */
 @Service("inscripcionService")
 public class InscripcionServiceImpl implements InscripcionService {
+    @Override
+    public mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOportunidadesDTO obtenerConfiguracionOportunidades() { return inscripcionesRepository.obtenerConfiguracionOportunidades(); }
+    @Override
+    @Transactional
+    public void guardarConfiguracionOportunidades(mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConfiguracionOportunidadesDTO d,Long usuario) { inscripcionesRepository.guardarConfiguracionOportunidades(d,usuario); }
+    @Override
+    public List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.OportunidadesUnidadDTO> obtenerOportunidades(Long persona,Long plan,int limite) { return inscripcionesRepository.obtenerOportunidades(persona,plan,limite); }
+    @Override
+    public mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ConclusionEstudiosDTO evaluarConclusionEstudios(Long persona,Long plan,Long convocatoria) {
+        return inscripcionesRepository.evaluarConclusionEstudios(persona,plan,convocatoria);
+    }
+    @Override
+    public List<ReglaInscripcionDTO> obtenerConfiguracionesConclusion() { return inscripcionesRepository.obtenerConfiguracionesConclusion(); }
+    @Override
+    @Transactional
+    public void guardarConfiguracionConclusion(ReglaInscripcionDTO d,Long usuario) { inscripcionesRepository.guardarConfiguracionConclusion(d,usuario); }
+    @Override
+    @Transactional
+    public void registrarConfirmacionEvaluacion(Long persona, Long plan, Long proceso, String resultado) {
+        inscripcionesRepository.registrarEvaluacion(persona,plan,proceso,"CONFIRMACION_PERSISTIDA",null,resultado);
+    }
+    @Override
+    public String obtenerEvidenciaEvaluacion(Long persona, Long plan, Date fecha) {
+        return inscripcionesRepository.obtenerEvidenciaEvaluacion(persona,plan,fecha);
+    }
+    @Override
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+    public void registrarEvaluacion(Long persona, Long plan, Long proceso, String momento, String anterior, String resultado) {
+        inscripcionesRepository.registrarEvaluacion(persona,plan,proceso,momento,anterior,resultado);
+    }
 
-	private static final Logger logger = Logger.getLogger(InscripcionServiceImpl.class);
+    @Override
+    public boolean tieneObligatoriasPendientes(Long persona,Long plan) { return inscripcionesRepository.tieneObligatoriasPendientes(persona,plan); }
+
+    @Override
+    public List<mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AdeudoOptativaDTO> obtenerAdeudosOptativasAdicionales(Long persona, Long plan) {
+        return inscripcionesRepository.obtenerAdeudosOptativasAdicionales(persona, plan);
+    }
+    @Override
+    public int obtenerOptativasRequeridasAcreditadas(Long persona, Long plan, Long convocatoria) {
+        return inscripcionesRepository.obtenerOptativasRequeridasAcreditadas(persona, plan, convocatoria);
+    }
+    @Override
+    public long contarInscripcionesOptativa(Long persona, Long plan, Long programa) {
+        return inscripcionesRepository.contarInscripcionesOptativa(persona, plan, programa);
+    }
+
+    @Override
+    public String[] obtenerConfiguracionBajasInscripcion() { return inscripcionesRepository.obtenerConfiguracionBajasInscripcion(); }
+    @Override
+    @Transactional
+    public void guardarConfiguracionBajasInscripcion(String[] valores, Long idUsuario) { inscripcionesRepository.guardarConfiguracionBajasInscripcion(valores,idUsuario); }
+
+	    @Override
+    public ConfiguracionOmisionReinscripcionDTO obtenerConfiguracionOmisionReinscripcion() {
+        return inscripcionesRepository.obtenerConfiguracionOmisionReinscripcion();
+    }
+    @Override
+    @Transactional
+    public void guardarConfiguracionOmisionReinscripcion(ConfiguracionOmisionReinscripcionDTO configuracion, Long idUsuario) {
+        inscripcionesRepository.guardarConfiguracionOmisionReinscripcion(configuracion, idUsuario);
+    }
+    @Override
+    public List<String> obtenerPeriodosSinReinscripcion(Long idPersona, Long idPlan, Date fechaActual) {
+        return inscripcionesRepository.obtenerPeriodosSinReinscripcion(idPersona, idPlan, fechaActual);
+    }
+private static final Logger logger = Logger.getLogger(InscripcionServiceImpl.class);
 
 	@Autowired
 	private IinscripcionRepository inscripcionesRepository;
@@ -341,10 +408,32 @@ public class InscripcionServiceImpl implements InscripcionService {
 		return listaBajasAsignaturas;
 	}
 
-	@Override
-	public void insertarInscripciones(List<InscripcionInsertDTO> inscripciones) {
-		inscripciones.forEach(inscripcionesRepository::insertarRegistro);
-	}
+    @Override
+    public boolean controlaCupoOptativas(Long proceso) {
+        return inscripcionesRepository.controlaCupoOptativas(proceso);
+    }
+
+    @Override
+    public List<CupoOptativaDTO> obtenerCuposOptativas(Long proceso) {
+        return inscripcionesRepository.obtenerCuposOptativas(proceso);
+    }
+
+    @Override
+    @Transactional
+    public void guardarCuposOptativas(Long proceso, boolean activo, List<CupoOptativaDTO> cupos) {
+        inscripcionesRepository.guardarCuposOptativas(proceso, activo, cupos);
+    }
+
+    @Override
+    @Transactional
+    public void insertarInscripciones(List<InscripcionInsertDTO> inscripciones) {
+        for (InscripcionInsertDTO inscripcion : inscripciones) {
+            if (inscripcion.isOptativa() && inscripcion.getIdProcesoInscripcion() != null) {
+                inscripcionesRepository.validarCupoOptativaParaGuardar(inscripcion);
+            }
+            inscripcionesRepository.insertarRegistro(inscripcion);
+        }
+    }
 
 	@Override
 	public List<InscripcionMateriasDTO> obtenerMateriasPorPeriodoInscripcion(Long idPlan, Date fechaActual,
@@ -375,6 +464,11 @@ public class InscripcionServiceImpl implements InscripcionService {
 	@Override
 	public void bloquearPersonaParaInscripcion(Long idPersona) {
 		inscripcionesRepository.bloquearPersonaParaInscripcion(idPersona);
+	}
+
+	@Override
+	public boolean personaActivaParaInscripcion(Long idPersona) {
+		return inscripcionesRepository.personaActivaParaInscripcion(idPersona);
 	}
 
 	@Override
@@ -419,6 +513,17 @@ public class InscripcionServiceImpl implements InscripcionService {
 	public Optional<EstadoInscripcionEstudianteDTO> obtenerEstadoInscripcionEstudiante(Long idPersona,
 			Long idProcesoInscripcion) {
 		return inscripcionesRepository.obtenerEstadoInscripcionEstudiante(idPersona, idProcesoInscripcion);
+	}
+
+	@Override
+	public Optional<EstadoInscripcionEstudianteDTO> obtenerEstadoInscripcionEstudiante(Long idPersona,
+			Long idProcesoInscripcion, Long idPlan) {
+		return inscripcionesRepository.obtenerEstadoInscripcionEstudiante(idPersona, idProcesoInscripcion, idPlan);
+	}
+
+	@Override
+	public Boolean procesoVigenteParaInscripcion(Long proceso, Long plan, Long convocatoria, Date fecha, boolean bloquear) {
+		return inscripcionesRepository.procesoVigenteParaInscripcion(proceso, plan, convocatoria, fecha, bloquear);
 	}
 
 	@Override

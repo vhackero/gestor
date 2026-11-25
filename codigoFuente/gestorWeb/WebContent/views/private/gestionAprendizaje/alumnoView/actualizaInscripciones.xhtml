@@ -11,6 +11,7 @@
 	
 	<h:panelGroup id="formEdicion">
 		<p:panel header="Editar Registro">
+			<p:messages globalOnly="true" />
 			<div class="form-group">
 
 				<div class="row">
@@ -110,7 +111,9 @@
 							pattern="dd/MM/yyyy HH:mm" hourFormat="24"
 							locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
-							placeholder="Seleccionar" />
+							placeholder="Seleccionar" required="true"
+                            requiredMessage="El campo fecha inicio es requerido" />
+                        <p:message for="fecIniEdit" display="text" />
 					</div>
 
 					<!-- Fecha de Fin -->
@@ -122,7 +125,9 @@
 							pattern="dd/MM/yyyy HH:mm" hourFormat="24"
 							locale="es" showOn="button" navigator="true"
 							readonlyInput="true" yearRange="c-100:c+100"
-							placeholder="Seleccionar" />
+							placeholder="Seleccionar" required="true"
+                            requiredMessage="El campo fecha fin es requerido" />
+                        <p:message for="fecFinEdit" display="text" />
 					</div>
 				</div>
 					</div>
@@ -144,6 +149,23 @@
 						</div>
 					</div>
 				</ui:fragment>
+                <p:panel id="cupoOptativas" header="Cupo de optativas">
+                    <p:messages id="mensajeCupoOptativas" for="mensajeCupoOptativas" showDetail="false" />
+                    <h:panelGrid columns="2">
+                        <p:selectBooleanCheckbox id="controlCupoOptativas" value="#{inscripocionesBean.controlCupoOptativas}" />
+                        <p:outputLabel for="controlCupoOptativas" value="Habilitar control de cupo de optativas en este proceso" />
+                    </h:panelGrid>
+                    <p:dataTable value="#{inscripocionesBean.cuposOptativas}" var="optativa"
+                        emptyMessage="El proceso no tiene optativas ofertadas.">
+                        <p:column headerText="Optativa"><h:outputText value="#{optativa.nombre}" /></p:column>
+                        <p:column headerText="Inscripciones confirmadas"><h:outputText value="#{optativa.ocupados}" /></p:column>
+                        <p:column headerText="Cupo autorizado">
+                            <p:inputText value="#{optativa.maximo}" label="Cupo de #{optativa.nombre}" />
+                        </p:column>
+                    </p:dataTable>
+                    <p:commandButton value="Guardar cupos" action="#{inscripocionesBean.guardarCuposOptativas}"
+                        process="cupoOptativas" update="cupoOptativas" />
+                </p:panel>
 				<div class="form-group text-right">
 					<p:commandButton value="Guardar"
 					    actionListener="#{inscripocionesBean.guardarCambios}" 

@@ -20,7 +20,18 @@
 				<p:outputLabel styleClass="h1" value="#{sistema.obtenerTexto('gw.alumno.inscripcion.titulo')}" />
 			</h1>
 
-			<p:outputPanel styleClass="mt-2"
+            <p:outputPanel id="avisoUltimaOportunidad" styleClass="mt-2">
+                <p:outputPanel rendered="#{not empty inscripcionBean.contextoInscripcion.avisoUltimaOportunidad}">
+                    <div class="alert alert-warning" role="alert"><h:outputText value="#{inscripcionBean.contextoInscripcion.avisoUltimaOportunidad}" /></div>
+                    <p:selectBooleanCheckbox value="#{inscripcionBean.contextoInscripcion.aceptaUltimaOportunidad}"><p:ajax event="change" process="@this" update="panelFinalizar" /></p:selectBooleanCheckbox>
+                    <h:outputText value="#{sistema.obtenerTexto('gw.inscripcion.mensaje.he.leido.el.aviso.de.ultima.oportunidad.de.2')}" />
+                </p:outputPanel>
+            </p:outputPanel>
+            <p:outputPanel id="adeudosAdicionales" />
+            <p:outputPanel id="conclusionEstudios" styleClass="mt-2" rendered="#{inscripcionBean.contextoInscripcion != null}">
+                <p:outputPanel rendered="#{inscripcionBean.contextoInscripcion.conclusionEstudios.concluido}"><div class="alert alert-info" role="alert"><h:outputText value="#{inscripcionBean.contextoInscripcion.conclusionEstudios.mensaje}" /></div></p:outputPanel>
+            </p:outputPanel>
+            <p:outputPanel styleClass="mt-2"
 				rendered="#{inscripcionBean.mostrarAviso}">
 								
 				<div class="alert alert-#{inscripcionBean.tipoAviso}" role="alert">#{inscripcionBean.textoAviso}</div>
@@ -98,13 +109,25 @@
 					rendered="#{not empty inscripcionBean.contextoInscripcion.mensajeSeriacion}">
 					<div class="alert alert-info mb-0" role="alert">#{inscripcionBean.contextoInscripcion.mensajeSeriacion}</div>
 				</p:outputPanel>
+				<p:outputPanel rendered="#{not empty inscripcionBean.contextoInscripcion.mensajeReferencia}">
+					<div class="alert alert-warning" role="alert">
+						<h:outputText value="#{inscripcionBean.contextoInscripcion.mensajeReferencia}" />
+					</div>
+				</p:outputPanel>
 
 				<p:outputPanel styleClass="mt-2"
 					rendered="#{not empty inscripcionBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}">
 					<div class="alert alert-#{inscripcionBean.contextoInscripcion.permiteInscripcionLimiteReprobadas ? 'warning' : 'danger'} mb-0" role="alert">#{inscripcionBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado}</div>
 				</p:outputPanel>
 
-				<div class="form-group mt-1">
+				 <p:outputPanel rendered="#{not empty inscripcionBean.contextoInscripcion.estadoAcademico.avisoCupoOptativas}">
+                <div class="alert alert-warning" role="alert">
+                    <h:outputText value="#{inscripcionBean.contextoInscripcion.estadoAcademico.avisoCupoOptativas}" />
+                </div>
+            </p:outputPanel>
+            <p:outputPanel id="avisoOmisionReinscripcion" styleClass="mt-2"><p:outputPanel rendered="#{not empty inscripcionBean.contextoInscripcion.mensajeOmisionReinscripcion}">
+<div class="alert alert-#{inscripcionBean.contextoInscripcion.permiteInscripcionOmision ? 'warning' : 'danger'}" role="alert"><h:outputText value="#{inscripcionBean.contextoInscripcion.mensajeOmisionReinscripcion}" /></div></p:outputPanel></p:outputPanel>
+<div class="form-group mt-1">
 					<div class="row">
 						<div class="col-md-12">
 
@@ -141,12 +164,26 @@
 									<h:outputText value="#{inscripcion.subestructura}" />
 								</p:column>
 
+                                <p:column headerText="#{sistema.obtenerTexto('gw.inscripcion.adeudo.columna')}"
+                                    rendered="#{inscripcionBean.mostrarSelectorAdeudo}">
+                                    <p:selectOneMenu value="#{inscripcion.idAdeudoOptativa}" converter="javax.faces.Long"
+                                        rendered="#{inscripcion.admiteSustitucionOptativa and not inscripcion.disabled and not inscripcion.oportunidades.agotada}">
+                                        <f:selectItem itemLabel="#{sistema.obtenerTexto('gw.inscripcion.adeudo.seleccionar')}"
+                                            itemValue="#{null}" noSelectionOption="true" />
+                                        <f:selectItems value="#{inscripcionBean.contextoInscripcion.estadoAcademico.adeudosOptativasAdicionales}"
+                                            var="adeudo" itemValue="#{adeudo.idOrigen}" itemLabel="#{adeudo.descripcion}"
+                                            itemDisabled="#{adeudo.enCurso or not adeudo.admiteOtraOportunidad or not adeudo.admiteSustitucion}" />
+                                        <p:ajax process="@this" listener="#{inscripcionBean.validarSeleccionMateria(inscripcion)}"
+                                            update=":mainForm:tblEditaComp :pnlMensaje :mainForm:avisoUltimaOportunidad :mainForm:adeudosAdicionales :mainForm:conclusionEstudios :mainForm:panelFinalizar" />
+                                    </p:selectOneMenu>
+                                </p:column>
+
 								<p:column headerText="#{sistema.obtenerTexto('gw.alumno.inscripcion.unidadesDidacticasDisponibles.seleccionar')}" styleClass="text-center">
-									<p:selectBooleanCheckbox disabled="#{inscripcion.disabled}"
+									<p:selectBooleanCheckbox disabled="#{inscripcion.disabled or inscripcion.oportunidades.agotada or not inscripcionBean.contextoInscripcion.permiteInscripcionOmision or inscripcionBean.contextoInscripcion.conclusionEstudios.bloqueaInscripcion}"
 										value="#{inscripcion.check}" styleClass="cursor-pointer">
 										<p:ajax
 											listener="#{inscripcionBean.validarSeleccionMateria(inscripcion)}"
-											event="change" update="@this :pnlMensaje" />
+											event="change" update="@this :mainForm:tblEditaComp :pnlMensaje :mainForm:avisoUltimaOportunidad :mainForm:adeudosAdicionales :mainForm:conclusionEstudios :mainForm:avisoOmisionReinscripcion :mainForm:panelFinalizar" />
 									</p:selectBooleanCheckbox>
 								</p:column>
 
@@ -173,7 +210,7 @@
 
 				<p:outputPanel id="panelFinalizar" styleClass="text-center mt-2" rendered="#{not empty inscripcionBean.contextoInscripcion.estadoAcademico.materiasDisponibles}">
 					<p:commandButton id="finalizarBtn"
-						disabled="#{(inscripcionBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionBean.aceptaTerminos) or (not empty inscripcionBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado and not inscripcionBean.contextoInscripcion.permiteInscripcionLimiteReprobadas)}"
+						disabled="#{(inscripcionBean.contextoInscripcion.terminosCondiciones.mostrarTerminosCondiciones and not inscripcionBean.aceptaTerminos) or (not empty inscripcionBean.contextoInscripcion.mensajeLimiteReprobacionesAlcanzado and not inscripcionBean.contextoInscripcion.permiteInscripcionLimiteReprobadas) or not inscripcionBean.contextoInscripcion.permiteInscripcionOmision or inscripcionBean.contextoInscripcion.conclusionEstudios.bloqueaInscripcion or (not empty inscripcionBean.contextoInscripcion.avisoUltimaOportunidad and not inscripcionBean.contextoInscripcion.aceptaUltimaOportunidad)}"
 						value="#{sistema.obtenerTexto('gw.alumno.inscripcion.finalizar')}" update="@form :pnlMensaje"
 						action="#{inscripcionBean.finalizarInscripcion}"
 						styleClass="btn btn-primary" />

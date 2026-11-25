@@ -1,5 +1,6 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
+import mx.gob.sedesol.basegestor.service.admin.TextoSistemaService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,6 +27,14 @@ import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasSe
 @ManagedBean
 @ViewScoped
 public class InscripcionBean extends BaseBean {
+
+	@javax.faces.bean.ManagedProperty(value = "#{textoSistemaService}")
+	private transient TextoSistemaService textosInscripcion;
+
+	public void setTextosInscripcion(TextoSistemaService textosInscripcion) {
+		this.textosInscripcion = textosInscripcion;
+	}
+
 
 	private static final long serialVersionUID = -4348522429538060563L;
 
@@ -94,6 +103,7 @@ public class InscripcionBean extends BaseBean {
 	}
 
 	public void validarSeleccionMateria(InscripcionMateriasDTO materiaSeleccionada) {
+        contextoInscripcion.setAceptaUltimaOportunidad(false);
 		if (esSeleccionEnFalse(materiaSeleccionada)) {
 			return;
 		}
@@ -107,12 +117,44 @@ public class InscripcionBean extends BaseBean {
 
 	}
 
+	public boolean isMostrarSelectorAdeudo() {
+		if (contextoInscripcion == null || contextoInscripcion.getEstadoAcademico() == null
+				|| !Boolean.TRUE.equals(contextoInscripcion.getPermiteInscripcionOmision())
+				|| (contextoInscripcion.getConclusionEstudios() != null
+						&& contextoInscripcion.getConclusionEstudios().isBloqueaInscripcion())) {
+			return false;
+		}
+		return contextoInscripcion.getEstadoAcademico().getAdeudosOptativasAdicionales().stream()
+				.anyMatch(adeudo -> !adeudo.isEnCurso() && adeudo.isAdmiteOtraOportunidad() && adeudo.isAdmiteSustitucion())
+				&& contextoInscripcion.getEstadoAcademico().getMateriasDisponibles().stream()
+						.anyMatch(materia -> materia.isAdmiteSustitucionOptativa()
+								&& !Boolean.TRUE.equals(materia.getDisabled())
+								&& (materia.getOportunidades() == null || !materia.getOportunidades().isAgotada()));
+	}
+
+    public void actualizarEvaluacion() {
+        if(contextoInscripcion==null) return;
+        try {
+            String anterior=contextoInscripcion.getEvidenciaEvaluacion();
+            contextoInscripcion=inscripcionFacade.actualizarEvaluacion(contextoInscripcion);
+            if(!java.util.Objects.equals(anterior,contextoInscripcion.getEvidenciaEvaluacion())) {
+                aceptaTerminos=false;
+                RequestContext.getCurrentInstance().update("mainForm");
+                mostrarMensajeDialog(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.se.actualizaron.tu.situacion.academica.carga.y.oferta"));
+            }
+        } catch(InscripcionException ex) { mostrarMensajeDialog(ex.getMessage()); }
+        catch(Exception ex) { manejarErrorGeneral(ex); }
+    }
+
 	public void finalizarInscripcion() {
 		try {
 			inscripcionFacade.finalizarInscripcion(aceptaTerminos, contextoInscripcion);
+            String avisoOmisiones = contextoInscripcion.getMensajeOmisionReinscripcion();
+            if (avisoOmisiones == null) avisoOmisiones = "";
+            else avisoOmisiones = " " + avisoOmisiones;
 			limpiarContextoInscripcion();
-			mostrarMensajeDialog("Inscripción de unidades didácticas realizada con éxito, por favor, revisa tu correo institucional.");
-			mostrarAviso("Inscripción de unidades didácticas completada con exito.", ConstantesGestorWeb.TIPO_AVISO_SUCCESS);
+			mostrarMensajeDialog(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.inscripcion.de.unidades.didacticas.realizada.con.exito.por", avisoOmisiones));
+			mostrarAviso(textosInscripcion.obtenerTextoFormateado("gw.inscripcion.mensaje.inscripcion.de.unidades.didacticas.completada.con.exito", avisoOmisiones), ConstantesGestorWeb.TIPO_AVISO_SUCCESS);
 		} catch (InscripcionException ie) {
 			manejarErrorDeFinalizacion(ie);
 		} catch (Exception e) {
@@ -202,7 +244,7 @@ public class InscripcionBean extends BaseBean {
 
 	private void manejarErrorGeneral(Exception e) {
 		logger.error("Error inesperado: ", e);
-		mostrarMensajeDialog("Ha ocurrido un error inesperado");
+		mostrarMensajeDialog(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.ha.ocurrido.un.error.inesperado"));
 	}
 
 	private void mostrarMensajeDialog(String mensaje) {

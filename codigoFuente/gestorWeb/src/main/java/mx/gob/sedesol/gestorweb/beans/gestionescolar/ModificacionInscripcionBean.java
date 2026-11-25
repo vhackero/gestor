@@ -1,5 +1,6 @@
 package mx.gob.sedesol.gestorweb.beans.gestionescolar;
 
+import mx.gob.sedesol.basegestor.service.admin.TextoSistemaService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +29,14 @@ import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
 @ManagedBean
 @ViewScoped
 public class ModificacionInscripcionBean extends BaseBean {
+
+	@javax.faces.bean.ManagedProperty(value = "#{textoSistemaService}")
+	private transient TextoSistemaService textosInscripcion;
+
+	public void setTextosInscripcion(TextoSistemaService textosInscripcion) {
+		this.textosInscripcion = textosInscripcion;
+	}
+
 
 	private static final long serialVersionUID = -4348522429538060563L;
 
@@ -125,8 +134,9 @@ public class ModificacionInscripcionBean extends BaseBean {
 
 	public void actualizarInscripcion() {
 		List<Long> idsEliminar = seleccionarLasQueNoEstanMarcadas();
-		inscripcionesService.eliminarInscripcionesPorIds(idsEliminar);
-		eliminarLasQueNoEstanMarcadasTabla();
+		if (eliminarInscripciones(idsEliminar)) {
+			eliminarLasQueNoEstanMarcadasTabla();
+		}
 	}
 
 	private void eliminarLasQueNoEstanMarcadasTabla() {
@@ -140,8 +150,22 @@ public class ModificacionInscripcionBean extends BaseBean {
 
 	public void eliminarTodaInscripcion() {
 		List<Long> idsEliminar = obtenerIdsTodasMaterias();
-		inscripcionesService.eliminarInscripcionesPorIds(idsEliminar);
-		eliminarTodasMateriasMostradasTabla();
+		if (eliminarInscripciones(idsEliminar)) {
+			eliminarTodasMateriasMostradasTabla();
+		}
+	}
+
+	private boolean eliminarInscripciones(List<Long> ids) {
+		try {
+			inscripcionesService.eliminarInscripcionesPorIds(ids);
+			return true;
+		} catch (IllegalArgumentException ex) {
+			agregarMsgWarn(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.eliminar.la.inscripcion"), ex.getMessage());
+		} catch (Exception ex) {
+			logger.error("Error al eliminar las inscripciones seleccionadas", ex);
+			agregarMsgError(textosInscripcion.obtenerTexto("gw.inscripcion.mensaje.no.fue.posible.eliminar.la.inscripcion"), "No se completó la operación. Revisa el registro del aplicativo.");
+		}
+		return false;
 	}
 
 	private void eliminarTodasMateriasMostradasTabla() {
