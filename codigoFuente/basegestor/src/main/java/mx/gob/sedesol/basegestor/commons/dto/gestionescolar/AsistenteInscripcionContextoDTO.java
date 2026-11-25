@@ -2,7 +2,11 @@ package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PeriodoTrayectoriaV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
 
 public class AsistenteInscripcionContextoDTO implements Serializable {
 
@@ -39,10 +43,20 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
     private RiesgoAcademicoDTO riesgos;
     private ProyeccionSiguientePeriodoDTO proyeccionSiguientePeriodo;
     private OportunidadAcademicaDTO oportunidades;
+    private TrayectoriaPermanenciaDTO trayectoriaPermanencia;
+    private MetadatosConsultaAsistenteDTO metadatosConsulta;
+    /** Intentos reprobados por identidad curricular de UD; no modifica el historial. */
+    private Map<Long, Long> intentosReprobadosPorUd;
+    private Boolean intentosReprobadosDisponibles;
 
     private List<String> reglasActivas;
     private List<String> pendientesCriticos;
     private List<UnidadDecisionInscripcionDTO> unidades;
+    /** Malla completa del plan, distinta de la oferta/candidatas del periodo. */
+    private List<UnidadDecisionInscripcionDTO> unidadesMapaPlan;
+    private List<UnidadDecisionInscripcionDTO> unidadesCandidatasPeriodo;
+    private List<PeriodoTrayectoriaV2DTO> periodosTrayectoriaV2;
+    private List<IntentoAcreditacionUnidadV2DTO> historialIntentosV2;
     private List<EscenarioCargaDTO> escenarios;
 
     private String auditoriaDecisionId;
@@ -51,7 +65,13 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
         this.reglasActivas = new ArrayList<String>();
         this.pendientesCriticos = new ArrayList<String>();
         this.unidades = new ArrayList<UnidadDecisionInscripcionDTO>();
+        this.unidadesMapaPlan = new ArrayList<UnidadDecisionInscripcionDTO>();
+        this.unidadesCandidatasPeriodo = new ArrayList<UnidadDecisionInscripcionDTO>();
+        this.periodosTrayectoriaV2 = new ArrayList<PeriodoTrayectoriaV2DTO>();
+        this.historialIntentosV2 = new ArrayList<IntentoAcreditacionUnidadV2DTO>();
         this.escenarios = new ArrayList<EscenarioCargaDTO>();
+        this.intentosReprobadosPorUd = new HashMap<Long, Long>();
+        this.intentosReprobadosDisponibles = Boolean.FALSE;
     }
 
     public InscripcionContextoDTO getContextoBase() {
@@ -270,6 +290,39 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
         this.oportunidades = oportunidades;
     }
 
+    public TrayectoriaPermanenciaDTO getTrayectoriaPermanencia() {
+        return trayectoriaPermanencia;
+    }
+
+    public void setTrayectoriaPermanencia(TrayectoriaPermanenciaDTO trayectoriaPermanencia) {
+        this.trayectoriaPermanencia = trayectoriaPermanencia;
+    }
+
+    public MetadatosConsultaAsistenteDTO getMetadatosConsulta() {
+        return metadatosConsulta;
+    }
+
+    public void setMetadatosConsulta(MetadatosConsultaAsistenteDTO metadatosConsulta) {
+        this.metadatosConsulta = metadatosConsulta;
+    }
+
+    public Map<Long, Long> getIntentosReprobadosPorUd() {
+        return intentosReprobadosPorUd;
+    }
+
+    public void setIntentosReprobadosPorUd(Map<Long, Long> intentosReprobadosPorUd) {
+        this.intentosReprobadosPorUd = intentosReprobadosPorUd == null
+                ? new HashMap<Long, Long>() : new HashMap<Long, Long>(intentosReprobadosPorUd);
+    }
+
+    public Boolean getIntentosReprobadosDisponibles() {
+        return intentosReprobadosDisponibles;
+    }
+
+    public void setIntentosReprobadosDisponibles(Boolean intentosReprobadosDisponibles) {
+        this.intentosReprobadosDisponibles = intentosReprobadosDisponibles;
+    }
+
     public List<String> getReglasActivas() {
         return reglasActivas;
     }
@@ -293,6 +346,15 @@ public class AsistenteInscripcionContextoDTO implements Serializable {
     public void setUnidades(List<UnidadDecisionInscripcionDTO> unidades) {
         this.unidades = unidades;
     }
+
+    public List<UnidadDecisionInscripcionDTO> getUnidadesMapaPlan() { return unidadesMapaPlan; }
+    public void setUnidadesMapaPlan(List<UnidadDecisionInscripcionDTO> valores) { unidadesMapaPlan = valores == null ? new ArrayList<UnidadDecisionInscripcionDTO>() : valores; }
+    public List<UnidadDecisionInscripcionDTO> getUnidadesCandidatasPeriodo() { return unidadesCandidatasPeriodo; }
+    public void setUnidadesCandidatasPeriodo(List<UnidadDecisionInscripcionDTO> valores) { unidadesCandidatasPeriodo = valores == null ? new ArrayList<UnidadDecisionInscripcionDTO>() : valores; }
+    public List<PeriodoTrayectoriaV2DTO> getPeriodosTrayectoriaV2() { return periodosTrayectoriaV2; }
+    public void setPeriodosTrayectoriaV2(List<PeriodoTrayectoriaV2DTO> valores) { periodosTrayectoriaV2 = valores == null ? new ArrayList<PeriodoTrayectoriaV2DTO>() : valores; }
+    public List<IntentoAcreditacionUnidadV2DTO> getHistorialIntentosV2() { return historialIntentosV2; }
+    public void setHistorialIntentosV2(List<IntentoAcreditacionUnidadV2DTO> valores) { historialIntentosV2 = valores == null ? new ArrayList<IntentoAcreditacionUnidadV2DTO>() : valores; }
 
     public List<EscenarioCargaDTO> getEscenarios() {
         return escenarios;

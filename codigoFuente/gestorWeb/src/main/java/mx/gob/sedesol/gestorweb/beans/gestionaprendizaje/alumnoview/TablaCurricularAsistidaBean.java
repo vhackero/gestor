@@ -4,16 +4,20 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Calendar;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.Set;
+import java.time.LocalDateTime;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -25,6 +29,11 @@ import org.apache.log4j.Logger;
 
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.AsistenteInscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoAcademicoDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EstadoFuenteConsultaAsistente;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MetadatosConsultaAsistenteDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EscenarioProyeccionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.EscenarioCargaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ProyeccionSiguientePeriodoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionBajasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionContextoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.InscripcionMateriasCursadasDTO;
@@ -38,9 +47,17 @@ import mx.gob.sedesol.basegestor.commons.dto.inscripcion.InscripcionPreviaMateri
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.FichaDescProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.planesyprogramas.MallaCurricularDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AsistenteVirtualAccionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoReglaCurricularV2;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ContextoAsistenteCurricularV2DTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.FichaIntegralCasoDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PanelAsistenteVirtualDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.DecisionUnidadCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoMotivoCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.AvisoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.CodigoAvisoEvaluacionCurricularV2;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.TrazaReglaAplicadaV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PeriodoTrayectoriaV2DTO;
 import mx.gob.sedesol.basegestor.commons.utils.InscripcionException;
 import mx.gob.sedesol.basegestor.commons.utils.ObjectUtils;
 import mx.gob.sedesol.basegestor.commons.utils.ObjetoCurricularEnum;
@@ -48,6 +65,7 @@ import mx.gob.sedesol.basegestor.service.gestionescolar.AsistenteInscripcionServ
 import mx.gob.sedesol.basegestor.service.gestionescolar.GrupoParticipanteService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.InscripcionService;
 import mx.gob.sedesol.basegestor.service.gestionescolar.v2.AsistenteCurricularV2Facade;
+import mx.gob.sedesol.basegestor.service.gestionescolar.v2.SimuladorCurricularV2Service;
 import mx.gob.sedesol.basegestor.service.impl.planesyprogramas.FECServiceFacade;
 import mx.gob.sedesol.basegestor.service.inscripcion.InscripcionPreviaMateriasService;
 import mx.gob.sedesol.gestorweb.beans.acceso.BaseBean;
@@ -59,7 +77,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     private static final long serialVersionUID = 1L;
     private static final int MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA = 8;
+    private static final int MAXIMO_RECURSAMIENTOS_POR_UD = 2;
+    private static final int MAXIMO_OPORTUNIDADES_ACREDITACION_POR_UD = 3;
+    private static final double CALIFICACION_BAJA_AUTORIZADA = 666d;
     private static final Logger logger = Logger.getLogger(TablaCurricularAsistidaBean.class);
+    private static final AsistenteCurricularV2ResultadoAdapter ADAPTADOR_RESULTADO_V2 = new AsistenteCurricularV2ResultadoAdapter();
     private static final String SESION_PRESELECCION_INSCRIPCION = "preseleccionInscripcionAsistente";
 
     @ManagedProperty(value = "#{asistenteInscripcionServiceImpl}")
@@ -83,8 +105,14 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     @ManagedProperty(value = "#{asistenteCurricularV2Facade}")
     private AsistenteCurricularV2Facade asistenteCurricularV2Facade;
 
+    @ManagedProperty(value = "#{simuladorCurricularV2Service}")
+    private SimuladorCurricularV2Service simuladorCurricularV2Service;
+
     private AsistenteInscripcionContextoDTO contexto;
     private FichaIntegralCasoDTO fichaIntegralV2;
+    private ResultadoEvaluacionCurricularV2DTO resultadoEvaluacionV2;
+    private AsistenteCurricularViewModelDTO orientacionPE2027;
+    private Map<Long, DecisionUnidadCurricularV2DTO> decisionesV2PorPrograma = new HashMap<Long, DecisionUnidadCurricularV2DTO>();
     private boolean intentoCargaFichaIntegralV2;
     private List<SemestreAsistidoDTO> semestres;
     private String mensajeError;
@@ -98,12 +126,24 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private String preguntaOrientacionSeleccionada;
     private String respuestaPreguntaOrientacion;
     private CreditosResumenMallaDTO creditosResumenMalla;
+    private List<InscripcionPreviaMateriasDTO> inscripcionesActualesResumen;
+    private Map<String, List<EventoConstanciaDTO>> eventosHistorialPorClave;
+    private Map<String, OportunidadAcreditacionDTO> oportunidadesAcreditacionPrioritarias;
+    /**
+     * La tarjeta de recursamiento se basa en el historial por idPrograma y la
+     * inscripción vigente, no en el agregado de reprobaciones del contexto V2.
+     */
+    private Map<String, AntecedenteRecursamientoDTO> antecedentesRecursamientoPrioritarios;
+    /** Selección transitoria de resultados hipotéticos de la pestaña Expectativa. */
+    private List<ExpectativaUnidadDTO> unidadesExpectativaLogro;
+    private ProyeccionSiguientePeriodoDTO expectativaLogro;
     /** Vista interna de la pestaña Simulador: selección o revisión final. */
     private boolean mostrarRevisionSeleccion;
 
     @PostConstruct
     public void init() {
         semestres = new ArrayList<SemestreAsistidoDTO>();
+        inscripcionesActualesResumen = null;
         try {
             Long idPersona = trayectoriaAcademicaContextoBean.resolverIdPersonaObjetivo(idPersonaEnSesion());
             idPersonaObjetivo = idPersona;
@@ -111,8 +151,10 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             nombrePersonaObjetivo = trayectoriaAcademicaContextoBean.resolverNombreObjetivo(getUsuarioEnSession().getUsuario());
             matriculaPersonaObjetivo = trayectoriaAcademicaContextoBean.resolverMatriculaObjetivo(getUsuarioEnSession().getUsuario());
             contexto = asistenteInscripcionService.obtenerContextoAsistido(idPersona);
+            cargarResultadoEvaluacionV2();
             construirSemestres();
-            cargarFichaIntegralV2();
+			registrarResumenAplicacionV2();
+            // D1: la orientación se deriva exclusivamente de resultadoEvaluacionV2.
             inicializarRespuestasContextuales();
         } catch (InscripcionException e) {
             logger.error("Error al obtener contexto asistido de inscripción.", e);
@@ -202,8 +244,226 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         fila.setRecomendada(Boolean.TRUE.equals(unidad.getRecomendada()));
         fila.setMotivoPrincipal(obtenerMotivoPrincipal(unidad));
         fila.setMotivos(obtenerMotivos(unidad));
+        aplicarDecisionV2(fila);
         return fila;
     }
+
+	private void cargarResultadoEvaluacionV2() {
+		resultadoEvaluacionV2 = null;
+		decisionesV2PorPrograma.clear();
+		if (asistenteCurricularV2Facade == null || contexto == null) return;
+		try {
+			logger.info("[ASISTENTE_V2] Inicio de evaluacion curricular");
+			logger.info("[ASISTENTE_V2] Evaluando reglas curriculares");
+			resultadoEvaluacionV2 = asistenteCurricularV2Facade.evaluarSombra(contexto);
+			if (resultadoEvaluacionV2 == null) {
+				actualizarEstadoEvaluacionV2(EstadoFuenteConsultaAsistente.ERROR);
+				logger.warn("[ASISTENTE_V2] No fue posible obtener el resultado de la evaluacion curricular");
+				return;
+			}
+			actualizarEstadoEvaluacionV2(EstadoFuenteConsultaAsistente.DISPONIBLE);
+			for (DecisionUnidadCurricularV2DTO decision : resultadoEvaluacionV2.getDecisiones()) {
+				if (decision != null && decision.getIdPrograma() != null) decisionesV2PorPrograma.put(decision.getIdPrograma(), decision);
+			}
+			orientacionPE2027 = new AsistenteCurricularResultadoAdapter().adaptar(resultadoEvaluacionV2);
+			aplicarLimiteCargaV2AProyeccion();
+			logger.info("[ASISTENTE_V2] Resultado de evaluacion curricular obtenido correctamente");
+		} catch (Exception e) {
+			actualizarEstadoEvaluacionV2(EstadoFuenteConsultaAsistente.ERROR);
+			logger.warn("[ASISTENTE_V2] Error al evaluar las reglas curriculares", e);
+		}
+	}
+
+	private void actualizarEstadoEvaluacionV2(EstadoFuenteConsultaAsistente estado) {
+		if (contexto == null || contexto.getMetadatosConsulta() == null) return;
+		actualizarEstadoEvaluacionV2(contexto.getMetadatosConsulta(), estado, new Date());
+	}
+
+	/** Conserva el instante propio de V2; no lo hace pasar por corte de expediente u oferta. */
+	static void actualizarEstadoEvaluacionV2(MetadatosConsultaAsistenteDTO metadatos,
+			EstadoFuenteConsultaAsistente estado, Date fechaEvaluacion) {
+		if (metadatos == null) return;
+		metadatos.setEstadoEvaluacionV2(estado);
+		if (estado == EstadoFuenteConsultaAsistente.DISPONIBLE) metadatos.setFechaEvaluacionV2(fechaEvaluacion);
+	}
+
+	/** Resumen de origen para evitar presentar un corte parcial como información completa. */
+	public String getResumenFuentesSituacion() {
+		return resumirFuentesConsulta(contexto != null ? contexto.getMetadatosConsulta() : null);
+	}
+
+	/** Evita que los KPI se interpreten como definitivos si una fuente material está incompleta. */
+    public boolean isResumenIndicadoresParcial() {
+        MetadatosConsultaAsistenteDTO metadatos = contexto != null ? contexto.getMetadatosConsulta() : null;
+        return sonIndicadoresParciales(metadatos);
+    }
+
+    static boolean sonIndicadoresParciales(MetadatosConsultaAsistenteDTO metadatos) {
+        return metadatos == null || esEstadoFuenteLimitante(metadatos.getEstadoExpediente())
+                || esEstadoFuenteLimitante(metadatos.getEstadoTrayectoria())
+                || esEstadoFuenteLimitante(metadatos.getEstadoOferta())
+                || esEstadoFuenteLimitante(metadatos.getEstadoEvaluacionV2());
+    }
+
+    public String getNotaIndicadoresParciales() {
+        MetadatosConsultaAsistenteDTO metadatos = contexto != null ? contexto.getMetadatosConsulta() : null;
+        return construirNotaIndicadoresParciales(metadatos);
+    }
+
+    static String construirNotaIndicadoresParciales(MetadatosConsultaAsistenteDTO metadatos) {
+        if (!sonIndicadoresParciales(metadatos)) return null;
+        String pendientes = metadatos == null || metadatos.getCamposPendientes().isEmpty() ? "fuentes pendientes de validar"
+                : StringUtils.join(metadatos.getCamposPendientes(), ", ");
+        return "Indicadores parciales: " + pendientes + ". Los totales pueden requerir actualización.";
+	}
+
+	private static boolean esEstadoFuenteLimitante(EstadoFuenteConsultaAsistente estado) {
+		return estado == null || estado == EstadoFuenteConsultaAsistente.PARCIAL
+				|| estado == EstadoFuenteConsultaAsistente.DESACTUALIZADO
+				|| estado == EstadoFuenteConsultaAsistente.ERROR;
+	}
+
+	static String resumirFuentesConsulta(MetadatosConsultaAsistenteDTO metadatos) {
+		if (metadatos == null) return "Información de consulta parcial: no se identificó el corte de datos.";
+		String version = StringUtils.isBlank(metadatos.getVersionReglas()) ? "versión normativa no disponible"
+				: "versión " + metadatos.getVersionReglas();
+		return version + " · Expediente: " + etiquetaEstadoFuente(metadatos.getEstadoExpediente())
+				+ " (corte " + formatearCorteFuente(metadatos.getFechaCorteExpediente()) + ") · Trayectoria: "
+				+ etiquetaEstadoFuente(metadatos.getEstadoTrayectoria()) + " (corte "
+				+ formatearCorteFuente(metadatos.getFechaCorteTrayectoria() != null
+						? metadatos.getFechaCorteTrayectoria() : metadatos.getFechaCorte()) + ") · Oferta: "
+				+ etiquetaEstadoFuente(metadatos.getEstadoOferta()) + " (corte "
+				+ formatearCorteFuente(metadatos.getFechaCorteOferta()) + ") · Evaluación curricular: "
+				+ etiquetaEstadoFuente(metadatos.getEstadoEvaluacionV2()) + " (evaluada "
+				+ formatearCorteFuente(metadatos.getFechaEvaluacionV2()) + ").";
+	}
+
+	private static String formatearCorteFuente(Date fecha) {
+		return fecha == null ? "no informado" : new SimpleDateFormat("dd/MM/yyyy").format(fecha);
+	}
+
+	private static String etiquetaEstadoFuente(EstadoFuenteConsultaAsistente estado) {
+		if (estado == null) return "no disponible";
+		switch (estado) {
+		case DISPONIBLE: return "disponible";
+		case VACIO: return "sin registros";
+		case DESACTUALIZADO: return "desactualizada";
+		case ERROR: return "con error";
+		default: return "parcial";
+		}
+	}
+
+	private void aplicarLimiteCargaV2AProyeccion() {
+		if (contexto == null || contexto.getProyeccionSiguientePeriodo() == null) return;
+		Integer cargaMaxima = resultadoEvaluacionV2.getEvaluacionCargaAcademica() != null
+				? resultadoEvaluacionV2.getEvaluacionCargaAcademica().getCargaMaximaNormativa()
+				: null;
+		if (cargaMaxima == null) cargaMaxima = resultadoEvaluacionV2.getCargaMaximaFuturaSombra();
+		if (cargaMaxima == null || cargaMaxima.intValue() < 0) return;
+		for (EscenarioProyeccionDTO escenario : contexto.getProyeccionSiguientePeriodo().getEscenarios()) {
+			if (escenario == null) continue;
+			escenario.setMateriasOfertadas(limitarPorCargaV2(escenario.getMateriasOfertadas(), cargaMaxima));
+			escenario.setMateriasHabilitadas(limitarPorCargaV2(escenario.getMateriasHabilitadas(), cargaMaxima));
+		}
+	}
+
+	static Integer limitarPorCargaV2(Integer cantidad, Integer cargaMaxima) {
+		if (cantidad == null || cargaMaxima == null) return cantidad;
+		return Integer.valueOf(Math.min(cantidad.intValue(), cargaMaxima.intValue()));
+	}
+
+	private void aplicarDecisionV2(FilaAsistidaDTO fila) {
+		if (fila == null || fila.getUdId() == null) return;
+		DecisionUnidadCurricularV2DTO decision = decisionesV2PorPrograma.get(fila.getUdId());
+		if (decision == null) return;
+		ADAPTADOR_RESULTADO_V2.aplicar(fila, decision);
+	}
+
+	private void registrarResumenAplicacionV2() {
+		if (resultadoEvaluacionV2 == null) return;
+		int habilitadas = 0;
+		int restringidas = 0;
+		int prioritarias = 0;
+		int recomendadas = 0;
+		for (FilaAsistidaDTO fila : obtenerFilasPlanas()) {
+			if (Boolean.TRUE.equals(fila.getBloqueada())) restringidas++;
+			else if (Boolean.TRUE.equals(fila.getSeleccionable())) habilitadas++;
+			if (Boolean.TRUE.equals(fila.getPrioritaria())) prioritarias++;
+			if (Boolean.TRUE.equals(fila.getRecomendada())) recomendadas++;
+		}
+		logger.info("[ASISTENTE_V2] Recomendaciones construidas utilizando resultado V2");
+		logger.info("[ASISTENTE_V2] Resumen - situacion=" + resultadoEvaluacionV2.getSituacionAcademicaCalculada()
+				+ " - habilitadas=" + habilitadas + " - restringidas=" + restringidas
+				+ " - prioritarias=" + prioritarias + " - recomendadas=" + recomendadas);
+	}
+
+	/** Evidencia compacta exclusiva para clasificaciones no regulares. */
+	public String getResumenClasificacionNoRegularV2() {
+		return construirResumenClasificacionNoRegularV2(resultadoEvaluacionV2);
+	}
+
+    /** Agregados del contrato V2: no se recalculan en la vista. */
+    public String getResumenAdeudosV2() {
+        if (resultadoEvaluacionV2 == null) return null;
+        int vigentes = resultadoEvaluacionV2.getAdeudosVigentes() == null ? 0 : resultadoEvaluacionV2.getAdeudosVigentes().intValue();
+        int revision = resultadoEvaluacionV2.getAdeudosEnRevision() == null ? 0 : resultadoEvaluacionV2.getAdeudosEnRevision().intValue();
+        int historicos = resultadoEvaluacionV2.getResultadosReprobatoriosInformativos() == null ? 0 : resultadoEvaluacionV2.getResultadosReprobatoriosInformativos().intValue();
+        return "Adeudos vigentes: " + vigentes + ". Adeudos en revisión: " + revision
+                + ". Resultados reprobatorios informativos: " + historicos + ".";
+    }
+
+	public String getDetalleClasificacionNoRegularV2() {
+		return construirDetalleClasificacionNoRegularV2(resultadoEvaluacionV2);
+	}
+
+    /** Aviso de consulta configurado por el motor, nunca una autorización escolar. */
+    public boolean isMostrarAvisoComunicadoInstitucional() {
+        return getAvisoComunicadoInstitucional() != null;
+    }
+
+    public String getAvisoComunicadoInstitucional() {
+        if (resultadoEvaluacionV2 == null || resultadoEvaluacionV2.getAvisos() == null) return null;
+        for (AvisoEvaluacionCurricularV2DTO aviso : resultadoEvaluacionV2.getAvisos()) {
+            if (aviso != null && aviso.getCodigo() == CodigoAvisoEvaluacionCurricularV2.AVISO_COMUNICADO_2027_1
+                    && !StringUtils.isBlank(aviso.getTexto())) return aviso.getTexto();
+        }
+        return null;
+    }
+
+	static String construirResumenClasificacionNoRegularV2(ResultadoEvaluacionCurricularV2DTO resultado) {
+		if (resultado == null || "REGULAR".equals(resultado.getSituacionAcademicaCalculada())) return null;
+		if ("IRREGULAR".equals(resultado.getSituacionAcademicaCalculada())) {
+			int reprobadas = resultado.getCantidadReprobadasVigentes() == null ? 0 : resultado.getCantidadReprobadasVigentes().intValue();
+			return "Situación irregular: " + reprobadas + " unidad" + (reprobadas == 1 ? " didáctica reprobada vigente" : "es didácticas reprobadas vigentes") + ".";
+		}
+		return "Situación académica pendiente de revisión.";
+	}
+
+	static String construirDetalleClasificacionNoRegularV2(ResultadoEvaluacionCurricularV2DTO resultado) {
+		String resumen = construirResumenClasificacionNoRegularV2(resultado);
+		if (resumen == null) return null;
+		List<String> reglas = obtenerReglasCausalesClasificacion(resultado);
+		return resumen + " Fundamento normativo: " + (reglas.isEmpty() ? "requiere revisión de evidencia curricular" : StringUtils.join(reglas, ", ")) + ".";
+	}
+
+	private static List<String> obtenerReglasCausalesClasificacion(ResultadoEvaluacionCurricularV2DTO resultado) {
+		String resultadoEsperado = "SITUACION_ACADEMICA_" + resultado.getSituacionAcademicaCalculada();
+		return resultado.getTrazas().stream()
+				.filter(traza -> traza != null && traza.getCodigoRegla() != null)
+				.filter(traza -> resultadoEsperado.equals(traza.getResultado()))
+				.map(TrazaReglaAplicadaV2DTO::getCodigoRegla)
+				.map(TablaCurricularAsistidaBean::formatearCodigoReglaV2)
+				.distinct()
+				.sorted()
+				.collect(Collectors.toList());
+	}
+
+	static String formatearCodigoReglaV2(CodigoReglaCurricularV2 regla) {
+		String codigo = regla.name();
+		int separador = codigo.indexOf('_');
+		if (separador < 0) return codigo;
+		return codigo.substring(0, separador) + "-" + codigo.substring(separador + 1).replace('_', '.');
+	}
 
     private String construirEtiquetaBloque(UnidadDecisionInscripcionDTO unidad) {
         if (unidad == null) {
@@ -321,6 +581,168 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public void setContexto(AsistenteInscripcionContextoDTO contexto) {
         this.contexto = contexto;
+        this.antecedentesRecursamientoPrioritarios = null;
+        this.eventosHistorialPorClave = null;
+        this.oportunidadesAcreditacionPrioritarias = null;
+        this.unidadesExpectativaLogro = null;
+        this.expectativaLogro = null;
+    }
+
+    /**
+     * Construye los controles únicamente con UD de la inscripción vigente. La
+     * identidad es el id curricular; la clave sólo se muestra al estudiante.
+     */
+    public List<ExpectativaUnidadDTO> getUnidadesExpectativaLogro() {
+        if (unidadesExpectativaLogro != null) return unidadesExpectativaLogro;
+        unidadesExpectativaLogro = new ArrayList<ExpectativaUnidadDTO>();
+        if (contexto == null || contexto.getUnidades() == null) return unidadesExpectativaLogro;
+        Set<Long> idsEnCurso = new LinkedHashSet<Long>();
+        for (InscripcionPreviaMateriasDTO materia : obtenerInscripcionesActualesResumen()) {
+            if (materia != null && materia.getIdPrograma() != null) idsEnCurso.add(materia.getIdPrograma());
+        }
+        for (UnidadDecisionInscripcionDTO unidad : contexto.getUnidades()) {
+            if (unidad == null || unidad.getUdId() == null || !idsEnCurso.contains(unidad.getUdId())) continue;
+            ExpectativaUnidadDTO control = new ExpectativaUnidadDTO();
+            control.setUdId(unidad.getUdId());
+            control.setClave(unidad.getClave());
+            control.setNombre(unidad.getNombre());
+            control.setTipo(unidad.getTipoUd());
+            control.setAcredita(Boolean.TRUE);
+            unidadesExpectativaLogro.add(control);
+        }
+        Collections.sort(unidadesExpectativaLogro, Comparator.comparing(ExpectativaUnidadDTO::getClave,
+                Comparator.nullsLast(String::compareTo)));
+        return unidadesExpectativaLogro;
+    }
+
+    public ProyeccionSiguientePeriodoDTO getExpectativaLogro() {
+        if (expectativaLogro == null && contexto != null) {
+            // El contexto inicial conserva escenarios informativos. La pestaña
+            // necesita desde el primer render la comparación conjunta V2.
+            actualizarExpectativaLogro();
+            if (expectativaLogro == null) expectativaLogro = contexto.getProyeccionSiguientePeriodo();
+        }
+        return expectativaLogro;
+    }
+
+    public EscenarioProyeccionDTO getEscenarioReferenciaExpectativa() {
+        return buscarEscenarioExpectativa("Situación registrada");
+    }
+
+    public EscenarioProyeccionDTO getEscenarioAcreditaTodaCarga() {
+        return buscarEscenarioExpectativa("Si acreditas toda tu carga");
+    }
+
+    public EscenarioProyeccionDTO getEscenarioSeleccionadoExpectativa() {
+        return buscarEscenarioExpectativa("Si no acreditas las UD seleccionadas");
+    }
+
+    private EscenarioProyeccionDTO buscarEscenarioExpectativa(String nombre) {
+        ProyeccionSiguientePeriodoDTO proyeccion = getExpectativaLogro();
+        if (proyeccion == null || proyeccion.getEscenarios() == null) return null;
+        for (EscenarioProyeccionDTO escenario : proyeccion.getEscenarios()) {
+            if (escenario != null && nombre.equals(escenario.getNombre())) return escenario;
+        }
+        return null;
+    }
+
+    /** Reevalúa el mismo contexto con la selección transitoria; nunca persiste una calificación. */
+    public void actualizarExpectativaLogro() {
+        if (asistenteInscripcionService == null || idPersonaObjetivo == null) return;
+        Set<Long> noAcreditadas = new LinkedHashSet<Long>();
+        for (ExpectativaUnidadDTO unidad : getUnidadesExpectativaLogro()) {
+            if (!Boolean.TRUE.equals(unidad.getAcredita()) && unidad.getUdId() != null) noAcreditadas.add(unidad.getUdId());
+        }
+        try {
+            AsistenteInscripcionContextoDTO actualizado = asistenteInscripcionService
+                    .obtenerExpectativaLogro(idPersonaObjetivo, noAcreditadas);
+            expectativaLogro = actualizado != null ? actualizado.getProyeccionSiguientePeriodo() : null;
+            if (expectativaLogro == null) mensajeError = "No fue posible actualizar la expectativa de logro.";
+        } catch (InscripcionException e) {
+            logger.warn("No fue posible actualizar la expectativa de logro con V2.", e);
+            expectativaLogro = null;
+            mensajeError = "No fue posible actualizar la expectativa de logro.";
+        }
+    }
+
+    public void restablecerExpectativaLogro() {
+        for (ExpectativaUnidadDTO unidad : getUnidadesExpectativaLogro()) unidad.setAcredita(Boolean.TRUE);
+        actualizarExpectativaLogro();
+    }
+
+    public String getPeriodoProyectadoExpectativa() {
+        String periodo = contexto != null ? contexto.getPeriodoActivo() : null;
+        if (StringUtils.isBlank(periodo) || !periodo.matches("\\d{4}-[12]")) return "No determinado";
+        int anio = Integer.parseInt(periodo.substring(0, 4));
+        return periodo.endsWith("-1") ? anio + "-2" : (anio + 1) + "-1";
+    }
+
+    public int getTotalUnidadesEvaluadasExpectativa() {
+        return contexto != null && contexto.getUnidades() != null ? contexto.getUnidades().size() : 0;
+    }
+
+    /** Datos de presentación de una propuesta ya calculada por el servicio. */
+    public List<FilaAsistidaDTO> getFilasProyeccion(EscenarioCargaDTO escenario) {
+        if (escenario == null || escenario.getUnidadesIds() == null) return Collections.emptyList();
+        Set<Long> ids = new LinkedHashSet<Long>(escenario.getUnidadesIds());
+        return obtenerFilasPlanas().stream().filter(fila -> fila.getUdId() != null && ids.contains(fila.getUdId()))
+                .sorted(Comparator.comparing(FilaAsistidaDTO::getBloque, Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(FilaAsistidaDTO::getClave, Comparator.nullsLast(String::compareTo)))
+                .collect(Collectors.toList());
+    }
+
+    public int getCantidadBloqueProyeccion(EscenarioCargaDTO escenario, int bloque) {
+        return (int) getFilasProyeccion(escenario).stream()
+                .filter(fila -> Integer.valueOf(bloque).equals(fila.getBloque())).count();
+    }
+
+    public String getTituloProyeccion(EscenarioCargaDTO escenario) {
+        if (escenario == null) return "Alternativa de carga";
+        if ("MINIMO".equals(escenario.getTipoEscenario())) return "Carga reducida";
+        if ("BALANCEADO".equals(escenario.getTipoEscenario())) return "Carga intermedia";
+        if ("MAXIMO".equals(escenario.getTipoEscenario())) return "Carga intensiva";
+        return escenario.getNombre();
+    }
+
+    public String getReferenciaProyeccion(EscenarioCargaDTO escenario) {
+        if (escenario == null) return "Propuesta sujeta a validación.";
+        if ("MINIMO".equals(escenario.getTipoEscenario())) return "Mínima aplicable en tu caso";
+        if ("BALANCEADO".equals(escenario.getTipoEscenario())) return "Entre el mínimo y tu límite";
+        if ("MAXIMO".equals(escenario.getTipoEscenario())) return "Máxima aplicable en tu caso";
+        return escenario.getDescripcion();
+    }
+
+    public String getFinalidadProyeccion(FilaAsistidaDTO fila) {
+        if (fila == null) return "Avanzar";
+        if ("REPROBADA".equalsIgnoreCase(fila.getEstatusHistorico())
+                || "NO_ACREDITADA".equalsIgnoreCase(fila.getEstatusHistorico())) return "Regularizar";
+        if ("BAJA".equalsIgnoreCase(fila.getEstatusHistorico())
+                || !StringUtils.isBlank(fila.getAcreditacionActualBajaParcial())) return "Recuperar";
+        return "Avanzar";
+    }
+
+    public String getResumenBaseProyeccion() {
+        EscenarioProyeccionDTO referencia = getEscenarioReferenciaExpectativa();
+        return referencia == null ? "Situación registrada." : "Base: " + referencia.getDescripcion();
+    }
+
+    public boolean isPuedeProbarProyeccion() {
+        return isMostrarSimuladorParaEstudiante() && !isSimuladorSoloConsulta();
+    }
+
+    /** La pestaña de expectativa sólo existe durante cursamiento; no usar índices fijos en AJAX. */
+    public int getIndicePestanaSimulador() {
+        return isPeriodoCursamiento() ? 4 : 3;
+    }
+
+    /** Traslada una propuesta de consulta al simulador sombra, sin inscribir ni reservar cupo. */
+    public void probarProyeccion(EscenarioCargaDTO escenario) {
+        if (!isPuedeProbarProyeccion() || escenario == null || escenario.getUnidadesIds() == null) return;
+        Set<Long> seleccion = new HashSet<Long>(escenario.getUnidadesIds());
+        for (FilaAsistidaDTO fila : obtenerFilasPlanas()) {
+            if (fila != null && fila.getUdId() != null) fila.setSeleccionada(Boolean.valueOf(seleccion.contains(fila.getUdId())));
+        }
+        simularSeleccion();
     }
 
     public List<SemestreAsistidoDTO> getSemestres() {
@@ -341,6 +763,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public ResultadoSimulacionDTO getResultadoSimulacion() {
         return resultadoSimulacion;
+    }
+
+    /** Presentación PE2027; no expone ficha, caso ni dictamen histórico. */
+    public AsistenteCurricularViewModelDTO getOrientacionPE2027() {
+        return orientacionPE2027;
     }
 
     public void setResultadoSimulacion(ResultadoSimulacionDTO resultadoSimulacion) {
@@ -383,6 +810,10 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
     public void setAsistenteInscripcionService(AsistenteInscripcionService asistenteInscripcionService) {
         this.asistenteInscripcionService = asistenteInscripcionService;
+    }
+
+    public void setSimuladorCurricularV2Service(SimuladorCurricularV2Service simuladorCurricularV2Service) {
+        this.simuladorCurricularV2Service = simuladorCurricularV2Service;
     }
 
     public void setFecServiceFacade(FECServiceFacade fecServiceFacade) {
@@ -576,16 +1007,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private void cargarFichaIntegralV2() {
         intentoCargaFichaIntegralV2 = true;
         fichaIntegralV2 = null;
-        if (asistenteCurricularV2Facade == null || idPersonaObjetivo == null) {
-            return;
-        }
-        try {
-            fichaIntegralV2 = asistenteCurricularV2Facade.obtenerFichaIntegral(construirContextoV2());
-        } catch (InscripcionException e) {
-            logger.warn("No fue posible cargar la ficha integral V2 para el asistente curricular.", e);
-        } catch (Exception e) {
-            logger.warn("Error inesperado al cargar la ficha integral V2 para el asistente curricular.", e);
-        }
+        logger.debug("[D1_PE2027] Ficha histórica omitida; el asistente no la usa para orientación.");
     }
 
     public void actualizarDiagnosticoMotor() {
@@ -596,8 +1018,12 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             // La situación cambia con el historial; se reconstruye el contexto antes de recalcular V2.
             contexto = asistenteInscripcionService.obtenerContextoAsistido(idPersonaObjetivo);
             intentoCargaFichaIntegralV2 = false;
+			cargarResultadoEvaluacionV2();
+			semestres.clear();
+			construirSemestres();
             cargarFichaIntegralV2();
             inicializarRespuestasContextuales();
+			registrarResumenAplicacionV2();
         } catch (InscripcionException e) {
             logger.warn("No fue posible actualizar el diagnóstico V2 del asistente curricular.", e);
             mensajeError = "No fue posible actualizar el diagnóstico académico.";
@@ -834,7 +1260,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     public void simularSeleccion() {
         try {
             Long idPersona = idPersonaObjetivo != null ? idPersonaObjetivo : idPersonaEnSesion();
-            resultadoSimulacion = asistenteInscripcionService.simularInscripcion(idPersona, obtenerUnidadesSeleccionadas());
+            resultadoSimulacion = simuladorCurricularV2Service.simularSombra(idPersona, obtenerUnidadesSeleccionadas());
         } catch (InscripcionException e) {
             logger.error("Error al simular selección asistida.", e);
             mensajeError = e.getMessage();
@@ -1104,7 +1530,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     /**
-     * El motor V2 clasifica el caso y construye el panel para ambos perfiles.
+     * La evaluacion curricular clasifica el caso y construye el panel para ambos perfiles.
      * El bean conserva la regla local solo como degradación controlada si V2 no responde.
      */
     private String resolverEscenarioAsistente() {
@@ -1219,9 +1645,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     private boolean esFilaNoAcreditada(FilaAsistidaDTO fila) {
-        return fila != null
-                && fila.getEstatusHistorico() != null
-                && fila.getEstatusHistorico().toUpperCase(Locale.ROOT).contains("NO ACREDIT");
+        return esFilaNoAcreditadaPrioritaria(fila);
     }
 
     private boolean esFilaPendienteRiesgo(FilaAsistidaDTO fila) {
@@ -1280,6 +1704,14 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         }
         String tipo = normalizaTexto(fila.getTipo());
         return tipo.contains("optativa opcional");
+    }
+
+    private boolean esOptativaAdicionalActual(FilaAsistidaDTO fila) {
+        if (fila == null || fila.getMotivos() == null) {
+            return false;
+        }
+        return fila.getMotivos().stream()
+                .anyMatch(motivo -> motivo != null && "OPTATIVA_OPCIONAL".equalsIgnoreCase(motivo.getCodigo()));
     }
 
     private String normalizaTexto(String texto) {
@@ -1348,14 +1780,18 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     }
 
     public int getConteoUdPendientesPanel() {
-        if (contexto == null || contexto.getDiagnosticoActual() == null) {
-            return obtenerConteoPendientesDerivado();
-        }
-        int materiasCriticas = valor(contexto.getDiagnosticoActual().getMateriasCriticas());
-        if (materiasCriticas > 0) {
-            return materiasCriticas;
+        // materiasCriticas incluye UD estratégicas o que desbloquean otras;
+        // no representa una deuda de regularización.
+        if (esResultadoV2RegularSinPendientes()) {
+            return 0;
         }
         return obtenerConteoPendientesDerivado();
+    }
+
+    private boolean esResultadoV2RegularSinPendientes() {
+        return resultadoEvaluacionV2 != null
+                && "REGULAR".equalsIgnoreCase(resultadoEvaluacionV2.getSituacionAcademicaCalculada())
+                && valor(resultadoEvaluacionV2.getCantidadReprobadasVigentes()) == 0;
     }
 
     public int getConteoSeriacionPanel() {
@@ -1909,7 +2345,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     public String getTituloResumenDiagnosticoAsistenteVirtual() {
         if (isMostrarResultadoMotorV2() && fichaIntegralV2.getCasoAcademico().getDiagnostico() != null
                 && !StringUtils.isBlank(fichaIntegralV2.getCasoAcademico().getDiagnostico().getSituacionAcademica())) {
-            return fichaIntegralV2.getCasoAcademico().getDiagnostico().getSituacionAcademica().trim();
+            return formatearEstadoEnOracion(fichaIntegralV2.getCasoAcademico().getDiagnostico().getSituacionAcademica());
         }
         PanelAsistenteVirtualDTO panel = getPanelAsistenteVirtualV2();
         if (panel != null && !StringUtils.isBlank(panel.getResumenTitulo())) {
@@ -1924,6 +2360,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             return "Situación académica con irregularidad";
         }
     }
+
+	static String formatearEstadoEnOracion(String estado) {
+		if (StringUtils.isBlank(estado)) return estado;
+		return StringUtils.capitalize(estado.trim().toLowerCase(Locale.ROOT).replace('_', ' '));
+	}
 
     public String getContenidoResumenDiagnosticoAsistenteVirtual() {
         if (isMostrarResultadoMotorV2()) {
@@ -2076,7 +2517,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         Set<String> claves = new HashSet<String>();
         List<InscripcionMateriasReprobadasDTO> reprobadas = obtenerReprobadasActivasParaDetalle();
         for (InscripcionMateriasReprobadasDTO reprobada : reprobadas) {
-            if (reprobada == null || tieneBajaActiva(reprobada)) {
+            if (reprobada == null || tieneBajaParcialAplicada(reprobada)) {
                 continue;
             }
             String clave = StringUtils.trimToNull(reprobada.getClavePrograma());
@@ -2097,7 +2538,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         }
         Set<Long> noAcreditadas = new HashSet<Long>();
         for (InscripcionMateriasReprobadasDTO reprobada : obtenerReprobadasActivasParaDetalle()) {
-            if (reprobada != null && !tieneBajaActiva(reprobada) && reprobada.getIdPrograma() != null
+            if (reprobada != null && !tieneBajaParcialAplicada(reprobada) && reprobada.getIdPrograma() != null
                     && !estaAprobadaEnHistorialActual(reprobada.getIdPrograma())) {
                 noAcreditadas.add(reprobada.getIdPrograma());
             }
@@ -2222,14 +2663,15 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return Collections.emptyList();
     }
 
-    private boolean tieneBajaActiva(InscripcionMateriasReprobadasDTO reprobada) {
+    /** Una baja temporal es semestral; solo la parcial puede excluir una UD. */
+    private boolean tieneBajaParcialAplicada(InscripcionMateriasReprobadasDTO reprobada) {
         if (contexto == null || contexto.getContextoBase() == null
                 || contexto.getContextoBase().getEstadoAcademico() == null
                 || contexto.getContextoBase().getEstadoAcademico().getMateriasBajas() == null) {
             return false;
         }
         for (InscripcionBajasDTO baja : contexto.getContextoBase().getEstadoAcademico().getMateriasBajas()) {
-            if (baja != null && ((reprobada.getIdPrograma() != null && reprobada.getIdPrograma().equals(baja.getIdPrograma()))
+            if (esBajaParcial(baja) && ((reprobada.getIdPrograma() != null && reprobada.getIdPrograma().equals(baja.getIdPrograma()))
                     || (StringUtils.isNotBlank(reprobada.getClavePrograma())
                             && reprobada.getClavePrograma().equalsIgnoreCase(baja.getClavePrograma())))) {
                 return true;
@@ -2574,11 +3016,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
     private int obtenerConteoPendientesDerivado() {
         int noAcreditadas = getConteoUdNoAcreditadasPanel();
         int omisiones = getConteoUdOmisionesPanel();
-        int derivado = noAcreditadas + omisiones;
-        if (derivado > 0) {
-            return derivado;
-        }
-        return getFilasUdPrioritarias().size();
+        return noAcreditadas + omisiones;
     }
 
     private void agregarMensajeUnico(List<String> mensajes, String mensaje) {
@@ -2729,6 +3167,1291 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return obtenerCreditosResumenMalla().getElectivasPendientes();
     }
 
+    /**
+     * Estos indicadores son de presentacion: conservan el universo curricular
+     * de la malla y no sustituyen decisiones del resultado V2.
+     */
+    public int getUnidadesAcreditadasResumen() {
+        return obtenerCreditosResumenMalla().getAcreditadas();
+    }
+
+    public int getTotalUnidadesPlanResumen() {
+        return obtenerCreditosResumenMalla().getTotalUnidadesPlan();
+    }
+
+    public int getUnidadesObligatoriasAcreditadasResumen() {
+        return obtenerCreditosResumenMalla().getObligatoriasAcreditadas();
+    }
+
+    public int getTotalUnidadesObligatoriasPlanResumen() {
+        return obtenerCreditosResumenMalla().getTotalObligatoriasPlan();
+    }
+
+    public int getUnidadesOptativasRequeridasAcreditadasResumen() {
+        return Math.min(MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA,
+                obtenerCreditosResumenMalla().getOptativasAcreditadas());
+    }
+
+    public int getTotalUnidadesOptativasRequeridasPlanResumen() {
+        return Math.min(MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA,
+                obtenerCreditosResumenMalla().getTotalOptativasPlan());
+    }
+
+    public int getUnidadesOptativasAdicionalesAcreditadasResumen() {
+        return Math.max(0, obtenerCreditosResumenMalla().getOptativasAcreditadas()
+                - MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA);
+    }
+
+    public int getTotalUnidadesOptativasAdicionalesPlanResumen() {
+        return Math.max(0, obtenerCreditosResumenMalla().getTotalOptativasPlan()
+                - getTotalUnidadesOptativasRequeridasPlanResumen());
+    }
+
+    public int getUnidadesActualesRegistradasResumen() {
+        return contexto != null && contexto.getDiagnosticoActual() != null
+                ? valor(contexto.getDiagnosticoActual().getMateriasEnCurso()) : 0;
+    }
+
+    public String getDetalleUnidadesActualesResumen() {
+        return detalleActualConRespaldo(filtrarFilasActualesResumen(), null, 0,
+                getUnidadesActualesRegistradasResumen());
+    }
+
+    public String getDetalleUnidadesObligatoriasActualesResumen() {
+        return detalleActualConRespaldo(filtrarFilasActualesPorTipo("oblig", false), "oblig", 0,
+                getUnidadesObligatoriasActualesResumen());
+    }
+
+    public String getDetalleUnidadesOptativasRequeridasActualesResumen() {
+        List<FilaAsistidaDTO> filas = new ArrayList<FilaAsistidaDTO>();
+        for (FilaAsistidaDTO fila : filtrarFilasActualesPorTipo("optativa", true)) {
+            if (!esOptativaAdicionalActual(fila)) {
+                filas.add(fila);
+            }
+        }
+        return detalleActualConRespaldo(filas, "optativa", 0,
+                getUnidadesOptativasRequeridasActualesResumen());
+    }
+
+    public String getDetalleUnidadesOptativasAdicionalesActualesResumen() {
+        List<FilaAsistidaDTO> filas = new ArrayList<FilaAsistidaDTO>();
+        for (FilaAsistidaDTO fila : filtrarFilasActualesPorTipo("optativa", true)) {
+            if (esOptativaAdicionalActual(fila)) {
+                filas.add(fila);
+            }
+        }
+        return detalleActualConRespaldo(filas, "optativa",
+                getUnidadesOptativasRequeridasActualesResumen(),
+                getUnidadesOptativasAdicionalesActualesResumen());
+    }
+
+    public String getDetalleUnidadesConBajaParcialResumen() {
+        return detalleFilasResumen(getFilasConBajaParcialPrioritarias());
+    }
+
+    public String getDetalleUnidadesAcreditadasResumen() {
+        return obtenerCreditosResumenMalla().getDetalleAcreditadas();
+    }
+
+    public String getDetalleUnidadesObligatoriasAcreditadasResumen() {
+        return obtenerCreditosResumenMalla().getDetalleObligatoriasAcreditadas();
+    }
+
+    public String getDetalleUnidadesOptativasRequeridasAcreditadasResumen() {
+        return obtenerCreditosResumenMalla().getDetalleOptativasAcreditadas(0,
+                MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA);
+    }
+
+    public String getDetalleUnidadesOptativasAdicionalesAcreditadasResumen() {
+        return obtenerCreditosResumenMalla().getDetalleOptativasAcreditadas(
+                MINIMO_OPTATIVAS_REQUERIDAS_PROGRAMA, Integer.MAX_VALUE);
+    }
+
+    public String getDetalleUnidadesPendientesRegularizarResumen() {
+        String detalle = detalleFilasResumen(getFilasIrregularesDetalle());
+        return getConteoUdPendientesPanel() > 0 && "Sin UD relacionadas.".equals(detalle)
+                ? obtenerDetalleReprobadasActivasContexto() : detalle;
+    }
+
+    private String detalleActualConRespaldo(List<FilaAsistidaDTO> filas, String tipo,
+            int inicio, int cantidadEsperada) {
+        String detalle = detalleFilasResumen(filas);
+        if (cantidadEsperada <= 0 || !"Sin UD relacionadas.".equals(detalle)) {
+            return detalle;
+        }
+        return detalleInscripcionesActuales(tipo, inicio, cantidadEsperada);
+    }
+
+    private String detalleInscripcionesActuales(String tipo, int inicio, int cantidadEsperada) {
+        List<InscripcionPreviaMateriasDTO> candidatas = new ArrayList<InscripcionPreviaMateriasDTO>();
+        for (InscripcionPreviaMateriasDTO materia : obtenerInscripcionesActualesResumen()) {
+            if (materia == null || (tipo != null
+                    && !normalizaTexto(materia.getTipoPrograma()).contains(tipo))) {
+                continue;
+            }
+            candidatas.add(materia);
+        }
+        Collections.sort(candidatas, Comparator.comparing(InscripcionPreviaMateriasDTO::getClavePrograma,
+                Comparator.nullsLast(String::compareTo)));
+        int desde = Math.min(Math.max(0, inicio), candidatas.size());
+        int hasta = Math.min(candidatas.size(), desde + Math.max(0, cantidadEsperada));
+        if (desde >= hasta) {
+            return "UD relacionadas no disponibles en la fuente de inscripción.";
+        }
+        StringBuilder detalle = new StringBuilder();
+        for (InscripcionPreviaMateriasDTO materia : candidatas.subList(desde, hasta)) {
+            if (detalle.length() > 0) {
+                detalle.append('\n');
+            }
+            detalle.append(StringUtils.defaultIfBlank(materia.getClavePrograma(), "Sin clave"))
+                    .append(" - ")
+                    .append(StringUtils.defaultIfBlank(materia.getAsignatura(),
+                            StringUtils.defaultIfBlank(materia.getPrograma(), "Sin nombre")));
+        }
+        return detalle.toString();
+    }
+
+    private List<InscripcionPreviaMateriasDTO> obtenerInscripcionesActualesResumen() {
+        if (inscripcionesActualesResumen == null) {
+            if (inscripcionPreviaMateriasService != null && idPersonaObjetivo != null) {
+                List<InscripcionPreviaMateriasDTO> inscritas = inscripcionPreviaMateriasService
+                        .obtenerInscripcionPrevia(idPersonaObjetivo);
+                inscripcionesActualesResumen = inscritas != null ? inscritas
+                        : Collections.<InscripcionPreviaMateriasDTO>emptyList();
+            } else {
+                inscripcionesActualesResumen = Collections.emptyList();
+            }
+        }
+        return inscripcionesActualesResumen;
+    }
+
+    private List<FilaAsistidaDTO> filtrarFilasActualesResumen() {
+        return obtenerFilasPlanas().stream()
+                .filter(this::esFilaActual)
+                .collect(Collectors.toList());
+    }
+
+    private List<FilaAsistidaDTO> filtrarFilasActualesPorTipo(String tipo, boolean incluirOpcionales) {
+        return obtenerFilasPlanas().stream()
+                .filter(this::esFilaActual)
+                .filter(fila -> normalizaTexto(fila.getTipo()).contains(tipo))
+                .filter(fila -> incluirOpcionales || !esUnidadOpcionalLibre(fila))
+                .collect(Collectors.toList());
+    }
+
+    private String detalleFilasResumen(List<FilaAsistidaDTO> filas) {
+        if (filas == null || filas.isEmpty()) {
+            return "Sin UD relacionadas.";
+        }
+        Map<String, FilaAsistidaDTO> unicas = new LinkedHashMap<String, FilaAsistidaDTO>();
+        for (FilaAsistidaDTO fila : filas) {
+            if (fila != null && !unicas.containsKey(claveUnicaFila(fila))) {
+                unicas.put(claveUnicaFila(fila), fila);
+            }
+        }
+        List<FilaAsistidaDTO> ordenadas = new ArrayList<FilaAsistidaDTO>(unicas.values());
+        Collections.sort(ordenadas, Comparator.comparing(FilaAsistidaDTO::getClave,
+                Comparator.nullsLast(String::compareTo)));
+        StringBuilder detalle = new StringBuilder();
+        for (FilaAsistidaDTO fila : ordenadas) {
+            if (detalle.length() > 0) {
+                detalle.append('\n');
+            }
+            detalle.append(valorTexto(fila.getClave(), "Sin clave"))
+                    .append(" - ")
+                    .append(valorTexto(fila.getAsignatura(), "Sin nombre"));
+        }
+        return detalle.toString();
+    }
+
+    /**
+     * Etiqueta visual del resumen vigente. El bloque se obtiene de las UD que
+     * están registradas o en curso, por lo que no depende de una fecha fija.
+     */
+    public String getEtiquetaResumenActual() {
+        String periodoRaw = resolverPeriodoResumenActual();
+        String periodo = StringUtils.isBlank(periodoRaw)
+                ? "No determinado" : formatearPeriodoAcademico(periodoRaw, 0);
+        Integer bloque = resolverBloqueResumenActual();
+        return bloque != null ? "Periodo " + periodo + " · Bloque B" + bloque
+                : "Periodo " + periodo;
+    }
+
+    private String resolverPeriodoResumenActual() {
+        String periodoActivo = contexto != null ? contexto.getPeriodoActivo() : null;
+        if (!StringUtils.isBlank(periodoActivo)) {
+            return periodoActivo;
+        }
+        if (contexto != null && contexto.getTrayectoriaPermanencia() != null) {
+            String periodoCorte = contexto.getTrayectoriaPermanencia().getPeriodoCorte();
+            if (!StringUtils.isBlank(periodoCorte)) {
+                return periodoCorte;
+            }
+            Integer transcurridos = contexto.getTrayectoriaPermanencia().getPeriodosAcademicosTranscurridos();
+            if (Boolean.TRUE.equals(contexto.getTrayectoriaPermanencia().getSemestreEnCurso())
+                    && transcurridos != null && transcurridos.intValue() > 0) {
+                return getEtiquetaPeriodoTrayectoria(transcurridos);
+            }
+        }
+        return null;
+    }
+
+    private Integer resolverBloqueResumenActual() {
+        Integer bloqueActual = null;
+        for (FilaAsistidaDTO fila : obtenerFilasPlanas()) {
+            if (!esFilaActual(fila) || fila.getBloque() == null) {
+                continue;
+            }
+            if (bloqueActual == null || fila.getBloque().intValue() > bloqueActual.intValue()) {
+                bloqueActual = fila.getBloque();
+            }
+        }
+        if (bloqueActual == null && inscripcionPreviaMateriasService != null && idPersonaObjetivo != null) {
+            List<InscripcionPreviaMateriasDTO> inscritas = inscripcionPreviaMateriasService
+                    .obtenerInscripcionPrevia(idPersonaObjetivo);
+            if (!ObjectUtils.isNullOrEmpty(inscritas)) {
+                for (InscripcionPreviaMateriasDTO materia : inscritas) {
+                    int bloque = parseNumero(materia.getBloque(), 0);
+                    if (bloque > 0 && (bloqueActual == null || bloque > bloqueActual.intValue())) {
+                        bloqueActual = Integer.valueOf(bloque);
+                    }
+                }
+            }
+        }
+        return bloqueActual;
+    }
+
+    public int getUnidadesObligatoriasActualesResumen() {
+        if (contexto != null && contexto.getDiagnosticoActual() != null
+                && contexto.getDiagnosticoActual().getMateriasEnCursoObligatorias() != null) {
+            return valor(contexto.getDiagnosticoActual().getMateriasEnCursoObligatorias());
+        }
+        return contarUnidadesActualesPorTipo("oblig");
+    }
+
+    public int getUnidadesOptativasRequeridasActualesResumen() {
+        if (contexto != null && contexto.getDiagnosticoActual() != null
+                && contexto.getDiagnosticoActual().getMateriasEnCursoOptativasRequeridas() != null) {
+            return valor(contexto.getDiagnosticoActual().getMateriasEnCursoOptativasRequeridas());
+        }
+        return calcularOptativasRequeridasActuales(contarOptativasActuales(),
+                contarOptativasAdicionalesActuales());
+    }
+
+    public int getUnidadesOptativasAdicionalesActualesResumen() {
+        if (contexto != null && contexto.getDiagnosticoActual() != null
+                && contexto.getDiagnosticoActual().getMateriasEnCursoOptativasAdicionales() != null) {
+            return valor(contexto.getDiagnosticoActual().getMateriasEnCursoOptativasAdicionales());
+        }
+        return contarOptativasAdicionalesActuales();
+    }
+
+    static int calcularOptativasRequeridasActuales(int optativasActuales, int optativasAdicionales) {
+        return Math.min(Math.max(0, optativasActuales),
+                Math.max(0, optativasActuales - optativasAdicionales));
+    }
+
+    private int contarOptativasActuales() {
+        return (int) obtenerFilasPlanas().stream()
+                .filter(this::esFilaActual)
+                .filter(fila -> normalizaTexto(fila.getTipo()).contains("optativa"))
+                .map(this::claveUnicaFila)
+                .distinct()
+                .count();
+    }
+
+    private int contarOptativasAdicionalesActuales() {
+        return (int) obtenerFilasPlanas().stream()
+                .filter(this::esFilaActual)
+                .filter(fila -> normalizaTexto(fila.getTipo()).contains("optativa"))
+                .filter(this::esOptativaAdicionalActual)
+                .map(this::claveUnicaFila)
+                .distinct()
+                .count();
+    }
+
+    public int getUnidadesConBajaParcialResumen() {
+        return (int) getFilasConBajaParcialPrioritarias().stream()
+                .map(this::claveUnicaFila)
+                .distinct()
+                .count();
+    }
+
+    public int getPorcentajeTiempoNominalTranscurrido() {
+        return calcularPorcentajeTiempoTranscurrido(contexto != null ? contexto.getTrayectoriaPermanencia() : null,
+                true);
+    }
+
+    public int getPorcentajePlazoMaximoTranscurrido() {
+        return calcularPorcentajeTiempoTranscurrido(contexto != null ? contexto.getTrayectoriaPermanencia() : null,
+                false);
+    }
+
+    private int calcularPorcentajeTiempoTranscurrido(
+            mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO trayectoria,
+            boolean duracionNominal) {
+        if (trayectoria == null || trayectoria.getFechaPrimeraInscripcion() == null
+                || trayectoria.getFechaCorte() == null) {
+            return 0;
+        }
+        Integer anios = duracionNominal ? trayectoria.getDuracionNominalAnios() : trayectoria.getPlazoMaximoAnios();
+        if (anios == null || anios.intValue() <= 0) {
+            return 0;
+        }
+        Calendar limite = Calendar.getInstance();
+        limite.setTime(trayectoria.getFechaPrimeraInscripcion());
+        limite.add(Calendar.YEAR, anios.intValue());
+        long total = limite.getTimeInMillis() - trayectoria.getFechaPrimeraInscripcion().getTime();
+        long transcurrido = trayectoria.getFechaCorte().getTime() - trayectoria.getFechaPrimeraInscripcion().getTime();
+        if (total <= 0 || transcurrido <= 0) {
+            return 0;
+        }
+        return Math.min(100, Math.max(0, (int) Math.round((transcurrido * 100.0d) / total)));
+    }
+
+    public int getSemestresAdicionalesMaximo() {
+        if (contexto == null || contexto.getTrayectoriaPermanencia() == null) {
+            return 0;
+        }
+        Integer maximo = contexto.getTrayectoriaPermanencia().getPlazoMaximoSemestres();
+        Integer nominal = contexto.getTrayectoriaPermanencia().getDuracionNominalSemestres();
+        if (maximo == null || nominal == null) {
+            return 0;
+        }
+        return Math.max(0, maximo.intValue() - nominal.intValue());
+    }
+
+    public List<Integer> getHitosTrayectoria() {
+        List<Integer> hitos = new ArrayList<Integer>();
+        if (contexto == null || contexto.getTrayectoriaPermanencia() == null
+                || contexto.getTrayectoriaPermanencia().getDuracionNominalSemestres() == null) {
+            return hitos;
+        }
+        for (int semestre = 1; semestre <= contexto.getTrayectoriaPermanencia().getDuracionNominalSemestres(); semestre++) {
+            hitos.add(Integer.valueOf(semestre));
+        }
+        return hitos;
+    }
+
+    public String getEstadoHitoTrayectoria(Integer semestre) {
+        if (semestre == null || contexto == null || contexto.getTrayectoriaPermanencia() == null) {
+            return "pendiente";
+        }
+        String periodo = getEtiquetaPeriodoTrayectoria(semestre);
+        PeriodoTrayectoriaV2DTO evidenciaPeriodo = obtenerEvidenciaPeriodoTrayectoria(periodo);
+        // Una baja temporal aplicada se conserva como hecho de trayectoria,
+        // aunque exista una calificación capturada en alguna UD del periodo.
+        if (evidenciaPeriodo != null && Boolean.TRUE.equals(evidenciaPeriodo.getBajaTemporalCompleta())) {
+            return "baja-temporal";
+        }
+        if (esPeriodoTranscurridoSinInscripcion(semestre, evidenciaPeriodo)) {
+            return "no-cursado";
+        }
+        Integer concluidos = contexto.getTrayectoriaPermanencia().getSemestresConcluidos();
+        if (concluidos != null && semestre.intValue() <= concluidos.intValue()) {
+            return "concluido";
+        }
+        Integer transcurridos = contexto.getTrayectoriaPermanencia().getPeriodosAcademicosTranscurridos();
+        if (Boolean.TRUE.equals(contexto.getTrayectoriaPermanencia().getSemestreEnCurso())
+                && transcurridos != null && semestre.intValue() == transcurridos.intValue()) {
+            return "actual";
+        }
+        return "pendiente";
+    }
+
+    private PeriodoTrayectoriaV2DTO obtenerEvidenciaPeriodoTrayectoria(String periodo) {
+        if (StringUtils.isBlank(periodo) || contexto == null || contexto.getPeriodosTrayectoriaV2() == null) {
+            return null;
+        }
+        for (PeriodoTrayectoriaV2DTO candidato : contexto.getPeriodosTrayectoriaV2()) {
+            if (candidato != null && periodo.equals(candidato.getPeriodo())) {
+                return candidato;
+            }
+        }
+        return null;
+    }
+
+    private boolean esPeriodoTranscurridoSinInscripcion(Integer semestre, PeriodoTrayectoriaV2DTO evidenciaPeriodo) {
+        if (semestre == null || contexto == null || contexto.getTrayectoriaPermanencia() == null) {
+            return false;
+        }
+        Integer transcurridos = contexto.getTrayectoriaPermanencia().getPeriodosAcademicosTranscurridos();
+        if (transcurridos == null || semestre.intValue() > transcurridos.intValue()) {
+            return false;
+        }
+        return evidenciaPeriodo == null || (!Boolean.TRUE.equals(evidenciaPeriodo.getParticipacionGrupo())
+                && !Boolean.TRUE.equals(evidenciaPeriodo.getInscripcionFormal()));
+    }
+
+    public String getEtiquetaPeriodoTrayectoria(Integer semestre) {
+        if (semestre == null || contexto == null || contexto.getTrayectoriaPermanencia() == null) {
+            return "";
+        }
+        String primerPeriodo = contexto.getTrayectoriaPermanencia().getPeriodoPrimeraInscripcion();
+        if (StringUtils.isBlank(primerPeriodo) || !primerPeriodo.matches("\\d{4}-[12]")) {
+            return "";
+        }
+        String[] partes = primerPeriodo.split("-");
+        int anio = Integer.parseInt(partes[0]);
+        int termino = Integer.parseInt(partes[1]);
+        int desplazamiento = semestre.intValue() - 1;
+        while (desplazamiento-- > 0) {
+            if (termino == 1) {
+                termino = 2;
+            } else {
+                termino = 1;
+                anio++;
+            }
+        }
+        return anio + "-" + termino;
+    }
+
+    private int contarUnidadesActualesPorTipo(String tipo) {
+        return (int) obtenerFilasPlanas().stream()
+                .filter(this::esFilaActual)
+                .filter(fila -> normalizaTexto(fila.getTipo()).contains(tipo))
+                .filter(fila -> !esUnidadOpcionalLibre(fila))
+                .map(this::claveUnicaFila)
+                .distinct()
+                .count();
+    }
+
+    private boolean esFilaActual(FilaAsistidaDTO fila) {
+        if (fila == null || StringUtils.isBlank(fila.getEstatusPeriodo())) {
+            return false;
+        }
+        return esEstatusPeriodoActual(fila.getEstatusPeriodo());
+    }
+
+    static boolean esEstatusPeriodoActual(String estatusPeriodo) {
+        String estatus = Normalizer.normalize(StringUtils.defaultString(estatusPeriodo), Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "").toLowerCase(Locale.ROOT);
+        // No basta una coincidencia parcial: "NO_INSCRITA" contiene
+        // "inscrita", pero no representa una carga vigente ni recursamiento.
+        if (estatus.contains("no inscrita") || estatus.contains("no_inscrita")
+                || estatus.contains("no cursada") || estatus.contains("no_cursada")
+                || estatus.contains("baja")) {
+            return false;
+        }
+        return estatus.contains("en curso") || estatus.contains("cursando")
+                || estatus.contains("inscrita") || estatus.contains("registrada");
+    }
+
+    public List<FilaAsistidaDTO> getFilasReprobadasPrioritarias() {
+        // La regularización debe usar el contexto curricular completo, no sólo
+        // las filas que la vista agrupó por semestre. Así una reprobada sin
+        // oferta o sin ubicación visual completa sigue siendo visible.
+        return filtrarFilasReprobadasPrioritarias(obtenerFilasContextoParaRegularizacion());
+    }
+
+    private List<FilaAsistidaDTO> obtenerFilasContextoParaRegularizacion() {
+        if (contexto == null || contexto.getUnidades() == null || contexto.getUnidades().isEmpty()) {
+            return obtenerFilasPlanas();
+        }
+        return contexto.getUnidades().stream()
+                .filter(unidad -> unidad != null)
+                .map(this::convertirAFila)
+                .collect(Collectors.toList());
+    }
+
+    static List<FilaAsistidaDTO> filtrarFilasReprobadasPrioritarias(List<FilaAsistidaDTO> filas) {
+        if (filas == null || filas.isEmpty()) return new ArrayList<FilaAsistidaDTO>();
+        Map<String, FilaAsistidaDTO> porIdentidad = new LinkedHashMap<String, FilaAsistidaDTO>();
+        filas.stream()
+                .filter(TablaCurricularAsistidaBean::esFilaNoAcreditadaPrioritaria)
+                .sorted(Comparator
+                        .comparing(FilaAsistidaDTO::getSemestre, Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(FilaAsistidaDTO::getBloque, Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(FilaAsistidaDTO::getClave, Comparator.nullsLast(String::compareTo)))
+                .forEach(fila -> porIdentidad.putIfAbsent(claveUnicaFilaPrioritaria(fila), fila));
+        return new ArrayList<FilaAsistidaDTO>(porIdentidad.values());
+    }
+
+    private static boolean esFilaNoAcreditadaPrioritaria(FilaAsistidaDTO fila) {
+        if (fila == null || fila.getEstatusHistorico() == null) return false;
+        String estatus = fila.getEstatusHistorico().toUpperCase(Locale.ROOT);
+        return estatus.contains("NO ACREDIT") || estatus.contains("NO_ACREDIT") || estatus.contains("REPROB");
+    }
+
+    private static String claveUnicaFilaPrioritaria(FilaAsistidaDTO fila) {
+        if (fila == null) return "SIN_UD";
+        if (fila.getUdId() != null) return "ID:" + fila.getUdId();
+        if (!StringUtils.isBlank(fila.getClave())) return "CLAVE:" + fila.getClave().trim().toUpperCase(Locale.ROOT);
+        return "FILA:" + System.identityHashCode(fila);
+    }
+
+    /** Reprobadas que continúan en curso: se regularizan al acreditar, no al reinscribirse. */
+    public List<FilaAsistidaDTO> getFilasReprobadasRecursandoPrioritarias() {
+        return getFilasReprobadasPrioritarias().stream()
+                .filter(this::esFilaActual)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Una UD sólo entra a esta tarjeta si hay evidencia de que se volvió a
+     * cursar: acreditación posterior a una reprobación o inscripción vigente
+     * sobre una UD con reprobación histórica. Las reprobadas pendientes por sí
+     * solas no constituyen antecedentes de recursamiento.
+     */
+    public List<FilaAsistidaDTO> getFilasAntecedenteRecursamientoPrioritarias() {
+        List<FilaAsistidaDTO> resultado = new ArrayList<FilaAsistidaDTO>();
+        for (AntecedenteRecursamientoDTO antecedente : obtenerAntecedentesRecursamientoPrioritarios().values()) {
+            resultado.add(antecedente.getFila());
+        }
+        Collections.sort(resultado, Comparator
+                .comparing((FilaAsistidaDTO fila) -> !esRecursando(fila))
+                .thenComparing(FilaAsistidaDTO::getClave, Comparator.nullsLast(String::compareTo)));
+        return resultado;
+    }
+
+    private Map<String, AntecedenteRecursamientoDTO> obtenerAntecedentesRecursamientoPrioritarios() {
+        if (antecedentesRecursamientoPrioritarios != null) {
+            return antecedentesRecursamientoPrioritarios;
+        }
+        antecedentesRecursamientoPrioritarios = new LinkedHashMap<String, AntecedenteRecursamientoDTO>();
+        Long planId = resolverIdPlanV2();
+        if (idPersonaObjetivo == null || planId == null || inscripcionService == null) {
+            return antecedentesRecursamientoPrioritarios;
+        }
+
+        Map<Long, MallaAlumnoProgramaDTO> historialPorPrograma = new HashMap<Long, MallaAlumnoProgramaDTO>();
+        List<MallaAlumnoProgramaDTO> historial = inscripcionService
+                .obtenerProgramasMallaAlumno(idPersonaObjetivo, planId);
+        if (!ObjectUtils.isNullOrEmpty(historial)) {
+            for (MallaAlumnoProgramaDTO registro : historial) {
+                if (registro != null && registro.getIdPrograma() != null) {
+                    historialPorPrograma.put(registro.getIdPrograma(), registro);
+                }
+            }
+        }
+
+        Set<Long> programasConInscripcionVigente = obtenerProgramasConInscripcionVigente();
+
+        Map<String, List<EventoConstanciaDTO>> eventosPorClave = obtenerEventosHistorialPorClave();
+        Map<Long, FilaAsistidaDTO> filasPorPrograma = new LinkedHashMap<Long, FilaAsistidaDTO>();
+        for (FilaAsistidaDTO fila : obtenerFilasContextoParaRegularizacion()) {
+            if (fila != null && fila.getUdId() != null) {
+                filasPorPrograma.putIfAbsent(fila.getUdId(), fila);
+            }
+        }
+        // El contexto de inscripción puede omitir una UD ya acreditada. La
+        // Malla sí consulta todo el plan; completamos esas filas para no perder
+        // antecedentes regularizados como CSNPD.
+        if (fecServiceFacade != null && fecServiceFacade.getFichaDescProgramaService() != null) {
+            List<FichaDescProgramaDTO> programasPlan = fecServiceFacade.getFichaDescProgramaService()
+                    .buscarProgramasPorPlan(planId.intValue());
+            if (!ObjectUtils.isNullOrEmpty(programasPlan)) {
+                for (FichaDescProgramaDTO programa : programasPlan) {
+                    if (programa == null || programa.getIdPrograma() == null
+                            || filasPorPrograma.containsKey(programa.getIdPrograma().longValue())) {
+                        continue;
+                    }
+                    FilaAsistidaDTO fila = new FilaAsistidaDTO();
+                    fila.setUdId(programa.getIdPrograma().longValue());
+                    fila.setClave(programa.getCvePrograma());
+                    fila.setAsignatura(resolveNombrePrograma(programa));
+                    fila.setTipo(programa.getTipo());
+                    fila.setCreditos(programa.getCreditos());
+                    filasPorPrograma.put(fila.getUdId(), fila);
+                }
+            }
+        }
+
+        for (FilaAsistidaDTO fila : filasPorPrograma.values()) {
+            if (fila == null || fila.getUdId() == null) {
+                continue;
+            }
+            MallaAlumnoProgramaDTO historialUd = historialPorPrograma.get(fila.getUdId());
+            if (historialUd == null) {
+                continue;
+            }
+            boolean regularizada = Boolean.TRUE.equals(historialUd.getRegularizada());
+            boolean recursando = programasConInscripcionVigente.contains(fila.getUdId())
+                    && esReprobacionHistorica(historialUd);
+            if (!regularizada && !recursando) {
+                continue;
+            }
+            String identidad = claveUnicaFilaPrioritaria(fila);
+            antecedentesRecursamientoPrioritarios.putIfAbsent(identidad,
+                    construirAntecedenteRecursamiento(fila, recursando ? "Recursando" : "Regularizada",
+                            eventosPorClave.get(normalizaClaveCurricular(fila.getClave()))));
+        }
+        return antecedentesRecursamientoPrioritarios;
+    }
+
+    private Map<String, List<EventoConstanciaDTO>> obtenerEventosHistorialPorClave() {
+        if (eventosHistorialPorClave != null) {
+            return eventosHistorialPorClave;
+        }
+        eventosHistorialPorClave = new HashMap<String, List<EventoConstanciaDTO>>();
+        if (grupoParticipanteService == null || idPersonaObjetivo == null) {
+            return eventosHistorialPorClave;
+        }
+        List<EventoConstanciaDTO> eventos = grupoParticipanteService
+                .getParticipanteByActaCerradaYconstancia2(idPersonaObjetivo);
+        if (ObjectUtils.isNullOrEmpty(eventos)) {
+            return eventosHistorialPorClave;
+        }
+        for (EventoConstanciaDTO evento : eventos) {
+            String clave = evento != null ? normalizaClaveCurricular(evento.getClave()) : null;
+            if (StringUtils.isBlank(clave)) {
+                continue;
+            }
+            List<EventoConstanciaDTO> eventosUd = eventosHistorialPorClave.get(clave);
+            if (eventosUd == null) {
+                eventosUd = new ArrayList<EventoConstanciaDTO>();
+                eventosHistorialPorClave.put(clave, eventosUd);
+            }
+            eventosUd.add(evento);
+        }
+        return eventosHistorialPorClave;
+    }
+
+    private AntecedenteRecursamientoDTO construirAntecedenteRecursamiento(FilaAsistidaDTO fila, String estado,
+            List<EventoConstanciaDTO> eventos) {
+        EventoConstanciaDTO ultimo = null;
+        int recursamientos = 0;
+        if (eventos != null) {
+            for (EventoConstanciaDTO evento : eventos) {
+                if (evento == null) {
+                    continue;
+                }
+                if ("REC".equalsIgnoreCase(StringUtils.trimToEmpty(evento.getTipoEvaluacion()))) {
+                    recursamientos++;
+                }
+                if (ultimo == null || esPosterior(evento, ultimo)) {
+                    ultimo = evento;
+                }
+            }
+        }
+        return new AntecedenteRecursamientoDTO(fila, estado, ultimo,
+                recursamientos > 0 ? Integer.valueOf(recursamientos) : null);
+    }
+
+    private static boolean esPosterior(EventoConstanciaDTO candidato, EventoConstanciaDTO referencia) {
+        if (referencia == null) {
+            return true;
+        }
+        if (candidato.getFecha() != null && referencia.getFecha() != null) {
+            return candidato.getFecha().after(referencia.getFecha());
+        }
+        if (candidato.getFecha() != null) {
+            return true;
+        }
+        if (referencia.getFecha() != null) {
+            return false;
+        }
+        return StringUtils.defaultString(candidato.getPeriodo())
+                .compareTo(StringUtils.defaultString(referencia.getPeriodo())) > 0;
+    }
+
+    private static String normalizaClaveCurricular(String clave) {
+        return StringUtils.upperCase(StringUtils.trimToEmpty(clave));
+    }
+
+    private static boolean esReprobacionHistorica(MallaAlumnoProgramaDTO historialUd) {
+        if (historialUd == null || historialUd.getCalificacionFinal() == null) {
+            return false;
+        }
+        double minima = historialUd.getCalificacionMinAprobatoria() != null
+                ? historialUd.getCalificacionMinAprobatoria().doubleValue() : 0d;
+        return historialUd.getCalificacionFinal().doubleValue() < minima;
+    }
+
+    private boolean esRecursando(FilaAsistidaDTO fila) {
+        AntecedenteRecursamientoDTO antecedente = obtenerAntecedentesRecursamientoPrioritarios()
+                .get(claveUnicaFilaPrioritaria(fila));
+        return antecedente != null && "Recursando".equals(antecedente.getEstado());
+    }
+
+    public String getReferenciaReprobadasPendientesPrioritarias() {
+        return getFilasReprobadasRecursandoPrioritarias().isEmpty()
+                ? "Pendientes de regularizar"
+                : "Actualmente en recursamiento";
+    }
+
+    public String getReferenciaOportunidadesPrioritarias() {
+        if (!fuenteOportunidadesDisponible()) {
+            return "Historial de oportunidades no disponible";
+        }
+        List<FilaAsistidaDTO> filas = getFilasOportunidadesAcreditacionPrioritarias();
+        if (filas.isEmpty()) {
+            return getFilasReprobadasPrioritarias().isEmpty()
+                    ? "Sin UD pendientes con oportunidades por revisar"
+                    : "Historial de oportunidades no disponible para todas las UD pendientes";
+        }
+        for (FilaAsistidaDTO fila : filas) {
+            OportunidadAcreditacionDTO oportunidad = obtenerOportunidadesAcreditacionPrioritarias()
+                    .get(claveUnicaFilaPrioritaria(fila));
+            if (oportunidad != null && oportunidad.isEnCurso()) {
+                return oportunidad.getOportunidadesUtilizadas() == MAXIMO_OPORTUNIDADES_ACREDITACION_POR_UD
+                        ? "Última oportunidad en curso" : "Oportunidad en curso";
+            }
+        }
+        return "Oportunidades individuales verificadas";
+    }
+
+    public String getConteoOportunidadesAcreditacionPrioritarias() {
+        return fuenteOportunidadesDisponible()
+                ? String.valueOf(getFilasOportunidadesAcreditacionPrioritarias().size()) : "N/D";
+    }
+
+    public boolean isOportunidadesAcreditacionDisponibles() {
+        return fuenteOportunidadesDisponible();
+    }
+
+    private boolean fuenteOportunidadesDisponible() {
+        return grupoParticipanteService != null && idPersonaObjetivo != null;
+    }
+
+    public List<FilaAsistidaDTO> getFilasOportunidadesAcreditacionPrioritarias() {
+        List<FilaAsistidaDTO> resultado = new ArrayList<FilaAsistidaDTO>();
+        for (OportunidadAcreditacionDTO oportunidad : obtenerOportunidadesAcreditacionPrioritarias().values()) {
+            resultado.add(oportunidad.getFila());
+        }
+        Collections.sort(resultado, Comparator
+                .comparing((FilaAsistidaDTO fila) -> !esOportunidadEnCurso(fila))
+                .thenComparing(FilaAsistidaDTO::getClave, Comparator.nullsLast(String::compareTo)));
+        return resultado;
+    }
+
+    private Map<String, OportunidadAcreditacionDTO> obtenerOportunidadesAcreditacionPrioritarias() {
+        if (oportunidadesAcreditacionPrioritarias != null) {
+            return oportunidadesAcreditacionPrioritarias;
+        }
+        oportunidadesAcreditacionPrioritarias = new LinkedHashMap<String, OportunidadAcreditacionDTO>();
+        Set<Long> programasEnCurso = obtenerProgramasConInscripcionVigente();
+        Map<String, List<EventoConstanciaDTO>> eventosPorClave = obtenerEventosHistorialPorClave();
+        for (FilaAsistidaDTO fila : getFilasReprobadasPrioritarias()) {
+            if (fila == null || fila.getUdId() == null) continue;
+            List<EventoConstanciaDTO> eventos = eventosPorClave.get(normalizaClaveCurricular(fila.getClave()));
+            int cerradosComputables = contarEventosComputables(eventos);
+            boolean enCurso = programasEnCurso.contains(fila.getUdId());
+            int oportunidadesUtilizadas = cerradosComputables + (enCurso ? 1 : 0);
+            if (oportunidadesUtilizadas <= 0) continue;
+            oportunidadesAcreditacionPrioritarias.putIfAbsent(claveUnicaFilaPrioritaria(fila),
+                    new OportunidadAcreditacionDTO(fila, oportunidadesUtilizadas, enCurso));
+        }
+        return oportunidadesAcreditacionPrioritarias;
+    }
+
+    private Set<Long> obtenerProgramasConInscripcionVigente() {
+        Set<Long> programas = new HashSet<Long>();
+        if (inscripcionPreviaMateriasService == null || idPersonaObjetivo == null) return programas;
+        List<InscripcionPreviaMateriasDTO> inscripciones = inscripcionPreviaMateriasService
+                .obtenerInscripcionPrevia(idPersonaObjetivo);
+        if (!ObjectUtils.isNullOrEmpty(inscripciones)) {
+            for (InscripcionPreviaMateriasDTO inscripcion : inscripciones) {
+                if (inscripcion != null && inscripcion.getIdPrograma() != null) {
+                    programas.add(inscripcion.getIdPrograma());
+                }
+            }
+        }
+        return programas;
+    }
+
+    private static int contarEventosComputables(List<EventoConstanciaDTO> eventos) {
+        int total = 0;
+        if (eventos == null) return total;
+        for (EventoConstanciaDTO evento : eventos) {
+            if (evento == null || (evento.getCalificacionFinal() != null
+                    && Double.compare(evento.getCalificacionFinal().doubleValue(), CALIFICACION_BAJA_AUTORIZADA) == 0)) {
+                continue;
+            }
+            total++;
+        }
+        return total;
+    }
+
+    private boolean esOportunidadEnCurso(FilaAsistidaDTO fila) {
+        OportunidadAcreditacionDTO oportunidad = obtenerOportunidadesAcreditacionPrioritarias()
+                .get(claveUnicaFilaPrioritaria(fila));
+        return oportunidad != null && oportunidad.isEnCurso();
+    }
+
+    public String getReferenciaRecursamientoPrioritarias() {
+        return "Antecedentes verificados en historial e inscripción vigente";
+    }
+
+    public String getReferenciaSustitucionesPrioritarias() {
+        return "Relación de adeudo y sustitutas no disponible";
+    }
+
+    public String getReferenciaBajasParcialesPrioritarias() {
+        return "Solicitudes autorizadas y aplicadas; movimientos identificados";
+    }
+
+    public String getReferenciaBajasTemporalesPrioritarias() {
+        return "Autorizadas y aplicadas; periodo e intervalo obtenidos del evento";
+    }
+
+    public String getPeriodoReprobacionPrioritaria(FilaAsistidaDTO fila) {
+        EventoConstanciaDTO evento = getUltimoEventoReprobado(fila);
+        return evento != null && StringUtils.isNotBlank(evento.getPeriodo()) ? evento.getPeriodo() : "Periodo no disponible";
+    }
+
+    /** Firma invocable desde EL para el periodo de la fila prioritaria. */
+    public String periodoReprobacionPrioritaria(FilaAsistidaDTO fila) {
+        return getPeriodoReprobacionPrioritaria(fila);
+    }
+
+    public String getCalificacionReprobacionPrioritaria(FilaAsistidaDTO fila) {
+        return formatearCalificacionEvento(getUltimoEventoReprobado(fila));
+    }
+
+    /** Firma invocable desde EL para la calificación de la fila prioritaria. */
+    public String calificacionReprobacionPrioritaria(FilaAsistidaDTO fila) {
+        return getCalificacionReprobacionPrioritaria(fila);
+    }
+
+    public String getEstadoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        AntecedenteRecursamientoDTO antecedente = obtenerAntecedentesRecursamientoPrioritarios()
+                .get(claveUnicaFilaPrioritaria(fila));
+        return antecedente != null ? antecedente.getEstado() : "Antecedente no determinado";
+    }
+
+    public String getPeriodoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        EventoConstanciaDTO evento = getEventoAntecedenteRecursamiento(fila);
+        return evento != null && StringUtils.isNotBlank(evento.getPeriodo()) ? evento.getPeriodo() : "No disponible";
+    }
+
+    public String periodoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        return getPeriodoAntecedenteRecursamiento(fila);
+    }
+
+    public String getCalificacionAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        return formatearCalificacionEvento(getEventoAntecedenteRecursamiento(fila));
+    }
+
+    private String formatearCalificacionEvento(EventoConstanciaDTO evento) {
+        if (evento == null) return "No disponible";
+        if (evento.getCalificacionFinal() != null) {
+            return String.valueOf(evento.getCalificacionFinal().intValue());
+        }
+        // El historial conserva la calificación textual aun cuando
+        // calificacionFinal no se pobló por un cruce de bajas ajeno a la UD.
+        String calificacion = StringUtils.trimToNull(evento.getCalificacion());
+        if (calificacion == null) {
+            return "No disponible";
+        }
+        try {
+            double valor = Double.parseDouble(calificacion);
+            return valor == Math.rint(valor) ? String.valueOf((int) valor) : calificacion;
+        } catch (NumberFormatException ex) {
+            return calificacion;
+        }
+    }
+
+    private EventoConstanciaDTO getUltimoEventoReprobado(FilaAsistidaDTO fila) {
+        if (fila == null) return null;
+        List<EventoConstanciaDTO> eventos = obtenerEventosHistorialPorClave()
+                .get(normalizaClaveCurricular(fila.getClave()));
+        EventoConstanciaDTO ultimo = null;
+        if (eventos == null) return null;
+        for (EventoConstanciaDTO evento : eventos) {
+            if (!esEventoNoAcreditado(evento)) continue;
+            if (ultimo == null || esPosterior(evento, ultimo)) {
+                ultimo = evento;
+            }
+        }
+        return ultimo;
+    }
+
+    private static boolean esEventoNoAcreditado(EventoConstanciaDTO evento) {
+        return evento != null && evento.getTipoConstancia() != null
+                && evento.getTipoConstancia().intValue() != 1;
+    }
+
+    public String calificacionAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        return getCalificacionAntecedenteRecursamiento(fila);
+    }
+
+    public String getRecursamientosAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        AntecedenteRecursamientoDTO antecedente = obtenerAntecedentesRecursamientoPrioritarios()
+                .get(claveUnicaFilaPrioritaria(fila));
+        return antecedente != null && antecedente.getRecursamientos() != null
+                ? antecedente.getRecursamientos() + " de " + MAXIMO_RECURSAMIENTOS_POR_UD
+                : "Dato no disponible";
+    }
+
+    public String recursamientosAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        return getRecursamientosAntecedenteRecursamiento(fila);
+    }
+
+    private EventoConstanciaDTO getEventoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        AntecedenteRecursamientoDTO antecedente = obtenerAntecedentesRecursamientoPrioritarios()
+                .get(claveUnicaFilaPrioritaria(fila));
+        return antecedente != null ? antecedente.getUltimoEvento() : null;
+    }
+
+    /** Firma invocable desde EL para el estado del antecedente. */
+    public String estadoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        return getEstadoAntecedenteRecursamiento(fila);
+    }
+
+    public String getClaseEstadoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        String estado = getEstadoAntecedenteRecursamiento(fila);
+        return "Recursando".equals(estado) ? "recursando" : "Regularizada".equals(estado) ? "regularizada" : "neutro";
+    }
+
+    /** Firma invocable desde EL para la clase visual del antecedente. */
+    public String claseEstadoAntecedenteRecursamiento(FilaAsistidaDTO fila) {
+        return getClaseEstadoAntecedenteRecursamiento(fila);
+    }
+
+    public String getReprobacionesRegistradasBreve(FilaAsistidaDTO fila) {
+        String valor = reprobacionesRegistradas(contexto, fila);
+        return valor.replace("Reprobaciones registradas: ", "");
+    }
+
+    /** Firma invocable desde EL para el dato informativo de reprobaciones. */
+    public String reprobacionesRegistradasBreve(FilaAsistidaDTO fila) {
+        return getReprobacionesRegistradasBreve(fila);
+    }
+
+    private boolean tieneAntecedenteReprobacionVerificable(FilaAsistidaDTO fila) {
+        if (fila == null || fila.getUdId() == null || contexto == null
+                || !Boolean.TRUE.equals(contexto.getIntentosReprobadosDisponibles())) return false;
+        Long reprobaciones = contexto.getIntentosReprobadosPorUd().get(fila.getUdId());
+        return reprobaciones != null && reprobaciones.longValue() > 0L;
+    }
+
+    private boolean esFilaAcreditada(FilaAsistidaDTO fila) {
+        if (fila == null || StringUtils.isBlank(fila.getEstatusHistorico())) return false;
+        String estatus = normalizaTexto(fila.getEstatusHistorico());
+        if (estatus.contains("reprob") || estatus.contains("no acredit")) return false;
+        return estatus.contains("acredit") || estatus.contains("aprob");
+    }
+
+    public List<FilaAsistidaDTO> getFilasIrregularesDetalle() {
+        return obtenerFilasPlanas().stream()
+                .filter(this::esFilaIrregularParaDetalle)
+                .sorted(Comparator
+                        .comparing(FilaAsistidaDTO::getSemestre, Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(FilaAsistidaDTO::getBloque, Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(FilaAsistidaDTO::getClave, Comparator.nullsLast(String::compareTo)))
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(this::claveUnicaFila, fila -> fila,
+                                (primera, repetida) -> primera, LinkedHashMap::new),
+                        filasPorClave -> new ArrayList<FilaAsistidaDTO>(filasPorClave.values())));
+    }
+
+    private boolean esFilaIrregularParaDetalle(FilaAsistidaDTO fila) {
+        if (fila == null) {
+            return false;
+        }
+        // El detalle debe explicar exactamente las UD pendientes, incluso si
+        // son optativas alternativas. El filtro operativo de riesgo excluye
+        // esas opciones para selección, pero no debe ocultarlas aquí.
+        if (esFilaNoAcreditada(fila) || esFilaBaja(fila)) {
+            return true;
+        }
+        String estatus = normalizaTexto(fila.getEstatusHistorico());
+        if (estatus.contains("no inscrita") || estatus.contains("no cursada")) {
+            return true;
+        }
+        DecisionUnidadCurricularV2DTO decision = fila.getUdId() != null
+                ? decisionesV2PorPrograma.get(fila.getUdId()) : null;
+        return decision != null && (decision.getMotivos().contains(CodigoMotivoCurricularV2.REPROBACION_ACUMULADA)
+                || decision.getMotivos().contains(CodigoMotivoCurricularV2.PENDIENTE_NO_CURSADA)
+                || decision.getMotivos().contains(CodigoMotivoCurricularV2.BAJA_PARCIAL));
+    }
+
+    public String getTextoAlertaSituacionAcademica() {
+        if (isEstudianteRegularContexto()) {
+            return "Tu situación académica es regular. Continúa con tu trayectoria conforme a las UD disponibles.";
+        }
+        int pendientes = getConteoUdPendientesAlerta();
+        return "Tienes " + pendientes + " " + (pendientes == 1 ? "unidad didáctica pendiente" : "unidades didácticas pendientes")
+                + " de regularizar. Revisa las UD prioritarias para conocer las acciones disponibles en tu siguiente periodo.";
+    }
+
+    /** Si hay reprobadas vigentes, son el primer agrupamiento mostrado al estudiante. */
+    public int getConteoUdPendientesAlerta() {
+        List<FilaAsistidaDTO> reprobadas = getFilasReprobadasPrioritarias();
+        return !reprobadas.isEmpty() ? reprobadas.size() : getConteoUdPendientesPanel();
+    }
+
+    public List<FilaAsistidaDTO> getFilasPendientesAlerta() {
+        List<FilaAsistidaDTO> reprobadas = getFilasReprobadasPrioritarias();
+        return !reprobadas.isEmpty() ? reprobadas : getFilasIrregularesDetalle();
+    }
+
+    public String getTipoCurricularFilaIrregular(FilaAsistidaDTO fila) {
+        if (fila == null) {
+            return "Tipo no determinado";
+        }
+        String tipo = normalizaTexto(fila.getTipo());
+        if (tipo.contains("oblig")) {
+            return "Obligatoria";
+        }
+        if (tipo.contains("optativa")) {
+            return tipo.contains("adicional") || esUnidadOpcionalLibre(fila)
+                    || esOptativaAdicionalActual(fila) ? "Optativa adicional" : "Optativa";
+        }
+        return StringUtils.defaultIfBlank(fila.getTipo(), "Tipo no determinado");
+    }
+
+    public String getUbicacionFilaIrregular(FilaAsistidaDTO fila) {
+        if (fila == null) {
+            return "Ubicación no determinada";
+        }
+        String semestre = fila.getSemestre() != null ? "S" + fila.getSemestre() : "Semestre no determinado";
+        String bloque = fila.getBloque() != null ? "B" + fila.getBloque() : "Bloque no determinado";
+        return semestre + " / " + bloque;
+    }
+
+    public List<FilaAsistidaDTO> getFilasConBajaParcialPrioritarias() {
+        return construirFilasBajaPrioritarias("PARCIAL");
+    }
+
+    /** Movimientos fuente identificados por la llave primaria de rel_persona_bajas. */
+    public int getConteoMovimientosBajaParcialPrioritarias() {
+        return contarMovimientosBajaPorTipo(obtenerBajasContexto(), "PARCIAL");
+    }
+
+    /** Las bajas temporales se agrupan por el intervalo academico del evento. */
+    public int getConteoBajasTemporalesPrioritarias() {
+        return filtrarBajasTemporalesPorMovimiento(obtenerBajasContexto()).size();
+    }
+
+    public List<FilaAsistidaDTO> getFilasBajaTemporalPrioritarias() {
+        List<FilaAsistidaDTO> filas = new ArrayList<FilaAsistidaDTO>();
+        List<InscripcionBajasDTO> bajas = obtenerBajasContexto();
+        for (InscripcionBajasDTO baja : filtrarBajasTemporalesPorMovimiento(bajas)) {
+            FilaAsistidaDTO fila = new FilaAsistidaDTO();
+            fila.setPeriodoReferencia(StringUtils.defaultIfBlank(baja.getPeriodoEvento(), "Periodo no disponible"));
+            fila.setInicioBaja(formatearFechaBaja(baja.getFechaInicioEvento()));
+            fila.setFinBaja(formatearFechaBaja(baja.getFechaFinEvento()));
+            fila.setClavesBajaTemporal(clavesBajaTemporalAgrupada(baja, bajas));
+            fila.setEstatusHistorico("BAJA TEMPORAL");
+            filas.add(fila);
+        }
+        return filas;
+    }
+
+    private String clavesBajaTemporalAgrupada(InscripcionBajasDTO referencia, List<InscripcionBajasDTO> bajas) {
+        String identidad = identidadPeriodoBajaTemporal(referencia);
+        LinkedHashSet<String> claves = new LinkedHashSet<String>();
+        if (identidad == null || bajas == null) return "No disponible";
+        for (InscripcionBajasDTO baja : bajas) {
+            if (esBajaTemporal(baja) && identidad.equals(identidadPeriodoBajaTemporal(baja))
+                    && StringUtils.isNotBlank(baja.getClavePrograma())) {
+                claves.add(baja.getClavePrograma().trim().toUpperCase(Locale.ROOT));
+            }
+        }
+        return claves.isEmpty() ? "No disponible" : String.join(", ", claves);
+    }
+
+    private List<FilaAsistidaDTO> construirFilasBajaPrioritarias(String tipoBaja) {
+        List<FilaAsistidaDTO> filas = new ArrayList<FilaAsistidaDTO>();
+        Map<String, FilaAsistidaDTO> porIdentidad = new LinkedHashMap<String, FilaAsistidaDTO>();
+        for (InscripcionBajasDTO baja : filtrarBajasPorTipo(obtenerBajasContexto(), tipoBaja)) {
+            FilaAsistidaDTO fila = buscarFilaContexto(baja);
+            if (fila == null) {
+                fila = new FilaAsistidaDTO();
+                fila.setUdId(baja.getIdPrograma());
+                fila.setClave(baja.getClavePrograma());
+                fila.setTipo("Tipo no determinado");
+                fila.setOfertada(Boolean.FALSE);
+            }
+            // La consulta excluye una acreditacion posterior; reinscribirse no
+            // cambia este estado hasta que exista una calificacion aprobatoria.
+            fila.setPeriodoReferencia(StringUtils.defaultIfBlank(baja.getPeriodoEvento(), "Periodo no disponible"));
+            fila.setAcreditacionActualBajaParcial("Aún sin acreditar");
+            fila.setEstatusHistorico("BAJA " + tipoBaja);
+            porIdentidad.putIfAbsent(claveUnicaFilaPrioritaria(fila), fila);
+        }
+        filas.addAll(porIdentidad.values());
+        return filas;
+    }
+
+    private FilaAsistidaDTO buscarFilaContexto(InscripcionBajasDTO baja) {
+        if (baja == null || contexto == null || contexto.getUnidades() == null) return null;
+        for (UnidadDecisionInscripcionDTO unidad : contexto.getUnidades()) {
+            if (unidad == null) continue;
+            boolean mismoId = baja.getIdPrograma() != null && baja.getIdPrograma().equals(unidad.getUdId());
+            boolean mismaClave = !StringUtils.isBlank(baja.getClavePrograma())
+                    && baja.getClavePrograma().equalsIgnoreCase(unidad.getClave());
+            if (mismoId || mismaClave) return convertirAFila(unidad);
+        }
+        return null;
+    }
+
+    private List<InscripcionBajasDTO> obtenerBajasContexto() {
+        if (contexto == null || contexto.getContextoBase() == null
+                || contexto.getContextoBase().getEstadoAcademico() == null
+                || contexto.getContextoBase().getEstadoAcademico().getMateriasBajas() == null) {
+            return Collections.emptyList();
+        }
+        return contexto.getContextoBase().getEstadoAcademico().getMateriasBajas();
+    }
+
+    static List<InscripcionBajasDTO> filtrarBajasPorTipo(List<InscripcionBajasDTO> bajas, String tipoEsperado) {
+        if (bajas == null || bajas.isEmpty() || StringUtils.isBlank(tipoEsperado)) return Collections.emptyList();
+        String tipo = tipoEsperado.toUpperCase(Locale.ROOT);
+        Map<String, InscripcionBajasDTO> porIdentidad = new LinkedHashMap<String, InscripcionBajasDTO>();
+        for (InscripcionBajasDTO baja : bajas) {
+            if (baja == null || baja.getTipoBaja() == null
+                    || !baja.getTipoBaja().toUpperCase(Locale.ROOT).contains(tipo)) continue;
+            String identidad = baja.getIdPrograma() != null ? "ID:" + baja.getIdPrograma()
+                    : "CLAVE:" + StringUtils.defaultString(baja.getClavePrograma()).trim().toUpperCase(Locale.ROOT);
+            porIdentidad.putIfAbsent(identidad, baja);
+        }
+        return new ArrayList<InscripcionBajasDTO>(porIdentidad.values());
+    }
+
+    /** Una baja temporal puede crear varias filas por UD, pero comparte fechas de evento. */
+    static List<InscripcionBajasDTO> filtrarBajasTemporalesPorMovimiento(List<InscripcionBajasDTO> bajas) {
+        if (bajas == null || bajas.isEmpty()) return Collections.emptyList();
+        Map<String, InscripcionBajasDTO> porMovimiento = new LinkedHashMap<String, InscripcionBajasDTO>();
+        int sinIdentificador = 0;
+        for (InscripcionBajasDTO baja : bajas) {
+            if (!esBajaTemporal(baja)) continue;
+            String identidad = identidadPeriodoBajaTemporal(baja);
+            if (identidad == null) identidad = "SIN_IDENTIFICADOR:" + (++sinIdentificador);
+            porMovimiento.putIfAbsent(identidad, baja);
+        }
+        return new ArrayList<InscripcionBajasDTO>(porMovimiento.values());
+    }
+
+    private static String identidadPeriodoBajaTemporal(InscripcionBajasDTO baja) {
+        if (baja == null) return null;
+        if (baja.getFechaInicioEvento() != null && baja.getFechaFinEvento() != null) {
+            return "INTERVALO:" + baja.getFechaInicioEvento() + "|" + baja.getFechaFinEvento();
+        }
+        if (baja.getIdEvento() != null) return "EVENTO:" + baja.getIdEvento();
+        return baja.getIdBaja() != null ? "MOVIMIENTO:" + baja.getIdBaja() : null;
+    }
+
+    private String formatearFechaBaja(LocalDateTime fecha) {
+        return fecha == null ? "No disponible" : fecha.toLocalDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
+
+    private static boolean esBajaParcial(InscripcionBajasDTO baja) {
+        return baja != null && StringUtils.containsIgnoreCase(baja.getTipoBaja(), "PARCIAL");
+    }
+
+    private static boolean esBajaTemporal(InscripcionBajasDTO baja) {
+        return baja != null && StringUtils.containsIgnoreCase(baja.getTipoBaja(), "TEMPORAL");
+    }
+
+    static int contarMovimientosBajaPorTipo(List<InscripcionBajasDTO> bajas, String tipoEsperado) {
+        if (bajas == null || bajas.isEmpty() || StringUtils.isBlank(tipoEsperado)) return 0;
+        String tipo = tipoEsperado.toUpperCase(Locale.ROOT);
+        Set<Long> movimientos = new LinkedHashSet<Long>();
+        for (InscripcionBajasDTO baja : bajas) {
+            if (baja != null && baja.getTipoBaja() != null
+                    && baja.getTipoBaja().toUpperCase(Locale.ROOT).contains(tipo)
+                    && baja.getIdBaja() != null) {
+                movimientos.add(baja.getIdBaja());
+            }
+        }
+        return movimientos.size();
+    }
+
+    public String getDetalleFilaPrioritaria(FilaAsistidaDTO fila) {
+        if (fila == null) {
+            return "Sin información verificable de la unidad didáctica.";
+        }
+        StringBuilder detalle = new StringBuilder();
+        detalle.append(valorTexto(fila.getClave(), "Sin clave"));
+        if (!StringUtils.isBlank(fila.getAsignatura())) {
+            detalle.append(" - ").append(fila.getAsignatura());
+        }
+        detalle.append(". Estado: ").append(valorTexto(fila.getEstatusHistorico(), "No determinado"));
+        detalle.append(". Oferta: ").append(Boolean.TRUE.equals(fila.getOfertada()) ? "disponible" : "no disponible");
+        if (!StringUtils.isBlank(fila.getPrioridad())) {
+            detalle.append(". Prioridad: ").append(fila.getPrioridad());
+        }
+        return detalle.toString();
+    }
+
+    /** Firma invocable desde EL para el detalle por fila de UD prioritarias. */
+    public String detalleFilaPrioritaria(FilaAsistidaDTO fila) {
+        return getDetalleFilaPrioritaria(fila);
+    }
+
+    public String getResumenBajasTemporalesPrioritarias() {
+        int registros = getConteoBajasTemporalesPrioritarias();
+        if (registros == 0) {
+            return "No se identifican registros de baja temporal en el contexto académico disponible.";
+        }
+        return "Bajas temporales autorizadas y aplicadas, agrupadas por inicio y fin del evento. La reincorporacion y su vigencia requieren una fuente institucional adicional.";
+    }
+
+    public String getResumenSustitucionesOptativasPrioritarias() {
+        return "La sustitución de optativas adicionales no cuenta con una fuente verificable en este contexto; requiere consulta institucional.";
+    }
+
+    public String getResumenOportunidadesAcreditacionPrioritarias() {
+        return resumenReprobacionesRegistradas(contexto);
+    }
+
+    static String resumenReprobacionesRegistradas(AsistenteInscripcionContextoDTO contexto) {
+        if (contexto == null || !Boolean.TRUE.equals(contexto.getIntentosReprobadosDisponibles())) {
+            return "El historial de reprobaciones no está disponible para esta consulta. El cómputo de oportunidades conforme a RN-1.4 requiere el detalle de cada inscripción.";
+        }
+        return "La fuente disponible registra reprobaciones con calificación final menor a 60 por UD. No permite determinar oportunidades consumidas, una oportunidad en curso ni las exclusiones por baja autorizada.";
+    }
+
+    /**
+     * La consulta legacy sólo devuelve reprobaciones agregadas por UD. No es un
+     * contador de oportunidades RN-1.4 porque no contiene primera inscripción,
+     * bajas autorizadas ni el estado del intento actual.
+     */
+    public String getReprobacionesRegistradasFilaPrioritaria(FilaAsistidaDTO fila) {
+        return reprobacionesRegistradas(contexto, fila);
+    }
+
+    /** Firma invocable desde EL para el contador de la fila prioritaria. */
+    public String reprobacionesRegistradasFilaPrioritaria(FilaAsistidaDTO fila) {
+        return getReprobacionesRegistradasFilaPrioritaria(fila);
+    }
+
+    static String reprobacionesRegistradas(AsistenteInscripcionContextoDTO contexto, FilaAsistidaDTO fila) {
+        if (contexto == null || !Boolean.TRUE.equals(contexto.getIntentosReprobadosDisponibles())
+                || fila == null || fila.getUdId() == null) {
+            return "Dato no disponible";
+        }
+        Long reprobaciones = contexto.getIntentosReprobadosPorUd().get(fila.getUdId());
+        return "Reprobaciones registradas: " + (reprobaciones == null ? 0L : reprobaciones);
+    }
+
+    public String getSituacionOportunidadesFilaPrioritaria(FilaAsistidaDTO fila) {
+        OportunidadAcreditacionDTO oportunidad = obtenerOportunidadesAcreditacionPrioritarias()
+                .get(claveUnicaFilaPrioritaria(fila));
+        if (oportunidad == null) return situacionOportunidadesNoDisponible();
+        int utilizadas = oportunidad.getOportunidadesUtilizadas();
+        if (oportunidad.isEnCurso()) {
+            if (utilizadas >= MAXIMO_OPORTUNIDADES_ACREDITACION_POR_UD) return "Última oportunidad en curso";
+            return utilizadas == 1 ? "Primera oportunidad en curso" : "Segunda oportunidad en curso";
+        }
+        if (utilizadas >= MAXIMO_OPORTUNIDADES_ACREDITACION_POR_UD) return "Sin oportunidades";
+        if (utilizadas == MAXIMO_OPORTUNIDADES_ACREDITACION_POR_UD - 1) return "Última disponible";
+        return "Oportunidades disponibles";
+    }
+
+    /** Firma invocable desde EL para el estado de oportunidades de la fila. */
+    public String situacionOportunidadesFilaPrioritaria(FilaAsistidaDTO fila) {
+        return getSituacionOportunidadesFilaPrioritaria(fila);
+    }
+
+    public String getOportunidadesUtilizadasFilaPrioritaria(FilaAsistidaDTO fila) {
+        OportunidadAcreditacionDTO oportunidad = obtenerOportunidadesAcreditacionPrioritarias()
+                .get(claveUnicaFilaPrioritaria(fila));
+        return oportunidad != null ? oportunidad.getOportunidadesUtilizadas() + " de "
+                + MAXIMO_OPORTUNIDADES_ACREDITACION_POR_UD : "Dato no disponible";
+    }
+
+    public String oportunidadesUtilizadasFilaPrioritaria(FilaAsistidaDTO fila) {
+        return getOportunidadesUtilizadasFilaPrioritaria(fila);
+    }
+
+    static String situacionOportunidadesNoDisponible() {
+        return "Cómputo de oportunidades no disponible";
+    }
+
     public int getUnidadesDisponiblesParaRegistrarSituacion() {
         if (contexto == null || contexto.getUnidades() == null) {
             return 0;
@@ -2775,6 +4498,12 @@ public class TablaCurricularAsistidaBean extends BaseBean {
             programasPorEje = programasPlanCompleto.stream()
                     .filter(programa -> programa.getEjeCapacitacion() != null)
                     .collect(Collectors.groupingBy(FichaDescProgramaDTO::getEjeCapacitacion));
+            for (FichaDescProgramaDTO programa : programasPlanCompleto) {
+                if (programa != null) {
+                    resumen.registrarUnidadPlan(claveUnicaUd(programa), programa.getTipo(),
+                            resolveNombrePrograma(programa));
+                }
+            }
         }
 
         Map<Integer, MallaAlumnoProgramaDTO> estatusPorPrograma = new HashMap<Integer, MallaAlumnoProgramaDTO>();
@@ -2854,8 +4583,12 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                     Integer idPrograma = programa.getIdPrograma();
                     MallaAlumnoProgramaDTO estatus = idPrograma != null ? estatusPorPrograma.get(idPrograma) : null;
                     String claveContable = claveUnicaUd(programa);
+                    resumen.registrarEtiqueta(claveContable, nombrePrograma);
                     boolean acreditada = esProgramaAprobadoResumen(estatus)
                             || clavesAcreditadasPrograma.contains(claveContable);
+                    if (acreditada) {
+                        resumen.registrarAcreditada(claveContable);
+                    }
                     if (acreditada && esProgramaOpcional(programa.getTipo())) {
                         resumen.registrarOptativaAcreditada(claveContable);
                     }
@@ -2878,6 +4611,8 @@ public class TablaCurricularAsistidaBean extends BaseBean {
                         } else if (tipo.contains("electiva")) {
                             resumen.registrarElectivaPendiente(claveContable);
                         }
+                    } else if (normalizaTexto(programa.getTipo()).contains("oblig")) {
+                        resumen.registrarObligatoriaAcreditada(claveContable);
                     }
                 }
             }
@@ -3320,6 +5055,63 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         return getObservacionValidacion(fila);
     }
 
+    private static class AntecedenteRecursamientoDTO implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final FilaAsistidaDTO fila;
+        private final String estado;
+        private final EventoConstanciaDTO ultimoEvento;
+        private final Integer recursamientos;
+
+        AntecedenteRecursamientoDTO(FilaAsistidaDTO fila, String estado, EventoConstanciaDTO ultimoEvento,
+                Integer recursamientos) {
+            this.fila = fila;
+            this.estado = estado;
+            this.ultimoEvento = ultimoEvento;
+            this.recursamientos = recursamientos;
+        }
+
+        FilaAsistidaDTO getFila() {
+            return fila;
+        }
+
+        String getEstado() {
+            return estado;
+        }
+
+        EventoConstanciaDTO getUltimoEvento() {
+            return ultimoEvento;
+        }
+
+        Integer getRecursamientos() {
+            return recursamientos;
+        }
+    }
+
+    private static class OportunidadAcreditacionDTO implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final FilaAsistidaDTO fila;
+        private final int oportunidadesUtilizadas;
+        private final boolean enCurso;
+
+        OportunidadAcreditacionDTO(FilaAsistidaDTO fila, int oportunidadesUtilizadas, boolean enCurso) {
+            this.fila = fila;
+            this.oportunidadesUtilizadas = oportunidadesUtilizadas;
+            this.enCurso = enCurso;
+        }
+
+        FilaAsistidaDTO getFila() {
+            return fila;
+        }
+
+        int getOportunidadesUtilizadas() {
+            return oportunidadesUtilizadas;
+        }
+
+        boolean isEnCurso() {
+            return enCurso;
+        }
+    }
+
     public static class SemestreAsistidoDTO implements Serializable {
         private static final long serialVersionUID = 1L;
         private Integer numero;
@@ -3351,6 +5143,27 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         }
     }
 
+    /** Control de presentación de una hipótesis; no representa un resultado escolar registrado. */
+    public static class ExpectativaUnidadDTO implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private Long udId;
+        private String clave;
+        private String nombre;
+        private String tipo;
+        private Boolean acredita;
+
+        public Long getUdId() { return udId; }
+        public void setUdId(Long udId) { this.udId = udId; }
+        public String getClave() { return clave; }
+        public void setClave(String clave) { this.clave = clave; }
+        public String getNombre() { return nombre; }
+        public void setNombre(String nombre) { this.nombre = nombre; }
+        public String getTipo() { return tipo; }
+        public void setTipo(String tipo) { this.tipo = tipo; }
+        public Boolean getAcredita() { return acredita; }
+        public void setAcredita(Boolean acredita) { this.acredita = acredita; }
+    }
+
     public static class FilaAsistidaDTO implements Serializable {
         private static final long serialVersionUID = 1L;
         private Integer semestre;
@@ -3362,6 +5175,11 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         private String clave;
         private Integer creditos;
         private String estatusHistorico;
+        private String periodoReferencia;
+        private String inicioBaja;
+        private String finBaja;
+        private String clavesBajaTemporal;
+        private String acreditacionActualBajaParcial;
         private String estatusPeriodo;
         private String prioridad;
         private String motivoPrincipal;
@@ -3454,6 +5272,46 @@ public class TablaCurricularAsistidaBean extends BaseBean {
 
         public void setEstatusHistorico(String estatusHistorico) {
             this.estatusHistorico = estatusHistorico;
+        }
+
+        public String getPeriodoReferencia() {
+            return periodoReferencia;
+        }
+
+        public void setPeriodoReferencia(String periodoReferencia) {
+            this.periodoReferencia = periodoReferencia;
+        }
+
+        public String getInicioBaja() {
+            return inicioBaja;
+        }
+
+        public void setInicioBaja(String inicioBaja) {
+            this.inicioBaja = inicioBaja;
+        }
+
+        public String getFinBaja() {
+            return finBaja;
+        }
+
+        public void setFinBaja(String finBaja) {
+            this.finBaja = finBaja;
+        }
+
+        public String getClavesBajaTemporal() {
+            return clavesBajaTemporal;
+        }
+
+        public void setClavesBajaTemporal(String clavesBajaTemporal) {
+            this.clavesBajaTemporal = clavesBajaTemporal;
+        }
+
+        public String getAcreditacionActualBajaParcial() {
+            return acreditacionActualBajaParcial;
+        }
+
+        public void setAcreditacionActualBajaParcial(String acreditacionActualBajaParcial) {
+            this.acreditacionActualBajaParcial = acreditacionActualBajaParcial;
         }
 
         public String getEstatusPeriodo() {
@@ -3677,7 +5535,7 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         }
     }
 
-    private static class CreditosResumenMallaDTO implements Serializable {
+	static class CreditosResumenMallaDTO implements Serializable {
         private static final long serialVersionUID = 1L;
         private int requeridos;
         private int aprobados;
@@ -3686,11 +5544,17 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         private int optativasOpcionalesPendientes;
         private int electivasPendientes;
         private final Set<String> clavesObligatoriasPendientes = new HashSet<String>();
+        private final Set<String> clavesAcreditadas = new HashSet<String>();
+        private final Set<String> clavesObligatoriasAcreditadas = new HashSet<String>();
         private final Set<String> clavesOptativasPendientes = new HashSet<String>();
         private final Set<String> clavesOptativasAcreditadas = new HashSet<String>();
         private final Set<String> clavesOptativasOpcionalesPendientes = new HashSet<String>();
         private final Set<String> clavesElectivasPendientes = new HashSet<String>();
         private final Set<String> clavesConCreditosContabilizados = new HashSet<String>();
+        private final Set<String> clavesUnidadesPlan = new HashSet<String>();
+        private final Set<String> clavesObligatoriasPlan = new HashSet<String>();
+        private final Set<String> clavesOptativasPlan = new HashSet<String>();
+        private final Map<String, String> etiquetasPorClave = new HashMap<String, String>();
 
         public int getRequeridos() {
             return requeridos;
@@ -3699,6 +5563,24 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         public int getAprobados() {
             return aprobados;
         }
+
+        public void registrarUnidadPlan(String clave, String tipo, String nombre) {
+            if (clave == null || !clavesUnidadesPlan.add(clave)) {
+                return;
+            }
+            registrarEtiqueta(clave, nombre);
+            String tipoNormalizado = Normalizer.normalize(StringUtils.defaultString(tipo), Normalizer.Form.NFD)
+                    .replaceAll("\\p{M}", "").toLowerCase(Locale.ROOT);
+            if (tipoNormalizado.contains("oblig")) {
+                clavesObligatoriasPlan.add(clave);
+            } else if (tipoNormalizado.contains("optativa")) {
+                clavesOptativasPlan.add(clave);
+            }
+        }
+
+        public int getTotalUnidadesPlan() { return clavesUnidadesPlan.size(); }
+        public int getTotalObligatoriasPlan() { return clavesObligatoriasPlan.size(); }
+        public int getTotalOptativasPlan() { return clavesOptativasPlan.size(); }
 
         public void registrarCreditos(String clave, int creditos, boolean acreditada) {
             if (clavesConCreditosContabilizados.add(clave)) {
@@ -3710,7 +5592,16 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         }
 
         public int getObligatoriasPendientes() { return clavesObligatoriasPendientes.size(); }
+        public void registrarEtiqueta(String clave, String nombre) {
+            if (clave != null && !etiquetasPorClave.containsKey(clave)) {
+                etiquetasPorClave.put(clave, StringUtils.defaultIfBlank(nombre, "Sin nombre"));
+            }
+        }
         public void registrarObligatoriaPendiente(String clave) { clavesObligatoriasPendientes.add(clave); }
+        public int getAcreditadas() { return clavesAcreditadas.size(); }
+        public void registrarAcreditada(String clave) { clavesAcreditadas.add(clave); }
+        public int getObligatoriasAcreditadas() { return clavesObligatoriasAcreditadas.size(); }
+        public void registrarObligatoriaAcreditada(String clave) { clavesObligatoriasAcreditadas.add(clave); }
         public int getOptativasPendientes() { return clavesOptativasPendientes.size(); }
         public void registrarOptativaPendiente(String clave) { clavesOptativasPendientes.add(clave); }
         public int getOptativasAcreditadas() { return clavesOptativasAcreditadas.size(); }
@@ -3719,5 +5610,39 @@ public class TablaCurricularAsistidaBean extends BaseBean {
         public void registrarOptativaOpcionalPendiente(String clave) { clavesOptativasOpcionalesPendientes.add(clave); }
         public int getElectivasPendientes() { return clavesElectivasPendientes.size(); }
         public void registrarElectivaPendiente(String clave) { clavesElectivasPendientes.add(clave); }
+
+        public String getDetalleAcreditadas() { return detalleClaves(clavesAcreditadas); }
+        public String getDetalleObligatoriasAcreditadas() { return detalleClaves(clavesObligatoriasAcreditadas); }
+
+        public String getDetalleOptativasAcreditadas(int inicio, int limite) {
+            List<String> claves = new ArrayList<String>(clavesOptativasAcreditadas);
+            Collections.sort(claves);
+            int desde = Math.min(Math.max(0, inicio), claves.size());
+            int hasta = limite == Integer.MAX_VALUE ? claves.size()
+                    : Math.min(claves.size(), desde + Math.max(0, limite));
+            return detalleClaves(claves.subList(desde, hasta));
+        }
+
+        private String detalleClaves(Iterable<String> claves) {
+            List<String> ordenadas = new ArrayList<String>();
+            for (String clave : claves) {
+                if (clave != null) {
+                    ordenadas.add(clave);
+                }
+            }
+            Collections.sort(ordenadas);
+            if (ordenadas.isEmpty()) {
+                return "Sin UD relacionadas.";
+            }
+            StringBuilder detalle = new StringBuilder();
+            for (String clave : ordenadas) {
+                if (detalle.length() > 0) {
+                    detalle.append('\n');
+                }
+                detalle.append(clave).append(" - ")
+                        .append(StringUtils.defaultIfBlank(etiquetasPorClave.get(clave), "Sin nombre"));
+            }
+            return detalle.toString();
+        }
     }
 }

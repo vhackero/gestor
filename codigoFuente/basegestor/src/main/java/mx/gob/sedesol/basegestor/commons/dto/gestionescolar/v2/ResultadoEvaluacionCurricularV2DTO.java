@@ -1,0 +1,116 @@
+package mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+/** Resultado concurrente de sólo lectura; no sustituye el dictamen vigente. */
+public class ResultadoEvaluacionCurricularV2DTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private String situacionAcademica;
+    private String situacionAcademicaCalculada;
+    private Integer cantidadReprobadasVigentes = Integer.valueOf(0);
+    /** UD distintas con adeudo vigente; es la base de RN-6.4. */
+    private Integer adeudosVigentes = Integer.valueOf(0);
+    /** UD con evidencia insuficiente para confirmar o descartar un adeudo. */
+    private Integer adeudosEnRevision = Integer.valueOf(0);
+    /** Agregado histórico informativo; no se usa para aplicar RN-6.4. */
+    private Integer resultadosReprobatoriosInformativos = Integer.valueOf(0);
+    private Integer cargaMaximaFuturaSombra;
+    private List<Long> unidadesOrigenIrregularidad = new ArrayList<Long>();
+    private List<String> evidenciasSituacionAcademica = new ArrayList<String>();
+    private List<String> datosDescartadosSituacionAcademica = new ArrayList<String>();
+    private String situacionAcademicaActualCalculada;
+    private Boolean recuperacionRegularidadEvaluada = Boolean.FALSE;
+    private Boolean recuperacionRegularidadProcede;
+    private String resultadoRecuperacionRegularidad;
+    private List<String> condicionesRecuperacionCumplidas = new ArrayList<String>();
+    private List<String> condicionesRecuperacionNoCumplidas = new ArrayList<String>();
+    private List<Long> udsReprobadasImpedimentoRecuperacion = new ArrayList<Long>();
+    private List<Long> pendientesNoReprobatoriosRecuperacion = new ArrayList<Long>();
+    private List<EvaluacionIntentosUnidadV2DTO> evaluacionesIntentos = new ArrayList<EvaluacionIntentosUnidadV2DTO>();
+    private EvaluacionCargaMinimaCurricularV2DTO evaluacionCargaMinima;
+    private EvaluacionCargaMaximaCurricularV2DTO evaluacionCargaMaxima;
+    private EvaluacionCargaAcademicaV2DTO evaluacionCargaAcademica;
+    private Integer oportunidadesMejoraUtilizadas;
+    private Integer oportunidadesMejoraDisponibles;
+    private List<EvaluacionMejoraPromedioUnidadV2DTO> evaluacionesMejoraPromedio = new ArrayList<EvaluacionMejoraPromedioUnidadV2DTO>();
+    private EstadoActividadAcademicaV2 estadoActividadAcademica = EstadoActividadAcademicaV2.NO_DETERMINADO;
+    private Integer totalReprobadas;
+    private Boolean avanceCondicionado = Boolean.FALSE;
+    private Integer prioridadTecnicaDominante;
+    private Boolean efectosProductivosAplicados = Boolean.FALSE;
+    private List<CondicionCurricularV2> condicionesDetectadas = new ArrayList<CondicionCurricularV2>();
+    private List<CodigoReglaCurricularV2> reglasEvaluadas = new ArrayList<CodigoReglaCurricularV2>();
+    private List<DecisionUnidadCurricularV2DTO> decisiones = new ArrayList<DecisionUnidadCurricularV2DTO>();
+    private List<CodigoMotivoCurricularV2> restricciones = new ArrayList<CodigoMotivoCurricularV2>();
+    private List<String> excepciones = new ArrayList<String>();
+    private List<ExcepcionCurricularV2DTO> excepcionesEvaluadas = new ArrayList<ExcepcionCurricularV2DTO>();
+    private List<String> mensajes = new ArrayList<String>();
+    /** Avisos institucionales de consulta, sin efectos en decisiones ni motivos. */
+    private List<AvisoEvaluacionCurricularV2DTO> avisos = new ArrayList<AvisoEvaluacionCurricularV2DTO>();
+    private List<TrazaReglaAplicadaV2DTO> trazas = new ArrayList<TrazaReglaAplicadaV2DTO>();
+
+    public String getSituacionAcademica() { return situacionAcademica; }
+    public void setSituacionAcademica(String situacionAcademica) { this.situacionAcademica = situacionAcademica; }
+    public String getSituacionAcademicaCalculada() { return situacionAcademicaCalculada; }
+    public void setSituacionAcademicaCalculada(String valor) { situacionAcademicaCalculada = valor; }
+    public Integer getCantidadReprobadasVigentes() { return cantidadReprobadasVigentes; }
+    public void setCantidadReprobadasVigentes(Integer valor) { cantidadReprobadasVigentes = valor; }
+    public Integer getAdeudosVigentes() { return adeudosVigentes; }
+    public void setAdeudosVigentes(Integer valor) { adeudosVigentes = valor; }
+    public Integer getAdeudosEnRevision() { return adeudosEnRevision; }
+    public void setAdeudosEnRevision(Integer valor) { adeudosEnRevision = valor; }
+    public Integer getResultadosReprobatoriosInformativos() { return resultadosReprobatoriosInformativos; }
+    public void setResultadosReprobatoriosInformativos(Integer valor) { resultadosReprobatoriosInformativos = valor; }
+    public Integer getCargaMaximaFuturaSombra() { return cargaMaximaFuturaSombra; }
+    public void setCargaMaximaFuturaSombra(Integer valor) { cargaMaximaFuturaSombra = valor; }
+    public List<Long> getUnidadesOrigenIrregularidad() { return unidadesOrigenIrregularidad; }
+    public List<String> getEvidenciasSituacionAcademica() { return evidenciasSituacionAcademica; }
+    public List<String> getDatosDescartadosSituacionAcademica() { return datosDescartadosSituacionAcademica; }
+    public String getSituacionAcademicaActualCalculada() { return situacionAcademicaActualCalculada; }
+    public void setSituacionAcademicaActualCalculada(String valor) { situacionAcademicaActualCalculada = valor; }
+    public Boolean getRecuperacionRegularidadEvaluada() { return recuperacionRegularidadEvaluada; }
+    public void setRecuperacionRegularidadEvaluada(Boolean valor) { recuperacionRegularidadEvaluada = valor; }
+    public Boolean getRecuperacionRegularidadProcede() { return recuperacionRegularidadProcede; }
+    public void setRecuperacionRegularidadProcede(Boolean valor) { recuperacionRegularidadProcede = valor; }
+    public String getResultadoRecuperacionRegularidad() { return resultadoRecuperacionRegularidad; }
+    public void setResultadoRecuperacionRegularidad(String valor) { resultadoRecuperacionRegularidad = valor; }
+    public List<String> getCondicionesRecuperacionCumplidas() { return condicionesRecuperacionCumplidas; }
+    public List<String> getCondicionesRecuperacionNoCumplidas() { return condicionesRecuperacionNoCumplidas; }
+    public List<Long> getUdsReprobadasImpedimentoRecuperacion() { return udsReprobadasImpedimentoRecuperacion; }
+    public List<Long> getPendientesNoReprobatoriosRecuperacion() { return pendientesNoReprobatoriosRecuperacion; }
+    public List<EvaluacionIntentosUnidadV2DTO> getEvaluacionesIntentos() { return evaluacionesIntentos; }
+    public EvaluacionCargaMinimaCurricularV2DTO getEvaluacionCargaMinima() { return evaluacionCargaMinima; }
+    public void setEvaluacionCargaMinima(EvaluacionCargaMinimaCurricularV2DTO valor) { evaluacionCargaMinima = valor; }
+    public EvaluacionCargaMaximaCurricularV2DTO getEvaluacionCargaMaxima() { return evaluacionCargaMaxima; }
+    public void setEvaluacionCargaMaxima(EvaluacionCargaMaximaCurricularV2DTO valor) { evaluacionCargaMaxima = valor; }
+    public EvaluacionCargaAcademicaV2DTO getEvaluacionCargaAcademica() { return evaluacionCargaAcademica; }
+    public void setEvaluacionCargaAcademica(EvaluacionCargaAcademicaV2DTO valor) { evaluacionCargaAcademica = valor; }
+    public Integer getOportunidadesMejoraUtilizadas() { return oportunidadesMejoraUtilizadas; }
+    public void setOportunidadesMejoraUtilizadas(Integer valor) { oportunidadesMejoraUtilizadas = valor; }
+    public Integer getOportunidadesMejoraDisponibles() { return oportunidadesMejoraDisponibles; }
+    public void setOportunidadesMejoraDisponibles(Integer valor) { oportunidadesMejoraDisponibles = valor; }
+    public List<EvaluacionMejoraPromedioUnidadV2DTO> getEvaluacionesMejoraPromedio() { return evaluacionesMejoraPromedio; }
+    public EstadoActividadAcademicaV2 getEstadoActividadAcademica() { return estadoActividadAcademica; }
+    public void setEstadoActividadAcademica(EstadoActividadAcademicaV2 valor) { estadoActividadAcademica = valor; }
+    public Integer getTotalReprobadas() { return totalReprobadas; }
+    public void setTotalReprobadas(Integer totalReprobadas) { this.totalReprobadas = totalReprobadas; }
+    public Boolean getAvanceCondicionado() { return avanceCondicionado; }
+    public void setAvanceCondicionado(Boolean avanceCondicionado) { this.avanceCondicionado = avanceCondicionado; }
+    public Integer getPrioridadTecnicaDominante() { return prioridadTecnicaDominante; }
+    public void setPrioridadTecnicaDominante(Integer prioridadTecnicaDominante) { this.prioridadTecnicaDominante = prioridadTecnicaDominante; }
+    public Boolean getEfectosProductivosAplicados() { return efectosProductivosAplicados; }
+    public void setEfectosProductivosAplicados(Boolean efectosProductivosAplicados) { this.efectosProductivosAplicados = efectosProductivosAplicados; }
+    public List<CondicionCurricularV2> getCondicionesDetectadas() { return condicionesDetectadas; }
+    public List<CodigoReglaCurricularV2> getReglasEvaluadas() { return reglasEvaluadas; }
+    public List<DecisionUnidadCurricularV2DTO> getDecisiones() { return decisiones; }
+    public List<CodigoMotivoCurricularV2> getRestricciones() { return restricciones; }
+    public List<String> getExcepciones() { return excepciones; }
+    public List<ExcepcionCurricularV2DTO> getExcepcionesEvaluadas() { return excepcionesEvaluadas; }
+    public List<String> getMensajes() { return mensajes; }
+    public List<AvisoEvaluacionCurricularV2DTO> getAvisos() { return avisos; }
+    public List<TrazaReglaAplicadaV2DTO> getTrazas() { return trazas; }
+}

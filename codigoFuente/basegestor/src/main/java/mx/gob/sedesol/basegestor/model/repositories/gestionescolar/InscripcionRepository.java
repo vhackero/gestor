@@ -37,12 +37,284 @@ import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.LimitesCargaAcademic
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.MallaAlumnoProgramaDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.IntentosAsignaturasDTO;
 import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.ReglaInscripcionDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.TrayectoriaPermanenciaDTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.PeriodoTrayectoriaV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.IntentoAcreditacionUnidadV2DTO;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.EstadoIntentoAcreditacionV2;
 
 @Repository
 public class InscripcionRepository implements IinscripcionRepository {
 
 	@Autowired
 	public EntityManager entityManager;
+
+	/**
+	 * Recupera únicamente hechos históricos verificables. Las fechas sin un
+	 * calendario académico se obtiene de los eventos del plan. Las ventanas de
+	 * inscripción sólo validan la clave del periodo; no aportan sus fechas.
+	 */
+	@Override
+	public TrayectoriaPermanenciaDTO obtenerTrayectoriaPermanencia(Long idPersona, Long idPlan, Date fechaCorte) {
+		TrayectoriaPermanenciaDTO resultado = new TrayectoriaPermanenciaDTO();
+		resultado.setFechaCorte(fechaCorte);
+		if (idPersona == null || idPlan == null || fechaCorte == null) return resultado;
+
+		Date primeraInscripcion = obtenerPrimeraInscripcionValida(idPersona);
+		resultado.setFechaPrimeraInscripcion(primeraInscripcion);
+		if (primeraInscripcion == null) return resultado;
+
+		Object[] periodoInicial = obtenerPeriodoAcademicoPorInscripcion(idPlan, primeraInscripcion);
+		Object[] periodoCorte = obtenerPeriodoAcademicoPorFecha(idPlan, fechaCorte);
+		if (periodoInicial == null || periodoCorte == null) return resultado;
+
+		resultado.setPeriodoPrimeraInscripcion((String) periodoInicial[0]);
+		resultado.setPeriodoCorte((String) periodoCorte[0]);
+		Date inicioPrimerPeriodo = (Date) periodoInicial[1];
+		Date inicioPeriodoCorte = (Date) periodoCorte[1];
+		resultado.setPeriodosAcademicosTranscurridos(contarPeriodosAcademicos(idPlan, inicioPrimerPeriodo, inicioPeriodoCorte));
+		resultado.setPeriodosConInscripcion(contarPeriodosAcademicosConInscripcion(idPersona, idPlan, fechaCorte));
+		return resultado;
+	}
+
+	/**
+	 * Recupera una fila por periodo académico a partir de participación verificable.
+	 * Un periodo cuenta para RN-6.9 únicamente con calificación final o NP por baja;
+	 * las bajas temporales contabilizables se agrupan por periodo.
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<PeriodoTrayectoriaV2DTO> obtenerPeriodosTrayectoriaV2(Long idPersona, Long idPlan) {
+		List<PeriodoTrayectoriaV2DTO> resultado = new ArrayList<PeriodoTrayectoriaV2DTO>();
+		if (idPersona == null || idPlan == null) return resultado;
+		String sql = "SELECT pi.nombre_periodo, "
+				+ "1 AS participacion_formal_v2, "
+				+ "MAX(CASE WHEN rgp.calificacion_final IS NOT NULL THEN 1 ELSE 0 END), "
+				+ "1 AS participacion_grupo_v2, "
+				+ "MAX(CASE WHEN mb.tipo_baja_id IN (2,7,8) THEN 1 ELSE 0 END), "
+				+ "MAX(CASE WHEN mb.tipo_baja_id = 1 THEN 1 ELSE 0 END) "
+				+ "FROM rel_grupo_participante rgp "
+				+ "INNER JOIN tbl_grupos g ON g.id = rgp.id_grupo "
+				+ "INNER JOIN tbl_eventos e ON e.id_evento = g.id_evento "
+				+ "INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa = e.id_programa "
+				// El periodo es el sufijo AAAA-N de la clave del evento. LIKE puede
+				// coincidir con segmentos internos de la clave y duplicar trayectoria.
+				+ "LEFT JOIN tbl_periodos_inscripcion pi ON SUBSTRING_INDEX(e.cve_evento_cap, '-', -2) = pi.nombre_periodo "
+				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona = rgp.id_persona_participante "
+				+ " AND baja.id_grupo = rgp.id_grupo AND baja.contabilizar = 1 "
+				+ "LEFT JOIN rel_motivo_baja mb ON mb.id_motivo_baja = baja.motivo_baja_id "
+				+ "WHERE rgp.id_persona_participante = :idPersona AND fd.id_plan = :idPlan "
+				+ "AND pi.nombre_periodo IS NOT NULL GROUP BY pi.nombre_periodo ORDER BY pi.nombre_periodo";
+		List<Object[]> filas = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona)
+				.setParameter("idPlan", idPlan).getResultList();
+		for (Object[] fila : filas) {
+			PeriodoTrayectoriaV2DTO periodo = new PeriodoTrayectoriaV2DTO();
+			periodo.setPeriodo(fila[0] == null ? null : String.valueOf(fila[0]));
+			periodo.setInscripcionFormal(Boolean.valueOf(getIntegerValue(fila[1]) != null && getIntegerValue(fila[1]).intValue() > 0));
+			periodo.setCalificacionFinal(Boolean.valueOf(getIntegerValue(fila[2]) != null && getIntegerValue(fila[2]).intValue() > 0));
+			periodo.setParticipacionGrupo(Boolean.valueOf(getIntegerValue(fila[3]) != null && getIntegerValue(fila[3]).intValue() > 0));
+			periodo.setNpBajaParcial(Boolean.valueOf(getIntegerValue(fila[5]) != null && getIntegerValue(fila[5]).intValue() > 0));
+			periodo.setBajaTemporalCompleta(Boolean.valueOf(getIntegerValue(fila[4]) != null && getIntegerValue(fila[4]).intValue() > 0));
+			resultado.add(periodo);
+		}
+		return resultado;
+	}
+
+	/**
+	 * Fuente canónica: una fila por participación académica.
+	 * El grano es estudiante + UD (id_programa) + periodo; no se une con
+	 * evaluaciones parciales, por lo que no multiplica intentos por evaluación.
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<IntentoAcreditacionUnidadV2DTO> obtenerIntentosCurricularesV2(Long idPersona, Long idPlan) {
+		List<IntentoAcreditacionUnidadV2DTO> resultado = new ArrayList<IntentoAcreditacionUnidadV2DTO>();
+		if (idPersona == null || idPlan == null) return resultado;
+		String sql = consultaIntentosCurricularesV2();
+		List<Object[]> filas = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona).setParameter("idPlan", idPlan).getResultList();
+		for (Object[] fila : filas) resultado.add(mapearIntentoCurricularV2(fila));
+		return resultado;
+	}
+
+	/** Relaciona bajas aplicadas por persona y grupo, la llave verificable de la participación. */
+	private String consultaIntentosCurricularesV2() {
+		return "SELECT MIN(rgp.id) AS id_participacion_v2, fd.id_programa AS id_programa_v2, "
+				+ "pi.nombre_periodo AS periodo_v2, MIN(rgp.id_grupo) AS id_grupo_v2, "
+				+ "MAX(rgp.calificacion_final) AS calificacion_final_v2, "
+				+ "MAX(mb.tipo_baja_id) AS tipo_baja_v2, MAX(mb.descripcion) AS motivo_baja_v2, "
+				+ "MAX(e.fecha_final) AS fecha_fin_evento_v2, MAX(g.acta_cerrada) AS acta_cerrada_v2, "
+				// tbl_periodos_inscripcion es una ventana administrativa. El cierre académico
+				// se obtiene del último evento del plan y periodo, no de dicha ventana.
+				+ "MAX(calendario.fecha_final_periodo) AS fecha_fin_periodo_v2, "
+				+ "CASE WHEN COUNT(DISTINCT COALESCE(rgp.calificacion_final,-999999)) > 1 THEN 1 ELSE 0 END AS calificacion_conflictiva_v2, "
+				+ "MAX(CASE WHEN baja_registrada.id_persona IS NOT NULL AND COALESCE(baja_registrada.contabilizar,0) <> 1 THEN 1 ELSE 0 END) AS baja_sin_confirmar_v2 "
+				+ "FROM rel_grupo_participante rgp "
+				+ "INNER JOIN tbl_grupos g ON g.id=rgp.id_grupo "
+				+ "INNER JOIN tbl_eventos e ON e.id_evento=g.id_evento "
+				+ "INNER JOIN tbl_ficha_descriptiva_programa fd ON fd.id_programa=e.id_programa "
+				+ "LEFT JOIN tbl_periodos_inscripcion pi ON SUBSTRING_INDEX(e.cve_evento_cap, '-', -2)=pi.nombre_periodo "
+				+ "LEFT JOIN (SELECT fd_cal.id_plan AS id_plan_cal, SUBSTRING_INDEX(e_cal.cve_evento_cap, '-', -2) AS periodo_cal, "
+				+ "MAX(e_cal.fecha_final) AS fecha_final_periodo "
+				+ "FROM tbl_eventos e_cal INNER JOIN tbl_ficha_descriptiva_programa fd_cal ON fd_cal.id_programa=e_cal.id_programa "
+				+ "WHERE e_cal.fecha_final IS NOT NULL GROUP BY fd_cal.id_plan, SUBSTRING_INDEX(e_cal.cve_evento_cap, '-', -2)) calendario "
+				+ "ON calendario.id_plan_cal=fd.id_plan AND calendario.periodo_cal=pi.nombre_periodo "
+				+ "LEFT JOIN rel_persona_bajas baja ON baja.id_persona=rgp.id_persona_participante "
+				+ "AND baja.id_grupo=rgp.id_grupo AND baja.contabilizar=1 "
+				+ "LEFT JOIN rel_persona_bajas baja_registrada ON baja_registrada.id_persona=rgp.id_persona_participante "
+				+ "AND baja_registrada.id_grupo=rgp.id_grupo "
+				+ "LEFT JOIN rel_motivo_baja mb ON mb.id_motivo_baja=baja.motivo_baja_id "
+				+ "WHERE rgp.id_persona_participante=:idPersona AND fd.id_plan=:idPlan "
+				+ "GROUP BY fd.id_programa, pi.nombre_periodo ORDER BY pi.nombre_periodo, fd.id_programa";
+	}
+
+	private IntentoAcreditacionUnidadV2DTO mapearIntentoCurricularV2(Object[] fila) {
+		IntentoAcreditacionUnidadV2DTO intento = new IntentoAcreditacionUnidadV2DTO();
+		Long idParticipacion = getLongValue(fila[0]);
+		intento.setIdEjecucionTecnico(idParticipacion == null ? null : "PARTICIPACION:" + idParticipacion);
+		intento.setIdPrograma(getLongValue(fila[1])); intento.setPeriodo(fila[2] == null ? null : String.valueOf(fila[2]));
+		intento.setIdParticipacion(idParticipacion); intento.setIdGrupo(getLongValue(fila[3]));
+		Double calificacion = getDoubleValue(fila[4]); Integer tipoBaja = getIntegerValue(fila[5]);
+		String motivoBaja = fila[6] == null ? null : String.valueOf(fila[6]); Date fechaFinEvento = fila[7] instanceof Date ? (Date) fila[7] : null;
+		boolean contratoConActa = fila.length > 11;
+		boolean actaCerrada = contratoConActa && getIntegerValue(fila[8]) != null && getIntegerValue(fila[8]).intValue() > 0;
+		Date fechaFinPeriodo = fila.length > (contratoConActa ? 9 : 8) && fila[contratoConActa ? 9 : 8] instanceof Date ? (Date) fila[contratoConActa ? 9 : 8] : null;
+		boolean calificacionConflictiva = getIntegerValue(fila[contratoConActa ? 10 : 9]) != null && getIntegerValue(fila[contratoConActa ? 10 : 9]).intValue() > 0;
+		boolean bajaSinConfirmar = fila.length > (contratoConActa ? 11 : 10) && getIntegerValue(fila[contratoConActa ? 11 : 10]) != null && getIntegerValue(fila[contratoConActa ? 11 : 10]).intValue() > 0;
+		intento.setCalificacionFinal(calificacion);
+		intento.setActaCerrada(Boolean.valueOf(actaCerrada));
+		if (intento.getIdPrograma() == null || intento.getPeriodo() == null || calificacionConflictiva || (bajaSinConfirmar && tipoBaja == null)) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO);
+			intento.setEvidenciaFuente(bajaSinConfirmar && tipoBaja == null
+					? "HISTORIAL_PARTICIPACION_BAJA_SIN_CONTABILIZAR_REQUIERE_REVISION"
+					: calificacionConflictiva
+					? "HISTORIAL_PARTICIPACION_CALIFICACION_CONFLICTIVA_REQUIERE_REVISION"
+					: "HISTORIAL_PARTICIPACION_SIN_IDENTIDAD_UD_O_PERIODO_REQUIERE_REVISION");
+			return intento;
+		}
+		// La baja definitiva afecta al expediente, no borra la calificacion ya registrada.
+		boolean conservaResultado = tipoBaja != null && (tipoBaja.intValue() == 3 || tipoBaja.intValue() == 6);
+		boolean calificacionNumericaIncompatibleConBaja = tipoBaja != null && !conservaResultado
+				&& calificacion != null && (calificacion.doubleValue() >= 60D
+						|| (calificacion.doubleValue() >= 1D && calificacion.doubleValue() < 60D));
+		if (calificacionNumericaIncompatibleConBaja) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO);
+			intento.setEvidenciaFuente("BAJA_AUTORIZADA_CON_CALIFICACION_NUMERICA_REQUIERE_REVISION:TIPO="
+					+ tipoBaja + ";CALIFICACION=" + calificacion);
+		} else if (tipoBaja != null && !conservaResultado) {
+			mapearBajaContabilizable(intento, tipoBaja, motivoBaja);
+		} else if (calificacion == null) {
+			// G1/G2 vigente: mientras el acta siga abierta, NULL no es resultado definitivo.
+			// La fecha del evento se conserva para medición y no sustituye el cierre del acta.
+			intento.setEstado(actaCerrada ? EstadoIntentoAcreditacionV2.NO_DETERMINADO : EstadoIntentoAcreditacionV2.EN_CURSO);
+			intento.setEvidenciaFuente((conservaResultado
+					? "REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja + ";ESTADO_EXPEDIENTE=BAJA_DEFINITIVA;"
+					: "") + (actaCerrada ? "ACTA_CERRADA_SIN_CALIFICACION_REQUIERE_REVISION"
+							: "PARTICIPACION_EN_CURSO_ACTA_ABIERTA")
+							+ ";FECHA_FIN_EVENTO=" + (fechaFinEvento == null ? "SIN_DATO" : fechaFinEvento)
+							+ ";FECHA_FIN_PERIODO=" + (fechaFinPeriodo == null ? "SIN_DATO" : fechaFinPeriodo));
+		} else if (calificacion.doubleValue() < 0D || calificacion.doubleValue() > 100D) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente("NP_SIN_BAJA_REQUIERE_REVISION:CALIFICACION_FUERA_RANGO_0_100");
+		} else {
+			int umbral = umbralAprobatorioV2();
+			intento.setEstado(calificacion.doubleValue() >= umbral ? EstadoIntentoAcreditacionV2.ACREDITADO : EstadoIntentoAcreditacionV2.REPROBADO);
+			intento.setEvidenciaFuente((conservaResultado
+					? "REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja + ";ESTADO_EXPEDIENTE=BAJA_DEFINITIVA;"
+					: "") + "INSCRIPCION_GRUPO_ACTA:UMBRAL_V2=" + umbral);
+		}
+		return intento;
+	}
+
+	private int umbralAprobatorioV2() {
+		try { return Integer.parseInt(System.getProperty("V2_CALIFICACION_MINIMA_APROBATORIA", "60")); }
+		catch (NumberFormatException e) { return 60; }
+	}
+
+	private void mapearBajaContabilizable(IntentoAcreditacionUnidadV2DTO intento, Integer tipoBaja, String motivo) {
+		String evidencia = "REL_PERSONA_BAJAS_CONTABILIZAR_1:TIPO=" + tipoBaja + ";MOTIVO=" + (motivo == null ? "" : motivo);
+		if (tipoBaja.intValue() == 2 || tipoBaja.intValue() == 7 || tipoBaja.intValue() == 8) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.BAJA_TEMPORAL); intento.setEvidenciaFuente(evidencia + ";MOTIVO=BAJA_TEMPORAL"); return;
+		}
+		if (tipoBaja.intValue() == 1) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.BAJA_PARCIAL); intento.setEvidenciaFuente(evidencia + ";CAUSA=BAJA_PARCIAL_APLICADA"); return;
+		}
+		if (tipoBaja.intValue() == 4) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente(evidencia + ";BAJA_ADMINISTRATIVA_SEGUN_RESOLUCION"); return;
+		}
+		if (tipoBaja.intValue() == 5) {
+			intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente(evidencia + ";BAJA_ART40_SUBTIPO_NO_DETERMINADO"); return;
+		}
+		intento.setEstado(EstadoIntentoAcreditacionV2.NO_DETERMINADO); intento.setEvidenciaFuente(evidencia + ";TIPO_BAJA_NO_MAPEADO_REQUIERE_REVISION");
+	}
+
+	private Date obtenerPrimeraInscripcionValida(Long idPersona) {
+		String sql = "SELECT MIN(ti.fecha_registro) FROM tbl_inscripciones ti "
+				+ "WHERE ti.Idpersona = :idPersona AND ti.fecha_registro >= '2000-01-01 00:00:00'";
+		Object valor = entityManager.createNativeQuery(sql).setParameter("idPersona", idPersona).getSingleResult();
+		return valor instanceof Date ? (Date) valor : null;
+	}
+
+	private Object[] obtenerPeriodoAcademicoPorFecha(Long idPlan, Date fecha) {
+		String sql = "SELECT calendario.periodo, calendario.fecha_inicio FROM (" + consultaCalendarioAcademico()
+				+ ") calendario WHERE :fecha BETWEEN calendario.fecha_inicio AND calendario.fecha_final "
+				+ "ORDER BY calendario.fecha_inicio DESC LIMIT 1";
+		@SuppressWarnings("unchecked")
+		List<Object[]> periodos = entityManager.createNativeQuery(sql).setParameter("idPlan", idPlan)
+				.setParameter("fecha", fecha).getResultList();
+		return periodos.isEmpty() ? null : periodos.get(0);
+	}
+
+	/**
+	 * La inscripción se ubica primero en su ventana administrativa y se usa su
+	 * nombre como llave del periodo en las claves de evento del plan.
+	 */
+	private Object[] obtenerPeriodoAcademicoPorInscripcion(Long idPlan, Date fechaInscripcion) {
+		String sql = "SELECT calendario.periodo, calendario.fecha_inicio FROM (" + consultaCalendarioAcademico()
+				+ ") calendario JOIN tbl_periodos_inscripcion periodoInscripcion "
+				+ "ON periodoInscripcion.nombre_periodo = calendario.periodo "
+				+ "WHERE :fechaInscripcion BETWEEN periodoInscripcion.fecha_inicio AND periodoInscripcion.fecha_finalizacion "
+				+ "ORDER BY calendario.fecha_inicio DESC LIMIT 1";
+		@SuppressWarnings("unchecked")
+		List<Object[]> periodos = entityManager.createNativeQuery(sql).setParameter("idPlan", idPlan)
+				.setParameter("fechaInscripcion", fechaInscripcion).getResultList();
+		return periodos.isEmpty() ? null : periodos.get(0);
+	}
+
+	private Integer contarPeriodosAcademicos(Long idPlan, Date inicio, Date corte) {
+		String sql = "SELECT COUNT(*) FROM (" + consultaCalendarioAcademico()
+				+ ") calendario WHERE calendario.fecha_inicio >= :inicio AND calendario.fecha_inicio <= :corte";
+		Object valor = entityManager.createNativeQuery(sql).setParameter("idPlan", idPlan)
+				.setParameter("inicio", inicio).setParameter("corte", corte)
+				.getSingleResult();
+		return valor instanceof Number ? Integer.valueOf(((Number) valor).intValue()) : null;
+	}
+
+	private Integer contarPeriodosAcademicosConInscripcion(Long idPersona, Long idPlan, Date fechaCorte) {
+		String sql = "SELECT COUNT(*) FROM (" + consultaCalendarioAcademico()
+				+ ") calendario WHERE EXISTS (SELECT 1 FROM tbl_inscripciones ti "
+				+ "JOIN tbl_periodos_inscripcion periodoInscripcion "
+				+ "ON ti.fecha_registro BETWEEN periodoInscripcion.fecha_inicio AND periodoInscripcion.fecha_finalizacion "
+				+ "WHERE ti.Idpersona = :idPersona AND ti.fecha_registro >= '2000-01-01 00:00:00' "
+				+ "AND ti.fecha_registro <= :fechaCorte "
+				+ "AND periodoInscripcion.nombre_periodo = calendario.periodo)";
+		Object valor = entityManager.createNativeQuery(sql).setParameter("idPlan", idPlan).setParameter("idPersona", idPersona)
+				.setParameter("fechaCorte", fechaCorte).getSingleResult();
+		return valor instanceof Number ? Integer.valueOf(((Number) valor).intValue()) : null;
+	}
+
+	/**
+	 * Los eventos son la fuente de fechas académicas. La clave contiene el
+	 * periodo y se contrasta con el catálogo administrativo cuando éste existe,
+	 * sin usar su ventana administrativa como duración del semestre.
+	 */
+	private String consultaCalendarioAcademico() {
+		return "SELECT COALESCE(pi.nombre_periodo, SUBSTRING_INDEX(te.cve_evento_cap, '-', -2)) AS periodo, "
+				+ "MIN(te.fecha_inicial) AS fecha_inicio, MAX(te.fecha_final) AS fecha_final "
+				+ "FROM tbl_eventos te "
+				+ "JOIN tbl_ficha_descriptiva_programa fdp ON fdp.id_programa = te.id_programa "
+				+ "LEFT JOIN tbl_periodos_inscripcion pi ON te.cve_evento_cap LIKE CONCAT('%', pi.nombre_periodo, '%') "
+				+ "WHERE fdp.id_plan = :idPlan AND te.fecha_inicial IS NOT NULL AND te.fecha_final IS NOT NULL "
+				+ "AND te.cve_evento_cap REGEXP '[0-9]{4}-[0-9]$' "
+				+ "GROUP BY COALESCE(pi.nombre_periodo, SUBSTRING_INDEX(te.cve_evento_cap, '-', -2))";
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -328,6 +600,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 		dto.setIdPrograma(getLongValue(obj[0]));
 		dto.setCalificacionFinal(getDoubleValue(obj[1]));
 		dto.setCalificacionMinAprobatoria(getDoubleValue(obj[2]));
+		dto.setRegularizada(obj.length > 3 ? getBooleanValue(obj[3]) : Boolean.FALSE);
 		return dto;
 	}
 
@@ -403,7 +676,16 @@ public class InscripcionRepository implements IinscripcionRepository {
 		String consulta = "SELECT\r\n"
 				+ "    fd.id_programa,\r\n"
 				+ "    califs.calificacion_final,\r\n"
-				+ "    fd.calificacion_min_aprobatoria\r\n"
+				+ "    fd.calificacion_min_aprobatoria,\r\n"
+				+ "    CASE WHEN califs.calificacion_final >= fd.calificacion_min_aprobatoria AND EXISTS (\r\n"
+				+ "        SELECT 1 FROM rel_grupo_participante rgp_hist\r\n"
+				+ "        INNER JOIN tbl_grupos g_hist ON g_hist.id = rgp_hist.id_grupo AND g_hist.acta_cerrada = 1\r\n"
+				+ "        INNER JOIN tbl_eventos e_hist ON e_hist.id_evento = g_hist.id_evento\r\n"
+				+ "        WHERE rgp_hist.id_persona_participante = :idPersona\r\n"
+				+ "          AND e_hist.id_programa = fd.id_programa\r\n"
+				+ "          AND rgp_hist.calificacion_final IS NOT NULL\r\n"
+				+ "          AND rgp_hist.calificacion_final < fd.calificacion_min_aprobatoria\r\n"
+				+ "    ) THEN 1 ELSE 0 END AS regularizada\r\n"
 				+ "FROM tbl_ficha_descriptiva_programa fd\r\n"
 				+ "LEFT JOIN (\r\n"
 				+ "    SELECT e.id_programa, MAX(rgp.calificacion_final) AS calificacion_final\r\n"
@@ -488,7 +770,7 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 		List<InscripcionBajasDTO> lista = new ArrayList<InscripcionBajasDTO>();
 
-		String consulta = "SELECT rpb.id_plan, rpb.id_programa, ctb.id_tipo_baja, ctb.nombre tipo_baja, ctb.fecha_modificacion FROM rel_persona_bajas rpb\r\n"
+		String consulta = "SELECT rpb.id_baja, rpb.id_plan, rpb.id_programa, ctb.id_tipo_baja, ctb.nombre tipo_baja, ctb.fecha_modificacion FROM rel_persona_bajas rpb\r\n"
 				+ "         INNER JOIN rel_motivo_baja rmb ON rmb.id_motivo_baja = rpb.motivo_baja_id\r\n"
 				+ "         INNER JOIN cat_tipo_bajas ctb ON ctb.id_tipo_baja = rmb.tipo_baja_id\r\n"
 				+ "         WHERE rpb.id_persona = :id_persona";
@@ -640,11 +922,12 @@ public class InscripcionRepository implements IinscripcionRepository {
 
 		InscripcionBajasDTO personaBaja = new InscripcionBajasDTO();
 
-		personaBaja.setIdPlan(Long.valueOf(obj[0].toString()));
-		personaBaja.setIdPrograma(Long.valueOf(obj[1].toString()));
-		personaBaja.setIdTipoBaja(Long.valueOf(obj[2].toString()));
-		personaBaja.setTipoBaja(obj[3].toString());
-		personaBaja.setFechaModificacion(LocalDateTime.parse(obj[4].toString()));
+		personaBaja.setIdBaja(Long.valueOf(obj[0].toString()));
+		personaBaja.setIdPlan(Long.valueOf(obj[1].toString()));
+		personaBaja.setIdPrograma(Long.valueOf(obj[2].toString()));
+		personaBaja.setIdTipoBaja(Long.valueOf(obj[3].toString()));
+		personaBaja.setTipoBaja(obj[4].toString());
+		personaBaja.setFechaModificacion(LocalDateTime.parse(obj[5].toString()));
 
 		return personaBaja;
 	}
@@ -1123,26 +1406,50 @@ public class InscripcionRepository implements IinscripcionRepository {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<InscripcionBajasDTO> obtenerBajasDeMateriasSolicitadas(Long idPersona) {
+		List<Object[]> resultados = entityManager.createNativeQuery(consultaBajasDeMateriasSolicitadas())
+				.setParameter("id_persona", idPersona).getResultList();
 
+		List<InscripcionBajasDTO> listaDTO = new ArrayList<>();
+
+		for (Object[] row : resultados) {
+			listaDTO.add(mapearInscripcionBajas(row));
+		}
+
+		return listaDTO;
+	}
+
+	/**
+	 * Las bajas que alimentan los consumidores curriculares requieren una
+	 * confirmacion explicita del proceso de bajas. Un valor nulo no acredita
+	 * autorizacion ni aplicacion.
+	 */
+	private String consultaBajasDeMateriasSolicitadas() {
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT rpb.id_plan, ");
+		sql.append("SELECT rpb.id_baja, ");
+		sql.append("       rpb.id_plan, ");
 		sql.append("       rpb.id_programa, ");
 		sql.append("       tfdp.cve_programa, ");
 		sql.append("       ctb.id_tipo_baja, ");
 		sql.append("       ctb.nombre AS tipo_baja, ");
-		sql.append("       ctb.fecha_modificacion ");
+		sql.append("       ctb.fecha_modificacion, ");
+		sql.append("       rpb.id_evento, ");
+		sql.append("       SUBSTRING_INDEX(evento.cve_evento_cap, '-', -2) AS periodo_evento, ");
+		sql.append("       evento.fecha_inicial, ");
+		sql.append("       evento.fecha_final ");
 		sql.append("FROM rel_persona_bajas rpb ");
 		sql.append("INNER JOIN rel_motivo_baja rmb ON rmb.id_motivo_baja = rpb.motivo_baja_id ");
 		sql.append("INNER JOIN cat_tipo_bajas ctb ON ctb.id_tipo_baja = rmb.tipo_baja_id ");
 		sql.append("INNER JOIN tbl_ficha_descriptiva_programa tfdp ON tfdp.id_programa = rpb.id_programa ");
-		// Una baja con contabilizar = 0 se conserva como antecedente auditado,
-		// pero ya no debe prevalecer sobre una reinscripción acreditada.
+		sql.append("LEFT JOIN tbl_eventos evento ON evento.id_evento = rpb.id_evento ");
+		// Solo contabilizar = 1 acredita una baja autorizada y aplicada.
+		// Una baja con contabilizar = 0 o NULL se conserva como antecedente auditado,
+		// pero no se entrega a los consumidores curriculares.
 		// Del mismo modo, una baja contabilizable deja de ser una restricción activa
 		// cuando el estudiante ya acreditó posteriormente la misma UD. La baja se
 		// conserva en rel_persona_bajas para fines administrativos, pero no se
 		// entrega a los motores de inscripción, simulación o mapa curricular.
 		sql.append("WHERE rpb.id_persona = :id_persona ");
-		sql.append("  AND COALESCE(rpb.contabilizar, 1) = 1 ");
+		sql.append("  AND rpb.contabilizar = 1 ");
 		sql.append("  AND NOT EXISTS ( ");
 		sql.append("      SELECT 1 ");
 		sql.append("      FROM rel_grupo_participante rgp_acreditada ");
@@ -1155,26 +1462,22 @@ public class InscripcionRepository implements IinscripcionRepository {
 		sql.append("        AND rgp_acreditada.calificacion_final >= fd_acreditada.calificacion_min_aprobatoria ");
 		sql.append("  )");
 
-		List<Object[]> resultados = entityManager.createNativeQuery(sql.toString())
-				.setParameter("id_persona", idPersona).getResultList();
-
-		List<InscripcionBajasDTO> listaDTO = new ArrayList<>();
-
-		for (Object[] row : resultados) {
-			listaDTO.add(mapearInscripcionBajas(row));
-		}
-
-		return listaDTO;
+		return sql.toString();
 	}
 
 	private InscripcionBajasDTO mapearInscripcionBajas(Object[] row) {
 		InscripcionBajasDTO dto = new InscripcionBajasDTO();
-		dto.setIdPlan(getLongValue(row[0]));
-		dto.setIdPrograma(getLongValue(row[1]));
-		dto.setClavePrograma((String) row[2]);
-		dto.setIdTipoBaja(getLongValue(row[3]));
-		dto.setTipoBaja((String) row[4]);
-		dto.setFechaModificacion(getLocalDateTimeValue(row[5]));
+		dto.setIdBaja(getLongValue(row[0]));
+		dto.setIdPlan(getLongValue(row[1]));
+		dto.setIdPrograma(getLongValue(row[2]));
+		dto.setClavePrograma((String) row[3]);
+		dto.setIdTipoBaja(getLongValue(row[4]));
+		dto.setTipoBaja((String) row[5]);
+		dto.setFechaModificacion(getLocalDateTimeValue(row[6]));
+		dto.setIdEvento(getLongValue(row[7]));
+		dto.setPeriodoEvento((String) row[8]);
+		dto.setFechaInicioEvento(getLocalDateTimeValue(row[9]));
+		dto.setFechaFinEvento(getLocalDateTimeValue(row[10]));
 
 		return dto;
 	}

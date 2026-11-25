@@ -3,6 +3,7 @@ package mx.gob.sedesol.basegestor.commons.dto.gestionescolar;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import mx.gob.sedesol.basegestor.commons.dto.gestionescolar.v2.ResultadoEvaluacionCurricularV2DTO;
 
 public class ResultadoSimulacionDTO implements Serializable {
 
@@ -18,6 +19,8 @@ public class ResultadoSimulacionDTO implements Serializable {
     private List<MotivoDecisionDTO> motivos;
     private List<String> advertencias;
     private List<Long> unidadesSeleccionadas;
+    /** Evidencia académica de sólo lectura para el consumidor Simulador. */
+    private ResultadoEvaluacionCurricularV2DTO evaluacionCurricularV2;
 
     public ResultadoSimulacionDTO() {
         this.motivos = new ArrayList<MotivoDecisionDTO>();
@@ -88,4 +91,6 @@ public class ResultadoSimulacionDTO implements Serializable {
     public void setUnidadesSeleccionadas(List<Long> unidadesSeleccionadas) {
         this.unidadesSeleccionadas = unidadesSeleccionadas;
     }
+    public ResultadoEvaluacionCurricularV2DTO getEvaluacionCurricularV2() { return evaluacionCurricularV2; }
+    public void setEvaluacionCurricularV2(ResultadoEvaluacionCurricularV2DTO valor) { evaluacionCurricularV2 = valor; }
 }
